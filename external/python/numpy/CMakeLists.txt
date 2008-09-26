@@ -88,7 +88,7 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
       
       execute_process (
 	WORKING_DIRECTORY ${NUMPY_SOURCE_DIR}
-	COMMAND python setup.py install --prefix=${NUMPY_prefix}
+	COMMAND ${PYTHON_EXECUTABLE} setup.py install --prefix=${NUMPY_prefix}
 	TIMEOUT 1800
 	ERROR_VARIABLE error_configure
 	ERROR_FILE error.log

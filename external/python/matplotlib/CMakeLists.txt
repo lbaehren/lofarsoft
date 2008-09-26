@@ -189,7 +189,7 @@ endif (MATPLOTLIB_CMAKE_BUILD)
 
 execute_process (
   WORKING_DIRECTORY ${MATPLOTLIB_SOURCE_DIR}
-  COMMAND python setup.py build
+  COMMAND ${PYTHON_EXECUTABLE} setup.py build
   TIMEOUT 1800
   ERROR_VARIABLE error_build
   ERROR_FILE matplotlib_build.log
@@ -199,7 +199,7 @@ execute_process (
 
 execute_process (
   WORKING_DIRECTORY ${MATPLOTLIB_SOURCE_DIR}
-  COMMAND python setup.py install --home=${MATPLOTLIB_prefix}
+  COMMAND ${PYTHON_EXECUTABLE} setup.py install --home=${MATPLOTLIB_prefix}
   TIMEOUT 1800
   ERROR_VARIABLE error_install
   ERROR_FILE matplotlib_install.log

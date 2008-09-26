@@ -68,7 +68,7 @@ if (NOT HAVE_PYTHON_NUMARRAY OR PYTHON_NUMARRAY_FORCE_BUILD)
     
     execute_process (
       WORKING_DIRECTORY ${PYTHON_NUMARRAY_SOURCE_DIR}
-      COMMAND python setup.py build install --home=${PYTHON_NUMARRAY_prefix}
+      COMMAND ${PYTHON_EXECUTABLE} setup.py build install --home=${PYTHON_NUMARRAY_prefix}
       TIMEOUT 1800
       ERROR_VARIABLE error_configure
       ERROR_FILE error.log
