@@ -1005,6 +1005,21 @@ namespace CR {  //  Namespace CR -- begin
 			 uint const &beta);
   
   /*!
+    \brief Enable/Disable the Hanning filter
+
+    \param alpha     -- Slope parameter of the HanningFilter.
+    \param beta      -- Width of the plateau with w[n]=1.
+    \param betaRise  -- Width before beginning of the plateau
+    \param betaFall  -- Width after end of the plateau. beta + betaRise + betaFall must equal 1.
+  */
+ 
+  void setHanningFilter (double const &alpha,
+			 uint const &beta,
+                         uint const &betaRise, 
+			 uint const &betaFall);
+
+
+  /*!
     \brief Get the name of the class
     
     \return className -- The name of the class, DataReader.

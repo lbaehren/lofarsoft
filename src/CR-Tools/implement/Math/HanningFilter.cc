@@ -69,6 +69,23 @@ namespace CR {  // Namespace CR -- begin
   }
   
   template <class T> 
+  HanningFilter<T>::HanningFilter (unsigned int const &channels,
+				   T const &alpha,
+				   uint const &beta,
+				   uint const &betaRise,
+				   uint const &betaFall)
+    : BasicFilter<T> (channels),
+      alpha_p (alpha),
+      beta_p (beta),
+      betaRise_p (betaRise),
+      betaFall_p (betaFall)
+  {
+    setBeta (beta,
+	     betaRise,
+	     betaFall);
+  } 
+
+  template <class T> 
   HanningFilter<T>::HanningFilter (HanningFilter<T> const &other)
   {
     copy (other);

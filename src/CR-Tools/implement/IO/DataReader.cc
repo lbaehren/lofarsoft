@@ -1230,6 +1230,24 @@ void DataReader::setHanningFilter (double const &alpha,
   }
 }
 
+void DataReader::setHanningFilter (double const &alpha,
+				   uint const &beta,
+                                   uint const &betaRise, 
+				   uint const &betaFall)
+{
+  if (alpha == 0.0) {
+    applyHanning_p = False;
+  } else {
+    HanningFilter<Double> tmp (blocksize_p,
+			      alpha,
+			      beta,
+			      betaRise,
+			      betaFall);
+    hanningFilter_p = tmp;
+    applyHanning_p = True;
+  }
+}
+
 // --------------------------------------------------------------- selectChannels
 
 Matrix<DComplex> DataReader::selectChannels (Matrix<DComplex> const &in)

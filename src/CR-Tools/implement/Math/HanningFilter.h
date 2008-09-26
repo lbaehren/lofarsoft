@@ -135,14 +135,17 @@ namespace CR {  // Namespace CR -- begin
     
     /*!
       \brief Argumented constructor.
-      
-      \todo not yet implemented
-      
+    
       \param blocksize -- Number of frequency channels in a block of Fourier
       transformed data.
       \param alpha     -- Parameter for the slope of the Hanning filter.
       \param beta      -- Width of the plateau, where the window function is
-      unity
+      unity.
+      \param betaRise  -- Width before plateau, where the window function is 
+      smaller then unity.
+      \param betaFall  -- Width after plateau, where the window function is also 
+      smaller then unity. The sum of the three beta-parameters must equal the 
+      blocksize.
     */
     HanningFilter (uint const &blocksize,
 		   T const &alpha,
