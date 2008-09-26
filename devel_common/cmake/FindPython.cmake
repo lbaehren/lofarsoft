@@ -57,10 +57,17 @@ foreach (python_version 2.6 2.5 2.4 2.3)
 
   ## Check for executable
   
-  find_program (PYTHON_EXECUTABLE python${python_version}
-    PATHS ${bin_locations}
-    NO_DEFAULT_PATH
-    )
+  if (HAVE_PYTHONHOME)
+    find_program (PYTHON_EXECUTABLE python python${python_version}
+      PATHS ${HAVE_PYTHONHOME} ${HAVE_PYTHONHOME}/bin
+      NO_DEFAULT_PATH
+      )
+  else (HAVE_PYTHONHOME)
+    find_program (PYTHON_EXECUTABLE python${python_version}
+      PATHS ${bin_locations}
+      NO_DEFAULT_PATH
+      )
+  endif (HAVE_PYTHONHOME)
   
   ## Check for the PYTHON header files
 
