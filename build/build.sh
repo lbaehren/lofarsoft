@@ -14,6 +14,7 @@
 ##
 
 basedir=`pwd`
+SYSTEM_NAME=`uname -s`
 
 ## Required minimum version of CMake; system should provide a version at
 ## at least matching the one provided as part of the USG distribution
@@ -31,6 +32,14 @@ param_reportBuild='';
 ## Environment variables; in particular we need to ensure, the CMake binary can 
 ## be found. However failure in that could also signify, that there is no CMake
 ## available, so we need to make to sure we build it first.
+
+## parallelize the build if possible
+
+if [ "$SYSTEM_NAME" == "Darwin" ] ; then
+  var_make="make -j 2"
+else 
+  var_make="make"
+fi
 
 ## move one directory up to get a clean result when setting LOFARSOFT
 
@@ -162,7 +171,7 @@ build_cmake ()
     $basedir/../external/cmake/configure --prefix=$basedir/../release
 	## build and install
     echo "[`date`] Initiating build and install of CMake ..."
-    make && make install
+    $var_make && $var_make install
     export PATH=$PATH:$basedir/../release/bin
 
     } fi;
@@ -209,10 +218,10 @@ build_package ()
 	echo "[`date`] No target install for $buildDir."
     else
 	if test -z $param_reportBuild ; then
-	    make install;
+	    $var_make install;
 	else
-	    make Experimental;
-	    make install;
+	    $var_make Experimental;
+	    $var_make install;
 	fi
     fi
   }
