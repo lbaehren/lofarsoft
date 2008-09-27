@@ -85,7 +85,6 @@ if (NOT USG_CMAKE_CONFIG)
     /usr
     /usr/local
     /usr/X11R6
-    /opt/aips++/local
     /opt/casa/local    
     CACHE
     PATH
@@ -118,7 +117,6 @@ if (NOT USG_CMAKE_CONFIG)
     /usr/include
     /usr/local/include
     /usr/X11R6/include
-    /opt/aips++/local/include
     /opt/casa/local/include    
     CACHE
     PATH
@@ -139,7 +137,6 @@ if (NOT USG_CMAKE_CONFIG)
     /usr/lib64
     /usr/lib
     /usr/X11R6/lib
-    /opt/aips++/local/lib
     /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
     CACHE
     PATH
