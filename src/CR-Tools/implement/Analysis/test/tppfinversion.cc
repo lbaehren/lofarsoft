@@ -49,12 +49,12 @@ using CR::ppfimplement ;
 using CR::tbbctlIn ;
 using CR::rawSubbandIn ;
 
- using namespace std;
- using DAL::BeamFormed ;
- using DAL::BeamGroup ;
+using namespace std;
+using DAL::BeamFormed ;
+using DAL::BeamGroup ;
 
-uint dataBlockSize (1024);
-uint nofsegmentation(16*6) ;
+const uint dataBlockSize (1024);
+const uint nofsegmentation(16*6) ;
 Vector<Double> samples( dataBlockSize*nofsegmentation, 0.0 ) ;
  
 // -----------------------------------------------------------------------------
@@ -76,106 +76,105 @@ void show_data ( Matrix<Double> const &data )
 // 	    <<std::endl ;
 	    
  }
- int nofFailedTests (0);
- 
+
 int test_ppfinversion ()
 {
   cout << "\n[test_ppfinversion]\n" << endl;
-
+  
+  int nofFailedTests = 0;
+  
   cout << "[1] Testing default constructor ..." << endl;
   
   try {
-           
-      ppfinversion ppf_inv ;
-      ppfimplement ppf_imp ;
-      tbbctlIn newtbbctlIn ;
-      rawSubbandIn newrawSubbandIn ;
-      
-      
-      Vector<String> filenames( 2 );
-       {
-       filenames(0)="/mnt/lofar/ppfinversion/TBB1.cor.h5";
-       filenames(1)="/mnt/lofar/ppfinversion/rw_20080604_121347_2300.dat.h5"; 
-       }
-      cout << "[1] Testing attaching file...." << endl ;
-      
-      //"making object of class BeamFormed "
-           
-      DAL::BeamFormed bformed (filenames(0));
-      
-      DAL::BeamGroup bgroup() ;
-      
-      cout << "Filename = " << bformed.filename() << endl;
- 
-      //if(!bformed.)
     
-         
+    ppfinversion ppf_inv ;
+    ppfimplement ppf_imp ;
+    tbbctlIn newtbbctlIn ;
+    rawSubbandIn newrawSubbandIn ;
+    
+    
+    Vector<String> filenames( 2 );
+    {
+      filenames(0)="/mnt/lofar/ppfinversion/TBB1.cor.h5";
+      filenames(1)="/mnt/lofar/ppfinversion/rw_20080604_121347_2300.dat.h5"; 
+    }
+    cout << "[1] Testing attaching file...." << endl ;
+    
+    //"making object of class BeamFormed "
+    
+    DAL::BeamFormed bformed (filenames(0));
+    
+    DAL::BeamGroup bgroup() ;
+    
+    cout << "Filename = " << bformed.filename() << endl;
+    
+    //if(!bformed.)
+    
+    
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
   
   return nofFailedTests;
- }
+}
 
- Bool test_ppfinversions ()
+// ----------------------------------------------------------- test_ppfinversions
 
+int test_ppfinversions (std::string const &filename)
 {
- Bool ok(True) ;
+  int nofFailedTests (0);
   
-   try {
-        int nofFailedTests (0);
-        Vector<Double> ppfcoeff(16384,0.0) ;
-	readAsciiVector( ppfcoeff,data_ppf_coefficients.c_str()) ;
-	Vector<Double> ppfcoeff_inv(16384, 0.0) ;
-	readAsciiVector( ppfcoeff_inv,data_ppf_inversion.c_str()) ;
-	
-	ppfinversion ppf_inv ;
-        ppfimplement ppf_imp ;
-        tbbctlIn newtbbctlIn ;
-        rawSubbandIn newrawSubbandIn ;     
-               
-      
-      Vector<String> filenames( 1 );
- 
-       filenames(0)="/mnt/lofar/ppfinversion/TBB.cor.h5";
- 
-      cout << "[1] Testing attaching file...." << endl ;
-      
-      //"making object of class BeamFormed "
-           
-      DAL::BeamFormed bformed (filenames(0));
-      
-      DAL::BeamGroup bgroup() ;
-      
-      cout << "Filename = " << bformed.filename() << endl;
- 
-	cout << "objects are build :" << endl ;
+  try {
+    Vector<Double> ppfcoeff(16384,0.0) ;
+    readAsciiVector( ppfcoeff,data_ppf_coefficients.c_str()) ;
+    Vector<Double> ppfcoeff_inv(16384, 0.0) ;
+    readAsciiVector( ppfcoeff_inv,data_ppf_inversion.c_str()) ;
     
-	
-	
-	     
-   } catch( AipsError x) {
-   cerr << x.getMesg() << endl ;
-   ok = False ;
-   }
- return ok ;
- 
- }   
-  
+    ppfinversion ppf_inv ;
+    ppfimplement ppf_imp ;
+    tbbctlIn newtbbctlIn ;
+    rawSubbandIn newrawSubbandIn ;     
+    
+    cout << "[1] Testing attaching file...." << endl ;
+    
+    //"making object of class BeamFormed "
+    
+    DAL::BeamFormed bformed (filename);
+    
+    DAL::BeamGroup bgroup() ;
+    
+    cout << "Filename = " << bformed.filename() << endl;
+    
+    cout << "objects are build :" << endl ;
+    
+  } catch (AipsError x) {
+    cerr << x.getMesg() << endl ;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}   
+
 // -----------------------------------------------------------------------------
 
-int main ()
+int main (int argc,
+	  char *argv[])
 {
-  Bool ok(True);
-  
-  Int retval(0) ;
-  if(ok) {
-  ok= test_ppfinversions ();
-  if(!ok){
-  retval = 1;
-  cout <<"Error............... early exit " << endl;
+  int nofFailedTests (0);
+  std::string filename;
+
+  /* Check parameter provided from the command line */
+  if ( argc < 2 ) {
+    cout << "[tppfinversion] Missing name of input data file!" << endl;
+    return 1;
+  } else {
+    filename = std::string (argv[1]);
   }
- }
- return retval;
+
+  /* Run the tests */
+
+  nofFailedTests += test_ppfinversions (filename);
+
+  return nofFailedTests;
 }

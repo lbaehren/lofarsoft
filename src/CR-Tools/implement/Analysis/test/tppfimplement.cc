@@ -92,18 +92,18 @@ int test_ppfimplement ()
   
   int nofFailedTests (0);
 
+  std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
     ppfimplement ppf_impl;
     ppfinversion ppf_inv ;
     ionoCalibration iono_cal ;
     SubbandID band_ID ;
-      tbbctlIn newtbbctlIn ;
-        rawSubbandIn newrawSubbandIn ;  
+    tbbctlIn newtbbctlIn ;
+    rawSubbandIn newrawSubbandIn ;  
+  } catch ( AipsError x){
+    cerr << x.getMesg() << endl;
   }
   
-  catch ( AipsError x){
-    cerr << "test_ppfimplement :--- testing the default constructor.... " << x.getMesg() << endl;
-  }
   return nofFailedTests ;
 }
 
@@ -117,30 +117,30 @@ int test_ppfimplement ()
           function
 */
 Bool test_ppfimplements ()
- try {
-  std::cout << "\n[test_ppfimplements]\n" << std::endl;
-
-//  int nofFailedTests (0);
-  
-  /* Provide some feedback on the variables used */
-  std::cout << "-- Data block size   = " << dataBlockSize      << std::endl;
-  std::cout << "-- nof. segments     = " << nofsegmentation    << std::endl;
-  std::cout << "-- Vector of samples = " << samples.shape()    << std::endl;
-  std::cout << "-- Sample frequency  = " << sampling_frequency << std::endl;
-  
-  
-  ppfimplement ppf_impl;
+  try {
+    std::cout << "\n[test_ppfimplements]\n" << std::endl;
+    
+    //  int nofFailedTests (0);
+    
+    /* Provide some feedback on the variables used */
+    std::cout << "-- Data block size   = " << dataBlockSize      << std::endl;
+    std::cout << "-- nof. segments     = " << nofsegmentation    << std::endl;
+    std::cout << "-- Vector of samples = " << samples.shape()    << std::endl;
+    std::cout << "-- Sample frequency  = " << sampling_frequency << std::endl;
+    
+    
+    ppfimplement ppf_impl;
     ppfinversion ppf_inv ;
     ionoCalibration iono_cal ;
     SubbandID band_ID ;
-      tbbctlIn newtbbctlIn ;
-        rawSubbandIn newrawSubbandIn ;  
-  //***************************************************************************
-  //**************** gaussian (random) noise generation************************
-  //***************************************************************************
-  
-  cout << "[1] Testing the MLCG generator ..." << endl ;
- 
+    tbbctlIn newtbbctlIn ;
+    rawSubbandIn newrawSubbandIn ;  
+    //***************************************************************************
+	//**************** gaussian (random) noise generation************************
+	    //***************************************************************************
+	    
+	    cout << "[1] Testing the MLCG generator ..." << endl ;
+    
     uint nSample (0);
     ACG gen(1, samples.nelements() );
     
@@ -149,13 +149,13 @@ Bool test_ppfimplements ()
       //      Double nextExpRand = rnd() ;
       samples(nSample) = 0.0 ; //nextExpRand ;
     }
-   // Resetting the generator, should get the same numbers.
+    // Resetting the generator, should get the same numbers.
     gen.reset () ;
-
+    
     samples( 16*dataBlockSize*3+400 ) = 10.0 ;
     cout << "-- samples with a peak has been saved " << endl ;
-         
-  
+    
+    
   
   //************************************************************************
   //************** Calling TBB data for Nyquist sampling *******************
@@ -401,9 +401,9 @@ Bool test_ppfimplements ()
    
     cout << " number of elements in initial time vector :" << samples.nelements() <<endl ;
     
-  } catch (AipsError x) {
-    cerr << x.getMesg()<< endl;
-   }
+ } catch (AipsError x) {
+   cerr << x.getMesg()<< endl;
+ }
 
 
 // -----------------------------------------------------------------------------
