@@ -76,38 +76,43 @@ int run_test1 (int const &min,
   int ncol (0);
   clock_t start;
   clock_t end;
+  std::ofstream outfile;
 
   try {
+    outfile.open("Matrix_int_create.dat");
     for (int nelem(min); nelem<max; nelem+=step) {
       start = clock();
       /* Test operation -- begin */
       Matrix<float> mat (nelem,nelem);
       /* Test operation -- end */
       end = clock();
-      std::cout << "\t" << nelem
+      outfile << "\t" << nelem
 	      << "\t" << start
 	      << "\t" << end
 	      << "\t" << runtime(start,end)
 	      << std::endl;
     }
+    outfile.close();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
   
   try {
+    outfile.open("Matrix_double_create.dat");
     for (int nelem(min); nelem<max; nelem+=step) {
       start = clock();
       /* Test operation -- begin */
       Matrix<double> mat (nelem,nelem);
       /* Test operation -- end */
       end = clock();
-      std::cout << "\t" << nelem
+      outfile << "\t" << nelem
 	      << "\t" << start
 	      << "\t" << end
 	      << "\t" << runtime(start,end)
 	      << std::endl;
     }
+    outfile.close();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -358,7 +363,7 @@ int run_test6 (int const &min,
   std::ofstream outfile;
 
   try {
-    outfile.open("Matrix_int.dat");
+    outfile.open("Matrix_int_assign.dat");
     for (int nelem(min); nelem<max; nelem+=step) {
       Matrix<int> mat (nelem,nelem);
       start = clock();
@@ -379,7 +384,7 @@ int run_test6 (int const &min,
   }
   
   try {
-    outfile.open("Matrix_float.dat");
+    outfile.open("Matrix_float_assign.dat");
     for (int nelem(min); nelem<max; nelem+=step) {
       Matrix<float> mat (nelem,nelem);
       start = clock();
@@ -400,7 +405,7 @@ int run_test6 (int const &min,
   }
   
   try {
-    outfile.open("Matrix_double.dat");
+    outfile.open("Matrix_double_assign.dat");
     for (int nelem(min); nelem<max; nelem+=step) {
       Matrix<double> mat (nelem,nelem);
       start = clock();
