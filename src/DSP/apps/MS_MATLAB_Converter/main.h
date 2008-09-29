@@ -13,9 +13,9 @@
 
 using namespace std;
 
-class test{
+class testClass {
  public:
-  void test::countZeros(const Cube<complex<float> >& cube) const
+  void testClass::countZeros(const Cube<complex<float> >& cube) const
   {
     uInt nAntenae1 = cube.nrow();
     uInt nAntenae2 = cube.ncolumn();
