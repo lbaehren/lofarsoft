@@ -55,7 +55,7 @@ namespace DAL { // Namespace DAL -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>Definition of the LOFAR time-series data format
+      <li>\ref dal_file_formats
       <li>Classes handling the entities further down in the hierarchy of the
       dataset:
       <ul>

@@ -24,6 +24,7 @@
 #include <Coordinates/TimeFreqSkymap.h>
 
 // Namespace usage
+using CR::CoordinateType;
 using CR::TimeFreqSkymap;
 
 /*!
@@ -134,7 +135,8 @@ int test_parameters ()
 
   TimeFreqSkymap timeFreq;
 
-  /* Test of the methods inherited from the base class */
+  /******************************************************************/
+  /* Test of the methods inherited from the base class              */
 
   std::cout << "[1] Blocksize ..." << std::endl;
   try {
@@ -188,7 +190,8 @@ int test_parameters ()
     nofFailedTests++;
   }
 
-  /* Test of the methods added by TimeFreqSkymap  */
+  /******************************************************************/
+  /* Test of the methods added by TimeFreqSkymap                    */
 
   std::cout << "[5] Input data blocks per time-frame ..." << std::endl;
   try {
@@ -216,41 +219,90 @@ int test_parameters ()
     nofFailedTests++;
   }
 
-  std::cout << "[7] Coordinate axis increment ..." << std::endl;
-  try {
-#ifdef HAVE_CASA
-    std::cout << "-- increment = " << timeFreq.increment() << std::endl;
-#else 
-    std::cout << "-- increment = [" << timeFreq.increment()[0] << ","
-	      << timeFreq.increment()[1] << std::endl;
-#endif
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-
-  std::cout << "[8] Coordinate axis length ..." << std::endl;
-  try {
-#ifdef HAVE_CASA
-    std::cout << "-- shape = " << timeFreq.shape() << std::endl;
-#else 
-    std::cout << "-- shape = [" << timeFreq.shape()[0] << ","
-	      << timeFreq.shape()[1] << std::endl;
-#endif
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-
   return nofFailedTests;
 }
 
 // -----------------------------------------------------------------------------
 
+/*!
+  \brief Test the various methods provded by the class
+
+  Test the methods, which not simply provide access to the private data, but
+  which perform operations or computations based on them.
+
+  \return nofFailedTests -- The number of failed tests within this function.
+*/
 int test_methods ()
 {
-  int nofFailedTests (0);
+  std::cout << "\n[tTimeFreqSkymap::test_methods]\n" << std::endl;
 
+  int nofFailedTests (0);
+  
+  uint blocksize (1024);
+  double sampleFreq (200e06);
+  int nyquistZone (2);
+  uint blocksPerFrame (2);
+  uint nofFrames (10);
+  TimeFreqSkymap tf (blocksize,
+		     sampleFreq,
+		     nyquistZone,
+		     blocksPerFrame,
+		     nofFrames);
+  
+  std::cout << "[1] Coordinate axis reference value ..." << std::endl;
+  try {
+#ifdef HAVE_CASA
+    std::cout << "-- referenceValue = " << tf.referenceValue() << std::endl;
+#else 
+    std::cout << "-- referenceValue = [" << tf.referenceValue()[0] << ","
+	      << tf.referenceValue()[1] << std::endl;
+#endif
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[2] Coordinate axis increment ..." << std::endl;
+  try {
+#ifdef HAVE_CASA
+    std::cout << "-- increment = " << tf.increment() << std::endl;
+#else 
+    std::cout << "-- increment = [" << tf.increment()[0] << ","
+	      << tf.increment()[1] << std::endl;
+#endif
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[3] Coordinate axis length ..." << std::endl;
+  try {
+#ifdef HAVE_CASA
+    std::cout << "-- shape = " << tf.shape() << std::endl;
+#else 
+    std::cout << "-- shape = [" << tf.shape()[0] << ","
+	      << tf.shape()[1] << std::endl;
+#endif
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+#ifdef HAVE_CASA
+  std::cout << "[4] Coordinate objects for the axes .." << std::endl;
+  try {
+    std::cout << "--> time axis" << std::endl;
+    casa::LinearCoordinate time = tf.timeAxisCoordinate();
+    CoordinateType::summary (std::cout,time);
+    //
+    std::cout << "--> frequency axis" << std::endl;
+    casa::SpectralCoordinate freq = tf.frequencyAxisCoordinate();
+    CoordinateType::summary (std::cout,freq);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+#endif
   
   return nofFailedTests;
 }
@@ -265,6 +317,8 @@ int main ()
   nofFailedTests += test_constructors ();
   // Test access to the internal parameters
   nofFailedTests += test_parameters ();
+  // Test provided methods
+  nofFailedTests += test_methods ();
   
   return nofFailedTests;
 }

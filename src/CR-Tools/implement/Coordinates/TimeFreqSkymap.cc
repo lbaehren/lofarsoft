@@ -232,8 +232,6 @@ namespace CR { // Namespace CR -- begin
 #endif
   }
   
-  
-  
   // ============================================================================
   //
   //  Methods
@@ -288,6 +286,53 @@ namespace CR { // Namespace CR -- begin
   }
 #endif
 
+  // ------------------------------------------------------------- referenceValue
+
+#ifdef HAVE_CASA
+  casa::Vector<double> TimeFreqSkymap::referenceValue (int const &nFrame) const
+  {
+    casa::Vector<double> refValue (2);
+
+    switch (beamDomain_p.type()) {
+    case CoordinateDomain::Time:
+      refValue(0) = referenceTime() + blocksize_p*nFrame/sampleFrequency_p;
+      refValue(1) = sampleFrequency_p*(2*nyquistZone_p-1)/4;
+      break;
+    case CoordinateDomain::Frequency: {
+      refValue(0) = referenceTime() + blocksize_p*blocksPerFrame_p*nFrame/sampleFrequency_p;
+      refValue(1) = sampleFrequency_p*(nyquistZone_p-1)/2;
+    }
+      break;
+    default:
+      std::cerr << "[TimeFreqSkymap::shape] Invalid domain!" << std::endl;
+      break;
+    };
+    
+    return refValue;
+  }
+#else 
+  vector<double> TimeFreqSkymap::referenceValue (int const &nFrame) const
+  {
+    vector<double> refValue (2);
+
+    switch (beamDomain_p.type()) {
+    case CoordinateDomain::Time:
+      refValue[0] = referenceTime() + blocksize_p*nFrame/sampleFrequency_p;
+      refValue[1] = sampleFrequency_p*(2*nyquistZone_p-1)/4;
+      break;
+    case CoordinateDomain::Frequency: {
+      refValue[0] = referenceTime() + blocksize_p*blocksPerFrame_p*nFrame/sampleFrequency_p;
+      refValue[1] = sampleFrequency_p*(nyquistZone_p-1)/2;
+    }
+      break;
+    default:
+      std::cerr << "[TimeFreqSkymap::shape] Invalid domain!" << std::endl;
+      break;
+    };
+    
+    return refValue;
+  }
+#endif
   // ------------------------------------------------------------------ increment
   
 #ifdef HAVE_CASA
@@ -333,5 +378,55 @@ namespace CR { // Namespace CR -- begin
     return vec;
   }
 #endif  
+  
+  // ============================================================================
+  //
+  //  Optional methods (explicitely requiring casacore)
+  //
+  // ============================================================================
+
+#ifdef HAVE_CASA
+
+  // --------------------------------------------------------- timeAxisCoordinate
+  
+  casa::LinearCoordinate TimeFreqSkymap::timeAxisCoordinate ()
+  {
+    double crval = referenceValue()(0);
+    double cdelt = increment()(0);
+
+    return CoordinateType::makeTimeCoordinate(crval,
+					      cdelt);
+  }
+
+  // ---------------------------------------------------- frequencyAxisCoordinate
+
+  casa::SpectralCoordinate TimeFreqSkymap::frequencyAxisCoordinate ()
+  {
+    double crval = referenceValue()(1);
+    double cdelt = increment()(1);
+
+    return CoordinateType::makeSpectralCoordinate (crval,
+						   cdelt);
+  }
+
+  // ---------------------------------------------------------------- coordinates
+
+  bool TimeFreqSkymap::coordinates (casa::LinearCoordinate &time,
+				    casa::SpectralCoordinate &freq)
+  {
+    bool status (true);
+    
+    try {
+      time = timeAxisCoordinate();
+      freq = frequencyAxisCoordinate();
+    } catch (std::string message) {
+      std::cerr << "[TimeFreqSkymap::coordinates] " << message << std::endl;
+      status = false;
+    }
+
+    return status;
+  }
+  
+#endif
   
 } // Namespace CR -- end

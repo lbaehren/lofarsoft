@@ -1,3 +1,5 @@
+/* $Id$ */
+
 /**
 
 \page crtools_build CR-Tools :: Configuration & Build
@@ -84,28 +86,33 @@ option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES
 
   Build the graphical user interface? -- If selected \e CMake will check if all
   the required external components from
-	* Python
-	* Boost
-	* Qt4
+  <ul>
+    <li>Python
+    <li>Boost
+    <li>Qt4
+  </ul>
   are available; if any of them is missing building of the GUI is disabled and an
   warning is thrown, indicating which external component is missing.
 
   <li>\b CR_WITH_STARTOOLS
 
-  Enable the usage of additional routines from LOPES-Star?
+  Enable the usage of additional routines from the LOPES-Star package? If no
+  installation of the package is found, usage of its routines is disabled.
 </ul>
 
 \b Examples:
 
-  - Switch off builing the test programs:
+<ul>
+  <li>Switch off builing the test programs:
   \verbatim
   cmake ../../src/CR-Tools/ -DCR_BUILD_TESTS:BOOL=0
   \endverbatim
   
-  - Build the Glish-clients, but no test programms:
+  <li>Build the Glish-clients, but no test programms:
   \verbatim
   cmake ../../src/CR-Tools/ -DCR_BUILD_TESTS:BOOL=0 -DCR_GLISH_SUPPORT:BOOL=1
   \endverbatim
+</ul>
 
 <hr>
 

@@ -1,3 +1,5 @@
+/* $Id$ */
+
 /**
 
 \page crtools_changes CR-Tools :: Required and requested changes
@@ -12,6 +14,10 @@
 
 \section crtools_changes_build Build issues
 
+- No build from scratch possible on Ray; however this appears not to be an issue with the CR-Tools code itself, but rather with the dependency
+on the Boost library. Even after removing the very specific additional search path for external components to the installation in /opt/aips++
+the build still fails due to picking up the Boost installation in /usr instead $LOFARSOFT/release.
+
 <hr>
 
 \section crtools_changes_classes Issues with library classes
@@ -22,6 +28,9 @@
 - CR::SkymapCoordinates
   - replace internal CR::TimeFreq object with CR::TimeFreqSkymap
   - use CR::SpatialCoordinate instead of individual coordinate objects
+
+- DAL::LOFAR_StationGroup
+  - Collect start-times of the dumps from the individual dipoles and thereof compute a relative shift between the data channels.
 
 <hr>
 

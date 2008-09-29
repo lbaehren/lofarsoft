@@ -140,7 +140,7 @@ namespace CR { // Namespace CR -- begin
     <h3>Example(s)</h3>
     
     <ul>
-      <li>Store data inide a new TimeFreqSkymap object:
+      <li>Store data inside a new TimeFreqSkymap object:
       \code
       uint blocksize (1024);
       casa::Quantity sampleFreq (200,"MHz");
@@ -154,15 +154,28 @@ namespace CR { // Namespace CR -- begin
 			 blocksPerFrame,
 			 frames);
       \endcode
+      <li>Create new object, making use of already existing data stored in a
+      TimeFreq object:
+      \code
+      TimeFreq tf;
+      uint blocksPerFrame (10);
+      uint frames (100);
+      
+      TimeFreqSkymap tf_skymap (tf,
+			        blocksPerFrame,
+			        frames);
+      \endcode
       <li>Get the internal object storing the coordinate domain information:
       \code 
       TimeFreqSkymap tf;
 
       CoordinateDomain domain = tf.beamDomain();
       \endcode
-      The actual coordinate domain type can be exctracted just as easily:
+      The actual coordinate domain \e type and \e name can be exctracted just as
+      easily:
       \code
       CoordinateDomain::Types domainType = tf.beamDomain().type();
+      std::string domainName             = tf.beamDomain().name();
       \endcode
     </ul>
     
@@ -171,11 +184,11 @@ namespace CR { // Namespace CR -- begin
     
   protected:
 
-    /*! The target domain for which the data are processed by the Beamformer */
+    //! The target domain for which the data are processed by the Beamformer
     CoordinateDomain beamDomain_p;
-    /*! The number of data blocks added up within a single time frame */
+    //! The number of data blocks added up within a single time frame
     uint blocksPerFrame_p;
-    /*! The number of time frames, \f$ N_{\rm Frames} \f$ */
+    //! The number of time frames, \f$ N_{\rm Frames} \f$
     uint nofFrames_p;
     
   public:
@@ -205,7 +218,7 @@ namespace CR { // Namespace CR -- begin
       \param nyquistZone     -- Nyquist zone,  [1]
       \param blocksPerFrame  -- The number of data blocks added up within a single
              time frame
-      \param nofFrames      -- The number of frames
+      \param nofFrames       -- The number of frames
     */
     TimeFreqSkymap (uint const &blocksize,
 		    double const &sampleFrequency,
@@ -221,7 +234,7 @@ namespace CR { // Namespace CR -- begin
       \param nyquistZone     -- Nyquist zone,  [1]
       \param blocksPerFrame  -- The number of data blocks added up within a single
              time frame
-      \param nofFrames      -- The number of frames
+      \param nofFrames       -- The number of frames
     */
     TimeFreqSkymap (uint const &blocksize,
 		    casa::Quantity const &sampleFrequency,
@@ -333,6 +346,12 @@ namespace CR { // Namespace CR -- begin
       return nofFrames_p;
     }
 
+    /*!
+      \brief Set the number of time frames
+
+      \param nofFrames -- The total number of time frames to generate for the
+             resulting skymap.
+    */
     inline void setNofFrames (uint const &nofFrames) {
       nofFrames_p = nofFrames;
     }
@@ -375,17 +394,34 @@ namespace CR { // Namespace CR -- begin
 #endif
     
     /*!
+      \brief Get the reference value for the world coordinates of the axes
+
+      \param nFrame -- The number of the frame for which to retrieve the
+             reference values; keep in mind that the reference value for the
+	     time axis indeed is dependent on the frame number.
+
+      \return refValue -- [time,freq] = \f$ [ t_{\rm CRVAL}, \nu_{\rm CRVAL} ] \f$
+    */
+#ifdef HAVE_CASA
+    casa::Vector<double> referenceValue (int const &nFrame=0) const;
+#else 
+    vector<double> referenceValue (int const &nFrame=0) const;
+#endif
+
+    /*!
       \brief Get the increment between subsequent values along the axes
 
       \return increment -- [time,freq] = \f$ [ \delta_t, \delta_\nu ] \f$
     */
 #ifdef HAVE_CASA
-    virtual casa::Vector<double> increment () const;
+    casa::Vector<double> increment () const;
 #else 
-    virtual vector<double> increment () const;
+    vector<double> increment () const;
 #endif
 
     // --------------------------------------------------------- Optional methods
+
+#ifdef HAVE_CASA
 
     /*!
       \brief Create a coordinate object from the internally stored parameters
@@ -416,6 +452,8 @@ namespace CR { // Namespace CR -- begin
     */
     bool coordinates (casa::LinearCoordinate &time,
 		      casa::SpectralCoordinate &freq);
+
+#endif
     
   private:
     

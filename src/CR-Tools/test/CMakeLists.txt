@@ -25,7 +25,7 @@ else (HAVE_CASACORE OR HAVE_CASA)
     )
 endif (HAVE_CASACORE OR HAVE_CASA)
 
-foreach (test tNumericalRanges tObjects tTemplates)
+foreach (test tTemplates)
   ## compiler instructions
   add_executable (${test} ${test}.cc)
   ## linker instructions

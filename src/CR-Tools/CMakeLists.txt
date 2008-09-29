@@ -387,11 +387,10 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ## Test datasets
 
-find_file (dataset_tbb rw_20080604_121347_2300.dat.h5
+find_file (dataset_tbb rw_20080604_122217_2300.dat.h5
   PATHS
-  ${CR_SOURCE_DIR}/data
-  ${CR_SOURCE_DIR}/../data
-  ${CR_SOURCE_DIR}/../../data
+    ${USG_ROOT}/data
+    ${USG_ROOT}/data/test
   )
 
 if (dataset_tbb)
