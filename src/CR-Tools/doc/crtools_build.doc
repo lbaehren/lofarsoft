@@ -4,7 +4,17 @@
 
 \page crtools_build CR-Tools :: Configuration & Build
 
+- \ref crtools_obtain_code
 - \ref crtools_build_parameters
+
+<hr>
+
+\section crtools_obtain_code Obtaining the source code
+
+All the source code is available through the Subversion repository of the User Software Group; in order to obtain a working copy run the following command:
+\verbatim
+svn co http://usg.lofar.org/svn/code/trunk usg
+\endverbatim
 
 <hr>
 

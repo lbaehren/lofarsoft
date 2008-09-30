@@ -15,11 +15,11 @@ lofarsoft
 `-- src
     |-- contrib
     |-- CR-Tools         <-- you are here
-	|   |-- apps
-	|   |-- docs
-	|   |-- implement
-	|   |-- scripts
-	|   `-- test
+    |   |-- apps
+    |   |-- docs
+    |   |-- implement
+    |   |-- scripts
+    |   `-- test
     |-- DAL
     `-- pybdsm
 \endverbatim
