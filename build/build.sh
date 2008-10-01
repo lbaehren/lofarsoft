@@ -36,7 +36,7 @@ param_reportBuild='';
 ## parallelize the build if possible
 
 if [ "$SYSTEM_NAME" == "Darwin" ] ; then
-  var_make="make -j 2"
+  var_make="make -j 4"
 else 
   var_make="make"
 fi
@@ -201,10 +201,10 @@ build_package ()
   {
     # Feedback
     echo "[`date`] Building package";
-    echo " -- Build directory ..... : $buildDir";
-    echo " -- Source directory .... : $sourceDir";
-    echo " -- Configuration options : $buildOptions";
-    echo " -- Send build log ...... : $param_reportBuild";
+    echo "-- Build directory ..... : $buildDir";
+    echo "-- Source directory .... : $sourceDir";
+    echo "-- Configuration options : $buildOptions";
+    echo "-- Send build log ...... : $param_reportBuild";
     # change into the build directory
     cd $buildDir
     # run cmake on the source directory
@@ -494,7 +494,7 @@ case $param_packageName in
 	cd $basedir; ./build.sh bison
 	cd $basedir; ./build.sh casacore
 	cd $basedir; ./build.sh plplot
-	cd $basedir; ./build.sh boost
+	cd $basedir; ./build.sh boost --force-build
 	cd $basedir; ./build.sh python
 	## USG packages
 	echo "[`date`] Building Data Access Library ..."
