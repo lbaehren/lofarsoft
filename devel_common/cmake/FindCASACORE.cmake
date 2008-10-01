@@ -132,7 +132,7 @@ foreach (CASACORE_HEADER ${casacore_headers})
     get_filename_component (tmp ${header_path} ABSOLUTE)
     list (APPEND CASACORE_INCLUDES ${tmp})
   else (header_path)
-    message (SEND_ERROR "[casacore] Unable to locate ${CASACORE_HEADER}")
+    message (MESSAGE "[casacore] Unable to locate ${CASACORE_HEADER}")
   endif (header_path)
 endforeach (CASACORE_HEADER)
 
