@@ -45,6 +45,7 @@ option (BOOST_LIB_PYTHON            "Build libboost_python"             YES )
 option (BOOST_LIB_RANGE             "Build libboost_range"              NO  )
 option (BOOST_LIB_REGEX             "Build libboost_regex"              NO  )
 option (BOOST_LIB_SIGNALS           "Build libboost_signals"            YES )
+option (BOOST_LIB_TEST              "Build libboost_test"               YES )
 option (BOOST_LIB_THREAD            "Build libboost_thread"             YES )
 option (BOOST_LIB_WAVE              "Build libboost_wave"               YES )
 

@@ -46,6 +46,10 @@ if (BOOST_LIB_SIGNALS)
   add_subdirectory (signals)
 endif (BOOST_LIB_SIGNALS)
 
+if (BOOST_LIB_TEST)
+  add_subdirectory (test)
+endif (BOOST_LIB_TEST)
+
 if (BOOST_LIB_THREAD)
   add_subdirectory (thread)
 endif (BOOST_LIB_THREAD)
