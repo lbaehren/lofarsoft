@@ -24,10 +24,15 @@
 #include <iostream>
 #include <string>
 
+using std::cout;
+using std::endl;
+
 #include <dal/dalDataset.h>
 
 using DAL::dalDataset;
 using DAL::dalGroup;
+
+#include <crtools.h>
 
 // -----------------------------------------------------------------------------
 
@@ -77,7 +82,7 @@ int test_dalDataset (std::string const &filename)
   int nofFailedTests (0);
 
   int retval (0);
-  std::string groupname ("Station001");
+  std::string groupname = name_station;
   char *h5filename = string2char(filename);
   
   cout << "[1] Open dataset using DAL::Dataset object pointer" << endl;
@@ -186,9 +191,9 @@ int main (int argc,
     exit the program.
   */
   if (argc < 2) {
-    std::cerr << "[tLOFAR_TBB] Too few parameters!" << endl;
+    std::cerr << "[tUseDAL] Too few parameters!" << endl;
     std::cerr << "" << endl;
-    std::cerr << "  tLOFAR_TBB <filename>" << endl;
+    std::cerr << "  tUseDAL <filename>" << endl;
     std::cerr << "" << endl;
     return -1;
   }

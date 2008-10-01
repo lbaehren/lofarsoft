@@ -41,7 +41,6 @@
 #include <Analysis/ppfinversion.h>
 #include <Analysis/ionoCalibration.h>
 
-//using namespace DAL ;
 using namespace CR ;
 
 
@@ -67,16 +66,16 @@ using CR::rawSubbandIn ;
 // -----------------------------------------------------------------------------
 //  Global variables used throughout the program
 
-uint dataBlockSize (1024);
-uint nofsegmentation(16*10) ;
+const uint dataBlockSize        = 1024;
+const uint nofsegmentation      = 16*10;
 Vector<Double> samples( dataBlockSize*nofsegmentation, 0.0 ) ;
-Double hrAngle( 1.034 );
-Double declinationAngle( 1.078 );
-Double geomagLatitude( 0.915708 ) ;
-Double height_ionosphere( 4e5 ) ;
-Double TEC_value( 10e15 ) ;
+const Double hrAngle            = 1.034;
+const Double declinationAngle   = 1.078;
+const Double geomagLatitude     = 0.915708;
+const Double height_ionosphere  = 4e5;
+const Double TEC_value          = 10e15;
 Vector<Double> subband_frequencies( 512, 0.0 );
-Double sampling_frequency( 200e6 );
+const Double sampling_frequency = 200e6;
 
 // -----------------------------------------------------------------------------
 
@@ -85,13 +84,12 @@ Double sampling_frequency( 200e6 );
   
   \return nofFailedTests -- The number of failed tests.
 */
-
 int test_ppfimplement ()
 {
   std::cout << "\n[test_ppfimplement]\n" << std::endl;
   
   int nofFailedTests (0);
-
+  
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
     ppfimplement ppf_impl;
@@ -116,7 +114,10 @@ int test_ppfimplement ()
   \return nofFailedTests -- The number of failed tests encountered within this
           function
 */
-Bool test_ppfimplements ()
+int test_ppfimplements ()
+{
+  int nofFailedTests (0);
+  
   try {
     std::cout << "\n[test_ppfimplements]\n" << std::endl;
     
@@ -135,11 +136,12 @@ Bool test_ppfimplements ()
     SubbandID band_ID ;
     tbbctlIn newtbbctlIn ;
     rawSubbandIn newrawSubbandIn ;  
-    //***************************************************************************
-	//**************** gaussian (random) noise generation************************
-	    //***************************************************************************
-	    
-	    cout << "[1] Testing the MLCG generator ..." << endl ;
+    
+    /*
+     *  Gaussian (random) noise generation
+     */
+    
+    cout << "[1] Testing the MLCG generator ..." << endl ;
     
     uint nSample (0);
     ACG gen(1, samples.nelements() );
@@ -156,45 +158,45 @@ Bool test_ppfimplements ()
     cout << "-- samples with a peak has been saved " << endl ;
     
     
-  
-  //************************************************************************
-  //************** Calling TBB data for Nyquist sampling *******************
-  //************************************************************************
-//     int nofFailedTests (0);
-//     
-//    Vector<String> filenames(1) ;
-//     filenames(0) = "/mnt/lofar/kalpana/rw_20080306_141000_2301.dat" ;
-//     
-//     std::cout << "[2] Testing attaching a file... " << std::endl ;
-//     
-//     cout << "[3]Testing retrieval of fx() data....." << endl ;
-// 	
-// 	if(!newtbbctlIn.attachFile(filenames)) {
-// 	  cout << " Failed to attach file(s)!" <<endl ;
-// 	  nofFailedTests++ ;
-// 	  return nofFailedTests ;
-// 	  } ;
-// 	
-// 	Matrix<Double> data ;
-// 	data = newtbbctlIn.fx() ;
-// 	uint rows_data = data.nrow() ;
-// 	cout << "number of rows of real raw data : " <<  rows_data << endl ;
-// 	uint columns_data = data.ncolumn() ;
-// 	cout << "number of columns of real raw data : " << columns_data<< endl ;
-//     
-//     Vector<Double> data_input = data.column(0) ;
-// 	uint ndatasamples_raw = data_input.nelements() ;
-// 	
-// 	cout << " number of elements in the raw vector samples :" << ndatasamples_raw << endl ;
-// 	
-// 	Vector<Double> chopped_data(163840) ;
-// 	chopped_data = data_input(Slice(0,163840)) ;
-// 	
-// 	chopped_data(16384*6+500)=1000 ;
-// 	
-// 	uint n_chopped_data= chopped_data.nelements() ;
-// 	cout << "number of elements in the chopped data vector: " << n_chopped_data <<endl ;
-	
+    /*
+     * Calling TBB data for Nyquist sampling
+     */
+
+    //     int nofFailedTests (0);
+    //     
+    //    Vector<String> filenames(1) ;
+    //     filenames(0) = "/mnt/lofar/kalpana/rw_20080306_141000_2301.dat" ;
+    //     
+    //     std::cout << "[2] Testing attaching a file... " << std::endl ;
+    //     
+    //     cout << "[3]Testing retrieval of fx() data....." << endl ;
+    // 	
+    // 	if(!newtbbctlIn.attachFile(filenames)) {
+    // 	  cout << " Failed to attach file(s)!" <<endl ;
+    // 	  nofFailedTests++ ;
+    // 	  return nofFailedTests ;
+    // 	  } ;
+    // 	
+    // 	Matrix<Double> data ;
+    // 	data = newtbbctlIn.fx() ;
+    // 	uint rows_data = data.nrow() ;
+    // 	cout << "number of rows of real raw data : " <<  rows_data << endl ;
+    // 	uint columns_data = data.ncolumn() ;
+    // 	cout << "number of columns of real raw data : " << columns_data<< endl ;
+    //     
+    //     Vector<Double> data_input = data.column(0) ;
+    // 	uint ndatasamples_raw = data_input.nelements() ;
+    // 	
+    // 	cout << " number of elements in the raw vector samples :" << ndatasamples_raw << endl ;
+    // 	
+    // 	Vector<Double> chopped_data(163840) ;
+    // 	chopped_data = data_input(Slice(0,163840)) ;
+    // 	
+    // 	chopped_data(16384*6+500)=1000 ;
+    // 	
+    // 	uint n_chopped_data= chopped_data.nelements() ;
+    // 	cout << "number of elements in the chopped data vector: " << n_chopped_data <<endl ;
+    
     ofstream logfile1;
     
     logfile1.open( "sample1", ios::out );
@@ -203,14 +205,14 @@ Bool test_ppfimplements ()
     }
     
     logfile1.close() ;
-   
+    
     
     Vector<Double> ppfcoeff(16384) ;
     Vector<Double> ppfcoeff_inv(16384) ;
     
-     readAsciiVector(ppfcoeff,data_ppf_coefficients.c_str());
-       
-     readAsciiVector(ppfcoeff_inv,data_ppf_inversion.c_str());
+    readAsciiVector(ppfcoeff,data_ppf_coefficients.c_str());
+    
+    readAsciiVector(ppfcoeff_inv,data_ppf_inversion.c_str());
     
     
     //***************************************************************
@@ -399,26 +401,24 @@ Bool test_ppfimplements ()
     
     logfile3.close() ;						 
    
-    cout << " number of elements in initial time vector :" << samples.nelements() <<endl ;
+    cout << " number of elements in initial time vector :" << samples.nelements()
+	 <<endl ;
     
- } catch (AipsError x) {
-   cerr << x.getMesg()<< endl;
- }
-
+  } catch (AipsError x) {
+    cerr << x.getMesg()<< endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
 
 // -----------------------------------------------------------------------------
 
 int main ()
 {
-  Bool ok(True);
-  
-  Int retval(0) ;
-  if(ok) {
-  ok= test_ppfimplements ();
-  if(!ok){
-  retval = 1;
-  cout <<"Error............... early exit " << endl;
-  }
- }
- return retval; 
+  int nofFailedTests (0);
+
+  nofFailedTests += test_ppfimplements ();
+
+  return nofFailedTests;
 }

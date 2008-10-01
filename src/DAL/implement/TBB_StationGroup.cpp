@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
+ | $Id::                                                               $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -22,8 +22,9 @@
  ***************************************************************************/
 
 #include <casa/Arrays/ArrayIO.h>
-#include <dal/Enumerations.h>
-#include <Data/LOFAR_StationGroup.h>
+
+#include <Enumerations.h>
+#include <TBB_StationGroup.h>
 
 using std::cout;
 using std::endl;
@@ -36,26 +37,37 @@ namespace DAL { // Namespace DAL -- begin
   //
   // ============================================================================
   
-  // --------------------------------------------------------- LOFAR_StationGroup
+  // ----------------------------------------------------------- TBB_StationGroup
   
-  LOFAR_StationGroup::LOFAR_StationGroup ()
+  TBB_StationGroup::TBB_StationGroup ()
   {
     init ();
   }
   
-  // --------------------------------------------------------- LOFAR_StationGroup
+  // ----------------------------------------------------------- TBB_StationGroup
   
-  LOFAR_StationGroup::LOFAR_StationGroup (std::string const &filename,
-					  std::string const &group)
+  /*!
+    \param filename -- Name of the HDF5 file within which the group is
+           contained.
+    \param group    -- Name of the group, in this case the full path from
+           the base of the hierarchical structure within the HDF5 file.
+  */
+  TBB_StationGroup::TBB_StationGroup (std::string const &filename,
+				      std::string const &group)
   {
     init (filename,
 	  group);
   }
   
-  // --------------------------------------------------------- LOFAR_StationGroup
+  // ----------------------------------------------------------- TBB_StationGroup
   
-  LOFAR_StationGroup::LOFAR_StationGroup (hid_t const &location,
-					  std::string const &group)
+  /*!
+    \param location -- Identifier for the location within the HDF5 file, below
+           which the group is placed.
+    \param group    -- Name of the group.
+  */
+  TBB_StationGroup::TBB_StationGroup (hid_t const &location,
+				      std::string const &group)
   {
     // Initialize internal variables
     groupID_p = 0;
@@ -64,16 +76,16 @@ namespace DAL { // Namespace DAL -- begin
 	  group);
   }
   
-  // --------------------------------------------------------- LOFAR_StationGroup
+  // ----------------------------------------------------------- TBB_StationGroup
   
-  LOFAR_StationGroup::LOFAR_StationGroup (hid_t const &group_id)
+  TBB_StationGroup::TBB_StationGroup (hid_t const &group_id)
   {
     init (group_id);
   }
   
-  // --------------------------------------------------------- LOFAR_StationGroup
+  // ----------------------------------------------------------- TBB_StationGroup
   
-  LOFAR_StationGroup::LOFAR_StationGroup (LOFAR_StationGroup const &other)
+  TBB_StationGroup::TBB_StationGroup (TBB_StationGroup const &other)
   {
     // Initialize internal variables
     groupID_p = 0;
@@ -87,12 +99,12 @@ namespace DAL { // Namespace DAL -- begin
   //
   // ============================================================================
   
-  LOFAR_StationGroup::~LOFAR_StationGroup ()
+  TBB_StationGroup::~TBB_StationGroup ()
   {
     destroy();
   }
   
-  void LOFAR_StationGroup::destroy ()
+  void TBB_StationGroup::destroy ()
   {
     herr_t h5error (0);
     
@@ -109,7 +121,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ------------------------------------------------------------------ operator=
   
-  LOFAR_StationGroup& LOFAR_StationGroup::operator= (LOFAR_StationGroup const &other)
+  TBB_StationGroup& TBB_StationGroup::operator= (TBB_StationGroup const &other)
   {
     if (this != &other) {
       destroy ();
@@ -120,7 +132,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------------------- copy
   
-  void LOFAR_StationGroup::copy (LOFAR_StationGroup const &other)
+  void TBB_StationGroup::copy (TBB_StationGroup const &other)
   {
     if (other.groupID_p > 0) {
       init (other.groupID_p);
@@ -139,7 +151,7 @@ namespace DAL { // Namespace DAL -- begin
   //
   // ============================================================================
   
-  std::string LOFAR_StationGroup::group_name (bool const &stripPath)
+  std::string TBB_StationGroup::group_name (bool const &stripPath)
   {
     bool status (true);
     std::string name ("UNDEFINED");
@@ -151,7 +163,7 @@ namespace DAL { // Namespace DAL -- begin
 	return name.substr(1);
       }
     } else {
-      std::cerr <<  "[LOFAR_StationGroup::group_name] "
+      std::cerr <<  "[TBB_StationGroup::group_name] "
 		<< "Error retrieving name of HDF5 group!"
 		<< std::endl;
     }
@@ -161,7 +173,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------- station_position_value
   
-  casa::Vector<double> LOFAR_StationGroup::station_position_value ()
+  casa::Vector<double> TBB_StationGroup::station_position_value ()
   {
     casa::Vector<double> val;
     
@@ -176,7 +188,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ------------------------------------------------------ station_position_unit
   
-  std::string LOFAR_StationGroup::station_position_unit ()
+  std::string TBB_StationGroup::station_position_unit ()
   {
     std::string val;
     
@@ -191,7 +203,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------- station_position_frame
   
-  std::string LOFAR_StationGroup::station_position_frame ()
+  std::string TBB_StationGroup::station_position_frame ()
   {
     std::string val;
     
@@ -206,7 +218,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------- station_position
   
-  casa::MPosition LOFAR_StationGroup::station_position ()
+  casa::MPosition TBB_StationGroup::station_position ()
   {
     return DAL::h5get_position (DAL::STATION_POSITION_VALUE,
 				DAL::STATION_POSITION_UNIT,
@@ -216,7 +228,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ------------------------------------------------------- beam_direction_value
   
-  casa::Vector<double> LOFAR_StationGroup::beam_direction_value ()
+  casa::Vector<double> TBB_StationGroup::beam_direction_value ()
   {
     casa::Vector<double> val;
     
@@ -232,7 +244,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // -------------------------------------------------------- beam_direction_unit
   
-  std::string LOFAR_StationGroup::beam_direction_unit ()
+  std::string TBB_StationGroup::beam_direction_unit ()
   {
     std::string val;
     
@@ -247,7 +259,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ------------------------------------------------------- beam_direction_frame
   
-  std::string LOFAR_StationGroup::beam_direction_frame ()
+  std::string TBB_StationGroup::beam_direction_frame ()
   {
     std::string val;
     
@@ -263,7 +275,7 @@ namespace DAL { // Namespace DAL -- begin
   // ------------------------------------------------------------- beam_direction
   
 #ifdef HAVE_CASA
-  casa::MDirection LOFAR_StationGroup::beam_direction ()
+  casa::MDirection TBB_StationGroup::beam_direction ()
   {
     return DAL::h5get_direction (DAL::BEAM_DIRECTION_VALUE,
 				 DAL::BEAM_DIRECTION_UNIT,
@@ -274,7 +286,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // --------------------------------------------------------------- trigger_type
   
-  std::string LOFAR_StationGroup::trigger_type ()
+  std::string TBB_StationGroup::trigger_type ()
   {
     std::string val;
     
@@ -289,7 +301,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ------------------------------------------------------------- trigger_offset
   
-  double LOFAR_StationGroup::trigger_offset ()
+  double TBB_StationGroup::trigger_offset ()
   {
     double val (0);
     
@@ -305,7 +317,7 @@ namespace DAL { // Namespace DAL -- begin
   // --------------------------------------------------------- triggered_antennas
   
 #ifdef HAVE_CASA
-  casa::Vector<uint> LOFAR_StationGroup::triggered_antennas ()
+  casa::Vector<uint> TBB_StationGroup::triggered_antennas ()
   {
     casa::Vector<uint> val;
     
@@ -318,7 +330,7 @@ namespace DAL { // Namespace DAL -- begin
     }
   }
 #else 
-  std::vector<uint> LOFAR_StationGroup::triggered_antennas ()
+  std::vector<uint> TBB_StationGroup::triggered_antennas ()
   {
     std::vector<uint> val;
     
@@ -334,9 +346,9 @@ namespace DAL { // Namespace DAL -- begin
   
   // -------------------------------------------------------------------- summary
   
-  void LOFAR_StationGroup::summary (std::ostream &os)
+  void TBB_StationGroup::summary (std::ostream &os)
   {
-    os << "[LOFAR_StationGroup] Summary of object properties"     << endl;
+    os << "[TBB_StationGroup] Summary of object properties"     << endl;
     
     os << "-- Group ID  .............. : " << groupID_p           << endl;
 
@@ -366,14 +378,14 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------------------- init
   
-  void LOFAR_StationGroup::init ()
+  void TBB_StationGroup::init ()
   {
     groupID_p = 0;
   }
   
   // ----------------------------------------------------------------------- init
   
-  void LOFAR_StationGroup::init (hid_t const &group_id)
+  void TBB_StationGroup::init (hid_t const &group_id)
   {
     bool status (true);
     std::string filename;
@@ -399,7 +411,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------------------- init
   
-  void LOFAR_StationGroup::init (std::string const &filename,
+  void TBB_StationGroup::init (std::string const &filename,
 				 std::string const &group)
   {
     hid_t file_id (0);
@@ -418,7 +430,7 @@ namespace DAL { // Namespace DAL -- begin
       init (file_id,
 	    group);
     } else {
-      std::cerr << "[LOFAR_StationGroup::init] Error opening HDF5 file "
+      std::cerr << "[TBB_StationGroup::init] Error opening HDF5 file "
 		<< filename 
 		<< " !"
 		<< std::endl;
@@ -433,7 +445,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------------------- init
   
-  void LOFAR_StationGroup::init (hid_t const &location,
+  void TBB_StationGroup::init (hid_t const &location,
 				 std::string const &group)
   {
     bool status (true);
@@ -447,7 +459,7 @@ namespace DAL { // Namespace DAL -- begin
       group_id = H5Gopen1 (location,
 			   group.c_str());
     } catch (std::string message) {
-      std::cerr << "[LOFAR_StationGroup::init] " << message << std::endl;
+      std::cerr << "[TBB_StationGroup::init] " << message << std::endl;
       status = false;
     }
     
@@ -463,7 +475,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ---------------------------------------------------------- setDipoleDatasets
   
-  bool LOFAR_StationGroup::setDipoleDatasets ()
+  bool TBB_StationGroup::setDipoleDatasets ()
   {
     /* Check minimal condition for operations below. */
     if (groupID_p < 1) {
@@ -489,15 +501,15 @@ namespace DAL { // Namespace DAL -- begin
 	  status = DAL::h5get_name (datasetName,
 				    groupID_p,
 				    idx);
-	  // if name retrieval was successful, create new LOFAR_DipoleDataset
+	  // if name retrieval was successful, create new TBB_DipoleDataset
 	  if (status) {
-	    datasets_p.push_back(DAL::LOFAR_DipoleDataset (groupID_p,
+	    datasets_p.push_back(DAL::TBB_DipoleDataset (groupID_p,
 							   datasetName));
 	  }
 	}
       }
     } catch (std::string message) {
-      std::cerr << "[LOFAR_StationGroup::setDipoleDatasets] "
+      std::cerr << "[TBB_StationGroup::setDipoleDatasets] "
 		<< message
 		<< std::endl;
       return false;
@@ -506,23 +518,23 @@ namespace DAL { // Namespace DAL -- begin
     return true;
   }
   
-  // ---------------------------------------------------------------- channelsIDs
+  // ---------------------------------------------------------------- channelID
   
-  std::vector<int> LOFAR_StationGroup::channelIDs ()
+  std::vector<int> TBB_StationGroup::channelID ()
   {
-    std::vector<int> channels_ids;
+    std::vector<int> channel_ids;
     
     for (uint n(0); n<datasets_p.size(); n++) {
-      channels_ids.push_back(datasets_p[n].channelID());
+      channel_ids.push_back(datasets_p[n].channelID());
     }
     
-    return channels_ids;
+    return channel_ids;
   }
 
   // ------------------------------------------------------ antennaPositionValues
 
 #ifdef HAVE_CASA
-  casa::Matrix<double> LOFAR_StationGroup::antennaPositionValues ()
+  casa::Matrix<double> TBB_StationGroup::antennaPositionValues ()
   {
     unsigned int nofDipoles = datasets_p.size();
     casa::Matrix<double> positionValues (nofDipoles,3);
@@ -537,21 +549,34 @@ namespace DAL { // Namespace DAL -- begin
   
   // --------------------------------------------------------------- channelNames
   
-  std::vector<std::string> LOFAR_StationGroup::channelNames ()
+#ifdef HAVE_CASA
+  casa::Vector<casa::String> TBB_StationGroup::channelNames ()
   {
-    std::vector<std::string> names;
+    casa::Vector<casa::String> names (datasets_p.size());
     
     for (uint n(0); n<datasets_p.size(); n++) {
-      names.push_back(datasets_p[n].channelName());
+      names(n) = datasets_p[n].channelName();
     }
     
     return names;
   }
+#else
+  std::vector<std::string> TBB_StationGroup::channelNames ()
+  {
+    std::vector<std::string> names (datasets_p.size());
+    
+    for (uint n(0); n<datasets_p.size(); n++) {
+      names[n] = datasets_p[n].channelName();
+    }
+    
+    return names;
+  }
+#endif
   
   // ----------------------------------------------------------------- datasetIDs
   
 #ifdef HAVE_CASA
-  casa::Vector<hid_t> LOFAR_StationGroup::datasetIDs ()
+  casa::Vector<hid_t> TBB_StationGroup::datasetIDs ()
   {
     uint nofDatasets (datasets_p.size());
     casa::Vector<hid_t> dataset_ids (nofDatasets);
@@ -563,7 +588,7 @@ namespace DAL { // Namespace DAL -- begin
     return dataset_ids;
   }
 #else
-  std::vector<hid_t> LOFAR_StationGroup::datasetIDs ()
+  std::vector<hid_t> TBB_StationGroup::datasetIDs ()
   {
     std::vector<hid_t> dataset_ids;
     
@@ -578,7 +603,7 @@ namespace DAL { // Namespace DAL -- begin
   // ---------------------------------------------------------------------- times
   
 #ifdef HAVE_CASA
-  casa::Vector<uint> LOFAR_StationGroup::times ()
+  casa::Vector<uint> TBB_StationGroup::times ()
   {
     uint nofDatasets (datasets_p.size());
     casa::Vector<uint> time (nofDatasets);
@@ -590,7 +615,7 @@ namespace DAL { // Namespace DAL -- begin
     return time;
   }
 #else
-  std::vector<uint> LOFAR_StationGroup::times ()
+  std::vector<uint> TBB_StationGroup::times ()
   {
     std::vector<uint> time;
     
@@ -606,7 +631,7 @@ namespace DAL { // Namespace DAL -- begin
   
 #ifdef HAVE_CASA
   casa::Vector<double>
-  LOFAR_StationGroup::sample_frequencies (std::string const &units)
+  TBB_StationGroup::sample_frequencies (std::string const &units)
   {
     uint nofDatasets (datasets_p.size());
     casa::Vector<double> sample_frequency (nofDatasets);
@@ -618,7 +643,7 @@ namespace DAL { // Namespace DAL -- begin
     return sample_frequency;
   }
 #else
-  std::vector<double> LOFAR_StationGroup::sample_frequencies (std::string const &units)
+  std::vector<double> TBB_StationGroup::sample_frequencies (std::string const &units)
   {
     std::vector<double> sample_frequency;
     
@@ -633,7 +658,7 @@ namespace DAL { // Namespace DAL -- begin
   // --------------------------------------------------------------- data_lengths
   
 #ifdef HAVE_CASA
-  casa::Vector<uint> LOFAR_StationGroup::data_lengths ()
+  casa::Vector<uint> TBB_StationGroup::data_lengths ()
   {
     uint nofDatasets (datasets_p.size());
     casa::Vector<uint> data_length (nofDatasets);
@@ -645,7 +670,7 @@ namespace DAL { // Namespace DAL -- begin
     return data_length;
   }
 #else
-  std::vector<uint> LOFAR_StationGroup::data_lengths ()
+  std::vector<uint> TBB_StationGroup::data_lengths ()
   {
     std::vector<uint> data_length;
     
@@ -659,7 +684,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ------------------------------------------------------------------------- fx
   
-  casa::Matrix<double> LOFAR_StationGroup::fx (int const &start,
+  casa::Matrix<double> TBB_StationGroup::fx (int const &start,
 					       int const &nofSamples)
   {
     /* Check minimal condition for operations below. */
@@ -670,7 +695,7 @@ namespace DAL { // Namespace DAL -- begin
     casa::Matrix<double> data (nofSamples,datasets_p.size());
     casa::Vector<double> tmp (nofSamples);
 
-    std::cout << "[LOFAR_StationGroup::fx]"           << std::endl;
+    std::cout << "[TBB_StationGroup::fx]"           << std::endl;
     std::cout << "-- nof. samples = " << nofSamples   << std::endl;
     std::cout << "-- shape(data)  = " << data.shape() << std::endl;
     std::cout << "-- shape(tmp)   = " << tmp.shape()  << std::endl;
@@ -687,7 +712,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ------------------------------------------------------------------------- fx
   
-  casa::Matrix<double> LOFAR_StationGroup::fx (int const &start,
+  casa::Matrix<double> TBB_StationGroup::fx (int const &start,
 					       int const &nofSamples,
 					       std::vector<uint> const &dipoleSelection)
   {
@@ -715,7 +740,14 @@ namespace DAL { // Namespace DAL -- begin
   
   // ---------------------------------------------------------- attributes2record
   
-  casa::Record LOFAR_StationGroup::attributes2record (bool const &addRecursive)
+  /*!
+    \param addRecursive -- Recursively add information from embedded HDF5
+           objects, such as groups and datasets? 
+    
+    \return record -- A casa::Record container holding the values of the 
+            attributes attached to the dataset for this dipole
+  */
+  casa::Record TBB_StationGroup::attributes2record (bool const &addRecursive)
   {
     casa::Record rec;
     
@@ -739,7 +771,7 @@ namespace DAL { // Namespace DAL -- begin
       rec.define(casa::RecordFieldId(attribute_name(DAL::TRIGGERED_ANTENNAS)),
  		 triggered_antennas());
     } catch (std::string message) {
-      std::cerr << "[LOFAR_StationGroup::attributes2record] "
+      std::cerr << "[TBB_StationGroup::attributes2record] "
 		<< "Error filling the record with attribute values!\n"
 		<< message
 		<< std::endl;

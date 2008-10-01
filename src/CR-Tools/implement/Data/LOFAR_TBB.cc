@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "LOFAR_TBB.h"
+#include <Data/LOFAR_TBB.h>
 #include <Utilities/StringTools.h>
 
 using std::cout;
@@ -34,18 +34,18 @@ namespace CR { // Namespace CR -- begin
   //  Construction
   //
   // ============================================================================
-
+  
   // ------------------------------------------------------------------ LOFAR_TBB
   
   LOFAR_TBB::LOFAR_TBB ()
-    : LOFAR_Timeseries (),
+    : TBB_Timeseries (),
       DataReader ()
   { }
   
   // ------------------------------------------------------------------ LOFAR_TBB
   
   LOFAR_TBB::LOFAR_TBB (std::string const &filename)
-    : LOFAR_Timeseries (filename),
+    : TBB_Timeseries (filename),
       DataReader ()
   {
     init ();
@@ -55,16 +55,16 @@ namespace CR { // Namespace CR -- begin
   
   LOFAR_TBB::LOFAR_TBB (std::string const &filename,
 			uint const &blocksize)
-    : LOFAR_Timeseries (filename),
+    : TBB_Timeseries (filename),
       DataReader (blocksize)
   {
     init ();
   }
   
   // ------------------------------------------------------------------ LOFAR_TBB
-
-  LOFAR_TBB::LOFAR_TBB (LOFAR_Timeseries const &timeseries)
-    : LOFAR_Timeseries (timeseries),
+  
+  LOFAR_TBB::LOFAR_TBB (TBB_Timeseries const &timeseries)
+    : TBB_Timeseries (timeseries),
       DataReader ()
   {
     init();
@@ -87,7 +87,7 @@ namespace CR { // Namespace CR -- begin
   {
     destroy();
   }
-
+  
   // -------------------------------------------------------------------- destroy
   
   void LOFAR_TBB::destroy ()
@@ -100,7 +100,7 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   // ------------------------------------------------------------------ operator=
-
+  
   LOFAR_TBB& LOFAR_TBB::operator= (LOFAR_TBB const &other)
   {
     if (this != &other) {
@@ -111,15 +111,15 @@ namespace CR { // Namespace CR -- begin
   }
   
   // ----------------------------------------------------------------------- copy
-
+  
   void LOFAR_TBB::copy (LOFAR_TBB const &other)
   {
     /* Copy operations for the base classes */
-    LOFAR_Timeseries::operator= (other);
+    TBB_Timeseries::operator= (other);
     DataReader::operator= (other);
-
+    
   }
-
+  
   // ============================================================================
   //
   //  Parameters
@@ -170,22 +170,22 @@ namespace CR { // Namespace CR -- begin
   //  Methods
   //
   // ============================================================================
-
+  
   // ----------------------------------------------------------------------- init
   
   bool LOFAR_TBB::init ()
   {
     bool status (true);
-
+    
     /* Set up the vector collecting the IDs for the individual dipoles */
-
-    uint nofDipoles = LOFAR_Timeseries::nofDipoleDatasets();
+    
+    uint nofDipoles = TBB_Timeseries::nofDipoleDatasets();
     channelID_p.resize (nofDipoles);
-
+    
     /* Set the correct data for the time and frequency axis */
 #ifdef HAVE_CASA
     // retrieve the values
-    casa::Vector<double> sampleFreq = LOFAR_Timeseries::sample_frequencies();
+    casa::Vector<double> sampleFreq = TBB_Timeseries::sample_frequencies();
     // Feedback
     std::cout << "[LOFAR_TBB::init]" << std::endl;
     std::cout << "-- nof. dipoles       = " << nofDipoles << std::endl;
@@ -199,7 +199,7 @@ namespace CR { // Namespace CR -- begin
     }
 #else
     // retrieve the values
-    std::vector<double> sampleFreq = LOFAR_Timeseries::sample_frequencies();
+    std::vector<double> sampleFreq = TBB_Timeseries::sample_frequencies();
     // adjust internal settings
     if (sampleFreq.size() > 0) {
       sampleFrequency_p = sampleFreq[0];
@@ -213,16 +213,16 @@ namespace CR { // Namespace CR -- begin
      * Connect the streams (or at least the pointers normally connected to a
      * stream)
      */
-
+    
     if (status) {
       return setStreams();
     }
-
+    
     return status;
   }
-
+  
   // ----------------------------------------------------------------- setStreams
-
+  
   bool LOFAR_TBB::setStreams ()
   {
     bool status (true);
@@ -231,13 +231,13 @@ namespace CR { // Namespace CR -- begin
       Set up the iterators to navigate through the data volume and the selection
       of data input channels.
     */
-
+    
     uint blocksize (blocksize_p);
     nofStreams_p = channelID_p.size();
-
+    
     iterator_p = new DataIterator[nofStreams_p];
     selectedAntennas_p.resize(nofStreams_p);
-
+    
     for (uint antenna(0); antenna<nofStreams_p; antenna++) {
       iterator_p[antenna].setDataStart(0);
       iterator_p[antenna].setStride(0);
@@ -247,12 +247,12 @@ namespace CR { // Namespace CR -- begin
       // keep track of the antennas/data channels selected
       selectedAntennas_p(antenna) = antenna;
     }
-
+    
     /*
       Set up the record with the header information
-     */
+    */
     status = setHeaderRecord ();
-
+    
     /*
       Set the conversion arrays: adc2voltage & fft2calfft
     */
@@ -268,19 +268,16 @@ namespace CR { // Namespace CR -- begin
       std::cerr << "[LOFAR_TBB::setStreams]" << message << endl;
       status = false;
     }
-
+    
     return status;
   }
-
+  
   // ------------------------------------------------------------ setHeaderRecord
-
+  
   bool LOFAR_TBB::setHeaderRecord () 
   {
+    header_p = DAL::TBB_Timeseries::attributes2headerRecord();
     try {
-      header_p.define("Date",min(times()));
-      header_p.define("AntennaIDs",channelIDs());
-      header_p.define("Observatory",telescope());
-      header_p.define("Filesize",min(data_lengths()));
       header_p.define("SampleFreq",DataReader::sampleFrequency());
       //      header_p.define("StartSample",headerpoint_p->SampleNr);
       //      header_p.define("dDate",(Double)headerpoint_p->Date + 
@@ -297,9 +294,9 @@ namespace CR { // Namespace CR -- begin
   casa::Matrix<double> LOFAR_TBB::fx ()
   {
     int start = iterator_p[0].position();
-
-    return LOFAR_Timeseries::fx (start,
-				 blocksize_p);
+    
+    return TBB_Timeseries::fx (start,
+			       blocksize_p);
   }
   
 } // Namespace CR -- end

@@ -63,7 +63,7 @@ if (HAVE_DAL)
   ## linker instructions
   target_link_libraries (tppfinversion cr ${DAL_LIBRARIES})
   ## testing
-  add_test (tppfinversion tppfinversion)
+  add_test (tppfinversion tppfinversion ${dataset_beamformed})
   ## installation
   list (APPEND tests tppfinversion)
 endif (HAVE_DAL)

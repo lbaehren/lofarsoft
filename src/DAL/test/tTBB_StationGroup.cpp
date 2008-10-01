@@ -21,34 +21,35 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <crtools.h>
-
 #include <iostream>
+
+#include <dal.h>
+#include <dalDataset.h>
+#include <TBB_StationGroup.h>
 
 #include <casa/Arrays/ArrayIO.h>
 #include <casa/Arrays/Vector.h>
+#include <casa/BasicSL/String.h>
 #include <casa/Containers/Record.h>
 #include <casa/HDF5/HDF5File.h>
 #include <casa/HDF5/HDF5Record.h>
-
-#include <dal/dal.h>
-#include <dal/dalDataset.h>
-
-#include <Data/LOFAR_StationGroup.h>
-#include <Utilities/StringTools.h>
 
 // Namespace usage
 using std::cerr;
 using std::cout;
 using std::endl;
-using DAL::LOFAR_StationGroup;
+using DAL::TBB_StationGroup;
+
+const std::string name_station = "Station023";
+const std::string name_dataset = "023000000";
+const std::string path_dataset = "Station023/023000000";
 
 /*!
-  \file tLOFAR_StationGroup.cc
+  \file tTBB_StationGroup.cpp
 
-  \ingroup CR_Data
+  \ingroup DAL
 
-  \brief A collection of test routines for the LOFAR_StationGroup class
+  \brief A collection of test routines for the TBB_StationGroup class
  
   \author Lars B&auml;hren
  
@@ -58,7 +59,7 @@ using DAL::LOFAR_StationGroup;
   
   To run the test program use:
   \verbatim
-  tLOFAR_StationGroup <filename>
+  tTBB_StationGroup <filename>
   \endverbatim
   where the <i>filename</i> points to an existing HDF5 time-series dataset.
 */
@@ -95,7 +96,7 @@ int test_datasets (std::string const &filename)
     
     cout << "-- opening HDF5 group ..." << endl;
     groupID = H5Gopen1 (fileID,
-		       name_station.c_str());
+			name_station.c_str());
     
     if (groupID > 0) {
       hsize_t nofObjects;
@@ -130,22 +131,22 @@ int test_datasets (std::string const &filename)
 // ------------------------------------------------------------ test_construction
 
 /*!
-  \brief Test constructors for a new LOFAR_StationGroup object
+  \brief Test constructors for a new TBB_StationGroup object
 
   This function should provide tests for all the available constructors to a 
-  new DAL::LOFAR_StationGroup object:
+  new DAL::TBB_StationGroup object:
   \code
-    LOFAR_StationGroup ();
+    TBB_StationGroup ();
 
-    LOFAR_StationGroup (std::string const &filename,
+    TBB_StationGroup (std::string const &filename,
 			std::string const &group);
 
-    LOFAR_StationGroup (hid_t const &location,
+    TBB_StationGroup (hid_t const &location,
 			std::string const &group);
 
-    LOFAR_StationGroup (hid_t const &group_id);
+    TBB_StationGroup (hid_t const &group_id);
 
-    LOFAR_StationGroup (LOFAR_StationGroup const &other);
+    TBB_StationGroup (TBB_StationGroup const &other);
   \endcode
   
   \param filename -- Data file used for testing
@@ -170,7 +171,7 @@ int test_construction (std::string const &filename)
   
   cout << "[1] Testing default constructor ..." << endl;
   try {
-    LOFAR_StationGroup group;
+    TBB_StationGroup group;
     //
     group.summary(); 
   } catch (std::string message) {
@@ -186,7 +187,7 @@ int test_construction (std::string const &filename)
   
   cout << "[2] Testing argumented constructor ..." << endl;
   try {
-    LOFAR_StationGroup group (filename,
+    TBB_StationGroup group (filename,
 			      name_station);
     //
     group.summary(); 
@@ -204,7 +205,7 @@ int test_construction (std::string const &filename)
   cout << "[3] Testing argumented constructor ..." << endl;
   try {    
     if (file_id > 0) {
-      LOFAR_StationGroup group (file_id,
+      TBB_StationGroup group (file_id,
 				name_station);
       group.summary(); 
     } else {
@@ -232,7 +233,7 @@ int test_construction (std::string const &filename)
 	// feedback
 	cout << "--> Passed group ID = " << groupID << endl;
 	// create new object
-	LOFAR_StationGroup group (groupID);
+	TBB_StationGroup group (groupID);
 	group.summary(); 
       } else {
 	cerr << "--> Unable to perform test; invalid group ID!" << endl;
@@ -253,12 +254,12 @@ int test_construction (std::string const &filename)
   cout << "[5] Testing copy constructor ..." << endl;
   try {
     cout << "--> creating original object ..." << endl;
-    LOFAR_StationGroup group (filename,
+    TBB_StationGroup group (filename,
 			      name_station);
     group.summary();
     //
     cout << "--> creating new object as copy ..." << endl;
-    LOFAR_StationGroup groupCopy (group);
+    TBB_StationGroup groupCopy (group);
     groupCopy.summary();
   } catch (std::string message) {
     cerr << message << endl;
@@ -349,8 +350,8 @@ int test_methods (std::string const &filename)
 
   int nofFailedTests (0);
 
-  // create LOFAR_StationGroup object to continue working with
-  LOFAR_StationGroup group (filename,name_station);
+  // create TBB_StationGroup object to continue working with
+  TBB_StationGroup group (filename,name_station);
   
   cout << "[1] Retrieve list of UNIX times ..." << endl;
   try {
@@ -418,14 +419,15 @@ int test_export2record (std::string const &filename)
   std::cout << "\n[test_export2record]\n" << std::endl;
 
   int nofFailedTests (0);
-  LOFAR_StationGroup group (filename,name_station);
+  TBB_StationGroup group (filename,name_station);
 
   std::cout << "[1] Retreiving attributes of group into record ..." << std::endl;
   try {
     // retrieve attributes into record
     casa::Record rec = group.attributes2record ();
     // Create HDF5 file and write the record to it
-    casa::HDF5File file("tStationGroup_1.h5", casa::ByteIO::New);
+    casa::String outfile ("tStationGroup_1.h5");
+    casa::HDF5File file(outfile, casa::ByteIO::New);
     casa::HDF5Record::writeRecord (file, "StationGroup", rec);
   } catch (std::string message) {
     cerr << message << endl;
@@ -462,7 +464,7 @@ int test_data (std::string const &filename)
   cout << "\n[test_data]\n" << endl;
 
   int nofFailedTests (0);
-  LOFAR_StationGroup group (filename,name_station);
+  TBB_StationGroup group (filename,name_station);
   int start (0);
   int blocksize (1024);
 
@@ -496,9 +498,9 @@ int main (int argc,
     exit the program.
   */
   if (argc < 2) {
-    cerr << "[tLOFAR_StationGroup] Too few parameters!" << endl;
+    cerr << "[tTBB_StationGroup] Too few parameters!" << endl;
     cerr << "" << endl;
-    cerr << "  tLOFAR_StationGroup <filename>" << endl;
+    cerr << "  tTBB_StationGroup <filename>" << endl;
     cerr << "" << endl;
     return -1;
   }

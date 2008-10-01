@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
+ | $Id::                                                               $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -21,8 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef LOFAR_STATIONGROUP_H
-#define LOFAR_STATIONGROUP_H
+#ifndef TBB_STATIONGROUP_H
+#define TBB_STATIONGROUP_H
 
 // Standard library header files
 #include <iostream>
@@ -35,31 +35,32 @@
 #include <measures/Measures/MDirection.h>
 #include <measures/Measures/MPosition.h>
 
-#include <crtools.h>
-#include <Data/LOFAR_DipoleDataset.h>
+#ifndef TBB_DIPOLEDATASET_H
+#include <TBB_DipoleDataset.h>
+#endif
 
 namespace DAL { // Namespace DAL -- begin
   
   /*!
-    \class LOFAR_StationGroup
+    \class TBB_StationGroup
     
-    \ingroup CR_Data
+    \ingroup DAL
     
     \brief Container for the data in the StationGroup of LOFAR times-series data
     
     \author Lars B&auml;hren
-
+    
     \date 2007/12/10
-
-    \test tLOFAR_StationGroup.cc
+    
+    \test tTBB_StationGroup.cpp
     
     <h3>Prerequisite</h3>
     
     <ul type="square">
       <li>Definition of the LOFAR time-series data format
-      <li>[DAL] DAL::LOFAR_Timeseries
-      <li>[DAL] DAL::LOFAR_DipoleDataset
-      <li>[CR] CR::LOFAR_TBB -- Interface between Data Access Library (DAL) and
+      <li>[DAL] DAL::TBB_Timeseries
+      <li>[DAL] DAL::TBB_DipoleDataset
+      <li>[CR] CR::TBB_TBB -- Interface between Data Access Library (DAL) and
       CR::DataReader framework
     </ul>
     
@@ -95,12 +96,12 @@ namespace DAL { // Namespace DAL -- begin
       std::string filename = "data.h5";
       std::string group    = "Station001";
 
-      LOFAR_StationGroup group (filename,
+      TBB_StationGroup group (filename,
                                 group);
       \endcode
       <li>Retrieve the list of channels IDs contained within this group:
       \code
-      std::string <std::vector> channelIDs = group.channelIDs();
+      std::string <std::vector> channelID = group.channelID();
       \endcode
       which will return something along the lines of
       \verbatim
@@ -109,7 +110,7 @@ namespace DAL { // Namespace DAL -- begin
       <li>Retrieve a block of samples from the data channels (i.e. dipoles) 
       belonging to this station:
       \code
-      // LOFAR_StationGroup constructed somewhere above...
+      // TBB_StationGroup constructed somewhere above...
       
       // set sample at which to start reading
       int start      = 0;
@@ -122,12 +123,12 @@ namespace DAL { // Namespace DAL -- begin
     </ol>
     
   */
-  class LOFAR_StationGroup {
+  class TBB_StationGroup {
 
     //! Identifier for this group within the HDF5 file
     hid_t groupID_p;
     //! Datasets contained within this group
-    std::vector<LOFAR_DipoleDataset> datasets_p;
+    std::vector<TBB_DipoleDataset> datasets_p;
 
   public:
     
@@ -139,28 +140,15 @@ namespace DAL { // Namespace DAL -- begin
       Default constructor does not connect to a file, but simply sets up internal
       parameters.
     */
-    LOFAR_StationGroup ();
+    TBB_StationGroup ();
     
-    /*!
-      \brief Argumented constructor
-
-      \param filename -- Name of the HDF5 file within which the group is
-             contained.
-      \param group    -- Name of the group, in this case the full path from
-             the base of the hierarchical structure within the HDF5 file.
-    */
-    LOFAR_StationGroup (std::string const &filename,
-			std::string const &group);
+    //! Argumented constructor
+    TBB_StationGroup (std::string const &filename,
+		      std::string const &group);
     
-    /*!
-      \brief Argumented constructor
-
-      \param location -- Identifier for the location within the HDF5 file, below
-             which the group is placed.
-      \param group    -- Name of the group.
-    */
-    LOFAR_StationGroup (hid_t const &location,
-			std::string const &group);
+    //! Argumented constructor
+    TBB_StationGroup (hid_t const &location,
+		      std::string const &group);
     
     /*!
       \brief Argumented constructor
@@ -168,32 +156,32 @@ namespace DAL { // Namespace DAL -- begin
       \param group_id -- Identifier for the group contained within the HDF5
              file
     */
-    LOFAR_StationGroup (hid_t const &group_id);
+    TBB_StationGroup (hid_t const &group_id);
     
     /*!
       \brief Copy constructor
       
-      \param other -- Another LOFAR_StationGroup object from which to create
+      \param other -- Another TBB_StationGroup object from which to create
              this new one.
     */
-    LOFAR_StationGroup (LOFAR_StationGroup const &other);
+    TBB_StationGroup (TBB_StationGroup const &other);
     
     // -------------------------------------------------------------- Destruction
 
     /*!
       \brief Destructor
     */
-    ~LOFAR_StationGroup ();
+    ~TBB_StationGroup ();
     
     // ---------------------------------------------------------------- Operators
     
     /*!
       \brief Overloading of the copy operator
       
-      \param other -- Another LOFAR_StationGroup object from which to make a
+      \param other -- Another TBB_StationGroup object from which to make a
              copy.
     */
-    LOFAR_StationGroup& operator= (LOFAR_StationGroup const &other); 
+    TBB_StationGroup& operator= (TBB_StationGroup const &other); 
     
     // --------------------------------------------------------------- Parameters
     
@@ -202,9 +190,7 @@ namespace DAL { // Namespace DAL -- begin
       
       \return groupID -- The identifier for this group within the HDF5 file
     */
-    inline hid_t group_id () const {
-      return groupID_p;
-    }
+    inline hid_t group_id () const { return groupID_p; }
 
     /*!
       \brief Get the name for this group within the HDF5 file
@@ -292,18 +278,14 @@ namespace DAL { // Namespace DAL -- begin
     /*!
       \brief Get the name of the class
       
-      \return className -- The name of the class, LOFAR_StationGroup.
+      \return className -- The name of the class, TBB_StationGroup.
     */
-    std::string className () const {
-      return "LOFAR_StationGroup";
-    }
+    std::string className () const { return "TBB_StationGroup"; }
 
     /*!
       \brief Provide a summary of the internal status
     */
-    inline void summary () {
-      summary (std::cout);
-    }
+    inline void summary () { summary (std::cout); }
 
     /*!
       \brief Provide a summary of the internal status
@@ -318,9 +300,7 @@ namespace DAL { // Namespace DAL -- begin
       \return nofDipoleDatasets -- The number of dipole datasets contained with
               this station group.
     */
-    inline uint nofDipoleDatasets () {
-      return datasets_p.size();
-    }
+    inline uint nofDipoleDatasets () { return datasets_p.size(); }
 
     /*!
       \brief Get the values of TIME for all present datasets
@@ -389,10 +369,10 @@ namespace DAL { // Namespace DAL -- begin
     /*!
       \brief Retrieve the list of channels IDs contained within this group
 
-      \return channelIDs -- A list of the channel IDs for all the dipoles within
+      \return channelID -- A list of the channel IDs for all the dipoles within
               this LOFAR station.
     */
-    std::vector<int> channelIDs ();
+    std::vector<int> channelID ();
 
     /*!
       \brief Retrieve the list of channels names contained within this group
@@ -400,7 +380,11 @@ namespace DAL { // Namespace DAL -- begin
       \return channelNames -- A list of the channel names for all the dipoles
               within this LOFAR station.
     */
+#ifdef HAVE_CASA
+    casa::Vector<casa::String> channelNames ();
+#else
     std::vector<std::string> channelNames ();
+#endif
 
     /*!
       \brief Convert individual ID number to joint unique ID
@@ -483,22 +467,12 @@ namespace DAL { // Namespace DAL -- begin
 			     int const &nofSamples,
 			     std::vector<uint> const &dipoleSelection);
     
-    /*!
-      \brief Get a casa::Record containing the values of the attributes
-
-      \param addRecursive -- Recursively add information from embedded HDF5
-             objects, such as groups and datasets? 
-
-      \return record -- A casa::Record container holding the values of the 
-              attributes attached to the dataset for this dipole
-    */
+    //! Get a casa::Record containing the values of the attributes
     casa::Record attributes2record (bool const &addRecursive=false);
     
   private:
-
-    /*!
-      \brief Initialize the internal dataspace
-    */
+    
+    //! Initialize the internal dataspace
     void init ();
     
     /*!
@@ -531,10 +505,10 @@ namespace DAL { // Namespace DAL -- begin
     /*!
       \brief Unconditional copying
 
-      \param other -- Another LOFAR_StationGroup object from which to create
+      \param other -- Another TBB_StationGroup object from which to create
              this new one.
     */
-    void copy (LOFAR_StationGroup const &other);
+    void copy (TBB_StationGroup const &other);
     
     /*!
       \brief Unconditional deletion 
@@ -560,5 +534,5 @@ namespace DAL { // Namespace DAL -- begin
   
 } // Namespace DAL -- end
 
-#endif /* LOFAR_STATIONGROUP_H */
+#endif /* TBB_STATIONGROUP_H */
   

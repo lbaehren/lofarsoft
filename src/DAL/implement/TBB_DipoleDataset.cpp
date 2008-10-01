@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Data/LOFAR_DipoleDataset.h>
+#include <TBB_DipoleDataset.h>
 
 using std::cerr;
 using std::cout;
@@ -35,25 +35,36 @@ namespace DAL { // Namespace DAL -- begin
   //
   // ============================================================================
   
-  // -------------------------------------------------------- LOFAR_DipoleDataset
+  // -------------------------------------------------------- TBB_DipoleDataset
 
-  LOFAR_DipoleDataset::LOFAR_DipoleDataset ()
+  TBB_DipoleDataset::TBB_DipoleDataset ()
   {
     init ();
   }
   
-  // -------------------------------------------------------- LOFAR_DipoleDataset
+  // -------------------------------------------------------- TBB_DipoleDataset
   
-  LOFAR_DipoleDataset::LOFAR_DipoleDataset (std::string const &filename,
+  /*!
+      \param filename -- Name of the HDF5 file within which the dataset is
+             contained.
+      \param dataset  -- Name of the dataset, in this case the full path from
+             the base of the hierarchical structure within the HDF5 file.
+  */  
+  TBB_DipoleDataset::TBB_DipoleDataset (std::string const &filename,
 					    std::string const &dataset)
   {
     init (filename,
 	  dataset);
   }
 
-  // -------------------------------------------------------- LOFAR_DipoleDataset
+  // -------------------------------------------------------- TBB_DipoleDataset
 
-  LOFAR_DipoleDataset::LOFAR_DipoleDataset (hid_t const &location,
+  /*!
+    \param location -- Identifier for the location within the HDF5 file, below
+           which the dataset is placed.
+    \param dataset  -- Name of the dataset.
+  */
+  TBB_DipoleDataset::TBB_DipoleDataset (hid_t const &location,
 					    std::string const &dataset)
   {
     // Initialize internal variables
@@ -63,16 +74,20 @@ namespace DAL { // Namespace DAL -- begin
 	  dataset);
   }
 
-  // -------------------------------------------------------- LOFAR_DipoleDataset
+  // -------------------------------------------------------- TBB_DipoleDataset
 
-  LOFAR_DipoleDataset::LOFAR_DipoleDataset (hid_t const &dataset_id)
+  /*!
+    \param dataset_id -- Identifier for the dataset contained within the HDF5
+           file
+  */
+  TBB_DipoleDataset::TBB_DipoleDataset (hid_t const &dataset_id)
   {
     init (dataset_id);
   }
   
-  // -------------------------------------------------------- LOFAR_DipoleDataset
+  // -------------------------------------------------------- TBB_DipoleDataset
 
-  LOFAR_DipoleDataset::LOFAR_DipoleDataset (LOFAR_DipoleDataset const &other)
+  TBB_DipoleDataset::TBB_DipoleDataset (TBB_DipoleDataset const &other)
   {
     // Initialize internal variables
     datasetID_p = 0;
@@ -86,14 +101,14 @@ namespace DAL { // Namespace DAL -- begin
   //
   // ============================================================================
   
-  LOFAR_DipoleDataset::~LOFAR_DipoleDataset ()
+  TBB_DipoleDataset::~TBB_DipoleDataset ()
   {
     destroy();
   }
 
   // -------------------------------------------------------------------- destroy
   
-  void LOFAR_DipoleDataset::destroy ()
+  void TBB_DipoleDataset::destroy ()
   {
     /*
       If an identifier to the dataset was assigned, we need to release it; if
@@ -113,7 +128,7 @@ namespace DAL { // Namespace DAL -- begin
   //
   // ============================================================================
   
-  LOFAR_DipoleDataset& LOFAR_DipoleDataset::operator= (LOFAR_DipoleDataset const &other)
+  TBB_DipoleDataset& TBB_DipoleDataset::operator= (TBB_DipoleDataset const &other)
   {
     if (this != &other) {
       destroy ();
@@ -124,7 +139,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------------------- copy
 
-  void LOFAR_DipoleDataset::copy (LOFAR_DipoleDataset const &other)
+  void TBB_DipoleDataset::copy (TBB_DipoleDataset const &other)
   {
     if (other.datasetID_p > 0) {
       init (other.datasetID_p);
@@ -141,7 +156,7 @@ namespace DAL { // Namespace DAL -- begin
 
   // -------------------------------------------------------------- nofAttributes
 
-  int LOFAR_DipoleDataset::nofAttributes ()
+  int TBB_DipoleDataset::nofAttributes ()
   {
     if (datasetID_p > 0) {
       return H5Aget_num_attrs (datasetID_p);
@@ -152,9 +167,9 @@ namespace DAL { // Namespace DAL -- begin
   
   // -------------------------------------------------------------------- summary
   
-  void LOFAR_DipoleDataset::summary (std::ostream &os)
+  void TBB_DipoleDataset::summary (std::ostream &os)
   {
-    os << "[LOFAR_DipoleDataset::summary]"   << endl;
+    os << "[TBB_DipoleDataset::summary]"   << endl;
     os << "-- Dataset ID             = " << datasetID_p  << endl;
   
     if (datasetID_p) {
@@ -188,7 +203,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------------- station_id
   
-  uint LOFAR_DipoleDataset::station_id ()
+  uint TBB_DipoleDataset::station_id ()
   {    
     if (datasetID_p > 0) {
       uint val (0);
@@ -197,12 +212,12 @@ namespace DAL { // Namespace DAL -- begin
 			       datasetID_p)) {
 	return val;
       } else {
-	cerr << "[LOFAR_DipoleDataset::station_id]"
+	cerr << "[TBB_DipoleDataset::station_id]"
 	     << " Error retrieving attribute value!" << endl;
 	return 0;
       }
     } else {
-      cerr << "[LOFAR_DipoleDataset::station_id] Dataset undefined!"
+      cerr << "[TBB_DipoleDataset::station_id] Dataset undefined!"
 	   << endl;;
       return 0;
     }
@@ -210,7 +225,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // --------------------------------------------------------------------- rsp_id
   
-  uint LOFAR_DipoleDataset::rsp_id ()
+  uint TBB_DipoleDataset::rsp_id ()
   {
     if (datasetID_p > 0) {
       uint val (0);
@@ -219,12 +234,12 @@ namespace DAL { // Namespace DAL -- begin
 			       datasetID_p)) {
 	return val;
       } else {
-	cerr << "[LOFAR_DipoleDataset::rsp_id]"
+	cerr << "[TBB_DipoleDataset::rsp_id]"
 	     << " Error retrieving attribute value!" << endl;
 	return 0;
       }
     } else {
-      cerr << "[LOFAR_DipoleDataset::rsp_id] Dataset undefined!"
+      cerr << "[TBB_DipoleDataset::rsp_id] Dataset undefined!"
 	   << endl;
       return 0;
     }
@@ -232,7 +247,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // --------------------------------------------------------------------- rcu_id
   
-  uint LOFAR_DipoleDataset::rcu_id ()
+  uint TBB_DipoleDataset::rcu_id ()
   {
     if (datasetID_p > 0) {
       uint val (0);
@@ -241,12 +256,12 @@ namespace DAL { // Namespace DAL -- begin
 			       datasetID_p)) {
 	return val;
       } else {
-	cerr << "[LOFAR_DipoleDataset::rcu_id]"
+	cerr << "[TBB_DipoleDataset::rcu_id]"
 	     << " Error retrieving attribute value!" << endl;
 	return 0;
       }
     } else {
-      cerr << "[LOFAR_DipoleDataset::rcu_id] Dataset undefined!"
+      cerr << "[TBB_DipoleDataset::rcu_id] Dataset undefined!"
 	   << endl;
       return 0;
     }
@@ -254,7 +269,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------------------- time
   
-  uint LOFAR_DipoleDataset::time ()
+  uint TBB_DipoleDataset::time ()
   {
     if (datasetID_p > 0) {
       uint val (0);
@@ -263,12 +278,12 @@ namespace DAL { // Namespace DAL -- begin
 			       datasetID_p)) {
 	return val;
       } else {
-	cerr << "[LOFAR_DipoleDataset::time]"
+	cerr << "[TBB_DipoleDataset::time]"
 	     << " Error retrieving attribute value!" << endl;
 	return 0;
       }
     } else {
-      cerr << "[LOFAR_DipoleDataset::time] Dataset undefined!"
+      cerr << "[TBB_DipoleDataset::time] Dataset undefined!"
 	   << endl;
       return 0;
     }
@@ -276,7 +291,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ------------------------------------------------------------------ julianDay
   
-  double LOFAR_DipoleDataset::julianDay (bool const &onlySeconds)
+  double TBB_DipoleDataset::julianDay (bool const &onlySeconds)
   {
     uint seconds = time ();
     double jd    = 0.0;
@@ -298,7 +313,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------- sample_frequency_value
   
-  double LOFAR_DipoleDataset::sample_frequency_value (std::string const &unit)
+  double TBB_DipoleDataset::sample_frequency_value (std::string const &unit)
   {
     if (datasetID_p > 0) {
       bool status (true);
@@ -313,7 +328,7 @@ namespace DAL { // Namespace DAL -- begin
       if (status) {
 	if (unit == "Hz" && val < 1e3) {
 #ifdef DEBUGGING_MESSAGES
-	  std::cerr << "[LOFAR_DipoleDataset::sample_frequency_value] "
+	  std::cerr << "[TBB_DipoleDataset::sample_frequency_value] "
 		    << "Encountered combination of value and unit for sample "
 		    << "outside LOFAR range -- assuming value in MHz and "
 		    << "correction for it."
@@ -322,7 +337,7 @@ namespace DAL { // Namespace DAL -- begin
 	  val *= 1e6;
 	} else if (unit == "kHz" && val < 1e6) {
 #ifdef DEBUGGING_MESSAGES
-	  std::cerr << "[LOFAR_DipoleDataset::sample_frequency_value] "
+	  std::cerr << "[TBB_DipoleDataset::sample_frequency_value] "
 		    << "Encountered combination of value and unit for sample "
 		    << "outside LOFAR range -- assuming value in kHz and "
 		    << "correction for it."
@@ -335,7 +350,7 @@ namespace DAL { // Namespace DAL -- begin
 	return 0;
       }
     } else {
-      cerr << "[LOFAR_DipoleDataset::sample_frequency_value] Dataset undefined!"
+      cerr << "[TBB_DipoleDataset::sample_frequency_value] Dataset undefined!"
 	   << endl;
       return 0;
     }
@@ -343,7 +358,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ------------------------------------------------------ sample_frequency_unit
   
-  std::string LOFAR_DipoleDataset::sample_frequency_unit ()
+  std::string TBB_DipoleDataset::sample_frequency_unit ()
   {
     std::string val;
     
@@ -358,7 +373,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------- sample_frequency
   
-  casa::MFrequency LOFAR_DipoleDataset::sample_frequency ()
+  casa::MFrequency TBB_DipoleDataset::sample_frequency ()
   {
     if (datasetID_p > 0) {
       casa::Quantity qFreq = DAL::h5get_quantity (DAL::SAMPLE_FREQUENCY_VALUE,
@@ -367,7 +382,7 @@ namespace DAL { // Namespace DAL -- begin
       return casa::MFrequency (qFreq,
 			       casa::MFrequency::TOPO);
     } else {
-      cerr << "[LOFAR_DipoleDataset::sample_frequency] Dataset undefined!"
+      cerr << "[TBB_DipoleDataset::sample_frequency] Dataset undefined!"
 	   << endl;
       return casa::MFrequency();
     }
@@ -375,7 +390,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // --------------------------------------------------------------- nyquist_zone
   
-  uint LOFAR_DipoleDataset::nyquist_zone ()
+  uint TBB_DipoleDataset::nyquist_zone ()
   {
     if (datasetID_p > 0) {
       uint val (0);
@@ -387,7 +402,7 @@ namespace DAL { // Namespace DAL -- begin
 	return 0;
       }
     } else {
-      cerr << "[LOFAR_DipoleDataset::nyquist_zone] Dataset undefined!"
+      cerr << "[TBB_DipoleDataset::nyquist_zone] Dataset undefined!"
 	   << endl;
       return 0;
     }
@@ -401,14 +416,14 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------------------- init
   
-  void LOFAR_DipoleDataset::init ()
+  void TBB_DipoleDataset::init ()
   {
     datasetID_p = 0;
   }
   
   // ----------------------------------------------------------------------- init
   
-  void LOFAR_DipoleDataset::init (hid_t const &dataset_id)
+  void TBB_DipoleDataset::init (hid_t const &dataset_id)
   {
     bool status (true);
     std::string filename;
@@ -440,7 +455,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------------------- init
   
-  void LOFAR_DipoleDataset::init (std::string const &filename,
+  void TBB_DipoleDataset::init (std::string const &filename,
 				  std::string const &dataset)
   {
     hid_t file_id (0);
@@ -459,7 +474,7 @@ namespace DAL { // Namespace DAL -- begin
       init (file_id,
 	    dataset);
     } else {
-      cerr << "[LOFAR_DipoleDataset::init] Error opening HDF5 file "
+      cerr << "[TBB_DipoleDataset::init] Error opening HDF5 file "
 	   << filename 
 	   << " !"
 	   << endl;
@@ -474,7 +489,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------------------- init
 
-  void LOFAR_DipoleDataset::init (hid_t const &location,
+  void TBB_DipoleDataset::init (hid_t const &location,
 				  std::string const &dataset)
   {
     bool status (true);
@@ -488,7 +503,7 @@ namespace DAL { // Namespace DAL -- begin
       dataset_id = H5Dopen1 (location,
 			     dataset.c_str());
     } catch (std::string message) {
-      cerr << "[LOFAR_DipoleDataset::init] " << message << endl;
+      cerr << "[TBB_DipoleDataset::init] " << message << endl;
       status = false;
     }
 
@@ -502,7 +517,7 @@ namespace DAL { // Namespace DAL -- begin
 
   // -------------------------------------------------------------- sample_number
   
-  uint LOFAR_DipoleDataset::sample_number ()
+  uint TBB_DipoleDataset::sample_number ()
   {
     if (datasetID_p > 0) {
       uint val (0);
@@ -520,7 +535,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ---------------------------------------------------------- samples_per_frame
   
-  uint LOFAR_DipoleDataset::samples_per_frame ()
+  uint TBB_DipoleDataset::samples_per_frame ()
   {
     if (datasetID_p > 0) {
       uint val (0);
@@ -538,7 +553,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ---------------------------------------------------------------- data_length
   
-  uint LOFAR_DipoleDataset::data_length ()
+  uint TBB_DipoleDataset::data_length ()
   {
     uint val (0);
     std::vector<uint> shape;
@@ -554,7 +569,7 @@ namespace DAL { // Namespace DAL -- begin
 
   // ----------------------------------------------------------------------- feed
   
-  std::string LOFAR_DipoleDataset::feed ()
+  std::string TBB_DipoleDataset::feed ()
   {
     std::string val;
     
@@ -569,7 +584,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------- antenna_position_value
   
-  casa::Vector<double> LOFAR_DipoleDataset::antenna_position_value ()
+  casa::Vector<double> TBB_DipoleDataset::antenna_position_value ()
   {
     casa::Vector<double> val;
     
@@ -584,7 +599,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ------------------------------------------------------ antenna_position_unit
   
-  std::string LOFAR_DipoleDataset::antenna_position_unit ()
+  std::string TBB_DipoleDataset::antenna_position_unit ()
   {
     std::string val;
     
@@ -599,7 +614,7 @@ namespace DAL { // Namespace DAL -- begin
 
   // ----------------------------------------------------------- antenna_position
 
-  casa::MPosition LOFAR_DipoleDataset::antenna_position ()
+  casa::MPosition TBB_DipoleDataset::antenna_position ()
   {
     return DAL::h5get_position (DAL::ANTENNA_POSITION_VALUE,
 				DAL::ANTENNA_POSITION_UNIT,
@@ -609,7 +624,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------- antenna_position_frame
   
-  std::string LOFAR_DipoleDataset::antenna_position_frame ()
+  std::string TBB_DipoleDataset::antenna_position_frame ()
   {
     std::string val;
     
@@ -624,7 +639,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // -------------------------------------------------- antenna_orientation_value
   
-  casa::Vector<double> LOFAR_DipoleDataset::antenna_orientation_value ()
+  casa::Vector<double> TBB_DipoleDataset::antenna_orientation_value ()
   {
     casa::Vector<double> val;
     
@@ -639,7 +654,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // --------------------------------------------------- antenna_orientation_unit
   
-  std::string LOFAR_DipoleDataset::antenna_orientation_unit ()
+  std::string TBB_DipoleDataset::antenna_orientation_unit ()
   {
     std::string val;
     
@@ -654,7 +669,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // -------------------------------------------------- antenna_orientation_frame
   
-  std::string LOFAR_DipoleDataset::antenna_orientation_frame ()
+  std::string TBB_DipoleDataset::antenna_orientation_frame ()
   {
     std::string val;
     
@@ -669,14 +684,14 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------------- channel_id
   
-  int LOFAR_DipoleDataset::channelID ()
+  int TBB_DipoleDataset::channelID ()
   {
     return rcu_id() + 1000*rsp_id() + 1000000*station_id();
   }
 
   // ---------------------------------------------------------------- channelName
   
-  std::string LOFAR_DipoleDataset::channelName ()
+  std::string TBB_DipoleDataset::channelName ()
   {
     char uid[10];
     sprintf(uid,
@@ -691,7 +706,7 @@ namespace DAL { // Namespace DAL -- begin
 
   // ------------------------------------------------------------------------- fx
   
-  bool LOFAR_DipoleDataset::fx (int const &start,
+  bool TBB_DipoleDataset::fx (int const &start,
 				int const &nofSamples,
 				short *data)
   {
@@ -705,7 +720,7 @@ namespace DAL { // Namespace DAL -- begin
       filespaceID = H5Dget_space(datasetID_p);
       
       if (filespaceID < 0) {
-	cerr << "[LOFAR_DipoleDataset::fx]"
+	cerr << "[TBB_DipoleDataset::fx]"
 	     << " Error retrieving filespace of dataset!" << endl;
 	return false;
       }
@@ -715,7 +730,7 @@ namespace DAL { // Namespace DAL -- begin
       rank = H5Sget_simple_extent_ndims(filespaceID);
       
       if (rank < 0) {
-	cerr << "[LOFAR_DipoleDataset::fx]"
+	cerr << "[TBB_DipoleDataset::fx]"
 	     << " Error retrieving rank of dataspace!" << endl;
 	return false;
       }
@@ -727,7 +742,7 @@ namespace DAL { // Namespace DAL -- begin
 					   shape,
 					   NULL);
       if (h5error < 0) {
-	cerr << "[LOFAR_DipoleDataset::fx]"
+	cerr << "[TBB_DipoleDataset::fx]"
 	     << " Error retrieving dataspace dimension!" << endl;
 	return false;
       } else {
@@ -742,7 +757,7 @@ namespace DAL { // Namespace DAL -- begin
       hsize_t offset[1];
 
       if (filespaceID < 0) {
-	cerr << "[LOFAR_DipoleDataset::fx]"
+	cerr << "[TBB_DipoleDataset::fx]"
 	     << " Error creating memory space for reading in data!"
 	     << endl;
 	return false;
@@ -760,7 +775,7 @@ namespace DAL { // Namespace DAL -- begin
 				     NULL);
       
       if (h5error < 0) {
-	cerr << "[LOFAR_DipoleDataset::fx]"
+	cerr << "[TBB_DipoleDataset::fx]"
 	     << " Error selecting hyperslab through the data!"
 	     << endl;
 	return false;
@@ -776,13 +791,13 @@ namespace DAL { // Namespace DAL -- begin
 			 data);
       
       if (h5error < 0) {
-	cerr << "[LOFAR_DipoleDataset::fx]"
+	cerr << "[TBB_DipoleDataset::fx]"
 	     << " Error reading data from file into buffer!"
 	     << endl;
 	return false;
       }
     } else {
-      cerr << "[LOFAR_DipoleDataset::fx]"
+      cerr << "[TBB_DipoleDataset::fx]"
 	   << " Unable to read with connection to dataset object!"
 	   << endl;
       return false;
@@ -793,7 +808,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ------------------------------------------------------------------------- fx
   
-  casa::Vector<double> LOFAR_DipoleDataset::fx (int const &start,
+  casa::Vector<double> TBB_DipoleDataset::fx (int const &start,
 						int const &nofSamples)
   {
     if (datasetID_p > 0) {
@@ -831,7 +846,7 @@ namespace DAL { // Namespace DAL -- begin
 
   // ---------------------------------------------------------- recordDescription
 
-  casa::RecordDesc LOFAR_DipoleDataset::recordDescription ()
+  casa::RecordDesc TBB_DipoleDataset::recordDescription ()
   {
     casa::RecordDesc desc;
 
@@ -857,7 +872,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ---------------------------------------------------------- attributes2record
   
-  casa::Record LOFAR_DipoleDataset::attributes2record ()
+  casa::Record TBB_DipoleDataset::attributes2record ()
   {
     casa::Record rec;
     
@@ -893,7 +908,7 @@ namespace DAL { // Namespace DAL -- begin
       rec.define(casa::RecordFieldId(attribute_name(DAL::DATA_LENGTH)),
 		 data_length());
     } catch (std::string message) {
-      cerr << "[LOFAR_DipoleDataset::attributes2record] "
+      cerr << "[TBB_DipoleDataset::attributes2record] "
 	   << "Error filling the record with attribute values!\n"
 	   << message
 	   << endl;

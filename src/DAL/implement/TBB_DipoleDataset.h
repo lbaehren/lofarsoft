@@ -21,12 +21,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef LOFAR_DIPOLEDATASET_H
-#define LOFAR_DIPOLEDATASET_H
+#ifndef TBB_DIPOLEDATASET_H
+#define TBB_DIPOLEDATASET_H
 
 #include <string>
-
-#include <crtools.h>
 
 #include <casa/aips.h>
 #include <casa/Arrays/ArrayIO.h>
@@ -37,19 +35,18 @@
 #include <measures/Measures/MPosition.h>
 
 #ifndef HDF5COMMON_H
-#include <dal/HDF5Common.h>
+#include <HDF5Common.h>
 #endif
 
 #ifndef ENUMERATIONS_H
-#include <dal/Enumerations.h>
+#include <Enumerations.h>
 #endif
 
 namespace DAL { // Namespace DAL -- begin
   
   /*!
-    \class LOFAR_DipoleDataset
+    \class TBB_DipoleDataset
     
-    \ingroup CR_Data
     \ingroup DAL
     
     \brief Container for dipole-based data in a LOFAR TBB time-series dataset
@@ -58,15 +55,15 @@ namespace DAL { // Namespace DAL -- begin
 
     \date 2008/01/10
 
-    \test tLOFAR_DipoleDataset.cc
+    \test tTBB_DipoleDataset.cpp
     
     <h3>Prerequisite</h3>
     
     <ul type="square">
       <li><a href="http://www.atnf.csiro.au/computing/software/casacore/classcasa_1_1Record.html">casa::Record</a>
       -- A hierarchical collection of named fields of various types.
-      <li>DAL::LOFAR_StationGroup
-      <li>DAL::LOFAR_Timeseries
+      <li>DAL::TBB_StationGroup
+      <li>DAL::TBB_Timeseries
     </ul>
     
     <h3>Synopsis</h3>
@@ -100,7 +97,7 @@ namespace DAL { // Namespace DAL -- begin
     <h3>Example(s)</h3>
     
   */  
-  class LOFAR_DipoleDataset {
+  class TBB_DipoleDataset {
     
     //! Identifier for this dataset within the HDF5 file
     hid_t datasetID_p;
@@ -109,64 +106,41 @@ namespace DAL { // Namespace DAL -- begin
     
     // ------------------------------------------------------------- Construction
      
-    /*!
-      \brief Default constructor
-    */
-    LOFAR_DipoleDataset ();
-    
-    /*!
-      \brief Argumented constructor
-
-      \param filename -- Name of the HDF5 file within which the dataset is
-             contained.
-      \param dataset  -- Name of the dataset, in this case the full path from
-             the base of the hierarchical structure within the HDF5 file.
-    */
-    LOFAR_DipoleDataset (std::string const &filename,
+    //! Default constructor
+    TBB_DipoleDataset ();
+    //! Argumented constructor
+    TBB_DipoleDataset (std::string const &filename,
+			 std::string const &dataset);
+    //! Argumented constructor
+    TBB_DipoleDataset (hid_t const &location,
 			 std::string const &dataset);
     
-    /*!
-      \brief Argumented constructor
-
-      \param location -- Identifier for the location within the HDF5 file, below
-             which the dataset is placed.
-      \param dataset  -- Name of the dataset.
-    */
-    LOFAR_DipoleDataset (hid_t const &location,
-			 std::string const &dataset);
-    
-    /*!
-      \brief Argumented constructor
-
-      \param dataset_id -- Identifier for the dataset contained within the HDF5
-             file
-    */
-    LOFAR_DipoleDataset (hid_t const &dataset_id);
+    TBB_DipoleDataset (hid_t const &dataset_id);
     
     /*!
       \brief Copy constructor
       
-      \param other -- Another LOFAR_DipoleDataset object from which to create
+      \param other -- Another TBB_DipoleDataset object from which to create
              this new one.
     */
-    LOFAR_DipoleDataset (LOFAR_DipoleDataset const &other);
+    TBB_DipoleDataset (TBB_DipoleDataset const &other);
     
     // -------------------------------------------------------------- Destruction
 
     /*!
       \brief Destructor
     */
-    ~LOFAR_DipoleDataset ();
+    ~TBB_DipoleDataset ();
     
     // ---------------------------------------------------------------- Operators
     
     /*!
       \brief Overloading of the copy operator
       
-      \param other -- Another LOFAR_DipoleDataset object from which to make a
+      \param other -- Another TBB_DipoleDataset object from which to make a
              copy.
     */
-    LOFAR_DipoleDataset& operator= (LOFAR_DipoleDataset const &other); 
+    TBB_DipoleDataset& operator= (TBB_DipoleDataset const &other); 
     
     // --------------------------------------------------------------- Parameters
     
@@ -175,9 +149,7 @@ namespace DAL { // Namespace DAL -- begin
 
       \return H5datasetID -- The identifier for this dataset within the HDF5 file
     */
-    inline hid_t dataset_id () const {
-      return datasetID_p;
-    }
+    inline hid_t dataset_id () const { return datasetID_p; }
 
     /*!
       \brief Get the number of attributes attached to the dataset
@@ -354,10 +326,10 @@ namespace DAL { // Namespace DAL -- begin
     /*!
       \brief Get the name of the class
       
-      \return className -- The name of the class, LOFAR_DipoleDataset.
+      \return className -- The name of the class, TBB_DipoleDataset.
     */
     std::string className () const {
-      return "LOFAR_DipoleDataset";
+      return "TBB_DipoleDataset";
     }
 
     /*!
@@ -477,10 +449,10 @@ namespace DAL { // Namespace DAL -- begin
     /*!
       \brief Unconditional copying
 
-      \param other -- Another LOFAR_DipoleDataset object from which to create
+      \param other -- Another TBB_DipoleDataset object from which to create
              this new one.
     */
-    void copy (LOFAR_DipoleDataset const &other);
+    void copy (TBB_DipoleDataset const &other);
     
     /*!
       \brief Unconditional deletion 
@@ -491,5 +463,5 @@ namespace DAL { // Namespace DAL -- begin
   
 } // Namespace DAL -- end
 
-#endif /* LOFAR_DIPOLEDATASET_H */
+#endif /* TBB_DIPOLEDATASET_H */
   

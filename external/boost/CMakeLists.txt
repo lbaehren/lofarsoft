@@ -168,7 +168,9 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
     ## Thread enabling?
     
     if (CMAKE_THREAD_LIBS_INIT)
-      add_definitions (-pthread)
+      if (NOT APPLE)
+	add_definitions (-pthread)
+      endif (NOT APPLE)
     else (CMAKE_THREAD_LIBS_INIT)
       set (BOOST_LIB_THREAD NO)
     endif (CMAKE_THREAD_LIBS_INIT)

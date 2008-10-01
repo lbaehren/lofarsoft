@@ -49,6 +49,8 @@ using casa::Vector;
 
   \brief Collection of tests for the various access schemes to casa::Matrix<T>
 
+  \author Lars B&auml;hren
+
   <h3>Usage</h3>
 
   \verbatim

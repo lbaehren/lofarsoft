@@ -47,6 +47,21 @@ if (NOT HAVE_BOOST)
   message (FATAL_ERROR "[num_util] Missing Boost.Python! Unable to build.")
 endif (NOT HAVE_BOOST)
 
+## search for local version of numpy header files
+
+find_path (arrayobject_h numpy/arrayobject.h
+  PATHS
+  ${PYTHON_MODULES_SOURCE_DIR}
+  ${PYTHON_NUM_UTIL_SOURCE_DIR}/..
+  PATH_SUFFIXES
+  numpy/numpy/core/include
+  numpy/numpy/core/include/numpy
+  )
+
+if (arrayobject_h)
+  list (APPEND NUMPY_INCLUDES ${arrayobject_h})
+endif (arrayobject_h)
+
 ## -----------------------------------------------------------------------------
 ## Compilation targets
 

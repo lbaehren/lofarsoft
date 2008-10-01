@@ -21,30 +21,33 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <crtools.h>
-
 #include <hdf5.h>
 
+#include <casa/BasicSL/String.h>
 #include <casa/Arrays/ArrayIO.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/HDF5/HDF5File.h>
 #include <casa/HDF5/HDF5Record.h>
 
-#include <dal/Enumerations.h>
-#include <Data/LOFAR_DipoleDataset.h>
+#include <Enumerations.h>
+#include <TBB_DipoleDataset.h>
 
 using std::cerr;
 using std::cout;
 using std::endl;
 
-using DAL::LOFAR_DipoleDataset;
+using DAL::TBB_DipoleDataset;
+
+const std::string name_station = "Station023";
+const std::string name_dataset = "023000000";
+const std::string path_dataset = "Station023/023000000";
 
 /*!
-  \file tLOFAR_DipoleDataset.cc
+  \file tTBB_DipoleDataset.cpp
 
-  \ingroup CR_Data
+  \ingroup DAL
 
-  \brief A collection of test routines for the LOFAR_DipoleDataset class
+  \brief A collection of test routines for the TBB_DipoleDataset class
  
   \author Lars B&auml;hren
  
@@ -54,22 +57,22 @@ using DAL::LOFAR_DipoleDataset;
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test constructors for a new LOFAR_DipoleDataset object
+  \brief Test constructors for a new TBB_DipoleDataset object
 
   This function should provide tests for all the available constructors to a 
-  new DAL::LOFAR_DipoleDataset object:
+  new DAL::TBB_DipoleDataset object:
   \code
-    LOFAR_DipoleDataset ();
+    TBB_DipoleDataset ();
 
-    LOFAR_DipoleDataset (std::string const &filename,
+    TBB_DipoleDataset (std::string const &filename,
 			 std::string const &dataset);
 
-    LOFAR_DipoleDataset (hid_t const &location,
+    TBB_DipoleDataset (hid_t const &location,
 			 std::string const &dataset);
 
-    LOFAR_DipoleDataset (hid_t const &dataset_id);
+    TBB_DipoleDataset (hid_t const &dataset_id);
 
-    LOFAR_DipoleDataset (LOFAR_DipoleDataset const &other);
+    TBB_DipoleDataset (TBB_DipoleDataset const &other);
   \endcode
   
   \param filename -- Name of the HDF5 file, within which the dataset is located
@@ -89,7 +92,7 @@ int test_construction (std::string const &filename)
   
   cout << "[1] Testing default constructor ..." << endl;
   try {
-    LOFAR_DipoleDataset dataset;
+    TBB_DipoleDataset dataset;
     //
     dataset.summary();
   } catch (std::string message) {
@@ -104,7 +107,7 @@ int test_construction (std::string const &filename)
   
   cout << "[2] Testing argumented constructor ..." << endl;
   try {
-    LOFAR_DipoleDataset dataset (filename,
+    TBB_DipoleDataset dataset (filename,
 				 path_dataset);
     //
     dataset.summary(); 
@@ -126,7 +129,7 @@ int test_construction (std::string const &filename)
 			     H5P_DEFAULT);
 
     if (file_id > 0) {
-      LOFAR_DipoleDataset dataset (file_id,
+      TBB_DipoleDataset dataset (file_id,
 				   path_dataset);
       dataset.summary();
       h5error = H5Fclose (file_id);
@@ -159,7 +162,7 @@ int test_construction (std::string const &filename)
       
       if (group_id > 0) {
 	// create new object
-	LOFAR_DipoleDataset dataset (group_id,
+	TBB_DipoleDataset dataset (group_id,
 				     name_dataset);
 	// provide summary of object's properties
 	dataset.summary(); 
@@ -202,7 +205,7 @@ int test_construction (std::string const &filename)
       
       if (dataset_id > 0) {
 	// create new object
-	LOFAR_DipoleDataset dataset (dataset_id);
+	TBB_DipoleDataset dataset (dataset_id);
 	// provide summary of object's properties
 	dataset.summary(); 
 	// release dataset ID
@@ -232,12 +235,12 @@ int test_construction (std::string const &filename)
   cout << "[6] Testing copy constructor ..." << endl;
   try {
     cout << "-- creating original object ..." << endl;
-    LOFAR_DipoleDataset dataset (filename,
+    TBB_DipoleDataset dataset (filename,
  				 path_dataset);
     dataset.summary();
     //
     cout << "-- creating new object as copy ..." << endl;
-    LOFAR_DipoleDataset datasetCopy (dataset);
+    TBB_DipoleDataset datasetCopy (dataset);
     datasetCopy.summary();
   } catch (std::string message) {
     cerr << message << endl;
@@ -251,14 +254,14 @@ int test_construction (std::string const &filename)
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test handling of multiple LOFAR_DipoleDataset objects
+  \brief Test handling of multiple TBB_DipoleDataset objects
 
   One of the essentional issues for mapping the interal structure of a HDF5
   TBB time-series file onto a set up C++ objects is the possibility for
   higher-level structure elements to contain a collection of lower-level ones.
   The prefered way to do this is to use a construct such as 
   \code 
-  std::vector<DAL::LOFAR_DipoleDataset> datasets;
+  std::vector<DAL::TBB_DipoleDataset> datasets;
   \endcode
   so we should be testing well in advance that such a construct behaves as
   expected.
@@ -374,26 +377,26 @@ int test_datasets (std::string const &filename)
 
   /*
    * TEST: Use std::vector as container for keeping a set of multiple
-   *       LOFAR_DipoleDataset objects. This will be required by classes
+   *       TBB_DipoleDataset objects. This will be required by classes
    *       representing higher-level structures of the HDF5 file, such as e.g.
-   *       LOFAR_StationGroup.
+   *       TBB_StationGroup.
    */
 
   cout << "[5] Creating a collection of dipole dataset objects ..." << endl;
   try {
-    std::vector<DAL::LOFAR_DipoleDataset> datasets;
+    std::vector<DAL::TBB_DipoleDataset> datasets;
 
     for (uint n(0); n<nofDatasets; n++) {
       // try to open the dataset
       dataset_id = H5Dopen1 (file_id,
 			     dataset_names[n].c_str());
       h5error = H5Eclear1();
-      // if HDF5 object exists, create LOFAR_DipoleDataset object for it
+      // if HDF5 object exists, create TBB_DipoleDataset object for it
       if (dataset_id > 0) {
  	cout << "-- " << dataset_names[n] << endl;
-	// create LOFAR_DipoleDataset object new to the list
-	LOFAR_DipoleDataset dataset (dataset_id);
-  	datasets.push_back (LOFAR_DipoleDataset(dataset_id));
+	// create TBB_DipoleDataset object new to the list
+	TBB_DipoleDataset dataset (dataset_id);
+  	datasets.push_back (TBB_DipoleDataset(dataset_id));
 	// feedback
 	cout << "--> Dateset ID      = " << dataset.dataset_id()    << endl;
 	cout << "--> nof. attributes = " << dataset.nofAttributes() << endl;
@@ -435,7 +438,7 @@ int test_parameters (std::string const &filename)
   herr_t h5error;
 
   // create object to use for the subsequent tests
-  LOFAR_DipoleDataset dataset (filename,
+  TBB_DipoleDataset dataset (filename,
 			       path_dataset);
 
   cout << "[1] Retrieve object parameters ..." << endl;
@@ -511,7 +514,7 @@ int test_data (std::string const &filename)
   uint blocksize (10);
 
   // open dataset
-  LOFAR_DipoleDataset dataset (filename,
+  TBB_DipoleDataset dataset (filename,
 			       path_dataset);
   
   std::cout << "[1] Retrieve data via pointer to array ..." << std::endl;
@@ -602,7 +605,7 @@ int test_export2record (std::string const &filename)
   cout << "[1] Retrieve attributes of dataset into record ..." << endl;
   try {
     // open dataset
-    LOFAR_DipoleDataset dataset (filename,
+    TBB_DipoleDataset dataset (filename,
 				 path_dataset);
     // retrieve attributes into record
     casa::Record rec = dataset.attributes2record ();
@@ -610,7 +613,8 @@ int test_export2record (std::string const &filename)
     cout << "-- nof. attributes    = " << dataset.nofAttributes() << endl;
     cout << "-- nof. record fields = " << rec.nfields()           << endl;
     // Create HDF5 file and write the record to it
-    casa::HDF5File file("tDipoleDataset_1.h5", casa::ByteIO::New);
+    casa::String outfile ("tDipoleDataset_1.h5");
+    casa::HDF5File file(outfile, casa::ByteIO::New);
     casa::HDF5Record::writeRecord (file, "DipoleDataset", rec);
   } catch (std::string message) {
     cerr << message << endl;
@@ -620,7 +624,7 @@ int test_export2record (std::string const &filename)
   cout << "[2] Combine records from multiple dipole datasets ..." << endl;
   try {
     // open dataset
-    LOFAR_DipoleDataset dataset (filename,
+    TBB_DipoleDataset dataset (filename,
 				 path_dataset);
     // retrieve attributes into record
     casa::Record rec = dataset.attributes2record ();

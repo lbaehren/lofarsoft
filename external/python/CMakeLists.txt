@@ -88,13 +88,7 @@ if (module_numeric)
   add_subdirectory (numeric)
 endif (module_numeric)
 
-## [4] num_util
-
-if (module_num_util)
-  add_subdirectory (num_util)
-endif (module_num_util)
-
-## [5] NumPy
+## [4] NumPy
 
 # NumPy is a replacement of Numeric Python that adds the features of numarray.  
 # To install:
@@ -106,6 +100,12 @@ endif (module_num_util)
 if (module_numpy)
   add_subdirectory (numpy)
 endif (module_numpy)
+
+## [5] num_util
+
+if (module_num_util)
+  add_subdirectory (num_util)
+endif (module_num_util)
 
 ## ------------------------------------------------------------------------------
 ## Configuration summary

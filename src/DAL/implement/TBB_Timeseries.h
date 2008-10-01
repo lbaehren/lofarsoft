@@ -21,8 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef LOFAR_TIMESERIES_H
-#define LOFAR_TIMESERIES_H
+#ifndef TBB_TIMESERIES_H
+#define TBB_TIMESERIES_H
 
 // Standard library header files
 #include <iostream>
@@ -33,24 +33,22 @@
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
 
-// Header files of CR-Tools
-#include <Data/LOFAR_StationGroup.h>
+#include <TBB_StationGroup.h>
 
 namespace DAL { // Namespace DAL -- begin
   
   /*!
-    \class LOFAR_Timeseries
+    \class TBB_Timeseries
     
-    \ingroup CR_Data
     \ingroup DAL
     
-    \brief Brief description for class LOFAR_Timeseries
+    \brief Brief description for class TBB_Timeseries
     
     \author Lars B&auml;hren
 
     \date 2008/02/06
 
-    \test tLOFAR_Timeseries.cc
+    \test tTBB_Timeseries.cpp
     
     <h3>Prerequisite</h3>
     
@@ -59,8 +57,8 @@ namespace DAL { // Namespace DAL -- begin
       <li>Classes handling the entities further down in the hierarchy of the
       dataset:
       <ul>
-        <li>[DAL] LOFAR_StationGroup
-	<li>[DAL] LOFAR_DipoleDataset
+        <li>DAL::TBB_StationGroup
+	<li>DAL::TBB_DipoleDataset
       </ul>
       Some of the direct interaction with a HDF5 dataset is implemented in
       HDF5Common.h
@@ -391,7 +389,7 @@ namespace DAL { // Namespace DAL -- begin
     <h3>Example(s)</h3>
     
   */  
-  class LOFAR_Timeseries {
+  class TBB_Timeseries {
 
   protected:
     
@@ -400,7 +398,7 @@ namespace DAL { // Namespace DAL -- begin
     //! File handle identifier
     hid_t fileID_p;
     //! Station groups contained within this file
-    std::vector<LOFAR_StationGroup> groups_p;
+    std::vector<TBB_StationGroup> groups_p;
     
   public:
     
@@ -412,39 +410,39 @@ namespace DAL { // Namespace DAL -- begin
       A minimal setup of the internal dataspace is performed, but since no
       data file is provided, no inspection of the data structure is carried out.
     */
-    LOFAR_Timeseries ();
+    TBB_Timeseries ();
     
     /*!
       \brief Default constructor
 
       \param filename -- Name of the data file
     */
-    LOFAR_Timeseries (std::string const &filename);
+    TBB_Timeseries (std::string const &filename);
     
     /*!
       \brief Copy constructor
       
-      \param other -- Another LOFAR_Timeseries object from which to create
+      \param other -- Another TBB_Timeseries object from which to create
              this new one.
     */
-    LOFAR_Timeseries (LOFAR_Timeseries const &other);
+    TBB_Timeseries (TBB_Timeseries const &other);
     
     // -------------------------------------------------------------- Destruction
 
     /*!
       \brief Destructor
     */
-    ~LOFAR_Timeseries ();
+    ~TBB_Timeseries ();
     
     // ---------------------------------------------------------------- Operators
     
     /*!
       \brief Overloading of the copy operator
       
-      \param other -- Another LOFAR_Timeseries object from which to make a
+      \param other -- Another TBB_Timeseries object from which to make a
              copy.
     */
-    LOFAR_Timeseries& operator= (LOFAR_Timeseries const &other); 
+    TBB_Timeseries& operator= (TBB_Timeseries const &other); 
     
     // --------------------------------------------------------------- Parameters
 
@@ -469,10 +467,10 @@ namespace DAL { // Namespace DAL -- begin
     /*!
       \brief Get station groups embedded within the dataset
 
-      \return stationGroups -- Vector with a set of LOFAR_StationGroup objects,
+      \return stationGroups -- Vector with a set of TBB_StationGroup objects,
               encapsulating the contents of the groups within the dataset.
     */
-    inline std::vector<LOFAR_StationGroup> stationGroups () const {
+    inline std::vector<TBB_StationGroup> stationGroups () const {
       return groups_p;
     }
 
@@ -520,10 +518,10 @@ namespace DAL { // Namespace DAL -- begin
     /*!
       \brief Get the name of the class
       
-      \return className -- The name of the class, LOFAR_Timeseries.
+      \return className -- The name of the class, TBB_Timeseries.
     */
     std::string className () const {
-      return "LOFAR_Timeseries";
+      return "TBB_Timeseries";
     }
 
     /*!
@@ -570,18 +568,21 @@ namespace DAL { // Namespace DAL -- begin
       \return channelIDnames -- A list of the channel IDs for all the dipoles within
               this data set.
      */
+#ifdef HAVE_CASA
+    casa::Vector<casa::String> channelNames ();
+#else
     std::vector<std::string> channelNames ();
-
+#endif
     /*!
       \brief Retrieve the list of channel IDs
 
-      \return channelIDs -- A list of the channel IDs for all the dipoles within
+      \return channelID -- A list of the channel IDs for all the dipoles within
               this data set.
      */
 #ifdef HAVE_CASA
-    casa::Vector<int> channelIDs ();
+    casa::Vector<int> channelID ();
 #else
-    std::vector<int> channelIDs ();
+    std::vector<int> channelID ();
 #endif
     
     /*!
@@ -658,16 +659,20 @@ namespace DAL { // Namespace DAL -- begin
               attributes attached to the dataset for this dipole
     */
     casa::Record attributes2record (bool const &addRecursive=false);
+
+    //! Set up the record which is used as member of the CR::DataReader class
+    casa::Record attributes2headerRecord ();
+    void attributes2headerRecord (casa::Record &rec);
     
   private:
     
     /*!
       \brief Unconditional copying
 
-      \param other -- Another LOFAR_Timeseries object from which to create
+      \param other -- Another TBB_Timeseries object from which to create
              this new one.
     */
-    void copy (LOFAR_Timeseries const &other);
+    void copy (TBB_Timeseries const &other);
     
     /*!
       \brief Initialize the internal dataspace of the object
@@ -693,5 +698,5 @@ namespace DAL { // Namespace DAL -- begin
   
 } // Namespace DAL -- end
 
-#endif /* LOFAR_TIMESERIES_H */
+#endif /* TBB_TIMESERIES_H */
   

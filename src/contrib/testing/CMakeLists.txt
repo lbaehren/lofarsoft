@@ -10,6 +10,7 @@ if (HAVE_CASACORE)
   include_directories (${CASA_INCLUDES})
 
   set (tests
+    casacoreArrayMath
     casacoreMatrixAccess02
     casacoreMatrixAccess03
     casacoreMatrixAccess04

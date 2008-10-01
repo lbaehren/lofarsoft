@@ -21,25 +21,23 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <crtools.h>
-
 #include <casa/Arrays/ArrayIO.h>
 #include <casa/HDF5/HDF5File.h>
 #include <casa/HDF5/HDF5Record.h>
 
-#include <Data/LOFAR_Timeseries.h>
+#include <TBB_Timeseries.h>
 
 using std::cerr;
 using std::cout;
 using std::endl;
-using DAL::LOFAR_Timeseries;  // Namespace usage
+using DAL::TBB_Timeseries;  // Namespace usage
 
 /*!
-  \file tLOFAR_Timeseries.cc
+  \file tTBB_Timeseries.cpp
 
-  \ingroup CR_Data
+  \ingroup DAL
 
-  \brief A collection of test routines for the LOFAR_Timeseries class
+  \brief A collection of test routines for the TBB_Timeseries class
  
   \author Lars B&auml;hren
  
@@ -49,7 +47,7 @@ using DAL::LOFAR_Timeseries;  // Namespace usage
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test constructors for a new LOFAR_Timeseries object
+  \brief Test constructors for a new TBB_Timeseries object
 
   \param filename -- Name of the HDF5 file used for testing
 
@@ -63,9 +61,9 @@ int test_construction (std::string const &filename)
   
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    LOFAR_Timeseries newLOFAR_Timeseries;
+    TBB_Timeseries newTBB_Timeseries;
     //
-    newLOFAR_Timeseries.summary(); 
+    newTBB_Timeseries.summary(); 
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -73,9 +71,9 @@ int test_construction (std::string const &filename)
   
   std::cout << "[2] Testing argumented constructor ..." << std::endl;
   try {
-    LOFAR_Timeseries newLOFAR_Timeseries (filename);
+    TBB_Timeseries newTBB_Timeseries (filename);
     //
-    newLOFAR_Timeseries.summary(); 
+    newTBB_Timeseries.summary(); 
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -84,11 +82,11 @@ int test_construction (std::string const &filename)
   std::cout << "[3] Testing copy constructor ..." << std::endl;
   try {
     std::cout << "--> creating original object ..." << std::endl;
-    LOFAR_Timeseries timeseries (filename);
+    TBB_Timeseries timeseries (filename);
     timeseries.summary(); 
     //
     std::cout << "--> creating new object by copy ..." << std::endl;
-    LOFAR_Timeseries timeseriesCopy (timeseries);
+    TBB_Timeseries timeseriesCopy (timeseries);
     timeseriesCopy.summary(); 
   } catch (std::string message) {
     std::cerr << message << std::endl;
@@ -112,7 +110,7 @@ int test_methods (std::string const &filename)
   std::cout << "\n[test_methods]\n" << std::endl;
 
   int nofFailedTests = 0;
-  LOFAR_Timeseries timeseries (filename);
+  TBB_Timeseries timeseries (filename);
 
   cout << "[1] Retrieving sample frequencies ..." << endl;
   try {
@@ -161,7 +159,7 @@ int test_attributes2record (string const &filename)
   std::cout << "\n[test_attributes2record]\n" << std::endl;
 
   int nofFailedTests (0);
-  LOFAR_Timeseries ts (filename);
+  TBB_Timeseries ts (filename);
 
   std::cout << "[1] Retreiving attributes of group into record ..." << std::endl;
   try {
@@ -188,6 +186,50 @@ int test_attributes2record (string const &filename)
     nofFailedTests++;
   }
 
+  std::cout << "[3] Fill dataset information into a record ..." << std::endl;
+  try {
+    casa::Record rec;
+    //
+    std::cout << "-- TELESCOPE" << std::endl;
+    rec.define("TELESCOPE",ts.telescope());
+    //
+    std::cout << "-- OBSERVER" << std::endl;
+    rec.define("OBSERVER",ts.observer());
+    //
+    std::cout << "-- PROJECT" << std::endl;
+    rec.define("PROJECT",ts.project());
+    //
+    std::cout << "-- CHANNEL_NAME" << std::endl;
+    rec.define("CHANNEL_NAME",ts.channelNames());
+    //
+    std::cout << "-- CHANNEL_ID" << std::endl;
+    rec.define("CHANNEL_ID",ts.channelID());
+    //
+    std::cout << "-- TIME" << std::endl;
+    rec.define("TIME",ts.times());
+    //
+    std::cout << "-- DATA_LENGTH" << std::endl;
+    rec.define("DATA_LENGTH",ts.data_lengths());
+    // Create HDF5 file and write the record to it
+    casa::HDF5File file("tTimeseries_3.h5", casa::ByteIO::New);
+    casa::HDF5Record::writeRecord (file, "Timeseries", rec);
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[4] Test operations on parameters " << std::endl;
+  try {
+    uint min_times      = min(ts.times());
+    uint min_dataLength = min(ts.data_lengths());
+    //
+    std::cout << "-- min(times)       = " << min_times      << std::endl;
+    std::cout << "-- min(data_length) = " << min_dataLength << std::endl;
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+
   return nofFailedTests;
 }
 
@@ -207,7 +249,7 @@ int test_data (std::string const &filename)
   int nofFailedTests = 0;
   int start          = 0;
   int nofSamples     = 1024;
-  LOFAR_Timeseries timeseries (filename);
+  TBB_Timeseries timeseries (filename);
 
   std::cout << "[1] Retrieve time-series data without channel selection"
 	    << std::endl;
@@ -240,9 +282,9 @@ int main (int argc,
     exit the program.
   */
   if (argc < 2) {
-    std::cerr << "[tLOFAR_StationGroup] Too few parameters!" << endl;
+    std::cerr << "[tTBB_StationGroup] Too few parameters!" << endl;
     std::cerr << "" << endl;
-    std::cerr << "  tLOFAR_StationGroup <filename>" << endl;
+    std::cerr << "  tTBB_StationGroup <filename>" << endl;
     std::cerr << "" << endl;
     return -1;
   }
@@ -257,7 +299,7 @@ int main (int argc,
     nofFailedTests += test_attributes2record (filename);
     nofFailedTests += test_data (filename);
   } else {
-    std::cerr << "[tLOFAR_StationGroup]"
+    std::cerr << "[tTBB_StationGroup]"
 	      << " Skipping tests after testing constructors returned errors!"
 	      << std::endl;
   }

@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
+ | $Id::                                                               $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2008                                                    *
@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Data/LOFAR_Timeseries.h>
+#include <TBB_Timeseries.h>
 
 using std::cout;
 using std::endl;
@@ -34,24 +34,24 @@ namespace DAL { // Namespace DAL -- begin
   //
   // ============================================================================
   
-  // ----------------------------------------------------------- LOFAR_Timeseries
+  // ------------------------------------------------------------- TBB_Timeseries
   
-  LOFAR_Timeseries::LOFAR_Timeseries ()
+  TBB_Timeseries::TBB_Timeseries ()
   {
     filename_p = "UNDEFINED";
     fileID_p   = 0;
   }
 
-  // ----------------------------------------------------------- LOFAR_Timeseries
+  // ------------------------------------------------------------- TBB_Timeseries
   
-  LOFAR_Timeseries::LOFAR_Timeseries (std::string const &filename)
+  TBB_Timeseries::TBB_Timeseries (std::string const &filename)
   {
     init (filename);
   }
   
-  // ----------------------------------------------------------- LOFAR_Timeseries
+  // ------------------------------------------------------------- TBB_Timeseries
   
-  LOFAR_Timeseries::LOFAR_Timeseries (LOFAR_Timeseries const &other)
+  TBB_Timeseries::TBB_Timeseries (TBB_Timeseries const &other)
   {
     // Initialize internal variables
     fileID_p   = 0;
@@ -66,12 +66,12 @@ namespace DAL { // Namespace DAL -- begin
   //
   // ============================================================================
   
-  LOFAR_Timeseries::~LOFAR_Timeseries ()
+  TBB_Timeseries::~TBB_Timeseries ()
   {
     destroy();
   }
   
-  void LOFAR_Timeseries::destroy ()
+  void TBB_Timeseries::destroy ()
   {;}
   
   // ============================================================================
@@ -82,7 +82,7 @@ namespace DAL { // Namespace DAL -- begin
 
   // ------------------------------------------------------------------ operator=
   
-  LOFAR_Timeseries& LOFAR_Timeseries::operator= (LOFAR_Timeseries const &other)
+  TBB_Timeseries& TBB_Timeseries::operator= (TBB_Timeseries const &other)
   {
     if (this != &other) {
       destroy ();
@@ -93,7 +93,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------------------- copy
 
-  void LOFAR_Timeseries::copy (LOFAR_Timeseries const &other)
+  void TBB_Timeseries::copy (TBB_Timeseries const &other)
   {
     if (other.fileID_p == 0) {
       filename_p = "UNDEFINED";
@@ -111,7 +111,7 @@ namespace DAL { // Namespace DAL -- begin
 
   // ------------------------------------------------------------------ telescope
 
-  std::string LOFAR_Timeseries::telescope ()
+  std::string TBB_Timeseries::telescope ()
   {
     std::string val;
     
@@ -126,7 +126,7 @@ namespace DAL { // Namespace DAL -- begin
 
   // ------------------------------------------------------------------- observer
   
-  std::string LOFAR_Timeseries::observer ()
+  std::string TBB_Timeseries::observer ()
   {
     std::string val;
     
@@ -141,7 +141,7 @@ namespace DAL { // Namespace DAL -- begin
 
   // -------------------------------------------------------------------- project
 
-  std::string LOFAR_Timeseries::project ()
+  std::string TBB_Timeseries::project ()
   {
     std::string val;
     
@@ -156,7 +156,7 @@ namespace DAL { // Namespace DAL -- begin
 
   // ------------------------------------------------------------- observation_id
   
-  std::string LOFAR_Timeseries::observation_id ()
+  std::string TBB_Timeseries::observation_id ()
   {
     std::string val;
     
@@ -171,7 +171,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------- observation_mode
   
-  std::string LOFAR_Timeseries::observation_mode ()
+  std::string TBB_Timeseries::observation_mode ()
   {
     std::string val;
     
@@ -186,9 +186,9 @@ namespace DAL { // Namespace DAL -- begin
   
   // -------------------------------------------------------------------- summary
   
-  void LOFAR_Timeseries::summary (std::ostream &os)
+  void TBB_Timeseries::summary (std::ostream &os)
   {
-    os << "[LOFAR_Timeseries] Summary of object properties"       << endl;
+    os << "[TBB_Timeseries] Summary of object properties"       << endl;
     os << "-- File name  ........  : " << filename_p              << endl;
     os << "-- File ID      ......  : " << fileID_p                << endl;
 
@@ -217,7 +217,7 @@ namespace DAL { // Namespace DAL -- begin
 
   // ----------------------------------------------------------------------- init
   
-  void LOFAR_Timeseries::init (std::string const &filename)
+  void TBB_Timeseries::init (std::string const &filename)
   {
     // try to open the HDF5 file
     fileID_p = H5Fopen (filename.c_str(),
@@ -231,11 +231,11 @@ namespace DAL { // Namespace DAL -- begin
       bool status = setStationGroups ();
       // feedback
       if (!status) {
-	std::cerr << "[LOFAR_Timeseries::init] Error setting up the station groups!"
+	std::cerr << "[TBB_Timeseries::init] Error setting up the station groups!"
 		  << std::endl;
       }
     } else {
-      std::cerr << "[LOFAR_Timeseries::init] Error opening file "
+      std::cerr << "[TBB_Timeseries::init] Error opening file "
 		<< filename
 		<< std::endl;
     }
@@ -243,7 +243,7 @@ namespace DAL { // Namespace DAL -- begin
 
   // ----------------------------------------------------------- setStationGroups
   
-  bool LOFAR_Timeseries::setStationGroups ()
+  bool TBB_Timeseries::setStationGroups ()
   {
     /* Check minimal condition for operations below. */
     if (fileID_p < 1) {
@@ -272,24 +272,24 @@ namespace DAL { // Namespace DAL -- begin
 				      n);
 	    /*
 	     * If retrieval of group name was successful, create new
-	     * LOFAR_StationGroup object to be added to the internal list.
+	     * TBB_StationGroup object to be added to the internal list.
 	     */
 	    if (status) {
-	      groups_p.push_back(DAL::LOFAR_StationGroup(filename_p,
+	      groups_p.push_back(DAL::TBB_StationGroup(filename_p,
 							 name));
 	    } else {
-	      std::cerr << "[LOFAR_Timeseries::setStationGroups]"
+	      std::cerr << "[TBB_Timeseries::setStationGroups]"
 			<< " Error retrieving group name!"
 			<< std::endl;
 	    }
 	  }
 	}
       } else {
-	std::cout << "[LOFAR_Timeseries::setStationGroups]"
+	std::cout << "[TBB_Timeseries::setStationGroups]"
 		  << " No objects found at root level of the file!" << std::endl;
       }
     } catch (std::string message) {
-      std::cerr << "[LOFAR_Timeseries::setStationGroups] " << message
+      std::cerr << "[TBB_Timeseries::setStationGroups] " << message
 		<< std::endl;
       return false;
     }
@@ -297,10 +297,28 @@ namespace DAL { // Namespace DAL -- begin
     return true;
   }
   
-  // ---------------------------------------------------------------- channelIDs
+  // -------------------------------------------------------------- channelNames
 
 #ifdef HAVE_CASA
-  casa::Vector<int> LOFAR_Timeseries::channelIDs ()
+    casa::Vector<casa::String> TBB_Timeseries::channelNames ()
+    {
+      casa::Vector<casa::String> names;
+
+      return names;
+    }
+#else
+    std::vector<std::string> TBB_Timeseries::channelNames ()
+    {
+      std::vector<std::string> names;
+      
+      return names;
+    }
+#endif
+
+  // ---------------------------------------------------------------- channelID
+
+#ifdef HAVE_CASA
+  casa::Vector<int> TBB_Timeseries::channelID ()
   {
     uint n           = 0;
     uint station     = 0;
@@ -311,7 +329,7 @@ namespace DAL { // Namespace DAL -- begin
     casa::Vector<int> tmp;
     
     for (station=0; station<nofStations; station++) {
-      tmp        = groups_p[station].channelIDs();
+      tmp        = groups_p[station].channelID();
       nofDipoles = groups_p[station].nofDipoleDatasets();
       for (dipole=0; dipole<nofDipoles; dipole++) {
 	channelIDvalues(n) = tmp(dipole);
@@ -322,7 +340,7 @@ namespace DAL { // Namespace DAL -- begin
     return channelIDvalues;
   }
 #else
-  std::vector<uint> LOFAR_Timeseries::channelIDs ()
+  std::vector<uint> TBB_Timeseries::channelID ()
   {
     uint n           = 0;
     uint station     = 0;
@@ -333,7 +351,7 @@ namespace DAL { // Namespace DAL -- begin
     std::vector<int> tmp;
     
     for (station=0; station<nofStations; station++) {
-      tmp        = groups_p[station].channelIDs();
+      tmp        = groups_p[station].channelID();
       nofDipoles = groups_p[station].nofDipoleDatasets();
       for (dipole=0; dipole<nofDipoles; dipole++) {
 	channelIDvalues[n] = tmp[dipole];
@@ -348,7 +366,7 @@ namespace DAL { // Namespace DAL -- begin
   // ---------------------------------------------------------------------- times
 
 #ifdef HAVE_CASA
-  casa::Vector<uint> LOFAR_Timeseries::times ()
+  casa::Vector<uint> TBB_Timeseries::times ()
   {
     uint n           = 0;
     uint station     = 0;
@@ -370,7 +388,7 @@ namespace DAL { // Namespace DAL -- begin
     return UnixTimes;
   }
 #else
-  std::vector<uint> LOFAR_Timeseries::times (std::string const &units)
+  std::vector<uint> TBB_Timeseries::times (std::string const &units)
   {
     uint n           = 0;
     uint station     = 0;
@@ -396,7 +414,7 @@ namespace DAL { // Namespace DAL -- begin
   // --------------------------------------------------------- sample_frequencies
 
 #ifdef HAVE_CASA
-  casa::Vector<double> LOFAR_Timeseries::sample_frequencies (std::string const &units)
+  casa::Vector<double> TBB_Timeseries::sample_frequencies (std::string const &units)
   {
     uint n           = 0;
     uint station     = 0;
@@ -418,7 +436,7 @@ namespace DAL { // Namespace DAL -- begin
     return sampleFrequencies;
   }
 #else
-  std::vector<double> LOFAR_Timeseries::sample_frequencies (std::string const &units)
+  std::vector<double> TBB_Timeseries::sample_frequencies (std::string const &units)
   {
     uint n           = 0;
     uint station     = 0;
@@ -444,7 +462,7 @@ namespace DAL { // Namespace DAL -- begin
   // ----------------------------------------------------------------- data_lengths
 
 #ifdef HAVE_CASA
-  casa::Vector<uint> LOFAR_Timeseries::data_lengths ()
+  casa::Vector<uint> TBB_Timeseries::data_lengths ()
   {
     uint n           = 0;
     uint station     = 0;
@@ -466,7 +484,7 @@ namespace DAL { // Namespace DAL -- begin
     return dataLengths;
   }
 #else
-  std::vector<uint> LOFAR_Timeseries::data_lengths ()
+  std::vector<uint> TBB_Timeseries::data_lengths ()
   {
     uint n           = 0;
     uint station     = 0;
@@ -491,7 +509,7 @@ namespace DAL { // Namespace DAL -- begin
 
   // ---------------------------------------------------------- attributes2record
 
-  casa::Record LOFAR_Timeseries::attributes2record (bool const &addRecursive)
+  casa::Record TBB_Timeseries::attributes2record (bool const &addRecursive)
   {
     casa::Record rec;
     
@@ -521,9 +539,35 @@ namespace DAL { // Namespace DAL -- begin
     return rec;
   }
 
+  // ---------------------------------------------------- attributes2headerRecord
+
+  casa::Record TBB_Timeseries::attributes2headerRecord ()
+  {
+    casa::Record rec;
+    
+    attributes2headerRecord (rec);
+    
+    return rec;
+  }
+
+  // ---------------------------------------------------- attributes2headerRecord
+  
+  void TBB_Timeseries::attributes2headerRecord (casa::Record &rec)
+  {
+    try {
+      rec.define("Date",min(times()));
+      rec.define("AntennaIDs",channelID());
+      rec.define("Observatory",telescope());
+      rec.define("Filesize",min(data_lengths()));
+    } catch (std::string message) {
+      std::cerr << "[TBB_Timeseries::attributes2headerRecord] " << message
+		<< std::endl;      
+    }
+  }
+
   // ------------------------------------------------------------------------- fx
 
-  casa::Matrix<double> LOFAR_Timeseries::fx (int const &start,
+  casa::Matrix<double> TBB_Timeseries::fx (int const &start,
 					     int const &nofSamples)
   {
     /* Check minimal condition for operations below. */
@@ -541,7 +585,7 @@ namespace DAL { // Namespace DAL -- begin
     casa::Vector<double> tmp (nofSamples);
     
 #ifdef DEBUGGING_MESSAGES
-    std::cout << "[LOFAR_Timeseries::fx]" << std::endl;
+    std::cout << "[TBB_Timeseries::fx]" << std::endl;
     std::cout << "-- nof. dipoles  = " << nofDipoles   << std::endl;
     std::cout << "-- nof. stations = " << nofStations  << std::endl;
     std::cout << "-- shape(data)   = " << data.shape() << std::endl;

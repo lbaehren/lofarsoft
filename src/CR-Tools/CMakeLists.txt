@@ -387,12 +387,6 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ## Test datasets
 
-find_file (dataset_tbb rw_20080604_122217_2300.dat.h5
-  PATHS
-    ${USG_ROOT}/data
-    ${USG_ROOT}/data/test
-  )
-
 if (dataset_tbb)
   set (CR_DATASET_TBB 1)
   set (CR_DATASET_TBB_STATION "Station023")

@@ -29,17 +29,21 @@
 #include <string>
 #include <vector>
 
-#include <casa/aips.h>
+#include <casa/Arrays/ArrayIO.h>
+#include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/BasicSL/String.h>
+#include <casa/Containers/Record.h>
+#include <casa/HDF5/HDF5File.h>
+#include <casa/HDF5/HDF5Record.h>
 
 #include <dal/Enumerations.h>
+#include <dal/TBB_Timeseries.h>
 
-#include <Data/LOFAR_Timeseries.h>
-#include <Data/LOFAR_StationGroup.h>
 #include <IO/DataReader.h>
 
-using DAL::LOFAR_Timeseries;
-using DAL::LOFAR_StationGroup;
+using DAL::TBB_Timeseries;
 
 namespace CR { // Namespace CR -- begin
 
@@ -63,9 +67,9 @@ namespace CR { // Namespace CR -- begin
       datafiles.
       <li>[DAL] Enumerations.h -- A collection of enumerations defining 
           attributes and keywords.
-      <li>[DAL] DAL::LOFAR_Timeseries -- Class encapsulating the basic
+      <li>DAL::TBB_Timeseries -- Class encapsulating the basic
           information of how to interact with a LOFAR TBB time-series dataset.
-      <li>[CR] DataReader -- Base class of CR-Tools data I/O framework.
+      <li>CR::DataReader -- Base class of CR-Tools data I/O framework.
     </ul>
     
     <h3>Synopsis</h3>
@@ -119,7 +123,7 @@ namespace CR { // Namespace CR -- begin
     <h3>Example(s)</h3>
     
   */  
-  class LOFAR_TBB : public LOFAR_Timeseries, public DataReader {
+  class LOFAR_TBB : public DAL::TBB_Timeseries, public CR::DataReader {
 
     //! List of channel IDs pointing to the dipole datasets holding the TBB data
     std::vector <std::string> channelID_p;
@@ -152,11 +156,11 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Argumented constructor
       
-      \param timeseries -- LOFAR_Timeseries object encapsulating the basic 
+      \param timeseries -- TBB_Timeseries object encapsulating the basic 
              information on how to interact with a LOFAR TBB time-series 
 	     dataset.
     */
-    LOFAR_TBB (LOFAR_Timeseries const &timeseries);
+    LOFAR_TBB (TBB_Timeseries const &timeseries);
     
     /*!
       \brief Copy constructor
@@ -197,7 +201,7 @@ namespace CR { // Namespace CR -- begin
       \brief Provide a summary of the internal status
       
       \param listStationGroups -- Recursive summary of the embedded
-             LOFAR_StationGroup objects?
+             TBB_StationGroup objects?
     */
     inline void summary (bool const &listStationGroups=false,
 			 bool const &listChannelIDs=false) {
