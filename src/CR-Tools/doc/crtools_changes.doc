@@ -18,6 +18,18 @@
 on the Boost library. Even after removing the very specific additional search path for external components to the installation in /opt/aips++
 the build still fails due to picking up the Boost installation in /usr instead $LOFARSOFT/release.
 
+- Opening a file with the CR::LOFAR_TBB class doesn't work. A line like:
+  \verbatim
+  hdf5In = new LOFAR_TBB(files(fnum),524288);
+  \endverbatim
+  stop either without error message, or with something like:
+  \verbatim
+  *** glibc detected *** double free or corruption: 0x0876f688 ***
+  \endverbatim
+  I have also seen it throw a segfault, but that was with a potentially bogous
+  version of the DAL. (I.e. the posibility that the includes and libraries from
+  two different boost version were used.)
+
 - hfget library
   - Import of the symbols from the generated library fails:
   \verbatim
