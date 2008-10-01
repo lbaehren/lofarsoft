@@ -23,12 +23,21 @@ add_library (casa_fits
   ${fits_sources}
   )
 
-target_link_libraries (casa_fits
-  casa_measures
-  ${G2C_LIBRARIES}
-  ${CFITSIO_LIBRARIES}
-  ${WCSLIB_LIBRARIES}
-  )
+if (GFORTRAN_LIBRARIES)
+  target_link_libraries (casa_fits
+    casa_measures
+    ${GFORTRAN_LIBRARIES}
+    ${CFITSIO_LIBRARIES}
+    ${WCSLIB_LIBRARIES}
+    )
+else (GFORTRAN_LIBRARIES)
+  target_link_libraries (casa_fits
+    casa_measures
+    ${G2C_LIBRARIES}
+    ${CFITSIO_LIBRARIES}
+    ${WCSLIB_LIBRARIES}
+    )
+endif (GFORTRAN_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
