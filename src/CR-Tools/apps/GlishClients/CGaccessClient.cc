@@ -159,7 +159,7 @@ Bool LoadLOPESEvent(GlishSysEvent &event, void *){
     };
     DataReader_p = lev_p;
     Record outrec;
-    outrec.merge(lev_p->header(),RecordInterface::OverwriteDuplicates);
+    outrec.merge(lev_p->headerRecord(),RecordInterface::OverwriteDuplicates);
     pipeline_p->setPhaseCenter(0.,0.);
     pipeline_p->GetTimeSeries(lev_p);
     outrec.define("AntPos",pipeline_p->GetAntPositions());
@@ -216,7 +216,7 @@ Bool LoadTBBCTLEvent(GlishSysEvent &event, void *){
     };
     DataReader_p = &tbbIn;
     Record outrec;
-    outrec.merge(tbbIn.header(),RecordInterface::OverwriteDuplicates);
+    outrec.merge(tbbIn.headerRecord(),RecordInterface::OverwriteDuplicates);
     pipeline_p->setPhaseCenter(0.,0.);
     pipeline_p->GetTimeSeries(DataReader_p);
     outrec.define("AntPos",pipeline_p->GetAntPositions());

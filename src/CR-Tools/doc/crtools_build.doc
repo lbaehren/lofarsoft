@@ -118,9 +118,9 @@ option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES
   cmake ../../src/CR-Tools/ -DCR_BUILD_TESTS:BOOL=0
   \endverbatim
   
-  <li>Build the Glish-clients, but no test programms:
+  <li>Build the Glish-clients, but no external test programms:
   \verbatim
-  cmake ../../src/CR-Tools/ -DCR_BUILD_TESTS:BOOL=0 -DCR_GLISH_SUPPORT:BOOL=1
+  cmake ../../src/CR-Tools/ -DCR_WITH_GLISH:BOOL=1 -DCR_BUILD_EXTERNAL_TESTS:BOOL=0 
   \endverbatim
 </ul>
 

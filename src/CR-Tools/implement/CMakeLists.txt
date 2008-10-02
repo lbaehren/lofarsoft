@@ -46,16 +46,34 @@ endforeach (cr_module)
 
 if (CR_WITH_GLISH AND HAVE_CASA)
   list (APPEND cr_sources templates.cc)
+  set ( cr_to_remove
+        Analysis/ppfinversion.cc
+        Analysis/genCRmap.cc
+        Data/LOFAR_TBB.cc
+        Imaging/Skymapper.cc
+        ApplicationSupport/SkymapperTools.cc
+        Observation/StationBeam.cc
+  )
+  FILE (GLOB cr_remove_items ${cr_to_remove})
+  list (REMOVE_ITEM cr_sources ${cr_remove_items})
 endif (CR_WITH_GLISH AND HAVE_CASA)
 
 if (NOT HAVE_PGPLOT)
-  list (REMOVE_ITEM cr_sources Display/PGPlotterCR.cc)
-  list (REMOVE_ITEM cr_sources Display/PGPlotterLocal.cc)
+  set ( cr_to_remove
+        Display/PGPlotterCR.cc
+        Display/PGPlotterLocal.cc
+  )
+  FILE (GLOB cr_remove_items ${cr_to_remove})
+  list (REMOVE_ITEM cr_sources ${cr_remove_items})
 endif (NOT HAVE_PGPLOT)
 
 if (NOT CR_WITH_STARTOOLS)
-  list (REMOVE_ITEM cr_sources Analysis/CompletePipeline.cc)
-  list (REMOVE_ITEM cr_sources Analysis/analyseLOPESevent2.cc)
+  set ( cr_to_remove
+        Analysis/CompletePipeline.cc
+        Analysis/analyseLOPESevent2.cc
+  )
+  FILE (GLOB cr_remove_items ${cr_to_remove})
+  list (REMOVE_ITEM cr_sources ${cr_remove_items})
 endif (NOT CR_WITH_STARTOOLS)
 
 ## ------------------------------------------------------------------------------
@@ -70,6 +88,11 @@ endif (HAVE_GIF)
 if (HAVE_GSL)
   set (cr_includes "${cr_includes} -I${GSL_INCLUDES}")
 endif (HAVE_GSL)
+
+if (HAVE_FFTW3)
+  set (cr_includes "${cr_includes} -I${FFTW3_INCLUDES}")
+  message ( STATUS "cr_includes: ${cr_includes}" )
+endif (HAVE_FFTW3)
 
 ## ------------------------------------------------------------------------------
 ## Assemble list of external libraries against which to link
@@ -163,7 +186,7 @@ if (APPLE)
 else (APPLE)
   set_target_properties (cr
     PROPERTIES
-    COMPILE_FLAGS "${CASACORE_COMPILE_FLAGS} -fPIC -O2 -fPIC -ftemplate-depth-100"
+    COMPILE_FLAGS "${CASACORE_COMPILE_FLAGS} -fPIC -O2 -fPIC -ftemplate-depth-100 ${cr_includes}"
     LINK_FLAGS "-bind_at_load"
     )
 endif (APPLE)
