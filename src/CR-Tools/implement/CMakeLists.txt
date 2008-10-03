@@ -58,15 +58,6 @@ if (CR_WITH_GLISH AND HAVE_CASA)
   list (REMOVE_ITEM cr_sources ${cr_remove_items})
 endif (CR_WITH_GLISH AND HAVE_CASA)
 
-if (NOT HAVE_PGPLOT)
-  set ( cr_to_remove
-        Display/PGPlotterCR.cc
-        Display/PGPlotterLocal.cc
-  )
-  FILE (GLOB cr_remove_items ${cr_to_remove})
-  list (REMOVE_ITEM cr_sources ${cr_remove_items})
-endif (NOT HAVE_PGPLOT)
-
 if (NOT CR_WITH_STARTOOLS)
   set ( cr_to_remove
         Analysis/CompletePipeline.cc
@@ -91,7 +82,6 @@ endif (HAVE_GSL)
 
 if (HAVE_FFTW3)
   set (cr_includes "${cr_includes} -I${FFTW3_INCLUDES}")
-  message ( STATUS "cr_includes: ${cr_includes}" )
 endif (HAVE_FFTW3)
 
 ## ------------------------------------------------------------------------------
