@@ -315,8 +315,6 @@ endif (CR_WITH_STARTOOLS)
 
 if (CR_WITH_GUI)
 
-  set (QT4_LIBRARIES "")
-
   ## locate the Qt4 libraries
 
   find_library (QT4_LIBARY_QTCORE QtCore
@@ -342,6 +340,8 @@ if (CR_WITH_GUI)
   if (QT4_LIBARY_QTDESIGNER)
     list (APPEND QT4_LIBRARIES ${QT4_LIBARY_QTDESIGNER})
   endif (QT4_LIBARY_QTDESIGNER)
+
+  list(REVERSE QT4_LIBRARIES)
   
   ## locate the Qt4 header files
 
