@@ -315,23 +315,34 @@ endif (CR_WITH_STARTOOLS)
 
 if (CR_WITH_GUI)
 
+  set (QT4_LIBRARIES "")
+
   ## locate the Qt4 libraries
 
   find_library (QT4_LIBARY_QTCORE QtCore
     PATHS ${lib_locations}
     PATH_SUFFIXES qt4-x11 qt4-x11/lib
     )
+  if (QT4_LIBARY_QTCORE)
+    list (APPEND QT4_LIBRARIES ${QT4_LIBARY_QTCORE})
+  endif (QT4_LIBARY_QTCORE)
   
   find_library (QT4_LIBARY_QTGUI QtGui
     PATHS ${lib_locations}
     PATH_SUFFIXES qt4-x11 qt4-x11/lib
     )
+  if (QT4_LIBARY_QTGUI)
+    list (APPEND QT4_LIBRARIES ${QT4_LIBARY_QTGUI})
+  endif (QT4_LIBARY_QTGUI)
 
   find_library (QT4_LIBARY_QTDESIGNER QtDesigner
     PATHS ${lib_locations}
     PATH_SUFFIXES qt4-x11 qt4-x11/lib
     )
-
+  if (QT4_LIBARY_QTDESIGNER)
+    list (APPEND QT4_LIBRARIES ${QT4_LIBARY_QTDESIGNER})
+  endif (QT4_LIBARY_QTDESIGNER)
+  
   ## locate the Qt4 header files
 
   find_path (QT4_INCLUDES Qt/qatomic.h QtGui/QTableWidgetItem

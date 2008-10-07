@@ -282,9 +282,7 @@ if (CR_WITH_GUI)
   
   ## linker instructions
   target_link_libraries (hfget
-    ${QT4_LIBARY_QTGUI}
-    ${QT4_LIBARY_QTCORE}
-    ${QT4_LIBARY_QTDESIGNER}
+    ${QT4_LIBARIES}
     ${PYTHON_LIBRARIES}
     ${BOOST_LIBRARIES}
     )
