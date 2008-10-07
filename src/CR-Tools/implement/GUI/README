@@ -11,10 +11,9 @@ description of the get mechanism.
 
 Installation of Qt and python was straight forward.
 
-
 After compilation of the hfplot package with make (Makefile is now
 created by qmake, which means that hfget.pro needs to be adapted to
-suit the local system) one siimpy runs python with
+suit the local system) one simply runs python with
 
 python -i hfget.py
 
@@ -138,141 +137,6 @@ v[:]=[0,1,2,3,4,5,6,7]
 v[3:4]=[8,9]
 
 ------------------------------------------------------------------------
-
-Copy of a short description for the c++ Data object class (for how to
-use python look at hfget.py):
-
-//========================================================================
-//class Data 
-//========================================================================
-/*
-
-This is the basic data object. It contains pointers to a data vector
-and a function, as well as links to other objects.
-
-The basic method to retrieve data are get and put. Every object is
-dynamically typed, so can change its type during execution. The
-storage type is determined by "put", the output type is determined by
-"get" (i.e. autmatically converted).
-
-Every data is a vector and right now we only allow the follwing types:
-Pointer, Integer, Number (i.e. floats), Complex, and String. Complex
-data structures (i.e. "structs" or records) have to be built up by a
-network of object! Single parameters are stored as vectors of length
-one. 
-
-In principle n-dimensional data cubes should also be supported by
-specifiying dimension information - still the data would be stored as
-an STL vector. However, high-dimensionality is not yet implemented.
-
-It is crucial for the logic to work that every data in the entire
-system is stored in the objects!
-
-
-Objects could alse be assigned a function instead or in addition to
-the data vector. This function is executed whenever the data in the
-object is retrieved by get (and if a data vector is present, the
-function is executed only if the data actually needs to be
-recalculated).
-
-This is done using 
-
-data.setFunction(Name, Type, Library). (not sure, if type is really needed ...)
-
-So, data["Data:Squared"].setFunction("Square","Sys") will assign a
-squaring function to the object "Squared", which will then give the
-square of the elements in "Data".
-
-New objects are created and linked by newObjects...
-
-Deletion and changing of links is not yet fully supported. 
-
-A new link is established with "setLink".
-
-The links of an object in the network can have two directions: To and
-From (an object). Also, each To and From can have either a To or From
-direction for signalling that a change of data has occurred! (this can
-be confusing, but allows one to have "push" and "pull" dynamic actions
-in the net.
-
-Every object can be used as a starting object to search for other
-objects in the network, relative to the current object.
-
-e.g. data["root:name"] searches for the next object in the "from"
-direction with name "name" and retrieves that data object. (This does
-not necessarily mean that name is directly attached to "root")
-
-Hence, data["root:name"].get(vec) actually retrieves not the data
-object data but the one with name "name" that is attached to "root"
-being attached to data. Most of the objects don't have a c++ variable
-name (like data) - typically only the first one. The others have just
-their links stored in the network (and in a master list, called the
-"superior")
-
-data["root:name'directory"] actually steps first forward to root, then
-to name, and then BACKWARD to "directory". So, name actually is
-derived from "directory" in this example.
-
-It is possible that objects can have the same name. If they are on
-different levels, then one will simply shadow the other, unless
-explicitly specified. So,
-
-data["root:name:name"] is possible, but data["name"] would only access
-the first object.
-
-If objects on the same level have the same name, then either all
-objects are returned using the method data.Find("Station") - which
-returns a list of pointers. Or just the first one, when using
-data["Station"]. However, in this case it is also possible to retrieve
-a specific object based on its contents by using the "name=value"
-syntax.
-
-Imagine you have a structure like this, where the name of the object
-is shown and in brackets its contents.
-
-
-          Telescope("LOFAR")
-           /     \
-    Station(1)  Station(2)
-          |      |
-  Data(1,2,3...) Data(7,6,3,3...)
-
-
-Here 
-
-- data.get(string_vector) would retrieve a vector the name "LOFAR"
-(data["Telescope"].get would yield the same).
-
-- data["Station:Data"].get(integer_vector) or data["Data"].get(..)  (!)
-would both retrieve (1,2,3...), while 
-
-- data["Station=2:Data"].get(...) would yield 7,6,3,3
-
-BTW, it is also possible to specify a list of objects. For example 
-
-- data.Find("Station=1,2,4:Data") would yield the objects where 
-the Station number is 1,2, or 4, but not 3
-
-
-Later one could implement more complex logic, eg. "(Station>2&&Station<10):Data" ...
-
-
-Things still to be done (very incomplete ....):
-
-- add unit support - this could, however, be done by special objects 
-attached to each real data vector containing the unit name (e.g. "m"), 
-scale letter (e.g. "k" for km) and a scale factor (here 1000). In fact per
-unit there needs to be only on single unit object that all data objects point 
-to if needed.
-
-- do more operator overloading, such that data["Station=1:Data"]=vector, 
-replaces data["Station=1:Data"].put(vector).
-
-- use operators like -> or so for setting Links (also in Python).
-
-- There is also a class Vector_Selector which is intended to allow you retrieving
-sub-parts of the data vector (e.g. only every 2nd value, or just values 
-above a certain threshold ...). That needs a bit more work still ...
 
 */
 

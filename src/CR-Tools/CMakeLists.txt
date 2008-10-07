@@ -309,6 +309,10 @@ endif (CR_WITH_STARTOOLS)
 ## -------------------------------------------------------------------
 ## Option: Create graphical user interface? ON/OFF
 
+# LFLAGS = -L/usr/lib
+#          -lboost_python-gcc41-d-1_35.so.1.35.0 -lboost_thread-gcc41-mt-1_35.so.1.35.0
+#          -lpthread -lQtGui -lQtCore
+
 if (CR_WITH_GUI)
 
   ## locate the Qt4 libraries
@@ -319,6 +323,11 @@ if (CR_WITH_GUI)
     )
   
   find_library (QT4_LIBARY_QTGUI QtGui
+    PATHS ${lib_locations}
+    PATH_SUFFIXES qt4-x11 qt4-x11/lib
+    )
+
+  find_library (QT4_LIBARY_QTDESIGNER QtDesigner
     PATHS ${lib_locations}
     PATH_SUFFIXES qt4-x11 qt4-x11/lib
     )

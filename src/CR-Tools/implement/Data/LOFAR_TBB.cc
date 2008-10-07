@@ -131,10 +131,12 @@ namespace CR { // Namespace CR -- begin
 			   bool const &listChannelIDs)
   {
     os << "[LOFAR_TBB] Summary of object properties" << endl;
+
+      os << "-- Name of data file ... : " << filename_p            << endl;
+      os << "-- HDF5 file ID ........ : " << fileID_p              << endl;
     
     if (fileID_p > 0) {
       /* Variables describing the dataset itself */
-      os << "-- Name of data file ... : " << filename_p            << endl;
       os << "-- Telescope ........... : " << telescope()           << endl;
       os << "-- Observer ............ : " << observer()            << endl;
       os << "-- Project ............. : " << project()             << endl;
@@ -160,8 +162,6 @@ namespace CR { // Namespace CR -- begin
 	  groups_p[station].summary();
 	}
       }
-    } else {
-      os << "-- Not connected to a data-set; nothing to be reported here!" << endl;
     }
   }  
   
@@ -175,20 +175,34 @@ namespace CR { // Namespace CR -- begin
   
   bool LOFAR_TBB::init ()
   {
+#ifdef DEBUGGING_MESSAGES
+    std::cout << "[LOFAR_TBB::init()]" << std::endl;
+#endif
+    
     bool status (true);
     
-    /* Set up the vector collecting the IDs for the individual dipoles */
+    /* Check if we are actually connected to a dataset */
     
+    if (fileID_p < 0) {
+      std::cerr << "[LOFAR_TBB::init] Not connected to dataset!" << std::endl;
+      return false;
+    }
+    
+    /*
+     * Set up the vector collecting the IDs for the individual dipoles
+     */
     uint nofDipoles = TBB_Timeseries::nofDipoleDatasets();
     channelID_p.resize (nofDipoles);
     
-    /* Set the correct data for the time and frequency axis */
+    std::cout << "-- nof dipole datasets = " << nofDipoles << std::endl;
+    
+    /*
+     * Set the correct data for the time and frequency axis
+     */
 #ifdef HAVE_CASA
     // retrieve the values
     casa::Vector<double> sampleFreq = TBB_Timeseries::sample_frequencies();
     // Feedback
-    std::cout << "[LOFAR_TBB::init]" << std::endl;
-    std::cout << "-- nof. dipoles       = " << nofDipoles << std::endl;
     std::cout << "-- sample frequencies = " << sampleFreq << std::endl;
     // adjust internal settings
     if (sampleFreq.nelements() > 0) {
@@ -225,13 +239,17 @@ namespace CR { // Namespace CR -- begin
   
   bool LOFAR_TBB::setStreams ()
   {
+#ifdef DEBUGGING_MESSAGES
+    std::cout << " [ LOFAR_TBB::setStreams () ] " << std::endl;
+#endif
     bool status (true);
     
     /*
-      Set up the iterators to navigate through the data volume and the selection
-      of data input channels.
-    */
-    
+     * Set up the iterators to navigate through the data volume and the selection
+     * of data input channels.
+     */
+    std::cout << "-- Setting up DataIterator objects ..." << std::endl;
+
     uint blocksize (blocksize_p);
     nofStreams_p = channelID_p.size();
     
@@ -249,8 +267,10 @@ namespace CR { // Namespace CR -- begin
     }
     
     /*
-      Set up the record with the header information
-    */
+     * Set up the record with the header information
+     */
+    std::cout << "-- Setting up header record ..." << std::endl;
+
     status = setHeaderRecord ();
     
     /*

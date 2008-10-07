@@ -14,9 +14,11 @@
 
 \section crtools_changes_build Build issues
 
-- No build from scratch possible on Ray; however this appears not to be an issue with the CR-Tools code itself, but rather with the dependency
-on the Boost library. Even after removing the very specific additional search path for external components to the installation in /opt/aips++
-the build still fails due to picking up the Boost installation in /usr instead $LOFARSOFT/release.
+- No build from scratch possible on Ray; however this appears not to be an issue
+with the CR-Tools code itself, but rather with the dependency on the Boost
+library. Even after removing the very specific additional search path for
+external components to the installation in /opt/aips++ the build still fails due
+to picking up the Boost installation in /usr instead $LOFARSOFT/release.
 
 - Opening a file with the CR::LOFAR_TBB class doesn't work. A line like:
   \verbatim
@@ -29,19 +31,6 @@ the build still fails due to picking up the Boost installation in /usr instead $
   I have also seen it throw a segfault, but that was with a potentially bogous
   version of the DAL. (I.e. the posibility that the includes and libraries from
   two different boost version were used.)
-
-- hfget library
-  - Import of the symbols from the generated library fails:
-  \verbatim
-  Python 2.4.4 (#2, Apr 15 2008, 23:43:20) 
-  [GCC 4.1.2 20061115 (prerelease) (Debian 4.1.1-21)] on linux2
-  Type "help", "copyright", "credits" or "license" for more information.
-  >>> from libhfget import *
-  Traceback (most recent call last):
-	File "<stdin>", line 1, in ?
-  ImportError: ./libhfget.so: invalid ELF header
-  >>> 
-  \endverbatim
 
 <hr>
 
@@ -57,6 +46,19 @@ the build still fails due to picking up the Boost installation in /usr instead $
 - CR::LOFAR_TBB
   - add an \e attachFile method to the class, such that we can have a default
   constructor without directly opening the data file
+  
+- Data (GUI module)
+  - add unit support - this could, however, be done by special objects 
+  attached to each real data vector containing the unit name (e.g. "m"), 
+  scale letter (e.g. "k" for km) and a scale factor (here 1000). In fact per
+  unit there needs to be only on single unit object that all data objects point 
+  to if needed.
+  - do more operator overloading, such that data["Station=1:Data"]=vector, 
+  replaces data["Station=1:Data"].put(vector).
+  - use operators like -> or so for setting Links (also in Python).
+  - There is also a class Vector_Selector which is intended to allow you retrieving
+  sub-parts of the data vector (e.g. only every 2nd value, or just values 
+  above a certain threshold ...). That needs a bit more work still ...
 
 <hr>
 

@@ -175,6 +175,30 @@
   -DCR_WITH_GUI:BOOL=TRUE
   \endverbatim
   to the list of CMake configuration parameters.
+  
+  <h3>Usage</h3>
+
+  In order to use the generated shared object library in Python run
+  \verbatim
+  python 
+  from libhfget import *
+  \endverbatim
+  Once you have done this you can make use of the actual functionaly provided 
+  by the module:
+  \verbatim
+  d=Data("LOFAR")
+  d.printStatus(1)
+  v=d.newObjects("Header")
+  d2=d.ObjectID(v[0])
+  v=d.newObjects("Header:X")
+  len(v)
+  d.printDecendants("")
+  DIR.TO+1
+  
+  v2=IntVec()
+  v[:]=[0,1,2,3,4,5,6,7]
+  v[3:4]=[8,9]
+  \endverbatim
 */
 
 // ==============================================================================

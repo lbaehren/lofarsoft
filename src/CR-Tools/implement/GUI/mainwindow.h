@@ -21,6 +21,8 @@ class MainWindow : public QMainWindow
   Q_OBJECT
     
     public:
+  
+  //! Default constructor
   MainWindow();
   
  protected:
@@ -57,7 +59,6 @@ class MainWindow : public QMainWindow
   
   Plotter* plotter;
   QSplitter * mainSplitter; 
-  
   
   Spreadsheet *spreadsheet;
   FindDialog *findDialog;

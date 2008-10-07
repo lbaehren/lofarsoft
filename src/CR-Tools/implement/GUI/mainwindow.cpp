@@ -5,6 +5,14 @@
 #include <GUI/sortdialog.h>
 #include <GUI/spreadsheet.h>
 
+// ==============================================================================
+//
+//  Construction
+//
+// ==============================================================================
+
+// ------------------------------------------------------------------- MainWindow
+
 MainWindow::MainWindow()
 {
 
@@ -39,6 +47,14 @@ MainWindow::MainWindow()
     setCurrentFile("");
 }
 
+// ==============================================================================
+//
+//  Methods
+//
+// ==============================================================================
+
+// ------------------------------------------------------------------- closeEvent
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     if (okToContinue()) {
@@ -49,6 +65,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 }
 
+// ---------------------------------------------------------------------- newFile
+
 void MainWindow::newFile()
 {
     if (okToContinue()) {
@@ -56,6 +74,8 @@ void MainWindow::newFile()
         setCurrentFile("");
     }
 }
+
+// ------------------------------------------------------------------------- open
 
 void MainWindow::open()
 {
@@ -68,6 +88,8 @@ void MainWindow::open()
     }
 }
 
+// ------------------------------------------------------------------------- save
+
 bool MainWindow::save()
 {
     if (curFile.isEmpty()) {
@@ -76,6 +98,8 @@ bool MainWindow::save()
         return saveFile(curFile);
     }
 }
+
+// ----------------------------------------------------------------------- saveAs
 
 bool MainWindow::saveAs()
 {
@@ -87,6 +111,8 @@ bool MainWindow::saveAs()
 
     return saveFile(fileName);
 }
+
+// ------------------------------------------------------------------------- find
 
 void MainWindow::find()
 {
@@ -106,6 +132,8 @@ void MainWindow::find()
     findDialog->activateWindow();
 }
 
+// --------------------------------------------------------------------- goToCell
+
 void MainWindow::goToCell()
 {
     GoToCellDialog dialog(this);
@@ -115,6 +143,8 @@ void MainWindow::goToCell()
                                     str[0].unicode() - 'A');
     }
 }
+
+// ------------------------------------------------------------------------- sort
 
 void MainWindow::sort()
 {

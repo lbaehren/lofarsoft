@@ -24,47 +24,41 @@ set (cr_modules
   Utilities
   )
 
-## ------------------------------------------------------------------------------
-## optional modules (added depending on requested features and installed packages)
-
-if (CR_WITH_PLOTTING)
-  list (APPEND cr_modules Display)
-endif (CR_WITH_PLOTTING)
-
-if (CR_WITH_GLISH)
-  list (APPEND cr_modules ApplicationSupport)
-endif (CR_WITH_GLISH)
-
-## ------------------------------------------------------------------------------
-## Assemble list of source files
-
 foreach (cr_module ${cr_modules})
   ## list of source files for this module
   FILE (GLOB cr_${cr_module} ${cr_module}/*.cc)
   LIST (APPEND cr_sources ${cr_${cr_module}})
 endforeach (cr_module)
 
-if (CR_WITH_GLISH AND HAVE_CASA)
-  list (APPEND cr_sources templates.cc)
-  set ( cr_to_remove
-        Analysis/ppfinversion.cc
-        Analysis/genCRmap.cc
-        Data/LOFAR_TBB.cc
-        Imaging/Skymapper.cc
-        ApplicationSupport/SkymapperTools.cc
-        Observation/StationBeam.cc
-  )
-  FILE (GLOB cr_remove_items ${cr_to_remove})
-  list (REMOVE_ITEM cr_sources ${cr_remove_items})
-endif (CR_WITH_GLISH AND HAVE_CASA)
+## ------------------------------------------------------------------------------
+## Optional modules (added depending on requested features and installed packages)
+
+if (CR_WITH_PLOTTING)
+  ## add source files to the library
+  FILE (GLOB cr_Display Display/*.cc)
+  ## addition to the lists
+  list (APPEND cr_modules Display)
+  LIST (APPEND cr_sources ${cr_Display})
+endif (CR_WITH_PLOTTING)
+
+## Support for generation of plots?
+
+if (CR_WITH_GLISH)
+  ## add source files to the library
+  FILE (GLOB cr_ApplicationSupport ApplicationSupport/*.cc)
+  if (HAVE_CASA)
+    list (APPEND cr_sources templates.cc)
+  endif (HAVE_CASA)
+  ## addition to the lists
+  list (APPEND cr_modules ApplicationSupport)
+  LIST (APPEND cr_sources ${cr_ApplicationSupport})
+endif (CR_WITH_GLISH)
+
+## Enable using routines from LOPES-Star?
 
 if (NOT CR_WITH_STARTOOLS)
-  set ( cr_to_remove
-        Analysis/CompletePipeline.cc
-        Analysis/analyseLOPESevent2.cc
-  )
-  FILE (GLOB cr_remove_items ${cr_to_remove})
-  list (REMOVE_ITEM cr_sources ${cr_remove_items})
+  list (REMOVE_ITEM cr_sources Analysis/CompletePipeline.cc)
+  list (REMOVE_ITEM cr_sources Analysis/analyseLOPESevent2.cc)
 endif (NOT CR_WITH_STARTOOLS)
 
 ## ------------------------------------------------------------------------------
@@ -79,10 +73,6 @@ endif (HAVE_GIF)
 if (HAVE_GSL)
   set (cr_includes "${cr_includes} -I${GSL_INCLUDES}")
 endif (HAVE_GSL)
-
-if (HAVE_FFTW3)
-  set (cr_includes "${cr_includes} -I${FFTW3_INCLUDES}")
-endif (HAVE_FFTW3)
 
 ## ------------------------------------------------------------------------------
 ## Assemble list of external libraries against which to link
@@ -176,7 +166,7 @@ if (APPLE)
 else (APPLE)
   set_target_properties (cr
     PROPERTIES
-    COMPILE_FLAGS "${CASACORE_COMPILE_FLAGS} -fPIC -O2 -fPIC -ftemplate-depth-100 ${cr_includes}"
+    COMPILE_FLAGS "${CASACORE_COMPILE_FLAGS} -fPIC -O2 -fPIC -ftemplate-depth-100"
     LINK_FLAGS "-bind_at_load"
     )
 endif (APPLE)
@@ -263,7 +253,8 @@ if (CR_WITH_GUI)
     GUI/VectorSelector.cc
     GUI/hffuncs.cc
     GUI/hfget.cc
-    GUI/hfqt.cc moc_finddialog.cpp
+    GUI/hfqt.cc
+    GUI/moc_finddialog.cpp
     GUI/moc_gotocelldialog.cpp
     GUI/moc_mainwindow.cpp
     GUI/moc_sortdialog.cpp
@@ -285,12 +276,15 @@ if (CR_WITH_GUI)
   endif (QT4_INCLUDES)
 
   ## compiler instructions
-  add_library (hfget ${libhfget_sources})
+  add_library (hfget MODULE
+    ${libhfget_sources}
+    )
   
   ## linker instructions
   target_link_libraries (hfget
     ${QT4_LIBARY_QTGUI}
     ${QT4_LIBARY_QTCORE}
+    ${QT4_LIBARY_QTDESIGNER}
     ${PYTHON_LIBRARIES}
     ${BOOST_LIBRARIES}
     )
@@ -302,7 +296,7 @@ if (CR_WITH_GUI)
       PREFIX "lib"
       SUFFIX .so
       COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -fpermissive -DQT_GUI_LIB -DQT_CORE_LIB -I${CR_SOURCE_DIR}/implement/GUI ${libhfget_includes}"
-      LINK_FLAGS "-fPIC -flat_namespace"
+      LINK_FLAGS "-fPIC -flat_namespace -Wl"
       )
   else (APPLE)
     set_target_properties (hfget
@@ -310,9 +304,15 @@ if (CR_WITH_GUI)
       PREFIX "lib"
       SUFFIX .so
       COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -DQT_GUI_LIB -DQT_CORE_LIB -I${CR_SOURCE_DIR}/implement/GUI ${libhfget_includes}"
-      LINK_FLAGS "-fPIC -shared"
+      LINK_FLAGS "-fPIC -shared -shared -Wl"
       )
   endif (APPLE)
+  
+  ## installation
+  install (
+    TARGETS hfget
+    LIBRARY DESTINATION lib/python
+    )
   
 endif (CR_WITH_GUI)
 
