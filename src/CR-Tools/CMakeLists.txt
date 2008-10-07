@@ -340,11 +340,13 @@ if (CR_WITH_GUI)
   if (QT4_LIBARY_QTDESIGNER)
     list (APPEND QT4_LIBRARIES ${QT4_LIBARY_QTDESIGNER})
   endif (QT4_LIBARY_QTDESIGNER)
-
-  list(REVERSE QT4_LIBRARIES)
+  
+  if (QT4_LIBRARIES)
+    list(REVERSE QT4_LIBRARIES)
+  endif (QT4_LIBRARIES)
   
   ## locate the Qt4 header files
-
+  
   find_path (QT4_INCLUDES Qt/qatomic.h QtGui/QTableWidgetItem
     PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
     PATH_SUFFIXES qt4-x11/include qt4-x11
