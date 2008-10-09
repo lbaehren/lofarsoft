@@ -114,7 +114,7 @@ Vector<String> filenamesVector()
 {
  Vector<String> files( 1 );
  
- files(0)="/data/ITS/2004.11/2004.11.02-11:30:14.04-24h/experiment.meta";
+ files(0)="/data/LOPES/2008/08/06/2008.08.06.16:02:56.047.event";
 //  files(1)="/data/ITS/2004.11/2004.11.02-15:00:17.00-24h/experiment.meta";
 //  files(2)="/data/ITS/2004.11/2004.11.02-17:30:13.27-24h/experiment.meta";
 //  files(3)="/data/ITS/2004.11/2004.11.02-18:00:13.04-24h/experiment.meta";
@@ -208,7 +208,7 @@ Vector<String> filenamesVector()
 
   ofstream logfile1;
  
-  logfile1.open("rawdata",ios::out);
+  logfile1.open("raw_data",ios::out);
  
    for (uInt sample(0); sample< Rows; sample++) {
      for (uInt antenna(0); antenna< Columns; antenna++) {
@@ -246,7 +246,7 @@ Vector<String> filenamesVector()
 
   ofstream logfile2;
 
-   logfile2.open("25RFIrejectedSpectra17",ios::out);
+   logfile2.open("rfirejectedspectra",ios::out);
 //   	
     for (uInt sample(0); sample< nOfRows; sample++) {
       for (uInt antenna(0); antenna< nOfColumns; antenna++) {
