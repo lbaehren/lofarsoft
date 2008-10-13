@@ -2,15 +2,19 @@
 ## ------------------------------------------------------------------------------
 ## Sub-directories
 
-foreach (src convenience_test equivalent fstream_test large_file_support_test
-    operations_test path_test wide_test)
+set (system_test_sources
+  error_code_test
+  error_code_user_test
+  header_only_test
+  initialization_test
+  system_error_test
+  )
+
+foreach (src ${system_test_sources})
   ## compiler instructions
   add_executable (${src} ${src}.cpp)
   ## linker instrucions
-  target_link_libraries (${src}
-    boost_filesystem
-    boost_system
-    )
+  target_link_libraries (${src} boost_system)
   ## testing
   add_test (${src} ${src})
 endforeach (src)
