@@ -29,7 +29,6 @@
 #include <string.h>
 
 // AIPS++/CASA header files
-#include <casa/aips.h>
 #include <casa/iostream.h>
 #include <casa/fstream.h>
 #include <casa/string.h>

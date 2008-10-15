@@ -18,34 +18,32 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
-// CGuipipeline includes
-#include <Analysis/analyseLOPESevent.h>
-#include <Data/tbbctlIn.h>
-#include <Data/LOFAR_TBB.h>
-#include <Analysis/tbbTools.h>
-#include <Calibration/RFIMitigationPlugin.h>
-
-// Glish includes
-#include <casa/aips.h>
-#include <casa/string.h>
-#include <casa/Arrays.h>
-#include <casa/Arrays/ArrayMath.h>
-#include <scimath/Mathematics/FFTServer.h>
-
 // general includes
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <fstream>
 
+// CGuipipeline includes
+#include <crtools.h>
+#include <Analysis/analyseLOPESevent.h>
+#include <Analysis/tbbTools.h>
+#include <Calibration/RFIMitigationPlugin.h>
+#include <Data/tbbctlIn.h>
+#include <Data/LOFAR_TBB.h>
+
+// Glish includes
+#include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/BasicSL/String.h>
+#include <scimath/Mathematics/FFTServer.h>
 
 /*!
   \file tbbTest.cc
   
   \ingroup CR_Applications
 
-  \brief A collection of routines to test/simulate the tbb behavior
+  \brief A collection of routines to test/simulate the TBB behavior
   
   \author Andreas Horneffer
   
@@ -53,9 +51,8 @@
   
   <h3>Prerequisite</h3>
   
-  analyseLOPESevent 
-  tbbctlIn
-  
+  - analyseLOPESevent 
+  - tbbctlIn
   
   <h3>Synopsis</h3>
   

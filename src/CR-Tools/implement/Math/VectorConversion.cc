@@ -195,8 +195,7 @@ namespace CR { // Namespace CR -- begin
 			  sourceCoordinate,
 			  anglesInDegrees);
   }
-#endif
-
+#else
 #ifdef HAVE_BLITZ
   bool convertVector (blitz::Array<double,1> &target,
 		      CR::CoordinateType::Types const &targetCoordinate,
@@ -214,6 +213,7 @@ namespace CR { // Namespace CR -- begin
 			  sourceCoordinate,
 			  anglesInDegrees);
   }
+#endif
 #endif
 
   // ============================================================================
@@ -308,6 +308,41 @@ namespace CR { // Namespace CR -- begin
       }
     }
   }
+
+  // ------------------------------------------------------------- AzEl2Cartesian
+  
+#ifdef HAVE_CASA
+#else
+#ifdef HAVE_BLITZ
+  blitz::Array<double,1> azel2Cartesian (const blitz::Array<double,1>& azel,
+					 bool const &anglesInDegrees);
+  {
+    blitz::Array<double,1> cartesian(3);
+    unsigned int shape = azel.numElements();
+    double radius = 1.0;
+    double az = CR::deg2rad(azel(0));
+    double el = CR::deg2rad(azel(1));
+
+    if (anglesInDegrees) {
+      az = CR::deg2rad(azel(0));
+      el = CR::deg2rad(azel(1));
+    } else {
+      az = azel(0);
+      el = azel(1);
+    }
+    
+    /* Check if a source distance is provided. */
+    if (shape == 3 && azel(2) > 0) {
+      radius = azel(2);
+    }
+    
+    // Coordinate transformation from (az,el) to cartesian (x,y,z)
+    cartesian = radius*cos(el)*cos(az), radius*cos(el)*sin(az), radius*sin(el);
+    
+    return cartesian;
+  }
+#endif
+#endif
   
   // ------------------------------------------------------- AzElHeight2Cartesian
 
@@ -376,10 +411,7 @@ namespace CR { // Namespace CR -- begin
 				 AzElHeight(2),
 				 anglesInDegrees);
   }
-#endif
-
-  // ------------------------------------------------------- AzElHeight2Cartesian
-
+#else
 #ifdef HAVE_BLITZ
   bool AzElHeight2Cartesian (blitz::Array<double,1> &Cartesian,
 			     blitz::Array<double,1> const &AzElHeight,
@@ -393,6 +425,7 @@ namespace CR { // Namespace CR -- begin
 				 AzElHeight(2),
 				 anglesInDegrees);
   }
+#endif
 #endif
 
   // ------------------------------------------------------- AzElRadius2Cartesian
@@ -457,10 +490,7 @@ namespace CR { // Namespace CR -- begin
 				 AzElRadius(2),
 				 anglesInDegrees);
   }
-#endif
-
-  // ------------------------------------------------------- AzElRadius2Cartesian
-
+#else
 #ifdef HAVE_BLITZ
   bool AzElRadius2Cartesian (blitz::Array<double,1> &Cartesian,
 			     blitz::Array<double,1> const &AzElRadius,
@@ -474,6 +504,7 @@ namespace CR { // Namespace CR -- begin
 				 AzElRadius(2),
 				 anglesInDegrees);
   }
+#endif
 #endif
 
   // ------------------------------------------------------- AzElRadius2Spherical
@@ -529,10 +560,7 @@ namespace CR { // Namespace CR -- begin
 				 AzElRadius(2),
 				 anglesInDegrees);
   }
-#endif
-
-  // ------------------------------------------------------- AzElRadius2Spherical
-
+#else
 #ifdef HAVE_BLITZ
   bool AzElRadius2Spherical (blitz::Array<double,1> &Spherical,
 			     blitz::Array<double,1> const &AzElRadius,
@@ -546,6 +574,7 @@ namespace CR { // Namespace CR -- begin
 				 AzElRadius(2),
 				 anglesInDegrees);
   }
+#endif
 #endif
 
   // ============================================================================
@@ -614,10 +643,7 @@ namespace CR { // Namespace CR -- begin
 				 cartesian(2),
 				 anglesInDegrees);
   }
-#endif
-  
-  // ------------------------------------------------------- Cartesian2AzElHeight
-
+#else
 #ifdef HAVE_BLITZ
   bool Cartesian2AzElHeight (blitz::Array<double,1> &AzElHeight,
 			     blitz::Array<double,1> const &cartesian,
@@ -631,6 +657,7 @@ namespace CR { // Namespace CR -- begin
 				 cartesian(2),
 				 anglesInDegrees);
   }
+#endif
 #endif
 
   // ------------------------------------------------------- Cartesian2AzElRadius
@@ -693,10 +720,7 @@ namespace CR { // Namespace CR -- begin
 				 cartesian(2),
 				 anglesInDegrees);
   }
-#endif
-  
-  // ------------------------------------------------------- Cartesian2AzElRadius
-
+#else
 #ifdef HAVE_BLITZ
   bool Cartesian2AzElRadius (blitz::Array<double,1> &AzElRadius,
 			     blitz::Array<double,1> const &cartesian,
@@ -710,6 +734,7 @@ namespace CR { // Namespace CR -- begin
 				 cartesian(2),
 				 anglesInDegrees);
   }
+#endif
 #endif
 
   // ------------------------------------------------------ Cartesian2Cylindrical
@@ -770,8 +795,7 @@ namespace CR { // Namespace CR -- begin
 				  cartesian(2),
 				  anglesInDegrees);
   }
-#endif
-  
+#else  
 #ifdef HAVE_BLITZ
   bool Cartesian2Cylindrical (blitz::Array<double,1> &cylindrical,
 			      blitz::Array<double,1> const &cartesian,
@@ -785,6 +809,7 @@ namespace CR { // Namespace CR -- begin
 				  cartesian(2),
 				  anglesInDegrees);
   }
+#endif
 #endif
 
   // -------------------------------------------------------- Cartesian2Spherical
@@ -845,8 +870,7 @@ namespace CR { // Namespace CR -- begin
 				cartesian(2),
 				anglesInDegrees);
   }
-#endif
-  
+#else
 #ifdef HAVE_BLITZ
   bool Cartesian2Spherical (blitz::Array<double,1> &spherical,
 			    blitz::Array<double,1> const &cartesian,
@@ -860,6 +884,7 @@ namespace CR { // Namespace CR -- begin
 				cartesian(2),
 				anglesInDegrees);
   }
+#endif
 #endif
 
   // ============================================================================
@@ -929,10 +954,7 @@ namespace CR { // Namespace CR -- begin
 				   cylindrical(2),
 				   anglesInDegrees);
   }
-#endif
-
-  // ----------------------------------------------------- Cylindrical2AzElHeight
-
+#else
 #ifdef HAVE_BLITZ
   bool Cylindrical2AzElHeight (blitz::Array<double,1> &azElHeight,
 			       blitz::Array<double,1> const &cylindrical,
@@ -946,6 +968,7 @@ namespace CR { // Namespace CR -- begin
 				   cylindrical(2),
 				   anglesInDegrees);
   }
+#endif
 #endif
 
   // ----------------------------------------------------- Cylindrical2AzElRadius
@@ -1009,10 +1032,7 @@ namespace CR { // Namespace CR -- begin
 				   cylindrical(2),
 				   anglesInDegrees);
   }
-#endif
-
-  // ----------------------------------------------------- Cylindrical2AzElRadius
-
+#else
 #ifdef HAVE_BLITZ
   bool Cylindrical2AzElRadius (blitz::Array<double,1> &azElRadius,
 			       blitz::Array<double,1> const &cylindrical,
@@ -1026,6 +1046,7 @@ namespace CR { // Namespace CR -- begin
 				   cylindrical(2),
 				   anglesInDegrees);
   }
+#endif
 #endif
 
   // ------------------------------------------------------ Cylindrical2Cartesian
@@ -1088,10 +1109,7 @@ namespace CR { // Namespace CR -- begin
 				  cylindrical(2),
 				  anglesInDegrees);
   }
-#endif
-  
-  // ------------------------------------------------------ Cylindrical2Cartesian
-
+#else
 #ifdef HAVE_BLITZ
   bool Cylindrical2Cartesian (blitz::Array<double,1> &cartesian,
 			      blitz::Array<double,1> const &cylindrical,
@@ -1105,6 +1123,7 @@ namespace CR { // Namespace CR -- begin
 				  cylindrical(2),
 				  anglesInDegrees);
   }
+#endif
 #endif
 
   // ------------------------------------------------------ Cylindrical2Spherical
@@ -1451,30 +1470,9 @@ namespace CR { // Namespace CR -- begin
   //
   // ===========================================================================
 
+#ifndef HAVE_CASA
 #ifdef HAVE_BLITZ
   
-  // ------------------------------------------------------------- azel2Cartesian
-
-  template <class T>
-  blitz::Array<T,1> azel2Cartesian (const blitz::Array<T,1>& azel)
-  {
-    blitz::Array<T,1> cartesian(3);
-    unsigned int shape = azel.numElements();
-    T radius = 1.0;
-    T az = CR::deg2rad(azel(0));
-    T el = CR::deg2rad(azel(1));
-    
-    /* Check if a source distance is provided. */
-    if (shape == 3 && azel(2) > 0) {
-      radius = azel(2);
-    }
-    
-    // Coordinate transformation from (az,el) to cartesian (x,y,z)
-    cartesian = radius*cos(el)*cos(az), radius*cos(el)*sin(az), radius*sin(el);
-    
-    return cartesian;
-  }
-
   // ------------------------------------------------------------ polar2Cartesian
   
   template <class T>
@@ -1502,6 +1500,7 @@ namespace CR { // Namespace CR -- begin
   template blitz::Array<float,1> polar2Cartesian (blitz::Array<float,1> const &polar);
   template blitz::Array<double,1> polar2Cartesian (blitz::Array<double,1> const &polar);
 
+#endif
 #endif
   
 } // Namespace CR -- end

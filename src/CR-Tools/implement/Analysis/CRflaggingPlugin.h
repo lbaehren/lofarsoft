@@ -31,7 +31,6 @@
 #include <string>
 
 // AIPS++/CASA header files
-#include <casa/aips.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Exceptions/Error.h>
 

@@ -40,7 +40,6 @@
 #define CLIPPINGFRACTION_H
 
 // AIPS++ wrapper classes
-#include <casa/aips.h>
 #include <casa/iostream.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/Array.h>

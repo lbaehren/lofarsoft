@@ -45,6 +45,7 @@ using std::endl;
 //
 // ==============================================================================
 
+#ifndef HAVE_CASA
 #ifdef HAVE_BLITZ
 
 /*!
@@ -202,6 +203,7 @@ int test_Norms ()
 }
 
 #endif
+#endif
   
 // ==============================================================================
 //
@@ -262,20 +264,13 @@ int main ()
 {
   int nofFailedTests (0);
 
-
+#ifdef HAVE_CASA
+    nofFailedTests += test_casa_functions();
+#else
 #ifdef HAVE_BLITZ
-  
   nofFailedTests += test_Norms ();
   nofFailedTests += test_blitz_functions ();
-  
 #endif
-
-#ifdef HAVE_CASA
-
-  {
-    nofFailedTests += test_casa_functions();
-  }
-
 #endif
 
   return nofFailedTests;  

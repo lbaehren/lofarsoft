@@ -37,7 +37,6 @@
 #endif
 
 #ifdef HAVE_CASA
-#include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>

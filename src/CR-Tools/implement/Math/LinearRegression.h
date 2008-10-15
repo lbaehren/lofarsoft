@@ -26,7 +26,6 @@
 #ifndef _LINEARREGRESSION_H_
 #define _LINEARREGRESSION_H_
 
-#include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Arrays/ArrayMath.h>

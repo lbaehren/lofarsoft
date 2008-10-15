@@ -182,6 +182,14 @@
 /* Define to 1 if we have the WCS library */
 #cmakedefine HAVE_WCSLIB 1
 
+/* The CFITSIO function fits_read_wcstab() accepts an array of structs defined
+ * by wcs.h within WCSLIB.  The problem then was to define this struct within
+ * fitsio.h without including wcs.h, especially noting that wcs.h will often (but
+ * not always) be included together with fitsio.h in an applications program that
+ * uses fits_read_wcstab().
+ */
+#cmakedefine WCSLIB_GETWCSTAB 1
+
 /* Define to 1 if we use PGPlot or PLplot */
 #cmakedefine NEED_FORTRAN_UNDERSCORES 1
 
@@ -193,19 +201,6 @@
  *  Specific directives
  * ------------------------------------------------------------------------------
  */
-
-/*
- *  Define to 1 if we want <blitz/compiler.h> to redefine the "restrict" keyword.
- *  As it turns out we get into a conflict when including both the Blitz++ and 
- *  casacore environment header files; so if our project is going to include
- *  both <casa/aipsdef.h> and <blitz/compiler.h>, we need switch off the
- *  redefinition in the latter header file.
- */
-#ifdef HAVE_BLITZ
-#ifndef HAVE_CASA
-#define BZ_HAVE_NCEG_RESTRICT 1
-#endif
-#endif
 
 /*
  * ------------------------------------------------------------------------------

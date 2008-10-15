@@ -170,11 +170,13 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 ## tbbctlResort
 
 if (HAVE_CASA OR HAVE_CASACORE)
-    add_executable (tbbctlResort tbbctlResort.cc)
-    ## linker instructions
-    target_link_libraries (tbbctlResort cr)
-    ## installation instructions
+  add_executable (tbbctlResort tbbctlResort.cc)
+  ## linker instructions
+  target_link_libraries (tbbctlResort cr)
+  ## installation instructions
   list (APPEND cr_apps tbbctlResort)
+else (HAVE_CASA OR HAVE_CASACORE)
+  message (STATUS "[CR-Tools] Unable to build executable tbbctlResort.")
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 
@@ -190,7 +192,6 @@ if (HAVE_CASA OR HAVE_CASACORE)
       cr
       ${DAL_LIBRARIES}
       ${HDF5_LIBRARIES}
-      ${CFITSIO_LIBRARIES}
       )
     ## installation instructions
     list (APPEND cr_apps tbbTest)

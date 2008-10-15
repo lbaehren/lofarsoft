@@ -35,7 +35,8 @@
 #include <casa/BasicSL/String.h>
 #include <casa/Exceptions/Error.h>
 
-#include <casa/namespace.h>
+using casa::String;
+using casa::Vector;
 
 //CR-tools header files
 #include <IO/DataReader.h>

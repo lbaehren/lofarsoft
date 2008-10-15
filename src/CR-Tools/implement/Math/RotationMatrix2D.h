@@ -88,8 +88,17 @@ namespace CR { // Namespace CR -- begin
     RotationMatrix2D (vector<double> const &angles,
 		      bool const &anglesInDegree=true);
     
+#ifdef HAVE_CASA
+    /*!
+      \brief Argumented constructor (CASA array classes)
+      
+      \param angles         -- 
+      \param anglesInDegree -- 
+    */
+    RotationMatrix2D (casa::Vector<double> const &angles,
+		      bool const &anglesInDegree=true);
+#else
 #ifdef HAVE_BLITZ
-    
     /*!
       \brief Argumented constructor (using Blitz++ array classes)
       
@@ -100,18 +109,6 @@ namespace CR { // Namespace CR -- begin
 		      bool const &anglesInDegree=true);
     
 #endif
-    
-#ifdef HAVE_CASA
-    
-    /*!
-      \brief Argumented constructor (CASA array classes)
-      
-      \param angles         -- 
-      \param anglesInDegree -- 
-    */
-    RotationMatrix2D (casa::Vector<double> const &angles,
-		      bool const &anglesInDegree=true);
-    
 #endif
     
     /*!

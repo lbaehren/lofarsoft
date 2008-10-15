@@ -24,7 +24,6 @@
 #ifndef _BASICFILTER_H_
 #define _BASICFILTER_H_
 
-#include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/Vector.h>

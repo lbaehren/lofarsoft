@@ -26,7 +26,6 @@
 #include <crtools.h>
 
 // AIPS++ header files
-#include <casa/aips.h>
 #include <casa/iostream.h>
 #include <casa/fstream.h>
 #include <casa/string.h>

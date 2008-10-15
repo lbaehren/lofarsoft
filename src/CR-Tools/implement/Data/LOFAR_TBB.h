@@ -29,6 +29,14 @@
 #include <string>
 #include <vector>
 
+// CR-Tools header files
+#include <crtools.h>
+#include <IO/DataReader.h>
+
+// DAL header files
+#include <dal/Enumerations.h>
+#include <dal/TBB_Timeseries.h>
+
 #include <casa/Arrays/ArrayIO.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/Matrix.h>
@@ -37,11 +45,6 @@
 #include <casa/Containers/Record.h>
 #include <casa/HDF5/HDF5File.h>
 #include <casa/HDF5/HDF5Record.h>
-
-#include <dal/Enumerations.h>
-#include <dal/TBB_Timeseries.h>
-
-#include <IO/DataReader.h>
 
 using DAL::TBB_Timeseries;
 

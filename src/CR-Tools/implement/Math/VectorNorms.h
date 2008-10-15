@@ -28,12 +28,7 @@
 
 #include <vector>
 
-#ifdef HAVE_BLITZ
-#include <blitz/array.h>
-#endif
-
 #ifdef HAVE_CASA
-#include <casa/aips.h>
 #include <casa/string.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/Array.h>
@@ -49,6 +44,10 @@ using casa::DComplex;
 using casa::IPosition;
 using casa::String;
 using casa::uInt;
+#else
+#ifdef HAVE_BLITZ
+#include <blitz/array.h>
+#endif
 #endif
 
 namespace CR { // namespace CR -- begin
@@ -187,24 +186,17 @@ namespace CR { // namespace CR -- begin
     \return norm -- L1-norm of the vector
   */
   template <class T>
-    T L1Norm (std::vector<T> const &vec);
-
-#ifdef HAVE_BLITZ
-  /*!
-    \brief Compute the L1-Norm of a vector
-
-    The <a href="http://mathworld.wolfram.com/L1-Norm.html">L1-Norm</a> is a
-    vector norm defined for a vector \f$ \vec x = [x_1,x_2,...,x_N]^T \f$ with
-    complex entries by 
-    \f[ |\vec x|_{1} = \sum_{i=1}^{N} |x_i| \f]
-
-    \param vec -- The input vector
-
-    \return norm -- The L1-Norm for the vector
-  */
-  template <class T>
-    T L1Norm (blitz::Array<T,1> const &vec);
-#endif
+    T L1Norm (std::vector<T> const &vec)
+    {
+      unsigned int nelem(vec.size());
+      T sum (0.0);
+      
+      for (unsigned int n(0); n<nelem; n++) {
+	sum += fabs(vec[n]);
+      }
+      
+      return sum;
+    }
   
 #ifdef HAVE_CASA
   /*!
@@ -220,7 +212,30 @@ namespace CR { // namespace CR -- begin
     \return norm -- The L1-Norm for the vector
   */
   template <class T>
-    T L1Norm (casa::Vector<T> const &vec);
+    T L1Norm (casa::Vector<T> const &vec)
+    {
+      return sum(fabs(vec));
+    }
+#else
+#ifdef HAVE_BLITZ
+  /*!
+    \brief Compute the L1-Norm of a vector
+
+    The <a href="http://mathworld.wolfram.com/L1-Norm.html">L1-Norm</a> is a
+    vector norm defined for a vector \f$ \vec x = [x_1,x_2,...,x_N]^T \f$ with
+    complex entries by 
+    \f[ |\vec x|_{1} = \sum_{i=1}^{N} |x_i| \f]
+
+    \param vec -- The input vector
+
+    \return norm -- The L1-Norm for the vector
+  */
+  template <class T>
+    T L1Norm (blitz::Array<T,1> const &vec)
+    {
+      return sum(fabs(vec));
+    }
+#endif
 #endif
   
   // ----------------------------------------------------------------------------
@@ -248,28 +263,6 @@ namespace CR { // namespace CR -- begin
   template <class T>
     T L2Norm (std::vector<T> const &vec);
 
-#ifdef HAVE_BLITZ
-  /*!
-    \brief Compute the L2-Norm of a vector
-
-    The <a href="http://mathworld.wolfram.com/L2-Norm.html">L2-Norm</a> is a
-    vector norm defined for a vector \f$ \vec x = [x_1,x_2,...,x_N]^T \f$ with
-    complex entries by
-    \f[ |\vec x| = \sqrt{\sum_{i=1}^{N} |x_i|^2} \f]
-    where \f$|x_{i}|\f$ on the right denotes the complex modulus. The
-    \f$\ell^2\f$-norm is the vector norm that is commonly encountered in vector
-    algebra and vector operations (such as the
-    <a href="http://mathworld.wolfram.com/DotProduct.html">dot product</a>),
-    where it is commonly denoted \f$|\vec x|\f$.
-
-    \param vec -- The input vector
-
-    \return norm -- The \f$\ell^2\f$-norm for the vector
-  */
-  template <class T>
-    T L2Norm (blitz::Array<T,1> const &vec);
-#endif
-
 #ifdef HAVE_CASA
 
   /*!
@@ -290,9 +283,39 @@ namespace CR { // namespace CR -- begin
     \return norm -- The \f$\ell^2\f$-norm for the vector
   */
   template <class T>
-    T L2Norm (casa::Vector<T> const &vec);
-#endif
+    T L2Norm (casa::Vector<T> const &vec)
+    {
+      T norm (0.0);
+      norm = sqrt(sum(pow(vec,2)));
+      return norm;
+    }
+#else
+#ifdef HAVE_BLITZ
+  /*!
+    \brief Compute the L2-Norm of a vector
 
+    The <a href="http://mathworld.wolfram.com/L2-Norm.html">L2-Norm</a> is a
+    vector norm defined for a vector \f$ \vec x = [x_1,x_2,...,x_N]^T \f$ with
+    complex entries by
+    \f[ |\vec x| = \sqrt{\sum_{i=1}^{N} |x_i|^2} \f]
+    where \f$|x_{i}|\f$ on the right denotes the complex modulus. The
+    \f$\ell^2\f$-norm is the vector norm that is commonly encountered in vector
+    algebra and vector operations (such as the
+    <a href="http://mathworld.wolfram.com/DotProduct.html">dot product</a>),
+    where it is commonly denoted \f$|\vec x|\f$.
+
+    \param vec -- The input vector
+
+    \return norm -- The \f$\ell^2\f$-norm for the vector
+  */
+  template <class T>
+    T L2Norm (blitz::Array<T,1> const &vec)
+    {
+      return sqrt(sum(pow2(vec)));
+    }
+#endif
+#endif
+  
   // ============================================================================
   //
   //  Sign (of vector elements)
@@ -307,7 +330,12 @@ namespace CR { // namespace CR -- begin
     \return sign - The sign of <i>x</i>.
   */
   template <class T>
-    T sign (T const &x);
+    T sign (T const &x)
+    {
+      if (x<0) return static_cast<T>(-1);
+      else if (x>0) return static_cast<T>(+1);
+      else return static_cast<T>(0);
+    }
   
   /*!
     \brief Determine the sign of a real-valued number 
@@ -328,8 +356,18 @@ namespace CR { // namespace CR -- begin
     \return sign - The signs of the \f$ x_i \f$.
   */
   template <class T>
-    casa::Vector<T> sign (casa::Vector<T> const &x);
-
+    casa::Vector<T> sign (casa::Vector<T> const &x)
+    {
+      int nelem (x.nelements());
+      casa::Vector<T> s(nelem);
+      
+      for (int n=0; n<nelem; ++n) {
+	s(n) = sign (x(n));
+      }
+      
+      return s;
+    }
+  
   /*!
     \brief Invert the order of elements in a vector.
   */

@@ -309,10 +309,6 @@ endif (CR_WITH_STARTOOLS)
 ## -------------------------------------------------------------------
 ## Option: Create graphical user interface? ON/OFF
 
-# LFLAGS = -L/usr/lib
-#          -lboost_python-gcc41-d-1_35.so.1.35.0 -lboost_thread-gcc41-mt-1_35.so.1.35.0
-#          -lpthread -lQtGui -lQtCore
-
 if (CR_WITH_GUI)
 
   ## locate the Qt4 libraries
@@ -487,16 +483,15 @@ include_directories (BEFORE
 
 ## External header files
 
-if (HAVE_BLITZ)
-  include_directories (${BLITZ_INCLUDES})
-endif (HAVE_BLITZ)
-
 if (HAVE_BOOST)
   include_directories (${BOOST_INCLUDES})
 endif (HAVE_BOOST)
 
 if (HAVE_CFITSIO)
   include_directories (${CFITSIO_INCLUDES})
+  if (HAVE_WCSLIB)
+    set (WCSLIB_GETWCSTAB 1)
+  endif (HAVE_WCSLIB)
 endif (HAVE_CFITSIO)
 
 if (HAVE_DAL)
@@ -547,6 +542,10 @@ endif (ROOT_INCLUDES)
 if (HAVE_CASA OR HAVE_CASACORE)
   include_directories (${CASA_INCLUDES})
 endif (HAVE_CASA OR HAVE_CASACORE)
+
+if (HAVE_BLITZ)
+  include_directories (${BLITZ_INCLUDES})
+endif (HAVE_BLITZ)
 
 ## =============================================================================
 ##

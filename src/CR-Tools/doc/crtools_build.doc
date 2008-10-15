@@ -5,7 +5,10 @@
 \page crtools_build CR-Tools :: Configuration & Build
 
 - \ref crtools_obtain_code
+- \ref crtools_configure_build
 - \ref crtools_build_parameters
+- \ref crtools_build_components
+- \ref crtools_build_reporting
 
 <hr>
 
@@ -15,6 +18,32 @@ All the source code is available through the Subversion repository of the User S
 \verbatim
 svn co http://usg.lofar.org/svn/code/trunk usg
 \endverbatim
+
+<hr>
+
+\section crtools_configure_build Simple configure and build
+
+There is a build script available, which will go through the list of required external components and finally
+builds the CR-Tools themselves. The script can be run in two different ways:
+
+  - From the root directory of the USG code tree:
+  \code
+  cd $LOFARSOFT
+  ./devel_common/scripts/install_crtools
+  \endcode
+  - Direct call to the script in the build directory:
+  \code
+  cd $LOFARSOFT/build
+  ./build.sh cr
+  \endcode
+
+<hr>
+
+\section crtools_build_components Build individual components
+
+Once you have run \e CMake on the source code directory, you can start building the various libraries, test
+programs and application programs; all of these individual products are presented to the user as "build
+targets" which can either be generated all together or individually.
 
 <hr>
 
@@ -32,7 +61,7 @@ option (CR_VERBOSE_CONFIGURE    "Verbose output during configuration?"       NO 
 option (CR_WITH_GLISH           "Support for Glish applications?"            NO  )
 option (CR_WITH_PYTHON          "Support for Python applications?"           NO  )
 option (CR_WITH_PLOTTING        "Support for generation of plots?"           YES )
-option (CR_WITH_GUI             "Build the graphical interface?"             NO  )
+option (CR_WITH_GUI             "Build the graphical interface?"             YES )
 option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES )
 \endverbatim
 
@@ -123,6 +152,24 @@ option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES
   cmake ../../src/CR-Tools/ -DCR_WITH_GLISH:BOOL=1 -DCR_BUILD_EXTERNAL_TESTS:BOOL=0 
   \endverbatim
 </ul>
+
+<hr>
+
+\section crtools_build_reporting Reporting back configuration & build errors
+
+If for some reason the build fails you should run the build script with the additional option to generate a
+build/test report, which then is sent to the USG Dashboard server; this will not
+only provide the feedback that something went wrong with building the software
+on your machine, but also help to narrow down where to look for the cause of the
+problem.
+\verbatim
+cd $LOFARSOFT/build
+./build.sh cr --report-build
+\endverbatim
+
+\b Note: While the server already is up and running, due to the settings on the
+ASTRON firewall it currently isn't yet possible to submit logs from outside the
+ASTRON network -- we are working on getting this resolved.
 
 <hr>
 

@@ -24,10 +24,7 @@
 #if !defined(_MATHALGEBRA_H)
 #define _MATHALGEBRA_H
 
-/* Id */
-
 // AIPS++ wrapper classes
-#include <casa/aips.h>
 #include <casa/string.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/Array.h>

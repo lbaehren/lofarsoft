@@ -28,7 +28,6 @@
 
 #include <iostream>
 
-#include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/ArrayMath.h>
 

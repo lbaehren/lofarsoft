@@ -32,7 +32,6 @@
 #include <sys/time.h>
 
 // AIPS++ header files
-#include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/ArrayIO.h>

@@ -28,7 +28,6 @@
 #include <iomanip>
 
 // AIPS++ wrapper classes
-#include <casa/aips.h>
 #include <casa/iostream.h>
 #include <casa/string.h>
 #include <casa/Exceptions/Error.h>

@@ -24,7 +24,6 @@
 #ifndef _MEDIANFILTER_H_
 #define _MEDIANFILTER_H_
 
-#include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/BasicSL/Complex.h>

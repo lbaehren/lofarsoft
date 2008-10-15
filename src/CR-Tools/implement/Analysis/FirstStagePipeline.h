@@ -23,15 +23,10 @@
 #ifndef FIRSTSTAGEPIPELINE_H
 #define FIRSTSTAGEPIPELINE_H
 
-#include <crtools.h>
-
 // Standard library header files
 #include <string>
 
-// AIPS++/CASA header files
-#include <casa/aips.h>
-#include <casa/Exceptions/Error.h>
-
+#include <crtools.h>
 #include <IO/DataReader.h>
 #include <Calibration/CalTableReader.h> 
 #include <Calibration/CalTableInterpolater.h>

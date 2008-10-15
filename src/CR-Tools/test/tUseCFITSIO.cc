@@ -29,6 +29,10 @@ extern "C" {
 #include <fitsio.h>
 }
 
+#ifdef HAVE_WCSLIB
+#include <wcslib/wcs.h>
+#endif
+
 /*!
   \file tUseCFITSIO.cc
 

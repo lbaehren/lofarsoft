@@ -24,18 +24,21 @@
 #ifndef ANALYSELOPESEVENT_H
 #define ANALYSELOPESEVENT_H
 
-#include <crtools.h>
 
 // Standard library header files
 #include <string>
 #include <iostream>
 
-#include <casa/aips.h>
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/ArrayIO.h>
-#include <casa/Arrays/MaskedArray.h>
-#include <casa/Arrays/ArrayError.h>
-#include <casa/Arrays/Cube.h>
+// Header files for CR-Tools
+#include <crtools.h>
+#include <Analysis/CRinvFFT.h>
+#include <Analysis/CRflaggingPlugin.h>
+#include <Analysis/fitCR2gauss.h>
+#include <Data/LopesEventIn.h>
+#include <Data/UpSampledDR.h>
+#include <Display/SimplePlot.h>
+
+// CASA/casacore header files
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/MatrixMath.h>
@@ -50,15 +53,6 @@
 #include <casa/Exceptions/Error.h>
 #include <scimath/Mathematics/FFTServer.h>
 #include <scimath/Mathematics/InterpolateArray1D.h>
-
-#include <Analysis/CRinvFFT.h>
-#include <Analysis/CRflaggingPlugin.h>
-#include <Analysis/fitCR2gauss.h>
-#include <Data/LopesEventIn.h>
-#include <Data/UpSampledDR.h>
-#include <Display/SimplePlot.h>
-
-#include <casa/namespace.h>
 
 using casa::Bool;
 using casa::Double;

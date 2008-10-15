@@ -25,7 +25,6 @@
 #define MATHFFT_H
 
 // AIPS++ wrapper classes
-#include <casa/aips.h>
 #include <casa/string.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/Array.h>

@@ -54,6 +54,34 @@ namespace CR { // Namespace CR -- begin
 	  angles,
 	  anglesInDegrees);
   }
+
+  // ------------------------------------------------------------- RotationMatrix
+  
+#ifdef HAVE_CASA
+  RotationMatrix::RotationMatrix (unsigned int const &rank,
+				  casa::Vector<double> const &angles,
+				  bool const &anglesInDegree)
+  {
+    bool status (true);
+    
+    if (setRank(rank)) {
+      status = setAngles (angles);
+    }
+  }
+#else
+#ifdef HAVE_BLITZ
+  RotationMatrix::RotationMatrix (unsigned int const &rank,
+				  blitz::Array<double,1> const &angles,
+				  bool const &anglesInDegree)
+  {
+    bool status (true);
+    
+    if (setRank(rank)) {
+      status = setAngles (angles);
+    }
+  }
+#endif
+#endif
   
   // ------------------------------------------------------------- RotationMatrix
   
@@ -214,6 +242,38 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
   
+  // ------------------------------------------------------------------ setAngles
+
+#ifdef HAVE_CASA
+  bool RotationMatrix::setAngles (casa::Vector<double> const &angles,
+				  bool const &anglesInDegree)
+  {
+    unsigned int nelem (angles.nelements());
+    vector<double> rotationAngles (nelem);
+
+    for (unsigned int n(0); n<nelem; n++) {
+      rotationAngles[n] = angles(n);
+    }
+
+    return setAngles (rotationAngles,anglesInDegree);
+  }
+#else
+#ifdef HAVE_BLITZ
+  bool RotationMatrix::setAngles (blitz::Array<double,1> const &angles,
+				  bool const &anglesInDegree)
+  {
+    unsigned int nelem (angles.numElements());
+    vector<double> rotationAngles (nelem);
+    
+    for (unsigned int n(0); n<nelem; n++) {
+      rotationAngles[n] = angles(n);
+    }
+    
+    return setAngles (rotationAngles,anglesInDegree);
+  }
+#endif
+#endif
+
   // ---------------------------------------------------------- setRotationMatrix
 
   bool RotationMatrix::setRotationMatrix ()
@@ -293,44 +353,11 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
   
-  // ============================================================================
-  //
-  //  Methods using Blitz++ library
-  //
-  // ============================================================================
-
-#ifdef HAVE_BLITZ
-  
-  // ------------------------------------------------------------- RotationMatrix
-  
-  RotationMatrix::RotationMatrix (unsigned int const &rank,
-				  blitz::Array<double,1> const &angles,
-				  bool const &anglesInDegree)
-  {
-    bool status (true);
-    
-    if (setRank(rank)) {
-      status = setAngles (angles);
-    }
-  }
-  
-  // ------------------------------------------------------------------ setAngles
-
-  bool RotationMatrix::setAngles (blitz::Array<double,1> const &angles,
-				  bool const &anglesInDegree)
-  {
-    unsigned int nelem (angles.numElements());
-    vector<double> rotationAngles (nelem);
-    
-    for (unsigned int n(0); n<nelem; n++) {
-      rotationAngles[n] = angles(n);
-    }
-    
-    return setAngles (rotationAngles,anglesInDegree);
-  }
-  
   // --------------------------------------------------------------------- rotate
   
+#ifdef HAVE_CASA
+#else
+#ifdef HAVE_BLITZ  
   bool RotationMatrix::rotate (blitz::Array<double,1> &out,
 			       blitz::Array<double,1> const &in)
   {
@@ -364,8 +391,6 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
   
-  // --------------------------------------------------------------------- rotate
-  
   bool RotationMatrix::rotate (blitz::Array<double,2> &out,
 			       blitz::Array<double,2> const &in)
   {
@@ -375,43 +400,6 @@ namespace CR { // Namespace CR -- begin
   }
     
 #endif
-
-  // ============================================================================
-  //
-  //  Methods using CASA library
-  //
-  // ============================================================================
-
-#ifdef HAVE_CASA
-
-  // ------------------------------------------------------------- RotationMatrix
-  
-  RotationMatrix::RotationMatrix (unsigned int const &rank,
-				  casa::Vector<double> const &angles,
-				  bool const &anglesInDegree)
-  {
-    bool status (true);
-    
-    if (setRank(rank)) {
-      status = setAngles (angles);
-    }
-  }
-
-  // ------------------------------------------------------------------ setAngles
-  
-  bool RotationMatrix::setAngles (casa::Vector<double> const &angles,
-				  bool const &anglesInDegree)
-  {
-    unsigned int nelem (angles.nelements());
-    vector<double> rotationAngles (nelem);
-
-    for (unsigned int n(0); n<nelem; n++) {
-      rotationAngles[n] = angles(n);
-    }
-
-    return setAngles (rotationAngles,anglesInDegree);
-  }
-
 #endif
 
 } // Namespace CR -- end

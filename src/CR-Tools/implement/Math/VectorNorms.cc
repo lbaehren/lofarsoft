@@ -80,39 +80,6 @@ namespace CR { // Namespace CR -- begin
     
     return sum;
   }
-
-  template <class T>
-  T L1Norm (std::vector<T> const &vec)
-  {
-    unsigned int nelem(vec.size());
-    T sum (0.0);
-    
-    for (unsigned int n(0); n<nelem; n++) {
-      sum += fabs(vec[n]);
-    }
-    
-    return sum;
-  }
-  
-#ifdef HAVE_BLITZ
-
-  template <class T>
-  T L1Norm (blitz::Array<T,1> const &vec)
-  {
-    return sum(fabs(vec));
-  }
-
-#endif  
-
-#ifdef HAVE_CASA
-
-  template <class T>
-  T L1Norm (casa::Vector<T> const &vec)
-  {
-    return sqrt(sum(fabs(vec)));
-  }
-
-#endif
   
   // --------------------------------------------------------------------- L2Norm
   
@@ -129,61 +96,8 @@ namespace CR { // Namespace CR -- begin
     return sqrt (sum2);
   }
   
-#ifdef HAVE_BLITZ
-
-  template <class T>
-  T L2Norm (blitz::Array<T,1> const &vec)
-  {
-    return sqrt(sum(pow2(vec)));
-  }
-
-#endif
-
-#ifdef HAVE_CASA
-
-  template <class T>
-  T L2Norm (casa::Vector<T> const &vec)
-  {
-    T norm (0.0);
-    norm = sqrt(sum(pow(vec,2)));
-    return norm;
-  }
-  
-#endif
-
-  // ============================================================================
-  //
-  //  Sign (of vector elements)
-  //
-  // ============================================================================
-  
-  // ----------------------------------------------------------------------- sign
-
-  template <class T>
-  T sign (T const &x)
-  {
-    if (x<0) return static_cast<T>(-1);
-    else if (x>0) return static_cast<T>(+1);
-    else return static_cast<T>(0);
-  }
-  
 #ifdef HAVE_CASA
   
-  // ----------------------------------------------------------------------- sign
-  
-  template <class T>
-  casa::Vector<T> sign (casa::Vector<T> const &x)
-  {
-    int nelem (x.nelements());
-    casa::Vector<T> s(nelem);
-
-    for (int n=0; n<nelem; ++n) {
-      s(n) = sign (x(n));
-    }
-
-    return s;
-  }
-
   // ---------------------------------------------------------------- invertOrder
 
   template <class T>
@@ -227,25 +141,7 @@ namespace CR { // Namespace CR -- begin
   template float L2Norm (float const *vec, unsigned int const &nelem);
   template double L2Norm (double const *vec, unsigned int const &nelem);
 
-  template float L1Norm (std::vector<float> const &vec);
-  template double L1Norm (std::vector<double> const &vec);
-
-  template int sign (int const &x);
-  template float sign (float const &x);
-  template double sign (double const &x);
-
-#ifdef HAVE_BLITZ
-
-  template float L1Norm (blitz::Array<float,1> const &vec);
-  template double L1Norm (blitz::Array<double,1> const &vec);
-
-  template float L2Norm (blitz::Array<float,1> const &vec);
-  template double L2Norm (blitz::Array<double,1> const &vec);
-
-#endif
-
 #ifdef HAVE_CASA
-
   template casa::Vector<String> invertOrder (casa::Vector<String> const &vec);
   template casa::Vector<uInt> invertOrder (casa::Vector<uInt> const &vec);
   template casa::Vector<int> invertOrder (casa::Vector<int> const &vec);
@@ -253,17 +149,6 @@ namespace CR { // Namespace CR -- begin
   template casa::Vector<double> invertOrder (casa::Vector<double> const &vec);
   template casa::Vector<Complex> invertOrder (casa::Vector<Complex> const &vec);
   template casa::Vector<DComplex> invertOrder (casa::Vector<DComplex> const &vec);
-
-//   template float L1Norm (casa::Vector<float> const &vec);
-  template double L1Norm (casa::Vector<double> const &vec);
-
-  template float L2Norm (casa::Vector<float> const &vec);
-  template double L2Norm (casa::Vector<double> const &vec);
-
-  template casa::Vector<int> sign (casa::Vector<int> const &x);
-  template casa::Vector<float> sign (casa::Vector<float> const &x);
-  template casa::Vector<double> sign (casa::Vector<double> const &x);
-  
 #endif
 
 } // Namespace CR -- end

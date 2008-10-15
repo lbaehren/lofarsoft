@@ -25,6 +25,7 @@
 #define GEOMETRICALWEIGHT_H
 
 // Custom header files
+#include <crtools.h>
 #include <Imaging/GeometricalDelay.h>
 #include <Imaging/GeometricalPhase.h>
 

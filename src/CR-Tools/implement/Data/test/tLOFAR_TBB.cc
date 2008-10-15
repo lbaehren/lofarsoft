@@ -26,7 +26,6 @@
 #include <Data/LOFAR_TBB.h>
 #include <Utilities/StringTools.h>
 
-#include <casa/aips.h>
 #include <casa/Arrays/Matrix.h>
 
 /* Namespace usage */

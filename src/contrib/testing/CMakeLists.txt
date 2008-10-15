@@ -70,3 +70,51 @@ if (HAVE_BOOST)
   add_test (boostProgramOptions_test6 boostProgramOptions --blocksize 2048 --refcode B1950)
 
 endif (HAVE_BOOST)
+
+## ==============================================================================
+##
+##  Tests for HDF5
+##
+## ==============================================================================
+
+if (HAVE_HDF5)
+
+  include_directories (${HDF5_INCLUDES})
+  
+  set (tests_hdf5
+    hdf5_attrs
+    hdf5_attrsarray
+    hdf5_attrvstr
+    hdf5_crtstr1
+    hdf5_grpatt
+    hdf5_h5cmpstr
+    hdf5_h5time
+    hdf5_strarray
+    hdf5_vlstra
+    hdf5_vlstratt
+    )
+
+  foreach (test_hdf5 ${tests_hdf5}) 
+    ## locate the source file
+    find_file (HAVE_${test_hdf5} ${test_hdf5}.c PATHS .)
+    ## remove test from list of source file not found
+    if (NOT HAVE_${test_hdf5})
+      list (REMOVE_ITEM tests_hdf5 ${test_hdf5})
+    endif (NOT HAVE_${test_hdf5})
+  endforeach (test_hdf5)
+  
+  foreach (src ${tests_hdf5})
+    ## compiler instructions
+    add_executable (${src} ${src}.c)
+    ## linker instructions
+    target_link_libraries (${src} ${HDF5_LIBRARIES})
+    ## additional properties
+    set_target_properties (${src} PROPERTIES
+      COMPILE_FLAGS "-DH5_USE_16_API"
+      )
+    ## Testing 
+    add_test (${src} ${src})
+  endforeach (src)  
+  
+endif (HAVE_HDF5)
+

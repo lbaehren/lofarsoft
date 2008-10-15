@@ -25,7 +25,6 @@
 
 #include <crtools.h>
 
-#include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/IPosition.h>

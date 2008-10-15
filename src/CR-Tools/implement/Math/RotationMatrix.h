@@ -29,13 +29,13 @@
 #include <string>
 #include <vector>
 
-#ifdef HAVE_BLITZ
-#include <blitz/array.h>
-#endif
-
 #ifdef HAVE_CASA
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
+#else
+#ifdef HAVE_BLITZ
+#include <blitz/array.h>
+#endif
 #endif
 
 #include <Math/VectorConversion.h>
@@ -119,7 +119,20 @@ namespace CR { // Namespace CR -- begin
     RotationMatrix (unsigned int const &rank,
 		    vector<double> const &angles,
 		    bool const &anglesInDegree=true);
+
+#ifdef HAVE_CASA
     
+    /*!
+      \brief Argumented constructor (CASA array classes)
+
+      \param rank           -- 
+      \param angles         -- 
+      \param anglesInDegree -- 
+    */
+    RotationMatrix (unsigned int const &rank,
+		    casa::Vector<double> const &angles,
+		    bool const &anglesInDegree=true);
+#else
 #ifdef HAVE_BLITZ
 
     /*!
@@ -134,20 +147,6 @@ namespace CR { // Namespace CR -- begin
 		    bool const &anglesInDegree=true);
 
 #endif
-
-#ifdef HAVE_CASA
-    
-    /*!
-      \brief Argumented constructor (CASA array classes)
-
-      \param rank           -- 
-      \param angles         -- 
-      \param anglesInDegree -- 
-    */
-    RotationMatrix (unsigned int const &rank,
-		    casa::Vector<double> const &angles,
-		    bool const &anglesInDegree=true);
-
 #endif
     
     /*!
@@ -217,8 +216,18 @@ namespace CR { // Namespace CR -- begin
     bool setAngles (vector<double> const &angles,
 		    bool const &anglesInDegree=true);
 
+#ifdef HAVE_CASA
+    /*!
+      \brief Get the angles parametrizing the rotation
+
+      \param angles -- 
+
+      \return status -- 
+    */
+    bool setAngles (casa::Vector<double> const &angles,
+		    bool const &anglesInDegree=true);
+#else
 #ifdef HAVE_BLITZ
-    
     /*!
       \brief Get the angles parametrizing the rotation
 
@@ -230,19 +239,6 @@ namespace CR { // Namespace CR -- begin
 		    bool const &anglesInDegree=true);
 
 #endif
-    
-#ifdef HAVE_CASA
-    
-    /*!
-      \brief Get the angles parametrizing the rotation
-
-      \param angles -- 
-
-      \return status -- 
-    */
-    bool setAngles (casa::Vector<double> const &angles,
-		    bool const &anglesInDegree=true);
-
 #endif
     
     /*!
@@ -279,9 +275,33 @@ namespace CR { // Namespace CR -- begin
     */
     virtual bool rotate (vector<double> &out,
 			 vector<double> const &in);
-    
-#ifdef HAVE_BLITZ
-    
+        
+#ifdef HAVE_CASA
+    /*!
+      \brief Apply rotation to a vector
+
+      \retval out -- Vector after application of the rotation
+      \param  in  -- Vector to which the rotation is applied
+
+      \return status -- Status of the operation; returns <i>false</i> if an error
+                        was encountered.
+    */
+    bool rotate (casa::Vector<double> &out,
+		 casa::Vector<double> const &in);
+
+    /*!
+      \brief Apply rotation to a Matrix
+
+      \retval out -- Matrix after application of the rotation
+      \param  in  -- Matrix to which the rotation is applied
+
+      \return status -- Status of the operation; returns <i>false</i> if an error
+                        was encountered.
+    */
+    bool rotate (casa::Matrix<double> &out,
+		 casa::Matrix<double> const &in);
+#else
+#ifdef HAVE_BLITZ    
     /*!
       \brief Apply rotation to a vector
 
@@ -307,33 +327,6 @@ namespace CR { // Namespace CR -- begin
 			 blitz::Array<double,2> const &in);
     
 #endif
-    
-#ifdef HAVE_CASA
-    
-    /*!
-      \brief Apply rotation to a vector
-
-      \retval out -- Vector after application of the rotation
-      \param  in  -- Vector to which the rotation is applied
-
-      \return status -- Status of the operation; returns <i>false</i> if an error
-                        was encountered.
-    */
-    bool rotate (casa::Vector<double> &out,
-		 casa::Vector<double> const &in);
-
-    /*!
-      \brief Apply rotation to a Matrix
-
-      \retval out -- Matrix after application of the rotation
-      \param  in  -- Matrix to which the rotation is applied
-
-      \return status -- Status of the operation; returns <i>false</i> if an error
-                        was encountered.
-    */
-    bool rotate (casa::Matrix<double> &out,
-		 casa::Matrix<double> const &in);
-
 #endif
     
   private:

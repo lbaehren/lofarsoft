@@ -14,12 +14,6 @@
 
 \section crtools_changes_build Build issues
 
-- No build from scratch possible on Ray; however this appears not to be an issue
-with the CR-Tools code itself, but rather with the dependency on the Boost
-library. Even after removing the very specific additional search path for
-external components to the installation in /opt/aips++ the build still fails due
-to picking up the Boost installation in /usr instead $LOFARSOFT/release.
-
 - Opening a file with the CR::LOFAR_TBB class doesn't work. A line like:
   \verbatim
   hdf5In = new LOFAR_TBB(files(fnum),524288);
@@ -31,6 +25,16 @@ to picking up the Boost installation in /usr instead $LOFARSOFT/release.
   I have also seen it throw a segfault, but that was with a potentially bogous
   version of the DAL. (I.e. the posibility that the includes and libraries from
   two different boost version were used.)
+
+- Conflicting declaration of symbol when trying to build \e tbbTest
+  \verbatim
+  [ 98%] Building CXX object apps/CMakeFiles/tbbTest.dir/tbbTest.cc.o
+  /Users/lars/Code/lofar/usg/release/include/cfitsio/fitsio.h:409: error: conflicting declaration ?typedef struct wtbarr_s wtbarr_s?
+  /Users/lars/Code/lofar/usg/release/include/wcslib/wcs.h:1135: error: ?struct wtbarr_s? has a previous declaration as ?struct wtbarr_s?
+  make[2]: *** [apps/CMakeFiles/tbbTest.dir/tbbTest.cc.o] Error 1
+  make[1]: *** [apps/CMakeFiles/tbbTest.dir/all] Error 2
+  make: *** [all] Error 2
+\endverbatim
 
 <hr>
 

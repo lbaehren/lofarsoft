@@ -23,20 +23,18 @@
 #ifndef SECONDSTAGEPIPELINE_H
 #define SECONDSTAGEPIPELINE_H
 
-#include <crtools.h>
 
 // Standard library header files
 #include <string>
 
-// AIPS++/CASA header files
-#include <casa/aips.h>
-#include <casa/Exceptions/Error.h>
-
+// CR-Tools header files
+#include <crtools.h>
 #include <Analysis/FirstStagePipeline.h>
-//#include <Calibration/PhaseCalibrationPlugin.h>
 #include <Calibration/TVCalibrationPlugin.h>
 #include <Calibration/RFIMitigationPlugin.h>
 
+// AIPS++/CASA header files
+#include <casa/Exceptions/Error.h>
 #include <casa/namespace.h>
 
 namespace CR { // Namespace CR -- begin
