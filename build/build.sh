@@ -197,7 +197,7 @@ build_package ()
   buildOptions=$3
   # check if the build directory exists
   cd $basedir
-  if test -d $buildDir ; then
+  if test -d "$buildDir" ; then
   {
     # Feedback
     echo "[`date`] Building package";
@@ -208,7 +208,7 @@ build_package ()
     # change into the build directory
     cd $buildDir
     # run cmake on the source directory
-    if test -z $buildOptions ; then
+    if test -z "$buildOptions" ; then
 	cmake $basedir/../$sourceDir
     else 
 	cmake $basedir/../$sourceDir $buildOptions
@@ -217,7 +217,7 @@ build_package ()
     if test -z "`make help | grep install`" ; then
 	echo "[`date`] No target install for $buildDir."
     else
-	if test -z $param_reportBuild ; then
+	if test -z "$param_reportBuild" ; then
 	    $var_make install;
 	else
 	    $var_make Experimental;

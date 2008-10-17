@@ -31,11 +31,9 @@
 #
 #############################################################################
 
-if test -z $LOFARSOFT ; then
+if test -z "$LOFARSOFT" ; then
    echo "ERROR:  Please set the LOFARSOFT environment variable"
-   exit;
-fi
-
+else  # only execute the following if LOFARSOFT is set
 
 #############################################################################
 #
@@ -51,7 +49,7 @@ export PATH=$PATH:$LOFARSOFT/release/bin
 #
 #############################################################################
 
-if test -z $PYTHONPATH ; then
+if test -z "$PYTHONPATH" ; then
 	export PYTHONPATH=$LOFARSOFT/release/lib/python
 else
 	export PYTHONPATH=$PYTHONPATH:$LOFARSOFT/release/lib/python
@@ -63,7 +61,7 @@ fi
 #
 #############################################################################
 
-if test -z $AIPSPATH ; then
+if test -z "$AIPSPATH" ; then
 	export AIPSPATH=$LOFARSOFT
 fi
 
@@ -71,3 +69,4 @@ fi
 #                    Finished configuration                                 #  
 #############################################################################
 
+fi # end of: if test -z "$LOFARSOFT" ; then
