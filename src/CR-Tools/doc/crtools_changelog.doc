@@ -1,0 +1,68 @@
+/* $Id$ */
+
+/**
+
+\page crtools_changelog CR-Tools :: Changelog
+
+<hr>
+
+<pre>
+From: Lars B"ahren
+Date: October 16, 2008 1:20:30 PM GMT+02:00
+</pre>
+
+Hey folks,
+
+I think it is time for sending around a short note on what I going on right now
+and has been happening within the last few days. (btw., if I am missing somebody
+on this list, please forward this mail and let me know to be more complete next
+time).
+
+1) With more and more activities dedicated towards preparing for LOFAR20,
+considerable amount of work has been put in to providing access to the produced
+data sets. The relevant code is delivered with the Data Access Library (DAL),
+until recently developed and written by Joseph Masters (UvA); after signing up
+for another position, Joe no longer is available to drive the bulk of the DAL
+development and take care of bigger bug fixes. In order to maintain a minimum
+level of support (fixes, required enhancements), for the time being I have taken
+over the responsibility to keep the DAL around and suited to our needs. With the
+increased usage of the library a number of bugs surfaced recently, which as of
+this week should be fixed. (http://usg.lofar.org/doxygen/dal_changelog.html)
+
+2) The changes in the DAL triggered the surfacing of an error in the build of
+the CR-Tools, which resulted in the build of at least one executable to build.
+This now has been resolved and tested on the standard test platforms.
+
+3) The Qt-based graphical user interface Heino has been working on is now part
+of the standard build of the CR-Tools; after tracking down two errors in the
+CMake configuration scripts the shared library is created, installed and thereby
+(at least I hope) ready for use. Concerning the functionality and usage all
+questions should be directed towards Heino, since I am not involved in the
+writing of the code itself (just ensuring development can be carried out within
+the framework as used for the rest of the software).
+
+4) It was pointed out, that we should have a possibility to track "stable
+releases" of our software; with the soon to be increasing number of users -
+which are not necessarily developers - we need a way to provide people with a
+version of the CR-Tools, which properly builds and does not contain major bugs
+known at that point. While it may require a certain minimal amount of logistics
+to actually determine when to give a version these blessings and then also
+imprint this into the code repository, for the time being I have set up a
+"Stable source code versions" <a href="http://usg.lofar.org/wiki/doku.php?id=software:packages:cr-tools:stable_source_code_versions">page on the Wiki</a> which should provide you with the essential information about versions consider stable for working with. Note: if you are actively developing code, then changes of course should always be worked into the latest version!
+
+Next in line:
+
+1) Finished recursive retrieval of the metadata attached to the TBB time-series
+data sets to present them to the header record as part of the DataReader class
+(and its derivatives).
+
+2) Add simple mechanism to write missing metadata to the TBB time-series data
+sets; currently information such as antennas positions, etc. are not shipped
+with the data sets, since the connection to the metadata database is not in
+place yet.
+
+3) If nothing major comes up, clean up the contents of the Imaging module and
+solve the two known issues which keep a first version of the Imager becoming
+operational.
+
+*/
