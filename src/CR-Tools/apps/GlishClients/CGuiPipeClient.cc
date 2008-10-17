@@ -72,8 +72,9 @@ Bool initPipeline(GlishSysEvent &event, void *){
 Bool ProcessEvent(GlishSysEvent &event, void *){
   GlishSysEventSource *glishBus = event.glishSource();
   try {
-    String evname, PlotPrefix;
-    Double Az, El, distance=4000, XC, YC, ExtraDelay=0.; 
+    String evname, PlotPrefix, Polarization="EW";
+    Double Az, El, distance=4000, XC, YC, ExtraDelay=0., UpSamplingRate=0.;
+    int doTVcal=-1; 
     Bool RotatePos=True, generatePlots=False, verbose=False, fitPos=False;
     Vector<Int> FlaggedAntIDs; 
     if (event.val().type() != GlishValue::RECORD) {
@@ -128,10 +129,13 @@ Bool ProcessEvent(GlishSysEvent &event, void *){
     if (input.isDefined("FlaggedAntIDs")){
       FlaggedAntIDs = input.asArrayInt("FlaggedAntIDs");
     };
+    if (input.isDefined("UpSamplingRate")){
+      UpSamplingRate = input.asDouble("UpSamplingRate");
+    };
     
     output = pipeline.ProcessEvent(evname, Az, El, distance, XC, YC, RotatePos, 
 				   PlotPrefix, generatePlots, FlaggedAntIDs, verbose, 
-				   fitPos, ExtraDelay);
+				   fitPos, ExtraDelay, doTVcal, UpSamplingRate, Polarization);
     if (glishBus->replyPending()) {
       GlishRecord outrec;
       outrec.fromRecord(output);
