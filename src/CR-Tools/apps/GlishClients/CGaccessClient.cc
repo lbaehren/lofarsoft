@@ -25,6 +25,7 @@
 using CR::DataReader;
 using CR::LopesEventIn;
 
+
 // global Variable for LOPES events that actually contains all the data
 CR::analyseLOPESevent pipeline;
 
@@ -34,8 +35,11 @@ CR::tbbctlIn tbbIn;
 // local copies (of the pointers) to access the stuff.
 CR::CRinvFFT *pipeline_p;    
 DataReader *DataReader_p;
+CR::UpSampledDR Upsampler;
+CR::CRinvFFT upsamplepipe;    
 
 Bool doTVcal=True, doRFImitigation=True;
+double upsampleFreq=200e6;
 
 //---------------------------------------------------------------------   initPipeline
 
@@ -66,6 +70,7 @@ Bool initPipeline(GlishSysEvent &event, void *){
       pipeline_p = pipeline.GetPipeline();
       DataReader_p = pipeline.GetDataReader();
       pipeline_p->setVerbosity(False);
+      upsamplepipe.SetObsRecord(obsrec);
       if (glishBus->replyPending()) {
 	glishBus->reply(GlishArray(True));
       };
@@ -498,6 +503,84 @@ Bool GetTCXP(GlishSysEvent &event, void *){
 
 
 
+//---------------------------------------------------------------------  GetUpsample
+Bool GetUpsample(GlishSysEvent &event, void *){
+  GlishSysEventSource *glishBus = event.glishSource();
+  try {
+    Double Az, El, distance=1e37, XC, YC, ExtraDelay=0.; 
+    Bool RotatePos=False;
+    Vector<Bool> FlaggedAnts; 
+    if (event.val().type() != GlishValue::RECORD) {
+      cerr << "CGaccessClient:GetUpsample: Need record with: Az, El, XC, YC!" 
+	   << endl;
+      if (glishBus->replyPending()) {
+	glishBus->reply(GlishArray(False));
+      };
+      return True;
+    };
+    GlishRecord  inrec = event.val();
+    Record input, output;
+    inrec.toRecord(input);
+    if (!(input.isDefined("Az") && input.isDefined("El") 
+	  && input.isDefined("XC") && input.isDefined("YC") )) {
+      cerr << "CGaccessClient:GetUpsample: Need record with: Az, El, XC, YC!" 
+	   << endl;
+      if (glishBus->replyPending()) {
+	glishBus->reply(GlishArray(False));
+      };
+      return True;
+    };
+    Az = input.asDouble("Az");
+    El = input.asDouble("El");
+    XC = input.asDouble("XC");
+    YC = input.asDouble("YC");
+    if (input.isDefined("distance")){
+      distance = input.asDouble("distance");
+    };
+    if (input.isDefined("ExtraDelay")){
+      ExtraDelay = input.asDouble("ExtraDelay");
+    };
+    if (input.isDefined("RotatePos")){
+      RotatePos = input.asBool("RotatePos");
+    };
+    if (input.isDefined("FlaggedAnts")){
+      FlaggedAnts = input.asArrayBool("FlaggedAnts");
+    };    
+    Matrix<Double> TimeSeries;
+    Vector<Double> ccBeamData, xBeamData, pBeamData;
+    Upsampler.setup(DataReader_p, upsampleFreq, False, pipeline_p);
+    upsamplepipe.InitEvent(&Upsampler,False);
+    upsamplepipe.doPhaseCal(False);
+    upsamplepipe.doRFImitigation(False);
+    upsamplepipe.setVerbosity(False);
+
+    upsamplepipe.setPhaseCenter(XC, YC, RotatePos);
+    upsamplepipe.setDirection(Az, El, distance);
+    upsamplepipe.setExtraDelay(ExtraDelay);
+    upsamplepipe.GetTCXP(&Upsampler, TimeSeries, ccBeamData, xBeamData,
+			 pBeamData, FlaggedAnts);
+    if (glishBus->replyPending()) {
+      output.define("UpTimes",Upsampler.timeValues());
+      output.define("FieldStrength",upsamplepipe.GetTimeSeries(&Upsampler));
+      output.define("CCBeam",ccBeamData);
+      output.define("XBeam",xBeamData);
+      output.define("PBeam",pBeamData);
+      GlishRecord outrec;
+      outrec.fromRecord(output);
+      glishBus->reply(outrec);
+    };
+  } catch (AipsError x) {
+    cerr << "CGaccessClient:GetUpsample: " << x.getMesg() << endl;
+    if (glishBus->replyPending()) {
+      glishBus->reply(GlishArray(False));
+    };
+    return False;
+  };   
+  return True;
+};
+
+
+
 
 //---------------------------------------------------------------------   GetFieldStrength
 Bool GetFieldStrength(GlishSysEvent &event, void *){
@@ -579,6 +662,7 @@ int main(int argc, char *argv[])
   glishStream.addTarget(GetFilteredFFT,"GetFilteredFFT");
   glishStream.addTarget(GetShiftedFFT,"GetShiftedFFT");
   glishStream.addTarget(GetTCXP,"GetTCXP");
+  glishStream.addTarget(GetUpsample,"GetUpsample");
 
   glishStream.addTarget(GetFieldStrength,"GetFieldStrength");
   glishStream.addTarget(GetCCBeam,"GetCCBeam");

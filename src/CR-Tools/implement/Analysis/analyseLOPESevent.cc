@@ -302,7 +302,7 @@ namespace CR { // Namespace CR -- begin
 	upsamplePipe_p->doRFImitigation(False);
 	upsamplePipe_p->setVerbosity(verbose);
 	
-	filterStrength_p = (int)ceil(3*UpSamplingRate/lev_p->sampleFrequency());
+	filterStrength_p = (int)floor(3*UpSamplingRate/lev_p->sampleFrequency());
 	
 	Double tmpdouble;
 	int upBlockSize,upBlock;

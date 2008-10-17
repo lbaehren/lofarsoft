@@ -164,6 +164,14 @@ Bool GetShiftedFFT(GlishSysEvent &event, void *);
 */
 Bool GetTCXP(GlishSysEvent &event, void *);
 
+/*!
+  \brief Get upsampled data
+
+  \return status -- Status of the operation; return <tt>false</tt> if an error
+                    was encountered
+*/
+Bool GetUpsample(GlishSysEvent &event, void *);
+
 
 
 /*!

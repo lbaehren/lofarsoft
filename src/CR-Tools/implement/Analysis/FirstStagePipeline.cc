@@ -129,7 +129,7 @@ namespace CR { // Namespace CR -- begin
 	  newCTR=True;
 	};
       } else {
-	cerr << "FirstStagePipeline::InitEvent: Unknown Observatory: " << tmpstring << endl;
+	cerr << "FirstStagePipeline::InitEvent: Unknown Observatory: " << obsstring << endl;
 	return False;	
       };
       if (newCTR){
