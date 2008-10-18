@@ -13,6 +13,8 @@
  ********************************************************************************
  */
 
+/* Standard system header files */
+
 #cmakedefine HAVE_MATH_H 1
 
 #cmakedefine HAVE_STRING_H 1
@@ -30,6 +32,12 @@
 #cmakedefine HAVE_STDLIB_H 1
 
 #cmakedefine HAVE_CTYPE_H 1
+
+/* Additional header to be found on the system */
+
+#cmakedefine HAVE_LTDL_H 1
+
+/* MathGL specific variables */
 
 #cmakedefine MOD_LIB_DIR "${MOD_LIB_DIR}"
 
