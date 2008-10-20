@@ -23,7 +23,10 @@
 
 #include <crtools.h>
 
+#include <dal/dalCommon.h>
+#include <dal/dalDataset.h>
 #include <dal/BeamFormed.h>
+#include <dal/BeamGroup.h>
 
 #include <Analysis/ppfinversion.h>
 #include <Analysis/ppfimplement.h>
@@ -73,25 +76,45 @@ int test_ppfinversion (std::string const &filename)
   int nofFailedTests = 0;
   
   cout << "[1] Testing default constructor ..." << endl;
-  
-  try {
-    
+    try {
     ppfinversion ppf_inv ;
     ppfimplement ppf_imp ;
     tbbctlIn newtbbctlIn ;
     rawSubbandIn newrawSubbandIn ;
     
-    
+  /*  
     Vector<String> filenames( 2 );
     {
-      filenames(0)=filename;
+      filenames(0)="/mnt/lofar/ppfinversion/TBB.corr.h5";
       filenames(1)="/mnt/lofar/ppfinversion/rw_20080604_121347_2300.dat.h5"; 
     }
     cout << "[1] Testing attaching file...." << endl ;
-    
-    DAL::BeamFormed bf (filenames(0));
+    */
+    DAL::BeamFormed bf (filename );
     bf.summary();
-    
+    cout << "-- Extracting beam group from dataset ..." << endl;
+    int numBeam (0);
+    int nofBeams = bf.number_of_beams();
+//     DAL::BeamGroup * group = bf.getBeam (numBeam);
+//     //
+//     group->summary();
+    std::cout << "[1] Attributes of the root group..." << std::endl;
+
+    std::cout << "-- Filename       = " << bf.filename()        << std::endl;
+    std::cout << "-- Telescope      = " << bf.telescope()       << std::endl;
+    std::cout << "-- nof. stations  = " << bf.nofStations()     << std::endl;
+    std::cout << "-- Datatype       = " << bf.datatype()        << std::endl;
+    std::cout << "-- EM band        = " << bf.emband()          << std::endl;
+    std::cout << "-- Observation ID = " << bf.observation_id()  << std::endl;
+    std::cout << "-- Project ID     = " << bf.proj_id()         << std::endl;
+    std::cout << "-- nof. beams     = " << bf.number_of_beams() << std::endl;
+    //
+    std::vector<std::string> sources = bf.sources();
+    std::cout << "-- Sources        = [";
+    for (unsigned int idx=0; idx<sources.size(); idx++) {
+      std::cout << " " << sources[ idx ];
+    }
+    std::cout << " ]" << std::endl;
     
   } catch (std::string message) {
     std::cerr << message << std::endl;
@@ -137,22 +160,36 @@ int main (int argc,
 	  char *argv[])
 {
   int nofFailedTests (0);
-  std::string fileBeamformed;
-
-  /* Check parameter provided from the command line */
-  if ( argc < 2 ) {
-    std::cerr << "[tppfinversion] Missing name of input data file!" << endl;
-    std::cerr << endl;
-    std::cerr << "  tppfinversion <filename>" << endl;
-    std::cerr << endl;
-    return 1;
+// std::string fileBeamformed;
+// int test_ppfinversion (std::string const &filename) 
+  std::string filename;
+  if (argc > 1) {
+    filename = std::string(argv[1]);
   } else {
-    fileBeamformed = std::string (argv[1]);
+    std::cerr << "Please provide a HDF5 filename.\n";
+    return(DAL::FAIL);
   }
+  
+   nofFailedTests += test_ppfinversion(filename);
+
+//   if (nofFailedTests == 0) {
+//     nofFailedTests += test_attributes (filename);
+//     nofFailedTests += test_getData (filename);
+//   }
+  /* Check parameter provided from the command line */
+//   if ( argc < 2 ) {
+//     std::cerr << "[tppfinversion] Missing name of input data file!" << endl;
+//     std::cerr << endl;
+//     std::cerr << "  tppfinversion <filename>" << endl;
+//     std::cerr << endl;
+//     return 1;
+//   } else {
+//     fileBeamformed = std::string (argv[1]);
+//   }
   
   /* Run the tests */
   
-  nofFailedTests += test_inversions (fileBeamformed);
+//  nofFailedTests += test_inversions (fileBeamformed);
   
   return nofFailedTests;
 }
