@@ -16,6 +16,11 @@ class QLabel;
 class FindDialog;
 class Spreadsheet;
 
+/*!
+  \class MainWindow
+  
+  \ingroup CR_GUI
+*/
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
