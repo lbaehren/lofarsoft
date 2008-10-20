@@ -26,15 +26,40 @@
   version of the DAL. (I.e. the posibility that the includes and libraries from
   two different boost version were used.)
 
-- Conflicting declaration of symbol when trying to build \e tbbTest
+- The library for the graphical user interface (libhfget) is not getting build on the machine in
+  Karlsruhe:
   \verbatim
-  [ 98%] Building CXX object apps/CMakeFiles/tbbTest.dir/tbbTest.cc.o
-  /Users/lars/Code/lofar/usg/release/include/cfitsio/fitsio.h:409: error: conflicting declaration ?typedef struct wtbarr_s wtbarr_s?
-  /Users/lars/Code/lofar/usg/release/include/wcslib/wcs.h:1135: error: ?struct wtbarr_s? has a previous declaration as ?struct wtbarr_s?
-  make[2]: *** [apps/CMakeFiles/tbbTest.dir/tbbTest.cc.o] Error 1
-  make[1]: *** [apps/CMakeFiles/tbbTest.dir/all] Error 2
-  make: *** [all] Error 2
-\endverbatim
+  [ 56%] Building CXX object implement/CMakeFiles/hfget.dir/GUI/hfget.cc.o
+  In file included
+  from /home/schroeder/temp/usg/src/CR-Tools/implement/GUI/hfget.cc:1618:
+  /home/schroeder/temp/usg/src/CR-Tools/implement/GUI/hfget.cc: In  
+  function 'T mycast(void*) [with T = int]':
+  /home/schroeder/temp/usg/src/CR-Tools/implement/GUI/switch-type.cc:29:
+  instantiated from 'void set_ptr_to_value(void*, DATATYPE, T) [with T = void*]'
+  /home/schroeder/temp/usg/src/CR-Tools/implement/GUI/switch-type.cc:26:
+  instantiated from here
+  /home/schroeder/temp/usg/src/CR-Tools/implement/GUI/hfget.cc:140: error: cast
+  from 'void*' to 'Integer' loses precision
+  /home/schroeder/temp/usg/src/CR-Tools/implement/GUI/hfget.cc: In  
+  function 'T mycast(void*) [with T = double]':
+  /home/schroeder/temp/usg/src/CR-Tools/implement/GUI/switch-type.cc:32:
+  instantiated from 'void set_ptr_to_value(void*, DATATYPE, T) [with T = void*]'
+  /home/schroeder/temp/usg/src/CR-Tools/implement/GUI/switch-type.cc:26:
+  instantiated from here
+  /home/schroeder/temp/usg/src/CR-Tools/implement/GUI/hfget.cc:140:  
+  error: cast from 'void*' to 'Integer' loses precision
+  /home/schroeder/temp/usg/src/CR-Tools/implement/GUI/hfget.cc: In  
+  function 'T mycast(void*) [with T = std::complex<double>]':
+  /home/schroeder/temp/usg/src/CR-Tools/implement/GUI/switch-type.cc:35:
+  instantiated from 'void set_ptr_to_value(void*, DATATYPE, T) [with T = void*]'
+  /home/schroeder/temp/usg/src/CR-Tools/implement/GUI/switch-type.cc:26:
+  instantiated from here
+  /home/schroeder/temp/usg/src/CR-Tools/implement/GUI/hfget.cc:140:  
+  error: cast from 'void*' to 'Integer' loses precision
+  make[2]: *** [implement/CMakeFiles/hfget.dir/GUI/hfget.cc.o] Fehler 1
+  make[1]: *** [implement/CMakeFiles/hfget.dir/all] Fehler 2
+  make: *** [all] Fehler 2
+  \endverbatim
 
 <hr>
 

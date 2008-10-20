@@ -254,6 +254,8 @@ if (CR_WITH_GUI)
     GUI/hffuncs.cc
     GUI/hfget.cc
     GUI/hfqt.cc
+    GUI/qrc_spreadsheet.cpp
+    GUI/qrc_plotter.cpp
     GUI/moc_finddialog.cpp
     GUI/moc_gotocelldialog.cpp
     GUI/moc_mainwindow.cpp
@@ -261,8 +263,6 @@ if (CR_WITH_GUI)
     GUI/moc_spreadsheet.cpp
     GUI/moc_plotter.cpp
     GUI/moc_hfqt.cpp
-    GUI/qrc_spreadsheet.cpp
-    GUI/qrc_plotter.cpp
     )
   
   ## include directories
