@@ -1087,6 +1087,9 @@ namespace CR { // Namespace CR -- begin
         double envMaximum = 0;
         int envMaxtimevalue = 0;
 
+        // save values in addition into pulse property class
+        PulseProperties pulse;
+
         // get current trace and its envelope
         trace = yValues.column(i)(range);
         envTrace = envelope(trace);
@@ -1170,6 +1173,18 @@ namespace CR { // Namespace CR -- begin
         fwhm.push_back( (pulsestop-pulsestart)*1e9);
         // if (pulsestart != 0) start_time.push_back(pulsestart*1e6);
         start_time.push_back(pulsestart*1e6);
+
+        // fill pulseproperties object (in ns)
+        pulse.antenna = i+1;
+        pulse.maximum = maximum*1e9;
+        pulse.envelopeMaximum = envMaximum*1e9;
+        pulse.minimum = minimum*1e9;
+        pulse.maximumTime = timeRange(maxtimevalue)*1e9;
+        pulse.envelopeTime = timeRange(envMaxtimevalue)*1e9;
+        pulse.minimumTime = timeRange(mintimevalue)*1e9;
+        pulse.halfheightTime = pulsestart*1e9;
+        pulse.fwhm = (pulsestop-pulsestart)*1e9;
+testpulse = pulse;
 
         // print the calculated values
         cout << setw(2) << i+1 << "   "

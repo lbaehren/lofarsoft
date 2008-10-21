@@ -296,6 +296,8 @@ class analyseLOPESevent2 : public analyseLOPESevent {
     void summaryPlot(string filename,
                      unsigned int columns = 3);
 
+inline PulseProperties gettestpulse() {return CompleteBeamPipe_p->testpulse;}
+
   protected:
 
     //! the new pipeline objects, one for the input, one for the upsampling (like CRinvFFT + LopesSTAR-upsampling)

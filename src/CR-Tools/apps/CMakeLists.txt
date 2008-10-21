@@ -112,7 +112,7 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 if (CR_WITH_STARTOOLS)
 
   if (HAVE_PGPLOT OR HAVE_PLPLOT)
-    add_executable (call_pipeline call_pipeline.cc)
+    add_executable (call_pipeline call_pipeline.cc ${CR_SOURCE_DIR}/implement/Analysis/RootDict.C)
     ## extra properties to take care of
     if (APPLE)
       set_target_properties (call_pipeline

@@ -40,6 +40,8 @@
 // For Upsampling:
 #include <startools/reconstruction.hh>
 
+#include <Analysis/PulseProperties.h>
+
 namespace CR { // Namespace CR -- begin
   
   /*!
@@ -68,6 +70,7 @@ namespace CR { // Namespace CR -- begin
     <h3>Example(s)</h3>
     
   */  
+
   class CompletePipeline : public CRinvFFT {
 
   protected:
@@ -98,6 +101,8 @@ namespace CR { // Namespace CR -- begin
 
 
   public:
+//! testpulse
+PulseProperties testpulse;
     
     // ------------------------------------------------------------- Construction
     

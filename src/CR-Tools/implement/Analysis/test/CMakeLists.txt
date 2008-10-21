@@ -182,6 +182,19 @@ if (NOT APPLE)
     endif (CR_ENABLE_TESTING) 
   endif (HAVE_STARTOOLS AND CR_WITH_PLOTTING AND CR_WITH_PYTHON)
   
+  if (HAVE_ROOT)
+    ## compiler instructions
+    add_executable (tPulseProperties tPulseProperties.cc ${CR_SOURCE_DIR}/implement/Analysis/RootDict.C)
+    target_link_libraries (tPulseProperties
+        cr
+	${ROOT_LIBRARIES}
+	)
+    ## testing 
+    add_test (tPulseProperties tPulseProperties)
+    ## installation
+    list (APPEND tests tPulseProperties)
+  endif (HAVE_ROOT)
+
 endif (NOT APPLE)
 
 ## ==============================================================================
