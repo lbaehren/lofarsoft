@@ -13,7 +13,6 @@ set (wcslib_tests
   twcssub
   tpih1
   tfitshdr
-  tunits
   twcsfix
 )
 
@@ -33,6 +32,16 @@ install (TARGETS ${wcslib_tests}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+## -----------------------------------------------------------------------------
+## Test which require additional input
+
+add_executable (tunits tunits.c)
+
+target_link_libraries (tunits wcs ${libm})
+
+#add_test (tunits_test1 tunits km/h)
+#add_test (tunits_test2 tunits m/ms)
 
 ## -----------------------------------------------------------------------------
 ## Test programs that do require PGPLOT.
