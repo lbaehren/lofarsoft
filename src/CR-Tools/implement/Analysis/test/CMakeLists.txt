@@ -116,7 +116,7 @@ if (NOT APPLE)
   
   if (CR_WITH_STARTOOLS)
     ## compiler instructions
-    add_executable (tanalyseLOPESevent2 tanalyseLOPESevent2.cc)
+    add_executable (tanalyseLOPESevent2 tanalyseLOPESevent2.cc ${CR_SOURCE_DIR}/implement/Analysis/RootDict.C)
     ## linker instructions
     if (HAVE_PLPLOT OR HAVE_PGPLOT)
       target_link_libraries (tanalyseLOPESevent2
