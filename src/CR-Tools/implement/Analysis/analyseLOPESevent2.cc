@@ -37,7 +37,9 @@ namespace CR { // Namespace CR -- begin
     : analyseLOPESevent(),
       CompleteBeamPipe_p(NULL),
       upsamplingExponent(0),
-      ccWindowWidth_p(0.045e-6)
+      ccWindowWidth_p(0.045e-6),
+      rawPulses( map<int,PulseProperties>() ),
+      calibPulses( map<int,PulseProperties>() )
   {;}
   
   // ============================================================================
@@ -162,7 +164,8 @@ namespace CR { // Namespace CR -- begin
                                               getUpsamplingExponent(), true);
 
 	// calculate the maxima
-        if (CalculateMaxima) CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(), true);
+        if (CalculateMaxima) 
+          rawPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(), true);
       }
 
       //perform the position fitting (if simplexFit = false, then only the PhaseCenter is set)
@@ -214,7 +217,7 @@ namespace CR { // Namespace CR -- begin
 
         // calculate the maxima
 	if (CalculateMaxima)
-          CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(), false);
+          calibPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(), false);
         // user friendly list of calculated maxima
         if (listCalcMaxima)
           CompleteBeamPipe_p->listCalcMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),fiterg.asDouble("CCcenter"));
@@ -324,7 +327,8 @@ namespace CR { // Namespace CR -- begin
                                               getUpsamplingExponent(), true, false);
 
 	// calculate the maxima
-        if (CalculateMaxima) CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), true);
+        if (CalculateMaxima)
+          rawPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), true);
       }
 
       // Generate plots
@@ -340,7 +344,7 @@ namespace CR { // Namespace CR -- begin
 
         // calculate the maxima
 	if (CalculateMaxima)
-          CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
+          calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
       };
 
       // give out the names of the created plots

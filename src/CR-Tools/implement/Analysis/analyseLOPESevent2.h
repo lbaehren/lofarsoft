@@ -69,6 +69,23 @@ namespace CR { // Namespace CR -- begin
   */  
 class analyseLOPESevent2 : public analyseLOPESevent {
     
+  protected:
+
+    //! the new pipeline objects, one for the input, one for the upsampling (like CRinvFFT + LopesSTAR-upsampling)
+    CompletePipeline pipeline, upsamplePipe;
+    //! switcher to the used pipeline (pipeline or upsamplePipe)
+    CompletePipeline *CompleteBeamPipe_p;
+
+    //! upsampling will be done by a factor of 2^upsamplingExponent
+    unsigned int upsamplingExponent;
+    //! time window of the interval to search for radio pulse
+    Double ccWindowWidth_p;
+
+    //! map of calculated pulse parameters of raw data, accessable with antenna ID as key
+    map <int, PulseProperties> rawPulses;
+    //! map of calculated pulse parameters of calibrated fieldstrength traces
+    map <int, PulseProperties> calibPulses;
+
   public:
     
     // ------------------------------------------------------------- Construction
@@ -165,6 +182,23 @@ class analyseLOPESevent2 : public analyseLOPESevent {
        ccWindowWidth_p = ccWindowWidth;
     }
 
+    /*!
+      \brief Get map of pulse parameters of raw data trace (calculation must be allready done)
+
+      \return rawPulses
+    */
+    inline map<int,PulseProperties> getRawPulseProperties () {
+      return rawPulses;
+    }
+
+    /*!
+      \brief Get map of pulse parameters of calibrated data traces (calculation must be allready done)
+
+      \return calibPulses
+    */
+    inline map<int,PulseProperties> getCalibPulseProperties () {
+      return calibPulses;
+    }
 
 
     /*!
@@ -295,23 +329,6 @@ class analyseLOPESevent2 : public analyseLOPESevent {
     */
     void summaryPlot(string filename,
                      unsigned int columns = 3);
-
-inline PulseProperties gettestpulse() {return CompleteBeamPipe_p->testpulse;}
-
-  protected:
-
-    //! the new pipeline objects, one for the input, one for the upsampling (like CRinvFFT + LopesSTAR-upsampling)
-    CompletePipeline pipeline, upsamplePipe;
-    //! switcher to the used pipeline (pipeline or upsamplePipe)
-    CompletePipeline *CompleteBeamPipe_p;
-    
-  private:
-   
-    //! upsampling will be done by a factor of 2^upsamplingExponent
-    unsigned int upsamplingExponent;
-
-    //! time window of the interval to search for radio pulse
-    Double ccWindowWidth_p;
   };
   
 } // Namespace CR -- end

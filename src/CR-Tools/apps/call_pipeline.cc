@@ -940,9 +940,10 @@ int main (int argc, char *argv[])
 
   // variables for reconstruction information (output of pipeline)
   unsigned int gt = 0;
-  double CCheight, CCheight_NS;  	// CCheight will be used for EW polarization or ANY polarization
-  double AzL, ElL, AzL_NS, ElL_NS;	// Azimuth and Elevation
-  PulseProperties *testpulse = new PulseProperties();
+  double CCheight, CCheight_NS;           // CCheight will be used for EW polarization or ANY polarization
+  double AzL, ElL, AzL_NS, ElL_NS;        // Azimuth and Elevation
+  map <int,PulseProperties> rawPulses;    // pulse properties of pules in raw data traces
+  map <int,PulseProperties> calibPulses;  // pulse properties of pules in calibrated data traces
 
   try {
     std::cout << "\nStarting Program \"call_pipline\".\n\n" << std::endl;
@@ -1022,7 +1023,7 @@ int main (int argc, char *argv[])
     // create tree and tree structure (depends on chosen polarization)
     TTree roottree("T","LOPES");
     roottree.Branch("Gt",&gt,"Gt/i");	// GT as unsigned int
-    roottree.Branch("testpulse","PulseProperties",&testpulse);
+//roottree.Branch("testpulse","PulseProperties",&testpulse);
 
     // the following branches are not used in the calibration mode
     if ( !calibrationMode )
@@ -1156,10 +1157,17 @@ int main (int argc, char *argv[])
         // if summaryColumns = 0 the method does not create a summary.
         eventPipeline.summaryPlot(plotprefix+"-summary",summaryColumns);
 
+        // get the pulse properties
+        rawPulses = eventPipeline.getRawPulseProperties();
+        calibPulses = eventPipeline.getCalibPulseProperties();
+        if (rawPulses.size() > 0) cout << "\nRaw pulses found!\n" << endl;
+        if (calibPulses.size() > 0) cout << "\nCalibrated pulses found!\n" << endl;
+
         // adding results to variables (needed to fill them into the root tree)
         gt = results.asuInt("Date");
-*testpulse = eventPipeline.gettestpulse();
-cout << "\n\nTestpulse antenna: " << testpulse->antenna << "\n" << endl;
+
+//*testpulse = eventPipeline.gettestpulse();
+//cout << "\n\nTestpulse antenna: " << testpulse->antenna << "\n" << endl;
       } else
       {
         if ( (polarization == "ANY") || (polarization == "EW") || both_pol)

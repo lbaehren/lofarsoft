@@ -1010,13 +1010,14 @@ namespace CR { // Namespace CR -- begin
   }
   
   
-  void CompletePipeline::calculateMaxima(DataReader *dr,
-					 Vector<Bool> antennaSelection,
-					 const int& upsampling_exp,
-					 const bool& rawData)
+  map <int,PulseProperties> CompletePipeline::calculateMaxima(DataReader *dr,
+							      Vector<Bool> antennaSelection,
+							      const int& upsampling_exp,
+							      const bool& rawData)
   {
+    map <int,PulseProperties> pulses;           // return value with pulse properties
     try 
-      {
+    {
       Vector<Double> timeValues;		// time values
       Vector<Double> timeRange;			// time values
       Matrix<Double> yValues;			// y-values
@@ -1044,6 +1045,10 @@ namespace CR { // Namespace CR -- begin
       if (antennaSelection.nelements() == 0) {
 	antennaSelection = GetAntennaMask(dr);
       }
+
+      // get AntennaIDs to store pulse parameters in corresponding map
+      Vector<int> antennaIDs;
+      dr->headerRecord().get("AntennaIDs",antennaIDs);
 
       // adopt the antennaSelection to the chosen polarization
       deselectectPolarization(dr,antennaSelection);
@@ -1175,6 +1180,7 @@ namespace CR { // Namespace CR -- begin
         start_time.push_back(pulsestart*1e6);
 
         // fill pulseproperties object (in ns)
+        pulse.antennaID = antennaIDs(i);
         pulse.antenna = i+1;
         pulse.maximum = maximum*1e9;
         pulse.envelopeMaximum = envMaximum*1e9;
@@ -1184,7 +1190,9 @@ namespace CR { // Namespace CR -- begin
         pulse.minimumTime = timeRange(mintimevalue)*1e9;
         pulse.halfheightTime = pulsestart*1e9;
         pulse.fwhm = (pulsestop-pulsestart)*1e9;
-testpulse = pulse;
+
+        // store pulse properties in map
+        pulses[antennaIDs(i)] = pulse;
 
         // print the calculated values
         cout << setw(2) << i+1 << "   "
@@ -1245,12 +1253,14 @@ testpulse = pulse;
     } catch (AipsError x) 
       {
         std::cerr << "CompletePipeline:caclulateMaxima: " << x.getMesg() << std::endl;
-      }; 
+      };
+
+    return pulses;
   }
 
 
 
-  void CompletePipeline::listCalcMaxima(DataReader *dr,
+  void CompletePipeline::listCalcMaxima (DataReader *dr,
 					 Vector<Bool> antennaSelection,
 					 const int& upsampling_exp,
 					 const double& cc_center)

@@ -30,6 +30,7 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <map>
 
 #ifdef HAVE_STARTOOLS
 
@@ -99,10 +100,7 @@ namespace CR { // Namespace CR -- begin
     //! sets pipeline to calibration mode for processing time calibration measurements
     bool calibrationMode;
 
-
   public:
-//! testpulse
-PulseProperties testpulse;
     
     // ------------------------------------------------------------- Construction
     
@@ -274,7 +272,6 @@ PulseProperties testpulse;
       return calibrationMode;
     }
 
- 
     /*!
       \brief Caclulates an envelope (uses the LOPES-Star library)
 
@@ -459,12 +456,14 @@ PulseProperties testpulse;
       \param upsampling_exp   -- a value > 0 means that data are upsampled by a factor of 2^upsampling_exp
                                  use e.g. uspampling_exp = 1 to have twice as many points plotted.
       \param rawData          -- uses the raw ADC data instead of the calibrated fieldstrength
+
+      \return pulses          -- a map with the calculated pulse parameters (keys = antennaIDs)
     */
 
-    void calculateMaxima (DataReader *dr,
-                          Vector<Bool> antennaSelection = Vector<Bool>(),
-                          const int& upsampling_exp = 0,
-                          const bool& rawData = false);
+    map <int,PulseProperties> calculateMaxima (DataReader *dr,
+                                               Vector<Bool> antennaSelection = Vector<Bool>(),
+                                               const int& upsampling_exp = 0,
+                                               const bool& rawData = false);
     /*!
       \brief same as calculateMaxima, but different output form and does not work with the envelope of the trace
 
