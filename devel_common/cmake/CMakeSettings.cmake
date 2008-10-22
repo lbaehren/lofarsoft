@@ -70,6 +70,13 @@ if (NOT USG_CMAKE_CONFIG)
       "USG include area"
       FORCE
       )
+    ## (Test) data
+    set (USG_DATA ${USG_ROOT}/data
+      CACHE
+      PATH
+      "USG data area"
+      FORCE
+      )
   else (USG_ROOT)
     message (SEND_ERROR "USG_ROOT is undefined!")
   endif (USG_ROOT)
