@@ -170,13 +170,13 @@ if (NOT USG_CMAKE_CONFIG)
 
   ## TBB time-series data
   
-  find_file (dataset_tbb tbb_multi_antenna.h5 tbb_20080604_122217_2300.dat.h5
+  find_file (dataset_tbb rw_20071024_090656.h5
     PATHS
     ${USG_ROOT}/data
     ${USG_ROOT}/data/test
     )
   
-  find_file (dataset_tbb_raw tbb_20080604_122217_2300.dat
+  find_file (dataset_tbb_raw rw_20071024_090656_0101.dat rw_20071024_090656_0102.dat
     PATHS
     ${USG_ROOT}/data
     ${USG_ROOT}/data/test
