@@ -12,7 +12,9 @@
 <table border=0 cellpadding=1 cellspacing=1>
   <tr>
     <td class="indexkey">[ ]</td><td>not yet started</td>
+    <td>&nbsp;</td>
     <td class="indexkey">[/]</td><td>work in progress</td>
+    <td>&nbsp;</td>
     <td class="indexkey">[x]</td><td>done</td>
   </tr>
 </table>
@@ -30,8 +32,13 @@
     <td class="indexkey">Responsible</td>
   </tr>
   <tr valign=top>
-    <td>[/]</td>
+    <td>[x]</td>
     <td>Merge HDF5Common and Common into single file (dalCommon.cpp)</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td>[x]</td>
+    <td>Clean up template instantiation in dalCommon</td>
     <td>Lars</td>
   </tr>
   <tr valign=top>
