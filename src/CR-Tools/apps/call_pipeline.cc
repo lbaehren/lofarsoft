@@ -940,12 +940,21 @@ int main (int argc, char *argv[])
 
   // variables for reconstruction information (output of pipeline)
   unsigned int gt = 0;
-  double CCheight, CCheight_NS;           // CCheight will be used for EW polarization or ANY polarization
-  double AzL, ElL, AzL_NS, ElL_NS;        // Azimuth and Elevation
-  map <int,PulseProperties> rawPulses;    // pulse properties of pules in raw data traces
-  map <int,PulseProperties> calibPulses;  // pulse properties of pules in calibrated data traces
+  double CCheight, CCheight_NS;                  // CCheight will be used for EW polarization or ANY polarization
+  double AzL, ElL, AzL_NS, ElL_NS;               // Azimuth and Elevation
+  map <int,PulseProperties> rawPulsesMap;        // pulse properties of pules in raw data traces
+  map <int,PulseProperties> calibPulsesMap;      // pulse properties of pules in calibrated data traces
+  PulseProperties* rawPulses[MAX_NUM_ANTENNAS];  // use array of pointers to store pulse properties in root tree
+  PulseProperties* calibPulses[MAX_NUM_ANTENNAS];// use array of pointers to store pulse properties in root tree
+  try
+  {
+    // allocate space for arrays with pulse properties
+    for (int i=0; i < MAX_NUM_ANTENNAS; i++)
+    {
+      rawPulses[i] = new PulseProperties();
+      calibPulses[i] = new PulseProperties();
+    }
 
-  try {
     std::cout << "\nStarting Program \"call_pipline\".\n\n" << std::endl;
 
     // Check correct number of arguments (1 or 2 + program name = 2 or 3)
@@ -1023,7 +1032,6 @@ int main (int argc, char *argv[])
     // create tree and tree structure (depends on chosen polarization)
     TTree roottree("T","LOPES");
     roottree.Branch("Gt",&gt,"Gt/i");	// GT as unsigned int
-//roottree.Branch("testpulse","PulseProperties",&testpulse);
 
     // the following branches are not used in the calibration mode
     if ( !calibrationMode )
@@ -1158,16 +1166,11 @@ int main (int argc, char *argv[])
         eventPipeline.summaryPlot(plotprefix+"-summary",summaryColumns);
 
         // get the pulse properties
-        rawPulses = eventPipeline.getRawPulseProperties();
-        calibPulses = eventPipeline.getCalibPulseProperties();
-        if (rawPulses.size() > 0) cout << "\nRaw pulses found!\n" << endl;
-        if (calibPulses.size() > 0) cout << "\nCalibrated pulses found!\n" << endl;
+        rawPulsesMap = eventPipeline.getRawPulseProperties();
+        calibPulsesMap = eventPipeline.getCalibPulseProperties();
 
         // adding results to variables (needed to fill them into the root tree)
         gt = results.asuInt("Date");
-
-//*testpulse = eventPipeline.gettestpulse();
-//cout << "\n\nTestpulse antenna: " << testpulse->antenna << "\n" << endl;
       } else
       {
         if ( (polarization == "ANY") || (polarization == "EW") || both_pol)
@@ -1283,6 +1286,57 @@ int main (int argc, char *argv[])
         }
       }  // if...else (calibrationMode)
 
+
+      // process pulse properties
+      // delete arrays
+      for (int i=0; i < MAX_NUM_ANTENNAS; i++)
+      {
+        *rawPulses[i] = PulseProperties();
+        *calibPulses[i] = PulseProperties();
+      }
+
+      // fill information in array for raw pulses
+      for ( map<int,PulseProperties>::iterator it=rawPulsesMap.begin() ; it != rawPulsesMap.end(); it++ )
+      {
+        // check if antenna number lies in valid range
+        if ( (it->second.antenna < 1) || (it->second.antenna >= MAX_NUM_ANTENNAS) )
+        {
+          cerr << "\nWARNING: Antenna number in rawPulsesMap is out of range!" << endl;
+        }
+        else
+        {
+          *rawPulses[it->second.antenna-1] = it->second;
+          // create branch name
+          stringstream antNumber(""); 
+          antNumber << it->second.antenna;
+          string branchname = "Ant_" + antNumber.str() + "_raw";
+          // check if branch allready exists and if not, create it
+          if (! roottree.GetBranchStatus(branchname.c_str()))
+            roottree.Branch(branchname.c_str(),"PulseProperties",&rawPulses[it->second.antenna-1]);
+        }
+      }
+
+      // fill information in array for calibrated pulses
+      for ( map<int,PulseProperties>::iterator it=calibPulsesMap.begin() ; it != calibPulsesMap.end(); it++ )
+      {
+        // check if antenna number lies in valid range
+        if ( (it->second.antenna < 1) || (it->second.antenna >= MAX_NUM_ANTENNAS) )
+        {
+          cerr << "\nWARNING: Antenna number in rawPulsesMap is out of range!" << endl;
+        }
+        else
+        {
+          *calibPulses[it->second.antenna-1] = it->second;
+          // create branch name
+          stringstream antNumber(""); 
+          antNumber << it->second.antenna;
+          string branchname = "Ant_" + antNumber.str() + "_cal";
+          // check if branch allready exists and if not, create it
+          if (! roottree.GetBranchStatus(branchname.c_str()))
+            roottree.Branch(branchname.c_str(),"PulseProperties",&calibPulses[it->second.antenna-1]);
+        }
+      }
+
       // write output to root tree
       if (rootFilename != "")
       {
@@ -1302,6 +1356,14 @@ int main (int argc, char *argv[])
       rootfile->Write();
       rootfile->Close();
     }
+
+  // free space
+  for (int i=0; i < MAX_NUM_ANTENNAS; i++)
+  {
+    delete rawPulses[i];
+    delete calibPulses[i];
+  }
+
 
   } catch (AipsError x) 
   {
