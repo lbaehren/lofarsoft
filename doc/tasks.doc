@@ -1,0 +1,235 @@
+/*!
+
+\page tasks Task list towards a CR pipeline for LOFAR20
+
+- \ref tasks_dal
+- \ref tasks_crtools
+- \ref tasks_infrastructure
+- \ref tasks_formats
+
+<hr>
+
+<table border=0 cellpadding=1 cellspacing=1>
+  <tr>
+    <td class="indexkey">[ ]</td><td>not yet started</td>
+    <td class="indexkey">[/]</td><td>work in progress</td>
+    <td class="indexkey">[x]</td><td>done</td>
+  </tr>
+</table>
+
+<hr>
+
+\section tasks_dal Data Access Library
+
+\subsection tasks_dalCommon Common functions for the manipulation of HDF5 attributes
+
+<table border=0>
+  <tr>
+    <td class="indexkey">Status</td>
+    <td class="indexkey">Task description</td>
+    <td class="indexkey">Responsible</td>
+  </tr>
+  <tr valign=top>
+    <td>[/]</td>
+    <td>Merge HDF5Common and Common into single file (dalCommon.cpp)</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td>[/]</td>
+    <td>End-to-end testing of functions to write and read attributes</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td>[/]</td>
+    <td>Remove multiply defined functions (e.g. h5getAttribute vs. h5get_attribute)</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td>[/]</td>
+    <td>Where necessary add functions to support specific data types (e.g. casa::Vector<T>)</td>
+    <td>Lars</td>
+  </tr>
+</table>
+
+\subsection tasks_tbb2h5 HDF5 writer for TBB data
+
+<table border=0>
+  <tr>
+    <td class="indexkey">Status</td>
+    <td class="indexkey">Task description</td>
+    <td class="indexkey">Responsible</td>
+  </tr>
+  <tr valign=top>
+    <td>[x]</td>
+    <td>Verify subsequent writing of multiple input files into single output file</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td>[x]</td>
+    <td>Get access to the CS1 station and antenna position tables</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Add method to fill in the missing station and antenna position information using tables created for station calServer</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Support for concentration of data arriving at multiple ports into a single output file (present implementation only supports one port per output file)</td>
+    <td></td>
+  </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Bring tbb2h5 under the control of MAC/SAS</td>
+    <td></td>
+  </tr>
+</table>
+
+\subsection tasks_tbb High-level interface to HDF5 TBB data
+
+<table border=0>
+  <tr>
+    <td class="indexkey">Status</td>
+    <td class="indexkey">Task description</td>
+    <td class="indexkey">Responsible</td>
+  </tr>
+  <tr valign=top>
+    <td>[x]</td>
+    <td>Upward propagation of metadata from DAL::TBB_DipoleDataset to DAL::TBB_StationGroup</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td>[/]</td>
+    <td>Upward propagation of metadata from DAL::TBB_StationGroup to DAL::TBB_Timeseries</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Sync implementation and ICD</td>
+    <td></td>
+  </tr>
+  <tr valign=top>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+
+<hr>
+
+\section tasks_crtools CR-Tools
+
+<table border=0>
+  <tr>
+    <td class="indexkey">Status</td>
+    <td class="indexkey">Task description</td>
+    <td class="indexkey">Responsible</td>
+  </tr>
+  <tr valign=top>
+    <td>[/]</td>
+    <td>Build on multiple platforms (Intel Mac, Debian GNU Linux, SuSE Linux) to catch system dependent compile and runtime errors.</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Fill vertically collected metadata from TBB time-series dataset into header record of CR::LOFAR_TBB</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Transformation of sky and antenna coordinates onto common reference frame</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Debugging of error causing CR::Skymapper to segfault when inserting computed pixel values into the array of the output file</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Adoption of CalTables to store station calibration data</td>
+    <td></td>
+  </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Prepare list of air shower parameters to be stored in results database</td>
+    <td></td>
+  </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Add MathGL to the list of requred external packages and provide configuration/build support through CMake</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+
+<hr>
+
+\section tasks_infrastructure Central infrastructure
+
+<table border=0>
+  <tr>
+    <td class="indexkey">Status</td>
+    <td class="indexkey">Task description</td>
+    <td class="indexkey">Responsible</td>
+  </tr>
+  <tr valign=top>
+    <td>[/]</td>
+    <td>Build on multiple platforms (Intel Mac, Debian GNU Linux, SuSE Linux) to catch system dependent compile and runtime errors.</td>
+    <td>Lars, Marcel</td>
+  </tr>
+  <tr valign=top>
+    <td>[/]</td>
+    <td>Arrange for Dart server to collect automated nightly builds</td>
+    <td>Lars, Michael, Andre</td>
+  </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Merge Subversion repositories containing user software and central software</td>
+    <td></td>
+  </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Transition of LOFAR central software towards using CMake for configuration and build</td>
+    <td></td>
+  </tr>
+  <tr valign=top>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+
+<hr>
+
+\section tasks_formats Data Formats
+
+<table border=0>
+  <tr>
+    <td class="indexkey">Status</td>
+    <td class="indexkey">Task description</td>
+    <td class="indexkey">Responsible</td>
+  </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Update and send around description of common metadata expected for all standard LOFAR data products</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Update and send around LOFAR image data format ICD along with the request for input from the other KSPs</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+
+*/
