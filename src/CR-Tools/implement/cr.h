@@ -34,6 +34,8 @@
     <li>\ref crtools_build
     <li>\ref crtools_source_tree
     <li>\ref crtools_changes
+    <li>\ref crtools_imaging
+    <li>\ref tasks
   </ul>
 
   <h3>Prerequisite</h3>

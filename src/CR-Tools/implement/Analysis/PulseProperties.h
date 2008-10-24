@@ -2,8 +2,8 @@
  | $Id:: NewClass.h 1964 2008-09-06 17:52:38Z baehren                    $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Frank Schroeder (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Frank Schroeder (<mail>)                                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -81,7 +81,7 @@
     /*!
       \brief Destructor
     */
-    ~PulseProperties ();
+    virtual ~PulseProperties ();
     
     // ---------------------------------------------------------------- Variables
     //! ID of antenna which recorde the pulse
