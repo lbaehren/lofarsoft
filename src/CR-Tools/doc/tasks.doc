@@ -13,7 +13,7 @@
   <tr>
     <td class="indexkey">[ ]</td><td>not yet started</td>
     <td>&nbsp;</td>
-    <td class="indexkey">[/]</td><td>work in progress</td>
+    <td class="indexkey">[*]</td><td>work in progress</td>
     <td>&nbsp;</td>
     <td class="indexkey">[x]</td><td>done</td>
   </tr>
@@ -42,17 +42,17 @@
     <td>Lars</td>
   </tr>
   <tr valign=top>
-    <td>[/]</td>
+    <td>[*]</td>
     <td>End-to-end testing of functions to write and read attributes</td>
     <td>Lars</td>
   </tr>
   <tr valign=top>
-    <td>[/]</td>
+    <td>[*]</td>
     <td>Remove multiply defined functions (e.g. h5getAttribute vs. h5get_attribute)</td>
     <td>Lars</td>
   </tr>
   <tr valign=top>
-    <td>[/]</td>
+    <td>[*]</td>
     <td>Where necessary add functions to support specific data types (e.g. casa::Vector<T>)</td>
     <td>Lars</td>
   </tr>
@@ -73,7 +73,7 @@
   </tr>
   <tr valign=top>
     <td>[x]</td>
-    <td>Get access to the CS1 station and antenna position tables</td>
+    <td>Get access to the CS1 station and antenna position tables (via Ruud)</td>
     <td>Lars</td>
   </tr>
   <tr valign=top>
@@ -107,14 +107,14 @@
     <td>Lars</td>
   </tr>
   <tr valign=top>
-    <td>[/]</td>
+    <td>[*]</td>
     <td>Upward propagation of metadata from DAL::TBB_StationGroup to DAL::TBB_Timeseries</td>
     <td>Lars</td>
   </tr>
   <tr valign=top>
     <td>[ ]</td>
     <td>Sync implementation and ICD</td>
-    <td></td>
+    <td>Lars</td>
   </tr>
   <tr valign=top>
     <td></td>
@@ -134,7 +134,7 @@
     <td class="indexkey">Responsible</td>
   </tr>
   <tr valign=top>
-    <td>[/]</td>
+    <td>[*]</td>
     <td>Build on multiple platforms (Intel Mac, Debian GNU Linux, SuSE Linux) to catch system dependent compile and runtime errors.</td>
     <td>Lars</td>
   </tr>
@@ -169,6 +169,11 @@
     <td>Lars</td>
   </tr>
   <tr valign=top>
+    <td>[*]</td>
+    <td>Verification of PPF inversion algorithm</td>
+    <td>Kalpana</td>
+  </tr>
+  <tr valign=top>
     <td></td>
     <td></td>
     <td></td>
@@ -186,12 +191,12 @@
     <td class="indexkey">Responsible</td>
   </tr>
   <tr valign=top>
-    <td>[/]</td>
+    <td>[*]</td>
     <td>Build on multiple platforms (Intel Mac, Debian GNU Linux, SuSE Linux) to catch system dependent compile and runtime errors.</td>
     <td>Lars, Marcel</td>
   </tr>
   <tr valign=top>
-    <td>[/]</td>
+    <td>[*]</td>
     <td>Arrange for Dart server to collect automated nightly builds</td>
     <td>Lars, Michael, Andre</td>
   </tr>

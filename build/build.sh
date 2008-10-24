@@ -1,4 +1,3 @@
-#!/bin/sh
 
 ##-------------------------------------------------------------------------------
 ## $Id:: CMakeLists.txt 724 2007-09-10 10:17:21Z baehren                        $
@@ -15,6 +14,10 @@
 
 basedir=`pwd`
 SYSTEM_NAME=`uname -s`
+FORCE_BUILD=0;
+CLEAN_BUILD=0;
+REPORT_BUILD=0;
+BUILD_TESTS=0;
 
 ## Required minimum version of CMake; system should provide a version at
 ## at least matching the one provided as part of the USG distribution
@@ -22,21 +25,15 @@ SYSTEM_NAME=`uname -s`
 REQUIRED_MAJOR_VERSION=2
 REQUIRED_MINOR_VERSION=6
 
-## Default values for the optional parameters
-
-param_forceBuild=0;
-param_cleanBuild=0;
-param_reportBuild='';
-
-## -----------------------------------------------------------------------------
+##______________________________________________________________________________
 ## Environment variables; in particular we need to ensure, the CMake binary can 
 ## be found. However failure in that could also signify, that there is no CMake
 ## available, so we need to make to sure we build it first.
 
-## parallelize the build if possible
+## parallelize build on selected systems
 
 if [ "$SYSTEM_NAME" == "Darwin" ] ; then
-  var_make="make -j 4"
+  var_make="make -j 5"
 else 
   var_make="make"
 fi
@@ -60,7 +57,7 @@ fi
 
 cd $basedir
 
-## -----------------------------------------------------------------------------
+##______________________________________________________________________________
 ## Helper functions
 
 print_help ()
@@ -204,7 +201,7 @@ build_package ()
     echo "-- Build directory ..... : $buildDir";
     echo "-- Source directory .... : $sourceDir";
     echo "-- Configuration options : $buildOptions";
-    echo "-- Send build log ...... : $param_reportBuild";
+    echo "-- Send build log ...... : $REPORT_BUILD";
     # change into the build directory
     cd $buildDir
     # run cmake on the source directory
@@ -217,10 +214,10 @@ build_package ()
     if test -z "`make help | grep install`" ; then
 	echo "[`date`] No target install for $buildDir."
     else
-	if test -z "$param_reportBuild" ; then
+	if [[ ${REPORT_BUILD} == 1 ]] ; then
+	    $var_make Experimental;
 	    $var_make install;
 	else
-	    $var_make Experimental;
 	    $var_make install;
 	fi
     fi
@@ -277,6 +274,7 @@ else
 	    rm -rf dal dsp;
 	    rm -rf flex;
 	    rm -rf hdf5;
+	    rm -rf mathgl;
 	    rm -rf plplot python;
 	    rm -rf root;
 	    rm -rf qt;
@@ -343,17 +341,17 @@ while [ "$option_found" == "true" ]
   do
   case $2 in
     --force-build)
-      param_forceBuild=1;
+      FORCE_BUILD=1;
       shift;
       echo " -- Recognized build option; forcing build."; 
     ;;
     --new-build)
-      param_cleanBuild=1;
+      CLEAN_BUILD=1;
       shift;
       echo " -- Recognized clean-build option; forcing new configuration."; 
     ;;
     --report-build)
-      param_reportBuild="--report-build"
+      REPORT_BUILD=1;
       shift
       echo " -- Recognized build option; reporting build/test results."; 
     ;;
@@ -375,15 +373,15 @@ build_cmake
 case $param_packageName in 
     bison)
         echo "[`date`] Selected package Bison";
-	build_package bison external/bison "-DBISON_FORCE_BUILD:BOOL=$param_forceBuild";
+	build_package bison external/bison "-DBISON_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     blitz)
         echo "[`date`] Selected package Blitz++";
-	build_package blitz external/blitz "-DBLITZ_FORCE_BUILD:BOOL=$param_forceBuild";
+	build_package blitz external/blitz "-DBLITZ_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     boost)
         echo "[`date`] Selected package Boost";
-        build_package boost external/boost "-DBOOST_FORCE_BUILD:BOOL=$param_forceBuild -DBOOST_FIND_python_ONLY:BOOL=1";
+        build_package boost external/boost "-DBOOST_FORCE_BUILD:BOOL=$FORCE_BUILD -DBOOST_FIND_python_ONLY:BOOL=1";
     ;;
     casacore)
         echo "[`date`] Selected package CASACORE";
@@ -392,11 +390,11 @@ case $param_packageName in
         build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=1";
 	cd $basedir; ./build.sh hdf5
         ## -- build package
-        build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$param_forceBuild";
+        build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     cfitsio)
         echo "[`date`] Selected package CFITSIO";
-        build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
+        build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     cmake)
        echo "[`date`] Selected package CMake";
@@ -404,17 +402,24 @@ case $param_packageName in
     ;;
     flex)
         echo "[`date`] Selected package Flex";
-	build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild"
+	build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$FORCE_BUILD"
     ;;
     hdf5)
         echo "[`date`] Selected package Hdf5"
-	build_package szip external/szip "-DSZIP_FORCE_BUILD:BOOL=$param_forceBuild";
-	#build_package zlib external/zlib "-DZLIB_FORCE_BUILD:BOOL=$param_forceBuild";
-	build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
+	build_package szip external/szip "-DSZIP_FORCE_BUILD:BOOL=$FORCE_BUILD";
+	#build_package zlib external/zlib "-DZLIB_FORCE_BUILD:BOOL=$FORCE_BUILD";
+	build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$FORCE_BUILD";
 	## post-installation clean-up: since the "--includedir" option does not seem
 	## to be handled properly by the configure script, we need to manually move
 	## the header files after installation
 	cd $basedir/../release/include ; mkdir hdf5 ; mv H5*.h hdf5 ; mv hdf5*.h hdf5
+    ;;
+    mathgl)
+        echo "[`date`] Selected package MathGL";
+        ## -- build required packages
+	cd $basedir; ./build.sh hdf5
+        ## -- build package
+	build_package mathgl external/mathgl
     ;;
     plplot)
         echo "[`date`] Selected package Plplot"
@@ -446,20 +451,20 @@ case $param_packageName in
     ;;
     qt)
         echo "[`date`] Selected package QT"
-	build_package qt external/qt "-DQT_FORCE_BUILD:BOOL=$param_forceBuild";
+	build_package qt external/qt "-DQT_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     root)
         echo "[`date`] Selected package ROOT"
-	build_package root external/root "-DROOT_FORCE_BUILD:BOOL=$param_forceBuild";
+	build_package root external/root "-DROOT_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     startools)
         echo "[`date`] Selected package Star-Tools"
 	cd $basedir; ./build.sh root
-	build_package startools external/startools "-DStarTools_FORCE_BUILD:BOOL=$param_forceBuild";
+	build_package startools external/startools "-DStarTools_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     szip)
         echo "[`date`] Selected package Star-Tools"
-	build_package szip external/szip "-DSZIP_FORCE_BUILD:BOOL=$param_forceBuild";
+	build_package szip external/szip "-DSZIP_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     vtk)
         echo "[`date`] Selected package VTK"
@@ -467,9 +472,9 @@ case $param_packageName in
     ;;
     wcslib)
         echo "[`date`] Selected package WCSLIB"
-	$basedir/build.sh bison $param_reportBuild
-	build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild";
-	build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
+	$basedir/build.sh bison $REPORT_BUILD
+	build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$FORCE_BUILD";
+	build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     wcstools)
         echo "[`date`] Selected package WCSTOOLS"
@@ -477,11 +482,11 @@ case $param_packageName in
     ;;
     wget)
         echo "[`date`] Selected package WGET"
-	build_package wget external/wget "-DWGET_FORCE_BUILD:BOOL=$param_forceBuild";
+	build_package wget external/wget "-DWGET_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     zlib)
         echo "[`date`] Selected package ZLIB"
-	build_package zlib external/zlib "-DZLIB_FORCE_BUILD:BOOL=$param_forceBuild";
+	build_package zlib external/zlib "-DZLIB_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     ## --------------------------------------------------------------------------
     ## --- USG software packages ------------------------------------------------
@@ -514,6 +519,7 @@ case $param_packageName in
         echo "[`date`] Processing packages required for CR-Tools ..."
 	cd $basedir; ./build.sh dal
 	cd $basedir; ./build.sh startools
+	cd $basedir; ./build.sh mathgl
 	echo "[`date`] Building CR-Tools package ..."
 	build_package cr src/CR-Tools;
     ;;

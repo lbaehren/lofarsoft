@@ -39,20 +39,24 @@ endif (USG_ROOT)
 
 ## External packages
 
+option (BUILD_BISON     "Build Bison?"                   YES )
+option (BUILD_BOOST     "Build the Boost libraries?"     YES )
 option (BUILD_CASACORE  "Build casacore?"                YES )
 option (BUILD_CFITSIO   "Build the CFITSIO library?"     YES )
+option (BUILD_MATHGL    "Build the MathGL package?"      YES )
 option (BUILD_STARTOOLS "Build the Star-Tools package?"  YES )
 option (BUILD_WCSLIB    "Build the WCS library?"         YES )
 option (BUILD_WCSTOOLS  "Build the WCS-Tools package?"   YES )
 
 ## USG packages
 
-option (BUILD_DAL      "Build the Data Access Library (DAL)?" NO )
-option (BUILD_CR       "Build the Cosmic Ray Tools?"          NO )
+option (BUILD_DAL      "Build the Data Access Library (DAL)?"     NO )
+option (BUILD_CONTRIB  "Build contributed programs and scripts?"  NO )
+option (BUILD_CR       "Build the Cosmic Ray Tools?"              NO )
 
 ## ==============================================================================
 ##
-##  Handling of options
+##  External packages
 ##
 ## ==============================================================================
 
