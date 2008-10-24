@@ -1309,7 +1309,7 @@ int main (int argc, char *argv[])
           // create branch name
           stringstream antNumber(""); 
           antNumber << it->second.antenna;
-          string branchname = "Ant_" + antNumber.str() + "_raw";
+          string branchname = "Ant_" + antNumber.str() + "_raw.";
           // check if branch allready exists and if not, create it
           if (! roottree.GetBranchStatus(branchname.c_str()))
             roottree.Branch(branchname.c_str(),"PulseProperties",&rawPulses[it->second.antenna-1]);
@@ -1330,7 +1330,7 @@ int main (int argc, char *argv[])
           // create branch name
           stringstream antNumber(""); 
           antNumber << it->second.antenna;
-          string branchname = "Ant_" + antNumber.str() + "_cal";
+          string branchname = "Ant_" + antNumber.str() + "_cal.";
           // check if branch allready exists and if not, create it
           if (! roottree.GetBranchStatus(branchname.c_str()))
             roottree.Branch(branchname.c_str(),"PulseProperties",&calibPulses[it->second.antenna-1]);
