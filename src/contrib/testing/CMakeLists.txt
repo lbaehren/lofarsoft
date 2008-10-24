@@ -80,6 +80,16 @@ endif (HAVE_BOOST)
 if (HAVE_HDF5)
 
   include_directories (${HDF5_INCLUDES})
+
+  ##__________________________________________________________________
+  ## Custom tests
+
+  add_executable (hdf5_attributes hdf5_attributes.cc)
+  target_link_libraries (hdf5_attributes ${HDF5_LIBRARIES})
+  add_test (hdf5_attributes hdf5_attributes)
+  
+  ##__________________________________________________________________
+  ## Third party tests
   
   set (tests_hdf5
     hdf5_attrs
