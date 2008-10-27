@@ -42,7 +42,7 @@
   
  PulseProperties::PulseProperties ():
     antennaID(0),
-    antenna(0.),
+    antenna(0),
     maximum(0.),
     envelopeMaximum(0.),
     minimum(0.),
