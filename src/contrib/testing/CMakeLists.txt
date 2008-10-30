@@ -95,6 +95,7 @@ if (HAVE_HDF5)
     hdf5_attrs
     hdf5_attrsarray
     hdf5_attrvstr
+	hdf5_cmpvlstrar
     hdf5_crtstr1
     hdf5_grpatt
     hdf5_h5cmpstr
