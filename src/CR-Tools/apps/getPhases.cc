@@ -31,7 +31,7 @@
 	 
   \author Frank Schröder
  
-  \date 2008/05/19
+  \date 2008/11/03
     
   <h3>Motivation</h3>
 
@@ -46,26 +46,31 @@
  
   <h3>Usage</h3>
   \verbatim
-  ./getPhases eventfile output-file start_frequency [stop_frequency [path]]
+  ./getPhases arguments
   \endverbatim
   
   <ul>
-    <li> eventfile = LOPES event file (.event)
-    <li> output-file = a file to which the output will be appended(!)
-    <li> start_frequency = frequency in Hz to look at
-    <li> stop_frequency = end of the frequency range to look at
-    <li> path = Path to LOPES calibration tables (if the default doesn't work)
+    Required arguments:
+    <li> --in         eventfile           LOPES event file (.event)
+    <li> --freq       start_frequency     frequency in Hz to look at
+    Optional argumens:
+    <li> --out        textfile            a file to which the output will be appended(!)
+    <li> --stopfreq   stop_frequency      end of the frequency range to look at
+    <li> --cal        CalTablePath        path to LOPES calibration tables (if the default doesn't work)
+    <li> --refant     reference antenna   if no refAnt is given, phases instead of phase diffs will be calculated
+    <li> --cutSample  number of samples   samples not used at the beginning and the end of the trace
+    <li> --help                           prints short help message
   </ul>
    
   <h3>Examples</h3>
 
   \verbatim
-  ./getPhases test.event output.txt 63500000
+  ./getPhases --in test.event --out output.txt --freq 63500000
   (reads the phases for the spectra of test.event at 63.5 MHz and appends it to output.txt)
-  ./getPhases test.event output.txt 63500000 0 /home/schroeder/usg/data/lopes/LOPES-CalTable/
+  ./getPhases --in test.event --out output.txt 63500000 --cal /home/schroeder/usg/data/lopes/LOPES-CalTable/
   (same, but using the calibration table at the specified path)
-  ./getPhases test.event output.txt 63000000 64000000
-  (reads the phases for the spectra of test.event at the heighest peak between 63 and 64 MHz)
+  ./getPhases --in test.event --out output.txt --freq 63000000 --stopfreq 64000000 --refant 1
+  (calculates the phase differences to antenna 1 at the frequency with the heighest peak between 63 and 64 MHz)
   \endverbatim  
 */
 
@@ -141,56 +146,111 @@ int main (int argc, char *argv[])
 {
   try
   {
-    // Check correct number of arguments (3 or 4 + program name = 4 or 5)
-    if ((argc < 4) || (argc > 6))
+    // Process the arguments
+    string eventfile("");	// event file for input
+    string outputfile("");	// test file for output
+    double startFreq = -1;	// start frequency
+    double stopFreq = 0;	// stop frequency if a peak in a frequency range should be searched for
+    unsigned int refAnt = 0;    // reference antenna for calculation of phase differences
+    string CalTablePath("/home/schroeder/usg/data/lopes/LOPES-CalTable"); // default
+    unsigned int cutSamples = 0;// unused samples at the beginning and the end of the trace
+    int i = 1;		//counter for arguments
+    while (i < argc)
     {
-      std::cerr << "Wrong number of arguments in call of \"getPhases\".\n The correct format is:\n";
-      std::cerr << "getPhases LOPES-event output-file start_frequency [stop_frequency [Path to Caltables]]\n";
-      std::cerr << "for example:\n";
-      std::cerr << "./getPhases example.event output.txt 63500000\n";
-      std::cerr << "If no CalTable-path is given, the default will be used.\n" << std::endl;
-      return 1;				// Exit the program
-    }
-
-    // assign the arguments:
-
-    // name of the event
-    string eventfile(argv[1]);
-
-    // name of the output file
-    string outputfile(argv[2]);
-
-    // the startFreq argument must be a positive double 
-    double startFreq = -1;
-    string tempString(argv[3]);
-    stringstream(tempString) >> startFreq; 
-    if (startFreq <= 0)
-    {
-      std::cerr << "Error: startFreq must by a positive double\n";
-      std::cerr << "Please specify the frequency in Hz.\n";
-      return 1;				// Exit the program
-    }
-
-    // the stopFreq argument must be a positive double if supplied, if not set it to zero
-    double stopFreq = -1;
-    if (argc >= 5)
-    {
-      string tempString2(argv[4]);
-      stringstream(tempString2) >> stopFreq; 
-      if (stopFreq < 0)
-      {
-        std::cerr << "Error: stopFreq must by a non-negative double\n";
-        std::cerr << "Please specify the frequency in Hz.\n";
-        return 1;				// Exit the program
+      // get option and argument
+      string option(argv[i]);
+      i++;
+      // look for keywords which require no argument
+      if ( (option == "--help") || (option == "-help")
+           || (option == "--h") || (option == "-h")) {
+        cout << "getPhases calculates the phase of a event at a certain frequency.\n"
+             << "Possible options and arguments:\n" 
+             << "option        argument\n"
+             << "--help                           Displays this help message\n"
+             << "--in, -i      eventfile          The name of the input file (required)\n"
+             << "--out, -o     outputfile         The name of the output file (optional)\n"
+             << "--freq, -f    frequency in Hz    (Start)frequency to look at (required)\n"
+             << "--stopfreq    frequency in Hz    (Stop)frequency for peak search in interval (optional)\n"
+             << "--cal         path               Path to calibration tables\n"
+             << "--refant      antenna number     Calculates phase differences to this antenna instead of phases\n"
+             << "--cutsamples  antenna number     Unused samples at the beginning and the end of the trace\n"
+             << endl;
+        continue;
       }
-    } else
-      stopFreq = 0;
 
+      // now look for options which require an argument and get the argument
+      if (i >= argc) {
+        cerr << "ERROR: No argument given for option or unknown option: \"" << option << "\"\n";
+        cerr << "Use --help for more information." << endl;
+        return 1;			// Exit the program if argument is missing
+      }
+      string argument(argv[i]);
+      i++;
 
-    // Default CalTable-Path
-    string CalTablePath="/home/schroeder/usg/data/lopes/LOPES-CalTable";
-    // Check if there are 4 arguments: The last one is the path to the Caltables
-    if (argc >= 6) CalTablePath.assign(argv[5]);
+      // look for keywords which require an option
+      if ( (option == "--in") || (option == "-in")
+           || (option == "--i") || (option == "-i")) {
+        eventfile = argument;
+        continue;
+      }
+
+      if ( (option == "--out") || (option == "-out")
+           || (option == "--o") || (option == "-o")) {
+        outputfile = argument;
+        continue;
+      }
+
+      if ( (option == "--cal") || (option == "-cal")
+           || (option == "--c") || (option == "-c")) {
+        CalTablePath = argument;
+        continue;
+      }
+
+      if ( (option == "--freq") || (option == "-freq")
+           || (option == "--f") || (option == "-f")) {
+        stringstream(argument) >> startFreq;
+        continue;
+      }
+
+      if ( (option == "--stopfreq") || (option == "-stopfreq")) {
+        stringstream(argument) >> stopFreq;
+        continue;
+      }
+
+      if ( (option == "--refant") || (option == "-refant")
+           || (option == "--r") || (option == "-r")) {
+        stringstream(argument) >> refAnt;
+        continue;
+      }
+
+       if ( (option == "--cutsamples") || (option == "-cutsamples")
+           || (option == "--cs") || (option == "-cs")) {
+        stringstream(argument) >> cutSamples;
+        continue;
+      }
+
+      // if loop comes here, the option was not found
+      cerr << "ERROR: Invalid option: \"" << option << "\"\n";
+      cerr << "Use --help for more information." << endl;
+      return 1;			// Exit the program if argument is missing
+    }
+
+     // Check if options are set correctly
+     if (eventfile == "") {
+       cerr << "ERROR: Please set an input file with the --in option!\n";
+       cerr << "Use --help for more information." << endl;
+       return 1;
+     }
+     if (startFreq <= 0) {
+      std::cerr << "ERROR: startfreq must by a positive double.\n";
+       cerr << "Please set a frequency with the --freq option.\n";
+       cerr << "Use --help for more information." << endl;
+       return 1;
+     }
+     if (stopFreq < 0) {
+       std::cerr << "ERROR: stoptfreq must by a non-negative double.\n";
+       return 1;
+     }
 
     cout << "Intialising event: " << eventfile << std::endl;
 
@@ -201,22 +261,20 @@ int main (int argc, char *argv[])
     obsrec.define("LOPES",CalTablePath);
     pipeline.SetObsRecord(obsrec);
 
-    if (! dr.attachFile(eventfile) )
-    {
+    if (! dr.attachFile(eventfile) ) {
       std::cerr << "Failed to attach file: " << eventfile << std::endl;
       return 1;
-    };
+    }
 
     // switch off certain calibration steps:
     pipeline.doGainCal(false);			// has no effect on phases of the calFFT
     pipeline.doDispersionCal(false);		// application of dispersion correction
     pipeline.doDelayCal(false);		// correction of antenna delays
 
-    if (! pipeline.InitEvent(&dr))
-    {
+    if (! pipeline.InitEvent(&dr)) {
       std::cerr << "Failed to initialize the DataReader!" << std::endl;
       return 1;
-    };
+    }
 
     // set a time range in the data reader
     // this is useful, to consider only a part of the trace for the FFT
@@ -229,8 +287,16 @@ int main (int argc, char *argv[])
     //number of elements smaller then end time
     unsigned int stopsample = ntrue(dr.timeValues()<stop_time);
 
+    startsample += cutSamples;
+    stopsample -= cutSamples;
+
+    if (startsample >= stopsample) {
+       cerr << "ERROR: cutSamples must be < 1/2 of the total samples, which are: " << dr.timeValues().size() << endl;
+       return 1;
+    }
     // WARNING:
     // Phasedifferences seem to depend dramatically on the exact number of samples and frequency
+    // (Problem does not persist anymore if one uses a fixed number of samples)
 
     // print information and set it in the datareader if only an interval of the time series is used
     if ( (startsample!=0) || (stopsample != dr.timeValues().size()) )
@@ -266,28 +332,45 @@ int main (int argc, char *argv[])
     Matrix<DComplex> spectra = dr.fft(); // use fft() instead of calfft() to get faster results
     Vector<Double> phases = phase(spectra.row(freqIndex))*180./3.1415926;
 
-    // open output file in append-mode
-    ofstream outputfile_stream;
-    outputfile_stream.open(outputfile.c_str(), ofstream::app);
+    // substract reference phase if refAnt is given (and not too big)
+    if (refAnt > phases.size() ) {
+      cout << "WARNING: Reference antenna must be <= " << phases.size() << ".\n"
+           << "No phase differences will be calculated" << endl;
+    } else
+    if (refAnt > 0) {
+      double refPhase = phases(refAnt -1);
+      phases = phases - refPhase;
+    }
 
-    // check if file could be opened
-    if (!(outputfile_stream.is_open()))
-    {
-      std::cerr << "Failed to open file \"" << outputfile <<"\" in append-mode." << std::endl;
-    } else 
-    {
-      cout << "Appending phases to file: " << outputfile << endl;
+    // if an output filename was given, write output
+    if (outputfile == "") {
+      cout << "Output will not be written to a file." << endl;
+    } else {
+      // open output file in append-mode
+      ofstream outputfile_stream;
+      outputfile_stream.open(outputfile.c_str(), ofstream::app);
 
-      // Write the output (name of eventfile and phases in columns)
-      outputfile_stream << "\"" << eventfile << "\"";
+      // check if file could be opened
+      if (!(outputfile_stream.is_open()))
+      {
+        std::cerr << "Failed to open file \"" << outputfile <<"\" in append-mode." << std::endl;
+      }   else 
+      {
+        cout << "Appending phases to file: " << outputfile << endl;
 
-      // loop through antennas and write the pases (seperated by space)
-      for (unsigned int i = 0; i < phases.size(); i++)
-        outputfile_stream << " " << phases(i);
+        // Write the output (name of eventfile and phases in columns)
+        outputfile_stream << "\"" << eventfile << "\"";
 
-      // end the output file with a new line and close it
-      outputfile_stream << endl;
-      outputfile_stream.close();
+        // loop through antennas and write the pases (seperated by space)
+        //const unsigned int nAntennas = phases.size();
+        const unsigned int nAntennas = 3;
+        for (unsigned int i = 0; i < nAntennas; i++)
+          outputfile_stream << " " << phases(i);
+
+        // end the output file with a new line and close it
+        outputfile_stream << endl;
+        outputfile_stream.close();
+      }
     }
   } catch (AipsError x) 
   {
