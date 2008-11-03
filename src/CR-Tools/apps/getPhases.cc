@@ -362,8 +362,7 @@ int main (int argc, char *argv[])
         outputfile_stream << "\"" << eventfile << "\"";
 
         // loop through antennas and write the pases (seperated by space)
-        //const unsigned int nAntennas = phases.size();
-        const unsigned int nAntennas = 3;
+        const unsigned int nAntennas = phases.size();
         for (unsigned int i = 0; i < nAntennas; i++)
           outputfile_stream << " " << phases(i);
 
