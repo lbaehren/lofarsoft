@@ -42,12 +42,12 @@
     <td>Lars</td>
   </tr>
   <tr valign=top>
-    <td>[*]</td>
+    <td>[x]</td>
     <td>End-to-end testing of functions to write and read attributes</td>
     <td>Lars</td>
   </tr>
   <tr valign=top>
-    <td>[*]</td>
+    <td>[x]</td>
     <td>Remove multiply defined functions (e.g. h5getAttribute vs. h5get_attribute)</td>
     <td>Lars</td>
   </tr>
