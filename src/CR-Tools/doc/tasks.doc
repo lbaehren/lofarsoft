@@ -3,6 +3,9 @@
 \page tasks Task list towards a CR pipeline for LOFAR20
 
 - \ref tasks_dal
+  - \ref tasks_dalCommon
+  - \ref tasks_tbb2h5
+  - \ref tasks_hdf5
 - \ref tasks_crtools
 - \ref tasks_infrastructure
 - \ref tasks_formats
@@ -93,7 +96,7 @@
   </tr>
 </table>
 
-\subsection tasks_tbb High-level interface to HDF5 TBB data
+\subsection tasks_hdf5 High-level interfaces to LOFAR HDF5 datasets
 
 <table border=0>
   <tr>
@@ -109,6 +112,11 @@
   <tr valign=top>
     <td>[*]</td>
     <td>Upward propagation of metadata from DAL::TBB_StationGroup to DAL::TBB_Timeseries</td>
+    <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td>[*]</td>
+    <td>Export of attributes/metadata as casa::Record</td>
     <td>Lars</td>
   </tr>
   <tr valign=top>
@@ -209,6 +217,12 @@
     <td>[ ]</td>
     <td>Transition of LOFAR central software towards using CMake for configuration and build</td>
     <td></td>
+  </tr>
+  <tr valign=top>
+    <td>[*]</td>
+    <td>Import \e pyrap package (Python binding for \e casacore) into USG code tree, including
+	CMake-based configuration/build</td>
+    <td>Lars</td>
   </tr>
   <tr valign=top>
     <td></td>
