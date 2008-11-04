@@ -275,7 +275,7 @@ else
 	    rm -rf flex;
 	    rm -rf hdf5;
 	    rm -rf mathgl;
-	    rm -rf plplot python;
+	    rm -rf plplot pyrap python;
 	    rm -rf root;
 	    rm -rf qt;
 	    rm -rf startools szip;
@@ -443,6 +443,12 @@ case $param_packageName in
 	cd $basedir
 	$basedir/build.sh plplot
     fi
+    ;;
+    pyrap)
+        echo "[`date`] Selected package Pyrap"
+        cd $basedir; ./build.sh casacore
+        cd $basedir; ./build.sh python
+        build_package pyrap external/pyrap
     ;;
     python)
         echo "[`date`] Selected package PYTHON"
