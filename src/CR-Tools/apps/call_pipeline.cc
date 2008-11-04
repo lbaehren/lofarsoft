@@ -49,9 +49,22 @@ using CR::LopesEventIn;
   and any configurations how to analyse the events should be provide
   be external, human readable files.
 
+  <h3>Usage</h3>
+  \verbatim
+  ./call_pipeline arguments
+  \endverbatim
+  
+  <ul>
+    Required arguments:
+    <li> --in         eventfile list      list with LOPES event files (.event)
+    Optional argumens:
+    <li> --config     textfile            a file with configuration settings for the pipeline
+    <li> --help                           prints a help message
+  </ul>
+
   <h3>Prerequisites</h3>
   <br>
-  You need at least one event list file (textfile) like the following example:<br>
+  You need at least one event list file (textfile) like the example files below:<br>
   <br>
   <br>
   \verbatim
@@ -136,7 +149,7 @@ using CR::LopesEventIn;
   <h3>Example</h3>
 
   \verbatim
-  ./call_pipeline eventlist.txt configs.txt
+  ./call_pipeline --in eventlist.txt --config config.txt
   \endverbatim
 
   <h3>Upsampling</h3>
@@ -155,6 +168,8 @@ using CR::LopesEventIn;
   <h3>Calibration</h3>
   The calibration mode can be switched on by calibration = true in the config file.
   It can be used for processing LOPES events for the delay calibration.
+  In calibration mode the eventlist must contain only the event files but not additional
+  information like Az, El, core and curvature.
 
 */
 
@@ -207,66 +222,30 @@ void readConfigFile (const string &filename)
       configfile.open (filename.c_str(), ifstream::in);
 
       // check if file could be opened
-      if (!(configfile.is_open()))
-      {
-        std::cerr << "Failed to open file \"" << filename <<"\".\n";
-        std::cerr << "Program will continue with default configuration." << std::endl;
+      if (!(configfile.is_open())) {
+        cerr << "Failed to open file \"" << filename <<"\".\n";
+        cerr << "Program will continue with default configuration." << endl;
         return;		// exit function
       }
 
       // look for the beginnig of the config data (after a line containing only and at least three '-' or '='	
       string temp_read;
       bool configs_found = false;
-      while ((configs_found == false) && (configfile.good()))
-      {
+      while ((configs_found == false) && (configfile.good())) {
 	configfile >> temp_read;
         if ((temp_read.find("---") != string::npos) || (temp_read.find("===") != string::npos))
-        {
 	  configs_found = true;
-        }
       }
 	
       // print warning if no configs were found and countinue program using default values
-      if (configs_found == false)
-      {
+      if (configs_found == false) {
         configfile.close();  // close file
-        std::cerr << "\nWarning!";
-        std::cerr << "\nNo config information was foung in file \"" << filename <<"\".\n" ;
-        std::cerr << "Use the following file format ('=' seperated by spaces): \n\n";
-        std::cerr << "some lines of text\n";
-        std::cerr << "===================================\n";
-        std::cerr << "caltablepath = /home/schroeder/usg/data/lopes/LOPES-CalTable\n";
-        std::cerr << "path = /home/schroeder/lopes/events\n";
-        std::cerr << "RotatePos = true\n";
-        std::cerr << "GeneratePlots = true\n";
-        std::cerr << "SinglePlots = true\n";
-        std::cerr << "PlotRawData = false\n";
-        std::cerr << "CalculateMaxima = false\n";
-        std::cerr << "listCalcMaxima=false\n";
-        std::cerr << "printShowerCoordinates=false\n";
-        std::cerr << "verbose = true\n";
-        std::cerr << "simplexFit = true\n";
-        std::cerr << "doTVcal = default\n";
-        std::cerr << "doGainCal = true\n";
-        std::cerr << "doDispersionCal = true\n";
-        std::cerr << "doDelayCal = true\n";
-        std::cerr << "doRFImitigation = true\n";
-        std::cerr << "polarization = ANY\n";
-        std::cerr << "plotBegin = -2.05e-6\n";
-        std::cerr << "plotEnd = -1.60e-6\n";
-        std::cerr << "upsamplingRate = 320e6\n";
-        std::cerr << "upsamplingExponent = 1\n";
-        std::cerr << "summaryColumns = 3\n";
-        std::cerr << "ccWindowWidth = 0.045e-6\n";
-        std::cerr << "flagged = 10101\n";
-        std::cerr << "flagged = 10102\n";
-        std::cerr << "rootfilename = output.root\n";
-        std::cerr << "calibration = false\n";
-        std::cerr << "... \n";
-        std::cerr << "\nProgram will continue using default configuration values." << std::endl;
+        cerr << "\nWarning!";
+        cerr << "\nNo config information was foung in file \"" << filename <<"\".\n" ;
+        cerr << "Type \"call_pipeline --help\" for help.\n";
+        cerr << "\nProgram will continue using default configuration values." << endl;
       }
-      else while(configfile.good()) // read configurations if configs_found
-      {
+      else while(configfile.good()) { // read configurations if configs_found
         string keyword, value, equal_token;
 
         // read in first keyword, then a token that should be '=' and afterward the value for the keyword
@@ -280,652 +259,532 @@ void readConfigFile (const string &filename)
 					// configfile.good() should be false now.
 
         // check if syntax ("=") is correct		
-        if (equal_token.compare("=") != 0)
-        {
-          std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-          std::cerr << "No '=' was found after \"" << keyword << "\".\n";
-          std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+        if (equal_token.compare("=") != 0) {
+          cerr << "\nError processing file \"" << filename <<"\".\n" ;
+          cerr << "No '=' was found after \"" << keyword << "\".\n";
+          cerr << "\nProgram will continue skipping the problem." << endl;
         }
 
         // check keywords an set appropriate configurations
 
-        if ( (keyword.compare("path")==0) || (keyword.compare("Path")==0) )
-        {
+        if ( (keyword.compare("path")==0) || (keyword.compare("Path")==0) ) {
 	  path = value;
           // add final "/" if not allready there
           if ( path[path.length()-1] != '/') path += "/";
 
-	  std::cout << "Path set to \"" << path << "\".\n";
+	  cout << "Path set to \"" << path << "\".\n";
 	}
 
         if ( (keyword.compare("generateplots")==0) || (keyword.compare("GeneratePlots")==0) ||
-             (keyword.compare("generatePlots")==0))
-        {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
-	  {
+             (keyword.compare("generatePlots")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
 	    generatePlots = true;
-	    std::cout << "GeneratePlots set to 'true'.\n";
+	    cout << "GeneratePlots set to 'true'.\n";
 	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
-	  {
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
 	    generatePlots = false;
-	    std::cout << "GeneratePlots set to 'false'.\n";
-          } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "GeneratePlots must be either 'true' or 'false'.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "GeneratePlots set to 'false'.\n";
+          } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "GeneratePlots must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
-        }	
+        }
 
         if ( (keyword.compare("singleplots")==0) || (keyword.compare("SinglePlots")==0) ||
-             (keyword.compare("singlePlots")==0))
-        {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
-	  {
+             (keyword.compare("singlePlots")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
 	    singlePlots = true;
-	    std::cout << "SinglePlots set to 'true'.\n";
+	    cout << "SinglePlots set to 'true'.\n";
 	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
-	  {
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
 	    singlePlots = false;
-	    std::cout << "SinglePlots set to 'false'.\n";
-          } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "SinglePlots must be either 'true' or 'false'.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "SinglePlots set to 'false'.\n";
+          } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "SinglePlots must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
-        }	
+        }
 
         if ( (keyword.compare("plotrawdata")==0) || (keyword.compare("PlotRawData")==0) ||
-             (keyword.compare("plotRawdata")==0) || (keyword.compare("plotRawData")==0) )
-        {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
-	  {
+             (keyword.compare("plotRawdata")==0) || (keyword.compare("plotRawData")==0) ) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
 	    PlotRawData = true;
-	    std::cout << "PlotRawData set to 'true'.\n";
+	    cout << "PlotRawData set to 'true'.\n";
 	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
-	  {
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
 	    PlotRawData = false;
-	    std::cout << "PlotRawData set to 'false'.\n";
-          } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "PlotRawData must be either 'true' or 'false'.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "PlotRawData set to 'false'.\n";
+          } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "PlotRawData must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
-        }	
+        }
 
         if ( (keyword.compare("calculatemaxima")==0) || (keyword.compare("CalculateMaxima")==0) ||
-             (keyword.compare("Calculatemaxima")==0) || (keyword.compare("calculateMaxima")==0))
-        {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
-	  {
+             (keyword.compare("Calculatemaxima")==0) || (keyword.compare("calculateMaxima")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
 	    CalculateMaxima = true;
-	    std::cout << "CalculateMaxima set to 'true'.\n";
+	    cout << "CalculateMaxima set to 'true'.\n";
 	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
-	  {
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
 	    CalculateMaxima = false;
-	    std::cout << "CalculateMaxima set to 'false'.\n";
-          } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "CalculateMaxima must be either 'true' or 'false'.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "CalculateMaxima set to 'false'.\n";
+          } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "CalculateMaxima must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
-        }	
+        }
 
         if ( (keyword.compare("listcalcmaxima")==0) || (keyword.compare("ListCalcMaxima")==0) ||
-             (keyword.compare("listCalcMaxima")==0) )
-        {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
-	  {
+             (keyword.compare("listCalcMaxima")==0) ) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
 	    listCalcMaxima = true;
-	    std::cout << "listCalcMaxima set to 'true'.\n";
+	    cout << "listCalcMaxima set to 'true'.\n";
 	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
-	  {
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
 	    listCalcMaxima = false;
-	    std::cout << "listCalcMaxima set to 'false'.\n";
-          } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "listCalcMaxima must be either 'true' or 'false'.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "listCalcMaxima set to 'false'.\n";
+          } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "listCalcMaxima must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
-        }	
+        }
 
         if ( (keyword.compare("printShowerCoordinates")==0) || (keyword.compare("printShowerCoordinates")==0) ||
-             (keyword.compare("printShowerCoordinates")==0) )
-        {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
-	  {
+             (keyword.compare("printShowerCoordinates")==0) ) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
 	    printShowerCoordinates = true;
-	    std::cout << "printShowerCoordinates set to 'true'.\n";
+	    cout << "printShowerCoordinates set to 'true'.\n";
 	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
-	  {
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
 	    printShowerCoordinates = false;
-	    std::cout << "printShowerCoordinates set to 'false'.\n";
-          } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "printShowerCoordinates must be either 'true' or 'false'.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "printShowerCoordinates set to 'false'.\n";
+          } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "printShowerCoordinates must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
-        }	
+        }
 
-        if ( (keyword.compare("rotatepos")==0) || (keyword.compare("RotatePos")==0))
-        {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
-	  {
+        if ( (keyword.compare("rotatepos")==0) || (keyword.compare("RotatePos")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
 	    RotatePos = true;
-	    std::cout << "RotatePos set to 'true'.\n";
+	    cout << "RotatePos set to 'true'.\n";
 	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
-	  {
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
 	    RotatePos = false;
-	    std::cout << "RotatePos set to 'false'.\n";
-          } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "RotatePos must be either 'true' or 'false'.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "RotatePos set to 'false'.\n";
+          } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "RotatePos must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
-        }	
+        }
 
-        if ( (keyword.compare("verbose")==0) || (keyword.compare("Verbose")==0))
-        {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
-	  {
+        if ( (keyword.compare("verbose")==0) || (keyword.compare("Verbose")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
 	    verbose = true;
-	    std::cout << "Verbose set to 'true'.\n";
+	    cout << "Verbose set to 'true'.\n";
 	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
-	  {
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
 	    verbose = false;
-	    std::cout << "Verbose set to 'false'.\n";
-	  } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "Verbose must be either 'true' or 'false'.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "Verbose set to 'false'.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "Verbose must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
-        }	
+        }
 
-        if ( (keyword.compare("simplexfit")==0) || (keyword.compare("simplexFit")==0) || (keyword.compare("SimplexFit")==0))
-        {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
-	  {
+        if ( (keyword.compare("simplexfit")==0) || (keyword.compare("simplexFit")==0) || (keyword.compare("SimplexFit")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
 	    simplexFit = true;
-	    std::cout << "SimplexFit set to 'true'.\n";
+	    cout << "SimplexFit set to 'true'.\n";
 	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
-	  {
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
 	    simplexFit = false;
-	    std::cout << "SimplexFit set to 'false'.\n";
-	  } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "SimplexFit must be either 'true' or 'false'.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "SimplexFit set to 'false'.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "SimplexFit must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
 	}
 
         if ( (keyword.compare("dotvcal")==0) || (keyword.compare("doTVcal")==0) 
-             || (keyword.compare("DoTVCal")==0) || (keyword.compare("doTVCal")==0))
-        {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
-	  {
+             || (keyword.compare("DoTVCal")==0) || (keyword.compare("doTVCal")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
 	    doTVcal = 1;
-	    std::cout << "doTVcal set to 1 (TV calibration will be done.).\n";
+	    cout << "doTVcal set to 1 (TV calibration will be done.).\n";
 	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
-	  {
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
 	    doTVcal = 0;
-	    std::cout << "doTVcal set to 0 (TV calibration won't be done.).\n";
+	    cout << "doTVcal set to 0 (TV calibration won't be done.).\n";
 	  } else
-	  if ( (value.compare("default")==0) || (value.compare("Default")==0) || (value.compare("-1")==0) )
-	  {
+	  if ( (value.compare("default")==0) || (value.compare("Default")==0) || (value.compare("-1")==0) ) {
 	    doTVcal = -1;
-	    std::cout << "doTVcal set to -1 (default will be used).\n";
-	  } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "doTVcal must be either -1 ('default'), 0 ('false') or 1 ('true').\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "doTVcal set to -1 (default will be used).\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "doTVcal must be either -1 ('default'), 0 ('false') or 1 ('true').\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
         }
 
-        if ( (keyword.compare("doGaincal")==0) || (keyword.compare("doGainCal")==0) 
-             || (keyword.compare("DoGainCal")==0) || (keyword.compare("dogaincal")==0))
-        {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
-	  {
+        if ( (keyword.compare("doGaincal")==0) || (keyword.compare("doGainCal")==0)
+             || (keyword.compare("DoGainCal")==0) || (keyword.compare("dogaincal")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
 	    doGainCal = true;
-	    std::cout << "doGainCal set to 'true'.\n";
+	    cout << "doGainCal set to 'true'.\n";
 	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
-	  {
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
 	    doGainCal = false;
-	    std::cout << "doGainCal set to 'false'.\n";
-	  } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "doGainCal must be either 'true' or 'false'.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "doGainCal set to 'false'.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "doGainCal must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
 	}
 
-        if ( (keyword.compare("doDispersioncal")==0) || (keyword.compare("doDispersionCal")==0) 
-             || (keyword.compare("DoDispersionCal")==0) || (keyword.compare("dodispersioncal")==0))
-        {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
-	  {
+        if ( (keyword.compare("doDispersioncal")==0) || (keyword.compare("doDispersionCal")==0)
+             || (keyword.compare("DoDispersionCal")==0) || (keyword.compare("dodispersioncal")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
 	    doDispersionCal = true;
-	    std::cout << "doDispersionCal set to 'true'.\n";
+	    cout << "doDispersionCal set to 'true'.\n";
 	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
-	  {
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
 	    doDispersionCal = false;
-	    std::cout << "doDispersionCal set to 'false'.\n";
-	  } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "doDispersionCal must be either 'true' or 'false'.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "doDispersionCal set to 'false'.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "doDispersionCal must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
 	}
 
-        if ( (keyword.compare("doDelaycal")==0) || (keyword.compare("doDelayCal")==0) 
-             || (keyword.compare("DoDelayCal")==0) || (keyword.compare("dodelaycal")==0))
-        {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
-	  {
+        if ( (keyword.compare("doDelaycal")==0) || (keyword.compare("doDelayCal")==0)
+             || (keyword.compare("DoDelayCal")==0) || (keyword.compare("dodelaycal")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
 	    doDelayCal = true;
-	    std::cout << "doDelayCal set to 'true'.\n";
+	    cout << "doDelayCal set to 'true'.\n";
 	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
-	  {
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
 	    doDelayCal = false;
-	    std::cout << "doDelayCal set to 'false'.\n";
-	  } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "doDelayCal must be either 'true' or 'false'.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "doDelayCal set to 'false'.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "doDelayCal must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
 	}
 
 
-        if ( (keyword.compare("doRFImitigation")==0) || (keyword.compare("DoRFIMitigation")==0) 
-             || (keyword.compare("DoRFImitigation")==0) || (keyword.compare("dorfimitigation")==0))
-        {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
-	  {
+        if ( (keyword.compare("doRFImitigation")==0) || (keyword.compare("DoRFIMitigation")==0)
+             || (keyword.compare("DoRFImitigation")==0) || (keyword.compare("dorfimitigation")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
 	    doRFImitigation = true;
-	    std::cout << "doRFImitigation set to 'true'.\n";
+	    cout << "doRFImitigation set to 'true'.\n";
 	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
-	  {
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
 	    doRFImitigation = false;
-	    std::cout << "doRFImitigation set to 'false'.\n";
-	  } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "doRFImitigation must be either 'true' or 'false'.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "doRFImitigation set to 'false'.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "doRFImitigation must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
 	}
 
-        if ( (keyword.compare("polarization")==0) || (keyword.compare("Polarization")==0) 
-             || (keyword.compare("polarisation")==0) || (keyword.compare("Polarisation")==0))
-        {
-          if ( (value.compare("ANY")==0) || (value.compare("any")==0) )
-	  {
+        if ( (keyword.compare("polarization")==0) || (keyword.compare("Polarization")==0)
+             || (keyword.compare("polarisation")==0) || (keyword.compare("Polarisation")==0)) {
+          if ( (value.compare("ANY")==0) || (value.compare("any")==0) ) {
 	    polarization = "ANY";
             both_pol = false;
-	    std::cout << "polarization set to ANY (polarization won't be considered during analysis).\n";
+	    cout << "polarization set to ANY (polarization won't be considered during analysis).\n";
 	  } else
-          if ( (value.compare("EW")==0) || (value.compare("ew")==0) )
-	  {
+          if ( (value.compare("EW")==0) || (value.compare("ew")==0) ) {
 	    polarization = "EW";
             both_pol = false;
-	    std::cout << "polarization set to EW (only EW antennas will be beamformed).\n";
+	    cout << "polarization set to EW (only EW antennas will be beamformed).\n";
 	  } else
-	  if ( (value.compare("NS")==0) || (value.compare("ns")==0) )
-	  {
+	  if ( (value.compare("NS")==0) || (value.compare("ns")==0) ) {
 	    polarization = "NS";
             both_pol = false;
-	    std::cout << "polarization set to NS (only NS antennas will be beamformed).\n";
+	    cout << "polarization set to NS (only NS antennas will be beamformed).\n";
 	  } else
-	  if ( (value.compare("Both")==0) || (value.compare("BOTH")==0) || (value.compare("both")==0) )
-	  {
+	  if ( (value.compare("Both")==0) || (value.compare("BOTH")==0) || (value.compare("both")==0) ) {
 	    polarization = "BOTH";
             both_pol = true;
-	    std::cout << "polarization set to BOTH (EW and NS antennas will be beamformed seperatly).\n";
-	  } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "Polarization must be either ANY, EW, NS or BOTH.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "polarization set to BOTH (EW and NS antennas will be beamformed seperatly).\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "Polarization must be either ANY, EW, NS or BOTH.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
         }
 
-        if ( (keyword.compare("plotStart")==0) || (keyword.compare("PlotStart")==0) || (keyword.compare("plotstart")==0))
-        {
+        if ( (keyword.compare("plotStart")==0) || (keyword.compare("PlotStart")==0) || (keyword.compare("plotstart")==0)) {
           double temp = 9999999;
-          stringstream(value) >> temp; 
+          stringstream(value) >> temp;
 
-          if (temp != 9999999)  // will be false, if value is not of typ "double"
-	  {
-            plotStart = temp; 
-	    std::cout << "PlotStart set to " << plotStart << " seconds.\n";
-	  } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "PlotStart must be of typ 'double'. \n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          if (temp != 9999999) { // will be false, if value is not of typ "double"
+            plotStart = temp;
+	    cout << "PlotStart set to " << plotStart << " seconds.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "PlotStart must be of typ 'double'. \n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
         }
 
-        if ( (keyword.compare("plotEnd")==0) || (keyword.compare("PlotEnd")==0) || (keyword.compare("plotend")==0))
-        {
+        if ( (keyword.compare("plotEnd")==0) || (keyword.compare("PlotEnd")==0) || (keyword.compare("plotend")==0)) {
           double temp = 9999999;
-          stringstream(value) >> temp; 
+          stringstream(value) >> temp;
 
-          if (temp != 9999999)  // will be false, if value is not of typ "double"
-	  {
-            plotEnd = temp; 
-	    std::cout << "PlotEnd set to " << plotEnd << " seconds.\n";
-	  } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "PlotEnd must be of typ 'double'. \n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          if (temp != 9999999) { // will be false, if value is not of typ "double"
+            plotEnd = temp;
+	    cout << "PlotEnd set to " << plotEnd << " seconds.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "PlotEnd must be of typ 'double'. \n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
         }
 
         if ( (keyword.compare("upsamplingRate")==0) || (keyword.compare("UpsamplingRate")==0) 
-	  || (keyword.compare("upsamplingrate")==0))
-        {
+	  || (keyword.compare("upsamplingrate")==0)) {
           double temp = 9999999;
-          stringstream(value) >> temp; 
+          stringstream(value) >> temp;
 
-          if (temp != 9999999)  // will be false, if value is not of typ "double"
-	  {
-            upsamplingRate = temp; 
-	    std::cout << "UpsamplingRate set to " << upsamplingRate << " Hz.\n";
+          if (temp != 9999999) {  // will be false, if value is not of typ "double"
+            upsamplingRate = temp;
+	    cout << "UpsamplingRate set to " << upsamplingRate << " Hz.\n";
             // For upsampling rates < 80 MHz no upsampling will be done,
             // but for upsampling rates between 80 and 160 MHz strange results
             // may occur. So show a warning in this case:
 	    if ((upsamplingRate >= 80e6) && (upsamplingRate < 160e6))
-              std::cerr << "WARNING: UpsamplingRate should be larger than 160 MHz to obtain useful results.\n";
-	  } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "UpsamplingRate must be of typ 'double'. \n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+              cerr << "WARNING: UpsamplingRate should be larger than 160 MHz to obtain useful results.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "UpsamplingRate must be of typ 'double'. \n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
         }
 
         if ( (keyword.compare("upsamplingExponent")==0) || (keyword.compare("UpsamplingExponent")==0) 
-	  || (keyword.compare("upsamplingexponent")==0))
-        {
+	  || (keyword.compare("upsamplingexponent")==0)) {
           unsigned int temp = 9999999;
-          stringstream(value) >> temp; 
+          stringstream(value) >> temp;
 
-          if (temp != 9999999)  // will be false, if value is not of typ "int"
-	  {
-            upsamplingExponent = temp; 
-	    std::cout << "UpsamplingExponent set to " << upsamplingExponent<< ".\n";
-	  } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "UpsamplingExponent must be of typ 'unsignend int'. \n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          if (temp != 9999999) {  // will be false, if value is not of typ "int"
+            upsamplingExponent = temp;
+	    cout << "UpsamplingExponent set to " << upsamplingExponent<< ".\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "UpsamplingExponent must be of typ 'unsignend int'. \n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
         }
 
-        if ( (keyword.compare("summarycolumns")==0) || (keyword.compare("summaryColumns")==0) 
-	  || (keyword.compare("SummaryColumns")==0))
-        {
+        if ( (keyword.compare("summarycolumns")==0) || (keyword.compare("summaryColumns")==0)
+	  || (keyword.compare("SummaryColumns")==0)) {
           unsigned int temp = 9999999;
-          stringstream(value) >> temp; 
+          stringstream(value) >> temp;
 
-          if (temp != 9999999)  // will be false, if value is not of typ "int"
-	  {
-            summaryColumns = temp; 
-	    std::cout << "SummaryColumns set to " << summaryColumns << ".\n";
-	  } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "SummaryColumns must be of typ 'unsignend int'. \n";
-            std::cerr << "Use 'summaryColumns = 0' if you don't want to hava a summary postscrict.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          if (temp != 9999999) {  // will be false, if value is not of typ "int"
+            summaryColumns = temp;
+	    cout << "SummaryColumns set to " << summaryColumns << ".\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "SummaryColumns must be of typ 'unsignend int'. \n";
+            cerr << "Use 'summaryColumns = 0' if you don't want to hava a summary postscrict.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
         }
 
-        if ( (keyword.compare("ccwindowwidth")==0) || (keyword.compare("CCWindowWidth")==0) || 
+        if ( (keyword.compare("ccwindowwidth")==0) || (keyword.compare("CCWindowWidth")==0) ||
               (keyword.compare("CCwindowwidth")==0) || (keyword.compare("ccWindowWidth")==0))
         {
           double temp = 9999999;
-          stringstream(value) >> temp; 
+          stringstream(value) >> temp;
 
-          if (temp != 9999999)  // will be false, if value is not of typ "double"
-	  {
-            ccWindowWidth = temp; 
-	    std::cout << "ccWindowWidth set to " << ccWindowWidth << " seconds.\n";
-	  } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "ccWindowWidth must be of typ 'double'. \n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          if (temp != 9999999) { // will be false, if value is not of typ "double"
+            ccWindowWidth = temp;
+	    cout << "ccWindowWidth set to " << ccWindowWidth << " seconds.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "ccWindowWidth must be of typ 'double'. \n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
         }
-
 
 	// flagg antennas
         if ( (keyword.compare("flagged")==0) || (keyword.compare("Flagged")==0))
         {
-          if ( (value.compare("10101")==0) || (value.compare("1")==0) )
-	  {
+          if ( (value.compare("10101")==0) || (value.compare("1")==0) ) {
 	    flagged.push_back(10101);
-	    std::cout << "Flagged antenna 1 (id = 10101).\n";
+	    cout << "Flagged antenna 1 (id = 10101).\n";
 	  } else
-          if ( (value.compare("10102")==0) || (value.compare("2")==0) )
-	  {
+          if ( (value.compare("10102")==0) || (value.compare("2")==0) ) {
 	    flagged.push_back(10102);
-	    std::cout << "Flagged antenna 2 (id = 10102).\n";
+	    cout << "Flagged antenna 2 (id = 10102).\n";
 	  } else
-          if ( (value.compare("10201")==0) || (value.compare("3")==0) )
-	  {
+          if ( (value.compare("10201")==0) || (value.compare("3")==0) ) {
 	    flagged.push_back(10201);
-	    std::cout << "Flagged antenna 3 (id = 10201).\n";
+	    cout << "Flagged antenna 3 (id = 10201).\n";
 	  } else
-          if ( (value.compare("10202")==0) || (value.compare("4")==0) )
-	  {
+          if ( (value.compare("10202")==0) || (value.compare("4")==0) ) {
 	    flagged.push_back(10202);
-	    std::cout << "Flagged antenna 4 (id = 10202).\n";
+	    cout << "Flagged antenna 4 (id = 10202).\n";
 	  } else
-          if ( (value.compare("20101")==0) || (value.compare("5")==0) )
-	  {
+          if ( (value.compare("20101")==0) || (value.compare("5")==0) ) {
 	    flagged.push_back(20101);
-	    std::cout << "Flagged antenna 5 (id = 20101).\n";
+	    cout << "Flagged antenna 5 (id = 20101).\n";
 	  } else
-          if ( (value.compare("20102")==0) || (value.compare("6")==0) )
-	  {
+          if ( (value.compare("20102")==0) || (value.compare("6")==0) ) {
 	    flagged.push_back(20102);
-	    std::cout << "Flagged antenna 6 (id = 20102).\n";
+	    cout << "Flagged antenna 6 (id = 20102).\n";
 	  } else
-          if ( (value.compare("20201")==0) || (value.compare("7")==0) )
-	  {
+          if ( (value.compare("20201")==0) || (value.compare("7")==0) ) {
 	    flagged.push_back(20201);
-	    std::cout << "Flagged antenna 7 (id = 20201).\n";
+	    cout << "Flagged antenna 7 (id = 20201).\n";
 	  } else
-          if ( (value.compare("20202")==0) || (value.compare("8")==0) )
-	  {
+          if ( (value.compare("20202")==0) || (value.compare("8")==0) ) {
 	    flagged.push_back(20202);
-	    std::cout << "Flagged antenna 8 (id = 20202).\n";
+	    cout << "Flagged antenna 8 (id = 20202).\n";
 	  } else
-          if ( (value.compare("30101")==0) || (value.compare("9")==0) )
-	  {
+          if ( (value.compare("30101")==0) || (value.compare("9")==0) ) {
 	    flagged.push_back(30101);
-	    std::cout << "Flagged antenna 9 (id = 30101).\n";
+	    cout << "Flagged antenna 9 (id = 30101).\n";
 	  } else
-          if ( (value.compare("30102")==0) || (value.compare("10")==0) )
-	  {
+          if ( (value.compare("30102")==0) || (value.compare("10")==0) ) {
 	    flagged.push_back(30102);
-	    std::cout << "Flagged antenna 10 (id = 30102).\n";
+	    cout << "Flagged antenna 10 (id = 30102).\n";
 	  } else
-          if ( (value.compare("40101")==0) || (value.compare("11")==0) )
-	  {
+          if ( (value.compare("40101")==0) || (value.compare("11")==0) ) {
 	    flagged.push_back(40101);
-	    std::cout << "Flagged antenna 11 (id = 40101).\n";
+	    cout << "Flagged antenna 11 (id = 40101).\n";
 	  } else
-          if ( (value.compare("40102")==0) || (value.compare("12")==0) )
-	  {
+          if ( (value.compare("40102")==0) || (value.compare("12")==0) ) {
 	    flagged.push_back(40102);
-	    std::cout << "Flagged antenna 12 (id = 40102).\n";
+	    cout << "Flagged antenna 12 (id = 40102).\n";
 	  } else
-          if ( (value.compare("40201")==0) || (value.compare("13")==0) )
-	  {
+          if ( (value.compare("40201")==0) || (value.compare("13")==0) ) {
 	    flagged.push_back(40201);
-	    std::cout << "Flagged antenna 13 (id = 40201).\n";
+	    cout << "Flagged antenna 13 (id = 40201).\n";
 	  } else
-          if ( (value.compare("40202")==0) || (value.compare("14")==0) )
-	  {
+          if ( (value.compare("40202")==0) || (value.compare("14")==0) ) {
 	    flagged.push_back(40202);
-	    std::cout << "Flagged antenna 14 (id = 40202).\n";
+	    cout << "Flagged antenna 14 (id = 40202).\n";
 	  } else
-          if ( (value.compare("50101")==0) || (value.compare("15")==0) )
-	  {
+          if ( (value.compare("50101")==0) || (value.compare("15")==0) ) {
 	    flagged.push_back(50101);
-	    std::cout << "Flagged antenna 15 (id = 50101).\n";
+	    cout << "Flagged antenna 15 (id = 50101).\n";
 	  } else
-          if ( (value.compare("50102")==0) || (value.compare("16")==0) )
-	  {
+          if ( (value.compare("50102")==0) || (value.compare("16")==0) ) {
 	    flagged.push_back(50102);
-	    std::cout << "Flagged antenna 16 (id = 50102).\n";
+	    cout << "Flagged antenna 16 (id = 50102).\n";
 	  } else
-          if ( (value.compare("50201")==0) || (value.compare("17")==0) )
-	  {
+          if ( (value.compare("50201")==0) || (value.compare("17")==0) ) {
 	    flagged.push_back(50201);
-	    std::cout << "Flagged antenna 17 (id = 50201).\n";
+	    cout << "Flagged antenna 17 (id = 50201).\n";
 	  } else
-          if ( (value.compare("50202")==0) || (value.compare("18")==0) )
-	  {
+          if ( (value.compare("50202")==0) || (value.compare("18")==0) ) {
 	    flagged.push_back(50202);
-	    std::cout << "Flagged antenna 18 (id = 50202).\n";
+	    cout << "Flagged antenna 18 (id = 50202).\n";
 	  } else
-          if ( (value.compare("60101")==0) || (value.compare("19")==0) )
-	  {
+          if ( (value.compare("60101")==0) || (value.compare("19")==0) ) {
 	    flagged.push_back(60101);
-	    std::cout << "Flagged antenna 19 (id = 60101).\n";
+	    cout << "Flagged antenna 19 (id = 60101).\n";
 	  } else
-          if ( (value.compare("60102")==0) || (value.compare("20")==0) )
-	  {
+          if ( (value.compare("60102")==0) || (value.compare("20")==0) ) {
 	    flagged.push_back(60102);
-	    std::cout << "Flagged antenna 20 (id = 60102).\n";
+	    cout << "Flagged antenna 20 (id = 60102).\n";
 	  } else
-          if ( (value.compare("70101")==0) || (value.compare("21")==0) )
-	  {
+          if ( (value.compare("70101")==0) || (value.compare("21")==0) ) {
 	    flagged.push_back(70101);
-	    std::cout << "Flagged antenna 21 (id = 70101).\n";
+	    cout << "Flagged antenna 21 (id = 70101).\n";
 	  } else
-          if ( (value.compare("70102")==0) || (value.compare("22")==0) )
-	  {
+          if ( (value.compare("70102")==0) || (value.compare("22")==0) ) {
 	    flagged.push_back(70102);
-	    std::cout << "Flagged antenna 22 (id = 70102).\n";
+	    cout << "Flagged antenna 22 (id = 70102).\n";
 	  } else
-          if ( (value.compare("70201")==0) || (value.compare("23")==0) )
-	  {
+          if ( (value.compare("70201")==0) || (value.compare("23")==0) ) {
 	    flagged.push_back(70201);
-	    std::cout << "Flagged antenna 23 (id = 70201).\n";
+	    cout << "Flagged antenna 23 (id = 70201).\n";
 	  } else
-          if ( (value.compare("70202")==0) || (value.compare("24")==0) )
-	  {
+          if ( (value.compare("70202")==0) || (value.compare("24")==0) ) {
 	    flagged.push_back(70202);
-	    std::cout << "Flagged antenna 24 (id = 70202).\n";
+	    cout << "Flagged antenna 24 (id = 70202).\n";
 	  } else
-          if ( (value.compare("80101")==0) || (value.compare("25")==0) )
-	  {
+          if ( (value.compare("80101")==0) || (value.compare("25")==0) ) {
 	    flagged.push_back(80101);
-	    std::cout << "Flagged antenna 25 (id = 80101).\n";
+	    cout << "Flagged antenna 25 (id = 80101).\n";
 	  } else
-          if ( (value.compare("80102")==0) || (value.compare("26")==0) )
-	  {
+          if ( (value.compare("80102")==0) || (value.compare("26")==0) ) {
 	    flagged.push_back(80102);
-	    std::cout << "Flagged antenna 26 (id = 80102).\n";
+	    cout << "Flagged antenna 26 (id = 80102).\n";
 	  } else
-          if ( (value.compare("80201")==0) || (value.compare("27")==0) )
-	  {
+          if ( (value.compare("80201")==0) || (value.compare("27")==0) ) {
 	    flagged.push_back(80201);
-	    std::cout << "Flagged antenna 27 (id = 80201).\n";
+	    cout << "Flagged antenna 27 (id = 80201).\n";
 	  } else
-          if ( (value.compare("80202")==0) || (value.compare("28")==0) )
-	  {
+          if ( (value.compare("80202")==0) || (value.compare("28")==0) ) {
 	    flagged.push_back(80202);
-	    std::cout << "Flagged antenna 28 (id = 80202).\n";
+	    cout << "Flagged antenna 28 (id = 80202).\n";
 	  } else
-          if ( (value.compare("90101")==0) || (value.compare("29")==0) )
-	  {
+          if ( (value.compare("90101")==0) || (value.compare("29")==0) ) {
 	    flagged.push_back(90101);
-	    std::cout << "Flagged antenna 29 (id = 90101).\n";
+	    cout << "Flagged antenna 29 (id = 90101).\n";
 	  } else
           if ( (value.compare("90102")==0) || (value.compare("30")==0) )
 	  {
 	    flagged.push_back(90102);
-	    std::cout << "Flagged antenna 30 (id = 90102).\n";
-	  } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "'Flagged = ' must be followed by a valid antenna id.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "Flagged antenna 30 (id = 90102).\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "'Flagged = ' must be followed by a valid antenna id.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
         }
 
-        if ( (keyword.compare("caltablepath")==0) || (keyword.compare("CalTablePath")==0) )
-        {
+        if ( (keyword.compare("caltablepath")==0) || (keyword.compare("CalTablePath")==0) ) {
 	  caltablepath = value;
-	  std::cout << "CalTablePath set to \"" << caltablepath << "\".\n";
+	  cout << "CalTablePath set to \"" << caltablepath << "\".\n";
 	}
 
         if ( (keyword.compare("rootfilename")==0) || (keyword.compare("Rootfilename")==0)
-           || (keyword.compare("rootFilename")==0) || (keyword.compare("RootFilename")==0))
-        {
+           || (keyword.compare("rootFilename")==0) || (keyword.compare("RootFilename")==0)) {
 	  rootFilename = value;
-	  std::cout << "RootFilename set to \"" << rootFilename << "\".\n";
+	  cout << "RootFilename set to \"" << rootFilename << "\".\n";
 	}
  
-        if ( (keyword.compare("calibration")==0) || (keyword.compare("calibration")==0) 
-             || (keyword.compare("calibrationmode")==0) || (keyword.compare("CalibrationMode")==0))
-        {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
-	  {
+        if ( (keyword.compare("calibration")==0) || (keyword.compare("calibration")==0)
+             || (keyword.compare("calibrationmode")==0) || (keyword.compare("CalibrationMode")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
 	    calibrationMode = true;
-	    std::cout << "calibration set to 'true'.\n";
+	    cout << "calibration set to 'true'.\n";
 	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
-	  {
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
 	    calibrationMode = false;
-	    std::cout << "calibration set to 'false'.\n";
-	  } else
-          {
-            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "calibration must be either 'true' or 'false'.\n";
-            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+	    cout << "calibration set to 'false'.\n";
+	  } else{
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "calibration must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
           }
 	}
       }	// while(configfile.good())
 
       // close config file
       configfile.close();
-  } catch (AipsError x) 
-  {
+  } catch (AipsError x) {
     cerr << "call_pipeline:readConfigFile: " << x.getMesg() << endl;
   }
 }
@@ -955,76 +814,141 @@ int main (int argc, char *argv[])
       calibPulses[i] = new PulseProperties();
     }
 
-    std::cout << "\nStarting Program \"call_pipline\".\n\n" << std::endl;
 
-    // Check correct number of arguments (1 or 2 + program name = 2 or 3)
-    if ((argc < 2) || (argc >3))
+    cout << "\nStarting Program \"call_pipline\".\n\n" << endl;
+
+    // check arguments of call_pipeline
+    int i = 1;		//counter for arguments
+    while (i < argc)
     {
-      std::cerr << "Wrong number of arguments in call of \"call_pipeline\". The correct format is:\n";
-      std::cerr << "call_pipeline eventfilelist [configfile]\n" << std::endl;
-      return 1;				// Exit the program
+      // get option and argument
+      string option(argv[i]);
+      i++;
+      // look for keywords which require no argument
+      if ( (option == "--help") || (option == "-help")
+           || (option == "--h") || (option == "-h")) {
+        cout << "call_pipeline runs the CR-Tools pipeline for LOPES events.\n"
+             << "Possible options and arguments:\n"
+             << "option        argument\n"
+             << "--help                           Displays this help message\n"
+             << "--in, -i      eventfilelist      A test file which contains a list of events to process (required)\n"
+             << "--config, -c  configfile         A file containing configuration parameters how to process the events (optional)\n"
+             << "\n\nUse the following file format for the eventlist: \n\n"
+             << "some lines of text\n"
+             << "===================================\n"
+             << "eventfile1 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n"
+             << "eventfile2 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n"
+             << "... \n"
+             << "\n\nUse the following file format for the config file\n"
+             << "('=' must be seperated by spaces): \n\n"
+             << "some lines of text\n"
+             << "===================================\n"
+             << "caltablepath = /home/schroeder/usg/data/lopes/LOPES-CalTable\n"
+             << "path = /home/schroeder/lopes/events\n"
+             << "RotatePos = true\n"
+             << "GeneratePlots = true\n"
+             << "SinglePlots = true\n"
+             << "PlotRawData = false\n"
+             << "CalculateMaxima = false\n"
+             << "listCalcMaxima=false\n"
+             << "printShowerCoordinates=false\n"
+             << "verbose = true\n"
+             << "simplexFit = true\n"
+             << "doTVcal = default\n"
+             << "doGainCal = true\n"
+             << "doDispersionCal = true\n"
+             << "doDelayCal = true\n"
+             << "doRFImitigation = true\n"
+             << "polarization = ANY\n"
+             << "plotBegin = -2.05e-6\n"
+             << "plotEnd = -1.60e-6\n"
+             << "upsamplingRate = 320e6\n"
+             << "upsamplingExponent = 1\n"
+             << "summaryColumns = 3\n"
+             << "ccWindowWidth = 0.045e-6\n"
+             << "flagged = 10101\n"
+             << "flagged = 10102\n"
+             << "rootfilename = output.root\n"
+             << "calibration = false\n"
+             << "... \n"
+             << endl;
+        return 0;	// exit here
+      }
+
+      // now look for options which require an argument and get the argument
+      if (i >= argc) {
+        cerr << "ERROR: No argument given for option or unknown option: \"" << option << "\"\n";
+        cerr << "Use --help for more information." << endl;
+        return 1;			// Exit the program if argument is missing
+      }
+      string argument(argv[i]);
+      i++;
+
+      // look for keywords which require an option
+      if ( (option == "--in") || (option == "-in")
+           || (option == "--i") || (option == "-i")) {
+        eventfilelistname = argument;
+        continue;
+      }
+
+      if ( (option == "--config") || (option == "-config")
+           || (option == "--c") || (option == "-c")) {
+        cout << "Reading config data from file: " << argument << endl;
+        readConfigFile(argument);
+        continue;
+      }
+
+      // if loop comes here, the option was not found
+      cerr << "ERROR: Invalid option: \"" << option << "\"\n";
+      cerr << "Use --help for more information." << endl;
+      return 1;			// Exit the program if argument is missing
     }
 
-    // First argument should be the name of the file containing the list of event files
-    eventfilelistname.assign(argv[1]);
-    std::cout << "File containing list of event files: " << eventfilelistname << std::endl;
-
-    // If a second argument is available it sould contain the name of the config file
-    if (argc == 3) 
-    {
-      std::cout << "Reading config data from file: " << argv[2] << std::endl;
-      readConfigFile(argv[2]);
+    // Check if options are set correctly
+    if (eventfilelistname == "") {
+      cerr << "ERROR: Please set an eventlist file with the --in option!\n";
+      cerr << "Use --help for more information." << endl;
+      return 1;
     }
+    cout << "Processing eventlist: " << eventfilelistname << endl;
 
     // open event file list
     ifstream eventfilelist;
     eventfilelist.open (eventfilelistname.c_str(), ifstream::in);
 
     // check if file could be opened
-    if (!(eventfilelist.is_open()))
-    {
-      std::cerr << "Failed to open file \"" << eventfilelistname <<"\"." << std::endl;
+    if (!(eventfilelist.is_open())) {
+      cerr << "Failed to open file \"" << eventfilelistname <<"\"." << endl;
       return 1;		// exit program
     }
 
     // look for the beginnig of the data (after a line containing only and at least three '-' or '='	
     string temp_read;
     bool data_found = false;
-    while ((data_found == false) && (eventfilelist.good()))
-    {
+    while ((data_found == false) && (eventfilelist.good())) {
       eventfilelist >> temp_read;
       if ((temp_read.find("---") != string::npos) || (temp_read.find("===") != string::npos))
-      {
-	data_found = true;
-      }
+        data_found = true;
     }
-	
+
     // exit program if no data are found	
-    if (data_found == false)
-    {
+    if (data_found == false) {
       eventfilelist.close();  // close file
-      std::cerr << "\nNo list of event files found in file \"" << eventfilelistname <<"\".\n" ;
-      std::cerr << "Use the following file format: \n\n";
-      std::cerr << "some lines of text\n";
-      std::cerr << "===================================\n";
-      std::cerr << "eventfile1 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
-      std::cerr << "eventfile2 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
-      std::cerr << "... \n" << std::endl;
+      cerr << "\nNo list of event files found in file \"" << eventfilelistname <<"\".\n" ;
+      cerr << "Type \"call_pipeline --help\" for help.\n" << endl;
       return 1;		// exit program
     }
 
     // prepare output in root file
     TFile *rootfile=NULL;
 
-    if (rootFilename != "")
-    {
+    if (rootFilename != "") {
       // open root file and create tree structure
       rootfile = new TFile(rootFilename.c_str(),"RECREATE","Resulst of CR-Tools pipeline");
 
       // check if file is open
-      if (rootfile->IsZombie()) 
-      {
-        std::cerr << "\nError: Could not create file: " << rootFilename << "\n" << std::endl;
+      if (rootfile->IsZombie()) {
+        cerr << "\nError: Could not create file: " << rootFilename << "\n" << endl;
         return 1;		// exit program
       }
     }
@@ -1093,20 +1017,20 @@ int main (int argc, char *argv[])
       if (read_in_error)		
       {
         eventfilelist.close();  // close file
-	std::cerr << "\nError processing file \"" << eventfilelistname <<"\".\n" ;
-	std::cerr << "Use the following file format: \n\n";
-	std::cerr << "some lines of text\n";
-	std::cerr << "===================================\n";
+	cerr << "\nError processing file \"" << eventfilelistname <<"\".\n" ;
+	cerr << "Use the following file format: \n\n";
+	cerr << "some lines of text\n";
+	cerr << "===================================\n";
         if (calibrationMode)
         {
-          std::cerr << "eventfile1\n";
-          std::cerr << "eventfile2\n";
+          cerr << "eventfile1\n";
+          cerr << "eventfile2\n";
         } else
         {
-          std::cerr << "eventfile1 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
-          std::cerr << "eventfile2 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]]\n";
+          cerr << "eventfile1 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
+          cerr << "eventfile2 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]]\n";
         }
-	std::cerr << "... \n" << std::endl;
+	cerr << "... \n" << endl;
 	return 1;		// exit program
       }
 	
@@ -1122,12 +1046,12 @@ int main (int argc, char *argv[])
       // print information and process the event
       if (calibrationMode)
       {
-        std::cout << "\nProcessing calibration event \"" << filename << "\".\n" << std::endl;
+        cout << "\nProcessing calibration event \"" << filename << "\".\n" << endl;
       } else
       {
-        std::cout << "\nProcessing event \"" << filename << "\"\nwith azimuth " << azimuth << " °, elevation " << elevation
+        cout << "\nProcessing event \"" << filename << "\"\nwith azimuth " << azimuth << " °, elevation " << elevation
                   << " °, distance (radius of curvature) " << distance << " m, core position X " << core_x
-                  << " m and core position Y " << core_y << " m.\n" << std::endl;
+                  << " m and core position Y " << core_y << " m.\n" << endl;
       }
 
       // Set observatory record to LOPES
@@ -1315,6 +1239,7 @@ int main (int argc, char *argv[])
             roottree.Branch(branchname.c_str(),"PulseProperties",&rawPulses[it->second.antenna-1]);
         }
       }
+      for ( map<int,PulseProperties>::iterator it=calibPulsesMap.begin() ; it != calibPulsesMap.end(); it++ )
 
       // fill information in array for calibrated pulses
       for ( map<int,PulseProperties>::iterator it=calibPulsesMap.begin() ; it != calibPulsesMap.end(); it++ )
@@ -1340,8 +1265,9 @@ int main (int argc, char *argv[])
       // write output to root tree
       if (rootFilename != "")
       {
-        cout << "Adding results to root tree.\n" << endl;
+        cout << "Adding results to root tree and saving root file \"" << rootFilename << "\"\n" << endl;
         roottree.Fill();
+        rootfile->Write("",TObject::kOverwrite);
       }
     }
 
@@ -1349,21 +1275,18 @@ int main (int argc, char *argv[])
     eventfilelist.close();
 
     // write and close root file
-    if (rootFilename != "")
-    {
-      cout << "Writing outout to root file: " << rootFilename << endl;
-
-      rootfile->Write();
+    if (rootFilename != "") {
+      cout << "Closing root file: " << rootFilename << endl;
       rootfile->Close();
     }
 
-  // free space
-  for (int i=0; i < MAX_NUM_ANTENNAS; i++)
-  {
-    delete rawPulses[i];
-    delete calibPulses[i];
-  }
+    // free space
+    for (int i=0; i < MAX_NUM_ANTENNAS; i++) {
+      delete rawPulses[i];
+      delete calibPulses[i];
+    }
 
+    cout << "\nPipeline finished successfully.\n" << endl;
 
   } catch (AipsError x) 
   {
