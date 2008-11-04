@@ -296,7 +296,7 @@ namespace CR { // Namespace CR -- begin
   
   bool LOFAR_TBB::setHeaderRecord () 
   {
-    header_p = DAL::TBB_Timeseries::attributes2headerRecord();
+    DAL::TBB_Timeseries::attributes2record(header_p,false,true);
     try {
       header_p.define("SampleFreq",DataReader::sampleFrequency());
       //      header_p.define("StartSample",headerpoint_p->SampleNr);
