@@ -50,7 +50,11 @@
     envelopeTime(0.),
     minimumTime(0.),
     halfheightTime(0.),
-    fwhm(0.)
+    fwhm(0.),
+    distX(-1.),
+    distY(-1.),
+    dist(-1.),
+    polarization("")
   {}
   
   // ============================================================================

@@ -104,6 +104,14 @@
     double halfheightTime;
     //! FWHM
     double fwhm;
+    //! antenna position in shower coordinates x
+    double distX;
+    //! antenna position in shower coordinates x
+    double distY;
+    //! distance of antenna position from shower axis
+    double dist;
+    //! polarization
+    std::string polarization;
 
     // --------------------------------------------------------------- Parameters
     

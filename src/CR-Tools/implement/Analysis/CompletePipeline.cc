@@ -1190,6 +1190,7 @@ namespace CR { // Namespace CR -- begin
         pulse.minimumTime = timeRange(mintimevalue)*1e9;
         pulse.halfheightTime = pulsestart*1e9;
         pulse.fwhm = (pulsestop-pulsestart)*1e9;
+        pulse.polarization = Polarization;
 
         // store pulse properties in map
         pulses[antennaIDs(i)] = pulse;

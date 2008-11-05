@@ -373,11 +373,9 @@ namespace CR { // Namespace CR -- begin
                                                   const double& Yc,
                                                   const unsigned int date) const
   {
-    try 
-    {
+    try {
       // check if size is consistent
-      if ( AntPos.nrow() != distances.size())
-      {
+      if ( AntPos.nrow() != distances.size()) {
         cerr << "analyseLOPESevent2::printAntennaDistances: " 
              << "ERROR: number of distances and antenna positions are different!" <<  endl;
         return;		// exit function without showing (confusing) results
@@ -388,8 +386,7 @@ namespace CR { // Namespace CR -- begin
       std::cout << "An  dist_x    dist_y    dist"<<std::endl;
 
       // loop through all antennas in print the distances (should be in shower coordinates)
-      for (unsigned int i=0 ; i < distances.size(); i++)
-      {
+      for (unsigned int i=0 ; i < distances.size(); i++) {
         std::cout << std::setw(2) << i+1 << " " << std::setw(8) << AntPos.row(i)(0) << "  ";
         std::cout << std::setw(8) << AntPos.row(i)(1) << "  " << std::setw(8) <<distances(i)<<std::endl;
       }

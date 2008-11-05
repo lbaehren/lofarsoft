@@ -799,12 +799,12 @@ int main (int argc, char *argv[])
 
   // variables for reconstruction information (output of pipeline)
   unsigned int gt = 0;
-  double CCheight, CCheight_NS;                  // CCheight will be used for EW polarization or ANY polarization
-  double AzL, ElL, AzL_NS, ElL_NS;               // Azimuth and Elevation
-  map <int,PulseProperties> rawPulsesMap;        // pulse properties of pules in raw data traces
-  map <int,PulseProperties> calibPulsesMap;      // pulse properties of pules in calibrated data traces
-  PulseProperties* rawPulses[MAX_NUM_ANTENNAS];  // use array of pointers to store pulse properties in root tree
-  PulseProperties* calibPulses[MAX_NUM_ANTENNAS];// use array of pointers to store pulse properties in root tree
+  double CCheight, CCheight_NS;                     // CCheight will be used for EW polarization or ANY polarization
+  double AzL, ElL, AzL_NS, ElL_NS;                  // Azimuth and Elevation
+  map <int,PulseProperties> rawPulsesMap;           // pulse properties of pules in raw data traces
+  map <int,PulseProperties> calibPulsesMap;         // pulse properties of pules in calibrated data traces
+  PulseProperties* rawPulses[MAX_NUM_ANTENNAS];     // use array of pointers to store pulse properties in root tree
+  PulseProperties* calibPulses[MAX_NUM_ANTENNAS];   // use array of pointers to store pulse properties in root tree
   try
   {
     // allocate space for arrays with pulse properties
@@ -1146,6 +1146,10 @@ int main (int argc, char *argv[])
           // if summaryColumns = 0 the method does not create a summary.
           eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",summaryColumns);
 
+          // get the pulse properties
+          rawPulsesMap = eventPipeline.getRawPulseProperties();
+          calibPulsesMap = eventPipeline.getCalibPulseProperties();
+
           // adding results to variables (needed to fill them into the root tree)
           AzL = results.asDouble("Azimuth");
           ElL = results.asDouble("Elevation");
@@ -1202,6 +1206,13 @@ int main (int argc, char *argv[])
            if summaryColumns = 0 the method does not create a summary. */
           eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",summaryColumns);
 
+          // get the pulse properties and insert them into allready existing EW map
+          // (which will be empty, if polarization = EW, but still existing
+          map <int,PulseProperties> newPulses(eventPipeline.getRawPulseProperties());
+          rawPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
+          newPulses = eventPipeline.getCalibPulseProperties();
+          calibPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
+
           // adding results to variables (needed to fill them into the root tree)
           AzL_NS = results.asDouble("Azimuth");
           ElL_NS = results.asDouble("Elevation");
@@ -1213,22 +1224,17 @@ int main (int argc, char *argv[])
 
       // process pulse properties
       // delete arrays
-      for (int i=0; i < MAX_NUM_ANTENNAS; i++)
-      {
+      for (int i=0; i < MAX_NUM_ANTENNAS; i++) {
         *rawPulses[i] = PulseProperties();
         *calibPulses[i] = PulseProperties();
       }
 
       // fill information in array for raw pulses
-      for ( map<int,PulseProperties>::iterator it=rawPulsesMap.begin() ; it != rawPulsesMap.end(); it++ )
-      {
+      for ( map<int,PulseProperties>::iterator it=rawPulsesMap.begin() ; it != rawPulsesMap.end(); it++ ) {
         // check if antenna number lies in valid range
-        if ( (it->second.antenna < 1) || (it->second.antenna >= MAX_NUM_ANTENNAS) )
-        {
+        if ( (it->second.antenna < 1) || (it->second.antenna >= MAX_NUM_ANTENNAS) ) {
           cerr << "\nWARNING: Antenna number in rawPulsesMap is out of range!" << endl;
-        }
-        else
-        {
+        } else {
           *rawPulses[it->second.antenna-1] = it->second;
           // create branch name
           stringstream antNumber(""); 
