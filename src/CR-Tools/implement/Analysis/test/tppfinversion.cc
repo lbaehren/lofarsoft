@@ -92,30 +92,6 @@ int test_ppfinversion (std::string const &filename)
     */
     DAL::BeamFormed bf (filename );
     bf.summary();
-    cout << "-- Extracting beam group from dataset ..." << endl;
-    int numBeam (0);
-    int nofBeams = bf.number_of_beams();
-//     DAL::BeamGroup * group = bf.getBeam (numBeam);
-//     //
-//     group->summary();
-    std::cout << "[1] Attributes of the root group..." << std::endl;
-
-    std::cout << "-- Filename       = " << bf.filename()        << std::endl;
-    std::cout << "-- Telescope      = " << bf.telescope()       << std::endl;
-    std::cout << "-- nof. stations  = " << bf.nofStations()     << std::endl;
-    std::cout << "-- Datatype       = " << bf.datatype()        << std::endl;
-    std::cout << "-- EM band        = " << bf.emband()          << std::endl;
-    std::cout << "-- Observation ID = " << bf.observation_id()  << std::endl;
-    std::cout << "-- Project ID     = " << bf.proj_id()         << std::endl;
-    std::cout << "-- nof. beams     = " << bf.number_of_beams() << std::endl;
-    //
-    std::vector<std::string> sources = bf.sources();
-    std::cout << "-- Sources        = [";
-    for (unsigned int idx=0; idx<sources.size(); idx++) {
-      std::cout << " " << sources[ idx ];
-    }
-    std::cout << " ]" << std::endl;
-    
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
