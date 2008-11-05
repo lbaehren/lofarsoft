@@ -56,7 +56,8 @@
   </tr>
   <tr valign=top>
     <td>[*]</td>
-    <td>Where necessary add functions to support specific data types (e.g. casa::Vector<T>)</td>
+    <td>Where necessary add functions to support specific data types (e.g.
+	casa::Vector<T> or casa::MPosition)</td>
     <td>Lars</td>
   </tr>
 </table>
@@ -80,7 +81,7 @@
     <td>Lars</td>
   </tr>
   <tr valign=top>
-    <td>[ ]</td>
+    <td>[*]</td>
     <td>Add method to fill in the missing station and antenna position information using tables created for station calServer</td>
     <td>Lars</td>
   </tr>
@@ -158,7 +159,8 @@
   </tr>
   <tr valign=top>
     <td>[ ]</td>
-    <td>Debugging of error causing CR::Skymapper to segfault when inserting computed pixel values into the array of the output file</td>
+    <td>Debugging of error causing CR::Skymapper to segfault when inserting computed pixel
+	values into the array of the output file</td>
     <td>Lars</td>
   </tr>
   <tr valign=top>
@@ -173,13 +175,21 @@
   </tr>
   <tr valign=top>
     <td>[ ]</td>
-    <td>Add MathGL to the list of requred external packages and provide configuration/build support through CMake</td>
+    <td>Add MathGL to the list of requred external packages and provide configuration/build
+	support through CMake</td>
     <td>Lars</td>
   </tr>
   <tr valign=top>
     <td>[*]</td>
     <td>Verification of PPF inversion algorithm</td>
     <td>Kalpana</td>
+  </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Trimming of the linker instructions in the CMake scripts to produce smaller
+	extecutables; currently the footprint on disk is rather large, because we are linking
+	against all external libraries almost all of the time</td>
+    <td></td>
   </tr>
   <tr valign=top>
     <td></td>
@@ -223,6 +233,12 @@
     <td>Import \e pyrap package (Python binding for \e casacore) into USG code tree, including
 	CMake-based configuration/build</td>
     <td>Lars</td>
+  </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Check if we need to make \e PyQt part of the USG code repository as one of the required external components or if we simply rely on
+	the package being installed (system-wide) by the user.</td>
+    <td></td>
   </tr>
   <tr valign=top>
     <td></td>
