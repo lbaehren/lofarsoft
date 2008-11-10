@@ -280,7 +280,7 @@ endif (CR_WITH_PLOTTING)
 ## -------------------------------------------------------------------
 ## Handle option: Additional routines from LOPES-Star
 
-if (CR_WITH_STARTOOLS)
+if (CR_WITH_STARTOOLS AND HAVE_ROOT)
   
   include (FindStarTools)
   
@@ -304,7 +304,7 @@ if (CR_WITH_STARTOOLS)
     set (CR_WITH_STARTOOLS FALSE)
   endif (NOT HAVE_FFTW3)
 
-endif (CR_WITH_STARTOOLS)
+endif (CR_WITH_STARTOOLS AND HAVE_ROOT)
 
 ## -------------------------------------------------------------------
 ## Option: Create graphical user interface? ON/OFF
