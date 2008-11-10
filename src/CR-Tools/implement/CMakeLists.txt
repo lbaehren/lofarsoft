@@ -59,6 +59,7 @@ endif (CR_WITH_GLISH)
 if (NOT CR_WITH_STARTOOLS)
   list (REMOVE_ITEM cr_sources Analysis/CompletePipeline.cc)
   list (REMOVE_ITEM cr_sources Analysis/analyseLOPESevent2.cc)
+  list (REMOVE_ITEM cr_sources Analysis/PulseProperties.cc)
 endif (NOT CR_WITH_STARTOOLS)
 
 ## ------------------------------------------------------------------------------
