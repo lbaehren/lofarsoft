@@ -304,6 +304,8 @@ if (CR_WITH_STARTOOLS AND HAVE_ROOT)
     set (CR_WITH_STARTOOLS FALSE)
   endif (NOT HAVE_FFTW3)
 
+else (CR_WITH_STARTOOLS AND HAVE_ROOT)
+  set (CR_WITH_STARTOOLS NO)
 endif (CR_WITH_STARTOOLS AND HAVE_ROOT)
 
 ## -------------------------------------------------------------------
