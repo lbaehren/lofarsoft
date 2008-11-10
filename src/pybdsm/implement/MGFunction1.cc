@@ -41,6 +41,9 @@ MGFunction::MGFunction(numeric::array data, numeric::array mask, double weight)
 
 MGFunction::~MGFunction()
 {
+  // enforce data cache reset
+  // this is needed if new MGFunction is allocated at the same spot in memory
+  mm_obj = 0;
 }
 
 void MGFunction::py_reset()
@@ -206,6 +209,9 @@ void MGFunction::register_class()
 
     .def("fitted_parameters", &MGFunction::parameters_size,
 	 "total number of fitted parameters")
+
+    .def("reset", &MGFunction::py_reset,
+	 "reset MGFunction by forgetting all gaussians")
 
     ADD_PROPERTY2("parameters", &MGFunction::py_get_parameters, &MGFunction::py_set_parameters,
 		  "get/set parameters of all gaussians together")

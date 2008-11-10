@@ -1,39 +1,46 @@
+"""Initialize PyBDSM namespace.
+
+Import all standart operations, define default chain of
+operations and provide function 'execute', which can
+execute chain of operations properly.
+"""
+
 from FITS import Op_loadFITS
-from bstat import Op_bstat, Op_thresholds
+from preprocess import Op_preprocess
+from rmsimage import Op_rmsimage
 from islands import Op_islands
 from gausfit import Op_gausfit
 from fittedimage import Op_fittedimage
 from output import Op_outlist
 
-fits_chain = [Op_loadFITS(), Op_bstat(), Op_thresholds(), Op_islands(),
-              Op_gausfit(), Op_fittedimage(), Op_outlist()]
-
-bdsm_default_opts = {'rms_clip': 3,       ### sigma's for hard threshold
-                     'isl_min_size': 4,   ### minimal island size, pixels
-                     'isl_peak_clip': 5,  ### sigma's for island peak
-                     'isl_clip': 3,       ### sigma's for island boundary
-                     'print_timing': True,### print basic timing information
-                     'verbose_fitting': 1,### print out extra information during fitting
-                     'noise_map': True,   ### calculate mean/rms map
-                     'bstat_box': (50,25),### box size and step for statistics calculations
-                     'spline_rank': 1,    ### rank of the interpolating function for rms/mean map
-                     'fittedimage_clip': .1### sigma's for clipping gaussians while creating fittedimage
-                     }
-
+fits_chain = [Op_loadFITS(), Op_preprocess(),
+              Op_rmsimage(), Op_islands(),
+              Op_gausfit(), Op_fittedimage(),
+              Op_outlist()]
 
 def execute(chain, opts):
     """Execute chain.
 
-    Create new Image with given options and apply chain of operations to it.
+    Create new Image with given options and apply chain of 
+    operations to it.
     """
-
     from image import Image
     from time import time
+    from types import ClassType, TypeType
 
-    img = Image(bdsm_default_opts)
-    img.opts._apply(opts)
+    img = Image(opts)
 
+
+    ### make sure all op's are instances
+    ops = []
     for op in chain:
+        if isinstance(op, (ClassType, TypeType)):
+            ops.append(op())
+        else:
+            ops.append(op)
+
+    ### and run them all
+    for op in ops:
         op.__start_time = time()
         op(img)
         op.__stop_time = time()
@@ -48,3 +55,4 @@ def execute(chain, opts):
                              (chain[-1].__stop_time - chain[0].__start_time))
 
     return img
+
