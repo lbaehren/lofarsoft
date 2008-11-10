@@ -31,13 +31,7 @@
 // Library for ROOT Dictionary
 #include <Rtypes.h>
 
-// Don't forget to run the following commands in implement/Analysis, if something has changed:
-// rm RootDict.*
-// rootcint RootDict.C -c PulseProperties.h
 
-
-// namespace declaration causes problems with root dictionary
-// should be solved in ROOT 5.20
 //namespace CR { // Namespace CR -- begin
   
   /*!
@@ -56,14 +50,20 @@
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>Root dictionary, created by
-      <li>rootcint RootDict.C -c PulseProperties.h
+      <li>Don't forget to run the following commands in implement/Analysis,
+      if something has changed:
+      \verbatim
+      rm RootDict.*
+      rootcint RootDict.C -c PulseProperties.h
+      \endverbatim
+      <li>Namespace declaration causes problems with root dictionary
+      should be solved in ROOT 5.20
     </ul>
     
     <h3>Synopsis</h3>
     
     <h3>Example(s)</h3>
-    
+
   */  
   class PulseProperties {
     

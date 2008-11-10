@@ -95,6 +95,12 @@
     <td>Bring tbb2h5 under the control of MAC/SAS</td>
     <td></td>
   </tr>
+  <tr valign=top>
+    <td>[ ]</td>
+    <td>Test how to install tbb2h5 on the cluster nodes; we can use \e listfen as reference
+	system.</td>
+    <td></td>
+  </tr>
 </table>
 
 \subsection tasks_hdf5 High-level interfaces to LOFAR HDF5 datasets

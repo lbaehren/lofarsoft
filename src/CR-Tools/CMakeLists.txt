@@ -280,7 +280,21 @@ endif (CR_WITH_PLOTTING)
 ## -------------------------------------------------------------------
 ## Handle option: Additional routines from LOPES-Star
 
-if (CR_WITH_STARTOOLS AND HAVE_ROOT)
+## check if ROOT is available
+
+if (NOT HAVE_ROOT)
+  message (STATUS "[CR-Tools] LopesStar support disabled; missing ROOT.")
+  set (CR_WITH_STARTOOLS FALSE)
+endif (NOT HAVE_ROOT)
+
+## check if FFTW3 is available
+
+if (NOT HAVE_FFTW3)
+  message (STATUS "[CR-Tools] LopesStar support disabled; missing FFTW3.")
+  set (CR_WITH_STARTOOLS FALSE)
+endif (NOT HAVE_FFTW3)
+
+if (CR_WITH_STARTOOLS)
   
   include (FindStarTools)
   
@@ -290,23 +304,7 @@ if (CR_WITH_STARTOOLS AND HAVE_ROOT)
     set (CR_WITH_STARTOOLS FALSE)
   endif (HAVE_STARTOOLS)
   
-  ## check if ROOT is available
-
-  if (NOT HAVE_ROOT)
-    message (STATUS "LopesStar support disabled; missing ROOT.")
-    set (CR_WITH_STARTOOLS FALSE)
-  endif (NOT HAVE_ROOT)
-
-  ## check if FFTW3 is available
-
-  if (NOT HAVE_FFTW3)
-    message (STATUS "LopesStar support disabled; missing FFTW3.")
-    set (CR_WITH_STARTOOLS FALSE)
-  endif (NOT HAVE_FFTW3)
-
-else (CR_WITH_STARTOOLS AND HAVE_ROOT)
-  set (CR_WITH_STARTOOLS NO)
-endif (CR_WITH_STARTOOLS AND HAVE_ROOT)
+endif (CR_WITH_STARTOOLS)
 
 ## -------------------------------------------------------------------
 ## Option: Create graphical user interface? ON/OFF
