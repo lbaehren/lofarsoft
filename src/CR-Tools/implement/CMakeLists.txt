@@ -57,9 +57,10 @@ endif (CR_WITH_GLISH)
 ## Enable using routines from LOPES-Star?
 
 if (NOT CR_WITH_STARTOOLS)
-  list (REMOVE_ITEM cr_sources Analysis/CompletePipeline.cc)
-  list (REMOVE_ITEM cr_sources Analysis/analyseLOPESevent2.cc)
-  list (REMOVE_ITEM cr_sources Analysis/PulseProperties.cc)
+  message (STATUS "[CR-Tools] Removing source files requiring STAR-Tools installation.")
+  list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implementAnalysis/CompletePipeline.cc)
+  list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/analyseLOPESevent2.cc)
+  list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/PulseProperties.cc)
 endif (NOT CR_WITH_STARTOOLS)
 
 ## ------------------------------------------------------------------------------
