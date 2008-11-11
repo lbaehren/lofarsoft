@@ -6,6 +6,11 @@
   \author Oleksandr Usov
   
   \author 15/10/2007
+
+
+Python interface.
+Most routines here are pretty straighforward, as they just wrap/unwrap
+parameters coming to/from python side.
 */
 
 #define PY_ARRAY_UNIQUE_SYMBOL PyArrayHandle
@@ -20,9 +25,10 @@
 using namespace std;
 namespace n = num_util;
 
-//////////////////////////
-// Python interface
-/////////////////////////
+
+//
+// Constructor -- check data types/shapes and store them
+//
 MGFunction::MGFunction(numeric::array data, numeric::array mask, double weight)
   :  m_weight(weight), m_npar(0), m_data(data), m_mask(mask)
 {
@@ -39,13 +45,21 @@ MGFunction::MGFunction(numeric::array data, numeric::array mask, double weight)
   Py_DECREF(sum);
 }
 
+//
+// Destructor -- essentially do-nothing thing
+//
 MGFunction::~MGFunction()
 {
   // enforce data cache reset
-  // this is needed if new MGFunction is allocated at the same spot in memory
-  mm_obj = 0;
+  // this is needed if new MGFunction object is allocated 
+  // at the same spot in memory as previous one
+  if (mm_obj == this)
+    mm_obj = 0;
 }
 
+//
+// Clear MGFunction, dropping all gaussians
+//
 void MGFunction::py_reset()
 {
   m_npar = 0;
@@ -54,6 +68,9 @@ void MGFunction::py_reset()
   m_errors.clear();
 }
 
+//
+// Add a gaussian of a specific kind
+//
 void MGFunction::py_add_gaussian(Gtype type, object parameters)
 {
   py_assert(len(parameters) == 6,
@@ -69,6 +86,9 @@ void MGFunction::py_add_gaussian(Gtype type, object parameters)
   m_errors.push_back(vector<double>(6));
 }
 
+//
+// Remove gaussian by index
+//
 void MGFunction::py_remove_gaussian(int idx)
 {
   if (idx < 0)
@@ -83,6 +103,9 @@ void MGFunction::py_remove_gaussian(int idx)
   m_errors.erase(m_errors.begin() + idx);
 }
 
+//
+// Get gaussian parameters by index
+//
 tuple MGFunction::py_get_gaussian(int idx)
 {
   if (idx < 0)
@@ -96,6 +119,9 @@ tuple MGFunction::py_get_gaussian(int idx)
   return make_tuple(p[0], p[1], p[2], p[3], p[4], p[5]);
 }
 
+//
+// Set gaussian parameters by index
+//
 void MGFunction::py_set_gaussian(int idx, object parameters)
 {
   if (idx < 0)
@@ -110,6 +136,9 @@ void MGFunction::py_set_gaussian(int idx, object parameters)
     m_parameters[idx][i] = extract<double>(parameters[i]);
 }
 
+//
+// Get all gaussian parameters as a list of tuples
+//
 list MGFunction::py_get_parameters()
 {
   list res;
@@ -121,6 +150,9 @@ list MGFunction::py_get_parameters()
   return res;
 }
 
+//
+// Set all gaussian parameters from a list of tuples
+//
 void MGFunction::py_set_parameters(object parameters)
 {
   py_assert(len(parameters) == int(m_gaul.size()),
@@ -130,6 +162,9 @@ void MGFunction::py_set_parameters(object parameters)
     py_set_gaussian(i, parameters[i]);
 }
 
+//
+// Errors -- not really implemented now
+//
 list MGFunction::py_get_errors()
 {
   list res;
@@ -142,6 +177,9 @@ list MGFunction::py_get_errors()
   return res;
 }
 
+//
+// Find highest peak in the data-MGFunction residual
+//
 tuple MGFunction::py_find_peak()
 {
   vector<double> buf(data_size());
@@ -162,6 +200,10 @@ tuple MGFunction::py_find_peak()
   return make_tuple(peak, make_tuple(x1, x2));
 }
 
+
+//
+// Register MGFunction class in python interpreter
+//
 void MGFunction::register_class()
 {
   /*

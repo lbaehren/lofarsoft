@@ -18,8 +18,28 @@ using namespace boost::python;
 
   \date 15/10/2007
   
-  This class allows you to manage multi-gaussian function and implements all math
-  required to use it for fitting.
+  This class allows you to manage multi-gaussian function and implements
+  all math required to use it for fitting.
+
+  In order to improve fitting performance a number of tricks are done.
+  MGFunction maintains internal caches of unmasked data points (mm_data)
+  and partially evaluated gaussians (mm_fcn). 
+
+  End-user interface consists of functions to add (py_add_gaussian),
+  remove (py_remove_gaussian), retrieve (py_get_gaussian) single gaussians
+  and a functions to access all parameters at once (py_get/set_parameters).
+
+  Few more support routines are present too (py_find_peak, py_reset, etc).
+
+
+  Internal interface for fitter routines provides a number of low-level
+  functions to evaluate gaussians (and their derivatives) in a number of
+  ways (fcn_value, fcn_diff, fcn_gradient, etc).
+
+  An important note -- current implementation isn't thread-safe, as caches
+  are shared between all instances. One of the possibilities change it is
+  to define caches thread-local, but this will require special care for the
+  cleanup to prevent memory leaks.
 */
 
 class MGFunction

@@ -6,6 +6,27 @@
   \author Oleksandr Usov
   
   \date 15/10/2007
+
+
+Low-level interface.
+Beware that most routines here are quite involved and unforgiving.
+Make sure output array sizes are correct.
+
+MGFunction class stores internally all unmasked data points, and 
+a list of 2D gaussians, and provides functions to evaluate them
+in the variety of ways. Let me introduce some notation.
+
+MGFunction object with N 2D gaussians in it is defined as:
+
+
+MGF(x1,x2) = sum(A_i * fcn_i(x1,x2; NL_ij)), where
+
+fcn_i(x1,x2; NL_ij) = exp(-0.5 * (f1^2 + f2^2))
+f1 = ( (x1-NL_i1)*cos(NL_i5) + (x2-NL_i2)*sin(NL_i5))/NL_i3
+f2 = (-(x1-NL_i1)*sin(NL_i5) + (x2-NL_i2)*cos(NL_i5))/NL_i4
+
+so amplitudes of sub-gaussians (A_i) are linear fitted parameters, 
+and parameters under exponents (NL_ij) are non-linear.
 */
 
 #define PY_ARRAY_UNIQUE_SYMBOL PyArrayHandle
@@ -29,11 +50,10 @@ unsigned long MGFunction::mm_cksum = -1;
 static const double deg = M_PI/180;
 
 
-//////////////////////////
-// low-level interface
-//////////////////////////
-
-/// copy all tunable parameters to buf
+//
+// Copy all fitted parameters to buf.
+// buf should be parameters_size() long.
+//
 void MGFunction::get_parameters(double *buf) const
 {
   double *chk = buf;
@@ -44,7 +64,10 @@ void MGFunction::get_parameters(double *buf) const
   assert(buf - chk == (int)m_npar);
 }
 
-/// set all tunable parameters from buf
+//
+// Set all fitted parameters from buf
+// buf should be parameters_size() long.
+//
 void MGFunction::set_parameters(const double *buf)
 {
   const double *chk = buf;
@@ -55,7 +78,10 @@ void MGFunction::set_parameters(const double *buf)
   assert(buf - chk == (int)m_npar);
 }
 
-/// copy all tunable non-linear parameters to buf
+//
+// Copy all fitted non-linear parameters to buf
+// buf should be parameters_size() - gaul_size() long.
+//
 void MGFunction::get_nlin_parameters(double *buf) const
 {
   double *chk = buf;
@@ -66,7 +92,10 @@ void MGFunction::get_nlin_parameters(double *buf) const
   assert(buf - chk == (int)(m_npar - m_gaul.size()));
 }
 
-/// set all tunable non-linear parameters from buf
+//
+// Set all fitted non-linear parameters from buf
+// buf should be parameters_size() - gaul_size() long.
+//
 void MGFunction::set_nlin_parameters(const double *buf)
 {
   const double *chk = buf;
@@ -77,14 +106,22 @@ void MGFunction::set_nlin_parameters(const double *buf)
   assert(buf - chk == (int)(m_npar - m_gaul.size()));
 }
 
-/// set all tunable linear parameters from buf
+//
+// Set all fitted linear parameters from buf
+// buf should be gaul_size() long.
+//
 void MGFunction::set_lin_parameters(const double *buf)
 {
+  const double *chk = buf;
   for(unsigned i = 0; i < m_gaul.size(); ++i, ++buf)
     m_parameters[i][0] = *buf;
+  assert(buf - chk == (int)m_gaul.size());
 }
 
-/// copy (unmasked) data into buf
+//
+// Copy (unmasked) data into buf.
+// buf should be data_size() long.
+//
 void MGFunction::data(double *buf) const
 {
   _update_fcache();
@@ -95,7 +132,10 @@ void MGFunction::data(double *buf) const
   assert(buf - chk == (int)m_ndata);
 }
 
-/// evaluate mgfunction (unmasked pixels only) and store it in buf
+//
+// Evaluate MGFunction (for unmasked pixels only)
+// buf should be data_size() long.
+//
 void MGFunction::fcn_value(double *buf) const
 {
   _update_fcache();
@@ -110,7 +150,10 @@ void MGFunction::fcn_value(double *buf) const
   assert(buf - chk == (int)m_ndata);
 }
 
-/// evaluate (data - mgfunction) and store it in buf
+//
+// Evaluate (data-MGFunction) (for unmasked pixels only)
+// buf should be data_size() long.
+//
 void MGFunction::fcn_diff(double *buf) const
 {
   _update_fcache();
@@ -125,8 +168,18 @@ void MGFunction::fcn_diff(double *buf) const
   assert(buf - chk == (int)m_ndata);
 }
 
-/// evaluate non-linear part of mgfunction
-/// each sub-function is evaluated for all data points and stored contiguously
+//
+// Evaluate non-linear part of MGFunction
+// each gaussian is evaluated for all data points and stored contiguously
+// buf should be data_size()*gaul_size() long.
+// 
+// buf layout is following:
+//  fcn_0(X_0; ...), fcn_0(X_1; ...), ....... fcn_0(X_n; ...)
+//      .............................................
+//  fcn_m(X_0; ...), fcn_m(X_1; ...), ....... fcn_m(X_n; ...)
+//
+// where n == data_size() and m == gaul_size()
+//
 void MGFunction::fcn_partial_value(double *buf) const
 {
   _update_fcache();
@@ -140,7 +193,18 @@ void MGFunction::fcn_partial_value(double *buf) const
   assert((gidx - 1) * m_ndata + didx == m_ndata * m_gaul.size());
 }
 
-/// gradient of fcn_value; all derivatives are evaluated for each data point and stored all together
+//
+// Gradient of MGFunction
+// all derivatives are evaluated for each data point and stored contiguously
+// buf should be data_size()*parameters_size() long
+//
+// buf layout:
+// dF(X_0)/dx_0 , dF(X_0)/dx_1, .... dF(X_0)/dx_m
+//     ....................................
+// dF(X_n)/dx_0 , dF(X_n)/dx_1, .... dF(X_n)/dx_m
+//
+// where n == data_size() and m == parameters_size()
+//
 void MGFunction::fcn_gradient(double *buf) const
 {
   _update_fcache();
@@ -168,7 +232,13 @@ void MGFunction::fcn_gradient(double *buf) const
   assert(buf - chk == (int)(m_ndata * m_npar));
 }
 
-/// gradient of fcn_diff; all derivatives are evaluated for each data point and stored all together
+//
+// Gradient of (data-MGFunction)
+// all derivatives are evaluated for each data point and stored contiguously
+// buf should be data_size()*parameters_size() long
+//
+// see fcn_gradient for layout description
+//
 void MGFunction::fcn_diff_gradient(double *buf) const
 {
   _update_fcache();
@@ -196,7 +266,18 @@ void MGFunction::fcn_diff_gradient(double *buf) const
   assert(buf - chk == (int)(m_ndata * m_npar));
 }
 
-/// gradient of fcn_value; each derivative is evaluated for all datapoints and stored contiguously
+//
+// Gradient of MGFunction
+// each derivative is evaluated for all data points and stored contiguously
+// buf should be data_size()*parameters_size() long
+//
+// buf layout:
+// dF(X_0)/dx_0 , dF(X_1)/dx_0, .... dF(X_n)/dx_0
+//     ....................................
+// dF(X_0)/dx_m , dF(X_1)/dx_m, .... dF(X_n)/dx_m
+//
+// where n == data_size() and m == parameters_size()
+//
 void MGFunction::fcn_transposed_gradient(double *buf) const
 {
   _update_fcache();
@@ -227,7 +308,13 @@ void MGFunction::fcn_transposed_gradient(double *buf) const
   assert(ggidx * m_ndata == m_ndata * m_npar);
 }
 
-/// gradient of fcn_diff; each derivative is evaluated for all datapoints and stored contiguously
+//
+// Gradient of (data-MGFunction)
+// each derivative is evaluated for all data points and stored contiguously
+// buf should be data_size()*parameters_size() long
+//
+// see fcn_transposed_gradient for layout description
+//
 void MGFunction::fcn_diff_transposed_gradient(double *buf) const
 {
   _update_fcache();
@@ -258,7 +345,18 @@ void MGFunction::fcn_diff_transposed_gradient(double *buf) const
   assert(ggidx * m_ndata == m_ndata * m_npar);
 }
 
-/// gradient of fcn_partial_value; each derivative is evaluated for all datapoints and stored contiguously
+//
+// Gradient of non-linear functions (corresponds to fcn_partial_value)
+// each derivative is evaluated for all data points and stored contiguously
+// buf should be data_size()*(parameters_size() - gaul_size()) long
+//
+// buf layout:
+// dF(X_0)/dNL_0 , dF(X_1)/dNL_0, .... dF(X_n)/dNL_0
+//     ....................................
+// dF(X_0)/dNL_m , dF(X_1)/dNL_m, .... dF(X_n)/dNL_m
+//
+// where n == data_size() and m == (parameters_size()-gaul_size())
+//
 void MGFunction::fcn_partial_gradient(double *buf) const
 {
   _update_fcache();
@@ -289,6 +387,10 @@ void MGFunction::fcn_partial_gradient(double *buf) const
   assert(ggidx * m_ndata == m_ndata * (m_npar - m_gaul.size()));
 }
 
+//
+// Calculate \chi^2 measure between data and MGFunction
+// uses uniform weighting for all data points
+//
 double MGFunction::chi2() const
 {
   _update_fcache();
@@ -310,6 +412,12 @@ double MGFunction::chi2() const
 //////////////////////////////
 // cache-handling
 //////////////////////////////
+
+//
+// Calculate checksum of values of fitted parameters.
+// this is used as for a quick check whether cached values of 
+// function should be updated
+//
 unsigned long MGFunction::_cksum() const
 {
   typedef unsigned long T;
@@ -326,6 +434,10 @@ unsigned long MGFunction::_cksum() const
   return res;
 }
 
+//
+// Update data-cache: rescan data and mask arrays and copy
+// unmasked pixels into data-cache
+//
 template<class T>
 void MGFunction::__update_dcache() const
 {
@@ -349,6 +461,9 @@ void MGFunction::__update_dcache() const
   assert(mm_data.size() == m_ndata);
 }
 
+//
+// Type-dispatcher for __update_dcache
+//
 void MGFunction::_update_dcache() const
 {
   PyArray_TYPES type = n::type(m_data);
@@ -364,6 +479,12 @@ void MGFunction::_update_dcache() const
   }
 }
 
+//
+// Update function-cache: check if fitted parameters were changed
+// and recalculate all gaussians.
+//
+// Also calls _update_dcache if needed
+//
 void MGFunction::_update_fcache() const
 {
   unsigned long cksum = _cksum();
