@@ -34,7 +34,7 @@ class Op_fittedimage(Op):
 
             fimg[bbox] += self.gaussian_fcn(g=g, *N.mgrid[bbox])
 
-        img.fitted_img = fimg
+        img.fitted_image = fimg
         return img
 
     def find_bbox(self, thresh, g):
@@ -66,8 +66,8 @@ class Op_fittedimage(Op):
         S1, S2, Th = g.shape_pix
 
         th = radians(Th)
-        cs = cos(Th)
-        sn = sin(Th)
+        cs = cos(th)
+        sn = sin(th)
 
         f1 = ((x1-C1)*cs + (x2-C2)*sn)/S1
         f2 = (-(x1-C1)*sn + (x2-C2)*cs)/S2

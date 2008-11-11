@@ -5,7 +5,14 @@ parameters for PyBDSM.
 """
 import numpy as N
 import _cbdsm
-from image import Op
+from image import *
+
+### Insert attributes into Image class
+Image.raw_mean = Float(doc="Unclipped image mean")
+Image.raw_rms  = Float(doc="Unclipped image rms")
+Image.clipped_mean = Float(doc="Clipped image mean")
+Image.clipped_rms  = Float(doc="Clipped image rms")
+
 
 class Op_preprocess(Op):
     """Preprocessing -- calculate some basic statistics and set 

@@ -92,9 +92,6 @@ class Op_gausfit(Op):
             gaul, fgaul = self.flag_gaussians(fcn.parameters, opts, 
                                               beam, thr, peak, shape)
 
-            print("fit = ", fitok)
-            print("gauls = %d  %d" %(len(gaul), len(fgaul)))
-
             if fitok and len(fgaul) == 0:
                 break
 
@@ -270,7 +267,6 @@ class Gaussian(object):
     ## should we use tuples for value + error ??
     total_flux  = Float(doc="Total flux, in Jy")
     total_fluxE = Float(doc="Total flux error")
-
     peak_flux   = Float(doc="Peak flux density, Jy/beam")
     peak_fluxE  = Float()
     center_sky  = List(Float(), doc="Sky coordinates of gaussian center")
