@@ -50,6 +50,7 @@ using CR::LopesEventIn;
   be external, human readable files.
 
   <h3>Usage</h3>
+
   \verbatim
   ./call_pipeline arguments
   \endverbatim
@@ -154,18 +155,23 @@ using CR::LopesEventIn;
 
   <h3>Upsampling</h3>
 
-  Currently there are to upsampling methods implemented:
-  The one called by setting an upsampling exponent uses the Upsampling routines of LOPES-Star
-  and has an effect only to the traces of single antennas.
-  The upsampling due to setting an upsamplingRate greater than 160 MHz effects the whole analysis
-  chain, including the CC-Beam. At a later point this method might be the only one used anymore.
+  Currently there are two upsampling methods implemented:
+  <ol>
+    <li>The one called by setting an upsampling exponent uses the Upsampling
+    routines of LOPES-Star and has an effect only to the traces of single
+    antennas.
+    <li>The upsampling due to setting an upsamplingRate greater than 160 MHz
+    effects the whole analysis chain, including the CC-Beam. At a later point
+    this method might be the only one used anymore.
+  </ol>
   You should prefer 2^n * 80 MHz rates (e.g. 160, 320, 640, 1280, ...).
-
+  
   WARNING:
   The two upsampling methods should not be mixed!
   Otherwise wrong traces are obtained.
-
+  
   <h3>Calibration</h3>
+
   The calibration mode can be switched on by calibration = true in the config file.
   It can be used for processing LOPES events for the delay calibration.
   In calibration mode the eventlist must contain only the event files but not additional

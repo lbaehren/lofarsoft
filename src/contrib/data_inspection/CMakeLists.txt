@@ -2,14 +2,23 @@
 ## $Id::                                                                        $
 ## ------------------------------------------------------------------------------
 
-## Assemble the list files to install
+##_______________________________________________________________________________
+## Testing
+
+if (contrib_ENABLE_TESTING)
+
+  add_test (msinfo msinfo.py)
+
+endif (contrib_ENABLE_TESTING)
+
+##_______________________________________________________________________________
+## Installation
+
+## assemble list of files to install
 
 file (GLOB data_inspection_sources *.py)
 
-## ------------------------------------------------------------------------------
-## Installation
-
-## python scripts
+## installation destination
 
 install (FILES ${data_inspection_sources}
   DESTINATION bin

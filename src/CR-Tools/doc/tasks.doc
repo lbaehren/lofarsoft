@@ -8,7 +8,8 @@
   - \ref tasks_hdf5
 - \ref tasks_crtools
   - \ref tasks_crtools_skymapper
-   - \ref tasks_crtools_interactiv
+  - \ref tasks_crtools_interactiv
+  - \ref tasks_crtools_detectors
 - \ref tasks_infrastructure
 - \ref tasks_formats
 
@@ -16,11 +17,20 @@
 
 <table border=0 cellpadding=1 cellspacing=1>
   <tr>
-    <td class="indexkey">[ ]</td><td>not yet started</td>
-    <td>&nbsp;</td>
-    <td class="indexkey">[*]</td><td>work in progress</td>
-    <td>&nbsp;</td>
-    <td class="indexkey">[x]</td><td>done</td>
+    <td class="indexkey">Not yet started</td>
+	<td width="100" bgcolor=eeeeff>&nbsp;</td>
+  </tr>
+  <tr>
+    <td class="indexkey">Work in progress</td>
+	<td width="100" bgcolor=orange>&nbsp;</td>
+  </tr>
+  <tr>
+    <td class="indexkey">Delayed</td>
+	<td width="100" bgcolor=red>&nbsp;</td>
+  </tr>
+  <tr>
+    <td class="indexkey">Done</td>
+	<td width="100" bgcolor=#00ee00>&nbsp;</td>
   </tr>
 </table>
 
@@ -32,35 +42,54 @@
 
 <table border=0>
   <tr>
-    <td class="indexkey">Status</td>
-    <td class="indexkey">Task description</td>
+    <td class="indexkey">Task</td>
     <td class="indexkey">Responsible</td>
+    <td class="indexkey">Expected</td>
+    <td class="indexkey">Start</td>
+    <td class="indexkey">Finished</td>
   </tr>
-  <tr valign=top>
-    <td>[x]</td>
+  <tr valign=top bgcolor=#00ee00>
     <td>Merge HDF5Common and Common into single file (dalCommon.cpp)</td>
     <td>Lars</td>
+    <td>Oct 2008</td>
+    <td>Oct 2008</td>
+    <td>Oct 2008</td>
   </tr>
-  <tr valign=top>
-    <td>[x]</td>
-    <td>Clean up template instantiation in dalCommon</td>
+  <tr valign=top bgcolor=#00ee00>
+    <td>Clean up template instantiation in DAL::dalCommon.h</td>
     <td>Lars</td>
+    <td>Oct 2008</td>
+    <td>Oct 2008</td>
+    <td>Oct 2008</td>
   </tr>
-  <tr valign=top>
-    <td>[x]</td>
+  <tr valign=top bgcolor=#00ee00>
     <td>End-to-end testing of functions to write and read attributes</td>
     <td>Lars</td>
+    <td>Nov 2008</td>
+    <td>Nov 2008</td>
+    <td>Nov 2008</td>
   </tr>
-  <tr valign=top>
-    <td>[x]</td>
+  <tr valign=top bgcolor=#00ee00>
     <td>Remove multiply defined functions (e.g. h5getAttribute vs. h5get_attribute)</td>
     <td>Lars</td>
+    <td>Nov 2008</td>
+    <td>Nov 2008</td>
+    <td>Nov 2008</td>
   </tr>
-  <tr valign=top>
-    <td>[*]</td>
+  <tr valign=top bgcolor=orange>
     <td>Where necessary add functions to support specific data types (e.g.
 	casa::Vector<T> or casa::MPosition)</td>
     <td>Lars</td>
+    <td>Nov 2008</td>
+    <td>Nov 2008</td>
+    <td></td>
+  </tr>
+  <tr valign=top>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
 </table>
 
@@ -68,42 +97,56 @@
 
 <table border=0>
   <tr>
-    <td class="indexkey">Status</td>
-    <td class="indexkey">Task description</td>
+    <td class="indexkey">Task</td>
     <td class="indexkey">Responsible</td>
+    <td class="indexkey">Expected</td>
+    <td class="indexkey">Start</td>
+    <td class="indexkey">Finished</td>
   </tr>
-  <tr valign=top>
-    <td>[x]</td>
+  <tr valign=top bgcolor=#00ee00>
     <td>Verify subsequent writing of multiple input files into single output file</td>
     <td>Lars</td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
-  <tr valign=top>
-    <td>[x]</td>
+  <tr valign=top bgcolor=#00ee00>
     <td>Get access to the CS1 station and antenna position tables (via Ruud)</td>
     <td>Lars</td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
-  <tr valign=top>
-    <td>[*]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Add method to fill in the missing station and antenna position information
 	using tables created for station calServer</td>
     <td>Lars</td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Support for concentration of data arriving at multiple ports into a single
 	output file (present implementation only supports one port per output
 	file)</td>
     <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Bring tbb2h5 under the control of MAC/SAS</td>
     <td>Ruud</td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
-    <td>Test how to install tbb2h5 on the cluster nodes; we can use \e listfen as reference
-	system.</td>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Test how to install \e tbb2h5 on the cluster nodes; we can use \e
+	listfen as reference system.</td>
+    <td>Arno, Lars</td>
+    <td></td>
+    <td></td>
     <td></td>
   </tr>
 </table>
@@ -112,42 +155,58 @@
 
 <table border=0>
   <tr>
-    <td class="indexkey">Status</td>
-    <td class="indexkey">Task description</td>
+    <td class="indexkey">Task</td>
     <td class="indexkey">Responsible</td>
+    <td class="indexkey">Expected</td>
+    <td class="indexkey">Start</td>
+    <td class="indexkey">Finished</td>
   </tr>
-  <tr valign=top>
-    <td>[x]</td>
+  <tr valign=top bgcolor=#00ee00>
     <td>Upward propagation of metadata from DAL::TBB_DipoleDataset to DAL::TBB_StationGroup</td>
     <td>Lars</td>
+    <td>Oct 2008</td>
+    <td>Oct 2008</td>
+    <td>Oct 2008</td>
   </tr>
-  <tr valign=top>
-    <td>[*]</td>
+  <tr valign=top bgcolor=orange>
     <td>Upward propagation of metadata from DAL::TBB_StationGroup to DAL::TBB_Timeseries</td>
     <td>Lars</td>
+    <td>Nov 2008</td>
+    <td>Nov 2008</td>
+    <td></td>
   </tr>
-  <tr valign=top>
-    <td>[*]</td>
+  <tr valign=top bgcolor=orange>
     <td>Debugging of DAL::TBB_Timeseries to track down error causing segmentation
 	fault</td>
+    <td>Lars</td>
+    <td>Nov 2008</td>
+    <td>Nov 2008</td>
     <td></td>
   </tr>
-  <tr valign=top>
-    <td>[*]</td>
+  <tr valign=top bgcolor=orange>
     <td>Export of attributes/metadata as casa::Record</td>
     <td>Lars</td>
+    <td>Nov 2008</td>
+    <td>Nov 2008</td>
+    <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Sync implementation of HDF5 TBB time-series data format with description in ICD</td>
     <td>Lars</td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>High-level C++ interface to LOFAR standard image data format</td>
+    <td></td>
+    <td></td>
+    <td></td>
     <td></td>
   </tr>
   <tr valign=top>
+    <td></td>
+    <td></td>
     <td></td>
     <td></td>
     <td></td>
@@ -160,135 +219,266 @@
 
 <table border=0>
   <tr>
-    <td class="indexkey">Status</td>
-    <td class="indexkey">Task description</td>
+    <td class="indexkey">Task</td>
     <td class="indexkey">Responsible</td>
+    <td class="indexkey">Expected</td>
+    <td class="indexkey">Start</td>
+    <td class="indexkey">Finished</td>
   </tr>
-  <tr valign=top>
-    <td>[*]</td>
+  <tr valign=top bgcolor=orange>
     <td>Build on multiple platforms (Intel Mac, Debian GNU Linux, SuSE Linux) to
 	catch system dependent compile and runtime errors.</td>
     <td>Lars</td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Fill vertically collected metadata from TBB time-series dataset into header
 	record of CR::LOFAR_TBB</td>
     <td>Lars</td>
-  </tr>
-  <tr valign=top>
-    <td>[ ]</td>
-    <td>Adoption of CalTables to store station calibration data</td>
-    <td>Andreas</td>
-  </tr>
-  <tr valign=top>
-    <td>[ ]</td>
-    <td>Prepare list of air shower parameters to be stored in results database</td>
+    <td>Dec 2008</td>
+    <td></td>
     <td></td>
   </tr>
-  <tr valign=top>
-    <td>[*]</td>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Adoption of CalTables to store station calibration data</td>
+    <td>Andreas</td>
+    <td>2009/Q1</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Prepare list of air shower parameters to be stored in results database</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr valign=top bgcolor=orange>
     <td>Verification of PPF inversion algorithm</td>
     <td>Kalpana</td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Trimming of the linker instructions in the CMake scripts to produce smaller
 	extecutables; currently the footprint on disk is rather large, because we are linking
 	against all external libraries almost all of the time</td>
     <td></td>
-  </tr>
-  <tr valign=top>
-    <td>[ ]</td>
-    <td>Define list of products generated by the CR pipeline</td>
+    <td></td>
+    <td></td>
     <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Define list of products generated by the CR pipeline</td>
+    <td>Andreas, Heino</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr valign=top bgcolor=eeeeff>
     <td>Definition of database structure for storage of pulse parameters computed by
 	the pipeline</td>
     <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
   <tr valign=top>
+    <td></td>
+    <td></td>
     <td></td>
     <td></td>
     <td></td>
   </tr>
 </table>
 
-\section tasks_crtools_skymapper CR-Tools imager
+\subsection tasks_crtools_skymapper CR-Tools imager
 
 <table border=0>
   <tr>
-    <td class="indexkey">Status</td>
-    <td class="indexkey">Task description</td>
+    <td class="indexkey">Task</td>
     <td class="indexkey">Responsible</td>
+    <td class="indexkey">Expected</td>
+    <td class="indexkey">Start</td>
+    <td class="indexkey">Finished</td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Transformation of sky and antenna coordinates onto common reference
 	frame</td>
     <td>Lars</td>
+    <td>Dec 2008</td>
+    <td></td>
+    <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Debugging of error causing CR::Skymapper to segfault when inserting computed
 	pixel values into the array of the output file</td>
     <td>Lars</td>
+    <td>Dec 2008</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Control of the imager executable (skymapper.cc) through parameters
+	provided from the command line or a settings file</td>
+    <td>Lars</td>
+    <td>Jan 2009</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Modification of imager to generate output conforming to standard LOFAR
+	image data format</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Parallelization of the CR::Beamformer</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Parallelized reading of input data</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Parallelized writing of computed image data</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
   <tr valign=top>
+    <td></td>
+    <td></td>
     <td></td>
     <td></td>
     <td></td>
   </tr>
 </table>
 
-\section tasks_crtools_interactiv Qt/Python-based pipeline
+\subsection tasks_crtools_interactiv Qt/Python-based pipeline
 
 <table border=0>
   <tr>
-    <td class="indexkey">Status</td>
-    <td class="indexkey">Task description</td>
+    <td class="indexkey">Task</td>
     <td class="indexkey">Responsible</td>
+    <td class="indexkey">Expected</td>
+    <td class="indexkey">Start</td>
+    <td class="indexkey">Finished</td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Breakdown of (external) components for the Qt/Python module</td>
     <td>Heino</td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Add support to obtain and build Qt4 from with the build environment</td>
+    <td>Lars</td>
+    <td>Dec 2008</td>
+    <td></td>
     <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Add support to obtain and build PyQt from with the build environment</td>
+    <td>Lars</td>
+    <td></td>
+    <td></td>
     <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Evaluation of plotting libraries - MathGL, s2plot, plplot - to pick a choice
 	for which one to use and support</td>
     <td>Heino</td>
-  </tr>
-  <tr valign=top>
-    <td>[ ]</td>
-    <td>Import and support building of picked plotting library</td>
+    <td></td>
+    <td></td>
     <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Import and support building of picked plotting library</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr valign=top bgcolor=eeeeff>
     <td>Break up existing monolithic version of processing pipeline into a modular
 	version to be strung together through Python</td>
     <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Python bindings for the classes/routines present in \e libcr</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+
+\subsection tasks_crtools_detectors Particle detector array
+
+<table border=0>
+  <tr>
+    <td class="indexkey">Task</td>
+    <td class="indexkey">Responsible</td>
+    <td class="indexkey">Expected</td>
+    <td class="indexkey">Start</td>
+    <td class="indexkey">Finished</td>
+  </tr>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Define data to be transmitted from installation at station to CEP</td>
+    <td>Joerg</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Implement transport of (meta-)data from particle detectors to CEP</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Bring detector status information to the awareness of PVSS</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Bring operation of particle detectors (including associated electronics)
+	under the control of MAC/SAS</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Enable reading in of particle detectors data into CR-Tools</td>
+    <td></td>
+    <td></td>
+    <td></td>
     <td></td>
   </tr>
   <tr valign=top>
+    <td></td>
+    <td></td>
     <td></td>
     <td></td>
     <td></td>
@@ -301,23 +491,31 @@
 
 <table border=0>
   <tr>
-    <td class="indexkey">Status</td>
-    <td class="indexkey">Task description</td>
+    <td class="indexkey">Task</td>
     <td class="indexkey">Responsible</td>
+    <td class="indexkey">Expected</td>
+    <td class="indexkey">Start</td>
+    <td class="indexkey">Finished</td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Update and send around description of common metadata expected for all
 	standard LOFAR data products</td>
     <td>Lars</td>
+    <td>Nov 2008</td>
+    <td></td>
+    <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Update and send around LOFAR image data format ICD along with the request
 	for input from the other KSPs</td>
     <td>Lars</td>
+    <td>Nov 2008</td>
+    <td></td>
+    <td></td>
   </tr>
   <tr valign=top>
+    <td></td>
+    <td></td>
     <td></td>
     <td></td>
     <td></td>
@@ -330,43 +528,69 @@
 
 <table border=0>
   <tr>
-    <td class="indexkey">Status</td>
-    <td class="indexkey">Task description</td>
+    <td class="indexkey">Task</td>
     <td class="indexkey">Responsible</td>
+    <td class="indexkey">Expected</td>
+    <td class="indexkey">Start</td>
+    <td class="indexkey">Finished</td>
   </tr>
-  <tr valign=top>
-    <td>[*]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Build on multiple platforms (Intel Mac, Debian GNU Linux, SuSE Linux) to catch system dependent compile and runtime errors.</td>
-    <td> </td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
-  <tr valign=top>
-    <td>[*]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Arrange for Dart server to collect automated nightly builds</td>
-    <td> </td>
-  </tr>
-  <tr valign=top>
-    <td>[ ]</td>
-    <td>Merge Subversion repositories containing user software and central software</td>
+    <td></td>
+    <td></td>
+    <td></td>
     <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
-    <td>Transition of LOFAR central software towards using CMake for configuration and build</td>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Merge Subversion repositories containing user software and central
+	software</td>
+    <td></td>
+    <td>2009/Q1</td>
+    <td></td>
     <td></td>
   </tr>
-  <tr valign=top>
-    <td>[*]</td>
+  <tr valign=top bgcolor=#00ee00>
+    <td>Test suitability of CMake to replace Autotools-based
+	configuration/build</td>
+    <td>Martin, Lars, Marcel, Ger</td>
+    <td>2008/Q3</td>
+    <td>2008/Q3</td>
+    <td>2008/Q3</td>
+  </tr>
+  <tr valign=top bgcolor=eeeeff>
+    <td>Transition of LOFAR central software towards using CMake for
+	configuration and build</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr valign=top bgcolor=orange>
     <td>Import \e pyrap package (Python binding for \e casacore) into USG code tree, including
 	CMake-based configuration/build</td>
     <td>Lars</td>
+    <td>Nov 2008</td>
+    <td></td>
+    <td></td>
   </tr>
-  <tr valign=top>
-    <td>[ ]</td>
+  <tr valign=top bgcolor=eeeeff>
     <td>Check if we need to make \e PyQt part of the USG code repository as one of the required external components or if we simply rely on
 	the package being installed (system-wide) by the user.</td>
     <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
   <tr valign=top>
+    <td></td>
+    <td></td>
     <td></td>
     <td></td>
     <td></td>

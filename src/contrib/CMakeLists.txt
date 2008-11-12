@@ -11,7 +11,8 @@ cmake_minimum_required (VERSION 2.5)
 ## ------------------------------------------------------------------------------
 ## Options
 
-option (contrib_VERBOSE_CONFIGURE "Verbose output during configuration?" NO )
+option (contrib_VERBOSE_CONFIGURE "Verbose output during configuration?"     NO )
+option (contrib_ENABLE_TESTING    "Build and enable running test programs?"  YES )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -80,8 +81,10 @@ endif (NOT contrib_VERBOSE_CONFIGURE)
 
 ## Standard CMake modules
 
-include (CTest)
-enable_testing()
+if (contrib_ENABLE_TESTING)
+  include (CTest)
+  enable_testing()
+endif (contrib_ENABLE_TESTING)
 
 find_package (X11)
 find_package (ZLIB)
