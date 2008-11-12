@@ -340,9 +340,11 @@ int main (int argc, char *argv[])
       for (unsigned int i = 0; i < phases.size(); i++) {
         double lowphase = phases2(i);
         double highphase = phases(i);
+        //cout << "Lower phase / higher phase of ant " << i+1  << ": \t" << lowphase << " \t" << highphase << endl;
         // add +/- 360° if the difference between two phases is > 180°
         // to bring the two phases closer together for interpolation
-        if ((lowphase - highphase) > 180) lowphase += 360 * ((highphase > 0) - (highphase < 0));
+        if (abs(lowphase - highphase) > 180) lowphase += 360 * ((highphase > 0) - (highphase < 0));
+        //cout << "Lower phase / higher phase of ant " << i+1  << ": \t" << lowphase << " \t" << highphase << endl;
 
         // print warning if phase difference is still big
         if ( abs(lowphase - highphase) > 90)
@@ -351,6 +353,7 @@ int main (int argc, char *argv[])
         // linear interpolation: 
         // phase_int = phase1 - ( delta phase * delta freq / freq bin)
         double interphase = lowphase - (highphase-lowphase) * (startFreq - freqValues(freqIndex-1)) / freqbin;
+        //cout << "Interpolated phase: " << interphase << endl;
         phases(i) = interphase;
       }
     } else {
