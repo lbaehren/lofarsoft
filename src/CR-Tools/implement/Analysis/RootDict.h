@@ -27,8 +27,8 @@ extern void G__set_cpp_environmentRootDict();
 }
 
 
-#include "TObject.h"
-#include "TMemberInspector.h"
+#include <TObject.h>
+#include <TMemberInspector.h>
 #include "PulseProperties.h"
 
 #ifndef G__MEMFUNCBODY

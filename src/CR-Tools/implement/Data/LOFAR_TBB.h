@@ -66,12 +66,12 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[DAL] HDF5Common.h -- A collection of functions to work with HDF5-based
+      <li>[DAL] dalCommon.h -- A collection of functions to work with HDF5-based
       datafiles.
       <li>[DAL] Enumerations.h -- A collection of enumerations defining 
           attributes and keywords.
-      <li>DAL::TBB_Timeseries -- Class encapsulating the basic
-          information of how to interact with a LOFAR TBB time-series dataset.
+      <li>DAL::TBB_Timeseries, DAL::TBB_StationGroup, DAL::TBB_DipoleDataset --
+          High-level interface classes to the HDF5 TBB time-series data sets.
       <li>CR::DataReader -- Base class of CR-Tools data I/O framework.
     </ul>
     
@@ -80,48 +80,6 @@ namespace CR { // Namespace CR -- begin
     This class encapsulates the required functionality to connect the DataReader
     framework of the CR-Tools to the lower-level functionality of the Data Access
     Library (DAL), which handles the access to the standard LOFAR data products.
-
-    <ol>
-      <li><b>Structure of the data set</b> <br>
-      \verbatim
-      /                             ... Group
-      |-- TELESCOPE                 ... Attribute       ... string
-      |-- OBSERVER                  ... Attribute       ... string
-      |-- PROJECT                   ... Attribute       ... string
-      |-- OBSERVATION_ID            ... Attribute       ... string
-      |-- OBSERVATION_MODE          ... Attribute       ... string
-      |-- Station001                ... Group
-      |   |-- TRIGGER_TYPE          ... Attribute       ... string
-      |   |-- TRIGGER_OFFSET        ... Attribute       ... string
-      |   |-- TRIG_ANTS             ... Attribute       ... array<int,1>
-      |   |-- BEAM_DIRECTION        ... Attribute       ... array<double,2>
-      |   |-- 001000000             ... Dataset         ... array<uint,1>
-      |   |   |-- STATION_ID        ... Attribute       ... uint
-      |   |   |-- RSP_ID            ... Attribute       ... uint 
-      |   |   |-- RCU_ID            ... Attribute       ... uint
-      |   |   |-- SAMPLE_FREQ       ... Attribute       ... double
-      |   |   |-- TIME              ... Attribute       ... uint
-      |   |   |-- SAMPLE_NR         ... Attribute       ... uint
-      |   |   |-- SAMPLES_PER_FRAME ... Attribute       ... uint
-      |   |   |-- NYQUIST_ZONE      ... Attribute       ... uint
-      |   |   |-- FEED              ... Attribute       ... string
-      |   |   |-- ANT_POSITION      ... Attribute       ... array<double,1>
-      |   |   `-- ANT_ORIENTATION   ... Attribute       ... array<double,1>
-      |   |-- 001000001
-      |   |-- 001000002
-      |   |-- 001000003
-      |   |-- 001000004
-      |   |
-      |   |-- 001001000
-      |   |-- 001001001
-      |   |
-      |
-      \endverbatim
-      As can be read from the above listing, the internal structure of a LOFAR
-      time-series dataset is made up of a number of sub-components, each of them
-      representing a hierarchical level in the setup of the telecope.
-    </ol>
-
     
     <h3>Example(s)</h3>
     
@@ -233,27 +191,19 @@ namespace CR { // Namespace CR -- begin
               values for the selected data channels (dipoles).
     */
     casa::Matrix<double> fx ();
-
+    
     /*!
-      \brief Get a casa::Record containing the values of the attributes
-
-      \return record -- A casa::Record container holding the values of the 
-              attributes attached to the dataset for this dipole
+      \brief Set the record with the header information
+      
+      \param header -- Record containing the header information
+      
+      \return status -- Status of the operation; returns <tt>false</tt> in case an
+      error was encountered.
     */
-    casa::Record attributes2record ();
-
-  /*!
-    \brief Set the record with the header information
-    
-    \param header -- Record containing the header information
-    
-    \return status -- Status of the operation; returns <tt>false</tt> in case an
-            error was encountered.
-  */
     bool setHeaderRecord (casa::Record const &rec) {
       return DataReader::setHeaderRecord (rec);
     }
-
+    
   protected:
     
     /*!

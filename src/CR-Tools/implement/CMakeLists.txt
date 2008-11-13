@@ -56,12 +56,14 @@ endif (CR_WITH_GLISH)
 
 ## Enable using routines from LOPES-Star?
 
-if (NOT CR_WITH_STARTOOLS)
+if (CR_WITH_STARTOOLS)
+  LIST (APPEND cr_sources ${CR_SOURCE_DIR}/implement/Analysis/RootDict.C)
+else (CR_WITH_STARTOOLS)
   message (STATUS "[CR-Tools] Removing source files requiring STAR-Tools installation.")
-  list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implementAnalysis/CompletePipeline.cc)
+  list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/CompletePipeline.cc)
   list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/analyseLOPESevent2.cc)
   list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/PulseProperties.cc)
-endif (NOT CR_WITH_STARTOOLS)
+endif (CR_WITH_STARTOOLS)
 
 ## ------------------------------------------------------------------------------
 ## Assemble list of directories containing header files

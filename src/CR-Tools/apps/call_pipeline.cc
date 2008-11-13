@@ -64,10 +64,9 @@ using CR::LopesEventIn;
   </ul>
 
   <h3>Prerequisites</h3>
-  <br>
+
   You need at least one event list file (textfile) like the example files below:<br>
-  <br>
-  <br>
+
   \verbatim
   Example event list<br>
   some lines of comments here<br>
@@ -184,31 +183,33 @@ using CR::LopesEventIn;
 // Set default configuration values for the pipeline
 string caltablepath = "/home/schroeder/usg/data/lopes/LOPES-CalTable";
 string path = "";
-bool generatePlots = true;		// the plot prefix will be the name of the event file
-bool singlePlots = false;		// by default there are no single plots for each antenna
-bool PlotRawData = false;		// by default there the raw data are not plotted
-bool CalculateMaxima = false;		// by default the maxima are not calculated
-bool listCalcMaxima=false;    		// print calculated maxima in more user friendly way
-bool printShowerCoordinates=false;	// print the distance between antenna and shower core
-bool RotatePos = true; 		// should be true if coordinates are given in KASKADE frame
+bool generatePlots = true;	      // the plot prefix will be the name of the event file
+bool singlePlots = false;	      // by default there are no single plots for each antenna
+bool PlotRawData = false;	      // by default there the raw data are not plotted
+bool CalculateMaxima = false;	      // by default the maxima are not calculated
+bool listCalcMaxima=false;    	      // print calculated maxima in more user friendly way
+bool printShowerCoordinates=false;    // print the distance between antenna and shower core
+bool RotatePos = true; 	       	      // should be true if coordinates are given in KASKADE frame
 bool verbose = true;
 bool simplexFit = true;
-int doTVcal = -1;			// 1: yes, 0: no, -1: use default	
-bool doGainCal = true;			// calibration of the electrical fieldstrength
-bool doDispersionCal = true;		// application of the CalTable PhaseCal values	
-bool doDelayCal = true;		// correction for the general delay of each antenna
-bool doRFImitigation = true;		// supresses narrow band noise (RFI)
-string polarization = "ANY";		// polarization: ANY, EW, NS or BOTH
-bool both_pol = false;			// Should both polarizations be processed?
-double plotStart = -2.05e-6;		// in seconds
-double plotEnd = -1.60e-6;		// in seconds
-double upsamplingRate = 0.;		// Upsampling Rate for new upsampling
-unsigned int upsamplingExponent = 0;	// by default no upsampling will be done
-vector<Int> flagged;			// use of STL-vector instead of CASA-vector due to support of push_back()
-unsigned int summaryColumns = 0;	// be default no summary of all plots
-double ccWindowWidth = 0.045e-6;	// width of window for CC-beam
-string rootFilename = "";		// name of root file for output
-bool calibrationMode = false;		// calibration mode is off by default
+int doTVcal = -1;		      // 1: yes, 0: no, -1: use default	
+bool doGainCal = true;		      // calibration of the electrical fieldstrength
+bool doDispersionCal = true;	      // application of the CalTable PhaseCal values	
+bool doDelayCal = true;		      // correction for the general delay of each antenna
+bool doRFImitigation = true;	      // supresses narrow band noise (RFI)
+string polarization = "ANY";	      // polarization: ANY, EW, NS or BOTH
+bool both_pol = false;		      // Should both polarizations be processed?
+double plotStart = -2.05e-6;	      // in seconds
+double plotEnd = -1.60e-6;	      // in seconds
+double upsamplingRate = 0.;	      // Upsampling Rate for new upsampling
+unsigned int upsamplingExponent = 0;  // by default no upsampling will be done
+vector<Int> flagged;		      // use of STL-vector instead of CASA-vector due to support of push_back()
+unsigned int summaryColumns = 0;      // be default no summary of all plots
+double ccWindowWidth = 0.045e-6;      // width of window for CC-beam
+//! Name of root file for output
+string rootFilename = "";
+//! Calibration mode is off by default
+bool calibrationMode = false;	      
 
 // ------------- Functions ----------------
 

@@ -346,7 +346,7 @@ int test_headerRecord (std::string const &filename)
   try {
     LOFAR_TBB data (filename,
 		    blocksize);
-    casa::Record rec = data.headerRecord();
+    casa::Record rec = data.attributes2headerRecord();
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
