@@ -16,34 +16,32 @@ cmake_minimum_required (VERSION 2.5)
 
 ## Locate additional CMake find scripts
 
-find_path (PYBDSM_cmake CMakeSettings.cmake
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
   ${PYBDSM_SOURCE_DIR}
   ${PYBDSM_SOURCE_DIR}/..
   ${PYBDSM_SOURCE_DIR}/../..
   ${PYBDSM_SOURCE_DIR}/../../..
-  PATH_SUFFIXES
-  devel_common/cmake
   )
 
-if (PYBDSM_cmake)
-  list (APPEND CMAKE_MODULE_PATH ${PYBDSM_cmake})
-else (PYBDSM_cmake)
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (PYBDSM_cmake)
+endif (USG_ROOT)
 
 ## locate external packages
 
-if (PYBDSM_cmake)
+if (USG_ROOT)
   ## Boost
   set (BOOST_FIND_QUIETLY 1)
-  include (${PYBDSM_cmake}/FindBoost.cmake)
+  include (FindBoost)
   ## Python
   set (PYTHON_FIND_QUIETLY 1)
-  include (${PYBDSM_cmake}/FindPython.cmake)
-else (PYBDSM_cmake)
+  include (FindPython)
+else (USG_ROOT)
   message (SEND_ERROR "Unable to locate additional CMake find scripts!")
-endif (PYBDSM_cmake)
+endif (USG_ROOT)
 
 ## -----------------------------------------------------------------------------
 ## Subdirectories
