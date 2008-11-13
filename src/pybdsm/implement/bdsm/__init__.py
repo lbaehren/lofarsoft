@@ -6,6 +6,7 @@ execute chain of operations properly.
 """
 
 from FITS import Op_loadFITS
+from collapse import Op_collapse
 from preprocess import Op_preprocess
 from rmsimage import Op_rmsimage
 from islands import Op_islands
@@ -13,7 +14,8 @@ from gausfit import Op_gausfit
 from fittedimage import Op_fittedimage
 from output import Op_outlist
 
-fits_chain = [Op_loadFITS(), Op_preprocess(),
+fits_chain = [Op_loadFITS(), Op_collapse(),
+              Op_preprocess(),
               Op_rmsimage(), Op_islands(),
               Op_gausfit(), Op_fittedimage(),
               Op_outlist()]
