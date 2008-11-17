@@ -105,6 +105,19 @@ foreach (lib ${libs})
   endif (root${lib})
 endforeach (lib)
 
+## system libraries in addition to root libraries themselves
+
+find_library (libm m ${lib_locations})
+find_library (libdl dl ${lib_locations})
+
+if (libm)
+  list (APPEND ROOT_LIBRARIES ${libm})
+endif (libm)
+
+if (libdl)
+  list (APPEND ROOT_LIBRARIES ${libdl})
+endif (libdl)
+
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
@@ -140,10 +153,12 @@ endif (HAVE_ROOT)
 mark_as_advanced (
   ROOT_INCLUDES
   ROOT_LIBRARIES
+  libm
+  libdl
   )
 
 foreach (lib ${libs})
-    if (root${lib})
-      mark_as_advanced (root${lib})
+  if (root${lib})
+    mark_as_advanced (root${lib})
   endif (root${lib})
 endforeach (lib)

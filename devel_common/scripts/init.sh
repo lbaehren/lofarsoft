@@ -41,7 +41,7 @@ else  # only execute the following if LOFARSOFT is set
 #
 #############################################################################
 
-export PATH=$PATH:$LOFARSOFT/release/bin
+export PATH=$LOFARSOFT/release/bin:$PATH
 
 #############################################################################
 #
@@ -52,7 +52,7 @@ export PATH=$PATH:$LOFARSOFT/release/bin
 if test -z "$PYTHONPATH" ; then
 	export PYTHONPATH=$LOFARSOFT/release/lib/python
 else
-	export PYTHONPATH=$PYTHONPATH:$LOFARSOFT/release/lib/python
+	export PYTHONPATH=$LOFARSOFT/release/lib/python:$PYTHONPATH
 fi
 
 #############################################################################

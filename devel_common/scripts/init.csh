@@ -46,7 +46,7 @@ endif
 
 echo "-- Add the LOFAR executables to the path"
 
-set path = ( $path $LOFARSOFT/release/bin )
+set path = ( $LOFARSOFT/release/bin $path )
 
 
 #############################################################################
@@ -59,7 +59,7 @@ echo "-- Add the Python libraries to the existing search path"
 
 if ($?PYTHONPATH) then
    if ( $PYTHONPATH != $LOFARSOFT/release/lib ) then   
-      setenv PYTHONPATH ${PYTHONPATH}:${LOFARSOFT}/release/lib/python
+      setenv PYTHONPATH ${LOFARSOFT}/release/lib/python:${PYTHONPATH}
    endif
 else 
    setenv PYTHONPATH ${LOFARSOFT}/release/lib/python
