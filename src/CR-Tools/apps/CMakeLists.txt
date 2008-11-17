@@ -18,22 +18,80 @@
 #  endif (HAVE_CFITSIO)
 #endif (HAVE_CASACORE OR HAVE_CASA)
   
-## -------------------------------------------------------------------
-## treetest  GLISH CFITSIO WCSLIB
+##____________________________________________________________________
+## getPhases
 
-if (LAPACK_LIBRARIES AND G2C_LIBRARIES)
+if (HAVE_CASA OR HAVE_CASACORE)
+    add_executable (getPhases getPhases.cc)
+    ## linker instructions
+    target_link_libraries (getPhases cr)
+    ## installation instructions
+  list (APPEND cr_apps getPhases)
+else (HAVE_CASA OR HAVE_CASACORE)
+  message (STATUS "[CR-Tools] Unable to build executable getPhases.")
+endif (HAVE_CASA OR HAVE_CASACORE)
+
+##____________________________________________________________________
+## reas2event
+
+if (HAVE_CASA OR HAVE_CASACORE)
+  add_executable (reas2event reas2event.cc)
+  ## linker instructions
+  target_link_libraries (reas2event cr)
+  ## additional properties to consider
+  set_target_properties (reas2event
+    PROPERTIES
+    BUILD_WITH_INSTALL_RPATH TRUE
+    )
+  ## installation instructions
+  list (APPEND cr_apps reas2event)
+else (HAVE_CASA OR HAVE_CASACORE)
+  message (STATUS "[CR-Tools] Unable to build executable reas2event.")
+endif (HAVE_CASA OR HAVE_CASACORE)
+
+##____________________________________________________________________
+## simStationBeam
+
+if (HAVE_CASACORE)
+  if (HAVE_PGPLOT OR HAVE_PLPLOT)
+    add_executable (simStationBeam simStationBeam.cc)
+    ## linker instructions
+    target_link_libraries (simStationBeam cr)
+    ## installation instructions
+    list (APPEND cr_apps simStationBeam)
+  endif (HAVE_PGPLOT OR HAVE_PLPLOT)
+else (HAVE_CASACORE)
+  message (STATUS "[CR-Tools] Unable to build executable simStationBeam.")
+endif (HAVE_CASACORE)
+
+##____________________________________________________________________
+## skymapper
+
+if (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
+  ## compiler instructions
+  add_executable (skymapper skymapper.cc)
+  ## linker instructions
+  target_link_libraries (skymapper cr ${BOOST_LIBRARIES})
+  ## installation instructions
+  list (APPEND cr_apps skymapper)
+endif (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
+
+##____________________________________________________________________
+## treetest
+
+if (LAPACK_LIBRARIES AND G2C_LIBRARIES AND CR_WITH_LEGACY)
   ## compiler instructions
   add_executable (treetest treetest.cc)
   ## linker instructions
   target_link_libraries (treetest cr)
   ## installation instructions
   list (APPEND cr_apps treetest)
-else (LAPACK_LIBRARIES AND G2C_LIBRARIES)
+else (LAPACK_LIBRARIES AND G2C_LIBRARIES AND CR_WITH_LEGACY)
   message (STATUS "[CR-Tools] Unable to build executable treetest.")
-endif (LAPACK_LIBRARIES AND G2C_LIBRARIES)
+endif (LAPACK_LIBRARIES AND G2C_LIBRARIES AND CR_WITH_LEGACY)
 
-## -------------------------------------------------------------------
-## trigrun   GLISH POPT LAPACK F77 CFITSIO WCSLIB
+##____________________________________________________________________
+## trigrun
 
 if (HAVE_POPT AND LAPACK_LIBRARIES)
   ## compiler instructions
@@ -53,47 +111,6 @@ if (HAVE_POPT AND LAPACK_LIBRARIES)
 endif (HAVE_POPT AND LAPACK_LIBRARIES)
 
 ## -------------------------------------------------------------------
-## simStationBeam
-
-if (HAVE_CASACORE)
-  if (HAVE_PGPLOT OR HAVE_PLPLOT)
-    add_executable (simStationBeam simStationBeam.cc)
-    ## linker instructions
-    target_link_libraries (simStationBeam cr)
-    ## installation instructions
-    list (APPEND cr_apps simStationBeam)
-  endif (HAVE_PGPLOT OR HAVE_PLPLOT)
-endif (HAVE_CASACORE)
-
-## -------------------------------------------------------------------
-## skymapper
-
-if (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
-  ## compiler instructions
-  add_executable (skymapper skymapper.cc)
-  ## linker instructions
-  target_link_libraries (skymapper cr ${BOOST_LIBRARIES})
-  ## installation instructions
-  list (APPEND cr_apps skymapper)
-endif (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
-
-## -------------------------------------------------------------------
-## reas2event
-
-if (HAVE_CASA OR HAVE_CASACORE)
-  add_executable (reas2event reas2event.cc)
-  ## linker instructions
-  target_link_libraries (reas2event cr)
-  ## additional properties to consider
-  set_target_properties (reas2event
-    PROPERTIES
-    BUILD_WITH_INSTALL_RPATH TRUE
-    )
-  ## installation instructions
-  list (APPEND cr_apps reas2event)
-endif (HAVE_CASA OR HAVE_CASACORE)
-
-## -------------------------------------------------------------------
 ## calcSourcePosition
 
 if (HAVE_CASA OR HAVE_CASACORE)
@@ -109,7 +126,7 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 ## -------------------------------------------------------------------
 ## call_pipeline
 
-if (CR_WITH_STARTOOLS)
+if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 
   if (HAVE_PGPLOT OR HAVE_PLPLOT)
     add_executable (call_pipeline
@@ -130,12 +147,13 @@ if (CR_WITH_STARTOOLS)
       ${STARTOOLS_LIBRARIES}
       ${ROOT_LIBRARIES}
       ${FFTW3_LIBRARIES}
+      ${POSTGRESQL_LIBRARIES}
       )
     ## installation instructions
     list (APPEND cr_apps call_pipeline)
   endif (HAVE_PGPLOT OR HAVE_PLPLOT)
 
-endif (CR_WITH_STARTOOLS)
+endif (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 
 ## -------------------------------------------------------------------
 ## readLopesCalTable
@@ -160,17 +178,6 @@ if (HAVE_CASA OR HAVE_CASACORE)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
-## getPhases
-
-if (HAVE_CASA OR HAVE_CASACORE)
-    add_executable (getPhases getPhases.cc)
-    ## linker instructions
-    target_link_libraries (getPhases cr)
-    ## installation instructions
-  list (APPEND cr_apps getPhases)
-endif (HAVE_CASA OR HAVE_CASACORE)
-
-## -------------------------------------------------------------------
 ## tbbctlResort
 
 if (HAVE_CASA OR HAVE_CASACORE)
@@ -188,7 +195,9 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 ## tbbTest
 
 if (HAVE_CASA OR HAVE_CASACORE)
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+
+  if (DAL_LIBRARIES AND HDF5_LIBRARIES AND CR_WITH_LEGACY)
+
     ## compiler instructions
     add_executable (tbbTest tbbTest.cc)
     ## linker instructions
@@ -199,9 +208,16 @@ if (HAVE_CASA OR HAVE_CASACORE)
       )
     ## installation instructions
     list (APPEND cr_apps tbbTest)
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+
+  else (DAL_LIBRARIES AND HDF5_LIBRARIES AND CR_WITH_LEGACY)
+
     message (STATUS "[CR-Tools] Unable to build executable tbbTest.")
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    message (STATUS "HAVE_DAL ..... = ${HAVE_DAL}")
+    message (STATUS "HAVE_HDF5 .... = ${HAVE_HDF5}")
+    message (STATUS "CR_WITH_LEGACY = ${CR_WITH_LEGACY}")
+
+  endif (DAL_LIBRARIES AND HDF5_LIBRARIES AND CR_WITH_LEGACY)
+
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
@@ -268,6 +284,7 @@ if (HAVE_STARTOOLS AND HAVE_PLPLOT)
     ${STARTOOLS_LIBRARIES}
     ${ROOT_LIBRARIES}
     ${FFTW3_LIBRARIES}
+    ${POSTGRESQL_LIBRARIES}
     )
   ## installation instructions
   list (APPEND cr_apps calculatePhaseBehaviour)

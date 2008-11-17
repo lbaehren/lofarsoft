@@ -26,16 +26,6 @@
   version of the DAL. (I.e. the posibility that the includes and libraries from
   two different boost version were used.)
 
-- The \e call_pipeline executable fails to build under Mac OS X due to missing symbols from one of the ROOT libraries:
-  \verbatim
-  Linking CXX executable call_pipeline
-  /usr/libexec/gcc/i686-apple-darwin8/4.0.1/ld: Undefined symbols:
-  TClass::GetClass(char const*, bool)
-  collect2: ld returned 1 exit status
-  make[2]: *** [apps/call_pipeline] Error 1
-  make[1]: *** [apps/CMakeFiles/call_pipeline.dir/all] Error 2
-  \endverbatim
-
 - The library for the graphical user interface (libhfget) is not getting build on the machine in
   Karlsruhe:
   \verbatim
@@ -70,6 +60,9 @@
   make[1]: *** [implement/CMakeFiles/hfget.dir/all] Fehler 2
   make: *** [all] Fehler 2
   \endverbatim
+
+- Clean up linker instructions to reduce size of produced libraries and
+  executables.
 
 <hr>
 

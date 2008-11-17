@@ -69,23 +69,31 @@ if (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
 	PROPERTIES
 	COMPILE_FLAGS "-I${HDF5_INCLUDES} -I${CR_BINARY_DIR}"
 	)
+      ## linker instructions
+      target_link_libraries (${test}
+	cr
+	${HDF5_LIBRARIES}
+	${LAPACK_LIBRARIES}
+	${CFITSIO_LIBRARIES}
+	${WCSLIB_LIBRARIES}
+	${G2C_LIBRARIES}
+	${HAVE_LIBM}
+	)
     else (HAVE_HDF5)
       set_target_properties (${test}
 	PROPERTIES
 	COMPILE_FLAGS "-I${CR_BINARY_DIR}"
 	)
+      ## linker instructions
+      target_link_libraries (${test}
+	cr
+	${LAPACK_LIBRARIES}
+	${CFITSIO_LIBRARIES}
+	${WCSLIB_LIBRARIES}
+	${G2C_LIBRARIES}
+	${HAVE_LIBM}
+	)
     endif (HAVE_HDF5)
-    ## linker instructions
-    target_link_libraries (${test}
-      cr
-#      ${CASA_LIBRARIES}
-#      ${HDF5_LIBRARIES}
-      ${LAPACK_LIBRARIES}
-      ${CFITSIO_LIBRARIES}
-      ${WCSLIB_LIBRARIES}
-      ${G2C_LIBRARIES}
-      ${HAVE_LIBM}
-      )
     ## testing
     add_test (${test} ${test})
   endforeach (test ${tests_casacore})

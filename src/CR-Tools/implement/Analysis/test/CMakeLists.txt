@@ -8,22 +8,25 @@
 ##
 ## ==============================================================================
 
+##____________________________________________________________________
 ## Set up the list with test program sources
 
 set (tests
   tClippingFraction
   tCRdelayPlugin
-  tCRinvFFT
   tDynamicSpectrum
   tFirstStagePipeline
-  tfitCR2gauss
-  tgenCRmap
   tionoCalibration
   tSecondStagePipeline
   tSubbandID
   )
 
-## -------------------------------------------------------------------
+if (CR_WITH_LEGACY) 
+  list (APPEND tests tfitCR2gauss)
+  list (APPEND tests tCRinvFFT)
+endif (CR_WITH_LEGACY)
+
+##____________________________________________________________________
 ## Tests which require input data
 
 if (data_modelcoeff1 AND data_modelcoeff2)
@@ -38,7 +41,7 @@ else (data_ppf_coefficients AND data_ppf_inversion)
   message (STATUS "Excluding tppfimplement from list of tests; missing input data.")
 endif (data_ppf_coefficients AND data_ppf_inversion)
 
-## -------------------------------------------------------------------
+##____________________________________________________________________
 ## Build the test programs
 
 foreach (src ${tests})
@@ -56,12 +59,26 @@ endforeach (src)
 ##
 ## ==============================================================================
 
+##____________________________________________________________________
+## Test programs which require HDF5 library
+
+if (HAVE_HDF5)
+  ## compiler instructions
+  add_executable (tgenCRmap tgenCRmap.cc)
+  ## linker instructions
+  target_link_libraries (tgenCRmap cr ${HDF5_LIBRARIES})
+  ## testing
+  add_test (tgenCRmap tgenCRmap)
+endif (HAVE_HDF5)
+
+##____________________________________________________________________
+## Test programs which require the Data Access Library (DAL)
 
 if (HAVE_DAL)
   ## compiler instructions
   add_executable (tppfinversion tppfinversion.cc)
   ## linker instructions
-  target_link_libraries (tppfinversion cr ${DAL_LIBRARIES})
+  target_link_libraries (tppfinversion cr ${DAL_LIBRARIES} ${HDF5_LIBRARIES})
   ## testing
   add_test (tppfinversion tppfinversion ${dataset_beamformed})
   ## installation
@@ -184,7 +201,7 @@ if (NOT APPLE)
   
   if (HAVE_ROOT)
     ## compiler instructions
-    add_executable (tPulseProperties tPulseProperties.cc ${CR_SOURCE_DIR}/implement/Analysis/RootDict.C)
+    add_executable (tPulseProperties tPulseProperties.cc)
     target_link_libraries (tPulseProperties
         cr
 	${ROOT_LIBRARIES}

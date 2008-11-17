@@ -8,8 +8,8 @@
 ##
 ## =============================================================================
 
-## -----------------------------------------------------------------------------
-## Core modules which should be included in any case
+##__________________________________________________________
+## Core modules
 
 set (cr_modules
   Analysis
@@ -18,41 +18,42 @@ set (cr_modules
   Data
   Imaging
   IO
-  LopesLegacy
   Math
   Observation
   Utilities
   )
 
+##__________________________________________________________
+## Optional modules depending on user selection
+
+if (CR_WITH_LEGACY)
+  list (APPEND cr_modules LopesLegacy)
+endif (CR_WITH_LEGACY)
+
+if (CR_WITH_PLOTTING)
+  list (APPEND cr_modules Display)
+endif (CR_WITH_PLOTTING)
+
+if (CR_WITH_GLISH)
+  list (APPEND cr_modules ApplicationSupport)
+  ## additional sources-files
+  if (HAVE_CASA)
+    list (APPEND cr_sources templates.cc)
+  endif (HAVE_CASA)
+endif (CR_WITH_GLISH)
+
+##__________________________________________________________
+## Collect source files to be compiled into the library
+
 foreach (cr_module ${cr_modules})
   ## list of source files for this module
   FILE (GLOB cr_${cr_module} ${cr_module}/*.cc)
+  ## add to global source files list
   LIST (APPEND cr_sources ${cr_${cr_module}})
 endforeach (cr_module)
 
 ## ------------------------------------------------------------------------------
 ## Optional modules (added depending on requested features and installed packages)
-
-if (CR_WITH_PLOTTING)
-  ## add source files to the library
-  FILE (GLOB cr_Display Display/*.cc)
-  ## addition to the lists
-  list (APPEND cr_modules Display)
-  LIST (APPEND cr_sources ${cr_Display})
-endif (CR_WITH_PLOTTING)
-
-## Support for generation of plots?
-
-if (CR_WITH_GLISH)
-  ## add source files to the library
-  FILE (GLOB cr_ApplicationSupport ApplicationSupport/*.cc)
-  if (HAVE_CASA)
-    list (APPEND cr_sources templates.cc)
-  endif (HAVE_CASA)
-  ## addition to the lists
-  list (APPEND cr_modules ApplicationSupport)
-  LIST (APPEND cr_sources ${cr_ApplicationSupport})
-endif (CR_WITH_GLISH)
 
 ## Enable using routines from LOPES-Star?
 
@@ -80,10 +81,6 @@ endif (HAVE_GSL)
 
 ## ------------------------------------------------------------------------------
 ## Assemble list of external libraries against which to link
-
-if (HDF5_LIBRARIES)
-  list (APPEND cr_link_libraries ${HDF5_LIBRARIES})
-endif (HDF5_LIBRARIES)
 
 if (CASA_LIBRARIES)
   list (APPEND cr_link_libraries ${CASA_LIBRARIES})
@@ -124,26 +121,6 @@ endif (PLPLOT_LIBRARIES)
 if (FFTW3_LIBRARIES)
   list (APPEND cr_link_libraries ${FFTW3_LIBRARIES})
 endif (FFTW3_LIBRARIES)
-
-if (ROOT_LIBRARIES)
-  list (APPEND cr_link_libraries ${ROOT_LIBRARIES})
-endif (ROOT_LIBRARIES)
-
-if (POSTGRESQL_LIBRARIES)
-  list (APPEND cr_link_libraries ${POSTGRESQL_LIBRARIES})
-endif (POSTGRESQL_LIBRARIES)
-
-if (PNG_LIBRARIES)
-  list (APPEND cr_link_libraries ${PNG_LIBRARIES})
-endif (PNG_LIBRARIES)
-
-if (GIF_LIBRARIES)
-  list (APPEND cr_link_libraries ${GIF_LIBRARIES})
-endif (GIF_LIBRARIES)
-
-if (HAVE_LIBGD)
-  list (APPEND cr_link_libraries ${HAVE_LIBGD})
-endif (HAVE_LIBGD)
 
 if (HAVE_LIBUTIL)
   list (APPEND cr_link_libraries ${HAVE_LIBUTIL})

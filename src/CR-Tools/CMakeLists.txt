@@ -40,6 +40,7 @@ option (CR_BUILD_EXTERNAL_TESTS "Build test programs for external packages?" YES
 option (CR_COMPILER_WARNINGS    "Enable standard set of compiler warnings?"  YES )
 option (CR_DEBUGGING_MESSAGES   "Print debugging information?"               NO  )
 option (CR_VERBOSE_CONFIGURE    "Verbose output during configuration?"       NO  )
+option (CR_WITH_LEGACY          "Include building legacy code?"              YES )
 option (CR_WITH_GLISH           "Support for Glish applications?"            NO  )
 option (CR_WITH_PYTHON          "Support for Python applications?"           NO  )
 option (CR_WITH_PLOTTING        "Support for generation of plots?"           YES )
