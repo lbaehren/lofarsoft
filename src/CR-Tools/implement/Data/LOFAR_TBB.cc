@@ -201,7 +201,7 @@ namespace CR { // Namespace CR -- begin
      */
 #ifdef HAVE_CASA
     // retrieve the values
-    casa::Vector<double> sampleFreq = TBB_Timeseries::sample_frequency();
+    casa::Vector<double> sampleFreq = TBB_Timeseries::sample_frequency_value();
     // Feedback
     std::cout << "-- sample frequencies = " << sampleFreq << std::endl;
     // adjust internal settings
@@ -213,7 +213,7 @@ namespace CR { // Namespace CR -- begin
     }
 #else
     // retrieve the values
-    std::vector<double> sampleFreq = TBB_Timeseries::sample_frequency();
+    std::vector<double> sampleFreq = TBB_Timeseries::sample_frequency_value();
     // adjust internal settings
     if (sampleFreq.size() > 0) {
       sampleFrequency_p = sampleFreq[0];
