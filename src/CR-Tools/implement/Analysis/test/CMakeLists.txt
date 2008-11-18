@@ -133,12 +133,16 @@ if (NOT APPLE)
   
   if (CR_WITH_STARTOOLS)
     ## compiler instructions
-    add_executable (tanalyseLOPESevent2 tanalyseLOPESevent2.cc ${CR_SOURCE_DIR}/implement/Analysis/RootDict.C)
+    add_executable (tanalyseLOPESevent2
+      tanalyseLOPESevent2.cc
+      ${CR_SOURCE_DIR}/implement/Analysis/RootDict.C
+      )
     ## linker instructions
     if (HAVE_PLPLOT OR HAVE_PGPLOT)
       target_link_libraries (tanalyseLOPESevent2
 	cr
 	${STARTOOLS_LIBRARIES}
+	${POSTGRESQL_LIBRARIES}
 	${FFTW3_LIBRARIES}
 	${ROOT_LIBRARIES}
 	${PLPLOT_LIBRARIES}
@@ -151,6 +155,7 @@ if (NOT APPLE)
       target_link_libraries (tanalyseLOPESevent2
         cr
 	${STARTOOLS_LIBRARIES}
+	${POSTGRESQL_LIBRARIES}
 	${X11_LIBRARIES}
 	${PGPLOT_LIBRARIES}
 	)
