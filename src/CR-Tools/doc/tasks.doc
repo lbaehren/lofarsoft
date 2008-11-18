@@ -175,13 +175,13 @@
     <td>Nov 2008</td>
     <td></td>
   </tr>
-  <tr valign=top bgcolor=orange>
+  <tr valign=top bgcolor=00ee00>
     <td>Debugging of DAL::TBB_Timeseries to track down error causing segmentation
 	fault</td>
     <td>Lars</td>
     <td>Nov 2008</td>
     <td>Nov 2008</td>
-    <td></td>
+    <td>Nov 2008</td>
   </tr>
   <tr valign=top bgcolor=orange>
     <td>Export of attributes/metadata as casa::Record</td>
