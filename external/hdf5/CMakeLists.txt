@@ -17,7 +17,11 @@ cmake_minimum_required(VERSION 2.5)
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (HDF5_FORCE_BUILD "Force rebuild and local installation" 0)
+option (HDF5_FORCE_BUILD  "Force rebuild and local installation" NO  )
+option (HDF5_BUILD_SHARED "Build shared version of the library?" YES )
+option (HDF5_BUILD_STATIC "Build static version of the library?" YES )
+option (HDF5_BUILD_CXX    "Build C++ interface to the library?"  NO  )
+option (HDF5_BUILD_HL     "Enable the high level library?"       YES )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -34,7 +38,7 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
 if (USG_ROOT)
   include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
 else (USG_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+  message (FATAL_ERROR "[HDF5] Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
 ## ------------------------------------------------------------------------------
@@ -69,7 +73,7 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
     )
   
   if (NOT HDF5_prefix)
-    message (FATAL_ERROR "Unable to locate the installation area")
+    message (FATAL_ERROR "[HDF5] Unable to locate the installation area")
   endif (NOT HDF5_prefix)
   
   ## ----------------------------------------------------------------------------
@@ -79,15 +83,38 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   include (FindZLIB)
 
   ## ----------------------------------------------------------------------------
-  ## Run the configure script provided along with the distribution
+  ## Processing of the optional user settings
+
+  if (HDF5_BUILD_CXX)
+    set (config_settings "${config_settings} --enable-cxx") 
+  else (HDF5_BUILD_CXX)
+    set (config_settings "${config_settings} --disable-cxx") 
+  endif (HDF5_BUILD_CXX)
   
+  if (HDF5_BUILD_HL)
+    set (config_settings "${config_settings} --enable-hl") 
+  else (HDF5_BUILD_HL)
+    set (config_settings "${config_settings} --disable-hl")
+  endif (HDF5_BUILD_HL)
+
+  if (NOT HDF5_BUILD_SHARED)
+    set (config_settings "${config_settings} --disable-shared") 
+  endif (NOT HDF5_BUILD_SHARED)
+  
+  if (NOT HDF5_BUILD_STATIC)
+    set (config_settings "${config_settings} --disable-static") 
+  endif (NOT HDF5_BUILD_STATIC)
+  
+  ## ----------------------------------------------------------------------------
+  ## Run the configure script provided along with the distribution
+
   ## [1] configure
   
   message (STATUS "Running the HDF5 configure script...")
   
   execute_process (
     WORKING_DIRECTORY ${HDF5_SOURCE_DIR}
-    COMMAND ./configure --prefix=${HDF5_prefix} --bindir=${HDF5_prefix}/bin --includedir=${HDF5_prefix}/include/hdf5 --disable-shared
+    COMMAND ./configure --prefix=${HDF5_prefix} --bindir=${HDF5_prefix}/bin --includedir=${HDF5_prefix}/include/hdf5 ${config_settings}
     TIMEOUT 300
     ERROR_VARIABLE error_configure
     ERROR_FILE error.log
