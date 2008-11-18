@@ -409,10 +409,6 @@ case $param_packageName in
 	build_package szip external/szip "-DSZIP_FORCE_BUILD:BOOL=$FORCE_BUILD";
 	#build_package zlib external/zlib "-DZLIB_FORCE_BUILD:BOOL=$FORCE_BUILD";
 	build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$FORCE_BUILD";
-	## post-installation clean-up: since the "--includedir" option does not seem
-	## to be handled properly by the configure script, we need to manually move
-	## the header files after installation
-	cd $basedir/../release/include ; mkdir hdf5 ; mv H5*.h hdf5 ; mv hdf5*.h hdf5
     ;;
     mathgl)
         echo "[`date`] Selected package MathGL";
@@ -446,8 +442,10 @@ case $param_packageName in
     ;;
     pyrap)
         echo "[`date`] Selected package Pyrap"
-        cd $basedir; ./build.sh casacore
-        cd $basedir; ./build.sh python
+	build_package hdf5 external/hdf5
+	build_package casacore external/casacore
+	build_package boost external/boost
+	build_package python external/python
         build_package pyrap external/pyrap
     ;;
     python)
@@ -532,8 +530,7 @@ case $param_packageName in
     contrib)
 	echo "[`date`] Building packages and tools in contrib ..."
 	## required packages
-	cd $basedir; ./build.sh casacore
-	cd $basedir; ./build.sh boost --force-build
+	cd $basedir; ./build.sh dal
 	## contrib
 	build_package contrib src/contrib;
     ;;

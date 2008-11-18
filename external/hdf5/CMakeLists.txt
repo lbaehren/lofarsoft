@@ -82,8 +82,8 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   include (FindSZIP)
   include (FindZLIB)
 
-  ## ----------------------------------------------------------------------------
-  ## Processing of the optional user settings
+  ##__________________________________________________________________
+  ## Build list of configuration parameters
 
   if (HDF5_BUILD_CXX)
     set (config_settings "${config_settings} --enable-cxx") 
@@ -105,63 +105,52 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
     set (config_settings "${config_settings} --disable-static") 
   endif (NOT HDF5_BUILD_STATIC)
   
-  ## ----------------------------------------------------------------------------
-  ## Run the configure script provided along with the distribution
+  ##__________________________________________________________________
+  ## Custom target wrapping the standard configure/build chain
 
-  ## [1] configure
-  
-  message (STATUS "Running the HDF5 configure script...")
-  
-  execute_process (
+  ## Run "./configure [args]"
+
+  add_custom_target (run_configure ALL
+    COMMAND ./configure --prefix=${HDF5_prefix} --bindir=${HDF5_prefix}/bin --includedir=${HDF5_prefix}/include/hdf5
     WORKING_DIRECTORY ${HDF5_SOURCE_DIR}
-    COMMAND ./configure --prefix=${HDF5_prefix} --bindir=${HDF5_prefix}/bin --includedir=${HDF5_prefix}/include/hdf5 ${config_settings}
-    TIMEOUT 300
-    ERROR_VARIABLE error_configure
-    ERROR_FILE error.log
     )
-  
-  if (error_configure)
-    message (STATUS "There was an error running the HDF5 configure script!")
-    message (SEND_ERROR "${error_configure}")
-  endif (error_configure)
-  
-  ## [2] make
-  
-  message (STATUS "Building HDF5 library...")
-  
-  execute_process (
+
+  ## Run "make"
+
+  add_custom_target (run_make ALL
+    COMMAND make
     WORKING_DIRECTORY ${HDF5_SOURCE_DIR}
-    COMMAND make 
-    TIMEOUT 3600
-    ERROR_VARIABLE error_make
-    ERROR_FILE error.log
     )
+  add_dependencies (run_make run_configure)
+
+  ## Run "make install"
+
+  add_custom_target (run_install ALL
+    COMMAND make install
+    WORKING_DIRECTORY ${HDF5_SOURCE_DIR}
+    )
+  add_dependencies (run_install run_make)
+
+  ## Run "make clean"
+
+  add_custom_target (run_clean ALL
+    COMMAND make clean
+    WORKING_DIRECTORY ${HDF5_SOURCE_DIR}
+    )
+  add_dependencies (run_clean run_install)
   
-  if (error_make)
-    message (STATUS "There was an error building/installing the HDF5 library!")
-    message (SEND_ERROR "${error_make}")
-  endif (error_make)
-  
-  ## [3] make install
-  
-  if (NOT error_make)
-    
-    message (STATUS "Installing HDF5 library...")
-    
-    execute_process (
-      WORKING_DIRECTORY ${HDF5_SOURCE_DIR}
-      COMMAND make install
-      TIMEOUT 180
-      ERROR_VARIABLE error_make_install
-      ERROR_FILE error.log
-      )
-    
-    if (error_make_install)
-      message (STATUS "There was an error building/installing the HDF5 library!")
-      message (SEND_ERROR "${error_make_install}")
-    endif (error_make_install)
-    
-  endif (NOT error_make)
+  ##__________________________________________________________________
+  ## Post-installation clean-up: since the "--includedir" option does
+  ## not seem to be handled properly by the configure script, we need
+  ## to manually move the header files after installation
+
+  add_custom_target (install ALL
+    COMMAND mkdir -p hdf5 
+    COMMAND mv H5*.h hdf5
+    COMMAND mv hdf5*.h hdf5
+    WORKING_DIRECTORY ${HDF5_prefix}/include
+    )
+  add_dependencies (install run_install)
   
   ## <-- end build condition ----------------------------------------------------->
   
