@@ -10,10 +10,10 @@ cmake_minimum_required (VERSION 2.5)
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (ROOT_FORCE_BUILD "Force rebuild and local installation?"   NO  )
-option (ROOT_CMAKE_BUILD "Use CMake to configure and build ROOT?"  YES )
-option (ROOT_VERBOSE_CONFIGURE "Be verbose during configuration?"  NO  )
-option (ROOT_VERBOSE_BUILD     "Be verbose during build process?"  NO  )
+option (ROOT_FORCE_BUILD       "Force rebuild and local installation?"   NO  )
+option (ROOT_CMAKE_BUILD       "Use CMake to configure and build ROOT?"  YES )
+option (ROOT_VERBOSE_CONFIGURE "Be verbose during configuration?"        NO  )
+option (ROOT_VERBOSE_BUILD     "Be verbose during build process?"        NO  )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -70,7 +70,7 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   find_program (HAVE_CURL  curl  ${bin_locations} )
   find_program (HAVE_TAR   tar   ${bin_locations} )
 
-  ## ------------------------------------------------------------------------------
+  ##__________________________________________________________________
   ## Download the tar-archive from the USG server
 
   set (ROOT_VERSION "v5.20.00")
@@ -85,88 +85,50 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   endif (ROOT_VERBOSE_CONFIGURE)
   
   if (HAVE_WGET)
-    message (STATUS "Retrieving tar-archive from USG server ...")
-    execute_process (
-      WORKING_DIRECTORY ${ROOT_BINARY_DIR}
+    add_custom_target (run_download ALL
       COMMAND wget -c ${ROOT_URL}
-      TIMEOUT 600
-      ERROR_VARIABLE error_wget
-      ERROR_FILE error.log
+      WORKING_DIRECTORY ${ROOT_BINARY_DIR}
       )
   else (HAVE_WGET)
     if (HAVE_CURL)
-      execute_process (
-	WORKING_DIRECTORY ${ROOT_BINARY_DIR}
+      add_custom_target (run_download ALL
 	COMMAND curl ${ROOT_URL}
-	TIMEOUT 600
-	ERROR_VARIABLE error_curl
-	ERROR_FILE error.log
+	WORKING_DIRECTORY ${ROOT_BINARY_DIR}
 	)
     else (HAVE_CURL)
       message (FATAL_ERROR "[ROOT] No tool found to download tar-archive!")
     endif (HAVE_CURL)
   endif (HAVE_WGET)
   
-  ## ------------------------------------------------------------------------------
+  ##__________________________________________________________________
   ## Expand the downloaded tar-archive
-
-  find_file (HAVE_TAR_ARCHIVE ${ROOT_TAR_ARCHIVE}
-    PATHS ${ROOT_BINARY_DIR}
-    )
-
-  if (NOT HAVE_TAR_ARCHIVE)
-    message (FATAL_ERROR "Unable to find downloaded tar archive!")
-  endif (NOT HAVE_TAR_ARCHIVE)
-
-  if (HAVE_TAR)
-    message (STATUS "[ROOT] Expanding downloaded tar-archive ...")
-      execute_process (
-	WORKING_DIRECTORY ${ROOT_BINARY_DIR}
-	COMMAND tar -xvzf ${HAVE_TAR_ARCHIVE}
-	TIMEOUT 300
-	ERROR_VARIABLE error_tar
-	ERROR_FILE error.log
-	)
-  else (HAVE_TAR)
-    message (FATAL_ERROR "[ROOT] Unable to find executable tar; please install!")
-  endif (HAVE_TAR)
-
-  ## ------------------------------------------------------------------------------
-  ## Configure and build
-
-  if (NOT error_tar)
-    message (STATUS "Configuring ROOT ...")    
-    execute_process (
-      WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root
-      COMMAND ./configure --prefix=${ROOT_prefix}
-      TIMEOUT 300
-      ERROR_VARIABLE error_configure
-      ERROR_FILE error.log
-      )
-  endif (NOT error_tar)
-
-  if (NOT error_configure)
-    execute_process (
-      WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root
-      COMMAND make
-      TIMEOUT 1500
-      ERROR_VARIABLE error_make
-      ERROR_FILE error.log
-      )
-  endif (NOT error_configure)
   
-  ## ------------------------------------------------------------------------------
-  ## Install
+  add_custom_target (run_tar ALL
+    COMMAND tar -xvzf ${ROOT_TAR_ARCHIVE}
+    WORKING_DIRECTORY ${ROOT_BINARY_DIR}
+    )
+  add_dependencies (run_tar run_download)
 
-  if (NOT error_make)
-    execute_process (
-      WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root
-      COMMAND make install
-      TIMEOUT 1500
-      ERROR_VARIABLE error_make
-      ERROR_FILE error.log
-      )
-  endif (NOT error_make)
+  ##__________________________________________________________________
+  ## Configure, build and install
+
+  add_custom_target (run_configure ALL
+    COMMAND ./configure --prefix=${ROOT_prefix}
+    WORKING_DIRECTORY ${ROOT_BINARY_DIR}
+    )
+  add_dependencies (run_configure run_tar)
+
+  add_custom_target (run_make ALL
+    COMMAND make
+    WORKING_DIRECTORY ${ROOT_BINARY_DIR}
+    )
+  add_dependencies (run_make run_configure)
+
+  add_custom_target (install ALL
+    COMMAND make install
+    WORKING_DIRECTORY ${ROOT_BINARY_DIR}
+    )
+  add_dependencies (install run_make)
   
   ## <-- end build condition ----------------------------------------------------->
   
