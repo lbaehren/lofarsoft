@@ -162,6 +162,7 @@ include (FindWCS)
 ## Handle option: testing mode on/off
 
 if (CR_BUILD_TESTS OR CR_BUILD_EXTERNAL_TESTS)
+  set (UPDATE_TYPE "svn")
   include (CTest)
   enable_testing()
 endif (CR_BUILD_TESTS OR CR_BUILD_EXTERNAL_TESTS)
