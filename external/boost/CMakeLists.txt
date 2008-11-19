@@ -156,10 +156,11 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
   #  |   `-- tuple.hpp
   #  `-- python.hpp
   
-  if (BOOST_CMAKE_BUILD AND HAVE_PYTHON)
+  if (BOOST_CMAKE_BUILD)
     
     message (STATUS "Building Boost using CMake.")
 
+    ##______________________________________________________
     ## Testing activated?
 
     if (BOOST_ENABLE_TESTING)
@@ -167,6 +168,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
       enable_testing()
     endif (BOOST_ENABLE_TESTING)
 
+    ##______________________________________________________
     ## Thread enabling?
     
     if (CMAKE_THREAD_LIBS_INIT)
@@ -177,7 +179,8 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
       set (BOOST_LIB_THREAD NO)
     endif (CMAKE_THREAD_LIBS_INIT)
     
-    ## include paths for header files
+    ##______________________________________________________
+    ## Include paths for header files
     
     include_directories (
       .
@@ -185,8 +188,15 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
       ${BOOST_SOURCE_DIR}/libs
       ${PYTHON_INCLUDES}
       )
+    
+    if (HAVE_PYTHON)
+      include_directories (${PYTHON_INCLUDES})
+    else (HAVE_PYTHON)
+      set (BOOST_LIB_PYTHON NO)
+    endif (HAVE_PYTHON)
 
-    ## project sub-directories
+    ##______________________________________________________
+    ## Project sub-directories
     
     add_subdirectory (boost)
     add_subdirectory (libs)
@@ -213,7 +223,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
     message (STATUS "============================================================")
     message (STATUS " ")
     
-  else (BOOST_CMAKE_BUILD AND HAVE_PYTHON)
+  else (BOOST_CMAKE_BUILD)
     
     ## --------------------------------------------------------------------------
     ## Run the configure script provided along with the distribution
@@ -288,7 +298,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
     
     ## <-- end build condition ------------------------------------------------->
     
-  endif (BOOST_CMAKE_BUILD AND HAVE_PYTHON)
+  endif (BOOST_CMAKE_BUILD)
   
 else (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
   message (STATUS "Found system-wide installation of BOOST; skipping rebuild!")
