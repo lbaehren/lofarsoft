@@ -30,6 +30,8 @@
 #include <fstream>
 #include <string>
 
+#include <crtools.h>
+
 namespace CR {
   
   /*!

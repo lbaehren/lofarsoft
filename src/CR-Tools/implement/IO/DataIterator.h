@@ -24,6 +24,8 @@
 #ifndef DATAITERATOR_H
 #define DATAITERATOR_H
 
+#include <crtools.h>
+
 namespace CR {  // Namespace CR -- begin
   
   /*!
