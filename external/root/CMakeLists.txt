@@ -85,13 +85,13 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   endif (ROOT_VERBOSE_CONFIGURE)
   
   if (HAVE_WGET)
-    add_custom_target (run_download ALL
+    add_custom_target (download_archive ALL
       COMMAND wget -c ${ROOT_URL}
       WORKING_DIRECTORY ${ROOT_BINARY_DIR}
       )
   else (HAVE_WGET)
     if (HAVE_CURL)
-      add_custom_target (run_download ALL
+      add_custom_target (download_archive ALL
 	COMMAND curl ${ROOT_URL}
 	WORKING_DIRECTORY ${ROOT_BINARY_DIR}
 	)
@@ -103,30 +103,30 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   ##__________________________________________________________________
   ## Expand the downloaded tar-archive
   
-  add_custom_target (run_tar ALL
+  add_custom_target (expand_archive ALL
     COMMAND tar -xvzf ${ROOT_TAR_ARCHIVE}
     WORKING_DIRECTORY ${ROOT_BINARY_DIR}
     )
-  add_dependencies (run_tar run_download)
+  add_dependencies (expand_archive download_archive)
 
   ##__________________________________________________________________
   ## Configure, build and install
 
   add_custom_target (run_configure ALL
     COMMAND ./configure --prefix=${ROOT_prefix}
-    WORKING_DIRECTORY ${ROOT_BINARY_DIR}
+    WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root
     )
-  add_dependencies (run_configure run_tar)
+  add_dependencies (run_configure expand_archive)
 
   add_custom_target (run_make ALL
     COMMAND make
-    WORKING_DIRECTORY ${ROOT_BINARY_DIR}
+    WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root
     )
   add_dependencies (run_make run_configure)
 
   add_custom_target (install ALL
     COMMAND make install
-    WORKING_DIRECTORY ${ROOT_BINARY_DIR}
+    WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root
     )
   add_dependencies (install run_make)
   
