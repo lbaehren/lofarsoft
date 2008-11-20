@@ -115,6 +115,7 @@ check_type_size ("float"         SIZEOF_FLOAT       )
 check_type_size ("double"        SIZEOF_DOUBLE      )
 check_type_size ("long"          SIZEOF_LONG        )
 check_type_size ("long long"     SIZEOF_LONG_LONG   )
+check_type_size ("uint"          SIZEOF_UINT        )
 
 ## Check functions -------------------------------
 
