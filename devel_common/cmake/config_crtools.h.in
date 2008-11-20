@@ -55,6 +55,10 @@
 /* The size of `uint', as computed by sizeof. */
 #cmakedefine SIZEOF_UINT ${SIZEOF_UINT}
 
+#ifndef SIZEOF_UINT
+typedef unsigned int uint
+#endif
+
 /*
  * ------------------------------------------------------------------------------
  *  Dependencies on external packages
