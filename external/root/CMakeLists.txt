@@ -130,6 +130,15 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
     )
   add_dependencies (install run_make)
   
+  ##__________________________________________________________________
+  ## Clean up the build directory
+
+  add_custom_target (cleanup_build ALL
+    COMMAND rm -f ${ROOT_TAR_ARCHIVE}
+    COMMAND rm -rf root
+    WORKING_DIRECTORY ${ROOT_BINARY_DIR}
+    )
+  
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
