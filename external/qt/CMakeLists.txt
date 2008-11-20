@@ -78,16 +78,18 @@ if (NOT HAVE_QT OR QT_FORCE_BUILD)
   find_program (HAVE_CURL  curl  ${bin_locations} )
   find_program (HAVE_TAR   tar   ${bin_locations} )
 
-  ## ------------------------------------------------------------------------------
+  ##__________________________________________________________________
   ## Download the tar-archive from the USG server
   
   if (UNIX)
     if (APPLE)
-      set (QT_TAR_ARCHIVE "qt-mac-opensource-src-4.4.0.tar.gz")
+      set (QT_SYSTEM "mac")
     else (APPLE)
-      set (QT_TAR_ARCHIVE "qt-x11-opensource-src-4.4.0.tar.gz")
+      set (QT_SYSTEM "x11")
     endif (APPLE)
   endif (UNIX)
+  set (QT_BUILD_DIR "qt-${QT_SYSTEM}-opensource-src-4.4.0")
+  set (QT_TAR_ARCHIVE "${QT_BUILD_DIR}.tar.gz")
   
   set (QT_URL "${USG_DOWNLOAD}/software/${QT_TAR_ARCHIVE}")
 
@@ -98,55 +100,65 @@ if (NOT HAVE_QT OR QT_FORCE_BUILD)
   endif (QT_VERBOSE_CONFIGURE)
   
   if (HAVE_WGET)
-    message (STATUS "[QT] Retrieving tar-archive from USG server ...")
-    execute_process (
-      WORKING_DIRECTORY ${QT_BINARY_DIR}
+    add_custom_target (download_archive ALL
       COMMAND wget -c ${QT_URL}
-      TIMEOUT 300
-      ERROR_VARIABLE error_wget
-      ERROR_FILE error.log
+      WORKING_DIRECTORY ${QT_BINARY_DIR}
       )
   else (HAVE_WGET)
     if (HAVE_CURL)
-      execute_process (
-	WORKING_DIRECTORY ${QT_BINARY_DIR}
+      add_custom_target (download_archive ALL
 	COMMAND curl ${QT_URL}
-	TIMEOUT 300
-	ERROR_VARIABLE error_curl
-	ERROR_FILE error.log
+	WORKING_DIRECTORY ${QT_BINARY_DIR}
 	)
     else (HAVE_CURL)
       message (FATAL_ERROR "[QT] No tool found to download tar-archive!")
     endif (HAVE_CURL)
   endif (HAVE_WGET)
   
-  ## ------------------------------------------------------------------------------
+  ##__________________________________________________________________
   ## Expand the downloaded tar-archive
-
-  find_file (HAVE_TAR_ARCHIVE ${QT_TAR_ARCHIVE}
-    PATHS ${QT_BINARY_DIR}
+  
+  add_custom_target (expand_archive ALL
+    COMMAND tar -xvzf ${QT_TAR_ARCHIVE}
+    WORKING_DIRECTORY ${QT_BINARY_DIR}
     )
+  add_dependencies (expand_archive download_archive)
 
-  if (NOT HAVE_TAR_ARCHIVE)
-    message (FATAL_ERROR "[QT] Unable to find downloaded tar archive!")
-  endif (NOT HAVE_TAR_ARCHIVE)
+  ##__________________________________________________________________
+  ## Configure
+  
+  add_custom_target (run_configure ALL
+    COMMAND ./configure --prefix=${QT_prefix}
+    WORKING_DIRECTORY ${QT_BINARY_DIR}/${QT_BUILD_DIR}
+    )
+  add_dependencies (run_configure expand_archive)
+  
+  ##__________________________________________________________________
+  ## Build
+  
+  add_custom_target (run_make ALL
+    COMMAND make
+    WORKING_DIRECTORY ${QT_BINARY_DIR}/${QT_BUILD_DIR}
+    )
+  add_dependencies (run_make run_configure)
 
-  if (HAVE_TAR)
-    message (STATUS "[QT] Expanding downloaded tar-archive ...")
-      execute_process (
-	WORKING_DIRECTORY ${QT_BINARY_DIR}
-	COMMAND tar -xvzf ${HAVE_TAR_ARCHIVE}
-	TIMEOUT 300
-	ERROR_VARIABLE error_tar
-	ERROR_FILE error.log
-	)
-  else (HAVE_TAR)
-    message (FATAL_ERROR "[QT] Unable to find executable tar; please install!")
-  endif (HAVE_TAR)
+  ##__________________________________________________________________
+  ## Installation
 
-  ## ------------------------------------------------------------------------------
-  ## 
+  add_custom_target (install ALL
+    COMMAND make install
+    WORKING_DIRECTORY ${QT_BINARY_DIR}/${QT_BUILD_DIR}
+    )
+  add_dependencies (install run_make)
 
+  ##__________________________________________________________________
+  ## Installation
+
+  add_custom_target (cleanup_build ALL
+    COMMAND rm -rf qt-*
+    WORKING_DIRECTORY ${QT_BINARY_DIR}
+    )
+  add_dependencies (install run_make)
 
   ## <-- end build condition ----------------------------------------------------->
   
