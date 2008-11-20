@@ -92,7 +92,7 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   else (HAVE_WGET)
     if (HAVE_CURL)
       add_custom_target (download_archive ALL
-	COMMAND curl ${ROOT_URL}
+	COMMAND curl ${ROOT_URL} -o ${ROOT_TAR_ARCHIVE}
 	WORKING_DIRECTORY ${ROOT_BINARY_DIR}
 	)
     else (HAVE_CURL)

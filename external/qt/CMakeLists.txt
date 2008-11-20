@@ -107,7 +107,7 @@ if (NOT HAVE_QT OR QT_FORCE_BUILD)
   else (HAVE_WGET)
     if (HAVE_CURL)
       add_custom_target (download_archive ALL
-	COMMAND curl ${QT_URL}
+	COMMAND curl ${QT_URL} -o ${QT_TAR_ARCHIVE}
 	WORKING_DIRECTORY ${QT_BINARY_DIR}
 	)
     else (HAVE_CURL)
