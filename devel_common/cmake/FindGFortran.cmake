@@ -53,6 +53,7 @@ include (CMakeSettings)
 
 if (UNIX)
   if (APPLE)
+    ## architecture-dependent locations
     IF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
       list (APPEND lib_locations
 	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/powerpc-apple-darwin8/4.0.0
@@ -64,6 +65,12 @@ if (UNIX)
 	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1
 	)
     ENDIF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
+    ## generic locations (Fink installation)
+    list (APPEND lib_locations
+      /sw/lib/gcc4.3/lib
+      /sw/lib/gcc4.2/lib
+      /sw/lib/gcc4.1/lib
+      )
   else (APPLE)
     list (APPEND lib_locations
       /usr/lib/gcc/i386-redhat-linux/3.4.6
