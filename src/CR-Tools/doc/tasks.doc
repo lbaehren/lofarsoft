@@ -84,6 +84,15 @@
     <td>Nov 2008</td>
     <td></td>
   </tr>
+  <tr valign=top bgcolor=orange>
+    <td>Enable updating previously created attributes; the original
+	implementation only allows for the assignment at creation time, but not
+	afterwards.</td>
+    <td>Lars</td>
+    <td>Nov 2008</td>
+    <td>Nov 2008</td>
+    <td></td>
+  </tr>
   <tr valign=top>
     <td></td>
     <td></td>
@@ -539,6 +548,16 @@
     <td></td>
     <td></td>
     <td></td>
+    <td></td>
+  </tr>
+  <tr valign=top bgcolor=orange>
+    <td>Upate CMake scripts wrapping the installation of ROOT and QT4 to make
+	use of the \e addd_custom_command feature such that we a) get a more stable
+	handling of the process and b) can separate configuration from the actual
+	build and installation.</td>
+    <td>Lars</td>
+    <td>Nov 2008</td>
+    <td>Nov 2008</td>
     <td></td>
   </tr>
   <tr valign=top bgcolor=eeeeff>
