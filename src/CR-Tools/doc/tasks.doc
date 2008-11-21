@@ -76,22 +76,22 @@
     <td>Nov 2008</td>
     <td>Nov 2008</td>
   </tr>
-  <tr valign=top bgcolor=orange>
+  <tr valign=top bgcolor=#00ee00>
     <td>Where necessary add functions to support specific data types (e.g.
 	casa::Vector<T> or casa::MPosition)</td>
     <td>Lars</td>
     <td>Nov 2008</td>
     <td>Nov 2008</td>
-    <td></td>
+    <td>21 Nov 2008</td>
   </tr>
-  <tr valign=top bgcolor=orange>
+  <tr valign=top bgcolor=#00ee00>
     <td>Enable updating previously created attributes; the original
 	implementation only allows for the assignment at creation time, but not
 	afterwards.</td>
     <td>Lars</td>
     <td>Nov 2008</td>
     <td>Nov 2008</td>
-    <td></td>
+    <td>21 Nov 2008</td>
   </tr>
   <tr valign=top>
     <td></td>
