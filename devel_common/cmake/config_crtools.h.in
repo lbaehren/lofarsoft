@@ -55,10 +55,6 @@
 /* The size of `uint', as computed by sizeof. */
 #cmakedefine SIZEOF_UINT ${SIZEOF_UINT}
 
-#ifndef SIZEOF_UINT
-typedef unsigned int uint
-#endif
-
 /*
  * ------------------------------------------------------------------------------
  *  Dependencies on external packages
@@ -202,9 +198,17 @@ typedef unsigned int uint
 
 /*
  * ------------------------------------------------------------------------------
- *  Specific directives
+ *  Include of system header files
  * ------------------------------------------------------------------------------
  */
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 
 /*
  * ------------------------------------------------------------------------------
