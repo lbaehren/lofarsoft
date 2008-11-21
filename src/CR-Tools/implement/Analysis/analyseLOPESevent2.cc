@@ -164,7 +164,7 @@ namespace CR { // Namespace CR -- begin
                                               getUpsamplingExponent(), true);
 
 	// calculate the maxima
-        if (CalculateMaxima) 
+        if (CalculateMaxima)
           rawPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(), true);
       }
 
@@ -173,23 +173,17 @@ namespace CR { // Namespace CR -- begin
 			      AntennaSelection, Polarization, simplexFit, verbose) ){
 	cerr << "analyseLOPESevent2::RunPipeline: " << "Error during doPositionFitting()!" << endl;
 	return Record();
-      };
+      }
 
       // make gauss fit to CC-beam
       if (! GaussFitData(Az, El, distance, center, AntennaSelection, evname, erg, fiterg, 
 			 Polarization, verbose) ){
 	cerr << "analyseLOPESevent2::RunPipeline: " << "Error during GaussFitData()!" << endl;
 	return Record();
-      };
+      }
 
-
-      // output of antnenna to core distances in shower coordinates, if requested
-      if (printShowerCoordinates) printAntennaDistances(erg.asArrayDouble("distances"),
-                                                         toShower(beamPipe_p->GetAntPositions(), Az, El),	
-                                                         El, Az, XC, YC, beamformDR_p->headerRecord().asInt("Date"));
       // Generate plots
-      if (generatePlots)
-      {
+      if (generatePlots) {
         // Plot CC-beam; if fit has converged, then also plot the result of the fit
     	if (fiterg.asBool("CCconverged"))
           CompleteBeamPipe_p->plotCCbeam(PlotPrefix + "-CC", beamformDR_p, fiterg.asArrayDouble("Cgaussian"),
@@ -221,22 +215,26 @@ namespace CR { // Namespace CR -- begin
         // user friendly list of calculated maxima
         if (listCalcMaxima)
           CompleteBeamPipe_p->listCalcMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),fiterg.asDouble("CCcenter"));
-      };
+      }
+
+      // output of antnenna to core distances in shower coordinates, if requested
+      if (printShowerCoordinates) printAntennaDistances(erg.asArrayDouble("distances"),
+                                                         toShower(beamPipe_p->GetAntPositions(), Az, El),	
+                                                         El, Az, XC, YC, beamformDR_p->headerRecord().asInt("Date"));
+      storeShowerCoordinates(erg);	// store shower coordinates in every case
 
       // give out the names of the created plots
-      if (verbose)		
-      {
+      if (verbose) {
         vector<string> plotlist = CompleteBeamPipe_p->getPlotList();
         std::cout <<"\nList of generated plots:\n";
         for (unsigned int i = 0; i < plotlist.size(); i++) std::cout << plotlist[i] << "\n";
         std::cout << std::endl;
       }
 
-    } catch (AipsError x) 
-    {
+    } catch (AipsError x) {
       std::cerr << "analyseLOPESevent2::RunPipeline: " << x.getMesg() << std::endl;
       return Record();
-    } 
+    }
     return erg;
   }
 
@@ -397,12 +395,34 @@ namespace CR { // Namespace CR -- begin
 
 
 
+ void analyseLOPESevent2::storeShowerCoordinates (const Record& erg)
+  {
+    try {
+      // get AntennaIDs to store pulse parameters in corresponding map
+      Vector<int> antennaIDs;
+      beamformDR_p->headerRecord().get("AntennaIDs",antennaIDs);
+
+      // get antenna positions and distances in shower coordinates
+      Vector <double> distances = erg.asArrayDouble("distances");
+      Matrix <double> antPos = toShower(beamPipe_p->GetAntPositions(), erg.asDouble("Azimuth"), erg.asDouble("Elevation"));
+
+      // loop through antenna IDs and write distances in pulseProperties if element exists
+      for (unsigned int i=0 ; i < antennaIDs.size(); i++)
+        if (calibPulses.find(antennaIDs(i)) != calibPulses.end()) {
+          calibPulses[antennaIDs(i)].distX = antPos.row(i)(0);
+          calibPulses[antennaIDs(i)].distY = antPos.row(i)(1);
+          calibPulses[antennaIDs(i)].dist  = distances(i);
+        }
+
+    } catch (AipsError x) {
+      cerr << "analyseLOPESevent2::storeShowerCoordinates: " << x.getMesg() << endl;
+    }
+  }
 
   void analyseLOPESevent2::summaryPlot(string filename,
                                        unsigned int columns)
   {
-    try 
-    {
+    try {
       // check if anything should be done (means columns must be > 0)
       if (columns <= 0) return;
 
@@ -414,11 +434,9 @@ namespace CR { // Namespace CR -- begin
       latexfile.open(latexfilename.c_str(), ofstream::out);
 
       // check if file could be opened
-      if (!(latexfile.is_open()))
-      {
+      if (!(latexfile.is_open())) {
         std::cerr << "Failed to write to file \"" << latexfilename <<"\"." << std::endl;
-      } else 
-      {
+      } else {
         // Create header for latex file
         latexfile << "\\documentclass[a4paper]{article}\n";
         latexfile << "\\usepackage{graphicx,a4wide}\n";
@@ -430,8 +448,7 @@ namespace CR { // Namespace CR -- begin
         // get list of generated plots and loop through the list
         vector<string> plotlist = pipeline.getPlotList();
 
-        for (unsigned int i = 0; i < plotlist.size(); i++)
-        {
+        for (unsigned int i = 0; i < plotlist.size(); i++) {
           // line break after #columns plots
           if ( (i > 0) && ((i % columns) == 0) ) latexfile << "\\newline\n";
 

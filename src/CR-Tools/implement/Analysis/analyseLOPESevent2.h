@@ -304,7 +304,7 @@ class analyseLOPESevent2 : public analyseLOPESevent {
 
     /*!
       \brief Prints the distances of the antennas to the core (in shower coordinates)
-      
+
       \param distances  - distances from antennas to shower core (should be in shower coordinates)
       \param AntPos     - antenna positions (in shower coordinates)
       \param Az         - value for the azimuth direction [in deg]
@@ -322,8 +322,16 @@ class analyseLOPESevent2 : public analyseLOPESevent {
                                 const unsigned int date) const;
 
     /*!
+      \brief Stores the distances of the antennas to the core in PulseProperties objects
+
+      \param erg         - results of the pipeline (e.g. Azimuth, Elevation)
+   */
+
+    void storeShowerCoordinates (const Record& erg);
+
+    /*!
       \brief Creates a summary postscript of all created plots (uses LaTeX)
-      
+
       \param filename - name of the file for the summary plot (without final ".ps").
       \param columns - number of columns in the summary (if columns=0, nothing is done)
     */
