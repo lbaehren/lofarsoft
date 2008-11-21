@@ -750,8 +750,7 @@ void readConfigFile (const string &filename)
 	    flagged.push_back(90101);
 	    cout << "Flagged antenna 29 (id = 90101).\n";
 	  } else
-          if ( (value.compare("90102")==0) || (value.compare("30")==0) )
-	  {
+          if ( (value.compare("90102")==0) || (value.compare("30")==0) ) {
 	    flagged.push_back(90102);
 	    cout << "Flagged antenna 30 (id = 90102).\n";
 	  } else {
@@ -806,17 +805,16 @@ int main (int argc, char *argv[])
 
   // variables for reconstruction information (output of pipeline)
   unsigned int gt = 0;
-  double CCheight, CCheight_NS;                     // CCheight will be used for EW polarization or ANY polarization
-  double AzL, ElL, AzL_NS, ElL_NS;                  // Azimuth and Elevation
-  map <int,PulseProperties> rawPulsesMap;           // pulse properties of pules in raw data traces
-  map <int,PulseProperties> calibPulsesMap;         // pulse properties of pules in calibrated data traces
-  PulseProperties* rawPulses[MAX_NUM_ANTENNAS];     // use array of pointers to store pulse properties in root tree
-  PulseProperties* calibPulses[MAX_NUM_ANTENNAS];   // use array of pointers to store pulse properties in root tree
-  try
-  {
+  double CCheight, CCheight_NS;                                 // CCheight will be used for EW polarization or ANY polarization
+  double CCheight_error, CCheight_error_NS;
+  double AzL, ElL, AzL_NS, ElL_NS;                              // Azimuth and Elevation
+  map <int,PulseProperties> rawPulsesMap;                       // pulse properties of pules in raw data traces
+  map <int,PulseProperties> calibPulsesMap;                     // pulse properties of pules in calibrated data traces
+  PulseProperties* rawPulses[MAX_NUM_ANTENNAS];                 // use array of pointers to store pulse properties in root tree
+  PulseProperties* calibPulses[MAX_NUM_ANTENNAS];                // use array of pointers to store pulse properties in root tree
+  try {
     // allocate space for arrays with pulse properties
-    for (int i=0; i < MAX_NUM_ANTENNAS; i++)
-    {
+    for (int i=0; i < MAX_NUM_ANTENNAS; i++) {
       rawPulses[i] = new PulseProperties();
       calibPulses[i] = new PulseProperties();
     }
@@ -826,8 +824,7 @@ int main (int argc, char *argv[])
 
     // check arguments of call_pipeline
     int i = 1;		//counter for arguments
-    while (i < argc)
-    {
+    while (i < argc) {
       // get option and argument
       string option(argv[i]);
       i++;
@@ -965,29 +962,28 @@ int main (int argc, char *argv[])
     roottree.Branch("Gt",&gt,"Gt/i");	// GT as unsigned int
 
     // the following branches are not used in the calibration mode
-    if ( !calibrationMode )
-    {
+    if ( !calibrationMode ) {
       roottree.Branch("Xc",&core_x,"Xc/D");
       roottree.Branch("Yc",&core_y,"Yc/D");
 
       // one result, if polarization = ANY
-      if (polarization == "ANY")
-      {
+      if (polarization == "ANY") {
         roottree.Branch("AzL",&azimuth,"AzL/D");
         roottree.Branch("ElL",&elevation,"ElL/D");
         roottree.Branch("CCheight",&CCheight,"CCheight/D");
+	roottree.Branch("CCheight_error",&CCheight_error,"CCheight_error/D");
       }
-      if ( (polarization == "EW") || (polarization == "BOTH"))
-      {
+      if ( (polarization == "EW") || (polarization == "BOTH")) {
         roottree.Branch("AzL_EW",&AzL,"AzL_EW/D");
         roottree.Branch("ElL_EW",&ElL,"ElL_EW/D");
         roottree.Branch("CCheight_EW",&CCheight,"CCheight_EW/D");
+	roottree.Branch("CCheight_error_EW",&CCheight_error,"CCheight_error_EW/D");
       }
-      if ( (polarization == "NS") || (polarization == "BOTH"))
-      {
+      if ( (polarization == "NS") || (polarization == "BOTH")) {
         roottree.Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
         roottree.Branch("ElL_NS",&ElL_NS,"ElL_NS/D");
         roottree.Branch("CCheight_NS",&CCheight_NS,"CCheight_NS/D");
+	roottree.Branch("CCheight_error_NS",&CCheight_error_NS,"CCheight_error_NS/D");
       }
     } //if
 
@@ -1051,11 +1047,9 @@ int main (int argc, char *argv[])
        plotprefix.erase(0,plotprefix.find_last_of('/')+1);
 
       // print information and process the event
-      if (calibrationMode)
-      {
+      if (calibrationMode) {
         cout << "\nProcessing calibration event \"" << filename << "\".\n" << endl;
-      } else
-      {
+      } else {
         cout << "\nProcessing event \"" << filename << "\"\nwith azimuth " << azimuth << " °, elevation " << elevation
                   << " °, distance (radius of curvature) " << distance << " m, core position X " << core_x
                   << " m and core position Y " << core_y << " m.\n" << endl;
@@ -1102,12 +1096,9 @@ int main (int argc, char *argv[])
 
         // adding results to variables (needed to fill them into the root tree)
         gt = results.asuInt("Date");
-      } else
-      {
-        if ( (polarization == "ANY") || (polarization == "EW") || both_pol)
-        {
-          if (both_pol)
-          {
+      } else {
+        if ( (polarization == "ANY") || (polarization == "EW") || both_pol) {
+          if (both_pol) {
             cout << "Pipeline is started for East-West Polarization.\n" << endl;
             polPlotPrefix = "-EW";
             polarization = "EW";	// do EW here
@@ -1161,13 +1152,12 @@ int main (int argc, char *argv[])
           AzL = results.asDouble("Azimuth");
           ElL = results.asDouble("Elevation");
           CCheight = results.asDouble("CCheight");
+	  CCheight_error = results.asDouble("CCheight_error");
           gt = results.asuInt("Date");
          }
 
-        if ( (polarization == "NS") || both_pol)
-        {
-          if (both_pol) 
-          {
+        if ( (polarization == "NS") || both_pol) {
+          if (both_pol) {
             cout << "Pipeline is started for North-South Polarization.\n" << endl;
             polPlotPrefix = "-NS";
             polarization = "NS";	// do NS here
@@ -1224,6 +1214,9 @@ int main (int argc, char *argv[])
           AzL_NS = results.asDouble("Azimuth");
           ElL_NS = results.asDouble("Elevation");
           CCheight_NS = results.asDouble("CCheight");
+	  CCheight_error_NS = results.asDouble("CCheight_error");
+	  roottree.Branch("CCheight_NS",&CCheight_NS,"CCheight_NS/D");
+	  roottree.Branch("CCheight_error_NS",&CCheight_error_NS,"CCheight_error_NS/D");
           gt = results.asuInt("Date");
         }
       }  // if...else (calibrationMode)
@@ -1255,15 +1248,11 @@ int main (int argc, char *argv[])
       for ( map<int,PulseProperties>::iterator it=calibPulsesMap.begin() ; it != calibPulsesMap.end(); it++ )
 
       // fill information in array for calibrated pulses
-      for ( map<int,PulseProperties>::iterator it=calibPulsesMap.begin() ; it != calibPulsesMap.end(); it++ )
-      {
+      for ( map<int,PulseProperties>::iterator it=calibPulsesMap.begin() ; it != calibPulsesMap.end(); it++ ) {
         // check if antenna number lies in valid range
-        if ( (it->second.antenna < 1) || (it->second.antenna >= MAX_NUM_ANTENNAS) )
-        {
+        if ( (it->second.antenna < 1) || (it->second.antenna >= MAX_NUM_ANTENNAS) ) {
           cerr << "\nWARNING: Antenna number in rawPulsesMap is out of range!" << endl;
-        }
-        else
-        {
+        } else {
           *calibPulses[it->second.antenna-1] = it->second;
           // create branch name
           stringstream antNumber(""); 
@@ -1276,8 +1265,7 @@ int main (int argc, char *argv[])
       }
 
       // write output to root tree
-      if (rootFilename != "")
-      {
+      if (rootFilename != "") {
         cout << "Adding results to root tree and saving root file \"" << rootFilename << "\"\n" << endl;
         roottree.Fill();
         rootfile->Write("",TObject::kOverwrite);
@@ -1301,8 +1289,7 @@ int main (int argc, char *argv[])
 
     cout << "\nPipeline finished successfully.\n" << endl;
 
-  } catch (AipsError x) 
-  {
+  } catch (AipsError x) {
     cerr << "call_pipeline: " << x.getMesg() << endl;
   }
 
