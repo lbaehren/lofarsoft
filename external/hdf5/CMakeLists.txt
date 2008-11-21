@@ -45,6 +45,8 @@ endif (USG_ROOT)
 ## Check for system-wide HDF5 library installation
 
 set (HDF5_FIND_QUIETLY 1)
+set (SZIP_FIND_QUIETLY 1)
+
 include (FindHDF5)
 
 ## if the there is a system-wide installation, it is the correct version of the
@@ -85,36 +87,51 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   ##__________________________________________________________________
   ## Build list of configuration parameters
 
+  set (config_settings "")
+
   if (HDF5_BUILD_CXX)
-    set (config_settings "${config_settings} --enable-cxx") 
+    set (HDF5_enable_cxx "--enable-cxx") 
   else (HDF5_BUILD_CXX)
-    set (config_settings "${config_settings} --disable-cxx") 
+    set (HDF5_enable_cxx "--disable-cxx") 
   endif (HDF5_BUILD_CXX)
   
   if (HDF5_BUILD_HL)
-    set (config_settings "${config_settings} --enable-hl") 
+    set (HDF5_enable_hl "--enable-hl") 
   else (HDF5_BUILD_HL)
-    set (config_settings "${config_settings} --disable-hl")
+    set (HDF5_enable_hl "--disable-hl") 
   endif (HDF5_BUILD_HL)
 
-  if (NOT HDF5_BUILD_SHARED)
-    set (config_settings "${config_settings} --disable-shared") 
-  endif (NOT HDF5_BUILD_SHARED)
+  if (HDF5_BUILD_SHARED)
+    set (HDF5_enable_shared "--enable-shared") 
+  else (HDF5_BUILD_SHARED)
+    set (HDF5_enable_shared "--disable-shared") 
+  endif (HDF5_BUILD_SHARED)
   
-  if (NOT HDF5_BUILD_STATIC)
-    set (config_settings "${config_settings} --disable-static") 
-  endif (NOT HDF5_BUILD_STATIC)
+  if (HDF5_BUILD_STATIC)
+    set (HDF5_enable_static "--enable-static") 
+  else (HDF5_BUILD_STATIC)
+    set (HDF5_enable_static "--disable-static") 
+  endif (HDF5_BUILD_STATIC)
   
+  ##__________________________________________________________________
+  ## 
+  
+  message (STATUS "[HDF5] Configuration summary.")
+  message (STATUS "Build shared version of the library? : ${HDF5_BUILD_SHARED}")
+  message (STATUS "Build static version of the library? : ${HDF5_BUILD_STATIC}")
+  message (STATUS "Build C++ interface to the library?  : ${HDF5_BUILD_CXX}")
+  message (STATUS "Enable the high level library?       : ${HDF5_BUILD_HL}")
+
   ##__________________________________________________________________
   ## Custom target wrapping the standard configure/build chain
 
   ## Run "./configure [args]"
-
+  
   add_custom_target (run_configure ALL
-    COMMAND ./configure --prefix=${HDF5_prefix} --bindir=${HDF5_prefix}/bin --includedir=${HDF5_prefix}/include/hdf5
+    COMMAND ./configure --prefix=${HDF5_prefix} --bindir=${HDF5_prefix}/bin --includedir=${HDF5_prefix}/include/hdf5 ${HDF5_enable_cxx} ${HDF5_enable_hl} ${HDF5_enable_shared} ${HDF5_enable_static}
     WORKING_DIRECTORY ${HDF5_SOURCE_DIR}
     )
-
+  
   ## Run "make"
 
   add_custom_target (run_make ALL
@@ -133,11 +150,10 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
 
   ## Run "make clean"
 
-  add_custom_target (run_clean ALL
+  add_custom_target (cleanup_build ALL
     COMMAND make clean
     WORKING_DIRECTORY ${HDF5_SOURCE_DIR}
     )
-  add_dependencies (run_clean run_install)
   
   ##__________________________________________________________________
   ## Post-installation clean-up: since the "--includedir" option does
