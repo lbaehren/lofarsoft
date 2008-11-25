@@ -76,6 +76,35 @@ include (FindBoost)
 include (FindPython)
 include (FindThreads)
 
+## ------------------------------------------------------------------------------
+## Check for completeness of the Boost libraries in case an installation was
+## detected
+
+if (HAVE_BOOST)
+
+  ## create the test source file
+
+  file (WRITE ${BOOST_BINARY_DIR}/testBoostLibraries.cxx
+    "#include <boost/program_options.hpp>\n"
+    "#include <boost/program_options/cmdline.hpp>\n"
+    "#include <boost/program_options/options_description.hpp>\n"
+    "#include <boost/program_options/detail/cmdline.hpp>\n"
+    "int main() { return 0; }\n"
+    )
+  
+  try_compile (BOOST_LIBRARY_WORKS
+    ${BOOST_BINARY_DIR}
+    ${BOOST_BINARY_DIR}/testBoostLibraries.cxx
+    OUTPUT_VARIABLE OUTPUT
+    )
+
+  if (NOT BOOST_LIBRARY_WORKS)
+    message (STATUS "[Boost] Unable to build test program; forcing library build!")
+    set (BOOST_FORCE_BUILD TRUE)
+  endif (NOT BOOST_LIBRARY_WORKS)
+
+endif (HAVE_BOOST)
+
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
