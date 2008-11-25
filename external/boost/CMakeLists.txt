@@ -160,7 +160,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
     
     message (STATUS "Building Boost using CMake.")
 
-    ##______________________________________________________
+    ##________________________________________________________________
     ## Testing activated?
 
     if (BOOST_ENABLE_TESTING)
@@ -168,7 +168,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
       enable_testing()
     endif (BOOST_ENABLE_TESTING)
 
-    ##______________________________________________________
+    ##________________________________________________________________
     ## Thread enabling?
     
     if (CMAKE_THREAD_LIBS_INIT)
@@ -179,14 +179,13 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
       set (BOOST_LIB_THREAD NO)
     endif (CMAKE_THREAD_LIBS_INIT)
     
-    ##______________________________________________________
+    ##________________________________________________________________
     ## Include paths for header files
-    
+
     include_directories (
       .
       ${BOOST_SOURCE_DIR}
       ${BOOST_SOURCE_DIR}/libs
-      ${PYTHON_INCLUDES}
       )
     
     if (HAVE_PYTHON)
@@ -195,13 +194,14 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
       set (BOOST_LIB_PYTHON NO)
     endif (HAVE_PYTHON)
 
-    ##______________________________________________________
+    ##________________________________________________________________
     ## Project sub-directories
     
     add_subdirectory (boost)
     add_subdirectory (libs)
 
-    ## summary of configuration settings
+    ##________________________________________________________________
+    ## Summary of configuration settings
     
     message (STATUS " ")
     message (STATUS "============================================================")
