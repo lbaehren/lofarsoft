@@ -84,19 +84,31 @@ if (HAVE_BOOST)
 
   ## create the test source file
 
-  file (WRITE ${BOOST_BINARY_DIR}/testBoostLibraries.cxx
+  file (WRITE ${BOOST_BINARY_DIR}/CMakeTmp/testBoostLibraries.cxx
     "#include <boost/program_options.hpp>\n"
     "#include <boost/program_options/cmdline.hpp>\n"
     "#include <boost/program_options/options_description.hpp>\n"
     "#include <boost/program_options/detail/cmdline.hpp>\n"
+    "namespace bpo = boost::program_options;\n"
     "int main() { return 0; }\n"
     )
-  
-  try_compile (BOOST_LIBRARY_WORKS
-    ${BOOST_BINARY_DIR}
-    ${BOOST_BINARY_DIR}/testBoostLibraries.cxx
-    OUTPUT_VARIABLE OUTPUT
+
+  ## create CMake project file
+
+  file (WRITE ${BOOST_BINARY_DIR}/CMakeTmp/CMakeLists.txt
+    "project (testBoost)\n"
+    "cmake_minimum_required(VERSION 2.6)\n"
+    "include_directories (${BOOST_INCLUDES})\n"
+    "add_executable (testBoostLibraries testBoostLibraries.cxx)\n"
+    "target_link_libraries (testBoostLibraries ${BOOST_LIBRARIES})\n"
     )
+  
+   try_compile (BOOST_LIBRARY_WORKS
+     ${BOOST_BINARY_DIR}/CMakeTmp
+     ${BOOST_BINARY_DIR}/CMakeTmp
+     testBoostLibraries
+     OUTPUT_VARIABLE OUTPUT
+     )
 
   if (NOT BOOST_LIBRARY_WORKS)
     message (STATUS "[Boost] Unable to build test program; forcing library build!")
