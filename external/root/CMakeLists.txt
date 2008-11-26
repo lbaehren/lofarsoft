@@ -76,13 +76,6 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   set (ROOT_VERSION "v5.20.00")
   set (ROOT_TAR_ARCHIVE "root_${ROOT_VERSION}.source.tar.gz")
   set (ROOT_URL "${USG_DOWNLOAD}/software/${ROOT_TAR_ARCHIVE}")
-
-  if (ROOT_VERBOSE_CONFIGURE)
-    message (STATUS "Root version      = ${ROOT_VERSION}")
-    message (STATUS "Root download URL = ${ROOT_URL}")
-    message (STATUS "wget binary       = ${HAVE_WGET}")
-    message (STATUS "curl binary       = ${HAVE_CURL}")
-  endif (ROOT_VERBOSE_CONFIGURE)
   
   if (HAVE_WGET)
     add_custom_target (download_archive ALL
@@ -92,7 +85,7 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   else (HAVE_WGET)
     if (HAVE_CURL)
       add_custom_target (download_archive ALL
-	COMMAND curl ${ROOT_URL} -o ${ROOT_TAR_ARCHIVE}
+	COMMAND curl ${ROOT_URL} -o ${ROOT_TAR_ARCHIVE} -C
 	WORKING_DIRECTORY ${ROOT_BINARY_DIR}
 	)
     else (HAVE_CURL)
@@ -102,22 +95,26 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   
   ##__________________________________________________________________
   ## Expand the downloaded tar-archive
-  
-  add_custom_target (expand_archive ALL
-    COMMAND tar -xvzf ${ROOT_TAR_ARCHIVE}
-    WORKING_DIRECTORY ${ROOT_BINARY_DIR}
-    )
-  add_dependencies (expand_archive download_archive)
 
+  if (HAVE_TAR)
+    add_custom_target (expand_archive ALL
+      COMMAND tar -xvzf ${ROOT_TAR_ARCHIVE}
+      WORKING_DIRECTORY ${ROOT_BINARY_DIR}
+      )
+    add_dependencies (expand_archive download_archive)
+  else (HAVE_TAR)
+    message (FATAL_ERROR "[ROOT] Missing tar to expand downloaded archive!")
+  endif (HAVE_TAR)
+  
   ##__________________________________________________________________
   ## Configure, build and install
-
+  
   add_custom_target (run_configure ALL
     COMMAND ./configure --prefix=${ROOT_prefix}
     WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root
     )
   add_dependencies (run_configure expand_archive)
-
+  
   add_custom_target (run_make ALL
     COMMAND make
     WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root

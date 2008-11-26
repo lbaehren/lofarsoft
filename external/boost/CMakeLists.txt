@@ -232,7 +232,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
     if (HAVE_PYTHON)
       include_directories (${PYTHON_INCLUDES})
     else (HAVE_PYTHON)
-      set (BOOST_LIB_PYTHON NO)
+      set (BOOST_LIB_PYTHON OFF)
     endif (HAVE_PYTHON)
 
     ##________________________________________________________________
@@ -343,5 +343,4 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
   
 else (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
   message (STATUS "Found system-wide installation of BOOST; skipping rebuild!")
-  message (STATUS "BOOST_INCLUDES = ${BOOST_INCLUDES}")
 endif (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
