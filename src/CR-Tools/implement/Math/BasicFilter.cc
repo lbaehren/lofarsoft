@@ -147,7 +147,8 @@ void BasicFilter<T>::filter (Vector<T> filteredData,
 //
 // =============================================================================
 
-template class BasicFilter<Float>;
-template class BasicFilter<Double>;
-template class BasicFilter<Complex>;
-template class BasicFilter<DComplex>;
+template class BasicFilter<casa::Int>;
+template class BasicFilter<casa::Float>;
+template class BasicFilter<casa::Double>;
+template class BasicFilter<casa::Complex>;
+template class BasicFilter<casa::DComplex>;

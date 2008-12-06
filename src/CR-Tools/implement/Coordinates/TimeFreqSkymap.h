@@ -33,7 +33,6 @@
 
 #include <crtools.h>
 #include <Coordinates/TimeFreq.h>
-#include <Coordinates/CoordinateDomain.h>
 #include <Coordinates/CoordinateType.h>
 
 namespace CR { // Namespace CR -- begin
@@ -185,7 +184,7 @@ namespace CR { // Namespace CR -- begin
   protected:
 
     //! The target domain for which the data are processed by the Beamformer
-    CoordinateDomain beamDomain_p;
+    CoordinateType coordType_p;
     //! The number of data blocks added up within a single time frame
     uint blocksPerFrame_p;
     //! The number of time frames, \f$ N_{\rm Frames} \f$
@@ -284,10 +283,10 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the target domain for the beamforming
 
-      \return domain -- The target domain for the beamforming.
+      \return type -- The target domain for the beamforming.
     */
-    inline CoordinateDomain beamDomain () const {
-      return beamDomain_p;
+    inline CoordinateType beamCoordDomain () const {
+      return coordType_p;
     }
     
     /*!
@@ -298,7 +297,7 @@ namespace CR { // Namespace CR -- begin
       \return status -- Status of the operation; returns <tt>false</tt> in case
               an error was encountered.
     */
-    bool setBeamDomain (CR::CoordinateDomain::Types const &domain);
+    bool setBeamCoordDomain (CR::CoordinateType::Types const &domain);
     
     /*!
       \brief Get the target domain for the beamforming
@@ -308,7 +307,7 @@ namespace CR { // Namespace CR -- begin
       \return status -- Status of the operation; returns <tt>false</tt> in case
               an error was encountered.
     */
-    bool setBeamDomain (CR::CoordinateDomain const &domain);
+    bool setBeamCoordDomain (CR::CoordinateType const &type);
     
     /*!
       \brief Get the number of blocks per time frame
@@ -466,6 +465,13 @@ namespace CR { // Namespace CR -- begin
       \brief Unconditional deletion 
     */
     void destroy(void);
+
+    /*!
+      \brief Initialize the internal settings of the object
+    */
+    void init (CoordinateType const &coordType,
+	       uint const &blocksPerFrame,
+	       uint const &nofFrames);
     
   };
   

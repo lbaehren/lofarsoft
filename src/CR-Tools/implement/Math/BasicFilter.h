@@ -31,7 +31,7 @@
 #include <casa/BasicSL/Complex.h>
 #include <scimath/Mathematics.h>
 
-#include <casa/namespace.h>
+using casa::Vector;
 
 /*!
   \class BasicFilter
@@ -86,9 +86,11 @@
 
 template <class T> class BasicFilter {
   
-  // Number of elements in a data vector passed to the filter
+ protected:
+  
+  //! Number of elements in a data vector passed to the filter
   unsigned int blocksize_p;
-  // Filter weights by which the incoming data are multiplied
+  //! Filter weights by which the incoming data are multiplied
   Vector<T> weights_p;
   
  public:

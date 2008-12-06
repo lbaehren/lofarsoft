@@ -100,13 +100,22 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
 
   /*!
-    \brief Get MDirection type from reference code of the coordinate frame
+    \brief Get MDirection type from the reference code of the coordinate frame
     
     \param refcode -- Reference code of the coordinate frame
     
     \return tp -- MDirection type
   */
   casa::MDirection::Types MDirectionType (String const &refcode);
+
+  /*!
+    \brief Get MDirection reference code from the type of the coordinate frame
+
+    \param tp -- MDirection type
+
+    \return refcode -- Reference code of the coordinate frame    
+  */
+  casa::String MDirectionName (casa::MDirection::Types const &tp);
   
   /*!
     \brief Get Projection type from reference code of the projection

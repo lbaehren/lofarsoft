@@ -74,6 +74,12 @@ int test_CoordinateType ()
     //
     CoordinateType coord4 (CoordinateType::Cylindrical);
     coord4.summary();
+    //
+    CoordinateType coord5 (CoordinateType::Time);
+    coord5.summary();
+    //
+    CoordinateType coord6 (CoordinateType::Frequency);
+    coord6.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;

@@ -41,10 +41,11 @@ namespace CR { // Namespace CR -- begin
   SkymapCoordinates::SkymapCoordinates ()
   {
     Bool status (true);
+    uint nofBlocks (1);
     
     status = init (TimeFreq(),
 		   ObservationData (),
-		   1);
+		   nofBlocks);
     
     if (!status) {
       std::cerr << "[SkymapCoordinates] Error initializing object!"

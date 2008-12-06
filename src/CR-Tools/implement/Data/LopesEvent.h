@@ -39,6 +39,9 @@
 
 using namespace std;
 
+using casa::AipsError;
+using casa::IPosition;
+
 namespace CR {  //  Namespace CR -- begin
   
   /*!

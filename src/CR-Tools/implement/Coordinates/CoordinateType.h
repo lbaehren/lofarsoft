@@ -131,7 +131,11 @@ namespace CR { // Namespace CR -- begin
       //! Azimuth-Elevation-Radius, \f$ \vec x = (Az,El,R) \f$
       AzElRadius,
       //! North-East-Height
-      NorthEastHeight
+      NorthEastHeight,
+      //! Time
+      Time,
+      //! Frquency
+      Frequency
     };
     
     // ------------------------------------------------------------- Construction
@@ -195,6 +199,13 @@ namespace CR { // Namespace CR -- begin
     inline CoordinateType::Types type () const {
       return type_p;
     }
+
+    /*!
+      \brief Get the name of the coordinate type
+
+      \return name -- The name of the coordinate type
+    */
+    std::string name ();
 
     /*!
       \brief Set the coordinate type
@@ -286,6 +297,66 @@ namespace CR { // Namespace CR -- begin
               Cylindrical.
     */
     static bool isCylindrical (CoordinateType::Types const &coord);
+
+    /*!
+      \brief Is the coordinate of type Space?
+    
+      \return isSpatial -- Returns <tt>true</tt> is the coordinate is of type
+              Space.
+    */
+    inline bool isSpatial () const {
+      return isSpatial (type_p);
+    }
+
+    /*!
+      \brief Is the coordinate of type Space?
+    
+      \param coord -- Coordinate type to check
+    
+      \return isSpatial -- Returns <tt>true</tt> is the coordinate is of type
+              Space.
+    */
+    static bool isSpatial (CoordinateType::Types const &coord);
+
+    /*!
+      \brief Is the coordinate of type Time?
+    
+      \return isTemporal -- Returns <tt>true</tt> is the coordinate is of type
+              Time.
+    */
+    inline bool isTemporal () const {
+      return isTemporal (type_p);
+    }
+
+    /*!
+      \brief Is the coordinate of type Time?
+    
+      \param coord -- Coordinate type to check
+    
+      \return isTemporal -- Returns <tt>true</tt> is the coordinate is of type
+              Time.
+    */
+    static bool isTemporal (CoordinateType::Types const &coord);
+
+    /*!
+      \brief Is the coordinate of type Frequency?
+    
+      \return isSpectral -- Returns <tt>true</tt> is the coordinate is of type
+              Time.
+    */
+    inline bool isSpectral () const {
+      return isSpectral (type_p);
+    }
+
+    /*!
+      \brief Is the coordinate of type Frequency?
+    
+      \param coord -- Coordinate type to check
+    
+      \return isSpectral -- Returns <tt>true</tt> is the coordinate is of type
+              Time.
+    */
+    static bool isSpectral (CoordinateType::Types const &coord);
 
     /*!
       \brief Create a DirectionCoordinate object

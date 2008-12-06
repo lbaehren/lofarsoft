@@ -30,29 +30,53 @@ namespace CR { // Namespace CR -- begin
   //  Construction
   //
   // ============================================================================
-
+  
+  SpatialCoordinate::SpatialCoordinate (CoordinateType::Types const &coordType,
+					casa::String const &refcode,
+					casa::String const &projection)
+  {
+    init (coordType,
+	  refcode,
+	  projection);
+  }
+  
+  // ---------------------------------------------------------- SpatialCoordinate
+  
+  SpatialCoordinate::SpatialCoordinate (casa::DirectionCoordinate const &direction,
+					casa::LinearCoordinate const &linear)
+  {
+    type_p           = CoordinateType::DirectionRadius;
+    nofAxes_p        = 3;
+    nofCoordinates_p = 2;
+    
+    directionCoord_p = direction;
+    linearCoord_p    = linear;
+  }
+  
   // ---------------------------------------------------------- SpatialCoordinate
 
   SpatialCoordinate::SpatialCoordinate (casa::LinearCoordinate const &linear,
 					CoordinateType::Types const &coordType)
   {
-    switch (coordType) {
-    case CoordinateType::Direction:
-    case CoordinateType::DirectionRadius:
-      {
-	/* issue error message */
-	std::cerr << "[SpatialCoordinate] Inconsistent combination of coordinate"
-		  << " type and coordinate object!" << std::endl;
-	/* use the coordinate type only for the creation of a new object */
+    if (linear.nPixelAxes() == 3) {
+      switch (coordType) {
+      case CoordinateType::Cartesian:
+      case CoordinateType::Spherical:
+      case CoordinateType::Cylindrical:
+	type_p           = coordType;
+	nofAxes_p        = 3;
+	nofCoordinates_p = 1;
+	linearCoord_p    = linear;
+	break;
+      default:
+	std::cerr << "[SpatialCoordinat::SpatialCoordinate]"
+		  << " Provided coordinate type does not match coordinate object!"
+		  << std::endl;
 	init (coordType);
-      }
-      break;
-    default:
-      {
-	init (coordType);
-	linearCoord_p = linear;
-      }
-      break;
+	break;
+      };
+    } else {
+      init (coordType);
     }
   }
   
@@ -110,17 +134,68 @@ namespace CR { // Namespace CR -- begin
   void SpatialCoordinate::summary (std::ostream &os)
   {
     os << "[SpatialCoordinate::summary]" << std::endl;
-    os << "-- Type of spatial coordinate = " << type_p           << std::endl;
-    os << "-- nof. coordinate axes       = " << nofAxes()        << std::endl;
-    os << "-- nof. coordinate objects    = " << nofCoordinates() << std::endl;
-    os << "-- World axis names           = " << worldAxisNames() << std::endl;
-    os << "-- World axis units           = " << worldAxisUnits() << std::endl;
-    os << "-- Reference pixel    (CRPIX) = " << referencePixel() << std::endl;
-    os << "-- Increment          (CDELT) = " << increment()      << std::endl;
-    os << "-- Reference value    (CRVAL) = " << referenceValue() << std::endl;
+    os << "-- Type of spatial coordinate = " << type_p             << std::endl;
+    os << "-- nof. coordinate axes       = " << nofAxes()          << std::endl;
+    os << "-- nof. coordinate objects    = " << nofCoordinates()   << std::endl;
+    os << "-- World axis names           = " << worldAxisNames()   << std::endl;
+    os << "-- World axis units           = " << worldAxisUnits()   << std::endl;
+    os << "-- Reference pixel    (CRPIX) = " << referencePixel()   << std::endl;
+    os << "-- Increment          (CDELT) = " << increment()        << std::endl;
+    os << "-- Reference value    (CRVAL) = " << referenceValue()   << std::endl;
+    os << "-- Spherical map projection   = " << projection()       << std::endl;
+    os << "-- Direction reference code   = " << directionRefcode() << std::endl;
+  }
+
+  // ----------------------------------------------------- setDirectionCoordinate
+  
+  bool SpatialCoordinate::setDirectionCoordinate (DirectionCoordinate const &direction)
+  {
+    switch (type_p) {
+    case CoordinateType::DirectionRadius:
+      directionCoord_p = direction;
+      return true;
+      break;
+    default:
+      std::cerr << "[SpatialCoordinate::setDirectionCoordinate] "
+		<< "No direction component for this spatial coordinate!"
+		<< std::endl;
+      return false;
+      break;
+    };
+  }
+
+  // ----------------------------------------------------------- directionRefcode
+
+  String SpatialCoordinate::directionRefcode ()
+  {
+    switch (type_p) {
+    case CoordinateType::Direction:
+    case CoordinateType::DirectionRadius:
+      {
+	casa::MDirection md;
+	return md.showType(directionCoord_p.directionType());
+      }
+      break;
+    default:
+      return "NONE";
+      break;
+    };
   }
   
-  
+  // ----------------------------------------------------------------- projection
+
+  String SpatialCoordinate::projection ()
+  {
+    switch (type_p) {
+    case CoordinateType::Direction:
+    case CoordinateType::DirectionRadius:
+      return directionCoord_p.projection().name();
+      break;
+    default:
+      return "NONE";
+      break;
+    };
+  }
   
   // ============================================================================
   //
@@ -128,7 +203,9 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  void SpatialCoordinate::init (CoordinateType::Types const &coordType)
+  void SpatialCoordinate::init (CoordinateType::Types const &coordType,
+				casa::String const &refcode,
+				casa::String const &projection)
   {
     type_p = coordType;
 
@@ -139,7 +216,8 @@ namespace CR { // Namespace CR -- begin
 	nofAxes_p        = 3;
 	nofCoordinates_p = 2;
 	// set up the coordinate objects
-	directionCoord_p = CoordinateType::makeDirectionCoordinate();
+	directionCoord_p = CoordinateType::makeDirectionCoordinate(refcode,
+								   projection);
 	casa::Vector<casa::String> names (1,"Length");
 	casa::Vector<casa::String> units (1,"m");
 	linearCoord_p    = CoordinateType::makeLinearCoordinate(1,
@@ -202,7 +280,7 @@ namespace CR { // Namespace CR -- begin
       break;
     }
   }
-  
+
   // ------------------------------------------------------------- worldAxisNames
 
   Vector<String> SpatialCoordinate::worldAxisNames()
@@ -229,6 +307,43 @@ namespace CR { // Namespace CR -- begin
     }
 
     return names;
+  }
+
+  // ---------------------------------------------------------- setWorldAxisNames
+  
+  bool SpatialCoordinate::setWorldAxisNames (Vector<String> const &names)
+  {
+    bool status (true);
+
+    // Check the input
+    if (names.nelements() != nofAxes()) {
+      std::cerr << "[SpatialCoordinate::setWorldAxisNames]"
+		<< " Number of worldAxisNames values does not match the number"
+		<< " of coordinate axes!"
+		<< std::endl;
+      return false;
+    }
+    
+    switch (type_p) {
+    case CoordinateType::DirectionRadius:
+      {
+	Vector<String> namesDir (2);
+	Vector<String> namesLin (1);
+	//
+	namesDir(0) = names(0);
+	namesDir(1) = names(1);
+	namesLin(0) = names(2);
+	//
+	directionCoord_p.setWorldAxisNames (namesDir);
+	linearCoord_p.setWorldAxisNames (namesLin);
+      }
+      break;
+    default:
+      linearCoord_p.setWorldAxisNames (names);
+      break;
+    };
+
+    return status;
   }
 
   // ------------------------------------------------------------- worldAxisUnits
@@ -259,6 +374,43 @@ namespace CR { // Namespace CR -- begin
     return units;
   }
 
+  // ---------------------------------------------------------- setWorldAxisUnits
+  
+  bool SpatialCoordinate::setWorldAxisUnits (Vector<String> const &units)
+  {
+    bool status (true);
+
+    // Check the input
+    if (units.nelements() != nofAxes()) {
+      std::cerr << "[SpatialCoordinate::setWorldAxisUnits]"
+		<< " Number of worldAxisUnits values does not match the number"
+		<< " of coordinate axes!"
+		<< std::endl;
+      return false;
+    }
+    
+    switch (type_p) {
+    case CoordinateType::DirectionRadius:
+      {
+	Vector<String> unitsDir (2);
+	Vector<String> unitsLin (1);
+	//
+	unitsDir(0) = units(0);
+	unitsDir(1) = units(1);
+	unitsLin(0) = units(2);
+	//
+	directionCoord_p.setWorldAxisUnits (unitsDir);
+	linearCoord_p.setWorldAxisUnits (unitsLin);
+      }
+      break;
+    default:
+      linearCoord_p.setWorldAxisUnits (units);
+      break;
+    };
+
+    return status;
+  }
+
   // ------------------------------------------------------------- referencePixel
 
   Vector<double> SpatialCoordinate::referencePixel()
@@ -285,6 +437,43 @@ namespace CR { // Namespace CR -- begin
     }
 
     return refPixel;
+  }
+
+  // ---------------------------------------------------------- setReferencePixel
+
+  bool SpatialCoordinate::setReferencePixel (Vector<double> const &refPixel)
+  {
+    bool status (true);
+
+    // Check the input
+    if (refPixel.nelements() != nofAxes()) {
+      std::cerr << "[SpatialCoordinate::setReferencePixel]"
+		<< " Number of reference pixel values does not match the number"
+		<< " of coordinate axes!"
+		<< std::endl;
+      return false;
+    }
+    
+    switch (type_p) {
+    case CoordinateType::DirectionRadius:
+      {
+	Vector<double> crpixDir (2);
+	Vector<double> crpixLin (1);
+	//
+	crpixDir(0) = refPixel(0);
+	crpixDir(1) = refPixel(1);
+	crpixLin(0) = refPixel(2);
+	//
+	directionCoord_p.setReferencePixel (crpixDir);
+	linearCoord_p.setReferencePixel (crpixLin);
+      }
+      break;
+    default:
+      linearCoord_p.setReferencePixel (refPixel);
+      break;
+    };
+
+    return status;
   }
 
   // ------------------------------------------------------------------ increment
@@ -315,6 +504,43 @@ namespace CR { // Namespace CR -- begin
     return increment;
   }
 
+  // --------------------------------------------------------------- setIncrement
+
+  bool SpatialCoordinate::setIncrement (Vector<double> const &incr)
+  {
+    bool status (true);
+
+    // Check the input
+    if (incr.nelements() != nofAxes()) {
+      std::cerr << "[SpatialCoordinate::setIncrement]"
+		<< " Number of increment values does not match the number"
+		<< " of coordinate axes!"
+		<< std::endl;
+      return false;
+    }
+    
+    switch (type_p) {
+    case CoordinateType::DirectionRadius:
+      {
+	Vector<double> cdeltDir (2);
+	Vector<double> cdeltLin (1);
+	//
+	cdeltDir(0) = incr(0);
+	cdeltDir(1) = incr(1);
+	cdeltLin(0) = incr(2);
+	//
+	directionCoord_p.setIncrement (cdeltDir);
+	linearCoord_p.setIncrement (cdeltLin);
+      }
+      break;
+    default:
+      linearCoord_p.setIncrement (incr);
+      break;
+    };
+
+    return status;
+  }
+
   // ------------------------------------------------------------- referenceValue
 
   Vector<double> SpatialCoordinate::referenceValue()
@@ -343,6 +569,43 @@ namespace CR { // Namespace CR -- begin
     return refValue;
   }
 
+  // ---------------------------------------------------------- setReferenceValue
+
+  bool SpatialCoordinate::setReferenceValue (Vector<double> const &refValue)
+  {
+    bool status (true);
+
+    // Check the input
+    if (refValue.nelements() != nofAxes()) {
+      std::cerr << "[SpatialCoordinate::setReferenceValue]"
+		<< " Number of reference value values does not match the number"
+		<< " of coordinate axes!"
+		<< std::endl;
+      return false;
+    }
+    
+    switch (type_p) {
+    case CoordinateType::DirectionRadius:
+      {
+	Vector<double> crvalDir (2);
+	Vector<double> crvalLin (1);
+	//
+	crvalDir(0) = refValue(0);
+	crvalDir(1) = refValue(1);
+	crvalLin(0) = refValue(2);
+	//
+	directionCoord_p.setReferenceValue (crvalDir);
+	linearCoord_p.setReferenceValue (crvalLin);
+      }
+      break;
+    default:
+      linearCoord_p.setReferenceValue (refValue);
+      break;
+    };
+
+    return status;
+  }
+
   // -------------------------------------------------------------------- toWorld
 
   void SpatialCoordinate::toWorld (Vector<double> &world,
@@ -354,20 +617,20 @@ namespace CR { // Namespace CR -- begin
 	break;
     case CoordinateType::DirectionRadius:
       {
-	Vector<casa::Double> worldDirection (2);
-	Vector<casa::Double> worldLinear (2);
-	Vector<casa::Double> pixelDirection (2);
-	Vector<casa::Double> pixelLinear (1);
-	pixelDirection(0) = pixel(0);
-	pixelDirection(1) = pixel(1);
-	pixelLinear(0)    = pixel(2);
+	Vector<casa::Double> dirPixel (2);
+	Vector<casa::Double> dirWorld (2);
+	Vector<casa::Double> linPixel (1);
+	Vector<casa::Double> linWorld (2);
+	dirPixel(0) = pixel(0);
+	dirPixel(1) = pixel(1);
+	linPixel(0) = pixel(2);
 	// conversion
-	directionCoord_p.toWorld (worldDirection,pixelDirection);
-	linearCoord_p.toWorld (worldLinear,pixelLinear);
+	directionCoord_p.toWorld (dirWorld,dirPixel);
+	linearCoord_p.toWorld (linWorld,linPixel);
 	// copy to output
-	world(0) = worldDirection(0);
-	world(1) = worldDirection(0);
-	world(2) = worldLinear(0);
+	world(0) = dirWorld(0);
+	world(1) = dirWorld(1);
+	world(2) = linWorld(0);
       }
       break;
     default:
@@ -387,26 +650,48 @@ namespace CR { // Namespace CR -- begin
 	break;
     case CoordinateType::DirectionRadius:
       {
-	Vector<casa::Double> pixelDirection (2);
-	Vector<casa::Double> pixelLinear (2);
-	Vector<casa::Double> worldDirection (2);
-	Vector<casa::Double> worldLinear (1);
-	worldDirection(0) = world(0);
-	worldDirection(1) = world(1);
-	worldLinear(0)    = world(2);
+	Vector<casa::Double> dirPixel (2);
+	Vector<casa::Double> linPixel (2);
+	Vector<casa::Double> dirWorld (2);
+	Vector<casa::Double> linWorld (1);
+	dirWorld(0) = world(0);
+	dirWorld(1) = world(1);
+	linWorld(0)    = world(2);
 	// conversion
-	directionCoord_p.toPixel (pixelDirection,worldDirection);
-	linearCoord_p.toPixel (pixelLinear,worldLinear);
+	directionCoord_p.toPixel (dirPixel,dirWorld);
+	linearCoord_p.toPixel (linPixel,linWorld);
 	// copy to output
-	pixel(0) = pixelDirection(0);
-	pixel(1) = pixelDirection(0);
-	pixel(2) = pixelLinear(0);
+	pixel(0) = dirPixel(0);
+	pixel(1) = dirPixel(1);
+	pixel(2) = linPixel(0);
       }
       break;
     default:
       linearCoord_p.toPixel (pixel,world);
       break;
     }
+  }
+
+  // --------------------------------------------------------- toCoordinateSystem
+
+  void SpatialCoordinate::toCoordinateSystem (casa::CoordinateSystem &csys,
+					      bool const &append)
+  {
+    if (!append) {
+      std::cerr << "[SpatialCoordinate::toCoordinateSystem]"
+		<< " Option append=false not yet implemented!"
+		<< std::endl;
+    }
+    
+    switch (type_p) {
+    case CoordinateType::DirectionRadius:
+      csys.addCoordinate (directionCoord_p);
+      csys.addCoordinate (linearCoord_p);
+      break;
+    default:
+      csys.addCoordinate (linearCoord_p);
+      break;
+    };
   }
   
 } // Namespace CR -- end

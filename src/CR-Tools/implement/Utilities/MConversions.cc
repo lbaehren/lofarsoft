@@ -42,6 +42,15 @@ namespace CR { // Namespace CR -- begin
     return tp;
   }
 
+  // ------------------------------------------------------------- MDirectionName
+
+  casa::String MDirectionName (casa::MDirection::Types const &tp)
+  {
+    casa::MDirection md;
+
+    return md.showType(tp);
+  }
+
   // ------------------------------------------------------------- ProjectionType
   
   casa::Projection::Type ProjectionType (String const &refcode)

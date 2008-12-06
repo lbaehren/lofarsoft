@@ -68,8 +68,8 @@ using CR::LopesEventIn;
   You need at least one event list file (textfile) like the example files below:<br>
 
   \verbatim
-  Example event list<br>
-  some lines of comments here<br>
+  Example event list
+  some lines of comments here
   filename(event) azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]
   =========================================================================================
   /home/schroeder/data/lopesstar/first.event 354.55215 63.882182 2750 8.6060886 -368.0933
@@ -101,7 +101,7 @@ using CR::LopesEventIn;
   doDispersionCal        = true
   doDelayCal             = true
   doRFImitgation         = true
-  polarization		= ANY
+  polarization           = ANY
   plotStart              = -2.05e-6
   plotEnd                = -1.60e-6
   upsamplingRate         = 320e6

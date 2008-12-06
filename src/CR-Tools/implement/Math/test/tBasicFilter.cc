@@ -22,6 +22,11 @@
 
 #include <Math/BasicFilter.h>
 
+using casa::Double;
+using casa::Complex;
+
+using namespace std;
+
 /*!
   \file tBasicFilter.cc
   
@@ -35,6 +40,15 @@
 */
 
 /*!
+  \brief Test operator overloading
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_operators ();
+
+// ------------------------------------------------------------- test_BasicFilter
+
+/*!
   \brief Test constructors for a new BasicFilter object
 
   Test the various constructors for a new BasicFilter object; as the class
@@ -43,49 +57,33 @@
 
   \return nofFailedTests -- The number of failed tests.
 */
-Int test_BasicFilter ();
-/*!
-  \brief Test manipulation and retrival of the filter weights
-
-  \return nofFailedTests -- The number of failed tests.
-*/
-Int test_weights ();
-/*!
-  \brief Test operator overloading
-
-  \return nofFailedTests -- The number of failed tests.
-*/
-Int test_operators ();
-
-// ------------------------------------------------------------- test_BasicFilter
-
-Int test_BasicFilter ()
+int test_BasicFilter ()
 {
   cout << "\n[test_BasicFilter]\n" << endl;
 
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
   //
   unsigned int blocksize (1024);
-  Vector<Float> weights_float (blocksize,1);
+  Vector<casa::Float> weights_float (blocksize,1);
   Vector<Double> weights_double (blocksize,1);
-  Vector<Complex> weights_complex (blocksize,1);
+  Vector<casa::Complex> weights_complex (blocksize,1);
 
   // default constructor
   cout << "[1] BasicFilter<T> ()" << endl;
   {
     cout << " - float" << endl;
-    BasicFilter<Float> filter_float();
+    BasicFilter<casa::Float> filter_float();
     cout << " - double" << endl;
     BasicFilter<Double> filter_double();
     cout << " - complex" << endl;
-    BasicFilter<Complex> filter_complex();
+    BasicFilter<casa::Complex> filter_complex();
   }
 
   // simplest argumented constructor
   cout << "[2] BasicFilter<T> (const Int&blocksize)" << endl;
   {
     cout << " - float" << endl;
-    BasicFilter<Float> filter_float(blocksize);
+    BasicFilter<casa::Float> filter_float(blocksize);
     cout << " - double" << endl;
     BasicFilter<Double> filter_double(blocksize);
     cout << " - complex" << endl;
@@ -96,7 +94,7 @@ Int test_BasicFilter ()
   cout << "[3] BasicFilter<T> (const Vector<T>& weights)" << endl;
   {
     cout << " - float" << endl;
-    BasicFilter<Float> filter_float(weights_float);
+    BasicFilter<casa::Float> filter_float(weights_float);
     //
     cout << " - double" << endl;
     BasicFilter<Double> filter_double(weights_double);
@@ -109,8 +107,8 @@ Int test_BasicFilter ()
   cout << "[4] BasicFilter<T> (const BasicFilter<T>& other)" << endl;
   {
     cout << " - float ... " << flush;
-    BasicFilter<Float> filter_float1 (blocksize);
-    BasicFilter<Float> filter_float2 (filter_float1);
+    BasicFilter<casa::Float> filter_float1 (blocksize);
+    BasicFilter<casa::Float> filter_float2 (filter_float1);
     cout << "ok" << endl;
     //
     cout << " - double ... " << flush;
@@ -129,18 +127,23 @@ Int test_BasicFilter ()
 
 // ----------------------------------------------------------------- test_weights
 
-Int test_weights ()
+/*!
+  \brief Test manipulation and retrival of the filter weights
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_weights ()
 {
   cout << "\n[test_weights]\n" << endl;
 
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
   //
   unsigned int blocksize (1024);
 
   cout << "[1] float" << endl;
   {
-    Vector<Float> weights (blocksize,2);
-    BasicFilter<Float> filter (blocksize);
+    Vector<casa::Float> weights (blocksize,2);
+    BasicFilter<casa::Float> filter (blocksize);
     //
     cout << sum(filter.weights()) << " -> ";
     //
@@ -178,17 +181,17 @@ Int test_weights ()
 
 // --------------------------------------------------------------- test_operators
 
-Int test_operators ()
+int test_operators ()
 {
   cout << "\n[test_operators]\n" << endl;
 
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
   //
   unsigned int blocksize (512);
-  Vector<Float> weights (1024,1.5);
+  Vector<casa::Float> weights (1024,1.5);
 
-  BasicFilter<Float> filter1 (blocksize);
-  BasicFilter<Float> filter2 (filter1);
+  BasicFilter<casa::Float> filter1 (blocksize);
+  BasicFilter<casa::Float> filter2 (filter1);
 
   cout << " - copy constructor" << endl;
   cout << " -- Filter 1 : " << sum(filter1.weights()) << endl;
@@ -208,22 +211,14 @@ Int test_operators ()
 
 int main ()
 {
-  Int nofFailedTests (0);
-
+  int nofFailedTests (0);
+  
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_BasicFilter ();
-  }
-
+  nofFailedTests += test_BasicFilter ();
   // Test for computation of the filter weights
-  {
-    nofFailedTests += test_weights ();
-  }
-
+  nofFailedTests += test_weights ();
   // Test for the operators
-  {
-    nofFailedTests += test_operators ();
-  }
-
+  nofFailedTests += test_operators ();
+  
   return nofFailedTests;
 }

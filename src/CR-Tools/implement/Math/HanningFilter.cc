@@ -34,38 +34,33 @@ namespace CR {  // Namespace CR -- begin
   
   template <class T> 
   HanningFilter<T>::HanningFilter ()
-    : BasicFilter<T> (),
-      alpha_p (0.5)
+    : BasicFilter<T> ()
   {
-    beta_p = 0;
+    init();
   }
   
   template <class T> 
   HanningFilter<T>::HanningFilter (unsigned int const &channels)
-    : BasicFilter<T> (channels),
-      alpha_p (0.5)
+    : BasicFilter<T> (channels)
   {
-    beta_p = 0;
+    init();
   }
   
   template <class T> 
   HanningFilter<T>::HanningFilter (unsigned int const &channels,
 				   T const &alpha)
-    : BasicFilter<T> (channels),
-      alpha_p (alpha)
+    : BasicFilter<T> (channels)
   {
-    beta_p = 0;
+    init(alpha);
   }
   
   template <class T> 
   HanningFilter<T>::HanningFilter (unsigned int const &channels,
 				   T const &alpha,
 				   uint const &beta)
-    : BasicFilter<T> (channels),
-      alpha_p (alpha),
-      beta_p (beta)
+    : BasicFilter<T> (channels)
   {
-    setBeta (beta);
+    init (alpha,beta);
   }
   
   template <class T> 
@@ -138,6 +133,51 @@ namespace CR {  // Namespace CR -- begin
   //  Methods
   //
   // =============================================================================
+
+  // --------------------------------------------------------------------- summary
+  
+  template <class T>
+  void HanningFilter<T>::summary (std::ostream &os,
+				  bool const &showWeights)
+  {
+    os << "[HanningFilter] Summary of internal parameters" << std::endl;
+    os << "-- blocksize   = " << BasicFilter<T>::blocksize() << std::endl;
+    os << "-- alpha       = " << alpha_p     << std::endl;
+    os << "-- beta        = " << beta_p      << std::endl;
+    os << "-- beta (rise) = " << betaRise_p  << std::endl;
+    os << "-- beta (fall) = " << betaFall_p  << std::endl;
+  }
+  
+  // ----------------------------------------------------------------------- init
+
+  template <class T> 
+  void HanningFilter<T>::init ()
+  {
+    T alpha = 0.5;
+    init (alpha);
+  }
+  
+  // ----------------------------------------------------------------------- init
+
+  template <class T> 
+  void HanningFilter<T>::init (T const &alpha)
+  {
+    uint beta = 0.5;
+    init (alpha,
+	  beta);
+  }
+  
+  // ----------------------------------------------------------------------- init
+
+  template <class T> 
+  void HanningFilter<T>::init (T const &alpha,
+			       uint const &beta)
+  {
+    alpha_p    = alpha;
+    beta_p     = beta;
+
+    setBeta (beta);
+  }
   
   // ------------------------------------------------------ HanningFilter::setAlpha
   
@@ -176,6 +216,8 @@ namespace CR {  // Namespace CR -- begin
     }
     
   }
+  
+  // ------------------------------------------------------- HanningFilter::setBeta
   
   template <class T> 
   void HanningFilter<T>::setBeta (uint const &beta,
@@ -252,6 +294,7 @@ namespace CR {  // Namespace CR -- begin
   //
   // =============================================================================
   
+  template class HanningFilter<casa::Int>;
   template class HanningFilter<casa::Float>;
   template class HanningFilter<casa::Double>;
   template class HanningFilter<casa::Complex>;

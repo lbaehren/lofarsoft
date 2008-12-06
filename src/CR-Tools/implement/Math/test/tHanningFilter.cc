@@ -21,6 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <iostream>
 #include <fstream>
 
 #include <Math/BasicFilter.h>
@@ -45,13 +46,6 @@ using casa::Vector;
   \date 2005/11/16
 */
 
-// template <class T> void exportWeights (string const &filename,
-// 				       Vector<T> const &weights);
-int test_HanningFilter ();
-int test_alpha ();
-int test_beta ();
-int test_operators ();
-
 // ------------------------------------------------------------- show_HanningFilter
 
 /*!
@@ -69,6 +63,8 @@ void show_HanningFilter (HanningFilter<T> &h)
   cout << " - beta_fall = " << h.betaFall()  << endl;
 }
 
+//! Show the parameters of the Hanning filter
+template void show_HanningFilter (HanningFilter<Int> &h);
 //! Show the parameters of the Hanning filter
 template void show_HanningFilter (HanningFilter<Float> &h);
 //! Show the parameters of the Hanning filter
@@ -94,65 +90,113 @@ int test_HanningFilter ()
   int nofFailedTests (0);
   //
   unsigned int channels = 1024;
-  Float alpha_float     = 0.7;
-  Double alpha_double   = 0.7;
-  Complex alpha_complex = 0.7;
+  float alpha           = 0.7;
 
-  // default constructor
+  //________________________________________________________
+  // Default constructor
+
   cout << "[1] HanningFilter<T> ()" << endl;
   try {
-    cout << " - float" << endl;
-    HanningFilter<Float> filter_float();
-    cout << " - double" << endl;
-    HanningFilter<Double> filter_double();
-    cout << " - complex" << endl;
-    HanningFilter<Complex> filter_complex();
+    HanningFilter<Float> filter_float;
+    filter_float.summary();
+    //
+    HanningFilter<Double> filter_double;
+    filter_double.summary();
+    //
+    HanningFilter<Complex> filter_complex;
+    filter_complex.summary();
+    //
+    HanningFilter<DComplex> filter_dcomplex;
+    filter_dcomplex.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
 
-  // simplest constructor
+  //________________________________________________________
+  // Construction using number of channels
+
   cout << "[2] HanningFilter<T> (const unsigned int& channels)" << endl;
   try {
-    cout << " - float" << endl;
     HanningFilter<Float> filter_float(channels);
-    cout << " - double" << endl;
+    filter_float.summary();
+    //
     HanningFilter<Double> filter_double(channels);
-    cout << " - complex" << endl;
+    filter_double.summary();
+    //
     HanningFilter<Complex> filter_complex(channels);
+    filter_complex.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
 
-  // Construction using predefined weights
+  //________________________________________________________
+  // Construction using number of channel and height
+
   cout << "[3] HanningFilter<T> (const unsigned int& channels,const T& alpha)" << endl;
   try {
-    cout << " - float" << endl;
     HanningFilter<Float> filter_float(channels,
-				      alpha_float);
-    cout << " - double" << endl;
+				      Float(alpha));
+    filter_float.summary();
+    //
     HanningFilter<Double> filter_double(channels,
-					alpha_double);
-    cout << " - complex" << endl;
+					Double(alpha));
+    filter_double.summary();
+    //
     HanningFilter<Complex> filter_complex(channels,
-					  alpha_complex);
+					  Complex(alpha));
+    filter_complex.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
+
+  //________________________________________________________
+  // Constuction using number of channels, height and plateau
+
+  cout << "[4] Constuction using number of channels, height and plateau" << endl;
+  try {
+    uint beta (channels/2);
+    //
+    HanningFilter<Float> filter_float(channels,
+				      Float(alpha),
+				      beta);
+    filter_float.summary();
+    //
+    HanningFilter<Double> filter_double(channels,
+					Double(alpha),
+					beta);
+    filter_double.summary();
+    //
+    HanningFilter<Complex> filter_complex(channels,
+					  Complex(alpha),
+					  beta);
+    filter_complex.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  //________________________________________________________
     
   // Construction from other HanningFilter object
-  cout << "[4] HanningFilter<T> (HanningFilter<T> const &other)" << endl;
+  cout << "[5] HanningFilter<T> (HanningFilter<T> const &other)" << endl;
   try {
-    cout << " - float" << endl;
     HanningFilter<Float> filter_float1 (channels);
     HanningFilter<Float> filter_float2 (filter_float1);
-    cout << " - double" << endl;
+    cout << "--> original object:" << endl;
+    filter_float1.summary();
+    cout << "--> object created via copy constructor:" << endl;
+    filter_float2.summary();
+    //
     HanningFilter<Double> filter_double1 (channels);
     HanningFilter<Double> filter_double2 (filter_double1);
-    cout << " - complex" << endl;
+    cout << "--> original object:" << endl;
+    filter_double1.summary();
+    cout << "--> object created via copy constructor:" << endl;
+    filter_double2.summary();
+    //
     HanningFilter<Complex> filter_complex1 (channels);
     HanningFilter<Complex> filter_complex2 (filter_complex1);
   } catch (std::string message) {
@@ -163,89 +207,50 @@ int test_HanningFilter ()
   return nofFailedTests;
 }
 
-// ----------------------------------------------------------------- test_alpha
+// ----------------------------------------------------------------- test_weights
 
 /*!
   \brief Test creation of the hanning window for different slope parameters
 
+  Since the shape of the filter can be controlled through a number of parameters
+  we here go through a number of combinations to see how these settings affect
+  the shape of the filter, i.e. the values of the filter coefficients.
+
   \return nofFailedTests -- The number of failed tests.
 */
-int test_alpha ()
+int test_weights ()
 {
-  cout << "\n[test_alpha]\n" << endl;
+  cout << "\n[test_weights]\n" << endl;
 
   int nofFailedTests (0);
   //
   unsigned int blocksize (1024);
   ofstream outfile;
-  
-  cout << "[1] float" << endl;
-  try {
-    outfile.open("tHanningFilter_float.data", ios::out);
-    //
-    HanningFilter<Float> filter40 (blocksize,0.40);
-    HanningFilter<Float> filter50 (blocksize,0.50);
-    HanningFilter<Float> filter60 (blocksize,0.60);
-    //
-    Vector<Float> weights40 (filter40.weights());
-    Vector<Float> weights50 (filter50.weights());
-    Vector<Float> weights60 (filter60.weights());
-    //
-    for (unsigned int n(0); n<blocksize; n++) {
-      outfile << n
-	      << "\t" << weights40(n)
-	      << "\t" << weights50(n)
-	      << "\t" << weights60(n) << endl;
-    }
-    //
-    outfile.close();
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
 
-  cout << "[2] double" << endl;
+  //________________________________________________________
+  
+  cout << "[1] Filter for different values of alpha ..." << endl;
   try {
-    outfile.open("tHanningFilter_double.data", ios::out);
+    outfile.open("tHanningFilter_alpha.data", ios::out);
     //
     HanningFilter<Double> filter40 (blocksize,0.40);
     HanningFilter<Double> filter50 (blocksize,0.50);
     HanningFilter<Double> filter60 (blocksize,0.60);
+    HanningFilter<Double> filter70 (blocksize,0.70);
     //
-    Vector<Double> weights40 (filter40.weights());
-    Vector<Double> weights50 (filter50.weights());
-    Vector<Double> weights60 (filter60.weights());
+    filter40.summary();
+    //
+    Vector<Double> weights40 = filter40.weights();
+    Vector<Double> weights50 = filter50.weights();
+    Vector<Double> weights60 = filter60.weights();
+    Vector<Double> weights70 = filter70.weights();
     //
     for (unsigned int n(0); n<blocksize; n++) {
       outfile << n
 	      << "\t" << weights40(n)
 	      << "\t" << weights50(n)
-	      << "\t" << weights60(n) << endl;
-    }
-    //
-    outfile.close();
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-
-  cout << "[2] complex" << endl;
-  try {
-    outfile.open("tHanningFilter_complex.data", ios::out);
-    //
-    HanningFilter<Complex> filter40 (blocksize,0.40);
-    HanningFilter<Complex> filter50 (blocksize,0.50);
-    HanningFilter<Complex> filter60 (blocksize,0.60);
-    //
-    Vector<Complex> weights40 (filter40.weights());
-    Vector<Complex> weights50 (filter50.weights());
-    Vector<Complex> weights60 (filter60.weights());
-    //
-    for (unsigned int n(0); n<blocksize; n++) {
-      outfile << n
-	      << "\t" << real(weights40(n)) << " " << imag(weights40(n))
-	      << "\t" << real(weights50(n)) << " " << imag(weights50(n))
-	      << "\t" << real(weights60(n)) << " " << imag(weights60(n))
+	      << "\t" << weights60(n)
+	      << "\t" << weights70(n)
 	      << endl;
     }
     //
@@ -255,7 +260,9 @@ int test_alpha ()
     nofFailedTests++;
   }
 
-  cout << "[3] Filter as function of alpha" << endl;
+  //________________________________________________________
+  
+  cout << "[2] Filter as function of alpha" << endl;
   {
     HanningFilter<Double> filter (blocksize);
     Vector<Double> weights (blocksize);
@@ -276,6 +283,31 @@ int test_alpha ()
     outfile.close();
   }
 
+  //________________________________________________________
+
+  cout << "[3] Filter for different values of beta ..." << endl;
+  try {
+    Double alpha (0.5);
+    HanningFilter<Double> filter1 (blocksize,alpha,blocksize/2);
+    HanningFilter<Double> filter2 (blocksize,alpha,blocksize/4);
+    
+    filter1.summary();
+
+    Vector<Double> weights1 = filter1.weights();
+    Vector<Double> weights2 = filter2.weights();
+
+    outfile.open("tHanningFilter_beta.data", ios::out);
+
+    for (uint n(0); n<blocksize; n++) {
+      outfile << n << "\t" << weights1(n) << "\t" << weights2(n) << endl;
+    }
+
+    outfile.close();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 
@@ -310,21 +342,9 @@ int test_beta ()
   uint beta (blocksize/2);
   ofstream outfile;
 
-  // -- Test for constructor -------------------------------
-
-  cout << "[1] Test construction with beta provided ..." << endl;
-  try {
-    HanningFilter<Float> h (blocksize, alpha, beta);
-    //
-    show_HanningFilter (h);
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-    nofFailedTests++;
-  }
-
   // -- Window as function of beta -------------------------
   
-  cout << "[2] Test range of beta ..." << endl;
+  cout << "[1] Test range of beta ..." << endl;
   try {
     HanningFilter<Float> h (blocksize, alpha, beta);
     Vector<Float> weights (blocksize);
@@ -500,7 +520,7 @@ int main ()
   // Test for the constructor(s)
   nofFailedTests += test_HanningFilter ();
   // Test for manipulation of the slope parameter
-  nofFailedTests += test_alpha ();
+  nofFailedTests += test_weights ();
   // Test for manipulation of the segmentation parameters
   nofFailedTests += test_beta ();
   // Test for operators

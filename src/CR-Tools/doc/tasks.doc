@@ -314,6 +314,14 @@
     <td class="indexkey">Start</td>
     <td class="indexkey">Finished</td>
   </tr>
+  <tr valign=top bgcolor=orange>
+    <td>Finish implemetation of CR::SpatialCoordinate class and integrate it with
+	the CR::SkymapCoordinates</td>
+    <td>Lars</td>
+    <td>Dec 2008</td>
+    <td>Dec 2008</td>
+    <td></td>
+  </tr>
   <tr valign=top bgcolor=eeeeff>
     <td>Transformation of sky and antenna coordinates onto common reference
 	frame</td>

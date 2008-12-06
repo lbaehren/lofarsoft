@@ -61,10 +61,16 @@ using casa::IPosition;
 using casa::LinearCoordinate;
 using casa::Matrix;
 using casa::MDirection;
+using casa::MVDirection;
+using casa::Quantity;
 using casa::SpectralCoordinate;
 using casa::Vector;
 
 using CR::TimeFreq;
+
+using std::cerr;
+using std::cout;
+using std::endl;
 
 namespace CR { // Namespace CR -- begin
   

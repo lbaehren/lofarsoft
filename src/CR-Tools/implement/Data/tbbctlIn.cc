@@ -197,7 +197,7 @@ namespace CR { // Namespace CR -- begin
 			 headerpoint_p->SampleNr-startsample);
 	  if ( (start+headerpoint_p->NoSamples) <= noSamples) {
 	    fread(tmppoint, sizeof(short),headerpoint_p->NoSamples, fd); 
-	    channeldata_p.column(fnum)(Slice(start,headerpoint_p->NoSamples)) = Vector<short>(IPosition(1,headerpoint_p->NoSamples),tmppoint,SHARE);
+	    channeldata_p.column(fnum)(Slice(start,headerpoint_p->NoSamples)) = Vector<short>(IPosition(1,headerpoint_p->NoSamples),tmppoint,casa::SHARE);
 	  };
 	};
 	fclose(fd);

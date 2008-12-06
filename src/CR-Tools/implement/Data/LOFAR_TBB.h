@@ -46,6 +46,8 @@
 #include <casa/HDF5/HDF5File.h>
 #include <casa/HDF5/HDF5Record.h>
 
+using casa::AipsError;
+
 using DAL::TBB_Timeseries;
 
 namespace CR { // Namespace CR -- begin

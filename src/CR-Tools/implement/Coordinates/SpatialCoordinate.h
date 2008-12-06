@@ -35,9 +35,11 @@
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/String.h>
 #include <coordinates/Coordinates/Coordinate.h>
+#include <coordinates/Coordinates/CoordinateSystem.h>
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <coordinates/Coordinates/LinearCoordinate.h>
 #include <coordinates/Coordinates/TabularCoordinate.h>
+#include <coordinates/Coordinates/ObsInfo.h>
 
 #include <Coordinates/CoordinateType.h>
 
@@ -67,6 +69,8 @@ namespace CR { // Namespace CR -- begin
     
     <ul type="square">
       <li>casacore <a href="http://www.astron.nl/casacore/doc/html/classcasa_1_1Coordinate.html">Coordinate</a> class
+      <li>casacore <a href="http://www.astron.nl/casacore/doc/html/classcasa_1_1CoordinateSystem.html">CoordinateSystem</a> class
+      <li>CR::CoordinateType
     </ul>
     
     <h3>Synopsis</h3>
@@ -92,7 +96,8 @@ namespace CR { // Namespace CR -- begin
       
     <table border="0">
       <tr>
-        <td class="indexkey">Coordinate types</td>
+        <td class="indexkey">Coordinate objects</td>
+        <td class="indexkey">Type</td>
 	<td class="indexkey">Axis names</td>
 	<td class="indexkey">Axis units</td>
 	<td class="indexkey">Projection</td>
@@ -100,6 +105,7 @@ namespace CR { // Namespace CR -- begin
       </tr>
       <tr>
         <td>[Direction,Linear]</td>
+        <td>DirectionRadius</td>
 	<td>[Longitude, Latitude,Length]</td>
 	<td>[rad, rad,m]</td>
 	<td>yes</td>
@@ -107,6 +113,7 @@ namespace CR { // Namespace CR -- begin
       </tr>
       <tr>
         <td>[Linear]</td>
+        <td>Cartesian</td>
 	<td>[Distance, Distance, Distance]</td>
 	<td>[m, m, m]</td>
 	<td>no</td>
@@ -114,8 +121,9 @@ namespace CR { // Namespace CR -- begin
       </tr>
       <tr>
         <td>[Linear]</td>
-	<td>[Longitude, Latitude, Length]</td>
-	<td>[deg, deg, m]</td>
+        <td>Spherical</td>
+	<td>[Length,Longitude, Latitude]</td>
+	<td>[m,deg, deg]</td>
 	<td>no</td>
 	<td>Spherical coordinates</td>
       </tr>
@@ -156,21 +164,30 @@ namespace CR { // Namespace CR -- begin
     // ------------------------------------------------------------- Construction
     
     /*!
-      \brief Default constructor
+      \brief Default constructr
+      
+      Creates a new SpatialCoordinate of type \e DirectionRadius for AZEL and
+      STG projection
     */
     SpatialCoordinate () {
-      init (CoordinateType::DirectionRadius);
+      init (CoordinateType::DirectionRadius,
+	    "AZEL",
+	    "STG");
     }
     
     /*!
       \brief Argumented constructor
-
-      \param coordType -- Type of coordinate for which to create an object.
+      
+      \param coordType  -- Type of coordinate for which to create an object.
+      \param refcode    -- Reference code for the celestial coordinate system, in
+             case the coordinate contains a DirectionCoordinate
+      \param projection -- Identifier for the spherical map projection, in case
+             the coordinate contains a DirectionCoordinate
     */
-    SpatialCoordinate (CoordinateType::Types const &coordType) {
-      init (coordType);
-    }
-    
+    SpatialCoordinate (CoordinateType::Types const &coordType,
+		       casa::String const &refcode="AZEL",
+		       casa::String const &projection="STG");
+      
     /*!
       \brief Argumented constructor for coordinate of type DirectionRadius
       
@@ -263,6 +280,19 @@ namespace CR { // Namespace CR -- begin
     }
 
     /*!
+      \brief Set the direction part of the spatial coordinate
+
+      \param direction -- The direction coordinate to be used as part of the 
+             spatial coordinate.
+
+      \return status -- Status of the operation; returns <tt>false</tt> in case
+              an error was encountered, e.g. because trying to set a
+	      DirectionCoordinate when the spatial coordinate is purely a set of
+	      linear coordinates.
+    */
+    bool setDirectionCoordinate (DirectionCoordinate const &direction);
+
+    /*!
       \brief Get the LinearCoordinate object of the spatial coordinate
 
       \return linearCoord -- The LinearCoordinate object of the spatial
@@ -272,6 +302,20 @@ namespace CR { // Namespace CR -- begin
     inline LinearCoordinate linearCoordinate () const {
       return linearCoord_p;
     }
+
+    /*!
+      \brief Get the reference code for the type of direction coordinate
+    */
+    String directionRefcode ();
+
+    /*!
+      \brief Get the spherical map projection of the direction coordinate
+
+      \return projection -- Identifier for the spherical map projection; in case
+              the spatial coordinate does not contain an object of type
+	      DirectionCoordinate the value "NONE" is returned.
+    */
+    String projection ();
 
     /*!
       \brief Get the name of the class
@@ -292,6 +336,24 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Provide a summary of the internal status
 
+      Depending on the type of spatial coordinate certain properties will not be
+      defined; a such e.g. a direction reference code or a spherical map
+      projection will only be set in case the coordinate actually contains a
+      directional component.
+      \verbatim
+      [SpatialCoordinate::summary]
+      -- Type of spatial coordinate = 1
+      -- nof. coordinate axes       = 3
+      -- nof. coordinate objects    = 2
+      -- World axis names           = [Longitude, Latitude, Length]
+      -- World axis units           = [rad, rad, m]
+      -- Reference pixel    (CRPIX) = [0, 0, 0]
+      -- Increment          (CDELT) = [-0.0174533, 0.0174533, 1]
+      -- Reference value    (CRVAL) = [0, 1.5708, 0]
+      -- Spherical map projection   = STG
+      -- Direction reference code   = AZEL
+      \endverbatim
+
       \param os -- Output stream to which the summary is written.
     */
     void summary (std::ostream &os);    
@@ -299,19 +361,16 @@ namespace CR { // Namespace CR -- begin
     // ------------------------------------------------------------------ Methods
     
     /*!
-      \brief Get the names of the world axes
-
-      \return names -- The names of the world axes, as retrieved through the
-              <tt>casa::Coordinate::worldAxisNames()<tt> function.
-    */
-    Vector<String> worldAxisNames();
-    /*!
       \brief Get the value of the reference pixel
 
       \return refPixel -- The value of the reference pixel, as retrieved through
               the <tt>casa::Coordinate::referencePixel()<tt> function.
     */
     Vector<double> referencePixel();
+    /*!
+      \brief Set the value of the reference pixel
+    */
+    bool setReferencePixel(Vector<double> const &refPixel);
     /*!
       \brief Get the matrix for the linear transformation
 
@@ -327,12 +386,34 @@ namespace CR { // Namespace CR -- begin
     */
     Vector<double> increment();
     /*!
+      \brief Set the value of the coordinate increment
+     */
+    bool setIncrement(Vector<double> const &incr);
+    /*!
       \brief Get the reference value
 
       \return refPixel -- The reference value, as retrieved through the
               <tt>casa::Coordinate::referenceValue()<tt> function.
     */
     Vector<double> referenceValue();
+    /*!
+      \brief Set the value of the reference value
+    */
+    bool setReferenceValue(Vector<double> const &refValue);
+    /*!
+      \brief Get the names of the world axes
+
+      \return names -- The names of the world axes, as retrieved through the
+              <tt>casa::Coordinate::worldAxisNames()<tt> function.
+    */
+    Vector<String> worldAxisNames();
+    /*!
+      \brief Set the names of the world axes
+
+      \param names -- The names of the world axes, as to be set through the
+             <tt>casa::Coordinate::setWorldAxisNames()<tt> function.
+    */
+    bool setWorldAxisNames(Vector<String> const &names);
     /*!
       \brief Get the units of the world axes
 
@@ -341,21 +422,39 @@ namespace CR { // Namespace CR -- begin
     */
     Vector<String> worldAxisUnits();
     /*!
+      \brief Set the units of the world axes
+
+      \return units -- The units of the world axes, as to be set through the
+              <tt>casa::Coordinate::setWorldAxisUnits()<tt> function.
+    */
+    bool setWorldAxisUnits(Vector<String> const &units);
+    /*!
       \brief Conversion from pixel to world coordinates
 
-      \retval world -- 
-      \param pixel  -- 
+      \retval world -- Values in world coordinates
+      \param pixel  -- Values in pixel coordinates
     */
     void toWorld (Vector<double> &world,
 		  const Vector<double> &pixel);
     /*!
       \brief Conversion from world to pixel coordinates
 
-      \retval pixel -- 
-      \param world  -- 
+      \retval pixel -- Values in pixel coordinates
+      \param world  -- Values in world coordinates
     */
     void toPixel (Vector<double> &pixel,
 		  const Vector<double> &world);
+
+    /*!
+      \brief Add the coordinates to a coordinate system object
+
+      \retval csys  -- Coordinate system object collecting the individual
+              coordinate
+      \param append -- Append the coordinates to the existing coordinate system
+             object.
+    */
+    void toCoordinateSystem (casa::CoordinateSystem &csys,
+			     bool const &append=true);
     
   private:
     
@@ -372,10 +471,16 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Initialize the object for a given coordinate type
 
-      \param coordType -- Type of coordinate for which to create an object.
+      \param coordType  -- Type of coordinate for which to create an object.
+      \param refcode    -- Reference code for the celestial coordinate system, in
+             case the coordinate contains a DirectionCoordinate
+      \param projection -- Identifier for the spherical map projection, in case
+             the coordinate contains a DirectionCoordinate
     */
-    void init (CoordinateType::Types const &coordType);
-    
+    void init (CoordinateType::Types const &coordType,
+	       casa::String const &refcode="AZEL",
+	       casa::String const &projection="STG");
+
   };
   
 } // Namespace CR -- end

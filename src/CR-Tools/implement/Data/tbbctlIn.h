@@ -35,8 +35,17 @@
 #include <casa/BasicSL/String.h>
 #include <casa/Exceptions/Error.h>
 
+using casa::AipsError;
+using casa::Int;
+using casa::IPosition;
+using casa::Short;
 using casa::String;
+using casa::Slice;
 using casa::Vector;
+
+using std::cerr;
+using std::cout;
+using std::endl;
 
 //CR-tools header files
 #include <IO/DataReader.h>

@@ -25,7 +25,7 @@
 #define HANNINGFILTER_H
 
 // Standard header files
-#include <stdio.h>
+#include <iostream>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -43,6 +43,10 @@
 
 #include <Math/BasicFilter.h>
 
+using std::cerr;
+using std::cout;
+using std::endl;
+
 namespace CR {  // Namespace CR -- begin
   
   /*!
@@ -54,7 +58,7 @@ namespace CR {  // Namespace CR -- begin
     
     \author Lars B&auml;hren
     
-    \date January 26, 2005
+    \date 2005/01/26
     
     \test tHanningFilter.cc
     
@@ -72,8 +76,18 @@ namespace CR {  // Namespace CR -- begin
     \f]
     where \f$ \alpha \f$ is a parameter controlling the slope of the Hanning 
     filter.
-    
-    <img src="../figures/tHanningFilter.png">
+
+    <table border=0>
+      <tr align="center">
+        <td class="indexkey">Variation of \f$\alpha\f$.
+	<td class="indexkey">Variation of \f$\beta\f$.
+      </tr>
+      <tr>
+        <td><img src="images/HanningFilter-alpha.png"></td>
+	<td><img src="images/HanningFilter-beta.png"></td>
+      </tr>
+    </ul>
+
   */
   
   template<class T> class HanningFilter : public BasicFilter<T> {
@@ -94,9 +108,7 @@ namespace CR {  // Namespace CR -- begin
     
     // --- Construction ----------------------------------------------------------
     
-    /*!
-      \brief Default constructor 
-    */
+    //! Default constructor 
     HanningFilter ();
     
     /*!
@@ -136,15 +148,15 @@ namespace CR {  // Namespace CR -- begin
       \brief Argumented constructor.
     
       \param blocksize -- Number of frequency channels in a block of Fourier
-      transformed data.
+             transformed data.
       \param alpha     -- Parameter for the slope of the Hanning filter.
       \param beta      -- Width of the plateau, where the window function is
-      unity.
+             unity.
       \param betaRise  -- Width before plateau, where the window function is 
-      smaller then unity.
+             smaller then unity.
       \param betaFall  -- Width after plateau, where the window function is also 
-      smaller then unity. The sum of the three beta-parameters must equal the 
-      blocksize.
+             smaller then unity. The sum of the three beta-parameters must equal
+	     the blocksize.
     */
     HanningFilter (uint const &blocksize,
 		   T const &alpha,
@@ -158,9 +170,7 @@ namespace CR {  // Namespace CR -- begin
     
     // --- Destruction -----------------------------------------------------------
     
-    /*!
-      \brief Destructor.
-    */
+    //! Destructor.
     ~HanningFilter ();
     
     // ------------------------------------------------------------------ Operators
@@ -174,6 +184,20 @@ namespace CR {  // Namespace CR -- begin
     
     // --- Methods ---------------------------------------------------------------  
     
+    //! Provide a summary of the internal status
+    inline void summary (bool const &showWeights=false) {
+      summary (std::cout,
+	       showWeights);
+    }
+
+    /*!
+      \brief Provide a summary of the internal status
+
+      \param os -- Output stream to which the summary is written.
+    */
+    void summary (std::ostream &os,
+		  bool const &showWeights=false);
+
     /*!
       \brief Get the slope parameter 
       
@@ -218,7 +242,8 @@ namespace CR {  // Namespace CR -- begin
     /*!
       \brief For an unsymmetrical filter, get the parameter for the rising slope
       
-      \return betaRise -- 
+      \return betaRise -- The parameter controlling the rising slope of an
+              unsymmetrical filter.
     */
     inline uint betaRise () const {
       return betaRise_p;
@@ -235,19 +260,31 @@ namespace CR {  // Namespace CR -- begin
     
   private:
     
-    /*!
-      \brief Unconditional copying
-    */
+    //! Unconditional copying
     void copy (HanningFilter<T> const& other);
     
-    /*!
-      \brief Unconditional deletion 
-    */
+    //! Unconditional deletion 
     void destroy(void);
-    
+
     /*!
-      \brief Set up the filter weights
+      \brief Initialize the internal parameters
+      
+      We are using a chain of init functions:
+      \veratim
+      init() -> init(T const &alpha) -> init(T const &alpha,
+                                             uint const &beta)
+      \endverbatim
     */
+    void init ();
+    
+    //! Initialize the internal parameters
+    void init (T const &alpha);
+    
+    //! Initialize the internal parameters
+    void init (T const &alpha,
+	       uint const &beta);
+    
+    //! Set up the filter weights
     void setWeights ();  
     
   };

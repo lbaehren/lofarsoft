@@ -61,6 +61,9 @@ namespace CR { // Namespace CR -- begin
     os << "-- is cartesian    = " << isCartesian()   << std::endl;
     os << "-- is spherical    = " << isSpherical()   << std::endl;
     os << "-- is cylindrical  = " << isCylindrical() << std::endl;
+    os << "-- is spatial      = " << isSpatial()     << std::endl;
+    os << "-- is temporal     = " << isTemporal()    << std::endl;
+    os << "-- is spectral     = " << isSpectral()    << std::endl;
   }
 
   // ============================================================================
@@ -69,7 +72,49 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  // -------------------------------------------------------------- hasProjection
+  //________________________________________________________________________ name
+
+  std::string CoordinateType::name ()
+  {
+    std::string name;
+
+    switch (type_p) {
+    case CoordinateType::Direction:
+      name="Direction";
+      break;
+    case CoordinateType::DirectionRadius:
+      name="DirectionRadius";
+      break;
+    case CoordinateType::Cartesian:
+      name="Cartesian";
+      break;
+    case CoordinateType::Spherical:
+      name="Spherical";
+      break;
+    case CoordinateType::Cylindrical:
+      name="Cylindrical";
+      break;
+    case CoordinateType::AzElHeight:
+      name="AzElHeight";
+      break;
+    case CoordinateType::AzElRadius:
+      name="AzElRadius";
+      break;
+    case CoordinateType::NorthEastHeight:
+      name="NorthEastHeight";
+      break;
+    case CoordinateType::Time:
+      name="Time";
+      break;
+    case CoordinateType::Frequency:
+      name="Frequency";
+      break;
+    };
+
+    return name;
+  }
+
+  //_______________________________________________________________ hasProjection
   
   bool CoordinateType::hasProjection (CoordinateType::Types const &coord)
   {
@@ -118,6 +163,49 @@ namespace CR { // Namespace CR -- begin
   {
     switch (coord) {
     case CoordinateType::Cylindrical:
+      return true;
+      break;
+    default:
+      return false;
+      break;
+    }
+  }
+
+  // ------------------------------------------------------------------ isSpatial
+  
+  bool CoordinateType::isSpatial (CoordinateType::Types const &coord)
+  {
+    switch (coord) {
+    case CoordinateType::Time:
+    case CoordinateType::Frequency:
+      return false;
+      break;
+    default:
+      return true;
+      break;
+    }
+  }
+
+  // ----------------------------------------------------------------- isTemporal
+  
+  bool CoordinateType::isTemporal (CoordinateType::Types const &coord)
+  {
+    switch (coord) {
+    case CoordinateType::Time:
+      return true;
+      break;
+    default:
+      return false;
+      break;
+    }
+  }
+
+  // ----------------------------------------------------------------- isSpectral
+  
+  bool CoordinateType::isSpectral (CoordinateType::Types const &coord)
+  {
+    switch (coord) {
+    case CoordinateType::Frequency:
       return true;
       break;
     default:

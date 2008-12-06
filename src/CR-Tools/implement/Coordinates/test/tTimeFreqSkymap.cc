@@ -54,9 +54,9 @@ int test_constructors ()
 
   std::cout << "[1] Default constructor ..." << std::endl;
   try {
-    TimeFreqSkymap newTimeFreqSkymap;
+    TimeFreqSkymap coord;
     //
-    newTimeFreqSkymap.summary(); 
+    coord.summary(); 
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -66,10 +66,10 @@ int test_constructors ()
   try {
     uint blocksPerFrame (2);
     uint nofFrames (10);
-    TimeFreqSkymap newTimeFreqSkymap (blocksPerFrame,
-				      nofFrames);
+    TimeFreqSkymap coord (blocksPerFrame,
+			  nofFrames);
     //
-    newTimeFreqSkymap.summary(); 
+    coord.summary(); 
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -82,13 +82,13 @@ int test_constructors ()
     int nyquistZone (2);
     uint blocksPerFrame (2);
     uint nofFrames (10);
-    TimeFreqSkymap newTimeFreqSkymap (blocksize,
-				      sampleFreq,
-				      nyquistZone,
-				      blocksPerFrame,
-				      nofFrames);
+    TimeFreqSkymap coord (blocksize,
+			  sampleFreq,
+			  nyquistZone,
+			  blocksPerFrame,
+			  nofFrames);
     //
-    newTimeFreqSkymap.summary(); 
+    coord.summary(); 
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -135,8 +135,8 @@ int test_parameters ()
 
   TimeFreqSkymap timeFreq;
 
-  /******************************************************************/
-  /* Test of the methods inherited from the base class              */
+  //________________________________________________________
+  // Test of the methods inherited from the base class
 
   std::cout << "[1] Blocksize ..." << std::endl;
   try {
@@ -190,8 +190,8 @@ int test_parameters ()
     nofFailedTests++;
   }
 
-  /******************************************************************/
-  /* Test of the methods added by TimeFreqSkymap                    */
+  //________________________________________________________
+  // Test of the methods added by TimeFreqSkymap
 
   std::cout << "[5] Input data blocks per time-frame ..." << std::endl;
   try {

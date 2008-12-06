@@ -38,10 +38,7 @@ using std::cout;
 using std::endl;
 using CR::GeometricalDelay;
 using CR::L2Norm;
-
-
-//! Speed of light (Source: Wikipedia)
-const double lightspeed = 299792458;
+using CR::lightspeed;
 
 /*!
   \file tGeometricalDelay.cc

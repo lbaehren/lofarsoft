@@ -44,18 +44,13 @@
 #include <scimath/Mathematics.h>
 #include <scimath/Mathematics/FFTServer.h>
 
-using casa::DComplex;
-using casa::Double;
-using casa::Matrix;
-using casa::Vector;
-
 #include <Coordinates/TimeFreq.h>
 #include <IO/DataIterator.h>
 #include <Math/HanningFilter.h>
 
-using CR::HanningFilter;
-using CR::DataIterator;
-using CR::TimeFreq;
+using namespace std;
+using namespace casa;
+using namespace CR;
 
 namespace CR {  //  Namespace CR -- begin
   
