@@ -599,13 +599,13 @@
     <td></td>
     <td></td>
   </tr>
-  <tr valign=top bgcolor=red>
+  <tr valign=top bgcolor=#00ee00>
     <td>Import \e pyrap package (Python binding for \e casacore) into USG code tree, including
 	CMake-based configuration/build</td>
     <td>Lars</td>
     <td>Nov 2008</td>
-    <td></td>
-    <td></td>
+    <td>Nov 2008</td>
+    <td>Nov 2008</td>
   </tr>
   <tr valign=top bgcolor=eeeeff>
     <td>Check if we need to make \e PyQt part of the USG code repository as one of the required external components or if we simply rely on
