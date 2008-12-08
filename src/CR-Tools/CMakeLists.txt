@@ -572,11 +572,54 @@ add_subdirectory (apps)
 
 ## =============================================================================
 ##
+##  Creation of tar-archive
+##
+## =============================================================================
+
+find_program (tar_executable tar ${bin_locations})
+find_program (gzip_executable gzip ${bin_locations})
+
+if (tar_executable AND gzip_executable)
+
+  add_custom_target (create_archive
+    COMMENT "Creating tar-archive for CR-Tools and required packages."
+    WORKING_DIRECTORY ${USG_ROOT}
+    COMMAND ${tar_executable} -cvf crtools.tar --exclude .svn CMakeLists.txt
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn devel_common
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn release/release_area.txt
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn build/build.sh
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/cmake
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/flex
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/bison
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/wcslib
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/cfitsio
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/hdf5
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/casacore
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/plplot
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/boost
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/python
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/root
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/startools
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn src/DAL
+    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn src/CR-Tools
+    COMMAND ${gzip_executable} crtools.tar
+    COMMAND mv crtools.tar.gz crtools.tgz
+    )
+  
+else (tar_executable AND gzip_executable)
+
+  message (STATUS "[CR-Tools] Unable to create tar-archive - missing utilities!")
+
+endif (tar_executable AND gzip_executable)
+
+## =============================================================================
+##
 ##  Configuration summary
 ##
 ## =============================================================================
 
 if (CR_VERBOSE_CONFIGURE)
+
   message (STATUS "+============================================================+")
   message (STATUS "| CR-Tools: Summary of configuration settings                |")
   message (STATUS "+------------------------------------------------------------+")
@@ -623,4 +666,5 @@ if (CR_VERBOSE_CONFIGURE)
   message (STATUS " Graphical user interface .. : ${CR_WITH_GUI}")
   message (STATUS " Test TBB dataset .......... : ${dataset_tbb}")
   message (STATUS "+============================================================+")
+
 endif (CR_VERBOSE_CONFIGURE)

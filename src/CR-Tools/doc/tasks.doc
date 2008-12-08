@@ -177,7 +177,7 @@
     <td>Oct 2008</td>
     <td>Oct 2008</td>
   </tr>
-  <tr valign=top bgcolor=orange>
+  <tr valign=top bgcolor=red>
     <td>Upward propagation of metadata from DAL::TBB_StationGroup to DAL::TBB_Timeseries</td>
     <td>Lars</td>
     <td>Nov 2008</td>
@@ -192,7 +192,7 @@
     <td>Nov 2008</td>
     <td>Nov 2008</td>
   </tr>
-  <tr valign=top bgcolor=orange>
+  <tr valign=top bgcolor=red>
     <td>Export of attributes/metadata as casa::Record</td>
     <td>Lars</td>
     <td>Nov 2008</td>
@@ -514,7 +514,7 @@
     <td class="indexkey">Start</td>
     <td class="indexkey">Finished</td>
   </tr>
-  <tr valign=top bgcolor=eeeeff>
+  <tr valign=top bgcolor=red>
     <td>Update and send around description of common metadata expected for all
 	standard LOFAR data products</td>
     <td>Lars</td>
@@ -522,7 +522,7 @@
     <td></td>
     <td></td>
   </tr>
-  <tr valign=top bgcolor=eeeeff>
+  <tr valign=top bgcolor=red>
     <td>Update and send around LOFAR image data format ICD along with the request
 	for input from the other KSPs</td>
     <td>Lars</td>
@@ -560,7 +560,7 @@
   </tr>
   <tr valign=top bgcolor=orange>
     <td>Upate CMake scripts wrapping the installation of ROOT and QT4 to make
-	use of the \e addd_custom_command feature such that we a) get a more stable
+	use of the \e add_custom_command feature such that we a) get a more stable
 	handling of the process and b) can separate configuration from the actual
 	build and installation.</td>
     <td>Lars</td>
@@ -599,7 +599,7 @@
     <td></td>
     <td></td>
   </tr>
-  <tr valign=top bgcolor=orange>
+  <tr valign=top bgcolor=red>
     <td>Import \e pyrap package (Python binding for \e casacore) into USG code tree, including
 	CMake-based configuration/build</td>
     <td>Lars</td>
