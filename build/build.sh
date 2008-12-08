@@ -14,6 +14,7 @@
 
 basedir=`pwd`
 SYSTEM_NAME=`uname -s`
+SYSTEM_CPU=`uname -p`
 FORCE_BUILD=0;
 CLEAN_BUILD=0;
 REPORT_BUILD=0;
@@ -33,10 +34,18 @@ REQUIRED_MINOR_VERSION=6
 ## parallelize build on selected systems
 
 if [ "$SYSTEM_NAME" == "Darwin" ] ; then
-  var_make="make -j 5"
-else 
-  var_make="make"
+  SYSTEM_NOF_CPU=5
+else
+  ## try to determine the number of cores/CPUs
+  if test -f /proc/cpuinfo ; then
+    SYSTEM_NOF_CPU=`cat /proc/cpuinfo  | grep processor | wc -l`
+  else
+    SYSTEM_NOF_CPU=1
+  fi
 fi
+
+## set make command using multi-threading
+var_make="make -j $SYSTEM_NOF_CPU"
 
 ## move one directory up to get a clean result when setting LOFARSOFT
 
@@ -386,8 +395,8 @@ case $param_packageName in
     casacore)
         echo "[`date`] Selected package CASACORE";
         ## -- build required packages
-        build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=1";
-        build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=1";
+	cd $basedir; ./build.sh wcslib
+	cd $basedir; ./build.sh cfitsio
 	cd $basedir; ./build.sh hdf5
         ## -- build package
         build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$FORCE_BUILD";
@@ -499,11 +508,10 @@ case $param_packageName in
         ## external packages
         echo "[`date`] Processing required packages ..."
 	$basedir/build.sh cmake
-	cd $basedir; ./build.sh flex
 	cd $basedir; ./build.sh bison
+	cd $basedir; ./build.sh flex
 	cd $basedir; ./build.sh casacore
 	cd $basedir; ./build.sh plplot
-	cd $basedir; ./build.sh boost --force-build
 	cd $basedir; ./build.sh python
 	## USG packages
 	echo "[`date`] Building Data Access Library ..."
