@@ -25,6 +25,28 @@
 
 namespace CR { // Namespace CR -- begin
   
+  // ------------------------------------------------------------- ProjectionType
+  
+  casa::Projection::Type ProjectionType (String const &refcode)
+  {
+    casa::Projection prj;
+    casa::Projection::Type tp (casa::Projection::STG);
+    
+    try {
+      tp = prj.type(refcode);
+    } catch (casa::AipsError x) {
+      std::cerr << "[MConversions::ProjectionType] " << x.getMesg() << std::endl;
+    }
+    
+    return tp;
+  }
+
+  // ============================================================================
+  //
+  //  Directions
+  //
+  // ============================================================================
+
   // ------------------------------------------------------------- MDirectionType
   
   casa::MDirection::Types MDirectionType (String const &refcode)
@@ -51,21 +73,11 @@ namespace CR { // Namespace CR -- begin
     return md.showType(tp);
   }
 
-  // ------------------------------------------------------------- ProjectionType
-  
-  casa::Projection::Type ProjectionType (String const &refcode)
-  {
-    casa::Projection prj;
-    casa::Projection::Type tp (casa::Projection::STG);
-    
-    try {
-      tp = prj.type(refcode);
-    } catch (casa::AipsError x) {
-      std::cerr << "[MConversions::ProjectionType] " << x.getMesg() << std::endl;
-    }
-    
-    return tp;
-  }
+  // ============================================================================
+  //
+  //  Positions
+  //
+  // ============================================================================
 
   // -------------------------------------------------------- ObservatoryPosition
 
@@ -95,16 +107,22 @@ namespace CR { // Namespace CR -- begin
     return obsPosition;
   }
 
+  // ============================================================================
+  //
+  //  Conversions
+  //
+  // ============================================================================
+
   // --------------------------------------------------------------- LOPES2MEpoch
 
-  MEpoch LOPES2MEpoch(casa::uInt JDR,
-		      int TL)
+  casa::MEpoch LOPES2MEpoch(casa::uInt JDR,
+			    int TL)
   {
     double offset (3506716800.);
 
-    return MEpoch(casa::MVEpoch(Quantity(((double)JDR+((double)TL/5e6)+offset),
-					 "s")),
-		  casa::MEpoch::Ref(casa::MEpoch::UTC));
+    return casa::MEpoch(casa::MVEpoch(Quantity(((double)JDR+((double)TL/5e6)+offset),
+					       "s")),
+			casa::MEpoch::Ref(casa::MEpoch::UTC));
   }
   
 } // Namespace CR -- end

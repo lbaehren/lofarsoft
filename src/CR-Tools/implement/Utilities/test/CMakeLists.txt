@@ -7,6 +7,7 @@
 
 set (tests
   tMasking
+  tMConversions
   tProgressBar
   tStringTools
   tTimestamp

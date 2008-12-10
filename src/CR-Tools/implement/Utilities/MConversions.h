@@ -30,8 +30,10 @@
 
 #include <casa/aips.h>
 #include <casa/string.h>
+#include <coordinates/Coordinates/ObsInfo.h>
 #include <coordinates/Coordinates/Projection.h>
 #include <measures/Measures.h>
+#include <measures/Measures/MeasConvert.h>
 #include <measures/Measures/MCDirection.h>
 #include <measures/Measures/MDirection.h>
 #include <measures/Measures/MEpoch.h>
@@ -39,7 +41,6 @@
 #include <measures/Measures/MeasRef.h>
 #include <measures/Measures/MeasTable.h>
 
-using casa::MEpoch;
 using casa::String;
 using casa::Quantity;
 
@@ -59,6 +60,11 @@ namespace CR { // Namespace CR -- begin
     \test tMConversions.cc
     
     <h3>Prerequisite</h3>
+
+    <ul>
+      <li>casacore <a href="http://www.astron.nl/casacore/doc/html/group__Coordinates__module.html">Coordinates</a> module
+      <li>casacore <a href="http://www.astron.nl/casacore/doc/html/group__Measures__module.html">Measures</a> module
+    </ul>
     
     <h3>Synopsis</h3>
 
@@ -78,6 +84,30 @@ namespace CR { // Namespace CR -- begin
       <li>Unix Time uses January 1, 1970 as the epoch, but counts by the second,
       not by the day.
       \f[ \hbox{Unix Time} = (JD - 2440587.5) \times 86400 \f]
+    </ul>
+
+    Given the central role of the Measures model the documentation provided by
+    both CASA and casacore is everything by clear when it comes to providing the
+    help of how to implement the solution of a given problem. A simple example
+    for this is how to set up Measures describing the position of the station and
+    the individual antennas: whereas a position given in WGS84 coordinates
+    requires the position values to be passed as Quantities, this is not the case
+    a position in ITRF.
+    <ul>
+    <li>Position in WGS84 coordinates:
+    \code
+    MPosition pos_wgs84 (MVPosition(Quantity(25, "m"),     // Height
+				    Quantity(20, "deg"),   // East longitude
+				    Quantity(53, "deg")),  // Lattitude
+			 MPosition::WGS84);                // Reference type
+    \endcode
+    <li>Position in ITRF coordinates
+    \code
+    MPosition pos_itrf (MVPosition(884084.2636,     // X
+				   -4924578.7481,   // Y
+				   3943734.3354),   // Z
+			MPosition::ITRF);           // Reference type
+    \endcode
     </ul>
     
     <h3>Example(s)</h3>
@@ -128,7 +158,7 @@ namespace CR { // Namespace CR -- begin
 
   // ============================================================================
   //
-  //  Locations
+  //  Positions
   //
   // ============================================================================
 
@@ -149,10 +179,10 @@ namespace CR { // Namespace CR -- begin
 
   // ============================================================================
   //
-  //  Times/Epochs
+  //  Conversions
   //
   // ============================================================================
-  
+
   /*!
     \brief Convert UNIX seconds (since Jan 1, 1970) to Julian Day
 
@@ -187,8 +217,59 @@ namespace CR { // Namespace CR -- begin
     
     \return epoch -- Observation epoch as casa::MEpoch measures object
   */
-  MEpoch LOPES2MEpoch(casa::uInt JDR=0,
-		      int TL=0);
+  casa::MEpoch LOPES2MEpoch(casa::uInt JDR=0,
+			    int TL=0);
+  
+  /*!
+    \brief Set up a Measures conversion frame
+
+    \param epoch -- Instant in time for which the conversion should be performed
+    \param pos   -- Position in space to which the conversion is anchored.
+    
+    \return frame -- Measures conversion frame which can be used to set up a 
+            conversion engine
+  */
+  inline casa::MeasFrame setMeasFrame (casa::MEpoch const &epoch,
+				       casa::MPosition const &pos)
+    {
+      return casa::MeasFrame (epoch,
+			      pos);
+    }
+
+  /*!
+    \brief Set up a Measures conversion frame
+
+    \param obsInfo -- 
+    \param pos     -- Position in space to which the conversion is anchored.
+    
+    \return frame -- Measures conversion frame which can be used to set up a 
+            conversion engine
+  */
+  inline casa::MeasFrame setMeasFrame (casa::ObsInfo const &obsInfo,
+				       casa::MPosition const &pos)
+    {
+      return casa::MeasFrame (obsInfo.obsDate(),
+			      pos);
+    }
+  
+  /*!
+    \brief Set up a Measures conversion frame
+
+    \param obsInfo -- Container for information regarding the time and location
+           of an observation
+
+    \return frame -- Measures conversion frame which can be used to set up a 
+            conversion engine
+  */
+  inline casa::MeasFrame setMeasFrame (casa::ObsInfo const &obsInfo)
+    {
+      // extract the telescope position from the observation info
+      casa::MPosition obsPosition = ObservatoryPosition (obsInfo.telescope());
+      casa::MEpoch obsEpoch       = obsInfo.obsDate();
+      // forward the function call
+      return casa::MeasFrame (obsEpoch,
+			      obsPosition);
+    }
   
 } // Namespace CR -- end
 

@@ -8,30 +8,8 @@
 
   - \ref crtools_imaging_geometry
   - \ref crtools_imaging_frames
+  - \ref crtools_imaging_implementation
   - \ref crtools_imaging_references
-
-<hr>
-
-Image array:
-\f[  I = I (\xi_1,\xi_2,\xi_3,\nu,t)  \in R^5 \f]
-
-In order to use the slicing operations, the arrays internally used by the
-Skymapper or the Beamformer need to be of equal rank -- otherwise the
-<tt>putSlice()</tt> and <tt>getSlice()</tt> operations are not well defined (or at
-least give trouble.
-
-\code
-IPosition start (5,0);
-
-for (uint block(0); block<nofBlocks; block++) {
-  for (uint channel(0); channel<nofChannels; channel++) {
-    /* do something with the data */
-    start(3)++;
-  }
-  start(3)=0;
-  start(4)++;
-}
-\endcode
 
 <hr>
 
@@ -137,14 +115,41 @@ Generally, X1, X2, T, D, R are function of time.
 
 <hr>
 
+\section crtools_imaging_implementation Implementation
+
+Image array:
+\f[  I = I (\xi_1,\xi_2,\xi_3,\nu,t)  \in R^5 \f]
+
+In order to use the slicing operations, the arrays internally used by the
+Skymapper or the Beamformer need to be of equal rank -- otherwise the
+<tt>putSlice()</tt> and <tt>getSlice()</tt> operations are not well defined (or at
+least give trouble.
+
+\code
+IPosition start (5,0);
+
+for (uint block(0); block<nofBlocks; block++) {
+  for (uint channel(0); channel<nofChannels; channel++) {
+    /* do something with the data */
+    start(3)++;
+  }
+  start(3)=0;
+  start(4)++;
+}
+\endcode
+
+<hr>
+
 \section crtools_imaging_references References
   
   <ul>
     <li>casacore <a href="http://www.astron.nl/casacore/doc/html/classcasa_1_1Coordinate.html">Coordinate</a> class
+	<li>casacore <a href="http://www.astron.nl/casacore/doc/html/group__Measures__module.html">Measures</a> module
     <li><a href="http://itrf.ensg.ign.fr">itrf.ensg.ign.fr</a>
     <li><a href="http://www.iers.org">International Earth Rotation and Reference
     System Service</a>
     <li>Least-squares image estimation on a multiresolution pyramid. Clippingdale, S.C.; Wilson, R.G. Acoustics, Speech, and Signal Processing, 1989. ICASSP-89., 1989 International Conference on Volume , Issue , 23-26 May 1989 Page(s):1409 - 1412 vol.3
+	<li><a href="http://www.gb.nrao.edu/ovlbi/es70_stationLocation.txt">NRAO orbiting VLBI earth station coordinates</a>
   </ul>
 
 

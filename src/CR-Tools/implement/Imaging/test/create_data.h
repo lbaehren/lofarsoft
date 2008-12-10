@@ -104,6 +104,8 @@ get_antennaPositions (uint const &nofAntennas=4,
       antPositions(n,1) = n*incr;
     }
     break; 
+  case CR::CoordinateType::Time:
+  case CR::CoordinateType::Frequency:
   case CR::CoordinateType::Direction:
   case CR::CoordinateType::DirectionRadius:
   case CR::CoordinateType::AzElHeight:
