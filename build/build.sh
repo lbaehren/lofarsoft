@@ -19,6 +19,7 @@ FORCE_BUILD=0;
 CLEAN_BUILD=0;
 REPORT_BUILD=0;
 BUILD_TESTS=0;
+ENABLE_MULTITHREADING=0;
 
 ## Required minimum version of CMake; system should provide a version at
 ## at least matching the one provided as part of the USG distribution
@@ -30,22 +31,6 @@ REQUIRED_MINOR_VERSION=6
 ## Environment variables; in particular we need to ensure, the CMake binary can 
 ## be found. However failure in that could also signify, that there is no CMake
 ## available, so we need to make to sure we build it first.
-
-## parallelize build on selected systems
-
-if [ "$SYSTEM_NAME" == "Darwin" ] ; then
-  SYSTEM_NOF_CPU=5
-else
-  ## try to determine the number of cores/CPUs
-  if test -f /proc/cpuinfo ; then
-    SYSTEM_NOF_CPU=`cat /proc/cpuinfo  | grep processor | wc -l`
-  else
-    SYSTEM_NOF_CPU=1
-  fi
-fi
-
-## set make command using multi-threading
-var_make="make -j $SYSTEM_NOF_CPU"
 
 ## move one directory up to get a clean result when setting LOFARSOFT
 
@@ -105,6 +90,32 @@ print_help ()
     echo "    clean, clean-build = Clean out the build directory."
     echo "    clean-release      = Clean out the release directory."
     echo "    clean-all          = Do a clean-build and a clean-release."
+}
+
+## -------------------------------------------------------------------
+## Determine the make command to use (e.g. if to activate multi-threading)
+
+make_command ()
+{
+  ## parallelize build on selected systems
+
+  if [ "$SYSTEM_NAME" == "Darwin" ] ; then
+    SYSTEM_NOF_CPU=5
+  else
+    ## try to determine the number of cores/CPUs
+    if test -f /proc/cpuinfo ; then
+      SYSTEM_NOF_CPU=`cat /proc/cpuinfo  | grep processor | wc -l`
+    else
+      SYSTEM_NOF_CPU=1
+    fi
+  fi
+
+  ## set make command
+  if [ "$ENABLE_MULTITHREADING" == "1" ] ; then 
+    var_make="make -j $SYSTEM_NOF_CPU"
+  else 
+    var_make="make"
+  fi
 }
 
 ## -------------------------------------------------------------------
@@ -364,6 +375,11 @@ while [ "$option_found" == "true" ]
       shift
       echo " -- Recognized build option; reporting build/test results."; 
     ;;
+    --multithreading)
+      ENABLE_MULTITHREADING=1;
+      shift
+      echo " -- Recognized build option; multi-threading enabled."; 
+    ;;
     *)
     option_found=false
   esac
@@ -371,6 +387,8 @@ done
 
 ## -----------------------------------------------------------------------------
 ## Build individual/multiple packages
+
+make_command
 
 ## since all further operations need CMake as central tool, we need to make sure
 ## it is available first.
