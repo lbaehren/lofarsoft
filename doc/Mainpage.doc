@@ -177,3 +177,21 @@ In this:
       `-- pybdsm
   \endverbatim
 */
+
+/*!
+  \defgroup startools Star-Tools function collection
+
+  \verbatim
+  lofarsoft
+  |-- data
+  |-- doc
+  |-- release
+  |-- build
+  |-- devel_common
+  |-- external
+  |   |-- casacore
+  |   |-- hdf5
+  |   `-- startools   <-- you are here
+  `-- src
+  \endverbatim
+*/
