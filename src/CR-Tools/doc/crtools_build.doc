@@ -8,7 +8,7 @@
 - \ref crtools_configure_build
 - \ref crtools_build_parameters
 - \ref crtools_build_components
-- \ref crtools_build_reporting
+- \ref crtools_build_script
 
 <hr>
 
@@ -45,6 +45,8 @@ svn co http://usg.lofar.org/svn/code/trunk usg
   cd $LOFARSOFT/build
   ./build.sh cr
   \endcode
+  For further control of the process see the section on \ref crtools_build_script
+  below.
 </ul>
 
 <hr>
@@ -166,21 +168,34 @@ option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES
 
 <hr>
 
-\section crtools_build_reporting Reporting back configuration & build errors
+\section crtools_build_script Build script options and parameters
 
-If for some reason the build fails you should run the build script with the additional option to generate a
-build/test report, which then is sent to the USG Dashboard server; this will not
-only provide the feedback that something went wrong with building the software
-on your machine, but also help to narrow down where to look for the cause of the
-problem.
-\verbatim
-cd $LOFARSOFT/build
-./build.sh cr --report-build
-\endverbatim
+The build script \e build.sh has a number of option which you can use to enable
+or disable certain behaviour during the actual build phase:
 
-\b Note: While the server already is up and running, due to the settings on the
-ASTRON firewall it currently isn't yet possible to submit logs from outside the
-ASTRON network -- we are working on getting this resolved.
+<ul>
+
+  <li>\b --report-build - Send build log to Dart Dashboard server <br>
+  If for some reason the build fails you should run the build script with the
+  additional option to generate a build/test report, which then is sent to the USG
+  Dashboard server; this will not only provide the feedback that something went
+  wrong with building the software on your machine, but also help to narrow down
+  where to look for the cause of the problem.
+  \verbatim
+  cd $LOFARSOFT/build
+  ./build.sh cr --report-build
+  \endverbatim
+  \b Note: While the server already is up and running, due to the settings on the
+  ASTRON firewall it currently isn't yet possible to submit logs from outside the
+  ASTRON network -- we are working on getting this resolved.
+  
+  <li>\b --multithreading - Enable multithreaded compile
+  \verbatim
+  cd $LOFARSOFT/build
+  ./build.sh cr --multithreading
+  \endverbatim
+
+</ul>
 
 <hr>
 
