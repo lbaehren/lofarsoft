@@ -245,7 +245,7 @@ class analyseLOPESevent2 : public analyseLOPESevent {
       \param CalculateMaxima - Finds the maximum and the minimum of the trace in the plot range
       \param listCalcMaxima  - output version of CalculateMax
       \param printShowerCoordinates -	 print the x,y and total distance between antenna and shower core in shower coordinates
-
+      \param ignoreDistance  -	ignores the given distance but tries to find it automatically 
       \return Record with the results.
     */
     Record RunPipeline (const string& evname,
@@ -272,7 +272,8 @@ class analyseLOPESevent2 : public analyseLOPESevent {
 			bool PlotRawData=false,
 			bool CalculateMaxima=false,
 			bool listCalcMaxima=false,
-			bool printShowerCoordinates=false);
+			bool printShowerCoordinates=false,
+			bool ignoreDistance=false);
 
 
     /*!

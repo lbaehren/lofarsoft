@@ -118,15 +118,18 @@ namespace CR { // Namespace CR -- begin
 					  String Polarization,
 					  bool SinglePlots,
 					  bool PlotRawData,
-  					  bool CalculateMaxima,
+					  bool CalculateMaxima,
 					  bool listCalcMaxima,
-					  bool printShowerCoordinates) {
+					  bool printShowerCoordinates,
+					  bool ignoreDistance) {
     Record erg;
     try {
       // ofstream latexfile;  // WARNING: causes problem in fitCR2gauss.cc line 200, left here for future tests
       Vector <Bool> AntennaSelection;
       Record fiterg;
       Double center;		// position of the cc-beam (set in doPositionFitting)
+
+      erg.define("goodReconstructed",false);  // will be set to true at the end of the reconstruction
 
       // initialize the pipeline
       if (! SetupEvent(evname, doTVcal, FlaggedAntIDs, AntennaSelection, 
@@ -231,6 +234,8 @@ namespace CR { // Namespace CR -- begin
         std::cout << std::endl;
       }
 
+      erg.define("goodReconstructed",true);  // assume that everything was fine, then this position is reached.
+
     } catch (AipsError x) {
       std::cerr << "analyseLOPESevent2::RunPipeline: " << x.getMesg() << std::endl;
       return Record();
@@ -257,6 +262,7 @@ namespace CR { // Namespace CR -- begin
       // ofstream latexfile;  // WARNING: causes problem in fitCR2gauss.cc line 200, left here for future tests
       Vector <Bool> AntennaSelection;
 
+      erg.define("goodReconstructed",false);  // will be set to true at the end of the reconstruction
 
       pipeline_p->setVerbosity(verbose);
       // Generate the Data Reader
@@ -353,6 +359,8 @@ namespace CR { // Namespace CR -- begin
         for (unsigned int i = 0; i < plotlist.size(); i++) std::cout << plotlist[i] << "\n";
         std::cout << std::endl;
       }
+
+      erg.define("goodReconstructed",true);  // assume that everything was fine, then this position is reached.
 
     } catch (AipsError x) 
     {

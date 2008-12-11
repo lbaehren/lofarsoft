@@ -95,6 +95,7 @@ using CR::LopesEventIn;
   listCalcMaxima         = false
   printShowerCoordinates = false
   verbose                = true
+  ignoreDistance         = true
   simplexFit             = true
   doTVcal                = default
   doGainCal              = true
@@ -111,6 +112,8 @@ using CR::LopesEventIn;
   flagged                = 10101
   flagged                = 10102
   rootfilename           = output.root
+  rootfilemode           = recreate
+  wirteBadEvents         = true
   caliabration           = false
   \endverbatim
   This example means:
@@ -126,8 +129,8 @@ using CR::LopesEventIn;
     <li>prints a list of the absolut maxima in a more user friendly was
     <li>prints the distance form the core to the antennas in shower coordinates
     <li>there will be more text output during the analysis,
-    <li>the simplex fit of the arrival direction and radius of curvature is
-    done,
+    <li>the distance value will be estimateda and the value in the eventlist ignored
+    <li>the simplex fit of the arrival direction and radius of curvature is done,
     <li>the TV calibration will be done by default,
     <li>the electrical gain calibration (fieldstrength) will be done,
     <li>correction of the dispersion (frequency dependent delay) is enabled,
@@ -143,6 +146,9 @@ using CR::LopesEventIn;
     <li>time range to search for CC-beam-peak in lateral distribution studies is +/- 45 ns,
     <li>the antennas 10101 and 10102 are not considered in the analysis,
     <li>the output of the pipeline is written to a root tree in the file "output.root".
+    <li>an old root file with the same name will be overwritten
+    <li>events with a bad reconstruction (e.g. simplex fit crashed) 
+        will be written to the root file.
     <li>the analysis is run normally, not in calibration mode
   </ul>
 
@@ -188,9 +194,10 @@ bool singlePlots = false;	      // by default there are no single plots for each
 bool PlotRawData = false;	      // by default there the raw data are not plotted
 bool CalculateMaxima = false;	      // by default the maxima are not calculated
 bool listCalcMaxima=false;    	      // print calculated maxima in more user friendly way
-bool printShowerCoordinates=false;    // print the distance between antenna and shower core
-bool RotatePos = true; 	       	      // should be true if coordinates are given in KASKADE frame
+bool printShowerCoordinates=false;   // print the distance between antenna and shower core
+bool RotatePos = true; 	      // should be true if coordinates are given in KASKADE frame
 bool verbose = true;
+bool ignoreDistance = false;         // distance value of the eventlist will be ignored
 bool simplexFit = true;
 int doTVcal = -1;		      // 1: yes, 0: no, -1: use default	
 bool doGainCal = true;		      // calibration of the electrical fieldstrength
@@ -206,10 +213,10 @@ unsigned int upsamplingExponent = 0;  // by default no upsampling will be done
 vector<Int> flagged;		      // use of STL-vector instead of CASA-vector due to support of push_back()
 unsigned int summaryColumns = 0;      // be default no summary of all plots
 double ccWindowWidth = 0.045e-6;      // width of window for CC-beam
-//! Name of root file for output
-string rootFilename = "";
-//! Calibration mode is off by default
-bool calibrationMode = false;	      
+string rootFileName = "";             // Name of root file for output
+string rootFileMode = "RECREATE";     // Mode, how to access root file
+bool writeBadEvents = false;         // also bad events are written into the root file (if possible)
+bool calibrationMode = false;	      // Calibration mode is off by default
 
 // ------------- Functions ----------------
 
@@ -237,22 +244,22 @@ void readConfigFile (const string &filename)
 
       // look for the beginnig of the config data (after a line containing only and at least three '-' or '='	
       string temp_read;
-      bool configs_found = false;
-      while ((configs_found == false) && (configfile.good())) {
+      bool header_found= false;
+      while ((header_found== false) && (configfile.good())) {
 	configfile >> temp_read;
         if ((temp_read.find("---") != string::npos) || (temp_read.find("===") != string::npos))
-	  configs_found = true;
+	  header_found= true;
       }
 	
-      // print warning if no configs were found and countinue program using default values
-      if (configs_found == false) {
+      // print warning if no header was found and assume there is none
+      if (header_found== false) {
         configfile.close();  // close file
-        cerr << "\nWarning!";
-        cerr << "\nNo config information was foung in file \"" << filename <<"\".\n" ;
-        cerr << "Type \"call_pipeline --help\" for help.\n";
-        cerr << "\nProgram will continue using default configuration values." << endl;
+        cout << "\nWarning: No header was found in configuration file \"" << filename <<"\".\n" ;
+        cout << "Program will continue normally.\n" << endl;
+        configfile.open (filename.c_str(), ifstream::in);  //reopen file to start at the beginning
       }
-      else while(configfile.good()) { // read configurations if configs_found
+
+      while(configfile.good()) { // read configurations if configs_found
         string keyword, value, equal_token;
 
         // read in first keyword, then a token that should be '=' and afterward the value for the keyword
@@ -404,6 +411,22 @@ void readConfigFile (const string &filename)
 	  } else {
             cerr << "\nError processing file \"" << filename <<"\".\n" ;
             cerr << "Verbose must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+        }
+
+        if ( (keyword.compare("ignoredistance")==0) || (keyword.compare("ignoreDistance")==0) ||
+             (keyword.compare("IgnoreDistance")==0) || (keyword.compare("IgnoreDistance")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
+	    ignoreDistance = true;
+	    cout << "ignoreDistance set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
+	    ignoreDistance = false;
+	    cout << "ignoreDistance set to 'false'.\n";
+          } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "ignoreDistance must be either 'true' or 'false'.\n";
             cerr << "\nProgram will continue skipping the problem." << endl;
           }
         }
@@ -766,11 +789,40 @@ void readConfigFile (const string &filename)
 	}
 
         if ( (keyword.compare("rootfilename")==0) || (keyword.compare("Rootfilename")==0)
-           || (keyword.compare("rootFilename")==0) || (keyword.compare("RootFilename")==0)) {
-	  rootFilename = value;
-	  cout << "RootFilename set to \"" << rootFilename << "\".\n";
+           || (keyword.compare("rootFileName")==0) || (keyword.compare("RootFilename")==0)) {
+	  rootFileName = value;
+	  cout << "RootFilename set to \"" << rootFileName << "\".\n";
 	}
+
+        if ( (keyword.compare("rootfilemode")==0) || (keyword.compare("Rootfilemode")==0)
+           || (keyword.compare("rootFileMode")==0) || (keyword.compare("RootFileMode")==0)) {
+          if ( (value.compare("overwrite")==0) || (value.compare("OVERWRITE")==0)
+             || (value.compare("recreate")==0) || (value.compare("RECREATE")==0)) {
+	    rootFileMode = "RECREATE";
+	    cout << "RootFileMode set to RECREATE (existing root file will be overwritten).\n";
+   	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "RootFileMode must be RECREATE.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+        }
  
+        if ( (keyword.compare("writeBadEvents")==0) || (keyword.compare("writebadevents")==0)
+             || (keyword.compare("Writebadevents")==0) || (keyword.compare("WriteBadEvents")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
+	    writeBadEvents = true;
+	    cout << "writeBadEvents set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
+	    calibrationMode = false;
+	    cout << "writeBadEvents set to 'false'.\n";
+	  } else{
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "writeBadEvents must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+	}
+
         if ( (keyword.compare("calibration")==0) || (keyword.compare("calibration")==0)
              || (keyword.compare("calibrationmode")==0) || (keyword.compare("CalibrationMode")==0)) {
           if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
@@ -807,11 +859,13 @@ int main (int argc, char *argv[])
   unsigned int gt = 0;
   double CCheight, CCheight_NS;                                 // CCheight will be used for EW polarization or ANY polarization
   double CCheight_error, CCheight_error_NS;
+  bool CCconverged, CCconvergedNS;                              // is true if the Gaussian fit to the CCbeam converged
   double AzL, ElL, AzL_NS, ElL_NS;                              // Azimuth and Elevation
   map <int,PulseProperties> rawPulsesMap;                       // pulse properties of pules in raw data traces
   map <int,PulseProperties> calibPulsesMap;                     // pulse properties of pules in calibrated data traces
   PulseProperties* rawPulses[MAX_NUM_ANTENNAS];                 // use array of pointers to store pulse properties in root tree
-  PulseProperties* calibPulses[MAX_NUM_ANTENNAS];                // use array of pointers to store pulse properties in root tree
+  PulseProperties* calibPulses[MAX_NUM_ANTENNAS];               // use array of pointers to store pulse properties in root tree
+  bool goodEW = false, goodNS = false;                       // true if reconstruction worked
   try {
     // allocate space for arrays with pulse properties
     for (int i=0; i < MAX_NUM_ANTENNAS; i++) {
@@ -857,6 +911,7 @@ int main (int argc, char *argv[])
              << "listCalcMaxima=false\n"
              << "printShowerCoordinates=false\n"
              << "verbose = true\n"
+             << "ignoredistance = true\n"
              << "simplexFit = true\n"
              << "doTVcal = default\n"
              << "doGainCal = true\n"
@@ -873,6 +928,8 @@ int main (int argc, char *argv[])
              << "flagged = 10101\n"
              << "flagged = 10102\n"
              << "rootfilename = output.root\n"
+             << "rootfilemode = recreate\n"
+             << "writebadevents = false\n"
              << "calibration = false\n"
              << "... \n"
              << endl;
@@ -926,33 +983,33 @@ int main (int argc, char *argv[])
       return 1;		// exit program
     }
 
-    // look for the beginnig of the data (after a line containing only and at least three '-' or '='	
+    // look for the end of the header (after a line containing only and at least three '-' or '=')
     string temp_read;
-    bool data_found = false;
-    while ((data_found == false) && (eventfilelist.good())) {
+    bool header_found = false;
+    while ((header_found == false) && (eventfilelist.good())) {
       eventfilelist >> temp_read;
       if ((temp_read.find("---") != string::npos) || (temp_read.find("===") != string::npos))
-        data_found = true;
+        header_found = true;
     }
 
-    // exit program if no data are found	
-    if (data_found == false) {
+    //  if no header was found, assume that the file begins with an event and reopen it.
+    if (header_found == false) {
       eventfilelist.close();  // close file
-      cerr << "\nNo list of event files found in file \"" << eventfilelistname <<"\".\n" ;
-      cerr << "Type \"call_pipeline --help\" for help.\n" << endl;
-      return 1;		// exit program
+      cout << "\nWarning: No header found in file \"" << eventfilelistname <<"\".\n" ;
+      cerr << "Program will continue normally.\n" << endl;
+      eventfilelist.open (eventfilelistname.c_str(), ifstream::in); // reopen file to start at the beginning
     }
 
     // prepare output in root file
     TFile *rootfile=NULL;
 
-    if (rootFilename != "") {
+    if (rootFileName != "") {
       // open root file and create tree structure
-      rootfile = new TFile(rootFilename.c_str(),"RECREATE","Resulst of CR-Tools pipeline");
+      rootfile = new TFile(rootFileName.c_str(),"RECREATE","Resulst of CR-Tools pipeline");
 
       // check if file is open
       if (rootfile->IsZombie()) {
-        cerr << "\nError: Could not create file: " << rootFilename << "\n" << endl;
+        cerr << "\nError: Could not create file: " << rootFileName << "\n" << endl;
         return 1;		// exit program
       }
     }
@@ -971,19 +1028,25 @@ int main (int argc, char *argv[])
         roottree.Branch("AzL",&azimuth,"AzL/D");
         roottree.Branch("ElL",&elevation,"ElL/D");
         roottree.Branch("CCheight",&CCheight,"CCheight/D");
-	roottree.Branch("CCheight_error",&CCheight_error,"CCheight_error/D");
+        roottree.Branch("CCheight_error",&CCheight_error,"CCheight_error/D");
+        roottree.Branch("CCconverged",&CCconverged,"CCconverged/B");
+        roottree.Branch("goodReconstructed",&goodEW,"goodReconstructed/B");
       }
       if ( (polarization == "EW") || (polarization == "BOTH")) {
         roottree.Branch("AzL_EW",&AzL,"AzL_EW/D");
         roottree.Branch("ElL_EW",&ElL,"ElL_EW/D");
         roottree.Branch("CCheight_EW",&CCheight,"CCheight_EW/D");
-	roottree.Branch("CCheight_error_EW",&CCheight_error,"CCheight_error_EW/D");
+        roottree.Branch("CCheight_error_EW",&CCheight_error,"CCheight_error_EW/D");
+        roottree.Branch("CCconverged_EW",&CCconverged,"CCconverged_EW/B");
+        roottree.Branch("goodReconstructed_EW",&goodEW,"goodReconstructed_EW/B");
       }
       if ( (polarization == "NS") || (polarization == "BOTH")) {
         roottree.Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
         roottree.Branch("ElL_NS",&ElL_NS,"ElL_NS/D");
         roottree.Branch("CCheight_NS",&CCheight_NS,"CCheight_NS/D");
-	roottree.Branch("CCheight_error_NS",&CCheight_error_NS,"CCheight_error_NS/D");
+        roottree.Branch("CCheight_error_NS",&CCheight_error_NS,"CCheight_error_NS/D");
+        roottree.Branch("CCconverged_NS",&CCconverged,"CCconverged_NS/B");
+        roottree.Branch("goodReconstructed_NS",&goodNS,"goodReconstructed_NS/B");
       }
     } //if
 
@@ -1046,6 +1109,11 @@ int main (int argc, char *argv[])
       if (plotprefix.find("/") != string::npos)
        plotprefix.erase(0,plotprefix.find_last_of('/')+1);
 
+      // set reconstruction flags to bad
+      // if they are not set to true during reconstruction the event is not written into the root file
+      goodEW = false;
+      goodNS = false;
+
       // print information and process the event
       if (calibrationMode) {
         cout << "\nProcessing calibration event \"" << filename << "\".\n" << endl;
@@ -1095,6 +1163,7 @@ int main (int argc, char *argv[])
         calibPulsesMap = eventPipeline.getCalibPulseProperties();
 
         // adding results to variables (needed to fill them into the root tree)
+        goodEW = results.asBool("goodReconstructed");
         gt = results.asuInt("Date");
       } else {
         if ( (polarization == "ANY") || (polarization == "EW") || both_pol) {
@@ -1138,7 +1207,8 @@ int main (int argc, char *argv[])
                                                PlotRawData,
                                                CalculateMaxima,
                                                listCalcMaxima,
-                                               printShowerCoordinates);
+                                               printShowerCoordinates,
+                                               ignoreDistance);
 
           // make a postscript with a summary of all plots
           // if summaryColumns = 0 the method does not create a summary.
@@ -1149,10 +1219,12 @@ int main (int argc, char *argv[])
           calibPulsesMap = eventPipeline.getCalibPulseProperties();
 
           // adding results to variables (needed to fill them into the root tree)
+          goodEW = results.asBool("goodReconstructed");
           AzL = results.asDouble("Azimuth");
           ElL = results.asDouble("Elevation");
           CCheight = results.asDouble("CCheight");
-	  CCheight_error = results.asDouble("CCheight_error");
+          CCheight_error = results.asDouble("CCheight_error");
+          CCconverged = results.asBool("CCconverged");
           gt = results.asuInt("Date");
          }
 
@@ -1211,12 +1283,12 @@ int main (int argc, char *argv[])
           calibPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
 
           // adding results to variables (needed to fill them into the root tree)
+          goodNS = results.asBool("goodReconstructed");
           AzL_NS = results.asDouble("Azimuth");
           ElL_NS = results.asDouble("Elevation");
           CCheight_NS = results.asDouble("CCheight");
-	  CCheight_error_NS = results.asDouble("CCheight_error");
-	  roottree.Branch("CCheight_NS",&CCheight_NS,"CCheight_NS/D");
-	  roottree.Branch("CCheight_error_NS",&CCheight_error_NS,"CCheight_error_NS/D");
+          CCheight_error_NS = results.asDouble("CCheight_error");
+          CCconvergedNS = results.asDouble("CCconverged");
           gt = results.asuInt("Date");
         }
       }  // if...else (calibrationMode)
@@ -1265,10 +1337,15 @@ int main (int argc, char *argv[])
       }
 
       // write output to root tree
-      if (rootFilename != "") {
-        cout << "Adding results to root tree and saving root file \"" << rootFilename << "\"\n" << endl;
-        roottree.Fill();
-        rootfile->Write("",TObject::kOverwrite);
+      if (rootFileName != "") {
+        // check if event was reconstructed or if also bad events shall be written to the root file
+        if (goodEW || goodNS || writeBadEvents) {
+          cout << "Adding results to root tree and saving root file \"" << rootFileName << "\"\n" << endl;
+          roottree.Fill();
+          rootfile->Write("",TObject::kOverwrite);
+        } else {
+          cout << "WARNING: Event is not written into root file because as badly reconstructed." << endl;
+        }
       }
     }
 
@@ -1276,8 +1353,8 @@ int main (int argc, char *argv[])
     eventfilelist.close();
 
     // write and close root file
-    if (rootFilename != "") {
-      cout << "Closing root file: " << rootFilename << endl;
+    if (rootFileName != "") {
+      cout << "Closing root file: " << rootFileName << endl;
       rootfile->Close();
     }
 
