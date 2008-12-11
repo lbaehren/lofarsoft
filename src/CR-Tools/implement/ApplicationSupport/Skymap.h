@@ -60,6 +60,7 @@ using namespace std;
 #include <Observation/ObservationFrame.h>
 #include <Imaging/SkymapGrid.h>
 #include <Imaging/SkymapQuantity.h>
+#include <Math/Transforms.h>
 #include <Utilities/ProgressBar.h>
 
 using CR::SkymapGrid;

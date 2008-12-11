@@ -42,6 +42,24 @@ using casa::MVPosition;
 */
 
 //_______________________________________________________________________________
+//                                                               test_MVDirection
+
+/*!
+  \brief Test working with Measures of type MVDirection
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function
+*/
+int test_MVDirection ()
+{
+  std::cout << "\n[tMConversions::test_MVDirection]\n" << endl;
+  
+  int nofFailedTests (0);
+
+  return nofFailedTests;
+}
+  
+//_______________________________________________________________________________
 //                                                                test_MDirection
 
 /*!
@@ -173,15 +191,48 @@ int test_MPosition ()
 */
 int test_operations ()
 {
+  std::cout << "\n[tMConversions::test_operations]\n" << endl;
+
   int nofFailedTests (0);
 
-  MVPosition pos1 (Quantity(25, "m"),
-		   Quantity(20, "deg"),
-		   Quantity(53, "deg"));
-  MVPosition incr (Quantity(1, "m"),
-		   Quantity(1, "deg"),
-		   Quantity(1, "deg"));
+  std::cout << "[1] Addition of MVPosition (m,deg,deg) ..." << endl;
+  try {
+    MVPosition pos1 (Quantity(25, "m"),
+		     Quantity(20, "deg"),
+		     Quantity(53, "deg"));
+    MVPosition shift (Quantity(1, "m"),
+		     Quantity(1, "deg"),
+		     Quantity(1, "deg"));
+    MVPosition pos2 = pos1+shift;
+    //
+    std::cout << "-- Position 1     = " << pos1  << endl;
+    std::cout << "-- Position shift = " << shift << endl;
+    std::cout << "-- Position 2     = " << pos2  << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
 
+  std::cout << "[1] Addition of MVPosition (m,m,m) ..." << endl;
+  try {
+    MVPosition pos1 (25,25,1);
+    MVPosition shift (1,1,1);
+    MVPosition pos2 = pos1+shift;
+    //
+    std::cout << "-- Position 1       = " << pos1  << endl;
+    std::cout << "-- Position shift   = " << shift << endl;
+    std::cout << "-- Position 2       = " << pos2  << endl;
+    std::cout << "                    = " << pos2.get() << endl;
+    std::cout << "-- (lon,lat,length) = ("
+	      << pos2.getLong() << ","
+	      << pos2.getLat() << ","
+	      << pos2.getLength() << ")"
+	      << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 
@@ -204,6 +255,7 @@ int main ()
 {
   int nofFailedTests (0);
 
+  nofFailedTests += test_MVDirection();
   nofFailedTests += test_MDirection();
   nofFailedTests += test_MPosition();
   nofFailedTests += test_operations ();

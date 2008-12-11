@@ -48,9 +48,11 @@
 namespace CR { // Namespace CR -- begin
   
   /*!
-    \brief Fourier transform related mathematical operations.
-    
+    \file Transforms.h
+
     \ingroup CR_Math
+    
+    \brief Collection of functions to carry out transforms
     
     \author Lars B&auml;hren
     

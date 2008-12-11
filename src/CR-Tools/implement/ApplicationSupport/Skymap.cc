@@ -19,7 +19,6 @@
  ***************************************************************************/
 
 #include <ApplicationSupport/Skymap.h>
-#include <Math/MathFFT.h>
 
 using CR::FFT2Fx;
 

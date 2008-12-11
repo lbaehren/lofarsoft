@@ -229,8 +229,8 @@ namespace CR { // Namespace CR -- begin
     \return frame -- Measures conversion frame which can be used to set up a 
             conversion engine
   */
-  inline casa::MeasFrame setMeasFrame (casa::MEpoch const &epoch,
-				       casa::MPosition const &pos)
+  inline casa::MeasFrame MeasuresFrame (casa::MEpoch const &epoch,
+					casa::MPosition const &pos)
     {
       return casa::MeasFrame (epoch,
 			      pos);
@@ -245,8 +245,8 @@ namespace CR { // Namespace CR -- begin
     \return frame -- Measures conversion frame which can be used to set up a 
             conversion engine
   */
-  inline casa::MeasFrame setMeasFrame (casa::ObsInfo const &obsInfo,
-				       casa::MPosition const &pos)
+  inline casa::MeasFrame MeasuresFrame (casa::ObsInfo const &obsInfo,
+					casa::MPosition const &pos)
     {
       return casa::MeasFrame (obsInfo.obsDate(),
 			      pos);
@@ -261,7 +261,7 @@ namespace CR { // Namespace CR -- begin
     \return frame -- Measures conversion frame which can be used to set up a 
             conversion engine
   */
-  inline casa::MeasFrame setMeasFrame (casa::ObsInfo const &obsInfo)
+  inline casa::MeasFrame MeasuresFrame (casa::ObsInfo const &obsInfo)
     {
       // extract the telescope position from the observation info
       casa::MPosition obsPosition = ObservatoryPosition (obsInfo.telescope());
