@@ -155,6 +155,8 @@ Matrix<double> get_skyPositions (uint const &nofPositions=2,
       positions(n,0) = n*incr;
     }
     break;
+  case CR::CoordinateType::Time:
+  case CR::CoordinateType::Frequency:
   case CR::CoordinateType::Direction:
   case CR::CoordinateType::DirectionRadius:
   case CR::CoordinateType::AzElHeight:

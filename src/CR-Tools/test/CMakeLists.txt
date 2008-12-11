@@ -164,27 +164,6 @@ if (HAVE_FFTW3)
 endif (HAVE_FFTW3)
 
 ## -----------------------------------------------------------------------------
-## Test for GSL
-
-if (HAVE_GSL)
-  ## compiler instructions
-  add_executable (tUseGSL tUseGSL.cc)
-  set_target_properties (tUseGSL
-    PROPERTIES
-    COMPILE_FLAGS "-I${GSL_INCLUDES}"
-    )
-  ## linker instructions
-  target_link_libraries (tUseGSL ${GSL_LIBRARIES})
-  ## testing
-  add_test (tUseGSL tUseGSL)
-  ## installation
-  install (
-    TARGETS tUseGSL
-    RUNTIME DESTINATION bin
-    )
-endif (HAVE_GSL)
-
-## -----------------------------------------------------------------------------
 ## Test(s) for PGPlot
 
 if (HAVE_PGPLOT)

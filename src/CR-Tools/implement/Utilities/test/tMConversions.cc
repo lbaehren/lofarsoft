@@ -34,7 +34,7 @@ using casa::MVPosition;
 
   \ingroup CR_Utilities
 
-  \brief A collection of test routines for the MConversions class
+  \brief A collection of tests for the routines implemented in MConversions.cc
  
   \author Lars B&auml;hren
  
@@ -77,15 +77,19 @@ int test_MDirection ()
     MDirection j2000 (MDirection(Quantity(0,"deg"),
 				 Quantity(90,"deg"),
 				 MDirection::Ref(MDirection::J2000)));
+    MDirection itrf (MDirection(Quantity(0,"deg"),
+				Quantity(90,"deg"),
+				MDirection::Ref(MDirection::ITRF)));
     //
-    std::cout << "-- MDirection ( AZEL) = " << azel << endl;
+    std::cout << "-- MDirection ( AZEL) = " << azel  << endl;
     std::cout << "-- MDirection (B1950) = " << b1950 << endl;
     std::cout << "-- MDirection (J2000) = " << j2000 << endl;
+    std::cout << "-- MDirection ( ITRF) = " << itrf  << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
-
+  
   std::cout << "[3] Get MDirection type from the reference code ..." << endl;
   try {
     std::cout << "-- AZEL  -> " << CR::MDirectionType ("AZEL") << endl;
@@ -159,6 +163,29 @@ int test_MPosition ()
 }
 
 //_______________________________________________________________________________
+//                                                                test_operations
+
+/*!
+  \brief Test application of mathematical operations to Measures
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function
+*/
+int test_operations ()
+{
+  int nofFailedTests (0);
+
+  MVPosition pos1 (Quantity(25, "m"),
+		   Quantity(20, "deg"),
+		   Quantity(53, "deg"));
+  MVPosition incr (Quantity(1, "m"),
+		   Quantity(1, "deg"),
+		   Quantity(1, "deg"));
+
+  return nofFailedTests;
+}
+
+//_______________________________________________________________________________
 //                                                               test_conversions
 
 int test_conversions ()
@@ -179,6 +206,7 @@ int main ()
 
   nofFailedTests += test_MDirection();
   nofFailedTests += test_MPosition();
+  nofFailedTests += test_operations ();
   nofFailedTests += test_conversions ();
 
   return nofFailedTests;

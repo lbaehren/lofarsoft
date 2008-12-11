@@ -95,7 +95,7 @@ if (HAVE_HDF5)
     hdf5_attrs
     hdf5_attrsarray
     hdf5_attrvstr
-	hdf5_cmpvlstrar
+    hdf5_cmpvlstrar
     hdf5_crtstr1
     hdf5_grpatt
     hdf5_h5cmpstr
@@ -104,7 +104,7 @@ if (HAVE_HDF5)
     hdf5_vlstra
     hdf5_vlstratt
     )
-
+  
   foreach (test_hdf5 ${tests_hdf5}) 
     ## locate the source file
     find_file (HAVE_${test_hdf5} ${test_hdf5}.c PATHS .)
@@ -129,3 +129,18 @@ if (HAVE_HDF5)
   
 endif (HAVE_HDF5)
 
+## ==============================================================================
+##
+##  Tests for GNU Scientific Library (GSL)
+##
+## ==============================================================================
+
+if (HAVE_GSL)
+
+  add_executable (gsl gsl.cc)
+
+  target_link_libraries (gsl ${GSL_LIBRARIES})
+
+  add_test (gsl gsl)
+
+endif (HAVE_GSL)

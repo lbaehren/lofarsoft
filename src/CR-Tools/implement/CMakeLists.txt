@@ -67,19 +67,6 @@ else (CR_WITH_STARTOOLS)
 endif (CR_WITH_STARTOOLS)
 
 ## ------------------------------------------------------------------------------
-## Assemble list of directories containing header files
-
-set (cr_includes "")
-
-if (HAVE_GIF)
-  set (cr_includes "${cr_includes} -I${GIF_INCLUDES}")
-endif (HAVE_GIF)
-
-if (HAVE_GSL)
-  set (cr_includes "${cr_includes} -I${GSL_INCLUDES}")
-endif (HAVE_GSL)
-
-## ------------------------------------------------------------------------------
 ## Assemble list of external libraries against which to link
 
 if (CASA_LIBRARIES)
@@ -141,7 +128,7 @@ add_library (cr
 if (APPLE)
   set_target_properties (cr
     PROPERTIES
-    COMPILE_FLAGS "-fPIC -ftemplate-depth-100 ${cr_includes}"
+    COMPILE_FLAGS "-fPIC -ftemplate-depth-100"
     LINK_FLAGS "-bind_at_load"
     )
 else (APPLE)

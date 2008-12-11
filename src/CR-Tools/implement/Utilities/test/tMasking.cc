@@ -28,6 +28,8 @@
   
   \ingroup CR_Utilities
   
+  \brief A collection of tests for the routines implemented in Masking.cc
+
   \author Lars B&auml;hren
   
   \date 2005/02/11
