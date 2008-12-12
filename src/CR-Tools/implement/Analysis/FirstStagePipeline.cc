@@ -229,7 +229,7 @@ namespace CR { // Namespace CR -- begin
       if ( (abspresync != 0) && (dr->blocksize()/abspresync > 2)){
 	dr->setHanningFilter(0.5,(dr->blocksize() - 3*abspresync/2), (3*abspresync/4), (3*abspresync/4));
       } else {
-	dr->setHanningFilter(0.5,(fftlen/2));
+	dr->setHanningFilter(0.5,fftlen);
       };
 
     } catch (AipsError x) {

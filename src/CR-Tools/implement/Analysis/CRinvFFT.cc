@@ -369,8 +369,14 @@ namespace CR { // Namespace CR -- begin
     try {
       Matrix<Double> TimeSeries;
       TimeSeries = GetTimeSeries(dr, antennaSelection, Polarization);
-      LOPES::ccBeam<Double,DComplex> cc;
-      ccBeamData = cc.ccbeam(TimeSeries);
+      if (TimeSeries.ncolumn() > 1) {
+	LOPES::ccBeam<Double,DComplex> cc;
+	ccBeamData = cc.ccbeam(TimeSeries);
+      } else if (TimeSeries.ncolumn() == 1) {
+	ccBeamData = abs(TimeSeries.column(0));
+      } else {
+	ccBeamData = Vector<Double>();
+      };      
     } catch (AipsError x) {
       cerr << "CRinvFFT::GetCCBeam: " << x.getMesg() << endl;
       return Vector<Double>();
@@ -384,8 +390,14 @@ namespace CR { // Namespace CR -- begin
     try {
       Matrix<Double> TimeSeries;
       TimeSeries = GetTimeSeries(dr, antennaSelection, Polarization);
-      LOPES::xBeam<Double,DComplex> xx;
-      xBeamData = xx.xbeam(TimeSeries);
+      if (TimeSeries.ncolumn() > 1) {
+	LOPES::xBeam<Double,DComplex> xx;
+	xBeamData = xx.xbeam(TimeSeries);
+      } else if (TimeSeries.ncolumn() == 1) {
+	xBeamData = abs(TimeSeries.column(0));
+      } else {
+	xBeamData = Vector<Double>();
+      };						 
     } catch (AipsError x) {
       cerr << "CRinvFFT::GetXBeam: " << x.getMesg() << endl;
       return Vector<Double>();
@@ -401,13 +413,16 @@ namespace CR { // Namespace CR -- begin
       TimeSeries = GetTimeSeries(dr, antennaSelection, Polarization);
       Int i,nants=TimeSeries.ncolumn();
 
-      pBeamData = square(TimeSeries.column(nants-1));
-      for (i=0; i<(nants-1); i++){
-	pBeamData += square(TimeSeries.column(i));
-      };
-      pBeamData /= (Double)nants;
-      pBeamData = sqrt(pBeamData);
-
+      if (TimeSeries.ncolumn() > 0) {
+	pBeamData = square(TimeSeries.column(nants-1));
+	for (i=0; i<(nants-1); i++){
+	  pBeamData += square(TimeSeries.column(i));
+	};
+	pBeamData /= (Double)nants;
+	pBeamData = sqrt(pBeamData);
+      } else {
+	pBeamData = Vector<Double>();
+      }; 
     } catch (AipsError x) {
       cerr << "CRinvFFT::GetXBeam: " << x.getMesg() << endl;
       return Vector<Double>();
@@ -424,19 +439,24 @@ namespace CR { // Namespace CR -- begin
 			 String Polarization) {
     try {
       TimeSeries = GetTimeSeries(dr, antennaSelection, Polarization);
-      LOPES::ccBeam<Double,DComplex> cc;
-      ccBeamData = cc.ccbeam(TimeSeries);
-      LOPES::xBeam<Double,DComplex> xx;
-      xBeamData = xx.xbeam(TimeSeries);
-
-      Int i,nants=TimeSeries.ncolumn();
-      pBeamData = square(TimeSeries.column(nants-1));
-      for (i=0; i<(nants-1); i++){
-	pBeamData += square(TimeSeries.column(i));
-      };
-      pBeamData /= (Double)nants;
-      pBeamData = sqrt(pBeamData);
-
+      if (TimeSeries.ncolumn() > 1) {
+	LOPES::ccBeam<Double,DComplex> cc;
+	ccBeamData = cc.ccbeam(TimeSeries);
+	LOPES::xBeam<Double,DComplex> xx;
+	xBeamData = xx.xbeam(TimeSeries);
+	
+	Int i,nants=TimeSeries.ncolumn();
+	pBeamData = square(TimeSeries.column(nants-1));
+	for (i=0; i<(nants-1); i++){
+	  pBeamData += square(TimeSeries.column(i));
+	};
+	pBeamData /= (Double)nants;
+	pBeamData = sqrt(pBeamData);
+      } else if (TimeSeries.ncolumn() == 1) {
+	ccBeamData = xBeamData = pBeamData = abs(TimeSeries.column(0));
+      } else {
+	ccBeamData = xBeamData = pBeamData = Vector<Double>();
+      };						 
     } catch (AipsError x) {
       cerr << "CRinvFFT::GetTCX: " << x.getMesg() << endl;
       return False;
