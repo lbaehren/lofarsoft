@@ -303,7 +303,8 @@ namespace CR { // Namespace CR -- begin
 	upsamplePipe_p->setVerbosity(verbose);
 	
 	filterStrength_p = (int)floor(3*UpSamplingRate/lev_p->sampleFrequency());
-	
+	//filterStrength_p = (int)ceil(UpSamplingRate/{bandwidth});
+
 	Double tmpdouble;
 	int upBlockSize,upBlock;
 	// Calculate the blocksize for the upsampled data
@@ -322,7 +323,7 @@ namespace CR { // Namespace CR -- begin
 	if (verbose) {
 	  Times = upsampler_p->timeValues();
 	  cout << "analyseLOPESevent::SetupEvent: " << "Upsampling: upBlockSize: " << upBlockSize
-	       << " upBlock: " << upBlock << endl;
+	       << " upBlock: " << upBlock << " filter: " << filterStrength_p << endl;
 	  cout << "analyseLOPESevent::SetupEvent: " << " min(Times): " << min(Times)*1e6 
 	       << " max(Times): " << max(Times)*1e6 << endl;
 	};
@@ -377,6 +378,43 @@ namespace CR { // Namespace CR -- begin
 	  cerr << "analyseLOPESevent::doPositionFitting: " << "Error during evaluateGrid()!" << endl;
 	  return False;
 	};
+	//################################## quick hack! start!!! ############################################
+// 	if (verbose) { cout << "analyseLOPESevent::doPositionFitting: starting reduced SimplexFit()." << endl;};
+// 	{
+// 	  Vector<Bool> NewAntennaSelection;
+// 	  Double height, max1=-1000., max2=-1000.;
+// 	  int i, max1pos=0, max2pos=0;
+// 	  Matrix<Double> ts;
+// 	  NewAntennaSelection = AntennaSelection;
+
+// 	  beamPipe_p->setDirection(Az, El, distance);
+// 	  for (i=0; i<AntennaSelection.nelements(); i++){
+// 	    if (AntennaSelection(i)){
+// 	      NewAntennaSelection = False;
+// 	      NewAntennaSelection(i) = True;
+// 	      //height = getHeight(Az, El, distance, NewAntennaSelection, NULL);
+// 	      ts = beamPipe_p->GetTimeSeries(beamformDR_p, NewAntennaSelection, Polarization_p);	      
+// 	      height = max(abs(ts.column(0)));
+// 	      if (height >= max1) {
+// 		max2 = max1;
+// 		max2pos = max1pos;
+// 		max1 = height;
+// 		max1pos = i;
+// 	      } else if (height >= max2) {
+// 		max2 = height;
+// 		max2pos = i;
+// 	      };
+// 	    };
+// 	  };
+// 	  NewAntennaSelection = AntennaSelection;
+// 	  NewAntennaSelection(max1pos) = NewAntennaSelection(max2pos) = False;
+// 	  if (verbose) {cout<<"analyseLOPESevent::doPositionFitting: old Selection"<<AntennaSelection<<endl;};
+// 	  if (verbose) {cout<<"analyseLOPESevent::doPositionFitting: new Selection"<<NewAntennaSelection<<endl;};
+// 	  if (! SimplexFit(Az, El, distance, center, NewAntennaSelection) ){
+// 	    cerr << "analyseLOPESevent::doPositionFitting: " << "Error during reducedSimplexFit()!" << endl;
+// 	  };	  
+// 	};
+	//################################## quick hack! end!!! ############################################
 	if (verbose) { cout << "analyseLOPESevent::doPositionFitting: starting SimplexFit()." << endl;};
 	if (! SimplexFit(Az, El, distance, center, AntennaSelection) ){
 	  cerr << "analyseLOPESevent::doPositionFitting: " << "Error during SimplexFit()!" << endl;
