@@ -23,9 +23,12 @@
 
 #include <Utilities/MConversions.h>
 
+using std::cerr;
+using std::cout;
 using std::endl;
 
 using casa::MDirection;
+using casa::MVDirection;
 using casa::MPosition;
 using casa::MVPosition;
 
@@ -42,19 +45,35 @@ using casa::MVPosition;
 */
 
 //_______________________________________________________________________________
-//                                                               test_MVDirection
+//                                                                 test_MeasValue
 
 /*!
-  \brief Test working with Measures of type MVDirection
+  \brief Test working with Measures of type MVPosition and MVDirection
 
   \return nofFailedTests -- The number of failed tests encountered within this
           function
 */
-int test_MVDirection ()
+int test_MeasValue ()
 {
-  std::cout << "\n[tMConversions::test_MVDirection]\n" << endl;
+  std::cout << "\n[tMConversions::test_MeasValue]\n" << endl;
   
   int nofFailedTests (0);
+
+  try {
+    MVDirection dir1;
+    MVDirection dir2 (1,2,3);
+    MVDirection dir3 (Quantity(0,"deg"),Quantity(90,"deg"));
+
+    cout << "-- MVDirection()      = " << dir1 << endl;
+    cout << "                      = " << dir1.get() << endl;
+    cout << "-- MVDirection(1,2,3) = " << dir2 << endl;
+    cout << "                      = " << dir2.get() << endl;
+    cout << "-- MVDirection(0,90)  = " << dir3 << endl;
+    cout << "                      = " << dir3.get() << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
 
   return nofFailedTests;
 }
@@ -80,7 +99,7 @@ int test_MDirection ()
     //
     std::cout << "-- MDirection() = " << dir << endl;
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -104,7 +123,7 @@ int test_MDirection ()
     std::cout << "-- MDirection (J2000) = " << j2000 << endl;
     std::cout << "-- MDirection ( ITRF) = " << itrf  << endl;
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -114,7 +133,7 @@ int test_MDirection ()
     std::cout << "-- J2000 -> " << CR::MDirectionType ("J2000") << endl;
     std::cout << "-- ITRF  -> " << CR::MDirectionType ("ITRF") << endl;
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -126,7 +145,7 @@ int test_MDirection ()
     std::cout << "-- JMEAN -> " << CR::MDirectionName (MDirection::JMEAN) << endl;
     std::cout << "-- ITRF  -> " << CR::MDirectionName (MDirection::ITRF) << endl;
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -154,7 +173,7 @@ int test_MPosition ()
     //
     std::cout << "-- MPosition()  = " << pos << endl;
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -173,7 +192,7 @@ int test_MPosition ()
     std::cout << "-- MPosition (WGS84) = " << pos_wgs84 << endl;
     std::cout << "-- MPosition (ITRF)  = " << pos_itrf  << endl;
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -209,7 +228,7 @@ int test_operations ()
     std::cout << "-- Position shift = " << shift << endl;
     std::cout << "-- Position 2     = " << pos2  << endl;
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -229,7 +248,7 @@ int test_operations ()
 	      << pos2.getLength() << ")"
 	      << endl;
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -255,7 +274,7 @@ int main ()
 {
   int nofFailedTests (0);
 
-  nofFailedTests += test_MVDirection();
+  nofFailedTests += test_MeasValue();
   nofFailedTests += test_MDirection();
   nofFailedTests += test_MPosition();
   nofFailedTests += test_operations ();

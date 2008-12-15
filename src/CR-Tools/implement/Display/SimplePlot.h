@@ -61,7 +61,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class SimplePlot
     
-    \ingroup Display
+    \ingroup CR_Display
     
     \brief Generate simple (postscript) plots with PLplot or the CASA pgplotter interface
     

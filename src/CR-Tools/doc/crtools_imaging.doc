@@ -40,6 +40,13 @@ from this we derive the following fundamental statements:
   arriving at antenna <i>j</i>.
 </ol>
 
+<table border=0>
+<tr>
+<td>\image html Plane.gif</td>
+<td>\image html PointPlaneDistance.gif</td>
+</tr>
+</table>
+
 <hr>
 
 \section crtools_imaging_frames Reference frames
@@ -149,7 +156,8 @@ for (uint block(0); block<nofBlocks; block++) {
     <li><a href="http://www.iers.org">International Earth Rotation and Reference
     System Service</a>
     <li>Least-squares image estimation on a multiresolution pyramid. Clippingdale, S.C.; Wilson, R.G. Acoustics, Speech, and Signal Processing, 1989. ICASSP-89., 1989 International Conference on Volume , Issue , 23-26 May 1989 Page(s):1409 - 1412 vol.3
-	<li><a href="http://www.gb.nrao.edu/ovlbi/es70_stationLocation.txt">NRAO orbiting VLBI earth station coordinates</a>
+    <li><a href="http://www.gb.nrao.edu/ovlbi/es70_stationLocation.txt">NRAO orbiting VLBI earth station coordinates</a>
+    <li><a href="http://mathworld.wolfram.com/Point-PlaneDistance.html">Point-Plane Distance</a> (MathWorld)
   </ul>
 
 

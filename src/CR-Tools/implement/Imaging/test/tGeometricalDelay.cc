@@ -33,6 +33,7 @@
 
 #include "create_data.h"
 #include <Imaging/GeometricalDelay.h>
+#include <Math/VectorNorms.h>
 
 using std::cout;
 using std::endl;
@@ -97,38 +98,85 @@ void export_delays (casa::Matrix<double> const &antPositions,
 // -----------------------------------------------------------------------------
 
 /*!
+  \brief Compute the geometrical delay
+
+  \param antPosition -- Antenna position, \f$\vec x\f$
+  \param skyPosition -- Sky position, \f$\vec\rho\f$.
+  \param farField    -- Compute geometrical delay for the far-field limit? By
+         default this is not the case.
+
+  \return 
+*/
+double compute_delay (casa::Vector<double> const &antPosition,
+		      casa::Vector<double> const &skyPosition,
+		      bool const &farField)
+{
+  double delay (0);
+
+  if (farField) {
+    delay = (skyPosition(0)*antPosition(0)+skyPosition(1)*antPosition(1)+skyPosition(2)*antPosition(2))/lightspeed;
+  } else {
+    casa::Vector<double> diff = skyPosition-antPosition;
+    delay = (CR::L2Norm(diff)-CR::L2Norm(skyPosition))/lightspeed;
+  }
+  
+  return delay;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
   \brief Fundamental testing on the different formulae for delay computation
 
   \return nofFailedTests -- The number of failed tests.
 */
 int test_formula ()
 {
-  cout << "\n[test_formula] (CASA arrays)\n" << endl;
+  cout << "\n[test_formula]\n" << endl;
   
   int nofFailedTests (0);
   
   int nofCoordinates (3);
-  casa::Matrix<double> antPositions = get_antennaPositions();
-  casa::Matrix<double> skyPositions = get_skyPositions();
-  double delay (.0);
-  
-  /*!
-    Standard version for the computation of the delay
-   */
-  cout << "[1] Far-field geometry" << endl;
-  try {
-    double scalarProduct (.0);
+  casa::Vector<double> antPosition (nofCoordinates,0.0);
+  casa::Vector<double> skyPosition (nofCoordinates,0.0);
+  casa::Vector<double> skyPositionN (nofCoordinates,0.0);
+  double delay_nearField (.0);
+  double delay_farField (.0);
+  double delay_farFieldN (.0);
 
-    for (int n(0); n<nofCoordinates; n++) {
-      scalarProduct += (antPositions(1,n)-antPositions(0,n))*skyPositions(2,n);
+  // sampling of the parameter space
+  uint nofAntPositions (50);
+  uint nofSkyPositions (200);
+  double incrAnt (10);
+  double incrSky (100);
+
+  // export of the computation results
+  std::ofstream outfile ("geometricalDelay.data");
+
+  for (uint antpos (0); antpos<nofAntPositions; antpos++) {
+    antPosition(0) = antPosition(1) = antpos*incrAnt;
+    skyPosition = 0.0;
+    for (uint skypos(0); skypos<nofSkyPositions; skypos++) {
+      skyPosition(2) = skypos*incrSky;
+      CR::normalize (skyPositionN,skyPosition);
+      // compute the delay
+      delay_nearField = compute_delay(antPosition,skyPosition,false);
+      delay_farField  = compute_delay(antPosition,skyPosition,true);
+      delay_farFieldN = compute_delay(antPosition,skyPositionN,true);
+      // export the computation results
+      outfile << antPosition << "\t"
+	      << CR::L2Norm(antPosition) << "\t"
+	      << skyPosition << "\t"
+	      << CR::L2Norm(skyPosition) << "\t"
+	      << delay_nearField << "\t"
+	      << delay_farField  << "\t"
+	      << delay_farFieldN
+	      << endl;
     }
-    delay = scalarProduct/lightspeed;
-    
-    cout << "delay(FF)     = " << delay         << endl;
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
+    outfile << endl;
   }
+
+  outfile.close();
   
   return nofFailedTests;
 }
@@ -570,7 +618,7 @@ int main ()
 {
   int nofFailedTests (0);
   
-//   nofFailedTests += test_formula ();
+  nofFailedTests += test_formula ();
 
   // Test for the constructor(s)
   nofFailedTests += test_GeometricalDelay ();

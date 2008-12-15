@@ -41,6 +41,8 @@
 #include <casa/BasicMath/Math.h>
 using casa::Complex;
 using casa::DComplex;
+using casa::Double;
+using casa::Float;
 using casa::IPosition;
 using casa::String;
 using casa::uInt;
@@ -93,6 +95,8 @@ namespace CR { // namespace CR -- begin
       algebra and vector operations (such as the
       <a href="http://mathworld.wolfram.com/DotProduct.html">dot product</a>),
       where it is commonly denoted \f$|\vec x|\f$.
+      <li>Normalization of a vector \f$ \vec x = [x_1,x_2,...,x_N]^T \f$:
+      \f[ \hat x = \vec x / |\vec x| \f]
     </ul>
     
     <h3>Example(s)</h3>
@@ -132,7 +136,14 @@ namespace CR { // namespace CR -- begin
   */
   template <class T>
     T scalar_product (std::vector<T> const &x,
-		      std::vector<T> const &y);
+		      std::vector<T> const &y)
+    {
+      T product(0);
+      
+      scalar_product (product,x,y);
+      
+      return product;
+    }
 
   /*!
     \brief Compute the scalar product between to vectors 
@@ -145,13 +156,112 @@ namespace CR { // namespace CR -- begin
   template <class T>
     void scalar_product (T &product,
 			 std::vector<T> const &x,
-			 std::vector<T> const &y);
+			 std::vector<T> const &y)
+    {
+      product = 0;
+      
+      if (x.size() == y.size()) {
+	for (uint n(0); n<x.size(); n++) {
+	  product += x[n]*y[n];
+	}
+      } 
+    }
   
   // ============================================================================
   //
   //  Vector norms
   //
   // ============================================================================
+
+  /*!
+    \brief In-place normalization of a vector
+
+    Replaces vector \f$ \vec x \f$ by normalized vector
+    \f$ \hat x = \vec x / |\vec x| \f$
+
+    \param vec   -- Vector to normlize to length 1.
+    \param nelem -- Number of elements in the vector.
+  */
+  template <class T>
+    void normalize (T *vec,
+		    unsigned int const &nelem)
+    {
+      T length = L2Norm (vec,nelem);
+
+      for (unsigned int n(0); n<nelem; n++) {
+	vec[n] /= length;
+      }
+    }
+
+  /*!
+    \brief In-place normalization of a vector
+
+    \param vec   -- Vector to normlize to length 1.
+  */
+  template <class T>
+    void normalize (std::vector<T> &vec)
+    {
+      unsigned int nelem(vec.size());
+      T length = L2Norm (vec);
+      
+      for (unsigned int n(0); n<nelem; n++) {
+	vec[n] /= length;
+      }
+    }
+
+#ifdef HAVE_CASA
+  /*!
+    \brief In-place normalization of a vector
+
+    \param vec   -- Vector to normlize to length 1.
+  */
+  template <class T>
+    void normalize (casa::Vector<T> &vec)
+    {
+      unsigned int nelem(vec.nelements());
+      T length = L2Norm (vec);
+      
+      for (unsigned int n(0); n<nelem; n++) {
+	vec(n) /= length;
+      }
+    }
+#endif
+
+  /*!
+    \brief Out-of-place normalization of a vector
+
+    \retval nvec -- Normalized version of the input vector
+    \param vec   -- Vector to normlize to length 1.
+  */
+  template <class T>
+    void normalize (std::vector<T> &nvec,
+		    std::vector<T> const &vec)
+    {
+      unsigned int nelem(vec.size());
+      T length = L2Norm (vec);
+      
+      for (unsigned int n(0); n<nelem; n++) {
+	nvec[n] = vec[n]/length;
+      }
+    }
+
+#ifdef HAVE_CASA
+  /*!
+    \brief Out-of-place normalization of a vector
+
+    \retval nvec -- Normalized version of the input vector
+    \param vec   -- Vector to normlize to length 1.
+  */
+  template <class T>
+    void normalize (casa::Vector<T> &nvec,
+		    casa::Vector<T> const &vec)
+    {
+      unsigned int nelem(vec.nelements());
+      T length = L2Norm (vec);
+
+      nvec = vec/length;
+    }
+#endif
 
   // ----------------------------------------------------------------------------
   // L1-Norm
@@ -171,7 +281,16 @@ namespace CR { // namespace CR -- begin
   */
   template <class T>
     T L1Norm (T const *vec,
-	      unsigned int const &nelem);
+	      unsigned int const &nelem)
+    {
+      T sum (0.0);
+      
+      for (unsigned int n(0); n<nelem; n++) {
+	sum += fabs(vec[n]);
+      }
+      
+      return sum;
+    }
   
   /*!
     \brief Compute the L1-Norm of a vector
@@ -251,7 +370,16 @@ namespace CR { // namespace CR -- begin
   */
   template <class T>
     T L2Norm (T const *vec,
-	      unsigned int const &nelem);
+	      unsigned int const &nelem)
+    {
+      T sum2 (0.0);
+      
+      for (unsigned int n(0); n<nelem; n++) {
+	sum2 += vec[n]*vec[n];
+      }
+      
+      return sqrt (sum2);
+    }
 
   /*!
     \brief Compute the L2-Norm of a vector
@@ -261,7 +389,17 @@ namespace CR { // namespace CR -- begin
     \return norm -- L2-norm of the vector
   */
   template <class T>
-    T L2Norm (std::vector<T> const &vec);
+    T L2Norm (std::vector<T> const &vec)
+    {
+      uint nelem = vec.size();
+      T sum2     = 0.0;
+      
+      for (unsigned int n(0); n<nelem; n++) {
+	sum2 += vec[n]*vec[n];
+      }
+      
+      return sqrt (sum2);
+    }
 
 #ifdef HAVE_CASA
 
