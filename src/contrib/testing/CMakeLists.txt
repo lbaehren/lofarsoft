@@ -14,6 +14,7 @@ if (HAVE_CASACORE)
     casacoreMatrixAccess02
     casacoreMatrixAccess03
     casacoreMatrixAccess04
+    casacoreMeasures
     )
 
   foreach (src ${tests})
