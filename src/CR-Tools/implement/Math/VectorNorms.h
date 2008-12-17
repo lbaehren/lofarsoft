@@ -188,8 +188,10 @@ namespace CR { // namespace CR -- begin
     {
       T length = L2Norm (vec,nelem);
 
-      for (unsigned int n(0); n<nelem; n++) {
-	vec[n] /= length;
+      if (length != 0) {
+	for (unsigned int n(0); n<nelem; n++) {
+	  vec[n] /= length;
+	}
       }
     }
 
@@ -203,9 +205,11 @@ namespace CR { // namespace CR -- begin
     {
       unsigned int nelem(vec.size());
       T length = L2Norm (vec);
-      
-      for (unsigned int n(0); n<nelem; n++) {
-	vec[n] /= length;
+
+      if (length != 0) {
+	for (unsigned int n(0); n<nelem; n++) {
+	  vec[n] /= length;
+	}
       }
     }
 
@@ -221,8 +225,10 @@ namespace CR { // namespace CR -- begin
       unsigned int nelem(vec.nelements());
       T length = L2Norm (vec);
       
-      for (unsigned int n(0); n<nelem; n++) {
-	vec(n) /= length;
+      if (length != 0) {
+	for (unsigned int n(0); n<nelem; n++) {
+	  vec(n) /= length;
+	}
       }
     }
 #endif
@@ -256,10 +262,11 @@ namespace CR { // namespace CR -- begin
     void normalize (casa::Vector<T> &nvec,
 		    casa::Vector<T> const &vec)
     {
-      unsigned int nelem(vec.nelements());
       T length = L2Norm (vec);
 
-      nvec = vec/length;
+      if (length != 0) {
+	nvec = vec/length;
+      }
     }
 #endif
 

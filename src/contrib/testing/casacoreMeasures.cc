@@ -107,11 +107,10 @@ int test_MVPosition ()
     casa::MVPosition pos1 (1,1,1);
     casa::MVPosition pos2 (1,2,3);
     //
-    casa::MVPosition posSum = pos1+pos2;
-    //
     cout << "-- pos1      = " << pos1   << endl;
     cout << "-- pos2      = " << pos2   << endl;
-    cout << "-- pos1+pos2 = " << posSum << endl;
+    cout << "-- pos1+pos2 = " << pos1+pos2 << endl;
+    cout << "-- pos1-pos2 = " << pos1-pos2 << endl;
   } catch (std::string message) {
     cerr << message << endl;
     nofFailedTests++;
@@ -128,6 +127,21 @@ int test_MVPosition ()
     cout << "-- pos2 = " << pos2 << " = " << pos2.getAngle() << endl;
     cout << "-- pos3 = " << pos3 << " = " << pos3.getAngle() << endl;
     cout << "-- pos4 = " << pos4 << " = " << pos4.getAngle() << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[5] Collect objects into array ..." << endl;
+  try {
+    uint nofCoords (3);
+    casa::Vector<casa::MVPosition> positions (nofCoords);
+    //
+    positions(0) = casa::MVPosition (1,1,1);
+    positions(1) = casa::MVPosition (2,2,2);
+    positions(2) = casa::MVPosition (3,3,3);
+    //
+    cout << "-- Vector<MVPosition> = " << positions << endl;
   } catch (std::string message) {
     cerr << message << endl;
     nofFailedTests++;

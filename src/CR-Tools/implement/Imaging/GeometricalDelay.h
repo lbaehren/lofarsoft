@@ -112,7 +112,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     \endcode
 
     <b><a name="Past implementation">Past implementation</a>.</b>
-    The first implementation of the routines for thhe computation of the
+    The first implementation of the routines for the computation of the
     geometrical delay and the subsequent computation of beamformer weights was
     handled in Phasing:
     \code
@@ -138,10 +138,18 @@ namespace CR { // NAMESPACE CR -- BEGIN
   */  
   class GeometricalDelay {
 
+  protected:
+    
+    //! Geometrical constraint for the beamforming geometry: far-/near-field
+    bool nearField_p;
+    //! Book-keeping: number of antennas
+    uint nofAntennas_p;
+    //! Buffer the values for the geometrical delay?
+    bool bufferDelays_p;
+    // Show progress during computations?
+    bool showProgress_p;
     //! Are the buffered values in sync? 
     bool bufferInSync_p;
-    
-  protected:
     
 #ifdef HAVE_CASA
     //! [nofAntennas,3] Antenna positions for which the delay is computed
@@ -161,15 +169,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #endif
 #endif
 
-    //! Geometrical constraint for the beamforming geometry: far-/near-field
-    bool nearField_p;
-    //! Book-keeping: number of antennas
-    uint nofAntennas_p;
-    //! Buffer the values for the geometrical delay?
-    bool bufferDelays_p;
-    // Show progress during computations?
-    bool showProgress_p;
-    
   public:
     
     // ------------------------------------------------------------- Construction
@@ -789,6 +788,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     // ------------------------------------------------------------------ Methods
     
+#ifdef HAVE_CASA
     /*!
       \brief Get the value of the geometrical delay
 
@@ -799,20 +799,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \return delay -- The geometrical delay for a given combination of antenna
               and sky position
     */
-#ifdef HAVE_CASA
     double delay (int const &indexAntenna,
 		  int const &indexSky);
-#endif
-    
-    /*
-      \brief Compute an individual delay
-    */
-    double delay (double const &xAntenna,
-		  double const &yAntenna,
-		  double const &zAntenna,
-		  double const &xSky,
-		  double const &ySky,
-		  double const &zSky);
     
     /*
       \brief Compute an individual delay
@@ -822,10 +810,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
       
       \return delay -- Geometrical delay \f$ \tau \f$
     */
-#ifdef HAVE_CASA
     double delay (casa::Vector<double> const &antennaPosition,
 		  casa::Vector<double> const &skyPosition);
 #endif
+    
+    //! Compute an individual delay
+    double delay (double const &xAntenna,
+		  double const &yAntenna,
+		  double const &zAntenna,
+		  double const &xSky,
+		  double const &ySky,
+		  double const &zSky);
     
     /*!
       \brief Get the name of the class

@@ -21,8 +21,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -35,6 +33,7 @@
 #include <Imaging/GeometricalDelay.h>
 #include <Math/VectorNorms.h>
 
+using std::cerr;
 using std::cout;
 using std::endl;
 using CR::GeometricalDelay;
@@ -46,14 +45,15 @@ using CR::lightspeed;
 
   \ingroup CR_Imaging
 
-  \brief A collection of test routines for GeometricalDelay
+  \brief A collection of test routines for the GeometricalDelay class
  
   \author Lars B&auml;hren
  
   \date 2007/01/15
 */
 
-// -----------------------------------------------------------------------------
+//______________________________________________________________________________
+//                                                                 export_delays
 
 /*!
   \brief Export the positions and delays to an ASCII table
@@ -95,35 +95,55 @@ void export_delays (casa::Matrix<double> const &antPositions,
   outfile.close();
 }
 
-// -----------------------------------------------------------------------------
+//______________________________________________________________________________
+//                                                                 compute_delay
 
 /*!
   \brief Compute the geometrical delay
 
-  \param antPosition -- Antenna position, \f$\vec x\f$
+  \param pos_ant -- Antenna position, \f$\vec x\f$
   \param skyPosition -- Sky position, \f$\vec\rho\f$.
   \param farField    -- Compute geometrical delay for the far-field limit? By
          default this is not the case.
+  \param normalize -- Normalize the sky position vector? This option is available
+         only in the far-field case, where we can consider the beam pointing
+	 towards a location on a sphere of unit radius. Setting
+	 <tt>normalize=true</tt> will use
+	 \f$ \hat \rho = \vec \rho / |\vec \rho| \f$ in place of the input vector
+	 \f$ \vec \rho \f$.
 
-  \return 
+  \return delay -- The value of the geometrical delay. For the far-field the 
+          geometrical delay is computed through
+          \f[ \tau = \frac{1}{c} \langle \vec \rho , \vec x \rangle \f]
+	  whereas for the near-field we employe the full spatial information
+	  on antenna position and beam pointing position:
+	  \f[ \tau = \frac{1}{c} \Bigl( |\vec \rho - \vec x| - |\vec \rho| \Bigr) \f]
 */
-double compute_delay (casa::Vector<double> const &antPosition,
+double compute_delay (casa::Vector<double> const &pos_ant,
 		      casa::Vector<double> const &skyPosition,
-		      bool const &farField)
+		      bool const &farField=false,
+		      bool const &normalize=false)
 {
   double delay (0);
-
-  if (farField) {
-    delay = (skyPosition(0)*antPosition(0)+skyPosition(1)*antPosition(1)+skyPosition(2)*antPosition(2))/lightspeed;
+  
+  if (farField==true) {
+    if (normalize==true) {
+      casa::Vector<double> direction (3);
+      CR::normalize (direction,skyPosition);
+      delay = -(direction(0)*pos_ant(0)+direction(1)*pos_ant(1)+direction(2)*pos_ant(2))/lightspeed;
+    } else {
+      delay = -(skyPosition(0)*pos_ant(0)+skyPosition(1)*pos_ant(1)+skyPosition(2)*pos_ant(2))/lightspeed;
+    }
   } else {
-    casa::Vector<double> diff = skyPosition-antPosition;
+    casa::Vector<double> diff = skyPosition-pos_ant;
     delay = (CR::L2Norm(diff)-CR::L2Norm(skyPosition))/lightspeed;
   }
   
   return delay;
 }
 
-// -----------------------------------------------------------------------------
+//______________________________________________________________________________
+//                                                                  test_formula
 
 /*!
   \brief Fundamental testing on the different formulae for delay computation
@@ -136,36 +156,39 @@ int test_formula ()
   
   int nofFailedTests (0);
   
-  int nofCoordinates (3);
-  casa::Vector<double> antPosition (nofCoordinates,0.0);
-  casa::Vector<double> skyPosition (nofCoordinates,0.0);
-  casa::Vector<double> skyPositionN (nofCoordinates,0.0);
+  int nofAxes (3);
+  casa::Vector<double> pos_ant (nofAxes,0.0);
+  casa::Vector<double> skyPosition (nofAxes,0.0);
   double delay_nearField (.0);
   double delay_farField (.0);
   double delay_farFieldN (.0);
 
   // sampling of the parameter space
   uint nofAntPositions (50);
-  uint nofSkyPositions (200);
+  uint nofSkyPositions (100);
   double incrAnt (10);
-  double incrSky (100);
+  double incrSky (200);
+
+  // feedback on used parameters
+  cout << "-- nof. antenna positions     = " << nofAntPositions << endl;
+  cout << "-- antenna position increment = " << incrAnt << endl;
+  cout << "-- nof. sky positions         = " << nofSkyPositions << endl;
+  cout << "-- sky position increment     = " << incrSky << endl;
 
   // export of the computation results
   std::ofstream outfile ("geometricalDelay.data");
 
   for (uint antpos (0); antpos<nofAntPositions; antpos++) {
-    antPosition(0) = antPosition(1) = antpos*incrAnt;
-    skyPosition = 0.0;
+    pos_ant(0) = antpos*incrAnt;
     for (uint skypos(0); skypos<nofSkyPositions; skypos++) {
-      skyPosition(2) = skypos*incrSky;
-      CR::normalize (skyPositionN,skyPosition);
+      skyPosition = skypos*incrSky;
       // compute the delay
-      delay_nearField = compute_delay(antPosition,skyPosition,false);
-      delay_farField  = compute_delay(antPosition,skyPosition,true);
-      delay_farFieldN = compute_delay(antPosition,skyPositionN,true);
+      delay_nearField = compute_delay(pos_ant,skyPosition,false,false);
+      delay_farField  = compute_delay(pos_ant,skyPosition,true,false);
+      delay_farFieldN = compute_delay(pos_ant,skyPosition,true,true);
       // export the computation results
-      outfile << antPosition << "\t"
-	      << CR::L2Norm(antPosition) << "\t"
+      outfile << pos_ant << "\t"
+	      << CR::L2Norm(pos_ant) << "\t"
 	      << skyPosition << "\t"
 	      << CR::L2Norm(skyPosition) << "\t"
 	      << delay_nearField << "\t"
@@ -258,10 +281,10 @@ int test_GeometricalDelay ()
     bool bufferDelays (false);
     bool antennaIndexFirst (false);
     // retrieve arrays with the positions
-    std::cout << "-- getting antenna positions ..." << std::endl;
+    cout << "-- getting antenna positions ..." << std::endl;
     casa::Matrix<double> antPositions = get_antennaPositions(nofAntennas,
 							     antennaIndexFirst);
-    std::cout << "-- getting sky positions ..." << std::endl;
+    cout << "-- getting sky positions ..." << std::endl;
     casa::Matrix<double> skyPositions = get_skyPositions();
     // create new object
     GeometricalDelay delay (antPositions,
@@ -593,7 +616,7 @@ int test_delayComputation ()
 		   "tGeometricalDelay-near.data");
 
     // retrieve the delay values for the far-field geometry
-    std::cout << "-- switching to far-field geometry" << std::endl;
+    cout << "-- switching to far-field geometry" << std::endl;
     delay.setNearField (false,
 			false);
     /* Export positions and computed delays */

@@ -1,0 +1,45 @@
+set term post color solid enhanced
+set output "geometricalDelay.ps"
+
+##______________________________________________________________________________
+## Plot of combined variation of antenna and sky positions
+
+set contour
+
+set xlabel "|x|"
+set ylabel "|{/Symbol r}|"
+set zlabel "{/Symbol t} [s]"
+set label "Near-field"
+splot 'geometricalDelay.data' u 4:8:9 w l t "Near-field delay"
+
+set xlabel "|x|"
+set ylabel "|{/Symbol r}|"
+set label "Far-field (no normalization)"
+splot 'geometricalDelay.data' u 4:8:10 w l t "Far-field delay (no norm.)"
+
+set xlabel "|x|"
+set ylabel "|{/Symbol r}|"
+set label "Far-field (with normalization)"
+splot 'geometricalDelay.data' u 4:8:11 w l t "Far-field delay (norm.)"
+
+set xlabel "|x|"
+set ylabel "|{/Symbol r}|"
+set label "Far-field (norm.) - Near-field"
+set cntrparam levels discrete 1e-09,2e-09,5e-09,1e-08,2e-08,5e-08
+splot 'geometricalDelay.data' u 4:8:($9-$11) w l t "Far-field (norm.) - Near-field"
+
+set xlabel "|x|"
+set ylabel "|{/Symbol r}|"
+set label "Far-field (norm.) - Far-field"
+set cntrparam levels auto
+splot 'geometricalDelay.data' u 4:8:($9-$10) w l
+
+set xlabel "|x|/|{/Symbol r}|"
+set ylabel "({/Symbol t}_{near} - {/Symbol t}_{far})/{/Symbol t}_{far}"
+set label ""
+set grid
+plot 'geometricalDelay.data' u ($4/$8):($9-$11)/$11
+
+##______________________________________________________________________________
+
+quit

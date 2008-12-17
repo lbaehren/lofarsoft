@@ -36,7 +36,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //
   // ============================================================================
 
-  // ----------------------------------------------------------- GeometricalDelay
+  //_____________________________________________________________________________
+  //                                                             GeometricalDelay
   
 #ifdef HAVE_CASA
   GeometricalDelay::GeometricalDelay ()
@@ -89,7 +90,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #endif
 #endif
   
-  // ----------------------------------------------------------- GeometricalDelay
+  //_____________________________________________________________________________
+  //                                                             GeometricalDelay
   
 #ifdef HAVE_CASA
   GeometricalDelay::GeometricalDelay (Matrix<double> const &antPositions,
@@ -123,7 +125,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #endif
 #endif
 
-  // ----------------------------------------------------------- GeometricalDelay
+  //_____________________________________________________________________________
+  //                                                             GeometricalDelay
   
 #ifdef HAVE_CASA
   GeometricalDelay::GeometricalDelay (Matrix<double> const &antPositions,
@@ -161,7 +164,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #endif
 #endif
   
-  // ----------------------------------------------------------- GeometricalDelay
+  //_____________________________________________________________________________
+  //                                                             GeometricalDelay
   
 #ifdef HAVE_CASA
   GeometricalDelay::GeometricalDelay (Matrix<double> const &antPositions,
@@ -197,7 +201,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #endif
 #endif
   
-  // ----------------------------------------------------------- GeometricalDelay
+  //_____________________________________________________________________________
+  //                                                             GeometricalDelay
   
   GeometricalDelay::GeometricalDelay (GeometricalDelay const &other)
   {
@@ -464,8 +469,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
   }
 #endif
 #endif
-  
-  // -------------------------------------------------------- setAntennaPositions
+
+  //_____________________________________________________________________________  
+  //                                                          setAntennaPositions
   
 #ifdef HAVE_CASA
   bool
@@ -529,7 +535,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #endif
 #endif
   
-  // ------------------------------------------------------------ setSkyPositions
+  //_____________________________________________________________________________
+  //                                                              setSkyPositions
   
 #ifdef HAVE_CASA
   bool GeometricalDelay::setSkyPositions (const Matrix<double> &skyPositions,
@@ -907,7 +914,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //
   // ============================================================================
 
-  // ---------------------------------------------------------------------- delay
+  //_____________________________________________________________________________
+  //                                                                        delay
 
 #ifdef HAVE_CASA
   double GeometricalDelay::delay (int const &indexAntenna,
@@ -916,9 +924,26 @@ namespace CR { // NAMESPACE CR -- BEGIN
     return delay (antPositions_p.row(indexAntenna),
 		  skyPositions_p.row(indexSky));
   }
+
+  
+  double GeometricalDelay::delay (casa::Vector<double> const &posAntenna,
+					  casa::Vector<double> const &posSky)
+  {
+    double delay (0.);
+    casa::Vector<double> diff = posSky-posAntenna;
+    
+    if (nearField_p) {
+      delay = (CR::L2Norm(diff)-CR::L2Norm(posSky))/lightspeed;
+    } else {
+      delay = -sum(posSky*posAntenna)/lightspeed;
+    }
+    
+    return delay;
+  }
 #endif
   
-  // ---------------------------------------------------------------------- delay
+  //_____________________________________________________________________________
+  //                                                                        delay
   
 #ifdef HAVE_CASA
   double GeometricalDelay::delay (double const &xAntenna,
@@ -949,7 +974,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     if (nearField_p) {
       delay = (CR::L2Norm(diff)-CR::L2Norm(skyPosition))/lightspeed;
     } else {
-      delay = -(xSky*xAntenna+ySky*yAntenna+zSky*zAntenna)/lightspeed;
+      double length = sqrt(xSky*xSky+ySky*ySky+zSky*zSky)/lightspeed;
+      delay = -(xSky*xAntenna+ySky*yAntenna+zSky*zAntenna)/length;
     }
     
     return delay;
@@ -975,25 +1001,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
     return delay;
   }
 #endif
-#endif
-  
-  // ---------------------------------------------------------------------- delay
-  
-#ifdef HAVE_CASA
-  double GeometricalDelay::delay (casa::Vector<double> const &antennaPosition,
-				  casa::Vector<double> const &skyPosition)
-  {
-    double delay (0.);
-    casa::Vector<double> diff = skyPosition-antennaPosition;
-    
-    if (nearField_p) {
-      delay = (CR::L2Norm(diff)-CR::L2Norm(skyPosition))/lightspeed;
-    } else {
-      delay = -sum(skyPosition*antennaPosition)/lightspeed;
-    }
-    
-    return delay;
-  }
 #endif
   
   // ----------------------------------------------------------------- calcDelays
