@@ -1,10 +1,10 @@
 /* $Id$ */
 
-/**
+/*!
+\defgroup CR_Imaging CR-Tools :: Imaging module
+\ingroup CR
 
-\page crtools_imaging CR-Tools :: Imaging
-
-<hr>
+\brief Imaging module for the CR-pipeline
 
   - \ref crtools_imaging_geometry
   - \ref crtools_imaging_frames
@@ -96,6 +96,29 @@ is said to be a realization of the TRS.
   references), namely dynamical or kinematical ones, depending whether a
   dynamical model is applied in the determination process of these coordinates,
   or not.
+
+  <li><i>Earth Centred Earth Fixed (ECEF) coordinates</i> <br>
+  The Earth-centred Earth-fixed (ECEF) or conventional terrestrial coordinate
+  system rotates with the Earth and has its origin at the centre of the Earth.
+  The \f$X\f$ axis passes through the equator at the prime meridian. The \f$Z\f$ axis
+  passes through the north pole. The \f$Y\f$ axis can be determined by the
+  right-hand rule to be passing through the equator at \f$90^{\circ}\f$ longitude.
+
+  <li><i>Local east, north, up (ENU) coordinates</i> <br>
+  In many targeting and tracking applications the local East, North, Up (ENU)
+  Cartesian coordinate system is far more intuitive and practical than ECEF or
+  Geodetic coordinates. The local ENU coordinates are formed from a plane tangent
+  to the Earth's surface fixed to a specific location and hence it is sometimes
+  known as a "Local Tangent" or "local geodetic" plane. By convention the east
+  axis is labeled \f$x\f$, the north \f$y\f$ and the up \f$z\f$.
+
+  <li><i>Local north, east, down (NED) coordinates</i> <br>
+  In an aeroplane most objects of interest are below you, it is therefore
+  sensible to define down as a positive number, the NED coordinates allow you
+  to do this as an alternative the ENU local tangent plane. By convention the
+  north axis is labeled \f$x'\f$, the east \f$y'\f$ and the down \f$z'\f$. To
+  avoid confusion between \f$x\f$ and \f$x'\f$, etc in this web page we will
+  restrict the local coordinate frame to ENU.
 </ol>
 
 The standard relation of transformation between two reference systems is an
@@ -123,6 +146,34 @@ Generally, X1, X2, T, D, R are function of time.
 <hr>
 
 \section crtools_imaging_implementation Implementation
+
+The functionality required for beamforming and subsequent imaging is broken
+down into a number of classes.
+
+<table border="0">
+  <tr>
+    <td class="indexkey">Quantity</td>
+    <td class="indexkey">implemented in</td>
+    <td class="indexkey">Relation</td>
+  </tr>
+  <tr>
+    <td>gemoetrical delay</td>
+    <td>CR::GeomDelay</td>
+    <td>\f$ \tau_j = \frac{1}{c} \left( |\vec \rho - \vec x_j| - |\vec \rho|
+    \right) \f$</td>
+  </tr>
+  <tr>
+    <td>geometrical phase</td>
+    <td>CR::GeometricalPhase</td>
+    <td>\f$ \phi (\vec x_j, \vec \rho, \nu) = 2 \pi \nu \tau_{\rm geom} \f$</td>
+  </tr>
+  <tr>
+    <td>geometrical weight</td>
+    <td>CR::GeometricalWeight</td>
+    <td>\f$ w (\vec x_j, \vec \rho, \nu) = \exp \Bigl( i\, \phi (\vec x_j,
+    \vec \rho, \nu) \Bigr) \f$</td>
+  </tr>
+</table>
 
 Image array:
 \f[  I = I (\xi_1,\xi_2,\xi_3,\nu,t)  \in R^5 \f]

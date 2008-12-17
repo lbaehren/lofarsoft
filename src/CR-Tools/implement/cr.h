@@ -55,7 +55,7 @@
 //_________________________________________________________________ CR-Tools/apps
 
 /*!
-  \defgroup CR_Applications CR-Pipeline applications collection
+  \defgroup CR_Applications CR-Tools :: Applications collection
   \ingroup CR
 */
 
@@ -63,7 +63,7 @@
 //                                                    CR-Tools/implement/Analysis
 
 /*!
-  \defgroup Analysis CR-Pipeline: Analysis module
+  \defgroup Analysis CR-Tools :: Analysis module
   \ingroup CR
 
   \brief Analysis module for the CR-pipeline
@@ -76,7 +76,7 @@
 //                                          CR-Tools/implement/ApplicationSupport
 
 /*!
-  \defgroup ApplicationSupport CR-Pipeline: ApplicationSupport module
+  \defgroup ApplicationSupport CR-Tools :: ApplicationSupport module
   \ingroup CR
 
   \brief ApplicationSupport module for the CR-pipeline
@@ -89,7 +89,7 @@
 //                                                 CR-Tools/implement/Calibration
 
 /*!
-  \defgroup Calibration CR-Pipeline: Calibration module
+  \defgroup Calibration CR-Tools :: Calibration module
   \ingroup CR
 
   \brief Calibration module for the CR-pipeline
@@ -99,23 +99,10 @@
 */
 
 //_______________________________________________________________________________
-//                                                 CR-Tools/implement/Coordinates
-
-/*!
-  \defgroup CR_Coordinates CR-Pipeline: Coordinates module
-  \ingroup CR
-
-  \brief Coordinates module for the CR-pipeline
-  
-  <h3>Synopsis</h3>
-  
-*/
-
-//_______________________________________________________________________________
 //                                                        CR-Tools/implement/Data
 
 /*!
-  \defgroup CR_Data CR-Pipeline: Data module
+  \defgroup CR_Data CR-Tools :: Data module
   \ingroup CR
 
   \brief Data module for the CR-pipeline
@@ -142,7 +129,7 @@
 //                                                     CR-Tools/implement/Display
 
 /*!
-  \defgroup CR_Display CR-Pipeline: Display module
+  \defgroup CR_Display CR-Tools :: Display module
   \ingroup CR
 
   \brief Display module for the CR-pipeline
@@ -152,7 +139,7 @@
 //                                                         CR-Tools/implement/GUI
 
 /*!
-  \defgroup CR_GUI CR-Pipeline: Graphical user-interface module
+  \defgroup CR_GUI CR-Tools :: Graphical user-interface module
   \ingroup CR
 
   \brief The basic data get/put mechanism for the Plotting Tool for LOFAR Data
@@ -191,50 +178,6 @@
   \endverbatim
 */
 
-//_______________________________________________________________________________
-//                                                     CR-Tools/implement/Imaging
-
-/*!
-  \defgroup CR_Imaging CR-Pipeline: Imaging module
-  \ingroup CR
-
-  \brief Imaging module for the CR-pipeline
-
-  <h3><a name="Synopsis">Synopsis</a></h3>
-
-  The functionality required for beamforming and subsequent imaging is broken
-  down into a number of classes.
-
-  <table border="0">
-    <tr>
-      <td class="indexkey">Quantity</td>
-      <td class="indexkey">implemented in</td>
-      <td class="indexkey">Relation</td>
-    </tr>
-    <tr>
-      <td>gemoetrical delay</td>
-      <td>CR::GeometricalDelay</td>
-      <td>\f$ \tau_j = \frac{1}{c} \left( |\vec \rho - \vec x_j| - |\vec \rho|
-      \right) \f$</td>
-    </tr>
-    <tr>
-      <td>geometrical phase</td>
-      <td>CR::GeometricalPhase</td>
-      <td>\f$ \phi (\vec x_j, \vec \rho, \nu) = 2 \pi \nu \tau_{\rm geom} \f$</td>
-    </tr>
-    <tr>
-      <td>geometrical weight</td>
-      <td>CR::GeometricalWeight</td>
-      <td>\f$ w (\vec x_j, \vec \rho, \nu) = \exp \Bigl( i\, \phi (\vec x_j,
-      \vec \rho, \nu) \Bigr) \f$</td>
-    </tr>
-  </table>
-
-  - \ref crtools_imaging_geometry
-  - \ref crtools_imaging_frames
-  - \ref crtools_imaging_references
-*/
-
 // ==============================================================================
 //
 //  Module IO
@@ -242,7 +185,7 @@
 // ==============================================================================
 
 /*!
-  \defgroup IO CR-Pipeline: IO module
+  \defgroup IO CR-Tools :: IO module
   \ingroup CR
 
   \brief IO module for the CR-pipeline
@@ -258,7 +201,7 @@
 // ==============================================================================
 
 /*!
-  \defgroup LopesLegacy CR-Pipeline: LopesLegacy module
+  \defgroup LopesLegacy CR-Tools :: LopesLegacy module
   \ingroup CR
 
   \brief LopesLegacy module for the CR-pipeline
@@ -274,7 +217,7 @@
 // ==============================================================================
 
 /*!
-  \defgroup CR_Math CR-Pipeline: Math module
+  \defgroup CR_Math CR-Tools :: Math module
   \ingroup CR
 
   \brief Math module for the CR-pipeline
@@ -294,7 +237,7 @@
 // ==============================================================================
 
 /*!
-  \defgroup Observation CR-Pipeline: Observation module
+  \defgroup Observation CR-Tools :: Observation module
   \ingroup CR
 
   \brief Observation module for the CR-pipeline
@@ -310,7 +253,7 @@
 // ==============================================================================
 
 /*!
-  \defgroup CR_Utilities CR-Pipeline: Utilities collection
+  \defgroup CR_Utilities CR-Tools :: Utilities collection
   \ingroup CR
 
   \brief Utilities collection for the CR-pipeline
