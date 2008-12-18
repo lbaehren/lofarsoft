@@ -9,6 +9,9 @@ update:
 
 clean:
 	rm -f *~
+	rm -f html/formula*
+	rm -f html/tab*
+	rm -f html/search.*
 	rm -f html/*.png
 	rm -f html/*.map
 	rm -f html/*.html
