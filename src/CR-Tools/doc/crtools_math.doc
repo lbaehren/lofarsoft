@@ -1,0 +1,15 @@
+/* $Id$ */
+
+/*!
+  \defgroup CR_Math CR-Tools :: Math module
+  \ingroup CR
+
+  \brief Math module for the CR-pipeline
+  
+  <h3>Synopsis</h3>
+
+  Even though we make usage of the extensive functionality of the CASA math
+  modules, there sometimes are operations missing which will be required 
+  over and over again. The Math module of the CR-Pipeline is a collection of
+  such additional functions.
+*/
