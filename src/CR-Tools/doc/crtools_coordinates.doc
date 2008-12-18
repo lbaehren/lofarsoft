@@ -60,49 +60,65 @@
       <td class="indexkey">Type</td>
       <td class="indexkey">Description</td>
       <td class="indexkey">Coordinates</td>
+      <td class="indexkey">Comments</td>
     </tr>
     <tr>
 	  <td>Direction</td>
 	  <td>Direction on the sky</td>
-	  <td>\f$ \vec x = (Lon,Lat) \f$</td>
+	  <td>\f$ (Lon,Lat) \f$</td>
+	  <td></td>
 	</tr>
     <tr>
 	  <td>DirectionRadius</td>
 	  <td>Direction on the sky with radial distance</td>
-	  <td>\f$ \vec x = (Lon,Lat,R) \f$</td>
+	  <td>\f$ (Lon,Lat,R) \f$</td>
+	  <td>Encapsulated through CR::SpatialCoordinate</td>
 	</tr>
     <tr>
 	  <td>Cartesian</td>
 	  <td>Cartesian coordinates</td>
-	  <td>\f$ \vec x = (x,y,z) \f$</td>
+	  <td>\f$ (x,y,z) \f$</td>
+	  <td>Encapsulated through CR::SpatialCoordinate</td>
 	</tr>
     <tr>
 	  <td>Spherical</td>
 	  <td>Spherical coordinates</td>
-	  <td>\f$ \vec x = (r,\phi,\theta) \f$</td>
+	  <td>\f$ (r,\phi,\theta) \f$</td>
+	  <td>Encapsulated through CR::SpatialCoordinate</td>
 	</tr>
     <tr>
 	  <td>Cylindrical</td>
 	  <td>Cylindrical coordinates</td>
-	  <td>\f$ \vec x = (r,\phi,h) \f$</td>
+	  <td>\f$ (r,\phi,h) \f$</td>
+	  <td></td>
 	</tr>
     <tr>
 	  <td>AzElHeight</td>
 	  <td>Azimuth-Elevation-Height</td>
-	  <td>\f$ \vec x = (Az,El,H) \f$</td>
+	  <td>\f$ (Az,El,H) \f$</td>
+	  <td></td>
 	</tr>
     <tr>
 	  <td>AzElRadius</td>
 	  <td>Azimuth-Elevation-Radius</td>
-	  <td>\f$ \vec x = (Az,El,R) \f$</td>
+	  <td>\f$ (Az,El,R) \f$</td>
+	  <td></td>
 	</tr>
     <tr>
 	  <td>NorthEastHeight</td>
 	  <td></td>
 	  <td></td>
+	  <td></td>
+	</tr>
+    <tr>
+	  <td>LonLatRadius</td>
+	  <td>(Local) Longitude-Latitude-Radius</td>
+	  <td>\f$ (Lon,Lat,R) \f$</td>
+	  <td></td>
 	</tr>
     <tr>
 	  <td>Time</td>
+	  <td></td>
 	  <td></td>
 	  <td></td>
 	</tr>
@@ -110,8 +126,11 @@
 	  <td>Frequency</td>
 	  <td></td>
 	  <td></td>
+	  <td></td>
+	  <td></td>
 	</tr>
     <tr>
+	  <td></td>
 	  <td></td>
 	  <td></td>
 	  <td></td>
@@ -204,12 +223,69 @@
 	  <td>\f$ \left[ \begin{array}{c} N \\ E \\ H \end{array} \right] =
 	  \left[ \begin{array}{l} y \\ x \\ z \end{array} \right] \f$</td>
 	</tr>
-        <tr>
+	<tr>
+	  <td>Cartesian <br> \f$ (x,y,z) \f$</td>
+      <td>LonLatRadius <br> \f$ (Lon,Lat,R) \f$</td>
+	  <td></td>
+	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
+	  \left[ \begin{array}{l} R \cos(Lat) \cos(Lon) \\ R \cos(Lat) \sin(Lon) \\
+	  R \sin(Lat) \end{array} \right] \f$</td>
+	  <td></td>
+	</tr>
+    <tr>
 	  <td class="indexkey">Target</td>
 	  <td class="indexkey">... as function of</td>
 	  <td class="indexkey">Function</td>
 	  <td class="indexkey">Relation</td>
 	  <td class="indexkey">Inversion</td>
+	</tr>
+	<tr>
+	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
+          <td>Cartesian <br> \f$ (x,y,z) \f$</td>
+	  <td>CR::Cartesian2Spherical</td>
+	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
+	  = \left[ \begin{array}{l}
+	  \sqrt{x^2 + y^2 + z^2} \\
+	  \mathrm{atan} (y/x) \\ 
+	  \mathrm{acos} \left( \frac{z}{\sqrt{x^2 + y^2 + z^2}} \right)
+	  \end{array} \right] \f$</td>
+	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
+	  \left[ \begin{array}{l}
+	    r \sin(\theta) \cos(\phi) \\
+	    r \sin(\theta) \sin(\phi) \\
+	    r \cos(\theta) \end{array} \right] \f$</td>
+	</tr>
+	<tr>
+	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
+      <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
+	  <td>CR::Cylindrical2Spherical</td>
+	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
+	    = \left[ \begin{array}{l} 
+	    \sqrt{\rho^2 + z^2} \\
+	    \phi \\
+	    \mathrm{asin} \left( \frac{\rho}{\sqrt{\rho^2 + z^2}} \right)
+	    \end{array} \right] \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
+	    = \left[ \begin{array}{l} 
+	    r \sin(\theta) \\ \phi \\ r \cos(\theta)
+	    \end{array} \right] \f$</td>
+	</tr>
+	<tr>
+	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
+      <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
+	  <td>CR::AzElRadius2Spherical</td>
+	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
+	  = \left[ \begin{array}{l}
+	  R \\
+	  90^{\circ} - Az \\
+	  90^{\circ} - El
+	  \end{array} \right] \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
+	  = \left[ \begin{array}{l}
+	  90^{\circ} - \phi \\
+	  90^{\circ} - \theta \\
+	  r
+	  \end{array} \right] \f$</td>
 	</tr>
   </table>
   

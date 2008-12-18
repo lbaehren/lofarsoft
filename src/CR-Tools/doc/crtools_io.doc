@@ -1,0 +1,9 @@
+/* $Id$ */
+
+/*!
+  \defgroup IO CR-Tools :: IO module
+  \ingroup CR
+
+  \brief IO module for the CR-pipeline
+  
+*/
