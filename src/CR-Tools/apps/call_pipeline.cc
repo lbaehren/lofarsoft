@@ -1288,7 +1288,7 @@ int main (int argc, char *argv[])
           ElL_NS = results.asDouble("Elevation");
           CCheight_NS = results.asDouble("CCheight");
           CCheight_error_NS = results.asDouble("CCheight_error");
-          CCconvergedNS = results.asDouble("CCconverged");
+          CCconvergedNS = results.asBool("CCconverged");
           gt = results.asuInt("Date");
         }
       }  // if...else (calibrationMode)
