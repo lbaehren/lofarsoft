@@ -78,6 +78,24 @@ int test_constructors ()
     nofFailedTests++;
   }
   
+  std::cout << "[3] Testing argumented constructor ..." << endl;
+  try {
+    Vector<casa::MVPosition> antPositions (1);
+    Vector<casa::MVPosition> skyPositions (1);
+
+    antPositions(0) = casa::MVPosition (100,100,0);
+    skyPositions(0) = casa::MVPosition (casa::Quantity(100,"m"),
+					casa::Quantity(0,"deg"),
+					casa::Quantity(90,"deg"));
+    GeomDelay newObject (antPositions,
+			 skyPositions);
+    //
+    newObject.summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 

@@ -110,6 +110,7 @@ get_antennaPositions (uint const &nofAntennas=4,
   case CR::CoordinateType::DirectionRadius:
   case CR::CoordinateType::AzElHeight:
   case CR::CoordinateType::AzElRadius:
+  case CR::CoordinateType::LongLatRadius:
   case CR::CoordinateType::Cylindrical:
   case CR::CoordinateType::NorthEastHeight:
     std::cout << "-- No special settings for this coordinates." << std::endl;
@@ -161,6 +162,7 @@ Matrix<double> get_skyPositions (uint const &nofPositions=2,
   case CR::CoordinateType::DirectionRadius:
   case CR::CoordinateType::AzElHeight:
   case CR::CoordinateType::AzElRadius:
+  case CR::CoordinateType::LongLatRadius:
   case CR::CoordinateType::Cylindrical:
   case CR::CoordinateType::NorthEastHeight:
     std::cout << "-- No special settings for this coordinates." << std::endl;

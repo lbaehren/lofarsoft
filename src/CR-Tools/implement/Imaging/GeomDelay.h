@@ -34,6 +34,7 @@
 #include <casa/Quanta/MVPosition.h>
 // CR-Tools header files
 #include <Coordinates/CoordinateType.h>
+#include <Coordinates/PositionVector.h>
 #include <Math/Constants.h>
 #include <Math/VectorNorms.h>
 
@@ -59,7 +60,7 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[start filling in your text here]
+      <li>casa::<a href="http://www.astron.nl/casacore/doc/html/classcasa_1_1MVPosition.html">MVPosition</a> class
     </ul>
     
     <h3>Synopsis</h3>
@@ -71,6 +72,15 @@ namespace CR { // Namespace CR -- begin
 			 std::vector<double> const &skyPosition,
 			 bool const &farField=false);
     \endcode
+    Depending on the value of <tt>farField</tt> one of the following two
+    expressions is evaluated:
+    <ul>
+      <li>Near-field:
+      \f[ \tau_{j} = \frac{|\vec \rho|}{c} \left( \sqrt{1 + \frac{|\vec x_j|^2 -
+        2 \langle \vec \rho , \vec x_j \rangle}{|\vec \rho|^2}} - 1 \right) \f]
+      <li>Far-field:
+      \f[ \tau_{j} = - \frac{1}{c} \frac{\langle \vec \rho , \vec x_j \rangle}{|\vec \rho|} \f]
+    </ul>
     
     <h3>Example(s)</h3>
     
@@ -144,9 +154,7 @@ namespace CR { // Namespace CR -- begin
       \param bufferDelays -- Buffer the values of the geometrical delays?
     */
     GeomDelay (Vector<MVPosition> const &antPositions,
-	       CoordinateType::Types const &antCoord,
 	       Vector<MVPosition> const &skyPositions,
-	       CoordinateType::Types const &skyCoord,
 	       bool const &farField=false,
 	       bool const &bufferDelays=false);
     
@@ -350,6 +358,23 @@ namespace CR { // Namespace CR -- begin
 	       bool const &farField=false,
 	       bool const &bufferDelays=false);
 
+    /*!
+      \brief Initialize internal parameters
+
+      \param antPositions -- [antenna,3], positions of the antennas
+      \param skyPositions -- [position,3], positions towards which the beams are
+             formed
+      \param farField     -- Compute geometrical delay for far-field? By default
+             no approximation is made and the full 3D geometry is taken into
+	     account.
+      \param bufferDelays -- Buffer the values of the geometrical delays?
+    */
+    void init (Matrix<double> const &antPositions,
+	       CoordinateType::Types const &antCoord,
+	       Matrix<double> const &skyPositions,
+	       CoordinateType::Types const &skyCoord,
+	       bool const &farField=false,
+	       bool const &bufferDelays=false);
   };
   
 } // Namespace CR -- end

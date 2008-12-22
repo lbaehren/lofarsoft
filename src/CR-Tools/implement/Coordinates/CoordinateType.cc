@@ -103,6 +103,9 @@ namespace CR { // Namespace CR -- begin
     case CoordinateType::NorthEastHeight:
       name="NorthEastHeight";
       break;
+    case CoordinateType::LongLatRadius:
+      name="LongLatRadius";
+      break;
     case CoordinateType::Time:
       name="Time";
       break;

@@ -56,6 +56,50 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                    GeomDelay
   
+  GeomDelay::GeomDelay (Matrix<double> const &antPositions,
+			CoordinateType::Types const &antCoord,
+			Matrix<double> const &skyPositions,
+			CoordinateType::Types const &skyCoord,
+			bool const &farField,
+			bool const &bufferDelays)
+  {
+    init (antPositions,
+	  antCoord,
+	  skyPositions,
+	  skyCoord,
+	  farField,
+	  bufferDelays);
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                    GeomDelay
+  
+  GeomDelay::GeomDelay (Vector<MVPosition> const &antPositions,
+			Vector<MVPosition> const &skyPositions,
+			bool const &farField,
+			bool const &bufferDelays)
+  {
+    farField_p     = farField;
+    bufferDelays_p = bufferDelays;
+
+    uint nofAntPositions = antPositions.nelements();
+    uint nofSkyPositions = skyPositions.nelements();
+
+    antPositions_p.resize(nofAntPositions,3);
+    skyPositions_p.resize(nofSkyPositions,3);
+
+    for (uint n(0); n<nofAntPositions; n++) {
+      antPositions_p.row(n) = antPositions(n).getValue();
+    }
+
+    for (uint n(0); n<nofSkyPositions; n++) {
+      skyPositions_p.row(n) = skyPositions(n).getValue();
+    }
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                    GeomDelay
+  
   GeomDelay::GeomDelay (GeomDelay const &other)
   {
     copy (other);
@@ -144,16 +188,34 @@ namespace CR { // Namespace CR -- begin
 			bool const &farField,
 			bool const &bufferDelays)
   {
+    init (antPositions,
+	  CoordinateType::Cartesian,
+	  skyPositions,
+	  CoordinateType::Cartesian,
+	  farField,
+	  bufferDelays);
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                         init
+  
+  void GeomDelay::init (Matrix<double> const &antPositions,
+			CoordinateType::Types const &antCoord,
+			Matrix<double> const &skyPositions,
+			CoordinateType::Types const &skyCoord,
+			bool const &farField,
+			bool const &bufferDelays)
+  {
     farField_p     = farField;
     bufferDelays_p = bufferDelays;
 
     antPositions_p.resize(antPositions.shape());
-    antPositions_p = antPositions;
-
     skyPositions_p.resize(skyPositions.shape());
+
+    antPositions_p = antPositions;
     skyPositions_p = skyPositions;
   }
-
+  
   //_____________________________________________________________________________
   //                                                                      summary
   

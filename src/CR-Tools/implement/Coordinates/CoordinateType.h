@@ -132,6 +132,8 @@ namespace CR { // Namespace CR -- begin
       AzElRadius,
       //! North-East-Height
       NorthEastHeight,
+      //! Longitude-Latitude-Radius
+      LongLatRadius,
       //! Time
       Time,
       //! Frquency

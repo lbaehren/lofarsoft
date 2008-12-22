@@ -68,222 +68,23 @@ namespace CR { // Namespace CR -- begin
       <li>Basic knowledge of analytical geometry
       <li>Some overview of existing conventions for spherical coordinate systems.
     </ul>
+
+    <h3>Required adjustments</h3>
     
-    <h3>Synopsis</h3>
-
-    The <b>spherical coordinate</b> system represents points as a tuple of three
-    components. For use in physical sciences and technology, the recommended
-    international standard notation is \f$ r,\vartheta,\phi \f$ for distance,
-    zenith and azimuth (ISO 31-11). (In the standard \f$\vartheta\f$ is preferred
-    to \f$\theta\f$, although it is the same Greek letter). Otherwise, in America
-    the components are typically notated as \f$(\rho,\phi,\theta)\f$ for
-    distance, zenith and azimuth, while elsewhere the notation is reversed for
-    zenith and azimuth as \f$(\rho,\theta,\phi)\f$. The former has the advantage
-    of being most compatible with the notation for the two-dimensional polar
-    coordinate system and the three-dimensional cylindrical coordinate system,
-    while the latter has the broader acceptance geographically. The notation
-    convention of the author of any work pertaining to spherical coordinates
-    should always be checked before using the formulas and equations of that
-    author. [from Wikipedia, english version]
-
-    We here use the three coordinates \f$(r,\phi,\theta)\f$ according to the
-    following convention:
-    <ul>
-      <li>\f$r\f$ (radius) is the distance of a point P from the origin O of the
-      coordinate system, i.e. the length of the vector \f$\vec r\f$;
-      <li>\f$\phi\f$ (azimuth angle) is the angle between the positive x-axis and
-      \f$\vec r_{xy}\f$ (i.e. the projection of the vector \f$\vec r\f$ onto the
-      x-y-plane), with values running from 0 to \f$2\pi\f$ (\f$0^\circ\f$ to
-      \f$360^\circ\f$) counted counter-clockwise
-      <li>\f$\theta\f$ (polar angle) is the angle between the positive z-axis
-      and the vector \f$\vec r\f$, with values running from 0 to \f$\pi\f$
-      (\f$0^\circ\f$ to \f$180^\circ\f$)
-    </ul>
-
-    For <b>cylindrical coordinates</b> we closely follow the above convention,
-    such that the azmiuthal angle \f$\phi\f$ in the x-y-plane is the same as for
-    the case of spherical coordinates (and thereby reflection the relation of
-    the cylindrical coordinates to polar coordinates in the plain).
-
-    \image html coordinates.png
-
+    \verbatim
+    ApplicationSupport/Phasing.h:#include <Math/VectorConversion.h>
+    Imaging/GeomDelay.h:#include <Math/VectorConversion.h>
+    Imaging/GeomDelay.h~:#include <Math/VectorConversion.h>
+    Imaging/GeometricalDelay.h:#include <Math/VectorConversion.h>
+    Imaging/SkymapCoordinates.cc:#include <Math/VectorConversion.h>
+    Math/RotationMatrix.h:#include <Math/VectorConversion.h>
+    Math/VectorConversion.cc:#include <Math/VectorConversion.h>
+    \endverbatim
+    
     <h3>Conversion relations/functions</h3>
 
     <center>
       <table>
-        <tr>
-	  <td class="indexkey">Target</td>
-	  <td class="indexkey">... as function of</td>
-	  <td class="indexkey">Function</td>
-	  <td class="indexkey">Relation</td>
-	  <td class="indexkey">Inversion</td>
-	</tr>
-	<tr>
-          <td>Cartesian <br> \f$ (x,y,z) \f$</td>
-	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
-	  <td>CR::Spherical2Cartesian</td>
-	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
-	  \left[ \begin{array}{l}
-	    r \sin(\theta) \cos(\phi) \\
-	    r \sin(\theta) \sin(\phi) \\
-	    r \cos(\theta) \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
-	  = \left[ \begin{array}{l}
-	  \sqrt{x^2 + y^2 + z^2} \\
-	  \mathrm{atan} (y/x) \\ 
-	  \mathrm{acos} \left( \frac{z}{\sqrt{x^2 + y^2 + z^2}} \right)
-	  \end{array} \right] \f$</td>
-	</tr>
-	<tr>
-          <td>Cartesian <br> \f$ (x,y,z) \f$</td>
-	  <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
-	  <td>CR::Cylindrical2Cartesian</td>
-	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
-	    \left[ \begin{array}{l}
-	  \rho \cos(\phi) \\
-	  \rho \sin(\phi) \\
-	  z \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
-	    = \left[ \begin{array}{l}
-	    \sqrt{x^2 + y^2} \\
-	    \mathrm{atan} (y/x) \\
-	    z \end{array} \right] \f$</td>
-	</tr>
-	<tr>
-	  <td>Cartesian <br> \f$ (x,y,z) \f$</td>
-          <td>AzElHeight <br> \f$ (Az,El,H) \f$</td>
-	  <td>CR::AzElHeight2Cartesian</td>
-	  <td>\f$ \left[ \begin{array}{l} x \\ y \\ z \end{array} \right]
-	    = \left[ \begin{array}{l} 
-	    H \frac{\sin(Az)}{\tan(El)} \\
-	    H \frac{\cos(Az)}{\tan(El)} \\
-	    H
-	    \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ H \end{array} \right]
-	    = \left[ \begin{array}{l}
-	    \mathrm{atan} \left( \frac{x}{y} \right) \\
-	    \mathrm{atan} \left( \frac{z}{\sqrt{x^2+y^2}} \right) \\
-	    z
-	    \end{array} \right] \f$</td>
-	</tr>
-	<tr>
-	  <td>Cartesian <br> \f$ (x,y,z) \f$</td>
-          <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
-	  <td>CR::AzElRadius2Cartesian</td>
-	  <td>\f$ \left[ \begin{array}{l} x \\ y \\ z \end{array} \right]
-	    = \left[ \begin{array}{l}
-	    R \cos(El) \sin(Az) \\
-	    R \cos(El) \cos(Az) \\
-	    R \sin(El)
-	    \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
-	    = \left[ \begin{array}{l}
-	    \mathrm{atan} \left( x/y \right) \\
-	    \mathrm{acos} \left( \sqrt{\frac{x^2+y^2}{x^2+y^2+z^2}} \right) \\
-	    \sqrt{x^2+y^2+z^2}
-	    \end{array} \right] \f$</td>
-	</tr>
-	<tr>
-	  <td>Cartesian <br> \f$ (x,y,z) \f$</td>
-          <td>NorthEastHeight <br> \f$ (N,E,H) \f$</td>
-	  <td>CR::NorthEastHeight2Cartesian</td>
-	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
-	  \left[ \begin{array}{l} E \\ N \\ H \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{c} N \\ E \\ H \end{array} \right] =
-	  \left[ \begin{array}{l} y \\ x \\ z \end{array} \right] \f$</td>
-	</tr>
-        <tr>
-	  <td class="indexkey">Target</td>
-	  <td class="indexkey">... as function of</td>
-	  <td class="indexkey">Function</td>
-	  <td class="indexkey">Relation</td>
-	  <td class="indexkey">Inversion</td>
-	</tr>
-	<tr>
-	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
-          <td>Cartesian <br> \f$ (x,y,z) \f$</td>
-	  <td>CR::Cartesian2Spherical</td>
-	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
-	  = \left[ \begin{array}{l}
-	  \sqrt{x^2 + y^2 + z^2} \\
-	  \mathrm{atan} (y/x) \\ 
-	  \mathrm{acos} \left( \frac{z}{\sqrt{x^2 + y^2 + z^2}} \right)
-	  \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
-	  \left[ \begin{array}{l}
-	    r \sin(\theta) \cos(\phi) \\
-	    r \sin(\theta) \sin(\phi) \\
-	    r \cos(\theta) \end{array} \right] \f$</td>
-	</tr>
-	<tr>
-	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
-          <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
-	  <td>CR::Cylindrical2Spherical</td>
-	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
-	    = \left[ \begin{array}{l} 
-	    \sqrt{\rho^2 + z^2} \\
-	    \phi \\
-	    \mathrm{asin} \left( \frac{\rho}{\sqrt{\rho^2 + z^2}} \right)
-	    \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
-	    = \left[ \begin{array}{l} 
-	    r \sin(\theta) \\ \phi \\ r \cos(\theta)
-	    \end{array} \right] \f$</td>
-	</tr>
-	<tr>
-	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
-          <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
-	  <td>CR::AzElRadius2Spherical</td>
-	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
-	  = \left[ \begin{array}{l}
-	  R \\
-	  90^{\circ} - Az \\
-	  90^{\circ} - El
-	  \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
-	  = \left[ \begin{array}{l}
-	  90^{\circ} - \phi \\
-	  90^{\circ} - \theta \\
-	  r
-	  \end{array} \right] \f$</td>
-	</tr>
-        <tr>
-	  <td class="indexkey">Target</td>
-	  <td class="indexkey">... as function of</td>
-	  <td class="indexkey">Function</td>
-	  <td class="indexkey">Relation</td>
-	  <td class="indexkey">Inversion</td>
-	</tr>
-	<tr>
-	  <td>Cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
-          <td>Cartesian <br> \f$ (x,y,z) \f$</td>
-	  <td>CR::Cartesian2Cylindrical</td>
-	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
-	    = \left[ \begin{array}{l}
-	    \sqrt{x^2 + y^2} \\
-	    \mathrm{atan} (y/x) \\
-	    z \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
-	    \left[ \begin{array}{l}
-	  \rho \cos(\phi) \\
-	  \rho \sin(\phi) \\
-	  z \end{array} \right] \f$</td>
-	</tr>
-	<tr>
-          <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
-	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
-	  <td>CR::Spherical2Cylindrical</td>
-	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
-	    = \left[ \begin{array}{l} 
-	    r \sin(\theta) \\ \phi \\ r \cos(\theta)
-	    \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
-	    = \left[ \begin{array}{l} 
-	    \sqrt{\rho^2 + z^2} \\
-	    \phi \\
-	    \mathrm{asin} \left( \frac{\rho}{\sqrt{\rho^2 + z^2}} \right)
-	    \end{array} \right] \f$</td>
-	</tr>
         <tr>
 	  <td class="indexkey">Target</td>
 	  <td class="indexkey">... as function of</td>
@@ -482,11 +283,10 @@ namespace CR { // Namespace CR -- begin
 
     \return rad -- Angle in radian
   */
-  inline double deg2rad (double const &deg)
- {
+  inline double deg2rad (double const &deg) {
     return deg*CR::pi/180.0;
   }
-
+  
   /*!
     \brief Convert radian to degrees
     

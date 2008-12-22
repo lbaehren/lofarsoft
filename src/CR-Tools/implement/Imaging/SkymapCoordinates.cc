@@ -26,7 +26,6 @@
 #include <measures/Measures/MeasRef.h>
 
 #include <Imaging/SkymapCoordinates.h>
-#include <Math/VectorConversion.h>
 
 namespace CR { // Namespace CR -- begin
   

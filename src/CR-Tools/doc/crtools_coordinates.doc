@@ -8,6 +8,7 @@
   
   - \ref crtools_coordinates_types
   - \ref crtools_coordinates_conversions
+  - \ref crtools_coordinates_references
 
   <hr>
 
@@ -65,13 +66,13 @@
     <tr>
 	  <td>Direction</td>
 	  <td>Direction on the sky</td>
-	  <td>\f$ (Lon,Lat) \f$</td>
+	  <td>\f$ (Long,Lat) \f$</td>
 	  <td></td>
 	</tr>
     <tr>
 	  <td>DirectionRadius</td>
 	  <td>Direction on the sky with radial distance</td>
-	  <td>\f$ (Lon,Lat,R) \f$</td>
+	  <td>\f$ (Long,Lat,R) \f$</td>
 	  <td>Encapsulated through CR::SpatialCoordinate</td>
 	</tr>
     <tr>
@@ -89,7 +90,7 @@
     <tr>
 	  <td>Cylindrical</td>
 	  <td>Cylindrical coordinates</td>
-	  <td>\f$ (r,\phi,h) \f$</td>
+	  <td>\f$ (\rho,\phi,z) \f$</td>
 	  <td></td>
 	</tr>
     <tr>
@@ -111,9 +112,9 @@
 	  <td></td>
 	</tr>
     <tr>
-	  <td>LonLatRadius</td>
+	  <td>LongLatRadius</td>
 	  <td>(Local) Longitude-Latitude-Radius</td>
-	  <td>\f$ (Lon,Lat,R) \f$</td>
+	  <td>\f$ (Long,Lat,R) \f$</td>
 	  <td></td>
 	</tr>
     <tr>
@@ -141,6 +142,149 @@
   
   \section crtools_coordinates_conversions Coordinate conversions
   
+  <ol>
+
+    <li>CR::CoordinateType::Cartesian \f$ (x,y,z) \f$
+	
+	  <table>
+        <tr>
+	      <td class="indexkey">... as function of</td>
+	      <td class="indexkey">Forward transform</td>
+	      <td class="indexkey">\f$ (x,y,z) \f$ to other</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::Spherical <br> \f$ (r,\phi,\theta) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} r \sin(\theta) \cos(\phi) \\ r \sin(\theta)
+		  \sin(\phi) \\ r \cos(\theta) \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} \sqrt{x^2 + y^2 + z^2} \\[1mm] \mathrm{atan}
+		  \left( y/x \right) \\[1mm] \mathrm{acos} \left( \frac{z}{\sqrt{x^2 + y^2
+		  + z^2}} \right) \end{array} \right] \f$</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::Cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} \rho \cos(\phi) \\ \rho \sin(\phi) \\ z
+		  \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} \sqrt{x^2 + y^2} \\ \mathrm{atan}(y/x) \\ z
+		  \end{array} \right] \f$</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::AzElRadius <br> \f$ (Az,El,R) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} R \cos(El) \sin(Az) \\ R \cos(El) \cos(Az) \\ R
+		  \sin(El) \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} \mathrm{atan}(x/y) \\ \mathrm{asin}(z/\sqrt{x^2
+		  + y^2 + z^2}) \\ \sqrt{x^2 + y^2 + z^2} \end{array} \right] \f$</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::AzElHeight <br> \f$ (Az,El,H) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::LongLatRadius <br> \f$ (Long,Lat,R) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} R \cos(Lat) \cos(Long) \\ R \cos(Lat) \sin(Long)
+		  \\ R \sin(Lat) \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} \mathrm{atan}(y/x) \\ \mathrm{asin}(z/\sqrt{x^2
+		  + y^2 + z^2}) \\ \sqrt{x^2 + y^2 + z^2} \end{array} \right] \f$</td>
+	    </tr>
+	  </table>
+
+    <li>CR::CoordinateType::Spherical \f$ (r,\phi,\theta) \f$
+	
+	  <table>
+        <tr>
+	      <td class="indexkey">... as function of</td>
+	      <td class="indexkey">Forward transform</td>
+	      <td class="indexkey">\f$ (r,\phi,\theta) \f$ to other</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::Cartesian <br> \f$ (x,y,z) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} \sqrt{x^2 + y^2 + z^2} \\ \mathrm{atan}(y/x) \\
+		  \mathrm{acos}(z/\sqrt{x^2 + y^2 + z^2}) \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} r \sin(\theta) \cos(\phi) \\ r \sin(\theta)
+		  \sin(\phi) \\ r \cos(\theta) \end{array} \right] \f$</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::AzElRadius <br> \f$ (Az,El,R) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} R \\ 90^{\circ}-Az \\ 90^{\circ}-El \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} 90^{\circ}-\phi \\ 90^{\circ}-\theta \\ r
+		  \end{array} \right] \f$</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::LongLatRadius <br> \f$ (Long,Lat,R) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} R \\ Long \\ 90^{\circ}-Lat \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} \phi \\ 90^{\circ}-\theta \\ r \end{array} \right] \f$</td>
+	    </tr>
+	  </table>
+
+    <li>CR::CoordinateType::Cylindrical \f$ (\rho,\phi,z) \f$
+
+	  <table>
+        <tr>
+	      <td class="indexkey">... as function of</td>
+	      <td class="indexkey">Forward transform</td>
+	      <td class="indexkey">\f$ (\rho,\phi,z) \f$ to other</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::Cartesian <br> \f$ (x,y,z) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::AzElRadius <br> \f$ (Az,El,R) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::LongLatRadius <br> \f$ (Long,Lat,R) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	    </tr>
+	  </table>
+
+    <li>CR::CoordinateType::AzElRadius \f$ (Az,El,R) \f$
+
+	  <table>
+        <tr>
+	      <td class="indexkey">... as function of</td>
+	      <td class="indexkey">Forward transform</td>
+	      <td class="indexkey">\f$ (Az,El,R) \f$ to other</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::Cartesian <br> \f$ (x,y,z) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	    </tr>
+	  </table>
+
+    <li>CR::CoordinateType::LongLatRadius \f$ (Long,Lat,R) \f$
+
+	  <table>
+        <tr>
+	      <td class="indexkey">... as function of</td>
+	      <td class="indexkey">Forward transform</td>
+	      <td class="indexkey">\f$ (Long,Lat,R) \f$ to other</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::Cartesian <br> \f$ (x,y,z) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} \mathrm{atan}(y/x) \\ \mathrm{asin}(z/\sqrt{x^2
+		  + y^2 + z^2}) \\ \sqrt{x^2 + y^2 + z^2} \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} R \cos(Lat) \cos(Long) \\ R \cos(Lat) \sin(Long)
+		  \\ R \sin(Lat) \end{array} \right] \f$</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::Spherical <br> \f$ (r,\phi,\theta) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} \phi \\ 90^{\circ}-\theta \\ r \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} R \\ Long \\ 90^{\circ}-Lat \end{array} \right] \f$</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::AzElRadius <br> \f$ (Az,El,R) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	    </tr>
+	  </table>
+
+  </ol>
+
   <table>
     <tr>
 	  <td class="indexkey">Target</td>
@@ -148,37 +292,6 @@
 	  <td class="indexkey">Function</td>
 	  <td class="indexkey">Relation</td>
 	  <td class="indexkey">Inversion</td>
-	</tr>
-	<tr>
-      <td>Cartesian <br> \f$ (x,y,z) \f$</td>
-	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
-	  <td>CR::Spherical2Cartesian</td>
-	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
-	  \left[ \begin{array}{l}
-	    r \sin(\theta) \cos(\phi) \\
-	    r \sin(\theta) \sin(\phi) \\
-	    r \cos(\theta) \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
-	  = \left[ \begin{array}{l}
-	  \sqrt{x^2 + y^2 + z^2} \\
-	  \mathrm{atan} (y/x) \\ 
-	  \mathrm{acos} \left( \frac{z}{\sqrt{x^2 + y^2 + z^2}} \right)
-	  \end{array} \right] \f$</td>
-	</tr>
-	<tr>
-      <td>Cartesian <br> \f$ (x,y,z) \f$</td>
-	  <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
-	  <td>CR::Cylindrical2Cartesian</td>
-	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
-	    \left[ \begin{array}{l}
-	  \rho \cos(\phi) \\
-	  \rho \sin(\phi) \\
-	  z \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
-	    = \left[ \begin{array}{l}
-	    \sqrt{x^2 + y^2} \\
-	    \mathrm{atan} (y/x) \\
-	    z \end{array} \right] \f$</td>
 	</tr>
 	<tr>
 	  <td>Cartesian <br> \f$ (x,y,z) \f$</td>
@@ -199,38 +312,12 @@
 	</tr>
 	<tr>
 	  <td>Cartesian <br> \f$ (x,y,z) \f$</td>
-          <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
-	  <td>CR::AzElRadius2Cartesian</td>
-	  <td>\f$ \left[ \begin{array}{l} x \\ y \\ z \end{array} \right]
-	    = \left[ \begin{array}{l}
-	    R \cos(El) \sin(Az) \\
-	    R \cos(El) \cos(Az) \\
-	    R \sin(El)
-	    \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
-	    = \left[ \begin{array}{l}
-	    \mathrm{atan} \left( x/y \right) \\
-	    \mathrm{acos} \left( \sqrt{\frac{x^2+y^2}{x^2+y^2+z^2}} \right) \\
-	    \sqrt{x^2+y^2+z^2}
-	    \end{array} \right] \f$</td>
-	</tr>
-	<tr>
-	  <td>Cartesian <br> \f$ (x,y,z) \f$</td>
-          <td>NorthEastHeight <br> \f$ (N,E,H) \f$</td>
+      <td>NorthEastHeight <br> \f$ (N,E,H) \f$</td>
 	  <td>CR::NorthEastHeight2Cartesian</td>
 	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
 	  \left[ \begin{array}{l} E \\ N \\ H \end{array} \right] \f$</td>
 	  <td>\f$ \left[ \begin{array}{c} N \\ E \\ H \end{array} \right] =
 	  \left[ \begin{array}{l} y \\ x \\ z \end{array} \right] \f$</td>
-	</tr>
-	<tr>
-	  <td>Cartesian <br> \f$ (x,y,z) \f$</td>
-      <td>LonLatRadius <br> \f$ (Lon,Lat,R) \f$</td>
-	  <td></td>
-	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
-	  \left[ \begin{array}{l} R \cos(Lat) \cos(Lon) \\ R \cos(Lat) \sin(Lon) \\
-	  R \sin(Lat) \end{array} \right] \f$</td>
-	  <td></td>
 	</tr>
     <tr>
 	  <td class="indexkey">Target</td>
@@ -238,22 +325,6 @@
 	  <td class="indexkey">Function</td>
 	  <td class="indexkey">Relation</td>
 	  <td class="indexkey">Inversion</td>
-	</tr>
-	<tr>
-	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
-          <td>Cartesian <br> \f$ (x,y,z) \f$</td>
-	  <td>CR::Cartesian2Spherical</td>
-	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
-	  = \left[ \begin{array}{l}
-	  \sqrt{x^2 + y^2 + z^2} \\
-	  \mathrm{atan} (y/x) \\ 
-	  \mathrm{acos} \left( \frac{z}{\sqrt{x^2 + y^2 + z^2}} \right)
-	  \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
-	  \left[ \begin{array}{l}
-	    r \sin(\theta) \cos(\phi) \\
-	    r \sin(\theta) \sin(\phi) \\
-	    r \cos(\theta) \end{array} \right] \f$</td>
 	</tr>
 	<tr>
 	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
@@ -270,23 +341,35 @@
 	    r \sin(\theta) \\ \phi \\ r \cos(\theta)
 	    \end{array} \right] \f$</td>
 	</tr>
+    <tr>
+	  <td class="indexkey">Target</td>
+	  <td class="indexkey">... as function of</td>
+	  <td class="indexkey">Function</td>
+	  <td class="indexkey">Relation</td>
+	  <td class="indexkey">Inversion</td>
+	</tr>
 	<tr>
+      <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
 	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
-      <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
-	  <td>CR::AzElRadius2Spherical</td>
+	  <td>CR::Spherical2Cylindrical</td>
+	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
+	    = \left[ \begin{array}{l} 
+	    r \sin(\theta) \\ \phi \\ r \cos(\theta)
+	    \end{array} \right] \f$</td>
 	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
-	  = \left[ \begin{array}{l}
-	  R \\
-	  90^{\circ} - Az \\
-	  90^{\circ} - El
-	  \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
-	  = \left[ \begin{array}{l}
-	  90^{\circ} - \phi \\
-	  90^{\circ} - \theta \\
-	  r
-	  \end{array} \right] \f$</td>
+	    = \left[ \begin{array}{l} 
+	    \sqrt{\rho^2 + z^2} \\
+	    \phi \\
+	    \mathrm{asin} \left( \frac{\rho}{\sqrt{\rho^2 + z^2}} \right)
+	    \end{array} \right] \f$</td>
 	</tr>
   </table>
+  
+  <hr>
+  
+  \section crtools_coordinates_references References
+  
+  - <a href="http://en.wikipedia.org/wiki/Geographic_coordinate">Geographic coordinate
+  system</a> (Wikipedia)
   
 */

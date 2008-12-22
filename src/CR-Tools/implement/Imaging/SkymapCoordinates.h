@@ -50,6 +50,7 @@
 
 // Custom header files
 #include <Coordinates/TimeFreq.h>
+#include <Coordinates/PositionVector.h>
 #include <Coordinates/SpatialCoordinate.h>
 #include <Imaging/Beamformer.h>
 #include <IO/DataReader.h>
@@ -968,6 +969,16 @@ namespace CR { // Namespace CR -- begin
     */
     bool setShape ();
     
+    //! Convert degress to radian
+    static double deg2rad (double const &deg) {
+      return deg*CR::pi/180.0;
+    }
+    
+    //! Convert radian to degrees
+    static double rad2deg (double const &rad) {
+      return rad*180/CR::pi;
+    }
+
     // ---------------------------------------------------------- Coordinate axes
 
     /*!
