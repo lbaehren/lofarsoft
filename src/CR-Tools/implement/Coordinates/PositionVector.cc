@@ -150,6 +150,11 @@ namespace CR { // Namespace  -- begin
       case CoordinateType::Spherical:
 	out = in;
 	break;
+      case CoordinateType::Cylindrical:
+	vec.Cylindrical2Spherical (out(0), out(1), out(2),
+				   in(0) ,  in(1),  in(2),
+				   anglesInDegrees);
+	break;
       case CoordinateType::AzElRadius:
 	vec.AzElRadius2Spherical (out(0), out(1), out(2),
 				  in(0) ,  in(1),  in(2),
@@ -167,6 +172,29 @@ namespace CR { // Namespace  -- begin
 	break;
       };
       break;
+      //____________________________________________________
+      //                          Conversions -> Cylindrical
+    case CoordinateType::Cylindrical:
+      switch (typeIn) {
+      case CoordinateType::Cartesian:
+	vec.Cartesian2Cylindrical (out(0), out(1), out(2),
+				   in(0) ,  in(1),  in(2),
+				   anglesInDegrees);
+	break;
+      case CoordinateType::Spherical:
+	vec.Spherical2Cylindrical (out(0), out(1), out(2),
+				   in(0) ,  in(1),  in(2),
+				   anglesInDegrees);
+	break;
+      default:
+	std::cerr << "[PositionVector::convert]"
+		  << " Requested conversion not yet implemented!" << std::endl;
+	status = false;
+	break;
+      };
+      break;
+      //____________________________________________________
+      //                               undefined conversions
     default:
       std::cerr << "[PositionVector::convert]"
 		<< " Requested conversion not yet implemented!" << std::endl;
@@ -283,6 +311,25 @@ namespace CR { // Namespace  -- begin
 
   }
   
+  void PositionVector::Cylindrical2Spherical (double &out_r,
+					      double &out_phi,
+					      double &out_theta,
+					      double const &in_rho,
+					      double const &in_phi,
+					      double const &in_z,
+					      bool const &anglesInDegrees)
+  {
+    if (anglesInDegrees) {
+      out_r     = sqrt(in_rho*in_rho+in_z*in_z);
+      out_phi   = in_phi;
+      out_theta = rad2deg(atan2(in_rho,in_z));
+    } else {
+      out_r     = sqrt(in_rho*in_rho+in_z*in_z);
+      out_phi   = in_phi;
+      out_theta = atan2(in_rho,in_z);
+    }
+  }
+  
   void PositionVector::AzElRadius2Spherical (double &out_r,
 					     double &out_phi,
 					     double &out_theta,
@@ -323,8 +370,45 @@ namespace CR { // Namespace  -- begin
   
   //_____________________________________________________________________________
   //                                                   Conversions -> Cylindrical
-
-
+  
+  void PositionVector::Cartesian2Cylindrical (double &out_rho,
+					      double &out_phi,
+					      double &out_z,
+					      double const &in_x,
+					      double const &in_y,
+					      double const &in_z,
+					      bool const &anglesInDegrees)
+  {
+    if (anglesInDegrees) {
+      out_rho = sqrt(in_x*in_x+in_y*in_y);
+      out_phi = rad2deg(atan2(in_y,in_x));
+      out_z   = in_z;
+    } else {
+      out_rho = sqrt(in_x*in_x+in_y*in_y);
+      out_phi = atan2(in_y,in_x);
+      out_z   = in_z;
+    }
+  }
+  
+  void PositionVector::Spherical2Cylindrical (double &out_rho,
+					      double &out_phi,
+					      double &out_z,
+					      double const &in_r,
+					      double const &in_phi,
+					      double const &in_theta,
+					      bool const &anglesInDegrees)
+  {
+    if (anglesInDegrees) {
+      out_rho = in_r*sin(deg2rad(in_theta));
+      out_phi = in_phi;
+      out_z   = in_r*cos(deg2rad(in_theta));
+    } else {
+      out_rho = in_r*sin(in_theta);
+      out_phi = in_phi;
+      out_z   = in_r*cos(in_theta);
+    }
+  }
+  
   //_____________________________________________________________________________
   //                                                    Conversions -> AzElRadius
 

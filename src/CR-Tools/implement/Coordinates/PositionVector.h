@@ -252,6 +252,27 @@ namespace CR { // Namespace  -- begin
 				  double const &in_r,
 				  bool const &anglesInDegrees=false);
     
+    //______________________________________________________
+    //                            Conversions -> Cylindrical
+    
+    //! Convert \f$ (x,y,z) \f$ to \f$ (\rho,\phi,z) \f$
+    void Cartesian2Cylindrical (double &out_rho,
+				double &out_phi,
+				double &out_z,
+				double const &in_x,
+				double const &in_y,
+				double const &in_z,
+				bool const &anglesInDegrees=false);
+    
+    //! Convert \f$ (r,\phi,\theta) \f$ to \f$ (\rho,\phi,z) \f$
+    void Spherical2Cylindrical (double &out_rho,
+				double &out_phi,
+				double &out_z,
+				double const &in_r,
+				double const &in_phi,
+				double const &in_theta,
+				bool const &anglesInDegrees=false);
+    
   };
   
 } // Namespace  -- end

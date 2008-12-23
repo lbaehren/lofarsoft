@@ -186,6 +186,11 @@
 	      <td>\f$ \left[ \begin{array}{l} \mathrm{atan}(y/x) \\ \mathrm{asin}(z/\sqrt{x^2
 		  + y^2 + z^2}) \\ \sqrt{x^2 + y^2 + z^2} \end{array} \right] \f$</td>
 	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::NorthEastHeight <br> \f$ (N,E,H) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	    </tr>
 	  </table>
 
     <li>CR::CoordinateType::Spherical \f$ (r,\phi,\theta) \f$
@@ -202,6 +207,13 @@
 		  \mathrm{acos}(z/\sqrt{x^2 + y^2 + z^2}) \end{array} \right] \f$</td>
 	      <td>\f$ \left[ \begin{array}{l} r \sin(\theta) \cos(\phi) \\ r \sin(\theta)
 		  \sin(\phi) \\ r \cos(\theta) \end{array} \right] \f$</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::Cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} \sqrt{\rho^2+z^2} \\ \phi \\
+		  \mathrm{atan}(\rho/z) \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} r \sin(\theta) \\ \phi \\ r \cos(\theta)
+		  \end{array} \right] \f$</td>
 	    </tr>
         <tr>
 	      <td>CR::CoordinateType::AzElRadius <br> \f$ (Az,El,R) \f$</td>
@@ -226,8 +238,17 @@
 	    </tr>
         <tr>
 	      <td>CR::CoordinateType::Cartesian <br> \f$ (x,y,z) \f$</td>
-	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
-	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} \sqrt{x^2 + y^2} \\ \mathrm{atan}(y/x) \\ z
+		  \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} \rho \cos(\phi) \\ \rho \sin(\phi) \\ z
+		  \end{array} \right] \f$</td>
+	    </tr>
+        <tr>
+	      <td>CR::CoordinateType::Spherical <br> \f$ (r,\phi,\theta) \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} r \sin(\theta) \\ \phi \\ r \cos(\theta)
+		  \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} \sqrt{\rho^2+z^2} \\ \phi \\
+		  \mathrm{atan}(\rho/z) \end{array} \right] \f$</td>
 	    </tr>
         <tr>
 	      <td>CR::CoordinateType::AzElRadius <br> \f$ (Az,El,R) \f$</td>
@@ -251,8 +272,10 @@
 	    </tr>
         <tr>
 	      <td>CR::CoordinateType::Cartesian <br> \f$ (x,y,z) \f$</td>
-	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
-	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} \mathrm{atan}(x/y) \\ \mathrm{asin}(z/\sqrt{x^2
+		  + y^2 + z^2}) \\ \sqrt{x^2 + y^2 + z^2} \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} R \cos(El) \sin(Az) \\ R \cos(El) \cos(Az) \\ R
+		  \sin(El) \end{array} \right] \f$</td>
 	    </tr>
 	  </table>
 
@@ -285,86 +308,6 @@
 
   </ol>
 
-  <table>
-    <tr>
-	  <td class="indexkey">Target</td>
-	  <td class="indexkey">... as function of</td>
-	  <td class="indexkey">Function</td>
-	  <td class="indexkey">Relation</td>
-	  <td class="indexkey">Inversion</td>
-	</tr>
-	<tr>
-	  <td>Cartesian <br> \f$ (x,y,z) \f$</td>
-      <td>AzElHeight <br> \f$ (Az,El,H) \f$</td>
-	  <td>CR::AzElHeight2Cartesian</td>
-	  <td>\f$ \left[ \begin{array}{l} x \\ y \\ z \end{array} \right]
-	    = \left[ \begin{array}{l} 
-	    H \frac{\sin(Az)}{\tan(El)} \\
-	    H \frac{\cos(Az)}{\tan(El)} \\
-	    H
-	    \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ H \end{array} \right]
-	    = \left[ \begin{array}{l}
-	    \mathrm{atan} \left( \frac{x}{y} \right) \\
-	    \mathrm{atan} \left( \frac{z}{\sqrt{x^2+y^2}} \right) \\
-	    z
-	    \end{array} \right] \f$</td>
-	</tr>
-	<tr>
-	  <td>Cartesian <br> \f$ (x,y,z) \f$</td>
-      <td>NorthEastHeight <br> \f$ (N,E,H) \f$</td>
-	  <td>CR::NorthEastHeight2Cartesian</td>
-	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
-	  \left[ \begin{array}{l} E \\ N \\ H \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{c} N \\ E \\ H \end{array} \right] =
-	  \left[ \begin{array}{l} y \\ x \\ z \end{array} \right] \f$</td>
-	</tr>
-    <tr>
-	  <td class="indexkey">Target</td>
-	  <td class="indexkey">... as function of</td>
-	  <td class="indexkey">Function</td>
-	  <td class="indexkey">Relation</td>
-	  <td class="indexkey">Inversion</td>
-	</tr>
-	<tr>
-	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
-      <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
-	  <td>CR::Cylindrical2Spherical</td>
-	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
-	    = \left[ \begin{array}{l} 
-	    \sqrt{\rho^2 + z^2} \\
-	    \phi \\
-	    \mathrm{asin} \left( \frac{\rho}{\sqrt{\rho^2 + z^2}} \right)
-	    \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
-	    = \left[ \begin{array}{l} 
-	    r \sin(\theta) \\ \phi \\ r \cos(\theta)
-	    \end{array} \right] \f$</td>
-	</tr>
-    <tr>
-	  <td class="indexkey">Target</td>
-	  <td class="indexkey">... as function of</td>
-	  <td class="indexkey">Function</td>
-	  <td class="indexkey">Relation</td>
-	  <td class="indexkey">Inversion</td>
-	</tr>
-	<tr>
-      <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
-	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
-	  <td>CR::Spherical2Cylindrical</td>
-	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
-	    = \left[ \begin{array}{l} 
-	    r \sin(\theta) \\ \phi \\ r \cos(\theta)
-	    \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
-	    = \left[ \begin{array}{l} 
-	    \sqrt{\rho^2 + z^2} \\
-	    \phi \\
-	    \mathrm{asin} \left( \frac{\rho}{\sqrt{\rho^2 + z^2}} \right)
-	    \end{array} \right] \f$</td>
-	</tr>
-  </table>
-  
   <hr>
   
   \section crtools_coordinates_references References
