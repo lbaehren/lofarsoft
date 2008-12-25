@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
+ | $Id::                                                                     $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2008                                                    *
@@ -21,18 +21,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Coordinates/TimeFreqSkymap.h>
+#include <Coordinates/TimeFreqCoordinate.h>
 
 // Namespace usage
 using CR::CoordinateType;
-using CR::TimeFreqSkymap;
+using CR::TimeFreqCoordinate;
 
 /*!
-  \file tTimeFreqSkymap.cc
+  \file tTimeFreqCoordinate.cc
 
   \ingroup CR_Coordinates
 
-  \brief A collection of test routines for the CR::TimeFreqSkymap class
+  \brief A collection of test routines for the CR::TimeFreqCoordinate class
  
   \author Lars B&auml;hren
  
@@ -42,7 +42,7 @@ using CR::TimeFreqSkymap;
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test constructors for a new CR::TimeFreqSkymap object
+  \brief Test constructors for a new CR::TimeFreqCoordinate object
 
   \return nofFailedTests -- The number of failed tests within this function.
 */
@@ -50,11 +50,11 @@ int test_constructors ()
 {
   int nofFailedTests (0);
   
-  std::cout << "\n[tTimeFreqSkymap::test_constructors]\n" << std::endl;
+  std::cout << "\n[tTimeFreqCoordinate::test_constructors]\n" << std::endl;
 
   std::cout << "[1] Default constructor ..." << std::endl;
   try {
-    TimeFreqSkymap coord;
+    TimeFreqCoordinate coord;
     //
     coord.summary(); 
   } catch (std::string message) {
@@ -66,8 +66,8 @@ int test_constructors ()
   try {
     uint blocksPerFrame (2);
     uint nofFrames (10);
-    TimeFreqSkymap coord (blocksPerFrame,
-			  nofFrames);
+    TimeFreqCoordinate coord (blocksPerFrame,
+			      nofFrames);
     //
     coord.summary(); 
   } catch (std::string message) {
@@ -82,11 +82,11 @@ int test_constructors ()
     int nyquistZone (2);
     uint blocksPerFrame (2);
     uint nofFrames (10);
-    TimeFreqSkymap coord (blocksize,
-			  sampleFreq,
-			  nyquistZone,
-			  blocksPerFrame,
-			  nofFrames);
+    TimeFreqCoordinate coord (blocksize,
+			      sampleFreq,
+			      nyquistZone,
+			      blocksPerFrame,
+			      nofFrames);
     //
     coord.summary(); 
   } catch (std::string message) {
@@ -101,15 +101,15 @@ int test_constructors ()
     int nyquistZone (2);
     uint blocksPerFrame (2);
     uint nofFrames (10);
-    TimeFreqSkymap coord1 (blocksize,
-			   sampleFreq,
-			   nyquistZone,
-			   blocksPerFrame,
-			   nofFrames);
+    TimeFreqCoordinate coord1 (blocksize,
+			       sampleFreq,
+			       nyquistZone,
+			       blocksPerFrame,
+			       nofFrames);
     //
     coord1.summary();
     /* create second object from the first one */
-    TimeFreqSkymap coord2 (coord1);
+    TimeFreqCoordinate coord2 (coord1);
     /* Summary of object properties */
     coord2.summary();
   } catch (std::string message) {
@@ -129,11 +129,11 @@ int test_constructors ()
 */
 int test_parameters ()
 {
-  std::cout << "\n[tTimeFreqSkymap::test_parameters]\n" << std::endl;
+  std::cout << "\n[tTimeFreqCoordinate::test_parameters]\n" << std::endl;
 
   int nofFailedTests (0);
 
-  TimeFreqSkymap timeFreq;
+  TimeFreqCoordinate timeFreq;
 
   //________________________________________________________
   // Test of the methods inherited from the base class
@@ -191,7 +191,7 @@ int test_parameters ()
   }
 
   //________________________________________________________
-  // Test of the methods added by TimeFreqSkymap
+  // Test of the methods added by TimeFreqCoordinate
 
   std::cout << "[5] Input data blocks per time-frame ..." << std::endl;
   try {
@@ -234,7 +234,7 @@ int test_parameters ()
 */
 int test_methods ()
 {
-  std::cout << "\n[tTimeFreqSkymap::test_methods]\n" << std::endl;
+  std::cout << "\n[tTimeFreqCoordinate::test_methods]\n" << std::endl;
 
   int nofFailedTests (0);
   
@@ -243,11 +243,11 @@ int test_methods ()
   int nyquistZone (2);
   uint blocksPerFrame (2);
   uint nofFrames (10);
-  TimeFreqSkymap tf (blocksize,
-		     sampleFreq,
-		     nyquistZone,
-		     blocksPerFrame,
-		     nofFrames);
+  TimeFreqCoordinate tf (blocksize,
+			 sampleFreq,
+			 nyquistZone,
+			 blocksPerFrame,
+			 nofFrames);
   
   std::cout << "[1] Coordinate axis reference value ..." << std::endl;
   try {

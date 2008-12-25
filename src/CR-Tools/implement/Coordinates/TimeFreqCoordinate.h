@@ -35,10 +35,12 @@
 #include <Coordinates/TimeFreq.h>
 #include <Coordinates/CoordinateType.h>
 
+using casa::Vector;
+
 namespace CR { // Namespace CR -- begin
   
   /*!
-    \class TimeFreqSkymap
+    \class TimeFreqCoordinate
     
     \ingroup CR_Coordinates
     
@@ -48,7 +50,7 @@ namespace CR { // Namespace CR -- begin
 
     \date 2008/09/06
 
-    \test tTimeFreqSkymap.cc
+    \test tTimeFreqCoordinate.cc
     
     <h3>Prerequisite</h3>
     
@@ -135,11 +137,24 @@ namespace CR { // Namespace CR -- begin
       </tr>
     </table>
 
-
+    Given the fact that we are working with more but a single object of type
+    casa::Coordinate we need to wrap the calls to function handling either
+    allowing access to internal parameters or carrying out coordinate conversions:
+    <ul>
+      <li>TimeFreqCoordinate::worldAxisNames
+      <li>TimeFreqCoordinate::worldAxisUnits
+      <li>TimeFreqCoordinate::referencePixel
+      <li>TimeFreqCoordinate::referenceValue
+      <li>TimeFreqCoordinate::linearTransform
+      <li>TimeFreqCoordinate::increment
+      <li>TimeFreqCoordinate::toWorld
+      <li>TimeFreqCoordinate::toPixel
+    </ul>
+    
     <h3>Example(s)</h3>
     
     <ul>
-      <li>Store data inside a new TimeFreqSkymap object:
+      <li>Store data inside a new TimeFreqCoordinate object:
       \code
       uint blocksize (1024);
       casa::Quantity sampleFreq (200,"MHz");
@@ -147,7 +162,7 @@ namespace CR { // Namespace CR -- begin
       uint blocksPerFrame (10);
       uint frames (100);
       
-      TimeFreqSkymap tf (blocksize,
+      TimeFreqCoordinate tf (blocksize,
                          sampleFreq,
 		         nyquistZone,
 			 blocksPerFrame,
@@ -160,13 +175,13 @@ namespace CR { // Namespace CR -- begin
       uint blocksPerFrame (10);
       uint frames (100);
       
-      TimeFreqSkymap tf_skymap (tf,
+      TimeFreqCoordinate tf_skymap (tf,
 			        blocksPerFrame,
 			        frames);
       \endcode
       <li>Get the internal object storing the coordinate domain information:
       \code 
-      TimeFreqSkymap tf;
+      TimeFreqCoordinate tf;
 
       CoordinateDomain domain = tf.beamDomain();
       \endcode
@@ -179,12 +194,17 @@ namespace CR { // Namespace CR -- begin
     </ul>
     
   */  
-  class TimeFreqSkymap : public TimeFreq {
+  class TimeFreqCoordinate : public TimeFreq {
+
+    //! The target domain for which the data are processed by the Beamformer
+    CR::CoordinateType coordType_p;
+    //! Linear coordinate for the time axis
+    casa::LinearCoordinate coordTime_p;
+    //! Spectral coordinate for the frequency axis
+    casa::SpectralCoordinate coordFrequency_p;
     
   protected:
 
-    //! The target domain for which the data are processed by the Beamformer
-    CoordinateType coordType_p;
     //! The number of data blocks added up within a single time frame
     uint blocksPerFrame_p;
     //! The number of time frames, \f$ N_{\rm Frames} \f$
@@ -197,7 +217,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Default constructor
     */
-    TimeFreqSkymap ();
+    TimeFreqCoordinate ();
     
     /*!
       \brief Argumented constructor
@@ -206,7 +226,7 @@ namespace CR { // Namespace CR -- begin
              time frame
       \param nofFrames      -- The number of frames
     */
-    TimeFreqSkymap (uint const &blocksPerFrame,
+    TimeFreqCoordinate (uint const &blocksPerFrame,
 		    uint const &nofFrames);
     
     /*!
@@ -219,7 +239,7 @@ namespace CR { // Namespace CR -- begin
              time frame
       \param nofFrames       -- The number of frames
     */
-    TimeFreqSkymap (uint const &blocksize,
+    TimeFreqCoordinate (uint const &blocksize,
 		    double const &sampleFrequency,
 		    uint const &nyquistZone,
 		    uint const &blocksPerFrame,
@@ -235,7 +255,7 @@ namespace CR { // Namespace CR -- begin
              time frame
       \param nofFrames       -- The number of frames
     */
-    TimeFreqSkymap (uint const &blocksize,
+    TimeFreqCoordinate (uint const &blocksize,
 		    casa::Quantity const &sampleFrequency,
 		    uint const &nyquistZone,
 		    uint const &blocksPerFrame,
@@ -250,33 +270,33 @@ namespace CR { // Namespace CR -- begin
              time frame
       \param nofFrames      -- The number of frames
     */
-    TimeFreqSkymap (TimeFreq const &timeFreq,
+    TimeFreqCoordinate (TimeFreq const &timeFreq,
 		    uint const &blocksPerFrame,
 		    uint const &nofFrames);
     
     /*!
       \brief Copy constructor
       
-      \param other -- Another TimeFreqSkymap object from which to create this new
+      \param other -- Another TimeFreqCoordinate object from which to create this new
       one.
     */
-    TimeFreqSkymap (TimeFreqSkymap const &other);
+    TimeFreqCoordinate (TimeFreqCoordinate const &other);
     
     // -------------------------------------------------------------- Destruction
 
     /*!
       \brief Destructor
     */
-    ~TimeFreqSkymap ();
+    ~TimeFreqCoordinate ();
     
     // ---------------------------------------------------------------- Operators
     
     /*!
       \brief Overloading of the copy operator
       
-      \param other -- Another TimeFreqSkymap object from which to make a copy.
+      \param other -- Another TimeFreqCoordinate object from which to make a copy.
     */
-    TimeFreqSkymap& operator= (TimeFreqSkymap const &other); 
+    TimeFreqCoordinate& operator= (TimeFreqCoordinate const &other); 
     
     // --------------------------------------------------------------- Parameters
 
@@ -351,17 +371,15 @@ namespace CR { // Namespace CR -- begin
       \param nofFrames -- The total number of time frames to generate for the
              resulting skymap.
     */
-    inline void setNofFrames (uint const &nofFrames) {
-      nofFrames_p = nofFrames;
-    }
+    void setNofFrames (uint const &nofFrames);
     
     /*!
       \brief Get the name of the class
       
-      \return className -- The name of the class, TimeFreqSkymap.
+      \return className -- The name of the class, TimeFreqCoordinate.
     */
     inline std::string className () const {
-      return "TimeFreqSkymap";
+      return "TimeFreqCoordinate";
     }
 
     /*!
@@ -386,11 +404,7 @@ namespace CR { // Namespace CR -- begin
       \return shape -- [time,freq] = \f$ [ N_t , N_\nu] \f$ The number of elements
               along each of the two coupled axes.
     */
-#ifdef HAVE_CASA
     virtual casa::IPosition shape () const;
-#else 
-    virtual vector<int> shape () const;
-#endif
     
     /*!
       \brief Get the reference value for the world coordinates of the axes
@@ -401,26 +415,66 @@ namespace CR { // Namespace CR -- begin
 
       \return refValue -- [time,freq] = \f$ [ t_{\rm CRVAL}, \nu_{\rm CRVAL} ] \f$
     */
-#ifdef HAVE_CASA
-    casa::Vector<double> referenceValue (int const &nFrame=0) const;
-#else 
-    vector<double> referenceValue (int const &nFrame=0) const;
-#endif
+    Vector<double> referenceValue (int const &nFrame=0) const;
+
+    // -------------------------------------------------------------- WCS methods
+
+    /*!
+      \brief Get the names of the world axes
+
+      \return names -- The names of the world axes, as retrieved through the
+              <tt>casa::Coordinate::worldAxisNames()<tt> function.
+    */
+    Vector<casa::String> worldAxisNames () const;
+    
+    /*!
+      \brief Get the units of the world axes
+
+      \return units -- The units of the world axes, as retrieved through the
+              <tt>casa::Coordinate::worldAxisUnits()<tt> function.
+    */
+    Vector<casa::String> worldAxisUnits () const;
+
+    /*!
+      \brief Get the value of the reference pixel
+
+      \return refPixel -- The value of the reference pixel, as retrieved through
+              the <tt>casa::Coordinate::referencePixel()<tt> function.
+    */
+    Vector<double> referencePixel() const;
+
+    /*!
+      \brief Get the matrix for the linear transformation
+
+      \return Xform -- The matrix of the linear transformation, as retrieved
+              through the <tt>casa::Coordinate::linearTransform()<tt> function.
+     */
+    Matrix<double> linearTransform();
 
     /*!
       \brief Get the increment between subsequent values along the axes
 
       \return increment -- [time,freq] = \f$ [ \delta_t, \delta_\nu ] \f$
     */
-#ifdef HAVE_CASA
-    casa::Vector<double> increment () const;
-#else 
-    vector<double> increment () const;
-#endif
+    Vector<double> increment () const;
 
-    // --------------------------------------------------------- Optional methods
+    /*!
+      \brief Conversion from pixel to world coordinates
 
-#ifdef HAVE_CASA
+      \retval world -- Values in world coordinates
+      \param pixel  -- Values in pixel coordinates
+    */
+    void toWorld (Vector<double> &world,
+		  Vector<double> const &pixel);
+
+    /*!
+      \brief Conversion from world to pixel coordinates
+
+      \retval pixel -- Values in pixel coordinates
+      \param world  -- Values in world coordinates
+    */
+    void toPixel (Vector<double> &pixel,
+		  Vector<double> const &world);
 
     /*!
       \brief Create a coordinate object from the internally stored parameters
@@ -428,7 +482,9 @@ namespace CR { // Namespace CR -- begin
       \return coord -- casa::LinearCoordinate object wrapping the
               characteristics of the time axis.
     */
-    casa::LinearCoordinate timeAxisCoordinate ();
+    inline casa::LinearCoordinate timeAxisCoordinate () const {
+      return coordTime_p;
+    };
 
     /*!
       \brief Create a coordinate object from the internally stored parameters
@@ -436,7 +492,9 @@ namespace CR { // Namespace CR -- begin
       \return coord -- casa::SpectralCoordinate object wrapping the
               characteristics of the frequency axis.
     */
-    casa::SpectralCoordinate frequencyAxisCoordinate ();
+    inline casa::SpectralCoordinate frequencyAxisCoordinate () const {
+      return coordFrequency_p;
+    }
 
     /*!
       \brief Create a coordinate objects from the internally stored parameters
@@ -452,14 +510,12 @@ namespace CR { // Namespace CR -- begin
     bool coordinates (casa::LinearCoordinate &time,
 		      casa::SpectralCoordinate &freq);
 
-#endif
-    
   private:
     
     /*!
       \brief Unconditional copying
     */
-    void copy (TimeFreqSkymap const &other);
+    void copy (TimeFreqCoordinate const &other);
     
     /*!
       \brief Unconditional deletion 
@@ -472,6 +528,9 @@ namespace CR { // Namespace CR -- begin
     void init (CoordinateType const &coordType,
 	       uint const &blocksPerFrame,
 	       uint const &nofFrames);
+
+    //! Set the coordinate objects
+    void setCoordinates ();
     
   };
   

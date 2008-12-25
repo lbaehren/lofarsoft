@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Coordinates/TimeFreqSkymap.h>
+#include <Coordinates/TimeFreqCoordinate.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -31,9 +31,9 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  // ------------------------------------------------------------- TimeFreqSkymap
+  // ------------------------------------------------------------- TimeFreqCoordinate
   
-  TimeFreqSkymap::TimeFreqSkymap ()
+  TimeFreqCoordinate::TimeFreqCoordinate ()
     : TimeFreq()
   {
     init (CoordinateType(CoordinateType::Frequency),
@@ -41,10 +41,10 @@ namespace CR { // Namespace CR -- begin
 	  1);
   }
   
-  // ------------------------------------------------------------- TimeFreqSkymap
+  // ------------------------------------------------------------- TimeFreqCoordinate
   
-  TimeFreqSkymap::TimeFreqSkymap (uint const &blocksPerFrame,
-				  uint const &nofFrames)
+  TimeFreqCoordinate::TimeFreqCoordinate (uint const &blocksPerFrame,
+					  uint const &nofFrames)
     : TimeFreq()
   {
     init (CoordinateType(CoordinateType::Frequency),
@@ -52,13 +52,13 @@ namespace CR { // Namespace CR -- begin
 	  nofFrames);
   }
   
-  // ------------------------------------------------------------- TimeFreqSkymap
+  // ------------------------------------------------------------- TimeFreqCoordinate
   
-  TimeFreqSkymap::TimeFreqSkymap (uint const &blocksize,
-				  double const &sampleFrequency,
-				  uint const &nyquistZone,
-				  uint const &blocksPerFrame,
-				  uint const &nofFrames)
+  TimeFreqCoordinate::TimeFreqCoordinate (uint const &blocksize,
+					  double const &sampleFrequency,
+					  uint const &nyquistZone,
+					  uint const &blocksPerFrame,
+					  uint const &nofFrames)
     : TimeFreq(blocksize,
 	       sampleFrequency,
 	       nyquistZone)
@@ -68,13 +68,13 @@ namespace CR { // Namespace CR -- begin
 	  nofFrames);
   }
   
-  // ------------------------------------------------------------- TimeFreqSkymap
+  // ------------------------------------------------------------- TimeFreqCoordinate
   
-  TimeFreqSkymap::TimeFreqSkymap (uint const &blocksize,
-				  casa::Quantity const &sampleFrequency,
-				  uint const &nyquistZone,
-				  uint const &blocksPerFrame,
-				  uint const &nofFrames)
+  TimeFreqCoordinate::TimeFreqCoordinate (uint const &blocksize,
+					  casa::Quantity const &sampleFrequency,
+					  uint const &nyquistZone,
+					  uint const &blocksPerFrame,
+					  uint const &nofFrames)
     : TimeFreq(blocksize,
 	       sampleFrequency,
 	       nyquistZone)
@@ -84,11 +84,11 @@ namespace CR { // Namespace CR -- begin
 	  nofFrames);
   }
   
-  // ------------------------------------------------------------- TimeFreqSkymap
+  // ------------------------------------------------------------- TimeFreqCoordinate
   
-  TimeFreqSkymap::TimeFreqSkymap (TimeFreq const &timeFreq,
-				  uint const &blocksPerFrame,
-				  uint const &nofFrames)
+  TimeFreqCoordinate::TimeFreqCoordinate (TimeFreq const &timeFreq,
+					  uint const &blocksPerFrame,
+					  uint const &nofFrames)
     : TimeFreq(timeFreq)
   {
     init (CoordinateType(CoordinateType::Frequency),
@@ -96,9 +96,9 @@ namespace CR { // Namespace CR -- begin
 	  nofFrames);
   }
   
-  // ------------------------------------------------------------- TimeFreqSkymap
+  // ------------------------------------------------------------- TimeFreqCoordinate
   
-  TimeFreqSkymap::TimeFreqSkymap (TimeFreqSkymap const &other)
+  TimeFreqCoordinate::TimeFreqCoordinate (TimeFreqCoordinate const &other)
     : TimeFreq(other),
       coordType_p (CoordinateType(CoordinateType::Frequency))
   {
@@ -111,12 +111,12 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  TimeFreqSkymap::~TimeFreqSkymap ()
+  TimeFreqCoordinate::~TimeFreqCoordinate ()
   {
     destroy();
   }
   
-  void TimeFreqSkymap::destroy ()
+  void TimeFreqCoordinate::destroy ()
   {;}
   
   // ============================================================================
@@ -125,7 +125,7 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  TimeFreqSkymap& TimeFreqSkymap::operator= (TimeFreqSkymap const &other)
+  TimeFreqCoordinate& TimeFreqCoordinate::operator= (TimeFreqCoordinate const &other)
   {
     if (this != &other) {
       destroy ();
@@ -134,15 +134,17 @@ namespace CR { // Namespace CR -- begin
     return *this;
   }
   
-  void TimeFreqSkymap::copy (TimeFreqSkymap const &other)
+  void TimeFreqCoordinate::copy (TimeFreqCoordinate const &other)
   {
     TimeFreq::operator= (other);
-
-    coordType_p      = other.coordType_p;
+    
     blocksPerFrame_p = other.blocksPerFrame_p;
     nofFrames_p      = other.nofFrames_p;
+    coordType_p      = other.coordType_p;
+    coordTime_p      = other.coordTime_p;
+    coordFrequency_p = other.coordFrequency_p;
   }
-
+  
   // ============================================================================
   //
   //  Parameters
@@ -150,24 +152,24 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   //_______________________________________________________________ setBeamDomain
-
-  bool TimeFreqSkymap::setBeamCoordDomain (CR::CoordinateType::Types const &type)
+  
+  bool TimeFreqCoordinate::setBeamCoordDomain (CR::CoordinateType::Types const &type)
   {
     return setBeamCoordDomain (CoordinateType(type));
   }
   
   //_______________________________________________________________ setBeamDomain
-
-  bool TimeFreqSkymap::setBeamCoordDomain (CR::CoordinateType const &type)
+  
+  bool TimeFreqCoordinate::setBeamCoordDomain (CR::CoordinateType const &type)
   {
     bool status (true);
-
+    
     switch (type.type()) {
     case CoordinateType::Time:
       if (blocksPerFrame_p == 1) {
 	coordType_p = type;
       } else {
-	std::cerr << "[TimeFreqSkymap::setBeamDomain] " 
+	std::cerr << "[TimeFreqCoordinate::setBeamDomain] " 
 		  << "Inconsistent combination of parameter values!" << std::endl;
 	status = false;
       }
@@ -176,21 +178,24 @@ namespace CR { // Namespace CR -- begin
       coordType_p = type;
       break;
     default:
-      std::cerr << "[TimeFreqSkymap::setBeamDomain] Invalid domain!" << std::endl;
+      std::cerr << "[TimeFreqCoordinate::setBeamDomain] Invalid domain!" << std::endl;
       status = false;
       break;
     }
     
+    // update the coordinate objects
+    setCoordinates();
+    
     return status;
   }
-
+  
   //___________________________________________________________ setBlocksPerFrame
-
-  bool TimeFreqSkymap::setBlocksPerFrame (uint const &blocksPerFrame,
-					  bool const &adjustDomain)
+  
+  bool TimeFreqCoordinate::setBlocksPerFrame (uint const &blocksPerFrame,
+					      bool const &adjustDomain)
   {
     bool status (true);
-
+    
     switch (coordType_p.type()) {
     case CoordinateType::Time:
       if (blocksPerFrame > 1 && adjustDomain) {
@@ -204,32 +209,37 @@ namespace CR { // Namespace CR -- begin
       blocksPerFrame_p = blocksPerFrame;
       break;
     }
+
+    // update the coordinate objects
+    setCoordinates();
     
     return status;
+  }
+
+  //________________________________________________________________ setNofFrames
+
+  void TimeFreqCoordinate::setNofFrames (uint const &nofFrames)
+  {
+    // store input value
+    nofFrames_p = nofFrames;
+    // update the coordinate objects
+    setCoordinates();
   }
   
   //_____________________________________________________________________ summary
   
-  void TimeFreqSkymap::summary (std::ostream &os)
+  void TimeFreqCoordinate::summary (std::ostream &os)
   {
-    os << "[TimeFreqSkymap] Summary of internal parameters."    << std::endl;
+    os << "[TimeFreqCoordinate] Summary of internal parameters."    << std::endl;
     os << "-- Blocksize            = " << blocksize_p           << std::endl;
     os << "-- Sample frequency     = " << sampleFrequency_p     << std::endl;
     os << "-- Nyquist zone         = " << nyquistZone_p         << std::endl;
     os << "-- Reference time       = " << referenceTime_p       << std::endl;
-    os << "-- Target domain        = " << coordType_p.name()   << std::endl;
+    os << "-- Target domain        = " << coordType_p.name()    << std::endl;
     os << "-- Blocks per frame     = " << blocksPerFrame_p      << std::endl;
-    os << "-- nof. frames          = " << nofFrames_p           << std::endl;
-    
-#ifdef HAVE_CASA
+    os << "-- nof. frames          = " << nofFrames_p           << std::endl;   
     os << "-- Shape of the axes    = " << shape()               << std::endl;
     os << "-- Axis value increment = " << increment()           << std::endl;
-#else
-    os << "-- Shape of the axes    = [" << shape()[0] << ","
-       << shape()[1] << std::endl;
-    os << "-- Axis value increment = [" << increment()[0] << ","
-       << increment()[1] << std::endl;
-#endif
   }
   
   // ============================================================================
@@ -237,10 +247,10 @@ namespace CR { // Namespace CR -- begin
   //  Methods
   //
   // ============================================================================
-
-  void TimeFreqSkymap::init (CoordinateType const &coordType,
-			     uint const &blocksPerFrame,
-			     uint const &nofFrames)
+  
+  void TimeFreqCoordinate::init (CoordinateType const &coordType,
+				 uint const &blocksPerFrame,
+				 uint const &nofFrames)
   {
     coordType_p = coordType;
     setBlocksPerFrame (blocksPerFrame);
@@ -249,8 +259,7 @@ namespace CR { // Namespace CR -- begin
   
   // ---------------------------------------------------------------------- shape
   
-#ifdef HAVE_CASA
-  casa::IPosition TimeFreqSkymap::shape () const
+  casa::IPosition TimeFreqCoordinate::shape () const
   {
     casa::IPosition shape(2);
     
@@ -265,42 +274,96 @@ namespace CR { // Namespace CR -- begin
     }
       break;
     default:
-      std::cerr << "[TimeFreqSkymap::shape] Invalid domain!" << std::endl;
+      std::cerr << "[TimeFreqCoordinate::shape] Invalid domain!" << std::endl;
       break;
     };
     
     return shape;
   }
-#else 
-  vector<int> TimeFreqSkymap::shape () const
+  
+  // ------------------------------------------------------------- setCoordinates
+
+  void TimeFreqCoordinate::setCoordinates ()
   {
-    vector<int> shape(2);
- 
+    Vector<double> crval = referenceValue();
+    Vector<double> cdelt;
+
+    //______________________________________________________
+    // Compute the increment along the coordinate axis
+
     switch (coordType_p.type()) {
     case CoordinateType::Time:
-      shape[0] = blocksize_p*nofFrames_p;
-      shape[1] = 1;
+      cdelt(0) = 1/sampleFrequency_p;
+      cdelt(1) = sampleFrequency_p/2;
       break;
-    case CoordinateType::Frequency: {
-      shape[0] = nofFrames_p;
-      shape[1] = fftLength_p;
-    }
+    case CoordinateType::Frequency:
+      cdelt(0) = blocksize_p*blocksPerFrame_p*nofFrames_p/sampleFrequency_p;
+      cdelt(1) = sampleFrequency_p/blocksize_p;
       break;
     default:
-      std::cerr << "[TimeFreqSkymap::shape] Invalid domain!" << std::endl;
+      std::cerr << "[TimeFreqCoordinate::increment] Invalid domain!" << std::endl;
       break;
     };
-    
-    return shape;
+
+    coordTime_p      = CoordinateType::makeTimeCoordinate(crval(0),
+							  cdelt(0));
+    coordFrequency_p = CoordinateType::makeSpectralCoordinate (crval(1),
+							       cdelt(1));
   }
-#endif
+
+  // ------------------------------------------------------------------ increment
+  
+  Vector<double> TimeFreqCoordinate::increment () const
+  {
+    Vector<double> cdelt (2);
+
+    cdelt(0) = coordTime_p.increment()(0);
+    cdelt(1) = coordFrequency_p.increment()(0);
+
+    return cdelt;
+  }
+
+  // ------------------------------------------------------------- worldAxisNames
+  
+  Vector<casa::String> TimeFreqCoordinate::worldAxisNames () const
+  {
+    Vector<casa::String> names (2);
+
+    names(0) = coordTime_p.worldAxisNames()(0);
+    names(1) = coordFrequency_p.worldAxisNames()(0);
+
+    return names;
+  }
+
+  // ------------------------------------------------------------- worldAxisUnits
+  
+  Vector<casa::String> TimeFreqCoordinate::worldAxisUnits () const
+  {
+    Vector<casa::String> units (2);
+
+    units(0) = coordTime_p.worldAxisUnits()(0);
+    units(1) = coordFrequency_p.worldAxisUnits()(0);
+
+    return units;
+  }
+
+  // ------------------------------------------------------------- referencePixel
+  
+  Vector<double> TimeFreqCoordinate::referencePixel () const
+  {
+    Vector<double> refPixel (2);
+
+    refPixel(0) = coordTime_p.referencePixel()(0);
+    refPixel(1) = coordFrequency_p.referencePixel()(0);
+
+    return refPixel;
+  }
 
   // ------------------------------------------------------------- referenceValue
 
-#ifdef HAVE_CASA
-  casa::Vector<double> TimeFreqSkymap::referenceValue (int const &nFrame) const
+  Vector<double> TimeFreqCoordinate::referenceValue (int const &nFrame) const
   {
-    casa::Vector<double> refValue (2);
+    Vector<double> refValue (2);
 
     switch (coordType_p.type()) {
     case CoordinateType::Time:
@@ -313,115 +376,56 @@ namespace CR { // Namespace CR -- begin
     }
       break;
     default:
-      std::cerr << "[TimeFreqSkymap::shape] Invalid domain!" << std::endl;
+      std::cerr << "[TimeFreqCoordinate::shape] Invalid domain!" << std::endl;
       break;
     };
     
     return refValue;
   }
-#else 
-  vector<double> TimeFreqSkymap::referenceValue (int const &nFrame) const
-  {
-    vector<double> refValue (2);
 
-    switch (coordType_p.type()) {
-    case CoordinateType::Time:
-      refValue[0] = referenceTime() + blocksize_p*nFrame/sampleFrequency_p;
-      refValue[1] = sampleFrequency_p*(2*nyquistZone_p-1)/4;
-      break;
-    case CoordinateType::Frequency: {
-      refValue[0] = referenceTime() + blocksize_p*blocksPerFrame_p*nFrame/sampleFrequency_p;
-      refValue[1] = sampleFrequency_p*(nyquistZone_p-1)/2;
-    }
-      break;
-    default:
-      std::cerr << "[TimeFreqSkymap::shape] Invalid domain!" << std::endl;
-      break;
-    };
-    
-    return refValue;
-  }
-#endif
-  // ------------------------------------------------------------------ increment
+  // -------------------------------------------------------------------- toWorld
   
-#ifdef HAVE_CASA
-  casa::Vector<double> TimeFreqSkymap::increment () const
+  void TimeFreqCoordinate::toWorld (Vector<double> &world,
+				    Vector<double> const &pixel)
   {
-    casa::Vector<double> vec (2);
-    
-    switch (coordType_p.type()) {
-    case CoordinateType::Time:
-      vec(0) = 1/sampleFrequency_p;
-      vec(1) = sampleFrequency_p/2;
-      break;
-    case CoordinateType::Frequency:
-      vec(0) = blocksize_p*blocksPerFrame_p*nofFrames_p/sampleFrequency_p;
-      vec(1) = sampleFrequency_p/blocksize_p;
-      break;
-    default:
-      std::cerr << "[TimeFreqSkymap::increment] Invalid domain!" << std::endl;
-      break;
-    };
-    
-    return vec;
-  }
-#else 
-  vector<double> TimeFreqSkymap::increment () const
-  {
-    vector<double> vec (2);
+    Vector<double> in (1);
+    Vector<double> out (1);
 
-    switch (coordType_p.type()) {
-    case CoordinateType::Time:
-      vec[0] = 1/sampleFrequency_p;
-      vec[1] = sampleFrequency_p/2;
-      break;
-    case CoordinateType::Frequency:
-      vec[0] = blocksize_p*blocksPerFrame_p*nofFrames_p/sampleFrequency_p;
-      vec[1] = sampleFrequency_p/blocksize_p;
-      break;
-    default:
-      std::cerr << "[TimeFreqSkymap::increment] Invalid domain!" << std::endl;
-      break;
-    };
-    
-    return vec;
+    // Time axis
+    in = pixel(0);
+    coordTime_p.toWorld (out,in);
+    world(0) = out(0);
+
+    // Frequency axis
+    in = pixel(1);
+    coordFrequency_p.toWorld (out,in);
+    world(1) = out(0);
   }
-#endif  
   
-  // ============================================================================
-  //
-  //  Optional methods (explicitely requiring casacore)
-  //
-  // ============================================================================
-
-#ifdef HAVE_CASA
-
-  // --------------------------------------------------------- timeAxisCoordinate
+  // -------------------------------------------------------------------- toPixel
   
-  casa::LinearCoordinate TimeFreqSkymap::timeAxisCoordinate ()
+  void TimeFreqCoordinate::toPixel (Vector<double> &pixel,
+				    Vector<double> const &world)
+
   {
-    double crval = referenceValue()(0);
-    double cdelt = increment()(0);
+    Vector<double> in (1);
+    Vector<double> out (1);
 
-    return CoordinateType::makeTimeCoordinate(crval,
-					      cdelt);
+    // Time axis
+    in = world(0);
+    coordTime_p.toPixel (out,in);
+    pixel(0) = out(0);
+
+    // Frequency axis
+    in = world(1);
+    coordFrequency_p.toPixel (out,in);
+    pixel(1) = out(0);
   }
-
-  // ---------------------------------------------------- frequencyAxisCoordinate
-
-  casa::SpectralCoordinate TimeFreqSkymap::frequencyAxisCoordinate ()
-  {
-    double crval = referenceValue()(1);
-    double cdelt = increment()(1);
-
-    return CoordinateType::makeSpectralCoordinate (crval,
-						   cdelt);
-  }
-
+  
   // ---------------------------------------------------------------- coordinates
-
-  bool TimeFreqSkymap::coordinates (casa::LinearCoordinate &time,
-				    casa::SpectralCoordinate &freq)
+  
+  bool TimeFreqCoordinate::coordinates (casa::LinearCoordinate &time,
+					casa::SpectralCoordinate &freq)
   {
     bool status (true);
     
@@ -429,13 +433,11 @@ namespace CR { // Namespace CR -- begin
       time = timeAxisCoordinate();
       freq = frequencyAxisCoordinate();
     } catch (std::string message) {
-      std::cerr << "[TimeFreqSkymap::coordinates] " << message << std::endl;
+      std::cerr << "[TimeFreqCoordinate::coordinates] " << message << std::endl;
       status = false;
     }
-
+    
     return status;
   }
-  
-#endif
   
 } // Namespace CR -- end

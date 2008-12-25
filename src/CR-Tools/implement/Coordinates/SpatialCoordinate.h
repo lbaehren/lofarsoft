@@ -106,8 +106,8 @@ namespace CR { // Namespace CR -- begin
       <tr>
         <td>[Direction,Linear]</td>
         <td>DirectionRadius</td>
-	<td>[Longitude, Latitude,Length]</td>
-	<td>[rad, rad,m]</td>
+	<td>[Longitude, Latitude, Length]</td>
+	<td>[rad, rad, m]</td>
 	<td>yes</td>
 	<td>Direction on the sky with radial distance</td>
       </tr>
@@ -122,10 +122,18 @@ namespace CR { // Namespace CR -- begin
       <tr>
         <td>[Linear]</td>
         <td>Spherical</td>
-	<td>[Length,Longitude, Latitude]</td>
-	<td>[m,deg, deg]</td>
+	<td>[Length, Longitude, Latitude]</td>
+	<td>[m, deg, deg]</td>
 	<td>no</td>
 	<td>Spherical coordinates</td>
+      </tr>
+      <tr>
+        <td>[Linear]</td>
+        <td>Cylindrical</td>
+	<td>[Length, Longitude, Length]</td>
+	<td>[m, deg, m]</td>
+	<td>no</td>
+	<td>Cylindrical coordinates</td>
       </tr>
     </table>
 

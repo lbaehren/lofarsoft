@@ -13,7 +13,7 @@ set (tests
   tPositionVector
   tSpatialCoordinate
   tTimeFreq
-  tTimeFreqSkymap
+  tTimeFreqCoordinate
   )
 
 ## ------------------------------------------------------------------------------

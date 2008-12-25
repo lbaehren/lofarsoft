@@ -147,6 +147,35 @@ Generally, X1, X2, T, D, R are function of time.
 
 \section crtools_imaging_implementation Implementation
 
+Image array:
+\f[  I = I (\xi_1,\xi_2,\xi_3,\nu,t)  \in C^5 \f]
+
+<h4>Coordinates</h4>
+
+Out of the five standard coordinate axes associated with the image array, two
+groups of coupled coordinate axes exist; in order to take account of that fact
+and provide the programmer/user with an interface reflecting these
+relationships, two custom coordinate object classes have been created:
+<ol>
+  <li>CR::SpatialCoordinate - Container to combine other coordinates into a
+  spatial (3D) coordinate.
+  <li>CR::TimeFreqCoordinate - Container for the time-frequency domain
+  parameters of a skymap.
+</ol>
+For both classes we provide the standard interfaces to WCS parameters,
+<ul>
+  <li>worldAxisNames
+  <li>worldAxisUnits
+  <li>referencePixel
+  <li>referenceValue
+  <li>linearTransform
+  <li>increment
+  <li>toWorld
+  <li>toPixel
+</ul>
+
+<h4>Beamforming</h4>
+
 The functionality required for beamforming and subsequent imaging is broken
 down into a number of classes.
 
@@ -174,9 +203,6 @@ down into a number of classes.
     \vec \rho, \nu) \Bigr) \f$</td>
   </tr>
 </table>
-
-Image array:
-\f[  I = I (\xi_1,\xi_2,\xi_3,\nu,t)  \in R^5 \f]
 
 In order to use the slicing operations, the arrays internally used by the
 Skymapper or the Beamformer need to be of equal rank -- otherwise the

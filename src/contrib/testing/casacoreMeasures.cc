@@ -118,15 +118,30 @@ int test_MVPosition ()
 
   cout << "[4] Test conversion between units ..." << endl;
   try {
-    casa::MVPosition pos1 (1,1,1);
-    casa::MVPosition pos2 (1,1,0);
-    casa::MVPosition pos3 (1,0,1);
-    casa::MVPosition pos4 (0,1,1);
+    casa::MVPosition pos1 (1,0,0);
+    casa::MVPosition pos2 (0,1,0);
+    casa::MVPosition pos3 (0,0,1);
+    casa::MVPosition pos4 (1,1,1);
     //
-    cout << "-- pos1 = " << pos1 << " = " << pos1.getAngle() << endl;
-    cout << "-- pos2 = " << pos2 << " = " << pos2.getAngle() << endl;
-    cout << "-- pos3 = " << pos3 << " = " << pos3.getAngle() << endl;
-    cout << "-- pos4 = " << pos4 << " = " << pos4.getAngle() << endl;
+    cout << "-- pos1 = " << pos1
+	 << " = " << pos1.getAngle(casa::Unit("deg"))
+	 << " = " << pos1.getAngle(casa::Unit("rad"))
+	 << endl;
+    cout << "-- pos2 = " << pos2
+	 << " = " << pos2.getAngle(casa::Unit("deg"))
+	 << " = " << pos2.getAngle(casa::Unit("rad"))
+	 << " = " << pos2.getAngle(casa::Unit("arcmin"))
+	 << endl;
+    cout << "-- pos3 = " << pos3
+	 << " = " << pos3.getAngle(casa::Unit("deg"))
+	 << " = " << pos3.getAngle(casa::Unit("rad"))
+	 << " = " << pos3.getAngle(casa::Unit("arcmin"))
+	 << endl;
+    cout << "-- pos4 = " << pos4
+	 << " = " << pos4.getAngle(casa::Unit("deg"))
+	 << " = " << pos4.getAngle(casa::Unit("rad"))
+	 << " = " << pos4.getAngle(casa::Unit("arcmin"))
+	 << endl;
   } catch (std::string message) {
     cerr << message << endl;
     nofFailedTests++;
