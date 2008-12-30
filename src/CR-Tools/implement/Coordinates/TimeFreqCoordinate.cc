@@ -36,9 +36,12 @@ namespace CR { // Namespace CR -- begin
   TimeFreqCoordinate::TimeFreqCoordinate ()
     : TimeFreq()
   {
+    uint blocksPerFrame = 1;
+    uint nofFrames      = 1;
+
     init (CoordinateType(CoordinateType::Frequency),
-	  1,
-	  1);
+	  blocksPerFrame,
+	  nofFrames);
   }
   
   // ------------------------------------------------------------- TimeFreqCoordinate
@@ -239,6 +242,8 @@ namespace CR { // Namespace CR -- begin
     os << "-- Blocks per frame     = " << blocksPerFrame_p      << std::endl;
     os << "-- nof. frames          = " << nofFrames_p           << std::endl;   
     os << "-- Shape of the axes    = " << shape()               << std::endl;
+    os << "-- Reference pixel      = " << referencePixel()      << std::endl;
+    os << "-- Reference value      = " << referenceValue()      << std::endl;
     os << "-- Axis value increment = " << increment()           << std::endl;
   }
   
@@ -283,10 +288,10 @@ namespace CR { // Namespace CR -- begin
   
   // ------------------------------------------------------------- setCoordinates
 
-  void TimeFreqCoordinate::setCoordinates ()
+  void TimeFreqCoordinate::setCoordinates (int const &nFrame)
   {
-    Vector<double> crval = referenceValue();
-    Vector<double> cdelt;
+    Vector<double> crval (2);
+    Vector<double> cdelt (2);
 
     //______________________________________________________
     // Compute the increment along the coordinate axis
@@ -305,6 +310,27 @@ namespace CR { // Namespace CR -- begin
       break;
     };
 
+    //______________________________________________________
+    // Compute the reference value of the coordinate axis
+    
+    switch (coordType_p.type()) {
+    case CoordinateType::Time:
+      crval(0) = referenceTime() + blocksize_p*nFrame/sampleFrequency_p;
+      crval(1) = sampleFrequency_p*(2*nyquistZone_p-1)/4;
+      break;
+    case CoordinateType::Frequency: {
+      crval(0) = referenceTime() + blocksize_p*blocksPerFrame_p*nFrame/sampleFrequency_p;
+      crval(1) = sampleFrequency_p*(nyquistZone_p-1)/2;
+    }
+      break;
+    default:
+      std::cerr << "[TimeFreqCoordinate::shape] Invalid domain!" << std::endl;
+      break;
+    };
+    
+    //______________________________________________________
+    // Set up the internal coordinate objects
+    
     coordTime_p      = CoordinateType::makeTimeCoordinate(crval(0),
 							  cdelt(0));
     coordFrequency_p = CoordinateType::makeSpectralCoordinate (crval(1),
@@ -361,25 +387,13 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------- referenceValue
 
-  Vector<double> TimeFreqCoordinate::referenceValue (int const &nFrame) const
+  Vector<double> TimeFreqCoordinate::referenceValue () const
   {
     Vector<double> refValue (2);
 
-    switch (coordType_p.type()) {
-    case CoordinateType::Time:
-      refValue(0) = referenceTime() + blocksize_p*nFrame/sampleFrequency_p;
-      refValue(1) = sampleFrequency_p*(2*nyquistZone_p-1)/4;
-      break;
-    case CoordinateType::Frequency: {
-      refValue(0) = referenceTime() + blocksize_p*blocksPerFrame_p*nFrame/sampleFrequency_p;
-      refValue(1) = sampleFrequency_p*(nyquistZone_p-1)/2;
-    }
-      break;
-    default:
-      std::cerr << "[TimeFreqCoordinate::shape] Invalid domain!" << std::endl;
-      break;
-    };
-    
+    refValue(0) = coordTime_p.referenceValue()(0);
+    refValue(1) = coordFrequency_p.referenceValue()(0);
+
     return refValue;
   }
 

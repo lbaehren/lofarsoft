@@ -415,7 +415,7 @@ namespace CR { // Namespace CR -- begin
 
       \return refValue -- [time,freq] = \f$ [ t_{\rm CRVAL}, \nu_{\rm CRVAL} ] \f$
     */
-    Vector<double> referenceValue (int const &nFrame=0) const;
+    Vector<double> referenceValue () const;
 
     // -------------------------------------------------------------- WCS methods
 
@@ -530,7 +530,7 @@ namespace CR { // Namespace CR -- begin
 	       uint const &nofFrames);
 
     //! Set the coordinate objects
-    void setCoordinates ();
+    void setCoordinates (int const &nFrame=0);
     
   };
   
