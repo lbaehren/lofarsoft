@@ -28,6 +28,7 @@
 #include <iostream>
 #include <string>
 
+#include <coordinates/Coordinates/CoordinateSystem.h>
 #include <coordinates/Coordinates/LinearCoordinate.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 
@@ -150,6 +151,13 @@ namespace CR { // Namespace CR -- begin
       <li>TimeFreqCoordinate::toWorld
       <li>TimeFreqCoordinate::toPixel
     </ul>
+
+    In order to keep the internal data of this object consistent, the following
+    methods of the base class need to overloaded:
+    - TimeFreq::setBlocksize
+    - TimeFreq::setSampleFrequency
+    - TimeFreq::setNyquistZone
+    - TimeFreq::setReferenceTime
     
     <h3>Example(s)</h3>
     
@@ -227,7 +235,7 @@ namespace CR { // Namespace CR -- begin
       \param nofFrames      -- The number of frames
     */
     TimeFreqCoordinate (uint const &blocksPerFrame,
-		    uint const &nofFrames);
+			uint const &nofFrames);
     
     /*!
       \brief Argumented constructor
@@ -240,10 +248,10 @@ namespace CR { // Namespace CR -- begin
       \param nofFrames       -- The number of frames
     */
     TimeFreqCoordinate (uint const &blocksize,
-		    double const &sampleFrequency,
-		    uint const &nyquistZone,
-		    uint const &blocksPerFrame,
-		    uint const &nofFrames);
+			double const &sampleFrequency,
+			uint const &nyquistZone=1,
+			uint const &blocksPerFrame=1,
+			uint const &nofFrames=1);
     
     /*!
       \brief Argumented constructor
@@ -256,10 +264,10 @@ namespace CR { // Namespace CR -- begin
       \param nofFrames       -- The number of frames
     */
     TimeFreqCoordinate (uint const &blocksize,
-		    casa::Quantity const &sampleFrequency,
-		    uint const &nyquistZone,
-		    uint const &blocksPerFrame,
-		    uint const &nofFrames);
+			casa::Quantity const &sampleFrequency,
+			uint const &nyquistZone=1,
+			uint const &blocksPerFrame=1,
+			uint const &nofFrames=1);
     
     /*!
       \brief Argumented constructor
@@ -271,8 +279,8 @@ namespace CR { // Namespace CR -- begin
       \param nofFrames      -- The number of frames
     */
     TimeFreqCoordinate (TimeFreq const &timeFreq,
-		    uint const &blocksPerFrame,
-		    uint const &nofFrames);
+			uint const &blocksPerFrame=1,
+			uint const &nofFrames=1);
     
     /*!
       \brief Copy constructor
@@ -299,6 +307,29 @@ namespace CR { // Namespace CR -- begin
     TimeFreqCoordinate& operator= (TimeFreqCoordinate const &other); 
     
     // --------------------------------------------------------------- Parameters
+
+    /*!
+      \brief Get the name of the class
+      
+      \return className -- The name of the class, TimeFreqCoordinate.
+    */
+    inline std::string className () const {
+      return "TimeFreqCoordinate";
+    }
+
+    /*!
+      \brief Provide a summary of the internal status
+    */
+    inline void summary () {
+      summary (std::cout);
+    }
+
+    /*!
+      \brief Provide a summary of the internal status
+
+      \param os -- Output stream to which the summary is written.
+    */
+    void summary (std::ostream &os);
 
     /*!
       \brief Get the target domain for the beamforming
@@ -374,28 +405,56 @@ namespace CR { // Namespace CR -- begin
     void setNofFrames (uint const &nofFrames);
     
     /*!
-      \brief Get the name of the class
+      \brief Create a coordinate object from the internally stored parameters
+
+      \return coord -- casa::LinearCoordinate object wrapping the
+              characteristics of the time axis.
+    */
+    inline casa::LinearCoordinate timeAxisCoordinate () const {
+      return coordTime_p;
+    };
+
+    /*!
+      \brief Create a coordinate object from the internally stored parameters
+
+      \return coord -- casa::SpectralCoordinate object wrapping the
+              characteristics of the frequency axis.
+    */
+    inline casa::SpectralCoordinate frequencyAxisCoordinate () const {
+      return coordFrequency_p;
+    }
+
+    // --------------------------- Overloading of methods inherited from TimeFreq
+    
+    /*!
+      \brief Set the blocksize, \f$ N_{\rm Blocksize} \f$
       
-      \return className -- The name of the class, TimeFreqCoordinate.
+      \param blocksize -- Blocksize, [samples]
     */
-    inline std::string className () const {
-      return "TimeFreqCoordinate";
-    }
+    virtual void setBlocksize (uint const &blocksize);
+    
+    /*!
+      \brief Set the sample frequency, \f$ \nu_{\rm Sample} \f$
+
+      \param sampleFrequency -- Sample frequency in the ADC, [Hz]
+    */
+    void setSampleFrequency (double const &sampleFrequency);
 
     /*!
-      \brief Provide a summary of the internal status
+      \brief Set the Nyquist zone, \f$ N_{\rm Nyquist} \f$
+
+      \param nyquistZone -- Nyquist zone,  [1]
     */
-    inline void summary () {
-      summary (std::cout);
-    }
+    void setNyquistZone (uint const &nyquistZone);
 
     /*!
-      \brief Provide a summary of the internal status
+      \brief Set the reference time, i.e. the start of the time axis
 
-      \param os -- Output stream to which the summary is written.
+      \param referenceTime -- The reference time, \f$ t_0 \f$, marking the
+             start of the time axis
     */
-    void summary (std::ostream &os);    
-
+    void setReferenceTime (double const &referenceTime);
+    
     // ------------------------------------------------------------------ Methods
 
     /*!
@@ -477,39 +536,17 @@ namespace CR { // Namespace CR -- begin
 		  Vector<double> const &world);
 
     /*!
-      \brief Create a coordinate object from the internally stored parameters
+      \brief Add the coordinates to a coordinate system object
 
-      \return coord -- casa::LinearCoordinate object wrapping the
-              characteristics of the time axis.
+      \retval csys  -- Coordinate system object collecting the individual
+              coordinate
+      \param append -- Append the coordinates to the existing coordinate system
+             object. If <tt>append=false</tt> then any already existing
+	     coordinate objects will be removed from the coordinate system first.
     */
-    inline casa::LinearCoordinate timeAxisCoordinate () const {
-      return coordTime_p;
-    };
-
-    /*!
-      \brief Create a coordinate object from the internally stored parameters
-
-      \return coord -- casa::SpectralCoordinate object wrapping the
-              characteristics of the frequency axis.
-    */
-    inline casa::SpectralCoordinate frequencyAxisCoordinate () const {
-      return coordFrequency_p;
-    }
-
-    /*!
-      \brief Create a coordinate objects from the internally stored parameters
-      
-      \retval coord -- casa::LinearCoordinate object wrapping the
-              characteristics of the time axis.
-      \retval coord -- casa::SpectralCoordinate object wrapping the
-              characteristics of the frequency axis.
-      
-      \return status -- Status of the operation; returns <tt>false</tt> in case
-              an error was encountered.
-    */
-    bool coordinates (casa::LinearCoordinate &time,
-		      casa::SpectralCoordinate &freq);
-
+    void toCoordinateSystem (casa::CoordinateSystem &csys,
+			     bool const &append=true);
+    
   private:
     
     /*!

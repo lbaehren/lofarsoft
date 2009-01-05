@@ -459,7 +459,8 @@ namespace CR { // Namespace CR -- begin
       \retval csys  -- Coordinate system object collecting the individual
               coordinate
       \param append -- Append the coordinates to the existing coordinate system
-             object.
+             object. If <tt>append=false</tt> then any already existing
+	     coordinate objects will be removed from the coordinate system first.
     */
     void toCoordinateSystem (casa::CoordinateSystem &csys,
 			     bool const &append=true);

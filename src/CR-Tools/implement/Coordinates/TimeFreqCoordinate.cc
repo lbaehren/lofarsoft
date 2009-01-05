@@ -246,6 +246,44 @@ namespace CR { // Namespace CR -- begin
     os << "-- Reference value      = " << referenceValue()      << std::endl;
     os << "-- Axis value increment = " << increment()           << std::endl;
   }
+
+  // ============================================================================
+  //
+  //  Overloading of methods inherited from TimeFreq
+  //
+  // ============================================================================
+  
+  void TimeFreqCoordinate::setBlocksize (uint const &blocksize)
+  {
+    // call the corresponding method of the base class
+    TimeFreq::setBlocksize(blocksize);
+    // update the coordinate objects
+    setCoordinates();
+  }
+  
+  void TimeFreqCoordinate::setSampleFrequency (double const &sampleFrequency)
+  {
+    // call the corresponding method of the base class
+    TimeFreq::setSampleFrequency(sampleFrequency);
+    // update the coordinate objects
+    setCoordinates();
+  }
+  
+  void TimeFreqCoordinate::setNyquistZone (uint const &nyquistZone)
+  {
+    // call the corresponding method of the base class
+    TimeFreq::setNyquistZone(nyquistZone);
+    // update the coordinate objects
+    setCoordinates();
+  }
+  
+  void TimeFreqCoordinate::setReferenceTime (double const &referenceTime)
+  {
+    // call the corresponding method of the base class
+    TimeFreq::setReferenceTime(referenceTime);
+    // update the coordinate objects
+    setCoordinates();
+  }
   
   // ============================================================================
   //
@@ -397,7 +435,7 @@ namespace CR { // Namespace CR -- begin
     return refValue;
   }
 
-  // -------------------------------------------------------------------- toWorld
+  //_____________________________________________________________________ toWorld
   
   void TimeFreqCoordinate::toWorld (Vector<double> &world,
 				    Vector<double> const &pixel)
@@ -416,7 +454,7 @@ namespace CR { // Namespace CR -- begin
     world(1) = out(0);
   }
   
-  // -------------------------------------------------------------------- toPixel
+  //_____________________________________________________________________ toPixel
   
   void TimeFreqCoordinate::toPixel (Vector<double> &pixel,
 				    Vector<double> const &world)
@@ -435,23 +473,18 @@ namespace CR { // Namespace CR -- begin
     coordFrequency_p.toPixel (out,in);
     pixel(1) = out(0);
   }
-  
-  // ---------------------------------------------------------------- coordinates
-  
-  bool TimeFreqCoordinate::coordinates (casa::LinearCoordinate &time,
-					casa::SpectralCoordinate &freq)
+
+  //__________________________________________________________ toCoordinateSystem
+
+  void TimeFreqCoordinate::toCoordinateSystem (casa::CoordinateSystem &csys,
+					       bool const &append)
   {
-    bool status (true);
-    
-    try {
-      time = timeAxisCoordinate();
-      freq = frequencyAxisCoordinate();
-    } catch (std::string message) {
-      std::cerr << "[TimeFreqCoordinate::coordinates] " << message << std::endl;
-      status = false;
+    if (!append) {
+      csys = casa::CoordinateSystem();
     }
-    
-    return status;
+
+    csys.addCoordinate(coordTime_p);
+    csys.addCoordinate(coordFrequency_p);
   }
   
 } // Namespace CR -- end

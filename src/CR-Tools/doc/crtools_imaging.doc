@@ -162,16 +162,21 @@ relationships, two custom coordinate object classes have been created:
   <li>CR::TimeFreqCoordinate - Container for the time-frequency domain
   parameters of a skymap.
 </ol>
-For both classes we provide the standard interfaces to WCS parameters,
+For both classes the following methods are provided:
 <ul>
-  <li>worldAxisNames
-  <li>worldAxisUnits
-  <li>referencePixel
-  <li>referenceValue
-  <li>linearTransform
-  <li>increment
-  <li>toWorld
-  <li>toPixel
+  <li>Interfaces to the WCS parameters describing the the relationship between
+  pixel and world coordinates:
+  <ul>
+	<li>worldAxisNames
+	<li>worldAxisUnits
+	<li>referencePixel
+	<li>referenceValue
+	<li>linearTransform
+	<li>increment
+	<li>toWorld
+	<li>toPixel
+  </ul>
+  <li>Export of the coordinate objects to a coordinate system.
 </ul>
 
 <h4>Beamforming</h4>
