@@ -58,7 +58,7 @@ namespace CR { // Namespace CR -- begin
     <ul type="square">
       <li>CR::TimeFreq
       <li>CR::CoordinateDomain
-      <li>CR::SkymapCoordinates
+      <li>CR::SkymapCoordinate
     </ul>
     
     <h3>Synopsis</h3>
@@ -98,7 +98,7 @@ namespace CR { // Namespace CR -- begin
       </tr>
     </table>
 
-    Base on the above variables we get different values for some of the quantities
+    Based on the above variables we get different values for some of the quantities
     already listed in CR::TimeFreq
 
     <table border="0">
@@ -403,6 +403,16 @@ namespace CR { // Namespace CR -- begin
              resulting skymap.
     */
     void setNofFrames (uint const &nofFrames);
+
+    /*!
+      \brief Get the number of blocks to be read in order to create the image
+
+      \return nofBlocks -- The number of blocks, \f$ N_{\rm Blocks} =
+      N_{\rm Frames} \cdot N_{\rm bpf} \f$, to be read in order to create the image
+    */
+    inline uint nofBlocks () const {
+      return nofFrames_p*blocksPerFrame_p;
+    }
     
     /*!
       \brief Create a coordinate object from the internally stored parameters

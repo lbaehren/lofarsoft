@@ -11,6 +11,7 @@ set (tests
   tGridCoordinate
   tPolarCoordinate
   tPositionVector
+  tSkymapCoordinate
   tSpatialCoordinate
   tTimeFreq
   tTimeFreqCoordinate

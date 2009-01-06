@@ -45,6 +45,7 @@
 
 using casa::Coordinate;
 using casa::DirectionCoordinate;
+using casa::IPosition;
 using casa::LinearCoordinate;
 using casa::Matrix;
 using casa::String;
@@ -163,10 +164,12 @@ namespace CR { // Namespace CR -- begin
     unsigned int nofAxes_p;
     /*! The number of coordinate objects */
     unsigned int nofCoordinates_p;
+    //! Number of elements along the coordinate axes
+    IPosition shape_p;
     /*! Coordinate objects forming the spatial coordinate */
     DirectionCoordinate directionCoord_p;
-    LinearCoordinate linearCoord_p;;
-    
+    LinearCoordinate linearCoord_p;
+
   public:
     
     // ------------------------------------------------------------- Construction
@@ -177,11 +180,12 @@ namespace CR { // Namespace CR -- begin
       Creates a new SpatialCoordinate of type \e DirectionRadius for AZEL and
       STG projection
     */
-    SpatialCoordinate () {
-      init (CoordinateType::DirectionRadius,
-	    "AZEL",
-	    "STG");
-    }
+    SpatialCoordinate ()
+      {
+	init (CoordinateType::DirectionRadius,
+	      "AZEL",
+	      "STG");
+      }
     
     /*!
       \brief Argumented constructor
@@ -194,8 +198,13 @@ namespace CR { // Namespace CR -- begin
     */
     SpatialCoordinate (CoordinateType::Types const &coordType,
 		       casa::String const &refcode="AZEL",
-		       casa::String const &projection="STG");
-      
+		       casa::String const &projection="STG")
+      {
+	init (coordType,
+	      refcode,
+	      projection);
+      }
+    
     /*!
       \brief Argumented constructor for coordinate of type DirectionRadius
       
@@ -275,6 +284,24 @@ namespace CR { // Namespace CR -- begin
     inline unsigned int nofCoordinates () const {
       return nofCoordinates_p;
     }
+
+    /*!
+      \brief Get the number of elements along the coordinate axes
+      
+      \return shape -- The number of elements along the individual coordinate
+              axes.
+    */
+    inline IPosition shape () const {
+      return shape_p;
+    }
+
+    /*!
+      \brief Get the number of elements along the coordinate axes
+      
+      \return shape -- The number of elements along the individual coordinate
+              axes.
+    */
+    bool setShape (IPosition const &shape);
 
     /*!
       \brief Get the DirectionCoordinate object of the spatial coordinate

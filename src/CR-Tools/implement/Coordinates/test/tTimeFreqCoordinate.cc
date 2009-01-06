@@ -24,6 +24,7 @@
 #include <Coordinates/TimeFreqCoordinate.h>
 
 // Namespace usage
+using std::cout;
 using std::endl;
 using CR::CoordinateType;
 using CR::TimeFreq;
@@ -52,9 +53,9 @@ int test_constructors ()
 {
   int nofFailedTests (0);
   
-  std::cout << "\n[tTimeFreqCoordinate::test_constructors]\n" << endl;
+  cout << "\n[tTimeFreqCoordinate::test_constructors]\n" << endl;
 
-  std::cout << "[1] Default constructor ..." << endl;
+  cout << "[1] Default constructor ..." << endl;
   try {
     TimeFreqCoordinate coord;
     //
@@ -64,7 +65,7 @@ int test_constructors ()
     nofFailedTests++;
   }
   
-  std::cout << "[2] Simple argumented constructor ..." << endl;
+  cout << "[2] Simple argumented constructor ..." << endl;
   try {
     uint blocksPerFrame (2);
     uint nofFrames (10);
@@ -77,7 +78,7 @@ int test_constructors ()
     nofFailedTests++;
   }
   
-  std::cout << "[3] Fully argumented constructor ..." << endl;
+  cout << "[3] Fully argumented constructor ..." << endl;
   try {
     uint blocksize (1024);
     double sampleFreq (200e06);
@@ -96,7 +97,7 @@ int test_constructors ()
     nofFailedTests++;
   }
   
-  std::cout << "[4] Construction using TimeFreq object ..." << endl;
+  cout << "[4] Construction using TimeFreq object ..." << endl;
   try {
     uint blocksize (1024);
     double sampleFreq (200e06);
@@ -112,16 +113,16 @@ int test_constructors ()
 			       blocksPerFrame,
 			       nofFrames);
     //
-    std::cout << "--> extra parameters at default values ..." << endl;
+    cout << "--> extra parameters at default values ..." << endl;
     coord1.summary(); 
-    std::cout << "--> custom values for extra parameters ..." << endl;
+    cout << "--> custom values for extra parameters ..." << endl;
     coord2.summary(); 
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[5] Copy constructor ..." << endl;
+  cout << "[5] Copy constructor ..." << endl;
   try {
     uint blocksize (1024);
     double sampleFreq (200e06);
@@ -156,7 +157,7 @@ int test_constructors ()
 */
 int test_parameters ()
 {
-  std::cout << "\n[tTimeFreqCoordinate::test_parameters]\n" << endl;
+  cout << "\n[tTimeFreqCoordinate::test_parameters]\n" << endl;
 
   int nofFailedTests (0);
 
@@ -165,81 +166,81 @@ int test_parameters ()
   //________________________________________________________
   // Test of the methods inherited from the base class
 
-  std::cout << "[1] Blocksize ..." << endl;
+  cout << "[1] Blocksize ..." << endl;
   try {
     /* current value */
-    std::cout << "-- blocksize       = " << coord.blocksize()      << endl;
-    std::cout << "-- reference value = " << coord.referenceValue() << endl;
-    std::cout << "-- Increment       = " << coord.increment()      << endl;
-    std::cout << "-- Shape           = " << coord.shape()          << endl;
+    cout << "-- blocksize       = " << coord.blocksize()      << endl;
+    cout << "-- reference value = " << coord.referenceValue() << endl;
+    cout << "-- Increment       = " << coord.increment()      << endl;
+    cout << "-- Shape           = " << coord.shape()          << endl;
     /* Adjust value */
     coord.setBlocksize (1024);
     /* New value */
-    std::cout << "--> new values" << endl;
-    std::cout << "-- blocksize       = " << coord.blocksize() << endl;
-    std::cout << "-- reference value = " << coord.referenceValue() << endl;
-    std::cout << "-- Increment       = " << coord.increment()      << endl;
-    std::cout << "-- Shape           = " << coord.shape()          << endl;
+    cout << "--> new values" << endl;
+    cout << "-- blocksize       = " << coord.blocksize() << endl;
+    cout << "-- reference value = " << coord.referenceValue() << endl;
+    cout << "-- Increment       = " << coord.increment()      << endl;
+    cout << "-- Shape           = " << coord.shape()          << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[2] Sample frequency ..." << endl;
+  cout << "[2] Sample frequency ..." << endl;
   try {
     /* current value */
-    std::cout << "-- sampleFrequency = " << coord.sampleFrequency() << endl;
-    std::cout << "-- reference value = " << coord.referenceValue() << endl;
-    std::cout << "-- Increment       = " << coord.increment()      << endl;
-    std::cout << "-- Shape           = " << coord.shape()          << endl;
+    cout << "-- sampleFrequency = " << coord.sampleFrequency() << endl;
+    cout << "-- reference value = " << coord.referenceValue() << endl;
+    cout << "-- Increment       = " << coord.increment()      << endl;
+    cout << "-- Shape           = " << coord.shape()          << endl;
     /* Adjust value */
     coord.setSampleFrequency (120e06);
     /* New value */
-    std::cout << "--> new values" << endl;
-    std::cout << "-- sampleFrequency = " << coord.sampleFrequency() << endl;
-    std::cout << "-- reference value = " << coord.referenceValue() << endl;
-    std::cout << "-- Increment       = " << coord.increment()      << endl;
-    std::cout << "-- Shape           = " << coord.shape()          << endl;
+    cout << "--> new values" << endl;
+    cout << "-- sampleFrequency = " << coord.sampleFrequency() << endl;
+    cout << "-- reference value = " << coord.referenceValue() << endl;
+    cout << "-- Increment       = " << coord.increment()      << endl;
+    cout << "-- Shape           = " << coord.shape()          << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[3] Nyquist zone ..." << endl;
+  cout << "[3] Nyquist zone ..." << endl;
   try {
     /* current value */
-    std::cout << "-- nyquistZone     = " << coord.nyquistZone() << endl;
-    std::cout << "-- reference value = " << coord.referenceValue() << endl;
-    std::cout << "-- Increment       = " << coord.increment()      << endl;
-    std::cout << "-- Shape           = " << coord.shape()          << endl;
+    cout << "-- nyquistZone     = " << coord.nyquistZone() << endl;
+    cout << "-- reference value = " << coord.referenceValue() << endl;
+    cout << "-- Increment       = " << coord.increment()      << endl;
+    cout << "-- Shape           = " << coord.shape()          << endl;
     /* Adjust value */
     coord.setNyquistZone (2);
     /* New value */
-    std::cout << "--> new values" << endl;
-    std::cout << "-- nyquistZone     = " << coord.nyquistZone() << endl;
-    std::cout << "-- reference value = " << coord.referenceValue() << endl;
-    std::cout << "-- Increment       = " << coord.increment()      << endl;
-    std::cout << "-- Shape           = " << coord.shape()          << endl;
+    cout << "--> new values" << endl;
+    cout << "-- nyquistZone     = " << coord.nyquistZone() << endl;
+    cout << "-- reference value = " << coord.referenceValue() << endl;
+    cout << "-- Increment       = " << coord.increment()      << endl;
+    cout << "-- Shape           = " << coord.shape()          << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[4] Reference time ..." << endl;
+  cout << "[4] Reference time ..." << endl;
   try {
     /* current value */
-    std::cout << "-- referenceTime   = " << coord.referenceTime() << endl;
-    std::cout << "-- reference value = " << coord.referenceValue() << endl;
-    std::cout << "-- Increment       = " << coord.increment()      << endl;
-    std::cout << "-- Shape           = " << coord.shape()          << endl;
+    cout << "-- referenceTime   = " << coord.referenceTime() << endl;
+    cout << "-- reference value = " << coord.referenceValue() << endl;
+    cout << "-- Increment       = " << coord.increment()      << endl;
+    cout << "-- Shape           = " << coord.shape()          << endl;
     /* Adjust value */
     coord.setReferenceTime (-0.5);
     /* New value */
-    std::cout << "--> new values" << endl;
-    std::cout << "-- referenceTime   = " << coord.referenceTime() << endl;
-    std::cout << "-- reference value = " << coord.referenceValue() << endl;
-    std::cout << "-- Increment       = " << coord.increment()      << endl;
-    std::cout << "-- Shape           = " << coord.shape()          << endl;
+    cout << "--> new values" << endl;
+    cout << "-- referenceTime   = " << coord.referenceTime() << endl;
+    cout << "-- reference value = " << coord.referenceValue() << endl;
+    cout << "-- Increment       = " << coord.increment()      << endl;
+    cout << "-- Shape           = " << coord.shape()          << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -248,41 +249,41 @@ int test_parameters ()
   //________________________________________________________
   // Test of the methods added by TimeFreqCoordinate
 
-  std::cout << "[5] Input data blocks per time-frame ..." << endl;
+  cout << "[5] Input data blocks per time-frame ..." << endl;
   try {
     /* current value */
-    std::cout << "-- blocksPerFrame  = " << coord.blocksPerFrame() << endl;
-    std::cout << "-- reference value = " << coord.referenceValue() << endl;
-    std::cout << "-- Increment       = " << coord.increment()      << endl;
-    std::cout << "-- Shape           = " << coord.shape()          << endl;
+    cout << "-- blocksPerFrame  = " << coord.blocksPerFrame() << endl;
+    cout << "-- reference value = " << coord.referenceValue() << endl;
+    cout << "-- Increment       = " << coord.increment()      << endl;
+    cout << "-- Shape           = " << coord.shape()          << endl;
     /* Adjust value */
     coord.setBlocksPerFrame (10);
     /* New value */
-    std::cout << "--> new values" << endl;
-    std::cout << "-- blocksPerFrame  = " << coord.blocksPerFrame() << endl;
-    std::cout << "-- reference value = " << coord.referenceValue() << endl;
-    std::cout << "-- Increment       = " << coord.increment()      << endl;
-    std::cout << "-- Shape           = " << coord.shape()          << endl;
+    cout << "--> new values" << endl;
+    cout << "-- blocksPerFrame  = " << coord.blocksPerFrame() << endl;
+    cout << "-- reference value = " << coord.referenceValue() << endl;
+    cout << "-- Increment       = " << coord.increment()      << endl;
+    cout << "-- Shape           = " << coord.shape()          << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[6] NofFrames ..." << endl;
+  cout << "[6] NofFrames ..." << endl;
   try {
     /* current value */
-    std::cout << "-- nofFrames       = " << coord.nofFrames() << endl;
-    std::cout << "-- reference value = " << coord.referenceValue() << endl;
-    std::cout << "-- Increment       = " << coord.increment()      << endl;
-    std::cout << "-- Shape           = " << coord.shape()          << endl;
+    cout << "-- nofFrames       = " << coord.nofFrames() << endl;
+    cout << "-- reference value = " << coord.referenceValue() << endl;
+    cout << "-- Increment       = " << coord.increment()      << endl;
+    cout << "-- Shape           = " << coord.shape()          << endl;
     /* Adjust value */
     coord.setNofFrames (100);
     /* New value */
-    std::cout << "--> new values" << endl;
-    std::cout << "-- nofFrames       = " << coord.nofFrames() << endl;
-    std::cout << "-- reference value = " << coord.referenceValue() << endl;
-    std::cout << "-- Increment       = " << coord.increment()      << endl;
-    std::cout << "-- Shape           = " << coord.shape()          << endl;
+    cout << "--> new values" << endl;
+    cout << "-- nofFrames       = " << coord.nofFrames() << endl;
+    cout << "-- reference value = " << coord.referenceValue() << endl;
+    cout << "-- Increment       = " << coord.increment()      << endl;
+    cout << "-- Shape           = " << coord.shape()          << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -303,7 +304,7 @@ int test_parameters ()
 */
 int test_methods ()
 {
-  std::cout << "\n[tTimeFreqCoordinate::test_methods]\n" << endl;
+  cout << "\n[tTimeFreqCoordinate::test_methods]\n" << endl;
 
   int nofFailedTests (0);
   
@@ -319,44 +320,109 @@ int test_methods ()
 			    blocksPerFrame,
 			    nofFrames);
   
-  std::cout << "[1] Coordinate objects for the axes .." << endl;
+  cout << "[1] Coordinate objects for the axes .." << endl;
   try {
-    std::cout << "--> time axis" << endl;
+    cout << "--> time axis" << endl;
     casa::LinearCoordinate time = coord.timeAxisCoordinate();
-    CoordinateType::summary (std::cout,time);
+    CoordinateType::summary (cout,time);
     //
-    std::cout << "--> frequency axis" << endl;
+    cout << "--> frequency axis" << endl;
     casa::SpectralCoordinate freq = coord.frequencyAxisCoordinate();
-    CoordinateType::summary (std::cout,freq);
+    CoordinateType::summary (cout,freq);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[2] Add coordinates objects to a coordinate system ..." << endl;
+  cout << "[2] Add coordinates objects to a coordinate system ..." << endl;
   try {
     casa::CoordinateSystem csys;
     // 
     coord.toCoordinateSystem (csys);
     //
-    std::cout << "-- nof. coordinates = " << csys.nCoordinates()   << endl;
-    std::cout << "-- Reference pixel  = " << csys.referencePixel() << endl;
-    std::cout << "-- Increment        = " << csys.increment()      << endl;
-    std::cout << "-- Reference value  = " << csys.referenceValue() << endl;
+    cout << "--> add coordinates to new coordinate system ..." << endl;
+    cout << "-- nof. coordinates = " << csys.nCoordinates()   << endl;
+    cout << "-- Reference pixel  = " << csys.referencePixel() << endl;
+    cout << "-- Increment        = " << csys.increment()      << endl;
+    cout << "-- Reference value  = " << csys.referenceValue() << endl;
     // 
     coord.toCoordinateSystem (csys);
     //
-    std::cout << "-- nof. coordinates = " << csys.nCoordinates()   << endl;
-    std::cout << "-- Reference pixel  = " << csys.referencePixel() << endl;
-    std::cout << "-- Increment        = " << csys.increment()      << endl;
-    std::cout << "-- Reference value  = " << csys.referenceValue() << endl;
+    cout << "--> append coordinates to coordinate system ..." << endl;
+    cout << "-- nof. coordinates = " << csys.nCoordinates()   << endl;
+    cout << "-- Reference pixel  = " << csys.referencePixel() << endl;
+    cout << "-- Increment        = " << csys.increment()      << endl;
+    cout << "-- Reference value  = " << csys.referenceValue() << endl;
     // 
     coord.toCoordinateSystem (csys,false);
     //
-    std::cout << "-- nof. coordinates = " << csys.nCoordinates()   << endl;
-    std::cout << "-- Reference pixel  = " << csys.referencePixel() << endl;
-    std::cout << "-- Increment        = " << csys.increment()      << endl;
-    std::cout << "-- Reference value  = " << csys.referenceValue() << endl;
+    cout << "--> overwrite contents of existing coordinate system ..." << endl;
+    cout << "-- nof. coordinates = " << csys.nCoordinates()   << endl;
+    cout << "-- Reference pixel  = " << csys.referencePixel() << endl;
+    cout << "-- Increment        = " << csys.increment()      << endl;
+    cout << "-- Reference value  = " << csys.referenceValue() << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[3] Conversion between pixel and world coordinates...." << endl;
+  try {
+    casa::Vector<double> pixel (2);
+    casa::Vector<double> world (2);
+    //
+    cout << "-- Reference pixel  = " << coord.referencePixel() << endl;
+    cout << "-- Increment        = " << coord.increment()      << endl;
+    cout << "-- Reference value  = " << coord.referenceValue() << endl;
+    //
+    cout << "--> conversion from pixel to world ..." << endl;
+    //
+    pixel(0) = 0;
+    pixel(1) = 0;
+    coord.toWorld (world,pixel);
+    cout << "\t" << pixel << " -> " << world << endl;
+    //
+    pixel(0) = 1;
+    pixel(1) = 0;
+    coord.toWorld (world,pixel);
+    cout << "\t" << pixel << " -> " << world << endl;
+    //
+    pixel(0) = 0;
+    pixel(1) = 1;
+    coord.toWorld (world,pixel);
+    cout << "\t" << pixel << " -> " << world << endl;
+    //
+    pixel(0) = 1;
+    pixel(1) = 1;
+    coord.toWorld (world,pixel);
+    cout << "\t" << pixel << " -> " << world << endl;
+    //
+    cout << "--> conversion from world to pixel ..." << endl;
+    //
+    world(0) = 0;
+    world(1) = 0;
+    coord.toPixel(pixel,world);
+    cout << "\t" << world << " -> " << pixel << endl;
+    //
+    world(0) = 1;
+    world(1) = 0;
+    coord.toPixel(pixel,world);
+    cout << "\t" << world << " -> " << pixel << endl;
+    //
+    world(0) = 2;
+    world(1) = 0;
+    coord.toPixel(pixel,world);
+    cout << "\t" << world << " -> " << pixel << endl;
+    //
+    world(0) = 0;
+    world(1) = 100e06;
+    coord.toPixel(pixel,world);
+    cout << "\t" << world << " -> " << pixel << endl;
+    //
+    world(0) = 0;
+    world(1) = 200e06;
+    coord.toPixel(pixel,world);
+    cout << "\t" << world << " -> " << pixel << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;

@@ -69,18 +69,6 @@ namespace CR { // Namespace CR -- begin
       <li>Some overview of existing conventions for spherical coordinate systems.
     </ul>
 
-    <h3>Required adjustments</h3>
-    
-    \verbatim
-    ApplicationSupport/Phasing.h:#include <Math/VectorConversion.h>
-    Imaging/GeomDelay.h:#include <Math/VectorConversion.h>
-    Imaging/GeomDelay.h~:#include <Math/VectorConversion.h>
-    Imaging/GeometricalDelay.h:#include <Math/VectorConversion.h>
-    Imaging/SkymapCoordinates.cc:#include <Math/VectorConversion.h>
-    Math/RotationMatrix.h:#include <Math/VectorConversion.h>
-    Math/VectorConversion.cc:#include <Math/VectorConversion.h>
-    \endverbatim
-    
     <h3>Conversion relations/functions</h3>
 
     <center>

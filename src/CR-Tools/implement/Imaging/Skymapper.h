@@ -49,6 +49,7 @@
 #endif
 
 // LOPES-Tools header files
+#include <Coordinates/SkymapCoordinate.h>
 #include <Observation/ObservationData.h>
 #include <Imaging/Beamformer.h>
 #include <Imaging/SkymapCoordinates.h>

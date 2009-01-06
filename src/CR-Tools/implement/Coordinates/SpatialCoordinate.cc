@@ -31,15 +31,6 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  SpatialCoordinate::SpatialCoordinate (CoordinateType::Types const &coordType,
-					casa::String const &refcode,
-					casa::String const &projection)
-  {
-    init (coordType,
-	  refcode,
-	  projection);
-  }
-  
   // ---------------------------------------------------------- SpatialCoordinate
   
   SpatialCoordinate::SpatialCoordinate (casa::DirectionCoordinate const &direction,
@@ -48,6 +39,7 @@ namespace CR { // Namespace CR -- begin
     type_p           = CoordinateType::DirectionRadius;
     nofAxes_p        = 3;
     nofCoordinates_p = 2;
+    shape_p          = IPosition (nofAxes_p,1);
     
     directionCoord_p = direction;
     linearCoord_p    = linear;
@@ -66,6 +58,7 @@ namespace CR { // Namespace CR -- begin
 	type_p           = coordType;
 	nofAxes_p        = 3;
 	nofCoordinates_p = 1;
+	shape_p          = IPosition(nofAxes_p,1);
 	linearCoord_p    = linear;
 	break;
       default:
@@ -115,12 +108,15 @@ namespace CR { // Namespace CR -- begin
     }
     return *this;
   }
+
+  //________________________________________________________________________ copy
   
   void SpatialCoordinate::copy (SpatialCoordinate const &other)
   {
     type_p           = other.type_p;
-    nofAxes_p        = nofAxes_p;
+    nofAxes_p        = other.nofAxes_p;
     nofCoordinates_p = other.nofCoordinates_p;
+    shape_p          = other.shape_p;
     directionCoord_p = other.directionCoord_p;
     linearCoord_p    = other.linearCoord_p;
   }
@@ -134,16 +130,17 @@ namespace CR { // Namespace CR -- begin
   void SpatialCoordinate::summary (std::ostream &os)
   {
     os << "[SpatialCoordinate::summary]" << std::endl;
-    os << "-- Type of spatial coordinate = " << type_p             << std::endl;
-    os << "-- nof. coordinate axes       = " << nofAxes()          << std::endl;
-    os << "-- nof. coordinate objects    = " << nofCoordinates()   << std::endl;
-    os << "-- World axis names           = " << worldAxisNames()   << std::endl;
-    os << "-- World axis units           = " << worldAxisUnits()   << std::endl;
-    os << "-- Reference pixel    (CRPIX) = " << referencePixel()   << std::endl;
-    os << "-- Increment          (CDELT) = " << increment()        << std::endl;
-    os << "-- Reference value    (CRVAL) = " << referenceValue()   << std::endl;
-    os << "-- Spherical map projection   = " << projection()       << std::endl;
-    os << "-- Direction reference code   = " << directionRefcode() << std::endl;
+    os << "-- Type of spatial coordinate   = " << type_p             << std::endl;
+    os << "-- nof. coordinate axes         = " << nofAxes()          << std::endl;
+    os << "-- nof. coordinate objects      = " << nofCoordinates()   << std::endl;
+    os << "-- nof. elements along the axes = " << shape()            << std::endl;
+    os << "-- World axis names             = " << worldAxisNames()   << std::endl;
+    os << "-- World axis units             = " << worldAxisUnits()   << std::endl;
+    os << "-- Reference pixel      (CRPIX) = " << referencePixel()   << std::endl;
+    os << "-- Increment            (CDELT) = " << increment()        << std::endl;
+    os << "-- Reference value      (CRVAL) = " << referenceValue()   << std::endl;
+    os << "-- Spherical map projection     = " << projection()       << std::endl;
+    os << "-- Direction reference code     = " << directionRefcode() << std::endl;
   }
 
   // ----------------------------------------------------- setDirectionCoordinate
@@ -196,6 +193,24 @@ namespace CR { // Namespace CR -- begin
       break;
     };
   }
+
+  //____________________________________________________________________ setShape
+  
+  bool SpatialCoordinate::setShape (IPosition const &shape)
+  {
+    unsigned int nelem = shape.nelements();
+
+    if (nelem == nofAxes_p) {
+      shape_p = shape;
+      return true;
+    } else {
+      std::cerr << "[SpatialCoordinate::setShape]"
+		<< " Provided shape information does not match the number of"
+		<< " coordinate axes!"
+		<< std::endl;
+      return false;
+    }
+  }
   
   // ============================================================================
   //
@@ -215,6 +230,7 @@ namespace CR { // Namespace CR -- begin
 	// book-keeping
 	nofAxes_p        = 3;
 	nofCoordinates_p = 2;
+	shape_p          = IPosition(nofAxes_p,1);
 	// set up the coordinate objects
 	directionCoord_p = CoordinateType::makeDirectionCoordinate(refcode,
 								   projection);
@@ -230,6 +246,7 @@ namespace CR { // Namespace CR -- begin
 	// book-keeping
 	nofAxes_p        = 3;
 	nofCoordinates_p = 1;
+	shape_p          = IPosition(nofAxes_p,1);
 	// set up the coordinate object
 	casa::Vector<casa::String> names (nofAxes_p,"Length");
 	casa::Vector<casa::String> units (nofAxes_p,"m");
@@ -243,6 +260,7 @@ namespace CR { // Namespace CR -- begin
 	// book-keeping
 	nofAxes_p        = 3;
 	nofCoordinates_p = 1;
+	shape_p          = IPosition(nofAxes_p,1);
 	// set up the coordinate object
 	casa::Vector<casa::String> names (nofAxes_p);
 	casa::Vector<casa::String> units (nofAxes_p);
@@ -261,6 +279,7 @@ namespace CR { // Namespace CR -- begin
       {
 	nofAxes_p        = 3;
 	nofCoordinates_p = 1;
+	shape_p          = IPosition(nofAxes_p,1);
 	// set up the coordinate object
 	casa::Vector<casa::String> names (nofAxes_p);
 	casa::Vector<casa::String> units (nofAxes_p);

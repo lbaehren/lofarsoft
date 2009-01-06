@@ -177,7 +177,13 @@ For both classes the following methods are provided:
 	<li>toPixel
   </ul>
   <li>Export of the coordinate objects to a coordinate system.
+  <ul>
+    <li>toCoordinateSystem
+  </ul>
 </ul>
+
+The above mentioned coordinate objects contain the major fraction of the data
+which are collected within an object of type CR::SkymapCoordinate.
 
 <h4>Beamforming</h4>
 
