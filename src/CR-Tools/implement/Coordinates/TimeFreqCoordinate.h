@@ -307,33 +307,29 @@ namespace CR { // Namespace CR -- begin
     TimeFreqCoordinate& operator= (TimeFreqCoordinate const &other); 
     
     // --------------------------------------------------------------- Parameters
-
+    
     /*!
-      \brief Get the name of the class
+      \brief Get the number of coordinate axes
       
-      \return className -- The name of the class, TimeFreqCoordinate.
+      \return nofAxes -- The number of coordinate axes.
     */
-    inline std::string className () const {
-      return "TimeFreqCoordinate";
+    inline unsigned int nofAxes () const {
+      return 2;
     }
-
+    
     /*!
-      \brief Provide a summary of the internal status
+      \brief Get the number of casa::Coordinate object to make of this coordinate
+      
+      \return nofCoordinates -- The number of casa::Coordinate object to make of
+             this coordinate
     */
-    inline void summary () {
-      summary (std::cout);
+    inline unsigned int nofCoordinates () const {
+      return 2;
     }
-
-    /*!
-      \brief Provide a summary of the internal status
-
-      \param os -- Output stream to which the summary is written.
-    */
-    void summary (std::ostream &os);
-
+    
     /*!
       \brief Get the target domain for the beamforming
-
+      
       \return type -- The target domain for the beamforming.
     */
     inline CoordinateType beamCoordDomain () const {
@@ -434,6 +430,29 @@ namespace CR { // Namespace CR -- begin
       return coordFrequency_p;
     }
 
+    /*!
+      \brief Get the name of the class
+      
+      \return className -- The name of the class, TimeFreqCoordinate.
+    */
+    inline std::string className () const {
+      return "TimeFreqCoordinate";
+    }
+
+    /*!
+      \brief Provide a summary of the internal status
+    */
+    inline void summary () {
+      summary (std::cout);
+    }
+
+    /*!
+      \brief Provide a summary of the internal status
+
+      \param os -- Output stream to which the summary is written.
+    */
+    void summary (std::ostream &os);
+
     // --------------------------- Overloading of methods inherited from TimeFreq
     
     /*!
@@ -448,14 +467,14 @@ namespace CR { // Namespace CR -- begin
 
       \param sampleFrequency -- Sample frequency in the ADC, [Hz]
     */
-    void setSampleFrequency (double const &sampleFrequency);
+    virtual void setSampleFrequency (double const &sampleFrequency);
 
     /*!
       \brief Set the Nyquist zone, \f$ N_{\rm Nyquist} \f$
 
       \param nyquistZone -- Nyquist zone,  [1]
     */
-    void setNyquistZone (uint const &nyquistZone);
+    virtual void setNyquistZone (uint const &nyquistZone);
 
     /*!
       \brief Set the reference time, i.e. the start of the time axis
@@ -463,7 +482,7 @@ namespace CR { // Namespace CR -- begin
       \param referenceTime -- The reference time, \f$ t_0 \f$, marking the
              start of the time axis
     */
-    void setReferenceTime (double const &referenceTime);
+    virtual void setReferenceTime (double const &referenceTime);
     
     // ------------------------------------------------------------------ Methods
 

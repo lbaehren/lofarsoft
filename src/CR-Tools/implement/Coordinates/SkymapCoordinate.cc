@@ -52,6 +52,17 @@ namespace CR { // Namespace CR -- begin
 
   //____________________________________________________________ SkymapCoordinate
 
+  SkymapCoordinate::SkymapCoordinate (ObservationData const &obsData,
+				      SpatialCoordinate const &spatialCoord,
+				      TimeFreqCoordinate const &timeFreqCoord)
+  {
+    init (obsData,
+	  spatialCoord,
+	  timeFreqCoord);
+  }
+  
+  //____________________________________________________________ SkymapCoordinate
+
   SkymapCoordinate::SkymapCoordinate (SkymapCoordinate const &other)
   {
     copy (other);
@@ -86,21 +97,21 @@ namespace CR { // Namespace CR -- begin
     return *this;
   }
   
+  //________________________________________________________________________ copy
+  
   void SkymapCoordinate::copy (SkymapCoordinate const &other)
-  {;}
+  {
+    obsData_p       = other.obsData_p;
+    spatialCoord_p  = other.spatialCoord_p;
+    timeFreqCoord_p = other.timeFreqCoord_p;
+    csys_p          = other.csys_p;
+  }
 
   // ============================================================================
   //
   //  Parameters
   //
   // ============================================================================
-
-  //_____________________________________________________________________ summary
-  
-  void SkymapCoordinate::summary (std::ostream &os)
-  {
-    os << "[SkymapCoordinate] Summary of internal parameters." << std::endl;
-  }
 
   //________________________________________________________ setSpatialCoordinate
   
@@ -110,7 +121,10 @@ namespace CR { // Namespace CR -- begin
 
     // store the input data
     spatialCoord_p = coord;
-    
+
+    // update coordinate system object 
+    setCoordinateSystem ();
+
     return status;
   }
 
@@ -123,7 +137,47 @@ namespace CR { // Namespace CR -- begin
     // store the input data
     timeFreqCoord_p = coord;
     
+    // update coordinate system object 
+    setCoordinateSystem ();
+
     return status;
+  }
+
+  //_______________________________________________________________________ shape
+
+  casa::IPosition SkymapCoordinate::shape ()
+  {
+    uint counter (0);
+    casa::IPosition shapeSkymap (nofAxes());
+    casa::IPosition shapeSpatial  = spatialCoord_p.shape();
+    casa::IPosition shapeTimeFreq = timeFreqCoord_p.shape();
+
+    for (uint n(0); n<shapeSpatial.nelements(); n++) {
+      shapeSkymap(counter) = shapeSpatial(n);
+      counter++;
+    }
+
+    for (uint n(0); n<shapeTimeFreq.nelements(); n++) {
+      shapeSkymap(counter) = shapeTimeFreq(n);
+      counter++;
+    }
+
+    return shapeSkymap;
+  }
+
+  //_____________________________________________________________________ summary
+  
+  void SkymapCoordinate::summary (std::ostream &os)
+  {
+    os << "[SkymapCoordinate] Summary of internal parameters." << std::endl;
+    os << "-- nof. coordinate objects = " << nofCoordinates()  << std::endl;
+    os << "-- nof. coordinate axes    = " << nofAxes()         << std::endl;
+    os << "-- Shape of the axes       = " << shape()           << std::endl;
+    os << "-- World axis names        = " << csys_p.worldAxisNames() << std::endl;
+    os << "-- World axis units        = " << csys_p.worldAxisUnits() << std::endl;
+    os << "-- Reference pixel (CRPIX) = " << csys_p.referencePixel() << std::endl;
+    os << "-- Increment       (CDELT) = " << csys_p.increment()      << std::endl;
+    os << "-- Reference value (CRVAL) = " << csys_p.referenceValue() << std::endl;
   }
   
   // ============================================================================
@@ -151,9 +205,26 @@ namespace CR { // Namespace CR -- begin
 			       SpatialCoordinate const &spatialCoord,
 			       TimeFreqCoordinate const &timeFreqCoord)
   {
+    obsData_p       = obsData;
+    spatialCoord_p  = spatialCoord;
+    timeFreqCoord_p = timeFreqCoord;
+
+    setCoordinateSystem ();
   }
   
+  //_________________________________________________________ setCoordinateSystem
   
+  void SkymapCoordinate::setCoordinateSystem ()
+  {
+    casa::CoordinateSystem csys;
+    
+    csys.setObsInfo (obsData_p.obsInfo());
+    
+    spatialCoord_p.toCoordinateSystem(csys);
+    timeFreqCoord_p.toCoordinateSystem(csys);
+    
+    csys_p = csys;
+  }
   
 
 } // Namespace CR -- end

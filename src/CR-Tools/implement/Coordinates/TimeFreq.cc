@@ -152,11 +152,23 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  // --------------------------------------------------------------- setBlocksize
+  //________________________________________________________________ setBlocksize
 
   void TimeFreq::setBlocksize (uint const &blocksize) {
     blocksize_p = blocksize;
     fftLength_p = blocksize_p/2+1;
+  }
+
+  //__________________________________________________________ setSampleFrequency
+
+  void TimeFreq::setSampleFrequency (double const &sampleFrequency) {
+    sampleFrequency_p = sampleFrequency;
+  }
+
+  //______________________________________________________________ setNyquistZone
+
+  void TimeFreq::setNyquistZone (uint const &nyquistZone) {
+    nyquistZone_p = nyquistZone;
   }
   
   // -------------------------------------------------------------------- summary

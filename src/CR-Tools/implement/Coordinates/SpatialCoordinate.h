@@ -72,6 +72,7 @@ namespace CR { // Namespace CR -- begin
       <li>casacore <a href="http://www.astron.nl/casacore/doc/html/classcasa_1_1Coordinate.html">Coordinate</a> class
       <li>casacore <a href="http://www.astron.nl/casacore/doc/html/classcasa_1_1CoordinateSystem.html">CoordinateSystem</a> class
       <li>CR::CoordinateType
+      <li>CR::SkymapCoordinate
     </ul>
     
     <h3>Synopsis</h3>

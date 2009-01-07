@@ -374,9 +374,7 @@ namespace CR { // Namespace CR -- begin
 
       \param sampleFrequency -- Sample frequency in the ADC, [Hz]
     */
-    inline void setSampleFrequency (double const &sampleFrequency) {
-      sampleFrequency_p = sampleFrequency;
-    }
+    virtual void setSampleFrequency (double const &sampleFrequency);
 
     /*!
       \brief Set the sample frequency, \f$ \nu_{\rm Sample} \f$
@@ -413,9 +411,7 @@ namespace CR { // Namespace CR -- begin
 
       \param nyquistZone -- Nyquist zone,  [1]
     */
-    inline void setNyquistZone (uint const &nyquistZone) {
-      nyquistZone_p = nyquistZone;
-    }
+    virtual void setNyquistZone (uint const &nyquistZone);
 
     // --- referenceTime -----------------------------------
 

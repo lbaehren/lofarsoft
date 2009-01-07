@@ -75,6 +75,8 @@ namespace CR { // Namespace CR -- begin
     CR::SpatialCoordinate spatialCoord_p;
     //! Container for the time-frequency axes
     CR::TimeFreqCoordinate timeFreqCoord_p;
+    //! Coordinate system object to be attached to an image
+    casa::CoordinateSystem csys_p;
     
   public:
     
@@ -126,6 +128,32 @@ namespace CR { // Namespace CR -- begin
     SkymapCoordinate& operator= (SkymapCoordinate const &other); 
     
     // --------------------------------------------------------------- Parameters
+
+    /*!
+      \brief Get the number of coordinate axes
+      
+      \return nofAxes -- The number of coordinate axes.
+    */
+    inline unsigned int nofAxes () const {
+      return (spatialCoord_p.nofAxes()+timeFreqCoord_p.nofAxes());
+    }
+    
+    /*!
+      \brief Get the number of casa::Coordinate object to make of this coordinate
+      
+      \return nofCoordinates -- The number of casa::Coordinate object to make of
+             this coordinate
+    */
+    inline unsigned int nofCoordinates () const {
+      return (spatialCoord_p.nofCoordinates()+timeFreqCoord_p.nofCoordinates());
+    }
+
+    /*!
+      \brief Get the shape, i.e. the number of elements along each axis
+      
+      \return shape -- Vector with the number of elements per coordinate axis.
+    */
+    casa::IPosition shape ();
 
     /*!
       \brief Get some basic information on the observation (epoch, location, etc.)
@@ -181,6 +209,52 @@ namespace CR { // Namespace CR -- begin
     bool setTimeFreqCoordinate (TimeFreqCoordinate const &coord);
 
     /*!
+      \brief Get the coordinate system from the coordinates
+
+      \return csys -- Coordinate system object encapsulating the coordinates for
+              the sky map.
+    */
+    inline casa::CoordinateSystem coordinateSystem () const {
+      return csys_p;
+    }
+
+    /*!
+      \brief Get the names of the world axes
+
+      \return names -- The names of the world axes.
+    */
+    inline Vector<String> worldAxisNames() const {
+      return csys_p.worldAxisNames();
+    }
+
+    /*!
+      \brief Get the units of the world axes
+
+      \return units -- The units of the world axes.
+    */
+    inline Vector<String> worldAxisUnits() const {
+      return csys_p.worldAxisUnits();
+    }
+
+    /*!
+      \brief Get the value of the reference pixel
+
+      \return refPixel -- The value of the reference pixel.
+    */
+    inline Vector<double> referencePixel() const {
+      return csys_p.referencePixel();
+    }
+
+    /*!
+      \brief Get the value of the reference value
+
+      \return refValue -- The value of the reference value.
+    */
+    inline Vector<double> referenceValue() const {
+      return csys_p.referenceValue();
+    }
+
+    /*!
       \brief Get the name of the class
       
       \return className -- The name of the class, SkymapCoordinate.
@@ -204,9 +278,7 @@ namespace CR { // Namespace CR -- begin
     void summary (std::ostream &os);    
 
     // ------------------------------------------------------------------ Methods
-    
-    
-    
+
   private:
     
     //! Unconditional copying
@@ -220,8 +292,9 @@ namespace CR { // Namespace CR -- begin
     void init (ObservationData const &obsData,
 	       SpatialCoordinate const &spatialCoord,
 	       TimeFreqCoordinate const &timeFreqCoord);
-    
-    
+
+    //! Set up the coordinate system object to be attached to an image
+    void setCoordinateSystem ();
   };
   
 } // Namespace CR -- end
