@@ -81,6 +81,11 @@ class analyseLOPESevent2 : public analyseLOPESevent {
     //! time window of the interval to search for radio pulse
     Double ccWindowWidth_p;
 
+    //! Start frequency for the plot of the spectrum
+    Double spectrumStart_p;
+    //! Stop frequency for the plot of the spectrum
+    Double spectrumStop_p;
+
     //! map of calculated pulse parameters of raw data, accessable with antenna ID as key
     map <int, PulseProperties> rawPulses;
     //! map of calculated pulse parameters of calibrated fieldstrength traces
@@ -182,6 +187,56 @@ class analyseLOPESevent2 : public analyseLOPESevent {
        ccWindowWidth_p = ccWindowWidth;
     }
 
+
+    /*!
+      \brief Get the start frequency for the plot of the spectrum
+
+      \return spectrumStart -- Start frequency for the plot of the spectrum
+    */
+    inline double getSpectrumStart () {
+      return spectrumStart_p;
+    }
+
+    /*!
+      \brief Set the start frequency for the plot of the spectrum
+
+      \param spectrumStart -- Start frequency for the plot of the spectrum
+    */
+    inline void setSpectrumStart (double const &spectrumStart) {
+      spectrumStart_p = spectrumStart;
+    }
+
+    /*!
+      \brief Get the stop frequency for the plot of the spectrum
+
+      \return spectrumStop -- Stop frequency for the plot of the spectrum
+    */
+    inline double getSpectrumStop () {
+      return spectrumStop_p;
+    }
+
+    /*!
+      \brief Set the stop frequency for the plot of the spectrum
+
+      \param spectrumStop -- Stop frequency for the plot of the spectrum
+    */
+    inline void setSpectrumStop (double const &spectrumStop) {
+      spectrumStop_p = spectrumStop;
+    }
+
+    /*!
+      \brief Set the interval for the plot of the spectrum
+
+      \param spectrumStart -- Start frequency for the plot of the spectrum
+      \param spectrumStop  -- Stop frequency for the plot of the spectrum
+    */
+    inline void setSpectrumInterval (double const &spectrumStart,
+                                       double const &spectrumStop) {
+      spectrumStart_p = spectrumStart;
+      spectrumStop_p  = spectrumStop;
+    }
+
+
     /*!
       \brief Get map of pulse parameters of raw data trace (calculation must be allready done)
 
@@ -225,6 +280,7 @@ class analyseLOPESevent2 : public analyseLOPESevent {
                                in LOPES coordinates)
       \param PlotPrefix      - prefix (including path) for the plots to be generated
       \param generatePlots   - generate the postscript plots
+      \param generateSpectra - generate postscript plots of the spectrum
       \param FlaggedAntIDs   - list of antenna IDs that are to be flagged.
       \param verbose         - produce verbose output on the commandline.
       \param simplexFit      - fit the direction with a simple simplex fit
@@ -257,6 +313,7 @@ class analyseLOPESevent2 : public analyseLOPESevent {
 			Bool RotatePos,
 			string PlotPrefix=String(),
 			Bool generatePlots=False,
+			Bool generateSpectra=False,
 			Vector<Int> FlaggedAntIDs=Vector<Int>(),
 			Bool verbose=False,
 			Bool simplexFit=False,
@@ -282,6 +339,7 @@ class analyseLOPESevent2 : public analyseLOPESevent {
       \param evname          - path to the eventfile to be processed
       \param PlotPrefix      - prefix (including path) for the plots to be generated
       \param generatePlots   - generate the postscript plots
+      \param generateSpectra - generate postscript plots of the spectrum
       \param FlaggedAntIDs   - list of antenna IDs that are to be flagged.
       \param verbose         - produce verbose output on the commandline.
       \param doDispersionCal - correct for the dispersion (frequency dependend PhaseCal values)
@@ -295,6 +353,7 @@ class analyseLOPESevent2 : public analyseLOPESevent {
     Record CalibrationPipeline (const string& evname,
 				string PlotPrefix=String(),
 				Bool generatePlots=False,
+				Bool generateSpectra=False,
 				Vector<Int> FlaggedAntIDs=Vector<Int>(),
 				Bool verbose=False,
 				bool doDispersionCal=true,

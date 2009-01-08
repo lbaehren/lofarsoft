@@ -81,6 +81,10 @@ namespace CR { // Namespace CR -- begin
     double plotStop_p;
     //! Time window for peak search of radio pulse
     double ccWindowWidth_p;
+    //! Start frequency for the plot of the spectrum
+    Double spectrumStart_p;
+    //! Stop frequency for the plot of the spectrum
+    Double spectrumStop_p;
     //! File names of created plots 
     vector <string> plotlist;
     //! Last upsampling exponent (-1 if no upsampling was done so far)
@@ -225,6 +229,57 @@ namespace CR { // Namespace CR -- begin
       ccWindowWidth_p = ccWindowWidth;
     }
 
+
+
+    /*!
+      \brief Get the start frequency for the plot of the spectrum
+
+      \return spectrumStart -- Start frequency for the plot of the spectrum
+    */
+    inline double getSpectrumStart () {
+      return spectrumStart_p;
+    }
+
+    /*!
+      \brief Set the start frequency for the plot of the spectrum
+
+      \param spectrumStart -- Start frequency for the plot of the spectrum
+    */
+    inline void setSpectrumStart (double const &spectrumStart) {
+      spectrumStart_p = spectrumStart;
+    }
+
+    /*!
+      \brief Get the stop frequency for the plot of the spectrum
+
+      \return spectrumStop -- Stop frequency for the plot of the spectrum
+    */
+    inline double getSpectrumStop () {
+      return spectrumStop_p;
+    }
+
+    /*!
+      \brief Set the stop frequency for the plot of the spectrum
+
+      \param spectrumStop -- Stop frequency for the plot of the spectrum
+    */
+    inline void setSpectrumStop (double const &spectrumStop) {
+      spectrumStop_p = spectrumStop;
+    }
+
+    /*!
+      \brief Set the interval for the plot of the spectrum
+
+      \param spectrumStart -- Start frequency for the plot of the spectrum
+      \param spectrumStop  -- Stop frequency for the plot of the spectrum
+    */
+    inline void setSpectrumInterval (double const &spectrumStart,
+                                       double const &spectrumStop) {
+      spectrumStart_p = spectrumStart;
+      spectrumStop_p  = spectrumStop;
+    }
+
+
     /*!
       \brief Get the list of the file names of all created plots
 
@@ -356,6 +411,17 @@ namespace CR { // Namespace CR -- begin
     Slice calculatePlotRange (const Vector<Double>& xaxis) const;
 
 
+    /*!
+      \brief Gets a Slice with the spectrum interval for the given xaxis
+
+      \param xaxis            -- a time axis (may be upsampled or not)
+
+      \return plotRange       -- A Slice containing the indices of the xaxis interval corresponding to the
+                                 class variables spectrumStart_p and spectrumStop_p
+    */
+    Slice calculateSpectrumRange (const Vector<Double>& xaxis) const;
+
+
 
     /*!
       \brief Gets a Slice with the time interval BEFORE the plotrange 
@@ -447,6 +513,21 @@ namespace CR { // Namespace CR -- begin
                           const int& upsampling_exp = 0,
                           const bool& rawData = false,
 			  const bool& plotEnvelope = false);
+
+    /*!
+      \brief Plots the spectrum of all antennas
+
+      \param filename         -- Name of the .ps file (without ".ps") the plot will be written to
+      \param DataReader       -- DataReader (LopesEventIn)
+      \param antennaSelection -- Selection of antennas considered for the plot
+      \param seperated        -- true = an individual plot for each antenna will be created
+                                 (the antenna number serves as file name appendix).
+    */
+
+    void plotSpectra (const string& filename,
+                      DataReader *dr,
+                      Vector<Bool> antennaSelection = Vector<Bool>(),
+                      const bool& seperated = false);
 
     /*!
       \brief Prints the height of the maximum of the envelope and the corresponding time in the plot range

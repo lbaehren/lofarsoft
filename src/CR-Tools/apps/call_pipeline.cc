@@ -89,6 +89,7 @@ using CR::LopesEventIn;
   path                   = /home/schroeder/lopes/events
   RotatePos              = true
   GeneratePlots          = true
+  GenerateSpectra        = true
   SinglePlots            = true
   PlotRawData            = false
   CalculateMaxima        = false
@@ -104,7 +105,9 @@ using CR::LopesEventIn;
   doRFImitgation         = true
   polarization           = ANY
   plotStart              = -2.05e-6
-  plotEnd                = -1.60e-6
+  plotStop               = -1.60e-6
+  spectrumStart          = 40e6
+  spectrumStop           = 80e-6
   upsamplingRate         = 320e6
   upsamplingExponent     = 1
   summaryColumns         = 3
@@ -123,6 +126,7 @@ using CR::LopesEventIn;
     <li>the given positions are in the Kascade coordinate system and must be
     rotated to the LOPES system,
     <li>there will be generated plots of the analaysed event,
+    <li>a spectrum will be plotted for every antenna
     <li>produces a plot for each antenna,
     <li>the raw ADC values (FX) are not plotted,
     <li>calcutlates the time and the height of the maximum and the minimum in the plot range 
@@ -139,6 +143,7 @@ using CR::LopesEventIn;
     <li>the analysis does not take care of the polarization of the antennas
         (select EW, NS or BOTH if you want to results for one (both) polarizations),
     <li>the plots start at -2.05 micro seconds and end at -1.60 micro seconds,
+    <li>the plotted spectra start at 40 MHz seconds and end 80 MHz,
     <li>the Lopes data will be upsampled to a sampling rate of 320 MHz (see below),
     <li>the upsampling of the calibrated antenna fieldstrengthes will be done by
     a factor of 2^1 = 2,
@@ -190,6 +195,7 @@ using CR::LopesEventIn;
 string caltablepath = "/home/schroeder/usg/data/lopes/LOPES-CalTable";
 string path = "";
 bool generatePlots = true;	      // the plot prefix will be the name of the event file
+bool generateSpectra = false;	      // by default no spectra are plotted
 bool singlePlots = false;	      // by default there are no single plots for each antenna
 bool PlotRawData = false;	      // by default there the raw data are not plotted
 bool CalculateMaxima = false;	      // by default the maxima are not calculated
@@ -207,7 +213,9 @@ bool doRFImitigation = true;	      // supresses narrow band noise (RFI)
 string polarization = "ANY";	      // polarization: ANY, EW, NS or BOTH
 bool both_pol = false;		      // Should both polarizations be processed?
 double plotStart = -2.05e-6;	      // in seconds
-double plotEnd = -1.60e-6;	      // in seconds
+double plotStop = -1.60e-6;	      // in seconds
+double spectrumStart = 40e6;          // in Hz
+double spectrumStop= 80e6;	      // in Hz
 double upsamplingRate = 0.;	      // Upsampling Rate for new upsampling
 unsigned int upsamplingExponent = 0;  // by default no upsampling will be done
 vector<Int> flagged;		      // use of STL-vector instead of CASA-vector due to support of push_back()
@@ -317,6 +325,22 @@ void readConfigFile (const string &filename)
           } else {
             cerr << "\nError processing file \"" << filename <<"\".\n" ;
             cerr << "SinglePlots must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+        }
+
+        if ( (keyword.compare("generateSpectra")==0) || (keyword.compare("GenerateSpectra")==0) ||
+             (keyword.compare("generatespectra")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
+	    generateSpectra = true;
+	    cout << "GenerateSpectra set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
+	    generatePlots = false;
+	    cout << "GenerateSpectra set to 'false'.\n";
+          } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "GenerateSpectra must be either 'true' or 'false'.\n";
             cerr << "\nProgram will continue skipping the problem." << endl;
           }
         }
@@ -573,16 +597,47 @@ void readConfigFile (const string &filename)
           }
         }
 
-        if ( (keyword.compare("plotEnd")==0) || (keyword.compare("PlotEnd")==0) || (keyword.compare("plotend")==0)) {
+        if ( (keyword.compare("plotStop")==0) || (keyword.compare("PlotStop")==0) || (keyword.compare("plotstop")==0)
+            || (keyword.compare("plotEnd")==0) || (keyword.compare("PlotEnd")==0) || (keyword.compare("plotend")==0)) {
           double temp = 9999999;
           stringstream(value) >> temp;
 
           if (temp != 9999999) { // will be false, if value is not of typ "double"
-            plotEnd = temp;
-	    cout << "PlotEnd set to " << plotEnd << " seconds.\n";
+            plotStop = temp;
+	    cout << "PlotStop set to " << plotStop << " seconds.\n";
 	  } else {
             cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "PlotEnd must be of typ 'double'. \n";
+            cerr << "PlotStop must be of typ 'double'. \n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+        }
+
+        if ( (keyword.compare("spectrumStart")==0) || (keyword.compare("SpectrumStart")==0) 
+            || (keyword.compare("spectrumstart")==0)) {
+          double temp = -9999999;
+          stringstream(value) >> temp;
+
+          if (temp != -9999999) { // will be false, if value is not of typ "double"
+            spectrumStart = temp;
+	    cout << "SpectrumStart set to " << spectrumStart << " seconds.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "SpectrumStart must be of typ 'double'. \n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+        }
+
+       if ( (keyword.compare("spectrumStop")==0) || (keyword.compare("SpectrumStop")==0) 
+            || (keyword.compare("spectrumstop")==0)) {
+          double temp = -9999999;
+          stringstream(value) >> temp;
+
+          if (temp != -9999999) { // will be false, if value is not of typ "double"
+            spectrumStop = temp;
+	    cout << "SpectrumStop set to " << spectrumStop << " seconds.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "SpectrumStop must be of typ 'double'. \n";
             cerr << "\nProgram will continue skipping the problem." << endl;
           }
         }
@@ -907,6 +962,7 @@ int main (int argc, char *argv[])
              << "GeneratePlots = true\n"
              << "SinglePlots = true\n"
              << "PlotRawData = false\n"
+             << "GenerateSpectra = true\n"
              << "CalculateMaxima = false\n"
              << "listCalcMaxima=false\n"
              << "printShowerCoordinates=false\n"
@@ -919,8 +975,10 @@ int main (int argc, char *argv[])
              << "doDelayCal = true\n"
              << "doRFImitigation = true\n"
              << "polarization = ANY\n"
-             << "plotBegin = -2.05e-6\n"
-             << "plotEnd = -1.60e-6\n"
+             << "plotStart = -2.05e-6\n"
+             << "plotStop = -1.60e-6\n"
+             << "spectrumStart = 40e6\n"
+             << "spectrumEnd = 80e6\n"
              << "upsamplingRate = 320e6\n"
              << "upsamplingExponent = 1\n"
              << "summaryColumns = 3\n"
@@ -1139,13 +1197,15 @@ int main (int argc, char *argv[])
         eventPipeline.initPipeline(obsrec);
 
         // set parameters of pipeline
-        eventPipeline.setPlotInterval(plotStart,plotEnd);
+        eventPipeline.setPlotInterval(plotStart,plotStop);
+        eventPipeline.setSpectrumInterval(spectrumStart,spectrumStop);
         eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
         // call the pipeline with an extra delay = 0.
         results = eventPipeline.CalibrationPipeline (path+filename,
                                                      plotprefix,
                                                      generatePlots,
+                                                     generateSpectra,
                                                      static_cast< Vector<int> >(flagged),
                                                      verbose,
                                                      doDispersionCal,
@@ -1178,7 +1238,8 @@ int main (int argc, char *argv[])
           eventPipeline.initPipeline(obsrec);
 
           // set parameters of pipeline
-          eventPipeline.setPlotInterval(plotStart,plotEnd);
+          eventPipeline.setPlotInterval(plotStart,plotStop);
+          eventPipeline.setSpectrumInterval(spectrumStart,spectrumStop);
           eventPipeline.setCCWindowWidth(ccWindowWidth);
           eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
@@ -1192,6 +1253,7 @@ int main (int argc, char *argv[])
                                                RotatePos,
                                                plotprefix+polPlotPrefix,
                                                generatePlots,
+                                               generateSpectra,
                                                static_cast< Vector<int> >(flagged),
                                                verbose,
                                                simplexFit,
@@ -1240,7 +1302,8 @@ int main (int argc, char *argv[])
           eventPipeline.initPipeline(obsrec);
 
           // set parameters of pipeline
-          eventPipeline.setPlotInterval(plotStart,plotEnd);
+          eventPipeline.setPlotInterval(plotStart,plotStop);
+          eventPipeline.setSpectrumInterval(spectrumStart,spectrumStop);
           eventPipeline.setCCWindowWidth(ccWindowWidth);
           eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
@@ -1254,6 +1317,7 @@ int main (int argc, char *argv[])
                                                RotatePos,
                                                plotprefix+polPlotPrefix,
                                                generatePlots,
+                                               generateSpectra,
                                                static_cast< Vector<int> >(flagged),
                                                verbose,
                                                simplexFit,

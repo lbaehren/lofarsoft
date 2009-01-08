@@ -38,6 +38,8 @@ namespace CR { // Namespace CR -- begin
       CompleteBeamPipe_p(NULL),
       upsamplingExponent(0),
       ccWindowWidth_p(0.045e-6),
+      spectrumStart_p(40e6),
+      spectrumStop_p(80e6),
       rawPulses( map<int,PulseProperties>() ),
       calibPulses( map<int,PulseProperties>() )
   {;}
@@ -105,6 +107,7 @@ namespace CR { // Namespace CR -- begin
 					  Bool RotatePos,
 					  string PlotPrefix, 
 					  Bool generatePlots,
+					  Bool generateSpectra,
 					  Vector<Int> FlaggedAntIDs, 
 					  Bool verbose,
 					  Bool simplexFit,
@@ -152,6 +155,7 @@ namespace CR { // Namespace CR -- begin
       // initialize Complete Pipeline
       CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
       CompleteBeamPipe_p->setCCWindowWidth(getCCWindowWidth());
+      CompleteBeamPipe_p->setSpectrumInterval(getSpectrumStart(),getSpectrumStop());
       CompleteBeamPipe_p->setPolarization(Polarization);
       CompleteBeamPipe_p->setCalibrationMode(false);
 
@@ -220,6 +224,14 @@ namespace CR { // Namespace CR -- begin
           CompleteBeamPipe_p->listCalcMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),fiterg.asDouble("CCcenter"));
       }
 
+      // Generate spectra
+      if (generateSpectra) {
+        if (SinglePlots)
+          CompleteBeamPipe_p->plotSpectra(PlotPrefix+"-spec", lev_p, AntennaSelection, true);
+        else
+          CompleteBeamPipe_p->plotSpectra(PlotPrefix + "-spec-all", lev_p, AntennaSelection, false);
+      }
+
       // output of antnenna to core distances in shower coordinates, if requested
       if (printShowerCoordinates) printAntennaDistances(erg.asArrayDouble("distances"),
                                                          toShower(beamPipe_p->GetAntPositions(), Az, El),	
@@ -249,6 +261,7 @@ namespace CR { // Namespace CR -- begin
   Record analyseLOPESevent2::CalibrationPipeline (const string& evname,
 						  string PlotPrefix, 
 						  Bool generatePlots,
+						  Bool generateSpectra,
 						  Vector<Int> FlaggedAntIDs, 
 						  Bool verbose,
 						  bool doDispersionCal,
@@ -317,6 +330,7 @@ namespace CR { // Namespace CR -- begin
       // initialize Complete Pipeline
       CompleteBeamPipe_p = static_cast<CompletePipeline*>(pipeline_p);
       CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
+      CompleteBeamPipe_p->setSpectrumInterval(getSpectrumStart(),getSpectrumStop());
       CompleteBeamPipe_p->setCalibrationMode(true);
 
       // Plot the raw data, if desired
@@ -349,7 +363,15 @@ namespace CR { // Namespace CR -- begin
         // calculate the maxima
 	if (CalculateMaxima)
           calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
-      };
+      }
+
+      // Generate spectra
+      if (generateSpectra) {
+        if (SinglePlots)
+          CompleteBeamPipe_p->plotSpectra(PlotPrefix+"-spec", lev_p, AntennaSelection, true);
+        else
+          CompleteBeamPipe_p->plotSpectra(PlotPrefix + "-spec-all", lev_p, AntennaSelection, false);
+      }
 
       // give out the names of the created plots
       if (verbose)		

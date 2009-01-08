@@ -40,6 +40,8 @@ namespace CR { // Namespace CR -- begin
     plotStart_p(-2.05e-6),
     plotStop_p(-1.55e-6),
     ccWindowWidth_p(0.045e-6),
+    spectrumStart_p(40e6),
+    spectrumStop_p(80e6),
     plotlist(),
     lastUpsamplingExponent(-1),
     lastTimeUpsamplingExponent(-1),
@@ -56,6 +58,8 @@ namespace CR { // Namespace CR -- begin
     plotStart_p(-2.05e-6),
     plotStop_p(-1.55e-6),
     ccWindowWidth_p(0.045e-6),
+    spectrumStart_p(40e6),
+    spectrumStop_p(80e6),
     plotlist(),
     lastUpsamplingExponent(-1),
     lastTimeUpsamplingExponent(-1),
@@ -496,12 +500,10 @@ namespace CR { // Namespace CR -- begin
 
   Slice CompletePipeline::calculatePlotRange (const Vector<Double>& xaxis) const
   {
-    try
-    {
+    try {
       // check if plotStart is <= plotStop
-      if (plotStop_p < plotStart_p)
-      {
-        std::cerr << "CompletePipeline:calculatePlotRange: Error: plotStop_p is greater than plotStart_p!" << std::endl;
+      if (plotStop_p < plotStart_p) {
+        cerr << "CompletePipeline:calculatePlotRange: Error: plotStop_p is greater than plotStart_p!" << std::endl;
         return Slice(0,0);
       }
       unsigned int startsample = ntrue(xaxis<plotStart_p);     //number of elements smaller then starting value of plot range
@@ -509,17 +511,43 @@ namespace CR { // Namespace CR -- begin
 
       // check for consistency
       if (startsample >= xaxis.size())
-        std::cerr << "CompletePipeline:calculatePlotRange: plot start is too large!" << std::endl;
+        cerr << "CompletePipeline:calculatePlotRange: plot start is too large!" << std::endl;
       else if (startsample == stopsample)
-        std::cerr << "CompletePipeline:calculatePlotRange: plot range is too small!" << std::endl;
+        cerr << "CompletePipeline:calculatePlotRange: plot range is too small!" << std::endl;
 
       // create Slice with plotRange
       return Slice(startsample,(stopsample-startsample));
-    } catch (AipsError x) 
-    {
-        std::cerr << "CompletePipeline:calculatePlotRange: " << x.getMesg() << std::endl;
-    }; 
- 
+    } catch (AipsError x) {
+        cerr << "CompletePipeline:calculatePlotRange: " << x.getMesg() << std::endl;
+    }
+
+    // return dummy to avoid warning (this command is reached only in case of an error).
+    return Slice();
+  }
+
+  Slice CompletePipeline::calculateSpectrumRange (const Vector<Double>& xaxis) const
+  {
+    try {
+      // check if spectrumStart is <= spectrumStop
+      if (spectrumStop_p < spectrumStart_p) {
+        cerr << "CompletePipeline:calculateSpectrumRange: Error: spectrumStop_p is greater than spectrumStart_p!" << std::endl;
+        return Slice(0,0);
+      }
+      unsigned int startsample = ntrue(xaxis<spectrumStart_p);     //number of elements smaller then starting value
+      unsigned int stopsample = ntrue(xaxis<spectrumStop_p);       //number of elements smaller then stop value
+
+      // check for consistency
+      if (startsample >= xaxis.size())
+        cerr << "CompletePipeline:calculateSpectrumRange: spectrum start is too large!" << std::endl;
+      else if (startsample == stopsample)
+        cerr << "CompletePipeline:calculateSpectrumRange: selected interval of the spectrum is too small!" << std::endl;
+
+      // create Slice with range for plot
+      return Slice(startsample,(stopsample-startsample));
+    } catch (AipsError x) {
+        cerr << "CompletePipeline:calculateSpectrumRange: " << x.getMesg() << std::endl;
+    }
+
     // return dummy to avoid warning (this command is reached only in case of an error).
     return Slice();
   }
@@ -527,12 +555,11 @@ namespace CR { // Namespace CR -- begin
 
   Slice CompletePipeline::calculateNoiseRange (const Vector<Double>& xaxis) const
   {
-    try
-    {
+    try {
       // check if plotStart is <= plotStop
       if (plotStop_p < plotStart_p)
       {
-        std::cerr << "CompletePipeline:calculateNoiseRange: Error: plotStop_p is greater than plotStart_p!" << std::endl;
+        cerr << "CompletePipeline:calculateNoiseRange: Error: plotStop_p is greater than plotStart_p!" << std::endl;
         return Slice(0,0);
       }
       //number of elements smaller then starting value of plot range
@@ -542,10 +569,9 @@ namespace CR { // Namespace CR -- begin
 
       // create Slice with noiseRange
       return  Slice((startsample+startsample-stopsample),(stopsample-startsample));
-    } catch (AipsError x) 
-    {
-        std::cerr << "CompletePipeline:calculateNoiseRange: " << x.getMesg() << std::endl;
-    }; 
+    } catch (AipsError x) {
+        cerr << "CompletePipeline:calculateNoiseRange: " << x.getMesg() << std::endl;
+    }
 
     // return dummy to avoid warning (this command is reached only in case of an error).
     return Slice();
@@ -554,12 +580,11 @@ namespace CR { // Namespace CR -- begin
 
   Slice CompletePipeline::calculateCCRange (const Vector<Double>& xaxis, const double& ccBeamcenter) const
   {
-    try
-    {
+    try {
       // check if ccBeam has converged
       if (ccBeamcenter == 0.0)
       {
-        std::cerr << "CompletePipeline:calculateCCRange: Error: CC-beam did not converged !" << std::endl;
+        cerr << "CompletePipeline:calculateCCRange: Error: CC-beam did not converged !" << std::endl;
         return Slice(0,0);
       }
       //number of elements smaller then CC-center minus window size
@@ -569,10 +594,9 @@ namespace CR { // Namespace CR -- begin
 
       // create Slice with plotRangeNoise
       return Slice(startsample,(stopsample-startsample));
-    } catch (AipsError x) 
-    {
-        std::cerr << "CompletePipeline:calculateCCRange: " << x.getMesg() << std::endl;
-    }; 
+    } catch (AipsError x) {
+        cerr << "CompletePipeline:calculateCCRange: " << x.getMesg() << std::endl;
+    }
 
     // return dummy to avoid warning (this command is reached only in case of an error).
     return Slice();
@@ -1003,21 +1027,177 @@ namespace CR { // Namespace CR -- begin
         // Add filename to list of created plots
         plotlist.push_back(plotfilename);
       } // else
-    } catch (AipsError x) 
-      {
+    } catch (AipsError x) {
         std::cerr << "CompletePipeline:plotAllAntennas: " << x.getMesg() << std::endl;
-      }; 
+      }
   }
-  
-  
+
+
+  void CompletePipeline::plotSpectra(const string& filename,
+                                     DataReader *dr,
+                                     Vector<Bool> antennaSelection,
+                                     const bool& seperated)
+  {
+    try {
+      SimplePlot plotter;    			// define plotter
+      Vector<Double> xaxis;			// xaxis
+      double xmax,xmin,ymin=0,ymax=0;		// Plotrange
+      int color = 3;				// starting color
+
+      // make antennaSelection unique, as casacore-Vectors are allways passed by reference
+      antennaSelection.unique();
+
+      // Get the antenna selection from the DataReader if no selction was chosen
+      if (antennaSelection.nelements() == 0) {
+	antennaSelection = GetAntennaMask(dr);
+      }
+
+      // adopt the antennaSelection to the chosen polarization
+      deselectectPolarization(dr,antennaSelection);
+
+      // Get the (not upsampled) time axis
+      xaxis = dr->frequencyValues();
+
+      // Get the spectra after all treatment and calculate the absolute value
+      // do a logarithmic plot
+      Matrix<Double> yValues ( log10( amplitude(GetData(dr)) ) );
+
+      // Define plotrange for not upsampled and upsampled data
+      Slice plotRange = calculateSpectrumRange(xaxis);
+
+      // conversion to Mega
+      xaxis /= 1e6;
+
+      // define Plotrange
+      xmin = min(xaxis(plotRange));
+      xmax = max(xaxis(plotRange));
+
+      // find the minimal and maximal y values for the plot
+      for (unsigned int i = 0; i < antennaSelection.nelements(); i++)
+        if (antennaSelection(i)) {		// consider only selected antennas
+          if ( ymin > min(yValues.column(i)(plotRange)) ) {
+            ymin = min(yValues.column(i)(plotRange));
+          }
+          if ( ymax < max(yValues.column(i)(plotRange)) ) {
+            ymax = max(yValues.column(i)(plotRange));
+          }
+        }
+
+      // multiply ymin and ymax by 105% to have some space at the bottom and the top of the plot
+      ymin *= 1.05;
+      ymax *= 1.05;
+
+      // set up label for plots and filename
+      string plotfilename;
+      string label;
+      uInt gtdate;
+      stringstream gtlabel, antennanumber;
+      // Get the AntennaIDs for labeling
+      dr->headerRecord().get("Date",gtdate);
+      gtlabel << gtdate;
+
+
+      // Create empty vector for not existing error bars 
+      Vector<Double> empty;
+
+      // Make the plots (either all antennas together or seperated)
+      if (seperated) {
+        stringstream antennaid;
+        Vector<Int> AntennaIDs;
+        dr->headerRecord().get("AntennaIDs",AntennaIDs);
+
+        // Create the plots for each individual antenna looping through antennas
+        cout <<"Plotting the spectrum:\n Antenna ..." ;
+
+
+        for (unsigned int i = 0; i < antennaSelection.nelements(); i++) {
+          // consider only selected antennas
+          if (antennaSelection(i)) {
+            // create filename and label
+	    antennanumber.str("");
+	    antennanumber.clear();
+            antennanumber << (i+1);
+            antennaid << AntennaIDs(i);
+
+            //set the plotfilename to filename + "-" + antennanumber.str() + ".ps";
+            if ( (i+1) < 10 ){
+               plotfilename = filename + "-0" + antennanumber.str() + ".ps";
+	    }else{
+               plotfilename = filename + "-" + antennanumber.str() + ".ps";
+	    }
+            //set label "GT - Ant.Nr"
+            label = "GT " + gtlabel.str() + " - Antenna " + antennanumber.str();
+
+            //alternative plotfilename
+            //plotfilename = gtlabel.str() + "-" + antennanumber.str() + ".ps";
+
+            // Initialize the plot giving xmin, xmax, ymin and ymax
+            plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
+
+            plotter.AddLabels("Frequency f [MHz]", "lg Amplitude",label);
+
+            // Plot spectrum
+            plotter.PlotLine(xaxis(plotRange),yValues.column(i)(plotRange),color,1);
+
+            // Add filename to list of created plots
+            plotlist.push_back(plotfilename);
+            cout << " " << (i+1);
+            color++;					// another color for the next antenna
+            if (color >= 13) color = 3;			// there are only 16 colors available, 
+							// use only ten as there are 3x10 antenna
+          }
+	}
+        cout << endl;
+      } else {  // if (seperated) => else
+        // add the ".ps" to the filename
+        plotfilename = filename + ".ps";
+
+        //alternative plotfilename
+        //plotfilename = gtlabel.str() + ".ps";
+
+        cout <<"Plotting the spectrum of all antennas to file: "
+             << plotfilename << endl;
+
+       // Add labels 
+        antennanumber << ntrue(antennaSelection);
+        label = "GT " + gtlabel.str() + " - " + antennanumber.str() + " Antennas";
+
+        // Initialize the plot giving xmin, xmax, ymin and ymax
+        plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
+
+        // Add labels 
+        plotter.AddLabels("Frequency f [MHz]", "lg Amplitude",label);
+
+        antennanumber << ntrue(antennaSelection);
+        label = "GT " + gtlabel.str() + " - " + antennanumber.str() + " Antennas";
+
+        // Create the plots looping through antennas
+        for (unsigned int i = 0; i < antennaSelection.nelements(); i++)
+          if (antennaSelection(i)) {		// consider only selected antennas
+            // Plot spectrum
+            plotter.PlotLine(xaxis(plotRange),yValues.column(i)(plotRange),color,1);
+
+            color++;					// another color for the next antenna
+            if (color >= 13) color = 3;			// there are only 16 colors available, 
+							// use only ten as there are 3x10 antennas
+        }
+
+        // Add filename to list of created plots
+        plotlist.push_back(plotfilename);
+      } // else
+    } catch (AipsError x) {
+        cerr << "CompletePipeline:plotSpectra: " << x.getMesg() << std::endl;
+      }
+  }
+
+
   map <int,PulseProperties> CompletePipeline::calculateMaxima(DataReader *dr,
 							      Vector<Bool> antennaSelection,
 							      const int& upsampling_exp,
 							      const bool& rawData)
   {
     map <int,PulseProperties> pulses;           // return value with pulse properties
-    try 
-    {
+    try {
       Vector<Double> timeValues;		// time values
       Vector<Double> timeRange;			// time values
       Matrix<Double> yValues;			// y-values
