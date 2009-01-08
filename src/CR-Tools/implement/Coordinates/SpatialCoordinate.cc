@@ -217,6 +217,8 @@ namespace CR { // Namespace CR -- begin
   //  Methods
   //
   // ============================================================================
+
+  //________________________________________________________________________ init
   
   void SpatialCoordinate::init (CoordinateType::Types const &coordType,
 				casa::String const &refcode,
@@ -300,6 +302,87 @@ namespace CR { // Namespace CR -- begin
     }
   }
 
+  //______________________________________________________________ positionValues
+
+  Matrix<double> SpatialCoordinate::positionValues (bool const &fastedIsFirst)
+  {
+    // determine the number of positions
+    uint nofPositions (1);
+    for (uint n(0); n<nofAxes_p; n++) {
+      nofPositions *= shape_p(n);
+    }
+
+    // set up in which order to iterate through the axes
+    IPosition axis (nofAxes_p);
+    if (fastedIsFirst) {
+      for (uint n(0); n<nofAxes_p; n++) {
+	axis(n) = n;
+      }
+    } else {
+      for (uint n(0); n<nofAxes_p; n++) {
+	axis(n) = nofAxes_p-1-n;
+      }
+    }
+
+    /* Create coordinate system object to handle the conversion; this is more
+       efficient than using the SpatialCoordinate::toWorld method, since the 
+       latter has to take care of the various ways in which the spatial
+       coordinate can be composed out of the basic coordinate objects.
+    */
+    casa::CoordinateSystem csys;
+    toCoordinateSystem (csys);
+
+    /* Set up the arrays for the conversion and the returned values */
+    Matrix<double> positions (nofPositions,nofAxes_p);
+    IPosition pos(nofAxes_p,0);
+    Vector<double> pixel (nofAxes_p,0);
+    Vector<double> world (nofAxes_p,0);
+    uint npos (0);
+    
+    switch (type_p) {
+    case CoordinateType::Direction:
+      break;
+      for (pos(1)=0; pos(1)<shape_p(axis(1)); pos(1)++) {
+	pixel(axis(1)) = pos(1);
+	for (pos(0)=0; pos(0)<shape_p(axis(0)); pos(0)++) {
+	  pixel(axis(0)) = pos(0);
+	  // conversion from pixel to world coordinates
+	  csys.toWorld (world,pixel);
+	  // copy result to returned array
+	  positions.row(npos) = world;
+	  // increment counter
+	  npos++;
+	}
+      }
+    default:
+      for (pos(2)=0; pos(2)<shape_p(axis(2)); pos(2)++) {
+	pixel(axis(2)) = pos(2);
+	for (pos(1)=0; pos(1)<shape_p(axis(1)); pos(1)++) {
+	  pixel(axis(1)) = pos(1);
+	  for (pos(0)=0; pos(0)<shape_p(axis(0)); pos(0)++) {
+	    pixel(axis(0)) = pos(0);
+	    // conversion from pixel to world coordinates
+	    csys.toWorld (world,pixel);
+	    // copy result to returned array
+	    positions.row(npos) = world;
+	    // increment counter
+	    npos++;
+	  }
+	}
+      }
+      break;
+    };
+    
+#ifdef DEBUGGING_MESSAGES
+    std::cout << "[SpatialCoordinate::positionValues]"          << std::endl;
+    std::cout << "-- nof. spatial positions = " << nofPositions << std::endl;
+    std::cout << "-- axis iteration order   = " << axis         << std::endl;
+    std::cout << "-- position values array  = " << positions.shape() << std::endl;
+#endif
+
+    return positions;
+  }
+  
   // ------------------------------------------------------------- worldAxisNames
 
   Vector<String> SpatialCoordinate::worldAxisNames()
@@ -625,7 +708,7 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
 
-  // -------------------------------------------------------------------- toWorld
+  //_____________________________________________________________________ toWorld
 
   void SpatialCoordinate::toWorld (Vector<double> &world,
 				   const Vector<double> &pixel)
@@ -657,8 +740,8 @@ namespace CR { // Namespace CR -- begin
       break;
     }
   }
-  
-  // -------------------------------------------------------------------- toPixel
+
+  //_____________________________________________________________________ toPixel
 
   void SpatialCoordinate::toPixel (Vector<double> &pixel,
 				   const Vector<double> &world)
@@ -691,7 +774,7 @@ namespace CR { // Namespace CR -- begin
     }
   }
 
-  // --------------------------------------------------------- toCoordinateSystem
+  //__________________________________________________________ toCoordinateSystem
 
   void SpatialCoordinate::toCoordinateSystem (casa::CoordinateSystem &csys,
 					      bool const &append)

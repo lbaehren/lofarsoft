@@ -408,27 +408,31 @@ int test_conversion ()
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test passing of coordinates to a coordinate system object
+  \brief Test the various methods
 
   \return nofFailedTests -- The number of failed tests encountered within this
           function.
 */
-int test_coordinateSystem ()
+int test_methods ()
 {
-  cout << "\n[test_coordinateSystem]\n" << endl;
+  cout << "\n[tSpatialCoordinate::test_methods]\n" << endl;
 
   int nofFailedTests (0);
-  
-  casa::CoordinateSystem csys;
-  casa::ObsInfo obsInfo;
+  std::string telescope  = "LOFAR";
+  std::string observer   = "Lars Baehren";
+  std::string refcode    = "AZEL";
+  std::string projection = "SIN";
 
-  obsInfo.setTelescope("LOFAR");
-  obsInfo.setObserver("Lars Baehren");
-
-  csys.setObsInfo (obsInfo);
-
+  cout << "[1] Test passing of coordinates to a coordinate system object" << endl;
   try {
-    SpatialCoordinate coord;
+    casa::CoordinateSystem csys;
+    casa::ObsInfo obsInfo;
+    CR::SpatialCoordinate coord;
+    
+    obsInfo.setTelescope(telescope);
+    obsInfo.setObserver(observer);
+    
+    csys.setObsInfo (obsInfo);
     
     coord.toCoordinateSystem (csys,true);
 
@@ -437,7 +441,38 @@ int test_coordinateSystem ()
     cout << "-- nof. coordinates = " << csys.nCoordinates()        << endl;
     cout << "-- nof. pixel axes  = " << csys.nPixelAxes()          << endl;
     cout << "-- nof. world axes  = " << csys.nWorldAxes()          << endl;
+    cout << "-- World axis names = " << csys.worldAxisNames()      << endl;
+    cout << "-- World axis units = " << csys.worldAxisUnits()      << endl;
+    cout << "-- Reference pixel  = " << csys.referencePixel()      << endl;
+    cout << "-- Reference value  = " << csys.referenceValue()      << endl;
+    cout << "-- Increment        = " << csys.increment()           << endl;
   } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Retrieve world coordinates of the positions ..." << endl;
+  try {
+    bool fastestIsFirst (false);
+    SpatialCoordinate coord (CR::CoordinateType::DirectionRadius,
+			     refcode,
+			     projection);
+    coord.setShape(casa::IPosition(3,20,20,10));
+    
+    Matrix<double> positions = coord.positionValues(fastestIsFirst);
+    IPosition shape          = positions.shape();
+
+    // some feedback
+    cout << "\t" << positions.row(0) << endl;
+    cout << "\t" << positions.row(1) << endl;
+    cout << "\t" << positions.row(2) << endl;
+    cout << "\t" << positions.row(3) << endl;
+    cout << "\t..." << endl;
+    cout << "\t" << positions.row(shape(0)-3) << endl;
+    cout << "\t" << positions.row(shape(0)-2) << endl;
+    cout << "\t" << positions.row(shape(0)-1) << endl;
+
+    } catch (std::string message) {
     cerr << message << endl;
     nofFailedTests++;
   }
@@ -457,8 +492,8 @@ int main ()
   nofFailedTests += test_wcs ();
   /* Test conversion between pixel and world coordinates */
   nofFailedTests += test_conversion();
-  /* Test export of the encapsulated coordinates to a coordinate system */
-  nofFailedTests += test_coordinateSystem ();
+  /* Test methods */
+  nofFailedTests += test_methods();
 
   return nofFailedTests;
 }

@@ -395,6 +395,32 @@ namespace CR { // Namespace CR -- begin
     void summary (std::ostream &os);    
 
     // ------------------------------------------------------------------ Methods
+
+    /*!
+      \brief Retrieve the world coordinates of the directions
+
+      Fasted varying axis is last:
+      \verbatim
+      [0 0 0]
+      [0 0 1]
+      [0 0 2]
+      ...
+      [0 1 0]
+      [0 1 1]
+      \endverbatim
+      Fasted varying axis is first:
+      \verbatim
+      [0 0 0]
+      [1 0 0]
+      [2 0 0]
+      ...
+      [0 1 0]
+      [0 2 0]
+      \endverbatim
+
+      \return values --
+    */
+    Matrix<double> positionValues (bool const &fastedIsFirst=true);
     
     /*!
       \brief Get the value of the reference pixel
@@ -417,7 +443,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the value of the coordinate increment
 
-      \return refPixel -- The value of the coordinate increment, as retrieved
+      \return increment -- The value of the coordinate increment, as retrieved
               through the <tt>casa::Coordinate::increment()<tt> function.
     */
     Vector<double> increment();

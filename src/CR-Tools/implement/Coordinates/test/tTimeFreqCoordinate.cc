@@ -427,6 +427,20 @@ int test_methods ()
     std::cerr << message << endl;
     nofFailedTests++;
   }
+
+  cout << "[4] Retrieve frequency values ..." << endl;
+  try {
+    Vector<double> frequencies = coord.frequencyValues();
+    //
+    cout << "-- nof. channels    = " << frequencies.nelements() << endl;
+    cout << "-- Frequency values = [ "
+	 << frequencies(0) << " "
+	 << frequencies(1) << " "
+	 << frequencies(2) << " ... ]" << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
   
   return nofFailedTests;
 }

@@ -246,6 +246,25 @@ namespace CR { // Namespace CR -- begin
     }
 
     /*!
+      \brief Get the value of the coordinate increment
+
+      \return increment -- The value of the coordinate increment.
+    */
+    inline Vector<double> increment() const {
+      return csys_p.increment();
+    }
+
+    /*!
+      \brief Get the matrix for the linear transformation
+      
+      \return Xform -- The matrix of the linear transformation, as retrieved
+              through the <tt>casa::Coordinate::linearTransform()<tt> function.
+     */
+    inline Matrix<double> linearTransform() const {
+      return csys_p.linearTransform();
+    }
+
+    /*!
       \brief Get the value of the reference value
 
       \return refValue -- The value of the reference value.
@@ -253,7 +272,31 @@ namespace CR { // Namespace CR -- begin
     inline Vector<double> referenceValue() const {
       return csys_p.referenceValue();
     }
+    
+    /*!
+      \brief Conversion from pixel to world coordinates
+      
+      \retval world -- Values in world coordinates
+      \param pixel  -- Values in pixel coordinates
+    */
+    inline void toWorld (Vector<double> &world,
+			 Vector<double> const &pixel)
+      {
+	csys_p.toWorld (world,pixel);
+      }
+    
+    /*!
+      \brief Conversion from world to pixel coordinates
 
+      \retval pixel -- Values in pixel coordinates
+      \param world  -- Values in world coordinates
+    */
+    inline void toPixel (Vector<double> &pixel,
+			 const Vector<double> &world)
+      {
+	csys_p.toPixel (pixel,world);
+      }
+    
     /*!
       \brief Get the name of the class
       

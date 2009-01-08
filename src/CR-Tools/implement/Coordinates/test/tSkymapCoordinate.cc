@@ -171,12 +171,116 @@ int test_constructors ()
 
 // -----------------------------------------------------------------------------
 
+/*!
+  \brief Tests for the embedded coordinate system object
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+*/
+int test_coordinateSystem ()
+{
+  cout << "\n[tSkymapCoordinate::test_coordinateSystem]\n" << endl;
+
+  int nofFailedTests (0);
+
+  // Parameters used for object creation
+  std::string telescope  = "LOFAR";
+  std::string observer   = "Lars Baehren";
+  std::string refcode    = "AZEL";
+  std::string projection = "SIN";
+  uint blocksize         = 1024;
+  casa::Quantity sampleFreq (200,"MHz");
+  uint nyquistZone (1);
+  uint blocksPerFrame (1);
+  uint nofFrames (10);
+  
+  // Coordinate objects
+  CR::ObservationData obsData (telescope,observer);
+  TimeFreqCoordinate timeFreq (blocksize,
+			       sampleFreq,
+			       nyquistZone,
+			       blocksPerFrame,
+			       nofFrames);
+  SpatialCoordinate spatial (CR::CoordinateType::DirectionRadius,
+			     refcode,
+			     projection);
+  spatial.setShape(casa::IPosition(3,100,100,10));
+  SkymapCoordinate coord (obsData,
+			  spatial,
+			  timeFreq);
+  
+  cout << "[1] WCS parameters ..." << endl;
+  try {
+    cout << "-- World axis names = " << coord.worldAxisNames()  << endl;
+    cout << "-- World axis units = " << coord.worldAxisUnits()  << endl;
+    cout << "-- Reference pixel  = " << coord.referencePixel()  << endl;
+    cout << "-- Increment        = " << coord.increment()       << endl;
+    cout << "-- Reference value  = " << coord.referenceValue()  << endl;
+    cout << "-- Linear transform = " << coord.linearTransform() << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[2] Conversion from pixel to world coordinates ..." << endl;
+  try {
+    Vector<double> pixel (coord.nofAxes());
+    Vector<double> world (coord.nofAxes());
+
+    // conversion of reference pixel
+    pixel = coord.referencePixel();
+    coord.toWorld (world,pixel);
+    cout << "\t" << pixel << " -> " << world << endl;
+
+    // +1 offset from the reference pixel for each coordinate axis
+    for (uint n(0); n<coord.nofAxes(); n++) {
+      pixel = coord.referencePixel();
+      pixel(n) += 1;
+      coord.toWorld (world,pixel);
+      cout << "\t" << pixel << " -> " << world << endl;
+    }
+    
+    // simultaneous offset by +1 from reference pixel
+    pixel = coord.referencePixel();
+    for (uint n(0); n<coord.nofAxes(); n++) {
+      pixel(n) += 1;
+    }
+    coord.toWorld (world,pixel);
+    cout << "\t" << pixel << " -> " << world << endl;
+    
+    } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[3] Conversion from world to pixel coordinates ..." << endl;
+  try {
+    Vector<double> pixel (coord.nofAxes());
+    Vector<double> world (coord.nofAxes());
+
+    // pixel coordinates of zero position in world coordintes
+    world = 0;
+    coord.toPixel(pixel,world);
+    cout << "\t" << world << " -> " << pixel << endl;
+
+    } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
 int main ()
 {
   int nofFailedTests (0);
 
   // Test for the constructor(s)
   nofFailedTests += test_constructors ();
+  // Tests for the embedded coordinate system object
+  nofFailedTests += test_coordinateSystem ();
 
   return nofFailedTests;
 }

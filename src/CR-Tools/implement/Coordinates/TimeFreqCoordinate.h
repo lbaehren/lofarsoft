@@ -493,18 +493,14 @@ namespace CR { // Namespace CR -- begin
               along each of the two coupled axes.
     */
     virtual casa::IPosition shape () const;
-    
+
     /*!
-      \brief Get the reference value for the world coordinates of the axes
+      \brief Retrieve the world coordinates along the frequency axis
 
-      \param nFrame -- The number of the frame for which to retrieve the
-             reference values; keep in mind that the reference value for the
-	     time axis indeed is dependent on the frame number.
-
-      \return refValue -- [time,freq] = \f$ [ t_{\rm CRVAL}, \nu_{\rm CRVAL} ] \f$
-    */
-    Vector<double> referenceValue () const;
-
+      \return values -- 
+     */
+    Vector<double> frequencyValues ();
+    
     // -------------------------------------------------------------- WCS methods
 
     /*!
@@ -530,6 +526,17 @@ namespace CR { // Namespace CR -- begin
               the <tt>casa::Coordinate::referencePixel()<tt> function.
     */
     Vector<double> referencePixel() const;
+
+    /*!
+      \brief Get the reference value for the world coordinates of the axes
+
+      \param nFrame -- The number of the frame for which to retrieve the
+             reference values; keep in mind that the reference value for the
+	     time axis indeed is dependent on the frame number.
+
+      \return refValue -- [time,freq] = \f$ [ t_{\rm CRVAL}, \nu_{\rm CRVAL} ] \f$
+    */
+    Vector<double> referenceValue () const;
 
     /*!
       \brief Get the matrix for the linear transformation

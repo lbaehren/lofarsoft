@@ -1,0 +1,25 @@
+/* $Id$ */
+
+/*!
+  \defgroup CR_Data CR-Tools :: Data module
+  \ingroup CR
+
+  \brief Data module for the CR-pipeline
+  
+  <h3>Synopsis</h3>
+
+  This module collects various classes and functions used for the interaction
+  with datasets - be they from the LOPES experiment or the LOFAR telescope.
+
+  <ul>
+    <li>The structure of a dataset containing a dump from the LOFAR transient 
+    buffer boards (TBBs) is mapped onto a hierarchy of C++ classes:
+    <ul>
+      <li>DAL::TBB_Timeseries -- Top-level structure of a time-series dataset
+      <li>DAL::TBB_StationGroup -- Group collecting the data for an individual
+      LOFAR station.
+      <li>DAL::TBB_DipoleDataset
+    </ul>
+  </ul>
+  
+*/

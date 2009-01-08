@@ -323,6 +323,24 @@ namespace CR { // Namespace CR -- begin
     
     return shape;
   }
+
+  //_____________________________________________________________ frequencyValues
+
+  Vector<double> TimeFreqCoordinate::frequencyValues ()
+  {
+    int nofChannels = shape()(1);
+    Vector<double> values (nofChannels);
+    Vector<double> pixel (1);
+    Vector<double> world (1);
+
+    for (int n(0); n<nofChannels; n++) {
+      pixel(0) = n;
+      coordFrequency_p.toWorld(world,pixel);
+      values(n) = world(0);
+    }
+
+    return values;
+  }
   
   // ------------------------------------------------------------- setCoordinates
 
