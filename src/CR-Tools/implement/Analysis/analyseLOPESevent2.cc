@@ -146,11 +146,12 @@ namespace CR { // Namespace CR -- begin
 
       // set Complete Pipeline and print output, which case is set!
       CompleteBeamPipe_p = static_cast<CompletePipeline*>(beamPipe_p);
-      if (verbose)
+      if (verbose) {
         if (CompleteBeamPipe_p == pipeline_p)
  		 cout << "analyseLOPESevent2::RunPipeline: " << "Proceed without (new) upsampling." << endl;
         else
  		 cout << "analyseLOPESevent2::RunPipeline: " << "(New) upsampling enabled." << endl;
+      }
 
       // initialize Complete Pipeline
       CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
