@@ -4,6 +4,7 @@
 #include <time.h>
 #include <math.h>
 #include <Riostream.h>
+#include <cstdlib>
 
 
 //!Fast Fourier Transform of the West Version 3
