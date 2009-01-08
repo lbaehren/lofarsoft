@@ -312,7 +312,7 @@ int test_methods ()
   double sampleFreq (200e06);
   int nyquistZone (2);
   uint blocksPerFrame (2);
-  uint nofFrames (10);
+  uint nofFrames (25);
 
   TimeFreqCoordinate coord (blocksize,
 			    sampleFreq,
@@ -341,15 +341,17 @@ int test_methods ()
     coord.toCoordinateSystem (csys);
     //
     cout << "--> add coordinates to new coordinate system ..." << endl;
-    cout << "-- nof. coordinates = " << csys.nCoordinates()   << endl;
-    cout << "-- Reference pixel  = " << csys.referencePixel() << endl;
-    cout << "-- Increment        = " << csys.increment()      << endl;
-    cout << "-- Reference value  = " << csys.referenceValue() << endl;
-    // 
+    cout << "-- nof. coordinates = " << csys.nCoordinates()    << endl;
+    cout << "-- World axis names = " << csys.worldAxisNames()  << endl;
+    cout << "-- Reference pixel  = " << csys.referencePixel()  << endl;
+    cout << "-- Increment        = " << csys.increment()       << endl;
+    cout << "-- Reference value  = " << csys.referenceValue()  << endl;
+    //
     coord.toCoordinateSystem (csys);
     //
     cout << "--> append coordinates to coordinate system ..." << endl;
     cout << "-- nof. coordinates = " << csys.nCoordinates()   << endl;
+    cout << "-- World axis names = " << csys.worldAxisNames()  << endl;
     cout << "-- Reference pixel  = " << csys.referencePixel() << endl;
     cout << "-- Increment        = " << csys.increment()      << endl;
     cout << "-- Reference value  = " << csys.referenceValue() << endl;
@@ -358,6 +360,7 @@ int test_methods ()
     //
     cout << "--> overwrite contents of existing coordinate system ..." << endl;
     cout << "-- nof. coordinates = " << csys.nCoordinates()   << endl;
+    cout << "-- World axis names = " << csys.worldAxisNames()  << endl;
     cout << "-- Reference pixel  = " << csys.referencePixel() << endl;
     cout << "-- Increment        = " << csys.increment()      << endl;
     cout << "-- Reference value  = " << csys.referenceValue() << endl;
@@ -371,6 +374,7 @@ int test_methods ()
     casa::Vector<double> pixel (2);
     casa::Vector<double> world (2);
     //
+    cout << "-- World axis names = " << coord.worldAxisNames() << endl;
     cout << "-- Reference pixel  = " << coord.referencePixel() << endl;
     cout << "-- Increment        = " << coord.increment()      << endl;
     cout << "-- Reference value  = " << coord.referenceValue() << endl;
@@ -428,15 +432,35 @@ int test_methods ()
     nofFailedTests++;
   }
 
-  cout << "[4] Retrieve frequency values ..." << endl;
+  cout << "[4] Retrieve time values ..." << endl;
+  try {
+    Vector<double> times = coord.timeValues();
+    uint nelem           = times.nelements();
+    //
+    cout << "-- nof. frames = " << nelem << endl;
+    cout << "-- Time values = [ "
+	 << times(0) << " "
+	 << times(1) << " "
+	 << times(2) << " ... "
+	 << times(nelem-2) << " "
+	 << times(nelem-1) << " ]" << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[5] Retrieve frequency values ..." << endl;
   try {
     Vector<double> frequencies = coord.frequencyValues();
+    uint nelem                 = frequencies.nelements();
     //
-    cout << "-- nof. channels    = " << frequencies.nelements() << endl;
+    cout << "-- nof. channels    = " << nelem << endl;
     cout << "-- Frequency values = [ "
 	 << frequencies(0) << " "
 	 << frequencies(1) << " "
-	 << frequencies(2) << " ... ]" << endl;
+	 << frequencies(2) << " ... "
+	 << frequencies(nelem-2) << " "
+	 << frequencies(nelem-1) << " ]" << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;

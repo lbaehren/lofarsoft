@@ -31,7 +31,7 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  // ------------------------------------------------------------- TimeFreqCoordinate
+  //__________________________________________________________ TimeFreqCoordinate
   
   TimeFreqCoordinate::TimeFreqCoordinate ()
     : TimeFreq()
@@ -44,7 +44,7 @@ namespace CR { // Namespace CR -- begin
 	  nofFrames);
   }
   
-  // ------------------------------------------------------------- TimeFreqCoordinate
+  //__________________________________________________________ TimeFreqCoordinate
   
   TimeFreqCoordinate::TimeFreqCoordinate (uint const &blocksPerFrame,
 					  uint const &nofFrames)
@@ -55,7 +55,7 @@ namespace CR { // Namespace CR -- begin
 	  nofFrames);
   }
   
-  // ------------------------------------------------------------- TimeFreqCoordinate
+  //__________________________________________________________ TimeFreqCoordinate
   
   TimeFreqCoordinate::TimeFreqCoordinate (uint const &blocksize,
 					  double const &sampleFrequency,
@@ -71,7 +71,7 @@ namespace CR { // Namespace CR -- begin
 	  nofFrames);
   }
   
-  // ------------------------------------------------------------- TimeFreqCoordinate
+  //__________________________________________________________ TimeFreqCoordinate
   
   TimeFreqCoordinate::TimeFreqCoordinate (uint const &blocksize,
 					  casa::Quantity const &sampleFrequency,
@@ -87,7 +87,7 @@ namespace CR { // Namespace CR -- begin
 	  nofFrames);
   }
   
-  // ------------------------------------------------------------- TimeFreqCoordinate
+  //__________________________________________________________ TimeFreqCoordinate
   
   TimeFreqCoordinate::TimeFreqCoordinate (TimeFreq const &timeFreq,
 					  uint const &blocksPerFrame,
@@ -99,7 +99,7 @@ namespace CR { // Namespace CR -- begin
 	  nofFrames);
   }
   
-  // ------------------------------------------------------------- TimeFreqCoordinate
+  //__________________________________________________________ TimeFreqCoordinate
   
   TimeFreqCoordinate::TimeFreqCoordinate (TimeFreqCoordinate const &other)
     : TimeFreq(other),
@@ -136,6 +136,8 @@ namespace CR { // Namespace CR -- begin
     }
     return *this;
   }
+
+  //________________________________________________________________________ copy
   
   void TimeFreqCoordinate::copy (TimeFreqCoordinate const &other)
   {
@@ -324,6 +326,24 @@ namespace CR { // Namespace CR -- begin
     return shape;
   }
 
+  //__________________________________________________________________ timeValues
+
+  Vector<double> TimeFreqCoordinate::timeValues ()
+  {
+    int nofFrames = shape()(0);
+    Vector<double> values (nofFrames);
+    Vector<double> pixel (1);
+    Vector<double> world (1);
+
+    for (int n(0); n<nofFrames; n++) {
+      pixel(0) = n;
+      coordTime_p.toWorld(world,pixel);
+      values(n) = world(0);
+    }
+
+    return values;
+  }
+  
   //_____________________________________________________________ frequencyValues
 
   Vector<double> TimeFreqCoordinate::frequencyValues ()

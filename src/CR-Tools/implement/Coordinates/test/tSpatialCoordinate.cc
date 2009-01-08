@@ -453,16 +453,16 @@ int test_methods ()
 
   cout << "[2] Retrieve world coordinates of the positions ..." << endl;
   try {
-    bool fastestIsFirst (false);
+    bool fastestIsFirst (true);
     SpatialCoordinate coord (CR::CoordinateType::DirectionRadius,
 			     refcode,
 			     projection);
-    coord.setShape(casa::IPosition(3,20,20,10));
+    coord.setShape(casa::IPosition(3,10,20,30));
     
     Matrix<double> positions = coord.positionValues(fastestIsFirst);
     IPosition shape          = positions.shape();
 
-    // some feedback
+    cout << "-- Coordinate of type DirectionRadius:" << endl;
     cout << "\t" << positions.row(0) << endl;
     cout << "\t" << positions.row(1) << endl;
     cout << "\t" << positions.row(2) << endl;
@@ -472,7 +472,47 @@ int test_methods ()
     cout << "\t" << positions.row(shape(0)-2) << endl;
     cout << "\t" << positions.row(shape(0)-1) << endl;
 
-    } catch (std::string message) {
+    // Cartesian coordinate
+
+    SpatialCoordinate coordCartesian (CR::CoordinateType::Cartesian,
+				      refcode,
+				      projection);
+    coordCartesian.setShape(casa::IPosition(3,10,20,30));
+    
+    positions = coordCartesian.positionValues(fastestIsFirst);
+    shape     = positions.shape();    
+
+    cout << "-- Coordinate of type Cartesian:" << endl;
+    cout << "\t" << positions.row(0) << endl;
+    cout << "\t" << positions.row(1) << endl;
+    cout << "\t" << positions.row(2) << endl;
+    cout << "\t" << positions.row(3) << endl;
+    cout << "\t..." << endl;
+    cout << "\t" << positions.row(shape(0)-3) << endl;
+    cout << "\t" << positions.row(shape(0)-2) << endl;
+    cout << "\t" << positions.row(shape(0)-1) << endl;
+
+    // Spherical coordinate
+
+    SpatialCoordinate coordSpherical (CR::CoordinateType::Spherical,
+				      refcode,
+				      projection);
+    coordSpherical.setShape(casa::IPosition(3,10,20,30));
+    
+    positions = coordSpherical.positionValues(fastestIsFirst);
+    shape     = positions.shape();    
+
+    cout << "-- Coordinate of type Spherical:" << endl;
+    cout << "\t" << positions.row(0) << endl;
+    cout << "\t" << positions.row(1) << endl;
+    cout << "\t" << positions.row(2) << endl;
+    cout << "\t" << positions.row(3) << endl;
+    cout << "\t..." << endl;
+    cout << "\t" << positions.row(shape(0)-3) << endl;
+    cout << "\t" << positions.row(shape(0)-2) << endl;
+    cout << "\t" << positions.row(shape(0)-1) << endl;
+
+  } catch (std::string message) {
     cerr << message << endl;
     nofFailedTests++;
   }

@@ -262,8 +262,96 @@ int test_coordinateSystem ()
     world = 0;
     coord.toPixel(pixel,world);
     cout << "\t" << world << " -> " << pixel << endl;
+    
+    // conversion from reference value to reference pixel
+    world = coord.referenceValue();
+    coord.toPixel(pixel,world);
+    cout << "\t" << world << " -> " << pixel << endl;
+    
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
 
-    } catch (std::string message) {
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test retrieval of data from the embedded objects
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+*/
+int test_embeddedObjects ()
+{
+  cout << "\n[tSkymapCoordinate::test_embeddedObjects]\n" << endl;
+
+  int nofFailedTests (0);
+
+  // Parameters used for object creation
+  std::string telescope  = "LOFAR";
+  std::string observer   = "Lars Baehren";
+  std::string refcode    = "AZEL";
+  std::string projection = "SIN";
+  uint blocksize         = 1024;
+  casa::Quantity sampleFreq (200,"MHz");
+  uint nyquistZone (1);
+  uint blocksPerFrame (1);
+  uint nofFrames (10);
+  
+  // Coordinate objects
+  CR::ObservationData obsData (telescope,observer);
+  TimeFreqCoordinate timeFreq (blocksize,
+			       sampleFreq,
+			       nyquistZone,
+			       blocksPerFrame,
+			       nofFrames);
+  SpatialCoordinate spatial (CR::CoordinateType::DirectionRadius,
+			     refcode,
+			     projection);
+  spatial.setShape(casa::IPosition(3,20,20,10));
+  SkymapCoordinate coord (obsData,
+			  spatial,
+			  timeFreq);
+  
+  cout << "[1] Retrieve time values ..." << endl;
+  try {
+    Vector<double> times = coord.timeFreqCoordinate().timeValues();
+    
+    cout << "\t[" << times(0) << " " << times(1) << " " << times(2) << " ... "
+	 << times(times.nelements()-1) << "]" << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Retrieve frequency values ..." << endl;
+  try {
+    Vector<double> freq = coord.timeFreqCoordinate().frequencyValues();
+    
+    cout << "\t[" << freq(0) << " " << freq(1) << " " << freq(2) << " ... "
+	 << freq(freq.nelements()-1) << "]" << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[3] Retrieve position values ..." << endl;
+  try {
+    Matrix<double> positions = coord.spatialCoordinate().positionValues();
+    IPosition shape          = positions.shape();
+
+    cout << "\t" << positions.row(0) << endl;
+    cout << "\t" << positions.row(1) << endl;
+    cout << "\t" << positions.row(2) << endl;
+    cout << "\t" << positions.row(3) << endl;
+    cout << "\t..." << endl;
+    cout << "\t" << positions.row(shape(0)-3) << endl;
+    cout << "\t" << positions.row(shape(0)-2) << endl;
+    cout << "\t" << positions.row(shape(0)-1) << endl;
+  } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
@@ -281,6 +369,8 @@ int main ()
   nofFailedTests += test_constructors ();
   // Tests for the embedded coordinate system object
   nofFailedTests += test_coordinateSystem ();
+  // Test retrieval of data from the embedded objects
+  nofFailedTests += test_embeddedObjects();
 
   return nofFailedTests;
 }

@@ -495,6 +495,13 @@ namespace CR { // Namespace CR -- begin
     virtual casa::IPosition shape () const;
 
     /*!
+      \brief Retrieve the world coordinates along the time axis
+
+      \return values -- 
+     */
+    Vector<double> timeValues ();
+    
+    /*!
       \brief Retrieve the world coordinates along the frequency axis
 
       \return values -- 
