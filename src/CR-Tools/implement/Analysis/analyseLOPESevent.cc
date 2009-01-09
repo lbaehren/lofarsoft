@@ -77,6 +77,8 @@ namespace CR { // Namespace CR -- begin
     fitStop_p      = -1.7e-6;
     plotStart_p    = -2.05e-6;
     plotStop_p     = -1.55e-6;
+    freqStart_p    = 40e6;
+    freqStop_p     = 80e6;
     filterStrength_p = 3;
     remoteRange_p.resize(2);
     Polarization_p = "ANY";
@@ -232,6 +234,7 @@ namespace CR { // Namespace CR -- begin
       pipeline_p->doGainCal(doGainCal);
       pipeline_p->doDispersionCal(doDispersionCal);
       pipeline_p->doDelayCal(doDelayCal);
+      pipeline_p->setFreqInterval(getFreqStart(),getFreqStop());
 
       // initialize the Data Reader
       if (! pipeline_p->InitEvent(lev_p)){

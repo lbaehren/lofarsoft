@@ -108,6 +108,8 @@ using CR::LopesEventIn;
   plotStop               = -1.60e-6
   spectrumStart          = 40e6
   spectrumStop           = 80e-6
+  freqStart              = 40e6
+  freqStop               = 80e-6
   upsamplingRate         = 320e6
   upsamplingExponent     = 1
   summaryColumns         = 3
@@ -144,6 +146,7 @@ using CR::LopesEventIn;
         (select EW, NS or BOTH if you want to results for one (both) polarizations),
     <li>the plots start at -2.05 micro seconds and end at -1.60 micro seconds,
     <li>the plotted spectra start at 40 MHz seconds and end 80 MHz,
+    <li>frequencies between 40 MHz and 80 MHz will be used for analysis,
     <li>the Lopes data will be upsampled to a sampling rate of 320 MHz (see below),
     <li>the upsampling of the calibrated antenna fieldstrengthes will be done by
     a factor of 2^1 = 2,
@@ -214,8 +217,10 @@ string polarization = "ANY";	      // polarization: ANY, EW, NS or BOTH
 bool both_pol = false;		      // Should both polarizations be processed?
 double plotStart = -2.05e-6;	      // in seconds
 double plotStop = -1.60e-6;	      // in seconds
-double spectrumStart = 40e6;          // in Hz
-double spectrumStop= 80e6;	      // in Hz
+double spectrumStart = 40e6;          // for plotting, in Hz
+double spectrumStop= 80e6;	      // for plotting, in Hz
+double freqStart = 40e6;              // for analysis, in Hz
+double freqStop= 80e6;	              // for analysis, in Hz
 double upsamplingRate = 0.;	      // Upsampling Rate for new upsampling
 unsigned int upsamplingExponent = 0;  // by default no upsampling will be done
 vector<Int> flagged;		      // use of STL-vector instead of CASA-vector due to support of push_back()
@@ -619,7 +624,7 @@ void readConfigFile (const string &filename)
 
           if (temp != -9999999) { // will be false, if value is not of typ "double"
             spectrumStart = temp;
-	    cout << "SpectrumStart set to " << spectrumStart << " seconds.\n";
+	    cout << "SpectrumStart set to " << spectrumStart << " Hz.\n";
 	  } else {
             cerr << "\nError processing file \"" << filename <<"\".\n" ;
             cerr << "SpectrumStart must be of typ 'double'. \n";
@@ -634,10 +639,41 @@ void readConfigFile (const string &filename)
 
           if (temp != -9999999) { // will be false, if value is not of typ "double"
             spectrumStop = temp;
-	    cout << "SpectrumStop set to " << spectrumStop << " seconds.\n";
+	    cout << "SpectrumStop set to " << spectrumStop << " Hz.\n";
 	  } else {
             cerr << "\nError processing file \"" << filename <<"\".\n" ;
             cerr << "SpectrumStop must be of typ 'double'. \n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+        }
+
+
+        if ( (keyword.compare("freqStart")==0) || (keyword.compare("FreqStart")==0) 
+            || (keyword.compare("freqstart")==0)) {
+          double temp = -9999999;
+          stringstream(value) >> temp;
+
+          if (temp != -9999999) { // will be false, if value is not of typ "double"
+            freqStart = temp;
+	    cout << "FreqStart set to " << freqStart << " Hz.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "FreqStart must be of typ 'double'. \n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+        }
+
+       if ( (keyword.compare("freqStop")==0) || (keyword.compare("FreqStop")==0) 
+            || (keyword.compare("freqstop")==0)) {
+          double temp = -9999999;
+          stringstream(value) >> temp;
+
+          if (temp != -9999999) { // will be false, if value is not of typ "double"
+            freqStop = temp;
+	    cout << "FreqStop set to " << freqStop << " Hz.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "FreqStop must be of typ 'double'. \n";
             cerr << "\nProgram will continue skipping the problem." << endl;
           }
         }
@@ -1199,6 +1235,7 @@ int main (int argc, char *argv[])
         // set parameters of pipeline
         eventPipeline.setPlotInterval(plotStart,plotStop);
         eventPipeline.setSpectrumInterval(spectrumStart,spectrumStop);
+        eventPipeline.setFreqInterval(freqStart,freqStop);
         eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
         // call the pipeline with an extra delay = 0.
@@ -1240,6 +1277,7 @@ int main (int argc, char *argv[])
           // set parameters of pipeline
           eventPipeline.setPlotInterval(plotStart,plotStop);
           eventPipeline.setSpectrumInterval(spectrumStart,spectrumStop);
+          eventPipeline.setFreqInterval(freqStart,freqStop);
           eventPipeline.setCCWindowWidth(ccWindowWidth);
           eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
@@ -1304,6 +1342,7 @@ int main (int argc, char *argv[])
           // set parameters of pipeline
           eventPipeline.setPlotInterval(plotStart,plotStop);
           eventPipeline.setSpectrumInterval(spectrumStart,spectrumStop);
+          eventPipeline.setFreqInterval(freqStart,freqStop);
           eventPipeline.setCCWindowWidth(ccWindowWidth);
           eventPipeline.setUpsamplingExponent(upsamplingExponent);
 

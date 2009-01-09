@@ -137,6 +137,10 @@ namespace CR { // Namespace CR -- begin
     Double plotStart_p;
     //! Stop time of the interval diplayed in the plot
     Double plotStop_p;
+    //! Start frequency for the analysis
+    Double freqStart_p;
+    //! Stop frequency for the analysis
+    Double freqStop_p;
     //! Strength of the mean-filter used for the smoothing
     int filterStrength_p;
     //! Which polarization to use
@@ -329,7 +333,55 @@ namespace CR { // Namespace CR -- begin
       plotStart_p = plotStart;
       plotStop_p  = plotStop;
     }
-    
+
+    /*!
+      \brief Get the start frequency for the analysis
+
+      \return freqStart -- Start frequency for the analysis
+    */
+    inline double getFreqStart () {
+      return freqStart_p;
+    }
+
+    /*!
+      \brief Set the start frequency for the analysis
+
+      \param freqStart -- Start frequency for the analysis
+    */
+    inline void setFreqStart (double const &freqStart) {
+      freqStart_p = freqStart;
+    }
+
+    /*!
+      \brief Get the stop frequency for the analysis
+
+      \return freqStop -- Stop frequency for the analysis
+    */
+    inline double getFreqStop () {
+      return freqStop_p;
+    }
+
+    /*!
+      \brief Set the stop frequency for the analysis
+
+      \param freqStop -- Stop frequency for the analysis
+    */
+    inline void setFreqStop (double const &freqStop) {
+      freqStop_p = freqStop;
+    }
+
+    /*!
+      \brief Set the interval for the analysis
+
+      \param freqStart -- Start frequency for the analysis
+      \param freqStop  -- Stop frequency for the analysis
+    */
+    inline void setFreqInterval (double const &freqStart,
+                                       double const &freqStop) {
+      freqStart_p = freqStart;
+      freqStop_p  = freqStop;
+    }
+
     /*!
       \brief Get the internal pipeline object
       

@@ -47,6 +47,8 @@ namespace CR { // Namespace CR -- begin
     CTRead = NULL;
     blocksize = 0;
     samplerate = 0.;
+    startFreq_p = 0.;
+    stopFreq_p = 1e99;
   }
   
   // ============================================================================
@@ -171,6 +173,26 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> freqVals; 
       freqVals = dr->frequencyValues(); // work around a bug in casa(core) 
       Double delay;
+
+      // create Vector to supress frequencies outside the desired band 
+      if (static_cast<Int>(freqVals.size()) != fftlen) {	// consistency check
+        cerr << "FirstStagePipeline::setCalibration: " 
+             << "Lenght of FFT (" << fftlen << ") "
+             << "does not equal length of frequency axis (" << freqVals.size() <<") !"
+             << endl;
+      }
+      Vector<DComplex> band(fftlen);
+      const DComplex supressionFactor(0.001,0.); // supression factor for frequencies outside the band
+      const double startFreq = getStartFreq();	 // this values are just set now but later
+      const double stopFreq = getStopFreq();     // something more elaborated can be used here
+      for (i=0; i < fftlen; ++i) {
+        if ( (freqVals(i) < startFreq) || (freqVals(i) > stopFreq) ) {
+          band(i) = supressionFactor;
+        } else {
+          band(i) = DComplex(1.,0.);
+        }
+      }
+
       for (i=0; i<nAnt ; i++){
         // Get electrical gain if switched on (otherwise set it to 1)
         if (DoGainCal_p)
@@ -197,7 +219,7 @@ namespace CR { // Namespace CR -- begin
           delay = 0;
 	tempComplexVec2.resize(freqVals.shape());
 	convertArray(tempComplexVec2,freqVals);
-	fftCal.column(i) = phasecal*tempComplexVec1*exp(tmpcomp*delay*tempComplexVec2);
+	fftCal.column(i) = phasecal*tempComplexVec1*exp(tmpcomp*delay*tempComplexVec2)*band;
         // Comment added by Frank Schröder to understand, what is done:
         //
         // phasecal = PhaseCal values (e.g. filter characteristics) from CalTables

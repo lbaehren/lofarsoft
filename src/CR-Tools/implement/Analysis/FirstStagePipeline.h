@@ -120,7 +120,16 @@ namespace CR { // Namespace CR -- begin
       \brief The CalTableReader
     */
     CalTableReader *CTRead;
-    
+
+    /*!
+      \brief Lowest frequency in the part of the spectrum used for analysis
+    */
+    Double startFreq_p;
+    /*!
+      \brief Highest frequency in the part of the spectrum used for analysis
+    */
+    Double stopFreq_p;
+
     // ---------------------------------------------------------- Private Methods
 
     /*!
@@ -205,6 +214,56 @@ namespace CR { // Namespace CR -- begin
 	cout << "FirstStagePipeline:: switched off delay correction." << endl;
       };
     }
+
+
+    /*!
+      \brief Get the start frequency used for the analysis (lower frequencies will be supressed)
+
+      \return startFreq -- Start frequency for the analysis
+    */
+    inline double getStartFreq () {
+      return startFreq_p;
+    }
+
+    /*!
+      \brief Set the start frequency used for the analysis (lower frequencies will be supressed)
+
+      \param startFreq -- Start frequency for the analysis
+    */
+    inline void setStartFreq (double const &startFreq) {
+      startFreq_p = startFreq;
+    }
+
+    /*!
+      \brief Get the stop frequency used for the analysis (higher frequencies will be supressed)
+
+      \return stopFreq  -- Stop frequency for the analysis
+    */
+    inline double getStopFreq () {
+      return stopFreq_p;
+    }
+
+    /*!
+      \brief Set the stop frequency used for the analysis (higher frequencies will be supressed)
+
+      \param stopFreq  -- Stop frequency for the analysis
+    */
+    inline void setStopFreq (double const &stopFreq) {
+      stopFreq_p = stopFreq;
+    }
+
+    /*!
+      \brief Set the interval for the frequencies used in the analysis (start and stop)
+
+      \param startFreq -- Start frequency for the analysis
+      \param stopFreq  -- Stop frequency for the analysis
+    */
+    inline void setFreqInterval (double const &startFreq,
+                                   double const &stopFreq) {
+      startFreq_p = startFreq;
+      stopFreq_p = stopFreq;
+    }
+
 
     // ------------------------------------------------------------------ Methods
     /*!
