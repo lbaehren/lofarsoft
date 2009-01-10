@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <string>
+#include <cstring>
 
 using std::cout;
 using std::endl;
