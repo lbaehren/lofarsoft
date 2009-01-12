@@ -1194,14 +1194,17 @@ namespace CR { // Namespace CR -- begin
   map <int,PulseProperties> CompletePipeline::calculateMaxima(DataReader *dr,
 							      Vector<Bool> antennaSelection,
 							      const int& upsampling_exp,
-							      const bool& rawData)
+							      const bool& rawData,
+							      const double& cc_center)
   {
     map <int,PulseProperties> pulses;           // return value with pulse properties
     try {
       Vector<Double> timeValues;		// time values
-      Vector<Double> timeRange;			// time values
+      Vector<Double> timeRange;			// time values of pulse region (= plot region)
+      Vector<Double> timeRangeNoise;		// time values of noise region
       Matrix<Double> yValues;			// y-values
       Vector<Double> trace;			// trace currently processed
+      Vector<Double> traceNoise;		// trace with noise currently processed
       Vector<Double> envTrace;			// envelope of trace currently processed
       vector<double> envMaxima;			// Stores the calculated maxima of the env
       vector<double> envMaxima_time;		// Stores the calculated time of the maxima of the env
@@ -1211,12 +1214,19 @@ namespace CR { // Namespace CR -- begin
       vector<double> minima_time;		// Stores the calculated time of the minima
       vector<double> fwhm;			// width of the pulse envelope
       vector<double> start_time;		// Stores the start time of the pulse (begin of FWHM)
+      vector<double> noiseValues;		// Mean of trace in a region before the cc-beam
+      bool calculate_noise = false;		// Is set to true if cc_center is not the default (1e99)
 
       if (rawData)
-        std::cout << "\nLooking for maxima in the envelope of the raw data FX: \n";
+        cout << "\nLooking for maxima in the envelope of the raw data FX: \n";
       else
-        std::cout << "\nLooking for maxima in the envelope of the calibrated fieldstrength: \n";
-  
+        cout << "\nLooking for maxima in the envelope of the calibrated fieldstrength: \n";
+
+      // check if noise shall be calculated
+      if ( cc_center != 1e99) {
+        calculate_noise = true;
+        cout << "Noise will be calculated.\n";
+      }
 
       // make antennaSelection unique, as casacore-Vectors are allways passed by reference
       antennaSelection.unique();
@@ -1245,25 +1255,47 @@ namespace CR { // Namespace CR -- begin
         yValues = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
 
       // check length of time axis and yValues traces for consistency
-      if (timeValues.size() != yValues.column(0).size())
-        std::cerr << "CompletePipeline:calculateMaxima: WARNING: Length of time axis differs from length of the antenna traces!\n"
-           << std::endl;
-
+      if (timeValues.size() != yValues.column(0).size()) {
+        cerr << "CompletePipeline:calculateMaxima: ERROR: Length of time axis differs from length of the antenna traces!\n" << endl;
+        return pulses;
+      }
 
       // Define the time range considered (the same as the plot range)
-      Slice range(calculatePlotRange(timeValues));
+      Slice range;
+      if (calculate_noise)
+        range = calculateCCRange(timeValues,cc_center);
+      else
+        range = calculatePlotRange(timeValues);
 
       // cut time values
       timeRange = timeValues(range);
 
+      // get the time range for noise calculation
+      Slice rangeNoise;
+      if (calculate_noise) {
+        // check if cc_center is at a valid position (time must be within the time-axis)
+        if ( (cc_center < timeValues(0)) || (cc_center > timeValues(timeValues.endPosition())) ) {
+          cerr << "CompletePipeline:calculateMaxima: ERROR: Center of CC-Beam is at an invalid time: " 
+               << cc_center << " s\n"
+               << "CompletePipeline:calculateMaxima: exiting function!" << endl;
+          return pulses;
+        }
+
+        // Define the time range considered (the same length as the plot range, 
+        // but before actual plot range)
+        rangeNoise = calculateNoiseRange(timeValues);
+        timeRangeNoise = timeValues(rangeNoise);
+     }
+
+
       // print header line of output
-      std::cout <<  "Ant   env height   max height   min height   env time   max time   min time   time of half height     FWHM\n"
-                <<  "[#]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]     [us]       [us]       [us]           [us]              [ns]\n"
-                <<  "-----------------------------------------------------------------------------------------------------------\n";
+      cout <<  "Ant   env height   max height   min height     noise     env time   max time   min time   time of half height     FWHM\n"
+           <<  "[#]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]    [us]       [us]       [us]           [us]              [ns]\n"
+           <<  "----------------------------------------------------------------------------------------------------------------------\n";
 
       // find the maximal y values for all selected antennas
-      for (unsigned int i = 0; i < antennaSelection.nelements(); i++) if (antennaSelection(i))
-      {
+      for (unsigned int i = 0; i < antennaSelection.nelements(); i++) 
+      if (antennaSelection(i)) {
         // Start with height 0 and search for heigher and lower values
         double maximum = 0;
         int maxtimevalue = 0;
@@ -1271,6 +1303,7 @@ namespace CR { // Namespace CR -- begin
         int mintimevalue = 0;
         double envMaximum = 0;
         int envMaxtimevalue = 0;
+        double noise=0;
 
         // save values in addition into pulse property class
         PulseProperties pulse;
@@ -1280,30 +1313,24 @@ namespace CR { // Namespace CR -- begin
         envTrace = envelope(trace);
 
         // loop through the values and search for the heighest one
-        for(unsigned int j = 0; j < timeRange.nelements(); j++)
-        {
-          if ( maximum < trace(j)) 
-          {
+        for(unsigned int j = 0; j < timeRange.nelements(); j++) {
+          if ( maximum < trace(j)) {
             maxtimevalue = j;
             maximum = trace(j);
           }
         }
 
         // loop through the values and search for the lowest one
-        for(unsigned int j = 0; j < timeRange.nelements(); j++)
-        {
-          if ( minimum > trace(j)) 
-          {
+        for(unsigned int j = 0; j < timeRange.nelements(); j++) {
+          if ( minimum > trace(j)) {
             mintimevalue = j;
             minimum = trace(j);
           }
         }
 
         // loop through the values of the envelope and search for the heighest one
-        for(unsigned int j = 0; j < timeRange.nelements(); j++)
-        {
-          if ( envMaximum < envTrace(j)) 
-          {
+        for(unsigned int j = 0; j < timeRange.nelements(); j++) {
+          if ( envMaximum < envTrace(j)) {
             envMaxtimevalue = j;
             envMaximum = envTrace(j);
           }
@@ -1313,11 +1340,9 @@ namespace CR { // Namespace CR -- begin
         double pulsestart = 0;
         double pulsestop = 0;
         // find begin of pulse (half height)
-        for(unsigned int j = envMaxtimevalue; j > 0; j--)
-        {
+        for(unsigned int j = envMaxtimevalue; j > 0; j--) {
           // find crossing of half height (between j and j+1)
-          if ( envTrace(j) <= envMaximum/2.)
-          {
+          if ( envTrace(j) <= envMaximum/2.) {
             // interpolate linear
             // calculate differences to half height
             double totaldiff = envTrace(j+1) - envTrace(j);
@@ -1329,11 +1354,9 @@ namespace CR { // Namespace CR -- begin
         }
 
         // find end of pulse (half height)
-        for(unsigned int j = envMaxtimevalue; j < timeRange.nelements(); j++)
-        {
+        for(unsigned int j = envMaxtimevalue; j < timeRange.nelements(); j++) {
           // find crossing of half height (between j-1 and j)
-          if ( envTrace(j) <= envMaximum/2.)
-          {
+          if ( envTrace(j) <= envMaximum/2.) {
             // interpolate linear
             // calculate differences to half height
             double totaldiff = envTrace(j-1) - envTrace(j);
@@ -1344,6 +1367,16 @@ namespace CR { // Namespace CR -- begin
           }
         }
 
+        // calculate the noise as mean of the part before of the trace before the pulse 
+        if (calculate_noise) {
+          // get the part of the trace for the noise
+          traceNoise = yValues.column(i)(rangeNoise);
+          for(unsigned int j = 0; j < timeRangeNoise.nelements(); j++)
+            noise += abs(traceNoise(j));
+
+          noise /=timeRangeNoise.nelements();
+        }
+
         // store the calculated values for later calculation of the mean
         // multiply by 1e6 for conversion to micro
         maxima.push_back(maximum*1e6);
@@ -1352,6 +1385,7 @@ namespace CR { // Namespace CR -- begin
         minima_time.push_back(timeRange(mintimevalue)*1e6);
         envMaxima.push_back(envMaximum*1e6);
         envMaxima_time.push_back(timeRange(envMaxtimevalue)*1e6);
+        noiseValues.push_back(noise*1e6);
 
         // make quality check before push back (calculation of FWHM and pulsestart can fail)
         // if ((pulsestop-pulsestart) < 200e-9) fwhm.push_back( (pulsestop-pulsestart)*1e9);
@@ -1359,17 +1393,18 @@ namespace CR { // Namespace CR -- begin
         // if (pulsestart != 0) start_time.push_back(pulsestart*1e6);
         start_time.push_back(pulsestart*1e6);
 
-        // fill pulseproperties object (in ns)
+        // fill pulseproperties object (in ns and µV/m/MHz)
         pulse.antennaID = antennaIDs(i);
         pulse.antenna = i+1;
-        pulse.maximum = maximum*1e9;
-        pulse.envelopeMaximum = envMaximum*1e9;
-        pulse.minimum = minimum*1e9;
+        pulse.maximum = maximum*1e6;
+        pulse.envelopeMaximum = envMaximum*1e6;
+        pulse.minimum = minimum*1e6;
         pulse.maximumTime = timeRange(maxtimevalue)*1e9;
         pulse.envelopeTime = timeRange(envMaxtimevalue)*1e9;
         pulse.minimumTime = timeRange(mintimevalue)*1e9;
         pulse.halfheightTime = pulsestart*1e9;
         pulse.fwhm = (pulsestop-pulsestart)*1e9;
+        pulse.noise = noise*1e6;
         pulse.polarization = Polarization;
 
         // store pulse properties in map
@@ -1379,7 +1414,8 @@ namespace CR { // Namespace CR -- begin
         cout << setw(2) << i+1 << "   "
              << setw(11)<< envMaximum*1e6 << "  "
              << setw(11)<< maximum*1e6 << "  "
-             << setw(11)<< minimum*1e6 << "   "
+             << setw(11)<< minimum*1e6 << " "
+             << setw(11)<< noise*1e6 << "   "
              << setw(8) << timeRange(envMaxtimevalue)*1e6 << "   "
              << setw(8) << timeRange(maxtimevalue)*1e6 << "   "
              << setw(8) << timeRange(mintimevalue)*1e6 << "       "
@@ -1388,53 +1424,64 @@ namespace CR { // Namespace CR -- begin
       } // for i
 
       // calculate the averages and the range if there is more than one value
-      if (envMaxima.size() > 1)
-      {
-        cout <<  "-----------------------------------------------------------------------------------------------------------\n";
+      if (envMaxima.size() > 1) {
+        cout <<  "----------------------------------------------------------------------------------------------------------------------\n";
         cout << "MIN  "
              << setw(11)<< min(static_cast< Vector<Double> >(envMaxima)) << "  "
              << setw(11)<< min(static_cast< Vector<Double> >(maxima))<< "  "
-             << setw(11)<< min(static_cast< Vector<Double> >(minima)) << "   "
+             << setw(11)<< min(static_cast< Vector<Double> >(minima)) << " "
+             << setw(11)<< min(static_cast< Vector<Double> >(noiseValues)) << "   "
              << setw(8) << min(static_cast< Vector<Double> >(envMaxima_time)) << "   "
              << setw(8) << min(static_cast< Vector<Double> >(maxima_time)) << "   "
              << setw(8) << min(static_cast< Vector<Double> >(minima_time)) << "       "
              << setw(8) << min(static_cast< Vector<Double> >(start_time)) << "         "
-             << setw(8) << min(static_cast< Vector<Double> >(fwhm)) << std::endl;
+             << setw(8) << min(static_cast< Vector<Double> >(fwhm)) << endl;
         cout << "MAX  "
              << setw(11)<< max(static_cast< Vector<Double> >(envMaxima)) << "  "
              << setw(11)<< max(static_cast< Vector<Double> >(maxima))<< "  "
-             << setw(11)<< max(static_cast< Vector<Double> >(minima)) << "   "
+             << setw(11)<< max(static_cast< Vector<Double> >(minima)) << " "
+             << setw(11)<< max(static_cast< Vector<Double> >(noiseValues)) << "   "
              << setw(8) << max(static_cast< Vector<Double> >(envMaxima_time)) << "   "
              << setw(8) << max(static_cast< Vector<Double> >(maxima_time)) << "   "
              << setw(8) << max(static_cast< Vector<Double> >(minima_time)) << "       "
              << setw(8) << max(static_cast< Vector<Double> >(start_time)) << "         "
-             << setw(8) << max(static_cast< Vector<Double> >(fwhm)) << std::endl;
-        cout <<  "-----------------------------------------------------------------------------------------------------------\n";
+             << setw(8) << max(static_cast< Vector<Double> >(fwhm)) << endl;
+        cout <<  "----------------------------------------------------------------------------------------------------------------------\n";
         cout << "MEAN "
              << setw(11)<< mean(static_cast< Vector<Double> >(envMaxima)) << "  "
              << setw(11)<< mean(static_cast< Vector<Double> >(maxima))<< "  "
-             << setw(11)<< mean(static_cast< Vector<Double> >(minima)) << "   "
+             << setw(11)<< mean(static_cast< Vector<Double> >(minima)) << " "
+             << setw(11)<< mean(static_cast< Vector<Double> >(noiseValues)) << "   "
              << setw(8) << mean(static_cast< Vector<Double> >(envMaxima_time)) << "   "
              << setw(8) << mean(static_cast< Vector<Double> >(maxima_time)) << "   "
              << setw(8) << mean(static_cast< Vector<Double> >(minima_time)) << "       "
              << setw(8) << mean(static_cast< Vector<Double> >(start_time)) << "         "
-             << setw(8) << mean(static_cast< Vector<Double> >(fwhm)) << "\n" << std::endl;
+             << setw(8) << mean(static_cast< Vector<Double> >(fwhm)) << "\n" << endl;
+        cout << "MEDIAN"
+             << setw(10)<< median(static_cast< Vector<Double> >(envMaxima)) << "  "
+             << setw(11)<< median(static_cast< Vector<Double> >(maxima))<< "  "
+             << setw(11)<< median(static_cast< Vector<Double> >(minima)) << " "
+             << setw(11)<< median(static_cast< Vector<Double> >(noiseValues)) << "   "
+             << setw(8) << median(static_cast< Vector<Double> >(envMaxima_time)) << "   "
+             << setw(8) << median(static_cast< Vector<Double> >(maxima_time)) << "   "
+             << setw(8) << median(static_cast< Vector<Double> >(minima_time)) << "       "
+             << setw(8) << median(static_cast< Vector<Double> >(start_time)) << "         "
+             << setw(8) << median(static_cast< Vector<Double> >(fwhm)) << "\n" << endl;
 
-        std::cout << "Summary for the maxima:\n" 
-                  << "Amplitude range [micro]:   " << min(static_cast< Vector<Double> >(envMaxima)) 
-                  << " to " << max(static_cast< Vector<Double> >(envMaxima)) << "\n"
-                  << "Amplitude average [micro]: " << mean(static_cast< Vector<Double> >(envMaxima)) << "\n"
-                  << "Time range [micro s]:      " << min(static_cast< Vector<Double> >(envMaxima_time))
-                  << " to " << max(static_cast< Vector<Double> >(envMaxima_time)) << "\n"
-                  << "Time average (max) [us]:   " << mean(static_cast< Vector<Double> >(envMaxima_time)) << "\n"
-                  << "Time average (start) [us]: " << mean(static_cast< Vector<Double> >(start_time)) << "\n"
-                  << "FWHM average [ns]:         " << mean(static_cast< Vector<Double> >(fwhm)) << std::endl;
+        cout << "Summary for the maxima:\n" 
+             << "Amplitude range [micro]:   " << min(static_cast< Vector<Double> >(envMaxima)) 
+             << " to " << max(static_cast< Vector<Double> >(envMaxima)) << "\n"
+             << "Amplitude average [micro]: " << mean(static_cast< Vector<Double> >(envMaxima)) << "\n"
+             << "Time range [micro s]:      " << min(static_cast< Vector<Double> >(envMaxima_time))
+             << " to " << max(static_cast< Vector<Double> >(envMaxima_time)) << "\n"
+             << "Time average (max) [us]:   " << mean(static_cast< Vector<Double> >(envMaxima_time)) << "\n"
+             << "Time average (start) [us]: " << mean(static_cast< Vector<Double> >(start_time)) << "\n"
+             << "FWHM average [ns]:         " << mean(static_cast< Vector<Double> >(fwhm)) << std::endl;
       }
 
-    } catch (AipsError x) 
-      {
-        std::cerr << "CompletePipeline:caclulateMaxima: " << x.getMesg() << std::endl;
-      };
+    } catch (AipsError x) {
+        cerr << "CompletePipeline:caclulateMaxima: " << x.getMesg() << endl;
+      }
 
     return pulses;
   }
@@ -1477,18 +1524,16 @@ namespace CR { // Namespace CR -- begin
 
 
       // check length of time axis and yValues traces for consistency
-      if (timeValues.size() != yValues.column(0).size())
-      {
-        std::cerr << "CompletePipeline:listCalcMaxima: Error: Length of time axis differs from length of the antenna traces!\n"
-                  << "CompletePipeline:listCalcMaxima: exiting function!" << std::endl;
+      if (timeValues.size() != yValues.column(0).size()) {
+        cerr << "CompletePipeline:listCalcMaxima: Error: Length of time axis differs from length of the antenna traces!\n"
+                  << "CompletePipeline:listCalcMaxima: exiting function!" << endl;
         return;
       }
 
       // check if cc_center is at a valid position (time must be within the time-axis)
-      if ( (cc_center < timeValues(0)) || (cc_center > timeValues(timeValues.endPosition())) )
-      {
-        std::cerr << "CompletePipeline:listCalcMaxima: Error: Center of CC-Beam is at an invalid time: " << cc_center << " s\n" 
-                  << "CompletePipeline:listCalcMaxima: exiting function!" << std::endl;
+      if ( (cc_center < timeValues(0)) || (cc_center > timeValues(timeValues.endPosition())) ) {
+        cerr << "CompletePipeline:listCalcMaxima: Error: Center of CC-Beam is at an invalid time: " << cc_center << " s\n" 
+                  << "CompletePipeline:listCalcMaxima: exiting function!" << endl;
         return;
       }
 
@@ -1514,13 +1559,13 @@ namespace CR { // Namespace CR -- begin
       timeRangeNoise = timeValues(rangeNoise);
 
       // find the maximal y  values  for all selected antennas
-      std::cout <<  "An field    noise    time\n";
-      for (unsigned int i = 0; i < antennaSelection.nelements(); i++) 
+      cout <<  "An field    noise    time\n";
 
+      for (unsigned int i = 0; i < antennaSelection.nelements(); i++) 
       if (antennaSelection(i)){
         // Start with height 0 and search for heigher and lower values
         maximum = 0;
-	minimum = 0;
+        minimum = 0;
         extremum =0;
         noise =0;
         extrematimevalue = 0;
@@ -1529,8 +1574,7 @@ namespace CR { // Namespace CR -- begin
         trace = yValues.column(i)(range);
 
         // loop through the values and search for the heighest and lowest one
-        for(unsigned int j = 0; j < timeRange.nelements(); j++)
-	{
+        for(unsigned int j = 0; j < timeRange.nelements(); j++) {
           if ( maximum < trace(j)) 
             maximum = trace(j);
 

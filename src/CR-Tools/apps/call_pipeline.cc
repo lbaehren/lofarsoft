@@ -120,6 +120,7 @@ using CR::LopesEventIn;
   rootfilemode           = recreate
   wirteBadEvents         = true
   caliabration           = false
+  lateralOutputFile      = false
   \endverbatim
   This example means:
   <ul>
@@ -158,6 +159,7 @@ using CR::LopesEventIn;
     <li>events with a bad reconstruction (e.g. simplex fit crashed) 
         will be written to the root file.
     <li>the analysis is run normally, not in calibration mode
+    <li>there will be no file created, which has a special format for the lateral distribtion analysis
   </ul>
 
   <h3>Example</h3>
@@ -230,6 +232,7 @@ string rootFileName = "";             // Name of root file for output
 string rootFileMode = "RECREATE";     // Mode, how to access root file
 bool writeBadEvents = false;         // also bad events are written into the root file (if possible)
 bool calibrationMode = false;	      // Calibration mode is off by default
+bool lateralOutputFile = false;      // no file for the lateral distribution will be created
 
 // ------------- Functions ----------------
 
@@ -929,6 +932,23 @@ void readConfigFile (const string &filename)
             cerr << "\nProgram will continue skipping the problem." << endl;
           }
 	}
+
+        if ( (keyword.compare("lateralOutputFile")==0) || (keyword.compare("lateraloutputfile")==0)
+             || (keyword.compare("Lateraloutputfile")==0) || (keyword.compare("LateralOutputFile")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
+	    lateralOutputFile = true;
+	    cout << "lateralOutputFile set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
+	    calibrationMode = false;
+	    cout << "lateralOutputFile set to 'false'.\n";
+	  } else{
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "lateralOutputFile must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+	}
+
       }	// while(configfile.good())
 
       // close config file
@@ -948,15 +968,17 @@ int main (int argc, char *argv[])
 
   // variables for reconstruction information (output of pipeline)
   unsigned int gt = 0;
-  double CCheight, CCheight_NS;                                 // CCheight will be used for EW polarization or ANY polarization
+  double CCheight, CCheight_NS;                         // CCheight will be used for EW polarization or ANY polarization
   double CCheight_error, CCheight_error_NS;
-  bool CCconverged, CCconvergedNS;                              // is true if the Gaussian fit to the CCbeam converged
-  double AzL, ElL, AzL_NS, ElL_NS;                              // Azimuth and Elevation
-  map <int,PulseProperties> rawPulsesMap;                       // pulse properties of pules in raw data traces
-  map <int,PulseProperties> calibPulsesMap;                     // pulse properties of pules in calibrated data traces
-  PulseProperties* rawPulses[MAX_NUM_ANTENNAS];                 // use array of pointers to store pulse properties in root tree
-  PulseProperties* calibPulses[MAX_NUM_ANTENNAS];               // use array of pointers to store pulse properties in root tree
-  bool goodEW = false, goodNS = false;                       // true if reconstruction worked
+  bool CCconverged, CCconvergedNS;                      // is true if the Gaussian fit to the CCbeam converged
+  double AzL, ElL, AzL_NS, ElL_NS;                      // Azimuth and Elevation
+  double distanceResult, distanceResultNS;                          // distance = radius of curvature
+  map <int,PulseProperties> rawPulsesMap;               // pulse properties of pules in raw data traces
+  map <int,PulseProperties> calibPulsesMap;             // pulse properties of pules in calibrated data traces
+  PulseProperties* rawPulses[MAX_NUM_ANTENNAS];         // use array of pointers to store pulse properties in root tree
+  PulseProperties* calibPulses[MAX_NUM_ANTENNAS];       // use array of pointers to store pulse properties in root tree
+  bool goodEW = false, goodNS = false;               // true if reconstruction worked
+
   try {
     // allocate space for arrays with pulse properties
     for (int i=0; i < MAX_NUM_ANTENNAS; i++) {
@@ -1025,6 +1047,7 @@ int main (int argc, char *argv[])
              << "rootfilemode = recreate\n"
              << "writebadevents = false\n"
              << "calibration = false\n"
+             << "lateralOutputFile = false\n"
              << "... \n"
              << endl;
         return 0;	// exit here
@@ -1121,6 +1144,7 @@ int main (int argc, char *argv[])
       if (polarization == "ANY") {
         roottree.Branch("AzL",&azimuth,"AzL/D");
         roottree.Branch("ElL",&elevation,"ElL/D");
+        roottree.Branch("Distance",&distanceResult,"Distance/D");	// radius of curvature
         roottree.Branch("CCheight",&CCheight,"CCheight/D");
         roottree.Branch("CCheight_error",&CCheight_error,"CCheight_error/D");
         roottree.Branch("CCconverged",&CCconverged,"CCconverged/B");
@@ -1129,6 +1153,7 @@ int main (int argc, char *argv[])
       if ( (polarization == "EW") || (polarization == "BOTH")) {
         roottree.Branch("AzL_EW",&AzL,"AzL_EW/D");
         roottree.Branch("ElL_EW",&ElL,"ElL_EW/D");
+        roottree.Branch("Distance_EW",&distanceResult,"Distance_EW/D");	// radius of curvature
         roottree.Branch("CCheight_EW",&CCheight,"CCheight_EW/D");
         roottree.Branch("CCheight_error_EW",&CCheight_error,"CCheight_error_EW/D");
         roottree.Branch("CCconverged_EW",&CCconverged,"CCconverged_EW/B");
@@ -1137,6 +1162,7 @@ int main (int argc, char *argv[])
       if ( (polarization == "NS") || (polarization == "BOTH")) {
         roottree.Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
         roottree.Branch("ElL_NS",&ElL_NS,"ElL_NS/D");
+        roottree.Branch("Distance_NS",&distanceResultNS,"Distance_NS/D");	// radius of curvature
         roottree.Branch("CCheight_NS",&CCheight_NS,"CCheight_NS/D");
         roottree.Branch("CCheight_error_NS",&CCheight_error_NS,"CCheight_error_NS/D");
         roottree.Branch("CCconverged_NS",&CCconverged,"CCconverged_NS/B");
@@ -1314,6 +1340,10 @@ int main (int argc, char *argv[])
           // if summaryColumns = 0 the method does not create a summary.
           eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",summaryColumns);
 
+          // create a special file for the lateral distribution output
+          if (lateralOutputFile)
+            eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
+
           // get the pulse properties
           rawPulsesMap = eventPipeline.getRawPulseProperties();
           calibPulsesMap = eventPipeline.getCalibPulseProperties();
@@ -1322,6 +1352,7 @@ int main (int argc, char *argv[])
           goodEW = results.asBool("goodReconstructed");
           AzL = results.asDouble("Azimuth");
           ElL = results.asDouble("Elevation");
+          distanceResult = results.asDouble("Distance");
           CCheight = results.asDouble("CCheight");
           CCheight_error = results.asDouble("CCheight_error");
           CCconverged = results.asBool("CCconverged");
@@ -1378,6 +1409,10 @@ int main (int argc, char *argv[])
            if summaryColumns = 0 the method does not create a summary. */
           eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",summaryColumns);
 
+          // create a special file for the lateral distribution output
+          if (lateralOutputFile)
+            eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
+
           // get the pulse properties and insert them into allready existing EW map
           // (which will be empty, if polarization = EW, but still existing
           map <int,PulseProperties> newPulses(eventPipeline.getRawPulseProperties());
@@ -1389,6 +1424,7 @@ int main (int argc, char *argv[])
           goodNS = results.asBool("goodReconstructed");
           AzL_NS = results.asDouble("Azimuth");
           ElL_NS = results.asDouble("Elevation");
+          distanceResultNS = results.asDouble("Distance");
           CCheight_NS = results.asDouble("CCheight");
           CCheight_error_NS = results.asDouble("CCheight_error");
           CCconvergedNS = results.asBool("CCconverged");

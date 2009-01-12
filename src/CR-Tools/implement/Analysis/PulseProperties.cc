@@ -54,6 +54,7 @@
     distX(-1.),
     distY(-1.),
     dist(-1.),
+    noise(0.),
     polarization("")
   {}
   

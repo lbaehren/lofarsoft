@@ -371,7 +371,7 @@ class analyseLOPESevent2 : public analyseLOPESevent {
       \param El         - value for the elevation [in deg]
       \param XC         - x-position of the shower center [in m]
       \param YC         - y-position of the shower center [in m]
-      \param date - date of the event in seconds
+      \param date       - date of the event in seconds
     */
     void printAntennaDistances (const Vector <double>& distances,
                                 const Matrix<double>& AntPos,
@@ -393,12 +393,26 @@ class analyseLOPESevent2 : public analyseLOPESevent {
       \brief Creates a summary postscript of all created plots (uses LaTeX)
 
       \param filename - name of the file for the summary plot (without final ".ps").
-      \param columns - number of columns in the summary (if columns=0, nothing is done)
+      \param columns  - number of columns in the summary (if columns=0, nothing is done)
     */
-    void summaryPlot(string filename,
-                     unsigned int columns = 3);
-  };
+    void summaryPlot (string filename,
+                      unsigned int columns = 3);
+
+    /*!
+      \brief Creates an output file for lateral distribution studies
+
+      \param filePrefix - the filename will be prefix+GT+".dat".
+      \param erg        - results of the pipeline (e.g. Azimuth, Elevation)
+      \param XC         - x-position of the shower center [in m]
+      \param YC         - y-position of the shower center [in m]
+   */
+    void createLateralOutput (const string& filePrefix,
+                              const Record& erg,
+                              const double& Xc,
+                              const double& Yc);
   
+  };
+
 } // Namespace CR -- end
 
 #endif /* HAVE_STARTOOLS */

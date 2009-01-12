@@ -537,6 +537,8 @@ namespace CR { // Namespace CR -- begin
       \param upsampling_exp   -- a value > 0 means that data are upsampled by a factor of 2^upsampling_exp
                                  use e.g. uspampling_exp = 1 to have twice as many points plotted.
       \param rawData          -- uses the raw ADC data instead of the calibrated fieldstrength
+      \param cc_center        -- center (time) of CC-beam fit (tries to calculate the noise before the pulse,
+                                 if this information is given)
 
       \return pulses          -- a map with the calculated pulse parameters (keys = antennaIDs)
     */
@@ -544,7 +546,8 @@ namespace CR { // Namespace CR -- begin
     map <int,PulseProperties> calculateMaxima (DataReader *dr,
                                                Vector<Bool> antennaSelection = Vector<Bool>(),
                                                const int& upsampling_exp = 0,
-                                               const bool& rawData = false);
+                                               const bool& rawData = false,
+                                               const double& cc_center = 1e99);
     /*!
       \brief same as calculateMaxima, but different output form and does not work with the envelope of the trace
 
@@ -552,7 +555,8 @@ namespace CR { // Namespace CR -- begin
       \param antennaSelection -- Selection of antennas
       \param upsampling_exp   -- a value > 0 means that data are upsampled by a factor of 2^upsampling_exp
                                  use e.g. uspampling_exp = 1 to have twice as many points plotted.
-      \param cc_center        -- center of CC-beam fit
+      \param cc_center        -- center of CC-beam fit, if it is set, the pulse parameters will be calculated
+                                 not in the plot range but in a region arround the cc-beam
     */
     void listCalcMaxima (DataReader *dr,
                          Vector<Bool> antennaSelection = Vector<Bool>(),

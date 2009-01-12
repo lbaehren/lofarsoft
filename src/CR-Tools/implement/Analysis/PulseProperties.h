@@ -110,6 +110,8 @@
     double distY;
     //! distance of antenna position from shower axis
     double dist;
+    //! mean noise of a certain part of the trace (for lateral distribution analysis)
+    double noise;
     //! polarization
     std::string polarization;
 

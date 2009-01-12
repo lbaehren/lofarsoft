@@ -219,7 +219,8 @@ namespace CR { // Namespace CR -- begin
 
         // calculate the maxima
 	if (CalculateMaxima)
-          calibPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(), false);
+          calibPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),
+                                                            false, fiterg.asDouble("CCcenter"));
         // user friendly list of calculated maxima
         if (listCalcMaxima)
           CompleteBeamPipe_p->listCalcMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),fiterg.asDouble("CCcenter"));
@@ -508,12 +509,70 @@ namespace CR { // Namespace CR -- begin
         system(shellCommand.c_str());
 
 
-        std::cout << "Created postscript summary: " << filename << ".ps" << std::endl;
+        cout << "Created postscript summary: " << filename << ".ps" << endl;
       }
     } catch (AipsError x) {
       cerr << "analyseLOPESevent2::summaryPlot: " << x.getMesg() << endl;
     }
   }
+
+ void analyseLOPESevent2::createLateralOutput (const string& filePrefix, 
+                                               const Record& erg,
+                                               const double& Xc,
+                                               const double& Yc)
+ {
+    try {
+      unsigned int GT = erg.asuInt("Date");
+
+      // get AntennaIDs to loop through pulse parameters
+      Vector<int> antennaIDs;
+      beamformDR_p->headerRecord().get("AntennaIDs",antennaIDs);
+
+      // create filename
+      stringstream filenameStream;
+      filenameStream << filePrefix << GT << ".dat";
+      string filename = filenameStream.str();
+
+      cout << "\nWriting output for lateral distribution into file: " << filename << endl;
+
+      // open file
+      ofstream lateralfile;
+      lateralfile.open(filename.c_str(), ofstream::out);
+
+
+      // get antenna positions and distances in shower coordinates
+      Vector <double> distances = erg.asArrayDouble("distances");
+      Matrix <double> antPos = toShower(beamPipe_p->GetAntPositions(), erg.asDouble("Azimuth"), erg.asDouble("Elevation"));
+
+      // loop through antenna and create output for every antenna with existing pulse information
+      for (unsigned int i=0 ; i < antennaIDs.size(); i++)
+        if (calibPulses.find(antennaIDs(i)) != calibPulses.end()) {
+          lateralfile << i + 1 << "  "
+                      << antPos.row(i)(0) << "  "
+                      << antPos.row(i)(1) << "  "
+                      << distances(i) << "  "
+                      << i + 1 << "  "
+                      << calibPulses[antennaIDs(i)].envelopeMaximum << "  "
+                      << calibPulses[antennaIDs(i)].noise << "  "
+                      << calibPulses[antennaIDs(i)].envelopeTime << endl;
+        }
+
+     // final line
+     lateralfile << "# " << GT
+                 << " "  << erg.asDouble("Azimuth")
+                 << " "  << erg.asDouble("Elevation")
+                 << " "  << erg.asDouble("Distance")
+                 << " "  << Xc
+                 << " "  << Yc << endl;
+
+     // close file
+     lateralfile.close();
+    } catch (AipsError x) {
+      cerr << "analyseLOPESevent2::createLateralOutput: " << x.getMesg() << endl;
+    }
+  }
+
+
 
 } // Namespace CR -- end
 
