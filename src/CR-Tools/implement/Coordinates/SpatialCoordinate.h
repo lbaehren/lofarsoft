@@ -155,6 +155,16 @@ namespace CR { // Namespace CR -- begin
     </ul>
     
     <h3>Example(s)</h3>
+
+    <ol>
+      <li>Create a spatial coordinate consisting of a directional component in 
+      a J2000 reference frame using a SIN projection and a radial component:
+      \code
+      SpatialCoordinate coord (CoordinateType::DirectionRadius,
+                               "J2000",
+			       "SIN")
+      \endcode
+    </ol>
     
   */  
   class SpatialCoordinate {
@@ -167,8 +177,9 @@ namespace CR { // Namespace CR -- begin
     unsigned int nofCoordinates_p;
     //! Number of elements along the coordinate axes
     IPosition shape_p;
-    /*! Coordinate objects forming the spatial coordinate */
+    /*! Directional component of the spatial coordinate */
     DirectionCoordinate directionCoord_p;
+    /*! Linear component of the spatial coordinate */
     LinearCoordinate linearCoord_p;
 
   public:
@@ -397,7 +408,7 @@ namespace CR { // Namespace CR -- begin
     // ------------------------------------------------------------------ Methods
 
     /*!
-      \brief Retrieve the world coordinates of the directions
+      \brief Retrieve the world axis values of the spatial coordinate
 
       Fasted varying axis is last:
       \verbatim
@@ -420,7 +431,20 @@ namespace CR { // Namespace CR -- begin
 
       \return values --
     */
-    Matrix<double> positionValues (bool const &fastedIsFirst=true);
+    Matrix<double> positionValues (bool const &fastedAxisFirst=true);
+
+    /*!
+      \brief Retrieve the world axis values of the spatial coordinate
+
+      This method is nothing but an alternate call to
+      SpatialCoordinate::positionValues, in order to provide a uniform interface
+      to the coordinate classes.
+
+      \return values -- The world axis values of the spatial coordinate
+    */
+    inline Matrix<double> worldAxisValues (bool const &fastedAxisFirst=true) {
+      return positionValues (fastedAxisFirst);
+    }
     
     /*!
       \brief Get the value of the reference pixel

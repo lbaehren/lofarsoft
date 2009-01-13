@@ -304,7 +304,7 @@ namespace CR { // Namespace CR -- begin
 
   //______________________________________________________________ positionValues
 
-  Matrix<double> SpatialCoordinate::positionValues (bool const &fastedIsFirst)
+  Matrix<double> SpatialCoordinate::positionValues (bool const &fastedAxisFirst)
   {
     // determine the number of positions
     uint nofPositions (1);
@@ -314,7 +314,7 @@ namespace CR { // Namespace CR -- begin
 
     // set up in which order to iterate through the axes
     IPosition axis (nofAxes_p);
-    if (fastedIsFirst) {
+    if (fastedAxisFirst) {
       for (uint n(0); n<nofAxes_p; n++) {
 	axis(n) = n;
       }

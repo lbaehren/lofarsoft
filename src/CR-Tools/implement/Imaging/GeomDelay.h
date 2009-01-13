@@ -181,6 +181,62 @@ namespace CR { // Namespace CR -- begin
     GeomDelay& operator= (GeomDelay const &other); 
     
     // --------------------------------------------------------------- Parameters
+
+    /*!
+      \brief Are the values of the geometrical delays getting buffered?
+      
+      \return bufferDelays -- Returns <tt>true</tt> in case the values of the 
+              geometrical delays are buffered.
+    */
+    inline bool bufferDelays () const {
+      return bufferDelays_p;
+    }
+
+    /*!
+      \brief Enable/Disable buffering of the values of the geometrical weights
+      
+      \param bufferDelays -- Choice wether or not to buffer the values of the
+             geometrical delays.
+    */
+    void bufferDelays (bool const &bufferDelays);
+
+    /*!
+      \brief Are the geometrical delays computed for the far-field geometry?
+
+      \return farField -- Returns <tt>true</tt> in case the delays are computed
+              for the far-field geometry.
+    */
+    inline bool farField () const {
+      return farField_p;
+    }
+
+    /*!
+      \brief Select computation of the delays for far-field geometry
+
+      \param farField -- If set to <tt>true</tt> delays will be computed for
+             the far-field geometry.
+    */
+    void farField (bool const &farField);
+
+    /*!
+      \brief Are the geometrical delays computed for the near-field geometry?
+
+      \return farField -- Returns <tt>true</tt> in case the delays are computed
+              for the near-field geometry.
+    */
+    inline bool nearField () const {
+      return !farField_p;
+    }
+
+    /*!
+      \brief Select computation of the delays for near-field geometry
+
+      \param farField -- If set to <tt>true</tt> delays will be computed for
+             the near-field geometry.
+    */
+    inline void nearField (bool const &nearField) {
+      farField (!nearField);
+    }
     
     /*!
       \brief Get the number of stored antenna positions
@@ -217,9 +273,14 @@ namespace CR { // Namespace CR -- begin
       \param antPositions -- [antenna,3] array with the antenna positions.
       \param type         -- Coordinate type as which the antenna positions are
              provided; if necessary conversion is performed internally.
+      \param anglesInDegrees -- If the coordinates of the antenna positions
+             contain an angular component, is this component given in degrees?
+	     If set <tt>false</tt> the angular components are considered to be
+	     given in radians.
     */
     bool setAntPositions (Matrix<double> const &antPositions,
-			  CoordinateType::Types const &type=CoordinateType::Cartesian);
+			  CoordinateType::Types const &type=CoordinateType::Cartesian,
+			  bool const &anglesInDegrees=true);
 
     /*!
       \brief Set the antenna positions
@@ -243,9 +304,14 @@ namespace CR { // Namespace CR -- begin
       \param skyPositions -- [antenna,3] array with the sky positions.
       \param type         -- Coordinate type as which the sky positions are
              provided; if necessary conversion is performed internally.
+      \param anglesInDegrees -- If the coordinates of the antenna positions
+             contain an angular component, is this component given in degrees?
+	     If set <tt>false</tt> the angular components are considered to be
+	     given in radians.
     */
     bool setSkyPositions (Matrix<double> const &skyPositions,
-			  CoordinateType::Types const &type=CoordinateType::Cartesian);
+			  CoordinateType::Types const &type=CoordinateType::Cartesian,
+			  bool const &anglesInDegrees=true);
     
     /*!
       \brief Set the sky positions
@@ -375,6 +441,7 @@ namespace CR { // Namespace CR -- begin
 	       CoordinateType::Types const &skyCoord,
 	       bool const &farField=false,
 	       bool const &bufferDelays=false);
+
   };
   
 } // Namespace CR -- end

@@ -466,6 +466,38 @@ int test_methods ()
     nofFailedTests++;
   }
   
+  cout << "[6] Retrieve world axis values of both axes ..." << endl;
+  try {
+    Matrix<double> values1 = coord.worldAxisValues(true);
+    casa::IPosition shape1 = values1.shape();
+
+    cout << "-- fastest varying axis first ..." << endl;
+    cout << "\t" << values1.row(0) << endl;
+    cout << "\t" << values1.row(1) << endl;
+    cout << "\t" << values1.row(2) << endl;
+    cout << "\t" << values1.row(3) << endl;
+    cout << "\t..." << endl;
+    cout << "\t" << values1.row(shape1(0)-3) << endl;
+    cout << "\t" << values1.row(shape1(0)-2) << endl;
+    cout << "\t" << values1.row(shape1(0)-1) << endl;
+
+    Matrix<double> values2 = coord.worldAxisValues(false);
+    casa::IPosition shape2 = values2.shape();
+
+    cout << "-- fastest varying axis last ..." << endl;
+    cout << "\t" << values2.row(0) << endl;
+    cout << "\t" << values2.row(1) << endl;
+    cout << "\t" << values2.row(2) << endl;
+    cout << "\t" << values2.row(3) << endl;
+    cout << "\t..." << endl;
+    cout << "\t" << values2.row(shape2(0)-3) << endl;
+    cout << "\t" << values2.row(shape2(0)-2) << endl;
+    cout << "\t" << values2.row(shape2(0)-1) << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 

@@ -51,7 +51,7 @@ namespace CR { // Namespace CR -- begin
   }
 
   //____________________________________________________________ SkymapCoordinate
-
+  
   SkymapCoordinate::SkymapCoordinate (ObservationData const &obsData,
 				      SpatialCoordinate const &spatialCoord,
 				      TimeFreqCoordinate const &timeFreqCoord)
@@ -105,6 +105,8 @@ namespace CR { // Namespace CR -- begin
     spatialCoord_p  = other.spatialCoord_p;
     timeFreqCoord_p = other.timeFreqCoord_p;
     csys_p          = other.csys_p;
+    nofAxes_p       = other.nofAxes_p;
+    shape_p         = other.shape_p;
   }
 
   // ============================================================================
@@ -145,7 +147,7 @@ namespace CR { // Namespace CR -- begin
 
   //_______________________________________________________________________ shape
 
-  casa::IPosition SkymapCoordinate::shape ()
+  void SkymapCoordinate::setShape ()
   {
     uint counter (0);
     casa::IPosition shapeSkymap (nofAxes());
@@ -162,7 +164,7 @@ namespace CR { // Namespace CR -- begin
       counter++;
     }
 
-    return shapeSkymap;
+    shape_p = shapeSkymap;
   }
 
   //_____________________________________________________________________ summary
@@ -208,7 +210,7 @@ namespace CR { // Namespace CR -- begin
     obsData_p       = obsData;
     spatialCoord_p  = spatialCoord;
     timeFreqCoord_p = timeFreqCoord;
-
+    
     setCoordinateSystem ();
   }
   
@@ -224,6 +226,72 @@ namespace CR { // Namespace CR -- begin
     timeFreqCoord_p.toCoordinateSystem(csys);
     
     csys_p = csys;
+
+    /* Set additional internal variables which might need updating */
+
+    nofAxes_p = spatialCoord_p.nofAxes()+timeFreqCoord_p.nofAxes();
+
+    setShape();
+  }
+
+  //_____________________________________________________________ worldAxisValues
+
+  casa::Matrix<double> SkymapCoordinate::worldAxisValues (bool const &fastedAxisFirst)
+  {
+    // determine the number of positions
+    uint nofPoints (1);
+    for (uint n(0); n<nofAxes_p; n++) {
+      nofPoints *= shape_p(n);
+    }
+
+    // set up in which order to iterate through the axes
+    casa::IPosition axis (nofAxes_p);
+    if (fastedAxisFirst) {
+      for (uint n(0); n<nofAxes_p; n++) {
+	axis(n) = n;
+      }
+    } else {
+      for (uint n(0); n<nofAxes_p; n++) {
+	axis(n) = nofAxes_p-1-n;
+      }
+    }
+    
+    /* Set up the arrays for the conversion and the returned values */
+    casa::Matrix<double> worldValues (nofPoints,nofAxes_p);
+    casa::IPosition pos(nofAxes_p,0);
+    casa::Vector<double> pixel (nofAxes_p,0);
+    casa::Vector<double> world (nofAxes_p,0);
+    uint npos (0);
+    
+    if (nofAxes_p>5) {
+      std::cerr << "[SkymapCoordinate::worldAxisValues]"
+		<< " Exceeded number of supported coordinate axes!"
+		<< std::endl;
+    } else {
+      for (pos(4)=0; pos(4)<shape_p(axis(4)); pos(4)++) {
+	pixel(axis(4)) = pos(4);
+	for (pos(3)=0; pos(3)<shape_p(axis(3)); pos(3)++) {
+	  pixel(axis(3)) = pos(3);
+	  for (pos(2)=0; pos(2)<shape_p(axis(2)); pos(2)++) {
+	    pixel(axis(2)) = pos(2);
+	    for (pos(1)=0; pos(1)<shape_p(axis(1)); pos(1)++) {
+	      pixel(axis(1)) = pos(1);
+	      for (pos(0)=0; pos(0)<shape_p(axis(0)); pos(0)++) {
+		pixel(axis(0)) = pos(0);
+		// conversion from pixel to world coordinates
+		csys_p.toWorld (world,pixel);
+		// copy result to returned array
+		worldValues.row(npos) = world;
+		// increment counter
+		npos++;
+	      }
+	    }
+	  }
+	}
+      }
+    }
+    
+    return worldValues;
   }
   
 

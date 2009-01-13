@@ -65,8 +65,43 @@ namespace CR { // Namespace CR -- begin
     the spatial and temporal-spectral characteristics of a sky map.
     
     <h3>Example(s)</h3>
+
+    <ol>
+      <li>Construct new object based on custom parameters:
+      \code
+      std::string telescope  = "LOFAR";
+      std::string observer   = "Lars Baehren";
+      std::string refcode    = "AZEL";
+      std::string projection = "SIN";
+      uint blocksize         = 1024;
+      casa::Quantity sampleFreq (200,"MHz");
+      uint nyquistZone (1);
+      uint blocksPerFrame (1);
+      uint nofFrames (10);
+
+      ObservationData obsData (telescope,
+                               observer);
+      TimeFreqCoordinate timeFreq (blocksize,
+	 			   sampleFreq,
+		 		   nyquistZone,
+			 	   blocksPerFrame,
+				   nofFrames);
+      
+      SkymapCoordinate coord (obsData,
+                              timeFreq);
+      \endcode
+      <li>Retrieve the values along the frequency and/or the time axis:
+      \code
+      Vector<double> times = coord.timeFreqCoordinate().timeValues();
+      Vector<double> freq  = coord.timeFreqCoordinate().frequencyValues();
+      \endcode
+      Retrieve the values along the spatial axes:
+      \code
+      Matrix<double> positions = coord.spatialCoordinate().positionValues();
+      \endcode
+    </ol>
     
-  */  
+  */
   class SkymapCoordinate {
     
     //! Observation data (epoch, location, etc.)
@@ -77,7 +112,11 @@ namespace CR { // Namespace CR -- begin
     CR::TimeFreqCoordinate timeFreqCoord_p;
     //! Coordinate system object to be attached to an image
     casa::CoordinateSystem csys_p;
-    
+    //! The number of coordinate axes
+    unsigned int nofAxes_p;
+    //! Number of elements along the coordinate axes
+    casa::IPosition shape_p;
+
   public:
     
     // ------------------------------------------------------------- Construction
@@ -135,7 +174,7 @@ namespace CR { // Namespace CR -- begin
       \return nofAxes -- The number of coordinate axes.
     */
     inline unsigned int nofAxes () const {
-      return (spatialCoord_p.nofAxes()+timeFreqCoord_p.nofAxes());
+      return nofAxes_p;
     }
     
     /*!
@@ -153,7 +192,9 @@ namespace CR { // Namespace CR -- begin
       
       \return shape -- Vector with the number of elements per coordinate axis.
     */
-    casa::IPosition shape ();
+    inline casa::IPosition shape () const {
+      return shape_p;
+    }
 
     /*!
       \brief Get some basic information on the observation (epoch, location, etc.)
@@ -322,6 +363,17 @@ namespace CR { // Namespace CR -- begin
 
     // ------------------------------------------------------------------ Methods
 
+    /*!
+      \brief Retrieve the world axis values of the coordinates
+
+      \b Warning: The array of values returned by this method can grow quite big,
+      thereby there is a considerable chance that memory allocation limits may
+      get exceeded.
+      
+      \return values -- The world axis values of the coordinates
+    */
+    casa::Matrix<double> worldAxisValues (bool const &fastedAxisFirst=true);
+
   private:
     
     //! Unconditional copying
@@ -338,6 +390,10 @@ namespace CR { // Namespace CR -- begin
 
     //! Set up the coordinate system object to be attached to an image
     void setCoordinateSystem ();
+
+    //! Set the shape of the coordinate axes
+    void setShape();
+
   };
   
 } // Namespace CR -- end

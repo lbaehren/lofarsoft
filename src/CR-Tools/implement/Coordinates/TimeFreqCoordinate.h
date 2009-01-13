@@ -217,6 +217,8 @@ namespace CR { // Namespace CR -- begin
     uint blocksPerFrame_p;
     //! The number of time frames, \f$ N_{\rm Frames} \f$
     uint nofFrames_p;
+    //! The number of coordinate axes
+    unsigned int nofAxes_p;
     
   public:
     
@@ -314,7 +316,7 @@ namespace CR { // Namespace CR -- begin
       \return nofAxes -- The number of coordinate axes.
     */
     inline unsigned int nofAxes () const {
-      return 2;
+      return nofAxes_p;
     }
     
     /*!
@@ -507,6 +509,13 @@ namespace CR { // Namespace CR -- begin
       \return values -- 
      */
     Vector<double> frequencyValues ();
+
+    /*!
+      \brief Retrieve the world axis values of the coordinates
+
+      \return values -- World axis values of the coordinates
+    */
+    Matrix<double> worldAxisValues (bool const &fastedAxisFirst=true);
     
     // -------------------------------------------------------------- WCS methods
 

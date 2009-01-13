@@ -145,6 +145,7 @@ namespace CR { // Namespace CR -- begin
     
     blocksPerFrame_p = other.blocksPerFrame_p;
     nofFrames_p      = other.nofFrames_p;
+    nofAxes_p        = other.nofAxes_p;
     coordType_p      = other.coordType_p;
     coordTime_p      = other.coordTime_p;
     coordFrequency_p = other.coordFrequency_p;
@@ -297,6 +298,7 @@ namespace CR { // Namespace CR -- begin
 				 uint const &blocksPerFrame,
 				 uint const &nofFrames)
   {
+    nofAxes_p   = 2;
     coordType_p = coordType;
     setBlocksPerFrame (blocksPerFrame);
     setNofFrames (nofFrames);
@@ -361,8 +363,62 @@ namespace CR { // Namespace CR -- begin
 
     return values;
   }
-  
-  // ------------------------------------------------------------- setCoordinates
+
+  //_____________________________________________________________ worldAxisValues
+
+  Matrix<double> TimeFreqCoordinate::worldAxisValues (bool const &fastedAxisFirst)
+  {
+    // determine the number of positions
+    uint nofPositions (1);
+    casa::IPosition axisShape = shape();
+    for (uint n(0); n<nofAxes_p; n++) {
+      nofPositions *= axisShape(n);
+    }
+    
+    // set up in which order to iterate through the axes
+    casa::IPosition axis (nofAxes_p);
+    if (fastedAxisFirst) {
+      for (uint n(0); n<nofAxes_p; n++) {
+	axis(n) = n;
+      }
+    } else {
+      for (uint n(0); n<nofAxes_p; n++) {
+	axis(n) = nofAxes_p-1-n;
+      }
+    }
+
+    /* Create coordinate system object to handle the conversion; this is more
+       efficient than using the TimeFreqCoordinate::toWorld method, since the 
+       latter has to take care of the various ways in which the spatial
+       coordinate can be composed out of the basic coordinate objects.
+    */
+    casa::CoordinateSystem csys;
+    toCoordinateSystem (csys);
+
+        /* Set up the arrays for the conversion and the returned values */
+    casa::Matrix<double> worldValues (nofPositions,nofAxes_p);
+    casa::IPosition pos(nofAxes_p,0);
+    casa::Vector<double> pixel (nofAxes_p,0);
+    casa::Vector<double> world (nofAxes_p,0);
+    uint npos (0);
+    
+    for (pos(1)=0; pos(1)<axisShape(axis(1)); pos(1)++) {
+      pixel(axis(1)) = pos(1);
+      for (pos(0)=0; pos(0)<axisShape(axis(0)); pos(0)++) {
+	pixel(axis(0)) = pos(0);
+	// conversion from pixel to world coordinates
+	csys.toWorld (world,pixel);
+	// copy result to returned array
+	worldValues.row(npos) = world;
+	// increment counter
+	npos++;
+      }
+    }
+    
+    return worldValues;
+  }
+
+  //______________________________________________________________ setCoordinates
 
   void TimeFreqCoordinate::setCoordinates (int const &nFrame)
   {

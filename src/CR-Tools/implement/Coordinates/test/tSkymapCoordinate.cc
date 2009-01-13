@@ -190,10 +190,10 @@ int test_coordinateSystem ()
   std::string projection = "SIN";
   uint blocksize         = 1024;
   casa::Quantity sampleFreq (200,"MHz");
-  uint nyquistZone (1);
-  uint blocksPerFrame (1);
-  uint nofFrames (10);
-  
+  uint nyquistZone       = 1;
+  uint blocksPerFrame    = 1;
+  uint nofFrames         = 10;
+
   // Coordinate objects
   CR::ObservationData obsData (telescope,observer);
   TimeFreqCoordinate timeFreq (blocksize,
@@ -201,14 +201,15 @@ int test_coordinateSystem ()
 			       nyquistZone,
 			       blocksPerFrame,
 			       nofFrames);
+
   SpatialCoordinate spatial (CR::CoordinateType::DirectionRadius,
 			     refcode,
 			     projection);
-  spatial.setShape(casa::IPosition(3,100,100,10));
+  spatial.setShape(casa::IPosition(3,50,50,10));
   SkymapCoordinate coord (obsData,
 			  spatial,
 			  timeFreq);
-  
+
   cout << "[1] WCS parameters ..." << endl;
   try {
     cout << "-- World axis names = " << coord.worldAxisNames()  << endl;
@@ -221,7 +222,7 @@ int test_coordinateSystem ()
     std::cerr << message << endl;
     nofFailedTests++;
   }
-  
+
   cout << "[2] Conversion from pixel to world coordinates ..." << endl;
   try {
     Vector<double> pixel (coord.nofAxes());
@@ -279,14 +280,14 @@ int test_coordinateSystem ()
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test retrieval of data from the embedded objects
+  \brief Test retrieval of the world axis values
 
   \return nofFailedTests -- The number of failed tests encountered within this
           function.
 */
-int test_embeddedObjects ()
+int test_worldAxisValues ()
 {
-  cout << "\n[tSkymapCoordinate::test_embeddedObjects]\n" << endl;
+  cout << "\n[tSkymapCoordinate::test_worldAxisValues]\n" << endl;
 
   int nofFailedTests (0);
 
@@ -356,6 +357,34 @@ int test_embeddedObjects ()
     nofFailedTests++;
   }
 
+  cout << "[4] Retrieve world axis values of skymap coordinates ..." << endl;
+  try{
+    // adjust internal parameters not to exceed memory
+    timeFreq.setBlocksize(100);
+    coord.setTimeFreqCoordinate(timeFreq);
+
+    Matrix<double> values = coord.worldAxisValues();
+    IPosition shape       = values.shape();
+
+    cout << "\t" << values.row(0) << endl;
+    cout << "\t" << values.row(1) << endl;
+    cout << "\t" << values.row(2) << endl;
+    cout << "\t" << values.row(3) << endl;
+    cout << "\t" << values.row(4) << endl;
+    cout << "\t" << values.row(5) << endl;
+    cout << "\t..." << endl;
+    cout << "\t" << values.row(shape(0)/2-1) << endl;
+    cout << "\t" << values.row(shape(0)/2) << endl;
+    cout << "\t" << values.row(shape(0)/2+1) << endl;
+    cout << "\t..." << endl;
+    cout << "\t" << values.row(shape(0)-3) << endl;
+    cout << "\t" << values.row(shape(0)-2) << endl;
+    cout << "\t" << values.row(shape(0)-1) << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
   return nofFailedTests;
 }
 
@@ -370,7 +399,7 @@ int main ()
   // Tests for the embedded coordinate system object
   nofFailedTests += test_coordinateSystem ();
   // Test retrieval of data from the embedded objects
-  nofFailedTests += test_embeddedObjects();
+  nofFailedTests += test_worldAxisValues();
 
   return nofFailedTests;
 }

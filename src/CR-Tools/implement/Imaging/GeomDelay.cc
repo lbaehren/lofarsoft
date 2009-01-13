@@ -215,6 +215,67 @@ namespace CR { // Namespace CR -- begin
     antPositions_p = antPositions;
     skyPositions_p = skyPositions;
   }
+
+  //_____________________________________________________________________________
+  //                                                                 bufferDelays
+  
+  void GeomDelay::bufferDelays (bool const &bufferDelays)
+  {
+    // case 1: buffering previously disabled, not switched on
+    if (!bufferDelays_p && bufferDelays) {
+      delays_p = delays();
+    }
+    // case 2: buffering of values switched off after previous enabled
+    else if (bufferDelays_p && !bufferDelays) {
+      Matrix<double> mat;
+      delays_p = mat;
+    }
+
+    bufferDelays_p = bufferDelays;
+  }
+  
+  //_____________________________________________________________________________
+  //                                                              setAntPositions
+  
+  bool GeomDelay::setAntPositions (Matrix<double> const &antPositions,
+				   CoordinateType::Types const &type,
+				   bool const &anglesInDegrees)
+  {
+    bool status (true);
+
+    switch (type) {
+    case CoordinateType::Cartesian:
+      antPositions_p.resize (antPositions.shape());
+      antPositions_p = antPositions;
+      break;
+    default:
+      break;
+    };
+    
+    if (bufferDelays_p) {
+      delays_p = delay (antPositions_p,
+			skyPositions_p,
+			farField_p);
+    }
+
+    return status;
+  }
+
+  //_____________________________________________________________________________
+  //                                                                     farField
+  
+  void GeomDelay::farField (bool const &farField)
+  {
+    // check if we need to adjust the buffer for the values of the delays
+    if (farField_p != farField && bufferDelays_p) {
+      delays_p = delay (antPositions_p,
+			skyPositions_p,
+			farField_p);
+    }
+    
+    // store the value of the parameter
+    farField_p = farField;
+  }
   
   //_____________________________________________________________________________
   //                                                                      summary
@@ -222,7 +283,8 @@ namespace CR { // Namespace CR -- begin
   void GeomDelay::summary (std::ostream &os)
   {
     os << "[GeomDelay] Summary of internal parameters." << std::endl;
-    os << "-- Far-field delay        = " << farField_p            << std::endl;
+    os << "-- Far-field delay        = " << farField()            << std::endl;
+    os << "-- Near-field delay       = " << nearField()           << std::endl;
     os << "-- Buffer delay values    = " << bufferDelays_p        << std::endl;
     os << "-- nof. antenna positions = " << nofAntennaPositions() << std::endl;
     os << "-- nof. sky positions     = " << nofSkyPositions()     << std::endl;
@@ -322,5 +384,4 @@ namespace CR { // Namespace CR -- begin
     return delays;
   }
 
-  
 } // Namespace CR -- end

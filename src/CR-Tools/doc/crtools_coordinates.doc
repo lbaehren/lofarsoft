@@ -312,6 +312,9 @@
   
   \section crtools_coordinates_references References
   
+  - casacore <a href="http://www.astron.nl/casacore/doc/html/group__Coordinates__module.html">Coordinates</a>
+  module, collecting classes to interconvert pixel and world (physical)
+  coordinates.
   - <a href="http://en.wikipedia.org/wiki/Geographic_coordinate">Geographic coordinate
   system</a> (Wikipedia)
   
