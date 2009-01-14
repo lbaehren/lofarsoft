@@ -241,14 +241,69 @@ namespace CR { // Namespace CR -- begin
 				   CoordinateType::Types const &type,
 				   bool const &anglesInDegrees)
   {
-    bool status (true);
-
+    bool status     = true;
+    IPosition shape = antPositions.shape();
+    
+    antPositions_p.resize (shape);
+    
     switch (type) {
     case CoordinateType::Cartesian:
       antPositions_p.resize (antPositions.shape());
       antPositions_p = antPositions;
       break;
     default:
+      {
+	Vector<double> out (3);
+	for (int n(0); n<shape(0); n++) {
+	  status = PositionVector::convert(out,
+					   CoordinateType::Cartesian,
+					   antPositions.row(n),
+					   type,
+					   anglesInDegrees);
+	  antPositions_p.row(n) = out;
+	}
+      }
+      break;
+    };
+    
+    if (bufferDelays_p) {
+      delays_p = delay (antPositions_p,
+			skyPositions_p,
+			farField_p);
+    }
+
+    return status;
+  }
+
+  //_____________________________________________________________________________
+  //                                                              setSkyPositions
+  
+  bool GeomDelay::setSkyPositions (Matrix<double> const &skyPositions,
+				   CoordinateType::Types const &type,
+				   bool const &anglesInDegrees)
+  {
+    bool status     = true;
+    IPosition shape = skyPositions.shape();
+    
+    skyPositions_p.resize (shape);
+    
+    switch (type) {
+    case CoordinateType::Cartesian:
+      skyPositions_p.resize (skyPositions.shape());
+      skyPositions_p = skyPositions;
+      break;
+    default:
+      {
+	Vector<double> out (3);
+	for (int n(0); n<shape(0); n++) {
+	  status = PositionVector::convert(out,
+					   CoordinateType::Cartesian,
+					   skyPositions.row(n),
+					   type,
+					   anglesInDegrees);
+	  skyPositions_p.row(n) = out;
+	}
+      }
       break;
     };
     
