@@ -23,6 +23,13 @@
 
 #include <Analysis/analyseLOPESevent2.h>
 
+#include "TROOT.h"
+#include "TCanvas.h"
+#include "TGraphErrors.h"
+#include "TF1.h"
+#include "TPaveStats.h"
+#include "TAxis.h"
+
 #ifdef HAVE_STARTOOLS
 
 namespace CR { // Namespace CR -- begin
@@ -569,6 +576,199 @@ namespace CR { // Namespace CR -- begin
      lateralfile.close();
     } catch (AipsError x) {
       cerr << "analyseLOPESevent2::createLateralOutput: " << x.getMesg() << endl;
+    }
+  }
+
+ void analyseLOPESevent2::fitLateralDistribution (const string& filePrefix,
+                                                  const Record& erg,
+                                                  const double& Xc,
+                                                  const double& Yc,
+                                                  const double& energy)
+ {
+    try {
+      cout << "\nFitting lateral distribution..." << endl;
+
+      // get shower properties
+      unsigned int GT = erg.asuInt("Date");
+      double az = erg.asDouble("Azimuth");
+      double el = erg.asDouble("Elevation");
+
+      // get AntennaIDs to loop through pulse parameters
+      Vector<int> antennaIDs;
+      beamformDR_p->headerRecord().get("AntennaIDs",antennaIDs);
+
+      // get antenna positions and distances in shower coordinates
+      Vector <double> distances = erg.asArrayDouble("distances");
+
+      // create arrays for plotting and fitting
+      unsigned int Nant = calibPulses.size();
+      Double_t fieldStr[Nant],distance[Nant],distanceClean[Nant],fieldStrClean[Nant];
+      Double_t fieldStrEr[Nant],distanceEr[Nant],distanceCleanEr[Nant],fieldStrCleanEr[Nant];
+      Double_t noiseBgr[Nant], timePos[Nant];
+
+      // loop through antennas and fill the arrays
+      unsigned int ant = 0;	// counting antennas with pulse information
+      for (unsigned int i=0 ; i < antennaIDs.size(); i++)
+        if (calibPulses.find(antennaIDs(i)) != calibPulses.end()) {
+           distance[ant] = distances(i);
+           fieldStr[ant] = calibPulses[antennaIDs(i)].envelopeMaximum;
+           noiseBgr[ant] = calibPulses[antennaIDs(i)].noise;
+           timePos[ant] = calibPulses[antennaIDs(i)].envelopeTime;
+           ant++;
+        }
+      // consistancy check
+      if (ant != Nant)
+        cerr << "analyseLOPESevent2::fitLateralDistribution: Nant != number of antenna values\n" << endl; 
+
+      Double_t fieldMax=0;
+      Double_t fieldMin=0;
+      Double_t maxdist=0;
+
+      // calculate errors and count number of clean (good) values
+      unsigned int clean = 0;
+      for (unsigned int i = 0; i < Nant; ++i) {
+        /* error of field strength = 19% + noise */
+        fieldStrEr[i]=fieldStr[i]*0.19+noiseBgr[i];
+        distanceEr[i]=15;		// should probably be calculated instead
+
+        /* get largest distance and min and max field strength */
+        if ( distance[i] > maxdist)
+          maxdist=distance[i];
+        if (fieldStr[i] > fieldMax)
+          fieldMax=fieldStr[i];
+        if (fieldStr[i] < fieldMin)
+          fieldMin=fieldStr[i];
+
+        // what are these cuts for?
+        if ( (distance[i]>15) && (fieldStr[i]>1.5)  ) {
+          distanceClean[clean]  = distance[i];
+          distanceCleanEr[clean]= distanceEr[i];
+          fieldStrClean[clean]  = fieldStr[i];
+          fieldStrCleanEr[clean]= fieldStrEr[i];
+          clean++;
+        }
+      }
+
+      cout << "\nAntennas in the Plot: " << ant << endl;
+      cout << "Entries for fit: " << clean << endl;
+
+      TGraphErrors *latPro = new TGraphErrors (ant, distance,fieldStr,distanceEr,fieldStrEr);
+      TGraphErrors *latProClean = new TGraphErrors (clean, distanceClean,fieldStrClean,distanceCleanEr,fieldStrCleanEr);
+      latPro->SetFillColor(1);
+      latPro->SetLineColor(2);
+      latPro->SetMarkerColor(2);
+      latPro->SetMarkerStyle(20);
+      latPro->SetMarkerSize(1.1);
+      stringstream label;
+      label << "Lateral distribution - " << GT;
+      latPro->SetTitle(label.str().c_str());
+      latPro->GetXaxis()->SetTitle("distance R [m]"); 
+      latPro->GetYaxis()->SetTitle("field strength #epsilon [#muV/m/MHz]");
+      latPro->GetXaxis()->SetTitleSize(0.05);
+      latPro->GetYaxis()->SetTitleSize(0.05);
+      latPro->GetYaxis()->SetRange(0,100);
+
+      latProClean->SetLineColor(4);
+      latProClean->SetMarkerColor(4);
+      latProClean->SetMarkerStyle(20);
+      latProClean->SetMarkerSize(1.1);
+
+
+      /* Canvas and Plotting */
+      TCanvas *c1 = new TCanvas("c1","lateral distribution");
+      c1->Range(-18.4356,-0.31111,195.528,2.19048);
+      c1->SetFillColor(0);
+      c1->SetBorderMode(0);
+      c1->SetBorderSize(2);
+      c1->SetLeftMargin(0.127768);
+      c1->SetRightMargin(0.0715503);
+      c1->SetTopMargin(0.0761421);
+      c1->SetBottomMargin(0.124365);
+      c1->SetFrameLineWidth(2);
+      c1->SetFrameBorderMode(0);
+
+      /* lateral plot */
+      c1->SetLogy();
+      latPro->SetMinimum(1);
+      latPro->SetMaximum((fieldMax*3));
+      latPro->SetTitle("");
+      //    latPro->SetTitle("Lateral 1160026193");
+      latPro->SetFillColor(0);
+      latPro->GetYaxis()->SetRangeUser(1,fieldMax);
+      latPro->GetXaxis()->SetRangeUser(0,(maxdist*1.10));
+      latPro->Draw("AP");
+      latProClean->Draw("same p");
+
+      /* statistic box of fit */
+      TPaveStats *ptstats = new TPaveStats(0.62,0.84,0.98,0.99,"brNDC");
+      ptstats->SetName("stats");
+      ptstats->SetBorderSize(2);
+      ptstats->SetTextAlign(12);
+      ptstats->SetFillColor(0);
+      ptstats->SetOptStat(0);
+      ptstats->SetOptFit(111);
+      ptstats->Draw();
+      latProClean->GetListOfFunctions()->Add(ptstats);
+      ptstats->SetParent(latProClean->GetListOfFunctions());
+
+      /* statistic box of EAS parameter */
+      TPaveStats *easstats = new TPaveStats(0.45,0.84,0.62,0.99,"brNDC");
+      easstats->SetBorderSize(2);
+      easstats->SetTextAlign(12);
+      easstats->SetFillColor(0);
+      easstats->SetOptStat(0);
+      easstats->SetOptFit(0);
+      easstats->SetName("stats");
+
+      // create labels for the plot
+      label.str("");
+      label << "GT " << GT;
+      TText *text = easstats->AddText(label.str().c_str());
+      text->SetTextSize(0.04);
+      label.str("");
+      label << "E_{g}  = " << energy;
+      text = easstats->AddText(label.str().c_str());
+      label.str("");
+      label << "#phi   = ";
+label.width(5);
+      label << az << "^{o}";
+      text = easstats->AddText(label.str().c_str());
+      label.str("");
+      label << "#theta = " << 90-el << "^{o}";
+      text = easstats->AddText(label.str().c_str());
+      easstats->Draw();
+
+      /* FIT */
+      TF1 *fitfunc;
+      fitfunc=new TF1("fitfunc","[0]*exp(-x/[1])",50,190);
+      fitfunc->SetParName(0,"#epsilon_{0}");
+      fitfunc->SetParName(1,"R_{0}");
+      //    fitfunc->SetParameter(0,20);
+      fitfunc->SetParameter(1,200);
+      fitfunc->GetXaxis()->SetRange(20,300);
+      //  fitfunc=new TF1("fitfunc","[0]*exp(-x/[1])+[2]",60,180);
+      //fitfunc->SetParameters(15,60,10000);
+      //  fitfunc->SetFillColor(19);
+      fitfunc->SetFillStyle(0);
+      fitfunc->SetLineWidth(2);
+
+      cout << "------------------------------"<<endl;
+      latProClean->Fit(fitfunc, "WME");
+      ptstats->Draw();
+
+      // write plot to file
+      stringstream plotNameStream;
+      plotNameStream << filePrefix << GT << ".eps";
+      cout << "\nCreating plot: " << plotNameStream.str() << endl;
+      c1->Print(plotNameStream.str().c_str());
+
+      cout << "Result of fit:\n"
+           << "eps = " << fitfunc->GetParameter(0) << "\t +/- " << fitfunc->GetParError(0) << "\t µV/m/MHz\n"
+           << "R_0 = " << fitfunc->GetParameter(1) << "\t +/- " << fitfunc->GetParError(1) << "\t m\n"
+           << endl;
+
+    } catch (AipsError x) {
+      cerr << "analyseLOPESevent2::fitLateralDistribution: " << x.getMesg() << endl;
     }
   }
 

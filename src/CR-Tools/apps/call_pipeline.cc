@@ -120,6 +120,7 @@ using CR::LopesEventIn;
   rootfilemode           = recreate
   wirteBadEvents         = true
   caliabration           = false
+  lateralDistribution    = false
   lateralOutputFile      = false
   \endverbatim
   This example means:
@@ -159,6 +160,7 @@ using CR::LopesEventIn;
     <li>events with a bad reconstruction (e.g. simplex fit crashed) 
         will be written to the root file.
     <li>the analysis is run normally, not in calibration mode
+    <li>the lateral distribution will not be analysed
     <li>there will be no file created, which has a special format for the lateral distribtion analysis
   </ul>
 
@@ -176,15 +178,15 @@ using CR::LopesEventIn;
     routines of LOPES-Star and has an effect only to the traces of single
     antennas.
     <li>The upsampling due to setting an upsamplingRate greater than 160 MHz
-    effects the whole analysis chain, including the CC-Beam. At a later point
-    this method might be the only one used anymore.
+    effects the whole analysis chain, including the CC-Beam. This method is
+    recommended if no upsampling of the raw data is needed.
   </ol>
   You should prefer 2^n * 80 MHz rates (e.g. 160, 320, 640, 1280, ...).
-  
+
   WARNING:
   The two upsampling methods should not be mixed!
   Otherwise wrong traces are obtained.
-  
+
   <h3>Calibration</h3>
 
   The calibration mode can be switched on by calibration = true in the config file.
@@ -232,6 +234,7 @@ string rootFileName = "";             // Name of root file for output
 string rootFileMode = "RECREATE";     // Mode, how to access root file
 bool writeBadEvents = false;         // also bad events are written into the root file (if possible)
 bool calibrationMode = false;	      // Calibration mode is off by default
+bool lateralDistribution = false;    // the lateral distribution will not be generated
 bool lateralOutputFile = false;      // no file for the lateral distribution will be created
 
 // ------------- Functions ----------------
@@ -949,6 +952,22 @@ void readConfigFile (const string &filename)
           }
 	}
 
+        if ( (keyword.compare("lateralDistribution")==0) || (keyword.compare("lateraldistribution")==0)
+             || (keyword.compare("Lateraldistribution")==0) || (keyword.compare("LateralDistribution")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
+	    lateralDistribution = true;
+	    cout << "lateralOutputFile set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
+	    calibrationMode = false;
+	    cout << "lateralDistribution set to 'false'.\n";
+	  } else{
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "lateralDistribution must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+	}
+
       }	// while(configfile.good())
 
       // close config file
@@ -1047,6 +1066,7 @@ int main (int argc, char *argv[])
              << "rootfilemode = recreate\n"
              << "writebadevents = false\n"
              << "calibration = false\n"
+             << "lateralDistribution = false\n"
              << "lateralOutputFile = false\n"
              << "... \n"
              << endl;
@@ -1344,6 +1364,10 @@ int main (int argc, char *argv[])
           if (lateralOutputFile)
             eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
 
+          // generate the lateral distribution
+          if (lateralDistribution)
+            eventPipeline.fitLateralDistribution("lateral"+polPlotPrefix+"-",results, core_x, core_y);
+
           // get the pulse properties
           rawPulsesMap = eventPipeline.getRawPulseProperties();
           calibPulsesMap = eventPipeline.getCalibPulseProperties();
@@ -1412,6 +1436,10 @@ int main (int argc, char *argv[])
           // create a special file for the lateral distribution output
           if (lateralOutputFile)
             eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
+
+          // generate the lateral distribution
+          if (lateralDistribution)
+            eventPipeline.fitLateralDistribution("lateral"+polPlotPrefix+"-",results, core_x, core_y);
 
           // get the pulse properties and insert them into allready existing EW map
           // (which will be empty, if polarization = EW, but still existing
