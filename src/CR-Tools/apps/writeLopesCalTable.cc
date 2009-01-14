@@ -66,7 +66,11 @@ const unsigned int delay_apr_07_start = 1158142580; // Mi Sep 13 10:16:20 UTC 20
 // Delay measurement of 04.09.2007
 const unsigned int delay_sep_07_start = 1184241600; // Do Jul 12 12:00:00 UTC 2007
 // Delay measurement of 27.11.2007
-const unsigned int delay_nov_07_start = 1189171000; //Fr Sep  7 13:16:40 UTC 2007 
+const unsigned int delay_nov_07_start = 1189171000; // Fr Sep  7 13:16:40 UTC 2007 
+// Shutdown of TV station
+const unsigned int TV_off = 1196134680; // Di 27. Nov 03:38:00 UTC 2007
+// Ant 19/20 interchange
+const unsigned int delay_2008_start = 1200570000; // Do 17. Jan 11:40:00 UTC 2008
 
 // Start of 63.5 and 68.1 MHz Phase Reference signal
 const unsigned int roof_setup_2_freq_start = 1202479000; // Fr Feb  8 13:56:40 UTC 2008
@@ -362,12 +366,141 @@ void rotate_antenna_model(unsigned int GTdate)
 }
 
 
+// interchange polarization of antenna 19 and 20 (not the filter)
+void interchange19_20()
+{
+   const unsigned int newGT = delay_2008_start;
+   const unsigned int oldGT = newGT-1;
+
+  // read in of old values of polarization and HardWareSetup
+  String HWSetup19, HWSetup20;
+  if (!reader.GetData(oldGT, antennaIDs[18], "HWSetup", &HWSetup19)) {
+      cerr << "Error while reading field: HWSetup" << endl;
+      return;
+  }
+  if (!reader.GetData(oldGT, antennaIDs[19], "HWSetup", &HWSetup20)) {
+      cerr << "Error while reading field: HWSetup" << endl;
+      return;
+  }
+  if (!writer.AddData(HWSetup20,antennaIDs[18],"HWSetup",newGT) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(HWSetup19,antennaIDs[19],"HWSetup",newGT) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+
+  String polarization19, polarization20;
+  if (!reader.GetData(oldGT, antennaIDs[18], "Polarization", &polarization19)) {
+      cerr << "Error while reading field: Polarization" << endl;
+      return;
+  }
+  if (!reader.GetData(oldGT, antennaIDs[19], "Polarization", &polarization20)) {
+      cerr << "Error while reading field: Polarization" << endl;
+      return;
+  }
+  if (!writer.AddData(polarization20,antennaIDs[18],"Polarization",newGT) )
+    cerr << "\nERROR while writing field: Polarization" << endl;
+  if (!writer.AddData(polarization19,antennaIDs[19],"Polarization",newGT) )
+    cerr << "\nERROR while writing field: Polarization" << endl;
+
+
+  // read in the AntennaGainFaktor
+  Cube<Double> AntennaGainFaktor19, AntennaGainFaktor20;
+  if (!reader.GetData(oldGT, antennaIDs[18], "AntennaGainFaktor", &AntennaGainFaktor19)) { 
+        cerr << "Error while reading field: AntennaGainFaktor" << endl;
+        return;
+  }
+  if (!reader.GetData(oldGT, antennaIDs[19], "AntennaGainFaktor", &AntennaGainFaktor20)) { 
+        cerr << "Error while reading field: AntennaGainFaktor" << endl;
+        return;
+  }
+
+  // write the data back as new values, but crossed
+  if (!writer.AddData(AntennaGainFaktor20, antennaIDs[18],"AntennaGainFaktor",newGT) )
+        cerr << "\nERROR while writing field: AntennaGainFaktor" << endl;
+  if (!writer.AddData(AntennaGainFaktor19, antennaIDs[19],"AntennaGainFaktor",newGT) )
+        cerr << "\nERROR while writing field: AntennaGainFaktor" << endl;
+
+
+  // read in the AntennaAziGain
+  Cube<Double> AntennaAziGain19, AntennaAziGain20;
+  if (!reader.GetData(oldGT, antennaIDs[18], "AntennaAziGain", &AntennaAziGain19)) { 
+        cerr << "Error while reading field: AntennaAziGain" << endl;
+        return;
+  }
+  if (!reader.GetData(oldGT, antennaIDs[19], "AntennaAziGain", &AntennaAziGain20)) { 
+        cerr << "Error while reading field: AntennaAziGain" << endl;
+        return;
+  }
+
+  // write the data back as new values, but crossed
+  if (!writer.AddData(AntennaAziGain20, antennaIDs[18],"AntennaAziGain",newGT) )
+        cerr << "\nERROR while writing field: AntennaAziGain" << endl;
+  if (!writer.AddData(AntennaAziGain19, antennaIDs[19],"AntennaAziGain",newGT) )
+        cerr << "\nERROR while writing field: AntennaAziGain" << endl;
+
+
+  // read in the AntennaZeniGain
+  Cube<Double> AntennaZeniGain19, AntennaZeniGain20;
+  if (!reader.GetData(oldGT, antennaIDs[18], "AntennaZeniGain", &AntennaZeniGain19)) { 
+        cerr << "Error while reading field: AntennaZeniGain" << endl;
+        return;
+  }
+  if (!reader.GetData(oldGT, antennaIDs[19], "AntennaZeniGain", &AntennaZeniGain20)) { 
+        cerr << "Error while reading field: AntennaZeniGain" << endl;
+        return;
+  }
+
+  // write the data back as new values, but crossed
+  if (!writer.AddData(AntennaZeniGain20, antennaIDs[18],"AntennaZeniGain",newGT) )
+        cerr << "\nERROR while writing field: AntennaZeniGain" << endl;
+  if (!writer.AddData(AntennaZeniGain19, antennaIDs[19],"AntennaZeniGain",newGT) )
+        cerr << "\nERROR while writing field: AntennaZeniGain" << endl;
+
+
+  // read in the AntennaAziPhase
+  Cube<Double> AntennaAziPhase19, AntennaAziPhase20;
+  if (!reader.GetData(oldGT, antennaIDs[18], "AntennaAziPhase", &AntennaAziPhase19)) { 
+        cerr << "Error while reading field: AntennaAziPhase" << endl;
+        return;
+  }
+  if (!reader.GetData(oldGT, antennaIDs[19], "AntennaAziPhase", &AntennaAziPhase20)) { 
+        cerr << "Error while reading field: AntennaAziPhase" << endl;
+        return;
+  }
+
+  // write the data back as new values, but crossed
+  if (!writer.AddData(AntennaAziPhase20, antennaIDs[18],"AntennaAziPhase",newGT) )
+        cerr << "\nERROR while writing field: AntennaAziPhase" << endl;
+  if (!writer.AddData(AntennaAziPhase19, antennaIDs[19],"AntennaAziPhase",newGT) )
+        cerr << "\nERROR while writing field: AntennaAziPhase" << endl;
+
+
+  // read in the AntennaZeniPhase
+  Cube<Double> AntennaZeniPhase19, AntennaZeniPhase20;
+  if (!reader.GetData(oldGT, antennaIDs[18], "AntennaZeniPhase", &AntennaZeniPhase19)) { 
+        cerr << "Error while reading field: AntennaZeniPhase" << endl;
+        return;
+  }
+  if (!reader.GetData(oldGT, antennaIDs[19], "AntennaZeniPhase", &AntennaZeniPhase20)) { 
+        cerr << "Error while reading field: AntennaZeniPhase" << endl;
+        return;
+  }
+
+  // write the data back as new values, but crossed
+  if (!writer.AddData(AntennaZeniPhase20, antennaIDs[18],"AntennaZeniPhase",newGT) )
+        cerr << "\nERROR while writing field: AntennaZeniPhase" << endl;
+  if (!writer.AddData(AntennaZeniPhase19, antennaIDs[19],"AntennaZeniPhase",newGT) )
+        cerr << "\nERROR while writing field: AntennaZeniPhase" << endl;
+}
+
+
+
 void writeDelays(void)
 {
   // Set delays (three measurements in 2007)
   Vector<Double> delay_apr(30);
   Vector<Double> delay_sep(30);
   Vector<Double> delay_nov(30);
+  Vector<Double> delay_2008(30);
 
   delay_apr(0)  = 0.		;
   delay_apr(1)  = 2.52		;
@@ -461,47 +594,80 @@ void writeDelays(void)
   delay_nov(27) = -543.75	;
   delay_nov(28) = -541.01	;
   delay_nov(29) = -562.5	;
-  
+
+  delay_2008(0	) = 0		;
+  delay_2008(1	) = 2.34	;
+  delay_2008(2	) = -417.17	;
+  delay_2008(3	) = -414.78	;
+  delay_2008(4	) = -456.95	;
+  delay_2008(5	) = -459.13	;
+  delay_2008(6	) = -417.88	;
+  delay_2008(7	) = -417.73	;
+  delay_2008(8	) = -428.28	;
+  delay_2008(9	) = -431.14	;
+  delay_2008(10	) = -1229.82	;
+  delay_2008(11	) = -1229.37	;
+  delay_2008(12	) = -1224.38	;
+  delay_2008(13	) = -1228.82	;
+  delay_2008(14	) = -1233	;
+  delay_2008(15	) = -1223.35	;
+  delay_2008(16	) = -809.71	;
+  delay_2008(17	) = -810.14	;
+  delay_2008(18	) = -1231.86	;
+  delay_2008(19	) = -1227.7	;
+  delay_2008(20	) = -951.6	;
+  delay_2008(21	) = -950.48	;
+  delay_2008(22	) = -961.23	;
+  delay_2008(23	) = -958.83	;
+  delay_2008(24	) = -529.17	;
+  delay_2008(25	) = -537.94	;
+  delay_2008(26	) = -542.42	;
+  delay_2008(27	) = -543.16	;
+  delay_2008(28	) = -539.93	;
+  delay_2008(29	) = -560.44	;
+
   // converstion from ns to s
   delay_apr /= 1e9;
   delay_sep /= 1e9;
   delay_nov /= 1e9;
-  
+  delay_2008 /= 1e9;
+
   // Add the delays for all antennas to the CalTable
   // write apr delays three times, as they are valid for three different periods
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing delays of apr 2007 for antenna: " << antennaIDs[i] << endl;
 
     if (!writer.AddData(delay_apr(i),antennaIDs[i],"Delay",delay_apr_07_start) )
       cerr << "\nERROR while writing field: Delay" << endl;
   }
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing delays of apr 2007 for antenna: " << antennaIDs[i] << endl;
 
     if (!writer.AddData(delay_apr(i),antennaIDs[i],"Delay",LOPES_pol_start) )
       cerr << "\nERROR while writing field: Delay" << endl;
   }
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing delays of apr 2007 for antenna: " << antennaIDs[i] << endl;
 
     if (!writer.AddData(delay_apr(i),antennaIDs[i],"Delay",Ant1_rotation_start) )
       cerr << "\nERROR while writing field: Delay" << endl;
   }
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing delays of sep 2007 for antenna: " << antennaIDs[i] << endl;
 
     if (!writer.AddData(delay_sep(i),antennaIDs[i],"Delay",delay_sep_07_start) )
       cerr << "\nERROR while writing field: Delay" << endl;
   }
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing delays of nov 2007 for antenna: " << antennaIDs[i] << endl;
 
     if (!writer.AddData(delay_nov(i),antennaIDs[i],"Delay",delay_nov_07_start) )
+      cerr << "\nERROR while writing field: Delay" << endl;
+  }
+  for (int i = 0; i < MAX_Antennas; i++) {
+    cout << "Writing delays of 2008 for antenna: " << antennaIDs[i] << endl;
+
+    if (!writer.AddData(delay_2008(i),antennaIDs[i],"Delay",delay_2008_start) )
       cerr << "\nERROR while writing field: Delay" << endl;
   }
 }
@@ -533,6 +699,51 @@ void addRefAntField(bool createfield = true)
 
 }
 
+// TV Shutdown: remove any reference phases
+void TVshutdown(void)
+{
+  // Set new reference frequencies
+  Matrix<Double> PhaseRefFreqs(0,0);
+
+  // Set reference Phases
+  Matrix<Double> PhaseRefPhases(30,0);
+
+  // Set Sample jumps
+  Vector<Double> SampleJumps(4);
+  SampleJumps(0) = -2;
+  SampleJumps(1) = 2;
+  SampleJumps(2) = -1;
+  SampleJumps(3) = 1;
+
+  // Add the value for all antennas
+  for (int i = 0; i < MAX_Antennas; i++)
+  {
+    cout << "Writing values for antenna: " << antennaIDs[i] << endl;
+
+    // It is neccessary to write the Delay again, as the other fields
+    // are junior fields an cannot be written alone
+    Double old_delay = 0.;
+    if (!reader.GetData(TV_off, antennaIDs[i], "Delay", &old_delay))
+    { 
+      cerr << "Error while reading field: Delay" << endl;
+    } else
+    {
+      if (!writer.AddData(old_delay,antennaIDs[i],"Delay",TV_off) )
+        cerr << "\nERROR while writing field: Delay" << endl;
+      if (!writer.AddData(PhaseRefFreqs,antennaIDs[i],"PhaseRefFreqs",TV_off) )
+        cerr << "\nERROR while writing field: PhaseRefFreqs" << endl;
+      if (!writer.AddData(SampleJumps,antennaIDs[i],"SampleJumps",TV_off) )
+        cerr << "\nERROR while writing field: SampleJumps" << endl;
+      if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",TV_off) )
+        cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
+      // no reference antenna as not phase signal
+      if (!writer.AddData(0,antennaIDs[i],"PhaseRefAnt",TV_off) )
+        cerr << "\nERROR while writing field: PhaseRefAnt" << endl;
+    }
+  }
+}
+
+
 // Writes reference phase differences for roof setup
 void writeRoofRefPhases(void)
 {
@@ -545,36 +756,36 @@ void writeRoofRefPhases(void)
 
   // Set reference Phases
   Matrix<Double> PhaseRefPhases(30,2);
-  PhaseRefPhases(0,0)  = -132.	;	  PhaseRefPhases(0,1)  = 108.	;
-  PhaseRefPhases(1,0)  = 105.4	;	  PhaseRefPhases(1,1)  = -79.83	;
-  PhaseRefPhases(2,0)  = 158.5	;	  PhaseRefPhases(2,1)  = -53.56	;
-  PhaseRefPhases(3,0)  = 0.	;	  PhaseRefPhases(3,1)  = 0.	;
-  PhaseRefPhases(4,0)  = 46.22	;	  PhaseRefPhases(4,1)  = 166.7	;
-  PhaseRefPhases(5,0)  = 75.92	;	  PhaseRefPhases(5,1)  = -150.2	;
-  PhaseRefPhases(6,0)  = -150.8	;	  PhaseRefPhases(6,1)  = 28.63	;
-  PhaseRefPhases(7,0)  = -1.523	;	  PhaseRefPhases(7,1)  = 143.	;
-  PhaseRefPhases(8,0)  = -137.6	;	  PhaseRefPhases(8,1)  = 53.53	;
-  PhaseRefPhases(9,0)  = 101.4	;	  PhaseRefPhases(9,1)  = 154.7	;
-  PhaseRefPhases(10,0) = -116.2	;	  PhaseRefPhases(10,1) = 102.9	;
-  PhaseRefPhases(11,0) = 61.83	;	  PhaseRefPhases(11,1) = 70.08	;
-  PhaseRefPhases(12,0) = -83.45	;	  PhaseRefPhases(12,1) = -135.8	;
-  PhaseRefPhases(13,0) = -2.295	;	  PhaseRefPhases(13,1) = -45.93	;
-  PhaseRefPhases(14,0) = 164.8	;	  PhaseRefPhases(14,1) = 37.24	;
-  PhaseRefPhases(15,0) = 41.63	;	  PhaseRefPhases(15,1) = 63.69	;
-  PhaseRefPhases(16,0) = -179.6	;	  PhaseRefPhases(16,1) = 97.7	;
-  PhaseRefPhases(17,0) = 12.72	;	  PhaseRefPhases(17,1) = 37.5	;
-  PhaseRefPhases(18,0) = -132.9	;	  PhaseRefPhases(18,1) = -24.66	;
-  PhaseRefPhases(19,0) = 124.8	;	  PhaseRefPhases(19,1) = -102.5	;
-  PhaseRefPhases(20,0) = 97.1	;	  PhaseRefPhases(20,1) = -1.764	;
-  PhaseRefPhases(21,0) = -58.16	;	  PhaseRefPhases(21,1) = 13.59	;
-  PhaseRefPhases(22,0) = 37.91	;	  PhaseRefPhases(22,1) = -22.52	;
-  PhaseRefPhases(23,0) = 75.2	;	  PhaseRefPhases(23,1) = 153.	;
-  PhaseRefPhases(24,0) = 113.1	;	  PhaseRefPhases(24,1) = 177.2	;
-  PhaseRefPhases(25,0) = -11.58	;	  PhaseRefPhases(25,1) = -13.73	;
-  PhaseRefPhases(26,0) = 141.5	;	  PhaseRefPhases(26,1) = 125.	;
-  PhaseRefPhases(27,0) = 132.	;	  PhaseRefPhases(27,1) = 139.2	;
-  PhaseRefPhases(28,0) = 66.59	;	  PhaseRefPhases(28,1) = -26.2	;
-  PhaseRefPhases(29,0) = -0.29	;	  PhaseRefPhases(29,1) = 152.6	;
+  PhaseRefPhases(0,0) =26.8;	PhaseRefPhases(0,1) =-150.9;
+  PhaseRefPhases(1,0) =96.6;	PhaseRefPhases(1,1) =-82.6;
+  PhaseRefPhases(2,0) =160.9;  	PhaseRefPhases(2,1) =-54;
+  PhaseRefPhases(3,0) =0;  	PhaseRefPhases(3,1) =0;
+  PhaseRefPhases(4,0) =-178.5;  PhaseRefPhases(4,1) =-99.3;
+  PhaseRefPhases(5,0) =-130.7;  PhaseRefPhases(5,1) =-52.34;
+  PhaseRefPhases(6,0) =-11.3;  	PhaseRefPhases(6,1) =129.4;
+  PhaseRefPhases(7,0) =142.1;  	PhaseRefPhases(7,1) =-124.1;
+  PhaseRefPhases(8,0) =20.9;  	PhaseRefPhases(8,1) =150.3;
+  PhaseRefPhases(9,0) =-106;  	PhaseRefPhases(9,1) =-98.9;
+  PhaseRefPhases(10,0) =-107.1; PhaseRefPhases(10,1) =115.5;
+  PhaseRefPhases(11,0) =62.6;  	PhaseRefPhases(11,1) =80.8;
+  PhaseRefPhases(12,0) =82.1;  	PhaseRefPhases(12,1) =-23.3;
+  PhaseRefPhases(13,0) =174;  	PhaseRefPhases(13,1) =66.3;
+  PhaseRefPhases(14,0) =-33.9;  PhaseRefPhases(14,1) =156.2;
+  PhaseRefPhases(15,0) =-150.4; PhaseRefPhases(15,1) =-176.3;
+  PhaseRefPhases(16,0) =-3.6;  	PhaseRefPhases(16,1) =-153.7;
+  PhaseRefPhases(17,0) =17;  	PhaseRefPhases(17,1) =44.5;
+  PhaseRefPhases(18,0) =28.5;  	PhaseRefPhases(18,1) =89.6;
+  PhaseRefPhases(19,0) =-82.9;  PhaseRefPhases(19,1) =-0.2;
+  PhaseRefPhases(20,0) =-106;  	PhaseRefPhases(20,1) =110.4;
+  PhaseRefPhases(21,0) =99.3;  	PhaseRefPhases(21,1) =119.9;
+  PhaseRefPhases(22,0) =-169.1; PhaseRefPhases(22,1) =81.4;
+  PhaseRefPhases(23,0) =-133.2; PhaseRefPhases(23,1) =-100.4;
+  PhaseRefPhases(24,0) =126.3;  PhaseRefPhases(24,1) =-168.8;
+  PhaseRefPhases(25,0) =147.3;  PhaseRefPhases(25,1) =85.6;
+  PhaseRefPhases(26,0) =111.1;  PhaseRefPhases(26,1) =97.6;
+  PhaseRefPhases(27,0) =141.5;  PhaseRefPhases(27,1) =143.4;
+  PhaseRefPhases(28,0) =-142.7; PhaseRefPhases(28,1) =78.2;
+  PhaseRefPhases(29,0) =168.4;  PhaseRefPhases(29,1) =-76.6;
 
   // Set Sample jumps
   Vector<Double> SampleJumps(4);
@@ -943,8 +1154,8 @@ int main (int argc, char *argv[])
     // LopesPol_HWSetup();        // allready checked in
 
     // Changes to Delay-Table , allready checked in
-    //writeDelays();
-    
+    writeDelays();
+
     // Rewrite field for variable reference antenna
     //addRefAntField(true); // set to true to also create the field
 
@@ -955,11 +1166,14 @@ int main (int argc, char *argv[])
 
     // write TV reference phase differences and reference phase diffrences for roof setup
     //writeTVRefPhases();		// checked in
-    //writeRoofRefPhases();     // checked in
+    TVshutdown();
+    writeRoofRefPhases();
 
     // Add the measured dispersion of the LOPES 30 filter boxes
     //writePhaseCal();   //  checked in
 
+    // interchange antenna 19 and 20
+    interchange19_20();
 
     cout << "Writing finished: " << endl;
     writer.PrintSummary();
