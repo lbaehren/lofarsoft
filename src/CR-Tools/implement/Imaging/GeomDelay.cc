@@ -46,6 +46,8 @@ namespace CR { // Namespace CR -- begin
 			Matrix<double> const &skyPositions,
 			bool const &farField,
 			bool const &bufferDelays)
+    : farField_p(false),
+      bufferDelays_p(false)
   {
     init (antPositions,
 	  skyPositions,
@@ -62,6 +64,8 @@ namespace CR { // Namespace CR -- begin
 			CoordinateType::Types const &skyCoord,
 			bool const &farField,
 			bool const &bufferDelays)
+    : farField_p(false),
+      bufferDelays_p(false)
   {
     init (antPositions,
 	  antCoord,
@@ -78,23 +82,13 @@ namespace CR { // Namespace CR -- begin
 			Vector<MVPosition> const &skyPositions,
 			bool const &farField,
 			bool const &bufferDelays)
+    : farField_p(false),
+      bufferDelays_p(false)
   {
-    farField_p     = farField;
-    bufferDelays_p = bufferDelays;
-
-    uint nofAntPositions = antPositions.nelements();
-    uint nofSkyPositions = skyPositions.nelements();
-
-    antPositions_p.resize(nofAntPositions,3);
-    skyPositions_p.resize(nofSkyPositions,3);
-
-    for (uint n(0); n<nofAntPositions; n++) {
-      antPositions_p.row(n) = antPositions(n).getValue();
-    }
-
-    for (uint n(0); n<nofSkyPositions; n++) {
-      skyPositions_p.row(n) = skyPositions(n).getValue();
-    }
+    init (antPositions,
+	  skyPositions,
+	  farField,
+	  bufferDelays);
   }
   
   //_____________________________________________________________________________
@@ -206,14 +200,33 @@ namespace CR { // Namespace CR -- begin
 			bool const &farField,
 			bool const &bufferDelays)
   {
+    setAntPositions (antPositions,antCoord);
+    setSkyPositions (skyPositions,skyCoord);
+
+    farField_p     = farField;
+    bufferDelays_p = bufferDelays;
+  }
+
+  //_____________________________________________________________________________
+  //                                                                         init
+  
+  void GeomDelay::init (Vector<MVPosition> const &antPositions,
+			Vector<MVPosition> const &skyPositions,
+			bool const &farField,
+			bool const &bufferDelays)
+  {
+    // store antenna and sky positions
+    setAntPositions (antPositions);
+    setSkyPositions (skyPositions);
+
     farField_p     = farField;
     bufferDelays_p = bufferDelays;
 
-    antPositions_p.resize(antPositions.shape());
-    skyPositions_p.resize(skyPositions.shape());
-
-    antPositions_p = antPositions;
-    skyPositions_p = skyPositions;
+    if (bufferDelays_p) {
+      delays_p = delay (antPositions_p,
+			skyPositions_p,
+			farField_p);
+    }
   }
 
   //_____________________________________________________________________________
@@ -276,6 +289,29 @@ namespace CR { // Namespace CR -- begin
   }
 
   //_____________________________________________________________________________
+  //                                                              setAntPositions
+
+  bool GeomDelay::setAntPositions (Vector<MVPosition> const &antPositions)
+  {
+    bool status (true);
+    uint nelem = antPositions.nelements();
+
+    antPositions_p.resize (nelem,3);
+
+    for (uint n(0); n<nelem; n++) {
+      antPositions_p.row(n) = antPositions(n).getValue();
+    }
+
+    if (bufferDelays_p) {
+      delays_p = delay (antPositions_p,
+			skyPositions_p,
+			farField_p);
+    }
+
+    return status;
+  }
+
+  //_____________________________________________________________________________
   //                                                              setSkyPositions
   
   bool GeomDelay::setSkyPositions (Matrix<double> const &skyPositions,
@@ -307,6 +343,29 @@ namespace CR { // Namespace CR -- begin
       break;
     };
     
+    if (bufferDelays_p) {
+      delays_p = delay (antPositions_p,
+			skyPositions_p,
+			farField_p);
+    }
+
+    return status;
+  }
+
+  //_____________________________________________________________________________
+  //                                                              setSkyPositions
+
+  bool GeomDelay::setSkyPositions (Vector<MVPosition> const &skyPositions)
+  {
+    bool status (true);
+    uint nelem = skyPositions.nelements();
+
+    skyPositions_p.resize (nelem,3);
+
+    for (uint n(0); n<nelem; n++) {
+      skyPositions_p.row(n) = skyPositions(n).getValue();
+    }
+
     if (bufferDelays_p) {
       delays_p = delay (antPositions_p,
 			skyPositions_p,

@@ -49,7 +49,7 @@ namespace CR { // Namespace CR -- begin
     
     \ingroup CR_Imaging
     
-    \brief Brief description for class GeomDelay
+    \brief Geometrical delays for the beamforming
     
     \author Lars B&auml;hren
 
@@ -442,6 +442,22 @@ namespace CR { // Namespace CR -- begin
 	       bool const &farField=false,
 	       bool const &bufferDelays=false);
 
+    /*!
+      \brief Initialize internal parameters
+
+      \param antPositions -- [antenna,3], positions of the antennas
+      \param skyPositions -- [position,3], positions towards which the beams are
+             formed
+      \param farField     -- Compute geometrical delay for far-field? By default
+             no approximation is made and the full 3D geometry is taken into
+	     account.
+      \param bufferDelays -- Buffer the values of the geometrical delays?
+    */
+    void init (Vector<MVPosition> const &antPositions,
+	       Vector<MVPosition> const &skyPositions,
+	       bool const &farField=false,
+	       bool const &bufferDelays=false);
+    
   };
   
 } // Namespace CR -- end
