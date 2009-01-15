@@ -106,7 +106,9 @@ namespace CR { // Namespace CR -- begin
     // ------------------------------------------------------------- Construction
     
     //! Default constructor
-    GeomDelay ();
+    GeomDelay () {
+      init();
+    }
 
     /*!
       \brief Argumented constructor
@@ -121,6 +123,7 @@ namespace CR { // Namespace CR -- begin
     */
     GeomDelay (Matrix<double> const &antPositions,
 	       Matrix<double> const &skyPositions,
+	       bool const &anglesInDegrees=true,
 	       bool const &farField=false,
 	       bool const &bufferDelays=false);
     
@@ -139,6 +142,7 @@ namespace CR { // Namespace CR -- begin
 	       CoordinateType::Types const &antCoord,
 	       Matrix<double> const &skyPositions,
 	       CoordinateType::Types const &skyCoord,
+	       bool const &anglesInDegrees=true,
 	       bool const &farField=false,
 	       bool const &bufferDelays=false);
     
@@ -239,26 +243,6 @@ namespace CR { // Namespace CR -- begin
     }
     
     /*!
-      \brief Get the number of stored antenna positions
-      
-      \return nofAntennaPositions -- The number of antenna positions stored for
-              the computation of the geometrical delays
-    */
-    inline unsigned int nofAntennaPositions () const {
-      return antPositions_p.nrow();
-    }
-    
-    /*!
-      \brief Get the number of stored sky positions
-      
-      \return nofSkyPositions -- The number of sky positions stored for the
-              computation of the geometrical delays
-    */
-    inline unsigned int nofSkyPositions () const {
-      return skyPositions_p.nrow();
-    }
-    
-    /*!
       \brief Get the antenna positions
       
       \return antPositions -- [position,3] array with the antenna positions
@@ -346,6 +330,41 @@ namespace CR { // Namespace CR -- begin
     // ------------------------------------------------------------------ Methods
 
     /*!
+      \brief Get the number of antenna positions for which to compute the delays
+      
+      \return nofAntPositions -- The number of antenna positions stored for
+              the computation of the geometrical delays
+    */
+    inline uint nofAntPositions () {
+      return antPositions_p.nrow();
+    }
+
+    /*!
+      \brief Get the number of sky positions for which to compute the delays
+      
+      \return nofSkyPositions -- The number of sky positions stored for the
+              computation of the geometrical delays
+    */
+    inline uint nofSkyPositions () {
+      return skyPositions_p.nrow();
+    }
+    
+    /*!
+      \brief Get the shape of the array storing the geometrical weights
+      
+      \return shape -- [nofAntennas,nofSkyPositions] The shape of the array
+              storing the values of the geometrical weights
+    */
+    inline casa::IPosition shape () {
+      return casa::IPosition(2,nofAntPositions(),nofSkyPositions());
+    }
+
+    //! Get the number of antenna baselines
+    inline uint nofBaselines () {
+      return antPositions_p.nrow()*(antPositions_p.nrow()-1)/2;
+    }
+    
+    /*!
       \brief Get the geometrical delays
       
       \return delays -- The geometrical delays for the given set of antenna and
@@ -421,6 +440,7 @@ namespace CR { // Namespace CR -- begin
     */
     void init (Matrix<double> const &antPositions,
 	       Matrix<double> const &skyPositions,
+	       bool const &anglesInDegrees=true,
 	       bool const &farField=false,
 	       bool const &bufferDelays=false);
 
@@ -439,6 +459,7 @@ namespace CR { // Namespace CR -- begin
 	       CoordinateType::Types const &antCoord,
 	       Matrix<double> const &skyPositions,
 	       CoordinateType::Types const &skyCoord,
+	       bool const &anglesInDegrees=true,
 	       bool const &farField=false,
 	       bool const &bufferDelays=false);
 
@@ -458,9 +479,19 @@ namespace CR { // Namespace CR -- begin
 	       bool const &farField=false,
 	       bool const &bufferDelays=false);
     
-  };
+    //! Set/Update the values of the geometrical delays if required
+    inline void setDelays ()
+      {
+	if (bufferDelays_p) {
+	  delays_p = delay (antPositions_p,
+			    skyPositions_p,
+			    farField_p);
+	}
+      }
+    
+  }; // Class GeomDelay -- end
   
 } // Namespace CR -- end
 
 #endif /* GEOMDELAY_H */
-  
+

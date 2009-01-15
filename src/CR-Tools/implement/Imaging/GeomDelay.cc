@@ -34,23 +34,15 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                    GeomDelay
   
-  GeomDelay::GeomDelay ()
-  {
-    init ();
-  }
-  
-  //_____________________________________________________________________________
-  //                                                                    GeomDelay
-  
   GeomDelay::GeomDelay (Matrix<double> const &antPositions,
 			Matrix<double> const &skyPositions,
+			bool const &anglesInDegrees,
 			bool const &farField,
 			bool const &bufferDelays)
-    : farField_p(false),
-      bufferDelays_p(false)
   {
     init (antPositions,
 	  skyPositions,
+	  anglesInDegrees,
 	  farField,
 	  bufferDelays);
   }
@@ -62,15 +54,15 @@ namespace CR { // Namespace CR -- begin
 			CoordinateType::Types const &antCoord,
 			Matrix<double> const &skyPositions,
 			CoordinateType::Types const &skyCoord,
+			bool const &anglesInDegrees,
 			bool const &farField,
 			bool const &bufferDelays)
-    : farField_p(false),
-      bufferDelays_p(false)
   {
     init (antPositions,
 	  antCoord,
 	  skyPositions,
 	  skyCoord,
+	  anglesInDegrees,
 	  farField,
 	  bufferDelays);
   }
@@ -82,8 +74,6 @@ namespace CR { // Namespace CR -- begin
 			Vector<MVPosition> const &skyPositions,
 			bool const &farField,
 			bool const &bufferDelays)
-    : farField_p(false),
-      bufferDelays_p(false)
   {
     init (antPositions,
 	  skyPositions,
@@ -179,6 +169,7 @@ namespace CR { // Namespace CR -- begin
   
   void GeomDelay::init (Matrix<double> const &antPositions,
 			Matrix<double> const &skyPositions,
+			bool const &anglesInDegrees,
 			bool const &farField,
 			bool const &bufferDelays)
   {
@@ -186,6 +177,7 @@ namespace CR { // Namespace CR -- begin
 	  CoordinateType::Cartesian,
 	  skyPositions,
 	  CoordinateType::Cartesian,
+	  anglesInDegrees,
 	  farField,
 	  bufferDelays);
   }
@@ -197,16 +189,28 @@ namespace CR { // Namespace CR -- begin
 			CoordinateType::Types const &antCoord,
 			Matrix<double> const &skyPositions,
 			CoordinateType::Types const &skyCoord,
+			bool const &anglesInDegrees,
 			bool const &farField,
 			bool const &bufferDelays)
   {
-    setAntPositions (antPositions,antCoord);
-    setSkyPositions (skyPositions,skyCoord);
+    // switch off buffering
+    bufferDelays_p = false;
 
+    // store antenna and sky positions
+    setAntPositions (antPositions,
+		     antCoord,
+		     anglesInDegrees);
+    setSkyPositions (skyPositions,
+		     skyCoord,
+		     anglesInDegrees);
+
+    // set control parameters
     farField_p     = farField;
     bufferDelays_p = bufferDelays;
-  }
 
+    setDelays();
+  }
+  
   //_____________________________________________________________________________
   //                                                                         init
   
@@ -215,18 +219,18 @@ namespace CR { // Namespace CR -- begin
 			bool const &farField,
 			bool const &bufferDelays)
   {
+    // switch off buffering
+    bufferDelays_p = false;
+
     // store antenna and sky positions
     setAntPositions (antPositions);
     setSkyPositions (skyPositions);
 
+    // set control parameters
     farField_p     = farField;
     bufferDelays_p = bufferDelays;
 
-    if (bufferDelays_p) {
-      delays_p = delay (antPositions_p,
-			skyPositions_p,
-			farField_p);
-    }
+    setDelays();
   }
 
   //_____________________________________________________________________________
@@ -279,11 +283,8 @@ namespace CR { // Namespace CR -- begin
       break;
     };
     
-    if (bufferDelays_p) {
-      delays_p = delay (antPositions_p,
-			skyPositions_p,
-			farField_p);
-    }
+    // Update the values of the delays
+    setDelays();
 
     return status;
   }
@@ -302,11 +303,8 @@ namespace CR { // Namespace CR -- begin
       antPositions_p.row(n) = antPositions(n).getValue();
     }
 
-    if (bufferDelays_p) {
-      delays_p = delay (antPositions_p,
-			skyPositions_p,
-			farField_p);
-    }
+    // Update the values of the delays
+    setDelays();
 
     return status;
   }
@@ -343,11 +341,8 @@ namespace CR { // Namespace CR -- begin
       break;
     };
     
-    if (bufferDelays_p) {
-      delays_p = delay (antPositions_p,
-			skyPositions_p,
-			farField_p);
-    }
+    // Update the values of the delays
+    setDelays();
 
     return status;
   }
@@ -366,11 +361,8 @@ namespace CR { // Namespace CR -- begin
       skyPositions_p.row(n) = skyPositions(n).getValue();
     }
 
-    if (bufferDelays_p) {
-      delays_p = delay (antPositions_p,
-			skyPositions_p,
-			farField_p);
-    }
+    // Update the values of the delays
+    setDelays();
 
     return status;
   }
@@ -381,10 +373,8 @@ namespace CR { // Namespace CR -- begin
   void GeomDelay::farField (bool const &farField)
   {
     // check if we need to adjust the buffer for the values of the delays
-    if (farField_p != farField && bufferDelays_p) {
-      delays_p = delay (antPositions_p,
-			skyPositions_p,
-			farField_p);
+    if (farField_p != farField) {
+      setDelays();
     }
     
     // store the value of the parameter
@@ -400,8 +390,9 @@ namespace CR { // Namespace CR -- begin
     os << "-- Far-field delay        = " << farField()            << std::endl;
     os << "-- Near-field delay       = " << nearField()           << std::endl;
     os << "-- Buffer delay values    = " << bufferDelays_p        << std::endl;
-    os << "-- nof. antenna positions = " << nofAntennaPositions() << std::endl;
+    os << "-- nof. antenna positions = " << nofAntPositions() << std::endl;
     os << "-- nof. sky positions     = " << nofSkyPositions()     << std::endl;
+    os << "-- Shape of delays array  = " << shape()               << std::endl;
   }
   
   
