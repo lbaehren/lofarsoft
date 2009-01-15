@@ -756,36 +756,36 @@ void writeRoofRefPhases(void)
 
   // Set reference Phases
   Matrix<Double> PhaseRefPhases(30,2);
-  PhaseRefPhases(0,0) =26.8;	PhaseRefPhases(0,1) =-150.9;
-  PhaseRefPhases(1,0) =96.6;	PhaseRefPhases(1,1) =-82.6;
-  PhaseRefPhases(2,0) =160.9;  	PhaseRefPhases(2,1) =-54;
-  PhaseRefPhases(3,0) =0;  	PhaseRefPhases(3,1) =0;
-  PhaseRefPhases(4,0) =-178.5;  PhaseRefPhases(4,1) =-99.3;
-  PhaseRefPhases(5,0) =-130.7;  PhaseRefPhases(5,1) =-52.34;
-  PhaseRefPhases(6,0) =-11.3;  	PhaseRefPhases(6,1) =129.4;
-  PhaseRefPhases(7,0) =142.1;  	PhaseRefPhases(7,1) =-124.1;
-  PhaseRefPhases(8,0) =20.9;  	PhaseRefPhases(8,1) =150.3;
-  PhaseRefPhases(9,0) =-106;  	PhaseRefPhases(9,1) =-98.9;
-  PhaseRefPhases(10,0) =-107.1; PhaseRefPhases(10,1) =115.5;
-  PhaseRefPhases(11,0) =62.6;  	PhaseRefPhases(11,1) =80.8;
-  PhaseRefPhases(12,0) =82.1;  	PhaseRefPhases(12,1) =-23.3;
-  PhaseRefPhases(13,0) =174;  	PhaseRefPhases(13,1) =66.3;
-  PhaseRefPhases(14,0) =-33.9;  PhaseRefPhases(14,1) =156.2;
-  PhaseRefPhases(15,0) =-150.4; PhaseRefPhases(15,1) =-176.3;
-  PhaseRefPhases(16,0) =-3.6;  	PhaseRefPhases(16,1) =-153.7;
-  PhaseRefPhases(17,0) =17;  	PhaseRefPhases(17,1) =44.5;
-  PhaseRefPhases(18,0) =28.5;  	PhaseRefPhases(18,1) =89.6;
-  PhaseRefPhases(19,0) =-82.9;  PhaseRefPhases(19,1) =-0.2;
-  PhaseRefPhases(20,0) =-106;  	PhaseRefPhases(20,1) =110.4;
-  PhaseRefPhases(21,0) =99.3;  	PhaseRefPhases(21,1) =119.9;
-  PhaseRefPhases(22,0) =-169.1; PhaseRefPhases(22,1) =81.4;
-  PhaseRefPhases(23,0) =-133.2; PhaseRefPhases(23,1) =-100.4;
-  PhaseRefPhases(24,0) =126.3;  PhaseRefPhases(24,1) =-168.8;
-  PhaseRefPhases(25,0) =147.3;  PhaseRefPhases(25,1) =85.6;
-  PhaseRefPhases(26,0) =111.1;  PhaseRefPhases(26,1) =97.6;
-  PhaseRefPhases(27,0) =141.5;  PhaseRefPhases(27,1) =143.4;
-  PhaseRefPhases(28,0) =-142.7; PhaseRefPhases(28,1) =78.2;
-  PhaseRefPhases(29,0) =168.4;  PhaseRefPhases(29,1) =-76.6;
+  PhaseRefPhases(0,0) =0;  PhaseRefPhases(0,1) =0;
+  PhaseRefPhases(1,0) =70.2;  PhaseRefPhases(1,1) =62.9;
+  PhaseRefPhases(2,0) =135.5;  PhaseRefPhases(2,1) =94.8;
+  PhaseRefPhases(3,0) =-24.8;  PhaseRefPhases(3,1) =147;
+  PhaseRefPhases(4,0) =156.5;  PhaseRefPhases(4,1) =45.3;
+  PhaseRefPhases(5,0) =-152.3;  PhaseRefPhases(5,1) =92.8;
+  PhaseRefPhases(6,0) =-36.5;  PhaseRefPhases(6,1) =-79.9;
+  PhaseRefPhases(7,0) =115.4;  PhaseRefPhases(7,1) =27.9;
+  PhaseRefPhases(8,0) =-7;  PhaseRefPhases(8,1) =-56.8;
+  PhaseRefPhases(9,0) =-133.6;  PhaseRefPhases(9,1) =53.9;
+  PhaseRefPhases(10,0) =19.2;  PhaseRefPhases(10,1) =-2.1;
+  PhaseRefPhases(11,0) =-172.4;  PhaseRefPhases(11,1) =-39.4;
+  PhaseRefPhases(12,0) =55.9;  PhaseRefPhases(12,1) =117.9;
+  PhaseRefPhases(13,0) =150.2;  PhaseRefPhases(13,1) =-153.3;
+  PhaseRefPhases(14,0) =-56.4;  PhaseRefPhases(14,1) =-58.3;
+  PhaseRefPhases(15,0) =173.7;  PhaseRefPhases(15,1) =-29.2;
+  PhaseRefPhases(16,0) =-27.9;  PhaseRefPhases(16,1) =-7.6;
+  PhaseRefPhases(17,0) =142.3;  PhaseRefPhases(17,1) =-69.7;
+  PhaseRefPhases(18,0) =1.4;  PhaseRefPhases(18,1) =-126.4;
+  PhaseRefPhases(19,0) =-108.4;  PhaseRefPhases(19,1) =145.5;
+  PhaseRefPhases(20,0) =-133.8;  PhaseRefPhases(20,1) =-102.5;
+  PhaseRefPhases(21,0) =73.8;  PhaseRefPhases(21,1) =-93;
+  PhaseRefPhases(22,0) =167.8;  PhaseRefPhases(22,1) =-130.7;
+  PhaseRefPhases(23,0) =-160.4;  PhaseRefPhases(23,1) =44.7;
+  PhaseRefPhases(24,0) =-109.4;  PhaseRefPhases(24,1) =75.4;
+  PhaseRefPhases(25,0) =119.4;  PhaseRefPhases(25,1) =-128.8;
+  PhaseRefPhases(26,0) =-125.3;  PhaseRefPhases(26,1) =-19.7;
+  PhaseRefPhases(27,0) =-98.2;  PhaseRefPhases(27,1) =26.6;
+  PhaseRefPhases(28,0) =-170.3;  PhaseRefPhases(28,1) =-135.1;
+  PhaseRefPhases(29,0) =140.6;  PhaseRefPhases(29,1) =70.7;
 
   // Set Sample jumps
   Vector<Double> SampleJumps(4);
@@ -802,7 +802,7 @@ void writeRoofRefPhases(void)
     // It is neccessary to write the Delay again, as the other fields
     // are junior fields an cannot be written alone
     Double old_delay = 0.;
-    if (!reader.GetData(roof_setup_2_freq_start, antennaIDs[i], "Delay", &old_delay))
+    if (!reader.GetData(roof_setup_2_freq_start-1, antennaIDs[i], "Delay", &old_delay))
     { 
       cerr << "Error while reading field: Delay" << endl;
     } else
@@ -816,7 +816,7 @@ void writeRoofRefPhases(void)
       if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",roof_setup_2_freq_start) )
         cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
       // Reference Antenna 4 for new phase differences
-      if (!writer.AddData(10202,antennaIDs[i],"PhaseRefAnt",roof_setup_2_freq_start) )
+      if (!writer.AddData(10101,antennaIDs[i],"PhaseRefAnt",roof_setup_2_freq_start) )
         cerr << "\nERROR while writing field: PhaseRefAnt" << endl;
     }
   }
