@@ -24,6 +24,8 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <iomanip>
+#include <sstream>
 
 #include <Analysis/analyseLOPESevent2.h>
 
@@ -981,22 +983,24 @@ void readConfigFile (const string &filename)
 
 int main (int argc, char *argv[])
 {
-  string eventfilelistname;			        // Files to be read in
-  double azimuth, elevation, distance, core_x, core_y;  // basic input parameters for the pipeline
-  Record results;					// results of the pipeline
+  string eventfilelistname;			         // Files to be read in
+  double azimuth, elevation, distance, core_x, core_y;   // basic input parameters for the pipeline
+  Record results;					 // results of the pipeline
 
   // variables for reconstruction information (output of pipeline)
   unsigned int gt = 0;
-  double CCheight, CCheight_NS;                         // CCheight will be used for EW polarization or ANY polarization
+  double CCheight, CCheight_NS;                          // CCheight will be used for EW polarization or ANY polarization
   double CCheight_error, CCheight_error_NS;
-  bool CCconverged, CCconvergedNS;                      // is true if the Gaussian fit to the CCbeam converged
-  double AzL, ElL, AzL_NS, ElL_NS;                      // Azimuth and Elevation
-  double distanceResult, distanceResultNS;                          // distance = radius of curvature
-  map <int,PulseProperties> rawPulsesMap;               // pulse properties of pules in raw data traces
-  map <int,PulseProperties> calibPulsesMap;             // pulse properties of pules in calibrated data traces
-  PulseProperties* rawPulses[MAX_NUM_ANTENNAS];         // use array of pointers to store pulse properties in root tree
-  PulseProperties* calibPulses[MAX_NUM_ANTENNAS];       // use array of pointers to store pulse properties in root tree
-  bool goodEW = false, goodNS = false;               // true if reconstruction worked
+  bool CCconverged, CCconvergedNS;                       // is true if the Gaussian fit to the CCbeam converged
+  double AzL, ElL, AzL_NS, ElL_NS;                       // Azimuth and Elevation
+  double distanceResult = 0, distanceResultNS = 0;       // distance = radius of curvature
+  double R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0; // R_0 from lateral distribution fit
+  double eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0; // Epsilon from lateral distribution fit
+  map <int,PulseProperties> rawPulsesMap;                // pulse properties of pules in raw data traces
+  map <int,PulseProperties> calibPulsesMap;              // pulse properties of pules in calibrated data traces
+  PulseProperties* rawPulses[MAX_NUM_ANTENNAS];          // use array of pointers to store pulse properties in root tree
+  PulseProperties* calibPulses[MAX_NUM_ANTENNAS];        // use array of pointers to store pulse properties in root tree
+  bool goodEW = false, goodNS = false;                // true if reconstruction worked
 
   try {
     // allocate space for arrays with pulse properties
@@ -1169,6 +1173,12 @@ int main (int argc, char *argv[])
         roottree.Branch("CCheight_error",&CCheight_error,"CCheight_error/D");
         roottree.Branch("CCconverged",&CCconverged,"CCconverged/B");
         roottree.Branch("goodReconstructed",&goodEW,"goodReconstructed/B");
+        if (lateralDistribution) {
+          roottree.Branch("R_0",&R_0,"R_0/D");
+          roottree.Branch("sigR_0",&sigR_0,"sigR_0/D");
+          roottree.Branch("eps",&eps,"eps/D");
+          roottree.Branch("sigeps",&sigeps,"sigeps/D");
+        }
       }
       if ( (polarization == "EW") || (polarization == "BOTH")) {
         roottree.Branch("AzL_EW",&AzL,"AzL_EW/D");
@@ -1178,6 +1188,12 @@ int main (int argc, char *argv[])
         roottree.Branch("CCheight_error_EW",&CCheight_error,"CCheight_error_EW/D");
         roottree.Branch("CCconverged_EW",&CCconverged,"CCconverged_EW/B");
         roottree.Branch("goodReconstructed_EW",&goodEW,"goodReconstructed_EW/B");
+        if (lateralDistribution) {
+          roottree.Branch("R_0_EW",&R_0,"R_0_EW/D");
+          roottree.Branch("sigR_0_EW",&sigR_0,"sigR_0_EW/D");
+          roottree.Branch("eps_EW",&eps,"eps_EW/D");
+          roottree.Branch("sigeps_EW",&sigeps,"sigeps_EW/D");
+        }
       }
       if ( (polarization == "NS") || (polarization == "BOTH")) {
         roottree.Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
@@ -1187,6 +1203,12 @@ int main (int argc, char *argv[])
         roottree.Branch("CCheight_error_NS",&CCheight_error_NS,"CCheight_error_NS/D");
         roottree.Branch("CCconverged_NS",&CCconverged,"CCconverged_NS/B");
         roottree.Branch("goodReconstructed_NS",&goodNS,"goodReconstructed_NS/B");
+        if (lateralDistribution) {
+          roottree.Branch("R_0_NS",&R_0_NS,"R_0_NS/D");
+          roottree.Branch("sigR_0_NS",&sigR_0_NS,"sigR_0_NS/D");
+          roottree.Branch("eps_NS",&eps_NS,"eps_NS/D");
+          roottree.Branch("sigeps_NS",&sigeps_NS,"sigeps_NS/D");
+        }
       }
     } //if
 
@@ -1253,6 +1275,17 @@ int main (int argc, char *argv[])
       // if they are not set to true during reconstruction the event is not written into the root file
       goodEW = false;
       goodNS = false;
+
+      // reset all resuls to 0
+      gt = 0;
+      CCheight = 0, CCheight_NS = 0;
+      CCheight_error = 0, CCheight_error_NS = 0;
+      CCconverged = 0, CCconvergedNS = 0;
+      AzL = 0, ElL = 0, AzL_NS = 0, ElL_NS = 0;
+      distanceResult = 0, distanceResultNS = 0;
+      R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0;
+      eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0;
+
 
       // print information and process the event
       if (calibrationMode) {
@@ -1364,9 +1397,14 @@ int main (int argc, char *argv[])
           if (lateralOutputFile)
             eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
 
-          // generate the lateral distribution
-          if (lateralDistribution)
+          // generate the lateral distribution and get resutls
+          if (lateralDistribution) {
             eventPipeline.fitLateralDistribution("lateral"+polPlotPrefix+"-",results, core_x, core_y);
+            R_0 = results.asDouble("R_0");
+            sigR_0 = results.asDouble("sigR_0");
+            eps = results.asDouble("eps");
+            sigeps = results.asDouble("sigeps");
+          }
 
           // get the pulse properties
           rawPulsesMap = eventPipeline.getRawPulseProperties();
@@ -1438,8 +1476,13 @@ int main (int argc, char *argv[])
             eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
 
           // generate the lateral distribution
-          if (lateralDistribution)
+          if (lateralDistribution) {
             eventPipeline.fitLateralDistribution("lateral"+polPlotPrefix+"-",results, core_x, core_y);
+            R_0_NS = results.asDouble("R_0");
+            sigR_0_NS = results.asDouble("sigR_0");
+            eps_NS = results.asDouble("eps");
+            sigeps_NS = results.asDouble("sigeps");
+          }
 
           // get the pulse properties and insert them into allready existing EW map
           // (which will be empty, if polarization = EW, but still existing

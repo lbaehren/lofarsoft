@@ -580,7 +580,7 @@ namespace CR { // Namespace CR -- begin
   }
 
  void analyseLOPESevent2::fitLateralDistribution (const string& filePrefix,
-                                                  const Record& erg,
+                                                  Record& erg,
                                                   const double& Xc,
                                                   const double& Yc,
                                                   const double& energy)
@@ -730,11 +730,17 @@ namespace CR { // Namespace CR -- begin
       text = easstats->AddText(label.str().c_str());
       label.str("");
       label << "#phi   = ";
-label.width(5);
+      label.setf(ios::showpoint);
+      label.precision(4);
+      label.width(5);
       label << az << "^{o}";
       text = easstats->AddText(label.str().c_str());
       label.str("");
-      label << "#theta = " << 90-el << "^{o}";
+      label << "#theta = ";
+      label.setf(ios::showpoint);
+      label.precision(4);
+      label.width(5);
+      label << 90-el << "^{o}";
       text = easstats->AddText(label.str().c_str());
       easstats->Draw();
 
@@ -767,6 +773,11 @@ label.width(5);
            << "R_0 = " << fitfunc->GetParameter(1) << "\t +/- " << fitfunc->GetParError(1) << "\t m\n"
            << endl;
 
+      // write fit results to record with other results
+      erg.define("eps",fitfunc->GetParameter(0));
+      erg.define("R_0",fitfunc->GetParameter(1));
+      erg.define("sigeps",fitfunc->GetParError(0));
+      erg.define("sigR_0",fitfunc->GetParError(1));
     } catch (AipsError x) {
       cerr << "analyseLOPESevent2::fitLateralDistribution: " << x.getMesg() << endl;
     }

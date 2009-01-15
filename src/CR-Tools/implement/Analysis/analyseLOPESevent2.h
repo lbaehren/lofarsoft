@@ -415,13 +415,13 @@ class analyseLOPESevent2 : public analyseLOPESevent {
       \brief Fits the lateral distribution
 
       \param filePrefix - the filename will be prefix+GT+".dat".
-      \param erg        - results of the pipeline (e.g. Azimuth, Elevation)
+      \param erg        - results of the pipeline (results from the fit will be added)
       \param XC         - x-position of the shower center [in m]
       \param YC         - y-position of the shower center [in m]
       \param energy     - estimated shower energy
    */
     void fitLateralDistribution (const string& filePrefix,
-                                 const Record& erg,
+                                 Record& erg,
                                  const double& Xc=0,
                                  const double& Yc=0,
                                  const double& energy=0);
