@@ -757,9 +757,9 @@ void writeRoofRefPhases(void)
   // Set reference Phases
   Matrix<Double> PhaseRefPhases(30,2);
   PhaseRefPhases(0,0) =0;  PhaseRefPhases(0,1) =0;
-  PhaseRefPhases(1,0) =70.2;  PhaseRefPhases(1,1) =62.9;
-  PhaseRefPhases(2,0) =135.5;  PhaseRefPhases(2,1) =94.8;
-  PhaseRefPhases(3,0) =-24.8;  PhaseRefPhases(3,1) =147;
+  PhaseRefPhases(1,0) =-141.3;  PhaseRefPhases(1,1) =170;
+  PhaseRefPhases(2,0) =-76;  PhaseRefPhases(2,1) =-158.1;
+  PhaseRefPhases(3,0) =123.7;  PhaseRefPhases(3,1) =-105.9;
   PhaseRefPhases(4,0) =156.5;  PhaseRefPhases(4,1) =45.3;
   PhaseRefPhases(5,0) =-152.3;  PhaseRefPhases(5,1) =92.8;
   PhaseRefPhases(6,0) =-36.5;  PhaseRefPhases(6,1) =-79.9;
@@ -1154,7 +1154,7 @@ int main (int argc, char *argv[])
     // LopesPol_HWSetup();        // allready checked in
 
     // Changes to Delay-Table , allready checked in
-    writeDelays();
+    //writeDelays();
 
     // Rewrite field for variable reference antenna
     //addRefAntField(true); // set to true to also create the field
@@ -1166,14 +1166,14 @@ int main (int argc, char *argv[])
 
     // write TV reference phase differences and reference phase diffrences for roof setup
     //writeTVRefPhases();		// checked in
-    TVshutdown();
+    //TVshutdown();
     writeRoofRefPhases();
 
     // Add the measured dispersion of the LOPES 30 filter boxes
     //writePhaseCal();   //  checked in
 
     // interchange antenna 19 and 20
-    interchange19_20();
+    //interchange19_20();
 
     cout << "Writing finished: " << endl;
     writer.PrintSummary();
