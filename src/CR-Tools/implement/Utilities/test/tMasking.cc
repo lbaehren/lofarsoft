@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tMasking.cc,v 1.5 2007/03/20 15:16:09 bahren Exp $ */
+/* $Id$ */
 
 // Custom header files
 #include <Utilities/Masking.h>
