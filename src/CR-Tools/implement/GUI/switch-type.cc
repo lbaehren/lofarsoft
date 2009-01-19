@@ -23,19 +23,19 @@
 
 // switch (DATATYPE) {
  case POINTER:
-   SW_TYPE_COMM(P,Pointer);
+   SW_TYPE_COMM(P,HPointer);
    break;
  case INTEGER:
-   SW_TYPE_COMM(I,Integer);
+   SW_TYPE_COMM(I,HInteger);
    break;
  case NUMBER:
-   SW_TYPE_COMM(N,Number);
+   SW_TYPE_COMM(N,HNumber);
    break;
  case COMPLEX:
-   SW_TYPE_COMM(C,Complex);
+   SW_TYPE_COMM(C,HComplex);
    break;
  case STRING:
-   SW_TYPE_COMM(S,String);
+   SW_TYPE_COMM(S,HString);
    break;
  default:
    ERROR("Error: unknown type."); 

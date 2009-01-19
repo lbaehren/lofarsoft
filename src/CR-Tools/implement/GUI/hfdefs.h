@@ -1,38 +1,10 @@
-/*-------------------------------------------------------------------------*
- | $Id:: TBB_StationGroup.h 2081 2008-10-17 17:01:45Z baehren            $ |
- *-------------------------------------------------------------------------*
- ***************************************************************************
- *   Copyright (C) 2008                                                    *
- *   Heino Falcke                                                          *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
-
-/*!
-  \file hfdefs.h
-
-  \ingroup CR_GUI
-*/
-
 #ifndef HFDEFS_H
 #define HFDEFS_H
 
 //#define DBG_MODE 0
 //#define DBG_MODE 1
 #define DBG_MODE 0
+#define VERBOSE 1
 
 #include <string>
 #include <iostream>
@@ -42,6 +14,38 @@
 #include <complex>
 #include <cmath>
 
+#include <casa/Arrays/IPosition.h>
+#include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/MatrixMath.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/BasicSL/String.h>
+#include <casa/Containers/Block.h>
+#include <casa/Containers/Record.h>
+#include <casa/Containers/RecordField.h>
+#include <casa/Containers/List.h>
+#include <casa/Containers/ListIO.h>
+#include <casa/Containers/OrderedMap.h>
+#include <casa/Exceptions/Error.h>
+
+#include <boost/python/class.hpp>
+#include <boost/python/module.hpp>
+#include <boost/python/def.hpp>
+#include <boost/utility.hpp>
+
+#include <boost/python/call_method.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/python/implicit.hpp>
+#include <boost/python/enum.hpp>
+#include <boost/python/overloads.hpp>
+#include <boost/python/args.hpp>
+#include <boost/python/tuple.hpp>
+#include <boost/python/class.hpp>
+#include <boost/python/return_internal_reference.hpp>
+#include <boost/python/operators.hpp>
+#include <boost/python/object_operators.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/python/has_back_reference.hpp>
+#include <boost/python/handle.hpp>
 
 #define ERROR( txt ) ( cout << endl << "ERROR in file " << __FILE__ << " line " << __LINE__ << ": "  << txt << endl ) 
 
@@ -59,6 +63,31 @@
 #define DBG3( txt ) ( txt )
 #endif
 
+#if DBG_MODE == 2 
+#define D2BG MESSAGE
+#define D2BG2( txt ) ( cout << "[" << __FILE__ << "," << __LINE__ << "]: " << txt )
+#define D2BG3( txt ) ( txt )
+#else
+#define D2BG( T ) 
+#define D2BG2( T ) 
+#define D2BG3( T ) 
+#endif
+
+
+
+//Not yet implemented .... should trace the run thropugh the networ in a more readable form.
+#if VERBOSE == 0 
+#define VERB( T ) 
+#define VERB2( T ) 
+#define VERB3( T ) 
+#else
+#define VERB MESSAGE
+#define VERB2( txt ) ( cout << "[" << __FILE__ << "," << __LINE__ << "]: " << txt )
+#define VERB3( txt ) ( txt )
+#endif
+
+
+typedef long int longint; /* should be at least 64 bits */
 
 typedef /*long*/ int address ;
 //This is used to identify each data field uniquely
@@ -66,12 +95,19 @@ typedef int objectid;
 //counts to keep track of whether an object was modified - 0 if not modified
 typedef int modval;
 
+
+#define MAXINT 2147483648
+
+//the maximum version number that is allowed inside an object (should be ~MAXINT)
+#define MAXVERSION MAXINT
+
+
 //Define Types of Data to be stored
-typedef int Integer;
-typedef double Number;
-typedef std::complex<double> Complex;
-typedef std::string String;
-typedef void* Pointer;
+typedef int HInteger;
+typedef double HNumber;
+typedef std::complex<double> HComplex;
+typedef std::string HString;
+typedef void* HPointer;
 
 /*!
   \brief Enumeration list of data types that can be used with data objects
@@ -108,12 +144,16 @@ enum DATACLASS {
   DAT_NONE
 };
 
+
 enum DIRECTION {
   DIR_FROM,
   DIR_TO,
   DIR_BOTH,
   DIR_NONE
 };
+
+#define PUSH DIR_TO
+#define PULL DIR_FROM
 
 enum MSG_CODE {MSG_NONE, MSG_MODIFIED};
 
@@ -129,28 +169,28 @@ DIRECTION inv_dir(DIRECTION dir);
 class Data;
 
 #define F_PTR( T ) void (*f_ptr_T)(vector<T> *, Data *, Vector_Selector *) 
-#define F_PTR_P void (*f_ptr_P)(vector<Pointer> *, Data *, Vector_Selector *)
-#define F_PTR_I void (*f_ptr_I)(vector<Integer> *, Data *, Vector_Selector *)
-#define F_PTR_N void (*f_ptr_N)(vector<Number> *, Data *, Vector_Selector *)
-#define F_PTR_C void (*f_ptr_C)(vector<Complex> *, Data *, Vector_Selector *)
-#define F_PTR_S void (*f_ptr_S)(vector<String> *, Data *, Vector_Selector *)
+#define F_PTR_P void (*f_ptr_P)(vector<HPointer> *, Data *, Vector_Selector *)
+#define F_PTR_I void (*f_ptr_I)(vector<HInteger> *, Data *, Vector_Selector *)
+#define F_PTR_N void (*f_ptr_N)(vector<HNumber> *, Data *, Vector_Selector *)
+#define F_PTR_C void (*f_ptr_C)(vector<HComplex> *, Data *, Vector_Selector *)
+#define F_PTR_S void (*f_ptr_S)(vector<HString> *, Data *, Vector_Selector *)
 #define DEF_F_PTR( T ) union {F_PTR(T); F_PTR_P; F_PTR_I; F_PTR_N; F_PTR_C; F_PTR_S; void * f_ptr_v;}
 
 #define D_PTR( T )  vector<T> *d_ptr_T
-#define D_PTR_P vector<Pointer> *d_ptr_P
-#define D_PTR_I vector<Integer> *d_ptr_I
-#define D_PTR_N vector<Number> *d_ptr_N
-#define D_PTR_C vector<Complex> *d_ptr_C
-#define D_PTR_S vector<String> *d_ptr_S
+#define D_PTR_P vector<HPointer> *d_ptr_P
+#define D_PTR_I vector<HInteger> *d_ptr_I
+#define D_PTR_N vector<HNumber> *d_ptr_N
+#define D_PTR_C vector<HComplex> *d_ptr_C
+#define D_PTR_S vector<HString> *d_ptr_S
 #define DEF_D_PTR( T ) union {D_PTR(T); D_PTR_P; D_PTR_I; D_PTR_N; D_PTR_C; D_PTR_S; void *d_ptr_v;}
 
 
 #define DEF_VAL_T( T )  T *val_T
-#define DEF_VAL_P Pointer *val_P
-#define DEF_VAL_I Integer *val_I
-#define DEF_VAL_N Number *val_N
-#define DEF_VAL_C Complex *val_C
-#define DEF_VAL_S String *val_S
+#define DEF_VAL_P HPointer *val_P
+#define DEF_VAL_I HInteger *val_I
+#define DEF_VAL_N HNumber *val_N
+#define DEF_VAL_C HComplex *val_C
+#define DEF_VAL_S HString *val_S
 #define DEF_VAL_V void *val_V
 #define DEF_VAL( T ) union {DEF_VAL_T(T); DEF_VAL_P; DEF_VAL_I; DEF_VAL_N; DEF_VAL_C; DEF_VAL_S;}
 

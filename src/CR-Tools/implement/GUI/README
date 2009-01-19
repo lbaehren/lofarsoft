@@ -9,6 +9,163 @@ description of the get mechanism.
 
 ------------------------------------------------------------------------
 
+Installation under build system:
+cd ~/LOFAR/usg/build/cr> 
+make help
+make hfget
+http://usg.lofar.org/doxygen/modules.html
+
+Install extra packages on Mac with "port" ot FinkCommander (NOT!)
+
+
+Compilation with Mac: FINK und port klappen nicht gut, weil sie andere
+Pakete (an anderen Orten) installieren und andere Compiler
+benutzen. am besten man kompiliert alles mit einem compiler selber
+(c++ 4.3 ...). The problem is that SIP requies Python to be build as a
+Mac Framework application - this is doen by the binary installer
+(.dmg) but not when compiling yourself.
+
+
+So, what did I do?
+
+- QT installiert von source
+- SIP installiert von Source (riverbank.co.uk siehe PyQt)
+- Python 2.6 installiert als Mac OS binary installer von python.org
+- python 2.6 installiert von source von python.org 
+- PyQt von source
+- MathGl von source
+DOT ... (http://www.graphviz.org/)
+
+In the end it worked and I didn't know why. I guess the point is that
+PyQt needs to be built by the packaged python while Mathgl needs to be
+build by the self-built python and using gcc4.3. It may also matter in
+which order this is done ...
+
+BTW, here is my PATH, which sometimes also matters ...
+
+/Library/Frameworks/Python.framework/Versions/Current/bin:/Users/falcke/LOFAR/usg/release/bin:/sw/lib/gcc4.3/bin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/local/Trolltech/Qt-4.4.3/bin:/sw/lib/qt4-x11/bin/:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/X11/bin
+
+------------------------------------------------------------------------
+Compilation in build system:
+
+#
+cd ~/LOFAR/usg/build/cr
+make -k hfget
+cp ~/LOFAR/usg/build/cr/implement/libhfget.so ~/LOFAR/usg/release/lib/python
+------------------------------------------------------------------------
+
+Changing ~/LOFAR/usg/src/CR-Tools/implement/CMakeLists.txt
+to tweak the system that MathGL compiles ...
+
+  if (QT4_INCLUDES)
+    include_directories (${QT4_INCLUDES})
+  endif (QT4_INCLUDES)
+
+  if (QT4_INCLUDES)
+    include_directories (${QT4_INCLUDES})
+    include_directories (/usr/share/qt4/mkspecs/default) 
+    include_directories (/usr/include/QtCore)
+    include_directories (/usr/include/QtGui)
+  endif (QT4_INCLUDES)
+
+on Mac:
+  if (QT4_INCLUDES)
+    include_directories (${QT4_INCLUDES})
+    include_directories (/sw/lib/qt4-x11/mkspecs/default)
+    include_directories (/sw/lib/qt4-x11/include/QtCore)	
+    include_directories (/sw/lib/qt4-x11/include/QtGui)	
+  endif (QT4_INCLUDES)
+
+
+and also add more link libraries:
+
+  ## linker instructions
+  target_link_libraries (hfget
+    cr
+    ${QT4_LIBRARIES}
+    ${CASA_LIBRARIES}	
+    /usr/local/lib/libmgl-qt.so
+    /usr/local/lib/libmgl.so
+    ${PYTHON_LIBRARIES}
+    ${BOOST_LIBRARIES}
+    )
+
+on Mac:
+
+  ## linker instructions
+  target_link_libraries (hfget
+    ${QT4_LIBRARIES}
+    ${CASA_LIBRARIES}	
+    /usr/local/lib/libmgl.dylib 
+    /usr/local/lib/libmgl-qt.dylib 
+    ${PYTHON_LIBRARIES}
+    ${BOOST_LIBRARIES}
+    )
+
+
+cp ~/LOFAR/usg/build/cr/implement/libhfget.so /home/falcke/LOFAR/usg/release/lib/python/
+
+
+
+Sample event:
+~/LOFAR/usg/data/lopes/2007.01.31.23:59:33.960.event
+
+
+#include "Data/LopesEventIn.h"
+#include "Data/LOFAR_TBB.h"
+
+
+void dataReaderTest(){
+
+    CR::DataReader* drp;
+    CR::LopesEventIn lopin;
+
+    lopin.attachFile("~/LOFAR/usg/data/lopes/2007.01.31.23:59:33.960.event");
+
+    drp = &lopin;
+    
+// http://usg.lofar.org/doxygen/classCR_1_1LopesEventIn.html
+
+    Matrix<Double> data;
+    vector<Number> vec;
+    Vector<Double> CASAVec;  //CASA Vector
+
+//DataReader Docu
+// http://usg.lofar.org/wiki/doku.php?id=software:packages:cr-tools
+
+    data=drp->fx();
+    CASAVec.resize(0);
+    CASAVec = data.column(0);
+
+    Record header=drp->headerRecord();
+
+    Vector<Int> AntennaIDs;
+    header.get("AntennaIDs",AntennaIDs);
+
+    cout << AntennaIDs(0);
+
+//http://usg.lofar.org/wiki/doku.php?id=software:packages:cr-tools:datareader
+
+// Pointer auf CASAVec const T *   getStorage (Bool &deleteIt) const
+    bool shall_memory_be_freed_by_freeStorag;
+
+    Double* cvecptr;
+
+    cvecprt=CASAVec.getStorage(shall_memory_be_freed_by_freeStorage);
+
+//~/LOFAR/usg/src/CR-Tools/implement/Analysis/analyseLOPESevent.cc
+//    data.column(0) = Zeitserie von erstem Kanal. 
+
+//http://www.astron.nl/casacore/doc/html/
+
+//http://www.astron.nl/casacore/doc/html/classcasa_1_1Matrix.html
+
+//svn st (status)
+//svn commit  
+}
+
+
+------------------------------------------------------------------------
 Installation of Qt and python was straight forward.
 
 After compilation of the hfplot package with make (Makefile is now
@@ -22,7 +179,7 @@ or
 python
 >>> execfile("hfget.py")
 
-
+execfile("~/LOFAR/usg/src/CR-Tools/scripts/python/hfget.py")
 
 ------------------------------------------------------------------------
 Install boost python:

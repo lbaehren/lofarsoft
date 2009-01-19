@@ -1,6 +1,14 @@
 //#define DBG_MODE 0
 //#define DBG_MODE 1
 
+// CASA/casacore header files
+
+//using casa::Bool;
+//using casa::Double;
+//using casa::Matrix;
+//using casa::String;
+//using casa::Vector;
+
 using namespace std;
 #include <boost/python/class.hpp>
 #include <boost/python/module.hpp>
@@ -21,11 +29,17 @@ using namespace std;
 #include <QtGui/QApplication>
 #include <QtGui/QtGui>
 
+#include <mgl/mgl_qt.h>
+
 #include <GUI/mainwindow.h>
 #include <GUI/hfdefs.h>
 #include <GUI/hfcast.h> 
 #include <GUI/hfget.h>
 #include <GUI/hffuncs.h>  
+
+
+#include "Data/LopesEventIn.h"
+//#include "Data/LOFAR_TBB.h"
 
 
 /*========================================================================
@@ -43,19 +57,11 @@ The process_X methods will be defined in the object functions to call
 a single templated (or not if typing is not relevant) method process
 that defines the function to be performed.
 */
-void ObjectFunctionClass::process_P (F_PARAMETERS_T(Pointer)) {
-  ERROR("ObjectFunctionClass: generic process call of function"
-	<< getName(true)
-	<< ", Call of Type Pointer not defined");
-};
-void ObjectFunctionClass::process_I(F_PARAMETERS_T(Integer)) {
-  ERROR("ObjectFunctionClass: generic process call of function"
-	<< getName(true)
-	<< ", Call of Type Integer not defined");
-};
-void ObjectFunctionClass::process_N(F_PARAMETERS_T(Number) ) {ERROR("ObjectFunctionClass: generic process call of function" << getName(true) << ", Call of Type Number not defined");};
-void ObjectFunctionClass::process_C(F_PARAMETERS_T(Complex)) {ERROR("ObjectFunctionClass: generic process call of function" << getName(true) << ", Call of Type Complex not defined");};
-void ObjectFunctionClass::process_S(F_PARAMETERS_T(String) ) {ERROR("ObjectFunctionClass: generic process call of function" << getName(true) << ", Call of Type String not defined");};
+void ObjectFunctionClass::process_P(F_PARAMETERS_T(HPointer)) {ERROR("ObjectFunctionClass: generic process call of function" << getName(true) << ", Call of Type HPointer not defined");};
+void ObjectFunctionClass::process_I(F_PARAMETERS_T(HInteger)) {ERROR("ObjectFunctionClass: generic process call of function" << getName(true) << ", Call of Type HInteger not defined");};
+void ObjectFunctionClass::process_N(F_PARAMETERS_T(HNumber) ) {ERROR("ObjectFunctionClass: generic process call of function" << getName(true) << ", Call of Type HNumber not defined");};
+void ObjectFunctionClass::process_C(F_PARAMETERS_T(HComplex)) {ERROR("ObjectFunctionClass: generic process call of function" << getName(true) << ", Call of Type HComplex not defined");};
+void ObjectFunctionClass::process_S(F_PARAMETERS_T(HString) ) {ERROR("ObjectFunctionClass: generic process call of function" << getName(true) << ", Call of Type HString not defined");};
 
 
 
@@ -67,8 +73,8 @@ void ObjectFunctionClass::process_S(F_PARAMETERS_T(String) ) {ERROR("ObjectFunct
 //the compiler knows which methods to create.
 template <class T>
 void ObjectFunctionClass::instantiate_one(){
-  T val; String s = "";
-  setParameter(s,s,val);
+  T val; HString s = "";
+  setParameter(s,val);
   getParameterDefault<T>(s);
 }; 
 //This ensures all templates for all known types are created
@@ -81,18 +87,32 @@ void ObjectFunctionClass::instantiate(){
   };
 }
 
-/*
-Function to set names and default values of parameters used in the function. The names are names of other
-objects in the network that contain the parameter values. It is also possible to set a default value in
-case that object is not found.
+/*!  Function to set names and default values of parameters used in the
+function. It is also possible to set a default value in case that object is
+not found.  The external names are names of other objects in the network that
+contain the parameter values. If not given the object name is the parameter
+name plus a prefix (either ' or ":").
+
+I have to use explicit overloading, since 
 */
+
+void ObjectFunctionClass::setParameter(HString internal_name, HPointer default_value, HString prefix, HString external_name){setParameterT(internal_name, default_value, prefix, external_name);};
+void ObjectFunctionClass::setParameter(HString internal_name, HInteger default_value, HString prefix, HString external_name){setParameterT(internal_name, default_value, prefix, external_name);};
+void ObjectFunctionClass::setParameter(HString internal_name, HNumber default_value, HString prefix, HString external_name){setParameterT(internal_name, default_value, prefix, external_name);};
+void ObjectFunctionClass::setParameter(HString internal_name, HComplex default_value, HString prefix, HString external_name){setParameterT(internal_name, default_value, prefix, external_name);};
+void ObjectFunctionClass::setParameter(HString internal_name, HString default_value, HString prefix, HString external_name){setParameterT(internal_name, default_value, prefix, external_name);};
+
+
 template <class T>  
-void ObjectFunctionClass::setParameter(String internal_name, String external_name , T default_value){
+void ObjectFunctionClass::setParameterT(HString internal_name, T default_value, HString prefix, HString external_name){
   DATATYPE type=WhichType<T>();
-  map<String,parameter_item>::iterator it=parameter_list.find(internal_name);
+  HString ext_name;
+  if (external_name=="") {ext_name=internal_name;} else {ext_name=external_name;};
+  ext_name=prefix+ext_name;
+  map<HString,parameter_item>::iterator it=parameter_list.find(internal_name);
   parameter_item p_i;
   DBG("ObjectFunctionClass::setParameter: internal_name=" << internal_name 
-      << ", external_name=" << external_name << ", default_value=" << default_value 
+      << ", ext_name=" << ext_name << ", default_value=" << default_value 
       << " Type=" << datatype_txt(type));
   if (it != parameter_list.end()) {  //Name already exists
     if ((it->second).type==type) {  // and type is the same
@@ -104,7 +124,7 @@ void ObjectFunctionClass::setParameter(String internal_name, String external_nam
     };
   };
 
-  p_i.name=external_name;
+  p_i.name=ext_name;
   p_i.type=type;
   p_i.ptr=new T;
   set_ptr_to_value(p_i.ptr,p_i.type,default_value);
@@ -114,8 +134,8 @@ void ObjectFunctionClass::setParameter(String internal_name, String external_nam
 /*
 Returns the external name (i.e. the name of the object to be accessed) of an internal parameter
 */
-String ObjectFunctionClass::getParameterName(String internal_name) {
-  map<String,parameter_item>::iterator it;
+HString ObjectFunctionClass::getParameterName(HString internal_name) {
+  map<HString,parameter_item>::iterator it;
   DBG("ObjectFunctionClass::getParameterName: internal_name=" << internal_name);
   it=parameter_list.find(internal_name);
 
@@ -131,14 +151,16 @@ String ObjectFunctionClass::getParameterName(String internal_name) {
 Returns the default value of an internal parameter, typically used  if the external name (object) does not exist. Can also be used as a static variable of an object.
 */
 template <class T>
-T ObjectFunctionClass::getParameterDefault(String internal_name) {
-  map<String,parameter_item>::iterator it;
+T ObjectFunctionClass::getParameterDefault(HString internal_name) {
+  map<HString,parameter_item>::iterator it;
   it=parameter_list.find(internal_name);
   if (it != parameter_list.end()) {
     DBG("getParameterDefault: Type=" << datatype_txt(WhichType<T>()));
     DBG("getParameterDefault: type=" << datatype_txt((it->second).type));
     DBG("getParameterDefault: ptr=" << (it->second).ptr);
-    DBG("getParameterDefault: cast<Int>=" << cast_ptr_to_value<Integer>((it->second).ptr,(it->second).type));
+    DBG("getParameterDefault: cast<Int>=" << cast_ptr_to_value<HInteger>((it->second).ptr,(it->second).type));
+    //.ptr contains a pointer to a location storing the default value.
+    //cast_ptr_to_value retrieves that value under the assumption it is of type .type
     T ret=cast_ptr_to_value<T>((it->second).ptr,(it->second).type);
     DBG("ret=" << ret);
     return ret;
@@ -154,7 +176,7 @@ ObjectFunctionClass::ObjectFunctionClass(Data * dp){
 };
 
 ObjectFunctionClass::~ObjectFunctionClass(){
-  map<String,parameter_item>::iterator it; //Now destroy all the parameter default variables, created with setParameter
+  map<HString,parameter_item>::iterator it; //Now destroy all the parameter default variables, created with setParameter
   it = parameter_list.begin();
   while (it !=parameter_list.end()){
     DBG("~ObjectFunctionClass(): delete parameter " << (it->second).name);
@@ -175,12 +197,12 @@ of the class.
 
 */
 
-DataFuncDescriptor::DataFuncDescriptor(){}
+DataFuncDescriptor::DataFuncDescriptor(){setType(UNDEF);}
 
 DataFuncDescriptor::~DataFuncDescriptor(){}
 
 //Save the basic information about the function class (name, library it belongs to, and a short description)
-void DataFuncDescriptor::setInfo(String name, String library, String shortdocstring, String docstring){
+void DataFuncDescriptor::setInfo(HString name, HString library, HString shortdocstring, HString docstring){
   DBG("DataFuncDescriptor.set: name=" << name << " library=" << library);
   fd.name=name;
   fd.library=library;
@@ -188,20 +210,38 @@ void DataFuncDescriptor::setInfo(String name, String library, String shortdocstr
   fd.shortdocstring=shortdocstring;
 }
 
-
 /*
+Used to describe the defaul behaviour during creation of function. Is a vector buffer present? And what is its type
+*/
+void DataFuncDescriptor::setType(DATATYPE typ){fd.deftype=typ;}
+bool DataFuncDescriptor::getBuffered(){return fd.buffered;}
+void DataFuncDescriptor::setBuffered(bool buf){fd.buffered=buf;}
+
+/*!
 Creates a new instance of the class (on the heap) and returns a
   function descriptor, which also contains the pointer to the new
   instance. This instance will be called by "get" later on.
 */
 
-ObjectFunctionClass* DataFuncDescriptor::newFunction(Data *dp){
+ObjectFunctionClass* DataFuncDescriptor::newFunction(Data *dp, DATATYPE typ){
   DataFuncDescriptor fdnew;
+  DATATYPE newtype=typ;
+  
+  //Call the Constructor of that function - defined with
+  //DATAFUNC_CONSTRUCTOR (this will actually create the method and
+  //hence call its constructor.
   fdnew=(*getConstructor())(dp);
   fdnew.getFunction()->setInfo(fdnew.getName(false),fdnew.getLibrary(),
 			       fdnew.getDocstring(true),fdnew.getDocstring(false));
   fdnew.getFunction()->setConstructor(fdnew.getConstructor());
   fdnew.getFunction()->setFunction(fdnew.getFunction());
+  //Create a new buffer if that is the default behaviour
+  if (newtype==UNDEF) {newtype=fdnew.getType();};
+  if (fdnew.getBuffered() && !(dp->hasData())) {
+    dp->newVector(newtype);
+  } else {
+    dp->setType(newtype);
+  };
   return fdnew.getFunction();
 }
     
@@ -215,12 +255,15 @@ void DataFuncDescriptor::setConstructor(ConstructorFunctionPointer ptr){fd.const
 ConstructorFunctionPointer DataFuncDescriptor::getConstructor(){return fd.constructor;}
 
 //Return the library name the function belongs to
-String DataFuncDescriptor::getLibrary(){return fd.library;};
+HString DataFuncDescriptor::getLibrary(){return fd.library;};
+
+//Return the default type of the function 
+DATATYPE DataFuncDescriptor::getType(){return fd.deftype;};
 
 //Return the name of the function being described 
 //(either with (fullname=false) or without the library name attached)
-String DataFuncDescriptor::getName(bool fullname){
-  String s;
+HString DataFuncDescriptor::getName(bool fullname){
+  HString s;
   if (fullname){
     s= fd.library + ":" + fd.name;
   } else {
@@ -231,7 +274,7 @@ String DataFuncDescriptor::getName(bool fullname){
 }
 
 //Retrieve the long or short description of the function
-String DataFuncDescriptor::getDocstring(bool shortdoc){
+HString DataFuncDescriptor::getDocstring(bool shortdoc){
   if (shortdoc) {return fd.shortdocstring;}
   else {return fd.docstring;};
 }
@@ -265,14 +308,14 @@ an actual pointer to the class.
 void DataFuncLibraryClass::add(ConstructorFunctionPointer c_ptr){
   DBG ("FuncLibrary: add");
   DataFuncDescriptor fd=(*c_ptr)(false);
-  String fname=fd.getName(true);
+  HString fname=fd.getName(true);
   DBG ("FuncLibrary: add, name=" << fname);
   func_library[fname]=fd;
   DBG("FuncLibrary: size=" << func_library.size());
 }
 
 //Retrieves the pointer to the function class
-ObjectFunctionClass* DataFuncLibraryClass::f_ptr(String name, String library){
+ObjectFunctionClass* DataFuncLibraryClass::f_ptr(HString name, HString library){
   it=func_library.find(library+":"+name);
   if (it !=func_library.end()) {
     return (it->second).getFunction();
@@ -282,7 +325,7 @@ ObjectFunctionClass* DataFuncLibraryClass::f_ptr(String name, String library){
 }
 
 //Retrieves the struct describing the function class 
-DataFuncDescriptor* DataFuncLibraryClass::FuncDescriptor(String name, String library){
+DataFuncDescriptor* DataFuncLibraryClass::FuncDescriptor(HString name, HString library){
   it=func_library.find(library+":"+name);
   if (it !=func_library.end()) {
     return &(it->second);
@@ -292,7 +335,7 @@ DataFuncDescriptor* DataFuncLibraryClass::FuncDescriptor(String name, String lib
 }
 
 //Checks whether a function is in the library or not
-bool DataFuncLibraryClass::inLibrary(String name, String library){
+bool DataFuncLibraryClass::inLibrary(HString name, HString library){
   it=func_library.find(library+":"+name);
   return (it !=func_library.end());
 }
@@ -340,13 +383,13 @@ preprocessor step.
 
 //---square
 template<class T> inline T hf_square(const T v){return v*v;};
-template<>        inline String hf_square<String>(const String v){return mycast<String>(hf_square(mycast<Number>(v)));};
-template<>        inline Pointer hf_square<Pointer>(const Pointer v){return v;};
+template<>        inline HString hf_square<HString>(const HString v){return mycast<HString>(hf_square(mycast<HNumber>(v)));};
+template<>        inline HPointer hf_square<HPointer>(const HPointer v){return v;};
 
 //---sqrt - square root
 template<class T> inline T hf_sqrt(const T v){return sqrt(v);};
-template<>        inline String hf_sqrt<String>(const String v){return mycast<String>(hf_sqrt(mycast<Number>(v)));};
-template<>        inline Pointer hf_sqrt<Pointer>(const Pointer v){return v;};
+template<>        inline HString hf_sqrt<HString>(const HString v){return mycast<HString>(hf_sqrt(mycast<HNumber>(v)));};
+template<>        inline HPointer hf_sqrt<HPointer>(const HPointer v){return v;};
 
 
 //--End Math functions-----------------------------------------------------
@@ -390,7 +433,6 @@ situation. I'd prefer a dynamic solution.
 
 A somewhat smarter preprocesser (like an (n)awk-script) could probably
 do that easily.
-
 */
 
 
@@ -398,7 +440,7 @@ class DataFunc_Sys_Copy : public ObjectFunctionClass {
 public:  
   DEFINE_PROCESS_CALLS 
 
-  DataFunc_Sys_Copy(Data*dp){};
+  DataFunc_Sys_Copy(Data*dp){dp->setUpdateable(false);};
   
   template <class T>
   void process(F_PARAMETERS) {
@@ -407,7 +449,27 @@ public:
     if (vs != NULL) {(*vp) = (*vs).get(*vp);};
   }
 };
-DATAFUNC_CONSTRUCTOR(Copy,Sys,"Copies the content of one object to the next.")
+DATAFUNC_CONSTRUCTOR(Copy,Sys,"Copies the content of one object to the next.",INTEGER, false)
+
+class DataFunc_Sys_Neighbours : public ObjectFunctionClass {
+public:  
+  DEFINE_PROCESS_CALLS 
+  
+  DataFunc_Sys_Neighbours(Data*dp){dp->setUpdateable(true);};
+
+  template <class T>
+  void process(F_PARAMETERS) {
+    vector<HString> vec;
+    vec=dp->getNeighbours(DIR_TO);
+    vec.push_back("");
+    vec_append(vec,dp->getNeighbours(DIR_FROM));
+    copycast_vec<T,HString>(vp,&vec);
+    if (vs != NULL) {(*vp) = (*vs).get(*vp);};
+  }
+};
+
+DATAFUNC_CONSTRUCTOR(Neighbours,Sys,"Returns a list of names of all neighbour objects, first in To direction and the in FROM direction separated by an empty string.",STRING, true)
+//Name, Library, Description, Default Type, Buffered or not
 
 
 class DataFunc_Sys_Square : public ObjectFunctionClass {
@@ -415,7 +477,7 @@ public:
 
   DEFINE_PROCESS_CALLS 
 
-  DataFunc_Sys_Square(Data*dp){};
+  DataFunc_Sys_Square(Data*dp){dp->setUpdateable(false);};
  
   template <class T>
   void process(F_PARAMETERS) {
@@ -441,7 +503,7 @@ public:
     if (vs != NULL) {(*vp) = (*vs).get(*vp);};
   }
 };
-DATAFUNC_CONSTRUCTOR(Square,Sys,"Squares the elements in the data vector.")
+DATAFUNC_CONSTRUCTOR(Square,Sys,"Squares the elements in the data vector.",INTEGER, false)
  
 
 class DataFunc_Sys_Print : public ObjectFunctionClass {
@@ -461,7 +523,7 @@ public:
     printvec(*vp);
   }
 };
-DATAFUNC_CONSTRUCTOR(Print,Sys,"Prints contents of data vector to stdout.");
+DATAFUNC_CONSTRUCTOR(Print,Sys,"Prints contents of data vector to stdout.",STRING, false);
 
 
 class DataFunc_Sys_Range : public ObjectFunctionClass {
@@ -473,14 +535,14 @@ public:
   DataFunc_Sys_Range (Data * dp){
     //set the default parameters, which are by default integers - perhaps change to float numbers later??
     DBG("DataFunc_Sys_Range: initialization called.");
-    setParameter("start", "'start", 0);
-    setParameter("end", "'end", 0);
-    setParameter("inc", "'inc", 1);
+    setParameter("start", 0);
+    setParameter("end", 0);
+    setParameter("inc", 1);
   }
 
   template <class T>
   void process(F_PARAMETERS) {
-    Integer i,size;
+    HInteger i,size;
 
     //This macro will define and obtain set local variables with
     //values from corresponding parameter objects (set by
@@ -518,13 +580,13 @@ public:
   //tried this with an explicit specialization of the method process,
   //using template<>, but the compiler didn't like that for some
   //reasons.
-  void process_S(F_PARAMETERS_T(String)) {
-    vector<Number> vn;
-    process<Number>(&vn, F_PARAMETERS_CALL_NOVEC);
-    copycast_vec<Number,String>(&vn,vp);
+  void process_S(F_PARAMETERS_T(HString)) {
+    vector<HNumber> vn;
+    process<HNumber>(&vn, F_PARAMETERS_CALL_NOVEC);
+    copycast_vec<HNumber,HString>(&vn,vp);
   }
 };
-DATAFUNC_CONSTRUCTOR(Range,Sys,"Return a range of numbers (0,1,2,3,4,...N). Parameter objects: start=0, end=0, inc=1");
+DATAFUNC_CONSTRUCTOR(Range,Sys,"Return a range of numbers (0,1,2,3,4,...N). Parameter objects: start=0, end=0, inc=1",INTEGER, false);
 
 
 /*
@@ -543,6 +605,233 @@ Define Objects. FileName, BlockSize, BlockNumber, BlockOffset, DataColumns, Type
 //------------------------------------------------------------------------
 //End Sys Library
 //------------------------------------------------------------------------
+
+
+/*========================================================================
+  Define DataFunc Object Library "CR"
+  ========================================================================
+
+  This library allows one to access the CR IO and analysis functions
+
+*/
+
+
+class DataFunc_CR_dataReaderObject : public ObjectFunctionClass {
+
+public:
+  //The following line is necessary to define the process methods for
+  //the various types which will all call the templated method process<T>.
+  //This emulates a templated virtual funcion.
+
+  DEFINE_PROCESS_CALLS
+  
+  //  The function creates a CR-Tool data reader object and stores a pointer to it
+  DataFunc_CR_dataReaderObject (Data* dp){
+	DBG("DataFunc_CR_dataReaderObject: initialization called.");
+	setParameter("Filename", "/Users/falcke/LOFAR/usg/data/lopes/2007.01.31.23:59:33.960.event");
+	setParameter("Filetype", "LOPESEvent");
+	DBG("dataReaderObject: Initialization done.");
+    }
+
+    ~DataFunc_CR_dataReaderObject (){
+      MSG("~DataFunc_CR_dataReaderObject: Deleting DataReader.");
+      delete reinterpret_cast<CR::DataReader*>(data_pointer->getOne<HPointer>()); 
+      DBG("~DataFunc_CR_dataReaderObject: Deleted.");
+  }
+  
+  template <class T>
+  void process(F_PARAMETERS) {
+      GET_FUNC_PARAMETER_T(Filename,HString);
+      GET_FUNC_PARAMETER_T(Filetype,HString);
+      static HString oldfilename="";
+      bool opened;
+      void* ptr;
+
+      DBG("dataReaderObject: Retrieved filename parameter =" << Filename);
+
+      if (vp->size()>0 && AsPtr(vp->at(0))!=NULL) {
+	DBG("dataReaderObject: Delete old data reader object " << AsPtr(vp->at(0)));
+	CR::DataReader* drp=reinterpret_cast<DataReader*>(AsPtr(vp->at(0)));
+	delete drp;
+      }
+      vp->clear();
+
+      //Create the a pointer to the DataReader object and store the pointer
+      //Here we could have if statements depending on data types
+      
+      DBG("DataFunc_CR_dataReaderObject: Opening File, Filename=" << Filename);
+      if (Filetype=="LOPESEvent") {
+	  CR::LopesEventIn* lep = new CR::LopesEventIn; ptr = lep;
+	  DBG("DataFunc_CR_dataReaderObject: lep=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
+	  opened=lep->attachFile(Filename);
+	  if (oldfilename!=Filename) {lep->summary();};
+	  oldfilename=Filename;
+      } else if (Filetype=="LOFAR_TBB") {
+/*	  CR::LOFAR_TBB* tbb = new CR::LOFAR_TBB(Filename); ptr = tbb;
+	  DBG("DataFunc_CR_dataReaderObject: tbb=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
+	  opened=tbb!=NULL;
+	  DBG3(tbb->summary());
+*/
+      } else {
+	  ERROR("DataFunc_CR_dataReaderObject: Unknown Filetype = " << Filetype  << ", name=" << dp->getName(true));
+	  vp->push_back(mycast<T>(NULL)); 
+	  return;
+      }
+      if (!opened){
+	  ERROR("DataFunc_CR_dataReaderObject: Opening file " << Filename << "failed." << ", name=" << dp->getName(true));
+	  vp->push_back(mycast<T>(NULL)); 
+	  return;
+      };
+
+    //Store the pointer in the object, so that other objects can access
+    //it. The object should actually me made read-only, since the pointer is
+    //not to be changed by put ever again until the window is deleted
+      vp->push_back(mycast<T>(ptr)); 
+      DBG("DataFunc_CR_dataReaderObject: Success.");
+  }
+};
+
+//The following macro has to come at the of the definiton. It defines
+//a constructor function (no class) with a pointer that is called when
+//an object is assigned this function.
+DATAFUNC_CONSTRUCTOR(dataReaderObject,CR,"Creates a DataReader object for reading CR data and stores its pointer.",POINTER,true);
+
+
+
+/*!
+  \brief The function converts a column in an aips++ matrix to an stl vector
+ */
+
+template <class S, class T>
+void aipscol2stlvec(casa::Matrix<S> data, vector<T>& stlvec, HInteger col){
+    HInteger i,nrow,ncol;
+//    vector<HNumber>::iterator p;
+    
+    nrow=data.nrow();
+    ncol=data.ncolumn();
+
+    if (col>=ncol) {
+	ERROR("aipscol2stlvec: column number col=" << col << " is larger than total number of columns (" << ncol << ") in matrix.");
+	stlvec.clear();
+	return;
+    }
+
+    stlvec.resize(nrow);
+    casa::Vector<S> CASAVec = data.column(col);
+    
+//    p=stlvec.begin();
+    
+    for (i=0;i<nrow;i++) {
+//	*p=mycast<T>(CASAVec[i]); 
+	stlvec[i]=mycast<T>(CASAVec[i]); 
+//	p++;
+    };
+}
+
+/*!
+  \brief The function converts an aips++ vector to an stl vector
+ */
+
+template <class S, class T>
+void aipsvec2stlvec(casa::Vector<S> data, vector<T>& stlvec){
+    HInteger i,n;
+//    vector<R>::iterator p;
+    
+    n=data.size();
+    stlvec.resize(n);
+//    p=stlvec.begin();
+    for (i=0;i<n;i++) {
+//	*p=mycast<T>(data[i]); 
+	stlvec[i]=mycast<T>(data[i]); 
+//	p++;
+    };
+}
+
+
+class DataFunc_CR_dataRead : public ObjectFunctionClass {
+public:
+  //The following line is necessary to define the process method for this class
+
+  DEFINE_PROCESS_CALLS 
+
+  //  This function reads Data from an DataReader Object to read CR data
+  DataFunc_CR_dataRead (Data* dp){
+    DBG("DataFunc_CR_dataRead: initialization called.");
+
+    HPointer ptr=NULL;
+    setParameter("FileObject",  ptr);
+    setParameter("Antenna", 0);
+    setParameter("Blocksize", -1);
+    setParameter("Block", 0);
+    setParameter("Stride", 0);
+    setParameter("Shift", 0);
+    HString s="Fx"; setParameter("Datatype", s);
+
+    //Now create a new, but empty data vector as buffer
+    vector<HNumber> vec;
+    dp->noMod(); dp->put(vec);     
+  }
+
+  ~DataFunc_CR_dataRead (){
+    MSG("~DataFunc_CR_dataRead: Here something probably needs to happen for destroying the plotter");
+  }
+  
+  template <class T>
+  void process(F_PARAMETERS) {
+
+    //First retrieve the pointer to the pointer to the dataRead and check whether it is non-NULL.
+    GET_FUNC_PARAMETER_T(FileObject,HPointer);
+    DBG("FileObject=" << FileObject);
+    if (FileObject==NULL){
+	ERROR("dataRead: pointer to FileObject is NULL, DataReader not found." << ", name=" << dp->getName(true)); 
+	return;
+    };
+    DataReader *drp=reinterpret_cast<DataReader*>(FileObject); 
+
+
+//!!!One Needs to verify somehow that the parameters make sense !!!
+    GET_FUNC_PARAMETER_T(Antenna, HInteger);
+    GET_FUNC_PARAMETER_T(Blocksize,  HInteger);
+    GET_FUNC_PARAMETER_T(Block,  HInteger);
+    GET_FUNC_PARAMETER_T(Stride,  HInteger);
+    GET_FUNC_PARAMETER_T(Shift, HInteger);
+    GET_FUNC_PARAMETER_T(Datatype, HString);
+
+//    MSG("Antenna=" << Antenna);
+
+    drp->setBlocksize(Blocksize);
+    drp->setBlock(Block);
+    drp->setStride(Stride);
+    drp->setShift(Shift);
+
+    Vector<uint> antennas(1,Antenna);
+    drp->setSelectedAntennas(antennas);
+//    Vector<uint> selantennas=drp->selectedAntennas();
+//    MSG("No of Selected Antennas" << drp->nofSelectedAntennas ()<< " SelectedAntennas[0]=" <<selantennas[0]);
+
+    if (Datatype=="Time") {aipsvec2stlvec(drp->timeValues(),*vp);}
+    else if (Datatype=="Frequency") {aipsvec2stlvec(drp->frequencyValues(),*vp);}
+    else if (Datatype=="Fx") {aipscol2stlvec(drp->fx(),*vp,0);}
+    else if (Datatype=="Voltage") {aipscol2stlvec(drp->voltage(),*vp,0);}
+    else if (Datatype=="invFFT") {aipscol2stlvec(drp->invfft(),*vp,0);}
+    else if (Datatype=="FFT") {aipscol2stlvec(drp->fft(),*vp,0);}
+    else if (Datatype=="CalFFT") {aipscol2stlvec(drp->calfft(),*vp,0);}
+    else {
+	ERROR("DataFunc_CR_dataRead: Datatype=" << Datatype << " is unknown." << ", name=" << dp->getName(true));
+	vp->clear();
+	return;
+    };
+  }
+};
+
+//The following macro has to come at the of the definiton. It defines
+//a constructor function (no class) with a pointer that is called when
+//an object is assigned this function.
+DATAFUNC_CONSTRUCTOR(dataRead,CR,"Function retrieving a vector from the dataReader.",NUMBER, true);
+
+/*------------------------------------------------------------------------
+End DataFunc Object Library "CR"
+------------------------------------------------------------------------*/
 
 
 /*========================================================================
@@ -565,9 +854,9 @@ public:
     //set the default parameters, which are by default integers - perhaps change to float numbers later??
     DBG("DataFunc_Qt_Mainwindow: initialization called.");
 
-    String s="hfplot";
-    setParameter("name", "'Name", s);
-    GET_FUNC_PARAMETER_T(name,String);
+    HString s="hfplot";
+    setParameter("Name",  s);
+    GET_FUNC_PARAMETER_T(Name,HString);
 
     //Create the a pointer to the MainWindow object and store a
     //pointer to the pointer ...  this is the only way the two threads
@@ -578,7 +867,7 @@ public:
 
     MainWindow **mainwin = new (MainWindow*);
 
-    DBG("mainwin=" << mainwin << " = " << reinterpret_cast<Integer>(mainwin));
+    DBG("mainwin=" << mainwin << " = " << reinterpret_cast<HInteger>(mainwin));
 
     *mainwin=NULL;
 
@@ -587,7 +876,7 @@ public:
     //read-only, since the pointer is not to be changed by put ever
     //again until the window is deleted
 
-    dp->putOne(static_cast<Pointer>(mainwin)); 
+    dp->putOne(static_cast<HPointer>(mainwin)); 
 
     //Now we start a thread, with the pointer to the pointer as the
     //only parameter. The function qrun (defined in hfqt.cc) will then
@@ -597,7 +886,7 @@ public:
     boost::thread my_thread(boost::bind(qrun,mainwin));     
     
     //Ideally we would now have here a waiting loop until the other
-    //thread has filled the pointer with a value, but some how that
+    //thread has filled the pointer with a value, but somehow that
     //didn't work yet. 
 
     // while (label==NULL) {i++;};
@@ -616,8 +905,137 @@ public:
     //location stored in the buffer will not be changed.
   }
 };
-DATAFUNC_CONSTRUCTOR(Mainwindow,Qt,"Creates the main application/plotting window and stores its pointer");
+DATAFUNC_CONSTRUCTOR(Mainwindow,Qt,"Creates the main application/plotting window and stores its pointer",POINTER, true);
 
+class DataFunc_Qt_mglWindow : public ObjectFunctionClass {
+public:
+  //This is necessary to define the process method for this function
+  //which in this case ignores the input vector.
+
+  DEFINE_PROCESS_CALLS_IGNORE_DATATYPE
+  
+  //  This function launches a MathGL QT window and stores a pointer to the pointer of the window class
+  DataFunc_Qt_mglWindow (Data* dp){
+    DBG("DataFunc_Qt_mglWindow: initialization called.");
+
+
+    HString s="hfplot";
+    setParameter("WindowName",  s);
+
+    //Create the a pointer to the MainWindow object and store a
+    //pointer to the pointer ...  this is the only way the two threads
+    //can communicate at this point (through shared memory). For
+    //non-shared memory in a cluster, some MPI scheme needs to be
+    //invented
+
+    mglGraphQT **mglwin = new (mglGraphQT*);
+
+    DBG("mglwin=" << mglwin << " = " << reinterpret_cast<HInteger>(mglwin));
+
+    *mglwin=NULL;
+
+    //Store the pointer to pointer in the object, so that other
+    //objects can access is. The object should actually me made
+    //read-only, since the pointer is not to be changed by put ever
+    //again until the window is deleted
+
+    dp->putOne(static_cast<HPointer>(mglwin)); 
+
+    //Now we start a thread, with the pointer to the pointer as the
+    //only parameter. The function qrun (defined in hfqt.cc) will then
+    //launch the Qt window (and go into its own waiting loop).
+
+    DBG("Starting thread.");
+    boost::thread my_thread(boost::bind(mglrun,mglwin));     
+    
+    //Ideally we would now have here a waiting loop until the other
+    //thread has filled the pointer with a value, but somehow that
+    //didn't work yet. 
+
+    // while (*mglwin==NULL) {i++;};
+
+    //Here we would then call a function to set the textlabel and
+    //other things
+
+  }
+
+  ~DataFunc_Qt_mglWindow (){
+    MSG("~DataFunc_Qt_mglWindow: Here still need a function to destroy the window and delete the pointer to it.");
+  }
+  
+  void process(F_PARAMETERS_NOVEC){
+    //No Processing needed here
+  }
+};
+
+//The following macro has to come at the of the definiton. It defines
+//a constructor function (no class) with a pointer that is called when
+//an object is assigned this function.
+DATAFUNC_CONSTRUCTOR(mglWindow,Qt,"Creates a MathGL plotter window under QT and stores its pointer",POINTER, true);
+
+class DataFunc_Qt_mglPlot : public ObjectFunctionClass {
+public:
+  //This is necessary to define the process method for this function
+  //which in this case ignores the input vector:
+
+  DEFINE_PROCESS_CALLS_IGNORE_DATATYPE
+  
+  //  This function initializes the Plotter. It assumes that a MathGL
+  //  QT window was already launched with Qt_mglWindow.
+  DataFunc_Qt_mglPlot (Data* dp){
+    DBG("DataFunc_Qt_mglPlot: initialization called.");
+
+    HString s="1D-Plotter";
+    HPointer ptr=NULL;
+    setParameter("mglWindow",  ptr);
+    setParameter("PlotName",  s);
+    setParameter("NPanelsX",  1);
+    setParameter("NPanelsY",  1);
+    s="x-Axis"; setParameter("XAxisLabel", s);
+    s="y-Axis"; setParameter("YAxisLabel", s);
+  }
+
+  ~DataFunc_Qt_mglPlot (){
+    MSG("~DataFunc_Qt_mglPlot: Here something probably needs to happen for destroying the plotter");
+  }
+  
+  void process(F_PARAMETERS_NOVEC){
+
+    //First retrieve the pointer to the pointer to the mglWindow and check whether it is non-NULL.
+    GET_FUNC_PARAMETER_T(mglWindow,HPointer);
+    if (mglWindow==NULL){MSG("mglWindow: pointer to pointer is NULL, window not yet launched"); return;}
+    else {MSG("mglWindow=" << mglWindow);};
+    mglGraphQT **gp=static_cast<mglGraphQT**>(mglWindow); 
+
+    GET_FUNC_PARAMETER_T(PlotName,HString);
+    MSG("PlotName:" << PlotName);
+    GET_FUNC_PARAMETER_T(XAxisLabel,HString);
+    MSG("XAxisLabel:" << XAxisLabel);
+    GET_FUNC_PARAMETER_T(YAxisLabel,HString);
+    MSG("YAxisLabel:" << YAxisLabel);
+    GET_FUNC_PARAMETER_T(NPanelsX,HInteger);
+    MSG("NPanelsX:" << NPanelsX);
+    GET_FUNC_PARAMETER_T(NPanelsY,HInteger);
+    MSG("NPanelsY:" << NPanelsY);
+
+
+    mglData  d(50);
+    d.Modify("0.7*sin(2*pi*x) + 0.5*cos(3*pi*x) + 0.2*sin(pi*x)");
+    (*gp)->NewFrame();
+    (*gp)->Box();	
+    (*gp)->Axis("xy");	
+    (*gp)->Label('x',XAxisLabel.c_str());	
+    (*gp)->Label('y',YAxisLabel.c_str());
+    (*gp)->Text(mglPoint(0,1.2,1),PlotName.c_str());
+    (*gp)->Plot(d);
+    (*gp)->EndFrame();
+  }
+};
+
+//The following macro has to come at the of the definiton. It defines
+//a constructor function (no class) with a pointer that is called when
+//an object is assigned this function.
+DATAFUNC_CONSTRUCTOR(mglPlot,Qt,"Function which plots data in a MathGL plotter window under QT",POINTER,false);
 
 class DataFunc_Qt_QPrint : public ObjectFunctionClass {
 public:
@@ -627,8 +1045,8 @@ public:
   //  Constructor launching the window
   DataFunc_Qt_QPrint (Data * dp){
     DBG("DataFunc_Qt_QPrint: initialization called.");
-    Pointer null=NULL;
-    setParameter("mainwindow_pointer", "'Mainwindow", null);
+    HPointer null=NULL;
+    setParameter("mainwindow_pointer", null,"'","Mainwindow");
     // We assume that the Label already exists in the main window ....
   };
 
@@ -636,15 +1054,15 @@ public:
   void process(F_PARAMETERS_NOVEC){
     DBG("DataFunc_Qt_QPrint: processing.");
 
-    GET_FUNC_PARAMETER_T(mainwindow_pointer,Pointer);
+    GET_FUNC_PARAMETER_T(mainwindow_pointer,HPointer);
     /*
-    String n=getParameterName("mainwindow_pointer");
+    HString n=getParameterName("mainwindow_pointer");
     DBG("Name=" << n);
 
-    Pointer p=getParameterDefault<Pointer>("mainwindow_pointer");
-    DBG("Pointer=" << p);
+    HPointer p=getParameterDefault<HPointer>("mainwindow_pointer");
+    DBG("HPointer=" << p);
 
-    Pointer mainwindow_pointer;
+    HPointer mainwindow_pointer;
     DBG("mainwindow_pointer");
 
     mainwindow_pointer=dp->getParameter(n,p);
@@ -653,12 +1071,12 @@ public:
     if (mainwindow_pointer != NULL) {
       
       MainWindow ** mainwin_pp = static_cast<MainWindow**>(mainwindow_pointer);
-      DBG("mainwin_pp=" << mainwin_pp << "=" << reinterpret_cast<Integer>(mainwin_pp));
+      DBG("mainwin_pp=" << mainwin_pp << "=" << reinterpret_cast<HInteger>(mainwin_pp));
       DBG("*mainwin_pp=" << *mainwin_pp);
 
-      vector<String> vec_S;
+      vector<HString> vec_S;
       (*dp).getFirstFromVector(vec_S,vs);    //copy data vector from predecessor
-      String s=(*dp).getName()+":"+vectostring(vec_S);
+      HString s=(*dp).getName()+":"+vectostring(vec_S);
 
       DBG(s);
 
@@ -670,14 +1088,96 @@ public:
     };
   }
 };
-DATAFUNC_CONSTRUCTOR(QPrint,Qt,"Allows one to print the contents of an object in a text window");
+DATAFUNC_CONSTRUCTOR(QPrint,Qt,"Allows one to print the contents of an object in a text window",INTEGER, false);
+
+
+/*------------------------------------------------------------------------
+Python Interface Functions
+------------------------------------------------------------------------*/
+
+
+class DataFunc_Py_PyFunc : public ObjectFunctionClass {
+public:
+  //This is necessary to define the process method for this function
+  //which in this case ignores the input vector:
+
+  DEFINE_PROCESS_CALLS_IGNORE_DATATYPE
+  
+  //  This function initializes the Plotter. It assumes that a MathGL
+  //  QT window was already launched with Py_mglWindow.
+  DataFunc_Py_PyFunc (Data* dp){
+    DBG("DataFunc_Py_PyFunc: initialization called.");
+    HPointer ptr=NULL;
+    setParameter("PythonObject",  ptr); //Contains pointer to the hffunc python object
+
+    GET_FUNC_PARAMETER_T(PythonObject,HPointer);
+    if (PythonObject==NULL){ERROR("PyFunc: pointer to PythonObject is NULL. Object PythonObject does not exist. Define PythonObject and use pytore before assigning PyFunc to this Object." << ", name=" << dp->getName(true)); return;};
+
+    PyObject * pyobj = reinterpret_cast<PyObject*>(PythonObject);
+    DBG("DataFunc_Py_PyFunc: pyobj=" << pyobj);
+
+    //Call the startup method if present
+    char AttribStr[] = "hfstartup";
+    //first we need to check if attribute is present in the Python Object
+    if (!PyObject_HasAttrString(pyobj, AttribStr)) {
+	ERROR("PyFunc: Object does not have Attribute " << AttribStr << ", name=" << dp->getName(true)); return;};
+    int ret=boost::python::call_method<int>(pyobj,AttribStr,boost::ref(*dp));
+    if (ret!=0) {
+	ERROR("PyFunc - startup method returned user-defined error code" << ret << ", name=" << dp->getName(true));
+    };
+  }
+
+    ~DataFunc_Py_PyFunc (){
+	Data * dp = data_pointer;
+	
+	GET_FUNC_PARAMETER_T(PythonObject,HPointer);
+	if (PythonObject==NULL){ERROR("PyFunc: pointer to Python Object is NULL." << ", name=" << dp->getName(true)); return;};
+
+	PyObject * pyobj = reinterpret_cast<PyObject*>(PythonObject);
+
+	char AttribStr[] = "hfcleanup";
+	//we need to check if the attribute is present in the Python Object
+	if (!PyObject_HasAttrString(pyobj, AttribStr)) {
+	    ERROR("PyFunc: Object does not have Attribute " << AttribStr << ", name=" << dp->getName(true) << "."); return;};
+	int ret=boost::python::call_method<int>(pyobj,AttribStr);
+	if (ret!=0) {
+	    ERROR("PyFunc - process method returned user-defined error code" << ret  << ", name=" << dp->getName(true));
+	};
+    }
+ 
+
+    void process(F_PARAMETERS_NOVEC){
+
+	//First retrieve the pointer to the pointer to the mglWindow and check whether it is non-NULL.
+	GET_FUNC_PARAMETER_T(PythonObject,HPointer);
+	if (PythonObject==NULL){ERROR("PyFunc: pointer to Python Object is NULL."  << ", name=" << dp->getName(true)); return;};
+
+	PyObject * pyobj = reinterpret_cast<PyObject*>(PythonObject);
+	DBG("DataFunc_Py_PyFunc.process: pyobj=" << pyobj << " name=" << dp->getName(true));
+
+	char AttribStr[] = "hfprocess";
+	//we need to check if the process attribute is present in the Python Object
+	if (!PyObject_HasAttrString(pyobj, AttribStr)) {
+	    ERROR("PyFunc: Object does not have Attribute " << AttribStr << "."  << ", name=" << dp->getName(true)); return;};
+	DBG("DataFunc_Py_PyFunc.process: Call Pythopn Object");
+	int ret=boost::python::call_method<int>(pyobj,AttribStr,boost::ref(*dp));
+	if (ret!=0) {
+	    ERROR("PyFunc - process method returned user-defined error code" << ret << ", name=" << dp->getName(true));
+	};
+    }
+};
+
+//The following macro has to come at the of the definiton. It defines
+//a constructor function (no class) with a pointer that is called when
+//an object is assigned this function.
+DATAFUNC_CONSTRUCTOR(PyFunc,Py,"Function to call a user-defined python object of type hffunc",POINTER,false);
 
 /*
 
 template <class T>
 void DataFunc_Qt_QPrint(F_PARAMETERS) {
   static QLabel* label=NULL;
-  String s;
+  HString s;
   int i=0;
   //Define local static variables
   //End definition of local static variables
@@ -707,7 +1207,7 @@ void DataFunc_Qt_QPrint(F_PARAMETERS) {
 
 template <class T>
 void DataFunc_Qt_Main(F_PARAMETERS) {
-    String s;
+    HString s;
   int i=0;
   FUNC_CALLTYPE calltype;
   //Define local static variables
@@ -833,6 +1333,7 @@ int ReadTextFile(string filename)
 //------------------------------------------------------------------------
 
 void DataFunc_Sys_Library_publish(DataFuncLibraryClass* library_ptr){
+  library_ptr->add(&DataFunc_Sys_Neighbours_Constructor);
   library_ptr->add(&DataFunc_Sys_Copy_Constructor);
   library_ptr->add(&DataFunc_Sys_Print_Constructor);
   library_ptr->add(&DataFunc_Sys_Square_Constructor);
@@ -841,7 +1342,17 @@ void DataFunc_Sys_Library_publish(DataFuncLibraryClass* library_ptr){
 
 void DataFunc_Qt_Library_publish(DataFuncLibraryClass* library_ptr){
   library_ptr->add(&DataFunc_Qt_Mainwindow_Constructor);
+  library_ptr->add(&DataFunc_Qt_mglWindow_Constructor);
+  library_ptr->add(&DataFunc_Qt_mglPlot_Constructor);
   library_ptr->add(&DataFunc_Qt_QPrint_Constructor);
 }
- 
 
+void DataFunc_CR_Library_publish(DataFuncLibraryClass* library_ptr){
+  library_ptr->add(&DataFunc_CR_dataReaderObject_Constructor);
+  library_ptr->add(&DataFunc_CR_dataRead_Constructor);
+}
+
+void DataFunc_Py_Library_publish(DataFuncLibraryClass* library_ptr){
+  library_ptr->add(&DataFunc_Py_PyFunc_Constructor);
+}
+ 

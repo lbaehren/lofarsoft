@@ -1,4 +1,8 @@
-#define DBG_MODE 0
+//#define DBG_MODE 0
+//#define DBG_MODE 1
+
+#include <QApplication>
+#include <QtGui>
 
 using namespace std;
 #include "mainwindow.h"
@@ -6,6 +10,8 @@ using namespace std;
 #include "hfcast.h"
 #include "hfget.h"
 #include "hfqt.h"
+#include <mgl/mgl_qt.h>
+
 
 void qrun2(QLabel **label){
   int argc;
@@ -15,7 +21,7 @@ void qrun2(QLabel **label){
 
   argv[0]="hfplot";
   argc=1;
-  String s="Hallo Heino";
+  HString s="Hallo Heino";
   cout << s <<endl;
   QApplication qapp(argc,argv);
   
@@ -55,6 +61,125 @@ void qrun(MainWindow **mwin_pp){
   qapp.exec();
   DBG("Done.");
 }
+//This is an example function from mgl used temporarily ..
+
+int sample_1(mglGraph *gr, void *)
+{
+	setlocale(LC_ALL, "C");
+	mglData  a(50,15),d(50),d1(50),d2(50);
+	d.Modify("0.7*sin(2*pi*x) + 0.5*cos(3*pi*x) + 0.2*sin(pi*x)");
+	d1.Modify("cos(2*pi*x)");
+	d2.Modify("sin(2*pi*x)");
+	a.Modify("pow(x,4*y)");
+
+	gr->NewFrame();
+	gr->Box();	gr->Axis("xy");	gr->Label('x',"x");	gr->Label('y',"y");
+	gr->Text(mglPoint(0,1.2,1),"Simple plot of one curve");
+	gr->Plot(d);
+	gr->EndFrame();
+
+	gr->NewFrame();
+	gr->Box();	gr->Axis("xy");	gr->Label('x',"x");	gr->Label('y',"y");
+	gr->Text(mglPoint(0,1.2,1),"Three curves with manual styles");
+	gr->Plot(d,"b");
+	gr->Plot(d1,"ri");
+	gr->Plot(d2,"m|^");
+	gr->Plot(d,"l o");
+	gr->EndFrame();
+
+	gr->NewFrame();
+	gr->Box();	gr->Axis("xy");	gr->Label('x',"x");	gr->Label('y',"y");
+	gr->Text(mglPoint(0,1.2,1),"Three curves with automatic styles");
+	gr->Plot(d);
+	gr->Plot(d1);
+	gr->Plot(d2);
+	gr->EndFrame();
+
+	gr->NewFrame();
+	gr->Box();	gr->Axis("xy");	gr->Label('x',"x");	gr->Label('y',"y");
+	gr->Text(mglPoint(0,1.2,1),"Curves from matrix");
+	gr->Plot(a);
+	gr->EndFrame();
+
+	gr->NewFrame();
+	gr->Box();	gr->Axis("xy");	gr->Label('x',"x");	gr->Label('y',"y");
+	gr->Text(mglPoint(0,1.2,1),"Parametrical curves in 2D");
+	gr->Plot(d1,d2,"b");
+	gr->Plot(d1,d,"ri");
+	gr->EndFrame();
+
+	gr->NewFrame();
+	gr->Text(mglPoint(0,1.2,1),"Parametrical curves in 3D");
+	gr->Rotate(60,40);
+	gr->Box();	gr->Axis();	gr->Label('x',"x");	gr->Label('y',"y");	gr->Label('z',"z");
+	gr->Plot(d1,d2,d,"b");
+	gr->EndFrame();
+
+	gr->NewFrame();
+	gr->SubPlot(2,2,0);
+	gr->Box();	gr->Axis("xy");	gr->Label('x',"x");	gr->Label('y',"y");
+	gr->Text(mglPoint(0,1.2,1),"Area plot");
+	gr->Area(d);
+	gr->SubPlot(2,2,1);
+	gr->Box();	gr->Axis("xy");	gr->Label('x',"x");	gr->Label('y',"y");
+	gr->Text(mglPoint(0,1.2,1),"Step plot");
+	gr->Step(d);
+	gr->SubPlot(2,2,2);
+	gr->Box();	gr->Axis("xy");	gr->Label('x',"x");	gr->Label('y',"y");
+	gr->Text(mglPoint(0,1.2,1),"Stem plot");
+	gr->Stem(d);
+	gr->SubPlot(2,2,3);
+	gr->Box();	gr->Axis("xy");	gr->Label('x',"x");	gr->Label('y',"y");
+	gr->Text(mglPoint(0,1.2,1),"Bars plot");
+	gr->Bars(d);
+	gr->EndFrame();
+
+	gr->NewFrame();
+	gr->SubPlot(2,2,0);
+	gr->Text(mglPoint(0,1.2,1),"Area plot in 3D");
+	gr->Rotate(60,40);
+	gr->Box();	gr->Axis();	gr->Label('x',"x");	gr->Label('y',"y");
+	gr->Area(d1,d2,d);
+	gr->SubPlot(2,2,1);
+	gr->Text(mglPoint(0,1.2,1),"Step plot in 3D");
+	gr->Rotate(60,40);
+	gr->Box();	gr->Axis();	gr->Label('x',"x");	gr->Label('y',"y");
+	gr->Step(d1,d2,d);
+	gr->SubPlot(2,2,2);
+	gr->Text(mglPoint(0,1.2,1),"Stem plot in 3D");
+	gr->Rotate(60,40);
+	gr->Box();	gr->Axis();	gr->Label('x',"x");	gr->Label('y',"y");
+	gr->Stem(d1,d2,d);
+	gr->SubPlot(2,2,3);
+	gr->Text(mglPoint(0,1.2,1),"Bars plot in 3D");
+	gr->Rotate(60,40);
+	gr->Box();	gr->Axis();	gr->Label('x',"x");	gr->Label('y',"y");
+	gr->Bars(d1,d2,d);
+	gr->EndFrame();
+	return gr->GetNumFrame();
+}
+
+void mglrun(mglGraphQT **mglwin){
+  //To make it clear: mglwin is a pointer to a location in
+  //memory. This location is accessible from both threads. That
+  //location stores as content again a pointer, which points to the
+  //MathGL window. So, (*mglwin) gives a pointer to the window.
+  //**mglwin is the window class. *mglwin->Method willc all methods of
+  //the MathGL window.
+
+  int argc;
+  char *argv[1];
+  argv[0]="hfplot-mgl-window";
+  argc=1;
+ 
+  DBG("Create new mgl Window.");
+  *mglwin=new mglGraphQT;
+
+  (*mglwin)->Window(argc,argv,sample_1,"1D plots",NULL);	
+  DBG("Run mglQT Application.");
+  mglQtRun();
+  DBG("Done mglQTApplication.");
+}
 
 HQLabel::HQLabel(QWidget *parent) 
   : QLabel(parent)
@@ -65,7 +190,7 @@ HQLabel::HQLabel(QWidget *parent)
 
 void HQLabel::print(const QString &text){
 //void HQLabel::print(){
-//  String text="Clicked..";
+//  HString text="Clicked..";
   QString s;
   s.setNum(ncalled);
   ncalled++;

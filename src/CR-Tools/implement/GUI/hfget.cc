@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------*
- | $Id:: HDF5Common.h 1628 2008-06-10 15:46:50Z baehren                  $ |
+ | $Id:: hfget.cc 1628 2008-06-10 15:46:50Z falcke                       $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2008                                                    *
- *   Lars B"ahren (lbaehren@gmail.com)                                     *
+ *   Heino Falcke (www.astro.ru.nl/~falcke)                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -26,21 +26,6 @@
   Plotting Tool for LOFAR Data
 */
 
-#include <boost/python/class.hpp>
-#include <boost/python/module.hpp>
-#include <boost/python/def.hpp>
-
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include <boost/python/implicit.hpp>
-#include <boost/python/enum.hpp>
-#include <boost/python/overloads.hpp>
-#include <boost/python/args.hpp>
-#include <boost/python/tuple.hpp>
-#include <boost/python/class.hpp>
-#include <boost/python/return_internal_reference.hpp>
-#include <boost/python/operators.hpp>
-#include <boost/python/object_operators.hpp>
-#include <boost/thread/thread.hpp>
 
 using namespace std;
 
@@ -51,6 +36,8 @@ using namespace std;
 #include "hfget.h"
 #include "hffuncs.h"  
 
+#define DOSILENT( DOSOMETHING ) bool SILENTx=Silent(true); DOSOMETHING; Silent(SILENTx)
+#define DOSILENT2( DOSOMETHING ) SILENTx=Silent(true); DOSOMETHING; Silent(SILENTx)
 
 //------------------------------------------------------------------------
 // Globale Definitions
@@ -99,17 +86,17 @@ bool object_logic_in_set(Data* o_ptr, vector<T> &set){
 #define SW_TYPE_COMM(EXT,TYPE)			\
     val_##EXT = new TYPE;			\
     (*val_##EXT)=o_ptr->getOne<TYPE>();		\
-    DBG("VALUE=" << (*val_##EXT));		\
+    D2BG("VALUE=" << (*val_##EXT));		\
     for (i=0; i<s && !found; i++) {		\
-      DBG("set[" <<i<<"]=" << set[i]);			    \
+      D2BG("set[" <<i<<"]=" << set[i]);			    \
       found = (mycast<TYPE>(set[i]) == *val_##EXT);	    \
-      DBG("FOUND=" << tf_txt(found));			    \
+      D2BG("FOUND=" << tf_txt(found));			    \
     };							    \
     delete val_##EXT
 #include "switch-type.cc"
     found=false;
   };
-  DBG("Return FOUND=" << tf_txt(found));				    
+  D2BG("Return FOUND=" << tf_txt(found));				    
   return found;
 }
 
@@ -129,7 +116,7 @@ to loose information). mycast is the basic function which allows one to do that.
 
 
 //Convert the various data types into each other:
-template<class S> inline String mytostring(S v){std::ostringstream os; os << v; return os.str();}
+template<class S> inline HString mytostring(S v){std::ostringstream os; os << v; return os.str();}
 
 //Identity
 template<class T> inline T mycast(const T v){return v;}
@@ -137,43 +124,45 @@ template<class T> inline T mycast(const T v){return v;}
 //--Numbers ------------------------------------------------------------
 
 //Convert to arbitrary class T if no specified otherwise
-template<class T> inline T mycast(const Pointer v){return mycast<T>(reinterpret_cast<Integer>(v));}
-template<class T> inline T mycast(const Integer v){return static_cast<T>(v);}
-template<class T> inline T mycast(const Number v){return static_cast<T>(v);}
-template<class T> inline T mycast(const Complex v){return static_cast<T>(v);}
-template<class T> inline T mycast(const String v){T t; std::istringstream is(v); is >> t; return t;}
+template<class T> inline T mycast(const HPointer v){return mycast<T>(reinterpret_cast<HInteger>(v));}
+template<class T> inline T mycast(const HInteger v){return static_cast<T>(v);}
+template<class T> inline T mycast(const HNumber v){return static_cast<T>(v);}
+template<class T> inline T mycast(const HComplex v){return static_cast<T>(v);}
+template<class T> inline T mycast(const HString v){T t; std::istringstream is(v); is >> t; return t;}
 
 //Convert Numbers to Numbers and loose information (round float, absolute of complex)
-template<>  inline Integer mycast<Integer>(Number v){return static_cast<Integer>(floor(v+0.5));}
-template<>  inline Integer mycast<Integer>(Complex v){return static_cast<Integer>(floor(abs(v)+0.5));}
+template<>  inline HInteger mycast<HInteger>(HNumber v){return static_cast<HInteger>(floor(v+0.5));}
+template<>  inline HInteger mycast<HInteger>(HComplex v){return static_cast<HInteger>(floor(abs(v)+0.5));}
 
-template<>  inline Number mycast<Number>(Complex v){return abs(v);}
+template<>  inline HNumber mycast<HNumber>(HComplex v){return abs(v);}
 
 
 //--Strings ------------------------------------------------------------
 
 //Convert Numbers to Strings
-template<> inline String mycast<String>(Pointer v){std::ostringstream os; os << v; return os.str();}
-template<> inline String mycast<String>(Integer v){std::ostringstream os; os << v; return os.str();}
-template<> inline String mycast<String>(Number v){std::ostringstream os; os << v; return os.str();}
-template<> inline String mycast<String>(Complex v){std::ostringstream os; os << v; return os.str();}
+template<> inline HString mycast<HString>(HPointer v){std::ostringstream os; os << v; return os.str();}
+template<> inline HString mycast<HString>(HInteger v){std::ostringstream os; os << v; return os.str();}
+template<> inline HString mycast<HString>(HNumber v){std::ostringstream os; os << v; return os.str();}
+template<> inline HString mycast<HString>(HComplex v){std::ostringstream os; os << v; return os.str();}
 
 
 
 //--Pointers ------------------------------------------------------------
 
 
-//Convert Type T to Pointer:
-template<> inline Pointer mycast(const Pointer v){return v;}
-template<> inline Pointer mycast(const Integer v){return mycast<Pointer>(v);}
-template<> inline Pointer mycast(const Number v){return reinterpret_cast<Pointer>(mycast<Integer>(v));}
-template<> inline Pointer mycast(const Complex v){return reinterpret_cast<Pointer>(mycast<Integer>(v));}
+//Convert Type T to HPointer:
+template<> inline HPointer mycast(const HPointer v){return v;}
+template<> inline HPointer mycast(const HInteger v){return mycast<HPointer>(v);}
+template<> inline HPointer mycast(const HNumber v){return reinterpret_cast<HPointer>(mycast<HInteger>(v));}
+template<> inline HPointer mycast(const HComplex v){return reinterpret_cast<HPointer>(mycast<HInteger>(v));}
 
 
-//The default function pointer to be passed on as reference
-//The function will return a vector of type T and take as 
-//input a vector of (void) pointers that are assumed to
-//point to Data objects
+/*! \brief Casts a vector of type S to a vector of type T. 
+
+ptr is a void pointer to a vector of type T which will receive the
+copied data from vector<S> *sp.
+
+*/
 
 template <class T, class S>
 void copycast_vec(void *ptr, vector<S> *sp) {
@@ -218,8 +207,8 @@ char* reftype_txt(REFTYPE x){
 }
 
 char* datatype_txt(DATATYPE x){
-  char* DATATYPE_TXT[6]={"Pointer","Integer", "Number", "Complex", "String", "UNDEF"};
-  DBG("datatype_txt: x=" << x);
+  char* DATATYPE_TXT[6]={"HPointer","HInteger", "HNumber", "HComplex", "HString", "UNDEF"};
+//  DBG("datatype_txt: x=" << x);
   if (x <= UNDEF && x >=0) {return DATATYPE_TXT[x];} else {return "UNKNOWN_TYPE";};
 }
 
@@ -283,7 +272,7 @@ vector<T> vec_combine(vector<T> v1,vector<T> v2){
   return v;
 }
 
-/* append one vector to the end of the other */
+/*!\brief append the second vector to the end of the first */
 template <class T>
 void vec_append(vector<T> &v1,const vector<T> &v2){
   v1.reserve(v1.size() + v2.size());
@@ -291,20 +280,42 @@ void vec_append(vector<T> &v1,const vector<T> &v2){
   return;
 }
 
+/*!\brief Return true if element elem is already in the vector v.*/
 template <class T>
-String vectostring(vector<T> v,address maxlen=8){
+bool in_vector(const T elem, const vector<T> &v){
+  bool ret=false;
+  int i;
+  for (i=0; i<v.size() && !ret; i++) {
+    ret = ret || (v[i]==elem);
+  };
+  return ret;
+}
+
+/*!\brief Return a version of vector v, which contains each element only once.*/
+template <class T>
+vector<T> vec_unique(const vector<T> &v){
+  vector<T> v_out;
+  int i;
+  for (i=0; i<v.size(); i++) {
+    if (!in_vector(v[i],v_out)) v_out.push_back(v[i]);
+  };
+  return v_out;
+}
+
+template <class T>
+HString vectostring(vector<T> v,address maxlen=8){
   int i;
   int s;
-  String out="";
+  HString out="";
   s=v.size(); 
   if (s==0) {return out;};
   if (s<=maxlen+1) {
-    for (i=0;i<s-1;i++) {out += mycast<String>(v[i])+", ";};
-    out += mycast<String>(v[i]);
+    for (i=0;i<s-1;i++) {out += mycast<HString>(v[i])+", ";};
+    out += mycast<HString>(v[i]);
   } else {
-    for (i=0;i<maxlen/2;i++) {out += mycast<String>(v[i])+", ";};
+    for (i=0;i<maxlen/2;i++) {out += mycast<HString>(v[i])+", ";};
     out += "...";
-    for (i=s-maxlen/2;i<s;i++) {out += ", " + mycast<String>(v[i]);};
+    for (i=s-maxlen/2;i<s;i++) {out += ", " + mycast<HString>(v[i]);};
   };
   return out;
 }
@@ -347,11 +358,11 @@ void printvec_txt(vector<T> v, char* (*f)(S)){
 template <class T>
 DATATYPE WhichType() {
   DATATYPE t;
-       if (typeid(T)==typeid(Pointer)) t = POINTER;
-  else if (typeid(T)==typeid(Integer)) t = INTEGER;
-  else if (typeid(T)==typeid(Number )) t = NUMBER;
-  else if (typeid(T)==typeid(Complex)) t = COMPLEX;
-  else if (typeid(T)==typeid(String )) t = STRING;
+       if (typeid(T)==typeid(HPointer)) t = POINTER;
+  else if (typeid(T)==typeid(HInteger)) t = INTEGER;
+  else if (typeid(T)==typeid(HNumber )) t = NUMBER;
+  else if (typeid(T)==typeid(HComplex)) t = COMPLEX;
+  else if (typeid(T)==typeid(HString )) t = STRING;
   else t = UNDEF;
   return t;
 }
@@ -371,13 +382,13 @@ void * new_vector(DATATYPE type, address len){
 }
 
 bool del_vector(void *ptr, DATATYPE type) {
-  DEF_D_PTR( Integer );
+  DEF_D_PTR( HInteger );
   d_ptr_v=ptr;
   switch (type) {
 #define SW_TYPE_COMM(EXT,TYPE) \
-    DBG("Delete " << #TYPE << " ptr=" << d_ptr_v << endl);\
+    DBG("Delete " << #TYPE << " ptr=" << d_ptr_v);\
     delete d_ptr_##EXT;\
-    DBG("Deleted: " << #TYPE << " ptr=" << d_ptr_v << ", type=" << type << endl)
+    DBG("Deleted: " << #TYPE << " ptr=" << d_ptr_v << ", type=" << type)
 #include "switch-type.cc"
     ERROR("del_vector: While attemptting to delete a vector.");
   }
@@ -395,9 +406,9 @@ bool del_value(void *ptr, DATATYPE type) {
 }
 
 //splits a string of type name1:name2:name3 into a vector of strings
-vector<String> split_str_into_vector(String str, char c)
+vector<HString> split_str_into_vector(HString str, char c)
 {
-  vector<String> out;
+  vector<HString> out;
   int pos,oldpos=0;
   for (pos=str.find(c);pos>-1;pos=str.find(c,pos+1)) {
     out.push_back(str.substr(oldpos,pos-oldpos));
@@ -408,7 +419,7 @@ vector<String> split_str_into_vector(String str, char c)
 }
 
 //finds the first location of certain characters, n contains the position
-int string_find_chars (const String s, const String c, int &n, const int npos)
+int string_find_chars (const HString s, const HString c, int &n, const int npos)
 {
   int i, slen=s.size();
   int nchrs=c.size();
@@ -426,7 +437,7 @@ finds the last location of certain characters (c) in string s, n contains the ch
 npos gives a starting position relative to the end
 */
 
-int string_rfind_chars (const String s, const String c, int &n, const int npos)
+int string_rfind_chars (const HString s, const HString c, int &n, const int npos)
 {
   int i, slen=s.size();
   int nchrs=c.size();
@@ -443,7 +454,7 @@ finds the last location of certain characters (c) in string s, npos gives a star
 and the returns the string from the end up to (and excluding) the (punctuation) character 
 */
 
-String string_rfind_chars_substr (const String s, const String c, const int npos)
+HString string_rfind_chars_substr (const HString s, const HString c, const int npos)
 {
   int n,i=string_rfind_chars (s, c, n, npos);
   return s.substr(i,s.size()-i);
@@ -455,7 +466,7 @@ Takes a string and splits it into a vector of strings (names) at the punctuation
 contained in string c =":'". If a ":" is encountered the corresponding element in the 
 direction vector dirs is set to DIR_TO otherwise it is set to DIR_FROM.
  */
-void parse_record_name_to_vector(String name, vector<String> &names, vector<DIRECTION> &dirs, String c)
+void parse_record_name_to_vector(HString name, vector<HString> &names, vector<DIRECTION> &dirs, HString c)
 {
   DIRECTION dir = DIR_TO;
   int nc,pos,oldpos=0;
@@ -472,16 +483,16 @@ void parse_record_name_to_vector(String name, vector<String> &names, vector<DIRE
   dirs.push_back(dir);
 }
 
-bool parse_record_selection_to_vector(String str, String &name, vector<String> &elems)
+bool parse_record_selection_to_vector(HString str, HString &name, vector<HString> &elems)
 {
   int pos;
   pos=str.find('=');
   if (pos==-1) {name=str; elems.clear(); return false;};
   name=str.substr(0,pos);
-  DBG(endl << "Input=" << str);
-  DBG("name=" << name);
+//  DBG(endl << "Input=" << str);
+//  DBG("name=" << name);
   elems=split_str_into_vector(str.substr(pos+1),',');
-  DBG2("elems="); DBG3(printvec(elems));
+//  DBG2("elems="); DBG3(printvec(elems));
   return true;
 }
 
@@ -519,188 +530,787 @@ vector<objectid> DPtrToOid(vector<Data*> objects)
   
 */
 
+bool isValidDataObject(Data* obj) {
+  return obj!=NULL && obj->magiccode==MAGICCODE;
+}
+
+bool operator== (Data::modification_record mod1, Data::modification_record mod2) {return mod1.ref==mod2.ref && mod1.version==mod2.version;}
+
 Vector_Selector * Data::sel(){return data.s_ptr;}
 void Data::new_sel(){if (data.s_ptr==NULL) {data.s_ptr=new Vector_Selector;};}
 void Data::del_sel(){delete data.s_ptr;data.s_ptr=NULL;}
 
 
-void Data::print_reference_descr(reference_descr rd){
-  cout << "name=" << rd.name;
-  cout << ", ref=" << rd.ref;
-  cout << ", port=" << rd.port; 
-  cout << ", direction=" << direction_txt(rd.direction);
-  cout << ", mod=" << rd.mod;
-  cout << ", type=" << datatype_txt(rd.type) << endl;
+HString Data::reference_descr_str(reference_descr* rd){
+  std::ostringstream sout;
+  sout << "name=" << rd->name;
+  sout << ", ref=" << rd->ref;
+  sout << ", port=" << rd->port; 
+  sout << ", direction=" << direction_txt(rd->direction);
+  sout << ", mod=" << strModFlag(rd->mod);
+  sout << ", type=" << datatype_txt(rd->type);
+  return sout.str();
 }
 
-void Data::printAllStatus(bool short_output){
-  Integer i;
+void Data::printAllStatus(bool short_output,longint maxlevel){
+  HInteger i;
   if (data.superior!=NULL) {
     for (i=0; i<data.superior->data_objects.size(); i++) {
-      data.superior->data_objects[i]->printStatus(short_output);
+      SaveCall(data.superior->data_objects[i]) {
+	if (data.superior->data_objects[i]->getNetLevel()<=maxlevel)
+	  data.superior->data_objects[i]->printStatus(short_output);
+      };
     };
   } else {
     ERROR("printAllStatus: No superior created yet, can't find any objects!");
   }
 }
 
-void Data::printStatus(bool short_output){
-  objectid i;
-  DEF_D_PTR(Integer); 
+vector<objectid> Data::getAllIDs(){
+  HInteger i;
+  vector<objectid> vec;
+  if (data.superior!=NULL) {
+    for (i=0; i<data.superior->data_objects.size(); i++) {
+      SaveCall(data.superior->data_objects[i]) vec.push_back(data.superior->data_objects[i]->getOid());
+    };
+  } else {
+    ERROR("getAllIDs: No superior created yet, can't find any objects!");
+  }
+  return vec;
+}
+
+void Data::printStatus(bool short_output){cout << Status(short_output) <<endl;}
+
+/*! \brief Return the number of modification flags which are set*/
+
+address Data::getMod(){
+  address i,result=0;
+  for (i=0; i<data.from.size(); i++) {
+    if (data.from[i]->mod.ref!=NULL) {result++;};
+  };
+  return result;
+}
+
+/*! \brief Return a vector of modification flags of the object in
+    direction dir. Flags are set by setModification.*/
+
+vector<Data::modification_record> Data::getModFlags(DIRECTION dir){
+    objectid i;
+    vector<modification_record> vec;
+    if (dir==DIR_FROM || dir==DIR_BOTH) {for (i=0; i<data.from.size(); i++) {vec.push_back(data.from[i]->mod);};} 
+    else if (dir==DIR_TO || dir==DIR_BOTH) {for (i=0; i<data.to.size(); i++) {vec.push_back(data.to[i]->mod);};} 
+    return vec;
+}
+
+/*! \brief Return a string representation of a modification flag.*/
+
+HString Data::strModFlag(modification_record mod){
+    std::ostringstream sout;
+    if (mod.ref==NULL) {sout << "NULL.0";} 
+    else {sout << mod.ref->getName(true) << "." << mod.version;};
+    return sout.str();
+}
+
+/*! \brief Return a vector of strings containing the modification flags in direction dir. See also listNames, listIDs.*/
+
+vector<HString> Data::listModFlags(DIRECTION dir){
+  address i;
+  vector<HString> vec;
+  vector<modification_record> mods=getModFlags(dir);
+  for (i=0; i<mods.size(); i++) {vec.push_back(strModFlag(mods[i]));};
+  return vec;
+}
+
+/*!  Return a boolean flag indicating whether the modification flags
+in an object are set. If false, this need not imply that the object is
+up to date, since this call does not trigger going through the chain
+for PULL connections. It juts looks at the from ports in the current
+object.
+*/
+
+bool Data::isModified(){
+    return data.modified;
+}
+
+
+HString Data::Status(bool short_output){
+    std::ostringstream sout;
+    objectid i;
+
+
+  DEF_D_PTR(HInteger); 
   if (short_output) {
-    cout << "#" << data.name << ": ";
-    if (data.of_ptr != NULL) {cout << data.of_ptr->getName() <<"[";};
-    cout << datatype_txt(data.type);
-    if (data.of_ptr != NULL) {cout << "]";};
-    if (data.len>0) {cout << "(" << data.len << ")";};
+      sout << "#" << getName(true) << ": ";
+    if (data.of_ptr != NULL) {sout << data.of_ptr->getName() <<"(";};
+    sout << datatype_txt(data.type);
+    if (data.of_ptr != NULL) {sout << ")";};
+    if (data.len>0) {sout << "[" << data.len << "]";};
+    if (isModified()) {sout << "*";};
     if (data.d_ptr!=NULL) {
-      cout << "=";
+      sout << "=";
       d_ptr_v=data.d_ptr;
-      CALL_FUNC_D_PTR (printvec_noendl);
+      CALL_FUNC_D_PTR (sout << vectostring);
     };
     if (data.to.size()>0) {
-      cout << " ->";
+      sout << " =>";
       for (i=0; i<data.to.size(); i++) {
-	cout << data.to[i].ref->getName();
-	if (i<data.to.size()-1) {cout << ",";};
+	  if (data.to[i]->direction==PULL || data.to[i]->direction==DIR_BOTH) {sout << " <<";};
+	  if (data.to[i]->direction==PUSH || data.to[i]->direction==DIR_BOTH) {sout << " >>";};
+	  sout << data.to[i]->ref->getName();
+	  sout << "{" << data.to[i]->ref->getOid() << "}";
+	if (i<data.to.size()-1) {sout << ",";};
       };
     };
     if (data.from.size()>0) {
-      cout << " <-";
+      sout << " <= ";
       for (i=0; i<data.from.size(); i++) {
-	cout << data.from[i].ref->getName();
-	if (i<data.from.size()-1) {cout << ",";};
+	  sout << "{" << data.from[i]->ref->getOid() << "}";
+	  sout << data.from[i]->ref->getName();
+	  if (data.from[i]->direction==PULL || data.from[i]->direction==DIR_BOTH) {sout << "<<";};
+	  if (data.from[i]->direction==PUSH || data.from[i]->direction==DIR_BOTH) {sout << ">>";};
+	if (i<data.from.size()-1) {sout << ",";};
       };
     };
-    cout << endl;
   } else {
-  cout << endl;
-  cout << "------------------------------------------------------------------------"<<endl;
-  cout << "Name: " << data.name <<endl;
-  cout << "oid: " << data.oid <<endl;
-  cout << "this:" << this << endl;
-  cout << "------------------------------------------------------------------------"<<endl;
-  cout << "origin: " << reftype_txt(data.origin) <<endl;
-  cout << "buflen: " << data.buflen <<endl;
-  cout << "len: " << data.len <<endl;
-  cout << "To  : "<<endl; 
-  for (  i=0; i<data.to.size(); i++) {cout <<"["<<i<<"] "; this->print_reference_descr(data.to[i]);};
-  cout << "From: "<<endl; 
-  for (  i=0; i<data.from.size(); i++) {cout <<"["<<i<<"] "; this->print_reference_descr(data.from[i]);};
-  cout << "datatype=" << datatype_txt(data.type) << endl;
-  cout << "of_ptr=" << data.of_ptr << endl;
-  cout << "d_ptr=" << data.d_ptr << endl;
-  cout << "s_ptr=" << data.s_ptr << endl;
+  sout << endl;
+  sout << "------------------------------------------------------------------------"<<endl;
+  sout << "Name: " << data.name <<endl;
+  sout << "oid: " << data.oid <<endl;
+  sout << "this:" << this << endl;
+  sout << "------------------------------------------------------------------------"<<endl;
+  sout << "origin: " << reftype_txt(data.origin) <<endl;
+  sout << "buflen: " << data.buflen <<endl;
+  sout << "len: " << data.len <<endl;
+  address nmod=getMod();
+  sout << "#mod: " << nmod <<endl;
+  sout << "version: " << getVersion() << " - is modifed: " << tf_txt(isModified()) <<endl;
+  sout << "To  : "<<endl; 
+  for (  i=0; i<data.to.size(); i++) {sout <<"["<<i<<"] "; sout << this->reference_descr_str(data.to[i])<<endl;};
+  sout << "From: "<<endl; 
+  for (  i=0; i<data.from.size(); i++) {sout <<"["<<i<<"] "; sout << this->reference_descr_str(data.from[i])<<endl;};
+  sout << "datatype=" << datatype_txt(data.type) << endl;
+  sout << "of_ptr=" << data.of_ptr << endl;
+  sout << "d_ptr=" << data.d_ptr << endl;
+  sout << "s_ptr=" << data.s_ptr << endl;
 
   if (data.d_ptr!=NULL) {
-    cout << "========================================================================"<<endl;
-    cout << "data = ";
+    sout << "========================================================================"<<endl;
+    sout << "data = ";
     d_ptr_v=data.d_ptr;
-    CALL_FUNC_D_PTR (printvec);
+    CALL_FUNC_D_PTR (sout << vectostring);
+    sout << endl;
   };
-  cout << "========================================================================"<<endl;
+  sout << "========================================================================";
   };
+  return sout.str();
 }
 
-void Data::printDecendants(String rootname){
+void Data::printDecendants(HString rootname){
  objectid i;
-  String name;
+  HString name;
   if (rootname=="") {name=data.name;} else {name = rootname + ":" + data.name;};
   cout <<  name << "[" << data.len << "]";
   if (data.d_ptr != NULL || data.of_ptr != NULL) {
     cout << " = ";
-    DEF_D_PTR(Number); 
+    DEF_D_PTR(HNumber); 
     d_ptr_v=new_vector(data.type,data.len);
     CALL_FUNC_D_PTR(get);
     CALL_FUNC_D_PTR(printvec);
     del_vector(d_ptr_v,data.type);
   } else {cout << endl;};
-  for (i=0; i<data.to.size(); i++) {if (data.to[i].ref!=NULL) {data.to[i].ref->printDecendants(name);};};
+  for (i=0; i<data.to.size(); i++) {if (data.to[i]->ref!=NULL) {data.to[i]->ref->printDecendants(name);};};
 }
 
+/*!  \brief Provides a list of all names of objects linked to the
+current one in the direction DIR (DIR.FROM, DIR.TO, or DIR.BOTH). See
+also listIDs, listDirs, listModFlags
+*/
+
+vector<HString> Data::listNames(DIRECTION dir){
+    vector<HString> l;
+    objectid i;
+    if (dir==DIR_FROM || dir==DIR_BOTH) {
+      for (i=0; i<data.from.size(); i++) {
+	SaveCall(data.from[i]->ref) l.push_back(data.from[i]->ref->getName());
+      };
+    };
+    if (dir==DIR_TO || dir==DIR_BOTH) {
+      for (i=0; i<data.to.size(); i++) {
+	SaveCall(data.to[i]->ref) l.push_back(data.to[i]->ref->getName());
+      };
+    };
+    return l;
+}
+
+
+/*!
+\brief Provides a list/vector of all object IDs of objects linked to the current one in the direction DIR. See also listNames, listDirs, listModFlags.
+ */
+vector<objectid> Data::listIDs(DIRECTION dir){
+    vector<objectid> l;
+    objectid i;
+    if (dir==DIR_FROM || dir==DIR_BOTH) {
+      for (i=0; i<data.from.size(); i++) {
+	SaveCall(data.from[i]->ref) l.push_back(data.from[i]->ref->getOid());
+      };
+    };
+    if (dir==DIR_TO || dir==DIR_BOTH) {
+      for (i=0; i<data.to.size(); i++) {
+	SaveCall(data.to[i]->ref) l.push_back(data.to[i]->ref->getOid());
+      };
+    };
+    return l;
+}
+
+/*!
+\brief Provides a list of the PUSH/PULL direction of the all object links linked to the current one in the TO direction. See also listFromDirs, listToNames, listToIDs, listModFlags.
+ */
+vector<DIRECTION> Data::listDirs(DIRECTION dir){
+    vector<DIRECTION> l;
+    objectid i;
+    if (dir==DIR_FROM || dir==DIR_BOTH) {
+      for (i=0; i<data.from.size(); i++) {
+	l.push_back(data.from[i]->direction);
+      };
+    };
+    if (dir==DIR_TO || dir==DIR_BOTH) {
+      for (i=0; i<data.to.size(); i++) {
+	l.push_back(data.to[i]->direction);
+      };
+    };
+    return l;
+}
+
+/*! \brief Increments the version number of the object.
+
+The version is increased each time the object is modified and is used for creating unique modification flags and can be used to measure activity of an object.
+ */
+longint Data::incVersion(){
+  if (data.version>=MAXVERSION) {
+    MSG("incVersion(): Version Wrap - No Error - name=" << getName(true) << " data.version=" <<data.version << " MAXVERSION=" << MAXVERSION);
+    data.version=0;
+  } else { 
+    data.version++; 
+  };
+  return data.version;
+}
+
+/*! \brief Returns the version number of the object.
+
+The version is increased each time the object is modified and is used for creating unique modification flags and can be used to measure activity of an object.
+ */
+longint Data::getVersion(){return data.version;}
+
+/*! \brief Set the version number of the object.
+
+The version is increased each time the object is modified and is used for creating unique modification flags and can be used to measure activity of an object.
+ */
+void Data::setVersion(longint ver){data.version=ver;}
+
+/*! \brief Get the Net level of the object.
+
+The netlevel represents a criterion for displaying objects in a
+network representation. Lower levels are more important. If the level
+number is too high, the object will not be dsiplayed. Major objects
+have level>=1, user parameters have level>=10, default paramteres have
+level >=100, and system objects have level>=1000.
+ */
+longint Data::getNetLevel(){return data.netlevel;}
+
+/*! \brief Get the Net level of the object.
+
+The netlevel represents a criterion for displaying objects in a
+network representation. Lower levels are more important. If the level
+number is too high, the object will not be dsiplayed. Major objects
+have level>=1, user parameters have level>=10, default paramteres have
+level >=100, and system objects have level>=1000.
+ */
+Data& Data::setNetLevel(longint lev){data.netlevel=lev; return *this;}
+
+HString Data::getName(bool longname){
+     if (!longname) return data.name;
+     ostringstream s;
+     s << "{" << getOid() << "}" << data.name;
+     return s.str();
+ }
+ address Data::len(){return data.len;}
  DATATYPE Data::getType(){return data.type;}
- String Data::getName(){return data.name;}
+
+/*!
+Set the data type of an object. This is only possible if the object does not yet contain a data vector.
+ */
+ void Data::setType(DATATYPE typ){
+   if (!hasData()) {data.type=typ;};
+}
  objectid Data::getOid(){return data.oid;}
  ObjectFunctionClass* Data::getFunction(){return data.of_ptr;};
 
 //  sendMessage(MSG_MODIFIED,DIR_TO);
 
 
-//modified without a parameter is local, i.e. the current object has been modified and all modified flags are incremented
-//With a port number, the modification came from one port and the from fag is set and a recalc is initiated.
 
-objectid Data::checkModification(objectid port){
-  objectid size,i,mods;
-  size=data.from.size();
-  mods=0;
-  for (i=0; i<size /*&& mods==0*/; i++) {//check out all "from"-ports and query predecessor objects if requested
-    if (data.from[i].direction == DIR_FROM || data.from[i].direction == DIR_BOTH) {
-      data.from[i].mod=data.from[i].mod+data.from[i].ref->checkModification(data.from[i].port);
-    };//if it is TO direction for communication, then only check local mod value 
-      //otherwise go through tree and set "from" modvalues based on objects lower down.
-    mods=mods+data.from[i].mod;
-  };
-  if (port>=0 && port < data.to.size()) {  //if a special port is queried (from higher up) then, also check .to mod value (which is the actual query)
-    mods=mods+data.to[port].mod++;
-  };
-  return mods;
-}
+/*!  \brief Make an object silent. 
 
-
-/* Make an object silent. That allows you to change the value of an object, withou triggering an instant recalc of the net.*/
+That allows you to change the value of an object,
+without triggering an instant update of the net. The modification flag will be
+set however. To modify the object without setting the modifcation flag, use
+noMod.
+*/
 
 bool Data::Silent(bool silent){
-  if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return false;};
+  if (this==&NullObject) {ERROR("Silent: Operation on NullObject not allowed."); return false;};
   bool old;
   old=data.silent;
   data.silent=silent;
   return old;
 }
 
-void Data::touch(){setModification(-1);}
+/*!
+\brief checks whether an object needs updating
+ */
+bool Data::needsUpdate(){
+  if (this==&NullObject) {ERROR("needsUpdate: Operation on NullObject not allowed."); return false;};
+  return hasData() && hasFunc() && isModified();
+}
 
-/*Set all moodification flags and propagate the message through the net, if necessary*/
+/*!
+\brief Returns the flag which determines whether an object is automatically updated when a modification message has been received.
+ */
+bool Data::doesAutoUpdate(){
+  if (this==&NullObject) {ERROR("doesAutoUpdate: Operation on NullObject not allowed."); return false;};
+  return data.autoupdate;
+}
 
-void Data::setModification(objectid port){
-  if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return;};
-  objectid size,i,count;
-  size=data.to.size();
-  count=0;
-  DBG("SETMOD name=" << getName());
-  for (i=0; i<size; i++) {
-    DBG("MOD TO port=" << i);
-    data.to[i].mod++;   //if an object is modified all data.to flags will be set to modified
-    if ((data.to[i].direction == DIR_TO || data.to[i].direction == DIR_BOTH) && !data.silent) {
-      DBG("CALL MOD for port=" << i << " and ptr=" <<  data.to[i].ref << " to port=" << data.to[i].port);
-      count++;
-      data.to[i].ref->setModification(data.to[i].port);   //If requested, notify any objects higher up in the food chain about the modification
+/*!
+\brief Returns true if the object in principle is updateable (i.e. stores or displays data in some form).
+ */
+
+bool Data::Updateable(){
+  if (this==&NullObject) {ERROR("Updateable: Operation on NullObject not allowed."); return false;};
+  return data.updateable;
+}
+
+/*!
+\brief Sets a flag which determines whether an object is automatically updated when a modification message has been received. up=true means that automatic updating is enabled.
+ */
+void Data::setAutoUpdate(bool up){
+    if (this==&NullObject) {ERROR("setAutoUpdate: Operation on NullObject not allowed."); return;};
+  data.autoupdate=up;
+}
+
+/*!
+\brief Sets a flag which determines whether an object is in principle updateable. 
+ */
+void Data::setUpdateable(bool up){
+  if (this==&NullObject) {ERROR("Updateable: Operation on NullObject not allowed."); return;};
+  DBG("setUpdateable(" << tf_txt(up) << "): name=" << getName(true));
+  data.updateable=up;
+}
+
+/*! If this returns true the object will produce a short message everytime the get method is called. Usefulf for tracing network operations.
+ */
+bool Data::Verbose(){return data.verbose>data.netlevel;}
+
+/*! Set the verbose level, the higher the more will be displayed. Goes
+    in logarithmic steps (9,99,999,9999). Uses the NetLevel of each
+    object as comparison. If Verbose() returns true the object will
+    produce a short message everytime the get method is
+    called. Usefulf for tracing network operations.
+ */
+longint Data::setVerbose(longint verbose){
+  if (this==&NullObject) {ERROR("setVerbose: Operation on NullObject not allowed."); return false;};
+  longint old;
+  old=data.verbose;
+  data.verbose=verbose;
+  return old;
+}
+
+/*!  
+Sets the default direction (PUSH or PULL) when creating new parameter objects
+automatically in a function. This needs to be set before the function is
+executed the first time. In some cases before initialization.
+*/
+
+void Data::setDefaultDirection(DIRECTION dir){
+    data.defdir=dir;
+}
+
+/*!  
+Gets the default direction (PUSH or PULL) when creating new parameter objects
+automatically in a function. This needs to be set before the function is
+executed the first time. In some cases before initialization.
+*/
+
+DIRECTION Data::getDefaultDirection(){
+    return data.defdir;
+}
+
+
+/*!
+\brief Sets in all objects the verbose level. 
+
+/*! The higher the verbose level, the more will be displayed. Goes
+    in logarithmic steps (9,99,999,9999). Uses the NetLevel of each
+    object as comparison. If Verbose() returns true the object will
+    produce a short message everytime the get method is
+    called. Usefulf for tracing network operations.
+ */
+longint Data::AllVerbose(longint verbose){
+  if (this==&NullObject) {ERROR("AllVerbose: Operation on NullObject not allowed."); return false;};
+  HInteger i;
+  if (data.superior!=NULL) {
+    for (i=0; i<data.superior->data_objects.size(); i++) {
+	data.superior->data_objects[i]->setVerbose(verbose);
+    };
+  } else {
+      ERROR("AllVerbose: No superior created yet, can't find any objects!");
+  };
+}
+
+/*!
+\brief Mark the current object as modified and propagate the message through the network if necessary. This does not lead to an update of the object itself! Use .update() for that.
+ */
+void Data::touch(){setModification();}
+
+/*!
+
+\brief Set all modification flags and propagate the message through the net
+upwards (TO), if necessary.
+
+If called without parameters then the object was directly modifed. As
+a consequence set the modification for all TO ports, and propagate the
+information further if a PUSH connections is made.  If called with a
+port and version information the modification was signalled from a
+another object which was modifed. In this case set all TO ports and
+also the corresponding from port and propagate the information higher
+up. Each object signals its current version. If a receiving object has
+a version number smaller than the one it has received an update is
+necessary.
+
+Called without parameters: Tell the object that it was modified by a
+user input. If necessary (PUSH connection) signal the modification to
+the objects higher up the chain and cause update if necessary.
+
+*/
+
+void Data::setModification(){
+    modification_record newmod;
+
+    if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return -1;};
+
+    if (data.noMod) {
+	DBG("setModification: NO MODIFICATION since noMod=true.");
+	data.noMod=false;
+	return -1;
+    }    
+
+    /*
+    if (data.beingmodified && !data.silent) MSG("setModification: name=" << getName(true) << " data.version=" <<getVersion() << ". Warning the object is being modified again, while another modification chain is already in progress. Maybe there is an inconsistent state of the network.");
+    */
+
+    data.beingmodified=true;
+
+    //Creating the modification message that will be passed on
+
+    newmod.version=incVersion();
+    newmod.ref=this;
+
+    if (Worm == NULL) {Worm = new worm;};
+
+    setModification(newmod);
+
+    //Now the worm is filled with object references. Go sequentially
+    //along the worm and update the objects.
+
+    if (!data.silent) executeUpdateWorm();
+    data.beingmodified=true;
+}
+
+/*! \brief This is just a convinience subroutine to setModification() 
+
+*/
+void Data::setModification(modification_record newmod){
+
+    objectid size,i;
+
+
+
+    //Increase the version number to create a unique version number
+    //which will be passed through the network. In case the maximum
+    //version number was reached the counter is reset. 
+        
+    DBG("setModification: name=" << getName(true) << " data.version=" <<getVersion());
+ 
+    //Now signal the modification to all objects in the forward direction.
+    //For a PULL conncetion just store it locally, for a PUSH connection set
+    //the modification flags of the TO objects (and make them update if necesssary.)
+
+    data.modified=true;
+
+    size=data.to.size();
+    for (i=0; i<size; i++) {
+      //mark the port to the next higher object as modified - this
+      //will be queried from higher up when needed.
+      data.to[i]->mod=newmod;
+      //In push mode notify any objects higher up in the food chain
+      //about the modification. They will in turn notify objects higher
+      //up. The notification messagis a worm 
+      //The references of the to be updated objects will be added
+      //to the update-worm of the object that started this (who's
+      //reference is contained in newmod, which is passed on higher).
+      if ((data.to[i]->direction == PUSH || data.to[i]->direction == DIR_BOTH)) {
+	SaveCall(data.to[i]->ref) data.to[i]->ref->setModification(data.to[i]->port,newmod);
+      };
+    };   
+
+    return;
+}
+
+/*!
+\brief Execute the update worm which was created by setModification or checkModification
+
+The worm is filled with object references. The function goes sequentially along the
+worm, i.e. through the list of objects, and update the objects.
+
+ */
+
+void Data::executeUpdateWorm(){
+  if (Worm==NULL) {
+    ERROR("executeUpdateWorm() name=" << getName(true) << ": Uninitialized UpdateWorm called ...");
+    return;
+  }
+  if (!data.silent) {
+    DBG("executeUpdateWorm(): executed by object " << getName(true) << ", worm.size=" << Worm->size());
+    worm::iterator it;
+    for (it=Worm->begin(); it<Worm->end(); it++) {
+      DBG("executeUpdateWorm(): executed by " << getName(true) << " -> update object worm.name=" << (*it)->getName(true));
+      (*it)->doAutoUpdate();
     };
   };
-  if (port>=0 && port < data.from.size()) {
-    DBG("SET FROM MODIFICATION port=" << port);
-    data.from[port].mod++;
-    if (count==0) {recalc();};  //If the message is not passed any higher, start a recalc trickeling down the net.
-  };
-  DBG("SET MODIFICATION:");
+  DBG("executeUpdateWorm(): clear Worm.");
+  Worm -> clear();
 }
 
-void Data::clearModification(objectid port){
+/*!
+Tell the object that an object it depends on was modified (e.g., by a user input). If necessary (PUSH connection) signal the modification to the objects higher up the chain. Add itself to the update worm of the object that caused the update chain.
+ */
+
+void Data::setModification(objectid port, modification_record newmod){
+  if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return -1;};
+
   objectid size,i;
-  if (port>=0 && port < data.to.size()) {
-    data.to[port].mod=0;
+  
+  DBG("setModification(port=" <<port<<", mod=" << strModFlag(newmod) <<"): name=" << getName(true));
+
+  /*  if (data.beingmodified) MSG("setModification(port=" <<port<<", mod=" << strModFlag(newmod) <<"): name=" << getName(true) << " data.version=" <<getVersion() << ". Warning the object is being modified again, while another modification chain is already in progress. Maybe there is an inconsistent state of the network.");
+   */
+
+  //store the modification in the respective FROM port, check for a circular network 
+  if (port>=0 && port <data.from.size()) {
+    if (data.from[port]->mod==newmod) {
+      MSG("setModification(port=" <<port<<", mod=" << strModFlag(newmod) <<") name=" << getName(true) <<": Same modification flag received twice. Do you have a circular network?");
+      return;
+    };
+    data.from[port]->mod=newmod;
+  } else {
+    ERROR("setModification(port=" <<port<<", mod=" << strModFlag(newmod) <<") name=" << getName(true) << ": Port number out of range - network is inconsistent.");
   };
+
+  bool sameflag=false;
+  
   size=data.from.size();
-  for (i=0; i<size; i++) {data.from[i].mod=0;};   
+  for (i=0; i<size && !sameflag; i++) {
+    //check whether the flag has aready been received at another
+    //port. If yes, don't go further.
+    if (i!=port) sameflag=data.from[i]->mod==newmod;
+    if (sameflag) {
+      DBG("setModification(port=" <<port<<", mod=" << strModFlag(newmod) <<") name=" << getName(true) << ": Same flag already present at port #" <<i);
+      return;
+    };
+  };
+
+  data.modified=true;
+
+  size=data.to.size();
+  for (i=0; i<size; i++) {
+    //mark the port to the next higher object as modified - this
+    //will be queried from higher up when needed.
+    data.to[i]->mod=newmod;
+    //In push mode notify any objects higher up in the food chain
+    //about the modification. They will in turn notify objects higher
+    //up. The notification messagis a worm 
+    //The references of the to be updated objects will be added
+    //to the update-worm of the object that started this (who's
+    //reference is contained in newmod, which is passed on higher).
+    if ((data.to[i]->direction == PUSH || data.to[i]->direction == DIR_BOTH)) {
+      SaveCall(data.to[i]->ref) data.to[i]->ref->setModification(data.to[i]->port,newmod);
+    };
+  };   
+
+  //Add yourself to the update worm ...
+  SaveCall(newmod.ref) newmod.ref->Worm->push_back(this);
 }
 
-/*Not yet really used, but probably useful at some point */
+/*!  Check whether an object is modified an needs to be updated. Also,
+  check the modification in the respective FROM ports, check for a
+  circular network, and loop through all from ports that have a PULL
+  connection, check whether these objects are modified (and lower) and
+  if so set the modification flag of the current object and add itself
+  to the update worm.
+  */
+bool Data::checkModification(){
+  if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return -1;};
+
+  objectid size,i;
+  bool modified=data.modified;
+  modification_record newmod;
+
+  DBG("checkModification(): name=" << getName(true) << " data.modified=" << tf_txt(data.modified));
+  if (modified) return true;
+
+  //The following few lines are only used for PULL connections, so that
+  //could me made smarter if one introduces a flag that tells whether
+  //PULL connections exist.
+  
+  //Creating the modification message that will be passed on
+  newmod.version=incVersion();
+  newmod.ref=this;
+
+  if (Worm == NULL) {Worm = new worm;};
+
+  //check the modification in the respective FROM ports This will set
+  //all modification flags in the FROM direction and create an update
+  //worm, which needs to be executed separately.
+  size=data.from.size();
+  for (i=0; i<size; i++) {
+    if ((data.from[i]->direction == PULL || data.from[i]->direction == DIR_BOTH)) {
+      SaveCall(data.from[i]->ref) modified = modified || data.from[i]->ref->checkModification(data.from[i]->port,newmod);
+    };
+  };   
+  return modified;
+}
+
+/*!  Check whether an object is modified an needs to be updated. Also,
+  check the modification in the respective FROM ports, check for a
+  circular network, and loop through all from ports that have a PULL
+  connection, check whether these objects are modified (and lower) and
+  if so set the modification flag of the current object and add itself
+  to the update worm.
+
+  If objects in the FROM direction with a PULL connection are
+  modified, then the current object is also modified
+  (data.modified=true). If the TO flag is set, but the object itself
+  is not modified (this can happen if the object has both: PUSH and
+  PULL connections in the TO direction), then the routine returns
+  modified=true (to signal the object higher up that it needs
+  updating), but the object itself remains up-to-date
+  (data.modified=false).
+  */
+bool Data::checkModification(objectid port, modification_record newmod){
+  if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return -1;};
+
+  objectid size,i;
+  bool modified=data.modified;
+
+
+  DBG("checkModification(port=" <<port<<", newmod="<<strModFlag(newmod) <<"): name=" << getName(true) << " data.modified=" << tf_txt(data.modified));
+
+  //If the TO flag for the port currently queried (from an object
+  //higher up) is set then return modified=true. Also check if the new
+  //mod message is unique. Otherwise return and do not go deeper,
+  //since there must have been a circular network somehow.
+  if (port>=0 && port <data.to.size()) {
+    if (data.to[port]->mod.ref!=NULL) {
+      modified=true;
+      if (data.to[port]->mod==newmod) {
+	MSG("checkModification(toport=" <<port<<", mod=" << strModFlag(newmod) <<") name=" << getName(true) <<": Same modification flag received twice. Do you have a circular network?");
+	return true;
+      };
+    };
+  } else {
+      ERROR("checkModification(port=" <<port<<", mod=" << strModFlag(newmod) <<") name=" << getName(true) << ": Port number out of range - network is inconsistent.");
+      return true;
+  };
+
+  //Now go deeper through the network in the FROM direction (even if
+  //this is already modified)
+  size=data.from.size();
+  for (i=0; i<size; i++) {
+    if ((data.from[i]->direction == PULL || data.from[i]->direction == DIR_BOTH)) {
+      SaveCall(data.from[i]->ref) {
+	  if (data.from[i]->mod==newmod) {
+	    MSG("checkModification(port=" <<port<<", mod=" << strModFlag(newmod) <<") name=" << getName(true) <<": Same modification flag received twice. Do you have a circular network?");
+	    return false;
+	  } else {
+	    if (data.from[i]->ref->checkModification(data.from[i]->port,newmod)) {
+	      data.from[i]->mod=newmod;
+	      data.modified=true;
+	      modified = true;
+	      data.to[port]->mod=newmod;
+	    };
+	  };
+      };  
+    };
+  };   
+  
+  //If the object is modified (i.e., if one object in FROM direction
+  //was modified), then set the TO flag accordingly and add itself to
+  //the update worm
+
+  //Add itself to the update worm, if the object itself is modified.
+  if (data.modified) {SaveCall(newmod.ref) newmod.ref->Worm->push_back(this);};
+  return modified;
+}
+
+
+/*!  Clears the modification flag and sets all FROM mod flags to
+     NULL. This indicates that the object is up-to-date. For any
+     connection in the FROM diretion it will also clear the TO flag in
+     the respective parent object.
+ */
+void Data::clearModification(){
+    objectid size,i;
+
+    DBG("clearModification(): name=" << getName(true));
+
+    data.modified = false;
+
+    size=data.from.size();
+    for (i=0; i<size; i++) {
+      data.from[i]->mod.ref=NULL;
+      SaveCall(data.from[i]->ref) data.from[i]->ref->clearModificationTO(data.from[i]->port);
+    };
+    return;
+}
+
+/*!  Clears the modification flag in the TO direction of PORT. This is
+     called exclusively by clearModification().
+ */
+void Data::clearModificationTO(objectid port){
+    objectid size,i;
+
+    DBG("clearModification(port="<<port<<"): name=" << getName(true));
+
+    if (port>=0 && port<data.to.size()) {
+      data.to[port]->mod.ref=NULL;
+    } else {
+      ERROR("clearModification(port=" <<port<<") name=" << getName(true) << ": Port number out of range - network is inconsistent.");
+    };
+    return;
+}
+
+
+
+/*!
+Not yet really used, but probably useful at some point 
+*/
 void Data::sendMessage(MSG_CODE msg, DIRECTION dir, objectid count, void* ptr) {
   objectid i,s;
   if (dir == DIR_FROM || dir == DIR_BOTH) {
     s=data.from.size();
     for (i=0; i<s-1; i++) {
-      if (data.from[i].direction == DIR_FROM || data.from[i].direction == DIR_BOTH) {
-	data.from[i].ref->getMessage(msg,dir,data.from[i].port,count,ptr);
+      if (data.from[i]->direction == DIR_FROM || data.from[i]->direction == DIR_BOTH) {
+	data.from[i]->ref->getMessage(msg,dir,data.from[i]->port,count,ptr);
       };
     };
   };
@@ -708,8 +1318,8 @@ void Data::sendMessage(MSG_CODE msg, DIRECTION dir, objectid count, void* ptr) {
   if (dir == DIR_TO || dir == DIR_BOTH) {
     s=data.to.size();
     for (i=0; i<s-1; i++) {
-      if (data.to[i].direction == DIR_TO || data.to[i].direction == DIR_BOTH) {
-	data.to[i].ref->getMessage(msg,dir,data.to[i].port,count,ptr);
+      if (data.to[i]->direction == DIR_TO || data.to[i]->direction == DIR_BOTH) {
+	data.to[i]->ref->getMessage(msg,dir,data.to[i]->port,count,ptr);
       };
     };
   };
@@ -722,10 +1332,6 @@ void Data::getMessage(MSG_CODE msg, DIRECTION dir, objectid port, objectid count
   objectid i,s;
   switch (msg) {
   case MSG_MODIFIED:
-    data.from[port].mod++;
-
-    if (dir==DIR_TO) {};
-    if (dir==DIR_FROM) {data.to[port].mod++;};
     return;
     break;
   default:
@@ -735,7 +1341,7 @@ void Data::getMessage(MSG_CODE msg, DIRECTION dir, objectid port, objectid count
   if (count > 0) {sendMessage(msg, dir, count-1, ptr);};
 }
 
-/*
+/*!
 This function assigns the corresponding port number of a referencing
 object, i.e. port "port" in the current object will point to port
 report in the related object. dir specifies whether that is a "to" or a
@@ -743,18 +1349,40 @@ report in the related object. dir specifies whether that is a "to" or a
 */
 void Data::setPort(objectid port, objectid refport, DIRECTION dir){
   if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return;};
-  vector<reference_descr> * tf;
+  vector<reference_descr*> * tf;
   if (dir == DIR_FROM ) {tf=&data.from;} 
   else if (dir == DIR_TO) {tf=&data.to;} 
   else {
     ERROR("setPort: Improper direction specified- neiter to nor from.");
     return;
   };
-  if ((*tf).size()>port) {(*tf)[port].port=refport;}
+  if ((*tf).size()>port) {(*tf)[port]->port=refport;}
   else {ERROR("setPort: Changing non-existing port.");};
 }
 
-/*
+/*!
+This function searches for a link to another object and deletes it.
+*/
+
+void Data::delLink(Data &d) {
+  int i,l;
+  l=data.to.size();
+  DBG("delLink(" << &d << "=" << d.getName() << "): ptr=" << this << "=" << d.getName());
+  for (i=0; i<l; i++) {
+    if (data.to[i]->ref == &d) {delLink(i,DIR_TO,true);
+      DBG("  delLink TO:" << data.to[i]->ref << "->" << &d << " (deleted)");
+    };
+  };
+  l=data.from.size();
+  for (i=0; i<l; i++) {
+    if (data.from[i]->ref == &d) {
+      delLink(i,DIR_FROM,true);
+      DBG("  delLink FROM:" << data.from[i]->ref << "<-" << &d << " (deleted)");
+    };
+  };
+}
+
+/*!
 This function deletes a link to another object, specified by the port number
 */
 
@@ -765,54 +1393,96 @@ void Data::delLink_ID(objectid oid, objectid port, DIRECTION dir) {
   Ptr(oid)->delLink(port,dir);
 }
 
-void Data::delLink(objectid port, DIRECTION dir, bool del_other) {
+void Data::delLink(objectid port, DIRECTION dir, bool del_other,
+		bool delete_empty) {
   objectid corresponding_port;
-  vector<reference_descr> * tf;
+  vector<reference_descr*> * tf;
   if (dir == DIR_FROM ) {tf=&data.from;} 
   else if (dir == DIR_TO) {tf=&data.to;} 
   else {
-    ERROR("delLink: Improper direction specified: neither to nor from.");
+    ERROR("delLink(port=" << port <<", dir=" << direction_txt(dir) << ", del_other=" << tf_txt(del_other) <<") name=" << getName(false) <<": Improper direction specified: neither to nor from.");
     return;
   };
-  DBG("delLink: link=" << this << " port=" << port << " to/from.size()=" << (*tf).size());
+  DBG("delLink(port=" << port <<", dir=" << direction_txt(dir) << ", del_other=" << tf_txt(del_other) <<") name=" << getName(false) <<": link=" << this << " port=" << port << " to/from.size()=" << (*tf).size() << " delete_empty=" << tf_txt(delete_empty));
   DBG3(this->printStatus(false));
   if (port < (*tf).size()) {
     //If this was the first call to the function delete the corresponding entrance in the
     //other object
     if (del_other) {
-      (*tf)[port].ref->delLink((*tf)[port].port,inv_dir(dir),false);
+      (*tf)[port]->ref->delLink((*tf)[port]->port,inv_dir(dir),false,delete_empty);
     };
+//Delete the reference descriptor
+    delete (*tf)[port];
+
     //If this was the last reference in the vector, just delete it
     //otherwise copy the last object to the current reference port and then delete the last
     if (port<(*tf).size()-1) {
       (*tf)[port] = (*tf).back(); //(*tf)[(*tf).size()-1];
-      if ((*tf)[port].ref!=NULL) {
-	(*tf)[port].ref->setPort((*tf)[port].port,port,inv_dir(dir));
-      } else {ERROR("DelLink: Deleting a reference to a non-existing object");};
+      if ((*tf)[port]->ref!=NULL) {
+	(*tf)[port]->ref->setPort((*tf)[port]->port,port,inv_dir(dir));
+      } else {ERROR("delLink(port=" << port <<", dir=" << direction_txt(dir) << ", del_other=" << tf_txt(del_other) <<") name=" << getName(false) <<": Deleting a reference to a non-existing object");};
     };
     (*tf).pop_back();
   } else {
-    ERROR("delLink: Attempting to delete a non-existing Link. Port number too high.");
+    ERROR("delLink(port=" << port <<", dir=" << direction_txt(dir) << ", del_other=" << tf_txt(del_other) <<") name=" << getName(false) <<": Attempting to delete a non-existing Link. Port number too high.");
   };
+  if (!del_other && getNumberOfLinks()==0 && getOid()!=0 && delete_empty) {
+    DBG("delLink(port=" << port <<", dir=" << direction_txt(dir) << ", del_other=" << tf_txt(del_other) <<") name=" << getName(false) <<": deleting myself.");
+    delete this;
+  }
 }
+/*!\brief Returns the number links in direction dir. If dir=DIR_BOTH (default) return the total number of links.
 
-//The next was used for python binding - still necessary?
-DEF_DATA_FUNC_OF_DPTR_3PARS(objectid,setLink, DIRECTION, dir_type, DIRECTION, dir, objectid, port)
+Can, e.g., be used to kill an object if zero is returned.
+ */
+longint Data::getNumberOfLinks(DIRECTION dir){
+  longint n=0;
+  if (dir==DIR_FROM || dir==DIR_BOTH) n+=data.from.size();
+  if (dir==DIR_TO   || dir==DIR_BOTH) n+=data.to.size();
+  return n;
+}
 
 
 /*!
   \brief Set a link to another object
+
+dir_type specifies whether the link is a push or a pull link. For a push link
+(DIR_TO) the update flag will be propagated through the network whenever an
+objected is updated. A pull link (DIR_FROM) means that the updated flag will
+be set only locally when an update is made. Other objects will only check when
+their get method is called whether an update of a dependend object (i.e. all
+objects in the DIR_FROM direction) has happened.
+
+Example you have a parameter and a graph on a screen. In the PUSH link mode
+the screen will be updated whenever the parameter is changed. In the PULL link
+mode the parameter can be updated frequently without anything happening. Only
+when the user request a replot of the screen the parameter is checked for an
+update.
+
+All this only affects objects that have both: a data vector - acting as a local
+buffer - and a function actually generating the data.
+
+if thisport is >=0 then the link at port THISPORT will be
+overwritten. This is used by insert() and can cause harm if used
+improperly!
+
+See newObject.
 */
-objectid Data::setLink (Data *d,
+objectid Data::setLink(Data *d,
 			DIRECTION dir_type,
 			DIRECTION dir,
-			objectid port)
+		       objectid otherport,
+		       objectid thisport)
 {
+  DBG("setLink( I am =" << getName(true) << ", link to name=" << d->getName(true) << ", dir_type=" << direction_txt(dir_type)  << ", dir=" << direction_txt(dir) << ", otherport=" << otherport << ", thisport=" << thisport <<": started.");
   if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return -1;};
-  objectid prt;
   Data* p = this;
-  reference_descr rd;
-  
+  reference_descr* rd=new reference_descr;
+  modification_record newmod;
+  if (dir_type==DIR_NONE) dir_type=data.defdir;
+  newmod.ref=this;
+  newmod.version=0;
+
   if (d == this) {
     ERROR("setLink: Object can't point to itself.");
     return -1;
@@ -821,73 +1491,231 @@ objectid Data::setLink (Data *d,
     ERROR("setLink: Attempting to link Object to NullObject. It is likely that a wrong object name was specified.");
     return -1;
   }
-  prt=port;
   if (dir == DIR_FROM || dir == DIR_BOTH) {
-    if (prt<0) {prt=(d->setLink(this, dir_type, DIR_TO,data.from.size()));};
-    rd.direction=dir_type; rd.ref=d; rd.port=prt; rd.mod=0; rd.type=d->getType();
-    rd.name=d->getName(); rd.oid=d->getOid(); 
-    data.mapfrom[rd.name]=data.from.size();
-    data.from.push_back(rd);
-    return data.from.size()-1;
+    if (otherport<0) {
+      if (thisport>=0  & thisport < data.to.size()) {
+	otherport=(d->setLink(this, dir_type,DIR_TO,thisport));
+      } else {
+	otherport=(d->setLink(this, dir_type,DIR_TO,data.from.size()));
+      };
+    };
+    rd->direction=dir_type; rd->ref=d; rd->port=otherport; rd->type=d->getType();
+    rd->name=d->getName(); rd->oid=d->getOid(); 
+    rd->mod=newmod;
+    //    if (dir_type==PUSH) {rd->mod=1;} else {rd->mod=0;};
+    //    D2BG("setLink: mod=" << rd->mod);
+    if (thisport>=0 & thisport < data.from.size()) {
+      D2BG("setLink: using thisport len(mapfrom)="<<data.mapfrom.size()<<" removing name=" <<data.from[thisport]->name);
+      data.mapfrom.erase(data.mapfrom.find(data.from[thisport]->name));
+      D2BG("setLink: using thisport len(mapfrom)="<<data.mapfrom.size()<<" adding name="<< rd->name);
+      data.mapfrom[rd->name]=thisport;
+      data.from[thisport]=rd;
+      return thisport;
+    }
+    else {
+      data.mapfrom[rd->name]=data.from.size();
+      data.from.push_back(rd);
+      return data.from.size()-1;
+    };
+    //D2BG("setLink: data.from[len]->mod=" << data.from[data.from.size()-1]->mod);
+    
   } else if (dir == DIR_TO || dir == DIR_BOTH) {
-    if (prt<0) {prt=(d->setLink(this, dir_type,DIR_FROM,data.to.size()));};
-    rd.direction=dir_type; rd.ref=d; rd.port=prt; rd.mod=0; rd.type=d->getType();
-    rd.name=d->getName(); rd.oid=d->getOid(); 
-    data.mapto[rd.name]=data.to.size();
-    data.to.push_back(rd);
-    return data.to.size()-1;
+    if (otherport<0) {
+      if (thisport>=0  & thisport < data.to.size()) {
+	otherport=(d->setLink(this, dir_type,DIR_FROM,thisport));
+      } else {
+	otherport=(d->setLink(this, dir_type,DIR_FROM,data.to.size()));
+      };
+    };
+    rd->direction=dir_type; rd->ref=d; rd->port=otherport; rd->mod=newmod; rd->type=d->getType();
+    rd->name=d->getName(); rd->oid=d->getOid(); 
+    rd->mod=newmod;
+    //    if (dir_type==PULL) {rd->mod=1;} else {rd->mod=0;};
+    //D2BG("setLink: mod=" << rd->mod << " rd=" << rd);
+    if (thisport>=0 & thisport < data.to.size()) {
+      D2BG("setLink: using thisport len(mapto)="<<data.mapto.size()<<" removing name=" <<data.to[thisport]->name);
+      data.mapto.erase(data.mapto.find(data.to[thisport]->name));
+      D2BG("setLink: using thisport len(mapto)="<<data.mapto.size()<<" adding name=" << rd->name);
+      data.mapto[rd->name]=thisport;
+      data.to[thisport]=rd;
+      return thisport;
+    }
+    else {
+      data.mapto[rd->name]=data.to.size();
+      data.to.push_back(rd);
+      return data.to.size()-1;
+    };
+    //D2BG("setLink: data.to[len]->mod=" << data.to[data.to.size()-1]->mod);
   };
+  DOSILENT(setModification());
 };
 
+//The next was used for python binding, creating _Name, _ID etc.
+Data& Data::setLink_Ref_3(Data &d, DIRECTION dir_type, DIRECTION dir){
+  setLink(&d, dir_type,dir,-1,-1);  return d;}
+Data& Data::setLink_Ref_2(Data &d, DIRECTION dir_type){
+  setLink(&d, dir_type,DIR_FROM,-1,-1);  return d;}
+Data& Data::setLink_Ref_1(Data &d){
+  setLink(&d, DIR_NONE,DIR_FROM,-1,-1);  return d;}
 
+
+/*!
+\brief Returns the port number of the link to object d in direction dir.
+*/
+int Data::getPort(Data & d, DIRECTION dir) {
+  map<HString,int>* maptofrom;
+  map<HString,int>::iterator it;
+
+  if (dir==DIR_FROM) {
+    maptofrom = &data.mapfrom;
+  } else {
+    maptofrom = &data.mapto;
+  };
+    
+  it=maptofrom->find(d.getName());
+  if (it != maptofrom->end()){return it->second;}
+  else return -1;
+}
+
+/*!\brief Returns a vector of strings containing the names of all immediate neighbours in direction DIR.
+
+ */
+vector<HString> Data::getNeighbours(DIRECTION dir) {
+  vector<reference_descr*> *fromto;
+  vector<HString> vec;
+  if (dir==DIR_TO) {
+    fromto = & data.to;
+  } else {
+    fromto = &data.from;
+  };
+  vec.reserve(fromto->size());
+  for (longint i=0;i<(fromto->size());i++) vec.push_back((*fromto)[i]->name);
+  return vec;
+}
+
+/*!
+\brief Returns the reference descriptor (i.e. the recod describing a link to another object) for a given port number.
+*/
+Data::reference_descr Data::getLink(objectid port, DIRECTION dir) {
+  vector<reference_descr*> *fromto;
+  reference_descr rd;
+  rd.ref=NULL;
+
+  if (dir==DIR_TO) {
+    fromto = & data.to;
+  } else {
+    fromto = &data.from;
+  };
+    
+  if ((port>=0) && (port<((*fromto).size()))) {rd=*(fromto->at(port));};
+  return rd;    
+}
+
+/*!
+\brief Returns a pointer to the object hooked into port PORT in the FROM direction.
+*/
 Data* Data::from(objectid port) {
-  if (port >=0 && port < data.from.size()) {return data.from[port].ref;}
+  if (port >=0 && port < data.from.size()) {return data.from[port]->ref;}
   else {ERROR("data.from(): unknown reference port=" << port); return NULL;};
 }
 
+/*!
+\brief Returns a pointer to the object hooked into port PORT in the TO direction.
+*/
 Data* Data::to(objectid port) {
-  if (port >=0 && port < data.to.size()) {return data.to[port].ref;}
+  if (port >=0 && port < data.to.size()) {return data.to[port]->ref;}
   else {ERROR("data.to(): unknown reference port=" << port); return NULL;};
 }
 
-Data* Data::from(String name) {
+/*!
+\brief Returns a pointer to the object with name NAME in the FROM direction.
+*/
+Data* Data::from(HString name) {
 
   data.it=data.mapfrom.find(name);
-  if (data.it != data.mapfrom.end()){return data.from[data.it->second].ref;}
+  if (data.it != data.mapfrom.end()){return data.from[data.it->second]->ref;}
   else {ERROR("data.from(): unknown reference \"" << name << "\""); return NULL;};
 }
 
-Data* Data::to(String name) {
+/*!
+\brief Returns a pointer to the object with name NAME in the TO direction.
+*/
+Data* Data::to(HString name) {
   data.it=data.mapto.find(name);
-  if (data.it != data.mapto.end()){return data.to[data.it->second].ref;}
+  if (data.it != data.mapto.end()){return data.to[data.it->second]->ref;}
   else {ERROR("data.to(): unknown reference \"" << name << "\""); return NULL;};
 };
 
+/*!
+\brief Creates a new object between the current object (in TO direction) and the neighbouring object of name NAME. 
 
-//Currently the property list is not really used - delete it?
-void Data::setProperty(String name,String value){
+ */
+Data& Data::create(HString name){
+  Data * d = new Data(name,data.superior);
+  return *d;
+}
+
+
+/*!
+\brief Inserts an object between the current object (in TO direction) and the neighbouring object. 
+
+ */
+Data& Data::insert(Data & d, Data & neighbour){
+  DBG("insert(d=" << d.getName(true) << ", neighbour=" << neighbour.getName(true) <<"): Start");
+  map<HString,int>::iterator it=data.mapto.find(neighbour.getName());
+  if (it != data.mapto.end()){
+    int port=it->second;
+    reference_descr * rd=data.to[port];
+    DBG("insert(d=" << d.getName(true) << ", neighbour=" << neighbour.getName(true) <<") port=" << port<<", rd->port=" << rd->port);
+    setLink(&d,rd->direction,DIR_TO,-1,port);
+    neighbour.setLink(&d,rd->direction,DIR_FROM,-1,rd->port);
+    //    d.touch();
+    return d;
+  }
+  else {
+    ERROR("data.to(name=" << d.getName() <<", neighbour=" << neighbour.getName(true) <<") name=" << getName(true) <<": Unknown neighbour!"); 
+    return NullObject;
+  };
+}
+
+
+
+/*!
+\brief Inserts a new object between the current object (in TO direction)
+
+ */
+Data& Data::insertNew(HString newname, Data & neighbour){
+    return insert(create(newname),neighbour);
+}
+
+/*!
+Currently the property list is not really used - delete it?
+*/
+
+void Data::setProperty(HString name,HString value){
   if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return;};
-  map<String,String>::iterator it;
-  if (data.prop_ptr==NULL) {data.prop_ptr=new map<String,String>;}; //create if not yet present
+  map<HString,HString>::iterator it;
+  if (data.prop_ptr==NULL) {data.prop_ptr=new map<HString,HString>;}; //create if not yet present
   (*data.prop_ptr)[name,value];
   return;
 };
 
-String Data::getProperty(String name){
+HString Data::getProperty(HString name){
   if (data.prop_ptr==NULL) {return "";};
-  map<String,String>::iterator it;
+  map<HString,HString>::iterator it;
   it=data.prop_ptr->find(name);
   if (it != data.prop_ptr->end()){return it->second;} else {return "";};
 };
 
 
 /*!
-  Creates a new, dynamic data vector of a given type
+  Creates a new, dynamic data vector in the object (a "buffer") of a given type
 */
 void Data::newVector(DATATYPE type){
   if (data.d_ptr!=NULL) {delData();};
   data.type=type; 
-  data.d_ptr=new_vector(data.type,data.buflen); 
+  data.d_ptr=new_vector(data.type,0); 
+  data.len=0;
   DBG("new-vec data.d_ptr=" << data.d_ptr);
 }
 
@@ -897,6 +1725,37 @@ void Data::delData(){
   data.type=UNDEF;
 }
 
+/*! \brief Store a pyhton object reference in the  Data buffer.
+
+Used to store the pointer to a Python object. The Python object can be retrieved with pyretrieve.
+ */
+Data& Data::putPy(PyObject* pyobj) {
+  vector<HPointer> vp(1,reinterpret_cast<HPointer>(pyobj));
+  put(vp);
+  return *this;
+}
+/*! \brief Store a pyhton object reference in the  Data buffer and cause no update.
+Used to store the pointer to a Python object. The Python object can be retrieved with pyretrieve.
+ */
+Data& Data::putPy_silent(PyObject* pyobj) {
+  vector<HPointer> vp(1,reinterpret_cast<HPointer>(pyobj));
+  DOSILENT(put(vp));
+  return *this;
+}
+
+/*!  \brief Retrieve a pyhton object from Data buffer.
+
+Used retrieve a python object which was stored with pystore. This will
+create a new reference to the same python object stored with pystore.
+ */
+boost::python::handle<> Data::getPy() {
+    return boost::python::handle<>(boost::python::borrowed(reinterpret_cast<PyObject*>(getOne<HPointer>())));
+}
+
+
+
+//return_value_policy<manage_new_object>()
+
 template <class T>
 void Data::putOne(T one) {
   vector<T> vp(1,one);
@@ -905,7 +1764,7 @@ void Data::putOne(T one) {
 }
 
 template <class T>
-void Data::putOne(String name, T one) {
+void Data::putOne(HString name, T one) {
   Ptr(name)->putOne(one); 
 }
 
@@ -914,14 +1773,29 @@ void Data::putOne(objectid oid, T one) {
   Ptr(oid)->putOne(one); 
 }
 
+/*
+The follwing overloaded methods should be really removed and replaced by a call invoking data["name"]...
+ */
 template <class T>
-void Data::put(String name, vector<T> &vin) {
+void Data::put(HString name, vector<T> &vin) {
   Ptr(name)->put(vin); 
 }
 
 template <class T>
 void Data::put(objectid oid, vector<T> &vin) {
   Ptr(oid)->put(vin); 
+}
+
+/*!
+
+\brief Do not set modification flag during next put operation
+
+This method allows one to modify an object without setting the modification
+flag. This is valid only for the next operation. This should be used with
+care, since it can lead to an inconsistent network.
+ */
+void Data::noMod(){
+    data.noMod=true;
 }
 
 template <class T>
@@ -961,21 +1835,23 @@ void Data::delFunction(){
 }
 
 /*!
-  This method adds a function to the object that will performed whenever a recalc
+  This method adds a function to the object that will performed whenever an update
   is requested.
 */
-void Data::setFunction (String name,
-			DATATYPE type,
-			String library)
+void Data::setFunction (HString name,
+			HString library,
+			DATATYPE typ)
 {
   if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return;};
   if (data.superior!=NULL && data.superior->library_ptr!=NULL) {
     if (data.superior->library_ptr->inLibrary(name,library)) {
+      DBG("setFunction(" << name << "," << library << "," << datatype_txt(typ) << "): name=" << getName(true));
       delFunction(); //Delete old function if necessary;
       DataFuncDescriptor fd = *(data.superior->library_ptr->FuncDescriptor(name,library));
-      data.of_ptr = fd.newFunction(this);
-      if (data.d_ptr==NULL) {data.type=type;};
+      data.of_ptr = fd.newFunction(this,typ);
+      //      if (data.d_ptr==NULL) {data.type=typ;};
       data.origin=REF_FUNCTION;
+      setUpdateable();  //Make the function updateable by default
       setModification();
     } else {
       ERROR("setFunction: Function " << name << " in library " << library << " not found.");
@@ -989,43 +1865,92 @@ void Data::setFunction (String name,
 
 
 //Needed for Python Bindings
-template <class T> T Data::getOne_1_(address i){return getOne<T>(i);}
 template <class T> T Data::getOne_0_(){return getOne<T>();}
 
 template <class T>
-T Data::getOne(address i,objectid port){
+T Data::getOne(address i){
   Vector_Selector *vs;
   vs = new Vector_Selector;
   vs->setOne(i);
   vector<T> v(1);
-  get(v,vs,port);
+  get(v,vs);
   delete vs;
   return v.at(0);
 }
 
-void Data::recalc(bool force){
-  DBG("RECALC: name=" << data.name << " Empty=" << tf_txt(Empty())<< " silent=" << tf_txt(data.silent));
-  if (!Empty() && (!data.silent || force)) {
-    DEF_D_PTR(Number);
+
+/*!  \brief Update contents of onbject and execute function.
+
+Execute the internal function of the object and update the
+stored vector if present. Also propagate an updated message through
+the network, depending on the type of connection (PUSH/PULL). If you
+want to just mark the object as modified but not update itself (only
+the ones higher up) use .touch() instead.
+*/
+
+void Data::update(){
+  DBG("Update: name=" << data.name << " Empty=" << tf_txt(Empty())<< " silent=" << tf_txt(data.silent));
+  if (hasFunc()) {
+    DEF_D_PTR(HNumber);
     d_ptr_v=new_vector(data.type,data.buflen);
     CALL_FUNC_D_PTR(get);
     del_vector(d_ptr_v, data.type);
   };
 }
 
+/*!  \brief Update all objects in the network
+
+updateAll will start with the current object and then sequentially go
+through all objetcs according to their object ID backwards. Can be
+used to initialize the network.
+*/
+
+void Data::updateAll(){
+  HInteger i;
+  update();
+  if (data.superior!=NULL) {
+    for (i=data.superior->data_objects.size()-1; i>=0; i--) {
+      SaveCall(data.superior->data_objects[i]) data.superior->data_objects[i]->update();
+    };
+  } else {
+    ERROR("updateAll: No superior created yet, can't find any objects! (Should never happen...)");
+  }
+}
+
+/*!  \brief If necessary updates the current content of the object and
+calls its internal function. 
+
+AutoUpdate does not perform a full modification check (i.e. does not call
+checkModification), but relies on the modification flag to be properly
+set. This is the case when the update worm has crawled through the
+network. It also respects the AutoUpdate flag.
+*/
+
+void Data::doAutoUpdate(){
+  if (isModified()) {
+    if (hasFunc() && Updateable()) {
+      if (doesAutoUpdate()) update();
+    } else {
+    //These are objects which can't be updated, so just clear the update flag.
+      clearModification();
+    };
+  };
+}
+
+
 /*!
   Go backward or forward through the net until you find an object of the
   specified name returns NULL if not found and "this" (pointer to current object)
   for an empty string.
 */
-Data* Data::find_name(String name, DIRECTION dir) {
+Data* Data::find_name(HString name, DIRECTION dir) {
   Data *D_ptr=&NullObject; 
   if (name != data.name && name!="") {
     objectid i;
-    vector<reference_descr> *p_ref;
+    vector<reference_descr*> *p_ref;
     if (dir==DIR_TO) {p_ref = &data.to;} else {p_ref = &data.from;};
     for (i=0;i<(*p_ref).size() && D_ptr==&NullObject;i++){
-      D_ptr=(*p_ref)[i].ref->find_name(name,dir);
+      D_ptr=(*p_ref)[i]->ref->find_name(name,dir);
     };
     return D_ptr;
   } else {
@@ -1034,22 +1959,24 @@ Data* Data::find_name(String name, DIRECTION dir) {
 }
 
 
-//Check if any of the immediate relatives in direction dir has a given name and return
-//pointers to these objects. Returns multiple pointers in vec if multiple names are present.
-//The function returns true if the relative is found, and false if not.
+/*!
+Check if any of the immediate relatives in direction dir has a given name and return
+pointers to these objects. Returns multiple pointers in vec if multiple names are present.
+The function returns true if the relative is found, and false if not.
+*/
 
-  vector<Data*> Data::find_immediate_relatives(String name, DIRECTION dir) {
+  vector<Data*> Data::find_immediate_relatives(HString name, DIRECTION dir) {
   objectid i;
-  vector<reference_descr> *p_ref;
+  vector<reference_descr*> *p_ref;
   vector<Data*> vec;
-  DBG("find_immediate_relatives: name=" << name << " dir=" << direction_txt(dir) << " current object=" << data.name);
+  D2BG("find_immediate_relatives: name=" << name << " dir=" << direction_txt(dir) << " current object=" << data.name);
   if (dir==DIR_TO) {p_ref = &data.to;} else {p_ref = &data.from;};
   for (i=0;i<(*p_ref).size();i++){
-    if ((*p_ref)[i].name==name) {
-      vec.push_back((*p_ref)[i].ref);
+    if ((*p_ref)[i]->name==name) {
+      vec.push_back((*p_ref)[i]->ref);
     };
   };
-  DBG2("find_immediate_relatives: found=" << tf_txt(vec.size()>0) << " i=" << i); DBG3(printvec(vec));
+  D2BG2("find_immediate_relatives: found=" << tf_txt(vec.size()>0) << " i=" << i); D2BG3(printvec(vec));
   return vec;
 }
 
@@ -1057,41 +1984,42 @@ Data* Data::find_name(String name, DIRECTION dir) {
 //pointers to these object. Returns multiple pointers in vec if multiple names are present.
 //If not, seek the next generation of relatives. Returns only the relatives of the first object
 //to have relatives of the name searched for.
-//The function returns true if the relatives are found, and false if not.
 
-vector<Data*> Data::find_relatives(String name, DIRECTION dir) {
+vector<Data*> Data::find_relatives(HString name, DIRECTION dir) {
   objectid i;
   vector<Data*> vec;
-  vector<reference_descr> *p_ref;
+  vector<reference_descr*> *p_ref;
   vec=find_immediate_relatives(name,dir);
   if (vec.size()==0) {
     //search the next generation, if name is not found in the immediate vicinity
     if (dir==DIR_TO) {p_ref = &data.to;} else {p_ref = &data.from;};
     for (i=0;i<p_ref->size();i++){
-      vec_append(vec,(*p_ref)[i].ref->find_relatives(name,dir));
+      vec_append(vec,(*p_ref)[i]->ref->find_relatives(name,dir));
     };
   };
   return vec;
 }
 
 
-//find all relatives of name=name which have a vlaue in vector elems
+//find all relatives of name=name which have a value in vector elems
 template <class T>
-vector<Data*> Data::select_relatives(String name, vector<T> &elems, DIRECTION dir) {
+vector<Data*> Data::select_relatives(HString name, vector<T> &elems, DIRECTION dir) {
   vector<Data*> vec1,vec2;
   objectid i,s;
   bool found;
   vec1=find_relatives(name,dir);
-  DBG2("find_relatives: name=" << name << " dir=" << direction_txt(dir) << " vec1="); DBG3(printvec(vec1));
+//  DBG2("find_relatives: name=" << name << " dir=" << direction_txt(dir) << " vec1="); D2BG3(printvec(vec1));
   s=vec1.size();
   for (i=0;i<s;i++){
-    DBG2("in_set vec1[" << i << "] in ["); DBG3(printvec_noendl(elems)); DBG3(cout << "]" <<endl);
+//    DBG2("in_set vec1[" << i << "] in ["); DBG3(printvec_noendl(elems)); DBG3(cout << "]" <<endl);
     found=object_logic_in_set(vec1[i],elems);
-    DBG("found=" << tf_txt(found));
-    if (found) {DBG2("Found! "); 
+//    DBG("found=" << tf_txt(found));
+    if (found) {
+//	DBG2("Found! "); 
       vec2.push_back(vec1[i]); 
-      DBG("i=" << i << " vec2.size()=" << vec2.size()); 
-      DBG3(vec2[vec2.size()-1]->printStatus());};
+//      DBG("i=" << i << " vec2.size()=" << vec2.size()); 
+//      DBG3(vec2[vec2.size()-1]->printStatus());
+    };
   };
   return vec2;
 }
@@ -1101,30 +2029,40 @@ vector<Data*> Data::select_relatives(String name, vector<T> &elems, DIRECTION di
 //if rpos<0 then drops the last -npos objects from the right side
 //rpos is defaulted to 0
 
-vector<objectid> Data::IDs(String s) {return DPtrToOid(Find(s));}
-objectid Data::ID(String s) {return DPtrToOid(Find(s)).front();}
+vector<objectid> Data::IDs(HString s) {return DPtrToOid(Find(s));}
+objectid Data::ID(HString s) {
+    vector<Data*> vec = Find(s);
+    if (vec.size()==0) {return -1;};
+    return DPtrToOid(vec).front();
+}
 
 /*
 Returns a reference  to the object with the given object ID or Name
  */
 
-Data& Data::operator[] (String name) {return Object_Name(name);}
+Data& Data::operator[] (HString name) {return Object_Name(name);}
 Data& Data::operator[] (objectid oid) {return Object_ID(oid);}
 
-Data& Data::Object(String name) {return Object_Name(name);}
+Data& Data::Object(HString name) {return Object_Name(name);}
 Data& Data::Object(objectid oid) {return Object_ID(oid);}
 Data& Data::Object(Data &d) {return d;}
 
 
-Data& Data::Object_Name(String name) {
+Data& Data::Object_Name(HString name) {
   Data* ptr=Ptr(name);
-  if (ptr==&NullObject || ptr==NULL) {ERROR("Object_Name: Object of name=" << name << " not found.");};
+  if (ptr==&NullObject || ptr==NULL) {
+    DBG("Object_Name: Object of name=" << name << " not found.");
+    return NullObject;
+  };
   return *ptr;
 }
 
 Data& Data::Object_ID(objectid oid) {
   Data* ptr=Ptr(oid);
-  if (ptr==&NullObject || ptr==NULL) {ERROR("Object_ID: Object of ID=" << oid << " not found.");};
+  if (ptr==&NullObject || ptr==NULL) {
+    DBG("Object_ID: Object of ID=" << oid << " not found.");
+    return NullObject;
+  };
   return *ptr;
 }
 
@@ -1148,49 +2086,49 @@ Data* Data::Ptr(objectid oid) {
 /*
 Returns a pointer to the first object with the given name
  */
-Data * Data::Ptr(String name) {
+Data * Data::Ptr(HString name) {
   vector<Data*> vec = Find(name);
   if (vec.size()==0) {
     return &NullObject;
   } else {return vec.front();};
 }
 
-vector<Data*> Data::Find(String s, const int rpos) {
+vector<Data*> Data::Find(HString s, const int rpos) {
   vector<Data*> vec_in,vec_out;
   bool found=true;
   bool selection;
-  String name;
-  vector<String> names,elems;
+  HString name;
+  vector<HString> names,elems;
   vector<DIRECTION> dirs;
   parse_record_name_to_vector(s, names, dirs);
   DBG("Find: names=" << s); 
-  DBG2("names="); DBG3(printvec(names));
-  DBG2("Directions="); DBG3(printvec_txt(dirs,&direction_txt)); 
+  D2BG2("names="); D2BG3(printvec(names));
+  D2BG2("Directions="); D2BG3(printvec_txt(dirs,&direction_txt)); 
   objectid i,beg=0,end=names.size()-1;
   objectid j,n;
   vec_in.push_back(this); n=1;
   if (rpos>0) {beg=max(end-rpos+1,0);};
   if (rpos<0) {end=end+rpos;};
-  DBG("beg=" << beg << " end=" << end);
+  D2BG("beg=" << beg << " end=" << end);
   for (i=beg;i<=end && n>0;i++) {
     selection=parse_record_selection_to_vector(names[i],name,elems);
-    DBG2("parse_record_selection_to_vector: names[" << i << "]=" << names[i] << " selection=" << tf_txt(selection) << " name=" << name << " elems="); 
-    DBG3(printvec(elems));
+    D2BG2("parse_record_selection_to_vector: names[" << i << "]=" << names[i] << " selection=" << tf_txt(selection) << " name=" << name << " elems="); 
+    D2BG3(printvec(elems));
     vec_out.clear(); 
     for (j=0;j<n;j++) {
-      DBG("pre_append : " << "j=" <<j << " n=" << n << " vec_out.size()=" << vec_out.size());
+      D2BG("pre_append : " << "j=" <<j << " n=" << n << " vec_out.size()=" << vec_out.size());
       if (selection) {
 	vec_append(vec_out,vec_in[j]->select_relatives(name,elems,dirs[i]));
       } else {
 	vec_append(vec_out,vec_in[j]->find_relatives(name,dirs[i]));
       };
-      DBG("post_append: " << "j=" <<j << " n=" << n << " vec_out.size()=" << vec_out.size());
+      D2BG("post_append: " << "j=" <<j << " n=" << n << " vec_out.size()=" << vec_out.size());
     };
     vec_in=vec_out; n=vec_in.size();
-    DBG("n=" << n << "vec_in.size()=" << vec_in.size());
-    DBG2("vec_in="); DBG3(printvec(vec_in));
+    D2BG("n=" << n << "vec_in.size()=" << vec_in.size());
+    D2BG2("vec_in="); D2BG3(printvec(vec_in));
   };
-  return vec_in;
+  return vec_unique(vec_in);
 }
 
 //Sequentially go through the list  of names and find the corresponding name in the net, one after the other.
@@ -1198,7 +2136,7 @@ vector<Data*> Data::Find(String s, const int rpos) {
 //returns the NullObject if not found and "this" if the vector is of length 0.
 
 
-Data* Data::find_names(vector<String> names, vector<DIRECTION> dir) {
+Data* Data::find_names(vector<HString> names, vector<DIRECTION> dir) {
   if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return &NullObject;};
   Data *D_ptr=this; 
   objectid i;
@@ -1208,31 +2146,61 @@ Data* Data::find_names(vector<String> names, vector<DIRECTION> dir) {
   return D_ptr;
 }
 
-//Check if an object is empty, i.e. has neither function nor data vector ...
-
+/*
+\brief Check if an object is empty, i.e. has neither function nor data vector 
+*/
 
 bool Data::Empty(){
   return (data.of_ptr==NULL && data.d_ptr==NULL);
 }
+
+bool Data::hasFunc(){
+    return data.of_ptr!=NULL;
+}
+
+bool Data::hasData(){
+    return data.d_ptr!=NULL;
+}
+
+template <class T>
+void Data::inspect(vector<T> &vec){
+    if (!hasData()) {return;};
+    switch (data.type) {
+#define SW_TYPE_COMM(EXT,TYPE)			\
+	copycast_vec<TYPE,T>(data.d_ptr, &vec)
+#include "switch-type.cc"
+	ERROR("inspect: Undefined Datatype encountered while retrieving vector.");
+    };
+}
+
+HString Data::getFuncName(){
+    if (data.of_ptr == NULL) {return "";};
+    return data.of_ptr->getName();
+}
+
+
+
 
 /*
   Returns a parameter of an object. This means that for a relative of the current object is searched that has the name  "name". If found the value of that object is returned, otherwise a default value.
 
 */
 template <class T>
-T Data::getParameter(String name, T defval){
-  Data * dp;
-  dp = Ptr(name); 
-  DBG("getParameter: name=" << name << " ptr=" << dp << " NullObject=" << &NullObject << " Empty=" << tf_txt(dp->Empty()));
-  if (dp==&NullObject || dp->Empty()) {
-    DBG("getParameter: defval=" << defval);
-    return defval;
-  } else {
-    DBG("getParameter: val=" << dp->getOne<T>());
-    return dp->getOne<T>();
-  };
+T Data::getParameter(HString name, T defval){
+    Data * dp;
+    dp = Ptr(name); 
+    DBG("getParameter: name=" << name << " ptr=" << dp << " NullObject=" << &NullObject << " Empty=" << tf_txt(dp->Empty()));
+    if (dp==&NullObject || dp->Empty()) {
+	DBG("getParameter: Creating new object with name=" << name << " and value defval=" << defval);
+	Data* dpnew=newObject(name,data.defdir);
+	DOSILENT(dpnew->putOne(defval));
+	dpnew->setNetLevel(100);
+	return defval;
+    } else {
+	DBG("getParameter: val=" << dp->getOne<T>());
+	return dp->getOne<T>();
+    };
 }
-
 
 /*
 This looks for the first object that is available on port 0 and fill
@@ -1243,10 +2211,10 @@ vector to work on.
 template <class T>
 void Data::getFirstFromVector(vector<T> &v, Vector_Selector* vs){
   if (data.from.size()>0) {
-    if (data.from[0].ref!=NULL) {
-      data.from[0].ref->get(v,vs,0);
+    if (data.from[0]->ref!=NULL) {
+      data.from[0]->ref->get(v,vs);
     } else {
-      ERROR("getFirstFromVector: Pointer to first related object = NULL, object=" << getName());
+      ERROR("getFirstFromVector: HPointer to first related object = NULL, object=" << getName());
     };
   } else {
     ERROR("getFirstFromVector: No related object. Object=" << getName());
@@ -1259,89 +2227,102 @@ template <class T>
 void Data::get_1_(vector<T> &v){get(v);};
 
 
-//Creates an empty vector of proper type and calls a get on the object, throwing the vector away afterwards.
-//This is a bit ugly?
-void Data::redo(){
-  DEF_D_PTR( Integer );
-  switch (getType()) {
-#define SW_TYPE_COMM(EXT,TYPE) \
-  d_ptr_##EXT=new vector<TYPE>;\
-  get(*d_ptr_##EXT);            \
-  delete d_ptr_##EXT
-#include "switch-type.cc"
-  };
-}
-
 //The vector Selector will overwrite the default Selector of the data set
 
 //The basic get function described above extensively
+
+//NOTE: the port parameter is currently unused. Remove if possible.
+
 template <class T> 
-void Data::get(vector<T> &v, Vector_Selector *vs, objectid port) {
+void Data::get(vector<T> &v, Vector_Selector *vs) {
   objectid checkmod;
   DATATYPE type=WhichType<T>();
   DEF_D_PTR(T);
   ObjectFunctionClass* f_ptr=getFunction();
   d_ptr_v = data.d_ptr;
+  bool wormcreated=false;
 
   Vector_Selector *s_ptr;
   if (vs!=NULL) {s_ptr=vs;} else {s_ptr=data.s_ptr;};
   F_VECTOR_SELECTOR_DEFINITION( s_ptr );
 
-  DBG("get: name=" << data.name << ", port=" << port << ", vs1=" << vs1 << ", vs2=" << vs2);
+  DBG("get: name=" << data.name << ", vs1=" << vs1 << ", vs2=" << vs2);
 
   if (f_ptr==NULL) {   //No function but data with different type
-    if (d_ptr_v==NULL) {MESSAGE("No Data in Data Object!"); return;};
-    switch (data.type) {  //here we just have a data vector present, so just copy the data buffer to the vector
-#define SW_TYPE_COMM(EXT,TYPE) \
-       copycast_vec<TYPE,T>(d_ptr_v, &v, vs1)
-#include "switch-type.cc"
-      ERROR("get: Undefined Datatype encountered while retrieving vector.");
+    if (d_ptr_v==NULL) {
+      getFirstFromVector(v,vs);
+      DBG("No Data in Data Object!" << " name=" << getName(true)); 
       return;
+    } else {
+      switch (data.type) {  //here we just have a data vector present, so just copy the data buffer to the vector
+#define SW_TYPE_COMM(EXT,TYPE) \
+	copycast_vec<TYPE,T>(d_ptr_v, &v, vs1)
+#include "switch-type.cc"
+	ERROR("get: Undefined Datatype encountered while retrieving vector." << " name=" << getName(true));
+      };
+      if (Verbose()) {
+	cout << getName(true)<<"(";
+	if (v.size()>0) {cout << v[0];};
+	cout <<") -> ";
+      }
     };
   } else { //f_ptr != NULL - that means we need to execute a function
       DBG("get: Function " << f_ptr->getName() << " f_ptr=" << f_ptr);
       if (d_ptr_v==NULL) {  //here we have just a function, so execute
 			    //it, with output going to the vector to
 			    //be returned
+        incVersion();
 	switch (type){
 #define SW_TYPE_COMM(EXT,TYPE) \
 	  DBG("get: Calling .process of function " << f_ptr->getName() << "<" << #TYPE << "> started. ");\
 	  f_ptr->process_##EXT(static_cast<vector<TYPE>*>(static_cast<void*>(&v)),this, vs1);  //Note: only one of these is actually ever called
 #include "switch-type.cc"
-	  ERROR("Error (get): Unknown type encountered while processing an object function.");
+	  ERROR("Error (get): Unknown type encountered while processing an object function."  << " name=" << getName(true));
 	};  //end switch types
 	data.len=v.size();
+	if (Verbose()) {
+	    cout << getName(true)<<"(";
+	    if (data.len>0) {cout << v[0];};
+	    cout <<")~ -> ";
+	};
       } else {  //function and vector (buffer) are present, so execute
 		//function if network in the from-direction has been
 		//modified, with output to internal data vector and
 		//copy that to the output vector
 	checkmod=checkModification();
-	DBG("GET: name=" << data.name << " checkmod=" << checkmod);
-	if (checkmod>0) {
-	  switch (type){
-#define SW_TYPE_COMM(EXT,TYPE) \
-            f_ptr->process_##EXT(d_ptr_##EXT,this, vs1);\
+	wormcreated=checkmod && Worm!=NULL && Worm->size()>0;
+	DBG("GET: name=" << data.name << " checkmod=" << tf_txt(checkmod) << " worm created=" << tf_txt(wormcreated));
+	switch (type){
+#define SW_TYPE_COMM(EXT,TYPE)					\
+	    if (checkmod) {incVersion();f_ptr->process_##EXT(d_ptr_##EXT,this, vs1);}; \
             copycast_vec<TYPE,T>(d_ptr_v, &v)
 #include "switch-type.cc"
-	    ERROR("Error (get): unknown type.");
-	  };
+	    ERROR("Error (get): unknown type." << " name=" << getName(true) );
 	};
 	data.len=v.size();
+	if (Verbose()) {
+	    cout << getName(true)<<"(";
+	    if (data.len>0) {cout << v[0];};
+	    if (checkmod) {cout <<")* -> ";}
+	    else {cout <<")$ -> ";};
+	};
       }; //end else d_ptr!=0 && f_ptr!=0
   }; // end else f_ptr!=0
+
   
   if (vs2!=NULL) {v=(*vs2).get(v);}; //Select on values if necessary ....
-  clearModification(port);
+  clearModification();
+  if (wormcreated) executeUpdateWorm();
 }
 
-Data::Data(String name,superior_container * superior){
+Data::Data(HString name,superior_container * superior){
 
   magiccode = MAGICCODE; //allows one to verify the data object as such
 
   DBG("Data: name=" << name << " this=" << this);
   data.name=name;
   data.origin=REF_NONE;
-  data.buflen=DEF_DATA_BUFFER_SIZE;
+  data.buflen=0;
   data.len=0;
   data.dimensions.push_back(0);
   data.dataclass=DAT_CONTAINER;
@@ -1351,6 +2332,18 @@ Data::Data(String name,superior_container * superior){
   data.s_ptr=NULL;
   data.of_ptr=NULL;
   data.d_ptr=NULL;
+  data.noMod=false;
+  data.modified=true;
+  data.beingmodified=false;
+  data.autoupdate=true;
+  data.updateable=false;
+  data.silent=false;
+  data.verbose=0;
+  data.defdir=PUSH;
+  data.netlevel=1;
+  setVersion(1);
+  Worm = NULL;
+
   //There is no superior, so create one
   if (superior==NULL){
     DBG("Data: Create new superior");
@@ -1361,11 +2354,15 @@ Data::Data(String name,superior_container * superior){
     data.superior->data_objects.push_back(this);
     DBG("Data: Create new Data Func Library Class");
     data.superior->library_ptr=new DataFuncLibraryClass;
-    //Initialize the data function libraries
+    //Initialize the data function libraries - this should be automized
     DBG("Data: Publish library functions Sys");
     DataFunc_Sys_Library_publish(data.superior->library_ptr); 
     DBG("Data: Publish library functions Qt");
     DataFunc_Qt_Library_publish(data.superior->library_ptr); 
+    DBG("Data: Publish library functions Qt");
+    DataFunc_Py_Library_publish(data.superior->library_ptr); 
+    DBG("Data: Publish library functions CR");
+    DataFunc_CR_Library_publish(data.superior->library_ptr); 
   } else {
     data.superior=superior;
     //The superior vector is densely filled, so expand it
@@ -1377,12 +2374,12 @@ Data::Data(String name,superior_container * superior){
       data.superior->no_of_data_objects=data.superior->data_objects.size();
       data.oid=data.superior->no_of_data_objects-1;
     } else {
-    //The superior vector has gaps, so find them
+      DBG("Data creator: no_of_data_objects=" << data.superior->no_of_data_objects << ", data_objects.size()="<< data.superior->data_objects.size() <<": The superior vector has gaps, so find them.");
       data.oid=0;
-      while (data.oid<data.superior->data_objects.size()-1 && data.superior->data_objects[data.oid]!=NULL ) {
+      while (data.oid<data.superior->data_objects.size()-1 && data.superior->data_objects[data.oid]!=&NullObject ) {
 	data.oid++;
       };
-      if (data.oid>=data.superior->data_objects.size()-1 || data.superior->data_objects[data.oid]!=NULL) {
+      if (data.oid>=data.superior->data_objects.size()-1 || data.superior->data_objects[data.oid]!=&NullObject) {
 	ERROR("Data Constructor: Found no free OID for new object. no_of_data_objects and data_objects are inconsistent. Internal error.");
       } else {
 	data.superior->no_of_data_objects++;
@@ -1391,6 +2388,7 @@ Data::Data(String name,superior_container * superior){
       };
     };
   };
+  DBG("Data: Done!");
 }
 
 Data::~Data() {
@@ -1425,6 +2423,7 @@ Data::~Data() {
   if (data.d_ptr!=NULL) {DBG("Delete Object: name=" << data.name << ", ptr=" << data.d_ptr); delData();};
   if (data.unit_ptr!=NULL) {delete data.unit_ptr;};
   if (data.prop_ptr!=NULL) {delete data.prop_ptr;};
+  if (Worm!=NULL) {delete Worm;};
   size=data.to.size()-1; for (i=size;i>=0;i--) {delLink(i,DIR_TO);};
   size=data.from.size()-1; for (i=size;i>=0;i--) {delLink(i,DIR_FROM);};
 }
@@ -1438,49 +2437,191 @@ void Data::delObject_ID(objectid oid)
   Ptr(oid)->~Data();
 }
 
-void Data::delObject_Name(String name)
+void Data::delObject_Name(HString name)
 {
   Ptr(name)->~Data();
 }
 
-void Data::delObject(String name)
-{
-  Ptr(name)->~Data();
+/*! \brief Called by delObject to delete object itself.
+
+ */
+void Data::delOtherObject(Data *ptr){
+  DBG("delOtherObject(" << ptr << ") name=" << getName(false) <<": Deleting other object -> " << ptr -> getName());
+  delete ptr;
 }
 
-void Data::delObject(objectid oid)
+/*! \brief Erases a neighbouring object from the network and take over its links (for Python binding)
+ */
+Data& Data::erase_1(Data &d) {erase(d);};
+
+/*! \brief Erases a neighbouring object in direction DIR from the network and take over its links
+ */
+Data& Data::erase(Data &d,DIRECTION dir)
 {
-  Ptr(oid)->~Data();
+  longint port;
+  longint i;
+  reference_descr rd;
+
+  port = d.getPort(*this,inv_dir(dir));
+  if (port<0) {
+    ERROR("erase(neighbour name=" << d.getName(true) << ", dir=" << direction_txt(dir) << ") name=" <<getName(true) <<": Neighbour doesn't know me ...");
+    return NullObject;
+  };
+  d.delLink(port,inv_dir(dir),false,false);
+
+  port = getPort(d,dir);
+
+  DBG("erase(neighbour name=" << d.getName(true) << ", dir=" << direction_txt(dir) << "name=" <<getName(true) <<": Start");
+
+  if (port<0) {
+    ERROR("erase(neighbour name=" << d.getName(true) << ", dir=" << direction_txt(dir) << ") name=" <<getName(true) <<": Neighbour not found in specified direction.");
+    return NullObject;
+  };
+  //Now look at the Links of the object to be deleted
+
+  longint n=d.getNumberOfLinks(dir);
+  DBG("erase: NumberOfLinks in " << d.getName(true) <<" = " << n);
+  for (i=0; i<n; i++) {
+    rd=d.getLink(i,dir);
+    DBG("erase: i=" << i);
+    if (rd.ref==NULL) {
+      ERROR("erase(neighbour name=" << d.getName(true) << ", dir=" << direction_txt(dir) << "name=" <<getName(true) <<": Invalid link returned from Neighbour.");
+      return NullObject;
+    };
+    //Replace the link in the object linked to the erased object with links to this object
+    if (i==0) {
+      DBG("erase: Special case i=0");
+      setLink(rd.ref,rd.direction,dir,rd.port,port);
+      SaveCall(rd.ref) rd.ref->setLink(this,rd.direction,inv_dir(dir),port,rd.port);
+    } else {
+      SaveCall(rd.ref) rd.ref->setLink(this,rd.direction,inv_dir(dir),-1,rd.port);
+    }
+  };
+  for (i=n-1; i>=0; i--) {
+    DBG("erase: Deleting Link in dying object port=" << i);
+    d.delLink(i,dir,false,false);
+  };
+  d.delObject();
+  if (!data.silent) touch();
+  return *this;
 }
 
+/*! \brief Delete an Object and remove it from the network
 
-vector<objectid> Data::newObjects_ID(String name,DIRECTION dir_type) 
+Will first cut all links, then perform and update, and finally, call
+upon the root object to delete the current object from memory.
+ */
+void Data::delObject()
+{
+  vector<Data*> dvec;
+  longint i;
+
+  //First cut all Links in From direction
+  longint size=data.from.size(); 
+  DBG("delObject() name=" << getName(true) <<": Number of FROM links=" << size);
+  DBG3(printStatus());
+  for (i=size-1;i>=0;i--) {delLink(i,DIR_FROM);};
+
+  //Cut Links in TO direction and store them locally
+  
+  size=data.to.size(); 
+  DBG("delObject() name=" << getName(true) <<": Number of TO links=" << size);
+  for (i=size-1;i>=0;i--) {
+    dvec.push_back(data.to[i]->ref);
+    delLink(i,DIR_TO);
+  };
+
+  
+  //Create a new modification message
+  modification_record newmod;
+
+  newmod.version=incVersion();
+  newmod.ref=this;
+  DBG("delObject: version=" << newmod.version << ", size=" << size);
+  //Now signal the modification higher up (but only if the object is
+  //not isolated - in that case it was killed by delLink)
+  for (i=0;i<size;i++) {
+    SaveCall(dvec[i]) 
+      {if (dvec[i]->getNumberOfLinks()>0) dvec[i]->setModification(newmod);};
+  };
+  DBG("delObject: executeUpdateWorm");
+
+  if (!data.silent && size>0) executeUpdateWorm();
+
+  //Call Root object and delete itself...
+  if (data.superior!=NULL) {
+    if (data.superior->data_objects.size()>=1) {
+      SaveCall(data.superior->data_objects[0]) data.superior->data_objects[0]->delOtherObject(this);
+    } else {
+      ERROR("delObject() name=" << getName() <<": No objects left in superior to delete, including the current object. Something is seriously wrong with the system...");
+    };
+  } else {
+    ERROR("delObject() name=" << getName() <<": No superior created yet, will self-destruct delete myself!");
+    delete this;
+  };
+}
+
+/*!
+Creates new objects and returns a vector of objectids. Mainly used for python bindings.
+ */
+vector<objectid> Data::newObjects_ID(HString name,DIRECTION dir_type) 
 {
   vector<Data*> objects = newObjects(name,dir_type);
   return DPtrToOid(objects);
 }
 
-vector<Data*> Data::newObjects(String name, DIRECTION dir_type) 
+/*!  \brief Creates new objectx and returns a references to teh first data
+  object. Mainly used for python bindings.  Calls newObjects.
+ */
+
+Data& Data::newObject_Ref(HString name, DIRECTION dir_type){
+    vector<Data*> vec=newObjects(name, dir_type);
+    if (vec.size()==0) {return NullObject;};
+    return *vec[0];
+} 
+
+Data& Data::newObject_Ref_1(HString name){return newObject_Ref(name);}
+
+Data* Data::newObject(HString name, DIRECTION dir_type){
+    vector<Data*> vec=newObjects(name, dir_type);
+    if (vec.size()==0) {return NULL;};
+    return vec[0];
+} 
+
+/*!  Create new objects. The name specifies the name. If it is preceded by a '
+then the object will be a predecessor of the current objects. With nothing or
+a ":" preceding, the object will be a successor. The name can also have
+existing object names, which means that the new object will be attached to
+these and not the current object. If there are several objects with this
+name on the same level, then multiple objects are created at once.  dir_type
+specifies the kind of link (push or pull) - see setLink for a description
+
+ */
+vector<Data*> Data::newObjects(HString name, DIRECTION dir_type, objectid maxparents) 
 {
   vector<Data*> parents;
   vector<Data*> children;
   DIRECTION dir;
   int n1,n2=0;
+  objectid size;
+  if (dir_type==DIR_NONE) dir_type=getDefaultDirection();
   //Determine the direction of the link. If name is preceded by ' then the new object links to the old one
   //and is not derived from it.
   n1=string_rfind_chars(name,RECORD_SEP,n2);
   if ((n1>0) && (n2==1)) {dir=DIR_TO;} else {dir=DIR_FROM;};
   DBG("newObjects: determine direction n1 = " << n1 << " n2=" << n2 << " dir=" << direction_txt(dir));
-  String newname=string_rfind_chars_substr(name);
+  HString newname=string_rfind_chars_substr(name);
   objectid i;
   if (name!=newname) {parents=Find(name,-1);} else {parents.push_back(this);};
   if (parents.size()==0) {
-    ERROR("new(\"" << name << "\"): Parent not found!");
+      ERROR("new(\"" << name << "\"): Parent not found!");
   } else {
-    for (i=0; i<parents.size(); i++) {
+      size=maxparents<=0 ? parents.size() : maxparents;
+	  for (i=0; i<size; i++) {
       if (parents[i]!=&NullObject) {
 	DBG("Creating new object: " << newname << " i_parent=" << i);
 	children.push_back(new Data(newname,data.superior));
+	DBG("NewObjects: data.superior=" << data.superior);
 	DBG("No of objects=" << data.superior->no_of_data_objects);
 	children.back()->setLink(parents[i],dir_type,dir,-1);
       }
@@ -1491,19 +2632,19 @@ vector<Data*> Data::newObjects(String name, DIRECTION dir_type)
 }
 
 template <class T>
-vector<Data*> Data::newObjects(String name, T val, DIRECTION dir_type) {
+vector<Data*> Data::newObjects(HString name, T val, DIRECTION dir_type, objectid maxparents) {
   vector<Data*> dobs;
   objectid i;
-  dobs=newObjects(name,dir_type);
+  dobs=newObjects(name,dir_type,maxparents);
   for (i=0;i<dobs.size();i++) {dobs[i]->putOne(val);};
   return dobs;
 }
 
 template <class T>
-vector<Data*> Data::newObjects(String name, vector<T> vec, DIRECTION dir_type) {
+vector<Data*> Data::newObjects(HString name, vector<T> vec, DIRECTION dir_type, objectid maxparents) {
   vector<Data*> dobs;
   objectid i;
-  dobs=newObjects(name,dir_type);
+  dobs=newObjects(name,dir_type,maxparents);
   for (i=0;i<dobs.size();i++) {dobs[i]->put(vec);};
   return dobs;
 }
@@ -1524,10 +2665,10 @@ Currently no longer used - tests are done from Python now.
 */
 
 bool test_result_verbose = true;
-map<String,bool> test_results;
+map<HString,bool> test_results;
 
 template <class T>
-bool test_result(String routine, vector<T> v1, vector<T> v2){
+bool test_result(HString routine, vector<T> v1, vector<T> v2){
   bool result=(v1==v2);
   test_results[routine]=result;
   if (test_result_verbose) {
@@ -1535,12 +2676,12 @@ bool test_result(String routine, vector<T> v1, vector<T> v2){
     cout << "Expected: "; printvec(v1);
     cout << "Result  : "; printvec(v2);
   };
-  cout << "TEST " << routine << " " << pf_txt(result) << endl;
+  cout << "TEST " << routine << " " << tf_txt(result) << endl;
   return result;
 }
 
 template <class T>
-bool test_result(String routine, T v1, T v2){
+bool test_result(HString routine, T v1, T v2){
   bool result=(v1==v2);
   test_results[routine]=result;
   if (test_result_verbose) {
@@ -1554,8 +2695,8 @@ bool test_result(String routine, T v1, T v2){
 
 int test_parse() {
   vector<DIRECTION> v;
-  vector<String> s;
-  String name;
+  vector<HString> s;
+  HString name;
   name="LOFAR:Station:Ant'inc'dec:list"; parse_record_name_to_vector(name,s,v); cout <<name<<endl; printvec(s); printvec_txt(v,&direction_txt);
   name="LOFAR"; parse_record_name_to_vector(name,s,v); cout <<name<<endl; printvec(s); printvec_txt(v,&direction_txt);
   name=":list"; parse_record_name_to_vector(name,s,v); cout <<name<<endl; printvec(s); printvec_txt(v,&direction_txt);
@@ -1571,19 +2712,108 @@ int test_parse() {
 
 }
 
-String mytest(){cout << "Hello HF World" << endl; return "Hi!";}
-vector<int> mytest2(){
+HString mytest(){cout << "Hello HF World" << endl; return "Hi!";}
+
+float* mytest2(vector<HNumber>vec){
   vector<int> v; 
+  float* ary;
+  
   for (int i=0;i<10; i++) {v.push_back(i);};
   cout << "mytest2" << endl; 
-  return v;}
-vector<String> mytest3(){
-  vector<String> v; 
-  for (int i=0;i<10; i++) {v.push_back("Hi");};
-  cout << "mytest3" << endl; 
+  return ary;}
+
+
+mglData * mytest3(){
+    mglData * dp;
+    dp = new mglData(50);
+    dp->Modify("0.7*sin(2*pi*x) + 0.5*cos(3*pi*x) + 0.2*sin(pi*x)");
+    return dp;
+}
+
+mglData& mytest4(){
+    cout << "mytest4" << endl; 
+    mglData d(50);
+    d.Modify("0.7*sin(2*pi*x) + 0.5*cos(3*pi*x) + 0.2*sin(pi*x)");
+    return d;
+}
+
+float* mytest5(){
+    float d[50];
+    int i;
+    for (i=0;i++;i<50) {d[i]=i*1.5;}
+    return d;
+}
+
+vector<HNumber>& mytest6(){
+  vector<HNumber> v; 
+  for (int i=0;i<10; i++) {v.push_back(i*1.5);};
+  cout << "mytest6" << endl; 
   return v;
 }
 
+/*------------------------------------------------------------------------
+Here are some functions that are needed to interact between boost python and
+SWIG objects. Specifically for getting vector data into an mglData object
+------------------------------------------------------------------------*/
+
+#include <mgl/mgl_qt.h>
+
+//The basic wrapper SWIG uses ...
+struct PySwigObject {
+    PyObject_HEAD 
+    void * ptr;
+    const char * desc;
+};
+
+/*
+This function returns the pointer to an object exposed in SWIG 
+ */
+void* extract_swig_wrapped_pointer(PyObject* obj)
+{
+    char thisStr[] = "this";
+    //first we need to get the this attribute from the Python Object
+    if (!PyObject_HasAttrString(obj, thisStr))
+        return NULL;
+        
+    PyObject* thisAttr = PyObject_GetAttrString(obj, thisStr);
+    if (thisAttr == NULL)
+        return NULL;
+    //This Python Object is a SWIG Wrapper and contains our pointer
+    return (((PySwigObject*)thisAttr)->ptr);
+}
+
+//just prints the pointer of a Python Object
+void PyGetPtr(PyObject* obj){
+    cout << reinterpret_cast<void*>(obj) << endl;
+}
+ 
+/*
+in the definiton of our boost python module in the .hpp file, we then have to
+add the follwoing line
+
+boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_id<mglData>());
+
+which tells boost::python to recognize an object of type mglData and use our
+extraction function above.
+ */
+
+//This just sets the data in an mgData wrapper to the STL vector vec.  The
+//function is exposed to python (in hfget.hpp) and can be called interactively
+void mglDataSetVecN(mglData* md, vector<HNumber> &vec){
+    HNumber * a = &(vec[0]);
+    md->Set(a,vec.size());
+}
+
+/*
+void mglDataSetVecI(mglData* md, vector<HInteger> &vec){
+    HInteger * a = &(vec[0]);
+    md->Set(a,vec.size());
+}
+*/
+
+//------------------------------------------------------------------------
+// End Swig compatibility tools
+//------------------------------------------------------------------------
 
 
 //Just a trick to make sure all instances are created, it is
@@ -1593,8 +2823,8 @@ void instantiate_hfget(DATATYPE type){
   Data d;
   Vector_Selector vs;
 
-  DEF_D_PTR(Integer);
-  DEF_VAL(Integer);
+  DEF_D_PTR(HInteger);
+  DEF_VAL(HInteger);
 
   switch (type){
 
@@ -1604,6 +2834,8 @@ d.getParameter("NIX",*val_##EXT);\
 d.getFirstFromVector(*d_ptr_##EXT, &vs);\
 d.putOne(*val_##EXT);\
 d.put(*d_ptr_##EXT);\
+d.inspect(*d_ptr_##EXT);\
+vec_append(*d_ptr_##EXT,*d_ptr_##EXT);			\
 WhichType<TYPE>();\
 printvec(*d_ptr_##EXT,8);\
 printvec_noendl(*d_ptr_##EXT,8);\
@@ -1614,5 +2846,14 @@ cast_ptr_to_value<TYPE>(NULL, INTEGER)
   }
 }
 
+/* specialize has_back_reference for Data
+namespace boost { namespace python
+{
+  template <>
+  struct has_back_reference<Data>
+      : mpl::true_
+  {};
+}}
+*/
 
 #include <GUI/hfget.hpp>

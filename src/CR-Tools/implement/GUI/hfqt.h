@@ -44,7 +44,7 @@ class HQLabel : public QLabel {
  private:
   
   QString label_text;
-  Integer ncalled;
+  HInteger ncalled;
   
 };
 

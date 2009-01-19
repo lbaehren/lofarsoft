@@ -26,6 +26,10 @@
 
 #define MAGICCODE 260966
 
+#define SaveCall( REF ) if (!isValidDataObject( REF )) {ERROR(getName(true) << ": Data Object reference invalid. Network corrupt.");} else 
+
+
+
 /* Namespace usage */
 using namespace std;
 
@@ -54,12 +58,12 @@ class DataFuncLibraryClass;
   "get" (i.e. autmatically converted).
   
   Every data is a vector and right now we only allow the follwing types:
-  - Pointer,
-  - Integer,
-  - Number (i.e. floats),
-  - Complex, 
-  - String.
-  Complex data structures (i.e. "structs" or records) have to be built up by a
+  - HPointer,
+  - HInteger,
+  - HNumber (i.e. floats),
+  - HComplex, 
+  - HString.
+  HComplex data structures (i.e. "structs" or records) have to be built up by a
   network of object! Single parameters are stored as vectors of length
   one. 
   
@@ -157,14 +161,25 @@ class DataFuncLibraryClass;
   
   Later one could implement more complex logic, eg. "(Station>2&&Station<10):Data" ...
 */
+
+
+typedef vector<Data*> worm;
+
+bool isValidDataObject(Data* obj);
+
 class Data {
   
  public:
   
   int magiccode;
+
+  struct modification_record {
+    Data* ref;
+    longint version;
+  };
   
   struct superior_container {
-    /*! Pointer to the root Data object in a chain of object */
+    /*! HPointer to the root Data object in a chain of object */
     Data * root;
     /*! The number of Data objects attached */
     objectid no_of_data_objects;
@@ -178,16 +193,16 @@ class Data {
   */
   struct reference_descr {
     //! Name of the object linked to
-    String name;
+    HString name;
     //! ID of the object
     objectid oid;
-    //! Pointer the object links to
+    //! HPointer the object links to
     Data* ref;
     //! Stores the input/channel/port the link is established to
     objectid port;
     DIRECTION direction;
     //! Keep track of whether an object was modified - 0 if not modified
-    modval mod;
+    modification_record mod;
     //! Stores the type of object the reference is pointing to
     DATATYPE type;
   };
@@ -197,8 +212,8 @@ class Data {
   //or whether that is by default an X, or Y-axis value, you name it ...
   
   /*  struct properties_descr {
-      String name;
-      String value;
+      HString name;
+      HString value;
       };*/
   
   /*Struct containing Information necessary to describe a local parameter, 
@@ -206,21 +221,21 @@ class Data {
   
   /*!
     Defines a unit that goes with the data and also a prefix "milli, mikro,
-    nano, etc." adn scalefactor
+    nano, etc." and scalefactor
   */
   struct unit_descr {
     /*! The unit of the quantity */
-    String unit;
+    HString unit;
     /*! The scale factor */
-    Number scalefactor;
+    HNumber scalefactor;
     /*! Prefix of the unit */
-    String prefix;
+    HString prefix;
   };
   
   struct data_field {
     
     /*! Name identifying the data field */
-    String name;
+    HString name;
     
     /*! ID of the object */
     objectid oid;
@@ -233,13 +248,26 @@ class Data {
     /*! Not yet implemented, to be used for arrays */
     vector<address> dimensions;
     /*! This object links TO that one or derives FROM a link */
-    vector<reference_descr> to;
+    vector<reference_descr*> to;
     /*! This object links TO that one or derives FROM a link */
-    vector<reference_descr> from;
+    vector<reference_descr*> from;
     /*! If true then modifications are not passed on in a DIR_TO connection */
+
+    longint version; 
+    longint netlevel; 
+    bool beingmodified;
+    bool modified;
+
     bool silent;
-    map<String,int> mapto,mapfrom;
-    map<String,int>::iterator it; //nonsense, but pure convenience in programming ....
+    bool noMod;
+    bool autoupdate;
+    bool updateable;
+    longint verbose;
+/*! Flag which states whether the object is modified or not*/
+    DIRECTION defdir;
+
+    map<HString,int> mapto,mapfrom;
+    map<HString,int>::iterator it; //nonsense, but pure convenience in programming ....
     
     /*! This pointer points to a class describing the function used to operate on
       the data. */
@@ -247,9 +275,9 @@ class Data {
     
     Vector_Selector* s_ptr; //This pointer points to a selector field
     
-    map<String,String> *prop_ptr;  //freely definabel properties of data set
+    map<HString,HString> *prop_ptr;  //freely definabel properties of data set
     
-    DATATYPE type; //Gives the data type in vector: Integer, (real)Number, Complex, or String ...
+    DATATYPE type; //Gives the data type in vector: HInteger, (real)HNumber, HComplex, or HString ...
     DATACLASS dataclass; //Specifies data class (actual vector data, or just paramters, or an container ...)
     unit_descr *unit_ptr;
     void *d_ptr; //Finally, this pointer points to the data 
@@ -260,54 +288,71 @@ class Data {
     superior_container * superior;
   };
   
-  void print_reference_descr(reference_descr rd);
-  void printAllStatus(bool short_output=true);
+  HString reference_descr_str(reference_descr *rd);
+  void printAllStatus(bool short_output=true,longint maxlevel=9999);
   
-  void printDecendants (String rootname="");
+  void printDecendants (HString rootname="");
   
   void printStatus(bool short_output=true);
+  HString Status(bool short_output=true);
   
+  vector<HString> listNames(DIRECTION dir);
+  vector<objectid> listIDs(DIRECTION dir);
+  vector<DIRECTION> listDirs(DIRECTION dir);
+  vector<HString> listModFlags(DIRECTION dir);
+  vector<objectid> getAllIDs();
+
   Vector_Selector *sel();
   void new_sel();
   void del_sel();
   
   void setPort(objectid port, objectid refport, DIRECTION dir);
-  
-  Data* from(String name);
-  Data* to(String name);
+
+  vector<HString> getNeighbours(DIRECTION dir);
+  int getPort(Data & d, DIRECTION dir);
+  reference_descr getLink(objectid port, DIRECTION dir);
+
+  Data* from(HString name);
+  Data* to(HString name);
   
   Data* from(objectid port);
   Data* to(objectid port);
   
-  void setProperty(String name,String value);
-  String getProperty(String name);
+  Data& create(HString name);
+  Data& insert(Data & d, Data & neighbour);
+  Data& insertNew(HString newname, Data & neighbour);
+  Data& erase(Data &d,DIRECTION dir=DIR_TO);
+  Data& erase_1(Data &d);
+  
+  void setProperty(HString name,HString value);
+  HString getProperty(HString name);
   
   
-  vector<Data*> find_immediate_relatives(String name, DIRECTION dir);
-  vector<Data*> find_relatives(String name, DIRECTION dir);
+  vector<Data*> find_immediate_relatives(HString name, DIRECTION dir);
+  vector<Data*> find_relatives(HString name, DIRECTION dir);
   
   template <class T>
-    vector<Data*> select_relatives(String name, vector<T> &elems, DIRECTION dir);
+    vector<Data*> select_relatives(HString name, vector<T> &elems, DIRECTION dir);
   
-  vector<Data*> Find(const String s, const int rpos=0);
+  vector<Data*> Find(const HString s, const int rpos=0);
   
-  vector<objectid> IDs(String s);
-  objectid ID(String s);
+  vector<objectid> IDs(HString s);
+  objectid ID(HString s);
   
-  Data* Ptr(String name);
+  Data* Ptr(HString name);
   Data* Ptr(objectid oid);
   //This one is used for python
   
-  Data& Object_Name(String name);
+  Data& Object_Name(HString name);
   Data& Object_ID(objectid oid);
   Data& Object_Ref(Data& d);
-  Data& Object(String name);
+  Data& Object(HString name);
   Data& Object(objectid oid);
   Data& Object(Data& d);
   
-  // Data& operator[] (String name);
+  // Data& operator[] (HString name);
   Data& operator[] (objectid oid);
-  Data& operator[] (String name);
+  Data& operator[] (HString name);
   
   ObjectFunctionClass* getFunction();
   
@@ -315,35 +360,52 @@ class Data {
     Creates an empty vector and calls a get on the object, throwing the vector
     away.
   */
-  void redo();
-  
+
   template <class T>
-    void get(vector<T> &v, Vector_Selector *vs=NULL, objectid port=-1); 
+    void get(vector<T> &v, Vector_Selector *vs=NULL); 
   
   template <class T>
     void get_1_(vector<T> &v);
   
   template <class T>
-    T getParameter(String name, T defval);
+    T getParameter(HString name, T defval);
   
   template <class T>
     void getFirstFromVector(vector<T> &v, Vector_Selector* vs);
   
   template <class T>
-    T getOne(address i=0,objectid port=-1); 
+    T getOne(address i=0); 
   template <class T>
     T getOne_0_(); 
-  template <class T>
-    T getOne_1_(address i); 
   
-  Data* find_name(String name="", DIRECTION dir=DIR_FROM);
-  Data* find_names(vector<String> names, vector<DIRECTION> dir);
+  Data* find_name(HString name="", DIRECTION dir=DIR_FROM);
+  Data* find_names(vector<HString> names, vector<DIRECTION> dir);
   
   DATATYPE getType();
-  String getName ();
+  void setType(DATATYPE typ);
+  address len();
+  longint incVersion();
+  longint getVersion();
+  void setVersion(longint ver);
+  longint getNetLevel();
+  Data& setNetLevel(longint lev);
+  HString getName (bool longname=false);
   objectid getOid ();
-  
+  HString getFuncName();
+  address getMod();
+  longint getNumberOfLinks(DIRECTION dir=DIR_BOTH);
+  vector<modification_record> getModFlags(DIRECTION dir);
+  HString strModFlag(modification_record mod);
+/*! only returns the local mod values - not a full check for modification. Used for inspection mainly */
+  bool isModified();
+
+  worm*  Worm; /* A worm for the update check, containing pointers to all the objects to be updated */
+
+  void setDefaultDirection(DIRECTION dir);
+  DIRECTION getDefaultDirection();
+
   REFTYPE getOrigin();
+
   
   template <class T>
     void put(vector<T> &v);
@@ -351,27 +413,49 @@ class Data {
     void put(string, vector<T> &vin);
   template <class T>
     void put(objectid, vector<T> &vin);
-  
-  objectid checkModification(objectid port=-1);
-  
+  template <class T>
+      void inspect(vector<T> &vec);
+
+  void noMod();
+  bool needsUpdate(); //obsolete?
+  bool doesAutoUpdate();
+  void setAutoUpdate(bool up=true);
+  bool Updateable();
+  void setUpdateable(bool up=true);
   bool Silent(bool silent);
+  longint setVerbose(longint verbose);
+  bool Verbose();
+  longint AllVerbose(longint verbose);
   bool Empty();
+  bool hasFunc();
+  bool hasData();
   void touch();
-  void setModification(objectid port=-1);
-  void clearModification(objectid port=-1);
-  void recalc(bool force=false);
+  bool checkModification();
+  bool checkModification(objectid port, modification_record mod);
+  void setModification();
+  void setModification(modification_record newmod);
+  void setModification(objectid port, modification_record mod);
+  void clearModification();
+  void clearModificationTO(objectid port);
+  void executeUpdateWorm();
+  void doAutoUpdate();
+  void update();
+  void updateAll();
   
   template <class T>
     void putOne(T one);
   template <class T>
-    void putOne(String, T one);
+    void putOne(HString, T one);
   template <class T>
     void putOne(objectid, T one);
-  
+  Data& putPy(PyObject* pyobj);
+  Data& putPy_silent(PyObject* pyobj);
+  boost::python::handle<> getPy();
+
   void delFunction();
-  void setFunction (String name,
-		    DATATYPE type,
-		    String library="Sys");
+  void setFunction (HString name,
+		    HString library="Sys",
+		    DATATYPE typ=UNDEF);
   
   void sendMessage (MSG_CODE msg,
 		    DIRECTION dir,
@@ -386,7 +470,10 @@ class Data {
   
   void delLink (objectid port,
 		DIRECTION dir,
-		bool del_other=true);
+		bool del_other=true,
+		bool delete_empty=true);
+
+  void delLink (Data & d);
   
   void delLink (objectid oid,
 		objectid port,
@@ -397,35 +484,40 @@ class Data {
 		   objectid port,
 		   DIRECTION dir);
   
-  DEF_DATA_FUNC_DEF_OF_DPTR_3PARS (objectid,
-				   setLink,
-				   DIRECTION dir_type=DIR_FROM,
-				   DIRECTION dir=DIR_FROM,
-				   objectid port=-1)
-    
-    objectid setLink(Data *ptr, DIRECTION dir_type=DIR_FROM, DIRECTION dir=DIR_FROM , objectid port=-1);
+
+  objectid setLink(Data *d, DIRECTION dir_type=DIR_NONE, DIRECTION dir=DIR_FROM , objectid otherport=-1, objectid thisport=-1);
+  Data& setLink_Ref_3(Data &d, DIRECTION dir_type=DIR_NONE, DIRECTION dir=DIR_FROM);
+  Data& setLink_Ref_2(Data &d, DIRECTION dir_type=DIR_NONE);
+  Data& setLink_Ref_1(Data &d);
   
   
-  void delObject_ID(objectid oid);
-  void delObject_Name(String name);
-  void delObject(objectid oid);
-  void delObject(String name);
-  
-  vector<objectid> newObjects_ID(String name, DIRECTION dir_type=DIR_FROM);
-  vector<Data*> newObjects(String name, DIRECTION dir_type=DIR_FROM);
+  void delObject_ID(objectid oid=-1);
+  void delObject_Name(HString name);
+  void delObject();
+  void delOtherObject(Data *ptr);
+
+  vector<objectid> newObjects_ID(HString name, DIRECTION dir_type=DIR_NONE);
+
+  Data& newObject_Ref(HString name, DIRECTION dir_type=DIR_NONE);
+  Data& newObject_Ref_1(HString name);
+
+  Data* newObject(HString name, DIRECTION dir_type=DIR_NONE);
+
+  vector<Data*> newObjects(HString name, DIRECTION dir_type=DIR_NONE, objectid maxparents=-1);
   
   template <class T>
-    vector<Data*> newObjects(String name, T val, DIRECTION dir_type=DIR_FROM);
+    vector<Data*> newObjects(HString name, T val, DIRECTION dir_type=DIR_NONE, objectid maxparents=-1);
   template <class T>
-    vector<Data*> newObjects(String name, vector<T> vec, DIRECTION dir_type=DIR_FROM);
+    vector<Data*> newObjects(HString name, vector<T> vec, DIRECTION dir_type=DIR_NONE, objectid maxparents=-1);
   
   void delData();
+
+  void newVector(DATATYPE type);
   
-  Data(String name="ROOT",superior_container * superior=NULL);
+  Data(HString name="ROOT",superior_container * superior=NULL);
   ~Data(); 
   
  private:
-  void newVector(DATATYPE type);
   
   template <class T>
     void get_mem(vector<T> &v,  Vector_Selector *vs); 

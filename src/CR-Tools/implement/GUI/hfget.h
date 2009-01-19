@@ -25,11 +25,6 @@ class ObjectFunctionClass;
 //Use long int if you want to address long data sets
 
 
-//Define Default Buffer Size for get/put arrays number 
-#define MAX_DATA_BUFFER_SIZE  1024
-#define DEF_DATA_BUFFER_SIZE  1024
-
-
 #define RECORD_SEP ":'"
 
 
@@ -65,31 +60,31 @@ void * new_vector (DATATYPE type, address len);
 bool del_vector (void *p, DATATYPE type);
 bool del_value (void *p, DATATYPE type);
 
-vector<String> split_str_into_vector (String str,
+vector<HString> split_str_into_vector (HString str,
 				      char c=',');
 
-int string_find_chars (const String s,
-		       const String c,
+int string_find_chars (const HString s,
+		       const HString c,
 		       int &n,
 		       const int npos=0);
 
-int string_rfind_chars (const String s,
-			const String c,
+int string_rfind_chars (const HString s,
+			const HString c,
 			int &n,
 			const int npos=0);
 
-String string_rfind_chars_substr (const String s,
-				  const String c=RECORD_SEP,
+HString string_rfind_chars_substr (const HString s,
+				  const HString c=RECORD_SEP,
 				  const int npos=0);
 
-void parse_record_name_to_vector (String name,
-				  vector<String> &names,
+void parse_record_name_to_vector (HString name,
+				  vector<HString> &names,
 				  vector<DIRECTION> &dirs,
-				  String c=RECORD_SEP);
+				  HString c=RECORD_SEP);
 
-bool parse_record_selection_to_vector (String str,
-				       String &name,
-				       vector<String> &elems);
+bool parse_record_selection_to_vector (HString str,
+				       HString &name,
+				       vector<HString> &elems);
 
 //End Utilities
 //========================================================================

@@ -38,9 +38,9 @@ class Vector_Selector {
   void setRange(address start, address end, address inc=1);
 
   void setAll();
-  void setAbove(Number x);
-  void setBelow(Number x);
-  void setBetween(Number x, Number y);
+  void setAbove(HNumber x);
+  void setBelow(HNumber x);
+  void setBetween(HNumber x, HNumber y);
 
   void setList(const vector<address> &vptr);
   void setOne(address start);
@@ -68,7 +68,7 @@ private:
   struct sel_range {address start,end,inc;} s_range;
 
   //This needs to be made generic, so that all types can be dealt with.
-  struct sel_limit {Number above, below;} s_limit;
+  struct sel_limit {HNumber above, below;} s_limit;
 
   vector<address> s_list;
   SELECTORTYPE type;

@@ -30,17 +30,17 @@ SELECTORTYPE Vector_Selector::SelectorType(){
   return type;
 }
 
-void Vector_Selector::setAbove(Number x){
+void Vector_Selector::setAbove(HNumber x){
   type=SEL_ABOVE;
   s_limit.above=x;
 }
 
-void Vector_Selector::setBelow(Number x){
+void Vector_Selector::setBelow(HNumber x){
   type=SEL_BELOW;
   s_limit.below=x;
 }
 
-void Vector_Selector::setBetween(Number x, Number y){
+void Vector_Selector::setBetween(HNumber x, HNumber y){
   type=SEL_BETWEEN;
   s_limit.above=x;
   s_limit.below=y;
@@ -143,7 +143,7 @@ void Vector_Selector::calcAboveList(const vector<T> &v){
   type=SEL_LIST;
   size=v.size();
   s_list.clear(); if (s_list.capacity()<size) {s_list.reserve(size);};
-  for (i=0;i<size;i++){if (mycast<Number>(v[i])>s_limit.above) {s_list.push_back(i);};
+  for (i=0;i<size;i++){if (mycast<HNumber>(v[i])>s_limit.above) {s_list.push_back(i);};
   }
 }
 
@@ -153,7 +153,7 @@ void Vector_Selector::calcBelowList(const vector<T> &v){
   type=SEL_LIST;
   size=v.size();
   s_list.clear(); if (s_list.capacity()<size) {s_list.reserve(size);};
-  for (i=0;i<size;i++){if (mycast<Number>(v[i])<s_limit.below) {s_list.push_back(i);};
+  for (i=0;i<size;i++){if (mycast<HNumber>(v[i])<s_limit.below) {s_list.push_back(i);};
   }
 }
 
@@ -163,7 +163,7 @@ void Vector_Selector::calcBetweenList(const vector<T> &v){
   type=SEL_LIST;
   size=v.size();
   s_list.clear(); if (s_list.capacity()<size) {s_list.reserve(size);};
-  for (i=0;i<size;i++){if (mycast<Number>(v[i])>s_limit.above && mycast<Number>(v[i])<s_limit.below) {s_list.push_back(i);};
+  for (i=0;i<size;i++){if (mycast<HNumber>(v[i])>s_limit.above && mycast<HNumber>(v[i])<s_limit.below) {s_list.push_back(i);};
   }
 }
 
@@ -175,8 +175,8 @@ void Vector_Selector::calcBetweenList(const vector<T> &v){
 void instantiate_VectorSelector(DATATYPE type){
   
   Vector_Selector vs;
-  DEF_D_PTR(Integer);
-  DEF_VAL(Integer);
+  DEF_D_PTR(HInteger);
+  DEF_VAL(HInteger);
 
   switch (type) {
 

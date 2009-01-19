@@ -17,7 +17,7 @@ execfile("hfget.py")
 //Assignment of function pointers
 #define DEF_DATA_OID_NAME_FUNC_PY( TYPE, FUNC  ) \
 TYPE (Data::*Data_##FUNC)() = &Data::FUNC;\
-TYPE (Data::*Data_##FUNC##_Name)(String) = &Data::FUNC;\
+TYPE (Data::*Data_##FUNC##_Name)(HString) = &Data::FUNC;\
 TYPE (Data::*Data_##FUNC##_ID)(objectid) = &Data::FUNC;
 
 //Definition of python objects, pointing to the pointer
@@ -30,12 +30,12 @@ TYPE (Data::*Data_##FUNC##_ID)(objectid) = &Data::FUNC;
 
 #define DEF_DATA_OID_NAME_FUNC_PY_0( EXT, TYPE, FUNC) \
 TYPE (Data::*Data_##FUNC##EXT)() = &Data::FUNC##EXT;\
-TYPE (Data::*Data_##FUNC##_Name##EXT)(String) = &Data::FUNC##EXT;\
+TYPE (Data::*Data_##FUNC##_Name##EXT)(HString) = &Data::FUNC##EXT;\
 TYPE (Data::*Data_##FUNC##_ID##EXT)(objectid) = &Data::FUNC##EXT;\
 
 #define DEF_DATA_OID_NAME_FUNC_PY_1( EXT, TYPE, FUNC, TYPE1 ) \
 TYPE (Data::*Data_##FUNC##EXT)(TYPE1) = &Data::FUNC##EXT;\
-TYPE (Data::*Data_##FUNC##_Name##EXT)(String,TYPE1) = &Data::FUNC##EXT;\
+TYPE (Data::*Data_##FUNC##_Name##EXT)(HString,TYPE1) = &Data::FUNC##EXT;\
 TYPE (Data::*Data_##FUNC##_ID##EXT)(objectid,TYPE1) = &Data::FUNC##EXT;
 
 #define DEF_DATA_OID_NAME_FUNC_PYDEF_EXT( EXT, FUNC  ) \
@@ -60,57 +60,70 @@ DEF_DATA_OID_NAME_FUNC_PYDEF_EXT( , FUNC  )
 
 
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_printStatus_overloads,printStatus,0,1)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_printAllStatus_overloads,printAllStatus,0,2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_Status_overloads,Status,0,1)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_getName_overloads,getName,0,1)
+
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_printDecendants_overloads,printDecendants,0,0)
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_setLink_Name_overloads,setLink_Name,1,3)
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_setLink_ID_overloads,setLink_ID,1,3)
+  //  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_setLink_Name_overloads,setLink_Name,1,4)
+  //  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_setLink_ID_overloads,setLink_ID,1,4)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_setLink_Ref_overloads,setLink_Ref,1,3)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_setFunction_overloads,setFunction,2,3)
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_recalc_overloads,recalc,0,1)
+  //BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_update_overloads,update,0,1)
 
-    void (Data::*Data_get_I)(vector<Integer>&) = &Data::get_1_;
-    void (Data::*Data_get_N)(vector<Number>&) = &Data::get_1_;
-    void (Data::*Data_get_C)(vector<Complex>&) = &Data::get_1_;
-    void (Data::*Data_get_S)(vector<String>&) = &Data::get_1_;
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_newObjects_ID_overloads,newObjects_ID,1,2)
 
-    void (Data::*Data_put_I)(vector<Integer>&) = &Data::put;
-    void (Data::*Data_put_N)(vector<Number>&) = &Data::put;
-    void (Data::*Data_put_C)(vector<Complex>&) = &Data::put;
-    void (Data::*Data_put_S)(vector<String>&) = &Data::put;
+    void (Data::*Data_delLink)(Data &) = &Data::delLink;
 
-    void (Data::*Data_put_name_I)(String, vector<Integer>&) = &Data::put;
-    void (Data::*Data_put_name_N)(String, vector<Number>&) = &Data::put;
-    void (Data::*Data_put_name_C)(String, vector<Complex>&) = &Data::put;
-    void (Data::*Data_put_name_S)(String, vector<String>&) = &Data::put;
+    void (Data::*Data_get_I)(vector<HInteger>&) = &Data::get_1_;
+    void (Data::*Data_get_N)(vector<HNumber>&) = &Data::get_1_;
+    void (Data::*Data_get_C)(vector<HComplex>&) = &Data::get_1_;
+    void (Data::*Data_get_S)(vector<HString>&) = &Data::get_1_;
 
-    void (Data::*Data_put_oid_I)(objectid, vector<Integer>&) = &Data::put;
-    void (Data::*Data_put_oid_N)(objectid, vector<Number>&) = &Data::put;
-//   void (Data::*Data_put_oid_C)(objectid, vector<Complex>&) = &Data::put;
-    void (Data::*Data_put_oid_S)(objectid, vector<String>&) = &Data::put;
+    void (Data::*Data_inspect_I)(vector<HInteger>&) = &Data::inspect;
+    void (Data::*Data_inspect_N)(vector<HNumber>&) = &Data::inspect;
+    void (Data::*Data_inspect_C)(vector<HComplex>&) = &Data::inspect;
+    void (Data::*Data_inspect_S)(vector<HString>&) = &Data::inspect;
 
-    void (Data::*Data_putOne_I)(Integer) = &Data::putOne;
-    void (Data::*Data_putOne_N)(Number) = &Data::putOne;
-//    void (Data::*Data_putOne_C)(Complex) = &Data::putOne;
-    void (Data::*Data_putOne_S)(String) = &Data::putOne;
+    void (Data::*Data_put_I)(vector<HInteger>&) = &Data::put;
+    void (Data::*Data_put_N)(vector<HNumber>&) = &Data::put;
+    void (Data::*Data_put_C)(vector<HComplex>&) = &Data::put;
+    void (Data::*Data_put_S)(vector<HString>&) = &Data::put;
 
-    void (Data::*Data_putOne_name_I)(String, Integer) = &Data::putOne;
-    void (Data::*Data_putOne_name_N)(String, Number) = &Data::putOne;
-    void (Data::*Data_putOne_name_C)(String, Complex) = &Data::putOne;
-    void (Data::*Data_putOne_name_S)(String, String) = &Data::putOne;
+    void (Data::*Data_put_name_I)(HString, vector<HInteger>&) = &Data::put;
+    void (Data::*Data_put_name_N)(HString, vector<HNumber>&) = &Data::put;
+    void (Data::*Data_put_name_C)(HString, vector<HComplex>&) = &Data::put;
+    void (Data::*Data_put_name_S)(HString, vector<HString>&) = &Data::put;
 
-    void (Data::*Data_putOne_oid_I)(objectid, Integer) = &Data::putOne;
-    void (Data::*Data_putOne_oid_N)(objectid, Number) = &Data::putOne;
-    void (Data::*Data_putOne_oid_C)(objectid, Complex) = &Data::putOne;
-    void (Data::*Data_putOne_oid_S)(objectid, String) = &Data::putOne;
+    void (Data::*Data_put_oid_I)(objectid, vector<HInteger>&) = &Data::put;
+    void (Data::*Data_put_oid_N)(objectid, vector<HNumber>&) = &Data::put;
+    void (Data::*Data_put_oid_C)(objectid, vector<HComplex>&) = &Data::put;
+    void (Data::*Data_put_oid_S)(objectid, vector<HString>&) = &Data::put;
 
-    Integer (Data::*Data_getOne_I_1)(address) = &Data::getOne_1_<Integer>;
-    Number  (Data::*Data_getOne_N_1)(address) = &Data::getOne_1_<Number>;
-    Complex (Data::*Data_getOne_C_1)(address) = &Data::getOne_1_<Complex>;
-    String  (Data::*Data_getOne_S_1)(address) = &Data::getOne_1_<String>;
+    void (Data::*Data_putOne_I)(HInteger) = &Data::putOne;
+    void (Data::*Data_putOne_N)(HNumber) = &Data::putOne;
+    void (Data::*Data_putOne_C)(HComplex) = &Data::putOne;
+    void (Data::*Data_putOne_S)(HString) = &Data::putOne;
 
-    Integer(Data::*Data_getOne_I_0)() = &Data::getOne_0_<Integer>;
-    Number (Data::*Data_getOne_N_0)() = &Data::getOne_0_<Number>;
-    Complex(Data::*Data_getOne_C_0)() = &Data::getOne_0_<Complex>;
-    String (Data::*Data_getOne_S_0)() = &Data::getOne_0_<String>;
+    void (Data::*Data_putOne_name_I)(HString, HInteger) = &Data::putOne;
+    void (Data::*Data_putOne_name_N)(HString, HNumber) = &Data::putOne;
+    void (Data::*Data_putOne_name_C)(HString, HComplex) = &Data::putOne;
+    void (Data::*Data_putOne_name_S)(HString, HString) = &Data::putOne;
+
+    void (Data::*Data_putOne_oid_I)(objectid, HInteger) = &Data::putOne;
+    void (Data::*Data_putOne_oid_N)(objectid, HNumber) = &Data::putOne;
+    void (Data::*Data_putOne_oid_C)(objectid, HComplex) = &Data::putOne;
+    void (Data::*Data_putOne_oid_S)(objectid, HString) = &Data::putOne;
+
+    HInteger (Data::*Data_getOne_I_1)(address) = &Data::getOne<HInteger>;
+    HNumber  (Data::*Data_getOne_N_1)(address) = &Data::getOne<HNumber>;
+    HComplex (Data::*Data_getOne_C_1)(address) = &Data::getOne<HComplex>;
+    HString  (Data::*Data_getOne_S_1)(address) = &Data::getOne<HString>;
+
+    HInteger(Data::*Data_getOne_I_0)() = &Data::getOne_0_<HInteger>;
+    HNumber (Data::*Data_getOne_N_0)() = &Data::getOne_0_<HNumber>;
+    HComplex(Data::*Data_getOne_C_0)() = &Data::getOne_0_<HComplex>;
+    HString (Data::*Data_getOne_S_0)() = &Data::getOne_0_<HString>;
 
     
 //used to be BOOST_PYTHON_MODULE(hfget)
@@ -126,46 +139,86 @@ BOOST_PYTHON_MODULE(libhfget)
       .value("BOTH",DIR_BOTH);
 
     enum_<DATATYPE>("TYPE")
-      .value("UNDEF",UNDEF)
+      .value("POINTER",POINTER)
       .value("INTEGER",INTEGER)
       .value("NUMBER", NUMBER)
       .value("COMPLEX",COMPLEX)
-      .value("STRING",STRING);
+      .value("STRING",STRING)
+	.value("UNDEF",UNDEF);
 
     class_<Data>("Data", init<std::string>())
       //overloads the [] operator for indexing of objects
       .def("__getitem__",&Data::Object_ID,return_internal_reference<>())
       .def("__getitem__",&Data::Object_Name,return_internal_reference<>())
+      .def("Find",&Data::Object_Name,return_internal_reference<>())
+      .def("Find",&Data::Object_ID,return_internal_reference<>())
 
       .def("getType", &Data::getType)
-      .def("getName", &Data::getName)
+      .def("setType", &Data::setType)
+      .def("getName", &Data::getName,Data_getName_overloads())
+      .def("getNetLevel", &Data::getNetLevel)
+      .def("setNetLevel", &Data::setNetLevel,return_internal_reference<>())
+      .def("getVersion", &Data::getVersion)
+      .def("setVersion", &Data::setVersion)
       .def("getOid", &Data::getOid)
-      .def("setModification", &Data::setModification)
+      .def("getMod", &Data::getMod)
+      .def("setDefaultDirection", &Data::setDefaultDirection)
+      .def("getDefaultDirection", &Data::getDefaultDirection)
+      .def("isModified", &Data::isModified)
+      .def("getFuncName", &Data::getFuncName)
+      .def("__len__", &Data::len)
       .def("Empty", &Data::Empty)
+      .def("hasFunc", &Data::hasFunc)
+      .def("hasData", &Data::hasData)
       .def("Silent", &Data::Silent)
+      .def("noMod", &Data::noMod)
+      .def("needsUpdate", &Data::needsUpdate)
+      .def("doAutoUpdate", &Data::doAutoUpdate)
+      .def("doesAutoUpdate", &Data::doesAutoUpdate)
+      .def("setAutoUpdate", &Data::setAutoUpdate)
+      .def("Updateable", &Data::Updateable)
+      .def("setUpdateable", &Data::setUpdateable)
+      .def("setVerbose", &Data::setVerbose)
+      .def("Verbose", &Data::Verbose)
+      .def("AllVerbose", &Data::AllVerbose)
       .def("clearModification", &Data::clearModification)
-      .def("checkModification", &Data::checkModification)
 
-      .def("sendMessage", &Data::sendMessage)
-      .def("getMessage", &Data::getMessage)
+      .def("sendMessage", &Data::sendMessage) //not really implemented
+      .def("getMessage", &Data::getMessage) //not really implemented
       .def("setPort", &Data::setPort)
       .def("touch", &Data::touch)
-      .def("recalc", &Data::recalc, Data_recalc_overloads())
-      .def("redo", &Data::redo)//is actually almost the same
+      .def("update", &Data::update)
+      .def("updateAll", &Data::updateAll)
 
-
+      .def("Status", &Data::Status,Data_Status_overloads())
       .def("printStatus", &Data::printStatus,Data_printStatus_overloads())
+      .def("printAllStatus", &Data::printAllStatus,Data_printAllStatus_overloads())
       .def("printDecendants", &Data::printDecendants,Data_printDecendants_overloads())
+      .def("listNames", &Data::listNames)
+      .def("listIDs", &Data::listIDs)
+      .def("listDirs", &Data::listDirs)
+      .def("listModFlags", &Data::listModFlags)
+      .def("getAllIDs", &Data::getAllIDs)
+      .def("getNeighbours", &Data::getNeighbours)
 
+
+      .def("delLink", Data_delLink)
       .def("delLink", &Data::delLink_ID)
-      .def("setLink", &Data::setLink_Name, Data_setLink_Name_overloads())
-      .def("setLink", &Data::setLink_ID,   Data_setLink_ID_overloads())
-      .def("setLink", &Data::setLink_Ref,  Data_setLink_Ref_overloads())
+      //      .def("setLink", &Data::setLink_Name, Data_setLink_Name_overloads())
+      //.def("setLink", &Data::setLink_ID,   Data_setLink_ID_overloads())
+      .def("setLink", &Data::setLink_Ref_3,return_internal_reference<>())
+      .def("setLink", &Data::setLink_Ref_2,return_internal_reference<>())
+      .def("setLink", &Data::setLink_Ref_1,return_internal_reference<>())
 
       .def("get", Data_get_I)
       .def("get", Data_get_N)
       .def("get", Data_get_C)
       .def("get", Data_get_S)
+
+      .def("inspect", Data_inspect_I)
+      .def("inspect", Data_inspect_N)
+      .def("inspect", Data_inspect_C)
+      .def("inspect", Data_inspect_S)
 
       .def("put", Data_put_I)
       .def("put", Data_put_N)
@@ -180,12 +233,12 @@ BOOST_PYTHON_MODULE(libhfget)
 
       .def("__setitem__", Data_put_oid_I)
       .def("__setitem__", Data_put_oid_N)
-      //      .def("__setitem__", Data_put_oid_C)
+      .def("__setitem__", Data_put_oid_C)
       .def("__setitem__", Data_put_oid_S)
 
       .def("__setitem__", Data_putOne_name_I)
       .def("__setitem__", Data_putOne_name_N)
-      //      .def("__setitem__", Data_putOne_name_C)
+      .def("__setitem__", Data_putOne_name_C)
       .def("__setitem__", Data_putOne_name_S)
 
       .def("__setitem__", Data_putOne_oid_I)
@@ -193,10 +246,13 @@ BOOST_PYTHON_MODULE(libhfget)
       .def("__setitem__", Data_putOne_oid_C)
       .def("__setitem__", Data_putOne_oid_S)
 
+      .def("putPy", &Data::putPy,return_internal_reference<>())
+      .def("putPy_silent", &Data::putPy_silent,return_internal_reference<>())
+      .def("getPy", &Data::getPy)
 
       .def("putI", Data_putOne_I)
       .def("putN", Data_putOne_N)
-      //      .def("putC", Data_putOne_C)
+      .def("putC", Data_putOne_C)
       .def("putS", Data_putOne_S)
 
       .def("getI", Data_getOne_I_0)
@@ -211,10 +267,18 @@ BOOST_PYTHON_MODULE(libhfget)
       .def("delData", &Data::delData)
       .def("delFunction", &Data::delFunction)
       .def("setFunction", &Data::setFunction,Data_setFunction_overloads())
-      .def("printAllStatus", &Data::printAllStatus)
       .def("delObject", &Data::delObject_ID)
       .def("delObject", &Data::delObject_Name)
-      .def("newObjects", &Data::newObjects_ID)
+      .def("delObject", &Data::delObject)
+      .def("erase", &Data::erase,return_internal_reference<>())
+      .def("erase", &Data::erase_1,return_internal_reference<>())
+      .def("__ifloordiv__", &Data::erase_1,return_internal_reference<>()) // this is the "//=" operator
+      .def("insert", &Data::insert,return_internal_reference<>())
+      .def("insertNew", &Data::insertNew,return_internal_reference<>())
+      .def("newObjects", &Data::newObjects_ID,Data_newObjects_ID_overloads())
+      .def("newObject", &Data::newObject_Ref,return_internal_reference<>())
+      .def("newObject", &Data::newObject_Ref_1,return_internal_reference<>())
+      .def("create", &Data::create,return_internal_reference<>())
       .def("IDs", &Data::IDs)
       .def("ID", &Data::ID)
 
@@ -249,30 +313,47 @@ DEF_TEMPLATED_MEMBER_FUNCTIONS
         ;
 
     //Define vectors in Python ...
-    
-    class_<std::vector<Integer> >("IntVec")
-        .def(vector_indexing_suite<std::vector<Integer> >())
+
+/*    class_<casa::Vector<casa::Double> >("FloatAVec")
+        .def(vector_indexing_suite<casa::Vector<casa::Double> >())
+    ;
+*/
+  
+    class_<std::vector<DIRECTION> >("DirVec")
+        .def(vector_indexing_suite<std::vector<DIRECTION> >())
+    ;
+    class_<std::vector<HInteger> >("IntVec")
+        .def(vector_indexing_suite<std::vector<HInteger> >())
     ;
 
-    class_<std::vector<Number> >("FloatVec")
-        .def(vector_indexing_suite<std::vector<Number> >())
+    class_<std::vector<HNumber> >("FloatVec")
+        .def(vector_indexing_suite<std::vector<HNumber> >())
     ;
     
     class_<std::vector<bool> >("BoolVec")
         .def(vector_indexing_suite<std::vector<bool> >())
     ;
     
-    class_<std::vector<Complex> >("ComplexVec")
-        .def(vector_indexing_suite<std::vector<Complex> >())
+    class_<std::vector<HComplex> >("ComplexVec")
+        .def(vector_indexing_suite<std::vector<HComplex> >())
     ;
 
-    class_<std::vector<String> >("StringVec")
-        .def(vector_indexing_suite<std::vector<String> >())
+    class_<std::vector<HString> >("StringVec")
+        .def(vector_indexing_suite<std::vector<HString> >())
     ;
 
-    def("mytest", mytest);
-    def("mytest2", mytest2);
-    def("mytest3", mytest3);
+boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_id<mglData>());
+
+def("mglDataSet", mglDataSetVecN);
+def("getptr", PyGetPtr);
+
+//    def("setwidget", setwidget);
+//    def("mytest", mytest);
+//    def("mytest2", mytest2);
+//    def("mytest3", mytest3);
+//    def("mytest4", mytest4,return_internal_reference<>());
+//    def("mytest6", mytest6,return_internal_reference<>());
+//    def("mytest5", &mytest5);
     //    def("mycast", mycast);
     //    def("printvec", printvec);
     //def("split_str_into_vector", split_str_into_vector);

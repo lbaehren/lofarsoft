@@ -12,4 +12,56 @@ hffuncs.cc:
 
 - hfget.hpp: Note that the ID method needs a bit more work (e.g. to give the ID of the current object with input "")
 
+- provide methods for the functions to set/ default values and names of
+  parameters ...
+
 - property object??
+
+- make sure that objects stroed with pystore and referred to by PyFunc don't
+  crash the system if deleted under python
+
+- in aipscol2stlvec access matric elements directly (withou .column) and
+  return an empty vector incase of error
+
+- clearModification does not work with dataReader network 
+
+- potential memory leaks when putting pointers of objects into a Data object
+  (and overwriting an old one without destroying it!), e.g. in hfPlotWindow
+
+- currently a poiner to a pyfunction has to be assigned to a pyobject first,
+  which is then passed to .putPy() - here one has to worry about uniqueness
+  and what happens if that object is being overwritten (but pointer emains in
+  memory). Use "ward" mechanism in boost?
+
+- Replace the ID by some other unique identifier. The problem is that the ID
+  is only unique within one data network. However, it is perfectly reasonable
+  to link two data networks, which would then have two superiors and duplicate IDs!
+
+
+- Introduce a dictionary for object names, which assign each name a unique
+  interger number. That should make searching faster for at least nearby
+  parameters if the unique number is stored with the parameters.
+
+- The modification flag may need to be passed with getParameter (to be
+  used with setModification()). For example, if (e.g. after creation
+  of the network) an object is not up-to-date getParameter will update
+  it, which will cause an update throughout higher up the net and
+  hence cause multiple updates including the object that called
+  getParameter.
+
+- Somehow get the data.beingmodified flag/check to work (the problem
+  is that DOSILENT always only affects the first object) and the
+  others can generate false (?) alarms. getParameter seems to be a
+  culprit.
+ 
+- Let the c++ functions als return DataObjects (or pointers), just like python
+
+
+- Change the search algorithm so that it goes stepwise through the net, one level after the next, returning all object links of the net level (violates locality, but the update worm has done that already ....)
+
+BUGS:
+
+- d.delObject() does not work properly (the last elements in the list are not
+  deleted if several have been deleted at once) - use DataList.delObject() to
+  test.
+
