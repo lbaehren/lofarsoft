@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id:: NewClass.cc 1964 2008-09-06 17:52:38Z baehren                   $ |
+ | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2008                                                    *
@@ -240,15 +240,16 @@ namespace CR { // Namespace CR -- begin
   {
     // case 1: buffering previously disabled, not switched on
     if (!bufferDelays_p && bufferDelays) {
-      delays_p = delays();
+      bufferDelays_p = bufferDelays;
+      setDelays();
     }
     // case 2: buffering of values switched off after previous enabled
     else if (bufferDelays_p && !bufferDelays) {
+      bufferDelays_p = bufferDelays;
       Matrix<double> mat;
+      delays_p.resize(mat.shape());
       delays_p = mat;
     }
-
-    bufferDelays_p = bufferDelays;
   }
   
   //_____________________________________________________________________________
@@ -387,12 +388,13 @@ namespace CR { // Namespace CR -- begin
   void GeomDelay::summary (std::ostream &os)
   {
     os << "[GeomDelay] Summary of internal parameters." << std::endl;
-    os << "-- Far-field delay        = " << farField()            << std::endl;
-    os << "-- Near-field delay       = " << nearField()           << std::endl;
-    os << "-- Buffer delay values    = " << bufferDelays_p        << std::endl;
-    os << "-- nof. antenna positions = " << nofAntPositions() << std::endl;
-    os << "-- nof. sky positions     = " << nofSkyPositions()     << std::endl;
-    os << "-- Shape of delays array  = " << shape()               << std::endl;
+    os << "-- Far-field delay        = " << farField()         << std::endl;
+    os << "-- Near-field delay       = " << nearField()        << std::endl;
+    os << "-- Buffer delay values    = " << bufferDelays_p     << std::endl;
+    os << "-- nof. antenna positions = " << nofAntPositions()  << std::endl;
+    os << "-- nof. sky positions     = " << nofSkyPositions()  << std::endl;
+    os << "-- Shape of delays array  = " << shape()            << std::endl;
+    os << "                          = " << delays_p.shape()   << std::endl;
   }
   
   
@@ -402,6 +404,22 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
+  //_____________________________________________________________________________
+  //                                                                    setDelays
+  
+  void GeomDelay::setDelays ()
+  {
+    /* Only recompute and set values if buffering is enabled */
+    if (bufferDelays_p) {
+      casa::IPosition itsShape = shape();
+      delays_p.resize();
+      
+      delays_p = delay (antPositions_p,
+			skyPositions_p,
+			farField_p);
+    }
+  }
+  
   //_____________________________________________________________________________
   //                                                                       delays
   

@@ -28,10 +28,13 @@
 #include <iostream>
 #include <string>
 // casacore header files
+#include <casa/Arrays/Cube.h>
 #include <casa/Quanta/MVFrequency.h>
 // CR-Tools header files
 #include <Imaging/GeomDelay.h>
 
+using casa::Cube;
+using casa::Matrix;
 using casa::MVFrequency;
 
 namespace CR { // Namespace CR -- begin
@@ -64,13 +67,12 @@ namespace CR { // Namespace CR -- begin
     
   protected:
 
+    //! Buffer the values of the phases?
+    bool bufferPhases_p;
     //! Frequency values
     Vector<double> frequencies_p;
     //! The geometrical phases
-    Matrix<double> phases_p;
-
-    //! Buffer the values of the phases?
-    bool bufferPhases_p;
+    Cube<double> phases_p;
     
   public:
     
@@ -100,6 +102,79 @@ namespace CR { // Namespace CR -- begin
 	       bool const &bufferPhases=false);
     
     /*!
+      \brief Argumented constructor
+
+      \param frequencies  -- The frequencies, [Hz], for which the phases are
+             being computed.
+      \param bufferPhases -- Buffer the values of the phases?
+    */
+    GeomPhase (GeomDelay const &geomDelay,
+	       Vector<double> const &frequencies,
+	       bool const &bufferPhases=false);
+    
+    /*!
+      \brief Argumented constructor
+
+      \param frequencies  -- The frequencies for which the phases are being
+             computed.
+      \param bufferPhases -- Buffer the values of the phases?
+    */
+    GeomPhase (GeomDelay const &geomDelay,
+	       Vector<MVFrequency> const &frequencies,
+	       bool const &bufferPhases=false);
+    
+    /*!
+      \brief Argumented constructor
+
+      \param antPositions -- [antenna,3], positions of the antennas
+      \param antCoord     -- 
+      \param skyPositions -- [position,3], positions towards which the beams are
+             formed
+      \param skyCoord     --
+      \param anglesInDegrees -- If the coordinates of the antenna positions
+             contain an angular component, is this component given in degrees?
+	     If set <tt>false</tt> the angular components are considered to be
+	     given in radians.
+      \param farField     -- Compute geometrical delay for far-field? By default
+             no approximation is made and the full 3D geometry is taken into
+	     account.
+      \param bufferDelays -- Buffer the values of the geometrical delays?
+      \param frequencies  -- The frequencies, [Hz], for which the phases are
+             being computed.
+      \param bufferPhases -- Buffer the values of the phases?
+    */
+    GeomPhase (Matrix<double> const &antPositions,
+	       CoordinateType::Types const &antCoord,
+	       Matrix<double> const &skyPositions,
+	       CoordinateType::Types const &skyCoord,
+	       bool const &anglesInDegrees,
+	       bool const &farField,
+	       bool const &bufferDelays,
+	       Vector<double> const &frequencies,
+	       bool const &bufferPhases);
+    
+    /*!
+      \brief Argumented constructor
+
+      \param antPositions -- [antenna,3], positions of the antennas
+      \param skyPositions -- [position,3], positions towards which the beams are
+             formed
+      \param farField     -- Compute geometrical delay for far-field? By default
+             no approximation is made and the full 3D geometry is taken into
+	     account.
+      \param bufferDelays -- Buffer the values of the geometrical delays?
+      \param frequencies  -- The frequencies for which the phases are being
+             computed.
+      \param bufferPhases -- Buffer the values of the phases?
+    */
+    GeomPhase (Vector<MVPosition> const &antPositions,
+	       Vector<MVPosition> const &skyPositions,
+	       bool const &farField,
+	       bool const &bufferDelays,
+	       Vector<MVFrequency> const &frequencies,
+	       bool const &bufferPhases);
+    
+    /*!
       \brief Copy constructor
       
       \param other -- Another GeomPhase object from which to create this new
@@ -110,7 +185,7 @@ namespace CR { // Namespace CR -- begin
     // -------------------------------------------------------------- Destruction
 
     //! Destructor
-    ~GeomPhase ();
+    virtual ~GeomPhase ();
     
     // ---------------------------------------------------------------- Operators
     
@@ -133,6 +208,15 @@ namespace CR { // Namespace CR -- begin
     inline bool bufferPhases () const {
       return bufferPhases_p;
     }
+
+    /*!
+      \brief Are the values of the phases to be buffered?
+
+      \param bufferPhases -- If set <tt>true</tt> the values of the geometrical
+             phases are getting buffered and need not be recomputed for each 
+	     request.
+    */
+    void bufferPhases (bool const &bufferPhases);
 
     /*!
       \brief Get the frequency values
@@ -175,9 +259,7 @@ namespace CR { // Namespace CR -- begin
       return "GeomPhase";
     }
 
-    /*!
-      \brief Provide a summary of the internal status
-    */
+    //! Provide a summary of the internal status
     inline void summary () {
       summary (std::cout);
     }
@@ -190,8 +272,64 @@ namespace CR { // Namespace CR -- begin
     void summary (std::ostream &os);    
 
     // ------------------------------------------------------------------ Methods
+
+    //! Get the shape of the array holding the geometrical phases
+    casa::IPosition shape();
+
+    /*!
+      \brief Compute the gemetrical phase
+
+      \param delay -- The value of the geometrical delay, as computed for a
+             combination of antenna and pointing position. [s]
+      \param freq  -- The frequency. [Hz]
+
+      \return phase -- The value of the geometrical phase
+    */
+    static double calcPhases (double const &delay,
+			      double const &freq) {
+      return CR::_2pi*freq*delay;
+    }
     
+    /*!
+      \brief Compute the gemetrical phase
+
+      \param delay -- The values of the geometrical delay, as computed for a
+             combination of antenna and pointing positions. [s]
+      \param freq  -- The frequency. [Hz]
+
+      \return phase -- [ant,sky] The values of the geometrical phases
+    */
+    static Matrix<double> calcPhases (Matrix<double> const &delay,
+				      double const &freq) {
+      return CR::_2pi*freq*delay;
+    }
     
+    /*!
+      \brief Compute the gemetrical phase
+
+      \param delay -- The values of the geometrical delay, as computed for a
+             combination of antenna and pointing positions. [s]
+      \param freq  -- Frequency values. [Hz]
+
+      \return phase -- [freq,ant,sky] The values of the geometrical phases
+    */
+    static Cube<double> calcPhases (Matrix<double> const &delay,
+				    Vector<double> const &freq);
+    
+    /*!
+      \brief Get the values of the geometrical phases
+
+      \return phases -- [freq,ant,sky] The numerical values of the geometrical
+              phases.
+    */
+    Cube<double> phases ();
+
+  protected:
+
+    virtual void setDelays();
+
+    //! Compute and set the values of the geometrical phases
+    virtual void setPhases();
     
   private:
     
@@ -201,9 +339,6 @@ namespace CR { // Namespace CR -- begin
     //! Unconditional deletion 
     void destroy(void);
 
-    //! Initialize internal parameters
-    void init ();
-    
     /*!
       \brief Initialize internal parameters
 
@@ -213,6 +348,27 @@ namespace CR { // Namespace CR -- begin
     */
     void init (Vector<double> const &frequencies,
 	       bool const &bufferPhases=false);
+
+    /*!
+      \brief Initialize internal parameters
+
+      \param frequencies  -- The frequencies for which the phases are being
+             computed.
+      \param bufferPhases -- Buffer the values of the phases?
+    */
+    void init (Vector<MVFrequency> const &frequencies,
+	       bool const &bufferPhases=false);
+
+    /*!
+      \brief Get the values of the geometrical phases
+
+      \param delays -- Array with the values of the geometrical delays for which
+             the phases are to be computed.
+
+      \return phases --  The numerical values of the geometrical phases.
+    */
+    Cube<double> phases (Matrix<double> const &delays);
+    
   };
   
 } // Namespace CR -- end

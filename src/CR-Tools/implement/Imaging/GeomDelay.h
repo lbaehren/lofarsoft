@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id:: NewClass.h 1964 2008-09-06 17:52:38Z baehren                    $ |
+ | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2008                                                    *
@@ -116,6 +116,10 @@ namespace CR { // Namespace CR -- begin
       \param antPositions -- [antenna,3], positions of the antennas
       \param skyPositions -- [position,3], positions towards which the beams are
              formed
+      \param anglesInDegrees -- If the coordinates of the antenna positions
+             contain an angular component, is this component given in degrees?
+	     If set <tt>false</tt> the angular components are considered to be
+	     given in radians.
       \param farField     -- Compute geometrical delay for far-field? By default
              no approximation is made and the full 3D geometry is taken into
 	     account.
@@ -131,8 +135,14 @@ namespace CR { // Namespace CR -- begin
       \brief Argumented constructor
 
       \param antPositions -- [antenna,3], positions of the antennas
+      \param antCoord     -- 
       \param skyPositions -- [position,3], positions towards which the beams are
              formed
+      \param skyCoord     --
+      \param anglesInDegrees -- If the coordinates of the antenna positions
+             contain an angular component, is this component given in degrees?
+	     If set <tt>false</tt> the angular components are considered to be
+	     given in radians.
       \param farField     -- Compute geometrical delay for far-field? By default
              no approximation is made and the full 3D geometry is taken into
 	     account.
@@ -173,7 +183,7 @@ namespace CR { // Namespace CR -- begin
     // -------------------------------------------------------------- Destruction
 
     //! Destructor
-    ~GeomDelay ();
+    virtual ~GeomDelay ();
     
     // ---------------------------------------------------------------- Operators
     
@@ -367,8 +377,8 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the geometrical delays
       
-      \return delays -- The geometrical delays for the given set of antenna and
-              sky positions
+      \return delays -- [ant,sky] The geometrical delays for the given set of
+              antenna and sky positions.
     */
     Matrix<double> delays ();
     
@@ -415,6 +425,11 @@ namespace CR { // Namespace CR -- begin
     static Matrix<double> delay (casa::Matrix<double> const &antPositions,
 				 casa::Matrix<double> const &skyPositions,
 				 bool const &farField=false);
+
+  protected:
+    
+    //! Set/Update the values of the geometrical delays if required
+    virtual void setDelays ();
     
   private:
     
@@ -433,6 +448,10 @@ namespace CR { // Namespace CR -- begin
       \param antPositions -- [antenna,3], positions of the antennas
       \param skyPositions -- [position,3], positions towards which the beams are
              formed
+      \param anglesInDegrees -- If the coordinates of the antenna positions
+             contain an angular component, is this component given in degrees?
+	     If set <tt>false</tt> the angular components are considered to be
+	     given in radians.
       \param farField     -- Compute geometrical delay for far-field? By default
              no approximation is made and the full 3D geometry is taken into
 	     account.
@@ -450,6 +469,10 @@ namespace CR { // Namespace CR -- begin
       \param antPositions -- [antenna,3], positions of the antennas
       \param skyPositions -- [position,3], positions towards which the beams are
              formed
+      \param anglesInDegrees -- If the coordinates of the antenna positions
+             contain an angular component, is this component given in degrees?
+	     If set <tt>false</tt> the angular components are considered to be
+	     given in radians.
       \param farField     -- Compute geometrical delay for far-field? By default
              no approximation is made and the full 3D geometry is taken into
 	     account.
@@ -478,16 +501,6 @@ namespace CR { // Namespace CR -- begin
 	       Vector<MVPosition> const &skyPositions,
 	       bool const &farField=false,
 	       bool const &bufferDelays=false);
-    
-    //! Set/Update the values of the geometrical delays if required
-    inline void setDelays ()
-      {
-	if (bufferDelays_p) {
-	  delays_p = delay (antPositions_p,
-			    skyPositions_p,
-			    farField_p);
-	}
-      }
     
   }; // Class GeomDelay -- end
   
