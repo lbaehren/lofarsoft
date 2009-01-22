@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id:: Imaging.h 1097 2007-11-28 10:51:59Z baehren                     $ |
+ | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -36,8 +36,8 @@ namespace CR { // Namespace CR -- begin
     // Reference position for the antenna setup
     ReferencePos = Vector<Double>(3,0.);
     
-    SkyCoord_p.setBeamType(CR::TIME_X);
-    SkyCoord_p.setMapOrientation(SkymapCoordinates::NORTH_WEST);
+//     SkyCoord_p.setBeamType(CR::TIME_X);
+//     SkyCoord_p.setMapOrientation(SkymapCoordinates::NORTH_WEST);
     //SkyCoord_p.setDirectionShape(51,51);
     
   }
@@ -96,7 +96,7 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> tmpvec;
 
       // Set TimeFreq values from the data reader.
-      success = success && SkyCoord_p.setTimeFreq(dr);
+      success = success && SkyCoord_p.setTimeFreqCoordinate(dr);
       //success = success && SkyCoord_p.setTimeFreq(dr.blocksize(),dr.sampleFrequency(),
       //					  dr.nyquistZone(), dr.referenceTime() );
       

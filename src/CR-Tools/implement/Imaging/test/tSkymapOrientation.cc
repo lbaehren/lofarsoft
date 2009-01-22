@@ -1,6 +1,9 @@
-/***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+/*-------------------------------------------------------------------------*
+ | $Id::                                                                 $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2009                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,38 +21,42 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
+#include <Imaging/SkymapOrientation.h>
 
-#include <Analysis/CRdelayPlugin.h>
+// Namespace usage
+using CR::SkymapOrientation;
 
 /*!
-  \file tCRdelayPlugin.cc
+  \file tSkymapOrientation.cc
 
-  \ingroup Analysis
+  \ingroup Imaging
 
-  \brief A collection of test routines for CRdelayPlugin
+  \brief A collection of test routines for the SkymapOrientation class
  
-  \author Andreas Horneffer
+  \author Lars Baehren
  
-  \date 2007/04/19
+  \date 2009/01/13
 */
 
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test constructors for a new CRdelayPlugin object
+  \brief Test constructors for a new SkymapOrientation object
 
-  \return nofFailedTests -- The number of failed tests.
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
 */
-int test_CRdelayPlugin ()
+int test_constructors ()
 {
+  std::cout << "\n[tSkymapOrientation::test_constructors]\n" << std::endl;
+
   int nofFailedTests (0);
   
-  std::cout << "\n[test_CRdelayPlugin]\n" << std::endl;
-
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    CR::CRdelayPlugin newObject;
+    SkymapOrientation newObject;
+    //
+    newObject.summary(); 
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -65,9 +72,7 @@ int main ()
   int nofFailedTests (0);
 
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_CRdelayPlugin ();
-  }
+  nofFailedTests += test_constructors ();
 
   return nofFailedTests;
 }

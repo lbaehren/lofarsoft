@@ -24,14 +24,17 @@
 #include <casa/BasicMath/Random.h>
 
 #include <Coordinates/CoordinateType.h>
-#include <Imaging/SkymapCoordinates.h>
+#include <Coordinates/SpatialCoordinate.h>
+#include <Coordinates/TimeFreqCoordinate.h>
+#include <Coordinates/SkymapCoordinate.h>
+#include <Math/VectorConversion.h>
 
 using casa::DComplex;
 using casa::Matrix;
 using casa::Vector;
 
 using CR::ObservationData;
-using CR::SkymapCoordinates;
+using CR::SkymapCoordinate;
 using CR::TimeFreq;
 
 /*!
@@ -320,49 +323,43 @@ Matrix<DComplex> get_data (uint const &nofAntennas=4,
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Wrapper for creation of a SkymapCoordinates object 
-  
-  \verbatim
-  nof. processed blocks    = 10
-  Projection               = STG
-  Skymap orientation       = 1 [North,West]
-  Skymap quantity          = 1 [FREQ,POWER]
-  Number of coordinates    = 4
-  Shape of the pixel array = [120, 120, 1, 10, 513]
-  World axis names         = [Longitude, Latitude, Distance, Time, Frequency]
-  World axis units         = [rad, rad, m, s, Hz]
-  Reference pixel  (CRPIX) = [60, 60, 0, 0, 0]
-  Reference value  (CRVAL) = [0, 1.5708, -1, 0, 0]
-  Increment        (CDELT) = [-0.0349066, 0.0349066, 0, 2.5e-08, 39062.5]
-  \endverbatim
+  \brief Wrapper for creation of a SkymapCoordinate object 
 
-  \param blocksize        -- 
-  \param sampleFrequency  -- 
-  \param nyquistZone      -- 
-  \param nofDistanceSteps -- 
+  \param blocksize        -- nof. samples per block of data
+  \param sampleFrequency  -- Sample frequency in the A/D conversion step
+  \param nyquistZone      -- Nyquist zone
+  \param nofDistanceSteps -- nof. steps along the distance axis
   
   \return coord -- A new SkymapCoordinates object
 */
-SkymapCoordinates get_SkymapCoordinates (uint const blocksize=1024,
-					 double const sampleFrequency=40e6,
-					 uint const nyquistZone=1,
-					 uint const nofDistanceSteps=2)
+SkymapCoordinate get_SkymapCoordinate (uint const blocksize=1024,
+				       double const sampleFrequency=40e6,
+				       uint const nyquistZone=1,
+				       uint const nofDistanceSteps=2)
 {
-  TimeFreq timeFreq (blocksize,
-		     sampleFrequency,
-		     nyquistZone);
-  ObservationData obsData ("WSRT");
-  uint nofBlocks (10);
+  // Parameters used for object creation
+  std::string telescope  = "WSRT";
+  std::string observer   = "Somebody";
+  std::string refcode    = "AZEL";
+  std::string projection = "SIN";
+  casa::Quantity sampleFreq (sampleFrequency,"Hz");
+  uint blocksPerFrame    = 1;
+  uint nofFrames         = 1;
   
-  // create SkymapCoordinates object
-  SkymapCoordinates coord (timeFreq,
-			   obsData,
-			   nofBlocks,
-			   SkymapCoordinates::NORTH_WEST,
-			   CR::FREQ_POWER);
-
-  // update parameters
-  coord.setDistanceShape (nofDistanceSteps);
+  // Coordinate objects
+  CR::ObservationData obsData (telescope,observer);
+  CR::TimeFreqCoordinate timeFreq (blocksize,
+				   sampleFreq,
+				   nyquistZone,
+				   blocksPerFrame,
+				   nofFrames);
+  CR::SpatialCoordinate spatial (CR::CoordinateType::DirectionRadius,
+				 refcode,
+				 projection);
+  spatial.setShape(casa::IPosition(3,20,20,nofDistanceSteps));
+  SkymapCoordinate coord (obsData,
+			  spatial,
+			  timeFreq);
   
   return coord;
 }

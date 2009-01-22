@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tCalTables.cc,v 1.4 2006/11/10 16:54:24 horneff Exp $*/
+/* $Id$*/
 
 #include <casa/Utilities/ValType.h>
 #include <tables/Tables/ExprNodeSet.h>

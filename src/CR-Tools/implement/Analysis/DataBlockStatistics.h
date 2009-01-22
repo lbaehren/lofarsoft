@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: DataBlockStatistics.h,v 1.5 2006/04/13 13:54:15 bahren Exp $*/
+/* $Id$*/
 
 #ifndef _DATABLOCKSTATISTICS_H_
 #define _DATABLOCKSTATISTICS_H_

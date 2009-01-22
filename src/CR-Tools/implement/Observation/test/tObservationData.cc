@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tObservationData.cc,v 1.6 2007/04/04 16:16:14 bahren Exp $ */
+/* $Id$ */
 
 #include <casa/aips.h>
 #include <casa/string.h>

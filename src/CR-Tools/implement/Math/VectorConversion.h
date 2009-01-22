@@ -82,13 +82,6 @@ namespace CR { // Namespace CR -- begin
 	</tr>
 	<tr>
 	  <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
-          <td>AzElHeight <br> \f$ (Az,El,H) \f$</td>
-	  <td>CR::AzElHeight2AzElRadius</td>
-	  <td></td>
-	  <td></td>
-	</tr>
-	<tr>
-	  <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
           <td>Cartesian <br> \f$ (x,y,z) \f$</td>
 	  <td>CR::Cartesian2AzElRadius</td>
 	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
@@ -120,37 +113,6 @@ namespace CR { // Namespace CR -- begin
 	    90^{\circ} - Az \\
 	    ...
 	    \end{array} \right] \f$</td>
-	</tr>
-	<tr>
-	  <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
-          <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
-	  <td>CR::Spherical2AzElRadius</td>
-	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
-	  = \left[ \begin{array}{l}
-	  90^{\circ} - \phi \\
-	  90^{\circ} - \theta \\
-	  r
-	  \end{array} \right] \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
-	  = \left[ \begin{array}{l}
-	  R \\
-	  90^{\circ} - Az \\
-	  90^{\circ} - El
-	  \end{array} \right] \f$</td>
-	</tr>
-        <tr>
-	  <td class="indexkey">Target</td>
-	  <td class="indexkey">... as function of</td>
-	  <td class="indexkey">Function</td>
-	  <td class="indexkey">Relation</td>
-	  <td class="indexkey">Inversion</td>
-	</tr>
-	<tr>
-	  <td>AzElHeight <br> \f$ (Az,El,H) \f$</td>
-          <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
-	  <td>CR::AzElRadius2AzElHeight</td>
-	  <td></td>
-	  <td></td>
 	</tr>
         <tr>
 	  <td class="indexkey">Target</td>

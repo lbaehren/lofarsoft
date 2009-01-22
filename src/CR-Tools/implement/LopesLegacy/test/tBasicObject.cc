@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tBasicObject.cc,v 1.3 2007/04/17 13:52:48 bahren Exp $*/
+/* $Id$*/
 
 #include <LopesLegacy/BasicObject.h>
 

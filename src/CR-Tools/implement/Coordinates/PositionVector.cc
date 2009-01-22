@@ -27,20 +27,6 @@ namespace CR { // Namespace  -- begin
   
   // ============================================================================
   //
-  //  Construction
-  //
-  // ============================================================================
-  
-  PositionVector::PositionVector ()
-  {;}
-  
-  PositionVector::PositionVector (PositionVector const &other)
-  {
-    copy (other);
-  }
-  
-  // ============================================================================
-  //
   //  Destruction
   //
   // ============================================================================
@@ -69,7 +55,12 @@ namespace CR { // Namespace  -- begin
   }
   
   void PositionVector::copy (PositionVector const &other)
-  {;}
+  {
+    type_p = other.type_p;
+
+    position_p.resize(other.position_p.shape());
+    position_p = other.position_p;
+  }
 
   // ============================================================================
   //
@@ -79,7 +70,16 @@ namespace CR { // Namespace  -- begin
   
   void PositionVector::summary (std::ostream &os)
   {
+    unsigned int nelem = position_p.nelements();
+
     os << "[PositionVector] Summary of internal parameters." << std::endl;
+    os << "-- Coordinate type  = " << type_p.type() << std::endl;
+    os << "-- Coordinate name  = " << type_p.name() << std::endl;
+    os << "-- Coordinate value = [";
+    for (unsigned int n(0); n<nelem; n++) {
+      os << " " << position_p(n);
+    }
+    os << " ]" << std::endl;
   }
   
   
@@ -90,6 +90,29 @@ namespace CR { // Namespace  -- begin
   //
   // ============================================================================
 
+  //_____________________________________________________________________________
+  //                                                                         init
+
+  void PositionVector::init (CoordinateType const &coordType)
+  {
+    casa::Vector<double> pos (3,0.0);
+
+    init (coordType,
+	  pos);
+  }
+
+  //_____________________________________________________________________________
+  //                                                                         init
+  
+  void PositionVector::init (CoordinateType const &coordType,
+			     casa::Vector<double> const &position)
+  {
+    type_p = coordType;
+
+    position_p.resize(position.shape());
+    position_p = position;
+  }
+  
   //_____________________________________________________________________________
   //                                                                      convert
   

@@ -34,7 +34,7 @@
 
 */
 
-/* $Id: ClippingFraction.h,v 1.7 2006/04/13 13:54:15 bahren Exp $ */
+/* $Id$ */
 
 #ifndef CLIPPINGFRACTION_H
 #define CLIPPINGFRACTION_H

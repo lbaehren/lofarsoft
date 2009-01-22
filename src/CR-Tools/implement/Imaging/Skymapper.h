@@ -52,10 +52,8 @@
 #include <Coordinates/SkymapCoordinate.h>
 #include <Observation/ObservationData.h>
 #include <Imaging/Beamformer.h>
-#include <Imaging/SkymapCoordinates.h>
 #include <Imaging/SkymapQuantity.h>
 
-using casa::IPosition;
 using casa::Matrix;
 using casa::String;
 using casa::Vector;
@@ -145,7 +143,7 @@ namespace CR {  // Namespace CR -- begin
     String filename_p;
     
     //! Container and handler for the coordinates
-    SkymapCoordinates coordinates_p;
+    SkymapCoordinate coordinates_p;
     
     //! Object to handle the beamforming of the input data
     Beamformer beamformer_p;
@@ -187,30 +185,30 @@ namespace CR {  // Namespace CR -- begin
     /*!
       \brief Argumented constructor
       
-      \param coordinates -- Coordinates information encapsulated in a
-                            SkymapCoordinates object.
+      \param skymapCoord -- Coordinates information encapsulated in a
+                            SkymapCoordinate object.
     */
-    Skymapper (SkymapCoordinates const &coordinates);
+    Skymapper (SkymapCoordinate const &skymapCoord);
     
     /*!
       \brief Argumented constructor
       
-      \param coordinates   -- Coordinates information encapsulated in a
-                              SkymapCoordinates object.
+      \param skymapCoord   -- Coordinates information encapsulated in a
+                              SkymapCoordinate object.
       \param antPositions  -- [nofAntennas,3] Antenna positions for which the
                               delay is computed, \f$ (x,y,z) \f$
     */
-    Skymapper (SkymapCoordinates const &coordinates,
+    Skymapper (SkymapCoordinate const &skymapCoord,
 	       Matrix<double> const &antPositions);
     
   /*!
     \brief Argumented constructor
 
-    \param coordinates -- Coordinates information encapsulated in a
-                          SkymapCoordinates object.
+    \param skymapCoord -- Coordinates information encapsulated in a
+                          SkymapCoordinate object.
     \param beamformer  -- Beamformer object
   */
-  Skymapper (SkymapCoordinates const &coordinates,
+  Skymapper (SkymapCoordinate const &skymapCoord,
 	     Beamformer const &beamformer);
   
   /*!
@@ -267,7 +265,7 @@ namespace CR {  // Namespace CR -- begin
 
     \return shape -- Shape of the pixel array inside the created image
   */
-  inline IPosition imageShape () {
+  inline casa::IPosition imageShape () {
     return coordinates_p.shape();
   }
   
@@ -341,26 +339,26 @@ namespace CR {  // Namespace CR -- begin
     
     \return skymapCoordinates -- Container and handler for the coordinates
   */
-  inline SkymapCoordinates skymapCoordinates () {
+  inline SkymapCoordinate skymapCoordinate () {
     return coordinates_p;
   }
 
   /*!
-    \brief Set the SkymapCoordinates object handling the coordinate operations
+    \brief Set the SkymapCoordinate object handling the coordinate operations
     
     \param coordinates -- Container and handler for the coordinates
     
     \return status -- Status of the operation; returns <tt>false</tt> if an error
                       was encountered.
   */
-  bool setSkymapCoordinates (SkymapCoordinates const &coordinates);
+  bool setSkymapCoordinate (SkymapCoordinate const &skymapCoord);
 
   /*!
     \brief Get the coordinate system associated with the image
     
     \return cs -- The coordinate system as created via SkymapCoordinates
   */
-  inline CoordinateSystem coordinateSystem () {
+  inline casa::CoordinateSystem coordinateSystem () {
     return coordinates_p.coordinateSystem();
   }
   
@@ -374,7 +372,7 @@ namespace CR {  // Namespace CR -- begin
     \param crval      -- Reverence value at the position of the sky map
     \param cdelt      -- Coordinate increment
   */
-  Bool setDirectionAxis (String const &refcode,
+  bool setDirectionAxis (String const &refcode,
 			 String const &projection,
 			 const Vector<Double> &crval,
 			 const Vector<Double>& cdelt);    
@@ -472,7 +470,7 @@ namespace CR {  // Namespace CR -- begin
     \param isOperational      -- Is the Skymapper operational to process data?
     \param nofProcessedBlocks -- nof. blocks to be processed
     \param filename           -- Name of the image file created on disk
-    \param coordinates        -- SkymapCoordinates object encapsulating the
+    \param skymapCoord        -- SkymapCoordinate object encapsulating the
                                  characteristics of the coordinate axes
     \param beamformer         -- Beamformer object, to handle the combination of
                                  antenna signals
@@ -481,8 +479,11 @@ namespace CR {  // Namespace CR -- begin
 	     bool const &isOperational,
 	     uint const &nofProcessedBlocks,
 	     std::string const &filename,
-	     SkymapCoordinates const &coordinates,
+	     SkymapCoordinate const &skymapCoord,
 	     Beamformer const &beamformer);
+
+  //! Get the stride along the time axis
+  int timeAxisStride ();
 
   /*!
     \brief Default function for retrival of data during the imging process

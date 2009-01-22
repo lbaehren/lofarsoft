@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ppfinversion.h,v 1.4 2007/08/08 15:29:50 singh Exp $*/
+/* $Id$*/
 
 #ifndef PPFINVERSION_H
 #define PPFINVERSION_H

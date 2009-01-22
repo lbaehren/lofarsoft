@@ -23,127 +23,277 @@
 
 #include <Imaging/SkymapQuantity.h>
 
-// ==============================================================================
-//
-//  Construction
-//
-// ==============================================================================
+namespace CR {  // Namespace CR -- begin
+  
+  // ============================================================================
+  //
+  //  Construction
+  //
+  // ============================================================================
+  
+  //______________________________________________________________ SkymapQuantity
+  
+  SkymapQuantity::SkymapQuantity ()
+  {
+    setSkymapQuantity (SkymapQuantity::FREQ_POWER);
+  }
+  
+  //______________________________________________________________ SkymapQuantity
+  
+  SkymapQuantity::SkymapQuantity (SkymapQuantity::Type const &quantity)
+  {
+    setSkymapQuantity (quantity);
+  }
 
-// --------------------------------------------------------------- SkymapQuantity
+  //______________________________________________________________ SkymapQuantity
 
-SkymapQuantity::SkymapQuantity ()
-{
-  setSkymapQuantity (SkymapQuantity::FREQ_POWER);
-}
+  SkymapQuantity::SkymapQuantity (std::string const &domain,
+				  std::string const &quantity)
+  {
+    SkymapQuantity::Type skymapType;
+    bool status = getType (skymapType,
+			   domain,
+			   quantity);
 
-// --------------------------------------------------------------- SkymapQuantity
-
-SkymapQuantity::SkymapQuantity (SkymapQuantity::Type const &quantity)
-{
-  setSkymapQuantity (quantity);
-}
-
-// --------------------------------------------------------------- SkymapQuantity
-
-SkymapQuantity::SkymapQuantity (SkymapQuantity const &other)
-{
-  copy (other);
-}
-
-// ==============================================================================
-//
-//  Destruction
-//
-// ==============================================================================
-
-SkymapQuantity::~SkymapQuantity ()
-{
-  destroy();
-}
-
-void SkymapQuantity::destroy ()
-{;}
-
-// ==============================================================================
-//
-//  Operators
-//
-// ==============================================================================
-
-SkymapQuantity& SkymapQuantity::operator= (SkymapQuantity const &other)
-{
-  if (this != &other) {
-    destroy ();
+    if (status) {
+      setSkymapQuantity (skymapType);
+    } else {
+      setSkymapQuantity (SkymapQuantity::FREQ_POWER);
+    }
+  }
+  
+  //______________________________________________________________ SkymapQuantity
+  
+  SkymapQuantity::SkymapQuantity (SkymapQuantity const &other)
+  {
     copy (other);
   }
-  return *this;
-}
-
-// ------------------------------------------------------------------------- copy
-
-void SkymapQuantity::copy (SkymapQuantity const &other)
-{
-  quantity_p = other.quantity_p;
-}
-
-// ==============================================================================
-//
-//  Parameters
-//
-// ==============================================================================
-
-
-
-// ==============================================================================
-//
-//  Methods
-//
-// ==============================================================================
-
-// ----------------------------------------------------------------------- domain
-
-String SkymapQuantity::domain ()
-{
-  String domain ("UNDEFINED");
   
-  switch (quantity_p) {
-  case TIME_FIELD:
-  case TIME_POWER:
-  case TIME_CC:
-  case TIME_X:
-    domain = "Time";
-    break;
-  case FREQ_POWER:
-  case FREQ_FIELD:
-    domain = "Frequency";
-    break;
+  // ============================================================================
+  //
+  //  Destruction
+  //
+  // ============================================================================
+  
+  SkymapQuantity::~SkymapQuantity ()
+  {
+    destroy();
   }
   
-  return domain;
-}
-
-// --------------------------------------------------------------------- quantity
-
-String SkymapQuantity::quantity () 
-{
-  String quantity ("UNDEFINED");
+  void SkymapQuantity::destroy ()
+  {;}
   
-  switch (quantity_p) {
-  case TIME_FIELD:
-  case FREQ_FIELD:
-    quantity = "Field";
-    break;
-  case TIME_POWER:
-  case FREQ_POWER:
-    quantity = "Power";
-    break;
-  case TIME_CC:
-    quantity = "CC";
-    break;
-  case TIME_X:
-    quantity = "X";
-    break;
+  // ==============================================================================
+  //
+  //  Operators
+  //
+  // ==============================================================================
+  
+  SkymapQuantity& SkymapQuantity::operator= (SkymapQuantity const &other)
+  {
+    if (this != &other) {
+      destroy ();
+      copy (other);
+    }
+    return *this;
   }
   
-  return quantity;
+  // ------------------------------------------------------------------------- copy
+  
+  void SkymapQuantity::copy (SkymapQuantity const &other)
+  {
+    quantity_p = other.quantity_p;
+  }
+  
+  // ==============================================================================
+  //
+  //  Parameters
+  //
+  // ==============================================================================
+  
+  void SkymapQuantity::setSkymapQuantity (SkymapQuantity::Type const &quantity)
+  {
+    quantity_p = quantity;
+    
+    // update the coordinate type
+    switch (quantity_p) {
+    case TIME_FIELD:
+    case TIME_POWER:
+    case TIME_CC:
+    case TIME_X:
+    case TIME_P:
+      coordType_p = CR::CoordinateType (CR::CoordinateType::Time);
+      break;
+    case FREQ_POWER:
+    case FREQ_FIELD:
+      coordType_p = CR::CoordinateType (CR::CoordinateType::Frequency);
+      break;
+    }
+  }
+
+  //_____________________________________________________________________________
+  //                                                                      summary
+  
+  void SkymapQuantity::summary (std::ostream &os)
+  {
+    os << "[SkymapQuantity] Summary of internal parameters." << std::endl;
+    os << "-- Domain type     = " << domainType() << std::endl;
+    os << "-- Domain name     = " << domainName() << std::endl;
+    os << "-- Skymap quantity = " << quantity () << std::endl;
+  }
+  
+  // ============================================================================
+  //
+  //  Methods
+  //
+  // ============================================================================
+
+  //_____________________________________________________________________________
+  //                                                                         type
+
+  std::string SkymapQuantity::name ()
+  {
+    bool status (true);
+    std::string domain;
+    std::string quantity;
+
+    status = getType (domain,
+		      quantity,
+		      quantity_p);
+
+    std::string quantityName = domain+"_"+quantity;
+
+    return quantityName;
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                     quantity
+  
+  std::string SkymapQuantity::quantity () 
+  {
+    std::string quantity ("UNDEFINED");
+    
+    switch (quantity_p) {
+    case TIME_FIELD:
+    case FREQ_FIELD:
+      quantity = "Field";
+      break;
+    case TIME_POWER:
+    case FREQ_POWER:
+      quantity = "Power";
+      break;
+    case TIME_CC:
+      quantity = "CC";
+      break;
+    case TIME_X:
+      quantity = "X";
+      break;
+    case TIME_P:
+      quantity = "P";
+      break;
+    }
+    
+    return quantity;
+  }
+
+  //_____________________________________________________________________________
+  //                                                                      getType
+  
+  bool SkymapQuantity::getType (SkymapQuantity::Type &skymapType,
+				std::string const &domain,
+				std::string const &quantity)
+  {
+    bool status (true);
+
+    // domain==TIME
+    if (domain == "time" || domain == "Time" || domain == "TIME") {
+      if (quantity == "field" || quantity == "Field" || quantity == "FIELD") {
+	skymapType = TIME_FIELD;
+      } else if (quantity == "power" || quantity == "Power" || quantity == "POWER") {
+	skymapType = TIME_POWER;
+      } else if (quantity == "cc" || quantity == "CC") {
+	skymapType = TIME_CC;
+      } else if (quantity == "p" || quantity == "P") {
+	skymapType = TIME_P;
+      } else if (quantity == "x" || quantity == "X") {
+	skymapType = TIME_X;
+      } else {
+	status = false;
+      }
+    }
+    // domain==FREQ
+    else if (domain == "freq" || domain == "Freq" || domain == "FREQ") {
+      if (quantity == "field" || quantity == "Field" || quantity == "FIELD") {
+	skymapType = FREQ_FIELD;
+      } else if (quantity == "power" || quantity == "Power" || quantity == "POWER") {
+	skymapType = FREQ_POWER;
+      } else {
+	status = false;
+      }
+    }
+    else {
+      status=false;
+    }
+    
+  /*
+    Feedback in case we were unable to construct a valid SkymapQuantity::Type
+    from the provided input parameters
+  */
+  if (status == false) {
+    std::cerr << "[SkymapQuantity::getType]"
+	      << " Unable to construct valid SkymapQuantity::Type from"
+	      << " domain=" << domain
+	      << ", quantity=" << quantity
+	      << std::endl;
+  }
+  
+  return status;
 }
+  
+  //_____________________________________________________________________________
+  //                                                                      getType
+
+  bool SkymapQuantity::getType (std::string &domain,
+				std::string &quantity,
+				SkymapQuantity::Type const &skymapType)
+  {
+    bool status (true);
+    
+    switch (skymapType) {
+    case TIME_FIELD:
+      domain   = "TIME";
+      quantity = "FIELD";
+      break;
+    case TIME_POWER:
+      domain   = "TIME";
+      quantity = "POWER";
+      break;
+    case TIME_CC:
+      domain   = "TIME";
+      quantity = "CC";
+      break;
+    case TIME_P:
+      domain   = "TIME";
+      quantity = "P";
+      break;
+    case TIME_X:
+      domain   = "TIME";
+      quantity = "X";
+      break;
+    case FREQ_POWER:
+      domain   = "FREQ";
+      quantity = "POWER";
+      break;
+    case FREQ_FIELD:
+      domain   = "FREQ";
+      quantity = "FIELD";
+      break;
+    default:
+      status = false;
+      break;
+    };
+
+    return status;
+  }
+  
+}  // Namespace CR -- end

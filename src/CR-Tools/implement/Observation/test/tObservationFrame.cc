@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 
-/* $Id: tObservationFrame.cc,v 1.3 2007/04/04 16:16:14 bahren Exp $ */
+/* $Id$ */
 
 #include <Observation/ObservationFrame.h>
 

@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tImportAntenna.cc,v 1.5 2007/03/22 10:57:15 huege Exp $*/
+/* $Id$*/
 
 #include <string>
 

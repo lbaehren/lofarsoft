@@ -708,6 +708,36 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
 
+  //_____________________________________________________________ linearTransform
+
+  Matrix<double> SpatialCoordinate::linearTransform()
+  {
+    switch (type_p) {
+    case CoordinateType::DirectionRadius:
+      {
+	Matrix<double> xform (nofAxes_p,nofAxes_p,0.0);
+	Matrix<double> xformDirection (directionCoord_p.linearTransform());
+	Matrix<double> xformLinear (linearCoord_p.linearTransform());
+
+	xform(0,0) = xformDirection(0,0);
+	xform(0,1) = xformDirection(0,1);
+	xform(1,0) = xformDirection(1,0);
+	xform(1,1) = xformDirection(1,1);
+
+	xform(2,2) = xformLinear(0,0);
+
+	return xform;
+      }
+      break;
+    case CoordinateType::Direction:
+      return directionCoord_p.linearTransform();
+      break;
+    default:
+      return linearCoord_p.linearTransform();
+      break;
+    }
+  }
+
   //_____________________________________________________________________ toWorld
 
   void SpatialCoordinate::toWorld (Vector<double> &world,

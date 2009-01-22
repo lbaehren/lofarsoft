@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tSkymapperTools.cc,v 1.4 2006/08/02 14:08:44 bahren Exp $*/
+/* $Id$*/
 
 #include <casa/aips.h>
 #include <casa/System/Aipsrc.h>

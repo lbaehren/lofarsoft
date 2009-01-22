@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tPluginBase.cc,v 1.4 2006/07/12 10:13:16 bahren Exp $*/
+/* $Id$*/
 
 #include <Calibration/PluginBase.h>
 

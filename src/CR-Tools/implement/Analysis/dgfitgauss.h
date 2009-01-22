@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: dgfitgauss.h,v 1.3 2007/06/21 16:07:31 horneff Exp $*/
+/* $Id$*/
 
 #ifndef DFITGAUSS_H
 #define DFITGAUSS_H

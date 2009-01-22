@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: DynamicSpectrum.h,v 1.2 2006/04/13 13:54:15 bahren Exp $*/
+/* $Id$*/
 
 #ifndef _DYNAMICSPECTRUM_H_
 #define _DYNAMICSPECTRUM_H_

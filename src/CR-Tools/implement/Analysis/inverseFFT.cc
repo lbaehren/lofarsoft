@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: inverseFFT.cc,v 1.4 2007/04/03 14:03:07 bahren Exp $*/
+/* $Id$*/
 
 #include <Analysis/inverseFFT.h>
 

@@ -26,6 +26,8 @@
 // Namespace usage
 using std::cout;
 using std::endl;
+using CR::GeomDelay;
+using CR::GeomPhase;
 using CR::GeomWeight;
 
 /*!
@@ -77,7 +79,66 @@ int test_constructors ()
     nofFailedTests++;
   }
 
-  cout << "[3] Testing fully argumented constructor ..." << endl;
+  cout << "[3] Construction using (GeomDelay,Vector<double>,bool,bool) ..." << endl;
+  try {
+    // parameters for GeomDelay
+    casa::Matrix<double> antPositions (2,3);
+    casa::Matrix<double> skyPositions (10,3);
+    bool anglesInDegrees (true);
+    bool farField (false);
+    bool bufferDelays (false);
+    GeomDelay geomDelay (antPositions,
+			 skyPositions,
+			 anglesInDegrees,
+			 farField,
+			 bufferDelays);
+    // parameters for GeomPhase
+    Vector<double> frequencies (10);
+    bool bufferPhases (false);
+    // parameters for GeomWeights
+    bool bufferWeights (false);
+
+    GeomWeight weight (geomDelay,
+		       frequencies,
+		       bufferPhases,
+		       bufferWeights);
+    weight.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[4] Construction using (GeomDelay,Vector<MVFrequency>,bool,bool) ..."
+       << endl;
+  try {
+    // parameters for GeomDelay
+    casa::Matrix<double> antPositions (2,3);
+    casa::Matrix<double> skyPositions (10,3);
+    bool anglesInDegrees (true);
+    bool farField (false);
+    bool bufferDelays (false);
+    GeomDelay geomDelay (antPositions,
+			 skyPositions,
+			 anglesInDegrees,
+			 farField,
+			 bufferDelays);
+    // parameters for GeomPhase
+    Vector<MVFrequency> frequencies (10);
+    bool bufferPhases (false);
+    // parameters for GeomWeights
+    bool bufferWeights (false);
+
+    GeomWeight weight (geomDelay,
+		       frequencies,
+		       bufferPhases,
+		       bufferWeights);
+    weight.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[5] Testing fully argumented constructor ..." << endl;
   try {
     // parameters for GeomDelay
     casa::Matrix<double> antPositions (2,3);
@@ -108,7 +169,7 @@ int test_constructors ()
     nofFailedTests++;
   }
 
-  cout << "[4] Testing fully argumented constructor ..." << endl;
+  cout << "[6] Testing fully argumented constructor ..." << endl;
   try {
     // parameters for GeomDelay
     casa::Vector<casa::MVPosition> antPositions (2);
@@ -135,7 +196,7 @@ int test_constructors ()
     nofFailedTests++;
   }
   
-  cout << "[5] Testing copy constructor ..." << endl;
+  cout << "[7] Testing copy constructor ..." << endl;
   try {
     Vector<MVFrequency> frequencies (10);
     CR::GeomPhase phase (frequencies,false);

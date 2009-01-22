@@ -24,7 +24,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: dgfitgauss.cc,v 1.4 2007/06/21 16:07:31 horneff Exp $
+//# $Id$
 //#--------------------------------------------------------------------------
 
 #include <Analysis/dgfitgauss.h>

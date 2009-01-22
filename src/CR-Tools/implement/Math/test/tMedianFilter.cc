@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tMedianFilter.cc,v 1.4 2005/12/22 13:51:38 bahren Exp $*/
+/* $Id$*/
 
 #include <Math/MedianFilter.h>
 

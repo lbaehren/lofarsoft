@@ -48,25 +48,25 @@ namespace CR {  // Namespace CR -- begin
 	  false,
 	  0,
 	  "skymap.img",
-	  SkymapCoordinates(),
+	  SkymapCoordinate(),
 	  Beamformer());
   }
   
   // ------------------------------------------------------------------ Skymapper
   
-  Skymapper::Skymapper (SkymapCoordinates const &coordinates)
+  Skymapper::Skymapper (SkymapCoordinate const &skymapCoord)
   {
     init (0,
 	  false,
 	  0,
 	  "skymap.img",
-	  coordinates,
+	  skymapCoord,
 	  Beamformer());
   }
   
   // ------------------------------------------------------------------ Skymapper
   
-  Skymapper::Skymapper (SkymapCoordinates const &coordinates,
+  Skymapper::Skymapper (SkymapCoordinate const &skymapCoord,
 			Matrix<double> const &antPositions)
   {
     Beamformer beamformer;
@@ -76,20 +76,20 @@ namespace CR {  // Namespace CR -- begin
 	  false,
 	  0,
 	  "skymap.img",
-	  coordinates,
+	  skymapCoord,
 	  beamformer);
   }
   
   // ------------------------------------------------------------------ Skymapper
   
-  Skymapper::Skymapper (SkymapCoordinates const &coordinates,
+  Skymapper::Skymapper (SkymapCoordinate const &skymapCoord,
 			Beamformer const &beamformer)
   {
     init (0,
 	  false,
 	  0,
 	  "skymap.img",
-	  coordinates,
+	  skymapCoord,
 	  beamformer);
   }
 
@@ -157,7 +157,7 @@ namespace CR {  // Namespace CR -- begin
 			bool const &isOperational,
 			uint const &nofProcessedBlocks,
 			std::string const &filename,
-			SkymapCoordinates const &coordinates,
+			SkymapCoordinate const &skymapCoord,
 			Beamformer const &beamformer)
   {
     // Store atomic parameters
@@ -174,8 +174,8 @@ namespace CR {  // Namespace CR -- begin
 	   << endl;
     }
     
-    if (!setSkymapCoordinates (coordinates)) {
-      cerr << "[Skymapper::init] Error setting SkymapCoordinates object!"
+    if (!setSkymapCoordinate (skymapCoord)) {
+      cerr << "[Skymapper::init] Error setting SkymapCoordinate object!"
 	   << endl;
     }
     
@@ -207,15 +207,15 @@ namespace CR {  // Namespace CR -- begin
 
   // ------------------------------------------------------- setSkymapCoordinates
 
-  bool Skymapper::setSkymapCoordinates (SkymapCoordinates const &coordinates)
+  bool Skymapper::setSkymapCoordinate (SkymapCoordinate const &skymapCoord)
   {
     bool status (true);
     
     try {
-      coordinates_p = coordinates;
+      coordinates_p = skymapCoord;
     } catch (std::string message) {
-      cerr << "[Skymapper::setSkymapCoordinates] "
-		<< "Error setting setSkymapCoordinates object!"
+      cerr << "[Skymapper::setSkymapCoordinate] "
+		<< "Error setting setSkymapCoordinate object!"
 		<< endl;
       cerr << "--> " << message << endl;
     }
@@ -229,6 +229,30 @@ namespace CR {  // Namespace CR -- begin
   //
   // ============================================================================
 
+  //_____________________________________________________________________________
+  //                                                               timeAxisStride
+
+  int Skymapper::timeAxisStride ()
+  {
+    int stride (1);
+    
+    switch (quantity_p.type()) {
+    case SkymapQuantity::TIME_FIELD:
+    case SkymapQuantity::TIME_POWER:
+    case SkymapQuantity::TIME_CC:
+    case SkymapQuantity::TIME_P:
+    case SkymapQuantity::TIME_X:
+      stride = coordinates_p.timeFreqCoordinate().blocksize();
+      break;
+    case SkymapQuantity::FREQ_POWER:
+    case SkymapQuantity::FREQ_FIELD:
+      stride = 1;
+      break;
+    }
+
+    return stride;
+  }
+  
   // -------------------------------------------------------------- initSkymapper
 
   bool Skymapper::initSkymapper () 
@@ -243,26 +267,18 @@ namespace CR {  // Namespace CR -- begin
     */
     try {
       // Retrieve the values of the direction axes
-      Matrix<double> directionValues;
-      status = coordinates_p.directionAxisValues ("AZEL",
-						  directionValues,
-						  directionMask_p,
-						  false);
-
-      // Retrieve the values of the distance axis
-      Vector<double> distances (coordinates_p.distanceAxisValues());
+      Matrix<double> skyPositions = coordinates_p.spatialCoordinate().worldAxisValues();
 
       // Combine the values from the axes to yield the 3D positions
       bool anglesInDegrees (true);
       bool bufferDelays (false);
       Vector<int> axisOrder (3);
       casa::indgen(axisOrder);
-      status = beamformer_p.setSkyPositions(directionValues,
-					    distances,
-					    axisOrder,
-					    CR::CoordinateType::Spherical,
-					    anglesInDegrees,
-					    bufferDelays);
+//       status = beamformer_p.setSkyPositions(skyPositions,
+// 					    axisOrder,
+// 					    CR::CoordinateType::Spherical,
+// 					    anglesInDegrees,
+// 					    bufferDelays);
     } catch (std::string message) {
       cerr << "[Skymapper::initSkymapper] Failed assigning beam directions!"
 	   << endl;
@@ -273,7 +289,7 @@ namespace CR {  // Namespace CR -- begin
       In order to set the beamforming weights we require the frequency values
     */
     try {
-      Vector<double> frequencies (coordinates_p.frequencyAxisValues());
+      Vector<double> frequencies (coordinates_p.timeFreqCoordinate().timeValues());
       status = beamformer_p.setFrequencies (frequencies);
 
     } catch (std::string message) {
@@ -287,14 +303,14 @@ namespace CR {  // Namespace CR -- begin
       and initialize one first, before we can start inserting the computed 
       image data.
     */
-    CoordinateSystem csys = coordinates_p.coordinateSystem();
-    IPosition shape       = coordinates_p.shape();
-    TiledShape tile (shape);
+    casa::CoordinateSystem csys = coordinates_p.coordinateSystem();
+    casa::IPosition shape       = coordinates_p.shape();
+    casa::TiledShape tile (shape);
 
     try {
-      image_p = new PagedImage<double> (tile,
-					csys,
-					filename_p);
+      image_p = new casa::PagedImage<double> (tile,
+					      csys,
+					      filename_p);
     } catch (std::string message) {
       cerr << "[Skymapper::initSkymapper] Failed creating the image file!" << endl;
       cerr << "--> " << message << endl;
@@ -341,10 +357,9 @@ namespace CR {  // Namespace CR -- begin
     */
     if (status) {
       // Declare additional variables
-      int timeAxisStride (coordinates_p.timeAxisStride());
-      IPosition shape (coordinates_p.shape());
-      IPosition start  (shape.nelements(),0);
-      IPosition stride (shape.nelements(),1);
+      casa::IPosition shape (coordinates_p.shape());
+      casa::IPosition start  (shape.nelements(),0);
+      casa::IPosition stride (shape.nelements(),1);
 
       // Set up temporary array used to insert the output from the Beamformer
       // into the pixel array of the PagedImage; this approach is not too 
@@ -359,7 +374,7 @@ namespace CR {  // Namespace CR -- begin
 			       );
       
       // Adjust the slicing operators
-      start(3) = timeAxisStride*nofProcessedBlocks_p;
+      start(3) = nofProcessedBlocks_p*timeAxisStride();
 
       // Progress bar
       ProgressBar bar (shape(0),">");
@@ -435,13 +450,9 @@ namespace CR {  // Namespace CR -- begin
   
   void Skymapper::summary (std::ostream &os)
   {
-    TimeFreq timeFreq        = coordinates_p.timeFreq();
-    CoordinateSystem csys    = coordinates_p.coordinateSystem();
-    DirectionCoordinate axis = coordinates_p.directionCoordinate();
-    MDirection direction     = axis.directionType();
-    String refcode           = direction.getRefString();
-    String projection        = axis.projection().name();
-    ObsInfo obsInfo          = csys.obsInfo();
+    TimeFreq timeFreq           = coordinates_p.timeFreqCoordinate();
+    casa::CoordinateSystem csys = coordinates_p.coordinateSystem();
+    ObsInfo obsInfo             = csys.obsInfo();
     
     os << "[Skymapper] Summary of the internal parameters"             << endl;
     os << " - Observation ..............  "                               << endl;
@@ -455,8 +466,8 @@ namespace CR {  // Namespace CR -- begin
     os << " -- Nyquist zone             = " << timeFreq.nyquistZone()     << endl;
     os << " -- nof. antennas            = " << beamformer_p.nofAntennas() << endl;
     os << " - Coordinates .............  "                                << endl;
-    os << " -- reference code           = " << refcode                    << endl;
-    os << " -- projection               = " << projection                 << endl;
+//     os << " -- reference code           = " << refcode                    << endl;
+//     os << " -- projection               = " << projection                 << endl;
     os << " -- nof. coordinates         = " << csys.nCoordinates()        << endl;
     os << " -- names                    = " << csys.worldAxisNames()      << endl;
     os << " -- units                    = " << csys.worldAxisUnits()      << endl;

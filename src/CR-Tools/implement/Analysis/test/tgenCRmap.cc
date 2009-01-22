@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tgenCRmap.cc,v 1.1 2007/04/19 14:23:30 horneff Exp $*/
+/* $Id$*/
 
 #include <Analysis/genCRmap.h>
 #include <Analysis/SecondStagePipeline.h>

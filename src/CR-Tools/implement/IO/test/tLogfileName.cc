@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tLogfileName.cc,v 1.2 2006/01/09 19:23:10 bahren Exp $*/
+/* $Id$*/
 
 #include <IO/LogfileName.h>
 

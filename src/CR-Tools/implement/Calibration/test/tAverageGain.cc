@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tAverageGain.cc,v 1.7 2006/07/12 10:13:16 bahren Exp $ */
+/* $Id$ */
 
 #include <Calibration/AverageGain.h>
 

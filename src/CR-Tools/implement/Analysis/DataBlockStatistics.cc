@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: DataBlockStatistics.cc,v 1.5 2006/11/02 12:38:31 horneff Exp $*/
+/* $Id$*/
 
 #include <Analysis/DataBlockStatistics.h>
 

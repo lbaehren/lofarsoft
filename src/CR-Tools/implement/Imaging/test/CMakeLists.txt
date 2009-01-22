@@ -15,11 +15,15 @@ set (tests
   tBeamformer
   tFeed
   tGeomDelay
+  tGeomPhase
+  tGeomWeight
   tGeometricalDelay
   tGeometricalPhase
   tGeometricalWeight
   tMDirection
   tSkymapGrid
+  tSkymapQuantity
+  tSkymapOrientation
   )
 
 ## Build the test programs
@@ -38,26 +42,6 @@ endforeach (src)
 ##  Tests needing extra requirements
 ##
 ## ==============================================================================
-
-##____________________________________________________________________
-## tSkymapCoordinates
-
-if (HAVE_DAL AND HAVE_HDF5)
-
-  ## compiler instructions
-  add_executable (tSkymapCoordinates tSkymapCoordinates.cc)
-  ## linker instructions
-  target_link_libraries (tSkymapCoordinates
-    cr
-    ${DAL_LIBRARIES}
-    ${HDF5_LIBRARIES}
-    )
-  ## testing
-  add_test (tSkymapCoordinates tSkymapCoordinates)
-  ## installation
-  list (APPEND tests tSkymapCoordinates)
-
-endif (HAVE_DAL AND HAVE_HDF5)
 
 ##____________________________________________________________________
 ## tSkymapper

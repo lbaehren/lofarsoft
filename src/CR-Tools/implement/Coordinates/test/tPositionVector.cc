@@ -41,6 +41,43 @@ using CR::PositionVector;
 
 // -----------------------------------------------------------------------------
 
+/*!
+  \brief Test constructors for a new PositionVector object
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+*/
+int test_constructors ()
+{
+  std::cout << "\n[tPositionVector::test_constructors]\n" << std::endl;
+
+  int nofFailedTests (0);
+  
+  std::cout << "[1] Testing default constructor ..." << std::endl;
+  try {
+    PositionVector pos;
+    pos.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[2] Testing argumented constructor ..." << std::endl;
+  try {
+    CR::CoordinateType coordType (CR::CoordinateType::Spherical);
+
+    PositionVector pos (coordType);
+    pos.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
 int test_static_functions ()
 {
   std::cout << "\n[tPositionVector::test_static_functions]\n" << std::endl;
@@ -288,33 +325,6 @@ int test_static_functions ()
     nofFailedTests++;
   }
 
-  return nofFailedTests;
-}
-
-// -----------------------------------------------------------------------------
-
-/*!
-  \brief Test constructors for a new PositionVector object
-
-  \return nofFailedTests -- The number of failed tests encountered within this
-          function.
-*/
-int test_constructors ()
-{
-  std::cout << "\n[tPositionVector::test_constructors]\n" << std::endl;
-
-  int nofFailedTests (0);
-  
-  std::cout << "[1] Testing default constructor ..." << std::endl;
-  try {
-    PositionVector newObject;
-    //
-    newObject.summary(); 
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
   return nofFailedTests;
 }
 

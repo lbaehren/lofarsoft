@@ -17,7 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-/* $Id: tLinearRegression.cc,v 1.4 2005/08/05 12:57:41 bahren Exp $*/
+/* $Id$*/
 
 #include <fstream>
 #include <Math/LinearRegression.h>

@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tBasicFilter.cc,v 1.2 2006/02/06 16:12:43 bahren Exp $*/
+/* $Id$*/
 
 #include <Math/BasicFilter.h>
 

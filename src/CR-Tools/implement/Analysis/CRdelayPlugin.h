@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: CRdelayPlugin.h,v 1.4 2007/06/17 17:47:44 horneff Exp $*/
+/* $Id$*/
 
 #ifndef CRDELAYPLUGIN_H
 #define CRDELAYPLUGIN_H

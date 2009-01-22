@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ClippingFraction.cc,v 1.10 2007/03/07 17:54:56 bahren Exp $ */
+/* $Id$ */
 
 #include <Analysis/ClippingFraction.h>
 

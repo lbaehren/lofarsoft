@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ppfinversion.cc,v 1.5 2007/08/08 15:29:50 singh Exp $*/
+/* $Id$*/
 
 #include <Analysis/ppfinversion.h>
 #include <Analysis/SubbandID.h>

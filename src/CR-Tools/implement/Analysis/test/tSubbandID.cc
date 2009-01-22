@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tsubbandID.cc,v 1.1 2007/06/07 08:11:38 singh Exp $*/
+/* $Id$*/
 
 #include <casa/aips.h>
 #include <casa/iostream.h>

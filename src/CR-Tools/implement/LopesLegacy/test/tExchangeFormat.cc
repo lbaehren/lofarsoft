@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tExchangeFormat.cc,v 1.2 2006/07/05 12:59:12 bahren Exp $*/
+/* $Id$*/
 
 #include <iostream>
 #include <LopesLegacy/ExchangeFormat.h>

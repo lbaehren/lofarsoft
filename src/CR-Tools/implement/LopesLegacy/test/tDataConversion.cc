@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tDataConversion.cc,v 1.1 2005/07/15 07:16:47 bahren Exp $ */
+/* $Id$ */
 
 #include <LopesLegacy/DataConversion.h>
 

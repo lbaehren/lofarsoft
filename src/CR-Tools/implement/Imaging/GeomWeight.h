@@ -87,7 +87,33 @@ namespace CR { // Namespace CR -- begin
     GeomWeight (bool const &bufferWeights=false);
     
     /*!
-      \brief Default constructor
+      \brief Argumented constructor
+
+      \param geomDelay     -- 
+      \param frequencies   --
+      \param bufferPhases  -- 
+      \param bufferWeights -- Buffer the values of the weights?
+    */
+    GeomWeight (GeomDelay const &geomDelay,
+		Vector<double> const &frequencies,
+		bool const &bufferPhases=false,
+		bool const &bufferWeights=false);
+    
+    /*!
+      \brief Argumented constructor
+
+      \param geomDelay     -- 
+      \param frequencies   --
+      \param bufferPhases  -- 
+      \param bufferWeights -- Buffer the values of the weights?
+    */
+    GeomWeight (GeomDelay const &geomDelay,
+		Vector<MVFrequency> const &frequencies,
+		bool const &bufferPhases=false,
+		bool const &bufferWeights=false);
+    
+    /*!
+      \brief Argumented constructor
 
       \param geomPhase     -- 
       \param bufferWeights -- Buffer the values of the weights?
@@ -173,6 +199,15 @@ namespace CR { // Namespace CR -- begin
     
     // --------------------------------------------------------------- Parameters
 
+    /*!
+      \brief Get the values of the geometrical weights
+
+      \return weights -- [freq,ant,sky] The numerical values of the geometrical
+              weights.
+    */
+    Cube<DComplex> weights ();
+    
+    //! Get the shape of the array holding the geometrical weights
     inline IPosition shape () {
       return GeomPhase::shape();
     }
@@ -197,8 +232,6 @@ namespace CR { // Namespace CR -- begin
     */
     void bufferWeights (bool const &bufferWeights);
 
-    Cube<DComplex> weights ();
-    
     /*!
       \brief Get the name of the class
       

@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: txBeam.cc,v 1.2 2007/08/08 15:51:18 lbaehren Exp $*/
+/* $Id$*/
 
 #include <Beamforming/xBeam.h>
 

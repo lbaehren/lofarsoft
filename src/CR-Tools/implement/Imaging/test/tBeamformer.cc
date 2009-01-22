@@ -34,6 +34,7 @@ using CR::GeometricalDelay;
 using CR::GeometricalPhase;
 using CR::GeometricalWeight;
 using CR::Beamformer;
+using CR::SkymapQuantity;
 
 /*!
   \file Imaging/test/tBeamformer.cc
@@ -175,25 +176,25 @@ int test_beamType ()
 		 get_frequencies());
 
   std::cout << "[1] Field in the frequency domain..." << std::endl;
-  ok = bf.setBeamType (CR::FREQ_FIELD);
+  ok = bf.setSkymapType (SkymapQuantity::FREQ_FIELD);
   
   std::cout << "[2] Power in the frequency domain..." << std::endl;
-  ok = bf.setBeamType (CR::FREQ_POWER);
+  ok = bf.setSkymapType (SkymapQuantity::FREQ_POWER);
   
   std::cout << "[3] Field in the time domain..." << std::endl;
-  ok = bf.setBeamType (CR::TIME_FIELD);
+  ok = bf.setSkymapType (SkymapQuantity::TIME_FIELD);
   
   std::cout << "[4] Power in the time domain..." << std::endl;
-  ok = bf.setBeamType (CR::TIME_POWER);
+  ok = bf.setSkymapType (SkymapQuantity::TIME_POWER);
   
   std::cout << "[5] cc-beam in the time domain..." << std::endl;
-  ok = bf.setBeamType (CR::TIME_CC);
+  ok = bf.setSkymapType (SkymapQuantity::TIME_CC);
   
   std::cout << "[6] Power-beam in the time domain..." << std::endl;
-  ok = bf.setBeamType (CR::TIME_P);
+  ok = bf.setSkymapType (SkymapQuantity::TIME_P);
   
   std::cout << "[7] Excess-beam in the time domain..." << std::endl;
-  ok = bf.setBeamType (CR::TIME_X);
+  ok = bf.setSkymapType (SkymapQuantity::TIME_X);
   
   return nofFailedTests;
 }
@@ -277,7 +278,7 @@ int test_processing ()
 
   std::cout << "[1] Power in the frequency domain (FREQ_POWER)" << std::endl;
   try {
-    bf.setBeamType(CR::FREQ_POWER);
+    bf.setSkymapType(SkymapQuantity::FREQ_POWER);
     bf.summary();
     status = bf.processData (beam,data);
   } catch (std::string message) {
@@ -287,7 +288,7 @@ int test_processing ()
   
   std::cout << "[2] cc-beam in the time domain (TIME_CC)" << std::endl;
   try {
-    bf.setBeamType(CR::TIME_CC);
+    bf.setSkymapType(SkymapQuantity::TIME_CC);
     bf.summary();
     status = bf.processData (beam,data);
   } catch (std::string message) {
@@ -297,7 +298,7 @@ int test_processing ()
   
   std::cout << "[3] powerbeam in the time domain (TIME_P)" << std::endl;
   try {
-    bf.setBeamType(CR::TIME_P);
+    bf.setSkymapType(SkymapQuantity::TIME_P);
     bf.summary();
     status = bf.processData (beam,data);
   } catch (std::string message) {
@@ -315,14 +316,12 @@ int main ()
   int nofFailedTests (0);
 
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_Beamformer ();
-  }
-
+  nofFailedTests += test_Beamformer ();
+  
   if (!nofFailedTests) {
     nofFailedTests += test_beamType ();
     nofFailedTests += test_processing ();
   }
-
+  
   return nofFailedTests;
 }

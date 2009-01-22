@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tParameterFromRecord.cc,v 1.2 2006/07/18 17:05:41 bahren Exp $*/
+/* $Id$*/
 
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>

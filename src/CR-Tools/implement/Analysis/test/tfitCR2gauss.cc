@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tfitCR2gauss.cc,v 1.2 2007/06/20 15:29:25 horneff Exp $*/
+/* $Id$*/
 
 #include <Analysis/CRinvFFT.h>
 #include <Data/LopesEventIn.h>

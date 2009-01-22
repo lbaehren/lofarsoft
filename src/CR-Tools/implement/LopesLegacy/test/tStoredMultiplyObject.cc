@@ -17,7 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-/* $Id: tStoredMultiplyObject.cc,v 1.1 2005/07/22 13:40:36 horneff Exp $*/
+/* $Id$*/
 
 #include <LopesLegacy/StoredMultiplyObject.h>
 

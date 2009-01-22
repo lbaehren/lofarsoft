@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tDataReaderTools.cc,v 1.4 2007/03/13 22:36:42 bahren Exp $*/
+/* $Id$*/
 
 #include <casa/aips.h>
 #include <casa/iostream.h>

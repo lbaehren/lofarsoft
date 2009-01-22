@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id:: Imaging.h 1097 2007-11-28 10:51:59Z baehren                     $ |
+ | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: genCRmap.h,v 1.2 2007/05/02 09:37:10 bahren Exp $*/
+/* $Id$*/
 
 #ifndef GENCRMAP_H
 #define GENCRMAP_H
@@ -31,18 +31,17 @@
 // Standard library header files
 #include <string>
 
-// AIPS++/CASA header files
+// casacore header files
 #include <casa/aips.h>
-#include <casa/Exceptions/Error.h>
-
 #include <casa/Arrays.h>
-// #include <casa/Containers/RecordField.h>
+#include <casa/Exceptions/Error.h>
+#include <casa/namespace.h>
 
+// CR-Tools header files
 #include <Imaging/Beamformer.h>
 #include <Imaging/Skymapper.h>
+#include <IO/DataReader.h>
 #include <Calibration/CalTableReader.h>
-
-#include <casa/namespace.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -75,7 +74,7 @@ namespace CR { // Namespace CR -- begin
   protected:
     
     //! SkymapCoordinates object that holds all the Meta-Information
-    SkymapCoordinates SkyCoord_p;
+    SkymapCoordinate SkyCoord_p;
 
     //! Unmodified antenna positions, i.e. relative to coordinate system and not shower core.
     Matrix<Double> AntPositions_p;
@@ -126,7 +125,8 @@ namespace CR { // Namespace CR -- begin
       
       \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    Bool setMapHeader(DataReader &dr, CalTableReader *CTRead);
+    Bool setMapHeader (DataReader &dr,
+		       CalTableReader *CTRead);
    
     
     // ------------------------------------------------------------------ Methods

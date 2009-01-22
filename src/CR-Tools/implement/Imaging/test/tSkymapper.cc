@@ -33,15 +33,20 @@
 #include <casa/OS/Directory.h>
 #include <images/Images/PagedImage.h>
 
+using casa::AipsError;
+using casa::Array;
 using casa::IPosition;
+using casa::PagedImage;
+using casa::TiledShape;
 
+#include <Coordinates/SkymapCoordinate.h>
 #include <Imaging/Skymapper.h>
 #include <Utilities/ProgressBar.h>
 #include "create_data.h"
 
 using CR::ObservationData;
 using CR::ProgressBar;
-using CR::SkymapCoordinates;
+using CR::SkymapCoordinate;
 using CR::Skymapper;
 using CR::TimeFreq;
 
@@ -85,9 +90,9 @@ using CR::TimeFreq;
   \endverbatim
 */
 template <class T>
-void show_PagedImage (const PagedImage<T>& myimage)
+void show_PagedImage (const casa::PagedImage<T>& myimage)
 {
-  IPosition shape (myimage.shape());
+  casa::IPosition shape (myimage.shape());
   int nofAxes (shape.nelements());
   double nofPixes (1.0);
   bool stripPath (true);
@@ -106,8 +111,8 @@ void show_PagedImage (const PagedImage<T>& myimage)
   cout << " -- has pixel mask   : " << myimage.hasPixelMask() << endl;
 }
 
-template void show_PagedImage (const PagedImage<Float>& myimage);
-template void show_PagedImage (const PagedImage<Double>& myimage);
+template void show_PagedImage (const casa::PagedImage<Float>& myimage);
+template void show_PagedImage (const casa::PagedImage<Double>& myimage);
 
 // -----------------------------------------------------------------------------
 
@@ -173,7 +178,7 @@ int test_CoordinateSystem ()
 {
   cout << "\n[test_CoordinateSystem]" << endl;
 
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
 
   cout << "\n[1] Construct linear coordinate and afterwards adjust parameters ..."
        << endl;
@@ -275,9 +280,9 @@ int test_PagedImage (bool const &test_putAt)
 {
   cout << "\n[test_PagedImage]\n" << endl;
 
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
   Skymapper skymapper;
-  String pathTestImage (Aipsrc::aipsRoot());
+  casa::String pathTestImage (casa::Aipsrc::aipsRoot());
 
   pathTestImage += "/data/demo/Images/test_image";
 
@@ -517,11 +522,11 @@ int test_PagedImage (bool const &test_putAt)
 
   \return nofFailedTests -- The number of failed tests.
 */
-Int test_Skymapper ()
+int test_Skymapper ()
 {
   cout << "\n[test_Skymapper]" << endl;
 
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
 
   cout << "\n[1] Testing default constructor ..." << endl;
   try {
@@ -536,15 +541,16 @@ Int test_Skymapper ()
   cout << "\n[2] Testing argumented constructor ..." << endl;
   try {
     // Time-frequency domain data
-    TimeFreq timeFreq (2048,80e06,2);
+    TimeFreqCoordinate timeFreq (2048,80e06,2);
     // Observation info
     ObservationData obsData ("LOFAR-ITS");
     obsData.setObserver ("Lars Baehren");
     // Coordinates 
-    SkymapCoordinates coords (timeFreq,
-			      obsData);
+    SkymapCoordinate coord;
+    coord.setTimeFreqCoordinate(timeFreq);
+    coord.setObservationData(obsData);
     
-    Skymapper skymapper (coords);
+    Skymapper skymapper (coord);
     
     skymapper.summary();
   } catch (AipsError x) {
@@ -554,7 +560,7 @@ Int test_Skymapper ()
   
   cout << "\n[3] Logging of internal parameters ..." << endl;
   try {
-    ofstream logfile;
+    std::ofstream logfile;
     Skymapper skymapper;
 
     logfile.open("tSkymapper.log");
@@ -604,7 +610,7 @@ int test_processing (string const &lopesData,
   
   std::cout << "[2] Test init function for custom object..." << std::endl;
   try {
-    Skymapper skymapper (get_SkymapCoordinates());
+    Skymapper skymapper (get_SkymapCoordinate());
     // enable additional feedback during processing
     skymapper.setVerboseLevel(1);
     // set the name of the created image file
@@ -625,8 +631,7 @@ int test_processing (string const &lopesData,
     uint nofAntennas (2);
     // --- create SkymapCoordinates object ---
     std::cout << "-- creating SkymapCoordinates object..." << std::endl;
-    CR::SkymapCoordinates skymapCoordinates (get_SkymapCoordinates(blocksize));
-    skymapCoordinates.setNofBlocks (nofDataBlocks);
+    CR::SkymapCoordinate skymapCoordinates (get_SkymapCoordinate(blocksize));
     IPosition shape (skymapCoordinates.shape());
     // create Skymapper object
     std::cout << "-- creating Skymapper object..." << std::endl;
@@ -659,11 +664,12 @@ int test_processing (string const &lopesData,
 int main (int argc,
 	  char *argv[])
 {
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
+
   string metafile ("/data/ITS/exampledata.its/experiment.meta");
-  string lopesData ("/data/LOPES/example.event");
-  uint blocksize (1024);
-  bool test_putAt (false);
+  string lopesData = "/data/LOPES/example.event";
+  uint blocksize   = 1024;
+  bool test_putAt  = false;
   
 //   nofFailedTests += test_CoordinateSystem ();
 //   nofFailedTests += test_PagedImage (test_putAt);

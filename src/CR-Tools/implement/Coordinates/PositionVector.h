@@ -62,7 +62,7 @@ namespace CR { // Namespace  -- begin
   class PositionVector {
 
     //! Coordinate type of the position vector
-    CoordinateType::Types type_p;
+    CR::CoordinateType type_p;
     //! Numerical values of the position vector
     casa::Vector<double> position_p;
     
@@ -71,7 +71,30 @@ namespace CR { // Namespace  -- begin
     // ------------------------------------------------------------- Construction
     
     //! Default constructor
-    PositionVector ();
+    PositionVector () {
+      init (CR::CoordinateType::Cartesian);
+    }
+    
+    /*!
+      \brief Argumented constructor
+
+      \param coordType -- Type of the coordinate
+    */
+    PositionVector (CoordinateType const &coordType) {
+      init (coordType);
+    }
+    
+    /*!
+      \brief Argumented constructor
+
+      \param coordType -- Type of the coordinate.
+      \param position  -- Position values.
+    */
+    PositionVector (CoordinateType const &coordType,
+		    casa::Vector<double> const &position) {
+      init (coordType,
+	    position);
+    }
     
     /*!
       \brief Copy constructor
@@ -79,7 +102,9 @@ namespace CR { // Namespace  -- begin
       \param other -- Another PositionVector object from which to create this new
              one.
     */
-    PositionVector (PositionVector const &other);
+    PositionVector (PositionVector const &other) {
+      copy (other);
+    }
     
     // -------------------------------------------------------------- Destruction
 
@@ -103,13 +128,32 @@ namespace CR { // Namespace  -- begin
       \return type - The coordinate type of the position vector
     */
     inline CR::CoordinateType::Types getType () const {
-      return type_p;
+      return type_p.type();
     }
 
+    /*!
+      \brief Get the coordinate type of the position vector
+
+      \return type - The coordinate type of the position vector
+    */
+    inline std::string getName () {
+      return type_p.name();
+    }
+
+    /*!
+      \brief Get the values of the position vector
+
+      \return position -- Numerical values of the position vector.
+    */
     inline casa::Vector<double> getValue () const {
       return position_p;
     }
 
+    /*!
+      \brief Get the values of the position vector in specific coordinates
+
+      \return position -- Numerical values of the position vector.
+    */
     casa::Vector<double> getValue (CR::CoordinateType::Types const &type);
     
     /*!
@@ -163,6 +207,22 @@ namespace CR { // Namespace  -- begin
     
     //! Unconditional deletion 
     void destroy(void);
+
+    /*!
+      \brief Initialize the object's internal parameters
+
+      \param coordType -- Type of the coordinate.
+    */
+    void init (CoordinateType const &coordType);
+
+    /*!
+      \brief Initialize the object's internal parameters
+
+      \param coordType -- Type of the coordinate.
+      \param position  -- Position values.
+    */
+    void init (CoordinateType const &coordType,
+	       casa::Vector<double> const &position);
     
     //! Convert degress to radian
     inline double deg2rad (double const &deg) {
@@ -173,7 +233,7 @@ namespace CR { // Namespace  -- begin
     inline double rad2deg (double const &rad) {
       return rad*180/CR::pi;
     }
-
+    
     //________________________________________________________________
     //                                        Conversions -> Cartesian
 

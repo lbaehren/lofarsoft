@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tDataCC.cc,v 1.3 2007/03/20 14:45:31 bahren Exp $ */
+/* $Id$ */
 
 #include <casa/aips.h>
 #include <casa/Arrays.h>

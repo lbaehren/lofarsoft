@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ionoCalibration.cc,v 1.3 2007/08/08 15:29:50 singh Exp $*/
+/* $Id$*/
 
 #include <Analysis/ionoCalibration.h>
 #include <Analysis/ppfinversion.h>

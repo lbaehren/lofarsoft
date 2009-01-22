@@ -28,122 +28,20 @@
 #include <iostream>
 #include <string>
 
+// casacore header files
 #include <casa/Arrays/Array.h>
+#include <scimath/Mathematics.h>
+#include <scimath/Mathematics/FFTServer.h>
 
+// CR-Tools header files
 #include <Imaging/GeometricalWeight.h>
+#include <Imaging/SkymapQuantity.h>
 
 namespace CR { // Namespace CR -- begin
   
   /*!
-    \brief List of implemented and supported beam types.
-  */
-  typedef enum {
-    /*!
-      Electric field strength as function of frequency,
-      \f[ \widetilde S (\vec\rho,\nu) = \frac{1}{N} \sum_{j=1}^{N}
-      w_{j}(\vec \rho,\nu) \widetilde{s_{j}}(\nu) \f]
-    */
-    FREQ_FIELD,
-    /*!
-      <b>Directed spectral power</b> (power of the electric field as function
-      of frequency) <br>
-      \f[ \widetilde P (\vec\rho,\nu) = \overline{\widetilde S (\vec\rho,\nu)}
-      \cdot \widetilde S (\vec\rho,\nu) \f]
-      where 
-      \f[ \widetilde S (\vec\rho,\nu) = \frac{1}{N_{\rm Ant}}
-      \sum_{j=1}^{N_{\rm Ant}} \widetilde S_{j} (\vec\rho,\nu) =
-      \frac{1}{N_{\rm Ant}} \sum_{j=1}^{N_{\rm Ant}} w (\vec x_j, \vec \rho, \nu)
-      \widetilde s_{j} (\nu) \f]
-      in which \f$ w \f$ is the weighting factor for each combination of antenna,
-      pointing direction and frequency and \f$ \widetilde s_j \f$ is the Fourier
-      transform of the data from antenna \f$ j \f$.
-      
-      While in the above step the beam beam is computed by summation over all 
-      selected antennas, there also is the option to sum over antenna pairs,
-      i.e. baselines
-      \f[ \widetilde P (\vec\rho,\nu) = \left( \frac{N^2-N}{2} \right)^{-1}
-      \sum_{j=1}^{N} \sum_{k>j}^{N} \overline{w_{j}(\vec\rho,\nu)
-      \widetilde s_{j}(\nu)} w_{k}(\vec\rho,\nu) \widetilde s_{k}(\nu) \f]
-
-      Instead of computing the beam from the spectra \f$ \widetilde s_j (\nu) \f$
-      of the individual antennas, the directed power also can be computed from
-      the array correlation matrix (ACM), \f$ C_{jk}(\nu) =
-      \overline{\widetilde s_j(\nu)} \widetilde s_k(\nu) \f$.
-      \f[ \widetilde P (\vec\rho,\nu) = \left( \frac{N^2-N}{2} \right)^{-1}
-      \sum_{j=1}^{N} \sum_{k>j}^{N} \overline{w_{j}(\vec\rho,\nu)}
-      w_{k}(\vec\rho,\nu) \, C_{jk}(\nu) \f]
-    */
-    FREQ_POWER,
-    /*!
-      Electric field strength as function of time (sample resolution)
-
-      \f[ S (\vec\rho,t) = \mathcal{F}^{-1} \left\{ \widetilde S(\vec\rho,\nu)
-      \right\} \f]
-    */
-    TIME_FIELD,
-    /*!
-      Power of the electric field as function of time
-
-      \f[ P (\vec\rho,\nu) = \left| S (\vec\rho,t) \right|^{2} \f]
-    */
-    TIME_POWER,
-    /*!
-      <b>Cross-correlation beam</b> (cc-beam)<br>
-      The data from each unique pair of antennas is multiplied, the resulting
-      values are averaged, and then the square root is taken while preserving
-      the sign.
-      \f[
-      cc(\vec \rho)[t] = \, ^+_- \sqrt{\left| \frac{1}{N_{Pairs}} \sum^{N-1}_{i=1}
-      \sum^{N}_{j>i} s_i(\vec\rho)[t] s_j(\vec\rho)[t] \right|}
-      \f]
-      where 
-      \f[
-      s_j(\vec\rho)[t]
-      = \mathcal{F}^{-1} \left\{ \tilde s_j(\vec\rho)[k] \right\}
-      = \mathcal{F}^{-1} \Bigl\{ w_j(\vec\rho)[k] \cdot \tilde s_j[k] \Bigr\}
-      \f]
-      is the time shifted field strength of the single antennas for a direction
-      \f$\vec \rho \f$. \f$ N \f$ is the number of antennas, \f$t\f$ the time or
-      pixel index and \f$N_{Pairs}\f$ the number of unique pairs of antennas.
-      The negative sign is taken if the sum had a negative sign before taking the
-      absolute values, and the positive sign otherwise.
-      Computation - for each direction in the sky - is performed as follows:
-      <ol>
-      <li>Compute the shifted time-series for all antennas,
-      \f$ s_j (\vec\rho,t) \f$, by first applying the weights to the Fourier
-      transformed data and thereafter transforming back to time domain.
-      <li>Sum over unique products from all antenna pairs and normalize by
-      the number of such pairs.
-      <li>Take the square root of the sum and multiply with the sign of the
-      some.
-      </ol>       */
-    TIME_CC,
-    /*!
-      <b>Power-beam</b> (p-beam)
-      \f[
-      P (\vec\rho,\nu)
-      \ = \ \sqrt{\frac{1}{N} \sum_{j=1}^{N} \left( s_{j}(\vec\rho,\nu) \right)^2}
-      \ = \ \sqrt{\frac{1}{N} \sum_{j=1}^{N} \left( \mathcal{F}^{-1} \Bigl\{
-      \widetilde s_{j}(\vec\rho,\nu) \Bigr\} \right)^{2}} 
-      \ = \ \sqrt{\frac{1}{N} \sum_{j=1}^{N} \left( \mathcal{F}^{-1} \Bigl\{
-      w_{j}(\vec\rho,\nu) \widetilde s_{j}(\nu) \Bigr\} \right)^{2}} 
-      \f]
-    */
-    TIME_P,
-    /*!
-      <b>Excess-beam</b> (x-beam)
-      
-      \f[
-      P_{x}(\vec\rho,t) = P_{cc}(\vec\rho,t) \cdot \left| \frac{\langle
-      P_{cc}(\vec\rho,t) \rangle}{\langle P(\vec\rho,t) \rangle} \right|
-      \f]
-    */
-    TIME_X
-  } BeamType;
-
-  /*!
     \brief Correlation types for polarized data
-
+    
     Since by default we are dealing with dual-polarization data, we have a number
     of choices on how to combine the individual signals.
   */
@@ -165,15 +63,15 @@ namespace CR { // Namespace CR -- begin
   
   /*!
     \class Beamformer
-
+    
     \ingroup CR_Imaging
     
     \brief Brief description for class Beamformer
     
     \author Lars B&auml;hren
-
+    
     \date 2007/06/13
-
+    
     \test tBeamformer.cc
     
     <h3>Prerequisite</h3>
@@ -182,6 +80,7 @@ namespace CR { // Namespace CR -- begin
       <li>GeometricalDelay
       <li>GeometricalPhase
       <li>GeometricalWeight
+      <li>SkymapQuantity
     </ul>
     
     <h3>Synopsis</h3>
@@ -212,16 +111,9 @@ namespace CR { // Namespace CR -- begin
     Implementation of a new beamforming methods requires three entries within
     this class:
     <ol>
-      <li>Add an entry to the CR::BeamType enumeration, as this will be used
+      <li>Add an entry to the CR::SkymapQuantity class, as this will be used
       internally for managing function calls and redirection from the generic
       interface.
-      \code
-      typedef enum {
-        // some entries
-	TIME_CC,
-	// some more entries
-      } BeamType;
-      \endcode
       <li>The function implementing the new beam type, using the interface
       of Beamformer::processData.
       \code
@@ -245,24 +137,6 @@ namespace CR { // Namespace CR -- begin
 	return status;
       }
       \endcode
-      <li><i>(Optional, but recommended)</i> Register the new BeamType with the
-      Beamformer::beamTypeName function; this will enable retriving the name
-      of newly implemented beamforming method instead only the number from the
-      CR::BeamType enumeration.
-      \code
-      static std::string beamTypeName (BeamType const &beamType)
-      {
-        std::string name;
-      
-	switch (beamType) {
-	  case TIME_CC:
-	  name = "TIME_CC";
-	  break;
-	}
-
-	return name;
-      }
-      \endcode
     </ol>
 
     <h3>Example(s)</h3>
@@ -284,7 +158,7 @@ namespace CR { // Namespace CR -- begin
   class Beamformer : public GeometricalWeight {
     
     //! Type of beamforming method used in data processing
-    BeamType beamType_p;
+    SkymapQuantity skymapType_p;
     
     /*!
       \brief Pointer to the function performing the beamforming
@@ -302,14 +176,12 @@ namespace CR { // Namespace CR -- begin
     
     //! The weights applied by the Beamformer
     casa::Cube<DComplex> bfWeights_p;
-
-    public:
+    
+  public:
     
     // ------------------------------------------------------------- Construction
     
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     Beamformer ();
     
     /*!
@@ -408,27 +280,27 @@ namespace CR { // Namespace CR -- begin
 
       \return beamType -- The type of beam to be used at data processing
      */
-    inline BeamType beamType () {
-      return beamType_p;
+    inline SkymapQuantity skymapType () const {
+      return skymapType_p;
     }
 
+    /*!
+      \brief Get the type of the beam type to be used at processing
+
+      \return beamType -- The type of beam to be used at data processing
+     */
+    inline CoordinateType::Types domainType () {
+      return skymapType_p.domainType();
+    }
+    
     /*!
       \brief Get the name of the beam type to be used at processing
 
       \return beamType -- The type of beam to be used at data processing
      */
-    inline std::string beamTypeName () {
-      return beamTypeName(beamType_p);
+    inline std::string domainName () {
+      return skymapType_p.domainName();
     }
-    
-    /*!
-      \brief Get the name of the beam type to be used at processing
-      
-      \param beamType -- The type of beam to be used at data processing
-      
-      \return name -- The name of the beam type to be used at data processing
-    */
-    static std::string beamTypeName (BeamType const &beamType);
     
     /*!
       \brief Set the type of beam to be used at data processing
@@ -438,77 +310,19 @@ namespace CR { // Namespace CR -- begin
       \return status -- Status of the operation; returns <i>false</i> if an
               an error was encountered
     */
-    bool setBeamType (BeamType const &beam);
+    bool setSkymapType (SkymapQuantity const &skymapType);
     
     /*!
-      \brief Convert combination of domain and quantity label to BeamType
+      \brief Set the type of beam to be used at data processing
       
-      \retval beamType -- BeamType identifier
-      \param domain -- Domain (time, freq) in which the beamformed data will
-             reside.
-      \param quantity -- (EM) Quanity the beamformed data are going to represent
-
+      \param beam -- The BeamType to be used at data processing
+      
       \return status -- Status of the operation; returns <i>false</i> if an
               an error was encountered
     */
-    static bool beamType (BeamType &beamType,
-			  string const &domain,
-			  string const &quantity);
-    
-    /*!
-      \brief Convert BeamType to combination of domain and quantity label
-      
-      \retval domain   -- 
-      \retval quantity -- 
-      \param beamType  -- 
-
-      \return status -- Status of the operation; returns <i>false</i> if an
-              an error was encountered
-    */
-    static bool beamType (std::string &domain,
-			  std::string &quantity,
-			  BeamType const &beamType)
-      {
-	bool ok (true);
-	
-	try {
-	  switch (beamType) {
-	  case TIME_FIELD:
-	    domain   = "TIME";
-	    quantity = "FIELD";
-	    break;
-	  case TIME_POWER:
-	    domain   = "TIME";
-	    quantity = "POWER";
-	    break;
-	  case TIME_CC:
-	    domain   = "TIME";
-	    quantity = "CC";
-	    break;
-	  case TIME_P:
-	    domain   = "TIME";
-	    quantity = "P";
-	    break;
-	  case TIME_X:
-	    domain   = "TIME";
-	    quantity = "X";
-	    break;
-	  case FREQ_POWER:
-	    domain   = "FREQ";
-	    quantity = "POWER";
-	    break;
-	  case FREQ_FIELD:
-	    domain   = "FREQ";
-	    quantity = "FIELD";
-	    break;
-	  }
-	} catch (std::string message) {
-	  std::cerr << "[Beamformer::beamType] " << message << std::endl;
-	  ok = false;
-	}
-	
-	return ok;
-      }
+    inline bool setSkymapType (SkymapQuantity::Type const &skymapType) {
+      return setSkymapType (SkymapQuantity(skymapType));
+    }
     
     /*!
       \brief Get the name of the class

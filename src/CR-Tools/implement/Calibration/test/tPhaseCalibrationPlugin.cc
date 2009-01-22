@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tPhaseCalibrationPlugin.cc,v 1.5 2007/03/26 14:23:34 singh Exp $*/
+/* $Id$*/
 
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>

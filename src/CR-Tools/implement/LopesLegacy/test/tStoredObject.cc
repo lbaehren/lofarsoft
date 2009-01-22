@@ -17,7 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-/* $Id: tStoredObject.cc,v 1.4 2007/04/17 13:52:48 bahren Exp $*/
+/* $Id$*/
 
 #include <LopesLegacy/StoredObject.h>
 

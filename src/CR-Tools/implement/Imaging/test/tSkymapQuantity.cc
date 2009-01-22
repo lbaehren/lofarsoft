@@ -2,7 +2,7 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2006                                                    *
+ *   Copyright (C) 2009                                                    *
  *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,93 +21,87 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
+#include <Imaging/SkymapQuantity.h>
 
-#include <casa/aips.h>
-#include <casa/Exceptions/Error.h>
-
-#include <Skymap/SkymapQuantity.h>
+// Namespace usage
+using std::endl;
+using CR::SkymapQuantity;
 
 /*!
   \file tSkymapQuantity.cc
 
-  \ingroup CR_Imaging
+  \ingroup Imaging
 
-  \brief A collection of test routines for SkymapQuantity
+  \brief A collection of test routines for the SkymapQuantity class
  
   \author Lars B&auml;hren
  
-  \date 2006/09/18
+  \date 2009/01/13
 */
-
-// -----------------------------------------------------------------------------
-
-/*!
-  \brief Show the internal parameters of the created object
-
-  \param qnt -- SkymapQuantity to be displayed
-*/
-void show (SkymapQuantity &qnt)
-{
-  std::cout << " - class name           = " << qnt.className()      << std::endl;
-  std::cout << " - SkymapQuantity::Type = " << qnt.skymapQuantity() << std::endl;
-  std::cout << " - signal domain        = " << qnt.domain()         << std::endl;
-  std::cout << " - signal quantity      = " << qnt.quantity()       << std::endl;
-}
 
 // -----------------------------------------------------------------------------
 
 /*!
   \brief Test constructors for a new SkymapQuantity object
 
-  \return nofFailedTests -- The number of failed tests.
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
 */
-int test_SkymapQuantity ()
+int test_constructors ()
 {
+  std::cout << "\n[tSkymapQuantity::test_constructors]\n" << endl;
+
   int nofFailedTests (0);
   
-  std::cout << "\n[test_SkymapQuantity]\n" << std::endl;
+  std::cout << "[1] Testing default constructor ..." << endl;
+  try {
+    SkymapQuantity newObject;
+    //
+    newObject.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[2] Testing argumented constructor ..." << endl;
+  try {
+    SkymapQuantity newObject (SkymapQuantity::TIME_CC);
+    //
+    newObject.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
 
-  std::cout << "[1] Testing default constructor ..." << std::endl;
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test the various methods
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+*/
+int test_methods ()
+{
+  std::cout << "\n[tSkymapQuantity::test_methods]\n" << endl;
+
+  int nofFailedTests (0);
+  SkymapQuantity mapQuant (SkymapQuantity::TIME_CC);
+
+  std::cout << "[1] Retrieve values of the internal parameters..." << endl;
   try {
-    SkymapQuantity qnt;
-    //
-    show (qnt);
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+    std::cout << "-- Class name          = " << mapQuant.className()  << endl;
+    std::cout << "-- Domain type         = " << mapQuant.domainType() << endl;
+    std::cout << "-- Domain name         = " << mapQuant.domainName() << endl;
+    std::cout << "-- Electrical quantity = " << mapQuant.quantity()   << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
     nofFailedTests++;
-  } 
-  
-  std::cout << "[2] Testing argumented constructor ..." << std::endl;
-  try {
-    SkymapQuantity qnt1 = SkymapQuantity (SkymapQuantity::TIME_FIELD);
-    SkymapQuantity qnt2 = SkymapQuantity (SkymapQuantity::TIME_POWER);
-    SkymapQuantity qnt3 = SkymapQuantity (SkymapQuantity::TIME_CC);
-    SkymapQuantity qnt4 = SkymapQuantity (SkymapQuantity::TIME_X);
-    //
-    show (qnt1);
-    show (qnt2);
-    show (qnt3);
-    show (qnt4);
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-    nofFailedTests++;
-  } 
-  
-  std::cout << "[3] Testing copy constructor ..." << std::endl;
-  try {
-    SkymapQuantity qnt1 = SkymapQuantity (SkymapQuantity::TIME_FIELD);
-    SkymapQuantity qnt2 = SkymapQuantity (qnt1);
-    //
-    std::cout << "original object:" << std::endl;
-    show (qnt1);
-    std::cout << "copied object:" << std::endl;
-    show (qnt2);
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-    nofFailedTests++;
-  } 
-  
+  }
+
   return nofFailedTests;
 }
 
@@ -118,9 +112,9 @@ int main ()
   int nofFailedTests (0);
 
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_SkymapQuantity ();
-  }
+  nofFailedTests += test_constructors();
+  // Test the various methods
+  nofFailedTests =+ test_methods();
 
   return nofFailedTests;
 }

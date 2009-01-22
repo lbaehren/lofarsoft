@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tSecondStagePipeline.cc,v 1.1 2007/03/06 12:55:11 horneff Exp $*/
+/* $Id$*/
 
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>

@@ -51,6 +51,36 @@ namespace CR { // Namespace CR -- begin
     bufferWeights_p = bufferWeights;
     setWeights();
   }
+
+  //_____________________________________________________________________________
+  //                                                                   GeomWeight
+
+  GeomWeight::GeomWeight (GeomDelay const &geomDelay,
+			  Vector<double> const &frequencies,
+			  bool const &bufferPhases,
+			  bool const &bufferWeights)
+    : GeomPhase(geomDelay,
+		frequencies,
+		bufferPhases)
+  {
+    bufferWeights_p = bufferWeights;
+    setWeights();
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                   GeomWeight
+
+  GeomWeight::GeomWeight (GeomDelay const &geomDelay,
+			  Vector<MVFrequency> const &frequencies,
+			  bool const &bufferPhases,
+			  bool const &bufferWeights)
+    : GeomPhase(geomDelay,
+		frequencies,
+		bufferPhases)
+  {
+    bufferWeights_p = bufferWeights;
+    setWeights();
+  }
   
   //_____________________________________________________________________________
   //                                                                   GeomWeight

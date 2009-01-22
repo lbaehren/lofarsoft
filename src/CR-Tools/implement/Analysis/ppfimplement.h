@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ppfimplement.h,v 1.3 2007/08/06 14:43:10 singh Exp $*/
+/* $Id$*/
 
 #ifndef PPFIMPLEMENT_H
 #define PPFIMPLEMENT_H

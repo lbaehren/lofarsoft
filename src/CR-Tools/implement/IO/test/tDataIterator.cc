@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tDataIterator.cc,v 1.10 2007/03/13 22:48:33 bahren Exp $*/
+/* $Id$*/
 
 #include <iostream>
 #include <string>

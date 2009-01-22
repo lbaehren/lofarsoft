@@ -17,7 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-/* $Id: tDataBlockSettings.cc,v 1.4 2005/08/05 13:46:28 bahren Exp $*/
+/* $Id$*/
 
 #include <IO/DataBlockSettings.h>
 

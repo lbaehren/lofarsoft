@@ -115,6 +115,21 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
+  //__________________________________________________________ setObservationData
+
+  bool SkymapCoordinate::setObservationData (ObservationData const &obsData)
+  {
+    bool status (true);
+
+    // store the input data
+    obsData_p = obsData;
+
+    // update coordinate system object 
+    setCoordinateSystem ();
+
+    return status;
+  }
+
   //________________________________________________________ setSpatialCoordinate
   
   bool SkymapCoordinate::setSpatialCoordinate (SpatialCoordinate const &coord)

@@ -24,7 +24,13 @@
 #include <iostream>
 
 #include <Imaging/Beamformer.h>
-#include <Imaging/SkymapCoordinates.h>
+#include <Coordinates/TimeFreqCoordinate.h>
+#include <Coordinates/SpatialCoordinate.h>
+#include <Coordinates/SkymapCoordinate.h>
+
+using std::cerr;
+using std::cout;
+using std::endl;
 
 /*!
   \file tMDirection.cc
@@ -126,13 +132,14 @@ int test_SkymapCoordinates ()
   uint blocksize (512);
   double sampleFrequency (40e6);
   uint nyquistZone (1);
-  CR::TimeFreq timeFreq (blocksize,
-			 sampleFrequency,
-			 nyquistZone);
+  CR::TimeFreqCoordinate timeFreq (blocksize,
+				   sampleFrequency,
+				   nyquistZone);
   CR::ObservationData obsData ("LOFAR-ITS",
 			       "Lars Baehren");
-  CR::SkymapCoordinates coord (timeFreq,
-			       obsData);
+
+  CR::SkymapCoordinate coord;
+  coord.setTimeFreqCoordinate(timeFreq);
 
   // -----------------------------------------------------------------
   // [2] Retrieve the coordinate system constructed for the image
@@ -172,19 +179,15 @@ int test_SkymapCoordinates ()
   // -----------------------------------------------------------------
   // [3] Retrieve the coordinate handling the direction axes
 
-  casa::DirectionCoordinate dc (coord.directionCoordinate());
+  CR::SpatialCoordinate dc (coord.spatialCoordinate());
   
   {
     Vector<Double> crpix = dc.referencePixel();
     Vector<Double> crval = dc.referenceValue();
     Vector<Double> cdelt = dc.increment();
     Matrix<Double> pc    = dc.linearTransform();
-    Projection proj      = dc.projection();
-    MDirection md (dc.directionType());
    
     cout << "--> Summary of the direction coordinate:" << endl;
-    cout << "-- Direction type   = " << md.getRefString() << endl;
-    cout << "-- Projection       = " << proj.name()    << endl;
     cout << "-- Reference pixel  = " << crpix          << endl;
     cout << "-- Reference value  = " << crval          << endl;
     cout << "-- Increment        = " << cdelt          << endl;

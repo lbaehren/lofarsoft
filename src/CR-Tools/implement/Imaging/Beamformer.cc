@@ -21,9 +21,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-// CASA header files
-#include <scimath/Mathematics.h>
-#include <scimath/Mathematics/FFTServer.h>
 // Custom header files
 #include <Imaging/Beamformer.h>
 
@@ -39,7 +36,8 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  // ----------------------------------------------------------------- Beamformer
+  //_____________________________________________________________________________
+  //                                                                   Beamformer
   
   Beamformer::Beamformer ()
     : GeometricalWeight()
@@ -47,7 +45,8 @@ namespace CR { // Namespace CR -- begin
     init ();
   }
   
-  // ----------------------------------------------------------------- Beamformer
+  //_____________________________________________________________________________
+  //                                                                   Beamformer
   
   Beamformer::Beamformer (GeometricalWeight const &weights)
     : GeometricalWeight (weights)
@@ -55,7 +54,8 @@ namespace CR { // Namespace CR -- begin
     init ();
   }
   
-  // ----------------------------------------------------------------- Beamformer
+  //_____________________________________________________________________________
+  //                                                                   Beamformer
   
   Beamformer::Beamformer (GeometricalPhase const &phase,
 			  bool const &bufferWeights)
@@ -65,7 +65,8 @@ namespace CR { // Namespace CR -- begin
     init ();
   }
 
-  // ----------------------------------------------------------------- Beamformer
+  //_____________________________________________________________________________
+  //                                                                   Beamformer
   
   Beamformer::Beamformer (GeometricalDelay const &delay,
 			  casa::Vector<double> const &frequencies,
@@ -144,8 +145,7 @@ namespace CR { // Namespace CR -- begin
     // copy the underlying base object
     GeometricalWeight::operator= (other);
 
-    // copy settings to handle the type of beam
-    setBeamType (other.beamType_p);
+    skymapType_p = other.skymapType_p;
 
     bfWeights_p.resize(other.bfWeights_p.shape());
     bfWeights_p = other.bfWeights_p;
@@ -165,127 +165,52 @@ namespace CR { // Namespace CR -- begin
     // Activate the buffering of the weighting factors
     GeometricalWeight::bufferWeights (true);
     // default setting for the used beamforming method
-    status = setBeamType (FREQ_POWER);
+    skymapType_p = SkymapQuantity (SkymapQuantity::FREQ_POWER);
     /* set the weights used in the beamforming */
     status = setBeamformerWeights ();
   }
   
   // ---------------------------------------------------------------- setBeamType
 
-  bool Beamformer::setBeamType (BeamType const &beam)
+  bool Beamformer::setSkymapType (SkymapQuantity const &skymapType)
   {
     bool status (true);
     
-    switch (beam) {
-    case FREQ_FIELD:
+    switch (skymapType.type()) {
+    case SkymapQuantity::FREQ_FIELD:
       std::cerr << "[Beamformer::setBeamType]" << std::endl;
       std::cerr << " Beam type FREQ_FIELD not yet supported!" << std::endl;
       status = false;
 //       beamType_p    = beam;
 //       processData_p = &Beamformer::freq_field;
       break;
-    case FREQ_POWER:
-      beamType_p    = beam;
+    case SkymapQuantity::FREQ_POWER:
+      skymapType_p  = skymapType;
       processData_p = &Beamformer::freq_power;
       break;
-    case TIME_FIELD:
-      beamType_p    = beam;
+    case SkymapQuantity::TIME_FIELD:
+      skymapType_p  = skymapType;
       processData_p = &Beamformer::time_field;
       break;
-    case TIME_POWER:
-      beamType_p    = beam;
+    case SkymapQuantity::TIME_POWER:
+      skymapType_p  = skymapType;
       processData_p = &Beamformer::time_power;
       break;
-    case TIME_CC:
-      beamType_p    = beam;
+    case SkymapQuantity::TIME_CC:
+      skymapType_p  = skymapType;
       processData_p = &Beamformer::time_cc;
       break;
-    case TIME_P:
-      beamType_p    = beam;
+    case SkymapQuantity::TIME_P:
+      skymapType_p  = skymapType;
       processData_p = &Beamformer::time_p;
       break;
-    case TIME_X:
-      beamType_p    = beam;
+    case SkymapQuantity::TIME_X:
+      skymapType_p  = skymapType;
       processData_p = &Beamformer::time_x;
       break;
     }
     
     return status;
-  }
-
-  // --------------------------------------------------------------- beamTypeName
-  
-  std::string Beamformer::beamTypeName (BeamType const &beamType)
-  {
-    std::string name;
-    
-    switch (beamType) {
-    case FREQ_FIELD:
-      name = "FREQ_FIELD";
-      break;
-    case FREQ_POWER:
-      name = "FREQ_POWER";
-      break;
-    case TIME_FIELD:
-      name = "TIME_FIELD";
-      break;
-    case TIME_POWER:
-      name = "TIME_POWER";
-      break;
-    case TIME_CC:
-      name = "TIME_CC";
-      break;
-    case TIME_P:
-      name = "TIME_P";
-      break;
-    case TIME_X:
-      name = "TIME_X";
-	break;
-    }
-    return name;
-  }
-  
-  // ------------------------------------------------------------------- beamType
-
-  bool Beamformer::beamType (BeamType &beamType,
-			     string const &domain,
-			     string const &quantity)
-  {
-    bool ok (true);
-
-    if (domain == "time" || domain == "Time" || domain == "TIME") {
-      if (quantity == "field" || quantity == "Field" || quantity == "FIELD") {
-	beamType = TIME_FIELD;
-      } else if (quantity == "power" || quantity == "Power" || quantity == "POWER") {
-	beamType = TIME_POWER;
-      } else if (quantity == "cc" || quantity == "CC") {
-	beamType = TIME_CC;
-      } else if (quantity == "p" || quantity == "P") {
-	beamType = TIME_P;
-      } else if (quantity == "x" || quantity == "X") {
-	beamType = TIME_X;
-      } else {
-	std::cerr << "[Beamformer::beamType] Unknown signal quantity "
-		  << quantity << std::endl;
-	ok = false;
-      }
-    } else if (domain == "freq" || domain == "Freq" || domain == "FREQ") {
-      if (quantity == "field" || quantity == "Field" || quantity == "FIELD") {
-	beamType = FREQ_FIELD;
-      } else if (quantity == "power" || quantity == "Power" || quantity == "POWER") {
-	beamType = FREQ_POWER;
-      } else {
-	std::cerr << "[SkymapCoordinates::setMapQuantity] Unknown signal quantity "
-		  << quantity << std::endl;
-	ok = false;
-      }
-    } else {
-      std::cerr << "[SkymapCoordinates::setMapQuantity] Unknown signal domain "
-		<< domain << std::endl;
-      ok = false;
-    }
-
-    return ok;
   }
 
   // -------------------------------------------------------------------- summary
@@ -301,8 +226,7 @@ namespace CR { // Namespace CR -- begin
     os << "-- buffer phases       : " << bufferPhases_p             << std::endl;
     os << "-- buffer weights      : " << bufferWeights_p            << std::endl;
     os << "-- show progress       : " << showProgress_p             << std::endl;
-    os << "-- Beamforming method  : " << beamType_p
-       << " / " << beamTypeName() << std::endl;
+    os << "-- Beamforming method  : " << skymapType_p.name()        << std::endl;
     os << "-- Beamformer weights  : " << bfWeights_p.shape()        << std::endl;
   }
   
