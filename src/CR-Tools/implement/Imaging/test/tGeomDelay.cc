@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id:: tNewClass.cc 1964 2008-09-06 17:52:38Z baehren                  $ |
+ | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2008                                                    *
@@ -26,7 +26,9 @@
 #include "create_data.h"
 
 // Namespace usage
+using std::cout;
 using std::endl;
+using CR::CoordinateType;
 using CR::GeomDelay;
 
 /*!
@@ -51,46 +53,47 @@ using CR::GeomDelay;
 */
 int test_constructors ()
 {
-  std::cout << "\n[tGeomDelay::test_constructors]\n" << endl;
+  cout << "\n[tGeomDelay::test_constructors]\n" << endl;
 
   int nofFailedTests (0);
   
-  std::cout << "[1] Testing default constructor ..." << endl;
+  cout << "[1] Testing default constructor ..." << endl;
   try {
-    GeomDelay newObject;
+    GeomDelay delay;
     //
-    newObject.summary(); 
+    delay.summary(); 
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[2] Testing argumented constructor ..." << endl;
+  cout << "[2] COnstruction using (Matrix<double>,Matrix<double>) ..." << endl;
   try {
     Matrix<double> antPositions = get_antennaPositions();
     Matrix<double> skyPositions = get_skyPositions();
-    GeomDelay newObject (antPositions,
-			 skyPositions);
+    GeomDelay delay (antPositions,
+		     skyPositions);
     //
-    newObject.summary(); 
+    delay.summary(); 
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[3] Testing argumented constructor ..." << endl;
+  cout << "[3] Construction using (Vector<MVPosition>,Vector<MVPosition>) ..."
+       << endl;
   try {
     Vector<casa::MVPosition> antPositions (1);
     Vector<casa::MVPosition> skyPositions (1);
-
+    
     antPositions(0) = casa::MVPosition (100,100,0);
     skyPositions(0) = casa::MVPosition (casa::Quantity(100,"m"),
 					casa::Quantity(0,"deg"),
 					casa::Quantity(90,"deg"));
-    GeomDelay newObject (antPositions,
-			 skyPositions);
+    GeomDelay delay (antPositions,
+		     skyPositions);
     //
-    newObject.summary();
+    delay.summary();
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -103,73 +106,73 @@ int test_constructors ()
 
 /*!
   \brief Test the static functions provided by the GeomDelay class
-
+  
   \return nofFailedTests -- The number of failed tests encountered within this
           function.
 */
 int test_static_functions ()
 {
-  std::cout << "\n[tGeomDelay::test_static_functions]\n" << endl;
-
+  cout << "\n[tGeomDelay::test_static_functions]\n" << endl;
+  
   int nofFailedTests (0);
-
-  std::cout << "[1] delay(std::vector<double>,std::vector<double>)" << endl;
+  
+  cout << "[1] delay(std::vector<double>,std::vector<double>)" << endl;
   try {
     std::vector<double> antPosition (3);
     std::vector<double> skyPosition (3);
 
     antPosition[0] = antPosition[1] = 100.0;
     antPosition[2] = 0.0;
-
+    
     skyPosition[0] = 100;
     skyPosition[1] = 100;
     skyPosition[2] = 100;
-
-    std::cout << "-- antenna position  = ["
-	      << antPosition[0] << ","
-	      << antPosition[1] << ","
-	      << antPosition[2] << "]"
-	      << endl;
-    std::cout << "-- sky position      = ["
-	      << skyPosition[0] << ","
-	      << skyPosition[1] << ","
-	      << skyPosition[2] << "]"
-	      << endl;
-    std::cout << "-- geometrical delay = " << GeomDelay::delay(antPosition,
-							       skyPosition,
-							       false)
-	      << endl;
-    std::cout << "-- geometrical delay = " << GeomDelay::delay(antPosition,
-							       skyPosition,
-							       true)
-	      << endl;
+    
+    cout << "-- antenna position  = ["
+	 << antPosition[0] << ","
+	 << antPosition[1] << ","
+	 << antPosition[2] << "]"
+	 << endl;
+    cout << "-- sky position      = ["
+	 << skyPosition[0] << ","
+	 << skyPosition[1] << ","
+	 << skyPosition[2] << "]"
+	 << endl;
+    cout << "-- geometrical delay = " << GeomDelay::delay(antPosition,
+							  skyPosition,
+							  false)
+	 << endl;
+    cout << "-- geometrical delay = " << GeomDelay::delay(antPosition,
+							  skyPosition,
+							  true)
+	 << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   } 
   
-  std::cout << "[2] delay(casa::Vector<double>,casa::Vector<double>)" << endl;
+  cout << "[2] delay(casa::Vector<double>,casa::Vector<double>)" << endl;
   try {
     casa::Vector<double> antPosition (3);
     casa::Vector<double> skyPosition (3);
-
+    
     antPosition(0) = antPosition(1) = 100.0;
     antPosition(2) = 0.0;
-
+    
     skyPosition(0) = 100;
     skyPosition(1) = 100;
     skyPosition(2) = 100;
-
-    std::cout << "-- antenna position  = " << antPosition << endl;
-    std::cout << "-- sky position      = " << skyPosition << endl;
-    std::cout << "-- geometrical delay = " << GeomDelay::delay(antPosition,
-							       skyPosition,
-							       false)
-	      << endl;
-    std::cout << "-- geometrical delay = " << GeomDelay::delay(antPosition,
-							       skyPosition,
-							       true)
-	      << endl;
+    
+    cout << "-- antenna position  = " << antPosition << endl;
+    cout << "-- sky position      = " << skyPosition << endl;
+    cout << "-- geometrical delay = " << GeomDelay::delay(antPosition,
+							  skyPosition,
+							  false)
+	 << endl;
+    cout << "-- geometrical delay = " << GeomDelay::delay(antPosition,
+							  skyPosition,
+							  true)
+	 << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -182,13 +185,13 @@ int test_static_functions ()
 
 /*!
   \brief Test for the various methods of the class
-
+  
   \return nofFailedTests -- The number of failed tests encountered within this
           function.
 */
 int test_methods ()
 {
-  std::cout << "\n[tGeomDelay::test_methods]\n" << endl;
+  cout << "\n[tGeomDelay::test_methods]\n" << endl;
 
   int nofFailedTests (0);
   
@@ -202,47 +205,47 @@ int test_methods ()
   GeomDelay geomDelay (antPositions,
 		       skyPositions);
   
-  std::cout << "[1] Get antenna and sky positions ..." << std::endl;
+  cout << "[1] Get antenna and sky positions ..." << endl;
   try {
     Matrix<double> antPositions = geomDelay.antPositions();
     Matrix<double> skyPositions = geomDelay.skyPositions();
     
-    std::cout << "-- Antenna positions = " << antPositions << std::endl;
-    std::cout << "-- Sky positions     = " << skyPositions << std::endl;
+    cout << "-- Antenna positions = " << antPositions << endl;
+    cout << "-- Sky positions     = " << skyPositions << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[2] Set antenna positions via Matrix ..." << std::endl;
+  cout << "[2] Set antenna positions via Matrix ..." << endl;
   try {
     Matrix<double> pos (2,3);
-
-    std::cout << "-- cartesian coordinates ..." << std::endl;
-
+    
+    cout << "-- cartesian coordinates ..." << std::endl;
+    
     pos.row(0) = -100;
     pos.row(1) = +100;
     geomDelay.setAntPositions (pos,
 			       CoordinateType::Cartesian,
 			       false);
-    std::cout << geomDelay.antPositions() << std::endl;
-
-    std::cout << "-- spherical coordinates ..." << std::endl;
-
+    cout << geomDelay.antPositions() << std::endl;
+    
+    cout << "-- spherical coordinates ..." << std::endl;
+    
     pos(0,0) = 1;
     pos(0,1) = 90;
     pos(0,2) = 0;
     pos(1,0) = 1;
     pos(1,1) = 0;
     pos(1,2) = 90;
-
+    
     geomDelay.setAntPositions (pos,
 			       CoordinateType::Spherical,
 			       true);
-    std::cout << geomDelay.antPositions() << std::endl;
-
-    std::cout << "-- cylindrical coordinates ..." << std::endl;
-
+    cout << geomDelay.antPositions() << std::endl;
+    
+    cout << "-- cylindrical coordinates ..." << std::endl;
+    
     pos(0,0) = 1;
     pos(0,1) = 90;
     pos(0,2) = 1;
@@ -253,27 +256,27 @@ int test_methods ()
     geomDelay.setAntPositions (pos,
 			       CoordinateType::Cylindrical,
 			       true);
-    std::cout << geomDelay.antPositions() << std::endl;
+    cout << geomDelay.antPositions() << std::endl;
 
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[3] Set sky positions via Matrix ..." << std::endl;
+  cout << "[3] Set sky positions via Matrix ..." << std::endl;
   try {
     Matrix<double> pos (2,3);
 
-    std::cout << "-- cartesian coordinates ..." << std::endl;
+    cout << "-- cartesian coordinates ..." << std::endl;
 
     pos.row(0) = -100;
     pos.row(1) = +100;
     geomDelay.setSkyPositions (pos,
 			       CoordinateType::Cartesian,
 			       false);
-    std::cout << geomDelay.skyPositions() << std::endl;
+    cout << geomDelay.skyPositions() << std::endl;
 
-    std::cout << "-- spherical coordinates ..." << std::endl;
+    cout << "-- spherical coordinates ..." << std::endl;
 
     pos(0,0) = 1;
     pos(0,1) = 90;
@@ -285,9 +288,9 @@ int test_methods ()
     geomDelay.setSkyPositions (pos,
 			       CoordinateType::Spherical,
 			       true);
-    std::cout << geomDelay.skyPositions() << std::endl;
+    cout << geomDelay.skyPositions() << std::endl;
 
-    std::cout << "-- cylindrical coordinates ..." << std::endl;
+    cout << "-- cylindrical coordinates ..." << std::endl;
 
     pos(0,0) = 1;
     pos(0,1) = 90;
@@ -299,14 +302,14 @@ int test_methods ()
     geomDelay.setSkyPositions (pos,
 			       CoordinateType::Cylindrical,
 			       true);
-    std::cout << geomDelay.skyPositions() << std::endl;
+    cout << geomDelay.skyPositions() << std::endl;
 
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[2] Set antenna positions via MVPosition ..." << std::endl;
+  cout << "[4] Set antenna positions via MVPosition ..." << std::endl;
   try {
     antPositions.resize(3);
     antPositions(0) = casa::MVPosition (100,0,0);
@@ -315,7 +318,26 @@ int test_methods ()
 
     geomDelay.setAntPositions (antPositions);
 
-    std::cout << geomDelay.antPositions() << std::endl;
+    cout << geomDelay.antPositions() << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[5] Adjust settings for the buffering of the delay values ..." << endl;
+  try {
+    cout << "--> Internal settings before changing buffer settings:" << endl;
+    geomDelay.summary();
+    //
+    geomDelay.bufferDelays (true);
+    //
+    cout << "--> Internal settings after switching on buffering:" << endl;
+    geomDelay.summary();
+    //
+    geomDelay.bufferDelays (false);
+    //
+    cout << "--> Internal settings after switching off buffering:" << endl;
+    geomDelay.summary();
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
