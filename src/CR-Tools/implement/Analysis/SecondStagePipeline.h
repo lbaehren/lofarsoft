@@ -187,6 +187,8 @@ namespace CR { // Namespace CR -- begin
     
     /*!
       \brief Initialize the phase calibration plugin
+
+      \return is-initialized -- Returns <tt>True</tt> if the calibration plugin can be used afterwards
     */
     Bool InitPhaseCal(DataReader *dr);
 

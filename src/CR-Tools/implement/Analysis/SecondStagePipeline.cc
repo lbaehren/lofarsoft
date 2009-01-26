@@ -98,11 +98,16 @@ namespace CR { // Namespace CR -- begin
       data = dr->calfft();
 
       if (DoPhaseCal_p){
-	InitPhaseCal(dr);
-	// Do the phase calibration
-	pCal_p.calcDelays(dr->fft());
-	pCal_p.apply(data);
-	pCal_p.parameters().get("AntennaMask",AntennaMask_p);
+	if (InitPhaseCal(dr)) {
+	  // Do the phase calibration
+	  pCal_p.calcDelays(dr->fft());
+	  pCal_p.apply(data);
+	  pCal_p.parameters().get("AntennaMask",AntennaMask_p);
+	} else {
+	  if (verbose) {
+	    cout << "SecondStagePipeline::updateCache: " << "InitPhaseCal() returned false, skipping PhaseCal." << endl;
+	  };
+	};
       };
 
       if (DoRFImitigation_p) {
@@ -151,6 +156,7 @@ namespace CR { // Namespace CR -- begin
 
       CTRead->GetData(date, AntennaIDs(0), "PhaseRefAnt", &DrefAntID);
       refAntID = (int)DrefAntID;
+      if (refAntID < 0) { return False; }; // skip PhaseCal if switched off via refAntID
       for (i=0; i<numAntennas; i++){
 	if (AntennaIDs(i) == refAntID) {
 	  refAnt = i;
