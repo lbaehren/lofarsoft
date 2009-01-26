@@ -53,6 +53,7 @@ using CR::CalTableReader;
 // define constants for the start date of LOPES 10 and LOPES 30
 // date conversion can be done with:
 // date -u -d '1970-01-01 978350400 seconds'
+// date --date='2008-12-19 00:02:00 UTC' +%s
 const unsigned int LOPES10_start = 978350400; // Mo Jan  1 12:00:00 UTC 2001
 const unsigned int LOPES30_start = 1104580800; //Sa Jan  1 12:00:00 UTC 2005 
 // Antenna 27, 29 and 30 are moved to NS
@@ -102,6 +103,34 @@ void adjust_height_of_ant_14(void)
   if (!writer.AddData(position_14,40202,"Position",LOPES30_start) )
     cerr << "\nERROR while writing field: Position" << endl;
 }
+
+// adds a new field, which contains the information, in which periods an antenna was acitve (ok)
+// if createfield = false then only the values in the existing field are rewritten
+void addActiveField(bool createfield = true)
+{
+  if (createfield)
+    if (!writer.AddField("Active", "Shows the status of an antenna (false means not active / problems)", "Double",
+    			  False,  IPosition::IPosition(), False, "HWSetup") )
+        cerr << "\nERROR while adding field: Active" << endl;
+  
+  // set Active to true of Antenna 1 for LOPES 10 and 30
+  for (int i = 0; i < 10; i++)
+  {
+    cout << "Writing 'Active' for LOPES 10 for antenna: " << antennaIDs[i] << endl;
+
+    if (!writer.AddData(True,antennaIDs[i],"Active",LOPES10_start) )
+      cerr << "\nERROR while writing field: Active" << endl;
+  }
+  for (int i = 0; i < MAX_Antennas; i++)
+  {
+    cout << "Writing 'Active' for LOPES 30 for antenna: " << antennaIDs[i] << endl;
+
+    if (!writer.AddData(True,antennaIDs[i],"Active",LOPES30_start) )
+      cerr << "\nERROR while writing field: Active" << endl;
+  }
+
+}
+
 
 void LopesPol_HWSetup(void)
 {
@@ -737,7 +766,7 @@ void TVshutdown(void)
       if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",TV_off) )
         cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
       // no reference antenna as not phase signal
-      if (!writer.AddData(0,antennaIDs[i],"PhaseRefAnt",TV_off) )
+      if (!writer.AddData(-1,antennaIDs[i],"PhaseRefAnt",TV_off) )
         cerr << "\nERROR while writing field: PhaseRefAnt" << endl;
     }
   }
@@ -1110,8 +1139,7 @@ void writePhaseCal(void)
 
   cout << "Writing PhaseCal entries..." << endl;
   // Add the values to the CalTAbles
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing values for antenna: " << antennaIDs[i] << endl;
 
     if (!writer.AddData(PhaseCal.column(i),antennaIDs[i],"PhaseCal",delay_apr_07_start) )
@@ -1119,6 +1147,30 @@ void writePhaseCal(void)
     if (!writer.AddData(PhaseCalFreq,antennaIDs[i],"PhaseCalFreq",delay_apr_07_start) )
       cerr << "\nERROR while writing field: PhaseCalFreq" << endl;
   }
+}
+
+// Sets the field "Active" to false for bad periods of antennas
+void writeBadPeriods(void)
+{
+  // test of an 19 /20 after discovery of the cable interchange
+  unsigned int start_date = 1228219200; // 2008-12-02 12:00:00 UTC
+  unsigned int stop_date = 1228753800; // 2008-12-08 16:30:00 UTC
+  if (!writer.AddData("Problems due to interchange of cables of Ant 19/20",antennaIDs[18],"HWSetup",start_date) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[18],"Active",start_date) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("Problems due to interchange of cables of Ant 19/20",antennaIDs[19],"HWSetup",start_date) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[19],"Active",start_date) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("Test of Ant 19/20 finished.",antennaIDs[18],"HWSetup",stop_date) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[18],"Active",stop_date) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("Test of Ant 19/20 finished.",antennaIDs[19],"HWSetup",stop_date) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[19],"Active",stop_date) )
+    cerr << "\nERROR while writing field: Active" << endl;
 
 }
 
@@ -1128,23 +1180,20 @@ int main (int argc, char *argv[])
   // Default CalTable-Path
   const string CalTablePath="/home/schroeder/usg/data/lopes/LOPES-CalTable";
   //const string CalTablePath="/home/schroeder/lopestools/lopescasa/data/LOPES/LOPES-CalTable";
-  
-  try
-  {
+
+  try {
     cout << "Starting writeLopesCalTable...\n"
          << "Make sure that you made the right changes to the source code.\n" << endl;
  
-    if (!reader.AttachTable(CalTablePath.c_str()))
-    {
+    if (!reader.AttachTable(CalTablePath.c_str())) {
       cerr << "AttachTable for reading failed!" << endl;
       return 1;
-    };
+    }
 
-    if (!writer.AttachTable(CalTablePath.c_str()))
-    {
+    if (!writer.AttachTable(CalTablePath.c_str())) {
       cerr << "AttachTable for writing failed!" << endl;
       return 1;
-    };
+    }
 
     cout << "Opened table for writing: " << endl;
     writer.PrintSummary();
@@ -1166,8 +1215,8 @@ int main (int argc, char *argv[])
 
     // write TV reference phase differences and reference phase diffrences for roof setup
     //writeTVRefPhases();		// checked in
-    //TVshutdown();
-    writeRoofRefPhases();
+    TVshutdown();
+    //writeRoofRefPhases();
 
     // Add the measured dispersion of the LOPES 30 filter boxes
     //writePhaseCal();   //  checked in
@@ -1175,14 +1224,16 @@ int main (int argc, char *argv[])
     // interchange antenna 19 and 20
     //interchange19_20();
 
+    // add field "Active" to store information, when an antenna had problems
+    addActiveField(true);
+    writeBadPeriods();
+
     cout << "Writing finished: " << endl;
     writer.PrintSummary();
-  } 
-  catch (AipsError x) 
-  {
+  } catch (AipsError x) {
       cerr << "writeLopesCalTable: " << x.getMesg() << endl;
       return 1;
-  };
+  }
 
   return 0;
 }
