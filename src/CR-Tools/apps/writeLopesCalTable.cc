@@ -1214,19 +1214,19 @@ int main (int argc, char *argv[])
     //rotate_antenna_model(Ant1_rotation_start);  // rotates antenna 1
 
     // write TV reference phase differences and reference phase diffrences for roof setup
-    //writeTVRefPhases();		// checked in
-    TVshutdown();
-    //writeRoofRefPhases();
+    // writeTVRefPhases();		// checked in
+    // TVshutdown();			// checked in
+    // writeRoofRefPhases();		// checked in
 
     // Add the measured dispersion of the LOPES 30 filter boxes
     //writePhaseCal();   //  checked in
 
     // interchange antenna 19 and 20
-    //interchange19_20();
+    //interchange19_20();		// checked in
 
     // add field "Active" to store information, when an antenna had problems
-    addActiveField(true);
-    writeBadPeriods();
+    // addActiveField(true);		// checked in
+    // writeBadPeriods();		// checked in
 
     cout << "Writing finished: " << endl;
     writer.PrintSummary();

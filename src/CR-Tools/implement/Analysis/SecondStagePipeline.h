@@ -95,6 +95,11 @@ namespace CR { // Namespace CR -- begin
     Bool DoRFImitigation_p;
 
     /*!
+      \brief Flags antennas marked as not active in the CalTables (default=True)
+    */
+    Bool DoFlagNotActiveAnts_p;
+
+    /*!
       \brief Store the data once it is calculated.
     */
     Matrix<DComplex> CachedData_p;
@@ -155,7 +160,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Enable/disable doing the RFI mitigation
 
-      \param DoPhaseCal - do the phase calibration?
+      \param DoRFImitigation - do the RFI mitigation?
     */
     inline void doRFImitigation(Bool const &DoRFImitigation=True) {
       DoRFImitigation_p = DoRFImitigation;
@@ -164,7 +169,20 @@ namespace CR { // Namespace CR -- begin
 	cout << "SecondStagePipeline:: switched off RFI mitigation." << endl;
       };
     }
-    
+
+    /*!
+      \brief Enable/disable flagging antennas marked as not active in the CalTables
+
+      \param DoFlagNotActiveAnts - do the flagging?
+    */
+    inline void doFlagNotActiveAnts(Bool const &DoFlagNotActiveAnts=True) {
+      DoFlagNotActiveAnts_p = DoFlagNotActiveAnts;
+      SecondStageCacheValid_p = False;
+      if (verbose && !DoFlagNotActiveAnts){
+	cout << "SecondStagePipeline:: switched off DoFlagNotActiveAnts." << endl;
+      };
+    }
+
     // ------------------------------------------------------------------ Methods
     
     /*!
@@ -196,6 +214,13 @@ namespace CR { // Namespace CR -- begin
     //      \brief Initialize the RFI mitigation plugin
     //    */
     //    Bool InitRFIMitigation(DataReader *dr);
+
+    /*!
+      \brief Flags antennas which are marked as not-active in the CalTables.
+
+      \return status -- Returns <tt>True</tt> if no error occured.
+    */
+    Bool FlagNotActiveAntennas(DataReader *dr);
 
     /*!
       \brief Do the calculations. Gets the data from the DataReader object, feeds

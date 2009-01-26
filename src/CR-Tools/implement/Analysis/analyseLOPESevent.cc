@@ -220,7 +220,9 @@ namespace CR { // Namespace CR -- begin
 				     Bool doGainCal,
 				     Bool doDispersionCal,
 				     Bool doDelayCal,
-				     Bool doRFImitigation){
+				     Bool doRFImitigation,
+				     Bool doFlagNotActiveAnts,
+				     Bool doAutoFlagging){
     try {
       pipeline_p->setVerbosity(verbose);
       // Generate the Data Reader
@@ -234,6 +236,7 @@ namespace CR { // Namespace CR -- begin
       pipeline_p->doGainCal(doGainCal);
       pipeline_p->doDispersionCal(doDispersionCal);
       pipeline_p->doDelayCal(doDelayCal);
+      pipeline_p->doFlagNotActiveAnts(doFlagNotActiveAnts);
       pipeline_p->setFreqInterval(getFreqStart(),getFreqStop());
 
       // initialize the Data Reader
@@ -289,12 +292,14 @@ namespace CR { // Namespace CR -- begin
 	  };
 	};
       };
-      
-      //Flagg antennas
-      flagger.calcWeights(pipeline_p->GetTimeSeries(lev_p));
-      AntennaSelection = AntennaSelection && flagger.parameters().asArrayBool("AntennaMask");
+
+      // Flag antennas (due to bad signal or because marked as not active in the CalTables)
+      if (doAutoFlagging) {
+        flagger.calcWeights(pipeline_p->GetTimeSeries(lev_p));
+        AntennaSelection = AntennaSelection && flagger.parameters().asArrayBool("AntennaMask");
+      }
       nselants = ntrue(AntennaSelection);
-      
+
       //Do the upsampling (if requested)	
       Vector<Double> Times;
       if (UpSamplingRate >= lev_p->sampleFrequency()) {

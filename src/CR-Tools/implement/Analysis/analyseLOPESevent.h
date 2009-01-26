@@ -484,20 +484,22 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Setup one event, perform calibration and filtering, sets beamformDR_p and beamPipe_p
 
-      \param evname           - path to the eventfile to be processed
-      \param doTVcal          - perform the phase calibration on the TV transmitter
-                                (1: yes, 0: no, -1: use default)
-      \param FlaggedAntIDs    - list of antenna IDs that are to be flagged.
-      \param AntennaSelection - Mask (boolean array) which Antenna(-channels) are selected (modified in place)
-      \param UpSamplingRate   - Samplerate for upsampling. If smaller than the original
-                                samplerate (80MHz for LOPES) then no upsampling is done.
-                                (Check the docs of <tt>UpSampledDR<\tt> for more info.)
-      \param ExtraDelay       - additional delay to shift the data in time.
-      \param verbose          - produce verbose output on the commandline.
-      \param doGainCal        - does the calibration of the electric fieldstrength
-      \param doDispersionCal  - corrects the dispersion (frequency dependend delay)
-      \param doDelayCal       - corrects the delay of each antenna
-      \param doRFImitigation  - suppresses narrow band noise
+      \param evname              - path to the eventfile to be processed
+      \param doTVcal             - perform the phase calibration on the TV transmitter
+                                   (1: yes, 0: no, -1: use default)
+      \param FlaggedAntIDs       - list of antenna IDs that are to be flagged.
+      \param AntennaSelection    - Mask (boolean array) which Antenna(-channels) are selected (modified in place)
+      \param UpSamplingRate      - Samplerate for upsampling. If smaller than the original
+                                   samplerate (80MHz for LOPES) then no upsampling is done.
+                                   (Check the docs of <tt>UpSampledDR<\tt> for more info.)
+      \param ExtraDelay          - additional delay to shift the data in time.
+      \param verbose             - produce verbose output on the commandline.
+      \param doGainCal           - does the calibration of the electric fieldstrength
+      \param doDispersionCal     - corrects the dispersion (frequency dependend delay)
+      \param doDelayCal          - corrects the delay of each antenna
+      \param doRFImitigation     - suppresses narrow band noise
+      \param doFlagNotActiveAnts - flags antennas marked as "not active" in the CalTables
+      \param doAutoFlagging      - flags antennas due to bad signal (does not affect flagging by the phase calibration)-
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
@@ -511,8 +513,10 @@ namespace CR { // Namespace CR -- begin
 		    Bool doGainCal=True,
 		    Bool doDispersionCal=True,
 		    Bool doDelayCal=True,
-		    Bool doRFImitigation=True);
-    
+		    Bool doRFImitigation=True,
+		    Bool doFlagNotActiveAnts=True,
+		    Bool doAutoFlagging=True);
+
     /*!
       \brief Perform the direction fitting
 

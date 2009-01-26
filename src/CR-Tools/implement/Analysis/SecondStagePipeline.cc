@@ -39,6 +39,7 @@ namespace CR { // Namespace CR -- begin
     DoRFImitigation_p = True;
     SecondStageCacheValid_p = False;
     DoPhaseCal_p = True;
+    DoFlagNotActiveAnts_p = True;
     cachedDate_p = 0;
 
     // Initialize standard values of the PhaseCalibration Plugin
@@ -115,6 +116,10 @@ namespace CR { // Namespace CR -- begin
 	// Do the RFI mitigation
 	rfiM_p.apply(data,True);
       };
+
+      if (DoFlagNotActiveAnts_p) {
+        FlagNotActiveAntennas(dr);
+      }
 
       CachedData_p.reference(data);
       SecondStageCacheValid_p = True;
@@ -205,6 +210,42 @@ namespace CR { // Namespace CR -- begin
   };
   */
 
+  Bool SecondStagePipeline::FlagNotActiveAntennas(DataReader *dr) {
+    try {
+      Vector<Int> AntennaIDs;
+      uInt date;
+      dr->headerRecord().get("Date",date);
+      dr->headerRecord().get("AntennaIDs",AntennaIDs);
+
+      // consistency check
+      if (AntennaMask_p.nelements() != AntennaIDs.nelements()) {
+        cerr << "SecondStagePipeline::FlagNotActiveAntennas: "
+             << "AntennaMask_p.nelements() != AntenneIDs.nelements()"
+             << endl;
+        return False;
+      }
+
+      // read field "Active" in the CalTables for every antenna
+      for (unsigned int i = 0; i < AntennaIDs.nelements(); i++) {
+        double active;
+        CTRead->GetData(date, AntennaIDs(i), "Active", &active);
+        // flag antenna if not active
+        if (!active) {
+          AntennaMask_p(i) = False;
+          if (verbose)
+            cout << "SecondStagePipeline::FlagNotActiveAntennas: "
+                 << "Flagged antenna " 
+                 << i+1
+                 << " as marked as not active in the CalTables."
+                 << endl;
+        }
+      }
+    } catch (AipsError x) {
+      cerr << "SecondStagePipeline::FlagNotActiveAntennas: " << x.getMesg() << endl;
+      return False;
+    }
+    return True;
+  }
 
 
 } // Namespace CR -- end
