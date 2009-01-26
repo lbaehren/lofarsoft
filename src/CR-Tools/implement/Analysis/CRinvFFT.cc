@@ -216,11 +216,13 @@ namespace CR { // Namespace CR -- begin
       tmpvec(2) = DirParams_p.asDouble("Curvature");
       // Container for the phase gradients
       Matrix<DComplex> phaseGradients;
-      CR::GeometricalWeight geomWeight;
-      geomWeight.showProgress(verbose); 
-      geomWeight.setAntennaPositions(tmpAntPos,True,CR::CoordinateType::NorthEastHeight); 
-      geomWeight.setSkyPosition(DirParams_p.asDouble("Az"),DirParams_p.asDouble("El"),
-				DirParams_p.asDouble("Curvature"), CR::CoordinateType::AzElRadius, True);
+      CR::GeomWeight geomWeight;
+//       geomWeight.showProgress(verbose); 
+      geomWeight.setAntPositions(tmpAntPos,
+				 CR::CoordinateType::NorthEastHeight); 
+      geomWeight.setSkyPositions(tmpvec,
+				 CR::CoordinateType::AzElRadius,
+				 True);
       geomWeight.setFrequencies(dr->frequencyValues());
 #ifdef DEBUGGING_MESSAGES      
       geomWeight.summary();

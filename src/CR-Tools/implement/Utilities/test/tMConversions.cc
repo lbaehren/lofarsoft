@@ -31,6 +31,7 @@ using casa::MDirection;
 using casa::MVDirection;
 using casa::MPosition;
 using casa::MVPosition;
+using casa::Quantity;
 
 /*!
   \file tMConversions.cc
@@ -95,7 +96,7 @@ int test_MDirection ()
   
   std::cout << "[1] Default constructors ..." << endl;
   try {
-    casa::MDirection dir;
+    MDirection dir;
     //
     std::cout << "-- MDirection() = " << dir << endl;
   } catch (std::string message) {
@@ -105,18 +106,27 @@ int test_MDirection ()
 
   std::cout << "[2] Argumented constructor for MDirection ..." << endl;
   try {
-    MDirection azel (MDirection(Quantity(0,"deg"),
-				Quantity(90,"deg"),
-				MDirection::Ref(MDirection::AZEL)));
-    MDirection b1950 (MDirection(Quantity(0,"deg"),
-				 Quantity(90,"deg"),
-				 MDirection::Ref(MDirection::B1950)));
-    MDirection j2000 (MDirection(Quantity(0,"deg"),
-				 Quantity(90,"deg"),
-				 MDirection::Ref(MDirection::J2000)));
-    MDirection itrf (MDirection(Quantity(0,"deg"),
-				Quantity(90,"deg"),
-				MDirection::Ref(MDirection::ITRF)));
+    MDirection dir;
+    //
+    dir = MDirection(Quantity(0,"deg"),
+		     Quantity(90,"deg"),
+		     MDirection::Ref(MDirection::AZEL));
+    MDirection azel (dir);
+    //
+    dir = MDirection(Quantity(0,"deg"),
+		     Quantity(90,"deg"),
+		     MDirection::Ref(MDirection::B1950));
+    MDirection b1950 (dir);
+    //
+    dir = MDirection(Quantity(0,"deg"),
+		     Quantity(90,"deg"),
+		     MDirection::Ref(MDirection::J2000));
+    MDirection j2000 (dir);
+    //
+    dir = MDirection(Quantity(0,"deg"),
+		     Quantity(90,"deg"),
+		     MDirection::Ref(MDirection::ITRF));
+    MDirection itrf (dir);
     //
     std::cout << "-- MDirection ( AZEL) = " << azel  << endl;
     std::cout << "-- MDirection (B1950) = " << b1950 << endl;
@@ -179,15 +189,19 @@ int test_MPosition ()
 
   std::cout << "[2] Argumented constructor for MPosition ..." << endl;
   try {
-    MPosition pos_wgs84 (MVPosition(Quantity(25, "m"),     // Height
-				    Quantity(20, "deg"),   // East longitude
-				    Quantity(53, "deg")),  // Lattitude
-			 MPosition::WGS84);                // Reference type
+    casa::MVPosition mvp;
+    //
+    mvp = MVPosition(Quantity(25, "m"),       // Height
+		     Quantity(20, "deg"),     // East longitude
+		     Quantity(53, "deg"));    // Lattitude
+    MPosition pos_wgs84 (mvp,
+			 MPosition::WGS84);   // Reference type
     // 45 foot diameter antenna, Green Bank, West Virginia
-    MPosition pos_itrf (MVPosition(884084.2636,     // X
-				   -4924578.7481,   // Y
-				   3943734.3354),   // Z
-			MPosition::ITRF);           // Reference type
+    mvp = MVPosition(884084.2636,             // X
+		     -4924578.7481,           // Y
+		     3943734.3354);           // Z
+    MPosition pos_itrf (mvp,
+			MPosition::ITRF);     // Reference type
     //
     std::cout << "-- MPosition (WGS84) = " << pos_wgs84 << endl;
     std::cout << "-- MPosition (ITRF)  = " << pos_itrf  << endl;

@@ -89,6 +89,15 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Argumented constructor
 
+      \param geomPhase     -- 
+      \param bufferWeights -- Buffer the values of the weights?
+    */
+    GeomWeight (GeomPhase const &geomPhase,
+		bool const &bufferWeights=false);
+    
+    /*!
+      \brief Argumented constructor
+
       \param geomDelay     -- 
       \param frequencies   --
       \param bufferPhases  -- 
@@ -110,15 +119,6 @@ namespace CR { // Namespace CR -- begin
     GeomWeight (GeomDelay const &geomDelay,
 		Vector<MVFrequency> const &frequencies,
 		bool const &bufferPhases=false,
-		bool const &bufferWeights=false);
-    
-    /*!
-      \brief Argumented constructor
-
-      \param geomPhase     -- 
-      \param bufferWeights -- Buffer the values of the weights?
-    */
-    GeomWeight (GeomPhase const &geomPhase,
 		bool const &bufferWeights=false);
     
     /*!

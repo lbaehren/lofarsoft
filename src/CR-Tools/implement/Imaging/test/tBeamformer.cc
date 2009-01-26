@@ -30,9 +30,9 @@ using casa::DComplex;
 using casa::Matrix;
 using casa::Vector;
 
-using CR::GeometricalDelay;
-using CR::GeometricalPhase;
-using CR::GeometricalWeight;
+using CR::GeomDelay;
+using CR::GeomPhase;
+using CR::GeomWeight;
 using CR::Beamformer;
 using CR::SkymapQuantity;
 
@@ -74,82 +74,6 @@ int test_Beamformer ()
     nofFailedTests++;
   }
   
-  std::cout << "[2] Testing construction with GeometricalWeight ..." << std::endl;
-  try {
-    std::cout << "-- creating GeometricalWeight object ..." << std::endl;
-    GeometricalWeight weight (get_antennaPositions(),
-			      get_skyPositions(),
-			      get_frequencies());
-    
-    std::cout << "-- creating Beamformer object ..." << std::endl;
-    Beamformer bf (weight);
-    bf.summary();
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
-  std::cout << "[3] Testing construction with GeometricalPhase ..." << std::endl;
-  try {
-    std::cout << "-- creating GeometricalPhase object ..." << std::endl;
-    GeometricalPhase phase (get_antennaPositions(),
-			    get_skyPositions(),
-			    get_frequencies());
-    
-    std::cout << "-- creating Beamformer object ..." << std::endl;
-    Beamformer bf (phase);
-    bf.summary();
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
-  std::cout << "[4] Testing construction with GeometricalDelay ..." << std::endl;
-  try {
-    std::cout << "-- creating GeometricalDelay object ..." << std::endl;
-    GeometricalDelay delay (get_antennaPositions(),
-			    get_skyPositions());
-    
-    std::cout << "-- creating Beamformer object ..." << std::endl;
-    Beamformer bf (delay,
-		   get_frequencies());
-    bf.summary();
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
-  std::cout << "[5] Testing argumented constructor ..." << std::endl;
-  try {
-    Beamformer bf (get_antennaPositions(),
-		   CR::CoordinateType::Cartesian,
-		   get_skyPositions(),
-		   CR::CoordinateType::Cartesian,
-		   get_frequencies());
-    bf.summary();
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
-  std::cout << "[4] Testing copy constructor ..." << std::endl;
-  try {
-    std::cout << "-- creating original Beamformer object ..." << std::endl;
-    Beamformer bf (get_antennaPositions(),
-		   CR::CoordinateType::Cartesian,
-		   get_skyPositions(),
-		   CR::CoordinateType::Cartesian,
-		   get_frequencies());
-    //
-    bf.bufferDelays (true);
-    //
-    std::cout << "-- creating new Beamformer object as copy ..." << std::endl;
-    Beamformer bfCopy (bf);
-    bfCopy.summary();
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
   
   return nofFailedTests;
 }
@@ -169,11 +93,15 @@ int test_beamType ()
   bool ok (true);
 
   // Create Beamformer object for testing its functionality
-  Beamformer bf (get_antennaPositions(),
-		 CR::CoordinateType::Cartesian,
-		 get_skyPositions(),
-		 CR::CoordinateType::Cartesian,
-		 get_frequencies());
+  CR::Beamformer bf (get_antennaPositions(),
+		     CR::CoordinateType::Cartesian,
+		     get_skyPositions(),
+		     CR::CoordinateType::Cartesian,
+		     false,
+		     false,
+		     false,
+		     get_frequencies(),
+		     false);
 
   std::cout << "[1] Field in the frequency domain..." << std::endl;
   ok = bf.setSkymapType (SkymapQuantity::FREQ_FIELD);
@@ -213,12 +141,16 @@ int test_weights ()
   int nofFailedTests (0);
 
   /* Create beamformer object to work with */
-  Beamformer bf (get_antennaPositions(),
-		 CR::CoordinateType::Cartesian,
-		 get_skyPositions(),
-		 CR::CoordinateType::Cartesian,
-		 get_frequencies());
-  
+  CR::Beamformer bf (get_antennaPositions(),
+		     CR::CoordinateType::Cartesian,
+		     get_skyPositions(),
+		     CR::CoordinateType::Cartesian,
+		     false,
+		     false,
+		     false,
+		     get_frequencies(),
+		     false);
+
   /* Work with default settings (geometrical weights only) */
   try {
     bf.summary();
@@ -264,11 +196,15 @@ int test_processing ()
   uint nofAntennas (4);
 
   // Beamformer object for the subsequent testing
-  Beamformer bf (get_antennaPositions(nofAntennas),
-		 CR::CoordinateType::Cartesian,
-		 get_skyPositions(),
-		 CR::CoordinateType::Cartesian,
-		 get_frequencies());
+  CR::Beamformer bf (get_antennaPositions(),
+		     CR::CoordinateType::Cartesian,
+		     get_skyPositions(),
+		     CR::CoordinateType::Cartesian,
+		     false,
+		     false,
+		     false,
+		     get_frequencies(),
+		     false);
   bf.summary();
 
   // Some data to test the processing

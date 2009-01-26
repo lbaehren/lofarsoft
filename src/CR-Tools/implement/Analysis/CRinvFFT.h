@@ -32,7 +32,7 @@
 #include <Analysis/SecondStagePipeline.h>
 #include <Coordinates/CoordinateType.h>
 #include <Calibration/CalTableInterpolater.h>
-#include <Imaging/GeometricalWeight.h>
+#include <Imaging/GeomWeight.h>
 
 // AIPS++/CASA header files
 #include <casa/Arrays/Matrix.h>

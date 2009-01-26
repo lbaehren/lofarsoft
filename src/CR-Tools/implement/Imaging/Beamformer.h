@@ -34,7 +34,7 @@
 #include <scimath/Mathematics/FFTServer.h>
 
 // CR-Tools header files
-#include <Imaging/GeometricalWeight.h>
+#include <Imaging/GeomWeight.h>
 #include <Imaging/SkymapQuantity.h>
 
 namespace CR { // Namespace CR -- begin
@@ -155,7 +155,7 @@ namespace CR { // Namespace CR -- begin
       \endcode
     </ol>    
   */  
-  class Beamformer : public GeometricalWeight {
+  class Beamformer : public GeomWeight {
     
     //! Type of beamforming method used in data processing
     SkymapQuantity skymapType_p;
@@ -187,67 +187,99 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Argumented constructor
 
-      \param weights -- Object storing the geometrical weights which are required
-             for the Beamformer
+      \param weights -- 
     */
-    Beamformer (GeometricalWeight const &weights);
+    Beamformer (GeomWeight const &weights);
     
     /*!
-      \brief Argumented constructor using existing GeometricalPhase object
-      
-      \param phase -- GeometricalPhase object encapsulating the functionality
-             on top of which this class builds.
+      \brief Argumented constructor
+
+      \param phases        --
       \param bufferWeights -- Buffer the values of the geometrical weights?
     */
-    Beamformer (GeometricalPhase const &phase,
-		bool const &bufferWeights=false);
+    Beamformer (GeomPhase const &phases,
+		bool const &bufferWeights=true);
     
     /*!
-      \brief Argumented constructor using existing GeometricalDelay object
-      
-      \param delay -- GeometricalDelay object encapsulating the functionality
-             on top of which this class builds.
-      \param frequencies  -- Frequencies for which the geometrical delays are
-             converted into phases, [Hz]
-      \param bufferPhases -- Buffer the values of the phases?
-      \param bufferWeights -- Buffer the values of the geometrical weights?
+      \brief Argumented constructor
+
+      \param geomDelay     -- 
+      \param frequencies   --
+      \param bufferPhases  -- 
+      \param bufferWeights -- Buffer the values of the weights?
     */
-    Beamformer (GeometricalDelay const &delay,
-		casa::Vector<double> const &frequencies,
+    Beamformer (GeomDelay const &geomDelay,
+		Vector<double> const &frequencies,
 		bool const &bufferPhases=false,
 		bool const &bufferWeights=false);
     
     /*!
       \brief Argumented constructor
       
-      \param antPositions -- [nofAntennas,3] Antenna positions for which the
-             delay is computed, given in Cartesian coordinates \f$ (x,y,z) \f$
-      \param antCoordType -- CR::CoordinateType::Types of the antenna position
-             coordinates; if the coordinates are non-cartesian and thereby
-	     include anglular components, the values must be provided in radians.
-      \param skyPositions -- [nofSkyPositions,3] Positions in the sky towards
-             which to point, given in the same reference frame as the antenna
-	     positions, \f$ (x,y,z) \f$
-      \param skyCoordType -- CR::CoordinateType::Types of the sky position coordinates;
-             if the coordinates are non-cartesian and thereby include anglular
-	     components, the values must be provided in radians.
-      \param frequencies  -- Frequencies for which the geometrical delays are
-             converted into phases
-      \param bufferDelays -- Buffer the values for the geometrical delay? If set
-             <i>yes</i> the delays will be computed from the provided antenna and
-	     sky positions and afterwards kept in memory; if set <i>no</i> only
-	     the input parameters are stored an no further action is taken.
-      \param bufferPhases -- Buffer the values of the phases?
-      \param bufferWeights -- Buffer the values of the geometrical weights?
+      \param geomDelay     -- 
+      \param frequencies   --
+      \param bufferPhases  -- 
+      \param bufferWeights -- Buffer the values of the weights?
     */
-    Beamformer (casa::Matrix<double> const &antPositions,
-		CR::CoordinateType::Types const &antCoordType,
-		casa::Matrix<double> const &skyPositions,
-		CR::CoordinateType::Types const &skyCoordType,
-		casa::Vector<double> const &frequencies,
-		bool const &bufferDelays=false,
+    Beamformer (GeomDelay const &geomDelay,
+		Vector<MVFrequency> const &frequencies,
 		bool const &bufferPhases=false,
 		bool const &bufferWeights=false);
+    
+    /*!
+      \brief Argumented constructor
+
+      \param antPositions -- [antenna,3], positions of the antennas
+      \param antCoord     -- 
+      \param skyPositions -- [position,3], positions towards which the beams are
+             formed
+      \param skyCoord     --
+      \param anglesInDegrees -- If the coordinates of the antenna positions
+             contain an angular component, is this component given in degrees?
+	     If set <tt>false</tt> the angular components are considered to be
+	     given in radians.
+      \param farField     -- Compute geometrical delay for far-field? By default
+             no approximation is made and the full 3D geometry is taken into
+	     account.
+      \param bufferDelays -- Buffer the values of the geometrical delays?
+      \param frequencies  -- The frequencies, [Hz], for which the phases are
+             being computed.
+      \param bufferPhases -- Buffer the values of the phases?
+      \param bufferWeights -- Buffer the values of the weights?
+    */
+    Beamformer (Matrix<double> const &antPositions,
+		CoordinateType::Types const &antCoord,
+		Matrix<double> const &skyPositions,
+		CoordinateType::Types const &skyCoord,
+		bool const &anglesInDegrees,
+		bool const &farField,
+		bool const &bufferDelays,
+		Vector<double> const &frequencies,
+		bool const &bufferPhases,
+		bool const &bufferWeights=false);
+    
+    /*!
+      \brief Argumented constructor
+
+      \param antPositions -- Positions of the antennas
+      \param skyPositions -- Positions towards which the beams are formed
+      \param farField     -- Compute geometrical delay for far-field? By default
+             no approximation is made and the full 3D geometry is taken into
+	     account.
+      \param bufferDelays -- Buffer the values of the geometrical delays?
+      \param frequencies  -- The frequencies for which the phases are being
+             computed.
+      \param bufferPhases -- Buffer the values of the phases?
+      \param bufferWeights -- Buffer the values of the weights?
+    */
+    Beamformer (Vector<MVPosition> const &antPositions,
+		Vector<MVPosition> const &skyPositions,
+		bool const &farField,
+		bool const &bufferDelays,
+		Vector<MVFrequency> const &frequencies,
+		bool const &bufferPhases,
+		bool const &bufferWeights=false);
+    
     
     /*!
       \brief Copy constructor

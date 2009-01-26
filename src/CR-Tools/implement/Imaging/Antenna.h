@@ -33,7 +33,7 @@
 #include <casa/BasicSL/Complex.h>
 
 #include <Imaging/Feed.h>
-#include <Imaging/GeometricalDelay.h>
+#include <Imaging/GeomDelay.h>
 
 using std::vector;
 

@@ -40,7 +40,7 @@ namespace CR { // Namespace CR -- begin
   //                                                                   Beamformer
   
   Beamformer::Beamformer ()
-    : GeometricalWeight()
+    : GeomWeight()
   {
     init ();
   }
@@ -48,59 +48,103 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                   Beamformer
   
-  Beamformer::Beamformer (GeometricalWeight const &weights)
-    : GeometricalWeight (weights)
+  Beamformer::Beamformer (GeomWeight const &weights)
+    : GeomWeight()
   {
-    init ();
+    init();
   }
   
   //_____________________________________________________________________________
   //                                                                   Beamformer
   
-  Beamformer::Beamformer (GeometricalPhase const &phase,
+  Beamformer::Beamformer (GeomPhase const &phases,
 			  bool const &bufferWeights)
-    : GeometricalWeight (phase,
-			 bufferWeights)
+    : GeomWeight (phases,
+		  bufferWeights)
+  {
+    init ();
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                   Beamformer
+  
+  Beamformer::Beamformer (GeomDelay const &geomDelay,
+			  Vector<double> const &frequencies,
+			  bool const &bufferPhases,
+			  bool const &bufferWeights)
+    : GeomWeight(geomDelay,
+		 frequencies,
+		 bufferPhases,
+		 bufferWeights)
+  {
+    init();
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                   Beamformer
+  
+  Beamformer::Beamformer (GeomDelay const &geomDelay,
+			  Vector<MVFrequency> const &frequencies,
+			  bool const &bufferPhases,
+			  bool const &bufferWeights)
+    : GeomWeight(geomDelay,
+		 frequencies,
+		 bufferPhases,
+		 bufferWeights)
+  {
+    init();
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                   Beamformer
+  
+  Beamformer::Beamformer (Matrix<double> const &antPositions,
+			  CoordinateType::Types const &antCoord,
+			  Matrix<double> const &skyPositions,
+			  CoordinateType::Types const &skyCoord,
+			  bool const &anglesInDegrees,
+			  bool const &farField,
+			  bool const &bufferDelays,
+			  Vector<double> const &frequencies,
+			  bool const &bufferPhases,
+			  bool const &bufferWeights)
+    : GeomWeight(antPositions,
+		 antCoord,
+		 skyPositions,
+		 skyCoord,
+		 anglesInDegrees,
+		 farField,
+		 bufferDelays,
+		 frequencies,
+		 bufferPhases,
+		 bufferWeights)
+  {
+    init ();
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                   Beamformer
+  
+  Beamformer::Beamformer (Vector<MVPosition> const &antPositions,
+			  Vector<MVPosition> const &skyPositions,
+			  bool const &farField,
+			  bool const &bufferDelays,
+			  Vector<MVFrequency> const &frequencies,
+			  bool const &bufferPhases,
+			  bool const &bufferWeights)
+    : GeomWeight(antPositions,
+		 skyPositions,
+		 farField,
+		 bufferDelays,
+		 frequencies,
+		 bufferPhases,
+		 bufferWeights)
   {
     init ();
   }
 
   //_____________________________________________________________________________
   //                                                                   Beamformer
-  
-  Beamformer::Beamformer (GeometricalDelay const &delay,
-			  casa::Vector<double> const &frequencies,
-			  bool const &bufferPhases,
-			  bool const &bufferWeights)
-    : GeometricalWeight (delay,
-			 frequencies,
-			 bufferPhases,
-			 bufferWeights)
-  {
-    init ();
-  }
-  
-  // ----------------------------------------------------------------- Beamformer
-  
-  Beamformer::Beamformer (casa::Matrix<double> const &antPositions,
-			  CR::CoordinateType::Types const &antCoordType,
-			  casa::Matrix<double> const &skyPositions,
-			  CR::CoordinateType::Types const &skyCoordType,
-			  casa::Vector<double> const &frequencies,
-			  bool const &bufferDelays,
-			  bool const &bufferPhases,
-			  bool const &bufferWeights)
-    : GeometricalWeight (antPositions,
-			 antCoordType,
-			 skyPositions,
-			 skyCoordType,
-			 frequencies,
-			 bufferDelays,
-			 bufferPhases,
-			 bufferWeights)
-  {
-    init ();
-  }
   
   Beamformer::Beamformer (Beamformer const &other)
   {
@@ -143,7 +187,7 @@ namespace CR { // Namespace CR -- begin
   void Beamformer::copy (Beamformer const &other)
   {
     // copy the underlying base object
-    GeometricalWeight::operator= (other);
+    GeomWeight::operator= (other);
 
     skymapType_p = other.skymapType_p;
 
@@ -163,7 +207,7 @@ namespace CR { // Namespace CR -- begin
   {
     bool status (true);
     // Activate the buffering of the weighting factors
-    GeometricalWeight::bufferWeights (true);
+    GeomWeight::bufferWeights (true);
     // default setting for the used beamforming method
     skymapType_p = SkymapQuantity (SkymapQuantity::FREQ_POWER);
     /* set the weights used in the beamforming */
@@ -221,11 +265,10 @@ namespace CR { // Namespace CR -- begin
     os << "-- Sky positions       : " << skyPositions_p.shape()     << std::endl;
     os << "-- Antenna positions   : " << antPositions_p.shape()     << std::endl;
     os << "-- Frequency values    : " << frequencies_p.shape()      << std::endl;
-    os << "-- Geometrical weights : " << GeometricalWeight::shape() << std::endl;
+    os << "-- Geometrical weights : " << GeomWeight::shape()        << std::endl;
     os << "-- buffer delays       : " << bufferDelays_p             << std::endl;
     os << "-- buffer phases       : " << bufferPhases_p             << std::endl;
     os << "-- buffer weights      : " << bufferWeights_p            << std::endl;
-    os << "-- show progress       : " << showProgress_p             << std::endl;
     os << "-- Beamforming method  : " << skymapType_p.name()        << std::endl;
     os << "-- Beamformer weights  : " << bfWeights_p.shape()        << std::endl;
   }
@@ -248,8 +291,8 @@ namespace CR { // Namespace CR -- begin
       phases.
     */
     try {
-      bfWeights_p.resize (GeometricalWeight::shape());
-      bfWeights_p = GeometricalWeight::weights();
+      bfWeights_p.resize (GeomWeight::shape());
+      bfWeights_p = GeomWeight::weights();
     } catch (std::string message) {
       std::cerr << "[Beamformer::setBeamformerWeights] "
 		<< message
@@ -294,7 +337,7 @@ namespace CR { // Namespace CR -- begin
     try {
       /* extract shape information first */
       casa::IPosition shapeGains       = gains.shape();
-      casa::IPosition shapeGeomWeights = GeometricalWeight::shape();
+      casa::IPosition shapeGeomWeights = GeomWeight::shape();
       /* check if the shapes agree */
       if (shapeGains == shapeGeomWeights) {
 	status = setBeamformerWeights (gains);
@@ -543,7 +586,7 @@ namespace CR { // Namespace CR -- begin
 	
 	casa::IPosition shape = bfWeights_p.shape();  //  [freq,antenna,direction]
 	int blocksize         = 2*(shape(0)-1);
-	double nofBaselines   = GeometricalDelay::nofBaselines();
+	double nofBaselines   = GeomDelay::nofBaselines();
 	int direction (0);
 	int ant2 (0);
 	casa::IPosition pos (2);

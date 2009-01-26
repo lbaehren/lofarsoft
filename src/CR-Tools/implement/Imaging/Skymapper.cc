@@ -70,7 +70,7 @@ namespace CR {  // Namespace CR -- begin
 			Matrix<double> const &antPositions)
   {
     Beamformer beamformer;
-    beamformer.setAntennaPositions (antPositions);
+    beamformer.setAntPositions (antPositions);
     //
     init (0,
 	  false,
@@ -202,7 +202,7 @@ namespace CR {  // Namespace CR -- begin
   
   bool Skymapper::setAntennaPositions (Matrix<double> const &antPositions)
   {
-    return beamformer_p.setAntennaPositions (antPositions);
+    return beamformer_p.setAntPositions (antPositions);
   }
 
   // ------------------------------------------------------- setSkymapCoordinates
@@ -270,8 +270,6 @@ namespace CR {  // Namespace CR -- begin
       Matrix<double> skyPositions = coordinates_p.spatialCoordinate().worldAxisValues();
 
       // Combine the values from the axes to yield the 3D positions
-      bool anglesInDegrees (true);
-      bool bufferDelays (false);
       Vector<int> axisOrder (3);
       casa::indgen(axisOrder);
 //       status = beamformer_p.setSkyPositions(skyPositions,
@@ -464,7 +462,7 @@ namespace CR {  // Namespace CR -- begin
     os << " -- FFT length    [channels] = " << timeFreq.blocksize()       << endl;
     os << " -- sampling rate       [Hz] = " << timeFreq.sampleFrequency() << endl;
     os << " -- Nyquist zone             = " << timeFreq.nyquistZone()     << endl;
-    os << " -- nof. antennas            = " << beamformer_p.nofAntennas() << endl;
+    os << " -- nof. antennas            = " << beamformer_p.nofAntPositions() << endl;
     os << " - Coordinates .............  "                                << endl;
 //     os << " -- reference code           = " << refcode                    << endl;
 //     os << " -- projection               = " << projection                 << endl;

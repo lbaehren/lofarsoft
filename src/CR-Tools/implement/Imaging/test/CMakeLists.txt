@@ -17,9 +17,6 @@ set (tests
   tGeomDelay
   tGeomPhase
   tGeomWeight
-  tGeometricalDelay
-  tGeometricalPhase
-  tGeometricalWeight
   tMDirection
   tSkymapGrid
   tSkymapQuantity

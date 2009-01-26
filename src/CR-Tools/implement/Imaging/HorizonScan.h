@@ -28,7 +28,7 @@
 #include <string>
 
 // include custom header files
-#include <Imaging/GeometricalWeight.h>
+#include <Imaging/Beamformer.h>
 
 namespace CR { // NAMESPACE CR -- BEGIN
   
@@ -66,9 +66,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
     //! Increment in Azimuth along the the horizon (angular resolution)
     double angularResolution_p;
-
-    //! Geometrical weights applied for the beamforming
-    GeometricalWeight weights_p;
+    //! Beamformer to handle the pointing
+    Beamformer beamformer_p;
     
   public:
     
@@ -129,23 +128,24 @@ namespace CR { // NAMESPACE CR -- BEGIN
     bool setAngularResolution (const double &angularResolution);
 
     /*!
-      \brief Get the geometrical weights required for the beamforming
+      \brief Get the embedded Beamformer object handling the pointing
 
-      \return weights -- The geometrical weights required for the beamforming
-                         process
+      \return beamformer -- The embedded Beamformer object
     */
-    GeometricalWeight weights () {
-      return weights_p;
+    inline Beamformer beamformer () const {
+      return beamformer_p;
     }
 
     /*!
-      \brief Set the geometrical weights required for the beamforming
+      \brief Set the embedded Beamformer object handling the pointing
 
-      \param weights -- 
+      \param beamformer -- A new Beamformer object to handle the phasing up of
+             the antenna data
 
-      \return status -- 
+      \return status -- Status of the operation; returns \e false in case an
+              error was encountered.
     */
-    bool setWeights (const GeometricalWeight &weights);
+    bool setBeamformer (Beamformer const &beamformer);
     
     // ------------------------------------------------------------------ Methods
 
