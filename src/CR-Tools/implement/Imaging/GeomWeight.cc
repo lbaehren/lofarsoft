@@ -249,6 +249,8 @@ namespace CR { // Namespace CR -- begin
     os << "-- Shape of phases array  = " << GeomPhase::shape()     << std::endl;
     os << "                          = " << phases_p.shape()       << std::endl;
     os << "-- Buffer weights values  = " << bufferWeights_p        << std::endl;
+    os << "-- Shape of weights array = " << shape()                << std::endl;
+    os << "                          = " << weights_p.shape()      << std::endl;
   }
   
   // ============================================================================
@@ -278,16 +280,18 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                   setWeights
 
-  void GeomWeight::setWeights()
+  void GeomWeight::setWeights ()
   {
     /* Only recompute and set values if buffering is enabled */
     if (bufferWeights_p) {
+      /* Adjust the shape of the array storing the weights */
       casa::IPosition itsShape = shape();
-      weights_p.resize();
+      weights_p.resize(itsShape);
+      /* Retrieve the values of the geometrical phases */
       if (bufferPhases_p) {
 	weights_p = calcWeights(phases_p);
       } else {
-	casa::Matrix<double> geomPhases = GeomPhase::phases();
+	casa::Cube<double> geomPhases = GeomPhase::phases();
 	weights_p = calcWeights(geomPhases);
       }
     }

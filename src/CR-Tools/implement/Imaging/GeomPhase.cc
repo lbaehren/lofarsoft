@@ -359,10 +359,7 @@ namespace CR { // Namespace CR -- begin
 
   void GeomPhase::setDelays ()
   {
-    std::cout << "[GeomPhase::setDelays]" << std::endl;
-    std::cout << "-- setting delay values ..." << std::endl;
     GeomDelay::setDelays();
-    std::cout << "-- setting phase values ..." << std::endl;
     setPhases();
   }
   

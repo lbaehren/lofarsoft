@@ -2,6 +2,7 @@
 
 /*!
   \defgroup Analysis CR-Tools :: Analysis module
+
   \ingroup CR
 
   \brief Analysis module for the CR-pipeline

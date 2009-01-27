@@ -26,6 +26,9 @@
 #include <Imaging/Beamformer.h>
 #include "create_data.h"
 
+using std::cout;
+using std::endl;
+
 using casa::DComplex;
 using casa::Matrix;
 using casa::Vector;
@@ -37,7 +40,7 @@ using CR::Beamformer;
 using CR::SkymapQuantity;
 
 /*!
-  \file Imaging/test/tBeamformer.cc
+  \file tBeamformer.cc
 
   \ingroup CR_Imaging
 
@@ -48,11 +51,7 @@ using CR::SkymapQuantity;
   \date 2007/06/13
 */
 
-// ==============================================================================
-//
-//  Test functions
-//
-// ==============================================================================
+// -----------------------------------------------------------------------------
 
 /*!
   \brief Test constructors for a new Beamformer object
@@ -74,55 +73,275 @@ int test_Beamformer ()
     nofFailedTests++;
   }
   
+  cout << "[2] Construction using (GeomWeight) ..." << endl;
+  try {
+    Vector<MVFrequency> frequencies (10);
+    CR::GeomPhase phase (frequencies,false);
+    GeomWeight weight (phase);
+    //
+    Beamformer bf (weight);
+    bf.summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
   
+  cout << "[3] Construction using (GeomPhase,bool) ..." << endl;
+  try {
+    // parameters for GeomPhase
+    Vector<MVFrequency> frequencies (10);
+    CR::GeomPhase phase (frequencies,false);
+    //
+    Beamformer bf (phase);
+    bf.summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[4] Construction using (GeomDelay,Vector<double>,bool,bool) ..." << endl;
+  try {
+    // parameters for GeomDelay
+    casa::Matrix<double> antPositions (2,3);
+    casa::Matrix<double> skyPositions (10,3);
+    bool anglesInDegrees (true);
+    bool farField (false);
+    bool bufferDelays (false);
+    GeomDelay geomDelay (antPositions,
+			 skyPositions,
+			 anglesInDegrees,
+			 farField,
+			 bufferDelays);
+    // parameters for GeomPhase
+    Vector<double> frequencies (10);
+    bool bufferPhases (false);
+    // parameters for GeomWeights
+    bool bufferWeights (false);
+
+    Beamformer bf (geomDelay,
+		   frequencies,
+		   bufferPhases,
+		   bufferWeights);
+    bf.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[5] Construction using (GeomDelay,Vector<MVFrequency>,bool,bool) ..."
+       << endl;
+  try {
+    // parameters for GeomDelay
+    casa::Matrix<double> antPositions (2,3);
+    casa::Matrix<double> skyPositions (10,3);
+    bool anglesInDegrees (true);
+    bool farField (false);
+    bool bufferDelays (false);
+    GeomDelay geomDelay (antPositions,
+			 skyPositions,
+			 anglesInDegrees,
+			 farField,
+			 bufferDelays);
+    // parameters for GeomPhase
+    Vector<MVFrequency> frequencies (10);
+    bool bufferPhases (false);
+    // parameters for GeomWeights
+    bool bufferWeights (false);
+
+    Beamformer bf (geomDelay,
+		   frequencies,
+		   bufferPhases,
+		   bufferWeights);
+    bf.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[6] Testing fully argumented constructor ..." << endl;
+  try {
+    // parameters for GeomDelay
+    casa::Matrix<double> antPositions (2,3);
+    casa::Matrix<double> skyPositions (10,3);
+    bool anglesInDegrees (true);
+    bool farField (false);
+    bool bufferDelays (false);
+    // parameters for GeomPhase
+    Vector<double> frequencies (100);
+    bool bufferPhases (false);
+    // parameters for GeomWeights
+    bool bufferWeights (false);
+
+    Beamformer bf (antPositions,
+		   CR::CoordinateType::Cartesian,
+		   skyPositions,
+		   CR::CoordinateType::Cartesian,
+		   anglesInDegrees,
+		   farField,
+		   bufferDelays,
+		   frequencies,
+		   bufferPhases,
+		   bufferWeights);
+    
+    bf.summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[7] Testing fully argumented constructor ..." << endl;
+  try {
+    // parameters for GeomDelay
+    casa::Vector<casa::MVPosition> antPositions (2);
+    casa::Vector<casa::MVPosition> skyPositions (10);
+    bool farField (false);
+    bool bufferDelays (false);
+    // parameters for GeomPhase
+    casa::Vector<casa::MVFrequency> frequencies (100);
+    bool bufferPhases (false);
+    // parameters for GeomWeights
+    bool bufferWeights (false);
+    //
+    Beamformer bf (antPositions,
+		   skyPositions,
+		   farField,
+		   bufferDelays,
+		   frequencies,
+		   bufferPhases,
+		   bufferWeights);
+    //
+    bf.summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[8] Testing copy constructor ..." << endl;
+  try {
+    Vector<MVFrequency> frequencies (10);
+    CR::GeomPhase phase (frequencies,false);
+    GeomWeight weight (phase);
+    //
+    Beamformer bf (weight);
+    cout << "--> original object:" << endl;
+    bf.summary();
+    //
+    Beamformer bfCopy (bf);
+    cout << "-> object constructed as copy:" << endl;
+    bfCopy.summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
   return nofFailedTests;
 }
 
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test assigning different beam-types for the handling of the data
+  \brief Test the methods providing access to internal parameters
 
-  \return nofFailedTests -- The number of failed tests.
+  \return nofFailedTests -- The number of failed test encountered within this
+          function.
 */
-int test_beamType ()
+int test_parameters ()
 {
-  std::cout << "\n[test_beamType]\n" << std::endl;
+  std::cout << "\n[test_parameters]\n" << std::endl;
 
   int nofFailedTests (0);
-  bool ok (true);
+  Beamformer bf;
 
-  // Create Beamformer object for testing its functionality
-  CR::Beamformer bf (get_antennaPositions(),
-		     CR::CoordinateType::Cartesian,
-		     get_skyPositions(),
-		     CR::CoordinateType::Cartesian,
-		     false,
-		     false,
-		     false,
-		     get_frequencies(),
-		     false);
+  cout << "[1] Set antenna positions ..." << endl;
+  try {
+    uint nelem (10);
+    Vector<MVPosition> antPositions (nelem);
+    //
+    cout << "-- old values = " << bf.antPositions().shape() << endl;
+    cout << "-- new values = " << antPositions.shape()      << endl;
+    //
+    bf.setAntPositions (antPositions);
+    //
+    bf.summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
 
-  std::cout << "[1] Field in the frequency domain..." << std::endl;
-  ok = bf.setSkymapType (SkymapQuantity::FREQ_FIELD);
-  
-  std::cout << "[2] Power in the frequency domain..." << std::endl;
-  ok = bf.setSkymapType (SkymapQuantity::FREQ_POWER);
-  
-  std::cout << "[3] Field in the time domain..." << std::endl;
-  ok = bf.setSkymapType (SkymapQuantity::TIME_FIELD);
-  
-  std::cout << "[4] Power in the time domain..." << std::endl;
-  ok = bf.setSkymapType (SkymapQuantity::TIME_POWER);
-  
-  std::cout << "[5] cc-beam in the time domain..." << std::endl;
-  ok = bf.setSkymapType (SkymapQuantity::TIME_CC);
-  
-  std::cout << "[6] Power-beam in the time domain..." << std::endl;
-  ok = bf.setSkymapType (SkymapQuantity::TIME_P);
-  
-  std::cout << "[7] Excess-beam in the time domain..." << std::endl;
-  ok = bf.setSkymapType (SkymapQuantity::TIME_X);
+  cout << "[2] Set sky positions ..." << endl;
+  try {
+    uint nelem (50);
+    Vector<MVPosition> skyPositions (nelem);
+    //
+    cout << "-- old values = " << bf.skyPositions().shape() << endl;
+    cout << "-- new values = " << skyPositions.shape()      << endl;
+    //
+    bf.setSkyPositions (skyPositions);
+    //
+    bf.summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[3] Set frequency values ..." << endl;
+  try {
+    uint nelem (1024);
+    Vector<MVFrequency> freq (nelem);
+    //
+    cout << "-- old values = " << bf.frequencies().shape() << endl;
+    cout << "-- new values = " << freq.shape()             << endl;
+    //
+    bf.setFrequencies (freq);
+    //
+    bf.summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[4] Set the skymap quantity for which to form the beam ..." << endl;
+  try {
+    bool ok (true);
+
+    cout << "-- Field in the frequency domain..." << std::endl;
+    ok = bf.setSkymapType (SkymapQuantity::FREQ_FIELD);
+    cout << "--> Beam domain name   = " << bf.domainName()        << endl;
+    cout << "--> Beamforming method = " << bf.skymapType().name() << endl;
+    
+    std::cout << "-- Power in the frequency domain..." << std::endl;
+    ok = bf.setSkymapType (SkymapQuantity::FREQ_POWER);
+    cout << "--> Beam domain name   = " << bf.domainName()        << endl;
+    cout << "--> Beamforming method = " << bf.skymapType().name() << endl;
+    
+    std::cout << "-- Field in the time domain..." << std::endl;
+    ok = bf.setSkymapType (SkymapQuantity::TIME_FIELD);
+    cout << "--> Beam domain name   = " << bf.domainName()        << endl;
+    cout << "--> Beamforming method = " << bf.skymapType().name() << endl;
+    
+    std::cout << "-- Power in the time domain..." << std::endl;
+    ok = bf.setSkymapType (SkymapQuantity::TIME_POWER);
+    cout << "--> Beam domain name   = " << bf.domainName()        << endl;
+    cout << "--> Beamforming method = " << bf.skymapType().name() << endl;
+    
+    std::cout << "-- cc-beam in the time domain..." << std::endl;
+    ok = bf.setSkymapType (SkymapQuantity::TIME_CC);
+    cout << "--> Beam domain name   = " << bf.domainName()        << endl;
+    cout << "--> Beamforming method = " << bf.skymapType().name() << endl;
+    
+    std::cout << "-- Power-beam in the time domain..." << std::endl;
+    ok = bf.setSkymapType (SkymapQuantity::TIME_P);
+    cout << "--> Beam domain name   = " << bf.domainName()        << endl;
+    cout << "--> Beamforming method = " << bf.skymapType().name() << endl;
+    
+    std::cout << "-- Excess-beam in the time domain..." << std::endl;
+    ok = bf.setSkymapType (SkymapQuantity::TIME_X);
+    cout << "--> Beam domain name   = " << bf.domainName()        << endl;
+    cout << "--> Beamforming method = " << bf.skymapType().name() << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
   
   return nofFailedTests;
 }
@@ -255,7 +474,7 @@ int main ()
   nofFailedTests += test_Beamformer ();
   
   if (!nofFailedTests) {
-    nofFailedTests += test_beamType ();
+    nofFailedTests += test_parameters();
     nofFailedTests += test_processing ();
   }
   

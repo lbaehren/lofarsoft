@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Copyright (C) 2009                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -31,9 +31,32 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
+  //_____________________________________________________________________________
+  //                                                                  AntennaGain
+
   AntennaGain::AntennaGain ()
-  {;}
+  {
+  }
   
+  //_____________________________________________________________________________
+  //                                                                  AntennaGain
+  
+  AntennaGain::AntennaGain (Vector<int> const &antennas,
+			    Vector<MVPosition> const &skyPositions,
+			    Vector<MVFrequency> const &frequencies,
+			    Cube<casa::DComplex> const &gains,
+			    bool const gainsMatchGrid)
+  {
+    setGains (antennas,
+	      skyPositions,
+	      frequencies,
+	      gains,
+	      gainsMatchGrid);
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                  AntennaGain
+
   AntennaGain::AntennaGain (AntennaGain const &other)
   {
     copy (other);
@@ -76,11 +99,56 @@ namespace CR { // Namespace CR -- begin
   //  Parameters
   //
   // ============================================================================
+
+  //_____________________________________________________________________________
+  //                                                                      summary
   
   void AntennaGain::summary (std::ostream &os)
-  {;}
+  {
+    os << "[AntennaGain] Summary of internal parameters." << std::endl;
+    os << "-- nof. antennas           = " << antennas_p.shape()     << std::endl;
+    os << "-- nof. sky positions      = " << skyPositions_p.shape() << std::endl;
+    os << "-- nof. frequency channels = " << frequencies_p.shape()  << std::endl;
+    os << "-- Antenna gain values     = " << gains_p.shape()        << std::endl;
+  }
+
+  //_____________________________________________________________________________
+  //                                                                        gains
   
+  Cube<casa::DComplex> AntennaGain::gains ()
+  {
+    if (gainsMatchGrid_p) {
+      return gains_p;
+    } else {
+      std::cerr << "[AntennaGain::gains] Interpolation not yet implemented!"
+		<< std::endl;
+      return Cube<casa::DComplex>();
+    }
+  }
+
+  //_____________________________________________________________________________
+  //                                                                        gains
   
+  void AntennaGain::setGains (Vector<int> const &antennas,
+			      Vector<MVPosition> const &skyPositions,
+			      Vector<MVFrequency> const &frequencies,
+			      Cube<casa::DComplex> const &gains,
+			      bool const gainsMatchGrid)
+  {
+    antennas_p.resize(antennas.shape());
+    antennas_p = antennas;
+
+    skyPositions_p.resize(skyPositions.shape());
+    skyPositions_p = skyPositions;
+    
+    frequencies_p.resize(frequencies.shape());
+    frequencies_p = frequencies;
+
+    gains_p.resize(gains.shape());
+    gains_p = gains;
+
+    gainsMatchGrid_p = gainsMatchGrid;
+  }
   
   // ============================================================================
   //

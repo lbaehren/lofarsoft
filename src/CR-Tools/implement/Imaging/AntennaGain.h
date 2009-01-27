@@ -2,7 +2,7 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2007                                                    *
+ *   Copyright (C) 2009                                                    *
  *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,10 +27,16 @@
 // Standard library header files
 #include <iostream>
 #include <string>
+//casacore header files
+#include <casa/Arrays/Cube.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/Quanta/MVFrequency.h>
+#include <casa/Quanta/MVPosition.h>
+// CR-Tools header files
+#include <Imaging/GeomPhase.h>
 
-#include <casa/aips.h>
-#include <casa/Arrays/Array.h>
-#include <casa/BasicSL/Complex.h>
+using casa::Cube;
+using casa::Vector;
 
 namespace CR { // Namespace CR -- begin
   
@@ -39,69 +45,64 @@ namespace CR { // Namespace CR -- begin
     
     \ingroup CR_Imaging
     
-    \brief Brief description for class AntennaGain
+    \brief Container for the complex-valued antenna gains
     
     \author Lars B&auml;hren
 
-    \date 2007/11/27
+    \date 2009/01/27
 
     \test tAntennaGain.cc
     
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>Beamformer
-      <li>GeometricalWeight
+      <li>GeomDelay
+      <li>GeomPhase
     </ul>
     
     <h3>Synopsis</h3>
-
-    For each antenna \f$j\f$ we need to able to assign a direction- and
-    frequency-dependent gain factor
-    \f[ g_{j} = g_{j} (\vec\rho,\nu) \f]
     
     <h3>Example(s)</h3>
     
   */  
   class AntennaGain {
 
-    //! Buffer the antenna gains?
-    bool bufferAntennaGains_p;
-
-  protected:
-
-    casa::Array<casa::DComplex> gains_p;
+    //! IDs of the antennas for which the gains are provided
+    Vector<int> antennas_p;
+    //! Sky positions for which the antenna gains are provided
+    Vector<MVPosition> skyPositions_p;
+    //! Frequencies for which the antenna gains are provided
+    Vector<MVFrequency> frequencies_p;
+    //! Complex antenna gains as function of direction and frequency
+    Cube<casa::DComplex> gains_p;
+    //! Are the gain values computed for the given grid of positions and frequencies?
+    bool gainsMatchGrid_p;
     
   public:
     
     // ------------------------------------------------------------- Construction
     
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     AntennaGain ();
     
-    /*!
-      \brief Argumented constructor
-      
-      \param gains -- [freq,antenna,direction] Array holding the weighting
-             factors \f$g_{j}(\vec\rho,\nu)\f$ describing the antenna gain(s).
-    */
-    AntennaGain (casa::Array<casa::DComplex> const &gains);
+    //! Argumented constructor
+    AntennaGain (Vector<int> const &antennas,
+		 Vector<MVPosition> const &skyPositions,
+		 Vector<MVFrequency> const &frequencies,
+		 Cube<casa::DComplex> const &gains,
+		 bool const gainsMatchGrid=true);
     
     /*!
       \brief Copy constructor
       
       \param other -- Another AntennaGain object from which to create this new
-      one.
+             one.
     */
     AntennaGain (AntennaGain const &other);
     
     // -------------------------------------------------------------- Destruction
 
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     ~AntennaGain ();
     
     // ---------------------------------------------------------------- Operators
@@ -114,13 +115,54 @@ namespace CR { // Namespace CR -- begin
     AntennaGain& operator= (AntennaGain const &other); 
     
     // --------------------------------------------------------------- Parameters
+
+    inline Vector<int> antennas () const {
+      return antennas_p;
+    }
+
+    /*!
+      \brief Get the sky positions for which the antenna gains are provided
+
+      \return skyPositions -- Sky positions for which the antenna gains are
+              provided
+    */
+    inline Vector<MVPosition> skyPositions () const {
+      return skyPositions_p;
+    }
+
+    /*!
+      \brief Get the frequencies for which the antenna gains are provided
+
+      \return frequencies -- Frequencies for which the antenna gains are provided
+    */
+    inline Vector<MVFrequency> frequencies () const {
+      return frequencies_p;
+    }
+    
+    //! Complex antenna gains as function of direction and frequency
+    Cube<casa::DComplex> gains ();
+    
+    /*!
+      \brief Set the values of the antenna gains
+
+      \param antennas       -- 
+      \param skyPositions   -- 
+      \param frequencies    -- 
+      \param gains          -- 
+      \param gainsMatchGrid -- 
+    */
+    void setGains (Vector<int> const &antennas,
+		   Vector<MVPosition> const &skyPositions,
+		   Vector<MVFrequency> const &frequencies,
+		   Cube<casa::DComplex> const &gains,
+		   bool const gainsMatchGrid=true);
     
     /*!
       \brief Get the name of the class
       
       \return className -- The name of the class, AntennaGain.
     */
-    std::string className () const {
+    inline std::string className () const {
       return "AntennaGain";
     }
 
@@ -133,30 +175,33 @@ namespace CR { // Namespace CR -- begin
 
     /*!
       \brief Provide a summary of the internal status
+
+      \param os -- Output stream to which the summary is written.
     */
     void summary (std::ostream &os);    
 
     // ------------------------------------------------------------------ Methods
     
-    bool setGains (casa::Array<casa::DComplex> const &gains);
+    /*!
+      \brief Shape of the array storing the antenna gain values
 
-    inline casa::Array<casa::DComplex> gains () {
-      return gains_p;
+      \return shape -- [freq,sky] 
+    */
+    inline IPosition shape () {
+      return IPosition (2,
+			frequencies_p.nelements(),
+			skyPositions_p.nelements());
     }
     
   private:
     
-    /*!
-      \brief Unconditional copying
-    */
+    //! Unconditional copying
     void copy (AntennaGain const &other);
     
-    /*!
-      \brief Unconditional deletion 
-    */
+    //! Unconditional deletion 
     void destroy(void);
-    
-  };
+
+  }; // Class AntennaGain -- end
   
 } // Namespace CR -- end
 

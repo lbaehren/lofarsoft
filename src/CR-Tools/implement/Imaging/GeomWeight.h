@@ -264,7 +264,7 @@ namespace CR { // Namespace CR -- begin
              given set of antenna and sky positions
       \param frequencies -- Frequency values, [Hz].
 
-      return weights -- Geometrical weights
+      \return weights -- Geometrical weights
     */
     static Cube<DComplex> calcWeights (Matrix<double> const &delays,
 				       Vector<double> const &frequencies);
@@ -276,7 +276,7 @@ namespace CR { // Namespace CR -- begin
              given set of antenna and sky positions
       \param frequencies -- Frequency values, [Hz].
 
-      return weights -- Geometrical weights
+      \return weights -- Geometrical weights
     */
     static Cube<DComplex> calcWeights (Cube<double> const &phases);
     

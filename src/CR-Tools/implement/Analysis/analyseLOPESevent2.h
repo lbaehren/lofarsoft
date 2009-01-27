@@ -47,9 +47,9 @@ namespace CR { // Namespace CR -- begin
     \brief Brief description for class analyseLOPESevent2
     
     \author Frank Schroeder
-
+    
     \date 2008/01/30
-
+    
     \test tanalyseLOPESevent2.cc
     
     <h3>Prerequisite</h3>
@@ -67,7 +67,7 @@ namespace CR { // Namespace CR -- begin
     <h3>Example(s)</h3>
     
   */  
-class analyseLOPESevent2 : public analyseLOPESevent {
+  class analyseLOPESevent2 : public analyseLOPESevent {
     
   protected:
 

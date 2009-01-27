@@ -77,10 +77,11 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
 
     <ul type="square">
-      <li>GeometricalDelay
-      <li>GeometricalPhase
-      <li>GeometricalWeight
+      <li>GeomDelay
+      <li>GeomPhase
+      <li>GeomWeight
       <li>SkymapQuantity
+      <li>AntennaGain
     </ul>
     
     <h3>Synopsis</h3>
@@ -128,10 +129,10 @@ namespace CR { // Namespace CR -- begin
         bool status (true);
 	
 	switch (beam) {
-	case TIME_CC:
-	  beamType_p    = beam;
-	  processData_p = &Beamformer::time_cc;
-	  break;
+	  case SkymapQuantity::TIME_CC:
+	    skymapType_p  = skymapType;
+	    processData_p = &Beamformer::time_cc;
+	    break;
 	}
 
 	return status;
@@ -142,15 +143,23 @@ namespace CR { // Namespace CR -- begin
     <h3>Example(s)</h3>
 
     <ol>
-      <li>Use and existing object handling the geometrical weights in order
-      to set up a new Beamformer:
+      <li>A new Beamformer object can be created based on object of any of its
+      base classes; the least number of new argumentes is required when starting
+      out with geometrical weights:
       \code
-      // [1] create an object handling the geometrical weights
-      GeometricalWeight weight (get_antennaPositions(),
-                                get_skyPositions(),
-				get_frequencies());
+      // Creation of object to handle the geometrical weights
+      GeomWeight w (antPositions,
+                    CR::CoordinateType::Cartesian,
+		    skyPositions,
+		    CR::CoordinateType::Cartesian,
+		    anglesInDegrees,
+		    farField,
+		    bufferDelays,
+		    frequencies,
+		    bufferPhases,
+		    bufferWeights);
 
-      // [2] create new Beamformer from the previously created GeometricalWeights
+      // Create Beamformer
       Beamformer bf (weight);
       \endcode
     </ol>    
@@ -187,14 +196,16 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Argumented constructor
 
-      \param weights -- 
+      \param weights -- Object encapulating the geometrical weights applied by
+             the Beamformer.
     */
     Beamformer (GeomWeight const &weights);
     
     /*!
       \brief Argumented constructor
 
-      \param phases        --
+      \param phases        -- Object encapsulating the geometrical phases from
+             which the geometrical weights applied by the Beamformer are derived.
       \param bufferWeights -- Buffer the values of the geometrical weights?
     */
     Beamformer (GeomPhase const &phases,
@@ -203,7 +214,8 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Argumented constructor
 
-      \param geomDelay     -- 
+      \param geomDelay     -- Object encapsulating the geometrical delays from
+             which the geoometrical weights applied by the Beamformer are derived.
       \param frequencies   --
       \param bufferPhases  -- 
       \param bufferWeights -- Buffer the values of the weights?
@@ -317,24 +329,6 @@ namespace CR { // Namespace CR -- begin
     }
 
     /*!
-      \brief Get the type of the beam type to be used at processing
-
-      \return beamType -- The type of beam to be used at data processing
-     */
-    inline CoordinateType::Types domainType () {
-      return skymapType_p.domainType();
-    }
-    
-    /*!
-      \brief Get the name of the beam type to be used at processing
-
-      \return beamType -- The type of beam to be used at data processing
-     */
-    inline std::string domainName () {
-      return skymapType_p.domainName();
-    }
-    
-    /*!
       \brief Set the type of beam to be used at data processing
       
       \param beam -- The BeamType to be used at data processing
@@ -354,6 +348,24 @@ namespace CR { // Namespace CR -- begin
     */
     inline bool setSkymapType (SkymapQuantity::Type const &skymapType) {
       return setSkymapType (SkymapQuantity(skymapType));
+    }
+    
+    /*!
+      \brief Get the type of the beam type to be used at processing
+
+      \return beamType -- The type of beam to be used at data processing
+     */
+    inline CoordinateType::Types domainType () {
+      return skymapType_p.domainType();
+    }
+    
+    /*!
+      \brief Get the name of the beam type to be used at processing
+
+      \return beamType -- The type of beam to be used at data processing
+     */
+    inline std::string domainName () {
+      return skymapType_p.domainName();
     }
     
     /*!
@@ -408,8 +420,15 @@ namespace CR { // Namespace CR -- begin
                           an error was encountered
     */
     template <class T>
-    bool processData (casa::Matrix<T> &beam,
-		      const casa::Array<DComplex> &data);
+      bool processData (casa::Matrix<T> &beam,
+			const casa::Array<DComplex> &data)
+      {
+	if (checkData(beam,data)) {
+	  return (this->*processData_p) (beam,data);
+	} else {
+	  return false;
+	}
+      }
     
     /*!
       \brief Directed field as function of frequency, \f$ \widetilde S (\vec\rho,\nu) \f$
@@ -470,6 +489,17 @@ namespace CR { // Namespace CR -- begin
     bool time_x (casa::Matrix<double> &beam,
 		 const casa::Array<DComplex> &data);
     
+  protected:
+    
+    //! Compute and set the values of the geometrical delays
+    void setDelays ();
+    
+    //! Compute and set the values of the geometrical phases
+    void setPhases ();
+    
+    //! Compute and set the values of the geometrical weights
+    void setWeights ();
+    
   private:
     
     /*!
@@ -489,17 +519,25 @@ namespace CR { // Namespace CR -- begin
 
     /*
       \brief Set the values of the Beamformer weights
-    */
-    bool setBeamformerWeights ();
-    
-    /*
-      \brief Set the values of the Beamformer weights
 
       \param gains -- [freq,antenna,direction] Array with the complex antenna
              gains, \f$ w_{j,\rm gain} (\vec\rho,\nu) \f$, describing the beam
 	     pattern of the antennas as fucntions of direction and frequency
     */
-    bool setBeamformerWeights (casa::Cube<DComplex> const &gains);
+    void setWeights (casa::Cube<DComplex> const &gains);
+
+    /*
+      \brief Set the values of the Beamformer weights
+
+      \param geomWeights -- [freq,antenna,direction] Array with the complex
+             geometrical weights.
+      \param gainWeights -- [freq,antenna,direction] Array with the complex
+             antenna gains, \f$ w_{j,\rm gain} (\vec\rho,\nu) \f$, describing
+	     the beam pattern of the antennas as fucntions of direction and
+	     frequency.
+    */
+    void setWeights (casa::Cube<DComplex> const &geomWeights,
+		     casa::Cube<DComplex> const &gainWeights);
 
     /*!
       \brief Check if the input data are consistent with the internal settings

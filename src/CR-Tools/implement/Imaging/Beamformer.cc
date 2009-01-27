@@ -49,7 +49,7 @@ namespace CR { // Namespace CR -- begin
   //                                                                   Beamformer
   
   Beamformer::Beamformer (GeomWeight const &weights)
-    : GeomWeight()
+    : GeomWeight(weights)
   {
     init();
   }
@@ -205,17 +205,14 @@ namespace CR { // Namespace CR -- begin
 
   void Beamformer::init ()
   {
-    bool status (true);
-    // Activate the buffering of the weighting factors
-    GeomWeight::bufferWeights (true);
     // default setting for the used beamforming method
     skymapType_p = SkymapQuantity (SkymapQuantity::FREQ_POWER);
     /* set the weights used in the beamforming */
-    status = setBeamformerWeights ();
+    setWeights ();
   }
   
   // ---------------------------------------------------------------- setBeamType
-
+  
   bool Beamformer::setSkymapType (SkymapQuantity const &skymapType)
   {
     bool status (true);
@@ -261,16 +258,21 @@ namespace CR { // Namespace CR -- begin
 
   void Beamformer::summary (std::ostream &os)
   {
-    os << "[Beamformer] Summary of object"                     << std::endl;
-    os << "-- Sky positions       : " << skyPositions_p.shape()     << std::endl;
-    os << "-- Antenna positions   : " << antPositions_p.shape()     << std::endl;
-    os << "-- Frequency values    : " << frequencies_p.shape()      << std::endl;
-    os << "-- Geometrical weights : " << GeomWeight::shape()        << std::endl;
-    os << "-- buffer delays       : " << bufferDelays_p             << std::endl;
-    os << "-- buffer phases       : " << bufferPhases_p             << std::endl;
-    os << "-- buffer weights      : " << bufferWeights_p            << std::endl;
-    os << "-- Beamforming method  : " << skymapType_p.name()        << std::endl;
-    os << "-- Beamformer weights  : " << bfWeights_p.shape()        << std::endl;
+    os << "[Beamformer] Summary of object"                             << std::endl;
+    os << "-- Geometrical delays     = " << GeomDelay::shape()         << std::endl;
+    os << "                          = " << delays_p.shape()           << std::endl;
+    os << "-- Geometrical phases     = " << GeomPhase::shape()         << std::endl;
+    os << "                          = " << phases_p.shape()           << std::endl;
+    os << "-- Geometrical weights    = " << GeomWeight::shape()        << std::endl;
+    os << "                          = " << weights_p.shape()          << std::endl;
+    os << "-- buffer delays          = " << bufferDelays_p             << std::endl;
+    os << "-- buffer phases          = " << bufferPhases_p             << std::endl;
+    os << "-- buffer weights         = " << bufferWeights_p            << std::endl;
+    os << "-- Near-field beamforming = " << GeomDelay::nearField()     << std::endl;
+    os << "-- Beam domain type/name  = " << domainType() << " / " << domainName() 
+       << std::endl;
+    os << "-- Beamforming method     = " << skymapType_p.name()        << std::endl;
+    os << "-- Beamformer weights     = " << bfWeights_p.shape()        << std::endl;
   }
   
   // ============================================================================
@@ -279,11 +281,31 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  // ------------------------------------------------------- setBeamformerWeights
+  //_____________________________________________________________________________
+  //                                                                    setPhases
 
-  bool Beamformer::setBeamformerWeights ()
+  void Beamformer::setDelays ()
   {
-    bool status (true);
+    GeomPhase::setDelays();
+    setWeights();
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                    setPhases
+
+  void Beamformer::setPhases ()
+  {
+    GeomPhase::setPhases();
+    setWeights();
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                   setWeights
+
+  void Beamformer::setWeights ()
+  {
+    /* Forward the function call to the method of the base class */
+    GeomWeight::setWeights();
     
     /*
       In the simplest case no antenna gain corrections are applied, so the
@@ -297,29 +319,22 @@ namespace CR { // Namespace CR -- begin
       std::cerr << "[Beamformer::setBeamformerWeights] "
 		<< message
 		<< std::endl;
-      status = false;
     }
     
-    return status;
   }
   
-  // ------------------------------------------------------- setBeamformerWeights
-  
-  bool Beamformer::setBeamformerWeights (casa::Cube<DComplex> const &gains)
+  //_____________________________________________________________________________
+  //                                                                   setWeights
+
+  void Beamformer::setWeights (casa::Cube<DComplex> const &gains)
   {
-    bool status (true);
-    
     /*
       No array shape checking required at this point, this this is handled in
       the function accepting the antenna gains.
     */
-    status = setBeamformerWeights();
-    
-    if (status) {
-      bfWeights_p *= gains;
-    }
-    
-    return status;
+    setWeights();
+   
+    bfWeights_p *= gains;
   }
   
   // ------------------------------------------------------------ setAntennaGains
@@ -340,7 +355,7 @@ namespace CR { // Namespace CR -- begin
       casa::IPosition shapeGeomWeights = GeomWeight::shape();
       /* check if the shapes agree */
       if (shapeGains == shapeGeomWeights) {
-	status = setBeamformerWeights (gains);
+	setWeights (gains);
       } else {
 	std::cerr << "[Beamformer::setAntennaGains] "
 		  << "Mismatching array shapes!" 
@@ -360,19 +375,19 @@ namespace CR { // Namespace CR -- begin
   bool Beamformer::unsetAntennaGains ()
   {
     bool status (true);
-
+    
     try {
-      status = setBeamformerWeights ();
+      setWeights ();
     } catch (std::string message) {
       std::cerr << "[Beamformer::unsetAntennaGains]"
 		<< message
 		<< std::endl;
       status = false;
     }
-      
+    
     return status;
   }
-
+  
   // ------------------------------------------------------------------ checkData
 
   template <class T>
@@ -423,19 +438,6 @@ namespace CR { // Namespace CR -- begin
     }
   }
   
-  // ---------------------------------------------------------------- processData
-  
-  template <class T>
-  bool Beamformer::processData (casa::Matrix<T> &beam,
-				const casa::Array<DComplex> &data)
-  {
-    if (checkData(beam,data)) {
-      return (this->*processData_p) (beam,data);
-    } else {
-      return false;
-    }
-  }
-
   // ------------------------------------------------------------------ beam_freq
   
   void Beamformer::beam_freq (casa::Vector<DComplex> &beamFreq,
@@ -716,10 +718,6 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  template bool Beamformer::processData (casa::Matrix<double> &beam,
-					 const casa::Array<DComplex> &data);
-//   template bool Beamformer::processData (casa::Matrix<DComplex> &beam,
-// 					 const casa::Array<DComplex> &data);
 //   template bool Beamformer::checkData (casa::Matrix<double> &beam,
 // 				       casa::Array<double> const &data);
 //   template bool Beamformer::checkData (casa::Matrix<double> &beam,

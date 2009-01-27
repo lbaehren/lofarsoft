@@ -58,9 +58,9 @@ int test_constructors ()
   
   cout << "[1] Testing default constructor ..." << endl;
   try {
-    GeomWeight weight;
+    GeomWeight w;
     //
-    weight.summary(); 
+    w.summary(); 
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -71,7 +71,7 @@ int test_constructors ()
     Vector<MVFrequency> frequencies (10);
     CR::GeomPhase phase (frequencies,false);
     //
-    GeomWeight weight (phase);
+    GeomWeight weight (phase,false);
     //
     weight.summary(); 
   } catch (std::string message) {

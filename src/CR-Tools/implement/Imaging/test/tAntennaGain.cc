@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Copyright (C) 2009                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -23,7 +23,8 @@
 
 #include <Imaging/AntennaGain.h>
 
-using CR::AntennaGain;  // Namespace usage
+// Namespace usage
+using CR::AntennaGain;
 
 /*!
   \file tAntennaGain.cc
@@ -32,9 +33,9 @@ using CR::AntennaGain;  // Namespace usage
 
   \brief A collection of test routines for the AntennaGain class
  
-  \author Lars Baehren
+  \author Lars B&auml;hren
  
-  \date 2007/11/27
+  \date 2009/01/27
 */
 
 // -----------------------------------------------------------------------------
@@ -42,19 +43,20 @@ using CR::AntennaGain;  // Namespace usage
 /*!
   \brief Test constructors for a new AntennaGain object
 
-  \return nofFailedTests -- The number of failed tests.
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
 */
-int test_AntennaGain ()
+int test_constructors ()
 {
+  std::cout << "\n[tAntennaGain::test_constructors]\n" << std::endl;
+
   int nofFailedTests (0);
   
-  std::cout << "\n[test_AntennaGain]\n" << std::endl;
-
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    AntennaGain newAntennaGain;
+    AntennaGain newObject;
     //
-    newAntennaGain.summary(); 
+    newObject.summary(); 
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -70,9 +72,7 @@ int main ()
   int nofFailedTests (0);
 
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_AntennaGain ();
-  }
+  nofFailedTests += test_constructors ();
 
   return nofFailedTests;
 }

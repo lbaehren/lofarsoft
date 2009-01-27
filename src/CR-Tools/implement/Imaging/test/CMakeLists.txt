@@ -12,6 +12,7 @@
 
 set (tests
   tAntenna
+  tAntennaGain
   tBeamformer
   tFeed
   tGeomDelay
