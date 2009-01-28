@@ -22,7 +22,7 @@ else: channels = [int(sys.argv[5])]
 
 # open file
 msds= dal.dalDataset()
-if ( msds.open(sys.argv[1]) ):
+if ( True != msds.open(sys.argv[1]) ):
 	sys.exit(1)
 
 # open table

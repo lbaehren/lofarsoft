@@ -20,7 +20,7 @@ else:
     
 # open file
 msds= dal.dalDataset()
-if ( msds.open(sys.argv[1]) ):
+if ( True != msds.open(sys.argv[1]) ):
         sys.exit(1)
 
 # get frequencies
@@ -59,10 +59,10 @@ if doall:
     datatab = msds.openTable('MAIN')
     expcol = datatab.getColumn('EXPOSURE')
     exp = expcol.data()
-    num_ints = len(exp)
+    num_ints = expcol.shape()[0][0]
     # check data columns
     datacol = datatab.getColumn('DATA')
-    data = datacol.data()
+    data = datacol.data(10)
     try:
         msds.setFilter( "CORRECTED_DATA", "ANTENNA1 = 0 AND ANTENNA2 = 0" )
         datatab = msds.openTable('MAIN')
@@ -70,7 +70,7 @@ if doall:
         correctedcol = 0
     else:
         correctedcol = datatab.getColumn('CORRECTED_DATA')
-        corrected = correctedcol.data()
+        corrected = correctedcol.data(10)
         correctedcol = 1
 
     try:
@@ -80,7 +80,7 @@ if doall:
         modelcol = 0
     else:
         modelcol = datatab.getColumn('MODEL_DATA')
-        model = modelcol.data()
+        model = modelcol.data(10)
         modelcol = 1
         
 # get processing history?
@@ -93,7 +93,7 @@ print 'Phase center (deg): (' + str(phasedir[0]*180/3.1415) + ',' + str(phasedir
 print 'Frequency range (MHz): (' + str(min(freq/1e6)) + ', ' + str(max(freq/1e6)) + ')'
 print 'Wavelength range (m): (' + str(min(299792458.0/freq)) + ', ' + str(max(299792458.0/freq)) + ')'
 print 'Time range (MJD): (' + str(time[0]) + ', ' + str(time[1]) + ') s or ' + str((time[1]-time[0])/3600) + ' hrs'
-if doall:  print 'Integrations, Time bin size: ' + str(num_ints) + ', ' + str(exp[0]) + ' s'
+if doall:  print 'Integrations, Time bin size: ' + str(num_ints) + ', ' + str(expcol.data(1)[0]) + ' s'
 print 'Channels, Width: ' + str(numchan) + ', ' + str(chan_width/1e3) + ' kHz'
 print 'Polarizations: ' + str(num_pols)
 print ''
