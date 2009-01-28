@@ -181,6 +181,12 @@ namespace CR { // Namespace CR -- begin
       Double center;
       Record fiterg;
       
+#ifdef DEBUGGING_MESSAGES
+      if (!verbose){
+	cout <<"analyseLOPESevent::ProcessEvent: compiled with DEBUGGING_MESSAGES, so switching on verbose output."<<endl;
+	verbose = True;
+      };
+#endif
       if (! SetupEvent(evname, doTVcal, FlaggedAntIDs, AntennaSelection, 
 		       UpSamplingRate, ExtraDelay, verbose)) {
 	cerr << "analyseLOPESevent::ProcessEvent: " << "Error during SetupEvent()!" << endl;
@@ -368,7 +374,8 @@ namespace CR { // Namespace CR -- begin
 					    Vector<Bool> AntennaSelection, 
 					    String Polarization,
 					    Bool simplexFit,
-					    Bool verbose){
+					    Bool verbose,
+					    Bool distanceSearch){
     try {    
       if (Polarization != ""){
 	Polarization_p = Polarization;
@@ -381,10 +388,22 @@ namespace CR { // Namespace CR -- begin
       //perform the position fitting
       center=-1.8e-6;
       if (simplexFit) {
+        if (distanceSearch) {
+	  if (! findDistance(Az, El, distance, AntennaSelection, &center,1) ){
+	    cerr << "analyseLOPESevent::doPositionFitting: " << "Error during findDistance()!" << endl;
+	    return False;
+	  };
+	};
 	if (verbose) { cout << "analyseLOPESevent::doPositionFitting: starting evaluateGrid()." << endl;};
 	if (! evaluateGrid(Az, El, distance, AntennaSelection, &center) ){
 	  cerr << "analyseLOPESevent::doPositionFitting: " << "Error during evaluateGrid()!" << endl;
 	  return False;
+	};
+        if (distanceSearch) {
+	  if (! findDistance(Az, El, distance, AntennaSelection, &center,0) ){
+	    cerr << "analyseLOPESevent::doPositionFitting: " << "Error during findDistance()!" << endl;
+	    return False;
+	  };
 	};
 	//################################## quick hack! start!!! ############################################
 // 	if (verbose) { cout << "analyseLOPESevent::doPositionFitting: starting reduced SimplexFit()." << endl;};
@@ -424,9 +443,17 @@ namespace CR { // Namespace CR -- begin
 // 	};
 	//################################## quick hack! end!!! ############################################
 	if (verbose) { cout << "analyseLOPESevent::doPositionFitting: starting SimplexFit()." << endl;};
-	if (! SimplexFit(Az, El, distance, center, AntennaSelection) ){
-	  cerr << "analyseLOPESevent::doPositionFitting: " << "Error during SimplexFit()!" << endl;
-	  return False;
+
+	if (distanceSearch) {
+	  if (! SimplexFit(Az, El, distance, center, AntennaSelection, 500.) ){
+  	    cerr << "analyseLOPESevent::doPositionFitting: " << "Error during SimplexFit()!" << endl;
+	    return False;
+	  };
+	} else {
+	  if (! SimplexFit(Az, El, distance, center, AntennaSelection, 2000.) ){
+	    cerr << "analyseLOPESevent::doPositionFitting: " << "Error during SimplexFit()!" << endl;
+	    return False;
+	  };
 	};
 	beamPipe_p->setVerbosity(verbose);
       };
@@ -694,7 +721,8 @@ namespace CR { // Namespace CR -- begin
 				      Double &El,
 				      Double &distance,
 				      Double &center, 
-				      Vector<Bool> AntennaSelection ){    
+				      Vector<Bool> AntennaSelection,
+				      Double distanceStep){    
     try {
       Int i,minpos,maxpos,niteration=0,oldminpos,nsameiter;
       Record erg;
@@ -717,7 +745,7 @@ namespace CR { // Namespace CR -- begin
       azs = Az; els = El; dists = distance;
       azs(1) += 1; els(2) += 1; 
       azs(3) -= 1; els(3) -= 1;      
-      dists(2) -= 2000;dists(1) += 2000;dists(3) += 2000;
+      dists(2) -= distanceStep;dists(1) += distanceStep;dists(3) += distanceStep;
       cents = center;
       for (i=0; i<4; i++){
 	height(i) = getHeight(azs(i), els(i), dists(i), AntennaSelection, &cents(i));
@@ -963,6 +991,42 @@ namespace CR { // Namespace CR -- begin
       return 0.;
     }; 
     return erg;
+  };
+
+
+  Bool analyseLOPESevent::findDistance( Double &Az,
+		      			Double &El,
+				        Double &distance,
+				        Vector<Bool> AntennaSelection, 
+				        Double *centerp,
+					Bool rough,
+					Bool verbose){
+    try {
+      Double height_, maxheight=0, maxdist=2500, center_=-1.8e-6, maxcenter=NULL;
+      for(int d=2000; d<=15000; ){
+        height_=getHeight(Az, El, d, AntennaSelection, &center_);
+	// if the fit was not succesfull, center is set to -1.8e-6. This case has to be excluded
+        // Why???? I kicked that out.
+	//if (height_ > maxheight && center_ !=-1.8e-6) {
+	if (height_ > maxheight) {
+  	  maxheight = height_;
+	  maxdist = d;
+	  maxcenter = center_;
+        };
+
+        if (rough) d+=1000;
+        else d+=200;
+      };
+      distance = maxdist;
+      if (centerp != NULL) {
+        *centerp = maxcenter;
+      };
+      if (verbose) { cout << "findDistance: best Distance: "<<distance<<endl; };
+    } catch (AipsError x) {
+	cerr << "analyseLOPESevent:findDistance: "<< x.getMesg() <<endl;
+	return false;
+    };
+    return true;
   };
 
 } // Namespace CR -- end

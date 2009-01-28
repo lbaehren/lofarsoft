@@ -533,6 +533,8 @@ namespace CR { // Namespace CR -- begin
                               ("": use stored setting;"ANY": ignore antenna polarization)
       \param simplexFit     - fit the direction with a simple simplex fit
       \param verbose        - produce verbose output on the commandline.
+      \param distanceSearch - if true, ignore the initial value of distance and perform a 
+			      simple search for the best starting value.
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
@@ -542,7 +544,8 @@ namespace CR { // Namespace CR -- begin
 			   Vector<Bool> AntennaSelection,
 			   String Polarization="",
 			   Bool simplexFit=True,
-			   Bool verbose=False);
+			   Bool verbose=False,
+			   Bool distanceSearch=False);
     
    /*!
       \brief Perform the direction fitting
@@ -595,6 +598,8 @@ namespace CR { // Namespace CR -- begin
       \param center - (initial) value for the position of the pulse (center of the
              gaussian) [in s]; modified in place
       \param AntennaSelection - Vector of bool to select only part of the antennas.
+      \param distanceStep - difference in the distance of the inital points. 
+
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
@@ -602,7 +607,8 @@ namespace CR { // Namespace CR -- begin
 		     Double &El,
 		     Double &distance,
 		     Double &center,
-		     Vector<Bool> AntennaSelection);
+		     Vector<Bool> AntennaSelection,
+		     Double distanceStep);
 
     /*!
       \brief Evaluate a smallish grid around to find a good starting point for the simplenx fit
@@ -635,6 +641,30 @@ namespace CR { // Namespace CR -- begin
     Matrix<Double> toShower(const Matrix<Double> & pos,
 			    Double Az,
 			    Double El);
+
+    /*!
+      \brief Finds the distance with the maximal cc-beam in a given direction in the
+             range from 2000 m to 15000 m
+      
+      \param Az               - value for the azimuth direction [in deg]
+      \param El               - value for the elevation [in deg]
+      \param distance         - value for the distance parameter [in m]; modified in place
+      \param AntennaSelection - Vector of bool to select only part of the antennas.
+      \param center*          - position into which the center can be returned
+      \param rough            - if <tt>True</tt>, makes only a rough scan in steps of 1000m, 
+                                otherwise in steps of 200m.
+      \param verbose          - produce verbose output on the commandline.
+ 
+      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+    */
+    Bool findDistance(Double &Az,
+		      Double &El,
+		      Double &distance,
+		      Vector<Bool> AntennaSelection, 
+		      Double *centerp=NULL,
+		      Bool rough=True,
+		      Bool verbose=False);
+
 
   protected: //this methods are protected to make them available in child class
     
