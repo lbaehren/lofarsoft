@@ -330,7 +330,15 @@ namespace CR { // Namespace CR -- begin
       \brief Set the verbosity
     */
     inline void setVerbosity(Bool newVerbosity) { verbose = newVerbosity; };
-    
+
+
+  protected:
+    /*!
+      \brief Calculates the bandwidth which should be used for analysis (tighter bounds of CalTables and set values)
+    */
+    void calculateBandLimits(DataReader *dr);
+
+
   private:
     
     /*!
