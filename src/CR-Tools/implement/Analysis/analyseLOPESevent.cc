@@ -25,8 +25,6 @@
 
 #define DEG2RAD (PI/180.)
 
-#define DEBUGGING_MESSAGES      
-
 namespace CR { // Namespace CR -- begin
   
   // ============================================================================
