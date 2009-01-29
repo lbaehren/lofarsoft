@@ -141,9 +141,10 @@ namespace CR { // Namespace CR -- begin
 
       erg.define("goodReconstructed",false);  // will be set to true at the end of the reconstruction
 
-      // initialize the pipeline
+      // initialize the pipeline (flag not active antennas and antennas with bad signals)
       if (! SetupEvent(evname, doTVcal, FlaggedAntIDs, AntennaSelection, 
-		       UpSamplingRate, ExtraDelay, verbose, doGainCal, doDispersionCal, doDelayCal, doRFImitigation)) {
+		       UpSamplingRate, ExtraDelay, verbose, doGainCal, doDispersionCal, doDelayCal, doRFImitigation,
+                       true,true)) {
 	cerr << "analyseLOPESevent2::RunPipeline: " << "Error during SetupEvent()!" << endl;
 	return Record();
       };
@@ -273,7 +274,9 @@ namespace CR { // Namespace CR -- begin
 						  Bool generateSpectra,
 						  Vector<Int> FlaggedAntIDs, 
 						  Bool verbose,
+						  bool doGainCal,
 						  bool doDispersionCal,
+						  bool doDelayCal,
 						  bool doRFImitigation,
 						  bool SinglePlots,
 						  bool PlotRawData,
@@ -295,9 +298,11 @@ namespace CR { // Namespace CR -- begin
 
       //  Enable/disable calibration steps of the FirstStagePipeline (must be done before InitEvent)
       //  parameters are initialized with 'true' by default
-      pipeline_p->doGainCal(false);
+      pipeline_p->doGainCal(doGainCal);
       pipeline_p->doDispersionCal(doDispersionCal);
-      pipeline_p->doDelayCal(false);
+      pipeline_p->doDelayCal(doDelayCal);
+      pipeline_p->doFlagNotActiveAnts(false);		// use all antennas in calibration mode
+      pipeline_p->setFreqInterval(getFreqStart(),getFreqStop());
 
       // initialize the Data Reader
       if (! pipeline_p->InitEvent(lev_p)){

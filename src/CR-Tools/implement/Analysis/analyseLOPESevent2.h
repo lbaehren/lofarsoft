@@ -342,7 +342,9 @@ namespace CR { // Namespace CR -- begin
       \param generateSpectra - generate postscript plots of the spectrum
       \param FlaggedAntIDs   - list of antenna IDs that are to be flagged.
       \param verbose         - produce verbose output on the commandline.
+      \param doGainCal       - apply calibration of electrical fieldstrength
       \param doDispersionCal - correct for the dispersion (frequency dependend PhaseCal values)
+      \param doDelayCal      - correct for general delay of the antennas
       \param doRFImitigation - suppresses narrow band noise
       \param SinglePlots     - makes a plot for each antenna
       \param PlotRawData     - Plots the raw data FX
@@ -356,8 +358,10 @@ namespace CR { // Namespace CR -- begin
 				Bool generateSpectra=False,
 				Vector<Int> FlaggedAntIDs=Vector<Int>(),
 				Bool verbose=False,
+				bool doGainCal=false,
 				bool doDispersionCal=true,
-				bool doRFImitigation=true,
+				bool doDelayCal=false,
+				bool doRFImitigation=false,
 				bool SinglePlots=false,
 				bool PlotRawData=false,
 				bool CalculateMaxima=false);

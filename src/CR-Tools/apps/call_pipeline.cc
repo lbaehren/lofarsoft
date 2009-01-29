@@ -209,10 +209,10 @@ bool singlePlots = false;	      // by default there are no single plots for each
 bool PlotRawData = false;	      // by default there the raw data are not plotted
 bool CalculateMaxima = false;	      // by default the maxima are not calculated
 bool listCalcMaxima=false;    	      // print calculated maxima in more user friendly way
-bool printShowerCoordinates=false;   // print the distance between antenna and shower core
-bool RotatePos = true; 	      // should be true if coordinates are given in KASKADE frame
+bool printShowerCoordinates=false;    // print the distance between antenna and shower core
+bool RotatePos = true; 	              // should be true if coordinates are given in KASKADE frame
 bool verbose = true;
-bool ignoreDistance = false;         // distance value of the eventlist will be ignored
+bool ignoreDistance = true;           // distance value of the eventlist will be ignored
 bool simplexFit = true;
 int doTVcal = -1;		      // 1: yes, 0: no, -1: use default	
 bool doGainCal = true;		      // calibration of the electrical fieldstrength
@@ -238,6 +238,10 @@ bool writeBadEvents = false;         // also bad events are written into the roo
 bool calibrationMode = false;	      // Calibration mode is off by default
 bool lateralDistribution = false;    // the lateral distribution will not be generated
 bool lateralOutputFile = false;      // no file for the lateral distribution will be created
+
+// Event parameters for calling the pipeline
+string eventname ="";
+double azimuth=0, elevation=0, radiusOfCurvature=0, core_x=0, core_y=0;   // basic input parameters (e.g. from Kascade)
 
 // ------------- Functions ----------------
 
@@ -979,12 +983,139 @@ void readConfigFile (const string &filename)
   }
 }
 
+
+/*!
+  \brief reads the next event from an eventlist file
+
+  \param eventfilelistname     -- name of eventlist
+
+  \return true if an event could be read in, false in case of EOF or error
+*/
+
+bool getEventFromEventlist (const string &eventfilelistname)
+{
+  static bool fileOpen = false;		// will be set to true, once an eventlist was openend
+  static ifstream eventfilelist;
+
+  try {
+    // reset pipeline parameters before readin
+    eventname ="";
+    azimuth=0, elevation=0, radiusOfCurvature=0, core_x=0, core_y=0;
+
+    // if this function is called for the first time, then try to open the file
+    if (!fileOpen) {
+      // open event file list
+      eventfilelist.open (eventfilelistname.c_str(), ifstream::in);
+
+      // check if file could be opened
+      if (!(eventfilelist.is_open())) {
+        cerr << "Failed to open file \"" << eventfilelistname <<"\"." << endl;
+        return false;
+      }
+
+      cout << "Opened eventlist: " << eventfilelistname << endl;
+
+      // store the file is open and read in the header
+      fileOpen = true;
+      // look for the end of the header (after a line containing only and at least three '-' or '=')
+      string temp_read;
+      bool header_found = false;
+      while ((header_found == false) && (eventfilelist.good())) {
+        eventfilelist >> temp_read;
+        if ((temp_read.find("---") != string::npos) || (temp_read.find("===") != string::npos))
+        header_found = true;
+      }
+      //  if no header was found, assume that the file begins with an event and reopen it.
+      if (header_found == false) {
+        eventfilelist.close();  // close file
+        cout << "\nWarning: No header found in file \"" << eventfilelistname <<"\".\n" ;
+        cout << "Program will continue normally.\n" << endl;
+        eventfilelist.open (eventfilelistname.c_str(), ifstream::in); // reopen file to start at the beginning
+      }
+    }
+
+    // check if file is still good
+    if (!(eventfilelist.good())) {
+      cout << "\nFile \"" << eventfilelistname 
+           << "\"is no longer good. Do not worry if this message appears after processing the last event."
+           << endl;
+      // close file and return to main()
+      eventfilelist.close();
+      fileOpen = false;
+      return false;
+    }
+
+    // if the file is open, then try to get the next event
+    bool read_in_error = false;
+    if (fileOpen) {
+      // read in event name
+      if (eventfilelist.good()) eventfilelist >> eventname;
+        else read_in_error = true;
+
+      // check if end of file occured:
+      // eventname should contain "", if file is terminated by a new line
+      if (eventname == "") {
+        cout << "\nFile \"" << eventfilelistname 
+             << "\"seems to contain no more events."
+             << endl;
+        // close file and return to main()
+        eventfilelist.close();
+        fileOpen = false;
+        return false;
+      }
+
+      // in calibration mode the eventfile list contains only the event name
+      // otherwise read azimuth, elevation, radiusOfCurvature and shower core
+      if ( !calibrationMode ) {
+        if (eventfilelist.good()) eventfilelist >> azimuth;
+          else read_in_error = true;
+        if (eventfilelist.good()) eventfilelist >> elevation;
+          else read_in_error = true;
+        if (eventfilelist.good()) eventfilelist >> radiusOfCurvature;
+          else read_in_error = true;
+        if (eventfilelist.good()) eventfilelist >> core_x;
+          else read_in_error = true;
+        if (eventfilelist.good()) eventfilelist >> core_y;
+          else read_in_error = true;
+      }
+    }
+
+    // return false if error occured and print error message
+    if (read_in_error) {
+      eventfilelist.close();  // close file
+      fileOpen = false;
+
+      cerr << "\nError processing file \"" << eventfilelistname <<"\".\n" ;
+      cerr << "Use the following file format: \n\n";
+      cerr << "some lines of description (any text)\n";
+      cerr << "==================================\n";
+      if (calibrationMode) {
+        cerr << "eventfile1\n";
+        cerr << "eventfile2\n";
+      } else {
+        cerr << "eventfile1 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
+        cerr << "eventfile2 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]]\n";
+      }
+      cerr << "... \n" << endl;
+      return false;  // go back to main
+    } else {
+      // if no error occured the pipeline parameters should contain the new values now
+      return true;
+    }
+  } catch (AipsError x) {
+    cerr << "call_pipeline:getFileFromEventlist: " << x.getMesg() << endl;
+  }
+
+  // normally should not get here, if so return false
+  return false;
+}
+
+
 // -----------------------------------------------------------------------------
 
 int main (int argc, char *argv[])
 {
   string eventfilelistname;			         // Files to be read in
-  double azimuth, elevation, distance, core_x, core_y;   // basic input parameters for the pipeline
   Record results;					 // results of the pipeline
 
   // variables for reconstruction information (output of pipeline)
@@ -1114,33 +1245,6 @@ int main (int argc, char *argv[])
     }
     cout << "Processing eventlist: " << eventfilelistname << endl;
 
-    // open event file list
-    ifstream eventfilelist;
-    eventfilelist.open (eventfilelistname.c_str(), ifstream::in);
-
-    // check if file could be opened
-    if (!(eventfilelist.is_open())) {
-      cerr << "Failed to open file \"" << eventfilelistname <<"\"." << endl;
-      return 1;		// exit program
-    }
-
-    // look for the end of the header (after a line containing only and at least three '-' or '=')
-    string temp_read;
-    bool header_found = false;
-    while ((header_found == false) && (eventfilelist.good())) {
-      eventfilelist >> temp_read;
-      if ((temp_read.find("---") != string::npos) || (temp_read.find("===") != string::npos))
-        header_found = true;
-    }
-
-    //  if no header was found, assume that the file begins with an event and reopen it.
-    if (header_found == false) {
-      eventfilelist.close();  // close file
-      cout << "\nWarning: No header found in file \"" << eventfilelistname <<"\".\n" ;
-      cerr << "Program will continue normally.\n" << endl;
-      eventfilelist.open (eventfilelistname.c_str(), ifstream::in); // reopen file to start at the beginning
-    }
-
     // prepare output in root file
     TFile *rootfile=NULL;
 
@@ -1163,6 +1267,9 @@ int main (int argc, char *argv[])
     if ( !calibrationMode ) {
       roottree.Branch("Xc",&core_x,"Xc/D");
       roottree.Branch("Yc",&core_y,"Yc/D");
+      roottree.Branch("AzIn",&azimuth,"AzIn/D");
+      roottree.Branch("ElIn",&elevation,"ElIn/D");
+      roottree.Branch("DistanceIn",&radiusOfCurvature,"DistanceIn/D");
 
       // one result, if polarization = ANY
       if (polarization == "ANY") {
@@ -1213,57 +1320,10 @@ int main (int argc, char *argv[])
     } //if
 
     // Process events from event file list
-    while (eventfilelist.good())
-    {	
-      string filename, plotprefix;
-      bool read_in_error = false;
+    while ( getEventFromEventlist(eventfilelistname) ) {
+      // Create a plotprefix using the eventname
+      string plotprefix = eventname;
 
-      // read in filename, azimuth, elevation, distance and log_energy	
-      if (eventfilelist.good()) eventfilelist >> filename;
-        else read_in_error = true;
-      // if calibration mode the eventfile list contains only the file name
-      if ( !calibrationMode )
-      {
-        if (eventfilelist.good()) eventfilelist >> azimuth;
-          else read_in_error = true;
-        if (eventfilelist.good()) eventfilelist >> elevation;
-          else read_in_error = true;
-        if (eventfilelist.good()) eventfilelist >> distance;
-          else read_in_error = true;
-        if (eventfilelist.good()) eventfilelist >> core_x;
-          else read_in_error = true;
-        if (eventfilelist.good()) eventfilelist >> core_y;
-          else read_in_error = true;
-      }
-
-      // check if end of file occured:
-      // filename should contain "", if file is terminated be a new line
-      if (filename == "") continue;	// go back to begin of while-loop 
-					// eventfilelist.good() should be false now.
-
-      // exit program if error occured
-      if (read_in_error)		
-      {
-        eventfilelist.close();  // close file
-	cerr << "\nError processing file \"" << eventfilelistname <<"\".\n" ;
-	cerr << "Use the following file format: \n\n";
-	cerr << "some lines of text\n";
-	cerr << "===================================\n";
-        if (calibrationMode)
-        {
-          cerr << "eventfile1\n";
-          cerr << "eventfile2\n";
-        } else
-        {
-          cerr << "eventfile1 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
-          cerr << "eventfile2 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]]\n";
-        }
-	cerr << "... \n" << endl;
-	return 1;		// exit program
-      }
-	
-      // Create a plotprefix using the filename
-      plotprefix = filename;
       // delete the file ending
       if (plotprefix.find(".event") != string::npos)
         plotprefix.erase(plotprefix.find_last_of('.'));	
@@ -1289,10 +1349,10 @@ int main (int argc, char *argv[])
 
       // print information and process the event
       if (calibrationMode) {
-        cout << "\nProcessing calibration event \"" << filename << "\".\n" << endl;
+        cout << "\nProcessing calibration event \"" << eventname << "\".\n" << endl;
       } else {
-        cout << "\nProcessing event \"" << filename << "\"\nwith azimuth " << azimuth << " °, elevation " << elevation
-                  << " °, distance (radius of curvature) " << distance << " m, core position X " << core_x
+        cout << "\nProcessing event \"" << eventname << "\"\nwith azimuth " << azimuth << " °, elevation " << elevation
+                  << " °, distance (radius of curvature) " << radiusOfCurvature << " m, core position X " << core_x
                   << " m and core position Y " << core_y << " m.\n" << endl;
       }
 
@@ -1318,13 +1378,15 @@ int main (int argc, char *argv[])
         eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
         // call the pipeline with an extra delay = 0.
-        results = eventPipeline.CalibrationPipeline (path+filename,
+        results = eventPipeline.CalibrationPipeline (path+eventname,
                                                      plotprefix,
                                                      generatePlots,
                                                      generateSpectra,
                                                      static_cast< Vector<int> >(flagged),
                                                      verbose,
+                                                     doGainCal,
                                                      doDispersionCal,
+                                                     false,		// never correct delays in calibration mode
                                                      doRFImitigation,
                                                      singlePlots,
                                                      PlotRawData,
@@ -1361,10 +1423,10 @@ int main (int argc, char *argv[])
           eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
           // call the pipeline with an extra delay = 0.
-          results = eventPipeline.RunPipeline (path+filename,
+          results = eventPipeline.RunPipeline (path+eventname,
                                                azimuth,
                                                elevation,
-                                               distance,
+                                               radiusOfCurvature,
                                                core_x,
                                                core_y,
                                                RotatePos,
@@ -1440,10 +1502,10 @@ int main (int argc, char *argv[])
           eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
           // call the pipeline with an extra delay = 0.
-          results = eventPipeline.RunPipeline (path+filename,
+          results = eventPipeline.RunPipeline (path+eventname,
                                                azimuth,
                                                elevation,
-                                               distance,
+                                               radiusOfCurvature,
                                                core_x,
                                                core_y,
                                                RotatePos,
@@ -1558,9 +1620,6 @@ int main (int argc, char *argv[])
         }
       }
     }
-
-    // close file
-    eventfilelist.close();
 
     // write and close root file
     if (rootFileName != "") {
