@@ -122,11 +122,20 @@ namespace CR { // Namespace CR -- begin
     CalTableReader *CTRead;
 
     /*!
-      \brief Lowest frequency in the part of the spectrum used for analysis
+      \brief Lowest frequency set for analysis 
+    */
+    Double setStartFreq_p;
+    /*!
+      \brief Highest frequency set for analysis
+    */
+    Double setStopFreq_p;
+
+    /*!
+      \brief Lowest frequency actually used for analysis
     */
     Double startFreq_p;
     /*!
-      \brief Highest frequency in the part of the spectrum used for analysis
+      \brief Highest frequency actually used for analysis
     */
     Double stopFreq_p;
 
@@ -231,7 +240,9 @@ namespace CR { // Namespace CR -- begin
       \param startFreq -- Start frequency for the analysis
     */
     inline void setStartFreq (double const &startFreq) {
+      setStartFreq_p = startFreq;
       startFreq_p = startFreq;
+      SecondStageCacheValid_p = False;
     }
 
     /*!
@@ -249,7 +260,9 @@ namespace CR { // Namespace CR -- begin
       \param stopFreq  -- Stop frequency for the analysis
     */
     inline void setStopFreq (double const &stopFreq) {
+      setStopFreq_p = stopFreq;
       stopFreq_p = stopFreq;
+      SecondStageCacheValid_p = False;
     }
 
     /*!
@@ -260,8 +273,11 @@ namespace CR { // Namespace CR -- begin
     */
     inline void setFreqInterval (double const &startFreq,
                                    double const &stopFreq) {
+      setStartFreq_p = startFreq;
+      setStopFreq_p = stopFreq;
       startFreq_p = startFreq;
       stopFreq_p = stopFreq;
+      SecondStageCacheValid_p = False;
     }
 
 

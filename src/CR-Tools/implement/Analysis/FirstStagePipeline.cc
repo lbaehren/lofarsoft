@@ -182,11 +182,9 @@ namespace CR { // Namespace CR -- begin
              << endl;
       }
       Vector<DComplex> band(fftlen);
-      const DComplex supressionFactor(0.001,0.); // supression factor for frequencies outside the band
-      const double startFreq = getStartFreq();	 // this values are just set now but later
-      const double stopFreq = getStopFreq();     // something more elaborated can be used here
+      const DComplex supressionFactor(1e-6,0.); // supression factor for frequencies outside the band
       for (i=0; i < fftlen; ++i) {
-        if ( (freqVals(i) < startFreq) || (freqVals(i) > stopFreq) ) {
+        if ( (freqVals(i) < startFreq_p) || (freqVals(i) > stopFreq_p) ) {
           band(i) = supressionFactor;
         } else {
           band(i) = DComplex(1.,0.);
