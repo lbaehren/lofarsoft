@@ -122,20 +122,20 @@ namespace CR { // Namespace CR -- begin
     CalTableReader *CTRead;
 
     /*!
-      \brief Lowest frequency set for analysis 
+      \brief Lowest frequency set for analysis [in Hz]
     */
     Double setStartFreq_p;
     /*!
-      \brief Highest frequency set for analysis
+      \brief Highest frequency set for analysis [in Hz]
     */
     Double setStopFreq_p;
 
     /*!
-      \brief Lowest frequency actually used for analysis
+      \brief Lowest frequency actually used for analysis [in Hz]
     */
     Double startFreq_p;
     /*!
-      \brief Highest frequency actually used for analysis
+      \brief Highest frequency actually used for analysis [in Hz]
     */
     Double stopFreq_p;
 
@@ -228,7 +228,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the start frequency used for the analysis (lower frequencies will be supressed)
 
-      \return startFreq -- Start frequency for the analysis
+      \return startFreq -- Start frequency used in the analysis [in Hz]
     */
     inline double getStartFreq () {
       return startFreq_p;
@@ -237,7 +237,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Set the start frequency used for the analysis (lower frequencies will be supressed)
 
-      \param startFreq -- Start frequency for the analysis
+      \param startFreq -- Start frequency for the analysis [in Hz]
     */
     inline void setStartFreq (double const &startFreq) {
       setStartFreq_p = startFreq;
@@ -248,7 +248,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the stop frequency used for the analysis (higher frequencies will be supressed)
 
-      \return stopFreq  -- Stop frequency for the analysis
+      \return stopFreq  -- Stop frequency used in the analysis [in Hz]
     */
     inline double getStopFreq () {
       return stopFreq_p;
@@ -257,7 +257,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Set the stop frequency used for the analysis (higher frequencies will be supressed)
 
-      \param stopFreq  -- Stop frequency for the analysis
+      \param stopFreq  -- Stop frequency for the analysis [in Hz]
     */
     inline void setStopFreq (double const &stopFreq) {
       setStopFreq_p = stopFreq;
@@ -268,8 +268,8 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Set the interval for the frequencies used in the analysis (start and stop)
 
-      \param startFreq -- Start frequency for the analysis
-      \param stopFreq  -- Stop frequency for the analysis
+      \param startFreq -- Start frequency for the analysis [in Hz]
+      \param stopFreq  -- Stop frequency for the analysis [in Hz]
     */
     inline void setFreqInterval (double const &startFreq,
                                    double const &stopFreq) {

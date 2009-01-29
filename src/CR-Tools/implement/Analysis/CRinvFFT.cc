@@ -193,11 +193,6 @@ namespace CR { // Namespace CR -- begin
 	  AntPositions_p.column(i) = tmpvec;
 	};
 	tmpvec.resize(2);
-	FrequencyBands_p.resize(2,AntennaIDs.nelements());
-	for (i=0;i<AntennaIDs.nelements();i++){
-	  CTRead->GetData(date, AntennaIDs(i), "FrequencyBand", &tmpvec);
-	  FrequencyBands_p.column(i) = tmpvec;
-	};
 	AntPosValid_p = True;
 	posCachedDate_p = dr->headerRecord().asuInt("Date");
       };
@@ -267,9 +262,9 @@ namespace CR { // Namespace CR -- begin
 	  convertArray(tmpCvec,Vector<Double>(tmparr));
 	  // compute 1.947/delta_nu/sqrt(Gain)
 	  //   1.947        = constant (at least for LOPES)
-	  //   delta_nu     = (FreqBand(1)-FreqBand(0))/1e6 [in MHz]
+	  //   delta_nu     = (stopFreq_p-startFreq_p)/1e6 [converted to MHz]
 	  //   1/sqrt(Gain) = tmpCvec
-	  tmpCval = 1.947*1e6/(FrequencyBands_p(1,i)-FrequencyBands_p(0,i));
+	  tmpCval = 1.947*1e6/(stopFreq_p-startFreq_p);
 	  AntGainFactors.column(i) = tmpCvec*tmpCval;
         }
       else
