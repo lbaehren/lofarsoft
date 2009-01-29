@@ -305,15 +305,31 @@ namespace CR { // Namespace CR -- begin
 					    Vector<double> const &freq)
   {
     uint nofFreq = freq.nelements();
+    uint nofAnt  = delay.nrow();
+    uint nofSky  = delay.ncolumn();
     
     Cube<double> values (nofFreq,
-			 delay.nrow(),
-			 delay.ncolumn());
+			 nofAnt,
+			 nofSky);
     
+#ifdef HAVE_CASACORE
     for (uint n(0); n<nofFreq; n++) {
       values.yzPlane(n) = calcPhases(delay,freq(n));
     }
+#else
+    uint nFreq (0);
+    uint nAnt (0);
+    uint nSky(0);
 
+    for (nSky=0; nSky<nofSky; nSky++) {
+      for (nAnt=0; nAnt<nofAnt; nAnt++) {
+	for (nFreq=0; nFreq<nofFreq; nFreq++) {
+	  values(nFreq,nAnt,nSky) = calcPhases(delay(nAnt,nSky),freq(nFreq));
+	}
+      }
+    }
+#endif
+    
     return values;
   }
   
@@ -346,10 +362,26 @@ namespace CR { // Namespace CR -- begin
     casa::IPosition phasesShape = shape();
     casa::Cube<double> values (phasesShape);
     
+#ifdef HAVE_CASACORE
     for (int freq(0); freq<phasesShape(0); freq++) {
       values.yzPlane (freq) = calcPhases (delays,
 					  frequencies_p(freq));
     }
+#else
+    uint nofAnt = delay.nrow();
+    uint nofSky = delay.ncolumn();
+    uint nFreq  = 0;
+    uint nAnt   = 0;
+    uint nSky   = 0;
+
+    for (nSky=0; nSky<nofSky; nSky++) {
+      for (nAnt=0; nAnt<nofAnt; nAnt++) {
+	for (nFreq=0; nFreq<phasesShape(0); nFreq++) {
+	  values(nFreq,nAnt,nSky) = calcPhases(delay(nAnt,nSky),freq(nFreq));
+	}
+      }
+    }
+#endif
     
     return values;
   }

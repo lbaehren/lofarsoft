@@ -34,6 +34,7 @@
 #include <scimath/Mathematics/FFTServer.h>
 
 // CR-Tools header files
+#include <Imaging/AntennaGain.h>
 #include <Imaging/GeomWeight.h>
 #include <Imaging/SkymapQuantity.h>
 
@@ -168,6 +169,9 @@ namespace CR { // Namespace CR -- begin
     
     //! Type of beamforming method used in data processing
     SkymapQuantity skymapType_p;
+
+    //! Complex-valued antenna gains per antenna
+    AntennaGain antennaGains_p;
     
     /*!
       \brief Pointer to the function performing the beamforming
@@ -386,27 +390,32 @@ namespace CR { // Namespace CR -- begin
 
     /*!
       \brief Provide a summary of the internal status
+
+      \param os -- Output stream to which the summary is being written.
     */
     void summary (std::ostream &os);
     
     // ------------------------------------------------------------------ Methods
-
-    /*!
-      \brief Set values for the antenna gains, \f$ w_{j,\rm gain} (\vec\rho,\nu) \f$
-
-      \param gains -- [freq,antenna,direction] Array with the complex antenna
-             gains, \f$ w_{j,\rm gain} (\vec\rho,\nu) \f$, describing the beam
-	     pattern of the antennas as fucntions of direction and frequency
-    */
-    bool setAntennaGains (casa::Cube<DComplex> const &gains);
     
     /*!
-      \brief Unset the values for the antenna gains
-      
-      Calling this function will remove the effect of the antenna gain calibration,
-      i.e. restricting the beamformer weights to the geometrical weights only.
+      \brief Get the complex-valued antenn gains
+
+      \return gains -- Container for the complex-values antennas gains,
+              \f$ w_{i,\rm Gain} (\vec \rho, \nu) \f$, as function of pointing 
+	      direction and frequency.
     */
-    bool unsetAntennaGains ();    
+    inline AntennaGain antennaGain () const {
+      return antennaGains_p;
+    }
+
+    /*!
+      \brief Set the complex-valued antenn gains
+
+      \param gains -- Container for the complex-values antennas gains,
+             \f$ w_{i,\rm Gain} (\vec \rho, \nu) \f$, as function of pointing 
+	     direction and frequency.
+    */
+    bool setAntennaGain (AntennaGain const &gains);
     
     /*!
       \brief Beamforming of the data, returning real-valued result
@@ -429,6 +438,17 @@ namespace CR { // Namespace CR -- begin
 	  return false;
 	}
       }
+    
+  protected:
+    
+    //! Compute and set the values of the geometrical delays
+    void setDelays ();
+    
+    //! Compute and set the values of the geometrical phases
+    void setPhases ();
+    
+    //! Compute and set the values of the geometrical weights
+    void setWeights ();
     
     /*!
       \brief Directed field as function of frequency, \f$ \widetilde S (\vec\rho,\nu) \f$
@@ -489,17 +509,6 @@ namespace CR { // Namespace CR -- begin
     bool time_x (casa::Matrix<double> &beam,
 		 const casa::Array<DComplex> &data);
     
-  protected:
-    
-    //! Compute and set the values of the geometrical delays
-    void setDelays ();
-    
-    //! Compute and set the values of the geometrical phases
-    void setPhases ();
-    
-    //! Compute and set the values of the geometrical weights
-    void setWeights ();
-    
   private:
     
     /*!
@@ -516,15 +525,6 @@ namespace CR { // Namespace CR -- begin
       \brief Initialize internal settings of the Beamformer
     */
     void init ();
-
-    /*
-      \brief Set the values of the Beamformer weights
-
-      \param gains -- [freq,antenna,direction] Array with the complex antenna
-             gains, \f$ w_{j,\rm gain} (\vec\rho,\nu) \f$, describing the beam
-	     pattern of the antennas as fucntions of direction and frequency
-    */
-    void setWeights (casa::Cube<DComplex> const &gains);
 
     /*
       \brief Set the values of the Beamformer weights

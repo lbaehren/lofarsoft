@@ -75,8 +75,6 @@ namespace CR { // Namespace CR -- begin
     Vector<MVFrequency> frequencies_p;
     //! Complex antenna gains as function of direction and frequency
     Cube<casa::DComplex> gains_p;
-    //! Are the gain values computed for the given grid of positions and frequencies?
-    bool gainsMatchGrid_p;
     
   public:
     
@@ -89,8 +87,7 @@ namespace CR { // Namespace CR -- begin
     AntennaGain (Vector<int> const &antennas,
 		 Vector<MVPosition> const &skyPositions,
 		 Vector<MVFrequency> const &frequencies,
-		 Cube<casa::DComplex> const &gains,
-		 bool const gainsMatchGrid=true);
+		 Cube<casa::DComplex> const &gains);
     
     /*!
       \brief Copy constructor
@@ -140,7 +137,9 @@ namespace CR { // Namespace CR -- begin
     }
     
     //! Complex antenna gains as function of direction and frequency
-    Cube<casa::DComplex> gains ();
+    inline Cube<casa::DComplex> gains () const {
+      return gains_p;
+    }
     
     /*!
       \brief Set the values of the antenna gains
@@ -149,13 +148,11 @@ namespace CR { // Namespace CR -- begin
       \param skyPositions   -- 
       \param frequencies    -- 
       \param gains          -- 
-      \param gainsMatchGrid -- 
     */
     void setGains (Vector<int> const &antennas,
 		   Vector<MVPosition> const &skyPositions,
 		   Vector<MVFrequency> const &frequencies,
-		   Cube<casa::DComplex> const &gains,
-		   bool const gainsMatchGrid=true);
+		   Cube<casa::DComplex> const &gains);
     
     /*!
       \brief Get the name of the class
@@ -185,11 +182,13 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Shape of the array storing the antenna gain values
 
-      \return shape -- [freq,sky] 
+      \return shape -- [freq,ant,sky] The shape of the array storing the antenna
+              gain values.
     */
     inline IPosition shape () {
-      return IPosition (2,
+      return IPosition (3,
 			frequencies_p.nelements(),
+			antennas_p.nelements(),
 			skyPositions_p.nelements());
     }
     

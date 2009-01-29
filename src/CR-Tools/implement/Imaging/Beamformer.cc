@@ -219,7 +219,7 @@ namespace CR { // Namespace CR -- begin
     
     switch (skymapType.type()) {
     case SkymapQuantity::FREQ_FIELD:
-      std::cerr << "[Beamformer::setBeamType]" << std::endl;
+      std::cerr << "[Beamformer::setSkymapType]" << std::endl;
       std::cerr << " Beam type FREQ_FIELD not yet supported!" << std::endl;
       status = false;
 //       beamType_p    = beam;
@@ -248,6 +248,11 @@ namespace CR { // Namespace CR -- begin
     case SkymapQuantity::TIME_X:
       skymapType_p  = skymapType;
       processData_p = &Beamformer::time_x;
+      break;
+    default:
+      std::cerr << "[Beamformer::setSkymapType]"
+		<< " Unsupported skymap quantity or type of beam!"
+		<< std::endl;
       break;
     }
     
@@ -304,7 +309,10 @@ namespace CR { // Namespace CR -- begin
 
   void Beamformer::setWeights ()
   {
-    /* Forward the function call to the method of the base class */
+    /*
+     *  Forward the function call to the method of the base class; required
+     *  recursive calls are implemented through GeomWeight::setWeights().
+     */
     GeomWeight::setWeights();
     
     /*
@@ -324,71 +332,7 @@ namespace CR { // Namespace CR -- begin
   }
   
   //_____________________________________________________________________________
-  //                                                                   setWeights
-
-  void Beamformer::setWeights (casa::Cube<DComplex> const &gains)
-  {
-    /*
-      No array shape checking required at this point, this this is handled in
-      the function accepting the antenna gains.
-    */
-    setWeights();
-   
-    bfWeights_p *= gains;
-  }
-  
-  // ------------------------------------------------------------ setAntennaGains
-
-  bool Beamformer::setAntennaGains (casa::Cube<DComplex> const &gains)
-  {
-    bool status (true);
-
-    /*
-      Check if the provided array has the correct shape; for the time being we
-      simply reject the provided data, if they to not match -- no interpolation
-      is attempted for mitigation (this would require some additional information
-      anyway, as we would need to know about the coordinate axes).
-    */
-    try {
-      /* extract shape information first */
-      casa::IPosition shapeGains       = gains.shape();
-      casa::IPosition shapeGeomWeights = GeomWeight::shape();
-      /* check if the shapes agree */
-      if (shapeGains == shapeGeomWeights) {
-	setWeights (gains);
-      } else {
-	std::cerr << "[Beamformer::setAntennaGains] "
-		  << "Mismatching array shapes!" 
-		  << std::endl;
-	status = false;
-      }
-    } catch (std::string message) {
-      std::cerr << "[Beamformer::setAntennaGains] " << message << std::endl;
-      status = false;
-    }
-
-    return status;
-  }
-
-  // ---------------------------------------------------------- unsetAntennaGains
-  
-  bool Beamformer::unsetAntennaGains ()
-  {
-    bool status (true);
-    
-    try {
-      setWeights ();
-    } catch (std::string message) {
-      std::cerr << "[Beamformer::unsetAntennaGains]"
-		<< message
-		<< std::endl;
-      status = false;
-    }
-    
-    return status;
-  }
-  
-  // ------------------------------------------------------------------ checkData
+  //                                                                    checkData
 
   template <class T>
   bool Beamformer::checkData (casa::Matrix<T> &beam,

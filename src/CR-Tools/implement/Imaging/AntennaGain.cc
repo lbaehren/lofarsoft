@@ -36,6 +36,10 @@ namespace CR { // Namespace CR -- begin
 
   AntennaGain::AntennaGain ()
   {
+    antennas_p     = Vector<int>(1);
+    skyPositions_p = Vector<MVPosition>(1);
+    frequencies_p  = Vector<MVFrequency>(1);
+    gains_p        = Cube<casa::DComplex>(1,1,1);
   }
   
   //_____________________________________________________________________________
@@ -44,14 +48,12 @@ namespace CR { // Namespace CR -- begin
   AntennaGain::AntennaGain (Vector<int> const &antennas,
 			    Vector<MVPosition> const &skyPositions,
 			    Vector<MVFrequency> const &frequencies,
-			    Cube<casa::DComplex> const &gains,
-			    bool const gainsMatchGrid)
+			    Cube<casa::DComplex> const &gains)
   {
     setGains (antennas,
 	      skyPositions,
 	      frequencies,
-	      gains,
-	      gainsMatchGrid);
+	      gains);
   }
   
   //_____________________________________________________________________________
@@ -115,25 +117,10 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                        gains
   
-  Cube<casa::DComplex> AntennaGain::gains ()
-  {
-    if (gainsMatchGrid_p) {
-      return gains_p;
-    } else {
-      std::cerr << "[AntennaGain::gains] Interpolation not yet implemented!"
-		<< std::endl;
-      return Cube<casa::DComplex>();
-    }
-  }
-
-  //_____________________________________________________________________________
-  //                                                                        gains
-  
   void AntennaGain::setGains (Vector<int> const &antennas,
 			      Vector<MVPosition> const &skyPositions,
 			      Vector<MVFrequency> const &frequencies,
-			      Cube<casa::DComplex> const &gains,
-			      bool const gainsMatchGrid)
+			      Cube<casa::DComplex> const &gains)
   {
     antennas_p.resize(antennas.shape());
     antennas_p = antennas;
@@ -146,8 +133,6 @@ namespace CR { // Namespace CR -- begin
 
     gains_p.resize(gains.shape());
     gains_p = gains;
-
-    gainsMatchGrid_p = gainsMatchGrid;
   }
   
   // ============================================================================
