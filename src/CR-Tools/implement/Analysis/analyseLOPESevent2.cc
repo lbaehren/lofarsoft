@@ -186,7 +186,7 @@ namespace CR { // Namespace CR -- begin
 
       //perform the position fitting (if simplexFit = false, then only the PhaseCenter is set)
       if (! doPositionFitting(Az, El, distance, center, XC, YC, RotatePos,
-			      AntennaSelection, Polarization, simplexFit, verbose) ){
+			      AntennaSelection, Polarization, simplexFit, verbose, ignoreDistance) ){
 	cerr << "analyseLOPESevent2::RunPipeline: " << "Error during doPositionFitting()!" << endl;
 	return Record();
       }
