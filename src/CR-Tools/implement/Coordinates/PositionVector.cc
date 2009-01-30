@@ -125,102 +125,482 @@ namespace CR { // Namespace  -- begin
     bool status (true);
 
     CR::PositionVector vec;
-    
-    switch (typeOut) {
-      //____________________________________________________
-      //                            Conversions -> Cartesian
+
+    switch (typeIn) {
+      //______________________________________________________________
+      //                                           AzElHeight -> other
+    case CoordinateType::AzElHeight:
+      switch (typeOut) {
+      case CoordinateType::AzElHeight:
+	out = in;
+	break;
+      case CoordinateType::AzElRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: AzElHeight->AzElRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::Cartesian:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: AzElHeight->Cartesian"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::Cylindrical:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: AzElHeight->Cylindrical"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::DirectionRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: AzElHeight->DirectionRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::LongLatRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: AzElHeight->LongLatRadius"
+		  << std::endl;
+	status = false;
+	break;
+      case CoordinateType::NorthEastHeight:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: AzElHeight->NorthEastHeight"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::Spherical:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: AzElHeight->Spherical"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      default:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: "
+		  << CoordinateType::getName(typeIn)
+		  << " -> "
+		  << CoordinateType::getName(typeOut)
+		  << std::endl;
+	status = false;
+	break;
+      };
+      break;
+      //______________________________________________________________
+      //                                           AzElRadius -> other
+    case CoordinateType::AzElRadius:
+      switch (typeOut) {
+      case CoordinateType::AzElHeight:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: AzElRadius->AzElHeight"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::AzElRadius:
+	out = in;
+	break;
+      case CoordinateType::Cartesian:
+	vec.AzElRadius2Cartesian (out(0), out(1), out(2),
+				  in(0) ,  in(1),  in(2),
+				  anglesInDegrees);
+	break;
+      case CoordinateType::Cylindrical:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: AzElRadius->Cylindrical"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::DirectionRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: AzElRadius->DirectionRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::LongLatRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: AzElRadius->LongLatRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::NorthEastHeight:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: AzElRadius->NorthEastHeight"
+		  << std::endl;
+	status = false;
+	break;
+      case CoordinateType::Spherical:
+	vec.AzElRadius2Spherical (out(0), out(1), out(2),
+				  in(0) ,  in(1),  in(2),
+				  anglesInDegrees);
+	break;
+      default:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: "
+		  << CoordinateType::getName(typeIn)
+		  << " -> "
+		  << CoordinateType::getName(typeOut)
+		  << std::endl;
+	status = false;
+	break;
+      };
+      break;
+      //______________________________________________________________
+      //                                            Cartesian -> other
     case CoordinateType::Cartesian:
-      switch (typeIn) {
+      switch (typeOut) {
+      case CoordinateType::AzElHeight:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: Cartesian->AzElHeight"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::AzElRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: Cartesian->AzElRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
       case CoordinateType::Cartesian:
 	out = in;
 	break;
+      case CoordinateType::Cylindrical:
+	vec.Cartesian2Cylindrical (out(0), out(1), out(2),
+				   in(0) ,  in(1),  in(2),
+				   anglesInDegrees);
+	break;
+      case CoordinateType::DirectionRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: Cartesian->DirectionRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::LongLatRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: Cartesian->LongLatRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::NorthEastHeight:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: Cartesian->NorthEastHeight"
+		  << std::endl << std::flush;
+	status = false;
+	break;
       case CoordinateType::Spherical:
+	vec.Cartesian2Spherical (out(0), out(1), out(2),
+				 in(0) ,  in(1),  in(2),
+				 anglesInDegrees);
+	break;
+      default:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: "
+		  << CoordinateType::getName(typeIn)
+		  << " -> "
+		  << CoordinateType::getName(typeOut)
+		  << std::endl;
+	status = false;
+	break;
+      };
+      break;
+      //______________________________________________________________
+      //                                          Cylindrical -> other
+    case CoordinateType::Cylindrical:
+      switch (typeOut) {
+      case CoordinateType::AzElHeight:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: Cylindrical->AzElHeight"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::AzElRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: Cylindrical->AzElRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::Cartesian:
+	vec.Cylindrical2Cartesian (out(0), out(1), out(2),
+				   in(0) ,  in(1),  in(2),
+				   anglesInDegrees);
+	break;
+      case CoordinateType::Cylindrical:
+	out = in;
+	break;
+      case CoordinateType::DirectionRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: Cylindrical->DirectionRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::LongLatRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: Cylindrical->LongLatRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::NorthEastHeight:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: Cylindrical->NorthEastHeight"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::Spherical:
+	vec.Cylindrical2Spherical (out(0), out(1), out(2),
+				   in(0) ,  in(1),  in(2),
+				   anglesInDegrees);
+	break;
+      case CoordinateType::Direction:
+      case CoordinateType::Frequency:
+      case CoordinateType::Time:
+	std::cerr << "[PositionVector::convert]"
+		  << " No such conversion: Cylindrical->(Direction,Frequency,Time)"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      };
+      break;
+      //______________________________________________________________
+      //                                      DirectionRadius -> other
+    case CoordinateType::DirectionRadius:
+      switch (typeOut) {
+      case CoordinateType::AzElHeight:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: DirectionRadius->AzElHeight"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::AzElRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: DirectionRadius->AzElRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::Cartesian:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: DirectionRadius->Cartesian"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::Cylindrical:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: DirectionRadius->Cylindrical"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::DirectionRadius:
+	out = in;
+	break;
+      case CoordinateType::LongLatRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: DirectionRadius->LongLatRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::NorthEastHeight:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: DirectionRadius->NorthEastHeight"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::Spherical:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: DirectionRadius->Spherical"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::Direction:
+      case CoordinateType::Frequency:
+      case CoordinateType::Time:
+	std::cerr << "[PositionVector::convert]"
+		  << " No such conversion: DirectionRadius->(Direction,Frequency,Time)"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      };
+      break;
+      //______________________________________________________________
+      //                                        LongLatRadius -> other
+    case CoordinateType::LongLatRadius:
+      switch (typeOut) {
+      case CoordinateType::AzElHeight:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: LongLatRadius->AzElHeight"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::AzElRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: LongLatRadius->AzElRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::Cartesian:
+	vec.LongLatRadius2Cartesian (out(0), out(1), out(2),
+				     in(0) ,  in(1),  in(2),
+				     anglesInDegrees);
+	break;
+      case CoordinateType::Cylindrical:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: LongLatRadius->Cylindrical"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::DirectionRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: LongLatRadius->DirectionRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::LongLatRadius:
+	out = in;
+	break;
+      case CoordinateType::NorthEastHeight:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: LongLatRadius->NorthEastHeight"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::Spherical:
+	vec.LongLatRadius2Spherical (out(0), out(1), out(2),
+				     in(0) ,  in(1),  in(2),
+				     anglesInDegrees);
+	break;
+      case CoordinateType::Direction:
+      case CoordinateType::Frequency:
+      case CoordinateType::Time:
+	std::cerr << "[PositionVector::convert]"
+		  << " No such conversion: LongLatRadius->(Direction,Frequency,Time)"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      };
+      break;
+      //______________________________________________________________
+      //                                      NorthEastHeight -> other
+    case CoordinateType::NorthEastHeight:
+      switch (typeOut) {
+      case CoordinateType::AzElHeight:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: NorthEastHeight->AzElHeight"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::AzElRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: NorthEastHeight->AzElRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::Cartesian:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: NorthEastHeight->Cartesian"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::Cylindrical:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: NorthEastHeight->Cylindrical"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::DirectionRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: NorthEastHeight->DirectionRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::LongLatRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: NorthEastHeight->LongLatRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::NorthEastHeight:
+	out = in;
+	break;
+      case CoordinateType::Spherical:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: NorthEastHeight->Spherical"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::Direction:
+      case CoordinateType::Frequency:
+      case CoordinateType::Time:
+	std::cerr << "[PositionVector::convert]"
+		  << " No such conversion: NorthEastHeight->(Direction,Frequency,Time)"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      };
+      break;
+      //______________________________________________________________
+      //                                            Spherical -> other
+    case CoordinateType::Spherical:
+      switch (typeOut) {
+      case CoordinateType::AzElHeight:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: Spherical->AzElHeight"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::AzElRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: Spherical->AzElRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::Cartesian:
 	vec.Spherical2Cartesian (out(0), out(1), out(2),
 				 in(0) ,  in(1),  in(2),
 				 anglesInDegrees);
 	break;
       case CoordinateType::Cylindrical:
-	vec.Cylindrical2Cartesian (out(0), out(1), out(2),
-				   in(0) ,  in(1),  in(2),
-				   anglesInDegrees);
-	break;
-      case CoordinateType::AzElRadius:
-	vec.AzElRadius2Cartesian (out(0), out(1), out(2),
-				  in(0) ,  in(1),  in(2),
-				  anglesInDegrees);
-	break;
-      case CoordinateType::LongLatRadius:
-	vec.LongLatRadius2Cartesian (out(0), out(1), out(2),
-				     in(0) ,  in(1),  in(2),
-				     anglesInDegrees);
-	break;
-      default:
-	std::cerr << "[PositionVector::convert]"
-		  << " Requested conversion not yet implemented!" << std::endl;
-	status = false;
-	break;
-      };
-      break;
-      //____________________________________________________
-      //                            Conversions -> Spherical
-    case CoordinateType::Spherical:
-      switch (typeIn) {
-      case CoordinateType::Cartesian:
-	vec.Cartesian2Spherical (out(0), out(1), out(2),
-				 in(0) ,  in(1),  in(2),
-				 anglesInDegrees);
-	break;
-      case CoordinateType::Spherical:
-	out = in;
-	break;
-      case CoordinateType::Cylindrical:
-	vec.Cylindrical2Spherical (out(0), out(1), out(2),
-				   in(0) ,  in(1),  in(2),
-				   anglesInDegrees);
-	break;
-      case CoordinateType::AzElRadius:
-	vec.AzElRadius2Spherical (out(0), out(1), out(2),
-				  in(0) ,  in(1),  in(2),
-				  anglesInDegrees);
-	break;
-      case CoordinateType::LongLatRadius:
-	vec.LongLatRadius2Spherical (out(0), out(1), out(2),
-				     in(0) ,  in(1),  in(2),
-				     anglesInDegrees);
-	break;
-      default:
-	std::cerr << "[PositionVector::convert]"
-		  << " Requested conversion not yet implemented!" << std::endl;
-	status = false;
-	break;
-      };
-      break;
-      //____________________________________________________
-      //                          Conversions -> Cylindrical
-    case CoordinateType::Cylindrical:
-      switch (typeIn) {
-      case CoordinateType::Cartesian:
-	vec.Cartesian2Cylindrical (out(0), out(1), out(2),
-				   in(0) ,  in(1),  in(2),
-				   anglesInDegrees);
-	break;
-      case CoordinateType::Spherical:
 	vec.Spherical2Cylindrical (out(0), out(1), out(2),
 				   in(0) ,  in(1),  in(2),
 				   anglesInDegrees);
 	break;
-      default:
+      case CoordinateType::DirectionRadius:
 	std::cerr << "[PositionVector::convert]"
-		  << " Requested conversion not yet implemented!" << std::endl;
+		  << " Conversion not implemented: Spherical->DirectionRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::LongLatRadius:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: Spherical->LongLatRadius"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::NorthEastHeight:
+	std::cerr << "[PositionVector::convert]"
+		  << " Conversion not implemented: Spherical->NorthEastHeight"
+		  << std::endl << std::flush;
+	status = false;
+	break;
+      case CoordinateType::Spherical:
+	out = in;
+	break;
+      case CoordinateType::Direction:
+      case CoordinateType::Frequency:
+      case CoordinateType::Time:
+	std::cerr << "[PositionVector::convert]"
+		  << " No such conversion: Spherical->(Direction,Frequency,Time)"
+		  << std::endl << std::flush;
 	status = false;
 	break;
       };
       break;
-      //____________________________________________________
-      //                               undefined conversions
+      //______________________________________________________________
+      //                     Catch further conversions not implemented
     default:
       std::cerr << "[PositionVector::convert]"
-		<< " Requested conversion not yet implemented!" << std::endl;
+		<< " Conversion not implemented: "
+		<< CoordinateType::getName(typeIn)
+		<< " -> "
+		<< CoordinateType::getName(typeOut)
+		<< std::endl;
       status = false;
       break;
     };

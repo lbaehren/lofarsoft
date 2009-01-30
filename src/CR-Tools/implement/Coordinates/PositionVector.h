@@ -235,26 +235,8 @@ namespace CR { // Namespace  -- begin
     }
     
     //________________________________________________________________
-    //                                        Conversions -> Cartesian
+    //                                             AzElRadius -> other
 
-    //! Convert \f$ (r,\phi,\theta) \f$ to \f$ (x,y,z) \f$.
-    void Spherical2Cartesian (double &out_x,
-			      double &out_y,
-			      double &out_z,
-			      double const &in_r,
-			      double const &in_phi,
-			      double const &in_theta,
-			      bool const &anglesInDegrees=false);
-    
-    //! Convert \f$ (\rho,\phi,z) \f$ to \f$ (x,y,z) \f$.
-    void Cylindrical2Cartesian (double &out_x,
-				double &out_y,
-				double &out_z,
-				double const &in_rho,
-				double const &in_phi,
-				double const &in_z,
-				bool const &anglesInDegrees=false);
-    
     //! Convert \f$ (Az,El,R) \f$ to \f$ (x,y,z) \f$.
     void AzElRadius2Cartesian (double &out_x,
 				  double &out_y,
@@ -263,36 +245,6 @@ namespace CR { // Namespace  -- begin
 				  double const &in_el,
 				  double const &in_r,
 				  bool const &anglesInDegrees=false);
-    
-    //! Convert \f$ (Long,Lat,R) \f$ to \f$ (x,y,z) \f$.
-    void LongLatRadius2Cartesian (double &out_x,
-				  double &out_y,
-				  double &out_z,
-				  double const &in_long,
-				  double const &in_lat,
-				  double const &in_r,
-				  bool const &anglesInDegrees=false);
-    
-    //______________________________________________________
-    //                              Conversions -> Spherical
-
-    //! Convert \f$ (x,y,z) \f$ to \f$ (r,\phi,\theta) \f$
-    void Cartesian2Spherical (double &out_r,
-			      double &out_phi,
-			      double &out_theta,
-			      double const &in_x,
-			      double const &in_y,
-			      double const &in_z,
-			      bool const &anglesInDegrees=false);
-    
-    //! Convert \f$ (\rho,\phi,z) \f$ to \f$ (r,\phi,\theta) \f$
-    void Cylindrical2Spherical (double &out_r,
-				double &out_phi,
-				double &out_theta,
-				double const &in_rho,
-				double const &in_phi,
-				double const &in_z,
-				bool const &anglesInDegrees=false);
     
     //! Convert \f$ (Az,El,R) \f$ to \f$ (r,\phi,\theta) \f$
     void AzElRadius2Spherical (double &out_r,
@@ -303,17 +255,17 @@ namespace CR { // Namespace  -- begin
 			       double const &in_r,
 			       bool const &anglesInDegrees=false);
     
-    //! Convert \f$ (Long,Lat,R) \f$ to \f$ (r,\phi,\theta) \f$
-    void LongLatRadius2Spherical (double &out_r,
-				  double &out_phi,
-				  double &out_theta,
-				  double const &in_long,
-				  double const &in_lat,
-				  double const &in_r,
-				  bool const &anglesInDegrees=false);
-    
-    //______________________________________________________
-    //                            Conversions -> Cylindrical
+    //________________________________________________________________
+    //                                              Cartesian -> other
+
+    //! Convert \f$ (x,y,z) \f$ to \f$ (Az,El,R) \f$
+    void Cartesian2AzElRadius (double &out_rho,
+			       double &out_phi,
+			       double &out_z,
+			       double const &in_az,
+			       double const &in_el,
+			       double const &in_r,
+			       bool const &anglesInDegrees=false);
     
     //! Convert \f$ (x,y,z) \f$ to \f$ (\rho,\phi,z) \f$
     void Cartesian2Cylindrical (double &out_rho,
@@ -324,6 +276,69 @@ namespace CR { // Namespace  -- begin
 				double const &in_z,
 				bool const &anglesInDegrees=false);
     
+    //! Convert \f$ (x,y,z) \f$ to \f$ (r,\phi,\theta) \f$
+    void Cartesian2Spherical (double &out_r,
+			      double &out_phi,
+			      double &out_theta,
+			      double const &in_x,
+			      double const &in_y,
+			      double const &in_z,
+			      bool const &anglesInDegrees=false);
+    
+    //________________________________________________________________
+    //                                            Cylindrical -> other
+
+    //! Convert \f$ (\rho,\phi,z) \f$ to \f$ (x,y,z) \f$.
+    void Cylindrical2Cartesian (double &out_x,
+				double &out_y,
+				double &out_z,
+				double const &in_rho,
+				double const &in_phi,
+				double const &in_z,
+				bool const &anglesInDegrees=false);
+    
+    //! Convert \f$ (\rho,\phi,z) \f$ to \f$ (r,\phi,\theta) \f$
+    void Cylindrical2Spherical (double &out_r,
+				double &out_phi,
+				double &out_theta,
+				double const &in_rho,
+				double const &in_phi,
+				double const &in_z,
+				bool const &anglesInDegrees=false);
+    
+    //________________________________________________________________
+    //                                          LongLatRadius -> other
+
+    //! Convert \f$ (Long,Lat,R) \f$ to \f$ (x,y,z) \f$.
+    void LongLatRadius2Cartesian (double &out_x,
+				  double &out_y,
+				  double &out_z,
+				  double const &in_long,
+				  double const &in_lat,
+				  double const &in_r,
+				  bool const &anglesInDegrees=false);
+    
+    //! Convert \f$ (Long,Lat,R) \f$ to \f$ (r,\phi,\theta) \f$
+    void LongLatRadius2Spherical (double &out_r,
+				  double &out_phi,
+				  double &out_theta,
+				  double const &in_long,
+				  double const &in_lat,
+				  double const &in_r,
+				  bool const &anglesInDegrees=false);
+    
+    //________________________________________________________________
+    //                                              Spherical -> other
+
+    //! Convert \f$ (r,\phi,\theta) \f$ to \f$ (x,y,z) \f$.
+    void Spherical2Cartesian (double &out_x,
+			      double &out_y,
+			      double &out_z,
+			      double const &in_r,
+			      double const &in_phi,
+			      double const &in_theta,
+			      bool const &anglesInDegrees=false);
+
     //! Convert \f$ (r,\phi,\theta) \f$ to \f$ (\rho,\phi,z) \f$
     void Spherical2Cylindrical (double &out_rho,
 				double &out_phi,

@@ -116,28 +116,28 @@ namespace CR { // Namespace CR -- begin
       \brief Types of (spatial) coordinates
     */
     enum Types {
-      //! Direction on the sky, \f$ \vec x = (Lon,Lat) \f$
-      Direction,
-      //! Direction on the sky with radial distance, \f$ \vec x = (Lon,Lat,R) \f$
-      DirectionRadius,
-      //! Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
-      Cartesian,
-      //! Spherical coordinates, \f$ \vec x = (r,\phi,\theta) \f$
-      Spherical,
-      //! Cylindrical coordinates, \f$ \vec x = (r,\phi,h) \f$
-      Cylindrical,
       //! Azimuth-Elevation-Height, \f$ \vec x = (Az,El,H) \f$
       AzElHeight,
       //! Azimuth-Elevation-Radius, \f$ \vec x = (Az,El,R) \f$
       AzElRadius,
-      //! North-East-Height
-      NorthEastHeight,
+      //! Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
+      Cartesian,
+      //! Cylindrical coordinates, \f$ \vec x = (r,\phi,h) \f$
+      Cylindrical,
+      //! Direction on the sky, \f$ \vec x = (Lon,Lat) \f$
+      Direction,
+      //! Direction on the sky with radial distance, \f$ \vec x = (Lon,Lat,R) \f$
+      DirectionRadius,
+      //! Frquency
+      Frequency,
       //! Longitude-Latitude-Radius
       LongLatRadius,
+      //! North-East-Height
+      NorthEastHeight,
+      //! Spherical coordinates, \f$ \vec x = (r,\phi,\theta) \f$
+      Spherical,
       //! Time
-      Time,
-      //! Frquency
-      Frequency
+      Time
     };
     
     // ------------------------------------------------------------- Construction
@@ -208,6 +208,13 @@ namespace CR { // Namespace CR -- begin
       \return name -- The name of the coordinate type
     */
     std::string name ();
+
+    /*!
+      \brief Get the name of the coordinate type
+
+      \return name -- The name of the coordinate type
+    */
+    static std::string getName (CoordinateType::Types const &type);
 
     /*!
       \brief Set the coordinate type

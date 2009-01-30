@@ -76,9 +76,16 @@ namespace CR { // Namespace CR -- begin
 
   std::string CoordinateType::name ()
   {
+    return getName (type_p);
+  }
+  
+  //_____________________________________________________________________ getName
+
+  std::string CoordinateType::getName (CoordinateType::Types const &type)
+  {
     std::string name;
 
-    switch (type_p) {
+    switch (type) {
     case CoordinateType::Direction:
       name="Direction";
       break;
@@ -116,7 +123,7 @@ namespace CR { // Namespace CR -- begin
 
     return name;
   }
-
+  
   //_______________________________________________________________ hasProjection
   
   bool CoordinateType::hasProjection (CoordinateType::Types const &coord)
