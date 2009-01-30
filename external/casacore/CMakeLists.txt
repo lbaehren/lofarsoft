@@ -29,6 +29,7 @@ include (CTest)
 ##
 ## =============================================================================
 
+option (casacore_FORCE_BUILD       "Force rebuild and local installation" NO  )
 option (casacore_BUILD_TESTS       "Build the test programs?"             NO  )
 option (casacore_ENABLE_TESTING    "Enable running test programs?"        NO  )
 option (casacore_SHARED_LIBRARIES  "Build libraries as shared libraries?" NO  )
@@ -448,10 +449,10 @@ if (casacore_VERBOSE_CONFIGURE)
   message (STATUS "Wget network downloader .... = ${WGET_EXECUTABLE}")
   message (STATUS "Bison lexical parser ....... = ${bison_bin}")
   message (STATUS "Flex lexical parser ........ = ${flex_bin}")
-  message (STATUS "libm library ............... = ${libm}")
+  message (STATUS "Have libm? ................. = ${libm}")
+  message (STATUS "Have libgfortran? .......... = ${GFORTRAN_LIBRARIES}")
+  message (STATUS "Have libg2c? ............... = ${G2C_LIBRARIES}")
   message (STATUS "Have CFITSIO? .............. = ${HAVE_CFITSIO}")
-  message (STATUS "Have GFortran? ............. = ${HAVE_GFORTRAN}")
-  message (STATUS "Have G2C? .................. = ${HAVE_G2C}")
   message (STATUS "Have HDF5? ................. = ${HAVE_HDF5}")
   message (STATUS "HDF5 library version ....... = ${HDF5_MAJOR_VERSION}.${HDF5_MINOR_VERSION}")
   message (STATUS "Have LAPACK? ............... = ${HAVE_LAPACK}")
@@ -461,3 +462,13 @@ if (casacore_VERBOSE_CONFIGURE)
   message (STATUS " ")
 
 endif (casacore_VERBOSE_CONFIGURE)
+
+## =============================================================================
+##
+##  Check on build conditions
+##
+## =============================================================================
+
+if (NOT GFORTRAN_LIBRARIES)
+  message (SEND_ERROR "[casacore] Unable to build: missing gfortran libraries!")
+endif (NOT GFORTRAN_LIBRARIES)
