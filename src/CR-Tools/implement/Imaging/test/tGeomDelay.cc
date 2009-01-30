@@ -207,17 +207,17 @@ int test_methods ()
   
   cout << "[1] Get antenna and sky positions ..." << endl;
   try {
-    Matrix<double> antPositions = geomDelay.antPositions();
-    Matrix<double> skyPositions = geomDelay.skyPositions();
+    Matrix<double> antPos = geomDelay.antPositions();
+    Matrix<double> skyPos = geomDelay.skyPositions();
     
-    cout << "-- Antenna positions = " << antPositions << endl;
-    cout << "-- Sky positions     = " << skyPositions << endl;
+    cout << "-- Antenna positions = " << antPos << endl;
+    cout << "-- Sky positions     = " << skyPos << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  cout << "[2] Set antenna positions via Matrix ..." << endl;
+  cout << "[2] Set antenna positions via Matrix<double> ..." << endl;
   try {
     Matrix<double> pos (2,3);
     
@@ -263,53 +263,7 @@ int test_methods ()
     nofFailedTests++;
   }
 
-  cout << "[3] Set sky positions via Matrix ..." << std::endl;
-  try {
-    Matrix<double> pos (2,3);
-
-    cout << "-- cartesian coordinates ..." << std::endl;
-
-    pos.row(0) = -100;
-    pos.row(1) = +100;
-    geomDelay.setSkyPositions (pos,
-			       CoordinateType::Cartesian,
-			       false);
-    cout << geomDelay.skyPositions() << std::endl;
-
-    cout << "-- spherical coordinates ..." << std::endl;
-
-    pos(0,0) = 1;
-    pos(0,1) = 90;
-    pos(0,2) = 0;
-    pos(1,0) = 1;
-    pos(1,1) = 0;
-    pos(1,2) = 90;
-
-    geomDelay.setSkyPositions (pos,
-			       CoordinateType::Spherical,
-			       true);
-    cout << geomDelay.skyPositions() << std::endl;
-
-    cout << "-- cylindrical coordinates ..." << std::endl;
-
-    pos(0,0) = 1;
-    pos(0,1) = 90;
-    pos(0,2) = 1;
-    pos(1,0) = 1;
-    pos(1,1) = 90;
-    pos(1,2) = -1;
-
-    geomDelay.setSkyPositions (pos,
-			       CoordinateType::Cylindrical,
-			       true);
-    cout << geomDelay.skyPositions() << std::endl;
-
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-
-  cout << "[4] Set antenna positions via MVPosition ..." << std::endl;
+  cout << "[3] Set antenna positions via Vector<MVPosition> ..." << std::endl;
   try {
     antPositions.resize(3);
     antPositions(0) = casa::MVPosition (100,0,0);
@@ -324,7 +278,71 @@ int test_methods ()
     nofFailedTests++;
   }
 
-  cout << "[5] Adjust settings for the buffering of the delay values ..." << endl;
+  cout << "[4] Set sky positions via Matrix<double> ..." << std::endl;
+  try {
+    Matrix<double> pos (2,3);
+
+    cout << "-- cartesian coordinates ..." << std::endl;
+
+    pos.row(0) = -100;
+    pos.row(1) = +100;
+    geomDelay.setSkyPositions (pos,
+			       CoordinateType::Cartesian,
+			       false);
+    cout << geomDelay.skyPositions() << std::endl;
+
+    cout << "-- spherical coordinates ..." << std::endl;
+
+    pos(0,0) = 1;
+    pos(0,1) = 90;
+    pos(0,2) = 0;
+    pos(1,0) = 1;
+    pos(1,1) = 0;
+    pos(1,2) = 90;
+
+    geomDelay.setSkyPositions (pos,
+			       CoordinateType::Spherical,
+			       true);
+    cout << geomDelay.skyPositions() << std::endl;
+
+    cout << "-- cylindrical coordinates ..." << std::endl;
+
+    pos(0,0) = 1;
+    pos(0,1) = 90;
+    pos(0,2) = 1;
+    pos(1,0) = 1;
+    pos(1,1) = 90;
+    pos(1,2) = -1;
+
+    geomDelay.setSkyPositions (pos,
+			       CoordinateType::Cylindrical,
+			       true);
+    cout << geomDelay.skyPositions() << std::endl;
+
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[5] Set single sky position via Vector<double> ..." << std::endl;
+  try {
+    Vector<double> pos(3);
+
+    pos(0) = 10;
+    pos(1) = 20;
+    pos(2) = 30;
+    
+    geomDelay.setSkyPositions (pos,
+			       CoordinateType::Cartesian,
+			       true);
+    cout << geomDelay.skyPositions() << std::endl;
+    
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[6] Adjust settings for the buffering of the delay values ..." << endl;
   try {
     cout << "--> Internal settings before changing buffer settings:" << endl;
     geomDelay.summary();

@@ -306,6 +306,10 @@ namespace CR { // Namespace CR -- begin
     bool setSkyPositions (Matrix<double> const &skyPositions,
 			  CoordinateType::Types const &type=CoordinateType::Cartesian,
 			  bool const &anglesInDegrees=true);
+
+    bool setSkyPositions (Vector<double> const &skyPositions,
+			  CoordinateType::Types const &type=CoordinateType::Cartesian,
+			  bool const &anglesInDegrees=true);
     
     /*!
       \brief Set the sky positions

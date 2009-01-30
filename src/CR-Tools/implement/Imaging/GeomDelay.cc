@@ -318,6 +318,15 @@ namespace CR { // Namespace CR -- begin
   {
     bool status     = true;
     IPosition antShape = skyPositions.shape();
+
+    /* Check the shape of the provided input array */
+    if (antShape(1) != 3) {
+      std::cerr << "[GeomDelay::setSkyPositions] Incorrect shape of input array: "
+		<< antShape
+		<< "Expected array of shape [nofAnt,3]"
+		<< std::endl;
+      return false;
+    }
     
     skyPositions_p.resize (antShape);
     
@@ -346,6 +355,28 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
 
+  //_____________________________________________________________________________
+  //                                                              setSkyPositions
+
+  bool GeomDelay::setSkyPositions (Vector<double> const &skyPositions,
+				   CoordinateType::Types const &type,
+				   bool const &anglesInDegrees)
+  {
+    if (skyPositions.nelements() == 3) {
+      Matrix<double> mat (1,3);
+      mat.row(0) = skyPositions;
+      // forward the function call
+      return setSkyPositions (mat,
+			      type,
+			      anglesInDegrees);
+    } else {
+      std::cerr << "[GeomDelay::setSkyPositions] Incorrect shape of input vector: "
+		<< skyPositions.shape()
+		<< std::endl;
+      return false;
+    }
+  }
+  
   //_____________________________________________________________________________
   //                                                              setSkyPositions
 
