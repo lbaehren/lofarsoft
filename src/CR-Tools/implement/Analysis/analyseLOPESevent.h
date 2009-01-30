@@ -443,6 +443,7 @@ namespace CR { // Namespace CR -- begin
       \param Az             - value for the azimuth direction [in deg] (e.g. from KASCADE)
       \param El             - value for the elevation [in deg] (e.g. from KASCADE)
       \param distance       - value for the distance parameter [in m]
+                              If "distance<=0." then distance is set with <tt>findDistance()</tt>
       \param XC             - x-position of the shower center [in m]
       \param YC             - y-position of the shower center [in m]
       \param RotatePos      - rotate the XC/YC position (set to False if XC/YC already

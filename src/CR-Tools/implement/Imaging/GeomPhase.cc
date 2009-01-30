@@ -368,8 +368,8 @@ namespace CR { // Namespace CR -- begin
 					  frequencies_p(freq));
     }
 #else
-    uint nofAnt = delay.nrow();
-    uint nofSky = delay.ncolumn();
+    uint nofAnt = delays.nrow();
+    uint nofSky = delays.ncolumn();
     uint nFreq  = 0;
     uint nAnt   = 0;
     uint nSky   = 0;
@@ -377,7 +377,7 @@ namespace CR { // Namespace CR -- begin
     for (nSky=0; nSky<nofSky; nSky++) {
       for (nAnt=0; nAnt<nofAnt; nAnt++) {
 	for (nFreq=0; nFreq<phasesShape(0); nFreq++) {
-	  values(nFreq,nAnt,nSky) = calcPhases(delay(nAnt,nSky),freq(nFreq));
+	  values(nFreq,nAnt,nSky) = calcPhases(delays(nAnt,nSky),frequencies_p(nFreq));
 	}
       }
     }

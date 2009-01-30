@@ -191,7 +191,7 @@ namespace CR { // Namespace CR -- begin
 	return Record();
       };
       if (! doPositionFitting(Az, El, distance, center, XC, YC, RotatePos,
-			      AntennaSelection, Polarization, simplexFit, verbose) ){
+			      AntennaSelection, Polarization, simplexFit, verbose, (distance<=0.) ) ){
 	cerr << "analyseLOPESevent::ProcessEvent: " << "Error during doPositionFitting()!" << endl;
 	return Record();
       };
@@ -1000,7 +1000,7 @@ namespace CR { // Namespace CR -- begin
 					Bool rough,
 					Bool verbose){
     try {
-      Double height_, maxheight=0, maxdist=2500, center_=-1.8e-6, maxcenter=NULL;
+      Double height_, maxheight=0., maxdist=2500., center_=-1.8e-6, maxcenter=0.;
       for(int d=2000; d<=15000; ){
         height_=getHeight(Az, El, d, AntennaSelection, &center_);
 	// if the fit was not succesfull, center is set to -1.8e-6. This case has to be excluded
