@@ -282,10 +282,9 @@ namespace CR { // Namespace  -- begin
 	status = false;
 	break;
       case CoordinateType::NorthEastHeight:
-	std::cerr << "[PositionVector::convert]"
-		  << " Conversion not implemented: Cartesian->NorthEastHeight"
-		  << std::endl << std::flush;
-	status = false;
+	vec.Cartesian2NorthEastHeight (out(0), out(1), out(2),
+				       in(0) ,  in(1),  in(2),
+				       anglesInDegrees);
 	break;
       case CoordinateType::Spherical:
 	vec.Cartesian2Spherical (out(0), out(1), out(2),
@@ -493,10 +492,9 @@ namespace CR { // Namespace  -- begin
 	status = false;
 	break;
       case CoordinateType::Cartesian:
-	std::cerr << "[PositionVector::convert]"
-		  << " Conversion not implemented: NorthEastHeight->Cartesian"
-		  << std::endl << std::flush;
-	status = false;
+	vec.NorthEastHeight2Cartesian (out(0),out(1),out(2),
+				       in(0),in(1),in(2),
+				       anglesInDegrees);
 	break;
       case CoordinateType::Cylindrical:
 	std::cerr << "[PositionVector::convert]"
@@ -811,13 +809,42 @@ namespace CR { // Namespace  -- begin
       out_z   = in_r*cos(in_theta);
     }
   }
+
+  //_____________________________________________________________________________
+  //_____________________________________________________________________________
+
+
+  //_____________________________________________________________________________
+  //                                                           Cartesian -> other
+
+  void PositionVector::Cartesian2NorthEastHeight (double &out_north,
+						  double &out_east,
+						  double &out_height,
+						  double const &in_x,
+						  double const &in_y,
+						  double const &in_z,
+						  bool const &anglesInDegrees)
+  {
+    out_north  = in_y;
+    out_east   = in_x;
+    out_height = in_z;
+  }
   
   //_____________________________________________________________________________
-  //                                                    Conversions -> AzElRadius
-
-
-  //_____________________________________________________________________________
-  //                                                 Conversions -> LongLatRadius
-
+  //                                                     NorthEastHeight -> other
+  
+  void PositionVector::NorthEastHeight2Cartesian (double &out_x,
+						  double &out_y,
+						  double &out_z,
+						  double const &in_north,
+						  double const &in_east,
+						  double const &in_height,
+						  bool const &anglesInDegrees)
+  {
+    out_x = in_east;
+    out_y = in_north;
+    out_z = in_height;
+  }
+  
   
 } // Namespace  -- end

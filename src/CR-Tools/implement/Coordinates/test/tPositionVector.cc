@@ -78,214 +78,6 @@ int test_constructors ()
 
 // -----------------------------------------------------------------------------
 
-int test_static_functions ()
-{
-  std::cout << "\n[tPositionVector::test_static_functions]\n" << std::endl;
-
-  int nofFailedTests (0);
-
-  //___________________________________________ Spherical -> Cartesian
-
-  std::cout << "[1] Spherical -> Cartesian" << std::endl;
-  try {
-    casa::Vector<double> cartesian (3);
-    casa::Vector<double> spherical (3);
-
-    spherical(0) = 1;  // 
-    spherical(1) = 0;
-    spherical(2) = 0;
-    PositionVector::convert(cartesian,CoordinateType::Cartesian,
-			    spherical,CoordinateType::Spherical,
-			    true);
-    std::cout << "\t" << spherical << "\t->\t" << cartesian << std::endl;
-    
-    spherical(0) = 1;
-    spherical(1) = 0;
-    spherical(2) = 90;
-    PositionVector::convert(cartesian,CoordinateType::Cartesian,
-			    spherical,CoordinateType::Spherical,
-			    true);
-    std::cout << "\t" << spherical << "\t->\t" << cartesian << std::endl;
-    
-    spherical(0) = 1;
-    spherical(1) = 90;
-    spherical(2) = 90;
-    PositionVector::convert(cartesian,CoordinateType::Cartesian,
-			    spherical,CoordinateType::Spherical,
-			    true);
-    std::cout << "\t" << spherical << "\t->\t" << cartesian << std::endl;
-    
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-
-  //_________________________________________ Cylindrical -> Cartesian
-
-  std::cout << "[2] Cylindrical -> Cartesian" << std::endl;
-  try {
-    casa::Vector<double> cartesian (3);
-    casa::Vector<double> cylindrical (3);
-
-    cylindrical(0) = 1;  // r
-    cylindrical(1) = 0;  // phi
-    cylindrical(2) = 0;  // h
-    PositionVector::convert(cartesian,CoordinateType::Cartesian,
-			    cylindrical,CoordinateType::Cylindrical,
-			    true);
-    std::cout << "\t" << cylindrical << "\t->\t" << cartesian << std::endl;
-
-    cylindrical(0) = 1;   // r
-    cylindrical(1) = 90;  // phi
-    cylindrical(2) = 0;   // h
-    PositionVector::convert(cartesian,CoordinateType::Cartesian,
-			    cylindrical,CoordinateType::Cylindrical,
-			    true);
-    std::cout << "\t" << cylindrical << "\t->\t" << cartesian << std::endl;
-
-    cylindrical(0) = 0;   // r
-    cylindrical(1) = 0;   // phi
-    cylindrical(2) = 1;   // h
-    PositionVector::convert(cartesian,CoordinateType::Cartesian,
-			    cylindrical,CoordinateType::Cylindrical,
-			    true);
-    std::cout << "\t" << cylindrical << "\t->\t" << cartesian << std::endl;
-
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-
-  //__________________________________________ AzElRadius -> Cartesian
-
-  std::cout <<"[3] AzElRadius -> Cartesian" << std::endl;
-  try {
-    casa::Vector<double> cartesian (3);
-    casa::Vector<double> azelradius (3);
-
-    azelradius(0) = 0;  //  Az
-    azelradius(1) = 0;  //  El
-    azelradius(2) = 1;  //  r
-    PositionVector::convert(cartesian,CoordinateType::Cartesian,
-			    azelradius,CoordinateType::AzElRadius,
-			    true);
-    std::cout << "\t" << azelradius << "\t->\t" << cartesian << std::endl;
-    
-    azelradius(0) = 90;  //  Az
-    azelradius(1) = 0;   //  El
-    azelradius(2) = 1;   //  r
-    PositionVector::convert(cartesian,CoordinateType::Cartesian,
-			    azelradius,CoordinateType::AzElRadius,
-			    true);
-    std::cout << "\t" << azelradius << "\t->\t" << cartesian << std::endl;
-    
-    azelradius(0) = 0;   //  Az
-    azelradius(1) = 90;  //  El
-    azelradius(2) = 1;   //  r
-    PositionVector::convert(cartesian,CoordinateType::Cartesian,
-			    azelradius,CoordinateType::AzElRadius,
-			    true);
-    std::cout << "\t" << azelradius << "\t->\t" << cartesian << std::endl;
-    
-    azelradius(0) = 90;  //  Az
-    azelradius(1) = 90;  //  El
-    azelradius(2) = 1;   //  r
-    PositionVector::convert(cartesian,CoordinateType::Cartesian,
-			    azelradius,CoordinateType::AzElRadius,
-			    true);
-    std::cout << "\t" << azelradius << "\t->\t" << cartesian << std::endl;
-    
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-
-  //_______________________________________ LongLatRadius -> Cartesian
-
-  std::cout <<"[4] LongLatRadius -> Cartesian" << std::endl;
-  try {
-
-    casa::Vector<double> cartesian (3);
-    casa::Vector<double> longLatRadius (3);
-
-    longLatRadius(0) = 0;  //  long
-    longLatRadius(1) = 0;  //  lat
-    longLatRadius(2) = 1;  //  radius
-    PositionVector::convert(cartesian,CoordinateType::Cartesian,
-			    longLatRadius,CoordinateType::LongLatRadius,
-			    true);
-    std::cout << "\t" << longLatRadius << "\t->\t" << cartesian << std::endl;
-
-    longLatRadius(0) = 90;  //  long
-    longLatRadius(1) = 0;   //  lat
-    longLatRadius(2) = 1;   //  radius
-    PositionVector::convert(cartesian,CoordinateType::Cartesian,
-			    longLatRadius,CoordinateType::LongLatRadius,
-			    true);
-    std::cout << "\t" << longLatRadius << "\t->\t" << cartesian << std::endl;
-
-    longLatRadius(0) = 0;   //  long
-    longLatRadius(1) = 90;  //  lat
-    longLatRadius(2) = 1;   //  radius
-    PositionVector::convert(cartesian,CoordinateType::Cartesian,
-			    longLatRadius,CoordinateType::LongLatRadius,
-			    true);
-    std::cout << "\t" << longLatRadius << "\t->\t" << cartesian << std::endl;
-
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-
-  //__________________________________________ AzElRadius -> Spherical
-
-  std::cout << "[6] AzElRadius -> Spherical" << std::endl;
-  try {
-    casa::Vector<double> azelradius (3);
-    casa::Vector<double> spherical (3);
-
-    azelradius(0) = 0;
-    azelradius(1) = 0;
-    azelradius(2) = 0;
-    PositionVector::convert(spherical,CoordinateType::Spherical,
-			    azelradius,CoordinateType::AzElRadius,
-			    true);
-    std::cout << "\t" << azelradius << "\t->\t" << spherical << std::endl;
-
-    azelradius(0) = 90;
-    azelradius(1) = 0;
-    azelradius(2) = 0;
-    PositionVector::convert(spherical,CoordinateType::Spherical,
-			    azelradius,CoordinateType::AzElRadius,
-			    true);
-    std::cout << "\t" << azelradius << "\t->\t" << spherical << std::endl;
-
-    azelradius(0) = 0;
-    azelradius(1) = 90;
-    azelradius(2) = 0;
-    PositionVector::convert(spherical,CoordinateType::Spherical,
-			    azelradius,CoordinateType::AzElRadius,
-			    true);
-    std::cout << "\t" << azelradius << "\t->\t" << spherical << std::endl;
-
-    azelradius(0) = 0;
-    azelradius(1) = 0;
-    azelradius(2) = 1;
-    PositionVector::convert(spherical,CoordinateType::Spherical,
-			    azelradius,CoordinateType::AzElRadius,
-			    true);
-    std::cout << "\t" << azelradius << "\t->\t" << spherical << std::endl;
-
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-
-  return nofFailedTests;
-}
-
-// -----------------------------------------------------------------------------
-
 /*!
   \brief Test conversion from (Azimuth,Elevation,Radius) coordinates to other
 
@@ -318,6 +110,8 @@ int test_Cartesian2other ()
   int nofFailedTests (0);
   Vector<double> cartesian(3);
   Vector<double> other (3);
+
+  //__________________________________________________________________
 
   std::cout << "[1] Cartesian -> AzElHeight" << std::endl;
   try {
@@ -359,6 +153,8 @@ int test_Cartesian2other ()
     nofFailedTests++;
   }
 
+  //__________________________________________________________________
+
   std::cout << "[2] Cartesian -> AzElRadius" << std::endl;
   try {
     other = 0;
@@ -398,6 +194,8 @@ int test_Cartesian2other ()
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
+
+  //__________________________________________________________________
 
   std::cout << "[3] Cartesian -> Cartesian" << std::endl;
   try {
@@ -439,6 +237,8 @@ int test_Cartesian2other ()
     nofFailedTests++;
   }
 
+  //__________________________________________________________________
+
   std::cout << "[4] Cartesian -> Cylindrical" << std::endl;
   try {
     other = 0;
@@ -479,6 +279,8 @@ int test_Cartesian2other ()
     nofFailedTests++;
   }
 
+  //__________________________________________________________________
+
   std::cout << "[5] Cartesian -> DirectionRadius" << std::endl;
   try {
     other = 0;
@@ -487,6 +289,8 @@ int test_Cartesian2other ()
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
+
+  //__________________________________________________________________
 
   std::cout << "[6] Cartesian -> LongLatRadius" << std::endl;
   try {
@@ -497,14 +301,49 @@ int test_Cartesian2other ()
     nofFailedTests++;
   }
 
+  //__________________________________________________________________
+
   std::cout << "[7] Cartesian -> NorthEastHeight" << std::endl;
   try {
     other = 0;
     //
+    cartesian(0) = 0;
+    cartesian(1) = 0;
+    cartesian(2) = 0;
+    PositionVector::convert(other,CoordinateType::NorthEastHeight,
+			    cartesian,CoordinateType::Cartesian,
+			    true);
+    std::cout << "\t" << cartesian << "\t->\t" << other << std::endl;
+    //
+    cartesian(0) = 1;
+    cartesian(1) = 0;
+    cartesian(2) = 0;
+    PositionVector::convert(other,CoordinateType::NorthEastHeight,
+			    cartesian,CoordinateType::Cartesian,
+			    true);
+    std::cout << "\t" << cartesian << "\t->\t" << other << std::endl;
+    //
+    cartesian(0) = 0;
+    cartesian(1) = 1;
+    cartesian(2) = 0;
+    PositionVector::convert(other,CoordinateType::NorthEastHeight,
+			    cartesian,CoordinateType::Cartesian,
+			    true);
+    std::cout << "\t" << cartesian << "\t->\t" << other << std::endl;
+    //
+    cartesian(0) = 0;
+    cartesian(1) = 0;
+    cartesian(2) = 1;
+    PositionVector::convert(other,CoordinateType::NorthEastHeight,
+			    cartesian,CoordinateType::Cartesian,
+			    true);
+    std::cout << "\t" << cartesian << "\t->\t" << other << std::endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
+
+  //__________________________________________________________________
 
   std::cout << "[8] Cartesian -> Spherical" << std::endl;
   try {
@@ -551,14 +390,280 @@ int test_Cartesian2other ()
 
 // -----------------------------------------------------------------------------
 
+/*!
+  \brief Test conversion from Cylindrical coordinates to other
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+*/
+int test_Cylindrical2other ()
+{
+  std::cout << "\n[tPositionVector::test_Cylindrical2other]\n" << std::endl;
+
+  int nofFailedTests (0);
+  Vector<double> northEastHeight(3);
+  Vector<double> other (3);
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test conversion from (North,East,Height) coordinates to other
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+*/
+int test_NorthEastHeight2other ()
+{
+  std::cout << "\n[tPositionVector::test_NorthEastHeight2other]\n" << std::endl;
+
+  int nofFailedTests (0);
+  Vector<double> northEastHeight(3);
+  Vector<double> other (3);
+
+  std::cout << "[1] NorthEastHeight -> AzElHeight" << std::endl;
+  try {
+    other = 0;
+    //
+    northEastHeight(0) = 0;
+    northEastHeight(1) = 0;
+    northEastHeight(2) = 0;
+    PositionVector::convert(other,CoordinateType::AzElHeight,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+    //
+    northEastHeight(0) = 1;
+    northEastHeight(1) = 0;
+    northEastHeight(2) = 0;
+    PositionVector::convert(other,CoordinateType::AzElHeight,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+    //
+    northEastHeight(0) = 0;
+    northEastHeight(1) = 1;
+    northEastHeight(2) = 0;
+    PositionVector::convert(other,CoordinateType::AzElHeight,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+    //
+    northEastHeight(0) = 0;
+    northEastHeight(1) = 0;
+    northEastHeight(2) = 1;
+    PositionVector::convert(other,CoordinateType::AzElHeight,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] NorthEastHeight -> AzElRadius" << std::endl;
+  try {
+    other = 0;
+    //
+    northEastHeight(0) = 0;
+    northEastHeight(1) = 0;
+    northEastHeight(2) = 0;
+    PositionVector::convert(other,CoordinateType::AzElRadius,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+    //
+    northEastHeight(0) = 1;
+    northEastHeight(1) = 0;
+    northEastHeight(2) = 0;
+    PositionVector::convert(other,CoordinateType::AzElRadius,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+    //
+    northEastHeight(0) = 0;
+    northEastHeight(1) = 1;
+    northEastHeight(2) = 0;
+    PositionVector::convert(other,CoordinateType::AzElRadius,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+    //
+    northEastHeight(0) = 0;
+    northEastHeight(1) = 0;
+    northEastHeight(2) = 1;
+    PositionVector::convert(other,CoordinateType::AzElRadius,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[3] NorthEastHeight -> Cartesian" << std::endl;
+  try {
+    other = 0;
+    //
+    northEastHeight(0) = 0;
+    northEastHeight(1) = 0;
+    northEastHeight(2) = 0;
+    PositionVector::convert(other,CoordinateType::Cartesian,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+    //
+    northEastHeight(0) = 1;
+    northEastHeight(1) = 0;
+    northEastHeight(2) = 0;
+    PositionVector::convert(other,CoordinateType::Cartesian,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+    //
+    northEastHeight(0) = 0;
+    northEastHeight(1) = 1;
+    northEastHeight(2) = 0;
+    PositionVector::convert(other,CoordinateType::Cartesian,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+    //
+    northEastHeight(0) = 0;
+    northEastHeight(1) = 0;
+    northEastHeight(2) = 1;
+    PositionVector::convert(other,CoordinateType::Cartesian,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[4] NorthEastHeight -> Cylindrical" << std::endl;
+  try {
+    other = 0;
+    //
+    northEastHeight(0) = 0;
+    northEastHeight(1) = 0;
+    northEastHeight(2) = 0;
+    PositionVector::convert(other,CoordinateType::Cylindrical,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+    //
+    northEastHeight(0) = 1;
+    northEastHeight(1) = 0;
+    northEastHeight(2) = 0;
+    PositionVector::convert(other,CoordinateType::Cylindrical,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+    //
+    northEastHeight(0) = 0;
+    northEastHeight(1) = 1;
+    northEastHeight(2) = 0;
+    PositionVector::convert(other,CoordinateType::Cylindrical,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+    //
+    northEastHeight(0) = 0;
+    northEastHeight(1) = 0;
+    northEastHeight(2) = 1;
+    PositionVector::convert(other,CoordinateType::Cylindrical,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[5] NorthEastHeight -> DirectionRadius" << std::endl;
+  try {
+    other = 0;
+    //
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[6] NorthEastHeight -> LongLatRadius" << std::endl;
+  try {
+    other = 0;
+    //
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[7] NorthEastHeight -> NorthEastHeight" << std::endl;
+  try {
+    other = 0;
+    //
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[8] NorthEastHeight -> Spherical" << std::endl;
+  try {
+    other = 0;
+    //
+    northEastHeight(0) = 0;
+    northEastHeight(1) = 0;
+    northEastHeight(2) = 0;
+    PositionVector::convert(other,CoordinateType::Spherical,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+    //
+    northEastHeight(0) = 1;
+    northEastHeight(1) = 0;
+    northEastHeight(2) = 0;
+    PositionVector::convert(other,CoordinateType::Spherical,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+    //
+    northEastHeight(0) = 0;
+    northEastHeight(1) = 1;
+    northEastHeight(2) = 0;
+    PositionVector::convert(other,CoordinateType::Spherical,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+    //
+    northEastHeight(0) = 0;
+    northEastHeight(1) = 0;
+    northEastHeight(2) = 1;
+    PositionVector::convert(other,CoordinateType::Spherical,
+			    northEastHeight,CoordinateType::NorthEastHeight,
+			    true);
+    std::cout << "\t" << northEastHeight << "\t->\t" << other << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
 int main ()
 {
   int nofFailedTests (0);
 
   // Test the static functions provided by the class
-  nofFailedTests += test_static_functions();
   nofFailedTests += test_AzElRadius2other();
   nofFailedTests += test_Cartesian2other();
+  nofFailedTests += test_Cylindrical2other();
+  nofFailedTests += test_NorthEastHeight2other();
   // Test for the constructor(s)
   nofFailedTests += test_constructors ();
 

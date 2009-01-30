@@ -276,6 +276,15 @@ namespace CR { // Namespace  -- begin
 				double const &in_z,
 				bool const &anglesInDegrees=false);
     
+    //! Convert \f$ (x,y,z) \f$ to \f$ (N,E,H) \f$
+    void Cartesian2NorthEastHeight (double &out_north,
+				    double &out_east,
+				    double &out_height,
+				    double const &in_x,
+				    double const &in_y,
+				    double const &in_z,
+				    bool const &anglesInDegrees=false);
+    
     //! Convert \f$ (x,y,z) \f$ to \f$ (r,\phi,\theta) \f$
     void Cartesian2Spherical (double &out_r,
 			      double &out_phi,
@@ -305,6 +314,18 @@ namespace CR { // Namespace  -- begin
 				double const &in_phi,
 				double const &in_z,
 				bool const &anglesInDegrees=false);
+    
+    //________________________________________________________________
+    //                                        NorthEastHeight -> other
+
+    //! Convert \f$ (H,E,H) \f$ to \f$ (x,y,z) \f$.
+    void NorthEastHeight2Cartesian (double &out_x,
+				    double &out_y,
+				    double &out_z,
+				    double const &in_north,
+				    double const &in_east,
+				    double const &in_height,
+				    bool const &anglesInDegrees=false);
     
     //________________________________________________________________
     //                                          LongLatRadius -> other
