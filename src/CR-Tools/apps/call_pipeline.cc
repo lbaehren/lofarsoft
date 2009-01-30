@@ -1527,7 +1527,8 @@ int main (int argc, char *argv[])
                                                PlotRawData,
                                                CalculateMaxima,
                                                listCalcMaxima,
-                                               printShowerCoordinates);
+                                               printShowerCoordinates,
+					       ignoreDistance);
 
           /* make a postscript with a summary of all plots
            if summaryColumns = 0 the method does not create a summary. */
