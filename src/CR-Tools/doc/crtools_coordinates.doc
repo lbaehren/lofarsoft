@@ -188,8 +188,8 @@
 	    </tr>
         <tr>
 	      <td>CR::CoordinateType::NorthEastHeight <br> \f$ (N,E,H) \f$</td>
-	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
-	      <td>\f$ \left[ \begin{array}{l}  \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} E \\ N \\ H \end{array} \right] \f$</td>
+	      <td>\f$ \left[ \begin{array}{l} y \\ x \\ z \end{array} \right] \f$</td>
 	    </tr>
 	  </table>
 

@@ -260,19 +260,18 @@ namespace CR { // Namespace CR -- begin
 				   bool const &anglesInDegrees)
   {
     bool status     = true;
-    IPosition shape = antPositions.shape();
+    IPosition antShape = antPositions.shape();
     
-    antPositions_p.resize (shape);
+    antPositions_p.resize (antShape);
     
     switch (type) {
     case CoordinateType::Cartesian:
-      antPositions_p.resize (antPositions.shape());
       antPositions_p = antPositions;
       break;
     default:
       {
 	Vector<double> out (3);
-	for (int n(0); n<shape(0); n++) {
+	for (int n(0); n<antShape(0); n++) {
 	  status = PositionVector::convert(out,
 					   CoordinateType::Cartesian,
 					   antPositions.row(n),
@@ -318,19 +317,18 @@ namespace CR { // Namespace CR -- begin
 				   bool const &anglesInDegrees)
   {
     bool status     = true;
-    IPosition shape = skyPositions.shape();
+    IPosition antShape = skyPositions.shape();
     
-    skyPositions_p.resize (shape);
+    skyPositions_p.resize (antShape);
     
     switch (type) {
     case CoordinateType::Cartesian:
-      skyPositions_p.resize (skyPositions.shape());
       skyPositions_p = skyPositions;
       break;
     default:
       {
 	Vector<double> out (3);
-	for (int n(0); n<shape(0); n++) {
+	for (int n(0); n<antShape(0); n++) {
 	  status = PositionVector::convert(out,
 					   CoordinateType::Cartesian,
 					   skyPositions.row(n),
@@ -412,7 +410,7 @@ namespace CR { // Namespace CR -- begin
     /* Only recompute and set values if buffering is enabled */
     if (bufferDelays_p) {
       casa::IPosition itsShape = shape();
-      delays_p.resize();
+      delays_p.resize(itsShape);
       
       delays_p = delay (antPositions_p,
 			skyPositions_p,
