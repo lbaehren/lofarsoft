@@ -60,7 +60,7 @@ class hffunc():
         self.pars.append(par)
     def getParameters(self):
         if len(self.pars)>0:
-        #Check for paramter object and create it if necessary
+        #Check for paramter object which belongs to this object and create it if necessary
             pobj=self.data["'Parameters="+self.parnames[0]]
             if type(pobj)!=Data:
                 pobj=self.data.newObject("'Parameters")
@@ -246,10 +246,11 @@ class hfQtPanel(hffunc):
         if verbose: print "QtPanel startup!"
         self.setParameter("Parent",None)
         self.setParameter("Title","HFLPLOT")
-        self.setParameter("Width",800)
-        self.setParameter("Height",600)
+        self.setParameter("Width",765)
+        self.setParameter("Height",510)
         self.setParameter("PlotWidget",None)
         self.setParameter("PlotWindow",None)
+        self.setParameter("GraphObject",None)
         return 0
     def initialize(self):
         "Called at the end of the startup routine. Will create the PlotWidget and insert it into the PlotWidget Object."
@@ -259,10 +260,13 @@ class hfQtPanel(hffunc):
 #        d["'PlotWidget"].setNetLevel(999)
             self.obj.PlotWidget.putPy_silent(self.PlotWidget)
             self.obj.PlotWidget.setNetLevel(999)
-            self.PlotWidget.setGeometry(50,50, self.Width,self.Height)
             self.PlotWidget.setWindowTitle(self.Title)
+            self.setSize(self.Width,self.Height)
             self.PlotWidget.setImage(QtGui.QImage())
         return 0
+    def setSize(self,width,height):
+        self.GraphObject.SetSize(width,height)
+        self.PlotWidget.setGeometry(0,0,width,height)
     def process(self,d):
         if verbose: print "QtPanel process"
         self.PlotWidget.setGraph(self.PlotWindow)
@@ -290,9 +294,8 @@ class hfQtNetview(hffunc):
         self.SVGWidget.show()
         return 0
 
-# i.e. object already exists
-#                if par.type=="Py":
-#                    self.i=obj.getI() 
-#                    if self.i==0:
-#                        exec("self."+par.parname+"=None")
-#                        return
+def UnitChooser(self):
+    return MakeChooser(self,"Unit",("ScaleFactor","Prefix"),(("",1.0),("f",10**-15),("p",10**-12),("n",10**-9),("mu",10**-6),("m",10**-3),("c",10**-2),("d",10**-1),("h",10**2),("k",10**3),("M",10**6),("G",10**9),("T",10**12),("P",10**15),("E",10**18),("Z",10**21)))
+
+def LOPESDatatypeChooser(self):
+    return MakeChooser(self,"LOPESDatatype",("DataType","UnitName","Axis"),(("Time","s","x"),("Frequency","Hz","x"),("Fx","Counts","y"),("Voltage","V","y"),("CalFFT","","y"),("invFFT","","y")))

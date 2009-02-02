@@ -4,36 +4,64 @@
 ------------------------------------------------------------------------
 
 This are some scratch notes on my installation procedures for "hfplot"
-- mainly for getting boost-python installed. At the end also a
-description of the get mechanism.
 
 ------------------------------------------------------------------------
 
-Installation under build system:
-cd ~/LOFAR/usg/build/cr> 
+**Compilation under LOFAR usg build system:
+
+cd ~/LOFAR/usg/build/cr
 make help
 make hfget
-http://usg.lofar.org/doxygen/modules.html
 
-Install extra packages on Mac with "port" ot FinkCommander (NOT!)
+**Documentation: http://usg.lofar.org/doxygen/modules.html
+
+**In fact I made a little compile script, containing:
+#
+cd ~/LOFAR/usg/build/cr
+make -k hfget
+cp ~/LOFAR/usg/build/cr/implement/libhfget.so ~/LOFAR/usg/release/lib/python
+
+**To start it:
+cd implement/GUI
+./start
+
+** To get started:
+
+- see hfnet.py for setting up a network, containing some of the syntax.
+
+- hfsample.py contains some very basic explanation of the early syntax
+  (may be somewhat outdated)
+
+- some documentation of the get/put mechansim is given in the source
+  code of hfget.cc linked to the Data class.
+
+------------------------------------------------------------------------
+Installation of exetrnal packages (Mac):
+------------------------------------------------------------------------
+
+You might tr installing extra packages on Mac with "port" or
+FinkCommander (NOT!)??
 
 
-Compilation with Mac: FINK und port klappen nicht gut, weil sie andere
-Pakete (an anderen Orten) installieren und andere Compiler
-benutzen. am besten man kompiliert alles mit einem compiler selber
-(c++ 4.3 ...). The problem is that SIP requies Python to be build as a
-Mac Framework application - this is doen by the binary installer
-(.dmg) but not when compiling yourself.
+However, FINK and port don't work so well, since they are often
+installed in unusual places or (install external packages in other
+places) and use different compilers. The letter is sometimes a problem
+for pre-compiled things.
+
+The best is to compile everything with one compiler.  (c++ 4.3
+...). The problem is that SIP requires Python to be build as a Mac
+Framework application - this is done by the binary installer (.dmg)
+but not when compiling yourself.
 
 
 So, what did I do?
 
-- QT installiert von source
-- SIP installiert von Source (riverbank.co.uk siehe PyQt)
-- Python 2.6 installiert als Mac OS binary installer von python.org
-- python 2.6 installiert von source von python.org 
-- PyQt von source
-- MathGl von source
+- QT installed from source
+- SIP installed from source (riverbank.co.uk siehe PyQt)
+- Python 2.6 installed as Mac OS binary installer from python.org
+- python 2.6 installed from source from python.org 
+- PyQt from source
+- MathGl from source
 DOT ... (http://www.graphviz.org/)
 
 In the end it worked and I didn't know why. I guess the point is that
@@ -44,6 +72,14 @@ which order this is done ...
 BTW, here is my PATH, which sometimes also matters ...
 
 /Library/Frameworks/Python.framework/Versions/Current/bin:/Users/falcke/LOFAR/usg/release/bin:/sw/lib/gcc4.3/bin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/local/Trolltech/Qt-4.4.3/bin:/sw/lib/qt4-x11/bin/:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/X11/bin
+
+
+
+******************************************************************************************
+!!Now follow some older notes on previous installations, kept for historical reasons.!!
+Don't use for curren installation.
+******************************************************************************************
+
 
 ------------------------------------------------------------------------
 Compilation in build system:

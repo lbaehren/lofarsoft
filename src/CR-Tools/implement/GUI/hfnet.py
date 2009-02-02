@@ -1,5 +1,8 @@
 
 vf=FloatVec()
+vc=ComplexVec()
+vs=StringVec()
+vi=IntVec()
 d=Data("LOPES")
 #Setting the Filename
 
@@ -7,22 +10,28 @@ d >> _d("Filetype","LOPESEvent",_l(2)) \
   >> _d("Filename","/Users/falcke/LOFAR/usg/data/lopes/2007.01.31.23:59:33.960.event",_l(2)) \
   >> _d("FileObject",_f("dataReaderObject","CR")) \
   >> "File"
+
 #Provide general input parameters for the data file, which are supposed to affect all antennas
-[_d("Block",1,_l(100)),_d("Blocksize",1024,_l(100))] >> d["File"]
+[_d("Block",1,_l(100)),_d("Blocksize",1024,_l(100))] >> (("Parameters","Data",_l(100)) >> d["File"])
+
+#Create a global Parameter object for the PlotPanel objects
+(("Parameters","PlotPanel",_l(100)) >> d["File"])
 
 #Create several Antennas on the same level and add a Data object as placeholder
-d["File"] >> [("Antenna",0),("Antenna",1)] >> ("Data",_f("dataRead","CR",TYPE.NUMBER))
-("Datatype","Fx",_l(100)) >> DataUnion(d["Data"])
+d["File"] >> NewObjectRange("Antenna",2) >> ("Data",_f("dataRead","CR",TYPE.COMPLEX))
 
-("Color","b") >> d["File"]
+("Datatype","CalFFT",_l(100)) >> (("Parameters","Data",_l(100)) >> DataUnion(d["Data"]))
+
+("Color","b",_l(100)) >>(("Parameters","PlotData",_l(100)) >> d["File"])
 
 ("GraphObject",_f(hfGraphObject),_l(1000)) >>  DataUnion(d["Antenna:Data"])
-d["Data"] >> "yAxis" >> ("PlotData",_f(hfPlotData)) >>  ("PlotPanel",_f(hfPlotPanel))
+
+d["Data"]>> ("UnitData",_f("Unit")) >> "yAxis"  >> ("PlotData",_f(hfPlotData)) >>  ("PlotPanel",_f(hfPlotPanel))
 
 
-d["Antenna"] >> ("Data",_f("Range")) >> "xAxis" >> d["PlotData"]
+d["Antenna"] >> ("Data",_f("Range"))>> ("UnitData",_f("Unit")) >> "xAxis" >> d["PlotData"]
 
-d["xAxis'end"]=1023
+d["xAxis'end"]=512
 
 DataUnion(d["PlotPanel"]) >>  ("PlotWindow",_f(hfPlotWindow))
 
@@ -33,22 +42,51 @@ d["PlotWindow"].update()
 d["PlotWindow"]  >> ("QtPanel",_f(hfQtPanel)) >> ("QtNetview",_f(hfQtNetview),_l(999))
 
 
+unitchooser=UnitChooser(d)
 
+#To use the designer hfQtPlotWidget needs to be explicitly created here
 hfQtPlotWidget=hfQtPlotConstructor(d["QtPanel"])
-mf=MyForm()
-mf.raise_()
-mf.show()
+hfm=hfMainWindow(hfQtPlotWidget)
+hfm.raise_()
+hfm.show()
+gui=hfm.ui
 
 verbose=False
 d.touch()
 
+##Now setting up some connections to the GUI ... will be done in the code, since we need to do the object selection.
+d["PlotWindow'npanels"].connect(gui.npanels)
+d["PlotWindow'npanelsx"].connect(gui.npanelsx)
+d["PlotWindow'npanelsy"].connect(gui.npanelsy)
+
+d["PlotPanel'xmin"][0].connect(gui.xmin)  ##OK the [0] shouldn't be necessary, but somehow the search does not work!
+d["PlotPanel'ymin"][0].connect(gui.ymin)  ##OK the [0] shouldn't be necessary, but somehow the search does not work!
+d["PlotPanel'xmax"][0].connect(gui.xmax)  ##OK the [0] shouldn't be necessary, but somehow the search does not work!
+d["PlotPanel'ymax"][0].connect(gui.ymax)  ##OK the [0] shouldn't be necessary, but somehow the search does not work!
+
+initializePyQtObjects(d)
+
+
+
+
 """
+d["Antenna=1:PlotPanel"] // d["Antenna=1:PlotPanel'Parameters"] >> d["File"]
+~d["Antenna:PlotPanel'Parameters"]
+
+d["QtNetview'maxNetLevel"]=999
+
+
+Unit
+
+-> Unit, "Jy","erg/sec/cm^2/Hz","Watt/m^2/Hz"
+
+-> Scale, "n","mu","m","c","","d","h","k","M","G","T"
+-> ScaleFactor (1e-9,1e-6,1e-3,1e-2,1,10,100,1000,1e6,1e9,1e12)
 
 ############
 d["QtPanel"].update()
 d["QtNetview"].update()
 
-d["QtNetview'maxNetLevel"]=999
 
 d["Antenna=1:PlotData"] >> d["Antenna=0:PlotPanel"]
 
@@ -64,16 +102,12 @@ d["PlotWindow'GraphObject"].touch()
 
 
 ###############
-d.create("TEST")  # creates a new object
-d.initializeObject("NAME",val,_f(FUNC),_l(netlevel)) # initializes it
-d[89] ^ (d,d[1])  # inserts a new object between two other objects
-_n("TEST3",1) ^ (d[0],d[1])   #inserts a new object with initialization paramters given in _n
+newobj=d.create("TEST")  # creates a new object
+~newobj #deletes it right away
+newobj.initializeObject("NAME",val,_f(FUNC),_l(netlevel)) # initializes it
+newobj ^ (d,d[1])  # inserts a new object between two other objects
+_n("TEST",1) ^ (d[0],d[1])   #inserts a new object with initialization paramters given in _n
 d // d["TEST"]  ## separates a link between two objects
-
-
-
-
-
 
 
 d["Antenna=0:PlotWindow"].update()

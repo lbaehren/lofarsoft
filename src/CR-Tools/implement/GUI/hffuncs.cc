@@ -131,7 +131,7 @@ void ObjectFunctionClass::setParameterT(HString internal_name, T default_value, 
   parameter_list[internal_name]=p_i;
 }
 
-/*
+/*!
 Returns the external name (i.e. the name of the object to be accessed) of an internal parameter
 */
 HString ObjectFunctionClass::getParameterName(HString internal_name) {
@@ -147,7 +147,25 @@ HString ObjectFunctionClass::getParameterName(HString internal_name) {
   };
 }
 
-/*
+/*!
+Returns a string vector containing all defined parameters (i.e., return the external names). The string parameter first_element can be inserted as the first element.
+*/
+
+vector<HString> ObjectFunctionClass::getParameterList(HString first_element) {
+  DBG("getParameterList: start.");
+  map<HString,parameter_item>::iterator it;
+  it=parameter_list.begin();
+  vector<HString> vec;
+  if (first_element!="") vec.push_back(first_element);
+  while (it != parameter_list.end()) {
+    vec.push_back((it->second).name);
+    it++;
+  };
+  return vec;
+}
+
+
+/*!
 Returns the default value of an internal parameter, typically used  if the external name (object) does not exist. Can also be used as a static variable of an object.
 */
 template <class T>
@@ -436,6 +454,37 @@ do that easily.
 */
 
 
+class DataFunc_Sys_Unit : public ObjectFunctionClass {
+public:  
+  DEFINE_PROCESS_CALLS_NUMONLY 
+
+  DataFunc_Sys_Unit(Data * dp){ 
+    //set the default parameters, which are by default integers - perhaps change to float numbers later??
+    DBG("DataFunc_Sys_Unit: initialization called.");
+    setParameter("UnitName", "");
+    setParameter("ScalePrefix", "");
+    setParameter("ScaleFactor", 1.0);
+  }
+
+  template <class T>
+  void process(F_PARAMETERS) {
+    GET_FUNC_PARAMETER_T(ScaleFactor,HNumber);
+    dp->getFirstFromVector(*vp,vs);
+    address i,size=vp->size();
+    for (i=0; i<size;i++) {
+      (*vp)[i] = (*vp)[i]/ScaleFactor;
+    };
+  }
+
+  void process_S(F_PARAMETERS_T(HString)) {
+    vp->clear();
+    GET_FUNC_PARAMETER_T(ScalePrefix,HString);
+    GET_FUNC_PARAMETER_T(UnitName,HString);
+    vp->push_back(ScalePrefix + UnitName);
+  }
+};
+DATAFUNC_CONSTRUCTOR(Unit,Sys,"Multiplies the data with a unit scale factor and also returns the apropriate unit string.",NUMBER, false)
+
 class DataFunc_Sys_Copy : public ObjectFunctionClass {
 public:  
   DEFINE_PROCESS_CALLS 
@@ -506,6 +555,7 @@ public:
 DATAFUNC_CONSTRUCTOR(Square,Sys,"Squares the elements in the data vector.",INTEGER, false)
  
 
+
 class DataFunc_Sys_Print : public ObjectFunctionClass {
 public:
 
@@ -524,6 +574,7 @@ public:
   }
 };
 DATAFUNC_CONSTRUCTOR(Print,Sys,"Prints contents of data vector to stdout.",STRING, false);
+
 
 
 class DataFunc_Sys_Range : public ObjectFunctionClass {
@@ -1103,18 +1154,14 @@ public:
 
   DEFINE_PROCESS_CALLS_IGNORE_DATATYPE
   
-  //  This function initializes the Plotter. It assumes that a MathGL
-  //  QT window was already launched with Py_mglWindow.
   DataFunc_Py_PyFunc (Data* dp){
+    PyObject* pyobj = dp->retrievePyFunc();
+
     DBG("DataFunc_Py_PyFunc: initialization called.");
-    HPointer ptr=NULL;
-    setParameter("PythonObject",  ptr); //Contains pointer to the hffunc python object
-
-    GET_FUNC_PARAMETER_T(PythonObject,HPointer);
-    if (PythonObject==NULL){ERROR("PyFunc: pointer to PythonObject is NULL. Object PythonObject does not exist. Define PythonObject and use pytore before assigning PyFunc to this Object." << ", name=" << dp->getName(true)); return;};
-
-    PyObject * pyobj = reinterpret_cast<PyObject*>(PythonObject);
-    DBG("DataFunc_Py_PyFunc: pyobj=" << pyobj);
+    if (pyobj==NULL){
+      ERROR("PyFunc: pointer to PythonObject is NULL. Object PythonObject does not exist. Define PythonObject and use pytore before assigning PyFunc to this Object." << ", name=" << dp->getName(true)); 
+      return;
+    };
 
     //Call the startup method if present
     char AttribStr[] = "hfstartup";
@@ -1128,12 +1175,10 @@ public:
   }
 
     ~DataFunc_Py_PyFunc (){
-	Data * dp = data_pointer;
+      Data * dp = data_pointer;
+      PyObject* pyobj = dp->retrievePyFunc();
 	
-	GET_FUNC_PARAMETER_T(PythonObject,HPointer);
-	if (PythonObject==NULL){ERROR("PyFunc: pointer to Python Object is NULL." << ", name=" << dp->getName(true)); return;};
-
-	PyObject * pyobj = reinterpret_cast<PyObject*>(PythonObject);
+	if (pyobj==NULL){ERROR("PyFunc: pointer to Python Object is NULL." << ", name=" << dp->getName(true)); return;};
 
 	char AttribStr[] = "hfcleanup";
 	//we need to check if the attribute is present in the Python Object
@@ -1147,26 +1192,22 @@ public:
  
 
     void process(F_PARAMETERS_NOVEC){
+      PyObject* pyobj = dp->retrievePyFunc();
 
-	//First retrieve the pointer to the pointer to the mglWindow and check whether it is non-NULL.
-	GET_FUNC_PARAMETER_T(PythonObject,HPointer);
-	if (PythonObject==NULL){ERROR("PyFunc: pointer to Python Object is NULL."  << ", name=" << dp->getName(true)); return;};
-
-	PyObject * pyobj = reinterpret_cast<PyObject*>(PythonObject);
 	DBG("DataFunc_Py_PyFunc.process: pyobj=" << pyobj << " name=" << dp->getName(true));
+	if (pyobj==NULL){ERROR("PyFunc: pointer to Python Object is NULL."  << ", name=" << dp->getName(true)); return;};
 
 	char AttribStr[] = "hfprocess";
 	//we need to check if the process attribute is present in the Python Object
 	if (!PyObject_HasAttrString(pyobj, AttribStr)) {
 	    ERROR("PyFunc: Object does not have Attribute " << AttribStr << "."  << ", name=" << dp->getName(true)); return;};
-	DBG("DataFunc_Py_PyFunc.process: Call Pythopn Object");
+	DBG("DataFunc_Py_PyFunc.process: Call Python Object");
 	int ret=boost::python::call_method<int>(pyobj,AttribStr,boost::ref(*dp));
 	if (ret!=0) {
 	    ERROR("PyFunc - process method returned user-defined error code" << ret << ", name=" << dp->getName(true));
 	};
     }
 };
-
 //The following macro has to come at the of the definiton. It defines
 //a constructor function (no class) with a pointer that is called when
 //an object is assigned this function.
@@ -1338,6 +1379,7 @@ void DataFunc_Sys_Library_publish(DataFuncLibraryClass* library_ptr){
   library_ptr->add(&DataFunc_Sys_Print_Constructor);
   library_ptr->add(&DataFunc_Sys_Square_Constructor);
   library_ptr->add(&DataFunc_Sys_Range_Constructor);
+  library_ptr->add(&DataFunc_Sys_Unit_Constructor);
 }
 
 void DataFunc_Qt_Library_publish(DataFuncLibraryClass* library_ptr){

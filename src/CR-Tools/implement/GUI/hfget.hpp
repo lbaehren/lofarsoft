@@ -125,6 +125,13 @@ DEF_DATA_OID_NAME_FUNC_PYDEF_EXT( , FUNC  )
     HComplex(Data::*Data_getOne_C_0)() = &Data::getOne_0_<HComplex>;
     HString (Data::*Data_getOne_S_0)() = &Data::getOne_0_<HString>;
 
+HInteger(Data::*Data_getParameter_I)(HString, HInteger) = &Data::getParameter;
+HNumber (Data::*Data_getParameter_N)(HString, HNumber) = &Data::getParameter;
+HComplex(Data::*Data_getParameter_C)(HString, HComplex) = &Data::getParameter;
+HString (Data::*Data_getParameter_S)(HString, HString) = &Data::getParameter;
+
+
+
     
 //used to be BOOST_PYTHON_MODULE(hfget)
 BOOST_PYTHON_MODULE(libhfget)
@@ -172,6 +179,7 @@ BOOST_PYTHON_MODULE(libhfget)
       .def("hasData", &Data::hasData)
       .def("Silent", &Data::Silent)
       .def("noMod", &Data::noMod)
+      .def("noSignal", &Data::noSignal,return_internal_reference<>())
       .def("needsUpdate", &Data::needsUpdate)
       .def("doAutoUpdate", &Data::doAutoUpdate)
       .def("doesAutoUpdate", &Data::doesAutoUpdate)
@@ -215,6 +223,11 @@ BOOST_PYTHON_MODULE(libhfget)
       .def("get", Data_get_C)
       .def("get", Data_get_S)
 
+      .def("getParameter", Data_getParameter_I)
+      .def("getParameter", Data_getParameter_N)
+      .def("getParameter", Data_getParameter_C)
+      .def("getParameter", Data_getParameter_S)
+
       .def("inspect", Data_inspect_I)
       .def("inspect", Data_inspect_N)
       .def("inspect", Data_inspect_C)
@@ -249,6 +262,15 @@ BOOST_PYTHON_MODULE(libhfget)
       .def("putPy", &Data::putPy,return_internal_reference<>())
       .def("putPy_silent", &Data::putPy_silent,return_internal_reference<>())
       .def("getPy", &Data::getPy)
+
+      .def("storePyFunc", &Data::storePyFunc,return_internal_reference<>())
+      .def("deletePyFunc", &Data::deletePyFunc,return_internal_reference<>())
+      .def("retrievePyFuncObject", &Data::retrievePyFuncObject)
+
+      .def("storePyQt", &Data::storePyQt,return_internal_reference<>())
+      .def("deletePyQt", &Data::deletePyQt,return_internal_reference<>())
+      .def("retrievePyQtObject", &Data::retrievePyQtObject)
+      .def("signalPyQt", &Data::signalPyQt)
 
       .def("putI", Data_putOne_I)
       .def("putN", Data_putOne_N)

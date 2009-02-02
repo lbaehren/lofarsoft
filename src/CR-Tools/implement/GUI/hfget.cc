@@ -530,8 +530,8 @@ vector<objectid> DPtrToOid(vector<Data*> objects)
   
 */
 
-bool isValidDataObject(Data* obj) {
-  return obj!=NULL && obj->magiccode==MAGICCODE;
+bool isDataObject(Data* obj) {
+  return obj!=&NullObject && obj!=NULL && obj->magiccode==MAGICCODE;
 }
 
 bool operator== (Data::modification_record mod1, Data::modification_record mod2) {return mod1.ref==mod2.ref && mod1.version==mod2.version;}
@@ -556,9 +556,11 @@ void Data::printAllStatus(bool short_output,longint maxlevel){
   HInteger i;
   if (data.superior!=NULL) {
     for (i=0; i<data.superior->data_objects.size(); i++) {
-      SaveCall(data.superior->data_objects[i]) {
-	if (data.superior->data_objects[i]->getNetLevel()<=maxlevel)
-	  data.superior->data_objects[i]->printStatus(short_output);
+      if (data.superior->data_objects[i]!=&NullObject) {
+	SaveCall(data.superior->data_objects[i]) {
+	  if (data.superior->data_objects[i]->getNetLevel()<=maxlevel)
+	    data.superior->data_objects[i]->printStatus(short_output);
+	};
       };
     };
   } else {
@@ -571,7 +573,9 @@ vector<objectid> Data::getAllIDs(){
   vector<objectid> vec;
   if (data.superior!=NULL) {
     for (i=0; i<data.superior->data_objects.size(); i++) {
-      SaveCall(data.superior->data_objects[i]) vec.push_back(data.superior->data_objects[i]->getOid());
+      if (data.superior->data_objects[i]!=&NullObject) {
+	SaveCall(data.superior->data_objects[i]) vec.push_back(data.superior->data_objects[i]->getOid());
+      };
     };
   } else {
     ERROR("getAllIDs: No superior created yet, can't find any objects!");
@@ -691,6 +695,8 @@ HString Data::Status(bool short_output){
   sout << "datatype=" << datatype_txt(data.type) << endl;
   sout << "of_ptr=" << data.of_ptr << endl;
   sout << "d_ptr=" << data.d_ptr << endl;
+  sout << "pyqt=" << data.pyqt << endl;
+  sout << "py_func=" << data.py_func << endl;
   sout << "s_ptr=" << data.s_ptr << endl;
 
   if (data.d_ptr!=NULL) {
@@ -825,7 +831,11 @@ number is too high, the object will not be dsiplayed. Major objects
 have level>=1, user parameters have level>=10, default paramteres have
 level >=100, and system objects have level>=1000.
  */
-Data& Data::setNetLevel(longint lev){data.netlevel=lev; return *this;}
+Data& Data::setNetLevel(longint lev){
+  data.netlevel=lev; 
+  DBG("setNetLevel(" << lev << "): name=" << getName(true));
+  return *this;
+}
 
 HString Data::getName(bool longname){
      if (!longname) return data.name;
@@ -1725,6 +1735,116 @@ void Data::delData(){
   data.type=UNDEF;
 }
 
+/*! \brief Send a signal to PyQt.
+
+ Invokes the internally stored PyQt object and cals the method
+ specified in the input string. This is used, for example, to send an
+ updated() signal to the GUI.
+*/
+
+void Data::signalPyQt(HString signal){
+  if (data.pyqt==NULL) return;
+  char *AttribStr = signal.c_str();
+  //we need to check if the process attribute is present in the Python Object
+  if (!PyObject_HasAttrString(data.pyqt, AttribStr)) {
+    ERROR("signalPyQt: Object does not have Attribute " << AttribStr << "."  << ", name=" << getName(true)); return;};
+  DBG("signalPyQt(signal=" << signal <<"): name=" << getName(true));
+  int ret=boost::python::call_method<int>(data.pyqt,AttribStr,boost::ref(*this));
+  if (ret!=0) {
+    ERROR("signalPyQt(signal=" << signal <<") returned user-defined error code" << ret << ", name=" << getName(true));
+  };
+}
+
+/*! \brief Store a reference to a python QObject reference in the object.
+
+  The QObject is used to emit and receive Qt Signals to communicate with a GUI.
+  See setPyQt under python
+
+  #REF: setPyQt(Py), deletePyQt, retrievePyQt, retrievePyQtObject
+ */
+Data& Data::storePyQt(PyObject* pyobj) {
+  data.pyqt=pyobj;
+  return *this;
+}
+
+/*! \brief Delete the reference to the python QObject reference in the object.
+
+  The QObject is used to emit and receive Qt Signals to communicate with a GUI.
+
+  #REF: setPyQt(Py), retrievePyQt, storePyQt, retrievePyQtObject
+ */
+Data& Data::deletePyQt(PyObject* pyobj) {
+  data.pyqt=NULL;
+  return *this;
+}
+
+/*! \brief Retrieve a reference to the Qt Object.
+
+  The QObject is used to emit and receive Qt Signals to communicate with a GUI.
+
+  #REF: deletePyQt, storePyQt, retrievePyQtObject
+ */
+PyObject* Data::retrievePyQt() {return data.pyqt;}
+
+
+/*! \brief Retrieve under python the Qt Object.
+
+  The QObject is used to emit and receive Qt Signals to communicate with a GUI.
+
+  #REF: deletePyQt, retrievePyQt, storePyQt, retrievePyQt
+ */
+boost::python::handle<> Data::retrievePyQtObject() {
+    return boost::python::handle<>(boost::python::borrowed(data.pyqt));
+}
+
+
+
+
+
+
+/*! \brief Store a reference to a python function in the object.
+
+  The python function is used to run user defined functions
+
+  #REF: deletePyFunc, retrievePyFunc, retrievePyFuncObject
+ */
+Data& Data::storePyFunc(PyObject* pyobj) {
+  data.py_func=pyobj;
+  return *this;
+}
+
+/*! \brief Retrieve a reference to a python function in the object.
+
+  The python function is used to run user defined functions
+
+  #REF: deletePyFunc, storePyFunc, retrievePyFuncObject
+ */
+PyObject* Data::retrievePyFunc() {return data.py_func;}
+
+/*! \brief Delete the reference to the python QObject reference in the object.
+
+  The QObject is used to emit and receive Func Signals to communicate with a GUI.
+
+  #REF: storePyFunc, retrievePyFunc, retrievePyFuncObject
+ */
+Data& Data::deletePyFunc(PyObject* pyobj) {
+  data.py_func=NULL;
+  return *this;
+}
+
+/*! \brief Retrieve under python the user-defined python function in the object.
+
+  The python function is used to run user defined functions in the object.
+
+  #REF: deletePyFunc, storePyFunc, retrievePyFunc
+ */
+boost::python::handle<> Data::retrievePyFuncObject() {
+    return boost::python::handle<>(boost::python::borrowed(data.py_func));
+}
+
+
+
+
 /*! \brief Store a pyhton object reference in the  Data buffer.
 
 Used to store the pointer to a Python object. The Python object can be retrieved with pyretrieve.
@@ -1745,13 +1865,31 @@ Data& Data::putPy_silent(PyObject* pyobj) {
 
 /*!  \brief Retrieve a pyhton object from Data buffer.
 
-Used retrieve a python object which was stored with pystore. This will
-create a new reference to the same python object stored with pystore.
+Used retrieve a python object which was stored with putPy. This will
+create a new reference to the same python object stored with putPy.
  */
 boost::python::handle<> Data::getPy() {
     return boost::python::handle<>(boost::python::borrowed(reinterpret_cast<PyObject*>(getOne<HPointer>())));
 }
 
+/*! \brief put a vector value into the object without updating the network
+ */
+template <class T>
+void Data::put_silent(vector<T> &v) {
+  bool sil=Silent(true);
+  put(v);
+  Silent(sil);
+}
+
+
+/*! \brief put a single value into the object without updating the network
+ */
+template <class T>
+void Data::putOne_silent(T v) {
+  bool sil=Silent(true);
+  putOne(v);
+  Silent(sil);
+}
 
 
 //return_value_policy<manage_new_object>()
@@ -1798,6 +1936,21 @@ void Data::noMod(){
     data.noMod=true;
 }
 
+/*!
+
+\brief Do not send a PyQt signal during the next put operation
+
+This method allows one to modify an object without sending a Signal
+and is used by the GUI to change a parameter from the user without
+creating an infinte loop between GUI and data object. This flag is
+valid only for the next operation and will be qutomatically reset
+after the put operation.
+ */
+Data & Data::noSignal(){
+    data.noSignal=true;
+    return *this;
+}
+
 template <class T>
 void Data::put(vector<T> &vin) {
   if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return;};
@@ -1820,6 +1973,8 @@ void Data::put(vector<T> &vin) {
   data.len=vin.size();
   DBG("put: d_ptr=" << data.d_ptr << ", &vin=" << &vin << ", len=" << data.len);
   setModification();  //Note that the data has changed
+  if (data.noSignal) {data.noSignal=false;}
+  else {signalPyQt("updated");}; //Tell a GUI, if present, that this has changed 
 }
 
 /*!
@@ -2187,20 +2342,43 @@ HString Data::getFuncName(){
 */
 template <class T>
 T Data::getParameter(HString name, T defval){
-    Data * dp;
-    dp = Ptr(name); 
-    DBG("getParameter: name=" << name << " ptr=" << dp << " NullObject=" << &NullObject << " Empty=" << tf_txt(dp->Empty()));
-    if (dp==&NullObject || dp->Empty()) {
-	DBG("getParameter: Creating new object with name=" << name << " and value defval=" << defval);
-	Data* dpnew=newObject(name,data.defdir);
-	DOSILENT(dpnew->putOne(defval));
-	dpnew->setNetLevel(100);
-	return defval;
-    } else {
-	DBG("getParameter: val=" << dp->getOne<T>());
-	return dp->getOne<T>();
+    Data * obj;
+    Data * pobj;
+    //First search for the parameter object and create it, if not present
+    pobj = Ptr("'Parameters="+getName());
+    if (!isDataObject(pobj)) {
+      DBG("getParameter name=" <<getName(true) <<": Creating new parameter object (parameter: name=" << name << " and value defval=" << defval << ")");
+      pobj=newObject("'Parameters",data.defdir);
+      pobj->setNetLevel(100);
+      DBG("getParameter name=" <<getName(true) <<": new object =" << reinterpret_cast<void*>(pobj) << " isDataObject=" << tf_txt(isDataObject(pobj)) << " func_ptr=" << reinterpret_cast<void*>(data.of_ptr));
+
+      vector<HString> parlist;
+      if (!hasFunc()) {
+	parlist.push_back(getName());
+      } else {
+	parlist = data.of_ptr->getParameterList(getName());
+      };
+      pobj->put_silent(parlist);
     };
+    //Now search for parameter after parameter object
+    obj = pobj->Ptr(name); 
+    //If not present search the entire net
+    if (!isDataObject(obj)) {
+      obj=Ptr(name);
+      if (!isDataObject(obj)) { 
+	//Still not found? Then create it locally.
+	DBG("getParameter name=" <<getName(true) <<": Creating new object with name=" << name << " and value defval=" << defval);
+	obj=pobj->newObject(name,data.defdir);
+	obj->setNetLevel(100);
+	obj->putOne_silent(defval);
+	return defval;
+      }
+    };
+    DBG("getParameter: name=" << name << " ptr=" << obj << " NullObject=" << &NullObject << " Empty=" << tf_txt(obj->Empty()));
+    DBG("getParameter: val=" << obj->getOne<T>());
+    return obj->getOne<T>();
 }
+
 
 /*
 This looks for the first object that is available on port 0 and fill
@@ -2250,8 +2428,11 @@ void Data::get(vector<T> &v, Vector_Selector *vs) {
 
   if (f_ptr==NULL) {   //No function but data with different type
     if (d_ptr_v==NULL) {
-      getFirstFromVector(v,vs);
-      DBG("No Data in Data Object!" << " name=" << getName(true)); 
+      if (data.from.size()>0) {
+	getFirstFromVector(v,vs);
+      } else {
+	DBG("No Data in Data Object!" << " name=" << getName(true)); 
+      };
       return;
     } else {
       switch (data.type) {  //here we just have a data vector present, so just copy the data buffer to the vector
@@ -2332,7 +2513,10 @@ Data::Data(HString name,superior_container * superior){
   data.s_ptr=NULL;
   data.of_ptr=NULL;
   data.d_ptr=NULL;
+  data.pyqt=NULL;
+  data.py_func=NULL;
   data.noMod=false;
+  data.noSignal=false;
   data.modified=true;
   data.beingmodified=false;
   data.autoupdate=true;
@@ -2649,7 +2833,6 @@ vector<Data*> Data::newObjects(HString name, vector<T> vec, DIRECTION dir_type, 
   return dobs;
 }
 
-
 //------------------------------------------------------------------------
 //End Data class
 //------------------------------------------------------------------------
@@ -2833,7 +3016,9 @@ vectostring(*d_ptr_##EXT); \
 d.getParameter("NIX",*val_##EXT);\
 d.getFirstFromVector(*d_ptr_##EXT, &vs);\
 d.putOne(*val_##EXT);\
+d.putOne_silent(*val_##EXT);\
 d.put(*d_ptr_##EXT);\
+d.put_silent(*d_ptr_##EXT);\
 d.inspect(*d_ptr_##EXT);\
 vec_append(*d_ptr_##EXT,*d_ptr_##EXT);			\
 WhichType<TYPE>();\

@@ -162,6 +162,8 @@ public:
   
   HString getParameterName(HString);
 
+  vector<HString> getParameterList(HString first_element="");
+
   template <class T>
     void instantiate_one();
   

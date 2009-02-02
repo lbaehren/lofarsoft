@@ -1,3 +1,43 @@
+obj=d["PlotWindow'npanels"]
+obj.connect(gui.npanels)
+obj.connect(gui.npanels,QtCore.SLOT("setText(QString)"))
+
+d["PlotWindow'npanels"]=8
+
+obj.activatePyQt()
+QtCore.QObject.connect(obj.PyQt(),obj.SIGNAL(),gui.npanels,QtCore.SLOT("setText(QString)"))
+QtCore.QObject.connect(hfm.ui.dummy,QtCore.SIGNAL("clicked()"),obj.SLOT())
+
+hfo.connect(hfm.ui.dummy,QtCore.SIGNAL("clicked()"),hfo.put)
+hfo.connect(hfo,QtCore.SIGNAL("hfupdated(QString)"),hfm.ui.npanels,QtCore.SLOT("setText(QString)"))
+
+
+class hfobject(QtCore.QObject):
+    def put(self):
+        print "Clicked:",self.sender().objectName()
+        return 0
+    def updated(self,object):
+        self.hfupdated(object.getS())
+        return 0
+    def hfupdated(self,value):
+        self.emit(QtCore.SIGNAL("hfupdated(QString)"),QtCore.QString(str(value)))
+        return 0
+
+
+hfo=hfobject()
+d["PlotWindow'npanels"].storePyQt(hfo)
+
+hfo.connect(hfm.ui.dummy,QtCore.SIGNAL("clicked()"),hfo.put)
+hfo.connect(hfo,QtCore.SIGNAL("hfupdated(QString)"),hfm.ui.npanels,QtCore.SLOT("setText(QString)"))
+
+hfo.connect(hfo,QtCore.SIGNAL("hfupdated(QString)"),hfm.ui.npanels.setText)
+
+d["PlotWindow'npanels"]=8
+
+QtCore.QObject.disconnect(hfm.ui.npanels, QtCore.SIGNAL("returnPressed()"), hfm.ui.HMainPlotter.hfsetNPanels)
+QtCore.QObject.connect(hfm.ui.npanels, QtCore.SIGNAL("returnPressed()"), hfm.ui.HMainPlotter.hfsetNPanels)
+
+
 
 
 pw=d["QtPanel'PlotWidget"]

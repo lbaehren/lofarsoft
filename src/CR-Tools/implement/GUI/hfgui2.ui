@@ -1,0 +1,951 @@
+<ui version="4.0" >
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1127</width>
+    <height>664</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget" >
+   <widget class="QPushButton" name="pushButton" >
+    <property name="geometry" >
+     <rect>
+      <x>720</x>
+      <y>-30</y>
+      <width>75</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>PushButton</string>
+    </property>
+   </widget>
+   <widget class="QFrame" name="frame" >
+    <property name="geometry" >
+     <rect>
+      <x>0</x>
+      <y>5</y>
+      <width>1121</width>
+      <height>611</height>
+     </rect>
+    </property>
+    <property name="frameShape" >
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow" >
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QFrame" name="frame_3" >
+     <property name="geometry" >
+      <rect>
+       <x>335</x>
+       <y>5</y>
+       <width>781</width>
+       <height>536</height>
+      </rect>
+     </property>
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Raised</enum>
+     </property>
+     <widget class="QTabWidget" name="tabwindow" >
+      <property name="geometry" >
+       <rect>
+        <x>5</x>
+        <y>0</y>
+        <width>771</width>
+        <height>531</height>
+       </rect>
+      </property>
+      <property name="currentIndex" >
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tab" >
+       <attribute name="title" >
+        <string>Tab 1</string>
+       </attribute>
+       <widget class="hfQtPlotWidget" native="1" name="HMainPlotter" >
+        <property name="geometry" >
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>766</width>
+          <height>511</height>
+         </rect>
+        </property>
+        <property name="baseSize" >
+         <size>
+          <width>800</width>
+          <height>600</height>
+         </size>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab_2" >
+       <attribute name="title" >
+        <string>Tab 2</string>
+       </attribute>
+       <widget class="QtSvg.QSvgWidget" native="1" name="networkdisplay" >
+        <property name="geometry" >
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>766</width>
+          <height>506</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QFrame" name="frame_4" >
+     <property name="geometry" >
+      <rect>
+       <x>5</x>
+       <y>0</y>
+       <width>326</width>
+       <height>601</height>
+      </rect>
+     </property>
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Raised</enum>
+     </property>
+     <widget class="QWidget" native="1" name="widget" >
+      <property name="geometry" >
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>321</width>
+        <height>601</height>
+       </rect>
+      </property>
+      <widget class="QFrame" name="frame_7" >
+       <property name="geometry" >
+        <rect>
+         <x>0</x>
+         <y>5</y>
+         <width>321</width>
+         <height>591</height>
+        </rect>
+       </property>
+       <property name="frameShape" >
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow" >
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QFrame" name="frame_12" >
+        <property name="geometry" >
+         <rect>
+          <x>3</x>
+          <y>415</y>
+          <width>306</width>
+          <height>66</height>
+         </rect>
+        </property>
+        <property name="frameShape" >
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow" >
+         <enum>QFrame::Raised</enum>
+        </property>
+        <widget class="QFrame" name="frame_13" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>301</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="frameShape" >
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QLabel" name="label_5" >
+          <property name="geometry" >
+           <rect>
+            <x>10</x>
+            <y>0</y>
+            <width>81</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="font" >
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text" >
+           <string>Window:</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="windowselection" >
+          <property name="geometry" >
+           <rect>
+            <x>120</x>
+            <y>0</y>
+            <width>171</width>
+            <height>26</height>
+           </rect>
+          </property>
+          <property name="editable" >
+           <bool>false</bool>
+          </property>
+          <item>
+           <property name="text" >
+            <string>All Windows</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>Window 1</string>
+           </property>
+          </item>
+         </widget>
+        </widget>
+        <widget class="QFrame" name="frame_14" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>30</y>
+           <width>301</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="frameShape" >
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QLabel" name="label_7" >
+          <property name="geometry" >
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>81</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string>No. Panels:</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="npanels" >
+          <property name="geometry" >
+           <rect>
+            <x>70</x>
+            <y>0</y>
+            <width>21</width>
+            <height>22</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="npanelsx" >
+          <property name="geometry" >
+           <rect>
+            <x>160</x>
+            <y>0</y>
+            <width>21</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="panelauto" >
+          <property name="geometry" >
+           <rect>
+            <x>240</x>
+            <y>0</y>
+            <width>51</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string>Auto</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_8" >
+          <property name="geometry" >
+           <rect>
+            <x>90</x>
+            <y>0</y>
+            <width>71</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string> row x col:</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="npanelsy" >
+          <property name="geometry" >
+           <rect>
+            <x>210</x>
+            <y>0</y>
+            <width>21</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_9" >
+          <property name="geometry" >
+           <rect>
+            <x>190</x>
+            <y>0</y>
+            <width>16</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string>x</string>
+          </property>
+         </widget>
+        </widget>
+       </widget>
+       <widget class="QFrame" name="frame_5" >
+        <property name="enabled" >
+         <bool>true</bool>
+        </property>
+        <property name="geometry" >
+         <rect>
+          <x>5</x>
+          <y>5</y>
+          <width>306</width>
+          <height>111</height>
+         </rect>
+        </property>
+        <property name="maximumSize" >
+         <size>
+          <width>16777215</width>
+          <height>282</height>
+         </size>
+        </property>
+        <property name="cursor" >
+         <cursorShape>ArrowCursor</cursorShape>
+        </property>
+        <property name="frameShape" >
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow" >
+         <enum>QFrame::Raised</enum>
+        </property>
+        <widget class="QCommandLinkButton" name="commandLinkButton" >
+         <property name="geometry" >
+          <rect>
+           <x>200</x>
+           <y>75</y>
+           <width>91</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="toolTip" >
+          <string>Provides access to all parameters of DataPlotter</string>
+         </property>
+         <property name="whatsThis" >
+          <string>Provides access to all parameters of DataPlotter</string>
+         </property>
+         <property name="text" >
+          <string>Parameters</string>
+         </property>
+        </widget>
+        <widget class="QFrame" name="frame_6" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>301</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="frameShape" >
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QLabel" name="label" >
+          <property name="geometry" >
+           <rect>
+            <x>10</x>
+            <y>0</y>
+            <width>101</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="font" >
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text" >
+           <string>Data Plotter:</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="plotterselection" >
+          <property name="geometry" >
+           <rect>
+            <x>120</x>
+            <y>0</y>
+            <width>171</width>
+            <height>26</height>
+           </rect>
+          </property>
+          <property name="editable" >
+           <bool>false</bool>
+          </property>
+          <item>
+           <property name="text" >
+            <string>Selected Window</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>Selected Panel</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>All Lines</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>Line 1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>Line 2</string>
+           </property>
+          </item>
+         </widget>
+        </widget>
+        <widget class="QFrame" name="frame_9" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>30</y>
+           <width>291</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QLabel" name="label_6" >
+          <property name="geometry" >
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>41</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string>Color:</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="color" >
+          <property name="geometry" >
+           <rect>
+            <x>40</x>
+            <y>0</y>
+            <width>21</width>
+            <height>16</height>
+           </rect>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QPushButton" name="dummy" >
+         <property name="geometry" >
+          <rect>
+           <x>25</x>
+           <y>80</y>
+           <width>113</width>
+           <height>32</height>
+          </rect>
+         </property>
+         <property name="text" >
+          <string>Dummy</string>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QFrame" name="frame_15" >
+        <property name="geometry" >
+         <rect>
+          <x>0</x>
+          <y>235</y>
+          <width>311</width>
+          <height>106</height>
+         </rect>
+        </property>
+        <property name="frameShape" >
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow" >
+         <enum>QFrame::Raised</enum>
+        </property>
+        <widget class="QFrame" name="frame_10" >
+         <property name="geometry" >
+          <rect>
+           <x>5</x>
+           <y>55</y>
+           <width>271</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="frameShape" >
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QLabel" name="label_2" >
+          <property name="geometry" >
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>71</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string>y-Range:</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="ymin" >
+          <property name="geometry" >
+           <rect>
+            <x>60</x>
+            <y>0</y>
+            <width>71</width>
+            <height>22</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="ymax" >
+          <property name="geometry" >
+           <rect>
+            <x>140</x>
+            <y>0</y>
+            <width>71</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="yauto" >
+          <property name="geometry" >
+           <rect>
+            <x>220</x>
+            <y>0</y>
+            <width>51</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string>Auto</string>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QFrame" name="frame_11" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>301</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="frameShape" >
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QLabel" name="label_4" >
+          <property name="geometry" >
+           <rect>
+            <x>10</x>
+            <y>0</y>
+            <width>41</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="font" >
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text" >
+           <string>Panel:</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="panelselection" >
+          <property name="geometry" >
+           <rect>
+            <x>120</x>
+            <y>0</y>
+            <width>171</width>
+            <height>26</height>
+           </rect>
+          </property>
+          <property name="editable" >
+           <bool>false</bool>
+          </property>
+          <item>
+           <property name="text" >
+            <string>Selected Windows</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>All Panels</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>Panel 1</string>
+           </property>
+          </item>
+         </widget>
+        </widget>
+        <widget class="QFrame" name="frame_8" >
+         <property name="geometry" >
+          <rect>
+           <x>5</x>
+           <y>30</y>
+           <width>271</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="frameShape" >
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QLabel" name="label_3" >
+          <property name="geometry" >
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>71</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string>x-Range:</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="xmin" >
+          <property name="geometry" >
+           <rect>
+            <x>60</x>
+            <y>0</y>
+            <width>71</width>
+            <height>22</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="xmax" >
+          <property name="geometry" >
+           <rect>
+            <x>140</x>
+            <y>0</y>
+            <width>71</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="xauto" >
+          <property name="geometry" >
+           <rect>
+            <x>220</x>
+            <y>0</y>
+            <width>51</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string>Auto</string>
+          </property>
+         </widget>
+        </widget>
+       </widget>
+       <widget class="QPushButton" name="quit" >
+        <property name="geometry" >
+         <rect>
+          <x>245</x>
+          <y>560</y>
+          <width>75</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text" >
+         <string>Quit</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="replot" >
+        <property name="geometry" >
+         <rect>
+          <x>5</x>
+          <y>560</y>
+          <width>75</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text" >
+         <string>Replot</string>
+        </property>
+       </widget>
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QFrame" name="frame_2" >
+     <property name="geometry" >
+      <rect>
+       <x>335</x>
+       <y>545</y>
+       <width>781</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1127</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile" >
+    <property name="title" >
+     <string>File</string>
+    </property>
+   </widget>
+   <addaction name="menuFile" />
+  </widget>
+  <widget class="QStatusBar" name="statusbar" />
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>hfQtPlotWidget</class>
+   <extends>QWidget</extends>
+   <header location="global" > </header>
+   <container>1</container>
+   <slots>
+    <slot>hfsetNPanels()</slot>
+    <slot>hfsetNPanelsx()</slot>
+    <slot>hfsetNPanelsy()</slot>
+    <slot>hfsetXMax()</slot>
+    <slot>hfsetXMin()</slot>
+    <slot>hfsetYMax()</slot>
+    <slot>hfsetYMin()</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>QtSvg.QSvgWidget</class>
+   <extends>QWidget</extends>
+   <header location="global" > </header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>npanels</sender>
+   <signal>returnPressed()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfsetNPanels()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>88</x>
+     <y>487</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>725</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>quit</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>287</x>
+     <y>603</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>563</x>
+     <y>331</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>replot</sender>
+   <signal>clicked()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>repaint()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>47</x>
+     <y>603</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>725</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>npanelsx</sender>
+   <signal>returnPressed()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfsetNPanelsx()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>178</x>
+     <y>487</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>725</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>npanelsy</sender>
+   <signal>returnPressed()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfsetNPanelsy()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>228</x>
+     <y>487</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>725</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>xmin</sender>
+   <signal>returnPressed()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfsetXMin()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>105</x>
+     <y>307</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>725</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>xmax</sender>
+   <signal>returnPressed()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfsetXMax()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>185</x>
+     <y>307</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>725</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ymin</sender>
+   <signal>returnPressed()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfsetYMin()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>130</x>
+     <y>338</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>421</x>
+     <y>404</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ymax</sender>
+   <signal>returnPressed()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfsetYMax()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>189</x>
+     <y>330</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>350</x>
+     <y>371</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

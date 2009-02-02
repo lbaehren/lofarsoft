@@ -26,7 +26,7 @@
 
 #define MAGICCODE 260966
 
-#define SaveCall( REF ) if (!isValidDataObject( REF )) {ERROR(getName(true) << ": Data Object reference invalid. Network corrupt.");} else 
+#define SaveCall( REF ) if (!isDataObject( REF )) {ERROR(getName(true) << ": SaveCall - Data Object reference invalid. Network corrupt.");} else 
 
 
 
@@ -165,7 +165,7 @@ class DataFuncLibraryClass;
 
 typedef vector<Data*> worm;
 
-bool isValidDataObject(Data* obj);
+bool isDataObject(Data* obj);
 
 class Data {
   
@@ -260,6 +260,7 @@ class Data {
 
     bool silent;
     bool noMod;
+    bool noSignal;
     bool autoupdate;
     bool updateable;
     longint verbose;
@@ -275,12 +276,15 @@ class Data {
     
     Vector_Selector* s_ptr; //This pointer points to a selector field
     
-    map<HString,HString> *prop_ptr;  //freely definabel properties of data set
+    map<HString,HString> *prop_ptr;  //freely definable properties of data set --- may be superfluous 
     
     DATATYPE type; //Gives the data type in vector: HInteger, (real)HNumber, HComplex, or HString ...
     DATACLASS dataclass; //Specifies data class (actual vector data, or just paramters, or an container ...)
     unit_descr *unit_ptr;
     void *d_ptr; //Finally, this pointer points to the data 
+    
+    PyObject * pyqt; //Contains a pointer to a PyQT object which is used to send and received Qt SIGNALS
+    PyObject * py_func; //Contains a pointer to a Py object which contains a user-defined Python function (not yet implemented)
     
     //Finally, Finally, the pointer to the superior containing
     //information about the whole network 
@@ -406,7 +410,10 @@ class Data {
 
   REFTYPE getOrigin();
 
-  
+  template <class T>
+    void put_silent(vector<T> &v);
+  template <class T>
+    void putOne_silent(T v);
   template <class T>
     void put(vector<T> &v);
   template <class T>
@@ -417,6 +424,7 @@ class Data {
       void inspect(vector<T> &vec);
 
   void noMod();
+  Data & noSignal();
   bool needsUpdate(); //obsolete?
   bool doesAutoUpdate();
   void setAutoUpdate(bool up=true);
@@ -448,9 +456,21 @@ class Data {
     void putOne(HString, T one);
   template <class T>
     void putOne(objectid, T one);
+
   Data& putPy(PyObject* pyobj);
   Data& putPy_silent(PyObject* pyobj);
   boost::python::handle<> getPy();
+
+  Data& storePyQt(PyObject* pyobj);
+  Data& deletePyQt(PyObject* pyobj);
+  PyObject* retrievePyQt();
+  boost::python::handle<> retrievePyQtObject();
+  void signalPyQt(HString signal);
+
+  Data& storePyFunc(PyObject* pyobj);
+  Data& deletePyFunc(PyObject* pyobj);
+  PyObject* retrievePyFunc();
+  boost::python::handle<> retrievePyFuncObject();
 
   void delFunction();
   void setFunction (HString name,

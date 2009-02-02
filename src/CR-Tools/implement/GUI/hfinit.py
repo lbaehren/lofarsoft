@@ -3,6 +3,8 @@ pyoblist=[]
 PUSH=DIR.TO
 PULL=DIR.FROM
 
+def hfERR(self,txt):
+    print "Error:",txt
 
 help={}
 help["verbose"]="Use d.AllVerbose(True/False) to watch the execution of the network. The output is {Objectid}Name(data_vector[0])flag, where flag is one of the following: blank=no function, just data; ~=just a function, no data; *=function and data present and is modified; $=function and data present and is not modified."
@@ -16,6 +18,7 @@ def initializeObject(self,value):
     "This function initializes a newly created data object with values and parameters. value can be a tuple, list, or DataParameterList. The first value of the tuple is the new, which is not used for an already created object. _f(func) defines a function, _l(n) defines the netlevel of the object for displaying. Everything else is used to set the value of the object (e.g. a number or a string)."
     if (type(value) in [tuple,list,DataParameterList]):
         for elem in value[1:]:
+            
             if hasattr(elem,"__hftype__"):
                 if (elem.__hftype__()=="_f"):
                     self.setFunc_f_silent(elem)
@@ -24,6 +27,21 @@ def initializeObject(self,value):
             else:
                 object_set_silent(self,elem)
     return self
+
+def object_new(self,*arg):
+    "Creates a new object an initializes ist (see .create() and .initializeObject())"
+    tup=(arg)
+    if (len(tup)>1): return self.create(tup[0]).initializeObject(tup)
+    else: return self.create(tup[0])
+
+def MakeChooser(d,name,fields,values):
+    "Create a chooser, which is a collection of objects which act like a record of similar records, containgin a set of parameters among which you can choose in a menu. The first parameter is the name of the chooser object. The second parameter is a tuple of parameter names that form one set. The third parameter is a tuple of tuple containing the parameter values which belong to the respective parameters."
+    chooser=d.new("Chooser",name,_l(200))
+    for val in values:
+        obj=(fields[0],val[0],_l(200)) >> chooser
+        for i in range(1,len(fields)):
+          obj=(fields[i],val[i],_l(200)) >> obj
+    return chooser
 
 
 class DataParameterList(list):
@@ -41,7 +59,11 @@ def _d(*arg):
     x.extend(arg)
     return x
 
-
+def NewObjectRange(name,n1,n2=None,inc=1):
+    'Creates a list of the form [("Name",i1),("Name",i2),("Name",i3),...], where the ii are generated accordingto the input parameters n1,n2,inc which are the same parameters as used for range(). The result can be used to create multiple new objects, e.g. d >> NeObjectRange("Name",5)], to create multiple paths in the network. Name obviously is the name of the objects.'
+    if (n2==None): r=range(n1)
+    else: r=range(n1,n2,inc)
+    return map(lambda n:(name,n), r) 
 
 class DataList(list):
     def datalist(self): return
@@ -80,8 +102,13 @@ class DataList(list):
         for d in self:
             d.delObject()
     def update(self):
-        for d in self:
-            d.update()
+        for d in self: d.update()
+        return self
+    def noSignal(self):
+        for d in self: d.noSignal()
+        return self
+    def set(self,value):
+        for d in self: d.set(value)
         return self
 
 class DataUnion(DataList):
@@ -223,13 +250,77 @@ class _l():
         return "<_l("+str(self.level)+")>"
     def __hftype__(self):
         return "_l"
-        
-def getStoredPyObject(self):
-    return self.stored_pyobj[self.getOid()]
 
-def setStoredPyObject(self, pyob):
-    self.stored_pyobj[self.getOid()]=pyob
+def object_hasPyQt(self):
+    return not (self.getStoredPyQtObject() == None)
 
+def getStoredPyFuncObject(self):
+    "Retrieves the user defined python function from the data object."
+    oid=self.getOid()
+    if self.stored_pyfuncobj.has_key(oid): return self.stored_pyfuncobj[oid]
+    else: return None
+
+def setStoredPyFuncObject(self, pyob):
+    "Keeps a python reference to the user defined python function in the data object, so that Python does not delete it."
+    self.stored_pyfuncobj[self.getOid()]=pyob
+
+def getStoredPyQtObject(self):
+    "Retrieves the user defined python Qt Object from the data object."
+    oid=self.getOid()
+    if self.stored_pyqtobj.has_key(oid): return self.stored_pyqtobj[oid]
+    else: return None
+    
+def setStoredPyQtObject(self, pyob):
+    "Keeps a python reference to the user defined python Qt Object in the data object, so that Python does not delete it."
+    self.stored_pyqtobj[self.getOid()]=pyob
+
+
+def initializePyQtObjects(self):
+    for obj in self.stored_pyqtobj.values(): obj.obj.signalPyQt("updated")
+
+class hfPyQtObject(QtCore.QObject):
+    "Base class for PyQtObjects that can be assigned to a Data object and take care of the PyQt Signals and Slots. The class has one slot: hfput(value), which receives a new value and assigns it to the object. It emits a signal hfupdated(QString) which contains the new value in an object, if it was changed. The method updated(object) is called from c++ and has as argument the object which was updated. self.obj should contain a reference to the Data object and needs to be set explicitly."
+    def hfput(self,value=None):
+        print "Clicked ...!"
+        if type(self.obj)==Data: 
+            if value==None: self.obj.update()
+            else: self.obj.object_set(value)
+            return 0
+        else:
+            hfERR("hfPyQtObject - no Data Object set")
+            return -1
+    def updated(self,object):
+        self.hfupdated(object.getS())
+        return 0
+    def hfupdated(self,value):
+        self.emit(QtCore.SIGNAL("hfupdated(QString)"),QtCore.QString(str(value)))
+        return 0
+
+
+def object_activatePyQt(self):
+    "Creates and stores a hfPyQtObject for communication via the SIGNAL/SLOT mechanism between PyQt and a Data object."
+    obj=hfPyQtObject()
+    obj.obj=self
+    self.setStoredPyQtObject(obj)
+    self.storePyQt(obj)
+
+def object_PyQt(self):
+    "Returns the Python object which interfaces between the Data object and PyQt."
+    return self.getStoredPyQtObject()
+    
+def object_SIGNAL(self):
+    "Returns the SIGNAL the Data Object will send when updated. Can be used for QObject.connect()."
+    return QtCore.SIGNAL("hfupdated(QString)")
+    
+def object_SLOT(self):
+    "Returns the method of the Data object that can be used as a SLOT method for PyQt."
+    return self.PyQt().hfput
+
+def object_connect(self,method,slot=QtCore.SLOT("setText(QString)")):
+    "Conects the data object's update signal to a Slot of a QtObject. The Update signal will contain the content of the object as a QString parameter"
+    if not self.hasPyQt(): self.activatePyQt()
+    return QtCore.QObject.connect(self.PyQt(),self.SIGNAL(),method,slot)
+    
 def object_setFunc_f_silent(self,f):
     "Assining a function using the _f class as input but not causing an update."
     sil=self.Silent(True)
@@ -237,13 +328,14 @@ def object_setFunc_f_silent(self,f):
         self.setFunc(f.funcname,f.library,f.functype)
     elif f.library=="Py": 
 #       In this case we have specified a Python function
-        self.setStoredPyObject(f.functype())
+        self.setStoredPyFuncObject(f.functype()) ##Store Python function to keep the instance under python
+        self.storePyFunc(self.getStoredPyFuncObject()) ##Store it also on the c++ level (this can perhaps smarter ...)
+        self.setFunc(f.funcname,f.library,TYPE.STRING) 
 #        print self.getStoredPyObjecdt()
-#        print type(self.getStoredPyObject())
-        pyobj=self.newObject("'PythonObject",PUSH)
-        pyobj.putPy_silent(self.getStoredPyObject())
-        pyobj.setNetLevel(1000)
-        self.setFunc(f.funcname,f.library,TYPE.STRING)
+#        print type(self.getStoredPyFuncObject())
+##        pyobj=self.newObject("'PythonObject",PUSH)
+##        pyobj.putPy_silent(self.getStoredPyFuncObject())
+##        pyobj.setNetLevel(1000)
     self.Silent(sil)
     return self
 
@@ -253,12 +345,15 @@ def object_setFunc_f(self,f):
         self.setFunc(f.funcname,f.library,f.functype)
     elif f.library=="Py": 
 #       In this case we have specified a Python function
-        self.setStoredPyObject(f.functype())
-#        print self.getStoredPyObject()
-#        print type(self.getStoredPyObject())
-        pyobj=self.newObject("'PythonObject",PUSH)
-        pyobj.putPy(self.getStoredPyObject())
-        pyobj.setNetLevel(1000)
+        self.setStoredPyFuncObject(f.functype()) ##Store Python function to keep the instance under python
+        self.storePyFunc(self.getStoredPyFuncObject()) ##Store it also on the c++ level (this can perhaps smarter ...)
+        self.setFunc(f.funcname,f.library,TYPE.STRING) 
+##        self.setStoredPyFuncObject(f.functype())
+#        print self.getStoredPyFuncObject()
+#        print type(self.getStoredPyFuncObject())
+##        pyobj=self.newObject("'PythonObject",PUSH)
+##        pyobj.putPy(self.getStoredPyFuncObject())
+##        pyobj.setNetLevel(1000)
         self.setFunc(f.funcname,f.library,TYPE.STRING)
     return self
 
@@ -268,17 +363,17 @@ def object_setFunc(self,funcname="Copy",library="Sys",functype=TYPE.UNDEF):
     self.setFunction(funcname,library,functype)
     return self
 
-#self // other  - deltes a link in the to direction
+#self // other  - deletes a link in the to direction
 def object_floordiv(self,other): 
     "data // data deletes a link between two objects in eitehr FROM or TO direction. The function returns the first data object."
     if type(other)==str:
-        self.delLink(self["other"])
-        self["other"].touch()
+        obj=self["other"]
     elif type(other)==Data:
-        self.delLink(other)
-        other.touch()
+        obj=other
+    self.delLink(obj)
+    obj.touch()
     self.touch()
-    return self
+    return obj
 
 def object_invert(self):  # delObject
     "~data deletes an object."
@@ -478,9 +573,9 @@ def object_nview(self,maxnetlevel=999):
 #    os.system("dot -Tsvg "+fn+" -o "+fn+".svg")
 
 
-
 Data.__repr__=object_print
 Data.__invert__=object_invert  #~data = delObject
+DataList.__invert__=object_invert  #~data = delObject
 Data.__rrshift__=object_rrshift   #newobject+setlink
 Data.__rshift__=object_rshift     #newobject+setlink
 Data.__rlshift__=object_rlshift   #newobject+setlink 
@@ -490,11 +585,13 @@ Data.__getitem__=object_getitem
 Data.put_silent=object_set_silent
 Data.__floordiv__=object_floordiv # // = dellink
 Data.__xor__=insert_object        #d ^ (d1,d2) = insert 
+Data.new=object_new
 Data.initializeObject=initializeObject
 Data.netsvg=object_net2qb
 
 Data.getitem=object_getitem
 Data.setFunc=object_setFunc
+Data.set=object_set
 Data.setFunc_f=object_setFunc_f
 Data.setFunc_f_silent=object_setFunc_f_silent
 Data.getDOT=object_getDOT
@@ -507,9 +604,18 @@ def datalist(self,maxnetlevel=9999):
 
 Data.list = datalist
 Data.ls = datalist
-Data.stored_pyobj={}
-Data.getStoredPyObject=getStoredPyObject
-Data.setStoredPyObject=setStoredPyObject
+Data.stored_pyfuncobj={}
+Data.stored_pyqtobj={}
+Data.getStoredPyFuncObject=getStoredPyFuncObject
+Data.setStoredPyFuncObject=setStoredPyFuncObject
+Data.getStoredPyQtObject=getStoredPyQtObject
+Data.setStoredPyQtObject=setStoredPyQtObject
+Data.activatePyQt=object_activatePyQt
+Data.hasPyQt=object_hasPyQt
+Data.connect=object_connect
+Data.PyQt=object_PyQt
+Data.SIGNAL=object_SIGNAL
+Data.SLOT=object_SLOT
 
 #Extending mathgl to accept STL vectors 
 def mglDataSetVec(self,vec):
