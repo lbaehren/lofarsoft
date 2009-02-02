@@ -387,7 +387,7 @@ namespace CR { // Namespace CR -- begin
       center=-1.8e-6;
       if (simplexFit) {
         if (distanceSearch) {
-	  if (! findDistance(Az, El, distance, AntennaSelection, &center,1) ){
+	  if (! findDistance(Az, El, distance, AntennaSelection, &center,1, verbose) ){
 	    cerr << "analyseLOPESevent::doPositionFitting: " << "Error during findDistance()!" << endl;
 	    return False;
 	  };
@@ -398,7 +398,7 @@ namespace CR { // Namespace CR -- begin
 	  return False;
 	};
         if (distanceSearch) {
-	  if (! findDistance(Az, El, distance, AntennaSelection, &center,0) ){
+	  if (! findDistance(Az, El, distance, AntennaSelection, &center,0, verbose) ){
 	    cerr << "analyseLOPESevent::doPositionFitting: " << "Error during findDistance()!" << endl;
 	    return False;
 	  };
