@@ -1041,50 +1041,87 @@ void writeTVRefPhases(void)
     if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",delay_sep_07_start) )
       cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
   }
+}
 
-  // Set reference phases from oct 07 for LOPES Dual Pol
-  PhaseRefPhases(0,0)  = 0	;	  PhaseRefPhases(0,1)  = 0	;	  PhaseRefPhases(0,2)  = 0	;
-  PhaseRefPhases(1,0)  = -107.4	;	  PhaseRefPhases(1,1)  = -1.2	;	  PhaseRefPhases(1,2)  = -35.9	;
-  PhaseRefPhases(2,0)  = -163.4	;	  PhaseRefPhases(2,1)  = 114.3	;	  PhaseRefPhases(2,2)  = 116.8	;
-  PhaseRefPhases(3,0)  = 80.74	;	  PhaseRefPhases(3,1)  = -54.9	;	  PhaseRefPhases(3,2)  = -40.4	;
-  PhaseRefPhases(4,0)  = -174.3	;	  PhaseRefPhases(4,1)  = 2.7	;	  PhaseRefPhases(4,2)  = 58.5	;
-  PhaseRefPhases(5,0)  = 85.42	;	  PhaseRefPhases(5,1)  = -94.2	;	  PhaseRefPhases(5,2)  = 64.3	;
-  PhaseRefPhases(6,0)  = 65	;	  PhaseRefPhases(6,1)  = 118.6	;	  PhaseRefPhases(6,2)  = 152.5	;
-  PhaseRefPhases(7,0)  = -34.7	;	  PhaseRefPhases(7,1)  = 152.5	;	  PhaseRefPhases(7,2)  = 168.7	;
-  PhaseRefPhases(8,0)  = 169.9	;	  PhaseRefPhases(8,1)  = 34.9	;	  PhaseRefPhases(8,2)  = 56.7	;
-  PhaseRefPhases(9,0)  = -86.7	;	  PhaseRefPhases(9,1)  = 91.2	;	  PhaseRefPhases(9,2)  = 111	;
-  PhaseRefPhases(10,0) = 170.1	;	  PhaseRefPhases(10,1) = 10.7	;	  PhaseRefPhases(10,2) = 106.9	;
-  PhaseRefPhases(11,0) = 125.2	;	  PhaseRefPhases(11,1) = -87	;	  PhaseRefPhases(11,2) = 33	;
-  PhaseRefPhases(12,0) = 14.4	;	  PhaseRefPhases(12,1) = 147.7	;	  PhaseRefPhases(12,2) = -91.4	;
-  PhaseRefPhases(13,0) = 104.9	;	  PhaseRefPhases(13,1) = 0.9	;	  PhaseRefPhases(13,2) = 108	;
-  PhaseRefPhases(14,0) = -163.5	;	  PhaseRefPhases(14,1) = 75.6	;	  PhaseRefPhases(14,2) = -172	;
-  PhaseRefPhases(15,0) = -59.7	;	  PhaseRefPhases(15,1) = -174.2	;	  PhaseRefPhases(15,2) = -51.5	;
-  PhaseRefPhases(16,0) = 83.6	;	  PhaseRefPhases(16,1) = -141	;	  PhaseRefPhases(16,2) = -38.3	;
-  PhaseRefPhases(17,0) = 54.83	;	  PhaseRefPhases(17,1) = -4.6	;	  PhaseRefPhases(17,2) = 91.6	;
-  PhaseRefPhases(18,0) = 39.3	;	  PhaseRefPhases(18,1) = -61.8	;	  PhaseRefPhases(18,2) = 36.3	;
-  PhaseRefPhases(19,0) = -46	;	  PhaseRefPhases(19,1) = -152.5	;	  PhaseRefPhases(19,2) = -22.5	;
-  PhaseRefPhases(20,0) = -163.4	;	  PhaseRefPhases(20,1) = -96.35	;	  PhaseRefPhases(20,2) = -21.9	;
-  PhaseRefPhases(21,0) = -49.5	;	  PhaseRefPhases(21,1) = 35	;	  PhaseRefPhases(21,2) = 106.4	;
-  PhaseRefPhases(22,0) = -149.8	;	  PhaseRefPhases(22,1) = 31.3	;	  PhaseRefPhases(22,2) = 134.5	;
-  PhaseRefPhases(23,0) = 94.5	;	  PhaseRefPhases(23,1) = -100.5	;	  PhaseRefPhases(23,2) = -8.3	;
-  PhaseRefPhases(24,0) = -174	;	  PhaseRefPhases(24,1) = -157.4	;	  PhaseRefPhases(24,2) = -87.8	;
-  PhaseRefPhases(25,0) = -15.7	;	  PhaseRefPhases(25,1) = 144.3	;	  PhaseRefPhases(25,2) = -144.6	;
-  PhaseRefPhases(26,0) = -3.7	;	  PhaseRefPhases(26,1) = -63.6	;	  PhaseRefPhases(26,2) = -53.3	;
-  PhaseRefPhases(27,0) = 111.4	;	  PhaseRefPhases(27,1) = -0.7	;	  PhaseRefPhases(27,2) = 57.1	;
-  PhaseRefPhases(28,0) = 155	;	  PhaseRefPhases(28,1) = -159	;	  PhaseRefPhases(28,2) = -135.9	;
-  PhaseRefPhases(29,0) = 67.1	;	  PhaseRefPhases(29,1) = 85.5	;	  PhaseRefPhases(29,2) = 122.3	;
+
+// Writes reference phase differences for the time just befor the TV transmitter was switched of
+void writeTVsep2007RefPhases(void)
+{
+  // Set new reference frequencies
+  Matrix<Double> PhaseRefFreqs(2,2);
+  PhaseRefFreqs(0,0) = 6.21659e+07;
+  PhaseRefFreqs(0,1) = 6.22232e+07;
+  PhaseRefFreqs(1,0) = 6.7915e+07;
+  PhaseRefFreqs(1,1) = 6.7947e+07;
+
+  // Set reference Phases
+  Matrix<Double> PhaseRefPhases(30,2);
+  PhaseRefPhases(0,0) =0;  	PhaseRefPhases(0,1) =0;
+  PhaseRefPhases(1,0) =-121.4;  PhaseRefPhases(1,1) =-41.2;
+  PhaseRefPhases(2,0) =-167.3;  PhaseRefPhases(2,1) =122.6;
+  PhaseRefPhases(3,0) =78.1;  	PhaseRefPhases(3,1) =-44.8;
+  PhaseRefPhases(4,0) =-174;  	PhaseRefPhases(4,1) =68.4;
+  PhaseRefPhases(5,0) =93.1;  	PhaseRefPhases(5,1) =-58.4;
+  PhaseRefPhases(6,0) =66.9;  	PhaseRefPhases(6,1) =149.2;
+  PhaseRefPhases(7,0) =-28.4;  	PhaseRefPhases(7,1) =170.5;
+  PhaseRefPhases(8,0) =163.4;  	PhaseRefPhases(8,1) =55.8;
+  PhaseRefPhases(9,0) =-95.4;  	PhaseRefPhases(9,1) =108.8;
+  PhaseRefPhases(10,0) =-172.3; PhaseRefPhases(10,1) =128.9;
+  PhaseRefPhases(11,0) =140.6;  PhaseRefPhases(11,1) =50.2;
+  PhaseRefPhases(12,0) =34.1;  	PhaseRefPhases(12,1) =-72.4;
+  PhaseRefPhases(13,0) =127.8;  PhaseRefPhases(13,1) =132.2;
+  PhaseRefPhases(14,0) =-141.9; PhaseRefPhases(14,1) =-149.6;
+  PhaseRefPhases(15,0) =-47.1;  PhaseRefPhases(15,1) =-37.1;
+  PhaseRefPhases(16,0) =97.4;  	PhaseRefPhases(16,1) =-24.5;
+  PhaseRefPhases(17,0) =64.9; 	PhaseRefPhases(17,1) =107.5;
+  PhaseRefPhases(18,0) =51.2;  	PhaseRefPhases(18,1) =53.2;
+  PhaseRefPhases(19,0) =-26.4;  PhaseRefPhases(19,1) =-6.4;
+  PhaseRefPhases(20,0) =-156.7; PhaseRefPhases(20,1) =-18.5;
+  PhaseRefPhases(21,0) =-48.4;  PhaseRefPhases(21,1) =110.6;
+  PhaseRefPhases(22,0) =-142.5; PhaseRefPhases(22,1) =146.7;
+  PhaseRefPhases(23,0) =99.6; 	PhaseRefPhases(23,1) =0.7;
+  PhaseRefPhases(24,0) =-164.5; PhaseRefPhases(24,1) =-86.7;
+  PhaseRefPhases(25,0) =-9.8; 	PhaseRefPhases(25,1) =-150.2;
+  PhaseRefPhases(26,0) =-2.1;  	PhaseRefPhases(26,1) =-46.7;
+  PhaseRefPhases(27,0) =96;  	PhaseRefPhases(27,1) =59.9;
+  PhaseRefPhases(28,0) =165.2;  PhaseRefPhases(28,1) =-130.9;
+  PhaseRefPhases(29,0) =64.6;  	PhaseRefPhases(29,1) =130.3;
+
+  // Set Sample jumps
+  Vector<Double> SampleJumps(4);
+  SampleJumps(0) = -2;
+  SampleJumps(1) = 2;
+  SampleJumps(2) = -1;
+  SampleJumps(3) = 1;
 
   // Add the value for all antennas
-  cout << "Writing TV reference phases for LOPES POL, GT = " << delay_nov_07_start << endl;
   for (int i = 0; i < MAX_Antennas; i++)
   {
     cout << "Writing values for antenna: " << antennaIDs[i] << endl;
 
-    if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",delay_nov_07_start) )
-      cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
+    // It is neccessary to write the Delay again, as the other fields
+    // are junior fields an cannot be written alone
+    Double old_delay = 0.;
+    if (!reader.GetData(delay_nov_07_start-1, antennaIDs[i], "Delay", &old_delay))
+    { 
+      cerr << "Error while reading field: Delay" << endl;
+    } else
+    {
+      if (!writer.AddData(old_delay,antennaIDs[i],"Delay",delay_nov_07_start) )
+        cerr << "\nERROR while writing field: Delay" << endl;
+      if (!writer.AddData(PhaseRefFreqs,antennaIDs[i],"PhaseRefFreqs",delay_nov_07_start) )
+        cerr << "\nERROR while writing field: PhaseRefFreqs" << endl;
+      if (!writer.AddData(SampleJumps,antennaIDs[i],"SampleJumps",delay_nov_07_start) )
+        cerr << "\nERROR while writing field: SampleJumps" << endl;
+      if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",delay_nov_07_start) )
+        cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
+      // Reference Antenna 4 for new phase differences
+      if (!writer.AddData(10101,antennaIDs[i],"PhaseRefAnt",delay_nov_07_start) )
+        cerr << "\nERROR while writing field: PhaseRefAnt" << endl;
+    }
   }
-
 }
+
 
 
 // write dispersion correction
@@ -1217,6 +1254,7 @@ int main (int argc, char *argv[])
     // writeTVRefPhases();		// checked in
     // TVshutdown();			// checked in
     // writeRoofRefPhases();		// checked in
+    writeTVsep2007RefPhases();
 
     // Add the measured dispersion of the LOPES 30 filter boxes
     //writePhaseCal();   //  checked in
