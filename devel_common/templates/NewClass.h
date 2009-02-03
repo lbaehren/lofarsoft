@@ -60,24 +60,20 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
     
     // ------------------------------------------------------------- Construction
     
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     <newClass> ();
     
     /*!
       \brief Copy constructor
       
       \param other -- Another <newClass> object from which to create this new
-      one.
+             one.
     */
     <newClass> (<newClass> const &other);
     
     // -------------------------------------------------------------- Destruction
 
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     ~<newClass> ();
     
     // ---------------------------------------------------------------- Operators
@@ -120,17 +116,13 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
     
   private:
     
-    /*!
-      \brief Unconditional copying
-    */
+    //! Unconditional copying
     void copy (<newClass> const &other);
     
-    /*!
-      \brief Unconditional deletion 
-    */
+    //! Unconditional deletion 
     void destroy(void);
     
-  };
+  }; // Class <newClass> -- end
   
 } // Namespace <newNamespace> -- end
 
