@@ -219,6 +219,7 @@ namespace CR { // Namespace CR -- begin
 				 CR::CoordinateType::AzElRadius,
 				 True);
       geomWeight.setFrequencies(dr->frequencyValues());
+
 #ifdef DEBUGGING_MESSAGES      
       geomWeight.summary();
 #endif
@@ -227,7 +228,9 @@ namespace CR { // Namespace CR -- begin
 #ifdef DEBUGGING_MESSAGES      
       cout << "CRinvFFT::GetShiftedFFT: delays: " <<geomWeight.delays() << endl;
 #endif
+
       phaseGradients = Matrix<DComplex>(geomWeight.weights().nonDegenerate());
+
       // ***** getting the antenna gain calibration
       // initialize the caltable interpolater (if needed)      
       if (!AntGainInterpInit_p) { //AntGainInterpInit_p is defined in FirstStagePipeline.h and reset in InitEvent()
@@ -265,10 +268,12 @@ namespace CR { // Namespace CR -- begin
 	  //   delta_nu     = (stopFreq_p-startFreq_p)/1e6 [converted to MHz]
 	  //   1/sqrt(Gain) = tmpCvec
 	  tmpCval = 1.947*1e6/(stopFreq_p-startFreq_p);
+
 	  AntGainFactors.column(i) = tmpCvec*tmpCval;
         }
-      else
+      else {
         AntGainFactors.set(DComplex (1.,0.));
+      };
       //cout << "CRinvFFT::GetShiftedFFT: AntGainFactors:" << AntGainFactors.shape()
       //     << " phaseGradients:"<< phaseGradients.shape() << endl;
       FFTdata = phaseGradients*AntGainFactors*GetData(dr);

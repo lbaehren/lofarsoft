@@ -81,9 +81,6 @@ namespace CR { // Namespace CR -- begin
     //! Unmodified antenna positions, i.e. relative to coordinate system and not shower core.
     Matrix<Double> AntPositions_p;
 
-    //! The FrequencyBand
-    Matrix<Double> FrequencyBands_p;
-   
     //! Are the antenna positions valid?
     Bool AntPosValid_p;
 

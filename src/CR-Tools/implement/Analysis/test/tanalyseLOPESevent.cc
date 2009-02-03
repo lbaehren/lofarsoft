@@ -54,7 +54,7 @@ int test_analyseLOPESevent ()
     analyseLOPESevent newObject;
 
     Record obsrec,results;
-    obsrec.define("LOPES","/home/horneff/lopescasa/data/LOPES/LOPES-CalTable");
+    obsrec.define("LOPES","/home/horneff/usg/data/lopes/LOPES-CalTable");
 
     newObject.initPipeline(obsrec);
 

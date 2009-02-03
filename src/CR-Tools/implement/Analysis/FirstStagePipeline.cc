@@ -48,7 +48,7 @@ namespace CR { // Namespace CR -- begin
     blocksize = 0;
     samplerate = 0.;
     setStartFreq_p = 0.;
-    setStartFreq_p = 1e99;
+    setStopFreq_p = 1e99;
     startFreq_p = 0.;
     stopFreq_p = 1e99;
   }
@@ -150,6 +150,7 @@ namespace CR { // Namespace CR -- begin
 	  return False;	
 	};
       };
+      calculateBandLimits(dr);
       if (setCal) { setCalibration(dr); };
     } catch (AipsError x) {
       cerr << "FirstStagePipeline::InitEvent: " << x.getMesg() << endl;
@@ -157,44 +158,6 @@ namespace CR { // Namespace CR -- begin
     }; 
     return True;
   };
-
-  void FirstStagePipeline::calculateBandLimits(DataReader *dr) {
-    try {
-      // to start: set the limits to the user defined values
-      startFreq_p = setStartFreq_p;
-      stopFreq_p = setStopFreq_p;
-
-      // read the band limits from the CalTables for all antennas
-      // if the CalTable gives a thighter limit for any antenna
-      // then set the used frequencies to this limit instead of the user defined value.
-      Vector<Int> AntennaIDs;
-      uInt date;
-      Vector<Double> CTBand;
-      dr->headerRecord().get("Date",date);
-      dr->headerRecord().get("AntennaIDs",AntennaIDs);
-
-      for (unsigned int i = 0; i < AntennaIDs.nelements(); i++) {
-        // read in the band from the CalTables (all frequency in Hz)
-        CTRead->GetData(date, AntennaIDs(i), "FrequencyBand", &CTBand);
-        if (CTBand(0) > startFreq_p)		// compare lower limit
-          startFreq_p = CTBand(0);
-        if (CTBand(1) < stopFreq_p)		// compare upper limit
-          stopFreq_p = CTBand(1);
-      }
-
-      // consistency check
-      if (startFreq_p >= stopFreq_p) {
-         startFreq_p = stopFreq_p;
-         cerr << "FirstStagePipeline::calculateBandLimits: WARNING: "
-              << "StartFreq " << startFreq_p << " Hz"
-              << " is >= StopFreq " << stopFreq_p << "Hz."
-              << endl;
-      }
-    } catch (AipsError x) {
-      cerr << "FirstStagePipeline::calculateBandLimits: " << x.getMesg() << endl;
-    }
-  }
-
 
   Bool FirstStagePipeline::setCalibration(DataReader *dr){
     try {
@@ -211,30 +174,27 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> freqVals; 
       freqVals = dr->frequencyValues(); // work around a bug in casa(core) 
       Double delay;
+      Vector<DComplex> band(fftlen,DComplex(1.,0.));
 
-      // create Vector to supress frequencies outside the desired band 
-      if (static_cast<Int>(freqVals.size()) != fftlen) {	// consistency check
-        cerr << "FirstStagePipeline::setCalibration: " 
-             << "Lenght of FFT (" << fftlen << ") "
-             << "does not equal length of frequency axis (" << freqVals.size() <<") !"
-             << endl;
-      }
-
-      // create an array with a supression factor for frequencies outside of the analysis band
-      calculateBandLimits(dr);
-      Vector<DComplex> band(fftlen);
-      const DComplex supressionFactor(1e-6,0.); // supression factor for frequencies outside the band
-      for (i=0; i < fftlen; ++i) {
-        if ( (freqVals(i) < startFreq_p) || (freqVals(i) > stopFreq_p) ) {
-          band(i) = supressionFactor;
-        } else {
-          band(i) = DComplex(1.,0.);
-        }
-      }
-      if (verbose) {
-        cout << "Used start frequency for analysis: " << startFreq_p << " Hz." << endl;
-        cout << "Used stop frequency for analysis:  " << stopFreq_p << " Hz." << endl;
-      }
+       // create Vector to supress frequencies outside the desired band 
+      if ((int)freqVals.size() != fftlen) {  // consistency check
+	cerr << "FirstStagePipeline::setCalibration: " << "Lenght of FFT (" << fftlen << ") " 
+ 	     << "does not equal length of frequency axis (" << freqVals.size() <<") !" << endl;
+      };
+      
+       // create an array with a supression factor for frequencies outside of the analysis band
+//       const DComplex supressionFactor(1e-6,0.); // supression factor for frequencies outside the band
+//       for (i=0; i < fftlen; ++i) {
+//         if ( (freqVals(i) < startFreq_p) || (freqVals(i) > stopFreq_p) ) {
+//           band(i) = supressionFactor;
+//         } else {
+//           band(i) = DComplex(1.,0.);
+//         }
+//       }
+//       if (verbose) {
+//         cout << "FirstStagePipeline::setCalibration: " << "Frequency band for analysis: " 
+// 	     << startFreq_p << " Hz to " << stopFreq_p << " Hz." << endl;
+//       }
 
       for (i=0; i<nAnt ; i++){
         // Get electrical gain if switched on (otherwise set it to 1)
@@ -303,6 +263,43 @@ namespace CR { // Namespace CR -- begin
     }; 
     return True;
   };
+
+  void FirstStagePipeline::calculateBandLimits(DataReader *dr) {
+    try {
+      // to start: set the limits to the user defined values
+      startFreq_p = setStartFreq_p;
+      stopFreq_p = setStopFreq_p;
+
+      // read the band limits from the CalTables for all antennas
+      // if the CalTable gives a thighter limit for any antenna
+      // then set the used frequencies to this limit instead of the user defined value.
+      Vector<Int> AntennaIDs;
+      uInt date;
+      Vector<Double> CTBand;
+      dr->headerRecord().get("Date",date);
+      dr->headerRecord().get("AntennaIDs",AntennaIDs);
+
+      for (unsigned int i = 0; i < AntennaIDs.nelements(); i++) {
+        // read in the band from the CalTables (all frequency in Hz)
+        CTRead->GetData(date, AntennaIDs(i), "FrequencyBand", &CTBand);
+        if (CTBand(0) > startFreq_p)		// compare lower limit
+          startFreq_p = CTBand(0);
+        if (CTBand(1) < stopFreq_p)		// compare upper limit
+          stopFreq_p = CTBand(1);
+      }
+
+      // consistency check
+      if (startFreq_p >= stopFreq_p) {
+         startFreq_p = stopFreq_p;
+         cerr << "FirstStagePipeline::calculateBandLimits: WARNING: "
+              << "StartFreq " << startFreq_p << " Hz"
+              << " is >= StopFreq " << stopFreq_p << "Hz."
+              << endl;
+      }
+    } catch (AipsError x) {
+      cerr << "FirstStagePipeline::calculateBandLimits: " << x.getMesg() << endl;
+    }
+  }
 
 
 } // Namespace CR -- end

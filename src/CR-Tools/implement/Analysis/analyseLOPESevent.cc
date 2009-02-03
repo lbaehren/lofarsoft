@@ -25,6 +25,8 @@
 
 #define DEG2RAD (PI/180.)
 
+//#define DEBUGGING_MESSAGES
+
 namespace CR { // Namespace CR -- begin
   
   // ============================================================================
@@ -241,7 +243,7 @@ namespace CR { // Namespace CR -- begin
       pipeline_p->doDispersionCal(doDispersionCal);
       pipeline_p->doDelayCal(doDelayCal);
       pipeline_p->doFlagNotActiveAnts(doFlagNotActiveAnts);
-      pipeline_p->setFreqInterval(getFreqStart(),getFreqStop());
+      pipeline_p->setFreqInterval(freqStart_p,freqStop_p);
 
       // initialize the Data Reader
       if (! pipeline_p->InitEvent(lev_p)){
@@ -387,7 +389,7 @@ namespace CR { // Namespace CR -- begin
       center=-1.8e-6;
       if (simplexFit) {
         if (distanceSearch) {
-	  if (! findDistance(Az, El, distance, AntennaSelection, &center,1, verbose) ){
+	  if (! findDistance(Az, El, distance, AntennaSelection, &center, True, verbose) ){
 	    cerr << "analyseLOPESevent::doPositionFitting: " << "Error during findDistance()!" << endl;
 	    return False;
 	  };
@@ -398,7 +400,7 @@ namespace CR { // Namespace CR -- begin
 	  return False;
 	};
         if (distanceSearch) {
-	  if (! findDistance(Az, El, distance, AntennaSelection, &center,0, verbose) ){
+	  if (! findDistance(Az, El, distance, AntennaSelection, &center, False, verbose) ){
 	    cerr << "analyseLOPESevent::doPositionFitting: " << "Error during findDistance()!" << endl;
 	    return False;
 	  };
@@ -443,7 +445,7 @@ namespace CR { // Namespace CR -- begin
 	if (verbose) { cout << "analyseLOPESevent::doPositionFitting: starting SimplexFit()." << endl;};
 
 	if (distanceSearch) {
-	  if (! SimplexFit(Az, El, distance, center, AntennaSelection, 500.) ){
+	  if (! SimplexFit(Az, El, distance, center, AntennaSelection, 2000.) ){
   	    cerr << "analyseLOPESevent::doPositionFitting: " << "Error during SimplexFit()!" << endl;
 	    return False;
 	  };
