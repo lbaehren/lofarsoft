@@ -3,8 +3,26 @@
 /*!
   \defgroup CR_GUI CR-Tools :: Graphical user-interface module
   \ingroup CR
-
   \brief The basic data get/put mechanism for the Plotting Tool for LOFAR Data
+
+  <hr>
+  
+  \section CR_GUI_requirements Requirements
+  
+  - QT installiert von source
+  - <a href="http://www.riverbankcomputing.co.uk/software/sip/download">SIP</a> installiert von Source
+  - Python 2.6 installiert als Mac OS binary installer von python.org
+  - python 2.6 installiert von source von python.org 
+  - PyQt von source
+  - MathGl von source
+  - DOT ... (http://www.graphviz.org/)
+
+  In the end it worked and I didn't know why. I guess the point is that
+  PyQt needs to be built by the packaged python while Mathgl needs to be
+  build by the self-built python and using gcc4.3. It may also matter in
+  which order this is done ...
+
+  <hr>
 
   <b>Note:</b> This module is optional and -- at least for the moment -- not
   included in the default build of the CR-Tools software package; since the code

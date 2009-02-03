@@ -409,15 +409,6 @@ if (dataset_tbb)
   set (CR_DATASET_TBB_DATASET "Station023/023000000")
 endif (dataset_tbb)
 
-find_file (dataset_event 2007.01.31.23:59:33.960.event
-  PATHS
-  ${CR_SOURCE_DIR}/data
-  ${CR_SOURCE_DIR}/../data
-  ${CR_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
-  )
-
 ## Reference values for test programs
 
 find_file (data_ppf_coefficients Coeffs16384Kaiser-quant.dat

@@ -55,7 +55,11 @@ if (HAVE_DAL AND HAVE_HDF5 AND positions_lopes08)
     ${HDF5_LIBRARIES}
     )
   ## testing
-  add_test (tSkymapper tSkymapper)
+  if (dataset_lopes)
+    add_test (tSkymapper tSkymapper ${dataset_lopes})
+  else (dataset_lopes)
+    add_test (tSkymapper tSkymapper)
+  endif (dataset_lopes)
   ## installation
   list (APPEND tests tSkymapper)
 

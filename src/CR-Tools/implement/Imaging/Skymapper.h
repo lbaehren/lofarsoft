@@ -52,7 +52,6 @@
 #include <Coordinates/SkymapCoordinate.h>
 #include <Observation/ObservationData.h>
 #include <Imaging/Beamformer.h>
-#include <Imaging/SkymapQuantity.h>
 
 using casa::Matrix;
 using casa::String;
@@ -83,44 +82,41 @@ namespace CR {  // Namespace CR -- begin
       
       <li>Beamformer
       <li>ObservationData
-      <li>SkymapCoordinates -- coordinates involved in the creation of a skymap
+      <li>SkymapCoordinate
       <li>SkymapQuantity
       <li>SkymapperTools
     </ul>
-    
+      
     <h3>Synopsis</h3>
     
-    By default -- i.e. with the default constructor -- we set up everything for
-    a [120,120] pixel all-sky map in STG projection, centered on (0,90) in AZEL
-    coordinates; the various ingredients for the created PagedImage are delivered
-    by the functions:
-    <ul type="square">
-      <li>Skymapper::defaultImageShape
-      <li>Skymapper::defaultCoordsys
+    Since almost all of the parameters required by the emedded Beamformer object
+    can be derived from the also embedded SkymapCoordinate object, only a minimal
+    interface is provided to the outside world:
+    <ul>
+      <li>Skymapper::beamformer -- retrieve the embedded Beamformer object
+      <li>Skymapper::skymapType
+      <li>Skymapper::setSkymapType
+      <li>Skymapper::setAntPositions -- as the Skymapper class itself is not
+      handling the actual data I/O, the antenna positions required by the
+      Beamformer need to be provided separately.
     </ul>
     
     <h3>Example(s)</h3>
     
-    Currently the whole Skymapper class is undergoing fundamental changes in order
-    to make it fit into the prototype-pipeline under construction by A. Horneffer.
-    Besides obvious changes in the interface, a number of internal adjustment need
-    to be carried out, to provide the required functionality.
-    
     Here is a example of how the interface and usage will look like in the near
-    future:
+    future; again keep in mind, that the actual access to the data is outside the
+    scope of the Skymapper class, in order to keep it as independent of whatever
+    circumstances it might be used in.
     \code
-    using LOPES::Skymapper;
-    using LOPES::SkymapCoordinates;
-    
     bool status (true);
-    uint nofBlocks;
+    uint nofBlocks (10);
     Matrix<DComplex> data;
     
     // Collect all the required coordinate information
-    SkymapCoordinates coords (...);
+    CR::SkymapCoordinate coord (...);
     
     // Create a new Skymapper object
-    Skymapper skymapper (coords);
+    CR::Skymapper skymapper (coord);
     
     if (skymapper.initSkymapper()) {
       while (skymapper.nofProcessedBlocks()<=nofBlocks) {
@@ -150,25 +146,20 @@ namespace CR {  // Namespace CR -- begin
     
     //! Pointer to a paged image containing the generated data
     casa::PagedImage<Double> *image_p;
+
+    //! Stride along the axes within the exported image array
+    casa::IPosition stride_p;
     
     // -- book-keeping
     
     //! Switch to enable/disable verbose mode
     short verbose_p;
     
-    //! Track the status of the Skymapper
-    bool isOperational_p;
-    
     //! The number of processed data blocks so far
     uint nofProcessedBlocks_p;
 
     //! Direction mask to flag individual pixels
     Matrix<bool> directionMask_p;
-    
-    // -- questionable variables (might be thrown out later) --------------------
-    
-    //! Electrical quantity, for which the sky map is generated
-    SkymapQuantity quantity_p;
     
   public:
     
@@ -194,232 +185,273 @@ namespace CR {  // Namespace CR -- begin
       \brief Argumented constructor
       
       \param skymapCoord   -- Coordinates information encapsulated in a
-                              SkymapCoordinate object.
+             SkymapCoordinate object.
       \param antPositions  -- [nofAntennas,3] Antenna positions for which the
-                              delay is computed, \f$ (x,y,z) \f$
+             delay is computed, \f$ (x,y,z) \f$
+      \param skymapType -- The physical quantity (of the electromagnetic field)
+             for which the skymap will be computed.
     */
     Skymapper (SkymapCoordinate const &skymapCoord,
-	       Matrix<double> const &antPositions);
+	       Matrix<double> const &antPositions,
+	       SkymapQuantity const &skymapType=SkymapQuantity::FREQ_POWER);
     
-  /*!
-    \brief Argumented constructor
-
-    \param skymapCoord -- Coordinates information encapsulated in a
-                          SkymapCoordinate object.
-    \param beamformer  -- Beamformer object
-  */
-  Skymapper (SkymapCoordinate const &skymapCoord,
-	     Beamformer const &beamformer);
-  
-  /*!
-    \brief Copy constructor
-
-    \param other -- Another Skymapper object from which to create this new
-                    one.
-  */
-  Skymapper (Skymapper const& other);
-
-  // ---------------------------------------------------------------- Destruction
-
-  /*!
-    \brief Destructor
-  */
-  ~Skymapper ();
-
-  // ------------------------------------------------------------------ Operators
-
-  /*!
-    \brief Overloading of the copy operator
-
-    \param other -- Another Skymapper object from which to make a copy.
-  */
-  Skymapper &operator= (Skymapper const &other); 
-
-  // ----------------------------------------------------------------- Parameters
-
-  inline short verboseLevel () {
-    return verbose_p;
-  }
-
-  /*!
-    \brief Set the verbosity level during processing
-
-    \param verbose -- The verbosity level during processing; if
-                      <tt>verbose=0</tt> no additional output will be produced.
-  */
-  inline void setVerboseLevel (short const &verbose) {
-    verbose_p = verbose;
-  }
-
-  /*!
-    \brief Get the name of (or path to) the created image file
+    /*!
+      \brief Argumented constructor
+      
+      \param skymapCoord   -- Coordinates information encapsulated in a
+             SkymapCoordinate object.
+      \param antPositions  -- Antenna positions for which the delay is computed,
+             \f$ (x,y,z) \f$
+      \param skymapType -- The physical quantity (of the electromagnetic field)
+             for which the skymap will be computed.
+    */
+    Skymapper (SkymapCoordinate const &skymapCoord,
+	       Vector<MVPosition> const &antPositions,
+	       SkymapQuantity const &skymapType=SkymapQuantity::FREQ_POWER);
     
-    \return filename -- Name of (or path to) the created image file
-  */
-  inline String filename () const {
-    return filename_p;
-  }
-
-  /*!
-    \brief Get the pixel array shape of the created image
-
-    \return shape -- Shape of the pixel array inside the created image
-  */
-  inline casa::IPosition imageShape () {
-    return coordinates_p.shape();
-  }
-  
-  /*!
-    \brief Set the name of (or path to) the created image file
+    /*!
+      \brief Copy constructor
+      
+      \param other -- Another Skymapper object from which to create this new
+      one.
+    */
+    Skymapper (Skymapper const& other);
     
-    \param  filename -- Name of (or path to) the created image file
-  */
-  inline void setFilename (String const &filename) {
-    filename_p = filename;
-  }
-
-  /*!
-    \brief How many blocks of data have been processed so far?
-
-    \return nofProcessedBlocks -- The number of processed data blocks so far
-  */
-  inline uint nofProcessedBlocks () {
-    return nofProcessedBlocks_p;
-  }
-
-  /*!
-    \brief Set the electrical quantity, for which the sky map is generated
-
-    \brief quantity -- Electrical quantity, for which the sky map is generated
-  */
-  void setSkymapQuantity (SkymapQuantity::Type quantity);
-  
-  /*!
-    \brief Get the mask to flag individual direction pixels
+    // ---------------------------------------------------------------- Destruction
     
-    \return directionMask -- [nof. Lon. pixels, nof. Lat. pixels] Matrix of
-                             boolean values to keep track of individual 
-			     pixels of the direction axes, which have been
-			     flagged (e.g. because their world value lies
-			     beneath the local horizon).
-  */
-  inline Matrix<bool> directionMask () {
-    return directionMask_p;
-  }
-  
-  // -------------------------------------------------------------------- Methods
+    /*!
+      \brief Destructor
+    */
+    ~Skymapper ();
+    
+    // ------------------------------------------------------------------ Operators
+    
+    /*!
+      \brief Overloading of the copy operator
+      
+      \param other -- Another Skymapper object from which to make a copy.
+    */
+    Skymapper &operator= (Skymapper const &other); 
+    
+    // ----------------------------------------------------------------- Parameters
+    
+    /*!
+      \brief Set the verbosity level during processing
+      
+      \param verbose -- The verbosity level during processing; if
+             <tt>verbose=0</tt> no additional output will be produced.
+    */
+    inline void setVerboseLevel (short const &verbose) {
+      verbose_p = verbose;
+    }
+    
+    /*!
+      \brief Get the name of (or path to) the created image file
+      
+      \return filename -- Name of (or path to) the created image file
+    */
+    inline String filename () const {
+      return filename_p;
+    }
+    
+    /*!
+      \brief Get the pixel array shape of the created image
+      
+      \return shape -- Shape of the pixel array inside the created image
+    */
+    inline casa::IPosition imageShape () {
+      return coordinates_p.shape();
+    }
+    
+    /*!
+      \brief Set the name of (or path to) the created image file
+      
+      \param  filename -- Name of (or path to) the created image file
+    */
+    inline void setFilename (String const &filename) {
+      filename_p = filename;
+    }
+    
+    /*!
+      \brief How many blocks of data have been processed so far?
+      
+      \return nofProcessedBlocks -- The number of processed data blocks so far
+    */
+    inline uint nofProcessedBlocks () const {
+      return nofProcessedBlocks_p;
+    }
+    
+    /*!
+      \brief Get the mask to flag individual direction pixels
+      
+      \return directionMask -- [nof. Lon. pixels, nof. Lat. pixels] Matrix of
+              boolean values to keep track of individual pixels of the direction
+	      axes, which have been flagged (e.g. because their world value lies
+	      beneath the local horizon).
+    */
+    inline Matrix<bool> directionMask () const {
+      return directionMask_p;
+    }
+    
+    // -------------------------------------------------------------------- Methods
+    
+    /*!
+      \brief Initialize the internal structure of the Skymapper for data processing
+      
+      \return status -- Status of the operation; returns <tt>false</tt> if an error
+      was encountered.
+    */
+    bool initSkymapper ();
+    
+    /*!
+      \brief Process a block of data and add the result to the image being created
+      
+      \todo We need to check whether of not we have reached the maximum number of 
+      blocks to be processed; otherwise will operate outside the range of the 
+      image pixel data array.
+      
+      \param data -- Array with the input data, [channels,antennas]; typically this
+      will be frequency domain data after calibration.
+      
+      \return status -- Status of the operation; returns <tt>false</tt> if an error
+      was encountered.
+    */
+    bool processData (Matrix<DComplex> const &data);
 
-  /*!
-    \brief Initialize the internal structure of the Skymapper for data processing
+    // ----------------------------------------------------------------- Beamformer
+    
+    /*!
+      \brief Get the type of beam to be used at processing
+      
+      \return beamType -- The type of beam to be used at data processing
+    */
+    inline SkymapQuantity skymapType () {
+      return beamformer_p.skymapType();
+    }
+    
+    /*!
+      \brief Set the type of beam to be used at data processing
+      
+      \param skymapType -- The BeamType to be used at data processing
+      
+      \return status -- Status of the operation; returns <i>false</i> if an
+              an error was encountered
+    */
+    inline bool setSkymapType (SkymapQuantity const &skymapType) {
+      return beamformer_p.setSkymapType(skymapType);
+    }
+    
+    /*!
+      \brief Set the type of beam to be used at data processing
+      
+      \param skymapType -- The BeamType to be used at data processing
+      
+      \return status -- Status of the operation; returns <i>false</i> if an
+              an error was encountered
+    */
+    inline bool setSkymapType (SkymapQuantity::Type const &skymapType) {
+      return beamformer_p.setSkymapType(skymapType);
+    }
+    
+    /*!
+      \brief Set the antenna positions
 
-    \return status -- Status of the operation; returns <tt>false</tt> if an error
-                      was encountered.
-  */
-  bool initSkymapper ();
+      \param antPositions -- [antenna,3] array with the antenna positions.
+      \param type         -- Coordinate type as which the antenna positions are
+             provided; if necessary conversion is performed internally.
+      \param anglesInDegrees -- If the coordinates of the antenna positions
+             contain an angular component, is this component given in degrees?
+	     If set <tt>false</tt> the angular components are considered to be
+	     given in radians.
+    */
+    inline bool setAntPositions (Matrix<double> const &antPositions,
+				 CoordinateType::Types const &type,
+				 bool const &anglesInDegrees) {
+      return beamformer_p.setAntPositions(antPositions,
+					  type,
+					  anglesInDegrees);
+    }
 
-  /*!
-    \brief Process a block of data and add the result to the image being created
+    /*!
+      \brief Set the antenna positions
 
-    \todo We need to check whether of not we have reached the maximum number of 
-    blocks to be processed; otherwise will operate outside the range of the 
-    image pixel data array.
-
-    \param data -- Array with the input data, [channels,antennas]; typically this
-                   will be frequency domain data after calibration.
-		   
-    \return status -- Status of the operation; returns <tt>false</tt> if an error
-                      was encountered.
-  */
-  bool processData (Matrix<DComplex> const &data);
-
-  // ---------------------------------------------------------- Coordinate system
-
-  /*!
+      \param antPositions -- Array with the antenna positions.
+    */
+    inline bool setAntPositions (Vector<MVPosition> const &antPositions) {
+      return beamformer_p.setAntPositions(antPositions);
+    }
+    
+    // ---------------------------------------------------------- Coordinate system
+    
+    /*!
     \brief Get the SkymapCoordinates object handling the coordinate operations
     
     \return skymapCoordinates -- Container and handler for the coordinates
-  */
-  inline SkymapCoordinate skymapCoordinate () {
-    return coordinates_p;
-  }
-
-  /*!
-    \brief Set the SkymapCoordinate object handling the coordinate operations
+    */
+    inline SkymapCoordinate skymapCoordinate () {
+      return coordinates_p;
+    }
     
-    \param coordinates -- Container and handler for the coordinates
+    /*!
+      \brief Set the SkymapCoordinate object handling the coordinate operations
+      
+      \param coordinates -- Container and handler for the coordinates
+      
+      \return status -- Status of the operation; returns <tt>false</tt> if an error
+      was encountered.
+    */
+    bool setSkymapCoordinate (SkymapCoordinate const &skymapCoord);
     
-    \return status -- Status of the operation; returns <tt>false</tt> if an error
-                      was encountered.
-  */
-  bool setSkymapCoordinate (SkymapCoordinate const &skymapCoord);
-
-  /*!
-    \brief Get the coordinate system associated with the image
+    /*!
+      \brief Get the coordinate system associated with the image
+      
+      \return cs -- The coordinate system as created via SkymapCoordinates
+    */
+    inline casa::CoordinateSystem coordinateSystem () {
+      return coordinates_p.coordinateSystem();
+    }
     
-    \return cs -- The coordinate system as created via SkymapCoordinates
-  */
-  inline casa::CoordinateSystem coordinateSystem () {
-    return coordinates_p.coordinateSystem();
-  }
-  
-  /*!
-    \brief Set the direction axis of the coordinate system
- 
-    \param refcode    -- Reference code identifying the coordinate reference
-                         frame, e.g. <i>AZEL</i>
-    \param projection -- Reference code identifying the spherical map projection,
-                         e.g. <i>AIT</i>
-    \param crval      -- Reverence value at the position of the sky map
-    \param cdelt      -- Coordinate increment
-  */
-  bool setDirectionAxis (String const &refcode,
-			 String const &projection,
-			 const Vector<Double> &crval,
-			 const Vector<Double>& cdelt);    
-
-  // ----------------------------------------------------------------- Beamformer
-
-  /*!
-    \brief Get the Beamformer object handling the combination of antenna signals
-
-    \return beamformer -- Beamformer object, to handle the combination of
-                          antenna signals
-   */
-  inline Beamformer beamformer () {
-    return beamformer_p;
-  }
-
-  /*!
-    \brief Set a new Beamformer object handle the combination of antenna signals
-
-    \param beamformer -- Beamformer object, to handle the combination of
-                         antenna signals
-
-    \return status -- Status of the operation; returns <tt>false</tt> if an error
-                      was encountered.
-  */
-  bool setBeamformer (Beamformer const &beamformer);
-
-  /*!
-    \brief Update the antenna positions used by the Beamformer
+    // ----------------------------------------------------------------- Beamformer
     
-    \param antPositions  -- [nofAntennas,3] Antenna positions for which the
-                            delay is computed, \f$ (x,y,z) \f$
+    /*!
+      \brief Get the Beamformer object handling the combination of antenna signals
+      
+      \return beamformer -- Beamformer object, to handle the combination of
+              antenna signals
+    */
+    inline Beamformer beamformer () const {
+      return beamformer_p;
+    }
     
-    \return status -- Status of the operation; returns <tt>false</tt> if an error
-                      was encountered.
-  */
-  bool setAntennaPositions (Matrix<double> const &antPositions);
-
-  // ------------------------------------------------------------------- feedback
-
-  /*!
-    \brief Provide a summary of the internal parameters to standard output
-   */
-  inline void summary () {
-    summary (std::cout);
-  }
-
+    /*!
+      \brief Set a new Beamformer object handle the combination of antenna signals
+      
+      \param beamformer -- Beamformer object, to handle the combination of
+      antenna signals
+      
+      \return status -- Status of the operation; returns <tt>false</tt> if an error
+      was encountered.
+    */
+    bool setBeamformer (Beamformer const &beamformer);
+    
+    /*!
+      \brief Update the antenna positions used by the Beamformer
+      
+      \param antPositions  -- [nofAntennas,3] Antenna positions for which the
+      delay is computed, \f$ (x,y,z) \f$
+      
+      \return status -- Status of the operation; returns <tt>false</tt> if an error
+      was encountered.
+    */
+    bool setAntennaPositions (Matrix<double> const &antPositions);
+    
+    // ------------------------------------------------------------------- feedback
+    
+    //! Provide a summary of the internal parameters to standard output
+    inline void summary () {
+      summary (std::cout);
+    }
+    
   /*!
     \brief Provide a summary of the internal parameters
 
@@ -458,29 +490,53 @@ namespace CR {  // Namespace CR -- begin
   */
   void copy (Skymapper const& other);
 
-  /*!
-    \brief Unconditional deletion 
-  */
+  //! Unconditional deletion 
   void destroy(void);
 
+  /*!
+    \brief Initialize the object's internal parameters
+    
+    \param coord -- Coordinates to be attached to the skymap.
+  */
+  void init (SkymapCoordinate const &coord);
+
+  /*!
+    \brief Initialize the object's internal parameters
+    
+    \param coord        -- Coordinates to be attached to the skymap.
+    \param antPositions -- Antenna positions to be fed into the Beamformer
+    \param skymapType   -- Electromagnetical quantity for which the skymap is
+           getting computed.
+  */
+  void init (SkymapCoordinate const &skymapCoord,
+	     Matrix<double> const &antPositions,
+	     SkymapQuantity const &skymapType=SkymapQuantity::FREQ_POWER);
+  
+  /*!
+    \brief Initialize the object's internal parameters
+    
+    \param coord        -- Coordinates to be attached to the skymap.
+    \param antPositions -- Antenna positions to be fed into the Beamformer
+    \param skymapType   -- Electromagnetical quantity for which the skymap is
+           getting computed.
+  */
+  void init (SkymapCoordinate const &skymapCoord,
+	     Vector<MVPosition> const &antPositions,
+	     SkymapQuantity const &skymapType=SkymapQuantity::FREQ_POWER);
+  
   /*!
     \brief Initialize internal parameters at construction
 
     \param verbose            -- Be verbose during processing?
-    \param isOperational      -- Is the Skymapper operational to process data?
     \param nofProcessedBlocks -- nof. blocks to be processed
     \param filename           -- Name of the image file created on disk
     \param skymapCoord        -- SkymapCoordinate object encapsulating the
-                                 characteristics of the coordinate axes
-    \param beamformer         -- Beamformer object, to handle the combination of
-                                 antenna signals
-   */
+           characteristics of the coordinate axes
+  */
   void init (short const &verbose,
-	     bool const &isOperational,
 	     uint const &nofProcessedBlocks,
 	     std::string const &filename,
-	     SkymapCoordinate const &skymapCoord,
-	     Beamformer const &beamformer);
+	     SkymapCoordinate const &skymapCoord);
 
   //! Get the stride along the time axis
   int timeAxisStride ();

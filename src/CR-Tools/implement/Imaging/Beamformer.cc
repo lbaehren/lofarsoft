@@ -206,7 +206,7 @@ namespace CR { // Namespace CR -- begin
   void Beamformer::init ()
   {
     // default setting for the used beamforming method
-    skymapType_p = SkymapQuantity (SkymapQuantity::FREQ_POWER);
+    setSkymapType (SkymapQuantity::FREQ_POWER);
     /* set the weights used in the beamforming */
     setWeights ();
   }
@@ -216,6 +216,9 @@ namespace CR { // Namespace CR -- begin
   bool Beamformer::setSkymapType (SkymapQuantity const &skymapType)
   {
     bool status (true);
+
+    IPosition shape_of_weights = GeomWeight::shape();
+    int blocksize              = (shape_of_weights(0)-1)*2;
     
     switch (skymapType.type()) {
     case SkymapQuantity::FREQ_FIELD:
@@ -224,30 +227,37 @@ namespace CR { // Namespace CR -- begin
       status = false;
 //       beamType_p    = beam;
 //       processData_p = &Beamformer::freq_field;
+//       shapeBeam_p   = IPosition(2,shape_of_weights(0),shape_of_weights(2));
       break;
     case SkymapQuantity::FREQ_POWER:
       skymapType_p  = skymapType;
       processData_p = &Beamformer::freq_power;
+      shapeBeam_p   = IPosition(2,shape_of_weights(0),shape_of_weights(2));
       break;
     case SkymapQuantity::TIME_FIELD:
       skymapType_p  = skymapType;
       processData_p = &Beamformer::time_field;
+      shapeBeam_p   = IPosition(2,blocksize,shape_of_weights(2));
       break;
     case SkymapQuantity::TIME_POWER:
       skymapType_p  = skymapType;
       processData_p = &Beamformer::time_power;
+      shapeBeam_p   = IPosition(2,blocksize,shape_of_weights(2));
       break;
     case SkymapQuantity::TIME_CC:
       skymapType_p  = skymapType;
       processData_p = &Beamformer::time_cc;
+      shapeBeam_p   = IPosition(2,blocksize,shape_of_weights(2));
       break;
     case SkymapQuantity::TIME_P:
       skymapType_p  = skymapType;
       processData_p = &Beamformer::time_p;
+      shapeBeam_p   = IPosition(2,blocksize,shape_of_weights(2));
       break;
     case SkymapQuantity::TIME_X:
       skymapType_p  = skymapType;
       processData_p = &Beamformer::time_x;
+      shapeBeam_p   = IPosition(2,blocksize,shape_of_weights(2));
       break;
     default:
       std::cerr << "[Beamformer::setSkymapType]"
@@ -263,21 +273,22 @@ namespace CR { // Namespace CR -- begin
 
   void Beamformer::summary (std::ostream &os)
   {
-    os << "[Beamformer] Summary of object"                             << std::endl;
-    os << "-- Geometrical delays     = " << GeomDelay::shape()         << std::endl;
-    os << "                          = " << delays_p.shape()           << std::endl;
-    os << "-- Geometrical phases     = " << GeomPhase::shape()         << std::endl;
-    os << "                          = " << phases_p.shape()           << std::endl;
-    os << "-- Geometrical weights    = " << GeomWeight::shape()        << std::endl;
-    os << "                          = " << weights_p.shape()          << std::endl;
-    os << "-- buffer delays          = " << bufferDelays_p             << std::endl;
-    os << "-- buffer phases          = " << bufferPhases_p             << std::endl;
-    os << "-- buffer weights         = " << bufferWeights_p            << std::endl;
-    os << "-- Near-field beamforming = " << GeomDelay::nearField()     << std::endl;
+    os << "[Beamformer] Summary of object"                         << std::endl;
+    os << "-- Near-field beamforming = " << GeomDelay::nearField() << std::endl;
     os << "-- Beam domain type/name  = " << domainType() << " / " << domainName() 
        << std::endl;
-    os << "-- Beamforming method     = " << skymapType_p.name()        << std::endl;
-    os << "-- Beamformer weights     = " << bfWeights_p.shape()        << std::endl;
+    os << "-- Beamforming method     = " << skymapType_p.name()    << std::endl;
+    os << "-- buffer delays          = " << bufferDelays_p         << std::endl;
+    os << "-- buffer phases          = " << bufferPhases_p         << std::endl;
+    os << "-- buffer weights         = " << bufferWeights_p        << std::endl;
+    os << "-- Geometrical delays     = " << GeomDelay::shape()     << std::endl;
+    os << "                          = " << delays_p.shape()       << std::endl;
+    os << "-- Geometrical phases     = " << GeomPhase::shape()     << std::endl;
+    os << "                          = " << phases_p.shape()       << std::endl;
+    os << "-- Geometrical weights    = " << GeomWeight::shape()    << std::endl;
+    os << "                          = " << weights_p.shape()      << std::endl;
+    os << "-- Beamformer weights     = " << shapeWeights()         << std::endl;
+    os << "-- beamformed data shape  = " << shapeBeam()            << std::endl;
   }
   
   // ============================================================================
@@ -316,17 +327,15 @@ namespace CR { // Namespace CR -- begin
     GeomWeight::setWeights();
     
     /*
-      In the simplest case no antenna gain corrections are applied, so the
-      weights simply consist of the weights calculated from the geometrical 
-      phases.
+      In case the geometrical weights are buffered, we simply set up a reference
+      to the array storing the values. If no buffering of the geometrical weights
+      is done, we retrieve the values and store them here.
     */
-    try {
+    if (bufferWeights_p) {
+      bfWeights_p.reference(weights_p);
+    } else {
       bfWeights_p.resize (GeomWeight::shape());
       bfWeights_p = GeomWeight::weights();
-    } catch (std::string message) {
-      std::cerr << "[Beamformer::setBeamformerWeights] "
-		<< message
-		<< std::endl;
     }
     
   }
@@ -466,21 +475,22 @@ namespace CR { // Namespace CR -- begin
 			       const casa::Array<DComplex> &data)
   {
     bool status (true);
-    int direction (0);
-    casa::IPosition pos (2);
+    int position;
     casa::DComplex tmp;
 
     try {
-      // Get the shape of the beamformer weights, [freq,antenna,sky]
-      casa::IPosition shape = bfWeights_p.shape();
-      // Resize the array returning the beamformed data
-      beam.resize (shape(0),shape(2),0.0);
+      // Shape of the array with the input data, [freq,antenna]
+      IPosition index (2);
+      // Shape of the array with the beamformer weights, [freq,antenna,position]
+      IPosition shape = bfWeights_p.shape();
+      // initialize the array holding the beamformed data
+      beam = 0;
       
-      for (direction=0; direction<shape(2); direction++) {
-	for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
-	  for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
-	    tmp = data(pos)*bfWeights_p(pos(0),pos(1),direction);
-	    beam(pos(0),direction) += real(tmp*conj(tmp));
+      for (position=0; position<shape(2); position++) {
+	for (index(0)=0; index(0)<shape(0); index(0)++) {
+	  for (index(1)=0; index(1)<shape(1); index(1)++) {
+	    tmp = data(index)*bfWeights_p(index(0),index(1),position);
+	    beam(index(0),position) += real(tmp*conj(tmp));
 	  }
 	}
       }
@@ -489,7 +499,7 @@ namespace CR { // Namespace CR -- begin
       std::cerr << "[Beamformer::freq_power] " << message << std::endl;
       status = false;
     }
-
+    
     return status;
   }
   
@@ -499,6 +509,12 @@ namespace CR { // Namespace CR -- begin
 			       const casa::Array<DComplex> &data)
   {
     bool status (true);
+
+#ifdef DEBUGGING_MESSAGES
+    std::cout << "[Beamformer::time_field]" << std::endl;
+    std::cout << "-- shape(data) = " << data.shape() << std::endl;
+    std::cout << "-- shape(beam) = " << beam.shape() << std::endl;
+#endif
 
     std::cerr << "[Beamformer::time_field] Method not yet implemented!"
 	      << std::endl;
@@ -525,68 +541,57 @@ namespace CR { // Namespace CR -- begin
 			    const casa::Array<DComplex> &data)
   {
     bool status (true);
-
-    if (checkData (beam,data)) {
-
-      try {
-	
-	casa::IPosition shape = bfWeights_p.shape();  //  [freq,antenna,direction]
-	int blocksize         = 2*(shape(0)-1);
-	double nofBaselines   = GeomDelay::nofBaselines();
-	int direction (0);
-	int ant2 (0);
-	casa::IPosition pos (2);
-	casa::Vector<DComplex> tmpFreq (shape(0),0.0);
-	casa::Vector<double>   tmpTime (blocksize,0.0);
-	casa::Matrix<double>   tmpData (shape(1),blocksize);
-
-#ifdef DEBUGGING_MESSAGES
-	std::cout << "-- shape(weights) = " << shape << std::endl;
-	std::cout << "-- shape(tmpFreq) = " << tmpFreq.shape() << std::endl;
-	std::cout << "-- shape(tmpTime) = " << tmpTime.shape() << std::endl;	
-	std::cout << "-- shape(tmpData) = " << tmpData.shape() << std::endl;
-#endif
-	
-	/*
-	  Set up the casa::FFTServer which is to handle the inverse Fourier
-	  transform taking place before the summation step.
-	*/
-	FFTServer<double,std::complex<double> > server(IPosition(1,blocksize),
-						       casa::FFTEnums::REALTOCOMPLEX);
-	// resize array returning the beamformed data
-	beam.resize (blocksize,shape(2),0.0);
-	
-	for (direction=0; direction<shape(2); direction++) {
-	  // Precompute the shifted time series for a given sky position
-	  for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
-	    // --- Apply the beamformer weights to the Fourier-transformed data
-	    for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
-	      tmpFreq(pos(0)) = data(pos)*bfWeights_p(pos(0),pos(1),direction);
-	    }
-	    // --- Inverse Fourier transform back to time domain
-	    server.fft (tmpTime,tmpFreq);
-	    tmpData.row(pos(1)) = tmpTime;
+    
+    try {
+      
+      casa::IPosition shape = bfWeights_p.shape();  //  [freq,antenna,direction]
+      double nofBaselines   = GeomDelay::nofBaselines();
+      int direction (0);
+      int ant2 (0);
+      casa::IPosition pos (2);
+      casa::Vector<DComplex> tmpFreq (shape(0),0.0);
+      casa::Vector<double>   tmpTime (shapeBeam_p(0),0.0);
+      casa::Matrix<double>   tmpData (shape(1),shapeBeam_p(0));
+      
+      /*
+	Set up the casa::FFTServer which is to handle the inverse Fourier
+	transform taking place before the summation step.
+      */
+      FFTServer<double,std::complex<double> > server(IPosition(1,shapeBeam_p(0)),
+						     casa::FFTEnums::REALTOCOMPLEX);
+      // resize array returning the beamformed data
+      beam.resize (shapeBeam_p(0),shape(2),0.0);
+      
+      for (direction=0; direction<shape(2); direction++) {
+	// Precompute the shifted time series for a given sky position
+	for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	  // --- Apply the beamformer weights to the Fourier-transformed data
+	  for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	    tmpFreq(pos(0)) = data(pos)*bfWeights_p(pos(0),pos(1),direction);
 	  }
-	  /*
-	    Once we have precomputed all the shifted time-series, we go through
-	    all baselines and add up antenna combinations.
-	  */
-	  tmpTime = 0.0;
-	  for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
-	    for (ant2=pos(1)+1; ant2<shape(1); ant2++) {
-	      tmpTime += tmpData.row(pos(1))*tmpData.row(ant2);
-	    }  // end loop: antenn2
-	  }  // end loop: antenna 1
-	  // normalization w.r.t. the number of baselines
-	  tmpTime /= nofBaselines;
-	  //
-	  beam.column(direction) = CR::sign(tmpTime)*sqrt(abs(tmpTime));
+	  // --- Inverse Fourier transform back to time domain
+	  server.fft (tmpTime,tmpFreq);
+	  tmpData.row(pos(1)) = tmpTime;
 	}
-      } catch (std::string message) {
-	std::cerr << "[Beamformer::time_cc] " << message << std::endl;
-	status = false;
-      } 
-    }
+	/*
+	  Once we have precomputed all the shifted time-series, we go through
+	  all baselines and add up antenna combinations.
+	*/
+	tmpTime = 0.0;
+	for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	  for (ant2=pos(1)+1; ant2<shape(1); ant2++) {
+	    tmpTime += tmpData.row(pos(1))*tmpData.row(ant2);
+	  }  // end loop: antenn2
+	}  // end loop: antenna 1
+	// normalization w.r.t. the number of baselines
+	tmpTime /= nofBaselines;
+	//
+	beam.column(direction) = CR::sign(tmpTime)*sqrt(abs(tmpTime));
+      }
+    } catch (std::string message) {
+      std::cerr << "[Beamformer::time_cc] " << message << std::endl;
+      status = false;
+    } 
     
     return status;
   }
@@ -603,11 +608,10 @@ namespace CR { // Namespace CR -- begin
       int direction(0);
       casa::IPosition pos(2);                       // [freq,antenna]
       casa::IPosition shape = bfWeights_p.shape();  // [freq,antenna,direction]
-      int blocksize         = 2*(shape(0)-1);
       casa::Vector<DComplex> tmpFreq (shape(0));
-      casa::Vector<double> tmpTime (blocksize);
-      casa::Vector<double> sum (blocksize);
-      FFTServer<double,DComplex> server(casa::IPosition(1,blocksize),
+      casa::Vector<double> tmpTime (shapeBeam_p(0));
+      casa::Vector<double> sum (shapeBeam_p(0));
+      FFTServer<double,DComplex> server(casa::IPosition(1,shapeBeam_p(0)),
 					casa::FFTEnums::REALTOCOMPLEX);
 
 #ifdef DEBUGGING_MESSAGES

@@ -382,8 +382,10 @@ namespace CR { // Namespace CR -- begin
     //! Unconditional deletion 
     void destroy(void);
 
+    //! Initialize the object's internal parameters
     void init ();
 
+    //! Initialize the object's internal parameters
     void init (ObservationData const &obsData,
 	       SpatialCoordinate const &spatialCoord,
 	       TimeFreqCoordinate const &timeFreqCoord);

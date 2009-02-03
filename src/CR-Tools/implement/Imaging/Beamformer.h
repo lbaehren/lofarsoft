@@ -110,12 +110,21 @@ namespace CR { // Namespace CR -- begin
 
     <h3>Adding new beamforming methods</h3>
 
-    Implementation of a new beamforming methods requires three entries within
-    this class:
+    In order to consistently implement the functionality for a new beamforming
+    method a number of changes are required (here using the cross-correlation
+    beam as an example):
     <ol>
       <li>Add an entry to the CR::SkymapQuantity class, as this will be used
       internally for managing function calls and redirection from the generic
       interface.
+      \code
+      typedef enum {
+        // Definition of the various other methods
+	// [...]
+        // Cross-correlation beam (cc-beam)
+        TIME_CC
+      } Type;
+      \endcode
       <li>The function implementing the new beam type, using the interface
       of Beamformer::processData.
       \code
@@ -131,7 +140,11 @@ namespace CR { // Namespace CR -- begin
 	
 	switch (beam) {
 	  case SkymapQuantity::TIME_CC:
+	    // Register the type of the skymap quantity
 	    skymapType_p  = skymapType;
+	    // Register the shape of the array with the beamformed data
+	    shapeBeam_p   = IPosition(2,blocksize,shape_of_weights(2));
+	    // Direct the data processing function to the actual implementation
 	    processData_p = &Beamformer::time_cc;
 	    break;
 	}
@@ -161,7 +174,17 @@ namespace CR { // Namespace CR -- begin
 		    bufferWeights);
 
       // Create Beamformer
-      Beamformer bf (weight);
+      Beamformer bf (w);
+      \endcode
+      <li>In order to avoid unnecessary checking and resizing of arrays, the
+      array returning the beamformed data needs to be properly dimensioned before
+      calling Beamformer::processData
+      \code
+      Array<double> beam;
+      // Select the type of beam to compute from the data
+      bf.setSkymapType(SkymapQuantity::FREQ_POWER);
+      // Bring the array to hold the beamformed up to the correct shape
+      beam.resize(bf.shapeBeam());
       \endcode
     </ol>    
   */  
@@ -169,10 +192,12 @@ namespace CR { // Namespace CR -- begin
     
     //! Type of beamforming method used in data processing
     SkymapQuantity skymapType_p;
-
+    //! Shape of the array with the beamformed data
+    IPosition shapeBeam_p;
+    //! The weights applied by the Beamformer
+    casa::Cube<DComplex> bfWeights_p;
     //! Complex-valued antenna gains per antenna
     AntennaGain antennaGains_p;
-    
     /*!
       \brief Pointer to the function performing the beamforming
      
@@ -186,9 +211,6 @@ namespace CR { // Namespace CR -- begin
     */
     bool (Beamformer::*processData_p) (casa::Matrix<double> &beam,
 				       const casa::Array<DComplex> &data);
-    
-    //! The weights applied by the Beamformer
-    casa::Cube<DComplex> bfWeights_p;
     
   public:
     
@@ -396,6 +418,24 @@ namespace CR { // Namespace CR -- begin
     void summary (std::ostream &os);
     
     // ------------------------------------------------------------------ Methods
+
+    /*!
+      \brief Get the shape of the array holding the Beamformer weights
+
+      \return shape --
+    */
+    inline IPosition shapeWeights () const {
+      return bfWeights_p.shape();
+    }
+
+    /*!
+      \brief Get the shape of the array with the beamformed data
+      
+      \return shape -- Shape of the array with the beamformed data
+    */
+    inline IPosition shapeBeam () const {
+      return shapeBeam_p;
+    }
     
     /*!
       \brief Get the complex-valued antenn gains
@@ -521,9 +561,7 @@ namespace CR { // Namespace CR -- begin
     */
     void destroy(void);
 
-    /*!
-      \brief Initialize internal settings of the Beamformer
-    */
+    //! Initialize internal settings of the Beamformer
     void init ();
 
     /*

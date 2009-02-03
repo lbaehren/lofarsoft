@@ -411,31 +411,44 @@ int test_processing ()
 
   int nofFailedTests (0);
   bool status (true);
-
+  
+  // parameters for GeomDelay
   uint nofAntennas (4);
-
-  // Beamformer object for the subsequent testing
-  CR::Beamformer bf (get_antennaPositions(),
-		     CR::CoordinateType::Cartesian,
-		     get_skyPositions(),
-		     CR::CoordinateType::Cartesian,
-		     false,
-		     false,
-		     false,
-		     get_frequencies(),
-		     false);
+  casa::Matrix<double> antPositions (nofAntennas,3);
+  casa::Matrix<double> skyPositions (10,3);
+  bool anglesInDegrees (true);
+  bool farField (false);
+  bool bufferDelays (false);
+  // parameters for GeomPhase
+  uint nofChannels (100);
+  Vector<double> frequencies (nofChannels);
+  bool bufferPhases (false);
+  // parameters for GeomWeights
+  bool bufferWeights (false);
+  // Create beamformer
+  Beamformer bf (antPositions,
+		 CR::CoordinateType::Cartesian,
+		 skyPositions,
+		 CR::CoordinateType::Cartesian,
+		 anglesInDegrees,
+		 farField,
+		 bufferDelays,
+		 frequencies,
+		 bufferPhases,
+		 bufferWeights);
   bf.summary();
-
+  
   // Some data to test the processing
-  Matrix<DComplex> data (get_data(nofAntennas));
+  Matrix<DComplex> data (nofChannels,nofAntennas,1.0);
   // Array to store the beamformed data
   Matrix<double> beam;
 
   std::cout << "[1] Power in the frequency domain (FREQ_POWER)" << std::endl;
   try {
     bf.setSkymapType(SkymapQuantity::FREQ_POWER);
-    bf.summary();
+    beam.resize(bf.shapeBeam());
     status = bf.processData (beam,data);
+    std::cout << "-- beamformed data : " << beam << std::endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -444,8 +457,9 @@ int test_processing ()
   std::cout << "[2] cc-beam in the time domain (TIME_CC)" << std::endl;
   try {
     bf.setSkymapType(SkymapQuantity::TIME_CC);
-    bf.summary();
+    beam.resize(bf.shapeBeam());
     status = bf.processData (beam,data);
+    std::cout << "-- beamformed data : " << beam << std::endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -454,8 +468,9 @@ int test_processing ()
   std::cout << "[3] powerbeam in the time domain (TIME_P)" << std::endl;
   try {
     bf.setSkymapType(SkymapQuantity::TIME_P);
-    bf.summary();
+    beam.resize(bf.shapeBeam());
     status = bf.processData (beam,data);
+    std::cout << "-- beamformed data : " << beam << std::endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
