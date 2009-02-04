@@ -58,6 +58,32 @@ class hffunc():
     def setParameter(self,parname,defval,prefix="'",objname=""):
         par=funcparameters(parname,defval,prefix,objname)
         self.pars.append(par)
+#WORK IN PROGRESS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    def getParameterObject(self): #and create it if necessary
+        #Check for paramter object which belongs to this object and create it if necessary
+        pobj=self.data["'Parameters="+self.parnames[0]]
+        if type(pobj)!=Data:
+            pobj=self.data.newObject("'Parameters")
+            pobj.setNetLevel(100)
+            pobj.put_silent(self.parnames)            
+            obj=pobj[par.objname]
+        #First search Object linked to Parameter object
+            if type(obj)!=Data: 
+                #If not present search through the entire net
+                obj=self.data[par.objname]
+        #Still not found? Then create it attached to the Parameter Object
+                if type(obj)!=Data: 
+                    obj=pobj.newObject(par.objname)
+                    obj.setNetLevel(100)
+                    obj.put_silent(par.defval)
+        #Finally we are ready to set the local variable.
+            if par.type=="Py":
+                if obj.getI()==0: 
+                    exec("self.obj."+par.parname+"=None")
+                    return 0
+            exec("self."+par.parname+"=obj.get"+par.type+"()") 
+            exec("self.obj."+par.parname+"=obj") 
+        return 0
     def getParameters(self):
         if len(self.pars)>0:
         #Check for paramter object which belongs to this object and create it if necessary
@@ -85,6 +111,7 @@ class hffunc():
             exec("self."+par.parname+"=obj.get"+par.type+"()") 
             exec("self.obj."+par.parname+"=obj") 
         return 0
+
 
 class funcparameters:
     def __init__(self,parname,defval,prefix="'",objname=""):
@@ -124,11 +151,18 @@ class hfPlotData(hffunc):
         self.setParameter("Color","b")
         self.setParameter("GraphObject",None)
         return 0
-    def process(self,d):
-        if verbose: print "Process hfPlotData user function"
-        self.yvec=FloatVec(); 
+    def initialize(self):
+        self.yvec=FloatVec() #create local scratch vectors
         self.xvec=FloatVec()
         self.zvec=FloatVec()
+        self.xdat=mglData() # create local mglData vectors - better create method which does that directly (getmglData)
+        self.ydat=mglData()
+        self.zdat=mglData()
+    def process(self,d):
+        if verbose: print "Process hfPlotData user function"
+        self.xvec=self.xvec[0:0]  # delete the local scratch vectors
+        self.yvec=self.yvec[0:0]
+        self.zvec=self.zvec[0:0]
         naxis=0;
         axis=d["'yAxis'Data"]
         if not type(axis)==Data: 
@@ -136,30 +170,30 @@ class hfPlotData(hffunc):
             return 1
         naxis+=1
         axis.get(self.yvec)
-        self.ydat=mglData()
-        self.ydat.SetVec(self.yvec)
         axis=d["'xAxis'Data"]
         if type(axis)==Data:
             naxis+=1;
-            axis.get(self.xvec)
-            self.xdat=mglData()
-            self.xdat.SetVec(self.xvec)
+            axis.get(self.xvec) #Use Vector selector in the future ...!
+            if len(self.xvec)>len(self.yvec): self.xvec=self.xvec[0:len(self.yvec)]
+            if len(self.xvec)<len(self.yvec): self.yvec=self.yvec[0:len(self.xvec)]
             if verbose: print "self.xdat.nx=",self.xdat.nx," max=",self.xdat.Maximal()
             axis=d["'zAxis'Data"]
             if type(axis)==Data:
                 naxis+=1;
                 axis.get(self.zvec)
-                self.zdat=mglData()
                 self.zdat.SetVec(self.zvec)
+        if naxis==1: self.xvec.extend(range(len(self.yvec)))
+        self.xdat.SetVec(self.xvec)
+        self.ydat.SetVec(self.yvec)
         if verbose: print "naxis=",naxis
         if verbose: print "self.ydat.ny=",self.ydat.ny," max=",self.ydat.Maximal()
-        if naxis==1: self.GraphObject.Plot(self.ydat,self.Color)
-        if naxis==2: self.GraphObject.Plot(self.xdat,self.ydat,self.Color)
+        if naxis<=2: self.GraphObject.Plot(self.xdat,self.ydat,self.Color)
         if naxis==3: self.GraphObject.Plot(self.xdat,self.ydat,self.zdat,self.Color)
         return 0
     def cleanup(self):
         return 0
 
+#For debugging: type self=d["Antenna=0:PlotData"].PyFunc() to retrieve that function
 
 class hfPlotPanel(hffunc):
     "hfPlotPanel: Plots a panel and plots all linked PlotData Objects into it."
@@ -276,13 +310,18 @@ class hfQtNetview(hffunc):
     "hfQtNetview: Start a QtSVGWidget which shows the current network of objects."
     def startup(self,d):
         if verbose: print "QtNetview startup!"
+        self.setParameter("GUI",None)
         self.setParameter("SVGWidget",None)
         self.setParameter("maxNetLevel",99)
         return 0
     def initialize(self):
         "Called at the end of the startup routine. Will create the SVGWidget."
         if self.SVGWidget == None:
-            self.SVGWidget=QtSvg.QSvgWidget()
+            if not self.GUI==None:
+                if "networkdisplay" in dir(gui): 
+                    self.SVGWidget = self.GUI.networkdisplay
+            if self.SVGWidget == None:
+                self.SVGWidget=QtSvg.QSvgWidget()
             self.obj.SVGWidget.putPy_silent(self.SVGWidget)
             self.obj.SVGWidget.setNetLevel(999)
         self.SVGWidget.setWindowTitle(d.getName()+" Network Display")
@@ -298,4 +337,4 @@ def UnitChooser(self):
     return MakeChooser(self,"Unit",("ScaleFactor","Prefix"),(("",1.0),("f",10**-15),("p",10**-12),("n",10**-9),("mu",10**-6),("m",10**-3),("c",10**-2),("d",10**-1),("h",10**2),("k",10**3),("M",10**6),("G",10**9),("T",10**12),("P",10**15),("E",10**18),("Z",10**21)))
 
 def LOPESDatatypeChooser(self):
-    return MakeChooser(self,"LOPESDatatype",("DataType","UnitName","Axis"),(("Time","s","x"),("Frequency","Hz","x"),("Fx","Counts","y"),("Voltage","V","y"),("CalFFT","","y"),("invFFT","","y")))
+    return MakeChooser(self,"Datatype",("Datatype","UnitName","Axis"),(("Time","s","x"),("Frequency","Hz","x"),("Fx","Counts","y"),("Voltage","V","y"),("CalFFT","","y"),("invFFT","","y")))

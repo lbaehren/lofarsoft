@@ -65,8 +65,51 @@ def NewObjectRange(name,n1,n2=None,inc=1):
     else: r=range(n1,n2,inc)
     return map(lambda n:(name,n), r) 
 
+def object_id(self):
+    "Function to return ID number of an object. Used for make_uniqe" 
+    return self.getOid()
+
+
+def make_unique(seq, idfun=None):  
+    "Returns a list which only contains unique members"
+    # order preserving 
+    if idfun is None: 
+        def idfun(x): return x 
+    seen = {} 
+    if type(seq)==DataList: result = DataList()
+    else: result = [] 
+    for item in seq: 
+        marker = idfun(item) 
+        # in old Python versions: 
+        # if seen.has_key(marker) 
+        # but in new ones: 
+        if marker in seen: continue 
+        seen[marker] = 1 
+        result.append(item) 
+    return result
+
+def datalist_unique(self):
+    l=make_unique(self,object_id)
+    if len(l)==1: return l[0]
+    else: return l
+
+
 class DataList(list):
     def datalist(self): return
+    def __getitem__(self,idx):
+        "If index is  a string then retrieve a list of data objects with that sting index from every data object in the list and create a new (flat) data list, otherwise return element idx"
+        if type(idx)==str:  
+            dl=DataList()
+            for d in self:
+                el=d[idx]
+                if type(el)==DataList: dl.extend(el) ##make sure the list remains flat ...
+                else: dl.append(el)
+            return datalist_unique(dl)
+        else:
+            return list(self)[idx]
+    def __floordiv__(self,other):
+        for d in self: d // other
+        return d
     def __rrshift__(self,value):
         dl=DataList()
         if (type(value)==DataList) & (len(self)>1): ## This means DataList >> DataList - here each member will be linked to the corresponding member in the other list
@@ -110,6 +153,11 @@ class DataList(list):
     def set(self,value):
         for d in self: d.set(value)
         return self
+    def val(self):
+        "Returns a list of the values in the Data object list"
+        ret=[]
+        for d in self: ret.append(d.val())
+        return ret
 
 class DataUnion(DataList):
     def __init__(self,*dlist):
@@ -182,7 +230,7 @@ def object_getitem(self,value):
     if type(value)==str:
         ids=self.IDs(value)
         if len(ids)==0:
-            return None
+            return DataList()
         elif len(ids)==1:
             return self.Object(ids[0])
         else:
@@ -220,6 +268,33 @@ def object_set(self,value):
     else:
         self.putPy(value)
     return self
+
+def object_val(self):
+    typ=self.getType()
+    if len(self)==1:
+        if typ==TYPE.INTEGER:
+            ret=self.getI()
+        elif typ==TYPE.NUMBER:
+            ret=self.getN()
+        elif typ==TYPE.STRING:
+            ret=self.getS()
+        elif typ==TYPE.COMPLEX:
+            ret=self.getC()
+        elif typ==TYPE.POINTER:
+            ret=self.getPy()
+        return ret
+    else:
+        if (typ==TYPE.INTEGER | typ==TYPE.POINTER):
+            v=IntVec()
+        elif typ==TYPE.NUMBER:
+            v=FloatVec()
+        elif typ==TYPE.STRING:
+            v=StringVec()
+        elif typ==TYPE.COMPLEX:
+            v=ComplexVec()
+        self.get(v)
+        return v
+
 
 def object_setitem(self,key,value):
     "Used to overload the assign operation for a data object with [] to set the content of the vector."
@@ -370,6 +445,8 @@ def object_floordiv(self,other):
         obj=self["other"]
     elif type(other)==Data:
         obj=other
+    elif type(other)==DataList:
+        return other // self
     self.delLink(obj)
     obj.touch()
     self.touch()
@@ -573,6 +650,12 @@ def object_nview(self,maxnetlevel=999):
 #    os.system("dot -Tsvg "+fn+" -o "+fn+".svg")
 
 
+def object_equal(self,other):
+    if type(other)==Data:
+        return self.getOid()==other.getOid()
+    else: return False
+
+Data.__eq__=object_equal
 Data.__repr__=object_print
 Data.__invert__=object_invert  #~data = delObject
 DataList.__invert__=object_invert  #~data = delObject
@@ -592,6 +675,7 @@ Data.netsvg=object_net2qb
 Data.getitem=object_getitem
 Data.setFunc=object_setFunc
 Data.set=object_set
+Data.val=object_val
 Data.setFunc_f=object_setFunc_f
 Data.setFunc_f_silent=object_setFunc_f_silent
 Data.getDOT=object_getDOT
@@ -610,6 +694,7 @@ Data.getStoredPyFuncObject=getStoredPyFuncObject
 Data.setStoredPyFuncObject=setStoredPyFuncObject
 Data.getStoredPyQtObject=getStoredPyQtObject
 Data.setStoredPyQtObject=setStoredPyQtObject
+Data.PyFunc=Data.retrievePyFuncObject
 Data.activatePyQt=object_activatePyQt
 Data.hasPyQt=object_hasPyQt
 Data.connect=object_connect
@@ -628,3 +713,8 @@ mglGraphZB=0
 mglGraphPS=1
 mglGraphGL=2
 mglGraphIDTF=3
+
+def e(file): 
+    "short form form execfile(file)"
+    print "Loading",file,"."
+    execfile(file)

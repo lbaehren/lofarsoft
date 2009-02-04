@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'hfgui2.ui'
 #
-# Created: Mon Feb  2 16:58:39 2009
+# Created: Wed Feb  4 14:19:18 2009
 #      by: PyQt4 UI code generator 4.4.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -53,7 +53,7 @@ class Ui_MainWindow(object):
         self.widget.setGeometry(QtCore.QRect(0, 0, 321, 601))
         self.widget.setObjectName("widget")
         self.frame_7 = QtGui.QFrame(self.widget)
-        self.frame_7.setGeometry(QtCore.QRect(0, 5, 321, 591))
+        self.frame_7.setGeometry(QtCore.QRect(0, 0, 321, 591))
         self.frame_7.setFrameShape(QtGui.QFrame.StyledPanel)
         self.frame_7.setFrameShadow(QtGui.QFrame.Raised)
         self.frame_7.setObjectName("frame_7")
@@ -116,7 +116,7 @@ class Ui_MainWindow(object):
         self.frame_5.setFrameShadow(QtGui.QFrame.Raised)
         self.frame_5.setObjectName("frame_5")
         self.commandLinkButton = QtGui.QCommandLinkButton(self.frame_5)
-        self.commandLinkButton.setGeometry(QtCore.QRect(200, 75, 91, 31))
+        self.commandLinkButton.setGeometry(QtCore.QRect(215, 80, 91, 31))
         self.commandLinkButton.setObjectName("commandLinkButton")
         self.frame_6 = QtGui.QFrame(self.frame_5)
         self.frame_6.setGeometry(QtCore.QRect(0, 0, 301, 31))
@@ -151,9 +151,14 @@ class Ui_MainWindow(object):
         self.color = QtGui.QLineEdit(self.frame_9)
         self.color.setGeometry(QtCore.QRect(40, 0, 21, 16))
         self.color.setObjectName("color")
-        self.dummy = QtGui.QPushButton(self.frame_5)
-        self.dummy.setGeometry(QtCore.QRect(25, 80, 113, 32))
-        self.dummy.setObjectName("dummy")
+        self.xdatatype = QtGui.QComboBox(self.frame_5)
+        self.xdatatype.setGeometry(QtCore.QRect(0, 50, 111, 26))
+        self.xdatatype.setEditable(True)
+        self.xdatatype.setObjectName("xdatatype")
+        self.ydatatype = QtGui.QComboBox(self.frame_5)
+        self.ydatatype.setGeometry(QtCore.QRect(120, 50, 111, 26))
+        self.ydatatype.setEditable(True)
+        self.ydatatype.setObjectName("ydatatype")
         self.frame_15 = QtGui.QFrame(self.frame_7)
         self.frame_15.setGeometry(QtCore.QRect(0, 235, 311, 106))
         self.frame_15.setFrameShape(QtGui.QFrame.StyledPanel)
@@ -219,6 +224,21 @@ class Ui_MainWindow(object):
         self.replot = QtGui.QPushButton(self.frame_7)
         self.replot.setGeometry(QtCore.QRect(5, 560, 75, 24))
         self.replot.setObjectName("replot")
+        self.frame_16 = QtGui.QFrame(self.frame_7)
+        self.frame_16.setGeometry(QtCore.QRect(5, 510, 306, 26))
+        self.frame_16.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.frame_16.setFrameShadow(QtGui.QFrame.Raised)
+        self.frame_16.setObjectName("frame_16")
+        self.label_10 = QtGui.QLabel(self.frame_16)
+        self.label_10.setGeometry(QtCore.QRect(10, 5, 156, 17))
+        self.label_10.setObjectName("label_10")
+        self.netlevel = QtGui.QComboBox(self.frame_16)
+        self.netlevel.setGeometry(QtCore.QRect(180, 0, 111, 26))
+        self.netlevel.setEditable(True)
+        self.netlevel.setObjectName("netlevel")
+        self.netlevel.addItem(QtCore.QString())
+        self.netlevel.addItem(QtCore.QString())
+        self.netlevel.addItem(QtCore.QString())
         self.frame_2 = QtGui.QFrame(self.frame)
         self.frame_2.setGeometry(QtCore.QRect(335, 545, 781, 61))
         self.frame_2.setFrameShape(QtGui.QFrame.StyledPanel)
@@ -247,6 +267,9 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.xmax, QtCore.SIGNAL("returnPressed()"), self.HMainPlotter.hfsetXMax)
         QtCore.QObject.connect(self.ymin, QtCore.SIGNAL("returnPressed()"), self.HMainPlotter.hfsetYMin)
         QtCore.QObject.connect(self.ymax, QtCore.SIGNAL("returnPressed()"), self.HMainPlotter.hfsetYMax)
+        QtCore.QObject.connect(self.xdatatype, QtCore.SIGNAL("textChanged(QString)"), self.HMainPlotter.xdatatype)
+        QtCore.QObject.connect(self.netlevel, QtCore.SIGNAL("textChanged(QString)"), self.HMainPlotter.netlevel)
+        QtCore.QObject.connect(self.ydatatype, QtCore.SIGNAL("textChanged(QString)"), self.HMainPlotter.ydatatype)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -271,7 +294,6 @@ class Ui_MainWindow(object):
         self.plotterselection.setItemText(3, QtGui.QApplication.translate("MainWindow", "Line 1", None, QtGui.QApplication.UnicodeUTF8))
         self.plotterselection.setItemText(4, QtGui.QApplication.translate("MainWindow", "Line 2", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setText(QtGui.QApplication.translate("MainWindow", "Color:", None, QtGui.QApplication.UnicodeUTF8))
-        self.dummy.setText(QtGui.QApplication.translate("MainWindow", "Dummy", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("MainWindow", "y-Range:", None, QtGui.QApplication.UnicodeUTF8))
         self.yauto.setText(QtGui.QApplication.translate("MainWindow", "Auto", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("MainWindow", "Panel:", None, QtGui.QApplication.UnicodeUTF8))
@@ -282,5 +304,9 @@ class Ui_MainWindow(object):
         self.xauto.setText(QtGui.QApplication.translate("MainWindow", "Auto", None, QtGui.QApplication.UnicodeUTF8))
         self.quit.setText(QtGui.QApplication.translate("MainWindow", "Quit", None, QtGui.QApplication.UnicodeUTF8))
         self.replot.setText(QtGui.QApplication.translate("MainWindow", "Replot", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_10.setText(QtGui.QApplication.translate("MainWindow", "Network Display Level:", None, QtGui.QApplication.UnicodeUTF8))
+        self.netlevel.setItemText(0, QtGui.QApplication.translate("MainWindow", "9", None, QtGui.QApplication.UnicodeUTF8))
+        self.netlevel.setItemText(1, QtGui.QApplication.translate("MainWindow", "99", None, QtGui.QApplication.UnicodeUTF8))
+        self.netlevel.setItemText(2, QtGui.QApplication.translate("MainWindow", "999", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
 

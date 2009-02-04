@@ -134,7 +134,7 @@
        <property name="geometry" >
         <rect>
          <x>0</x>
-         <y>5</y>
+         <y>0</y>
          <width>321</width>
          <height>591</height>
         </rect>
@@ -356,8 +356,8 @@
         <widget class="QCommandLinkButton" name="commandLinkButton" >
          <property name="geometry" >
           <rect>
-           <x>200</x>
-           <y>75</y>
+           <x>215</x>
+           <y>80</y>
            <width>91</width>
            <height>31</height>
           </rect>
@@ -487,17 +487,30 @@
           </property>
          </widget>
         </widget>
-        <widget class="QPushButton" name="dummy" >
+        <widget class="QComboBox" name="xdatatype" >
          <property name="geometry" >
           <rect>
-           <x>25</x>
-           <y>80</y>
-           <width>113</width>
-           <height>32</height>
+           <x>0</x>
+           <y>50</y>
+           <width>111</width>
+           <height>26</height>
           </rect>
          </property>
-         <property name="text" >
-          <string>Dummy</string>
+         <property name="editable" >
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QComboBox" name="ydatatype" >
+         <property name="geometry" >
+          <rect>
+           <x>120</x>
+           <y>50</y>
+           <width>111</width>
+           <height>26</height>
+          </rect>
+         </property>
+         <property name="editable" >
+          <bool>true</bool>
          </property>
         </widget>
        </widget>
@@ -739,6 +752,63 @@
          <string>Replot</string>
         </property>
        </widget>
+       <widget class="QFrame" name="frame_16" >
+        <property name="geometry" >
+         <rect>
+          <x>5</x>
+          <y>510</y>
+          <width>306</width>
+          <height>26</height>
+         </rect>
+        </property>
+        <property name="frameShape" >
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow" >
+         <enum>QFrame::Raised</enum>
+        </property>
+        <widget class="QLabel" name="label_10" >
+         <property name="geometry" >
+          <rect>
+           <x>10</x>
+           <y>5</y>
+           <width>156</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text" >
+          <string>Network Display Level:</string>
+         </property>
+        </widget>
+        <widget class="QComboBox" name="netlevel" >
+         <property name="geometry" >
+          <rect>
+           <x>180</x>
+           <y>0</y>
+           <width>111</width>
+           <height>26</height>
+          </rect>
+         </property>
+         <property name="editable" >
+          <bool>true</bool>
+         </property>
+         <item>
+          <property name="text" >
+           <string>9</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>99</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>999</string>
+          </property>
+         </item>
+        </widget>
+       </widget>
       </widget>
      </widget>
     </widget>
@@ -782,7 +852,7 @@
   <customwidget>
    <class>hfQtPlotWidget</class>
    <extends>QWidget</extends>
-   <header location="global" > </header>
+   <header location="global" >xxx.h</header>
    <container>1</container>
    <slots>
     <slot>hfsetNPanels()</slot>
@@ -792,12 +862,15 @@
     <slot>hfsetXMin()</slot>
     <slot>hfsetYMax()</slot>
     <slot>hfsetYMin()</slot>
+    <slot>xdatatype(QString)</slot>
+    <slot>ydatatype(QString)</slot>
+    <slot>netlevel(QString)</slot>
    </slots>
   </customwidget>
   <customwidget>
    <class>QtSvg.QSvgWidget</class>
    <extends>QWidget</extends>
-   <header location="global" > </header>
+   <header location="global" >xxx.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -944,6 +1017,54 @@
     <hint type="destinationlabel" >
      <x>350</x>
      <y>371</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>xdatatype</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>xdatatype(QString)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>84</x>
+     <y>104</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>345</x>
+     <y>174</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>netlevel</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>netlevel(QString)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>263</x>
+     <y>549</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>357</x>
+     <y>550</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ydatatype</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>ydatatype(QString)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>173</x>
+     <y>96</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>365</x>
+     <y>159</y>
     </hint>
    </hints>
   </connection>

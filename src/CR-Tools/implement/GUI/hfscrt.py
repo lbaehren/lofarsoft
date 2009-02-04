@@ -1,3 +1,9 @@
+class tst(list):
+    def __getitem__(self,val):
+        print type(val),val
+
+
+
 obj=d["PlotWindow'npanels"]
 obj.connect(gui.npanels)
 obj.connect(gui.npanels,QtCore.SLOT("setText(QString)"))
@@ -198,3 +204,101 @@ qw.setgraph(gr)
 #
 #Data.objstore = Data_objstore
   
+
+##################
+
+d["Antenna=0:Data"].get(vf)
+
+d["File'Block"]=2
+
+d["Antenna=0:PlotWindow"].update()
+d["Antenna=0:QtPanel"].update()
+
+gr=d[13].getPy()
+gr.WritePNG('test.png')
+
+pw=d["Antenna=0:QtPanel'PlotWidget"].getPy()
+
+d["Antenna=0:PlotData"] >>  ("PlotPanel",_f(hfPlotPanel))
+
+#-----
+d >> ("GraphObject",_f(hfGraphObject)) 
+
+
+
+
+
+
+
+d["File'Block"]=1
+
+d["hfPlotData"])
+x=hfGraphObject()
+
+("PythonObject",x) >> d["Antenna=0:hfPlotData"]
+
+d["Antenna=0:hfPlotData"].setFunction("PyFunc",TYPE.INTEGER,"Py")
+
+d["Antenna=0:hfPlotData"].getI()
+
+d["Antenna=0:hfPlotData"].setFunction("hfGraphObject
+d["Antenna=0:hfPlotData"].getI()
+
+                 d["Test"] =
+d["Antenna=0:hfPlotData'GraphObject"]=_f(hfGraphObject)
+
+"GraphObject" >>  DataUnion(d["hfPlotData"])
+d["hfPlotData'GraphObject"]=_f(hfGraphObject)
+
+("GraphObject",_f(hfGraphObject)) >>  d["hfPlotData"]
+
+
+
+d["hfPlotData"].newObject("'PythonObject",PUSH).putPy(obj3)
+
+
+d["yAxis"] >> "hfPlotData" >> "hfPlotPanel" >> "hfPlotGraph"
+
+d["Antenna=0:Data"].setAutoUpdate(False)
+
+d["Antenna=0:Data"].get(vf);vf
+d["Antenna=0:Data"].get(vf);vf
+
+
+
+d["y-Axis"].setFunction("Copy",TYPE.NUMBER)
+
+obj1=hfPlotGraph()
+d["hfPlotGraph"].newObject("'PythonObject",PUSH).putPy(obj1)
+d["hfPlotGraph"].setFunction("PyFunc",TYPE.NUMBER,"Py") 
+
+obj2=hfPlotPanel()
+d["hfPlotPanel"].newObject("'PythonObject",PUSH).putPy(obj2)
+d["hfPlotPanel"].setFunction("PyFunc",TYPE.NUMBER,"Py")
+
+obj3=hfPlotData()
+d["hfPlotData"].newObject("'PythonObject",PUSH).putPy(obj3)
+d["hfPlotData"].setFunction("PyFunc",TYPE.NUMBER,"Py")
+
+obj4=hfQtPanel()
+d["hfPlotGraph"].newObject("hfQtPanel",PUSH).newObject("'PythonObject",PUSH).putPy(obj4)
+d["hfQtPanel"].setFunction("PyFunc",TYPE.NUMBER,"Py")
+
+d["hfPlotGraph"].redo()
+d["hfQtPanel"].redo()
+
+hfQtPlotWidget=hfQtPlotConstructor(d["hfQtPanel"])
+
+
+#d["Antenna=0:Data"].get(vf);vf[0]
+
+#d["File'Block"].putI(0)
+#d["Antenna=0:Data"].get(vf);vf[0]
+#
+#for i in ids:
+#    d[i].putS("Frequency")
+
+#d["dataRead"].newObjects("plotpanel",PULL)
+#d["plotpanel"].newObjects("'xmin",PULL)
+#d["plotpanel"]["'xmin"]=-1
+

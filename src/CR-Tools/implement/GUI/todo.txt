@@ -59,9 +59,25 @@ hffuncs.cc:
 
 - Change the search algorithm so that it goes stepwise through the net, one level after the next, returning all object links of the net level (violates locality, but the update worm has done that already ....)
 
+- Maybe introduce a "link updated", i.e. a message that tells
+  dependent objects that the network structure has changed. This could
+  also be used for optimization. i.e. the search for parameters is
+  only done once (when links changed) and then the parameters are
+  directly linked internally.
+
 BUGS:
+
+- a link should not be created two times when calling >> twice....
+- deleting a double link leads to an error
+- if an object is deleted and there is a python reference, that python
+  object does not know about it and python crashes when calling the
+  pyhton reference. This can be avoided with a special reference
+  handling in BoostPython 
+
+- isolated objects should be automatically deleted when the last link
+  to them is linked. That does not seem to happen.
 
 - d.delObject() does not work properly (the last elements in the list are not
   deleted if several have been deleted at once) - use DataList.delObject() to
-  test.
+  test. (this is probably fixed now ...)
 
