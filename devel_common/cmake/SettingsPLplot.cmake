@@ -46,11 +46,12 @@ set (ENABLE_pygcw  OFF CACHE BOOL "Enable bindings for Python.gcw?")
 
 set (ENABLE_DYNDRIVERS OFF CACHE BOOL "Enable dynamic drivers?")
 
-set (PLD_aqt     OFF CACHE BOOL "Enable driver aqt")
-set (PLD_hp7470  OFF CACHE BOOL "Enable driver hp7470")
-set (PLD_hp7580  OFF CACHE BOOL "Enable driver hp7580")
-set (PLD_lj_hpgl OFF CACHE BOOL "Enable driver lj_hpgl")
-set (PLD_svg     OFF CACHE BOOL "Enable driver svg")
+set (PLD_aqt       OFF CACHE BOOL "Enable driver aqt")
+set (PLD_hp7470    OFF CACHE BOOL "Enable driver hp7470")
+set (PLD_hp7580    OFF CACHE BOOL "Enable driver hp7580")
+set (PLD_lj_hpgl   OFF CACHE BOOL "Enable driver lj_hpgl")
+set (PLD_svg       OFF CACHE BOOL "Enable driver svg")
+set (PLD_svgcairo  OFF CACHE BOOL "Enable driver svncairo")
 
 if (APPLE)
   set (PLD_wxwidgets OFF CACHE BOOL "Enable driver wxwidgets")
