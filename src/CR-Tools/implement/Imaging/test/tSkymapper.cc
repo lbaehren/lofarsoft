@@ -76,64 +76,6 @@ using CR::TimeFreq;
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Display some basic characteristics of an AIPS++ image tool
-
-  \param myimage -- An AIPS++ PagedImage object, usually used for storing 
-                    astronomical images.
-
-  \verbatim
-  [1] Opening AIPS++ test image from disk ... 
-  -- Name           : /dop71_0/aips++/weekly/data/demo/Images/test_image
-  -- Shape          : [32, 32, 8]
-  -- is persistent  : 1
-  -- is paged       : 1
-  -- is writable    : 0
-  -- has pixel mask : 0
-  \endverbatim
-*/
-template <class T>
-void show_PagedImage (const casa::PagedImage<T>& myimage)
-{
-  casa::IPosition shape (myimage.shape());
-  int nofAxes (shape.nelements());
-  double nofPixes (1.0);
-  bool stripPath (true);
-
-  for (int n(0); n<nofAxes; n++) {
-    nofPixes *= shape(n);
-  }
-
-//   cout.precision(10);
-  cout << " -- Name             : " << myimage.name(stripPath) << endl;
-  cout << " -- Image shape      : " << shape << endl;
-  cout << " -- Number of pixels : " << nofPixes << endl;
-  cout << " -- is persistent    : " << myimage.isPersistent() << endl;
-  cout << " -- is paged         : " << myimage.isPaged() << endl;
-  cout << " -- is writable      : " << myimage.isWritable() << endl;
-  cout << " -- has pixel mask   : " << myimage.hasPixelMask() << endl;
-}
-
-template void show_PagedImage (const casa::PagedImage<Float>& myimage);
-template void show_PagedImage (const casa::PagedImage<Double>& myimage);
-
-// -----------------------------------------------------------------------------
-
-/*!
-  \brief Read in the antenna positions from an ASCII table on disk
-
-  \return antennaPositions -- Matrix with the 3-dim antenna positions
-*/
-Matrix<Double> readAntennaPositions ()
-{
-  Matrix<Double> pos;
-  readAsciiMatrix (pos,positions_lopes08.c_str());
-
-  return pos;
-}
-
-// -----------------------------------------------------------------------------
-
-/*!
   \brief Clean up the directory once the tests have completed
 
   \return nofFailedTests -- The number of failed operations; this e.g. might
@@ -167,71 +109,6 @@ int cleanup_directory ()
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test working with AIPS++ CoordinateSystem objects
-
-  \return nofFailedTests
-
-  CoordinateSystem is the normal interface to coordinate systems, typically
-  attached to an ImageInterface, however the coordinate system can be manipulated
-  on its own. CoordinateSystem is in turn composed from various classes derived
-  from the base class Coordinate.
-*/
-int test_CoordinateSystem ()
-{
-  cout << "\n[tSkymapper::test_CoordinateSystem]\n" << endl;
-
-  int nofFailedTests (0);
-
-  cout << "\n[1] Construct linear coordinate and afterwards adjust parameters ..."
-       << endl;
-  try {
-    Vector<String> names (1,"Time");
-    Vector<String> units (1,"s");
-    Vector<Double> crval (1,0.0);
-    Vector<Double> cdelt (1,1.0);
-    Matrix<Double> pc    (1,1,1.0);
-    Vector<Double> crpix (1,0.0);
-    
-    LinearCoordinate axis (names,
-			   units,
-			   crval,
-			   cdelt,
-			   pc,
-			   crpix);
-
-    cout << " - initial values:" << endl;
-    cout << " -- names = " << axis.worldAxisNames() << endl;
-    cout << " -- units = " << axis.worldAxisUnits() << endl;
-    cout << " -- crpix = " << axis.referencePixel() << endl;
-    cout << " -- crval = " << axis.referenceValue() << endl;
-    cout << " -- cdelt = " << axis.increment()      << endl;
-
-    // adjust the axis parameters
-    crval(0) = 3600.0;
-    cdelt(0) = 60.0;
-
-    axis.setReferenceValue (crval);
-    axis.setIncrement (cdelt);
-
-    cout << " - modified values:" << endl;
-    cout << " -- names = " << axis.worldAxisNames() << endl;
-    cout << " -- units = " << axis.worldAxisUnits() << endl;
-    cout << " -- crpix = " << axis.referencePixel() << endl;
-    cout << " -- crval = " << axis.referenceValue() << endl;
-    cout << " -- cdelt = " << axis.increment()      << endl;
-    
-  } catch (AipsError x) {
-    cerr << "[tSkymapper::test_CoordinateSystem] " << x.getMesg() << endl;
-    nofFailedTests++;
-  }
-    
-
-  return nofFailedTests;
-}
-
-// -----------------------------------------------------------------------------
-
-/*!
   \brief Test setting up the Beamformer using a SkymapCoordinate object
 
   \return nofFailedTests -- The number of failed tests.
@@ -250,7 +127,7 @@ int test_Beamformer (uint const &blocksize)
 
   cout << "[1] Add observation data to the coordinate ..." << endl;;
   try {
-    std::string telescope ("LOFAR");
+    std::string telescope ("UNKNOWN");
     std::string observer ("Lars Baehren");
     CR::ObservationData obsData (telescope,observer);
     //
@@ -341,7 +218,7 @@ int test_Skymapper ()
 
   cout << "[1] Skymapper() ..." << endl;
   try {
-    Skymapper skymapper;
+    Skymapper skymapper ("skymap01.img");
     //
     skymapper.summary();
   } catch (AipsError x) {
@@ -354,14 +231,15 @@ int test_Skymapper ()
     // Time-frequency domain data
     TimeFreqCoordinate timeFreq (2048,80e06,2);
     // Observation info
-    ObservationData obsData ("LOFAR");
+    ObservationData obsData ("UNKNOWN");
     obsData.setObserver ("Lars Baehren");
     // Coordinates 
     SkymapCoordinate coord;
     coord.setTimeFreqCoordinate(timeFreq);
     coord.setObservationData(obsData);
     
-    Skymapper skymapper (coord);
+    Skymapper skymapper (coord,
+			 "skymap02.img");
     
     skymapper.summary();
   } catch (AipsError x) {
@@ -373,7 +251,7 @@ int test_Skymapper ()
        << endl;
   try {
     // Observation data
-    std::string telescope ("LOFAR");
+    std::string telescope ("UNKNOWN");
     std::string observer ("Lars Baehren");
     CR::ObservationData obsData (telescope,observer);
     // Spatial coordinates
@@ -394,28 +272,64 @@ int test_Skymapper ()
     //
     Skymapper skymapper (coord,
 			 antPositions,
-			 CR::SkymapQuantity());
+			 CR::SkymapQuantity(),
+			 "skymap03.img");
     skymapper.summary();
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl;
     nofFailedTests++;
   }
 
-  cout << "[4] Logging of internal parameters ..." << endl;
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test processing of the data to generate an image
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          fucntion.
+*/
+int test_methods ()
+{
+  cout << "\n[tSkymapper::test_methods]\n" << endl;
+  
+  int nofFailedTests (0);
+  
+  // Time-frequency domain data
+  TimeFreqCoordinate timeFreq (2048,80e06,2);
+  // Observation info
+  ObservationData obsData;
+  obsData.setObserver ("Lars Baehren");
+  // Coordinates 
+  SkymapCoordinate coord;
+  coord.setTimeFreqCoordinate(timeFreq);
+  coord.setObservationData(obsData);
+  // Skymapper object to work with
+  Skymapper skymapper (coord);
+
+  cout << "[1] Access to internal parameters ..." << endl;
   try {
-    std::ofstream logfile;
-    Skymapper skymapper;
-
-    logfile.open("tSkymapper.log");
-
-    skymapper.summary(logfile);
-
-    logfile.close();
+    cout << "-- Filename of image     = " << skymapper.filename()   << endl;
+    cout << "-- Image shape           = " << skymapper.imageShape() << endl;
+    cout << "-- Stride through image  = " << skymapper.stride()     << endl;
+    cout << "-- nof. processed blocks = " << skymapper.nofProcessedBlocks() << endl;
   } catch (AipsError x) {
-    cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl;
+    cerr << "[tSkymapper::test_methods] " << x.getMesg() << endl;
     nofFailedTests++;
   }
-  
+
+  cout << "[2] Access to Beamformer parameters ..." << endl;
+  try{
+    cout << "-- setting antenna positions ..." << endl;
+    Vector<MVPosition> antPos (48);
+    skymapper.setAntPositions (antPos);
+  } catch (AipsError x) {
+    cerr << "[tSkymapper::test_methods] " << x.getMesg() << endl;
+    nofFailedTests++;
+  }
+
   return nofFailedTests;
 }
 
@@ -427,7 +341,8 @@ int test_Skymapper ()
   \param infile -- LOPES data set to use as data input
   \param blocksize -- Number of samples per block of data.
 
-  \return nofFailedTests -- The number of failed tests.
+  \return nofFailedTests --  The number of failed tests encountered within this
+          fucntion.
 */
 int test_processing (string const &infile,
 		     uint const &blocksize)
@@ -439,13 +354,9 @@ int test_processing (string const &infile,
 
   std::cout << "[1] Test init function for default object..." << std::endl;
   try {
-    Skymapper skymapper;
-    // set the name of the created image file
-    skymapper.setFilename ("skymap01.img");
+    Skymapper skymapper ("skymap01.img");
     // provide a summary of the internal settings
     skymapper.summary();
-    // initialize the Skymapper for operation on data
-    status = skymapper.initSkymapper();
   } catch (std::string message) {
     cerr << message << endl;
     nofFailedTests++;
@@ -453,15 +364,10 @@ int test_processing (string const &infile,
   
   std::cout << "[2] Test init function for custom object..." << std::endl;
   try {
-    Skymapper skymapper (get_SkymapCoordinate());
-    // enable additional feedback during processing
-    skymapper.setVerboseLevel(1);
-    // set the name of the created image file
-    skymapper.setFilename ("skymap02.img");
+    Skymapper skymapper (get_SkymapCoordinate(),
+			 "skymap02.img");
     // provide a summary of the internal settings
     skymapper.summary();
-    // initialize the Skymapper for operation on data
-    status = skymapper.initSkymapper();
   } catch (std::string message) {
     cerr << message << endl;
     nofFailedTests++;
@@ -478,21 +384,14 @@ int test_processing (string const &infile,
     IPosition shape (skymapCoordinates.shape());
     // create Skymapper object
     std::cout << "-- creating Skymapper object..." << std::endl;
-    string filename ("skymap03.img");
-    Skymapper skymapper (skymapCoordinates);
-    std::cout << "-- updating Skymapper parameters..." << std::endl;
-    skymapper.setAntennaPositions(get_antennaPositions(nofAntennas));
-    skymapper.setFilename (filename);
-    skymapper.setVerboseLevel (1);
-    // if initialization goes well, start processing a block of data data
-    std::cout << "-- initializing Skymapper for processing..." << std::endl;
-    if (skymapper.initSkymapper()) {
-      for (uint datablock(0); datablock<nofDataBlocks; datablock++) {
-	Matrix<DComplex> data (get_data(nofAntennas,
-					shape(4)));
-	std::cout << "-- processing datablock " << datablock << " ..." << std::endl;
-	status = skymapper.processData (data);
-      }
+    Skymapper skymapper (skymapCoordinates,
+			 "skymap03.img");
+    // go through the blocks of data and process them
+    for (uint datablock(0); datablock<nofDataBlocks; datablock++) {
+      Matrix<DComplex> data (get_data(nofAntennas,
+				      shape(4)));
+      std::cout << "-- processing datablock " << datablock << " ..." << std::endl;
+      status = skymapper.processData (data);
     }
   } catch (std::string message) {
     cerr << message << endl;
@@ -524,11 +423,12 @@ int main (int argc,
 
   std::string filename = argv[1];
   
-//   nofFailedTests += test_CoordinateSystem ();
   // Test feeding SkymapCoordinate information into the Beamformer
   nofFailedTests += test_Beamformer (blocksize);
   // Test the various constructors for a Skymapper object
   nofFailedTests += test_Skymapper ();
+  // Test the various methods for accessing internal data
+  nofFailedTests += test_methods();
   
 //   if (have_dataset) {
 //     nofFailedTests += test_processing (filename,

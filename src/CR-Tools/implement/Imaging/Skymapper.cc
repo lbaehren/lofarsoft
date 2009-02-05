@@ -22,8 +22,6 @@
  ***************************************************************************/
 
 #include <iostream>
-#include <casa/Containers/Record.h>
-#include <casa/Exceptions/Error.h>
 #include <Imaging/Skymapper.h>
 // #include <Skymap/SkymapperTools.h>
 #include <Utilities/ProgressBar.h>
@@ -43,7 +41,8 @@ namespace CR {  // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                    Skymapper
   
-  Skymapper::Skymapper ()
+  Skymapper::Skymapper (std::string const &filename)
+    : filename_p (filename)
   {
     init (SkymapCoordinate());
   }
@@ -51,7 +50,9 @@ namespace CR {  // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                    Skymapper
   
-  Skymapper::Skymapper (SkymapCoordinate const &skymapCoord)
+  Skymapper::Skymapper (SkymapCoordinate const &skymapCoord,
+			std::string const &filename)
+    : filename_p (filename)
   {
     init (skymapCoord);
   }
@@ -61,7 +62,9 @@ namespace CR {  // Namespace CR -- begin
   
   Skymapper::Skymapper (SkymapCoordinate const &skymapCoord,
 			Matrix<double> const &antPositions,
-			SkymapQuantity const &skymapType)
+			SkymapQuantity const &skymapType,
+			std::string const &filename)
+    : filename_p(filename)
   {
     init (skymapCoord,
 	  antPositions,
@@ -73,7 +76,9 @@ namespace CR {  // Namespace CR -- begin
   
   Skymapper::Skymapper (SkymapCoordinate const &skymapCoord,
 			Vector<MVPosition> const &antPositions,
-			SkymapQuantity const &skymapType)
+			SkymapQuantity const &skymapType,
+			std::string const &filename)
+    : filename_p(filename)
   {
     init (skymapCoord,
 	  antPositions,
@@ -124,7 +129,7 @@ namespace CR {  // Namespace CR -- begin
   void Skymapper::copy (Skymapper const& other)
   {
     beamformer_p         = other.beamformer_p;
-    coordinates_p        = other.coordinates_p;
+    coord_p              = other.coord_p;
     filename_p           = other.filename_p;
     nofProcessedBlocks_p = other.nofProcessedBlocks_p;
     verbose_p            = other.verbose_p;
@@ -153,13 +158,6 @@ namespace CR {  // Namespace CR -- begin
     return status;
   }
   
-  // -------------------------------------------------------------- setBeamformer
-  
-  bool Skymapper::setAntennaPositions (Matrix<double> const &antPositions)
-  {
-    return beamformer_p.setAntPositions (antPositions);
-  }
-
   //_____________________________________________________________________________
   //                                                          setSkymapCoordinate
 
@@ -168,11 +166,11 @@ namespace CR {  // Namespace CR -- begin
     bool status (true);
 
     /* Store the skymap coordinates object */
-    coordinates_p = skymapCoord;
+    coord_p = skymapCoord;
 
     /* Update the Beamformer */
-    Matrix<double> skyPos = coordinates_p.spatialCoordinate().positionValues();
-    Vector<double> freq   = coordinates_p.timeFreqCoordinate().frequencyValues();
+    Matrix<double> skyPos = coord_p.spatialCoordinate().positionValues();
+    Vector<double> freq   = coord_p.timeFreqCoordinate().frequencyValues();
     beamformer_p.setSkyPositions(skyPos);
     beamformer_p.setFrequencies(freq);
     
@@ -207,21 +205,14 @@ namespace CR {  // Namespace CR -- begin
 			SkymapQuantity const &skymapType)
   {
     /* Store the skymap coordinates */
-    coordinates_p = skymapCoord;
+    coord_p = skymapCoord;
 
     /* set up the Beamformer */
-    Matrix<double> skyPos = coordinates_p.spatialCoordinate().positionValues();
-    Vector<double> freq   = coordinates_p.timeFreqCoordinate().frequencyValues();
     beamformer_p = Beamformer();
     beamformer_p.setAntPositions(antPositions);
-    beamformer_p.setSkyPositions(skyPos);
-    beamformer_p.setFrequencies(freq);
 
-    /* Summary of settings */
-    cout << "[Skymapper::init]" << endl;
-    cout << "-- nof. coordinate axes = " << coordinates_p.nofAxes()        << endl;
-    cout << "-- nof. coordinates     = " << coordinates_p.nofCoordinates() << endl;
-    cout << "-- coordinates shape    = " << coordinates_p.shape()          << endl;
+    /* initialize the internal settings and objects */
+    initSkymapper();
   }
 
   //_____________________________________________________________________________
@@ -232,21 +223,14 @@ namespace CR {  // Namespace CR -- begin
 			SkymapQuantity const &skymapType)
   {
     /* Store the skymap coordinates */
-    coordinates_p = skymapCoord;
+    coord_p = skymapCoord;
 
     /* set up the Beamformer */
-    Matrix<double> skyPos = coordinates_p.spatialCoordinate().positionValues();
-    Vector<double> freq   = coordinates_p.timeFreqCoordinate().frequencyValues();
     beamformer_p = Beamformer();
     beamformer_p.setAntPositions(antPositions);
-    beamformer_p.setSkyPositions(skyPos);
-    beamformer_p.setFrequencies(freq);
 
-    /* Summary of settings */
-    cout << "[Skymapper::init]" << endl;
-    cout << "-- nof. coordinate axes = " << coordinates_p.nofAxes()        << endl;
-    cout << "-- nof. coordinates     = " << coordinates_p.nofCoordinates() << endl;
-    cout << "-- coordinates shape    = " << coordinates_p.shape()          << endl;
+    /* initialize the internal settings and objects */
+    initSkymapper();
   }
   
   //_____________________________________________________________________________
@@ -272,79 +256,57 @@ namespace CR {  // Namespace CR -- begin
   }
   
   //_____________________________________________________________________________
-  //                                                               timeAxisStride
-
-  int Skymapper::timeAxisStride ()
-  {
-    int stride (1);
-    
-    switch (beamformer_p.skymapType().type()) {
-    case SkymapQuantity::TIME_FIELD:
-    case SkymapQuantity::TIME_POWER:
-    case SkymapQuantity::TIME_CC:
-    case SkymapQuantity::TIME_P:
-    case SkymapQuantity::TIME_X:
-      stride = coordinates_p.timeFreqCoordinate().blocksize();
-      break;
-    case SkymapQuantity::FREQ_POWER:
-    case SkymapQuantity::FREQ_FIELD:
-      stride = 1;
-      break;
-    }
-
-    return stride;
-  }
-  
-  // -------------------------------------------------------------- initSkymapper
+  //                                                                initSkymapper
 
   bool Skymapper::initSkymapper () 
   {
     bool status (true);
 
-    /*
-      For the later Beamforming we need to retrieve the coordinates of the
-      pointing positions; since we keep the directions constant and iterate over
-      the distance axis, we get the full position information by later
-      combination.
-    */
-    try {
-      // Retrieve the values of the direction axes
-      Matrix<double> skyPositions = coordinates_p.spatialCoordinate().worldAxisValues();
-
-      // Combine the values from the axes to yield the 3D positions
-      Vector<int> axisOrder (3);
-      casa::indgen(axisOrder);
-//       status = beamformer_p.setSkyPositions(skyPositions,
-// 					    axisOrder,
-// 					    CR::CoordinateType::Spherical,
-// 					    anglesInDegrees,
-// 					    bufferDelays);
-    } catch (std::string message) {
-      cerr << "[Skymapper::initSkymapper] Failed assigning beam directions!"
-	   << endl;
-      cerr << message << endl;
-    }
-
-    /*
-      In order to set the beamforming weights we require the frequency values
-    */
-    try {
-      Vector<double> frequencies (coordinates_p.timeFreqCoordinate().timeValues());
-      status = beamformer_p.setFrequencies (frequencies);
-
-    } catch (std::string message) {
-      cerr << "[Skymapper::initSkymapper] Failed assigning frequency values!"
-	   << endl;
-      cerr << message << endl;
-    }
+    /* Initialize variables for book-keeping */
+    verbose_p            = 0;
+    nofProcessedBlocks_p = 0;
     
+    /*
+      Set up the beamformer:
+      - set sky positions values
+      - set frequency values
+    */
+    try {
+      Matrix<double> skyPos = coord_p.spatialCoordinate().positionValues();
+      Vector<double> freq   = coord_p.timeFreqCoordinate().frequencyValues();
+      beamformer_p.setSkyPositions(skyPos);
+      beamformer_p.setFrequencies(freq);
+    } catch (std::string message) {
+      std::cerr << "[Skymapper::initSkymapper] " << message << std::endl;
+    }
+
+    /*
+      Set up the stride used to go through the pixel array of the output image
+    */
+    CoordinateType coordType = coord_p.timeFreqCoordinate().beamCoordDomain();
+    uint nofAxes             = coord_p.nofAxes();
+    stride_p.resize(nofAxes);
+    stride_p = 1;
+    switch (coordType.type()) {
+    case CoordinateType::Time:
+      stride_p(nofAxes-2) = coord_p.timeFreqCoordinate().blocksize();
+      break;
+    case CoordinateType::Frequency:
+      stride_p(nofAxes-2) = 1;
+      break;
+    default:
+      std::cerr << "[Skymapper::initSkymapper] Unsopported coordinate type!"
+		<< std::endl;
+      break;
+    }
+
     /*
       With the image data written into an AIPS++ PagedImage, we need to create
       and initialize one first, before we can start inserting the computed 
       image data.
     */
-    casa::CoordinateSystem csys = coordinates_p.coordinateSystem();
-    casa::IPosition shape       = coordinates_p.shape();
+    casa::CoordinateSystem csys = coord_p.coordinateSystem();
+    casa::IPosition shape       = coord_p.shape();
     casa::TiledShape tile (shape);
 
     /* Create paged image on disk */
@@ -377,7 +339,7 @@ namespace CR {  // Namespace CR -- begin
     */
     if (status) {
       // Declare additional variables
-      casa::IPosition shape (coordinates_p.shape());
+      casa::IPosition shape (coord_p.shape());
       casa::IPosition start  (shape.nelements(),0);
       casa::IPosition stride (shape.nelements(),1);
 
@@ -394,7 +356,7 @@ namespace CR {  // Namespace CR -- begin
 			       );
       
       // Adjust the slicing operators
-      start(3) = nofProcessedBlocks_p*timeAxisStride();
+      start(3) = nofProcessedBlocks_p*stride_p(stride_p.nelements()-2);
 
       // Progress bar
       ProgressBar bar (shape(0),">");
@@ -464,8 +426,8 @@ namespace CR {  // Namespace CR -- begin
   
   void Skymapper::summary (std::ostream &os)
   {
-    TimeFreq timeFreq           = coordinates_p.timeFreqCoordinate();
-    casa::CoordinateSystem csys = coordinates_p.coordinateSystem();
+    TimeFreq timeFreq           = coord_p.timeFreqCoordinate();
+    casa::CoordinateSystem csys = coord_p.coordinateSystem();
     ObsInfo obsInfo             = csys.obsInfo();
     
     os << "[Skymapper] Summary of the internal parameters"             << endl;
@@ -478,7 +440,7 @@ namespace CR {  // Namespace CR -- begin
     os << " --> Nyquist zone             = " << timeFreq.nyquistZone()     << endl;
     os << " :: Data I/O ::"                              << endl;
     os << " --> Blocksize      [samples] = " << timeFreq.blocksize()       << endl;
-    os << " --> FFT length    [channels] = " << timeFreq.blocksize()       << endl;
+    os << " --> FFT length    [channels] = " << timeFreq.fftLength()       << endl;
     os << " :: Coordinates ::"                                << endl;
     os << " --> nof. coordinates         = " << csys.nCoordinates()        << endl;
     os << " --> World axis names ....... = " << csys.worldAxisNames()      << endl;
@@ -488,9 +450,11 @@ namespace CR {  // Namespace CR -- begin
     os << " --> coord. increment (CDELT) = " << csys.increment()           << endl;
     os << " :: Image ::"                               << endl;
     os << " --> Filename                 = " << filename()                 << endl;
-    os << " --> Shape of pixel array     = " << coordinates_p.shape()      << endl;
+    os << " --> Shape of pixel array     = " << coord_p.shape()            << endl;
     os << " --> Shape of beam array      = " << beamformer_p.shapeBeam()   << endl;
     os << " --> Image array stride       = " << stride_p                   << endl;
+    os << " --> Domain of image quantity = " << beamformer_p.domainName()  << endl;
+    os << " --> Skymap quantity          = " << beamformer_p.skymapType().name() << endl;
   }
   
 }  // Namespace CR -- end

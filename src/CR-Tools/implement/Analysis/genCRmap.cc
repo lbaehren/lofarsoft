@@ -61,12 +61,16 @@ namespace CR { // Namespace CR -- begin
   //  Methods
   //
   // ============================================================================
+
+  //_____________________________________________________________________________
+  //                                                                  GenerateMap
   
-  Bool genCRmap::GenerateMap(const String &filename, const Matrix<DComplex> &data){
+  Bool genCRmap::GenerateMap (const String &filename,
+			      const Matrix<DComplex> &data){
     Bool success=True;
     try {
-      Skymapper skymapper(SkyCoord_p);
-      skymapper.setFilename(filename);
+      Skymapper skymapper(SkyCoord_p,
+			  filename);
       //      if (!skymapper.isOperational()){
       //	cerr << "genCRmap::GenerateMap: " << "Failed to initialize the skymapper!" << endl;
       //	return False;
@@ -82,10 +86,10 @@ namespace CR { // Namespace CR -- begin
     }; 
     return success;
   }
-
-
-
-
+  
+  //_____________________________________________________________________________
+  //                                                                 setMapHeader
+  
   Bool genCRmap::setMapHeader(DataReader &dr, CalTableReader *CTRead){
     Bool success=True;
     try {

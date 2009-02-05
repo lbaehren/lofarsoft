@@ -308,6 +308,5 @@ namespace CR { // Namespace CR -- begin
     
     return worldValues;
   }
-  
 
 } // Namespace CR -- end
