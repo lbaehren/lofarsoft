@@ -1100,6 +1100,62 @@ namespace CR { // Namespace CR -- begin
       // Create empty vector for not existing error bars 
       Vector<Double> empty;
 
+
+      // Calculating and plotting the median spectrum
+      // Create vector for the median spectrum
+      Vector<Double> medianspec;
+      medianspec.resize(yValues.nrow());
+      int counta=0;
+
+      // Create a new matrix to store only the selected antennas
+      Matrix<Double> yValuesA;
+      yValuesA.resize(yValues.nrow(), ntrue(antennaSelection));
+      for (unsigned int i = 0; i < antennaSelection.nelements(); i++)
+      {
+          if (antennaSelection(i))
+          {
+              for (unsigned int k = 0; k < yValues.nrow(); k++)
+                  yValuesA(k,counta) = yValues(k,i);
+              counta++;
+          }
+      }
+
+      // Calculate the median power values
+      for (unsigned int i=0; i<yValuesA.nrow(); i++)
+      {
+          medianspec[i]=median(yValuesA.row(i));
+      }
+
+      plotfilename = filename + "-meadian.ps";
+      //alternative plotfilename
+      //plotfilename = gtlabel.str() + ".ps";
+
+      cout <<"Plotting the median-spectrum of all antennas to file: "
+           << plotfilename << endl;
+
+      // Add labels 
+      antennanumber << counta;
+      label = "GT " + gtlabel.str() + " - " + antennanumber.str() + " Antennas";
+
+      // Initialize the plot giving xmin, xmax, ymin and ymax
+      plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
+
+      // Add labels 
+      plotter.AddLabels("Frequency f [MHz]", "lg Amplitude",label);
+      label = "GT " + gtlabel.str() + " - " + antennanumber.str() +" Antennas";
+
+      // Plot spectrum
+      plotter.PlotLine(xaxis(plotRange),medianspec(plotRange),9,1);
+
+      // Add filename to list of created plots
+      plotlist.push_back(plotfilename);
+      // finished with creating the median spectrum
+
+
+
+
+
+
       // Make the plots (either all antennas together or seperated)
       if (seperated) {
         stringstream antennaid;
