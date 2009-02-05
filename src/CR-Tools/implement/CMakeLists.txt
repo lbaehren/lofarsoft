@@ -105,6 +105,10 @@ if (PLPLOT_LIBRARIES)
   list (APPEND cr_link_libraries ${PLPLOT_LIBRARIES})
 endif (PLPLOT_LIBRARIES)
 
+if (PNG_LIBRARIES)
+  list (APPEND cr_link_libraries ${PNG_LIBRARIES})
+endif (PNG_LIBRARIES)
+
 if (FFTW3_LIBRARIES)
   list (APPEND cr_link_libraries ${FFTW3_LIBRARIES})
 endif (FFTW3_LIBRARIES)
