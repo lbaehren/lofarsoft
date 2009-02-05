@@ -207,7 +207,7 @@ BOOST_PYTHON_MODULE(libhfget)
       .def("listDirs", &Data::listDirs)
       .def("listModFlags", &Data::listModFlags)
       .def("getAllIDs", &Data::getAllIDs)
-      .def("getNeighbours", &Data::getNeighbours)
+      .def("getNeighbourNames", &Data::getNeighbourNames)
 
 
       .def("delLink", Data_delLink)
@@ -368,6 +368,7 @@ boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_i
 
 def("mglDataSet", mglDataSetVecN);
 def("getptr", PyGetPtr);
+def("setDebug", setDebug);
 
 //    def("setwidget", setwidget);
 //    def("mytest", mytest);

@@ -167,10 +167,10 @@ class hfQtPlot(QtGui.QWidget):
         par=obj["'yAxis'Data'Parameters=Data"]
         oldobj=par["'"+what] # find the parameter object to which the chooser is connected
         newobj=par["'Chooser'"+what+"="+s]
-        if (type(newobj)==Data) & (not newobj==oldobj):
+        if (type(newobj)==Data) &(type(oldobj)==Data) & (not newobj==oldobj):
             oldobj // par
             newobj >> par
-        else: print what+"="+s,"Object not found." 
+        else: print what+"="+s,"Object not found (y)." 
     def xdatatype(self,s):
         "Slot used by the GUI to change the xAxis Datatype"
         if s=="<None>": return
@@ -183,7 +183,7 @@ class hfQtPlot(QtGui.QWidget):
         if (type(newobj)==Data) & (not newobj==oldobj):
             oldobj // par
             newobj >> par
-        else: print what+"="+s,"Object not found." 
+        else: print what+"="+s,"Object not found (x)." 
 
 
 #Use 

@@ -509,9 +509,9 @@ public:
   template <class T>
   void process(F_PARAMETERS) {
     vector<HString> vec;
-    vec=dp->getNeighbours(DIR_TO);
+    vec=dp->getNeighbourNames(DIR_TO);
     vec.push_back("");
-    vec_append(vec,dp->getNeighbours(DIR_FROM));
+    vec_append(vec,dp->getNeighbourNames(DIR_FROM));
     copycast_vec<T,HString>(vp,&vec);
     if (vs != NULL) {(*vp) = (*vs).get(*vp);};
   }

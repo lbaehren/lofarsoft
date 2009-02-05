@@ -120,6 +120,7 @@ d["PlotWindow'GraphObject"].touch()
 
 
 ###############
+d["Antenna=0,1,3"] # returns three objects belonging to antenna 0,1, and 3.
 newobj=d.create("TEST")  # creates a new object
 ~newobj #deletes it right away
 newobj.initializeObject("NAME",val,_f(FUNC),_l(netlevel)) # initializes it

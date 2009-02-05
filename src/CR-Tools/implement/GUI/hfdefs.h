@@ -3,8 +3,10 @@
 
 //#define DBG_MODE 0
 //#define DBG_MODE 1
-#define DBG_MODE 0
-#define VERBOSE 1
+
+extern int global_debuglevel;
+
+#define DBG_MODE 2
 
 #include <string>
 #include <iostream>
@@ -58,34 +60,20 @@
 #define DBG2( T ) 
 #define DBG3( T ) 
 #else
-#define DBG MESSAGE
-#define DBG2( txt ) ( cout << "[" << __FILE__ << "," << __LINE__ << "]: " << txt )
-#define DBG3( txt ) ( txt )
+#define DBG if (global_debuglevel>0) MESSAGE
+#define DBG2( txt ) if (global_debuglevel>0) {cout << "[" << __FILE__ << "," << __LINE__ << "]: " << txt ;}
+#define DBG3( txt ) if (global_debuglevel>0) { txt ; }
 #endif
 
 #if DBG_MODE == 2 
-#define D2BG MESSAGE
-#define D2BG2( txt ) ( cout << "[" << __FILE__ << "," << __LINE__ << "]: " << txt )
-#define D2BG3( txt ) ( txt )
+#define D2BG if (global_debuglevel>1) MESSAGE
+#define D2BG2( txt )  if (global_debuglevel>1) {cout << "[" << __FILE__ << "," << __LINE__ << "]: " << txt ;}
+#define D2BG3( txt )  if (global_debuglevel>1) { txt ;}
 #else
 #define D2BG( T ) 
 #define D2BG2( T ) 
 #define D2BG3( T ) 
 #endif
-
-
-
-//Not yet implemented .... should trace the run thropugh the networ in a more readable form.
-#if VERBOSE == 0 
-#define VERB( T ) 
-#define VERB2( T ) 
-#define VERB3( T ) 
-#else
-#define VERB MESSAGE
-#define VERB2( txt ) ( cout << "[" << __FILE__ << "," << __LINE__ << "]: " << txt )
-#define VERB3( txt ) ( txt )
-#endif
-
 
 typedef long int longint; /* should be at least 64 bits */
 

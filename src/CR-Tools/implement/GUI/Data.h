@@ -312,7 +312,8 @@ class Data {
   
   void setPort(objectid port, objectid refport, DIRECTION dir);
 
-  vector<HString> getNeighbours(DIRECTION dir);
+  vector<HString> getNeighbourNames(DIRECTION dir);
+  vector<Data*> getNeighbours(DIRECTION dir);
   int getPort(Data & d, DIRECTION dir);
   reference_descr getLink(objectid port, DIRECTION dir);
 
@@ -333,10 +334,9 @@ class Data {
   
   
   vector<Data*> find_immediate_relatives(HString name, DIRECTION dir);
-  vector<Data*> find_relatives(HString name, DIRECTION dir);
-  
+
   template <class T>
-    vector<Data*> select_relatives(HString name, vector<T> &elems, DIRECTION dir);
+  vector<Data*> find_relatives(HString name,  vector<T> &elems, DIRECTION dir);
   
   vector<Data*> Find(const HString s, const int rpos=0);
   

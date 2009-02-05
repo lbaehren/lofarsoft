@@ -45,6 +45,9 @@ using namespace std;
 
 Data NullObject("NULL");
 
+int global_debuglevel = 0;
+
+void setDebug(int level) {global_debuglevel = level;}
 
 //========================================================================
 // object logic operators
@@ -87,7 +90,7 @@ bool object_logic_in_set(Data* o_ptr, vector<T> &set){
     val_##EXT = new TYPE;			\
     (*val_##EXT)=o_ptr->getOne<TYPE>();		\
     D2BG("VALUE=" << (*val_##EXT));		\
-    for (i=0; i<s && !found; i++) {		\
+    for (i=0; i<s && !found; ++i) {		\
       D2BG("set[" <<i<<"]=" << set[i]);			    \
       found = (mycast<TYPE>(set[i]) == *val_##EXT);	    \
       D2BG("FOUND=" << tf_txt(found));			    \
@@ -170,7 +173,7 @@ void copycast_vec(void *ptr, vector<S> *sp) {
   vector<T> *ip =  reinterpret_cast<vector<T>*>(ptr);
   s=(*ip).size();
   (*sp).clear();if ((*sp).capacity()<s) {(*sp).reserve(s);};
-  for (i=0;i<s;i++){(*sp).push_back(mycast<S>((*ip)[i]));};
+  for (i=0;i<s;++i){(*sp).push_back(mycast<S>((*ip)[i]));};
 }
 
 template <class T, class S>
@@ -184,7 +187,7 @@ void copycast_vec(void *ptr, vector<S> *sp, Vector_Selector *vs) {
 
   s1=(*it).size();  s2=(*ip).size();
   (*sp).clear();if ((*sp).capacity()<s1) {(*sp).reserve(s1);};
-  for (i=0;i<s1;i++){
+  for (i=0;i<s1;++i){
     if ((*it)[i]<s2) {(*sp).push_back(mycast<S>((*ip)[(*it)[i]]));};
   };
 }
@@ -280,12 +283,60 @@ void vec_append(vector<T> &v1,const vector<T> &v2){
   return;
 }
 
+/*!\brief Copying the first vector into the second, just retaining
+   unique elements nut not sorting them (each element exists only
+   once) */
+
+template <typename T>
+void vec_unique_copy(const vector<T> &v1,vector<T> &v2){
+  typename vector<T>::const_iterator it1a,it_end,it_beg,it1b;
+  typename vector<T>::iterator it2;
+  bool found;
+  longint l=0;
+  MSG("This function is buggy, please check");
+  v2.reserve(v1.size());
+  it_beg=v1.begin();
+  it_end=v1.end();
+  it1a=it_beg;
+  it2=v2.begin();
+  while (it1a!=it_end){
+    //    D2BG("vec_unique_copy: it1a=" << reinterpret_cast<void*>(it1a));
+    it1b=it1a;
+    found=false;
+    while (it1b!=it_beg){
+      --it1b;
+      //D2BG("vec_unique_copy: it1b=" << it1b << ",it1a=" << it1a);
+      if (*it1a==*it1b) found=true;
+    };
+    if (!found) {
+      //D2BG("Duplicate Found! it1b="<<it1b);
+      *it2=*it1a;
+      ++l;
+    }
+    ++it1a;
+  };
+  //D2BG("vec_unique_copy: l=" << l << ", v2.size=" << v2.size());
+  v2.resize(l);
+}
+
+/*!\brief Copying the first vector into the second, just retaining
+   unique elements and sorting them (each element exists only once) 
+
+   This is more efficient then vec_uniqe_copy(v1,v2).
+*/
+
+template <class T>
+void vec_unique_copy_sorted(const vector<T> &v1,vector<T> &v2){
+  sort(v1.begin(),v1.end());
+  v2.assign(v1.begin(),unique(v1.begin(),v1.end()));
+}
+
 /*!\brief Return true if element elem is already in the vector v.*/
 template <class T>
 bool in_vector(const T elem, const vector<T> &v){
   bool ret=false;
   int i;
-  for (i=0; i<v.size() && !ret; i++) {
+  for (i=0; i<v.size() && !ret; ++i) {
     ret = ret || (v[i]==elem);
   };
   return ret;
@@ -296,7 +347,7 @@ template <class T>
 vector<T> vec_unique(const vector<T> &v){
   vector<T> v_out;
   int i;
-  for (i=0; i<v.size(); i++) {
+  for (i=0; i<v.size(); ++i) {
     if (!in_vector(v[i],v_out)) v_out.push_back(v[i]);
   };
   return v_out;
@@ -310,12 +361,12 @@ HString vectostring(vector<T> v,address maxlen=8){
   s=v.size(); 
   if (s==0) {return out;};
   if (s<=maxlen+1) {
-    for (i=0;i<s-1;i++) {out += mycast<HString>(v[i])+", ";};
+    for (i=0;i<s-1;++i) {out += mycast<HString>(v[i])+", ";};
     out += mycast<HString>(v[i]);
   } else {
-    for (i=0;i<maxlen/2;i++) {out += mycast<HString>(v[i])+", ";};
+    for (i=0;i<maxlen/2;++i) {out += mycast<HString>(v[i])+", ";};
     out += "...";
-    for (i=s-maxlen/2;i<s;i++) {out += ", " + mycast<HString>(v[i]);};
+    for (i=s-maxlen/2;i<s;++i) {out += ", " + mycast<HString>(v[i]);};
   };
   return out;
 }
@@ -327,12 +378,12 @@ void printvec_noendl(vector<T> v,address maxlen=8){
   s=v.size(); 
   if (s==0) {return;};
   if (s<=maxlen+1) {
-    for (i=0;i<s-1;i++) {cout << v[i] << ", ";};
+    for (i=0;i<s-1;++i) {cout << v[i] << ", ";};
     cout << v[i];
   } else {
-    for (i=0;i<maxlen/2;i++) {cout << v[i] << ", ";};
+    for (i=0;i<maxlen/2;++i) {cout << v[i] << ", ";};
     cout << "...";
-    for (i=s-maxlen/2;i<s;i++) {cout << ", " << v[i];};
+    for (i=s-maxlen/2;i<s;++i) {cout << ", " << v[i];};
   };
 }
 
@@ -350,7 +401,7 @@ void printvec_txt(vector<T> v, char* (*f)(S)){
   int s;
   s=v.size();
   if (s==0) {cout <<endl; return;};
-  for (i=0;i<s-1;i++) {cout << *f(v[i]) << ", ";};
+  for (i=0;i<s-1;++i) {cout << *f(v[i]) << ", ";};
   cout << f(v[i]) << endl;
   return;
 }
@@ -405,7 +456,7 @@ bool del_value(void *ptr, DATATYPE type) {
   }
 }
 
-//splits a string of type name1:name2:name3 into a vector of strings
+/*! \brief Splits a string of type name1:name2:name3 (for c=":") into a vector of strings.*/
 vector<HString> split_str_into_vector(HString str, char c)
 {
   vector<HString> out;
@@ -424,7 +475,7 @@ int string_find_chars (const HString s, const HString c, int &n, const int npos)
   int i, slen=s.size();
   int nchrs=c.size();
   bool found=false;
-  for (i=npos; i<slen && !found; i++) {
+  for (i=npos; i<slen && !found; ++i) {
     for (n=0;n<nchrs && !found;n++) {found = c[n]==s[i];};
   };
   n=n-1;
@@ -482,25 +533,33 @@ void parse_record_name_to_vector(HString name, vector<HString> &names, vector<DI
   names.push_back(name.substr(oldpos));
   dirs.push_back(dir);
 }
+/*!  
 
+Searches for a comparison operator (currently only '=' is implemented)
+in the string describing the object searched for (used in square
+bracktets). Returns false if not present, otherwise returns the
+elements after the comparison operator. Multiple elements are possible
+if separated by a ','.
+
+*/
 bool parse_record_selection_to_vector(HString str, HString &name, vector<HString> &elems)
 {
   int pos;
   pos=str.find('=');
   if (pos==-1) {name=str; elems.clear(); return false;};
   name=str.substr(0,pos);
-//  DBG(endl << "Input=" << str);
-//  DBG("name=" << name);
+  //  D2BG(endl <<"parse_record_selection_to_vector" << "Input=" << str);
+  //D2BG("name=" << name);
   elems=split_str_into_vector(str.substr(pos+1),',');
-//  DBG2("elems="); DBG3(printvec(elems));
+  //D2BG2("elems="); DBG3(printvec(elems));
   return true;
 }
 
 vector<objectid> DPtrToOid(vector<Data*> objects) 
 {
   vector<objectid> object_oids;
-  vector<Data*>::iterator it;
-  for (it=objects.begin(); it<objects.end(); it++) {
+  vector<Data*>::const_iterator it;
+  for (it=objects.begin(); it<objects.end(); ++it) {
     object_oids.push_back((*it)->getOid());
   };
   return object_oids;
@@ -555,7 +614,7 @@ HString Data::reference_descr_str(reference_descr* rd){
 void Data::printAllStatus(bool short_output,longint maxlevel){
   HInteger i;
   if (data.superior!=NULL) {
-    for (i=0; i<data.superior->data_objects.size(); i++) {
+    for (i=0; i<data.superior->data_objects.size(); ++i) {
       if (data.superior->data_objects[i]!=&NullObject) {
 	SaveCall(data.superior->data_objects[i]) {
 	  if (data.superior->data_objects[i]->getNetLevel()<=maxlevel)
@@ -572,7 +631,7 @@ vector<objectid> Data::getAllIDs(){
   HInteger i;
   vector<objectid> vec;
   if (data.superior!=NULL) {
-    for (i=0; i<data.superior->data_objects.size(); i++) {
+    for (i=0; i<data.superior->data_objects.size(); ++i) {
       if (data.superior->data_objects[i]!=&NullObject) {
 	SaveCall(data.superior->data_objects[i]) vec.push_back(data.superior->data_objects[i]->getOid());
       };
@@ -589,7 +648,7 @@ void Data::printStatus(bool short_output){cout << Status(short_output) <<endl;}
 
 address Data::getMod(){
   address i,result=0;
-  for (i=0; i<data.from.size(); i++) {
+  for (i=0; i<data.from.size(); ++i) {
     if (data.from[i]->mod.ref!=NULL) {result++;};
   };
   return result;
@@ -601,8 +660,8 @@ address Data::getMod(){
 vector<Data::modification_record> Data::getModFlags(DIRECTION dir){
     objectid i;
     vector<modification_record> vec;
-    if (dir==DIR_FROM || dir==DIR_BOTH) {for (i=0; i<data.from.size(); i++) {vec.push_back(data.from[i]->mod);};} 
-    else if (dir==DIR_TO || dir==DIR_BOTH) {for (i=0; i<data.to.size(); i++) {vec.push_back(data.to[i]->mod);};} 
+    if (dir==DIR_FROM || dir==DIR_BOTH) {for (i=0; i<data.from.size(); ++i) {vec.push_back(data.from[i]->mod);};} 
+    else if (dir==DIR_TO || dir==DIR_BOTH) {for (i=0; i<data.to.size(); ++i) {vec.push_back(data.to[i]->mod);};} 
     return vec;
 }
 
@@ -621,7 +680,7 @@ vector<HString> Data::listModFlags(DIRECTION dir){
   address i;
   vector<HString> vec;
   vector<modification_record> mods=getModFlags(dir);
-  for (i=0; i<mods.size(); i++) {vec.push_back(strModFlag(mods[i]));};
+  for (i=0; i<mods.size(); ++i) {vec.push_back(strModFlag(mods[i]));};
   return vec;
 }
 
@@ -657,7 +716,7 @@ HString Data::Status(bool short_output){
     };
     if (data.to.size()>0) {
       sout << " =>";
-      for (i=0; i<data.to.size(); i++) {
+      for (i=0; i<data.to.size(); ++i) {
 	  if (data.to[i]->direction==PULL || data.to[i]->direction==DIR_BOTH) {sout << " <<";};
 	  if (data.to[i]->direction==PUSH || data.to[i]->direction==DIR_BOTH) {sout << " >>";};
 	  sout << data.to[i]->ref->getName();
@@ -667,7 +726,7 @@ HString Data::Status(bool short_output){
     };
     if (data.from.size()>0) {
       sout << " <= ";
-      for (i=0; i<data.from.size(); i++) {
+      for (i=0; i<data.from.size(); ++i) {
 	  sout << "{" << data.from[i]->ref->getOid() << "}";
 	  sout << data.from[i]->ref->getName();
 	  if (data.from[i]->direction==PULL || data.from[i]->direction==DIR_BOTH) {sout << "<<";};
@@ -689,9 +748,9 @@ HString Data::Status(bool short_output){
   sout << "#mod: " << nmod <<endl;
   sout << "version: " << getVersion() << " - is modifed: " << tf_txt(isModified()) <<endl;
   sout << "To  : "<<endl; 
-  for (  i=0; i<data.to.size(); i++) {sout <<"["<<i<<"] "; sout << this->reference_descr_str(data.to[i])<<endl;};
+  for (  i=0; i<data.to.size(); ++i) {sout <<"["<<i<<"] "; sout << this->reference_descr_str(data.to[i])<<endl;};
   sout << "From: "<<endl; 
-  for (  i=0; i<data.from.size(); i++) {sout <<"["<<i<<"] "; sout << this->reference_descr_str(data.from[i])<<endl;};
+  for (  i=0; i<data.from.size(); ++i) {sout <<"["<<i<<"] "; sout << this->reference_descr_str(data.from[i])<<endl;};
   sout << "datatype=" << datatype_txt(data.type) << endl;
   sout << "of_ptr=" << data.of_ptr << endl;
   sout << "d_ptr=" << data.d_ptr << endl;
@@ -724,7 +783,7 @@ void Data::printDecendants(HString rootname){
     CALL_FUNC_D_PTR(printvec);
     del_vector(d_ptr_v,data.type);
   } else {cout << endl;};
-  for (i=0; i<data.to.size(); i++) {if (data.to[i]->ref!=NULL) {data.to[i]->ref->printDecendants(name);};};
+  for (i=0; i<data.to.size(); ++i) {if (data.to[i]->ref!=NULL) {data.to[i]->ref->printDecendants(name);};};
 }
 
 /*!  \brief Provides a list of all names of objects linked to the
@@ -736,12 +795,12 @@ vector<HString> Data::listNames(DIRECTION dir){
     vector<HString> l;
     objectid i;
     if (dir==DIR_FROM || dir==DIR_BOTH) {
-      for (i=0; i<data.from.size(); i++) {
+      for (i=0; i<data.from.size(); ++i) {
 	SaveCall(data.from[i]->ref) l.push_back(data.from[i]->ref->getName());
       };
     };
     if (dir==DIR_TO || dir==DIR_BOTH) {
-      for (i=0; i<data.to.size(); i++) {
+      for (i=0; i<data.to.size(); ++i) {
 	SaveCall(data.to[i]->ref) l.push_back(data.to[i]->ref->getName());
       };
     };
@@ -756,12 +815,12 @@ vector<objectid> Data::listIDs(DIRECTION dir){
     vector<objectid> l;
     objectid i;
     if (dir==DIR_FROM || dir==DIR_BOTH) {
-      for (i=0; i<data.from.size(); i++) {
+      for (i=0; i<data.from.size(); ++i) {
 	SaveCall(data.from[i]->ref) l.push_back(data.from[i]->ref->getOid());
       };
     };
     if (dir==DIR_TO || dir==DIR_BOTH) {
-      for (i=0; i<data.to.size(); i++) {
+      for (i=0; i<data.to.size(); ++i) {
 	SaveCall(data.to[i]->ref) l.push_back(data.to[i]->ref->getOid());
       };
     };
@@ -775,12 +834,12 @@ vector<DIRECTION> Data::listDirs(DIRECTION dir){
     vector<DIRECTION> l;
     objectid i;
     if (dir==DIR_FROM || dir==DIR_BOTH) {
-      for (i=0; i<data.from.size(); i++) {
+      for (i=0; i<data.from.size(); ++i) {
 	l.push_back(data.from[i]->direction);
       };
     };
     if (dir==DIR_TO || dir==DIR_BOTH) {
-      for (i=0; i<data.to.size(); i++) {
+      for (i=0; i<data.to.size(); ++i) {
 	l.push_back(data.to[i]->direction);
       };
     };
@@ -969,7 +1028,7 @@ longint Data::AllVerbose(longint verbose){
   if (this==&NullObject) {ERROR("AllVerbose: Operation on NullObject not allowed."); return false;};
   HInteger i;
   if (data.superior!=NULL) {
-    for (i=0; i<data.superior->data_objects.size(); i++) {
+    for (i=0; i<data.superior->data_objects.size(); ++i) {
 	data.superior->data_objects[i]->setVerbose(verbose);
     };
   } else {
@@ -1058,7 +1117,7 @@ void Data::setModification(modification_record newmod){
     data.modified=true;
 
     size=data.to.size();
-    for (i=0; i<size; i++) {
+    for (i=0; i<size; ++i) {
       //mark the port to the next higher object as modified - this
       //will be queried from higher up when needed.
       data.to[i]->mod=newmod;
@@ -1091,8 +1150,8 @@ void Data::executeUpdateWorm(){
   }
   if (!data.silent) {
     DBG("executeUpdateWorm(): executed by object " << getName(true) << ", worm.size=" << Worm->size());
-    worm::iterator it;
-    for (it=Worm->begin(); it<Worm->end(); it++) {
+    worm::const_iterator it;
+    for (it=Worm->begin(); it<Worm->end(); ++it) {
       DBG("executeUpdateWorm(): executed by " << getName(true) << " -> update object worm.name=" << (*it)->getName(true));
       (*it)->doAutoUpdate();
     };
@@ -1129,7 +1188,7 @@ void Data::setModification(objectid port, modification_record newmod){
   bool sameflag=false;
   
   size=data.from.size();
-  for (i=0; i<size && !sameflag; i++) {
+  for (i=0; i<size && !sameflag; ++i) {
     //check whether the flag has aready been received at another
     //port. If yes, don't go further.
     if (i!=port) sameflag=data.from[i]->mod==newmod;
@@ -1142,7 +1201,7 @@ void Data::setModification(objectid port, modification_record newmod){
   data.modified=true;
 
   size=data.to.size();
-  for (i=0; i<size; i++) {
+  for (i=0; i<size; ++i) {
     //mark the port to the next higher object as modified - this
     //will be queried from higher up when needed.
     data.to[i]->mod=newmod;
@@ -1192,7 +1251,7 @@ bool Data::checkModification(){
   //all modification flags in the FROM direction and create an update
   //worm, which needs to be executed separately.
   size=data.from.size();
-  for (i=0; i<size; i++) {
+  for (i=0; i<size; ++i) {
     if ((data.from[i]->direction == PULL || data.from[i]->direction == DIR_BOTH)) {
       SaveCall(data.from[i]->ref) modified = modified || data.from[i]->ref->checkModification(data.from[i]->port,newmod);
     };
@@ -1245,7 +1304,7 @@ bool Data::checkModification(objectid port, modification_record newmod){
   //Now go deeper through the network in the FROM direction (even if
   //this is already modified)
   size=data.from.size();
-  for (i=0; i<size; i++) {
+  for (i=0; i<size; ++i) {
     if ((data.from[i]->direction == PULL || data.from[i]->direction == DIR_BOTH)) {
       SaveCall(data.from[i]->ref) {
 	  if (data.from[i]->mod==newmod) {
@@ -1286,7 +1345,7 @@ void Data::clearModification(){
     data.modified = false;
 
     size=data.from.size();
-    for (i=0; i<size; i++) {
+    for (i=0; i<size; ++i) {
       data.from[i]->mod.ref=NULL;
       SaveCall(data.from[i]->ref) data.from[i]->ref->clearModificationTO(data.from[i]->port);
     };
@@ -1318,7 +1377,7 @@ void Data::sendMessage(MSG_CODE msg, DIRECTION dir, objectid count, void* ptr) {
   objectid i,s;
   if (dir == DIR_FROM || dir == DIR_BOTH) {
     s=data.from.size();
-    for (i=0; i<s-1; i++) {
+    for (i=0; i<s-1; ++i) {
       if (data.from[i]->direction == DIR_FROM || data.from[i]->direction == DIR_BOTH) {
 	data.from[i]->ref->getMessage(msg,dir,data.from[i]->port,count,ptr);
       };
@@ -1327,7 +1386,7 @@ void Data::sendMessage(MSG_CODE msg, DIRECTION dir, objectid count, void* ptr) {
   
   if (dir == DIR_TO || dir == DIR_BOTH) {
     s=data.to.size();
-    for (i=0; i<s-1; i++) {
+    for (i=0; i<s-1; ++i) {
       if (data.to[i]->direction == DIR_TO || data.to[i]->direction == DIR_BOTH) {
 	data.to[i]->ref->getMessage(msg,dir,data.to[i]->port,count,ptr);
       };
@@ -1378,13 +1437,13 @@ void Data::delLink(Data &d) {
   int i,l;
   l=data.to.size();
   DBG("delLink(" << &d << "=" << d.getName() << "): ptr=" << this << "=" << d.getName());
-  for (i=0; i<l; i++) {
+  for (i=0; i<l; ++i) {
     if (data.to[i]->ref == &d) {delLink(i,DIR_TO,true);
       DBG("  delLink TO:" << data.to[i]->ref << "->" << &d << " (deleted)");
     };
   };
   l=data.from.size();
-  for (i=0; i<l; i++) {
+  for (i=0; i<l; ++i) {
     if (data.from[i]->ref == &d) {
       delLink(i,DIR_FROM,true);
       DBG("  delLink FROM:" << data.from[i]->ref << "<-" << &d << " (deleted)");
@@ -1486,6 +1545,10 @@ objectid Data::setLink(Data *d,
 {
   DBG("setLink( I am =" << getName(true) << ", link to name=" << d->getName(true) << ", dir_type=" << direction_txt(dir_type)  << ", dir=" << direction_txt(dir) << ", otherport=" << otherport << ", thisport=" << thisport <<": started.");
   if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return -1;};
+  if (in_vector(d,getNeighbours(dir))) {
+    ERROR("setLink( I am =" << getName(true) << ", link to name=" << d->getName(true) << ", dir_type=" << direction_txt(dir_type)  << ", dir=" << direction_txt(dir) << ", otherport=" << otherport << ", thisport=" << thisport << " -- Attempt to create a duplicate link!");
+    return -1;
+    };
   Data* p = this;
   reference_descr* rd=new reference_descr;
   modification_record newmod;
@@ -1590,7 +1653,7 @@ int Data::getPort(Data & d, DIRECTION dir) {
 /*!\brief Returns a vector of strings containing the names of all immediate neighbours in direction DIR.
 
  */
-vector<HString> Data::getNeighbours(DIRECTION dir) {
+vector<HString> Data::getNeighbourNames(DIRECTION dir) {
   vector<reference_descr*> *fromto;
   vector<HString> vec;
   if (dir==DIR_TO) {
@@ -1599,12 +1662,28 @@ vector<HString> Data::getNeighbours(DIRECTION dir) {
     fromto = &data.from;
   };
   vec.reserve(fromto->size());
-  for (longint i=0;i<(fromto->size());i++) vec.push_back((*fromto)[i]->name);
+  for (longint i=0;i<(fromto->size());++i) vec.push_back((*fromto)[i]->name);
+  return vec;
+}
+
+/*!\brief Returns a vector of pointers to the all immediate neighbours in direction DIR.
+
+ */
+vector<Data*> Data::getNeighbours(DIRECTION dir) {
+  vector<reference_descr*> *fromto;
+  vector<Data*> vec;
+  if (dir==DIR_TO) {
+    fromto = & data.to;
+  } else {
+    fromto = &data.from;
+  };
+  vec.reserve(fromto->size());
+  for (longint i=0;i<(fromto->size());++i) vec.push_back((*fromto)[i]->ref);
   return vec;
 }
 
 /*!
-\brief Returns the reference descriptor (i.e. the recod describing a link to another object) for a given port number.
+\brief Returns the reference descriptor (i.e. the record describing a link to another object) for a given port number.
 */
 Data::reference_descr Data::getLink(objectid port, DIRECTION dir) {
   vector<reference_descr*> *fromto;
@@ -2104,7 +2183,7 @@ Data* Data::find_name(HString name, DIRECTION dir) {
     objectid i;
     vector<reference_descr*> *p_ref;
     if (dir==DIR_TO) {p_ref = &data.to;} else {p_ref = &data.from;};
-    for (i=0;i<(*p_ref).size() && D_ptr==&NullObject;i++){
+    for (i=0;i<(*p_ref).size() && D_ptr==&NullObject;++i){
       D_ptr=(*p_ref)[i]->ref->find_name(name,dir);
     };
     return D_ptr;
@@ -2126,7 +2205,7 @@ The function returns true if the relative is found, and false if not.
   vector<Data*> vec;
   D2BG("find_immediate_relatives: name=" << name << " dir=" << direction_txt(dir) << " current object=" << data.name);
   if (dir==DIR_TO) {p_ref = &data.to;} else {p_ref = &data.from;};
-  for (i=0;i<(*p_ref).size();i++){
+  for (i=0;i<(*p_ref).size();++i){
     if ((*p_ref)[i]->name==name) {
       vec.push_back((*p_ref)[i]->ref);
     };
@@ -2135,11 +2214,58 @@ The function returns true if the relative is found, and false if not.
   return vec;
 }
 
+/*!Check if any of the immediate relatives in direction dir has a
+given name and return pointers to these object. Returns multiple
+pointers in vec if multiple names are present at the same level in the
+network.  If not, seek the next generation of relatives. if vector
+elems contains elements the additional requirement is that the data
+vector (i.e., its first element) is among the elements.
+*/
+template <class T>
+vector<Data*> Data::find_relatives(HString name, vector<T> &elems, DIRECTION dir) {
+  vector<Data*> neighbours,next_neighbours,result;
+  address i,level=0,n_size,el_size=elems.size();
+  bool found=false;
+  D2BG2("find_relatives("<<name<<", dir="<<direction_txt(dir)<<"): getName=" << getName(true)<<" elems=");D2BG3(printvec(elems));
+  neighbours=getNeighbours(dir);
+  n_size=neighbours.size();
+  while (result.size()==0 && n_size>0) {
+    D2BG("level="<<++level << ", result.size()=" << result.size() << ", n_size=" << n_size);
+    for (i=0;i<n_size; ++i) {
+      found=false;
+      SaveCall(neighbours[i]) {
+	D2BG(i << ": ptr=" << neighbours[i] <<", name=" << neighbours[i]->getName());
+	if (neighbours[i]->getName()==name) {
+	  if (el_size==0) found = true;  //No elements given, hence no further content-based selection necessary
+	  else found = object_logic_in_set(neighbours[i],elems); //Test whether contents of object is among those listed in elem
+	};
+      };
+      if (found) {
+	D2BG("Found!");
+	result.push_back(neighbours[i]);
+      };
+    };
+    //Produce a vector with all neighbours on the next level if nothing was found
+    if (result.size()==0) {
+      next_neighbours.clear();
+      for (i=0;i<n_size;++i) {
+	D2BG("neighbours["<<i<<"]=" << neighbours[i] << ", magiccode=" << neighbours[i]->magiccode);
+	SaveCall(neighbours[i]) vec_append(next_neighbours,neighbours[i]->getNeighbours(dir));
+      };
+      D2BG("Calling vec_unique_copy");
+      //vec_unique_copy(next_neighbours,neighbours);
+      neighbours=vec_unique(next_neighbours);
+      n_size=neighbours.size();
+    };
+  };
+  return result;
+}
+
 //Check if any of the immediate relatives in direction dir has a given name and return
 //pointers to these object. Returns multiple pointers in vec if multiple names are present.
 //If not, seek the next generation of relatives. Returns only the relatives of the first object
 //to have relatives of the name searched for.
-
+/* OLD OLD OLD
 vector<Data*> Data::find_relatives(HString name, DIRECTION dir) {
   objectid i;
   vector<Data*> vec;
@@ -2148,13 +2274,12 @@ vector<Data*> Data::find_relatives(HString name, DIRECTION dir) {
   if (vec.size()==0) {
     //search the next generation, if name is not found in the immediate vicinity
     if (dir==DIR_TO) {p_ref = &data.to;} else {p_ref = &data.from;};
-    for (i=0;i<p_ref->size();i++){
+    for (i=0;i<p_ref->size();++i){
       vec_append(vec,(*p_ref)[i]->ref->find_relatives(name,dir));
     };
   };
   return vec;
 }
-
 
 //find all relatives of name=name which have a value in vector elems
 template <class T>
@@ -2165,7 +2290,7 @@ vector<Data*> Data::select_relatives(HString name, vector<T> &elems, DIRECTION d
   vec1=find_relatives(name,dir);
 //  DBG2("find_relatives: name=" << name << " dir=" << direction_txt(dir) << " vec1="); D2BG3(printvec(vec1));
   s=vec1.size();
-  for (i=0;i<s;i++){
+  for (i=0;i<s;++i){
 //    DBG2("in_set vec1[" << i << "] in ["); DBG3(printvec_noendl(elems)); DBG3(cout << "]" <<endl);
     found=object_logic_in_set(vec1[i],elems);
 //    DBG("found=" << tf_txt(found));
@@ -2178,6 +2303,8 @@ vector<Data*> Data::select_relatives(HString name, vector<T> &elems, DIRECTION d
   };
   return vec2;
 }
+
+*/
 
 //find objects of the given name (includes : and ' and selection specifications)
 //if rpos>0 then only take rpos objects from the right side
@@ -2255,6 +2382,9 @@ vector<Data*> Data::Find(HString s, const int rpos) {
   HString name;
   vector<HString> names,elems;
   vector<DIRECTION> dirs;
+
+  if (this==&NullObject) return vec_in;
+
   parse_record_name_to_vector(s, names, dirs);
   DBG("Find: names=" << s); 
   D2BG2("names="); D2BG3(printvec(names));
@@ -2265,25 +2395,25 @@ vector<Data*> Data::Find(HString s, const int rpos) {
   if (rpos>0) {beg=max(end-rpos+1,0);};
   if (rpos<0) {end=end+rpos;};
   D2BG("beg=" << beg << " end=" << end);
-  for (i=beg;i<=end && n>0;i++) {
-    selection=parse_record_selection_to_vector(names[i],name,elems);
+  for (i=beg;i<=end && n>0;++i) {
+    //Check if the object names also have an additional condition,
+    //e.g. "Antenna=0,1,2". selection=trueif that is the case and the
+    //elements after '=' are in elems
+    parse_record_selection_to_vector(names[i],name,elems);
     D2BG2("parse_record_selection_to_vector: names[" << i << "]=" << names[i] << " selection=" << tf_txt(selection) << " name=" << name << " elems="); 
     D2BG3(printvec(elems));
     vec_out.clear(); 
     for (j=0;j<n;j++) {
       D2BG("pre_append : " << "j=" <<j << " n=" << n << " vec_out.size()=" << vec_out.size());
-      if (selection) {
-	vec_append(vec_out,vec_in[j]->select_relatives(name,elems,dirs[i]));
-      } else {
-	vec_append(vec_out,vec_in[j]->find_relatives(name,dirs[i]));
-      };
+      vec_append(vec_out,vec_in[j]->find_relatives(name,elems,dirs[i]));
       D2BG("post_append: " << "j=" <<j << " n=" << n << " vec_out.size()=" << vec_out.size());
     };
     vec_in=vec_out; n=vec_in.size();
     D2BG("n=" << n << "vec_in.size()=" << vec_in.size());
     D2BG2("vec_in="); D2BG3(printvec(vec_in));
   };
-  return vec_unique(vec_in);
+  //  return vec_unique(vec_in);
+  return vec_in;
 }
 
 //Sequentially go through the list  of names and find the corresponding name in the net, one after the other.
@@ -2295,7 +2425,7 @@ Data* Data::find_names(vector<HString> names, vector<DIRECTION> dir) {
   if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return &NullObject;};
   Data *D_ptr=this; 
   objectid i;
-  for (i=0;i<names.size() && D_ptr!=&NullObject;i++){
+  for (i=0;i<names.size() && D_ptr!=&NullObject;++i){
     D_ptr=D_ptr->find_name(names[i],dir[i]);
   };
   return D_ptr;
@@ -2665,7 +2795,7 @@ Data& Data::erase(Data &d,DIRECTION dir)
 
   longint n=d.getNumberOfLinks(dir);
   DBG("erase: NumberOfLinks in " << d.getName(true) <<" = " << n);
-  for (i=0; i<n; i++) {
+  for (i=0; i<n; ++i) {
     rd=d.getLink(i,dir);
     DBG("erase: i=" << i);
     if (rd.ref==NULL) {
@@ -2724,7 +2854,7 @@ void Data::delObject()
   DBG("delObject: version=" << newmod.version << ", size=" << size);
   //Now signal the modification higher up (but only if the object is
   //not isolated - in that case it was killed by delLink)
-  for (i=0;i<size;i++) {
+  for (i=0;i<size;++i) {
     SaveCall(dvec[i]) 
       {if (dvec[i]->getNumberOfLinks()>0) dvec[i]->setModification(newmod);};
   };
@@ -2801,7 +2931,7 @@ vector<Data*> Data::newObjects(HString name, DIRECTION dir_type, objectid maxpar
       ERROR("new(\"" << name << "\"): Parent not found!");
   } else {
       size=maxparents<=0 ? parents.size() : maxparents;
-	  for (i=0; i<size; i++) {
+	  for (i=0; i<size; ++i) {
       if (parents[i]!=&NullObject) {
 	DBG("Creating new object: " << newname << " i_parent=" << i);
 	children.push_back(new Data(newname,data.superior));
@@ -2820,7 +2950,7 @@ vector<Data*> Data::newObjects(HString name, T val, DIRECTION dir_type, objectid
   vector<Data*> dobs;
   objectid i;
   dobs=newObjects(name,dir_type,maxparents);
-  for (i=0;i<dobs.size();i++) {dobs[i]->putOne(val);};
+  for (i=0;i<dobs.size();++i) {dobs[i]->putOne(val);};
   return dobs;
 }
 
@@ -2829,7 +2959,7 @@ vector<Data*> Data::newObjects(HString name, vector<T> vec, DIRECTION dir_type, 
   vector<Data*> dobs;
   objectid i;
   dobs=newObjects(name,dir_type,maxparents);
-  for (i=0;i<dobs.size();i++) {dobs[i]->put(vec);};
+  for (i=0;i<dobs.size();++i) {dobs[i]->put(vec);};
   return dobs;
 }
 
@@ -2901,7 +3031,7 @@ float* mytest2(vector<HNumber>vec){
   vector<int> v; 
   float* ary;
   
-  for (int i=0;i<10; i++) {v.push_back(i);};
+  for (int i=0;i<10; ++i) {v.push_back(i);};
   cout << "mytest2" << endl; 
   return ary;}
 
@@ -2923,13 +3053,13 @@ mglData& mytest4(){
 float* mytest5(){
     float d[50];
     int i;
-    for (i=0;i++;i<50) {d[i]=i*1.5;}
+    for (i=0;++i;i<50) {d[i]=i*1.5;}
     return d;
 }
 
 vector<HNumber>& mytest6(){
   vector<HNumber> v; 
-  for (int i=0;i<10; i++) {v.push_back(i*1.5);};
+  for (int i=0;i<10; ++i) {v.push_back(i*1.5);};
   cout << "mytest6" << endl; 
   return v;
 }
