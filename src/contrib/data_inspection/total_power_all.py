@@ -99,9 +99,9 @@ elif quantity_plot == 'time':
 for i in antenna_range:
 	if antenna_range.index(i)%plots_per_page == 0:
 		if i > 0:
-			savefig('vv' + msname + '_' + str(antenna_range.index(i)/plots_per_page) + 'tp.jpg')
+			savefig('vv' + msname + '_' + str(antenna_range.index(i)/plots_per_page) + 'tp.png')
 			close()
-			print 'saved figure as ' + 'vv' + msname + '_' + str(antenna_range.index(i)/plots_per_page) + 'tp.jpg'
+			print 'saved figure as ' + 'vv' + msname + '_' + str(antenna_range.index(i)/plots_per_page) + 'tp.png'
 		fig = figure(antenna_range.index(i)/plots_per_page+1)
 		axis('off')
 		title(title_string)      # plot title on each new figure
@@ -145,6 +145,6 @@ for i in antenna_range:
 		if ax.is_first_row() and ax.is_first_col():
 			legend(('xx','xy','yx','yy'),4,numpoints=4)
 
-savefig('vv' + msname + '_' + str((antenna_range.index(i)+1)/plots_per_page) + 'tp.jpg')
+savefig('vv' + msname + '_' + str((antenna_range.index(i)+1)/plots_per_page) + 'tp.png')
 close()
-print 'saved figure as ' + 'vv' + msname + '_' + str((antenna_range.index(i)+1)/plots_per_page) + 'tp.jpg'
+print 'saved figure as ' + 'vv' + msname + '_' + str((antenna_range.index(i)+1)/plots_per_page) + 'tp.png'
