@@ -21,7 +21,9 @@ else:
 # open file
 msds= dal.dalDataset()
 if ( True != msds.open(sys.argv[1]) ):
-        sys.exit(1)
+	print "ERROR: Could not open file: " + sys.argv[1]
+	print "       Please check the file and try again."
+	sys.exit(1)
 
 # get frequencies
 freqtab = msds.openTable('SPECTRAL_WINDOW')
