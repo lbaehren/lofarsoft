@@ -181,20 +181,20 @@ namespace CR { // Namespace CR -- begin
 	cerr << "FirstStagePipeline::setCalibration: " << "Lenght of FFT (" << fftlen << ") " 
  	     << "does not equal length of frequency axis (" << freqVals.size() <<") !" << endl;
       };
-      
+
        // create an array with a supression factor for frequencies outside of the analysis band
-//       const DComplex supressionFactor(1e-6,0.); // supression factor for frequencies outside the band
-//       for (i=0; i < fftlen; ++i) {
-//         if ( (freqVals(i) < startFreq_p) || (freqVals(i) > stopFreq_p) ) {
-//           band(i) = supressionFactor;
-//         } else {
-//           band(i) = DComplex(1.,0.);
-//         }
-//       }
-//       if (verbose) {
-//         cout << "FirstStagePipeline::setCalibration: " << "Frequency band for analysis: " 
-// 	     << startFreq_p << " Hz to " << stopFreq_p << " Hz." << endl;
-//       }
+       const DComplex supressionFactor(1e-6,0.); // supression factor for frequencies outside the band
+       for (i=0; i < fftlen; ++i) {
+         if ( (freqVals(i) < startFreq_p) || (freqVals(i) > stopFreq_p) ) {
+           band(i) = supressionFactor;
+         } else {
+           band(i) = DComplex(1.,0.);
+         }
+       }
+       if (verbose) {
+         cout << "FirstStagePipeline::setCalibration: " << "Frequency band for analysis: " 
+              << startFreq_p << " Hz to " << stopFreq_p << " Hz." << endl;
+       }
 
       for (i=0; i<nAnt ; i++){
         // Get electrical gain if switched on (otherwise set it to 1)
