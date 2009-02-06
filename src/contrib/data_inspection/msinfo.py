@@ -95,7 +95,7 @@ print 'Phase center (deg): (' + str(phasedir[0]*180/3.1415) + ',' + str(phasedir
 print 'Frequency range (MHz): (' + str(min(freq/1e6)) + ', ' + str(max(freq/1e6)) + ')'
 print 'Wavelength range (m): (' + str(min(299792458.0/freq)) + ', ' + str(max(299792458.0/freq)) + ')'
 print 'Time range (MJD): (' + str(time[0]) + ', ' + str(time[1]) + ') s or ' + str((time[1]-time[0])/3600) + ' hrs'
-if doall:  print 'Integrations, Time bin size: ' + str(num_ints) + ', ' + str(expcol.data()[0]) + ' s'
+if doall:  print 'Integrations, Time bin size: ' + str(num_ints) + ', ' + str(exp[0]) + ' s'
 print 'Channels, Width: ' + str(numchan) + ', ' + str(chan_width/1e3) + ' kHz'
 print 'Polarizations: ' + str(num_pols)
 print ''
