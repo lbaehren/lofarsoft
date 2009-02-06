@@ -19,7 +19,7 @@ FORCE_BUILD=0;
 CLEAN_BUILD=0;
 REPORT_BUILD=0;
 BUILD_TESTS=0;
-ENABLE_MULTITHREADING=0;
+ENABLE_MULTITHREADING=1;
 
 ## Required minimum version of CMake; system should provide a version at
 ## at least matching the one provided as part of the USG distribution
@@ -92,7 +92,7 @@ print_help ()
     echo "    clean-all          = Do a clean-build and a clean-release."
 }
 
-## -------------------------------------------------------------------
+##______________________________________________________________________________
 ## Determine the make command to use (e.g. if to activate multi-threading)
 
 make_command ()
@@ -110,15 +110,17 @@ make_command ()
     fi
   fi
 
-  ## set make command
+  ## set make command based on control parameter
+
   if [ "$ENABLE_MULTITHREADING" == "1" ] ; then 
     var_make="make -j $SYSTEM_NOF_CPU"
   else 
     var_make="make"
   fi
+
 }
 
-## -------------------------------------------------------------------
+##______________________________________________________________________________
 ## Build CMake from source 
 
 build_cmake ()
@@ -298,7 +300,7 @@ else
 	    rm -rf plplot pyrap python;
 	    rm -rf root;
 	    rm -rf qt;
-	    rm -rf startools szip;
+	    rm -rf sip startools szip;
 	    rm -rf vtk;
 	    rm -rf wcslib wcstools wget;
 	    rm -rf zlib;
@@ -413,9 +415,9 @@ case $param_packageName in
     casacore)
         echo "[`date`] Selected package CASACORE";
         ## -- build required packages
-	cd $basedir; ./build.sh wcslib
-	cd $basedir; ./build.sh cfitsio
-	cd $basedir; ./build.sh hdf5
+		cd $basedir; ./build.sh wcslib
+		cd $basedir; ./build.sh cfitsio
+		cd $basedir; ./build.sh hdf5
         ## -- build package
         build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
@@ -469,55 +471,60 @@ case $param_packageName in
     ;;
     pyrap)
         echo "[`date`] Selected package Pyrap"
-	build_package hdf5 external/hdf5
-	build_package casacore external/casacore
-	build_package boost external/boost
-	build_package python external/python
+		build_package hdf5 external/hdf5
+		build_package casacore external/casacore
+		build_package boost external/boost
+		build_package python external/python
         build_package pyrap external/pyrap
     ;;
     python)
         echo "[`date`] Selected package PYTHON"
-	build_package boost external/boost
-	build_package python external/python
+		build_package boost external/boost
+		build_package python external/python
     ;;
     qt)
         echo "[`date`] Selected package QT"
-	build_package qt external/qt "-DQT_FORCE_BUILD:BOOL=$FORCE_BUILD";
+		build_package qt external/qt "-DQT_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     root)
         echo "[`date`] Selected package ROOT"
-	build_package root external/root "-DROOT_FORCE_BUILD:BOOL=$FORCE_BUILD";
+		build_package root external/root "-DROOT_FORCE_BUILD:BOOL=$FORCE_BUILD";
+    ;;
+    sip)
+        echo "[`date`] Selected package sip"
+		build_package sip external/sip "-DSIP_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     startools)
         echo "[`date`] Selected package Star-Tools"
-	cd $basedir; ./build.sh root
-	build_package startools external/startools "-DStarTools_FORCE_BUILD:BOOL=$FORCE_BUILD";
+		cd $basedir; ./build.sh root
+		build_package startools external/startools "-DStarTools_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     szip)
-        echo "[`date`] Selected package Star-Tools"
-	build_package szip external/szip "-DSZIP_FORCE_BUILD:BOOL=$FORCE_BUILD";
+        echo "[`date`] Selected package szip"
+		build_package szip external/szip "-DSZIP_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     vtk)
         echo "[`date`] Selected package VTK"
-	echo "-- No configuration and build support available yet!"
+		echo "-- No configuration and build support available yet!"
     ;;
     wcslib)
         echo "[`date`] Selected package WCSLIB"
-	$basedir/build.sh bison $REPORT_BUILD
-	build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$FORCE_BUILD";
-	build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$FORCE_BUILD";
+		$basedir/build.sh bison $REPORT_BUILD
+		build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$FORCE_BUILD";
+		build_package boost external/boost "-DBOOST_FORCE_BUILD:BOOL=$FORCE_BUILD";
+		build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     wcstools)
         echo "[`date`] Selected package WCSTOOLS"
-	build_package wcstools external/wcstools
+		build_package wcstools external/wcstools
     ;;
     wget)
         echo "[`date`] Selected package WGET"
-	build_package wget external/wget "-DWGET_FORCE_BUILD:BOOL=$FORCE_BUILD";
+		build_package wget external/wget "-DWGET_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     zlib)
         echo "[`date`] Selected package ZLIB"
-	build_package zlib external/zlib "-DZLIB_FORCE_BUILD:BOOL=$FORCE_BUILD";
+		build_package zlib external/zlib "-DZLIB_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     ## --------------------------------------------------------------------------
     ## --- USG software packages ------------------------------------------------
@@ -525,47 +532,47 @@ case $param_packageName in
     dal)
         ## external packages
         echo "[`date`] Processing required packages ..."
-	$basedir/build.sh cmake
-	cd $basedir; ./build.sh bison
-	cd $basedir; ./build.sh flex
-	cd $basedir; ./build.sh casacore
-	cd $basedir; ./build.sh plplot
-	cd $basedir; ./build.sh python
-	## USG packages
-	echo "[`date`] Building Data Access Library ..."
-	build_package dal src/DAL
-	## Post-installation testing
-	echo ""
-	echo "------------------------------------------------------------";
-	echo ""
-	echo "[`date`] To test the DAL installation run:"
-	echo ""
-	echo "  cd $basedir/dal; ctest"
-	echo ""
-	echo "------------------------------------------------------------";
-	echo ""
+		$basedir/build.sh cmake
+		cd $basedir; ./build.sh bison
+		cd $basedir; ./build.sh flex
+		cd $basedir; ./build.sh casacore
+		cd $basedir; ./build.sh plplot
+		cd $basedir; ./build.sh python
+		## USG packages
+		echo "[`date`] Building Data Access Library ..."
+		build_package dal src/DAL
+		## Post-installation testing
+		echo ""
+		echo "------------------------------------------------------------";
+		echo ""
+		echo "[`date`] To test the DAL installation run:"
+		echo ""
+		echo "  cd $basedir/dal; ctest"
+		echo ""
+		echo "------------------------------------------------------------";
+		echo ""
     ;;
     cr)
         echo "[`date`] Processing packages required for CR-Tools ..."
-	cd $basedir; ./build.sh dal
-	cd $basedir; ./build.sh startools
-	cd $basedir; ./build.sh mathgl
-	echo "[`date`] Building CR-Tools package ..."
-	build_package cr src/CR-Tools;
+		cd $basedir; ./build.sh dal
+		cd $basedir; ./build.sh startools
+		cd $basedir; ./build.sh mathgl
+		echo "[`date`] Building CR-Tools package ..."
+		build_package cr src/CR-Tools;
     ;;
     contrib)
-	echo "[`date`] Building packages and tools in contrib ..."
-	## required packages
-	cd $basedir; ./build.sh dal
-	## contrib
-	build_package contrib src/contrib;
+		echo "[`date`] Building packages and tools in contrib ..."
+		## required packages
+		cd $basedir; ./build.sh dal
+		## contrib
+		build_package contrib src/contrib;
     ;;
     bdsm)
         echo "[`date`] Processing packages required for BDSM ..."
-	cd $basedir; ./build.sh wcslib
-	cd $basedir; ./build.sh cfitsio
+		cd $basedir; ./build.sh wcslib
+		cd $basedir; ./build.sh cfitsio
         echo "[`date`] Building BDSM package ..."
-	build_package bdsm src/BDSM;
+		build_package bdsm src/BDSM;
     ;;
     ## --------------------------------------------------------------------------
     ## --- General testing of environment ---------------------------------------

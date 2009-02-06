@@ -18,7 +18,7 @@ set (WCSLIB_VERSION "${WCSLIB_VERSION_MAJOR}.${WCSLIB_VERSION_MINOR}")
 ## -----------------------------------------------------------------------------
 ## User defined build/install options
 
-option (WCSLIB_PYTHON_WRAPPER    "Generate Python wrapper for WCSLIB?"  NO  )
+option (WCSLIB_PYTHON_WRAPPER    "Generate Python wrapper for WCSLIB?"  YES )
 option (WCSLIB_VERBOSE_CONFIGURE "Verbose output during configuration?" NO  )
 option (WCSLIB_FORCE_BUILD       "Force rebuild and local installation" NO  )
 option (WCSLIB_ENABLE_TESTING    "Enable building and running tests?"   YES )
