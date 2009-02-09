@@ -102,7 +102,8 @@ namespace CR {  // Namespace CR -- begin
   
   void SkymapQuantity::copy (SkymapQuantity const &other)
   {
-    quantity_p = other.quantity_p;
+    coordType_p = other.coordType_p;
+    quantity_p  = other.quantity_p;
   }
   
   // ==============================================================================

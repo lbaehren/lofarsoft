@@ -223,6 +223,7 @@ int test_Beamformer ()
     GeomWeight weight (phase);
     //
     Beamformer bf (weight);
+    bf.setSkymapType (CR::SkymapQuantity::TIME_CC);
     cout << "--> original object:" << endl;
     bf.summary();
     //

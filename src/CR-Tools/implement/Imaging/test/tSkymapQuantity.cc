@@ -73,6 +73,20 @@ int test_constructors ()
     nofFailedTests++;
   }
   
+  std::cout << "[3] Testing copy constructor ..." << std::endl;
+  try {
+    std::cout << "--> creating original object ..." << std::endl;
+    SkymapQuantity quant1 (SkymapQuantity::TIME_CC);
+    quant1.summary(); 
+    //
+    std::cout << "--> creating new object as copy ..." << std::endl;
+    SkymapQuantity quant2 (quant1);
+    quant2.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 

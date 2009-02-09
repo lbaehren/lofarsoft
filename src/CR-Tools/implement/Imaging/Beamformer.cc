@@ -220,8 +220,6 @@ namespace CR { // Namespace CR -- begin
     IPosition shape_of_weights = GeomWeight::shape();
     int blocksize              = (shape_of_weights(0)-1)*2;
 
-    std::cout << "[Beamformer::setSkymapType]" << std::endl;
-    
     switch (skymapType.type()) {
     case SkymapQuantity::FREQ_FIELD:
       std::cerr << "[Beamformer::setSkymapType]" << std::endl;
