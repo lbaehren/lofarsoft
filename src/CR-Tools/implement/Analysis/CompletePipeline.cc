@@ -1110,10 +1110,8 @@ namespace CR { // Namespace CR -- begin
       // Create a new matrix to store only the selected antennas
       Matrix<Double> yValuesA;
       yValuesA.resize(yValues.nrow(), ntrue(antennaSelection));
-      for (unsigned int i = 0; i < antennaSelection.nelements(); i++)
-      {
-          if (antennaSelection(i))
-          {
+      for (unsigned int i = 0; i < antennaSelection.nelements(); i++) {
+          if (antennaSelection(i)) {
               for (unsigned int k = 0; k < yValues.nrow(); k++)
                   yValuesA(k,counta) = yValues(k,i);
               counta++;
@@ -1121,12 +1119,11 @@ namespace CR { // Namespace CR -- begin
       }
 
       // Calculate the median power values
-      for (unsigned int i=0; i<yValuesA.nrow(); i++)
-      {
+      for (unsigned int i=0; i<yValuesA.nrow(); i++) {
           medianspec[i]=median(yValuesA.row(i));
       }
 
-      plotfilename = filename + "-meadian.ps";
+      plotfilename = filename + "-median.ps";
       //alternative plotfilename
       //plotfilename = gtlabel.str() + ".ps";
 
@@ -1150,10 +1147,6 @@ namespace CR { // Namespace CR -- begin
       // Add filename to list of created plots
       plotlist.push_back(plotfilename);
       // finished with creating the median spectrum
-
-
-
-
 
 
       // Make the plots (either all antennas together or seperated)

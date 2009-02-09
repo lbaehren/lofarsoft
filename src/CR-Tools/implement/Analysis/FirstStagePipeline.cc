@@ -182,19 +182,30 @@ namespace CR { // Namespace CR -- begin
  	     << "does not equal length of frequency axis (" << freqVals.size() <<") !" << endl;
       };
 
-       // create an array with a supression factor for frequencies outside of the analysis band
-       const DComplex supressionFactor(1e-6,0.); // supression factor for frequencies outside the band
-       for (i=0; i < fftlen; ++i) {
-         if ( (freqVals(i) < startFreq_p) || (freqVals(i) > stopFreq_p) ) {
-           band(i) = supressionFactor;
-         } else {
-           band(i) = DComplex(1.,0.);
-         }
-       }
-       if (verbose) {
-         cout << "FirstStagePipeline::setCalibration: " << "Frequency band for analysis: " 
-              << startFreq_p << " Hz to " << stopFreq_p << " Hz." << endl;
-       }
+
+      // create a Hanning filter to supress frequencies outside of the used band
+      const double supressionFactor(1e-6); // supression factor for frequencies outside the band
+      Vector<Double> supressionVector(fftlen, supressionFactor);
+      // get number of samples in the band and the minimum of either before or after the band
+      uInt rise = min(ntrue(dr->frequencyValues() < startFreq_p), ntrue(dr->frequencyValues() > stopFreq_p));
+      uInt width = ntrue( (dr->frequencyValues() >= startFreq_p) && (dr->frequencyValues() <= stopFreq_p));
+      // rise should be a certain maximum of the filter width
+      // in this case only twice this maximum of the band has no supression (i.e. HanningFilter = 1)
+      const double maximalRisePart = 1./4.;
+      if (rise > width*maximalRisePart)
+        rise = trunc(static_cast<double>(width)*maximalRisePart);
+
+      // create hanning filter with an effecitve bandwith = wanted band width
+      HanningFilter<Double> hann(width+2*rise, (0.5+supressionFactor/2), width-2*rise);
+
+      // the supression starts #rise samples before the start frequency
+      supressionVector(Slice(ntrue(dr->frequencyValues() < startFreq_p)-rise, width+2*rise)) = hann.weights();
+      convertArray(band,supressionVector);	// convert from double to complex
+      if (verbose) {
+        cout << "FirstStagePipeline::setCalibration: " << "Frequency band for analysis: " 
+             << startFreq_p << " Hz to " << stopFreq_p << " Hz." << endl;
+      }
+
 
       for (i=0; i<nAnt ; i++){
         // Get electrical gain if switched on (otherwise set it to 1)
