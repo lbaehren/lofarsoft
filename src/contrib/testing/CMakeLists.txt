@@ -15,13 +15,19 @@ if (HAVE_CASACORE)
     casacoreMatrixAccess03
     casacoreMatrixAccess04
     casacoreMeasures
+    casacoreImages
     )
 
   foreach (src ${tests})
     ## compiler instructions
     add_executable (${src} ${src}.cc)
     ## linker instructions
-    target_link_libraries (${src} ${CASA_LIBRARIES})
+    target_link_libraries (${src}
+      ${CASA_LIBRARIES}
+      ${WCSLIB_LIBRARIES}
+      ${LAPACK_LIBRARIES}
+      ${HDF5_LIBRARIES}
+      )
     ## testing
     add_test (${src} ${src})
   endforeach (src)
