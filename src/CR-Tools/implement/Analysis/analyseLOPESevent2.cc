@@ -237,9 +237,9 @@ namespace CR { // Namespace CR -- begin
       // Generate spectra
       if (generateSpectra) {
         if (SinglePlots)
-          CompleteBeamPipe_p->plotSpectra(PlotPrefix+"-spec", lev_p, AntennaSelection, true);
+          CompleteBeamPipe_p->plotSpectra(PlotPrefix+"-spec", beamformDR_p, AntennaSelection, true);
         else
-          CompleteBeamPipe_p->plotSpectra(PlotPrefix + "-spec-all", lev_p, AntennaSelection, false);
+          CompleteBeamPipe_p->plotSpectra(PlotPrefix + "-spec-all", beamformDR_p, AntennaSelection, false);
       }
 
       // output of antnenna to core distances in shower coordinates, if requested
