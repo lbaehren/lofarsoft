@@ -194,6 +194,11 @@ void copycast_vec(void *ptr, vector<S> *sp, Vector_Selector *vs) {
 
 /* Functions that provide textual output for some of the enum types we use here */
 
+char* datapointer_txt(Data* d){
+  if (isDataObject(d)) {return (d->getName(true)).c_str();}
+  else return mycast<HString>(reinterpret_cast<HPointer>(d)).c_str();
+}
+
 char* direction_txt(DIRECTION dir){
   char* DIRECTION_TXT[DIR_NONE+1]={"DIR_FROM", "DIR_TO", "DIR_BOTH","DIR_NONE"};
   if (dir <= DIR_NONE && dir >=0) {return DIRECTION_TXT[dir];} else {return "UNKNOWN_DIRECTION";};
@@ -285,7 +290,10 @@ void vec_append(vector<T> &v1,const vector<T> &v2){
 
 /*!\brief Copying the first vector into the second, just retaining
    unique elements nut not sorting them (each element exists only
-   once) */
+   once)
+
+   ATTENTION!! That function should be slightly faster than
+   vec_unique, but due to a bug doesn't work yet!!!*/
 
 template <typename T>
 void vec_unique_copy(const vector<T> &v1,vector<T> &v2){
@@ -373,8 +381,7 @@ HString vectostring(vector<T> v,address maxlen=8){
 
 template <class T>
 void printvec_noendl(vector<T> v,address maxlen=8){
-  int i;
-  int s;
+  int i;  int s;
   s=v.size(); 
   if (s==0) {return;};
   if (s<=maxlen+1) {
@@ -1566,7 +1573,7 @@ objectid Data::setLink(Data *d,
   }
   if (dir == DIR_FROM || dir == DIR_BOTH) {
     if (otherport<0) {
-      if (thisport>=0  & thisport < data.to.size()) {
+      if (thisport>=0  && thisport < data.from.size()) {
 	otherport=(d->setLink(this, dir_type,DIR_TO,thisport));
       } else {
 	otherport=(d->setLink(this, dir_type,DIR_TO,data.from.size()));
@@ -1575,9 +1582,7 @@ objectid Data::setLink(Data *d,
     rd->direction=dir_type; rd->ref=d; rd->port=otherport; rd->type=d->getType();
     rd->name=d->getName(); rd->oid=d->getOid(); 
     rd->mod=newmod;
-    //    if (dir_type==PUSH) {rd->mod=1;} else {rd->mod=0;};
-    //    D2BG("setLink: mod=" << rd->mod);
-    if (thisport>=0 & thisport < data.from.size()) {
+    if (thisport>=0 && thisport < data.from.size()) {
       D2BG("setLink: using thisport len(mapfrom)="<<data.mapfrom.size()<<" removing name=" <<data.from[thisport]->name);
       data.mapfrom.erase(data.mapfrom.find(data.from[thisport]->name));
       D2BG("setLink: using thisport len(mapfrom)="<<data.mapfrom.size()<<" adding name="<< rd->name);
@@ -1594,7 +1599,7 @@ objectid Data::setLink(Data *d,
     
   } else if (dir == DIR_TO || dir == DIR_BOTH) {
     if (otherport<0) {
-      if (thisport>=0  & thisport < data.to.size()) {
+      if (thisport>=0  && thisport < data.to.size()) {
 	otherport=(d->setLink(this, dir_type,DIR_FROM,thisport));
       } else {
 	otherport=(d->setLink(this, dir_type,DIR_FROM,data.to.size()));
@@ -1603,8 +1608,6 @@ objectid Data::setLink(Data *d,
     rd->direction=dir_type; rd->ref=d; rd->port=otherport; rd->mod=newmod; rd->type=d->getType();
     rd->name=d->getName(); rd->oid=d->getOid(); 
     rd->mod=newmod;
-    //    if (dir_type==PULL) {rd->mod=1;} else {rd->mod=0;};
-    //D2BG("setLink: mod=" << rd->mod << " rd=" << rd);
     if (thisport>=0 & thisport < data.to.size()) {
       D2BG("setLink: using thisport len(mapto)="<<data.mapto.size()<<" removing name=" <<data.to[thisport]->name);
       data.mapto.erase(data.mapto.find(data.to[thisport]->name));
@@ -1746,9 +1749,13 @@ Data& Data::create(HString name){
 
 
 /*!
-\brief Inserts an object between the current object (in TO direction) and the neighbouring object. 
+\brief Inserts an object  in TO direction between this object and a neighbouring object.
 
+ If the neighbouring object is an immediate neighbour, it will not be
+ any more ofter this operation. If it is further away, simple links
+ will be created between this->d->neighbour (and hence it may get a bit closer).
  */
+
 Data& Data::insert(Data & d, Data & neighbour){
   DBG("insert(d=" << d.getName(true) << ", neighbour=" << neighbour.getName(true) <<"): Start");
   map<HString,int>::iterator it=data.mapto.find(neighbour.getName());
@@ -1760,10 +1767,10 @@ Data& Data::insert(Data & d, Data & neighbour){
     neighbour.setLink(&d,rd->direction,DIR_FROM,-1,rd->port);
     //    d.touch();
     return d;
-  }
-  else {
-    ERROR("data.to(name=" << d.getName() <<", neighbour=" << neighbour.getName(true) <<") name=" << getName(true) <<": Unknown neighbour!"); 
-    return NullObject;
+  } else {
+    DBG("insert(non-neighbour: d=" << d.getName(true) << ", neighbour=" << neighbour.getName(true) <<")");
+    setLink(&d,data.defdir,DIR_TO);
+    neighbour.setLink(&d,data.defdir,DIR_FROM);
   };
 }
 
@@ -1876,11 +1883,6 @@ boost::python::handle<> Data::retrievePyQtObject() {
     return boost::python::handle<>(boost::python::borrowed(data.pyqt));
 }
 
-
-
-
-
-
 /*! \brief Store a reference to a python function in the object.
 
   The python function is used to run user defined functions
@@ -1922,12 +1924,51 @@ boost::python::handle<> Data::retrievePyFuncObject() {
 }
 
 
+/*! \brief Store a list of python object reference in the  Data buffer.
 
-
-/*! \brief Store a pyhton object reference in the  Data buffer.
-
-Used to store the pointer to a Python object. The Python object can be retrieved with pyretrieve.
+Used to store the pointer to Python objects. The Python object can be retrieved with getPyList.
  */
+
+Data& Data::putPyList(boost::python::object& obj) {
+  boost::python::list lst = boost::python::extract<boost::python::list>(obj);
+  address i,l=boost::python::extract<HInteger>(lst.attr("__len__")());
+  vector<HPointer> vp;
+  vp.reserve(l);
+  PyObject* pyobj;
+  boost::python::object oitem;
+  for (i=0;i<l;++i) {
+      oitem=lst[i];
+      vp.push_back(reinterpret_cast<HPointer>(oitem.ptr()));
+       }
+  put(vp);
+  return *this;
+}
+
+/*! \brief Retrieve a list of python object references from the  Data buffer.
+
+Used to store the pointer to Python objects. The Python object can be stored with putPyList.
+ */
+
+boost::python::handle<> Data::getPyList() {
+  boost::python::list lst;
+  vector<HPointer> vp;
+  get(vp);
+  address i,l=vp.size();
+  PyObject* pyobj;
+  boost::python::object obj;
+  for (i=0;i<l;++i) {
+      pyobj=reinterpret_cast<PyObject*>(vp[i]);
+      obj=boost::python::object(boost::python::handle<>(boost::python::borrowed(pyobj)));
+      lst.append(obj);
+    };
+    return boost::python::handle<>(boost::python::borrowed(lst.ptr()));
+}
+
+/*! \brief Store a python object reference in the  Data buffer.
+
+Used to store the pointer to a Python object. The Python object can be retrieved with getPy().
+ */
+
 Data& Data::putPy(PyObject* pyobj) {
   vector<HPointer> vp(1,reinterpret_cast<HPointer>(pyobj));
   put(vp);
@@ -2258,6 +2299,8 @@ vector<Data*> Data::find_relatives(HString name, vector<T> &elems, DIRECTION dir
       n_size=neighbours.size();
     };
   };
+  //result=vec_unique(result); - This is done in Find again ...
+  D2BG2("find_relatives: result vector = "); D2BG3(printvec_txt(result,&datapointer_txt)); 
   return result;
 }
 
@@ -2386,9 +2429,9 @@ vector<Data*> Data::Find(HString s, const int rpos) {
   if (this==&NullObject) return vec_in;
 
   parse_record_name_to_vector(s, names, dirs);
-  DBG("Find: names=" << s); 
-  D2BG2("names="); D2BG3(printvec(names));
-  D2BG2("Directions="); D2BG3(printvec_txt(dirs,&direction_txt)); 
+  DBG("Find(s=" << s << ", rpos=" << rpos <<") [" << getName(true) << "]: Start"); 
+  D2BG2("Find(s=" << s << ", rpos=" << rpos <<") [" << getName(true) << "]: names="); D2BG3(printvec(names));
+  D2BG2("Find(s=" << s << ", rpos=" << rpos <<") [" << getName(true) << "]: Directions="); D2BG3(printvec_txt(dirs,&direction_txt)); 
   objectid i,beg=0,end=names.size()-1;
   objectid j,n;
   vec_in.push_back(this); n=1;
@@ -2400,20 +2443,19 @@ vector<Data*> Data::Find(HString s, const int rpos) {
     //e.g. "Antenna=0,1,2". selection=trueif that is the case and the
     //elements after '=' are in elems
     parse_record_selection_to_vector(names[i],name,elems);
-    D2BG2("parse_record_selection_to_vector: names[" << i << "]=" << names[i] << " selection=" << tf_txt(selection) << " name=" << name << " elems="); 
+    D2BG2("Find(s=" << s << ", rpos=" << rpos <<") [" << getName(true) << "]: parse_record_selection_to_vector: names[" << i << "]=" << names[i] << " selection=" << tf_txt(selection) << " name=" << name << " elems="); 
     D2BG3(printvec(elems));
     vec_out.clear(); 
     for (j=0;j<n;j++) {
-      D2BG("pre_append : " << "j=" <<j << " n=" << n << " vec_out.size()=" << vec_out.size());
+      D2BG("Find(s=" << s << ", rpos=" << rpos <<") [" << getName(true) << "]: pre_append : " << "j=" <<j << " n=" << n << " vec_out.size()=" << vec_out.size());
       vec_append(vec_out,vec_in[j]->find_relatives(name,elems,dirs[i]));
-      D2BG("post_append: " << "j=" <<j << " n=" << n << " vec_out.size()=" << vec_out.size());
+      D2BG("Find(s=" << s << ", rpos=" << rpos <<") [" << getName(true) << "]: post_append: " << "j=" <<j << " n=" << n << " vec_out.size()=" << vec_out.size());
     };
     vec_in=vec_out; n=vec_in.size();
-    D2BG("n=" << n << "vec_in.size()=" << vec_in.size());
-    D2BG2("vec_in="); D2BG3(printvec(vec_in));
+    D2BG("Find(s=" << s << ", rpos=" << rpos <<") [" << getName(true) << "]: n=" << n << ", vec_in.size()=" << vec_in.size());
+    D2BG2("Find(s=" << s << ", rpos=" << rpos <<") [" << getName(true) << "]: vec_in="); D2BG3(printvec(vec_in));
   };
-  //  return vec_unique(vec_in);
-  return vec_in;
+  return vec_unique(vec_in);
 }
 
 //Sequentially go through the list  of names and find the corresponding name in the net, one after the other.

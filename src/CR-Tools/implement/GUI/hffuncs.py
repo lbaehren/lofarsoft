@@ -9,34 +9,42 @@ verbose = False
 class empty():
     def __init__(self): return
 
-
 class hffunc():
     def hfstartup(self,d):
         if verbose: print "Startup.", self.__doc__
         d.Silent(True)
         self.data=d
         self.pars=[]
+        self.res={}
         self.obj=empty()
         self.var=empty()
         ret=self.startup(d)
         self.parnames=StringVec()
         self.parnames.append(d.getName())
+        self.resnames=StringVec()
+        self.resnames.append(d.getName())
         if len(self.pars)>1:
             for par in self.pars:
                 self.parnames.append(par.objname)
+        if len(self.res)>1:
+            for res in self.res:
+                self.resnames.append(self.res[res].objname)
         #Check for paramter object and create it if necessary
             pobj=d["'Parameters="+'"'+self.parnames[0]+'"']
             if type(pobj)!=Data:
                 pobj=d.newObject("'Parameters")
                 pobj.setNetLevel(100)
                 pobj.put_silent(self.parnames)            
-        self.getParameters()
+        self.getParameters() #create missing parameters objects if not yet present deeper down the net.
+        self.setResults() ## make sure result Objects exist.
         d.Silent(False)
         self.initialize()
         return ret
     def hfprocess(self,d):
         self.getParameters()
-        if verbose: print "Process.", self.__doc__
+        if verbose: 
+            print "Process.", self.__doc__
+            self.data.printStatus(True)
         return self.process(d)
     def hfcleanup(self):
         if verbose: print "Cleanup.", self.__doc__
@@ -58,58 +66,100 @@ class hffunc():
     def setParameter(self,parname,defval,prefix="'",objname=""):
         par=funcparameters(parname,defval,prefix,objname)
         self.pars.append(par)
-#WORK IN PROGRESS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    def getParameterObject(self): #and create it if necessary
+    def setResult(self,parname,defval,prefix="",objname=""):
+        par=funcparameters(parname,defval,prefix,objname)
+        self.res[parname]=par
+    def putParameter(self,parname,val,prefix="'",objname=""):
+        exec("self."+parname+"=val") 
+        if (objname==""): objname=parname
+        obj=self.getParameterObject(prefix+objname,val)
+        obj.put_silent(val)
+    def putResult(self,parname,val):
+        exec("self."+parname+"=val") 
+        res=self.res[parname]
+        obj=self.getResultObject(res.objname,val)
+        obj.put_silent(val)
+    def getParameterObject(self,name,defval): 
+        obj=self.data[self.getParametersObjectName()+name]
+        #First search Object linked to Parameter object
+        if obj.notFound():
+        #If not present search through the entire net
+            obj=self.data[name]
+        #Still not found? Then create it attached to the Parameter Object
+            if obj.notFound(): 
+                pobj=self.getParametersObject() # getPparameter object (and create if necessary)
+                obj=pobj.newObject(name)
+                obj.setNetLevel(100)
+                obj.put_silent(defval)
+        return obj
+    def getResultObject(self,name,defval): 
+        obj=self.data[self.getResultsObjectName()+name]
+        #First search Object linked to Results object
+        if obj.notFound():
+        #If not present search through the entire net
+            obj=self.data[name]
+        #Still not found? Then create it attached to the Results collector Object
+            if obj.notFound(): 
+                robj=self.getResultsObject() # get Results collector object (and create if necessary)
+                obj=self.data.new(name)
+                obj ^ (self.data,robj) # insert result object between this and he result collector object
+                obj.setNetLevel(100)
+                obj.put_silent(defval)
+        return obj
+    def getParametersObjectName(self): 
+        return "'Parameters="+self.parnames[0]
+    def getResultsObjectName(self): 
+        return ":Results="+self.resnames[0]
+    def getParametersObject(self): #and create it if necessary
         #Check for paramter object which belongs to this object and create it if necessary
-        pobj=self.data["'Parameters="+self.parnames[0]]
-        if type(pobj)!=Data:
+        pobj=self.data[self.getParametersObjectName()]
+        if pobj.notFound():
             pobj=self.data.newObject("'Parameters")
             pobj.setNetLevel(100)
-            pobj.put_silent(self.parnames)            
-            obj=pobj[par.objname]
-        #First search Object linked to Parameter object
-            if type(obj)!=Data: 
-                #If not present search through the entire net
-                obj=self.data[par.objname]
-        #Still not found? Then create it attached to the Parameter Object
-                if type(obj)!=Data: 
-                    obj=pobj.newObject(par.objname)
-                    obj.setNetLevel(100)
-                    obj.put_silent(par.defval)
-        #Finally we are ready to set the local variable.
-            if par.type=="Py":
-                if obj.getI()==0: 
-                    exec("self.obj."+par.parname+"=None")
-                    return 0
-            exec("self."+par.parname+"=obj.get"+par.type+"()") 
-            exec("self.obj."+par.parname+"=obj") 
-        return 0
+            pobj.put_silent(self.parnames)
+        return pobj
+    def getResultsObject(self): #and create it if necessary
+        #Check for results identifier object which belongs to this object and create it if necessary
+        obj=self.data[self.getResultsObjectName()]
+        if obj.notFound():
+            obj=self.data.newObject("Results")
+            obj.setNetLevel(100)
+            obj.put_silent(self.resnames)
+        return obj
     def getParameters(self):
         if len(self.pars)>0:
         #Check for paramter object which belongs to this object and create it if necessary
-            pobj=self.data["'Parameters="+self.parnames[0]]
-            if type(pobj)!=Data:
-                pobj=self.data.newObject("'Parameters")
-                pobj.setNetLevel(100)
-                pobj.put_silent(self.parnames)            
-        for par in self.pars:
-            obj=pobj[par.objname]
-        #First search Object linked to Parameter object
-            if type(obj)!=Data: 
-                #If not present search through the entire net
-                obj=self.data[par.objname]
-        #Still not found? Then create it attached to the Parameter Object
-                if type(obj)!=Data: 
-                    obj=pobj.newObject(par.objname)
-                    obj.setNetLevel(100)
-                    obj.put_silent(par.defval)
+            for par in self.pars:
+                obj=self.getParameterObject(par.objname,par.defval)
+                exec("self.obj."+par.parname+"=obj") 
         #Finally we are ready to set the local variable.
-            if par.type=="Py":
-                if obj.getI()==0: 
-                    exec("self.obj."+par.parname+"=None")
-                    return 0
-            exec("self."+par.parname+"=obj.get"+par.type+"()") 
-            exec("self.obj."+par.parname+"=obj") 
+                if par.type=="Py":
+                    if obj.getI()==0: 
+                        exec("self."+par.parname+"=None")
+                        if verbose: 
+                            exec("print 'getParameters("+self.data.getName(True)+"): self.'+par.parname+'=[None]")
+                        return 0
+                elif par.type=="PyList":
+                    if verbose: 
+                        print "PyList:",par.parname
+                    if obj.getI()==0: 
+                        exec("self."+par.parname+"=[None]")
+                        if verbose: 
+                            exec("print 'getParameters("+self.data.getName(True)+"): self.'+par.parname+'=[None]")
+                        return 0
+                if verbose: print par.parname
+                exec("self."+par.parname+"=obj.get"+par.type+"()") 
+                if verbose: 
+                    exec("print 'getParameters("+self.data.getName(True)+"): self.'+par.parname+'=obj.get'+par.type+'(): =',"+"self."+par.parname)
+        return 0
+    def setResults(self):
+        if len(self.res)>0:
+        #Check for paramter object which belongs to this object and create it if necessary
+            for name in self.res:
+                res=self.res[name]
+                exec("self."+res.parname+"=res.defval")
+                obj=self.getResultObject(res.objname,res.defval)
+                exec("self.obj."+res.parname+"=obj") 
         return 0
 
 
@@ -126,6 +176,7 @@ class funcparameters:
         elif type(defval)==type(0.):  self.type="N"
         elif type(defval)==type(0j):  self.type="C"
         elif defval==None:  self.type="Py"
+        elif defval==[None]:  self.type="PyList"
         elif type(defval)==type("0"):  self.type="S"
         else: 
             print "Error: funcparameters - unknown type", defval
@@ -144,14 +195,19 @@ class hfGraphObject(hffunc):
     def cleanup(self):
         return 0
 
-class hfPlotData(hffunc):
-    "hfPlotData: Plots a single dataobject into a Graphobject/Panel."
+class hfGraphDataBuffer(hffunc):
+    "hfGraphDataBuffer: Stores the data that is to be plotted in an mglData Object."
     def startup(self,d):
-        if verbose: print "Startup hfPlotData"
-        self.setParameter("Color","b")
-        self.setParameter("GraphObject",None)
+        if verbose: print "Startup hfGraphDataBuffer"
+        self.setResult("xminval",-1)
+        self.setResult("xmaxval",1)
+        self.setResult("yminval",-1)
+        self.setResult("ymaxval",1)
+        self.setResult("zminval",-1)
+        self.setResult("zmaxval",1)
         return 0
     def initialize(self):
+        if verbose: print "Initialize hfGraphDataBuffer"
         self.yvec=FloatVec() #create local scratch vectors
         self.xvec=FloatVec()
         self.zvec=FloatVec()
@@ -159,25 +215,22 @@ class hfPlotData(hffunc):
         self.ydat=mglData()
         self.zdat=mglData()
     def process(self,d):
-        if verbose: print "Process hfPlotData user function"
-        self.xvec=self.xvec[0:0]  # delete the local scratch vectors
-        self.yvec=self.yvec[0:0]
-        self.zvec=self.zvec[0:0]
+        if verbose: print "Process hfGraphDataBuffer user function"
         naxis=0;
-        axis=d["'yAxis'Data"]
+        axis=self.data["'yAxis'Data"]
         if not type(axis)==Data: 
-            print "hfPlotData: yAxis object not found."
+            print "hfGraphDataBuffer: yAxis object not found."
             return 1
         naxis+=1
         axis.get(self.yvec)
-        axis=d["'xAxis'Data"]
+        axis=self.data["'xAxis'Data"]
         if type(axis)==Data:
             naxis+=1;
             axis.get(self.xvec) #Use Vector selector in the future ...!
             if len(self.xvec)>len(self.yvec): self.xvec=self.xvec[0:len(self.yvec)]
             if len(self.xvec)<len(self.yvec): self.yvec=self.yvec[0:len(self.xvec)]
             if verbose: print "self.xdat.nx=",self.xdat.nx," max=",self.xdat.Maximal()
-            axis=d["'zAxis'Data"]
+            axis=self.data["'zAxis'Data"]
             if type(axis)==Data:
                 naxis+=1;
                 axis.get(self.zvec)
@@ -187,13 +240,49 @@ class hfPlotData(hffunc):
         self.ydat.SetVec(self.yvec)
         if verbose: print "naxis=",naxis
         if verbose: print "self.ydat.ny=",self.ydat.ny," max=",self.ydat.Maximal()
-        if naxis<=2: self.GraphObject.Plot(self.xdat,self.ydat,self.Color)
-        if naxis==3: self.GraphObject.Plot(self.xdat,self.ydat,self.zdat,self.Color)
+        self.putResult("xminval",self.xdat.Minimal())
+        self.putResult("xmaxval",self.xdat.Maximal())
+        self.putResult("yminval",self.ydat.Minimal())
+        self.putResult("ymaxval",self.ydat.Maximal())
+        self.xvec=self.xvec[0:0]
+        self.yvec=self.yvec[0:0]
+        self.zvec=self.zvec[0:0]
+        if verbose: print "GraphDataBuffer: naxis=",naxis
+        if naxis<=2: 
+            self.data.putPyList_silent([self.xdat,self.ydat])
+        if naxis==3: 
+            self.data.putPyList_silent([self.xdat,self.ydat,self.zdat])
+            self.putResult("zminval",self.zdat.Minimal())
+            self.putResult("zmaxval",self.zdat.Maximal())
         return 0
     def cleanup(self):
         return 0
 
-#For debugging: type self=d["Antenna=0:PlotData"].PyFunc() to retrieve that function
+#self=d["Antenna=0:GraphDataBuffer"].PyFunc() 
+
+class hfPlotData(hffunc):
+    "hfPlotData: Plots a single data set in the plotpanel."
+    def startup(self,d):
+        if verbose: print "Startup hfPlotData"
+        self.setParameter("Color","b")
+        self.setParameter("GraphObject",None)
+        self.setParameter("GraphDataBuffer",[None])
+        return 0
+    def process(self,d):
+        if verbose: print "Process hfPlotData user function"
+        naxis=len(self.GraphDataBuffer);
+        if verbose: print "self.GraphDataBuffer=",self.GraphDataBuffer
+        if (self.GraphObject==None) | (self.GraphDataBuffer==[None]): return
+        if naxis==1: self.GraphObject.Plot(self.GraphDataBuffer[0],self.Color) ## shouldn't happen
+        if naxis==2: self.GraphObject.Plot(self.GraphDataBuffer[0],self.GraphDataBuffer[1],self.Color)
+        elif naxis==3: self.GraphObject.Plot(self.GraphDataBuffer[0],self.GraphDataBuffer[1],self.GraphDataBuffer[2],self.Color)
+        return 0
+    def cleanup(self):
+        return 0
+
+#For debugging: type 
+#self=d["Antenna=0:PlotData"].PyFunc() 
+#to retrieve that function
 
 class hfPlotPanel(hffunc):
     "hfPlotPanel: Plots a panel and plots all linked PlotData Objects into it."
@@ -204,14 +293,62 @@ class hfPlotPanel(hffunc):
         self.setParameter("xmax",1024.)
         self.setParameter("ymin",-70.)
         self.setParameter("ymax",70.)
+        self.setParameter("yscale",0)
+        self.setParameter("yscalestep",0.05)
+        self.setParameter("xscale",0)
+        self.setParameter("xscalestep",0.05)
+        self.setParameter("xshift",0)
+        self.setParameter("yshift",0)
+        self.setParameter("XAuto",int(True))
+        self.setParameter("YAuto",int(True))
         self.setParameter("yAxisLabel","y-Axis")
         self.setParameter("xAxisLabel","x-Axis")
+        self.setResult("xmin",0.)
+        self.setResult("xmax",1024.)
+        self.setResult("ymin",-70.)
+        self.setResult("ymax",70.)
         return 0
     def process(self,d):
         if verbose: print "Processing hfPlotPanel."
         if not type(self.GraphObject)==mglGraph:
             print "Error: PlotPanel - GraphObject not of type mglGraph!"
             return 1
+        xminval=min(toList(self.data["'Results=GraphDataBuffer'xminval"].val()))
+        xmaxval=max(toList(self.data["'Results=GraphDataBuffer'xmaxval"].val()))
+        if self.XAuto:
+            xmin=xminval
+            xmax=xmaxval
+            if verbose: print "PlotPanel: XAuto=True - xmin=",xmin,"xmax=",xmax
+        else: 
+            xmin=self.xmin
+            xmax=self.xmax
+        if (not (self.xscale==0 & self.xshift==0)):
+            delta=(xmax-xmin)
+            x0=xmin+delta/2+(xmaxval-xminval)/2.*(self.xshift/100.)
+            delta=delta*(1.0+self.xscalestep)**-self.xscale
+            xmin=x0-delta/2
+            xmax=x0+delta/2
+        self.putResult("xmin",xmin)
+        self.putResult("xmax",xmax)
+        yminval=min(toList(d["'Results=GraphDataBuffer'yminval"].val()))
+        ymaxval=max(toList(d["'Results=GraphDataBuffer'ymaxval"].val()))
+        if self.YAuto:
+            ymin=yminval
+            ymax=ymaxval
+            if verbose: print "PlotPanel: YAuto=True - ymin=",ymin,"ymax=",ymax
+            extra=(ymax-ymin)*0.1/2
+        else: 
+            ymin=self.ymin
+            ymax=self.ymax
+            extra=0
+        if (not (self.yscale==0 & self.yshift==0)):
+            delta=(ymax-ymin)
+            y0=ymin+delta/2+(ymaxval-yminval)/2.*(self.yshift/100.)
+            delta=delta*(1+self.yscalestep)**-self.yscale
+            ymin=y0-delta/2
+            ymax=y0+delta/2
+        self.putResult("ymin",ymin-extra)
+        self.putResult("ymax",ymax+extra)
         self.GraphObject.SetFontSize(5.)
         self.GraphObject.SetFontDef("rR:r")
         self.GraphObject.SetRanges(self.xmin,self.xmax,self.ymin,self.ymax)
@@ -219,7 +356,8 @@ class hfPlotPanel(hffunc):
         self.GraphObject.Box("g")
         self.GraphObject.Label("x",self.xAxisLabel,1)
         self.GraphObject.Label("y",self.yAxisLabel,1)
-        self.PlotData=d["'PlotData"]
+        if verbose: print "PlotPanel: plotted Box in Graphobject, calling PlotData"
+        self.PlotData=self.data["'PlotData"]
         if type(self.PlotData)==Data: 
             self.PlotData.update()
         elif type(self.PlotData)==DataList: 
@@ -232,10 +370,14 @@ class hfPlotPanel(hffunc):
         return 0
     def cleanup(self):
         return 0
+#For debugging: type 
+#self=d["Antenna=0:PlotPanel"].PyFunc() 
+#to retrieve that function
 
 class hfPlotWindow(hffunc):
     "hfPlotWindow: Plots multiple panels in one Window."
     def startup(self,d):
+        if verbose: print "PlotWindow - Startup"
         self.setParameter("Title","Draft!")
         self.setParameter("npanels",-1)
         self.setParameter("npanelsx",-1)
@@ -243,12 +385,13 @@ class hfPlotWindow(hffunc):
         self.setParameter("GraphObject",None)
         return 0
     def process(self,d):
+        if verbose: print "PlotWindow - Process"
         if not type(self.GraphObject)==mglGraph:
             print "Error: PlotWindow - GraphObject not of type mglGraph!"
             return 1
         self.GraphObject.Clf()
         self.GraphObject.Title(self.Title)
-        self.PlotPanel=d["'PlotPanel"]
+        self.PlotPanel=self.data["'PlotPanel"]
         if type(self.PlotPanel)==Data: 
             self.PlotPanel.update()
         elif type(self.PlotPanel)==DataList:
@@ -269,7 +412,7 @@ class hfPlotWindow(hffunc):
         else:
             print "Error: PlotWindow - PlotPanel not found."
             return 1
-        d.noMod(); d.putPy(self.GraphObject)
+        self.data.noMod(); self.data.putPy(self.GraphObject)
         return 0
     def cleanup(self):
         return 0
@@ -287,6 +430,7 @@ class hfQtPanel(hffunc):
         self.setParameter("GraphObject",None)
         return 0
     def initialize(self):
+        if verbose: print "QtPanel - initialize."
         "Called at the end of the startup routine. Will create the PlotWidget and insert it into the PlotWidget Object."
         if self.PlotWidget == None:
             self.PlotWidget=hfQtPlot()

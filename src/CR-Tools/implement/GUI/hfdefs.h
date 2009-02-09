@@ -30,6 +30,9 @@ extern int global_debuglevel;
 #include <casa/Exceptions/Error.h>
 
 #include <boost/python/class.hpp>
+#include <boost/python/object.hpp>
+#include <boost/python/list.hpp>
+#include <boost/python/extract.hpp>
 #include <boost/python/module.hpp>
 #include <boost/python/def.hpp>
 #include <boost/utility.hpp>

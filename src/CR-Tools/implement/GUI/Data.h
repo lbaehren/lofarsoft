@@ -457,6 +457,8 @@ class Data {
   template <class T>
     void putOne(objectid, T one);
 
+  boost::python::handle<> getPyList();
+  Data& putPyList(boost::python::object& obj);
   Data& putPy(PyObject* pyobj);
   Data& putPy_silent(PyObject* pyobj);
   boost::python::handle<> getPy();

@@ -259,8 +259,10 @@ BOOST_PYTHON_MODULE(libhfget)
       .def("__setitem__", Data_putOne_oid_C)
       .def("__setitem__", Data_putOne_oid_S)
 
-      .def("putPy", &Data::putPy,return_internal_reference<>())
+      .def("putPyList", &Data::putPyList,return_internal_reference<>())
+      .def("getPyList", &Data::getPyList)
       .def("putPy_silent", &Data::putPy_silent,return_internal_reference<>())
+      .def("putPy", &Data::putPy,return_internal_reference<>())
       .def("getPy", &Data::getPy)
 
       .def("storePyFunc", &Data::storePyFunc,return_internal_reference<>())

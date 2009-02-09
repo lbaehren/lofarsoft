@@ -1,8 +1,75 @@
+
+class hfPlotDataOld(hffunc):
+    "hfPlotDataOld: Plots a single dataobject into a Graphobject/Panel."
+    def startup(self,d):
+        if verbose: print "Startup hfPlotDataOld"
+        self.setParameter("Color","b")
+        self.setParameter("GraphObject",None)
+        return 0
+    def initialize(self):
+        if verbose: print "Initialize hfPlotDataOld"
+        self.yvec=FloatVec() #create local scratch vectors
+        self.xvec=FloatVec()
+        self.zvec=FloatVec()
+        self.xdat=mglData() # create local mglData vectors - better create method which does that directly (getmglData)
+        self.ydat=mglData()
+        self.zdat=mglData()
+    def process(self,d):
+        if verbose: print "Process hfPlotDataOld user function"
+        self.xvec=self.xvec[0:0]  # delete the local scratch vectors
+        self.yvec=self.yvec[0:0]
+        self.zvec=self.zvec[0:0]
+        naxis=0;
+        axis=d["'yAxis'Data"]
+        if not type(axis)==Data: 
+            print "hfPlotDataOld: yAxis object not found."
+            return 1
+        naxis+=1
+        axis.get(self.yvec)
+        axis=d["'xAxis'Data"]
+        if type(axis)==Data:
+            naxis+=1;
+            axis.get(self.xvec) #Use Vector selector in the future ...!
+            if len(self.xvec)>len(self.yvec): self.xvec=self.xvec[0:len(self.yvec)]
+            if len(self.xvec)<len(self.yvec): self.yvec=self.yvec[0:len(self.xvec)]
+            if verbose: print "self.xdat.nx=",self.xdat.nx," max=",self.xdat.Maximal()
+            axis=d["'zAxis'Data"]
+            if type(axis)==Data:
+                naxis+=1;
+                axis.get(self.zvec)
+                self.zdat.SetVec(self.zvec)
+        if naxis==1: self.xvec.extend(range(len(self.yvec)))
+        self.xdat.SetVec(self.xvec)
+        self.ydat.SetVec(self.yvec)
+        if verbose: print "naxis=",naxis
+        if verbose: print "self.ydat.ny=",self.ydat.ny," max=",self.ydat.Maximal()
+        if naxis<=2: self.GraphObject.Plot(self.xdat,self.ydat,self.Color)
+        self.putParameter("xmin",self.xdat.Minimal())
+        self.putParameter("xmax",self.xdat.Maximal())
+        self.putParameter("ymin",self.ydat.Minimal())
+        self.putParameter("ymax",self.ydat.Maximal())
+        if naxis==3: 
+            self.GraphObject.Plot(self.xdat,self.ydat,self.zdat,self.Color)
+            self.putParameter("zmin",self.zdat.Minimal())
+            self.putParameter("zmax",self.zdat.Maximal())
+        return 0
+    def cleanup(self):
+        return 0
+
+
+x=Data("Hi")
+t=x.newObject("TST")
+o=x.new("INS")
+o2=x.new("INS2")
+x.insert(o,t)
+
+
 class tst(list):
     def __getitem__(self,val):
         print type(val),val
 
 
+QtCore.QObject.connect(gui.loadfile,QtCore.SIGNAL("triggered()"),gui.hfLoad)
 
 obj=d["PlotWindow'npanels"]
 obj.connect(gui.npanels)

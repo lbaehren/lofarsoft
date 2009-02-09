@@ -375,7 +375,7 @@ bool test_data_object_ptr(Data * dp){
   if (dp!=NULL && dp!=&NullObject) {
     if ((*dp).magiccode==MAGICCODE) {return true;};
   };
-  ERROR("Error: Innvalid data object pointer.");
+  ERROR("Error: Invalid data object pointer.");
   return false;
 }
 
@@ -814,6 +814,8 @@ public:
     setParameter("Antenna", 0);
     setParameter("Blocksize", -1);
     setParameter("Block", 0);
+    setParameter("maxBlock", 63);
+    setParameter("maxBlocksize", 65536);
     setParameter("Stride", 0);
     setParameter("Shift", 0);
     HString s="Fx"; setParameter("Datatype", s);
@@ -843,7 +845,9 @@ public:
 //!!!One Needs to verify somehow that the parameters make sense !!!
     GET_FUNC_PARAMETER_T(Antenna, HInteger);
     GET_FUNC_PARAMETER_T(Blocksize,  HInteger);
+    GET_FUNC_PARAMETER_T(maxBlocksize,  HInteger);
     GET_FUNC_PARAMETER_T(Block,  HInteger);
+    GET_FUNC_PARAMETER_T(maxBlock,  HInteger);
     GET_FUNC_PARAMETER_T(Stride,  HInteger);
     GET_FUNC_PARAMETER_T(Shift, HInteger);
     GET_FUNC_PARAMETER_T(Datatype, HString);

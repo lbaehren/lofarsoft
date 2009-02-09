@@ -18,7 +18,7 @@ d >> _d("Filetype","LOPESEvent",_l(2)) \
 (("Parameters","PlotPanel",_l(90)) >> d["File"])
 
 #Create several Antennas on the same level and add a Data object as placeholder
-d["File"] >> NewObjectRange("Antenna",2) >> ("Data",_f("dataRead","CR",TYPE.COMPLEX))
+d["File"] >> NewObjectRange("Antenna",4) >> ("Data",_f("dataRead","CR",TYPE.COMPLEX))
 
 
 datatypechooser=LOPESDatatypeChooser(d)
@@ -29,20 +29,34 @@ d["Data'Parameters=Data'Datatype=Fx"] >> d["Data'Parameters=Data"]
 
 ("Color","b",_l(90)) >>(("Parameters","PlotData",_l(90)) >> d["File"])
 
+
 ("GraphObject",_f(hfGraphObject),_l(1000)) >>  DataUnion(d["Antenna:Data"])
 
-d["Data"]>> ("UnitData",_f("Unit")) >> "yAxis"  >> ("PlotData",_f(hfPlotData)) >>  ("PlotPanel",_f(hfPlotPanel))
 
+d["Data"]>> ("UnitData",_f("Unit")) >> "yAxis" >> ("GraphDataBuffer",_f(hfGraphDataBuffer))  
+
+#The Results object is created during the initialization of
+#GraphDataBuffer, this is not immediately obvious and maybe one can
+#find a more transparent solution...
+
+d["Results=GraphDataBuffer"] >> ("PlotData",_f(hfPlotData)) >>  ("PlotPanel",_f(hfPlotPanel))
+
+#verbose=True
+#d.AllVerbose(True)
+d["GraphDataBuffer"].update() # This is necessary and I don't really understand why ....
 
 #The following can be used to create your own x-axis
 #d["Antenna"] >> ("Data",_f("Range"))>> ("UnitData",_f("Unit")) >> "xAxis" >> d["PlotData"]
 #d["xAxis'end"]=512
 
+
+
 DataUnion(d["PlotPanel"]) >>  ("PlotWindow",_f(hfPlotWindow))
 
 #verbose=True
-
 d["PlotWindow"].update()
+#verbose=False
+
 #again a manual update to bring the network into a clean state.
 d["PlotWindow"]  >> ("QtPanel",_f(hfQtPanel)) 
 
@@ -59,8 +73,10 @@ gui=hfm.ui # define an object which provides easy access to the GUI objects
 
 ("GUI",gui) >> d["QtPanel"] # and store it, so that the objects have access to the GUI. 
 
-d["QtPanel"] >> ("QtNetview",_f(hfQtNetview),_l(999)) #Here this is used by the Network Display object
 
+d["QtPanel"]  >> ("QtNetview",_f(hfQtNetview),_l(999)) #Here this is used by the Network Display object
+
+d >> d["QtNetview"] # to not loose it, when the above connection is cut
 
 verbose=False
 d.touch()
@@ -69,20 +85,43 @@ d.touch()
 d["PlotWindow'npanels"].connect(gui.npanels)
 d["PlotWindow'npanelsx"].connect(gui.npanelsx)
 d["PlotWindow'npanelsy"].connect(gui.npanelsy)
-d["QtNetview'maxNetLevel"].connect(gui.netlevel,QtCore.SLOT("setEditText(QString)"))
+d["QtNetview'maxNetLevel"].connect(gui.netlevel,"setEditText")
 
-d["PlotPanel'xmin"][0].connect(gui.xmin)  ##OK the [0] shouldn't be necessary, but somehow the search does not work!
-d["PlotPanel'ymin"][0].connect(gui.ymin)  ##OK the [0] shouldn't be necessary, but somehow the search does not work!
-d["PlotPanel'xmax"][0].connect(gui.xmax)  ##OK the [0] shouldn't be necessary, but somehow the search does not work!
-d["PlotPanel'ymax"][0].connect(gui.ymax)  ##OK the [0] shouldn't be necessary, but somehow the search does not work!
+d["PlotPanel:xmin"][0].connect(gui.xmin)  ##OK the [0] shouldn't be necessary, but somehow the search does not work!
+d["PlotPanel:ymin"][0].connect(gui.ymin)  ##OK the [0] shouldn't be necessary, but somehow the search does not work!
+d["PlotPanel:xmax"][0].connect(gui.xmax)  ##OK the [0] shouldn't be necessary, but somehow the search does not work!
+d["PlotPanel:ymax"][0].connect(gui.ymax)  ##OK the [0] shouldn't be necessary, but somehow the search does not work!
+
+d["PlotPanel'YAuto"][0].connect(gui.yauto,"setChecked","bool")
+d["PlotPanel'XAuto"][0].connect(gui.xauto,"setChecked","bool")
+
+d["File'Block"].connect(gui.blocknumber,"setValue","int")
+d["File'Blocksize"].connect(gui.blocksize,"setValue","int")
+d["Data'maxBlock"].connect(gui.blocknumber,"setMaximum","int",isSlot=False)
+d["Data'maxBlock"].connect(gui.blocknumberslider,"setMaximum","int",isSlot=False)
+d["Data'maxBlocksize"].connect(gui.blocksize,"setMaximum","int",isSlot=False)
+d["Data'maxBlocksize"].connect(gui.blocksizeslider,"setMaximum","int",isSlot=False)
+
+d["PlotPanel'xscale"][0].connect(gui.xzoomdial,"setValue","int")
+d["PlotPanel'yscale"][0].connect(gui.yzoomdial,"setValue","int")
+d["PlotPanel'xshift"][0].connect(gui.xshiftslider,"setValue","int")
+d["PlotPanel'yshift"][0].connect(gui.yshiftslider,"setValue","int")
+
+#QtCore.QObject.connect(gui.loadfile,QtCore.SIGNAL("triggered()"),gui.HMainPlotter.hfLoad)
+connect_action("loadfile","hfLoad")
+
 
 initializePyQtObjects(d)#This will send a PyQt signal from all objects to the GUI, so that the parameters are set in the GUI
 hfqtplot=d["QtPanel'PlotWidget"].getPy()
 hfqtplot.datatypechooser()
 
 
+print "Attention: For perfomance reasons it is avisable to toggle the Network Display off!"
+print 'Use: d["QtPanel"] // d["QtNetview"] or toggle in the GUI'
 
 """
+
+
 d["Antenna=1:PlotPanel"] // d["Antenna=1:PlotPanel'Parameters"] >> d["File"]
 ~d["Antenna:PlotPanel'Parameters"]
 
@@ -125,7 +164,7 @@ newobj=d.create("TEST")  # creates a new object
 ~newobj #deletes it right away
 newobj.initializeObject("NAME",val,_f(FUNC),_l(netlevel)) # initializes it
 newobj ^ (d,d[1])  # inserts a new object between two other objects
-_n("TEST",1) ^ (d[0],d[1])   #inserts a new object with initialization paramters given in _n
+d.new("TEST",1) ^ (d[0],d[1])   #inserts a new object with initialization paramters 
 d // d["TEST"]  ## separates a link between two objects
 
 x=d["QtPanel"].retrievePyFuncObject() #Retrieves the function interfacing with the QtPanel

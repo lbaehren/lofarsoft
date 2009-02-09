@@ -3,7 +3,7 @@ pyoblist=[]
 PUSH=DIR.TO
 PULL=DIR.FROM
 
-def hfERR(self,txt):
+def hfERR(txt):
     print "Error:",txt
 
 help={}
@@ -33,6 +33,7 @@ def object_new(self,*arg):
     tup=(arg)
     if (len(tup)>1): return self.create(tup[0]).initializeObject(tup)
     else: return self.create(tup[0])
+
 
 def MakeChooser(d,name,fields,values):
     "Create a chooser, which is a collection of objects which act like a record of similar records, containgin a set of parameters among which you can choose in a menu. The first parameter is the name of the chooser object. The second parameter is a tuple of parameter names that form one set. The third parameter is a tuple of tuple containing the parameter values which belong to the respective parameters."
@@ -69,6 +70,11 @@ def object_id(self):
     "Function to return ID number of an object. Used for make_uniqe" 
     return self.getOid()
 
+def toList(val):
+    "Returns val as a List, i.e leave it unchanged if it is already a list, or, for a scalar, create a one-element list"
+    if type(val)==list: return val
+    else: return [val]
+
 
 def make_unique(seq, idfun=None):  
     "Returns a list which only contains unique members"
@@ -93,6 +99,11 @@ def datalist_unique(self):
     if len(l)==1: return l[0]
     else: return l
 
+#Used for determining whether a search was successful If not, an
+#DataList will be returned that returns true and 0 for these
+#functions.
+def object_notFound(self): return False;
+def object_NFound(self): return 1;
 
 class DataList(list):
     def datalist(self): return
@@ -107,6 +118,12 @@ class DataList(list):
             return datalist_unique(dl)
         else:
             return list(self)[idx]
+    def notFound(self):
+        "Used for determining whether a search was successful. If not, an empty DataList will be returned that returns true  for this function."
+        return len(self)==0
+    def NFound(self):
+        "Number of objects in the DataList. Same as len. Used for determining whether a search was successful. If not, an empty DataList will be returned that returns zero for this function. If one object is found an Object is returned."
+        return len(self)
     def __floordiv__(self,other):
         for d in self: d // other
         return d
@@ -147,11 +164,17 @@ class DataList(list):
     def update(self):
         for d in self: d.update()
         return self
+    def touch(self):
+        for d in self: d.touch()
+        return self
     def noSignal(self):
         for d in self: d.noSignal()
         return self
     def set(self,value):
         for d in self: d.set(value)
+        return self
+    def put_silent(self,value):
+        for d in self: d.put_silent(value)
         return self
     def val(self):
         "Returns a list of the values in the Data object list"
@@ -239,17 +262,43 @@ def object_getitem(self,value):
                l.append(self.Object(i))
             return DataList(l)
 
-def object_set_list(self,value):
-    if hasattr(self,"datalist"):
-        for d in self:
-            object_set(d,value)
-    else:
-            object_set(self,value)
+def object_setitem(self,key,value):
+    "Used to overload the assign operation for a data object with [] to set the content of the vector."
+    return self[key].set(value)
 
 def object_set_silent(self,value):
     sil=self.Silent(True)
     object_set(self,value)
     self.Silent(sil)
+    return self
+
+def list2vec(lst):
+    if len(lst)==0: return FloatVec()
+    if type(lst[0])==int:
+        ret=IntVec()
+    elif type(lst[0])==float:
+        ret=FloatVec()
+    elif type(lst[0])==str:
+        ret=StringVec()
+    elif type(lst[0])==complex:
+        ret=ComplexVec()
+    else: ret=[]    
+    ret.extend(lst)
+    return ret
+    
+def vec2list(vec):
+    "Convert a stl vector to a python list"
+    ret=[]
+    ret.extend(vec)
+    return ret
+    
+def object_set_list(self,lst):
+    "Sets the Data object vector using a Python list as input. The type of the vector is determined by the first element."
+    vec=list2vec(lst)
+    if type(vec) in [FloatVec,IntVec,StringVec,ComplexVec]:
+        self.set(vec)
+    else: 
+        self.putPyList(vec)
     return self
 
 def object_set(self,value):
@@ -265,6 +314,8 @@ def object_set(self,value):
         self.put(value)
     elif hasattr(value,"funcname"):
         self.setFunc_f(value)
+    elif type(value)==list:
+        object_set_list(self,value)
     else:
         self.putPy(value)
     return self
@@ -295,10 +346,6 @@ def object_val(self):
         self.get(v)
         return v
 
-
-def object_setitem(self,key,value):
-    "Used to overload the assign operation for a data object with [] to set the content of the vector."
-    return object_set_list(self[key],value)
 
 def object_print(self):
     return "<hfObject: "+self.Status()+">";
@@ -353,8 +400,21 @@ def setStoredPyQtObject(self, pyob):
 def initializePyQtObjects(self):
     for obj in self.stored_pyqtobj.values(): obj.obj.signalPyQt("updated")
 
+
+def object_get_bool(self): return bool(self.getI())
+def object_get_QString(self): return QtCore.QString(self.getS())
+
+object_Type2Data_map={"int":"I","QString":"Q","float":"N","bool":"B","str":"S"}
+
+def object_getT(self,Type):
+    exec("ret=self.get"+object_Type2Data_map[Type]+"()")
+    return ret
+
 class hfPyQtObject(QtCore.QObject):
     "Base class for PyQtObjects that can be assigned to a Data object and take care of the PyQt Signals and Slots. The class has one slot: hfput(value), which receives a new value and assigns it to the object. It emits a signal hfupdated(QString) which contains the new value in an object, if it was changed. The method updated(object) is called from c++ and has as argument the object which was updated. self.obj should contain a reference to the Data object and needs to be set explicitly."
+#    def __init__(self,Type="QString"):   The presence of the __init__ routine cause problems ..., like: RuntimeError: underlying C/C++ object has been deleted
+#        self.type=Type
+#        return None
     def hfput(self,value=None):
         print "Clicked ...!"
         if type(self.obj)==Data: 
@@ -365,16 +425,17 @@ class hfPyQtObject(QtCore.QObject):
             hfERR("hfPyQtObject - no Data Object set")
             return -1
     def updated(self,object):
-        self.hfupdated(object.getS())
+        self.hfupdated(object.getT(self.type))
         return 0
     def hfupdated(self,value):
-        self.emit(QtCore.SIGNAL("hfupdated(QString)"),QtCore.QString(str(value)))
+        self.emit(QtCore.SIGNAL("hfupdated("+self.type+")"),value)
         return 0
 
 
-def object_activatePyQt(self):
+def object_activatePyQt(self,Type="QString"):
     "Creates and stores a hfPyQtObject for communication via the SIGNAL/SLOT mechanism between PyQt and a Data object."
     obj=hfPyQtObject()
+    obj.type=Type
     obj.obj=self
     self.setStoredPyQtObject(obj)
     self.storePyQt(obj)
@@ -383,18 +444,23 @@ def object_PyQt(self):
     "Returns the Python object which interfaces between the Data object and PyQt."
     return self.getStoredPyQtObject()
     
-def object_SIGNAL(self):
+def object_SIGNAL(self,Type="QString"):
     "Returns the SIGNAL the Data Object will send when updated. Can be used for QObject.connect()."
-    return QtCore.SIGNAL("hfupdated(QString)")
+    return QtCore.SIGNAL("hfupdated("+Type+")")
     
 def object_SLOT(self):
     "Returns the method of the Data object that can be used as a SLOT method for PyQt."
     return self.PyQt().hfput
 
-def object_connect(self,method,slot=QtCore.SLOT("setText(QString)")):
-    "Conects the data object's update signal to a Slot of a QtObject. The Update signal will contain the content of the object as a QString parameter"
-    if not self.hasPyQt(): self.activatePyQt()
-    return QtCore.QObject.connect(self.PyQt(),self.SIGNAL(),method,slot)
+def connect_action(guiaction,plottermethod):
+    return QtCore.QObject.connect(gui.__getattribute__(guiaction),QtCore.SIGNAL("triggered()"),gui.HMainPlotter.__getattribute__(plottermethod))
+
+def object_connect(self,method,slot="setText",Type="QString",isSlot=True):
+    "Conects the data object's update signal to a Slot of a QtObject. The Update signal will contain the content of the object as a QString parameter. If slot=(), then connect to a method and not a SLOT."
+    if not self.hasPyQt(): self.activatePyQt(Type)
+    if isSlot: return QtCore.QObject.connect(self.PyQt(),self.SIGNAL(Type),method,QtCore.SLOT(slot+"("+Type+")")) 
+    else: return QtCore.QObject.connect(self.PyQt(),self.SIGNAL(Type),method.__getattribute__(slot))
+
     
 def object_setFunc_f_silent(self,f):
     "Assining a function using the _f class as input but not causing an update."
@@ -650,11 +716,18 @@ def object_nview(self,maxnetlevel=999):
 #    os.system("dot -Tsvg "+fn+" -o "+fn+".svg")
 
 
+def object_putPyList_silent(self,l):
+    sil=self.Silent(True)
+    self.putPyList(l)
+    self.Silent(sil)
+
+
 def object_equal(self,other):
     if type(other)==Data:
         return self.getOid()==other.getOid()
     else: return False
 
+Data.putPyList_silent=object_putPyList_silent
 Data.__eq__=object_equal
 Data.__repr__=object_print
 Data.__invert__=object_invert  #~data = delObject
@@ -686,6 +759,8 @@ Data.nv=object_nview
 def datalist(self,maxnetlevel=9999):
     self.printAllStatus(1,maxnetlevel)
 
+Data.notFound=object_notFound
+Data.NFound=object_NFound
 Data.list = datalist
 Data.ls = datalist
 Data.stored_pyfuncobj={}
@@ -701,6 +776,9 @@ Data.connect=object_connect
 Data.PyQt=object_PyQt
 Data.SIGNAL=object_SIGNAL
 Data.SLOT=object_SLOT
+Data.getT=object_getT
+Data.getB=object_get_bool
+Data.getQ=object_get_QString
 
 #Extending mathgl to accept STL vectors 
 def mglDataSetVec(self,vec):

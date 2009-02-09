@@ -70,6 +70,20 @@ n
 
 qpointf=QtCore.QPointF()
 
+def qtpowerzoom(self,scale):
+    s=self.parent().parent().size()
+    self.resize(int(s.width()*1.05**scale),int(s.height()*1.05**scale))
+    self.parent().resize(int(s.width()*1.05**scale),int(s.height()*1.05**scale))
+
+def qtpoweraspect(self,scale):
+    s=self.parent().parent().size()
+    self.resize(int(s.width()*1.05**scale),int(s.width()))
+    self.parent().resize(int(s.width()*1.05**scale),int(s.width()))
+
+QtSvg.QSvgWidget.zoom=qtpowerzoom
+QtSvg.QSvgWidget.aspect=qtpoweraspect
+
+
 class hfQtPlotConstructor(QtGui.QWidget):
     def __call__(self,parent):
         self.hfqtplot.setParent(parent)
@@ -105,35 +119,71 @@ class hfQtPlot(QtGui.QWidget):
         paint.begin(self)
         paint.drawImage(qpointf,self.img)
         paint.end()
+    def hfsetTextT(self,name,type):
+        exec("nt=self.sender().text().to"+type+"()")
+        if nt[1]: self.d[name].noSignal().set(nt[0])
     def hfsetNPanels(self):
-        print "NPanels"
-        print "Sender:",self.sender()
-        print " txt=",self.sender().text()
-        nt=self.sender().text().toInt()
-        if nt[1]: self.d["'npanels"].noSignal().set(nt[0])
+        self.hfsetTextT("'npanels","Int")
     def hfsetNPanelsx(self):
-        nt=self.sender().text().toInt()
-        if nt[1]: self.d["'npanelsx"].noSignal().set(nt[0])
+        self.hfsetTextT("'npanelsx","Int")
     def hfsetNPanelsy(self):
-        nt=self.sender().text().toInt()
-        if nt[1]: self.d["'npanelsy"].noSignal().set(nt[0])
+        self.hfsetTextT("'npanelsy","Int")
     def hfsetXMin(self):
-        nt=self.sender().text().toDouble()
-        if nt[1]: self.d["'xmin"].noSignal().set(nt[0])
-        print "Set Xmin",nt[0]
+        self.hfsetTextT("'xmin","Double")
     def hfsetXMax(self):
-        nt=self.sender().text().toDouble()
-        if nt[1]: self.d["'xmax"].noSignal().set(nt[0])
+        self.hfsetTextT("'xmax","Double")
     def hfsetYMin(self):
-        nt=self.sender().text().toDouble()
-        if nt[1]: self.d["'ymin"].noSignal().set(nt[0])
-        print "Set Ymin",nt[0]
+        self.hfsetTextT("'ymin","Double")
     def hfsetYMax(self):
-        nt=self.sender().text().toDouble()
-        if nt[1]: self.d["'ymax"].noSignal().set(nt[0])
+        self.hfsetTextT("'ymax","Double")
+    def hfLoad(self):
+        qi=QtCore.QFileInfo(self.currentplotdataobject()["'Filename"].val())
+        f=str(QtGui.QFileDialog.getOpenFileName(hfm,"Load Data File",qi.absolutePath(),"*.event"))
+        if f=="": return
+        qi=QtCore.QFileInfo(f)
+        if qi.exists():
+            print "New File=",f
+            self.currentplotdataobject()["'Filename"].set(f)
+        else: hfERR("File "+f+"does not exist.")
     def netlevel(self,s):
         nt=s.toDouble()
         if nt[1]: self.d["QtNetview'maxNetLevel"].noSignal().set(nt[0])
+    def hfsetNetworkOn(self,yesno):
+        if yesno: self.d >> self.d["'LOPES:QtNetview"]
+        else: self.d // self.d["'LOPES:QtNetview"]
+    def hfsetXAuto(self,yesno):
+        obj=self.currentplotpanelobject()
+        obj["'xmin"].put_silent(obj["xmin"].val())
+        obj["'xmax"].put_silent(obj["xmax"].val())
+        obj["'XAuto"].put_silent(int(yesno))
+        obj.touch()
+    def hfsetYAuto(self,yesno):
+        obj=self.currentplotpanelobject()
+        obj["'ymin"].put_silent(obj["ymin"].val())
+        obj["'ymax"].put_silent(obj["ymax"].val())
+        obj["'YAuto"].put_silent(int(yesno))
+        obj.touch()
+    def hfsetXShift(self,i):
+        self.currentplotpanelobject()["'xshift"].set(i)
+    def hfsetYShift(self,i):
+        self.currentplotpanelobject()["'yshift"].set(i)
+    def hfsetYScale(self,i):
+        self.currentplotpanelobject()["'yscale"].set(i)
+    def hfsetXScale(self,i):
+        self.currentplotpanelobject()["'xscale"].set(i)
+    def hfXReset(self):
+        self.gui.xzoomdial.setValue(0)
+        self.gui.xshiftslider.setValue(0)
+        self.gui.xauto.setChecked(True)
+    def hfYReset(self):
+        self.gui.yzoomdial.setValue(0)
+        self.gui.yshiftslider.setValue(0)
+        self.gui.yauto.setChecked(True)
+    def hfsetBlock(self,i):
+        self.currentplotdataobject()["'Block"].set(i)
+    def hfsetBlocksize(self,i):
+        print "Blocksize should be ",i
+#        self.currentplotdataobject()["'Blocksize"].set(i)
     def currentplotdataobject(self):
         return self.currentplotpanelobject()["'PlotData"]
     def currentplotpanelobject(self):
@@ -167,7 +217,7 @@ class hfQtPlot(QtGui.QWidget):
         par=obj["'yAxis'Data'Parameters=Data"]
         oldobj=par["'"+what] # find the parameter object to which the chooser is connected
         newobj=par["'Chooser'"+what+"="+s]
-        if (type(newobj)==Data) &(type(oldobj)==Data) & (not newobj==oldobj):
+        if (newobj.NFound()) & (oldobj.NFound()) & (not newobj==oldobj):
             oldobj // par
             newobj >> par
         else: print what+"="+s,"Object not found (y)." 
