@@ -117,15 +117,15 @@ namespace CR {  // Namespace CR -- begin
     
     // update the coordinate type
     switch (quantity_p) {
-    case TIME_FIELD:
-    case TIME_POWER:
-    case TIME_CC:
-    case TIME_X:
-    case TIME_P:
+    case SkymapQuantity::TIME_FIELD:
+    case SkymapQuantity::TIME_POWER:
+    case SkymapQuantity::TIME_CC:
+    case SkymapQuantity::TIME_X:
+    case SkymapQuantity::TIME_P:
       coordType_p = CR::CoordinateType (CR::CoordinateType::Time);
       break;
-    case FREQ_POWER:
-    case FREQ_FIELD:
+    case SkymapQuantity::FREQ_POWER:
+    case SkymapQuantity::FREQ_FIELD:
       coordType_p = CR::CoordinateType (CR::CoordinateType::Frequency);
       break;
     }

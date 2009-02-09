@@ -76,10 +76,8 @@ namespace CR {  // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li><a href="http://casa.nrao.edu/docs/doxygen/group__Coordinates.html">CASA
-      Coordinates package</a>
-      <li><a href="http://casa.nrao.edu/docs/doxygen/group__Images.html">CASA
-      Images package</a>
+      <li><a href="http://www.astron.nl/casacore/trunk/casacore/doc/html/group__coordinates.html">casacore Coordinates module</a>
+      <li><a href="http://www.astron.nl/casacore/trunk/casacore/doc/html/group__images.html">casacore Images module</a>
       
       <li>Beamformer
       <li>ObservationData
@@ -89,18 +87,34 @@ namespace CR {  // Namespace CR -- begin
     </ul>
       
     <h3>Synopsis</h3>
-    
-    Since almost all of the parameters required by the emedded Beamformer object
-    can be derived from the also embedded SkymapCoordinate object, only a minimal
-    interface is provided to the outside world:
+
+    The bulk of the internal parameters and settings are stored within two 
+    embedded objects of type SkymapCoordinate and Beamformer:
     <ul>
-      <li>Skymapper::beamformer -- retrieve the embedded Beamformer object
-      <li>Skymapper::skymapType
-      <li>Skymapper::setSkymapType
-      <li>Skymapper::setAntPositions -- as the Skymapper class itself is not
-      handling the actual data I/O, the antenna positions required by the
-      Beamformer need to be provided separately.
+      <li>Since almost all of the parameters required by the emedded Beamformer
+      object can be derived from the also embedded SkymapCoordinate object, only
+      a minimal interface is provided to the outside world:
+      <ul>
+        <li>Skymapper::beamformer -- retrieve the embedded Beamformer object
+	<li>Skymapper::skymapType
+	<li>Skymapper::setSkymapType
+	<li>Skymapper::setAntPositions -- as the Skymapper class itself is not
+	handling the actual data I/O, the antenna positions required by the
+	Beamformer need to be provided separately.
+      </ul>
     </ul>
+
+    Methods for inserting the computed beamformed data into the image file:
+    \code
+    // Function which extracts an array from the map.
+    virtual Bool doGetSlice (Array<T> &buffer,
+                             const Slicer &theSlice);
+
+    // Function to replace the values in the map with soureBuffer. 
+    virtual void doPutSlice (const Array<T> &sourceBuffer,
+                             const IPosition &where,
+			     const IPosition &stride);
+    \endcode
     
     <h3>Example(s)</h3>
     
@@ -138,27 +152,25 @@ namespace CR {  // Namespace CR -- begin
     
     //! Name of the image created on disk
     String filename_p;
-    
     //! Container and handler for the coordinates
     SkymapCoordinate coord_p;
-    
     //! Object to handle the beamforming of the input data
     Beamformer beamformer_p;
-    
     //! Pointer to a paged image containing the generated data
     casa::PagedImage<Double> *image_p;
 
-    //! Stride along the axes within the exported image array
-    casa::IPosition stride_p;
-    
     // -- book-keeping
     
+    //! Start position when writing new data to the image pixel array
+    casa::IPosition start_p;
+    //! Length/shape of the array written to the image pixel array
+    casa::IPosition length_p;
+    //! Stride along the axes within the exported image array
+    casa::IPosition stride_p;
     //! Switch to enable/disable verbose mode
     short verbose_p;
-    
     //! The number of processed data blocks so far
     uint nofProcessedBlocks_p;
-
     //! Direction mask to flag individual pixels
     Matrix<bool> directionMask_p;
     
@@ -357,30 +369,6 @@ namespace CR {  // Namespace CR -- begin
     }
     
     /*!
-      \brief Set the type of beam to be used at data processing
-      
-      \param skymapType -- The BeamType to be used at data processing
-      
-      \return status -- Status of the operation; returns <i>false</i> if an
-              an error was encountered
-    */
-    inline bool setSkymapType (SkymapQuantity const &skymapType) {
-      return beamformer_p.setSkymapType(skymapType);
-    }
-    
-    /*!
-      \brief Set the type of beam to be used at data processing
-      
-      \param skymapType -- The BeamType to be used at data processing
-      
-      \return status -- Status of the operation; returns <i>false</i> if an
-              an error was encountered
-    */
-    inline bool setSkymapType (SkymapQuantity::Type const &skymapType) {
-      return beamformer_p.setSkymapType(skymapType);
-    }
-    
-    /*!
       \brief Set the antenna positions
 
       \param antPositions -- [antenna,3] array with the antenna positions.
@@ -537,20 +525,6 @@ namespace CR {  // Namespace CR -- begin
     void init (SkymapCoordinate const &skymapCoord,
 	       Vector<MVPosition> const &antPositions,
 	       SkymapQuantity const &skymapType=SkymapQuantity::FREQ_POWER);
-    
-    /*!
-      \brief Initialize internal parameters at construction
-      
-      \param verbose            -- Be verbose during processing?
-      \param nofProcessedBlocks -- nof. blocks to be processed
-      \param filename           -- Name of the image file created on disk
-      \param skymapCoord        -- SkymapCoordinate object encapsulating the
-      characteristics of the coordinate axes
-    */
-    void init (short const &verbose,
-	       uint const &nofProcessedBlocks,
-	       std::string const &filename,
-	       SkymapCoordinate const &skymapCoord);
     
     /*!
       \brief Initialize the internal structure of the Skymapper for data processing

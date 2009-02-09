@@ -269,10 +269,12 @@ int test_Skymapper ()
     // Antenna positions
     uint nofAntennas (10);
     Matrix<double> antPositions (nofAntennas,3);
+    // EM quantity for which the skymap is computed
+    CR::SkymapQuantity skymapQuantity (CR::SkymapQuantity::TIME_CC);
     //
     Skymapper skymapper (coord,
 			 antPositions,
-			 CR::SkymapQuantity(),
+			 skymapQuantity,
 			 "skymap03.img");
     skymapper.summary();
   } catch (AipsError x) {
@@ -325,6 +327,7 @@ int test_methods ()
     cout << "-- setting antenna positions ..." << endl;
     Vector<MVPosition> antPos (48);
     skymapper.setAntPositions (antPos);
+    skymapper.summary();
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_methods] " << x.getMesg() << endl;
     nofFailedTests++;

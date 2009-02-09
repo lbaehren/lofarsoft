@@ -35,6 +35,8 @@
 #include <boost/python/list.hpp>
 #include <boost/python/extract.hpp>
 
+// CR-Tools header files
+#include <Coordinates/CoordinateType.h>
 #include <Coordinates/TimeFreq.h>
 #include <IO/DataIterator.h>
 #include <IO/DataReader.h>
@@ -42,6 +44,7 @@
 
 namespace bpl = boost::python;
 
+using CR::CoordinateType;
 using CR::DataIterator;
 using CR::DataReader;
 using CR::HanningFilter;
@@ -61,6 +64,21 @@ BOOST_PYTHON_MODULE (pycr)
   //  implement/Coordinates
   //
   // ============================================================================
+  
+  //_____________________________________________________________________________
+  //                                                               CoordinateType
+
+  bpl::class_<CoordinateType>("CoordinateType")
+    .def(bpl::init<>())
+    .def(bpl::init<uint>()) 
+    .def("className", &CoordinateType::className)
+    .def("type", &CoordinateType::type)
+    .def("name", &CoordinateType::name)
+    .def("getName", &CoordinateType::getName)
+    ;  
+
+  //_____________________________________________________________________________
+  //                                                                     TimeFreq
   
   bpl::class_<TimeFreq>("TimeFreq")
     .def(bpl::init<>())
@@ -83,6 +101,14 @@ BOOST_PYTHON_MODULE (pycr)
 	 "Get the reference time for the time axis")
    ;
   
+  // ============================================================================
+  //
+  //  implement/Imaging
+  //
+  // ============================================================================
+
+  
+
   // ============================================================================
   //
   //  implement/IO

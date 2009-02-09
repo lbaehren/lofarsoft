@@ -167,8 +167,8 @@ if (CR_WITH_PYTHON)
 
   ## compiler instructions
   add_library (pycr MODULE
+    Coordinates/CoordinateType.cc
     Coordinates/TimeFreq.cc
-    Data/LOFAR_DipoleDataset.cc
     IO/DataIterator.cc
     IO/DataReader.cc
     BindingsBoostPython.cc

@@ -210,6 +210,7 @@ namespace CR {  // Namespace CR -- begin
     /* set up the Beamformer */
     beamformer_p = Beamformer();
     beamformer_p.setAntPositions(antPositions);
+    beamformer_p.setSkymapType(skymapType);
 
     /* initialize the internal settings and objects */
     initSkymapper();
@@ -228,31 +229,10 @@ namespace CR {  // Namespace CR -- begin
     /* set up the Beamformer */
     beamformer_p = Beamformer();
     beamformer_p.setAntPositions(antPositions);
+    beamformer_p.setSkymapType(skymapType);
 
     /* initialize the internal settings and objects */
     initSkymapper();
-  }
-  
-  //_____________________________________________________________________________
-  //                                                                         init
-
-  void Skymapper::init (short const &verbose,
-			uint const &nofProcessedBlocks,
-			std::string const &filename,
-			SkymapCoordinate const &skymapCoord)
-  {
-    /* Store the provided input parameters */
-    verbose_p            = verbose;
-    nofProcessedBlocks_p = nofProcessedBlocks;
-    filename_p           = filename;
-
-    // Store embedded objects
-    
-    if (!setSkymapCoordinate (skymapCoord)) {
-      cerr << "[Skymapper::init] Error setting SkymapCoordinate object!"
-	   << endl;
-    }
-    
   }
   
   //_____________________________________________________________________________
@@ -285,14 +265,17 @@ namespace CR {  // Namespace CR -- begin
     */
     CoordinateType coordType = coord_p.timeFreqCoordinate().beamCoordDomain();
     uint nofAxes             = coord_p.nofAxes();
-    stride_p.resize(nofAxes);
-    stride_p = 1;
+    start_p.resize(nofAxes);    start_p  = 0;
+    length_p.resize(nofAxes);   length_p = 1;
+    stride_p.resize(nofAxes);   stride_p = 1;
     switch (coordType.type()) {
     case CoordinateType::Time:
       stride_p(nofAxes-2) = coord_p.timeFreqCoordinate().blocksize();
+      length_p(nofAxes-2) = coord_p.timeFreqCoordinate().blocksize();
       break;
     case CoordinateType::Frequency:
       stride_p(nofAxes-2) = 1;
+      length_p(nofAxes-1) = coord_p.timeFreqCoordinate().fftLength();
       break;
     default:
       std::cerr << "[Skymapper::initSkymapper] Unsopported coordinate type!"
@@ -358,9 +341,6 @@ namespace CR {  // Namespace CR -- begin
       // Adjust the slicing operators
       start(3) = nofProcessedBlocks_p*stride_p(stride_p.nelements()-2);
 
-      // Progress bar
-      ProgressBar bar (shape(0),">");
-
       /*
 	Insert the previously computed pixel values into the pixel array of
 	the already existing image.
@@ -377,7 +357,6 @@ namespace CR {  // Namespace CR -- begin
 // 	    coord++;
 // 	  }  // -- end loop: start(2)
 // 	}  // -- end loop: start(1)
-// 	bar.update(start(0));
 //       }  // -- end loop: start(0)
       
       // -----------------------------------------
@@ -389,7 +368,6 @@ namespace CR {  // Namespace CR -- begin
       for (start(0)=0; start(0)<shape(0); start(0)++) {      // Longitude
 	for (start(1)=0; start(1)<shape(1); start(1)++) {    // Latitude
 	  for (start(2)=0; start(2)<shape(2); start(2)++) {  // Radius
-	    std::cout << "[" << shape(0)*shape(1)*shape(2) << " 0]" << std::endl;
 	  }
 	}
       }
@@ -453,6 +431,7 @@ namespace CR {  // Namespace CR -- begin
     os << " --> Shape of pixel array     = " << coord_p.shape()            << endl;
     os << " --> Shape of beam array      = " << beamformer_p.shapeBeam()   << endl;
     os << " --> Image array stride       = " << stride_p                   << endl;
+    os << " --> Image buffer shape       = " << length_p                   << endl;
     os << " --> Domain of image quantity = " << beamformer_p.domainName()  << endl;
     os << " --> Skymap quantity          = " << beamformer_p.skymapType().name() << endl;
   }
