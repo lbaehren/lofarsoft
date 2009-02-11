@@ -515,13 +515,16 @@ namespace CR { // Namespace CR -- begin
 			  const bool& plotEnvelope = false);
 
     /*!
-      \brief Plots the spectrum of all antennas
+      \brief Plots the spectrum of all antennas and a median spectrum
 
       \param filename         -- Name of the .ps file (without ".ps") the plot will be written to
       \param DataReader       -- DataReader (LopesEventIn)
       \param antennaSelection -- Selection of antennas considered for the plot
       \param seperated        -- true = an individual plot for each antenna will be created
                                  (the antenna number serves as file name appendix).
+
+      Be careful: If and upsampling frequency is used, the resolution of the spectrum is reduced,
+                  as the upsampling data reader uses only a part of the trace.
     */
 
     void plotSpectra (const string& filename,
