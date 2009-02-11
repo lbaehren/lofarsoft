@@ -353,7 +353,7 @@ void readConfigFile (const string &filename)
 	    cout << "GenerateSpectra set to 'true'.\n";
 	  } else
           if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    generatePlots = false;
+	    generateSpectra = false;
 	    cout << "GenerateSpectra set to 'false'.\n";
           } else {
             cerr << "\nError processing file \"" << filename <<"\".\n" ;
@@ -1131,7 +1131,10 @@ int main (int argc, char *argv[])
   map <int,PulseProperties> calibPulsesMap;              // pulse properties of pules in calibrated data traces
   PulseProperties* rawPulses[MAX_NUM_ANTENNAS];          // use array of pointers to store pulse properties in root tree
   PulseProperties* calibPulses[MAX_NUM_ANTENNAS];        // use array of pointers to store pulse properties in root tree
-  bool goodEW = false, goodNS = false;                // true if reconstruction worked
+  bool goodEW = false, goodNS = false;                   // true if reconstruction worked
+  double rmsCCbeam, rmsCCbeam_NS;			 // rms values of the beams in remote region
+  double rmsXbeam, rmsXbeam_NS;
+  double rmsPbeam, rmsPbeam_NS;
 
   try {
     // allocate space for arrays with pulse properties
@@ -1280,6 +1283,9 @@ int main (int argc, char *argv[])
         roottree.Branch("CCheight_error",&CCheight_error,"CCheight_error/D");
         roottree.Branch("CCconverged",&CCconverged,"CCconverged/B");
         roottree.Branch("goodReconstructed",&goodEW,"goodReconstructed/B");
+        roottree.Branch("rmsCCbeam",&rmsCCbeam,"rmsCCbeam/D");
+        roottree.Branch("rmsXbeam",&rmsXbeam,"rmsXbeam/D");
+	roottree.Branch("rmsPbeam",&rmsPbeam,"rmsPbeam/D");
         if (lateralDistribution) {
           roottree.Branch("R_0",&R_0,"R_0/D");
           roottree.Branch("sigR_0",&sigR_0,"sigR_0/D");
@@ -1295,6 +1301,9 @@ int main (int argc, char *argv[])
         roottree.Branch("CCheight_error_EW",&CCheight_error,"CCheight_error_EW/D");
         roottree.Branch("CCconverged_EW",&CCconverged,"CCconverged_EW/B");
         roottree.Branch("goodReconstructed_EW",&goodEW,"goodReconstructed_EW/B");
+        roottree.Branch("rmsCCbeam_EW",&rmsCCbeam,"rmsCCbeam_EW/D");
+	roottree.Branch("rmsXbeam_EW",&rmsXbeam,"rmsXbeam_EW/D");
+	roottree.Branch("rmsPbeam_EW",&rmsPbeam,"rmsPbeam_EW/D");
         if (lateralDistribution) {
           roottree.Branch("R_0_EW",&R_0,"R_0_EW/D");
           roottree.Branch("sigR_0_EW",&sigR_0,"sigR_0_EW/D");
@@ -1310,6 +1319,9 @@ int main (int argc, char *argv[])
         roottree.Branch("CCheight_error_NS",&CCheight_error_NS,"CCheight_error_NS/D");
         roottree.Branch("CCconverged_NS",&CCconverged,"CCconverged_NS/B");
         roottree.Branch("goodReconstructed_NS",&goodNS,"goodReconstructed_NS/B");
+        roottree.Branch("rmsCCbeam_NS",&rmsCCbeam_NS,"rmsCCbeam_NS/D");
+	roottree.Branch("rmsXbeam_NS",&rmsXbeam_NS,"rmsXbeam_NS/D");
+	roottree.Branch("rmsPbeam_NS",&rmsPbeam_NS,"rmsPbeam_NS/D");
         if (lateralDistribution) {
           roottree.Branch("R_0_NS",&R_0_NS,"R_0_NS/D");
           roottree.Branch("sigR_0_NS",&sigR_0_NS,"sigR_0_NS/D");
@@ -1354,6 +1366,8 @@ int main (int argc, char *argv[])
       distanceResult = 0, distanceResultNS = 0;
       R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0;
       eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0;
+      rmsCCbeam = 0, rmsXbeam = 0, rmsPbeam = 0;
+      rmsCCbeam_NS = 0, rmsXbeam_NS = 0, rmsPbeam_NS = 0;
 
 
       // print information and process the event
@@ -1489,6 +1503,9 @@ int main (int argc, char *argv[])
           CCheight = results.asDouble("CCheight");
           CCheight_error = results.asDouble("CCheight_error");
           CCconverged = results.asBool("CCconverged");
+	  rmsCCbeam = results.asDouble("rmsCCbeam");
+	  rmsXbeam = results.asDouble("rmsXbeam");
+	  rmsPbeam = results.asDouble("rmsPbeam");
           gt = results.asuInt("Date");
          }
 
@@ -1571,6 +1588,9 @@ int main (int argc, char *argv[])
           CCheight_NS = results.asDouble("CCheight");
           CCheight_error_NS = results.asDouble("CCheight_error");
           CCconvergedNS = results.asBool("CCconverged");
+          rmsCCbeam_NS = results.asDouble("rmsCCbeam");
+	  rmsXbeam_NS = results.asDouble("rmsXbeam");
+	  rmsPbeam_NS = results.asDouble("rmsPbeam");
           gt = results.asuInt("Date");
         }
       }  // if...else (calibrationMode)
