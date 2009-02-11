@@ -1123,6 +1123,9 @@ int main (int argc, char *argv[])
   double CCheight, CCheight_NS;                          // CCheight will be used for EW polarization or ANY polarization
   double CCheight_error, CCheight_error_NS;
   bool CCconverged, CCconvergedNS;                       // is true if the Gaussian fit to the CCbeam converged
+  double Xheight, Xheight_NS;                          // CCheight will be used for EW polarization or ANY polarization
+  double Xheight_error, Xheight_error_NS;
+  bool Xconverged, XconvergedNS;                       // is true if the Gaussian fit to the CCbeam converged
   double AzL, ElL, AzL_NS, ElL_NS;                       // Azimuth and Elevation
   double distanceResult = 0, distanceResultNS = 0;       // distance = radius of curvature
   double R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0; // R_0 from lateral distribution fit
@@ -1282,6 +1285,9 @@ int main (int argc, char *argv[])
         roottree.Branch("CCheight",&CCheight,"CCheight/D");
         roottree.Branch("CCheight_error",&CCheight_error,"CCheight_error/D");
         roottree.Branch("CCconverged",&CCconverged,"CCconverged/B");
+        roottree.Branch("Xheight",&Xheight,"Xheight/D");
+        roottree.Branch("Xheight_error",&Xheight_error,"Xheight_error/D");
+        roottree.Branch("Xconverged",&Xconverged,"Xconverged/B");
         roottree.Branch("goodReconstructed",&goodEW,"goodReconstructed/B");
         roottree.Branch("rmsCCbeam",&rmsCCbeam,"rmsCCbeam/D");
         roottree.Branch("rmsXbeam",&rmsXbeam,"rmsXbeam/D");
@@ -1300,6 +1306,9 @@ int main (int argc, char *argv[])
         roottree.Branch("CCheight_EW",&CCheight,"CCheight_EW/D");
         roottree.Branch("CCheight_error_EW",&CCheight_error,"CCheight_error_EW/D");
         roottree.Branch("CCconverged_EW",&CCconverged,"CCconverged_EW/B");
+        roottree.Branch("Xheight_EW",&Xheight,"Xheight_EW/D");
+        roottree.Branch("Xheight_error_EW",&Xheight_error,"Xheight_error_EW/D");
+        roottree.Branch("Xconverged_EW",&Xconverged,"Xconverged_EW/B");
         roottree.Branch("goodReconstructed_EW",&goodEW,"goodReconstructed_EW/B");
         roottree.Branch("rmsCCbeam_EW",&rmsCCbeam,"rmsCCbeam_EW/D");
 	roottree.Branch("rmsXbeam_EW",&rmsXbeam,"rmsXbeam_EW/D");
@@ -1318,6 +1327,9 @@ int main (int argc, char *argv[])
         roottree.Branch("CCheight_NS",&CCheight_NS,"CCheight_NS/D");
         roottree.Branch("CCheight_error_NS",&CCheight_error_NS,"CCheight_error_NS/D");
         roottree.Branch("CCconverged_NS",&CCconverged,"CCconverged_NS/B");
+        roottree.Branch("Xheight_NS",&Xheight_NS,"Xheight_NS/D");
+        roottree.Branch("Xheight_error_NS",&Xheight_error_NS,"Xheight_error_NS/D");
+        roottree.Branch("Xconverged_NS",&Xconverged,"Xconverged_NS/B");
         roottree.Branch("goodReconstructed_NS",&goodNS,"goodReconstructed_NS/B");
         roottree.Branch("rmsCCbeam_NS",&rmsCCbeam_NS,"rmsCCbeam_NS/D");
 	roottree.Branch("rmsXbeam_NS",&rmsXbeam_NS,"rmsXbeam_NS/D");
@@ -1362,6 +1374,9 @@ int main (int argc, char *argv[])
       CCheight = 0, CCheight_NS = 0;
       CCheight_error = 0, CCheight_error_NS = 0;
       CCconverged = 0, CCconvergedNS = 0;
+      Xheight = 0, Xheight_NS = 0;
+      Xheight_error = 0, Xheight_error_NS = 0;
+      Xconverged = 0, XconvergedNS = 0;
       AzL = 0, ElL = 0, AzL_NS = 0, ElL_NS = 0;
       distanceResult = 0, distanceResultNS = 0;
       R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0;
@@ -1503,6 +1518,9 @@ int main (int argc, char *argv[])
           CCheight = results.asDouble("CCheight");
           CCheight_error = results.asDouble("CCheight_error");
           CCconverged = results.asBool("CCconverged");
+          Xheight = results.asDouble("Xheight");
+          Xheight_error = results.asDouble("Xheight_error");
+          Xconverged = results.asBool("Xconverged");
 	  rmsCCbeam = results.asDouble("rmsCCbeam");
 	  rmsXbeam = results.asDouble("rmsXbeam");
 	  rmsPbeam = results.asDouble("rmsPbeam");
@@ -1588,6 +1606,9 @@ int main (int argc, char *argv[])
           CCheight_NS = results.asDouble("CCheight");
           CCheight_error_NS = results.asDouble("CCheight_error");
           CCconvergedNS = results.asBool("CCconverged");
+          Xheight_NS = results.asDouble("Xheight");
+          Xheight_error_NS = results.asDouble("Xheight_error");
+          XconvergedNS = results.asBool("Xconverged");
           rmsCCbeam_NS = results.asDouble("rmsCCbeam");
 	  rmsXbeam_NS = results.asDouble("rmsXbeam");
 	  rmsPbeam_NS = results.asDouble("rmsPbeam");
