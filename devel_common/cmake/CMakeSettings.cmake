@@ -92,7 +92,8 @@ if (NOT USG_CMAKE_CONFIG)
     /usr
     /usr/local
     /usr/X11R6
-    /opt/casa/local    
+    /opt/casa/local
+    /app/usg
     CACHE
     PATH
     "Directories to look for include files"
@@ -107,6 +108,7 @@ if (NOT USG_CMAKE_CONFIG)
     /usr/bin
     /usr/local/bin
     /sw/bin
+    /app/usg/release/bin
     CACHE
     PATH
     "Extra directories to look for executable files"
@@ -125,6 +127,7 @@ if (NOT USG_CMAKE_CONFIG)
     /usr/local/include
     /usr/X11R6/include
     /opt/casa/local/include    
+    /app/usg/release/include
     CACHE
     PATH
     "Directories to look for include files"
@@ -145,6 +148,7 @@ if (NOT USG_CMAKE_CONFIG)
     /usr/lib
     /usr/X11R6/lib
     /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
+    /app/usg/release/lib
     CACHE
     PATH
     "Directories to look for libraries"
