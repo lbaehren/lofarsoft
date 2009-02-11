@@ -256,6 +256,40 @@ namespace CR { // Namespace CR -- begin
         std::cout << std::endl;
       }
 
+
+      // calculate the rms values of p-, cc- and xbeam in the remote region
+      if (remoteRange_p(1) != 0 ) {
+	Slice remoteRegion( remoteRange_p(0),(remoteRange_p(1) - remoteRange_p(0)) );
+	Vector<Double> ccbeam, xbeam, pbeam;
+	
+	// get the beam data
+	ccbeam = CompleteBeamPipe_p->GetCCBeam(beamformDR_p, AntennaSelection, Polarization).copy();
+        xbeam = CompleteBeamPipe_p->GetXBeam(beamformDR_p, AntennaSelection, Polarization).copy();
+        pbeam = CompleteBeamPipe_p->GetPBeam(beamformDR_p, AntennaSelection, Polarization).copy();
+
+        // smooth the data
+        if (filterStrength_p > 0) {
+  	  StatisticsFilter<Double> mf(filterStrength_p,FilterType::MEAN);
+	  ccbeam = mf.filter(ccbeam);
+	  pbeam = mf.filter(pbeam);
+          xbeam = mf.filter(xbeam);
+	}
+
+        // removing offset
+	double ccBeamOffset = mean(ccbeam(remoteRegion));
+	double pBeamOffset  = mean(pbeam(remoteRegion));
+        double xBeamOffset  = mean(xbeam(remoteRegion));
+	ccbeam -= ccBeamOffset;
+        pbeam  -= pBeamOffset;
+	xbeam  -= xBeamOffset;
+
+	// calculating rms values
+	erg.define("rmsCCbeam",rms(ccbeam(remoteRegion)));
+        erg.define("rmsPbeam",rms(pbeam(remoteRegion)));
+        erg.define("rmsXbeam",rms(xbeam(remoteRegion)));
+      }
+
+
       erg.define("goodReconstructed",true);  // assume that everything was fine, then this position is reached.
 
     } catch (AipsError x) {
