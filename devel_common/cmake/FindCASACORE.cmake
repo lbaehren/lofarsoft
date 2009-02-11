@@ -79,10 +79,12 @@ list (APPEND include_locations
   /usr/local/include/casacore
   /sw/share/casacore
   /sw/include/casacore
+  /app/usg/release/include/casacore
 )
 
 list (APPEND lib_locations
   /opt/casacore/lib
+  /app/usg/release/lib
 )
 
 ## -----------------------------------------------------------------------------
