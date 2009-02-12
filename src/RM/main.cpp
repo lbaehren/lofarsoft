@@ -3,24 +3,16 @@
 #include "rm.h"						// RM Synthesis class
 
 // casa includes (from /usr/local/include/casacore)
+#include <casa/Arrays.h>
+#include <casa/Arrays/Array.h>
 #include <casa/Utilities/DataType.h>
 #include <tables/Tables/TiledFileAccess.h>
 #include <lattices/Lattices/TiledShape.h>
-#include <fits/FITS/fitsio.h>
-//#include <fits/FITS/fits.h>
-//#include <fits/FITS/BasicFITS.h>
-//#include <fits/FITSImage.h>					// high-level FITSImage interface
-#include <images/Images/ImageInterface.h>
-
-
-
-// casa includes (from $LOFARSOFT)
-//#include <casa/casa/Utilities/DataType.h>
-//#include <tables/tables/Tables/TiledFileAccess.h>
-//#include <lattices/lattices/Lattices/TiledShape.h>
-//#include <fits/FITS/fits.h>
-//#include <fits/FITS/BasicFITS.h>
-//#include <images/images/ImageInterface.h>
+#include <fits/FITS/BasicFITS.h>
+#include <images/Images/PagedImage.h>
+#include <images/Images/ImageFITSConverter.h>
+#include <images/Images/FITSImage.h>					// high-level FITSImage interface
+// #include <images/Images/ImageInterface.h>
 
 using namespace std;
 using namespace casa;
@@ -47,7 +39,7 @@ int main (int argc, char * const argv[]) {
 	
 	cout << "Filename_Q: " << filename_Q << endl;				// Debug output
 
-	image_Q=ReadFITS(filename_Q, status, casaerror);			// read Q FITS image
+ 	image_Q=ReadFITS(filename_Q, status, casaerror);			// read Q FITS image
 	if(status)													// on error....
 	{
 		cout << casaerror << endl;								// ... display error message
@@ -64,6 +56,6 @@ int main (int argc, char * const argv[]) {
 	}
 
 
-//    std::cout << "Read the file: " << filename << "!\n";		// Debug output
+	std::cout << "Read the file: " << filename_Q << "!\n";		// Debug output
     return 0;
 }

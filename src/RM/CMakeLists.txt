@@ -70,7 +70,6 @@ if (NOT RM_VERBOSE_CONFIGURE)
   set (POPT_FIND_QUIETLY       YES )
   set (POSTGRESQL_FIND_QUIETLY YES )
   set (PYTHON_FIND_QUIETLY     YES )
-  set (ROOT_FIND_QUIETLY       YES )
   set (STARTOOLS_FIND_QUIETLY  YES )
   set (WCSLIB_FIND_QUIETLY     YES )
   set (ZLIB_FIND_QUIETLY       YES )
@@ -124,7 +123,6 @@ find_package (ZLIB)
 
 ## Custom CMake modules --------------------------
 
-include (FindBlitz)
 include (FindBoost)
 include (FindCASACORE)
 include (FindCFITSIO)
@@ -134,13 +132,8 @@ include (FindGFortran)
 include (FindGTK)
 include (FindHDF5)
 include (FindLAPACK)
-include (FindPGPLOT)
-include (FindPLplot)
 include (FindPNG)
-include (FindPOPT)
-include (FindPostgreSQL)
 include (FindPython)
-include (FindROOT)
 include (FindWCS)
 
 ## =============================================================================
@@ -200,35 +193,6 @@ if (HAVE_CASA OR HAVE_CASACORE)
   
 endif (HAVE_CASA OR HAVE_CASACORE)
 
-## -------------------------------------------------------------------
-## Handle option: Additional routines from LOPES-Star
-
-## check if ROOT is available
-
-if (NOT HAVE_ROOT)
-  message (STATUS "[RM-Tools] LopesStar support disabled; missing ROOT.")
-  set (RM_WITH_STARTOOLS FALSE)
-endif (NOT HAVE_ROOT)
-
-## check if FFTW3 is available
-
-if (NOT HAVE_FFTW3)
-  message (STATUS "[RM-Tools] LopesStar support disabled; missing FFTW3.")
-  set (RM_WITH_STARTOOLS FALSE)
-endif (NOT HAVE_FFTW3)
-
-if (RM_WITH_STARTOOLS)
-  
-  include (FindStarTools)
-  
-  if (HAVE_STARTOOLS)
-    include_directories (${STARTOOLS_INCLUDES})
-  else (HAVE_STARTOOLS)
-    set (RM_WITH_STARTOOLS FALSE)
-  endif (HAVE_STARTOOLS)
-  
-endif (RM_WITH_STARTOOLS)
-
 ## =============================================================================
 ##
 ##  Installation
@@ -254,68 +218,6 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ## =============================================================================
 ##
-##  Datasets for the test programs
-##
-## =============================================================================
-
-## Test datasets
-
-if (dataset_tbb)
-  set (RM_DATASET_TBB 1)
-  set (RM_DATASET_TBB_STATION "Station023")
-  set (RM_DATASET_TBB_CHANNEL "023000000")
-  set (RM_DATASET_TBB_DATASET "Station023/023000000")
-endif (dataset_tbb)
-
-## Reference values for test programs
-
-find_file (data_ppf_coefficients Coeffs16384Kaiser-quant.dat
-  PATHS
-  ${RM_SOURCE_DIR}/data
-  ${RM_SOURCE_DIR}/../data
-  ${RM_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
-  )
-
-find_file (data_ppf_inversion ppf_inv.dat
-  PATHS
-  ${RM_SOURCE_DIR}/data
-  ${RM_SOURCE_DIR}/../data
-  ${RM_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
-  )
-
-find_file (data_modelcoeff1 modelcoeff1.dat
-  PATHS
-  ${RM_SOURCE_DIR}/data
-  ${RM_SOURCE_DIR}/../data
-  ${RM_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
-  )
-
-find_file (data_modelcoeff2 modelcoeff2.dat
-  PATHS
-  ${RM_SOURCE_DIR}/data
-  ${RM_SOURCE_DIR}/../data
-  ${RM_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
-  )
-
-find_file (positions_lopes08 positions_lopes08.dat
-  PATHS
-  ${RM_SOURCE_DIR}/data
-  ${RM_SOURCE_DIR}/../data
-  ${RM_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
-  )
-
-## =============================================================================
-##
 ##  Location of (external) header files
 ##
 ## =============================================================================
@@ -324,21 +226,11 @@ find_file (positions_lopes08 positions_lopes08.dat
 
 include_directories (BEFORE
   ${RM_BINARY_DIR}
+  ${RM_SOURCE_DIR}
   ${RM_SOURCE_DIR}/implement
   )
 
 ## External header files
-
-if (HAVE_BOOST)
-  include_directories (${BOOST_INCLUDES})
-endif (HAVE_BOOST)
-
-if (HAVE_CFITSIO)
-  include_directories (${CFITSIO_INCLUDES})
-  if (HAVE_WCSLIB)
-    set (WCSLIB_GETWCSTAB 1)
-  endif (HAVE_WCSLIB)
-endif (HAVE_CFITSIO)
 
 if (HAVE_DAL)
   include_directories (${DAL_INCLUDES})
@@ -349,49 +241,41 @@ if (HAVE_DAL)
   endif (HAVE_CASA OR HAVE_CASACORE)
 endif (HAVE_DAL)
 
-if (GFORTRAN_INCLUDES)
-  include_directories (${GFORTRAN_INCLUDES})
-else (GFORTRAN_INCLUDES)
-  if (G2C_INCLUDES)
-    include_directories (${G2C_INCLUDES})
-  endif (G2C_INCLUDES)
-endif (GFORTRAN_INCLUDES)
+if (HAVE_CASACORE)
+  include_directories (${CASACORE_INCLUDES})
+  add_definitions (-DHAVE_CASA)
+else (HAVE_CASACORE)
+  message (STATUS "[DAL] Missing or incomplete installation of casacore!")
+endif (HAVE_CASACORE)
 
-if (HDF5_INCLUDES)
+if (HAVE_CFITSIO)
+  include_directories (${CFITSIO_INCLUDES})
+  add_definitions (-DHAVE_CFITSIO)
+else (HAVE_CFITSIO)
+  message (STATUS "[DAL] Missing or incomplete installation of CFITSIO!")
+endif (HAVE_CFITSIO)
+
+if (HAVE_WCSLIB)
+  include_directories (${WCSLIB_INCLUDES})
+  add_definitions (-DHAVE_WCSLIB)
+else (HAVE_WCSLIB)
+  message (STATUS "[DAL] Missing or incomplete installation of WCSLIB!")
+endif (HAVE_WCSLIB)
+
+if (HAVE_HDF5)
   include_directories (${HDF5_INCLUDES})
-endif (HDF5_INCLUDES)
-
-if (HAVE_PGPLOT)
-  include_directories (${PGPLOT_INCLUDES})
-endif (HAVE_PGPLOT)
-
-if (HAVE_PLPLOT)
-  include_directories (${PLPLOT_INCLUDES})
-endif (HAVE_PLPLOT)
-
-if (PNG_INCLUDES)
-  include_directories (${PNG_INCLUDES})
-endif (PNG_INCLUDES)
-
-if (HAVE_POSTGRESQL)
-  include_directories (${POSTGRESQL_INCLUDES})
-endif (HAVE_POSTGRESQL)
-
-if (HAVE_PYTHON)
-  include_directories (${PYTHON_INCLUDES})
-endif (HAVE_PYTHON)
-
-if (ROOT_INCLUDES)
-  include_directories (${ROOT_INCLUDES})
-endif (ROOT_INCLUDES)
-
-if (HAVE_CASA OR HAVE_CASACORE)
-  include_directories (${CASA_INCLUDES})
-endif (HAVE_CASA OR HAVE_CASACORE)
-
-if (HAVE_BLITZ)
-  include_directories (${BLITZ_INCLUDES})
-endif (HAVE_BLITZ)
+  add_definitions (-DHAVE_HDF5)
+  ## check individual header files: H5LT.h
+  if (NOT HAVE_HDF5_H5LT_H)
+    message (STATUS "[DAL] HDF5 installation incomplete: missing H5LT.h")
+  endif (NOT HAVE_HDF5_H5LT_H)
+  ## check individual header files: hdf5_hl.h
+  if (NOT HAVE_HDF5_HDF5_HL_H)
+    message (STATUS "[DAL] HDF5 installation incomplete: missing hdf5_hl.h")
+  endif (NOT HAVE_HDF5_HDF5_HL_H)
+else (HAVE_HDF5)
+  message (STATUS "[DAL] HDF5 installation incomplete!")
+endif (HAVE_HDF5)
 
 ## =============================================================================
 ##
@@ -399,61 +283,12 @@ endif (HAVE_BLITZ)
 ##
 ## =============================================================================
 
-## Create "crtools.h"
-
-configure_file (${USG_ROOT}/devel_common/cmake/config_crtools.h.in
-  ${RM_BINARY_DIR}/crtools.h)
-
-## Sub-directories
-
 if (RM_BUILD_EXTERNAL_TESTS)
   add_subdirectory (test)
 endif (RM_BUILD_EXTERNAL_TESTS)
 
 add_subdirectory (implement)
 add_subdirectory (apps)
-
-## =============================================================================
-##
-##  Creation of tar-archive
-##
-## =============================================================================
-
-find_program (tar_executable tar ${bin_locations})
-find_program (gzip_executable gzip ${bin_locations})
-
-if (tar_executable AND gzip_executable)
-
-  add_custom_target (create_archive
-    COMMENT "Creating tar-archive for RM-Tools and required packages."
-    WORKING_DIRECTORY ${USG_ROOT}
-    COMMAND ${tar_executable} -cvf crtools.tar --exclude .svn CMakeLists.txt
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn devel_common
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn release/release_area.txt
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn build/build.sh
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/cmake
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/flex
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/bison
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/wcslib
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/cfitsio
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/hdf5
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/casacore
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/plplot
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/boost
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/python
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/root
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/startools
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn src/DAL
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn src/RM-Tools
-    COMMAND ${gzip_executable} crtools.tar
-    COMMAND mv crtools.tar.gz crtools.tgz
-    )
-  
-else (tar_executable AND gzip_executable)
-
-  message (STATUS "[RM-Tools] Unable to create tar-archive - missing utilities!")
-
-endif (tar_executable AND gzip_executable)
 
 ## =============================================================================
 ##
@@ -472,40 +307,38 @@ if (RM_VERBOSE_CONFIGURE)
   message (STATUS " CMAKE_SYSTEM_64BIT ........: ${CMAKE_SYSTEM_64BIT}")
   message (STATUS " CMAKE_SYSTEM_BIG_ENDIAN .. : ${CMAKE_SYSTEM_BIG_ENDIAN}")
   message (STATUS " CMAKE_MODULE_PATH ........ : ${CMAKE_MODULE_PATH}")
-  message (STATUS "+------------------------------------------------------------+")
-  message (STATUS " BLITZ .................... : ${HAVE_BLITZ}")
-  message (STATUS " BOOST .................... : ${HAVE_BOOST}")
-  message (STATUS " CASA ..................... : ${HAVE_CASA}")
-  message (STATUS " CASACORE ................. : ${HAVE_CASACORE}")
-  message (STATUS " CFITSIO .................. : ${HAVE_CFITSIO}")
-  message (STATUS " Data Access Library (DAL)  : ${HAVE_DAL}")
-  message (STATUS " FFTW3 .................... : ${HAVE_FFTW3}")
-  message (STATUS " G2C ...................... : ${HAVE_G2C}")
-  message (STATUS " Glish .................... : ${HAVE_GLISH}")
-  message (STATUS " GTK ...................... : ${HAVE_GTK}")
-  message (STATUS " HDF5 ..................... : ${HAVE_HDF5}")
-  message (STATUS " LAPACK ................... : ${HAVE_LAPACK}")
-  message (STATUS " PGPLOT ................... : ${HAVE_PGPLOT}")
-  message (STATUS " PLplot ................... : ${HAVE_PLPLOT}")
-  message (STATUS " PNG ...................... : ${HAVE_PNG}")
-  message (STATUS " POPT ..................... : ${HAVE_POPT}")
-  message (STATUS " PostgreSQL ............... : ${HAVE_POSTGRESQL}")
-  message (STATUS " Python ................... : ${HAVE_PYTHON}")
-  message (STATUS " ROOT ..................... : ${HAVE_ROOT}")
-  message (STATUS " Star-Tools ............... : ${HAVE_STARTOOLS}")
-  message (STATUS " WCSLIB ................... : ${HAVE_WCSLIB}")
-  message (STATUS "+------------------------------------------------------------+")
-  message (STATUS " USG root directory ........ : ${USG_ROOT}")
-  message (STATUS " Source directory .......... : ${RM_SOURCE_DIR}")
-  message (STATUS " Installation location ..... : ${CMAKE_INSTALL_PREFIX}")
-  message (STATUS " Build the test programs ... : ${RM_BUILD_TESTS}")
-  message (STATUS " Print debugging messages .. : ${RM_DEBUGGING_MESSAGES}")
-  message (STATUS " Enable LOPES-Star routines  : ${RM_WITH_STARTOOLS}")
-  message (STATUS " Support for plotting ...... : ${RM_WITH_PLOTTING}")
-  message (STATUS " Support for Glish ......... : ${RM_WITH_GLISH}")
-  message (STATUS " Support for Python ........ : ${RM_WITH_PYTHON}")
-  message (STATUS " Graphical user interface .. : ${RM_WITH_GUI}")
-  message (STATUS " Test TBB dataset .......... : ${dataset_tbb}")
   message (STATUS "+============================================================+")
 
 endif (RM_VERBOSE_CONFIGURE)
+
+## =============================================================================
+##
+##  Configuration summary
+##
+## =============================================================================
+
+## Build the library
+
+set (rm_sources
+#  fits.cpp
+  rm.cpp
+  )
+
+add_library (rm ${rm_sources})
+
+target_link_libraries (rm
+  ${CASA_LIBRARIES}
+  ${CFITSIO_LIBRARIES}
+  ${WCSLIB_LIBRARIES}
+)
+
+## Build applications
+
+add_executable (rmsynth main.cpp)
+
+target_link_libraries (rmsynth
+  ${rm}
+  ${CASA_LIBRARIES}
+  ${CFITSIO_LIBRARIES}
+  ${WCSLIB_LIBRARIES}
+  )
