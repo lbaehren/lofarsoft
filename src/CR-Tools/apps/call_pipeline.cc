@@ -1120,12 +1120,13 @@ int main (int argc, char *argv[])
 
   // variables for reconstruction information (output of pipeline)
   unsigned int gt = 0;
+  char eventfilename[64] ;			         // Name of event file (first 64 characters)
   double CCheight, CCheight_NS;                          // CCheight will be used for EW polarization or ANY polarization
   double CCheight_error, CCheight_error_NS;
   bool CCconverged, CCconvergedNS;                       // is true if the Gaussian fit to the CCbeam converged
-  double Xheight, Xheight_NS;                          // CCheight will be used for EW polarization or ANY polarization
+  double Xheight, Xheight_NS;                            // CCheight will be used for EW polarization or ANY polarization
   double Xheight_error, Xheight_error_NS;
-  bool Xconverged, XconvergedNS;                       // is true if the Gaussian fit to the CCbeam converged
+  bool Xconverged, XconvergedNS;                         // is true if the Gaussian fit to the CCbeam converged
   double AzL, ElL, AzL_NS, ElL_NS;                       // Azimuth and Elevation
   double distanceResult = 0, distanceResultNS = 0;       // distance = radius of curvature
   double R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0; // R_0 from lateral distribution fit
@@ -1268,6 +1269,7 @@ int main (int argc, char *argv[])
     // create tree and tree structure (depends on chosen polarization)
     TTree roottree("T","LOPES");
     roottree.Branch("Gt",&gt,"Gt/i");	// GT as unsigned int
+    roottree.Branch("Eventname",&eventfilename,"Eventname/C");
 
     // the following branches are not used in the calibration mode
     if ( !calibrationMode ) {
@@ -1368,6 +1370,16 @@ int main (int argc, char *argv[])
       // if they are not set to true during reconstruction the event is not written into the root file
       goodEW = false;
       goodNS = false;
+
+
+      // Generate cstring with a length of 64 characters to write to the root file, using the eventname
+      string eventname_ =  eventname;
+      // deletes the file path, if it exists    
+      if (eventname_.find("/") != string::npos)
+	eventname_.erase(0,plotprefix.find_last_of('/')+1);
+      // resize to 64 characters if longer
+      eventname_.resize(64, char(0));
+      strcpy (eventfilename, eventname_.c_str());
 
       // reset all resuls to 0
       gt = 0;
