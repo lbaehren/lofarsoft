@@ -298,7 +298,7 @@ else
 	    rm -rf hdf5;
 	    rm -rf mathgl;
 	    rm -rf plplot pyrap python;
-	    rm -rf root;
+	    rm -rf rm root;
 	    rm -rf qt;
 	    rm -rf sip startools szip;
 	    rm -rf vtk;
@@ -415,9 +415,9 @@ case $param_packageName in
     casacore)
         echo "[`date`] Selected package CASACORE";
         ## -- build required packages
-		cd $basedir; ./build.sh wcslib
-		cd $basedir; ./build.sh cfitsio
-		cd $basedir; ./build.sh hdf5
+	cd $basedir; ./build.sh wcslib --force-build
+	cd $basedir; ./build.sh cfitsio --force-build
+	cd $basedir; ./build.sh hdf5
         ## -- build package
         build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
@@ -573,6 +573,12 @@ case $param_packageName in
 		cd $basedir; ./build.sh cfitsio
         echo "[`date`] Building BDSM package ..."
 		build_package bdsm src/BDSM;
+    ;;
+    rm)
+        echo "[`date`] Processing packages required for RM ..."
+		cd $basedir; ./build.sh dal
+		echo "[`date`] Building RM package ..."
+		build_package rm src/RM;
     ;;
     ## --------------------------------------------------------------------------
     ## --- General testing of environment ---------------------------------------
