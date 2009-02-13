@@ -296,20 +296,21 @@ add_subdirectory (apps)
 ##
 ## =============================================================================
 
-if (RM_VERBOSE_CONFIGURE)
-
-  message (STATUS "+============================================================+")
-  message (STATUS "| RM-Tools: Summary of configuration settings                |")
-  message (STATUS "+------------------------------------------------------------+")
-  message (STATUS " CMAKE_SYSTEM ............. : ${CMAKE_SYSTEM}")
-  message (STATUS " CMAKE_SYSTEM_VERSION ..... : ${CMAKE_SYSTEM_VERSION}")
-  message (STATUS " CMAKE_SYSTEM_PROCESSOR ... : ${CMAKE_SYSTEM_PROCESSOR}")
-  message (STATUS " CMAKE_SYSTEM_64BIT ........: ${CMAKE_SYSTEM_64BIT}")
-  message (STATUS " CMAKE_SYSTEM_BIG_ENDIAN .. : ${CMAKE_SYSTEM_BIG_ENDIAN}")
-  message (STATUS " CMAKE_MODULE_PATH ........ : ${CMAKE_MODULE_PATH}")
-  message (STATUS "+============================================================+")
-
-endif (RM_VERBOSE_CONFIGURE)
+message (STATUS "+============================================================+")
+message (STATUS "| RM-Tools: Summary of configuration settings                |")
+message (STATUS "+------------------------------------------------------------+")
+message (STATUS " CMAKE_SYSTEM ............. : ${CMAKE_SYSTEM}")
+message (STATUS " CMAKE_SYSTEM_VERSION ..... : ${CMAKE_SYSTEM_VERSION}")
+message (STATUS " CMAKE_SYSTEM_PROCESSOR ... : ${CMAKE_SYSTEM_PROCESSOR}")
+message (STATUS " CMAKE_SYSTEM_64BIT ........: ${CMAKE_SYSTEM_64BIT}")
+message (STATUS " CMAKE_SYSTEM_BIG_ENDIAN .. : ${CMAKE_SYSTEM_BIG_ENDIAN}")
+message (STATUS " CMAKE_MODULE_PATH ........ : ${CMAKE_MODULE_PATH}")
+message (STATUS "+------------------------------------------------------------+")
+message (STATUS " CFITSIO headers .......... : ${CFITSIO_INCLUDES}")
+message (STATUS " CFITSIO libraries ........ : ${CFITSIO_LIBRARIES}")
+message (STATUS " DAL headers .............. : ${DAL_INCLUDES}")
+message (STATUS " DAL libraries ............ : ${DAL_LIBRARIES}")
+message (STATUS "+============================================================+")
 
 ## =============================================================================
 ##
