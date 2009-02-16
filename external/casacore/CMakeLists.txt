@@ -470,5 +470,5 @@ endif (casacore_VERBOSE_CONFIGURE)
 ## =============================================================================
 
 if (NOT GFORTRAN_LIBRARIES)
-  message (SEND_ERROR "[casacore] Unable to build: missing gfortran libraries!")
+  message (STATUS "[casacore] Missing gfortran library!")
 endif (NOT GFORTRAN_LIBRARIES)
