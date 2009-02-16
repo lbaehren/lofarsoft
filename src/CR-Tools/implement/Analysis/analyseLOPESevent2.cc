@@ -147,7 +147,13 @@ namespace CR { // Namespace CR -- begin
                        true,true)) {
 	cerr << "analyseLOPESevent2::RunPipeline: " << "Error during SetupEvent()!" << endl;
 	return Record();
-      };
+      }
+
+      // Check if any antennas are left unflagged (otherwise quit)
+      if ( ntrue(AntennaSelection) == 0) {
+        cerr << "analyseLOPESevent2::RunPipeline: " << "All antennas flagged!" << endl;
+        return Record();
+      }
 
       // storte GT in return record
       erg.mergeField(lev_p->headerRecord(),"Date", RecordInterface::OverwriteDuplicates);
@@ -169,8 +175,7 @@ namespace CR { // Namespace CR -- begin
       CompleteBeamPipe_p->setCalibrationMode(false);
 
       // Plot the raw data, if desired
-      if (PlotRawData)
-      {
+      if (PlotRawData) {
 	// plot upsampled raw data: either in seperated plots seperated or all traces in one plot
         if (SinglePlots)
           CompleteBeamPipe_p->plotAllAntennas(PlotPrefix+ "-raw", beamformDR_p, AntennaSelection, true,
@@ -663,8 +668,17 @@ namespace CR { // Namespace CR -- begin
       Double_t fieldMin=0;
       Double_t maxdist=0;
 
+      // for cuts (counters)
+      unsigned int CutCloseToCore = 0;
+      unsigned int CutSmallSignal = 0;
+      unsigned int CutBadTiming = 0;
+      unsigned int CutSNR = 0;
+      double ccCenter = erg.asDouble("CCcenter");
+      double xCenter = erg.asDouble("Xcenter");
+
       // calculate errors and count number of clean (good) values
       unsigned int clean = 0;
+      cout << "\nApplying quality cuts..." << endl;
       for (unsigned int i = 0; i < Nant; ++i) {
         /* error of field strength = 19% + noise */
         fieldStrEr[i]=fieldStr[i]*0.19+noiseBgr[i];
@@ -678,14 +692,60 @@ namespace CR { // Namespace CR -- begin
         if (fieldStr[i] < fieldMin)
           fieldMin=fieldStr[i];
 
-        // what are these cuts for?
-        if ( (distance[i]>15) && (fieldStr[i]>1.5)  ) {
-          distanceClean[clean]  = distance[i];
-          distanceCleanEr[clean]= distanceEr[i];
-          fieldStrClean[clean]  = fieldStr[i];
-          fieldStrCleanEr[clean]= fieldStrEr[i];
-          clean++;
+        // apply Steffen's cuts
+        if (distance[i]<15) {
+          CutCloseToCore++;
+          cout << "analyseLOPESevent2::fitLateralDistribution: Antenna cut because close to core!" << endl;
+          continue;
         }
+        if (fieldStr[i]<1.5) {
+          CutSmallSignal++;
+          cout << "analyseLOPESevent2::fitLateralDistribution: Antenna cut because signal to small!" << endl;
+          continue;
+        }
+        // pulse time correct?
+        if (abs(timePos[i]*1e-9 - ccCenter) > getCCWindowWidth()/2.) {
+          CutBadTiming++;
+          cout << "analyseLOPESevent2::fitLateralDistribution: Antenna cut because of bad timing: "
+               << "CCcenter = " << ccCenter*1e9 << " , pulse time = " << timePos[i]
+               << endl;
+          continue;
+        }
+        // SNR >= 1 ?
+        if ( abs(fieldStr[i]/noiseBgr[i]) < 1.) {
+          CutSNR++;
+          cout << "analyseLOPESevent2::fitLateralDistribution: Antenna cut because low SNR!" << endl;
+          continue;
+        }
+
+        // store value as good value if it passed all the cuts
+        distanceClean[clean]  = distance[i];
+        distanceCleanEr[clean]= distanceEr[i];
+        fieldStrClean[clean]  = fieldStr[i];
+        fieldStrCleanEr[clean]= fieldStrEr[i];
+        clean++;
+      }
+
+      // store number of cut antennas
+      erg.define("CutCloseToCore",CutCloseToCore);
+      erg.define("CutSmallSignal",CutSmallSignal);
+      erg.define("CutBadTiming",CutBadTiming);
+      erg.define("CutSNR",CutSNR);
+
+      // check if CC-beam was reconstructed (position inside of fit range)
+      // oterwise don't consider any antenna as good
+      if (!erg.asBool("CCconverged") ) {
+        clean = 0;
+        cout << "analyseLOPESevent2::fitLateralDistribution: Error: CC-beam did not converge." << endl; 
+      }
+      if ( (ccCenter < fitStart()) || (ccCenter > fitStop()) ) {
+        clean = 0;
+        cout << "analyseLOPESevent2::fitLateralDistribution: Error: CC-beam-center out of range (maybe fit did not converge)." << endl; 
+      }
+      // for consistency check if X-beam and CC-beam converged to the same peak
+      if ( abs(xCenter -ccCenter) > getCCWindowWidth()/2.  ) {
+        clean = 0;
+        cout << "analyseLOPESevent2::fitLateralDistribution: Error: X-beam and CC-beam converged to different peaks!" << endl; 
       }
 
       cout << "\nAntennas in the Plot: " << ant << endl;
@@ -784,22 +844,44 @@ namespace CR { // Namespace CR -- begin
       easstats->Draw();
 
       /* FIT */
-      TF1 *fitfunc;
-      fitfunc=new TF1("fitfunc","[0]*exp(-x/[1])",50,190);
-      fitfunc->SetParName(0,"#epsilon_{0}");
-      fitfunc->SetParName(1,"R_{0}");
-      //    fitfunc->SetParameter(0,20);
-      fitfunc->SetParameter(1,200);
-      fitfunc->GetXaxis()->SetRange(20,300);
-      //  fitfunc=new TF1("fitfunc","[0]*exp(-x/[1])+[2]",60,180);
-      //fitfunc->SetParameters(15,60,10000);
-      //  fitfunc->SetFillColor(19);
-      fitfunc->SetFillStyle(0);
-      fitfunc->SetLineWidth(2);
+      // do fit only if there are at least 3 good antennas left (otherwise set parameters to 0)!
+      if (clean >= 3) {
+        TF1 *fitfunc;
+        fitfunc=new TF1("fitfunc","[0]*exp(-x/[1])",50,190);
+        fitfunc->SetParName(0,"#epsilon_{0}");
+        fitfunc->SetParName(1,"R_{0}");
+        //    fitfunc->SetParameter(0,20);
+        fitfunc->SetParameter(1,200);
+        fitfunc->GetXaxis()->SetRange(20,300);
+        //  fitfunc=new TF1("fitfunc","[0]*exp(-x/[1])+[2]",60,180);
+        //fitfunc->SetParameters(15,60,10000);
+        //  fitfunc->SetFillColor(19);
+        fitfunc->SetFillStyle(0);
+        fitfunc->SetLineWidth(2);
 
-      cout << "------------------------------"<<endl;
-      latProClean->Fit(fitfunc, "WME");
-      ptstats->Draw();
+        cout << "------------------------------"<<endl;
+        latProClean->Fit(fitfunc, "WME");
+        ptstats->Draw();
+
+        // write fit results to record with other results
+        erg.define("eps",fitfunc->GetParameter(0));
+        erg.define("R_0",fitfunc->GetParameter(1));
+        erg.define("sigeps",fitfunc->GetParError(0));
+        erg.define("sigR_0",fitfunc->GetParError(1));
+        cout << "Result of fit:\n"
+             << "eps = " << fitfunc->GetParameter(0) << "\t +/- " << fitfunc->GetParError(0) << "\t µV/m/MHz\n"
+             << "R_0 = " << fitfunc->GetParameter(1) << "\t +/- " << fitfunc->GetParError(1) << "\t m\n"
+             << endl;
+      } else {
+        erg.define("eps",0.);
+        erg.define("R_0",0.);
+        erg.define("sigeps",0.);
+        erg.define("sigR_0",0.);
+        cout << "No fit was done, because less than 3 antennas are 'good':\n"
+             << "eps = " << 0 << "\t +/- " << 0 << "\t µV/m/MHz\n"
+             << "R_0 = " << 0 << "\t +/- " << 0 << "\t m\n"
+             << endl;
+      }
 
       // write plot to file
       stringstream plotNameStream;
@@ -807,16 +889,6 @@ namespace CR { // Namespace CR -- begin
       cout << "\nCreating plot: " << plotNameStream.str() << endl;
       c1->Print(plotNameStream.str().c_str());
 
-      cout << "Result of fit:\n"
-           << "eps = " << fitfunc->GetParameter(0) << "\t +/- " << fitfunc->GetParError(0) << "\t µV/m/MHz\n"
-           << "R_0 = " << fitfunc->GetParameter(1) << "\t +/- " << fitfunc->GetParError(1) << "\t m\n"
-           << endl;
-
-      // write fit results to record with other results
-      erg.define("eps",fitfunc->GetParameter(0));
-      erg.define("R_0",fitfunc->GetParameter(1));
-      erg.define("sigeps",fitfunc->GetParError(0));
-      erg.define("sigR_0",fitfunc->GetParError(1));
     } catch (AipsError x) {
       cerr << "analyseLOPESevent2::fitLateralDistribution: " << x.getMesg() << endl;
     }

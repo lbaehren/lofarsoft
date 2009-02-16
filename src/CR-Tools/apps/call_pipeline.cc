@@ -208,11 +208,11 @@ bool generateSpectra = false;	      // by default no spectra are plotted
 bool singlePlots = false;	      // by default there are no single plots for each antenna
 bool PlotRawData = false;	      // by default there the raw data are not plotted
 bool CalculateMaxima = false;	      // by default the maxima are not calculated
-bool listCalcMaxima=false;    	      // print calculated maxima in more user friendly way
-bool printShowerCoordinates=false;    // print the distance between antenna and shower core
+bool listCalcMaxima = false;         // print calculated maxima in more user friendly way
+bool printShowerCoordinates=false;   // print the distance between antenna and shower core
 bool RotatePos = true; 	              // should be true if coordinates are given in KASKADE frame
 bool verbose = true;
-bool ignoreDistance = true;           // distance value of the eventlist will be ignored
+bool ignoreDistance = true;          // distance value of the eventlist will be ignored
 bool simplexFit = true;
 int doTVcal = -1;		      // 1: yes, 0: no, -1: use default	
 bool doGainCal = true;		      // calibration of the electrical fieldstrength
@@ -917,7 +917,7 @@ void readConfigFile (const string &filename)
 	    cout << "writeBadEvents set to 'true'.\n";
 	  } else
           if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    calibrationMode = false;
+	    writeBadEvents = false;
 	    cout << "writeBadEvents set to 'false'.\n";
 	  } else{
             cerr << "\nError processing file \"" << filename <<"\".\n" ;
@@ -949,7 +949,7 @@ void readConfigFile (const string &filename)
 	    cout << "lateralOutputFile set to 'true'.\n";
 	  } else
           if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    calibrationMode = false;
+	    lateralOutputFile = false;
 	    cout << "lateralOutputFile set to 'false'.\n";
 	  } else{
             cerr << "\nError processing file \"" << filename <<"\".\n" ;
@@ -962,10 +962,10 @@ void readConfigFile (const string &filename)
              || (keyword.compare("Lateraldistribution")==0) || (keyword.compare("LateralDistribution")==0)) {
           if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
 	    lateralDistribution = true;
-	    cout << "lateralOutputFile set to 'true'.\n";
+	    cout << "lateralDistribution set to 'true'.\n";
 	  } else
           if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    calibrationMode = false;
+	    lateralDistribution = false;
 	    cout << "lateralDistribution set to 'false'.\n";
 	  } else{
             cerr << "\nError processing file \"" << filename <<"\".\n" ;
@@ -1139,6 +1139,10 @@ int main (int argc, char *argv[])
   double rmsCCbeam, rmsCCbeam_NS;			 // rms values of the beams in remote region
   double rmsXbeam, rmsXbeam_NS;
   double rmsPbeam, rmsPbeam_NS;
+  double CutCloseToCore, CutCloseToCore_NS;              // # of cut antennas in lateral distribution fit
+  double CutSmallSignal, CutSmallSignal_NS;              // # of cut antennas in lateral distribution fit
+  double CutBadTiming, CutBadTiming_NS;                  // # of cut antennas in lateral distribution fit
+  double CutSNR, CutSNR_NS;                              // # of cut antennas in lateral distribution fit
 
   try {
     // allocate space for arrays with pulse properties
@@ -1299,6 +1303,10 @@ int main (int argc, char *argv[])
           roottree.Branch("sigR_0",&sigR_0,"sigR_0/D");
           roottree.Branch("eps",&eps,"eps/D");
           roottree.Branch("sigeps",&sigeps,"sigeps/D");
+          roottree.Branch("CutCloseToCore",&CutCloseToCore,"CutCloseToCore/I");
+          roottree.Branch("CutSmallSignal",&CutSmallSignal,"CutSmallSignal/I");
+          roottree.Branch("CutBadTiming",&CutBadTiming,"CutBadTiming/I");
+          roottree.Branch("CutSNR",&CutSNR,"CutSNR/I");
         }
       }
       if ( (polarization == "EW") || (polarization == "BOTH")) {
@@ -1320,6 +1328,10 @@ int main (int argc, char *argv[])
           roottree.Branch("sigR_0_EW",&sigR_0,"sigR_0_EW/D");
           roottree.Branch("eps_EW",&eps,"eps_EW/D");
           roottree.Branch("sigeps_EW",&sigeps,"sigeps_EW/D");
+          roottree.Branch("CutCloseToCore_EW",&CutCloseToCore,"CutCloseToCore_EW/I");
+          roottree.Branch("CutSmallSignal_EW",&CutSmallSignal,"CutSmallSignal_EW/I");
+          roottree.Branch("CutBadTiming_EW",&CutBadTiming,"CutBadTiming_EW/I");
+          roottree.Branch("CutSNR_EW",&CutSNR,"CutSNR_EW/I");
         }
       }
       if ( (polarization == "NS") || (polarization == "BOTH")) {
@@ -1341,6 +1353,10 @@ int main (int argc, char *argv[])
           roottree.Branch("sigR_0_NS",&sigR_0_NS,"sigR_0_NS/D");
           roottree.Branch("eps_NS",&eps_NS,"eps_NS/D");
           roottree.Branch("sigeps_NS",&sigeps_NS,"sigeps_NS/D");
+          roottree.Branch("CutCloseToCore_NS",&CutCloseToCore_NS,"CutCloseToCore_NS/I");
+          roottree.Branch("CutSmallSignal_NS",&CutSmallSignal_NS,"CutSmallSignal_NS/I");
+          roottree.Branch("CutBadTiming_NS",&CutBadTiming_NS,"CutBadTiming_NS/I");
+          roottree.Branch("CutSNR_NS",&CutSNR_NS,"CutSNR_NS/I");
         }
       }
     } //if
@@ -1395,6 +1411,10 @@ int main (int argc, char *argv[])
       eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0;
       rmsCCbeam = 0, rmsXbeam = 0, rmsPbeam = 0;
       rmsCCbeam_NS = 0, rmsXbeam_NS = 0, rmsPbeam_NS = 0;
+      CutCloseToCore = 0, CutCloseToCore_NS = 0;
+      CutSmallSignal = 0, CutSmallSignal_NS = 0;
+      CutBadTiming = 0, CutBadTiming_NS = 0;
+      CutSNR = 0, CutSNR_NS = 0;
 
 
       // print information and process the event
@@ -1516,7 +1536,11 @@ int main (int argc, char *argv[])
             sigR_0 = results.asDouble("sigR_0");
             eps = results.asDouble("eps");
             sigeps = results.asDouble("sigeps");
-          }
+            CutCloseToCore = results.asInt("CutCloseToCore");
+            CutSmallSignal = results.asInt("CutSmallSignal");
+            CutBadTiming = results.asInt("CutBadTiming");
+            CutSNR = results.asInt("CutSNR");
+         }
 
           // get the pulse properties
           rawPulsesMap = eventPipeline.getRawPulseProperties();
@@ -1601,6 +1625,10 @@ int main (int argc, char *argv[])
             sigR_0_NS = results.asDouble("sigR_0");
             eps_NS = results.asDouble("eps");
             sigeps_NS = results.asDouble("sigeps");
+            CutCloseToCore_NS = results.asInt("CutCloseToCore");
+            CutSmallSignal_NS = results.asInt("CutSmallSignal");
+            CutBadTiming_NS = results.asInt("CutBadTiming");
+            CutSNR_NS = results.asInt("CutSNR");
           }
 
           // get the pulse properties and insert them into allready existing EW map

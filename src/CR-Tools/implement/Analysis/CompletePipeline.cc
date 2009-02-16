@@ -553,22 +553,32 @@ namespace CR { // Namespace CR -- begin
   }
 
 
-  Slice CompletePipeline::calculateNoiseRange (const Vector<Double>& xaxis) const
+  Slice CompletePipeline::calculateNoiseRange (const Vector<Double>& xaxis, const double& ccBeamcenter) const
   {
     try {
       // check if plotStart is <= plotStop
-      if (plotStop_p < plotStart_p)
-      {
-        cerr << "CompletePipeline:calculateNoiseRange: Error: plotStop_p is greater than plotStart_p!" << std::endl;
+      if (ccBeamcenter == 0.0) {
+        cerr << "CompletePipeline:calculateNoiseRange: Error: CC-beam did not converged !" << std::endl;
         return Slice(0,0);
       }
-      //number of elements smaller then starting value of plot range
-      int startsample = ntrue(xaxis<plotStart_p);
-      //number of elements smaller then end of plot range
-      int stopsample = ntrue(xaxis<plotStop_p);  
+
+      // calculate noise interval
+      int startsample = ntrue(xaxis<ccBeamcenter-15*ccWindowWidth_p);
+      int stopsample = ntrue(xaxis<ccBeamcenter-5*ccWindowWidth_p);
+
+      if (startsample >= stopsample) {
+        cerr << "CompletePipeline:calculateNoiseRange: Error: range is too small!" << std::endl;
+        return Slice(0,0);
+      }
+
+
+      if (verbose)
+        cout << "CompletePipeline:calculateNoiseRange: Range is from"
+             << xaxis(startsample) << " s until " << xaxis(stopsample) << " s."
+             << endl;
 
       // create Slice with noiseRange
-      return  Slice((startsample+startsample-stopsample),(stopsample-startsample));
+      return  Slice((startsample),(stopsample-startsample));
     } catch (AipsError x) {
         cerr << "CompletePipeline:calculateNoiseRange: " << x.getMesg() << std::endl;
     }
@@ -582,8 +592,7 @@ namespace CR { // Namespace CR -- begin
   {
     try {
       // check if ccBeam has converged
-      if (ccBeamcenter == 0.0)
-      {
+      if (ccBeamcenter == 0.0) {
         cerr << "CompletePipeline:calculateCCRange: Error: CC-beam did not converged !" << std::endl;
         return Slice(0,0);
       }
@@ -1332,7 +1341,7 @@ namespace CR { // Namespace CR -- begin
 
         // Define the time range considered (the same length as the plot range, 
         // but before actual plot range)
-        rangeNoise = calculateNoiseRange(timeValues);
+        rangeNoise = calculateNoiseRange(timeValues, cc_center);
         timeRangeNoise = timeValues(rangeNoise);
      }
 
@@ -1588,10 +1597,10 @@ namespace CR { // Namespace CR -- begin
 
 
       // Define the time range considered for peak search 
-      Slice range = calculateCCRange(timeValues,cc_center);
+      Slice range = calculateCCRange(timeValues, cc_center);
       // Define the time range considered (the same length as the plot range, 
       // but before actual plot range)
-      Slice rangeNoise = calculateNoiseRange(timeValues);
+      Slice rangeNoise = calculateNoiseRange(timeValues, cc_center);
 
 
       // Start with height 0 and search for heigher and lower values
@@ -1653,26 +1662,24 @@ namespace CR { // Namespace CR -- begin
 	noise /=timeRangeNoise.nelements();
 
         // print the calculated values
-        std::cout << std::setw(2) << i+1 << " " <<std::setw(7) <<extremum*1e6 << " ";
-	std::cout << std::setw(8) << noise*1e+6  << " " << std::setw(8)<< timeRange(extrematimevalue)*1e6 ;
-	std::cout << std::endl;
+        cout << setw(2) << i+1 << " " << setw(7) <<extremum*1e6 << " ";
+	cout << setw(8) << noise*1e+6  << " " << setw(8)<< timeRange(extrematimevalue)*1e6 ;
+	cout << endl;
       }else{
         // antenna has bad data
         // get current trace
         traceNoise = yValues.column(i)(rangeNoise);
         // loop through the values and search for the heighest and lowest one
-        for(unsigned int j = 0; j < timeRangeNoise.nelements(); j++)
-	{
+        for(unsigned int j = 0; j < timeRangeNoise.nelements(); j++) {
 	  noise += abs(traceNoise(j));
 	}
 	noise /=timeRangeNoise.nelements();
-        std::cout << std::setw(2) << i+1 << " 0.0      "<< std::setw(8) << noise*1e+6  << " 0.0" <<std::endl;
+        cout << std::setw(2) << i+1 << " 0.0      "<< setw(8) << noise*1e+6  << " 0.0" << endl;
       }
 
-    } catch (AipsError x) 
-      {
-        std::cerr << "CompletePipeline:listCalcMaxima: " << x.getMesg() << std::endl;
-      }; 
+    } catch (AipsError x) {
+       cerr << "CompletePipeline:listCalcMaxima: " << x.getMesg() << endl;
+    }
   }
 
 

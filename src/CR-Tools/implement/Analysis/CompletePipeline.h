@@ -424,15 +424,16 @@ namespace CR { // Namespace CR -- begin
 
 
     /*!
-      \brief Gets a Slice with the time interval BEFORE the plotrange 
+      \brief Gets a Slice with the time interval before the cc-beam
              for the given xaxis
 
       \param xaxis            -- a time axis (may be upsampled or not)
+      \param ccBeamcenter      -- position in time of the CC-beam center
 
-      \return plotRangeNoise  -- A Slice containing the indices of the xaxis interval corresponding to the
-                                 class variables plotStart_p and plotStop_p
+      \return noiseRange      -- a Slice containing the indices of the xaxis interval corresponding to 
+                                 CC-beam-center - 15 * cc-window until CC-beam-center - 5 * cc-window
     */
-    Slice calculateNoiseRange (const Vector<Double>& xaxis) const;
+    Slice calculateNoiseRange (const Vector<Double>& xaxis, const double& ccBeamcenter) const;
 
 
 
