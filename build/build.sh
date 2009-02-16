@@ -13,6 +13,7 @@
 ##
 
 basedir=`pwd`
+HOSTNAME=`hostname -s`
 SYSTEM_NAME=`uname -s`
 SYSTEM_CPU=`uname -p`
 FORCE_BUILD=0;
@@ -108,6 +109,10 @@ make_command ()
     else
       SYSTEM_NOF_CPU=1
     fi
+  fi
+
+  if [ "$HOSTNAME" == "ray" ] ; then
+    ENABLE_MULTITHREADING=0;
   fi
 
   ## set make command based on control parameter
