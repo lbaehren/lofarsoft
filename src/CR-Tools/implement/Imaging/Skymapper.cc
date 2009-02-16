@@ -128,11 +128,20 @@ namespace CR {  // Namespace CR -- begin
   
   void Skymapper::copy (Skymapper const& other)
   {
+    /* Adjust array sizes */
+    bufferStart_p.resize(other.bufferStart_p.nelements());
+    bufferEnd_p.resize(other.bufferEnd_p.nelements());
+    bufferStep_p.resize(other.bufferStep_p.nelements());
+
+    /* Copy values of internal variables */
     beamformer_p         = other.beamformer_p;
     coord_p              = other.coord_p;
     filename_p           = other.filename_p;
     nofProcessedBlocks_p = other.nofProcessedBlocks_p;
     verbose_p            = other.verbose_p;
+    bufferStart_p        = other.bufferStart_p;
+    bufferEnd_p          = other.bufferEnd_p;
+    bufferStep_p         = other.bufferStep_p;
   }
   
   // ============================================================================
@@ -243,14 +252,11 @@ namespace CR {  // Namespace CR -- begin
     bool status (true);
 
     /* Initialize variables for book-keeping */
-    verbose_p            = 0;
     nofProcessedBlocks_p = 0;
     
     /*
-      Set up the beamformer:
-      - set sky positions values
-      - set frequency values
-    */
+     *  Configure the Beamformer.
+     */
     try {
       Matrix<double> skyPos = coord_p.spatialCoordinate().positionValues();
       Vector<double> freq   = coord_p.timeFreqCoordinate().frequencyValues();
@@ -261,28 +267,43 @@ namespace CR {  // Namespace CR -- begin
     }
 
     /*
-      Set up the stride used to go through the pixel array of the output image
-    */
-    CoordinateType coordType = coord_p.timeFreqCoordinate().beamCoordDomain();
-    uint nofAxes             = coord_p.nofAxes();
-    start_p.resize(nofAxes);    start_p  = 0;
-    length_p.resize(nofAxes);   length_p = 1;
-    stride_p.resize(nofAxes);   stride_p = 1;
-    switch (coordType.type()) {
+     *  Set up the characteristics of the buffer array and the slicing
+     *  information on how to insert it into the pixel array of the output
+     *  image.
+     */
+    CoordinateType coordType    = coord_p.timeFreqCoordinate().beamCoordDomain();
+    uint nofAxes                = coord_p.nofAxes();
+    casa::IPosition bufferShape = coord_p.shape();
+
+    bufferStart_p.resize(nofAxes);
+    bufferEnd_p.resize(nofAxes);
+    bufferStep_p.resize(nofAxes);
+
+    bufferStart_p = 0;
+    bufferEnd_p   = coord_p.shape()-1;
+    bufferStep_p  = 0;
+    
+    switch (coordType.type()) {   // [Long,Lat,Radius,Freq,Time]
     case CoordinateType::Time:
-      stride_p(nofAxes-2) = coord_p.timeFreqCoordinate().blocksize();
-      length_p(nofAxes-2) = coord_p.timeFreqCoordinate().blocksize();
+      timeFreqAxis_p                = nofAxes-1;
+      bufferShape(timeFreqAxis_p-1) = 1;
+      bufferShape(timeFreqAxis_p)   = beamformer_p.shapeBeam()[0];
+      bufferStep_p(timeFreqAxis_p)  = coord_p.timeFreqCoordinate().blocksize();
       break;
     case CoordinateType::Frequency:
-      stride_p(nofAxes-2) = 1;
-      length_p(nofAxes-1) = coord_p.timeFreqCoordinate().fftLength();
+      timeFreqAxis_p                = nofAxes-2;
+      bufferShape(timeFreqAxis_p+1) = 1;                             // Time
+      bufferShape(timeFreqAxis_p)   = beamformer_p.shapeBeam()[0];   // Frequency
+      bufferStep_p(timeFreqAxis_p)  = 1;                             // Frequency
       break;
     default:
-      std::cerr << "[Skymapper::initSkymapper] Unsopported coordinate type!"
+      std::cerr << "-- Unsopported coordinate type!"
 		<< std::endl;
       break;
     }
-
+    
+    bufferArray_p.resize(bufferShape);
+    
     /*
       With the image data written into an AIPS++ PagedImage, we need to create
       and initialize one first, before we can start inserting the computed 
@@ -297,83 +318,64 @@ namespace CR {  // Namespace CR -- begin
 					    csys,
 					    filename_p);
     
-    // check the image file created in disk
-    if (image_p->ok() && image_p->isWritable()) {
-      cout << "[Skymapper::initSkymapper] Image file appears ok and is writable."
-	   << endl;
+    /*
+     *  Provide some minimal feedback about the image file created on disk.
+     */
+
+    if (!image_p->ok()) {
+      std::cerr << "[Skymapper::initSkymapper] Image is not ok!" << std::endl;
+    }
+
+    if (!image_p->isWritable()) {
+      std::cerr << "[Skymapper::initSkymapper] Image is not writable!" << std::endl;
     }
     
     return status;
   }
-  
-  // ---------------------------------------------------------------- processData
+
+  //_____________________________________________________________________________
+  //                                                                  processData
   
   bool Skymapper::processData (Matrix<DComplex> const &data)
   {
     bool status (true);
+    
+    casa::IPosition shape (coord_p.shape());
+    casa::IPosition shapeBeam (beamformer_p.shapeBeam());
+    casa::IPosition pos (bufferArray_p.shape());
+    Matrix<double> beam (shapeBeam);
 
-    // forward the data to the beamformer for processing
-    Matrix<double> beam (beamformer_p.shapeBeam());
+    //______________________________________________________
+    // Some basic feedback on the used settings
+
+    std::cout << "[Skymapper::processData]" << std::endl;
+    std::cout << "-- Input data      = Matrix<DComplex>"    << endl;
+    std::cout << "-- Quantity domain = " << beamformer_p.domainName()  << endl;
+    std::cout << "-- Skymap quantity = " << beamformer_p.skymapType().name() << endl;
+    std::cout << "-- TimeFreq index  = " << timeFreqAxis_p        << endl;
+    std::cout << "-- shape(data)     = " << data.shape()          << endl;
+    std::cout << "-- shape(beam)     = " << shapeBeam             << endl;
+    std::cout << "-- shape(buffer)   = " << bufferArray_p.shape() << endl;
+    std::cout << "-- shape(image)    = " << coord_p.shape()       << endl;
+
+    //______________________________________________________
+    // Forward the input data to the Beamformer for processing
+
     status = beamformer_p.processData (beam,
 				       data);
 
-    /*
-      Inserted the computed pixel values into the image.
-    */
+    return status;
+    
     if (status) {
-      // Declare additional variables
-      casa::IPosition shape (coord_p.shape());
-      casa::IPosition start  (shape.nelements(),0);
-      casa::IPosition stride (shape.nelements(),1);
-
-      // Set up temporary array used to insert the output from the Beamformer
-      // into the pixel array of the PagedImage; this approach is not too 
-      // efficient, so a better method needs to be found.
-      
-      casa::Array<double> tmp (IPosition(5,
-					 shape(0),
-					 shape(1),
-					 shape(2),
-					 1,
-					 1)
-			       );
-      
-      // Adjust the slicing operators
-      start(3) = nofProcessedBlocks_p*stride_p(stride_p.nelements()-2);
-
-      /*
-	Insert the previously computed pixel values into the pixel array of
-	the already existing image.
-      */
-      
-      // -----------------------------------------
-      // insert one spectrum at a time
-
-//       for (start(0)=0; start(0)<shape(0); start(0)++) {
-// 	for (start(1)=0; start(1)<shape(1); start(1)++) {
-// 	  for (start(2)=0; start(2)<shape(2); start(2)++) {
-//  	    image_p->putSlice (beam.row(coord),start,stride);
-// 	    // increment counter
-// 	    coord++;
-// 	  }  // -- end loop: start(2)
-// 	}  // -- end loop: start(1)
-//       }  // -- end loop: start(0)
-      
-      // -----------------------------------------
-      // insert radius-frequency plain at a time
-
-      IPosition beamSliceStart (2,0);
-      IPosition beamSliceEnd (2,shape(4)-1);
-
-      for (start(0)=0; start(0)<shape(0); start(0)++) {      // Longitude
-	for (start(1)=0; start(1)<shape(1); start(1)++) {    // Latitude
-	  for (start(2)=0; start(2)<shape(2); start(2)++) {  // Radius
+      for (pos(0)=0; pos(0)<shape(0); pos(0)++) {      // Longitude
+	for (pos(1)=0; pos(1)<shape(1); pos(1)++) {    // Latitude
+	  for (pos(2)=0; pos(2)<shape(2); pos(2)++) {  // Radius
+	    for (pos(timeFreqAxis_p)=0; pos(timeFreqAxis_p)<shape(timeFreqAxis_p); pos(timeFreqAxis_p)++) {
+	    }
 	  }
 	}
       }
-
-      // -----------------------------------------
-
+      
     } else {
       cerr << "[Skymapper::processData] No processing due to Beamformer error"
 	   << endl;
@@ -385,22 +387,57 @@ namespace CR {  // Namespace CR -- begin
       not, in order to keep navigation within the image pixel array consistent.
     */
     nofProcessedBlocks_p++;
-
-    return status;
-  }
-
-  // -------------------------------------------------------- write_beam_to_image
-
-  bool Skymapper::write_beam_to_image (Matrix<double> const &beam)
-  {
-    bool status (true);
-
     
-
     return status;
   }
   
-  // -------------------------------------------------------------------- summary
+  //_____________________________________________________________________________
+  //                                                                  processData
+  
+  bool Skymapper::processData (DataReader *dr)
+  {
+    bool status (true);
+    
+    /*
+     * Check the settings within the DataReader object; most important of all,
+     * the blocksize and the number of antennas must be correct, because otherwise
+     * matrix operations will fail.
+     */
+    if (coord_p.timeFreqCoordinate().blocksize() != dr->blocksize()) {
+	std::cerr << "[Skymapper::processData] "
+		  << " Mismatch discovered in value of blocksize!"
+		  << std::endl;
+	std::cerr << "-- Skymap coordinates : "
+		  << coord_p.timeFreqCoordinate().blocksize()
+		  << std::endl;
+	std::cerr << "-- DataReader         : " 
+		  << dr->blocksize() 
+		  << std::endl;
+	return false;
+    }
+    
+    /*
+     * Loop over the number of input data blocks which are to be processed and 
+     * written to the output image
+     */
+    uint nofBlocks = coord_p.timeFreqCoordinate().nofBlocks();
+    Matrix<casa::DComplex> data (dr->fftLength(),
+				 dr->nofSelectedAntennas());
+    
+    for (uint block(0); block<nofBlocks; block++) {
+      // retrieve block of data
+      data = dr->calfft();
+      // forward the data for processing
+      status = processData (data);
+      // go to the next block of data
+      dr->nextBlock();
+    }
+    
+    return status;
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                      summary
   
   void Skymapper::summary (std::ostream &os)
   {
@@ -430,8 +467,10 @@ namespace CR {  // Namespace CR -- begin
     os << " --> Filename                 = " << filename()                 << endl;
     os << " --> Shape of pixel array     = " << coord_p.shape()            << endl;
     os << " --> Shape of beam array      = " << beamformer_p.shapeBeam()   << endl;
-    os << " --> Image array stride       = " << stride_p                   << endl;
-    os << " --> Image buffer shape       = " << length_p                   << endl;
+    os << " --> buffer start position    = " << bufferStart_p              << endl;
+    os << " --> buffer end position      = " << bufferEnd_p                << endl;
+    os << " --> buffer step size         = " << bufferStep_p               << endl;
+    os << " --> index of the target axis = " << timeFreqAxis_p             << endl;
     os << " --> Domain of image quantity = " << beamformer_p.domainName()  << endl;
     os << " --> Skymap quantity          = " << beamformer_p.skymapType().name() << endl;
   }

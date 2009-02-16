@@ -53,6 +53,7 @@
 #include <Coordinates/SkymapCoordinate.h>
 #include <Observation/ObservationData.h>
 #include <Imaging/Beamformer.h>
+#include <IO/DataReader.h>
 
 using casa::Matrix;
 using casa::String;
@@ -84,6 +85,7 @@ namespace CR {  // Namespace CR -- begin
       <li>SkymapCoordinate
       <li>SkymapQuantity
       <li>SkymapperTools
+      <li>DataReader
     </ul>
       
     <h3>Synopsis</h3>
@@ -160,13 +162,18 @@ namespace CR {  // Namespace CR -- begin
     casa::PagedImage<Double> *image_p;
 
     // -- book-keeping
+
+    //! Aray buffering the data returned by the Beamformer 
+    casa::Array<double> bufferArray_p;
+    //! Position marking the start of the buffer within the output array
+    casa::IPosition bufferStart_p;
+    //! Position marking the end of the buffer within the output array
+    casa::IPosition bufferEnd_p;
+    //! Increment of the position markers between two subsequent data-blocks
+    casa::IPosition bufferStep_p;
+    //! Index of the time-frequency axis of the target domain
+    uint timeFreqAxis_p;
     
-    //! Start position when writing new data to the image pixel array
-    casa::IPosition start_p;
-    //! Length/shape of the array written to the image pixel array
-    casa::IPosition length_p;
-    //! Stride along the axes within the exported image array
-    casa::IPosition stride_p;
     //! Switch to enable/disable verbose mode
     short verbose_p;
     //! The number of processed data blocks so far
@@ -283,15 +290,6 @@ namespace CR {  // Namespace CR -- begin
     }
 
     /*!
-      \brief Get the stride along the axes within the exported image array
-
-      \return stride -- Stride along the axes within the exported image array
-    */
-    inline IPosition stride () const {
-      return stride_p;
-    }
-    
-    /*!
       \brief How many blocks of data have been processed so far?
       
       \return nofProcessedBlocks -- The number of processed data blocks so far
@@ -345,10 +343,6 @@ namespace CR {  // Namespace CR -- begin
     /*!
       \brief Process a block of data and add the result to the image being created
       
-      \todo We need to check whether of not we have reached the maximum number of
-      blocks to be processed; otherwise will operate outside the range of the 
-      image pixel data array.
-      
       \param data -- Array with the input data, [channels,antennas]; typically
              this will be frequency domain data after calibration.
       
@@ -356,6 +350,19 @@ namespace CR {  // Namespace CR -- begin
               error was encountered.
     */
     bool processData (Matrix<DComplex> const &data);
+
+    /*!
+      \brief Process the datato fill the image
+
+      Instead of handling reading in the data yourself -- i.e. in the application
+      program using this class -- one can also have the DataReader handle this
+      part of the processing. This method will subsequenctly call
+      DataReader::calfft until the sufficient number of data blocks have been
+      read from the input dataset.
+
+      \param dr -- DataReader object handling the access to the input data.
+    */
+    bool processData (DataReader *dr);
 
     // ------------------------------------------------------- Beamformer methods
     
@@ -434,25 +441,33 @@ namespace CR {  // Namespace CR -- begin
       The output typically will look something these lines:
       \verbatim
       [Skymapper] Summary of the internal parameters
-      - Observation ........  
-      -- telescope          = WSRT
-      -- observer           = LOFAR/CR KSP
-      -- observation date   = Epoch: 53955::17:14:33.4210
-      - Data I/O ..........   
-      -- blocksize          = 1
-      -- sampling rate [Hz] = 8e+07
-      -- Nyquist zone       = 1
-      - Coordinates ........  
-      -- nof. coordinates   = 4
-      -- names              = [Longitude, Latitude, Distance, Time, Frequency]
-      -- units              = [rad, rad, m, s, Hz]
-      -- ref. pixel         = [0, 0, 0, 0, 0]
-      -- ref. value         = [0, 1.5708, -1, 0, 0]
-      -- coord. increment   = [-0.0349066, 0.0349066, 0, 1, 1]
-      - Image ..............  
-      -- filename           = skymap.img
-      -- image shape        = [120, 120, 1, 1, 1]
-      -- blocks per frame   = 1
+      :: Observation ::
+      --> Observation date         = Epoch: 54878::11:02:30.1476
+      --> Telescope                = WSRT
+      --> Observer                 = Lars Baehren
+      --> nof. antennas            = 48
+      --> Sampling rate       [Hz] = 8e+07
+      --> Nyquist zone             = 2
+      :: Data I/O ::
+      --> Blocksize      [samples] = 2048
+      --> FFT length    [channels] = 1025
+      :: Coordinates ::
+      --> nof. coordinates         = 4
+      --> World axis names ....... = [Longitude, Latitude, Length, Frequency, Time]
+      --> World axis units ....... = [rad, rad, m, Hz, s]
+      --> Reference pixel  (CRPIX) = [0, 0, 0, 0, 0]
+      --> Reference value  (CRVAL) = [0, 1.5708, 0, 4e+07, 0]
+      --> coord. increment (CDELT) = [-0.0174533, 0.0174533, 1, 39062.5, 2.56e-05]
+      :: Image ::
+      --> Filename                 = skymap.img
+      --> Shape of pixel array     = [1, 1, 1, 1, 1025]
+      --> Shape of beam array      = [1025, 1]
+      --> buffer start position    = [0, 0, 0, 0, 0]
+      --> buffer end position      = [0, 0, 0, 0, 1024]
+      --> buffer step size         = [0, 0, 0, 1, 0]
+      --> index of the target axis = 4
+      --> Domain of image quantity = Frequency
+      --> Skymap quantity          = FREQ_POWER
       \endverbatim
     */
     void summary (std::ostream &os);
@@ -561,16 +576,6 @@ namespace CR {  // Namespace CR -- begin
       \brief Set the coordinates of the center of the skymap
     */
     bool setSkymapCenter ();
-    
-    /*!
-      \brief Write the beamformed data to the PagedImage on disk
-      
-      \param beam -- [position,channel] Output of the Beamformer
-      
-      \return status -- Status of the operation; returns <tt>false</tt> if an error
-      was encountered.
-    */
-    bool write_beam_to_image (Matrix<double> const &beam);
     
   };
   

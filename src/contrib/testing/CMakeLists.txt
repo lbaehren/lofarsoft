@@ -10,6 +10,7 @@ if (HAVE_CASACORE)
   include_directories (${CASA_INCLUDES})
 
   set (tests
+    casacoreArrayAccess
     casacoreArrayMath
     casacoreMatrixAccess02
     casacoreMatrixAccess03
@@ -52,6 +53,8 @@ if (HAVE_CASACORE)
   add_test (casacoreCubeAccess_test1 casacoreCubeAccess test1)
   add_test (casacoreCubeAccess_test2 casacoreCubeAccess test2)
   
+else (HAVE_CASACORE)
+  message (STATUS "Missing casacore - skipping tests!")
 endif (HAVE_CASACORE)
 
 ## ==============================================================================
@@ -76,6 +79,8 @@ if (HAVE_BOOST)
   add_test (boostProgramOptions_test5 boostProgramOptions --projection SIN)
   add_test (boostProgramOptions_test6 boostProgramOptions --blocksize 2048 --refcode B1950)
 
+else (HAVE_BOOST)
+  message (STATUS "Missing Bosst - skipping tests!")
 endif (HAVE_BOOST)
 
 ## ==============================================================================
@@ -134,6 +139,8 @@ if (HAVE_HDF5)
     add_test (${src} ${src})
   endforeach (src)  
   
+else (HAVE_HDF5)
+  message (STATUS "Missing HDF5 library - skipping tests!")
 endif (HAVE_HDF5)
 
 ## ==============================================================================
@@ -150,4 +157,6 @@ if (HAVE_GSL)
 
   add_test (gsl gsl)
 
+else (HAVE_GSL)
+  message (STATUS "Missing GNU Scientic Library (GSL) - skipping tests!")
 endif (HAVE_GSL)

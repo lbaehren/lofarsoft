@@ -50,7 +50,7 @@ namespace CR { // Namespace CR -- begin
     \author Lars B&auml;hren
 
     \date 2008/09/06
-
+    
     \test tTimeFreqCoordinate.cc
     
     <h3>Prerequisite</h3>
@@ -219,6 +219,8 @@ namespace CR { // Namespace CR -- begin
     uint nofFrames_p;
     //! The number of coordinate axes
     unsigned int nofAxes_p;
+    //! Return quantities in order where time axis is last?
+    bool timeAxisLast_p;
     
   public:
     
@@ -226,18 +228,24 @@ namespace CR { // Namespace CR -- begin
     
     /*!
       \brief Default constructor
+
+      \param timeAxisLast -- Treat quantities in order where time axis is last?
     */
-    TimeFreqCoordinate ();
-    
+    TimeFreqCoordinate (bool const &timeAxisLast=false);
+
     /*!
       \brief Argumented constructor
 
+      \param blocksize      -- Number of samples per block of data
       \param blocksPerFrame -- The number of data blocks added up within a single
              time frame
       \param nofFrames      -- The number of frames
+      \param timeAxisLast   -- Treat quantities in order where time axis is last?
     */
-    TimeFreqCoordinate (uint const &blocksPerFrame,
-			uint const &nofFrames);
+    TimeFreqCoordinate (uint const &blocksize,
+			uint const &blocksPerFrame,
+			uint const &nofFrames,
+			bool const &timeAxisLast=false);
     
     /*!
       \brief Argumented constructor
@@ -248,12 +256,14 @@ namespace CR { // Namespace CR -- begin
       \param blocksPerFrame  -- The number of data blocks added up within a single
              time frame
       \param nofFrames       -- The number of frames
+      \param timeAxisLast    -- Treat quantities in order where time axis is last?
     */
     TimeFreqCoordinate (uint const &blocksize,
 			double const &sampleFrequency,
 			uint const &nyquistZone=1,
 			uint const &blocksPerFrame=1,
-			uint const &nofFrames=1);
+			uint const &nofFrames=1,
+			bool const &timeAxisLast=false);
     
     /*!
       \brief Argumented constructor
@@ -264,12 +274,14 @@ namespace CR { // Namespace CR -- begin
       \param blocksPerFrame  -- The number of data blocks added up within a single
              time frame
       \param nofFrames       -- The number of frames
+      \param timeAxisLast    -- Treat quantities in order where time axis is last?
     */
     TimeFreqCoordinate (uint const &blocksize,
 			casa::Quantity const &sampleFrequency,
 			uint const &nyquistZone=1,
 			uint const &blocksPerFrame=1,
-			uint const &nofFrames=1);
+			uint const &nofFrames=1,
+			bool const &timeAxisLast=false);
     
     /*!
       \brief Argumented constructor
@@ -309,6 +321,24 @@ namespace CR { // Namespace CR -- begin
     TimeFreqCoordinate& operator= (TimeFreqCoordinate const &other); 
     
     // --------------------------------------------------------------- Parameters
+
+    /*!
+      \brief Return quantities in order where time axis is last?
+
+      \return timeAxisLast -- Return quantities in order where time axis is last?
+    */
+    inline bool timeAxisLast () const {
+      return timeAxisLast_p;
+    }
+    
+    /*!
+      \brief Return quantities in order where time axis is last?
+
+      \param timeAxisLast -- Return quantities in order where time axis is last?
+    */
+    inline void setTimeAxisLast (bool const &timeAxisLast) {
+      timeAxisLast_p = timeAxisLast;
+    }
     
     /*!
       \brief Get the number of coordinate axes
@@ -616,7 +646,8 @@ namespace CR { // Namespace CR -- begin
     */
     void init (CoordinateType const &coordType,
 	       uint const &blocksPerFrame,
-	       uint const &nofFrames);
+	       uint const &nofFrames,
+	       bool const &timeAxisLast);
 
     //! Set the coordinate objects
     void setCoordinates (int const &nFrame=0);

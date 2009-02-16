@@ -57,9 +57,11 @@ int test_constructors ()
 
   cout << "[1] Default constructor ..." << endl;
   try {
-    TimeFreqCoordinate coord;
+    TimeFreqCoordinate coord1;
+    TimeFreqCoordinate coord2(true);
     //
-    coord.summary(); 
+    coord1.summary(); 
+    coord2.summary(); 
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -67,12 +69,20 @@ int test_constructors ()
   
   cout << "[2] Simple argumented constructor ..." << endl;
   try {
+    uint blocksize (1024);
     uint blocksPerFrame (2);
     uint nofFrames (10);
-    TimeFreqCoordinate coord (blocksPerFrame,
-			      nofFrames);
     //
-    coord.summary(); 
+    TimeFreqCoordinate coord1 (blocksize,
+			      blocksPerFrame,
+			      nofFrames,
+			      false);
+    TimeFreqCoordinate coord2 (blocksize,
+			      blocksPerFrame,
+			      nofFrames,
+			      true);
+    coord1.summary(); 
+    coord2.summary();
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -85,13 +95,21 @@ int test_constructors ()
     int nyquistZone (2);
     uint blocksPerFrame (2);
     uint nofFrames (10);
-    TimeFreqCoordinate coord (blocksize,
-			      sampleFreq,
-			      nyquistZone,
-			      blocksPerFrame,
-			      nofFrames);
     //
-    coord.summary(); 
+    TimeFreqCoordinate coord1 (blocksize,
+			       sampleFreq,
+			       nyquistZone,
+			       blocksPerFrame,
+			       nofFrames);
+    coord1.summary(); 
+    //
+    TimeFreqCoordinate coord2 (blocksize,
+			       sampleFreq,
+			       nyquistZone,
+			       blocksPerFrame,
+			       nofFrames,
+			       true);
+    coord2.summary(); 
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;

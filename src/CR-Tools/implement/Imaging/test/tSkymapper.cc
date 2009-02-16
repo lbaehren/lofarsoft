@@ -315,7 +315,6 @@ int test_methods ()
   try {
     cout << "-- Filename of image     = " << skymapper.filename()   << endl;
     cout << "-- Image shape           = " << skymapper.imageShape() << endl;
-    cout << "-- Stride through image  = " << skymapper.stride()     << endl;
     cout << "-- nof. processed blocks = " << skymapper.nofProcessedBlocks() << endl;
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_methods] " << x.getMesg() << endl;
@@ -341,63 +340,92 @@ int test_methods ()
 /*!
   \brief Test processing of the data to generate an image
 
-  \param infile -- LOPES data set to use as data input
-  \param blocksize -- Number of samples per block of data.
+  \param infile       -- LOPES data set to use as data input
+  \param blocksize    -- Number of samples per block of data.
+  \param have_dataset -- Do we have a dataset available to work with? If this is
+         not the case the best we can do is to either use simulated data of blank
+	 input arrays.
 
   \return nofFailedTests --  The number of failed tests encountered within this
           fucntion.
 */
 int test_processing (string const &infile,
-		     uint const &blocksize)
+		     uint const &blocksize=1024,
+		     bool have_dataset=false)
 {
   cout << "\n[tSkymapper::test_processing]\n" << endl;
   
-  int nofFailedTests (0);
-  bool status (true);
+  int nofFailedTests     = 0;
 
-  std::cout << "[1] Test init function for default object..." << std::endl;
-  try {
-    Skymapper skymapper ("skymap01.img");
-    // provide a summary of the internal settings
-    skymapper.summary();
-  } catch (std::string message) {
-    cerr << message << endl;
-    nofFailedTests++;
-  }
+  std::string telescope  = "UNKNOWN";
+  std::string observer   = "Lars Baehren";
+  std::string refcode    = "AZEL";
+  std::string projection = "SIN";
+  uint nofFrames         = 10;
+  uint nofBlocksPerFrame = 2;
+  uint nofAntennas       = 10;
+
+  // Observation data
+  CR::ObservationData obsData (telescope,
+			       observer);
+  // Spatial coordinates
+  IPosition shape (3,20,20,10);
+  SpatialCoordinate spatial (CoordinateType::DirectionRadius,
+			     refcode,
+			     projection);
+  spatial.setShape(shape);
+  // Time-Frequency coordinate
+  TimeFreqCoordinate timeFreq (blocksize,
+			       nofBlocksPerFrame,
+			       nofFrames,
+			       true);
   
-  std::cout << "[2] Test init function for custom object..." << std::endl;
-  try {
-    Skymapper skymapper (get_SkymapCoordinate(),
-			 "skymap02.img");
-    // provide a summary of the internal settings
-    skymapper.summary();
-  } catch (std::string message) {
-    cerr << message << endl;
-    nofFailedTests++;
-  }
+  // Skymap coordinate
+  SkymapCoordinate coord (obsData,
+			  spatial,
+			  timeFreq);
   
-  std::cout << "[3] Test processData function with generated data..." << std::endl;
+  // Antenna positions
+  Matrix<double> antPositions (nofAntennas,3);
+  // EM quantity for which the skymap is computed
+  CR::SkymapQuantity skymapQuantity (CR::SkymapQuantity::TIME_CC);
+//   CR::SkymapQuantity skymapQuantity;
+
+  //________________________________________________________
+  // Display the chosen control parameters
+
+  cout << "-- Telescope name        = " << telescope         << endl;
+  cout << "-- Observer name         = " << observer          << endl;
+  cout << "-- Reference code        = " << refcode           << endl;
+  cout << "-- Map projection        = " << projection        << endl;
+  cout << "-- Blocksize             = " << timeFreq.blocksize() << endl;
+  cout << "-- FFT length            = " << timeFreq.fftLength() << endl;
+  cout << "-- nof. blocks per frame = " << nofBlocksPerFrame << endl;
+  cout << "-- nof. frames           = " << nofFrames         << endl;
+  cout << "-- nof. antennas         = " << nofAntennas       << endl;
+
+  //________________________________________________________
+  // Run the processing tests
+  
+  cout << "[1] Process a single block of data ..." << endl;
   try {
-    uint blocksize (1024);
-    uint nofDataBlocks (3);
-    uint nofAntennas (2);
-    // --- create SkymapCoordinates object ---
-    std::cout << "-- creating SkymapCoordinates object..." << std::endl;
-    CR::SkymapCoordinate skymapCoordinates (get_SkymapCoordinate(blocksize));
-    IPosition shape (skymapCoordinates.shape());
-    // create Skymapper object
-    std::cout << "-- creating Skymapper object..." << std::endl;
-    Skymapper skymapper (skymapCoordinates,
-			 "skymap03.img");
-    // go through the blocks of data and process them
-    for (uint datablock(0); datablock<nofDataBlocks; datablock++) {
-      Matrix<DComplex> data (get_data(nofAntennas,
-				      shape(4)));
-      std::cout << "-- processing datablock " << datablock << " ..." << std::endl;
-      status = skymapper.processData (data);
-    }
-  } catch (std::string message) {
-    cerr << message << endl;
+    Skymapper skymapper (coord,
+			 antPositions,
+			 skymapQuantity,
+			 "skymap_test1.img");
+
+    Matrix<casa::DComplex> data (timeFreq.fftLength(),
+				 nofAntennas);
+    data = 1.0;
+
+    cout << "-- Output filename     = " << skymapper.filename() << endl;
+    cout << "-- shape(antPositions) = " << antPositions.shape() << endl;
+    cout << "-- shape(data)         = " << data.shape()         << endl;
+
+    skymapper.processData(data);
+
+  } catch (AipsError x) {
+    cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;
     nofFailedTests++;
   }
   
@@ -412,6 +440,7 @@ int main (int argc,
   int nofFailedTests = 0;
   bool have_dataset  = true;
   uint blocksize     = 1024;
+  std::string infile;
 
   /*
     Check if filename of the dataset is provided on the command line; if only
@@ -422,9 +451,9 @@ int main (int argc,
 	      << " No input dataset provided - skipping related tests."
 	      << endl;
     have_dataset = false;
+  } else {
+    infile = argv[1];
   }
-
-  std::string filename = argv[1];
   
   // Test feeding SkymapCoordinate information into the Beamformer
   nofFailedTests += test_Beamformer (blocksize);
@@ -432,12 +461,10 @@ int main (int argc,
   nofFailedTests += test_Skymapper ();
   // Test the various methods for accessing internal data
   nofFailedTests += test_methods();
-  
-//   if (have_dataset) {
-//     nofFailedTests += test_processing (filename,
-// 				       blocksize);
-//     nofFailedTests += cleanup_directory ();
-//   }
+
+  nofFailedTests += test_processing (infile,
+				     blocksize,
+				     have_dataset);
   
   return nofFailedTests;
 }

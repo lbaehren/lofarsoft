@@ -337,6 +337,11 @@ namespace CR { // Namespace CR -- begin
       bfWeights_p.resize (GeomWeight::shape());
       bfWeights_p = GeomWeight::weights();
     }
+
+    /*
+     *  Update the shape information on the array returning the beamformed data
+     */
+    setSkymapType(skymapType_p);
     
   }
   

@@ -33,7 +33,7 @@ namespace CR { // Namespace CR -- begin
 
   //__________________________________________________________ TimeFreqCoordinate
   
-  TimeFreqCoordinate::TimeFreqCoordinate ()
+  TimeFreqCoordinate::TimeFreqCoordinate (bool const &timeAxisLast)
     : TimeFreq()
   {
     uint blocksPerFrame = 1;
@@ -41,18 +41,22 @@ namespace CR { // Namespace CR -- begin
 
     init (CoordinateType(CoordinateType::Frequency),
 	  blocksPerFrame,
-	  nofFrames);
+	  nofFrames,
+	  timeAxisLast);
   }
-  
+
   //__________________________________________________________ TimeFreqCoordinate
   
-  TimeFreqCoordinate::TimeFreqCoordinate (uint const &blocksPerFrame,
-					  uint const &nofFrames)
-    : TimeFreq()
+  TimeFreqCoordinate::TimeFreqCoordinate (uint const &blocksize,
+					  uint const &blocksPerFrame,
+					  uint const &nofFrames,
+					  bool const &timeAxisLast)
+    : TimeFreq(blocksize)
   {
     init (CoordinateType(CoordinateType::Frequency),
 	  blocksPerFrame,
-	  nofFrames);
+	  nofFrames,
+	  timeAxisLast);
   }
   
   //__________________________________________________________ TimeFreqCoordinate
@@ -61,14 +65,16 @@ namespace CR { // Namespace CR -- begin
 					  double const &sampleFrequency,
 					  uint const &nyquistZone,
 					  uint const &blocksPerFrame,
-					  uint const &nofFrames)
+					  uint const &nofFrames,
+					  bool const &timeAxisLast)
     : TimeFreq(blocksize,
 	       sampleFrequency,
 	       nyquistZone)
   {
     init (CoordinateType(CoordinateType::Frequency),
 	  blocksPerFrame,
-	  nofFrames);
+	  nofFrames,
+	  timeAxisLast);
   }
   
   //__________________________________________________________ TimeFreqCoordinate
@@ -77,14 +83,16 @@ namespace CR { // Namespace CR -- begin
 					  casa::Quantity const &sampleFrequency,
 					  uint const &nyquistZone,
 					  uint const &blocksPerFrame,
-					  uint const &nofFrames)
+					  uint const &nofFrames,
+					  bool const &timeAxisLast)
     : TimeFreq(blocksize,
 	       sampleFrequency,
 	       nyquistZone)
   {
     init (CoordinateType(CoordinateType::Frequency),
 	  blocksPerFrame,
-	  nofFrames);
+	  nofFrames,
+	  timeAxisLast);
   }
   
   //__________________________________________________________ TimeFreqCoordinate
@@ -96,7 +104,8 @@ namespace CR { // Namespace CR -- begin
   {
     init (CoordinateType(CoordinateType::Frequency),
 	  blocksPerFrame,
-	  nofFrames);
+	  nofFrames,
+	  false);
   }
   
   //__________________________________________________________ TimeFreqCoordinate
@@ -146,6 +155,7 @@ namespace CR { // Namespace CR -- begin
     blocksPerFrame_p = other.blocksPerFrame_p;
     nofFrames_p      = other.nofFrames_p;
     nofAxes_p        = other.nofAxes_p;
+    timeAxisLast_p   = other.timeAxisLast_p;
     coordType_p      = other.coordType_p;
     coordTime_p      = other.coordTime_p;
     coordFrequency_p = other.coordFrequency_p;
@@ -243,11 +253,13 @@ namespace CR { // Namespace CR -- begin
     os << "-- Reference time       = " << referenceTime_p       << std::endl;
     os << "-- Target domain        = " << coordType_p.name()    << std::endl;
     os << "-- Blocks per frame     = " << blocksPerFrame_p      << std::endl;
-    os << "-- nof. frames          = " << nofFrames_p           << std::endl;   
+    os << "-- nof. frames          = " << nofFrames_p           << std::endl;
+    os << "-- Time axis last?      = " << timeAxisLast_p        << std::endl;
     os << "-- Shape of the axes    = " << shape()               << std::endl;
     os << "-- Reference pixel      = " << referencePixel()      << std::endl;
     os << "-- Reference value      = " << referenceValue()      << std::endl;
     os << "-- Axis value increment = " << increment()           << std::endl;
+    os << "-- World axis names     = " << worldAxisNames()      << std::endl;
   }
 
   // ============================================================================
@@ -296,10 +308,12 @@ namespace CR { // Namespace CR -- begin
   
   void TimeFreqCoordinate::init (CoordinateType const &coordType,
 				 uint const &blocksPerFrame,
-				 uint const &nofFrames)
+				 uint const &nofFrames,
+				 bool const &timeAxisLast)
   {
-    nofAxes_p   = 2;
-    coordType_p = coordType;
+    nofAxes_p      = 2;
+    coordType_p    = coordType;
+    timeAxisLast_p = timeAxisLast;
     setBlocksPerFrame (blocksPerFrame);
     setNofFrames (nofFrames);
   }
@@ -324,8 +338,17 @@ namespace CR { // Namespace CR -- begin
       std::cerr << "[TimeFreqCoordinate::shape] Invalid domain!" << std::endl;
       break;
     };
+
+    /* Axis ordering */
+    if (timeAxisLast_p) {
+      casa::IPosition tmp(2);
+      tmp(0) = shape(1);
+      tmp(1) = shape(0);
+      return tmp;
+    } else {
+      return shape;
+    }
     
-    return shape;
   }
 
   //__________________________________________________________________ timeValues
@@ -475,9 +498,14 @@ namespace CR { // Namespace CR -- begin
   {
     Vector<double> cdelt (2);
 
-    cdelt(0) = coordTime_p.increment()(0);
-    cdelt(1) = coordFrequency_p.increment()(0);
-
+    if (timeAxisLast_p) {
+      cdelt(0) = coordFrequency_p.increment()(0);
+      cdelt(1) = coordTime_p.increment()(0);
+    } else {
+      cdelt(0) = coordTime_p.increment()(0);
+      cdelt(1) = coordFrequency_p.increment()(0);
+    }
+    
     return cdelt;
   }
 
@@ -486,10 +514,15 @@ namespace CR { // Namespace CR -- begin
   Vector<casa::String> TimeFreqCoordinate::worldAxisNames () const
   {
     Vector<casa::String> names (2);
-
-    names(0) = coordTime_p.worldAxisNames()(0);
-    names(1) = coordFrequency_p.worldAxisNames()(0);
-
+    
+    if (timeAxisLast_p) {
+      names(0) = coordFrequency_p.worldAxisNames()(0);
+      names(1) = coordTime_p.worldAxisNames()(0);
+    } else {
+      names(0) = coordTime_p.worldAxisNames()(0);
+      names(1) = coordFrequency_p.worldAxisNames()(0);
+    } 
+    
     return names;
   }
 
@@ -499,8 +532,13 @@ namespace CR { // Namespace CR -- begin
   {
     Vector<casa::String> units (2);
 
-    units(0) = coordTime_p.worldAxisUnits()(0);
-    units(1) = coordFrequency_p.worldAxisUnits()(0);
+    if (timeAxisLast_p) {
+      units(0) = coordFrequency_p.worldAxisUnits()(0);
+      units(1) = coordTime_p.worldAxisUnits()(0);
+    } else {
+      units(0) = coordTime_p.worldAxisUnits()(0);
+      units(1) = coordFrequency_p.worldAxisUnits()(0);
+    }
 
     return units;
   }
@@ -511,8 +549,13 @@ namespace CR { // Namespace CR -- begin
   {
     Vector<double> refPixel (2);
 
-    refPixel(0) = coordTime_p.referencePixel()(0);
-    refPixel(1) = coordFrequency_p.referencePixel()(0);
+    if (timeAxisLast_p) {
+      refPixel(0) = coordFrequency_p.referencePixel()(0);
+      refPixel(1) = coordTime_p.referencePixel()(0);
+    } else {
+      refPixel(0) = coordTime_p.referencePixel()(0);
+      refPixel(1) = coordFrequency_p.referencePixel()(0);
+    }
 
     return refPixel;
   }
@@ -522,9 +565,14 @@ namespace CR { // Namespace CR -- begin
   Vector<double> TimeFreqCoordinate::referenceValue () const
   {
     Vector<double> refValue (2);
-
-    refValue(0) = coordTime_p.referenceValue()(0);
-    refValue(1) = coordFrequency_p.referenceValue()(0);
+    
+    if (timeAxisLast_p) {
+      refValue(0) = coordFrequency_p.referenceValue()(0);
+      refValue(1) = coordTime_p.referenceValue()(0);
+    } else {
+      refValue(0) = coordTime_p.referenceValue()(0);
+      refValue(1) = coordFrequency_p.referenceValue()(0);
+    }
 
     return refValue;
   }
@@ -576,9 +624,14 @@ namespace CR { // Namespace CR -- begin
     if (!append) {
       csys = casa::CoordinateSystem();
     }
-
-    csys.addCoordinate(coordTime_p);
-    csys.addCoordinate(coordFrequency_p);
+    
+    if (timeAxisLast_p) {
+      csys.addCoordinate(coordFrequency_p);
+      csys.addCoordinate(coordTime_p);
+    } else {
+      csys.addCoordinate(coordTime_p);
+      csys.addCoordinate(coordFrequency_p);
+    }
   }
   
 } // Namespace CR -- end
