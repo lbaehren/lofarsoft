@@ -291,6 +291,36 @@ if (HAVE_STARTOOLS AND HAVE_PLPLOT)
 endif (HAVE_STARTOOLS AND HAVE_PLPLOT)
 
 
+## -------------------------------------------------------------------
+## plotLopesRaw
+
+if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
+
+  if (HAVE_PGPLOT OR HAVE_PLPLOT)
+    add_executable (plotLopesRaw plotLopesRaw.cc)
+    ## extra properties to take care of
+    if (APPLE)
+      set_target_properties (plotLopesRaw
+        PROPERTIES
+        COMPILE_FLAGS "-fsigned-char -fno-common"
+        LINK_FLAGS "-bind_at_load"
+        )
+    endif (APPLE)
+    ## linker instructions
+    target_link_libraries (plotLopesRaw
+      cr
+      ${STARTOOLS_LIBRARIES}
+      ${ROOT_LIBRARIES}
+      ${FFTW3_LIBRARIES}
+      ${POSTGRESQL_LIBRARIES}
+      )
+    ## installation instructions
+    list (APPEND cr_apps plotLopesRaw)
+  endif (HAVE_PGPLOT OR HAVE_PLPLOT)
+
+endif (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
+
+
 
 ## -------------------------------------------------------------------
 
