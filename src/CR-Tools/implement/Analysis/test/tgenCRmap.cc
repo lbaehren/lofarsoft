@@ -66,7 +66,7 @@ int test_genCRmap ()
     // Generate a record that points to the CalTable files 
     // Hardcoded path is not nice, but works...
     Record obsrec;
-    obsrec.define("LOPES","/home/horneff/lopescasa/data/LOPES/LOPES-CalTable");
+    obsrec.define("LOPES","/home/horneff/usg/data/lopes/LOPES-CalTable");
 
     // Put the record into the pipeline object.
     SSPipe.SetObsRecord(obsrec);

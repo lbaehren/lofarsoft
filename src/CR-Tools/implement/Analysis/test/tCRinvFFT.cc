@@ -40,7 +40,7 @@
   <h3>Example</h3>
 
   \code
-  ./tCRinvFFT /home/horneff/lopescasa/data/LOPES/LOPES-CalTable /data/LOPES/cr/sel/2004.01.12.00:28:11.577.event
+  ./tCRinvFFT /home/horneff/usg/data/lopes/LOPES-CalTable /data/LOPES/cr/sel/2004.01.12.00:28:11.577.event
   \endcode
 */
 
