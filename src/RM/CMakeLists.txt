@@ -310,6 +310,14 @@ message (STATUS "+============================================================+"
 ##
 ## =============================================================================
 
+set (link_libraries
+  ${CASA_LIBRARIES}
+  ${HDF5_LIBRARIES}
+  ${CFITSIO_LIBRARIES}
+  ${WCSLIB_LIBRARIES}
+  ${LAPACK_LIBRARIES}
+  )
+
 ## Build the library
 
 set (rm_sources
@@ -319,21 +327,11 @@ set (rm_sources
 
 add_library (rm ${rm_sources})
 
-target_link_libraries (rm
-  ${CASA_LIBRARIES}
-  ${HDF5_LIBRARIES}
-  ${CFITSIO_LIBRARIES}
-  ${WCSLIB_LIBRARIES}
-)
-
 ## Build applications
 
 add_executable (rmsynth main.cpp)
 
 target_link_libraries (rmsynth
   ${rm}
-  ${CASA_LIBRARIES}
-  ${HDF5_LIBRARIES}
-  ${CFITSIO_LIBRARIES}
-  ${WCSLIB_LIBRARIES}
+  ${link_libraries}
   )
