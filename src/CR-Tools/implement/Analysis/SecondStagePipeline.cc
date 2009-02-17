@@ -95,6 +95,8 @@ namespace CR { // Namespace CR -- begin
     try {
       AntennaMask_p.resize(dr->nofAntennas());
       AntennaMask_p = True;
+      PhaseCalDelays_p.resize(dr->nofAntennas());
+      PhaseCalDelays_p = 0.;
       Matrix<DComplex> data;
       data = dr->calfft();
 
@@ -104,6 +106,7 @@ namespace CR { // Namespace CR -- begin
 	  pCal_p.calcDelays(dr->fft());
 	  pCal_p.apply(data);
 	  pCal_p.parameters().get("AntennaMask",AntennaMask_p);
+	  pCal_p.parameters().get("delays",PhaseCalDelays_p);
 	} else {
 	  if (verbose) {
 	    cout << "SecondStagePipeline::updateCache: " << "InitPhaseCal() returned false, skipping PhaseCal." << endl;
@@ -144,6 +147,21 @@ namespace CR { // Namespace CR -- begin
       return AntennaMask_p;
     }; 
     return AntennaMask_p;
+  };
+
+  Vector<Bool> SecondStagePipeline::GetPhaseCalDelays(DataReader *dr){
+    try {
+      if ( (!SecondStageCacheValid_p)  || (cachedDate_p != dr->headerRecord().asuInt("Date")) ) {
+	if (!updateCache(dr)) {
+	  cerr << "SecondStagePipeline::GetPhaseCalDelays: " << "updateCache failed!" << endl;
+	  return AntennaMask_p;
+	};
+      };
+    } catch (AipsError x) {
+      cerr << "SecondStagePipeline::GetPhaseCalDelays: " << x.getMesg() << endl;
+      return PhaseCalDelays_p;
+    }; 
+    return PhaseCalDelays_p;
   };
 
  

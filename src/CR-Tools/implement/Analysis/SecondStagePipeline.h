@@ -113,6 +113,11 @@ namespace CR { // Namespace CR -- begin
       \brief Which antennas were good and which were not.
     */
     Vector<Bool> AntennaMask_p;
+
+    /*!
+      \brief Which antennas were good and which were not.
+    */
+    Vector<Double> PhaseCalDelays_p;
     
   public:
     
@@ -199,6 +204,13 @@ namespace CR { // Namespace CR -- begin
       \return The antenna mask;
     */
     Vector<Bool> GetAntennaMask(DataReader *dr);
+
+    /*!
+      \brief Get the delays from the phase calibration
+      
+      \return Vector with the delays [in seconds];
+    */
+    Vector<Double> GetPhaseCalDelays(DataReader *dr);
     
     
   private:
