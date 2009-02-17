@@ -45,7 +45,7 @@ option (SEND_REPORT "Send a report of the build to the Dashboard server?" NO )
 ##
 ## ==============================================================================
 
-add_custom_target (clean
+add_custom_target (cleanup
   COMMAND rm -rf *~
   COMMAND rm -rf cmake_install.cmake
   COMMAND rm -rf CMakeCache.txt
@@ -59,16 +59,22 @@ add_custom_target (clean
 ##
 ## ==============================================================================
 
+## generic build instructions for the packages
+
 set (packages_external
   bison
   blitz 
   boost
+  casacore
   cfitsio
   flex
+  hdf5
   qt
   root
   sip
+  startools
   szip
+  wcslib
   wcstools
   )
 
@@ -79,28 +85,15 @@ foreach (package_name ${packages_external})
     )
 endforeach (package_name)
 
-add_custom_target (casacore
-  COMMAND ./build.sh casacore
-  WORKING_DIRECTORY ${USG_BUILD}
-  )
+##____________________________________________________________________
+##                                        Dependencies of the packages
+
 add_dependencies (casacore hdf5 cfitsio boost wcslib)
 
-add_custom_target (hdf5
-  COMMAND ./build.sh hdf5
-  WORKING_DIRECTORY ${USG_BUILD}
-  )
 add_dependencies (hdf5 szip)
 
-add_custom_target (startools
-  COMMAND ./build.sh startools
-  WORKING_DIRECTORY ${USG_BUILD}
-  )
 add_dependencies (startools root)
 
-add_custom_target (wcslib
-  COMMAND ./build.sh wcslib
-  WORKING_DIRECTORY ${USG_BUILD}
-  )
 add_dependencies (wcslib boost)
 
 ## ==============================================================================
@@ -113,7 +106,7 @@ add_dependencies (wcslib boost)
 ##                                                            CR-Tools
 
 add_custom_target (cr
-  COMMAND ./build_package.sh cr src/CR-Tools
+  COMMAND ./build_package.sh cr ${USG_ROOT}/src/CR-Tools
   WORKING_DIRECTORY ${USG_BUILD}
   )
 add_dependencies (cr dal startools mathgl)
@@ -122,8 +115,17 @@ add_dependencies (cr dal startools mathgl)
 ##                                           Data Access Library (DAL)
 
 add_custom_target (dal
-  COMMAND ./build_package.sh dal src/DAL
+  COMMAND ./build_package.sh dal ${USG_ROOT}/src/DAL
   WORKING_DIRECTORY ${USG_BUILD}
   )
 add_dependencies (dal casacore hdf5 cfitsio boost)
+
+##____________________________________________________________________
+##                                                                  RM
+
+add_custom_target (rm
+  COMMAND ./build_package.sh rm ${USG_ROOT}/src/RM
+  WORKING_DIRECTORY ${USG_BUILD}
+  )
+add_dependencies (rm dal casacore hdf5 cfitsio boost)
 
