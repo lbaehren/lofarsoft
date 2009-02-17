@@ -1275,92 +1275,96 @@ int main (int argc, char *argv[])
     }
 
     // create tree and tree structure (depends on chosen polarization)
-    TTree roottree("T","LOPES");
-    roottree.Branch("Gt",&gt,"Gt/i");	// GT as unsigned int
-    roottree.Branch("Eventname",&eventfilename,"Eventname/C");
+    TTree *roottree = NULL;
+    if (rootFileMode == "RECREATE");
+      roottree = new TTree("T","LOPES");
+    if (rootFileMode == "UPDATE")
+      roottree = (TTree*)rootfile->Get("T;1");
+    roottree->Branch("Gt",&gt,"Gt/i");	// GT as unsigned int
+    roottree->Branch("Eventname",&eventfilename,"Eventname/C");
 
     // the following branches are not used in the calibration mode
     if ( !calibrationMode ) {
-      roottree.Branch("Xc",&core_x,"Xc/D");
-      roottree.Branch("Yc",&core_y,"Yc/D");
-      roottree.Branch("AzIn",&azimuth,"AzIn/D");
-      roottree.Branch("ElIn",&elevation,"ElIn/D");
-      roottree.Branch("DistanceIn",&radiusOfCurvature,"DistanceIn/D");
+      roottree->Branch("Xc",&core_x,"Xc/D");
+      roottree->Branch("Yc",&core_y,"Yc/D");
+      roottree->Branch("AzIn",&azimuth,"AzIn/D");
+      roottree->Branch("ElIn",&elevation,"ElIn/D");
+      roottree->Branch("DistanceIn",&radiusOfCurvature,"DistanceIn/D");
 
       // one result, if polarization = ANY
       if (polarization == "ANY") {
-        roottree.Branch("AzL",&azimuth,"AzL/D");
-        roottree.Branch("ElL",&elevation,"ElL/D");
-        roottree.Branch("Distance",&distanceResult,"Distance/D");	// radius of curvature
-        roottree.Branch("CCheight",&CCheight,"CCheight/D");
-        roottree.Branch("CCheight_error",&CCheight_error,"CCheight_error/D");
-        roottree.Branch("CCconverged",&CCconverged,"CCconverged/B");
-        roottree.Branch("Xheight",&Xheight,"Xheight/D");
-        roottree.Branch("Xheight_error",&Xheight_error,"Xheight_error/D");
-        roottree.Branch("Xconverged",&Xconverged,"Xconverged/B");
-        roottree.Branch("goodReconstructed",&goodEW,"goodReconstructed/B");
-        roottree.Branch("rmsCCbeam",&rmsCCbeam,"rmsCCbeam/D");
-        roottree.Branch("rmsXbeam",&rmsXbeam,"rmsXbeam/D");
-	roottree.Branch("rmsPbeam",&rmsPbeam,"rmsPbeam/D");
+        roottree->Branch("AzL",&azimuth,"AzL/D");
+        roottree->Branch("ElL",&elevation,"ElL/D");
+        roottree->Branch("Distance",&distanceResult,"Distance/D");	// radius of curvature
+        roottree->Branch("CCheight",&CCheight,"CCheight/D");
+        roottree->Branch("CCheight_error",&CCheight_error,"CCheight_error/D");
+        roottree->Branch("CCconverged",&CCconverged,"CCconverged/B");
+        roottree->Branch("Xheight",&Xheight,"Xheight/D");
+        roottree->Branch("Xheight_error",&Xheight_error,"Xheight_error/D");
+        roottree->Branch("Xconverged",&Xconverged,"Xconverged/B");
+        roottree->Branch("goodReconstructed",&goodEW,"goodReconstructed/B");
+        roottree->Branch("rmsCCbeam",&rmsCCbeam,"rmsCCbeam/D");
+        roottree->Branch("rmsXbeam",&rmsXbeam,"rmsXbeam/D");
+	roottree->Branch("rmsPbeam",&rmsPbeam,"rmsPbeam/D");
         if (lateralDistribution) {
-          roottree.Branch("R_0",&R_0,"R_0/D");
-          roottree.Branch("sigR_0",&sigR_0,"sigR_0/D");
-          roottree.Branch("eps",&eps,"eps/D");
-          roottree.Branch("sigeps",&sigeps,"sigeps/D");
-          roottree.Branch("CutCloseToCore",&CutCloseToCore,"CutCloseToCore/I");
-          roottree.Branch("CutSmallSignal",&CutSmallSignal,"CutSmallSignal/I");
-          roottree.Branch("CutBadTiming",&CutBadTiming,"CutBadTiming/I");
-          roottree.Branch("CutSNR",&CutSNR,"CutSNR/I");
+          roottree->Branch("R_0",&R_0,"R_0/D");
+          roottree->Branch("sigR_0",&sigR_0,"sigR_0/D");
+          roottree->Branch("eps",&eps,"eps/D");
+          roottree->Branch("sigeps",&sigeps,"sigeps/D");
+          roottree->Branch("CutCloseToCore",&CutCloseToCore,"CutCloseToCore/I");
+          roottree->Branch("CutSmallSignal",&CutSmallSignal,"CutSmallSignal/I");
+          roottree->Branch("CutBadTiming",&CutBadTiming,"CutBadTiming/I");
+          roottree->Branch("CutSNR",&CutSNR,"CutSNR/I");
         }
       }
       if ( (polarization == "EW") || (polarization == "BOTH")) {
-        roottree.Branch("AzL_EW",&AzL,"AzL_EW/D");
-        roottree.Branch("ElL_EW",&ElL,"ElL_EW/D");
-        roottree.Branch("Distance_EW",&distanceResult,"Distance_EW/D");	// radius of curvature
-        roottree.Branch("CCheight_EW",&CCheight,"CCheight_EW/D");
-        roottree.Branch("CCheight_error_EW",&CCheight_error,"CCheight_error_EW/D");
-        roottree.Branch("CCconverged_EW",&CCconverged,"CCconverged_EW/B");
-        roottree.Branch("Xheight_EW",&Xheight,"Xheight_EW/D");
-        roottree.Branch("Xheight_error_EW",&Xheight_error,"Xheight_error_EW/D");
-        roottree.Branch("Xconverged_EW",&Xconverged,"Xconverged_EW/B");
-        roottree.Branch("goodReconstructed_EW",&goodEW,"goodReconstructed_EW/B");
-        roottree.Branch("rmsCCbeam_EW",&rmsCCbeam,"rmsCCbeam_EW/D");
-	roottree.Branch("rmsXbeam_EW",&rmsXbeam,"rmsXbeam_EW/D");
-	roottree.Branch("rmsPbeam_EW",&rmsPbeam,"rmsPbeam_EW/D");
+        roottree->Branch("AzL_EW",&AzL,"AzL_EW/D");
+        roottree->Branch("ElL_EW",&ElL,"ElL_EW/D");
+        roottree->Branch("Distance_EW",&distanceResult,"Distance_EW/D");	// radius of curvature
+        roottree->Branch("CCheight_EW",&CCheight,"CCheight_EW/D");
+        roottree->Branch("CCheight_error_EW",&CCheight_error,"CCheight_error_EW/D");
+        roottree->Branch("CCconverged_EW",&CCconverged,"CCconverged_EW/B");
+        roottree->Branch("Xheight_EW",&Xheight,"Xheight_EW/D");
+        roottree->Branch("Xheight_error_EW",&Xheight_error,"Xheight_error_EW/D");
+        roottree->Branch("Xconverged_EW",&Xconverged,"Xconverged_EW/B");
+        roottree->Branch("goodReconstructed_EW",&goodEW,"goodReconstructed_EW/B");
+        roottree->Branch("rmsCCbeam_EW",&rmsCCbeam,"rmsCCbeam_EW/D");
+	roottree->Branch("rmsXbeam_EW",&rmsXbeam,"rmsXbeam_EW/D");
+	roottree->Branch("rmsPbeam_EW",&rmsPbeam,"rmsPbeam_EW/D");
         if (lateralDistribution) {
-          roottree.Branch("R_0_EW",&R_0,"R_0_EW/D");
-          roottree.Branch("sigR_0_EW",&sigR_0,"sigR_0_EW/D");
-          roottree.Branch("eps_EW",&eps,"eps_EW/D");
-          roottree.Branch("sigeps_EW",&sigeps,"sigeps_EW/D");
-          roottree.Branch("CutCloseToCore_EW",&CutCloseToCore,"CutCloseToCore_EW/I");
-          roottree.Branch("CutSmallSignal_EW",&CutSmallSignal,"CutSmallSignal_EW/I");
-          roottree.Branch("CutBadTiming_EW",&CutBadTiming,"CutBadTiming_EW/I");
-          roottree.Branch("CutSNR_EW",&CutSNR,"CutSNR_EW/I");
+          roottree->Branch("R_0_EW",&R_0,"R_0_EW/D");
+          roottree->Branch("sigR_0_EW",&sigR_0,"sigR_0_EW/D");
+          roottree->Branch("eps_EW",&eps,"eps_EW/D");
+          roottree->Branch("sigeps_EW",&sigeps,"sigeps_EW/D");
+          roottree->Branch("CutCloseToCore_EW",&CutCloseToCore,"CutCloseToCore_EW/I");
+          roottree->Branch("CutSmallSignal_EW",&CutSmallSignal,"CutSmallSignal_EW/I");
+          roottree->Branch("CutBadTiming_EW",&CutBadTiming,"CutBadTiming_EW/I");
+          roottree->Branch("CutSNR_EW",&CutSNR,"CutSNR_EW/I");
         }
       }
       if ( (polarization == "NS") || (polarization == "BOTH")) {
-        roottree.Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
-        roottree.Branch("ElL_NS",&ElL_NS,"ElL_NS/D");
-        roottree.Branch("Distance_NS",&distanceResultNS,"Distance_NS/D");	// radius of curvature
-        roottree.Branch("CCheight_NS",&CCheight_NS,"CCheight_NS/D");
-        roottree.Branch("CCheight_error_NS",&CCheight_error_NS,"CCheight_error_NS/D");
-        roottree.Branch("CCconverged_NS",&CCconverged,"CCconverged_NS/B");
-        roottree.Branch("Xheight_NS",&Xheight_NS,"Xheight_NS/D");
-        roottree.Branch("Xheight_error_NS",&Xheight_error_NS,"Xheight_error_NS/D");
-        roottree.Branch("Xconverged_NS",&Xconverged,"Xconverged_NS/B");
-        roottree.Branch("goodReconstructed_NS",&goodNS,"goodReconstructed_NS/B");
-        roottree.Branch("rmsCCbeam_NS",&rmsCCbeam_NS,"rmsCCbeam_NS/D");
-	roottree.Branch("rmsXbeam_NS",&rmsXbeam_NS,"rmsXbeam_NS/D");
-	roottree.Branch("rmsPbeam_NS",&rmsPbeam_NS,"rmsPbeam_NS/D");
+        roottree->Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
+        roottree->Branch("ElL_NS",&ElL_NS,"ElL_NS/D");
+        roottree->Branch("Distance_NS",&distanceResultNS,"Distance_NS/D");	// radius of curvature
+        roottree->Branch("CCheight_NS",&CCheight_NS,"CCheight_NS/D");
+        roottree->Branch("CCheight_error_NS",&CCheight_error_NS,"CCheight_error_NS/D");
+        roottree->Branch("CCconverged_NS",&CCconverged,"CCconverged_NS/B");
+        roottree->Branch("Xheight_NS",&Xheight_NS,"Xheight_NS/D");
+        roottree->Branch("Xheight_error_NS",&Xheight_error_NS,"Xheight_error_NS/D");
+        roottree->Branch("Xconverged_NS",&Xconverged,"Xconverged_NS/B");
+        roottree->Branch("goodReconstructed_NS",&goodNS,"goodReconstructed_NS/B");
+        roottree->Branch("rmsCCbeam_NS",&rmsCCbeam_NS,"rmsCCbeam_NS/D");
+	roottree->Branch("rmsXbeam_NS",&rmsXbeam_NS,"rmsXbeam_NS/D");
+	roottree->Branch("rmsPbeam_NS",&rmsPbeam_NS,"rmsPbeam_NS/D");
         if (lateralDistribution) {
-          roottree.Branch("R_0_NS",&R_0_NS,"R_0_NS/D");
-          roottree.Branch("sigR_0_NS",&sigR_0_NS,"sigR_0_NS/D");
-          roottree.Branch("eps_NS",&eps_NS,"eps_NS/D");
-          roottree.Branch("sigeps_NS",&sigeps_NS,"sigeps_NS/D");
-          roottree.Branch("CutCloseToCore_NS",&CutCloseToCore_NS,"CutCloseToCore_NS/I");
-          roottree.Branch("CutSmallSignal_NS",&CutSmallSignal_NS,"CutSmallSignal_NS/I");
-          roottree.Branch("CutBadTiming_NS",&CutBadTiming_NS,"CutBadTiming_NS/I");
-          roottree.Branch("CutSNR_NS",&CutSNR_NS,"CutSNR_NS/I");
+          roottree->Branch("R_0_NS",&R_0_NS,"R_0_NS/D");
+          roottree->Branch("sigR_0_NS",&sigR_0_NS,"sigR_0_NS/D");
+          roottree->Branch("eps_NS",&eps_NS,"eps_NS/D");
+          roottree->Branch("sigeps_NS",&sigeps_NS,"sigeps_NS/D");
+          roottree->Branch("CutCloseToCore_NS",&CutCloseToCore_NS,"CutCloseToCore_NS/I");
+          roottree->Branch("CutSmallSignal_NS",&CutSmallSignal_NS,"CutSmallSignal_NS/I");
+          roottree->Branch("CutBadTiming_NS",&CutBadTiming_NS,"CutBadTiming_NS/I");
+          roottree->Branch("CutSNR_NS",&CutSNR_NS,"CutSNR_NS/I");
         }
       }
     } //if
@@ -1680,8 +1684,8 @@ int main (int argc, char *argv[])
           antNumber << it->second.antenna;
           string branchname = "Ant_" + antNumber.str() + "_raw.";
           // check if branch allready exists and if not, create it
-          if (! roottree.GetBranchStatus(branchname.c_str()))
-            roottree.Branch(branchname.c_str(),"PulseProperties",&rawPulses[it->second.antenna-1]);
+          if (! roottree->GetBranchStatus(branchname.c_str()))
+            roottree->Branch(branchname.c_str(),"PulseProperties",&rawPulses[it->second.antenna-1]);
         }
       }
       for ( map<int,PulseProperties>::iterator it=calibPulsesMap.begin() ; it != calibPulsesMap.end(); it++ )
@@ -1698,8 +1702,8 @@ int main (int argc, char *argv[])
           antNumber << it->second.antenna;
           string branchname = "Ant_" + antNumber.str() + "_cal.";
           // check if branch allready exists and if not, create it
-          if (! roottree.GetBranchStatus(branchname.c_str()))
-            roottree.Branch(branchname.c_str(),"PulseProperties",&calibPulses[it->second.antenna-1]);
+          if (! roottree->GetBranchStatus(branchname.c_str()))
+            roottree->Branch(branchname.c_str(),"PulseProperties",&calibPulses[it->second.antenna-1]);
         }
       }
 
@@ -1708,7 +1712,7 @@ int main (int argc, char *argv[])
         // check if event was reconstructed or if also bad events shall be written to the root file
         if (goodEW || goodNS || writeBadEvents) {
           cout << "Adding results to root tree and saving root file \"" << rootFileName << "\"\n" << endl;
-          roottree.Fill();
+          roottree->Fill();
           rootfile->Write("",TObject::kOverwrite);
         } else {
           cout << "WARNING: Event is not written into root file because as badly reconstructed." << endl;
