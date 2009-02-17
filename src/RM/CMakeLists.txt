@@ -265,14 +265,6 @@ endif (HAVE_WCSLIB)
 if (HAVE_HDF5)
   include_directories (${HDF5_INCLUDES})
   add_definitions (-DHAVE_HDF5)
-  ## check individual header files: H5LT.h
-  if (NOT HAVE_HDF5_H5LT_H)
-    message (STATUS "[DAL] HDF5 installation incomplete: missing H5LT.h")
-  endif (NOT HAVE_HDF5_H5LT_H)
-  ## check individual header files: hdf5_hl.h
-  if (NOT HAVE_HDF5_HDF5_HL_H)
-    message (STATUS "[DAL] HDF5 installation incomplete: missing hdf5_hl.h")
-  endif (NOT HAVE_HDF5_HDF5_HL_H)
 else (HAVE_HDF5)
   message (STATUS "[DAL] HDF5 installation incomplete!")
 endif (HAVE_HDF5)
@@ -329,6 +321,7 @@ add_library (rm ${rm_sources})
 
 target_link_libraries (rm
   ${CASA_LIBRARIES}
+  ${HDF5_LIBRARIES}
   ${CFITSIO_LIBRARIES}
   ${WCSLIB_LIBRARIES}
 )
@@ -340,6 +333,7 @@ add_executable (rmsynth main.cpp)
 target_link_libraries (rmsynth
   ${rm}
   ${CASA_LIBRARIES}
+  ${HDF5_LIBRARIES}
   ${CFITSIO_LIBRARIES}
   ${WCSLIB_LIBRARIES}
   )
