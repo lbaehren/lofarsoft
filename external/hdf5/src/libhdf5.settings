@@ -4,15 +4,15 @@
 General Information:
 -------------------
 		   HDF5 Version: 1.8.1
-		  Configured on: Tue Nov  4 13:35:25 CET 2008
-		  Configured by: lars@ehef107.hef.kun.nl
+		  Configured on: Mon Feb 16 11:31:05 CET 2009
+		  Configured by: sduscha@pegasus-2.nfra.nl
 		 Configure mode: production
-		    Host system: i386-apple-darwin8.11.1
-	      Uname information: Darwin ehef107.hef.kun.nl 8.11.1 Darwin Kernel Version 8.11.1: Wed Oct 10 18:23:28 PDT 2007; root:xnu-792.25.20~1/RELEASE_I386 i386 i386
+		    Host system: i386-apple-darwin9.6.0
+	      Uname information: Darwin pegasus-2.nfra.nl 9.6.0 Darwin Kernel Version 9.6.0: Mon Nov 24 17:37:00 PST 2008; root:xnu-1228.9.59~1/RELEASE_I386 i386
 		       Byte sex: little-endian
 		      Libraries: 
 	       Parallel support: no
-	     Installation point: /Users/lars/Code/lofar/usg/external/hdf5/../../release
+	     Installation point: /Users/sduscha/LOFAR/usg/code/external/hdf5/../../release
 		       Compiler: /usr/bin/gcc (gcc-4.0.1)
 	      Compiler switches:  
 		Extra libraries:   -lz -lm 

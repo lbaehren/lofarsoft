@@ -5,16 +5,16 @@
 # It is necessary for linking the library.
 
 # The name that we can dlopen(3).
-dlname='libhdf5.so.5'
+dlname='libhdf5.5.dylib'
 
 # Names of this library.
-library_names='libhdf5.so.5.0.1 libhdf5.so.5 libhdf5.so'
+library_names='libhdf5.5.dylib libhdf5.dylib'
 
 # The name of the static archive.
 old_library='libhdf5.a'
 
 # Linker flags that can not go in dependency_libs.
-inherited_linker_flags=''
+inherited_linker_flags=' '
 
 # Libraries that this one depends upon.
 dependency_libs=' -lz -lm'
@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/home/jmasters/repositories/usg-repository/code/trunk/external/hdf5/../../release/lib'
+libdir='/Users/sduscha/LOFAR/usg/code/external/hdf5/../../release/lib'

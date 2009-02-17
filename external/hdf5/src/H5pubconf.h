@@ -115,7 +115,7 @@
 /* #undef H5_HAVE_FSEEKO */
 
 /* Define to 1 if you have the `fstat64' function. */
-/* #undef H5_HAVE_FSTAT64 */
+#define H5_HAVE_FSTAT64 1
 
 /* Define to 1 if you have the `ftello' function. */
 /* #undef H5_HAVE_FTELLO */
@@ -257,7 +257,7 @@
 #define H5_HAVE_SRANDOM 1
 
 /* Define to 1 if you have the `stat64' function. */
-/* #undef H5_HAVE_STAT64 */
+#define H5_HAVE_STAT64 1
 
 /* Define if `struct stat' has the `st_blocks' field */
 #define H5_HAVE_STAT_ST_BLOCKS 1
@@ -332,7 +332,7 @@
 /* #undef H5_HAVE_THREADSAFE */
 
 /* Define if `timezone' is a global variable */
-/* #undef H5_HAVE_TIMEZONE */
+#define H5_HAVE_TIMEZONE 1
 
 /* Define if the ioctl TIOCGETD is defined */
 #define H5_HAVE_TIOCGETD 1

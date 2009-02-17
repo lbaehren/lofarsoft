@@ -17,8 +17,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- * Created:		Nov  4, 2008
- *			Lars Baehren <lars@ehef107.hef.kun.nl>
+ * Created:		Feb 16, 2009
+ *			Sven Duscha <sduscha@pegasus-2.nfra.nl>
  *
  * Purpose:		This machine-generated source code contains
  *			information about the various integer and

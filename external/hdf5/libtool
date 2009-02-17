@@ -2,7 +2,7 @@
 
 # libtool - Provide generalized library-building support services.
 # Generated automatically by config.status (hdf5) 1.8.1
-# Libtool was configured on host ehef107.hef.kun.nl:
+# Libtool was configured on host pegasus-2.nfra.nl:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #
 #   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005,
@@ -56,16 +56,16 @@ fast_install=needless
 
 # The host system.
 host_alias=
-host=i386-apple-darwin8.11.1
-host_os=darwin8.11.1
+host=i386-apple-darwin9.6.0
+host_os=darwin9.6.0
 
 # The build system.
 build_alias=
-build=i386-apple-darwin8.11.1
-build_os=darwin8.11.1
+build=i386-apple-darwin9.6.0
+build_os=darwin9.6.0
 
 # A sed program that does not truncate output.
-SED="/sw/bin/sed"
+SED="/usr/bin/sed"
 
 # Sed that helps us avoid accidentally triggering echo(1) options like -n.
 Xsed="$SED -e 1s/^X//"
@@ -126,7 +126,7 @@ old_postinstall_cmds="chmod 644 \$oldlib~\$RANLIB \$oldlib"
 old_postuninstall_cmds=""
 
 # A C compiler.
-LTCC="/usr/bin/gcc"
+LTCC="gcc"
 
 # LTCC compiler flags.
 LTCFLAGS=""
@@ -150,7 +150,7 @@ objdir=.libs
 SHELL="/bin/sh"
 
 # An echo program that does not interpret backslashes.
-ECHO="echo"
+ECHO="/bin/echo"
 
 # Used to examine libraries when file_magic_cmd begins with "file".
 MAGIC_CMD=file
@@ -222,7 +222,7 @@ finish_eval=""
 hardcode_into_libs=no
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/usr/lib/gcc/i686-apple-darwin8/4.0.1 /usr/lib /lib /usr/local/lib"
+sys_lib_search_path_spec="/usr/lib/i686-apple-darwin9/4.0.1 /usr/lib /usr/lib/gcc/i686-apple-darwin9/4.0.1 /usr/local/lib"
 
 # Run-time system search path for libraries.
 sys_lib_dlsearch_path_spec="/usr/local/lib /lib /usr/lib"
@@ -242,13 +242,13 @@ striplib="strip -x"
 
 
 # The linker used to build libraries.
-LD="/usr/libexec/gcc/i686-apple-darwin8/4.0.1/ld"
+LD="/usr/libexec/gcc/i686-apple-darwin9/4.0.1/ld"
 
 # Commands used to build an old-style archive.
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs~\$RANLIB \$oldlib"
 
 # A language specific compiler.
-CC="/usr/bin/gcc"
+CC="gcc"
 
 # Is the compiler the GNU compiler?
 with_gcc=yes
@@ -1303,7 +1303,7 @@ func_lo2o ()
 # Append VALUE to the end of shell variable VAR.
 func_append ()
 {
-  eval "$1=\$$1\$2"
+  eval "$1+=\$2"
 }
 # Generated shell functions inserted here.
 
@@ -8275,13 +8275,13 @@ build_old_libs=`case $build_libtool_libs in yes) echo no;; *) echo yes;; esac`
 # ### BEGIN LIBTOOL TAG CONFIG: CXX
 
 # The linker used to build libraries.
-LD="/usr/libexec/gcc/i686-apple-darwin8/4.0.1/ld"
+LD="/usr/libexec/gcc/i686-apple-darwin9/4.0.1/ld"
 
 # Commands used to build an old-style archive.
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs~\$RANLIB \$oldlib"
 
 # A language specific compiler.
-CC="/usr/bin/c++"
+CC="g++"
 
 # Is the compiler the GNU compiler?
 with_gcc=yes
@@ -8424,7 +8424,7 @@ compiler_lib_search_path=""
 # ### BEGIN LIBTOOL TAG CONFIG: FC
 
 # The linker used to build libraries.
-LD="/usr/libexec/gcc/i686-apple-darwin8/4.0.1/ld"
+LD="/usr/libexec/gcc/i686-apple-darwin9/4.0.1/ld"
 
 # Commands used to build an old-style archive.
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs~\$RANLIB \$oldlib"

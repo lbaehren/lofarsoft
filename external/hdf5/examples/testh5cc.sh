@@ -21,7 +21,7 @@
 
 # Initializations
 # Where the tool is installed.
-prefix="${prefix:-/Users/lars/Code/lofar/usg/external/hdf5/../../release}"
+prefix="${prefix:-/Users/sduscha/LOFAR/usg/code/external/hdf5/../../release}"
 PARALLEL=no		# Am I in parallel mode?
 AR=ar
 RANLIB=ranlib

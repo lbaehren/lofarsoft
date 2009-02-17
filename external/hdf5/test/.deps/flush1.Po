@@ -1,58 +1,69 @@
 flush1.o flush1.o: flush1.c h5test.h ../src/hdf5.h ../src/H5public.h \
-  ../src/H5pubconf.h ../src/H5version.h /usr/include/features.h \
-  /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
-  /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h \
-  /usr/include/sys/types.h /usr/include/bits/types.h \
-  /usr/include/bits/typesizes.h /usr/include/time.h \
-  /usr/lib/gcc/x86_64-linux-gnu/4.2.3/include/stddef.h \
-  /usr/include/endian.h /usr/include/bits/endian.h \
-  /usr/include/sys/select.h /usr/include/bits/select.h \
-  /usr/include/bits/sigset.h /usr/include/bits/time.h \
-  /usr/include/sys/sysmacros.h \
-  /usr/lib/gcc/x86_64-linux-gnu/4.2.3/include/limits.h \
-  /usr/lib/gcc/x86_64-linux-gnu/4.2.3/include/syslimits.h \
-  /usr/include/limits.h /usr/include/bits/posix1_lim.h \
-  /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
-  /usr/include/stdint.h /usr/include/bits/wchar.h /usr/include/inttypes.h \
+  ../src/H5pubconf.h ../src/H5version.h /usr/include/sys/types.h \
+  /usr/include/sys/appleapiopts.h /usr/include/sys/cdefs.h \
+  /usr/include/machine/types.h /usr/include/i386/types.h \
+  /usr/include/i386/_types.h /usr/include/sys/_types.h \
+  /usr/include/machine/_types.h /usr/include/machine/endian.h \
+  /usr/include/i386/endian.h /usr/include/sys/_endian.h \
+  /usr/include/libkern/_OSByteOrder.h \
+  /usr/include/libkern/i386/_OSByteOrder.h /usr/include/sys/_structs.h \
+  /usr/lib/gcc/i686-apple-darwin9/4.0.1/include/limits.h \
+  /usr/lib/gcc/i686-apple-darwin9/4.0.1/include/syslimits.h \
+  /usr/include/limits.h /usr/include/machine/limits.h \
+  /usr/include/i386/limits.h /usr/include/i386/_limits.h \
+  /usr/include/sys/syslimits.h \
+  /usr/lib/gcc/i686-apple-darwin9/4.0.1/include/stdint.h \
+  /usr/include/inttypes.h /usr/include/_types.h \
+  /usr/lib/gcc/i686-apple-darwin9/4.0.1/include/stddef.h \
   ../src/H5api_adpt.h ../src/H5Apublic.h ../src/H5Ipublic.h \
-  ../src/H5Opublic.h ../src/H5Lpublic.h ../src/H5Ppublic.h \
-  ../src/H5Cpublic.h ../src/H5Dpublic.h ../src/H5Fpublic.h \
-  ../src/H5ACpublic.h ../src/H5FDpublic.h ../src/H5MMpublic.h \
-  ../src/H5Tpublic.h ../src/H5Zpublic.h ../src/H5Epublic.h \
-  /usr/include/stdio.h /usr/include/libio.h /usr/include/_G_config.h \
-  /usr/include/wchar.h \
-  /usr/lib/gcc/x86_64-linux-gnu/4.2.3/include/stdarg.h \
-  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
-  /usr/include/bits/stdio.h ../src/H5Epubgen.h ../src/H5Gpublic.h \
-  ../src/H5Rpublic.h ../src/H5Spublic.h ../src/H5FDcore.h \
-  ../src/H5FDfamily.h ../src/H5FDlog.h ../src/H5FDmpi.h ../src/H5FDmpio.h \
-  ../src/H5FDmpiposix.h ../src/H5FDmulti.h ../src/H5FDsec2.h \
-  ../src/H5FDstdio.h ../src/H5FDdirect.h ../src/H5private.h \
-  /usr/include/assert.h /usr/include/ctype.h /usr/include/errno.h \
-  /usr/include/bits/errno.h /usr/include/linux/errno.h \
-  /usr/include/asm/errno.h /usr/include/asm-generic/errno.h \
-  /usr/include/asm-generic/errno-base.h /usr/include/fcntl.h \
-  /usr/include/bits/fcntl.h \
-  /usr/lib/gcc/x86_64-linux-gnu/4.2.3/include/float.h /usr/include/math.h \
-  /usr/include/bits/huge_val.h /usr/include/bits/huge_valf.h \
-  /usr/include/bits/huge_vall.h /usr/include/bits/inf.h \
-  /usr/include/bits/nan.h /usr/include/bits/mathdef.h \
-  /usr/include/bits/mathcalls.h /usr/include/bits/mathinline.h \
-  /usr/include/signal.h /usr/include/bits/signum.h \
-  /usr/include/bits/sigaction.h /usr/include/bits/sigcontext.h \
-  /usr/include/bits/sigstack.h /usr/include/stdlib.h \
-  /usr/include/alloca.h /usr/include/string.h /usr/include/bits/string.h \
-  /usr/include/bits/string2.h /usr/include/unistd.h \
-  /usr/include/bits/posix_opt.h /usr/include/bits/confname.h \
-  /usr/include/sys/wait.h /usr/include/sys/resource.h \
-  /usr/include/bits/resource.h /usr/include/bits/waitflags.h \
-  /usr/include/bits/waitstatus.h /usr/include/pwd.h \
-  /usr/include/sys/stat.h /usr/include/bits/stat.h \
-  /usr/include/sys/time.h /usr/include/setjmp.h \
-  /usr/include/bits/setjmp.h /usr/include/sys/ioctl.h \
-  /usr/include/bits/ioctls.h /usr/include/asm/ioctls.h \
-  /usr/include/asm/ioctl.h /usr/include/asm-generic/ioctl.h \
-  /usr/include/bits/ioctl-types.h /usr/include/sys/ttydefaults.h
+  ../src/H5public.h ../src/H5Opublic.h ../src/H5public.h \
+  ../src/H5Ipublic.h ../src/H5Lpublic.h ../src/H5public.h \
+  ../src/H5Ipublic.h ../src/H5Ppublic.h ../src/H5public.h \
+  ../src/H5Cpublic.h ../src/H5public.h ../src/H5Dpublic.h \
+  ../src/H5public.h ../src/H5Ipublic.h ../src/H5Fpublic.h \
+  ../src/H5public.h ../src/H5Cpublic.h ../src/H5ACpublic.h \
+  ../src/H5public.h ../src/H5Cpublic.h ../src/H5Ipublic.h \
+  ../src/H5FDpublic.h ../src/H5public.h ../src/H5Fpublic.h \
+  ../src/H5Ipublic.h ../src/H5MMpublic.h ../src/H5public.h \
+  ../src/H5Tpublic.h ../src/H5public.h ../src/H5Ipublic.h \
+  ../src/H5Zpublic.h ../src/H5public.h ../src/H5Tpublic.h \
+  ../src/H5Tpublic.h ../src/H5ACpublic.h ../src/H5Dpublic.h \
+  ../src/H5Epublic.h /usr/include/stdio.h ../src/H5public.h \
+  ../src/H5Ipublic.h ../src/H5Epubgen.h ../src/H5Fpublic.h \
+  ../src/H5FDpublic.h ../src/H5Gpublic.h ../src/H5public.h \
+  ../src/H5Lpublic.h ../src/H5Opublic.h ../src/H5Tpublic.h \
+  ../src/H5Ipublic.h ../src/H5Lpublic.h ../src/H5MMpublic.h \
+  ../src/H5Opublic.h ../src/H5Ppublic.h ../src/H5Rpublic.h \
+  ../src/H5public.h ../src/H5Gpublic.h ../src/H5Ipublic.h \
+  ../src/H5Spublic.h ../src/H5public.h ../src/H5Ipublic.h \
+  ../src/H5Tpublic.h ../src/H5Zpublic.h ../src/H5FDcore.h \
+  ../src/H5Ipublic.h ../src/H5FDfamily.h ../src/H5Ipublic.h \
+  ../src/H5FDlog.h ../src/H5Ipublic.h ../src/H5FDmpi.h ../src/H5FDmpio.h \
+  ../src/H5FDmpiposix.h ../src/H5FDmulti.h ../src/H5Ipublic.h \
+  ../src/H5Ppublic.h ../src/H5Fpublic.h ../src/H5FDsec2.h \
+  ../src/H5Ipublic.h ../src/H5FDstdio.h ../src/H5Ipublic.h \
+  ../src/H5FDdirect.h ../src/H5Ipublic.h ../src/H5private.h \
+  ../src/H5public.h /usr/include/assert.h /usr/include/ctype.h \
+  /usr/include/runetype.h /usr/include/errno.h /usr/include/sys/errno.h \
+  /usr/include/fcntl.h /usr/include/sys/fcntl.h \
+  /usr/lib/gcc/i686-apple-darwin9/4.0.1/include/float.h \
+  /usr/lib/gcc/i686-apple-darwin9/4.0.1/include/syslimits.h \
+  /usr/include/math.h /usr/include/architecture/i386/math.h \
+  /usr/include/signal.h /usr/include/sys/signal.h \
+  /usr/include/machine/signal.h /usr/include/i386/signal.h \
+  /usr/include/i386/_structs.h /usr/include/machine/_structs.h \
+  /usr/include/mach/i386/_structs.h \
+  /usr/lib/gcc/i686-apple-darwin9/4.0.1/include/stdarg.h \
+  /usr/include/stdlib.h /usr/include/available.h /usr/include/sys/wait.h \
+  /usr/include/sys/resource.h /usr/include/alloca.h /usr/include/string.h \
+  /usr/include/unistd.h /usr/include/sys/unistd.h \
+  /usr/include/sys/select.h /usr/include/sys/_select.h /usr/include/pwd.h \
+  /usr/include/sys/stat.h /usr/include/sys/time.h /usr/include/time.h \
+  /usr/include/_structs.h /usr/include/setjmp.h \
+  /usr/include/machine/setjmp.h /usr/include/i386/setjmp.h \
+  /usr/include/sys/ioctl.h /usr/include/sys/ttycom.h \
+  /usr/include/sys/ioccom.h /usr/include/sys/filio.h \
+  /usr/include/sys/sockio.h
 
 h5test.h:
 
@@ -64,57 +75,55 @@ h5test.h:
 
 ../src/H5version.h:
 
-/usr/include/features.h:
+/usr/include/sys/types.h:
+
+/usr/include/sys/appleapiopts.h:
 
 /usr/include/sys/cdefs.h:
 
-/usr/include/bits/wordsize.h:
+/usr/include/machine/types.h:
 
-/usr/include/gnu/stubs.h:
+/usr/include/i386/types.h:
 
-/usr/include/gnu/stubs-64.h:
+/usr/include/i386/_types.h:
 
-/usr/include/sys/types.h:
+/usr/include/sys/_types.h:
 
-/usr/include/bits/types.h:
+/usr/include/machine/_types.h:
 
-/usr/include/bits/typesizes.h:
+/usr/include/machine/endian.h:
 
-/usr/include/time.h:
+/usr/include/i386/endian.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/4.2.3/include/stddef.h:
+/usr/include/sys/_endian.h:
 
-/usr/include/endian.h:
+/usr/include/libkern/_OSByteOrder.h:
 
-/usr/include/bits/endian.h:
+/usr/include/libkern/i386/_OSByteOrder.h:
 
-/usr/include/sys/select.h:
+/usr/include/sys/_structs.h:
 
-/usr/include/bits/select.h:
+/usr/lib/gcc/i686-apple-darwin9/4.0.1/include/limits.h:
 
-/usr/include/bits/sigset.h:
-
-/usr/include/bits/time.h:
-
-/usr/include/sys/sysmacros.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/4.2.3/include/limits.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/4.2.3/include/syslimits.h:
+/usr/lib/gcc/i686-apple-darwin9/4.0.1/include/syslimits.h:
 
 /usr/include/limits.h:
 
-/usr/include/bits/posix1_lim.h:
+/usr/include/machine/limits.h:
 
-/usr/include/bits/local_lim.h:
+/usr/include/i386/limits.h:
 
-/usr/include/linux/limits.h:
+/usr/include/i386/_limits.h:
 
-/usr/include/stdint.h:
+/usr/include/sys/syslimits.h:
 
-/usr/include/bits/wchar.h:
+/usr/lib/gcc/i686-apple-darwin9/4.0.1/include/stdint.h:
 
 /usr/include/inttypes.h:
+
+/usr/include/_types.h:
+
+/usr/lib/gcc/i686-apple-darwin9/4.0.1/include/stddef.h:
 
 ../src/H5api_adpt.h:
 
@@ -122,59 +131,141 @@ h5test.h:
 
 ../src/H5Ipublic.h:
 
+../src/H5public.h:
+
 ../src/H5Opublic.h:
+
+../src/H5public.h:
+
+../src/H5Ipublic.h:
 
 ../src/H5Lpublic.h:
 
+../src/H5public.h:
+
+../src/H5Ipublic.h:
+
 ../src/H5Ppublic.h:
+
+../src/H5public.h:
 
 ../src/H5Cpublic.h:
 
+../src/H5public.h:
+
 ../src/H5Dpublic.h:
+
+../src/H5public.h:
+
+../src/H5Ipublic.h:
 
 ../src/H5Fpublic.h:
 
+../src/H5public.h:
+
+../src/H5Cpublic.h:
+
 ../src/H5ACpublic.h:
+
+../src/H5public.h:
+
+../src/H5Cpublic.h:
+
+../src/H5Ipublic.h:
 
 ../src/H5FDpublic.h:
 
+../src/H5public.h:
+
+../src/H5Fpublic.h:
+
+../src/H5Ipublic.h:
+
 ../src/H5MMpublic.h:
+
+../src/H5public.h:
 
 ../src/H5Tpublic.h:
 
+../src/H5public.h:
+
+../src/H5Ipublic.h:
+
 ../src/H5Zpublic.h:
+
+../src/H5public.h:
+
+../src/H5Tpublic.h:
+
+../src/H5Tpublic.h:
+
+../src/H5ACpublic.h:
+
+../src/H5Dpublic.h:
 
 ../src/H5Epublic.h:
 
 /usr/include/stdio.h:
 
-/usr/include/libio.h:
+../src/H5public.h:
 
-/usr/include/_G_config.h:
-
-/usr/include/wchar.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/4.2.3/include/stdarg.h:
-
-/usr/include/bits/stdio_lim.h:
-
-/usr/include/bits/sys_errlist.h:
-
-/usr/include/bits/stdio.h:
+../src/H5Ipublic.h:
 
 ../src/H5Epubgen.h:
 
+../src/H5Fpublic.h:
+
+../src/H5FDpublic.h:
+
 ../src/H5Gpublic.h:
+
+../src/H5public.h:
+
+../src/H5Lpublic.h:
+
+../src/H5Opublic.h:
+
+../src/H5Tpublic.h:
+
+../src/H5Ipublic.h:
+
+../src/H5Lpublic.h:
+
+../src/H5MMpublic.h:
+
+../src/H5Opublic.h:
+
+../src/H5Ppublic.h:
 
 ../src/H5Rpublic.h:
 
+../src/H5public.h:
+
+../src/H5Gpublic.h:
+
+../src/H5Ipublic.h:
+
 ../src/H5Spublic.h:
+
+../src/H5public.h:
+
+../src/H5Ipublic.h:
+
+../src/H5Tpublic.h:
+
+../src/H5Zpublic.h:
 
 ../src/H5FDcore.h:
 
+../src/H5Ipublic.h:
+
 ../src/H5FDfamily.h:
 
+../src/H5Ipublic.h:
+
 ../src/H5FDlog.h:
+
+../src/H5Ipublic.h:
 
 ../src/H5FDmpi.h:
 
@@ -184,112 +275,108 @@ h5test.h:
 
 ../src/H5FDmulti.h:
 
+../src/H5Ipublic.h:
+
+../src/H5Ppublic.h:
+
+../src/H5Fpublic.h:
+
 ../src/H5FDsec2.h:
+
+../src/H5Ipublic.h:
 
 ../src/H5FDstdio.h:
 
+../src/H5Ipublic.h:
+
 ../src/H5FDdirect.h:
 
+../src/H5Ipublic.h:
+
 ../src/H5private.h:
+
+../src/H5public.h:
 
 /usr/include/assert.h:
 
 /usr/include/ctype.h:
 
+/usr/include/runetype.h:
+
 /usr/include/errno.h:
 
-/usr/include/bits/errno.h:
-
-/usr/include/linux/errno.h:
-
-/usr/include/asm/errno.h:
-
-/usr/include/asm-generic/errno.h:
-
-/usr/include/asm-generic/errno-base.h:
+/usr/include/sys/errno.h:
 
 /usr/include/fcntl.h:
 
-/usr/include/bits/fcntl.h:
+/usr/include/sys/fcntl.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/4.2.3/include/float.h:
+/usr/lib/gcc/i686-apple-darwin9/4.0.1/include/float.h:
+
+/usr/lib/gcc/i686-apple-darwin9/4.0.1/include/syslimits.h:
 
 /usr/include/math.h:
 
-/usr/include/bits/huge_val.h:
-
-/usr/include/bits/huge_valf.h:
-
-/usr/include/bits/huge_vall.h:
-
-/usr/include/bits/inf.h:
-
-/usr/include/bits/nan.h:
-
-/usr/include/bits/mathdef.h:
-
-/usr/include/bits/mathcalls.h:
-
-/usr/include/bits/mathinline.h:
+/usr/include/architecture/i386/math.h:
 
 /usr/include/signal.h:
 
-/usr/include/bits/signum.h:
+/usr/include/sys/signal.h:
 
-/usr/include/bits/sigaction.h:
+/usr/include/machine/signal.h:
 
-/usr/include/bits/sigcontext.h:
+/usr/include/i386/signal.h:
 
-/usr/include/bits/sigstack.h:
+/usr/include/i386/_structs.h:
+
+/usr/include/machine/_structs.h:
+
+/usr/include/mach/i386/_structs.h:
+
+/usr/lib/gcc/i686-apple-darwin9/4.0.1/include/stdarg.h:
 
 /usr/include/stdlib.h:
 
-/usr/include/alloca.h:
-
-/usr/include/string.h:
-
-/usr/include/bits/string.h:
-
-/usr/include/bits/string2.h:
-
-/usr/include/unistd.h:
-
-/usr/include/bits/posix_opt.h:
-
-/usr/include/bits/confname.h:
+/usr/include/available.h:
 
 /usr/include/sys/wait.h:
 
 /usr/include/sys/resource.h:
 
-/usr/include/bits/resource.h:
+/usr/include/alloca.h:
 
-/usr/include/bits/waitflags.h:
+/usr/include/string.h:
 
-/usr/include/bits/waitstatus.h:
+/usr/include/unistd.h:
+
+/usr/include/sys/unistd.h:
+
+/usr/include/sys/select.h:
+
+/usr/include/sys/_select.h:
 
 /usr/include/pwd.h:
 
 /usr/include/sys/stat.h:
 
-/usr/include/bits/stat.h:
-
 /usr/include/sys/time.h:
+
+/usr/include/time.h:
+
+/usr/include/_structs.h:
 
 /usr/include/setjmp.h:
 
-/usr/include/bits/setjmp.h:
+/usr/include/machine/setjmp.h:
+
+/usr/include/i386/setjmp.h:
 
 /usr/include/sys/ioctl.h:
 
-/usr/include/bits/ioctls.h:
+/usr/include/sys/ttycom.h:
 
-/usr/include/asm/ioctls.h:
+/usr/include/sys/ioccom.h:
 
-/usr/include/asm/ioctl.h:
+/usr/include/sys/filio.h:
 
-/usr/include/asm-generic/ioctl.h:
-
-/usr/include/bits/ioctl-types.h:
-
-/usr/include/sys/ttydefaults.h:
+/usr/include/sys/sockio.h:

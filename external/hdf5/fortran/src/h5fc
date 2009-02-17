@@ -24,10 +24,10 @@
 ## then modify them accordingly to represent the new paths.               ##
 ##                                                                        ##
 ############################################################################
-prefix="/Users/lars/Code/lofar/usg/external/hdf5/../../release"
+prefix="/Users/sduscha/LOFAR/usg/code/external/hdf5/../../release"
 exec_prefix="${prefix}"
 libdir="${exec_prefix}/lib"
-includedir="/Users/lars/Code/lofar/usg/external/hdf5/../../release/include/hdf5"
+includedir="/Users/sduscha/LOFAR/usg/code/external/hdf5/../../release/include/hdf5"
 HL="hl"
 
 ############################################################################
@@ -36,7 +36,7 @@ HL="hl"
 ##                                                                        ##
 ############################################################################
 
-host_os="darwin8.11.1"
+host_os="darwin9.6.0"
 
 prog_name="`basename $0`"
 
