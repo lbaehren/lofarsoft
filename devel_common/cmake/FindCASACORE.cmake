@@ -73,13 +73,13 @@ set (casacore_headers
 include (CMakeSettings)
 
 list (APPEND include_locations
-  ${USG_ROOT}/release/include/casacore
+  ${USG_ROOT}/release/include
   ${USG_ROOT}/external/casacore
-  /usr/include/casacore
-  /usr/local/include/casacore
+  /usr/include
+  /usr/local/include
   /sw/share/casacore
-  /sw/include/casacore
-  /app/usg/release/include/casacore
+  /sw/include
+  /app/usg/release/include
 )
 
 list (APPEND lib_locations
@@ -127,6 +127,7 @@ foreach (CASACORE_HEADER ${casacore_headers})
   ## search for the header file of a given module
   find_path (header_path ${CASACORE_HEADER}
     PATHS ${include_locations}
+    PATH_SUFFIXES casacore
     NO_DEFAULT_PATH
     )
   ## if the header file was found, add its path to the include path

@@ -195,6 +195,14 @@ if (NOT USG_CMAKE_CONFIG)
 
   ## Beam-formed data
 
+  find_file (dataset_bf_raw
+    NAMES
+    bf_20080604_121337.cor
+    PATHS
+    ${USG_ROOT}/data
+    ${USG_ROOT}/data/test
+    )
+  
   find_file (dataset_beamformed
     NAMES
     bf_20080604_121337.cor.h5 bf_20080604_121337.h5 TBB1.cor.h5
