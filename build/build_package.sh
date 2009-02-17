@@ -121,7 +121,7 @@ build_package ()
   else 
   {
       echo "[`date`] No build directory $buildDir - creating it now."
-      mkdir $buildDir;
+      mkdir -p $buildDir;
       # recursive call
       build_package $buildDir $sourceDir $buildOptions
   }

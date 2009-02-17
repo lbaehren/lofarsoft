@@ -59,6 +59,7 @@ add_custom_target (cleanup
 ##
 ## ==============================================================================
 
+##____________________________________________________________________
 ## generic build instructions for the packages
 
 set (packages_external
@@ -69,6 +70,9 @@ set (packages_external
   cfitsio
   flex
   hdf5
+  mathgl
+  pyrap
+  python
   qt
   root
   sip
@@ -76,6 +80,8 @@ set (packages_external
   szip
   wcslib
   wcstools
+  wget
+  zlib
   )
 
 foreach (package_name ${packages_external})
@@ -92,15 +98,49 @@ add_dependencies (casacore hdf5 cfitsio boost wcslib)
 
 add_dependencies (hdf5 szip)
 
+add_dependencies (mathgl hdf5)
+
+add_dependencies (pyrap casacore hdf5 python boost)
+
+add_dependencies (python boost)
+
 add_dependencies (startools root)
 
-add_dependencies (wcslib boost)
+add_dependencies (wcslib boost flex)
+
+##____________________________________________________________________
+## Packages needing extra attention
+
+add_custom_target (plplot
+  COMMAND mkdir -p ${USG_BUILD}/plplot 
+  COMMAND cd plplot && cmake -C ${USG_ROOT}/devel_common/cmake/SettingsPLplot.cmake ${USG_ROOT}/external/plplot
+  COMMAND cd ${USG_BUILD} && ./build_package.sh plplot ${USG_EXTERNAL}/plplot
+  WORKING_DIRECTORY ${USG_BUILD}
+  )
 
 ## ==============================================================================
 ##
 ##  USG packages
 ##
 ## ==============================================================================
+
+##____________________________________________________________________
+##                                                                BDSM
+
+add_custom_target (bdsm
+  COMMAND ./build_package.sh bdsm ${USG_ROOT}/src/BDSM
+  WORKING_DIRECTORY ${USG_BUILD}
+  )
+add_dependencies (bdsm cfitsio wcslib)
+
+##____________________________________________________________________
+##                                           Data Access Library (DAL)
+
+add_custom_target (dal
+  COMMAND ./build_package.sh dal ${USG_ROOT}/src/DAL
+  WORKING_DIRECTORY ${USG_BUILD}
+  )
+add_dependencies (dal python plplot casacore flex bison)
 
 ##____________________________________________________________________
 ##                                                            CR-Tools
@@ -112,20 +152,20 @@ add_custom_target (cr
 add_dependencies (cr dal startools mathgl)
 
 ##____________________________________________________________________
-##                                           Data Access Library (DAL)
-
-add_custom_target (dal
-  COMMAND ./build_package.sh dal ${USG_ROOT}/src/DAL
-  WORKING_DIRECTORY ${USG_BUILD}
-  )
-add_dependencies (dal casacore hdf5 cfitsio boost)
-
-##____________________________________________________________________
 ##                                                                  RM
 
 add_custom_target (rm
   COMMAND ./build_package.sh rm ${USG_ROOT}/src/RM
   WORKING_DIRECTORY ${USG_BUILD}
   )
-add_dependencies (rm dal casacore hdf5 cfitsio boost)
+add_dependencies (rm dal)
+
+##____________________________________________________________________
+##                                                             contrib
+
+add_custom_target (contrib
+  COMMAND ./build_package.sh contrib ${USG_ROOT}/src/contrib
+  WORKING_DIRECTORY ${USG_BUILD}
+  )
+add_dependencies (contrib dal)
 
