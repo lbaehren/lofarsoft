@@ -226,11 +226,6 @@ namespace CR { // Namespace CR -- begin
     spatialCoord_p  = spatialCoord;
     timeFreqCoord_p = timeFreqCoord;
 
-    // check ordering of time and frequency axis before storage
-    if (!timeFreqCoord_p.timeAxisLast()) {
-      timeFreqCoord_p.setTimeAxisLast(true);
-    }
-    
     setCoordinateSystem ();
   }
   
@@ -239,12 +234,16 @@ namespace CR { // Namespace CR -- begin
   void SkymapCoordinate::setCoordinateSystem ()
   {
     casa::CoordinateSystem csys;
-    bool append (true);
     
     csys.setObsInfo (obsData_p.obsInfo());
-    
+
+    /* Check the ordering of time and frequency axis */
+    if (!timeFreqCoord_p.timeAxisLast()) {
+      timeFreqCoord_p.setTimeAxisLast(true);
+    }
+
     spatialCoord_p.toCoordinateSystem(csys);
-    timeFreqCoord_p.toCoordinateSystem(csys,append);
+    timeFreqCoord_p.toCoordinateSystem(csys);
     
     csys_p = csys;
 

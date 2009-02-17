@@ -327,6 +327,12 @@ set (rm_sources
 
 add_library (rm ${rm_sources})
 
+install (
+  TARGETS rm
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
+
 ## Build applications
 
 add_executable (rmsynth main.cpp)
@@ -334,4 +340,11 @@ add_executable (rmsynth main.cpp)
 target_link_libraries (rmsynth
   ${rm}
   ${link_libraries}
+  )
+
+install (
+  TARGETS rmsynth
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
   )

@@ -58,7 +58,8 @@ using CR::SkymapQuantity;
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_Beamformer ()
+int test_Beamformer (uint blocksize=1024,
+		     uint fftLength=513)
 {
   std::cout << "\n[test_Beamformer]\n" << std::endl;
 
@@ -75,7 +76,7 @@ int test_Beamformer ()
   
   cout << "[2] Construction using (GeomWeight) ..." << endl;
   try {
-    Vector<MVFrequency> frequencies (10);
+    Vector<MVFrequency> frequencies (fftLength);
     CR::GeomPhase phase (frequencies,false);
     GeomWeight weight (phase);
     //
@@ -89,7 +90,7 @@ int test_Beamformer ()
   cout << "[3] Construction using (GeomPhase,bool) ..." << endl;
   try {
     // parameters for GeomPhase
-    Vector<MVFrequency> frequencies (10);
+    Vector<MVFrequency> frequencies (fftLength);
     CR::GeomPhase phase (frequencies,false);
     //
     Beamformer bf (phase);
@@ -113,7 +114,7 @@ int test_Beamformer ()
 			 farField,
 			 bufferDelays);
     // parameters for GeomPhase
-    Vector<double> frequencies (10);
+    Vector<double> frequencies (fftLength);
     bool bufferPhases (false);
     // parameters for GeomWeights
     bool bufferWeights (false);
@@ -143,7 +144,7 @@ int test_Beamformer ()
 			 farField,
 			 bufferDelays);
     // parameters for GeomPhase
-    Vector<MVFrequency> frequencies (10);
+    Vector<MVFrequency> frequencies (fftLength);
     bool bufferPhases (false);
     // parameters for GeomWeights
     bool bufferWeights (false);
@@ -167,7 +168,7 @@ int test_Beamformer ()
     bool farField (false);
     bool bufferDelays (false);
     // parameters for GeomPhase
-    Vector<double> frequencies (100);
+    Vector<double> frequencies (fftLength);
     bool bufferPhases (false);
     // parameters for GeomWeights
     bool bufferWeights (false);
@@ -197,7 +198,7 @@ int test_Beamformer ()
     bool farField (false);
     bool bufferDelays (false);
     // parameters for GeomPhase
-    casa::Vector<casa::MVFrequency> frequencies (100);
+    casa::Vector<casa::MVFrequency> frequencies (fftLength);
     bool bufferPhases (false);
     // parameters for GeomWeights
     bool bufferWeights (false);
@@ -218,7 +219,7 @@ int test_Beamformer ()
   
   cout << "[8] Testing copy constructor ..." << endl;
   try {
-    Vector<MVFrequency> frequencies (10);
+    Vector<MVFrequency> frequencies (fftLength);
     CR::GeomPhase phase (frequencies,false);
     GeomWeight weight (phase);
     //
@@ -246,7 +247,8 @@ int test_Beamformer ()
   \return nofFailedTests -- The number of failed test encountered within this
           function.
 */
-int test_parameters ()
+int test_parameters (uint blocksize=1024,
+		     uint fftLength=513)
 {
   std::cout << "\n[test_parameters]\n" << std::endl;
 
@@ -287,8 +289,7 @@ int test_parameters ()
 
   cout << "[3] Set frequency values ..." << endl;
   try {
-    uint nelem (1024);
-    Vector<MVFrequency> freq (nelem);
+    Vector<MVFrequency> freq (fftLength);
     //
     cout << "-- old values = " << bf.frequencies().shape() << endl;
     cout << "-- new values = " << freq.shape()             << endl;
@@ -354,7 +355,8 @@ int test_parameters ()
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_weights ()
+int test_weights (uint blocksize=1024,
+		  uint fftLength=513)
 {
   std::cout << "\n[test_weights]\n" << std::endl;
 
@@ -406,7 +408,8 @@ int test_weights ()
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_processing ()
+int test_processing (uint blocksize=1024,
+		     uint fftLength=513)
 {
   std::cout << "\n[test_processing]\n" << std::endl;
 

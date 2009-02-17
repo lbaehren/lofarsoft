@@ -191,6 +191,9 @@ namespace CR { // Namespace CR -- begin
 
     skymapType_p = other.skymapType_p;
 
+    shapeBeam_p.resize(other.shapeBeam_p.nelements());
+    shapeBeam_p = other.shapeBeam_p;
+
     bfWeights_p.resize(other.bfWeights_p.shape());
     bfWeights_p = other.bfWeights_p;
   }
@@ -369,8 +372,8 @@ namespace CR { // Namespace CR -- begin
     if (shapeData(0) != shapeWeights(0)) {
       std::cerr << "[Beamformer::checkData] Mismatch in number of frequencies"
 		<< std::endl;
-      std::cerr << "-- data    : " << shapeData(0)    << std::endl;
-      std::cerr << "-- weights : " << shapeWeights(0) << std::endl;
+      std::cerr << "-- shape(data)    = " << shapeData    << std::endl;
+      std::cerr << "-- shape(weights) = " << shapeWeights << std::endl;
       // increment error counter
       nofFailedChecks++;
     }
