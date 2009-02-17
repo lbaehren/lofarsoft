@@ -583,7 +583,7 @@ case $param_packageName in
         echo "[`date`] Processing packages required for RM ..."
 		cd $basedir; ./build.sh dal
 		echo "[`date`] Building RM package ..."
-		build_package rm src/RM;
+		build_package rm src/RM "-DRM_FORCE_BUILD:BOOL=$FORCE_BUILD";
     ;;
     ## --------------------------------------------------------------------------
     ## --- General testing of environment ---------------------------------------

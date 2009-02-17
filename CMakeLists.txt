@@ -8,7 +8,7 @@
 project (LUS)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.6)
 
 ## ==============================================================================
 ##
@@ -20,39 +20,38 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
   ${LUS_SOURCE_DIR}
   ${LUS_SOURCE_DIR}/..
-  ${LUS_SOURCE_DIR}/../..
-  ${LUS_SOURCE_DIR}/../../..
   $ENV{LOFARSOFT}
   )
 
 if (USG_ROOT)
   include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  set (USG_BUILD ${USG_ROOT}/build)
+  set (USG_EXTERNAL ${USG_ROOT}/external)
 else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
 ## ==============================================================================
 ##
-##  List of selectable packages/libraries
+##  Build options
 ##
 ## ==============================================================================
 
-## External packages
+option (SEND_REPORT "Send a report of the build to the Dashboard server?" NO )
 
-option (BUILD_BISON     "Build Bison?"                   YES )
-option (BUILD_BOOST     "Build the Boost libraries?"     YES )
-option (BUILD_CASACORE  "Build casacore?"                YES )
-option (BUILD_CFITSIO   "Build the CFITSIO library?"     YES )
-option (BUILD_MATHGL    "Build the MathGL package?"      YES )
-option (BUILD_STARTOOLS "Build the Star-Tools package?"  YES )
-option (BUILD_WCSLIB    "Build the WCS library?"         YES )
-option (BUILD_WCSTOOLS  "Build the WCS-Tools package?"   YES )
+## ==============================================================================
+##
+##  Cleaning up
+##
+## ==============================================================================
 
-## USG packages
-
-option (BUILD_DAL      "Build the Data Access Library (DAL)?"     NO )
-option (BUILD_CONTRIB  "Build contributed programs and scripts?"  NO )
-option (BUILD_CR       "Build the Cosmic Ray Tools?"              NO )
+add_custom_target (clean
+  COMMAND rm -rf *~
+  COMMAND rm -rf cmake_install.cmake
+  COMMAND rm -rf CMakeCache.txt
+  COMMAND rm -rf CMakeFiles
+  WORKING_DIRECTORY ${USG_BUILD}
+)
 
 ## ==============================================================================
 ##
@@ -60,46 +59,71 @@ option (BUILD_CR       "Build the Cosmic Ray Tools?"              NO )
 ##
 ## ==============================================================================
 
-## ------------------------------------------------------------------------------
-## CASACORE
+set (packages_external
+  bison
+  blitz 
+  boost
+  cfitsio
+  flex
+  qt
+  root
+  sip
+  szip
+  wcstools
+  )
 
-if (BUILD_CASACORE)
-  add_subdirectory (${LUS_SOURCE_DIR}/external/wcslib)
-  add_subdirectory (${LUS_SOURCE_DIR}/external/cfitsio)
-  add_subdirectory (${LUS_SOURCE_DIR}/external/casacore)
-endif (BUILD_CASACORE)
+foreach (package_name ${packages_external})
+  add_custom_target (${package_name}
+    COMMAND ./build_package.sh ${package_name} ${USG_EXTERNAL}/${package_name}
+    WORKING_DIRECTORY ${USG_BUILD}
+    )
+endforeach (package_name)
 
-## ------------------------------------------------------------------------------
-## CFITSIO
+add_custom_target (casacore
+  COMMAND ./build.sh casacore
+  WORKING_DIRECTORY ${USG_BUILD}
+  )
+add_dependencies (casacore hdf5 cfitsio boost wcslib)
 
-if (BUILD_CFITSIO)
-  add_subdirectory (${LUS_SOURCE_DIR}/external/cfitsio)
-endif (BUILD_CFITSIO)
+add_custom_target (hdf5
+  COMMAND ./build.sh hdf5
+  WORKING_DIRECTORY ${USG_BUILD}
+  )
+add_dependencies (hdf5 szip)
 
-## ------------------------------------------------------------------------------
-## PLPLOT
+add_custom_target (startools
+  COMMAND ./build.sh startools
+  WORKING_DIRECTORY ${USG_BUILD}
+  )
+add_dependencies (startools root)
 
-if (BUILD_PLPLOT)
-  add_subdirectory (${LUS_SOURCE_DIR}/external/plplot)
-endif (BUILD_PLPLOT)
+add_custom_target (wcslib
+  COMMAND ./build.sh wcslib
+  WORKING_DIRECTORY ${USG_BUILD}
+  )
+add_dependencies (wcslib boost)
 
-## ------------------------------------------------------------------------------
-## STARTOOLS
+## ==============================================================================
+##
+##  USG packages
+##
+## ==============================================================================
 
-if (BUILD_STARTOOLS)
-  add_subdirectory (${LUS_SOURCE_DIR}/external/startools)
-endif (BUILD_STARTOOLS)
+##____________________________________________________________________
+##                                                            CR-Tools
 
-## ------------------------------------------------------------------------------
-## WCSLIB
+add_custom_target (cr
+  COMMAND ./build_package.sh cr src/CR-Tools
+  WORKING_DIRECTORY ${USG_BUILD}
+  )
+add_dependencies (cr dal startools mathgl)
 
-if (BUILD_WCSLIB)
-  add_subdirectory (${LUS_SOURCE_DIR}/external/wcslib)
-endif (BUILD_WCSLIB)
+##____________________________________________________________________
+##                                           Data Access Library (DAL)
 
-## ------------------------------------------------------------------------------
-## WCSTOOLS
+add_custom_target (dal
+  COMMAND ./build_package.sh dal src/DAL
+  WORKING_DIRECTORY ${USG_BUILD}
+  )
+add_dependencies (dal casacore hdf5 cfitsio boost)
 
-if (BUILD_WCSTOOLS)
-  add_subdirectory (${LUS_SOURCE_DIR}/external/wcstools)
-endif (BUILD_WCSTOOLS)

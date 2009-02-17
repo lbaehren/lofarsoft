@@ -1,0 +1,84 @@
+#/bin/sh 
+
+##______________________________________________________________________________
+## Build CMake from source 
+
+REQUIRED_MAJOR_VERSION=2
+REQUIRED_MINOR_VERSION=6
+CMAKE_MAJOR_VERSION=0
+CMAKE_MINOR_VERSION=0
+HAVE_CMAKE=0
+
+## [1] Check the system if there already is a version of CMake
+##     installed
+    
+if test -z `which cmake` ; then {
+  HAVE_CMAKE=0;
+} else {
+  HAVE_CMAKE=1;
+} fi;
+	
+## [2] If a version of CMake is installed, check if it is a recent
+##     enough correct version.
+	
+    if [[ ${HAVE_CMAKE} == 1 ]] ; then {
+		
+        ## obtain version information
+		
+	CMAKE_VERSION=`cmake --version | tr " " "\n" | grep -v cmake | grep -v version`
+	CMAKE_MAJOR_VERSION=`echo $CMAKE_VERSION | tr "." " " | tr "-" " "  | awk '{print $1}'`
+	CMAKE_MINOR_VERSION=`echo $CMAKE_VERSION | tr "." " " | tr "-" " "  | awk '{print $2}'`
+	
+	## build condition
+		
+	if [[ ${CMAKE_MAJOR_VERSION} -lt ${REQUIRED_MAJOR_VERSION} ]] ; then {
+	    echo "CMake major version < ${REQUIRED_MAJOR_VERSION} ; build required";
+	    HAVE_CMAKE=0;
+	} else {
+	    if [[ ${CMAKE_MINOR_VERSION} -lt ${REQUIRED_MINOR_VERSION} ]] ; then {
+		echo "CMake minor version < ${REQUIRED_MINOR_VERSION} ; build required";
+		HAVE_CMAKE=0;
+	    } fi
+	} fi
+
+    } fi
+
+    ## [3] If required initiate build of CMake from provided sources
+
+    if [[ ${HAVE_CMAKE} == 0 ]] ; then {
+
+    ## Check if the source code to build cmake is available; if this
+    ## is not the case with error, since this is the bottom-most 
+    ## position in the dependency chain
+    if test -d $basedir/../external/cmake ; then
+	echo "[`date`] Found directory with source code for CMake."
+    else
+	echo "[`date`] Missing source directory for CMake! Unable to continue!"
+	exit 1;
+    fi
+	## prepare to build cmake from its source
+    if test -d cmake ; then
+	cd cmake;
+    else
+	mkdir cmake;
+	cd cmake;
+    fi
+	## run the configure script
+    echo "[`date`] Running configure script for CMake ..."
+    $basedir/../external/cmake/configure --prefix=$basedir/../release
+	## build and install
+    echo "[`date`] Initiating build and install of CMake ..."
+    make && make install
+    export PATH=$PATH:$basedir/../release/bin
+
+    } fi;
+
+    ## Check if after the build and installation indeed now we have a
+    ## working and recent enough version available
+
+    if test -z `which cmake` ; then { exit 1; } fi
+
+##______________________________________________________________________________
+## Run CMake to define build targets
+
+cmake ..
