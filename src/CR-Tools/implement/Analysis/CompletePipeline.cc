@@ -1328,6 +1328,17 @@ namespace CR { // Namespace CR -- begin
       // cut time values
       timeRange = timeValues(range);
 
+      // find time bin of the ccCenter
+      unsigned int ccTime = ntrue(timeRange <= cc_center);
+
+      // output if cc-center is inisde the range or not
+      if (verbose) {
+        if ( (ccTime == 0) || (ccTime == timeRange.size()) )
+          cout << "CC-beam not inside of the time range: Searching for global extrema!" << endl;
+        else
+          cout << "CC-beam inside of the time range: Searching for nearest local extrema!" << endl;
+      }
+
       // get the time range for noise calculation
       Slice rangeNoise;
       if (calculate_noise) {
@@ -1370,28 +1381,72 @@ namespace CR { // Namespace CR -- begin
         trace = yValues.column(i)(range);
         envTrace = envelope(trace);
 
+        // calculate the pulse heights differently depending on if the cc-center is inside the range
+        // if it is, find the nearest local maximum, if not find the global maximum
         // loop through the values and search for the heighest one
-        for(unsigned int j = 0; j < timeRange.nelements(); j++) {
-          if ( maximum < trace(j)) {
-            maxtimevalue = j;
-            maximum = trace(j);
-          }
-        }
 
-        // loop through the values and search for the lowest one
-        for(unsigned int j = 0; j < timeRange.nelements(); j++) {
-          if ( minimum > trace(j)) {
-            mintimevalue = j;
-            minimum = trace(j);
+        if ( (ccTime == 0) || (ccTime == timeRange.size()) ) {   // looking for global maxima
+          for(unsigned int j = 0; j < timeRange.nelements(); j++) {
+            if ( maximum < trace(j)) {
+              maxtimevalue = j;
+              maximum = trace(j);
+            }
           }
-        }
 
-        // loop through the values of the envelope and search for the heighest one
-        for(unsigned int j = 0; j < timeRange.nelements(); j++) {
-          if ( envMaximum < envTrace(j)) {
-            envMaxtimevalue = j;
-            envMaximum = envTrace(j);
+          // loop through the values and search for the lowest one
+          for(unsigned int j = 0; j < timeRange.nelements(); j++) {
+            if ( minimum > trace(j)) {
+              mintimevalue = j;
+              minimum = trace(j);
+            }
           }
+
+          // loop through the values of the envelope and search for the heighest one
+          for(unsigned int j = 0; j < timeRange.nelements(); j++) {
+            if ( envMaximum < envTrace(j)) {
+              envMaxtimevalue = j;
+              envMaximum = envTrace(j);
+            }
+          }
+        } else {       // looking for local maxima
+          // first look to the slope, if it is increasing or decreasing
+          int slope = 1;	// default: increasing trace
+          if ( trace(ccTime) < trace(ccTime-1) ) 
+            slope = -1;         // change to -1 for a decreasing trace
+
+          // find local maximum
+          unsigned int j = ccTime;	// counter
+          while( (j > 0) && (j < trace.size()-1) && (trace(j) < trace(j+slope)) ) {
+            j += slope;
+          }
+          if ( (j==0) && (j = trace.size()) )
+            cout << "WARNING: Range is too small: Local maximum could not be found!" << endl;
+          maxtimevalue = j;
+          maximum = trace(j);
+
+          // find local minimum
+          j = ccTime;	// counter
+          while( (j > 0) && (j < trace.size()-1) && (trace(j) > trace(j-slope)) ) {
+            j -= slope;
+          }
+          if ( (j==0) && (j = trace.size()) )
+            cout << "WARNING: Range is too small: Local minimum could not be found!" << endl;
+          mintimevalue = j;
+          minimum = trace(j);
+
+          // find the maximum of the envelope (recalculate slope, as it could be differen)
+          if ( envTrace(ccTime) < envTrace(ccTime-1) ) 
+            slope = -1;
+          else
+            slope = 1;
+          j = ccTime;	// counter
+          while( (j > 0) && (j < envTrace.size()-1) && (envTrace(j) < envTrace(j+slope)) ) {
+            j += slope;
+          }
+          if ( (j==0) && (j = envTrace.size()) )
+            cout << "WARNING: Range is too small: Local maximum of the envelope could not be found!" << endl;
+          envMaxtimevalue = j;
+          envMaximum = envTrace(j);
         }
 
         // calculate FWHM
