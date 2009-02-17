@@ -903,9 +903,14 @@ void readConfigFile (const string &filename)
              || (value.compare("recreate")==0) || (value.compare("RECREATE")==0)) {
 	    rootFileMode = "RECREATE";
 	    cout << "RootFileMode set to RECREATE (existing root file will be overwritten).\n";
+   	  } else 
+          if ( (value.compare("update")==0) || (value.compare("Update")==0)
+             || (value.compare("UPDATE")==0) || (value.compare("append")==0)) {
+	    rootFileMode = "UPDATE";
+	    cout << "RootFileMode set to UPDATE (results are appended to existing root file).\n";
    	  } else {
             cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "RootFileMode must be RECREATE.\n";
+            cerr << "RootFileMode must be RECREATE or UPDATE.\n";
             cerr << "\nProgram will continue skipping the problem." << endl;
           }
         }
@@ -1139,10 +1144,10 @@ int main (int argc, char *argv[])
   double rmsCCbeam, rmsCCbeam_NS;			 // rms values of the beams in remote region
   double rmsXbeam, rmsXbeam_NS;
   double rmsPbeam, rmsPbeam_NS;
-  double CutCloseToCore, CutCloseToCore_NS;              // # of cut antennas in lateral distribution fit
-  double CutSmallSignal, CutSmallSignal_NS;              // # of cut antennas in lateral distribution fit
-  double CutBadTiming, CutBadTiming_NS;                  // # of cut antennas in lateral distribution fit
-  double CutSNR, CutSNR_NS;                              // # of cut antennas in lateral distribution fit
+  int CutCloseToCore, CutCloseToCore_NS;              // # of cut antennas in lateral distribution fit
+  int CutSmallSignal, CutSmallSignal_NS;              // # of cut antennas in lateral distribution fit
+  int CutBadTiming, CutBadTiming_NS;                  // # of cut antennas in lateral distribution fit
+  int CutSNR, CutSNR_NS;                              // # of cut antennas in lateral distribution fit
 
   try {
     // allocate space for arrays with pulse properties
@@ -1261,8 +1266,7 @@ int main (int argc, char *argv[])
 
     if (rootFileName != "") {
       // open root file and create tree structure
-      rootfile = new TFile(rootFileName.c_str(),"RECREATE","Resulst of CR-Tools pipeline");
-
+      rootfile = new TFile(rootFileName.c_str(),rootFileMode.c_str(),"Resulst of CR-Tools pipeline");
       // check if file is open
       if (rootfile->IsZombie()) {
         cerr << "\nError: Could not create file: " << rootFileName << "\n" << endl;
