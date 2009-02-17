@@ -98,7 +98,6 @@ build_package ()
   {
     # change into the build directory
     cd $buildDir
-    echo "-- Changed into directory `pwd`"
 
     # run cmake on the source directory
     if test -z "$buildOptions" ; then
@@ -152,3 +151,5 @@ echo "-- Package source dir = ${PACKAGE_SOURCE_DIR}"
 
 make_command
 build_package $PACKAGE_NAME $PACKAGE_SOURCE_DIR
+
+
