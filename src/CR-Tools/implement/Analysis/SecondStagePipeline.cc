@@ -149,12 +149,12 @@ namespace CR { // Namespace CR -- begin
     return AntennaMask_p;
   };
 
-  Vector<Bool> SecondStagePipeline::GetPhaseCalDelays(DataReader *dr){
+  Vector<Double> SecondStagePipeline::GetPhaseCalDelays(DataReader *dr){
     try {
       if ( (!SecondStageCacheValid_p)  || (cachedDate_p != dr->headerRecord().asuInt("Date")) ) {
 	if (!updateCache(dr)) {
 	  cerr << "SecondStagePipeline::GetPhaseCalDelays: " << "updateCache failed!" << endl;
-	  return AntennaMask_p;
+	  return PhaseCalDelays_p;
 	};
       };
     } catch (AipsError x) {
