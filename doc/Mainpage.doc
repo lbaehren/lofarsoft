@@ -33,6 +33,7 @@
 <ol>
   <li><a href="#LOFAR User Software Group">LOFAR User Software Group</a>
   <li><a href="#Organization of the code">Organization of the code</a>
+  <li><a href="#Installation from source">Installation from source</a>
 </ol>
 
 <h2><a name="LOFAR User Software Group">LOFAR User Software Group</a></h2>
@@ -131,6 +132,28 @@ In this:
     Surveys KSP.
   </ul>
 </ul>
+
+<h2><a name="Installation from source">Installation from source</a></h2>
+
+In order to install modules/packages the following simple steps are required:
+<ol>
+  <li>Change into the \e build directory and run the bootstrap script:
+  \code
+  cd build
+  ./bootstrap
+  \endcode
+  The script will check if there is a recent enough version of CMake available
+  <li>Run \e make for the package/module in question, e.g. for the
+  <a href="group__DAL.html">Data Access Library</a>
+  \code
+  make dal
+  \endcode
+  Typing
+  \code
+  make help
+  \endcode
+  will provide you with a list of available build targets.
+</ol>
 
 */
 
