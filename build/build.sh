@@ -159,11 +159,11 @@ build_cmake ()
 	## build condition
 		
 	if [[ ${CMAKE_MAJOR_VERSION} -lt ${REQUIRED_MAJOR_VERSION} ]] ; then {
-	    echo "CMake major version < ${REQUIRED_MAJOR_VERSION} ; build required";
+	    echo "CMake major version < ${REQUIRED_MAJOR_VERSION} ; build required.";
 	    HAVE_CMAKE=0;
 	} else {
 	    if [[ ${CMAKE_MINOR_VERSION} -lt ${REQUIRED_MINOR_VERSION} ]] ; then {
-		echo "CMake minor version < ${REQUIRED_MINOR_VERSION} ; build required";
+		echo "CMake minor version < ${REQUIRED_MINOR_VERSION} ; build required.";
 		HAVE_CMAKE=0;
 	    } fi
 	} fi
@@ -405,9 +405,180 @@ build_cmake
 ## once we have make sure CMake is available, we can continue
 
 case $param_packageName in 
+    bison)
+        echo "[`date`] Selected package Bison";
+	build_package bison external/bison "-DBISON_FORCE_BUILD:BOOL=$FORCE_BUILD";
+    ;;
+    blitz)
+        echo "[`date`] Selected package Blitz++";
+	build_package blitz external/blitz "-DBLITZ_FORCE_BUILD:BOOL=$FORCE_BUILD";
+    ;;
+    boost)
+        echo "[`date`] Selected package Boost";
+        build_package boost external/boost "-DBOOST_FORCE_BUILD:BOOL=$FORCE_BUILD -DBOOST_FIND_python_ONLY:BOOL=1";
+    ;;
+    casacore)
+        echo "[`date`] Selected package CASACORE";
+        ## -- build required packages
+	cd $basedir; ./build.sh wcslib --force-build
+	cd $basedir; ./build.sh cfitsio --force-build
+	cd $basedir; ./build.sh hdf5
+        ## -- build package
+        build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$FORCE_BUILD";
+    ;;
+    cfitsio)
+        echo "[`date`] Selected package CFITSIO";
+        build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$FORCE_BUILD";
+    ;;
+    cmake)
+       echo "[`date`] Selected package CMake";
+       build_cmake
+    ;;
+    flex)
+        echo "[`date`] Selected package Flex";
+	build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$FORCE_BUILD"
+    ;;
+    hdf5)
+        echo "[`date`] Selected package Hdf5"
+	build_package szip external/szip "-DSZIP_FORCE_BUILD:BOOL=$FORCE_BUILD";
+	#build_package zlib external/zlib "-DZLIB_FORCE_BUILD:BOOL=$FORCE_BUILD";
+	build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$FORCE_BUILD";
+    ;;
+    mathgl)
+        echo "[`date`] Selected package MathGL";
+        ## -- build required packages
+	cd $basedir; ./build.sh hdf5
+        ## -- build package
+	build_package mathgl external/mathgl
+    ;;
+    plplot)
+        echo "[`date`] Selected package Plplot"
+	if test -d $basedir/../external/plplot ; then
+	## first pass
+	mkdir $basedir/plplot 
+	cd $basedir/plplot 
+	cmake -C $basedir/../devel_common/cmake/SettingsPLplot.cmake $basedir/../external/plplot
+	## second pass
+	build_package plplot external/plplot
+    else
+	cd $basedir/../external
+	## download the source tar-ball from source forge
+	wget -c http://ovh.dl.sourceforge.net/sourceforge/plplot/plplot-5.7.4.tar.gz
+	## unpack the tar-ball and adjust the name of the newly created directory
+	tar -xvzf plplot-5.7.4.tar.gz
+	mv plplot-5.7.4 plplot
+	## remove the tar-ball
+	rm -f plplot-5.7.4.tar.gz
+	## recursive call of this method
+	cd $basedir
+	$basedir/build.sh plplot
+    fi
+    ;;
+    pyrap)
+        echo "[`date`] Selected package Pyrap"
+		build_package hdf5 external/hdf5
+		build_package casacore external/casacore
+		build_package boost external/boost
+		build_package python external/python
+        build_package pyrap external/pyrap
+    ;;
+    python)
+        echo "[`date`] Selected package PYTHON"
+		build_package boost external/boost
+		build_package python external/python
+    ;;
+    qt)
+        echo "[`date`] Selected package QT"
+		build_package qt external/qt "-DQT_FORCE_BUILD:BOOL=$FORCE_BUILD";
+    ;;
+    root)
+        echo "[`date`] Selected package ROOT"
+		build_package root external/root "-DROOT_FORCE_BUILD:BOOL=$FORCE_BUILD";
+    ;;
+    sip)
+        echo "[`date`] Selected package sip"
+		build_package sip external/sip "-DSIP_FORCE_BUILD:BOOL=$FORCE_BUILD";
+    ;;
+    startools)
+        echo "[`date`] Selected package Star-Tools"
+		cd $basedir; ./build.sh root
+		build_package startools external/startools "-DStarTools_FORCE_BUILD:BOOL=$FORCE_BUILD";
+    ;;
+    szip)
+        echo "[`date`] Selected package szip"
+		build_package szip external/szip "-DSZIP_FORCE_BUILD:BOOL=$FORCE_BUILD";
+    ;;
+    vtk)
+        echo "[`date`] Selected package VTK"
+		echo "-- No configuration and build support available yet!"
+    ;;
+    wcslib)
+        echo "[`date`] Selected package WCSLIB"
+		$basedir/build.sh bison $REPORT_BUILD
+		build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$FORCE_BUILD";
+		build_package boost external/boost "-DBOOST_FORCE_BUILD:BOOL=$FORCE_BUILD";
+		build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$FORCE_BUILD";
+    ;;
+    wcstools)
+        echo "[`date`] Selected package WCSTOOLS"
+		build_package wcstools external/wcstools
+    ;;
+    wget)
+        echo "[`date`] Selected package WGET"
+		build_package wget external/wget "-DWGET_FORCE_BUILD:BOOL=$FORCE_BUILD";
+    ;;
+    zlib)
+        echo "[`date`] Selected package ZLIB"
+		build_package zlib external/zlib "-DZLIB_FORCE_BUILD:BOOL=$FORCE_BUILD";
+    ;;
     ## --------------------------------------------------------------------------
     ## --- USG software packages ------------------------------------------------
     ## --------------------------------------------------------------------------
+    dal)
+        ## external packages
+        echo "[`date`] Processing required packages ..."
+		$basedir/build.sh cmake
+		cd $basedir; ./build.sh bison
+		cd $basedir; ./build.sh flex
+		cd $basedir; ./build.sh casacore
+		cd $basedir; ./build.sh plplot
+		cd $basedir; ./build.sh python
+		## USG packages
+		echo "[`date`] Building Data Access Library ..."
+		build_package dal src/DAL
+		## Post-installation testing
+		echo ""
+		echo "------------------------------------------------------------";
+		echo ""
+		echo "[`date`] To test the DAL installation run:"
+		echo ""
+		echo "  cd $basedir/dal; ctest"
+		echo ""
+		echo "------------------------------------------------------------";
+		echo ""
+    ;;
+    cr)
+        echo "[`date`] Processing packages required for CR-Tools ..."
+		cd $basedir; ./build.sh dal
+		cd $basedir; ./build.sh startools
+		cd $basedir; ./build.sh mathgl
+		echo "[`date`] Building CR-Tools package ..."
+		build_package cr src/CR-Tools;
+    ;;
+    contrib)
+		echo "[`date`] Building packages and tools in contrib ..."
+		## required packages
+		cd $basedir; ./build.sh dal
+		## contrib
+		build_package contrib src/contrib;
+    ;;
+    bdsm)
+        echo "[`date`] Processing packages required for BDSM ..."
+		cd $basedir; ./build.sh wcslib
+		cd $basedir; ./build.sh cfitsio
+        echo "[`date`] Building BDSM package ..."
+		build_package bdsm src/BDSM;
+    ;;
     rm)
         echo "[`date`] Processing packages required for RM ..."
 		cd $basedir; ./build.sh dal
