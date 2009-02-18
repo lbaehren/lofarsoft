@@ -1,8 +1,0 @@
-This is the steps you should take to run the pipeline:
-1)Edit filelist.txt to include all the MS files that needs to be calibrated.
-2)Fire up MeqBrowser, open runpipeline.py script, change any options from the menus. Now all your options will be saved in .tdl.conf file. You do not need to run the script from the browser for this. You just need to compile the script.
-3)Look at preprocess.g and postprocess.g files to see if they match your requirements. No special flagging (like flagging an antenna is done in these scripts). Also check the phace centre in postprocess.g file to match with what you want.
-4)After all these checks, just type
-  nohup ./run.sh&
-
-NOTE: choosing MMSE noise var: this is very important if you want to use it properly. Say if you predict using 20000Jy sources, and your visiilities has an average absolute value of 0.001. It is best to choose a value around gain/1000, in this case 20000/0.001/1000 ~ around 1e-9. Because your gains are around 20000/0.001. In other words, look at the observed data and change this value accordingly.
