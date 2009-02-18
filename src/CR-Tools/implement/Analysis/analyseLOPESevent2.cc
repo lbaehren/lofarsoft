@@ -693,18 +693,24 @@ namespace CR { // Namespace CR -- begin
           fieldMin=fieldStr[i];
 
         // apply Steffen's cuts
+        /*
         if (distance[i]<15) {
           CutCloseToCore++;
           cout << "analyseLOPESevent2::fitLateralDistribution: Antenna cut because close to core!" << endl;
           continue;
         }
+      */
+        /* Removed this cut as SNR cut should be better
         if (fieldStr[i]<1.5) {
           CutSmallSignal++;
           cout << "analyseLOPESevent2::fitLateralDistribution: Antenna cut because signal to small!" << endl;
           continue;
         }
-        // pulse time correct?
-        if (abs(timePos[i]*1e-9 - ccCenter) > getCCWindowWidth()/2.) {
+      */
+
+        /* New Cuts */
+        // pulse time correct? (default: ccWindowWidth = 45 ns)
+        if (abs(timePos[i]*1e-9 - ccCenter) > getCCWindowWidth()/3.) {
           CutBadTiming++;
           cout << "analyseLOPESevent2::fitLateralDistribution: Antenna cut because of bad timing: "
                << "CCcenter = " << ccCenter*1e9 << " , pulse time = " << timePos[i]

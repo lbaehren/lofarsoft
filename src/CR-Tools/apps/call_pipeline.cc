@@ -240,6 +240,7 @@ bool lateralDistribution = false;    // the lateral distribution will not be gen
 bool lateralOutputFile = false;      // no file for the lateral distribution will be created
 
 // Event parameters for calling the pipeline
+string eventfilelistname("");			         // Name of the ASCII event list
 string eventname ="";
 double azimuth=0, elevation=0, radiusOfCurvature=0, core_x=0, core_y=0;   // basic input parameters (e.g. from Kascade)
 
@@ -1116,11 +1117,28 @@ bool getEventFromEventlist (const string &eventfilelistname)
 }
 
 
+/*!
+  \brief reads the next event from the input list
+
+  \return true if an event could be read in, false in case of EOF or error
+*/
+
+bool getNextEvent()
+{
+  // check if an eventlist was supplied as input format
+  if (eventfilelistname != "")
+    return getEventFromEventlist(eventfilelistname);
+
+  cerr << "\ncall_pipeline:getNextEvent: No input list found!" << endl;
+  return false; 		// should not come to this point
+}
+
+
+
 // -----------------------------------------------------------------------------
 
 int main (int argc, char *argv[])
 {
-  string eventfilelistname;			         // Files to be read in
   Record results;					 // results of the pipeline
 
   // variables for reconstruction information (output of pipeline)
@@ -1370,7 +1388,7 @@ int main (int argc, char *argv[])
     } //if
 
     // Process events from event file list
-    while ( getEventFromEventlist(eventfilelistname) ) {
+    while ( getNextEvent() ) {
 
       // Check if file exists
       fstream ftest( (path+eventname).c_str());
