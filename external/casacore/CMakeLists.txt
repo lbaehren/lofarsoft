@@ -33,7 +33,6 @@ option (casacore_FORCE_BUILD       "Force rebuild and local installation" NO  )
 option (casacore_BUILD_TESTS       "Build the test programs?"             NO  )
 option (casacore_ENABLE_TESTING    "Enable running test programs?"        NO  )
 option (casacore_SHARED_LIBRARIES  "Build libraries as shared libraries?" NO  )
-option (casacore_MEASURES_DATA     "Retrieve the measures data tables?"   NO  )
 option (casacore_WITH_G2C          "Use g2c for compiling Fortran code?"  NO  )
 option (casacore_HDF5_SUPPORT      "Enable support for HDF5?"             YES )
 option (casacore_VERBOSE_CONFIGURE "Verbose output during configuration?" YES )
@@ -393,27 +392,17 @@ endif (prefix)
 ##
 ## =============================================================================
 
-if (casacore_MEASURES_DATA)
+include (GetCasacoreData)
 
-  find_path (HAVE_EPHEMERIDES table.dat
-    PATHS ${USG_ROOT}/data/ephemerides
-    PATH_SUFFIXES DE200 DE405 Sources
-    )
+find_path (HAVE_EPHEMERIDES table.dat
+  PATHS ${USG_ROOT}/data/ephemerides
+  PATH_SUFFIXES DE200 DE405 Sources
+  )
 
-  find_path (HAVE_GEODETIC table.dat
-    PATHS ${USG_ROOT}/data/geodetic
-    PATH_SUFFIXES Observatories SCHED_locations TAI_UTC
-    )
-  
-  if (NOT HAVE_EPHEMERIDES OR NOT HAVE_GEODETIC)
-    
-    include (GetCasacoreData)
-    
-    get_casacore_data()
-    
-  endif (NOT HAVE_EPHEMERIDES OR NOT HAVE_GEODETIC)
-  
-endif (casacore_MEASURES_DATA)
+find_path (HAVE_GEODETIC table.dat
+  PATHS ${USG_ROOT}/data/geodetic
+  PATH_SUFFIXES Observatories SCHED_locations TAI_UTC
+  )
 
 ## =============================================================================
 ##

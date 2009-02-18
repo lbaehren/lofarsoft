@@ -32,71 +32,59 @@
 ##
 ## ==============================================================================
 
+##____________________________________________________________________
+## Connect to configuration framework
 
-MACRO (get_casacore_data)
+if (NOT USG_ROOT)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+endif (NOT USG_ROOT)  
 
-  set (TAR_FILENAME "casacore-data.tgz")
+find_program (HAVE_WGET  wget  ${bin_locations} )
+find_program (HAVE_CURL  curl  ${bin_locations} )
+find_program (HAVE_TAR   tar   ${bin_locations} )
 
-  ## -----------------------------------------------------------------
-  ## Check environment
+set (MEASURES_DATA_TARFILE "casacore-data.tgz")
 
-  if (NOT USG_ROOT)
-    message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-  endif (NOT USG_ROOT)  
+##____________________________________________________________________
+## Retrieve tar-archive of the measures data from the USG server
 
-  ## -----------------------------------------------------------------
-  ## Check for required tools
-
-  find_program (HAVE_WGET  wget  ${bin_locations} )
-  find_program (HAVE_CURL  curl  ${bin_locations} )
-  find_program (HAVE_TAR   tar   ${bin_locations} )
-
-  ## -----------------------------------------------------------------
-  ## Retrieve the tar-archive from the server
-  
-  if (HAVE_WGET)
-    message (STATUS "Retrieving tar-archive from USG server ...")
-    execute_process (
+if (HAVE_WGET)
+  add_custom_target (measures_download
+    COMMAND wget -c ${USG_DOWNLOAD}/software/${MEASURES_DATA_TARFILE}
+    WORKING_DIRECTORY ${USG_ROOT}/data
+    COMMENT "Retrieving tar-archive of the measures data from the USG server ..."
+    )
+else (HAVE_WGET)
+  if (HAVE_CURL)
+    add_custom_target (measures_download
+      COMMAND curl ${USG_DOWNLOAD}/software/${MEASURES_DATA_TARFILE}
       WORKING_DIRECTORY ${USG_ROOT}/data
-      COMMAND wget -c ${USG_DOWNLOAD}/software/${TAR_FILENAME}
-      TIMEOUT 600
-      ERROR_VARIABLE error_wget
+      COMMENT "Retrieving tar-archive of the measures data from the USG server ..."
       )
-  else (HAVE_WGET)
-    if (HAVE_CURL)
-      execute_process (
-	WORKING_DIRECTORY ${USG_ROOT}/data
-	COMMAND curl ${USG_DOWNLOAD}/software/${TAR_FILENAME}
-	TIMEOUT 600
-	ERROR_VARIABLE error_curl
-	)
-    else (HAVE_CURL)
-      message (FATAL_ERROR "No tool found to download tar-archive!")
-    endif (HAVE_CURL)
-  endif (HAVE_WGET)
-  
-  ## -----------------------------------------------------------------
-  ## If the download was successfuul: expand the tar archive within the
-  ## data directory.
+  else (HAVE_CURL)
+    message (FATAL_ERROR "No tool found to download tar-archive!")
+  endif (HAVE_CURL)
+endif (HAVE_WGET)
 
-  find_path (HAVE_TAR_ARCHIVE ${TAR_FILENAME} ${USG_ROOT}/data)
-  
-  if (HAVE_TAR_ARCHIVE)
-    
-    if (HAVE_TAR)
-      execute_process (
-	WORKING_DIRECTORY ${USG_ROOT}/data
-	COMMAND tar -xvzf ${TAR_FILENAME}
-	TIMEOUT 300
-	ERROR_VARIABLE error_tar
-	ERROR_FILE error.log
-	)
-    else (HAVE_TAR)
-      message (FATAL_ERROR "Unable to find executable tar; please install!")
-    endif (HAVE_TAR)
-    
-  else (HAVE_TAR_ARCHIVE)
-    message (STATUS "No tar archive with measures data found; nothing to unpack!")
-  endif (HAVE_TAR_ARCHIVE)
-  
-ENDMACRO (get_casacore_data)
+##____________________________________________________________________
+## If the download was successful: expand the tar archive within the
+## data directory.
+
+if (HAVE_TAR)
+  add_custom_target (measures_unpack
+    WORKING_DIRECTORY ${USG_ROOT}/data
+    COMMAND tar -xvzf ${USG_ROOT}/data/${MEASURES_DATA_TARFILE}
+    COMMENT "Expanding tar-archive of measures data ..."
+    )
+  add_dependencies (measures_unpack measures_download)
+endif (HAVE_TAR)
+
+##____________________________________________________________________
+## Summary target, which also also does post-installation cleaning
+
+add_custom_target (measures_install
+  WORKING_DIRECTORY ${USG_ROOT}/data
+  COMMAND rm -rf ${MEASURES_DATA_TARFILE}
+  COMMENT "Post-installation cleanup of the data directory ..."
+  )
+add_dependencies (measures_install measures_unpack)
