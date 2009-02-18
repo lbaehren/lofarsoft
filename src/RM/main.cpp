@@ -1,3 +1,18 @@
+/*!
+  \file main.cpp
+
+  \ingroup RM
+
+  \brief RM-Synthesis test
+ 
+  \author Sven Duscha
+ 
+  \date 28.01.09.
+
+  <h3>Synopsis</h3>
+
+*/
+
 #include <iostream>
 
 #include "rm.h"						// RM Synthesis class

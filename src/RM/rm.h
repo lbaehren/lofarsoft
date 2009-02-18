@@ -1,18 +1,35 @@
-/*
- *  rm.h
- *  rmsynth
- *
- *  Created by Sven Duscha on 28.01.09.
- *  
- *	The rm class provides algorithms for computing the Faraday Rotation Measure
- *	from an input image cube. The image cube should be provided in a 3D-"cube"
- *	array and can be read as a whole or in a tiled manner.
- *
- *	The RM is computed along the frequency axis of each line of sight. Since RM is the
- *	Inverse Fourier Transform of the lambda squared polarized intensities along the line
- *	of sight, input cube frequency planes are converted to lambda squared planes.
- *
- */
+/*!
+  \class rm
+  
+  \ingroup RM
+  
+  \brief Brief description for class <newClass>
+  
+  \author Sven Duscha
+  
+  \date 28.01.09.
+  
+  \test trm.cc
+  
+  <h3>Prerequisite</h3>
+  
+  <ul type="square">
+  <li>[start filling in your text here]
+  </ul>
+    
+  <h3>Synopsis</h3>
+
+  The rm class provides algorithms for computing the Faraday Rotation Measure
+  from an input image cube. The image cube should be provided in a 3D-"cube"
+  array and can be read as a whole or in a tiled manner.
+  
+  The RM is computed along the frequency axis of each line of sight. Since RM is the
+  Inverse Fourier Transform of the lambda squared polarized intensities along the line
+  of sight, input cube frequency planes are converted to lambda squared planes.
+  
+  <h3>Example(s)</h3>
+  
+*/  
 
 #ifndef RM_H
 #define RM_H
@@ -41,9 +58,9 @@ class rm
 		rm();							// constructor:
 		~rm();							// destructor: frees memory?
 		
-		// Rotation Measure computing algorithms
-		vector<double> inversefourier(vector<double>, vector<double>, bool freq=true);		// Brentjens and de Bruyn with the Inverse Fourier Transform
-		vector<double> wavelet(vector<double>, vector<double>, bool freq=true);				// Frick and Stepanov wavelet algorithm
+		//! Rotation Measure computing algorithms
+		vector<double> inversefourier(vector<double>, vector<double>, bool freq=true);		//! Brentjens and de Bruyn with the Inverse Fourier Transform
+		vector<double> wavelet(vector<double>, vector<double>, bool freq=true);				//! Frick and Stepanov wavelet algorithm
 		vector<double> ift(vector<double>, vector<double>, bool freq=true);					// Enßlin Information Theory Based algorithm
 		vector<double> fouriertransform(vector<double>, vector<double>, bool freq=true);	// (Forward) Fourier Transform to get an image from an RM cube
 		
