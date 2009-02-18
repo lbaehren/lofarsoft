@@ -25,6 +25,7 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
 
 if (USG_ROOT)
   include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  include (GetCasacoreData)
   set (USG_BUILD ${USG_ROOT}/build)
   set (USG_EXTERNAL ${USG_ROOT}/external)
 else (USG_ROOT)
@@ -37,7 +38,8 @@ endif (USG_ROOT)
 ##
 ## ==============================================================================
 
-option (SEND_REPORT "Send a report of the build to the Dashboard server?" NO )
+option (SEND_REPORT "Send a report of the build to the Dashboard server?" NO  )
+option (POST_BUILD_CLEAN "Clean up the build directory after a build?"    NO  )
 
 ## ==============================================================================
 ##
@@ -52,6 +54,34 @@ add_custom_target (cleanup
   COMMAND rm -rf CMakeFiles
   WORKING_DIRECTORY ${USG_BUILD}
 )
+
+add_custom_target (update
+  COMMAND svn up
+  WORKING_DIRECTORY ${USG_ROOT}
+  )
+
+add_custom_target (doc
+  COMMAND doxygen
+  WORKING_DIRECTORY ${USG_ROOT}/doc  
+  )
+
+add_custom_target (doc_clean
+  COMMAND rm -f *~
+  COMMAND rm -f html/formula*
+  COMMAND rm -f html/tab*
+  COMMAND rm -f html/search.*
+  COMMAND rm -f html/*.png
+  COMMAND rm -f html/*.map
+  COMMAND rm -f html/*.html
+  COMMAND rm -f html/*.md5
+  WORKING_DIRECTORY ${USG_ROOT}/doc  
+  )
+
+add_custom_target (doc_cmake
+  COMMAND cmake --help-html CMake.html
+  WORKING_DIRECTORY ${USG_ROOT}/doc  
+  )
+
 
 ## ==============================================================================
 ##
@@ -88,6 +118,7 @@ foreach (package_name ${packages_external})
   add_custom_target (${package_name}
     COMMAND ./build_package.sh ${package_name} ${USG_EXTERNAL}/${package_name}
     WORKING_DIRECTORY ${USG_BUILD}
+    COMMENT "Building package ${package_name} ..."
     )
 endforeach (package_name)
 
@@ -139,6 +170,7 @@ add_dependencies (bdsm cfitsio wcslib)
 add_custom_target (dal
   COMMAND ./build_package.sh dal ${USG_ROOT}/src/DAL
   WORKING_DIRECTORY ${USG_BUILD}
+  COMMENT "Building package DAL ..."
   )
 add_dependencies (dal python plplot casacore flex bison)
 
@@ -148,6 +180,7 @@ add_dependencies (dal python plplot casacore flex bison)
 add_custom_target (cr
   COMMAND ./build_package.sh cr ${USG_ROOT}/src/CR-Tools
   WORKING_DIRECTORY ${USG_BUILD}
+  COMMENT "Building package CR-Tools ..."
   )
 add_dependencies (cr dal startools mathgl)
 
@@ -157,6 +190,7 @@ add_dependencies (cr dal startools mathgl)
 add_custom_target (rm
   COMMAND ./build_package.sh rm ${USG_ROOT}/src/RM
   WORKING_DIRECTORY ${USG_BUILD}
+  COMMENT "Building package RM ..."
   )
 add_dependencies (rm dal)
 
