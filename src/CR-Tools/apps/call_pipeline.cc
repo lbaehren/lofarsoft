@@ -58,8 +58,9 @@ using CR::LopesEventIn;
   \endverbatim
   
   <ul>
-    Required arguments:
+    Requires one of the following arguments:
     <li> --in         eventfile list      list with LOPES event files (.event)
+    <li> --k          Kascade root file   (containing also the LOPES event names)
     Optional argumens:
     <li> --config     textfile            a file with configuration settings for the pipeline
     <li> --help                           prints a help message
@@ -241,7 +242,8 @@ bool lateralOutputFile = false;      // no file for the lateral distribution wil
 
 // Event parameters for calling the pipeline
 string eventfilelistname("");			         // Name of the ASCII event list
-string eventname ="";
+string kascadeRootFile("");			         // Name of root file with Kascade reconstruction and event names
+string eventname("");
 double azimuth=0, elevation=0, radiusOfCurvature=0, core_x=0, core_y=0;   // basic input parameters (e.g. from Kascade)
 
 // ------------- Functions ----------------
@@ -1118,6 +1120,99 @@ bool getEventFromEventlist (const string &eventfilelistname)
 
 
 /*!
+  \brief reads the next event from an root file containing the KASCADE reconstruction and the LOPES event name
+
+  \param kascadeRootFile     -- input file
+
+  \return true if an event could be read in, false in case of EOF or error
+*/
+
+bool getEventFromKASCADE (const string &kascadeRootFile)
+{
+  static bool fileOpen = false;		// will be set to true, once an eventlist was openend
+  static int eventNumber = 0;
+  static TFile *inputFile = NULL;
+  static TTree *inputTree  = NULL;
+
+  // for input form root file
+  static float_t Az = 0, Ze = 0, Xc = 0, Yc = 0;
+  static float_t Azg = 0, Zeg = 0, Xcg = 0, Ycg = 0;
+
+  try {
+    // reset pipeline parameters before readin
+    eventname ="";
+    azimuth=0, elevation=0, radiusOfCurvature=0, core_x=0, core_y=0;
+
+    // if this function is called for the first time, then try to open the file
+    if (!fileOpen) {
+      // open root file with the KASCADE results
+      inputFile = new TFile(kascadeRootFile.c_str());
+      if(!inputFile || inputFile->IsZombie()) {
+        cerr << "Failed to open file \"" << kascadeRootFile <<"\"." << endl;
+        return false;
+      }
+
+      inputTree = (TTree*)inputFile->Get("k;1");
+      if (!inputTree || (inputTree->GetEntries() == 0) ) {
+        cerr << "Failed to get tree of file \"" << kascadeRootFile <<"\" or tree is empty." << endl;
+        return false;
+      }
+
+      // set the read in variables in the tree
+      inputTree->SetBranchAddress("Az",&Az);
+      inputTree->SetBranchAddress("Ze",&Ze);
+      inputTree->SetBranchAddress("Xc",&Xc);
+      inputTree->SetBranchAddress("Yc",&Yc);
+      inputTree->SetBranchAddress("Azg",&Az);
+      inputTree->SetBranchAddress("Zeg",&Ze);
+      inputTree->SetBranchAddress("Xcg",&Xc);
+      inputTree->SetBranchAddress("Ycg",&Yc);
+//      inputTree->SetBranchAddress("Eventname",&eventname);
+
+      // as there is no radius of curvature in the file, set ignoreDistance to true
+      if (!ignoreDistance) {
+        ignoreDistance = true;
+        cout << "\nWARNING: ignoreDistance was set to 'true'!\n" << endl;
+      }
+
+      cout << "Opened file for readin: " << kascadeRootFile << endl;
+      fileOpen = true;
+    }
+
+    // check if events are remaining
+    if ( inputFile->IsZombie() || (eventNumber >= inputTree->GetEntries()) ) {
+      cout << "\nFile \"" << kascadeRootFile
+           << "\" contains no more events. Do not worry if this message appears after processing the last event."
+           << endl;
+      fileOpen = false;
+      return false;
+    }
+
+    // if file is open the get the next event
+    if (fileOpen) {
+      cout << "\nReading event number " << eventNumber+1 << " from file \"" << kascadeRootFile << "\"..." << endl;
+      inputTree->GetEntry(eventNumber);
+      eventNumber++;
+
+      // set variables (only KASCADE reconstruction for the moment)
+      azimuth = static_cast<double>(Az);
+      elevation = static_cast<double>(90.-Ze);
+      core_x = static_cast<double>(Xc);
+      core_y = static_cast<double>(Yc);
+      eventname="test";
+      return true;
+    }
+
+  } catch (AipsError x) {
+    cerr << "call_pipeline:getEventFromKASCADE: " << x.getMesg() << endl;
+  }
+
+  // normally should not get here, if so return false
+  return false;
+}
+
+
+/*!
   \brief reads the next event from the input list
 
   \return true if an event could be read in, false in case of EOF or error
@@ -1128,6 +1223,8 @@ bool getNextEvent()
   // check if an eventlist was supplied as input format
   if (eventfilelistname != "")
     return getEventFromEventlist(eventfilelistname);
+  if (kascadeRootFile != "")
+    return getEventFromKASCADE(kascadeRootFile);
 
   cerr << "\ncall_pipeline:getNextEvent: No input list found!" << endl;
   return false; 		// should not come to this point
@@ -1258,6 +1355,12 @@ int main (int argc, char *argv[])
         continue;
       }
 
+      // look for keywords which require an option
+      if ( (option == "--k") || (option == "-k")) {
+        kascadeRootFile = argument;
+        continue;
+      }
+
       if ( (option == "--config") || (option == "-config")
            || (option == "--c") || (option == "-c")) {
         cout << "Reading config data from file: " << argument << endl;
@@ -1272,12 +1375,16 @@ int main (int argc, char *argv[])
     }
 
     // Check if options are set correctly
-    if (eventfilelistname == "") {
-      cerr << "ERROR: Please set an eventlist file with the --in option!\n";
+    if ((eventfilelistname == "") && (kascadeRootFile == "") ) {
+      cerr << "ERROR: Please set an input file with the --in or --k option!\n";
       cerr << "Use --help for more information." << endl;
       return 1;
     }
-    cout << "Processing eventlist: " << eventfilelistname << endl;
+    if (!(eventfilelistname == "") && !(kascadeRootFile == "") ) {
+      cerr << "ERROR: Please set only one input file with the --in and --k option!\n";
+      cerr << "Use --help for more information." << endl;
+      return 1;
+    }
 
     // prepare output in root file
     TFile *rootfile=NULL;
@@ -1389,6 +1496,14 @@ int main (int argc, char *argv[])
 
     // Process events from event file list
     while ( getNextEvent() ) {
+      // print information and process the event
+      if (calibrationMode) {
+        cout << "\nProcessing calibration event \"" << eventname << "\".\n" << endl;
+      } else {
+        cout << "\nProcessing event \"" << eventname << "\"\nwith azimuth " << azimuth << " °, elevation " << elevation
+                  << " °, distance (radius of curvature) " << radiusOfCurvature << " m, core position X " << core_x
+                  << " m and core position Y " << core_y << " m.\n" << endl;
+      }
 
       // Check if file exists
       fstream ftest( (path+eventname).c_str());
@@ -1412,7 +1527,6 @@ int main (int argc, char *argv[])
       // if they are not set to true during reconstruction the event is not written into the root file
       goodEW = false;
       goodNS = false;
-
 
       // Generate cstring with a length of 64 characters to write to the root file, using the eventname
       string eventname_ =  eventname;
@@ -1441,16 +1555,6 @@ int main (int argc, char *argv[])
       CutSmallSignal = 0, CutSmallSignal_NS = 0;
       CutBadTiming = 0, CutBadTiming_NS = 0;
       CutSNR = 0, CutSNR_NS = 0;
-
-
-      // print information and process the event
-      if (calibrationMode) {
-        cout << "\nProcessing calibration event \"" << eventname << "\".\n" << endl;
-      } else {
-        cout << "\nProcessing event \"" << eventname << "\"\nwith azimuth " << azimuth << " °, elevation " << elevation
-                  << " °, distance (radius of curvature) " << radiusOfCurvature << " m, core position X " << core_x
-                  << " m and core position Y " << core_y << " m.\n" << endl;
-      }
 
       // Set observatory record to LOPES
       Record obsrec;
