@@ -6,6 +6,16 @@ NULL=NULL_Pointer()
 
 verbose = False
 
+
+def getaxisdivision(xmin,xmax,ndef=6):
+    delta=(xmax-xmin)
+    ds=delta/ndef
+    dns=[10**round(log10(ds)),10**round(log10(ds*2))/2,10**round(log10(ds*4))/4]
+    n=map(lambda(x):abs(delta/x-ndef),dns)
+    ds0=dns[n.index(min(n))]
+    return (ds0,ceil(xmin/ds0+0.5)*ds0)
+
+
 class empty():
     def __init__(self): return
 
@@ -135,22 +145,21 @@ class hffunc():
         #Finally we are ready to set the local variable.
                 if par.type=="Py":
                     if obj.getI()==0: 
-                        exec("self."+par.parname+"=None")
                         if verbose: 
                             exec("print 'getParameters("+self.data.getName(True)+"): self.'+par.parname+'=[None]")
+                        exec("self."+par.parname+"=None")
                         return 0
                 elif par.type=="PyList":
                     if verbose: 
                         print "PyList:",par.parname
                     if obj.getI()==0: 
-                        exec("self."+par.parname+"=[None]")
                         if verbose: 
                             exec("print 'getParameters("+self.data.getName(True)+"): self.'+par.parname+'=[None]")
+                        exec("self."+par.parname+"=[None]")
                         return 0
-                if verbose: print par.parname
-                exec("self."+par.parname+"=obj.get"+par.type+"()") 
                 if verbose: 
-                    exec("print 'getParameters("+self.data.getName(True)+"): self.'+par.parname+'=obj.get'+par.type+'(): =',"+"self."+par.parname)
+                    exec("print 'getParameters("+self.data.getName(True)+"): self.'+par.parname+'=obj.get'+par.type+'(): =',"+"self."+par.parname+", 'obj=',obj")
+                exec("self."+par.parname+"=obj.get"+par.type+"()") 
         return 0
     def setResults(self):
         if len(self.res)>0:
@@ -178,6 +187,12 @@ class funcparameters:
         elif defval==None:  self.type="Py"
         elif defval==[None]:  self.type="PyList"
         elif type(defval)==type("0"):  self.type="S"
+        elif type(defval)==list:
+            if type(defval[0])==type(0): self.type="IL"
+            elif type(defval[0])==type(0.): self.type="NL"
+            elif type(defval[0])==type(0j): self.type="CL"
+            elif type(defval[0])==type("0"): self.type="SL"
+            else: print "Error: funcparameters - unknown list type", defval
         else: 
             print "Error: funcparameters - unknown type", defval
         return
@@ -188,7 +203,7 @@ class hfGraphObject(hffunc):
         d.setAutoUpdate(False)
         return 0
     def process(self,d):
-        self.gr=mglGraph(mglGraphPS)
+        self.gr=mglGraph(mglGraphZB)
         d.noMod()
         d.putPy(self.gr)
         return 0
@@ -217,20 +232,20 @@ class hfGraphDataBuffer(hffunc):
     def process(self,d):
         if verbose: print "Process hfGraphDataBuffer user function"
         naxis=0;
-        axis=self.data["'yAxis'Data"]
+        axis=self.data["'yAxis"]
         if not type(axis)==Data: 
             print "hfGraphDataBuffer: yAxis object not found."
             return 1
         naxis+=1
         axis.get(self.yvec)
-        axis=self.data["'xAxis'Data"]
+        axis=self.data["'xAxis"]
         if type(axis)==Data:
             naxis+=1;
             axis.get(self.xvec) #Use Vector selector in the future ...!
             if len(self.xvec)>len(self.yvec): self.xvec=self.xvec[0:len(self.yvec)]
             if len(self.xvec)<len(self.yvec): self.yvec=self.yvec[0:len(self.xvec)]
             if verbose: print "self.xdat.nx=",self.xdat.nx," max=",self.xdat.Maximal()
-            axis=self.data["'zAxis'Data"]
+            axis=self.data["'zAxis"]
             if type(axis)==Data:
                 naxis+=1;
                 axis.get(self.zvec)
@@ -301,8 +316,14 @@ class hfPlotPanel(hffunc):
         self.setParameter("yshift",0)
         self.setParameter("XAuto",int(True))
         self.setParameter("YAuto",int(True))
-        self.setParameter("yAxisLabel","y-Axis")
-        self.setParameter("xAxisLabel","x-Axis")
+        self.setParameter("yAxisLabel","")
+        self.setParameter("xAxisLabel","")
+        self.setParameter("xAxisUnit","",objname="xAxis'UnitName")
+        self.setParameter("yAxisUnit","",objname="yAxis'UnitName")
+        self.setParameter("xAxisUnitPrefix","",objname="xAxis'UnitPrefix")
+        self.setParameter("yAxisUnitPrefix","",objname="yAxis'UnitPrefix")
+        self.setParameter("xAxisDatatype","",objname="xAxis'Datatype")
+        self.setParameter("yAxisDatatype","",objname="yAxis'Datatype")
         self.setResult("xmin",0.)
         self.setResult("xmax",1024.)
         self.setResult("ymin",-70.)
@@ -347,13 +368,23 @@ class hfPlotPanel(hffunc):
             delta=delta*(1+self.yscalestep)**-self.yscale
             ymin=y0-delta/2
             ymax=y0+delta/2
-        self.putResult("ymin",ymin-extra)
-        self.putResult("ymax",ymax+extra)
-        self.GraphObject.SetFontSize(5.)
+        ymin=ymin-extra
+        ymax=ymax+extra
+        self.putResult("ymin",ymin)
+        self.putResult("ymax",ymax)
+        xtick=getaxisdivision(xmin,xmax)
+        self.GraphObject.SetTicks("x",xtick[0],5,xtick[1])
+        ytick=getaxisdivision(ymin,ymax)
+        self.GraphObject.SetTicks("y",ytick[0],5,ytick[1])
+        self.GraphObject.SetFontSize(3.)
         self.GraphObject.SetFontDef("rR:r")
-        self.GraphObject.SetRanges(self.xmin,self.xmax,self.ymin,self.ymax)
+        self.GraphObject.SetRanges(xmin,xmax,ymin,ymax)
         self.GraphObject.Axis("xy")
         self.GraphObject.Box("g")
+        if self.xAxisLabel=="": self.xAxisLabel=self.xAxisDatatype
+        if self.yAxisLabel=="": self.yAxisLabel=self.yAxisDatatype
+        if not self.xAxisUnit=="": self.xAxisLabel=self.xAxisLabel+" ["+self.xAxisUnitPrefix+self.xAxisUnit+"]"
+        if not self.yAxisUnit=="": self.yAxisLabel=self.yAxisLabel+" ["+self.yAxisUnitPrefix+self.yAxisUnit+"]"
         self.GraphObject.Label("x",self.xAxisLabel,1)
         self.GraphObject.Label("y",self.yAxisLabel,1)
         if verbose: print "PlotPanel: plotted Box in Graphobject, calling PlotData"
@@ -379,6 +410,7 @@ class hfPlotWindow(hffunc):
     def startup(self,d):
         if verbose: print "PlotWindow - Startup"
         self.setParameter("Title","Draft!")
+        self.setParameter("BackgroundColor",[1.0,1.0,1.0])
         self.setParameter("npanels",-1)
         self.setParameter("npanelsx",-1)
         self.setParameter("npanelsy",-1)
@@ -389,8 +421,9 @@ class hfPlotWindow(hffunc):
         if not type(self.GraphObject)==mglGraph:
             print "Error: PlotWindow - GraphObject not of type mglGraph!"
             return 1
-        self.GraphObject.Clf()
-        self.GraphObject.Title(self.Title)
+        self.GraphObject.Clf(self.BackgroundColor[0],self.BackgroundColor[1],self.BackgroundColor[2])
+        self.GraphObject.SetTuneTicks(False,-1.2)
+        self.GraphObject.Title(self.Title,"iC",-1.5)
         self.PlotPanel=self.data["'PlotPanel"]
         if type(self.PlotPanel)==Data: 
             self.PlotPanel.update()
@@ -456,7 +489,7 @@ class hfQtNetview(hffunc):
         if verbose: print "QtNetview startup!"
         self.setParameter("GUI",None)
         self.setParameter("SVGWidget",None)
-        self.setParameter("maxNetLevel",99)
+        self.setParameter("maxNetLevel",100)
         return 0
     def initialize(self):
         "Called at the end of the startup routine. Will create the SVGWidget."
@@ -478,7 +511,7 @@ class hfQtNetview(hffunc):
         return 0
 
 def UnitChooser(self):
-    return MakeChooser(self,"Unit",("ScaleFactor","Prefix"),(("",1.0),("f",10**-15),("p",10**-12),("n",10**-9),("mu",10**-6),("m",10**-3),("c",10**-2),("d",10**-1),("h",10**2),("k",10**3),("M",10**6),("G",10**9),("T",10**12),("P",10**15),("E",10**18),("Z",10**21)))
+    return MakeChooser(self,"Unit",("UnitPrefix","UnitScaleFactor"),(("",1.0),("f",10.**-15),("p",10.**-12),("n",10.**-9),("mu",10.**-6),("m",10.**-3),("c",10.**-2),("d",10.**-1),("h",10.**2),("k",10.**3),("M",10.**6),("G",10.**9),("T",10.**12),("P",10.**15),("E",10.**18),("Z",10.**21)))
 
 def LOPESDatatypeChooser(self):
     return MakeChooser(self,"Datatype",("Datatype","UnitName","Axis"),(("Time","s","x"),("Frequency","Hz","x"),("Fx","Counts","y"),("Voltage","V","y"),("CalFFT","","y"),("invFFT","","y")))

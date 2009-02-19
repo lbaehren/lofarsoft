@@ -67,8 +67,13 @@ hffuncs.cc:
 
 BUGS:
 
+- hfgui.py - hfsetBlock : touch needs to be done twice - which is a bit of a waste ...
+
+- the conversion between types doesn not work correctly!! It uses
+  reinterpret_cast somewhere, instead of a real cast.
+
 - a link should not be created two times when calling >> twice....
-- deleting a double link leads to an error
+
 - if an object is deleted and there is a python reference, that python
   object does not know about it and python crashes when calling the
   pyhton reference. This can be avoided with a special reference
@@ -81,3 +86,4 @@ BUGS:
   deleted if several have been deleted at once) - use DataList.delObject() to
   test. (this is probably fixed now ...)
 
+- performance issues when plotting - check how the network works ...

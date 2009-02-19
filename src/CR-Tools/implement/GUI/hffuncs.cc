@@ -462,25 +462,25 @@ public:
     //set the default parameters, which are by default integers - perhaps change to float numbers later??
     DBG("DataFunc_Sys_Unit: initialization called.");
     setParameter("UnitName", "");
-    setParameter("ScalePrefix", "");
-    setParameter("ScaleFactor", 1.0);
+    setParameter("UnitPrefix", "");
+    setParameter("UnitScaleFactor", 1.0);
   }
 
   template <class T>
   void process(F_PARAMETERS) {
-    GET_FUNC_PARAMETER_T(ScaleFactor,HNumber);
+    GET_FUNC_PARAMETER_T(UnitScaleFactor,HNumber);
     dp->getFirstFromVector(*vp,vs);
     address i,size=vp->size();
     for (i=0; i<size;i++) {
-      (*vp)[i] = (*vp)[i]/ScaleFactor;
+      (*vp)[i] = (*vp)[i]/UnitScaleFactor;
     };
   }
 
   void process_S(F_PARAMETERS_T(HString)) {
     vp->clear();
-    GET_FUNC_PARAMETER_T(ScalePrefix,HString);
+    GET_FUNC_PARAMETER_T(UnitPrefix,HString);
     GET_FUNC_PARAMETER_T(UnitName,HString);
-    vp->push_back(ScalePrefix + UnitName);
+    vp->push_back(UnitPrefix + UnitName);
   }
 };
 DATAFUNC_CONSTRUCTOR(Unit,Sys,"Multiplies the data with a unit scale factor and also returns the apropriate unit string.",NUMBER, false)

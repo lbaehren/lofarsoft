@@ -37,7 +37,7 @@ def object_new(self,*arg):
 
 def MakeChooser(d,name,fields,values):
     "Create a chooser, which is a collection of objects which act like a record of similar records, containgin a set of parameters among which you can choose in a menu. The first parameter is the name of the chooser object. The second parameter is a tuple of parameter names that form one set. The third parameter is a tuple of tuple containing the parameter values which belong to the respective parameters."
-    chooser=d.new("Chooser",name,_l(200))
+    chooser=d.new("Chooser",name,_l(100))
     for val in values:
         obj=(fields[0],val[0],_l(200)) >> chooser
         for i in range(1,len(fields)):
@@ -161,6 +161,8 @@ class DataList(list):
     def delObject(self):
         for d in self:
             d.delObject()
+    def connect(self,method,slot="setText",Type="QString",isSlot=True):
+        self[0].connect(method,slot,Type,isSlot)
     def update(self):
         for d in self: d.update()
         return self
@@ -181,12 +183,42 @@ class DataList(list):
         ret=[]
         for d in self: ret.append(d.val())
         return ret
+    def getS(self):
+        "Returns a list of the values in the Data object list in String format"
+        ret=[]
+        for d in self: ret.append(d.getS())
+        return ret
+    def getI(self):
+        "Returns a list of the values in the Data object list in Integer format"
+        ret=[]
+        for d in self: ret.append(d.getI())
+        return ret
+    def getN(self):
+        "Returns a list of the values in the Data object list in floating point Number format"
+        ret=[]
+        for d in self: ret.append(d.getN())
+        return ret
+    def getC(self):
+        "Returns a list of the values in the Data object list in Complex number format"
+        ret=[]
+        for d in self: ret.append(d.getC())
+        return ret
 
-class DataUnion(DataList):
-    def __init__(self,*dlist):
+def DataUnion(*dlist):
+    if len(dlist)==1: 
+        if type(dlist[0])==Data:
+            return dlist[0]
+    return DataUnionClass(dlist)
+
+
+class DataUnionClass(DataList):
+    def __init__(self,dlist):
         for dl in dlist:
-            for d in dl:
-                self.append(d)
+            if type(dl)==DataList:
+                self.extend(dl)
+            elif type(dl)==Data:
+                self.append(dl)
+            else: print "DataUnionClass: unknown member type:",dl
 #value >> self
     def __rrshift__(self,value):
         first=None
@@ -319,6 +351,46 @@ def object_set(self,value):
     else:
         self.putPy(value)
     return self
+
+def object_getIV(self):
+    "Return the contents of the data vector as an integer vector"
+    vec=IntVec()
+    self.get(vec)
+    return vec
+
+def object_getNV(self):
+    "Return the contents of the data vector as a number vector"
+    vec=FloatVec()
+    self.get(vec)
+    return vec
+
+def object_getCV(self):
+    "Return the contents of the data vector as a complex vector"
+    vec=ComplexVec()
+    self.get(vec)
+    return vec
+
+def object_getSV(self):
+    "Return the contents of the data vector as a string vector"
+    vec=StringVec()
+    self.get(vec)
+    return vec
+
+def object_getIL(self):
+    "Return the contents of the data vector as an integer list"
+    return vec2list(self.getIV())
+
+def object_getNL(self):
+    "Return the contents of the data vector as a number list"
+    return vec2list(self.getNV())
+
+def object_getCL(self):
+    "Return the contents of the data vector as a complex list"
+    return vec2list(self.getCV())
+
+def object_getSL(self):
+    "Return the contents of the data vector as an string list"
+    return vec2list(self.getSV())
 
 def object_val(self):
     typ=self.getType()
@@ -514,8 +586,8 @@ def object_floordiv(self,other):
     elif type(other)==DataList:
         return other // self
     self.delLink(obj)
-    obj.touch()
-    self.touch()
+#    obj.touch()
+#    self.touch()
     return obj
 
 def object_invert(self):  # delObject
@@ -530,7 +602,12 @@ def object_xxshift(self,pre,other,dir):
         return newobj
     elif type(other)==Data:    # if both arguments are data objects, then only set a link
         other.setLink(self,dir)
-        other.touch()
+#        other.touch()
+        return other
+    elif type(other)==DataList:
+        for d in other:
+            d.setLink(self,dir)
+#        other.touch()
         return other
     else:
         return self.newObject(pre+other,dir)
@@ -680,7 +757,7 @@ def object_exportDOT(self,destination,maxnetlevel=999,details=1,reverse=False):
         OUT=hfWrite_File(fn)
         OUT.write("#dot -Tgif "+fn+" -o "+name+".gif; xview "+name+".gif\n")
         OUT.write("#dotty "+fn+"\n")
-        OUT.write("#/Applications/Graphviz.app/Contents/MacOS/Graphviz  LOPES.dot "+fn+"\n")
+        OUT.write("#/Applications/Graphviz.app/Contents/MacOS/Graphviz  ROOT.dot "+fn+"\n")
     elif destination=="Qt": 
         OUT=hfWrite_QByte()
     elif destination=="Str": 
@@ -739,6 +816,7 @@ Data.__lshift__=object_lshift     #newobject+setlink
 Data.__setitem__=object_setitem
 Data.__getitem__=object_getitem
 Data.put_silent=object_set_silent
+Data.set_silent=object_set_silent
 Data.__floordiv__=object_floordiv # // = dellink
 Data.__xor__=insert_object        #d ^ (d1,d2) = insert 
 Data.new=object_new
@@ -749,6 +827,14 @@ Data.getitem=object_getitem
 Data.setFunc=object_setFunc
 Data.set=object_set
 Data.val=object_val
+Data.getIV=object_getIV
+Data.getNV=object_getNV
+Data.getCV=object_getCV
+Data.getSV=object_getSV
+Data.getIL=object_getIL
+Data.getNL=object_getNL
+Data.getCL=object_getCL
+Data.getSL=object_getSL
 Data.setFunc_f=object_setFunc_f
 Data.setFunc_f_silent=object_setFunc_f_silent
 Data.getDOT=object_getDOT
@@ -779,6 +865,7 @@ Data.SLOT=object_SLOT
 Data.getT=object_getT
 Data.getB=object_get_bool
 Data.getQ=object_get_QString
+
 
 #Extending mathgl to accept STL vectors 
 def mglDataSetVec(self,vec):

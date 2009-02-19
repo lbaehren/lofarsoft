@@ -1,4 +1,46 @@
 
+xmax=30.
+xmin=10.
+ndef=7.
+delta=(xmax-xmin)
+ds=delta/ndef
+dns=[10**round(log10(ds)),10**round(log10(ds*2))/2,10**round(log10(ds*4))/4]
+n=map(lambda(x):abs(delta/x-ndef),dns)
+ds0=dns[n.index(min(n))]
+org=ceil(xmin/ds0+0.5)*ds0
+return (ds0,org)
+
+
+ymax=364.5
+ymin=362.135
+
+width=800
+height=600
+size=1024
+gr=mglGraph(mglGraphPS,width,height)
+y=mglData(size)
+y.Modify("cos(2*pi*x*10)+362.135+1")
+x=mglData(size)
+x.Modify("x*1024");
+ymax=y.Maximal()
+ymin=y.Minimal()
+gr.Clf()
+#gr.SetRanges(0,1024,-2,2)
+#gr.SetRanges(ymin,ymax,ymin,ymax)
+gr.SetTuneTicks(False)
+xtick=getaxisdivision(0,1023)
+gr.SetTicks("x",xtick[0],5,xtick[1])
+ytick=getaxisdivision(ymin,ymax)
+gr.SetTicks("y",ytick[0],5,ytick[1])
+gr.SetRanges(0,1024,ymin,ymax)
+gr.Axis("xy")
+gr.Title("Test Plot")
+gr.Label("x","x-Axis",1)
+gr.Label("y","y-Axis",1)
+gr.Plot(y);
+gr.WritePNG("test.png","Test Plot")
+
+
 class hfPlotDataOld(hffunc):
     "hfPlotDataOld: Plots a single dataobject into a Graphobject/Panel."
     def startup(self,d):

@@ -149,18 +149,18 @@ class hfQtPlot(QtGui.QWidget):
         nt=s.toDouble()
         if nt[1]: self.d["QtNetview'maxNetLevel"].noSignal().set(nt[0])
     def hfsetNetworkOn(self,yesno):
-        if yesno: self.d >> self.d["'LOPES:QtNetview"]
-        else: self.d // self.d["'LOPES:QtNetview"]
+        if yesno: (self.d >> self.d["'ROOT:QtNetview"]).touch()
+        else: (self.d // self.d["'ROOT:QtNetview"]).touch()
     def hfsetXAuto(self,yesno):
         obj=self.currentplotpanelobject()
-        obj["'xmin"].put_silent(obj["xmin"].val())
-        obj["'xmax"].put_silent(obj["xmax"].val())
+        obj["'xmin"].put_silent(min(toList(obj["xmin"].val())))
+        obj["'xmax"].put_silent(max(toList(obj["xmax"].val())))
         obj["'XAuto"].put_silent(int(yesno))
         obj.touch()
     def hfsetYAuto(self,yesno):
         obj=self.currentplotpanelobject()
-        obj["'ymin"].put_silent(obj["ymin"].val())
-        obj["'ymax"].put_silent(obj["ymax"].val())
+        obj["'ymin"].put_silent(min(toList(obj["ymin"].val())))
+        obj["'ymax"].put_silent(max(toList(obj["ymax"].val())))
         obj["'YAuto"].put_silent(int(yesno))
         obj.touch()
     def hfsetXShift(self,i):
@@ -180,7 +180,9 @@ class hfQtPlot(QtGui.QWidget):
         self.gui.yshiftslider.setValue(0)
         self.gui.yauto.setChecked(True)
     def hfsetBlock(self,i):
-        self.currentplotdataobject()["'Block"].set(i)
+        self.currentplotdataobject()["'Block"].set_silent(i)
+        self.currentplotdataobject()["'Block"].touch() ###This is a complete
+        self.currentplotdataobject()["'Block"].touch()
     def hfsetBlocksize(self,i):
         print "Blocksize should be ",i
 #        self.currentplotdataobject()["'Blocksize"].set(i)
@@ -190,50 +192,46 @@ class hfQtPlot(QtGui.QWidget):
         return self.currentplotwindowobject()["'PlotPanel"]
     def currentplotwindowobject(self):
         return self.d["'PlotWindow"]
-    def datatypechooser(self):
-        what="Datatype"
-        obj=self.currentplotpanelobject()
-        par=obj["'Data'Parameters=Data"] # find the parameter object to which the chooser is connectedxo
+    def fillchooser(self,what,rootobj,parname,slot):
+        "Fill the GUI selection (ComboBox) with the selections available in the chooser object."
+        par=rootobj[parname]
         l=QtCore.QStringList(par["'Chooser'"+what].val()) #gives a list of all possible choices
         l.prepend("<None>")
-        self.gui.ydatatype.clear()
-        self.gui.ydatatype.addItems(l) 
-        self.gui.xdatatype.clear()
-        self.gui.xdatatype.addItems(l) 
-        self.gui.xdatatype.setCurrentIndex(0)
-        self.gui.ydatatype.setCurrentIndex(0)
-        sely=obj["'yAxis'"+what].val() #Attention: this might return a list or a single item (assume single item)
-        selx=obj["'xAxis'"+what].val()
-        if (len(selx)>0):
-            if selx in l: self.gui.xdatatype.setCurrentIndex(l.indexOf(selx)) 
-        if (len(sely)>0):
-            if sely in l: self.gui.ydatatype.setCurrentIndex(l.indexOf(sely)) 
-    def ydatatype(self,s): ##hf ...
-        "Slot used by the GUI to change the yAxis Datatype"
+        slot.clear()
+        slot.addItems(l) 
+        slot.setCurrentIndex(0)
+        sel=rootobj["'"+what].val() #Attention: this might return a list or a single item (assume single item)
+        if (len(sel)>0):
+            if sel in l: slot.setCurrentIndex(l.indexOf(sel)) 
+    def initializechooser(self):
+        self.fillchooser("Datatype",self.currentplotpanelobject()["'xAxis"],"'Parameters=Data",self.gui.xdatatype)
+        self.fillchooser("Datatype",self.currentplotpanelobject()["'yAxis"],"'Parameters=Data",self.gui.ydatatype)
+        self.fillchooser("UnitPrefix",self.currentplotpanelobject()["'xAxis"],"'Parameters=UnitData",self.gui.xaxisunit)
+        self.fillchooser("UnitPrefix",self.currentplotpanelobject()["'yAxis"],"'Parameters=UnitData",self.gui.yaxisunit)
+    def chooser(self,s,what,par): ##hf ...
+        "Function used to change the selection made in a data chooser object connected to parameter object 'par'. The new selection is 'what=s'"
         if s=="<None>": return
         s=str(s) #Otherwise all string become QString objects ....
-        what="Datatype"
-        obj=self.currentplotpanelobject()
-        par=obj["'yAxis'Data'Parameters=Data"]
-        oldobj=par["'"+what] # find the parameter object to which the chooser is connected
-        newobj=par["'Chooser'"+what+"="+s]
+        oldobj=par["'"+what] # find the parameter of which is currently connected to the parameter object
+        newobj=par["'Chooser'"+what+"="+s] # Find the chosen parameter behind the Chooser object which will become the new parameter 
         if (newobj.NFound()) & (oldobj.NFound()) & (not newobj==oldobj):
             oldobj // par
             newobj >> par
-        else: print what+"="+s,"Object not found (y)." 
-    def xdatatype(self,s):
+            newobj.touch() # check if that is reall necessary ....
+        else: print what+"="+s,"Object not found (",par,")." 
+    def ydatatype(self,s): ##hf ...
+        "Slot used by the GUI to change the yAxis Datatype"
+        self.chooser(s,"Datatype",self.currentplotpanelobject()["'yAxis'Data'Parameters=Data"])
+    def xdatatype(self,s): ##hf ...
         "Slot used by the GUI to change the xAxis Datatype"
-        if s=="<None>": return
-        s=str(s) #Otherwise all string become QString objects ....
-        what="Datatype"
         obj=self.currentplotpanelobject()
-        par=obj["'xAxis'Data'Parameters=Data"]
-        oldobj=par["'Datatype"] # find the parameter object to which the chooser is connected
-        newobj=par["'Chooser'"+what+"="+s]
-        if (type(newobj)==Data) & (not newobj==oldobj):
-            oldobj // par
-            newobj >> par
-        else: print what+"="+s,"Object not found (x)." 
+        self.chooser(s,"Datatype",self.currentplotpanelobject()["'xAxis'Data'Parameters=Data"])
+    def xaxisunitscale(self,s): ##hf ...
+        "Slot used by the GUI to change the xAxis Unit scale"
+        self.chooser(s,"UnitPrefix",self.currentplotpanelobject()["'xAxis'Parameters=UnitData"])
+    def yaxisunitscale(self,s): ##hf ...
+        "Slot used by the GUI to change the xAxis Unit scale"
+        self.chooser(s,"UnitPrefix",self.currentplotpanelobject()["'yAxis'Parameters=UnitData"])
 
 
 #Use 
