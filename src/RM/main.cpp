@@ -39,7 +39,7 @@ using namespace casa;
 
 int main (int argc, char * const argv[]) {
 
-	char *filename_Q, *filename_U;		// filename of FITS file to read
+//	char *filename_Q=NULL, *filename_U=NULL;		// filename of FITS file to read
 //	Bool status;						// status of casa calls
 	String casaerror;					// error message of casa calls
 	LatticeBase *image_Q;				// lattice for Q input image
@@ -52,30 +52,36 @@ int main (int argc, char * const argv[]) {
 		return(0);
 	}
 
-	/*
-	// Handle command line arguments
-	if( (filename_Q=(char*) calloc(strlen(argv[1]), sizeof(char))+10) )	// only if we got memory allocated
-		strncpy(filename_Q, argv[1], strlen(argv[1]));					// copy to filename for Q Image
-	if( (filename_U=(char*) calloc(strlen(argv[2]), sizeof(char))+1) )	// only if we got memory allocated
-		strncpy(filename_U, argv[2], strlen(argv[2]));					// copy to filename for U Image
-	*/
-
+	char *filename_Q=argv[1];
+	char *filename_U=argv[2];
 	
 	#ifdef _debug
 	cout << "Filename_Q: " << filename_Q << endl;				// Debug output
 	#endif
 
-
-
-	// Register the FITS and Miriad image types.
-	FITSImage::registerOpenFunction();
+	FITSImage::registerOpenFunction();				// Register the FITS and Miriad image types.
 
 	image_Q=ImageOpener::openImage(argv[1]);		// try open the file with generic casa function
 	if(image_Q==NULL)								// on error	
 	{
 		cout << "Error opening " << filename_Q << endl;
-	
+		exit(0);
 	}
+	
+
+	image_Q = dynamic_cast<ImageInterface<Float>*(image_Q);
+	// the shape function is forced upon us by the Lattice base class
+
+  uInt rowLength = image_Q.shape()(0);
+      IPosition rowShape(image_Q.ndim());
+      rowShape = 1; rowShape(0) = rowLength;
+      Float sumPix = 0;
+      RO_LatticeIterator<Float> iter(image_Q, rowShape);
+      while(!iter.atEnd()){
+        sumPix += sum(iter.vectorCursor());
+        iter++;
+      }
+
 
 
 	#ifdef _debug
@@ -84,3 +90,4 @@ int main (int argc, char * const argv[]) {
 	
 	return 0;
 }
+
