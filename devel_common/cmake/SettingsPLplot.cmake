@@ -2,15 +2,6 @@
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${plplot_SOURCE_DIR}
-  ${plplot_SOURCE_DIR}/..
-  ${plplot_SOURCE_DIR}/../..
-  ${plplot_SOURCE_DIR}/../../..
-  ENV LOFARSOFT
-  )
-
 if (USG_ROOT)
   include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
 else (USG_ROOT)
