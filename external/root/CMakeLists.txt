@@ -63,7 +63,7 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
     message (FATAL_ERROR "Unable to locate the installation area")
   endif (NOT ROOT_prefix)
   
-  ## ------------------------------------------------------------------------------
+  ##__________________________________________________________________
   ## Check for required tools
 
   find_program (HAVE_WGET  wget  ${bin_locations} )
@@ -71,8 +71,33 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   find_program (HAVE_TAR   tar   ${bin_locations} )
 
   ##__________________________________________________________________
-  ## Download the tar-archive from the USG server
+  ## Locate required libraries
 
+  set (lib_locations
+    /usr/lib
+    /usr/lib64
+    /usr/local/lib
+    /usr/local/lib64
+    /usr/X11R6/lib
+    /usr/X11R6/lib64
+    /sw/lib
+    )
+
+  find_file (libXpm libXpm.so.0 libXpm.so.1 libXpm.so.2 libXpm.so.3 libXpm.so.4
+    PATHS ${lib_locations}
+    )
+
+  ## create symbolic link to ensure the library is found
+  if (libXpm)
+    execute_process(
+      COMMAND ln -s ${libXpm} libXpm.so
+      WORKING_DIRECTORY ${ROOT_prefix}/lib
+      )
+  endif (libXpm)
+  
+  ##__________________________________________________________________
+  ## Download the tar-archive from the USG server
+  
   set (ROOT_VERSION "v5.20.00")
   set (ROOT_TAR_ARCHIVE "root_${ROOT_VERSION}.source.tar.gz")
   set (ROOT_URL "${USG_DOWNLOAD}/software/${ROOT_TAR_ARCHIVE}")
@@ -109,8 +134,12 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   ##__________________________________________________________________
   ## Configure, build and install
   
+  # xml-libdir         XML support, location of libxml2
+  # x11-libdir         X11 support, path to libX11
+  # xpm-libdir         XPM support, path to libXpm
+  
   add_custom_target (run_configure ALL
-    COMMAND ./configure --prefix=${ROOT_prefix}
+    COMMAND ./configure --prefix=${ROOT_prefix} --with-xpm-libdir=${ROOT_prefix}/lib
     WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root
     )
   add_dependencies (run_configure expand_archive)
