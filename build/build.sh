@@ -105,7 +105,7 @@ make_command ()
   else
     ## try to determine the number of cores/CPUs
     if test -f /proc/cpuinfo ; then
-      SYSTEM_NOF_CPU=`cat /proc/cpuinfo  | grep processor | wc -l`
+      SYSTEM_NOF_CPU=`cat /proc/cpuinfo | grep -v model | grep processor | wc -l`
     else
       SYSTEM_NOF_CPU=1
     fi
