@@ -2,15 +2,25 @@
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
+if (NOT USG_ROOT)
+  find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+    PATHS 
+    ..
+    ../..
+    ../../..
+    ../../../..
+    $ENV{LOFARSOFT}
+    )
+endif (NOT USG_ROOT)
+
 if (USG_ROOT)
   include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  include (FindNumeric)
 else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
-## Python.Numeric
-
-include (FindNumeric)
+## Python.Numeric header files
 
 if (NUMERIC_INCLUDES)
   include_directories (${NUMERIC_INCLUDES})
