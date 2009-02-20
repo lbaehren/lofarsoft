@@ -91,6 +91,7 @@ using CR::LopesEventIn;
   caltablepath           = /home/schroeder/usg/data/lopes/LOPES-CalTable
   path                   = /home/schroeder/lopes/events
   RotatePos              = true
+  preferGrande           = false
   GeneratePlots          = true
   GenerateSpectra        = true
   SinglePlots            = true
@@ -125,6 +126,9 @@ using CR::LopesEventIn;
   caliabration           = false
   lateralDistribution    = false
   lateralOutputFile      = false
+  lateralSNRcut          = 1.0;
+  lateralTimeCut         = 15e-9;
+
   \endverbatim
   This example means:
   <ul>
@@ -132,6 +136,7 @@ using CR::LopesEventIn;
     <li>the events are stored at a certain location,
     <li>the given positions are in the Kascade coordinate system and must be
     rotated to the LOPES system,
+    <li>in doubt the KASCADE (instead of Grande) reconstruction is taken as input,
     <li>there will be generated plots of the analaysed event,
     <li>a spectrum will be plotted for every antenna
     <li>produces a plot for each antenna,
@@ -165,6 +170,8 @@ using CR::LopesEventIn;
     <li>the analysis is run normally, not in calibration mode
     <li>the lateral distribution will not be analysed
     <li>there will be no file created, which has a special format for the lateral distribtion analysis
+    <li>points with a SNR < 1.0 will be removed from the lateral distribution
+    <li>points with a time position more than 15 ns away of the CC beam center will be removed
   </ul>
 
   <h3>Example</h3>
@@ -204,6 +211,7 @@ using CR::LopesEventIn;
 // Set default configuration values for the pipeline
 string caltablepath = "/home/schroeder/usg/data/lopes/LOPES-CalTable";
 string path = "";
+bool preferGrande = false;	      // per default prefer KASCADE reconstruction as input
 bool generatePlots = true;	      // the plot prefix will be the name of the event file
 bool generateSpectra = false;	      // by default no spectra are plotted
 bool singlePlots = false;	      // by default there are no single plots for each antenna
@@ -211,7 +219,7 @@ bool PlotRawData = false;	      // by default there the raw data are not plotted
 bool CalculateMaxima = false;	      // by default the maxima are not calculated
 bool listCalcMaxima = false;         // print calculated maxima in more user friendly way
 bool printShowerCoordinates=false;   // print the distance between antenna and shower core
-bool RotatePos = true; 	              // should be true if coordinates are given in KASKADE frame
+bool RotatePos = true; 	      // should be true if coordinates are given in KASKADE frame
 bool verbose = true;
 bool ignoreDistance = true;          // distance value of the eventlist will be ignored
 bool simplexFit = true;
@@ -239,12 +247,20 @@ bool writeBadEvents = false;         // also bad events are written into the roo
 bool calibrationMode = false;	      // Calibration mode is off by default
 bool lateralDistribution = false;    // the lateral distribution will not be generated
 bool lateralOutputFile = false;      // no file for the lateral distribution will be created
+double lateralSNRcut = 1.0;            // SNR cut for removing points from lateral distribution
+double lateralTimeCut = 15e-9;         // Allowed time window +/- arround CC-beam-center for found peaks
 
 // Event parameters for calling the pipeline
 string eventfilelistname("");			         // Name of the ASCII event list
 string kascadeRootFile("");			         // Name of root file with Kascade reconstruction and event names
 string eventname("");
 double azimuth=0, elevation=0, radiusOfCurvature=0, core_x=0, core_y=0;   // basic input parameters (e.g. from Kascade)
+
+// Variables of KASCADE root file
+float_t Az = 0, Ze = 0, Xc = 0, Yc = 0;
+float_t Azg = 0, Zeg = 0, Xcg = 0, Ycg = 0;
+char reconstruction = 'A';	// A = KASCADE reconstruction taken, G = Grande reconstruction taken
+
 
 // ------------- Functions ----------------
 
@@ -316,6 +332,22 @@ void readConfigFile (const string &filename)
 
 	  cout << "Path set to \"" << path << "\".\n";
 	}
+
+        if ( (keyword.compare("preferGrande")==0) || (keyword.compare("prefergrande")==0) ||
+             (keyword.compare("PreferGrande")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
+	    preferGrande = true;
+	    cout << "preferGrande set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
+	    preferGrande = false;
+	    cout << "preferGrande set to 'false'.\n";
+          } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "preferGrande must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+        }
 
         if ( (keyword.compare("generateplots")==0) || (keyword.compare("GeneratePlots")==0) ||
              (keyword.compare("generatePlots")==0)) {
@@ -982,6 +1014,38 @@ void readConfigFile (const string &filename)
           }
 	}
 
+        if ( (keyword.compare("LateralSNRcut")==0) || (keyword.compare("lateralsnrcut")==0) ||
+              (keyword.compare("lateralSNRcut")==0) || (keyword.compare("LateralSNRCut")==0))
+        {
+          double temp = 9999999;
+          stringstream(value) >> temp;
+
+          if (temp != 9999999) { // will be false, if value is not of typ "double"
+            lateralSNRcut = temp;
+	    cout << "lateralSNRcut set to: " << lateralSNRcut;
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "lateralSNRcut must be of typ 'double'. \n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+        }
+
+        if ( (keyword.compare("LateralTimecut")==0) || (keyword.compare("lateraltimecut")==0) ||
+              (keyword.compare("lateralTimeCut")==0) || (keyword.compare("LateralTimeCut")==0))
+        {
+          double temp = 9999999;
+          stringstream(value) >> temp;
+
+          if (temp != 9999999) { // will be false, if value is not of typ "double"
+            lateralTimeCut = temp;
+	    cout << "lateralTimeCut set to " << lateralTimeCut << " seconds.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "lateralTimeCut must be of typ 'double'. \n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+        }
+
       }	// while(configfile.good())
 
       // close config file
@@ -1135,8 +1199,7 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
   static TTree *inputTree  = NULL;
 
   // for input form root file
-  static float_t Az = 0, Ze = 0, Xc = 0, Yc = 0;
-  static float_t Azg = 0, Zeg = 0, Xcg = 0, Ycg = 0;
+  static char Eventname[64];
 
   try {
     // reset pipeline parameters before readin
@@ -1167,7 +1230,7 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
       inputTree->SetBranchAddress("Zeg",&Ze);
       inputTree->SetBranchAddress("Xcg",&Xc);
       inputTree->SetBranchAddress("Ycg",&Yc);
-//      inputTree->SetBranchAddress("Eventname",&eventname);
+      inputTree->SetBranchAddress("Eventname",&Eventname);
 
       // as there is no radius of curvature in the file, set ignoreDistance to true
       if (!ignoreDistance) {
@@ -1190,16 +1253,44 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
 
     // if file is open the get the next event
     if (fileOpen) {
-      cout << "\nReading event number " << eventNumber+1 << " from file \"" << kascadeRootFile << "\"..." << endl;
+      cout << "\nReading event number " << eventNumber+1 << " from file \"" << kascadeRootFile << "\" ";
       inputTree->GetEntry(eventNumber);
       eventNumber++;
 
-      // set variables (only KASCADE reconstruction for the moment)
-      azimuth = static_cast<double>(Az);
-      elevation = static_cast<double>(90.-Ze);
-      core_x = static_cast<double>(Xc);
-      core_y = static_cast<double>(Yc);
-      eventname="test";
+      // choose if Kascade or Grande date should be used:
+      bool grande = false;
+
+      // if the Grande reconstruction should be prefered, then take it, if either the
+      // core is outside of 90 m radius, or if the core lies inside the Grande array
+      // if Kascade shall be prefered, then switch to Grande only if it is inside the 
+      // Grande Array and not inside the 90 m radius
+      if (preferGrande) {
+        if ( sqrt(Xc*Xc+Yc*Yc)>90 )
+          grande = true;
+        if ( (Xcg<-50) && (Ycg<-30) )
+          grande = true;
+      } else {
+        if ( (sqrt(Xc*Xc+Yc*Yc)>90) && ((Xcg<-50) && (Xcg>-420) && (Ycg<-30) && (Ycg>-550)) )
+          grande = true;
+      }
+
+      // set variables (Grande or KASCADE reconstruction)
+      eventname = string(Eventname);
+      if (grande) {
+        cout << "using the Grande reconstruction as input..." << endl;
+        azimuth = static_cast<double>(Azg);
+        elevation = static_cast<double>(90.-Zeg);
+        core_x = static_cast<double>(Xcg);
+        core_y = static_cast<double>(Ycg);
+        reconstruction = 'G';
+      } else {
+        cout << "using the KASCADE reconstruction as input..." << endl;
+        azimuth = static_cast<double>(Az);
+        elevation = static_cast<double>(90.-Ze);
+        core_x = static_cast<double>(Xc);
+        core_y = static_cast<double>(Yc);
+        reconstruction = 'A';
+      }
       return true;
     }
 
@@ -1263,6 +1354,7 @@ int main (int argc, char *argv[])
   int CutSmallSignal, CutSmallSignal_NS;              // # of cut antennas in lateral distribution fit
   int CutBadTiming, CutBadTiming_NS;                  // # of cut antennas in lateral distribution fit
   int CutSNR, CutSNR_NS;                              // # of cut antennas in lateral distribution fit
+  double latMeanDist, latMeanDist_NS;                 // mean distance of the antennas in the lateral distribution
 
   try {
     // allocate space for arrays with pulse properties
@@ -1301,6 +1393,7 @@ int main (int argc, char *argv[])
              << "===================================\n"
              << "caltablepath = /home/schroeder/usg/data/lopes/LOPES-CalTable\n"
              << "path = /home/schroeder/lopes/events\n"
+             << "preferGrande = false\n"
              << "RotatePos = true\n"
              << "GeneratePlots = true\n"
              << "SinglePlots = true\n"
@@ -1334,6 +1427,8 @@ int main (int argc, char *argv[])
              << "calibration = false\n"
              << "lateralDistribution = false\n"
              << "lateralOutputFile = false\n"
+             << "lateralSNRcut = 1.0\n"
+             << "lateralTimeCut = 25e-9\n"
              << "... \n"
              << endl;
         return 0;	// exit here
@@ -1410,11 +1505,23 @@ int main (int argc, char *argv[])
 
     // the following branches are not used in the calibration mode
     if ( !calibrationMode ) {
-      roottree->Branch("Xc",&core_x,"Xc/D");
-      roottree->Branch("Yc",&core_y,"Yc/D");
-      roottree->Branch("AzIn",&azimuth,"AzIn/D");
-      roottree->Branch("ElIn",&elevation,"ElIn/D");
-      roottree->Branch("DistanceIn",&radiusOfCurvature,"DistanceIn/D");
+      if (kascadeRootFile == "") {
+        roottree->Branch("Xc",&core_x,"Xc/D");
+        roottree->Branch("Yc",&core_y,"Yc/D");
+        roottree->Branch("AzIn",&azimuth,"AzIn/D");
+        roottree->Branch("ElIn",&elevation,"ElIn/D");
+        roottree->Branch("DistanceIn",&radiusOfCurvature,"DistanceIn/D");
+      } else {
+        roottree->Branch("Xc",&Xc,"Xc/F");
+        roottree->Branch("Xcg",&Xcg,"Xcg/F");
+        roottree->Branch("Yc",&Yc,"Yc/F");
+        roottree->Branch("Ycg",&Ycg,"Ycg/F");
+        roottree->Branch("Az",&Az,"Az/F");
+        roottree->Branch("Azg",&Azg,"Azg/F");
+        roottree->Branch("Ze",&Ze,"Ze/F");
+        roottree->Branch("Zeg",&Zeg,"Zeg/F");
+        roottree->Branch("reconstruction",&reconstruction,"reconstruction/B");
+      }
 
       // one result, if polarization = ANY
       if (polarization == "ANY") {
@@ -1440,6 +1547,7 @@ int main (int argc, char *argv[])
           roottree->Branch("CutSmallSignal",&CutSmallSignal,"CutSmallSignal/I");
           roottree->Branch("CutBadTiming",&CutBadTiming,"CutBadTiming/I");
           roottree->Branch("CutSNR",&CutSNR,"CutSNR/I");
+          roottree->Branch("latMeanDist",&latMeanDist,"latMeanDist/D");
         }
       }
       if ( (polarization == "EW") || (polarization == "BOTH")) {
@@ -1465,6 +1573,7 @@ int main (int argc, char *argv[])
           roottree->Branch("CutSmallSignal_EW",&CutSmallSignal,"CutSmallSignal_EW/I");
           roottree->Branch("CutBadTiming_EW",&CutBadTiming,"CutBadTiming_EW/I");
           roottree->Branch("CutSNR_EW",&CutSNR,"CutSNR_EW/I");
+          roottree->Branch("latMeanDist_EW",&latMeanDist,"latMeanDist_EW/D");
         }
       }
       if ( (polarization == "NS") || (polarization == "BOTH")) {
@@ -1490,6 +1599,7 @@ int main (int argc, char *argv[])
           roottree->Branch("CutSmallSignal_NS",&CutSmallSignal_NS,"CutSmallSignal_NS/I");
           roottree->Branch("CutBadTiming_NS",&CutBadTiming_NS,"CutBadTiming_NS/I");
           roottree->Branch("CutSNR_NS",&CutSNR_NS,"CutSNR_NS/I");
+          roottree->Branch("latMeanDist_NS",&latMeanDist_NS,"latMeanDist_NS/D");
         }
       }
     } //if
@@ -1555,6 +1665,7 @@ int main (int argc, char *argv[])
       CutSmallSignal = 0, CutSmallSignal_NS = 0;
       CutBadTiming = 0, CutBadTiming_NS = 0;
       CutSNR = 0, CutSNR_NS = 0;
+      latMeanDist = 0, latMeanDist_NS = 0;
 
       // Set observatory record to LOPES
       Record obsrec;
@@ -1621,6 +1732,8 @@ int main (int argc, char *argv[])
           eventPipeline.setFreqInterval(freqStart,freqStop);
           eventPipeline.setCCWindowWidth(ccWindowWidth);
           eventPipeline.setUpsamplingExponent(upsamplingExponent);
+          eventPipeline.setLateralSNRcut(lateralSNRcut);
+          eventPipeline.setLateralTimeCut(lateralTimeCut);
 
           // call the pipeline with an extra delay = 0.
           results = eventPipeline.RunPipeline (path+eventname,
@@ -1670,6 +1783,7 @@ int main (int argc, char *argv[])
             CutSmallSignal = results.asInt("CutSmallSignal");
             CutBadTiming = results.asInt("CutBadTiming");
             CutSNR = results.asInt("CutSNR");
+            latMeanDist = results.asDouble("latMeanDist");
          }
 
           // get the pulse properties
@@ -1710,6 +1824,8 @@ int main (int argc, char *argv[])
           eventPipeline.setFreqInterval(freqStart,freqStop);
           eventPipeline.setCCWindowWidth(ccWindowWidth);
           eventPipeline.setUpsamplingExponent(upsamplingExponent);
+          eventPipeline.setLateralSNRcut(lateralSNRcut);
+          eventPipeline.setLateralTimeCut(lateralTimeCut);
 
           // call the pipeline with an extra delay = 0.
           results = eventPipeline.RunPipeline (path+eventname,
@@ -1759,6 +1875,7 @@ int main (int argc, char *argv[])
             CutSmallSignal_NS = results.asInt("CutSmallSignal");
             CutBadTiming_NS = results.asInt("CutBadTiming");
             CutSNR_NS = results.asInt("CutSNR");
+            latMeanDist_NS = results.asDouble("latMeanDist");
           }
 
           // get the pulse properties and insert them into allready existing EW map

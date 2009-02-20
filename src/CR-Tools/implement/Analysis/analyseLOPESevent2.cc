@@ -48,7 +48,9 @@ namespace CR { // Namespace CR -- begin
       spectrumStart_p(40e6),
       spectrumStop_p(80e6),
       rawPulses( map<int,PulseProperties>() ),
-      calibPulses( map<int,PulseProperties>() )
+      calibPulses( map<int,PulseProperties>() ),
+      lateralSNRcut(1.0),
+      lateralTimeCut(25e-9)
   {;}
   
   // ============================================================================
@@ -649,6 +651,7 @@ namespace CR { // Namespace CR -- begin
       Double_t fieldStr[Nant],distance[Nant],distanceClean[Nant],fieldStrClean[Nant];
       Double_t fieldStrEr[Nant],distanceEr[Nant],distanceCleanEr[Nant],fieldStrCleanEr[Nant];
       Double_t noiseBgr[Nant], timePos[Nant];
+      int antennaNumber[Nant];
 
       // loop through antennas and fill the arrays
       unsigned int ant = 0;	// counting antennas with pulse information
@@ -658,6 +661,7 @@ namespace CR { // Namespace CR -- begin
            fieldStr[ant] = calibPulses[antennaIDs(i)].envelopeMaximum;
            noiseBgr[ant] = calibPulses[antennaIDs(i)].noise;
            timePos[ant] = calibPulses[antennaIDs(i)].envelopeTime;
+           antennaNumber[ant] = i+1;
            ant++;
         }
       // consistancy check
@@ -709,18 +713,20 @@ namespace CR { // Namespace CR -- begin
       */
 
         /* New Cuts */
-        // pulse time correct? (default: ccWindowWidth = 45 ns)
-        if (abs(timePos[i]*1e-9 - ccCenter) > getCCWindowWidth()/3.) {
+        // pulse time correct? (default: pulse at cc-beam center +/- 25ns)
+        if (abs(timePos[i]*1e-9 - ccCenter) > lateralTimeCut) {
           CutBadTiming++;
-          cout << "analyseLOPESevent2::fitLateralDistribution: Antenna cut because of bad timing: "
+          cout << "analyseLOPESevent2::fitLateralDistribution: Antenna " << antennaNumber[i] << " cut because of bad timing: "
                << "CCcenter = " << ccCenter*1e9 << " , pulse time = " << timePos[i]
                << endl;
           continue;
         }
         // SNR >= 1 ?
-        if ( abs(fieldStr[i]/noiseBgr[i]) < 1.) {
+        if ( abs(fieldStr[i]/noiseBgr[i]) < lateralSNRcut) {
           CutSNR++;
-          cout << "analyseLOPESevent2::fitLateralDistribution: Antenna cut because low SNR!" << endl;
+          cout << "analyseLOPESevent2::fitLateralDistribution: Antenna " << antennaNumber[i] 
+               << " cut because SNR lower than " << lateralSNRcut
+               << endl;
           continue;
         }
 
@@ -756,6 +762,13 @@ namespace CR { // Namespace CR -- begin
 
       cout << "\nAntennas in the Plot: " << ant << endl;
       cout << "Entries for fit: " << clean << endl;
+
+      // calculate mean distance of the remaining antennas
+      double latMeanDist = 0;
+      if (clean > 0)
+        latMeanDist = Mean(clean, distanceClean);
+      cout << "Mean distance of antennas surviving the cuts: " << latMeanDist << " m." << endl;
+      erg.define("latMeanDist",latMeanDist);
 
       TGraphErrors *latPro = new TGraphErrors (ant, distance,fieldStr,distanceEr,fieldStrEr);
       TGraphErrors *latProClean = new TGraphErrors (clean, distanceClean,fieldStrClean,distanceCleanEr,fieldStrCleanEr);

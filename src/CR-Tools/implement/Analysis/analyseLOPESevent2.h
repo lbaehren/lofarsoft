@@ -91,6 +91,12 @@ namespace CR { // Namespace CR -- begin
     //! map of calculated pulse parameters of calibrated fieldstrength traces
     map <int, PulseProperties> calibPulses;
 
+    //! SNR cut for lateral distribution
+    double lateralSNRcut;
+    //! Time window cut for lateral distribution (pulse time must be close to cc-beam center)
+    double lateralTimeCut;
+
+
   public:
     
     // ------------------------------------------------------------- Construction
@@ -255,10 +261,47 @@ namespace CR { // Namespace CR -- begin
       return calibPulses;
     }
 
+    /*!
+      \brief Get the SNR cut for the lateral distribution
+
+      \return SNRcut -- SNR cut
+    */
+    inline double getLateralSNRcut () {
+       return lateralSNRcut;
+    }
+
+    /*!
+      \brief Set the SNR cut for the lateral distribution
+
+      \return  SNRcut -- SNR cut
+    */
+    inline void setLateralSNRcut (double const &SNRcut) {
+      lateralSNRcut = SNRcut;
+    }
+
+    /*!
+      \brief Get the timing cut for the lateral distribution
+
+      \return timeCut -- timing cut
+    */
+    inline double getLateralTimeCut () {
+       return lateralTimeCut;
+    }
+
+    /*!
+      \brief Set the timing cut for the lateral distribution
+
+      \return  timeCut -- timing cut
+    */
+    inline void setLateralTimeCut (double const &timeCut) {
+      lateralTimeCut = timeCut;
+    }
+
+
 
     /*!
       \brief Initialize the pipeline
-      
+
       \param ObsRecord - observatories record that matches observatory names to the 
                           path to the corresponding CalTable
 			  
