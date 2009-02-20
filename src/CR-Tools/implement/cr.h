@@ -51,13 +51,6 @@
 
 */
 
-//_________________________________________________________________ CR-Tools/apps
-
-/*!
-  \defgroup CR_Applications CR-Tools :: Applications collection
-  \ingroup CR
-*/
-
 //_______________________________________________________________________________
 //                                          CR-Tools/implement/ApplicationSupport
 
