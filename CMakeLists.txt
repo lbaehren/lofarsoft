@@ -24,8 +24,10 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   )
 
 if (USG_ROOT)
+  ## load custom modules
   include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
   include (GetCasacoreData)
+  ## define custom variables
   set (USG_BUILD ${USG_ROOT}/build)
   set (USG_EXTERNAL ${USG_ROOT}/external)
 else (USG_ROOT)
@@ -125,13 +127,13 @@ endforeach (package_name)
 ##____________________________________________________________________
 ##                                        Dependencies of the packages
 
-add_dependencies (casacore hdf5 cfitsio boost wcslib)
+add_dependencies (casacore hdf5 cfitsio boost wcslib bison)
 
 add_dependencies (hdf5 szip)
 
 add_dependencies (mathgl hdf5)
 
-add_dependencies (pyrap casacore hdf5 python boost)
+add_dependencies (pyrap casacore python)
 
 add_dependencies (python boost)
 
@@ -161,6 +163,7 @@ add_custom_target (plplot
 add_custom_target (bdsm
   COMMAND ./build_package.sh bdsm ${USG_ROOT}/src/BDSM
   WORKING_DIRECTORY ${USG_BUILD}
+  COMMENT "Building package BDSM ..."
   )
 add_dependencies (bdsm cfitsio wcslib)
 
@@ -172,7 +175,7 @@ add_custom_target (dal
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package DAL ..."
   )
-add_dependencies (dal python plplot casacore flex bison)
+add_dependencies (dal python plplot casacore)
 
 ##____________________________________________________________________
 ##                                                            CR-Tools
