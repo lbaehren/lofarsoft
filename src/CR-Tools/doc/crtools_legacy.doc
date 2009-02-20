@@ -1,0 +1,12 @@
+/* $Id$ */
+
+/*!
+  \defgroup LopesLegacy CR-Tools :: LopesLegacy module
+
+  \ingroup CR
+
+  \brief LopesLegacy module for the CR-pipeline
+  
+  This module contains a collection of legacy code inherited from the earlier
+  LOPES-Tools.
+*/

@@ -34,7 +34,6 @@
     <li>\ref crtools_build
     <li>\ref crtools_source_tree
     <li>\ref crtools_changes
-    <li>\ref crtools_imaging
     <li>\ref tasks
   </ul>
 
@@ -72,18 +71,3 @@
   
 */
 
-// ==============================================================================
-//
-//  Module LopesLegacy
-//
-// ==============================================================================
-
-/*!
-  \defgroup LopesLegacy CR-Tools :: LopesLegacy module
-  \ingroup CR
-
-  \brief LopesLegacy module for the CR-pipeline
-  
-  <h3>Synopsis</h3>
-
-*/

@@ -78,7 +78,12 @@ if (HAVE_DAL)
   ## compiler instructions
   add_executable (tppfinversion tppfinversion.cc)
   ## linker instructions
-  target_link_libraries (tppfinversion cr ${DAL_LIBRARIES} ${HDF5_LIBRARIES})
+  target_link_libraries (tppfinversion
+    cr
+    ${DAL_LIBRARIES}
+    ${CASA_LIBRARIES}
+    ${HDF5_LIBRARIES}
+    )
   ## testing
   add_test (tppfinversion tppfinversion ${dataset_beamformed})
   ## installation
