@@ -180,10 +180,12 @@ namespace CR { // Namespace CR -- begin
       \brief Fit a gaussian first to the x-beam then to the cc-beam
 
       \param xBeam - time-series data tof the x-beam (same length as timeaxis!)
-      \param ccBeam - time-series data tof the cc-beam (same length as timeaxis!)
+      \param ccBeam - time-series data tof the cc-beam (same length as timeaxis or empty Vector!)
       \param EvalGauss=False - add a vector with the resulting gaussian to the record.
       \param center=-1e37 - start value for the center, instead of the default.
       
+      If the <tt>ccBeam</tt> parameter is an empry vector, then only a fit to the X-beam is done.
+
       \return Record with the fit results
     */
     Record Fitgauss (Vector<Double> xBeam,

@@ -405,47 +405,10 @@ namespace CR { // Namespace CR -- begin
 	    return False;
 	  };
 	};
-	//################################## quick hack! start!!! ############################################
-// 	if (verbose) { cout << "analyseLOPESevent::doPositionFitting: starting reduced SimplexFit()." << endl;};
-// 	{
-// 	  Vector<Bool> NewAntennaSelection;
-// 	  Double height, max1=-1000., max2=-1000.;
-// 	  int i, max1pos=0, max2pos=0;
-// 	  Matrix<Double> ts;
-// 	  NewAntennaSelection = AntennaSelection;
-
-// 	  beamPipe_p->setDirection(Az, El, distance);
-// 	  for (i=0; i<AntennaSelection.nelements(); i++){
-// 	    if (AntennaSelection(i)){
-// 	      NewAntennaSelection = False;
-// 	      NewAntennaSelection(i) = True;
-// 	      //height = getHeight(Az, El, distance, NewAntennaSelection, NULL);
-// 	      ts = beamPipe_p->GetTimeSeries(beamformDR_p, NewAntennaSelection, Polarization_p);	      
-// 	      height = max(abs(ts.column(0)));
-// 	      if (height >= max1) {
-// 		max2 = max1;
-// 		max2pos = max1pos;
-// 		max1 = height;
-// 		max1pos = i;
-// 	      } else if (height >= max2) {
-// 		max2 = height;
-// 		max2pos = i;
-// 	      };
-// 	    };
-// 	  };
-// 	  NewAntennaSelection = AntennaSelection;
-// 	  NewAntennaSelection(max1pos) = NewAntennaSelection(max2pos) = False;
-// 	  if (verbose) {cout<<"analyseLOPESevent::doPositionFitting: old Selection"<<AntennaSelection<<endl;};
-// 	  if (verbose) {cout<<"analyseLOPESevent::doPositionFitting: new Selection"<<NewAntennaSelection<<endl;};
-// 	  if (! SimplexFit(Az, El, distance, center, NewAntennaSelection) ){
-// 	    cerr << "analyseLOPESevent::doPositionFitting: " << "Error during reducedSimplexFit()!" << endl;
-// 	  };	  
-// 	};
-	//################################## quick hack! end!!! ############################################
 	if (verbose) { cout << "analyseLOPESevent::doPositionFitting: starting SimplexFit()." << endl;};
 
 	if (distanceSearch) {
-	  if (! SimplexFit(Az, El, distance, center, AntennaSelection, 500.) ){
+	  if (! SimplexFit(Az, El, distance, center, AntennaSelection, 2000.) ){
   	    cerr << "analyseLOPESevent::doPositionFitting: " << "Error during SimplexFit()!" << endl;
 	    return False;
 	  };
@@ -715,7 +678,8 @@ namespace CR { // Namespace CR -- begin
     }; 
     return erg;
   };
-  
+
+
 
   Bool analyseLOPESevent::SimplexFit (Double &Az,
 				      Double &El,
@@ -730,7 +694,12 @@ namespace CR { // Namespace CR -- begin
       Double newaz, newel, newdist, newheight, nnewheight, newcent, nnewcent;
       Double meanaz, meanel, meandist, vecaz, vecel, vecdist;
       Bool running=True;
-      
+#define Xstop 3.
+#define CCstop 0.5
+
+      // starting fit with xbeam
+      SkymapQuantity::Type beamtype = SkymapQuantity::TIME_X;
+
       if (beamPipe_p == NULL){
 	cerr << "analyseLOPESevent:SimplexFit: " << "Error: beamPipe_p == NULL " << endl;
 	return False;	
@@ -748,7 +717,7 @@ namespace CR { // Namespace CR -- begin
       dists(2) -= distanceStep;dists(1) += distanceStep;dists(3) += distanceStep;
       cents = center;
       for (i=0; i<4; i++){
-	height(i) = getHeight(azs(i), els(i), dists(i), AntennaSelection, &cents(i));
+	getBeamHeight(azs(i), els(i), dists(i), AntennaSelection, &height(i), beamtype, &cents(i));
       };
       minpos=0; nsameiter=0;oldminpos=0;
       while(running){ // the big loop
@@ -785,7 +754,7 @@ namespace CR { // Namespace CR -- begin
 	  els(minpos) = els(maxpos)+0.2;
 	  dists(minpos) = dists(maxpos)+50;
 	  cents(minpos) = cents(maxpos);
-	  height(minpos) = getHeight(azs(minpos),els(minpos),dists(minpos), AntennaSelection, &cents(minpos));
+	  getBeamHeight(azs(minpos),els(minpos),dists(minpos), AntennaSelection, &height(minpos), beamtype, &cents(minpos));
 	  continue;
 	};
 	if (nsameiter==16) {
@@ -796,13 +765,13 @@ namespace CR { // Namespace CR -- begin
 	newaz = azs(minpos) + 2.*vecaz;	newel = els(minpos) + 2.*vecel;
 	newdist = dists(minpos) + 2.*vecdist;
 	newcent = cents(minpos);
-	newheight = getHeight(newaz, newel, newdist, AntennaSelection, &newcent);
+	getBeamHeight(newaz, newel, newdist, AntennaSelection,&newheight, beamtype, &newcent);
 	if (newheight > max(height)) { //expand the simplex
 	  cout << " SimplexFit: expanding simplex"<<endl;
 	  newaz = azs(minpos) + 4.*vecaz; newel = els(minpos) + 4.*vecel;
 	  newdist = dists(minpos) + 4.*vecdist;
 	  nnewcent = cents(minpos);
-	  nnewheight = getHeight(newaz, newel, newdist, AntennaSelection, &nnewcent);
+	  getBeamHeight(newaz, newel, newdist, AntennaSelection, &nnewheight, beamtype, &nnewcent);
 	  if (newheight > nnewheight) {
 	    newaz = azs(minpos) + 2.*vecaz; newel = els(minpos) + 2.*vecel;
 	    newdist = dists(minpos) + 2.*vecdist;
@@ -817,7 +786,7 @@ namespace CR { // Namespace CR -- begin
 	    newaz = azs(minpos) + 1.5*vecaz; newel = els(minpos) + 1.5*vecel;
 	    newdist = dists(minpos) + 1.5*vecdist;
 	    nnewcent = cents(minpos);
-	    nnewheight = getHeight(newaz, newel, newdist, AntennaSelection, &nnewcent);
+	    getBeamHeight(newaz, newel, newdist, AntennaSelection, &nnewheight, beamtype, &nnewcent);
 	    if (newheight > nnewheight) {
 	      newaz = azs(minpos) + 2.*vecaz; newel = els(minpos) + 2.*vecel;
 	      newdist = dists(minpos) + 2.*vecdist;
@@ -849,7 +818,20 @@ namespace CR { // Namespace CR -- begin
 	meanaz *= cos(mean(els)*DEG2RAD);
 	meanaz = abs(meanaz*meanel);
 	meandist = max(dists)-min(dists);
-	if ((meanaz<0.01)&&((meandist/mean(dists))<0.025)) {
+	
+	
+	// switching to ccbeam if convergence gets better
+	if ((beamtype == SkymapQuantity::TIME_X)&&(meanaz<0.01*Xstop)&&((meandist/mean(dists))<0.025*Xstop)) {
+	  cout << "analyseLOPESevent:SimplexFit: Switching to fit to ccbeam." << endl;
+	  beamtype = SkymapQuantity::TIME_CC;
+	  // replacing xbeam fitresults with ccbeam fitresults
+	  for (i=0; i<4; i++){
+	    getBeamHeight(azs(i),els(i),dists(i), AntennaSelection, &height(i), beamtype, &cents(i) );
+	  };
+	};
+
+	// Stop fit if converged
+	if ((meanaz<0.01*CCstop)&&((meandist/mean(dists))<0.025*CCstop)) {
 	  running = False;
 	};
 	niteration++;
@@ -881,6 +863,10 @@ namespace CR { // Namespace CR -- begin
     return True;
   };
 
+
+
+
+  
   Bool analyseLOPESevent::evaluateGrid (Double &Az,
 					Double &El,
 					Double &distance,
@@ -910,9 +896,11 @@ namespace CR { // Namespace CR -- begin
 	  az_ = Az+astep*stepfactor/(cos(el_*DEG2RAD)+1e-6);
 	  if (el_>90.){ az_+= 180.; };
 	  center_ = 2e99;
-	  height_ = getHeight(az_, el_, distance, AntennaSelection, &center_);
-	  if (height_ > maxheight){
-	    maxaz = az_; maxel = el_; maxheight=height_; maxcenter=center_;
+	  // use x-beam for evaluateGrid
+	  if ( getBeamHeight(az_, el_, distance, AntennaSelection, &height_, SkymapQuantity::TIME_X, &center_)) {
+	    if (height_ > maxheight){
+	      maxaz = az_; maxel = el_; maxheight=height_; maxcenter=center_;
+	    };
 	  };
 	};
       };
@@ -994,6 +982,118 @@ namespace CR { // Namespace CR -- begin
   };
 
 
+
+
+
+
+  Bool analyseLOPESevent::getBeamHeight (Double az,
+                                         Double el,
+                                         Double dist,
+                                         Vector<Bool> AntennaSelection,
+				         Double *beamheightp,
+					 SkymapQuantity::Type beamtype,
+                                         Double *centerp){
+    Bool status = True;
+    try {
+      Vector<Double> ccb,xb,pb;
+      Matrix<Double> ts;
+      Record ergrec;
+      Bool clipping=True, goodfit=True;
+      while (clipping){
+        if (az>360.) { az-=360.; continue;};
+        if (az<0.) { az+=360.; continue;};
+        if (el>90.) { el=180.-el; continue;};
+        if (el<0.) { el=-el; continue;};
+        if (dist<0.) { dist=-dist; continue;};
+        clipping = False;
+      };
+      beamPipe_p->setDirection(az, el, dist);
+      beamPipe_p->GetTCXP(beamformDR_p, ts, ccb, xb, pb, AntennaSelection, Polarization_p);
+
+      // Apply mean filters to cc- and x-beam
+      StatisticsFilter<Double> mf(filterStrength_p,FilterType::MEAN);
+      xb = mf.filter(xb);
+      if (beamtype==SkymapQuantity::TIME_CC) {
+	ccb = mf.filter(ccb);
+      } else {
+	ccb.resize(0);
+      };
+
+      // Defining record for fit results
+      if (centerp != NULL) {
+        ergrec = fitObject.Fitgauss(xb, ccb, False, *centerp);
+      } else {
+        ergrec = fitObject.Fitgauss(xb, ccb, False);
+      };
+
+      // if desired beamtype is xbeam
+      if ( beamtype==SkymapQuantity::TIME_X) {
+	if (!ergrec.asBool("Xconverged") ||
+           (ergrec.asDouble("Xcenter") < fitStart_p) || (ergrec.asDouble("Xcenter") > fitStop_p) ||
+           (ergrec.asDouble("Xwidth")>1e-7) || (ergrec.asDouble("Xwidth")<1e-9) ||
+           (ergrec.asDouble("Xcenter_error")>(fitStop_p-fitStart_p))||
+           (ergrec.asDouble("Xwidth_error")>1e-7)||
+           ((ergrec.asDouble("Xheight_error")/ergrec.asDouble("Xheight"))>10) ) {
+ 	  pb = beamformDR_p->timeValues();
+          // return mean of xb in timewindow of 62.5 ns starting at 1.83e-6
+          *beamheightp=  mean(xb(Slice(ntrue(pb<-1.83e-6),int(beamformDR_p->sampleFrequency()/GetDataReader()->sampleFrequency())*5)))*1e6;
+	  goodfit=False;
+          if (centerp != NULL) {
+            *centerp = -1.8e-6;
+          };
+	}
+	else {
+	  *beamheightp = ergrec.asDouble("Xheight")*1e6;
+          if (centerp != NULL) {
+            *centerp = ergrec.asDouble("Xcenter");
+	  };
+	};
+
+      }
+      else if ( beamtype==SkymapQuantity::TIME_CC) {
+	// if beamtype is "CC" or any other unkown string
+        if (!ergrec.asBool("CCconverged") ||
+            (ergrec.asDouble("CCcenter") < fitStart_p) || (ergrec.asDouble("CCcenter") > fitStop_p) ||
+            (ergrec.asDouble("CCwidth")>1e-7) || (ergrec.asDouble("CCwidth")<1e-9) ||
+            (ergrec.asDouble("CCcenter_error")>(fitStop_p-fitStart_p))||
+            (ergrec.asDouble("CCwidth_error")>1e-7)||
+            ((ergrec.asDouble("CCheight_error")/ergrec.asDouble("CCheight"))>10) ) {
+          pb = beamformDR_p->timeValues();
+	  // return mean of ccb in timewindow of 62.5 ns around 1.83e-6
+          *beamheightp=  mean(ccb(Slice(ntrue(pb<-1.83e-6),int(beamformDR_p->sampleFrequency()/GetDataReader()->sampleFrequency())*5)))*1e6;
+          goodfit=False;
+          if (centerp != NULL) {
+            *centerp = -1.8e-6;
+          };
+        }
+        else {
+	  *beamheightp = ergrec.asDouble("CCheight")*1e6;
+          if (centerp != NULL) {
+            *centerp = ergrec.asDouble("CCcenter");
+          };
+	};
+      } else {
+	cerr << "getBeamHeight: Unknown beamtype, only SkymapQuantity::TIME_CC"
+	     << " and SkymapQuantity::TIME_X supported!" << endl;
+      };
+      status = goodfit;
+
+#ifdef DEBUGGING_MESSAGES      
+          cout << "getBeamHeight: Beamtype: "<<beamtype<<" Az:"<<az<<" El:"<<el<<" Dist:"<<dist<<" Height:"<< beamheightp << " conv:"
+	       << ergrec.asBool("Xconverged")<<ergrec.asBool("CCconverged")<<goodfit<< " Center:"<< ergrec.asDouble("CCcenter")<<endl;
+#endif
+
+    } catch (AipsError x) {
+      cerr << "analyseLOPESevent:getBeamHeight: " << x.getMesg() << endl;
+      return False;
+    };
+    return status;
+  };
+
+
+
+
+
   Bool analyseLOPESevent::findDistance( Double &Az,
 		      			Double &El,
 				        Double &distance,
@@ -1004,14 +1104,12 @@ namespace CR { // Namespace CR -- begin
     try {
       Double height_, maxheight=0., maxdist=2500., center_=-1.8e-6, maxcenter=0.;
       for(int d=2000; d<=15000; ){
-        height_=getHeight(Az, El, d, AntennaSelection, &center_);
-	// if the fit was not succesfull, center is set to -1.8e-6. This case has to be excluded
-        // Why???? I kicked that out.
-	//if (height_ > maxheight && center_ !=-1.8e-6) {
-	if (height_ > maxheight) {
-  	  maxheight = height_;
-	  maxdist = d;
-	  maxcenter = center_;
+	if (getBeamHeight(Az, El, d, AntennaSelection, &height_, SkymapQuantity::TIME_X, &center_)) {
+	  if (height_ > maxheight) {
+  	    maxheight = height_;
+  	    maxdist = d;
+	    maxcenter = center_;
+	  };
         };
 
         if (rough) d+=1000;
@@ -1021,7 +1119,7 @@ namespace CR { // Namespace CR -- begin
       if (centerp != NULL) {
         *centerp = maxcenter;
       };
-      if (verbose) { cout << "findDistance: best Distance: "<<distance<<endl; };
+      if (verbose) { cout << "findDistance: best Distance (xbeam): "<<distance<<endl; };
     } catch (AipsError x) {
 	cerr << "analyseLOPESevent:findDistance: "<< x.getMesg() <<endl;
 	return false;

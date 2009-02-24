@@ -37,6 +37,7 @@
 #include <Data/LopesEventIn.h>
 #include <Data/UpSampledDR.h>
 #include <Display/SimplePlot.h>
+#include <Imaging/SkymapQuantity.h>
 
 // CASA/casacore header files
 #include <casa/Arrays/IPosition.h>
@@ -145,6 +146,8 @@ namespace CR { // Namespace CR -- begin
     int filterStrength_p;
     //! Which polarization to use
     String Polarization_p;
+
+    //! 
     
   public:
     
@@ -693,7 +696,28 @@ namespace CR { // Namespace CR -- begin
 		      Double dist,
 		      Vector<Bool> AntennaSelection,
 		      Double *centerp=NULL);
-    
+
+    /*!
+      \brief Alternative to getHeight to use in FitPosition
+
+      \param az -- Azimuth component of the direction
+      \param el -- Elevation component of the direction
+      \param dist -- Value of the distance parameter
+      \param AntennaSelection --
+      \param beamheightp -- Pointer to return height of desired beam, multiplied with 1e6
+      \param beamtype -- Type of beam to return, enum defined in CR::SkymapQuantity
+      \param centerp -- 
+
+      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+    */
+    Bool getBeamHeight (Double az,
+                        Double el,
+                        Double dist,
+                        Vector<Bool> AntennaSelection,
+		        Double *beamheightp,
+		        SkymapQuantity::Type beamtype=SkymapQuantity::TIME_CC,
+                        Double *centerp=NULL);
+
   };
   
 } // Namespace CR -- end

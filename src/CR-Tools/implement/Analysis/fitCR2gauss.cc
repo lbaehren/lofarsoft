@@ -156,7 +156,7 @@ namespace CR { // Namespace CR -- begin
 	return Record();
       };
       if ((timeAxis_p.nelements()!=xBeam.nelements()) || 
-	  (timeAxis_p.nelements()!=ccBeam.nelements())) {
+	  ((timeAxis_p.nelements()!=ccBeam.nelements()) && !(ccBeam.nelements()==0))) {
 	cerr << "fitCR2gauss::Fitgauss: " << "Bad data: length != timeaxis!" << endl;
 	return Record();
       };
@@ -194,40 +194,43 @@ namespace CR { // Namespace CR -- begin
 	erg.define("Xgaussian",fitter.evalGaussian(timeAxis_p));
       };
       
-      // cut the Detector noise from the fit.
-      tmp.resize(0);
-      if (staterec.asBool("converged")) {
-	uInt newfitstop,newfitlen;
-	tmp = staterec.asArrayDouble("center");
-	newfitstop = ntrue(timeAxis_p<=(tmp(0)+3.75e-8));
-	newfitlen = newfitstop-fitRange_p(0);
-	if ((newfitlen>5) && (newfitlen<(fitregion.length()-1))){
-	  fitregion = Slice(fitRange_p(0),newfitlen);
+      //Only fit the CC-beam if requested
+      if (ccBeam.nelements()!=0) {
+	// cut the Detector noise from the fit.
+	tmp.resize(0);
+	if (staterec.asBool("converged")) {
+	  uInt newfitstop,newfitlen;
+	  tmp = staterec.asArrayDouble("center");
+	  newfitstop = ntrue(timeAxis_p<=(tmp(0)+3.75e-8));
+	  newfitlen = newfitstop-fitRange_p(0);
+	  if ((newfitlen>5) && (newfitlen<(fitregion.length()-1))){
+	    fitregion = Slice(fitRange_p(0),newfitlen);
 #ifdef DEBUGGING_MESSAGES   
-	} else {
-	  cout << "fitCR2gauss::Fitgauss: " << "fitregion not changed because newfitlen=" << newfitlen << endl;
+	  } else {
+	    cout << "fitCR2gauss::Fitgauss: " << "fitregion not changed because newfitlen=" << newfitlen << endl;
 #endif
+	  };
 	};
-      };
-
-      // fit the CC-beam
-      xval.resize(0); yval.resize(0);
-      xval = timeAxis_p(fitregion);
-      meanval = mean(ccBeam(remoteregion));
-      yval = ccBeam(fitregion)-meanval;
-      fitter.setState(staterec);
-      staterec = fitter.fitXY(xval, yval);
-      // transfer values into results vector
-      erg.define("CCconverged",staterec.asBool("converged"));
-      tmp = staterec.asArrayDouble("height"); erg.define("CCheight",tmp(0));
-      tmp = staterec.asArrayDouble("center"); erg.define("CCcenter",tmp(0));
-      tmp = staterec.asArrayDouble("width");erg.define("CCwidth",tmp(0));
-      tmp = staterec.asArrayDouble("height_error");erg.define("CCheight_error",tmp(0));
-      tmp = staterec.asArrayDouble("center_error");erg.define("CCcenter_error",tmp(0));
-      tmp = staterec.asArrayDouble("width_error");erg.define("CCwidth_error",tmp(0));
-      if (EvalGauss) {
-	erg.define("Cgaussian",fitter.evalGaussian(timeAxis_p));
-      };
+	
+	// fit the CC-beam
+	xval.resize(0); yval.resize(0);
+	xval = timeAxis_p(fitregion);
+	meanval = mean(ccBeam(remoteregion));
+	yval = ccBeam(fitregion)-meanval;
+	fitter.setState(staterec);
+	staterec = fitter.fitXY(xval, yval);
+	// transfer values into results vector
+	erg.define("CCconverged",staterec.asBool("converged"));
+	tmp = staterec.asArrayDouble("height"); erg.define("CCheight",tmp(0));
+	tmp = staterec.asArrayDouble("center"); erg.define("CCcenter",tmp(0));
+	tmp = staterec.asArrayDouble("width");erg.define("CCwidth",tmp(0));
+	tmp = staterec.asArrayDouble("height_error");erg.define("CCheight_error",tmp(0));
+	tmp = staterec.asArrayDouble("center_error");erg.define("CCcenter_error",tmp(0));
+	tmp = staterec.asArrayDouble("width_error");erg.define("CCwidth_error",tmp(0));
+	if (EvalGauss) {
+	  erg.define("Cgaussian",fitter.evalGaussian(timeAxis_p));
+	};
+      };//end of "if (ccBeam.nelements()!=0) {"
 
     } catch (AipsError x) {
       cerr << "fitCR2gauss::Fitgauss: " << x.getMesg() << endl;
