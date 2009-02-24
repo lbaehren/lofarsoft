@@ -29,6 +29,7 @@
 #include <string>
 
 // CR-Tools header files
+#include <Coordinates/SkymapQuantity.h>
 #include <Coordinates/SpatialCoordinate.h>
 #include <Coordinates/TimeFreqCoordinate.h>
 #include <Observation/ObservationData.h>
@@ -55,8 +56,9 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>CR::SpatialCoordinate
-      <li>CR::TimeFreqCoordinate
+      <li>CR::SkymapQuantity -- Quantity for which to compute the skymap
+      <li>CR::SpatialCoordinate -- Container for the spatial coordinates
+      <li>CR::TimeFreqCoordinate -- Container for the time-frequency axes
     </ul>
     
     <h3>Synopsis</h3>
@@ -110,6 +112,8 @@ namespace CR { // Namespace CR -- begin
     CR::SpatialCoordinate spatialCoord_p;
     //! Container for the time-frequency axes
     CR::TimeFreqCoordinate timeFreqCoord_p;
+    //! Quantity for which to compute the skymap
+    SkymapQuantity skymapQuantity_p;
     //! Coordinate system object to be attached to an image
     casa::CoordinateSystem csys_p;
     //! The number of coordinate axes
@@ -131,7 +135,8 @@ namespace CR { // Namespace CR -- begin
       \param timeFreqCoord -- Container for the coupled time and frequency axes
     */
     SkymapCoordinate (ObservationData const &obsData,
-		      TimeFreqCoordinate const &timeFreqCoord);
+		      TimeFreqCoordinate const &timeFreqCoord,
+		      SkymapQuantity::Type const &quantity=SkymapQuantity::FREQ_POWER);
 
     /*!
       \brief Argumented constructor
@@ -142,7 +147,8 @@ namespace CR { // Namespace CR -- begin
     */
     SkymapCoordinate (ObservationData const &obsData,
 		      SpatialCoordinate const &spatialCoord,
-		      TimeFreqCoordinate const &timeFreqCoord);
+		      TimeFreqCoordinate const &timeFreqCoord,
+		      SkymapQuantity::Type const &quantity=SkymapQuantity::FREQ_POWER);
     
     /*!
       \brief Copy constructor
@@ -167,6 +173,45 @@ namespace CR { // Namespace CR -- begin
     SkymapCoordinate& operator= (SkymapCoordinate const &other); 
     
     // --------------------------------------------------------------- Parameters
+
+    /*!
+      \brief Get the quantity for which to compute the skymap
+
+      \return skymapQuantity -- Quantity for which to compute the skymap
+    */
+    inline SkymapQuantity skymapQuantity () const {
+      return skymapQuantity_p;
+    }
+
+    /*!
+      \brief Set the quantity for which to compute the skymap
+
+      \param skymapQuantity -- Quantity for which to compute the skymap
+      \param adjustSettings -- Try to adjust internal settings in case internal 
+             parameters do not agree with the new skymap quantity?
+
+      \return status -- Status of the operation; returns \e false in case an error
+              was encountered.
+    */
+    bool setSkymapQuantity (SkymapQuantity::Type const &type,
+			    bool const &adjustSettings=true)
+    {
+      return setSkymapQuantity (SkymapQuantity(type),
+				adjustSettings);
+    }
+
+    /*!
+      \brief Set the quantity for which to compute the skymap
+
+      \param skymapQuantity -- Quantity for which to compute the skymap
+      \param adjustSettings -- Try to adjust internal settings in case internal 
+             parameters do not agree with the new skymap quantity?
+
+      \return status -- Status of the operation; returns \e false in case an error
+              was encountered.
+    */
+    bool setSkymapQuantity (SkymapQuantity const &skymapQuantity,
+			    bool const &adjustSettings=true);
 
     /*!
       \brief Get the number of coordinate axes
@@ -388,7 +433,8 @@ namespace CR { // Namespace CR -- begin
     //! Initialize the object's internal parameters
     void init (ObservationData const &obsData,
 	       SpatialCoordinate const &spatialCoord,
-	       TimeFreqCoordinate const &timeFreqCoord);
+	       TimeFreqCoordinate const &timeFreqCoord,
+	       SkymapQuantity::Type const &quantity=SkymapQuantity::FREQ_POWER);
 
     //! Set up the coordinate system object to be attached to an image
     void setCoordinateSystem ();

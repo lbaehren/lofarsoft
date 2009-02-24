@@ -130,11 +130,16 @@ int test_constructors ()
     TimeFreqCoordinate coord2 (tf,
 			       blocksPerFrame,
 			       nofFrames);
+    TimeFreqCoordinate coord3 (tf,
+			       blocksPerFrame,
+			       nofFrames,
+			       true);
     //
     cout << "--> extra parameters at default values ..." << endl;
     coord1.summary(); 
     cout << "--> custom values for extra parameters ..." << endl;
     coord2.summary(); 
+    coord3.summary(); 
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -267,17 +272,19 @@ int test_parameters ()
   //________________________________________________________
   // Test of the methods added by TimeFreqCoordinate
 
-  cout << "[5] Input data blocks per time-frame ..." << endl;
+  cout << "[5] Coordinate type of the target domain ..." << endl;
   try {
-    /* current value */
+    /* current settings */
+    cout << "-- Target domain   = " << coord.coordType().name() << endl;
     cout << "-- blocksPerFrame  = " << coord.blocksPerFrame() << endl;
     cout << "-- reference value = " << coord.referenceValue() << endl;
     cout << "-- Increment       = " << coord.increment()      << endl;
     cout << "-- Shape           = " << coord.shape()          << endl;
-    /* Adjust value */
-    coord.setBlocksPerFrame (10);
-    /* New value */
+    /* adjust the value */
+    coord.setCoordType(CoordinateType::Time);
+    /* new settings */
     cout << "--> new values" << endl;
+    cout << "-- Target domain   = " << coord.coordType().name() << endl;
     cout << "-- blocksPerFrame  = " << coord.blocksPerFrame() << endl;
     cout << "-- reference value = " << coord.referenceValue() << endl;
     cout << "-- Increment       = " << coord.increment()      << endl;
@@ -287,7 +294,38 @@ int test_parameters ()
     nofFailedTests++;
   }
 
-  cout << "[6] NofFrames ..." << endl;
+  cout << "[6] Input data blocks per time-frame ..." << endl;
+  try {
+    /* current value */
+    cout << "-- Target domain   = " << coord.coordType().name() << endl;
+    cout << "-- blocksPerFrame  = " << coord.blocksPerFrame() << endl;
+    cout << "-- reference value = " << coord.referenceValue() << endl;
+    cout << "-- Increment       = " << coord.increment()      << endl;
+    cout << "-- Shape           = " << coord.shape()          << endl;
+    /* Adjust value */
+    coord.setBlocksPerFrame (10,false);
+    /* New value */
+    cout << "--> new values" << endl;
+    cout << "-- Target domain   = " << coord.coordType().name() << endl;
+    cout << "-- blocksPerFrame  = " << coord.blocksPerFrame() << endl;
+    cout << "-- reference value = " << coord.referenceValue() << endl;
+    cout << "-- Increment       = " << coord.increment()      << endl;
+    cout << "-- Shape           = " << coord.shape()          << endl;
+    /* adjust value */
+    coord.setBlocksPerFrame (10,true);
+    /* New value */
+    cout << "--> new values" << endl;
+    cout << "-- Target domain   = " << coord.coordType().name() << endl;
+    cout << "-- blocksPerFrame  = " << coord.blocksPerFrame() << endl;
+    cout << "-- reference value = " << coord.referenceValue() << endl;
+    cout << "-- Increment       = " << coord.increment()      << endl;
+    cout << "-- Shape           = " << coord.shape()          << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[7] Number of frames ..." << endl;
   try {
     /* current value */
     cout << "-- nofFrames       = " << coord.nofFrames() << endl;
@@ -302,6 +340,30 @@ int test_parameters ()
     cout << "-- reference value = " << coord.referenceValue() << endl;
     cout << "-- Increment       = " << coord.increment()      << endl;
     cout << "-- Shape           = " << coord.shape()          << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[8] Switch ordering of axes to have time last ..." << endl;
+  try {
+    /* current value */
+    cout << "-- Time axis last?  = " << coord.timeAxisLast()   << endl;
+    cout << "-- World axis names = " << coord.worldAxisNames() << endl;
+    cout << "-- World axis units = " << coord.worldAxisUnits() << endl;
+    cout << "-- Reference value  = " << coord.referenceValue() << endl;
+    cout << "-- Increment        = " << coord.increment()      << endl;
+    cout << "-- Shape            = " << coord.shape()          << endl;
+    /* Adjust value */
+    coord.setTimeAxisLast (true);
+    /* New value */
+    cout << "--> new values" << endl;
+    cout << "-- Time axis last?  = " << coord.timeAxisLast()   << endl;
+    cout << "-- World axis names = " << coord.worldAxisNames() << endl;
+    cout << "-- World axis units = " << coord.worldAxisUnits() << endl;
+    cout << "-- Reference value  = " << coord.referenceValue() << endl;
+    cout << "-- Increment        = " << coord.increment()      << endl;
+    cout << "-- Shape            = " << coord.shape()          << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;

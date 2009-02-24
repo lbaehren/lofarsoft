@@ -243,8 +243,8 @@ namespace CR { // Namespace CR -- begin
       \param timeAxisLast   -- Treat quantities in order where time axis is last?
     */
     TimeFreqCoordinate (uint const &blocksize,
-			uint const &blocksPerFrame,
-			uint const &nofFrames,
+			uint const &blocksPerFrame=1,
+			uint const &nofFrames=1,
 			bool const &timeAxisLast=false);
     
     /*!
@@ -291,10 +291,12 @@ namespace CR { // Namespace CR -- begin
       \param blocksPerFrame -- The number of data blocks added up within a single
              time frame
       \param nofFrames      -- The number of frames
+      \param timeAxisLast   -- Treat quantities in order where time axis is last?
     */
     TimeFreqCoordinate (TimeFreq const &timeFreq,
 			uint const &blocksPerFrame=1,
-			uint const &nofFrames=1);
+			uint const &nofFrames=1,
+			bool const &timeAxisLast=false);
     
     /*!
       \brief Copy constructor
@@ -362,9 +364,9 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the target domain for the beamforming
       
-      \return type -- The target domain for the beamforming.
+      \return coordType -- The target domain for the beamforming.
     */
-    inline CoordinateType beamCoordDomain () const {
+    inline CoordinateType coordType () const {
       return coordType_p;
     }
     
@@ -372,21 +374,31 @@ namespace CR { // Namespace CR -- begin
       \brief Get the target domain for the beamforming
 
       \param domain -- The target domain, as type, for the beamforming.
+      \param adjust -- Adjust internal parameters in case they are not consistent
+             with the provided coordinate type; most prominently this will affect
+	     the setting for the number of blocks to be conbined into a single
+	     frame.
 
       \return status -- Status of the operation; returns <tt>false</tt> in case
               an error was encountered.
     */
-    bool setBeamCoordDomain (CR::CoordinateType::Types const &domain);
+    bool setCoordType (CR::CoordinateType::Types const &domain,
+		       bool const &adjust=true);
     
     /*!
       \brief Get the target domain for the beamforming
 
       \param domain -- The target domain, as name, for the beamforming.
+      \param adjust -- Adjust internal parameters in case they are not consistent
+             with the provided coordinate type; most prominently this will affect
+	     the setting for the number of blocks to be conbined into a single
+	     frame.
 
       \return status -- Status of the operation; returns <tt>false</tt> in case
               an error was encountered.
     */
-    bool setBeamCoordDomain (CR::CoordinateType const &type);
+    bool setCoordType (CR::CoordinateType const &type,
+		       bool const &adjust=true);
     
     /*!
       \brief Get the number of blocks per time frame

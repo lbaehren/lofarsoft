@@ -34,9 +34,9 @@
 #include <scimath/Mathematics/FFTServer.h>
 
 // CR-Tools header files
+#include <Coordinates/SkymapQuantity.h>
 #include <Imaging/AntennaGain.h>
 #include <Imaging/GeomWeight.h>
-#include <Imaging/SkymapQuantity.h>
 
 namespace CR { // Namespace CR -- begin
   

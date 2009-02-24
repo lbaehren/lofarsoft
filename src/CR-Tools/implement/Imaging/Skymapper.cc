@@ -213,13 +213,16 @@ namespace CR {  // Namespace CR -- begin
 			Matrix<double> const &antPositions,
 			SkymapQuantity const &skymapType)
   {
-    /* Store the skymap coordinates */
-    coord_p = skymapCoord;
-
     /* set up the Beamformer */
     beamformer_p = Beamformer();
     beamformer_p.setAntPositions(antPositions);
     beamformer_p.setSkymapType(skymapType);
+
+    /* Store the skymap coordinates */
+    coord_p = skymapCoord;
+    TimeFreqCoordinate timeFreq (coord_p.timeFreqCoordinate());
+    timeFreq.setCoordType(beamformer_p.domainType(),true);
+    coord_p.setTimeFreqCoordinate(timeFreq);
 
     /* initialize the internal settings and objects */
     initSkymapper();
@@ -271,7 +274,7 @@ namespace CR {  // Namespace CR -- begin
      *  information on how to insert it into the pixel array of the output
      *  image.
      */
-    CoordinateType coordType    = coord_p.timeFreqCoordinate().beamCoordDomain();
+    CoordinateType coordType    = coord_p.timeFreqCoordinate().coordType();
     uint nofAxes                = coord_p.nofAxes();
     casa::IPosition bufferShape = coord_p.shape();
 
@@ -285,16 +288,22 @@ namespace CR {  // Namespace CR -- begin
     
     switch (coordType.type()) {   // [Long,Lat,Radius,Freq,Time]
     case CoordinateType::Time:
-      timeFreqAxis_p                = nofAxes-1;
-      bufferShape(timeFreqAxis_p-1) = 1;
-      bufferShape(timeFreqAxis_p)   = beamformer_p.shapeBeam()[0];
-      bufferStep_p(timeFreqAxis_p)  = coord_p.timeFreqCoordinate().blocksize();
+      {
+	std::cout << "[Skymapper::initSkymapper] CoordinateType = Time" << std::endl;
+	timeFreqAxis_p                = nofAxes-1;
+	bufferShape(timeFreqAxis_p-1) = 1;
+	bufferShape(timeFreqAxis_p)   = beamformer_p.shapeBeam()[0];
+	bufferStep_p(timeFreqAxis_p)  = coord_p.timeFreqCoordinate().blocksize();
+      }
       break;
     case CoordinateType::Frequency:
-      timeFreqAxis_p                = nofAxes-2;
-      bufferShape(timeFreqAxis_p+1) = 1;                             // Time
-      bufferShape(timeFreqAxis_p)   = beamformer_p.shapeBeam()[0];   // Frequency
-      bufferStep_p(timeFreqAxis_p)  = 1;                             // Frequency
+      {
+	std::cout << "[Skymapper::initSkymapper] CoordinateType = Freq" << std::endl;
+	timeFreqAxis_p                = nofAxes-2;
+	bufferShape(timeFreqAxis_p+1) = 1;                             // Time
+	bufferShape(timeFreqAxis_p)   = beamformer_p.shapeBeam()[0];   // Frequency
+	bufferStep_p(timeFreqAxis_p)  = 1;                             // Frequency
+      }
       break;
     default:
       std::cerr << "-- Unsopported coordinate type!"
@@ -303,7 +312,7 @@ namespace CR {  // Namespace CR -- begin
     }
     
     bufferArray_p.resize(bufferShape);
-    
+
     /*
       With the image data written into an AIPS++ PagedImage, we need to create
       and initialize one first, before we can start inserting the computed 
@@ -446,14 +455,13 @@ namespace CR {  // Namespace CR -- begin
     ObsInfo obsInfo             = csys.obsInfo();
     
     os << "[Skymapper] Summary of the internal parameters"             << endl;
-    os << " :: Observation ::"                                                 << endl;
+    os << " :: Observation / Data ::"                                      << endl;
     os << " --> Observation date         = " << obsInfo.obsDate()          << endl;
     os << " --> Telescope                = " << obsInfo.telescope()        << endl;
     os << " --> Observer                 = " << obsInfo.observer()         << endl;
     os << " --> nof. antennas            = " << beamformer_p.nofAntPositions() << endl;
     os << " --> Sampling rate       [Hz] = " << timeFreq.sampleFrequency() << endl;
     os << " --> Nyquist zone             = " << timeFreq.nyquistZone()     << endl;
-    os << " :: Data I/O ::"                              << endl;
     os << " --> Blocksize      [samples] = " << timeFreq.blocksize()       << endl;
     os << " --> FFT length    [channels] = " << timeFreq.fftLength()       << endl;
     os << " :: Coordinates ::"                                << endl;

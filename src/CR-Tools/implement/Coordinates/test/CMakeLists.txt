@@ -12,6 +12,7 @@ set (tests
   tPolarCoordinate
   tPositionVector
   tSkymapCoordinate
+  tSkymapQuantity
   tSpatialCoordinate
   tTimeFreq
   tTimeFreqCoordinate

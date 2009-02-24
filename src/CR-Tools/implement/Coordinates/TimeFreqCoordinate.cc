@@ -99,13 +99,14 @@ namespace CR { // Namespace CR -- begin
   
   TimeFreqCoordinate::TimeFreqCoordinate (TimeFreq const &timeFreq,
 					  uint const &blocksPerFrame,
-					  uint const &nofFrames)
+					  uint const &nofFrames,
+					  bool const &timeAxisLast)
     : TimeFreq(timeFreq)
   {
     init (CoordinateType(CoordinateType::Frequency),
 	  blocksPerFrame,
 	  nofFrames,
-	  false);
+	  timeAxisLast);
   }
   
   //__________________________________________________________ TimeFreqCoordinate
@@ -167,34 +168,47 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  //_______________________________________________________________ setBeamDomain
+  //________________________________________________________________ setCoordType
   
-  bool TimeFreqCoordinate::setBeamCoordDomain (CR::CoordinateType::Types const &type)
+  bool TimeFreqCoordinate::setCoordType (CR::CoordinateType::Types const &type,
+					 bool const &adjust)
   {
-    return setBeamCoordDomain (CoordinateType(type));
+    return setCoordType (CoordinateType(type),
+			 adjust);
   }
   
-  //_______________________________________________________________ setBeamDomain
+  //________________________________________________________________ setCoordType
   
-  bool TimeFreqCoordinate::setBeamCoordDomain (CR::CoordinateType const &type)
+  bool TimeFreqCoordinate::setCoordType (CR::CoordinateType const &type,
+					 bool const &adjust)
   {
     bool status (true);
     
     switch (type.type()) {
     case CoordinateType::Time:
+      /*
+       *  If only a single data block is written into a time-frame, not further
+       *  checking is required; otherwise we can a) try to adjust the internal 
+       *  settings or b) reject the type adjustment and throw an error message.
+       */
       if (blocksPerFrame_p == 1) {
 	coordType_p = type;
       } else {
-	std::cerr << "[TimeFreqCoordinate::setBeamDomain] " 
-		  << "Inconsistent combination of parameter values!" << std::endl;
-	status = false;
+	if (adjust) {
+	  coordType_p      = type;
+	  blocksPerFrame_p = 1;
+	} else {
+	  std::cerr << "[TimeFreqCoordinate::setCoordType] " 
+		    << "Inconsistent combination of parameter values!" << std::endl;
+	  status = false;
+	}
       }
       break;
     case CoordinateType::Frequency:
       coordType_p = type;
       break;
     default:
-      std::cerr << "[TimeFreqCoordinate::setBeamDomain] Invalid domain!" << std::endl;
+      std::cerr << "[TimeFreqCoordinate::setCoordType] Invalid domain!" << std::endl;
       status = false;
       break;
     }
@@ -214,18 +228,33 @@ namespace CR { // Namespace CR -- begin
     
     switch (coordType_p.type()) {
     case CoordinateType::Time:
-      if (blocksPerFrame > 1 && adjustDomain) {
-	blocksPerFrame_p = blocksPerFrame;
-	coordType_p.setType (CoordinateType::Frequency);
-      } else {
-	blocksPerFrame_p = blocksPerFrame;
+      {
+	if (blocksPerFrame == 1) {
+	  blocksPerFrame_p = blocksPerFrame;
+	} else {
+	  if (adjustDomain) {
+	    // throw error message
+	    std::cerr << "[TimeFreqCoordinate::setBlocksPerFrame]"
+		      << " Adjusting target coordinate domain to frequency."
+		      << std::endl;
+	    // set internal parameters
+	    blocksPerFrame_p = blocksPerFrame;
+	    coordType_p.setType(CoordinateType::Frequency);
+	  } else {
+	    // throw error message
+	    std::cerr << "[TimeFreqCoordinate::setBlocksPerFrame]"
+		      << " New value rejected, because of wrong target domain."
+		      << std::endl;
+	    status = false;
+	  }
+	}
       }
       break;
     default:
       blocksPerFrame_p = blocksPerFrame;
       break;
     }
-
+    
     // update the coordinate objects
     setCoordinates();
     
@@ -355,11 +384,18 @@ namespace CR { // Namespace CR -- begin
 
   Vector<double> TimeFreqCoordinate::timeValues ()
   {
-    int nofFrames = shape()(0);
-    Vector<double> values (nofFrames);
+    int nofFrames;;
+
+    if (timeAxisLast_p) {
+      nofFrames = shape()(1);
+    } else {
+      nofFrames = shape()(0);
+    }
+
     Vector<double> pixel (1);
     Vector<double> world (1);
-
+    Vector<double> values (nofFrames);
+    
     for (int n(0); n<nofFrames; n++) {
       pixel(0) = n;
       coordTime_p.toWorld(world,pixel);
@@ -373,11 +409,18 @@ namespace CR { // Namespace CR -- begin
 
   Vector<double> TimeFreqCoordinate::frequencyValues ()
   {
-    int nofChannels = shape()(1);
-    Vector<double> values (nofChannels);
+    int nofChannels;
+    
+    if (timeAxisLast_p) {
+      nofChannels = shape()(0);
+    } else {
+      nofChannels = shape()(1);
+    }
+
     Vector<double> pixel (1);
     Vector<double> world (1);
-
+    Vector<double> values (nofChannels);
+    
     for (int n(0); n<nofChannels; n++) {
       pixel(0) = n;
       coordFrequency_p.toWorld(world,pixel);
@@ -486,10 +529,17 @@ namespace CR { // Namespace CR -- begin
     //______________________________________________________
     // Set up the internal coordinate objects
     
-    coordTime_p      = CoordinateType::makeTimeCoordinate(crval(0),
-							  cdelt(0));
-    coordFrequency_p = CoordinateType::makeSpectralCoordinate (crval(1),
-							       cdelt(1));
+    if (timeAxisLast_p) {
+      coordFrequency_p = CoordinateType::makeSpectralCoordinate (crval(0),
+								 cdelt(0));
+      coordTime_p      = CoordinateType::makeTimeCoordinate(crval(1),
+							    cdelt(1));
+    } else {
+      coordTime_p      = CoordinateType::makeTimeCoordinate(crval(0),
+							    cdelt(0));
+      coordFrequency_p = CoordinateType::makeSpectralCoordinate (crval(1),
+								 cdelt(1));
+    }
   }
 
   // ------------------------------------------------------------------ increment

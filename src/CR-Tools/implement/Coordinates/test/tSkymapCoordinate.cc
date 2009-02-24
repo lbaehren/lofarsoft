@@ -172,6 +172,89 @@ int test_constructors ()
 // -----------------------------------------------------------------------------
 
 /*!
+  \brief Test methods to access internal parameters
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+*/
+int test_methods ()
+{
+  cout << "\n[tSkymapCoordinate::test_methods]\n" << endl;
+
+  int nofFailedTests (0);
+  
+  /* Construct objects to perform the tests with */
+  uint blocksize         = 1024;
+  casa::Quantity sampleFreq (200,"MHz");
+  uint nyquistZone (1);
+  uint blocksPerFrame (1);
+  uint nofFrames (10);
+  CR::ObservationData obsData ("LOFAR",
+			       "Lars Baehren");
+  TimeFreqCoordinate timeFreq (blocksize,
+			       sampleFreq,
+			       nyquistZone,
+			       blocksPerFrame,
+			       nofFrames);
+  SpatialCoordinate spatial (CR::CoordinateType::DirectionRadius,
+			     "AZEL",
+			     "SIN");
+  spatial.setShape(casa::IPosition(3,100,100,10));
+  // 
+  SkymapCoordinate coord (obsData,
+			  spatial,
+			  timeFreq);
+  
+  /* Methods of the class itself */
+
+  cout << "[1] Coordinate properties ..." << endl;
+  try {
+    cout << "-- nof. coordinate axes = " << coord.nofAxes()         << endl;
+    cout << "-- nof. coordinates     = " << coord.nofCoordinates()  << endl;
+    cout << "-- Shape of the axes    = " << coord.shape()           << endl;
+    cout << "-- World axis names     = " << coord.worldAxisNames()  << endl;
+    cout << "-- World axis units     = " << coord.worldAxisUnits()  << endl;
+    cout << "-- Reference pixel      = " << coord.referencePixel()  << endl;
+    cout << "-- Increment            = " << coord.increment()       << endl;
+    cout << "-- Reference value      = " << coord.referenceValue()  << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  /* Methods of the embedded objects */
+
+  cout << "[2] Parameters of the TimeFreqCoordinate ..." << endl;
+  try {
+    cout << "-- blocksize         = " << coord.timeFreqCoordinate().blocksize()
+	 << endl;
+    cout << "-- nof. axes         = " << coord.timeFreqCoordinate().nofAxes()
+	 << endl;
+    cout << "-- nof. coordinates  = " << coord.timeFreqCoordinate().nofCoordinates() 
+	 << endl;
+    cout << "-- Shape of the axes = " << coord.timeFreqCoordinate().shape()
+	 << endl;
+    cout << "-- World axis names  = " << coord.timeFreqCoordinate().worldAxisNames()
+	 << endl;
+    cout << "-- World axis units  = " << coord.timeFreqCoordinate().worldAxisUnits()
+	 << endl;
+    cout << "-- Reference pixel   = " << coord.timeFreqCoordinate().referencePixel()
+	 << endl;
+    cout << "-- Increment         = " << coord.timeFreqCoordinate().increment()
+	 << endl;
+    cout << "-- Reference value   = " << coord.timeFreqCoordinate().referenceValue()
+	 << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
   \brief Tests for the embedded coordinate system object
 
   \return nofFailedTests -- The number of failed tests encountered within this
@@ -210,20 +293,7 @@ int test_coordinateSystem ()
 			  spatial,
 			  timeFreq);
 
-  cout << "[1] WCS parameters ..." << endl;
-  try {
-    cout << "-- World axis names = " << coord.worldAxisNames()  << endl;
-    cout << "-- World axis units = " << coord.worldAxisUnits()  << endl;
-    cout << "-- Reference pixel  = " << coord.referencePixel()  << endl;
-    cout << "-- Increment        = " << coord.increment()       << endl;
-    cout << "-- Reference value  = " << coord.referenceValue()  << endl;
-    cout << "-- Linear transform = " << coord.linearTransform() << endl;
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-
-  cout << "[2] Conversion from pixel to world coordinates ..." << endl;
+  cout << "[1] Conversion from pixel to world coordinates ..." << endl;
   try {
     Vector<double> pixel (coord.nofAxes());
     Vector<double> world (coord.nofAxes());
@@ -396,6 +466,8 @@ int main ()
 
   // Test for the constructor(s)
   nofFailedTests += test_constructors ();
+  // Test methods to access internal parameters
+  nofFailedTests += test_methods();
   // Tests for the embedded coordinate system object
   nofFailedTests += test_coordinateSystem ();
   // Test retrieval of data from the embedded objects

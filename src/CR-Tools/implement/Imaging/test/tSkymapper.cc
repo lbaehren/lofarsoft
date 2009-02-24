@@ -113,7 +113,7 @@ int cleanup_directory ()
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_Beamformer (uint const &blocksize)
+int test_Beamformer (uint const &blocksize=1024)
 {
   cout << "\n[tSkymapper::test_Beamformer]\n" << endl;
 
@@ -210,7 +210,7 @@ int test_Beamformer (uint const &blocksize)
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_Skymapper ()
+int test_Skymapper (uint const &blocksize=1024)
 {
   cout << "\n[tSkymapper::test_Skymapper]\n" << endl;
 
@@ -229,7 +229,7 @@ int test_Skymapper ()
   cout << "[2] Skymapper(SkymapCoordinate) ..." << endl;
   try {
     // Time-frequency domain data
-    TimeFreqCoordinate timeFreq (2048,80e06,2);
+    TimeFreqCoordinate timeFreq (blocksize,80e06,2);
     // Observation info
     ObservationData obsData ("UNKNOWN");
     obsData.setObserver ("Lars Baehren");
@@ -261,7 +261,7 @@ int test_Skymapper ()
 			       "SIN");
     spatial.setShape(shape);
     // Time-Frequency coordinate
-    TimeFreqCoordinate timeFreq;
+    TimeFreqCoordinate timeFreq (blocksize);
     // Skymap coordinate
     SkymapCoordinate coord (obsData,
 			    spatial,
@@ -270,18 +270,24 @@ int test_Skymapper ()
     uint nofAntennas (10);
     Matrix<double> antPositions (nofAntennas,3);
     // EM quantity for which the skymap is computed
-    CR::SkymapQuantity skymapQuantity (CR::SkymapQuantity::TIME_CC);
+    CR::SkymapQuantity time_cc (CR::SkymapQuantity::TIME_CC);
+    CR::SkymapQuantity freq_power (CR::SkymapQuantity::FREQ_POWER);
     //
-    Skymapper skymapper (coord,
-			 antPositions,
-			 skymapQuantity,
-			 "skymap03.img");
-    skymapper.summary();
+    Skymapper skymapper1 (coord,
+			  antPositions,
+			  time_cc,
+			  "skymap03.img");
+    Skymapper skymapper2 (coord,
+			  antPositions,
+			  freq_power,
+			  "skymap04.img");
+    skymapper1.summary();
+    skymapper2.summary();
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl;
     nofFailedTests++;
   }
-
+  
   return nofFailedTests;
 }
 
@@ -293,14 +299,14 @@ int test_Skymapper ()
   \return nofFailedTests -- The number of failed tests encountered within this
           fucntion.
 */
-int test_methods ()
+int test_methods (uint const &blocksize=1024)
 {
   cout << "\n[tSkymapper::test_methods]\n" << endl;
   
   int nofFailedTests (0);
   
   // Time-frequency domain data
-  TimeFreqCoordinate timeFreq (2048,80e06,2);
+  TimeFreqCoordinate timeFreq (blocksize,80e06,2);
   // Observation info
   ObservationData obsData;
   obsData.setObserver ("Lars Baehren");
@@ -388,8 +394,7 @@ int test_processing (string const &infile,
   // Antenna positions
   Matrix<double> antPositions (nofAntennas,3);
   // EM quantity for which the skymap is computed
-  CR::SkymapQuantity skymapQuantity (CR::SkymapQuantity::TIME_CC);
-//   CR::SkymapQuantity skymapQuantity;
+  CR::SkymapQuantity skymapQuantity (SkymapQuantity::TIME_CC);
 
   //________________________________________________________
   // Display the chosen control parameters
@@ -456,11 +461,11 @@ int main (int argc,
   }
   
   // Test feeding SkymapCoordinate information into the Beamformer
-  nofFailedTests += test_Beamformer (blocksize);
+//   nofFailedTests += test_Beamformer (blocksize);
   // Test the various constructors for a Skymapper object
   nofFailedTests += test_Skymapper ();
   // Test the various methods for accessing internal data
-  nofFailedTests += test_methods();
+//   nofFailedTests += test_methods();
 
   nofFailedTests += test_processing (infile,
 				     blocksize,

@@ -41,24 +41,28 @@ namespace CR { // Namespace CR -- begin
   //____________________________________________________________ SkymapCoordinate
 
   SkymapCoordinate::SkymapCoordinate (ObservationData const &obsData,
-				      TimeFreqCoordinate const &timeFreqCoord)
+				      TimeFreqCoordinate const &timeFreqCoord,
+				      SkymapQuantity::Type const &quantity)
   {
     SpatialCoordinate spatialCoord = SpatialCoordinate();
 
     init (obsData,
 	  spatialCoord,
-	  timeFreqCoord);
+	  timeFreqCoord,
+	  quantity);
   }
 
   //____________________________________________________________ SkymapCoordinate
   
   SkymapCoordinate::SkymapCoordinate (ObservationData const &obsData,
 				      SpatialCoordinate const &spatialCoord,
-				      TimeFreqCoordinate const &timeFreqCoord)
+				      TimeFreqCoordinate const &timeFreqCoord,
+				      SkymapQuantity::Type const &quantity)
   {
     init (obsData,
 	  spatialCoord,
-	  timeFreqCoord);
+	  timeFreqCoord,
+	  quantity);
   }
   
   //____________________________________________________________ SkymapCoordinate
@@ -101,12 +105,13 @@ namespace CR { // Namespace CR -- begin
   
   void SkymapCoordinate::copy (SkymapCoordinate const &other)
   {
-    obsData_p       = other.obsData_p;
-    spatialCoord_p  = other.spatialCoord_p;
-    timeFreqCoord_p = other.timeFreqCoord_p;
-    csys_p          = other.csys_p;
-    nofAxes_p       = other.nofAxes_p;
-    shape_p         = other.shape_p;
+    obsData_p        = other.obsData_p;
+    skymapQuantity_p = other.skymapQuantity_p;
+    spatialCoord_p   = other.spatialCoord_p;
+    timeFreqCoord_p  = other.timeFreqCoord_p;
+    csys_p           = other.csys_p;
+    nofAxes_p        = other.nofAxes_p;
+    shape_p          = other.shape_p;
   }
 
   // ============================================================================
@@ -130,6 +135,28 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
 
+  //___________________________________________________________ setSkymapQuantity
+
+  bool SkymapCoordinate::setSkymapQuantity (SkymapQuantity const &skymapQuantity,
+					    bool const &adjustSettings)
+  {
+    bool status (true);
+
+    status = timeFreqCoord_p.setCoordType(skymapQuantity.coordinateType(),
+					  adjustSettings);
+
+    if (status) {
+      skymapQuantity_p = skymapQuantity;
+    } else {
+      std::cerr << "[SkymapCoordinate::setSkymapQuantity]"
+		<< " New skymap quantity rejected due to error in"
+		<< " time-frequency coordinate!"
+		<< std::endl;
+    }
+    
+    return status;
+  }
+  
   //________________________________________________________ setSpatialCoordinate
   
   bool SkymapCoordinate::setSpatialCoordinate (SpatialCoordinate const &coord)
@@ -187,9 +214,10 @@ namespace CR { // Namespace CR -- begin
   void SkymapCoordinate::summary (std::ostream &os)
   {
     os << "[SkymapCoordinate] Summary of internal parameters." << std::endl;
-    os << "-- nof. coordinate objects = " << nofCoordinates()  << std::endl;
-    os << "-- nof. coordinate axes    = " << nofAxes()         << std::endl;
-    os << "-- Shape of the axes       = " << shape()           << std::endl;
+    os << "-- Skymap quantity name    = " << skymapQuantity_p.name() << std::endl;
+    os << "-- nof. coordinate objects = " << nofCoordinates()        << std::endl;
+    os << "-- nof. coordinate axes    = " << nofAxes()               << std::endl;
+    os << "-- Shape of the axes       = " << shape()                 << std::endl;
     os << "-- World axis names        = " << csys_p.worldAxisNames() << std::endl;
     os << "-- World axis units        = " << csys_p.worldAxisUnits() << std::endl;
     os << "-- Reference pixel (CRPIX) = " << csys_p.referencePixel() << std::endl;
@@ -213,18 +241,21 @@ namespace CR { // Namespace CR -- begin
     
     init (obsData,
 	  spatialCoord,
-	  timeFreqCoord);
+	  timeFreqCoord,
+	  SkymapQuantity::FREQ_POWER);
   }
   
   //________________________________________________________________________ init
   
   void SkymapCoordinate::init (ObservationData const &obsData,
 			       SpatialCoordinate const &spatialCoord,
-			       TimeFreqCoordinate const &timeFreqCoord)
+			       TimeFreqCoordinate const &timeFreqCoord,
+			       SkymapQuantity::Type const &quantity)
   {
-    obsData_p       = obsData;
-    spatialCoord_p  = spatialCoord;
-    timeFreqCoord_p = timeFreqCoord;
+    obsData_p        = obsData;
+    spatialCoord_p   = spatialCoord;
+    timeFreqCoord_p  = timeFreqCoord;
+    skymapQuantity_p = SkymapQuantity(quantity);
 
     setCoordinateSystem ();
   }

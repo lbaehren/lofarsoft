@@ -41,9 +41,9 @@ namespace CR {  // Namespace CR -- begin
   /*!
     \class SkymapQuantity
     
-    \ingroup CR_Imaging
+    \ingroup CR_Coordinates
     
-    \brief Brief description for class SkymapQuantity
+    \brief Container for the settings to determine the quantity of a skymap
     
     \author Lars B&auml;hren
     

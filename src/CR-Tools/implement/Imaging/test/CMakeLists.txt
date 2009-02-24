@@ -20,7 +20,6 @@ set (tests
   tGeomWeight
   tMDirection
   tSkymapGrid
-  tSkymapQuantity
   tSkymapOrientation
   )
 
