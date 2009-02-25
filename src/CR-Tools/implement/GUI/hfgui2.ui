@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1127</width>
-    <height>664</height>
+    <width>1198</width>
+    <height>686</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -49,8 +49,8 @@
       <rect>
        <x>335</x>
        <y>5</y>
-       <width>781</width>
-       <height>536</height>
+       <width>783</width>
+       <height>549</height>
       </rect>
      </property>
      <property name="frameShape" >
@@ -64,7 +64,7 @@
        <rect>
         <x>5</x>
         <y>0</y>
-        <width>771</width>
+        <width>769</width>
         <height>531</height>
        </rect>
       </property>
@@ -75,12 +75,62 @@
        <attribute name="title" >
         <string>Plot Window</string>
        </attribute>
-       <widget class="hfQtPlotWidget" native="1" name="HMainPlotter" >
-        <property name="baseSize" >
-         <size>
-          <width>765</width>
-          <height>510</height>
-         </size>
+       <widget class="QScrollArea" name="mainplotterscrollarea" >
+        <property name="geometry" >
+         <rect>
+          <x>32</x>
+          <y>4</y>
+          <width>709</width>
+          <height>500</height>
+         </rect>
+        </property>
+        <property name="verticalScrollBarPolicy" >
+         <enum>Qt::ScrollBarAlwaysOn</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy" >
+         <enum>Qt::ScrollBarAlwaysOn</enum>
+        </property>
+        <property name="widgetResizable" >
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents_2" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>690</width>
+           <height>481</height>
+          </rect>
+         </property>
+         <widget class="hfQtPlotWidget" native="1" name="HMainPlotter" >
+          <property name="geometry" >
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>700</width>
+            <height>500</height>
+           </rect>
+          </property>
+          <property name="baseSize" >
+           <size>
+            <width>760</width>
+            <height>500</height>
+           </size>
+          </property>
+         </widget>
+        </widget>
+       </widget>
+       <widget class="QSlider" name="verticalSlider" >
+        <property name="geometry" >
+         <rect>
+          <x>2</x>
+          <y>2</y>
+          <width>22</width>
+          <height>491</height>
+         </rect>
+        </property>
+        <property name="orientation" >
+         <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </widget>
@@ -605,7 +655,7 @@
           </rect>
          </property>
          <property name="text" >
-          <string> </string>
+          <string/>
          </property>
         </widget>
         <widget class="QComboBox" name="xaxisunit" >
@@ -2198,7 +2248,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1127</width>
+     <width>1198</width>
      <height>22</height>
     </rect>
    </property>
@@ -2267,22 +2317,6 @@
  <resources/>
  <connections>
   <connection>
-   <sender>npanels</sender>
-   <signal>returnPressed()</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfsetNPanels()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>88</x>
-     <y>487</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>725</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>quit</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
@@ -2295,166 +2329,6 @@
     <hint type="destinationlabel" >
      <x>563</x>
      <y>331</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>replot</sender>
-   <signal>clicked()</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>repaint()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>47</x>
-     <y>603</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>725</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>npanelsx</sender>
-   <signal>returnPressed()</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfsetNPanelsx()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>178</x>
-     <y>487</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>725</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>npanelsy</sender>
-   <signal>returnPressed()</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfsetNPanelsy()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>228</x>
-     <y>487</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>725</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>xmin</sender>
-   <signal>returnPressed()</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfsetXMin()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>105</x>
-     <y>307</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>725</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>xmax</sender>
-   <signal>returnPressed()</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfsetXMax()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>185</x>
-     <y>307</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>725</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ymin</sender>
-   <signal>returnPressed()</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfsetYMin()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>128</x>
-     <y>373</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>421</x>
-     <y>404</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ymax</sender>
-   <signal>returnPressed()</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfsetYMax()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>187</x>
-     <y>365</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>350</x>
-     <y>371</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>xdatatype</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>xdatatype(QString)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>84</x>
-     <y>104</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>345</x>
-     <y>174</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>netlevel</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>netlevel(QString)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>263</x>
-     <y>549</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>357</x>
-     <y>550</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ydatatype</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>ydatatype(QString)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>111</x>
-     <y>129</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>365</x>
-     <y>159</y>
     </hint>
    </hints>
   </connection>
@@ -2491,38 +2365,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>xauto</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfsetXAuto(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>240</x>
-     <y>301</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>356</x>
-     <y>228</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>yauto</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfsetYAuto(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>244</x>
-     <y>354</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>376</x>
-     <y>245</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>blocknumberslider</sender>
    <signal>valueChanged(int)</signal>
    <receiver>blocknumber</receiver>
@@ -2551,182 +2393,6 @@
     <hint type="destinationlabel" >
      <x>139</x>
      <y>182</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>blocknumber</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfsetBlock(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>257</x>
-     <y>168</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>402</x>
-     <y>189</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>blocksize</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfsetBlocksize(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>223</x>
-     <y>226</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>357</x>
-     <y>209</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>xzoomdial</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfsetXScale(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>312</x>
-     <y>315</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>348</x>
-     <y>318</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>yzoomdial</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfsetYScale(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>313</x>
-     <y>358</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>352</x>
-     <y>358</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>yshiftslider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfsetYShift(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>262</x>
-     <y>390</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>344</x>
-     <y>419</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>xshiftslider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfsetXShift(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>165</x>
-     <y>333</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>360</x>
-     <y>343</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>yreset</sender>
-   <signal>clicked()</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfYReset()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>235</x>
-     <y>371</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>350</x>
-     <y>437</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>xreset</sender>
-   <signal>clicked()</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfXReset()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>240</x>
-     <y>319</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>349</x>
-     <y>286</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>networkdisplayon</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>hfsetNetworkOn(bool)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>55</x>
-     <y>549</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>356</x>
-     <y>511</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>xaxisunit</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>xaxisunitscale(QString)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>242</x>
-     <y>86</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>344</x>
-     <y>71</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>yaxisunit</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>HMainPlotter</receiver>
-   <slot>yaxisunitscale(QString)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>221</x>
-     <y>107</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>346</x>
-     <y>90</y>
     </hint>
    </hints>
   </connection>

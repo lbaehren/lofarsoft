@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'hfgui2.ui'
 #
-# Created: Wed Feb 18 22:59:42 2009
+# Created: Thu Feb 19 17:25:31 2009
 #      by: PyQt4 UI code generator 4.4.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1127, 664)
+        MainWindow.resize(1198, 686)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.pushButton = QtGui.QPushButton(self.centralwidget)
@@ -29,12 +29,13 @@ class Ui_MainWindow(object):
         self.frame_3.setFrameShadow(QtGui.QFrame.Raised)
         self.frame_3.setObjectName("frame_3")
         self.tabwindow = QtGui.QTabWidget(self.frame_3)
-        self.tabwindow.setGeometry(QtCore.QRect(5, 0, 771, 531))
+        self.tabwindow.setGeometry(QtCore.QRect(5, 0, 769, 531))
         self.tabwindow.setObjectName("tabwindow")
         self.tab = QtGui.QWidget()
         self.tab.setObjectName("tab")
         self.HMainPlotter = hfQtPlotWidget(self.tab)
-        self.HMainPlotter.setBaseSize(QtCore.QSize(765, 510))
+        self.HMainPlotter.setGeometry(QtCore.QRect(0, 0, 1200, 900))
+        self.HMainPlotter.setBaseSize(QtCore.QSize(1200, 900))
         self.HMainPlotter.setObjectName("HMainPlotter")
         self.tabwindow.addTab(self.tab, "")
         self.tab_2 = QtGui.QWidget()
@@ -669,7 +670,7 @@ class Ui_MainWindow(object):
         self.frame_2.setObjectName("frame_2")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1127, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1198, 22))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -741,7 +742,6 @@ class Ui_MainWindow(object):
         self.label_15.setText(QtGui.QApplication.translate("MainWindow", "x-Axis:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_16.setText(QtGui.QApplication.translate("MainWindow", "y-Axis:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_17.setText(QtGui.QApplication.translate("MainWindow", "Unit:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_18.setText(QtGui.QApplication.translate("MainWindow", " ", None, QtGui.QApplication.UnicodeUTF8))
         self.label_19.setText(QtGui.QApplication.translate("MainWindow", "Unit:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("MainWindow", "y-Range:", None, QtGui.QApplication.UnicodeUTF8))
         self.yauto.setText(QtGui.QApplication.translate("MainWindow", "Auto", None, QtGui.QApplication.UnicodeUTF8))

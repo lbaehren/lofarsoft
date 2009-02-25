@@ -372,14 +372,18 @@ class hfPlotPanel(hffunc):
         ymax=ymax+extra
         self.putResult("ymin",ymin)
         self.putResult("ymax",ymax)
+#        self.GraphObject.Axis("log(y)")
+#        self.GraphObject.Axis("log(x)")
+        self.GraphObject.Axis("xy")
         xtick=getaxisdivision(xmin,xmax)
         self.GraphObject.SetTicks("x",xtick[0],5,xtick[1])
+#        self.GraphObject.SetTicks("x",0)
         ytick=getaxisdivision(ymin,ymax)
         self.GraphObject.SetTicks("y",ytick[0],5,ytick[1])
+#        self.GraphObject.SetTicks("y",0)
         self.GraphObject.SetFontSize(3.)
         self.GraphObject.SetFontDef("rR:r")
         self.GraphObject.SetRanges(xmin,xmax,ymin,ymax)
-        self.GraphObject.Axis("xy")
         self.GraphObject.Box("g")
         if self.xAxisLabel=="": self.xAxisLabel=self.xAxisDatatype
         if self.yAxisLabel=="": self.yAxisLabel=self.yAxisDatatype
@@ -456,8 +460,8 @@ class hfQtPanel(hffunc):
         if verbose: print "QtPanel startup!"
         self.setParameter("Parent",None)
         self.setParameter("Title","HFLPLOT")
-        self.setParameter("Width",765)
-        self.setParameter("Height",510)
+        self.setParameter("Width",760)
+        self.setParameter("Height",500)
         self.setParameter("PlotWidget",None)
         self.setParameter("PlotWindow",None)
         self.setParameter("GraphObject",None)
@@ -482,6 +486,8 @@ class hfQtPanel(hffunc):
         if verbose: print "QtPanel process"
         self.PlotWidget.setGraph(self.PlotWindow)
         return 0
+
+#f=d["QtPanel"].PyFunc()
 
 class hfQtNetview(hffunc):
     "hfQtNetview: Start a QtSVGWidget which shows the current network of objects."
