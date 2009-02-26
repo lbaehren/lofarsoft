@@ -104,7 +104,8 @@ lofarsoft
     |-- contrib
     |-- CR-Tools
     |-- DAL
-    `-- pybdsm
+    |-- pybdsm
+    `-- RM
 \endverbatim
 In this:
 <ul>
@@ -125,11 +126,13 @@ In this:
   <li>\b src contains the source code of the various projects and packages 
   developed and written within the framework of the USG. The main components are:
   <ul>
-    <li>\e CR-Tools - Tools for the analysis of cosmic ray data.
-    <li>\e DAL - The Data Access Library is the interface for the creation of
+    <li><a href="group__CR.html">CR-Tools</a> - Tools for the analysis of cosmic ray data.
+    <li><a href="group__DAL.html">DAL</a> - The <i>Data Access Library</i> is the interface for the creation of
     and access to LOFAR's standard data products.
-    <li>\e pybdsm - Blob detection and source modelling package developed by the
+    <li><a href="group__pybdsm.html">pybdsm</a> - <i>Blob detection and source modelling</i> package developed by the
     Surveys KSP.
+    <li><a href="group__RM.html">RM</a> - Rotation-measure synthesis imaging package developed by the
+	Cosmic Magnetism KSP.
   </ul>
 </ul>
 
@@ -137,7 +140,7 @@ In this:
 
 In order to install modules/packages the following simple steps are required:
 <ol>
-  <li>Change into the \e build directory and run the bootstrap script:
+  <li>Change into the \e build directory and run the \e bootstrap script:
   \code
   cd build
   ./bootstrap
@@ -216,5 +219,21 @@ In order to install modules/packages the following simple steps are required:
   |   |-- hdf5
   |   `-- startools   <-- you are here
   `-- src
+  \endverbatim
+*/
+
+/*!
+  \defgroup RM RM-Synthesis package
+
+  \verbatim
+  lofarsoft
+  |-- data
+  |-- doc
+  |-- release
+  |-- build
+  |-- devel_common
+  |-- external
+  `-- src
+      `-- RM          <-- you are here
   \endverbatim
 */
