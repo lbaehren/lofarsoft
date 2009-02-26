@@ -26,3 +26,12 @@ else (APPLE)
     )
 endif (APPLE)
 
+##_______________________________________________________________________________
+## Installation
+
+install (
+  TARGETS pyrap_fitting
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
+

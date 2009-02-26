@@ -26,3 +26,11 @@ else (APPLE)
     )
 endif (APPLE)
 
+##_______________________________________________________________________________
+## Installation
+
+install (
+  TARGETS pyrap_quanta
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
