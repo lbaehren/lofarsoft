@@ -1,18 +1,3 @@
-/*
- *  rm.cpp
- *  rmsynth
- *
- *  Created by Sven Duscha on 28.01.09.
- * 
- *	The rm class provides algorithms for computing the Faraday Rotation Measure
- *	from an input image cube. The image cube should be provided in a 3D-"cube"
- *	array and can be read as a whole or in a tiled manner, using casacore lattice classes.
- *
- *	The RM is computed along the frequency axis of each line of sight. Since RM is the
- *	Inverse Fourier Transform of the lambda squared polarized intensities along the line
- *	of sight, input cube frequency planes are converted to lambda squared planes.
- */
-
 
 #include <casa/Arrays.h>
 #include <casa/Arrays/Array.h>
@@ -20,16 +5,17 @@
 #include <tables/Tables/TiledFileAccess.h>
 #include <lattices/Lattices/TiledShape.h>
 
-
 #include "rm.h"
-
 
 using namespace std;
 using namespace casa;		// namespace for functions from casacore
 
-
-// rm class constructor
+//===============================================================================
 //
+//  Constructions / Destruction
+//
+//===============================================================================
+
 rm::rm()
 {
 	// Do nothing in particular
@@ -43,24 +29,35 @@ rm::~rm()
 	// Free memory?
 }
 
-
-
-// Helper functions
+//===============================================================================
 //
-// Convert from frequencies to lambda squared
+//  Methods
 //
+//===============================================================================
+
+/*!
+  \brief Convert from frequencies to lambda squared
+
+  \param frequency -- 
+
+  \return lambda_sq -- 
+*/
 vector<double>rm::freqToLambdaSq(vector<double> frequency)
 {
-	vector<double> lambda_sq;	// lambda squareds of measured channels
-	
-	
-	
-	return lambda_sq;
+  vector<double> lambda_sq;	// lambda squareds of measured channels
+  
+  
+  
+  return lambda_sq;
 }
 
+/*!
+  \brief Convert from lambda squared to frequencies
+  
+  \param lambda_sq -- 
 
-// Convert from lambda squared to frequencies
-//
+  \return freq -- 
+*/
 vector<double>rm::lambdaSqToFreq(vector<double> lambda_sq)
 {
 	vector<double> freq;	// frequencies of measured channels
@@ -80,7 +77,9 @@ vector<double>rm::lambdaSqToFreq(vector<double> lambda_sq)
 // Special case (bool freq=false): the input vector is already given as a range of polarized intensities
 // given at different lambda squareds
 //
-vector<double>rm::inverseFourier(vector<double> intensity, vector<double> frequency, bool freq)
+vector<double>rm::inverseFourier(vector<double> intensity,
+				 vector<double> frequency,
+				 bool freq)
 {
 	vector<double>rm;	// rm values along the line of sight
 
@@ -90,17 +89,27 @@ vector<double>rm::inverseFourier(vector<double> intensity, vector<double> freque
 
 
 
-// Wavelet Transform Method for calculating the Rotation Measure
-// Normal case (bool freq=true, default): the input vector is a range of complex polarized intensities
-// measured at different frequencies
-// Parameters a_min/a_max and b_min/b_max define ranges for wavelet parameter space probing
-//
-vector<double> rm::wavelet(vector<double> intensity, vector<double> frequencies, vector<double> wavelet_parameters, bool freq)
+/*!
+  Wavelet Transform Method for calculating the Rotation Measure
+
+  Normal case (bool freq=true, default): the input vector is a range of complex
+  polarized intensities measured at different frequencies. Parameters a_min/a_max
+  and b_min/b_max define ranges for wavelet parameter space probing.
+
+  \param intensity -- 
+  \param frequencies -- 
+  \param wavelet_parameters -- 
+  \param freq -- 
+ */
+vector<double> rm::wavelet(vector<double> intensity,
+			   vector<double> frequencies,
+			   vector<double> wavelet_parameters,
+			   bool freq)
 {
-	vector<double>rm;	// rm values along the line of sight
-
-
-	return rm;
+  vector<double>rm;	// rm values along the line of sight
+  
+  
+  return rm;
 }
 
 
