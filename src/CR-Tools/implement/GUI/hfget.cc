@@ -195,8 +195,10 @@ void copycast_vec(void *ptr, vector<S> *sp, Vector_Selector *vs) {
 /* Functions that provide textual output for some of the enum types we use here */
 
 char* datapointer_txt(Data* d){
-  if (isDataObject(d)) {return (d->getName(true)).c_str();}
-  else return mycast<HString>(reinterpret_cast<HPointer>(d)).c_str();
+  char * out;
+  if (isDataObject(d)) {out = (d->getName(true)).c_str();}
+  else out = mycast<HString>(reinterpret_cast<HPointer>(d)).c_str();
+  return out;
 }
 
 char* direction_txt(DIRECTION dir){
@@ -1072,12 +1074,12 @@ the objects higher up the chain and cause update if necessary.
 void Data::setModification(){
     modification_record newmod;
 
-    if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return -1;};
+    if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return;};
 
     if (data.noMod) {
 	DBG("setModification: NO MODIFICATION since noMod=true.");
 	data.noMod=false;
-	return -1;
+	return;
     }    
 
     /*
@@ -1172,7 +1174,7 @@ Tell the object that an object it depends on was modified (e.g., by a user input
  */
 
 void Data::setModification(objectid port, modification_record newmod){
-  if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return -1;};
+  if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return;};
 
   objectid size,i;
   
@@ -1235,7 +1237,7 @@ void Data::setModification(objectid port, modification_record newmod){
   to the update worm.
   */
 bool Data::checkModification(){
-  if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return -1;};
+  if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return false;};
 
   objectid size,i;
   bool modified=data.modified;
