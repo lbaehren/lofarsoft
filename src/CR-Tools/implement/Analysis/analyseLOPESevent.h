@@ -37,7 +37,7 @@
 #include <Data/LopesEventIn.h>
 #include <Data/UpSampledDR.h>
 #include <Display/SimplePlot.h>
-#include <Imaging/SkymapQuantity.h>
+#include <Coordinates/SkymapQuantity.h>
 
 // CASA/casacore header files
 #include <casa/Arrays/IPosition.h>
