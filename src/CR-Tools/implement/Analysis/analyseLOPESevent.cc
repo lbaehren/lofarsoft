@@ -408,7 +408,7 @@ namespace CR { // Namespace CR -- begin
 	if (verbose) { cout << "analyseLOPESevent::doPositionFitting: starting SimplexFit()." << endl;};
 
 	if (distanceSearch) {
-	  if (! SimplexFit(Az, El, distance, center, AntennaSelection, 2000.) ){
+	  if (! SimplexFit(Az, El, distance, center, AntennaSelection, 1000.) ){
   	    cerr << "analyseLOPESevent::doPositionFitting: " << "Error during SimplexFit()!" << endl;
 	    return False;
 	  };
