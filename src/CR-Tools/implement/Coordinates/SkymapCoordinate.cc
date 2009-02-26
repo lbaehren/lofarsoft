@@ -153,6 +153,9 @@ namespace CR { // Namespace CR -- begin
 		<< " time-frequency coordinate!"
 		<< std::endl;
     }
+
+    // update coordinate system object 
+    setCoordinateSystem ();
     
     return status;
   }
@@ -255,7 +258,8 @@ namespace CR { // Namespace CR -- begin
     obsData_p        = obsData;
     spatialCoord_p   = spatialCoord;
     timeFreqCoord_p  = timeFreqCoord;
-    skymapQuantity_p = SkymapQuantity(quantity);
+    
+    setSkymapQuantity(quantity);
 
     setCoordinateSystem ();
   }

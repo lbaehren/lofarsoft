@@ -210,7 +210,9 @@ int test_Beamformer (uint const &blocksize=1024)
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_Skymapper (uint const &blocksize=1024)
+int test_Skymapper (uint const &blocksize=1024,
+		    double const &sampleFreq=80e06,
+		    uint const &nyquistZone=2)
 {
   cout << "\n[tSkymapper::test_Skymapper]\n" << endl;
 
@@ -229,19 +231,28 @@ int test_Skymapper (uint const &blocksize=1024)
   cout << "[2] Skymapper(SkymapCoordinate) ..." << endl;
   try {
     // Time-frequency domain data
-    TimeFreqCoordinate timeFreq (blocksize,80e06,2);
+    TimeFreqCoordinate timeFreq (blocksize,
+				 sampleFreq,
+				 nyquistZone);
     // Observation info
     ObservationData obsData ("UNKNOWN");
     obsData.setObserver ("Lars Baehren");
-    // Coordinates 
-    SkymapCoordinate coord;
-    coord.setTimeFreqCoordinate(timeFreq);
-    coord.setObservationData(obsData);
-    
-    Skymapper skymapper (coord,
-			 "skymap02.img");
-    
-    skymapper.summary();
+
+    /* Skymapper to compute power in frequency */
+    SkymapCoordinate coord1 (obsData,
+			     timeFreq,
+			     CR::SkymapQuantity::FREQ_POWER);
+    Skymapper skymapper1 (coord1,
+			 "skymap02a.img");
+    skymapper1.summary();
+
+    /* Skymapper to compute cc-beam */
+    SkymapCoordinate coord2 (obsData,
+			     timeFreq,
+			     CR::SkymapQuantity::TIME_CC);
+    Skymapper skymapper2 (coord2,
+			 "skymap02b.img");
+    skymapper2.summary();
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl;
     nofFailedTests++;
@@ -269,20 +280,11 @@ int test_Skymapper (uint const &blocksize=1024)
     // Antenna positions
     uint nofAntennas (10);
     Matrix<double> antPositions (nofAntennas,3);
-    // EM quantity for which the skymap is computed
-    CR::SkymapQuantity time_cc (CR::SkymapQuantity::TIME_CC);
-    CR::SkymapQuantity freq_power (CR::SkymapQuantity::FREQ_POWER);
     //
-    Skymapper skymapper1 (coord,
-			  antPositions,
-			  time_cc,
-			  "skymap03.img");
-    Skymapper skymapper2 (coord,
-			  antPositions,
-			  freq_power,
-			  "skymap04.img");
-    skymapper1.summary();
-    skymapper2.summary();
+    Skymapper skymapper (coord,
+			 antPositions,
+			 "skymap03.img");
+    skymapper.summary();
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl;
     nofFailedTests++;
@@ -368,14 +370,14 @@ int test_processing (string const &infile,
   std::string refcode    = "AZEL";
   std::string projection = "SIN";
   uint nofFrames         = 10;
-  uint nofBlocksPerFrame = 2;
+  uint nofBlocksPerFrame = 1;
   uint nofAntennas       = 10;
 
   // Observation data
   CR::ObservationData obsData (telescope,
 			       observer);
   // Spatial coordinates
-  IPosition shape (3,20,20,10);
+  IPosition shape (3,30,30,10);
   SpatialCoordinate spatial (CoordinateType::DirectionRadius,
 			     refcode,
 			     projection);
@@ -397,35 +399,22 @@ int test_processing (string const &infile,
   CR::SkymapQuantity skymapQuantity (SkymapQuantity::TIME_CC);
 
   //________________________________________________________
-  // Display the chosen control parameters
-
-  cout << "-- Telescope name        = " << telescope         << endl;
-  cout << "-- Observer name         = " << observer          << endl;
-  cout << "-- Reference code        = " << refcode           << endl;
-  cout << "-- Map projection        = " << projection        << endl;
-  cout << "-- Blocksize             = " << timeFreq.blocksize() << endl;
-  cout << "-- FFT length            = " << timeFreq.fftLength() << endl;
-  cout << "-- nof. blocks per frame = " << nofBlocksPerFrame << endl;
-  cout << "-- nof. frames           = " << nofFrames         << endl;
-  cout << "-- nof. antennas         = " << nofAntennas       << endl;
-
-  //________________________________________________________
   // Run the processing tests
   
   cout << "[1] Process a single block of data ..." << endl;
   try {
     Skymapper skymapper (coord,
 			 antPositions,
-			 skymapQuantity,
 			 "skymap_test1.img");
+    skymapper.summary();
 
+    /* Prepare some test data to process */
+    
     Matrix<casa::DComplex> data (timeFreq.fftLength(),
 				 nofAntennas);
-    data = 1.0;
-
-    cout << "-- Output filename     = " << skymapper.filename() << endl;
-    cout << "-- shape(antPositions) = " << antPositions.shape() << endl;
-    cout << "-- shape(data)         = " << data.shape()         << endl;
+    for (uint freq(0); freq<timeFreq.fftLength(); freq++) {
+      data.row(freq) = double(freq);
+    }
 
     skymapper.processData(data);
 

@@ -21,10 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <iostream>
 #include <Imaging/Skymapper.h>
-// #include <Skymap/SkymapperTools.h>
-#include <Utilities/ProgressBar.h>
 
 using std::cerr;
 using std::cout;
@@ -62,13 +59,11 @@ namespace CR {  // Namespace CR -- begin
   
   Skymapper::Skymapper (SkymapCoordinate const &skymapCoord,
 			Matrix<double> const &antPositions,
-			SkymapQuantity const &skymapType,
 			std::string const &filename)
     : filename_p(filename)
   {
     init (skymapCoord,
-	  antPositions,
-	  skymapType);
+	  antPositions);
   }
 
   //_____________________________________________________________________________
@@ -76,13 +71,11 @@ namespace CR {  // Namespace CR -- begin
   
   Skymapper::Skymapper (SkymapCoordinate const &skymapCoord,
 			Vector<MVPosition> const &antPositions,
-			SkymapQuantity const &skymapType,
 			std::string const &filename)
     : filename_p(filename)
   {
     init (skymapCoord,
-	  antPositions,
-	  skymapType);
+	  antPositions);
   }
   
   //_____________________________________________________________________________
@@ -130,7 +123,7 @@ namespace CR {  // Namespace CR -- begin
   {
     /* Adjust array sizes */
     bufferStart_p.resize(other.bufferStart_p.nelements());
-    bufferEnd_p.resize(other.bufferEnd_p.nelements());
+    bufferStride_p.resize(other.bufferStride_p.nelements());
     bufferStep_p.resize(other.bufferStep_p.nelements());
 
     /* Copy values of internal variables */
@@ -138,9 +131,8 @@ namespace CR {  // Namespace CR -- begin
     coord_p              = other.coord_p;
     filename_p           = other.filename_p;
     nofProcessedBlocks_p = other.nofProcessedBlocks_p;
-    verbose_p            = other.verbose_p;
     bufferStart_p        = other.bufferStart_p;
-    bufferEnd_p          = other.bufferEnd_p;
+    bufferStride_p       = other.bufferStride_p;
     bufferStep_p         = other.bufferStep_p;
   }
   
@@ -199,30 +191,23 @@ namespace CR {  // Namespace CR -- begin
   {
     Beamformer bf;
     Matrix<double> antPositions = bf.antPositions();
-    SkymapQuantity skymapType   = bf.skymapType();
     
     init (coord,
-	  antPositions,
-	  skymapType);
+	  antPositions);
   }
   
   //_____________________________________________________________________________
   //                                                                         init
 
   void Skymapper::init (SkymapCoordinate const &skymapCoord,
-			Matrix<double> const &antPositions,
-			SkymapQuantity const &skymapType)
+			Matrix<double> const &antPositions)
   {
+    /* Store the skymap coordinates */
+    coord_p = skymapCoord;
+
     /* set up the Beamformer */
     beamformer_p = Beamformer();
     beamformer_p.setAntPositions(antPositions);
-    beamformer_p.setSkymapType(skymapType);
-
-    /* Store the skymap coordinates */
-    coord_p = skymapCoord;
-    TimeFreqCoordinate timeFreq (coord_p.timeFreqCoordinate());
-    timeFreq.setCoordType(beamformer_p.domainType(),true);
-    coord_p.setTimeFreqCoordinate(timeFreq);
 
     /* initialize the internal settings and objects */
     initSkymapper();
@@ -232,8 +217,7 @@ namespace CR {  // Namespace CR -- begin
   //                                                                         init
 
   void Skymapper::init (SkymapCoordinate const &skymapCoord,
-			Vector<MVPosition> const &antPositions,
-			SkymapQuantity const &skymapType)
+			Vector<MVPosition> const &antPositions)
   {
     /* Store the skymap coordinates */
     coord_p = skymapCoord;
@@ -241,8 +225,7 @@ namespace CR {  // Namespace CR -- begin
     /* set up the Beamformer */
     beamformer_p = Beamformer();
     beamformer_p.setAntPositions(antPositions);
-    beamformer_p.setSkymapType(skymapType);
-
+ 
     /* initialize the internal settings and objects */
     initSkymapper();
   }
@@ -256,19 +239,21 @@ namespace CR {  // Namespace CR -- begin
 
     /* Initialize variables for book-keeping */
     nofProcessedBlocks_p = 0;
-    
+
+    //________________________________________________________________
     /*
      *  Configure the Beamformer.
      */
-    try {
-      Matrix<double> skyPos = coord_p.spatialCoordinate().positionValues();
-      Vector<double> freq   = coord_p.timeFreqCoordinate().frequencyValues();
-      beamformer_p.setSkyPositions(skyPos);
-      beamformer_p.setFrequencies(freq);
-    } catch (std::string message) {
-      std::cerr << "[Skymapper::initSkymapper] " << message << std::endl;
-    }
 
+    /* Get sky positions and frequency values. */
+    Matrix<double> skyPos = coord_p.spatialCoordinate().positionValues();
+    Vector<double> freq   = coord_p.timeFreqCoordinate().frequencyValues();
+    /* Update internal settings of the Beamformer. */
+    beamformer_p.setSkymapType(coord_p.skymapQuantity().type());
+    beamformer_p.setSkyPositions(skyPos);
+    beamformer_p.setFrequencies(freq);
+    
+    //________________________________________________________________
     /*
      *  Set up the characteristics of the buffer array and the slicing
      *  information on how to insert it into the pixel array of the output
@@ -279,17 +264,19 @@ namespace CR {  // Namespace CR -- begin
     casa::IPosition bufferShape = coord_p.shape();
 
     bufferStart_p.resize(nofAxes);
-    bufferEnd_p.resize(nofAxes);
+    bufferStride_p.resize(nofAxes);
     bufferStep_p.resize(nofAxes);
 
-    bufferStart_p = 0;
-    bufferEnd_p   = coord_p.shape()-1;
-    bufferStep_p  = 0;
+    nofProcessedBlocks_p   = 0;
+    nofProcessedFrames_p   = 0;
+    nofBlocksPerFrame_p    = coord_p.timeFreqCoordinate().blocksPerFrame();
+    bufferStart_p          = 0;
+    bufferStride_p         = 1;
+    bufferStep_p           = 0;
     
     switch (coordType.type()) {   // [Long,Lat,Radius,Freq,Time]
     case CoordinateType::Time:
       {
-	std::cout << "[Skymapper::initSkymapper] CoordinateType = Time" << std::endl;
 	timeFreqAxis_p                = nofAxes-1;
 	bufferShape(timeFreqAxis_p-1) = 1;
 	bufferShape(timeFreqAxis_p)   = beamformer_p.shapeBeam()[0];
@@ -298,11 +285,10 @@ namespace CR {  // Namespace CR -- begin
       break;
     case CoordinateType::Frequency:
       {
-	std::cout << "[Skymapper::initSkymapper] CoordinateType = Freq" << std::endl;
-	timeFreqAxis_p                = nofAxes-2;
-	bufferShape(timeFreqAxis_p+1) = 1;                             // Time
-	bufferShape(timeFreqAxis_p)   = beamformer_p.shapeBeam()[0];   // Frequency
-	bufferStep_p(timeFreqAxis_p)  = 1;                             // Frequency
+	timeFreqAxis_p                 = nofAxes-2;
+	bufferShape(timeFreqAxis_p+1)  = 1;                             // Time
+	bufferStep_p(timeFreqAxis_p+1) = 1;                             // Time
+	bufferShape(timeFreqAxis_p)    = beamformer_p.shapeBeam()[0];   // Frequency
       }
       break;
     default:
@@ -332,11 +318,11 @@ namespace CR {  // Namespace CR -- begin
      */
 
     if (!image_p->ok()) {
-      std::cerr << "[Skymapper::initSkymapper] Image is not ok!" << std::endl;
+      std::cerr << "[Skymapper::initSkymapper] Image is not ok!" << endl;
     }
 
     if (!image_p->isWritable()) {
-      std::cerr << "[Skymapper::initSkymapper] Image is not writable!" << std::endl;
+      std::cerr << "[Skymapper::initSkymapper] Image is not writable!" << endl;
     }
     
     return status;
@@ -353,49 +339,63 @@ namespace CR {  // Namespace CR -- begin
     casa::IPosition shapeBeam (beamformer_p.shapeBeam());
     casa::IPosition pos (bufferArray_p.shape());
     Matrix<double> beam (shapeBeam);
+    int npos (0);
 
-    //______________________________________________________
-    // Some basic feedback on the used settings
-
-    std::cout << "[Skymapper::processData]" << std::endl;
-    std::cout << "-- Input data      = Matrix<DComplex>"    << endl;
-    std::cout << "-- Quantity domain = " << beamformer_p.domainName()  << endl;
-    std::cout << "-- Skymap quantity = " << beamformer_p.skymapType().name() << endl;
-    std::cout << "-- TimeFreq index  = " << timeFreqAxis_p        << endl;
-    std::cout << "-- shape(data)     = " << data.shape()          << endl;
-    std::cout << "-- shape(beam)     = " << shapeBeam             << endl;
-    std::cout << "-- shape(buffer)   = " << bufferArray_p.shape() << endl;
-    std::cout << "-- shape(image)    = " << coord_p.shape()       << endl;
-
-    //______________________________________________________
-    // Forward the input data to the Beamformer for processing
-
+    //________________________________________________________________
+    /*
+     *  Forward the input data to the Beamformer for processing
+     */
     status = beamformer_p.processData (beam,
 				       data);
+    nofProcessedBlocks_p++;
 
-    return status;
-    
+    //________________________________________________________________
+    /*
+     *  Map the contents of the array returning the Beamformer results
+     *  onto the internal buffer array.
+     */
     if (status) {
+      pos = 0;
       for (pos(0)=0; pos(0)<shape(0); pos(0)++) {      // Longitude
 	for (pos(1)=0; pos(1)<shape(1); pos(1)++) {    // Latitude
 	  for (pos(2)=0; pos(2)<shape(2); pos(2)++) {  // Radius
 	    for (pos(timeFreqAxis_p)=0; pos(timeFreqAxis_p)<shape(timeFreqAxis_p); pos(timeFreqAxis_p)++) {
-	    }
-	  }
-	}
-      }
-      
+	      bufferArray_p(pos) += beam(pos(timeFreqAxis_p),
+					 npos);
+	    }            // END -- Freq/Time
+	    npos++;
+	  }              // END -- Radius
+	}                // END -- Latitude
+      }                  // END -- Longitude
+
     } else {
       cerr << "[Skymapper::processData] No processing due to Beamformer error"
 	   << endl;
     }
     
+    //________________________________________________________________
     /*
-      Book-keeping of the number of processed blocks so far; this is accounted
-      for independent of whether the beamforming stage has been successful or
-      not, in order to keep navigation within the image pixel array consistent.
-    */
-    nofProcessedBlocks_p++;
+     *  Book-keeping of the number of processed blocks so far; this is
+     *  accounted for independent of whether the beamforming stage has
+     *  been successful or not, in order to keep navigation within the
+     *  image pixel array consistent.
+     */
+    if (nofProcessedBlocks_p == nofBlocksPerFrame_p) {
+      std::cout << "[Skymapper::processData]" << endl;
+      std::cout << "-- nof. processed blocks = " << nofProcessedBlocks_p << endl;
+      std::cout << "-- buffer start position = " << bufferStart_p        << endl;
+      std::cout << "-- buffer stride         = " << bufferStride_p       << endl;
+      std::cout << "-- buffer step           = " << bufferStep_p         << endl;
+      /* Write the buffered data to the output image. */
+      image_p->putSlice (bufferArray_p,
+			 bufferStart_p,
+			 bufferStride_p);
+      /* Reset internal variables. */
+      bufferArray_p         = 0;
+      nofProcessedBlocks_p  = 0;
+      nofProcessedFrames_p += 1;
+      bufferStart_p        += bufferStep_p;
+    }
     
     return status;
   }
@@ -415,13 +415,13 @@ namespace CR {  // Namespace CR -- begin
     if (coord_p.timeFreqCoordinate().blocksize() != dr->blocksize()) {
 	std::cerr << "[Skymapper::processData] "
 		  << " Mismatch discovered in value of blocksize!"
-		  << std::endl;
+		  << endl;
 	std::cerr << "-- Skymap coordinates : "
 		  << coord_p.timeFreqCoordinate().blocksize()
-		  << std::endl;
+		  << endl;
 	std::cerr << "-- DataReader         : " 
 		  << dr->blocksize() 
-		  << std::endl;
+		  << endl;
 	return false;
     }
     
@@ -455,7 +455,7 @@ namespace CR {  // Namespace CR -- begin
     ObsInfo obsInfo             = csys.obsInfo();
     
     os << "[Skymapper] Summary of the internal parameters"             << endl;
-    os << " :: Observation / Data ::"                                      << endl;
+    os << " ::: Observation / Data :::"                                      << endl;
     os << " --> Observation date         = " << obsInfo.obsDate()          << endl;
     os << " --> Telescope                = " << obsInfo.telescope()        << endl;
     os << " --> Observer                 = " << obsInfo.observer()         << endl;
@@ -464,23 +464,26 @@ namespace CR {  // Namespace CR -- begin
     os << " --> Nyquist zone             = " << timeFreq.nyquistZone()     << endl;
     os << " --> Blocksize      [samples] = " << timeFreq.blocksize()       << endl;
     os << " --> FFT length    [channels] = " << timeFreq.fftLength()       << endl;
-    os << " :: Coordinates ::"                                << endl;
+    os << " ::: Coordinates :::"                                << endl;
+    os << " --> Skymap quantity          = " << coord_p.skymapQuantity().name()
+       << endl;
+    os << " --> Domain of image quantity = " << coord_p.skymapQuantity().domainName()
+       << endl;
     os << " --> nof. coordinates         = " << csys.nCoordinates()        << endl;
     os << " --> World axis names ....... = " << csys.worldAxisNames()      << endl;
     os << " --> World axis units ....... = " << csys.worldAxisUnits()      << endl;
     os << " --> Reference pixel  (CRPIX) = " << csys.referencePixel()      << endl;
     os << " --> Reference value  (CRVAL) = " << csys.referenceValue()      << endl;
     os << " --> coord. increment (CDELT) = " << csys.increment()           << endl;
-    os << " :: Image ::"                               << endl;
+    os << " ::: Image :::"                               << endl;
     os << " --> Filename                 = " << filename()                 << endl;
     os << " --> Shape of pixel array     = " << coord_p.shape()            << endl;
     os << " --> Shape of beam array      = " << beamformer_p.shapeBeam()   << endl;
+    os << " --> Shape of buffer array    = " << bufferArray_p.shape()      << endl;
     os << " --> buffer start position    = " << bufferStart_p              << endl;
-    os << " --> buffer end position      = " << bufferEnd_p                << endl;
+    os << " --> buffer end position      = " << bufferStride_p             << endl;
     os << " --> buffer step size         = " << bufferStep_p               << endl;
     os << " --> index of the target axis = " << timeFreqAxis_p             << endl;
-    os << " --> Domain of image quantity = " << beamformer_p.domainName()  << endl;
-    os << " --> Skymap quantity          = " << beamformer_p.skymapType().name() << endl;
   }
   
 }  // Namespace CR -- end

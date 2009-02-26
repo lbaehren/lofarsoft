@@ -488,8 +488,8 @@ namespace CR { // Namespace CR -- begin
 
   void TimeFreqCoordinate::setCoordinates (int const &nFrame)
   {
-    Vector<double> crval (2);
-    Vector<double> cdelt (2);
+    Vector<double> crval (2);   // [Time,Freq]
+    Vector<double> cdelt (2);   // [Time,Freq]
 
     //______________________________________________________
     // Compute the increment along the coordinate axis
@@ -530,10 +530,10 @@ namespace CR { // Namespace CR -- begin
     // Set up the internal coordinate objects
     
     if (timeAxisLast_p) {
-      coordFrequency_p = CoordinateType::makeSpectralCoordinate (crval(0),
-								 cdelt(0));
-      coordTime_p      = CoordinateType::makeTimeCoordinate(crval(1),
-							    cdelt(1));
+      coordFrequency_p = CoordinateType::makeSpectralCoordinate (crval(1),
+								 cdelt(1));
+      coordTime_p      = CoordinateType::makeTimeCoordinate(crval(0),
+							    cdelt(0));
     } else {
       coordTime_p      = CoordinateType::makeTimeCoordinate(crval(0),
 							    cdelt(0));

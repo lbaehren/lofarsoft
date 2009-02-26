@@ -39,6 +39,7 @@
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <coordinates/Coordinates/LinearCoordinate.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
+#include <images/Images/HDF5Image.h>
 #include <images/Images/PagedImage.h>
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/SetupNewTab.h>
@@ -83,7 +84,6 @@ namespace CR {  // Namespace CR -- begin
       <li>Beamformer
       <li>ObservationData
       <li>SkymapCoordinate
-      <li>SkymapQuantity
       <li>SkymapperTools
       <li>DataReader
     </ul>
@@ -159,7 +159,7 @@ namespace CR {  // Namespace CR -- begin
     //! Object to handle the beamforming of the input data
     Beamformer beamformer_p;
     //! Pointer to a paged image containing the generated data
-    casa::PagedImage<Double> *image_p;
+    casa::ImageInterface<Double> *image_p;
 
     // -- book-keeping
 
@@ -167,17 +167,19 @@ namespace CR {  // Namespace CR -- begin
     casa::Array<double> bufferArray_p;
     //! Position marking the start of the buffer within the output array
     casa::IPosition bufferStart_p;
-    //! Position marking the end of the buffer within the output array
-    casa::IPosition bufferEnd_p;
+    //! Stride through the output array to insert the buffer array
+    casa::IPosition bufferStride_p;
     //! Increment of the position markers between two subsequent data-blocks
     casa::IPosition bufferStep_p;
     //! Index of the time-frequency axis of the target domain
     uint timeFreqAxis_p;
     
-    //! Switch to enable/disable verbose mode
-    short verbose_p;
     //! The number of processed data blocks so far
     uint nofProcessedBlocks_p;
+    //! The number of input data blocks combined into a time-frame
+    uint nofBlocksPerFrame_p;
+    //! The number of processed frames
+    uint nofProcessedFrames_p;
     //! Direction mask to flag individual pixels
     Matrix<bool> directionMask_p;
     
@@ -193,7 +195,7 @@ namespace CR {  // Namespace CR -- begin
 
       \param filename -- Name of the output file
     */
-    Skymapper (std::string const &filename="skymap.img");
+    Skymapper (std::string const &filename="skymap.h5");
     
     /*!
       \brief Argumented constructor
@@ -203,7 +205,7 @@ namespace CR {  // Namespace CR -- begin
       \param filename -- Name of the output file
     */
     Skymapper (SkymapCoordinate const &skymapCoord,
-	       std::string const &filename="skymap.img");
+	       std::string const &filename="skymap.h5");
     
     /*!
       \brief Argumented constructor
@@ -212,14 +214,11 @@ namespace CR {  // Namespace CR -- begin
              SkymapCoordinate object.
       \param antPositions  -- [nofAntennas,3] Antenna positions for which the
              delay is computed, \f$ (x,y,z) \f$
-      \param skymapType -- The physical quantity (of the electromagnetic field)
-             for which the skymap will be computed.
       \param filename -- Name of the output file
     */
     Skymapper (SkymapCoordinate const &skymapCoord,
 	       Matrix<double> const &antPositions,
-	       SkymapQuantity const &skymapType=SkymapQuantity::FREQ_POWER,
-	       std::string const &filename="skymap.img");
+	       std::string const &filename="skymap.h5");
     
     /*!
       \brief Argumented constructor
@@ -228,14 +227,11 @@ namespace CR {  // Namespace CR -- begin
              SkymapCoordinate object.
       \param antPositions  -- Antenna positions for which the delay is computed,
              \f$ (x,y,z) \f$
-      \param skymapType -- The physical quantity (of the electromagnetic field)
-             for which the skymap will be computed.
       \param filename -- Name of the output file
     */
     Skymapper (SkymapCoordinate const &skymapCoord,
 	       Vector<MVPosition> const &antPositions,
-	       SkymapQuantity const &skymapType=SkymapQuantity::FREQ_POWER,
-	       std::string const &filename="skymap.img");
+	       std::string const &filename="skymap.h5");
     
     /*!
       \brief Copy constructor
@@ -260,16 +256,6 @@ namespace CR {  // Namespace CR -- begin
     Skymapper &operator= (Skymapper const &other); 
     
     // ----------------------------------------------------------------- Parameters
-    
-    /*!
-      \brief Set the verbosity level during processing
-      
-      \param verbose -- The verbosity level during processing; if
-             <tt>verbose=0</tt> no additional output will be produced.
-    */
-    inline void setVerboseLevel (short const &verbose) {
-      verbose_p = verbose;
-    }
     
     /*!
       \brief Get the name of (or path to) the created image file
@@ -327,6 +313,16 @@ namespace CR {  // Namespace CR -- begin
     }
     
     /*!
+      \brief The quantity for which the skymap is computed
+      
+      \return skymapQuantity -- The skymap quantity for which to compute the
+              Beamformer is configured
+    */
+    inline SkymapQuantity skymapQuantity () {
+      return coord_p.skymapQuantity();
+    }
+    
+    /*!
       \brief Get the mask to flag individual direction pixels
       
       \return directionMask -- [nof. Lon. pixels, nof. Lat. pixels] Matrix of
@@ -365,15 +361,6 @@ namespace CR {  // Namespace CR -- begin
     bool processData (DataReader *dr);
 
     // ------------------------------------------------------- Beamformer methods
-    
-    /*!
-      \brief Get the type of beam to be used at processing
-      
-      \return beamType -- The type of beam to be used at data processing
-    */
-    inline SkymapQuantity skymapType () {
-      return beamformer_p.skymapType();
-    }
     
     /*!
       \brief Set the antenna positions
@@ -441,33 +428,32 @@ namespace CR {  // Namespace CR -- begin
       The output typically will look something these lines:
       \verbatim
       [Skymapper] Summary of the internal parameters
-      :: Observation ::
-      --> Observation date         = Epoch: 54878::11:02:30.1476
+      ::: Observation / Data :::
+      --> Observation date         = Epoch: 54887::13:45:53.1101
       --> Telescope                = WSRT
       --> Observer                 = Lars Baehren
-      --> nof. antennas            = 48
+      --> nof. antennas            = 10
       --> Sampling rate       [Hz] = 8e+07
-      --> Nyquist zone             = 2
-      :: Data I/O ::
-      --> Blocksize      [samples] = 2048
-      --> FFT length    [channels] = 1025
-      :: Coordinates ::
+      --> Nyquist zone             = 1
+      --> Blocksize      [samples] = 1024
+      --> FFT length    [channels] = 513
+      ::: Coordinates :::
+      --> Skymap quantity          = FREQ_POWER
+      --> Domain of image quantity = Frequency
       --> nof. coordinates         = 4
       --> World axis names ....... = [Longitude, Latitude, Length, Frequency, Time]
       --> World axis units ....... = [rad, rad, m, Hz, s]
       --> Reference pixel  (CRPIX) = [0, 0, 0, 0, 0]
-      --> Reference value  (CRVAL) = [0, 1.5708, 0, 4e+07, 0]
-      --> coord. increment (CDELT) = [-0.0174533, 0.0174533, 1, 39062.5, 2.56e-05]
-      :: Image ::
-      --> Filename                 = skymap.img
-      --> Shape of pixel array     = [1, 1, 1, 1, 1025]
-      --> Shape of beam array      = [1025, 1]
+      --> Reference value  (CRVAL) = [0, 1.5708, 0, 0, 0]
+      --> coord. increment (CDELT) = [-0.0174533, 0.0174533, 1, 78125, 1.28e-05]
+      ::: Image :::
+      --> Filename                 = skymap.h5
+      --> Shape of pixel array     = [20, 20, 10, 513, 1]
+      --> Shape of beam array      = [513, 4000]
       --> buffer start position    = [0, 0, 0, 0, 0]
-      --> buffer end position      = [0, 0, 0, 0, 1024]
+      --> buffer end position      = [19, 19, 9, 512, 0]
       --> buffer step size         = [0, 0, 0, 1, 0]
-      --> index of the target axis = 4
-      --> Domain of image quantity = Frequency
-      --> Skymap quantity          = FREQ_POWER
+      --> index of the target axis = 3
       \endverbatim
     */
     void summary (std::ostream &os);
@@ -522,24 +508,18 @@ namespace CR {  // Namespace CR -- begin
       
       \param coord        -- Coordinates to be attached to the skymap.
       \param antPositions -- Antenna positions to be fed into the Beamformer
-      \param skymapType   -- Electromagnetical quantity for which the skymap is
-      getting computed.
     */
     void init (SkymapCoordinate const &skymapCoord,
-	       Matrix<double> const &antPositions,
-	       SkymapQuantity const &skymapType=SkymapQuantity::FREQ_POWER);
+	       Matrix<double> const &antPositions);
     
     /*!
       \brief Initialize the object's internal parameters
       
       \param coord        -- Coordinates to be attached to the skymap.
       \param antPositions -- Antenna positions to be fed into the Beamformer
-      \param skymapType   -- Electromagnetical quantity for which the skymap is
-      getting computed.
     */
     void init (SkymapCoordinate const &skymapCoord,
-	       Vector<MVPosition> const &antPositions,
-	       SkymapQuantity const &skymapType=SkymapQuantity::FREQ_POWER);
+	       Vector<MVPosition> const &antPositions);
     
     /*!
       \brief Initialize the internal structure of the Skymapper for data processing

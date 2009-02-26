@@ -27,6 +27,7 @@
 // Namespace usage
 using std::cout;
 using std::endl;
+using CR::ObservationData;
 using CR::SkymapCoordinate;
 
 /*!
@@ -76,20 +77,27 @@ int test_constructors ()
   
   cout << "[2] Testing construction from observation data and time-freq ..." << endl;
   try {
-    CR::ObservationData obsData (telescope,observer);
+    ObservationData obsData (telescope,observer);
     TimeFreqCoordinate timeFreq (blocksize,
 				 sampleFreq,
 				 nyquistZone,
 				 blocksPerFrame,
 				 nofFrames);
     //
-    SkymapCoordinate coord (obsData,timeFreq);
-    //
     std::cout << "-- blocksize        = " << blocksize      << std::endl;
     std::cout << "-- sample frequency = " << sampleFreq     << std::endl;
     std::cout << "-- Nyquist zone     = " << nyquistZone    << std::endl;
     std::cout << "-- blocks per frame = " << blocksPerFrame << std::endl;
-    coord.summary(); 
+    //
+    SkymapCoordinate coord1 (obsData,
+			    timeFreq,
+			     CR::SkymapQuantity::FREQ_POWER);
+    coord1.summary(); 
+    //
+    SkymapCoordinate coord2 (obsData,
+			    timeFreq,
+			     CR::SkymapQuantity::TIME_CC);
+    coord2.summary(); 
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -97,7 +105,7 @@ int test_constructors ()
   
   cout << "[3] Testing construction for (Direction,Radius) coordinate ..." << endl;
   try {
-    CR::ObservationData obsData (telescope,observer);
+    ObservationData obsData (telescope,observer);
     TimeFreqCoordinate timeFreq (blocksize,
 				 sampleFreq,
 				 nyquistZone,
@@ -120,7 +128,7 @@ int test_constructors ()
 
   cout << "[4] Testing construction for cartesian coordinate ..." << endl;
   try {
-    CR::ObservationData obsData (telescope,observer);
+    ObservationData obsData (telescope,observer);
     TimeFreqCoordinate timeFreq (blocksize,
 				 sampleFreq,
 				 nyquistZone,
@@ -131,19 +139,25 @@ int test_constructors ()
 			       projection);
     spatial.setShape(casa::IPosition(3,100,100,10));
     //
-    SkymapCoordinate coord (obsData,
-			    spatial,
-			    timeFreq);
+    SkymapCoordinate coord1 (obsData,
+			     spatial,
+			     timeFreq,
+			     CR::SkymapQuantity::FREQ_POWER);
+    coord1.summary();
     //
-    coord.summary();
+    SkymapCoordinate coord2 (obsData,
+			     spatial,
+			     timeFreq,
+			     CR::SkymapQuantity::TIME_CC);
+    coord2.summary();
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
-
+  
   cout << "[5] Testing copy constructor ..." << endl;
   try {
-    CR::ObservationData obsData (telescope,observer);
+    ObservationData obsData (telescope,observer);
     TimeFreqCoordinate timeFreq (blocksize,
 				 sampleFreq,
 				 nyquistZone,
@@ -189,8 +203,8 @@ int test_methods ()
   uint nyquistZone (1);
   uint blocksPerFrame (1);
   uint nofFrames (10);
-  CR::ObservationData obsData ("LOFAR",
-			       "Lars Baehren");
+  ObservationData obsData ("LOFAR",
+			   "Lars Baehren");
   TimeFreqCoordinate timeFreq (blocksize,
 			       sampleFreq,
 			       nyquistZone,
@@ -222,9 +236,24 @@ int test_methods ()
     nofFailedTests++;
   }
   
+  cout << "[2] Adjust SkymapQuantity ..." << endl;
+  try {
+    /* current value */
+    cout << "--> parameter summary before adjustment:" << endl;
+    coord.summary();
+    /* assign new value */
+    coord.setSkymapQuantity(CR::SkymapQuantity::TIME_CC);
+    /* new value */
+    cout << "--> parameter summary after adjustment:" << endl;
+    coord.summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
   /* Methods of the embedded objects */
 
-  cout << "[2] Parameters of the TimeFreqCoordinate ..." << endl;
+  cout << "[3] Parameters of the TimeFreqCoordinate ..." << endl;
   try {
     cout << "-- blocksize         = " << coord.timeFreqCoordinate().blocksize()
 	 << endl;
@@ -278,7 +307,8 @@ int test_coordinateSystem ()
   uint nofFrames         = 10;
 
   // Coordinate objects
-  CR::ObservationData obsData (telescope,observer);
+  ObservationData obsData (telescope,
+			   observer);
   TimeFreqCoordinate timeFreq (blocksize,
 			       sampleFreq,
 			       nyquistZone,
@@ -373,7 +403,7 @@ int test_worldAxisValues ()
   uint nofFrames (10);
   
   // Coordinate objects
-  CR::ObservationData obsData (telescope,observer);
+  ObservationData obsData (telescope,observer);
   TimeFreqCoordinate timeFreq (blocksize,
 			       sampleFreq,
 			       nyquistZone,

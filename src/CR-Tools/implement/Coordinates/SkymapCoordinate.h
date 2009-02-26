@@ -90,7 +90,8 @@ namespace CR { // Namespace CR -- begin
 				   nofFrames);
       
       SkymapCoordinate coord (obsData,
-                              timeFreq);
+                              timeFreq,
+                              SkymapQuantity::TIME_CC);
       \endcode
       <li>Retrieve the values along the frequency and/or the time axis:
       \code
