@@ -48,6 +48,15 @@ namespace bpo = boost::program_options;
     \verbatim
     boostProgramOptions --help
     \endverbatim
+    Currently the following command line options are available:
+    \verbatim
+    Allowed options:
+    --help                Show help messages
+    --blocksize arg       Number of samples per block of data
+    --nof_frames arg      Number of frames
+    --refcode arg         Reference code for celestial coordinates
+    --projection arg      Spherical map projection
+    \endverbatim
     <li>User-specified values for the blocksize and the reference code for the 
     celestial reference frame:
     \verbatim
@@ -63,6 +72,8 @@ int main (int argc,
 {
   int result (0);
 
+  std::string infile;
+  std::string outfile    = "skymap.h5";
   int blocksize          = 1024;
   int nof_frames         = 1;
   std::string refcode    = "AZEL";
@@ -70,10 +81,12 @@ int main (int argc,
   
   /* Set up the list of options accepted on the command line */
 
-  bpo::options_description desc ("Allowed options");
+  bpo::options_description desc ("Supported command-line options");
 
   desc.add_options ()
     ("help", "Show help messages")
+    ("infile", bpo::value<std::string>(), "Input data set to process")
+    ("outfile", bpo::value<std::string>(), "Output file with the processing results")
     ("blocksize", bpo::value<int>(), "Number of samples per block of data")
     ("nof_frames", bpo::value<int>(), "Number of frames")
     ("refcode", bpo::value<std::string>(), "Reference code for celestial coordinates")
@@ -92,6 +105,18 @@ int main (int argc,
     return result;
   }
   
+  if (vm.count("infile")) {
+    infile = vm["infile"].as<std::string>();
+  } else {
+    std::cerr << "ERROR: Missing name of input file!" << std::endl;
+    std::cerr << desc << std::endl;
+    return result;
+  }
+
+  if (vm.count("outfile")) {
+    outfile = vm["outfile"].as<std::string>();
+  }
+
   if (vm.count("blocksize")) {
     blocksize = vm["blocksize"].as<int>();
   }
@@ -111,6 +136,8 @@ int main (int argc,
   /* Report variable values */
   
   std::cout << "[boostProgramOptions]" << std::endl;
+  std::cout << "-- infile     = " << infile     << std::endl;
+  std::cout << "-- outfile    = " << outfile    << std::endl;
   std::cout << "-- blocksize  = " << blocksize  << std::endl;
   std::cout << "-- nof_frames = " << nof_frames << std::endl;
   std::cout << "-- refcode    = " << refcode    << std::endl;

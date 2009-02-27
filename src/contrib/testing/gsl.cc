@@ -31,7 +31,7 @@
 /*!
   \file tUseGSL.cc
 
-  \ingroup CR_test
+  \ingroup contrib
 
   \brief A simple test for working with the GNU Scientific Library (GSL)
 
