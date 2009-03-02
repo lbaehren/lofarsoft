@@ -81,7 +81,7 @@ class rm
 		     bool freq=true);
   //! (Forward) Fourier Transform to get an image from an RM cube
   vector<double> fourierTransform(vector<double>, vector<double>, bool freq=true);
-		
+
   // Atmospheric correction of RM (contribution through atmosphere)
   // ??
 	
