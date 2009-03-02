@@ -128,10 +128,6 @@ MeasFrame ObservationFrame::getObservationFrame ()
 //
 // =============================================================================
 
-void ObservationFrame::setEpoch (const Quantity epoch) {
-  epoch_p = epoch;
-}
-
 void ObservationFrame::setEpoch (const double value,
 				 const String unit)
 {
@@ -193,10 +189,6 @@ void ObservationFrame::setObservatoryPosition ()
   }
 }
 
-String ObservationFrame::getObservatoryName () {
-  return observatoryName_p;
-}
-
 void ObservationFrame::getObservatory (MPosition& obsPosition) {
   obsPosition = observatoryPosition_p;
 }
@@ -220,11 +212,6 @@ void ObservationFrame::setAntennaPositions (const Matrix<double> antennaPosition
   antennaPositions_p = antennaPositions;
 }
 
-Matrix<double> ObservationFrame::antennaPositions ()
-{
-  return antennaPositions_p;
-}
-
 Cube<double> ObservationFrame::baselines ()
 {
   int nant,ncoords;
@@ -243,10 +230,6 @@ Cube<double> ObservationFrame::baselines ()
 
   return antennaBaselines;
 
-}
-
-int ObservationFrame::nofAntennae () {
-  return antennaPositions_p.nrow();
 }
 
 int ObservationFrame::nofAntennae (bool selected)

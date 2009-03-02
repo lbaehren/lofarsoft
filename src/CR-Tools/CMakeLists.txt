@@ -347,7 +347,7 @@ if (CR_WITH_GUI)
   
   find_path (HAVE_QT4_QWIDGET QWidget
     PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
-    PATH_SUFFIXES qt4-x11 qt4-x11/include qt4-x11/include/QtGui QtGui
+    PATH_SUFFIXES qt4-x11/include/QtGui QtGui
     )
   if (HAVE_QT4_QWIDGET)
     list (APPEND QT4_INCLUDES ${HAVE_QT4_QWIDGET})
@@ -371,13 +371,6 @@ if (CR_WITH_GUI)
   endif (NOT QT4_LIBARY_QTCORE OR NOT QT4_LIBARY_QTGUI)
 
 endif (CR_WITH_GUI)
-
-## -------------------------------------------------------------------
-## Build test programs for external packages?  ON/OFF
-
-#if (CR_BUILD_EXTERNAL_TESTS)
-#  add_subdirectory (test)
-#endif (CR_BUILD_EXTERNAL_TESTS)
 
 ## =============================================================================
 ##

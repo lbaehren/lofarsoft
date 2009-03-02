@@ -39,7 +39,6 @@
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <coordinates/Coordinates/LinearCoordinate.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
-#include <images/Images/PagedImage.h>
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/SetupNewTab.h>
 #include <tables/Tables/Table.h>
@@ -47,6 +46,10 @@
 
 #ifdef HAVE_HDF5
 #include <images/Images/HDF5Image.h>
+const std::string outfile_name ("skymap.h5");
+#else
+#include <images/Images/PagedImage.h>
+const std::string outfile_name ("skymap.img");
 #endif
 
 // LOPES-Tools header files
@@ -77,13 +80,22 @@ namespace CR {  // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li><a href="http://www.astron.nl/casacore/trunk/casacore/doc/html/group__coordinates.html">casacore Coordinates module</a>
-      <li><a href="http://www.astron.nl/casacore/trunk/casacore/doc/html/group__images.html">casacore Images module</a>
-      
+      <li>casacore modules:
+      <ul>
+        <li><a href="http://www.astron.nl/casacore/trunk/casacore/doc/html/group__coordinates.html">Coordinates</a>
+	<li><a href="http://www.astron.nl/casacore/trunk/casacore/doc/html/group__images.html">Images</a>
+      </ul>
+      <li>SkymapCoordinate: Container for the coordinates associated with a sky map.
+      <ul>
+        <li>ObservationData: Store information describing an observation.
+	<li>SkymapQuantity: Container for the settings to determine the quantity
+	of a skymap.
+	<li>SpatialCoordinate: Container to combine other coordinates into a
+	spatial (3D) coordinate.
+	<li>TimeFreqCoordinate: Container for the time-frequency domain parameters
+	of a sky map.
+      </ul>
       <li>Beamformer
-      <li>ObservationData
-      <li>SkymapCoordinate
-      <li>SkymapperTools
       <li>DataReader
     </ul>
       
@@ -94,11 +106,10 @@ namespace CR {  // Namespace CR -- begin
     <ul>
       <li>Since almost all of the parameters required by the emedded Beamformer
       object can be derived from the also embedded SkymapCoordinate object, only
-      a minimal interface is provided to the outside world:
+      a minimal interface is provided to the outside world for the first of the 
+      two:
       <ul>
         <li>Skymapper::beamformer -- retrieve the embedded Beamformer object
-	<li>Skymapper::skymapType
-	<li>Skymapper::setSkymapType
 	<li>Skymapper::setAntPositions -- as the Skymapper class itself is not
 	handling the actual data I/O, the antenna positions required by the
 	Beamformer need to be provided separately.
@@ -194,7 +205,7 @@ namespace CR {  // Namespace CR -- begin
 
       \param filename -- Name of the output file
     */
-    Skymapper (std::string const &filename="skymap.h5");
+    Skymapper (std::string const &filename=outfile_name);
     
     /*!
       \brief Argumented constructor
@@ -204,7 +215,7 @@ namespace CR {  // Namespace CR -- begin
       \param filename -- Name of the output file
     */
     Skymapper (SkymapCoordinate const &skymapCoord,
-	       std::string const &filename="skymap.h5");
+	       std::string const &filename=outfile_name);
     
     /*!
       \brief Argumented constructor
@@ -217,7 +228,7 @@ namespace CR {  // Namespace CR -- begin
     */
     Skymapper (SkymapCoordinate const &skymapCoord,
 	       Matrix<double> const &antPositions,
-	       std::string const &filename="skymap.h5");
+	       std::string const &filename=outfile_name);
     
     /*!
       \brief Argumented constructor
@@ -230,7 +241,7 @@ namespace CR {  // Namespace CR -- begin
     */
     Skymapper (SkymapCoordinate const &skymapCoord,
 	       Vector<MVPosition> const &antPositions,
-	       std::string const &filename="skymap.h5");
+	       std::string const &filename=outfile_name);
     
     /*!
       \brief Copy constructor
@@ -464,7 +475,7 @@ namespace CR {  // Namespace CR -- begin
       \param os      -- Output stream to which the summary will be written.
     */
     template <class T>
-      static void summary (const casa::PagedImage<T>& myimage,
+      static void summary (const casa::ImageInterface<T>& myimage,
 			   std::ostream &os=std::cout)
       {
 	casa::IPosition shape (myimage.shape());

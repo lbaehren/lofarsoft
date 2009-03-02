@@ -65,12 +65,6 @@ using CR::TimeFreq;
 
   <h3>Synopsis</h3>
 
-  There are quite a number of tests for better understanding the functionality
-  of the classes derived from casa::ImageInterface:
-  <ol>
-    <li>Basic creation of a new image, either of type casa::PagedImage or
-    casa::HDF5Image.
-  </ol>
 */
 
 // -----------------------------------------------------------------------------
@@ -112,6 +106,11 @@ int cleanup_directory ()
   \brief Test setting up the Beamformer using a SkymapCoordinate object
 
   \return nofFailedTests -- The number of failed tests.
+
+  Since the Skymapper class uses a Beamformer object as private data, all
+  interaction with the latter is taking place indirectly. The basic method by
+  which the Beamformer object is set up and configured is through extracting the
+  required data from the also embedded SkymapCoordinate object.
 */
 int test_Beamformer (uint const &blocksize=1024)
 {
@@ -401,7 +400,7 @@ int test_processing (string const &infile,
   //________________________________________________________
   // Run the processing tests
   
-  cout << "[1] Process a single block of data ..." << endl;
+  cout << "[1] Process a single block of (simulated) data ..." << endl;
   try {
     Skymapper skymapper (coord,
 			 antPositions,

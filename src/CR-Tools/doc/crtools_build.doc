@@ -6,8 +6,9 @@
 
 - \ref crtools_obtain_code
 - \ref crtools_configure_build
-- \ref crtools_build_parameters
 - \ref crtools_build_components
+- \ref crtools_update_code
+- \ref crtools_build_parameters
 - \ref crtools_build_script
 
 <hr>
@@ -56,6 +57,20 @@ svn co http://usg.lofar.org/svn/code/trunk usg
 Once you have run \e CMake on the source code directory, you can start building the various libraries, test
 programs and application programs; all of these individual products are presented to the user as "build
 targets" which can either be generated all together or individually.
+
+<hr>
+
+\section crtools_update_code Update your working version of the code tree
+
+In order to keep up with ongoing changes in the code base -- and thereby getting
+access to the latest features made available -- you should be updating you
+working version of the code tree against the repository.
+
+\code
+cd build
+make update
+make cr
+\endcode
 
 <hr>
 

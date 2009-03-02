@@ -65,19 +65,19 @@ using casa::Vector;
 
   <h3>Prerequisite</h3>
 
-  <ul type=square">
-  <li><a href="http://aips2.nrao.edu/docs/aips/implement/Quanta.html">AIPS++
-  Quanta module</a> for units and quantities.
-  <li><a href="http://aips2.nrao.edu/docs/aips/implement/Measures.html">AIPS++
-  Measures module</a>:  Measures are physical quantities within a certain
-  reference frame. Examples are the Hour-angle and Declination of a source at a
-  certain time and observatory; an Ra/Dec for a certain mean epoch; an apparent
-  frequency at a certain time given in eV; a local sidereal time at an observatory.
-  <li><a href="http://aips2.nrao.edu/docs/aips/implement/Measures/MeasTable.html">MeasTable</a>:
-  interface for all data that comes from Tables rather than the program.
-  <li>The <a href="http://aips2.nrao.edu/docs/reference/System/node13.html">AIPS++
-  data repository</a> contains all of the standard global data used internally by
-  AIPS++.
+  <ul type="square">
+    <li><a href="http://aips2.nrao.edu/docs/aips/implement/Quanta.html">AIPS++
+    Quanta module</a> for units and quantities.
+    <li><a href="http://aips2.nrao.edu/docs/aips/implement/Measures.html">AIPS++
+    Measures module</a>:  Measures are physical quantities within a certain
+    reference frame. Examples are the Hour-angle and Declination of a source at a
+    certain time and observatory; an Ra/Dec for a certain mean epoch; an apparent
+    frequency at a certain time given in eV; a local sidereal time at an observatory.
+    <li><a href="http://aips2.nrao.edu/docs/aips/implement/Measures/MeasTable.html">MeasTable</a>:
+    interface for all data that comes from Tables rather than the program.
+    <li>The <a href="http://aips2.nrao.edu/docs/reference/System/node13.html">AIPS++
+    data repository</a> contains all of the standard global data used internally by
+    AIPS++.
   </ul>
 
   <h3>Synopsis</h3>
@@ -96,70 +96,79 @@ using casa::Vector;
 
 class ObservationFrame {
 
-  // Epoch of the observation
+  //! Epoch of the observation
   Quantity epoch_p;
-  // The name of the observation site
+  //! The name of the observation site
   String observatoryName_p;
-  // The location of the observation site
+  //! The location of the observation site
   MPosition observatoryPosition_p;
-  // Antenna positions w.r.t. the array phase center
+  //! Antenna positions w.r.t. the array phase center
   Matrix<double> antennaPositions_p;
+  //! Antenna selection
   Vector<bool> antennaSelection_p;
   
  public:
 
   // === Construction / Deconstruction =========================================
 
-  //! Empty constructor
   /*!
+    \brief Default constructor
+  
     This creates an <i>ObservationFrame</i> object using a set of default
     values (uses present time as default epoch); the values of the member data
     are set through the ObservationFrame::setObservationFrame function.
   */
   ObservationFrame();
 
-  //! Argumented constructor
-  /*! Given the name of the observatory the AIPS++ data respository is inspected
+  /*!
+    \brief Argumented constructor
+
+    Given the name of the observatory the AIPS++ data respository is inspected
     to see wether this observatory is known to the system; if it is, the 
     position information is set as well.
-    \param epoch - The epoch of the observation, provided as AIPS++ Quantity.
+
+    \param epoch   - The epoch of the observation, provided as AIPS++ Quantity.
     \param obsName - The name of the observatory.
   */
   ObservationFrame(Quantity epoch,
 		   String obsName);
 
-  //! Argumented constructor
   /*!
-    \param epoch - The epoch of the observation, provided as AIPS++ Quantity.
+    \brief Argumented constructor
+
+    \param epoch       - The epoch of the observation, provided as AIPS++ Quantity.
     \param obsPosition - The position of the observatory in global geocentric
-    coordinates.
-   */
+           coordinates.
+  */
   ObservationFrame(Quantity epoch,
 		   MPosition obsPosition);
 
-  //! Argumented constructor
   /*!
-    \param epoch - The epoch of the observation, provided as AIPS++ Quantity.
-    \param obsName - The name of the observatory.
+    \brief Argumented constructor
+
+    \param epoch       - The epoch of the observation, provided as AIPS++ Quantity.
+    \param obsName     - The name of the observatory.
     \param obsPosition - The position of the observatory in global geocentric
-    coordinates.
-   */
+           coordinates.
+  */
   ObservationFrame(Quantity epoch,
 		   String obsName,
 		   MPosition obsPosition);
 
   // === Initialization ========================================================
 
-  //! Initialization of the main data members.
   /*!
+    \brief Initialization of the main data members.
+
     \param epoch   - The epoch of the observation, provided as AIPS++ Quantity.
     \param obsName - The name of the observatory.
   */
   void setObservationFrame (Quantity epoch,
 			    String obsName);
 
-  //! Initialization of the main data members.
   /*!
+    \brief Initialization of the main data members.
+
     \param epoch   - The epoch of the observation, provided as AIPS++ Quantity.
     \param obsName - The name of the observatory.
     \param antpos  - 3D positions of the antennae (in case of an array).
@@ -168,8 +177,9 @@ class ObservationFrame {
 			    String obsName,
 			    Matrix<double> antpos);
 
-  //! Initialization of the main data members.
   /*!
+    \brief Initialization of the main data members.
+
     \param epoch       - The epoch of the observation, provided as AIPS++
                          Quantity.
     \param obsName     - The name of the observatory.
@@ -180,19 +190,21 @@ class ObservationFrame {
 			    String obsName,
 			    MPosition obsPosition);
   
-  //! Get the epoch and the location of the observation
   /*!
+    \brief Get the epoch and the location of the observation
+
     \retval epoch       - Epoch ob the observation.
     \retval obsPosition - Position of the observatory.
-   */
+  */
   void getObservationFrame (Quantity& epoch,
 			    MPosition& obsPosition);
 
-  //! Get the epoch and the location as measures frame
   /*!
+    \brief Get the epoch and the location as measures frame
+  
     \retval frame - A reference frame constructed of the observation epoch and 
-    location.
-   */
+            location.
+  */
   MeasFrame getObservationFrame ();
 
   // === Epoch of the observation ==============================================
@@ -203,25 +215,35 @@ class ObservationFrame {
     (Re)Set the epoch of the observation. Input is a AIPS++ quantity, i.e. a
     value with a physical unit.
   */
-  void setEpoch (const Quantity epoch);
+  inline void setEpoch (Quantity const &epoch) {
+    epoch_p = epoch;
+  }
 
   /*!
     \brief Set the epoch of the observation.
-
+    
     \param value = Value of the quantity, e.g. time in days.
     \param unit  = Unit of the quantity, e.g. days.
-   */
+  */
   void setEpoch (const double value,
 		 const String unit);
+  
+  /*!
+    \brief Get the time of observation (epoch) as AIPS++ Quantity.
 
-  //! Get the time of observation (epoch) as AIPS++ Quantity.
+    \retval epoch -- The time of observation (epoch) as AIPS++ Quantity.
+  */
   void epoch (Quantity& epoch);
+  
+  /*!
+    \brief Get the time of observation (epoch) as AIPS++ Measure.
 
-  //! Get the time of observation (epoch) as AIPS++ Measure.
+    \retval epoch -- The time of observation (epoch) as AIPS++ Measure.
+  */
   void epoch (MEpoch& epoch);
-
+  
   // === Name and location of the Observatory ==================================
-
+  
   /*!
     \brief Set the name of the Observatory.
 
@@ -259,24 +281,38 @@ class ObservationFrame {
 
     \return observatoryName - The name of the observatory.
   */
-  String getObservatoryName ();
-
+  inline String getObservatoryName () {
+    return observatoryName_p;
+  }
+  
   //! Get the position of the observatory as AIPS++ Measure.
   void getObservatory (MPosition&);
 
   //! Get the name (as string) and the position of the observatory (as measure).
-  void getObservatory (String&,MPosition&);
+  void getObservatory (String&,
+		       MPosition&);
 
   // === Array antennae ========================================================
 
-  //! Set the 3D position of the antennae.
+  /*!
+    \brief Get the 3D position of the antennae.
+    
+    \param antennaPositions -- 3D positions of the antennae.
+  */
+  inline Matrix<double> antennaPositions () {
+    return antennaPositions_p;
+  }
+
+  /*!
+    \brief Set the 3D position of the antennae.
+    
+    \param antennaPositions -- 3D positions of the antennae.
+  */
   void setAntennaPositions (const Matrix<double> antennaPositions);
 
-  //! Get the 3D positions of the antennae.
-  Matrix<double> antennaPositions ();
-
-  //! Get the geometrical baselines between the antennae of the array.
   /*!
+    \brief Get the geometrical baselines between the antennae of the array.
+
     Get the geometrical baselines between the antennae of the array: for two
     antennae at positions \f$ x_i \f$ and \f$ x_j \f$ we have \f$ u_{ij} = 
     x_j - x_i \f$.
@@ -284,7 +320,9 @@ class ObservationFrame {
   Cube<double> baselines ();
 
   //! Of how many antennae does the array consist?
-  int nofAntennae ();
+  inline int nofAntennae () {
+    return antennaPositions_p.nrow();
+  }
 
   //! Number of selected/deselected antennae.
   int nofAntennae (bool);
@@ -295,6 +333,7 @@ class ObservationFrame {
   void show (std::ostream&);
   
  private: 
+
   /*!
     Set the observatory position by looking up the observatory name in the data
     repository.
