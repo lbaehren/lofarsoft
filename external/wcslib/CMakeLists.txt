@@ -37,7 +37,11 @@ if (NOT USG_ROOT)
     )
   
   if (USG_ROOT)
+    ## load general settings
     include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+    ## check if package is installed already
+    set (WCSLIB_FIND_QUIETLY YES)
+    include (FindWCS)
   else (USG_ROOT)
     message (FATAL_ERROR "Unable to locate additional CMake scripts!")
   endif (USG_ROOT)
@@ -50,13 +54,11 @@ if (NOT HAVE_WCSLIB OR WCSLIB_FORCE_BUILD)
   ## silence find scipt output if necessary
   
   if (NOT WCSLIB_VERBOSE_CONFIGURE)
-    set (CFITSIO_FIND_QUIETLY 1)
-    set (BOOST_FIND_QUIETLY 1)
-    set (PYTHON_FIND_QUIETLY 1)
-    set (WCSLIB_FIND_QUIETLY 1)
+    set (CFITSIO_FIND_QUIETLY YES )
+    set (BOOST_FIND_QUIETLY   YES )
+    set (PYTHON_FIND_QUIETLY  YES )
   endif (NOT WCSLIB_VERBOSE_CONFIGURE)
   
-  include (FindWCS)
   include (FindCFITSIO)
   include (FindBoost)
   include (FindPython)

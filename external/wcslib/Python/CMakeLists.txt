@@ -26,4 +26,8 @@ endif(APPLE)
 
 ## -----------------------------------------------------------------------------
 ## Installation
-install(TARGETS wcslib DESTINATION lib/python)
+
+install (
+  TARGETS wcslib
+  LIBRARY DESTINATION lib/python
+  )
