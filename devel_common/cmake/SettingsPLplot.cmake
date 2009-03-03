@@ -3,14 +3,12 @@
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
 if (NOT USG_ROOT)
-  message (STATUS "[SettingsPLplot] USG_ROOT not yet defined! Checking now...")
   find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
-    PATHS 
-    ..
-    ../..
-    ../../..
-    ../../../..
     $ENV{LOFARSOFT}
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../..
+    NO_DEFAULT_PATH
     )
 endif (NOT USG_ROOT)
 

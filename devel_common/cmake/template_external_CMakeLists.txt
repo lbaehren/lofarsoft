@@ -24,7 +24,7 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   ${<PROJECT>_SOURCE_DIR}/..
   ${<PROJECT>_SOURCE_DIR}/../..
   ${<PROJECT>_SOURCE_DIR}/../../..
-  ENV LOFARSOFT
+  $ENV{LOFARSOFT}
   )
 
 if (USG_ROOT)

@@ -22,6 +22,8 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   $ENV{LOFARSOFT}
   )
 
+message (STATUS "LOFARSOFT = $ENV{LOFARSOFT}")
+
 if (USG_ROOT)
   ## load custom modules
   include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
@@ -253,6 +255,7 @@ add_dependencies (contrib dal)
 message (STATUS "------------------------------------------------------------")
 message (STATUS "USG_ROOT           = ${USG_ROOT}")
 message (STATUS "USG_INSTALL_PREFIX = ${USG_INSTALL_PREFIX}")
+message (STATUS "USG_DATA           = ${USG_DATA}")
 message (STATUS "------------------------------------------------------------")
 
 if (SYSTEM_DIAGNOSTICS)

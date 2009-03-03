@@ -32,8 +32,9 @@ if (NOT USG_CMAKE_CONFIG)
     ## directory
     find_path (USG_INSTALL_PREFIX release/release_area.txt
       $ENV{LOFARSOFT}
-      ..
-      ../..
+      ${CMAKE_CURRENT_SOURCE_DIR}/..
+      ${CMAKE_CURRENT_SOURCE_DIR}/../..
+      ${CMAKE_CURRENT_SOURCE_DIR}/../../..
       NO_DEFAULT_PATH
       )
     ## convert the relative path to an absolute one
