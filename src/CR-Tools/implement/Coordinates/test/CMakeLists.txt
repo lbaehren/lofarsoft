@@ -6,6 +6,8 @@
 ## Set up the list with test program sources
 
 set (tests
+  tAntennaArray
+  tAntennaArrays
   tCoordinateType
   tCoordinateGrid
   tGridCoordinate
