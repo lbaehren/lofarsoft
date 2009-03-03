@@ -40,12 +40,22 @@
   \endcode
   
   <li><b>Build the software:</b><br>
-  There is a build script available, which will go through the list of required
-  external components and finally builds the CR-Tools themselves
-  \code
-  cd $LOFARSOFT/build
-  ./build.sh cr
-  \endcode
+  For the time being there are two build chains available:
+  <ol>
+    <li>Set up a CMake-based environemt using a bootstrap script:
+	\code
+	cd $LOFARSOFT/build
+	./bootstrap
+	make cr
+	\endcode
+    <li>Run a shell script which goes through a sequence of configuration and
+	build calls.
+	\code
+	cd $LOFARSOFT/build
+	./build.sh cr
+	\endcode
+	\e Note: This build chain is to be discontinued in the near future.
+  </ol>
   For further control of the process see the section on \ref crtools_build_script
   below.
 </ol>
