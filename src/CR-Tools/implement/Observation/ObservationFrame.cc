@@ -18,9 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
-/* $Id: ObservationFrame.cc,v 1.2 2006/11/27 10:54:04 bahren Exp $ */
-
 #include <Observation/ObservationFrame.h>
 
 using std::cout;
@@ -32,6 +29,9 @@ using std::endl;
 // Construction / Destruction
 //
 // =============================================================================
+
+//______________________________________________________________________________
+//                                                              ObservationFrame
 
 ObservationFrame::ObservationFrame()
 {
@@ -45,6 +45,9 @@ ObservationFrame::ObservationFrame()
   ObservationFrame::setObservationFrame(epoch,obsName);
 }
 
+//______________________________________________________________________________
+//                                                              ObservationFrame
+
 ObservationFrame::ObservationFrame(Quantity epoch,
 				   String obsName)
 {
@@ -57,6 +60,9 @@ ObservationFrame::ObservationFrame(Quantity epoch,
   ObservationFrame::setObservationFrame(epoch,obsName,obsPosition);
 }
 
+//______________________________________________________________________________
+//                                                              ObservationFrame
+
 ObservationFrame::ObservationFrame (Quantity epoch,
 				    MPosition obsPosition)
 {
@@ -64,6 +70,9 @@ ObservationFrame::ObservationFrame (Quantity epoch,
 
   ObservationFrame::setObservationFrame(epoch,obsName,obsPosition);
 }
+
+//______________________________________________________________________________
+//                                                              ObservationFrame
 
 ObservationFrame::ObservationFrame(Quantity epoch,
 				   String obsName,
@@ -79,6 +88,9 @@ ObservationFrame::ObservationFrame(Quantity epoch,
 //
 // =============================================================================
 
+//______________________________________________________________________________
+//                                                           setObservationFrame
+
 void ObservationFrame::setObservationFrame (Quantity epoch,
 					    String obsName)
 {
@@ -86,6 +98,9 @@ void ObservationFrame::setObservationFrame (Quantity epoch,
   ObservationFrame::setEpoch (epoch);
   ObservationFrame::setObservatory (obsName);
 }
+
+//______________________________________________________________________________
+//                                                           setObservationFrame
 
 void ObservationFrame::setObservationFrame (Quantity epoch,
 					    String obsName,
@@ -96,6 +111,9 @@ void ObservationFrame::setObservationFrame (Quantity epoch,
 }
 
 
+//______________________________________________________________________________
+//                                                           setObservationFrame
+
 void ObservationFrame::setObservationFrame (Quantity epoch,
 					    String obsName,
 					    MPosition obsPosition)
@@ -105,12 +123,8 @@ void ObservationFrame::setObservationFrame (Quantity epoch,
   ObservationFrame::setObservatory (obsName,obsPosition);
 }
 
-void ObservationFrame::getObservationFrame (Quantity& epoch,
-					    MPosition& obsPosition)
-{
-  ObservationFrame::epoch (epoch);
-  ObservationFrame::getObservatory (obsPosition);
-}
+//______________________________________________________________________________
+//                                                           getObservationFrame
 
 MeasFrame ObservationFrame::getObservationFrame ()
 {
@@ -122,47 +136,8 @@ MeasFrame ObservationFrame::getObservationFrame ()
   return frame;
 }
 
-// =============================================================================
-//
-//  Epoch of the observation
-//
-// =============================================================================
-
-void ObservationFrame::setEpoch (const double value,
-				 const String unit)
-{
-  epoch_p = Quantity (value,unit);
-}
-
-void ObservationFrame::epoch (Quantity& epoch) {
-  epoch = epoch_p;
-}
-
-void ObservationFrame::epoch (MEpoch& epoch) {
-  epoch = MEpoch(epoch_p);
-}
-
-// =============================================================================
-//
-//  Name and Position of the Observatory
-//
-// =============================================================================
-
-void ObservationFrame::setObservatory (const String observatoryName) {
-  observatoryName_p = observatoryName;
-  ObservationFrame::setObservatoryPosition ();
-}
-
-void ObservationFrame::setObservatory (MPosition obsPosition) {
-  observatoryPosition_p = obsPosition;
-}
-
-void ObservationFrame::setObservatory(String obsName,
-				      MPosition obsPosition)
-{
-  ObservationFrame::setObservatory (obsName);
-  ObservationFrame::setObservatory (obsPosition);
-}
+//______________________________________________________________________________
+//                                                        setObservatoryPosition
 
 void ObservationFrame::setObservatoryPosition () 
 {
@@ -170,7 +145,7 @@ void ObservationFrame::setObservatoryPosition ()
   MPosition obsPosition;
   bool obsStatus;
   
-  obsName = observatoryName_p;
+  obsName = name_p;
   MeasTable::initObservatories ();
   obsStatus = MeasTable::Observatory(obsPosition,obsName);
   
@@ -189,28 +164,8 @@ void ObservationFrame::setObservatoryPosition ()
   }
 }
 
-void ObservationFrame::getObservatory (MPosition& obsPosition) {
-  obsPosition = observatoryPosition_p;
-}
-
-void ObservationFrame::getObservatory (String& obsName,
-				       MPosition& obsPosition) 
-{
-  obsName = observatoryName_p;
-  obsPosition = observatoryPosition_p;
-}
-
-// =============================================================================
-//
-//  Array antennae
-//
-// =============================================================================
-
-void ObservationFrame::setAntennaPositions (const Matrix<double> antennaPositions)
-{
-  antennaPositions_p.resize(antennaPositions.shape());
-  antennaPositions_p = antennaPositions;
-}
+//______________________________________________________________________________
+//                                                                     baselines
 
 Cube<double> ObservationFrame::baselines ()
 {
@@ -232,7 +187,10 @@ Cube<double> ObservationFrame::baselines ()
 
 }
 
-int ObservationFrame::nofAntennae (bool selected)
+//______________________________________________________________________________
+//                                                                   nofAntennae
+
+int ObservationFrame::nofAntennae (bool const &selected)
 {
   int sum (0);
   int nofAntennae (antennaPositions_p.nrow());
@@ -256,13 +214,13 @@ int ObservationFrame::nofAntennae (bool selected)
 //
 // =============================================================================
 
-void ObservationFrame::show (std::ostream& s = std::cout)
+void ObservationFrame::summary (std::ostream& s = std::cout)
 {
   IPosition shape = antennaPositions_p.shape();
 
   s << "\n[ObservationFrame]\n" << endl;
   s << " - Epoch of the observation    : " << epoch_p << endl;
-  s << " - Name of the Observatory     : " << observatoryName_p << endl;
+  s << " - Name of the Observatory     : " << name_p << endl;
   s << " - Location of the Observatory : " << observatoryPosition_p << endl;
   s << " - 3D antenna positions ...... : " << shape << endl;
   for (int ant=0; ant<shape(0); ant++) {

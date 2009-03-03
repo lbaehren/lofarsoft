@@ -37,6 +37,8 @@ using CR::ObservationData;
 /*!
   \file tObservationData.cc
 
+  \ingroup Observation
+
   \brief A collection of tests for ObservationData.
 
   \author Lars B&auml;hren

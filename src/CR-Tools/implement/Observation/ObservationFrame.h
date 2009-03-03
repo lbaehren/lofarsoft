@@ -22,15 +22,12 @@
 #ifndef OBSERVATIONFRAME_H
 #define OBSERVATIONFRAME_H
 
-/* $Id: ObservationFrame.h,v 1.3 2006/11/27 10:54:04 bahren Exp $ */
-
-// C++ Standard library
+// Systen header files
 #include <cstdio>
 #include <sstream>
 #include <fstream>
 
-// AIPS++ wrapper classes
-#include <casa/aips.h>
+// casacore header files
 #include <casa/Arrays.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/ArrayMath.h>
@@ -99,7 +96,7 @@ class ObservationFrame {
   //! Epoch of the observation
   Quantity epoch_p;
   //! The name of the observation site
-  String observatoryName_p;
+  String name_p;
   //! The location of the observation site
   MPosition observatoryPosition_p;
   //! Antenna positions w.r.t. the array phase center
@@ -196,12 +193,15 @@ class ObservationFrame {
     \retval epoch       - Epoch ob the observation.
     \retval obsPosition - Position of the observatory.
   */
-  void getObservationFrame (Quantity& epoch,
-			    MPosition& obsPosition);
-
+  inline void getObservationFrame (Quantity &epoch,
+				   MPosition &obsPosition) {
+    ObservationFrame::epoch (epoch);
+    ObservationFrame::getObservatory (obsPosition);
+  }
+  
   /*!
     \brief Get the epoch and the location as measures frame
-  
+    
     \retval frame - A reference frame constructed of the observation epoch and 
             location.
   */
@@ -225,33 +225,45 @@ class ObservationFrame {
     \param value = Value of the quantity, e.g. time in days.
     \param unit  = Unit of the quantity, e.g. days.
   */
-  void setEpoch (const double value,
-		 const String unit);
+  inline void setEpoch (double const &value,
+			String const &unit) {
+    epoch_p = Quantity (value,unit);
+  }
+  
   
   /*!
     \brief Get the time of observation (epoch) as AIPS++ Quantity.
 
     \retval epoch -- The time of observation (epoch) as AIPS++ Quantity.
   */
-  void epoch (Quantity& epoch);
+  inline void epoch (Quantity& epoch) {
+    epoch = epoch_p;
+  }
   
   /*!
     \brief Get the time of observation (epoch) as AIPS++ Measure.
 
     \retval epoch -- The time of observation (epoch) as AIPS++ Measure.
   */
-  void epoch (MEpoch& epoch);
+  inline void epoch (MEpoch& epoch) {
+    epoch = MEpoch(epoch_p);
+  }
   
   // === Name and location of the Observatory ==================================
   
   /*!
     \brief Set the name of the Observatory.
 
+    \param name -- The name of the observatory.
+
     Set the name of the Observatory. Given the name, the related position is 
     attempted to be read from the data repository; if the telescope cannot be
     found there, the user is asked for further advice..
    */
-  void setObservatory (const String observatoryName);
+  inline void setObservatory (String const &name) {
+    name_p = name;
+    ObservationFrame::setObservatoryPosition ();
+  }
 
   /*!
     \brief Set the position of the observatory.
@@ -264,7 +276,9 @@ class ObservationFrame {
     enable reverse lookup, i.e. scan the data repository, wether the Observatory
     name to the provided values can be found in the database.
   */
-  void setObservatory (MPosition);
+  inline void setObservatory (MPosition const &obsPosition) {
+    observatoryPosition_p = obsPosition;
+  }
 
   /*!
     \brief Set name and position of the observatory
@@ -272,34 +286,48 @@ class ObservationFrame {
     \param obsName - The name of the observatory.
     \param obsPosition - The position of the observatory in global geocentric
            coordinates.
-   */
-  void setObservatory (String obsName,
-		       MPosition obsPosition);
+  */
+  inline void setObservatory (String const &obsName,
+			      MPosition const &obsPosition) {
+    setObservatory (obsName);
+    setObservatory (obsPosition);
+  }
 
   /*!
     \brief Get the name of the observatory.
 
     \return observatoryName - The name of the observatory.
   */
-  inline String getObservatoryName () {
-    return observatoryName_p;
+  inline String getObservatoryName () const {
+    return name_p;
   }
   
   //! Get the position of the observatory as AIPS++ Measure.
-  void getObservatory (MPosition&);
+  inline void getObservatory (MPosition &obsPosition) {
+    obsPosition = observatoryPosition_p;
+  }
 
-  //! Get the name (as string) and the position of the observatory (as measure).
-  void getObservatory (String&,
-		       MPosition&);
+  /*!
+    \brief Get the name (as string) and the position of the observatory (as measure).
 
+    \retval obsName     -- Name of the observatory.
+    \retval obsPosition -- Position/Location of the observatory.
+  */
+  inline void getObservatory (String& obsName,
+			      MPosition& obsPosition) 
+    {
+      obsName     = name_p;
+      obsPosition = observatoryPosition_p;
+    }
+  
   // === Array antennae ========================================================
-
+  
   /*!
     \brief Get the 3D position of the antennae.
     
-    \param antennaPositions -- 3D positions of the antennae.
+    \return antennaPositions -- 3D positions of the antennae.
   */
-  inline Matrix<double> antennaPositions () {
+  inline Matrix<double> antennaPositions () const {
     return antennaPositions_p;
   }
 
@@ -308,7 +336,10 @@ class ObservationFrame {
     
     \param antennaPositions -- 3D positions of the antennae.
   */
-  void setAntennaPositions (const Matrix<double> antennaPositions);
+  inline void setAntennaPositions (const Matrix<double> antennaPositions) {
+    antennaPositions_p.resize(antennaPositions.shape());
+    antennaPositions_p = antennaPositions;
+  }
 
   /*!
     \brief Get the geometrical baselines between the antennae of the array.
@@ -319,27 +350,38 @@ class ObservationFrame {
    */
   Cube<double> baselines ();
 
-  //! Of how many antennae does the array consist?
+  /*!
+    \brief Get the number of antennas
+    
+    \return nofAntennas -- The number of antennas.
+  */
   inline int nofAntennae () {
     return antennaPositions_p.nrow();
   }
 
   //! Number of selected/deselected antennae.
-  int nofAntennae (bool);
+  int nofAntennae (bool const &selected);
 
-  // === Debugging output ======================================================
-
-  //! Print the values of the member data
-  void show (std::ostream&);
+  //! Provide a summary of the internal status
+  inline void summary () {
+    summary (std::cout);
+  }
+  
+  /*!
+    \brief Provide a summary of the internal status
+    
+    \param os -- Output stream to which the summary is written.
+  */
+  void summary (std::ostream &os);    
   
  private: 
-
+  
   /*!
     Set the observatory position by looking up the observatory name in the data
     repository.
   */
   void setObservatoryPosition ();
-
+  
 };
 
 #endif

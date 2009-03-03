@@ -50,17 +50,3 @@
   Actively developed and supported successor to the older LOPES-Tools package.
 
 */
-
-//_______________________________________________________________________________
-//                                          CR-Tools/implement/ApplicationSupport
-
-/*!
-  \defgroup ApplicationSupport CR-Tools :: ApplicationSupport module
-  \ingroup CR
-
-  \brief ApplicationSupport module for the CR-pipeline
-  
-  <h3>Synopsis</h3>
-  
-*/
-

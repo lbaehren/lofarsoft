@@ -29,6 +29,9 @@
 #include <string>
 
 // casacore header files
+#include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/Quanta/MVPosition.h>
 #include <measures/Measures/MEpoch.h>>
 #include <measures/Measures/MPosition.h>>
 
@@ -51,7 +54,8 @@ namespace CR { // Namespace CR -- begin
     
     <ul type="square">
       <li>Some familiarity with the casacore Measures module
-      <li>CR-Tools ObservationFrame class 
+      <li>The ObservationFrame class might serve as a model, even though we try
+      to be more general at this point.
     </ul>
     
     <h3>Synopsis</h3>
@@ -67,6 +71,8 @@ namespace CR { // Namespace CR -- begin
     casa::MEpoch epoch_p;
     //! Geographic position of the antenna array center
     casa::MPosition location_p;
+    //! Positions of the individual antennas
+    casa::Vector<casa::MPosition> positions_p;
     
   public:
     
@@ -75,10 +81,6 @@ namespace CR { // Namespace CR -- begin
     //! Default constructor
     AntennaArray ();
     
-    //! Default constructor
-    AntennaArray (std::string const &name);
-    
-
     /*!
       \brief Argumented constructor
 
@@ -171,6 +173,53 @@ namespace CR { // Namespace CR -- begin
     }
 
     /*!
+      \brief Set the positions of the individual antennas in the array
+
+      \param positions -- The positions of the individual antennas in the array
+      \param relative  -- Are the antenna positions relative w.r.t. the array
+             center position? Set <tt>relative=false</tt> in case absolute 
+	     geographic positions are provided for each individual receiving
+	     element.
+
+      \return status -- Status of the operation; returns \e false in case an
+              error was encountered.
+    */
+    bool setPositions (casa::Matrix<double> const &positions,
+		       bool const &relative);
+
+    /*!
+      \brief Set the positions of the individual antennas in the array
+
+      \param positions -- The positions of the individual antennas in the array
+      \param relative  -- Are the antenna positions relative w.r.t. the array
+             center position? Set <tt>relative=false</tt> in case absolute 
+	     geographic positions are provided for each individual receiving
+	     element.
+
+      \return status -- Status of the operation; returns \e false in case an
+              error was encountered.
+    */
+    bool setPositions (casa::Vector<casa::MVPosition> const &positions,
+		       bool const &relative);
+    
+    /*!
+      \brief Set the positions of the individual antennas in the array
+
+      \param positions -- The positions of the individual antennas in the array
+      \param relative  -- Are the antenna positions relative w.r.t. the array
+             center position? Set <tt>relative=false</tt> in case absolute 
+	     geographic positions are provided for each individual receiving
+	     element.
+
+      \return status -- Status of the operation; returns \e false in case an
+              error was encountered.
+    */
+    bool setPositions (casa::Vector<casa::MPosition> const &positions,
+		       bool const &relative);
+    
+    // ------------------------------------------------------------------ Methods
+    
+    /*!
       \brief Get the name of the class
       
       \return className -- The name of the class, AntennaArray.
@@ -179,9 +228,7 @@ namespace CR { // Namespace CR -- begin
       return "AntennaArray";
     }
 
-    /*!
-      \brief Provide a summary of the internal status
-    */
+    //! Provide a summary of the internal status
     inline void summary () {
       summary (std::cout);
     }
@@ -193,11 +240,18 @@ namespace CR { // Namespace CR -- begin
     */
     void summary (std::ostream &os);    
 
-    // ------------------------------------------------------------------ Methods
-    
-    
-    
   private:
+
+    /*!
+      \brief Initialize internal settings
+
+      \param name     -- Name/Identifier of the antenna array
+      \param epoch    -- Epoch (required for reference frame transformations)
+      \param location -- Geographic position of the antenna array center
+    */
+    void init (std::string const &name,
+	       casa::MEpoch const &epoch,
+	       casa::MPosition const &location);
     
     //! Unconditional copying
     void copy (AntennaArray const &other);

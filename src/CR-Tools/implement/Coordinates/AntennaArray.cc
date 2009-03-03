@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2009                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Copyright (C) 2009                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -30,9 +30,31 @@ namespace CR { // Namespace CR -- begin
   //  Construction
   //
   // ============================================================================
+
+  //_____________________________________________________________________________
+  //                                                                 AntennaArray
   
   AntennaArray::AntennaArray ()
-  {;}
+  {
+    init ("UNDEFINED",
+	  casa::MEpoch(),
+	  casa::MPosition());
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                 AntennaArray
+  
+  AntennaArray::AntennaArray (std::string const &name,
+			      casa::MEpoch const &epoch,
+			      casa::MPosition const &location)
+  {
+    init (name,
+	  epoch,
+	  location);
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                 AntennaArray
   
   AntennaArray::AntennaArray (AntennaArray const &other)
   {
@@ -90,6 +112,17 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
+  //_____________________________________________________________________________
+  //                                                                         init
+  
+  void AntennaArray::init (std::string const &name,
+			   casa::MEpoch const &epoch,
+			   casa::MPosition const &location)
+  {
+    setName (name);
+    setEpoch(epoch);
+    setLocation(location);
+  }
   
 
 } // Namespace CR -- end

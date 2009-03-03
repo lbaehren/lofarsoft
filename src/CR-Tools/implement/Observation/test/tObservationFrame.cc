@@ -32,6 +32,8 @@ using casa::AipsError;
 /*!
   \file tObservationFrame.cc
 
+  \ingroup Observation
+
   \brief A collection of tests for ObservationFrame.
  */
 
