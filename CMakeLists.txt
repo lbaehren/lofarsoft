@@ -3,7 +3,6 @@
 ## $Id:: CMakeLists.txt 1620 2008-06-06 09:26:35Z baehren                       $
 ##-------------------------------------------------------------------------------
 
-
 ## Name of the project handled by CMake
 project (LUS)
 
@@ -40,9 +39,10 @@ endif (USG_ROOT)
 ##
 ## ==============================================================================
 
-option (SEND_BUILD_REPORT "Send a build report to the Dashboard server?"   NO  )
-option (POST_BUILD_CLEAN  "Clean up the build directory after a build?"    NO  )
-option (MULTITHREADED_BUILD "Enable multithreading during build?"          NO  )
+option (SEND_BUILD_REPORT   "Send a build report to the Dashboard server?"  NO )
+option (POST_BUILD_CLEAN    "Clean up the build directory after a build?"   NO )
+option (MULTITHREADED_BUILD "Enable multithreading during build?"           NO )
+option (SYSTEM_DIAGNOSTICS  "Produce some basic system diagnostics output?" NO )
 
 ## ==============================================================================
 ##
@@ -50,12 +50,12 @@ option (MULTITHREADED_BUILD "Enable multithreading during build?"          NO  )
 ##
 ## ==============================================================================
 
-add_custom_target (clean_all
-  COMMAND rm -rf *~
-  WORKING_DIRECTORY ${USG_ROOT}
-  COMMENT "Cleaning up ..."
-)
-add_dependencies (clean_all clean_build clean_doc clean_release)
+#add_custom_target (clean_all
+#  COMMAND rm -rf *~
+#  WORKING_DIRECTORY ${USG_ROOT}
+#  COMMENT "Cleaning up ..."
+#)
+#add_dependencies (clean_all clean_build clean_doc clean_release)
 
 add_custom_target (clean_build
   COMMAND rm -rf *~
@@ -186,6 +186,7 @@ add_custom_target (plplot
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package plplot ..."
   )
+add_dependencies (plplot python)
 
 ## ==============================================================================
 ##
@@ -243,3 +244,53 @@ add_custom_target (contrib
   )
 add_dependencies (contrib dal)
 
+## ==============================================================================
+##
+##  Basic system checks
+##
+## ==============================================================================
+
+message (STATUS "------------------------------------------------------------")
+message (STATUS "USG_ROOT           = ${USG_ROOT}")
+message (STATUS "USG_INSTALL_PREFIX = ${USG_INSTALL_PREFIX}")
+message (STATUS "------------------------------------------------------------")
+
+if (SYSTEM_DIAGNOSTICS)
+  
+  ##________________________________________________________
+  ##                                                GFortran
+  
+  set (GFORTRAN_FIND_QUIETLY YES)
+  include (FindGFORTRAN)
+  
+  if (GFORTRAN_INCLUDES)
+    message (STATUS "GFortran header files : YES")
+  else (GFORTRAN_INCLUDES)
+    message (STATUS "GFortran header files : NO")
+  endif (GFORTRAN_INCLUDES)
+  
+  if (GFORTRAN_LIBRARIES)
+    message (STATUS "GFortran libraries    : YES")
+  else (GFORTRAN_LIBRARIES)
+    message (STATUS "GFortran libraries    : NO")
+  endif (GFORTRAN_LIBRARIES)
+  
+  ##________________________________________________________
+  ##                                                    ROOT
+  
+  set (ROOT_FIND_QUIETLY YES)
+  include (FindROOT)
+  
+  if (ROOT_INCLUDES)
+    message (STATUS "ROOT header files     : YES")
+  else (ROOT_INCLUDES)
+    message (STATUS "ROOT header files     : NO")
+  endif (ROOT_INCLUDES)
+  
+  if (ROOT_LIBRARIES)
+    message (STATUS "ROOT libraries        : YES")
+  else (ROOT_LIBRARIES)
+    message (STATUS "ROOT libraries        : NO")
+  endif (ROOT_LIBRARIES)
+  
+endif (SYSTEM_DIAGNOSTICS)
