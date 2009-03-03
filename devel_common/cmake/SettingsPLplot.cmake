@@ -3,6 +3,7 @@
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
 if (NOT USG_ROOT)
+  message (STATUS "[SettingsPLplot] USG_ROOT not yet defined! Checking now...")
   find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
     PATHS 
     ..
@@ -71,9 +72,7 @@ set (BUILD_TEST ON CACHE BOOL "Build test programs?")
 
 find_path (prefix release_area.txt
   PATHS
-  ../release
-  ../../release
-  ../../../release
+  ${USG_ROOT}/release
   NO_DEFAULT_PATH
   )
 

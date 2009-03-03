@@ -38,9 +38,11 @@ include (CMakeSettings)
 
 set (HAVE_ROOTSYS $ENV{ROOTSYS})
 
-if (HAVE_ROOTSYS)
-  message (STATUS "Found environment variable ROOTSYS.")
-endif (HAVE_ROOTSYS)
+if (NOT ROOT_FIND_QUIETLY)
+  if (HAVE_ROOTSYS)
+    message (STATUS "Found environment variable ROOTSYS.")
+  endif (HAVE_ROOTSYS)
+endif (NOT ROOT_FIND_QUIETLY)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
