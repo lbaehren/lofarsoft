@@ -8,17 +8,38 @@
 project (StarTools)
 
 ## Minimum required CMake version
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.6)
 
-## ============================================================================== 
-##
-##  User selectable options
-##
-## ============================================================================== 
+## -----------------------------------------------------------------------------
+## User defined build/install options
 
 option (StarTools_VERBOSE_CONFIGURE  "Verbose output during configuration?"       1)
 option (StarTools_FORCE_BUILD        "Force rebuild and local installation"       0)
 option (StarTools_BUILD_APPLICATIONS "Build all the applications in the package?" 1)
+
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
+
+if (NOT USG_ROOT)
+  find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+    PATHS 
+    ${StarTools_SOURCE_DIR}
+    ${StarTools_SOURCE_DIR}/..
+    ${StarTools_SOURCE_DIR}/../..
+    ${StarTools_SOURCE_DIR}/../../..
+    ENV LOFARSOFT
+    )
+  
+  if (USG_ROOT)
+    ## load general settings
+    include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+    ## check if package is installed already
+    set (StarTools_FIND_QUIETLY YES)
+    include (FindWCS)
+  else (USG_ROOT)
+    message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+  endif (USG_ROOT)
+endif (NOT USG_ROOT)
 
 ## ============================================================================== 
 ##
@@ -51,39 +72,11 @@ option (StarTools_BUILD_APPLICATIONS "Build all the applications in the package?
 ##
 ## ==============================================================================
 
-## Locations in which to search for headers and libraries
-
-set (locations_lib
-  /usr/lib
-  /usr/local/lib
-  /opt/lib
-  /sw/lib
-  /sw/share/lib
-  ## additional locations for ROOT libraries
-  /opt/root/lib
-  /sw/share/root/lib
-  ## additional locations for ray&co.
-  /opt/aips++/local/lib
-)
-
-set (locations_includes
-  /usr/include
-  /usr/local/include
-  /opt/include
-  /sw/include
-  /sw/share/include
-  ## additional locations for ROOT header files
-  /opt/root/include
-  /sw/share/root/include
-  ## additional locations for ray&co.
-  /opt/aips++/local/include
-)
-
 ## --- System header files ---------------------------------
 
-find_path (HAVE_LIBGEN_H libgen.h ${locations_includes})
-find_path (HAVE_TIME_H   time.h   ${locations_includes})
-find_path (HAVE_MATH_H   math.h   ${locations_includes})
+find_path (HAVE_LIBGEN_H libgen.h ${include_locations})
+find_path (HAVE_TIME_H   time.h   ${include_locations})
+find_path (HAVE_MATH_H   math.h   ${include_locations})
 
 if (HAVE_LIBGEN_H)
   add_definitions (-DHAVE_LIBGEN_H)
@@ -99,13 +92,13 @@ endif (HAVE_MATH_H)
 
 ## --- System libraries ------------------------------------
 
-find_library (libm  m  ${locations_lib})
-find_library (libdl dl ${locations_lib})
+find_library (libm  m  ${lib_locations})
+find_library (libdl dl ${lib_locations})
 
 ## --- FFTW3 -----------------------------------------------
 
-find_library (FFTW3_LIBRARIES fftw3 PATH ${locations_lib}) 
-find_path (FFTW3_INCLUDES fftw3.h PATH ${locations_includes})
+find_library (FFTW3_LIBRARIES fftw3 PATH ${lib_locations}) 
+find_path (FFTW3_INCLUDES fftw3.h PATH ${include_locations})
 
 if (FFTW3_INCLUDES)
   include_directories (${FFTW3_INCLUDES})
@@ -119,7 +112,7 @@ set (ROOT_ROOTSYS $ENV{ROOTSYS})
 if (ROOT_ROOTSYS)
   set (ROOT_INCLUDES ${ROOT_ROOTSYS}/include)
 else (ROOT_ROOTSYS)
-  find_path (ROOT_INCLUDES TRandom.h PATH ${locations_includes})
+  find_path (ROOT_INCLUDES TRandom.h PATH ${include_locations})
 endif (ROOT_ROOTSYS)
 
 if (ROOT_INCLUDES)
@@ -129,7 +122,7 @@ endif (ROOT_INCLUDES)
 
 foreach (lib Core Cint RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics MathCore Thread freetype Gui)
   find_library (root${lib} ${lib}
-    PATHS ${locations_lib} ${ROOT_ROOTSYS}/lib
+    PATHS ${lib_locations} ${ROOT_ROOTSYS}/lib
     )
   if (root${lib})
     list (APPEND ROOT_LIBRARIES ${root${lib}})
@@ -149,14 +142,14 @@ endif (NOT ROOT_LIBRARIES)
 ## --- PostgreSQL ------------------------------------------
 
 find_path (POSTGRESQL_INCLUDES libpq-fe.h
-  PATH ${locations_includes}
+  PATH ${include_locations}
   PATH_SUFFIXES
   postgresql
   pgsql
   )
 
 find_library (POSTGRESQL_LIBRARIES pq
-  PATHS ${locations_lib}
+  PATHS ${lib_locations}
   PATH_SUFFIXES
   postgresql
   pgsql
