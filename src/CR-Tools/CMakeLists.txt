@@ -289,6 +289,8 @@ endif (NOT HAVE_ROOT)
 if (NOT HAVE_FFTW3)
   message (STATUS "[CR-Tools] LopesStar support disabled; missing FFTW3.")
   set (CR_WITH_STARTOOLS FALSE)
+else (NOT HAVE_FFTW3)
+  include_directories (${FFTW3_INCLUDES})
 endif (NOT HAVE_FFTW3)
 
 if (CR_WITH_STARTOOLS)
