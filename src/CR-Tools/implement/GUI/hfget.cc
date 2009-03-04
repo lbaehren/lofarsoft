@@ -194,11 +194,9 @@ void copycast_vec(void *ptr, vector<S> *sp, Vector_Selector *vs) {
 
 /* Functions that provide textual output for some of the enum types we use here */
 
-char* datapointer_txt(Data* d){
-  char * out;
-  if (isDataObject(d)) {out = (d->getName(true)).c_str();}
-  else out = mycast<HString>(reinterpret_cast<HPointer>(d)).c_str();
-  return out;
+const char* datapointer_txt(Data* d){
+  if (isDataObject(d)) {return (d->getName(true)).c_str();}
+  else {return mycast<HString>(reinterpret_cast<HPointer>(d)).c_str();};
 }
 
 char* direction_txt(DIRECTION dir){
@@ -405,7 +403,7 @@ void printvec(vector<T> v,address maxlen=8){
 
 //!!Check - this doesn't work properly for direction_txt
 template <class T, class S>
-void printvec_txt(vector<T> v, char* (*f)(S)){
+void printvec_txt(vector<T> v, const char* (*f)(S)){
   int i;
   int s;
   s=v.size();
@@ -1832,7 +1830,7 @@ void Data::delData(){
 
 void Data::signalPyQt(HString signal){
   if (data.pyqt==NULL) return;
-  char *AttribStr = signal.c_str();
+  const char *AttribStr = signal.c_str();
   //we need to check if the process attribute is present in the Python Object
   if (!PyObject_HasAttrString(data.pyqt, AttribStr)) {
     ERROR("signalPyQt: Object does not have Attribute " << AttribStr << "."  << ", name=" << getName(true)); return;};
