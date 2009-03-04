@@ -247,6 +247,10 @@ if (CR_WITH_GUI)
     include_directories (${QT4_INCLUDES})
   endif (QT4_INCLUDES)
 
+  if (MATHGL_INCLUDES)
+    include_directories (${MATHGL_INCLUDES})
+  endif (MATHGL_INCLUDES)
+
   ## compiler instructions
   add_library (hfget MODULE
     ${libhfget_sources}
@@ -257,6 +261,7 @@ if (CR_WITH_GUI)
     cr
     ${CASA_LIBRARIES}
     ${QT4_LIBRARIES}
+    ${MATHGL_LIBRARIES}
     ${PYTHON_LIBRARIES}
     ${BOOST_LIBRARIES}
     )

@@ -355,7 +355,9 @@ if (CR_WITH_GUI)
     list (APPEND QT4_INCLUDES ${HAVE_QT4_QWIDGET})
   endif (HAVE_QT4_QWIDGET)
 
-  ## (optional) test compile of some simple piece of example code
+  ## Check for MathGL
+
+  include (FindMathGL)
 
   ## process conditions for building the GUI
 
@@ -373,6 +375,10 @@ if (CR_WITH_GUI)
     message (STATUS "[CR-Tools] Unable to build GUI - Qt4 libraries incomplete!")
     set (CR_WITH_GUI NO)
   endif (NOT QT4_LIBARY_QTCORE OR NOT QT4_LIBARY_QTGUI OR NOT HAVE_QT4_QWIDGET)
+
+  if (NOT HAVE_MATHGL)
+    message (STATUS "[CR-Tools] Unable to build GUI - missing MathGL!")
+  endif (NOT HAVE_MATHGL)
 
 endif (CR_WITH_GUI)
 

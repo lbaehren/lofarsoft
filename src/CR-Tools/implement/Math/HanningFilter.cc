@@ -173,8 +173,8 @@ namespace CR {  // Namespace CR -- begin
   void HanningFilter<T>::init (T const &alpha,
 			       uint const &beta)
   {
-    alpha_p    = alpha;
-    beta_p     = beta;
+    alpha_p = alpha;
+    beta_p  = beta;
 
     setBeta (beta);
   }
