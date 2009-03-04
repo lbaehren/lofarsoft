@@ -257,7 +257,7 @@ Bool GenInputStatistics(GlishSysEvent &event, void *){
       maxs(fnum)    = dmax;
       means(fnum)   = mean(data);
       stddevs(fnum) = stddev(data);
-      ddates(fnum) = tbbIn.header().asDouble("dDate");;
+      ddates(fnum) = tbbIn.headerRecord().asDouble("dDate");;
       if (((fnum+1)%50)==0) {
 	cout << "SimpleDynspecClient:GenInputStatistics: processed " << fnum+1 << " files out of " 
 	     << numFiles << "!" << endl;
@@ -449,7 +449,7 @@ Bool SimTBBTrigger(GlishSysEvent &event, void *){
 	continue;
       };
 
-      //      cout << "file: " << files(fnum) << " Date: " << tbbIn.header().asuInt("Date") <<" dDate: " << tbbIn.header().asDouble("dDate") << endl;
+      //      cout << "file: " << files(fnum) << " Date: " << tbbIn.headerRecord().asuInt("Date") <<" dDate: " << tbbIn.headerRecord().asDouble("dDate") << endl;
       newpeaks = index.nelements();
       if (numpulses+newpeaks > vecsize) {
 	vecsize = numpulses+newpeaks+100;
@@ -463,7 +463,7 @@ Bool SimTBBTrigger(GlishSysEvent &event, void *){
 	gesafterval.resize(vecsize,True);
       };
       filenames(Slice(numpulses,newpeaks))   = files(fnum);
-      dates(Slice(numpulses,newpeaks))       = tbbIn.header().asDouble("dDate");
+      dates(Slice(numpulses,newpeaks))       = tbbIn.headerRecord().asDouble("dDate");
       gesindex(Slice(numpulses,newpeaks))    = index;
       gessum(Slice(numpulses,newpeaks))      = sum;
       geswidth(Slice(numpulses,newpeaks))    = width;

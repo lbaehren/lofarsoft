@@ -39,7 +39,7 @@ CR::UpSampledDR Upsampler;
 CR::CRinvFFT upsamplepipe;    
 
 Bool doTVcal=True, doRFImitigation=True;
-double upsampleFreq=200e6;
+double upsampleFreq=320e6;
 
 //---------------------------------------------------------------------   initPipeline
 
