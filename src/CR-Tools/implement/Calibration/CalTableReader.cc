@@ -170,7 +170,7 @@ namespace CR {  // Namespace CR -- begin
       return rowNrs(0);
     } else if ( rowNrs.nelements() < 1) {
       if (mindEmpty) {
-	cerr << "CalTableReader::GetDateRow: " << "Cannot find date in table" << endl;
+	cerr << "CalTableReader::GetDateRow: " << "Cannot find date in table: " << colTable.tableName() << endl;
       };
       return -1 ;
     };
@@ -195,7 +195,7 @@ namespace CR {  // Namespace CR -- begin
       return rowNrs(rowNrs.nelements()-1);
     } else if ( rowNrs.nelements() < 1) {
       if (mindEmpty) {
-	cerr << "CalTableReader::GetJuniorDateRow: " << "Cannot find date in table" << endl;
+	cerr << "CalTableReader::GetJuniorDateRow: " << "Cannot find date in table for field: " << MaskField << endl;
       };
       return -1 ;
     };
