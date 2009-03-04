@@ -199,7 +199,7 @@ const char* datapointer_txt(Data* d){
   else {return mycast<HString>(reinterpret_cast<HPointer>(d)).c_str();};
 }
 
-char* direction_txt(DIRECTION dir){
+const char* direction_txt(DIRECTION dir){
   char* DIRECTION_TXT[DIR_NONE+1]={"DIR_FROM", "DIR_TO", "DIR_BOTH","DIR_NONE"};
   if (dir <= DIR_NONE && dir >=0) {return DIRECTION_TXT[dir];} else {return "UNKNOWN_DIRECTION";};
 }

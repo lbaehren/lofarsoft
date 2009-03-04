@@ -122,7 +122,7 @@ template <class T>
 void printvec(vector<T> v,address maxlen=8);
 
 template <class T, class S>
-void printvec_txt(vector<T> v, char* (*f)(S));
+void printvec_txt(vector<T> v, const char* (*f)(S));
 
 template <class T>
 DATATYPE WhichType();

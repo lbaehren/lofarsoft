@@ -148,7 +148,7 @@ enum DIRECTION {
 
 enum MSG_CODE {MSG_NONE, MSG_MODIFIED};
 
-char* direction_txt(DIRECTION dir);
+const char* direction_txt(DIRECTION dir);
 char* dataclass_txt(DATACLASS x);
 char* reftype_txt(REFTYPE x);
 char* datatype_txt(DATATYPE x);
