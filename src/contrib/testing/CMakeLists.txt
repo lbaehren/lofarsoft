@@ -17,6 +17,7 @@ if (HAVE_CASACORE)
     casacoreMatrixAccess04
     casacoreMeasures
     casacoreImages
+    casacore_Coordinates_ObsInfo
     )
 
   foreach (src ${tests})

@@ -118,10 +118,10 @@ casa::CoordinateSystem coordinateSystem (std::string const telescope="LOFAR",
     ObsInfo obsInfo;
     obsInfo.setTelescope(telescope);
     obsInfo.setObserver(observer);
-
+    
     cs.setObsInfo(obsInfo);
   }
-
+  
   /* Direction coordinate (Long,Lat) */
   {
     Vector<Quantum<double> > refValue (2);
@@ -215,9 +215,37 @@ casa::CoordinateSystem coordinateSystem (std::string const telescope="LOFAR",
 // -----------------------------------------------------------------------------
 
 /*!
+  \brief Test working with a casa::ObsInfo object
+  
+  This class is used to record miscellaneous information about an observation.
+  At present it contains the following:
+
+  <ol>
+    <li>Telescope name
+    <li>Observer name
+    <li>Observation date
+    <li>Pointing centre (as distinct from the phase center or tangent point)
+  </ol>
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+*/
+int test_ObsInfo ()
+{
+  cout << "\n[test_ObsInfo]" << endl;
+
+  int nofFailedTests (0);
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
   \brief Test working with AIPS++ CoordinateSystem objects
 
-  \return nofFailedTests
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
 
   CoordinateSystem is the normal interface to coordinate systems, typically
   attached to an ImageInterface, however the coordinate system can be manipulated
