@@ -254,6 +254,7 @@ if (CR_WITH_GUI)
   
   ## linker instructions
   target_link_libraries (hfget
+    cr
     ${CASA_LIBRARIES}
     ${QT4_LIBRARIES}
     ${PYTHON_LIBRARIES}

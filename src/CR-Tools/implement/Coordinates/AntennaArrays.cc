@@ -80,6 +80,7 @@ namespace CR { // Namespace CR -- begin
   void AntennaArrays::summary (std::ostream &os)
   {
     os << "[AntennaArrays] Summary of internal parameters." << std::endl;
+    os << "-- nof. antenna arrays = " << nofArrays() << std::endl;
   }
   
   

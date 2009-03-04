@@ -355,6 +355,8 @@ if (CR_WITH_GUI)
     list (APPEND QT4_INCLUDES ${HAVE_QT4_QWIDGET})
   endif (HAVE_QT4_QWIDGET)
 
+  ## (optional) test compile of some simple piece of example code
+
   ## process conditions for building the GUI
 
   if (NOT HAVE_BOOST)

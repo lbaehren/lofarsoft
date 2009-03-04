@@ -8,6 +8,7 @@
   
   - \ref crtools_coordinates_types
   - \ref crtools_coordinates_conversions
+  - \ref crtools_coordinates_measures
   - \ref crtools_coordinates_references
 
   <hr>
@@ -307,14 +308,22 @@
 	  </table>
 
   </ol>
+  
+  <li>
+  
+  \section crtools_coordinates_measures casacore Measures & Quantities
+  
+  - list basic types of Quanta
+  - list basic types of Measures
+  - describe how to construct a Measure (from scratch, from a Quantity, ...)
 
   <hr>
   
   \section crtools_coordinates_references References
-  
-  - casacore <a href="http://www.astron.nl/casacore/doc/html/group__Coordinates__module.html">Coordinates</a>
-  module, collecting classes to interconvert pixel and world (physical)
-  coordinates.
+
+  - casacore modules:
+    - <a href="http://www.astron.nl/casacore/trunk/casacore/doc/html/group__Measures__module.html">Measures</a> -- physical quantities within a certain reference frame.
+    - <a href="http://www.astron.nl/casacore/trunk/casacore/doc/html/group__Coordinates__module.html">Coordinates</a> -- collecting classes to interconvert pixel and world (physical) coordinates.
   - <a href="http://en.wikipedia.org/wiki/Geographic_coordinate">Geographic coordinate
   system</a> (Wikipedia)
   

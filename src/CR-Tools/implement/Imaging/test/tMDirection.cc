@@ -129,14 +129,17 @@ int test_SkymapCoordinates ()
   // -----------------------------------------------------------------
   // [1] Assemble SkymapCoordinates object as used for the Skymapper
 
+  std::string telescope ("LOFAR");
+  std::string observer ("Lars Baehren");
   uint blocksize (512);
   double sampleFrequency (40e6);
   uint nyquistZone (1);
   CR::TimeFreqCoordinate timeFreq (blocksize,
 				   sampleFrequency,
 				   nyquistZone);
-  CR::ObservationData obsData ("LOFAR-ITS",
-			       "Lars Baehren");
+  casa::ObsInfo info;
+  info.setTelescope(telescope);
+  info.setObserver(observer);
 
   CR::SkymapCoordinate coord;
   coord.setTimeFreqCoordinate(timeFreq);

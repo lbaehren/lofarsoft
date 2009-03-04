@@ -37,20 +37,20 @@ namespace CR { // Namespace CR -- begin
   AntennaArray::AntennaArray ()
   {
     init ("UNDEFINED",
-	  casa::MEpoch(),
-	  casa::MPosition());
+	  casa::MPosition(),
+	  casa::MEpoch());
   }
   
   //_____________________________________________________________________________
   //                                                                 AntennaArray
   
   AntennaArray::AntennaArray (std::string const &name,
-			      casa::MEpoch const &epoch,
-			      casa::MPosition const &location)
+			      casa::MPosition const &location,
+			      casa::MEpoch const &epoch)
   {
     init (name,
-	  epoch,
-	  location);
+	  location,
+	  epoch);
   }
   
   //_____________________________________________________________________________
@@ -102,9 +102,10 @@ namespace CR { // Namespace CR -- begin
   void AntennaArray::summary (std::ostream &os)
   {
     os << "[AntennaArray] Summary of internal parameters." << std::endl;
+    os << "-- Antenna aray name   = " << name_p     << std::endl;
+    os << "-- Geographic location = " << location_p << std::endl;
+    os << "-- Epoch               = " << epoch_p    << std::endl;
   }
-  
-  
   
   // ============================================================================
   //
@@ -116,8 +117,8 @@ namespace CR { // Namespace CR -- begin
   //                                                                         init
   
   void AntennaArray::init (std::string const &name,
-			   casa::MEpoch const &epoch,
-			   casa::MPosition const &location)
+			   casa::MPosition const &location,
+			   casa::MEpoch const &epoch)
   {
     setName (name);
     setEpoch(epoch);

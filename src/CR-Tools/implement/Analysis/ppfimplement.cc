@@ -127,7 +127,7 @@ namespace CR { // Namespace CR -- begin
     
   {
     try {
-    uint filterRows = 1024 ;
+    uint filterRows = filterRows_p;
        
       Double pi = 3.14159265358979323846 ;
       

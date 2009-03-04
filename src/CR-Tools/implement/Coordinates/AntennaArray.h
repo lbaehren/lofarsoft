@@ -32,8 +32,10 @@
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Quanta/MVPosition.h>
-#include <measures/Measures/MEpoch.h>>
-#include <measures/Measures/MPosition.h>>
+#include <coordinates/Coordinates/ObsInfo.h>
+#include <measures/Measures/MEpoch.h>
+#include <measures/Measures/MPosition.h>
+#include <measures/Measures/MeasFrame.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -53,13 +55,29 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>Some familiarity with the casacore Measures module
+      <li>Some familiarity with the casacore Measures module:
+      <ul>
+        <li>casa::ObsInfo -- miscellaneous information related to an observation.
+	Since a frame will possibly be used by many different Measures, it
+	behaves as a smart pointer, with reference rather than copy
+	characteristics. Since it caches all its operations, it is advisable to
+	have a 'global' MeasFrame across an execution, resetting (or setting) its
+	values when appropriate. The frame can also contain other related
+	information.
+	<li>casa::MeasFrame -- container for the reference frame Measures.
+      </ul>
       <li>The ObservationFrame class might serve as a model, even though we try
       to be more general at this point.
     </ul>
     
     <h3>Synopsis</h3>
     
+    The information encapsulated by this class can be used to created a number of
+    objects dealing with coordinates and quantities within reference frames
+    (Measures):
+    - casa::ObsInfo -- miscellaneous information related to an observation.
+    - casa::MeasFrame -- container for the reference frame Measures.
+
     <h3>Example(s)</h3>
     
   */  
@@ -84,13 +102,27 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Argumented constructor
 
-      \param name     -- Name/Identifier of the antenna array
-      \param epoch    -- Epoch (required for reference frame transformations)
-      \param location -- Geographic position of the antenna array center
+      This constructor can be used in case the name of the antenna array (or
+      telescope for that matter) suffices to obtain further information by
+      either accessing the casacore Measures Observatory table or through
+      internal information.
+
+      \param name  -- Name/Identifier of the antenna array
+      \param epoch -- Epoch (required for reference frame transformations)
     */
     AntennaArray (std::string const &name,
-		  casa::MEpoch const &epoch,
-		  casa::MPosition const &location);
+		  casa::MEpoch const &epoch);
+    
+    /*!
+      \brief Argumented constructor
+
+      \param name     -- Name/Identifier of the antenna array
+      \param location -- Geographic position of the antenna array center
+      \param epoch    -- Epoch (required for reference frame transformations)
+    */
+    AntennaArray (std::string const &name,
+		  casa::MPosition const &location,
+		  casa::MEpoch const &epoch);
     
     /*!
       \brief Copy constructor
@@ -218,6 +250,33 @@ namespace CR { // Namespace CR -- begin
 		       bool const &relative);
     
     // ------------------------------------------------------------------ Methods
+
+    /*!
+      \brief Get container for miscellaneous information related to an observation
+
+      \return obsInfo -- cascore container for miscellaneous information related
+              to an observation.
+    */
+    inline casa::ObsInfo obsInfo () {
+      casa::ObsInfo obs;
+      /* fill the observation info */
+      obs.setTelescope (name_p);
+      obs.setObsDate (epoch_p);
+      /* return the observation info */
+      return obs;
+    }
+    
+    /*!
+      \brief Create a reference frame based on the epoch and array location
+
+      \return frame -- A reference frame for the conversion of measures,
+              constructed out of the epoch and the location of the antenna array.
+    */
+    inline casa::MeasFrame frame () {
+      casa::MeasFrame f (epoch_p,
+			 location_p);
+      return f;
+    }
     
     /*!
       \brief Get the name of the class
@@ -227,7 +286,7 @@ namespace CR { // Namespace CR -- begin
     inline std::string className () const {
       return "AntennaArray";
     }
-
+    
     //! Provide a summary of the internal status
     inline void summary () {
       summary (std::cout);
@@ -246,12 +305,12 @@ namespace CR { // Namespace CR -- begin
       \brief Initialize internal settings
 
       \param name     -- Name/Identifier of the antenna array
-      \param epoch    -- Epoch (required for reference frame transformations)
       \param location -- Geographic position of the antenna array center
+      \param epoch    -- Epoch (required for reference frame transformations)
     */
     void init (std::string const &name,
-	       casa::MEpoch const &epoch,
-	       casa::MPosition const &location);
+	       casa::MPosition const &location,
+	       casa::MEpoch const &epoch);
     
     //! Unconditional copying
     void copy (AntennaArray const &other);

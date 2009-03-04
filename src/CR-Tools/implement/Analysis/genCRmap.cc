@@ -105,7 +105,7 @@ namespace CR { // Namespace CR -- begin
       //					  dr.nyquistZone(), dr.referenceTime() );
       
       // Set Observation data values
-      ObservationData obsData=SkyCoord_p.observationData();
+      ObservationData obsData (SkyCoord_p.obsInfo());
       obsData.setObservatory(dr.headerRecord().asString("Observatory"));
       obsData.setEpoch(LOPES2Epoch(date));
       obsData.setObserver("CR-User");
@@ -118,7 +118,7 @@ namespace CR { // Namespace CR -- begin
       };
       obsData.setAntennaPositions(tmpAntPos);
 
-      success = success && SkyCoord_p.setObservationData(obsData);
+      success = success && SkyCoord_p.setObsInfo(obsData.obsInfo());
 
       cout << "*** Printing obsData summary " << endl;
       obsData.summary();

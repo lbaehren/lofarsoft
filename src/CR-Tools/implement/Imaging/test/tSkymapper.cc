@@ -31,11 +31,13 @@
 #include <casa/System/Aipsrc.h>
 #include <casa/System/ProgressMeter.h>
 #include <casa/OS/Directory.h>
+#include <coordinates/Coordinates/ObsInfo.h>
 #include <images/Images/PagedImage.h>
 
 using casa::AipsError;
 using casa::Array;
 using casa::IPosition;
+using casa::ObsInfo;
 using casa::PagedImage;
 using casa::TiledShape;
 
@@ -46,7 +48,6 @@ using casa::TiledShape;
 #include "create_data.h"
 
 using CR::Beamformer;
-using CR::ObservationData;
 using CR::ProgressBar;
 using CR::SkymapCoordinate;
 using CR::Skymapper;
@@ -126,14 +127,14 @@ int test_Beamformer (uint const &blocksize=1024)
 
   cout << "[1] Add observation data to the coordinate ..." << endl;;
   try {
-    std::string telescope ("UNKNOWN");
-    std::string observer ("Lars Baehren");
-    CR::ObservationData obsData (telescope,observer);
+    casa::ObsInfo info;
+    info.setTelescope ("UNKNOWN");
+    info.setObserver ("Lars Baehren");
     //
-    cout << "-- Telescope = " << telescope << endl;
-    cout << "-- Observer  = " << observer  << endl;
+    cout << "-- Telescope = " << info.telescope() << endl;
+    cout << "-- Observer  = " << info.observer()  << endl;
     //
-    coord.setObservationData (obsData);
+    coord.setObsInfo (info);
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
@@ -234,11 +235,12 @@ int test_Skymapper (uint const &blocksize=1024,
 				 sampleFreq,
 				 nyquistZone);
     // Observation info
-    ObservationData obsData ("UNKNOWN");
-    obsData.setObserver ("Lars Baehren");
+    casa::ObsInfo info;
+    info.setTelescope ("LOFAR");
+    info.setObserver ("Lars Baehren");
 
     /* Skymapper to compute power in frequency */
-    SkymapCoordinate coord1 (obsData,
+    SkymapCoordinate coord1 (info,
 			     timeFreq,
 			     CR::SkymapQuantity::FREQ_POWER);
     Skymapper skymapper1 (coord1,
@@ -246,7 +248,7 @@ int test_Skymapper (uint const &blocksize=1024,
     skymapper1.summary();
 
     /* Skymapper to compute cc-beam */
-    SkymapCoordinate coord2 (obsData,
+    SkymapCoordinate coord2 (info,
 			     timeFreq,
 			     CR::SkymapQuantity::TIME_CC);
     Skymapper skymapper2 (coord2,
@@ -260,10 +262,12 @@ int test_Skymapper (uint const &blocksize=1024,
   cout << "[3] Skymapper(SkymapCoordinate,Matrix<double>,SkymapQuantity) ..."
        << endl;
   try {
-    // Observation data
-    std::string telescope ("UNKNOWN");
+    // Observation info
+    std::string telescope ("LOFAR");
     std::string observer ("Lars Baehren");
-    CR::ObservationData obsData (telescope,observer);
+    casa::ObsInfo info;
+    info.setTelescope(telescope);
+    info.setObserver(observer);
     // Spatial coordinates
     IPosition shape (3,20,20,10);
     SpatialCoordinate spatial (CoordinateType::DirectionRadius,
@@ -273,7 +277,7 @@ int test_Skymapper (uint const &blocksize=1024,
     // Time-Frequency coordinate
     TimeFreqCoordinate timeFreq (blocksize);
     // Skymap coordinate
-    SkymapCoordinate coord (obsData,
+    SkymapCoordinate coord (info,
 			    spatial,
 			    timeFreq);
     // Antenna positions
@@ -309,12 +313,12 @@ int test_methods (uint const &blocksize=1024)
   // Time-frequency domain data
   TimeFreqCoordinate timeFreq (blocksize,80e06,2);
   // Observation info
-  ObservationData obsData;
-  obsData.setObserver ("Lars Baehren");
+  casa::ObsInfo info;
+  info.setObserver ("Lars Baehren");
   // Coordinates 
   SkymapCoordinate coord;
   coord.setTimeFreqCoordinate(timeFreq);
-  coord.setObservationData(obsData);
+  coord.setObsInfo(info);
   // Skymapper object to work with
   Skymapper skymapper (coord);
 
@@ -372,9 +376,10 @@ int test_processing (string const &infile,
   uint nofBlocksPerFrame = 1;
   uint nofAntennas       = 10;
 
-  // Observation data
-  CR::ObservationData obsData (telescope,
-			       observer);
+  // Observation info
+  casa::ObsInfo info;
+  info.setTelescope(telescope);
+  info.setObserver(observer);
   // Spatial coordinates
   IPosition shape (3,30,30,10);
   SpatialCoordinate spatial (CoordinateType::DirectionRadius,
@@ -388,7 +393,7 @@ int test_processing (string const &infile,
 			       true);
   
   // Skymap coordinate
-  SkymapCoordinate coord (obsData,
+  SkymapCoordinate coord (info,
 			  spatial,
 			  timeFreq);
   

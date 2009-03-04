@@ -25,6 +25,7 @@
 
 // Namespace usage
 using CR::AntennaArray;
+using casa::Quantity;
 
 /*!
   \file tAntennaArray.cc
@@ -38,7 +39,8 @@ using CR::AntennaArray;
   \date 2009/02/27
 */
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                              test_constructors
 
 /*!
   \brief Test constructors for a new AntennaArray object
@@ -54,9 +56,26 @@ int test_constructors ()
   
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    AntennaArray newObject;
+    AntennaArray arr;
     //
-    newObject.summary(); 
+    arr.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[2] Testing argumented constructor ..." << std::endl;
+  try {
+    // Arguments
+    std::string telescope ("LOPES");
+    casa::MPosition location ( casa::MVPosition(Quantity(100,"m"),
+						Quantity(8.437484,"deg"),
+						Quantity(49.099477, "deg")),
+			       casa::MPosition::WGS84);    
+    // Object construction
+    AntennaArray arr;
+    //
+    arr.summary(); 
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -65,7 +84,26 @@ int test_constructors ()
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                   test_methods
+
+/*!
+  \brief Test the various methods of an AntennaArray object
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+*/
+int test_methods ()
+{
+  std::cout << "\n[tAntennaArray::test_methods]\n" << std::endl;
+
+  int nofFailedTests (0);
+  
+  
+  return nofFailedTests;
+}
+
+//_______________________________________________________________________________
 
 int main ()
 {
@@ -73,6 +111,8 @@ int main ()
 
   // Test for the constructor(s)
   nofFailedTests += test_constructors ();
+  // Test for the methods
+  nofFailedTests += test_methods ();
 
   return nofFailedTests;
 }

@@ -28,11 +28,13 @@
 #include <iostream>
 #include <string>
 
+// casacore header files
+#include <coordinates/Coordinates/ObsInfo.h>
+
 // CR-Tools header files
 #include <Coordinates/SkymapQuantity.h>
 #include <Coordinates/SpatialCoordinate.h>
 #include <Coordinates/TimeFreqCoordinate.h>
-#include <Observation/ObservationData.h>
 
 // Namespace usage
 using CR::SpatialCoordinate;
@@ -81,15 +83,17 @@ namespace CR { // Namespace CR -- begin
       uint blocksPerFrame (1);
       uint nofFrames (10);
 
-      ObservationData obsData (telescope,
-                               observer);
+      casa::casa::ObsInfo obsInfo;
+      obsInfo.setTelescope(telescope);
+      obsInfo.setObserver(observer);
+
       TimeFreqCoordinate timeFreq (blocksize,
 	 			   sampleFreq,
 		 		   nyquistZone,
 			 	   blocksPerFrame,
 				   nofFrames);
       
-      SkymapCoordinate coord (obsData,
+      SkymapCoordinate coord (obsInfo,
                               timeFreq,
                               SkymapQuantity::TIME_CC);
       \endcode
@@ -107,8 +111,8 @@ namespace CR { // Namespace CR -- begin
   */
   class SkymapCoordinate {
     
-    //! Observation data (epoch, location, etc.)
-    ObservationData obsData_p;
+    //! Observation info (epoch, location, etc.)
+    casa::ObsInfo obsInfo_p;
     //! Container for the spatial coordinates
     CR::SpatialCoordinate spatialCoord_p;
     //! Container for the time-frequency axes
@@ -132,21 +136,21 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Argumented constructor
 
-      \param obsData       -- Observation data (epoch, location, etc.)
+      \param obsInfo       -- Observation info (epoch, location, etc.)
       \param timeFreqCoord -- Container for the coupled time and frequency axes
     */
-    SkymapCoordinate (ObservationData const &obsData,
+    SkymapCoordinate (casa::ObsInfo const &obsInfo,
 		      TimeFreqCoordinate const &timeFreqCoord,
 		      SkymapQuantity::Type const &quantity=SkymapQuantity::FREQ_POWER);
 
     /*!
       \brief Argumented constructor
 
-      \param obsData       -- Observation data (epoch, location, etc.)
+      \param obsInfo       -- Observation info (epoch, location, etc.)
       \param spatialCoord  -- 
       \param timeFreqCoord -- Container for the coupled time and frequency axes
     */
-    SkymapCoordinate (ObservationData const &obsData,
+    SkymapCoordinate (casa::ObsInfo const &obsInfo,
 		      SpatialCoordinate const &spatialCoord,
 		      TimeFreqCoordinate const &timeFreqCoord,
 		      SkymapQuantity::Type const &quantity=SkymapQuantity::FREQ_POWER);
@@ -245,21 +249,21 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get some basic information on the observation (epoch, location, etc.)
       
-      \return obsData -- Observation data (epoch, location, etc.)
+      \return obsInfo -- Observation info (epoch, location, etc.)
     */
-    inline ObservationData observationData () const {
-      return obsData_p;
+    inline casa::ObsInfo obsInfo () const {
+      return obsInfo_p;
     }
 
     /*!
       \brief Set some basic information on the observation (epoch, location, etc.)
       
-      \param obsData -- Observation data (epoch, location, etc.)
+      \param obsInfo -- Observation info (epoch, location, etc.)
 
       \return status -- Status of the operation; returns <tt>false</tt> in case
               an error was encountered.
     */
-    bool setObservationData (ObservationData const &obsData);
+    bool setObsInfo (casa::ObsInfo const &obsInfo);
 
     /*!
       \brief Get the object encapsulating the spatial coordinates
@@ -432,7 +436,7 @@ namespace CR { // Namespace CR -- begin
     void init ();
 
     //! Initialize the object's internal parameters
-    void init (ObservationData const &obsData,
+    void init (casa::ObsInfo const &obsInfo,
 	       SpatialCoordinate const &spatialCoord,
 	       TimeFreqCoordinate const &timeFreqCoord,
 	       SkymapQuantity::Type const &quantity=SkymapQuantity::FREQ_POWER);

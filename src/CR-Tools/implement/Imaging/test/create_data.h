@@ -22,12 +22,14 @@
  ***************************************************************************/
 
 #include <casa/BasicMath/Random.h>
+#include <coordinates/Coordinates/ObsInfo.h>
 
 #include <Coordinates/CoordinateType.h>
 #include <Coordinates/SpatialCoordinate.h>
 #include <Coordinates/TimeFreqCoordinate.h>
 #include <Coordinates/SkymapCoordinate.h>
 #include <Math/VectorConversion.h>
+#include <Observation/ObservationData.h>
 
 using casa::DComplex;
 using casa::Matrix;
@@ -345,9 +347,12 @@ SkymapCoordinate get_SkymapCoordinate (uint const blocksize=1024,
   casa::Quantity sampleFreq (sampleFrequency,"Hz");
   uint blocksPerFrame    = 1;
   uint nofFrames         = 1;
-  
+
+  // Observation information
+  casa::ObsInfo info;
+  info.setTelescope(telescope);
+  info.setObserver(observer);
   // Coordinate objects
-  CR::ObservationData obsData (telescope,observer);
   CR::TimeFreqCoordinate timeFreq (blocksize,
 				   sampleFreq,
 				   nyquistZone,
@@ -357,7 +362,7 @@ SkymapCoordinate get_SkymapCoordinate (uint const blocksize=1024,
 				 refcode,
 				 projection);
   spatial.setShape(casa::IPosition(3,20,20,nofDistanceSteps));
-  SkymapCoordinate coord (obsData,
+  SkymapCoordinate coord (info,
 			  spatial,
 			  timeFreq);
   

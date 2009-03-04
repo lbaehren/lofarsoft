@@ -40,26 +40,26 @@ namespace CR { // Namespace CR -- begin
   
   //____________________________________________________________ SkymapCoordinate
 
-  SkymapCoordinate::SkymapCoordinate (ObservationData const &obsData,
+  SkymapCoordinate::SkymapCoordinate (casa::ObsInfo const &obsInfo,
 				      TimeFreqCoordinate const &timeFreqCoord,
 				      SkymapQuantity::Type const &quantity)
   {
     SpatialCoordinate spatialCoord = SpatialCoordinate();
-
-    init (obsData,
+    
+    init (obsInfo,
 	  spatialCoord,
 	  timeFreqCoord,
 	  quantity);
   }
-
+  
   //____________________________________________________________ SkymapCoordinate
   
-  SkymapCoordinate::SkymapCoordinate (ObservationData const &obsData,
+  SkymapCoordinate::SkymapCoordinate (casa::ObsInfo const &obsInfo,
 				      SpatialCoordinate const &spatialCoord,
 				      TimeFreqCoordinate const &timeFreqCoord,
 				      SkymapQuantity::Type const &quantity)
   {
-    init (obsData,
+    init (obsInfo,
 	  spatialCoord,
 	  timeFreqCoord,
 	  quantity);
@@ -105,7 +105,7 @@ namespace CR { // Namespace CR -- begin
   
   void SkymapCoordinate::copy (SkymapCoordinate const &other)
   {
-    obsData_p        = other.obsData_p;
+    obsInfo_p        = other.obsInfo_p;
     skymapQuantity_p = other.skymapQuantity_p;
     spatialCoord_p   = other.spatialCoord_p;
     timeFreqCoord_p  = other.timeFreqCoord_p;
@@ -120,14 +120,14 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  //__________________________________________________________ setObservationData
+  //__________________________________________________________________ setObsInfo
 
-  bool SkymapCoordinate::setObservationData (ObservationData const &obsData)
+  bool SkymapCoordinate::setObsInfo (casa::ObsInfo const &obsInfo)
   {
     bool status (true);
 
     // store the input data
-    obsData_p = obsData;
+    obsInfo_p = obsInfo;
 
     // update coordinate system object 
     setCoordinateSystem ();
@@ -226,6 +226,8 @@ namespace CR { // Namespace CR -- begin
     os << "-- Reference pixel (CRPIX) = " << csys_p.referencePixel() << std::endl;
     os << "-- Increment       (CDELT) = " << csys_p.increment()      << std::endl;
     os << "-- Reference value (CRVAL) = " << csys_p.referenceValue() << std::endl;
+    os << "-- Telescope name          = " << obsInfo_p.telescope()   << std::endl;
+    os << "-- Observer name           = " << obsInfo_p.observer()    << std::endl;
   }
   
   // ============================================================================
@@ -238,11 +240,11 @@ namespace CR { // Namespace CR -- begin
   
   void SkymapCoordinate::init ()
   {
-    ObservationData obsData          = ObservationData();
+    casa::ObsInfo obsInfo            = casa::ObsInfo();
     SpatialCoordinate spatialCoord   = SpatialCoordinate ();
     TimeFreqCoordinate timeFreqCoord = TimeFreqCoordinate();
     
-    init (obsData,
+    init (obsInfo,
 	  spatialCoord,
 	  timeFreqCoord,
 	  SkymapQuantity::FREQ_POWER);
@@ -250,12 +252,12 @@ namespace CR { // Namespace CR -- begin
   
   //________________________________________________________________________ init
   
-  void SkymapCoordinate::init (ObservationData const &obsData,
+  void SkymapCoordinate::init (casa::ObsInfo const &obsInfo,
 			       SpatialCoordinate const &spatialCoord,
 			       TimeFreqCoordinate const &timeFreqCoord,
 			       SkymapQuantity::Type const &quantity)
   {
-    obsData_p        = obsData;
+    obsInfo_p        = obsInfo;
     spatialCoord_p   = spatialCoord;
     timeFreqCoord_p  = timeFreqCoord;
     
@@ -270,7 +272,7 @@ namespace CR { // Namespace CR -- begin
   {
     casa::CoordinateSystem csys;
     
-    csys.setObsInfo (obsData_p.obsInfo());
+    csys.setObsInfo (obsInfo_p);
 
     /* Check the ordering of time and frequency axis */
     if (!timeFreqCoord_p.timeAxisLast()) {

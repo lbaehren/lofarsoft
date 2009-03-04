@@ -122,6 +122,15 @@ namespace CR { // Namespace CR -- begin
     void summary (std::ostream &os);    
 
     // ------------------------------------------------------------------ Methods
+
+    /*!
+      \brief Get the number of stored antenna arrays
+
+      \return nofArrays -- The number of stored antenna arrays
+    */
+    inline uint nofArrays () const {
+      return arrays_p.size();
+    }
     
     /*!
       \brief Add an AntennaArray to the list of stored objects

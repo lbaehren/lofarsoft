@@ -22,12 +22,10 @@
  ***************************************************************************/
 
 #include <Coordinates/SkymapCoordinate.h>
-#include <Observation/ObservationData.h>
 
 // Namespace usage
 using std::cout;
 using std::endl;
-using CR::ObservationData;
 using CR::SkymapCoordinate;
 
 /*!
@@ -75,9 +73,12 @@ int test_constructors ()
     nofFailedTests++;
   }
   
-  cout << "[2] Testing construction from observation data and time-freq ..." << endl;
+  cout << "[2] Testing construction from observation info and time-freq ..." << endl;
   try {
-    ObservationData obsData (telescope,observer);
+    casa::ObsInfo obsInfo;
+    obsInfo.setTelescope (telescope);
+    obsInfo.setObserver (observer);
+    //
     TimeFreqCoordinate timeFreq (blocksize,
 				 sampleFreq,
 				 nyquistZone,
@@ -89,13 +90,13 @@ int test_constructors ()
     std::cout << "-- Nyquist zone     = " << nyquistZone    << std::endl;
     std::cout << "-- blocks per frame = " << blocksPerFrame << std::endl;
     //
-    SkymapCoordinate coord1 (obsData,
-			    timeFreq,
+    SkymapCoordinate coord1 (obsInfo,
+			     timeFreq,
 			     CR::SkymapQuantity::FREQ_POWER);
     coord1.summary(); 
     //
-    SkymapCoordinate coord2 (obsData,
-			    timeFreq,
+    SkymapCoordinate coord2 (obsInfo,
+			     timeFreq,
 			     CR::SkymapQuantity::TIME_CC);
     coord2.summary(); 
   } catch (std::string message) {
@@ -105,7 +106,10 @@ int test_constructors ()
   
   cout << "[3] Testing construction for (Direction,Radius) coordinate ..." << endl;
   try {
-    ObservationData obsData (telescope,observer);
+    casa::ObsInfo obsInfo;
+    obsInfo.setTelescope (telescope);
+    obsInfo.setObserver (observer);
+    //
     TimeFreqCoordinate timeFreq (blocksize,
 				 sampleFreq,
 				 nyquistZone,
@@ -116,7 +120,7 @@ int test_constructors ()
 			       projection);
     spatial.setShape(casa::IPosition(3,100,100,10));
     //
-    SkymapCoordinate coord (obsData,
+    SkymapCoordinate coord (obsInfo,
 			    spatial,
 			    timeFreq);
     //
@@ -128,7 +132,10 @@ int test_constructors ()
 
   cout << "[4] Testing construction for cartesian coordinate ..." << endl;
   try {
-    ObservationData obsData (telescope,observer);
+    casa::ObsInfo obsInfo;
+    obsInfo.setTelescope (telescope);
+    obsInfo.setObserver (observer);
+    //
     TimeFreqCoordinate timeFreq (blocksize,
 				 sampleFreq,
 				 nyquistZone,
@@ -139,13 +146,13 @@ int test_constructors ()
 			       projection);
     spatial.setShape(casa::IPosition(3,100,100,10));
     //
-    SkymapCoordinate coord1 (obsData,
+    SkymapCoordinate coord1 (obsInfo,
 			     spatial,
 			     timeFreq,
 			     CR::SkymapQuantity::FREQ_POWER);
     coord1.summary();
     //
-    SkymapCoordinate coord2 (obsData,
+    SkymapCoordinate coord2 (obsInfo,
 			     spatial,
 			     timeFreq,
 			     CR::SkymapQuantity::TIME_CC);
@@ -157,7 +164,10 @@ int test_constructors ()
   
   cout << "[5] Testing copy constructor ..." << endl;
   try {
-    ObservationData obsData (telescope,observer);
+    casa::ObsInfo obsInfo;
+    obsInfo.setTelescope (telescope);
+    obsInfo.setObserver (observer);
+    //
     TimeFreqCoordinate timeFreq (blocksize,
 				 sampleFreq,
 				 nyquistZone,
@@ -168,7 +178,7 @@ int test_constructors ()
 			       projection);
     spatial.setShape(casa::IPosition(3,100,100,10));
     //
-    SkymapCoordinate coord (obsData,
+    SkymapCoordinate coord (obsInfo,
 			    spatial,
 			    timeFreq);
     coord.summary();
@@ -203,8 +213,11 @@ int test_methods ()
   uint nyquistZone (1);
   uint blocksPerFrame (1);
   uint nofFrames (10);
-  ObservationData obsData ("LOFAR",
-			   "Lars Baehren");
+
+  casa::ObsInfo obsInfo;
+  obsInfo.setTelescope("LOFAR");
+  obsInfo.setObserver("Lars Baehren");
+
   TimeFreqCoordinate timeFreq (blocksize,
 			       sampleFreq,
 			       nyquistZone,
@@ -215,7 +228,7 @@ int test_methods ()
 			     "SIN");
   spatial.setShape(casa::IPosition(3,100,100,10));
   // 
-  SkymapCoordinate coord (obsData,
+  SkymapCoordinate coord (obsInfo,
 			  spatial,
 			  timeFreq);
   
@@ -306,9 +319,11 @@ int test_coordinateSystem ()
   uint blocksPerFrame    = 1;
   uint nofFrames         = 10;
 
+  // Observation info
+  casa::ObsInfo obsInfo;
+  obsInfo.setTelescope (telescope);
+  obsInfo.setObserver (observer);
   // Coordinate objects
-  ObservationData obsData (telescope,
-			   observer);
   TimeFreqCoordinate timeFreq (blocksize,
 			       sampleFreq,
 			       nyquistZone,
@@ -319,7 +334,7 @@ int test_coordinateSystem ()
 			     refcode,
 			     projection);
   spatial.setShape(casa::IPosition(3,50,50,10));
-  SkymapCoordinate coord (obsData,
+  SkymapCoordinate coord (obsInfo,
 			  spatial,
 			  timeFreq);
 
@@ -402,8 +417,11 @@ int test_worldAxisValues ()
   uint blocksPerFrame (1);
   uint nofFrames (10);
   
+  // Observation info
+  casa::ObsInfo obsInfo;
+  obsInfo.setTelescope (telescope);
+  obsInfo.setObserver (observer);
   // Coordinate objects
-  ObservationData obsData (telescope,observer);
   TimeFreqCoordinate timeFreq (blocksize,
 			       sampleFreq,
 			       nyquistZone,
@@ -413,7 +431,7 @@ int test_worldAxisValues ()
 			     refcode,
 			     projection);
   spatial.setShape(casa::IPosition(3,20,20,10));
-  SkymapCoordinate coord (obsData,
+  SkymapCoordinate coord (obsInfo,
 			  spatial,
 			  timeFreq);
   
