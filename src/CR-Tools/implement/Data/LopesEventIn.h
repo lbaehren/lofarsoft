@@ -81,6 +81,7 @@ namespace CR { // Namespace CR -- begin
     
     // ------------------------------------------------------------- Data
     
+    //! Type of event contained in the dataset
     enum EvClass {
       //! Unspecified event
       Unspecified,
@@ -96,6 +97,7 @@ namespace CR { // Namespace CR -- begin
       Other
     };
 
+    //! Name of the observatory
     enum Observatory {
       //! LOFAR Prototype Station
       LOPES,
@@ -108,30 +110,22 @@ namespace CR { // Namespace CR -- begin
 
     //! filename (incl. path) of the file to be read
     String filename_p;
-
     //! Is this object attached to a file?
     Bool attached_p;
-    
     //! Pointer to the (header-)data
     lopesevent *headerpoint_p;
-
     //! Number of antennas in the event
     Int NumAntennas_p;
-    
     //! Matrix with the data itself
     Matrix<short> channeldata_p;
-
     //! Vector with the antenna IDs
     Vector<Int> AntennaIDs_p;
-
     
   public:
 
     // ------------------------------------------------------------- Construction
     
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     LopesEventIn();
     
     /*!
@@ -157,8 +151,6 @@ namespace CR { // Namespace CR -- begin
     */
     ~LopesEventIn();
     
-    // ---------------------------------------------------------------- Operators
-           
     // ------------------------------------------------------------------ Methods
     
     /*!
@@ -176,8 +168,6 @@ namespace CR { // Namespace CR -- begin
       \return Matrix with the data
     */
     Matrix<Double> fx();
-
-
     
     // --------------------------------------------------------------- Parameters
     
@@ -186,7 +176,7 @@ namespace CR { // Namespace CR -- begin
       
       \return filename -- Name of the data file 
     */
-    String  filename() {return filename_p;}
+    inline String  filename() const { return filename_p; }
     
     /*!
       \brief Get the name of the class

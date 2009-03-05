@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Kalpana Singh (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Kalpana Singh (<mail>)                                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,15 +21,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Observation/NuMoonTrigger.h>
+#include <Analysis/NuMoonTrigger.h>
 
 // Namespace usage
-using ::NuMoonTrigger;
+using CR::NuMoonTrigger;
 
 /*!
   \file tNuMoonTrigger.cc
 
-  \ingroup Observation
+  \ingroup Analysis
 
   \brief A collection of test routines for the NuMoonTrigger class
  

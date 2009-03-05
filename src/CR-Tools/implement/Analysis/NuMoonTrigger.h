@@ -54,18 +54,12 @@
 #include <tables/Tables/ScaColDesc.h>
 #include <tables/Tables/ScaRecordColDesc.h>
 
-#include <casa/namespace.h>
-
-#include <Display/SimplePlot.h>
-
-using CR::SimplePlot;
-
-namespace  { // Namespace  -- begin
+namespace CR { // Namespace  -- begin
   
   /*!
     \class NuMoonTrigger
     
-    \ingroup Observation
+    \ingroup Analysis
     
     \brief Brief description for class NuMoonTrigger
     
@@ -82,11 +76,24 @@ namespace  { // Namespace  -- begin
     </ul>
     
     <h3>Synopsis</h3>
+
+    <i>Currently this class is not only not doing something useful, but actually
+    it is not doing anything at all, since there is nothing else but a few
+    function prototypes and not implementation of anything.</i>
     
     <h3>Example(s)</h3>
     
   */  
   class NuMoonTrigger {
+
+    //! Time of the observation
+    uint observingTime_p;
+    //! Sampling rate
+    double samplingRate_p;
+    //
+    double mean_p;
+    //
+    double variance_p;
     
   public:
     
@@ -98,27 +105,30 @@ namespace  { // Namespace  -- begin
     NuMoonTrigger ();
     
     /*!
-      \brief Copy constructor
+      \brief Argumented constructor
       
-      \param other -- Another NuMoonTrigger object from which to create this new
-      one.
+      \param observing_time -- 
+      \param sampling_rate  -- 
+      \param mean           -- 
+      \param variance       -- 
+      \param cutoff_level   -- 
+      \param dead_time      -- 
+      \param P3             -- 
     */
     NuMoonTrigger ( const uint& observing_time,
-    		    const Double& sampling_rate,
-		    const Double& mean,
-		    const Double& variance,
+    		    const double& sampling_rate,
+		    const double& mean,
+		    const double& variance,
                     const uint& cutoff_level,
 		    const uint& dead_time,
 		    const uint& P3 ) ;
-		    
-   		    
-		    
+	
+    //! Copy constructor
+    NuMoonTrigger (NuMoonTrigger const &other);
 		 
     // -------------------------------------------------------------- Destruction
 
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     ~NuMoonTrigger ();
     
     // ---------------------------------------------------------------- Operators
@@ -132,6 +142,10 @@ namespace  { // Namespace  -- begin
     
     // --------------------------------------------------------------- Parameters
     
+    inline uint observingTime () const {
+      return observingTime_p;
+    }
+
     /*!
       \brief Get the name of the class
       
@@ -141,9 +155,7 @@ namespace  { // Namespace  -- begin
       return "NuMoonTrigger";
     }
 
-    /*!
-      \brief Provide a summary of the internal status
-    */
+    //! Provide a summary of the internal status
     inline void summary () {
       summary (std::cout);
     }
@@ -154,16 +166,14 @@ namespace  { // Namespace  -- begin
       \param os -- Output stream to which the summary is written.
     */
     void summary (std::ostream &os);    
-
+    
     // ------------------------------------------------------------------ Methods
     
-    Vector<Double> setDataPoints (const uint& observing_time,
-    		                  const Double& sampling_rate,
-				  const Double& mean,
-		                  const Double& variance );
-				  
+    casa::Vector<double> setDataPoints (const uint& observing_time,
+					const double& sampling_rate,
+					const double& mean,
+					const double& variance );
     
-    				  				  
     
   private:
     

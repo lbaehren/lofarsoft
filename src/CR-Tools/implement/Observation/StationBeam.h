@@ -100,18 +100,18 @@ namespace CR { // Namespace CR -- begin
     
     // ------------------------------------------------------------- Construction
     
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     StationBeam ();
     
     /*!
-      \brief Copy constructor
+      \brief Argumented constructor
       
-      \param other -- Another StationBeam object from which to create this new
-      one.
+      \param source_declination -- 
+      \param source_hr_angle    -- 
+      \param sky_temp           -- 
+      \param moon_temp          -- 
+      \param station_id         -- 
     */
-    
     StationBeam( const Double& source_declination,
                  const Double& source_hr_angle,
 		 const Double& sky_temp,
@@ -124,15 +124,18 @@ namespace CR { // Namespace CR -- begin
 		 Vector<Double>& position_y,
 		 const Vector<Double>& legendre_root,
 		 const Vector<Double>& legendre_weight ) ;
-		 
-		 
+
+    /*!
+      \brief Copy constructor
+      
+      \param other -- Another StationBeam object from which to create this new
+             one.
+    */
     StationBeam (StationBeam const &other);
     
     // -------------------------------------------------------------- Destruction
 
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     virtual ~StationBeam ();
     
     // ---------------------------------------------------------------- Operators
@@ -155,21 +158,31 @@ namespace CR { // Namespace CR -- begin
       return "StationBeam";
     }
 
-    /*!
-      \brief Provide a summary of the internal status
-    */
+    //! Provide a summary of the internal status
     inline void summary () {
       summary (std::cout);
     }
 
     /*!
-      \brief Provide a summary of the internal status
+      \brief Provide a summary of the internal parameters
+      
+      \param os -- Output stream, to which the summary is written
     */
     void summary (std::ostream &os);    
     
     // ------------------------------------------------------------------ Methods
     
-    
+    /*!
+      \brief Compute the station beam
+      
+      \param frequency 
+      \param hr_angle
+      \param declination
+      \param source_declination
+      \param source_hr_angle
+      
+      \return power -- 
+    */
     Double station_beam(const Double& frequency,
 			const Double& hr_angle,
 			const Double& declination,

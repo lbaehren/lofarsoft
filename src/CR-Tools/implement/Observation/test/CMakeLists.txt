@@ -7,7 +7,6 @@
 
 set (tests
   tObservationData
-  tObservationFrame
   )
 
 ## -----------------------------------------------------------------------------

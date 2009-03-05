@@ -1,6 +1,9 @@
-/***************************************************************************
- *   Copyright (C) 2006                                                    *
- *   Lars B"ahren (bahren@astron.nl)                                       *
+/*-------------------------------------------------------------------------*
+ | $Id::                                                                 $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2008                                                    *
+ *   Kalpana Singh (<k.singh@rug.nl>)                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,10 +21,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <Analysis/NuMoonTrigger.h>
 
-#include <Observation/AntennaLayout.h>
-
-namespace CR {  // namespace CR -- begin
+namespace CR { // Namespace  -- begin
   
   // ============================================================================
   //
@@ -29,51 +31,67 @@ namespace CR {  // namespace CR -- begin
   //
   // ============================================================================
   
-  AntennaLayout::AntennaLayout ()
-  {;}
-  
-  AntennaLayout::AntennaLayout (const String& tableFilename,
-				const String& telescope,
-				const Quantity& epoch)
+  NuMoonTrigger::NuMoonTrigger ()
   {
-    obsInfo_p.setTelescope (telescope);
-    obsInfo_p.setObsDate (epoch);
+    observingTime_p = 0;
+    samplingRate_p  = 0;
+    mean_p          = 0;
+    variance_p      = 0;
   }
   
-  AntennaLayout::AntennaLayout (const String& tableFilename,
-				const ObsInfo& obsInfo)
-    : obsInfo_p(obsInfo)
-  {;}
-  
+  NuMoonTrigger::NuMoonTrigger (NuMoonTrigger const &other)
+  {
+    copy (other);
+  }
   
   // ============================================================================
-  //  
-  //  Object parameters
+  //
+  //  Destruction
   //
   // ============================================================================
   
-  void AntennaLayout::setEpoch (const MEpoch& epoch) 
+  NuMoonTrigger::~NuMoonTrigger ()
   {
-    obsInfo_p.setObsDate (epoch);
+    destroy();
   }
   
-  void AntennaLayout::setTelescope (const String& telescope)
+  void NuMoonTrigger::destroy ()
+  {;}
+  
+  // ============================================================================
+  //
+  //  Operators
+  //
+  // ============================================================================
+  
+  NuMoonTrigger& NuMoonTrigger::operator= (NuMoonTrigger const &other)
   {
-    obsInfo_p.setTelescope (telescope);
+    if (this != &other) {
+      destroy ();
+      copy (other);
+    }
+    return *this;
   }
   
-  // =============================================================================
-  // 
+  void NuMoonTrigger::copy (NuMoonTrigger const &other)
+  {;}
+
+  // ============================================================================
+  //
+  //  Parameters
+  //
+  // ============================================================================
   
-  Vector<double> AntennaLayout::antennaPosition (const int& antenna)
+  void NuMoonTrigger::summary (std::ostream &os)
   {
-    Vector<double> position;
-    
-    return position;
+    os << "[NuMoonTrigger] Summary of internal parameters." << std::endl;
   }
   
   // ============================================================================
-  //  Manipulation of the antenna layout table
+  //
+  //  Methods
+  //
   // ============================================================================
   
-}  //  namespace CR -- end
+  
+} // Namespace  -- end

@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2006                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -56,7 +56,9 @@ namespace CR { // Namespace CR -- begin
     init();
     attachFile(filename);
   }
-  
+ 
+  //________________________________________________________________________ init
+ 
   void LopesEventIn::init(){
     DataReader::setNyquistZone(LOPES_NYQUIST_ZONE);
     DataReader::setSampleFrequency(LOPES_SAMPLERATE);
@@ -120,14 +122,17 @@ namespace CR { // Namespace CR -- begin
       fread(&tmplen, 1, sizeof(uint), fd); 
       if (headerpoint_p->blocksize==0) {headerpoint_p->blocksize = tmplen;};
       if (headerpoint_p->blocksize != tmplen) {
-	cerr << "LOPESEventIn:attachFile: Inconsitent file (different blocksizes): " << filename << endl;
+	cerr << "LOPESEventIn:attachFile: Inconsitent file (different blocksizes): "
+	     << filename
+	     << endl;
 	fclose(fd);
 	return False;
       };
       i = fseek(fd,tmplen*sizeof(short),SEEK_CUR);
       if (i != 0) {
-	cerr << "LOPESEventIn:attachFile: Inconsitent file (unexpected end): " << filename << " in channel " << 
-	  tmpchan << " len:" << tmplen << endl;
+	cerr << "LOPESEventIn:attachFile: Inconsitent file (unexpected end): "
+	     << filename << " in channel "
+	     << tmpchan << " len:" << tmplen << endl;
 	fclose(fd);
 	return False;
       };
@@ -164,6 +169,8 @@ namespace CR { // Namespace CR -- begin
     }; 
     return True;
   }
+
+  //__________________________________________________________________ setStreams
 
   bool LopesEventIn::setStreams(){
     try{

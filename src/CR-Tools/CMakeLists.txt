@@ -422,6 +422,15 @@ endif (dataset_tbb)
 
 ## Reference values for test programs
 
+find_file (dataset_lopes_example example.event
+  PATHS
+  ${CR_SOURCE_DIR}/data
+  ${CR_SOURCE_DIR}/../data
+  ${CR_SOURCE_DIR}/../../data
+  PATH_SUFFIXES
+  lopes
+  )
+
 find_file (data_ppf_coefficients Coeffs16384Kaiser-quant.dat
   PATHS
   ${CR_SOURCE_DIR}/data

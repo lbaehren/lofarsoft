@@ -42,6 +42,7 @@ using casa::PagedImage;
 using casa::TiledShape;
 
 #include <Coordinates/SkymapCoordinate.h>
+#include <Data/LopesEvent.h>
 #include <Imaging/Beamformer.h>
 #include <Imaging/Skymapper.h>
 #include <Utilities/ProgressBar.h>
@@ -422,6 +423,20 @@ int test_processing (string const &infile,
 
     skymapper.processData(data);
 
+  } catch (AipsError x) {
+    cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Process example LOPES data-set ..." << endl;
+  try {
+    // set up DataReader for input of data
+    CR::LopesEvent dr (dataset_lopes_example,
+		       blocksize);
+    dr.summary();
+    // update SkymapCoordinate
+    info.setTelescope("LOPES");
+    coord.setObsInfo (info);
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;
     nofFailedTests++;

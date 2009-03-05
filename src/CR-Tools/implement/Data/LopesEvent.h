@@ -141,9 +141,6 @@ namespace CR {  //  Namespace CR -- begin
     //!  Type of the recorded event.
     EvType evType_;
     
-    //!  Number of samples (short) in one channel (optional)
-    uint blocksize_;
-    
     //!  First entry is presync for the sync signal (optional) 
     int  presync_;
     
@@ -162,9 +159,7 @@ namespace CR {  //  Namespace CR -- begin
     
     // --- Construction ----------------------------------------------------------
     
-    /*!
-      \brief Empty constructor
-    */
+    //! Empty constructor
     LopesEvent ();
     
     /*!
@@ -196,14 +191,14 @@ namespace CR {  //  Namespace CR -- begin
       
       This constructor creates a LOPES event object from a file with supplied name
       <b>name</b>.
+
+      \param name -- Name of the file from which to read in the data
     */
     LopesEvent (const char* name);
     
     // --- Destruction -----------------------------------------------------------
     
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     ~LopesEvent();
     
     // --- Lopes event parameters and data ---------------------------------------
@@ -213,16 +208,18 @@ namespace CR {  //  Namespace CR -- begin
       
       \return filename -- Name of the data file 
     */
-    string  filename()
-    {return filename_;}
+    inline string  filename() {
+      return filename_;
+    }
     
     /*!
       \brief Get the length of the data record.
       
       \return length -- Length of the data record in bytes
     */
-    uint&   length()
-      {return length_;}
+    inline uint& length() {
+      return length_;
+    }
     
     /*!
       \brief Set/Get the length of the data record.
@@ -231,16 +228,19 @@ namespace CR {  //  Namespace CR -- begin
       
       \return length -- Length of the data record in bytes
     */
-    uint&   length(uint in)
-      {length_ = in;    return length_;}
+    inline uint&   length(uint in) {
+      length_ = in;
+      return length_;
+    }
     
     /*!
       \brief Get the Version number of the data record
       
       \return version -- Version number of the data record
     */
-    uint&   version()
-      {return version_;}
+    inline uint&   version() {
+      return version_;
+    }
     
     /*!
       \brief Set/Get the Version number of the data record
@@ -249,11 +249,19 @@ namespace CR {  //  Namespace CR -- begin
       
       \return version -- Version number of the data record
     */
-    uint&   version(uint in)
-      {version_ = in;   return version_;}
+    inline uint&   version(uint in) {
+      version_ = in;
+      return version_;
+    }
     
-    uint&   timeJDR()
-      {return timeJDR_;}
+    /*!
+      \brief Get the JDR timestamp
+
+      \return jdr -- The JDR timestamp.
+    */
+    inline uint&   timeJDR() {
+      return timeJDR_;
+    }
     
     uint&   timeJDR(uint in)
       {timeJDR_ = in;   return timeJDR_;}

@@ -309,13 +309,43 @@
 
   </ol>
   
-  <li>
+  <hr>
   
   \section crtools_coordinates_measures casacore Measures & Quantities
   
   - list basic types of Quanta
   - list basic types of Measures
   - describe how to construct a Measure (from scratch, from a Quantity, ...)
+  
+  <ul>
+    <li>Quantity describing instances in time:
+	\code
+	casa::Quantity q1 (0.0,"d");
+	\endcode
+    <li>Object construction chain for an instance in time:
+    \code
+    casa::Time t;
+    casa::Quantity q;
+    casa::MEpoch epoch;
+     
+    q     = Quantity(t.modifiedJulianDay(),"d");
+    epoch = MEpoch(q);
+    \endcode
+  
+    <li>Retrieval of an observatory position:
+    \code
+    casa::String obsName("LOFAR");
+    casa::MPosition obsPosition;
+    
+    // initialize the observatory table
+    casa::MeasTable::initObservatories ();
+    // retrieve the position of the observatory
+    casa::MeasTable::Observatory(obsPosition,obsName);
+    
+    // get the list of available observatories
+    casa::Vector<casa::String> observatories = casa::MeasTable::Observatories();
+    \endcode
+  </ul>
 
   <hr>
   

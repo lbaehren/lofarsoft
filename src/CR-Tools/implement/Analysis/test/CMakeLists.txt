@@ -17,6 +17,7 @@ set (tests
   tDynamicSpectrum
   tFirstStagePipeline
   tionoCalibration
+  tNuMoonTrigger
   tSecondStagePipeline
   tSubbandID
   )

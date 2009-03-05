@@ -119,7 +119,7 @@ namespace CR { // Namespace CR -- begin
   //  Methods
   //
   // ============================================================================
-
+  
   Double StationBeam::station_beam( const Double& frequency,
 				    const Double& hr_angle,
 			       	    const Double& declination,
@@ -127,554 +127,551 @@ namespace CR { // Namespace CR -- begin
       	       		            const Double& source_hr_angle,
 			            const Double& station_radii,
 			            const Vector<Double>& legendre_root,
-			            const Vector<Double>& legendre_weight ) 
-
+			            const Vector<Double>& legendre_weight )
   {
     try {
-        
-         uint n_roots = legendre_root.nelements() ;
-	 
-	 Double pi(3.1416) ;	 
-	 DComplex j(0, 1 );
-	 DComplex Q(0.0);
-	 DComplex power_x(0.0);
-	 DComplex power_sum(0.0);
-	 DComplex power_final(0.0);
-	 
-	 Double a(0.0);
-	 Double b(0.0);
-	 Double h1(0.0);
-	 Double h2(0.0);
-	 Double cos_zenith(0.0);
-	 Double new_zenith(0.0);
-	 Double new_azimuth(0.0);
-	 Double L_cosine(0.0);
-	 Double M_cosine(0.0);
-	 Double sourceHrAngle = pi/180.*source_hr_angle ;
-         Double sourceDeclination = pi/180.*source_declination ;
-         Double hrAngle = pi/180.*hr_angle ;
-         Double decAngle = pi/180.*declination ;
-	 	 
-	 Double power_dish(0.0);
-	 Double xx(0.0);
-	 Double d1(0.0);
-	 Double c1(0.0);
-	 Double k1(0.0);
-	 Double k2(0.0);
-	 Double cos_z_f_term(0.0);
-	 Double cos_z_s_term(0.0);
-	 Double cos_z_t_term(0.0);
-	 	 
-	 a = -station_radii ;
-	 b = station_radii ;
-	 
-	 h1 = (b-a)/2 ;
-	 h2 = (b+a)/2 ;
-	 
-         cos_z_f_term = cos(sourceHrAngle)*sin(sourceDeclination)*cos(hrAngle)*sin(decAngle);
-         cos_z_s_term = sin(sourceHrAngle)*sin(sourceDeclination)*sin(hrAngle)*sin(decAngle) ;
-         cos_z_t_term = cos(sourceDeclination)*cos(decAngle) ;
-
-        cos_zenith = cos_z_f_term + cos_z_s_term + cos_z_t_term ;
-	
-	new_zenith = acos(cos_zenith) ;
-	
-	if (decAngle > sourceDeclination)
-	   new_azimuth = abs(hrAngle-sourceHrAngle) ;
-	   else 
-	   	  if(decAngle < sourceDeclination)
-		              new_azimuth = pi -abs(sourceHrAngle-hrAngle) ;
-			                if ((decAngle < sourceDeclination) && (hrAngle >pi))
-						   new_azimuth = pi + (sourceHrAngle - hrAngle) ;
-         
-	  L_cosine = sin(new_zenith)*cos(new_azimuth) ;
-	  
-	  M_cosine = sin(new_zenith)*sin(new_azimuth) ;
-	  
-        for( uint r =0; r <n_roots; r++ ){
-	
-	     DComplex power_x (0.0) ;
-	     Double yy(0.0);
-	     
-	     xx = h1*legendre_root(r)+h2 ;
-	    
-	     d1 = station_radii*cos(sourceDeclination)*sqrt(1.-(xx/station_radii)*(xx/station_radii)) ;
-	     
-	     c1 = -station_radii*cos(sourceDeclination)*sqrt(1.-(xx/station_radii)*(xx/station_radii)) ;
-	     
-	     k1 =(d1-c1)/2. ;
-	     
-	     k2 =(d1+c1)/2. ;
-	     
-	     for( uint s=0; s <n_roots; s++ ){
-	     
-	         yy = k1*legendre_root(s)+k2 ;
-		 
-		 Q = exp(-2*pi*j*frequency/3e8*(L_cosine*xx+M_cosine*yy)) ;
-		 
-		 power_x = power_x + legendre_weight(s)*(Q) ;
-		 
-	     }
-	     power_sum = power_sum + legendre_weight(r)*k1*power_x ;
-	    
-        }
-	power_final = h1*power_sum ;    
-	
-       power_dish = abs(h1*power_sum/(2.*pi*(3e8/frequency)*(3e8/frequency)))*abs(h1*power_sum/(2.*pi*(3e8/frequency)*(3e8/frequency))) ;
-	
-       return power_dish ;
-      }
       
-      catch( AipsError x ){
+      uint n_roots = legendre_root.nelements() ;
+      
+      Double pi(3.1416) ;	 
+      DComplex j(0, 1 );
+      DComplex Q(0.0);
+      DComplex power_x(0.0);
+      DComplex power_sum(0.0);
+      DComplex power_final(0.0);
+      
+      Double a(0.0);
+      Double b(0.0);
+      Double h1(0.0);
+      Double h2(0.0);
+      Double cos_zenith(0.0);
+      Double new_zenith(0.0);
+      Double new_azimuth(0.0);
+      Double L_cosine(0.0);
+      Double M_cosine(0.0);
+      Double sourceHrAngle = pi/180.*source_hr_angle ;
+      Double sourceDeclination = pi/180.*source_declination ;
+      Double hrAngle = pi/180.*hr_angle ;
+      Double decAngle = pi/180.*declination ;
+      
+      Double power_dish(0.0);
+      Double xx(0.0);
+      Double d1(0.0);
+      Double c1(0.0);
+      Double k1(0.0);
+      Double k2(0.0);
+      Double cos_z_f_term(0.0);
+      Double cos_z_s_term(0.0);
+      Double cos_z_t_term(0.0);
+      
+      a = -station_radii ;
+      b = station_radii ;
+      
+      h1 = (b-a)/2 ;
+      h2 = (b+a)/2 ;
+      
+      cos_z_f_term = cos(sourceHrAngle)*sin(sourceDeclination)*cos(hrAngle)*sin(decAngle);
+      cos_z_s_term = sin(sourceHrAngle)*sin(sourceDeclination)*sin(hrAngle)*sin(decAngle) ;
+      cos_z_t_term = cos(sourceDeclination)*cos(decAngle) ;
+      
+      cos_zenith = cos_z_f_term + cos_z_s_term + cos_z_t_term ;
+      
+      new_zenith = acos(cos_zenith) ;
+      
+      if (decAngle > sourceDeclination)
+	new_azimuth = abs(hrAngle-sourceHrAngle) ;
+      else 
+	if(decAngle < sourceDeclination)
+	  new_azimuth = pi -abs(sourceHrAngle-hrAngle) ;
+      if ((decAngle < sourceDeclination) && (hrAngle >pi))
+	new_azimuth = pi + (sourceHrAngle - hrAngle) ;
+      
+      L_cosine = sin(new_zenith)*cos(new_azimuth) ;
+      
+      M_cosine = sin(new_zenith)*sin(new_azimuth) ;
+      
+      for( uint r =0; r <n_roots; r++ ){
+	
+	DComplex power_x (0.0) ;
+	Double yy(0.0);
+	
+	xx = h1*legendre_root(r)+h2 ;
+	
+	d1 = station_radii*cos(sourceDeclination)*sqrt(1.-(xx/station_radii)*(xx/station_radii)) ;
+	
+	c1 = -station_radii*cos(sourceDeclination)*sqrt(1.-(xx/station_radii)*(xx/station_radii)) ;
+	
+	k1 =(d1-c1)/2. ;
+	
+	k2 =(d1+c1)/2. ;
+	
+	for( uint s=0; s <n_roots; s++ ){
+	  
+	  yy = k1*legendre_root(s)+k2 ;
+	  
+	  Q = exp(-2*pi*j*frequency/3e8*(L_cosine*xx+M_cosine*yy)) ;
+	  
+	  power_x = power_x + legendre_weight(s)*(Q) ;
+	  
+	}
+	power_sum = power_sum + legendre_weight(r)*k1*power_x ;
+	
+      }
+      power_final = h1*power_sum ;    
+      
+      power_dish = abs(h1*power_sum/(2.*pi*(3e8/frequency)*(3e8/frequency)))*abs(h1*power_sum/(2.*pi*(3e8/frequency)*(3e8/frequency))) ;
+      
+      return power_dish ;
+    }
+    
+    catch( AipsError x ){
       cerr << "StationBeam::station_beam " << x.getMesg () << endl ;
       return Double ();
     }       
-	       
- }
- 
-
     
-Double StationBeam::incoherent_beam( const Double& frequency,
-	                             const Double& hr_angle,
-		                     const Double& declination,
-		                     const Double& source_declination,
-		                     const Double& source_hr_angle,
-		                     const Double& station_radii,
-		                     const Vector<uint>& station_id,
-		                     const Vector<Double>& legendre_root,
-		                     const Vector<Double>& legendre_weight ) 
-{
-   try{
-
-        StationBeam stbm ;
-        
-// 	Double pi(3.1416) ;
-	DComplex j(0, 1 );
-        Double sum_incoherent(0.0);
-	Double integral_value (0.0) ;
+  }
+  
+  
+  
+  Double StationBeam::incoherent_beam( const Double& frequency,
+				       const Double& hr_angle,
+				       const Double& declination,
+				       const Double& source_declination,
+				       const Double& source_hr_angle,
+				       const Double& station_radii,
+				       const Vector<uint>& station_id,
+				       const Vector<Double>& legendre_root,
+				       const Vector<Double>& legendre_weight ) 
+  {
+    try{
+      
+      StationBeam stbm ;
+      
+      DComplex j(0, 1 );
+      Double sum_incoherent(0.0);
+      Double integral_value (0.0) ;
+      
+      uint n_stations = station_id.nelements() ;
+      
+      
+      Double stationbeam = stbm.station_beam( frequency,
+					      hr_angle,
+					      declination,
+					      source_declination,
+					      source_hr_angle,
+					      station_radii,
+					      legendre_root,
+					      legendre_weight ) ;
+      
+      for( uint ns=0; ns < n_stations; ns++ ){
 	
-	uint n_stations = station_id.nelements() ;
-// 	uint n_stat = 0 ;
-
-	
-	Double stationbeam = stbm.station_beam( frequency,
-				                hr_angle,
-			       	                declination,
-				                source_declination,
-      	       		                        source_hr_angle,
-			                        station_radii,
-			                        legendre_root,
-			                        legendre_weight ) ;
-						
-        for( uint ns=0; ns < n_stations; ns++ ){
-	            
-	    sum_incoherent = sum_incoherent +stationbeam ;
-	  }
-       
-       integral_value = sum_incoherent;	     	     
-       cout << " power sum for incoherent addition : " << integral_value << endl ;
-												
-       return integral_value ;
+	sum_incoherent = sum_incoherent +stationbeam ;
       }
       
-      catch( AipsError x ){
+      integral_value = sum_incoherent;	     	     
+      cout << " power sum for incoherent addition : " << integral_value << endl ;
+      
+      return integral_value ;
+    }
+    
+    catch( AipsError x ){
       cerr << "StationBeam::incoherent_beam " << x.getMesg () << endl ;
       return Double ();
-      }       
-	       
- }
-
-
-Double StationBeam::tied_array( const Double& frequency,
-                                const Double& hr_angle,
-		                const Double& declination,
-		                const Double& source_declination,
-		                const Double& source_hr_angle,
-		                const Double& station_radii,
-				const Vector<uint>& station_id,
-		                Vector<Double>& position_x,
-		                Vector<Double>& position_y,
-		                const Vector<Double>& legendre_root,
-		                const Vector<Double>& legendre_weight ) 
-     
- {
-   try {
-   
-        StationBeam stbm ;
+    }       
+    
+  }
+  
+  
+  Double StationBeam::tied_array( const Double& frequency,
+				  const Double& hr_angle,
+				  const Double& declination,
+				  const Double& source_declination,
+				  const Double& source_hr_angle,
+				  const Double& station_radii,
+				  const Vector<uint>& station_id,
+				  Vector<Double>& position_x,
+				  Vector<Double>& position_y,
+				  const Vector<Double>& legendre_root,
+				  const Vector<Double>& legendre_weight ) 
+    
+  {
+    try {
+      
+      StationBeam stbm ;
+      
+      Double pi(3.1416) ;
+      DComplex j(0, 1 );
+      DComplex sum_tied_array(0.0);
+      Double integral_value (0.0) ;
+      
+      uint n_stations = station_id.nelements() ;
+      uint n_stat = 0 ;
+      
+      Double observed_L(0.0) ;
+      Double observed_M(0.0) ;
+      Double observed_N(0.0) ;
+      Double pos_new_x(0.0) ;
+      Double pos_new_y(0.0) ;
+      
+      Double position_new_x(0.0);
+      Double position_new_y(0.0);
+      Double position_new_y1(0.0);
+      Double position_new_y2(0.0);
+      
+      Double sourceHrAngle = pi/180.*source_hr_angle ;
+      Double sourceDeclination = pi/180.*source_declination ;
+      Double hrAngle = pi/180.*hr_angle ;
+      Double decAngle = pi/180.*declination ;
+      
+      observed_L = sin(decAngle-sourceDeclination)*cos(hrAngle-sourceHrAngle) ;
+      
+      observed_M = sin(decAngle-sourceDeclination)*sin(hrAngle-sourceHrAngle) ;
+      
+      observed_N = cos(decAngle-sourceDeclination) ;
+      
+      Double stationbeam = stbm.station_beam( frequency,
+					      hr_angle,
+					      declination,
+					      source_declination,
+					      source_hr_angle,
+					      station_radii,
+					      legendre_root,
+					      legendre_weight ) ;
+      
+      for( uint ns=0; ns < n_stations; ns++ ){
+	
+	n_stat = station_id(ns) ;
+	pos_new_x = position_x(n_stat) ;
+	pos_new_y = position_y(n_stat) ;
+	
+	position_new_x = pos_new_x*cos(sourceHrAngle)-pos_new_y*sin(sourceHrAngle) ;
+	position_new_y1 = pos_new_x*cos(sourceDeclination)*sin(sourceHrAngle) ;
+	position_new_y2 = pos_new_y*cos(sourceHrAngle)*cos(sourceDeclination) ;
+	
+	position_new_y = position_new_y1 +position_new_y2 ;
         
-	Double pi(3.1416) ;
-	DComplex j(0, 1 );
-        DComplex sum_tied_array(0.0);
-	Double integral_value (0.0) ;
-	
-	uint n_stations = station_id.nelements() ;
-	uint n_stat = 0 ;
-	
-	Double observed_L(0.0) ;
-	Double observed_M(0.0) ;
-	Double observed_N(0.0) ;
-	Double pos_new_x(0.0) ;
-	Double pos_new_y(0.0) ;
-
-	Double position_new_x(0.0);
-	Double position_new_y(0.0);
-	Double position_new_y1(0.0);
-	Double position_new_y2(0.0);
-	
-        Double sourceHrAngle = pi/180.*source_hr_angle ;
-        Double sourceDeclination = pi/180.*source_declination ;
-        Double hrAngle = pi/180.*hr_angle ;
-        Double decAngle = pi/180.*declination ;
-
-	observed_L = sin(decAngle-sourceDeclination)*cos(hrAngle-sourceHrAngle) ;
-	
-	observed_M = sin(decAngle-sourceDeclination)*sin(hrAngle-sourceHrAngle) ;
-		
-	observed_N = cos(decAngle-sourceDeclination) ;
-		
-	Double stationbeam = stbm.station_beam( frequency,
-				                hr_angle,
-			       	                declination,
-				                source_declination,
-      	       		                        source_hr_angle,
-			                        station_radii,
-			                        legendre_root,
-			                        legendre_weight ) ;
-						
-        for( uint ns=0; ns < n_stations; ns++ ){
-	
-	     n_stat = station_id(ns) ;
-	     pos_new_x = position_x(n_stat) ;
-	     pos_new_y = position_y(n_stat) ;
-	     
-	     position_new_x = pos_new_x*cos(sourceHrAngle)-pos_new_y*sin(sourceHrAngle) ;
-	     position_new_y1 = pos_new_x*cos(sourceDeclination)*sin(sourceHrAngle) ;
-	     position_new_y2 = pos_new_y*cos(sourceHrAngle)*cos(sourceDeclination) ;
-	     
-	     position_new_y = position_new_y1 +position_new_y2 ;
-             
-	   sum_tied_array = sum_tied_array +stationbeam*exp(2*pi*j*(frequency/3e8)*(position_new_x*observed_L+position_new_y*observed_M));
-	  }
-       
-       integral_value = abs(sum_tied_array)*abs(sum_tied_array);	     	     
-													
-       return integral_value ;
+	sum_tied_array = sum_tied_array +stationbeam*exp(2*pi*j*(frequency/3e8)*(position_new_x*observed_L+position_new_y*observed_M));
       }
       
-      catch( AipsError x ){
+      integral_value = abs(sum_tied_array)*abs(sum_tied_array);	     	     
+      
+      return integral_value ;
+    }
+    
+    catch( AipsError x ){
       cerr << "StationBeam::tied_array " << x.getMesg () << endl ;
       return Double ();
-      }       
-	       
- }
- 
- 
- 	
-Double StationBeam::integrate_freq( const Double& hr_angle,
-                                    const Double& declination,
-                                    const Double& source_declination,
-	                            const Double& source_hr_angle,
-	                            const Double& station_radii,
-	                            const Vector<uint>& station_id,
-		                    const Double& freq_init,
-		                    const Double& bandwidth,
-                                    const Double& freq_interval,
-		                    Vector<Double>& position_x,
-		                    Vector<Double>& position_y,
-                                    const Vector<Double>& legendre_root,
-             		            const Vector<Double>& legendre_weight )   
-
-{
-   try {
-          StationBeam stbm ;
-         	 
-          uint nroots = legendre_root.nelements() ;
-          
-          Double freq_final = freq_init + bandwidth ;
-     
-          Double power_beam(0.0) ;
-//           Double power_sum(0.0); 
-          
-      	  Double k1_freq(0.0) ;
-          Double k2_freq(0.0) ;
-          Double k1_f(0.0);
-          Double k2_f(0.0);
-          Double freq(0.0);
-          Double y_outer_sum(0.0);
-          Double y_inner_sum(0.0);
-
-          while( k1_freq < freq_final ) {
-
-	      k2_freq = k1_freq + freq_interval ;
-              k1_f = (k2_freq - k1_freq)/2. ;
-              k2_f = (k2_freq +k1_freq )/2. ;
-             
-              y_inner_sum = 0;
-
-              for(uint ff=0; ff< nroots; ff++ ) {
+    }       
+    
+  }
   
-		  freq = k1_f*legendre_root(ff)+k2_f ;
-		                    
-		  power_beam = stbm. tied_array( freq,
-                                                 hr_angle,
-		                                 declination,
-		                                 source_declination,
-		                                 source_hr_angle,
-		                                 station_radii,
-				                 station_id,
-		                                 position_x,
-		                                 position_y,
-		                                 legendre_root,
-		                                 legendre_weight);
-
-		  y_inner_sum = y_inner_sum + legendre_weight(ff)*power_beam ;
-	      }
-
-              y_outer_sum = y_outer_sum + k1_f*y_inner_sum ;
-              k1_freq = k2_freq ;
-	  }
-            
-     return y_outer_sum ;
-   }
+  
+  
+  Double StationBeam::integrate_freq( const Double& hr_angle,
+				      const Double& declination,
+				      const Double& source_declination,
+				      const Double& source_hr_angle,
+				      const Double& station_radii,
+				      const Vector<uint>& station_id,
+				      const Double& freq_init,
+				      const Double& bandwidth,
+				      const Double& freq_interval,
+				      Vector<Double>& position_x,
+				      Vector<Double>& position_y,
+				      const Vector<Double>& legendre_root,
+				      const Vector<Double>& legendre_weight )   
+    
+  {
+    try {
+      StationBeam stbm ;
       
-   catch( AipsError x ){
-   cerr << "StationBeam::integrate_freq " << x.getMesg () << endl ;
-   return Double ();
-  }       
-}	
-
-
- 	
-Double StationBeam::incoherent_beaming( const Double& hr_angle,
-                                        const Double& declination,
-                                        const Double& source_declination,
-	                                const Double& source_hr_angle,
-	                                const Double& station_radii,
-	                                const Vector<uint>& station_id,
-		                        const Double& frequency,
-		                        Vector<Double>& position_x,
-		                        Vector<Double>& position_y,
-                                        const Vector<Double>& legendre_root,
-             		               const Vector<Double>& legendre_weight )   
-
-{
-   try {
+      uint nroots = legendre_root.nelements() ;
       
-        StationBeam stbm ;
+      Double freq_final = freq_init + bandwidth ;
+      
+      Double power_beam(0.0) ;
+      //           Double power_sum(0.0); 
+      
+      Double k1_freq(0.0) ;
+      Double k2_freq(0.0) ;
+      Double k1_f(0.0);
+      Double k2_f(0.0);
+      Double freq(0.0);
+      Double y_outer_sum(0.0);
+      Double y_inner_sum(0.0);
+      
+      while( k1_freq < freq_final ) {
+	
+	k2_freq = k1_freq + freq_interval ;
+	k1_f = (k2_freq - k1_freq)/2. ;
+	k2_f = (k2_freq +k1_freq )/2. ;
         
-	Double pi(3.1416) ;
-	DComplex j(0, 1 );
-        Double sum_tied_array(0.0);
-	Double integral_value (0.0) ;
+	y_inner_sum = 0;
 	
-	uint n_stations = station_id.nelements() ;
-// 	uint n_stat = 0 ;
+	for(uint ff=0; ff< nroots; ff++ ) {
+	  
+	  freq = k1_f*legendre_root(ff)+k2_f ;
+	  
+	  power_beam = stbm. tied_array( freq,
+					 hr_angle,
+					 declination,
+					 source_declination,
+					 source_hr_angle,
+					 station_radii,
+					 station_id,
+					 position_x,
+					 position_y,
+					 legendre_root,
+					 legendre_weight);
+	  
+	  y_inner_sum = y_inner_sum + legendre_weight(ff)*power_beam ;
+	}
 	
-	Double observed_L(0.0) ;
-	Double observed_M(0.0) ;
-	Double observed_N(0.0) ;
-// 	Double pos_new_x(0.0) ;
-// 	Double pos_new_y(0.0) ;
-
-// 	Double position_new_x(0.0);
-// 	Double position_new_y(0.0);
-// 	Double position_new_y1(0.0);
-// 	Double position_new_y2(0.0);
-	
-        Double sourceHrAngle = pi/180.*source_hr_angle ;
-        Double sourceDeclination = pi/180.*source_declination ;
-        Double hrAngle = pi/180.*hr_angle ;
-        Double decAngle = pi/180.*declination ;
-
-	observed_L = sin(decAngle-sourceDeclination)*cos(hrAngle-sourceHrAngle) ;
-	
-	observed_M = sin(decAngle-sourceDeclination)*sin(hrAngle-sourceHrAngle) ;
-		
-	observed_N = cos(decAngle-sourceDeclination) ;
-		
-	Double stationbeam = stbm.station_beam( frequency,
-				                hr_angle,
-			       	                declination,
-				                source_declination,
-      	       		                        source_hr_angle,
-			                        station_radii,
-			                        legendre_root,
-			                        legendre_weight ) ;
-						
-        for( uint ns=0; ns < n_stations; ns++ ){
-	
-	      sum_tied_array = sum_tied_array +stationbeam ;
-	  }
-       
-       integral_value = sum_tied_array ;	     	     
-													
-       return integral_value ;
+	y_outer_sum = y_outer_sum + k1_f*y_inner_sum ;
+	k1_freq = k2_freq ;
       }
       
-      catch( AipsError x ){
+      return y_outer_sum ;
+    }
+    
+    catch( AipsError x ){
+      cerr << "StationBeam::integrate_freq " << x.getMesg () << endl ;
+      return Double ();
+    }       
+  }	
+  
+  
+  
+  Double StationBeam::incoherent_beaming( const Double& hr_angle,
+					  const Double& declination,
+					  const Double& source_declination,
+					  const Double& source_hr_angle,
+					  const Double& station_radii,
+					  const Vector<uint>& station_id,
+					  const Double& frequency,
+					  Vector<Double>& position_x,
+					  Vector<Double>& position_y,
+					  const Vector<Double>& legendre_root,
+					  const Vector<Double>& legendre_weight )   
+    
+  {
+    try {
+      
+      StationBeam stbm ;
+      
+      Double pi(3.1416) ;
+      DComplex j(0, 1 );
+      Double sum_tied_array(0.0);
+      Double integral_value (0.0) ;
+      
+      uint n_stations = station_id.nelements() ;
+      // 	uint n_stat = 0 ;
+      
+      Double observed_L(0.0) ;
+      Double observed_M(0.0) ;
+      Double observed_N(0.0) ;
+      // 	Double pos_new_x(0.0) ;
+      // 	Double pos_new_y(0.0) ;
+      
+      // 	Double position_new_x(0.0);
+      // 	Double position_new_y(0.0);
+      // 	Double position_new_y1(0.0);
+      // 	Double position_new_y2(0.0);
+      
+      Double sourceHrAngle = pi/180.*source_hr_angle ;
+      Double sourceDeclination = pi/180.*source_declination ;
+      Double hrAngle = pi/180.*hr_angle ;
+      Double decAngle = pi/180.*declination ;
+      
+      observed_L = sin(decAngle-sourceDeclination)*cos(hrAngle-sourceHrAngle) ;
+      
+      observed_M = sin(decAngle-sourceDeclination)*sin(hrAngle-sourceHrAngle) ;
+      
+      observed_N = cos(decAngle-sourceDeclination) ;
+      
+      Double stationbeam = stbm.station_beam( frequency,
+					      hr_angle,
+					      declination,
+					      source_declination,
+					      source_hr_angle,
+					      station_radii,
+					      legendre_root,
+					      legendre_weight ) ;
+      
+      for( uint ns=0; ns < n_stations; ns++ ){
+	
+	sum_tied_array = sum_tied_array +stationbeam ;
+      }
+      
+      integral_value = sum_tied_array ;	     	     
+      
+      return integral_value ;
+    }
+    
+    catch( AipsError x ){
       cerr << "StationBeam::sky_mapping " << x.getMesg () << endl ;
       return Double ();
-      }       
-
-}	
-
-
-	
-Double StationBeam::integrate_phi( const Double& declination,
-                                   const Double& source_declination,
-	                           const Double& source_hr_angle,
-	                           const Double& station_radii,
-                                   const Vector<uint>& station_id,
-                                   const Double& freq_init,
-		                   const Double& bandwidth,
-                                   const Double& freq_interval,
-		                   Vector<Double>& position_x,
-		                   Vector<Double>& position_y,
-                                   const Vector<Double>& legendre_root,
-             		           const Vector<Double>& legendre_weight )   
-
-{
-   try {
-          StationBeam stbm ;
-         	 
-          uint nroots = legendre_root.nelements() ;
-          
-          Double phi_final(360.0);
-//           Double phi_init(0.0);
-          Double phi_interval(1.0);
-
-          Double power_beam(0.0) ;
-//           Double power_sum(0.0); 
-          Double hrangle(0.0);
-
-      	  Double k1_phi(0.0) ;
-          Double k2_phi(0.0) ;
-          Double k1phi(0.0);
-          Double k2phi(0.0);
-//           Double phi(0.0);
-          Double y_outer_sum(0.0);
-          Double y_inner_sum(0.0);
-
-          while( k1_phi < phi_final ) {
-
-	      k2_phi = k1_phi + phi_interval ;
-              k1phi = (k2_phi - k1_phi)/2. ;
-              k2phi = (k2_phi +k1_phi )/2. ;
-             
-              y_inner_sum = 0;
-
-              for(uint phi=0; phi< nroots; phi++ ) {
+    }       
+    
+  }	
   
-		  hrangle = k1phi*legendre_root(phi)+k2phi ;
-		  
-                power_beam = stbm.integrate_freq( hrangle,
-                                                  declination,
-                                                  source_declination,
-	                                         source_hr_angle,
-	                                         station_radii,
-	                                         station_id,
-		                                 freq_init,
-		                                 bandwidth,
-                                                 freq_interval,
-		                                 position_x,
-		                                 position_y,
-                                                legendre_root,
-             		                        legendre_weight ) ;    
-       
-		  y_inner_sum = y_inner_sum + legendre_weight(phi)*power_beam ;
-	      }
-
-              y_outer_sum = y_outer_sum + k1phi*y_inner_sum ;
-              k1_phi = k2_phi ;
-	  }
-            
-     return y_outer_sum ;
-   }
-      
-   catch( AipsError x ){
-   cerr << "StationBeam::integrate_phi " << x.getMesg () << endl ;
-   return Double ();
-  }       
-}	
-
-
-	
-Double StationBeam::integrate_decli( const Double& source_declination,
-	                           const Double& source_hr_angle,
-	                           const Double& station_radii,
-                                   const Vector<uint>& station_id,
-                                     const Double& freq_init,
-		                      const Double& bandwidth,
-                                      const Double& freq_interval,
-		                   Vector<Double>& position_x,
-		                   Vector<Double>& position_y,
-                                   const Vector<Double>& legendre_root,
-             		           const Vector<Double>& legendre_weight )   
-
-{
-   try {
-          StationBeam stbm ;
-         	 
-          uint nroots = legendre_root.nelements() ;
-          Double pi = 3.1416 ;
-
-          Double decli_final(90.0);
-//           Double decli_init(0.0);
-          Double decli_interval(0.25);
-          Double declination(0.0);
-
-          Double power_beam(0.0) ;
-//           Double power_sum(0.0); 
-          
-      	  Double k1_decli(0.0) ;
-          Double k2_decli(0.0) ;
-          Double k1decli(0.0);
-          Double k2decli(0.0);
-//           Double decli(0.0);
-          Double y_outer_sum(0.0);
-          Double y_inner_sum(0.0);
-
-          while( k1_decli < decli_final ) {
-
-	      k2_decli = k1_decli + decli_interval ;
-              k1decli = (k2_decli - k1_decli)/2. ;
-              k2decli = (k2_decli +k1_decli )/2. ;
-             
-              cout << " declination andgle " << k1_decli << endl ;
-              y_inner_sum = 0;
-
-              for(uint decli=0; decli< nroots; decli++ ) {
   
-		  declination = k1decli*legendre_root(decli)+ k2decli ;
-			
-                  power_beam = stbm.integrate_phi( declination,
-                                                   source_declination,
-	                                           source_hr_angle,
-	                                           station_radii,
-                                                   station_id,
-                                                   freq_init,
-		                                   bandwidth,
-                                                   freq_interval,
-		                                   position_x,
-		                                   position_y,
-                                                   legendre_root,
-             		                           legendre_weight )   ;
-
-		  y_inner_sum = y_inner_sum + legendre_weight(decli)*power_beam*sin(pi/180*declination) ;
-	      }
-
-              y_outer_sum = y_outer_sum + k1decli*y_inner_sum ;
-              k1_decli = k2_decli ;
-	  }
-            
-     return y_outer_sum ;
-   }
+  
+  Double StationBeam::integrate_phi( const Double& declination,
+				     const Double& source_declination,
+				     const Double& source_hr_angle,
+				     const Double& station_radii,
+				     const Vector<uint>& station_id,
+				     const Double& freq_init,
+				     const Double& bandwidth,
+				     const Double& freq_interval,
+				     Vector<Double>& position_x,
+				     Vector<Double>& position_y,
+				     const Vector<Double>& legendre_root,
+				     const Vector<Double>& legendre_weight )   
+    
+  {
+    try {
+      StationBeam stbm ;
       
-   catch( AipsError x ){
-   cerr << "StationBeam::integrate_decli " << x.getMesg () << endl ;
-   return Double ();
-  }       
-}	
+      uint nroots = legendre_root.nelements() ;
+      
+      Double phi_final(360.0);
+      //           Double phi_init(0.0);
+      Double phi_interval(1.0);
+      
+      Double power_beam(0.0) ;
+      //           Double power_sum(0.0); 
+      Double hrangle(0.0);
+      
+      Double k1_phi(0.0) ;
+      Double k2_phi(0.0) ;
+      Double k1phi(0.0);
+      Double k2phi(0.0);
+      //           Double phi(0.0);
+      Double y_outer_sum(0.0);
+      Double y_inner_sum(0.0);
+      
+      while( k1_phi < phi_final ) {
+	
+	k2_phi = k1_phi + phi_interval ;
+	k1phi = (k2_phi - k1_phi)/2. ;
+	k2phi = (k2_phi +k1_phi )/2. ;
+        
+	y_inner_sum = 0;
+	
+	for(uint phi=0; phi< nroots; phi++ ) {
+	  
+	  hrangle = k1phi*legendre_root(phi)+k2phi ;
+	  
+	  power_beam = stbm.integrate_freq( hrangle,
+					    declination,
+					    source_declination,
+					    source_hr_angle,
+					    station_radii,
+					    station_id,
+					    freq_init,
+					    bandwidth,
+					    freq_interval,
+					    position_x,
+					    position_y,
+					    legendre_root,
+					    legendre_weight ) ;    
+	  
+	  y_inner_sum = y_inner_sum + legendre_weight(phi)*power_beam ;
+	}
+	
+	y_outer_sum = y_outer_sum + k1phi*y_inner_sum ;
+	k1_phi = k2_phi ;
+      }
+      
+      return y_outer_sum ;
+    }
+    
+    catch( AipsError x ){
+      cerr << "StationBeam::integrate_phi " << x.getMesg () << endl ;
+      return Double ();
+    }       
+  }	
+  
+  
+  
+  Double StationBeam::integrate_decli( const Double& source_declination,
+				       const Double& source_hr_angle,
+				       const Double& station_radii,
+				       const Vector<uint>& station_id,
+				       const Double& freq_init,
+				       const Double& bandwidth,
+				       const Double& freq_interval,
+				       Vector<Double>& position_x,
+				       Vector<Double>& position_y,
+				       const Vector<Double>& legendre_root,
+				       const Vector<Double>& legendre_weight )   
+    
+  {
+    try {
+      StationBeam stbm ;
+      
+      uint nroots = legendre_root.nelements() ;
+      Double pi = 3.1416 ;
+      
+      Double decli_final(90.0);
+      //           Double decli_init(0.0);
+      Double decli_interval(0.25);
+      Double declination(0.0);
+      
+      Double power_beam(0.0) ;
+      //           Double power_sum(0.0); 
+      
+      Double k1_decli(0.0) ;
+      Double k2_decli(0.0) ;
+      Double k1decli(0.0);
+      Double k2decli(0.0);
+      //           Double decli(0.0);
+      Double y_outer_sum(0.0);
+      Double y_inner_sum(0.0);
+      
+      while( k1_decli < decli_final ) {
+	
+	k2_decli = k1_decli + decli_interval ;
+	k1decli = (k2_decli - k1_decli)/2. ;
+	k2decli = (k2_decli +k1_decli )/2. ;
+        
+	cout << " declination andgle " << k1_decli << endl ;
+	y_inner_sum = 0;
+	
+	for(uint decli=0; decli< nroots; decli++ ) {
+	  
+	  declination = k1decli*legendre_root(decli)+ k2decli ;
+	  
+	  power_beam = stbm.integrate_phi( declination,
+					   source_declination,
+					   source_hr_angle,
+					   station_radii,
+					   station_id,
+					   freq_init,
+					   bandwidth,
+					   freq_interval,
+					   position_x,
+					   position_y,
+					   legendre_root,
+					   legendre_weight )   ;
+	  
+	  y_inner_sum = y_inner_sum + legendre_weight(decli)*power_beam*sin(pi/180*declination) ;
+	}
+	
+	y_outer_sum = y_outer_sum + k1decli*y_inner_sum ;
+	k1_decli = k2_decli ;
+      }
+      
+      return y_outer_sum ;
+    }
+    
+    catch( AipsError x ){
+      cerr << "StationBeam::integrate_decli " << x.getMesg () << endl ;
+      return Double ();
+    }       
+  }	
 
 
 Double StationBeam::beamwidth_decli(  const Double& source_declination,
