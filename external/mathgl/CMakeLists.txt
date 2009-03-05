@@ -179,10 +179,14 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   ##__________________________________________________________________
   ## Configure and build the project using CMake
 
+  ## initial population of CMake cache
+
   configure_file (
     ${MATHGL_SOURCE_DIR}/mathgl.cmake.in
     ${MATHGL_BINARY_DIR}/mathgl.cmake
     )
+
+  ## have CMake configure the project
   
   add_custom_target (run_cmake ALL
     COMMAND cmake -C ${MATHGL_BINARY_DIR}/mathgl.cmake .
@@ -192,12 +196,23 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     )
   add_dependencies (run_cmake expand_archive)
 
+  ## run "make"
+
   add_custom_target (run_make ALL
     COMMAND make
     WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl
     COMMENT "Building MathGL ..."
     )
   add_dependencies (run_make run_cmake)
+
+  ## run "make install"
+
+  add_custom_target (run_install ALL
+    COMMAND make install
+    WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl
+    COMMENT "Building MathGL ..."
+    )
+  add_dependencies (run_install run_make)
 
 
   ## <-- end build condition ----------------------------------------------------->
