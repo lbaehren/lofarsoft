@@ -72,6 +72,13 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   ##__________________________________________________________________
   ## Locate Qt4 libraries and header files
 
+  find_file (QT_MOC_EXECUTABLE moc
+    PATHS ${bin_locations}
+    PATH_SUFFIXES qt4-x11 qt4-x11/bin
+    )
+
+  ## Libraries
+
   find_library (QT_QTCORE_LIBRARY QtCore
     PATHS ${lib_locations}
     PATH_SUFFIXES qt4-x11 qt4-x11/lib
@@ -101,8 +108,18 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   endif (QT4_LIBRARIES)
   
   ## locate the Qt4 header files
+
+  find_path (QT_QTCORE_INCLUDE_DIR QTimer
+    PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
+    PATH_SUFFIXES QtGui qt4-x11 qt4-x11/include qt4-x11/include/QtGui
+    )
   
-  find_path (QT4_INCLUDES Qt/qatomic.h QtGui/QTableWidgetItem QtGui/QWidget
+  find_path (QT_QTGUI_INCLUDE_DIR QApplication QMouseEvent
+    PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
+    PATH_SUFFIXES QtGui qt4-x11 qt4-x11/include qt4-x11/include/QtGui
+    )
+  
+  find_path (QT_INCLUDE_DIR Qt/qatomic.h QtGui/QTableWidgetItem QtGui/QWidget
     PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
     PATH_SUFFIXES qt4-x11 qt4-x11/include
     )
@@ -112,12 +129,12 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     PATH_SUFFIXES qt4-x11/include/QtGui QtGui
     )
   if (HAVE_QT4_QWIDGET)
-    list (APPEND QT4_INCLUDES ${HAVE_QT4_QWIDGET})
+    list (APPEND QT_INCLUDE_DIR ${HAVE_QT4_QWIDGET})
   endif (HAVE_QT4_QWIDGET)
   
-  if (QT4_LIBRARIES AND QT4_INCLUDES) 
+  if (QT4_LIBRARIES AND QT_INCLUDE_DIR) 
     set (QT4_FOUND TRUE)
-  endif (QT4_LIBRARIES AND QT4_INCLUDES)
+  endif (QT4_LIBRARIES AND QT_INCLUDE_DIR)
   
   ##__________________________________________________________________
   ## Check if a tar-archive with the source code is available already;
@@ -160,7 +177,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   add_dependencies (expand_archive download_archive)
   
   ##__________________________________________________________________
-  ## Configure the CMake project
+  ## Configure and build the project using CMake
 
   configure_file (
     ${MATHGL_SOURCE_DIR}/mathgl.cmake.in
@@ -169,10 +186,19 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   
   add_custom_target (run_cmake ALL
     COMMAND cmake -C ${MATHGL_BINARY_DIR}/mathgl.cmake .
+    COMMAND cmake .
     WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl
     COMMENT "Configuring project using CMake ..."
     )
   add_dependencies (run_cmake expand_archive)
+
+  add_custom_target (run_make ALL
+    COMMAND make
+    WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl
+    COMMENT "Building MathGL ..."
+    )
+  add_dependencies (run_make run_cmake)
+
 
   ## <-- end build condition ----------------------------------------------------->
   

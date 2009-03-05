@@ -1,6 +1,11 @@
 
-set (CMAKE_INSTALL_PREFIX "${MATHGL_prefix}" CACHE PATH "Installation prefix")
-set (enable-python        TRUE CACHE BOOL "Enable Python extension")
-
-set (enable-qt            TRUE CACHE BOOL "Enable Qt extension")
-set (QT4_FOUND            TRUE CACHE BOOL "Found Qt4?")
+set (CMAKE_INSTALL_PREFIX ${MATHGL_prefix} CACHE PATH "Installation prefix")
+set (enable-python         TRUE CACHE BOOL "Enable Python extension")
+set (enable-qt             TRUE CACHE BOOL "Enable Qt extension")
+set (QT4_FOUND             TRUE CACHE BOOL "Found Qt4?")
+set (QT_QTCORE_LIBRARY     ${QT_QTCORE_LIBRARY} CACHE FILEPATH "Path to libqtcore")
+set (QT_QTGUI_LIBRARY      ${QT_QTGUI_LIBRARY} CACHE FILEPATH "Path to libqtgui")
+set (QT_QTDESIGNER_LIBRARY ${QT_QTDESIGNER_LIBRARY} CACHE FILEPATH "Path to libqtdesigner")
+set (QT_MOC_EXECUTABLE     ${QT_MOC_EXECUTABLE} CACHE FILEPATH "Path to moc")
+set (QT_QTCORE_INCLUDE_DIR ${QT_QTCORE_INCLUDE_DIR} CACHE PATH "Path to include/QtCore")
+set (QT_QTGUI_INCLUDE_DIR  ${QT_QTGUI_INCLUDE_DIR} CACHE PATH "Path to include/QtGui")
