@@ -73,7 +73,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   ## Locate Qt4 libraries and header files
 
   find_file (QT_MOC_EXECUTABLE moc
-    PATHS ${bin_locations}
+    PATHS ${bin_locations} /opt/casa/local/bin
     PATH_SUFFIXES qt4-x11 qt4-x11/bin
     )
 
@@ -207,12 +207,12 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
 
   ## run "make install"
 
-  add_custom_target (run_install ALL
+  add_custom_target (install ALL
     COMMAND make install
     WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl
     COMMENT "Building MathGL ..."
     )
-  add_dependencies (run_install run_make)
+  add_dependencies (install run_make)
 
 
   ## <-- end build condition ----------------------------------------------------->
