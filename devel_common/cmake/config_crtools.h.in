@@ -239,6 +239,7 @@
 #include <string>
 
 const std::string dataset_lopes         = "${dataset_lopes}";
+const std::string dataset_lopes_example = "${dataset_lopes_example}";
 const std::string positions_lopes08     = "${positions_lopes08}";
 const std::string data_ppf_coefficients = "${data_ppf_coefficients}";
 const std::string data_ppf_inversion    = "${data_ppf_inversion}";

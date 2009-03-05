@@ -42,12 +42,49 @@ find_path (MATHGL_INCLUDES mgl/mgl.h mgl/mgl_data.h
   )
 
 ## -----------------------------------------------------------------------------
-## Check for the library
+## Check for the various libraries
 
-find_library (MATHGL_LIBRARIES mgl mgl_hdf
+set (MATHGL_LIBRARIES "")
+
+## libmgl
+
+find_library (HAVE_LIBMGL mgl
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )
+if (HAVE_LIBMGL)
+  list (APPEND MATHGL_LIBRARIES ${HAVE_LIBMGL})
+endif (HAVE_LIBMGL)
+
+## libmgl_hdf
+
+find_library (HAVE_LIBMGL_HDF mgl_hdf
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  )
+if (HAVE_LIBMGL_HDF)
+  list (APPEND MATHGL_LIBRARIES ${HAVE_LIBMGL_HDF})
+endif (HAVE_LIBMGL_HDF)
+
+## libmgl-fltk
+
+find_library (HAVE_LIBMGL_FLTK mgl-fltk
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  )
+if (HAVE_LIBMGL_FLTK)
+  list (APPEND MATHGL_LIBRARIES ${HAVE_LIBMGL_FLTK})
+endif (HAVE_LIBMGL_FLTK)
+
+## libmgl-qt
+
+find_library (HAVE_LIBMGL_QT mgl-qt
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  )
+if (HAVE_LIBMGL_QT)
+  list (APPEND MATHGL_LIBRARIES ${HAVE_LIBMGL_QT})
+endif (HAVE_LIBMGL_QT)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
