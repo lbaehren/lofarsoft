@@ -3,7 +3,7 @@
 project (MATHGL)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.6)
 
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the library from the provided source code, if no system
@@ -70,6 +70,56 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   set (MATHGL_URL "${USG_DOWNLOAD}/software/${MATHGL_TAR_ARCHIVE}")
 
   ##__________________________________________________________________
+  ## Locate Qt4 libraries and header files
+
+  find_library (QT_QTCORE_LIBRARY QtCore
+    PATHS ${lib_locations}
+    PATH_SUFFIXES qt4-x11 qt4-x11/lib
+    )
+  if (QT_QTCORE_LIBRARY)
+    list (APPEND QT4_LIBRARIES ${QT_QTCORE_LIBRARY})
+  endif (QT_QTCORE_LIBRARY)
+  
+  find_library (QT_QTGUI_LIBRARY QtGui
+    PATHS ${lib_locations}
+    PATH_SUFFIXES qt4-x11 qt4-x11/lib
+    )
+  if (QT_QTGUI_LIBRARY)
+    list (APPEND QT4_LIBRARIES ${QT_QTGUI_LIBRARY})
+  endif (QT_QTGUI_LIBRARY)
+
+  find_library (QT_QTDESIGNER_LIBRARY QtDesigner
+    PATHS ${lib_locations}
+    PATH_SUFFIXES qt4-x11 qt4-x11/lib
+    )
+  if (QT_QTDESIGNER_LIBRARY)
+    list (APPEND QT4_LIBRARIES ${QT_QTDESIGNER_LIBRARY})
+  endif (QT_QTDESIGNER_LIBRARY)
+  
+  if (QT4_LIBRARIES)
+    list(REVERSE QT4_LIBRARIES)
+  endif (QT4_LIBRARIES)
+  
+  ## locate the Qt4 header files
+  
+  find_path (QT4_INCLUDES Qt/qatomic.h QtGui/QTableWidgetItem QtGui/QWidget
+    PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
+    PATH_SUFFIXES qt4-x11 qt4-x11/include
+    )
+  
+  find_path (HAVE_QT4_QWIDGET QWidget
+    PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
+    PATH_SUFFIXES qt4-x11/include/QtGui QtGui
+    )
+  if (HAVE_QT4_QWIDGET)
+    list (APPEND QT4_INCLUDES ${HAVE_QT4_QWIDGET})
+  endif (HAVE_QT4_QWIDGET)
+  
+  if (QT4_LIBRARIES AND QT4_INCLUDES) 
+    set (QT4_FOUND TRUE)
+  endif (QT4_LIBRARIES AND QT4_INCLUDES)
+  
+  ##__________________________________________________________________
   ## Check if a tar-archive with the source code is available already;
   ## if this is not the case we need to fetch it from the USg server.
   
@@ -105,9 +155,25 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   add_custom_target (expand_archive ALL
     COMMAND tar -xvzf ${MATHGL_TAR_ARCHIVE}
     WORKING_DIRECTORY ${MATHGL_BINARY_DIR}
+    COMMENT "Expanding tar-archive ..."
     )
   add_dependencies (expand_archive download_archive)
   
+  ##__________________________________________________________________
+  ## Configure the CMake project
+
+  configure_file (
+    ${MATHGL_SOURCE_DIR}/mathgl.cmake.in
+    ${MATHGL_BINARY_DIR}/mathgl.cmake
+    )
+  
+  add_custom_target (run_cmake ALL
+    COMMAND cmake -C ${MATHGL_BINARY_DIR}/mathgl.cmake .
+    WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl
+    COMMENT "Configuring project using CMake ..."
+    )
+  add_dependencies (run_cmake expand_archive)
+
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)

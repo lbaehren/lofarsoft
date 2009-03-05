@@ -1,0 +1,6 @@
+
+set (CMAKE_INSTALL_PREFIX "${MATHGL_prefix}" CACHE PATH "Installation prefix")
+set (enable-python        TRUE CACHE BOOL "Enable Python extension")
+
+set (enable-qt            TRUE CACHE BOOL "Enable Qt extension")
+set (QT4_FOUND            TRUE CACHE BOOL "Found Qt4?")
