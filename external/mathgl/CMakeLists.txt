@@ -95,9 +95,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     find_path (NUMPY_INCLUDES numpy/arrayobject.h
       PATHS ${include_locations} /usr/lib /sw/lib
       PATH_SUFFIXES
-      python
-      numpy
-      python/numpy
+      python2.6/site-packages/numpy/core/include
       python2.5/site-packages/numpy/core/include
       python2.4/site-packages/numpy/core/include
       )
@@ -245,9 +243,9 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     COMMENT "Configuring project using CMake ..."
     )
   if (MATHGL_ENABLE_PYTHON)
-    add_dependencies (run_cmake expand_archive symlink_gsl symlink_numpy)
+    add_dependencies (run_cmake symlink_gsl symlink_numpy expand_archive)
   else (MATHGL_ENABLE_PYTHON)
-    add_dependencies (run_cmake expand_archive symlink_gsl)
+    add_dependencies (run_cmake symlink_gsl expand_archive)
   endif (MATHGL_ENABLE_PYTHON)
   
   ## run "make"
