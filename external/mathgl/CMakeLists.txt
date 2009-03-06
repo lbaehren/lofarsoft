@@ -77,8 +77,13 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   if (MATHGL_ENABLE_PYTHON)
     
     find_path (NUMPY_INCLUDES numpy/arrayobject.h
-      PATHS ${include_locations} /sw/lib/python2.5/site-packages/numpy/core/include
-      PATH_SUFFIXES python numpy python/numpy
+      PATHS ${include_locations} /usr/lib /sw/lib
+      PATH_SUFFIXES
+      python
+      numpy
+      python/numpy
+      python2.5/site-packages/numpy/core/include
+      python2.4/site-packages/numpy/core/include
       )
     
     if (NUMPY_INCLUDES)
@@ -250,9 +255,13 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   ##__________________________________________________________________
   ## Configuration summary
 
+  message ("-------------------------------------------------------------")
   message (STATUS "[MathGL] Summary of configuration status")
-  message (STATUS "NUMPY_INCLUDES = ${NUMPY_INCLUDES}")
-
+  message (STATUS "Forced rebuild from source = ${MATHGL_FORCE_BUILD}")
+  message (STATUS "Enable support for Python  = ${MATHGL_ENABLE_PYTHON}")
+  message (STATUS "Enable support for Qt      = ${MATHGL_ENABLE_QT}")
+  message (STATUS "NUMPY_INCLUDES             = ${NUMPY_INCLUDES}")
+  message ("-------------------------------------------------------------")
 
   ## <-- end build condition ----------------------------------------------------->
   
