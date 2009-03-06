@@ -14,7 +14,7 @@ option (MATHGL_FORCE_BUILD "Force rebuild and local installation?"     NO  )
 option (MATHGL_CMAKE_BUILD "Use CMake to configure and build MATHGL?"  YES )
 option (MATHGL_VERBOSE_CONFIGURE "Be verbose during configuration?"    NO  )
 option (MATHGL_VERBOSE_BUILD     "Be verbose during build process?"    NO  )
-option (MATHGL_ENABLE_PYTHON     "Enable support for Python?"          NO  )
+option (MATHGL_ENABLE_PYTHON     "Enable support for Python?"          YES )
 option (MATHGL_ENABLE_QT         "Enable support for Qt?"              NO  )
 
 ## ------------------------------------------------------------------------------
@@ -72,10 +72,29 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   set (MATHGL_URL "${USG_DOWNLOAD}/software/${MATHGL_TAR_ARCHIVE}")
 
   ##__________________________________________________________________
-  ## Locate GNU Scientific library
-
-  include (FindGSL)
-
+  ## Python bindings
+  
+  if (MATHGL_ENABLE_PYTHON)
+    
+    find_path (NUMPY_INCLUDES numpy/arrayobject.h
+      PATHS ${include_locations} /sw/lib/python2.5/site-packages/numpy/core/include
+      PATH_SUFFIXES python numpy python/numpy
+      )
+    
+    if (NUMPY_INCLUDES)
+      add_custom_target (symlink_numpy ALL
+	COMMAND rm -f numpy
+	COMMAND ln -s ${NUMPY_INCLUDES}/numpy .
+	WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl/include
+	COMMENT "Creating symbolic link to location of Numpy headers ..."
+	)
+    else (NUMPY_INCLUDES)
+      message (STATUS "[MathGL] Python bindings disabled - no Numpy found!")
+      set (MATHGL_ENABLE_PYTHON NO)
+    endif (NUMPY_INCLUDES)
+    
+  endif (MATHGL_ENABLE_PYTHON)
+  
   ##__________________________________________________________________
   ## Locate Qt4 libraries and header files
 
@@ -213,8 +232,12 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl
     COMMENT "Building MathGL ..."
     )
-  add_dependencies (run_make run_cmake)
-
+  if (MATHGL_ENABLE_PYTHON)
+    add_dependencies (run_make run_cmake symlink_numpy)
+  else (MATHGL_ENABLE_PYTHON)
+    add_dependencies (run_make run_cmake)
+  endif (MATHGL_ENABLE_PYTHON)
+  
   ## run "make install"
 
   add_custom_target (install ALL
@@ -223,6 +246,12 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     COMMENT "Building MathGL ..."
     )
   add_dependencies (install run_make)
+
+  ##__________________________________________________________________
+  ## Configuration summary
+
+  message (STATUS "[MathGL] Summary of configuration status")
+  message (STATUS "NUMPY_INCLUDES = ${NUMPY_INCLUDES}")
 
 
   ## <-- end build condition ----------------------------------------------------->
