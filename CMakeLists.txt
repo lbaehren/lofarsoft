@@ -9,6 +9,9 @@ project (LUS)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.6)
 
+## Enforced CMake policy 
+cmake_policy (VERSION 2.6)
+
 ## ==============================================================================
 ##
 ##  CMake configuration settings
@@ -21,8 +24,6 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   ${LUS_SOURCE_DIR}/..
   $ENV{LOFARSOFT}
   )
-
-message (STATUS "LOFARSOFT = $ENV{LOFARSOFT}")
 
 if (USG_ROOT)
   ## load custom modules
@@ -80,6 +81,13 @@ add_custom_target (clean_doc
   WORKING_DIRECTORY ${USG_ROOT}/doc  
   COMMENT "Cleaning up documentation directory ..."
   )
+
+add_custom_target (clean_hdf5
+  COMMAND cd ${USG_ROOT}/external/hdf5 && make distclean
+  COMMAND cd ${USG_ROOT}/build/hdf5 && rm -rf *
+  WORKING_DIRECTORY ${USG_ROOT}
+  COMMENT "Cleaning up external/hdf5 directory ..."
+)
 
 add_custom_target (clean_release
   COMMAND rm -rf bin
@@ -163,7 +171,7 @@ add_dependencies (casacore hdf5 cfitsio boost wcslib bison)
 
 add_dependencies (hdf5 szip)
 
-add_dependencies (mathgl hdf5)
+add_dependencies (mathgl hdf5 python)
 
 add_dependencies (pyrap casacore python)
 
@@ -253,6 +261,7 @@ add_dependencies (contrib dal)
 ## ==============================================================================
 
 message (STATUS "------------------------------------------------------------")
+message (STATUS "LOFARSOFT          = $ENV{LOFARSOFT}")
 message (STATUS "USG_ROOT           = ${USG_ROOT}")
 message (STATUS "USG_INSTALL_PREFIX = ${USG_INSTALL_PREFIX}")
 message (STATUS "USG_DATA           = ${USG_DATA}")
