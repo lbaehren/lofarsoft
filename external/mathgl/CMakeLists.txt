@@ -14,6 +14,8 @@ option (MATHGL_FORCE_BUILD "Force rebuild and local installation?"     NO  )
 option (MATHGL_CMAKE_BUILD "Use CMake to configure and build MATHGL?"  YES )
 option (MATHGL_VERBOSE_CONFIGURE "Be verbose during configuration?"    NO  )
 option (MATHGL_VERBOSE_BUILD     "Be verbose during build process?"    NO  )
+option (MATHGL_ENABLE_PYTHON     "Enable support for Python?"          YES )
+option (MATHGL_ENABLE_QT         "Enable support for Qt?"              NO  )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -70,6 +72,11 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   set (MATHGL_URL "${USG_DOWNLOAD}/software/${MATHGL_TAR_ARCHIVE}")
 
   ##__________________________________________________________________
+  ## Locate GNU Scientific library
+
+  include (FindGSL)
+
+  ##__________________________________________________________________
   ## Locate Qt4 libraries and header files
 
   find_file (QT_MOC_EXECUTABLE moc
@@ -111,8 +118,11 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
 
   find_path (QT_QTCORE_INCLUDE_DIR QTimer
     PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
-    PATH_SUFFIXES QtGui qt4-x11 qt4-x11/include qt4-x11/include/QtGui
+    PATH_SUFFIXES QtCore qt4-x11 qt4-x11/include qt4-x11/include/QtCore
     )
+  if (QT_QTCORE_INCLUDE_DIR)
+    list (APPEND QT_INCLUDE_DIR ${QT_QTCORE_INCLUDE_DIR})
+  endif (QT_QTCORE_INCLUDE_DIR) 
   
   find_path (QT_QTGUI_INCLUDE_DIR QApplication QMouseEvent
     PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
