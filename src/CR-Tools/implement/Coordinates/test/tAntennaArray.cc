@@ -68,10 +68,8 @@ int test_constructors ()
   try {
     // Arguments
     std::string telescope ("LOPES");
-    casa::MPosition location ( casa::MVPosition(Quantity(100,"m"),
-						Quantity(8.437484,"deg"),
-						Quantity(49.099477, "deg")),
-			       casa::MPosition::WGS84);    
+    casa::MVPosition badLOPESpos(Quantity(100,"m"),Quantity(8.437484,"deg"),Quantity(49.099477, "deg"));
+    casa::MPosition location(badLOPESpos, casa::MPosition::WGS84);    
     // Object construction
     AntennaArray arr;
     //
