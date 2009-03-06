@@ -14,7 +14,7 @@ option (MATHGL_FORCE_BUILD "Force rebuild and local installation?"     NO  )
 option (MATHGL_CMAKE_BUILD "Use CMake to configure and build MATHGL?"  YES )
 option (MATHGL_VERBOSE_CONFIGURE "Be verbose during configuration?"    NO  )
 option (MATHGL_VERBOSE_BUILD     "Be verbose during build process?"    NO  )
-option (MATHGL_ENABLE_PYTHON     "Enable support for Python?"          YES )
+option (MATHGL_ENABLE_PYTHON     "Enable support for Python?"          NO  )
 option (MATHGL_ENABLE_QT         "Enable support for Qt?"              NO  )
 
 ## ------------------------------------------------------------------------------
