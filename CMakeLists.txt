@@ -47,6 +47,10 @@ option (POST_BUILD_CLEAN    "Clean up the build directory after a build?"   NO )
 option (MULTITHREADED_BUILD "Enable multithreading during build?"           NO )
 option (SYSTEM_DIAGNOSTICS  "Produce some basic system diagnostics output?" NO )
 
+## Options affecting the build of individual packages
+
+option (CR_WITH_GUI "Build CR-Tools with graphical interface?" NO )
+
 ## ==============================================================================
 ##
 ##  Cleaning up
@@ -232,7 +236,12 @@ add_custom_target (cr
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package CR-Tools ..."
   )
-add_dependencies (cr dal startools mathgl)
+
+if (CR_WITH_GUI)
+  add_dependencies (cr dal startools mathgl)
+else (CR_WITH_GUI)
+  add_dependencies (cr dal startools)
+endif (CR_WITH_GUI)
 
 ##____________________________________________________________________
 ##                                                                  RM
