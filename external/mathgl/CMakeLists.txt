@@ -242,11 +242,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl
     COMMENT "Configuring project using CMake ..."
     )
-  if (MATHGL_ENABLE_PYTHON)
-    add_dependencies (run_cmake symlink_gsl symlink_numpy expand_archive)
-  else (MATHGL_ENABLE_PYTHON)
-    add_dependencies (run_cmake symlink_gsl expand_archive)
-  endif (MATHGL_ENABLE_PYTHON)
+  add_dependencies (run_cmake expand_archive)
   
   ## run "make"
 
@@ -255,7 +251,11 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl
     COMMENT "Building MathGL ..."
     )
-  add_dependencies (run_make run_cmake)
+  if (MATHGL_ENABLE_PYTHON)
+    add_dependencies (run_make run_cmake symlink_gsl symlink_numpy)
+  else (MATHGL_ENABLE_PYTHON)
+    add_dependencies (run_make run_cmake symlink_gsl)
+  endif (MATHGL_ENABLE_PYTHON)
   
   ## run "make install"
 
