@@ -72,6 +72,22 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   set (MATHGL_URL "${USG_DOWNLOAD}/software/${MATHGL_TAR_ARCHIVE}")
 
   ##__________________________________________________________________
+  ## GNU Scientific Library
+
+  set (GSL_FIND_QUIETLY YES)
+  include (FindGSL)
+
+  if (GSL_INCLUDES)
+    add_custom_target (symlink_gsl ALL
+      COMMAND rm -f gsl
+      COMMAND ln -s ${GSL_INCLUDES}/gsl .
+      WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl/include
+      COMMENT "Creating symbolic link to location of GSL headers ..."
+      )
+  endif (GSL_INCLUDES)
+    
+
+  ##__________________________________________________________________
   ## Python bindings
   
   if (MATHGL_ENABLE_PYTHON)
@@ -228,8 +244,12 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl
     COMMENT "Configuring project using CMake ..."
     )
-  add_dependencies (run_cmake expand_archive)
-
+  if (MATHGL_ENABLE_PYTHON)
+    add_dependencies (run_cmake expand_archive symlink_gsl symlink_numpy)
+  else (MATHGL_ENABLE_PYTHON)
+    add_dependencies (run_cmake expand_archive symlink_gsl)
+  endif (MATHGL_ENABLE_PYTHON)
+  
   ## run "make"
 
   add_custom_target (run_make ALL
@@ -237,11 +257,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl
     COMMENT "Building MathGL ..."
     )
-  if (MATHGL_ENABLE_PYTHON)
-    add_dependencies (run_make run_cmake symlink_numpy)
-  else (MATHGL_ENABLE_PYTHON)
-    add_dependencies (run_make run_cmake)
-  endif (MATHGL_ENABLE_PYTHON)
+  add_dependencies (run_make run_cmake)
   
   ## run "make install"
 
@@ -260,7 +276,8 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   message (STATUS "Forced rebuild from source = ${MATHGL_FORCE_BUILD}")
   message (STATUS "Enable support for Python  = ${MATHGL_ENABLE_PYTHON}")
   message (STATUS "Enable support for Qt      = ${MATHGL_ENABLE_QT}")
-  message (STATUS "NUMPY_INCLUDES             = ${NUMPY_INCLUDES}")
+  message (STATUS "GSL_INCLUDES               = ${GSL_INCLUDES}")
+  message (STATUS "NUMPY_INCLUDES             = ${NUMPY_INCLUDES}")  
   message ("-------------------------------------------------------------")
 
   ## <-- end build condition ----------------------------------------------------->
