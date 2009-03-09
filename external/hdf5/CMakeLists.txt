@@ -10,7 +10,10 @@
 project (HDF5)
 
 ## Required version of CMake
-cmake_minimum_required(VERSION 2.5)
+cmake_minimum_required (VERSION 2.6)
+
+## Enforced CMake policy 
+cmake_policy (VERSION 2.6)
 
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the library from the provided source code, if no system
@@ -87,6 +90,10 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   ##__________________________________________________________________
   ## Build list of configuration parameters
 
+  set (HDF5_VERSION "1.8.2")
+  set (HDF5_TAR_ARCHIVE "hdf5-${HDF5_VERSION}.tar.gz")
+  set (HDF5_URL "${USG_DOWNLOAD}/software/${HDF5_TAR_ARCHIVE}")
+  
   set (config_settings "")
 
   if (HDF5_BUILD_CXX)
@@ -117,11 +124,53 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   ## 
   
   message (STATUS "[HDF5] Configuration summary.")
+  message (STATUS "Library version to be build          = ${HDF5_VERSION}")
   message (STATUS "Build shared version of the library? : ${HDF5_BUILD_SHARED}")
   message (STATUS "Build static version of the library? : ${HDF5_BUILD_STATIC}")
   message (STATUS "Build C++ interface to the library?  : ${HDF5_BUILD_CXX}")
   message (STATUS "Enable the high level library?       : ${HDF5_BUILD_HL}")
 
+  ##__________________________________________________________________
+  ## Check if a tar-archive with the source code is available already;
+  ## if this is not the case we need to fetch it from the USg server.
+  
+  find_file (have_hdf5_tgz ${HDF5_TAR_ARCHIVE} ${HDF5_SOURCE_DIR})
+  
+  if (have_hdf5_tgz)
+    add_custom_target (download_archive ALL
+      COMMAND cp ${have_hdf5_tgz} .
+      WORKING_DIRECTORY ${HDF5_BINARY_DIR}
+      COMMENT "Copying tar-archive from USG_ROOT/external/hdf5 ..."
+      )
+  else (have_hdf5_tgz)
+    if (HAVE_WGET)
+      add_custom_target (download_archive ALL
+	COMMAND wget -c ${HDF5_URL}
+	WORKING_DIRECTORY ${HDF5_BINARY_DIR}
+	)
+    else (HAVE_WGET)
+      if (HAVE_CURL)
+	add_custom_target (download_archive ALL
+	  COMMAND curl ${HDF5_URL} -o ${HDF5_TAR_ARCHIVE} -C
+	  WORKING_DIRECTORY ${HDF5_BINARY_DIR}
+	  )
+      else (HAVE_CURL)
+	message (FATAL_ERROR "[HDF5] No tool found to download tar-archive!")
+      endif (HAVE_CURL)
+    endif (HAVE_WGET)
+  endif (have_hdf5_tgz)
+  
+  ##__________________________________________________________________
+  ## Expand the tar-archive
+  
+  add_custom_target (expand_archive ALL
+    COMMAND tar -xvzf ${HDF5_TAR_ARCHIVE}
+    COMMAND rm ${HDF5_TAR_ARCHIVE}
+    WORKING_DIRECTORY ${HDF5_BINARY_DIR}
+    COMMENT "Expanding tar-archive ..."
+    )
+  add_dependencies (expand_archive download_archive)
+  
   ##__________________________________________________________________
   ## Custom target wrapping the standard configure/build chain
 
@@ -129,14 +178,17 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   
   add_custom_target (run_configure ALL
     COMMAND ./configure --prefix=${HDF5_prefix} --bindir=${HDF5_prefix}/bin --includedir=${HDF5_prefix}/include/hdf5 ${HDF5_enable_cxx} ${HDF5_enable_hl} ${HDF5_enable_shared} ${HDF5_enable_static}
-    WORKING_DIRECTORY ${HDF5_SOURCE_DIR}
+    WORKING_DIRECTORY ${HDF5_BINARY_DIR}/hdf5-${HDF5_VERSION}
+    COMMENT "Configuring to build HDF5 library ..."
     )
-  
+  add_dependencies (run_configure expand_archive)
+
   ## Run "make"
 
   add_custom_target (run_make ALL
     COMMAND make
-    WORKING_DIRECTORY ${HDF5_SOURCE_DIR}
+    WORKING_DIRECTORY ${HDF5_BINARY_DIR}/hdf5-${HDF5_VERSION}
+    COMMENT "Start building HDF5 library ..."
     )
   add_dependencies (run_make run_configure)
 
@@ -144,17 +196,11 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
 
   add_custom_target (run_install ALL
     COMMAND make install
-    WORKING_DIRECTORY ${HDF5_SOURCE_DIR}
+    WORKING_DIRECTORY ${HDF5_BINARY_DIR}/hdf5-${HDF5_VERSION}
+    COMMENT "Installing HDF5 library and header files ..."
     )
   add_dependencies (run_install run_make)
 
-  ## Run "make clean"
-
-  add_custom_target (cleanup_build ALL
-    COMMAND make clean
-    WORKING_DIRECTORY ${HDF5_SOURCE_DIR}
-    )
-  
   ##__________________________________________________________________
   ## Post-installation clean-up: since the "--includedir" option does
   ## not seem to be handled properly by the configure script, we need
@@ -164,6 +210,7 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
     COMMAND mkdir -p hdf5 
     COMMAND mv H5*.h hdf5
     COMMAND mv hdf5*.h hdf5
+    COMMAND rm -rf ${HDF5_BINARY_DIR}/hdf5-${HDF5_VERSION}
     WORKING_DIRECTORY ${HDF5_prefix}/include
     )
   add_dependencies (install run_install)
