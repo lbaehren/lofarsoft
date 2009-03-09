@@ -32,7 +32,7 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
 if (USG_ROOT)
   include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
 else (USG_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+  message (FATAL_ERROR "[MathGL] Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
 ## ------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     )
   
   if (NOT MATHGL_prefix)
-    message (FATAL_ERROR "Unable to locate the installation area")
+    message (FATAL_ERROR "[MathGL] Unable to locate the installation area")
   endif (NOT MATHGL_prefix)
   
   ##__________________________________________________________________
@@ -84,6 +84,8 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
       WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl/include
       COMMENT "Creating symbolic link to location of GSL headers ..."
       )
+  else (GSL_INCLUDES)
+    message (STATUS "[MathGL] Unable to locate GSL headers!")
   endif (GSL_INCLUDES)
     
 
@@ -209,7 +211,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
 	  WORKING_DIRECTORY ${MATHGL_BINARY_DIR}
 	  )
       else (HAVE_CURL)
-	message (FATAL_ERROR "[MATHGL] No tool found to download tar-archive!")
+	message (FATAL_ERROR "[MathGL] No tool found to download tar-archive!")
       endif (HAVE_CURL)
     endif (HAVE_WGET)
   endif (have_mathgl_tgz)
@@ -227,16 +229,22 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   ##__________________________________________________________________
   ## Configure and build the project using CMake
 
-  ## initial population of CMake cache
+  ## Create configuration files from templates
 
   configure_file (
     ${MATHGL_SOURCE_DIR}/mathgl.cmake.in
     ${MATHGL_BINARY_DIR}/mathgl.cmake
     )
 
+  configure_file (
+    ${MATHGL_SOURCE_DIR}/setup.py.in
+    ${MATHGL_BINARY_DIR}/setup.py
+    )
+
   ## have CMake configure the project
   
   add_custom_target (run_cmake ALL
+    COMMAND cp ../setup.py .
     COMMAND cmake -C ${MATHGL_BINARY_DIR}/mathgl.cmake .
     COMMAND cmake .
     WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl
@@ -271,15 +279,15 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
 
   message ("-------------------------------------------------------------")
   message (STATUS "[MathGL] Summary of configuration status")
-  message (STATUS "Forced rebuild from source = ${MATHGL_FORCE_BUILD}")
-  message (STATUS "Enable support for Python  = ${MATHGL_ENABLE_PYTHON}")
-  message (STATUS "Enable support for Qt      = ${MATHGL_ENABLE_QT}")
-  message (STATUS "GSL_INCLUDES               = ${GSL_INCLUDES}")
-  message (STATUS "NUMPY_INCLUDES             = ${NUMPY_INCLUDES}")  
+  message (STATUS "Forced rebuild from source  = ${MATHGL_FORCE_BUILD}")
+  message (STATUS "Enable support for Python   = ${MATHGL_ENABLE_PYTHON}")
+  message (STATUS "Enable support for Qt       = ${MATHGL_ENABLE_QT}")
+  message (STATUS "GSL_INCLUDES                = ${GSL_INCLUDES}")
+  message (STATUS "NUMPY_INCLUDES              = ${NUMPY_INCLUDES}")
   message ("-------------------------------------------------------------")
 
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
-  message (STATUS "Found system-wide installation of MATHGL; skipping rebuild!")
+  message (STATUS "Found system-wide installation of MathGL; skipping rebuild!")
 endif (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
