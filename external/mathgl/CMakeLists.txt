@@ -77,6 +77,10 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   set (GSL_FIND_QUIETLY YES)
   include (FindGSL)
 
+  if (NOT HAVE_GSL)
+    message (SEND_ERROR "[MathGL] Unable to find GSL - please install!")
+  endif (NOT HAVE_GSL)
+
   ##__________________________________________________________________
   ## Python bindings
   
