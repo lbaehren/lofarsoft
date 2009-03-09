@@ -77,18 +77,6 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   set (GSL_FIND_QUIETLY YES)
   include (FindGSL)
 
-  if (GSL_INCLUDES)
-    add_custom_target (symlink_gsl
-      COMMAND rm -f gsl
-      COMMAND ln -s ${GSL_INCLUDES}/gsl .
-      WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl/include
-      COMMENT "Creating symbolic link to location of GSL headers ..."
-      )
-  else (GSL_INCLUDES)
-    message (STATUS "[MathGL] Unable to locate GSL headers!")
-  endif (GSL_INCLUDES)
-    
-
   ##__________________________________________________________________
   ## Python bindings
   
@@ -102,17 +90,10 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
       python2.4/site-packages/numpy/core/include
       )
     
-    if (NUMPY_INCLUDES)
-      add_custom_target (symlink_numpy
-	COMMAND rm -f numpy
-	COMMAND ln -s ${NUMPY_INCLUDES}/numpy .
-	WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl/include
-	COMMENT "Creating symbolic link to location of Numpy headers ..."
-	)
-    else (NUMPY_INCLUDES)
+    if (NOT NUMPY_INCLUDES)
       message (STATUS "[MathGL] Python bindings disabled - no Numpy found!")
       set (MATHGL_ENABLE_PYTHON NO)
-    endif (NUMPY_INCLUDES)
+    endif (NOT NUMPY_INCLUDES)
     
   endif (MATHGL_ENABLE_PYTHON)
   
@@ -225,6 +206,29 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     COMMENT "Expanding tar-archive ..."
     )
   add_dependencies (expand_archive download_archive)
+
+  ##__________________________________________________________________
+  ## Create symbolic links to required external packages
+
+  if (GSL_INCLUDES)
+    add_custom_target (symlink_gsl
+      COMMAND rm -f gsl
+      COMMAND ln -s ${GSL_INCLUDES}/gsl .
+      WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl/include
+      COMMENT "Creating symbolic link to location of GSL headers ..."
+      )
+    add_dependencies (symlink_gsl expand_archive)
+  endif (GSL_INCLUDES)
+  
+  if (NUMPY_INCLUDES)
+    add_custom_target (symlink_numpy
+      COMMAND rm -f numpy
+      COMMAND ln -s ${NUMPY_INCLUDES}/numpy .
+      WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl/include
+      COMMENT "Creating symbolic link to location of Numpy headers ..."
+      )
+    add_dependencies (symlink_numpy expand_archive)
+  endif (NUMPY_INCLUDES)
   
   ##__________________________________________________________________
   ## Configure and build the project using CMake
