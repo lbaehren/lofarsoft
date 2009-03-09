@@ -78,7 +78,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   include (FindGSL)
 
   if (GSL_INCLUDES)
-    add_custom_target (symlink_gsl ALL
+    add_custom_target (symlink_gsl
       COMMAND rm -f gsl
       COMMAND ln -s ${GSL_INCLUDES}/gsl .
       WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl/include
@@ -103,7 +103,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
       )
     
     if (NUMPY_INCLUDES)
-      add_custom_target (symlink_numpy ALL
+      add_custom_target (symlink_numpy
 	COMMAND rm -f numpy
 	COMMAND ln -s ${NUMPY_INCLUDES}/numpy .
 	WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl/include
@@ -269,6 +269,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
 
   add_custom_target (install ALL
     COMMAND make install
+    COMMAND rm -f ${MATHGL_BINARY_DIR}/${MATHGL_TAR_ARCHIVE}
     WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/mathgl
     COMMENT "Building MathGL ..."
     )
