@@ -210,9 +210,9 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the size of one channel of data
       
-      \return blocksize -- Size of one channel (number of shorts)
+      \return Filesize -- Size of one channel (number of shorts)
     */
-    inline unsigned int blocksize () {
+    inline unsigned int Filesize () {
       return headerpoint_p->blocksize;
     }
     

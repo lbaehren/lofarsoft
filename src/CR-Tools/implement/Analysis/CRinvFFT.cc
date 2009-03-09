@@ -121,9 +121,32 @@ namespace CR { // Namespace CR -- begin
     return True;    
   }
 
-  Matrix<Double> CRinvFFT::GetAntPositions(){
+  Matrix<Double> CRinvFFT::GetAntPositions(DataReader *dr){
     Matrix<Double> NewAntPos;
     try {
+      if (!AntPosValid_p && dr==NULL){
+	cerr << "CRinvFFT::GetAntPositions: Called without DataReader while position cache is not valid!" 
+	     << endl;
+	return Matrix<Double>();
+      };
+      if (dr!=NULL && posCachedDate_p != dr->headerRecord().asuInt("Date") ){
+	AntPosValid_p = False;
+      };
+      if (!AntPosValid_p ){
+	Vector<Int> AntennaIDs;
+	uInt i,date;
+	Vector<Double> tmpvec;
+	dr->headerRecord().get("Date",date);
+	dr->headerRecord().get("AntennaIDs",AntennaIDs);
+	tmpvec.resize(3);
+	AntPositions_p.resize(3,AntennaIDs.nelements());
+	for (i=0;i<AntennaIDs.nelements();i++){
+	  CTRead->GetData(date, AntennaIDs(i), "Position", &tmpvec);
+	  AntPositions_p.column(i) = tmpvec;
+	};
+	AntPosValid_p = True;
+	posCachedDate_p = dr->headerRecord().asuInt("Date");
+      };
       Int i,nants=AntPositions_p.ncolumn();
       Vector<Double> ReferencePos(3,0.);
       ReferencePos(0) = DirParams_p.asDouble("Ypos");
@@ -182,10 +205,7 @@ namespace CR { // Namespace CR -- begin
 
       // ***** getting the phase gradients
       // update the antenna positions (if needed)
-      if (posCachedDate_p != dr->headerRecord().asuInt("Date")) {
-	AntPosValid_p = False;
-      };
-      if (!AntPosValid_p){
+      if (!AntPosValid_p || (posCachedDate_p != dr->headerRecord().asuInt("Date")) ){
 	tmpvec.resize(3);
 	AntPositions_p.resize(3,AntennaIDs.nelements());
 	for (i=0;i<AntennaIDs.nelements();i++){
