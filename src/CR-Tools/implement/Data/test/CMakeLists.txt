@@ -19,6 +19,7 @@ set (tests
   tLopesEvent
   tLopesEventIn
   tNDABeam
+  tObservationData
   tTIM40Header
   ttbbctlIn
   trawSubbandIn

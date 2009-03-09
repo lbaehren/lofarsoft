@@ -162,3 +162,28 @@ if (HAVE_GSL)
 else (HAVE_GSL)
   message (STATUS "Missing GNU Scientic Library (GSL) - skipping tests!")
 endif (HAVE_GSL)
+
+## ==============================================================================
+##
+##  Tests for Blitz++
+##
+## ==============================================================================
+
+if (HAVE_BLITZ)
+
+  ## compiler instructions
+  add_executable (blitz blitz.cc)
+  set_target_properties (blitz
+    PROPERTIES
+    COMPILE_FLAGS "-I${BLITZ_INCLUDES}"
+    )
+
+  ## linker instructions
+  target_link_libraries (blitz ${BLITZ_LIBRARIES})
+
+  ## testing
+  add_test (blitz blitz)
+
+else (HAVE_BLITZ)
+  message (STATUS "Missing Blitz++ - skipping tests!")
+endif (HAVE_BLITZ)

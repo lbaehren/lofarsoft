@@ -59,7 +59,7 @@
 #include <IO/DataReader.h>
 #include <IO/LogfileName.h>
 #include <ApplicationSupport/DataFrequency.h>
-#include <Observation/ObservationData.h>
+#include <Data/ObservationData.h>
 
 using casa::String;
 

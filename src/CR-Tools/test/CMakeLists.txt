@@ -101,27 +101,6 @@ if (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
 endif (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
 
 ## -----------------------------------------------------------------------------
-## Test(s) for Blitz++
-
-if (HAVE_BLITZ)
-  ## compiler instructions
-  add_executable (tUseBlitz ${CR_BINARY_DIR}/crtools.h tUseBlitz.cc)
-  set_target_properties (tUseBlitz
-    PROPERTIES
-    COMPILE_FLAGS "-I${BLITZ_INCLUDES}"
-    )
-  ## linker instructions
-  target_link_libraries (tUseBlitz ${BLITZ_LIBRARIES})
-  ## testing
-  add_test (tUseBlitz tUseBlitz)
-  ## installation
-  install (
-    TARGETS tUseBlitz
-    RUNTIME DESTINATION bin
-    )
-endif (HAVE_BLITZ)
-
-## -----------------------------------------------------------------------------
 ## Test for CFITSIO
 
 if (HAVE_CFITSIO)

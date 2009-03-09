@@ -22,9 +22,9 @@
  ***************************************************************************/
 
 /*!
-  \file tUseBlitz.cc
+  \file blitz.cc
 
-  \ingroup CR_test
+  \ingroup contrib
 
   \brief A collection of tests for working with the Blitz++ library
 

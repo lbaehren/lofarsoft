@@ -61,7 +61,7 @@
 #include <Data/ITSCapture.h>
 #include <IO/DataReader.h>
 #include <Math.h>
-#include <Observation/ObservationData.h>
+#include <Data/ObservationData.h>
 #include <Utilities/StringTools.h>
 #include <Utilities/ProgressBar.h>
 

@@ -28,16 +28,28 @@
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/ArrayMath.h>
 
-#include <Observation/ObservationData.h>
+#include <Data/ObservationData.h>
 
-#include <casa/namespace.h>
+using std::cerr;
+using std::cout;
+using std::endl;
+
+using casa::IPosition;
+using casa::Matrix;
+using casa::MDirection;
+using casa::MEpoch;
+using casa::MVDirection;
+using casa::ObsInfo;
+using casa::Quantity;
+using casa::String;
+using casa::Vector;
 
 using CR::ObservationData;
 
 /*!
   \file tObservationData.cc
 
-  \ingroup Observation
+  \ingroup CR_Data
 
   \brief A collection of tests for ObservationData.
 
@@ -52,7 +64,7 @@ using CR::ObservationData;
   \param nofAntennas    -- Number of antenna elements the telecope has
   \param coordAxisFirst -- Return the coordinates per antenna as the first
                            axis of the array, i.e. [nCoord,nAntenna]. If
-			   <tt>coordAxisFirst=False</tt> the antenna
+			   <tt>coordAxisFirst=false</tt> the antenna
 			   positions will be return as [nAntenna,nCoord].
 
   \return antennaPositions -- Array with the 3D antenna positions,
@@ -88,14 +100,14 @@ Matrix<double> antennaPositions (uint const &nofAntennas,
 /*!
   \brief Generate AIPS++ ObsInfo object capsulating obersvation information
  */
-ObsInfo getObsInfo ()
+casa::ObsInfo getObsInfo ()
 {
-  Quantity epoch (52940.4624,"d");
-  MEpoch obsDate (epoch);
-  String telescope ("LOPES");
-  String observer ("Lars Baehren");
+  casa::Quantity epoch (52940.4624,"d");
+  casa::MEpoch obsDate (epoch);
+  casa::String telescope ("LOPES");
+  casa::String observer ("Lars Baehren");
 
-  ObsInfo obsInfo;
+  casa::ObsInfo obsInfo;
   obsInfo.setTelescope (telescope);
   obsInfo.setObsDate (obsDate);
 
@@ -107,7 +119,7 @@ ObsInfo getObsInfo ()
 /*!
   \brief Test constructors for an ObservationData object.
 
-  \return ok -- Status of the test routine; return <i>False</i> in case of 
+  \return ok -- Status of the test routine; return <i>false</i> in case of 
           errors.
 */
 int test_ObservationData ()
@@ -243,8 +255,8 @@ int test_antennas ()
     Matrix<double> positions = antennaPositions(nofAntennas,false);
     obsData.setAntennaPositions (positions,false);
 
-    cout << "coordinate axis first : " << obsData.antennaPositions (True)  << endl;
-    cout << "antenna number first  : " << obsData.antennaPositions (False) << endl;
+    cout << "coordinate axis first : " << obsData.antennaPositions (true)  << endl;
+    cout << "antenna number first  : " << obsData.antennaPositions (false) << endl;
   } catch (AipsError x) {
     cerr << "[tObservationData::test_antennas] " << x.getMesg() << endl;
     nofFailedTests++;
@@ -256,8 +268,8 @@ int test_antennas ()
 			     obsInfo.telescope());
     obsData.setAntennaPositions (antPos);
 
-    cout << "coordinate axis first : " << obsData.antennaPositions (True)  << endl;
-    cout << "antenna number first  : " << obsData.antennaPositions (False) << endl;
+    cout << "coordinate axis first : " << obsData.antennaPositions (true)  << endl;
+    cout << "antenna number first  : " << obsData.antennaPositions (false) << endl;
   } catch (AipsError x) {
     cerr << "[tObservationData::test_antennas] " << x.getMesg() << endl;
     nofFailedTests++;
@@ -271,7 +283,7 @@ int test_antennas ()
 /*!
   \brief Test creation and operation of the coordinate conversion engine.
 
-  \return ok -- Status of the test routine; return <i>False</i> in case of 
+  \return ok -- Status of the test routine; return <i>false</i> in case of 
                 errors.
 */
 int test_conversionEngine ()
@@ -309,8 +321,8 @@ int test_conversionEngine ()
     cout << " Sun (AZEL)  : " << sunAZEL << endl;
     cout << " Sun (J2000) : " << sunJ2000 << endl;
     //
-    for (uInt n=0; n<refcode.nelements(); n++) {
-      MDirection::Convert conv = obsData.conversionEngine (refcode(n),False);
+    for (uint n=0; n<refcode.nelements(); n++) {
+      MDirection::Convert conv = obsData.conversionEngine (refcode(n),false);
       //
       MVDirection MVDirectionFROM;
       Vector<Quantity> QDirectionTO(2);
@@ -343,7 +355,7 @@ int test_conversionEngine ()
     refcode(1) = "GALACTIC";
     refcode(2) = "B1950";
     //
-    for (uInt n=1; n<refcode.nelements(); n++) {
+    for (uint n=1; n<refcode.nelements(); n++) {
       //
       MDirection::Convert conv = obsData.conversionEngine (refcode(n),refcode(0));
       //

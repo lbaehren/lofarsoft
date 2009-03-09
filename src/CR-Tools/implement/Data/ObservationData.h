@@ -61,7 +61,7 @@ namespace CR {  // Namespace CR -- begin
   /*!
     \class ObservationData
     
-    \ingroup Observation
+    \ingroup CR_Data
     
     \brief Store information describing an observation.
     

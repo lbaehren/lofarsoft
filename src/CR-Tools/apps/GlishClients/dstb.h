@@ -65,7 +65,7 @@
 #include <Data/ITSCapture.h>
 #include <Data/LopesEvent.h>
 #include <Data/LopesEventIn.h>
-#include <Observation/ObservationData.h>
+#include <Data/ObservationData.h>
 #include <Utilities/ProgressBar.h>
 #include <Utilities/StringTools.h>
 

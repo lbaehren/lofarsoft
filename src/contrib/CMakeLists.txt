@@ -91,6 +91,7 @@ find_package (ZLIB)
 
 ## USG CMake modules 
 
+include (FindBlitz)
 include (FindBoost)
 include (FindCASACORE)
 include (FindCFITSIO)
@@ -105,6 +106,7 @@ include (FindWCS)
 
 if (contrib_VERBOSE_CONFIGURE)
   message (STATUS "[config] Configuration summary.")
+  message (STATUS "Have Blitz++  = ${HAVE_BLITZ}")
   message (STATUS "Have BOOST    = ${HAVE_BOOST}")
   message (STATUS "Have casacore = ${HAVE_CASACORE}")
   message (STATUS "Have CFITSIO  = ${HAVE_CFITSIO}")

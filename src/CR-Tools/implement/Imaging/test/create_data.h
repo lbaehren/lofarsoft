@@ -29,7 +29,7 @@
 #include <Coordinates/TimeFreqCoordinate.h>
 #include <Coordinates/SkymapCoordinate.h>
 #include <Math/VectorConversion.h>
-#include <Observation/ObservationData.h>
+#include <Data/ObservationData.h>
 
 using casa::DComplex;
 using casa::Matrix;

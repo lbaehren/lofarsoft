@@ -54,7 +54,7 @@ const std::string outfile_name ("skymap.img");
 
 // LOPES-Tools header files
 #include <Coordinates/SkymapCoordinate.h>
-#include <Observation/ObservationData.h>
+#include <Data/ObservationData.h>
 #include <Imaging/Beamformer.h>
 #include <IO/DataReader.h>
 

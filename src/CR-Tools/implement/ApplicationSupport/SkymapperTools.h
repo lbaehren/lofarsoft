@@ -34,7 +34,7 @@
 #include <ApplicationSupport/Glish.h>
 #include <ApplicationSupport/DataReaderTools.h>
 #include <ApplicationSupport/Skymap.h>
-#include <Observation/ObservationData.h>
+#include <Data/ObservationData.h>
 #include <Imaging/Skymapper.h>
 
 #include <casa/namespace.h>
