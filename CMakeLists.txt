@@ -74,7 +74,7 @@ if (SYSTEM_PACKAGES)
   
   include (FindBoost)
   include (FindFFTW3)
-  include (FindGFORTRAN)
+  include (FindGFortran)
   include (FindGSL)
   
   if (APPLE)
