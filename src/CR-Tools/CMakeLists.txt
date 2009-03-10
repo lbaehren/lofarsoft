@@ -300,6 +300,7 @@ if (CR_WITH_STARTOOLS)
   if (HAVE_STARTOOLS)
     include_directories (${STARTOOLS_INCLUDES})
   else (HAVE_STARTOOLS)
+    message (STATUS "[CR-Tools] LopesStar support disabled; startools not found.")
     set (CR_WITH_STARTOOLS FALSE)
   endif (HAVE_STARTOOLS)
   

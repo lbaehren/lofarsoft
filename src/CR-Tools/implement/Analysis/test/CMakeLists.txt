@@ -215,7 +215,7 @@ endif (HAVE_STARTOOLS AND CR_WITH_PLOTTING AND CR_WITH_PYTHON)
 ##____________________________________________________________________
 ## tPulseProperties
 
-if (HAVE_ROOT)
+if (HAVE_ROOT AND HAVE_STARTOOLS)
   ## compiler instructions
   add_executable (tPulseProperties tPulseProperties.cc)
   ## linker instructions
@@ -227,7 +227,7 @@ if (HAVE_ROOT)
   add_test (tPulseProperties tPulseProperties)
   ## installation
   list (APPEND tests tPulseProperties)
-endif (HAVE_ROOT)
+endif (HAVE_ROOT AND HAVE_STARTOOLS)
 
 ## ==============================================================================
 ##
