@@ -14,7 +14,7 @@
 project (NUMPY)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.6)
 
 ## -----------------------------------------------------------------------------
 ## Options
@@ -69,6 +69,8 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
   ## <-- method used to configure and build the package ------------------------>
 
   if (NUMPY_CMAKE_BUILD)
+
+    include_directories (${PYTHON_INCLUDES})
 
     add_subdirectory (numpy)
 

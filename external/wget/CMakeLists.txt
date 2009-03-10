@@ -11,7 +11,10 @@
 project (WGET C)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.6)
+
+## Enforced CMake policy 
+cmake_policy (VERSION 2.6)
 
 ## -----------------------------------------------------------------------------
 ## Todo

@@ -30,8 +30,10 @@ using namespace std;
 using namespace TMath;
 
 
-/*! \file reconstruction.hh 
- \brief Collection of functions and methods to reconstruct shower observables
+/*!
+  \file reconstruction.hh 
+  \ingroup startools
+  \brief Collection of functions and methods to reconstruct shower observables
 
  \date    Mar 13 2007
  \author  Thomas Asch

@@ -197,7 +197,9 @@ In order to install modules/packages the following simple steps are required:
   |-- devel_common
   |-- external
   `-- src
-      |-- contrib     <-- you are here
+      |-- contrib        <-- you are here
+      |   |-- testing
+      |   `-- utilities
       |-- CR-Tools
       |-- DAL
       `-- pybdsm

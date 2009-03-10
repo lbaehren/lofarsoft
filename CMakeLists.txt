@@ -36,16 +36,23 @@ else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
+message (STATUS "------------------------------------------------------------")
+message (STATUS "LOFARSOFT          = $ENV{LOFARSOFT}")
+message (STATUS "USG_ROOT           = ${USG_ROOT}")
+message (STATUS "USG_INSTALL_PREFIX = ${USG_INSTALL_PREFIX}")
+message (STATUS "USG_DATA           = ${USG_DATA}")
+message (STATUS "------------------------------------------------------------")
+
 ## ==============================================================================
 ##
 ##  Build options
 ##
 ## ==============================================================================
 
-option (SEND_BUILD_REPORT   "Send a build report to the Dashboard server?"  NO )
-option (POST_BUILD_CLEAN    "Clean up the build directory after a build?"   NO )
-option (MULTITHREADED_BUILD "Enable multithreading during build?"           NO )
-option (SYSTEM_DIAGNOSTICS  "Produce some basic system diagnostics output?" NO )
+option (SEND_BUILD_REPORT   "Send a build report to the Dashboard server?"  NO  )
+option (POST_BUILD_CLEAN    "Clean up the build directory after a build?"   NO  )
+option (MULTITHREADED_BUILD "Enable multithreading during build?"           NO  )
+option (SYSTEM_PACKAGES     "Installation of required system packages?"     YES )
 
 ## Options affecting the build of individual packages
 
@@ -53,16 +60,71 @@ option (CR_WITH_GUI "Build CR-Tools with graphical interface?" NO )
 
 ## ==============================================================================
 ##
-##  Cleaning up
+##  Installation of required system packages
 ##
 ## ==============================================================================
 
-#add_custom_target (clean_all
-#  COMMAND rm -rf *~
-#  WORKING_DIRECTORY ${USG_ROOT}
-#  COMMENT "Cleaning up ..."
-#)
-#add_dependencies (clean_all clean_build clean_doc clean_release)
+if (SYSTEM_PACKAGES)
+  
+  ## Mute the output of the find scripts
+  set (BOOST_FIND_QUIETLY    YES )
+  set (FFTW3_FIND_QUIETLY    YES )
+  set (GFORTRAN_FIND_QUIETLY YES )
+  set (GSL_FIND_QUIETLY      YES )
+  
+  include (FindBoost)
+  include (FindFFTW3)
+  include (FindGFORTRAN)
+  include (FindGSL)
+  
+  if (APPLE)
+    
+    ## Locate the Fink executable
+    find_program (fink_executable fink)
+    
+    if (fink_executable)
+      
+      ## List of Fink packages
+      set (fink_packages
+	boost1.33
+	boost1.33-shlibs
+	fftw3
+	fftw3-shlibs
+	gfortran-shlibs
+	gsl
+	gsl-shlibs
+	hdf5-18
+	hdf5-18-shlibs
+	)
+      ## Register Fink packages as targets
+      foreach (package_name ${fink_packages})
+	## Installation of package
+	add_custom_target (fink_install_${package_name}
+	  COMMAND ${fink_executable} install ${package_name}
+	  WORKING_DIRECTORY ${USG_BUILD}
+	  COMMENT "Installing Fink package ${package_name} ..."
+	  )
+	## Removal of package
+	add_custom_target (fink_remove_${package_name}
+	  COMMAND ${fink_executable} remove ${package_name}
+	  WORKING_DIRECTORY ${USG_BUILD}
+	  COMMENT "Removing Fink package ${package_name} ..."
+	  )
+      endforeach (package_name)
+      
+    else (fink_executable)
+      message (STATUS "Unable to install Fink packages!")
+    endif (fink_executable)
+    
+  endif (APPLE)
+  
+endif (SYSTEM_PACKAGES)
+
+## ==============================================================================
+##
+##  Cleaning up
+##
+## ==============================================================================
 
 add_custom_target (clean_build
   COMMAND rm -rf *~
@@ -195,7 +257,7 @@ find_file (plplot_settings SettingsPLplot.cmake
 
 add_custom_target (plplot
   COMMAND mkdir -p ${USG_BUILD}/plplot 
-  COMMAND cd plplot && cmake -C ${plplot_settings} ${USG_ROOT}/external/plplot
+  COMMAND cd plplot && cmake -C ${plplot_settings} ${USG_EXTERNAL}/plplot
   COMMAND cd ${USG_BUILD} && ./build_package.sh plplot ${USG_EXTERNAL}/plplot
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package plplot ..."
@@ -232,7 +294,7 @@ add_dependencies (dal python plplot casacore)
 ##                                                            CR-Tools
 
 add_custom_target (cr
-  COMMAND ./build_package.sh cr ${USG_ROOT}/src/CR-Tools
+  COMMAND ./build_package.sh cr ${USG_ROOT}/src/CR-Tools -DCR_WITH_GUI:BOOL=${CR_WITH_GUI}
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package CR-Tools ..."
   )
@@ -262,56 +324,3 @@ add_custom_target (contrib
   COMMENT "Building user-contributed software (programs, scripts, ...)"
   )
 add_dependencies (contrib dal)
-
-## ==============================================================================
-##
-##  Basic system checks
-##
-## ==============================================================================
-
-message (STATUS "------------------------------------------------------------")
-message (STATUS "LOFARSOFT          = $ENV{LOFARSOFT}")
-message (STATUS "USG_ROOT           = ${USG_ROOT}")
-message (STATUS "USG_INSTALL_PREFIX = ${USG_INSTALL_PREFIX}")
-message (STATUS "USG_DATA           = ${USG_DATA}")
-message (STATUS "------------------------------------------------------------")
-
-if (SYSTEM_DIAGNOSTICS)
-  
-  ##________________________________________________________
-  ##                                                GFortran
-  
-  set (GFORTRAN_FIND_QUIETLY YES)
-  include (FindGFORTRAN)
-  
-  if (GFORTRAN_INCLUDES)
-    message (STATUS "GFortran header files : YES")
-  else (GFORTRAN_INCLUDES)
-    message (STATUS "GFortran header files : NO")
-  endif (GFORTRAN_INCLUDES)
-  
-  if (GFORTRAN_LIBRARIES)
-    message (STATUS "GFortran libraries    : YES")
-  else (GFORTRAN_LIBRARIES)
-    message (STATUS "GFortran libraries    : NO")
-  endif (GFORTRAN_LIBRARIES)
-  
-  ##________________________________________________________
-  ##                                                    ROOT
-  
-  set (ROOT_FIND_QUIETLY YES)
-  include (FindROOT)
-  
-  if (ROOT_INCLUDES)
-    message (STATUS "ROOT header files     : YES")
-  else (ROOT_INCLUDES)
-    message (STATUS "ROOT header files     : NO")
-  endif (ROOT_INCLUDES)
-  
-  if (ROOT_LIBRARIES)
-    message (STATUS "ROOT libraries        : YES")
-  else (ROOT_LIBRARIES)
-    message (STATUS "ROOT libraries        : NO")
-  endif (ROOT_LIBRARIES)
-  
-endif (SYSTEM_DIAGNOSTICS)

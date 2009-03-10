@@ -18,7 +18,10 @@ message (STATUS "[CMake package configuration] casacore")
 project (casacore)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.6)
+
+## Enforced CMake policy 
+cmake_policy (VERSION 2.6)
 
 ## include the CTest environment
 include (CTest)

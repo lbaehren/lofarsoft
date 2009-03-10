@@ -1,17 +1,40 @@
 
 set (CMAKE_INSTALL_PREFIX  ${MATHGL_prefix} CACHE PATH "Installation prefix" FORCE)
+
+##____________________________________________________________________
+## Bindings for Python
+
 set (enable-python         ${MATHGL_ENABLE_PYTHON} CACHE BOOL "Enable Python extension")
-set (enable-qt             ${MATHGL_ENABLE_QT} CACHE BOOL "Enable Qt extension")
-set (QT4_FOUND             TRUE CACHE BOOL "Found Qt4?")
-set (QT_QTCORE_LIBRARY     ${QT_QTCORE_LIBRARY} CACHE FILEPATH "Path to libqtcore")
-set (QT_QTGUI_LIBRARY      ${QT_QTGUI_LIBRARY} CACHE FILEPATH "Path to libqtgui")
-set (QT_QTDESIGNER_LIBRARY ${QT_QTDESIGNER_LIBRARY} CACHE FILEPATH "Path to libqtdesigner")
+
+##____________________________________________________________________
+## OpenGL
+
+set (OPENGL_LIBRARIES      ${OPENGL_LIBRARIES} CACHE FILEPATH "Path to libOpenGL")
+
+##____________________________________________________________________
+## Bindings for Qt widgets
+
+set (enable-qt              ${MATHGL_ENABLE_QT} CACHE BOOL "Enable Qt extension")
+
+set (QT_FOUND               TRUE CACHE BOOL "Found Qt?")
+set (QT4_FOUND              TRUE CACHE BOOL "Found Qt4?")
+
+set (QT_INCLUDE_DIR        ${QT_INCLUDE_DIR} CACHE PATH "Path to Qt header files")
+set (QT_LIBRARIES          ${QT_LIBRARIES} CACHE FILEPATH "Path to Qt libraries")
 set (QT_MOC_EXECUTABLE     ${QT_MOC_EXECUTABLE} CACHE FILEPATH "Path to moc")
+
 set (QT_QTCORE_INCLUDE_DIR ${QT_QTCORE_INCLUDE_DIR} CACHE PATH "Path to include/QtCore")
 set (QT_QTGUI_INCLUDE_DIR  ${QT_QTGUI_INCLUDE_DIR} CACHE PATH "Path to include/QtGui")
-set (QT_INCLUDE_DIR        ${QT_INCLUDE_DIR} CACHE PATH "Path to Qt header files")
+
+set (QT_QTCORE_LIBRARY      ${QT_QTCORE_LIBRARY} CACHE FILEPATH "Path to libqtcore")
+set (QT_QTGUI_LIBRARY       ${QT_QTGUI_LIBRARY} CACHE FILEPATH "Path to libQtGui")
+set (QT_QTDESIGNER_LIBRARY  ${QT_QTDESIGNER_LIBRARY} CACHE FILEPATH "Path to libQtDesigner")
+set (QT_QTOPENGL_LIBRARY    ${QT_QTOPENGL_LIBRARY} CACHE FILEPATH "Path to libOpenGL")
+
+##____________________________________________________________________
+## Add include directories
 
 include_directories (
-  ${QT_QTCORE_INCLUDE_DIR}
-  ${QT_QTGUI_INCLUDE_DIR}
+  ${GSL_INCLUDES}
+  ${QT_INCLUDE_DIR}
 )

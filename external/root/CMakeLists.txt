@@ -90,6 +90,7 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   ## create symbolic link to ensure the library is found
   if (libXpm)
     execute_process(
+      COMMAND rm -f libXpm.so
       COMMAND ln -s ${libXpm} libXpm.so
       WORKING_DIRECTORY ${ROOT_prefix}/lib
       )

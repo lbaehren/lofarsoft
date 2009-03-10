@@ -7,8 +7,10 @@
 #include "RecRadioBasic.hh"
 
 
-/*! \file RecRadioTrigger.hh
- \brief basic trigger functions of LOPES-STAR for external lib support
+/*!
+  \file RecRadioTrigger.hh
+  \ingroup startools
+  \brief basic trigger functions of LOPES-STAR for external lib support
 
  \date    Feb 15 2008
  \author  Thomas Asch

@@ -28,8 +28,10 @@ using namespace std;
 using namespace TMath;
 
 
-/*! \file calibration.hh 
- \brief Collection of functions and methods to perform the calibration
+/*!
+  \file calibration.hh 
+  \ingroup startools
+  \brief Collection of functions and methods to perform the calibration
 
  \date    Mar 13 2007
  \author  Thomas Asch

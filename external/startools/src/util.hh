@@ -49,8 +49,10 @@ using namespace TMath;
 //! RecRadio headers
 
 
-/*! \file util.hh 
- \brief Collection of useful functions and methods to work with LOPES^STAR data
+/*!
+  \file util.hh 
+  \ingroup startools
+  \brief Collection of useful functions and methods to work with LOPES^STAR data
 
  \date    Mar 04 2006
  \author  Thomas Asch

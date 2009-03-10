@@ -4073,8 +4073,8 @@ Concept Index
 * POST:                                  HTTP Options.        (line 217)
 * progress indicator:                    Download Options.    (line 145)
 * proxies:                               Proxies.             (line   6)
-* proxy <1>:                             HTTP Options.        (line  43)
-* proxy:                                 Download Options.    (line 300)
+* proxy <1>:                             Download Options.    (line 300)
+* proxy:                                 HTTP Options.        (line  43)
 * proxy authentication:                  HTTP Options.        (line 175)
 * proxy filling:                         Recursive Retrieval Options.
                                                               (line  16)

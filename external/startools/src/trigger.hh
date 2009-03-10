@@ -37,8 +37,10 @@ using namespace std;
 using namespace TMath;
 
 
-/*! \file trigger.hh
- \brief Collection of all function related to the level one trigger 
+/*!
+  \file trigger.hh
+  \ingroup startools
+  \brief Collection of all function related to the level one trigger 
 
  \date    Aug 09 2006
  \author  Thomas Asch

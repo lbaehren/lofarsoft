@@ -14,12 +14,16 @@
 using namespace std;
 
 
-//! Conversion of differnt struct into the other
 /*!
- Input is a root file with, e.g. the Sh3 struct. The timestamps of this struct is then converted
- into a event, header and channel_profile sturcts.
- The output files can be used for the timestamp_compare algorithm.
+  \file TreeConvert.cpp
+  
+  \ingroup startools
+  
+  \brief Conversion of differnt struct into the other
 
+  Input is a root file with, e.g. the Sh3 struct. The timestamps of this struct is then converted
+  into a event, header and channel_profile sturcts.
+  The output files can be used for the timestamp_compare algorithm.
 */
 
 

@@ -7,8 +7,10 @@
 #include "RecRadioBasic.hh"
 
 
-/*! \file RecRadioCalib.hh
- \brief calibration functions of LOPES-STAR for external lib support
+/*!
+  \file RecRadioCalib.hh
+  \ingroup startools
+  \brief calibration functions of LOPES-STAR for external lib support
 
  \date    Feb 15 2008
  \author  Thomas Asch

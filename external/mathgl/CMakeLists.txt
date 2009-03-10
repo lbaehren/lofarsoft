@@ -100,77 +100,92 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     endif (NOT NUMPY_INCLUDES)
     
   endif (MATHGL_ENABLE_PYTHON)
+
+  ##__________________________________________________________________
+  ## Locate OpenGL
+
+  include (FindOpenGL)
   
   ##__________________________________________________________________
   ## Locate Qt4 libraries and header files
 
   find_file (QT_MOC_EXECUTABLE moc
-    PATHS ${bin_locations} /opt/casa/local/bin
-    PATH_SUFFIXES qt4-x11 qt4-x11/bin
+    PATHS ${bin_locations} /sw/lib /opt/casa/local/bin
+    PATH_SUFFIXES qt4-mac qt4-mac/bin qt4-x11 qt4-x11/bin
     )
 
   ## Libraries
 
   find_library (QT_QTCORE_LIBRARY QtCore
     PATHS ${lib_locations}
-    PATH_SUFFIXES qt4-x11 qt4-x11/lib
+    PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/bin
     )
   if (QT_QTCORE_LIBRARY)
-    list (APPEND QT4_LIBRARIES ${QT_QTCORE_LIBRARY})
+    list (APPEND QT_LIBRARIES ${QT_QTCORE_LIBRARY})
   endif (QT_QTCORE_LIBRARY)
   
   find_library (QT_QTGUI_LIBRARY QtGui
     PATHS ${lib_locations}
-    PATH_SUFFIXES qt4-x11 qt4-x11/lib
+    PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
     )
   if (QT_QTGUI_LIBRARY)
-    list (APPEND QT4_LIBRARIES ${QT_QTGUI_LIBRARY})
+    list (APPEND QT_LIBRARIES ${QT_QTGUI_LIBRARY})
   endif (QT_QTGUI_LIBRARY)
 
   find_library (QT_QTDESIGNER_LIBRARY QtDesigner
     PATHS ${lib_locations}
-    PATH_SUFFIXES qt4-x11 qt4-x11/lib
+    PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
     )
   if (QT_QTDESIGNER_LIBRARY)
-    list (APPEND QT4_LIBRARIES ${QT_QTDESIGNER_LIBRARY})
+    list (APPEND QT_LIBRARIES ${QT_QTDESIGNER_LIBRARY})
   endif (QT_QTDESIGNER_LIBRARY)
   
-  if (QT4_LIBRARIES)
-    list(REVERSE QT4_LIBRARIES)
-  endif (QT4_LIBRARIES)
+  find_library (QT_QTOPENGL_LIBRARY QtOpenGL
+    PATHS ${lib_locations}
+    PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
+    )
+  if (QT_QTOPENGL_LIBRARY)
+    list (APPEND QT_LIBRARIES ${QT_QTOPENGL_LIBRARY})
+  endif (QT_QTOPENGL_LIBRARY)
+
+  if (QT_LIBRARIES)
+    list(REVERSE QT_LIBRARIES)
+  endif (QT_LIBRARIES)
   
   ## locate the Qt4 header files
 
-  find_path (QT_QTCORE_INCLUDE_DIR QTimer
+  find_path (QT_INCLUDE_DIR QtCore/QTimer QtGui/QApplication
     PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
-    PATH_SUFFIXES QtCore qt4-x11 qt4-x11/include qt4-x11/include/QtCore
+    PATH_SUFFIXES qt4-mac/include qt4-x11/include
+    )
+
+  ## QtCore
+  find_path (QT_QTCORE_INCLUDE_DIR QtCore/QTimer QtCore/qbasictimer.h
+    PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
+    PATH_SUFFIXES qt4-mac/include qt4-x11/include
     )
   if (QT_QTCORE_INCLUDE_DIR)
-    list (APPEND QT_INCLUDE_DIR ${QT_QTCORE_INCLUDE_DIR})
+    list (APPEND QT_INCLUDE_DIR ${QT_QTCORE_INCLUDE_DIR}/QtCore)
   endif (QT_QTCORE_INCLUDE_DIR) 
   
-  find_path (QT_QTGUI_INCLUDE_DIR QApplication QMouseEvent
+  ## QtGui
+  find_path (QT_QTGUI_INCLUDE_DIR QtGui/QApplication QtGui/QMouseEvent
     PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
-    PATH_SUFFIXES QtGui qt4-x11 qt4-x11/include qt4-x11/include/QtGui
+    PATH_SUFFIXES qt4-mac/include qt4-x11/include
     )
-  
-  find_path (QT_INCLUDE_DIR Qt/qatomic.h QtGui/QTableWidgetItem QtGui/QWidget
+  if (QT_QTGUI_INCLUDE_DIR)
+    list (APPEND QT_INCLUDE_DIR ${QT_QTGUI_INCLUDE_DIR}/QtGui)
+  endif (QT_QTGUI_INCLUDE_DIR)
+
+  ## QtOpenGL
+  find_path (QT_QTOPENGL_INCLUDE_DIR QtOpenGL/QtOpenGL QtOpenGL/QGLWidget
     PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
-    PATH_SUFFIXES qt4-x11 qt4-x11/include
+    PATH_SUFFIXES qt4-mac/include qt4-x11/include
     )
-  
-  find_path (HAVE_QT4_QWIDGET QWidget
-    PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
-    PATH_SUFFIXES qt4-x11/include/QtGui QtGui
-    )
-  if (HAVE_QT4_QWIDGET)
-    list (APPEND QT_INCLUDE_DIR ${HAVE_QT4_QWIDGET})
-  endif (HAVE_QT4_QWIDGET)
-  
-  if (QT4_LIBRARIES AND QT_INCLUDE_DIR) 
-    set (QT4_FOUND TRUE)
-  endif (QT4_LIBRARIES AND QT_INCLUDE_DIR)
-  
+  if (QT_QTOPENGL_INCLUDE_DIR)
+    list (APPEND QT_INCLUDE_DIR ${QT_QTOPENGL_INCLUDE_DIR}/QtOpenGL)
+  endif (QT_QTOPENGL_INCLUDE_DIR)
+
   ##__________________________________________________________________
   ## Check if a tar-archive with the source code is available already;
   ## if this is not the case we need to fetch it from the USg server.

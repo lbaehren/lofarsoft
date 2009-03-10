@@ -13,7 +13,10 @@
 project (BOOST)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.6)
+
+## Enforced CMake policy 
+cmake_policy (VERSION 2.6)
 
 ## -----------------------------------------------------------------------------
 ## Additional CMake modules
@@ -226,6 +229,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
     include_directories (
       .
       ${BOOST_SOURCE_DIR}
+      ${BOOST_SOURCE_DIR}/boost
       ${BOOST_SOURCE_DIR}/libs
       )
     
