@@ -95,22 +95,19 @@ if (SYSTEM_PACKAGES)
 	gsl-shlibs
 	hdf5-18
 	hdf5-18-shlibs
+	qt4-mac
 	)
-      ## Register Fink packages as targets
+      
+      ## Convert list of packages to command line argument for Fink
       foreach (package_name ${fink_packages})
-	## Installation of package
-	add_custom_target (fink_install_${package_name}
-	  COMMAND ${fink_executable} install ${package_name}
-	  WORKING_DIRECTORY ${USG_BUILD}
-	  COMMENT "Installing Fink package ${package_name} ..."
-	  )
-	## Removal of package
-	add_custom_target (fink_remove_${package_name}
-	  COMMAND ${fink_executable} remove ${package_name}
-	  WORKING_DIRECTORY ${USG_BUILD}
-	  COMMENT "Removing Fink package ${package_name} ..."
-	  )
+	set (fink_packages_list "${fink_packages_list} ${package_name}")
       endforeach (package_name)
+      
+      add_custom_target (fink_packages_install
+	COMMAND ${fink_executable} install ${fink_packages_list}
+	WORKING_DIRECTORY ${USG_BUILD}
+	COMMENT "Installing Fink packages ..."
+	)
       
     else (fink_executable)
       message (STATUS "Unable to install Fink packages!")

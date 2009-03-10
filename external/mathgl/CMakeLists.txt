@@ -10,12 +10,11 @@ cmake_minimum_required (VERSION 2.6)
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (MATHGL_FORCE_BUILD "Force rebuild and local installation?"     NO  )
-option (MATHGL_CMAKE_BUILD "Use CMake to configure and build MATHGL?"  YES )
-option (MATHGL_VERBOSE_CONFIGURE "Be verbose during configuration?"    NO  )
-option (MATHGL_VERBOSE_BUILD     "Be verbose during build process?"    NO  )
-option (MATHGL_ENABLE_PYTHON     "Enable support for Python?"          YES )
-option (MATHGL_ENABLE_QT         "Enable support for Qt?"              NO  )
+option (MATHGL_FORCE_BUILD       "Force rebuild and local installation?"  NO  )
+option (MATHGL_VERBOSE_CONFIGURE "Be verbose during configuration?"       NO  )
+option (MATHGL_VERBOSE_BUILD     "Be verbose during build process?"       NO  )
+option (MATHGL_ENABLE_PYTHON     "Enable support for Python?"             YES )
+option (MATHGL_ENABLE_QT         "Enable support for Qt?"                 YES )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -109,9 +108,18 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   ##__________________________________________________________________
   ## Locate Qt4 libraries and header files
 
-  find_file (QT_MOC_EXECUTABLE moc
+  ## Executables
+
+  find_program (QT_MOC_EXECUTABLE moc
     PATHS ${bin_locations} /sw/lib /opt/casa/local/bin
     PATH_SUFFIXES qt4-mac qt4-mac/bin qt4-x11 qt4-x11/bin
+    NO_DEFAULT_PATH
+    )
+
+  find_program (QT_QMAKE_EXECUTABLE qmake
+    PATHS ${bin_locations} /sw/lib /opt/casa/local/bin
+    PATH_SUFFIXES qt4-mac qt4-mac/bin qt4-x11 qt4-x11/bin
+    NO_DEFAULT_PATH
     )
 
   ## Libraries
@@ -119,6 +127,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   find_library (QT_QTCORE_LIBRARY QtCore
     PATHS ${lib_locations}
     PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/bin
+    NO_DEFAULT_PATH
     )
   if (QT_QTCORE_LIBRARY)
     list (APPEND QT_LIBRARIES ${QT_QTCORE_LIBRARY})
@@ -127,6 +136,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   find_library (QT_QTGUI_LIBRARY QtGui
     PATHS ${lib_locations}
     PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
+    NO_DEFAULT_PATH
     )
   if (QT_QTGUI_LIBRARY)
     list (APPEND QT_LIBRARIES ${QT_QTGUI_LIBRARY})
@@ -135,6 +145,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   find_library (QT_QTDESIGNER_LIBRARY QtDesigner
     PATHS ${lib_locations}
     PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
+    NO_DEFAULT_PATH
     )
   if (QT_QTDESIGNER_LIBRARY)
     list (APPEND QT_LIBRARIES ${QT_QTDESIGNER_LIBRARY})
@@ -143,6 +154,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   find_library (QT_QTOPENGL_LIBRARY QtOpenGL
     PATHS ${lib_locations}
     PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
+    NO_DEFAULT_PATH
     )
   if (QT_QTOPENGL_LIBRARY)
     list (APPEND QT_LIBRARIES ${QT_QTOPENGL_LIBRARY})

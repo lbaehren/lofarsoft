@@ -2,6 +2,13 @@
 set (CMAKE_INSTALL_PREFIX  ${MATHGL_prefix} CACHE PATH "Installation prefix" FORCE)
 
 ##____________________________________________________________________
+## GNU Scientific Library
+
+set (GSL_LIB         ${GSL_GSL_LIBRARY}   CACHE FILEPATH "Path to libgsl" )
+set (GSL_CBLAS_LIB   ${GSL_CBLAS_LIBRARY} CACHE FILEPATH "Path to libgslcblas" )
+set (GSL_INCLUDE_DIR ${GSL_INCLUDES}      CACHE PATH     "GSL header files" )
+
+##____________________________________________________________________
 ## Bindings for Python
 
 set (enable-python         ${MATHGL_ENABLE_PYTHON} CACHE BOOL "Enable Python extension")
@@ -19,9 +26,11 @@ set (enable-qt              ${MATHGL_ENABLE_QT} CACHE BOOL "Enable Qt extension"
 set (QT_FOUND               TRUE CACHE BOOL "Found Qt?")
 set (QT4_FOUND              TRUE CACHE BOOL "Found Qt4?")
 
+set (QT_MOC_EXECUTABLE     ${QT_MOC_EXECUTABLE} CACHE FILEPATH "Path to moc")
+set (QT_QMAKE_EXECUTABLE   ${QT_QMAKE_EXECUTABLE} CACHE FILEPATH "Path to qmake")
+
 set (QT_INCLUDE_DIR        ${QT_INCLUDE_DIR} CACHE PATH "Path to Qt header files")
 set (QT_LIBRARIES          ${QT_LIBRARIES} CACHE FILEPATH "Path to Qt libraries")
-set (QT_MOC_EXECUTABLE     ${QT_MOC_EXECUTABLE} CACHE FILEPATH "Path to moc")
 
 set (QT_QTCORE_INCLUDE_DIR ${QT_QTCORE_INCLUDE_DIR} CACHE PATH "Path to include/QtCore")
 set (QT_QTGUI_INCLUDE_DIR  ${QT_QTGUI_INCLUDE_DIR} CACHE PATH "Path to include/QtGui")

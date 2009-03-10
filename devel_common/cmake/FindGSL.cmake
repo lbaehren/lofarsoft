@@ -51,25 +51,25 @@ set (GSL_LIBRARIES "")
 
 ## [1] libgsl
 
-find_library (libgsl gsl
+find_library (GSL_GSL_LIBRARY gsl
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )
 
-if (libgsl)
-  list (APPEND GSL_LIBRARIES ${libgsl})
-endif (libgsl)
+if (GSL_GSL_LIBRARY)
+  list (APPEND GSL_LIBRARIES ${GSL_GSL_LIBRARY})
+endif (GSL_GSL_LIBRARY)
 
 ## [2] libgslcblas
 
-find_library (libgslcblas gslcblas
+find_library (GSL_CBLAS_LIBRARY gslcblas
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )
 
-if (libgslcblas)
-  list (APPEND GSL_LIBRARIES ${libgslcblas})
-endif (libgslcblas)
+if (GSL_CBLAS_LIBRARY)
+  list (APPEND GSL_LIBRARIES ${GSL_CBLAS_LIBRARY})
+endif (GSL_CBLAS_LIBRARY)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
