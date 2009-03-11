@@ -219,7 +219,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     else (HAVE_WGET)
       if (HAVE_CURL)
 	add_custom_target (download_archive ALL
-	  COMMAND curl ${MATHGL_URL} -o ${MATHGL_TAR_ARCHIVE} -C
+	  COMMAND curl ${MATHGL_URL} -o ${MATHGL_TAR_ARCHIVE} -C -
 	  WORKING_DIRECTORY ${MATHGL_BINARY_DIR}
 	  )
       else (HAVE_CURL)
