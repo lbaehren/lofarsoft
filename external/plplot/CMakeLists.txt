@@ -1,210 +1,166 @@
-# Top-level CMakeLists.txt for PLplot
-###
-### Process this file with cmake to produce Makefile
-###
-# Copyright (C) 2006 Alan W. Irwin
-#
-# This file is part of PLplot.
-#
-# PLplot is free software; you can redistribute it and/or modify
-# it under the terms of the GNU Library General Public License as published
-# by the Free Software Foundation; version 2 of the License.
-#
-# PLplot is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Library General Public License for more details.
-#
-# You should have received a copy of the GNU Library General Public License
-# along with PLplot; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-# Version 2.4.5 or above of cmake is required!
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4.5 FATAL_ERROR)
+## Name of the project
+project (PLPLOT)
 
-# Recommended way to do user overrides of C-related variables, is given at
-# http://public.kitware.com/pipermail/cmake/2006-July/010334.html.
-# See also, CMakeCInformation.cmake.  There are also C++, and Fortran-specific
-# overrides that can be done.  However, I prefer putting overrides in just
-# one file so I use the overall variable CMAKE_USER_MAKE_RULES_OVERRIDE
-# instead.
-set(
-CMAKE_USER_MAKE_RULES_OVERRIDE
-${CMAKE_SOURCE_DIR}/cmake/UserOverride.cmake
-)
+## Minimum required version of CMake to configure the project
+cmake_minimum_required (VERSION 2.6)
 
-project(plplot)
+## -----------------------------------------------------------------------------
+## Only force rebuild of the library from the provided source code, if no system
+## installation can be found. In order to handle this properly, we use the CMake
+## find script
 
-set(PACKAGE plplot)
+option (PLPLOT_FORCE_BUILD       "Force rebuild and local installation?"  NO  )
+option (PLPLOT_VERBOSE_CONFIGURE "Be verbose during configuration?"       YES )
+option (PLPLOT_VERBOSE_BUILD     "Be verbose during build process?"       NO  )
 
-# Location where PLplot cmake build system first looks for cmake modules.
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-# Version data that need modification for each release.
-include(plplot_version)
-# parameters to control overall cmake behaviour.
-
-# Configure PLplot component variables....
-
-include(plplot)
-
-# Use configured variables to process configurable top-level files.
-
-configure_file(
-${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
-${CMAKE_CURRENT_BINARY_DIR}/config.h
-)
-# Allow access to the generated config.h for this build.
-ADD_DEFINITIONS("-DHAVE_CONFIG_H")
-# Install top-level files
-
-# Enable testing framework for examples
-if (BUILD_TEST)
-  include(CTest)
-endif (BUILD_TEST)
-
-# Disable warnings about deprecated functions (Visual C++ 2005)
-if(MSVC_VERSION GREATER 1399)
-  ADD_DEFINITIONS("/D_CRT_SECURE_NO_DEPRECATE")
-endif(MSVC_VERSION GREATER 1399)
-
-# in windows all created dlls are gathered in the dll directory
-# if you add this directory to your PATH all shared libraries are available
-if(BUILD_SHARED_LIBS AND WIN32 AND NOT CYGWIN)
-  SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/dll)
-endif(BUILD_SHARED_LIBS AND WIN32 AND NOT CYGWIN)
-
-# Borland Compiler must compile in ANSII mode
-if(BORLAND)
-  ADD_DEFINITIONS(-A)
-endif(BORLAND)
-
-set(top_level_DOCFILES
-AUTHORS
-COPYING.LIB
-ChangeLog
-Copyright
-FAQ
-NEWS
-PROBLEMS
-README
-README.release
-)
-install(FILES ${top_level_DOCFILES} DESTINATION ${DOC_DIR})
-
-# Process other directories including using configured variables to
-# process configurable files in those directories.
-# N.B. Order is important here at the cmake stage because targets must
-# be processed by cmake in a specific order e.g., due to get_target_property
-# invocations.  Note, this order has nothing to do with the order which make
-# processes these subdirectories at build time.  That build-time order
-# is determined by the dependencies between targets and also by file
-# dependencies that are established by the cmake configuration files.
-
-# needs no cmake processing
-#add_subdirectory(fonts)
-add_subdirectory(lib)
-add_subdirectory(include)
-add_subdirectory(src)
-add_subdirectory(data)
-add_subdirectory(bindings)
-add_subdirectory(drivers)
-add_subdirectory(examples)
-add_subdirectory(utils)
-add_subdirectory(test)
-add_subdirectory(scripts)
-add_subdirectory(doc)
-add_subdirectory(pkgcfg)
-# needs no cmake processing
-#add_subdirectory(cf)
-summary()
-
-if(PREBUILD_DIST)
-  # Pre-build everything required for a distribution tarball and copy it to
-  # the source tree (if build tree is different from source tree).
-
-  # List of targets that must be (pre-)built.
-  # N.B. the plhershey-unicode.h_built target has to be pre-built only because
-  # of the needs of the old windows build at sys/win32/msdev.
-  set(
-  DIST_TARGETS
-  plhershey-unicode.h_built
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+  PATHS 
+  ${PLPLOT_SOURCE_DIR}
+  ${PLPLOT_SOURCE_DIR}/..
+  ${PLPLOT_SOURCE_DIR}/../..
+  ${PLPLOT_SOURCE_DIR}/../../..
+  $ENV{LOFARSOFT}
   )
 
-  if(ENABLE_octave)
-    set(DIST_TARGETS ${DIST_TARGETS} make_documentation)
-  endif(ENABLE_octave)
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
+  message (FATAL_ERROR "[PLPLOT] Unable to locate additional CMake scripts!")
+endif (USG_ROOT)
 
-  if(BUILD_PRINT)
-    set(DIST_TARGETS ${DIST_TARGETS} print)
-  endif(BUILD_PRINT)
+## ------------------------------------------------------------------------------
+## Check if the program/package/library is already available
 
-  if(BUILD_INFO)
-    set(DIST_TARGETS ${DIST_TARGETS} info)
-  endif(BUILD_INFO)
+include (FindPLplot)
 
-  if(BUILD_MAN)
-    set(DIST_TARGETS ${DIST_TARGETS} man)
-  endif(BUILD_MAN)
+## <-- begin build condition --------------------------------------------------->
 
-  if(BUILD_HTML)
-    set(DIST_TARGETS ${DIST_TARGETS} html)
-  endif(BUILD_HTML)
-
-  if(CMAKE_BINARY_DIR STREQUAL "${CMAKE_SOURCE_DIR}")
-    add_custom_target(prebuild_dist)
-  else(CMAKE_BINARY_DIR STREQUAL "${CMAKE_SOURCE_DIR}")
-    # copy prebuilds back to source tree.
-    add_custom_target(
-    prebuild_dist
-    COMMAND ${CMAKE_COMMAND} -E copy
-    ${CMAKE_BINARY_DIR}/include/plhershey-unicode.h
-    ${CMAKE_SOURCE_DIR}/include
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_BINARY_DIR}/bindings/octave/plplot_octave_txt
-    ${CMAKE_SOURCE_DIR}/bindings/octave/plplot_octave_txt
-    COMMAND cp
-    `cat static_built_files ${INFO_MANIFEST} ${MAN_MANIFEST} ${HTML_MANIFEST}`
-    ${CMAKE_SOURCE_DIR}/doc/docbook/src
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/doc/docbook/src
+if (NOT HAVE_PLPLOT OR PLPLOT_FORCE_BUILD)
+  
+  ##__________________________________________________________________
+  ## Locate the installation area
+  
+  find_path (PLPLOT_prefix release_area.txt
+    PATHS
+    ${PLPLOT_SOURCE_DIR}
+    PATH_SUFFIXES
+    ../release
+    ../../release
+    ../../../release
+    NO_DEFAULT_PATH
     )
-  endif(CMAKE_BINARY_DIR STREQUAL "${CMAKE_SOURCE_DIR}")
-  add_dependencies(prebuild_dist ${DIST_TARGETS})
-endif(PREBUILD_DIST)
+  
+  if (NOT PLPLOT_prefix)
+    message (FATAL_ERROR "[Plplot] Unable to locate the installation area")
+  endif (NOT PLPLOT_prefix)
+  
+  ##__________________________________________________________________
+  ## Tools and definitions
 
-#
-# Packing stuff
-#
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Scientific Plotting Library PLplot")
-set(CPACK_PACKAGE_VENDOR "PLplot development team")
-set(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/README)
-if(WIN32)
-  set(CPACK_GENERATOR ZIP)
-else(WIN32)
-  set(CPACK_GENERATOR TGZ)
-endif(WIN32)
-set(
-CPACK_SOURCE_PACKAGE_FILE_NAME
-"plplot-${VERSION}"
-CACHE INTERNAL "tarball basename"
-)
-set(CPACK_SOURCE_GENERATOR TGZ)
-# The following components are regex's to match anywhere (unless anchored)
-# in absolute path + filename to find files or directories to be excluded
-# from source tarball.
-set(CPACK_SOURCE_IGNORE_FILES
-"~$"
-"\\\\.cvsignore$"
-"^${PROJECT_SOURCE_DIR}.*/CVS/"
-"^${PROJECT_SOURCE_DIR}/old/"
-"^${PROJECT_SOURCE_DIR}/sys/mac"
-"^${PROJECT_SOURCE_DIR}/sys/os2"
-"^${PROJECT_SOURCE_DIR}/sys/unix"
-"^${PROJECT_SOURCE_DIR}/sys/dos/msc"
-"^${PROJECT_SOURCE_DIR}/sys/dos/bcc"
-"^${PROJECT_SOURCE_DIR}/sys/dos/emx"
-"^${PROJECT_SOURCE_DIR}/sys/win-tk"
-"^${PROJECT_SOURCE_DIR}/sys/win32"
-)
-#message("CPACK_SOURCE_IGNORE_FILES = ${CPACK_SOURCE_IGNORE_FILES}")
-include(CPack)
+  find_program (HAVE_WGET  wget  ${bin_locations} )
+  find_program (HAVE_CURL  curl  ${bin_locations} )
+  find_program (HAVE_TAR   tar   ${bin_locations} )
+
+  set (PLPLOT_VERSION "5.9.2")
+  set (PLPLOT_DIRECTORY "plplot-${PLPLOT_VERSION}")
+  set (PLPLOT_TAR_ARCHIVE "${PLPLOT_DIRECTORY}.tar.gz")
+  set (PLPLOT_URL "${USG_DOWNLOAD}/software/${PLPLOT_TAR_ARCHIVE}")
+
+  ##__________________________________________________________________
+  ## Python.Numeric header files
+
+  include (FindNumeric)
+
+  if (NUMERIC_INCLUDES)
+    include_directories (${NUMERIC_INCLUDES})
+  endif (NUMERIC_INCLUDES)
+  
+  ##__________________________________________________________________
+  ## Check if a tar-archive with the source code is available already;
+  ## if this is not the case we need to fetch it from the USg server.
+  
+  find_file (have_plplot_tgz ${PLPLOT_TAR_ARCHIVE} ${PLPLOT_SOURCE_DIR})
+  
+  if (have_plplot_tgz)
+    add_custom_target (download_archive
+      COMMAND cp ${have_plplot_tgz} .
+      WORKING_DIRECTORY ${PLPLOT_BINARY_DIR}
+      COMMENT "Copying tar-archive from ${USG_ROOT}/external/plplot ..."
+      )
+  else (have_plplot_tgz)
+    if (HAVE_WGET)
+      add_custom_target (download_archive
+	COMMAND wget -c ${PLPLOT_URL}
+	WORKING_DIRECTORY ${PLPLOT_BINARY_DIR}
+	)
+    else (HAVE_WGET)
+      if (HAVE_CURL)
+	add_custom_target (download_archive ALL
+	  COMMAND curl ${PLPLOT_URL} -o ${PLPLOT_TAR_ARCHIVE} -C -
+	  WORKING_DIRECTORY ${PLPLOT_BINARY_DIR}
+	  )
+      else (HAVE_CURL)
+	message (FATAL_ERROR "[PLPLOT] No tool found to download tar-archive!")
+      endif (HAVE_CURL)
+    endif (HAVE_WGET)
+  endif (have_plplot_tgz)
+  
+  ##__________________________________________________________________
+  ## Expand the tar-archive
+  
+  add_custom_target (expand_archive
+    COMMAND tar -xvzf ${PLPLOT_TAR_ARCHIVE}
+    WORKING_DIRECTORY ${PLPLOT_BINARY_DIR}
+    COMMENT "Expanding tar-archive ..."
+    )
+  add_dependencies (expand_archive download_archive)
+
+  ##__________________________________________________________________
+  ## Configure and build the project
+
+  ## Create configuration files from templates
+
+  configure_file (
+    ${PLPLOT_SOURCE_DIR}/plplot.cmake.in
+    ${PLPLOT_BINARY_DIR}/plplot.cmake
+    )
+
+  ## run "cmake"
+
+  add_custom_target (run_cmake ALL
+    COMMAND cmake -C ${PLPLOT_BINARY_DIR}/plplot.cmake .
+    COMMAND cmake .
+    WORKING_DIRECTORY ${PLPLOT_BINARY_DIR}/${PLPLOT_DIRECTORY}
+    COMMENT "[PLPLOT] Running configure ..."
+    )
+  add_dependencies (run_cmake expand_archive)
+  
+  ## run "make"
+
+  add_custom_target (run_make ALL
+    COMMAND make
+    WORKING_DIRECTORY ${PLPLOT_BINARY_DIR}/${PLPLOT_DIRECTORY}
+    COMMENT "[PLPLOT] Starting build ..."
+    )
+  add_dependencies (run_make run_cmake)
+  
+  ## run "make install"
+
+  add_custom_target (install ALL
+    COMMAND make install
+    COMMAND rm -rf ${PLPLOT_BINARY_DIR}/${PLPLOT_TAR_ARCHIVE}
+    COMMAND rm -rf ${PLPLOT_BINARY_DIR}/${PLPLOT_DIRECTORY}
+    WORKING_DIRECTORY ${PLPLOT_BINARY_DIR}/${PLPLOT_DIRECTORY}
+    COMMENT "[PLPLOT] Installing software and cleaning up ..."
+    )
+  add_dependencies (install run_make)
+
+  ## <-- end build condition ----------------------------------------------------->
+  
+else (NOT HAVE_PLPLOT OR PLPLOT_FORCE_BUILD)
+  message (STATUS "Found system-wide installation of Plplot; skipping rebuild!")
+endif (NOT HAVE_PLPLOT OR PLPLOT_FORCE_BUILD)

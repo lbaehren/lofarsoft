@@ -206,6 +206,7 @@ set (packages_external
   flex
   hdf5
   mathgl
+  plplot
   pyrap
   python
   qt
@@ -246,22 +247,12 @@ add_dependencies (startools root)
 
 add_dependencies (wcslib boost flex)
 
+add_dependencies (plplot python swig)
+
 ##____________________________________________________________________
 ## Packages needing extra attention
 
-find_file (plplot_settings SettingsPLplot.cmake
-  PATHS ${LUS_SOURCE_DIR} ${USG_BUILD}
-  PATH_SUFFIXES devel_common/cmake
-  )
-
-add_custom_target (plplot
-  COMMAND mkdir -p ${USG_BUILD}/plplot 
-  COMMAND cd plplot && cmake -C ${plplot_settings} ${USG_EXTERNAL}/plplot
-  COMMAND cd ${USG_BUILD} && ./build_package.sh plplot ${USG_EXTERNAL}/plplot
-  WORKING_DIRECTORY ${USG_BUILD}
-  COMMENT "Building package plplot ..."
-  )
-add_dependencies (plplot python swig)
+## nothing right now
 
 ## ==============================================================================
 ##
