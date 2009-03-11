@@ -56,7 +56,8 @@ option (SYSTEM_PACKAGES     "Installation of required system packages?"     YES 
 
 ## Options affecting the build of individual packages
 
-option (CR_WITH_GUI "Build CR-Tools with graphical interface?" NO )
+option (CR_WITH_GUI         "Build CR-Tools with graphical interface?"   NO )
+option (CR_WITH_STARTOOLS   "Enable using routines from LOPES-Star?"     NO )
 
 ## ==============================================================================
 ##
@@ -292,16 +293,24 @@ add_dependencies (dal python plplot casacore)
 ##                                                            CR-Tools
 
 add_custom_target (cr
-  COMMAND ./build_package.sh cr ${USG_ROOT}/src/CR-Tools -DCR_WITH_GUI:BOOL=${CR_WITH_GUI}
+  COMMAND ./build_package.sh cr ${USG_ROOT}/src/CR-Tools -DCR_WITH_GUI:BOOL=${CR_WITH_GUI} -DCR_WITH_STARTOOLS:BOOL=${CR_WITH_STARTOOLS}
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package CR-Tools ..."
   )
 
-if (CR_WITH_GUI)
-  add_dependencies (cr dal startools mathgl)
-else (CR_WITH_GUI)
-  add_dependencies (cr dal startools)
-endif (CR_WITH_GUI)
+if (CR_WITH_STARTOOLS)
+  if (CR_WITH_GUI)
+    add_dependencies (cr dal startools mathgl)
+  else (CR_WITH_GUI)
+    add_dependencies (cr dal startools)
+  endif (CR_WITH_GUI)
+else (CR_WITH_STARTOOLS)
+  if (CR_WITH_GUI)
+    add_dependencies (cr dal mathgl)
+  else (CR_WITH_GUI)
+    add_dependencies (cr dal)
+  endif (CR_WITH_GUI)
+endif (CR_WITH_STARTOOLS)
 
 ##____________________________________________________________________
 ##                                                                  RM

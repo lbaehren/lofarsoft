@@ -40,6 +40,7 @@ set (ENABLE_itk    OFF CACHE BOOL "Enable bindings for [incr Tk]?")
 set (ENABLE_python ON  CACHE BOOL "Enable bindings for Python?")
 set (ENABLE_java   OFF CACHE BOOL "Enable bindings for Java?")
 set (ENABLE_pygcw  OFF CACHE BOOL "Enable bindings for Python.gcw?")
+set (ENABLE_octave OFF CACHE BOOL "Enable bindings for Octave?")
 
 ## -------------------------------------------------------------------
 ## Device drivers
