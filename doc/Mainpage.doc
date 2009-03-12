@@ -31,12 +31,15 @@
 \mainpage LOFAR User Software
 
 <ol>
-  <li><a href="#LOFAR User Software Group">LOFAR User Software Group</a>
-  <li><a href="#Organization of the code">Organization of the code</a>
-  <li><a href="#Installation from source">Installation from source</a>
+  <li>\ref usg_intro
+  <li>\ref configure_build
+  <ul>
+    <li>\ref configure_build_code
+    <li>\ref configure_build_install
+  </ul>
 </ol>
 
-<h2><a name="LOFAR User Software Group">LOFAR User Software Group</a></h2>
+\section usg_intro LOFAR User Software Group
 
 The <a href="http://usg.lofar.org">LOFAR User Software Group</a> represents a
 collaborative effort between the <a href="http://www.lofar.org">LOFAR</a>
@@ -76,87 +79,6 @@ analyse LOFAR data. In addition, the USG performs the following functions:
   <li>Maintain a generally accessible software repository
   <li>Represent the interests of the LOFAR user community in other software consortia
 </ul>
-
-<h2><a name="Organization of the code">Organization of the code</a></h2>
-
-A copy of the source code can be obtained through read-only access to the USG
-code repository:
-\verbatim
-svn co http://usg.lofar.org/svn/code/trunk lofarsoft
-\endverbatim
-Once the check-out is completed, you will find the following directory structure
-on your disk:
-\verbatim
-lofarsoft
-|-- data
-|-- doc
-|-- release
-|-- build
-|-- devel_common
-|   |-- cmake
-|   |-- scripts
-|   `-- templates
-|-- external
-|   |-- casacore
-|   |-- hdf5
-|   `-- wcslib
-`-- src
-    |-- contrib
-    |-- CR-Tools
-    |-- DAL
-    |-- pybdsm
-    `-- RM
-\endverbatim
-In this:
-<ul>
-  <li>\b lofarsoft is the root of the User Software code tree - go there if you
-  want to synchronize your local working version against the repository.
-  <li>\b build is used for building individual packages in the code
-  distribution; using a separate directory for this purpose makes it easy to
-  simply erase all compile and link attempts and start again from a clean plate.
-  <li>\b devel_common hold common tools for development; this includes e.g.
-  the find scripts for CMake or file templates for creating new C++ classes. Unless
-  you consider collaborating on the framework, you will not need to touch this
-  (but you will need it).
-  <li>\b doc contains a local version of the Doxygen-based source code
-  documentation; just go in there, fire up Doxygen and get an up-to-date version
-  of the source code documentation.
-  <li>\b external hosts the various external packages which will be required
-  to build parts of the LOFAR User Software.
-  <li>\b src contains the source code of the various projects and packages 
-  developed and written within the framework of the USG. The main components are:
-  <ul>
-    <li><a href="group__CR.html">CR-Tools</a> - Tools for the analysis of cosmic ray data.
-    <li><a href="group__DAL.html">DAL</a> - The <i>Data Access Library</i> is the interface for the creation of
-    and access to LOFAR's standard data products.
-    <li><a href="group__pybdsm.html">pybdsm</a> - <i>Blob detection and source modelling</i> package developed by the
-    Surveys KSP.
-    <li><a href="group__RM.html">RM</a> - Rotation-measure synthesis imaging package developed by the
-	Cosmic Magnetism KSP.
-  </ul>
-</ul>
-
-<h2><a name="Installation from source">Installation from source</a></h2>
-
-In order to install modules/packages the following simple steps are required:
-<ol>
-  <li>Change into the \e build directory and run the \e bootstrap script:
-  \code
-  cd build
-  ./bootstrap
-  \endcode
-  The script will check if there is a recent enough version of CMake available
-  <li>Run \e make for the package/module in question, e.g. for the
-  <a href="group__DAL.html">Data Access Library</a>
-  \code
-  make dal
-  \endcode
-  Typing
-  \code
-  make help
-  \endcode
-  will provide you with a list of available build targets.
-</ol>
 
 */
 

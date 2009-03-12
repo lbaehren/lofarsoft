@@ -174,6 +174,7 @@ find_path (prefix release_area.txt
   PATH_SUFFIXES
   ../release
   ../../release
+  ../../../release
   NO_DEFAULT_PATH
   )
 

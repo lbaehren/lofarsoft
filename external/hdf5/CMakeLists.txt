@@ -151,7 +151,7 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
     else (HAVE_WGET)
       if (HAVE_CURL)
 	add_custom_target (download_archive ALL
-	  COMMAND curl ${HDF5_URL} -o ${HDF5_TAR_ARCHIVE} -C
+	  COMMAND curl ${HDF5_URL} -o ${HDF5_TAR_ARCHIVE} -C -
 	  WORKING_DIRECTORY ${HDF5_BINARY_DIR}
 	  )
       else (HAVE_CURL)

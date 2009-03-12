@@ -144,8 +144,7 @@ if (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)
   ## run "./configure"
 
   add_custom_target (run_configure ALL
-    COMMAND ./configure
-#    COMMAND ./configure --prefix=${SWIG_prefix}
+    COMMAND ./configure --prefix=${SWIG_prefix}
     WORKING_DIRECTORY ${SWIG_BINARY_DIR}/${SWIG_DIRECTORY}
     COMMENT "[SWIG] Running configure ..."
     )

@@ -146,13 +146,6 @@ add_custom_target (clean_doc
   COMMENT "Cleaning up documentation directory ..."
   )
 
-add_custom_target (clean_hdf5
-  COMMAND cd ${USG_ROOT}/external/hdf5 && make distclean
-  COMMAND cd ${USG_ROOT}/build/hdf5 && rm -rf *
-  WORKING_DIRECTORY ${USG_ROOT}
-  COMMENT "Cleaning up external/hdf5 directory ..."
-)
-
 add_custom_target (clean_release
   COMMAND rm -rf bin
   COMMAND rm -rf etc
@@ -284,7 +277,7 @@ add_dependencies (dal python plplot casacore)
 ##                                                            CR-Tools
 
 add_custom_target (cr
-  COMMAND ./build_package.sh cr ${USG_ROOT}/src/CR-Tools -DCR_WITH_GUI:BOOL=${CR_WITH_GUI} -DCR_WITH_STARTOOLS:BOOL=${CR_WITH_STARTOOLS}
+  COMMAND ./build_package.sh cr ${USG_ROOT}/src/CR-Tools -DCR_WITH_GUI:BOOL=${CR_WITH_GUI}
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package CR-Tools ..."
   )
