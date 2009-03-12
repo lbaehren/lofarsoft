@@ -1,0 +1,180 @@
+/*!
+
+	\page configure_build Configuration, build and installation
+	
+	- \ref configure_build_code
+	- \ref configure_build_install
+	- \ref configure_build_usg
+	- \ref configure_build_external
+	- \ref configure_build_doc
+	- \ref configure_build_clean
+	
+	<hr>
+	
+	\section configure_build_code Organization of the code
+	
+	Once the check-out is completed, you will find the following directory structure
+	on your disk:
+	\verbatim
+	lofarsoft
+	|-- data
+	|-- doc
+	|-- release
+	|-- build
+	|-- devel_common
+	|   |-- cmake
+	|   |-- scripts
+	|   `-- templates
+	|-- external
+	|   |-- cfitsio
+	|   |-- casacore
+	|   |-- hdf5
+	|   |-- plplot
+	|   |-- swig
+	|   `-- wcslib
+	`-- src
+	    |-- contrib
+	    |-- CR-Tools
+	    |-- DAL
+	    |-- pybdsm
+	    `-- RM
+	\endverbatim
+	In this:
+	<ul>
+	  <li>\b lofarsoft is the root of the User Software code tree - go there if you
+	  want to synchronize your local working version against the repository.
+	  <li>\b build is used for building individual packages in the code
+	  distribution; using a separate directory for this purpose makes it easy to
+	  simply erase all compile and link attempts and start again from a clean plate.
+	  <li>\b devel_common hold common tools for development; this includes e.g.
+	  the find scripts for CMake or file templates for creating new C++ classes. Unless
+	  you consider collaborating on the framework, you will not need to touch this
+	  (but you will need it).
+	  <li>\b doc contains a local version of the Doxygen-based source code
+	  documentation; just go in there, fire up Doxygen and get an up-to-date version
+	  of the source code documentation.
+	  <li>\b external hosts the various external packages which will be required
+	  to build parts of the LOFAR User Software.
+	  <li>\b src contains the source code of the various projects and packages 
+	  developed and written within the framework of the USG. The main components are:
+	  <ul>
+    	<li><a href="group__DAL.html">DAL</a> - The <i>Data Access Library</i> is the interface for the creation of
+    	and access to LOFAR's standard data products.
+    	<li><a href="group__CR.html">CR-Tools</a> - Tools for the analysis of cosmic ray data.
+    	<li><a href="group__pybdsm.html">pybdsm</a> - <i>Blob detection and source modelling</i> package developed by the
+    	Surveys KSP.
+    	<li><a href="group__RM.html">RM</a> - Rotation-measure synthesis imaging package developed by the
+		Cosmic Magnetism KSP.
+	  </ul>
+	</ul>
+
+	<hr>
+	
+	\section configure_build_install Basic installation from source
+	
+	In order to install modules/packages the following simple steps are required:
+	<ol>
+	  <li>Get a working copy of the source code from the USG Subversion
+	  repository:
+	  \verbatim
+	  svn co http://usg.lofar.org/svn/code/trunk lofarsoft
+	  \endverbatim
+	  <li>Change into the \e build directory and run the \e bootstrap script:
+	  \code
+	  cd build
+	  ./bootstrap
+	  \endcode
+	  The script will check if there is a recent enough version of CMake available
+	  <li>Run \e make for the package/module in question, e.g. for the
+	  <a href="group__DAL.html">Data Access Library</a>
+	  \code
+	  make dal
+	  \endcode
+	  Typing
+	  \code
+	  make help
+	  \endcode
+	  will provide you with a list of available build targets.
+	</ol>
+
+	<hr>
+
+	\section configure_build_usg User Software packages
+	
+	The following targets can be used to build one (or multiple, in case of
+	dependencies) of the package developed and written by the User Software
+	Group:
+	
+	- \b dal - The <a href="group__DAL.html">Data Access Library</a> (DAL).
+
+	- \b cr - The <a href="group__CR.html">CR-Tools</a> package. The
+	configuration script enables selection of the following features from the
+	top-level directory: \e CR_WITH_GUI and \e CR_WITH_STARTOOLS - both of which
+	are disabled by default. See the page \ref crtools_build_parameters for
+	further description.
+
+	- \b pybdsm - Python version of the <i>Blob detection and source
+	modelling</i> package developed by the Surveys KSP.
+
+	- \b rm - Rotation-measure synthesis imaging package developed by the Cosmic
+	Magnetism KSP.
+	
+	<hr>
+
+	\section configure_build_external External packages
+	
+	- \b bison - GNU Project parser generator (yacc replacement)
+	- \b blitz 
+	- \b boost - a free peer-reviewed portable C++ source libraries. Amongst
+	many other things it contains \e Boost.Python, a C++ library which enables
+	seamless interoperability between C++ and the Python programming language.
+	- \b casacore
+	- \b cfitsio
+	- \b flex - Fast lexical analyzer generator
+	- \b hdf5
+	- \b mathgl - Library for the generation of scientific plots
+	- \b plplot - Library for the generation of scientific plots
+	- \b pyrap - Python bindings for casacore
+	- \b python
+	- \b qt
+	- \b root
+	- \b sip
+	- \b startools
+	- \b szip
+	- \b swig
+	- \b wcslib - Library implementing the WCS standard, central to a number of
+	astronomical data reduction packages.
+	- \b wcstools
+	- \b wget - Non-interactive network downloader. GNU Wget is a free utility
+	for non-interactive download of files from the Web. It supports HTTP,
+	HTTPS, and FTP protocols, as well as retrieval through HTTP proxies.
+	- \b zlib - Compression/decompression library.
+	
+	<hr>
+
+	\section configure_build_doc Documentation generation
+	
+	The following targets can be used to generate various sorts of
+	documentation:
+	
+	- \b doc - Create documentation for the source code using Doxygen.
+	- \b doc_cmake - Create documentation for CMake; the resulting HTML file
+	will be placed into $LOFARSOFT/doc.
+	
+	<hr>
+
+	\section configure_build_clean Clean targets
+	
+	- \b clean_build - Clean up the build directory; this will remove
+	everything except the original files obatined with a fresh check-out (which
+	of course means you will need to again run 
+	\code 
+	./bootstrap
+	\endcode
+	before any further action).
+	- \b clean_doc - Clean up the documentation directory; this will remove all
+	the created HTML files and images created by Doxygen.
+	- \b clean_release
+	- \b clean_src
+
+ */
