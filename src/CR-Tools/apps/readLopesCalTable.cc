@@ -21,6 +21,8 @@
 #include <time.h>
 #include <iostream>
 #include <string>
+
+#include <crtools.h>
 #include <Calibration/CalTableReader.h>
 
 using CR::CalTableReader;
@@ -105,7 +107,7 @@ int main (int argc, char *argv[])
     }
    
     // Default CalTable-Path
-    string CalTablePath="/home/schroeder/usg/data/lopes/LOPES-CalTable"; 	
+    string CalTablePath=caltable_lopes; 	
     // Check if there are 4 arguments: The last one is the path to the Caltables
     if (argc == 4) CalTablePath.assign(argv[3]);
        

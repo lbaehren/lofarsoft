@@ -18,9 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <string>
+
+#include <crtools.h>
 #include <Calibration/CalTableWriter.h>
 #include <Calibration/CalTableReader.h>
-#include <string>
 
 using CR::CalTableWriter;
 using CR::CalTableReader;
@@ -1215,8 +1217,7 @@ void writeBadPeriods(void)
 int main (int argc, char *argv[])
 {
   // Default CalTable-Path
-  const string CalTablePath="/home/schroeder/usg/data/lopes/LOPES-CalTable";
-  //const string CalTablePath="/home/schroeder/lopestools/lopescasa/data/LOPES/LOPES-CalTable";
+  const string CalTablePath=caltable_lopes;
 
   try {
     cout << "Starting writeLopesCalTable...\n"

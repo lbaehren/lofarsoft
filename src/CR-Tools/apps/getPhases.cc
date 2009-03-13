@@ -21,6 +21,7 @@
 #include <iostream>
 #include <fstream>
 
+#include <crtools.h>
 #include <Analysis/FirstStagePipeline.h>
 #include <Data/LopesEventIn.h>
 
@@ -153,7 +154,7 @@ int main (int argc, char *argv[])
     double startFreq = -1;	// start frequency
     double stopFreq = 0;	// stop frequency if a peak in a frequency range should be searched for
     unsigned int refAnt = 0;    // reference antenna for calculation of phase differences
-    string CalTablePath("/home/schroeder/usg/data/lopes/LOPES-CalTable"); // default
+    string CalTablePath (caltable_lopes); // default
     unsigned int cutSamples = 0;// unused samples at the beginning and the end of the trace
     bool interpolate = false;	// interpolate phase to the exact frequency
     int i = 1;		//counter for arguments

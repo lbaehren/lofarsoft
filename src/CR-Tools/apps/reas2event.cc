@@ -41,6 +41,7 @@
 
 */
 
+#include <crtools.h>
 #include <IO/simulation2event.h>
 #include <sstream>
 
@@ -78,7 +79,7 @@ int main(int argc, char** argv){
     ss << argv[5];
     ss >> date;
   } // block to invalidate local variables
-  String CalTablePath("/home/huege/lopescasa/data/LOPES/LOPES-CalTable");
+  String CalTablePath(caltable_lopes);
   if (argc>6) { CalTablePath=argv[6]; }
   Int presync=32768;
   if (argc>7)

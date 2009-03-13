@@ -36,13 +36,6 @@ else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
-message (STATUS "------------------------------------------------------------")
-message (STATUS "LOFARSOFT          = $ENV{LOFARSOFT}")
-message (STATUS "USG_ROOT           = ${USG_ROOT}")
-message (STATUS "USG_INSTALL_PREFIX = ${USG_INSTALL_PREFIX}")
-message (STATUS "USG_DATA           = ${USG_DATA}")
-message (STATUS "------------------------------------------------------------")
-
 ## ==============================================================================
 ##
 ##  Build options
@@ -58,6 +51,14 @@ option (SYSTEM_PACKAGES     "Installation of required system packages?"     YES 
 
 option (CR_WITH_GUI         "Build CR-Tools with graphical interface?"   NO )
 option (CR_WITH_STARTOOLS   "Enable using routines from LOPES-Star?"     NO )
+
+## ==============================================================================
+##
+##  Basic system inspection
+##
+## ==============================================================================
+
+include (FindDoxygen)
 
 ## ==============================================================================
 ##
@@ -124,16 +125,17 @@ endif (SYSTEM_PACKAGES)
 ##
 ## ==============================================================================
 
-add_custom_target (clean_build
+add_custom_target (clean-build
   COMMAND rm -rf *~
   COMMAND rm -rf cmake_install.cmake
   COMMAND rm -rf CMakeCache.txt
   COMMAND rm -rf CMakeFiles
+  COMMAND rm -rf bison blitz boost casacore cfitsio flex hdf5
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Cleaning up build directory ..."
 )
 
-add_custom_target (clean_doc
+add_custom_target (clean-doc
   COMMAND rm -f *~
   COMMAND rm -f html/formula*
   COMMAND rm -f html/tab*
@@ -146,17 +148,18 @@ add_custom_target (clean_doc
   COMMENT "Cleaning up documentation directory ..."
   )
 
-add_custom_target (clean_release
+add_custom_target (clean-release
   COMMAND rm -rf bin
   COMMAND rm -rf etc
   COMMAND rm -rf include
+  COMMAND rm -rf info
   COMMAND rm -rf lib
   COMMAND rm -rf share
   WORKING_DIRECTORY ${USG_ROOT}/release
   COMMENT "Cleaning up release directory ..."
 )
 
-add_custom_target (clean_src
+add_custom_target (clean-src
   COMMAND rm -rf *~ */*~ */*/*~ */*/*/*~
   WORKING_DIRECTORY ${USG_ROOT}/src
   COMMENT "Cleaning up build directory ..."
@@ -168,13 +171,17 @@ add_custom_target (update
   COMMENT "Updating working version of the source code from repository ..."
   )
 
-add_custom_target (doc
-  COMMAND doxygen
-  WORKING_DIRECTORY ${USG_ROOT}/doc  
-  COMMENT "Creating Doxygen documentation for source code ..."
-  )
+if (DOXYGEN_FOUND)
+  add_custom_target (doc
+    COMMAND doxygen
+    WORKING_DIRECTORY ${USG_ROOT}/doc  
+    COMMENT "Creating Doxygen documentation for source code ..."
+    )
+else (DOXYGEN_FOUND)
+  message (STATUS "Disabled generation of source documentation - missing Doxygen!")
+endif (DOXYGEN_FOUND)
 
-add_custom_target (doc_cmake
+add_custom_target (doc-cmake
   COMMAND cmake --help-html CMake.html
   WORKING_DIRECTORY ${USG_ROOT}/doc  
   COMMENT "Creating browsable documentation for CMake ..."
@@ -315,3 +322,21 @@ add_custom_target (contrib
   COMMENT "Building user-contributed software (programs, scripts, ...)"
   )
 add_dependencies (contrib dal)
+
+## ==============================================================================
+##
+##  Configuration summary
+##
+## ==============================================================================
+
+message (STATUS "------------------------------------------------------------")
+message (STATUS "LOFARSOFT          = $ENV{LOFARSOFT}")
+message (STATUS "USG_ROOT           = ${USG_ROOT}")
+message (STATUS "USG_INSTALL_PREFIX = ${USG_INSTALL_PREFIX}")
+message (STATUS "USG_DATA           = ${USG_DATA}")
+message (STATUS "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+message (STATUS "DOXYGEN_FOUND      = ${DOXYGEN_FOUND}")
+message (STATUS "CR_WITH_GUI        = ${CR_WITH_GUI}")
+message (STATUS "CR_WITH_STARTOOLS  = ${CR_WITH_STARTOOLS}")
+message (STATUS "------------------------------------------------------------")
+

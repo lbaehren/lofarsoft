@@ -18,9 +18,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+// Standard header files
 #include <time.h>
 #include <iostream>
 #include <string>
+
+// CR-Tools header files
+#include <crtools.h>
 #include <Calibration/CalTableReader.h>
 #include <Data/LopesEventIn.h>
 #include <Display/SimplePlot.h>
@@ -208,7 +212,7 @@ void readCalTableValues(void)
   try
   {
     // Default CalTable-Path
-    string CalTablePath="/home/schroeder/usg/data/lopes/LOPES-CalTable"; 	
+    string CalTablePath=caltable_lopes; 	
 
     // Initialise CalTableReader    
     CalTableReader table;

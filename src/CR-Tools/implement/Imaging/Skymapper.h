@@ -116,18 +116,22 @@ namespace CR {  // Namespace CR -- begin
       </ul>
     </ul>
 
-    Methods for inserting the computed beamformed data into the image file:
-    \code
-    // Function which extracts an array from the map.
-    virtual Bool doGetSlice (Array<T> &buffer,
-                             const Slicer &theSlice);
+    Here is the basic procedure when writing your own piece of code utilizing the
+    Skymapper class:
+    <ol>
+      <li>Create a TimeFreqCoordinate
+      <li>Create a SpatialCoordinate
+      <li>Create a SkymapCoordinate object storing all the relevant coordiate
+      information such as
+      <ul>
+        <li>Type of SpatialCoordinate
+	<li>Reference code for the celestial coordinate system
+	<li>Spherical map projection
+	<li>Resolution and number of pixels
+	<li>Input blocksize for the FFT, sampling frequency, Nyquist zone
+      </ul>
+    </ol>
 
-    // Function to replace the values in the map with soureBuffer. 
-    virtual void doPutSlice (const Array<T> &sourceBuffer,
-                             const IPosition &where,
-			     const IPosition &stride);
-    \endcode
-    
     <h3>Example(s)</h3>
     
     Here is a example of how the interface and usage will look like in the near

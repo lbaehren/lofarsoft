@@ -74,7 +74,7 @@
 	
 	In order to install modules/packages the following simple steps are required:
 	<ol>
-	  <li>Get a working copy of the source code from the USG Subversion
+	  <li><b>Get a working copy of the source code</b> from the USG Subversion
 	  repository:
 	  \verbatim
 	  svn co http://usg.lofar.org/svn/code/trunk lofarsoft
@@ -99,7 +99,7 @@
 
 	<hr>
 
-	\section configure_build_usg User Software packages
+	\section configure_build_usg Targets to build User Software packages
 	
 	The following targets can be used to build one (or multiple, in case of
 	dependencies) of the package developed and written by the User Software
@@ -121,7 +121,7 @@
 	
 	<hr>
 
-	\section configure_build_external External packages
+	\section configure_build_external Targets to build external packages
 	
 	- \b bison - GNU Project parser generator (yacc replacement)
 	- \b blitz 
@@ -152,29 +152,29 @@
 	
 	<hr>
 
-	\section configure_build_doc Documentation generation
+	\section configure_build_doc Targets for documentation generation
 	
 	The following targets can be used to generate various sorts of
 	documentation:
 	
 	- \b doc - Create documentation for the source code using Doxygen.
-	- \b doc_cmake - Create documentation for CMake; the resulting HTML file
+	- \b doc-cmake - Create documentation for CMake; the resulting HTML file
 	will be placed into $LOFARSOFT/doc.
 	
 	<hr>
 
-	\section configure_build_clean Clean targets
+	\section configure_build_clean Targets for cleaning up directories
 	
-	- \b clean_build - Clean up the build directory; this will remove
+	- \b clean-build - Clean up the build directory; this will remove
 	everything except the original files obatined with a fresh check-out (which
 	of course means you will need to again run 
 	\code 
 	./bootstrap
 	\endcode
 	before any further action).
-	- \b clean_doc - Clean up the documentation directory; this will remove all
+	- \b clean-doc - Clean up the documentation directory; this will remove all
 	the created HTML files and images created by Doxygen.
-	- \b clean_release
-	- \b clean_src
+	- \b clean-release
+	- \b clean-src
 
  */

@@ -412,6 +412,15 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 ##
 ## =============================================================================
 
+## LOPES Cal-Table
+
+find_path (caltable_lopes table.dat table.info
+  PATHS
+  ${USG_ROOT}/data/lopes
+  PATH_SUFFIXES
+  LOPES-CalTable
+  )
+
 ## Test datasets
 
 if (dataset_tbb)

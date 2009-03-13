@@ -39,6 +39,7 @@ using casa::ObsInfo;
 using casa::PagedImage;
 using casa::TiledShape;
 
+#include <crtools.h>
 #include <Coordinates/SkymapCoordinate.h>
 #include <Data/LopesEventIn.h>
 #include <Analysis/CRinvFFT.h>
@@ -89,7 +90,7 @@ int  simpleImage(string const &infile,
     CR::LopesEventIn dr(infile, blocksize); 
     CR::CRinvFFT pipeline;
     Record obsrec;
-    obsrec.define("LOPES","/home/horneff/usg/data/lopes/LOPES-CalTable");
+    obsrec.define("LOPES",caltable_lopes);
     pipeline.SetObsRecord(obsrec);
     pipeline.InitEvent(&dr);
 

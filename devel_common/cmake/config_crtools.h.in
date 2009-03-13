@@ -238,6 +238,7 @@
 
 #include <string>
 
+const std::string caltable_lopes        = "${caltable_lopes}";
 const std::string dataset_lopes         = "${dataset_lopes}";
 const std::string dataset_lopes_example = "${dataset_lopes_example}";
 const std::string positions_lopes08     = "${positions_lopes08}";

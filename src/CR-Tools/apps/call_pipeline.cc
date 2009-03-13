@@ -27,6 +27,7 @@
 #include <iomanip>
 #include <sstream>
 
+#include <crtools.h>
 #include <Analysis/analyseLOPESevent2.h>
 
 using CR::analyseLOPESevent2;
@@ -132,10 +133,13 @@ using CR::LopesEventIn;
   \endverbatim
   This example means:
   <ul>
-    <li>the caltables are in /home/horneff/lopescasa/data/LOPES/LOPES-CalTable,
-    <li>the events are stored at a certain location,
+    <li>the caltables are in $LOFARSOFT/data/LOPES/LOPES-CalTable; the main importance of this
+	variable is to locate the LOPES CalTable in case you have put it down in some non-standard
+	location - otherwise the configuration script will be able to locate it and place the path
+	into the "crtools.h" header file;
+    <li>the events are stored at a certain location;
     <li>the given positions are in the Kascade coordinate system and must be
-    rotated to the LOPES system,
+    rotated to the LOPES system;
     <li>in doubt the KASCADE (instead of Grande) reconstruction is taken as input,
     <li>there will be generated plots of the analaysed event,
     <li>a spectrum will be plotted for every antenna
@@ -209,15 +213,15 @@ using CR::LopesEventIn;
 // ------------- Global variables ----------------
 
 // Set default configuration values for the pipeline
-string caltablepath = "/home/schroeder/usg/data/lopes/LOPES-CalTable";
+string caltablepath = caltable_lopes;
 string path = "";
-bool preferGrande = false;	      // per default prefer KASCADE reconstruction as input
-bool generatePlots = true;	      // the plot prefix will be the name of the event file
-bool generateSpectra = false;	      // by default no spectra are plotted
-bool singlePlots = false;	      // by default there are no single plots for each antenna
-bool PlotRawData = false;	      // by default there the raw data are not plotted
-bool CalculateMaxima = false;	      // by default the maxima are not calculated
-bool listCalcMaxima = false;         // print calculated maxima in more user friendly way
+bool preferGrande    = false;     // per default prefer KASCADE reconstruction as input
+bool generatePlots   = true;      // the plot prefix will be the name of the event file
+bool generateSpectra = false;     // by default no spectra are plotted
+bool singlePlots     = false;     // by default there are no single plots for each antenna
+bool PlotRawData     = false;	  // by default there the raw data are not plotted
+bool CalculateMaxima = false;	  // by default the maxima are not calculated
+bool listCalcMaxima  = false;     // print calculated maxima in more user friendly way
 bool printShowerCoordinates=false;   // print the distance between antenna and shower core
 bool RotatePos = true; 	      // should be true if coordinates are given in KASKADE frame
 bool verbose = true;
