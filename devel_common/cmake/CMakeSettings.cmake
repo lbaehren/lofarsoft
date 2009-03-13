@@ -140,6 +140,7 @@ if (NOT USG_CMAKE_CONFIG)
   
   set (lib_locations
     ${USG_INSTALL_PREFIX}/lib
+    ${USG_INSTALL_PREFIX}/lib64
     /opt/lib
     /opt/local/lib
     /sw/lib
