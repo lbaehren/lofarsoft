@@ -28,6 +28,7 @@
 #
 #  HAVE_GFORTRAN       = Set to true, if all components of GFORTRAN have been
 #                        found.
+#  GFORTRAN_EXECUTABLE = Excutable of the GFortran compiler
 #  GFORTRAN_INCLUDES   = Include path for the header files of GFORTRAN
 #  GFORTRAN_LIBRARIES  = Link these to use GFORTRAN
 #  GFORTRAN_LFLAGS     = Linker flags (optional)
@@ -81,6 +82,13 @@ if (UNIX)
       )
   endif (APPLE)
 endif (UNIX)
+
+## -----------------------------------------------------------------------------
+## Check for the compiler executable
+
+find_program (GFORTRAN_EXECUTABLE gfortran
+  PATHS ${bin_locations}
+  )
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files

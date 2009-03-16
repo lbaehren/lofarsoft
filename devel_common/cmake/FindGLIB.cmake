@@ -67,7 +67,6 @@ find_path (glibconfig_h glibconfig.h
   )
 
 if (glibconfig_h)
-  message (STATUS "glibconfig.h = ${glibconfig_h}")
   list (APPEND GLIB_INCLUDES ${glibconfig_h})
 endif (glibconfig_h)
 

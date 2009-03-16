@@ -50,9 +50,9 @@ export PATH=$LOFARSOFT/release/bin:$PATH
 #############################################################################
 
 if test -z "$PYTHONPATH" ; then
-	export PYTHONPATH=$LOFARSOFT/release/lib/python
+	export PYTHONPATH=$LOFARSOFT/release/lib/python2.6:$LOFARSOFT/release/lib/python2.5:$LOFARSOFT/release/lib/python2.4:$LOFARSOFT/release/lib/python
 else
-	export PYTHONPATH=$LOFARSOFT/release/lib/python:$PYTHONPATH
+	export PYTHONPATH=$LOFARSOFT/release/lib/python2.6:$LOFARSOFT/release/lib/python2.5:$LOFARSOFT/release/lib/python2.4:$LOFARSOFT/release/lib/python:$PYTHONPATH
 fi
 
 #############################################################################
