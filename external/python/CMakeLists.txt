@@ -7,7 +7,7 @@
 project (PYTHON_MODULES)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.6)
 
 ## ------------------------------------------------------------------------------
 ## Options
@@ -16,15 +16,10 @@ option (PYTHON_MODULES_VERBOSE_CONFIGURE "Be verbose during configuration?" NO )
 
 ## Select the modules to be build
 
-option (module_matplotlib "Build matplotlib module?" YES )
-option (module_num_util   "Build num_util module?"   YES )
-option (module_numpy      "Build numpy module?"      YES )
-
-## the following modules are outdated and have become replaced by newer ones; 
-## we might want to remove them completely at some point in the future.
-
-option (module_numarray "Build numarray module?" NO )
-option (module_numeric  "Build numeric module?"  NO )
+option (enable-matplotlib  "Build matplotlib module?"  YES )
+option (enable-num_util    "Build num_util module?"    YES )
+option (enable-numpy       "Build numpy module?"       YES )
+option (enable-numarray    "Build numarray module?"    YES )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -44,31 +39,194 @@ else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
-## --- set verbosity during configuration
+##__________________________________________________________________
+## Locate the installation area
+
+find_path (PYTHON_MODULES_prefix release_area.txt
+  PATHS
+  ${PYTHON_MODULES_SOURCE_DIR}
+  PATH_SUFFIXES
+  ../release
+  ../../release
+  ../../../release
+  NO_DEFAULT_PATH
+  )
+
+if (NOT PYTHON_MODULES_prefix)
+  message (FATAL_ERROR "Unable to locate the installation area")
+endif (NOT PYTHON_MODULES_prefix)
+
+##____________________________________________________________________
+## CMake modules and system tools
 
 if (NOT PYTHON_MODULES_VERBOSE_CONFIGURE)
   set (BOOST_FIND_QUIETLY      YES )
   set (BOOST_pythonOnly        YES )
   set (BOOST_test_exec_monitor NO  )
+  set (FFTW3_FIND_QUIETLY      YES )
+  set (GFORTRAN_FIND_QUIETLY   YES )
   set (GLIB_FIND_QUIETLY       YES )
   set (PYTHON_FIND_QUIETLY     YES )
 endif (NOT PYTHON_MODULES_VERBOSE_CONFIGURE)
 
-## --- load CMake modules to locate external packages 
-
-include (FindPython)
 include (FindBoost)
+include (FindFFTW3)
+include (FindGFortran)
+include (FindGLIB)
+include (FindPython)
 
-## ------------------------------------------------------------------------------
-## Configuration and build
+find_program (HAVE_WGET  wget  ${bin_locations} )
+find_program (HAVE_CURL  curl  ${bin_locations} )
+find_program (HAVE_TAR   tar   ${bin_locations} )
 
-## [1] numarray
+## ==============================================================================
+##
+##  Handle build requirements
+##
+## ==============================================================================
 
-if (module_numarray)
-  add_subdirectory (numarray)
-endif (module_numarray)
+if (NOT GFORTRAN_LIBRARIES OR NOT FFTW3_LIBRARIES)
+  set (enable-numpy      NO)
+  set (enable-matplotlib NO)
+endif (NOT GFORTRAN_LIBRARIES OR NOT FFTW3_LIBRARIES)
 
-## [2] matplotlib
+if (enable-matplotlib)
+  set (enable-numpy YES)
+endif (enable-matplotlib)
+
+if (enable-num_util)
+  set (enable-numpy YES)
+endif (enable-num_util)
+
+## ==============================================================================
+##
+##  Build the individual packages
+##
+## ==============================================================================
+
+##____________________________________________________________________
+##                                                               NumPy
+
+if (enable-numpy OR enable-matplotlib)
+
+  set (NUMPY_VERSION "1.2.1")
+  set (NUMPY_DIRECTORY "numpy-${NUMPY_VERSION}")
+  set (NUMPY_TAR_ARCHIVE "${NUMPY_DIRECTORY}.tar.gz")
+  
+  find_file (have_numpy_tgz ${NUMPY_TAR_ARCHIVE} ${PYTHON_MODULES_SOURCE_DIR})
+  
+  if (have_numpy_tgz)
+
+    ## copy tar archive from source to build directory
+    add_custom_target (numpy_copy
+      COMMAND cp ${PYTHON_MODULES_SOURCE_DIR}/${NUMPY_TAR_ARCHIVE} .
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}
+      COMMENT "[NumPy] Expanding tar-archive ..."
+      )
+
+    ## expand the tar-archive
+    add_custom_target (numpy_expand
+      COMMAND ${HAVE_TAR} -xvzf ${NUMPY_TAR_ARCHIVE}
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}
+      COMMENT "[NumPy] Expanding tar-archive ..."
+      )
+    add_dependencies (numpy_expand numpy_copy)
+    
+    ## build the package
+    if (GFORTRAN_EXECUTABLE)
+      add_custom_target (numpy_build
+	COMMAND python setup.py build --fcompiler=gnu95
+	WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUMPY_DIRECTORY}
+	COMMENT "[NumPy] Starting build ..."
+	)
+    else (GFORTRAN_EXECUTABLE)
+      add_custom_target (numpy_build
+	COMMAND python setup.py build
+	WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUMPY_DIRECTORY}
+	COMMENT "[NumPy] Starting build ..."
+	)
+    endif (GFORTRAN_EXECUTABLE)
+    add_dependencies (numpy_build numpy_expand)
+    
+    ## build and install the package
+    add_custom_target (numpy_install
+      COMMAND python setup.py install --prefix=${USG_INSTALL_PREFIX}
+      COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${NUMPY_TAR_ARCHIVE}
+      COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${NUMPY_DIRECTORY}
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUMPY_DIRECTORY}
+      COMMENT "[NumPy] Installing package ..."
+      )
+    add_dependencies (numpy_install numpy_build)
+    
+  else (have_numpy_tgz)
+    message (STATUS "[NumPy] Unable to install - missing tar-archive!")
+  endif (have_numpy_tgz)
+  
+endif (enable-numpy OR enable-matplotlib)
+
+##____________________________________________________________________
+##                                                            num_util
+
+if (enable-num_util)
+
+  set (NUM_UTIL_VERSION "2.0")
+  set (NUM_UTIL_DIRECTORY "num_util-${NUM_UTIL_VERSION}")
+  set (NUM_UTIL_TAR_ARCHIVE "${NUM_UTIL_DIRECTORY}.tar.gz")
+  
+  find_file (have_num_util_tgz ${NUM_UTIL_TAR_ARCHIVE} ${PYTHON_MODULES_SOURCE_DIR})
+  
+  if (have_num_util_tgz)
+    
+    ## copy tar archive from source to build directory
+    add_custom_target (num_util_copy
+      COMMAND cp ${PYTHON_MODULES_SOURCE_DIR}/${NUM_UTIL_TAR_ARCHIVE} .
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}
+      COMMENT "[Num_util] Expanding tar-archive ..."
+      )
+    
+    ## expand the tar-archive
+    add_custom_target (num_util_expand
+      COMMAND ${HAVE_TAR} -xvzf ${NUM_UTIL_TAR_ARCHIVE}
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}
+      COMMENT "[Num_util] Expanding tar-archive ..."
+      )
+    add_dependencies (num_util_expand num_util_copy numpy_build)    
+
+    ## configure the package
+    add_custom_target (num_util_configure
+      COMMAND cmake -C ${PYTHON_MODULES_BINARY_DIR}/python.cmake .
+      COMMAND cmake .
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUM_UTIL_DIRECTORY}
+      COMMENT "[Num_util] Configuring package ..."
+      )
+    add_dependencies (num_util_configure num_util_expand)
+    
+    ## build the package
+    add_custom_target (num_util_build
+      COMMAND make
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUM_UTIL_DIRECTORY}
+      COMMENT "[Num_util] Building package ..."
+      )
+    add_dependencies (num_util_build num_util_configure)
+    
+    ## build the package
+    add_custom_target (num_util_install
+      COMMAND make install
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUM_UTIL_DIRECTORY}
+      COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${NUM_UTIL_TAR_ARCHIVE}
+      COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${NUM_UTIL_DIRECTORY}
+      COMMENT "[Num_util] Installting the package ..."
+      )
+    add_dependencies (num_util_install num_util_build)
+    
+  else (have_num_util_tgz)
+    message (STATUS "[Num_util] Unable to install - missing tar-archive!")
+  endif (have_num_util_tgz)
+  
+endif (enable-num_util)
+
+##____________________________________________________________________
+##                                                          matplotlib
 
 #  matplotlib works with with Numeric or numarray.  At compile time,
 #  setup.py will look for both packages and compile the appropriate
@@ -78,52 +236,186 @@ endif (module_numarray)
 #  with matplotlib, it is important that you have *both* present and in
 #  your PYTHONPATH when you compile matplotlib.
 
-if (module_matplotlib)
-  add_subdirectory (matplotlib)
-endif (module_matplotlib)
+if (enable-matplotlib)
+  
+  set (MATPLOTLIB_VERSION "0.98.5.2")
+  set (MATPLOTLIB_DIRECTORY "matplotlib-${MATPLOTLIB_VERSION}")
+  set (MATPLOTLIB_TAR_ARCHIVE "${MATPLOTLIB_DIRECTORY}.tar.gz")
 
-## [3] numeric
+  find_file (have_matplotlib_tgz ${MATPLOTLIB_TAR_ARCHIVE} ${PYTHON_MODULES_SOURCE_DIR})
 
-if (module_numeric)
-  add_subdirectory (numeric)
-endif (module_numeric)
+  if (have_matplotlib_tgz)
 
-## [4] NumPy
+    ## copy tar archive from source to build directory
+    add_custom_target (matplotlib_copy
+      COMMAND cp ${PYTHON_MODULES_SOURCE_DIR}/${MATPLOTLIB_TAR_ARCHIVE} .
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}
+      COMMENT "[Matplotlib] Expanding tar-archive ..."
+      )
 
-# NumPy is a replacement of Numeric Python that adds the features of numarray.  
-# To install:
-#   python setup.py install
-# The setup.py script will take advantage of fast BLAS on your system if it can
-# find it.  You can help the process with a site.cfg file.
-# If fast BLAS and LAPACK cannot be found, then a slower default version is used. 
+    ## expand the tar-archive
+    add_custom_target (matplotlib_expand
+      COMMAND ${HAVE_TAR} -xvzf ${MATPLOTLIB_TAR_ARCHIVE}
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}
+      COMMENT "[Matplotlib] Expanding tar-archive ..."
+      )
+    add_dependencies (matplotlib_expand matplotlib_copy)    
 
-if (module_numpy)
-  add_subdirectory (numpy)
-endif (module_numpy)
+    ## build the package
+    add_custom_target (matplotlib_build
+      COMMAND python setup.py build
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${MATPLOTLIB_DIRECTORY}
+      COMMENT "[Matplotlib] Starting build ..."
+      )
+    add_dependencies (matplotlib_build matplotlib_expand numpy_install)
 
-## [5] num_util
+    ## install the package
+    add_custom_target (matplotlib_install
+      COMMAND python setup.py install --prefix=${USG_INSTALL_PREFIX}
+      COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${MATPLOTLIB_TAR_ARCHIVE}
+      COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${MATPLOTLIB_DIRECTORY}
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${MATPLOTLIB_DIRECTORY}
+      COMMENT "[Matplotlib] Installing package ..."
+      )
+    add_dependencies (matplotlib_install matplotlib_build)
+    
+  else (have_matplotlib_tgz)
+    message (STATUS "[Matplotlib] Unable to install - missing tar-archive!")
+  endif (have_matplotlib_tgz)
+  
+endif (enable-matplotlib)
 
-if (module_num_util)
-  add_subdirectory (num_util)
-endif (module_num_util)
+##____________________________________________________________________
+##                                                            numarray
 
-## ------------------------------------------------------------------------------
-## Configuration summary
+if (enable-numarray)
+  
+  set (NUMARRAY_VERSION "1.5.2")
+  set (NUMARRAY_DIRECTORY "numarray-${NUMARRAY_VERSION}")
+  set (NUMARRAY_TAR_ARCHIVE "${NUMARRAY_DIRECTORY}.tar.gz")
+  
+  find_file (have_numarray_tgz ${NUMARRAY_TAR_ARCHIVE} ${PYTHON_MODULES_SOURCE_DIR})
 
-if (PYTHON_MODULES_VERBOSE_CONFIGURE)
-  message (STATUS ">------------------------------------------------------------<")
-  message (STATUS "> [Python modules] Configuration summary.                    <")
-  message (STATUS ">------------------------------------------------------------<")
-  message (STATUS "Build matplotlib module = ${module_matplotlib}")
-  message (STATUS "Build num_util module   = ${module_num_util}")
-  message (STATUS "Build numpy module      = ${module_numpy}")
-  message (STATUS " ")
-  message (STATUS "BOOST_INCLUDES          = ${BOOST_INCLUDES}")
-  message (STATUS "PYTHON_INCLUDES         = ${PYTHON_INCLUDES}")
-  message (STATUS "NUMPY_INCLUDES          = ${NUMPY_INCLUDES}")
-  message (STATUS "+------------------------------------------------------------+")
-endif (PYTHON_MODULES_VERBOSE_CONFIGURE)
+  if (have_numarray_tgz)
+    
+    ## copy tar archive from source to build directory
+    add_custom_target (numarray_copy
+      COMMAND cp ${PYTHON_MODULES_SOURCE_DIR}/${NUMARRAY_TAR_ARCHIVE} .
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}
+      COMMENT "[Numarray] Expanding tar-archive ..."
+      )
+    
+    ## expand the tar-archive
+    add_custom_target (numarray_expand
+      COMMAND ${HAVE_TAR} -xvzf ${NUMARRAY_TAR_ARCHIVE}
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}
+      COMMENT "[Numarray] Expanding tar-archive ..."
+      )
+    add_dependencies (numarray_expand numarray_copy)    
+  
+    ## build the package
+    add_custom_target (numarray_build
+      COMMAND python setup.py build
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUMARRAY_DIRECTORY}
+      COMMENT "[Numarray] Starting build ..."
+      )
+    add_dependencies (numarray_build numarray_expand)
+    
+    ## install the package
+    add_custom_target (numarray_install
+      COMMAND python setup.py install --prefix=${USG_INSTALL_PREFIX}
+      COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${NUMARRAY_TAR_ARCHIVE}
+      COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${NUMARRAY_DIRECTORY}
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUMARRAY_DIRECTORY}
+      COMMENT "[Numarray] Installing package ..."
+      )
+    add_dependencies (numarray_install numarray_build)
+    
+  else (have_numarray_tgz)
+    message (STATUS "[Numarray] Unable to continue - missing tar-archive!")
+  endif (have_numarray_tgz)
+  
+endif (enable-numarray)
 
+##____________________________________________________________________
+## Presets for CMake cache
+
+configure_file (
+  ${PYTHON_MODULES_SOURCE_DIR}/python.cmake.in
+  ${PYTHON_MODULES_BINARY_DIR}/python.cmake
+  )
+
+##____________________________________________________________________
+## Installation target
+
+add_custom_target (install
+  COMMENT "[Python modules] Installing packages"
+  WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}
+  )
+
+if (enable-num_util AND enable-matplotlib)
+  add_dependencies (install install_num_util matplotlib_install)
+else (enable-num_util AND enable-matplotlib)
+  ## Num_util
+  if (enable-num_util)
+    add_dependencies (install install_num_util)
+  endif (enable-num_util)
+  ## Matplotlib
+  if (enable-matplotlib)
+    add_dependencies (install matplotlib_install)
+  endif (enable-matplotlib)
+endif (enable-num_util AND enable-matplotlib)
+
+
+## ==============================================================================
+##
+##  Configuration summary
+##
+## ==============================================================================
+
+message (STATUS "------------------------------------------------------------")
+
+message (STATUS "[Python modules] Configuration summary:")
+message (STATUS "Install prefix     = ${USG_INSTALL_PREFIX}")
+message (STATUS "GFortran compiler  = ${GFORTRAN_EXECUTABLE}")
+message (STATUS "BOOST_INCLUDES     = ${BOOST_INCLUDES}")
+#message (STATUS "BOOST_LIBRARIES    = ${BOOST_LIBRARIES}")
+message (STATUS "FFTW3_INCLUDES     = ${FFTW3_INCLUDES}")
+message (STATUS "FFTW3_LIBRARIES    = ${FFTW3_LIBRARIES}")
+message (STATUS "GLIB_INCLUDES      = ${GLIB_INCLUDES}")
+message (STATUS "GLIB_LIBRARIES     = ${GLIB_LIBRARIES}")
+message (STATUS "PYTHON_INCLUDES    = ${PYTHON_INCLUDES}")
+message (STATUS "PYTHON_LIBRARIES   = ${PYTHON_LIBRARIES}")
+
+if (enable-numarray)
+  message (STATUS "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+  message (STATUS "NUMARRAY_VERSION       = ${NUMARRAY_VERSION}")
+  message (STATUS "NUMARRAY_DIRECTORY     = ${NUMARRAY_DIRECTORY}")
+  message (STATUS "NUMARRAY_TAR_ARCHIVE   = ${NUMARRAY_TAR_ARCHIVE}")
+endif (enable-numarray)
+
+if (enable-num_util)
+  message (STATUS "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+  message (STATUS "NUM_UTIL_VERSION       = ${NUM_UTIL_VERSION}")
+  message (STATUS "NUM_UTIL_DIRECTORY     = ${NUM_UTIL_DIRECTORY}")
+  message (STATUS "NUM_UTIL_TAR_ARCHIVE   = ${NUM_UTIL_TAR_ARCHIVE}")
+endif (enable-num_util)
+
+if (enable-numpy)
+  message (STATUS "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+  message (STATUS "NUMPY_VERSION          = ${NUMPY_VERSION}")
+  message (STATUS "NUMPY_DIRECTORY        = ${NUMPY_DIRECTORY}")
+  message (STATUS "NUMPY_TAR_ARCHIVE      = ${NUMPY_TAR_ARCHIVE}")
+endif (enable-numpy)
+
+if (enable-matplotlib)
+  message (STATUS "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+  message (STATUS "MATPLOTLIB_VERSION     = ${MATPLOTLIB_VERSION}")
+  message (STATUS "MATPLOTLIB_DIRECTORY   = ${MATPLOTLIB_DIRECTORY}")
+  message (STATUS "MATPLOTLIB_TAR_ARCHIVE = ${MATPLOTLIB_TAR_ARCHIVE}")
+endif (enable-matplotlib)
+
+message (STATUS "------------------------------------------------------------")
 
 ## ==============================================================================
 ##

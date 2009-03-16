@@ -6,7 +6,7 @@
 ## Project name and version number number
 
 ## Name of the project
-project (PYTHON_NUM_UTIL)
+project (NUM_UTIL)
 
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.4)
@@ -16,11 +16,11 @@ cmake_minimum_required (VERSION 2.4)
 
 find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
-  ${PYTHON_NUM_UTIL_SOURCE_DIR}
-  ${PYTHON_NUM_UTIL_SOURCE_DIR}/..
-  ${PYTHON_NUM_UTIL_SOURCE_DIR}/../..
-  ${PYTHON_NUM_UTIL_SOURCE_DIR}/../../..
-  ${PYTHON_NUM_UTIL_SOURCE_DIR}/../../../..
+  ${NUM_UTIL_SOURCE_DIR}
+  ${NUM_UTIL_SOURCE_DIR}/..
+  ${NUM_UTIL_SOURCE_DIR}/../..
+  ${NUM_UTIL_SOURCE_DIR}/../../..
+  ${NUM_UTIL_SOURCE_DIR}/../../../..
   ENV LOFARSOFT
   )
 
@@ -52,7 +52,7 @@ endif (NOT HAVE_BOOST)
 find_path (arrayobject_h numpy/arrayobject.h
   PATHS
   ${PYTHON_MODULES_SOURCE_DIR}
-  ${PYTHON_NUM_UTIL_SOURCE_DIR}/..
+  ${NUM_UTIL_SOURCE_DIR}/..
   PATH_SUFFIXES
   numpy/numpy/core/include
   numpy/numpy/core/include/numpy
@@ -91,9 +91,9 @@ add_library (num_util STATIC
 ## -----------------------------------------------------------------------------
 ## Installation
 
-find_path (PYTHON_NUM_UTIL_INSTALL_PREFIX release_area.txt
+find_path (NUM_UTIL_INSTALL_PREFIX release_area.txt
   PATHS
-  ${PYTHON_NUM_UTIL_SOURCE_DIR}
+  ${NUM_UTIL_SOURCE_DIR}
   PATH_SUFFIXES
   ../release
   ../../release
@@ -101,27 +101,15 @@ find_path (PYTHON_NUM_UTIL_INSTALL_PREFIX release_area.txt
   NO_DEFAULT_PATH
   )
 
-if (PYTHON_NUM_UTIL_INSTALL_PREFIX)
-  message (STATUS "Installation area located for package PYTHON_NUM_UTIL.")
+if (NUM_UTIL_INSTALL_PREFIX)
   ## Installation of the library
   install (TARGETS num_util
-    DESTINATION ${PYTHON_NUM_UTIL_INSTALL_PREFIX}/lib
+    DESTINATION ${NUM_UTIL_INSTALL_PREFIX}/lib
     )
   ## Installation of the header files
   install (FILES num_util.h
-    DESTINATION ${PYTHON_NUM_UTIL_INSTALL_PREFIX}/include/python/num_util
+    DESTINATION ${NUM_UTIL_INSTALL_PREFIX}/include/python/num_util
     )
-else (PYTHON_NUM_UTIL_INSTALL_PREFIX)
-  message (STATUS "Unable to locate installation area for package PYTHON_NUM_UTIL.")
-endif (PYTHON_NUM_UTIL_INSTALL_PREFIX)
-
-## -----------------------------------------------------------------------------
-## Configuration summary
-
-message (STATUS "+------------------------------------------------------------+")
-message (STATUS "[num_util] Configuration summary.")
-message (STATUS "+------------------------------------------------------------+")
-message (STATUS "BOOST_INCLUDES  = ${BOOST_INCLUDES}")
-message (STATUS "PYTHON_INCLUDES = ${PYTHON_INCLUDES}")
-message (STATUS "NUMPY_INCLUDES  = ${NUMPY_INCLUDES}")
-message (STATUS "+------------------------------------------------------------+")
+else (NUM_UTIL_INSTALL_PREFIX)
+  message (STATUS "Unable to locate installation area for package NUM_UTIL.")
+endif (NUM_UTIL_INSTALL_PREFIX)

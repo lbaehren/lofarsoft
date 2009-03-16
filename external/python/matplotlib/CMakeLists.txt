@@ -108,12 +108,7 @@ if (MATPLOTLIB_cmake)
   if (GTK_LIBRARIES)
     list (APPEND matplotlib_link_libraries ${GTK_LIBRARIES})
   endif (GTK_LIBRARIES)
-  ## --- Summary ---------------------------------
-  message (STATUS "Python   = ${HAVE_PYTHON}")
-  message (STATUS "Numarray = ${HAVE_NUMARRAY}")
-  message (STATUS "PyGtk    = ${HAVE_PYGTK}")
-  message (STATUS "GLib     = ${HAVE_GLIB}")
-  message (STATUS "GTK      = ${HAVE_GTK}")
+
 endif (MATPLOTLIB_cmake)
 
 ## <-- begin build condition --------------------------------------------------->
