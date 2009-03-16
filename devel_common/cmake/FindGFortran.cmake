@@ -86,7 +86,7 @@ endif (UNIX)
 ## -----------------------------------------------------------------------------
 ## Check for the compiler executable
 
-find_program (GFORTRAN_EXECUTABLE gfortran
+find_program (GFORTRAN_EXECUTABLE gfortran gfortran-4.3 gfortran-4.2  gfortran-4.1
   PATHS ${bin_locations}
   )
 
