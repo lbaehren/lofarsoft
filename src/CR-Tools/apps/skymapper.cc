@@ -30,8 +30,12 @@
 #include <boost/program_options/detail/cmdline.hpp>
 
 #include <crtools.h>
+#include <Data/LOFAR_TBB.h>
+#include <Data/LopesEventIn.h>
 #include <Imaging/Skymapper.h>
+#include <IO/DataReader.h>
 
+using std::cerr;
 using std::cout;
 using std::endl;
 
@@ -111,6 +115,16 @@ namespace bpo = boost::program_options;
       <td>STG</td>
       <td>Reference code for the spherical map projection.</td>
     </tr>
+    <tr>
+      <td>beamtype</td>
+      <td>FREQ_POWER</td>
+      <td>Type of beam used to create the skymap.</td>
+    </tr>
+    <tr>
+      <td>coord_type</td>
+      <td>DirectionRadius</td>
+      <td>Type of spatial coordinate.</td>
+    </tr>
   </table>
 
   <h3>Examples</h3>
@@ -124,12 +138,45 @@ namespace bpo = boost::program_options;
     \verbatim
     skymapper --infile 20080604_122217_2300.dat.h5
     \endverbatim
-    <li>Generate skymap using a specific celestial reference frame:
+    or via the short form
     \verbatim
-    skymapper --infile 20080604_122217_2300.dat.h5 --refcode J2000
+    skymapper -I 20080604_122217_2300.dat.h5
+    \endverbatim
+    <li>Generate skymap using a specific celestial reference frame and spherical
+    map projection:
+    \verbatim
+    skymapper -I 20080604_122217_2300.dat.h5 --refcode J2000 --projection SIN
     \endverbatim
   </ul>
 */
+
+//_______________________________________________________________________________
+//                                                                  setDataReader
+
+/*!
+  \brief Set up a DataReader object to read in the data
+
+  This function will attempt to determine the type of input data from which to
+  create the image. 
+
+  \retval dr    -- 
+  \param infile -- Input dataset from which to create the skymap.
+
+  \return status -- Status of the operation; returns \e true in case the input
+          dataset could be opened successfully. In case there was an error
+	  opening the input dataset -- either because of unknown type or due to
+	  corrupted data -- \e false will be returned.
+*/
+bool setDataReader (CR::DataReader &dr,
+		    std::string const &infile)
+{
+  bool status (true);
+  
+  return status;
+}
+
+//_______________________________________________________________________________
+//                                                                  main function
 
 int main (int argc, char *argv[])
 {
@@ -145,47 +192,59 @@ int main (int argc, char *argv[])
   int nofFrames          = 1;
   std::string refcode    = "AZEL";
   std::string projection = "STG";
+  std::string beamType   = "FREQ_POWER";
+  std::string coordType  = "DirectionRadius";
 
   bpo::options_description desc ("[skymapper] Available command line options");
 
   desc.add_options ()
-    ("help", "Show help messages")
-    ("infile", bpo::value<std::string>(),
+    ("help,H", "Show help messages")
+    ("infile,I", bpo::value<std::string>(),
      "Input data file from which to generate the image")
-    ("outfile", bpo::value<std::string>(),
+    ("outfile,O", bpo::value<std::string>(),
      "Output image file.")
-    ("blocksize", bpo::value<int>(),
+    ("blocksize,B", bpo::value<int>(),
      "Size of an individual block of data read from file, [samples].")
     ("blocks_per_frame", bpo::value<int>(),
-     "Number of input data blocks combined into an output time-frame.")
-    ("frames", bpo::value<int>(),
-     "Number of time-frames in generated image.")
-    ("refcode", bpo::value<std::string>(),
-     "Reference code for the celestial coordinate system.")
-    ("projection", bpo::value<std::string>(),
-     "Reference code for the spherical map projection.")
+     "Number of input data blocks combined into an output time-frame. (1)")
+    ("frames,F", bpo::value<int>(),
+     "Number of time-frames in generated image. (1)")
+    ("refcode,R", bpo::value<std::string>(),
+     "Reference code for the celestial coordinate system. (AZEL)")
+    ("projection,P", bpo::value<std::string>(),
+     "Reference code for the spherical map projection. (STG)")
+    ("beamtype", bpo::value<std::string>(),
+     "Type of beam to create the skymap with. (FREQ_POWER)")
+    ("coord_type", bpo::value<std::string>(),
+     "Type of spatial coordinate used in the skymap. (DirectionRadius)")
     ;
   
   bpo::variables_map vm;
   bpo::store (bpo::parse_command_line(argc,argv,desc), vm);
   
   if (vm.count("help") || argc == 1) {
-    std::cout << desc << std::endl;
+    cout << desc << endl;
+    return 0;
   }
   
   if (vm.count("blocksize")) {
     blocksize = vm["blocksize"].as<int>();
   }
-
+  
+  if (vm.count("blocks_per_frame")) {
+    blocksPerFrame = vm["blocks_per_frame"].as<int>();
+  }
+  
   if (vm.count("frames")) {
     nofFrames = vm["frames"].as<int>();
   }
-
+  
   if (vm.count("infile")) {
     infile = vm["infile"].as<std::string>();
   } else {
-    infile = "UNDEFINED";
     std::cerr << "ERROR: No data input file given! Unable to proceed!" << endl;
+    cout << desc << endl;
+    return 1;
   }
 
   if (vm.count("outfile")) {
@@ -200,9 +259,18 @@ int main (int argc, char *argv[])
     projection = vm["projection"].as<std::string>();
   }
 
+  if (vm.count("beamtype")) {
+    beamType = vm["beamtype"].as<std::string>();
+  }
+
+  if (vm.count("coord_type")) {
+    coordType = vm["coord_type"].as<std::string>();
+  }
+
   // -----------------------------------------------------------------
   // Report control parameters
 
+#ifdef DEBUGGING_MESSAGES
   cout << "-- Input data file           = " << infile         << endl;
   cout << "-- Output image file         = " << outfile        << endl;
   cout << "-- blocksize                 = " << blocksize      << endl;
@@ -210,6 +278,8 @@ int main (int argc, char *argv[])
   cout << "-- nof. time frames          = " << nofFrames      << endl;
   cout << "-- Celestial reference frame = " << refcode        << endl;
   cout << "-- Spherical map projection  = " << projection     << endl;
+  cout << "-- Beamtype for imaging      = " << beamType       << endl;
+#endif
 
   return status;
 }

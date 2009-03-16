@@ -74,6 +74,10 @@ if (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
   target_link_libraries (skymapper cr ${BOOST_LIBRARIES})
   ## installation instructions
   list (APPEND cr_apps skymapper)
+  ## testing 
+  add_test (skymapper_test01 skymapper --help)
+  add_test (skymapper_test02 skymapper --infile ${dataset_lopes_example})
+  add_test (skymapper_test03 skymapper --infile ${dataset_lopes_example} --blocksize 4096)
 endif (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
 
 ##____________________________________________________________________
