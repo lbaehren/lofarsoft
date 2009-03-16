@@ -73,7 +73,7 @@ endif (glibconfig_h)
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-find_library (GLIB_LIBRARIES glib
+find_library (GLIB_LIBRARIES glib glib-2.0
   PATHS ${lib_locations}
   PATH_SUFFIXES
   glib
