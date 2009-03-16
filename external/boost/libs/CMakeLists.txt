@@ -14,6 +14,10 @@ if (BOOST_LIB_IO)
   add_subdirectory (io)
 endif (BOOST_LIB_IO)
 
+if (BOOST_LIB_IOSTREAMS)
+  add_subdirectory (iostreams)
+endif (BOOST_LIB_IOSTREAMS)
+
 if (BOOST_LIB_LOGIC)
   add_subdirectory (logic)
 endif (BOOST_LIB_LOGIC)
@@ -41,6 +45,10 @@ endif (BOOST_LIB_RANGE)
 if (BOOST_LIB_REGEX)
   add_subdirectory (regex)
 endif (BOOST_LIB_REGEX)
+
+if (BOOST_LIB_SERIALIZATION)
+  add_subdirectory (serialization)
+endif (BOOST_LIB_SERIALIZATION)
 
 if (BOOST_LIB_SIGNALS)
   add_subdirectory (signals)
