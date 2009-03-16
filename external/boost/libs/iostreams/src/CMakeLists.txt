@@ -6,6 +6,10 @@ file (GLOB libboost_iostreams_sources
   *.cpp
   )
 
+if (NOT HAVE_BZLIB_H)
+  list (REMOVE_ITEM libboost_iostreams_sources ${BOOST_SOURCE_DIR}/libs/iostreams/src/bzip2.cpp)
+endif (NOT HAVE_BZLIB_H)
+
 ## -----------------------------------------------------------------------------
 ## Compiler instructions
 
