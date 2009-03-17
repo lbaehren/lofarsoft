@@ -80,6 +80,7 @@ include (FindBoost)
 include (FindFFTW3)
 include (FindGFortran)
 include (FindGLIB)
+include (FindMatplotlib)
 include (FindNumPy)
 include (FindPython)
 
@@ -121,6 +122,15 @@ if (HAVE_NUMPY)
   endif (NUMPY_API_VERSION LESS NUMPY_REQUIRED_VERSION)
 
 endif (HAVE_NUMPY)
+
+##____________________________________________________________________
+## Installation of Matplotlib
+
+if (MATPLOTLIB_LIBRARIES)
+
+  message (STATUS "MATPLOTLIB_API_VERSION = ${MATPLOTLIB_API_VERSION}")
+
+endif (MATPLOTLIB_LIBRARIES)
 
 ##____________________________________________________________________
 ## External packages

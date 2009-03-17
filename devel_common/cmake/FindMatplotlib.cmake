@@ -27,8 +27,8 @@
 #                             found.
 #  NUMPY_INCLUDES           = Include path for the header files of NUMPY
 #  NUMPY_LIBRARIES          = Link these to use NUMPY
-#  MATPLOTLIB_LFLAGS             = Linker flags (optional)
-#  MATPLOTLIB_API_VERSION        = API version of the installed and available Matplotlib
+#  MATPLOTLIB_LFLAGS        = Linker flags (optional)
+#  MATPLOTLIB_API_VERSION   = API version of the installed and available Matplotlib
 #                             package
 
 ## -----------------------------------------------------------------------------
@@ -64,7 +64,7 @@ find_path (MATPLOTLIB_INCLUDES numerix.h mplutils.h
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-FIND_LIBRARY (MATPLOTLIB_NXUTILS_LIBRARY NXUTILS
+FIND_LIBRARY (MATPLOTLIB_NXUTILS_LIBRARY nxutils
   PATHS
   ${lib_locations}
   PATH_SUFFIXES
@@ -73,14 +73,22 @@ FIND_LIBRARY (MATPLOTLIB_NXUTILS_LIBRARY NXUTILS
   python2.4/site-packages/matplotlib
   NO_DEFAULT_PATH
   )
+if (MATPLOTLIB_NXUTILS_LIBRARY)
+  list (APPEND MATPLOTLIB_LIBRARIES ${MATPLOTLIB_NXUTILS_LIBRARY})
+endif (MATPLOTLIB_NXUTILS_LIBRARY)
 
-## -----------------------------------------------------------------------------
-## Check for executables
-
-find_program (F2PY_EXECUTABLE f2py f2py2.6 f2py2.5 f2py2.4
-  PATHS ${bin_locations}
+FIND_LIBRARY (MATPLOTLIB_TTCONV_LIBRARY ttconv
+  PATHS
+  ${lib_locations}
+  PATH_SUFFIXES
+  python2.6/site-packages/matplotlib
+  python2.5/site-packages/matplotlib
+  python2.4/site-packages/matplotlib
   NO_DEFAULT_PATH
   )
+if (MATPLOTLIB_TTCONV_LIBRARY)
+  list (APPEND MATPLOTLIB_LIBRARIES ${MATPLOTLIB_TTCONV_LIBRARY})
+endif (MATPLOTLIB_TTCONV_LIBRARY)
 
 ## -----------------------------------------------------------------------------
 ## Try to determine the API version
@@ -96,49 +104,6 @@ execute_process (
 if (matplotlib_version_test_output)
   set (MATPLOTLIB_API_VERSION ${matplotlib_version_test_output})
 endif (matplotlib_version_test_output)
-
-include (FindPython)
-
-if (MATPLOTLIB_INCLUDES)
-find_file (MATPLOTLIB_NDARRAYOBJECT_H ndarrayobject.h
-  PATHS ${MATPLOTLIB_INCLUDES}
-  PATH_SUFFIXES matplotlib
-  NO_DEFAULT_PATH
-  )
-endif (MATPLOTLIB_INCLUDES)
-
-if (MATPLOTLIB_NDARRAYOBJECT_H)
-  file (STRINGS ${MATPLOTLIB_NDARRAYOBJECT_H} NPY_VERSION
-    REGEX "NPY_VERSION"
-    )
-  string (REGEX REPLACE "#define NPY_VERSION 0x" "" MATPLOTLIB_VERSION ${NPY_VERSION})
-endif (MATPLOTLIB_NDARRAYOBJECT_H)
-
-find_file (MATPLOTLIB_TEST_PROGRAM TestMatplotlibVersion.cc
-  PATHS ${CMAKE_MODULE_PATH} ${USG_ROOT}
-  PATH_SUFFIXES devel_common/cmake
-  )
-
-if (MATPLOTLIB_TEST_PROGRAM AND PYTHON_INCLUDES)
-  ## try to compile and run
-  try_run (
-    MATPLOTLIB_TEST_RUN_RESULT
-    MATPLOTLIB_TEST_COMPILE_RESULT
-    ${CMAKE_BINARY_DIR}
-    ${MATPLOTLIB_TEST_PROGRAM}
-    COMPILE_DEFINITIONS -I${PYTHON_INCLUDES} -I${MATPLOTLIB_INCLUDES}
-    COMPILE_OUTPUT_VARIABLE MATPLOTLIB_TEST_COMPILE
-    RUN_OUTPUT_VARIABLE MATPLOTLIB_TEST_RUN
-    )
-  ## display results
-  if (NOT MATPLOTLIB_FIND_QUIETLY)
-    message (STATUS "MATPLOTLIB_TEST_RUN_RESULT     = ${MATPLOTLIB_TEST_RUN_RESULT}")
-    message (STATUS "MATPLOTLIB_TEST_COMPILE_RESULT = ${MATPLOTLIB_TEST_COMPILE_RESULT}")
-    message (STATUS "MATPLOTLIB_TEST_RUN            = ${MATPLOTLIB_TEST_RUN}")
-  endif (NOT MATPLOTLIB_FIND_QUIETLY)
-else (MATPLOTLIB_TEST_PROGRAM AND PYTHON_INCLUDES)
-  message (STATUS "Unable to locate test program!")
-endif (MATPLOTLIB_TEST_PROGRAM AND PYTHON_INCLUDES)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -175,9 +140,8 @@ endif (HAVE_MATPLOTLIB)
 mark_as_advanced (
   MATPLOTLIB_INCLUDES
   MATPLOTLIB_LIBRARIES
-  MATPLOTLIB_MULTIARRAY_LIBRARY
-  MATPLOTLIB_SCALARMATH_LIBRARY
-  F2PY_EXECUTABLE
+  MATPLOTLIB_NXUTILS_LIBRARY
+  MATPLOTLIB_TTCONV_LIBRARY
   MATPLOTLIB_API_VERSION
   )
 
