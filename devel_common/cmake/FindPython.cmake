@@ -120,8 +120,10 @@ foreach (python_version 2.6 2.5 2.4 2.3)
   ## Check for the library
 
   find_library (PYTHON_LIBRARIES python${python_version}
-    PATHS ${lib_locations}
-    PATH_SUFFIXES . python${python_version}/config
+    PATHS
+    ${lib_locations}
+    PATH_SUFFIXES
+    python${python_version}/config
     NO_DEFAULT_PATH
     )
 

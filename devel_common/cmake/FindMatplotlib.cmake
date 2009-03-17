@@ -26,12 +26,9 @@
 #  HAVE_NUMPY               = Set to true, if all components of NUMPY have been
 #                             found.
 #  NUMPY_INCLUDES           = Include path for the header files of NUMPY
-#  NUMPY_MULTIARRAY_LIBRARY = Path to the multiarray shared library
-#  NUMPY_SCALARMATH_LIBRARY = Path to the scalarmath shared library
 #  NUMPY_LIBRARIES          = Link these to use NUMPY
-#  F2PY_EXECUTABLE          = The f2py executable
-#  NUMPY_LFLAGS             = Linker flags (optional)
-#  NUMPY_API_VERSION        = API version of the installed and available NumPy
+#  MATPLOTLIB_LFLAGS             = Linker flags (optional)
+#  MATPLOTLIB_API_VERSION        = API version of the installed and available Matplotlib
 #                             package
 
 ## -----------------------------------------------------------------------------
@@ -41,7 +38,7 @@ include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## As the shared libraries of a Python module typically do not contain the 
-## usual prefix, we need to remove it while searching for the NumPy libraries.
+## usual prefix, we need to remove it while searching for the Matplotlib libraries.
 ## In order however not to affect other CMake modules we need to swap back in the
 ## original prefixes once the end of this module is reached.
 
@@ -55,43 +52,27 @@ set (CMAKE_FIND_LIBRARY_PREFIXES "" CACHE STRING
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (NUMPY_INCLUDES numpy/__multiarray_api.h numpy/multiarray_api.txt
+find_path (MATPLOTLIB_INCLUDES numerix.h mplutils.h
   PATHS
   ${lib_locations}
   PATH_SUFFIXES
-  python2.6/site-packages/numpy/core/include
-  python2.5/site-packages/numpy/core/include
+  python2.6/site-packages/matplotlib/core/include
+  python2.5/site-packages/matplotlib/core/include
   NO_DEFAULT_PATH
   )
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-find_library (NUMPY_MULTIARRAY_LIBRARY multiarray
+FIND_LIBRARY (MATPLOTLIB_NXUTILS_LIBRARY NXUTILS
   PATHS
   ${lib_locations}
   PATH_SUFFIXES
-  python2.6/site-packages/numpy/core
-  python2.5/site-packages/numpy/core
-  python2.4/site-packages/numpy/core
+  python2.6/site-packages/matplotlib
+  python2.5/site-packages/matplotlib
+  python2.4/site-packages/matplotlib
   NO_DEFAULT_PATH
   )
-if (NUMPY_MULTIARRAY_LIBRARY)
-  list (APPEND NUMPY_LIBRARIES ${NUMPY_MULTIARRAY_LIBRARY})
-endif (NUMPY_MULTIARRAY_LIBRARY)
-
-find_library (NUMPY_SCALARMATH_LIBRARY scalarmath
-  PATHS
-  ${lib_locations}
-  PATH_SUFFIXES
-  python2.6/site-packages/numpy/core
-  python2.5/site-packages/numpy/core
-  python2.4/site-packages/numpy/core
-  NO_DEFAULT_PATH
-  )
-if (NUMPY_SCALARMATH_LIBRARY)
-  list (APPEND NUMPY_LIBRARIES ${NUMPY_SCALARMATH_LIBRARY})
-endif (NUMPY_SCALARMATH_LIBRARY)
 
 ## -----------------------------------------------------------------------------
 ## Check for executables
@@ -105,103 +86,99 @@ find_program (F2PY_EXECUTABLE f2py f2py2.6 f2py2.5 f2py2.4
 ## Try to determine the API version
 
 execute_process (
-  COMMAND python -c "import numpy; print numpy.__version__"
+  COMMAND python -c "import matplotlib; print matplotlib.__version__"
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  RESULT_VARIABLE numpy_version_test_result
-  OUTPUT_VARIABLE numpy_version_test_output
+  RESULT_VARIABLE matplotlib_version_test_result
+  OUTPUT_VARIABLE matplotlib_version_test_output
   OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 
-if (numpy_version_test_output)
+if (matplotlib_version_test_output)
+  set (MATPLOTLIB_API_VERSION ${matplotlib_version_test_output})
+endif (matplotlib_version_test_output)
 
-  set (NUMPY_API_VERSION ${numpy_version_test_output})
-  
-else (numpy_version_test_output)
-  
-  include (FindPython)
-  
-  if (NUMPY_INCLUDES)
-    find_file (NUMPY_NDARRAYOBJECT_H ndarrayobject.h
-      PATHS ${NUMPY_INCLUDES}
-      PATH_SUFFIXES numpy
-      NO_DEFAULT_PATH
-      )
-  endif (NUMPY_INCLUDES)
-  
-  if (NUMPY_NDARRAYOBJECT_H)
-    file (STRINGS ${NUMPY_NDARRAYOBJECT_H} NPY_VERSION
-      REGEX "NPY_VERSION"
-      )
-    string (REGEX REPLACE "#define NPY_VERSION 0x" "" NUMPY_VERSION ${NPY_VERSION})
-  endif (NUMPY_NDARRAYOBJECT_H)
-  
-  find_file (NUMPY_TEST_PROGRAM TestNumPyVersion.cc
-    PATHS ${CMAKE_MODULE_PATH} ${USG_ROOT}
-    PATH_SUFFIXES devel_common/cmake
+include (FindPython)
+
+if (MATPLOTLIB_INCLUDES)
+find_file (MATPLOTLIB_NDARRAYOBJECT_H ndarrayobject.h
+  PATHS ${MATPLOTLIB_INCLUDES}
+  PATH_SUFFIXES matplotlib
+  NO_DEFAULT_PATH
+  )
+endif (MATPLOTLIB_INCLUDES)
+
+if (MATPLOTLIB_NDARRAYOBJECT_H)
+  file (STRINGS ${MATPLOTLIB_NDARRAYOBJECT_H} NPY_VERSION
+    REGEX "NPY_VERSION"
     )
-  
-  if (NUMPY_TEST_PROGRAM AND PYTHON_INCLUDES)
-    ## try to compile and run
-    try_run (
-      NUMPY_TEST_RUN_RESULT
-      NUMPY_TEST_COMPILE_RESULT
-      ${CMAKE_BINARY_DIR}
-      ${NUMPY_TEST_PROGRAM}
-      COMPILE_DEFINITIONS -I${PYTHON_INCLUDES} -I${NUMPY_INCLUDES}
-      COMPILE_OUTPUT_VARIABLE NUMPY_TEST_COMPILE
-      RUN_OUTPUT_VARIABLE NUMPY_TEST_RUN
-      )
-    ## display results
-    if (NOT NUMPY_FIND_QUIETLY)
-      message (STATUS "NUMPY_TEST_RUN_RESULT     = ${NUMPY_TEST_RUN_RESULT}")
-      message (STATUS "NUMPY_TEST_COMPILE_RESULT = ${NUMPY_TEST_COMPILE_RESULT}")
-      message (STATUS "NUMPY_TEST_RUN            = ${NUMPY_TEST_RUN}")
-    endif (NOT NUMPY_FIND_QUIETLY)
-  else (NUMPY_TEST_PROGRAM AND PYTHON_INCLUDES)
-    message (STATUS "Unable to locate test program!")
-  endif (NUMPY_TEST_PROGRAM AND PYTHON_INCLUDES)
-  
-endif (numpy_version_test_output)
+  string (REGEX REPLACE "#define NPY_VERSION 0x" "" MATPLOTLIB_VERSION ${NPY_VERSION})
+endif (MATPLOTLIB_NDARRAYOBJECT_H)
+
+find_file (MATPLOTLIB_TEST_PROGRAM TestMatplotlibVersion.cc
+  PATHS ${CMAKE_MODULE_PATH} ${USG_ROOT}
+  PATH_SUFFIXES devel_common/cmake
+  )
+
+if (MATPLOTLIB_TEST_PROGRAM AND PYTHON_INCLUDES)
+  ## try to compile and run
+  try_run (
+    MATPLOTLIB_TEST_RUN_RESULT
+    MATPLOTLIB_TEST_COMPILE_RESULT
+    ${CMAKE_BINARY_DIR}
+    ${MATPLOTLIB_TEST_PROGRAM}
+    COMPILE_DEFINITIONS -I${PYTHON_INCLUDES} -I${MATPLOTLIB_INCLUDES}
+    COMPILE_OUTPUT_VARIABLE MATPLOTLIB_TEST_COMPILE
+    RUN_OUTPUT_VARIABLE MATPLOTLIB_TEST_RUN
+    )
+  ## display results
+  if (NOT MATPLOTLIB_FIND_QUIETLY)
+    message (STATUS "MATPLOTLIB_TEST_RUN_RESULT     = ${MATPLOTLIB_TEST_RUN_RESULT}")
+    message (STATUS "MATPLOTLIB_TEST_COMPILE_RESULT = ${MATPLOTLIB_TEST_COMPILE_RESULT}")
+    message (STATUS "MATPLOTLIB_TEST_RUN            = ${MATPLOTLIB_TEST_RUN}")
+  endif (NOT MATPLOTLIB_FIND_QUIETLY)
+else (MATPLOTLIB_TEST_PROGRAM AND PYTHON_INCLUDES)
+  message (STATUS "Unable to locate test program!")
+endif (MATPLOTLIB_TEST_PROGRAM AND PYTHON_INCLUDES)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
-if (NUMPY_INCLUDES AND NUMPY_LIBRARIES)
-  set (HAVE_NUMPY TRUE)
-else (NUMPY_INCLUDES AND NUMPY_LIBRARIES)
-  set (HAVE_NUMPY FALSE)
-  if (NOT NUMPY_FIND_QUIETLY)
-    if (NOT NUMPY_INCLUDES)
-      message (STATUS "Unable to find NUMPY header files!")
-    endif (NOT NUMPY_INCLUDES)
-    if (NOT NUMPY_LIBRARIES)
-      message (STATUS "Unable to find NUMPY library files!")
-    endif (NOT NUMPY_LIBRARIES)
-  endif (NOT NUMPY_FIND_QUIETLY)
-endif (NUMPY_INCLUDES AND NUMPY_LIBRARIES)
+if (MATPLOTLIB_INCLUDES AND MATPLOTLIB_LIBRARIES)
+  set (HAVE_MATPLOTLIB TRUE)
+else (MATPLOTLIB_INCLUDES AND MATPLOTLIB_LIBRARIES)
+  set (HAVE_MATPLOTLIB FALSE)
+  if (NOT MATPLOTLIB_FIND_QUIETLY)
+    if (NOT MATPLOTLIB_INCLUDES)
+      message (STATUS "Unable to find MATPLOTLIB header files!")
+    endif (NOT MATPLOTLIB_INCLUDES)
+    if (NOT MATPLOTLIB_LIBRARIES)
+      message (STATUS "Unable to find MATPLOTLIB library files!")
+    endif (NOT MATPLOTLIB_LIBRARIES)
+  endif (NOT MATPLOTLIB_FIND_QUIETLY)
+endif (MATPLOTLIB_INCLUDES AND MATPLOTLIB_LIBRARIES)
 
-if (HAVE_NUMPY)
-  if (NOT NUMPY_FIND_QUIETLY)
-    message (STATUS "Found components for NUMPY")
-    message (STATUS "NUMPY_INCLUDES  = ${NUMPY_INCLUDES}")
-    message (STATUS "NUMPY_LIBRARIES = ${NUMPY_LIBRARIES}")
-  endif (NOT NUMPY_FIND_QUIETLY)
-else (HAVE_NUMPY)
-  if (NUMPY_FIND_REQUIRED)
-    message (FATAL_ERROR "Could not find NUMPY!")
-  endif (NUMPY_FIND_REQUIRED)
-endif (HAVE_NUMPY)
+if (HAVE_MATPLOTLIB)
+  if (NOT MATPLOTLIB_FIND_QUIETLY)
+    message (STATUS "Found components for MATPLOTLIB")
+    message (STATUS "MATPLOTLIB_INCLUDES  = ${MATPLOTLIB_INCLUDES}")
+    message (STATUS "MATPLOTLIB_LIBRARIES = ${MATPLOTLIB_LIBRARIES}")
+  endif (NOT MATPLOTLIB_FIND_QUIETLY)
+else (HAVE_MATPLOTLIB)
+  if (MATPLOTLIB_FIND_REQUIRED)
+    message (FATAL_ERROR "Could not find MATPLOTLIB!")
+  endif (MATPLOTLIB_FIND_REQUIRED)
+endif (HAVE_MATPLOTLIB)
 
 ## -----------------------------------------------------------------------------
 ## Mark advanced variables
 
 mark_as_advanced (
-  NUMPY_INCLUDES
-  NUMPY_LIBRARIES
-  NUMPY_MULTIARRAY_LIBRARY
-  NUMPY_SCALARMATH_LIBRARY
+  MATPLOTLIB_INCLUDES
+  MATPLOTLIB_LIBRARIES
+  MATPLOTLIB_MULTIARRAY_LIBRARY
+  MATPLOTLIB_SCALARMATH_LIBRARY
   F2PY_EXECUTABLE
-  NUMPY_API_VERSION
+  MATPLOTLIB_API_VERSION
   )
 
 ## -----------------------------------------------------------------------------
