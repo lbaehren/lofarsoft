@@ -9,10 +9,16 @@ project (PYTHON_MODULES)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.6)
 
-## ------------------------------------------------------------------------------
-## Options
+## ==============================================================================
+##
+##  Options
+##
+## ==============================================================================
 
 option (PYTHON_MODULES_VERBOSE_CONFIGURE "Be verbose during configuration?" NO )
+
+option (NUMPY_FORCE_BUILD      "[NumPy] Force build from local sources?"      NO )
+option (MATPLOTLIB_FORCE_BUILD "[Matplotlib] Force build from local sources?" NO )
 
 ## Select the modules to be build
 
@@ -66,6 +72,7 @@ if (NOT PYTHON_MODULES_VERBOSE_CONFIGURE)
   set (FFTW3_FIND_QUIETLY      YES )
   set (GFORTRAN_FIND_QUIETLY   YES )
   set (GLIB_FIND_QUIETLY       YES )
+  set (NUMPY_FIND_QUIETLY      YES )
   set (PYTHON_FIND_QUIETLY     YES )
 endif (NOT PYTHON_MODULES_VERBOSE_CONFIGURE)
 
@@ -73,6 +80,7 @@ include (FindBoost)
 include (FindFFTW3)
 include (FindGFortran)
 include (FindGLIB)
+include (FindNumPy)
 include (FindPython)
 
 find_program (HAVE_WGET  wget  ${bin_locations} )
@@ -81,9 +89,41 @@ find_program (HAVE_TAR   tar   ${bin_locations} )
 
 ## ==============================================================================
 ##
-##  Handle build requirements
+##  Check build conditions
 ##
 ## ==============================================================================
+
+##____________________________________________________________________
+## Name of build platform as determined by distutils
+
+execute_process (
+  COMMAND python -c "from distutils import util;print util.get_platform()"
+  WORKING_DIRECTORY ${PYTHON_MODULES_SOURCE_DIR}
+  RESULT_VARIABLE platform_test_result
+  OUTPUT_VARIABLE platform_test_output
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+
+##____________________________________________________________________
+## Installation of NumPy
+
+if (HAVE_NUMPY)
+
+  set (NUMPY_REQUIRED_VERSION "1.1.1")
+  
+  if (NUMPY_API_VERSION LESS NUMPY_REQUIRED_VERSION)
+    ## Warning message
+    message (STATUS "Version of NumPy too old - need to rebuild!")
+    ## Switch on build from local sources
+    set (enable-numpy YES)
+  else (NUMPY_API_VERSION LESS NUMPY_REQUIRED_VERSION)
+    set (enable-numpy NO)
+  endif (NUMPY_API_VERSION LESS NUMPY_REQUIRED_VERSION)
+
+endif (HAVE_NUMPY)
+
+##____________________________________________________________________
+## External packages
 
 if (NOT GFORTRAN_LIBRARIES OR NOT FFTW3_LIBRARIES)
   set (enable-numpy      NO)
@@ -133,19 +173,12 @@ if (enable-numpy OR enable-matplotlib)
     add_dependencies (numpy_expand numpy_copy)
     
     ## build the package
-    if (GFORTRAN_EXECUTABLE)
-      add_custom_target (numpy_build
-	COMMAND python setup.py build --fcompiler=gnu95
-	WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUMPY_DIRECTORY}
-	COMMENT "[NumPy] Starting build ..."
-	)
-    else (GFORTRAN_EXECUTABLE)
-      add_custom_target (numpy_build
-	COMMAND python setup.py build
-	WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUMPY_DIRECTORY}
-	COMMENT "[NumPy] Starting build ..."
-	)
-    endif (GFORTRAN_EXECUTABLE)
+    add_custom_target (numpy_build
+      COMMAND python setup.py build
+#      COMMAND python setup.py build --plat-name=${platform_test_output}
+      WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUMPY_DIRECTORY}
+      COMMENT "[NumPy] Starting build ..."
+      )
     add_dependencies (numpy_build numpy_expand)
     
     ## build and install the package
@@ -221,6 +254,7 @@ if (enable-num_util)
     
   else (have_num_util_tgz)
     message (STATUS "[Num_util] Unable to install - missing tar-archive!")
+    set (enable-num_util OFF)
   endif (have_num_util_tgz)
   
 endif (enable-num_util)
@@ -376,10 +410,12 @@ endif (enable-num_util AND enable-matplotlib)
 message (STATUS "------------------------------------------------------------")
 
 message (STATUS "[Python modules] Configuration summary:")
+message (STATUS "Operating system   = ${CMAKE_SYSTEM}")
+message (STATUS "System processor   = ${CMAKE_SYSTEM_PROCESSOR}")
+message (STATUS "Python platform    = ${platform_test_output}")
 message (STATUS "Install prefix     = ${USG_INSTALL_PREFIX}")
 message (STATUS "GFortran compiler  = ${GFORTRAN_EXECUTABLE}")
 message (STATUS "BOOST_INCLUDES     = ${BOOST_INCLUDES}")
-#message (STATUS "BOOST_LIBRARIES    = ${BOOST_LIBRARIES}")
 message (STATUS "FFTW3_INCLUDES     = ${FFTW3_INCLUDES}")
 message (STATUS "FFTW3_LIBRARIES    = ${FFTW3_LIBRARIES}")
 message (STATUS "GLIB_INCLUDES      = ${GLIB_INCLUDES}")
@@ -406,7 +442,13 @@ if (enable-numpy)
   message (STATUS "NUMPY_VERSION          = ${NUMPY_VERSION}")
   message (STATUS "NUMPY_DIRECTORY        = ${NUMPY_DIRECTORY}")
   message (STATUS "NUMPY_TAR_ARCHIVE      = ${NUMPY_TAR_ARCHIVE}")
+else (enable-numpy)
+  message (STATUS "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+  message (STATUS "NUMPY_INCLUDES         = ${NUMPY_INCLUDES}")
+  message (STATUS "NUMPY_LIBRARIES        = ${NUMPY_LIBRARIES}")
+  message (STATUS "NUMPY_API_VERSION      = ${NUMPY_API_VERSION}")
 endif (enable-numpy)
+
 
 if (enable-matplotlib)
   message (STATUS "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")

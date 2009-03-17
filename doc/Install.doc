@@ -79,6 +79,22 @@
 	  \verbatim
 	  svn co http://usg.lofar.org/svn/code/trunk lofarsoft
 	  \endverbatim
+	  <li><b>Set up your environment</b>: Add the location of the new
+	  executables to your PATH variable:
+	  \code
+	  # csh, tcsh
+	  setenv LOFARSOFT <root directory of code tree>
+	  source $LOFARSOFT/devel_common/scripts/init.csh
+	  
+	  # sh, bash
+	  export LOFARSOFT=<root directory of code tree>
+	  . $LOFARSOFT/devel_common/scripts/init.sh
+	  \endcode
+	  If you want this information to be persistent, you should add the setting
+	  to the configuration file of your shell; for \e bash users this is
+	  done in either <tt>$HOME/.profile</tt> or <tt>$HOME/.bashrc</tt> -- users
+	  of \e tcsh or \e csh need to add the appropriate statement to
+	  <tt>$HOME/.cshrc</tt>.
 	  <li>Change into the \e build directory and run the \e bootstrap script:
 	  \code
 	  cd build

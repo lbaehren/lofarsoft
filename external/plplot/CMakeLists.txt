@@ -35,6 +35,8 @@ endif (USG_ROOT)
 ## ------------------------------------------------------------------------------
 ## Check if the program/package/library is already available
 
+set (PLPLOT_FIND_QUIETLY YES )
+
 include (FindPLplot)
 
 ## <-- begin build condition --------------------------------------------------->

@@ -51,6 +51,7 @@ option (SYSTEM_PACKAGES     "Installation of required system packages?"     YES 
 
 option (CR_WITH_GUI         "Build CR-Tools with graphical interface?"   NO )
 option (CR_WITH_STARTOOLS   "Enable using routines from LOPES-Star?"     NO )
+option (DAL_PYTHON_BINDINGS "Create python bindings for DAL?"            YES )
 
 ## ==============================================================================
 ##
@@ -130,7 +131,12 @@ add_custom_target (clean-build
   COMMAND rm -rf cmake_install.cmake
   COMMAND rm -rf CMakeCache.txt
   COMMAND rm -rf CMakeFiles
-  COMMAND rm -rf bison blitz boost casacore cfitsio flex hdf5
+  COMMAND rm -rf bison blitz boost
+  COMMAND rm -rf casacore cfitsio cr
+  COMMAND rm -rf dal flex hdf5 mathgl
+  COMMAND rm -rf plplot python root
+  COMMAND rm -rf startools swig szip
+  COMMAND rm -rf wcslib wcstools
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Cleaning up build directory ..."
 )
@@ -274,11 +280,11 @@ add_dependencies (bdsm cfitsio wcslib)
 ##                                           Data Access Library (DAL)
 
 add_custom_target (dal
-  COMMAND ./build_package.sh dal ${USG_ROOT}/src/DAL
+  COMMAND ./build_package.sh dal ${USG_ROOT}/src/DAL -DDAL_PYTHON_BINDINGS:BOOL=${DAL_PYTHON_BINDINGS}
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package DAL ..."
   )
-add_dependencies (dal python plplot casacore)
+add_dependencies (dal plplot casacore)
 
 ##____________________________________________________________________
 ##                                                            CR-Tools
