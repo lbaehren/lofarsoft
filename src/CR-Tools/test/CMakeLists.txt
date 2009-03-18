@@ -235,7 +235,7 @@ endif (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
 ## -----------------------------------------------------------------------------
 ## Test working with the Data Access Library (DAL)
 
-if (HAVE_DAL AND HAVE_CASACORE)
+if (HAVE_DAL AND HAVE_CASACORE AND HAVE_HDF5)
   ## compiler instructions
   add_executable (tUseDAL tUseDAL.cc)
   ## linker instructions
@@ -252,7 +252,7 @@ if (HAVE_DAL AND HAVE_CASACORE)
     )
   ## testing
   add_test (tUseDAL tUseDAL ${dataset_tbb})
-endif (HAVE_DAL AND HAVE_CASACORE)
+endif (HAVE_DAL AND HAVE_CASACORE AND HAVE_HDF5)
 
 ## -----------------------------------------------------------------------------
 ## Test working with the Python libraries
