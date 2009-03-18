@@ -1,8 +1,0 @@
-~/philprojects/pythonlibs/num_util/num_util phil@gull% make
-g++ -c -Wall -ftemplate-depth-100 -DBOOST_PYTHON_DYNAMIC_LIB -g -O0 -fno-inline -fPIC -I "/home/phil/usr243_Fc3/include/python2.4" -I  "/home/phil/usr243_Fc3/lib/python2.4/site-packages/numpy/core/include" -I "/nfs/kite/users/phil/include/boost_1_33_1" -I  "." -o num_test_ext.o num_test_ext.cpp
-g++ -c -Wall -ftemplate-depth-100 -DBOOST_PYTHON_DYNAMIC_LIB -g -O0 -fno-inline -fPIC -I "/home/phil/usr243_Fc3/include/python2.4" -I  "/home/phil/usr243_Fc3/lib/python2.4/site-packages/numpy/core/include" -I "/nfs/kite/users/phil/include/boost_1_33_1" -I  "." -o num_util.o num_util.cpp
-g++ -c -Wall -ftemplate-depth-100 -DBOOST_PYTHON_DYNAMIC_LIB -g -O0 -fno-inline -fPIC -I "/home/phil/usr243_Fc3/include/python2.4" -I  "/home/phil/usr243_Fc3/lib/python2.4/site-packages/numpy/core/include" -I "/nfs/kite/users/phil/include/boost_1_33_1" -I  "." -o num_test.o num_test.cpp
-g++ --fPIC -Wl,-rpath,/home/phil/lib/boost_lib_1_33_1/debug  -shared -o num_test_ext.so  -L/home/phil/usr243_Fc3/lib/python2.4/config -L/home/phil/lib/boost_lib_1_33_1/debug  -lboost_python  num_test_ext.o num_util.o num_test.o
-/home/phil/usr243_Fc3/bin/python num_py_test.py
-g++ -c -Wall -ftemplate-depth-100 -DBOOST_PYTHON_DYNAMIC_LIB -g -O0 -fno-inline -fPIC -I "/home/phil/usr243_Fc3/include/python2.4" -I  "/home/phil/usr243_Fc3/lib/python2.4/site-packages/numpy/core/include" -I "/nfs/kite/users/phil/include/boost_1_33_1" -I  "." -o simpletest.o simpletest.cpp
-g++ --fPIC -Wl,-rpath,/home/phil/lib/boost_lib_1_33_1/debug  -shared -o simple_ext.so  -L/home/phil/usr243_Fc3/lib/python2.4/config -L/home/phil/lib/boost_lib_1_33_1/debug  -lboost_python  num_util.o simpletest.o
