@@ -55,6 +55,14 @@ else
 	export PYTHONPATH=$LOFARSOFT/release/lib/python2.6:$LOFARSOFT/release/lib/python2.5:$LOFARSOFT/release/lib/python2.4:$LOFARSOFT/release/lib/python:$PYTHONPATH
 fi
 
+if test -d /sw/lib/python2.6/site-packages ; then
+    export PYTHONPATH=$PYTHONPATH:/sw/lib/python2.6/site-packages
+fi
+
+if test -d /sw/lib/python2.5/site-packages ; then
+    export PYTHONPATH=$PYTHONPATH:/sw/lib/python2.5/site-packages
+fi
+
 #############################################################################
 #
 #  Define the AIPSPATH environment variable, used to locate measures data
