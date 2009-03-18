@@ -193,6 +193,12 @@ add_custom_target (doc-cmake
   COMMENT "Creating browsable documentation for CMake ..."
   )
 
+add_custom_target (doc-ctest
+  COMMAND ctest --help-html CTest.html
+  WORKING_DIRECTORY ${USG_ROOT}/doc  
+  COMMENT "Creating browsable documentation for CTest ..."
+  )
+
 
 ## ==============================================================================
 ##

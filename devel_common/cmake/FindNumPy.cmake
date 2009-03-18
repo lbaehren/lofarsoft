@@ -61,6 +61,7 @@ find_path (NUMPY_INCLUDES numpy/__multiarray_api.h numpy/multiarray_api.txt
   PATH_SUFFIXES
   python2.6/site-packages/numpy/core/include
   python2.5/site-packages/numpy/core/include
+  python2.4/site-packages/numpy/core/include
   NO_DEFAULT_PATH
   )
 
