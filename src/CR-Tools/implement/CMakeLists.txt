@@ -19,7 +19,6 @@ set (cr_modules
   Imaging
   IO
   Math
-  Observation
   Utilities
   )
 
