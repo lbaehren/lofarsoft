@@ -104,13 +104,30 @@ find_program (F2PY_EXECUTABLE f2py f2py2.6 f2py2.5 f2py2.4
 ## -----------------------------------------------------------------------------
 ## Try to determine the API version
 
-execute_process (
-  COMMAND python -c "import numpy; print numpy.__version__"
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  RESULT_VARIABLE numpy_version_test_result
-  OUTPUT_VARIABLE numpy_version_test_output
-  OUTPUT_STRIP_TRAILING_WHITESPACE
+## Try to locate numpy/version.py first; if this script is not available, loading
+## the module in order to query its version does not make any sense.
+
+find_file (NUMPY_VERSION_PY version.py
+  PATHS
+  ${lib_locations}
+  PATH_SUFFIXES
+  python2.6/site-packages/numpy
+  python2.5/site-packages/numpy
+  python2.4/site-packages/numpy
+  NO_DEFAULT_PATH
   )
+
+if (NUMPY_VERSION_PY)
+  execute_process (
+    COMMAND python -c "import numpy; print numpy.__version__"
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    RESULT_VARIABLE numpy_version_test_result
+    OUTPUT_VARIABLE numpy_version_test_output
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+else (NUMPY_VERSION_PY)
+  message (STATUS "[NumPy] Unable to locate version.py script!")
+endif (NUMPY_VERSION_PY)
 
 if (numpy_version_test_output)
 

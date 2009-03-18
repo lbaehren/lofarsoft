@@ -78,6 +78,13 @@ if (NOT USG_CMAKE_CONFIG)
       "USG data area"
       FORCE
       )
+    ## USG augmentation to PYTHONPATH
+    set (USG_PYTHONPATH ${USG_ROOT}/release/lib/python2.6;${USG_ROOT}/release/lib/python2.5
+      CACHE
+      PATH
+      "USG data area"
+      FORCE
+      )
   else (USG_ROOT)
     message (SEND_ERROR "USG_ROOT is undefined!")
   endif (USG_ROOT)

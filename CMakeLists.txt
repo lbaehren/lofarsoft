@@ -256,9 +256,14 @@ add_dependencies (wcslib boost flex)
 add_dependencies (plplot python swig)
 
 ##____________________________________________________________________
-## Packages needing extra attention
+## Packages/Targets needing extra attention
 
-## nothing right now
+add_custom_target (cmake_modules
+  COMMAND mkdir -p cmake_modules
+  COMMAND cd cmake_modules && cmake ${USG_ROOT}/devel_common/cmake
+  WORKING_DIRECTORY ${USG_BUILD}
+  COMMENT "Building package cmake_modules ..."
+  )
 
 ## ==============================================================================
 ##
@@ -339,6 +344,7 @@ message (STATUS "------------------------------------------------------------")
 message (STATUS "LOFARSOFT          = $ENV{LOFARSOFT}")
 message (STATUS "USG_ROOT           = ${USG_ROOT}")
 message (STATUS "USG_INSTALL_PREFIX = ${USG_INSTALL_PREFIX}")
+message (STATUS "USG_PYTHONPATH     = ${USG_PYTHONPATH}")
 message (STATUS "USG_DATA           = ${USG_DATA}")
 #message (STATUS "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
 #message (STATUS "DOXYGEN_FOUND      = ${DOXYGEN_FOUND}")

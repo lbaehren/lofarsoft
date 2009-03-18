@@ -68,7 +68,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class StationBeam
     
-    \ingroup Observation
+    \ingroup Analysis
     
     \brief Brief description for class StationBeam
     
@@ -180,6 +180,9 @@ namespace CR { // Namespace CR -- begin
       \param declination
       \param source_declination
       \param source_hr_angle
+      \param station_radii
+      \param legendre_root
+      \param legendre_weight
       
       \return power -- 
     */
@@ -192,8 +195,14 @@ namespace CR { // Namespace CR -- begin
 			const Vector<Double>& legendre_root,
 			const Vector<Double>& legendre_weight ) ;
     
-    
-    
+    /*!
+      \param frequency   -- 
+      \param hr_angle    -- 
+      \param declination -- 
+      \param source_declination -- 
+      \param source_hr_angle    -- 
+      \param station_radii      -- 
+    */
     Double tied_array( const Double& frequency,
 		       const Double& hr_angle,
 		       const Double& declination,

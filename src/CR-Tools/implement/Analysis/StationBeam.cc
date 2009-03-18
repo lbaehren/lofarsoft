@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Observation/StationBeam.h>
+#include <Analysis/StationBeam.h>
  
 #ifndef HAVE_CASACORE
   #warning StationBeam.cc needs casacore as CASA is broken. Not doing anything

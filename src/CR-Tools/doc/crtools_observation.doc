@@ -1,9 +1,0 @@
-/* $Id$ */
-
-/*!
-  \defgroup Observation CR-Tools :: Observation module
-  \ingroup CR
-
-  \brief Observation module for the CR-pipeline
-  
-*/

@@ -32,14 +32,14 @@
 #include <casa/BasicSL/Complex.h>
 #include <casa/namespace.h>
 
-#include <Observation/StationBeam.h>
+#include <Analysis/StationBeam.h>
 
 using CR::StationBeam;
 
 /*!
   \file tStationBeam.cc
 
-  \ingroup Observation
+  \ingroup Analysis
 
   \brief A collection of test routines for StationBeam
  

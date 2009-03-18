@@ -4,10 +4,12 @@
 	
 	- \ref configure_build_code
 	- \ref configure_build_install
-	- \ref configure_build_usg
-	- \ref configure_build_external
-	- \ref configure_build_doc
-	- \ref configure_build_clean
+	- Targets provided by the top-level configuration script
+	  - \ref configure_build_usg
+	  - \ref configure_build_external
+	  - \ref configure_build_doc
+	  - \ref configure_build_clean
+	- \ref configure_build_dependencies
 	
 	<hr>
 	
@@ -114,7 +116,7 @@
 	</ol>
 
 	<hr>
-
+	
 	\section configure_build_usg Targets to build User Software packages
 	
 	The following targets can be used to build one (or multiple, in case of
@@ -135,8 +137,6 @@
 	- \b rm - Rotation-measure synthesis imaging package developed by the Cosmic
 	Magnetism KSP.
 	
-	<hr>
-
 	\section configure_build_external Targets to build external packages
 	
 	- \b bison - GNU Project parser generator (yacc replacement)
@@ -166,8 +166,6 @@
 	HTTPS, and FTP protocols, as well as retrieval through HTTP proxies.
 	- \b zlib - Compression/decompression library.
 	
-	<hr>
-
 	\section configure_build_doc Targets for documentation generation
 	
 	The following targets can be used to generate various sorts of
@@ -177,8 +175,6 @@
 	- \b doc-cmake - Create documentation for CMake; the resulting HTML file
 	will be placed into $LOFARSOFT/doc.
 	
-	<hr>
-
 	\section configure_build_clean Targets for cleaning up directories
 	
 	- \b clean-build - Clean up the build directory; this will remove
@@ -192,5 +188,71 @@
 	the created HTML files and images created by Doxygen.
 	- \b clean-release
 	- \b clean-src
+	
+	<hr>
+	
+	\section configure_build_dependencies Dependencies of the targets
+	
+	\verbatim	
+	mathgl
+	|-- hdf5
+	|   `-- szip
+	|-- python
+	|   `-- boost
+	`-- swig
+	
+	pyrap
+	|-- casacore
+	|   |-- hdf5
+	|   |   `-- szip
+	|   |-- cfitsio
+	|   |-- boost
+	|   |-- wcslib
+	|   |   |-- boost
+	|   |   `-- flex
+	|   `-- bison
+	`-- python
+	
+	startools
+	`-- root
+	
+	plplot
+	|-- python
+	|   `-- boost
+	`-- swig
+	
+	dal
+	|-- plplot
+	`-- casacore
+	    |-- hdf5
+	    |   `-- szip
+	    |-- cfitsio
+	    |-- boost
+	    |-- wcslib
+	    |   |-- boost
+	    |   `-- flex
+	    `-- bison
+
+	cr
+	|-- dal
+	|   |-- plplot
+	|   `-- casacore
+	|       |-- hdf5
+	|       |   `-- szip
+	|       |-- cfitsio
+	|       |-- boost
+	|       |-- wcslib
+	|       |   |-- boost
+	|       |   `-- flex
+	|       `-- bison
+	|-- startools
+	|   `-- root
+	`-- mathgl
+	    |-- hdf5
+	    |   `-- szip
+	    |-- python
+	    |   `-- boost
+	    `-- swig
+	\endverbatim
 
  */

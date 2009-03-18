@@ -36,15 +36,11 @@ include (CMakeSettings)
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (PLPLOT_INCLUDES plplot.h plplotcanvas.h
+find_path (PLPLOT_INCLUDES plplot/plplot.h plplot/plplotcanvas.h
   PATHS ${include_locations}
   PATH_SUFFIXES plplot
   NO_DEFAULT_PATH
   )
-
-if (PLPLOT_INCLUDES)
-  string (REGEX REPLACE "include/plplot" "include" PLPLOT_INCLUDES ${PLPLOT_INCLUDES})
-endif (PLPLOT_INCLUDES)
 
 ## -----------------------------------------------------------------------------
 ## Check for the library

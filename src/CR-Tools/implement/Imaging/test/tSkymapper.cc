@@ -469,7 +469,7 @@ int main (int argc,
   }
   
   // Test feeding SkymapCoordinate information into the Beamformer
-//   nofFailedTests += test_Beamformer (blocksize);
+  nofFailedTests += test_Beamformer (blocksize);
   // Test the various constructors for a Skymapper object
   nofFailedTests += test_Skymapper ();
   // Test the various methods for accessing internal data

@@ -66,14 +66,15 @@ endif (NOT PYTHON_MODULES_prefix)
 ## CMake modules and system tools
 
 if (NOT PYTHON_MODULES_VERBOSE_CONFIGURE)
-  set (BOOST_FIND_QUIETLY      YES )
-  set (BOOST_pythonOnly        YES )
-  set (BOOST_test_exec_monitor NO  )
-  set (FFTW3_FIND_QUIETLY      YES )
-  set (GFORTRAN_FIND_QUIETLY   YES )
-  set (GLIB_FIND_QUIETLY       YES )
-  set (NUMPY_FIND_QUIETLY      YES )
-  set (PYTHON_FIND_QUIETLY     YES )
+  set (BOOST_FIND_QUIETLY       YES )
+  set (BOOST_pythonOnly         YES )
+  set (BOOST_test_exec_monitor  NO  )
+  set (FFTW3_FIND_QUIETLY       YES )
+  set (GFORTRAN_FIND_QUIETLY    YES )
+  set (GLIB_FIND_QUIETLY        YES )
+  set (MATPLOTLIB_FIND_QUIETLY  YES )
+  set (NUMPY_FIND_QUIETLY       YES )
+  set (PYTHON_FIND_QUIETLY      YES )
 endif (NOT PYTHON_MODULES_VERBOSE_CONFIGURE)
 
 include (FindBoost)
@@ -105,8 +106,18 @@ execute_process (
   OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 
+## ==============================================================================
+##
+##  Build the individual packages
+##
+## ==============================================================================
+
 ##____________________________________________________________________
-## Installation of NumPy
+##                                                               NumPy
+
+## Check on possible system-wide installation first; if it exists and
+## is of a recent enough version, there is no need - unless forced -
+## to build NumPy from the provided sources.
 
 if (HAVE_NUMPY)
 
@@ -123,41 +134,11 @@ if (HAVE_NUMPY)
 
 endif (HAVE_NUMPY)
 
-##____________________________________________________________________
-## Installation of Matplotlib
-
-if (MATPLOTLIB_LIBRARIES)
-
-  message (STATUS "MATPLOTLIB_API_VERSION = ${MATPLOTLIB_API_VERSION}")
-
-endif (MATPLOTLIB_LIBRARIES)
-
-##____________________________________________________________________
-## External packages
-
-if (NOT GFORTRAN_LIBRARIES OR NOT FFTW3_LIBRARIES)
-  set (enable-numpy      NO)
-  set (enable-matplotlib NO)
-endif (NOT GFORTRAN_LIBRARIES OR NOT FFTW3_LIBRARIES)
-
-if (enable-matplotlib)
+if (NUMPY_FORCE_BUILD)
   set (enable-numpy YES)
-endif (enable-matplotlib)
+endif (NUMPY_FORCE_BUILD)
 
-if (enable-num_util)
-  set (enable-numpy YES)
-endif (enable-num_util)
-
-## ==============================================================================
-##
-##  Build the individual packages
-##
-## ==============================================================================
-
-##____________________________________________________________________
-##                                                               NumPy
-
-if (enable-numpy OR enable-matplotlib)
+if (enable-numpy)
 
   set (NUMPY_VERSION "1.2.1")
   set (NUMPY_DIRECTORY "numpy-${NUMPY_VERSION}")
@@ -185,7 +166,6 @@ if (enable-numpy OR enable-matplotlib)
     ## build the package
     add_custom_target (numpy_build
       COMMAND python setup.py build
-#      COMMAND python setup.py build --plat-name=${platform_test_output}
       WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUMPY_DIRECTORY}
       COMMENT "[NumPy] Starting build ..."
       )
@@ -205,7 +185,7 @@ if (enable-numpy OR enable-matplotlib)
     message (STATUS "[NumPy] Unable to install - missing tar-archive!")
   endif (have_numpy_tgz)
   
-endif (enable-numpy OR enable-matplotlib)
+endif (enable-numpy)
 
 ##____________________________________________________________________
 ##                                                            num_util
@@ -233,12 +213,15 @@ if (enable-num_util)
       WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}
       COMMENT "[Num_util] Expanding tar-archive ..."
       )
-    add_dependencies (num_util_expand num_util_copy numpy_build)    
-
+    if (enable-numpy)
+      add_dependencies (num_util_expand num_util_copy numpy_build)
+    else (enable-numpy)
+      add_dependencies (num_util_expand num_util_copy)
+    endif (enable-numpy)
+    
     ## configure the package
     add_custom_target (num_util_configure
       COMMAND cmake -C ${PYTHON_MODULES_BINARY_DIR}/python.cmake .
-      COMMAND cmake .
       WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUM_UTIL_DIRECTORY}
       COMMENT "[Num_util] Configuring package ..."
       )
@@ -280,6 +263,10 @@ endif (enable-num_util)
 #  with matplotlib, it is important that you have *both* present and in
 #  your PYTHONPATH when you compile matplotlib.
 
+if (MATPLOTLIB_LIBRARIES)
+  message (STATUS "MATPLOTLIB_API_VERSION = ${MATPLOTLIB_API_VERSION}")
+endif (MATPLOTLIB_LIBRARIES)
+
 if (enable-matplotlib)
   
   set (MATPLOTLIB_VERSION "0.98.5.2")
@@ -311,8 +298,12 @@ if (enable-matplotlib)
       WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${MATPLOTLIB_DIRECTORY}
       COMMENT "[Matplotlib] Starting build ..."
       )
-    add_dependencies (matplotlib_build matplotlib_expand numpy_install)
-
+    if (enable-numpy)
+      add_dependencies (matplotlib_build matplotlib_expand numpy_install)
+    else (enable-numpy)
+      add_dependencies (matplotlib_build matplotlib_expand)
+    endif (enable-numpy)
+    
     ## install the package
     add_custom_target (matplotlib_install
       COMMAND python setup.py install --prefix=${USG_INSTALL_PREFIX}
@@ -397,19 +388,33 @@ add_custom_target (install
   WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}
   )
 
-if (enable-num_util AND enable-matplotlib)
-  add_dependencies (install install_num_util matplotlib_install)
-else (enable-num_util AND enable-matplotlib)
-  ## Num_util
-  if (enable-num_util)
-    add_dependencies (install install_num_util)
-  endif (enable-num_util)
-  ## Matplotlib
+if (enable-numpy)
   if (enable-matplotlib)
-    add_dependencies (install matplotlib_install)
+    if (enable-num_util)
+      add_dependencies (install numpy_install matplotlib_install num_util_install)
+    else (enable-num_util)
+      add_dependencies (install numpy_install matplotlib_install)
+    endif (enable-num_util)
+  else (enable-matplotlib)
+    if (enable-num_util)
+      add_dependencies (install numpy_install num_util_install)
+    else (enable-num_util)
+      add_dependencies (install numpy_install)
+    endif (enable-num_util)
   endif (enable-matplotlib)
-endif (enable-num_util AND enable-matplotlib)
-
+else (enable-numpy)
+  if (enable-matplotlib)
+    if (enable-num_util)
+      add_dependencies (install matplotlib_install num_util_install)
+    else (enable-num_util)
+      add_dependencies (install matplotlib_install)
+    endif (enable-num_util)
+  else (enable-matplotlib)
+    if (enable-num_util)
+      add_dependencies (install num_util_install)
+    endif (enable-num_util)
+  endif (enable-matplotlib)
+endif (enable-numpy)
 
 ## ==============================================================================
 ##
@@ -458,7 +463,6 @@ else (enable-numpy)
   message (STATUS "NUMPY_LIBRARIES        = ${NUMPY_LIBRARIES}")
   message (STATUS "NUMPY_API_VERSION      = ${NUMPY_API_VERSION}")
 endif (enable-numpy)
-
 
 if (enable-matplotlib)
   message (STATUS "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")

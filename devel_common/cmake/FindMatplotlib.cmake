@@ -44,10 +44,7 @@ include (CMakeSettings)
 
 set (TMP_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES})
 
-set (CMAKE_FIND_LIBRARY_PREFIXES "" CACHE STRING
-  "Library prefixes"
-  FORCE
-  )
+set (CMAKE_FIND_LIBRARY_PREFIXES "" CACHE STRING "Library prefixes" FORCE )
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
@@ -93,17 +90,43 @@ endif (MATPLOTLIB_TTCONV_LIBRARY)
 ## -----------------------------------------------------------------------------
 ## Try to determine the API version
 
-execute_process (
-  COMMAND python -c "import matplotlib; print matplotlib.__version__"
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  RESULT_VARIABLE matplotlib_version_test_result
-  OUTPUT_VARIABLE matplotlib_version_test_output
-  OUTPUT_STRIP_TRAILING_WHITESPACE
+find_file (MATPLOTLIB_PYLAB_PY pylab.py
+  PATHS
+  ${lib_locations}
+  PATH_SUFFIXES
+  python2.6/site-packages/matplotlib
+  python2.5/site-packages/matplotlib
+  python2.4/site-packages/matplotlib
+  NO_DEFAULT_PATH
   )
 
-if (matplotlib_version_test_output)
-  set (MATPLOTLIB_API_VERSION ${matplotlib_version_test_output})
-endif (matplotlib_version_test_output)
+find_file (MATPLOTLIB_NXUTILS_PY nxutils.py
+  PATHS
+  ${lib_locations}
+  PATH_SUFFIXES
+  python2.6/site-packages/matplotlib
+  python2.5/site-packages/matplotlib
+  python2.4/site-packages/matplotlib
+  NO_DEFAULT_PATH
+  )
+
+if (MATPLOTLIB_PYLAB_PY)
+  ## have python load the module and print its version
+  execute_process (
+    COMMAND python -c "import matplotlib; print matplotlib.__version__"
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    RESULT_VARIABLE matplotlib_version_test_result
+    OUTPUT_VARIABLE matplotlib_version_test_output
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  
+  if (matplotlib_version_test_output)
+    set (MATPLOTLIB_API_VERSION ${matplotlib_version_test_output})
+  endif (matplotlib_version_test_output)
+  
+else (MATPLOTLIB_PYLAB_PY)
+  message (STATUS "[Matplotlib] Unable to determine version number!")
+endif (MATPLOTLIB_PYLAB_PY)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found

@@ -33,14 +33,14 @@
 #include <casa/namespace.h>
 
 #include <Display/SimplePlot.h>
-#include <Observation/StationBeam.h>
+#include <Analysis/StationBeam.h>
 
 using CR::StationBeam;
 using CR::SimplePlot;
 /*!
   \file tStationBeam.cc
 
-  \ingroup Observation
+  \ingroup CR_Applications
 
   \brief A collection of test routines for StationBeam
  

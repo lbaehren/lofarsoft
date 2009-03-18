@@ -6,9 +6,26 @@
 project (CMake C CXX)
 
 ## Required CMake version
-cmake_minimum_required (VERSION 2.4)
+cmake_minimum_required (VERSION 2.5)
 
-include (./CMakeSettings.cmake)
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
+
+if (NOT USG_ROOT)
+  find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+    PATHS
+    ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/..
+    ${PROJECT_SOURCE_DIR}/../..
+    ENV LOFARSOFT
+    )
+  
+  if (USG_ROOT)
+    include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  else (USG_ROOT)
+    message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+  endif (USG_ROOT)
+endif (NOT USG_ROOT)
 
 ## ==============================================================================
 ##
@@ -81,9 +98,11 @@ if (TEST_MACROS)
 
   include (MakePackageVersion)
   
-  make_package_version (./../../src/CR-Tools/implement/Data FALSE FALSE)
+  make_package_version (${USG_ROOT}/src/CR-Tools/implement/Data FALSE FALSE)
   message ("------------------------------------------------------------")
-  make_package_version (./../../src/CR-Tools/implement/IO FALSE FALSE)
+  make_package_version (${USG_ROOT}/src/CR-Tools/implement/IO FALSE FALSE)
+  message ("------------------------------------------------------------")
+  make_package_version (${USG_ROOT}/src/CR-Tools/implement/Imaging FALSE FALSE)
   
 endif (TEST_MACROS)
 
@@ -100,7 +119,7 @@ if (TEST_ENV)
   message ("======================================================================")
   
   message (STATUS "LOFARSOFT  = $ENV{LOFARSOFT}")
-  message (STATUS "PYTHONHOME = $ENV{PYTHONHOME}")
+  message (STATUS "PYTHONPATH = $ENV{PYTHONPATH}")
   message (STATUS "ROOTSYS    = $ENV{ROOTSYS}")
   
 endif (TEST_ENV)
