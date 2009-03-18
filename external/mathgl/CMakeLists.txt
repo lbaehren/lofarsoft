@@ -13,6 +13,7 @@ cmake_minimum_required (VERSION 2.6)
 option (MATHGL_FORCE_BUILD       "Force rebuild and local installation?"  NO  )
 option (MATHGL_VERBOSE_CONFIGURE "Be verbose during configuration?"       NO  )
 option (MATHGL_VERBOSE_BUILD     "Be verbose during build process?"       NO  )
+option (MATHGL_ENABLE_HDF5       "Enable support for HDF5?"               NO  )
 option (MATHGL_ENABLE_PYTHON     "Enable support for Python?"             YES )
 option (MATHGL_ENABLE_QT         "Enable support for Qt?"                 YES )
 
@@ -74,12 +75,21 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   ## GNU Scientific Library
 
   set (GSL_FIND_QUIETLY YES)
+
   include (FindGSL)
 
   if (NOT HAVE_GSL)
     message (SEND_ERROR "[MathGL] Unable to find GSL - please install!")
   endif (NOT HAVE_GSL)
 
+  ##__________________________________________________________________
+  ## 
+  
+  if (MATHGL_ENABLE_HDF5)
+    set (HDF5_FIND_QUIETLY YES)
+    include (FindHDF5)
+  endif (MATHGL_ENABLE_HDF5)
+  
   ##__________________________________________________________________
   ## Python bindings
   
@@ -319,6 +329,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   message (STATUS "Enable support for Python   = ${MATHGL_ENABLE_PYTHON}")
   message (STATUS "Enable support for Qt       = ${MATHGL_ENABLE_QT}")
   message (STATUS "GSL_INCLUDES                = ${GSL_INCLUDES}")
+  message (STATUS "HDF5_INCLUDES               = ${HDF5_INCLUDES}")
   message (STATUS "NUMPY_INCLUDES              = ${NUMPY_INCLUDES}")
   message ("-------------------------------------------------------------")
 

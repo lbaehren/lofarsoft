@@ -19,6 +19,13 @@ set (enable-python         ${MATHGL_ENABLE_PYTHON} CACHE BOOL "Enable Python ext
 set (OPENGL_LIBRARIES      ${OPENGL_LIBRARIES} CACHE FILEPATH "Path to libOpenGL")
 
 ##____________________________________________________________________
+## HDF5
+
+set (enable-hdf5         ${MATHGL_ENABLE_HDF5} CACHE BOOL "Enable HDF5 extension")
+
+set (HDF5_INCLUDE_DIR ${HDF5_INCLUDES} CACHE PATH "HDF5 header files")
+
+##____________________________________________________________________
 ## Bindings for Qt widgets
 
 set (enable-qt              ${MATHGL_ENABLE_QT} CACHE BOOL "Enable Qt extension")
