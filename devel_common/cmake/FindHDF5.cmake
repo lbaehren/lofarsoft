@@ -38,7 +38,7 @@ include (CMakeSettings)
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (HDF5_INCLUDES hdf5.h H5LT.h hdf5_hl.h
+find_path (HDF5_INCLUDES hdf5.h hdf5_hl.h
   PATHS ${include_locations}
   PATH_SUFFIXES hdf5
   NO_DEFAULT_PATH
