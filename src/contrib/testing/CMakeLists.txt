@@ -187,3 +187,29 @@ if (HAVE_BLITZ)
 else (HAVE_BLITZ)
   message (STATUS "Missing Blitz++ - skipping tests!")
 endif (HAVE_BLITZ)
+
+## ==============================================================================
+##
+## Tests for the Data Access Library (DAL)
+##
+## ==============================================================================
+
+if (HAVE_DAL AND HAVE_CASACORE AND HAVE_HDF5)
+  ## compiler instructions
+  add_executable (test_dal test_dal.cc)
+  ## linker instructions
+  target_link_libraries (test_dal
+    ${DAL_LIBRARIES}
+    ${HDF5_LIBRARIES}
+    ${CASA_LIBRARIES}
+    ${CFITSIO_LIBRARIES}
+    )
+  ## additional properties
+  set_target_properties (test_dal
+    PROPERTIES
+    COMPILE_FLAGS "-I${DAL_INCLUDES} -I${HDF5_INCLUDES}"
+    )
+  ## testing
+  add_test (test_dal test_dal ${dataset_tbb})
+endif (HAVE_DAL AND HAVE_CASACORE AND HAVE_HDF5)
+

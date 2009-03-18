@@ -233,28 +233,6 @@ if (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
 endif (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
-## Test working with the Data Access Library (DAL)
-
-if (HAVE_DAL AND HAVE_CASACORE AND HAVE_HDF5)
-  ## compiler instructions
-  add_executable (tUseDAL tUseDAL.cc)
-  ## linker instructions
-  target_link_libraries (tUseDAL
-    ${DAL_LIBRARIES}
-    ${HDF5_LIBRARIES}
-    ${CASA_LIBRARIES}
-    ${CFITSIO_LIBRARIES}
-    )
-  ## additional properties
-  set_target_properties (tUseDAL
-    PROPERTIES
-    COMPILE_FLAGS "-I${DAL_INCLUDES} -I${HDF5_INCLUDES}"
-    )
-  ## testing
-  add_test (tUseDAL tUseDAL ${dataset_tbb})
-endif (HAVE_DAL AND HAVE_CASACORE AND HAVE_HDF5)
-
-## -----------------------------------------------------------------------------
 ## Test working with the Python libraries
 
 if (HAVE_PYTHON)
