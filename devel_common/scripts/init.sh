@@ -65,15 +65,17 @@ for PY_VERSION in 2.6 2.5 2.4
   if test -d $LOFARSOFT/release/lib/python$PY_VERSION/site-packages ; then
     export PYTHONPATH=$LOFARSOFT/release/lib/python$PY_VERSION/site-packages:$PYTHONPATH
   fi
+
+  ## Location of Fink-installed packages
+
+  if test -d /sw/lib/python$PY_VERSION/site-packages ; then
+    export PYTHONPATH=$PYTHONPATH:/sw/lib/python$PY_VERSION/site-packages
+  fi
+
+  if test -d /sw/lib/python$PY_VERSION/site-packages/PyQt4 ; then
+    export PYTHONPATH=$PYTHONPATH:/sw/lib/python$PY_VERSION/site-packages/PyQt4
+  fi
 }
-
-if test -d /sw/lib/python2.6/site-packages ; then
-  export PYTHONPATH=$PYTHONPATH:/sw/lib/python2.6/site-packages
-fi
-
-if test -d /sw/lib/python2.5/site-packages ; then
-  export PYTHONPATH=$PYTHONPATH:/sw/lib/python2.5/site-packages
-fi
 
 #############################################################################
 #
