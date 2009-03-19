@@ -24,43 +24,55 @@
 #
 #############################################################################
 
+SYSTEM_NAME=`uname -s`
 
-#############################################################################
-#
-#  Check for the existence of the LOFARSOFT  environment variable
-#
-#############################################################################
+##______________________________________________________________________________
+## Check for the existence of the LOFARSOFT  environment variable
 
 if test -z "$LOFARSOFT" ; then
    echo "ERROR:  Please set the LOFARSOFT environment variable"
 else  # only execute the following if LOFARSOFT is set
 
-#############################################################################
-#
-#  Add the LOFAR executables to the path
-#
-#############################################################################
+##______________________________________________________________________________
+##  Add the LOFAR executables to the path
 
 export PATH=$LOFARSOFT/release/bin:$PATH
 
-#############################################################################
-#
-#  Add the Python libraries to the existing search path
-#
-#############################################################################
+##______________________________________________________________________________
+##  Add the location of the libraries
 
-if test -z "$PYTHONPATH" ; then
-	export PYTHONPATH=$LOFARSOFT/release/lib/python2.6:$LOFARSOFT/release/lib/python2.5:$LOFARSOFT/release/lib/python2.4:$LOFARSOFT/release/lib/python
-else
-	export PYTHONPATH=$LOFARSOFT/release/lib/python2.6:$LOFARSOFT/release/lib/python2.5:$LOFARSOFT/release/lib/python2.4:$LOFARSOFT/release/lib/python:$PYTHONPATH
+if [ "$SYSTEM_NAME" == "Darwin" ] ; then
+    export DYLD_LIBRARY_PATH=$LOFARSOFT/release/lib:$DYLD_LIBRARY_PATH
+else 
+    export LD_LIBRARY_PATH=$LOFARSOFT/release/lib:$LD_LIBRARY_PATH
 fi
 
+##______________________________________________________________________________
+## Add the Python libraries to the existing search path
+
+if test -z "$PYTHONPATH" ; then
+  export PYTHONPATH=$LOFARSOFT/release/lib/python
+else
+  export PYTHONPATH=$LOFARSOFT/release/lib/python:$PYTHONPATH
+fi
+
+for PY_VERSION in 2.6 2.5 2.4 
+{
+  if test -d $LOFARSOFT/release/lib/python$PY_VERSION ; then
+    export PYTHONPATH=$LOFARSOFT/release/lib/python$PY_VERSION:$PYTHONPATH
+  fi
+
+  if test -d $LOFARSOFT/release/lib/python$PY_VERSION/site-packages ; then
+    export PYTHONPATH=$LOFARSOFT/release/lib/python$PY_VERSION/site-packages:$PYTHONPATH
+  fi
+}
+
 if test -d /sw/lib/python2.6/site-packages ; then
-    export PYTHONPATH=$PYTHONPATH:/sw/lib/python2.6/site-packages
+  export PYTHONPATH=$PYTHONPATH:/sw/lib/python2.6/site-packages
 fi
 
 if test -d /sw/lib/python2.5/site-packages ; then
-    export PYTHONPATH=$PYTHONPATH:/sw/lib/python2.5/site-packages
+  export PYTHONPATH=$PYTHONPATH:/sw/lib/python2.5/site-packages
 fi
 
 #############################################################################
@@ -70,7 +82,7 @@ fi
 #############################################################################
 
 if test -z "$AIPSPATH" ; then
-	export AIPSPATH=$LOFARSOFT
+  export AIPSPATH=$LOFARSOFT
 fi
 
 #############################################################################
