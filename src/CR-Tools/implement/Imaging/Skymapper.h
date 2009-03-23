@@ -173,12 +173,12 @@ namespace CR {  // Namespace CR -- begin
     //! Object to handle the beamforming of the input data
     Beamformer beamformer_p;
     //! Pointer to a paged image containing the generated data
-    casa::ImageInterface<Double> *image_p;
+    casa::ImageInterface<float> *image_p;
 
     // -- book-keeping
 
     //! Aray buffering the data returned by the Beamformer 
-    casa::Array<double> bufferArray_p;
+    casa::Array<float> bufferArray_p;
     //! Position marking the start of the buffer within the output array
     casa::IPosition bufferStart_p;
     //! Stride through the output array to insert the buffer array

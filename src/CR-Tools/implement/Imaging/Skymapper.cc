@@ -310,11 +310,11 @@ namespace CR {  // Namespace CR -- begin
 
     /* Create paged image on disk */
 // #ifdef HAVE_HDF5
-//     image_p = new casa::HDF5Image<double> (tile,
+//     image_p = new casa::HDF5Image<float> (tile,
 // 					   csys,
 // 					   filename_p);
 // #else
-    image_p = new casa::PagedImage<double> (tile,
+    image_p = new casa::PagedImage<float> (tile,
 					    csys,
 					    filename_p);
 // #endif
