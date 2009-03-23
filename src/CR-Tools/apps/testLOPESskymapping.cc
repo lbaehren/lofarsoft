@@ -56,6 +56,8 @@ using CR::TimeFreq;
 /*!
   \file testLOPESskymapping.cc
 
+  \ingroup CR_Applications
+
   \brief Test the Skymapper with a LOPES event
  
   \author Andreas Horneffer

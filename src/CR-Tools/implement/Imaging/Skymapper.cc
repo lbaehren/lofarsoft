@@ -309,15 +309,15 @@ namespace CR {  // Namespace CR -- begin
     casa::TiledShape tile (shape);
 
     /* Create paged image on disk */
-#ifdef HAVE_HDF5
-    image_p = new casa::HDF5Image<double> (tile,
-					   csys,
-					   filename_p);
-#else
+// #ifdef HAVE_HDF5
+//     image_p = new casa::HDF5Image<double> (tile,
+// 					   csys,
+// 					   filename_p);
+// #else
     image_p = new casa::PagedImage<double> (tile,
 					    csys,
 					    filename_p);
-#endif
+// #endif
     
     /*
      *  Provide some minimal feedback about the image file created on disk.

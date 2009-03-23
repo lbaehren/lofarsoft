@@ -30,7 +30,7 @@ using CR::CalTableReader;
 /*!
   \file writeLopesCalTable.cc
   
-  \ingroup apps
+  \ingroup CR_Applications
 
   \brief for writing LOPES-CalTables
  

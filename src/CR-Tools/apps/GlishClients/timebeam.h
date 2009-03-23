@@ -18,12 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: timebeam.h,v 1.7 2007/03/19 12:29:46 bahren Exp $ */
-
 /*!
   \file timebeam.h
 
-  \ingroup CR_Applications
+  \ingroup CR_Glish
   
   \brief Generation of a timebeam
   

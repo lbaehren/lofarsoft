@@ -2,7 +2,7 @@
 /*!
   \file eventsaveclient-socket.cc
   
-  \ingroup CR_Applications
+  \ingroup CR_Glish
 
   \brief send events to the KASCADE-xevb.
 

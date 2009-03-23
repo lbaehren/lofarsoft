@@ -49,7 +49,7 @@ using namespace std;
 /*!
   \file moviemaker.h
   
-  ingroup CR_Applications
+  ingroup CR_Glish
 
   \brief Additional functionality for the moviefromimage tool.
 

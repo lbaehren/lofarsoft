@@ -43,7 +43,7 @@
 /*!
   \file CalTableClient.h
   
-  \ingroup CR_Applications
+  \ingroup CR_Glish
 
   \brief Wrapper to use the CalTables from Glish
   

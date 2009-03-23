@@ -21,7 +21,7 @@
 /*!
   \file dstb.h
 
-  \ingroup CR_Applications
+  \ingroup CR_Glish
   
   \brief Generation of dynamic spectrum on timebeam
   

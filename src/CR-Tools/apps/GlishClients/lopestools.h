@@ -43,7 +43,7 @@
 /*!
   \file lopestools.h
   
-  \ingroup CR_Applications
+  \ingroup CR_Glish
 
   \brief Various functions to use with the LOPES-glish software
 

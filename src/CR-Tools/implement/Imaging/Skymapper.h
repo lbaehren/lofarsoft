@@ -44,13 +44,13 @@
 #include <tables/Tables/Table.h>
 #include <tables/Tables/TableRecord.h>
 
-#ifdef HAVE_HDF5
-#include <images/Images/HDF5Image.h>
-const std::string outfile_name ("skymap.h5");
-#else
+/* #ifdef HAVE_HDF5 */
+/* #include <images/Images/HDF5Image.h> */
+/* const std::string outfile_name ("skymap.h5"); */
+/* #else */
 #include <images/Images/PagedImage.h>
 const std::string outfile_name ("skymap.img");
-#endif
+/* #endif */
 
 // LOPES-Tools header files
 #include <Coordinates/SkymapCoordinate.h>

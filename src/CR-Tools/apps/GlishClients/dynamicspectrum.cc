@@ -24,7 +24,7 @@
 /*!
   \file dynamicspectrum.cc
 
-  \ingroup CR_Applications
+  \ingroup CR_Glish
 */
 
 #include "dynamicspectrum.h"

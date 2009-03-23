@@ -41,7 +41,7 @@
 /*!
   \file SimpleDynspecClient.cc
   
-  \ingroup CR_Applications
+  \ingroup CR_Glish
 
   \brief Exceedingly simple dynamic-spectrum application
   

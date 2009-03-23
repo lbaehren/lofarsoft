@@ -44,7 +44,7 @@
 /*!
   \file ppsync.cc
   
-  \ingroup CR_Applications
+  \ingroup CR_Glish
 
   \brief Synchronization of parallel port CLI.
 

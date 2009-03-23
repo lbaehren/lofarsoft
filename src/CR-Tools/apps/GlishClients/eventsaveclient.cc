@@ -2,7 +2,7 @@
 /*!
   \file eventsaveclient.cc
   
-  \ingroup CR_Applications
+  \ingroup CR_Glish
 
   \brief Save/Read a LOPES-event to/from disk
   

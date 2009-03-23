@@ -68,7 +68,7 @@ using casa::String;
 /*!
   \file skymapper.h
 
-  \ingroup CR_Applications
+  \ingroup CR_Glish
 
   \brief A Glish CLI for the generation of skymaps.
 

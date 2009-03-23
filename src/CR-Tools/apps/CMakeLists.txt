@@ -65,19 +65,24 @@ else (HAVE_CASACORE)
 endif (HAVE_CASACORE)
 
 ##____________________________________________________________________
-## skymapper
+## imager
 
 if (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
   ## compiler instructions
-  add_executable (skymapper skymapper.cc)
+  add_executable (imager imager.cc)
   ## linker instructions
-  target_link_libraries (skymapper cr ${BOOST_LIBRARIES})
+  target_link_libraries (imager
+    cr
+    ${BOOST_LIBRARIES}
+    ${DAL_LIBRARIES}
+    ${HDF5_LIBRARIES}
+    )
   ## installation instructions
-  list (APPEND cr_apps skymapper)
+  list (APPEND cr_apps imager)
   ## testing 
-  add_test (skymapper_test01 skymapper --help)
-  add_test (skymapper_test02 skymapper --infile ${dataset_lopes_example})
-  add_test (skymapper_test03 skymapper --infile ${dataset_lopes_example} --blocksize 4096)
+  add_test (imager_test01 imager --help)
+  add_test (imager_test02 imager --infile ${dataset_lopes_example})
+  add_test (imager_test03 imager --infile ${dataset_lopes_example} --blocksize 4096)
 endif (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
 
 ##____________________________________________________________________

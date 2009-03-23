@@ -42,7 +42,7 @@ using std::endl;
 namespace bpo = boost::program_options;
 
 /*!
-  \file skymapper.cc
+  \file imager.cc
 
   \ingroup CR_Applications
   
@@ -132,20 +132,20 @@ namespace bpo = boost::program_options;
   <ul>
     <li>Show the available command line options:
     \verbatim
-    skymapper --help
+    imager --help
     \endverbatim
     <li>Use default setting for the generations of a skymap:
     \verbatim
-    skymapper --infile 20080604_122217_2300.dat.h5
+    imager --infile 20080604_122217_2300.dat.h5
     \endverbatim
     or via the short form
     \verbatim
-    skymapper -I 20080604_122217_2300.dat.h5
+    imager -I 20080604_122217_2300.dat.h5
     \endverbatim
     <li>Generate skymap using a specific celestial reference frame and spherical
     map projection:
     \verbatim
-    skymapper -I 20080604_122217_2300.dat.h5 --refcode J2000 --projection SIN
+    imager -I 20080604_122217_2300.dat.h5 --refcode J2000 --projection SIN
     \endverbatim
   </ul>
 */
@@ -159,18 +159,48 @@ namespace bpo = boost::program_options;
   This function will attempt to determine the type of input data from which to
   create the image. 
 
-  \retval dr    -- 
-  \param infile -- Input dataset from which to create the skymap.
+  \retval dr       -- Pointer to a DataReader object, allowing access to the 
+          contents of the dataset.
+  \param infile    -- Input dataset from which to create the skymap.
+  \param blocksize -- Size of an individual block of data read from file,
+         [samples].
 
   \return status -- Status of the operation; returns \e true in case the input
           dataset could be opened successfully. In case there was an error
 	  opening the input dataset -- either because of unknown type or due to
 	  corrupted data -- \e false will be returned.
 */
-bool setDataReader (CR::DataReader &dr,
-		    std::string const &infile)
+bool setDataReader (CR::DataReader *dr,
+		    std::string const &infile,
+		    uint const &blocksize)
 {
   bool status (true);
+
+  /* Try to open data-set using LopesEventIn */
+  try {
+    cout << "[imager] Try to open data-set using LopesEventIn ..." << endl;
+    CR::LopesEventIn *data = new CR::LopesEventIn (infile,blocksize);
+    dr = data;
+  } catch (std::string message) {
+    cerr << "[imager] Failed to open data-set as LOPES-Event." << endl;
+    status = false;
+  }
+  
+  /* Try to open data-set using LOFAR_TBB */
+  if (status == false) {
+    status = true;
+    try {
+      cout << "[imager] Try to open data-set using LOFAR-TBB ..." << endl;
+      CR::LOFAR_TBB *data = new CR::LOFAR_TBB (infile,blocksize);
+      dr = data;
+    } catch (std::string message) {
+      cerr << "[imager] Failed to open data-set as LOFAR-TBB." << endl;
+      status = false;
+    }
+  }
+
+  cout << "-- blocksize  dial = " << dr->blocksize() << endl;
+  cout << "-- FFT length = " << dr->fftLength() << endl;
   
   return status;
 }
@@ -182,12 +212,12 @@ int main (int argc, char *argv[])
 {
   int status (0);
 
-  // -----------------------------------------------------------------
+  //__________________________________________________________________
   // Parsing of the command-line parameters
 
   std::string infile     = "";
   std::string outfile    = "skymap.h5";
-  int blocksize          = 1024;
+  uint blocksize         = 1024;
   int blocksPerFrame     = 1;
   int nofFrames          = 1;
   std::string refcode    = "AZEL";
@@ -195,7 +225,7 @@ int main (int argc, char *argv[])
   std::string beamType   = "FREQ_POWER";
   std::string coordType  = "DirectionRadius";
 
-  bpo::options_description desc ("[skymapper] Available command line options");
+  bpo::options_description desc ("[imager] Available command line options");
 
   desc.add_options ()
     ("help,H", "Show help messages")
@@ -203,7 +233,7 @@ int main (int argc, char *argv[])
      "Input data file from which to generate the image")
     ("outfile,O", bpo::value<std::string>(),
      "Output image file.")
-    ("blocksize,B", bpo::value<int>(),
+    ("blocksize,B", bpo::value<uint>(),
      "Size of an individual block of data read from file, [samples].")
     ("blocks_per_frame", bpo::value<int>(),
      "Number of input data blocks combined into an output time-frame. (1)")
@@ -228,7 +258,7 @@ int main (int argc, char *argv[])
   }
   
   if (vm.count("blocksize")) {
-    blocksize = vm["blocksize"].as<int>();
+    blocksize = vm["blocksize"].as<uint>();
   }
   
   if (vm.count("blocks_per_frame")) {
@@ -265,6 +295,19 @@ int main (int argc, char *argv[])
 
   if (vm.count("coord_type")) {
     coordType = vm["coord_type"].as<std::string>();
+  }
+
+  //__________________________________________________________________
+  // Attempt to open the input data-set
+
+  CR::DataReader *dr = new CR::DataReader;
+
+  if (setDataReader(dr,infile,blocksize)) {
+    cout << "[imager] Successfully opened data-set into DataReader." << endl;
+    cout << "-- blocksize = " << dr->blocksize() << endl;
+  } else {
+    cerr << "[imager] Failed to open data-set!" << endl;
+    return 1;
   }
 
   // -----------------------------------------------------------------

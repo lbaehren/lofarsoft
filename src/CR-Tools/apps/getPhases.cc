@@ -28,6 +28,8 @@
 /*!
   \file getPhases.cc
 
+  \ingroup CR_Applications
+
   \brief Gets the phases of a LOPES event at a certain frequency (range)
 	 
   \author Frank Schröder
