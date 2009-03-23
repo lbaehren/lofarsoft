@@ -52,9 +52,10 @@ namespace CR { // Namespace CR -- begin
   
   LopesEventIn::LopesEventIn (String const &filename,
 			      uint const &blocksize)
-    : DataReader (blocksize){
+    : DataReader (1){
     init();
     attachFile(filename);
+    DataReader::setBlocksize(blocksize);
   }
  
   //________________________________________________________________________ init
