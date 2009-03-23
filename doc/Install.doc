@@ -253,6 +253,9 @@
 	    |-- python
 	    |   `-- boost
 	    `-- swig
+    
+	PyQt
+	`-- SIP
 	\endverbatim
 
  */
