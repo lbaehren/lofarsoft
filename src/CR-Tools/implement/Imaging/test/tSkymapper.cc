@@ -338,7 +338,32 @@ int test_methods (uint const &blocksize=1024)
     cout << "-- setting antenna positions ..." << endl;
     Vector<MVPosition> antPos (48);
     skymapper.setAntPositions (antPos);
-    skymapper.summary();
+    //
+    cout << "-- retrieving the embedded Beamformer object ..." << endl;
+    CR::Beamformer bf = skymapper.beamformer();
+    cout << "-- shape of the weights = " << bf.shapeWeights() << endl;
+    cout << "-- shape of the beam    = " << bf.shapeBeam()    << endl;
+  } catch (AipsError x) {
+    cerr << "[tSkymapper::test_methods] " << x.getMesg() << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[3] Test access to coordinates ..." << endl;
+  try {
+    CR::SkymapCoordinate coord  = skymapper.skymapCoordinate();
+    casa::CoordinateSystem csys = coord.coordinateSystem();
+    //
+    coord.summary();
+    //
+    cout << "[CoordinateSystem]" << endl;
+    cout << "-- nof. coordinates = " << csys.nCoordinates()   << endl;
+    cout << "-- nof. pixel axes  = " << csys.nPixelAxes()     << endl;
+    cout << "-- nof. world axes  = " << csys.nWorldAxes()     << endl;
+    cout << "-- World axis names = " << csys.worldAxisNames() << endl;
+    cout << "-- World axis units = " << csys.worldAxisUnits() << endl;
+    cout << "-- Reference value  = " << csys.referenceValue() << endl;
+    cout << "-- Reference pixel  = " << csys.referencePixel() << endl;
+    cout << "-- Increment        = " << csys.increment()      << endl;
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_methods] " << x.getMesg() << endl;
     nofFailedTests++;
@@ -469,11 +494,11 @@ int main (int argc,
   }
   
   // Test feeding SkymapCoordinate information into the Beamformer
-  nofFailedTests += test_Beamformer (blocksize);
+//   nofFailedTests += test_Beamformer (blocksize);
   // Test the various constructors for a Skymapper object
   nofFailedTests += test_Skymapper ();
   // Test the various methods for accessing internal data
-//   nofFailedTests += test_methods();
+  nofFailedTests += test_methods();
 
   nofFailedTests += test_processing (infile,
 				     blocksize,
