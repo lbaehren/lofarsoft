@@ -70,54 +70,77 @@ include (FindDoxygen)
 if (SYSTEM_PACKAGES)
   
   ## Mute the output of the find scripts
-  set (BOOST_FIND_QUIETLY    YES )
-  set (FFTW3_FIND_QUIETLY    YES )
-  set (GFORTRAN_FIND_QUIETLY YES )
-  set (GSL_FIND_QUIETLY      YES )
+  set (DOXYGEN_FIND_QUIETLY   YES )
+  set (FFTW3_FIND_QUIETLY     YES )
+  set (GFORTRAN_FIND_QUIETLY  YES )
+  set (GSL_FIND_QUIETLY       YES )
+  set (HDF5_FIND_QUIETLY      YES )
   
-  include (FindBoost)
+  include (FindDoxygen)
   include (FindFFTW3)
   include (FindGFortran)
   include (FindGSL)
-  
+  include (FindHDF5)
+
   if (APPLE)
     
     ## Locate the Fink executable
     find_program (fink_executable fink)
     
     if (fink_executable)
-      
-      ## List of Fink packages
+
+      ##______________________________________________________________
+      ## Set up the list of Fink packages
+
       set (fink_packages
 	atlas
 	bison
-	doxygen
 	flex
 	fftw3
 	fftw3-shlibs
 	gfortran-shlibs
-	gsl
-	gsl-shlibs
 	hdf5-18
 	hdf5-18-shlibs
 	numpy-py26
 	qt4-mac
 	sip-py26
-	swig
 	pyqt4-py26
 	)
-      
-      ## Convert list of packages to command line argument for Fink
-      foreach (package_name ${fink_packages})
-	set (fink_packages_list "${fink_packages_list} ${package_name}")
-      endforeach (package_name)
-      
+
+      if (NOT DOXYGEN_FOUND)
+	list (APPEND fink_packages doxygen)
+      endif (NOT DOXYGEN_FOUND)
+
+      if (NOT HAVE_GSL)
+	list (APPEND fink_packages gsl)
+	list (APPEND fink_packages gsl-shlibs)
+      endif (NOT HAVE_GSL)
+
+      if (NOT SWIG_FOUND)
+	list (APPEND fink_packages swig)
+      endif (NOT SWIG_FOUND)
+
+      ##______________________________________________________________
+      ## Define installation targets for the packages
+
+      foreach (fink_package ${fink_packages})
+	## define target for individual Fink package
+	add_custom_target (fink-${fink_package}
+	  COMMAND ${fink_executable} install ${fink_package}
+	  WORKING_DIRECTORY ${USG_BUILD}
+	  COMMENT "Installating Fink package ${fink_package} ..."
+	  )
+	## target dependencies
+	list (APPEND fink-packages-depends fink-${fink_package})
+      endforeach (fink_package)
+
+      ## Master target to install all of the above Fink packages
       add_custom_target (fink-packages
-	COMMAND ${fink_executable} install ${fink_packages_list}
 	COMMAND ${fink_executable} remove hdf5 hdf5-shlibs
 	WORKING_DIRECTORY ${USG_BUILD}
-	COMMENT "Installing Fink packages ..."
+	COMMENT "Installating Fink packages ..."
 	)
+      add_dependencies (fink-packages ${fink-packages-depends})
       
     else (fink_executable)
       message (STATUS "Unable to install Fink packages!")
@@ -271,11 +294,11 @@ add_dependencies (plplot python swig)
 ##____________________________________________________________________
 ## Packages/Targets needing extra attention
 
-add_custom_target (cmake_modules
+add_custom_target (cmake-modules
   COMMAND mkdir -p cmake_modules
   COMMAND cd cmake_modules && cmake ${USG_ROOT}/devel_common/cmake
   WORKING_DIRECTORY ${USG_BUILD}
-  COMMENT "Building package cmake_modules ..."
+  COMMENT "Running test of CMake-modules ..."
   )
 
 ## ==============================================================================
