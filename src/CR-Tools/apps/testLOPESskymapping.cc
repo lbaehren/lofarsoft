@@ -110,12 +110,12 @@ int  simpleImage(string const &infile,
     cout << "testLOPESskymapping::simpleImage Setting up SpatialCoordinate"  << endl;
     std::string refcode    = "AZEL";
     std::string projection = "SIN";
-    IPosition shape (3,30,30,10);
+    IPosition shape (3,30,30,3);
     SpatialCoordinate spatial (CoordinateType::DirectionRadius, refcode,projection);
     spatial.setShape(shape);
     // Time-Frequency coordinate
     cout << "testLOPESskymapping::simpleImage Setting up TimeFreqCoordinate"  << endl;
-    uint nofBlocksPerFrame = 1;
+    uint nofBlocksPerFrame = 64;
     uint nofFrames         = (dr.headerRecord().asInt("Filesize")/blocksize)/nofBlocksPerFrame;
     TimeFreqCoordinate timeFreq (blocksize, nofBlocksPerFrame, nofFrames,true);
     // Skymap coordinate
@@ -151,6 +151,8 @@ int  simpleImage(string const &infile,
     Matrix<casa::DComplex> data; 
 
     for (uint blocknum=0; blocknum<nofBlocks; blocknum++){
+      cout << "testLOPESskymapping::simpleImage Processing block: " << blocknum << " out of: " 
+	   << nofBlocks << endl;
       dr.setBlock(blocknum);
       data = dr.fft();
       skymapper.processData(data);
