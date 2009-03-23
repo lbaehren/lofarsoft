@@ -49,8 +49,8 @@ option (SYSTEM_PACKAGES     "Installation of required system packages?"     YES 
 
 ## Options affecting the build of individual packages
 
-option (CR_WITH_GUI         "Build CR-Tools with graphical interface?"   NO )
-option (CR_WITH_STARTOOLS   "Enable using routines from LOPES-Star?"     NO )
+option (CR_WITH_GUI         "Build CR-Tools with graphical interface?"   NO  )
+option (CR_WITH_STARTOOLS   "Enable using routines from LOPES-Star?"     NO  )
 option (DAL_PYTHON_BINDINGS "Create python bindings for DAL?"            YES )
 
 ## ==============================================================================
@@ -89,8 +89,10 @@ if (SYSTEM_PACKAGES)
       
       ## List of Fink packages
       set (fink_packages
-	boost1.33
-	boost1.33-shlibs
+	atlas
+	bison
+	doxygen
+	flex
 	fftw3
 	fftw3-shlibs
 	gfortran-shlibs
@@ -98,7 +100,11 @@ if (SYSTEM_PACKAGES)
 	gsl-shlibs
 	hdf5-18
 	hdf5-18-shlibs
+	numpy-py26
 	qt4-mac
+	sip-py26
+	swig
+	pyqt4-py26
 	)
       
       ## Convert list of packages to command line argument for Fink
@@ -106,8 +112,9 @@ if (SYSTEM_PACKAGES)
 	set (fink_packages_list "${fink_packages_list} ${package_name}")
       endforeach (package_name)
       
-      add_custom_target (fink_packages_install
+      add_custom_target (fink-packages
 	COMMAND ${fink_executable} install ${fink_packages_list}
+	COMMAND ${fink_executable} remove hdf5 hdf5-shlibs
 	WORKING_DIRECTORY ${USG_BUILD}
 	COMMENT "Installing Fink packages ..."
 	)
@@ -352,9 +359,5 @@ message (STATUS "USG_ROOT           = ${USG_ROOT}")
 message (STATUS "USG_INSTALL_PREFIX = ${USG_INSTALL_PREFIX}")
 message (STATUS "USG_PYTHONPATH     = ${USG_PYTHONPATH}")
 message (STATUS "USG_DATA           = ${USG_DATA}")
-#message (STATUS "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
-#message (STATUS "DOXYGEN_FOUND      = ${DOXYGEN_FOUND}")
-#message (STATUS "CR_WITH_GUI        = ${CR_WITH_GUI}")
-#message (STATUS "CR_WITH_STARTOOLS  = ${CR_WITH_STARTOOLS}")
 message (STATUS "------------------------------------------------------------")
 
