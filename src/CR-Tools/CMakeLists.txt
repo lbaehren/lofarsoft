@@ -315,7 +315,7 @@ if (CR_WITH_GUI)
 
   find_library (QT4_LIBARY_QTCORE QtCore
     PATHS ${lib_locations}
-    PATH_SUFFIXES qt4-x11 qt4-x11/lib
+    PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
     )
   if (QT4_LIBARY_QTCORE)
     list (APPEND QT4_LIBRARIES ${QT4_LIBARY_QTCORE})
@@ -323,7 +323,7 @@ if (CR_WITH_GUI)
   
   find_library (QT4_LIBARY_QTGUI QtGui
     PATHS ${lib_locations}
-    PATH_SUFFIXES qt4-x11 qt4-x11/lib
+    PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
     )
   if (QT4_LIBARY_QTGUI)
     list (APPEND QT4_LIBRARIES ${QT4_LIBARY_QTGUI})
@@ -331,7 +331,7 @@ if (CR_WITH_GUI)
 
   find_library (QT4_LIBARY_QTDESIGNER QtDesigner
     PATHS ${lib_locations}
-    PATH_SUFFIXES qt4-x11 qt4-x11/lib
+    PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
     )
   if (QT4_LIBARY_QTDESIGNER)
     list (APPEND QT4_LIBRARIES ${QT4_LIBARY_QTDESIGNER})
@@ -345,12 +345,12 @@ if (CR_WITH_GUI)
   
   find_path (QT4_INCLUDES Qt/qatomic.h QtGui/QTableWidgetItem QtGui/QWidget
     PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
-    PATH_SUFFIXES qt4-x11 qt4-x11/include
+    PATH_SUFFIXES qt4-mac qt4-mac/include qt4-x11 qt4-x11/include
     )
   
   find_path (HAVE_QT4_QWIDGET QWidget
     PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
-    PATH_SUFFIXES qt4-x11/include/QtGui QtGui
+    PATH_SUFFIXES qt4-mac/include/QtGui qt4-x11/include/QtGui QtGui
     )
   if (HAVE_QT4_QWIDGET)
     list (APPEND QT4_INCLUDES ${HAVE_QT4_QWIDGET})
