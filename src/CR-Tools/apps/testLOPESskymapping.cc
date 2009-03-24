@@ -138,7 +138,8 @@ int  simpleImage(string const &infile,
     cout << "testLOPESskymapping::simpleImage Setting up the Skymapper..."  << endl;
     Skymapper skymapper (coord,
 			 antPositions,
-			 outfile);
+			 outfile,
+			 CR::DataType::CASA_IMAGE);
     cout << "                                                         ... done."  << endl;
     skymapper.summary();
     

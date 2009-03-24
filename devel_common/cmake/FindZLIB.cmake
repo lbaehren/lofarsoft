@@ -45,7 +45,7 @@ find_path (ZLIB_INCLUDES zlib.h zutil.h
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-find_library (ZLIB_LIBRARIES zlib
+find_library (ZLIB_LIBRARIES z
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )

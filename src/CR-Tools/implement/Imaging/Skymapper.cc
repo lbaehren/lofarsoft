@@ -38,8 +38,10 @@ namespace CR {  // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                    Skymapper
   
-  Skymapper::Skymapper (std::string const &filename)
-    : filename_p (filename)
+  Skymapper::Skymapper (std::string const &filename,
+			DataType::Types const &imageType)
+    : filename_p (filename),
+      imageType_p (imageType)
   {
     init (SkymapCoordinate());
   }
@@ -48,8 +50,10 @@ namespace CR {  // Namespace CR -- begin
   //                                                                    Skymapper
   
   Skymapper::Skymapper (SkymapCoordinate const &skymapCoord,
-			std::string const &filename)
-    : filename_p (filename)
+			std::string const &filename,
+			DataType::Types const &imageType)
+    : filename_p (filename),
+      imageType_p (imageType)
   {
     init (skymapCoord);
   }
@@ -59,8 +63,10 @@ namespace CR {  // Namespace CR -- begin
   
   Skymapper::Skymapper (SkymapCoordinate const &skymapCoord,
 			Matrix<double> const &antPositions,
-			std::string const &filename)
-    : filename_p(filename)
+			std::string const &filename,
+			DataType::Types const &imageType)
+    : filename_p (filename),
+      imageType_p (imageType)
   {
     init (skymapCoord,
 	  antPositions);
@@ -71,8 +77,10 @@ namespace CR {  // Namespace CR -- begin
   
   Skymapper::Skymapper (SkymapCoordinate const &skymapCoord,
 			Vector<MVPosition> const &antPositions,
-			std::string const &filename)
-    : filename_p(filename)
+			std::string const &filename,
+			DataType::Types const &imageType)
+    : filename_p (filename),
+      imageType_p (imageType)
   {
     init (skymapCoord,
 	  antPositions);
@@ -307,26 +315,32 @@ namespace CR {  // Namespace CR -- begin
     casa::CoordinateSystem csys = coord_p.coordinateSystem();
     casa::IPosition shape       = coord_p.shape();
     casa::TiledShape tile (shape);
-
+    
     /* Create paged image on disk */
-// #ifdef HAVE_HDF5
-//     image_p = new casa::HDF5Image<float> (tile,
-// 					   csys,
-// 					   filename_p);
-// #else
-    image_p = new casa::PagedImage<float> (tile,
+    switch (imageType_p) {
+    case DataType::HDF5:
+      image_p = new casa::HDF5Image<float> (tile,
 					    csys,
 					    filename_p);
-// #endif
+      break;
+    case DataType::CASA_IMAGE:
+      image_p = new casa::PagedImage<float> (tile,
+					     csys,
+					     filename_p);
+      break;
+    default:
+      status = false;
+      break;
+    };
     
     /*
      *  Provide some minimal feedback about the image file created on disk.
      */
-
+    
     if (!image_p->ok()) {
       std::cerr << "[Skymapper::initSkymapper] Image is not ok!" << endl;
     }
-
+    
     if (!image_p->isWritable()) {
       std::cerr << "[Skymapper::initSkymapper] Image is not writable!" << endl;
     }

@@ -39,21 +39,16 @@
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <coordinates/Coordinates/LinearCoordinate.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
+#include <images/Images/HDF5Image.h>
+#include <images/Images/PagedImage.h>
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/SetupNewTab.h>
 #include <tables/Tables/Table.h>
 #include <tables/Tables/TableRecord.h>
 
-/* #ifdef HAVE_HDF5 */
-/* #include <images/Images/HDF5Image.h> */
-/* const std::string outfile_name ("skymap.h5"); */
-/* #else */
-#include <images/Images/PagedImage.h>
-const std::string outfile_name ("skymap.img");
-/* #endif */
-
-// LOPES-Tools header files
+// CR-Tools header files
 #include <Coordinates/SkymapCoordinate.h>
+#include <Data/DataType.h>
 #include <Data/ObservationData.h>
 #include <Imaging/Beamformer.h>
 #include <IO/DataReader.h>
@@ -162,12 +157,12 @@ namespace CR {  // Namespace CR -- begin
   */
   class Skymapper {
     
-  private:
-    
     // -- fundamental internal data ---------------------------------------------
     
     //! Name of the image created on disk
     String filename_p;
+    //! Data type of the created image (CASA_IMAGE or HDF5)
+    DataType::Types imageType_p;
     //! Container and handler for the coordinates
     SkymapCoordinate coord_p;
     //! Object to handle the beamforming of the input data
@@ -207,19 +202,23 @@ namespace CR {  // Namespace CR -- begin
       \f$ 120 \times 120 \f$ pixel grid of \f$ ( 2^\circ, 2^\circ ) \f$ deg
       resolution (AZEL, STG) map centered on \f$ ( 0, 90 ) \f$.
 
-      \param filename -- Name of the output file
+      \param filename  -- Name of the output file
+      \param imageType -- Data type of the created image (CASA_IMAGE or HDF5)
     */
-    Skymapper (std::string const &filename=outfile_name);
+    Skymapper (std::string const &filename="skymap.h5",
+	       DataType::Types const &imageType=DataType::HDF5);
     
     /*!
       \brief Argumented constructor
       
       \param skymapCoord -- Coordinates information encapsulated in a
                             SkymapCoordinate object.
-      \param filename -- Name of the output file
+      \param filename  -- Name of the output file
+      \param imageType -- Data type of the created image (CASA_IMAGE or HDF5)
     */
     Skymapper (SkymapCoordinate const &skymapCoord,
-	       std::string const &filename=outfile_name);
+	       std::string const &filename="skymap.h5",
+	       DataType::Types const &imageType=DataType::HDF5);
     
     /*!
       \brief Argumented constructor
@@ -228,11 +227,13 @@ namespace CR {  // Namespace CR -- begin
              SkymapCoordinate object.
       \param antPositions  -- [nofAntennas,3] Antenna positions for which the
              delay is computed, \f$ (x,y,z) \f$
-      \param filename -- Name of the output file
+      \param filename  -- Name of the output file
+      \param imageType -- Data type of the created image (CASA_IMAGE or HDF5)
     */
     Skymapper (SkymapCoordinate const &skymapCoord,
 	       Matrix<double> const &antPositions,
-	       std::string const &filename=outfile_name);
+	       std::string const &filename="skymap.h5",
+	       DataType::Types const &imageType=DataType::HDF5);
     
     /*!
       \brief Argumented constructor
@@ -241,11 +242,13 @@ namespace CR {  // Namespace CR -- begin
              SkymapCoordinate object.
       \param antPositions  -- Antenna positions for which the delay is computed,
              \f$ (x,y,z) \f$
-      \param filename -- Name of the output file
+      \param filename  -- Name of the output file
+      \param imageType -- Data type of the created image (CASA_IMAGE or HDF5)
     */
     Skymapper (SkymapCoordinate const &skymapCoord,
 	       Vector<MVPosition> const &antPositions,
-	       std::string const &filename=outfile_name);
+	       std::string const &filename="skymap.h5",
+	       DataType::Types const &imageType=DataType::HDF5);
     
     /*!
       \brief Copy constructor

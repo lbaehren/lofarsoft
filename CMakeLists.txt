@@ -55,11 +55,18 @@ option (DAL_PYTHON_BINDINGS "Create python bindings for DAL?"            YES )
 
 ## ==============================================================================
 ##
-##  Basic system inspection
+##  Basic system inspection:
+##
+##  - Look for essential system tools, which are required; some of the targets
+##    only will be activated if the necessary tool is available.
 ##
 ## ==============================================================================
 
-include (FindDoxygen)
+find_program (bison_executable   bison   PATHS ${bin_locations})
+find_program (doxygen_executable doxygen PATHS ${bin_locations})
+find_program (fink_executable    fink    PATHS ${bin_locations})
+find_program (flex_executable    flex    PATHS ${bin_locations})
+find_program (wget_executable    wget    PATHS ${bin_locations})
 
 ## ==============================================================================
 ##
@@ -70,22 +77,17 @@ include (FindDoxygen)
 if (SYSTEM_PACKAGES)
   
   ## Mute the output of the find scripts
-  set (DOXYGEN_FIND_QUIETLY   YES )
   set (FFTW3_FIND_QUIETLY     YES )
   set (GFORTRAN_FIND_QUIETLY  YES )
   set (GSL_FIND_QUIETLY       YES )
   set (HDF5_FIND_QUIETLY      YES )
   
-  include (FindDoxygen)
   include (FindFFTW3)
   include (FindGFortran)
   include (FindGSL)
   include (FindHDF5)
 
   if (APPLE)
-    
-    ## Locate the Fink executable
-    find_program (fink_executable fink)
     
     if (fink_executable)
 
@@ -107,9 +109,9 @@ if (SYSTEM_PACKAGES)
 	pyqt4-py26
 	)
 
-      if (NOT DOXYGEN_FOUND)
+      if (NOT doxygen_executable)
 	list (APPEND fink_packages doxygen)
-      endif (NOT DOXYGEN_FOUND)
+      endif (NOT doxygen_executable)
 
       if (NOT HAVE_GSL)
 	list (APPEND fink_packages gsl)
@@ -207,15 +209,15 @@ add_custom_target (update
   COMMENT "Updating working version of the source code from repository ..."
   )
 
-if (DOXYGEN_FOUND)
+if (doxygen_executable)
   add_custom_target (doc
-    COMMAND doxygen
+    COMMAND ${doxygen_executable}
     WORKING_DIRECTORY ${USG_ROOT}/doc  
     COMMENT "Creating Doxygen documentation for source code ..."
     )
-else (DOXYGEN_FOUND)
+else (doxygen_executable)
   message (STATUS "Disabled generation of source documentation - missing Doxygen!")
-endif (DOXYGEN_FOUND)
+endif (doxygen_executable)
 
 add_custom_target (doc-cmake
   COMMAND cmake --help-html CMake.html
@@ -236,16 +238,11 @@ add_custom_target (doc-ctest
 ##
 ## ==============================================================================
 
-##____________________________________________________________________
-## generic build instructions for the packages
-
 set (packages_external
-  bison
   blitz 
   boost
   casacore
   cfitsio
-  flex
   hdf5
   mathgl
   plplot
@@ -259,9 +256,23 @@ set (packages_external
   swig
   wcslib
   wcstools
-  wget
   zlib
   )
+
+if (NOT bison_executable)
+  list (APPEND packages_external bison)
+endif (NOT bison_executable)
+
+if (NOT flex_executable)
+  list (APPEND packages_external flex)
+endif (NOT flex_executable)
+
+if (NOT wget_executable)
+  list (APPEND packages_external wget)
+endif (NOT wget_executable)
+
+##____________________________________________________________________
+## generic build instructions for the packages
 
 foreach (package_name ${packages_external})
   add_custom_target (${package_name}

@@ -13,6 +13,7 @@ cmake_minimum_required (VERSION 2.6)
 option (SIP_FORCE_BUILD       "Force rebuild and local installation?"  NO  )
 option (SIP_VERBOSE_CONFIGURE "Be verbose during configuration?"       YES )
 option (SIP_VERBOSE_BUILD     "Be verbose during build process?"       NO  )
+option (SIP_CMAKE_BUILD       "Use CMake to configure and build?"      NO  )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -35,27 +36,7 @@ endif (USG_ROOT)
 ## ------------------------------------------------------------------------------
 ## Check if the program/package/library is already available
 
-#include (FindSIP)
-
-if (SIP_FOUND)
-  ## report found SIP installation
-  if (SIP_VERBOSE_CONFIGURE)
-    message (STATUS "SIP_DIR        = ${SIP_DIR}")
-    message (STATUS "SIP_EXECUTABLE = ${SIP_EXECUTABLE}")
-    message (STATUS "SIP_VERSION    = ${SIP_VERSION}")
-  endif (SIP_VERBOSE_CONFIGURE)
-  
-  string (COMPARE GREATER ${SIP_VERSION} "1.3.31" SIP_VERSION_OK)
-
-  if (SIP_VERSION_OK)
-    set (HAVE_SIP TRUE)
-  else (SIP_VERSION_OK)
-    message (STATUS "SIP version too old - forcing build of newer version!")
-    set (HAVE_SIP FALSE)
-  endif (SIP_VERSION_OK)
-else (SIP_FOUND)
-    set (HAVE_SIP FALSE)
-endif (SIP_FOUND)
+include (FindSIP)
 
 ## <-- begin build condition --------------------------------------------------->
 
@@ -92,7 +73,7 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
 
   ##__________________________________________________________________
   ## Check if a tar-archive with the source code is available already;
-  ## if this is not the case we need to fetch it from the USg server.
+  ## if this is not the case we need to fetch it from the server.
   
   find_file (have_sip_tgz ${SIP_TAR_ARCHIVE} ${SIP_SOURCE_DIR})
   
@@ -136,7 +117,7 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
   ## run "./configure"
 
   add_custom_target (run_configure ALL
-    COMMAND ./configure --prefix=${SIP_prefix}
+    COMMAND python configure.py -b ${SIP_prefix}/bin -d ${SIP_prefix}/lib/python2.6/site-packages  -e ${SIP_prefix}/include/python2.6cp -v ${SIP_prefix}/share/sip
     WORKING_DIRECTORY ${SIP_BINARY_DIR}/${SIP_DIRECTORY}
     COMMENT "[SIP] Running configure ..."
     )

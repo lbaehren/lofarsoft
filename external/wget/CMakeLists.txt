@@ -13,9 +13,6 @@ project (WGET C)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.6)
 
-## Enforced CMake policy 
-cmake_policy (VERSION 2.6)
-
 ## -----------------------------------------------------------------------------
 ## Todo
 
@@ -439,40 +436,67 @@ if (NOT HAVE_WGET OR WGET_FORCE_BUILD)
     
   else (WGET_CMAKE_BUILD)
     
-    ## [1] configure
+    set (WGET_VERSION "1.11.4")
+    set (WGET_DIRECTORY "wget-${WGET_VERSION}")
+    set (WGET_TAR_ARCHIVE "${WGET_DIRECTORY}.tar.gz")
+    set (WGET_URL "ftp://ftp.mirror.nl/pub/mirror/gnu/wget/${WGET_TAR_ARCHIVE}")
     
-    execute_process (
-      WORKING_DIRECTORY ${WGET_SOURCE_DIR}
-      COMMAND ./configure --prefix=${WGET_prefix} --includedir=${WGET_prefix}/src
-      TIMEOUT 300
-      ERROR_VARIABLE error_configure
-      ERROR_FILE error.log
+    ##________________________________________________________________
+    ## Check if a tar-archive with the source code is available already;
+    ## if this is not the case we need to fetch it from the server.
+    
+    find_file (have_wget_tgz ${WGET_TAR_ARCHIVE} ${WGET_SOURCE_DIR})
+    
+    if (have_wget_tgz)
+      add_custom_target (download_archive
+	COMMAND cp ${have_wget_tgz} .
+	WORKING_DIRECTORY ${WGET_BINARY_DIR}
+	COMMENT "Copying tar-archive from ${USG_ROOT}/external/wget ..."
+	)
+    else (have_wget_tgz)
+      if (HAVE_WGET)
+	add_custom_target (download_archive
+	  COMMAND wget -c ${WGET_URL}
+	  WORKING_DIRECTORY ${WGET_BINARY_DIR}
+	  )
+      else (HAVE_WGET)
+	if (HAVE_CURL)
+	  add_custom_target (download_archive ALL
+	    COMMAND curl ${WGET_URL} -o ${WGET_TAR_ARCHIVE} -C -
+	    WORKING_DIRECTORY ${WGET_BINARY_DIR}
+	    )
+	else (HAVE_CURL)
+	  message (FATAL_ERROR "[WGET] No tool found to download tar-archive!")
+	endif (HAVE_CURL)
+      endif (HAVE_WGET)
+    endif (have_wget_tgz)
+    
+    ##________________________________________________________________
+    ## Expand the tar-archive
+    
+    add_custom_target (expand_archive
+      COMMAND tar -xvzf ${WGET_TAR_ARCHIVE}
+      WORKING_DIRECTORY ${WGET_BINARY_DIR}
+      COMMENT "Expanding tar-archive ..."
       )
+    add_dependencies (expand_archive download_archive)
     
-    if (error_configure)
-      message (STATUS "There was an error running the WGET configure script!")
-      message (SEND_ERROR "${error_configure}")
-    endif (error_configure)
+    ##________________________________________________________________
+    ## Custom target wrapping the standard configure/build chain
     
-    ## [2] make
-    
-    execute_process (
-      WORKING_DIRECTORY ${WGET_SOURCE_DIR}
-      COMMAND make 
-      TIMEOUT 3600
-      ERROR_VARIABLE error_make
-      ERROR_FILE error.log
+    add_custom_target (run-configure ALL
+      COMMAND ./configure --prefix=${WGET_prefix}
+      WORKING_DIRECTORY ${WGET_BINARY_DIR}/${WGET_DIRECTORY}
+      COMMENT "[WGET] Running configure ..."
       )
+    add_dependencies (run-configure expand_archive)
     
-    ## [3] make install
-    
-    execute_process (
-      WORKING_DIRECTORY ${WGET_SOURCE_DIR}
-      COMMAND make install
-      TIMEOUT 180
-      ERROR_VARIABLE error_make_install
-      ERROR_FILE error.log
+    add_custom_target (run-make ALL
+      COMMAND make
+      WORKING_DIRECTORY ${WGET_BINARY_DIR}/${WGET_DIRECTORY}
+      COMMENT "[WGET] Starting build ..."
       )
+    add_dependencies (run-make run-configure)
     
     ## <-- end configure/build method ------------------------------------------>
     

@@ -221,9 +221,13 @@ int test_Skymapper (uint const &blocksize=1024,
 
   cout << "[1] Skymapper() ..." << endl;
   try {
-    Skymapper skymapper ("skymap01.img");
+    Skymapper hdf5_image ("skymap01.h5",
+			  CR::DataType::HDF5);
+    hdf5_image.summary();
     //
-    skymapper.summary();
+    Skymapper casa_image ("skymap01.img",
+			  CR::DataType::CASA_IMAGE);
+    casa_image.summary();
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl;
     nofFailedTests++;
@@ -245,7 +249,7 @@ int test_Skymapper (uint const &blocksize=1024,
 			     timeFreq,
 			     CR::SkymapQuantity::FREQ_POWER);
     Skymapper skymapper1 (coord1,
-			 "skymap02a.img");
+			 "skymap02a.h5");
     skymapper1.summary();
 
     /* Skymapper to compute cc-beam */
@@ -253,7 +257,7 @@ int test_Skymapper (uint const &blocksize=1024,
 			     timeFreq,
 			     CR::SkymapQuantity::TIME_CC);
     Skymapper skymapper2 (coord2,
-			 "skymap02b.img");
+			 "skymap02b.h5");
     skymapper2.summary();
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl;
@@ -433,27 +437,33 @@ int test_processing (string const &infile,
   
   cout << "[1] Process a single block of (simulated) data ..." << endl;
   try {
+    /* Create Skymapper object to work with */
     Skymapper skymapper (coord,
 			 antPositions,
 			 "skymap_test1.img");
     skymapper.summary();
-
     /* Prepare some test data to process */
-    
     Matrix<casa::DComplex> data (timeFreq.fftLength(),
 				 nofAntennas);
     for (uint freq(0); freq<timeFreq.fftLength(); freq++) {
       data.row(freq) = double(freq);
     }
-
+    /* Process a block of data and write out the result */
     skymapper.processData(data);
-
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;
     nofFailedTests++;
   }
-
-  cout << "[2] Process example LOPES data-set ..." << endl;
+  
+  cout << "[2] Reading back in previously created image file ..." << endl;
+  try {
+    casa::PagedImage<float> image ("skymap_test1.img");
+  } catch (AipsError x) {
+    cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[3] Process example LOPES data-set ..." << endl;
   try {
     // set up DataReader for input of data
     CR::LopesEvent dr (dataset_lopes_example,
