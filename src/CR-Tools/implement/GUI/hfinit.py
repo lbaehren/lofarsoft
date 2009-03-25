@@ -175,6 +175,9 @@ class DataList(list):
     def set(self,value):
         for d in self: d.set(value)
         return self
+    def set_silent(self,value):
+        for d in self: d.set_silent(value)
+        return self
     def put_silent(self,value):
         for d in self: d.put_silent(value)
         return self
@@ -336,6 +339,8 @@ def object_set_list(self,lst):
 def object_set(self,value):
     if type(value)==int:
         self.putI(value)
+    elif type(value)==bool:
+        self.putI(int(value))
     elif type(value)==float:
         self.putN(value)
     elif type(value)==str:
@@ -878,8 +883,9 @@ mglGraphZB=0
 mglGraphPS=1
 mglGraphGL=2
 mglGraphIDTF=3
+#mglGraphAB is not available - ZB is default
 
 def e(file): 
-    "short form form execfile(file)"
-    print "Loading",file,"."
-    execfile(file)
+    "short form form execfile(file.py)"
+    print "Loading",file+".py"
+    execfile(file+".py")

@@ -372,19 +372,22 @@ class hfPlotPanel(hffunc):
         ymax=ymax+extra
         self.putResult("ymin",ymin)
         self.putResult("ymax",ymax)
-#        self.GraphObject.Axis("log(y)")
-#        self.GraphObject.Axis("log(x)")
-        self.GraphObject.Axis("xy")
-        xtick=getaxisdivision(xmin,xmax)
-        self.GraphObject.SetTicks("x",xtick[0],5,xtick[1])
-#        self.GraphObject.SetTicks("x",0)
-        ytick=getaxisdivision(ymin,ymax)
-        self.GraphObject.SetTicks("y",ytick[0],5,ytick[1])
-#        self.GraphObject.SetTicks("y",0)
+##        self.GraphObject.Axis("log(y)")
+##        self.GraphObject.Axis("log(x)")
+        self.GraphObject.SetTickLen(0.2)
+        self.GraphObject.Axis("xy",False)
+#        self.GraphObject.AdjustTicks("y")
+#        self.GraphObject.AdjustTicks("x")
+#        xtick=getaxisdivision(xmin,xmax)
+#        self.GraphObject.SetTicks("x",xtick[0],5,xtick[1])
+##        self.GraphObject.SetTicks("x",0)
+#        ytick=getaxisdivision(ymin,ymax)
+#        self.GraphObject.SetTicks("y",ytick[0],5,ytick[1])
+##        self.GraphObject.SetTicks("y",0)
         self.GraphObject.SetFontSize(3.)
         self.GraphObject.SetFontDef("rR:r")
         self.GraphObject.SetRanges(xmin,xmax,ymin,ymax)
-        self.GraphObject.Box("g")
+#        self.GraphObject.Box("g")
         if self.xAxisLabel=="": self.xAxisLabel=self.xAxisDatatype
         if self.yAxisLabel=="": self.yAxisLabel=self.yAxisDatatype
         if not self.xAxisUnit=="": self.xAxisLabel=self.xAxisLabel+" ["+self.xAxisUnitPrefix+self.xAxisUnit+"]"
@@ -419,6 +422,9 @@ class hfPlotWindow(hffunc):
         self.setParameter("npanelsx",-1)
         self.setParameter("npanelsy",-1)
         self.setParameter("GraphObject",None)
+        self.setResult("npanelsplotted",0)
+        self.setResult("npanelsplottedx",0)
+        self.setResult("npanelsplottedy",0)
         return 0
     def process(self,d):
         if verbose: print "PlotWindow - Process"
@@ -426,7 +432,7 @@ class hfPlotWindow(hffunc):
             print "Error: PlotWindow - GraphObject not of type mglGraph!"
             return 1
         self.GraphObject.Clf(self.BackgroundColor[0],self.BackgroundColor[1],self.BackgroundColor[2])
-        self.GraphObject.SetTuneTicks(False,-1.2)
+#        self.GraphObject.SetTuneTicks(False,-1.2)
         self.GraphObject.Title(self.Title,"iC",-1.5)
         self.PlotPanel=self.data["'PlotPanel"]
         if type(self.PlotPanel)==Data: 
@@ -450,6 +456,9 @@ class hfPlotWindow(hffunc):
             print "Error: PlotWindow - PlotPanel not found."
             return 1
         self.data.noMod(); self.data.putPy(self.GraphObject)
+        self.putResult("npanelsplotted",npanels)
+        self.putResult("npanelsplottedx",nx)
+        self.putResult("npanelsplottedy",ny)
         return 0
     def cleanup(self):
         return 0

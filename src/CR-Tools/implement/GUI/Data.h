@@ -21,8 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QtCore/QMetaObject>
-#include <QtGui/QLabel>
+//#include <QtCore/QMetaObject>
+//#include <QtGui/QLabel>
 
 #define MAGICCODE 260966
 

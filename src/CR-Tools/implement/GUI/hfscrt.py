@@ -1,4 +1,17 @@
 
+def mousePressEvent(self,event):
+    print "Mouse pressed"
+    print "PosType=",type(event.pos())
+    print "Pos=",event.pos()
+
+def mymousePressEvent():
+    print "Mouse pressed"
+
+hfqtplot.mousePressEvent=mousePressEvent
+
+
+
+
 xmax=30.
 xmin=10.
 ndef=7.

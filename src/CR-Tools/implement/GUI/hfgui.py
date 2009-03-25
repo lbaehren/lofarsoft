@@ -66,7 +66,9 @@ n
         self.d["PlotData'Color"].Q=yyy.color.text()
 
 '''
-
+CURSORMODE_NONE=0
+CURSORMODE_VALUE=1
+CURSORMODE_ZOOM=2
 
 qpointf=QtCore.QPointF()
 
@@ -101,6 +103,8 @@ class hfQtPlot(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.img=(QtGui.QImage())
+        self.rubberBand=False
+        self.rubberOrigin=QtCore.QPoint()
     def setGraph(self,gr):
         self.gr=gr;
         self.createImage()
@@ -114,6 +118,46 @@ class hfQtPlot(QtGui.QWidget):
         self.update()
     def setData(self,data):
         self.d=data
+    def mousePressEvent(self,event):
+        self.rubberOrigin = QtCore.QPoint(event.pos());
+        if not self.rubberBand:
+            self.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self);
+        self.rubberBand.setGeometry(QtCore.QRect(self.rubberOrigin, QtCore.QSize()));
+        self.rubberBand.show();
+    def mouseMoveEvent(self,event):
+        self.rubberBand.setGeometry(QtCore.QRect(self.rubberOrigin, event.pos()).normalized())
+    def mouseReleaseEvent(self,event):
+        self.rubberBand.hide();
+        xy=self.screen2coord(self.rubberBand.geometry())
+        obj=self.currentplotpanelobject()
+        obj["'XAuto"].set_silent(int(False))
+        obj["'xmin"].set_silent(xy[0])
+        obj["'xmax"].set_silent(xy[2])
+        obj["'ymin"].set_silent(xy[1])
+        obj["'ymax"].set(xy[3])
+    def whichpanel(self,xs,ys):
+        "Returns the number of rows and columns of panels displayed and returns an index to the panel which contains screen position xs,xy. Returns a tupel of the form (nx,ny,n) and calls SubPlot with this input."
+        n=self.d["'PlotWindow:npanelsplotted"]
+        if n>1:
+            nx=self.d["'PlotWindow:npanelsplottedx"].val()
+            ny=self.d["'PlotWindow:npanelsplottedy"].val()
+            width=self.d["'Width"].val()
+            height=self.d["'Height"].val()
+            npx=int(ceil(1.0*xs/width*nx))
+            npy=int(ceil(1.0*ys/height*ny))
+            n=(npy-1)*ny+(npx-1)
+        else: 
+            nx=1
+            ny=1
+            n=1
+        self.gr.SubPlot(nx,ny,n)
+        return (nx,ny,n)
+    def screen2coord(self,qr):
+        "Given a QRectangle this will return the coordinates of the top left and bottom right corner in the current units chosed by the axis of the panel closest to the bottom left position. It wil also return the total rows & columns, and index of the selected panel. Returns a tupel of the form: (x1,y1,x2,y2,nx,ny,n)"
+        npan=self.whichpanel(qr.left(),qr.bottom())
+        xy1=self.gr.CalcXYZ(qr.left(),qr.bottom())
+        xy2=self.gr.CalcXYZ(qr.right(),qr.top())
+        return (xy1.x,xy1.y,xy2.x,xy2.y) + npan
     def paintEvent(self, event):
         paint = QtGui.QPainter()
         paint.begin(self)
@@ -153,16 +197,14 @@ class hfQtPlot(QtGui.QWidget):
         else: (self.d // self.d["'ROOT:QtNetview"]).touch()
     def hfsetXAuto(self,yesno):
         obj=self.currentplotpanelobject()
-        obj["'xmin"].put_silent(min(toList(obj["xmin"].val())))
-        obj["'xmax"].put_silent(max(toList(obj["xmax"].val())))
-        obj["'XAuto"].put_silent(int(yesno))
-        obj.touch()
+        obj["'XAuto"].set_silent(yesno)
+        obj["'xmin"].set_silent(min(toList(obj["xmin"].val())))
+        obj["'xmax"].set(max(toList(obj["xmax"].val())))
     def hfsetYAuto(self,yesno):
         obj=self.currentplotpanelobject()
-        obj["'ymin"].put_silent(min(toList(obj["ymin"].val())))
-        obj["'ymax"].put_silent(max(toList(obj["ymax"].val())))
-        obj["'YAuto"].put_silent(int(yesno))
-        obj.touch()
+        obj["'YAuto"].set_silent(yesno)
+        obj["'ymin"].set_silent(min(toList(obj["ymin"].val())))
+        obj["'ymax"].set(max(toList(obj["ymax"].val())))
     def hfsetXShift(self,i):
         self.currentplotpanelobject()["'xshift"].set(i)
     def hfsetYShift(self,i):

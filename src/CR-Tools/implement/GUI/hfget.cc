@@ -29,7 +29,7 @@
 
 using namespace std;
 
-#include "mainwindow.h" 
+//#include "mainwindow.h" 
 #include "hfdefs.h" 
 #include "hfcast.h" 
 #include "VectorSelector.h"
@@ -1823,7 +1823,7 @@ void Data::delData(){
 
 /*! \brief Send a signal to PyQt.
 
- Invokes the internally stored PyQt object and cals the method
+ Invokes the internally stored PyQt object and calls the method
  specified in the input string. This is used, for example, to send an
  updated() signal to the GUI.
 */
@@ -2713,9 +2713,7 @@ Data::Data(HString name,superior_container * superior){
     //Initialize the data function libraries - this should be automized
     DBG("Data: Publish library functions Sys");
     DataFunc_Sys_Library_publish(data.superior->library_ptr); 
-    DBG("Data: Publish library functions Qt");
-    DataFunc_Qt_Library_publish(data.superior->library_ptr); 
-    DBG("Data: Publish library functions Qt");
+    DBG("Data: Publish library functions Py");
     DataFunc_Py_Library_publish(data.superior->library_ptr); 
     DBG("Data: Publish library functions CR");
     DataFunc_CR_Library_publish(data.superior->library_ptr); 

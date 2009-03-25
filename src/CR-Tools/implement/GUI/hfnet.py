@@ -25,7 +25,7 @@ d >> _d("Filetype","LOPESEvent",_l(2)) \
 (("Parameters","PlotPanel",_l(90)) >> d["File"])
 
 #Create several Antennas on the same level and add a Data object as placeholder
-d["File"] >> NewObjectRange("Antenna",1) >> ("Data",_f("dataRead","CR",TYPE.COMPLEX)) >>  ("UnitData",_f("Unit")) >> "yAxis"
+d["File"] >> NewObjectRange("Antenna",4) >> ("Data",_f("dataRead","CR",TYPE.COMPLEX)) >>  ("UnitData",_f("Unit")) >> "yAxis"
 
 d["Antenna"] >>  ("Data",_f("dataRead","CR",TYPE.NUMBER)) >>  ("UnitData",_f("Unit")) >> "xAxis"
 
@@ -131,10 +131,19 @@ initializePyQtObjects(d)#This will send a PyQt signal from all objects to the GU
 hfqtplot=d["QtPanel'PlotWidget"].getPy()
 hfqtplot.initializechooser()
 
+guifuncs=d["QtPanel'PlotWidget"].getPy()
+gr=d["PlotWindow'GraphObject"].getPy()
 
-print "Attention: For perfomance reasons it is avisable to toggle the Network Display off!"
-print 'Use: d["QtPanel"] // d["QtNetview"] or toggle in the GUI'
+print "Attention: For perfomance reasons the Network Display is toggled off!"
+#print 'Use: d["QtPanel"] // d["QtNetview"] or toggle field in the GUI (bottom left)'
+d["QtPanel"] // d["QtNetview"]
 
+
+print '-------------------------------------'
+print 'A few tricks to help debugging:'
+print 'The GUI itself is accessed through the object "gui" (use dir(gui)) to see all the elements of the gui)'
+print 'To get access to the slots/functions in hfplot the GUI is connected to type  dir(guifuncs)'
+print "To access the mglGraph object use 'gr'."
 
 
 ##########End ....
