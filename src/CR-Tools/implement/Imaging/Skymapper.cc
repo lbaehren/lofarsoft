@@ -23,6 +23,8 @@
 
 #include <Imaging/Skymapper.h>
 
+#include <casa/Exceptions/Error.h>
+
 using std::cerr;
 using std::cout;
 using std::endl;
@@ -138,6 +140,7 @@ namespace CR {  // Namespace CR -- begin
     beamformer_p         = other.beamformer_p;
     coord_p              = other.coord_p;
     filename_p           = other.filename_p;
+    imageType_p          = other.imageType_p;
     nofProcessedBlocks_p = other.nofProcessedBlocks_p;
     bufferStart_p        = other.bufferStart_p;
     bufferStride_p       = other.bufferStride_p;
@@ -249,17 +252,21 @@ namespace CR {  // Namespace CR -- begin
     nofProcessedBlocks_p = 0;
 
     //________________________________________________________________
-    /*
-     *  Configure the Beamformer.
-     */
+    // Configure the Beamformer.
 
-    /* Get sky positions and frequency values. */
-    Matrix<double> skyPos = coord_p.spatialCoordinate().positionValues();
-    Vector<double> freq   = coord_p.timeFreqCoordinate().frequencyValues();
-    /* Update internal settings of the Beamformer. */
-    beamformer_p.setSkymapType(coord_p.skymapQuantity().type());
-    beamformer_p.setSkyPositions(skyPos);
-    beamformer_p.setFrequencies(freq);
+    try {
+      /* Get sky positions and frequency values. */
+      Matrix<double> skyPos = coord_p.spatialCoordinate().positionValues();
+      Vector<double> freq   = coord_p.timeFreqCoordinate().frequencyValues();
+      /* Update internal settings of the Beamformer. */
+      beamformer_p.setSkymapType(coord_p.skymapQuantity().type());
+      beamformer_p.setSkyPositions(skyPos);
+      beamformer_p.setFrequencies(freq);
+    } catch (casa::AipsError x) {
+      std::cerr << "[Skymapper::initSkymapper] Failed configuring Beamformer!\n"
+		<< x.getMesg()
+		<< std::endl;
+    }
     
     //________________________________________________________________
     /*
@@ -267,6 +274,7 @@ namespace CR {  // Namespace CR -- begin
      *  information on how to insert it into the pixel array of the output
      *  image.
      */
+
     CoordinateType coordType    = coord_p.timeFreqCoordinate().coordType();
     uint nofAxes                = coord_p.nofAxes();
     casa::IPosition bufferShape = coord_p.shape();
@@ -304,34 +312,48 @@ namespace CR {  // Namespace CR -- begin
 		<< std::endl;
       break;
     }
-    
-    bufferArray_p.resize(bufferShape);
 
+    try {    
+      bufferArray_p.resize(bufferShape);
+    } catch (casa::AipsError x) {
+      std::cerr << "[Skymapper::initSkymapper] Failed resizing buffer array!\n"
+		<< x.getMesg()
+		<< std::endl;
+    }
+    
+    //________________________________________________________________
     /*
       With the image data written into an AIPS++ PagedImage, we need to create
       and initialize one first, before we can start inserting the computed 
       image data.
     */
+
     casa::CoordinateSystem csys = coord_p.coordinateSystem();
     casa::IPosition shape       = coord_p.shape();
     casa::TiledShape tile (shape);
     
     /* Create paged image on disk */
-    switch (imageType_p) {
-    case DataType::HDF5:
-      image_p = new casa::HDF5Image<float> (tile,
-					    csys,
-					    filename_p);
-      break;
-    case DataType::CASA_IMAGE:
-      image_p = new casa::PagedImage<float> (tile,
-					     csys,
-					     filename_p);
-      break;
-    default:
-      status = false;
-      break;
-    };
+    try {
+      switch (imageType_p) {
+      case DataType::HDF5:
+	image_p = new casa::HDF5Image<float> (tile,
+					      csys,
+					      filename_p);
+	break;
+      case DataType::CASA_IMAGE:
+	image_p = new casa::PagedImage<float> (tile,
+					       csys,
+					       filename_p);
+	break;
+      default:
+	status = false;
+	break;
+      };
+    } catch (casa::AipsError x) {
+      std::cerr << "[Skymapper::initSkymapper] Failed creating image on disk!\n"
+		<< x.getMesg()
+		<< std::endl;
+    }
     
     /*
      *  Provide some minimal feedback about the image file created on disk.

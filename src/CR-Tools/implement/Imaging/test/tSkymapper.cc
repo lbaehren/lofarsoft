@@ -33,6 +33,9 @@
 #include <casa/OS/Directory.h>
 #include <coordinates/Coordinates/ObsInfo.h>
 #include <images/Images/PagedImage.h>
+#ifdef HAVE_HDF5
+#include <images/Images/HDF5Image.h>
+#endif
 
 using casa::AipsError;
 using casa::Array;
@@ -69,7 +72,8 @@ using CR::TimeFreq;
 
 */
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                              cleanup_directory
 
 /*!
   \brief Clean up the directory once the tests have completed
@@ -102,7 +106,118 @@ int cleanup_directory ()
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                     getObsInfo
+
+/*!
+  \brief Get a ObsInfo object to attach to coordinates
+
+  \param telescope -- Name of the telescope
+  \param observer  -- Name of the observer
+
+  \return info -- A casa::ObsInfo object, containing additional information on an
+          observation.
+*/
+casa::ObsInfo getObsInfo (std::string const &telescope="LOFAR",
+			  std::string const &observer="Lars Baehren")
+{
+  casa::ObsInfo info;
+  info.setTelescope (telescope);
+  info.setObserver (observer);
+  return info;
+}
+
+//_______________________________________________________________________________
+//                                                                    getTimeFreq
+
+/*!
+  /brief Get TimeFreq coordinate
+
+  \param blocksize      -- Number of samples per block of data.
+  \param sampleFreq     -- 
+  \param nyquistZone    -- 
+  \param blocksPerFrame -- 
+  \param nofFrames      -- 
+ */
+CR::TimeFreqCoordinate getTimeFreq (uint const &blocksize=1024,
+				    casa::Quantity const &sampleFreq=casa::Quantity(200,"MHz"),
+				    uint const &nyquistZone=1,
+				    uint const &blocksPerFrame=1,
+				    uint const &nofFrames=1)
+{
+  CR::TimeFreqCoordinate timeFreq (blocksize,
+				   sampleFreq,
+				   nyquistZone,
+				   blocksPerFrame,
+				   nofFrames);
+  return timeFreq;
+}
+
+//_______________________________________________________________________________
+//                                                            test_ImageInterface
+
+/*!
+  \brief Test working with implementations of the casa::ImageInterface class
+
+  \param blocksize       -- Number of samples per block of data.
+
+  \return nofFailedTests --  The number of failed tests encountered within this
+          fucntion.
+*/
+int test_ImageInterface (uint const &blocksize=1024)
+{
+  cout << "\n[tSkymapper::test_ImageInterface]\n" << endl;
+  
+  int nofFailedTests (0);
+  // Time-frequency domain data
+  TimeFreqCoordinate timeFreq (blocksize,80e06,2);
+  // Coordinates 
+  SkymapCoordinate coord;
+  coord.setTimeFreqCoordinate(timeFreq);
+  coord.setObsInfo(getObsInfo());
+
+  casa::CoordinateSystem csys (coord.coordinateSystem());
+  casa::TiledShape tile (coord.shape());
+  
+  cout << "[1] Testing constructor for ImageInterface<T> ..." << endl;
+  try {
+    cout << "-- creating PagedImage<float> ..." << endl;
+    casa::PagedImage<float> img_paged_float (tile,csys,"img_paged_float.img");
+    cout << "-- creating PagedImage<double> ..." << endl;
+    casa::PagedImage<double> img_paged_double (tile,csys,"img_paged_double.img");
+#ifdef HAVE_HDF5
+    cout << "-- creating HDF5Image<float> ..." << endl;
+    casa::HDF5Image<float> img_hdf5_float (tile,csys,"img_hdf5_float.h5");
+    cout << "-- creating HDF5Image<double> ..." << endl;
+    casa::HDF5Image<double> img_hdf5_double (tile,csys,"img_hdf5_double.h5");
+#endif
+  } catch (AipsError x) {
+    cerr << x.getMesg() << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[2] Test attachement to pointer ..." << endl;
+  try {
+    cout << "-- Create pointer ..." << endl;
+    casa::ImageInterface<float> *image;
+    //
+    cout << "-- Create new object attaching to pointer ..." << endl;
+    image = new casa::PagedImage<float> (tile,
+					 csys,
+					 "img_paged_float.img");
+    //
+    cout << "-- release assigned pointer ..." << endl;
+    delete image;
+  } catch (AipsError x) {
+    cerr << x.getMesg() << endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+//_______________________________________________________________________________
+//                                                                test_Beamformer
 
 /*!
   \brief Test setting up the Beamformer using a SkymapCoordinate object
@@ -116,7 +231,7 @@ int cleanup_directory ()
 */
 int test_Beamformer (uint const &blocksize=1024)
 {
-  cout << "\n[tSkymapper::test_Beamformer]\n" << endl;
+  cout << "\n[tSkymapper::test_Beamformer]\n" << endl << std::flush;
 
   int nofFailedTests (0);
   SkymapCoordinate coord;
@@ -126,7 +241,7 @@ int test_Beamformer (uint const &blocksize=1024)
   coord.summary();
   bf.summary();
 
-  cout << "[1] Add observation data to the coordinate ..." << endl;;
+  cout << "[1] Add observation data to the coordinate ..." << endl << std::flush;
   try {
     casa::ObsInfo info;
     info.setTelescope ("UNKNOWN");
@@ -141,7 +256,7 @@ int test_Beamformer (uint const &blocksize=1024)
     nofFailedTests++;
   }
 
-  cout << "[2] Set the time-frequency coordinate ..." << endl;
+  cout << "[2] Set the time-frequency coordinate ..." << endl << std::flush;
   try {
     casa::Quantity sampleFreq (200,"MHz");
     uint nyquistZone (1);
@@ -166,7 +281,7 @@ int test_Beamformer (uint const &blocksize=1024)
     nofFailedTests++;
   }
 
-  cout << "[3] Set the spatial coordinate ..." << endl;
+  cout << "[3] Set the spatial coordinate ..." << endl << std::flush;
   try {
     IPosition shape (3,20,20,10);
     //
@@ -186,7 +301,7 @@ int test_Beamformer (uint const &blocksize=1024)
     nofFailedTests++;
   }
 
-  cout << "[4] Set positions and frequencies ..." << endl;
+  cout << "[4] Set positions and frequencies ..." << endl << std::flush;
   try {
     Vector<MVPosition> antPos (10);
     Matrix<double> skyPos = coord.spatialCoordinate().positionValues();
@@ -204,7 +319,8 @@ int test_Beamformer (uint const &blocksize=1024)
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                 test_Skymapper
 
 /*!
   \brief Test constructors for a new Skymapper object
@@ -219,7 +335,7 @@ int test_Skymapper (uint const &blocksize=1024,
 
   int nofFailedTests (0);
 
-  cout << "[1] Skymapper() ..." << endl;
+  cout << "[1] Skymapper() ..." << endl << std::flush;
   try {
     Skymapper hdf5_image ("skymap01.h5",
 			  CR::DataType::HDF5);
@@ -229,23 +345,18 @@ int test_Skymapper (uint const &blocksize=1024,
 			  CR::DataType::CASA_IMAGE);
     casa_image.summary();
   } catch (AipsError x) {
-    cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl;
+    cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl << std::flush;
     nofFailedTests++;
   }
   
-  cout << "[2] Skymapper(SkymapCoordinate) ..." << endl;
+  cout << "[2] Skymapper(SkymapCoordinate) ..." << endl << std::flush;
   try {
     // Time-frequency domain data
     TimeFreqCoordinate timeFreq (blocksize,
 				 sampleFreq,
 				 nyquistZone);
-    // Observation info
-    casa::ObsInfo info;
-    info.setTelescope ("LOFAR");
-    info.setObserver ("Lars Baehren");
-
     /* Skymapper to compute power in frequency */
-    SkymapCoordinate coord1 (info,
+    SkymapCoordinate coord1 (getObsInfo(),
 			     timeFreq,
 			     CR::SkymapQuantity::FREQ_POWER);
     Skymapper skymapper1 (coord1,
@@ -253,55 +364,52 @@ int test_Skymapper (uint const &blocksize=1024,
     skymapper1.summary();
 
     /* Skymapper to compute cc-beam */
-    SkymapCoordinate coord2 (info,
+    SkymapCoordinate coord2 (getObsInfo(),
 			     timeFreq,
 			     CR::SkymapQuantity::TIME_CC);
     Skymapper skymapper2 (coord2,
 			 "skymap02b.h5");
     skymapper2.summary();
   } catch (AipsError x) {
-    cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl;
+    cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl << std::flush;
     nofFailedTests++;
   }
-  
+
   cout << "[3] Skymapper(SkymapCoordinate,Matrix<double>,SkymapQuantity) ..."
-       << endl;
+       <<endl << std::flush;
   try {
-    // Observation info
-    std::string telescope ("LOFAR");
-    std::string observer ("Lars Baehren");
-    casa::ObsInfo info;
-    info.setTelescope(telescope);
-    info.setObserver(observer);
     // Spatial coordinates
     IPosition shape (3,20,20,10);
     SpatialCoordinate spatial (CoordinateType::DirectionRadius,
 			       "AZEL"
 			       "SIN");
     spatial.setShape(shape);
-    // Time-Frequency coordinate
-    TimeFreqCoordinate timeFreq (blocksize);
     // Skymap coordinate
-    SkymapCoordinate coord (info,
+    SkymapCoordinate coord (getObsInfo(),
 			    spatial,
-			    timeFreq);
+			    getTimeFreq(blocksize));
     // Antenna positions
     uint nofAntennas (10);
     Matrix<double> antPositions (nofAntennas,3);
     //
+    cout << "-- blocksize         = " << blocksize            << endl << std::flush;
+    cout << "-- 3D shape          = " << shape                << endl << std::flush;
+    cout << "-- antenna positions = " << antPositions.shape() << endl << std::flush;
+    //
     Skymapper skymapper (coord,
 			 antPositions,
-			 "skymap03.img");
+			 "skymap03.h5");
     skymapper.summary();
   } catch (AipsError x) {
-    cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl;
+    cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl << std::flush;
     nofFailedTests++;
   }
   
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                   test_methods
 
 /*!
   \brief Test processing of the data to generate an image
@@ -311,23 +419,20 @@ int test_Skymapper (uint const &blocksize=1024,
 */
 int test_methods (uint const &blocksize=1024)
 {
-  cout << "\n[tSkymapper::test_methods]\n" << endl;
+  cout << "\n[tSkymapper::test_methods]\n" << endl << std::flush;
   
   int nofFailedTests (0);
   
   // Time-frequency domain data
   TimeFreqCoordinate timeFreq (blocksize,80e06,2);
-  // Observation info
-  casa::ObsInfo info;
-  info.setObserver ("Lars Baehren");
   // Coordinates 
   SkymapCoordinate coord;
   coord.setTimeFreqCoordinate(timeFreq);
-  coord.setObsInfo(info);
+  coord.setObsInfo(getObsInfo());
   // Skymapper object to work with
   Skymapper skymapper (coord);
 
-  cout << "[1] Access to internal parameters ..." << endl;
+  cout << "[1] Access to internal parameters ..." << endl << std::flush;
   try {
     cout << "-- Filename of image     = " << skymapper.filename()   << endl;
     cout << "-- Image shape           = " << skymapper.imageShape() << endl;
@@ -337,7 +442,7 @@ int test_methods (uint const &blocksize=1024)
     nofFailedTests++;
   }
 
-  cout << "[2] Access to Beamformer parameters ..." << endl;
+  cout << "[2] Access to Beamformer parameters ..." << endl << std::flush;
   try{
     cout << "-- setting antenna positions ..." << endl;
     Vector<MVPosition> antPos (48);
@@ -376,7 +481,8 @@ int test_methods (uint const &blocksize=1024)
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                test_processing
 
 /*!
   \brief Test processing of the data to generate an image
@@ -406,12 +512,8 @@ int test_processing (string const &infile,
   uint nofBlocksPerFrame = 1;
   uint nofAntennas       = 10;
 
-  // Observation info
-  casa::ObsInfo info;
-  info.setTelescope(telescope);
-  info.setObserver(observer);
   // Spatial coordinates
-  IPosition shape (3,30,30,10);
+  IPosition shape (3,35,35,10);
   SpatialCoordinate spatial (CoordinateType::DirectionRadius,
 			     refcode,
 			     projection);
@@ -423,7 +525,7 @@ int test_processing (string const &infile,
 			       true);
   
   // Skymap coordinate
-  SkymapCoordinate coord (info,
+  SkymapCoordinate coord (getObsInfo(),
 			  spatial,
 			  timeFreq);
   
@@ -440,7 +542,8 @@ int test_processing (string const &infile,
     /* Create Skymapper object to work with */
     Skymapper skymapper (coord,
 			 antPositions,
-			 "skymap_test1.img");
+			 "skymap_test1.h5",
+			 CR::DataType::HDF5);
     skymapper.summary();
     /* Prepare some test data to process */
     Matrix<casa::DComplex> data (timeFreq.fftLength(),
@@ -457,7 +560,13 @@ int test_processing (string const &infile,
   
   cout << "[2] Reading back in previously created image file ..." << endl;
   try {
-    casa::PagedImage<float> image ("skymap_test1.img");
+    casa::HDF5Image<float> image ("skymap_test1.h5");
+    //
+    cout << "-- Image name       = " << image.name()      << endl;
+    cout << "-- Image shape      = " << image.shape()     << endl;
+    cout << "-- Image type       = " << image.imageType() << endl;
+    cout << "-- World axis names = " << image.coordinates().worldAxisNames() << endl;
+    cout << "-- World axis units = " << image.coordinates().worldAxisUnits() << endl;
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;
     nofFailedTests++;
@@ -470,8 +579,13 @@ int test_processing (string const &infile,
 		       blocksize);
     dr.summary();
     // update SkymapCoordinate
-    info.setTelescope("LOPES");
-    coord.setObsInfo (info);
+    coord.setObsInfo (getObsInfo("LOPES"));
+    // Create Skymapper object to work with
+    Skymapper skymapper (coord,
+			 antPositions,
+			 "skymap_lopes.img",
+			 CR::DataType::CASA_IMAGE);
+    skymapper.summary();
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;
     nofFailedTests++;
@@ -480,7 +594,8 @@ int test_processing (string const &infile,
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                           main
 
 int main (int argc,
 	  char *argv[])
@@ -503,13 +618,15 @@ int main (int argc,
     infile = argv[1];
   }
   
+  // Test working with instantiations of casa::ImageInterface
+  nofFailedTests += test_ImageInterface();
   // Test feeding SkymapCoordinate information into the Beamformer
-//   nofFailedTests += test_Beamformer (blocksize);
+  nofFailedTests += test_Beamformer (blocksize);
   // Test the various constructors for a Skymapper object
   nofFailedTests += test_Skymapper ();
   // Test the various methods for accessing internal data
   nofFailedTests += test_methods();
-
+  // Test processing of data
   nofFailedTests += test_processing (infile,
 				     blocksize,
 				     have_dataset);

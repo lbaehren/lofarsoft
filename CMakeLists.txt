@@ -66,6 +66,7 @@ find_program (bison_executable   bison   PATHS ${bin_locations})
 find_program (doxygen_executable doxygen PATHS ${bin_locations})
 find_program (fink_executable    fink    PATHS ${bin_locations})
 find_program (flex_executable    flex    PATHS ${bin_locations})
+find_program (tar_executable     tar     PATHS ${bin_locations})
 find_program (wget_executable    wget    PATHS ${bin_locations})
 
 ## ==============================================================================
@@ -154,6 +155,34 @@ endif (SYSTEM_PACKAGES)
 
 ## ==============================================================================
 ##
+##  Documentation generation
+##
+## ==============================================================================
+
+if (doxygen_executable)
+  add_custom_target (doc
+    COMMAND ${doxygen_executable}
+    WORKING_DIRECTORY ${USG_ROOT}/doc  
+    COMMENT "Creating Doxygen documentation for source code ..."
+    )
+else (doxygen_executable)
+  message (STATUS "Disabled generation of source documentation - missing Doxygen!")
+endif (doxygen_executable)
+
+add_custom_target (doc-cmake
+  COMMAND cmake --help-html CMake.html
+  WORKING_DIRECTORY ${USG_ROOT}/doc  
+  COMMENT "Creating browsable documentation for CMake ..."
+  )
+
+add_custom_target (doc-ctest
+  COMMAND ctest --help-html CTest.html
+  WORKING_DIRECTORY ${USG_ROOT}/doc  
+  COMMENT "Creating browsable documentation for CTest ..."
+  )
+
+## ==============================================================================
+##
 ##  Cleaning up
 ##
 ## ==============================================================================
@@ -208,29 +237,6 @@ add_custom_target (update
   WORKING_DIRECTORY ${USG_ROOT}
   COMMENT "Updating working version of the source code from repository ..."
   )
-
-if (doxygen_executable)
-  add_custom_target (doc
-    COMMAND ${doxygen_executable}
-    WORKING_DIRECTORY ${USG_ROOT}/doc  
-    COMMENT "Creating Doxygen documentation for source code ..."
-    )
-else (doxygen_executable)
-  message (STATUS "Disabled generation of source documentation - missing Doxygen!")
-endif (doxygen_executable)
-
-add_custom_target (doc-cmake
-  COMMAND cmake --help-html CMake.html
-  WORKING_DIRECTORY ${USG_ROOT}/doc  
-  COMMENT "Creating browsable documentation for CMake ..."
-  )
-
-add_custom_target (doc-ctest
-  COMMAND ctest --help-html CTest.html
-  WORKING_DIRECTORY ${USG_ROOT}/doc  
-  COMMENT "Creating browsable documentation for CTest ..."
-  )
-
 
 ## ==============================================================================
 ##
@@ -311,6 +317,16 @@ add_custom_target (cmake-modules
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Running test of CMake-modules ..."
   )
+
+if (wget_executable AND tar_executable)
+  add_custom_target (test-data
+    COMMAND ${wget_executable} -c http://usg.lofar.org/download/datasets/usg_data_test.tgz
+    COMMAND ${tar_executable} -xvzf usg_data_test.tgz
+    COMMAND rm -f usg_data_test.tgz
+    WORKING_DIRECTORY ${USG_DATA}
+    COMMENT "Retrieving test data-sets ..."
+    )
+endif (wget_executable AND tar_executable)
 
 ## ==============================================================================
 ##

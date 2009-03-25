@@ -139,14 +139,14 @@
 	
 	\section configure_build_external Targets to build external packages
 	
-	- \b bison - GNU Project parser generator (yacc replacement)
+	- \b bison - [optional] GNU Project parser generator (yacc replacement)
 	- \b blitz 
 	- \b boost - a free peer-reviewed portable C++ source libraries. Amongst
 	many other things it contains \e Boost.Python, a C++ library which enables
 	seamless interoperability between C++ and the Python programming language.
 	- \b casacore
 	- \b cfitsio
-	- \b flex - Fast lexical analyzer generator
+	- \b flex - [optional] Fast lexical analyzer generator
 	- \b hdf5
 	- \b mathgl - Library for the generation of scientific plots
 	- \b plplot - Library for the generation of scientific plots
@@ -161,10 +161,13 @@
 	- \b wcslib - Library implementing the WCS standard, central to a number of
 	astronomical data reduction packages.
 	- \b wcstools
-	- \b wget - Non-interactive network downloader. GNU Wget is a free utility
-	for non-interactive download of files from the Web. It supports HTTP,
-	HTTPS, and FTP protocols, as well as retrieval through HTTP proxies.
+	- \b wget - [optional] Non-interactive network downloader. GNU Wget is a
+	free utility for non-interactive download of files from the Web. It supports
+	HTTP, HTTPS, and FTP protocols, as well as retrieval through HTTP proxies.
 	- \b zlib - Compression/decompression library.
+	
+	\b Note: Some of the above listed targets may not be present in your setup;
+	if this is the case, then the related system package is installed already.
 	
 	\section configure_build_doc Targets for documentation generation
 	
@@ -173,7 +176,9 @@
 	
 	- \b doc - Create documentation for the source code using Doxygen.
 	- \b doc-cmake - Create documentation for CMake; the resulting HTML file
-	will be placed into $LOFARSOFT/doc.
+	\e CMake.html will be placed into $LOFARSOFT/doc.
+	- \b doc-ctest - Create documentation for CTest; the resulting HTML file
+	\e CTest.html will be placed into $LOFARSOFT/doc.
 	
 	\section configure_build_clean Targets for cleaning up directories
 	
@@ -216,11 +221,6 @@
 	startools
 	`-- root
 	
-	plplot
-	|-- python
-	|   `-- boost
-	`-- swig
-	
 	dal
 	|-- plplot
 	`-- casacore
@@ -236,6 +236,9 @@
 	cr
 	|-- dal
 	|   |-- plplot
+	|   |   |-- python
+	|   |   |   `-- boost
+	|   |   `-- swig
 	|   `-- casacore
 	|       |-- hdf5
 	|       |   `-- szip
@@ -247,15 +250,14 @@
 	|       `-- bison
 	|-- startools
 	|   `-- root
-	`-- mathgl
-	    |-- hdf5
-	    |   `-- szip
-	    |-- python
-	    |   `-- boost
-	    `-- swig
-    
-	PyQt
-	`-- SIP
+	|-- mathgl
+	|   |-- hdf5
+	|   |   `-- szip
+	|   |-- python
+	|   |   `-- boost
+	|   `-- swig
+	`-- PyQt
+	    `-- SIP
 	\endverbatim
 
  */

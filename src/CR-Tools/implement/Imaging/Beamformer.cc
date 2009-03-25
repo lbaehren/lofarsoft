@@ -324,9 +324,9 @@ namespace CR { // Namespace CR -- begin
   void Beamformer::setWeights ()
   {
     /*
-     *  Forward the function call to the method of the base class; required
-     *  recursive calls are implemented through GeomWeight::setWeights().
-     */
+      Forward the function call to the method of the base class; required
+      recursive calls are implemented through GeomWeight::setWeights().
+    */
     GeomWeight::setWeights();
     
     /*
