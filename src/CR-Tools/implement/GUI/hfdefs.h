@@ -15,6 +15,7 @@ extern int global_debuglevel;
 #include <sstream>
 #include <complex>
 #include <cmath>
+#include <stdint.h>
 
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
@@ -94,7 +95,7 @@ typedef int modval;
 
 
 //Define Types of Data to be stored
-typedef int HInteger;
+typedef intptr_t HInteger;
 typedef double HNumber;
 typedef std::complex<double> HComplex;
 typedef std::string HString;
