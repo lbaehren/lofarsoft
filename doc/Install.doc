@@ -123,48 +123,155 @@
 	dependencies) of the package developed and written by the User Software
 	Group:
 	
-	- \b dal - The <a href="group__DAL.html">Data Access Library</a> (DAL).
-
-	- \b cr - The <a href="group__CR.html">CR-Tools</a> package. The
-	configuration script enables selection of the following features from the
-	top-level directory: \e CR_WITH_GUI and \e CR_WITH_STARTOOLS - both of which
-	are disabled by default. See the page \ref crtools_build_parameters for
-	further description.
-
-	- \b pybdsm - Python version of the <i>Blob detection and source
-	modelling</i> package developed by the Surveys KSP.
-
-	- \b rm - Rotation-measure synthesis imaging package developed by the Cosmic
-	Magnetism KSP.
-	
+	<table border=0>
+	  <tr>
+	    <td class="indexkey">Target</td>
+		<td class="indexkey">Description</td>
+	  </tr>
+	  <tr>
+	    <td bgcolor="dddddd">\b dal</td>
+		<td bgcolor="eeeeee">The <a href="group__DAL.html">Data Access Library</a> (DAL).</td>
+	  </tr>
+	  <tr>
+	    <td bgcolor="dddddd">\b cr</td>
+		<td bgcolor="eeeeee">The <a href="group__CR.html">CR-Tools</a> package. The configuration
+		script enables selection of the following features from the top-level
+		directory: \e CR_WITH_GUI and \e CR_WITH_STARTOOLS - both of
+		which are disabled by default. See the page \ref crtools_build_parameters
+		for further description.</td>
+	  </tr>
+	  <tr>
+	    <td bgcolor="dddddd">\b pybdsm</td>
+		<td bgcolor="eeeeee">Python version of the <i>Blob detection and source modelling</i>
+		package developed by the Surveys KSP.</td>
+	  </tr>
+	  <tr>
+	    <td bgcolor="dddddd">\b rm</td>
+		<td bgcolor="eeeeee">Rotation-measure synthesis imaging package developed by the Cosmic
+		Magnetism KSP.</td>
+	  </tr>
+	</table>
+		
 	\section configure_build_external Targets to build external packages
-	
-	- \b bison - [optional] GNU Project parser generator (yacc replacement)
-	- \b blitz 
-	- \b boost - a free peer-reviewed portable C++ source libraries. Amongst
-	many other things it contains \e Boost.Python, a C++ library which enables
-	seamless interoperability between C++ and the Python programming language.
-	- \b casacore
-	- \b cfitsio
-	- \b flex - [optional] Fast lexical analyzer generator
-	- \b hdf5
-	- \b mathgl - Library for the generation of scientific plots
-	- \b plplot - Library for the generation of scientific plots
-	- \b pyrap - Python bindings for casacore
-	- \b python
-	- \b qt
-	- \b root
-	- \b sip
-	- \b startools
-	- \b szip
-	- \b swig
-	- \b wcslib - Library implementing the WCS standard, central to a number of
-	astronomical data reduction packages.
-	- \b wcstools
-	- \b wget - [optional] Non-interactive network downloader. GNU Wget is a
+
+	<table border=0>
+	  <tr>
+	    <td class="indexkey">Target</td>
+	    <td class="indexkey">Availability</td>
+		<td class="indexkey">Description</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b bison</td>
+		<td>[optional]</td>
+		<td>GNU Project parser generator (yacc replacement)</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b blitz</td>
+		<td></td>
+		<td></td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b boost</td>
+		<td></td>
+		<td>A free peer-reviewed portable C++ source libraries. Amongst many
+		other things it contains \e Boost.Python, a C++ library which enables
+		seamless interoperability between C++ and the Python programming
+		language.</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b casacore</td>
+		<td></td>
+		<td></td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b cfitsio</td>
+		<td></td>
+		<td></td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b flex</td>
+		<td>[optional]</td>
+		<td>Fast lexical analyzer generator</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b hdf5</td>
+		<td></td>
+		<td></td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b mathgl</td>
+		<td></td>
+		<td>Library for the generation of scientific plots</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b plplot</td>
+		<td></td>
+		<td>Library for the generation of scientific plots</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b pyrap</td>
+		<td></td>
+		<td>Python bindings for casacore</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b python</td>
+		<td></td>
+		<td>A collection of Python packages: NumPy, Num_util, matplotlib</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b qt</td>
+		<td></td>
+		<td></td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b root</td>
+		<td></td>
+		<td></td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b sip</td>
+		<td></td>
+		<td></td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b startools</td>
+		<td></td>
+		<td></td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b szip</td>
+		<td></td>
+		<td></td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b swig</td>
+		<td></td>
+		<td></td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b wcslib</td>
+		<td></td>
+		<td>Library implementing the WCS standard, central to a number of
+		astronomical data reduction packages.</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b wcstools</td>
+		<td></td>
+		<td></td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b wget</td>
+		<td>[optional]</td>
+		<td>Non-interactive network downloader. GNU Wget is a
 	free utility for non-interactive download of files from the Web. It supports
-	HTTP, HTTPS, and FTP protocols, as well as retrieval through HTTP proxies.
-	- \b zlib - Compression/decompression library.
+	HTTP, HTTPS, and FTP protocols, as well as retrieval through HTTP proxies.</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b zlib</td>
+		<td></td>
+		<td>Compression/decompression library.</td>
+	  </tr>
+	</table>
 	
 	\b Note: Some of the above listed targets may not be present in your setup;
 	if this is the case, then the related system package is installed already.
@@ -174,26 +281,68 @@
 	The following targets can be used to generate various sorts of
 	documentation:
 	
-	- \b doc - Create documentation for the source code using Doxygen.
-	- \b doc-cmake - Create documentation for CMake; the resulting HTML file
-	\e CMake.html will be placed into $LOFARSOFT/doc.
-	- \b doc-ctest - Create documentation for CTest; the resulting HTML file
-	\e CTest.html will be placed into $LOFARSOFT/doc.
-	
+	<table border=0>
+	  <tr>
+	    <td class="indexkey">Target</td>
+	    <td class="indexkey">Availability</td>
+		<td class="indexkey">Description</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b doc</td>
+		<td>[optional; requires Doxygen]</td>
+		<td>Create documentation for the source code using Doxygen.</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b doc-cmake</td>
+		<td></td>
+		<td>Create documentation for CMake; the resulting HTML file
+		\e CMake.html will be placed into $LOFARSOFT/doc.</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b doc-ctest</td>
+		<td></td>
+		<td>Create documentation for CTest; the resulting HTML file
+		\e CTest.html will be placed into $LOFARSOFT/doc.</td>
+	  </tr>
+	</table>
+
 	\section configure_build_clean Targets for cleaning up directories
 	
-	- \b clean-build - Clean up the build directory; this will remove
-	everything except the original files obatined with a fresh check-out (which
-	of course means you will need to again run 
-	\code 
-	./bootstrap
-	\endcode
-	before any further action).
-	- \b clean-doc - Clean up the documentation directory; this will remove all
-	the created HTML files and images created by Doxygen.
-	- \b clean-release
-	- \b clean-src
-	
+	<table border=0>
+	  <tr>
+	    <td class="indexkey">Target</td>
+	    <td class="indexkey">Availability</td>
+		<td class="indexkey">Description</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b clean-build</td>
+		<td></td>
+		<td>Clean up the build directory; this will remove everything except the
+		original files obatined with a fresh check-out (which of course means
+		you will need to again run <tt>./bootstrap</tt> before any
+		further action).</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b clean-doc</td>
+		<td></td>
+		<td>Clean up the documentation directory; this will remove all the
+		created HTML files and images created by Doxygen.</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b clean-release</td>
+		<td></td>
+		<td>Clean up the \e release directory and put it back into the state it
+		was right after check-out of your working copy. \b Caution: If your
+		version of CMake is taken from \e release/bin you will need to run
+		<tt>./bootstrap</tt>.</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b clean-src</td>
+		<td></td>
+		<td></td>
+	  </tr>
+	</table>
+
 	<hr>
 	
 	\section configure_build_dependencies Dependencies of the targets

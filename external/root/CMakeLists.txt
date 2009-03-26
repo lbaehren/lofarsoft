@@ -99,7 +99,7 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   ##__________________________________________________________________
   ## Download the tar-archive from the USG server
   
-  set (ROOT_VERSION "v5.20.00")
+  set (ROOT_VERSION "v5.22.00")
   set (ROOT_TAR_ARCHIVE "root_${ROOT_VERSION}.source.tar.gz")
   set (ROOT_URL "${USG_DOWNLOAD}/software/${ROOT_TAR_ARCHIVE}")
   
