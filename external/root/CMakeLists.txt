@@ -3,7 +3,7 @@
 project (ROOT)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.6)
 
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the library from the provided source code, if no system
@@ -72,27 +72,23 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
 
   ##__________________________________________________________________
   ## Locate required libraries
-
-  set (lib_locations
-    /usr/lib
-    /usr/lib64
-    /usr/local/lib
-    /usr/local/lib64
-    /usr/X11R6/lib
-    /usr/X11R6/lib64
-    /sw/lib
-    )
-
+  
+  list (APPEND lib_locations /usr/lib64)
+  list (APPEND lib_locations /usr/local/lib64)
+  list (APPEND lib_locations /usr/X11R6/lib)
+  list (APPEND lib_locations /usr/X11R6/lib64)
+  
   find_file (libXpm libXpm.so.0 libXpm.so.1 libXpm.so.2 libXpm.so.3 libXpm.so.4
     PATHS ${lib_locations}
     )
 
   ## create symbolic link to ensure the library is found
   if (libXpm)
-    execute_process(
+    add_custom_target(symlink_libXpm
       COMMAND rm -f libXpm.so
       COMMAND ln -s ${libXpm} libXpm.so
       WORKING_DIRECTORY ${ROOT_prefix}/lib
+      COMMENT "Creating symbolic link for libXpm ..."
       )
   endif (libXpm)
   
@@ -126,6 +122,7 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
     add_custom_target (expand_archive ALL
       COMMAND tar -xvzf ${ROOT_TAR_ARCHIVE}
       WORKING_DIRECTORY ${ROOT_BINARY_DIR}
+      COMMENT "[ROOT] Expanding compressed tar-archive ..."
       )
     add_dependencies (expand_archive download_archive)
   else (HAVE_TAR)
@@ -139,15 +136,26 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   # x11-libdir         X11 support, path to libX11
   # xpm-libdir         XPM support, path to libXpm
   
-  add_custom_target (run_configure ALL
-    COMMAND ./configure --prefix=${ROOT_prefix} --with-xpm-libdir=${ROOT_prefix}/lib
-    WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root
-    )
-  add_dependencies (run_configure expand_archive)
+  if (libXpm)
+    add_custom_target (run_configure ALL
+      COMMAND ./configure --prefix=${ROOT_prefix} --with-xpm-libdir=${ROOT_prefix}/lib
+      WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root
+      COMMENT "[ROOT] Running configure ..."
+      )
+    add_dependencies (run_configure expand_archive symlink_libXpm)
+  else (libXpm)
+    add_custom_target (run_configure ALL
+      COMMAND ./configure --prefix=${ROOT_prefix}
+      WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root
+      COMMENT "[ROOT] Running configure ..."
+      )
+    add_dependencies (run_configure expand_archive)
+  endif (libXpm)
   
   add_custom_target (run_make ALL
     COMMAND make
     WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root
+      COMMENT "[ROOT] Running make ..."
     )
   add_dependencies (run_make run_configure)
 
