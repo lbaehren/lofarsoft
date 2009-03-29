@@ -231,7 +231,7 @@ int test_static_functions ()
     double delay (0.1);
     double freq (40e06);
     //
-    double phase = GeomPhase::calcPhases(delay,freq);
+    double phase = GeomPhase::phases(delay,freq);
     //
     cout << "-- Delay     [s ] = " << delay << endl;
     cout << "-- Frequency [Hz] = " << freq  << endl;
@@ -246,7 +246,7 @@ int test_static_functions ()
     Matrix<double> delay (3,3,0.1);
     double freq (40e06);
     //
-    Matrix<double> phase = GeomPhase::calcPhases(delay,freq);
+    Matrix<double> phase = GeomPhase::phases(delay,freq);
     //
     cout << "-- Delay     [s ] = " << delay << endl;
     cout << "-- Frequency [Hz] = " << freq  << endl;
@@ -260,12 +260,13 @@ int test_static_functions ()
   try {
     Matrix<double> delay (2,2,0.1);
     Vector<double> freq (3);
+    Cube<double> phase;
     //
     freq(0) = 20e6;
     freq(1) = 40e6;
     freq(2) = 80e6;
     //
-    Cube<double> phase = GeomPhase::calcPhases(delay,freq);
+    GeomPhase::phases(phase,delay,freq);
     //
     cout << "-- Delay     [s ] = " << delay << endl;
     cout << "-- Frequency [Hz] = " << freq  << endl;

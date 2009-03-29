@@ -274,7 +274,30 @@ namespace CR { // Namespace CR -- begin
     // ------------------------------------------------------------------ Methods
 
     //! Get the shape of the array holding the geometrical phases
-    casa::IPosition shape();
+    inline casa::IPosition shape() {
+      casa::IPosition shapeDelays = GeomDelay::shape();
+      
+      return casa::IPosition (3,
+			      frequencies_p.nelements(),
+			      shapeDelays(0),
+			      shapeDelays(1));
+    }
+
+    /*!
+      \brief Get the values of the geometrical phases
+
+      \return phases -- [freq,ant,sky] The numerical values of the geometrical
+              phases.
+    */
+    Cube<double> phases ();
+
+    /*!
+      \brief Get the values of the geometrical phases
+
+      \retval phases -- [freq,ant,sky] The numerical values of the geometrical
+              phases.
+    */
+    void phases (Cube<double> &phases);
 
     /*!
       \brief Compute the gemetrical phase
@@ -285,45 +308,53 @@ namespace CR { // Namespace CR -- begin
 
       \return phase -- The value of the geometrical phase
     */
-    static double calcPhases (double const &delay,
-			      double const &freq) {
+    static double phases (double const &delay,
+			  double const &freq) {
       return CR::_2pi*freq*delay;
     }
     
     /*!
       \brief Compute the gemetrical phase
-
+      
       \param delay -- The values of the geometrical delay, as computed for a
              combination of antenna and pointing positions. [s]
       \param freq  -- The frequency. [Hz]
 
       \return phase -- [ant,sky] The values of the geometrical phases
     */
-    static Matrix<double> calcPhases (Matrix<double> const &delay,
-				      double const &freq) {
+    static Matrix<double> phases (Matrix<double> const &delay,
+				  double const &freq) {
       return CR::_2pi*freq*delay;
     }
     
     /*!
       \brief Compute the gemetrical phase
-
+      
+      \retval phase -- [ant,sky] The values of the geometrical phases
       \param delay -- The values of the geometrical delay, as computed for a
              combination of antenna and pointing positions. [s]
-      \param freq  -- Frequency values. [Hz]
-
-      \return phase -- [freq,ant,sky] The values of the geometrical phases
+      \param freq  -- The frequency. [Hz]
     */
-    static Cube<double> calcPhases (Matrix<double> const &delay,
-				    Vector<double> const &freq);
+    static void phases (Matrix<double> &phase,
+			Matrix<double> const &delay,
+			double const &freq) {
+      phase.resize(delay.shape());
+      phase = CR::_2pi*freq*delay;
+    }
     
     /*!
-      \brief Get the values of the geometrical phases
+      \brief Compute the gemetrical phase
 
-      \return phases -- [freq,ant,sky] The numerical values of the geometrical
-              phases.
+      \retval phase -- [freq,ant,sky] The values of the geometrical phases
+      \param delay  -- The values of the geometrical delay, as computed for a
+             combination of antenna and pointing positions. [s]
+      \param freq   -- Frequency values. [Hz]
+
     */
-    Cube<double> phases ();
-
+    static void phases (Cube<double> &phases,
+			Matrix<double> const &delay,
+			Vector<double> const &freq);
+    
   protected:
 
     virtual void setDelays();
@@ -362,12 +393,12 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the values of the geometrical phases
 
-      \param delays -- Array with the values of the geometrical delays for which
+      \retval phases --  The numerical values of the geometrical phases.
+      \param delays  -- Array with the values of the geometrical delays for which
              the phases are to be computed.
-
-      \return phases --  The numerical values of the geometrical phases.
     */
-    Cube<double> phases (Matrix<double> const &delays);
+    void phases (Cube<double> &phases,
+		 Matrix<double> const &delays);
     
   };
   

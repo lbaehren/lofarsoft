@@ -487,7 +487,14 @@ namespace CR { // Namespace CR -- begin
     //! Compute and set the values of the geometrical phases
     void setPhases ();
     
-    //! Compute and set the values of the geometrical weights
+    /*!
+      \brief Compute and set the values of the geometrical weights
+
+      Due to the way the Beamformer class is derived on the underlying
+      base-classes, the most memory efficient manner to compute the weights is to
+      not store the underlying quantities but do directly compute everything from
+      ground up.
+    */
     void setWeights ();
     
     /*!

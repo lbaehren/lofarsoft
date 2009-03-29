@@ -67,7 +67,7 @@ int test_constructors ()
     nofFailedTests++;
   }
   
-  cout << "[2] COnstruction using (Matrix<double>,Matrix<double>) ..." << endl;
+  cout << "[2] Construction using (Matrix<double>,Matrix<double>) ..." << endl;
   try {
     Matrix<double> antPositions = get_antennaPositions();
     Matrix<double> skyPositions = get_skyPositions();
@@ -138,13 +138,13 @@ int test_static_functions ()
 	 << skyPosition[1] << ","
 	 << skyPosition[2] << "]"
 	 << endl;
-    cout << "-- geometrical delay = " << GeomDelay::delay(antPosition,
-							  skyPosition,
-							  false)
+    cout << "-- geometrical delay = " << GeomDelay::delays(antPosition,
+							   skyPosition,
+							   false)
 	 << endl;
-    cout << "-- geometrical delay = " << GeomDelay::delay(antPosition,
-							  skyPosition,
-							  true)
+    cout << "-- geometrical delay = " << GeomDelay::delays(antPosition,
+							   skyPosition,
+							   true)
 	 << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
@@ -165,14 +165,94 @@ int test_static_functions ()
     
     cout << "-- antenna position  = " << antPosition << endl;
     cout << "-- sky position      = " << skyPosition << endl;
-    cout << "-- geometrical delay = " << GeomDelay::delay(antPosition,
-							  skyPosition,
-							  false)
+    cout << "-- geometrical delay = " << GeomDelay::delays(antPosition,
+							   skyPosition,
+							   false)
 	 << endl;
-    cout << "-- geometrical delay = " << GeomDelay::delay(antPosition,
-							  skyPosition,
-							  true)
+    cout << "-- geometrical delay = " << GeomDelay::delays(antPosition,
+							   skyPosition,
+							   true)
 	 << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  } 
+
+  cout << "[3] delay(casa::Matrix<double>, casa::Matrix<double>)" << endl;
+  try {
+    uint nofAntennas (2);
+    uint nofPositions (3);
+    casa::Matrix<double> antPosition (nofAntennas,3);
+    casa::Matrix<double> skyPosition (nofPositions,3);
+
+    antPosition(0,0) = -100;
+    antPosition(0,1) = -100;
+    antPosition(0,2) = 0;
+    antPosition(1,0) = +100;
+    antPosition(1,1) = +100;
+    antPosition(1,2) = 0;
+    
+    skyPosition(0,0) = 100;
+    skyPosition(0,1) = 0;
+    skyPosition(0,2) = 0;
+    skyPosition(1,0) = 0;
+    skyPosition(1,1) = 100;
+    skyPosition(1,2) = 0;
+    skyPosition(2,0) = 0;
+    skyPosition(2,1) = 0;
+    skyPosition(2,2) = 100;
+
+    cout << "-- shape(antenna positions)  = " << antPosition.shape() << endl;
+    cout << "-- shape(sky positions)      = " << skyPosition.shape() << endl;
+    cout << "-- geometrical delays (near) = " << GeomDelay::delays(antPosition,
+								   skyPosition,
+								   false)
+	 << endl;
+    cout << "-- geometrical delays (far)  = " << GeomDelay::delays(antPosition,
+								   skyPosition,
+								   true)
+	 << endl;
+    
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  } 
+  
+  cout << "[3] delay(casa::Matrix<double>,casa::Matrix<double>,casa::Matrix<double>)"
+       << endl;
+  try {
+    uint nofAntennas (2);
+    uint nofPositions (3);
+    casa::Matrix<double> antPosition (nofAntennas,3);
+    casa::Matrix<double> skyPosition (nofPositions,3);
+    casa::Matrix<double> delays (nofAntennas,nofPositions);
+
+    antPosition(0,0) = -100;
+    antPosition(0,1) = -100;
+    antPosition(0,2) = 0;
+    antPosition(1,0) = +100;
+    antPosition(1,1) = +100;
+    antPosition(1,2) = 0;
+    
+    skyPosition(0,0) = 100;
+    skyPosition(0,1) = 0;
+    skyPosition(0,2) = 0;
+    skyPosition(1,0) = 0;
+    skyPosition(1,1) = 100;
+    skyPosition(1,2) = 0;
+    skyPosition(2,0) = 0;
+    skyPosition(2,1) = 0;
+    skyPosition(2,2) = 100;
+
+    cout << "-- shape(antenna positions)  = " << antPosition.shape() << endl;
+    cout << "-- shape(sky positions)      = " << skyPosition.shape() << endl;
+
+    GeomDelay::delays(delays, antPosition, skyPosition, false);
+    cout << "-- geometrical delays (near) = " << delays << endl;
+    
+    GeomDelay::delays(delays, antPosition, skyPosition, true);
+    cout << "-- geometrical delays (far)  = " << delays << endl;
+    
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;

@@ -207,6 +207,14 @@ namespace CR { // Namespace CR -- begin
     */
     Cube<DComplex> weights ();
     
+    /*!
+      \brief Get the values of the geometrical weights
+
+      \retval weights -- [freq,ant,sky] The numerical values of the geometrical
+              weights.
+    */
+    void weights (Cube<DComplex> &weights);
+    
     //! Get the shape of the array holding the geometrical weights
     inline IPosition shape () {
       return GeomPhase::shape();
@@ -274,11 +282,20 @@ namespace CR { // Namespace CR -- begin
 
       \param phases -- [ant,sky] The values of the geometrical phases, for a
              given set of antenna and sky positions
-      \param frequencies -- Frequency values, [Hz].
 
       \return weights -- Geometrical weights
     */
     static Cube<DComplex> calcWeights (Cube<double> const &phases);
+    
+    /*!
+      \brief Compute the geometrical weights
+
+      \retval weights -- Geometrical weights
+      \param phases   -- [ant,sky] The values of the geometrical phases, for a
+             given set of antenna and sky positions
+    */
+    static void calcWeights (Cube<DComplex> &weights,
+			     Cube<double> const &phases);
     
   protected:
     

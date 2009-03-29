@@ -255,15 +255,27 @@ namespace CR {  // Namespace CR -- begin
     // Configure the Beamformer.
 
     try {
-      /* Get sky positions and frequency values. */
-      Matrix<double> skyPos = coord_p.spatialCoordinate().positionValues();
-      Vector<double> freq   = coord_p.timeFreqCoordinate().frequencyValues();
-      /* Update internal settings of the Beamformer. */
       beamformer_p.setSkymapType(coord_p.skymapQuantity().type());
-      beamformer_p.setSkyPositions(skyPos);
-      beamformer_p.setFrequencies(freq);
     } catch (casa::AipsError x) {
       std::cerr << "[Skymapper::initSkymapper] Failed configuring Beamformer!\n"
+		<< x.getMesg()
+		<< std::endl;
+    }
+    
+    try {
+      Matrix<double> skyPos = coord_p.spatialCoordinate().positionValues();
+      beamformer_p.setSkyPositions(skyPos);
+    } catch (casa::AipsError x) {
+      std::cerr << "[Skymapper::initSkymapper] Failed setting sky positions!\n"
+		<< x.getMesg()
+		<< std::endl;
+    }
+
+    try {
+      Vector<double> freq   = coord_p.timeFreqCoordinate().frequencyValues();
+      beamformer_p.setFrequencies(freq);
+    } catch (casa::AipsError x) {
+      std::cerr << "[Skymapper::initSkymapper] Failed setting frequencies!\n"
 		<< x.getMesg()
 		<< std::endl;
     }

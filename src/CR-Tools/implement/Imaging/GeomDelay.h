@@ -379,7 +379,7 @@ namespace CR { // Namespace CR -- begin
     }
     
     /*!
-      \brief Get the geometrical delays
+      \brief Get the geometrical delay(s)
       
       \return delays -- [ant,sky] The geometrical delays for the given set of
               antenna and sky positions.
@@ -387,7 +387,15 @@ namespace CR { // Namespace CR -- begin
     Matrix<double> delays ();
     
     /*!
-      \brief Compute the geometrical delay
+      \brief Get the geometrical delay(s)
+      
+      \retval delays -- [ant,sky] The geometrical delays for the given set of
+              antenna and sky positions.
+    */
+    void delays (Matrix<double> &delays);
+    
+    /*!
+      \brief Compute the geometrical delay(s)
 
       \b Note: This function contains the reference implementation for the
       actual computation of the geometrical delay (no matter if for the near-field
@@ -400,12 +408,12 @@ namespace CR { // Namespace CR -- begin
 
       \return delay -- The value of the geometrical delay
     */
-    static double delay (std::vector<double> const &antPosition,
-			 std::vector<double> const &skyPosition,
-			 bool const &farField=false);
+    static double delays (std::vector<double> const &antPosition,
+			  std::vector<double> const &skyPosition,
+			  bool const &farField=false);
     
     /*!
-      \brief Compute the geometrical delay
+      \brief Compute the geometrical delay(s)
 
       \param antPosition -- 
       \param skyPosition -- 
@@ -413,12 +421,12 @@ namespace CR { // Namespace CR -- begin
 
       \return delay -- The value of the geometrical delay
     */
-    static double delay (casa::Vector<double> const &antPosition,
-			 casa::Vector<double> const &skyPosition,
-			 bool const &farField=false);
+    static double delays (casa::Vector<double> const &antPosition,
+			  casa::Vector<double> const &skyPosition,
+			  bool const &farField=false);
     
     /*!
-      \brief Compute the geometrical delay
+      \brief Compute the geometrical delay(s)
 
       \param antPositions -- Set of antenna positions
       \param skyPositions -- Set of sky positions
@@ -426,10 +434,23 @@ namespace CR { // Namespace CR -- begin
 
       \return delay -- The value of the geometrical delay
     */
-    static Matrix<double> delay (casa::Matrix<double> const &antPositions,
-				 casa::Matrix<double> const &skyPositions,
-				 bool const &farField=false);
+    static Matrix<double> delays (casa::Matrix<double> const &antPositions,
+				  casa::Matrix<double> const &skyPositions,
+				  bool const &farField=false);
 
+    /*!
+      \brief Compute the geometrical delay(s)
+
+      \retval delay       -- The value of the geometrical delay
+      \param antPositions -- Set of antenna positions
+      \param skyPositions -- Set of sky positions
+      \param farField     -- Compute geometrical delay for far-field?
+    */
+    static void delays (Matrix<double> &delays,
+			casa::Matrix<double> const &antPositions,
+			casa::Matrix<double> const &skyPositions,
+			bool const &farField=false);
+    
   protected:
     
     //! Set/Update the values of the geometrical delays if required

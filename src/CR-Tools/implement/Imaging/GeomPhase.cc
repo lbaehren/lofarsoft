@@ -220,6 +220,9 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
 
+  //_____________________________________________________________________________
+  //                                                               setFrequencies
+
   bool GeomPhase::setFrequencies (Vector<MVFrequency> const &frequencies)
   {
     bool status (true);
@@ -286,54 +289,6 @@ namespace CR { // Namespace CR -- begin
   }
 
   //_____________________________________________________________________________
-  //                                                                        shape
-  
-  casa::IPosition GeomPhase::shape()
-  {
-    casa::IPosition shapeDelays = GeomDelay::shape();
-    
-    return casa::IPosition (3,
-			    frequencies_p.nelements(),
-			    shapeDelays(0),
-			    shapeDelays(1));
-  }
-
-  //_____________________________________________________________________________
-  //                                                                        phase
-  
-  casa::Cube<double> GeomPhase::calcPhases (Matrix<double> const &delay,
-					    Vector<double> const &freq)
-  {
-    uint nofFreq = freq.nelements();
-    uint nofAnt  = delay.nrow();
-    uint nofSky  = delay.ncolumn();
-    
-    Cube<double> values (nofFreq,
-			 nofAnt,
-			 nofSky);
-    
-#ifdef HAVE_CASACORE
-    for (uint n(0); n<nofFreq; n++) {
-      values.yzPlane(n) = calcPhases(delay,freq(n));
-    }
-#else
-    uint nFreq (0);
-    uint nAnt (0);
-    uint nSky(0);
-
-    for (nSky=0; nSky<nofSky; nSky++) {
-      for (nAnt=0; nAnt<nofAnt; nAnt++) {
-	for (nFreq=0; nFreq<nofFreq; nFreq++) {
-	  values(nFreq,nAnt,nSky) = calcPhases(delay(nAnt,nSky),freq(nFreq));
-	}
-      }
-    }
-#endif
-    
-    return values;
-  }
-  
-  //_____________________________________________________________________________
   //                                                                       phases
   
   casa::Cube<double> GeomPhase::phases ()
@@ -343,13 +298,39 @@ namespace CR { // Namespace CR -- begin
 	 do is return the array string them. */
       return phases_p;
     } else {
+      casa::Cube<double> p;
       /* If we need to compute the geometrical phases, check if at least the
 	 values of the delays are buffered. */
       if (bufferDelays_p) {
-	return phases(delays_p);
+	phases(p,delays_p);
       } else {
 	casa::Matrix<double> geomDelays = GeomDelay::delays();
-	return phases(geomDelays);
+	phases(p,geomDelays);
+      }
+      // return the phases
+      return p;
+    }
+  }
+
+  //_____________________________________________________________________________
+  //                                                                       phases
+  
+  void GeomPhase::phases (casa::Cube<double> &p)
+  {
+    p.resize(GeomPhase::shape());
+
+    if (bufferPhases_p) {
+      /* If the values of the geometrical phases are buffered, all we need to
+	 do is return the array string them. */
+      p = phases_p;
+    } else {
+      /* If we need to compute the geometrical phases, check if at least the
+	 values of the delays are buffered. */
+      if (bufferDelays_p) {
+	phases(p,delays_p);
+      } else {
+	casa::Matrix<double> geomDelays = GeomDelay::delays();
+	phases(p,geomDelays);
       }
     }
   }
@@ -357,15 +338,17 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                       phases
 
-  casa::Cube<double> GeomPhase::phases (Matrix<double> const &delays)
+  void GeomPhase::phases (casa::Cube<double> &p,
+			  Matrix<double> const &delays)
   {
     casa::IPosition phasesShape = shape();
-    casa::Cube<double> values (phasesShape);
+    
+    p.resize(phasesShape);
     
 #ifdef HAVE_CASACORE
     for (int freq(0); freq<phasesShape(0); freq++) {
-      values.yzPlane (freq) = calcPhases (delays,
-					  frequencies_p(freq));
+      p.yzPlane (freq) = phases (delays,
+				 frequencies_p(freq));
     }
 #else
     uint nofAnt = delays.nrow();
@@ -373,22 +356,52 @@ namespace CR { // Namespace CR -- begin
     uint nFreq  = 0;
     uint nAnt   = 0;
     uint nSky   = 0;
-
+    
     for (nSky=0; nSky<nofSky; nSky++) {
       for (nAnt=0; nAnt<nofAnt; nAnt++) {
 	for (nFreq=0; nFreq<phasesShape(0); nFreq++) {
-	  values(nFreq,nAnt,nSky) = calcPhases(delays(nAnt,nSky),frequencies_p(nFreq));
+	  p(nFreq,nAnt,nSky) = calcPhases(delays(nAnt,nSky),frequencies_p(nFreq));
 	}
       }
     }
 #endif
-    
-    return values;
   }
+  
+  //_____________________________________________________________________________
+  //                                                                       phases
+  
+  void GeomPhase::phases (casa::Cube<double> &p,
+			  Matrix<double> const &delay,
+			  Vector<double> const &freq)
+  {
+    uint nofFreq = freq.nelements();
+    uint nofAnt  = delay.nrow();
+    uint nofSky  = delay.ncolumn();
+    
+    p.resize (nofFreq,nofAnt,nofSky);
+    
+#ifdef HAVE_CASACORE
+    for (uint n(0); n<nofFreq; n++) {
+      p.yzPlane(n) = phases(delay,freq(n));
+    }
+#else
+    uint nFreq (0);
+    uint nAnt (0);
+    uint nSky(0);
 
+    for (nSky=0; nSky<nofSky; nSky++) {
+      for (nAnt=0; nAnt<nofAnt; nAnt++) {
+	for (nFreq=0; nFreq<nofFreq; nFreq++) {
+	  p(nFreq,nAnt,nSky) = phases(delay(nAnt,nSky),freq(nFreq));
+	}
+      }
+    }
+#endif
+  }
+  
   //_____________________________________________________________________________
   //                                                                    setDelays
-
+  
   void GeomPhase::setDelays ()
   {
     GeomDelay::setDelays();
@@ -405,10 +418,10 @@ namespace CR { // Namespace CR -- begin
       casa::IPosition itsShape = shape();
       phases_p.resize();
       if (bufferDelays_p) {
-	phases_p = phases(delays_p);
+	phases(phases_p,delays_p);
       } else {
 	casa::Matrix<double> geomDelays = GeomDelay::delays();
-	phases_p = phases(geomDelays);
+	phases(phases_p,geomDelays);
       }
     }
   }

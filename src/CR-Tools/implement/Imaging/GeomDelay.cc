@@ -443,9 +443,10 @@ namespace CR { // Namespace CR -- begin
       casa::IPosition itsShape = shape();
       delays_p.resize(itsShape);
       
-      delays_p = delay (antPositions_p,
-			skyPositions_p,
-			farField_p);
+      delays (delays_p,
+	      antPositions_p,
+	      skyPositions_p,
+	      farField_p);
     }
   }
   
@@ -457,18 +458,34 @@ namespace CR { // Namespace CR -- begin
     if (bufferDelays_p) {
       return delays_p;
     } else {
-      return delay (antPositions_p,
-		    skyPositions_p,
-		    farField_p);
+      return delays (antPositions_p,
+		     skyPositions_p,
+		     farField_p);
+    }
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                       delays
+  
+  void GeomDelay::delays (Matrix<double> &d)
+  {
+    if (bufferDelays_p) {
+      d.resize(delays_p.shape());
+      d = delays_p;
+    } else {
+      delays (d,
+	      antPositions_p,
+	      skyPositions_p,
+	      farField_p);
     }
   }
   
   //_____________________________________________________________________________
   //                                                                        delay
   
-  double GeomDelay::delay (std::vector<double> const &antPosition,
-			   std::vector<double> const &skyPosition,
-			   bool const &farField)
+  double GeomDelay::delays (std::vector<double> const &antPosition,
+			    std::vector<double> const &skyPosition,
+			    bool const &farField)
   {
     double delay = 0;
     
@@ -493,9 +510,9 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                        delay
   
-  double GeomDelay::delay (casa::Vector<double> const &antPosition,
-			   casa::Vector<double> const &skyPosition,
-			   bool const &farField)  
+  double GeomDelay::delays (casa::Vector<double> const &antPosition,
+			    casa::Vector<double> const &skyPosition,
+			    bool const &farField)  
   {
     double delay = 0;
     
@@ -517,23 +534,45 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                        delay
   
-  Matrix<double> GeomDelay::delay (casa::Matrix<double> const &antPositions,
-				   casa::Matrix<double> const &skyPositions,
-				   bool const &farField)
+  Matrix<double> GeomDelay::delays (casa::Matrix<double> const &antPositions,
+				    casa::Matrix<double> const &skyPositions,
+				    bool const &farField)
   {
     unsigned int nofAnt = antPositions.nrow();
     unsigned int nofSky = skyPositions.nrow();
-    Matrix<double> delays (nofAnt,nofSky);
+    Matrix<double> d (nofAnt,nofSky);
     
     for (unsigned int ant(0); ant<nofAnt; ant++) {
       for (unsigned int sky(0); sky<nofSky; sky++) {
-	delays(ant,sky) = delay (antPositions.row(ant),
-				 skyPositions.row(sky),
-				 farField);
+	d(ant,sky) = delays (antPositions.row(ant),
+			     skyPositions.row(sky),
+			     farField);
       }
     }
-
-    return delays;
+    
+    return d;
   }
 
+  //_____________________________________________________________________________
+  //                                                                        delay
+  
+  void GeomDelay::delays (Matrix<double> &d,
+			  casa::Matrix<double> const &antPositions,
+			  casa::Matrix<double> const &skyPositions,
+			  bool const &farField)
+  {
+    unsigned int nofAnt = antPositions.nrow();
+    unsigned int nofSky = skyPositions.nrow();
+    
+    d.resize(nofAnt,nofSky);
+    
+    for (unsigned int ant(0); ant<nofAnt; ant++) {
+      for (unsigned int sky(0); sky<nofSky; sky++) {
+	d(ant,sky) = delays (antPositions.row(ant),
+			     skyPositions.row(sky),
+			     farField);
+      }
+    }
+  }
+  
 } // Namespace CR -- end

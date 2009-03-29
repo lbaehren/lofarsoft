@@ -219,7 +219,7 @@ namespace CR { // Namespace CR -- begin
   }
 
   //_____________________________________________________________________________
-  // weights
+  //                                                                      weights
 
   Cube<DComplex> GeomWeight::weights ()
   {
@@ -231,6 +231,23 @@ namespace CR { // Namespace CR -- begin
       } else {
 	Cube<double> geomPhases = GeomPhase::phases();
 	return calcWeights (geomPhases);
+      } 
+    }
+  }
+
+  //_____________________________________________________________________________
+  //                                                                      weights
+
+  void GeomWeight::weights (Cube<DComplex> &w)
+  {
+    if (bufferWeights_p) {
+      w = weights_p;
+    } else {
+      if (bufferPhases_p) {
+	calcWeights (w,phases_p);
+      } else {
+	Cube<double> geomPhases = GeomPhase::phases();
+	calcWeights (w,geomPhases);
       } 
     }
   }
@@ -284,15 +301,13 @@ namespace CR { // Namespace CR -- begin
   {
     /* Only recompute and set values if buffering is enabled */
     if (bufferWeights_p) {
-      /* Adjust the shape of the array storing the weights */
-      casa::IPosition itsShape = shape();
-      weights_p.resize(itsShape);
-      /* Retrieve the values of the geometrical phases */
       if (bufferPhases_p) {
-	weights_p = calcWeights(phases_p);
+	calcWeights(weights_p,
+		    phases_p);
       } else {
 	casa::Cube<double> geomPhases = GeomPhase::phases();
-	weights_p = calcWeights(geomPhases);
+	calcWeights(weights_p,
+		    geomPhases);
       }
     }
   }
@@ -303,19 +318,11 @@ namespace CR { // Namespace CR -- begin
   Cube<DComplex> GeomWeight::calcWeights (Matrix<double> const &delays,
 					  Vector<double> const &frequencies)
   {
-    Cube<double> p = GeomPhase::calcPhases(delays,frequencies);
+    Cube<double> p;
+    Cube<DComplex> w;
 
-    IPosition nelem = p.shape();
-    Cube<DComplex> w (nelem);
-    int i,j,k;
-    
-    for (k=0; k<nelem(2); k++) {
-      for (j=0; j<nelem(1); j++) {
-	for (i=0; i<nelem(0); i++) {
-	  w(i,j,k) = DComplex(cos(p(i,j,k)),sin(p(i,j,k)));
-	} 
-      } 
-    } 
+    GeomPhase::phases(p,delays,frequencies);
+    calcWeights (w,p);
     
     return w;
   }
@@ -325,9 +332,23 @@ namespace CR { // Namespace CR -- begin
 
   Cube<DComplex> GeomWeight::calcWeights (Cube<double> const &phases)
   {
+    Cube<DComplex> w;
+
+    calcWeights (w,phases);
+    
+    return w;
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                  calcWeights
+
+  void GeomWeight::calcWeights (Cube<DComplex> &w,
+				Cube<double> const &phases)
+  {
     IPosition nelem = phases.shape();
-    Cube<DComplex> w (nelem);
     int i,j,k;
+
+    w.resize(nelem);
     
     for (k=0; k<nelem(2); k++) {
       for (j=0; j<nelem(1); j++) {
@@ -336,9 +357,6 @@ namespace CR { // Namespace CR -- begin
 	} 
       } 
     } 
-    
-    return w;
   }
-  
   
 } // Namespace CR -- end

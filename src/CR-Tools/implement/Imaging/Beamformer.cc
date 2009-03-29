@@ -337,10 +337,25 @@ namespace CR { // Namespace CR -- begin
     if (bufferWeights_p) {
       bfWeights_p.reference(weights_p);
     } else {
-      bfWeights_p.resize (GeomWeight::shape());
-      bfWeights_p = GeomWeight::weights();
+      if (bufferPhases_p) {
+	IPosition nelem = phases_p.shape();
+	int i,j,k;
+	// adjust the size of the array storing the weights
+	bfWeights_p.resize(nelem);
+	// compute the weights
+	for (k=0; k<nelem(2); k++) {
+	  for (j=0; j<nelem(1); j++) {
+	    for (i=0; i<nelem(0); i++) {
+	      bfWeights_p(i,j,k) = DComplex(cos(phases_p(i,j,k)),sin(phases_p(i,j,k)));
+	    } 
+	  } 
+	} 
+      } else {
+	bfWeights_p.resize (GeomWeight::shape());
+	GeomWeight::weights(bfWeights_p);
+      }
     }
-
+    
     /*
      *  Update the shape information on the array returning the beamformed data
      */
@@ -667,17 +682,5 @@ namespace CR { // Namespace CR -- begin
     
     return status;
   }
-
-  // ============================================================================
-  //
-  //  Template instantiation
-  //
-  // ============================================================================
-
-//   template bool Beamformer::checkData (casa::Matrix<double> &beam,
-// 				       casa::Array<double> const &data);
-//   template bool Beamformer::checkData (casa::Matrix<double> &beam,
-// 				       casa::Array<DComplex> const &data);
-  
   
 } // Namespace CR -- end

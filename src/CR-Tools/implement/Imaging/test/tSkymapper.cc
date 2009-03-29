@@ -513,7 +513,7 @@ int test_processing (string const &infile,
   uint nofAntennas       = 10;
 
   // Spatial coordinates
-  IPosition shape (3,35,35,10);
+  IPosition shape (3,35,35,20);
   SpatialCoordinate spatial (CoordinateType::DirectionRadius,
 			     refcode,
 			     projection);
@@ -542,8 +542,8 @@ int test_processing (string const &infile,
     /* Create Skymapper object to work with */
     Skymapper skymapper (coord,
 			 antPositions,
-			 "skymap_test1.h5",
-			 CR::DataType::HDF5);
+			 "skymap_test1.img",
+			 CR::DataType::CASA_IMAGE);
     skymapper.summary();
     /* Prepare some test data to process */
     Matrix<casa::DComplex> data (timeFreq.fftLength(),
@@ -560,7 +560,7 @@ int test_processing (string const &infile,
   
   cout << "[2] Reading back in previously created image file ..." << endl;
   try {
-    casa::HDF5Image<float> image ("skymap_test1.h5");
+    casa::PagedImage<float> image ("skymap_test1.img");
     //
     cout << "-- Image name       = " << image.name()      << endl;
     cout << "-- Image shape      = " << image.shape()     << endl;
