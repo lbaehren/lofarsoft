@@ -161,7 +161,10 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
 
   add_custom_target (install ALL
     COMMAND make install
+    COMMAND rm -rf root
+    COMMAND rm -rf ${ROOT_TAR_ARCHIVE}
     WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root
+    COMMENT "[ROOT] Running installation ..."
     )
   add_dependencies (install run_make)
   

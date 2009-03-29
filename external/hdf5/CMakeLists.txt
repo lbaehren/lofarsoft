@@ -91,7 +91,8 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   ## Build list of configuration parameters
 
   set (HDF5_VERSION "1.8.2")
-  set (HDF5_TAR_ARCHIVE "hdf5-${HDF5_VERSION}.tar.gz")
+  set (HDF5_DIRECTORY "hdf5-${HDF5_VERSION}")
+  set (HDF5_TAR_ARCHIVE "${HDF5_DIRECTORY}.tar.gz")
   set (HDF5_URL "${USG_DOWNLOAD}/software/${HDF5_TAR_ARCHIVE}")
   
   set (config_settings "")
@@ -174,6 +175,15 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   ##__________________________________________________________________
   ## Custom target wrapping the standard configure/build chain
 
+  ## Apply required patches
+
+  add_custom_target (apply_patches
+    COMMAND cp ${HDF5_SOURCE_DIR}/zip_perf.c ${HDF5_DIRECTORY}/perform
+    WORKING_DIRECTORY ${HDF5_BINARY_DIR}
+    COMMENT "Applying patches to the source code ..."
+    )
+  add_dependencies (apply_patches expand_archive)
+
   ## Run "./configure [args]"
   
   add_custom_target (run_configure ALL
@@ -181,7 +191,7 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
     WORKING_DIRECTORY ${HDF5_BINARY_DIR}/hdf5-${HDF5_VERSION}
     COMMENT "Configuring to build HDF5 library ..."
     )
-  add_dependencies (run_configure expand_archive)
+  add_dependencies (run_configure apply_patches)
 
   ## Run "make"
 

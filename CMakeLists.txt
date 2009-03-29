@@ -102,8 +102,6 @@ if (SYSTEM_PACKAGES)
 	fftw3
 	fftw3-shlibs
 	gfortran-shlibs
-#	hdf5-18
-#	hdf5-18-shlibs
 	numpy-py26
 	qt4-mac
 	sip-py26
