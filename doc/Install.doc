@@ -7,6 +7,7 @@
 	- Targets provided by the top-level configuration script
 	  - \ref configure_build_usg
 	  - \ref configure_build_external
+	  - \ref configure_build_testdata
 	  - \ref configure_build_doc
 	  - \ref configure_build_clean
 	- \ref configure_build_dependencies
@@ -275,6 +276,47 @@
 	
 	\b Note: Some of the above listed targets may not be present in your setup;
 	if this is the case, then the related system package is installed already.
+	
+	\section configure_build_testdata Installation of test data sets
+	
+	There is a single target available which allows to download and install a
+	collection of small test data sets:
+	
+	<table border=0>
+	  <tr>
+	    <td class="indexkey">Target</td>
+		<td class="indexkey">Description</td>
+	  </tr>
+	  <tr bgcolor="eeeeee">
+	    <td bgcolor="dddddd">\b test-data</td>
+		<td>Retrieve a collection of small test data sets from the USG server
+		and install them into $LOFARSOFT/data/test</td>
+	  </tr>
+	</table>
+	
+	Once installed the following files/sub-directories will be contained in 
+	$LOFARSOFT/data/test:
+	
+	\verbatim
+	drwxr-xr-x   39 lars  lars        1326 Sep 24  2008 L2007_01810_SB18-20_OB20.MS
+	-rw-r--r--    1 lars  lars       35872 Nov 17 13:25 L2007_01810_SB18-20_OB20.MS.h5
+	-rw-r--r--    1 lars  lars     4204800 Sep 27  2008 WN65341H.fits
+	-rw-r--r--    1 lars  lars  1016092752 Jul  9  2008 bf_20080604_121337.cor
+	-rw-r--r--    1 lars  lars  1019864744 Nov 17 13:26 bf_20080604_121337.cor.h5
+	-rw-r--r--    1 lars  lars    10584488 Nov 17 13:26 rw_20071024_090656.h5
+	-rw-r--r--    1 lars  lars     2191360 Oct 22 11:55 rw_20071024_090656_0101.dat
+	-rw-r--r--    1 lars  lars     2191360 Oct 22 11:56 rw_20071024_090656_0102.dat
+	-rw-r--r--    1 lars  lars     2191360 Oct 22 11:56 rw_20071024_090656_0103.dat
+	\endverbatim
+	
+	This collection contains the following datasets:
+	<ul>
+	  <li><b>L2007_01810_SB18-20_OB20.MS</b> -- A casacore MeasurementSet as
+	  being created in the standard imaging pipeline.
+	  <li><b>L2007_01810_SB18-20_OB20.MS.h5</b> -- HDF5 version of the above
+	  MeasurementSet, containing the most significant tables (i.e. a subset of the
+	  original structure).
+	</ul>
 	
 	\section configure_build_doc Targets for documentation generation
 	
