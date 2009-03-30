@@ -46,6 +46,7 @@ option (SEND_BUILD_REPORT   "Send a build report to the Dashboard server?"  NO  
 option (POST_BUILD_CLEAN    "Clean up the build directory after a build?"   NO  )
 option (MULTITHREADED_BUILD "Enable multithreading during build?"           NO  )
 option (SYSTEM_PACKAGES     "Installation of required system packages?"     YES )
+option (TEST_DATASETS       "Download and install sample test datasets?"    NO )
 
 ## Options affecting the build of individual packages
 
@@ -316,14 +317,18 @@ add_custom_target (cmake-modules
   COMMENT "Running test of CMake-modules ..."
   )
 
-add_custom_target (test-data
-  COMMAND wget -c http://usg.lofar.org/download/datasets/usg_data_test.tgz
-  COMMAND tar -xvzf usg_data_test.tgz
-  COMMAND rm -f usg_data_test.tgz
-  WORKING_DIRECTORY ${USG_DATA}
-  COMMENT "Retrieving test data-sets ..."
-  )
-add_dependencies (test-data wget)
+if (wget_executable)
+  add_custom_target (test-data
+    COMMAND ${wget_executable} -c http://usg.lofar.org/download/datasets/usg_data_test.tgz
+    COMMAND tar -xvzf usg_data_test.tgz
+    COMMAND rm -f usg_data_test.tgz
+    WORKING_DIRECTORY ${USG_DATA}
+    COMMENT "Retrieving test data-sets ..."
+    )
+  add_dependencies (test-data wget)
+else (wget_executable)
+  message (STATUS "WARNING: Unable to retrieve test data sets - missing wget!")
+endif (wget_executable)
 
 ## ==============================================================================
 ##
@@ -349,7 +354,11 @@ add_custom_target (dal
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package DAL ..."
   )
-add_dependencies (dal casacore)
+if (TEST_DATASETS)
+  add_dependencies (dal test-data casacore)
+else(TEST_DATASETS)
+  add_dependencies (dal casacore)
+endif (TEST_DATASETS)
 
 ##____________________________________________________________________
 ##                                                            CR-Tools
