@@ -3,7 +3,6 @@
 
 #include <mgl/mgl_qt.h>
 
-
 #define F_PARAMETERS        vector<T> *vp, Data *dp, Vector_Selector *vs
 #define F_PARAMETERS_NOVEC                 Data *dp, Vector_Selector *vs                       
 #define F_PARAMETERS_DEF    vector<T> *vp; Data *dp; Vector_Selector *vs
@@ -79,16 +78,25 @@ DataFuncDescriptor DataFunc_##LIB##_##NAME##_Constructor(Data * dp=NULL){\
 
 typedef DataFuncDescriptor (*ConstructorFunctionPointer)(Data*);
 
+/*!
+  \class DataFuncDescriptor
+
+  \ingroup CR_GUI
+
+  \author Heino Falcke
+*/
 class DataFuncDescriptor {
-public:
+
+ public:
 
   /*!
-    \param name
-    \param library
-    \param shortdocstring
-    \param docstring
-   */
+    \brief Set the information on a data function descriptor
 
+    \param name           -- 
+    \param library        -- 
+    \param shortdocstring -- 
+    \param docstring      -- 
+  */
   void setInfo (HString name,
 		HString library="Sys",
 		HString shortdocstring="",

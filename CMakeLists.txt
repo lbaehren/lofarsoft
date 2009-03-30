@@ -349,7 +349,7 @@ add_custom_target (dal
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package DAL ..."
   )
-add_dependencies (dal plplot casacore)
+add_dependencies (dal casacore)
 
 ##____________________________________________________________________
 ##                                                            CR-Tools
