@@ -16,19 +16,19 @@
 
 #include <iostream>
 
-#include "rm.h"						// RM Synthesis class
+#include "rm.h"							// RM Synthesis class
 
 // casa includes (from /usr/local/include/casacore)
 #include <casa/Arrays.h>
 #include <casa/Arrays/Array.h>
 #include <casa/Logging/LogIO.h>
 #include <casa/Utilities/DataType.h>
-#include <images/Images/FITSImage.h>					// high-level FITSImage interface
+#include <images/Images/FITSImage.h>				// high-level FITSImage interface
 #include <tables/Tables/TiledFileAccess.h>
 #include <lattices/Lattices/TiledShape.h>
 #include <lattices/Lattices/LatticeBase.h>
 #include <lattices/Lattices/LatticeIterator.h>			// Iterator over lattices
-#include <images/Images/ImageOpener.h>					// wrapper class for Image type opening
+#include <images/Images/ImageOpener.h>				// wrapper class for Image type opening
 #include <images/Images/ImageFFT.h>
 #include <images/Images/ImageStatistics.h>
 #include <images/Images/ImageInterface.h>
@@ -67,10 +67,10 @@ int main (int argc, char * const argv[]) {
 	cout << "Filename_Q: " << filename_Q << endl;				// Debug output
 	#endif
 
-	FITSImage::registerOpenFunction();				// Register the FITS and Miriad image types.
+	FITSImage::registerOpenFunction();			// Register the FITS and Miriad image types.
 
-	lattice_Q=ImageOpener::openImage (filename_Q);	// try open the file with generic casa function
-	if(lattice_Q==NULL)								// on error	
+	lattice_Q=ImageOpener::openImage (filename_Q);		// try open the file with generic casa function
+	if(lattice_Q==NULL)					// on error	
 	{
 		cout << "Error opening " << filename_Q << endl;
 		exit(0);
@@ -98,6 +98,14 @@ int main (int argc, char * const argv[]) {
 			break;
 	}
 	
+	std::vector<double> freq(10), lambdaSq(10);	// Test frequency and lambda squared conversions 
+	
+	for(unsigned int i=0; i <= lambdaSq.size(); i++)
+	  lambdaSq[i]=i*100.0;
+	
+	lambdaSq=freqToLambdaSq(freq);
+	
+	
 	
 	// Lattice and iteration over line of sight
 	// create Lattice shape and iterator
@@ -108,7 +116,7 @@ int main (int argc, char * const argv[]) {
 	int i=0;
 	
 	RO_LatticeIterator<Float> iter(*lattice_Q_float, cursorShape);
-    for (iter.reset(); !iter.atEnd(); iter++) {
+	for (iter.reset(); !iter.atEnd(); iter++) {
 		minMax(min, max, iter.cursor());
 		cout << i++ << " Min = " << min << " Max = " << max << iter.cursor() << endl; 
 	}	

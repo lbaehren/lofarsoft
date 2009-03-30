@@ -45,11 +45,20 @@ rm::~rm()
 vector<double>rm::freqToLambdaSq(vector<double> frequency)
 {
   vector<double> lambda_sq;	// lambda squareds of measured channels
+  int i=0;			// loop variable
+  double conversion_factor=0;	// conversion factor to convert from freq to lambda squared values
+
+
+  for (vector<double>::iterator i = frequency.begin();i != frequency.end(); i++)   // loop through vector and convert to lambdaSquared
+  {
+//    cout << "frequency[" << i << "] = " << (*i) << endl;	// debug
   
+  }
   
   
   return lambda_sq;
 }
+
 
 /*!
   \brief Convert from lambda squared to frequencies
