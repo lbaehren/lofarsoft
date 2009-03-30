@@ -9,10 +9,12 @@ d=Data("ROOT")
 datatypechooser=LOPESDatatypeChooser(d)
 unitchooser=UnitChooser(d) # A subnet of objects which provides the different options for choosing unit scales from
 
-
-
+import os
+lofarMainDir = os.environ.get('LOFARSOFT')
+hardcodedFileName = lofarMainDir + '/data/lopes/2007.01.31.23:59:33.960.event'
+# /Users/acorstanje/usg/data/lopes/2007.01.31.23:59:33.960.event
 d >> _d("Filetype","LOPESEvent",_l(2)) \
-  >> _d("Filename","/Users/falcke/LOFAR/usg/data/lopes/2007.01.31.23:59:33.960.event",_l(2)) \
+  >> _d("Filename",hardcodedFileName,_l(2)) \
   >> _d("FileObject",_f("dataReaderObject","CR")) \
   >> "File"
 

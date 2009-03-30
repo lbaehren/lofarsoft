@@ -36,6 +36,7 @@ using namespace std;
 #include <GUI/hfcast.h> 
 #include <GUI/hfget.h>
 #include <GUI/hffuncs.h>  
+#include <crtools.h>
 
 #include "Data/LopesEventIn.h"
 //#include "Data/LOFAR_TBB.h"
@@ -678,7 +679,8 @@ public:
   //  The function creates a CR-Tool data reader object and stores a pointer to it
   DataFunc_CR_dataReaderObject (Data* dp){
 	DBG("DataFunc_CR_dataReaderObject: initialization called.");
-	setParameter("Filename", "/Users/falcke/LOFAR/usg/data/lopes/2007.01.31.23:59:33.960.event");
+	//  D2BG2(dataset_lopes);
+	setParameter("Filename", dataset_lopes); //"/Users/acorstanje/usg/data/lopes/2007.01.31.23:59:33.960.event");
 	setParameter("Filetype", "LOPESEvent");
 	DBG("dataReaderObject: Initialization done.");
     }
@@ -697,10 +699,10 @@ public:
       bool opened;
       void* ptr;
 
-      DBG("dataReaderObject: Retrieved filename parameter =" << Filename);
+      DBG("dataReaderObject: Retrieved filename parameter =" << Filename); // gets filename from hfnet.py
 
       if (vp->size()>0 && AsPtr(vp->at(0))!=NULL) {
-	DBG("dataReaderObject: Delete old data reader object " << AsPtr(vp->at(0)));
+	DBG("dataReaderObject: Delete old data reader object " << AsPtr(vp->at(0))); // does this mean deleting itself?  
 	CR::DataReader* drp=reinterpret_cast<DataReader*>(AsPtr(vp->at(0)));
 	delete drp;
       }

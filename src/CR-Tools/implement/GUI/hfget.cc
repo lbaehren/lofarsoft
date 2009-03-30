@@ -45,7 +45,7 @@ using namespace std;
 
 Data NullObject("NULL");
 
-int global_debuglevel = 0;
+int global_debuglevel = 2;
 
 void setDebug(int level) {global_debuglevel = level;}
 
