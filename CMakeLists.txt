@@ -64,6 +64,7 @@ option (DAL_PYTHON_BINDINGS "Create python bindings for DAL?"            YES )
 ## ==============================================================================
 
 find_program (bison_executable   bison   PATHS ${bin_locations})
+find_program (curl_executable    curl    PATHS ${bin_locations})
 find_program (doxygen_executable doxygen PATHS ${bin_locations})
 find_program (fink_executable    fink    PATHS ${bin_locations})
 find_program (flex_executable    flex    PATHS ${bin_locations})
@@ -121,6 +122,10 @@ if (SYSTEM_PACKAGES)
       if (NOT SWIG_FOUND)
 	list (APPEND fink_packages swig)
       endif (NOT SWIG_FOUND)
+
+      if (NOT wget_executable)
+	list (APPEND fink_packages wget)
+      endif (NOT wget_executable)
 
       ##______________________________________________________________
       ## Define installation targets for the packages
@@ -319,15 +324,24 @@ add_custom_target (cmake-modules
 
 if (wget_executable)
   add_custom_target (test-data
-    COMMAND ${wget_executable} -c http://usg.lofar.org/download/datasets/usg_data_test.tgz
+    COMMAND ${wget_executable} -c ${USG_DOWNLOAD}/datasets/usg_data_test.tgz
     COMMAND tar -xvzf usg_data_test.tgz
     COMMAND rm -f usg_data_test.tgz
     WORKING_DIRECTORY ${USG_DATA}
     COMMENT "Retrieving test data-sets ..."
     )
-  add_dependencies (test-data wget)
 else (wget_executable)
-  message (STATUS "WARNING: Unable to retrieve test data sets - missing wget!")
+  if (curl_executable)
+    add_custom_target (test-data
+      COMMAND ${curl_executable} ${USG_DOWNLOAD}/datasets/usg_data_test.tgz -o usg_data_test.tgz -C -
+      COMMAND tar -xvzf usg_data_test.tgz
+      COMMAND rm -f usg_data_test.tgz
+      WORKING_DIRECTORY ${USG_DATA}
+      COMMENT "Retrieving test data-sets ..."
+      )
+  else (curl_executable)
+    message (STATUS "WARNING: Unable to retrieve sample datasets - missing wget and curl!")
+  endif (curl_executable)
 endif (wget_executable)
 
 ## ==============================================================================
