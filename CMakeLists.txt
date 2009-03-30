@@ -316,15 +316,14 @@ add_custom_target (cmake-modules
   COMMENT "Running test of CMake-modules ..."
   )
 
-if (wget_executable AND tar_executable)
-  add_custom_target (test-data
-    COMMAND ${wget_executable} -c http://usg.lofar.org/download/datasets/usg_data_test.tgz
-    COMMAND ${tar_executable} -xvzf usg_data_test.tgz
-    COMMAND rm -f usg_data_test.tgz
-    WORKING_DIRECTORY ${USG_DATA}
-    COMMENT "Retrieving test data-sets ..."
-    )
-endif (wget_executable AND tar_executable)
+add_custom_target (test-data
+  COMMAND wget -c http://usg.lofar.org/download/datasets/usg_data_test.tgz
+  COMMAND tar -xvzf usg_data_test.tgz
+  COMMAND rm -f usg_data_test.tgz
+  WORKING_DIRECTORY ${USG_DATA}
+  COMMENT "Retrieving test data-sets ..."
+  )
+add_dependencies (test-data wget)
 
 ## ==============================================================================
 ##
