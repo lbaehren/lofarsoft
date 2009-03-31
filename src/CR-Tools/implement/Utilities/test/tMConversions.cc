@@ -159,6 +159,46 @@ int test_MDirection ()
     nofFailedTests++;
   }
 
+  std::cout << "[5] Conversion of MDirection to other  ..." << endl;
+  try {
+    MDirection dir;
+    double ra (0);
+    double dec (90);
+    //
+    dir = MDirection(Quantity(ra,"deg"),
+		     Quantity(dec,"deg"),
+		     MDirection::Ref(MDirection::J2000));
+    MDirection j2000 (dir);
+    //
+    cout << j2000 << endl;
+    //
+    cout << casa::MDirection::Convert (j2000,
+				       MDirection::Ref(MDirection::B1950))()
+	 << endl;
+    //
+    cout << casa::MDirection::Convert (j2000,
+				       MDirection::Ref(MDirection::GALACTIC))()
+	 << endl;
+    // Set up the model for the input (default reference is UTC)
+    casa::MEpoch epoch (  Quantity(0., "d"));
+    // Set the telescope position
+    MPosition obs(  MVPosition(     Quantity( 10, "m"),
+				    Quantity( -6, "deg"),
+				    Quantity( 50, "deg")),
+		    MPosition::Ref(MPosition::WGS84));
+    // Create refrence frame
+    casa::MeasFrame frame(epoch,obs);
+    //  Create conversion engine
+    MDirection::Convert conv (MDirection(MDirection::J2000),
+			      MDirection::Ref(MDirection::AZEL,frame));
+    // Convert direction from J2000 to AZEL
+    cout << "AZEL = " << conv(MVDirection (Quantity(ra,"deg"),
+			      Quantity(dec,"deg"))).getValue().getRecordValue() << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 
