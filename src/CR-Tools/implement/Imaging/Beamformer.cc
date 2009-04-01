@@ -334,10 +334,21 @@ namespace CR { // Namespace CR -- begin
       to the array storing the values. If no buffering of the geometrical weights
       is done, we retrieve the values and store them here.
     */
+    //________________________________________________________________
+    //                                          bufferWeights_p = true
     if (bufferWeights_p) {
+      std::cout << "[Beamformer::setWeights] bufferWeights_p = true" << std::endl;
+      //
       bfWeights_p.reference(weights_p);
-    } else {
+    }
+    //________________________________________________________________
+    //                                         bufferWeights_p = false
+    else {
+      std::cout << "[Beamformer::setWeights] bufferWeights_p = false" << std::endl;
+      //______________________________________________________________
+      //                                         bufferPhases_p = true
       if (bufferPhases_p) {
+	std::cout << "[Beamformer::setWeights] bufferPhases_p = true" << std::endl;
 	IPosition nelem = phases_p.shape();
 	int i,j,k;
 	// adjust the size of the array storing the weights
@@ -350,11 +361,18 @@ namespace CR { // Namespace CR -- begin
 	    } 
 	  } 
 	} 
-      } else {
+      }
+      //______________________________________________________________
+      //                                        bufferPhases_p = false
+      else {
+	std::cout << "[Beamformer::setWeights] bufferPhases_p = false" << std::endl;
 	bfWeights_p.resize (GeomWeight::shape());
 	GeomWeight::weights(bfWeights_p);
       }
-    }
+    }  // END: bufferWeights_p
+    
+    std::cout << "-- shape(weights) = " << bfWeights_p.shape()   << std::endl;
+    std::cout << "-- weights[0,,]   = " << bfWeights_p.yzPlane(0) << std::endl;
     
     /*
      *  Update the shape information on the array returning the beamformed data

@@ -202,15 +202,11 @@ namespace CR { // Namespace CR -- begin
   {
     // case 1: buffering OFF -> ON
     if (!bufferWeights_p && bufferWeights) {
-      std::cout << "[GeomWeight::bufferWeights] Switching buffering OFF -> ON"
-		<< std::endl;
       bufferWeights_p = bufferWeights;
       setWeights ();
     }
     // case 2: buffering of values switched off after previous enabled
     else if (bufferWeights_p && !bufferWeights) {
-      std::cout << "[GeomWeight::bufferWeights] Switching buffering ON -> OFF"
-		<< std::endl;
       bufferWeights_p = bufferWeights;
       Matrix<DComplex> mat;
       weights_p.resize(mat.shape());
@@ -223,16 +219,11 @@ namespace CR { // Namespace CR -- begin
 
   Cube<DComplex> GeomWeight::weights ()
   {
-    if (bufferWeights_p) {
-      return weights_p;
-    } else {
-      if (bufferPhases_p) {
-	return calcWeights (phases_p);
-      } else {
-	Cube<double> geomPhases = GeomPhase::phases();
-	return calcWeights (geomPhases);
-      } 
-    }
+    Cube<DComplex> w;
+
+    weights (w);
+
+    return w;
   }
 
   //_____________________________________________________________________________
@@ -241,17 +232,21 @@ namespace CR { // Namespace CR -- begin
   void GeomWeight::weights (Cube<DComplex> &w)
   {
     if (bufferWeights_p) {
+      w.resize(weights_p.shape());
       w = weights_p;
-    } else {
+    }
+    else {
       if (bufferPhases_p) {
 	calcWeights (w,phases_p);
-      } else {
-	Cube<double> geomPhases = GeomPhase::phases();
-	calcWeights (w,geomPhases);
+      }
+      else {
+	Cube<double> p;
+	GeomPhase::phases(p);
+	calcWeights (w,p);
       } 
     }
   }
-
+  
   //_____________________________________________________________________________
   //                                                                      summary
   
@@ -346,14 +341,14 @@ namespace CR { // Namespace CR -- begin
 				Cube<double> const &phases)
   {
     IPosition nelem = phases.shape();
-    int i,j,k;
+    int freq,ant,k;
 
     w.resize(nelem);
     
     for (k=0; k<nelem(2); k++) {
-      for (j=0; j<nelem(1); j++) {
-	for (i=0; i<nelem(0); i++) {
-	  w(i,j,k) = DComplex(cos(phases(i,j,k)),sin(phases(i,j,k)));
+      for (ant=0; ant<nelem(1); ant++) {
+	for (freq=0; freq<nelem(0); freq++) {
+	  w(freq,ant,k) = DComplex(cos(phases(freq,ant,k)),sin(phases(freq,ant,k)));
 	} 
       } 
     } 

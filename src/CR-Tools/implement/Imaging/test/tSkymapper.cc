@@ -513,7 +513,7 @@ int test_processing (string const &infile,
   uint nofAntennas       = 10;
 
   // Spatial coordinates
-  IPosition shape (3,35,35,20);
+  IPosition shape (3,10,10,5);
   SpatialCoordinate spatial (CoordinateType::DirectionRadius,
 			     refcode,
 			     projection);

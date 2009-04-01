@@ -343,9 +343,37 @@ int test_methods ()
 
   cout << "[5] Retrieve values of the geometrical phases ..." << endl;
   try {
-    Cube<double> val = phase.phases();
+    Vector<casa::MVPosition> antPositions (3);
+    Matrix<double> pos (2,3);
+    Vector<double> freq (10);
+    Matrix<double> delays;
     //
-    cout << "-- Shape of the array of values = " << val.shape() << endl;
+    pos(0,0) = 1;
+    pos(0,1) = 90;
+    pos(0,2) = 0;
+    pos(1,0) = 1;
+    pos(1,1) = 0;
+    pos(1,2) = 90;
+    phase.setSkyPositions (pos,
+			   CR::CoordinateType::Spherical,
+			   true);
+    //
+    antPositions(0) = casa::MVPosition (100,0,0);
+    antPositions(1) = casa::MVPosition (0,100,0);
+    antPositions(2) = casa::MVPosition (100,100,0);
+    phase.setAntPositions (antPositions);
+    //
+    for (uint n(0); n<freq.nelements(); n++) { freq(n) = n; } 
+    phase.setFrequencies(freq);
+    //
+    Cube<double> val;
+    //
+    val = phase.phases();
+    cout << "-- phases by return = " << val << endl;
+    //
+    val = 1;
+    phase.phases(val);
+    cout << "-- phases by ref    = " << val << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;

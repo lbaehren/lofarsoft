@@ -440,7 +440,38 @@ int test_methods ()
     std::cerr << message << endl;
     nofFailedTests++;
   }
-
+  
+  cout << "[7] Test retrieval of the delay values ..." << endl;
+  try {
+    Matrix<double> pos (2,3);
+    Matrix<double> delays;
+    //
+    pos(0,0) = 1;
+    pos(0,1) = 90;
+    pos(0,2) = 0;
+    pos(1,0) = 1;
+    pos(1,1) = 0;
+    pos(1,2) = 90;
+    geomDelay.setSkyPositions (pos,
+			       CoordinateType::Spherical,
+			       true);
+    //
+    cout << "-- nof. antenna pos = " << geomDelay.nofAntPositions() << endl;
+    cout << "-- nof. sky pos     = " << geomDelay.nofSkyPositions() << endl;
+    cout << "-- buffer delays    = " << geomDelay.bufferDelays() << endl;
+    cout << "-- shape(delays)    = " << geomDelay.shape()        << endl;
+    //
+    delays = geomDelay.delays();
+    cout << "-- delays by return = " << delays << endl;
+    //
+    delays = 1;
+    geomDelay.delays(delays);
+    cout << "-- delays by ref    = " << delays << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 

@@ -329,8 +329,9 @@ namespace CR { // Namespace CR -- begin
       if (bufferDelays_p) {
 	phases(p,delays_p);
       } else {
-	casa::Matrix<double> geomDelays = GeomDelay::delays();
-	phases(p,geomDelays);
+	casa::Matrix<double> d;
+	GeomDelay::delays(d);
+	phases(p,d);
       }
     }
   }

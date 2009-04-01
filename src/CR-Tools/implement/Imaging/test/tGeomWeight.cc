@@ -270,6 +270,101 @@ int test_static_functions ()
 
 // -----------------------------------------------------------------------------
 
+/*!
+  \brief Test the public methods of the GeomWeight class
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function. 
+*/
+int test_methods ()
+{
+  cout << "\n[tGeomWeight::test_methods]\n" << endl;
+
+  int nofFailedTests (0);
+  Vector<casa::MVPosition> antPositions (3);
+  Matrix<double> pos (2,3);
+  Vector<double> freq (10);
+  GeomWeight w;
+
+  cout << "[1] Storing parameters to GeomWeight object ..." << endl;
+  try {
+    pos(0,0) = 1;
+    pos(0,1) = 90;
+    pos(0,2) = 0;
+    pos(1,0) = 1;
+    pos(1,1) = 0;
+    pos(1,2) = 90;
+    std::cout << "-- setting sky positions ..." << std::endl;
+    w.setSkyPositions (pos,
+		       CR::CoordinateType::Spherical,
+		       true);
+    //
+    antPositions(0) = casa::MVPosition (100,0,0);
+    antPositions(1) = casa::MVPosition (0,100,0);
+    antPositions(2) = casa::MVPosition (100,100,0);
+    std::cout << "-- setting antenna positions ..." << std::endl;
+    w.setAntPositions (antPositions);
+    //
+    for (uint n(0); n<freq.nelements(); n++) { freq(n) = n; } 
+    std::cout << "-- setting frequency values ..." << std::endl;
+    w.setFrequencies(freq);
+    //
+    std::cout << "-- shape(weights) = " << w.shape() << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] Retrieve geometrical delays ..." << std::endl;
+  try {
+    Matrix<double> delays;
+    //
+    delays = w.delays();
+    std::cout << "-- delays by return = " << delays << std::endl;
+    //
+    delays = 1;
+    w.delays(delays);
+    std::cout << "-- delays by ref    = " << delays << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[3] Retrieve geometrical phases ..." << std::endl;
+  try {
+    Cube<double> phases;
+    //
+    phases = w.phases();
+    std::cout << "-- phases by return = " << phases << std::endl;
+    //
+    phases = 1;
+    w.phases(phases);
+    std::cout << "-- phases by ref    = " << phases << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[4] Retrieve geometrical weights ..." << std::endl;
+  try {
+    Cube<casa::DComplex> weights;
+    //
+    weights = w.weights();
+    std::cout << "-- weights by return = " << weights << std::endl;
+    //
+    weights = 1;
+    w.weights(weights);
+    std::cout << "-- weights by ref    = " << weights << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
 int main ()
 {
   int nofFailedTests (0);
@@ -278,6 +373,8 @@ int main ()
   nofFailedTests += test_constructors();
   // Test the static functions provided by the class
   nofFailedTests += test_static_functions();
+  // Test public methods of the clss
+  nofFailedTests += test_methods();
 
   return nofFailedTests;
 }
