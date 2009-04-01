@@ -6,7 +6,7 @@
 
 extern int global_debuglevel;
 
-#define DBG_MODE 2
+#define DBG_MODE 0
 
 #include <string>
 #include <iostream>
@@ -95,7 +95,8 @@ typedef int modval;
 
 
 //Define Types of Data to be stored
-typedef intptr_t HInteger;
+//typedef intptr_t HInteger;
+typedef int HInteger;
 typedef double HNumber;
 typedef std::complex<double> HComplex;
 typedef std::string HString;

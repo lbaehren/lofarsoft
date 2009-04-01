@@ -9,10 +9,12 @@ d=Data("ROOT")
 datatypechooser=LOPESDatatypeChooser(d)
 unitchooser=UnitChooser(d) # A subnet of objects which provides the different options for choosing unit scales from
 
-import os
 lofarMainDir = os.environ.get('LOFARSOFT')
+
+
+#hardcodedFileName = lofarMainDir + '/data/lofar/rw_20080701_162002_0109.h5' 
+#d >> _d("Filetype","LOFAR_TBB",_l(2)) \
 hardcodedFileName = lofarMainDir + '/data/lopes/2007.01.31.23:59:33.960.event'
-# /Users/acorstanje/usg/data/lopes/2007.01.31.23:59:33.960.event
 d >> _d("Filetype","LOPESEvent",_l(2)) \
   >> _d("Filename",hardcodedFileName,_l(2)) \
   >> _d("FileObject",_f("dataReaderObject","CR")) \
@@ -27,7 +29,7 @@ d >> _d("Filetype","LOPESEvent",_l(2)) \
 (("Parameters","PlotPanel",_l(90)) >> d["File"])
 
 #Create several Antennas on the same level and add a Data object as placeholder
-d["File"] >> NewObjectRange("Antenna",4) >> ("Data",_f("dataRead","CR",TYPE.COMPLEX)) >>  ("UnitData",_f("Unit")) >> "yAxis"
+d["File"] >> NewObjectRange("Antenna",1) >> ("Data",_f("dataRead","CR",TYPE.COMPLEX)) >>  ("UnitData",_f("Unit")) >> "yAxis"
 
 d["Antenna"] >>  ("Data",_f("dataRead","CR",TYPE.NUMBER)) >>  ("UnitData",_f("Unit")) >> "xAxis"
 

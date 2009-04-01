@@ -258,6 +258,8 @@ if (CR_WITH_GUI)
   ## linker instructions
   target_link_libraries (hfget
     cr
+    ${DAL_LIBRARIES}
+    ${HDF5_LIBRARIES}
     ${CASA_LIBRARIES}
     ${QT4_LIBRARIES}
     ${MATHGL_LIBRARIES}

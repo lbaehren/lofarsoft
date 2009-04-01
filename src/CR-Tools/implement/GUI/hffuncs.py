@@ -437,6 +437,9 @@ class hfPlotWindow(hffunc):
         self.PlotPanel=self.data["'PlotPanel"]
         if type(self.PlotPanel)==Data: 
             self.PlotPanel.update()
+            npanels=1
+            nx=1
+            ny=1
         elif type(self.PlotPanel)==DataList:
             npanels=len(self.PlotPanel)
             if self.npanels>=0: npanels=min(self.npanels,npanels)

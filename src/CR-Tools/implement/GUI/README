@@ -3,7 +3,18 @@
          - the (eventually) hyper-flexible plotting package -
 ------------------------------------------------------------------------
 
-This are some scratch notes on my installation procedures for "hfplot"
+This are some scratch notes on my installation procedures for "hfplot" - this is by now pretty much outdated ....
+
+
+
+-----------------------
+
+Here are some new things I tried to investigate Scipy:
+
+Install ipython 2.6 from fink
+installed matplotlib-py25 from fink
+ipython -i pylabplt.xlabel('Smarts')
+
 
 ------------------------------------------------------------------------
 

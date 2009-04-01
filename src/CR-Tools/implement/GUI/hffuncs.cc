@@ -39,7 +39,8 @@ using namespace std;
 #include <crtools.h>
 
 #include "Data/LopesEventIn.h"
-//#include "Data/LOFAR_TBB.h"
+#include "Data/LOFAR_TBB.h"
+#include "DAL/TBB_Timeseries.h"
 
 
 /*========================================================================
@@ -716,14 +717,15 @@ public:
 	  CR::LopesEventIn* lep = new CR::LopesEventIn; ptr = lep;
 	  DBG("DataFunc_CR_dataReaderObject: lep=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
 	  opened=lep->attachFile(Filename);
-	  if (oldfilename!=Filename) {lep->summary();};
+	  if (oldfilename!=Filename) {MSG("Filename="<<Filename);lep->summary();};
 	  oldfilename=Filename;
       } else if (Filetype=="LOFAR_TBB") {
-/*	  CR::LOFAR_TBB* tbb = new CR::LOFAR_TBB(Filename); ptr = tbb;
-	  DBG("DataFunc_CR_dataReaderObject: tbb=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
-	  opened=tbb!=NULL;
-	  DBG3(tbb->summary());
-*/
+	CR::LOFAR_TBB* tbb = new CR::LOFAR_TBB(Filename,1024); ptr = tbb;
+	MSG("ATTENTION: Hardcoded initial NBlocksize to 1024!")
+	DBG("DataFunc_CR_dataReaderObject: tbb=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
+	opened=tbb!=NULL;
+	if (oldfilename!=Filename) {MSG("Filename="<<Filename);tbb->summary();};
+	oldfilename=Filename;
       } else {
 	  ERROR("DataFunc_CR_dataReaderObject: Unknown Filetype = " << Filetype  << ", name=" << dp->getName(true));
 	  vp->push_back(mycast<T>(NULL)); 
@@ -852,8 +854,10 @@ public:
     GET_FUNC_PARAMETER_T(Stride,  HInteger);
     GET_FUNC_PARAMETER_T(Shift, HInteger);
     GET_FUNC_PARAMETER_T(Datatype, HString);
-
-//    MSG("Antenna=" << Antenna);
+    
+    MSG("Antenna=" << Antenna);
+    MSG("nofAntennas=" << drp->nofAntennas());
+    if (Antenna > drp->nofAntennas()-1) {ERROR("Requested Antenna number too large!");};
 
     drp->setBlocksize(Blocksize);
     drp->setBlock(Block);
