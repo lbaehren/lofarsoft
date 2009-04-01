@@ -240,6 +240,7 @@ if (CR_WITH_PLOTTING)
   if (PLPLOT_LIBRARIES)
     target_link_libraries (tStationBeam
       cr
+      ${CASA_LIBRARIES}
       ${PLPLOT_LIBRARIES}
       ${X11_LIBRARIES}
       )

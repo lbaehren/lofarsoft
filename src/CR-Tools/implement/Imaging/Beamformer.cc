@@ -366,13 +366,18 @@ namespace CR { // Namespace CR -- begin
       //                                        bufferPhases_p = false
       else {
 	std::cout << "[Beamformer::setWeights] bufferPhases_p = false" << std::endl;
-	bfWeights_p.resize (GeomWeight::shape());
 	GeomWeight::weights(bfWeights_p);
       }
     }  // END: bufferWeights_p
-    
-    std::cout << "-- shape(weights) = " << bfWeights_p.shape()   << std::endl;
+
+// #ifdef DEBUGGING_MESSAGES
+    std::cout << "-- nof. antennas  = " << GeomDelay::nofAntPositions() << std::endl;
+    std::cout << "-- nof. pointings = " << GeomDelay::nofSkyPositions() << std::endl;
+    std::cout << "-- shape(delays)  = " << GeomDelay::shape()     << std::endl;
+    std::cout << "-- shape(phases)  = " << GeomPhase::shape()     << std::endl;
+    std::cout << "-- shape(weights) = " << bfWeights_p.shape()    << std::endl;
     std::cout << "-- weights[0,,]   = " << bfWeights_p.yzPlane(0) << std::endl;
+// #endif
     
     /*
      *  Update the shape information on the array returning the beamformed data

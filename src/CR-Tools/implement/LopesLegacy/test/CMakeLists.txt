@@ -9,10 +9,6 @@ set (tests
   tBasicObject
   tDataConversion
   tExchangeFormat
-  tStoredAddObject
-  tStoredInputObject
-  tStoredMultiplyObject
-  tStoredObject
   )
 
 ## -----------------------------------------------------------------------------
