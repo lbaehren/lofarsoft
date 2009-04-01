@@ -86,20 +86,6 @@ if (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
 endif (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
 
 ##____________________________________________________________________
-## treetest
-
-if (LAPACK_LIBRARIES AND G2C_LIBRARIES AND CR_WITH_LEGACY)
-  ## compiler instructions
-  add_executable (treetest treetest.cc)
-  ## linker instructions
-  target_link_libraries (treetest cr)
-  ## installation instructions
-  list (APPEND cr_apps treetest)
-else (LAPACK_LIBRARIES AND G2C_LIBRARIES AND CR_WITH_LEGACY)
-  message (STATUS "[CR-Tools] Unable to build executable treetest.")
-endif (LAPACK_LIBRARIES AND G2C_LIBRARIES AND CR_WITH_LEGACY)
-
-##____________________________________________________________________
 ## trigrun
 
 if (HAVE_POPT AND LAPACK_LIBRARIES)
