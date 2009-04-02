@@ -226,7 +226,7 @@ int test_static_functions ()
 
   int nofFailedTests (0);
 
-  cout << "[1] GeomPhase(double,double) ..." << endl;
+  cout << "[1] phases(double,double) ..." << endl;
   try {
     double delay (0.1);
     double freq (40e06);
@@ -241,7 +241,7 @@ int test_static_functions ()
     nofFailedTests++;
   }
 
-  cout << "[2] GeomPhase(double,Matrix<double>) ..." << endl;
+  cout << "[2] phases(Matrix<double>,double) ..." << endl;
   try {
     Matrix<double> delay (3,3,0.1);
     double freq (40e06);
@@ -256,7 +256,7 @@ int test_static_functions ()
     nofFailedTests++;
   }
 
-  cout << "[3] GeomPhase(Vector<double>,Matrix<double>) ..." << endl;
+  cout << "[3] GeomPhase(Cube<double>,Matrix<double>,Vector<double>) ..." << endl;
   try {
     Matrix<double> delay (2,2,0.1);
     Vector<double> freq (3);
@@ -341,7 +341,7 @@ int test_methods ()
     nofFailedTests++;
   }
 
-  cout << "[5] Retrieve values of the geometrical phases ..." << endl;
+  cout << "[5] Retrieve values of delays and phases ..." << endl;
   try {
     Vector<casa::MVPosition> antPositions (3);
     Matrix<double> pos (2,3);
@@ -367,6 +367,13 @@ int test_methods ()
     phase.setFrequencies(freq);
     //
     Cube<double> val;
+    //
+    delays = phase.delays();
+    cout << "-- delays by return = " << delays << endl;
+    //
+    delays = 1;
+    phase.delays(delays);
+    cout << "-- delays by ref    = " << delays << endl;
     //
     val = phase.phases();
     cout << "-- phases by return = " << val << endl;

@@ -6,9 +6,6 @@
 ## Set up the list with test program sources
 
 set (tests
-  tBasicObject
-  tDataConversion
-  tExchangeFormat
   )
 
 ## -----------------------------------------------------------------------------
