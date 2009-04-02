@@ -220,6 +220,14 @@ namespace CR {  // Namespace CR -- begin
     beamformer_p = Beamformer();
     beamformer_p.setAntPositions(antPositions);
 
+#ifdef DEBUGGING_MESSAGES
+    std::cout << "[Skymapper::init]" << std::endl;
+    std::cout << "-- antenna positions (input) = " << antPositions
+	      << std::endl;
+    std::cout << "-- antenna positions (BF)    = " << beamformer_p.antPositions()
+	      << std::endl;
+#endif
+
     /* initialize the internal settings and objects */
     initSkymapper();
   }
@@ -279,7 +287,7 @@ namespace CR {  // Namespace CR -- begin
 		<< x.getMesg()
 		<< std::endl;
     }
-    
+
     //________________________________________________________________
     /*
      *  Set up the characteristics of the buffer array and the slicing

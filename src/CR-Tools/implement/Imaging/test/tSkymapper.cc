@@ -243,14 +243,7 @@ int test_Beamformer (uint const &blocksize=1024)
 
   cout << "[1] Add observation data to the coordinate ..." << endl << std::flush;
   try {
-    casa::ObsInfo info;
-    info.setTelescope ("UNKNOWN");
-    info.setObserver ("Lars Baehren");
-    //
-    cout << "-- Telescope = " << info.telescope() << endl;
-    cout << "-- Observer  = " << info.observer()  << endl;
-    //
-    coord.setObsInfo (info);
+    coord.setObsInfo (getObsInfo());
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
@@ -283,7 +276,7 @@ int test_Beamformer (uint const &blocksize=1024)
 
   cout << "[3] Set the spatial coordinate ..." << endl << std::flush;
   try {
-    IPosition shape (3,20,20,10);
+    IPosition shape (3,10,10,5);
     //
     SpatialCoordinate azel (CoordinateType::DirectionRadius,
 			    "AZEL"
@@ -303,14 +296,23 @@ int test_Beamformer (uint const &blocksize=1024)
 
   cout << "[4] Set positions and frequencies ..." << endl << std::flush;
   try {
-    Vector<MVPosition> antPos (10);
+    Vector<MVPosition> antPos (3);
     Matrix<double> skyPos = coord.spatialCoordinate().positionValues();
     Vector<double> freq   = coord.timeFreqCoordinate().frequencyValues();
+    //
+    antPos(0) = casa::MVPosition (100,0,0);
+    antPos(1) = casa::MVPosition (0,100,0);
+    antPos(2) = casa::MVPosition (100,100,0);
     // 
     bf.setAntPositions(antPos);
     bf.setSkyPositions(skyPos);
     bf.setFrequencies(freq);
     bf.summary();
+    //
+    cout << "-- geometrical delays  [0,]  = " << bf.delays().row(0)      << endl;
+    cout << "-- geometrical phases  [1,,] = " << bf.phases().yzPlane(1)  << endl;
+    cout << "-- geometrical weights [1,,] = " << bf.weights().yzPlane(1) << endl;
+    cout << "-- Beamformer weights  [1,,] = " << bf.beamformerWeights().yzPlane(1) << endl;
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
@@ -504,13 +506,11 @@ int test_processing (string const &infile,
   
   int nofFailedTests     = 0;
 
-  std::string telescope  = "UNKNOWN";
-  std::string observer   = "Lars Baehren";
   std::string refcode    = "AZEL";
   std::string projection = "SIN";
   uint nofFrames         = 10;
   uint nofBlocksPerFrame = 1;
-  uint nofAntennas       = 10;
+  uint nofAntennas       = 5;
 
   // Spatial coordinates
   IPosition shape (3,10,10,5);
@@ -531,6 +531,11 @@ int test_processing (string const &infile,
   
   // Antenna positions
   Matrix<double> antPositions (nofAntennas,3);
+  for (uint ant(0); ant<nofAntennas; ant++) {
+    antPositions(ant,0) = ant*100;
+    antPositions(ant,1) = ant*100;
+    antPositions(ant,2) = ant;
+  }
   // EM quantity for which the skymap is computed
   CR::SkymapQuantity skymapQuantity (SkymapQuantity::TIME_CC);
 

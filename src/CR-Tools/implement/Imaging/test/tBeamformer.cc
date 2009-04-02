@@ -350,6 +350,110 @@ int test_parameters (uint blocksize=1024,
 
 // -----------------------------------------------------------------------------
 
+int test_methods ()
+{
+  std::cout << "\n[test_methods]\n" << std::endl;
+
+  int nofFailedTests (0);
+  Vector<casa::MVPosition> antPositions (3);
+  Matrix<double> pos (2,3);
+  Vector<double> freq (10);
+  Beamformer bf;
+
+  cout << "[1] Storing parameters to Beamformer object ..." << endl;
+  try {
+    pos(0,0) = 1;
+    pos(0,1) = 90;
+    pos(0,2) = 0;
+    pos(1,0) = 1;
+    pos(1,1) = 0;
+    pos(1,2) = 90;
+    std::cout << "-- setting sky positions ..." << std::endl;
+    bf.setSkyPositions (pos,
+			CR::CoordinateType::Spherical,
+			true);
+    //
+    antPositions(0) = casa::MVPosition (100,0,0);
+    antPositions(1) = casa::MVPosition (0,100,0);
+    antPositions(2) = casa::MVPosition (100,100,0);
+    std::cout << "-- setting antenna positions ..." << std::endl;
+    bf.setAntPositions (antPositions);
+    //
+    for (uint n(0); n<freq.nelements(); n++) { freq(n) = n; } 
+    std::cout << "-- setting frequency values ..." << std::endl;
+    bf.setFrequencies(freq);
+    // summary
+    bf.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] Retrieve geometrical delays ..." << std::endl;
+  try {
+    Matrix<double> delays;
+    //
+    delays = bf.delays();
+    std::cout << "-- delays by return = " << delays << std::endl;
+    //
+    delays = 1;
+    bf.delays(delays);
+    std::cout << "-- delays by ref    = " << delays << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[3] Retrieve geometrical phases ..." << std::endl;
+  try {
+    Cube<double> phases;
+    //
+    phases = bf.phases();
+    std::cout << "-- phases by return = " << phases << std::endl;
+    //
+    phases = 1;
+    bf.phases(phases);
+    std::cout << "-- phases by ref    = " << phases << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[4] Retrieve geometrical weights ..." << std::endl;
+  try {
+    Cube<casa::DComplex> weights;
+    //
+    weights = bf.weights();
+    std::cout << "-- weights by return = " << weights << std::endl;
+    //
+    weights = 1;
+    bf.weights(weights);
+    std::cout << "-- weights by ref    = " << weights << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[5] Retrieve Beamfomer weights ..." << std::endl;
+  try {
+    Cube<casa::DComplex> weights;
+    //
+    weights = bf.beamformerWeights();
+    std::cout << "-- weights by return = " << weights << std::endl;
+    //
+    weights = 1;
+    bf.beamformerWeights(weights);
+    std::cout << "-- weights by ref    = " << weights << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
 /*!
   \brief Test modification of the Beamformer weights
 
@@ -494,6 +598,7 @@ int main ()
   
   if (!nofFailedTests) {
     nofFailedTests += test_parameters();
+    nofFailedTests += test_methods();
     nofFailedTests += test_processing ();
   }
   

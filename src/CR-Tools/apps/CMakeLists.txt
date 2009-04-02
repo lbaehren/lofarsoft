@@ -337,7 +337,6 @@ if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 endif (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 
 
-
 ## -------------------------------------------------------------------
 
 ## Glish client programs

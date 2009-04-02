@@ -420,6 +420,29 @@ namespace CR { // Namespace CR -- begin
     // ------------------------------------------------------------------ Methods
 
     /*!
+      \brief Retrieve the alues of the beamformer weights
+
+      \return weights -- [freq,ant,sky] Array with the weights applied by the
+              Beamformer to the frequency-domain data.
+    */
+    inline Cube<DComplex> beamformerWeights () {
+      Cube<DComplex> w(bfWeights_p.shape());
+      w = bfWeights_p;
+      return w;
+    }
+    
+    /*!
+      \brief Retrieve the alues of the beamformer weights
+
+      \retval weights -- [freq,ant,sky] Array with the weights applied by the
+              Beamformer to the frequency-domain data.
+    */
+    inline void beamformerWeights (Cube<DComplex> &w) {
+      w.resize(bfWeights_p.shape());
+      w = bfWeights_p;
+    }
+
+    /*!
       \brief Get the shape of the array holding the Beamformer weights
 
       \return shape --

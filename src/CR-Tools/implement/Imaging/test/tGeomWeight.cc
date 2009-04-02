@@ -231,17 +231,20 @@ int test_static_functions ()
   cout << "\n[tGeomWeight::test_static_functions]\n" << endl;
 
   int nofFailedTests (0);
-  
+
   cout << "[1] calcWeights (Matrix<double>,Vector<double>)" << endl;
   try {
     Matrix<double> delays (3,3,1.0);
     Vector<double> frequencies (4);
-    
+
+    // set geometrical delays
+    indgen(delays);
+    // set frequency values
     frequencies(0) = 20e06;
     frequencies(1) = 40e06;
     frequencies(2) = 80e06;
     frequencies(3) = 160e06;
-    
+    // compute the geometrical weights
     Cube<DComplex> weights = GeomWeight::calcWeights (delays,frequencies);
     
     cout << "-- delays      = " << delays      << endl;
@@ -255,6 +258,8 @@ int test_static_functions ()
   cout << "[2] calcWeights (Cube<double>)" << endl;
   try {
     Cube<double> phases (3,3,3,1.0);
+
+    indgen(phases);
 
     Cube<DComplex> weights = GeomWeight::calcWeights(phases);
 
