@@ -155,23 +155,32 @@ namespace CR { // Namespace CR -- begin
     <ul>
       <li>Construction of a new object, providing all basic parameters:
       \code
+      #include <Coordinates/TimeFreq.h>
+
       uint blocksize (2048);
       double sampleFrequency (80e06);
       uint nyquistZone (2);
     
-      CR::TimeFreq data (blocksize,sampleFrequency,nyquistZone);
+      CR::TimeFreq timeFreq (blocksize,sampleFrequency,nyquistZone);
       \endcode
+
       <li>Assigning a new value to the sample frequency can be done in a number
       of ways (all of will will have the same result):
       \code
       // sample frequency in its natural units, [Hz]
-      data.setSampleFrequency (80e06);
+      timeFreq.setSampleFrequency (80e06);
       
       // use combination of numerical value and unit
-      data.setSampleFrequency (80,"MHz");
+      timeFreq.setSampleFrequency (80,"MHz");
       
       // physical quantity encapsulating numerical value and unit
-      data.setSampleFrequency (casa::Quantity(80,"MHz"));
+      timeFreq.setSampleFrequency (casa::Quantity(80,"MHz"));
+      \endcode
+      
+      <li>Retrieve the frequency values for a given setup (sample frequency, blocksize,
+      Nyquist zone):
+      \code
+      casa::Vector<double> freq = timeFreq.frequencyValues();
       \endcode
     </ul>
   */

@@ -830,6 +830,7 @@ namespace CR {  //  Namespace CR -- begin
 	out.column(antenna) = outColumn;
 	break;
       case 2:
+      case 4:
 	for (int channel (0); channel<shape(0); channel++) {
 	  out(channel,antenna) = conj(outColumn(shape(0)-channel-1));
 	}
