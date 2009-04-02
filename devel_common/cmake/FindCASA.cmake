@@ -67,9 +67,9 @@ set (GLISH_FIND_QUIETLY TRUE)
 
 ## libg2c
 
-if (NOT HAVE_G2C)
-  include (FindG2C)
-endif (NOT HAVE_G2C)
+if (NOT HAVE_G2C AND NOT HAVE_GFORTRAN)
+  include (FindGFortran)
+endif (NOT HAVE_G2C AND NOT HAVE_GFORTRAN)
 
 ## Glish
 
