@@ -59,6 +59,17 @@ if (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
     tcasa_measures
     )
   
+  set (tests_casacore_link_libs ${LAPACK_LIBRARIES})
+  list (APPEND tests_casacore_link_libs ${CFITSIO_LIBRARIES})
+  list (APPEND tests_casacore_link_libs ${WCSLIB_LIBRARIES})
+  
+  if (GFORTRAN_LIBRARIES) 
+    list (APPEND tests_casacore_link_libs ${GFORTRAN_LIBRARIES})
+  else (GFORTRAN_LIBRARIES)
+    if (G2C_LIBRARIES) 
+    list (APPEND tests_casacore_link_libs ${G2C_LIBRARIES})
+    endif (G2C_LIBRARIES)
+  endif (GFORTRAN_LIBRARIES)
   
   foreach (test ${tests_casacore})
     ## compiler instructions
@@ -72,11 +83,8 @@ if (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
       ## linker instructions
       target_link_libraries (${test}
 	cr
+	${tests_casacore_link_libs}
 	${HDF5_LIBRARIES}
-	${LAPACK_LIBRARIES}
-	${CFITSIO_LIBRARIES}
-	${WCSLIB_LIBRARIES}
-	${G2C_LIBRARIES}
 	${HAVE_LIBM}
 	)
     else (HAVE_HDF5)
@@ -87,10 +95,7 @@ if (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
       ## linker instructions
       target_link_libraries (${test}
 	cr
-	${LAPACK_LIBRARIES}
-	${CFITSIO_LIBRARIES}
-	${WCSLIB_LIBRARIES}
-	${G2C_LIBRARIES}
+	${tests_casacore_link_libs}
 	${HAVE_LIBM}
 	)
     endif (HAVE_HDF5)
