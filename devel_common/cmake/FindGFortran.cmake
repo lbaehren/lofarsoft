@@ -74,6 +74,9 @@ if (UNIX)
       )
   else (APPLE)
     list (APPEND lib_locations
+      /usr/lib/gcc/i486-linux-gnu/4.3
+      /usr/lib/gcc/i486-linux-gnu/4.2
+      /usr/lib/gcc/i486-linux-gnu/4.1
       /usr/lib/gcc/i386-redhat-linux/3.4.6
       /usr/lib64/gcc/x86_64-suse-linux/4.3
       /usr/lib/gcc/x86_64-redhat-linux/3.4.3/32
