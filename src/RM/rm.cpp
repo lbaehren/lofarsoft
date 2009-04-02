@@ -1,11 +1,16 @@
+/*!
 
-#include <casa/Arrays.h>
+
+
+*/
+
+#include <casa/Arrays.h>			// CASA library functions
 #include <casa/Arrays/Array.h>
 #include <casa/Utilities/DataType.h>
 #include <tables/Tables/TiledFileAccess.h>
 #include <lattices/Lattices/TiledShape.h>
 
-#include "rm.h"
+#include "rm.h"					// rm class declarations
 
 using namespace std;
 using namespace casa;		// namespace for functions from casacore
@@ -16,18 +21,35 @@ using namespace casa;		// namespace for functions from casacore
 //
 //===============================================================================
 
-rm::rm()
+/*!
+  \brief Declare a new RM cube of size x (right ascension), y (declination), and depth and stepsize in Faraday depth
+
+  \param x, y, depth, stepsize, os -- 
+ 
+  \return none --
+*/
+
+rm::rm(int x, int y, int depth, double stepsize, ostream os)
 {
-	// Do nothing in particular
+	// declare RM cube of desired size and assign output stream
+	
+	
 }
 
+/*!
+  \brief rm class destructor
+
+*/
 
 // rm class destructor
 //
 rm::~rm()
 {
-	// Free memory?
+	// Free memory? Currently nothing to be done
 }
+
+
+
 
 //===============================================================================
 //
@@ -83,12 +105,22 @@ vector<double>rm::lambdaSqToFreq(vector<double> lambda_sq)
 
 
 
-// Inverse Fourier Method for calculating the Rotation Measure
-// Normal case (bool freq=true, default): the input vector is a range of complex polarized intensities
-// measured at different frequencies
-// Special case (bool freq=false): the input vector is already given as a range of polarized intensities
-// given at different lambda squareds
-//
+/*! \brief Inverse Fourier Method for calculating the Rotation Measure
+    
+    The inverse Fourier Transformation is the classical relation between the lambda squared space and Faraday
+    space. Input images channel are not necessarily given in lambda squared wavelengths, but in frequency instead. If that is the case, a conversion function between lambda squared and frequency is used.
+    
+    Normal case (bool freq=true, default): the input vector is a range of complex polarized intensities
+    measured at different frequencies
+    Special case (bool freq=false): the input vector is already given as a range of polarized intensities
+    given at different lambda squareds
+
+    \param intensity --
+    \param frequency --
+    \param freq --
+    
+    \return rm --
+*/
 vector<double>rm::inverseFourier(vector<double> intensity,
 				 vector<double> frequency,
 				 bool freq)
@@ -102,7 +134,7 @@ vector<double>rm::inverseFourier(vector<double> intensity,
 
 
 /*!
-  Wavelet Transform Method for calculating the Rotation Measure
+  \brief Wavelet Transform Method for calculating the Rotation Measure
 
   Normal case (bool freq=true, default): the input vector is a range of complex
   polarized intensities measured at different frequencies. Parameters a_min/a_max
@@ -112,6 +144,8 @@ vector<double>rm::inverseFourier(vector<double> intensity,
   \param frequencies -- 
   \param wavelet_parameters -- 
   \param freq -- 
+  
+  \return rm --
  */
 vector<double> rm::wavelet(vector<double> intensity,
 			   vector<double> frequencies,
@@ -145,11 +179,19 @@ vector<double> rm::wavelet(vector<double> intensity,
 
 // Error calculation algorithms
 
-// Calculate RM error using LSQ approximation
-// Input parameters are the vector of polarized intensities, along with a vector describing
-// their frequency distribution; if bool freq is set to false, these are assumed to be
-// given in lambda_squared values
-//
+/*! \brief Calculate RM error using LSQ approximation
+    
+    Input parameters are the vector of polarized intensities, along with a vector describing
+    their frequency distribution; if bool freq is set to false, these are assumed to be
+    given in lambda squared values
+    
+    \param intensity --
+    \param lambda_sqs --
+    \param lambda_sq --
+    
+    \return rm_error --
+*/
+
 vector<double> rm::rmErrorLsq(vector<double> intensity, vector<double> lambda_sqs, bool lambda_sq)
 {
 	vector<double> rm_error;
@@ -159,9 +201,19 @@ vector<double> rm::rmErrorLsq(vector<double> intensity, vector<double> lambda_sq
 }
 
 
-// Calculate RM error using Bayesian statistics
-//
-//
+/*! \brief Calculate RM error using Bayesian statistics
+
+    Input parameters are the vector of polarized intensities, along with a vector describing
+    their frequency distribution; if bool freq is set to false, these are assumed to be
+    given in lambda squared values
+    
+    \param intensity --
+    \param lambda_sqs --
+    \param lambda_sq --
+    
+    \return rm_error --
+*/
+
 vector<double> rm::rmErrorBayes(vector<double> intensity, vector<double> lambda_sqs, bool lambda_sq)
 {
 	vector<double> rm_error;

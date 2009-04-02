@@ -35,14 +35,18 @@
 #define RM_H
 
 #include <vector>
+#include <iostream>			// streamed input output for rm cubes
+#include <casa/Arrays.h>		// use CASA Arrays for storage of temporary Faraday buffers
+#include <casa/Arrays/Array.h>
 
 // Namespace usage
 using namespace std;
+using namespace casa;
 
 class rm
 {
   /* Private variables. */
-
+private:
   //! Cached line of sight rm values if already computed
   vector<double> cached_los;
   //! Pixel coords of cached rm los values
@@ -59,13 +63,33 @@ class rm
   
  public:
 
-  //! Default constructor.
-  rm();
-  //! Destructor: frees memory?
+  //! Default constructor.(external buffer handling independent of cube object)
+  rm(int, int, int, double, ostream);
+
+
+  /*! \brief RM cube with associated Faraday buffer. One line of sight or two dimensional
+  
+      create a RM cube object with one (or a times b) associated Faraday line(s) (defaults: axis a=1 axis b=0)
+      of sight, 
+  */
+  rm(int, int, int, double, ostream, Array<double> faradaybuffer, int x=1, int y=0);
+  
+  
+  
+  /*! \brief RM cube with a full Faraday plane (complete RA and Dec coverage of the image)
+  
+      create a RM cube object with one associated Faraday plane buffer of dimensions x and y, and
+      third dimension z (default 1)
+ */
+ rm(int, int, int, double, ostream, Array<double> faradayplanes, int x, int y, int z=1);
+  
+  
+ /*! \brief Default destructor
+  */
   ~rm();
 		
-  /* Rotation Measure computing algorithms */
-
+  //! Rotation Measure computing algorithms
+  //
   //! Brentjens and de Bruyn with the Inverse Fourier Transform
   vector<double> inverseFourier(vector<double>,
 				vector<double>,
@@ -88,7 +112,7 @@ class rm
   //! Calculcate Faraday rotation RM contribution by atmosphere
   double atmosphericFaradayRotation(double tec);
   
-  /* Rotation Measure error estimation */
+  //! Rotation Measure error estimation algorithms
 
   //! (assuming) a least squares error approximation
   vector<double> rmErrorLsq(vector<double> intensities,

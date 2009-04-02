@@ -37,12 +37,12 @@
 #define _debug	
 
 using namespace std;
-using namespace casa;
+using namespace casa;					// casa(core) namespace
 
 int main (int argc, char * const argv[]) {
 
-//	Bool status;						// status of casa calls
-	String casaerror;					// error message of casa calls
+//	Bool status;					// status of casa calls
+	String casaerror;				// error message of casa calls
 	LatticeBase *lattice_Q;				// lattice for Q input image, why do we need LatticeBase here?
 
 	Lattice<Float> *lattice_Q_float;		// lattice to determine type of lattice returned by imageOpen()
@@ -102,8 +102,11 @@ int main (int argc, char * const argv[]) {
 	
 	for(unsigned int i=0; i <= lambdaSq.size(); i++)
 	  lambdaSq[i]=i*100.0;
+
+	// create a rm_cube from rm constructor
+	new rm::rm_cube(10,10,10, 1.0, stdout);		
 	
-	lambdaSq=freqToLambdaSq(freq);
+	lambdaSq=rm.freqToLambdaSq(freq);
 	
 	
 	
