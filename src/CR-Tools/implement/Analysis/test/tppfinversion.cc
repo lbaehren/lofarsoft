@@ -118,8 +118,8 @@ int test_ppfinversion (std::string const &filename)
     }
     cout << "[1] Testing attaching file...." << endl ;
   
-    DAL::BeamFormed bf (filename );
-    bf.summary();
+  //  DAL::BeamFormed bf (filename );
+  //  bf.summary();
 
     cout << "-- Extracting beam group from dataset ..." << endl;
 
@@ -130,13 +130,17 @@ int test_ppfinversion (std::string const &filename)
   int length             = 500; //441344;
   
   std::cout << "[1] Extract BeamGroup ..." << std::endl;
-      file = new DAL::BeamFormed(filename.c_str());
+      file = new DAL::BeamFormed(filename.c_str());//.c_str()
     beam = file->getBeam(0);
-   
+  
     beam->summary();
     std::cout << "[2] Read in data from X-component of subband..." << std::endl;
     
-
+    string ra = file->point_ra();
+    cout << "Right Accension direction of the beam : " << ra << endl;
+    
+    string dec = file->point_dec();
+    cout << "Declination of the beam direction : " << dec << endl ;
 
     std::vector< std::complex<short> > xvals;
     std::vector< std::complex<short> > yvals;
@@ -147,6 +151,7 @@ int test_ppfinversion (std::string const &filename)
   //  for (unsigned int count=0; count < 10; count++ )
  //     {
 	beam->getSubbandData_XY( subband, start, length, xvals, yvals );
+	
 	Vector<float> total_intensity(length,0.0)  ;
 //	Vector<float> Y_amplitude(length,0.0)  ;
 //	printf( "Values %d through %d\n", start, start + length );
@@ -194,7 +199,7 @@ int test_ppfinversion (std::string const &filename)
 //******** to get TBB time series data *******************************
 
 
-
+/*
 int test_data (std::string const &filename)
 {
   cout << "\n[test_data]\n" << std::endl;
@@ -316,7 +321,7 @@ int test_inversions (std::string const &filename)
   }
   return nofFailedTests ;
 }
- 
+ */
 
 // -----------------------------------------------------------------------------
 
@@ -324,8 +329,8 @@ int main (int argc,
 	  char *argv[])
 {
   int nofFailedTests (0);
-// std::string fileBeamformed;
-// int test_ppfinversion (std::string const &filename) 
+ // std::string fileBeamformed;
+ // int test_ppfinversion (std::string const &filename) 
   std::string filename;
   if (argc > 1) {
     filename = std::string(argv[1]);
@@ -334,7 +339,7 @@ int main (int argc,
     return(DAL::FAIL);
   }
   
-  nofFailedTests += test_inversions( filename );
+  nofFailedTests += test_ppfinversion( filename );
 //nofFailedTests += test_getData(filename);
 //   if (nofFailedTests == 0) {
 //     nofFailedTests += test_attributes (filename);

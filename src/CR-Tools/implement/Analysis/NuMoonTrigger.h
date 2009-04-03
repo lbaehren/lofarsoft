@@ -28,6 +28,7 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <string>
 
 // AIPS++/CASA header files
 
@@ -43,16 +44,75 @@
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/Complex.h>
 #include <casa/BasicMath/Math.h>
-
+#include <casa/BasicMath/Random.h>
 #include <casa/Quanta.h>
 #include <casa/Exceptions/Error.h>
+
+#include <casa/HDF5/HDF5File.h>
+#include <casa/HDF5/HDF5Record.h>
+
+#include <Imaging/GeomWeight.h>
+#include <Imaging/Beamformer.h>
+#include <Analysis/SubbandID.h>
+
+#include <Analysis/ppfinversion.h>
+#include <Analysis/ppfimplement.h>
+#include <Coordinates/SkymapQuantity.h>
+#include <Coordinates/TimeFreq.h>
+
+#include <dal/dalCommon.h>
+//#include <dal/DataReader.h>
+#include <dal/dalDataset.h>
+#include <dal/BeamFormed.h>
+#include <dal/BeamGroup.h>
+#include <dal/TBB_Timeseries.h>
+#include <dal/TBB_DipoleDataset.h>
+
+
 #include <tables/Tables/Table.h>
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/SetupNewTab.h>
-
 #include <tables/Tables/ScalarColumn.h>
 #include <tables/Tables/ScaColDesc.h>
 #include <tables/Tables/ScaRecordColDesc.h>
+
+#include <Imaging/Beamformer.h>
+//#include "create_data.h"
+// root files to be included
+
+#include "TH2.h"
+#include "TFile.h"
+#include "TH1.h"
+#include "TF1.h"
+#include "TRandom.h"
+#include "TSystem.h"
+#include "TNtuple.h"
+#include "TMath.h"
+#include "TSpectrum.h"
+
+
+using std::cout;
+using std::endl;
+
+using casa::DComplex;
+using casa::Matrix;
+using casa::Vector;
+
+using CR::CoordinateType ;
+using CR::GeomDelay;
+using CR::GeomPhase;
+using CR::GeomWeight;
+using CR::Beamformer;
+using CR::SkymapQuantity;
+using CR::ppfinversion ;
+using CR::ppfimplement ;
+using CR::SubbandID ;
+using CR::TimeFreq ;
+
+using DAL::TBB_Timeseries ;
+using DAL::TBB_DipoleDataset ;
+
+typedef enum { TIME_CC }Type ;
 
 namespace CR { // Namespace  -- begin
   
@@ -86,10 +146,16 @@ namespace CR { // Namespace  -- begin
   */  
   class NuMoonTrigger {
 
+    uint start_p ;
+    
+    uint nofSamples_p ;
+
     //! Time of the observation
     uint observingTime_p;
     //! Sampling rate
-    double samplingRate_p;
+    double samplingRate_p ;
+
+    uint nyquistZone_p ;
     //
     double mean_p;
     //
@@ -115,13 +181,11 @@ namespace CR { // Namespace  -- begin
       \param dead_time      -- 
       \param P3             -- 
     */
-    NuMoonTrigger ( const uint& observing_time,
-    		    const double& sampling_rate,
-		    const double& mean,
-		    const double& variance,
-                    const uint& cutoff_level,
-		    const uint& dead_time,
-		    const uint& P3 ) ;
+    NuMoonTrigger ( std::string const & filename_t,
+		    Type const &quantity,
+		    std::string const & group,
+		    double samplingRate_p, 
+		   uint nyquistZone_p   ) ;
 	
     //! Copy constructor
     NuMoonTrigger (NuMoonTrigger const &other);
@@ -168,14 +232,41 @@ namespace CR { // Namespace  -- begin
     void summary (std::ostream &os);    
     
     // ------------------------------------------------------------------ Methods
+  
+  casa::Matrix<Double> timeSeries_data( std::string const & filename_t,
+				        std::string const & group,
+				        uint start_p,
+				        uint nofSamples_p  ) ;
+
+  casa::Matrix<Double> antenna_position( std::string const & filename_t,
+	  			         std::string const & group ) ;
+
+   string  beamAngle_ra( std::string const & filename ) ;
+
+   string  beamAngle_dec( std::string const & filename ) ;
+  
+   casa::Vector<uint>  obs_time( std::string const & filename ) ;
     
-    casa::Vector<double> setDataPoints (const uint& observing_time,
-					const double& sampling_rate,
-					const double& mean,
-					const double& variance );
+   casa::Vector<Double>  Direction_Conversion( double ra,
+                 	 		     double dec,
+					     double obs_epoch ) ;
+
+
+   casa::Matrix<Double> Beam_forming( std::string const &filename,
+				      Type const &quantity,
+				      std::string const &group,
+  				      double samplingRate_p, 
+		                      uint nyquistZone_p  ) ;
+
+   void root_ntuple( std::string const &filename,
+		      Type const &quantity,
+		      std::string const &group,
+		      double samplingRate_p, 
+	              uint nyquistZone_p ) ;
+
     
-    
-  private:
+
+ private:
     
     /*!
       \brief Unconditional copying
@@ -187,7 +278,8 @@ namespace CR { // Namespace  -- begin
     */
     void destroy(void);
     
-  };
+  
+};
   
 } // Namespace  -- end
 

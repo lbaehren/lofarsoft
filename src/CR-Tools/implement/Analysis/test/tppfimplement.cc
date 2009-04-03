@@ -147,15 +147,18 @@ int test_ppfimplements ()
     ACG gen(1, samples.nelements() );
     
     for(nSample=0; nSample < samples.nelements(); nSample++ ){
-      //       Normal rnd(&gen, 0.0, 0.1 );
-      //      Double nextExpRand = rnd() ;
-      samples(nSample) = 0.0 ; //nextExpRand ;
+             Normal rnd(&gen, 0.0, 0.1 );
+            Double nextExpRand = rnd() ;
+      samples(nSample) = nextExpRand ;
     }
     // Resetting the generator, should get the same numbers.
     gen.reset () ;
     
-    samples( 16*dataBlockSize*3+400 ) = 10.0 ;
-    cout << "-- samples with a peak has been saved " << endl ;
+  //  for( uint r=0; r< nofsegmentation; r++ ){
+  double sample_value =samples(16*dataBlockSize*3+400) ;
+        samples( 16*dataBlockSize*3+400) = sample_value*5.0+sample_value ;
+//	cout << "-- samples with a peak has been saved " << endl ;
+//	}
     
     
     /*
@@ -199,7 +202,7 @@ int test_ppfimplements ()
     
     ofstream logfile1;
     
-    logfile1.open( "sample1", ios::out );
+    logfile1.open( "sample", ios::out );
     for( uint nSample=0; nSample < samples.nelements() ; nSample++ ){
       logfile1 << samples(nSample) << endl;
     }
@@ -218,12 +221,17 @@ int test_ppfimplements ()
     //***************************************************************
     
    
-    uint nofrows (1024);
+    uint nofrows (256);
     Vector<uint> subBand_IDs(nofrows,0);
     
     for(uint s=0; s< nofrows; s++ ) {
 	subBand_IDs(s)= s+1 ;
       }
+      
+      
+ //    FFTServer <Double,DComplex> server ;
+      
+      
         
 //******************* FOR SIMPLE FFT *******************************
 //******************************************************************
@@ -236,11 +244,14 @@ int test_ppfimplements ()
     Vector<Double> freq_vector_shortened( 510,0.0 );
 
     
-    for( uint g=0; g<513; g++ ){
-      
-      freq_vector_fft(g)= (g+1)*(sampling_frequency/dataBlockSize) ;
-      // freq_vector_shortened(g)=g ;
-    }
+//     for( uint g=0; g< nofrows; g++ ){
+//     
+//         freq_vector_fft(g)= (g+1)*(sampling_frequency/dataBlockSize) ;
+//       // freq_vector_shortened(g)=g ;
+//     }
+    
+   Vector<Double> freqVector = band_ID.calcFreqVector( sampling_frequency,
+   						       subBand_IDs );
     
     FFTServer <Double,DComplex> server ;
     
@@ -248,13 +259,13 @@ int test_ppfimplements ()
     
     Vector<Double> sliced_vector(dataBlockSize, 0.0) ;
     
+    Vector<DComplex> FFTVector( dataBlockSize/2+1, 0.0 ) ;
+    
     uint sample(0);
     
     for( uint i=0; i< nofsegmentation; i++ ){
       
       sliced_vector = samples( Slice( sample, dataBlockSize ) ) ;
-      
-      Vector<DComplex> FFTVector( dataBlockSize/2+1, 0.0 ) ;
       
       server.fft( FFTVector, sliced_vector ) ;
       
@@ -264,41 +275,51 @@ int test_ppfimplements ()
     
     }
     
-    Matrix<DComplex> iono_corrupted = iono_cal.phaseCorrection( fft_implemented,
-                                                                hrAngle,
-								declinationAngle,
-								geomagLatitude,
-								height_ionosphere,
-								TEC_value,
-								sampling_frequency,
-								freq_vector_fft );
-								
-    uint N_col = iono_corrupted.ncolumn() ;
+//     Matrix<DComplex> iono_corrupted = iono_cal.phaseCorrection( fft_implemented,
+//                                                                 hrAngle,
+// 								declinationAngle,
+// 								geomagLatitude,
+// 								height_ionosphere,
+// 								TEC_value,
+// 								sampling_frequency,
+// 								freq_vector_fft );
+ Matrix<DComplex> fft_maintained( dataBlockSize/2+1 , nofsegmentation,0.0 ) ;
     
-    Vector<DComplex> iono_corr(dataBlockSize/2+1, 0.0 ) ;
-    
-    Vector<Double> IFFTVector( dataBlockSize, 0.0 );
-    
-    Vector<Double> timeSeries( dataBlockSize*nofsegmentation, 0.0 ) ;
-    
-    for( uint k=0; k< N_col; k++ ) {
-    
-          iono_corr = iono_corrupted.column(k) ;
-	  
-	  server.fft(IFFTVector, iono_corr ) ;
-	  
-	  for( uint a=0; a< dataBlockSize; a++ ) {
-	  
-	       timeSeries(k*1024+a)= IFFTVector(a) ;
-	       
-	       }
-	       
-        }
+    for( uint g=0; g< nofrows; g++ ){
+         
+	 uint row_number =  subBand_IDs(g) ;
+        fft_maintained.row(row_number) = fft_implemented.row(row_number) ;
+	//freq_vector_fft(g)= (g+1)*(sampling_frequency/dataBlockSize) ;
+      // freq_vector_shortened(g)=g ;
+    }
+
+// 								
+     uint N_col = fft_implemented.ncolumn() ;
+//     
+ //    Vector<DComplex> iono_corr(dataBlockSize/2+1, 0.0 ) ;
+//     
+     Vector<Double> IFFTVector( dataBlockSize, 0.0 );
+     
+     Vector<Double> timeSeries( dataBlockSize*nofsegmentation, 0.0 ) ;
+     
+     for( uint k=0; k< N_col; k++ ) {
+//     
+           FFTVector = fft_maintained.column(k) ;
+// 	  
+ 	  server.fft(IFFTVector, FFTVector ) ;
+// 	  
+ 	  for( uint a=0; a< dataBlockSize; a++ ) {
+// 	  
+ 	       timeSeries(k*1024+a)= IFFTVector(a) ;
+// 	       
+ 	       }
+// 	       
+}
 	
 	
       	ofstream logfile2;
      
-        logfile2.open( "Resample", ios::out );
+        logfile2.open( "resample", ios::out );
         for( uint sample(0); sample < ( dataBlockSize*nofsegmentation ) ; sample++ ){
              logfile2 << timeSeries(sample) << endl;
           }						 
@@ -323,8 +344,7 @@ int test_ppfimplements ()
 //       ppfimp_data.row(t)= ppfImp_data.row(2+t) ;
 //     }
 //     
-   Vector<Double> freqVector = band_ID.calcFreqVector( sampling_frequency,
-   						       subBand_IDs );
+
 // 						              
 //     Matrix<DComplex> iono_corrupted = iono_cal.phaseCorrection( ppfimp_data,
 // 								hrAngle,
@@ -365,17 +385,21 @@ int test_ppfimplements ()
 				
 	 uint ncRe = ppfReImp_data.ncolumn() ;
 	 
+	 uint nrRe = ppfReImp_data.nrow() ;
+	 
+	 Matrix<DComplex> ppfRemain_data( nrRe,ncRe,0.0);
+	 
 	 cout << " number of columns in ppf implemented data :" << ncRe <<endl;
 	 
    //nofrows
    
 //    Matrix<DComplex> ppfReimp_data(nofrows,ncRe,0.0 ) ;
 //    
-//    for( uint t=0; t< nofrows; t++ ){
-//    
-//       ppfReimp_data.row(t)= ppfReImp_data.row(2+t) ;
-//     }
-//     						  			  
+   for( uint t=0; t< nofrows; t++ ){
+   
+      ppfRemain_data.row(t)= ppfReImp_data.row(t) ;
+    }
+    						  			  
 //    Matrix<DComplex> iono_corrected = iono_cal.phaseRECorrection( ppfReimp_data,
 // 				    		               hrAngle,
 // 				    		               declinationAngle,
@@ -389,12 +413,12 @@ int test_ppfimplements ()
        
 
         Vector<Double> time_reinv = ppf_inv.FIR_inversion( ppfcoeff_inv,
-                                                           ppfReImp_data ,
+                                                           ppfRemain_data ,
 						           subBand_IDs ) ;
 							   
     	ofstream logfile3;
      
-        logfile3.open( "ReResample", ios::out );
+        logfile3.open( "reresample", ios::out );
         for( uint samp(0); samp < samples.nelements() ; samp++ ){
              logfile3 << time_reinv(samp) << endl;
           }
@@ -412,6 +436,7 @@ int test_ppfimplements ()
   return nofFailedTests;
 }
 
+
 // -----------------------------------------------------------------------------
 
 int main ()
@@ -421,4 +446,5 @@ int main ()
   nofFailedTests += test_ppfimplements ();
 
   return nofFailedTests;
+
 }
