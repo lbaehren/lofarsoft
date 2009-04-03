@@ -14,7 +14,7 @@
 set (tests
   tClippingFraction
   tCRdelayPlugin
-  tDynamicSpectrum
+#  tDynamicSpectrum
   tFirstStagePipeline
   tionoCalibration
   tSecondStagePipeline
@@ -23,7 +23,7 @@ set (tests
 
 if (CR_WITH_LEGACY) 
   list (APPEND tests tfitCR2gauss)
-  list (APPEND tests tCRinvFFT)
+#  list (APPEND tests tCRinvFFT)
 endif (CR_WITH_LEGACY)
 
 ##____________________________________________________________________
@@ -48,7 +48,7 @@ foreach (src ${tests})
   ## compiler instructions
   add_executable (${src} ${src}.cc)
   ## linker instructions
-  target_link_libraries (${src} cr)
+  target_link_libraries (${src} cr ${CASA_LIBRARIES})
   ## testing
   add_test (${src} ${src})
 endforeach (src)

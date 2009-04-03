@@ -262,11 +262,11 @@ namespace CR { // Namespace  -- begin
 	casa::MEpoch epoch( casa::Quantity( obs_epoch,"d")) ;
 	
 	double radius =1 ;
-	
-	MPosition obs( MVPosition( Quantity( radius,"m"),
-				   Quantity( ra,"deg"),
-				   Quantity( dec,"deg")),
-			MPosition::Ref(MPosition::WGS84));
+	casa::MVPosition mvp ( Quantity( radius,"m"),
+			       Quantity( ra,"deg"),
+			       Quantity( dec,"deg"));
+	MPosition obs( mvp,
+		       MPosition::Ref(MPosition::WGS84));
 	//create reference frame
 	casa::MeasFrame frame( epoch,obs ) ;
 	//create conversion engine
@@ -275,8 +275,8 @@ namespace CR { // Namespace  -- begin
 
 	//convert direction from J2000 to AZEL
 	cout <<"AZEL = " <<conv(MVDirection (MVDirection (Quantity(ra,"deg"),
-						Quantity(dec,"deg")))) << endl ;
-
+							  Quantity(dec,"deg")))) << endl ;
+	
 // 	return AZEL ;
 	
    }

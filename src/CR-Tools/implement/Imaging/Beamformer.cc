@@ -522,7 +522,7 @@ namespace CR { // Namespace CR -- begin
 
     try {
       // Shape of the array with the input data, [freq,antenna]
-      IPosition index (2);
+      IPosition index (data.shape());
       // Shape of the array with the beamformer weights, [freq,antenna,sky]
       IPosition shape = bfWeights_p.shape();
       // initialize the array holding the beamformed data
@@ -533,9 +533,9 @@ namespace CR { // Namespace CR -- begin
 	  for (index(1)=0; index(1)<shape(1); index(1)++) {
 	    tmp = data(index)*bfWeights_p(index(0),index(1),sky);
 	    beam(index(0),sky) += real(tmp*conj(tmp));
-	  }
-	}
-      }
+	  } // END : antenna
+	} // END : frequency
+      } // END : sky position
       
     } catch (std::string message) {
       std::cerr << "[Beamformer::freq_power] " << message << std::endl;
