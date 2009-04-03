@@ -270,14 +270,13 @@ namespace CR { // Namespace  -- begin
 	//create reference frame
 	casa::MeasFrame frame( epoch,obs ) ;
 	//create conversion engine
-	MDirection::Convert conv (MDirection(MDirection::J2000),
+	MDirection mdFROM (MDirection::J2000);
+	MDirection::Convert conv (mdFROM,
 				  MDirection::Ref(MDirection::AZEL,frame));
 
 	//convert direction from J2000 to AZEL
-	cout <<"AZEL = " <<conv(MVDirection (MVDirection (Quantity(ra,"deg"),
-							  Quantity(dec,"deg")))) << endl ;
-	
-// 	return AZEL ;
+	MVDirection mvd = MVDirection (Quantity(ra,"deg"),Quantity(dec,"deg"));
+	cout <<"AZEL = " <<conv(MVDirection (mvd)) << endl ;
 	
    }
    catch( AipsError x ){
