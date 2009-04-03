@@ -14,7 +14,7 @@
   through casacore high-level functions.
 */
 
-#include <iostream>
+#include <iostream>						// STL iostream
 
 #include "rm.h"							// RM Synthesis class
 
@@ -103,10 +103,11 @@ int main (int argc, char * const argv[]) {
 	for(unsigned int i=0; i <= lambdaSq.size(); i++)
 	  lambdaSq[i]=i*100.0;
 
+
+	ofstream file("rm.txt", ios::out); 
 	// create a rm_cube from rm constructor
-	new rm::rm_cube(10,10,10, 1.0, stdout);		
-	
-	lambdaSq=rm.freqToLambdaSq(freq);
+//  	rm rm_cube[1]={rm(10,10,10, 1.0, file)};		
+//  	lambdaSq=rm_cube[0].freqToLambdaSq(freq);
 	
 	
 	

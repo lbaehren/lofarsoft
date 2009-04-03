@@ -45,7 +45,7 @@ using namespace casa;
 
 class rm
 {
-  /* Private variables. */
+  // Private variables
 private:
   //! Cached line of sight rm values if already computed
   vector<double> cached_los;
@@ -54,25 +54,26 @@ private:
   //! Right Ascension and Declination coords of cached los rm values
   double cached_ra, cached_dec;
 
-  /* Private functions. */
-  
+  // Public functions.
+public:
+
   // Convert frequency vector to lambda squared vector
   vector<double> freqToLambdaSq(vector<double> frequency);
   // Convert frequency vector to lambda squared vector
   vector<double> lambdaSqToFreq(vector<double> lambda_sq);
   
- public:
+
 
   //! Default constructor.(external buffer handling independent of cube object)
-  rm(int, int, int, double, ostream);
+  rm(int, int, int, double, ofstream &);
 
 
   /*! \brief RM cube with associated Faraday buffer. One line of sight or two dimensional
   
       create a RM cube object with one (or a times b) associated Faraday line(s) (defaults: axis a=1 axis b=0)
-      of sight, 
+      of sight, buffer is only given as reference
   */
-  rm(int, int, int, double, ostream, Array<double> faradaybuffer, int x=1, int y=0);
+  rm(int, int, int, double, ostream &, Array<double> &faradaybuffer, int x=1, int y=0);
   
   
   
@@ -81,7 +82,7 @@ private:
       create a RM cube object with one associated Faraday plane buffer of dimensions x and y, and
       third dimension z (default 1)
  */
- rm(int, int, int, double, ostream, Array<double> faradayplanes, int x, int y, int z=1);
+ rm(int, int, int, double, ostream &, Array<double> &faradayplanes, int x, int y, int z=1);
   
   
  /*! \brief Default destructor

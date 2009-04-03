@@ -1,7 +1,8 @@
-/*!
+/*! Implementation of rm class methods
 
-
-
+    Author:		Sven Duscha (sduscha@mpa-garching.mpg.de)
+    Date:		18-12-2008
+    Last change:	03-04-2009
 */
 
 #include <casa/Arrays.h>			// CASA library functions
@@ -29,7 +30,7 @@ using namespace casa;		// namespace for functions from casacore
   \return none --
 */
 
-rm::rm(int x, int y, int depth, double stepsize, ostream os)
+rm::rm(int x, int y, int depth, double stepsize, ofstream &file)	// pass only reference to output stream!
 {
 	// declare RM cube of desired size and assign output stream
 	
