@@ -62,6 +62,7 @@ if (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
   set (tests_casacore_link_libs ${LAPACK_LIBRARIES})
   list (APPEND tests_casacore_link_libs ${CFITSIO_LIBRARIES})
   list (APPEND tests_casacore_link_libs ${WCSLIB_LIBRARIES})
+  list (APPEND tests_casacore_link_libs ${LAPACK_LIBRARIES})
   
   if (GFORTRAN_LIBRARIES) 
     list (APPEND tests_casacore_link_libs ${GFORTRAN_LIBRARIES})
