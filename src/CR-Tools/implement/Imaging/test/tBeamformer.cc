@@ -26,6 +26,7 @@
 #include <Imaging/Beamformer.h>
 #include "create_data.h"
 
+using std::cerr;
 using std::cout;
 using std::endl;
 
@@ -61,16 +62,16 @@ using CR::SkymapQuantity;
 int test_Beamformer (uint blocksize=1024,
 		     uint fftLength=513)
 {
-  std::cout << "\n[test_Beamformer]\n" << std::endl;
+  cout << "\n[test_Beamformer]\n" << endl;
 
   int nofFailedTests (0);
   
-  std::cout << "[1] Testing default constructor ..." << std::endl;
+  cout << "[1] Testing default constructor ..." << endl;
   try {
     Beamformer bf;
     bf.summary();
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -250,7 +251,7 @@ int test_Beamformer (uint blocksize=1024,
 int test_parameters (uint blocksize=1024,
 		     uint fftLength=513)
 {
-  std::cout << "\n[test_parameters]\n" << std::endl;
+  cout << "\n[test_parameters]\n" << endl;
 
   int nofFailedTests (0);
   Beamformer bf;
@@ -306,37 +307,37 @@ int test_parameters (uint blocksize=1024,
   try {
     bool ok (true);
 
-    cout << "-- Field in the frequency domain..." << std::endl;
+    cout << "-- Field in the frequency domain..." << endl;
     ok = bf.setSkymapType (SkymapQuantity::FREQ_FIELD);
     cout << "--> Beam domain name   = " << bf.domainName()        << endl;
     cout << "--> Beamforming method = " << bf.skymapType().name() << endl;
     
-    std::cout << "-- Power in the frequency domain..." << std::endl;
+    cout << "-- Power in the frequency domain..." << endl;
     ok = bf.setSkymapType (SkymapQuantity::FREQ_POWER);
     cout << "--> Beam domain name   = " << bf.domainName()        << endl;
     cout << "--> Beamforming method = " << bf.skymapType().name() << endl;
     
-    std::cout << "-- Field in the time domain..." << std::endl;
+    cout << "-- Field in the time domain..." << endl;
     ok = bf.setSkymapType (SkymapQuantity::TIME_FIELD);
     cout << "--> Beam domain name   = " << bf.domainName()        << endl;
     cout << "--> Beamforming method = " << bf.skymapType().name() << endl;
     
-    std::cout << "-- Power in the time domain..." << std::endl;
+    cout << "-- Power in the time domain..." << endl;
     ok = bf.setSkymapType (SkymapQuantity::TIME_POWER);
     cout << "--> Beam domain name   = " << bf.domainName()        << endl;
     cout << "--> Beamforming method = " << bf.skymapType().name() << endl;
     
-    std::cout << "-- cc-beam in the time domain..." << std::endl;
+    cout << "-- cc-beam in the time domain..." << endl;
     ok = bf.setSkymapType (SkymapQuantity::TIME_CC);
     cout << "--> Beam domain name   = " << bf.domainName()        << endl;
     cout << "--> Beamforming method = " << bf.skymapType().name() << endl;
     
-    std::cout << "-- Power-beam in the time domain..." << std::endl;
+    cout << "-- Power-beam in the time domain..." << endl;
     ok = bf.setSkymapType (SkymapQuantity::TIME_P);
     cout << "--> Beam domain name   = " << bf.domainName()        << endl;
     cout << "--> Beamforming method = " << bf.skymapType().name() << endl;
     
-    std::cout << "-- Excess-beam in the time domain..." << std::endl;
+    cout << "-- Excess-beam in the time domain..." << endl;
     ok = bf.setSkymapType (SkymapQuantity::TIME_X);
     cout << "--> Beam domain name   = " << bf.domainName()        << endl;
     cout << "--> Beamforming method = " << bf.skymapType().name() << endl;
@@ -352,7 +353,7 @@ int test_parameters (uint blocksize=1024,
 
 int test_methods ()
 {
-  std::cout << "\n[test_methods]\n" << std::endl;
+  cout << "\n[test_methods]\n" << endl;
 
   int nofFailedTests (0);
   Vector<casa::MVPosition> antPositions (3);
@@ -368,7 +369,7 @@ int test_methods ()
     pos(1,0) = 1;
     pos(1,1) = 0;
     pos(1,2) = 90;
-    std::cout << "-- setting sky positions ..." << std::endl;
+    cout << "-- setting sky positions ..." << endl;
     bf.setSkyPositions (pos,
 			CR::CoordinateType::Spherical,
 			true);
@@ -376,76 +377,76 @@ int test_methods ()
     antPositions(0) = casa::MVPosition (100,0,0);
     antPositions(1) = casa::MVPosition (0,100,0);
     antPositions(2) = casa::MVPosition (100,100,0);
-    std::cout << "-- setting antenna positions ..." << std::endl;
+    cout << "-- setting antenna positions ..." << endl;
     bf.setAntPositions (antPositions);
     //
     for (uint n(0); n<freq.nelements(); n++) { freq(n) = n; } 
-    std::cout << "-- setting frequency values ..." << std::endl;
+    cout << "-- setting frequency values ..." << endl;
     bf.setFrequencies(freq);
     // summary
     bf.summary();
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[2] Retrieve geometrical delays ..." << std::endl;
+  cout << "[2] Retrieve geometrical delays ..." << endl;
   try {
     Matrix<double> delays;
     //
     delays = bf.delays();
-    std::cout << "-- delays by return = " << delays << std::endl;
+    cout << "-- delays by return = " << delays << endl;
     //
     delays = 1;
     bf.delays(delays);
-    std::cout << "-- delays by ref    = " << delays << std::endl;
+    cout << "-- delays by ref    = " << delays << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[3] Retrieve geometrical phases ..." << std::endl;
+  cout << "[3] Retrieve geometrical phases ..." << endl;
   try {
     Cube<double> phases;
     //
     phases = bf.phases();
-    std::cout << "-- phases by return = " << phases << std::endl;
+    cout << "-- phases by return = " << phases << endl;
     //
     phases = 1;
     bf.phases(phases);
-    std::cout << "-- phases by ref    = " << phases << std::endl;
+    cout << "-- phases by ref    = " << phases << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[4] Retrieve geometrical weights ..." << std::endl;
+  cout << "[4] Retrieve geometrical weights ..." << endl;
   try {
     Cube<casa::DComplex> weights;
     //
     weights = bf.weights();
-    std::cout << "-- weights by return = " << weights << std::endl;
+    cout << "-- weights by return = " << weights << endl;
     //
     weights = 1;
     bf.weights(weights);
-    std::cout << "-- weights by ref    = " << weights << std::endl;
+    cout << "-- weights by ref    = " << weights << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[5] Retrieve Beamfomer weights ..." << std::endl;
+  cout << "[5] Retrieve Beamfomer weights ..." << endl;
   try {
     Cube<casa::DComplex> weights;
     //
     weights = bf.beamformerWeights();
-    std::cout << "-- weights by return = " << weights << std::endl;
+    cout << "-- weights by return = " << weights << endl;
     //
     weights = 1;
     bf.beamformerWeights(weights);
-    std::cout << "-- weights by ref    = " << weights << std::endl;
+    cout << "-- weights by ref    = " << weights << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -462,7 +463,7 @@ int test_methods ()
 int test_weights (uint blocksize=1024,
 		  uint fftLength=513)
 {
-  std::cout << "\n[test_weights]\n" << std::endl;
+  cout << "\n[test_weights]\n" << endl;
 
   int nofFailedTests (0);
 
@@ -481,21 +482,21 @@ int test_weights (uint blocksize=1024,
   try {
     bf.summary();
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
   /* Redo computation after setting vales for the antenna gains */
   try {
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
   /* Unset effect of the antenna gains, reverting to geometrical weights only */
   try {
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -515,72 +516,78 @@ int test_weights (uint blocksize=1024,
 int test_processing (uint blocksize=1024,
 		     uint fftLength=513)
 {
-  std::cout << "\n[test_processing]\n" << std::endl;
+  cout << "\n[test_processing]\n" << endl;
 
   int nofFailedTests (0);
   bool status (true);
   
   // parameters for GeomDelay
   uint nofAntennas (4);
-  casa::Matrix<double> antPositions (nofAntennas,3);
-  casa::Matrix<double> skyPositions (10,3);
-  bool anglesInDegrees (true);
-  bool farField (false);
-  bool bufferDelays (false);
+  Vector<casa::MVPosition> antPositions (nofAntennas);
+  antPositions(0) = casa::MVPosition (100,0,0);
+  antPositions(1) = casa::MVPosition (0,100,0);
+  antPositions(2) = casa::MVPosition (-100,0,0);
+  antPositions(3) = casa::MVPosition (0,-100,0);
+  Vector<casa::MVPosition> skyPositions (5);
+  skyPositions(0) = casa::MVPosition (1000,0,0);
+  skyPositions(1) = casa::MVPosition (1000,1000,0);
+  skyPositions(2) = casa::MVPosition (1000,1000,1000);
+  skyPositions(3) = casa::MVPosition (0,1000,0);
+  skyPositions(4) = casa::MVPosition (0,1000,1000);
+  GeomDelay delay (antPositions,skyPositions,false,false);
   // parameters for GeomPhase
-  uint nofChannels (100);
-  Vector<double> frequencies (nofChannels);
+  CR::TimeFreq timeFreq (blocksize,200e06,2);
+  Vector<double> frequencies = timeFreq.frequencyValues();
   bool bufferPhases (false);
   // parameters for GeomWeights
   bool bufferWeights (false);
   // Create beamformer
-  Beamformer bf (antPositions,
-		 CR::CoordinateType::Cartesian,
-		 skyPositions,
-		 CR::CoordinateType::Cartesian,
-		 anglesInDegrees,
-		 farField,
-		 bufferDelays,
+  Beamformer bf (delay,
 		 frequencies,
 		 bufferPhases,
 		 bufferWeights);
   bf.summary();
   
   // Some data to test the processing
-  Matrix<DComplex> data (nofChannels,nofAntennas,1.0);
+  Matrix<DComplex> data (timeFreq.fftLength(),nofAntennas,1.0);
   // Array to store the beamformed data
   Matrix<double> beam;
 
-  std::cout << "[1] Power in the frequency domain (FREQ_POWER)" << std::endl;
+  cout << "[1] Power in the frequency domain (FREQ_POWER)" << endl;
   try {
     bf.setSkymapType(SkymapQuantity::FREQ_POWER);
     beam.resize(bf.shapeBeam());
     status = bf.processData (beam,data);
-    std::cout << "-- beamformed data : " << beam << std::endl;
+#ifdef DEBUGGING_MESSAGES
+    cout << "-- Antenna positions = " << bf.antPositions() << endl;
+    cout << "-- Sky positions     = " << bf.skyPositions() << endl;
+    cout << "-- Frequency values  = " << bf.frequencies()  << endl;
+    cout << "-- Beamformed data   = " << beam              << endl;
+#endif
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[2] cc-beam in the time domain (TIME_CC)" << std::endl;
+  cout << "[2] cc-beam in the time domain (TIME_CC)" << endl;
   try {
     bf.setSkymapType(SkymapQuantity::TIME_CC);
     beam.resize(bf.shapeBeam());
     status = bf.processData (beam,data);
-    std::cout << "-- beamformed data : " << beam << std::endl;
+    cout << "-- beamformed data : " << beam << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[3] powerbeam in the time domain (TIME_P)" << std::endl;
+  cout << "[3] powerbeam in the time domain (TIME_P)" << endl;
   try {
     bf.setSkymapType(SkymapQuantity::TIME_P);
     beam.resize(bf.shapeBeam());
     status = bf.processData (beam,data);
-    std::cout << "-- beamformed data : " << beam << std::endl;
+    cout << "-- beamformed data : " << beam << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   

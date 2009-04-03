@@ -17,7 +17,6 @@ set (tests
   tDynamicSpectrum
   tFirstStagePipeline
   tionoCalibration
-  tNuMoonTrigger
   tSecondStagePipeline
   tSubbandID
   )
@@ -73,14 +72,23 @@ if (HAVE_HDF5)
 endif (HAVE_HDF5)
 
 ##____________________________________________________________________
-## Test programs which require the Data Access Library (DAL)
+## Test programs which require the DAL
 
-if (HAVE_DAL)
+if (HAVE_DAL AND HAVE_ROOT)
   ## compiler instructions
+  add_executable (tNuMoonTrigger tNuMoonTrigger.cc)
   add_executable (tppfinversion tppfinversion.cc)
   ## linker instructions
   target_link_libraries (tppfinversion
     cr
+    ${ROOT_LIBRARIES}
+    ${DAL_LIBRARIES}
+    ${CASA_LIBRARIES}
+    ${HDF5_LIBRARIES}
+    )
+  target_link_libraries (tNuMoonTrigger
+    cr
+    ${ROOT_LIBRARIES}
     ${DAL_LIBRARIES}
     ${CASA_LIBRARIES}
     ${HDF5_LIBRARIES}
@@ -89,7 +97,7 @@ if (HAVE_DAL)
   add_test (tppfinversion tppfinversion ${dataset_beamformed})
   ## installation
   list (APPEND tests tppfinversion)
-endif (HAVE_DAL)
+endif (HAVE_DAL AND HAVE_ROOT)
 
 if (data_ppf_coefficients AND data_ppf_inversion)
 

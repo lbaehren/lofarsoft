@@ -517,22 +517,22 @@ namespace CR { // Namespace CR -- begin
 			       const casa::Array<DComplex> &data)
   {
     bool status (true);
-    int position;
+    int sky;
     casa::DComplex tmp;
 
     try {
       // Shape of the array with the input data, [freq,antenna]
       IPosition index (2);
-      // Shape of the array with the beamformer weights, [freq,antenna,position]
+      // Shape of the array with the beamformer weights, [freq,antenna,sky]
       IPosition shape = bfWeights_p.shape();
       // initialize the array holding the beamformed data
       beam = 0;
       
-      for (position=0; position<shape(2); position++) {
+      for (sky=0; sky<shape(2); sky++) {
 	for (index(0)=0; index(0)<shape(0); index(0)++) {
 	  for (index(1)=0; index(1)<shape(1); index(1)++) {
-	    tmp = data(index)*bfWeights_p(index(0),index(1),position);
-	    beam(index(0),position) += real(tmp*conj(tmp));
+	    tmp = data(index)*bfWeights_p(index(0),index(1),sky);
+	    beam(index(0),sky) += real(tmp*conj(tmp));
 	  }
 	}
       }
@@ -541,6 +541,15 @@ namespace CR { // Namespace CR -- begin
       std::cerr << "[Beamformer::freq_power] " << message << std::endl;
       status = false;
     }
+
+// #ifdef DEBUGGING_MESSAGES
+    std::cout << "[Beamformer::freq_power]"                       << std::endl;
+    std::cout << "-- shape(weights) = " << bfWeights_p.shape()    << std::endl;
+    std::cout << "-- weights [1,,]  = " << bfWeights_p.yzPlane(1) << std::endl;
+    std::cout << "-- shape(data)    = " << data.shape()           << std::endl;
+    std::cout << "-- shape(beam)    = " << beam.shape()           << std::endl;
+    std::cout << "-- beam      [,0] = " << beam.column(0)         << std::endl;
+// #endif
     
     return status;
   }

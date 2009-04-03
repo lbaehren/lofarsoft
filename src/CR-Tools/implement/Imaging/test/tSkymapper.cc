@@ -33,6 +33,7 @@
 #include <casa/OS/Directory.h>
 #include <coordinates/Coordinates/ObsInfo.h>
 #include <images/Images/PagedImage.h>
+#include <images/Images/ImageFITSConverter.h>
 #ifdef HAVE_HDF5
 #include <images/Images/HDF5Image.h>
 #endif
@@ -513,7 +514,7 @@ int test_processing (string const &infile,
   uint nofAntennas       = 5;
 
   // Spatial coordinates
-  IPosition shape (3,10,10,5);
+  IPosition shape (3,20,20,5);
   SpatialCoordinate spatial (CoordinateType::DirectionRadius,
 			     refcode,
 			     projection);
@@ -539,8 +540,9 @@ int test_processing (string const &infile,
   // EM quantity for which the skymap is computed
   CR::SkymapQuantity skymapQuantity (SkymapQuantity::TIME_CC);
 
-  //________________________________________________________
-  // Run the processing tests
+  //__________________________________________________________________
+  // Process some mock-up data to test the functionality of the
+  // Skymapper to properly set up its internals.
   
   cout << "[1] Process a single block of (simulated) data ..." << endl;
   try {
@@ -562,9 +564,14 @@ int test_processing (string const &infile,
     cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;
     nofFailedTests++;
   }
+
+  //__________________________________________________________________
+  // Read back in the previously created image file and inspect it
   
   cout << "[2] Reading back in previously created image file ..." << endl;
   try {
+    bool status (true);
+    casa::String error;
     casa::PagedImage<float> image ("skymap_test1.img");
     //
     cout << "-- Image name       = " << image.name()      << endl;
@@ -572,11 +579,19 @@ int test_processing (string const &infile,
     cout << "-- Image type       = " << image.imageType() << endl;
     cout << "-- World axis names = " << image.coordinates().worldAxisNames() << endl;
     cout << "-- World axis units = " << image.coordinates().worldAxisUnits() << endl;
+    // Convert the image to FITS
+    status = casa::ImageFITSConverter::ImageToFITS(error, image, "skymap_test1.fits");
+    if (!status) {
+      std::cout << error << std::endl;
+    }
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;
     nofFailedTests++;
   }
   
+  //__________________________________________________________________
+  // Test processing of am example LOPES data set
+
   cout << "[3] Process example LOPES data-set ..." << endl;
   try {
     // set up DataReader for input of data

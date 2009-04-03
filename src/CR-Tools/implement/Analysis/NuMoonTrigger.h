@@ -247,17 +247,17 @@ namespace CR { // Namespace  -- begin
   
    casa::Vector<uint>  obs_time( std::string const & filename ) ;
     
-   casa::Vector<Double>  Direction_Conversion( double ra,
-                 	 		     double dec,
-					     double obs_epoch ) ;
-
-
-   casa::Matrix<Double> Beam_forming( std::string const &filename,
+   casa::Vector<Double>  Direction_Conversion( double const &ra,
+					       double const &dec,
+					       double const &obs_epoch ) ;
+   
+   
+   casa::Vector<Double> Beam_forming( std::string const &filename,
 				      Type const &quantity,
 				      std::string const &group,
   				      double samplingRate_p, 
 		                      uint nyquistZone_p  ) ;
-
+   
    void root_ntuple( std::string const &filename,
 		      Type const &quantity,
 		      std::string const &group,
@@ -284,4 +284,3 @@ namespace CR { // Namespace  -- begin
 } // Namespace  -- end
 
 #endif /* NUMOONTRIGGER_H */
-  

@@ -31,6 +31,8 @@ namespace CR { // Namespace  -- begin
   //
   // ============================================================================
   
+  NuMoonTrigger::NuMoonTrigger () {}
+
   NuMoonTrigger::NuMoonTrigger ( std::string const & filename_t,
 		                 Type const &quantity,
 		                 std::string const & group,
@@ -133,6 +135,8 @@ namespace CR { // Namespace  -- begin
 	}
    }
 
+  //_____________________________________________________________________________
+  //                                                             antenna_position
 
    Matrix<Double> NuMoonTrigger::antenna_position( std::string const & filename_t,
 						   std::string const & group )
@@ -158,74 +162,87 @@ namespace CR { // Namespace  -- begin
 	}
    }
 
+  //_____________________________________________________________________________
 
   string NuMoonTrigger::beamAngle_ra( std::string const & filename )
-
- {
-
-   cout << "To read the RA of the beam of filtered data" << endl ;
-
-   try {
-     
-   	DAL::BeamFormed bf( filename ) ;
-
-	string beamAngle_ra = bf.point_ra();	
-
-       }
-
-        catch( AipsError x ){
-	cerr << " NuMoonTrigger::beamAngle_ra" << x.getMesg () << endl ;
-	return string();
-	}
-   }
-
+  {
+    
+    cout << "To read the RA of the beam of filtered data" << endl ;
+    string beamAngle_ra;
+    try {
+      
+      DAL::BeamFormed bf( filename ) ;
+      
+      beamAngle_ra = bf.point_ra();	
+      
+    }
+    
+    catch( AipsError x ){
+      cerr << " NuMoonTrigger::beamAngle_ra" << x.getMesg () << endl ;
+      return string();
+    }
+    
+    return beamAngle_ra;
+  }
+  
+  //_____________________________________________________________________________
 
  string NuMoonTrigger::beamAngle_dec( std::string const & filename )
 
  {
 
    cout << "To read the RA of the beam of filtered data" << endl ;
-
+   
+   string beamAngle_dec;
+   
    try {
      
-   	DAL::BeamFormed bf( filename ) ;
-
-	string beamAngle_dec = bf.point_dec();	
-
-       }
-
-        catch( AipsError x ){
-	cerr << " NuMoonTrigger::beamAngle_dec" << x.getMesg () << endl ;
-	return string() ;
-	}
+     DAL::BeamFormed bf( filename ) ;
+     
+     beamAngle_dec = bf.point_dec();	
+     
    }
-
+   
+   catch( AipsError x ){
+     cerr << " NuMoonTrigger::beamAngle_dec" << x.getMesg () << endl ;
+     return string() ;
+   }
+   
+   return beamAngle_dec;
+ }
   
-   casa::Vector<uint> NuMoonTrigger::obs_time( std::string const & filename )
+  
+  //_____________________________________________________________________________
+
+
+  casa::Vector<uint> NuMoonTrigger::obs_time( std::string const & filename )
 
  {
 
    cout << "To read the time of observation" << endl ;
-
+   Vector<uint> obsTime;
+   
    try {
-     
-   	DAL::TBB_Timeseries TBB_time( filename ) ;
-
-	Vector<uint> obsTime = TBB_time.time();	
-
-       }
-
-        catch( AipsError x ){
-	cerr << " NuMoonTrigger::obs_time" << x.getMesg () << endl ;
-	return Vector<uint> () ;
-	}
+     DAL::TBB_Timeseries TBB_time( filename ) ;
+     obsTime = TBB_time.time();	
    }
+   
+   catch( AipsError x ){
+     cerr << " NuMoonTrigger::obs_time" << x.getMesg () << endl ;
+     obsTime = Vector<uint> ();
+   }
+   
+   return obsTime;
+ }
   
+  //_____________________________________________________________________________
 
-  Vector<Double> NuMoonTrigger::Direction_Conversion( double ra,
-						      double dec,
-						      double obs_epoch )
+  Vector<Double> NuMoonTrigger::Direction_Conversion( double const &ra,
+						      double const &dec,
+						      double const &obs_epoch )
  {
+   Vector<Double> azel;
+
    try {
         MDirection dir;
         dir = MDirection( Quantity(ra,"deg"),
@@ -237,15 +254,15 @@ namespace CR { // Namespace  -- begin
 	
 	cout << casa::MDirection::Convert ( j2000,
 					    MDirection::Ref( MDirection::B1950 ))() <<endl ;
-
+	
 	cout << casa::MDirection::Convert ( j2000,
 					    MDirection::Ref( MDirection::GALACTIC ))() <<endl ;
 	// set up a model for the input (default reference is UTC)
-
-	casa::MEpoch epoch( Quantity( obs_epoch, 'd')) ;
-
+	
+	casa::MEpoch epoch( casa::Quantity( obs_epoch,"d")) ;
+	
 	double radius =1 ;
-
+	
 	MPosition obs( MVPosition( Quantity( radius,"m"),
 				   Quantity( ra,"deg"),
 				   Quantity( dec,"deg")),
@@ -260,26 +277,30 @@ namespace CR { // Namespace  -- begin
 	cout <<"AZEL = " <<conv(MVDirection (MVDirection (Quantity(ra,"deg"),
 						Quantity(dec,"deg")))) << endl ;
 
-	return AZEL ;
-
-        }
-        catch( AipsError x ){
-	cerr << " NuMoonTrigger::Direction_Conversion" << x.getMesg () << endl ;
-	return Vector<double>() ;
-	}
+// 	return AZEL ;
+	
    }
+   catch( AipsError x ){
+     cerr << " NuMoonTrigger::Direction_Conversion" << x.getMesg () << endl ;
+     azel = Vector<double>();
+   }
+   
+   return azel;
+ }
+  
+  //_____________________________________________________________________________
+  //                                                                 Beam_forming
 
-
-
-    casa::Vector<Double> NuMoonTrigger::Beam_forming( std::string const &filename,
-						      Type const &quantity,
-						      std::string const &group,
-						      double samplingRate_p, 
-		                                      uint nyquistZone_p )
-
-   {
+  casa::Vector<Double> NuMoonTrigger::Beam_forming( std::string const &filename,
+						    Type const &quantity,
+						    std::string const &group,
+						    double samplingRate_p, 
+						    uint nyquistZone_p )
+    
+  {
 
    cout << "To do beamforming of TBB data" << endl ;
+   casa::Matrix<double> beam ;
 
    try {
 
@@ -345,7 +366,9 @@ namespace CR { // Namespace  -- begin
 	sky_Position.row(0) = sky_positions ;
 
 	Matrix<double> Phase_corrected( dataLength(0),n_dipoles,0.0) ;
-
+	Matrix<DComplex> out ( time_freq.fftLength(),
+			       n_dipoles );
+	
 	int n_frames = (1/nofSamples_p)*dataLength(0) ;
 	
 	int start = 0 ;
@@ -364,11 +387,6 @@ namespace CR { // Namespace  -- begin
 			time_freq.setNyquistZone( ny_Zone(n_Antenna) ) ;
 
 			casa::Vector<double> freqVector = time_freq.frequencyValues() ;
-
-			uint fftLength_p = nofSamples_p/2 +1 ;
-
-			Matrix<DComplex> out ( fftLength_p,
-					       n_dipoles );
 
 	  		IPosition shape (out.shape());			
 
@@ -401,9 +419,9 @@ namespace CR { // Namespace  -- begin
 		casa::Vector<double> frequencies = time_freq.frequencyValues() ;
 
 		CR::GeomWeight gm_weight( antennaPositions,
-					  Coordinate::Type Cartesian,
+					  CR::CoordinateType::Cartesian,
 					  sky_Position,
-					  Coordinate::Type AzElRadius,
+					  CR::CoordinateType::AzElRadius,
 					  anglesInDegrees,
 					  farfield,
 					  bufferDelays,
@@ -412,8 +430,6 @@ namespace CR { // Namespace  -- begin
 					  bufferweights ) ;
 
   		CR::Beamformer bf( gm_weight ) ;
-
-		casa::Matrix<double> beam ;
 
 		bf.setSkymapType( SkymapQuantity::TIME_CC ) ;
 
@@ -461,11 +477,11 @@ namespace CR { // Namespace  -- begin
      */        	
 	   for( uint filling=0; filling < nofSamples_p ; filling++ ) {
 
-		uint fill = start+ filling ;
+// 		uint fill = start+ filling ;
 
 		for( uint antennas=0; antennas < n_dipoles; antennas++ ) {
 
-			Phase_corrected( fill, antennas ) = IFFT(filling, antennas) ;
+// 		  Phase_corrected( fill, antennas ) = IFFT(filling, antennas) ;
   	       }
 	   }
           
@@ -474,47 +490,48 @@ namespace CR { // Namespace  -- begin
      }
         catch( AipsError x ){
 	cerr << " NuMoonTrigger::Beam_forming" << x.getMesg () << endl ;
-	return Matrix<double> () ;
+	return Vector<double> () ;
 	}
-   }
-  
- 
-  
-    void NuMoonTrigger::root_ntuple( std::string const &filename,
-				      Type const &quantity,
-				      std::string const &group,
-				      double samplingRate_p, 
-		                      uint nyquistZone_p )
-
-   {
-
-   cout << "To store data informaton in ntuples" << endl ;
-
-   try {
-  
-	CR::NuMoonTrigger numoonTrigger( filename,
-					 quantity,
-					 group,
-					samplingRate_p,
-					nyquistZone_p ) ;
-	
-	casa::Matrix<Double> numoontrigger.Beam_forming( std::string const &filename,
-						      Type const &quantity,
-						      std::string const &group,
-						      double samplingRate_p, 
-		                                      uint nyquistZone_p )
-	
-
-       TNtuple *eventuple = new TNtuple("eventuple","eventuple","signal");
-
-      }
-        catch( AipsError x ){
-	cerr << " NuMoonTrigger::root_ntuple" << x.getMesg () << endl ;
-	return void () ;
-	}
-   }
-  
    
-
+   return beam.column(0);
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                  root_ntuple
+  
+  void NuMoonTrigger::root_ntuple( std::string const &filename,
+				   Type const &quantity,
+				   std::string const &group,
+				   double samplingRate_p, 
+				   uint nyquistZone_p )
     
+  {
+    
+    cout << "To store data informaton in ntuples" << endl ;
+    
+    try {
+//       CR::NuMoonTrigger numoonTrigger( filename,
+// 				       quantity,
+// 				       group,
+// 				       samplingRate_p,
+// 				       nyquistZone_p ) ;
+      
+      casa::Vector<Double> signal = Beam_forming( filename,
+						  quantity,
+						  group,
+						  samplingRate_p, 
+						  nyquistZone_p );	
+      
+      TNtuple *eventuple = new TNtuple("eventuple","eventuple","signal");
+      
+    }
+    catch( AipsError x ){
+      cerr << " NuMoonTrigger::root_ntuple" << x.getMesg () << endl ;
+      return void () ;
+    }
+  }
+
+  
+  
+  
 } // Namespace  -- end
