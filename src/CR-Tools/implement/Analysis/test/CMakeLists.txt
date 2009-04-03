@@ -85,6 +85,7 @@ if (HAVE_DAL AND HAVE_ROOT)
     ${DAL_LIBRARIES}
     ${CASA_LIBRARIES}
     ${HDF5_LIBRARIES}
+    ${CFITSIO_LIBRARIES}
     )
   target_link_libraries (tNuMoonTrigger
     cr
