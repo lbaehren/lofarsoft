@@ -92,6 +92,7 @@ if (HAVE_DAL AND HAVE_ROOT)
     ${DAL_LIBRARIES}
     ${CASA_LIBRARIES}
     ${HDF5_LIBRARIES}
+    ${CFITSIO_LIBRARIES}
     )
   ## testing
   add_test (tppfinversion tppfinversion ${dataset_beamformed})
