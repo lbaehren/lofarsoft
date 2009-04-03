@@ -258,6 +258,48 @@ if (HAVE_CASACORE AND HAVE_DAL)
 endif (HAVE_CASACORE AND HAVE_DAL)
 
 ## -------------------------------------------------------------------
+## imagetofits
+
+if (HAVE_CASACORE AND HAVE_DAL)
+  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    ## compiler instructions
+    add_executable (imagetofits imagetofits.cc)
+    ## linker instructions
+    target_link_libraries (imagetofits 
+      cr 
+      ${DAL_LIBRARIES}
+      ${HDF5_LIBRARIES}
+      ${CFITSIO_LIBRARIES}
+      )
+    ## installation instructions
+    list (APPEND cr_apps imagetofits)
+  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    message (STATUS "[CR-Tools] Unable to build executable imagetofits.")
+  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
+endif (HAVE_CASACORE AND HAVE_DAL)
+
+## -------------------------------------------------------------------
+## checkimage
+
+if (HAVE_CASACORE AND HAVE_DAL)
+  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    ## compiler instructions
+    add_executable (checkimage checkimage.cc)
+    ## linker instructions
+    target_link_libraries (checkimage 
+      cr 
+      ${DAL_LIBRARIES}
+      ${HDF5_LIBRARIES}
+      ${CFITSIO_LIBRARIES}
+      )
+    ## installation instructions
+    list (APPEND cr_apps checkimage)
+  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    message (STATUS "[CR-Tools] Unable to build executable checkimage.")
+  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
+endif (HAVE_CASACORE AND HAVE_DAL)
+
+## -------------------------------------------------------------------
 ## tbbStatistics
 
 if (HAVE_CASA OR HAVE_CASACORE)
