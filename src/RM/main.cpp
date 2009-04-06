@@ -105,9 +105,10 @@ int main (int argc, char * const argv[]) {
 
 
 	ofstream file("rm.txt", ios::out); 
-	// create a rm_cube from rm constructor
-//  	rm rm_cube[1]={rm(10,10,10, 1.0, file)};		
-//  	lambdaSq=rm_cube[0].freqToLambdaSq(freq);
+
+	rm rm_cube(10,10,10,1.0, file);		// create a rm_cube from rm constructor
+//   	rm rm_cube[1]={rm(10,10,10, 1.0, file)};		
+//  	lambdaSq=rm_cube.freqToLambdaSq(freq);
 	
 	
 	
@@ -122,13 +123,13 @@ int main (int argc, char * const argv[]) {
 	RO_LatticeIterator<Float> iter(*lattice_Q_float, cursorShape);
 	for (iter.reset(); !iter.atEnd(); iter++) {
 		minMax(min, max, iter.cursor());
-		cout << i++ << " Min = " << min << " Max = " << max << iter.cursor() << endl; 
+		//cout << i++ << " Min = " << min << " Max = " << max << iter.cursor() << endl;		// debugging 
 	}	
 
 	cout << "Deleting lattice_Q" << endl;
 
 	delete lattice_Q_float;		// delete the lattice of image Q
-	delete &iter;				// delete iterator over image Q
+// 	delete &iter;			// delete iterator over image Q
 
 	#ifdef _debug
 	cout << "Finished: " << filename_Q << "!\n";	// Debug output

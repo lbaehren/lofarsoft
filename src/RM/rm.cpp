@@ -2,8 +2,11 @@
 
     Author:		Sven Duscha (sduscha@mpa-garching.mpg.de)
     Date:		18-12-2008
-    Last change:	03-04-2009
+    Last change:	06-04-2009
 */
+
+
+#include <iostream>				// C++/STL iostream
 
 #include <casa/Arrays.h>			// CASA library functions
 #include <casa/Arrays/Array.h>
@@ -77,8 +80,8 @@ vector<double>rm::freqToLambdaSq(vector<double> frequency)
 
   for (vector<double>::iterator i = frequency.begin();i != frequency.end(); i++)   // loop through vector and convert to lambdaSquared
   {
-//    cout << "frequency[" << i << "] = " << (*i) << endl;	// debug
-  
+   // cout << "frequency[" << i << "] = " << (*i) << endl;	// debug
+     cout << *i << endl;
   }
   
   
