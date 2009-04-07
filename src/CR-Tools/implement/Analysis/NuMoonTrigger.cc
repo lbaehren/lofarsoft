@@ -31,17 +31,24 @@ namespace CR { // Namespace  -- begin
   //
   // ============================================================================
   
-  NuMoonTrigger::NuMoonTrigger () {}
+  NuMoonTrigger::NuMoonTrigger ()
+  {
+    observingTime_p = 0;
+    samplingRate_p  = 0;
+    mean_p          = 0;
+    variance_p      = 0;
+  }
 
   NuMoonTrigger::NuMoonTrigger ( std::string const & filename_t,
-		                 Type const &quantity,
+		                 SkymapQuantity const &quantity,
 		                 std::string const & group,
-  				 double samplingRate_p, 
-		                 uint nyquistZone_p  )  
+  				 double samplingRate, 
+		                 uint nyquistZone  )  
 	
   {
-   // observingTime_p = 0;
-   // samplingRate_p  = 0;
+    observingTime_p = 0;
+    samplingRate_p  = samplingRate;
+    nyquistZone_p   = nyquistZone;
     mean_p          = 0;
     variance_p      = 0;
   }
@@ -138,30 +145,27 @@ namespace CR { // Namespace  -- begin
   //_____________________________________________________________________________
   //                                                             antenna_position
 
-   Matrix<Double> NuMoonTrigger::antenna_position( std::string const & filename_t,
-						   std::string const & group )
+  casa::Matrix<Double> NuMoonTrigger::antenna_position( std::string const & filename_t,
+							std::string const & group )
   {
-
-   cout << "To read the antenna positions for all buffer boards" << endl ;
-   try {
-     
-        DAL::TBB_StationGroup stationgroup( filename_t,
-					     group ) ;
-
-        casa::Matrix<double> antenna_Positions = stationgroup.antenna_position_value() ;
-
-	//casa::Vector<casa::MPosition> antenna_MPositions = stationgroup.antenna_position() ;
-      
-	return antenna_Positions ;
-        
-	}
-
-        catch( AipsError x ){
-	cerr << " NuMoonTrigger::antenna_position" << x.getMesg () << endl ;
-	return Matrix<Double> () ;
-	}
-   }
-
+    casa::Matrix<double> antPositions;
+    
+    try {
+      // Create object to handle access to the data
+      DAL::TBB_StationGroup station( filename_t,
+				     group );
+      // Retrieve the values of the antenna positions
+      antPositions = station.antenna_position_value();
+    }
+    
+    catch( AipsError x ) {
+      cerr << " NuMoonTrigger::antenna_position" << x.getMesg () << endl ;
+      antPositions = casa::Matrix<Double> ();
+    }
+    
+    return antPositions;
+  }
+  
   //_____________________________________________________________________________
 
   string NuMoonTrigger::beamAngle_ra( std::string const & filename )
@@ -289,171 +293,167 @@ namespace CR { // Namespace  -- begin
   
   //_____________________________________________________________________________
   //                                                                 Beam_forming
-
+  
   casa::Vector<Double> NuMoonTrigger::Beam_forming( std::string const &filename,
-						    Type const &quantity,
+						    SkymapQuantity const &quantity,
 						    std::string const &group,
 						    double samplingRate_p, 
 						    uint nyquistZone_p )
     
   {
+    
+    cout << "To do beamforming of TBB data" << endl ;
+    casa::Matrix<double> beam ;
+    
+    try {
+      
+      uint nofSamples_p (1024);
+      double ra ;
+      double dec ;
+      
+      DAL::TBB_Timeseries tbb_data ( filename) ;
+      
+      CR::TimeFreq time_freq (nofSamples_p,
+			      samplingRate_p,
+			      nyquistZone_p);
+      
+      DAL::TBB_StationGroup stationgroup( filename, 
+					  group ) ;
+      
+      CR::NuMoonTrigger numoonTrigger( filename,
+				       quantity,
+				       group,
+				       samplingRate_p,
+				       nyquistZone_p ) ;
+      cout << "Retrieve data without channel selection" << endl;
+      
+      //casa::Vector<casa::MDirection> beamDirection = timeseries.beam_direction() ;
+      
+      casa::Vector<double> sampling_frequency = stationgroup.sample_frequency_value() ;
+      
+      casa::Vector< uint > ny_Zone = stationgroup.nyquist_zone() ;   	
+      
+      casa::Vector< uint > dataLength = stationgroup.data_length() ; 
+      
+      uint n_dipoles = stationgroup.nofDipoleDatasets() ;	
+      
+      Matrix<double> antennaPositions = numoonTrigger.antenna_position( filename,
+									group ) ;
 
-   cout << "To do beamforming of TBB data" << endl ;
-   casa::Matrix<double> beam ;
-
-   try {
-
-	uint nofSamples_p = 1024 ;
-
-	DAL::TBB_Timeseries tbb_data ( filename) ;
-
-	CR::TimeFreq time_freq( nofSamples_p,
-				samplingRate_p,
-				nyquistZone_p ) ;	
-
-	DAL::TBB_StationGroup stationgroup( filename, 
-					     group ) ;
-
-	CR::NuMoonTrigger numoonTrigger( filename,
-					 quantity,
-					 group,
-					samplingRate_p,
-					nyquistZone_p ) ;
-        cout << "Retrieve data without channel selection" << endl;
-   
-       //casa::Vector<casa::MDirection> beamDirection = timeseries.beam_direction() ;
-
-	casa::Vector<double> sampling_frequency = stationgroup.sample_frequency_value() ;
-
-	casa::Vector< uint > ny_Zone = stationgroup.nyquist_zone() ;   	
-
-        casa::Vector< uint > dataLength = stationgroup.data_length() ; 
-
-	uint n_dipoles = stationgroup.nofDipoleDatasets() ;	
-	
-	//DAL::DataReader dr() ;
-     
-	Matrix<double> antennaPositions = numoonTrigger.antenna_position( filename,
-					       	                            group ) ;
-	
+      /* Retrieve beam pointing direction */
+      {
+	/* read original HDF5 attributes */
 	string ra_s = numoonTrigger.beamAngle_ra( filename ) ;
-
-	double ra ;
-
-	ra = atof(ra_s.c_str()) ;
-
 	string dec_s = numoonTrigger.beamAngle_dec( filename ) ;
-	
-	double dec ;
-
+	/* convert attribute values to floating point */
+	ra = atof(ra_s.c_str()) ;
 	dec =atof(dec_s.c_str()) ;
+      }
 
-        casa::Vector<uint> epoch = numoonTrigger.obs_time( filename ) ;
-
-	casa::Vector<double> sky_positions = numoonTrigger.Direction_Conversion( ra,
-						      				  dec,
-									          epoch(0) ) ;
+      casa::Vector<uint> epoch = numoonTrigger.obs_time( filename ) ;
+      
+      casa::Vector<double> sky_positions = numoonTrigger.Direction_Conversion( ra,
+									       dec,
+									       epoch(0) ) ;
+      
+      bool anglesInDegrees(false) ;
+      bool farfield(true) ;
+      bool bufferDelays(false) ;
+      bool bufferphases(false) ;
+      bool bufferweights(false) ;
+      
+      Matrix<double> sky_Position ;
+      
+      sky_Position.row(0) = sky_positions ;
+      
+      Matrix<double> Phase_corrected( dataLength(0),n_dipoles,0.0) ;
+      Matrix<DComplex> out ( time_freq.fftLength(),
+			     n_dipoles );
+      
+      int n_frames = (1/nofSamples_p)*dataLength(0) ;
+      
+      int start = 0 ;
+      
+      for( int frame=0; frame < n_frames; frame++ ){
+	
+	Matrix<double> tbb_frame = tbb_data.fx (start,
+						nofSamples_p);		
+	
+	for( uint n_Antenna =0; n_Antenna < n_dipoles; n_Antenna++ ) {
+	  
+	  Vector<double> inColumn = tbb_frame.column( n_Antenna ) ;
+	  
+	  time_freq.setSampleFrequency( sampling_frequency( n_Antenna ) ) ;
+	  
+	  time_freq.setNyquistZone( ny_Zone(n_Antenna) ) ;
+	  
+	  casa::Vector<double> freqVector = time_freq.frequencyValues() ;
+	  
+	  IPosition shape (out.shape());			
+	  
+	  Vector<DComplex> outColumn;
+	  
+	  FFTServer<Double,DComplex> server(IPosition(1,nofSamples_p),
+					    FFTEnums::REALTOCOMPLEX);
+	  
+	  //	for (int antenna(0); antenna<shape(1); antenna++) {
+	  
+	  //inColumn = tbb_frame.column(antenna);
+	  
+	  server.fft(outColumn,inColumn);	
+	  
+	  switch (nyquistZone_p) {
+	  case 1:
+	  case 3:
+	    out.column(n_Antenna) = outColumn;
+	    break;
+	  case 2:
+	    for (int channel (0); channel<shape(0); channel++) {
+	      out(channel,n_Antenna) = conj(outColumn(shape(0)-channel-1));
+	    }
+	    break;
+	  }
+	}
+	
+	casa::Vector<double> frequencies = time_freq.frequencyValues() ;
+	
+	CR::GeomWeight gm_weight( antennaPositions,
+				  CR::CoordinateType::Cartesian,
+				  sky_Position,
+				  CR::CoordinateType::AzElRadius,
+				  anglesInDegrees,
+				  farfield,
+				  bufferDelays,
+				  frequencies ,
+				  bufferphases ,
+				  bufferweights ) ;
+	
+	CR::Beamformer bf( gm_weight ) ;
+	
+	bf.setSkymapType( SkymapQuantity::TIME_CC ) ;
+	
+	//		bf.resize(bf.shapeBeam()) ;				
+	
+	bf.processData( beam,
+			out ) ;
+	
+	/*		casa::Matrix<double> IFFT( nofSamples_p, n_dipoles, 0.0 ) ;
 			
-	bool anglesInDegrees(false) ;
-	bool farfield(true) ;
-	bool bufferDelays(false) ;
-	bool bufferphases(false) ;
-	bool bufferweights(false) ;
-	
-	Matrix<double> sky_Position ;
-
-	sky_Position.row(0) = sky_positions ;
-
-	Matrix<double> Phase_corrected( dataLength(0),n_dipoles,0.0) ;
-	Matrix<DComplex> out ( time_freq.fftLength(),
-			       n_dipoles );
-	
-	int n_frames = (1/nofSamples_p)*dataLength(0) ;
-	
-	int start = 0 ;
-
-	for( int frame=0; frame < n_frames; frame++ ){
-
-		Matrix<double>tbb_frame = tbb_data.fx( start,
-							nofSamples_p ) ;		
-
-		for( uint n_Antenna =0; n_Antenna < n_dipoles; n_Antenna++ ) {
-
-			Vector<double> inColumn = tbb_frame.column( n_Antenna ) ;
-
-			time_freq.setSampleFrequency( sampling_frequency( n_Antenna ) ) ;
-	
-			time_freq.setNyquistZone( ny_Zone(n_Antenna) ) ;
-
-			casa::Vector<double> freqVector = time_freq.frequencyValues() ;
-
-	  		IPosition shape (out.shape());			
-
-  		//	Vector <Double> inColumn;
-		
-			Vector<DComplex> outColumn;
-	
-			FFTServer<Double,DComplex> server(IPosition(1,nofSamples_p),
-					            FFTEnums::REALTOCOMPLEX);
-	
-	//	for (int antenna(0); antenna<shape(1); antenna++) {
-
-		//inColumn = tbb_frame.column(antenna);
-	       
-		server.fft(outColumn,inColumn);	
-
-		switch (nyquistZone_p) {
-		       	case 1:
-	                case 3:
-		              out.column(n_Antenna) = outColumn;
-		        break;
-	                case 2:
-			for (int channel (0); channel<shape(0); channel++) {
-	  			out(channel,n_Antenna) = conj(outColumn(shape(0)-channel-1));
-				}
-		        break;
-	      	       }
-		}
+			for( uint nAntenna =0; nAntenna < n_dipoles; nAntenna++ ) {
 			
-		casa::Vector<double> frequencies = time_freq.frequencyValues() ;
-
-		CR::GeomWeight gm_weight( antennaPositions,
-					  CR::CoordinateType::Cartesian,
-					  sky_Position,
-					  CR::CoordinateType::AzElRadius,
-					  anglesInDegrees,
-					  farfield,
-					  bufferDelays,
-					  frequencies ,
-					  bufferphases ,
-					  bufferweights ) ;
-
-  		CR::Beamformer bf( gm_weight ) ;
-
-		bf.setSkymapType( SkymapQuantity::TIME_CC ) ;
-
-//		bf.resize(bf.shapeBeam()) ;				
-
-		bf.processData( beam,
-				out ) ;
-
-/*		casa::Matrix<double> IFFT( nofSamples_p, n_dipoles, 0.0 ) ;
-
-		for( uint nAntenna =0; nAntenna < n_dipoles; nAntenna++ ) {
-
-		uint fftLength_p = (nofSamples_p/2)+1 ;
-	//	for( timesampled_Freq =0 ; timesampled_Freq < n_frames; timesampled_Freq++ ) {
-
+			uint fftLength_p = (nofSamples_p/2)+1 ;
+			//	for( timesampled_Freq =0 ; timesampled_Freq < n_frames; timesampled_Freq++ ) {
+			
 			Vector<DComplex> inColumnFFT(fftLength_p) ;
-
+			
 			Vector<DComplex> fftData( fftLength_p) ;
-
+			
 			inColumnFFT = out.column(nAntenna) ;
-
+			
 			Vector<Double> invFFT (nofSamples_p,0.);	
- 	
+			
 			FFTServer<Double,DComplex> server(IPosition(1,nofSamples_p),
-							  FFTEnums::REALTOCOMPLEX);
+			FFTEnums::REALTOCOMPLEX);
 		      	switch (nyquistZone_p) {
 		      	case 1:
  	     		case 3:
@@ -464,57 +464,52 @@ namespace CR { // Namespace  -- begin
 			//cout << "DataReader::invfft Nyquist Zone == 2, inverting FFT." << endl;
 			#endif
 			for (uint channel (0); channel<fftLength_p; channel++) {
-		  		fftData(channel) = conj(inColumnFFT(fftLength_p-channel-1));
-				}
+			fftData(channel) = conj(inColumnFFT(fftLength_p-channel-1));
+			}
 			break;
       			}
       			// inv-FFT the data block for the current antenna 
       			server.fft(invFFT,fftData);	
 			
 			IFFT.column(nAntenna) = invFFT ;
-		     }			
-     */        	
-	   for( uint filling=0; filling < nofSamples_p ; filling++ ) {
-
-// 		uint fill = start+ filling ;
-
-		for( uint antennas=0; antennas < n_dipoles; antennas++ ) {
-
-// 		  Phase_corrected( fill, antennas ) = IFFT(filling, antennas) ;
-  	       }
-	   }
-          
+			}			
+	*/        	
+	for( uint filling=0; filling < nofSamples_p ; filling++ ) {
+	  
+	  // 		uint fill = start+ filling ;
+	  
+	  for( uint antennas=0; antennas < n_dipoles; antennas++ ) {
+	    
+	    // 		  Phase_corrected( fill, antennas ) = IFFT(filling, antennas) ;
+	  }
+	}
+        
         start = (frame+1)*nofSamples_p ;
-	}
-     }
-        catch( AipsError x ){
-	cerr << " NuMoonTrigger::Beam_forming" << x.getMesg () << endl ;
-	return Vector<double> () ;
-	}
-   
-   return beam.column(0);
+      }
+    }
+    catch( AipsError x ){
+      cerr << " NuMoonTrigger::Beam_forming" << x.getMesg () << endl ;
+      return Vector<double> () ;
+    }
+    
+    return beam.column(0);
   }
   
   //_____________________________________________________________________________
   //                                                                  root_ntuple
   
+#ifdef HAVE_ROOT  
   void NuMoonTrigger::root_ntuple( std::string const &filename,
-				   Type const &quantity,
+				   SkymapQuantity const &quantity,
 				   std::string const &group,
-				   double samplingRate_p, 
-				   uint nyquistZone_p )
+				   double const &samplingRate_p, 
+				   uint const &nyquistZone_p )
     
   {
     
     cout << "To store data informaton in ntuples" << endl ;
     
     try {
-//       CR::NuMoonTrigger numoonTrigger( filename,
-// 				       quantity,
-// 				       group,
-// 				       samplingRate_p,
-// 				       nyquistZone_p ) ;
-      
       casa::Vector<Double> signal = Beam_forming( filename,
 						  quantity,
 						  group,
@@ -524,13 +519,11 @@ namespace CR { // Namespace  -- begin
       TNtuple *eventuple = new TNtuple("eventuple","eventuple","signal");
       
     }
-    catch( AipsError x ){
+    catch( AipsError x ) {
       cerr << " NuMoonTrigger::root_ntuple" << x.getMesg () << endl ;
       return void () ;
     }
   }
-
-  
-  
+#endif  
   
 } // Namespace  -- end

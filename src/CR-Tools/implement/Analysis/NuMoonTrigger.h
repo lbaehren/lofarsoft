@@ -24,14 +24,15 @@
 #ifndef NUMOONTRIGGER_H
 #define NUMOONTRIGGER_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <iostream>
 #include <string>
 #include <cmath>
 #include <string>
 
-// AIPS++/CASA header files
-
+/* AIPS++/CASA header files */
 #include <casa/aips.h>
 #include <casa/iostream.h>
 #include <casa/fstream.h>
@@ -47,28 +48,8 @@
 #include <casa/BasicMath/Random.h>
 #include <casa/Quanta.h>
 #include <casa/Exceptions/Error.h>
-
 #include <casa/HDF5/HDF5File.h>
 #include <casa/HDF5/HDF5Record.h>
-
-#include <Imaging/GeomWeight.h>
-#include <Imaging/Beamformer.h>
-#include <Analysis/SubbandID.h>
-
-#include <Analysis/ppfinversion.h>
-#include <Analysis/ppfimplement.h>
-#include <Coordinates/SkymapQuantity.h>
-#include <Coordinates/TimeFreq.h>
-
-#include <dal/dalCommon.h>
-//#include <dal/DataReader.h>
-#include <dal/dalDataset.h>
-#include <dal/BeamFormed.h>
-#include <dal/BeamGroup.h>
-#include <dal/TBB_Timeseries.h>
-#include <dal/TBB_DipoleDataset.h>
-
-
 #include <tables/Tables/Table.h>
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/SetupNewTab.h>
@@ -76,10 +57,26 @@
 #include <tables/Tables/ScaColDesc.h>
 #include <tables/Tables/ScaRecordColDesc.h>
 
-#include <Imaging/Beamformer.h>
-//#include "create_data.h"
-// root files to be included
+/* DAL header files */
+#include <dal/dalCommon.h>
+#include <dal/dalDataset.h>
+#include <dal/BeamFormed.h>
+#include <dal/BeamGroup.h>
+#include <dal/TBB_Timeseries.h>
+#include <dal/TBB_StationGroup.h>
+#include <dal/TBB_DipoleDataset.h>
 
+/* CR-Tools header files */
+#include <Analysis/ppfinversion.h>
+#include <Analysis/ppfimplement.h>
+#include <Analysis/SubbandID.h>
+#include <Coordinates/SkymapQuantity.h>
+#include <Coordinates/TimeFreq.h>
+#include <Imaging/GeomWeight.h>
+#include <Imaging/Beamformer.h>
+
+/* ROOT header files */
+#ifdef HAVE_ROOT
 #include "TH2.h"
 #include "TFile.h"
 #include "TH1.h"
@@ -89,7 +86,7 @@
 #include "TNtuple.h"
 #include "TMath.h"
 #include "TSpectrum.h"
-
+#endif
 
 using std::cout;
 using std::endl;
@@ -108,11 +105,6 @@ using CR::ppfinversion ;
 using CR::ppfimplement ;
 using CR::SubbandID ;
 using CR::TimeFreq ;
-
-using DAL::TBB_Timeseries ;
-using DAL::TBB_DipoleDataset ;
-
-typedef enum { TIME_CC }Type ;
 
 namespace CR { // Namespace  -- begin
   
@@ -146,19 +138,19 @@ namespace CR { // Namespace  -- begin
   */  
   class NuMoonTrigger {
 
+    //! Start point within the data stream
     uint start_p ;
-    
+    //! nof. samples per block of data
     uint nofSamples_p ;
-
     //! Time of the observation
     uint observingTime_p;
     //! Sampling rate
     double samplingRate_p ;
-
+    //! Nyquist zone
     uint nyquistZone_p ;
-    //
+    // Mean value across the sliding window 
     double mean_p;
-    //
+    // Variance across the sliding window
     double variance_p;
     
   public:
@@ -182,16 +174,16 @@ namespace CR { // Namespace  -- begin
       \param P3             -- 
     */
     NuMoonTrigger ( std::string const & filename_t,
-		    Type const &quantity,
+		    SkymapQuantity const &quantity,
 		    std::string const & group,
 		    double samplingRate_p, 
-		   uint nyquistZone_p   ) ;
-	
+		    uint nyquistZone_p   ) ;
+    
     //! Copy constructor
     NuMoonTrigger (NuMoonTrigger const &other);
-		 
+    
     // -------------------------------------------------------------- Destruction
-
+    
     //! Destructor
     ~NuMoonTrigger ();
     
@@ -253,21 +245,21 @@ namespace CR { // Namespace  -- begin
    
    
    casa::Vector<Double> Beam_forming( std::string const &filename,
-				      Type const &quantity,
+				      SkymapQuantity const &quantity,
 				      std::string const &group,
   				      double samplingRate_p, 
 		                      uint nyquistZone_p  ) ;
    
+#ifdef HAVE_ROOT
    void root_ntuple( std::string const &filename,
-		      Type const &quantity,
-		      std::string const &group,
-		      double samplingRate_p, 
-	              uint nyquistZone_p ) ;
-
-    
-
- private:
-    
+		     SkymapQuantity const &quantity,
+		     std::string const &group,
+		     double const &samplingRate_p, 
+		     uint const &nyquistZone_p ) ;
+#endif
+   
+  private:
+   
     /*!
       \brief Unconditional copying
     */
