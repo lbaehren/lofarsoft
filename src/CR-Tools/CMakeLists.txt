@@ -311,61 +311,14 @@ endif (CR_WITH_STARTOOLS)
 
 if (CR_WITH_GUI)
 
-  ## locate the Qt4 libraries
-
-  find_library (QT4_LIBARY_QTCORE QtCore
-    PATHS ${lib_locations}
-    PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
-    )
-  if (QT4_LIBARY_QTCORE)
-    list (APPEND QT4_LIBRARIES ${QT4_LIBARY_QTCORE})
-  endif (QT4_LIBARY_QTCORE)
-  
-  find_library (QT4_LIBARY_QTGUI QtGui
-    PATHS ${lib_locations}
-    PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
-    )
-  if (QT4_LIBARY_QTGUI)
-    list (APPEND QT4_LIBRARIES ${QT4_LIBARY_QTGUI})
-  endif (QT4_LIBARY_QTGUI)
-
-  find_library (QT4_LIBARY_QTDESIGNER QtDesigner
-    PATHS ${lib_locations}
-    PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
-    )
-  if (QT4_LIBARY_QTDESIGNER)
-    list (APPEND QT4_LIBRARIES ${QT4_LIBARY_QTDESIGNER})
-  endif (QT4_LIBARY_QTDESIGNER)
-  
-  if (QT4_LIBRARIES)
-    list(REVERSE QT4_LIBRARIES)
-  endif (QT4_LIBRARIES)
-  
-  ## locate the Qt4 header files
-  
-  find_path (QT4_INCLUDES Qt/qatomic.h QtGui/QTableWidgetItem QtGui/QWidget
-    PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
-    PATH_SUFFIXES qt4-mac qt4-mac/include qt4-x11 qt4-x11/include
-    )
-  
-  find_path (HAVE_QT4_QWIDGET QWidget
-    PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
-    PATH_SUFFIXES qt4-mac/include/QtGui qt4-x11/include/QtGui QtGui
-    )
-  if (HAVE_QT4_QWIDGET)
-    list (APPEND QT4_INCLUDES ${HAVE_QT4_QWIDGET})
-  endif (HAVE_QT4_QWIDGET)
-
-  ## Check for MathGL
-
-  include (FindMathGL)
-
-  ## process conditions for building the GUI
-
   if (NOT HAVE_BOOST)
     message (STATUS "[CR-Tools] Unable to build GUI - missing Boost!")
     set (CR_WITH_GUI NO)
   endif (NOT HAVE_BOOST)
+
+  ## Check for Qt4
+
+  include (FindQtFink)
 
   if (NOT QT4_INCLUDES)
     message (STATUS "[CR-Tools] Unable to build GUI - missing Qt4 headers!")
@@ -376,6 +329,10 @@ if (CR_WITH_GUI)
     message (STATUS "[CR-Tools] Unable to build GUI - Qt4 libraries incomplete!")
     set (CR_WITH_GUI NO)
   endif (NOT QT4_LIBARY_QTCORE OR NOT QT4_LIBARY_QTGUI OR NOT HAVE_QT4_QWIDGET)
+
+  ## Check for MathGL
+
+  include (FindMathGL)
 
   if (NOT HAVE_MATHGL)
     message (STATUS "[CR-Tools] Unable to build GUI - missing MathGL!")
