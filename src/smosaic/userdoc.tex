@@ -1,0 +1,102 @@
+\documentclass[12pt]{article}
+
+\begin{document}
+\title{User manual for smosaic}
+\author{Alexander Usov}
+\maketitle
+
+\section{Intro}
+
+Smosaic is a simple and straightforward mosaicking tool developed 
+for LOFAR project. The primary reasons to develop new tool were the
+lack of support of multi-dimensional data cubes in the most packages
+targetted for the optical data and  lack of the direct support of 
+the HDF5 data cubes produced by the LOFAR pipeline.
+
+\section{Current status}
+
+In it's current state smosaic does not support all the intended 
+functionality completely. It's capable to perform basic mosaicking 
+of multi dimensional cubes, however non-spatial dimensions of the
+input and output cubes should be compatible. File format support
+currently implemented only for FITS files, however is should be trivial
+to update it for HDF5 cubes once their support is implemented in 
+casacore package.
+
+\section{Usage}
+
+\subsection{Building smosaic}
+
+In order to compile smosaic one need to have working installation of the
+recent casacore package. CMake autoconfiguration is not implemented yet,
+so manual editing of the Makefile is needed to put in there correct path 
+for casacore installation. Once it's done, simply run make to compile it.
+As a result you should get statically linked executable \verb/smosaic/.
+
+\subsection{Running mosaicking}
+
+In order to make a mosaic a number of preparational steps should be 
+performed. First put all input files into separate directory, as smosaic 
+uses directories to group input files.
+
+Second step is to prepare target header template. In the current 
+implementation template files use slightly simplified FITS header 
+syntax. To simplify creation of template files there is no need to 
+pad all lines to 80 characters, and newline symbols can be used freely. 
+An easy way to obtain valid template file is to run a command like 
+following in the terminal: 
+``\verb/fold file.fits | head -n 100 > img.hdr/''
+and cut the resulting header file (\verb/img.hdr/) right after 
+FITS END statement. Then you can edit projection related parameters 
+to suit your needs.
+
+The general syntax of the \verb/smosaic/ tool is the following: \\
+``\verb/smosaic <parameter>=value <parameter>=value ..../'', where the list of 
+possible parameters and their values is given below. An up-to-date list of parameters
+and their default values can be obtained by running \verb/smosaic/ with option
+ ``\verb/-h/''.
+
+Currently implemented are folowing parameters:
+\begin{itemize}
+\item[\bf indir] : Path to the directory with input images. 
+No reasonable default value can be provided.
+
+\item[\bf template] : Path to the template file. 
+No reasonable default value can be provided.
+
+\item[\bf out] : Filename (and path of course) for the FITS file containing 
+resulting mosaic. Defaults to ``\verb/out.fits/''.
+
+\item[\bf interp] : Pixel interpolation method. Possible values are 0, 1 or 
+2 corresponding to nearest pixel, linear and cubic interpolaiton methods 
+respectively. To my knowledge this changes interpolation scheme used to 
+calculate pixel values after reprojection of the image. Our tests show that 
+cubic interpolation is most accurate even for reasonably noisy images. 
+Defaults to cubic interpolation.
+
+\item[\bf autoBB] : Whether \verb/smosaic/ should automatically adjust size
+of the target mosaic to include all input images. Possible values are 
+True (for automatical image size adjustement) and False. This switch is 
+implemented to simplify the usage of \verb/smosaic/. When \verb/autoBB/ 
+option switched on, \verb/smosaic/ will automatically adjust size and 
+reference point of the target mosaic in such a way, that all input images
+are fully present on the mosaic. If you want to manually define size of the
+target mosaic to get just some specific area of it you should switch it off.
+Defaults to True.
+\end{itemize}
+
+\subsection{Test case}
+
+A simple test case is provided so that you can check whether your 
+\verb/smosaic/ and \verb/casacore/ are working properly. To check it simply
+run \\
+``\verb/smosaic indir=test_input header=test_template.hdr/''. This
+should produce file \verb/out.fits/ in the current directory. Compare it with
+\verb/test_result.fits/.
+
+\emph{ It's a bit strange, but my test\_result.fits still has problems with rugged
+image bounday. I believe it should have been fixed a time ago in casacore 
+regridder. Might be that my local version of casacore is outdate, need to check it
+later.}
+
+\end{document}
