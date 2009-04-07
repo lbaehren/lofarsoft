@@ -85,7 +85,8 @@ public:
  rm(int, int, int, double, ostream &, Array<double> &faradayplanes, int x, int y, int z=1);
   
   
- /*! \brief Default destructor
+ /*!
+   \brief Default destructor
   */
   ~rm();
 		

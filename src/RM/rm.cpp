@@ -45,15 +45,10 @@ rm::rm(int x, int y, int depth, double stepsize, ofstream &file)	// pass only re
 
 */
 
-// rm class destructor
-//
 rm::~rm()
 {
-	// Free memory? Currently nothing to be done
+  // Free memory? Currently nothing to be done
 }
-
-
-
 
 //===============================================================================
 //
