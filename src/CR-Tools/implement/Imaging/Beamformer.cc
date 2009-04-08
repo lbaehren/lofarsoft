@@ -517,39 +517,42 @@ namespace CR { // Namespace CR -- begin
 			       const casa::Array<DComplex> &data)
   {
     bool status (true);
-    int sky;
-    casa::DComplex tmp;
-
+    // Shape of the array with the input data,         [freq,antenna]
+    IPosition index (data.shape());
+    // Shape of the array with the beamformer weights, [freq,antenna,sky]
+    IPosition shape = bfWeights_p.shape();
+    
     try {
-      // Shape of the array with the input data, [freq,antenna]
-      IPosition index (data.shape());
-      // Shape of the array with the beamformer weights, [freq,antenna,sky]
-      IPosition shape = bfWeights_p.shape();
+      // Temporary storage of multiplication result
+      casa::DComplex tmp;
       // initialize the array holding the beamformed data
       beam = 0;
       
-      for (sky=0; sky<shape(2); sky++) {
-	for (index(0)=0; index(0)<shape(0); index(0)++) {
-	  for (index(1)=0; index(1)<shape(1); index(1)++) {
+      for (int sky(0); sky<shape(2); sky++) {                 /* loop: sky positions  */
+	for (index(1)=0; index(1)<shape(1); index(1)++) {     /* loop: antennas       */
+	  for (index(0)=0; index(0)<shape(0); index(0)++) {   /* loop: frequencies    */
 	    tmp = data(index)*bfWeights_p(index(0),index(1),sky);
 	    beam(index(0),sky) += real(tmp*conj(tmp));
-	  } // END : antenna
-	} // END : frequency
+	  } // END : frequency
+	} // END : antenna
       } // END : sky position
       
     } catch (std::string message) {
       std::cerr << "[Beamformer::freq_power] " << message << std::endl;
       status = false;
     }
-
-// #ifdef DEBUGGING_MESSAGES
-    std::cout << "[Beamformer::freq_power]"                       << std::endl;
-    std::cout << "-- shape(weights) = " << bfWeights_p.shape()    << std::endl;
-    std::cout << "-- weights [1,,]  = " << bfWeights_p.yzPlane(1) << std::endl;
-    std::cout << "-- shape(data)    = " << data.shape()           << std::endl;
-    std::cout << "-- shape(beam)    = " << beam.shape()           << std::endl;
-    std::cout << "-- beam      [,0] = " << beam.column(0)         << std::endl;
-// #endif
+    
+#ifdef DEBUGGING_MESSAGES
+    std::cout << "[Beamformer::freq_power]"                         << std::endl;
+    std::cout << "-- IPosition(index) = " << index                  << std::endl;
+    std::cout << "-- IPosition(shape) = " << shape                  << std::endl;
+    std::cout << "-- shape(data)      = " << data.shape()           << std::endl;
+    std::cout << "-- shape(weights)   = " << bfWeights_p.shape()    << std::endl;
+    std::cout << "-- shape(beam)      = " << beam.shape()           << std::endl;
+    std::cout << "-- weights [1,,]    = " << bfWeights_p.yzPlane(1) << std::endl;
+    std::cout << "-- beam      [,1]   = " << beam.column(1)         << std::endl;
+    std::cout << "-- beam      [1,]   = " << beam.row(1)            << std::endl;
+#endif
     
     return status;
   }

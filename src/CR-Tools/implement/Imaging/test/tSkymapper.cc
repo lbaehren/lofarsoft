@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
+#include <fstream>
 
 #include <casa/aips.h>
 #include <casa/Arrays/ArrayIO.h>
@@ -155,6 +155,90 @@ CR::TimeFreqCoordinate getTimeFreq (uint const &blocksize=1024,
 }
 
 //_______________________________________________________________________________
+// export_Beamformer
+
+/*!
+  Use the following instructions with Gnuplot to plot the exported data:
+  \verbatim
+  set xlabel "Antenna number"
+  set ylabel "Sky pixel number"
+  set zlabel "Geometrical delay"
+  set contour base
+  set term post color solid enhanced
+  set output "skymap-delays.ps"
+  splot "skymap-delays.txt" u 1:2:3 w l
+
+  set xlabel "Longitude"
+  set ylabel "Latitude"
+  set zlabel "Radius"
+  set ticslevel 0
+  set view 70,40,0.8,1.2
+  set mapping spherical
+  set parametric
+  unset contour
+  set term post color solid enhanced
+  set output "skymap-sky.ps"
+  splot "skymap-sky.txt" u 4:5:6 w p
+
+  quit
+  \endverbatim
+*/
+void export_Beamformer (Skymapper &map)
+{
+  int ant;
+  int sky;
+  int freq;
+  std::ofstream outfile;
+
+  /* Export the values of the sky positions */
+  {
+    Matrix<double> skyPositions = map.beamformer().skyPositions();
+    IPosition shape             = map.imageShape();
+    int lon;
+    int lat;
+    int radius;
+    int pixel (0);
+
+    outfile.open("skymap-sky.txt",std::ios::out);
+
+    for (lon=0; lon<shape(0); lon++) {
+      for (lat=0; lat<shape(1); lat++) {
+	for (radius=0; radius<shape(2); radius++) {
+	  outfile << lon << "\t" << lat << "\t" << radius
+		  << "\t" << skyPositions(pixel,0)
+		  << "\t" << skyPositions(pixel,1)
+		  << "\t" << skyPositions(pixel,2)
+		  << std::endl;
+	  pixel++;
+	}
+	outfile << std::endl;
+      }
+    }
+    
+    outfile.close();
+  }
+
+  /* Export the values of the geometrical delays */
+  {
+    Matrix<double> delays = map.beamformer().delays();
+    IPosition shape       = delays.shape(); /* [ant,sky] */
+
+    outfile.open("skymap-delays.txt",std::ios::out);
+
+    for (ant=0; ant<shape(0); ant++) {
+      for (sky=0; sky<shape(1); sky++) {
+	outfile << ant << "\t" << sky << "\t" << delays(ant,sky) << std::endl;
+      }
+      outfile << std::endl;
+    }
+
+    outfile.close();
+  }
+
+  /* Export the values of the geometrical phases */
+}
+
+//_______________________________________________________________________________
 //                                                            test_ImageInterface
 
 /*!
@@ -183,14 +267,14 @@ int test_ImageInterface (uint const &blocksize=1024)
   cout << "[1] Testing constructor for ImageInterface<T> ..." << endl;
   try {
     cout << "-- creating PagedImage<float> ..." << endl;
-    casa::PagedImage<float> img_paged_float (tile,csys,"img_paged_float.img");
+    casa::PagedImage<float> img_paged_float (tile,csys,"skymap_paged_float.img");
     cout << "-- creating PagedImage<double> ..." << endl;
-    casa::PagedImage<double> img_paged_double (tile,csys,"img_paged_double.img");
+    casa::PagedImage<double> img_paged_double (tile,csys,"skymap_paged_double.img");
 #ifdef HAVE_HDF5
     cout << "-- creating HDF5Image<float> ..." << endl;
-    casa::HDF5Image<float> img_hdf5_float (tile,csys,"img_hdf5_float.h5");
+    casa::HDF5Image<float> img_hdf5_float (tile,csys,"skymap_hdf5_float.h5");
     cout << "-- creating HDF5Image<double> ..." << endl;
-    casa::HDF5Image<double> img_hdf5_double (tile,csys,"img_hdf5_double.h5");
+    casa::HDF5Image<double> img_hdf5_double (tile,csys,"skymap_hdf5_double.h5");
 #endif
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
@@ -205,7 +289,7 @@ int test_ImageInterface (uint const &blocksize=1024)
     cout << "-- Create new object attaching to pointer ..." << endl;
     image = new casa::PagedImage<float> (tile,
 					 csys,
-					 "img_paged_float.img");
+					 "skymap_paged_float.img");
     //
     cout << "-- release assigned pointer ..." << endl;
     delete image;
@@ -514,7 +598,7 @@ int test_processing (string const &infile,
   uint nofAntennas       = 5;
 
   // Spatial coordinates
-  IPosition shape (3,20,20,5);
+  IPosition shape (3,30,30,5);
   SpatialCoordinate spatial (CoordinateType::DirectionRadius,
 			     refcode,
 			     projection);
@@ -534,7 +618,7 @@ int test_processing (string const &infile,
   Matrix<double> antPositions (nofAntennas,3);
   for (uint ant(0); ant<nofAntennas; ant++) {
     antPositions(ant,0) = ant*100;
-    antPositions(ant,1) = ant*100;
+    antPositions(ant,1) = ant*50;
     antPositions(ant,2) = ant;
   }
   // EM quantity for which the skymap is computed
@@ -544,7 +628,7 @@ int test_processing (string const &infile,
   // Process some mock-up data to test the functionality of the
   // Skymapper to properly set up its internals.
   
-  cout << "[1] Process a single block of (simulated) data ..." << endl;
+  cout << "[1] Test processData() function ..." << endl;
   try {
     /* Create Skymapper object to work with */
     Skymapper skymapper (coord,
@@ -552,14 +636,20 @@ int test_processing (string const &infile,
 			 "skymap_test1.img",
 			 CR::DataType::CASA_IMAGE);
     skymapper.summary();
+    /* Export the internal settings of embedded Beamformer object */
+    export_Beamformer (skymapper);
     /* Prepare some test data to process */
     Matrix<casa::DComplex> data (timeFreq.fftLength(),
 				 nofAntennas);
-    for (uint freq(0); freq<timeFreq.fftLength(); freq++) {
-      data.row(freq) = double(freq);
+
+    for (uint block(0); block<nofBlocksPerFrame*nofFrames; block++) {
+      /* Put some values into the data array passed to the method */
+      for (uint freq(0); freq<timeFreq.fftLength(); freq++) {
+	data.row(freq) = (block+1)*double(freq);
+      }
+      /* Process a block of data and write out the result */
+      skymapper.processData(data);
     }
-    /* Process a block of data and write out the result */
-    skymapper.processData(data);
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;
     nofFailedTests++;

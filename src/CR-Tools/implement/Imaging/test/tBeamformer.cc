@@ -548,14 +548,35 @@ int test_processing (uint blocksize=1024,
 		 bufferWeights);
   bf.summary();
   
-  // Some data to test the processing
-  Matrix<DComplex> data (timeFreq.fftLength(),nofAntennas,1.0);
-  // Array to store the beamformed data
+  /* Some data to test the processing */
+  Matrix<DComplex> data (timeFreq.fftLength(),nofAntennas);
+  for (uint n(0); n<nofAntennas; n++) {
+    for (uint k(0); k<timeFreq.fftLength(); k++) {
+      data(k,n) = casa::DComplex(frequencies(k),0);
+    }
+  }
+  /* Array to store the beamformed data */
   Matrix<double> beam;
 
   cout << "[1] Power in the frequency domain (FREQ_POWER)" << endl;
   try {
     bf.setSkymapType(SkymapQuantity::FREQ_POWER);
+    beam.resize(bf.shapeBeam());
+    status = bf.processData (beam,data);
+#ifdef DEBUGGING_MESSAGES
+    cout << "-- Antenna positions    = " << bf.antPositions() << endl;
+    cout << "-- Sky positions        = " << bf.skyPositions() << endl;
+    cout << "-- Frequency values     = " << bf.frequencies()  << endl;
+    cout << "-- Beamformed data [,0] = " << beam.column(0)    << endl;
+#endif
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[2] cc-beam in the time domain (TIME_CC)" << endl;
+  try {
+    bf.setSkymapType(SkymapQuantity::TIME_CC);
     beam.resize(bf.shapeBeam());
     status = bf.processData (beam,data);
 #ifdef DEBUGGING_MESSAGES
@@ -569,23 +590,17 @@ int test_processing (uint blocksize=1024,
     nofFailedTests++;
   }
   
-  cout << "[2] cc-beam in the time domain (TIME_CC)" << endl;
-  try {
-    bf.setSkymapType(SkymapQuantity::TIME_CC);
-    beam.resize(bf.shapeBeam());
-    status = bf.processData (beam,data);
-    cout << "-- beamformed data : " << beam << endl;
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-  
   cout << "[3] powerbeam in the time domain (TIME_P)" << endl;
   try {
     bf.setSkymapType(SkymapQuantity::TIME_P);
     beam.resize(bf.shapeBeam());
     status = bf.processData (beam,data);
-    cout << "-- beamformed data : " << beam << endl;
+#ifdef DEBUGGING_MESSAGES
+    cout << "-- Antenna positions = " << bf.antPositions() << endl;
+    cout << "-- Sky positions     = " << bf.skyPositions() << endl;
+    cout << "-- Frequency values  = " << bf.frequencies()  << endl;
+    cout << "-- Beamformed data   = " << beam              << endl;
+#endif
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;

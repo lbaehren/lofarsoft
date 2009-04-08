@@ -221,11 +221,11 @@ namespace CR {  // Namespace CR -- begin
     beamformer_p.setAntPositions(antPositions);
 
 #ifdef DEBUGGING_MESSAGES
-    std::cout << "[Skymapper::init]" << std::endl;
-    std::cout << "-- antenna positions (input) = " << antPositions
-	      << std::endl;
-    std::cout << "-- antenna positions (BF)    = " << beamformer_p.antPositions()
-	      << std::endl;
+    cout << "[Skymapper::init]" << std::endl;
+    cout << "-- antenna positions (input) = " << antPositions
+	 << std::endl;
+    cout << "-- antenna positions (BF)    = " << beamformer_p.antPositions()
+	 << std::endl;
 #endif
 
     /* initialize the internal settings and objects */
@@ -335,8 +335,9 @@ namespace CR {  // Namespace CR -- begin
 
     try {    
       bufferArray_p.resize(bufferShape);
+      bufferArray_p = 0;
     } catch (casa::AipsError x) {
-      std::cerr << "[Skymapper::initSkymapper] Failed resizing buffer array!\n"
+      std::cerr << "[Skymapper::initSkymapper] Failed initializing buffer array!\n"
 		<< x.getMesg()
 		<< std::endl;
     }
@@ -375,16 +376,19 @@ namespace CR {  // Namespace CR -- begin
 		<< std::endl;
     }
     
+    //________________________________________________________________
     /*
-     *  Provide some minimal feedback about the image file created on disk.
+      Provide some minimal feedback about the image file created on disk.
      */
     
     if (!image_p->ok()) {
       std::cerr << "[Skymapper::initSkymapper] Image is not ok!" << endl;
+      status = false;
     }
     
     if (!image_p->isWritable()) {
       std::cerr << "[Skymapper::initSkymapper] Image is not writable!" << endl;
+      status = false;
     }
     
     return status;
@@ -443,11 +447,14 @@ namespace CR {  // Namespace CR -- begin
      *  image pixel array consistent.
      */
     if (nofProcessedBlocks_p == nofBlocksPerFrame_p) {
-      std::cout << "[Skymapper::processData]" << endl;
-      std::cout << "-- nof. processed blocks = " << nofProcessedBlocks_p << endl;
-      std::cout << "-- buffer start position = " << bufferStart_p        << endl;
-      std::cout << "-- buffer stride         = " << bufferStride_p       << endl;
-      std::cout << "-- buffer step           = " << bufferStep_p         << endl;
+#ifdef DEBUGGING_MESSAGES
+      cout << "[Skymapper::processData] Finished processing blocks for timeframe"
+	   << endl;
+      cout << "-- nof. processed blocks = " << nofProcessedBlocks_p << endl;
+      cout << "-- buffer start position = " << bufferStart_p        << endl;
+      cout << "-- buffer stride         = " << bufferStride_p       << endl;
+      cout << "-- buffer step           = " << bufferStep_p         << endl;
+#endif
       /* Write the buffered data to the output image. */
       image_p->putSlice (bufferArray_p,
 			 bufferStart_p,
