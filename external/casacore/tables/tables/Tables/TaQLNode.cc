@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TaQLNode.cc 19796 2006-12-19 05:12:59Z gvandiep $
+//# $Id: TaQLNode.cc 20384 2008-08-13 05:53:00Z gervandiepen $
 
 //# Includes
 #include <tables/Tables/TaQLNode.h>
@@ -158,6 +158,8 @@ TaQLNode TaQLNode::restoreNode (AipsIO& aio)
     return TaQLRecFldNodeRep::restore (aio);
   case TaQLNode_Unit:
     return TaQLUnitNodeRep::restore (aio);
+  case TaQLNode_Regex:
+    return TaQLRegexNodeRep::restore (aio);
   default:
     throw AipsError ("TaQLNode::restoreNode - unknown node type");
   }
@@ -191,6 +193,27 @@ void TaQLConstNode::setIsTableName()
 const String& TaQLConstNode::getString() const
 {
   return itsNRep->getString();
+}
+
+
+TaQLRegexNode::TaQLRegexNode (TaQLRegexNodeRep* rep)
+  : TaQLNode(rep),
+    itsNRep(rep)
+{}
+
+const String& TaQLRegexNode::getString() const
+{
+  return itsNRep->itsValue;
+}
+
+Bool TaQLRegexNode::caseInsensitive() const
+{
+  return itsNRep->itsCaseInsensitive;
+}
+
+Bool TaQLRegexNode::negate() const
+{
+  return itsNRep->itsNegate;
 }
 
 

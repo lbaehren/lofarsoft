@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TaQLNodeHandler.h 20120 2007-09-05 07:24:42Z gervandiepen $
+//# $Id: TaQLNodeHandler.h 20505 2009-01-19 14:37:24Z gervandiepen $
 
 #ifndef TABLES_TAQLNODEHANDLER_H
 #define TABLES_TAQLNODEHANDLER_H
@@ -56,7 +56,7 @@ class TaQLNodeHRValue;
 //# Classes you should understand before using this one.
 //   <li> <linkto class=TaQLNode>TaQLNode</linkto>
 //   <li> Note 199 describing
-//        <a href="http://www.astron.nl/aips++/docs/notes/199/199.html">
+//        <a href="../notes/199.html">
 //        TaQL</a>
 // </prerequisite>
 
@@ -103,6 +103,7 @@ public:
   // Define the functions to visit each node type.
   // <group>
   virtual TaQLNodeResult visitConstNode    (const TaQLConstNodeRep& node);
+  virtual TaQLNodeResult visitRegexNode    (const TaQLRegexNodeRep& node);
   virtual TaQLNodeResult visitUnaryNode    (const TaQLUnaryNodeRep& node);
   virtual TaQLNodeResult visitBinaryNode   (const TaQLBinaryNodeRep& node);
   virtual TaQLNodeResult visitMultiNode    (const TaQLMultiNodeRep& node);
@@ -206,7 +207,7 @@ private:
 //   <li> <linkto class=TaQLNode>TaQLNodeResult</linkto>
 //   <li> <linkto class=TaQLNode>TaQLNodeHandler</linkto>
 //   <li> Note 199 describing
-//        <a href="http://www.astron.nl/aips++/docs/notes/199/199.html">
+//        <a href="../notes/199.html">
 //        TaQL</a>
 // </prerequisite>
 
@@ -227,9 +228,9 @@ class TaQLNodeHRValue: public TaQLNodeResultRep
 {
 public:
   TaQLNodeHRValue()
-  : itsInt(-1), itsElem(0), itsSet(0), itsNames(0) {}
+    : itsInt(-1), itsElem(0), itsSet(0), itsNames(0) {}
   TaQLNodeHRValue (const TableExprNode& expr)
-  : itsInt(-1), itsExpr(expr), itsElem(0), itsSet(0), itsNames(0) {}
+    : itsInt(-1), itsExpr(expr), itsElem(0), itsSet(0), itsNames(0) {}
   virtual ~TaQLNodeHRValue();
 
   // Get the values.

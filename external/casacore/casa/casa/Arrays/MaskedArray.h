@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MaskedArray.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: MaskedArray.h 20372 2008-07-03 14:02:23Z gervandiepen $
 
 #ifndef CASA_MASKEDARRAY_H
 #define CASA_MASKEDARRAY_H
@@ -537,7 +537,11 @@ public:
 
     // The number of elements of this masked array.
     // This is the number of elements in the underlying Array.
+    // <group>
     uInt nelements() const;
+    uInt size() const
+        { return nelements(); }
+    // </group>
 
     // The number of valid elements of this masked array.
     // This is the number of elements of the mask which are TRUE.

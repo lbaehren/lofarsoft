@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TableParse.cc 19796 2006-12-19 05:12:59Z gvandiep $
+//# $Id: TableParse.cc 20384 2008-08-13 05:53:00Z gervandiepen $
 
 #include <tables/Tables/TaQLNode.h>
 #include <tables/Tables/TaQLNodeHandler.h>
@@ -515,6 +515,8 @@ TableExprFuncNode::FunctionType TableParseSelect::findFunc
     ftype = TableExprFuncNode::arrminsFUNC;
   } else if (funcName == "runningmin") {
     ftype = TableExprFuncNode::runminFUNC;
+  } else if (funcName == "boxedmin") {
+    ftype = TableExprFuncNode::boxminFUNC;
   } else if (funcName == "max") {
     ftype = TableExprFuncNode::maxFUNC;
     if (narguments == 1) {
@@ -524,6 +526,8 @@ TableExprFuncNode::FunctionType TableParseSelect::findFunc
     ftype = TableExprFuncNode::arrmaxsFUNC;
   } else if (funcName == "runningmax") {
     ftype = TableExprFuncNode::runmaxFUNC;
+  } else if (funcName == "boxedmax") {
+    ftype = TableExprFuncNode::boxmaxFUNC;
   } else if (funcName == "sum") {
     ftype = TableExprFuncNode::arrsumFUNC;
   } else if (funcName == "sums") {
@@ -542,10 +546,14 @@ TableExprFuncNode::FunctionType TableParseSelect::findFunc
     ftype = TableExprFuncNode::arrmeansFUNC;
   } else if (funcName == "runningmean") {
     ftype = TableExprFuncNode::runmeanFUNC;
+  } else if (funcName == "boxedmean") {
+    ftype = TableExprFuncNode::boxmeanFUNC;
   } else if (funcName == "variance") {
     ftype = TableExprFuncNode::arrvarianceFUNC;
   } else if (funcName == "variances") {
     ftype = TableExprFuncNode::arrvariancesFUNC;
+  } else if (funcName == "boxedvariance") {
+    ftype = TableExprFuncNode::boxvarianceFUNC;
   } else if (funcName == "runningvariance") {
     ftype = TableExprFuncNode::runvarianceFUNC;
   } else if (funcName == "stddev") {
@@ -554,24 +562,32 @@ TableExprFuncNode::FunctionType TableParseSelect::findFunc
     ftype = TableExprFuncNode::arrstddevsFUNC;
   } else if (funcName == "runningstddev") {
     ftype = TableExprFuncNode::runstddevFUNC;
+  } else if (funcName == "boxedstddev") {
+    ftype = TableExprFuncNode::boxstddevFUNC;
   } else if (funcName == "avdev") {
     ftype = TableExprFuncNode::arravdevFUNC;
   } else if (funcName == "avdevs") {
     ftype = TableExprFuncNode::arravdevsFUNC;
   } else if (funcName == "runningavdev") {
     ftype = TableExprFuncNode::runavdevFUNC;
+  } else if (funcName == "boxedavdev") {
+    ftype = TableExprFuncNode::boxavdevFUNC;
   } else if (funcName == "rms") {
     ftype = TableExprFuncNode::arrrmsFUNC;
   } else if (funcName == "rmss") {
     ftype = TableExprFuncNode::arrrmssFUNC;
   } else if (funcName == "runningrms") {
     ftype = TableExprFuncNode::runrmsFUNC;
+  } else if (funcName == "boxedrms") {
+    ftype = TableExprFuncNode::boxrmsFUNC;
   } else if (funcName == "median") {
     ftype = TableExprFuncNode::arrmedianFUNC;
   } else if (funcName == "medians") {
     ftype = TableExprFuncNode::arrmediansFUNC;
   } else if (funcName == "runningmedian") {
     ftype = TableExprFuncNode::runmedianFUNC;
+  } else if (funcName == "boxedmedian") {
+    ftype = TableExprFuncNode::boxmedianFUNC;
   } else if (funcName == "fractile") {
     ftype = TableExprFuncNode::arrfractileFUNC;
   } else if (funcName == "fractiles") {
@@ -582,12 +598,16 @@ TableExprFuncNode::FunctionType TableParseSelect::findFunc
     ftype = TableExprFuncNode::anysFUNC;
   } else if (funcName == "runningany") {
     ftype = TableExprFuncNode::runanyFUNC;
+  } else if (funcName == "boxedany") {
+    ftype = TableExprFuncNode::boxanyFUNC;
   } else if (funcName == "all") {
     ftype = TableExprFuncNode::allFUNC;
   } else if (funcName == "alls") {
     ftype = TableExprFuncNode::allsFUNC;
   } else if (funcName == "runningall") {
     ftype = TableExprFuncNode::runallFUNC;
+  } else if (funcName == "boxedall") {
+    ftype = TableExprFuncNode::boxallFUNC;
   } else if (funcName == "ntrue") {
     ftype = TableExprFuncNode::ntrueFUNC;
   } else if (funcName == "ntrues") {
@@ -745,6 +765,16 @@ TableExprNode TableParseSelect::makeFuncNode
   case TableExprFuncNode::runmedianFUNC:
   case TableExprFuncNode::runanyFUNC:
   case TableExprFuncNode::runallFUNC:
+  case TableExprFuncNode::boxminFUNC:
+  case TableExprFuncNode::boxmaxFUNC:
+  case TableExprFuncNode::boxmeanFUNC:
+  case TableExprFuncNode::boxvarianceFUNC:
+  case TableExprFuncNode::boxstddevFUNC:
+  case TableExprFuncNode::boxavdevFUNC:
+  case TableExprFuncNode::boxrmsFUNC:
+  case TableExprFuncNode::boxmedianFUNC:
+  case TableExprFuncNode::boxanyFUNC:
+  case TableExprFuncNode::boxallFUNC:
   case TableExprFuncNode::arrayFUNC:
     if (arguments.nelements() > axarg) {
       TableExprNodeSet parms;
@@ -802,43 +832,187 @@ TableExprNode TableParseSelect::makeFuncNode
 //# Only take the part beyond the period.
 //# Extend the block each time. Since there are only a few column names,
 //# this will not be too expensive.
-void TableParseSelect::handleColumn (const String& name,
+void TableParseSelect::handleColumn (Int stringType,
+				     const String& name,
 				     const TableExprNode& expr,
 				     const String& newName,
 				     const String& newDtype)
 {
-  Int nrcol = columnNames_p.nelements();
-  columnNames_p.resize (nrcol+1);
-  columnExpr_p.resize (nrcol+1);
-  columnOldNames_p.resize (nrcol+1);
-  columnDtypes_p.resize (nrcol+1);
-  // No expression means that a column name is given.
-  if (expr.isNull()) {
-    String oldName;
-    String str = name;
-    Int i = str.index('.');
-    if (i < 0) {
-      oldName = str;
+  if (expr.isNull()  &&  stringType >= 0) {
+    // A wildcarded column name is given.
+    handleWildColumn (stringType, name);
+  } else {
+    // A single column is given.
+    Int nrcol = columnNames_p.nelements();
+    columnNames_p.resize (nrcol+1);
+    columnExpr_p.resize (nrcol+1);
+    columnOldNames_p.resize (nrcol+1);
+    columnDtypes_p.resize (nrcol+1);
+    if (expr.isNull()) {
+      // A true column name is given.
+      // Ignore the possible shorthand (until a later TaQL version with joins).
+      String oldName;
+      String str = name;
+      Int i = str.index('.');
+      if (i < 0) {
+	oldName = str;
+      } else {
+	oldName = str.after(i);
+      }
+      // Make an expression of the column name.
+      // If a data type is given, the column must be handled as an expression.
+      columnExpr_p[nrcol] = handleKeyCol (oldName);
+      if (newDtype.empty()) {
+	columnOldNames_p[nrcol] = oldName;
+      } else {
+	nrSelExprUsed_p++;
+      }
     } else {
-      oldName = str.after(i);
-    }
-    // Make an expression of the column name.
-    // If a data type is given, the column must be handled as an expression.
-    columnExpr_p[nrcol] = handleKeyCol (oldName);
-    if (newDtype.empty()) {
-      columnOldNames_p[nrcol] = oldName;
-    } else {
+      // An expression is given.
+      columnExpr_p[nrcol] = expr;
       nrSelExprUsed_p++;
     }
-  } else {
-    // An expression is given.
-    columnExpr_p[nrcol] = expr;
-    nrSelExprUsed_p++;
+    columnDtypes_p[nrcol] = newDtype;
+    columnNames_p[nrcol]  = newName;
+    if (newName.empty()) {
+      columnNames_p[nrcol] = columnOldNames_p[nrcol];
+    }
   }
-  columnDtypes_p[nrcol] = newDtype;
-  columnNames_p[nrcol]  = newName;
-  if (newName.empty()) {
-    columnNames_p[nrcol] = columnOldNames_p[nrcol];
+}
+
+//# Handle a wildcarded a column name.
+//# Add or remove to/from the block of column names as needed.
+void TableParseSelect::handleWildColumn (Int stringType, const String& name)
+{
+  Int nrcol = columnNames_p.nelements();
+  Bool caseInsensitive = ((stringType & 1) != 0);
+  Bool negate          = ((stringType & 2) != 0);
+  String str = name.substr(2, name.size()-3);
+  Regex regex;
+  // See if the wildcarded name has a table shorthand in it.
+  // That is not really handled yet (neither in handleColumn).
+  // It should be done in a future TaQL version (supporting joins).
+  String shorthand;
+  if (name[0] == 'p') {
+    if (!negate) {
+      int j = str.index('.');
+      if (j >= 0) {
+	shorthand = str.before(j);
+	str       = str.after(j);
+      }
+    }
+    regex = Regex::fromPattern (str);
+  } else {
+    if (!negate) {
+      int j = str.index("\\.");
+      if (j >= 0) {
+	shorthand = str.before(j);
+	str       = str.after(j+1);
+      }
+    }
+    if (name[0] == 'f') {
+      regex = Regex(str);
+    } else {
+      regex = Regex(".*(" + str + ").*");
+    }
+  }
+  if (!negate) {
+    // Add back the delimiting . if a shorthand is given.
+    if (! shorthand.empty()) {
+      shorthand += '.';
+    }
+    // Find all matching columns.
+    Table tab = findTable(String());
+    Vector<String> columns = tab.tableDesc().columnNames();
+    Int nr = 0;
+    for (uInt i=0; i<columns.size(); ++i) {
+      String col = columns[i];
+      if (caseInsensitive) {
+	col.downcase();
+      }
+      if (col.matches(regex)) {
+	++nr;
+      } else {
+	columns[i] = String();
+      }
+    }
+    // Add them to the list of column names.
+    columnNames_p.resize    (nrcol+nr);
+    columnExpr_p.resize     (nrcol+nr);
+    columnOldNames_p.resize (nrcol+nr);
+    columnDtypes_p.resize   (nrcol+nr);
+    for (uInt i=0; i<columns.size(); ++i) {
+      if (! columns[i].empty()) {
+	// Add the shorthand to the name, so negation takes that into account.
+	columnNames_p[nrcol++] = shorthand + columns[i];
+      }
+    }
+  } else {
+    // Negation of wildcard, thus remove columns if matching.
+    // This is done until the last non-wildcarded column name.
+    while (nrcol > 0) {
+      --nrcol;
+      if (! columnExpr_p[nrcol].isNull()) {
+	break;
+      }
+      String col = columnNames_p[nrcol];
+      if (!col.empty()) {
+	if (caseInsensitive) {
+	  col.downcase();
+	}
+	if (col.matches(regex)) {
+	  columnNames_p[nrcol] = String();
+	}
+      }
+    }
+  }
+}
+
+//# Finish the additions to the block of column names
+//# by removing the deleted empty names and creating Expr objects as needed.
+void TableParseSelect::handleColumnFinish (Bool distinct)
+{
+  distinct_p = distinct;
+  // Remove the deleted column names.
+  // Create Expr objects for the wildcarded names.
+  Int nrcol = columnNames_p.size();
+  if (nrcol > 0) {
+    Block<String> names(nrcol);
+    Block<String> oldNames(nrcol);
+    Block<TableExprNode> exprs(nrcol);
+    Block<String> dtypes(nrcol);
+    Int nr = 0;
+    for (Int i=0; i<nrcol; ++i) {
+      if (! (columnExpr_p[i].isNull()  &&  columnNames_p[i].empty())) {
+	names[nr]    = columnNames_p[i];
+	oldNames[nr] = columnOldNames_p[i];
+	exprs[nr]    = columnExpr_p[i];
+	dtypes[nr]   = columnDtypes_p[i];
+	// Create a Expr object if needed.
+	if (exprs[nr].isNull()) {
+	  // That can only be the case if no old name if filled in.
+	  AlwaysAssert (oldNames[nr].empty(), AipsError);
+	  String name = names[nr];
+	  Int j = name.index('.');
+	  if (j >= 0) {
+	    name = name.after(j);
+	  }
+	  // Make an expression of the column name.
+	  exprs[nr]    = handleKeyCol (name);
+	  names[nr]    = name;
+	  oldNames[nr] = name;
+	}
+	++nr;
+      }
+    }
+    names.resize   (nr, True);
+    oldNames.resize(nr, True);
+    exprs.resize   (nr, True);
+    dtypes.resize  (nr, True);
+    columnNames_p    = names;
+    columnOldNames_p = oldNames;
+    columnExpr_p     = exprs;
+    columnDtypes_p   = dtypes;
   }
 }
 

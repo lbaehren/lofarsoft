@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: IPosition.h 20113 2007-08-28 11:12:18Z gervandiepen $
+//# $Id: IPosition.h 20557 2009-04-02 14:11:08Z gervandiepen $
 
 #ifndef CASA_IPOSITION_H
 #define CASA_IPOSITION_H
@@ -169,13 +169,13 @@ public:
     // wants to remove trailing axes.
     // <br>
     // The functions with argument <src>ignoreAxes</src> do
-    // not consider the axes given in that argument..
+    // not consider the axes given in that argument.
     // <group>
     IPosition nonDegenerate(uInt startingAxis=0) const;
     IPosition nonDegenerate(const IPosition& ignoreAxes) const;
     // </group>
 
-    // Old values are copied on resize if copy==True..
+    // Old values are copied on resize if copy==True.
     // If the size increases, values beyond the former size are undefined.
     void resize(uInt newSize, Bool copy=True);
 
@@ -227,6 +227,9 @@ public:
     uInt nelements() const;
     uInt size() const;
     // </group>
+
+    // Is the IPosition empty (i.e. no elements)?
+    Bool empty() const;
 
     // conform returns true if nelements() == other.nelements().
     Bool conform(const IPosition& other) const;
@@ -422,20 +425,14 @@ Bool operator >= (Int val, const IPosition& right);
 // in a file.
 
 // <group name="IPosition Indexing">
-// Convert from offset to IPosition in an array. The second of these
-// functions requires that type T have shape and origin members which return
-// IPositions.
+// Convert from offset to IPosition in an array.
 IPosition toIPositionInArray (const uInt offset, const IPosition& shape);
 
-// Convert from IPosition to offset in an array. The second of these
-// functions requires that type T have shape and origin members which return
-// IPositions.
+// Convert from IPosition to offset in an array.
 uInt toOffsetInArray (const IPosition& iposition, const IPosition& shape);
 
 // Determine if the given offset or IPosition is inside the array. Returns
-// True if it is inside the Array. The second and fourth of these functions
-// require that type T have shape and origin members which return
-// IPositions.
+// True if it is inside the Array.
 // <thrown>
 //   <li> ArrayConformanceError: If all the IPositions are not the same length
 // </thrown>
@@ -481,6 +478,10 @@ inline uInt IPosition::nelements() const
 inline uInt IPosition::size() const
 {
     return size_p;
+}
+inline Bool IPosition::empty() const
+{
+    return size_p == 0;
 }
 
 inline Int& IPosition::operator[](uInt index)

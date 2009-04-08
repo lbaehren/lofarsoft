@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MaskArrMath.tcc 19956 2007-02-28 03:15:02Z gervandiepen $
+//# $Id: MaskArrMath.tcc 20446 2008-11-28 11:01:33Z gervandiepen $
 
 #include <casa/Arrays/ArrayLogical.h>
 #include <casa/Arrays/MaskArrMath.h>
@@ -1648,10 +1648,73 @@ template<class T> MaskedArray<T> cube(const MaskedArray<T> &left)
 }
 
 
-template <typename T>
+template <typename T, typename FuncType>
+MaskedArray<T> boxedArrayMath (const MaskedArray<T>& array,
+			       const IPosition& boxSize,
+			       const FuncType& funcObj)
+{
+  uInt ndim = array.ndim();
+  const IPosition& shape = array.shape();
+  // Set missing axes to 1.
+  IPosition boxsz (boxSize);
+  if (boxsz.size() != ndim) {
+    uInt sz = boxsz.size();
+    boxsz.resize (ndim);
+    for (uInt i=sz; i<ndim; ++i) {
+      boxsz[i] = 1;
+    }
+  }
+  // Determine the output shape.
+  IPosition resShape(ndim);
+  for (uInt i=0; i<ndim; ++i) {
+    // Set unspecified axes to full length.
+    if (boxsz[i] <= 0  ||  boxsz[i] > shape[i]) {
+      boxsz[i] = shape[i];
+    }
+    resShape[i] = (shape[i] + boxsz[i] - 1) / boxsz[i];
+  }
+  // Need to make shallow copy because operator() is non-const.
+  MaskedArray<T> arr (array);
+  Array<T> result (resShape);
+  Array<Bool> resultMask(resShape);
+  T* res = result.data();
+  Bool* resMask = resultMask.data();
+  // Loop through all data and assemble as needed.
+  IPosition blc(ndim, 0);
+  IPosition trc(boxsz-1);
+  while (True) {
+    MaskedArray<T> subarr (arr(blc,trc));
+    if (subarr.nelementsValid() == 0) {
+      *resMask++ = False;
+      *res++ = T();
+    } else {
+      *resMask++ = True;
+      *res++ = funcObj (arr(blc,trc));
+    }
+    uInt ax;
+    for (ax=0; ax<ndim; ++ax) {
+      blc[ax] += boxsz[ax];
+      if (blc[ax] < shape[ax]) {
+	trc[ax] += boxsz[ax];
+	if (trc[ax] >= shape[ax]) {
+	  trc[ax] = shape[ax]-1;
+	}
+	break;
+      }
+      blc[ax] = 0;
+      trc[ax] = boxsz[ax]-1;
+    }
+    if (ax == ndim) {
+      break;
+    }
+  }
+  return MaskedArray<T> (result, resultMask);
+}
+
+template <typename T, typename FuncType>
 Array<T> slidingArrayMath (const MaskedArray<T>& array,
 			   const IPosition& halfBoxSize,
-			   T (*reductionFunc) (const MaskedArray<T>&),
+			   const FuncType& funcObj,
 			   Bool fillEdge)
 {
   uInt ndim = array.ndim();
@@ -1688,7 +1751,7 @@ Array<T> slidingArrayMath (const MaskedArray<T>& array,
   IPosition trc(hboxsz);
   IPosition pos(ndim, 0);
   while (True) {
-    *res++ = reductionFunc(arr(blc,trc));
+    *res++ = funcObj (arr(blc,trc));
     uInt ax;
     for (ax=0; ax<ndim; ax++) {
       if (++pos[ax] < resShape[ax]) {

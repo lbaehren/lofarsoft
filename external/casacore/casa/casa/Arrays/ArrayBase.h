@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayBase.h 20234 2008-02-07 16:53:38Z gervandiepen $
+//# $Id: ArrayBase.h 20338 2008-06-19 05:58:02Z gervandiepen $
 
 #ifndef CASA_ARRAYBASE_H
 #define CASA_ARRAYBASE_H
@@ -99,6 +99,10 @@ public:
   uInt size() const
     { return nels_p; }
   // </group>
+
+  // Is the array empty (i.e. no elements)?
+  Bool empty() const
+    { return nels_p == 0; }
 
   // Are the array data contiguous?
   // If they are not contiguous, <src>getStorage</src> (see below)

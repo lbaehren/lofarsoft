@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Tables.h 20299 2008-04-03 05:56:44Z gervandiepen $
+//# $Id: Tables.h 20558 2009-04-04 04:21:38Z gervandiepen $
 
 #ifndef TABLES_TABLES_H
 #define TABLES_TABLES_H
@@ -132,7 +132,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //  <LI> <A HREF="#Tables:write">writing</A> into a table,
 //  <LI> <A HREF="#Tables:row-access">accessing rows</A> in a table,
 //  <LI> <A HREF="#Tables:select and sort">selection and sorting</A>
-//       (see also <A HREF=../../notes/199/199.html>Table Query Language</A>),
+//       (see also <A HREF="../notes/199.html">Table Query Language</A>),
 //  <LI> <A HREF="#Tables:concatenation">concatenating similar tables</A>
 //  <LI> <A HREF="#Tables:iterate">iterating</A> through a table,
 //  <LI> <A HREF="#Tables:LockSync">locking/synchronization</A>
@@ -143,8 +143,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // </UL>
 
 
-// <A NAME="Tables:motivation">
-// <motivation></A>
+// <ANCHOR NAME="Tables:motivation">
+// <motivation></ANCHOR>
 //
 // The AIPS++ tables are mainly based upon the ideas of Allen Farris,
 // as laid out in the
@@ -175,8 +175,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // designed.
 // </motivation>
 
-// <A NAME="Tables:properties">
-// <h3>Table Properties</h3></A>
+// <ANCHOR NAME="Tables:properties">
+// <h3>Table Properties</h3></ANCHOR>
 //
 // AIPS++ tables have the following properties:
 // <ul>
@@ -224,7 +224,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //       <code>Table::LocalEndian</code> (thus the endian format of the
 //       machine being used).
 //  <li> The SQL-like
-//       <a href="../../notes/199/199.html">Table Query Language</a> (TaQL)
+//       <a href="../notes/199.html">Table Query Language</a> (TaQL)
 //       can be used to do operations on tables like
 //       select, sort, update, insert, delete, and create.
 // </ul>
@@ -255,8 +255,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // of a key. In the future this might be replaced by a proper B+-tree index
 // mechanism.
 
-// <A NAME="Tables:open">
-// <h3>Opening an Existing Table</h3></A>
+// <ANCHOR NAME="Tables:open">
+// <h3>Opening an Existing Table</h3></ANCHOR>
 //
 // To open an existing table you just create a
 // <linkto class="Table:description">Table</linkto> object giving
@@ -277,8 +277,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // When the table is opened, the data managers are reinstantiated
 // according to their definition at table creation.
 
-// <A NAME="Tables:read">
-// <h3>Reading from a Table</h3></A>
+// <ANCHOR NAME="Tables:read">
+// <h3>Reading from a Table</h3></ANCHOR>
 //
 // You can read data from a table column with the "get" functions
 // in the classes
@@ -341,8 +341,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // }
 // </srcblock>
 
-// <A NAME="Tables:creation">
-// <h3>Creating a Table</h3></A>
+// <ANCHOR NAME="Tables:creation">
+// <h3>Creating a Table</h3></ANCHOR>
 //
 // The creation of a table is a multi-step process:
 // <ol>
@@ -437,8 +437,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //     Table tab(newtab, Table::Memory, 10);
 // </srcblock>
 
-// <A NAME="Tables:write">
-// <h3>Writing into a Table</h3></A>
+// <ANCHOR NAME="Tables:write">
+// <h3>Writing into a Table</h3></ANCHOR>
 //
 // Once a table has been created or has been opened for read/write,
 // you want to write data into it. Before doing that you may have
@@ -603,8 +603,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //   </ul>
 // </ol>
 
-// <A NAME="Tables:row-access">
-// <h3>Accessing rows in a Table</h3></A>
+// <ANCHOR NAME="Tables:row-access">
+// <h3>Accessing rows in a Table</h3></ANCHOR>
 //
 // Apart from accessing a table column-wise as described in the
 // previous two sections, it is also possible to access a table row-wise.
@@ -647,8 +647,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // </srcblock>
 // The description of TableRow contains some more extensive examples.
 
-// <A NAME="Tables:select and sort">
-// <h3>Table Selection and Sorting</h3></A>
+// <ANCHOR NAME="Tables:select and sort">
+// <h3>Table Selection and Sorting</h3></ANCHOR>
 //
 // The result of a select and sort of a table is another table,
 // which references the original table. This means that an update
@@ -750,13 +750,13 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // There is, however, another way. Strings containing selection and
 // sorting commands can be used.
 // The syntax of these commands is based on SQL and is described in the
-// <a href="../../notes/199/199.html">Table Query Language</a> (TaQL).
+// <a href="../notes/199.html">Table Query Language</a> (TaQL).
 // <br>Such a command can be executed with the static function
 // <src>TableParse::tableCommand</src> defined in class
 // <linkto class=TableParse>TableParse</linkto>.
 
-// <A NAME="Tables:concatenation">
-// <h3>Table Concatenation</h3></A>
+// <ANCHOR NAME="Tables:concatenation">
+// <h3>Table Concatenation</h3></ANCHOR>
 // Tables with identical descriptions can be concatenated in a virtual way
 // using the Table concatenation constructor. Such a Table object behaves
 // as any other Table object, thus any operation can be performed on it.
@@ -795,8 +795,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //   Table concTab (names, subNames);
 // </srcblock>
 
-// <A NAME="Tables:iterate">
-// <h3>Table Iterators</h3></A>
+// <ANCHOR NAME="Tables:iterate">
+// <h3>Table Iterators</h3></ANCHOR>
 //
 // You can iterate through a table in an arbitrary order by getting
 // a subset of the table consisting of the rows in which the iteration
@@ -841,8 +841,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // This means that the resulting table can be used again in a sort, select,
 // iteration, etc..
 
-// <A NAME="Tables:vectors">
-// <h3>Table Vectors</h3></A>
+// <ANCHOR NAME="Tables:vectors">
+// <h3>Table Vectors</h3></ANCHOR>
 //
 // A table vector makes it possible to treat a column in a table
 // as a vector. Almost all operators and functions defined for normal
@@ -885,8 +885,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //    tabvec *= 2;
 // </srcblock>
 
-// <A NAME="Tables:keywords">
-// <h3>Table Keywords</h3></A>
+// <ANCHOR NAME="Tables:keywords">
+// <h3>Table Keywords</h3></ANCHOR>
 //
 // Any number of keyword/value pairs may be attached to the table as a whole,
 // or to any individual column. They may be freely added, retrieved,
@@ -909,8 +909,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // It is (indirectly) derived from the standard record classes in the class
 // <linkto class="Record:description">Record</linkto>
 
-// <A NAME="Tables:Table Description">
-// <h3>Table Description</h3></A>
+// <ANCHOR NAME="Tables:Table Description">
+// <h3>Table Description</h3></ANCHOR>
 //
 // A table contains a description of itself, which defines the layout of the
 // columns and the keyword sets for the table and for the individual columns.
@@ -998,8 +998,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // }
 // </srcblock>
 
-// <A NAME="Tables:Data Managers">
-// <h3>Data Managers</h3></A>
+// <ANCHOR NAME="Tables:Data Managers">
+// <h3>Data Managers</h3></ANCHOR>
 //
 // Data managers take care of the actual access to the data in a column.
 // There are two kinds of data managers:
@@ -1021,9 +1021,34 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // data managers are being used underneath. Only when the table is created
 // data managers have to be bound to the columns. Thereafter it is
 // completely transparent.
+//
+// Data managers needs to be registered, so they can be found when a table is
+// opened. All data managers mentioned below are part of the system and
+// pre-registered.
+// It is, however, also possible to load data managers on demand. If a data
+// manager is not registered it is tried to load a dynamic library with the
+// name of the data manager (in lowercase).
+// E.g. if <src>BitFlagsEngine<uChar></src> was not registered, the dynamic
+// library <src>libbitflagsengine.so</src> (or .dylib) will be loaded. If
+// successful, its function <src>register_bitflagsengine()</src> will be
+// executed which can register the data manager. Thereafter it is known
+// and will be used. For example in a file Register.h and Register.cc:
+// <srcblock>
+//   // Declare in .h file as C function, so no name mangling is done.
+//   extern "C" {
+//     void register_bitflagsengine();
+//   }
+//   // Implement in .cc file.
+//   void register_bitflagsengine()
+//   {
+//     BitFlagsEngine<uChar>::registerClass();
+//     BitFlagsEngine<Short>::registerClass();
+//     BitFlagsEngine<Int>::registerClass();
+//   }
+// </srcblock>
 
-// <A NAME="Tables:storage managers">
-// <h3>Storage Managers</h3></A>
+// <ANCHOR NAME="Tables:storage managers">
+// <h3>Storage Managers</h3></ANCHOR>
 //
 // Several storage managers are currently supported.
 // The default and preferred storage manager is <src>StandardStMan</src>.
@@ -1098,8 +1123,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // manager in one single call.
 // </note>
 
-// <A NAME="Tables:TiledStMan">
-// <h3>Tiled Storage Manager</h3>
+// <ANCHOR NAME="Tables:TiledStMan">
+// <h3>Tiled Storage Manager</h3></ANCHOR>
 // The Tiled Storage Managers allow one to store the data of
 // one or more columns in a tiled way. Tiling means
 // that the data are stored without a preferred order to make access
@@ -1256,8 +1281,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // Another alternative is to use TiledShapeStMan, so the hypercubes are
 // added or extended automatically.
 
-// <A NAME="Tables:virtual column engines">
-// <h3>Virtual Column Engines</h3></A>
+// <ANCHOR NAME="Tables:virtual column engines">
+// <h3>Virtual Column Engines</h3></ANCHOR>
 //
 // Virtual column engines are used to implement the virtual (i.e.
 // calculated-on-the-fly) columns. The Table system provides
@@ -1284,9 +1309,14 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //  <li> The class
 //   <linkto class="VirtualTaQLColumn:description">VirtualTaQLColumn</linkto>
 //   makes it possible to define a column as an arbitrary expression of
-//   other columns. It uses the <a href="../../notes/199/199.html">TaQL</a>
+//   other columns. It uses the <a href="../notes/199.html">TaQL</a>
 //   CALC command. The virtual column can be a scalar or an array and
 //   can have one of the standard data types supported by the Table System.
+//  <li> The class
+//   <linkto class="BitFlagsEngine:description">BitFlagsEngine</linkto>
+//   maps an integer bit flags column to a Bool column. A read and write mask
+//   can be defined telling which bits to take into account when mapping
+//   to and from Bool (thus when reading or writing the Bool).
 //  <li> The class
 //   <linkto class="CompressFloat:description">CompressFloat</linkto>
 //   compresses a single precision floating point array by scaling the
@@ -1339,8 +1369,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // has been written. An example of how to use this class can be
 // found in the demo program <src>dVSCEngine.cc</src>.
 
-// <A NAME="Tables:LockSync">
-// <h3>Table locking and synchronization</h3></A>
+// <ANCHOR NAME="Tables:LockSync">
+// <h3>Table locking and synchronization</h3></ANCHOR>
 //
 // Multiple concurrent readers and writers (also via NFS) of a
 // table are supported by means of a locking/synchronization mechanism.
@@ -1461,8 +1491,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // }
 // </srcblock>
 
-// <A NAME="Tables:KeyLookup">
-// <h3>Table lookup based on a key</h3></A>
+// <ANCHOR NAME="Tables:KeyLookup">
+// <h3>Table lookup based on a key</h3></ANCHOR>
 //
 // Class <linkto class=ColumnsIndex>ColumnsIndex</linkto> offers the
 // user a means to find the rows matching a given key or key range.
@@ -1514,8 +1544,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // a (sub)table is valid for, say, a time range instead of a single
 // timestamp.
 
-// <A NAME="Tables:performance">
-// <h3>Performance and robustness considerations</h3></A>
+// <ANCHOR NAME="Tables:performance">
+// <h3>Performance and robustness considerations</h3></ANCHOR>
 //
 // The Table System resembles a database system, but it is not as robust.
 // It lacks the transaction and logging facilities common to data base systems.

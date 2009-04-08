@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ExprFuncNode.h 19796 2006-12-19 05:12:59Z gvandiep $
+//# $Id: ExprFuncNode.h 20373 2008-07-03 14:03:33Z gervandiepen $
 
 #ifndef TABLES_EXPRFUNCNODE_H
 #define TABLES_EXPRFUNCNODE_H
@@ -129,36 +129,46 @@ public:
 	arrminFUNC,
 	arrminsFUNC,
 	runminFUNC,
+	boxminFUNC,
 	arrmaxFUNC,
 	arrmaxsFUNC,
 	runmaxFUNC,
+	boxmaxFUNC,
 	arrmeanFUNC,
 	arrmeansFUNC,
 	runmeanFUNC,
+	boxmeanFUNC,
 	arrvarianceFUNC,
 	arrvariancesFUNC,
 	runvarianceFUNC,
+	boxvarianceFUNC,
 	arrstddevFUNC,
 	arrstddevsFUNC,
 	runstddevFUNC,
+	boxstddevFUNC,
 	arravdevFUNC,
 	arravdevsFUNC,
 	runavdevFUNC,
+	boxavdevFUNC,
 	arrrmsFUNC,
 	arrrmssFUNC,
 	runrmsFUNC,
+	boxrmsFUNC,
 	arrmedianFUNC,
 	arrmediansFUNC,
 	runmedianFUNC,
+	boxmedianFUNC,
 	arrfractileFUNC,
 	arrfractilesFUNC,
 	    // for Bool array returning Bool
         anyFUNC,
         anysFUNC,
         runanyFUNC,
+        boxanyFUNC,
 	allFUNC,
 	allsFUNC,
 	runallFUNC,
+	boxallFUNC,
 	    // for Bool array returning Double
 	ntrueFUNC,
 	ntruesFUNC,

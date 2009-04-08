@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TableProxy.cc 20238 2008-02-11 13:44:45Z gervandiepen $
+//# $Id: TableProxy.cc 20529 2009-02-23 08:45:34Z gervandiepen $
 
 
 #include <tables/Tables/TableProxy.h>
@@ -103,8 +103,9 @@ TableProxy::TableProxy (const String& tableName,
   if (!makeTableDesc (tableDesc, tabdesc, message)) {
     throw TableError (tableName + " failed: " + message);
   }
-  // Try to create the table.
-  SetupNewTable newtab(tableName, tabdesc, Table::New);
+  // Try to create the table (scratch if no table name given).
+  SetupNewTable newtab(tableName, tabdesc,
+                       tableName.empty()  ?  Table::Scratch : Table::New);
   // Apply a possible dminfo object.
   newtab.bindCreate (dmInfo);
   table_p = Table (newtab, type, makeLockOptions(lockOptions),
@@ -281,6 +282,367 @@ Bool TableProxy::isMultiUsed (Bool checkSubTables)
   return table_p.isMultiUsed (checkSubTables);
 }
 
+String TableProxy::toAscii (const String& asciiFile, 
+                            const String& headerFile, 
+                            const Vector<String>& columns, 
+                            const String& sep,
+                            const Vector<Int>& precision,
+                            Bool useBrackets)
+{
+  // Possible warning message.
+  String message;
+  // Determine separator
+  String theSep(sep);
+  if (sep.empty()) {
+    theSep = " ";
+  }
+  // Determine names of columns to write.
+  Vector<String> colNames(columns);
+  if (columns.empty() || columns(0).empty()) {
+    // No columns given, so use all.
+    colNames.assign (columnNames());
+  }
+  Int ncols = colNames.size();
+  // Analyse the columns.
+  vector<Bool>   col_is_good(ncols);
+  vector<String> col_type(ncols);
+  Int last_good_col = 0;
+  for (Int j=0; j<ncols; j++) {
+    col_is_good[j] = getColInfo (colNames[j], useBrackets,
+                                 col_type[j], message);
+    // Remember last good column 
+    if (col_is_good[j]) {
+      last_good_col = j;
+    }
+  }
+  // Open the output files.
+  // Determine if header info is in separate file.
+  std::ofstream ofs, ofs2;
+  std::ofstream *ofsp;
+  ofs.open (asciiFile.c_str(), ofstream::out);
+  if (!ofs) {
+    throw TableError("TableProxy::toAscii - error opening file '"
+                     + asciiFile + "'");
+  }
+  ofsp = &ofs;     // set initially header output to same file as data
+  if (!headerFile.empty() && (headerFile != asciiFile)) {
+    ofs2.open (headerFile.c_str(), ofstream::out);
+    if (!ofs2) {
+      throw TableError("TableProxy::toAscii - error opening file '" +
+                       headerFile + "'");
+    }
+    ofsp = &ofs2;  // redirect header output to separate header file
+  }
+  // Write the format into the header file.
+  //  - column names
+  for (Int i=0; i<ncols; i++) {
+    if (col_is_good[i]) {
+      *ofsp << colNames[i];
+      if (i<last_good_col) {
+        *ofsp << theSep;
+      }
+    }
+  }
+  *ofsp << endl;
+  //  - data types
+  for (Int i=0; i<ncols; i++) {
+    if (col_is_good[i]) {
+      *ofsp << col_type[i];
+      if (i<last_good_col) {
+        *ofsp << theSep;
+      }
+    }
+  }
+  *ofsp << endl;
+  // Close headerfile if needed.
+  if (ofsp == &ofs2) {
+    ofs2.close();
+  }
+  // Write the data
+  for (Int i=0; i<nrows(); i++) {
+    for (Int j=0; j<ncols; j++) {
+      Int prec = (j < precision.size()  ?  precision[j] : 0);
+      if (col_is_good[j]) {
+        printValueHolder (getCell(colNames[j], i), ofs, theSep,
+                          prec, useBrackets);
+        if (j < last_good_col) {
+          ofs << theSep;
+        }
+      }
+    }
+    ofs << endl;
+  }
+
+  ofs.close();
+  return message;
+}
+
+// Get the column info for output.
+Bool TableProxy::getColInfo (const String& colName, Bool useBrackets,
+                             String& colType, String& message)
+{
+  Bool good = True;
+  ColumnDesc colDesc(table_p.tableDesc().columnDesc (colName));
+  // Ignore columns containing Records or variable shaped arrays
+  // if not using brackets.
+  if (!useBrackets) {
+    if (colDesc.dataType() == TpRecord) {
+      message += "Column " + colName + " contains Record values.\n";
+      good = False;
+    } else if (! colDesc.isFixedShape()) {
+      message += "Column " + colName +
+        " possibly contains variable shaped arrays.\n";
+      good = False;
+    }
+  }
+  if (good) {
+    ostringstream oss;
+    // Implement the type naming convention as in class ReadTableAscii.
+    switch (colDesc.dataType()) {
+    case TpBool:
+      oss << "B";
+      break;
+    case TpUChar:
+    case TpShort:
+      oss << "S";
+      break;
+    case TpInt:
+      oss << "I";
+      break;
+    case TpFloat:
+      oss << "R";
+      break;
+    case TpDouble:
+      oss << "D";
+      break;
+    case TpComplex:
+      oss << "X";
+      break;
+    case TpDComplex:
+      oss << "DX";
+      break;
+    case TpString:
+      oss << "A";
+      break;
+    case TpRecord:
+      oss << "REC";
+      break;
+    default:
+      message += "Column " + colName +
+        " ignored because it contains values with an unknown type.\n";
+      good = False;
+      break;
+    }
+    // Append the type with the array shape. Use [] if brackets are to be used.
+    // If variable shape, use the shape of the first row.
+    if (colDesc.isArray()) {
+      IPosition col_shape;
+      if (colDesc.isFixedShape()) {
+        col_shape = colDesc.shape();
+      }
+      if (useBrackets) {
+        oss << "[";
+      } else {
+        // Show non-fixed shape of first row if no brackets are used.
+        if (!colDesc.isFixedShape()  &&  table_p.nrow() > 0) {
+          col_shape = ROTableColumn(table_p, colName).shape(0);
+        }
+      }
+      for (Int i=0; i<col_shape.size(); ++i) {
+        if (i > 0) {
+          oss << ",";
+        }
+        oss << col_shape[i];
+      }
+      if (useBrackets) {
+        oss << "]";
+      }
+    }
+    colType = oss.str();
+  }
+  return good;
+}
+
+void TableProxy::printValueHolder (const ValueHolder& vh, ostream& os,
+                                   const String& sep, Int prec,
+                                   bool useBrackets) const
+{
+  Int defPrec = 18;
+  switch (vh.dataType()) {
+  case TpBool:
+    os << vh.asBool();
+    break;
+  case TpUChar:
+  case TpShort:
+  case TpInt:
+    os << vh.asInt();
+    break;
+  case TpFloat:
+    defPrec = 9;
+  case TpDouble:
+    {
+      // set precision; set it back at the end.
+      if (prec <= 0) prec = defPrec;
+      streamsize oldPrec = os.precision(prec);
+      os << vh.asDouble();
+      os.precision (oldPrec);
+    }
+    break;
+  case TpComplex:
+    defPrec = 9;
+  case TpDComplex:
+    {
+      // set precision; set it back at the end.
+      if (prec <= 0) prec = defPrec;
+      streamsize oldPrec = os.precision(prec);
+      os << vh.asDComplex();
+      os.precision (oldPrec);
+    }
+    break;
+  case TpString:
+    os << '"' << vh.asString() << '"';
+    break;
+  case TpArrayBool:
+    {
+      Array<Bool> arr = vh.asArrayBool();
+      if (useBrackets) {
+        printArray (arr, os, sep);
+      } else {
+        Array<Bool>::const_iterator iterend = arr.end();
+        for (Array<Bool>::const_iterator iter=arr.begin();
+             iter!=iterend; ++iter) {
+          if (iter != arr.begin()) {
+            os << sep;
+          }
+          os << *iter;
+        }
+      }
+    }
+    break;
+  case TpArrayUChar:
+  case TpArrayShort:
+  case TpArrayInt:
+    {
+      Array<Int> arr = vh.asArrayInt();
+      if (useBrackets) {
+        printArray (arr, os, sep);
+      } else {
+        Array<Int>::const_iterator iterend = arr.end();
+        for (Array<Int>::const_iterator iter=arr.begin();
+             iter!=iterend; ++iter) {
+          if (iter != arr.begin()) {
+            os << sep;
+          }
+          os << *iter;
+        }
+      }
+    }
+    break;
+  case TpArrayFloat:
+    defPrec = 9;
+  case TpArrayDouble:
+    {
+      // set precision; set it back at the end.
+      if (prec <= 0) prec = defPrec;
+      streamsize oldPrec = os.precision(prec);
+      Array<Double> arr = vh.asArrayDouble();
+      if (useBrackets) {
+        printArray (arr, os, sep);
+      } else {
+        Array<Double>::const_iterator iterend = arr.end();
+        for (Array<Double>::const_iterator iter=arr.begin();
+             iter!=iterend; ++iter) {
+          if (iter != arr.begin()) {
+            os << sep;
+          }
+          os << *iter;
+        }
+      }
+      os.precision (oldPrec);
+    }
+    break;
+  case TpArrayComplex:
+    defPrec = 9;
+  case TpArrayDComplex:
+    {
+      // set precision; set it back at the end.
+      if (prec <= 0) prec = defPrec;
+      streamsize oldPrec = os.precision(prec);
+      Array<DComplex> arr = vh.asArrayDComplex();
+      if (useBrackets) {
+        printArray (arr, os, sep);
+      } else {
+        Array<DComplex>::const_iterator iterend = arr.end();
+        for (Array<DComplex>::const_iterator iter=arr.begin();
+             iter!=iterend; ++iter) {
+          if (iter != arr.begin()) {
+            os << sep;
+          }
+          os << iter->real() << sep << iter->imag();
+        }
+      }
+      os.precision (oldPrec);
+    }
+    break;
+  case TpArrayString:
+    {
+      Array<String> arr = vh.asArrayString();
+      if (useBrackets) {
+        printArray (arr, os, sep);
+      } else {
+        Array<String>::const_iterator iterend = arr.end();
+        for (Array<String>::const_iterator iter=arr.begin();
+             iter!=iterend; ++iter) {
+          if (iter != arr.begin()) {
+            os << sep;
+          }
+          os << '"' << *iter << '"';
+        }
+      }
+    }
+    break;
+  case TpRecord:
+    os << '{' << vh.asRecord() << '}';
+    break;
+  default:
+    throw AipsError ("ValueHolder::write - unknown data type");
+    break;
+  }
+}
+
+template<typename T>
+void TableProxy::printArray (const Array<T>& arr, ostream& os,
+                             const String& sep) const
+{
+  if (arr.empty()) {
+    cout << "[]";
+  } else {
+    const IPosition& shp = arr.shape();
+    uInt ndim = shp.size();
+    IPosition pos(shp.size(), 0);
+    typename Array<T>::const_iterator iter = arr.begin();
+    uInt i = ndim;
+    while (True) {
+      for (uInt j=0; j<i; ++j) {
+        os << '[';
+      }
+      printArrayValue (os, *iter, sep);
+      ++iter;
+      for (i=0; i<ndim; ++i) {
+        if (++pos[i] < shp[i]) {
+          break;
+        }
+        os << ']';
+        pos[i] = 0;
+      }
+      if (i == ndim) {
+        break;
+      }
+      os << sep;
+    }
+  }
+}
+
 void TableProxy::rename (const String& newTableName)
 {
   table_p.rename (newTableName, Table::New);
@@ -295,16 +657,15 @@ TableProxy TableProxy::copy (const String& newTableName,
 			     Bool noRows)
 {
   Table::EndianFormat endOpt = makeEndianFormat (endianFormat);
-  // Always deepcopy if dminfo is not empty or if no rows are copied.
+  // Always valuecopy if dminfo is not empty or if no rows are copied.
   if (dminfo.nfields() > 0  ||  noRows) {
-    deepCopy = True;
     valueCopy = True;
   }
   Table outtab;
   if (toMemory) {
     outtab = table_p.copyToMemoryTable (newTableName, noRows);
   } else {
-    if (deepCopy) {
+    if (deepCopy || valueCopy) {
       table_p.deepCopy (newTableName, dminfo, Table::New, valueCopy,
 			endOpt, noRows);
     } else {
@@ -1037,8 +1398,11 @@ void TableProxy::flush (Bool recursive)
 
 void TableProxy::close()
 {
-  flush(True);
-  table_p = Table();
+  if (! table_p.isNull()) {
+    flush(True);
+    unlock();
+    table_p = Table();
+  }
 }
 
 void TableProxy::reopenRW()
@@ -1189,11 +1553,9 @@ Bool TableProxy::makeTableDesc (const Record& gdesc, TableDesc& tabdesc,
   while (nrdone < gdesc.nfields()) {
     String name = gdesc.name(nrdone);
     const Record& cold (gdesc.asRecord(nrdone));
-    if (name == "_define_hypercolumn_") {
-      if (! makeHC (cold, tabdesc, message)) {
-	return False;
-      }
-    } else if (name != "_define_dminfo_") {
+    // _define_hypercolumn must be done at the end.
+    // _define_dminfo_ is obsolete and ignored.
+    if (name != "_define_hypercolumn_"  &&  name != "_define_dminfo_") {
       if (! cold.isDefined("valueType")) {
 	message = "No value type for column " + name;
 	return False;
@@ -1280,6 +1642,11 @@ Bool TableProxy::makeTableDesc (const Record& gdesc, TableDesc& tabdesc,
       }
     }
     nrdone++;
+  }
+  if (gdesc.isDefined ("_define_hypercolumn_")) {
+    if (! makeHC (gdesc.asRecord("_define_hypercolumn_"), tabdesc, message)) {
+      return False;
+    }
   }
   return True;
 }

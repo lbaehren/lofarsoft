@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tArray.cc 19893 2007-02-19 00:24:55Z gervandiepen $
+//# $Id: tArray.cc 20553 2009-03-31 03:20:57Z gervandiepen $
 
 //# If AIPS_DEBUG is not set, the Assert's won't be called.
 #if !defined(AIPS_DEBUG)
@@ -229,10 +229,14 @@ void oldArrayTest()
 	    AlwaysAssertExit(x(i) == 11 && x(i+1) == 5);
 	Vector<Int> zz; // default constructor
 	AlwaysAssertExit(zz.nelements() == 0);
+	AlwaysAssertExit(zz.size() == 0);
+	AlwaysAssertExit(zz.empty());
 	Vector<Int> zzz(x(Slice(0,5,2)));
 	zzz.unique();
 	AlwaysAssertExit(zzz.nrefs() == 1 && allEQ(zzz, 11) &&
 			 zzz.nelements() == 5);
+	AlwaysAssertExit(zzz.size() == 5);
+	AlwaysAssertExit(!zzz.empty());
 	Vector<Int> y1(5, 4);
 	AlwaysAssertExit (allEQ(y1, 4));
 
@@ -581,12 +585,21 @@ void oldArrayTest()
 	// middle plane
 	blc(0) = 0; blc(1) = 0; blc(2) = 1;
 	trc(0) = 2; trc(1) = 2; trc(2) = 1;
-// Why can't we just write   c(blc,trc) = 11; ?
-	c.Array<Int>::operator()(blc,trc) = 11;
+        c(blc,trc) = 11;
 	AlwaysAssertExit(allEQ (c.xyPlane(1), 11));
 	AlwaysAssertExit(allEQ (c.xyPlane(0), 3));
 	AlwaysAssertExit(allEQ (c.xyPlane(2), 3));
-	
+
+        // Check index operator.
+        Array<Int> cinx (c[1]);
+        AlwaysAssertExit (allEQ (cinx, c.xyPlane(1)));
+        cinx.reference (cinx[0]);
+        AlwaysAssertExit (cinx.shape() == c.shape().getFirst(1));
+        cinx.reference (cinx[0]);
+        AlwaysAssertExit (cinx.shape() == IPosition(1,1));
+        cinx.reference (cinx[0]);
+        AlwaysAssertExit (cinx.shape() == IPosition(1,1));
+        AlwaysAssertExit (allEQ (cinx, 11));
 	
 	cout << "OK\n";
     }

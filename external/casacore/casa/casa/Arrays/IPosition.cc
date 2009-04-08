@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: IPosition.cc 20254 2008-02-23 16:37:46Z gervandiepen $
+//# $Id: IPosition.cc 20336 2008-06-18 07:33:38Z gervandiepen $
 
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/ArrayError.h>
@@ -123,8 +123,7 @@ IPosition::IPosition (const IPosition& other)
 IPosition IPosition::nonDegenerate (uInt startingAxis) const
 {
     if (startingAxis >= size_p) {
-	throw (AipsError("IPosition::nonDegenerate: startingAxis is greater"
-			 " than size of this IPosition."));
+        return *this;
     }
     IPosition ignoreAxes(startingAxis);
     for (uInt i=0; i<startingAxis; i++) {

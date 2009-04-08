@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TableProxy.h 20238 2008-02-11 13:44:45Z gervandiepen $
+//# $Id: TableProxy.h 20531 2009-02-23 13:22:31Z gervandiepen $
 
 #ifndef TABLES_TABLEPROXY_H
 #define TABLES_TABLEPROXY_H
@@ -121,7 +121,7 @@ public:
 	      const Record& lockOptions,
 	      int option);
 
-  // Create a table with given name and description, etc..
+  // Create a table with given name and description, etc.
   TableProxy (const String& tableName,
 	      const Record& lockOptions,
 	      const String& endianFormat,
@@ -224,6 +224,34 @@ public:
   // Determine if the table (and optionally its subtables) are in use
   // in another process.
   Bool isMultiUsed (Bool checkSubTables);
+
+  // Write the table to an ASCII file
+  // (approximately the inverse of the from-ASCII-contructor).
+  // If <src>headerFile</src> is empty or equal to <src>asciiFile</src>, the
+  // headers are written in the same file as the data, otherwise in a separate
+  // file.
+  // If no columns are given (or if the first column name is empty), all
+  // table columns are written. Columns containing records are also printed
+  // (enclosed in {}), but a warning message is returned.
+  // <br>Argument <src>sep</src> is used as separator between columns and
+  // array values. If it is empty, a blank is used.
+  // <br>For each column the precision can be given. It is only used for
+  // columns containing floating point numbers. A value <=0 means using the
+  // default which is 9 for single and 18 for double precision.
+  // <br>If <src>useBrackets=True</src>, arrays are enclosed in [] (for each
+  // dimension), so variable shaped arrays can be read back unambiguously.
+  // The type in the header will be something like D[4,64]. If the column is
+  // variable shaped, the type is like D[].
+  // If <src>useBracket=False</src>, arrays are written linearly where a
+  // shape [4,64] is given in the header like D4,64. If the column is variable
+  // shaped, the shape of the first cell is used and a warning message is
+  // returned.
+  String toAscii (const String& asciiFile, 
+                  const String& headerFile, 
+                  const Vector<String>& columns, 
+                  const String& sep,
+                  const Vector<Int>& precision,
+                  Bool useBrackets);
 
   // Rename the table
   void rename (const String& newTableName);
@@ -543,6 +571,29 @@ private:
   // Make hypercolumn definitions for the given hypercolumns.
   static Bool makeHC (const Record& gdesc, TableDesc& tabdesc,
 		      String& message);
+
+  // Get the column info for toAscii.
+  Bool getColInfo (const String& colName, Bool useBrackets,
+                   String& type, String& message);
+
+  // Print the data in a table cell for toAscii.
+  // <group>
+  void printValueHolder (const ValueHolder& vh, ostream& os,
+                         const String& sep, Int prec, Bool useBrackets) const;
+  template<typename T>
+  void printArray (const Array<T>& arr, ostream& os,
+                   const String& sep) const;
+  void printArrayValue (ostream& os, Bool v, const String&) const
+    {os << v;}
+  void printArrayValue (ostream& os, Int v, const String&) const
+    {os << v;}
+  void printArrayValue (ostream& os, Double v, const String&) const
+    {os << v;}
+  void printArrayValue (ostream& os, const DComplex& v, const String& sep) const
+    {os << v;}
+  void printArrayValue (ostream& os, const String& v, const String&) const
+    {os << '"' << v << '"';}
+  // </group>
 
   // Check if the column name and row numbers are valid.
   // Return the recalculated nrow so that it does not exceed #rows.

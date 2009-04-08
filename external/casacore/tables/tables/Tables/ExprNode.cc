@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ExprNode.cc 20125 2007-10-08 12:26:47Z gervandiepen $
+//# $Id: ExprNode.cc 20407 2008-10-14 14:00:50Z gervandiepen $
 
 #include <tables/Tables/ExprNode.h>
 #include <tables/Tables/ExprNodeSet.h>
@@ -93,6 +93,11 @@ TableExprNode::TableExprNode (const DComplex& val)
 TableExprNode::TableExprNode (const String& val)
 {
     node_p = new TableExprNodeConstString (val);
+    node_p->link();
+}
+TableExprNode::TableExprNode (const std::string& val)
+{
+    node_p = new TableExprNodeConstString (String(val));
     node_p->link();
 }
 TableExprNode::TableExprNode (const char* val)
@@ -199,6 +204,22 @@ TableExprNode& TableExprNode::operator= (const TableExprNode& that)
 TableExprNode::~TableExprNode ()
 {
     TableExprNodeRep::unlink (node_p);
+}
+
+TableExprNode operator&& (const TableExprNode& left,
+			  const TableExprNode& right)
+{
+    if (left.isNull()) return right;
+    if (right.isNull()) return left;
+    return left.newAND (right.node_p);
+}
+
+TableExprNode operator|| (const TableExprNode& left,
+			  const TableExprNode& right)
+{
+    if (left.isNull()) return right;
+    if (right.isNull()) return left;
+    return left.newOR (right.node_p);
 }
 
 TableExprNode TableExprNode::in (const TableExprNodeSet& set) const

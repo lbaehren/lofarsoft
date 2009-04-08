@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayLogical.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: ArrayLogical.h 20557 2009-04-02 14:11:08Z gervandiepen $
 
 #ifndef CASA_ARRAYLOGICAL_H
 #define CASA_ARRAYLOGICAL_H
@@ -118,6 +118,32 @@ template <class T> class Cube;
 // <group name="Array logical operations">
 
 
+// Determine if the comparisons between corresponding array elements yield True.
+// <group>
+template<typename T, typename CompareOperator>
+bool arrayCompareAll (const Array<T>& left, const Array<T>& right,
+                      CompareOperator op);
+template<typename T, typename CompareOperator>
+bool arrayCompareAll (const Array<T>& left, T right,
+                      CompareOperator op);
+template<typename T, typename CompareOperator>
+bool arrayCompareAll (T left, const Array<T>& right,
+                      CompareOperator op);
+// </group>
+
+// Determine if the comparisons between corresponding array elements yield True.
+// <group>
+template<typename T, typename CompareOperator>
+bool arrayCompareAny (const Array<T>& left, const Array<T>& right,
+                      CompareOperator op);
+template<typename T, typename CompareOperator>
+bool arrayCompareAny (const Array<T>& left, T right,
+                      CompareOperator op);
+template<typename T, typename CompareOperator>
+bool arrayCompareAny (T left, const Array<T>& right,
+                      CompareOperator op);
+// </group>
+
 // 
 // Element by element comparisons between the "l" and "r" arrays. The result
 // is true only if the comparison is true for every element of the arrays.
@@ -177,48 +203,10 @@ template<class T> LogicalArray operator == (const Array<T> &l,
 template<class T> LogicalArray operator != (const Array<T> &l,
 					    const Array<T> &r);
 
-
-
-#define VECLOG_LA_OP_AA(OP,TYP) \
-template<class T> \
-inline LogicalArray operator OP (const TYP <T> &l, \
-				 const TYP <T> &r) {\
-  return (dynamic_cast<const Array<T> &>(l) OP \
-	  dynamic_cast<const Array<T> &>(r)); }
-
-VECLOG_LA_OP_AA ( <=, Vector  )
-VECLOG_LA_OP_AA ( <,  Vector  )
-VECLOG_LA_OP_AA ( >=, Vector  )
-VECLOG_LA_OP_AA ( >,  Vector  )
-VECLOG_LA_OP_AA ( ==, Vector  )
-VECLOG_LA_OP_AA ( !=, Vector  )
-VECLOG_LA_OP_AA ( &&, Vector  )
-VECLOG_LA_OP_AA ( ||, Vector  )
-
-VECLOG_LA_OP_AA ( <=, Matrix  )
-VECLOG_LA_OP_AA ( <,  Matrix  )
-VECLOG_LA_OP_AA ( >=, Matrix  )
-VECLOG_LA_OP_AA ( >,  Matrix  )
-VECLOG_LA_OP_AA ( ==, Matrix  )
-VECLOG_LA_OP_AA ( !=, Matrix  )
-VECLOG_LA_OP_AA ( &&, Matrix  )
-VECLOG_LA_OP_AA ( ||, Matrix  )
-
-VECLOG_LA_OP_AA ( <=, Cube  )
-VECLOG_LA_OP_AA ( <,  Cube  )
-VECLOG_LA_OP_AA ( >=, Cube  )
-VECLOG_LA_OP_AA ( >,  Cube  )
-VECLOG_LA_OP_AA ( ==, Cube  )
-VECLOG_LA_OP_AA ( !=, Cube  )
-VECLOG_LA_OP_AA ( &&, Cube  )
-VECLOG_LA_OP_AA ( ||, Cube  )
-
-#undef VECLOG_LA_OP_AA
-
 template<class T> LogicalArray near(const Array<T> &l, const Array<T> &r,
 				    Double tol);
 template<class T> LogicalArray nearAbs(const Array<T> &l, const Array<T> &r,
-				    Double tol);
+                                       Double tol);
 //
 // This only makes sense if the array element type is logical valued.
 // <group>
@@ -270,6 +258,14 @@ template<class T> Bool allOR (const T &val, const Array<T> &array);
 //
 // </group>
 
+
+// Element by element test for NaN or Infinity.
+// <group>
+LogicalArray isNaN (const Array<Float> &array);
+LogicalArray isNaN (const Array<Double> &array);
+LogicalArray isInf (const Array<Float> &array);
+LogicalArray isInf (const Array<Double> &array);
+// </group>
 
 // 
 // Element by element comparisons between an array and a scalar, which
@@ -402,13 +398,13 @@ inline Bool anyTrue (const Array<Bool>& array)
 
 // Determine it for the full array.
 // <group>
-template<class T> uInt ntrue (const Array<T> &array);
-template<class T> uInt nfalse (const Array<T> &array)
-  { return array.nelements() - ntrue(array); }
+template<class T> uInt nfalse (const Array<T> &array);
+template<class T> uInt ntrue (const Array<T> &array)
+  { return array.nelements() - nfalse(array); }
 // </group>
 
 // The same functions as above, but determine ntrue and nfalse for the
-// given axes only. The result is an array with a shape fomed by the
+// given axes only. The result is an array with a shape formed by the
 // remaining axes.
 // For example, for an array with shape [3,4,5], collapsing axis 0
 // results in an array with shape [4,5] containing ntrue or nfalse for
@@ -424,6 +420,26 @@ template<class T> Array<uInt> partialNFalse (const Array<T>& array,
 
 // </group>
 
+// </group>
+
+// Define logical Functors.
+// <group>
+class AllFunc {
+public:
+  Bool operator() (const Array<Bool>& arr) const { return allTrue(arr); }
+};
+class AnyFunc {
+public:
+  Bool operator() (const Array<Bool>& arr) const { return anyTrue(arr); }
+};
+template<typename T> class NTrueFunc {
+public:
+  T operator() (const Array<T>& arr) const { return ntrue(arr); }
+};
+template<typename T> class NFalseFunc {
+public:
+  T operator() (const Array<T>& arr) const { return nfalse(arr); }
+};
 // </group>
 
 

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ExprNode.h 20125 2007-10-08 12:26:47Z gervandiepen $
+//# $Id: ExprNode.h 20505 2009-01-19 14:37:24Z gervandiepen $
 
 #ifndef TABLES_EXPRNODE_H
 #define TABLES_EXPRNODE_H
@@ -100,6 +100,8 @@ class TableExprNode;
   // </group>
 
   // Logical operators to combine boolean TableExprNode's.
+  // A null TableExprNode object is ignored, so it is possible to
+  // build up a full expression gradually.
   // <group>
     TableExprNode operator&& (const TableExprNode& left,
 			      const TableExprNode& right);
@@ -424,7 +426,7 @@ class TableExprNode;
 //# Classes you should understand before using this one.
 //   <li> <linkto class=Table>Table</linkto>
 //   <li> Note 199 describing
-//        <a href="http://www.astron.nl/aips++/docs/notes/199/199.html">
+//        <a href="../notes/199.html">
 //        TaQL</a>
 // </prerequisite>
 
@@ -752,6 +754,7 @@ public:
     TableExprNode (const Complex& value);
     TableExprNode (const DComplex& value);
     TableExprNode (const String& value);
+    TableExprNode (const std::string& value);
     TableExprNode (const char*);
     TableExprNode (const Regex& value);
     TableExprNode (const MVTime& value);
@@ -1140,16 +1143,6 @@ inline TableExprNode operator< (const TableExprNode& left,
 inline TableExprNode TableExprNode::in (const TableExprNode& right) const
 {
     return newIN (right.node_p);
-}
-inline TableExprNode operator&& (const TableExprNode& left,
-				 const TableExprNode& right)
-{
-    return left.newAND (right.node_p);
-}
-inline TableExprNode operator|| (const TableExprNode& left,
-				 const TableExprNode& right)
-{
-    return left.newOR (right.node_p);
 }
 inline TableExprNode TableExprNode::operator() (const TableExprNodeSet& indices)
 {
@@ -1674,6 +1667,66 @@ inline TableExprNode runningAll (const TableExprNode& node,
 				 const TableExprNodeSet& halfBoxWidth)
 {
     return TableExprNode::newFunctionNode (TableExprFuncNode::runallFUNC,
+					   node, halfBoxWidth);
+}
+inline TableExprNode boxedMin (const TableExprNode& node,
+			       const TableExprNodeSet& halfBoxWidth)
+{
+    return TableExprNode::newFunctionNode (TableExprFuncNode::boxminFUNC,
+					   node, halfBoxWidth);
+}
+inline TableExprNode boxedMax (const TableExprNode& node,
+			       const TableExprNodeSet& halfBoxWidth)
+{
+    return TableExprNode::newFunctionNode (TableExprFuncNode::boxmaxFUNC,
+					   node, halfBoxWidth);
+}
+inline TableExprNode boxedMean (const TableExprNode& node,
+				const TableExprNodeSet& halfBoxWidth)
+{
+    return TableExprNode::newFunctionNode (TableExprFuncNode::boxmeanFUNC,
+					   node, halfBoxWidth);
+}
+inline TableExprNode boxedVariance (const TableExprNode& node,
+				    const TableExprNodeSet& halfBoxWidth)
+{
+    return TableExprNode::newFunctionNode (TableExprFuncNode::boxvarianceFUNC,
+					   node, halfBoxWidth);
+}
+inline TableExprNode boxedStddev (const TableExprNode& node,
+				  const TableExprNodeSet& halfBoxWidth)
+{
+    return TableExprNode::newFunctionNode (TableExprFuncNode::boxstddevFUNC,
+					   node, halfBoxWidth);
+}
+inline TableExprNode boxedAvdev (const TableExprNode& node,
+				 const TableExprNodeSet& halfBoxWidth)
+{
+    return TableExprNode::newFunctionNode (TableExprFuncNode::boxavdevFUNC,
+					   node, halfBoxWidth);
+}
+inline TableExprNode boxedRms (const TableExprNode& node,
+			       const TableExprNodeSet& halfBoxWidth)
+{
+    return TableExprNode::newFunctionNode (TableExprFuncNode::boxrmsFUNC,
+					   node, halfBoxWidth);
+}
+inline TableExprNode boxedMedian (const TableExprNode& node,
+				  const TableExprNodeSet& halfBoxWidth)
+{
+    return TableExprNode::newFunctionNode (TableExprFuncNode::boxmedianFUNC,
+					   node, halfBoxWidth);
+}
+inline TableExprNode boxedAny (const TableExprNode& node,
+			       const TableExprNodeSet& halfBoxWidth)
+{
+    return TableExprNode::newFunctionNode (TableExprFuncNode::boxanyFUNC,
+					   node, halfBoxWidth);
+}
+inline TableExprNode boxedAll (const TableExprNode& node,
+			       const TableExprNodeSet& halfBoxWidth)
+{
+    return TableExprNode::newFunctionNode (TableExprFuncNode::boxallFUNC,
 					   node, halfBoxWidth);
 }
 inline TableExprNode array (const TableExprNode& values,

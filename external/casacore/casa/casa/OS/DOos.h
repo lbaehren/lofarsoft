@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: DOos.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: DOos.h 20364 2008-06-30 06:10:38Z gervandiepen $
 
 #ifndef CASA_DOOS_H
 #define CASA_DOOS_H
@@ -50,7 +50,6 @@ class String;
 // </reviewed>
 
 // <prerequisite>
-//   <li> <linkto module=Tasking>Tasking</linkto>
 //   <li> <linkto module=OS>OS</linkto>
 // </prerequisite>
 
@@ -58,8 +57,9 @@ class String;
 // </etymology>
 
 // <synopsis>
-// This class is the connection between the Glish os server, and the
-// OS module. It is meant for access to OS-specific functions, in
+// This class serves as the connection between the OS module and a tasking
+// interface in Glish or Python.
+// It is meant for access to OS-specific functions, in
 // particular file handling.
 // </synopsis>
 

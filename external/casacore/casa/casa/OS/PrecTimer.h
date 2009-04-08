@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: PrecTimer.h 19279 2006-02-23 08:02:05Z gvandiep $
+//# $Id: PrecTimer.h 20454 2008-12-02 12:41:01Z gervandiepen $
 
 #ifndef CASA_PRECTIMER_H
 #define CASA_PRECTIMER_H
@@ -210,19 +210,7 @@ class String;
     :
 	"eax", "edx"
     );
-#elif (defined __i386__ || defined __x86_64__) && (defined __GNUC__ || defined __INTEL_COMPILER)
-    asm volatile
-    (
-	"rdtsc\n\t"
-	"subl %%eax, %0\n\t"
-	"sbbl %%edx, %1"
-    :
-	"+m" (total_time_low), "+m" (total_time_high)
-    :
-    :
-	"eax", "edx"
-    );
-#elif (defined __i386__ || defined __x86_64__) && defined __PATHSCALE__
+#elif (defined __i386__ || defined __x86_64__) && (defined __PATHSCALE__ || (defined __APPLE__ && defined __APPLE_CC__ && __APPLE_CC__ == 5531))
     unsigned eax, edx;
 
     asm volatile ("rdtsc" : "=a" (eax), "=d" (edx));
@@ -296,19 +284,7 @@ class String;
     :
 	"eax", "edx"
     );
-#elif (defined __i386__ || defined __x86_64__) && (defined __GNUC__ || defined __INTEL_COMPILER)
-    asm volatile
-    (
-	"rdtsc\n\t"
-	"addl %%eax, %0\n\t"
-	"adcl %%edx, %1"
-    :
-	"+m" (total_time_low), "+m" (total_time_high)
-    :
-    :
-	"eax", "edx"
-    );
-#elif (defined __i386__ || defined __x86_64__) && defined __PATHSCALE__
+#elif (defined __i386__ || defined __x86_64__) && (defined __PATHSCALE__ || (defined __APPLE__ && defined __APPLE_CC__ && __APPLE_CC__ == 5531))
     unsigned eax, edx;
 
     asm volatile ("rdtsc\n\t" : "=a" (eax), "=d" (edx));
