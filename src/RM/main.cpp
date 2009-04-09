@@ -101,25 +101,26 @@ int main (int argc, char * const argv[]) {
 	std::vector<double> freq(10), lambdaSq(10);	// Test frequency and lambda squared conversions 
 	
 	for(unsigned int i=0; i <= lambdaSq.size(); i++)
-	  lambdaSq[i]=i*100.0;
-
-
+	{
+	  freq[i]=(i+1)*10.0;
+	  lambdaSq[i]=(i+1)*100.0;
+	  cout << "freq[" << i << "]=" << freq[i] << endl;
+	}
+	
 	ofstream file("rm.txt", ios::out); 
 
 	rm rm_cube(10,10,10,1.0, file);		// create a rm_cube from rm constructor
 //   	rm rm_cube[1]={rm(10,10,10, 1.0, file)};		
-//  	lambdaSq=rm_cube.freqToLambdaSq(freq);
-	
-	
+  	lambdaSq=rm_cube.freqToLambdaSq(freq);
 	
 	// Lattice and iteration over line of sight
 	// create Lattice shape and iterator
-//	const uInt cursorSize = lattice_Q_float->advisedMaxPixels();
+// 	const uInt cursorSize = lattice_Q_float->advisedMaxPixels();
 //	const IPosition cursorShape = lattice_Q_float->niceCursorShape(cursorSize);
- 	const IPosition cursorShape(2, lattice_Q_float->shape()(0), lattice_Q_float->shape()(1));
+ //	const IPosition cursorShape(2, lattice_Q_float->shape()(0), lattice_Q_float->shape()(1));
     
 	int i=0;
-	
+	/*
 	RO_LatticeIterator<Float> iter(*lattice_Q_float, cursorShape);
 	for (iter.reset(); !iter.atEnd(); iter++) {
 		minMax(min, max, iter.cursor());
@@ -128,12 +129,12 @@ int main (int argc, char * const argv[]) {
 
 	cout << "Deleting lattice_Q" << endl;
 
-	delete lattice_Q_float;		// delete the lattice of image Q
-// 	delete &iter;			// delete iterator over image Q
-
+//	delete lattice_Q_float;		// delete the lattice of image Q
+//	delete iter;			// delete iterator over image Q
+	*/
 	#ifdef _debug
 	cout << "Finished: " << filename_Q << "!\n";	// Debug output
-    #endif
+	#endif
 	
 	return 0;
 }

@@ -63,23 +63,27 @@ rm::~rm()
 
   \return lambda_sq -- 
 */
-vector<double>rm::freqToLambdaSq(vector<double> frequency)
+vector<double>rm::freqToLambdaSq(vector<double> &frequency)
 {
+  // constants
+  double c=299792458.0;			// vacuum speed of light, c, in metres per second 
+//  int csq=299792458*299792458;	// c^2
+  double lambda=0.0;			// temporary variable to hold lambda (non-squared!) after initial conversion
+ 
   /* lambda squareds of measured channels */
   vector<double> lambda_sq;
-  /* loop variable */
-  int i=0;
   /* conversion factor to convert from freq to lambda squared values */
   double conversion_factor=0;
 
 
-  for (vector<double>::iterator i = frequency.begin();i != frequency.end(); i++)   // loop through vector and convert to lambdaSquared
+  for (vector<double>::iterator it = frequency.begin();it != frequency.end(); it++)   // loop through vector and convert to lambdaSquared
   {
-   // cout << "frequency[" << i << "] = " << (*i) << endl;	// debug
-     cout << *i << endl;
+    lambda=c/(*it);
+ 
+    cout << "frequency = " << *it << "  lambda = " << lambda << endl;
   }
   
-  
+  lambda=10;
   return lambda_sq;
 }
 
@@ -91,7 +95,7 @@ vector<double>rm::freqToLambdaSq(vector<double> frequency)
 
   \return freq -- 
 */
-vector<double>rm::lambdaSqToFreq(vector<double> lambda_sq)
+vector<double>rm::lambdaSqToFreq(vector<double> &lambda_sq)
 {
 	vector<double> freq;	// frequencies of measured channels
 

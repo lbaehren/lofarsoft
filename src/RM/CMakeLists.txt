@@ -163,7 +163,7 @@ endif (RM_DEBUGGING_MESSAGES)
 
 if (RM_COMPILER_WARNINGS)
   set (CMAKE_CXX_FLAGS
-    "-Wall -Wno-comment -Woverloaded-virtual -Wno-non-template-friend"
+    "-Wall -g -Wno-comment -Woverloaded-virtual -Wno-non-template-friend"
     )
 endif (RM_COMPILER_WARNINGS)
     
