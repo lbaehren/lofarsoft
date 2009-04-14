@@ -48,6 +48,7 @@ rm::rm(int x, int y, int depth, double stepsize, ofstream &file)	// pass only re
 rm::~rm()
 {
   // Free memory? Currently nothing to be done
+  cout << "rm destructor called" << endl;
 }
 
 //===============================================================================
@@ -63,28 +64,49 @@ rm::~rm()
 
   \return lambda_sq -- 
 */
-vector<double>rm::freqToLambdaSq(vector<double> &frequency)
+//vector<double>rm::freqToLambdaSq(vector<double> &frequency);
+bool rm::freqToLambdaSq(vector<double> &frequency, vector<double> &lambda_sq)
 {
   // constants
   double c=299792458.0;			// vacuum speed of light, c, in metres per second 
 //  int csq=299792458*299792458;	// c^2
   double lambda=0.0;			// temporary variable to hold lambda (non-squared!) after initial conversion
  
-  /* lambda squareds of measured channels */
-  vector<double> lambda_sq;
+  /* lambda squareds of measured channels, equal in size to frequency vector */
+ // vector<double> lambda_sq(frequency.size());
   /* conversion factor to convert from freq to lambda squared values */
   double conversion_factor=0;
 
 
-  for (vector<double>::iterator it = frequency.begin();it != frequency.end(); it++)   // loop through vector and convert to lambdaSquared
+  // Check for data consistency
+  if(frequency.size()==0)
   {
-    lambda=c/(*it);
- 
-    cout << "frequency = " << *it << "  lambda = " << lambda << endl;
+    cerr << "rm::freqToLambdaSq: frequency vector size 0" << endl;
+    return false;
   }
+  else if(frequency.size() != lambda_sq.size())
+  {
+    cerr << "rm::freqToLambdaSq: frequency and labda_sq vector sizes do not match" << endl;
+    return false:
+  }
+
+  // loop over frequency vector and compute lambda squared values
+  for(unsigned int i=0; i<frequency.size(); i++)
+  {
+     lambda=c/frequency[i];   
+     lambda_sq[i]=lambda*lambda;
+     
+     cout << "frequency = " << frequency[i] << "  lambda = " << lambda << "  lambda^2 = " << lambda_sq[i] << endl;
+  }
+
+  // Iterator to loop over frequency
+//   for (vector<double>::iterator it = frequency.begin();it != frequency.end(); it++)   // loop through vector and convert to lambdaSquared
+//   {
+//     lambda=c/(*it);
+//     cout << "frequency = " << *it << "  lambda = " << lambda << "lambda^2" << lambda_sq[*it] << endl;
+//   }
   
-  lambda=10;
-  return lambda_sq;
+  return true;
 }
 
 

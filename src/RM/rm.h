@@ -58,7 +58,8 @@ private:
 public:
 
   // Convert frequency vector to lambda squared vector
-  vector<double> freqToLambdaSq(vector<double> &frequency);
+ // vector<double> freqToLambdaSq(vector<double> &frequency);
+  bool freqToLambdaSq(vector<double> &frequency, vector<double> &lambda);
   // Convert frequency vector to lambda squared vector
   vector<double> lambdaSqToFreq(vector<double> &lambda_sq);
   

@@ -99,20 +99,22 @@ int main (int argc, char * const argv[]) {
 	}
 	
 	std::vector<double> freq(10), lambdaSq(10);	// Test frequency and lambda squared conversions 
-	
+
+	// debug: create dummy frequency vector
 	for(unsigned int i=0; i <= lambdaSq.size(); i++)
 	{
 	  freq[i]=(i+1)*10.0;
 	  lambdaSq[i]=(i+1)*100.0;
-	  cout << "freq[" << i << "]=" << freq[i] << endl;
 	}
 	
 	ofstream file("rm.txt", ios::out); 
 
 	rm rm_cube(10,10,10,1.0, file);		// create a rm_cube from rm constructor
-//   	rm rm_cube[1]={rm(10,10,10, 1.0, file)};		
-  	lambdaSq=rm_cube.freqToLambdaSq(freq);
+	rm_cube.freqToLambdaSq(freq, lambdaSq);
 	
+	//lambdaSq=rm_cube.freqToLambdaSq(freq);
+	
+	file.close();
 	// Lattice and iteration over line of sight
 	// create Lattice shape and iterator
 // 	const uInt cursorSize = lattice_Q_float->advisedMaxPixels();
