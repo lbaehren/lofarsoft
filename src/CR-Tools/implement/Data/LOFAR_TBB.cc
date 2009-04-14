@@ -123,22 +123,22 @@ namespace CR { // Namespace CR -- begin
   {
     os << "[LOFAR_TBB] Summary of object properties" << endl;
 
-      os << "-- Name of data file ... : " << filename_p            << endl;
-      os << "-- HDF5 file ID ........ : " << fileID_p              << endl;
+      os << "-- Name of data file .... : " << filename_p            << endl;
+      os << "-- HDF5 file ID ......... : " << fileID_p              << endl;
     
     if (fileID_p > 0) {
       /* Variables describing the dataset itself */
-      os << "-- Telescope ........... : " << telescope()           << endl;
-      os << "-- Observer ............ : " << observer()            << endl;
-      os << "-- Project ............. : " << project()             << endl;
-      os << "-- nof. station groups . : " << groups_p.size()       << endl;
-      os << "-- nof. data channels .. : " << nofDipoleDatasets()   << endl;
+      os << "-- Telescope ............ : " << telescope()           << endl;
+      os << "-- Observer ............. : " << observer()            << endl;
+      os << "-- Project .............. : " << project()             << endl;
+      os << "-- nof. station groups .. : " << groups_p.size()       << endl;
+      os << "-- nof. data channels ... : " << nofDipoleDatasets()   << endl;
       
       /* Variables describing the setup of the DataReader */
-      os << "-- blocksize  [samples ] : " << blocksize_p                   << endl;
-      os << "-- FFT length [channels] : " << DataReader::fftLength()       << endl;
-      os << "-- Sample frequency [Hz] : " << DataReader::sampleFrequency() << endl;
-      os << "-- Nyquist zone ........ : " << DataReader::nyquistZone()     << endl;
+      os << "-- blocksize   [samples ] : " << blocksize_p                   << endl;
+      os << "-- FFT length  [channels] : " << DataReader::fftLength()       << endl;
+      os << "-- Sample frequency [MHz] : " << DataReader::sampleFrequency() << endl;
+      os << "-- Nyquist zone ......... : " << DataReader::nyquistZone()     << endl;
       
       /* The rest of the summary output is conditional, because given the number
 	 station it might get quite a lot. */
