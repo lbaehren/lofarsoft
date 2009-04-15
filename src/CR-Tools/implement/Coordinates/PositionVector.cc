@@ -86,7 +86,7 @@ namespace CR { // Namespace  -- begin
   
   // ============================================================================
   //
-  //  Methods
+  //  General methods
   //
   // ============================================================================
 
@@ -376,10 +376,9 @@ namespace CR { // Namespace  -- begin
 	status = false;
 	break;
       case CoordinateType::Cartesian:
-	std::cerr << "[PositionVector::convert]"
-		  << " Conversion not implemented: DirectionRadius->Cartesian"
-		  << std::endl << std::flush;
-	status = false;
+	vec.DirectionRadius2Cartesian(out(0), out(1), out(2),
+				      in(0) ,  in(1),  in(2),
+				      anglesInDegrees);
 	break;
       case CoordinateType::Cylindrical:
 	std::cerr << "[PositionVector::convert]"
@@ -606,6 +605,12 @@ namespace CR { // Namespace  -- begin
     return status;
   }
   
+  // ============================================================================
+  //
+  //  Conversion functions
+  //
+  // ============================================================================
+
   //_____________________________________________________________________________
   //                                                      Conversion -> Cartesian
 
@@ -664,6 +669,23 @@ namespace CR { // Namespace  -- begin
       out_y = in_r*cos(in_el)*cos(in_az);
       out_z = in_r*sin(in_el);
     }
+  }
+  
+  void PositionVector::DirectionRadius2Cartesian (double &out_x,
+						  double &out_y,
+						  double &out_z,
+						  double const &in_long,
+						  double const &in_lat,
+						  double const &in_r,
+						  bool const &anglesInDegrees)
+  {
+    LongLatRadius2Cartesian (out_x,
+			     out_y,
+			     out_z,
+			     in_long,
+			     in_lat,
+			     in_r,
+			     anglesInDegrees);
   }
   
   void PositionVector::LongLatRadius2Cartesian (double &out_x,

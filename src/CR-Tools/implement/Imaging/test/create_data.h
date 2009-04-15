@@ -28,23 +28,22 @@
 #include <Coordinates/SpatialCoordinate.h>
 #include <Coordinates/TimeFreqCoordinate.h>
 #include <Coordinates/SkymapCoordinate.h>
-#include <Math/VectorConversion.h>
 #include <Data/ObservationData.h>
+#include <Imaging/Beamformer.h>
+#include <Math/VectorConversion.h>
 
 using casa::DComplex;
 using casa::Matrix;
 using casa::Vector;
 
 using CR::ObservationData;
-using CR::SkymapCoordinate;
-using CR::TimeFreq;
 
 /*!
   \file create_data.h
 
   \ingroup CR_Imaging
 
-  \brief A collection of routines to generate data for the various test programs
+  \brief A collection of routines to support the various test programs
  
   \author Lars B&auml;hren
  
@@ -52,10 +51,18 @@ using CR::TimeFreq;
 
   <h3>Synopsis</h3>
 
-  As there are a number of basic test data required by the various test programs
-  for the classes of the Imaging module, it does make sense to collect the
-  functions dealing with this is a single place.
+  <ul>
+    <li>Input parameters to classes/objects
+    <li>Test/Simulated data for processing
+    <li>Diagnostic output of parameter and (processed) data
+  </ul>
 */
+
+// ==============================================================================
+//
+//  Create parameters
+//
+// ==============================================================================
 
 // -----------------------------------------------------------------------------
 
@@ -331,22 +338,24 @@ Matrix<DComplex> get_data (uint const &nofAntennas=4,
   \param sampleFrequency  -- Sample frequency in the A/D conversion step
   \param nyquistZone      -- Nyquist zone
   \param nofDistanceSteps -- nof. steps along the distance axis
+  \param blocksPerFrame   -- nof. subsequent blocks combined into a single
+         time-frame
   
   \return coord -- A new SkymapCoordinates object
 */
-SkymapCoordinate get_SkymapCoordinate (uint const blocksize=1024,
-				       double const sampleFrequency=40e6,
-				       uint const nyquistZone=1,
-				       uint const nofDistanceSteps=2)
+CR::SkymapCoordinate get_SkymapCoordinate (uint const blocksize=1024,
+					   double const sampleFrequency=40e6,
+					   uint const nyquistZone=1,
+					   uint const nofDistanceSteps=2,
+					   uint blocksPerFrame=1,
+					   uint nofFrames=2,
+					   std::string refcode="AZEL",
+					   std::string projection="SIN")
 {
   // Parameters used for object creation
   std::string telescope  = "WSRT";
   std::string observer   = "Somebody";
-  std::string refcode    = "AZEL";
-  std::string projection = "SIN";
   casa::Quantity sampleFreq (sampleFrequency,"Hz");
-  uint blocksPerFrame    = 1;
-  uint nofFrames         = 1;
 
   // Observation information
   casa::ObsInfo info;
@@ -362,9 +371,92 @@ SkymapCoordinate get_SkymapCoordinate (uint const blocksize=1024,
 				 refcode,
 				 projection);
   spatial.setShape(casa::IPosition(3,20,20,nofDistanceSteps));
-  SkymapCoordinate coord (info,
-			  spatial,
-			  timeFreq);
+  CR::SkymapCoordinate coord (info,
+			      spatial,
+			      timeFreq);
   
   return coord;
+}
+
+// ==============================================================================
+//
+//  Diagnostic export of data
+//
+// ==============================================================================
+
+/*!
+  \brief Export the internal settings of the Beamformer
+
+  The following data files will be created:
+  - <prefix>-antPositions.dat
+  - <prefix>-skyPositions.dat
+  - <prefix>-delays.dat
+*/
+void export_Beamformer (CR::Beamformer &bf,
+			std::string const &prefix="beamformer")
+{
+  int ant;
+  int sky;
+  std::ofstream outfile;
+  
+  std::cout << "=- Exporting the values of the antenna positions ..." << std::endl;
+  {
+    std::string filename        = prefix+"-antPositions.dat";
+    Matrix<double> antPositions = bf.antPositions();
+    IPosition shape             = antPositions.shape();
+    int nCoord;
+
+    outfile.open(filename.c_str(),std::ios::out);
+
+    for (ant=0; ant<shape(0); ant++) {
+      outfile << ant;
+      for (nCoord=0; nCoord<shape(1); nCoord++) {
+	outfile << "\t" << antPositions(ant,nCoord);
+	}
+      outfile << std::endl;
+    }
+    
+    outfile.close();
+  }
+
+  /* Export the values of the sky positions */
+  {
+    std::string filename        = prefix+"-skyPositions.dat";
+    Matrix<double> skyPositions = bf.skyPositions();
+    IPosition shape             = skyPositions.shape();
+    int nSky;
+    int nCoord;
+
+    outfile.open(filename.c_str(),std::ios::out);
+
+    for (nSky=0; nSky<shape(0); nSky++) {
+      outfile << nSky;
+      for (nCoord=0; nCoord<shape(1); nCoord++) {
+	outfile << "\t" << skyPositions(nSky,nCoord);
+	}
+      outfile << std::endl;
+    }
+    
+    outfile.close();
+  }
+
+  /* Export the values of the geometrical delays */
+  {
+    std::string filename        = prefix+"-delays.dat";
+    Matrix<double> delays = bf.delays();
+    IPosition shape       = delays.shape(); /* [ant,sky] */
+
+    outfile.open(filename.c_str(),std::ios::out);
+
+    for (ant=0; ant<shape(0); ant++) {
+      for (sky=0; sky<shape(1); sky++) {
+	outfile << ant << "\t" << sky << "\t" << delays(ant,sky) << std::endl;
+      }
+      outfile << std::endl;
+    }
+
+    outfile.close();
+  }
+
+  /* Export the values of the geometrical phases */
 }

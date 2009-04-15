@@ -388,7 +388,8 @@ int test_Cartesian2other ()
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                         test_Cylindrical2other
 
 /*!
   \brief Test conversion from Cylindrical coordinates to other
@@ -407,7 +408,61 @@ int test_Cylindrical2other ()
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+// test_DirectionRadius2other
+
+/*!
+  \brief Test conversion from (Direction,Radius) coordinates to other
+
+  Since the direction typically is given as (Long,Lat) pair, this conversion
+  should be identical to \f$ (Long,Lat,Radius) \f$ to \f$ (x,y,z) \f$.
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+*/
+int test_DirectionRadius2other ()
+{
+  std::cout << "\n[tPositionVector::test_DirectionRadius2other]\n" << std::endl;
+
+  int nofFailedTests (0);
+  Vector<double> in (3);
+  Vector<double> other (3);
+
+  std::cout << "[1] DirectionRadius -> Cartesian" << std::endl;
+  try {
+    in(0) = 0;
+    in(1) = 0;
+    in(2) = 1;
+    PositionVector::convert(other,CoordinateType::Cartesian,
+			    in,CoordinateType::DirectionRadius,
+			    true);
+    std::cout << "\t" << in << "\t->\t" << other << std::endl;
+    //
+    in(0) = 45;
+    in(1) = 0;
+    in(2) = 1;
+    PositionVector::convert(other,CoordinateType::Cartesian,
+			    in,CoordinateType::DirectionRadius,
+			    true);
+    std::cout << "\t" << in << "\t->\t" << other << std::endl;
+    //
+    in(0) = 0;
+    in(1) = 45;
+    in(2) = 1;
+    PositionVector::convert(other,CoordinateType::Cartesian,
+			    in,CoordinateType::DirectionRadius,
+			    true);
+    std::cout << "\t" << in << "\t->\t" << other << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+//_______________________________________________________________________________
+//                                                     test_NorthEastHeight2other
 
 /*!
   \brief Test conversion from (North,East,Height) coordinates to other
@@ -663,6 +718,7 @@ int main ()
   nofFailedTests += test_AzElRadius2other();
   nofFailedTests += test_Cartesian2other();
   nofFailedTests += test_Cylindrical2other();
+  nofFailedTests += test_DirectionRadius2other();
   nofFailedTests += test_NorthEastHeight2other();
   // Test for the constructor(s)
   nofFailedTests += test_constructors ();

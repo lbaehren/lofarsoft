@@ -399,6 +399,20 @@ int test_methods ()
 			       true);
     cout << geomDelay.skyPositions() << std::endl;
 
+    cout << "-- (Direction,Radius) coordinates ..." << std::endl;
+
+    pos(0,0) = 45;
+    pos(0,1) = 45;
+    pos(0,2) = 1;
+    pos(1,0) = -45;
+    pos(1,1) = -45;
+    pos(1,2) = 1;
+
+    geomDelay.setSkyPositions (pos,
+			       CoordinateType::DirectionRadius,
+			       true);
+    cout << geomDelay.skyPositions() << std::endl;
+
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;

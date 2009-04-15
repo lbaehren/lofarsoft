@@ -415,7 +415,7 @@ namespace CR {  // Namespace CR -- begin
       \return beamformer -- Beamformer object, to handle the combination of
               antenna signals
     */
-    inline Beamformer beamformer () const {
+    inline Beamformer beamformer () {
       return beamformer_p;
     }
     

@@ -1,0 +1,51 @@
+
+##_______________________________________________________________________________
+## Plot the antenna positions for which to compute delays, phases and weights
+
+set title "Antenna positions"
+set xlabel "x [m]"
+set ylabel "y [m]"
+set zlabel "z [m]"
+unset contour
+set term pdf color solid enhanced
+set output "skymap-antPositions.pdf"
+splot "skymap-antPositions.dat" u 2:3:4 w p
+
+##_______________________________________________________________________________
+## Plot the sky positions for which to compute delays, phases and weights
+
+## cartesian coordinates
+set title "Sky positions"
+set xlabel "x [m]"
+set ylabel "y [m]"
+set zlabel "z [m]"
+## spherical coordinates
+#set xlabel "Longitude"
+#set ylabel "Latitude"
+#set zlabel "Radius"
+#set ticslevel 0
+#set view 70,40,0.8,1.2
+#set mapping spherical
+#set parametric
+## general settings
+unset contour
+set term pdf color solid enhanced
+set output "skymap-skyPositions.pdf"
+splot "skymap-skyPositions.dat" u 2:3:4 w p
+
+##_______________________________________________________________________________
+## Plot the values of the geometrical delays
+
+set title "Geometrical delays"
+set xlabel "Antenna number"
+set ylabel "Sky pixel number"
+set zlabel "Geometrical delay [s]"
+set contour base
+set term pdf color solid enhanced
+set output "skymap-delays.pdf"
+splot "skymap-delays.dat" u 1:2:3 w l
+
+##_______________________________________________________________________________
+## Clean up and exit
+
+quit

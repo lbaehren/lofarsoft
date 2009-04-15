@@ -50,7 +50,7 @@ using casa::TiledShape;
 #include <Imaging/Beamformer.h>
 #include <Imaging/Skymapper.h>
 #include <Utilities/ProgressBar.h>
-#include "create_data.h"
+#include <Imaging/test/create_data.h>
 
 using CR::Beamformer;
 using CR::ProgressBar;
@@ -152,90 +152,6 @@ CR::TimeFreqCoordinate getTimeFreq (uint const &blocksize=1024,
 				   blocksPerFrame,
 				   nofFrames);
   return timeFreq;
-}
-
-//_______________________________________________________________________________
-// export_Beamformer
-
-/*!
-  Use the following instructions with Gnuplot to plot the exported data:
-  \verbatim
-  set xlabel "Antenna number"
-  set ylabel "Sky pixel number"
-  set zlabel "Geometrical delay"
-  set contour base
-  set term post color solid enhanced
-  set output "skymap-delays.ps"
-  splot "skymap-delays.txt" u 1:2:3 w l
-
-  set xlabel "Longitude"
-  set ylabel "Latitude"
-  set zlabel "Radius"
-  set ticslevel 0
-  set view 70,40,0.8,1.2
-  set mapping spherical
-  set parametric
-  unset contour
-  set term post color solid enhanced
-  set output "skymap-sky.ps"
-  splot "skymap-sky.txt" u 4:5:6 w p
-
-  quit
-  \endverbatim
-*/
-void export_Beamformer (Skymapper &map)
-{
-  int ant;
-  int sky;
-  int freq;
-  std::ofstream outfile;
-
-  /* Export the values of the sky positions */
-  {
-    Matrix<double> skyPositions = map.beamformer().skyPositions();
-    IPosition shape             = map.imageShape();
-    int lon;
-    int lat;
-    int radius;
-    int pixel (0);
-
-    outfile.open("skymap-sky.txt",std::ios::out);
-
-    for (lon=0; lon<shape(0); lon++) {
-      for (lat=0; lat<shape(1); lat++) {
-	for (radius=0; radius<shape(2); radius++) {
-	  outfile << lon << "\t" << lat << "\t" << radius
-		  << "\t" << skyPositions(pixel,0)
-		  << "\t" << skyPositions(pixel,1)
-		  << "\t" << skyPositions(pixel,2)
-		  << std::endl;
-	  pixel++;
-	}
-	outfile << std::endl;
-      }
-    }
-    
-    outfile.close();
-  }
-
-  /* Export the values of the geometrical delays */
-  {
-    Matrix<double> delays = map.beamformer().delays();
-    IPosition shape       = delays.shape(); /* [ant,sky] */
-
-    outfile.open("skymap-delays.txt",std::ios::out);
-
-    for (ant=0; ant<shape(0); ant++) {
-      for (sky=0; sky<shape(1); sky++) {
-	outfile << ant << "\t" << sky << "\t" << delays(ant,sky) << std::endl;
-      }
-      outfile << std::endl;
-    }
-
-    outfile.close();
-  }
-
-  /* Export the values of the geometrical phases */
 }
 
 //_______________________________________________________________________________
@@ -603,6 +519,9 @@ int test_processing (string const &infile,
 			     refcode,
 			     projection);
   spatial.setShape(shape);
+  Vector<double> cdelt = spatial.increment();
+  cdelt(2) = 100;
+  spatial.setIncrement(cdelt);
   // Time-Frequency coordinate
   TimeFreqCoordinate timeFreq (blocksize,
 			       nofBlocksPerFrame,
@@ -637,11 +556,14 @@ int test_processing (string const &infile,
 			 CR::DataType::CASA_IMAGE);
     skymapper.summary();
     /* Export the internal settings of embedded Beamformer object */
-    export_Beamformer (skymapper);
+    {
+      Beamformer bf = skymapper.beamformer();
+      export_Beamformer (bf,"skymap");
+    }
     /* Prepare some test data to process */
     Matrix<casa::DComplex> data (timeFreq.fftLength(),
 				 nofAntennas);
-
+    
     for (uint block(0); block<nofBlocksPerFrame*nofFrames; block++) {
       /* Put some values into the data array passed to the method */
       for (uint freq(0); freq<timeFreq.fftLength(); freq++) {
@@ -670,7 +592,7 @@ int test_processing (string const &infile,
     cout << "-- World axis names = " << image.coordinates().worldAxisNames() << endl;
     cout << "-- World axis units = " << image.coordinates().worldAxisUnits() << endl;
     // Convert the image to FITS
-    status = casa::ImageFITSConverter::ImageToFITS(error, image, "skymap_test1.fits");
+    status = casa::ImageFITSConverter::ImageToFITS(error, image, "!skymap_test1.fits");
     if (!status) {
       std::cout << error << std::endl;
     }
@@ -690,6 +612,10 @@ int test_processing (string const &infile,
     dr.summary();
     // update SkymapCoordinate
     coord.setObsInfo (getObsInfo("LOPES"));
+    //
+    timeFreq.setBlocksPerFrame(1);
+    timeFreq.setNofFrames(10);
+    coord.setTimeFreqCoordinate(timeFreq);
     // Create Skymapper object to work with
     Skymapper skymapper (coord,
 			 antPositions,

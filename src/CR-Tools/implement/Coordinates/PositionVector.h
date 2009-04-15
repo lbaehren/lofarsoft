@@ -316,6 +316,18 @@ namespace CR { // Namespace  -- begin
 				bool const &anglesInDegrees=false);
     
     //________________________________________________________________
+    //                                        DirectionRadius -> other
+
+    //! Convert \f$ (Long,Lat,R) \f$ to \f$ (x,y,z) \f$.
+    void DirectionRadius2Cartesian (double &out_x,
+				    double &out_y,
+				    double &out_z,
+				    double const &in_long,
+				    double const &in_lat,
+				    double const &in_r,
+				    bool const &anglesInDegrees=false);
+    
+    //________________________________________________________________
     //                                        NorthEastHeight -> other
 
     //! Convert \f$ (H,E,H) \f$ to \f$ (x,y,z) \f$.

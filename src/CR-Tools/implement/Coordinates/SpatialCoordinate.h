@@ -41,6 +41,7 @@
 #include <coordinates/Coordinates/TabularCoordinate.h>
 #include <coordinates/Coordinates/ObsInfo.h>
 
+#include <Coordinates/CoordinateBase.h>
 #include <Coordinates/CoordinateType.h>
 
 using casa::Coordinate;
@@ -216,6 +217,27 @@ namespace CR { // Namespace CR -- begin
 	      refcode,
 	      projection);
       }
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param coordType  -- Type of coordinate for which to create an object.
+      \param refPixel   -- Reference pixel
+      \param refValue   -- Reference value
+      \param increment  -- Coordinate increment
+      \param shape      -- The number of elements along the coordinate axes
+      \param refcode    -- Reference code for the celestial coordinate system, in
+             case the coordinate contains a DirectionCoordinate
+      \param projection -- Identifier for the spherical map projection, in case
+             the coordinate contains a DirectionCoordinate
+    */
+    SpatialCoordinate (CoordinateType::Types const &coordType,
+		       casa::Vector<double> const &refPixel,
+		       casa::Vector<double> const &refValue,
+		       casa::Vector<double> const &increment,
+		       casa::IPosition const &shape,
+		       casa::String const &refcode="AZEL",
+		       casa::String const &projection="STG");
     
     /*!
       \brief Argumented constructor for coordinate of type DirectionRadius

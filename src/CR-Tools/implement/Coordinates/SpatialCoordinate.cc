@@ -31,7 +31,8 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  // ---------------------------------------------------------- SpatialCoordinate
+  //_____________________________________________________________________________
+  //                                                            SpatialCoordinate
   
   SpatialCoordinate::SpatialCoordinate (casa::DirectionCoordinate const &direction,
 					casa::LinearCoordinate const &linear)
@@ -45,8 +46,9 @@ namespace CR { // Namespace CR -- begin
     linearCoord_p    = linear;
   }
   
-  // ---------------------------------------------------------- SpatialCoordinate
-
+  //_____________________________________________________________________________
+  //                                                            SpatialCoordinate
+  
   SpatialCoordinate::SpatialCoordinate (casa::LinearCoordinate const &linear,
 					CoordinateType::Types const &coordType)
   {
@@ -73,8 +75,29 @@ namespace CR { // Namespace CR -- begin
     }
   }
   
-  // ---------------------------------------------------------- SpatialCoordinate
-
+  //_____________________________________________________________________________
+  //                                                            SpatialCoordinate
+  
+  SpatialCoordinate::SpatialCoordinate (CoordinateType::Types const &coordType,
+					casa::Vector<double> const &refPixel,
+					casa::Vector<double> const &refValue,
+					casa::Vector<double> const &increment,
+					casa::IPosition const &shape,
+					casa::String const &refcode,
+					casa::String const &projection)
+  {
+    init (coordType,
+	  refcode,
+	  projection);
+    setReferencePixel (refPixel);
+    setReferenceValue (refValue);
+    setIncrement (increment);
+    setShape(shape);
+  }
+  
+  //_____________________________________________________________________________
+  //                                                            SpatialCoordinate
+  
   SpatialCoordinate::SpatialCoordinate (SpatialCoordinate const &other)
   {
     copy (other);
