@@ -76,10 +76,6 @@ int main (int argc, char * const argv[]) {
 		exit(0);
 	}
 		
-	#ifdef _debug
-	cout << lattice_Q->dataType() << endl;
-	#endif
-
 	switch(lattice_Q->dataType()){
 		case TpFloat:
 			lattice_Q_float=dynamic_cast<ImageInterface<Float>*>(lattice_Q);
@@ -110,15 +106,14 @@ int main (int argc, char * const argv[]) {
 	ofstream file("rm.txt", ios::out); 
 
 	rm rm_cube(10,10,10,1.0, file);		// create a rm_cube from rm constructor
-	rm_cube.freqToLambdaSq(freq, lambdaSq);
+	rm_cube.freqToLambdaSq(freq, lambdaSq);	// debug: convert from freq to lambda squared
 	
-	//lambdaSq=rm_cube.freqToLambdaSq(freq);
+	rm_cube.lambdaSqToFreq(lambdaSq, freq);	// debug: convert from lambda squared back to freq
 	
-	file.close();
 	// Lattice and iteration over line of sight
 	// create Lattice shape and iterator
-// 	const uInt cursorSize = lattice_Q_float->advisedMaxPixels();
-//	const IPosition cursorShape = lattice_Q_float->niceCursorShape(cursorSize);
+ 	const uInt cursorSize = lattice_Q_float->advisedMaxPixels();
+	const IPosition cursorShape = lattice_Q_float->niceCursorShape(cursorSize);
  //	const IPosition cursorShape(2, lattice_Q_float->shape()(0), lattice_Q_float->shape()(1));
     
 	int i=0;
@@ -128,12 +123,10 @@ int main (int argc, char * const argv[]) {
 		minMax(min, max, iter.cursor());
 		//cout << i++ << " Min = " << min << " Max = " << max << iter.cursor() << endl;		// debugging 
 	}	
+       */
 
-	cout << "Deleting lattice_Q" << endl;
+	file.close();
 
-//	delete lattice_Q_float;		// delete the lattice of image Q
-//	delete iter;			// delete iterator over image Q
-	*/
 	#ifdef _debug
 	cout << "Finished: " << filename_Q << "!\n";	// Debug output
 	#endif

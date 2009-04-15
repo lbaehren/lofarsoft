@@ -68,16 +68,8 @@ rm::~rm()
 bool rm::freqToLambdaSq(vector<double> &frequency, vector<double> &lambda_sq)
 {
   // constants
-  double c=299792458.0;			// vacuum speed of light, c, in metres per second 
-//  int csq=299792458*299792458;	// c^2
-  double lambda=0.0;			// temporary variable to hold lambda (non-squared!) after initial conversion
+  double csq=89875517873681764.0;	// c^2
  
-  /* lambda squareds of measured channels, equal in size to frequency vector */
- // vector<double> lambda_sq(frequency.size());
-  /* conversion factor to convert from freq to lambda squared values */
-  double conversion_factor=0;
-
-
   // Check for data consistency
   if(frequency.size()==0)
   {
@@ -87,25 +79,15 @@ bool rm::freqToLambdaSq(vector<double> &frequency, vector<double> &lambda_sq)
   else if(frequency.size() != lambda_sq.size())
   {
     cerr << "rm::freqToLambdaSq: frequency and labda_sq vector sizes do not match" << endl;
-    return false:
+    return false;
   }
 
   // loop over frequency vector and compute lambda squared values
   for(unsigned int i=0; i<frequency.size(); i++)
   {
-     lambda=c/frequency[i];   
-     lambda_sq[i]=lambda*lambda;
-     
-     cout << "frequency = " << frequency[i] << "  lambda = " << lambda << "  lambda^2 = " << lambda_sq[i] << endl;
+     lambda_sq[i]=csq/(frequency[i]*frequency[i]);
+     cout << "frequency = " << frequency[i] << "  lambda^2 = " << lambda_sq[i] << endl;
   }
-
-  // Iterator to loop over frequency
-//   for (vector<double>::iterator it = frequency.begin();it != frequency.end(); it++)   // loop through vector and convert to lambdaSquared
-//   {
-//     lambda=c/(*it);
-//     cout << "frequency = " << *it << "  lambda = " << lambda << "lambda^2" << lambda_sq[*it] << endl;
-//   }
-  
   return true;
 }
 
@@ -117,11 +99,30 @@ bool rm::freqToLambdaSq(vector<double> &frequency, vector<double> &lambda_sq)
 
   \return freq -- 
 */
-vector<double>rm::lambdaSqToFreq(vector<double> &lambda_sq)
+bool rm::lambdaSqToFreq(vector<double> &lambda_sq, vector<double> &frequency)
 {
-	vector<double> freq;	// frequencies of measured channels
+    // constants
+    double csq=89875517873681764.0;	// c^2
 
-	return freq;
+    // Check for data consistency
+    if(lambda_sq.size()==0)
+    {
+      cerr << "rm::lambdaSqToFreq: lambda_sq vector size 0" << endl;
+      return false;
+    }
+    else if(lambda_sq.size() != frequency.size())
+    {
+      cerr << "rm::freqToLambdaSq: frequency and labda_sq vector sizes do not match" << endl;
+      return false;
+    }
+
+    // loop over frequency vector and compute lambda squared values
+    for(unsigned int i=0; i<lambda_sq.size(); i++)
+    {
+      frequency[i]=csq/(lambda_sq[i]*lambda_sq[i]);
+      cout << "lambda^2 = " << lambda_sq[i] << "  frequency = " << frequency[i]  << endl;
+    }
+    return true;
 }
 
 
