@@ -106,9 +106,6 @@ int main (int argc, char * const argv[]) {
 	ofstream file("rm.txt", ios::out); 
 
 	rm rm_cube(10,10,10,1.0, file);		// create a rm_cube from rm constructor
-	rm_cube.freqToLambdaSq(freq, lambdaSq);	// debug: convert from freq to lambda squared
-	
-	rm_cube.lambdaSqToFreq(lambdaSq, freq);	// debug: convert from lambda squared back to freq
 	
 	// Lattice and iteration over line of sight
 	// create Lattice shape and iterator

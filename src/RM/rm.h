@@ -54,15 +54,19 @@ private:
   //! Right Ascension and Declination coords of cached los rm values
   double cached_ra, cached_dec;
 
+  //! Convert frequency vector to lambda squared vector
+  bool freqToLambdaSq(const vector<double> &frequency, vector<double> &lambda);
+  //! Convert lambda squared vector to frequency vector
+  bool lambdaSqToFreq(const vector<double> &lambda_sq, vector<double> &frequency);
+
+
   // Public functions.
 public:
-
-  // Convert frequency vector to lambda squared vector
- // vector<double> freqToLambdaSq(vector<double> &frequency);
-  bool freqToLambdaSq(vector<double> &frequency, vector<double> &lambda);
-  // Convert frequency vector to lambda squared vector
-  bool lambdaSqToFreq(vector<double> &lambda_sq, vector<double> &frequency);
-  
+  //! Calculate delta lambda squared steps from lower and higher frequency limits
+  bool deltaLambdaSq(	vector<double> delta_lambda_sq, 
+			const vector<double> &freq_low, 
+			const vector<double> &freq_high,
+			bool freq=true);
 
 
   //! Default constructor.(external buffer handling independent of cube object)

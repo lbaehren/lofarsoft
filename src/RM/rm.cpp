@@ -2,11 +2,12 @@
 
     Author:		Sven Duscha (sduscha@mpa-garching.mpg.de)
     Date:		18-12-2008
-    Last change:	06-04-2009
+    Last change:	16-04-2009
 */
 
 
 #include <iostream>				// C++/STL iostream
+#include <math.h>					// mathematics library
 
 #include <casa/Arrays.h>			// CASA library functions
 #include <casa/Arrays/Array.h>
@@ -46,7 +47,7 @@ rm::rm(int x, int y, int depth, double stepsize, ofstream &file)	// pass only re
 */
 
 rm::~rm()
-{
+{ 
   // Free memory? Currently nothing to be done
   cout << "rm destructor called" << endl;
 }
@@ -61,11 +62,12 @@ rm::~rm()
   \brief Convert from frequencies to lambda squared
 
   \param frequency -- 
+  \param lambda_sq --
 
-  \return lambda_sq -- 
+  \return success -- 
 */
 //vector<double>rm::freqToLambdaSq(vector<double> &frequency);
-bool rm::freqToLambdaSq(vector<double> &frequency, vector<double> &lambda_sq)
+bool rm::freqToLambdaSq(const vector<double> &frequency, vector<double> &lambda_sq)
 {
   // constants
   double csq=89875517873681764.0;	// c^2
@@ -96,10 +98,11 @@ bool rm::freqToLambdaSq(vector<double> &frequency, vector<double> &lambda_sq)
   \brief Convert from lambda squared to frequencies
   
   \param lambda_sq -- 
-
-  \return freq -- 
+  \param frequency --
+  
+  \return succes -- 
 */
-bool rm::lambdaSqToFreq(vector<double> &lambda_sq, vector<double> &frequency)
+bool rm::lambdaSqToFreq(const vector<double> &lambda_sq, vector<double> &frequency)
 {
     // constants
     double csq=89875517873681764.0;	// c^2
@@ -119,16 +122,81 @@ bool rm::lambdaSqToFreq(vector<double> &lambda_sq, vector<double> &frequency)
     // loop over frequency vector and compute lambda squared values
     for(unsigned int i=0; i<lambda_sq.size(); i++)
     {
-      frequency[i]=csq/(lambda_sq[i]*lambda_sq[i]);
+      frequency[i]=sqrt(csq/(lambda_sq[i]));
       cout << "lambda^2 = " << lambda_sq[i] << "  frequency = " << frequency[i]  << endl;
     }
     return true;
 }
 
 
-// Convert intensities to Jy/beam
-// is this needed????
+/*!
+    Unit conversion functions are needed:
+    
+    Jy/beam, total integrated flux, flux per channel
+    need to know delta f of each channel for integration
+    RM-Imager: uv data is V^2 (Voltage squared)
+*/
 
+/*! Calculate the step size delta_lambda_sq for each lambda_squared channel
+    
+    \param freq_low --
+    \param freq_high --
+    \param freq
+    
+    \return delta_lambda_sq --
+*/
+bool rm::deltaLambdaSq( vector<double> delta_lambda_sq, 
+			const vector<double> &freq_low, 
+			const vector<double> &freq_high,
+			bool freq)
+{
+  // lambda vectors for conversion
+  vector<double> lambda_low(freq_high.size()), lambda_high(freq_low.size());
+
+
+  // check for valid parameters
+  if(freq_low.size()==0 || freq_high.size()==0)		// either of the limit vectors is zero
+  {
+    cerr << "rm::deltaLambdaSq: freq_low or freq_high vector 0" << endl;
+    return false;
+  }
+  else if(freq_low.size()!=freq_high.size())		// freq_low and freq_high differ in size
+  {
+    cerr << "rm::deltaLambdaSq: freq_low and freq_high vector differ in size" << endl;
+    return false;
+  }
+  else
+  {
+    // if frequencies are given (i.e. bool freq=true, default)
+    // convert lower and higher frequencies to lambda squared
+    if(freq)
+    {
+      if(freqToLambdaSq(&lambda_low, freq_high)==false)
+      {
+	cerr << "rm:deltaLambdaSq: conversion of freq_high to lambda_sq failed" << endl;
+	return false;
+      }
+      else if(freqToLambdaSq(&lambda_high, freq_low)==false)
+      {
+	cerr << "rm:deltaLambdaSq: conversion of freq_low to lambda_sq failed" << endl;
+	return false;
+      }
+    }
+
+    // compute difference between higher lambda and lower lambda (other way around than frequencies)
+    for(unsigned int i=0; i < freq_low.size(); i++)
+    {
+      delta_lambda_sq[i]=lambda_high[i]-lambda_low[i];	// compute difference
+      
+      #ifdef _debug
+      cout << "delta_lambda_sq[" << i << "] = " << delta_lambda_sq[i] << endl;	// debug output
+      #endif
+    }
+
+  }
+
+  return true;		// return success
+}
 
 
 /*! \brief Inverse Fourier Method for calculating the Rotation Measure
