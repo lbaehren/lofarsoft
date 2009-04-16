@@ -38,7 +38,7 @@
 #include <casa/Exceptions/Error.h>
 #include <casa/Utilities/Assert.h>
 
-#include "tests_common.h"
+#include <Utilities/TestsCommon.h>
 
 using std::cout;
 using std::endl;

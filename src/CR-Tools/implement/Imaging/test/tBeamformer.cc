@@ -24,6 +24,7 @@
 #include <casa/BasicMath/Random.h>
 
 #include <Imaging/Beamformer.h>
+#include <Utilities/TestsCommon.h>
 #include "create_data.h"
 
 using std::cerr;

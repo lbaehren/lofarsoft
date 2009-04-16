@@ -50,7 +50,7 @@ using casa::TiledShape;
 #include <Imaging/Beamformer.h>
 #include <Imaging/Skymapper.h>
 #include <Utilities/ProgressBar.h>
-#include <Imaging/test/create_data.h>
+#include <Utilities/TestsCommon.h>
 
 using CR::Beamformer;
 using CR::ProgressBar;
@@ -126,32 +126,6 @@ casa::ObsInfo getObsInfo (std::string const &telescope="LOFAR",
   info.setTelescope (telescope);
   info.setObserver (observer);
   return info;
-}
-
-//_______________________________________________________________________________
-//                                                                    getTimeFreq
-
-/*!
-  /brief Get TimeFreq coordinate
-
-  \param blocksize      -- Number of samples per block of data.
-  \param sampleFreq     -- 
-  \param nyquistZone    -- 
-  \param blocksPerFrame -- 
-  \param nofFrames      -- 
- */
-CR::TimeFreqCoordinate getTimeFreq (uint const &blocksize=1024,
-				    casa::Quantity const &sampleFreq=casa::Quantity(200,"MHz"),
-				    uint const &nyquistZone=1,
-				    uint const &blocksPerFrame=1,
-				    uint const &nofFrames=1)
-{
-  CR::TimeFreqCoordinate timeFreq (blocksize,
-				   sampleFreq,
-				   nyquistZone,
-				   blocksPerFrame,
-				   nofFrames);
-  return timeFreq;
 }
 
 //_______________________________________________________________________________
@@ -558,7 +532,7 @@ int test_processing (string const &infile,
     /* Export the internal settings of embedded Beamformer object */
     {
       Beamformer bf = skymapper.beamformer();
-      export_Beamformer (bf,"skymap");
+      CR::export_Beamformer (bf,"skymap");
     }
     /* Prepare some test data to process */
     Matrix<casa::DComplex> data (timeFreq.fftLength(),

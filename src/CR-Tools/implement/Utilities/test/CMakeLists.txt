@@ -10,6 +10,7 @@ set (tests
   tMConversions
   tProgressBar
   tStringTools
+  tTestsCommon
   tTimestamp
   )
 

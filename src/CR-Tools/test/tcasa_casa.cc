@@ -55,7 +55,7 @@
 #include <casa/HDF5/HDF5Record.h>
 #endif
 
-#include "tests_common.h"
+#include <Utilities/TestsCommon.h>
 #include "Casacore.h"
 
 using casa::Array;
@@ -343,7 +343,7 @@ int test_Arrays_Matrix (std::vector<int> const &nelem)
 	}
       }
       end = clock();
-      runtimes[0] = runtime (start,end);
+      runtimes[0] = CR::runtime (start,end);
       
       /* Element-wise addressing in opposite axis order */
       
@@ -354,7 +354,7 @@ int test_Arrays_Matrix (std::vector<int> const &nelem)
 	}
       }
       end = clock();
-      runtimes[1] = runtime (start,end);
+      runtimes[1] = CR::runtime (start,end);
       
       /* Show timing information */
       
@@ -381,7 +381,7 @@ int test_Arrays_Matrix (std::vector<int> const &nelem)
 	arr.row(pos(0)) = 1.0;
       }
       end = clock();
-      runtimes[0] = runtime (start,end);
+      runtimes[0] = CR::runtime (start,end);
 
       // looping over matrix columns
 
@@ -390,7 +390,7 @@ int test_Arrays_Matrix (std::vector<int> const &nelem)
 	arr.column(pos(1)) = 1.0;
       }
       end = clock();
-      runtimes[1] = runtime (start,end);
+      runtimes[1] = CR::runtime (start,end);
 
       /* Show timing information */
       
@@ -418,7 +418,7 @@ int test_Arrays_Matrix (std::vector<int> const &nelem)
 	arr.row(pos(0)) = vec;
       }
       end = clock();
-      runtimes[0] = runtime (start,end);
+      runtimes[0] = CR::runtime (start,end);
 
       // looping over matrix columns
 
@@ -427,7 +427,7 @@ int test_Arrays_Matrix (std::vector<int> const &nelem)
 	arr.column(pos(1)) = vec;
       }
       end = clock();
-      runtimes[1] = runtime (start,end);
+      runtimes[1] = CR::runtime (start,end);
 
       /* Show timing information */
       
@@ -499,7 +499,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 	}
       }
       end = clock();
-      runtimes[0] = runtime (start,end);
+      runtimes[0] = CR::runtime (start,end);
       
       /* Axis/Loop order: 0,2,1 */
       
@@ -512,7 +512,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 	}
       }
       end = clock();
-      runtimes[1] = runtime (start,end);
+      runtimes[1] = CR::runtime (start,end);
       
       /* Axis/Loop order: 1,0,2 */
       
@@ -525,7 +525,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 	}
       }
       end = clock();
-      runtimes[2] = runtime (start,end);
+      runtimes[2] = CR::runtime (start,end);
       
       /* Axis/Loop order: 1,2,0 */
       
@@ -538,7 +538,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 	}
       }
       end = clock();
-      runtimes[3] = runtime (start,end);
+      runtimes[3] = CR::runtime (start,end);
       
       /* Axis/Loop order: 2,0,1 */
       
@@ -551,7 +551,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 	}
       }
       end = clock();
-      runtimes[4] = runtime (start,end);
+      runtimes[4] = CR::runtime (start,end);
       
       /* Axis/Loop order: 2,1,0 -- loops in inverted order of array axes */
       
@@ -564,7 +564,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 	}
       }
       end = clock();
-      runtimes[5] = runtime (start,end);
+      runtimes[5] = CR::runtime (start,end);
       
       /* Show timing information */
       
@@ -602,7 +602,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 	arr.yzPlane(i) = 1.0;
       }
       end = clock();
-      runtimes[0] = runtime(start,end);
+      runtimes[0] = CR::runtime(start,end);
 
       /* Write values x-z-planes */
 
@@ -611,7 +611,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 	arr.xzPlane(i) = 1.0;
       }
       end = clock();
-      runtimes[1] = runtime(start,end);
+      runtimes[1] = CR::runtime(start,end);
 
       /* Write values x-y-planes */
 
@@ -620,7 +620,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 	arr.xyPlane(i) = 1.0;
       }
       end = clock();
-      runtimes[2] = runtime(start,end);
+      runtimes[2] = CR::runtime(start,end);
 
       /* Summary */
       
@@ -666,7 +666,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 	}
       }
       end = clock();
-      runtimes[0] = runtime (start,end);
+      runtimes[0] = CR::runtime (start,end);
       
       start = clock();
       for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
@@ -677,14 +677,14 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 	}
       }
       end = clock();
-      runtimes[1] = runtime (start,end);
+      runtimes[1] = CR::runtime (start,end);
       
       start = clock();
       for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
 	arr.yzPlane(pos(0)) = mat;
       }
       end = clock();
-      runtimes[2] = runtime (start,end);
+      runtimes[2] = CR::runtime (start,end);
 
       /* Summary */
       
@@ -730,7 +730,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 	}
       }
       end = clock();
-      runtimes[0] = runtime (start,end);
+      runtimes[0] = CR::runtime (start,end);
       
       /* write values into x-z planes - iteration axis first */
       
@@ -743,7 +743,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 	}
       }
       end = clock();
-      runtimes[1] = runtime (start,end);
+      runtimes[1] = CR::runtime (start,end);
       
       /* write values using Plane() method */
 
@@ -752,7 +752,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 	arr.xzPlane(pos(1)) = mat;
       }
       end = clock();
-      runtimes[2] = runtime (start,end);
+      runtimes[2] = CR::runtime (start,end);
 
       /* Summary */
       
@@ -799,12 +799,12 @@ int test_Arrays_Array (std::vector<int> const &nelem)
 	start = clock();
 	Array<double> arr (IPosition(dim,nelem[n]));
 	end = clock();
-	runtimes[0] = runtime (start,end);
+	runtimes[0] = CR::runtime (start,end);
 	//
 	start = clock();
 	arr = 1.0;
 	end = clock();
-	runtimes[1] = runtime (start,end);
+	runtimes[1] = CR::runtime (start,end);
 	//
 	std::cout << "\t" << runtimes[0]
 		  << "\t" << runtimes[1]
@@ -978,7 +978,7 @@ int test_Arrays_Slice (std::vector<int> const &nelem)
 	cube.yzPlane(n) = mat;
       }
       end = clock();
-      runtimes[0] = runtime (start,end);
+      runtimes[0] = CR::runtime (start,end);
       
       start = clock();
       for (n=0; n<shape(0); n++) {
@@ -986,7 +986,7 @@ int test_Arrays_Slice (std::vector<int> const &nelem)
 	cube (n,Slice(),Slice()).nonDegenerate() = mat;
       }
       end = clock();
-      runtimes[1] = runtime (start,end);
+      runtimes[1] = CR::runtime (start,end);
 
       /* write (x,z)-planes */
       
@@ -998,7 +998,7 @@ int test_Arrays_Slice (std::vector<int> const &nelem)
 	cube.xzPlane(n) = mat;
       }
       end = clock();
-      runtimes[2] = runtime (start,end);
+      runtimes[2] = CR::runtime (start,end);
       
       start = clock();
       for (n=0; n<shape(1); n++) {
@@ -1006,7 +1006,7 @@ int test_Arrays_Slice (std::vector<int> const &nelem)
 	cube (Slice(),n,Slice()).nonDegenerate() = mat;
       }
       end = clock();
-      runtimes[3] = runtime (start,end);
+      runtimes[3] = CR::runtime (start,end);
 
       /* print summary */
       
@@ -1250,7 +1250,7 @@ int test_HDF5 ()
 int main ()
 {
   int nofFailedTests (0);
-  std::vector<int> nelem = nof_array_elements ();
+  std::vector<int> nelem = CR::number_sequence ();
 
   // ----------------------------------------------------------------------------
   // Test for the various casacore classes and modules
