@@ -476,7 +476,7 @@ int test_weights (uint blocksize=1024,
 		     false,
 		     false,
 		     false,
-		     get_frequencies(),
+		     CR::test_getFrequencies(),
 		     false);
 
   /* Work with default settings (geometrical weights only) */

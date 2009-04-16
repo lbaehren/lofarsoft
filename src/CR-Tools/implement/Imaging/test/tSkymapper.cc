@@ -108,27 +108,6 @@ int cleanup_directory ()
 }
 
 //_______________________________________________________________________________
-//                                                                     getObsInfo
-
-/*!
-  \brief Get a ObsInfo object to attach to coordinates
-
-  \param telescope -- Name of the telescope
-  \param observer  -- Name of the observer
-
-  \return info -- A casa::ObsInfo object, containing additional information on an
-          observation.
-*/
-casa::ObsInfo getObsInfo (std::string const &telescope="LOFAR",
-			  std::string const &observer="Lars Baehren")
-{
-  casa::ObsInfo info;
-  info.setTelescope (telescope);
-  info.setObserver (observer);
-  return info;
-}
-
-//_______________________________________________________________________________
 //                                                            test_ImageInterface
 
 /*!
@@ -149,7 +128,7 @@ int test_ImageInterface (uint const &blocksize=1024)
   // Coordinates 
   SkymapCoordinate coord;
   coord.setTimeFreqCoordinate(timeFreq);
-  coord.setObsInfo(getObsInfo());
+  coord.setObsInfo(CR::test_ObsInfo());
 
   casa::CoordinateSystem csys (coord.coordinateSystem());
   casa::TiledShape tile (coord.shape());
@@ -218,7 +197,7 @@ int test_Beamformer (uint const &blocksize=1024)
 
   cout << "[1] Add observation data to the coordinate ..." << endl << std::flush;
   try {
-    coord.setObsInfo (getObsInfo());
+    coord.setObsInfo (CR::test_ObsInfo());
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
@@ -333,7 +312,7 @@ int test_Skymapper (uint const &blocksize=1024,
 				 sampleFreq,
 				 nyquistZone);
     /* Skymapper to compute power in frequency */
-    SkymapCoordinate coord1 (getObsInfo(),
+    SkymapCoordinate coord1 (CR::test_ObsInfo(),
 			     timeFreq,
 			     CR::SkymapQuantity::FREQ_POWER);
     Skymapper skymapper1 (coord1,
@@ -341,7 +320,7 @@ int test_Skymapper (uint const &blocksize=1024,
     skymapper1.summary();
 
     /* Skymapper to compute cc-beam */
-    SkymapCoordinate coord2 (getObsInfo(),
+    SkymapCoordinate coord2 (CR::test_ObsInfo(),
 			     timeFreq,
 			     CR::SkymapQuantity::TIME_CC);
     Skymapper skymapper2 (coord2,
@@ -362,7 +341,7 @@ int test_Skymapper (uint const &blocksize=1024,
 			       "SIN");
     spatial.setShape(shape);
     // Skymap coordinate
-    SkymapCoordinate coord (getObsInfo(),
+    SkymapCoordinate coord (CR::test_ObsInfo(),
 			    spatial,
 			    getTimeFreq(blocksize));
     // Antenna positions
@@ -405,7 +384,7 @@ int test_methods (uint const &blocksize=1024)
   // Coordinates 
   SkymapCoordinate coord;
   coord.setTimeFreqCoordinate(timeFreq);
-  coord.setObsInfo(getObsInfo());
+  coord.setObsInfo(CR::test_ObsInfo());
   // Skymapper object to work with
   Skymapper skymapper (coord);
 
@@ -488,7 +467,7 @@ int test_processing (string const &infile,
   uint nofAntennas       = 5;
 
   // Spatial coordinates
-  IPosition shape (3,30,30,5);
+  IPosition shape (3,60,60,5);
   SpatialCoordinate spatial (CoordinateType::DirectionRadius,
 			     refcode,
 			     projection);
@@ -503,7 +482,7 @@ int test_processing (string const &infile,
 			       true);
   
   // Skymap coordinate
-  SkymapCoordinate coord (getObsInfo(),
+  SkymapCoordinate coord (CR::test_ObsInfo(),
 			  spatial,
 			  timeFreq);
   
@@ -532,7 +511,7 @@ int test_processing (string const &infile,
     /* Export the internal settings of embedded Beamformer object */
     {
       Beamformer bf = skymapper.beamformer();
-      CR::export_Beamformer (bf,"skymap");
+      CR::test_exportBeamformer (bf,"skymap");
     }
     /* Prepare some test data to process */
     Matrix<casa::DComplex> data (timeFreq.fftLength(),
@@ -585,7 +564,7 @@ int test_processing (string const &infile,
 		       blocksize);
     dr.summary();
     // update SkymapCoordinate
-    coord.setObsInfo (getObsInfo("LOPES"));
+    coord.setObsInfo (CR::test_ObsInfo("LOPES"));
     //
     timeFreq.setBlocksPerFrame(1);
     timeFreq.setNofFrames(10);

@@ -71,9 +71,8 @@ int main ()
   int nofFailedTests (0);
 
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_NuMoonTrigger ();
-  }
-
+  nofFailedTests += test_NuMoonTrigger ();
+  
   return nofFailedTests;
 }
+

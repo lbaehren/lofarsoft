@@ -31,9 +31,11 @@
 #include <vector>
 
 // casacore header files
+#include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Quanta/Quantum.h>
+#include <coordinates/Coordinates/ObsInfo.h>
 
 // CR-Tools header files
 #include <Coordinates/CoordinateType.h>
@@ -58,13 +60,17 @@ namespace CR { // Namespace CR -- begin
 
     \test tTestsCommon.cc
     
-    <h3>Prerequisite</h3>
-    
-    <ul type="square">
-      <li>[start filling in your text here]
-    </ul>
-    
     <h3>Synopsis</h3>
+
+    Given the fact that a number of instructions/operations are used across the 
+    various test programs, it makes sense to collect a common set of functions.
+
+    <ul>
+      <li>A number of general routines.
+    </ul>
+
+    \e History: This file replaces and extends upon the earlier tests_common.h and
+    create_data.h
     
     <h3>Example(s)</h3>
     
@@ -96,6 +102,18 @@ namespace CR { // Namespace CR -- begin
   */
   std::vector<int> number_sequence ();
   
+  /*!
+    \brief Get a ObsInfo object to attach to coordinates
+    
+    \param telescope -- Name of the telescope
+    \param observer  -- Name of the observer
+    
+    \return info -- A casa::ObsInfo object, containing additional information on an
+            observation.
+  */
+  casa::ObsInfo test_ObsInfo (std::string const &telescope="LOFAR",
+			      std::string const &observer="Lars Baehren");
+  
   // ============================================================================
   //
   //  Module Coordinates
@@ -124,15 +142,48 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   /*!
-    \brief Export the internal settings of the Beamformer
+    \brief Create frequency band values for the Beamformer
+
+    \param blocksize -- Number of samples per block of data; this also is the input
+           size to the FFT.
+    \param sampleFrequency -- Sample frequency in the A/D conversion.
+    \param nyquistZone     -- Nyquist zone in which the A/D conversion is performed.
     
-    The following data files will be created:
-    - <prefix>-antPositions.dat
-    - <prefix>-skyPositions.dat
-    - <prefix>-delays.dat
+    \return frequencies -- Vector with the frequency values, [Hz]
   */
-  void export_GeomDelay (CR::GeomDelay &delay,
-			 std::string const &prefix="geomdelay");
+  casa::Vector<double> test_getFrequencies (uint const &blocksize=1024,
+					    double const &sampleFrequency=80e06,
+					    uint const &nyquistZone=1);
+  
+  
+  /*!
+    \brief Create some data processing with the Beamformer or Skymapper
+    
+    \retval data -- Array with the created data; the organization of the array
+                    depends on the value of the <tt>antennaIndexFirst</tt> parameter.
+    \param nofAntennas -- The number of antennas
+    \param nofChannels -- Number of frequency channels, into which the band is
+           split.
+    \param antennaIndexFirst -- How to organize the axes in the returned data 
+           array; if <tt>antennaIndexFirst=false</tt> then the data are organized
+	   as [freq,antenna], if <tt>antennaIndexFirst=true</tt> then we have
+	   [antenna,freq].
+    
+  */
+  void test_getData (Matrix<DComplex> &data,
+		     uint const &nofAntennas=4,
+		     uint const &nofChannels=4096,
+		     bool const &antennaIndexFirst=false);
+  
+  /*!
+    \brief Create some data processing with the Beamformer or Skymapper
+    
+    \retval data -- Array with the created data; the organization of the array
+                    depends on the value of the <tt>antennaIndexFirst</tt> parameter.
+  */
+  void test_getData (Matrix<DComplex> &data,
+		     casa::IPosition const &shape,
+		     bool const &antennaIndexFirst=false);
   
   /*!
     \brief Export the internal settings of the Beamformer
@@ -142,8 +193,19 @@ namespace CR { // Namespace CR -- begin
     - <prefix>-skyPositions.dat
     - <prefix>-delays.dat
   */
-  void export_Beamformer (CR::Beamformer &bf,
-			  std::string const &prefix="beamformer");
+  void test_exportGeomDelay (CR::GeomDelay &delay,
+			     std::string const &prefix="geomdelay");
+  
+  /*!
+    \brief Export the internal settings of the Beamformer
+    
+    The following data files will be created:
+    - <prefix>-antPositions.dat
+    - <prefix>-skyPositions.dat
+    - <prefix>-delays.dat
+  */
+  void test_exportBeamformer (CR::Beamformer &bf,
+			      std::string const &prefix="beamformer");
   
 } // Namespace CR -- end
 

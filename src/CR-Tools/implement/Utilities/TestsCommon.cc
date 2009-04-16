@@ -57,6 +57,18 @@ namespace CR { // Namespace CR -- begin
     // return sequence of numbers
     return nelem;
   }
+
+  //_____________________________________________________________________________
+  //                                                                 test_ObsInfo
+  
+  casa::ObsInfo test_ObsInfo (std::string const &telescope,
+			      std::string const &observer)
+  {
+    casa::ObsInfo info;
+    info.setTelescope (telescope);
+    info.setObserver (observer);
+    return info;
+  }
   
   // ============================================================================
   //
@@ -83,12 +95,83 @@ namespace CR { // Namespace CR -- begin
   //  Module Imaging
   //
   // ============================================================================
+
+  //_____________________________________________________________________________
+  //                                                          test_getFrequencies
+
+  casa::Vector<double> test_getFrequencies (uint const &blocksize,
+					    double const &sampleFrequency,
+					    uint const &nyquistZone)
+  {
+    CR::TimeFreq timefreq (blocksize,
+			   sampleFrequency,
+			   nyquistZone);
+    return timefreq.frequencyValues();
+  }
   
   //_____________________________________________________________________________
-  //                                                             export_GeomDelay
+  //                                                                 test_getData
+
+  void test_getData (casa::Matrix<casa::DComplex> &data,
+		     uint const &nofAntennas,
+		     uint const &nofChannels,
+		     bool const &antennaIndexFirst)
+  {
+    // Indices
+    uint antenna (0);
+    uint channel (0);
+    // Random number generator from CASA scimath/Mathematics module
+    casa::ACG gen(10, 20);
+    casa::Uniform random (&gen);
+    
+    if (antennaIndexFirst) {
+      // set the shape of the array returning the data
+      data.resize(nofAntennas,nofChannels,0.0);
+      for (channel=0; channel<nofChannels; channel++) {
+	for (antenna=0; antenna<nofAntennas; antenna++) {
+	  data(antenna,channel) = DComplex(random(),random());
+	}
+      }
+    } else {
+      // set the shape of the array returning the data
+      data.resize(nofChannels,nofAntennas,0.0);
+      for (antenna=0; antenna<nofAntennas; antenna++) {
+	for (channel=0; channel<nofChannels; channel++) {
+	  data(channel,antenna) = DComplex(random(),random());
+	}
+      }
+    }
+  }
   
-  void export_GeomDelay (CR::GeomDelay &delay,
-			 std::string const &prefix)
+  //_____________________________________________________________________________
+  //                                                                 test_getData
+  
+  void test_getData (Matrix<DComplex> &data,
+		     casa::IPosition const &shape,
+		     bool const &antennaIndexFirst)
+  {
+    uint nofAntennas;
+    uint nofChannels;
+    
+    if (antennaIndexFirst) {
+      nofAntennas = shape(0);
+      nofChannels = shape(1);
+    } else {
+      nofAntennas = shape(1);
+      nofChannels = shape(0);
+    }
+
+    test_getData (data,
+		  nofAntennas,
+		  nofChannels,
+		  antennaIndexFirst);
+  }
+  
+  //_____________________________________________________________________________
+  //                                                         test_exportGeomDelay
+  
+  void test_exportGeomDelay (CR::GeomDelay &delay,
+			     std::string const &prefix)
   {
     int ant;
     int sky;
@@ -116,10 +199,10 @@ namespace CR { // Namespace CR -- begin
   }
 
   //_____________________________________________________________________________
-  //                                                            export_Beamformer
+  //                                                        test_exportBeamformer
   
-  void export_Beamformer (CR::Beamformer &bf,
-			  std::string const &prefix)
+  void test_exportBeamformer (CR::Beamformer &bf,
+			      std::string const &prefix)
   {
     std::cout << "[TestsCommon::export_Beamformer]" << std::endl;
 
