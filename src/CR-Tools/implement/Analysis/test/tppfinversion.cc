@@ -198,8 +198,6 @@ int test_ppfinversion (std::string const &filename)
 //*********************************************************************
 //******** to get TBB time series data *******************************
 
-
-/*
 int test_data (std::string const &filename)
 {
   cout << "\n[test_data]\n" << std::endl;
@@ -321,7 +319,7 @@ int test_inversions (std::string const &filename)
   }
   return nofFailedTests ;
 }
- */
+
 
 // -----------------------------------------------------------------------------
 
@@ -339,12 +337,12 @@ int main (int argc,
     return(DAL::FAIL);
   }
   
-  nofFailedTests += test_ppfinversion( filename );
-//nofFailedTests += test_getData(filename);
-//   if (nofFailedTests == 0) {
-//     nofFailedTests += test_attributes (filename);
-//     nofFailedTests += test_getData (filename);
-//   }
+//  nofFailedTests += test_ppfinversion( filename );
+  nofFailedTests += test_data(filename);
+ //  if (nofFailedTests == 0) {
+  //  nofFailedTests += test_attributes (filename);
+   //  nofFailedTests += test_getData (filename);
+ //  }
   /* Check parameter provided from the command line */
 //   if ( argc < 2 ) {
 //     std::cerr << "[tppfinversion] Missing name of input data file!" << endl;
