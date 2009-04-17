@@ -34,7 +34,7 @@ namespace CR { // Namespace  -- begin
   NuMoonTrigger::NuMoonTrigger () {}
 
   NuMoonTrigger::NuMoonTrigger ( std::string const & filename_t,
-		                 Type const &quantity,
+		                 SkymapQuantity const &quantity,
 		                 std::string const & group,
   				 double samplingRate_p, 
 		                 uint nyquistZone_p  )  
@@ -291,7 +291,7 @@ namespace CR { // Namespace  -- begin
   //                                                                 Beam_forming
 
   casa::Vector<Double> NuMoonTrigger::Beam_forming( std::string const &filename,
-						    Type const &quantity,
+						    SkymapQuantity const &quantity,
 						    std::string const &group,
 						    double samplingRate_p, 
 						    uint nyquistZone_p )
@@ -499,10 +499,10 @@ namespace CR { // Namespace  -- begin
   //                                                                  root_ntuple
   
   void NuMoonTrigger::root_ntuple( std::string const &filename,
-				   Type const &quantity,
+				   SkymapQuantity const &quantity,
 				   std::string const &group,
-				   double samplingRate_p, 
-				   uint nyquistZone_p )
+				   double const &samplingRate_p, 
+				   uint const &nyquistZone_p )
     
   {
     

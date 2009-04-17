@@ -249,7 +249,9 @@ namespace CR { // Namespace  -- begin
 				      std::string const &group,
   				      double samplingRate_p, 
 		                      uint nyquistZone_p  ) ;
-   
+
+  
+			         
 #ifdef HAVE_ROOT
    void root_ntuple( std::string const &filename,
 		     SkymapQuantity const &quantity,
