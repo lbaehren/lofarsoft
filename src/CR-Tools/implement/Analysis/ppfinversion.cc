@@ -179,20 +179,19 @@ namespace CR { // Namespace CR -- begin
 		    
 	    uint nofelement = subBand_IDs.nelements() ;
            
-	    	    	    
 	    for(uint i=0; i< nofelement; i++ ){
 	        		 
 	         uint subbandID = subBand_IDs(i) ;
 		 
 	//	 Vector<DComplex> filtered_vector = filteredMatrix.row(512-subbandID) ;
-                  Vector<DComplex> filtered_vector = filteredMatrix.row(i) ;
+                  Vector<DComplex> filtered_vector = (filteredMatrix.row(i)) ;
 
 //		 generatedSubbands.row(512-subbandID) = filtered_vector ;
 		 generatedSubbands.row(subbandID) = filtered_vector ;
 	 
 		// if( subbandID< 512 ){	 
 //		 generatedSubbands.row(512+subbandID) = conj(filteredMatrix.row(512-subbandID)) ;
-	   	 generatedSubbands.row(1024-subbandID) = conj(filteredMatrix.row(i)) ;
+	   	 generatedSubbands.row(1024-subbandID) = (conj(filteredMatrix.row(i))) ;
 		 
 		// }
 	 
@@ -210,11 +209,16 @@ namespace CR { // Namespace CR -- begin
     
     				    
     Matrix<Double> ppfinversion::DFTinversion ( const Matrix<DComplex>& generatedSubbands,
-                                                const Matrix<DComplex>& DFTMatrix )
+                                                const Matrix<DComplex>& DFTMatrix,
+						const Vector<uint> subBand_IDs )
 
     {
       try {
-
+           uint nofelement = subBand_IDs.nelements() ;
+	   
+	   double base_p = 512/nofelement ;
+	   double power_ratio = pow(base_p,0.5) ;
+	   
            uint nOfColumns = generatedSubbands.ncolumn();
 	   
   //        uint nOfRows = generatedSubbands.ncolumn();
@@ -232,7 +236,7 @@ namespace CR { // Namespace CR -- begin
 		   
 		    //cout << r <<" row is inverting DFT " <<endl ;
 		    	
-                     Double DFTinverted = real( sum ( DFTMatrix.row(r)*generatedSubbands.column(c)) ) ;
+                     Double DFTinverted = (base_p)*real( sum ( DFTMatrix.row(r)*generatedSubbands.column(c)) ) ;
 			
         		  DFTinvertedMatrix( r,c ) = DFTinverted ;
 	          }
@@ -269,7 +273,7 @@ namespace CR { // Namespace CR -- begin
 	  
 	  uint n_Columns = FTData.ncolumn() ;
 	  
-	 Matrix<Double> DFTinverted( n_Rows, n_Columns, 0.0 ) ;
+	 Matrix<Double> DFTinverted( 1024, n_Columns, 0.0 ) ;
 	  
 	  cout << " number of rows in the input matrix to inversion : "<< n_Rows <<endl ;
 	  if(n_Rows <512)
@@ -279,7 +283,8 @@ namespace CR { // Namespace CR -- begin
 	
 	  cout << "number of subbands is less than 512  "<< endl ;								    
 	  Matrix<Double> DFTinverted_cal = ppfinv.DFTinversion ( generatedsubbands,
-                                                             DFT_matrix ) ;
+                                                                 DFT_matrix,
+								 subBand_IDs  ) ;
 	 
 	   DFTinverted = DFTinverted_cal ;
 		}
@@ -287,7 +292,8 @@ namespace CR { // Namespace CR -- begin
 	   {
 	   cout << "number of subband is greater than 512 " << endl ;
 	   Matrix<Double> DFTinverted_cal = ppfinv.DFTinversion ( FTData,
-                                                            DFT_matrix ) ;
+                                                            DFT_matrix,
+							    subBand_IDs ) ;
 							    
            DFTinverted = DFTinverted_cal ;							    
 	   } 

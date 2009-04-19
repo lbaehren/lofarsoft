@@ -231,7 +231,8 @@ namespace CR { // Namespace CR -- begin
    */
 
    Matrix<Double> DFTinversion( const Matrix<DComplex>& generatedSubbands,
-                                const Matrix<DComplex>& DFTMatrix ) ;
+                                const Matrix<DComplex>& DFTMatrix,
+				const Vector<uint> subBand_IDs ) ;
     
    /*!
    

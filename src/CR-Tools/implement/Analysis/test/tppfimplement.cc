@@ -156,7 +156,9 @@ int test_ppfimplements ()
     
   //  for( uint r=0; r< nofsegmentation; r++ ){
   double sample_value =samples(16*dataBlockSize*3+400) ;
-        samples( 16*dataBlockSize*3+400) = sample_value*5.0+sample_value ;
+        samples( 16*dataBlockSize*3+400) = 10.0*samples(16*dataBlockSize*3+400);
+	samples( 16*dataBlockSize*3+500) = 10.0*samples(16*dataBlockSize*3+500);
+	samples( 16*dataBlockSize*3+600) = 5.0;
 //	cout << "-- samples with a peak has been saved " << endl ;
 //	}
     
@@ -387,7 +389,7 @@ int test_ppfimplements ()
 	 
 	 uint nrRe = ppfReImp_data.nrow() ;
 	 
-	 Matrix<DComplex> ppfRemain_data( nrRe,ncRe,0.0);
+	 Matrix<DComplex> ppfRemain_data( nofrows,ncRe,0.0);
 	 
 	 cout << " number of columns in ppf implemented data :" << ncRe <<endl;
 	 
@@ -409,8 +411,7 @@ int test_ppfimplements ()
 // 				    		               sampling_frequency,
 // 				    		               freqVector ) ;
        
-       cout << " Phase correction has been done :" << endl ; 	
-       
+             
 
         Vector<Double> time_reinv = ppf_inv.FIR_inversion( ppfcoeff_inv,
                                                            ppfRemain_data ,
