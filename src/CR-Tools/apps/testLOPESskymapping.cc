@@ -139,7 +139,7 @@ int  simpleImage(string const &infile,
     Skymapper skymapper (coord,
 			 antPositions,
 			 outfile,
-			 CR::DataType::CASA_IMAGE);
+			 Skymapper::PagedImage);
     cout << "                                                         ... done."  << endl;
     skymapper.summary();
     

@@ -1,0 +1,9 @@
+/* $Id$ */
+
+/*!
+  \defgroup CR_test CR-Tools :: Tests for external components
+  \ingroup CR
+
+  \brief Collection of tests for usage of external components
+  
+*/

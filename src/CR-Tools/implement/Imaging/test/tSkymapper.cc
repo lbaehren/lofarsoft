@@ -294,11 +294,11 @@ int test_Skymapper (uint const &blocksize=1024,
   cout << "[1] Skymapper() ..." << endl << std::flush;
   try {
     Skymapper hdf5_image ("skymap01.h5",
-			  CR::DataType::HDF5);
+			  Skymapper::HDF5Image);
     hdf5_image.summary();
     //
     Skymapper casa_image ("skymap01.img",
-			  CR::DataType::CASA_IMAGE);
+			  Skymapper::PagedImage);
     casa_image.summary();
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl << std::flush;
@@ -343,7 +343,7 @@ int test_Skymapper (uint const &blocksize=1024,
     // Skymap coordinate
     SkymapCoordinate coord (CR::test_ObsInfo(),
 			    spatial,
-			    getTimeFreq(blocksize));
+			    test_TimeFreq(blocksize));
     // Antenna positions
     uint nofAntennas (10);
     Matrix<double> antPositions (nofAntennas,3);
@@ -506,7 +506,7 @@ int test_processing (string const &infile,
     Skymapper skymapper (coord,
 			 antPositions,
 			 "skymap_test1.img",
-			 CR::DataType::CASA_IMAGE);
+			 Skymapper::PagedImage);
     skymapper.summary();
     /* Export the internal settings of embedded Beamformer object */
     {
@@ -538,6 +538,7 @@ int test_processing (string const &infile,
     bool status (true);
     casa::String error;
     casa::PagedImage<float> image ("skymap_test1.img");
+
     //
     cout << "-- Image name       = " << image.name()      << endl;
     cout << "-- Image shape      = " << image.shape()     << endl;
@@ -573,7 +574,7 @@ int test_processing (string const &infile,
     Skymapper skymapper (coord,
 			 antPositions,
 			 "skymap_lopes.img",
-			 CR::DataType::CASA_IMAGE);
+			 Skymapper::PagedImage);
     skymapper.summary();
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;

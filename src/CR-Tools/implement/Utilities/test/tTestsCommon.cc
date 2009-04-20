@@ -24,6 +24,9 @@
 #include <Utilities/TestsCommon.h>
 #include <Imaging/Beamformer.h>
 
+using std::cout;
+using std::endl;
+
 /*!
   \file tTestsCommon.cc
 
@@ -45,18 +48,54 @@
 */
 int test_general ()
 {
-  std::cout << "\n[tTestsCommon::test_general]\n" << std::endl;
+  cout << "\n[tTestsCommon::test_general]\n" << endl;
 
   int nofFailedTests (0);
 
-  std::cout << "[1] Testing number_sequence() ..." << std::endl;
+  cout << "[1] Testing number_sequence() ..." << endl;
   try {
     std::vector<int> numbers;
     numbers = CR::number_sequence();
     uint nelem = numbers.size();
-    std::cout << "-- nof. elements = " << nelem << std::endl;
+    cout << "-- nof. elements = " << nelem << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Testing test_getFrequencies() ..." << endl;
+  try {
+    casa::Vector<double> freq1 = CR::test_frequencyValues();
+    casa::Vector<double> freq2 = CR::test_frequencyValues(100);
+    casa::Vector<double> freq3 = CR::test_frequencyValues(100,100e06);
+    casa::Vector<double> freq4 = CR::test_frequencyValues(100,100e06,2);
+    //
+    cout << "-- (--/--/--)      = " << freq1 << endl;
+    cout << "-- (100/--/--)     = " << freq2 << endl;
+    cout << "-- (100/100e06/--) = " << freq3 << endl;
+    cout << "-- (100/100e06/2)  = " << freq4 << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[3] Testing test_antPositions() ..." << endl;
+  try {
+    casa::Matrix<double> antPositions;
+    //
+    cout << "-- Cartesian coordinates ..." << endl;
+    CR::test_antPositions(antPositions,CoordinateType::Cartesian);
+    cout << antPositions << endl;
+    //
+    cout << "-- Spherical coordinates ..." << endl;
+    CR::test_antPositions(antPositions,CoordinateType::Spherical);
+    cout << antPositions << endl;
+    //
+    cout << "-- Cylindrical coordinates ..." << endl;
+    CR::test_antPositions(antPositions,CoordinateType::Cylindrical);
+    cout << antPositions << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -74,15 +113,15 @@ int test_general ()
 */
 int test_Imaging ()
 {
-  std::cout << "\n[tTestsCommon::test_Imaging]\n" << std::endl;
+  cout << "\n[tTestsCommon::test_Imaging]\n" << endl;
 
   int nofFailedTests (0);
   
-  std::cout << "[1] Testing logging of Beamformer settings ..." << std::endl;
+  cout << "[1] Testing logging of Beamformer settings ..." << endl;
   try {
     CR::Beamformer bf;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   

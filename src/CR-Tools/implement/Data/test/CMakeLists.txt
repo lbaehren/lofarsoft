@@ -14,7 +14,6 @@
 set (tests
   tData
   tDataFlag
-  tDataType
   tITS_Beam
   tITSMetadata
   tLopesEvent

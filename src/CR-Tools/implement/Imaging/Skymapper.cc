@@ -41,7 +41,7 @@ namespace CR {  // Namespace CR -- begin
   //                                                                    Skymapper
   
   Skymapper::Skymapper (std::string const &filename,
-			DataType::Types const &imageType)
+			Skymapper::ImageType const &imageType)
     : filename_p (filename),
       imageType_p (imageType)
   {
@@ -53,7 +53,7 @@ namespace CR {  // Namespace CR -- begin
   
   Skymapper::Skymapper (SkymapCoordinate const &skymapCoord,
 			std::string const &filename,
-			DataType::Types const &imageType)
+			Skymapper::ImageType const &imageType)
     : filename_p (filename),
       imageType_p (imageType)
   {
@@ -66,7 +66,7 @@ namespace CR {  // Namespace CR -- begin
   Skymapper::Skymapper (SkymapCoordinate const &skymapCoord,
 			Matrix<double> const &antPositions,
 			std::string const &filename,
-			DataType::Types const &imageType)
+			Skymapper::ImageType const &imageType)
     : filename_p (filename),
       imageType_p (imageType)
   {
@@ -80,7 +80,7 @@ namespace CR {  // Namespace CR -- begin
   Skymapper::Skymapper (SkymapCoordinate const &skymapCoord,
 			Vector<MVPosition> const &antPositions,
 			std::string const &filename,
-			DataType::Types const &imageType)
+			Skymapper::ImageType const &imageType)
     : filename_p (filename),
       imageType_p (imageType)
   {
@@ -365,12 +365,12 @@ namespace CR {  // Namespace CR -- begin
     /* Create paged image on disk */
     try {
       switch (imageType_p) {
-      case DataType::HDF5:
+      case Skymapper::HDF5Image:
 	image_p = new casa::HDF5Image<float> (tile,
 					      csys,
 					      filename_p);
 	break;
-      case DataType::CASA_IMAGE:
+      case Skymapper::PagedImage:
 	image_p = new casa::PagedImage<float> (tile,
 					       csys,
 					       filename_p);

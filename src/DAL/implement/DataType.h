@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
+ | $Id:: NewClass.h 2286 2009-02-03 10:50:48Z baehren                    $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2009                                                    *
@@ -28,91 +28,95 @@
 #include <iostream>
 #include <string>
 
-namespace CR { // Namespace CR -- begin
+namespace DAL { // Namespace DAL -- begin
   
   /*!
     \class DataType
     
-    \ingroup CR_Data
+    \ingroup DAL
     
-    \brief Brief description for class DataType
+    \brief Type descriptors for standard LOFAR data products
     
     \author Lars B&auml;hren
 
-    \date 2009/03/24
+    \date 2009/04/18
 
     \test tDataType.cc
     
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>Some basic knowledge about the data types available through \e casacore,
-      \e CFITSIO and the \e DAL.
+      <li>[start filling in your text here]
     </ul>
     
     <h3>Synopsis</h3>
     
+    Naming convention for standard LOFAR data products:
+    \verbatim
+    lofar_<ObsID>_<Date>_{processing}_<Type>.[h5,fits,casa]
+    \endverbatim
+    where the name is composed of the following elements:
+    <ul>
+      <li>\b lofar – identifies the telescope
+      <li>\b ObsID – unique identifier of the observation
+      <li>\b Date – most likely file creation date, but this also might be the
+      pipeline processing date → start of the observation, yyyymmdd
+      <li>\b processing – optional identifier to e.g mark splitting of an image
+      into sub-bands
+      <li>\b Type – descriptor for the file type
+      <ul>
+        <li>VIS – Visibility data
+	<li>SKY – (multi-dimensional) sky image
+	<li>RMC – Rotation measure cube
+	<li>RMM – Rotation measure map
+	<li>DYS – Dynamic spectrum
+	<li>CRC – Cosmic ray skymap cube
+	<li>BFS – Beamformed station data
+	<li>BFT – Beamformed tied-array data
+	<li>TBB – Transient buffer board dump (base-band and frequency data)
+      </ul>
+    </ul>
+      
     <h3>Example(s)</h3>
-
-    <ol>
-      <li>Register casacore MeasurementSet:
-      \code
-      // Create the object
-      DataType t (DataType::CASA_MS);
-      // Provide a summary of the previously created object
-      t.summary();
-      \endcode
-      <li>Use the data type as a switch to decide on how to write out data:
-      \code
-    switch (imageType_p) {
-    case DataType::HDF5:
-      image_p = new casa::HDF5Image<float> (tile,
-					    csys,
-					    filename_p);
-      break;
-    case DataType::CASA_IMAGE:
-      image_p = new casa::PagedImage<float> (tile,
-					     csys,
-					     filename_p);
-      break;
-    default:
-      status = false;
-      break;
-    };
-      \endcode
-    </ol>
     
   */  
   class DataType {
-    
+
   public:
 
-    //! Enumeration listing the possible data types
+    //! Type descriptors for standard LOFAR data products
     enum Types {
-      //! casacore PagedImage
-      CASA_IMAGE,
-      //! casacore MeasurementSet
-      CASA_MS,
-      //! FITS image
-      FITS,
-      //! HDF5 file; this can be a number of things, depending on the context.
-      HDF5,
-      //! LOFAR beam-formed data, stored in an HDF5 file
-      LOFAR_BF,
-      //! LOFAR TBB data, stored in an HDF5 file
-      LOFAR_TBB,
-      //! TIM40 data from LOPES
-      TIM40
+      //! Beamformed station data
+      BFS,
+      //! Beamformed tied-array data
+      BFT,
+      //! Cosmic ray skymap (hyper-)cube, typically [Lon,Lat,Radius,Freq,Time]
+      CRC,
+      //! Dynamic spectrum, typically [Time,Freq]
+      DYS, 
+      //! Rotation measure cube
+      RMC,
+      //! Rotation measure map
+      RMM,
+      //! (multi-dimensional) sky image, typically [Ra,Dec,Freq]
+      SKY,
+      //! Transient buffer board dump (base-band and frequency data)
+      TBB,
+      //! Visibility data
+      VIS
     };
+
+  private:
+
+    //! Data type
+    DataType::Types type_p;
+    
+  public:
     
     // ------------------------------------------------------------- Construction
     
-    /*!
-      \brief Constructor
-
-      \param dataType -- The identifier for the type of the data
-    */
-    DataType (DataType::Types const &dataType);
+    //! Default constructor
+    DataType (DataType::Types const &type=DataType::SKY);
     
     /*!
       \brief Copy constructor
@@ -138,61 +142,19 @@ namespace CR { // Namespace CR -- begin
     
     // --------------------------------------------------------------- Parameters
 
-    /*!
-      \brief Get the type identifier
-
-      \return type -- The type identifier of the data
-    */
-    inline DataType::Types type () const {
+    //! Get the data type
+    inline DataType::Types type () {
       return type_p;
     }
 
-    /*!
-      \brief Set the type of the data
-
-      \param dataType -- The identifier for the type of the data
-
-      \return status -- Status of the operation; returns \e false in case an
-              error was encountered (e.g. an invalid type was provided)
-    */
-    bool setType (DataType::Types const &dataType);
-    
-    /*!
-      \brief Get the name of the data type
-      
-      \return name -- The name of the data type.
-    */
-    inline std::string name ()
-    {
-      std::string itsName;
-
-      switch (type_p) {
-      case DataType::CASA_IMAGE:
-	itsName = "CASA_IMAGE";
-	break;
-      case DataType::CASA_MS:
-	itsName = "CASA_MS";
-	break;
-      case DataType::FITS:
-	itsName = "FITS";
-	break;
-      case DataType::HDF5:
-	itsName = "HDF5";
-	break;
-      case DataType::LOFAR_BF:
-	itsName = "LOFAR_BF";
-	break;
-      case DataType::LOFAR_TBB:
-	itsName = "LOFAR_TBB";
-	break;
-      case DataType::TIM40:
-	itsName = "TIM40";
-	break;
-      };
-      
-      return itsName;
+    //! Set the data type
+    inline void setType (DataType::Types const &type) {
+      type_p = type;
     }
-    
+
+    //! Get the name of the data type
+    std::string name ();
+
     /*!
       \brief Get the name of the class
       
@@ -216,21 +178,11 @@ namespace CR { // Namespace CR -- begin
     */
     void summary (std::ostream &os);    
 
-    //___________________________________________________________________________
-    //                                                             Public methods
+    // ------------------------------------------------------------------ Methods
     
-    
+    bool isVisibility ();
     
   private:
-
-    //___________________________________________________________________________
-    //                                                          Private variables
-    
-    //! Type of data
-    DataType::Types type_p;
-    
-    //___________________________________________________________________________
-    //                                                            Private methods
     
     //! Unconditional copying
     void copy (DataType const &other);
@@ -240,7 +192,7 @@ namespace CR { // Namespace CR -- begin
     
   }; // Class DataType -- end
   
-} // Namespace CR -- end
+} // Namespace DAL -- end
 
 #endif /* DATATYPE_H */
   

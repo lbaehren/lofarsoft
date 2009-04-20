@@ -334,45 +334,88 @@ namespace CR { // Namespace CR -- begin
       to the array storing the values. If no buffering of the geometrical weights
       is done, we retrieve the values and store them here.
     */
+    
     //________________________________________________________________
-    //                                          bufferWeights_p = true
+    //                                                  -- / -- / TRUE
     if (bufferWeights_p) {
-      //
       bfWeights_p.reference(weights_p);
     }
     //________________________________________________________________
-    //                                         bufferWeights_p = false
+    //                                                 -- / -- / FALSE
     else {
+      /*
+       * Adjust the size of the array storing the weights
+       */
+      IPosition nelem = GeomWeight::shape();
+      bfWeights_p.resize(nelem);
       //______________________________________________________________
-      //                                         bufferPhases_p = true
+      //                                             -- / TRUE / FALSE
       if (bufferPhases_p) {
-	IPosition nelem = phases_p.shape();
-	int i,j,k;
-	// adjust the size of the array storing the weights
-	bfWeights_p.resize(nelem);
+	std::cout << "[Beamformer::setWeights] -- / TRUE / FALSE" << std::endl;
+	/*
+	 * Phases are buffered, so we compute the weights from them.
+	 *  shape(phases)  = [freq,ant,sky]
+	 *  shape(weights) = [freq,ant,sky]
+	 */
+	int freq;
+	int ant;
+	int k;
 	// compute the weights
 	for (k=0; k<nelem(2); k++) {
-	  for (j=0; j<nelem(1); j++) {
-	    for (i=0; i<nelem(0); i++) {
-	      bfWeights_p(i,j,k) = DComplex(cos(phases_p(i,j,k)),sin(phases_p(i,j,k)));
-	    } 
-	  } 
-	} 
+	  for (ant=0; ant<nelem(1); ant++) {
+	    for (freq=0; freq<nelem(0); freq++) {
+	      bfWeights_p(freq,ant,k) = DComplex(cos(phases_p(freq,ant,k)),sin(phases_p(freq,ant,k)));
+	    } // END : freq 
+	  } // END : ant
+	} // END : k
       }
       //______________________________________________________________
-      //                                        bufferPhases_p = false
+      //                                            -- / FALSE / FALSE
       else {
-	GeomWeight::weights(bfWeights_p);
+	Matrix<double> delays;
+	//____________________________________________________________
+	//                                        TRUE / FALSE / FALSE
+	if (bufferDelays_p) {
+	  std::cout << "[Beamformer::setWeights] TRUE / FALSE / FALSE" << std::endl;
+	  delays.reference(delays_p);
+	}
+	//____________________________________________________________
+	//                                       FALSE / FALSE / FALSE
+	else {
+	  std::cout << "[Beamformer::setWeights] FALSE / FALSE / FALSE" << std::endl;
+	  GeomDelay::delays(delays);
+	}
+	/*
+	 * Since the delays depend on whether beamforming is performed in
+	 * the near-field or the far-field, we leave the first step up to
+	 * the GeomDelay class; everything from there on we compute here.
+	 *  shape(delays)  = [ant,sky]
+	 *  shape(phases)  = [freq,ant,sky]
+	 *  shape(weights) = [freq,ant,sky]
+	 */
+	int freq;
+	int ant;
+	int sky;
+	double phase;
+	for (sky=0; sky<nelem(2); sky++) {
+	  for (ant=0; ant<nelem(1); ant++) {
+	    for (freq=0; freq<nelem(0); freq++) {
+	      phase = CR::_2pi*frequencies_p(freq)*delays(ant,sky);
+	      bfWeights_p(freq,ant,sky) = DComplex(cos(phase),sin(phase));
+	    } // END : freq 
+	  } // END : ant
+	} // END : k
+	
       }
-    }  // END: bufferWeights_p
-
+    }
+    
 #ifdef DEBUGGING_MESSAGES
     std::cout << "-- nof. antennas  = " << GeomDelay::nofAntPositions() << std::endl;
     std::cout << "-- nof. pointings = " << GeomDelay::nofSkyPositions() << std::endl;
-    std::cout << "-- shape(delays)  = " << GeomDelay::shape()     << std::endl;
-    std::cout << "-- shape(phases)  = " << GeomPhase::shape()     << std::endl;
-    std::cout << "-- shape(weights) = " << bfWeights_p.shape()    << std::endl;
-    std::cout << "-- weights[0,,]   = " << bfWeights_p.yzPlane(0) << std::endl;
+    std::cout << "-- shape(delays)  = " << GeomDelay::shape()           << std::endl;
+    std::cout << "-- shape(phases)  = " << GeomPhase::shape()           << std::endl;
+    std::cout << "-- shape(weights) = " << bfWeights_p.shape()          << std::endl;
+    std::cout << "-- weights[0,,]   = " << bfWeights_p.yzPlane(0)       << std::endl;
 #endif
     
     /*

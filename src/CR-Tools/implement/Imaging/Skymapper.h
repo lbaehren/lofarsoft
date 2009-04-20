@@ -48,7 +48,6 @@
 
 // CR-Tools header files
 #include <Coordinates/SkymapCoordinate.h>
-#include <Data/DataType.h>
 #include <Data/ObservationData.h>
 #include <Imaging/Beamformer.h>
 #include <IO/DataReader.h>
@@ -156,13 +155,30 @@ namespace CR {  // Namespace CR -- begin
     \endcode
   */
   class Skymapper {
+
+  public:
+
+    /*!
+      \brief Type of image create on disk
+
+      At the time being the only two types supported are the two concrete
+      implementations of the casacore \e ImageInterface class.
+    */
+    enum ImageType {
+      //! Tables-based implementation of the casacore ImageInterface
+      PagedImage,
+      //! HDF5 implementation of the casacore ImageInterface
+      HDF5Image
+    };
+
+  private:
     
     // -- fundamental internal data ---------------------------------------------
     
     //! Name of the image created on disk
     String filename_p;
     //! Data type of the created image (CASA_IMAGE or HDF5)
-    DataType::Types imageType_p;
+    Skymapper::ImageType imageType_p;
     //! Container and handler for the coordinates
     SkymapCoordinate coord_p;
     //! Object to handle the beamforming of the input data
@@ -203,10 +219,10 @@ namespace CR {  // Namespace CR -- begin
       resolution (AZEL, STG) map centered on \f$ ( 0, 90 ) \f$.
 
       \param filename  -- Name of the output file
-      \param imageType -- Data type of the created image (CASA_IMAGE or HDF5)
+      \param imageType -- Data type of the created image (PagedImage or HDF5Image)
     */
     Skymapper (std::string const &filename="skymap.h5",
-	       DataType::Types const &imageType=DataType::HDF5);
+	       Skymapper::ImageType const &imageType=Skymapper::HDF5Image);
     
     /*!
       \brief Argumented constructor
@@ -214,11 +230,11 @@ namespace CR {  // Namespace CR -- begin
       \param skymapCoord -- Coordinates information encapsulated in a
                             SkymapCoordinate object.
       \param filename  -- Name of the output file
-      \param imageType -- Data type of the created image (CASA_IMAGE or HDF5)
+      \param imageType -- Data type of the created image (PagedImage or HDF5Image)
     */
     Skymapper (SkymapCoordinate const &skymapCoord,
 	       std::string const &filename="skymap.h5",
-	       DataType::Types const &imageType=DataType::HDF5);
+	       Skymapper::ImageType const &imageType=Skymapper::HDF5Image);
     
     /*!
       \brief Argumented constructor
@@ -228,12 +244,12 @@ namespace CR {  // Namespace CR -- begin
       \param antPositions  -- [nofAntennas,3] Antenna positions for which the
              delay is computed, \f$ (x,y,z) \f$
       \param filename  -- Name of the output file
-      \param imageType -- Data type of the created image (CASA_IMAGE or HDF5)
+      \param imageType -- Data type of the created image (PagedImage or HDF5Image)
     */
     Skymapper (SkymapCoordinate const &skymapCoord,
 	       Matrix<double> const &antPositions,
 	       std::string const &filename="skymap.h5",
-	       DataType::Types const &imageType=DataType::HDF5);
+	       Skymapper::ImageType const &imageType=Skymapper::HDF5Image);
     
     /*!
       \brief Argumented constructor
@@ -243,12 +259,12 @@ namespace CR {  // Namespace CR -- begin
       \param antPositions  -- Antenna positions for which the delay is computed,
              \f$ (x,y,z) \f$
       \param filename  -- Name of the output file
-      \param imageType -- Data type of the created image (CASA_IMAGE or HDF5)
+      \param imageType -- Data type of the created image (PagedImage or HDF5Image)
     */
     Skymapper (SkymapCoordinate const &skymapCoord,
 	       Vector<MVPosition> const &antPositions,
 	       std::string const &filename="skymap.h5",
-	       DataType::Types const &imageType=DataType::HDF5);
+	       Skymapper::ImageType const &imageType=Skymapper::HDF5Image);
     
     /*!
       \brief Copy constructor

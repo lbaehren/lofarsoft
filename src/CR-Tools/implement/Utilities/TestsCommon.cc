@@ -65,6 +65,9 @@ namespace CR { // Namespace CR -- begin
 			      std::string const &observer)
   {
     casa::ObsInfo info;
+    casa::Time startTime;
+    casa::Quantity epoch (startTime.modifiedJulianDay(), "d");
+    
     info.setTelescope (telescope);
     info.setObserver (observer);
     return info;
@@ -76,11 +79,11 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  CR::TimeFreqCoordinate getTimeFreq (uint const &blocksize,
-				      casa::Quantity const &sampleFreq,
-				      uint const &nyquistZone,
-				      uint const &blocksPerFrame,
-				      uint const &nofFrames)
+  CR::TimeFreqCoordinate test_TimeFreq (uint const &blocksize,
+					casa::Quantity const &sampleFreq,
+					uint const &nyquistZone,
+					uint const &blocksPerFrame,
+					uint const &nofFrames)
   {
     CR::TimeFreqCoordinate timeFreq (blocksize,
 				     sampleFreq,
@@ -95,13 +98,66 @@ namespace CR { // Namespace CR -- begin
   //  Module Imaging
   //
   // ============================================================================
+  
+  //_____________________________________________________________________________
+  //                                                            test_antPositions
 
+  void test_antPositions (casa::Matrix<double> &antPositions,
+			  CR::CoordinateType::Types const &type,
+			  double const &scale)
+  {
+    int nofAxes (3);
+
+    switch (type) {
+    case CR::CoordinateType::Cartesian:
+      // adjust the size of the array returning the results
+      antPositions.resize(9,nofAxes);
+      antPositions = 0;
+      //assign values
+      antPositions(0,0) = -scale;  antPositions(0,1) = -scale;
+      antPositions(1,0) = 0;       antPositions(1,1) = -scale;
+      antPositions(2,0) =  scale;  antPositions(2,1) = -scale;
+      antPositions(3,0) = -scale;  antPositions(3,1) = 0;
+      antPositions(4,0) = 0;       antPositions(4,1) = 0;
+      antPositions(5,0) =  scale;  antPositions(5,1) = 0;
+      antPositions(6,0) = -scale;  antPositions(6,1) = scale;
+      antPositions(7,0) = 0;       antPositions(7,1) = scale;
+      antPositions(8,0) =  scale;  antPositions(8,1) = scale;
+      break;
+    case CR::CoordinateType::Spherical:
+      // adjust the size of the array returning the results
+      antPositions.resize(9,nofAxes);
+      antPositions = 0;
+      //assign values
+      for (int phi(1); phi<9; phi++) {
+	antPositions(phi,0) = scale;
+	antPositions(phi,1) = (phi-1)*45.0;
+      }
+      break;
+    case CR::CoordinateType::Cylindrical:
+      // adjust the size of the array returning the results
+      antPositions.resize(9,nofAxes);
+      antPositions = 0;
+      //assign values
+      for (int phi(1); phi<9; phi++) {
+	antPositions(phi,0) = scale;
+	antPositions(phi,1) = (phi-1)*45.0;
+      }
+      break;
+    case CR::CoordinateType::DirectionRadius:
+      break;
+    default:
+      std::cout << "[test_antPositions] Unsupported coordinate type!" << std::endl;
+      break;
+    };
+  }
+  
   //_____________________________________________________________________________
   //                                                          test_getFrequencies
 
-  casa::Vector<double> test_getFrequencies (uint const &blocksize,
-					    double const &sampleFrequency,
-					    uint const &nyquistZone)
+  casa::Vector<double> test_frequencyValues (uint const &blocksize,
+					     double const &sampleFrequency,
+					     uint const &nyquistZone)
   {
     CR::TimeFreq timefreq (blocksize,
 			   sampleFrequency,
@@ -235,15 +291,14 @@ namespace CR { // Namespace CR -- begin
       std::string filename        = prefix+"-skyPositions.dat";
       Matrix<double> skyPositions = bf.skyPositions();
       IPosition shape             = skyPositions.shape();
-      int nSky;
       int nCoord;
       
       outfile.open(filename.c_str(),std::ios::out);
       
-      for (nSky=0; nSky<shape(0); nSky++) {
-	outfile << nSky;
+      for (sky=0; sky<shape(0); sky++) {
+	outfile << sky;
 	for (nCoord=0; nCoord<shape(1); nCoord++) {
-	  outfile << "\t" << skyPositions(nSky,nCoord);
+	  outfile << "\t" << skyPositions(sky,nCoord);
 	}
 	outfile << std::endl;
       }

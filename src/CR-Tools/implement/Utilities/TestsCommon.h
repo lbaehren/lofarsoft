@@ -35,7 +35,9 @@
 #include <casa/Arrays/Vector.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Quanta/Quantum.h>
+#include <coordinates/Coordinates/CoordinateSystem.h>
 #include <coordinates/Coordinates/ObsInfo.h>
+#include <images/Images/ImageInterface.h>
 
 // CR-Tools header files
 #include <Coordinates/CoordinateType.h>
@@ -43,6 +45,8 @@
 #include <Imaging/Beamformer.h>
 #include <Imaging/GeomDelay.h>
 
+using std::cout;
+using std::endl;
 using casa::Quantity;
 
 namespace CR { // Namespace CR -- begin
@@ -67,6 +71,8 @@ namespace CR { // Namespace CR -- begin
 
     <ul>
       <li>A number of general routines.
+      <li>Routines in support of operations common to test programs of a certain
+      module (e.g. Imaging).
     </ul>
 
     \e History: This file replaces and extends upon the earlier tests_common.h and
@@ -114,6 +120,47 @@ namespace CR { // Namespace CR -- begin
   casa::ObsInfo test_ObsInfo (std::string const &telescope="LOFAR",
 			      std::string const &observer="Lars Baehren");
   
+  /*!
+    \brief Provide a summary of the image's properties
+    
+    Example output:
+    \verbatim
+    -- Image type ............. : HDF5Image
+    -- Table name ............. : /Users/lars/Code/lofar/usg/build/cr/test/lofar_cr_skymap.h5
+    -- Image shape ............ : [256, 256, 100, 10, 513]
+    -- World axis names ....... : [Longitude, Latitude, Distance, Time, Frequency]
+    -- World axis units ....... : [rad, rad, m, s, Hz]
+    -- Referemce pixel ........ : [0, 0, 0, 0, 0]
+    -- Reference value ........ : [0, 1.5708, 0, 0, 0]
+    -- Maximum cache size ..... : 0
+    -- Is the image paged? .... : 1
+    -- Is the image persistent? : 1
+    -- Is the image writable?   : 1
+    -- Has the image a mask?    : 0
+    \endverbatim
+    
+    \param image -- Image object derived from the ImageInterface class.
+  */
+  template <class T>
+    void image_summary (casa::ImageInterface<T> &image)
+    {
+      casa::CoordinateSystem cs = image.coordinates();
+
+      cout << "-- Image type ............. : " << image.imageType()        << endl;
+      cout << "-- Table name ............. : " << image.name()             << endl;
+      cout << "-- Image shape ............ : " << image.shape()            << endl;
+      cout << "-- World axis names ....... : " << cs.worldAxisNames()      << endl;
+      cout << "-- World axis units ....... : " << cs.worldAxisUnits()      << endl;
+      cout << "-- Referemce pixel ........ : " << cs.referencePixel()      << endl;
+      cout << "-- Reference value ........ : " << cs.referenceValue()      << endl;
+      cout << "-- Increment .............. : " << cs.increment()           << endl;
+      cout << "-- Maximum cache size ..... : " << image.maximumCacheSize() << endl;
+      cout << "-- Is the image paged? .... : " << image.isPaged()      << endl;
+      cout << "-- Is the image persistent? : " << image.isPersistent() << endl;
+      cout << "-- Is the image writable?   : " << image.isWritable()   << endl;
+      cout << "-- Has the image a mask?    : " << image.hasPixelMask() << endl;
+    }
+  
   // ============================================================================
   //
   //  Module Coordinates
@@ -129,20 +176,35 @@ namespace CR { // Namespace CR -- begin
     \param blocksPerFrame -- 
     \param nofFrames      -- 
   */
-  CR::TimeFreqCoordinate getTimeFreq (uint const &blocksize=1024,
-				      Quantity const &sampleFreq=Quantity(200,"MHz"),
-				      uint const &nyquistZone=1,
-				      uint const &blocksPerFrame=1,
-				      uint const &nofFrames=2);
-    
+  CR::TimeFreqCoordinate test_TimeFreq (uint const &blocksize=1024,
+					Quantity const &sampleFreq=Quantity(200,"MHz"),
+					uint const &nyquistZone=1,
+					uint const &blocksPerFrame=1,
+					uint const &nofFrames=2);
+  
   // ============================================================================
   //
   //  Module Imaging
   //
   // ============================================================================
+
+  /*!
+    \brief Create a set of antenna positions
+
+    \retval antPositions -- [nofAntennas,3] The 3-dimensional antenna positions.
+    \param  type         -- Type of coordinates, within which the positions are
+            given.
+    \retval scale        -- Scaling factor for the separation of the individual
+            antennas. In the case of Cartesian coordinate this is translated into
+	    a regular grid with \e scale representing the separation of the grid
+	    points parallel to the coordinate axes.
+  */
+  void test_antPositions (casa::Matrix<double> &antPositions,
+			  CR::CoordinateType::Types const &type=CR::CoordinateType::Cartesian,
+			  double const &scale=100);
   
   /*!
-    \brief Create frequency band values for the Beamformer
+    \brief Create a set of frequency values
 
     \param blocksize -- Number of samples per block of data; this also is the input
            size to the FFT.
@@ -151,9 +213,9 @@ namespace CR { // Namespace CR -- begin
     
     \return frequencies -- Vector with the frequency values, [Hz]
   */
-  casa::Vector<double> test_getFrequencies (uint const &blocksize=1024,
-					    double const &sampleFrequency=80e06,
-					    uint const &nyquistZone=1);
+  casa::Vector<double> test_frequencyValues (uint const &blocksize=1024,
+					     double const &sampleFrequency=80e06,
+					     uint const &nyquistZone=1);
   
   
   /*!

@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
+ | $Id:: NewClass.cc 1964 2008-09-06 17:52:38Z baehren                   $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2009                                                    *
@@ -21,9 +21,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Data/DataType.h>
+#ifndef DATATYPE_H
+#include "DataType.h"
+#endif
 
-namespace CR { // Namespace CR -- begin
+namespace DAL { // Namespace DAL -- begin
   
   // ============================================================================
   //
@@ -31,14 +33,9 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  DataType::DataType (DataType::Types const &dataType)
+  DataType::DataType (DataType::Types const &type)
   {
-    if (!setType (dataType)) {
-      std::cerr << "[DataType] Constructor called with unsupported data type!"
-		<< " Using default value..."
-		<< std::endl;
-      setType (DataType::HDF5);
-    }
+    setType (type);
   }
   
   DataType::DataType (DataType const &other)
@@ -85,35 +82,56 @@ namespace CR { // Namespace CR -- begin
   //  Parameters
   //
   // ============================================================================
+  
+  //_____________________________________________________________________________
+  //                                                                         name
 
-  bool DataType::setType (DataType::Types const &dataType)
+  std::string DataType::name ()
   {
-    bool status (true);
-
-    switch (dataType) {
-    case DataType::CASA_IMAGE:
-    case DataType::CASA_MS:
-    case DataType::FITS:
-    case DataType::HDF5:
-    case DataType::LOFAR_BF:
-    case DataType::LOFAR_TBB:
-    case DataType::TIM40:
-      type_p = dataType;
+    std::string typeName;
+    
+    switch (type_p) {
+    case DataType::VIS:
+      typeName="VIS";
       break;
-    default:
-      status = false;
+    case DataType::SKY:
+      typeName="SKY";
+      break;
+    case DataType::RMC:
+      typeName="RMC";
+      break;
+    case DataType::RMM:
+      typeName="RMM";
+      break;
+    case DataType::DYS:
+      typeName="DYS";
+      break;
+    case DataType::CRC:
+      typeName="CRC";
+      break;
+    case DataType::BFS:
+      typeName="BFS";
+      break;
+    case DataType::BFT:
+      typeName="BFT";
+      break;
+    case DataType::TBB:
+      typeName="TBB";
       break;
     };
-
-    return status;
+    
+    return typeName;
   }
-
   
+  //_____________________________________________________________________________
+  //                                                                      summary
+
   void DataType::summary (std::ostream &os)
   {
     os << "[DataType] Summary of internal parameters." << std::endl;
-    os << "-- Type = " << type() << std::endl;
-    os << "-- Name = " << name() << std::endl;
+    os << "-- Type           = " << type() << std::endl;
+    os << "-- Name           = " << name() << std::endl;
+    os << "-- Is Visibility? = " << isVisibility() << std::endl;
   }
   
   // ============================================================================
@@ -122,6 +140,16 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  
+  bool DataType::isVisibility ()
+  {
+    switch (type_p) {
+    case DataType::VIS:
+      return true;
+      break;
+    default:
+      return false;
+      break;
+    };
+  }
 
-} // Namespace CR -- end
+} // Namespace DAL -- end

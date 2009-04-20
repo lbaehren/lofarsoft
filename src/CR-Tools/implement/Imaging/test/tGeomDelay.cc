@@ -23,6 +23,7 @@
 
 #include <crtools.h>
 #include <Imaging/GeomDelay.h>
+#include <Utilities/TestsCommon.h>
 #include "create_data.h"
 
 // Namespace usage
@@ -180,17 +181,11 @@ int test_static_functions ()
 
   cout << "[3] delay(casa::Matrix<double>, casa::Matrix<double>)" << endl;
   try {
-    uint nofAntennas (2);
     uint nofPositions (3);
-    casa::Matrix<double> antPosition (nofAntennas,3);
+    casa::Matrix<double> antPosition;
     casa::Matrix<double> skyPosition (nofPositions,3);
 
-    antPosition(0,0) = -100;
-    antPosition(0,1) = -100;
-    antPosition(0,2) = 0;
-    antPosition(1,0) = +100;
-    antPosition(1,1) = +100;
-    antPosition(1,2) = 0;
+    CR::test_antPositions(antPosition,CoordinateType::Cartesian);
     
     skyPosition(0,0) = 100;
     skyPosition(0,1) = 0;
@@ -221,18 +216,12 @@ int test_static_functions ()
   cout << "[3] delay(casa::Matrix<double>,casa::Matrix<double>,casa::Matrix<double>)"
        << endl;
   try {
-    uint nofAntennas (2);
     uint nofPositions (3);
-    casa::Matrix<double> antPosition (nofAntennas,3);
+    casa::Matrix<double> antPosition;
     casa::Matrix<double> skyPosition (nofPositions,3);
-    casa::Matrix<double> delays (nofAntennas,nofPositions);
-
-    antPosition(0,0) = -100;
-    antPosition(0,1) = -100;
-    antPosition(0,2) = 0;
-    antPosition(1,0) = +100;
-    antPosition(1,1) = +100;
-    antPosition(1,2) = 0;
+    casa::Matrix<double> delays;
+    
+    CR::test_antPositions(antPosition,CoordinateType::Cartesian);
     
     skyPosition(0,0) = 100;
     skyPosition(0,1) = 0;
@@ -303,8 +292,7 @@ int test_methods ()
     
     cout << "-- cartesian coordinates ..." << std::endl;
     
-    pos.row(0) = -100;
-    pos.row(1) = +100;
+    CR::test_antPositions(pos,CoordinateType::Cartesian);
     geomDelay.setAntPositions (pos,
 			       CoordinateType::Cartesian,
 			       false);
@@ -312,13 +300,7 @@ int test_methods ()
     
     cout << "-- spherical coordinates ..." << std::endl;
     
-    pos(0,0) = 1;
-    pos(0,1) = 90;
-    pos(0,2) = 0;
-    pos(1,0) = 1;
-    pos(1,1) = 0;
-    pos(1,2) = 90;
-    
+    CR::test_antPositions(pos,CoordinateType::Spherical);
     geomDelay.setAntPositions (pos,
 			       CoordinateType::Spherical,
 			       true);
@@ -326,13 +308,7 @@ int test_methods ()
     
     cout << "-- cylindrical coordinates ..." << std::endl;
     
-    pos(0,0) = 1;
-    pos(0,1) = 90;
-    pos(0,2) = 1;
-    pos(1,0) = 1;
-    pos(1,1) = 90;
-    pos(1,2) = -1;
-
+    CR::test_antPositions(pos,CoordinateType::Cylindrical);
     geomDelay.setAntPositions (pos,
 			       CoordinateType::Cylindrical,
 			       true);

@@ -36,13 +36,16 @@
 #include <coordinates/Coordinates/LinearCoordinate.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <images/Images/PagedImage.h>
+// #include <images/Images/ImageFITSConverter.h>
 #include <lattices/Lattices/TiledShape.h>
 
 #ifdef HAVE_HDF5
 #include <images/Images/HDF5Image.h>
 #endif
 
+// CR-Tools header files
 #include <Coordinates/CoordinateType.h>
+#include <Utilities/TestsCommon.h>
 
 using std::cout;
 using std::endl;
@@ -73,27 +76,6 @@ const double pi (3.14159265);
 //  Helper routines
 //
 // ==============================================================================
-
-/*!
-  \brief Create observation information object
-  
-  \return obsInfo -- Object containing misc. information on about the observation,
-          such as the name of the telescope and the observer, but also the time at
-	  which the observation was done.
-*/
-casa::ObsInfo observation_info (std::string const &telescope="LOFAR",
-				std::string const &observer="Lars Baehren")
-{
-  casa::ObsInfo obsInfo;
-  casa::Time startTime;
-  casa::Quantity epoch (startTime.modifiedJulianDay(), "d");
-
-  obsInfo.setObsDate (epoch);
-  obsInfo.setTelescope (casa::String(telescope));
-  obsInfo.setObserver (casa::String(observer));
-
-  return obsInfo;
-}
 
 // ------------------------------------------------------------------------------
 
@@ -137,23 +119,23 @@ casa::LinearCoordinate radial_coordinate (double const &referenceValue=0.0,
 
   \param imageType          -- Type of image for which to create the coordinate
          system; since we want to cover the basic image types to be defined for
-	 LOFAR we make use of the following values: "CR_SKY", "RM_CUBE", "RM_MAP".
+	 LOFAR we make use of the following values: "CR_SKYMAP", "RM_CUBE", "RM_MAP".
   \param incrementDirection -- Increment (resolution) along the direction axes.
   \param incrementDistance  -- Increment along the distance axis.
   \param incrementTime      -- Increment along the frequency axis.
   
   \return cs -- Coordinate system tool
 */
-casa::CoordinateSystem image_csys (std::string imageType="CR_SKY",
+casa::CoordinateSystem image_csys (std::string imageType="CR_SKYMAP",
 				   double incrementDirection=2.0,
 				   double incrementDistance=0.0,
 				   double incrementTime=1.0)
 {
   casa::CoordinateSystem cs;
   
-  if (imageType == "CR_SKY") {
+  if (imageType == "CR_SKYMAP") {
     // General observation information
-    cs.setObsInfo(observation_info());
+    cs.setObsInfo(CR::test_ObsInfo());
     // Direction axis
     cs.addCoordinate(CR::CoordinateType::makeDirectionCoordinate());
     // [2] Distance axis
@@ -165,7 +147,7 @@ casa::CoordinateSystem image_csys (std::string imageType="CR_SKY",
   }
   else if (imageType == "RM_CUBE") {
     // General observation information
-    cs.setObsInfo(observation_info());
+    cs.setObsInfo(CR::test_ObsInfo());
     // Direction axis
     cs.addCoordinate(CR::CoordinateType::makeDirectionCoordinate());
     // Faraday rotation
@@ -183,7 +165,7 @@ casa::CoordinateSystem image_csys (std::string imageType="CR_SKY",
   }
   else if (imageType == "RM_MAP") {
     // General observation information
-    cs.setObsInfo(observation_info());
+    cs.setObsInfo(CR::test_ObsInfo());
     // Direction axis
     cs.addCoordinate(CR::CoordinateType::makeDirectionCoordinate());
   }
@@ -193,39 +175,6 @@ casa::CoordinateSystem image_csys (std::string imageType="CR_SKY",
   
   return cs;
 }
-
-// ------------------------------------------------------------------------------
-
-/*!
-  \brief Provide a summary of the image's properties
-
-  Example output:
-  \verbatim
-  -- Image type ....... : HDF5Image
-  -- Table name ....... : hdf5image_d.h5
-  -- Image shape ...... : [25, 25, 10, 50, 128]
-  -- Maximum cache size : 0
-  \endverbatim
-  
-  \param image -- Image object derived from the ImageInterface class.
-*/
-template <class T>
-void image_summary (casa::ImageInterface<T> &image)
-{
-  cout << "-- Image type ............. : " << image.imageType() << endl;
-  cout << "-- Table name ............. : " << image.name()      << endl;
-  cout << "-- Image shape ............ : " << image.shape()     << endl;
-  cout << "-- Maximum cache size ..... : " << image.maximumCacheSize() << endl;
-  cout << "-- Is the image paged? .... : " << image.isPaged()      << endl;
-  cout << "-- Is the image persistent? : " << image.isPersistent() << endl;
-  cout << "-- Is the image writable?   : " << image.isWritable()   << endl;
-  cout << "-- Has the image a mask?    : " << image.hasPixelMask() << endl;
-}
-
-template void image_summary (casa::ImageInterface<float> &image);
-template void image_summary (casa::ImageInterface<double> &image);
-template void image_summary (casa::ImageInterface<casa::Complex> &image);
-template void image_summary (casa::ImageInterface<casa::DComplex> &image);
 
 // ==============================================================================
 //
@@ -257,10 +206,7 @@ int test_PagedImage ()
 					image_csys(),
 					"testimage_f.img");
     /* feedback */
-    image_summary (imageFloat);
-    /* clean up */
-    casa::Directory dir ("testimage_f.img");
-    dir.removeRecursive(); 
+    CR::image_summary (imageFloat);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -273,10 +219,7 @@ int test_PagedImage ()
 					  image_csys(),
 					  "testimage_d.img");
     /* feedback */
-    image_summary (imageDouble);
-    /* clean up */
-    casa::Directory dir ("testimage_d.img");
-    dir.removeRecursive(); 
+    CR::image_summary (imageDouble);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -314,19 +257,19 @@ int test_HDF5Image ()
     casa::HDF5Image<float> imageFloat (tshape,
 				       image_csys(),
 				       "hdf5image_f.h5");
-    image_summary (imageFloat);
+    CR::image_summary (imageFloat);
     
     cout << "--> HDF5Image<double>" << endl;
     casa::HDF5Image<double> imageDouble (tshape,
 					 image_csys(),
 					 "hdf5image_d.h5");
-    image_summary (imageDouble);
+    CR::image_summary (imageDouble);
     
     cout << "--> HDF5Image<casa::Complex>" << endl;
     casa::HDF5Image<casa::Complex> imageComplex (tshape,
 						 image_csys(),
 						 "hdf5image_c.h5");
-    image_summary (imageComplex);
+    CR::image_summary (imageComplex);
     
   } catch (std::string message) {
     std::cerr << message << endl;
@@ -429,8 +372,14 @@ int test_HDF5Image ()
 */
 int create_lofar_images ()
 {
+  std::cout << "\n[create_lofar_images]\n" << std::endl;
+
   int nofFailedTests (0);
   std::string imageType;
+  casa::String error;
+
+  //__________________________________________________________________
+  // Create image holding RM cube
 
   std::cout << "[1] Create image holding RM cube ..." << std::endl;
   try {
@@ -438,29 +387,72 @@ int create_lofar_images ()
     casa::TiledShape tshape (shape);
 
     imageType = "RM_CUBE";
-    
-    casa::HDF5Image<double> imageDouble (tshape,
-					 image_csys(imageType),
-					 "lofar_rm_cube.h5");    
+
+#ifdef HAVE_HDF5    
+    casa::HDF5Image<double> image (tshape,
+				   image_csys(imageType),
+				   "lofar_rm_cube.h5");
+#else
+    casa::PagedImage<double> image (tshape,
+				    image_csys(imageType),
+				    "lofar_rm_cube.img");
+#endif
+    CR::image_summary(image);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
 
+  //__________________________________________________________________
+  // Create image holding RM map
+  
   std::cout << "[2] Create image holding RM map ..." << std::endl;
   try {
     IPosition shape (2,4096,4096);
     casa::TiledShape tshape (shape);
 
     imageType = "RM_MAP";
-    
-    casa::HDF5Image<double> imageDouble (tshape,
-					 image_csys(imageType),
-					 "lofar_rm_map.h5");    
+
+#ifdef HAVE_HDF5    
+    casa::HDF5Image<double> image (tshape,
+				   image_csys(imageType),
+				   "lofar_rm_map.h5");    
+#else
+    casa::PagedImage<double> image (tshape,
+				    image_csys(imageType),
+				    "lofar_rm_map.img");    
+#endif
+    CR::image_summary(image);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
+
+  //__________________________________________________________________
+  // Create image holding CR sky map
+
+  std::cout << "[3] Create image holding CR sky map ..." << std::endl;
+  try {
+    IPosition shape (5,256,256,100,10,513);
+    casa::TiledShape tshape (shape);
+
+    imageType = "CR_SKYMAP";
+
+#ifdef HAVE_HDF5    
+    casa::HDF5Image<double> image (tshape,
+				   image_csys(imageType),
+				   "lofar_cr_skymap.h5");    
+#else
+    casa::PagedImage<double> image (tshape,
+				    image_csys(imageType),
+				    "lofar_cr_skymap.img");    
+#endif
+    CR::image_summary(image);
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
 
   return nofFailedTests;
 }
@@ -477,8 +469,10 @@ int main (int argc,
   
 #ifdef HAVE_HDF5
   nofFailedTests += test_HDF5Image ();
-  nofFailedTests += create_lofar_images();
 #endif
+
+  /* Create a set of example standard LOFAR images */
+  nofFailedTests += create_lofar_images();
 
   return nofFailedTests;
 }
