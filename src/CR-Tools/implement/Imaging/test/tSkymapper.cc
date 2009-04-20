@@ -453,7 +453,7 @@ int test_methods (uint const &blocksize=1024)
           fucntion.
 */
 int test_processing (string const &infile,
-		     uint const &blocksize=1024,
+		     uint const &blocksize=256,
 		     bool have_dataset=false)
 {
   cout << "\n[tSkymapper::test_processing]\n" << endl;
@@ -461,20 +461,32 @@ int test_processing (string const &infile,
   int nofFailedTests     = 0;
 
   std::string refcode    = "AZEL";
-  std::string projection = "SIN";
+  std::string projection = "STG";
   uint nofFrames         = 10;
   uint nofBlocksPerFrame = 1;
   uint nofAntennas       = 5;
 
   // Spatial coordinates
-  IPosition shape (3,60,60,5);
+  IPosition shape (3,120,120,1);
+  Vector<double> refValue (3);
+  Vector<double> refPixel (3);
+  Vector<double> increment (3);
+  refValue(0) = 0;
+  refValue(1) = 90;
+  refValue(2) = 100;
+  refPixel(0) = shape(0)/2;
+  refPixel(1) = shape(21)/2;
+  refPixel(2) = 0;
+  increment(0) = 1;
+  increment(1) = 1;
+  increment(2) = 100;
   SpatialCoordinate spatial (CoordinateType::DirectionRadius,
+			     refPixel,
+			     refValue,
+			     increment,
+			     shape,
 			     refcode,
 			     projection);
-  spatial.setShape(shape);
-  Vector<double> cdelt = spatial.increment();
-  cdelt(2) = 100;
-  spatial.setIncrement(cdelt);
   // Time-Frequency coordinate
   TimeFreqCoordinate timeFreq (blocksize,
 			       nofBlocksPerFrame,

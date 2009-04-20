@@ -217,25 +217,33 @@ int test_wcs ()
     cout << "--> SpatialCoordinate(DirectionRadius)" << endl;
     SpatialCoordinate coord (CoordinateType::DirectionRadius);
     cout << "-- old increment = " << coord.increment() << endl;
-    coord.setIncrement(Vector<double>(3,0.5));
+    coord.setIncrement(Vector<double>(3,0.5),true);
+    cout << "-- new increment = " << coord.increment() << endl;
+    coord.setIncrement(Vector<double>(3,0.5),false);
     cout << "-- new increment = " << coord.increment() << endl;
     //
     cout << "--> SpatialCoordinate(Cartesian)" << endl;
     SpatialCoordinate coord_cartesian (CoordinateType::Cartesian);
     cout << "-- old increment = " << coord_cartesian.increment() << endl;
-    coord_cartesian.setIncrement(Vector<double>(3,0.5));
+    coord_cartesian.setIncrement(Vector<double>(3,0.5),true);
+    cout << "-- new increment = " << coord_cartesian.increment() << endl;
+    coord_cartesian.setIncrement(Vector<double>(3,0.5),false);
     cout << "-- new increment = " << coord_cartesian.increment() << endl;
     //
     cout << "--> SpatialCoordinate(Spherical)" << endl;
     SpatialCoordinate coord_spherical (CoordinateType::Spherical);
     cout << "-- old increment = " << coord_spherical.increment() << endl;
-    coord_spherical.setIncrement(Vector<double>(3,0.5));
+    coord_spherical.setIncrement(Vector<double>(3,0.5),true);
+    cout << "-- new increment = " << coord_spherical.increment() << endl;
+    coord_spherical.setIncrement(Vector<double>(3,0.5),false);
     cout << "-- new increment = " << coord_spherical.increment() << endl;
     //
     cout << "--> SpatialCoordinate(Cylindrical)" << endl;
     SpatialCoordinate coord_cylindrical (CoordinateType::Cylindrical);
     cout << "-- old increment = " << coord_cylindrical.increment() << endl;
-    coord_cylindrical.setIncrement(Vector<double>(3,0.5));
+    coord_cylindrical.setIncrement(Vector<double>(3,0.5),true);
+    cout << "-- old increment = " << coord_cylindrical.increment() << endl;
+    coord_cylindrical.setIncrement(Vector<double>(3,0.5),false);
     cout << "-- new increment = " << coord_cylindrical.increment() << endl;
   } catch (std::string message) {
     cerr << message << endl;
@@ -277,25 +285,33 @@ int test_wcs ()
     cout << "--> SpatialCoordinate(DirectionRadius)" << endl;
     SpatialCoordinate coord (CoordinateType::DirectionRadius);
     cout << "-- old reference value = " << coord.referenceValue() << endl;
-    coord.setReferenceValue(Vector<double>(3,0.5));
+    coord.setReferenceValue(Vector<double>(3,0.5),true);
+    cout << "-- new reference value = " << coord.referenceValue() << endl;
+    coord.setReferenceValue(Vector<double>(3,0.5),false);
     cout << "-- new reference value = " << coord.referenceValue() << endl;
     //
     cout << "--> SpatialCoordinate(Cartesian)" << endl;
     SpatialCoordinate coord_cartesian (CoordinateType::Cartesian);
     cout << "-- old reference value = " << coord_cartesian.referenceValue() << endl;
-    coord_cartesian.setReferenceValue(Vector<double>(3,0.5));
+    coord_cartesian.setReferenceValue(Vector<double>(3,0.5),true);
+    cout << "-- new reference value = " << coord_cartesian.referenceValue() << endl;
+    coord_cartesian.setReferenceValue(Vector<double>(3,0.5),false);
     cout << "-- new reference value = " << coord_cartesian.referenceValue() << endl;
     //
     cout << "--> SpatialCoordinate(Spherical)" << endl;
     SpatialCoordinate coord_spherical (CoordinateType::Spherical);
     cout << "-- old reference value = " << coord_spherical.referenceValue() << endl;
-    coord_spherical.setReferenceValue(Vector<double>(3,0.5));
+    coord_spherical.setReferenceValue(Vector<double>(3,0.5),true);
+    cout << "-- new reference value = " << coord_spherical.referenceValue() << endl;
+    coord_spherical.setReferenceValue(Vector<double>(3,0.5),false);
     cout << "-- new reference value = " << coord_spherical.referenceValue() << endl;
     //
     cout << "--> SpatialCoordinate(Cylindrical)" << endl;
     SpatialCoordinate coord_cylindrical (CoordinateType::Cylindrical);
     cout << "-- old reference value = " << coord_cylindrical.referenceValue() << endl;
-    coord_cylindrical.setReferenceValue(Vector<double>(3,0.5));
+    coord_cylindrical.setReferenceValue(Vector<double>(3,0.5),true);
+    cout << "-- new reference value = " << coord_cylindrical.referenceValue() << endl;
+    coord_cylindrical.setReferenceValue(Vector<double>(3,0.5),false);
     cout << "-- new reference value = " << coord_cylindrical.referenceValue() << endl;
   } catch (std::string message) {
     cerr << message << endl;

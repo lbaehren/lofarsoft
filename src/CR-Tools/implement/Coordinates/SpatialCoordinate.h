@@ -43,6 +43,7 @@
 
 #include <Coordinates/CoordinateBase.h>
 #include <Coordinates/CoordinateType.h>
+#include <Math/VectorConversion.h>
 
 using casa::Coordinate;
 using casa::DirectionCoordinate;
@@ -237,7 +238,8 @@ namespace CR { // Namespace CR -- begin
 		       casa::Vector<double> const &increment,
 		       casa::IPosition const &shape,
 		       casa::String const &refcode="AZEL",
-		       casa::String const &projection="STG");
+		       casa::String const &projection="STG",
+		       bool const &anglesInDegrees=true);
     
     /*!
       \brief Argumented constructor for coordinate of type DirectionRadius
@@ -332,8 +334,8 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the number of elements along the coordinate axes
       
-      \return shape -- The number of elements along the individual coordinate
-              axes.
+      \param shape -- The number of elements along the individual coordinate
+             axes.
     */
     bool setShape (IPosition const &shape);
 
@@ -495,11 +497,15 @@ namespace CR { // Namespace CR -- begin
     Vector<double> increment();
     /*!
       \brief Set the value of the coordinate increment
-     */
-    bool setIncrement(Vector<double> const &incr);
+
+      \param increment -- The value of the coordinate increment, as retrieved
+             through the <tt>casa::Coordinate::increment()<tt> function.
+    */
+    bool setIncrement(Vector<double> const &incr,
+		      bool const &anglesInDegrees=true);
     /*!
       \brief Get the reference value
-
+      
       \return refPixel -- The reference value, as retrieved through the
               <tt>casa::Coordinate::referenceValue()<tt> function.
     */
@@ -507,7 +513,8 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Set the value of the reference value
     */
-    bool setReferenceValue(Vector<double> const &refValue);
+    bool setReferenceValue(Vector<double> const &refValue,
+			   bool const &anglesInDegrees=true);
     /*!
       \brief Get the names of the world axes
 
@@ -589,6 +596,15 @@ namespace CR { // Namespace CR -- begin
     void init (CoordinateType::Types const &coordType,
 	       casa::String const &refcode="AZEL",
 	       casa::String const &projection="STG");
+
+    /*!
+      \brief Convert angular components from angles to degrees
+
+      \param in -- Input vector with angular components in degrees.
+
+      \return out -- Output vector with angular components in radian.
+    */
+    casa::Vector<double> deg2rad (casa::Vector<double> const &in);
 
   };
   

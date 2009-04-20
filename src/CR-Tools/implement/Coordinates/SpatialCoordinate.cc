@@ -84,14 +84,17 @@ namespace CR { // Namespace CR -- begin
 					casa::Vector<double> const &increment,
 					casa::IPosition const &shape,
 					casa::String const &refcode,
-					casa::String const &projection)
+					casa::String const &projection,
+					bool const &anglesInDegrees)
   {
+    // basic initialization
     init (coordType,
 	  refcode,
 	  projection);
+    // store WCS parameters for coordinate axes
     setReferencePixel (refPixel);
-    setReferenceValue (refValue);
-    setIncrement (increment);
+    setReferenceValue (refValue,anglesInDegrees);
+    setIncrement (increment,anglesInDegrees);
     setShape(shape);
   }
   
@@ -221,18 +224,20 @@ namespace CR { // Namespace CR -- begin
   
   bool SpatialCoordinate::setShape (IPosition const &shape)
   {
+    bool status (true);
     unsigned int nelem = shape.nelements();
-
+    
     if (nelem == nofAxes_p) {
       shape_p = shape;
-      return true;
     } else {
       std::cerr << "[SpatialCoordinate::setShape]"
 		<< " Provided shape information does not match the number of"
 		<< " coordinate axes!"
 		<< std::endl;
-      return false;
+      status = false;
     }
+
+    return status;
   }
   
   // ============================================================================
@@ -314,9 +319,9 @@ namespace CR { // Namespace CR -- begin
 	units(0) = "m";
 	units(1) = "rad";
 	units(2) = "m";
-	linearCoord_p    = CoordinateType::makeLinearCoordinate(nofAxes_p,
-								names,
-								units);
+	linearCoord_p = CoordinateType::makeLinearCoordinate(nofAxes_p,
+							     names,
+							     units);
       }
       break;
     default:
@@ -325,6 +330,35 @@ namespace CR { // Namespace CR -- begin
     }
   }
 
+  //_____________________________________________________________________________
+  //                                                                      deg2rad
+
+  casa::Vector<double> SpatialCoordinate::deg2rad (casa::Vector<double> const &in)
+  {
+    casa::Vector<double> out (in);
+
+    switch (type_p) {
+    case CoordinateType::DirectionRadius:
+    case CoordinateType::LongLatRadius:
+    case CoordinateType::AzElHeight:
+    case CoordinateType::AzElRadius:
+      out(0) = CR::deg2rad(in(0));     // Long, Az
+      out(1) = CR::deg2rad(in(1));     // Lat, El
+      break;
+    case CoordinateType::Spherical:
+      out(1) = CR::deg2rad(in(1));      // phi
+      out(2) = CR::deg2rad(in(2));      // theta
+      break;
+    case CoordinateType::Cylindrical:
+      out(1) = CR::deg2rad(in(1));  // phi
+      break;
+    default:
+      break;
+    };
+    
+    return out;
+  }
+  
   //______________________________________________________________ positionValues
 
   Matrix<double> SpatialCoordinate::positionValues (bool const &fastedAxisFirst)
@@ -631,9 +665,11 @@ namespace CR { // Namespace CR -- begin
 
   // --------------------------------------------------------------- setIncrement
 
-  bool SpatialCoordinate::setIncrement (Vector<double> const &incr)
+  bool SpatialCoordinate::setIncrement (Vector<double> const &incr,
+					bool const &anglesInDegrees)
   {
     bool status (true);
+    Vector<double> cdelt (incr);
 
     // Check the input
     if (incr.nelements() != nofAxes()) {
@@ -644,25 +680,29 @@ namespace CR { // Namespace CR -- begin
       return false;
     }
     
+    if (anglesInDegrees) {
+      cdelt = SpatialCoordinate::deg2rad(incr);
+    }
+    
     switch (type_p) {
     case CoordinateType::DirectionRadius:
       {
 	Vector<double> cdeltDir (2);
 	Vector<double> cdeltLin (1);
 	//
-	cdeltDir(0) = incr(0);
-	cdeltDir(1) = incr(1);
-	cdeltLin(0) = incr(2);
+	cdeltDir(0) = cdelt(0);
+	cdeltDir(1) = cdelt(1);
+	cdeltLin(0) = cdelt(2);
 	//
 	directionCoord_p.setIncrement (cdeltDir);
 	linearCoord_p.setIncrement (cdeltLin);
       }
       break;
     default:
-      linearCoord_p.setIncrement (incr);
+      linearCoord_p.setIncrement (cdelt);
       break;
     };
-
+    
     return status;
   }
 
@@ -696,9 +736,11 @@ namespace CR { // Namespace CR -- begin
 
   // ---------------------------------------------------------- setReferenceValue
 
-  bool SpatialCoordinate::setReferenceValue (Vector<double> const &refValue)
+  bool SpatialCoordinate::setReferenceValue (Vector<double> const &refValue,
+					     bool const &anglesInDegrees)
   {
     bool status (true);
+    Vector<double> crval (refValue);
 
     // Check the input
     if (refValue.nelements() != nofAxes()) {
@@ -708,6 +750,10 @@ namespace CR { // Namespace CR -- begin
 		<< std::endl;
       return false;
     }
+
+    if (anglesInDegrees) {
+      crval = SpatialCoordinate::deg2rad(refValue);
+    }
     
     switch (type_p) {
     case CoordinateType::DirectionRadius:
@@ -715,16 +761,16 @@ namespace CR { // Namespace CR -- begin
 	Vector<double> crvalDir (2);
 	Vector<double> crvalLin (1);
 	//
-	crvalDir(0) = refValue(0);
-	crvalDir(1) = refValue(1);
-	crvalLin(0) = refValue(2);
+	crvalDir(0) = crval(0);
+	crvalDir(1) = crval(1);
+	crvalLin(0) = crval(2);
 	//
 	directionCoord_p.setReferenceValue (crvalDir);
 	linearCoord_p.setReferenceValue (crvalLin);
       }
       break;
     default:
-      linearCoord_p.setReferenceValue (refValue);
+      linearCoord_p.setReferenceValue (crval);
       break;
     };
 

@@ -199,7 +199,7 @@ namespace CR { // Namespace  -- begin
 			 casa::Vector<double> const &in,
 			 CR::CoordinateType::Types const &typeIn,
 			 bool const &anglesInDegrees=false);
-
+    
   private:
     
     //! Unconditional copying
