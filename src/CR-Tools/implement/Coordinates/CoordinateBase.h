@@ -60,6 +60,10 @@ namespace CR { // Namespace CR -- begin
     </ul>
     
     <h3>Synopsis</h3>
+
+    Even though casacore provides a set of coordinate classes which implement the
+    most commonly used coordinate types in astronomical images, there are a number
+    of cases which are not covered by thoses classes.
     
     <h3>Example(s)</h3>
     
@@ -130,11 +134,18 @@ namespace CR { // Namespace CR -- begin
     virtual Vector<double> referenceValue() =0;
     /*!
       \brief Set the value of the reference value
-    */
-    virtual bool setReferenceValue(Vector<double> const &refValue) =0;
 
+
+      \param increment -- The value of the coordinate increment, as assigned
+             through the <tt>casa::Coordinate::setReferenceValue()<tt> function.
+      \param anglesInDegrees -- If the coordinate contains angular coordinates, 
+             are their values given in radians or degrees?
+    */
+    virtual bool setReferenceValue(Vector<double> const &refValue,
+				   bool const &anglesInDegrees=true) =0;
+    
     /*!
-      \brief Get the value of the coordinate increment
+     \brief Get the value of the coordinate increment
       
       \return increment -- The value of the coordinate increment, as retrieved
               through the <tt>casa::Coordinate::increment()<tt> function.
@@ -142,8 +153,14 @@ namespace CR { // Namespace CR -- begin
     virtual Vector<double> increment() =0;
     /*!
       \brief Set the value of the coordinate increment
+
+      \param increment -- The value of the coordinate increment, as assigned
+             through the <tt>casa::Coordinate::setIncrement()<tt> function.
+      \param anglesInDegrees -- If the coordinate contains angular coordinates, 
+             are their values given in radians or degrees?
      */
-    virtual bool setIncrement(Vector<double> const &incr) =0;
+    virtual bool setIncrement(Vector<double> const &incr,
+			      bool const &anglesInDegrees=true) =0;
 
     /*!
       \brief Get the names of the world axes
@@ -174,6 +191,23 @@ namespace CR { // Namespace CR -- begin
               <tt>casa::Coordinate::setWorldAxisUnits()<tt> function.
     */
     virtual bool setWorldAxisUnits(Vector<String> const &units) =0;
+    
+    /*!
+      \brief Conversion from pixel to world coordinates
+
+      \retval world -- Values in world coordinates
+      \param pixel  -- Values in pixel coordinates
+    */
+    virtual void toWorld (Vector<double> &world,
+			  const Vector<double> &pixel) =0;
+    /*!
+      \brief Conversion from world to pixel coordinates
+
+      \retval pixel -- Values in pixel coordinates
+      \param world  -- Values in world coordinates
+    */
+    virtual void toPixel (Vector<double> &pixel,
+			  const Vector<double> &world) =0;
     
     /*!
       \brief Add the coordinates to a coordinate system object

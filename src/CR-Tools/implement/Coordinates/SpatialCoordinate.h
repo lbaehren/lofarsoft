@@ -169,7 +169,7 @@ namespace CR { // Namespace CR -- begin
     </ol>
     
   */  
-  class SpatialCoordinate {
+  class SpatialCoordinate : public CoordinateBase {
 
     /*! Type of spatial coordinate */
     CoordinateType::Types type_p;
@@ -195,6 +195,7 @@ namespace CR { // Namespace CR -- begin
       STG projection
     */
     SpatialCoordinate ()
+      : CoordinateBase()
       {
 	init (CoordinateType::DirectionRadius,
 	      "AZEL",
@@ -213,6 +214,7 @@ namespace CR { // Namespace CR -- begin
     SpatialCoordinate (CoordinateType::Types const &coordType,
 		       casa::String const &refcode="AZEL",
 		       casa::String const &projection="STG")
+      : CoordinateBase()
       {
 	init (coordType,
 	      refcode,

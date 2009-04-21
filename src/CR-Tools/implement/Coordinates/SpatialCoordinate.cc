@@ -36,6 +36,7 @@ namespace CR { // Namespace CR -- begin
   
   SpatialCoordinate::SpatialCoordinate (casa::DirectionCoordinate const &direction,
 					casa::LinearCoordinate const &linear)
+    : CoordinateBase()
   {
     type_p           = CoordinateType::DirectionRadius;
     nofAxes_p        = 3;
@@ -51,6 +52,7 @@ namespace CR { // Namespace CR -- begin
   
   SpatialCoordinate::SpatialCoordinate (casa::LinearCoordinate const &linear,
 					CoordinateType::Types const &coordType)
+    : CoordinateBase()
   {
     if (linear.nPixelAxes() == 3) {
       switch (coordType) {
@@ -86,6 +88,7 @@ namespace CR { // Namespace CR -- begin
 					casa::String const &refcode,
 					casa::String const &projection,
 					bool const &anglesInDegrees)
+    : CoordinateBase()
   {
     // basic initialization
     init (coordType,
@@ -102,6 +105,7 @@ namespace CR { // Namespace CR -- begin
   //                                                            SpatialCoordinate
   
   SpatialCoordinate::SpatialCoordinate (SpatialCoordinate const &other)
+    : CoordinateBase()
   {
     copy (other);
   }
