@@ -599,15 +599,6 @@ namespace CR { // Namespace CR -- begin
 	       casa::String const &refcode="AZEL",
 	       casa::String const &projection="STG");
 
-    /*!
-      \brief Convert angular components from angles to degrees
-
-      \param in -- Input vector with angular components in degrees.
-
-      \return out -- Output vector with angular components in radian.
-    */
-    casa::Vector<double> deg2rad (casa::Vector<double> const &in);
-
   };
   
 } // Namespace CR -- end

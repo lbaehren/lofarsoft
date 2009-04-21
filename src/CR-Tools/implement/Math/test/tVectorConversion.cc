@@ -34,6 +34,9 @@
 #include <casa/Arrays/Vector.h>
 #endif
 
+using std::cout;
+using std::endl;
+
 /*!
   \file tVectorConversion.cc
 
@@ -55,31 +58,31 @@ void show_conversion (double const &a1,
 		      double const &b2,
 		      double const &b3)
 {
-  std::cout << "\t";
-  std::cout << "[" << a1 << "," << a2 << "," << a3 << "]";
-  std::cout << "  ->  ";
-  std::cout << "[" << b1 << "," << b2 << "," << b3 << "]";
-  std::cout << std::endl;
+  cout << "\t";
+  cout << "[" << a1 << "," << a2 << "," << a3 << "]";
+  cout << "  ->  ";
+  cout << "[" << b1 << "," << b2 << "," << b3 << "]";
+  cout << endl;
 }
 
 void show_conversion (std::vector<double> const &a,
 		      std::vector<double> const &b)
 {
-  std::cout << "\t";
-  std::cout << "[" << a[0] << "," << a[1] << "," << a[2] << "]";
-  std::cout << "  ->  ";
-  std::cout << "[" << b[0] << "," << b[1] << "," << b[2] << "]";
-  std::cout << std::endl;
+  cout << "\t";
+  cout << "[" << a[0] << "," << a[1] << "," << a[2] << "]";
+  cout << "  ->  ";
+  cout << "[" << b[0] << "," << b[1] << "," << b[2] << "]";
+  cout << endl;
 }
 
 #ifdef HAVE_BLITZ
 void show_conversion (blitz::Array<double,1> const &a,
 		      blitz::Array<double,1> const &b)
 {
-  std::cout << "[" << a(0) << "," << a(1) << "," << a(2) << "]";
-  std::cout << "  ->  ";
-  std::cout << "[" << b(0) << "," << b(1) << "," << b(2) << "]";
-  std::cout << std::endl;
+  cout << "[" << a(0) << "," << a(1) << "," << a(2) << "]";
+  cout << "  ->  ";
+  cout << "[" << b(0) << "," << b(1) << "," << b(2) << "]";
+  cout << endl;
 }
 #endif
 
@@ -94,9 +97,9 @@ int test_angleConversion ()
 {
   int nofFailedTests (0);
   
-  std::cout << "\n[test_angleConversion]\n" << std::endl;
+  cout << "\n[test_angleConversion]\n" << endl;
 
-  std::cout << "[1] double deg2rad (double const &deg)" << std::endl;
+  cout << "[1] double deg2rad (double const &deg)" << endl;
   try {
     double degInput (0);
     double degOutput (0);
@@ -109,11 +112,11 @@ int test_angleConversion ()
     }
 
   } catch (std::string err) {
-    std::cerr << err << std::endl;
+    std::cerr << err << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[2] void deg2rad (double &rad,double const &deg)" << std::endl;
+  cout << "[2] void deg2rad (double &rad,double const &deg)" << endl;
   try {
     double degInput (0);
     double degOutput (0);
@@ -126,9 +129,32 @@ int test_angleConversion ()
     }
 
   } catch (std::string err) {
-    std::cerr << err << std::endl;
+    std::cerr << err << endl;
     nofFailedTests++;
   }
+  
+#ifdef HAVE_CASA
+  cout << "[3] Vector<double> deg2rad (Vector<double>,CoordinateType::Types)" << endl;
+  try {
+    casa::Vector<double> in (3);
+    //
+    in = 1.0;
+    cout << "-- Cartesian     : " << deg2rad(in,CR::CoordinateType::Cartesian)     << endl;
+    in = 1.0;
+    cout << "-- Spherical     : " << deg2rad(in,CR::CoordinateType::Spherical)     << endl;
+    in = 1.0;
+    cout << "-- Cylindrical   : " << deg2rad(in,CR::CoordinateType::Cylindrical)   << endl;
+    in = 1.0;
+    cout << "-- LongLatRadius : " << deg2rad(in,CR::CoordinateType::LongLatRadius) << endl;
+    in = 1.0;
+    cout << "-- AzElRadius    : " << deg2rad(in,CR::CoordinateType::AzElRadius)    << endl;
+    in = 1.0;
+    cout << "-- AzElHeight    : " << deg2rad(in,CR::CoordinateType::AzElHeight)    << endl;
+  } catch (std::string err) {
+    std::cerr << err << endl;
+    nofFailedTests++;
+  }
+#endif
   
   return nofFailedTests;
 }
@@ -142,7 +168,7 @@ int test_angleConversion ()
 */
 int test_vectorConversion ()
 {
-  std::cout << "\n[test_vectorConversion]\n" << std::endl;
+  cout << "\n[test_vectorConversion]\n" << endl;
 
   int nofFailedTests (0);
 
@@ -154,13 +180,13 @@ int test_vectorConversion ()
   double zTarget (0.0);
   bool status (true);
 
-  std::cout << "[1] Conversion from cartesian to other" << std::endl;
+  cout << "[1] Conversion from cartesian to other" << endl;
   try {
     xSource = 1.0;
     ySource = 1.0;
     zSource = 1.0;
     
-    std::cout << "-- cartesian -> cylindrical" << std::endl;
+    cout << "-- cartesian -> cylindrical" << endl;
     status = CR::convertVector (xTarget,
 				yTarget,
 				zTarget,
@@ -172,7 +198,7 @@ int test_vectorConversion ()
 				true);
     show_conversion(xSource,ySource,zSource,xTarget,yTarget,zTarget);
     
-    std::cout << "-- cartesian -> spherical" << std::endl;
+    cout << "-- cartesian -> spherical" << endl;
     status = CR::convertVector (xTarget,
 				yTarget,
 				zTarget,
@@ -185,17 +211,17 @@ int test_vectorConversion ()
     show_conversion(xSource,ySource,zSource,xTarget,yTarget,zTarget);
     
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[2] Conversion from cylindrical to other" << std::endl;
+  cout << "[2] Conversion from cylindrical to other" << endl;
   try {
     xSource =  1.0;  // rho
     ySource = 40.0;  // phi
     zSource =  1.0;  // z
     
-    std::cout << "-- cylindrical -> cartesian" << std::endl;
+    cout << "-- cylindrical -> cartesian" << endl;
     status = CR::convertVector (xTarget,
 				yTarget,
 				zTarget,
@@ -207,7 +233,7 @@ int test_vectorConversion ()
 				true);
     show_conversion(xSource,ySource,zSource,xTarget,yTarget,zTarget);
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -229,7 +255,7 @@ int test_vectorConversion ()
 */
 int test_Cartesian2Other ()
 {
-  std::cout << "\n[test_Cartesian2Other]\n" << std::endl;
+  cout << "\n[test_Cartesian2Other]\n" << endl;
 
   int nofFailedTests (0);
   bool status (true);
@@ -238,7 +264,7 @@ int test_Cartesian2Other ()
 
   cartesian[2] = 1.0;
 
-  std::cout << "[1] Cartesian (x,y,z) -> Spherical (r,phi,theta)" << std::endl;
+  cout << "[1] Cartesian (x,y,z) -> Spherical (r,phi,theta)" << endl;
   try {
     cartesian[0] = 1.0;
     cartesian[1] = 0.0; 
@@ -268,11 +294,11 @@ int test_Cartesian2Other ()
 				      true);
     show_conversion (cartesian,other);
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[2] Cartesian (x,y,z) -> Cylindrical (r,phi,z)" << std::endl;
+  cout << "[2] Cartesian (x,y,z) -> Cylindrical (r,phi,z)" << endl;
   try {
     cartesian[0] = 1.0;
     cartesian[1] = 0.0; 
@@ -302,11 +328,11 @@ int test_Cartesian2Other ()
 				      true);
     show_conversion (cartesian,other);
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[3] Cartesian (x,y,z) -> AzElHeight (Az,El,H)" << std::endl;
+  cout << "[3] Cartesian (x,y,z) -> AzElHeight (Az,El,H)" << endl;
   try {
     cartesian[0] = 1.0;
     cartesian[1] = 0.0; 
@@ -336,11 +362,11 @@ int test_Cartesian2Other ()
 				      true);
     show_conversion (cartesian,other);
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[4] Cartesian (x,y,z) -> AzElRadius (Az,El,R)" << std::endl;
+  cout << "[4] Cartesian (x,y,z) -> AzElRadius (Az,El,R)" << endl;
   try {
     cartesian[0] = 1.0;
     cartesian[1] = 0.0; 
@@ -370,11 +396,11 @@ int test_Cartesian2Other ()
 				      true);
     show_conversion (cartesian,other);
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[5] Cartesian (x,y,z) -> North-East-Height" << std::endl;
+  cout << "[5] Cartesian (x,y,z) -> North-East-Height" << endl;
   try {
     cartesian[0] = 1.0;
     cartesian[1] = 0.0;
@@ -404,7 +430,7 @@ int test_Cartesian2Other ()
 				      true);
     show_conversion (cartesian,other);
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -426,7 +452,7 @@ int test_Cartesian2Other ()
 */
 int test_Cylindrical2Other ()
 {
-  std::cout << "\n[test_Cylindrical2Other]\n" << std::endl;
+  cout << "\n[test_Cylindrical2Other]\n" << endl;
 
   int nofFailedTests (0);
   bool status (true);
@@ -436,7 +462,7 @@ int test_Cylindrical2Other ()
   cylindrical[0] = 1.0;
   cylindrical[2] = 0.0;
 
-  std::cout << "[1] Cylindrical (rho,phi,h) -> Cartesian (x,y,z)" << std::endl;
+  cout << "[1] Cylindrical (rho,phi,h) -> Cartesian (x,y,z)" << endl;
   try {
     cylindrical[1] = 0.0;
     status = CR::Cylindrical2Cartesian (other,
@@ -462,11 +488,11 @@ int test_Cylindrical2Other ()
 					true);
     show_conversion (cylindrical,other);
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[2] Cylindrical (rho,phi,h) -> Spherical (r,phi,theta)" << std::endl;
+  cout << "[2] Cylindrical (rho,phi,h) -> Spherical (r,phi,theta)" << endl;
   try {
     cylindrical[1] = 0.0;
     status = CR::Cylindrical2Spherical (other,
@@ -492,11 +518,11 @@ int test_Cylindrical2Other ()
 					true);
     show_conversion (cylindrical,other);
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[3] Cylindrical (rho,phi,h) -> Az-El-Height" << std::endl;
+  cout << "[3] Cylindrical (rho,phi,h) -> Az-El-Height" << endl;
   try {
     cylindrical[1] = 0.0;
     status = CR::Cylindrical2AzElHeight (other,
@@ -522,11 +548,11 @@ int test_Cylindrical2Other ()
 					true);
     show_conversion (cylindrical,other);
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[4] Cylindrical (rho,phi,h) -> Az-El-Radius" << std::endl;
+  cout << "[4] Cylindrical (rho,phi,h) -> Az-El-Radius" << endl;
   try {
     cylindrical[1] = 0.0;
     status = CR::Cylindrical2AzElRadius (other,
@@ -552,7 +578,7 @@ int test_Cylindrical2Other ()
 					true);
     show_conversion (cylindrical,other);
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -572,7 +598,7 @@ int test_Cylindrical2Other ()
 */
 int test_AzElRadius2Other ()
 {
-  std::cout << "\n[test_AzElRadius2Other]\n" << std::endl;
+  cout << "\n[test_AzElRadius2Other]\n" << endl;
 
   int nofFailedTests (0);
   bool status (true);
@@ -581,10 +607,10 @@ int test_AzElRadius2Other ()
 
   azElRadius[2] = 1.0;
 
-  std::cout << "[1] Azimuth-Elevation-Radius -> Cartesian (x,y,z)" << std::endl;
+  cout << "[1] Azimuth-Elevation-Radius -> Cartesian (x,y,z)" << endl;
   try {
     
-    std::cout << "-- Unit circle in the (x,y) plane ..." << std::endl;
+    cout << "-- Unit circle in the (x,y) plane ..." << endl;
     azElRadius[1] = 0.0;
     
     azElRadius[0] = 0.0;
@@ -611,7 +637,7 @@ int test_AzElRadius2Other ()
 				       true);
     show_conversion (azElRadius,other);
 
-    std::cout << "-- Unit circle in the (x,z) plane ..." << std::endl;
+    cout << "-- Unit circle in the (x,z) plane ..." << endl;
     azElRadius[0] = 0.0;
     
     azElRadius[1] = -90;
@@ -633,14 +659,14 @@ int test_AzElRadius2Other ()
     show_conversion (azElRadius,other);
 
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[2] Azimuth-Elevation-Radius -> Spherical (r,phi,theta)" << std::endl;
+  cout << "[2] Azimuth-Elevation-Radius -> Spherical (r,phi,theta)" << endl;
   try {
     
-    std::cout << "-- Unit circle in the (x,y) plane ..." << std::endl;
+    cout << "-- Unit circle in the (x,y) plane ..." << endl;
     azElRadius[1] = 0.0;
     
     azElRadius[0] = 0.0;
@@ -667,7 +693,7 @@ int test_AzElRadius2Other ()
 				       true);
     show_conversion (azElRadius,other);
 
-    std::cout << "-- Unit circle in the (x,z) plane ..." << std::endl;
+    cout << "-- Unit circle in the (x,z) plane ..." << endl;
     azElRadius[0] = 0.0;
     
     azElRadius[1] = -90;
@@ -689,7 +715,7 @@ int test_AzElRadius2Other ()
     show_conversion (azElRadius,other);
 
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -700,12 +726,12 @@ int test_AzElRadius2Other ()
 
 int test_Cylindrical2Cartesian ()
 {
-  std::cout << "\n[test_Cylindrical2Cartesian]\n" << std::endl;
+  cout << "\n[test_Cylindrical2Cartesian]\n" << endl;
 
   int nofFailedTests (0);
   bool status (true);
 
-  std::cout << "-- Passing of atomic parameters ..." << std::endl;
+  cout << "-- Passing of atomic parameters ..." << endl;
   try {
     double rho (1.0);
     double phi (0.0);
@@ -746,11 +772,11 @@ int test_Cylindrical2Cartesian ()
 		       z);
     }
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "-- Passing of STDL vectors ..." << std::endl;
+  cout << "-- Passing of STDL vectors ..." << endl;
   try {
     std::vector<double> cylindrical (3);
     std::vector<double> cartesian (3);
@@ -775,7 +801,7 @@ int test_Cylindrical2Cartesian ()
 		       cartesian);
     }
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   

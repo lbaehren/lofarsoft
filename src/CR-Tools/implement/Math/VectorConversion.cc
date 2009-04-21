@@ -23,6 +23,39 @@
 #include <Math/VectorConversion.h>
 
 namespace CR { // Namespace CR -- begin
+
+  //_____________________________________________________________________________
+  //                                                                      deg2rad
+
+  casa::Vector<double> deg2rad (casa::Vector<double> const &in,
+				CR::CoordinateType::Types const &coordType)
+  {
+    casa::Vector<double> out (in);
+    
+    switch (coordType) {
+    case CoordinateType::DirectionRadius:
+    case CoordinateType::LongLatRadius:
+    case CoordinateType::AzElHeight:
+    case CoordinateType::AzElRadius:
+      out(0) = deg2rad(in(0));     // Long, Az
+      out(1) = deg2rad(in(1));     // Lat, El
+      break;
+    case CoordinateType::Spherical:
+      out(1) = deg2rad(in(1));      // phi
+      out(2) = deg2rad(in(2));      // theta
+      break;
+    case CoordinateType::Cylindrical:
+      out(1) = deg2rad(in(1));      // phi
+      break;
+    default:
+      break;
+    };
+    
+    return out;
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                convertVector
   
   bool convertVector (double &xTarget,
 		      double &yTarget,
@@ -35,7 +68,7 @@ namespace CR { // Namespace CR -- begin
 		      bool const &anglesInDegrees)
   {
     bool status (false);
-
+    
     switch (sourceCoordinate) {
     case CR::CoordinateType::AzElHeight:
       // ---------------------------------------------------

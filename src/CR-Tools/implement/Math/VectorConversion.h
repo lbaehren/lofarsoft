@@ -275,16 +275,26 @@ namespace CR { // Namespace CR -- begin
     casa::Vector<double> rad = deg*casa::C::pi/180.0;
     return rad;
   }
+  
+  /*!
+    \brief Convert angular components from angles to degrees
+    
+    \param in -- Input vector with angular components in degrees.
+    
+    \return out -- Output vector with angular components in radian.
+  */
+  casa::Vector<double> deg2rad (casa::Vector<double> const &in,
+				CR::CoordinateType::Types const &coordType);
 #endif
   
   //-----------------------------------------------------------------------------
   // [2] radian -> degree
-
+  
   /*!
     \brief Convert radian to degrees
-
+    
     \param rad -- Angle in radian
-
+    
     \return deg -- Angle in degrees
   */
   inline double rad2deg (double const &rad) {

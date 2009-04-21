@@ -334,35 +334,6 @@ namespace CR { // Namespace CR -- begin
     }
   }
 
-  //_____________________________________________________________________________
-  //                                                                      deg2rad
-
-  casa::Vector<double> SpatialCoordinate::deg2rad (casa::Vector<double> const &in)
-  {
-    casa::Vector<double> out (in);
-
-    switch (type_p) {
-    case CoordinateType::DirectionRadius:
-    case CoordinateType::LongLatRadius:
-    case CoordinateType::AzElHeight:
-    case CoordinateType::AzElRadius:
-      out(0) = CR::deg2rad(in(0));     // Long, Az
-      out(1) = CR::deg2rad(in(1));     // Lat, El
-      break;
-    case CoordinateType::Spherical:
-      out(1) = CR::deg2rad(in(1));      // phi
-      out(2) = CR::deg2rad(in(2));      // theta
-      break;
-    case CoordinateType::Cylindrical:
-      out(1) = CR::deg2rad(in(1));  // phi
-      break;
-    default:
-      break;
-    };
-    
-    return out;
-  }
-  
   //______________________________________________________________ positionValues
 
   Matrix<double> SpatialCoordinate::positionValues (bool const &fastedAxisFirst)
@@ -685,7 +656,7 @@ namespace CR { // Namespace CR -- begin
     }
     
     if (anglesInDegrees) {
-      cdelt = SpatialCoordinate::deg2rad(incr);
+      cdelt = CR::deg2rad(incr,type_p);
     }
     
     switch (type_p) {
@@ -756,7 +727,7 @@ namespace CR { // Namespace CR -- begin
     }
 
     if (anglesInDegrees) {
-      crval = SpatialCoordinate::deg2rad(refValue);
+      crval = CR::deg2rad(refValue,type_p);
     }
     
     switch (type_p) {
