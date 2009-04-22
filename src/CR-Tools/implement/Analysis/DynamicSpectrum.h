@@ -39,6 +39,7 @@ extern "C" {
 #include <coordinates/Coordinates/LinearCoordinate.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <coordinates/Coordinates/CoordinateSystem.h>
+#include <Data/LOFAR_TBB.h>
 
 using casa::Quantum;
 using casa::String;
@@ -75,7 +76,7 @@ namespace CR {  // Namespace CR -- begin
     
     //! Array storing the pixel values of the dynamic spectrum, [freq,time]
     casa::Matrix<double> dynamicSpectrum_p;
-
+    
     //! Base name of the file to which the data can be exported
     std::string filename_p;
     
@@ -104,7 +105,6 @@ namespace CR {  // Namespace CR -- begin
       \brief Default constructor
     */
     DynamicSpectrum ();
-    
     /*!
       \brief Argumented constructor
       
@@ -126,7 +126,18 @@ namespace CR {  // Namespace CR -- begin
     DynamicSpectrum (casa::ObsInfo obsInfo,
 		     casa::LinearCoordinate timeAxis,
 		     casa::SpectralCoordinate freqAxis);
-    
+ 
+	  /*!
+	   \brief Argumented constructor
+	   
+	   \param ts2  -- LOFAR_TBB timeseries
+	   
+	   \param nrblocks -- Number of timesteps in the spectrum (optional, default 500)
+	   
+	   \param antennanr -- Antennanr from the dataset used (optional, default 0)
+	  */
+	  DynamicSpectrum (CR::LOFAR_TBB ts2, int nrblocks = 500, int antennanr = 0);	  
+	  
     /*!
       \brief Copy constructor
       
@@ -207,7 +218,25 @@ namespace CR {  // Namespace CR -- begin
     */
     void setFrequencyAxis (const Quantum<double>& crval,
 			   const Quantum<double>& cdelt);
-    
+	  
+	  
+	/*!
+	  \brief Import a dynamic spectrum directly 
+	 
+	  \params data -- The dynamic spectrum
+	 
+	*/
+	  
+	void setSpectrum ( casa::Matrix<double> const &data);
+	  
+	/*!
+	  \brief Set the filename for exporting data
+	 
+	  \params filename -- name of the export file
+	*/
+	  
+	void setFilename ( std::string &filename );
+	  
     /*!
       \brief Retrieve the coordinate system attached to the dynamic spectrum
       
@@ -238,7 +267,7 @@ namespace CR {  // Namespace CR -- begin
               spectrum by collapsing parallel to the time
       axis.
     */
-    Vector<float> averageSpectrum ();
+    Vector<double> averageSpectrum ();
     
     /*!
       \brief Retrieve the total power as function of time
@@ -247,7 +276,7 @@ namespace CR {  // Namespace CR -- begin
               dynamic spectrum by collapsing parallel to the
       frequency axis.
     */
-    Vector<float> totalPower ();
+    Vector<double> totalPower ();
     
     /*!
       \brief Export the dynamic spectrum to AIPS++ image
