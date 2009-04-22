@@ -1,6 +1,9 @@
 /***************************************************************************
  *   Copyright (C) 2006                                                    *
  *   Lars B"ahren (bahren@astron.nl)                                       *
+ *   Copyright (C) 2009                                                    *
+ *   Sander ter Veen (s.terveen@astro.ru.nl)                               *        
+ *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -280,46 +283,47 @@ namespace CR {  // Namespace CR -- begin
   //
   // ==============================================================================
 
-  // -------------------------------------------------------------- averageSpectrum
-  
-  Vector<double> DynamicSpectrum::averageSpectrum ()
-  {
-    casa::IPosition shape (dynamicSpectrum_p.shape());
-    Vector<double> averageSpectrum (shape(0));
-
-    /* Collapse the dynamic spectrum along the time-axis */
-    for (int freq(0); freq<shape(0); freq++) {
-		double fSum = 0;
-		for( int time(0); time<shape(1); time++) {
-			fSum += dynamicSpectrum_p(freq,time)*dynamicSpectrum_p(freq,time);
-		}
-		averageSpectrum(freq) = fabs(fSum);//sum(dynamicSpectrum_p.column(freq)
-										// *dynamicSpectrum_p.column(freq)));
-    }
-    
-    // return the result
-    return averageSpectrum;
-  }
-
   // ------------------------------------------------------------------- totalPower
   
   Vector<double> DynamicSpectrum::totalPower ()
   {
     casa::IPosition shape (dynamicSpectrum_p.shape());
-    Vector<double> totalPower (shape(1));
+    Vector<double> totalPower (shape(0));
 
-    /* Collapse the dynamic spectrum along the frequency axis */
-    for (int n(0); n<shape(1); n++) {
+    /* Collapse the dynamic spectrum along the time-axis */
+	// indices can be confusing but it works  
+    for (int freq(0); freq<shape(0); freq++) {
 		double tSum = 0;
-		for( int freq(0); freq<shape(0); freq++){
-			tSum += dynamicSpectrum_p(freq,n)*dynamicSpectrum_p(freq,n);
+		for( int time(0); time<shape(1); time++) {
+			tSum += dynamicSpectrum_p(freq,time)*dynamicSpectrum_p(freq,time);
 		}
-			totalPower(n) = abs(tSum); //sum(dynamicSpectrum_p.row(n)
-			       //*dynamicSpectrum_p.row(n)));
+		totalPower(freq) = fabs(tSum);
     }
     
     // return the result
     return totalPower;
+  }
+
+  // -------------------------------------------------------------- averageSpectrum
+  
+  Vector<double> DynamicSpectrum::averageSpectrum ()
+  {
+    casa::IPosition shape (dynamicSpectrum_p.shape());
+    Vector<double> averageSpectrum (shape(1));
+
+    /* Collapse the dynamic spectrum along the frequency axis */
+	// indices can be confusing but it works  
+    for (int n(0); n<shape(1); n++) {
+		double fSum = 0;
+		for( int freq(0); freq<shape(0); freq++){
+			fSum += dynamicSpectrum_p(freq,n)*dynamicSpectrum_p(freq,n);
+		}
+			averageSpectrum(n) = abs(fSum); //sum(dynamicSpectrum_p.row(n)
+			       //*dynamicSpectrum_p.row(n)));
+    }
+    
+    // return the result
+    return averageSpectrum;
   }
 
   // ---------------------------------------------------------------------- toImage
@@ -353,40 +357,39 @@ namespace CR {  // Namespace CR -- begin
 	long firstelement = 1;
     char *ctype[] = {"TIME","FREQ"};
 	 // char *cunit[] = {"sec","Hz"};
+	  // get the incrementvalues and units for the axes 
 	  std::string cd1(casa::String::toString(timeAxis_p.increment()(0)));
-	  //casa::String timeunit = casa::String::toString(timeAxis_p.worldAxisUnits()(0));
 	  std::string cd2(casa::String::toString(freqAxis_p.increment()(0)));
-	  //casa::String frequnit = freqAxis_p.worldAxisUnits()(0)
-	  //frequnit.append(" ");
-	  //frequnit.append(freqAxis_p.worldAxisUnits()(0));
+
 	  std::string tunit(timeAxis_p.worldAxisUnits()(0));
 	  std::string funit(freqAxis_p.worldAxisUnits()(0));
 	  
-	  
-
-	  	 //char *cunit[] = {tunit.c_str(), funit.c_str()};
-	 // cunit[1] = frequnit.c_str();
+	
+	  // copy the values to char*, as it's the only thing CFITSIO can handle;
 	  cout << "timeunit: " << tunit << "   frequnit: " << funit << std::endl;
 	  char *cunit0, *cunit1, *cd11, *cd12;
 	  cunit0 = new char[tunit.length()+1];
 	  tunit.copy(cunit0, string::npos);
 	  cunit0[tunit.length()] = '\0';
+	  
 	  cunit1 = new char[funit.length()+1];
 	  funit.copy(cunit1, string::npos);
 	  cunit1[funit.length()] = '\0';
+	  
 	  cd11 = new char[cd1.length()+1];
 	  cd1.copy(cd11, string::npos);
 	  cd11[cd1.length()]='\0';
+	  
 	  cd12 = new char[cd2.length()+1];
 	  cd2.copy(cd12, string::npos);
 	  cd12[cd2.length()]='\0';
 	  
 	  std::string outfile;
-    fitsfile *fptr;
+      fitsfile *fptr;
 	  std::cout << "shape: " << shape << std::endl;
 	  std::cout << "nelements: " << nelements << std::endl;  
     /* Adjust the filename such that existing data are overwritten */
-    outfile = "!" + filename_p + ".fits";
+      outfile = "!" + filename_p + ".fits";
 	  std::cout << "write to: " << outfile.c_str() << std::endl;
     /* Create FITS file on disk */
     fits_create_file (&fptr, outfile.c_str(), &status);
@@ -405,21 +408,76 @@ namespace CR {  // Namespace CR -- begin
 	dynamicSpectrum_float.putStorage(datapointer, storage);
 
  	//set keywords for the axis
-	  std::cout << " -- Set the keywords for the coordinate type" << std::endl;
+	  //std::cout << " -- Set the keywords for the coordinate type" << std::endl;
 	  ffukys (fptr, "CTYPE1", ctype[0], "Time axis", &status);
 	  ffukys (fptr, "CTYPE2", ctype[1], "Frequency axis", &status);
 	  
-	  std::cout << " -- Set the keywords for the units on the coordinate axes"
-	  << std::endl;
+	  //std::cout << " -- Set the keywords for the units on the coordinate axes"<< std::endl;
 	  ffukys (fptr, "CUNIT1", cunit0, "Time axis units", &status);
 	  ffukys (fptr, "CUNIT2", cunit1, "Frequency axis units", &status);
 	  
 	  ffukys (fptr, "CD1_1", cd11, "Time axis scaling", &status);
 	  ffukys (fptr, "CD2_2", cd12, "Frequency axis scaling", &status);
 	  
+	  
 	  //ADD start value CRVAL1 by start pixel CRPIX1 to complete the picture. This is needed for the second nyquist zone
 	  //CRVAL = (PIXEL - CRPIX1)*CD1_1 + CRVAL1
 	  //
+
+
+	  
+
+	  
+	  //Add frequency spectrum
+	  Vector<double> avSpectrum = log(averageSpectrum());
+	  
+	  casa::IPosition shape_F = avSpectrum.shape();
+	  long naxis_F            = shape_F.nelements();
+	  uint nelements_F        = avSpectrum.nelements();
+	  long naxes_F[2]         = { shape_F(0), shape_F(1)};
+	  long firstelement_F = 1; 
+	  
+	  casa::Bool storage_F;
+	  casa::Double* datapointer_F = avSpectrum.getStorage(storage_F);
+	  
+	  fits_create_img (fptr, DOUBLE_IMG, naxis_F, naxes_F, &status);
+	  fits_write_img (fptr, TDOUBLE, firstelement_F, nelements_F, datapointer_F, &status);
+	  avSpectrum.putStorage(datapointer_F, storage_F);	  
+
+	  
+	  
+
+	  ffukys (fptr, "CTYPE1", ctype[1], "Frequency axis", &status);
+	  ffukys (fptr, "CUNIT1", cunit1, "Frequency axis units", &status);
+	  ffukys (fptr, "CD1_1", cd12, "Frequency axis scaling", &status);
+      ffukys (fptr, "BUNIT", "log(averageSpectrum)", "Power axis", &status);
+
+	  ffukys (fptr, "EXTNAME", "Average Spectrum (logscale)", "Frequency spectrum averaged over time in logarithmic scale", &status);
+
+	  //Add powerspectrum
+	  Vector<double> totPower = log(totalPower());
+	  
+	  casa::IPosition shape_P = totPower.shape();
+	  long naxis_P            = shape_P.nelements();
+	  uint nelements_P        = totPower.nelements();
+	  long naxes_P[2]         = { shape_P(0), shape_P(1)};
+	  long firstelement_P = 1; 
+	  
+	  casa::Bool storage_P;
+	  casa::Double* datapointer_P = totPower.getStorage(storage_P);
+
+	  
+	  fits_create_img (fptr, DOUBLE_IMG, naxis_P, naxes_P, &status);
+	  fits_write_img (fptr, TDOUBLE, firstelement_P, nelements_P, datapointer_P, &status);
+	  totPower.putStorage(datapointer_P, storage_P);	 
+	  ffukys (fptr, "CTYPE1", ctype[0], "Time axis", &status);
+	  ffukys (fptr, "CUNIT1", cunit0, "Time axis units", &status);
+	  ffukys (fptr, "CD1_1", cd11, "Time axis scaling", &status);
+	  ffukys (fptr, "BUNIT", "log(totalPower)", "Power axis", &status);
+	  ffukys (fptr, "EXTNAME", "Total Power (logscale)", "Total power for each time in logarithmic scale", &status);
+
+
+
 	  fits_close_file (fptr, &status);  
     return true;
   }
