@@ -221,7 +221,7 @@ if (enable-num_util)
     
     ## configure the package
     add_custom_target (num_util_configure
-      COMMAND rm makefile
+      COMMAND rm -f makefile
       COMMAND cmake -C ${PYTHON_MODULES_BINARY_DIR}/python.cmake .
       WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUM_UTIL_DIRECTORY}
       COMMENT "[Num_util] Configuring package ..."
