@@ -238,6 +238,7 @@ add_custom_target (clean-src
 
 add_custom_target (update
   COMMAND svn up
+  COMMAND cd ${USG_ROOT}/build && ./bootstrap
   WORKING_DIRECTORY ${USG_ROOT}
   COMMENT "Updating working version of the source code from repository ..."
   )
@@ -368,11 +369,19 @@ add_custom_target (dal
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package DAL ..."
   )
-if (TEST_DATASETS)
-  add_dependencies (dal test-data casacore)
-else(TEST_DATASETS)
-  add_dependencies (dal casacore)
-endif (TEST_DATASETS)
+if (DAL_PYTHON_BINDINGS)
+  if (TEST_DATASETS)
+    add_dependencies (dal casacore python test-data)
+  else(TEST_DATASETS)
+    add_dependencies (dal casacore python)
+  endif (TEST_DATASETS)
+else (DAL_PYTHON_BINDINGS)
+  if (TEST_DATASETS)
+    add_dependencies (dal casacore test-data)
+  else(TEST_DATASETS)
+    add_dependencies (dal casacore)
+  endif (TEST_DATASETS)
+endif (DAL_PYTHON_BINDINGS)
 
 ##____________________________________________________________________
 ##                                                            CR-Tools
@@ -385,15 +394,15 @@ add_custom_target (cr
 
 if (CR_WITH_STARTOOLS)
   if (CR_WITH_GUI)
-    add_dependencies (cr dal startools mathgl)
+    add_dependencies (cr test-data dal startools mathgl)
   else (CR_WITH_GUI)
-    add_dependencies (cr dal startools)
+    add_dependencies (cr test-data dal startools)
   endif (CR_WITH_GUI)
 else (CR_WITH_STARTOOLS)
   if (CR_WITH_GUI)
-    add_dependencies (cr dal mathgl)
+    add_dependencies (cr test-data dal mathgl)
   else (CR_WITH_GUI)
-    add_dependencies (cr dal)
+    add_dependencies (cr test-data dal)
   endif (CR_WITH_GUI)
 endif (CR_WITH_STARTOOLS)
 
@@ -406,6 +415,16 @@ add_custom_target (rm
   COMMENT "Building package RM ..."
   )
 add_dependencies (rm dal)
+
+##____________________________________________________________________
+##                                                             smosaic
+
+add_custom_target (smosaic
+  COMMAND ./build_package.sh rm ${USG_ROOT}/src/smosaic
+  WORKING_DIRECTORY ${USG_BUILD}
+  COMMENT "Building package smosaic ..."
+  )
+add_dependencies (smosaic casacore cfitsio wcslib)
 
 ##____________________________________________________________________
 ##                                                             contrib
