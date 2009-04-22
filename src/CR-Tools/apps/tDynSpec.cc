@@ -69,6 +69,7 @@ int main (int argc, char *argv[])
   int fftblocksize = 1024;
   int nrblocks = 2500;
   int antennanr = 0;
+	
 	for(int argcounter(1); argcounter < argc; argcounter++){
 	    std::string topic = string(argv[argcounter]); 
 		if(topic == "help"){
@@ -102,22 +103,6 @@ int main (int argc, char *argv[])
 			cout << "specify at least an input file.";
 		}
 	}
-		
-	 
-	 
- // std::string filename = "/Users/STV/Astro/Programming/usg/data/test/rw_20090402_165959_0100.h5";
-  
-  
-  //std::string filename = "/Users/STV/Astro/Programming/usg/data/test/rw_testfile.h5";
-
-	// Test for the constructor(s)
-//   ofstream outfile;
-   //TBB_Timeseries ts = TBB_Timeseries(filename);
-//	int fftblocksize = 40240;
-//	int nrblocks = 2500;
-//	int antennanr = 0;
-	
-	
 	
     LOFAR_TBB ts2 = LOFAR_TBB(filename, fftblocksize);
 
@@ -129,28 +114,7 @@ int main (int argc, char *argv[])
 	cout << "make FITS \n";
 	Spectrum.toFITS();
 	
-	casa::Vector<double> SumFreq = log(Spectrum.averageSpectrum());
-	casa::Vector<double> SumTime = log(Spectrum.totalPower());
-	casa::Vector<double> xTime = ts2.frequencyValues(antennanr);
-	//cout << "shapes: " << xFreq.shape() << SumFreq.shape() << SumTime.shape() << endl;
-	double samplefreq = ts2.sample_frequency_value()(antennanr);
-	double timestep = 1 / samplefreq * ts2.blocksize();
-	double time = 0;
-	casa::Vector<double> xFreq; //(SumFreq.shape);
-	xFreq.resize(SumFreq.shape());
-	for(uint in(0); in< xFreq.shape(); in++){
-		xFreq(in) = time;
-		time += timestep;
-	}
 
-	
-    SimplePlot plotTT = SimplePlot();
-	//std::string psfile = outfile + "_FreqPower.ps";
-	plotTT.CR::SimplePlot::InitPlot 	("/Users/STV/Astro/Programming/debugging/DynSpecT.ps", min(xFreq), max(xFreq), min(SumFreq), max(SumFreq), 0, 0, 1, 1, 1);
-	plotTT.CR::SimplePlot::PlotLine 	(	xFreq,SumFreq, 10, 1);
-	SimplePlot plotF = SimplePlot();
-	plotF.CR::SimplePlot::InitPlot 	("/Users/STV/Astro/Programming/debugging/DynSpecF.ps", min(xTime), max(xTime), min(SumTime)-1, max(SumTime)+1, 0, 0, 1, 1, 1);
-    plotF.CR::SimplePlot::PlotLine 	(	xTime, SumTime, 10, 1);
 	
 	//cout << Spectrum.totalPower() << endl;
     return nofFailedTests;
