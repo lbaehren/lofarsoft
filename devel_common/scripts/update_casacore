@@ -1,6 +1,21 @@
 #!/bin/sh
 
 ## -----------------------------------------------------------------------------
+##
+## NAME:
+##    update_casacore
+##
+## DESCRIPTION:
+##    Shell script to update the existing code base of casacore as part of the
+##    USG repository from the most recent checkout of the source code from its
+##    original code repository.
+##
+## USAGE:
+##    update_casacore <sourcedir>
+##
+## -----------------------------------------------------------------------------
+
+## -----------------------------------------------------------------------------
 ## check input parameters
 
 if test -z $1 ; then

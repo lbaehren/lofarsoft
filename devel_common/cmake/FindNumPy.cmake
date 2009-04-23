@@ -111,6 +111,8 @@ find_program (F2PY_EXECUTABLE f2py f2py2.6 f2py2.5 f2py2.4
 find_file (NUMPY_VERSION_PY version.py
   PATHS
   ${lib_locations}
+  /usr/lib64
+  /usr/local/lib64
   PATH_SUFFIXES
   python2.6/site-packages/numpy
   python2.5/site-packages/numpy

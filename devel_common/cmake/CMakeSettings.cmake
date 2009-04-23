@@ -190,7 +190,7 @@ if (NOT USG_CMAKE_CONFIG)
 
   ## TBB time-series data
   
-  find_file (dataset_tbb rw_20071024_090656.h5
+  find_file (dataset_tbb rw_20090417_181700.h5
     PATHS
     ${USG_ROOT}/data
     ${USG_ROOT}/data/test
