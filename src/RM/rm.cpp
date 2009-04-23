@@ -137,6 +137,27 @@ bool rm::lambdaSqToFreq(const vector<double> &lambda_sq, vector<double> &frequen
     RM-Imager: uv data is V^2 (Voltage squared)
 */
 
+
+/*! Calculate the total intensity integrated over all channels
+
+  \param frequencies --
+  \param totalIntensity --
+  \param unit --
+*/
+
+bool rm:totalIntensity(vector<double> frequencies, double &totalIntensity, string unit)
+{
+
+  // integrate over all frequencies in channel
+  
+  
+  // convert to desired unit (given by string unit)
+
+  return true;
+}
+
+
+
 /*! Calculate the step size delta_lambda_sq for each lambda_squared channel
     
     \param freq_low --
@@ -145,11 +166,14 @@ bool rm::lambdaSqToFreq(const vector<double> &lambda_sq, vector<double> &frequen
     
     \return delta_lambda_sq --
 */
-bool rm::deltaLambdaSq( vector<double> delta_lambda_sq, 
+vector<double> rm::deltaLambdaSq( //vector<double> delta_lambda_sq, 
 			const vector<double> &freq_low, 
 			const vector<double> &freq_high,
 			bool freq)
 {
+  // vector containing the converted lambda squared bins
+  vector<double> delta_lambda_sq;
+
   // lambda vectors for conversion
   vector<double> lambda_low(freq_high.size()), lambda_high(freq_low.size());
 
@@ -162,8 +186,7 @@ bool rm::deltaLambdaSq( vector<double> delta_lambda_sq,
   }
   else if(freq_low.size()!=freq_high.size())		// freq_low and freq_high differ in size
   {
-    cerr << "rm::deltaLambdaSq: freq_low and freq_high vector differ in size" << endl;
-    return false;
+    throw "rm::deltaLambdaSq: freq_low and freq_high vector differ in size";
   }
   else
   {
@@ -173,14 +196,17 @@ bool rm::deltaLambdaSq( vector<double> delta_lambda_sq,
     {
       if(freqToLambdaSq(&lambda_low, freq_high)==false)
       {
-	cerr << "rm:deltaLambdaSq: conversion of freq_high to lambda_sq failed" << endl;
-	return false;
+	throw << "rm:deltaLambdaSq: conversion of freq_high to lambda_sq failed";
       }
       else if(freqToLambdaSq(&lambda_high, freq_low)==false)
       {
-	cerr << "rm:deltaLambdaSq: conversion of freq_low to lambda_sq failed" << endl;
-	return false;
+	throw "rm:deltaLambdaSq: conversion of freq_low to lambda_sq failed";
       }
+    }
+    else	// if limits were actually already given as lambda squareds just use these
+    {
+      lambda_low=freq_low;
+      lambda_high=freq_high; 
     }
 
     // compute difference between higher lambda and lower lambda (other way around than frequencies)
@@ -195,7 +221,7 @@ bool rm::deltaLambdaSq( vector<double> delta_lambda_sq,
 
   }
 
-  return true;		// return success
+  return delta_lambda_squared;		// return delta lambda squared vector
 }
 
 
@@ -204,23 +230,32 @@ bool rm::deltaLambdaSq( vector<double> delta_lambda_sq,
     The inverse Fourier Transformation is the classical relation between the lambda squared space and Faraday
     space. Input images channel are not necessarily given in lambda squared wavelengths, but in frequency instead. If that is the case, a conversion function between lambda squared and frequency is used.
     
-    Normal case (bool freq=true, default): the input vector is a range of complex polarized intensities
-    measured at different frequencies
-    Special case (bool freq=false): the input vector is already given as a range of polarized intensities
-    given at different lambda squareds
+    Normal case (bool freq=true, default): the input vector is a range of complex polarized 
+    intensities measured at different frequencies 
+    Special case (bool freq=false): the input vector is already given as a range of polarized intensities given at different lambda squareds
 
     \param intensity --
     \param frequency --
+    \param delta_freq --
     \param freq --
     
     \return rm --
 */
 vector<double>rm::inverseFourier(vector<double> intensity,
 				 vector<double> frequency,
+				 vector<double> delta_freq,
 				 bool freq)
 {
 	vector<double>rm;	// rm values along the line of sight
 
+
+	if(freq)		// if given as frequency, convert to lambda squareds
+	{
+	  convertToLambdaSquared()	// convert frequency vector
+	  
+					// convert delta step vector
+	
+	}
 
 	return rm;
 }
@@ -235,7 +270,8 @@ vector<double>rm::inverseFourier(vector<double> intensity,
   and b_min/b_max define ranges for wavelet parameter space probing.
 
   \param intensity -- 
-  \param frequencies -- 
+  \param frequencies --
+  \param delta_freq --
   \param wavelet_parameters -- 
   \param freq -- 
   
@@ -243,6 +279,7 @@ vector<double>rm::inverseFourier(vector<double> intensity,
  */
 vector<double> rm::wavelet(vector<double> intensity,
 			   vector<double> frequencies,
+			   vector<double> delta_freqs,
 			   vector<double> wavelet_parameters,
 			   bool freq)
 {

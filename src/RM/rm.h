@@ -55,16 +55,15 @@ private:
   double cached_ra, cached_dec;
 
   //! Convert frequency vector to lambda squared vector
-  bool freqToLambdaSq(const vector<double> &frequency, vector<double> &lambda);
+  vector<double> freqToLambdaSq(const vector<double> &frequency);
   //! Convert lambda squared vector to frequency vector
-  bool lambdaSqToFreq(const vector<double> &lambda_sq, vector<double> &frequency);
+  vector<double> lambdaSqToFreq(const vector<double> &lambda_sq);
 
 
   // Public functions.
 public:
   //! Calculate delta lambda squared steps from lower and higher frequency limits
-  bool deltaLambdaSq(	vector<double> delta_lambda_sq, 
-			const vector<double> &freq_low, 
+  vector<double> deltaLambdaSq(	const vector<double> &freq_low, 
 			const vector<double> &freq_high,
 			bool freq=true);
 
