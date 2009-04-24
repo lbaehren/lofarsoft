@@ -498,6 +498,7 @@ namespace CR { // Namespace  -- begin
   //_____________________________________________________________________________
   //                                                                  root_ntuple
   
+#ifdef HAVE_ROOT
   void NuMoonTrigger::root_ntuple( std::string const &filename,
 				   SkymapQuantity const &quantity,
 				   std::string const &group,
@@ -529,7 +530,7 @@ namespace CR { // Namespace  -- begin
       return void () ;
     }
   }
-
+#endif
   
   
   
