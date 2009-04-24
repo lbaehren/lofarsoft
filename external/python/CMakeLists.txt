@@ -99,7 +99,7 @@ find_program (HAVE_TAR   tar   ${bin_locations} )
 ## Name of build platform as determined by distutils
 
 execute_process (
-  COMMAND python -c "from distutils import util;print util.get_platform()"
+  COMMAND ${PYTHON_EXECUTABLE} -c "from distutils import util;print util.get_platform()"
   WORKING_DIRECTORY ${PYTHON_MODULES_SOURCE_DIR}
   RESULT_VARIABLE platform_test_result
   OUTPUT_VARIABLE platform_test_output
@@ -140,7 +140,7 @@ endif (NUMPY_FORCE_BUILD)
 
 if (enable-numpy)
 
-  set (NUMPY_VERSION "1.2.1")
+  set (NUMPY_VERSION "1.3.0")
   set (NUMPY_DIRECTORY "numpy-${NUMPY_VERSION}")
   set (NUMPY_TAR_ARCHIVE "${NUMPY_DIRECTORY}.tar.gz")
   
@@ -165,7 +165,7 @@ if (enable-numpy)
     
     ## build the package
     add_custom_target (numpy_build
-      COMMAND python setup.py build
+      COMMAND ${PYTHON_EXECUTABLE} setup.py build
       WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUMPY_DIRECTORY}
       COMMENT "[NumPy] Starting build ..."
       )
@@ -173,7 +173,7 @@ if (enable-numpy)
     
     ## build and install the package
     add_custom_target (numpy_install
-      COMMAND python setup.py install --prefix=${USG_INSTALL_PREFIX}
+      COMMAND ${PYTHON_EXECUTABLE} setup.py install --home=${USG_INSTALL_PREFIX}
       COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${NUMPY_TAR_ARCHIVE}
       COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${NUMPY_DIRECTORY}
       WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUMPY_DIRECTORY}
@@ -295,7 +295,7 @@ if (enable-matplotlib)
 
     ## build the package
     add_custom_target (matplotlib_build
-      COMMAND python setup.py build
+      COMMAND ${PYTHON_EXECUTABLE} setup.py build
       WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${MATPLOTLIB_DIRECTORY}
       COMMENT "[Matplotlib] Starting build ..."
       )
@@ -307,7 +307,7 @@ if (enable-matplotlib)
     
     ## install the package
     add_custom_target (matplotlib_install
-      COMMAND python setup.py install --prefix=${USG_INSTALL_PREFIX}
+      COMMAND ${PYTHON_EXECUTABLE} setup.py install --home=${USG_INSTALL_PREFIX}
       COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${MATPLOTLIB_TAR_ARCHIVE}
       COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${MATPLOTLIB_DIRECTORY}
       WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${MATPLOTLIB_DIRECTORY}
@@ -351,7 +351,7 @@ if (enable-numarray)
   
     ## build the package
     add_custom_target (numarray_build
-      COMMAND python setup.py build
+      COMMAND ${PYTHON_EXECUTABLE} setup.py build
       WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUMARRAY_DIRECTORY}
       COMMENT "[Numarray] Starting build ..."
       )
@@ -359,7 +359,7 @@ if (enable-numarray)
     
     ## install the package
     add_custom_target (numarray_install
-      COMMAND python setup.py install --prefix=${USG_INSTALL_PREFIX}
+      COMMAND ${PYTHON_EXECUTABLE} setup.py install --home=${USG_INSTALL_PREFIX}
       COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${NUMARRAY_TAR_ARCHIVE}
       COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${NUMARRAY_DIRECTORY}
       WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUMARRAY_DIRECTORY}

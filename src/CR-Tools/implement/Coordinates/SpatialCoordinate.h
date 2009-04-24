@@ -34,6 +34,7 @@
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/String.h>
+#include <casa/Quanta/Quantum.h>
 #include <coordinates/Coordinates/Coordinate.h>
 #include <coordinates/Coordinates/CoordinateSystem.h>
 #include <coordinates/Coordinates/DirectionCoordinate.h>
@@ -50,6 +51,7 @@ using casa::DirectionCoordinate;
 using casa::IPosition;
 using casa::LinearCoordinate;
 using casa::Matrix;
+using casa::Quantum;
 using casa::String;
 using casa::Vector;
 
@@ -191,8 +193,14 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Default constructr
       
-      Creates a new SpatialCoordinate of type \e DirectionRadius for AZEL and
-      STG projection
+      Creates a new SpatialCoordinate of type \e DirectionRadius:
+      - Reference  = AZEL
+      - Projection = STG
+      - Shape      = [120,120,1]
+      - Units      = ["deg","deg","m"]
+      - RefPixel   = [60,60,0]
+      - RefValue   = [0,90,1]
+      - Increment  = [1,1,1]
     */
     SpatialCoordinate ()
       : CoordinateBase()
@@ -225,23 +233,22 @@ namespace CR { // Namespace CR -- begin
       \brief Argumented constructor
       
       \param coordType  -- Type of coordinate for which to create an object.
-      \param refPixel   -- Reference pixel
-      \param refValue   -- Reference value
-      \param increment  -- Coordinate increment
-      \param shape      -- The number of elements along the coordinate axes
       \param refcode    -- Reference code for the celestial coordinate system, in
              case the coordinate contains a DirectionCoordinate
       \param projection -- Identifier for the spherical map projection, in case
              the coordinate contains a DirectionCoordinate
+      \param refPixel   -- Reference pixel
+      \param refValue   -- Reference value
+      \param increment  -- Coordinate increment
+      \param shape      -- The number of elements along the coordinate axes
     */
     SpatialCoordinate (CoordinateType::Types const &coordType,
+		       casa::String const &refcode,
+		       casa::String const &projection,
 		       casa::Vector<double> const &refPixel,
-		       casa::Vector<double> const &refValue,
-		       casa::Vector<double> const &increment,
-		       casa::IPosition const &shape,
-		       casa::String const &refcode="AZEL",
-		       casa::String const &projection="STG",
-		       bool const &anglesInDegrees=true);
+		       Vector<Quantum<double> > const &refValue,
+		       Vector<Quantum<double> > const &increment,
+		       casa::IPosition const &shape);
     
     /*!
       \brief Argumented constructor for coordinate of type DirectionRadius

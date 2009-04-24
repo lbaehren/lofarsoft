@@ -424,6 +424,9 @@ namespace CR {  // Namespace CR -- begin
 				       data);
     nofProcessedBlocks_p++;
 
+    // debugging output
+    std::cout << beam.row(1) << std::endl;
+
     //________________________________________________________________
     /*
      *  Map the contents of the array returning the Beamformer results

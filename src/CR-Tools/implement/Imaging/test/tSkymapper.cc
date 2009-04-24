@@ -468,25 +468,26 @@ int test_processing (string const &infile,
 
   // Spatial coordinates
   IPosition shape (3,120,120,1);
-  Vector<double> refValue (3);
   Vector<double> refPixel (3);
-  Vector<double> increment (3);
-  refValue(0) = 0;
-  refValue(1) = 90;
-  refValue(2) = 100;
-  refPixel(0) = shape(0)/2;
-  refPixel(1) = shape(21)/2;
-  refPixel(2) = 0;
-  increment(0) = 1;
-  increment(1) = 1;
-  increment(2) = 100;
+  Vector<Quantum<double> > refValue (3);
+  Vector<Quantum<double> > increment (3);
+  //
+  refPixel(0)  = shape(0)/2.0;
+  refPixel(1)  = shape(1)/2.0;
+  refValue(0)  = Quantity(0.0,"deg");
+  refValue(1)  = Quantity(90.0,"deg");
+  refValue(2)  = Quantity(1.0,"m");
+  increment(0) = Quantity(1,"deg");
+  increment(1) = Quantity(1,"deg");
+  increment(2) = Quantity(1,"m");
+  //
   SpatialCoordinate spatial (CoordinateType::DirectionRadius,
+			     refcode,
+			     projection,
 			     refPixel,
 			     refValue,
 			     increment,
-			     shape,
-			     refcode,
-			     projection);
+			     shape);
   // Time-Frequency coordinate
   TimeFreqCoordinate timeFreq (blocksize,
 			       nofBlocksPerFrame,

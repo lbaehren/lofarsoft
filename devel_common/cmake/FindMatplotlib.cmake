@@ -20,21 +20,18 @@
 # |   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                 |
 # +-----------------------------------------------------------------------------+
 
-# - Check for the presence of NUMPY
-#
-# The following variables are set when NUMPY is found:
-#  HAVE_NUMPY               = Set to true, if all components of NUMPY have been
-#                             found.
-#  NUMPY_INCLUDES           = Include path for the header files of NUMPY
-#  NUMPY_LIBRARIES          = Link these to use NUMPY
-#  MATPLOTLIB_LFLAGS        = Linker flags (optional)
-#  MATPLOTLIB_API_VERSION   = API version of the installed and available Matplotlib
-#                             package
+# The following variables are set when MATPLOTLIB is found:
+#  HAVE_MATPLOTLIB      = Set to true, if all components of MATPLOTLIB have been
+#                         found.
+#  MATPLOTLIB_INCLUDES  = Include path for the header files of MATPLOTLIB
+#  MATPLOTLIB_LIBRARIES = Link these to use MATPLOTLIB
+#  MATPLOTLIB_LFLAGS    = Linker flags (optional)
 
 ## -----------------------------------------------------------------------------
 ## Search locations
 
 include (CMakeSettings)
+include (FindPython)
 
 ## -----------------------------------------------------------------------------
 ## As the shared libraries of a Python module typically do not contain the 
@@ -53,8 +50,7 @@ find_path (MATPLOTLIB_INCLUDES numerix.h mplutils.h
   PATHS
   ${lib_locations}
   PATH_SUFFIXES
-  python2.6/site-packages/matplotlib/core/include
-  python2.5/site-packages/matplotlib/core/include
+  python${PYTHON_VERSION}/site-packages/matplotlib/core/include
   NO_DEFAULT_PATH
   )
 
@@ -65,9 +61,7 @@ FIND_LIBRARY (MATPLOTLIB_NXUTILS_LIBRARY nxutils
   PATHS
   ${lib_locations}
   PATH_SUFFIXES
-  python2.6/site-packages/matplotlib
-  python2.5/site-packages/matplotlib
-  python2.4/site-packages/matplotlib
+  python${PYTHON_VERSION}/site-packages/matplotlib
   NO_DEFAULT_PATH
   )
 if (MATPLOTLIB_NXUTILS_LIBRARY)
@@ -78,9 +72,7 @@ FIND_LIBRARY (MATPLOTLIB_TTCONV_LIBRARY ttconv
   PATHS
   ${lib_locations}
   PATH_SUFFIXES
-  python2.6/site-packages/matplotlib
-  python2.5/site-packages/matplotlib
-  python2.4/site-packages/matplotlib
+  python${PYTHON_VERSION}/site-packages/matplotlib
   NO_DEFAULT_PATH
   )
 if (MATPLOTLIB_TTCONV_LIBRARY)
@@ -94,9 +86,7 @@ find_file (MATPLOTLIB_PYLAB_PY pylab.py
   PATHS
   ${lib_locations}
   PATH_SUFFIXES
-  python2.6/site-packages/matplotlib
-  python2.5/site-packages/matplotlib
-  python2.4/site-packages/matplotlib
+  python${PYTHON_VERSION}/site-packages/matplotlib
   NO_DEFAULT_PATH
   )
 
@@ -104,9 +94,7 @@ find_file (MATPLOTLIB_NXUTILS_PY nxutils.py
   PATHS
   ${lib_locations}
   PATH_SUFFIXES
-  python2.6/site-packages/matplotlib
-  python2.5/site-packages/matplotlib
-  python2.4/site-packages/matplotlib
+  python${PYTHON_VERSION}/site-packages/matplotlib
   NO_DEFAULT_PATH
   )
 

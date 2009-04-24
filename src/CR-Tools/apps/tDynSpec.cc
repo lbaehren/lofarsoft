@@ -39,7 +39,8 @@
   \date 2009/03/30
 */
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                      show_data
 
 /*!
   \brief Show the contents of the data array
@@ -55,8 +56,22 @@ void show_data (Matrix<Double> const &data)
 	    << data(3,1)
 	    << std::endl;
 }
+
+//_______________________________________________________________________________
+//                                                                      plot_data
+
+void plot_data ()
+{
+}
+
+//_______________________________________________________________________________
+//                                                                           main
+
 /*!
-  \brief Test programming to process an antenna hfd5 file to a dynamic spectrum in FITS format 
+  \brief Test processing of raw TBB data to create a dynamic spectrum
+
+  Input is taken from an HDF5 file containing raw TBB data from the individual
+  dipoles, output dynamic spectrum is written to a FITS file.
  */
 int main (int argc, char *argv[])
 {

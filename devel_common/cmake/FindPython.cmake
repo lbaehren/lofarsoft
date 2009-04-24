@@ -24,16 +24,20 @@
 #
 # The following variables are set when PYTHON is found:
 #
-#  HAVE_PYTHON       = Set to true, if all components of PYTHON have been found.
-#  PYTHON_EXECUTABLE = Location of the Python executable
-#  PYTHON_INCLUDES   = Include path for the header files of PYTHON
-#  PYTHON_LIBRARIES  = Link these to use PYTHON
-#  PYTHON_LFGLAS     = Linker flags (optional)
+#  HAVE_PYTHON            = Set to true, if all components of PYTHON have been
+#                           found.
+#  PYTHON_EXECUTABLE      = Location of the Python executable
+#  PYTHON_INCLUDES        = Include path for the header files of PYTHON
+#  PYTHON_LIBRARIES       = Link these to use PYTHON
+#  PYTHON_VERSION         = Python version, as return from "python --version"
+#  PYTHON_MAJOR_VERSION   = (not yet implemented)
+#  PYTHON_MINOR_VERSION   = (not yet implemented)
+#  PYTHON_RELEASE_VERSION = (not yet implemented)
+#  PYTHON_LFGLAS          = Linker flags (optional)
 #
 # Beside the core components of Python we also include a search for optional
 # packages which might be installed as well:
 #
-#  NUMPY_INCLUDES    = Include path for the header files of NUMPY package
 #  NUM_UTIL_INCLUDES = Include path for the header files of NUM_UTIL package
 #
 
@@ -45,94 +49,88 @@ include (CMakeSettings)
 ## -----------------------------------------------------------------------------
 ## Is the root of the Python installation defined through environment variable?
 
-set (HAVE_PYTHONHOME $ENV{PYTHONHOME})
+set (PYTHON_PYTHONHOME $ENV{PYTHONHOME})
 
-if (HAVE_PYTHONHOME)
+if (PYTHON_PYTHONHOME)
   message (STATUS "Found environment variable PYTHONHOME.")
-endif (HAVE_PYTHONHOME)
+endif (PYTHON_PYTHONHOME)
 
 ## -----------------------------------------------------------------------------
 
 foreach (python_version 2.6 2.5 2.4 2.3)
 
-  ## Check for executable
-  
-  if (HAVE_PYTHONHOME)
-    find_program (PYTHON_EXECUTABLE python python${python_version}
-      PATHS ${HAVE_PYTHONHOME} ${HAVE_PYTHONHOME}/bin
+  if (NOT HAVE_PYTHON)
+    
+    ## Check for the Python executable
+    
+    if (PYTHON_PYTHONHOME)
+      find_program (PYTHON_EXECUTABLE python python${python_version}
+	PATHS ${PYTHON_PYTHONHOME} ${PYTHON_PYTHONHOME}/bin
+	NO_DEFAULT_PATH
+	)
+    else (PYTHON_PYTHONHOME)
+      find_program (PYTHON_EXECUTABLE python${python_version}
+	PATHS ${bin_locations}
+	NO_DEFAULT_PATH
+	)
+    endif (PYTHON_PYTHONHOME)
+
+    ## Extract the full version information from the Python executable
+    
+    if (PYTHON_EXECUTABLE)
+      execute_process (
+	COMMAND ${PYTHON_EXECUTABLE} --version
+	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+	RESULT_VARIABLE version_test_result
+	OUTPUT_VARIABLE version_test_output
+	ERROR_VARIABLE version_test_error
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+	ERROR_STRIP_TRAILING_WHITESPACE
+	)
+      if (version_test_error)
+	string (REGEX REPLACE "Python " "" version_test_error ${version_test_error})
+      endif (version_test_error)
+    endif(PYTHON_EXECUTABLE)
+    
+    ## Check for the Python header files
+    
+    find_path (PYTHON_INCLUDES Python.h
+      PATHS ${include_locations}
+      PATH_SUFFIXES python${python_version}
       NO_DEFAULT_PATH
       )
-  else (HAVE_PYTHONHOME)
-    find_program (PYTHON_EXECUTABLE python${python_version}
-      PATHS ${bin_locations}
+    
+    find_path (HAVE_PYCONFIG_H pyconfig.h
+      PATHS ${include_locations}
+      PATH_SUFFIXES python${python_version}
       NO_DEFAULT_PATH
       )
-  endif (HAVE_PYTHONHOME)
+    
+    ## Check for the Python library
+    
+    find_library (PYTHON_LIBRARIES python${python_version}
+      PATHS
+      ${lib_locations}
+      PATH_SUFFIXES
+      python${python_version}/config
+      NO_DEFAULT_PATH
+      )
+    
+    # Check if we have been able to find a consistent set of exectable,
+    # header files and library. If this is the case, we stop looking for
+    # such a combination in an older Python release.
+
+    if (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
+      set (PYTHON_VERSION ${python_version})
+      set (HAVE_PYTHON TRUE)
+    else (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
+      if (NOT PYTHON_FIND_QUIETLY)
+	message (STATUS "No consistent set of files found for Python ${python_version}")
+      endif (NOT PYTHON_FIND_QUIETLY)
+    endif (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
+    
+  endif (NOT HAVE_PYTHON)
   
-  ## Check for the PYTHON header files
-
-  find_path (PYTHON_INCLUDES Python.h
-    PATHS ${include_locations}
-    PATH_SUFFIXES python${python_version}
-    NO_DEFAULT_PATH
-    )
-
-  find_path (HAVE_PYCONFIG_H pyconfig.h
-    PATHS ${include_locations}
-    PATH_SUFFIXES python${python_version}
-    NO_DEFAULT_PATH
-    )
-
-  ## Check for the NUMPY header files
-
-  find_path (NUMPY_INCLUDES_tmp numpy/arrayobject.h
-    PATHS ${lib_locations} ${include_locations}
-    PATH_SUFFIXES
-    python
-    python${python_version}
-    python${python_version}/site-packages/numpy
-    python${python_version}/site-packages/numpy/core/include
-    NO_DEFAULT_PATH
-    )
-
-  if (NUMPY_INCLUDES_tmp)
-    get_filename_component (NUMPY_INCLUDES ${NUMPY_INCLUDES_tmp} ABSOLUTE)
-  endif (NUMPY_INCLUDES_tmp)
-
-  ## Check for the NUM_UTIL header files and libraries
-
-  find_path (NUM_UTIL_INCLUDES num_util/num_util.h
-    PATHS ${include_locations}
-    PATH_SUFFIXES
-    python
-    python${python_version}
-    NO_DEFAULT_PATH
-    )
-
-  find_library (NUM_UTIL_LIBRARIES num_util
-    PATHS ${lib_locations}
-    PATH_SUFFIXES
-    python
-    python${python_version}
-    NO_DEFAULT_PATH
-    )
-
-  ## Check for the library
-
-  find_library (PYTHON_LIBRARIES python${python_version}
-    PATHS
-    ${lib_locations}
-    PATH_SUFFIXES
-    python${python_version}/config
-    NO_DEFAULT_PATH
-    )
-
-  # check if components have been found
-  if (NOT PYTHON_INCLUDES OR NOT PYTHON_LIBRARIES)
-    if (NOT PYTHON_FIND_QUIETLY)
-      message (STATUS "No consistent set of files found for Python ${python_version}")
-    endif (NOT PYTHON_FIND_QUIETLY)
-  endif (NOT PYTHON_INCLUDES OR NOT PYTHON_LIBRARIES)
 endforeach (python_version)
 
 ## -----------------------------------------------------------------------------
@@ -170,9 +168,6 @@ if (HAVE_PYTHON)
     message (STATUS "PYTHON_EXECUTABLE  = ${PYTHON_EXECUTABLE}")
     message (STATUS "PYTHON_INCLUDES    = ${PYTHON_INCLUDES}")
     message (STATUS "PYTHON_LIBRARIES   = ${PYTHON_LIBRARIES}")
-    message (STATUS "NUMPY_INCLUDES     = ${NUMPY_INCLUDES}")
-    message (STATUS "NUM_UTIL_INCLUDES  = ${NUM_UTIL_INCLUDES}")
-    message (STATUS "NUM_UTIL_LIBRARIES = ${NUM_UTIL_LIBRARIES}")
   endif (NOT PYTHON_FIND_QUIETLY)
 else (HAVE_PYTHON)
   if (PYTHON_FIND_REQUIRED)

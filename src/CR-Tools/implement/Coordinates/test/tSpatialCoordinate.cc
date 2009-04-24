@@ -28,6 +28,8 @@
 using std::cerr;
 using std::cout;
 using std::endl;
+using casa::Quantum;
+using casa::Quantity;
 using CR::CoordinateType;
 using CR::SpatialCoordinate;
 
@@ -134,6 +136,32 @@ int test_SpatialCoordinate ()
     //
     SpatialCoordinate coord (linear,CoordinateType::Cartesian);
     coord.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  cout << "[6] Test construction using full set of WCS parameters ..." << endl;
+  try {
+    uint nofAxes (3);
+    IPosition shape (nofAxes,120,120,10);
+    Vector<double> refPixel (3);
+    Vector<Quantum<double> > refValue (3);
+    Vector<Quantum<double> > increment (3);
+    //
+    refPixel(0)  = shape(0)/2.0;
+    refPixel(1)  = shape(1)/2.0;
+    refValue(0)  = Quantity(0.0,"deg");
+    refValue(1)  = Quantity(90.0,"deg");
+    refValue(2)  = Quantity(1.0,"m");
+    increment(0) = Quantity(1,"deg");
+    increment(1) = Quantity(1,"deg");
+    increment(2) = Quantity(1,"m");
+    //
+    cout << "-- shape      = " << shape     << endl;
+    cout << "-- ref. pixel = " << refPixel  << endl;
+    cout << "-- ref. value = " << refValue  << endl;
+    cout << "-- increment  = " << increment << endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;

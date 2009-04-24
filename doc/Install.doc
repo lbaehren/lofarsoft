@@ -308,11 +308,11 @@
 	-rw-r--r--    1 lars  lars       35872 Nov 17 13:25 L2007_01810_SB18-20_OB20.MS.h5
 	-rw-r--r--    1 lars  lars     4204800 Sep 27  2008 WN65341H.fits
 	-rw-r--r--    1 lars  lars  1016092752 Jul  9  2008 bf_20080604_121337.cor
-	-rw-r--r--    1 lars  lars  1019864744 Nov 17 13:26 bf_20080604_121337.cor.h5
-	-rw-r--r--    1 lars  lars    10584488 Nov 17 13:26 rw_20071024_090656.h5
+	-rw-r--r--    1 lars  lars  1019864744 Apr 20 01:27 bf_20080604_121337.cor.h5
 	-rw-r--r--    1 lars  lars     2191360 Oct 22 11:55 rw_20071024_090656_0101.dat
 	-rw-r--r--    1 lars  lars     2191360 Oct 22 11:56 rw_20071024_090656_0102.dat
 	-rw-r--r--    1 lars  lars     2191360 Oct 22 11:56 rw_20071024_090656_0103.dat
+	-rw-r--r--    1 lars  lars   326246888 Apr 21 21:57 rw_20090417_181700.h5
 	\endverbatim
 	
 	This collection contains the following datasets:

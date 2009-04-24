@@ -81,24 +81,18 @@ namespace CR { // Namespace CR -- begin
   //                                                            SpatialCoordinate
   
   SpatialCoordinate::SpatialCoordinate (CoordinateType::Types const &coordType,
-					casa::Vector<double> const &refPixel,
-					casa::Vector<double> const &refValue,
-					casa::Vector<double> const &increment,
-					casa::IPosition const &shape,
 					casa::String const &refcode,
 					casa::String const &projection,
-					bool const &anglesInDegrees)
+					Vector<double> const &refPixel,
+					Vector<Quantum<double> > const &refValue,
+					Vector<Quantum<double> > const &increment,
+					casa::IPosition const &shape)
     : CoordinateBase()
   {
     // basic initialization
     init (coordType,
 	  refcode,
 	  projection);
-    // store WCS parameters for coordinate axes
-    setReferencePixel (refPixel);
-    setReferenceValue (refValue,anglesInDegrees);
-    setIncrement (increment,anglesInDegrees);
-    setShape(shape);
   }
   
   //_____________________________________________________________________________

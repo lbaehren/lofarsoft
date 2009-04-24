@@ -39,6 +39,8 @@
 
 include (CMakeSettings)
 
+include (FindPython)
+
 ## -----------------------------------------------------------------------------
 ## As the shared libraries of a Python module typically do not contain the 
 ## usual prefix, we need to remove it while searching for the NumPy libraries.
@@ -59,9 +61,10 @@ find_path (NUMPY_INCLUDES numpy/__multiarray_api.h numpy/multiarray_api.txt
   PATHS
   ${lib_locations}
   PATH_SUFFIXES
-  python2.6/site-packages/numpy/core/include
-  python2.5/site-packages/numpy/core/include
-  python2.4/site-packages/numpy/core/include
+  python
+  python${PYTHON_VERSION}
+  python${PYTHON_VERSION}/site-packages/numpy
+  python${PYTHON_VERSION}/site-packages/numpy/core/include
   NO_DEFAULT_PATH
   )
 
@@ -72,9 +75,7 @@ find_library (NUMPY_MULTIARRAY_LIBRARY multiarray
   PATHS
   ${lib_locations}
   PATH_SUFFIXES
-  python2.6/site-packages/numpy/core
-  python2.5/site-packages/numpy/core
-  python2.4/site-packages/numpy/core
+  python${PYTHON_VERSION}/site-packages/numpy/core
   NO_DEFAULT_PATH
   )
 if (NUMPY_MULTIARRAY_LIBRARY)
@@ -85,9 +86,7 @@ find_library (NUMPY_SCALARMATH_LIBRARY scalarmath
   PATHS
   ${lib_locations}
   PATH_SUFFIXES
-  python2.6/site-packages/numpy/core
-  python2.5/site-packages/numpy/core
-  python2.4/site-packages/numpy/core
+  python${PYTHON_VERSION}/site-packages/numpy/core
   NO_DEFAULT_PATH
   )
 if (NUMPY_SCALARMATH_LIBRARY)
@@ -97,7 +96,7 @@ endif (NUMPY_SCALARMATH_LIBRARY)
 ## -----------------------------------------------------------------------------
 ## Check for executables
 
-find_program (F2PY_EXECUTABLE f2py f2py2.6 f2py2.5 f2py2.4
+find_program (F2PY_EXECUTABLE f2py f2py${PYTHON_VERSION}
   PATHS ${bin_locations}
   NO_DEFAULT_PATH
   )
@@ -114,9 +113,7 @@ find_file (NUMPY_VERSION_PY version.py
   /usr/lib64
   /usr/local/lib64
   PATH_SUFFIXES
-  python2.6/site-packages/numpy
-  python2.5/site-packages/numpy
-  python2.4/site-packages/numpy
+  python${PYTHON_VERSION}/site-packages/numpy
   NO_DEFAULT_PATH
   )
 
@@ -126,6 +123,7 @@ if (NUMPY_VERSION_PY)
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     RESULT_VARIABLE numpy_version_test_result
     OUTPUT_VARIABLE numpy_version_test_output
+    ERROR_VARIABLE numpy_version_test_error
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 else (NUMPY_VERSION_PY)
