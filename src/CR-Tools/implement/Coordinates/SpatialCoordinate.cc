@@ -848,9 +848,7 @@ namespace CR { // Namespace CR -- begin
 					      bool const &append)
   {
     if (!append) {
-      std::cerr << "[SpatialCoordinate::toCoordinateSystem]"
-		<< " Option append=false not yet implemented!"
-		<< std::endl;
+      csys = casa::CoordinateSystem();
     }
     
     switch (type_p) {

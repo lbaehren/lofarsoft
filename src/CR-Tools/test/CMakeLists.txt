@@ -53,7 +53,6 @@ if (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
     tcasa_casa_Quanta
     tcasa_casa_Containers
     tcasa_tables
-    tcasa_coordinates
     tcasa_images
     tcasa_lattices
     tcasa_measures

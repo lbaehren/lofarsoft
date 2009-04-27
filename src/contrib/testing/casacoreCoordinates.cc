@@ -47,11 +47,11 @@ using casa::Quantum;
 using casa::Vector;
 
 /*!
-  \file tcasa_coordinates.cc
+  \file casacoreCoordinates.cc
 
   \brief A number of tests for clases in the casacore coordinates module
 
-  \ingroup CR_test
+  \ingroup contrib
 
   \author Lars B&auml;hren
 
@@ -263,17 +263,40 @@ int test_LinearCoordinate ()
   return nofFailedTests;
 }
 
-// ------------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                               test_export2fits
 
 /*!
-  \brief Test the combination of various coordinates within an STL container
+  \brief Test translation of WCS information during export to FITS
 
   \return nofFailedTests -- The number of failed tests encountered within this
           function.
 */
-int test_CoordinateCombinations ()
+int test_export2fits ()
 {
   int nofFailedTests (0);
+  
+  std::vector<std::string> refcode;
+  std::vector<std::string> projection;
+
+  refcode.push_back("AZEL");
+  refcode.push_back("B1950");
+  refcode.push_back("J2000");
+  refcode.push_back("GALACTIC");
+
+  projection.push_back("CAR");
+  projection.push_back("MER");
+  projection.push_back("SIN");
+  projection.push_back("STG");
+  projection.push_back("TAN");
+
+  for (uint ref(0); ref<refcode.size(); ref++) {
+    for (uint proj(0); proj<projection.size(); proj++) {
+      // set filename base
+      std::string filename = "image-" + refcode[ref] + "-" + projection[proj];
+
+    }
+  }
 
   return nofFailedTests;
 }
@@ -287,7 +310,7 @@ int main ()
   nofFailedTests += test_DirectionCoordinate ();
   nofFailedTests += test_LinearCoordinate ();
 
-  nofFailedTests += test_CoordinateCombinations ();
+  nofFailedTests += test_export2fits ();
 
   return nofFailedTests;
 }
