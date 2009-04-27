@@ -1225,6 +1225,7 @@ INCLUDE_FILE_PATTERNS  =
 
 PREDEFINED             = HAVE_CASA \
                          HAVE_BLITZ \
+                         HAVE_CFITSIO \
                          HAVE_HDF5 \
 						 HAVE_STARTOOLS
 
