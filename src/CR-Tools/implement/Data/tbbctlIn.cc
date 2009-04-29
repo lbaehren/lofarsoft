@@ -22,12 +22,12 @@
  ***************************************************************************/
 
 #include <Data/tbbctlIn.h>
-       
+#include <Data/CRCcheck.h>       
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
-#define TBBCTLIN_MAXSAMPLES 0x800000
+#include <time.h>
+#define TBBCTLIN_MAXSAMPLES 0x4000000
 
 namespace CR { // Namespace CR -- begin
   
@@ -57,6 +57,27 @@ namespace CR { // Namespace CR -- begin
     attached_p = False;
     iterator_p = NULL;
     headerpoint_p = (tbbctl_head*)malloc(sizeof(tbbctl_head));
+		// test CRC32-speed
+		short * testbuffer = new short[2048];
+		for (uint i=0; i<2048; i++)
+		{
+			testbuffer[i]=rand();
+		}
+		CRCcheck * checker = new CRCcheck;
+		
+		clock_t clocks = clock();
+		uint nofblocks = 10000;
+		for(uint i=0; i<nofblocks; i++)
+		{
+			checker->CRC32_tbbdata(testbuffer, 1024); // output uint32_t CRC is discarded
+		}
+		clocks = clock() - clocks;
+		cout << "CRC speed: " << nofblocks * 2 / 1024 / ( (double) clocks / CLOCKS_PER_SEC) << " MB/s" << endl;
+		// MB = nofblocks * 2 / 1024
+		delete checker;
+		delete testbuffer;									
+		
+		
   }
   
   // ============================================================================
@@ -89,8 +110,9 @@ namespace CR { // Namespace CR -- begin
   //
   //  Methods
   //
-  // ============================================================================
-  
+  // ============================================================================		
+	
+	
   Bool tbbctlIn::attachFile(Vector<String> filenames){
     try {
       int numchannels,fnum;
@@ -104,124 +126,152 @@ namespace CR { // Namespace CR -- begin
       struct stat filestat;
      
       attached_p = False;
-      
+      CRCcheck * CRCchecker = new CRCcheck;
+			
       numchannels = filenames.nelements();
       if (numchannels < 1) {
-	cerr << "tbbctlIn:attachFile: No filenames given!" <<endl;
-	return False;
-      };
-      numblocks.resize(numchannels); AntIDs.resize(numchannels);
-      for (fnum=0;fnum<numchannels;fnum++){
-	filename = filenames(fnum);
-	stat(filename.c_str(), &filestat);
-	numblocks(fnum) = filestat.st_size / TBBCTL_BLOCK_SIZE;
-	if (numblocks(fnum) < 1) {
-	  cerr << "tbbctlIn:attachFile: File " << filename << "too small (smaller than one blocksize)." <<endl;
-	  return False;
-	};
-	//	cout << " working on file: " << filename << endl;
-	FILE *fd = fopen(filename.c_str(),"r");
-	if (fd == NULL) {
-	  cerr << "tbbctlIn:attachFile: Can't open file: " << filename << endl;
-	  return False;
-	};
-	ui = fread(headerpoint_p, 1, sizeof(tbbctl_head), fd);
-	if ( (ui != sizeof(tbbctl_head) )  ) {
-	  cerr << "tbbctlIn:attachFile: Inconsitent file: " << filename << endl;
-	  fclose(fd);
-	  return False;
-	};
-	if (fnum==0){
-	  startdate = headerpoint_p->Date;
-	  startsample = headerpoint_p->SampleNr;
-	  stopdate = headerpoint_p->Date;
-	  stopsample = headerpoint_p->SampleNr + headerpoint_p->NoSamples;
-	  maxblock = headerpoint_p->NoSamples;
-	  sampleFreq = headerpoint_p->sampleFreq*1e6;
-	};
-	//AntIDs(fnum) = (headerpoint_p->station*256+headerpoint_p->RSP)*256+headerpoint_p->RCU;
-	AntIDs(fnum) = (1*256+headerpoint_p->RSP)*256+headerpoint_p->RCU;
-	for (block=0; block<numblocks(fnum); block++){
-	  fseek(fd, (block*(long)TBBCTL_BLOCK_SIZE), SEEK_SET); 
-	  ui = fread(headerpoint_p, 1, sizeof(tbbctl_head), fd);
-	  if ( (ui != sizeof(tbbctl_head) )  ) {
-	    cerr << "tbbctlIn:attachFile: Inconsitent file: " << filename << endl;
-	    fclose(fd);
-	    return False;
-	  };
-	  if (headerpoint_p->Date < startdate) {
-	    startdate = headerpoint_p->Date;
-	    startsample = headerpoint_p->SampleNr;
-	  } else if ((headerpoint_p->Date==startdate) && (headerpoint_p->SampleNr<startsample)){
-	    startsample = headerpoint_p->SampleNr;
-	  };
-	  if (headerpoint_p->Date > stopdate) {
-	    stopdate = headerpoint_p->Date;
-	    stopsample = headerpoint_p->SampleNr + headerpoint_p->NoSamples;
-	  } else if ((headerpoint_p->Date==startdate) &&
-		     ( (headerpoint_p->SampleNr+ headerpoint_p->NoSamples) > stopsample)){
-	    stopsample = headerpoint_p->SampleNr + headerpoint_p->NoSamples;
-	  };
-	  if (headerpoint_p->NoSamples > maxblock) { maxblock = headerpoint_p->NoSamples; };
-	  //cout << "file:" << filename <<" Date:" << headerpoint_p->Date << " start:" << headerpoint_p->SampleNr << endl;
-	};
-	fclose(fd);
-      }; // END: for (fnum=0;fnum<numchannels;fnum++)
-      tmpdouble = (stopdate-startdate)*sampleFreq+stopsample-startsample;
-      noSamples = (uint)tmpdouble;
-#ifdef DEBUGGING_MESSAGES
-      cout << "tbbctlIn:attachFile: " << "Files " << filenames << " spans a range of " 
-      	   << noSamples << " samples" << endl;
-#endif
-      if ((noSamples*numchannels) > TBBCTLIN_MAXSAMPLES){
-	cout << "tbbctlIn:attachFile: " << "Files " << filenames 
-	     << " contain more than "<< TBBCTLIN_MAXSAMPLES <<" samples! Truncating to " << TBBCTLIN_MAXSAMPLES/numchannels 
-	     << " samples/channel!" << endl;
-	noSamples = TBBCTLIN_MAXSAMPLES/numchannels;
-      }
-      //Allocate memory
-      channeldata_p.resize(noSamples,numchannels);
-      channeldata_p=0;
-      tmppoint = (short*)malloc(maxblock*sizeof(short));
-      if (tmppoint == NULL) {
- 	cerr << "tbbctlIn:attachFile: Error while allocating temporary memory " << endl;
- 	return False;	
-      };
-      for (fnum=0;fnum<numchannels;fnum++){
-	filename = filenames(fnum);
-	FILE *fd = fopen(filename.c_str(),"r");
-	for (block=0; block<numblocks(fnum); block++){
-	  fseek(fd, (block*(long)TBBCTL_BLOCK_SIZE), SEEK_SET); 
-	  fread(headerpoint_p, 1, sizeof(tbbctl_head), fd);
-	  start = (uint)((headerpoint_p->Date-startdate)*sampleFreq + 
-			 headerpoint_p->SampleNr-startsample);
-	  if ( (start+headerpoint_p->NoSamples) <= noSamples) {
-	    fread(tmppoint, sizeof(short),headerpoint_p->NoSamples, fd); 
-	    channeldata_p.column(fnum)(Slice(start,headerpoint_p->NoSamples)) = Vector<short>(IPosition(1,headerpoint_p->NoSamples),tmppoint,casa::SHARE);
-	  };
-	};
-	fclose(fd);
-      };
-      // Save the general data
-      headerpoint_p->Date = startdate;
-      headerpoint_p->SampleNr = startsample;
-      filenames_p = filenames;
-      NumAntennas_p = numchannels;
-      AntennaIDs_p = AntIDs;
-      datasize_p = noSamples;
+        cerr << "tbbctlIn:attachFile: No filenames given!" <<endl;
+        return False;
+            };
+            numblocks.resize(numchannels); AntIDs.resize(numchannels);
+            for (fnum=0;fnum<numchannels;fnum++){
+        filename = filenames(fnum);
+        stat(filename.c_str(), &filestat);
+        numblocks(fnum) = filestat.st_size / TBBCTL_BLOCK_SIZE;
+        if (numblocks(fnum) < 1) {
+          cerr << "tbbctlIn:attachFile: File " << filename << "too small (smaller than one blocksize)." <<endl;
+          return False;
+        };
+        //	cout << " working on file: " << filename << endl;
+        FILE *fd = fopen(filename.c_str(),"r");
+        if (fd == NULL) {
+          cerr << "tbbctlIn:attachFile: Can't open file: " << filename << endl;
+          return False;
+        };
+        ui = fread(headerpoint_p, 1, sizeof(tbbctl_head), fd);
+        if ( (ui != sizeof(tbbctl_head) )  ) {
+          cerr << "tbbctlIn:attachFile: Inconsistent file: " << filename << endl;
+          fclose(fd);
+          return False;
+        };
+        // Header CRC check (CRC16)
+              // uint16_t CRC16 = this->CRC16((uint16_t *)headerpoint_p, 44);
+        uint16_t CRC16 = CRCchecker->headerCRC(headerpoint_p);
+			
+				//std::cout << "Header CRC = " << CRC16 << std::endl;      
+				if (CRC16 != 0)
+				{
+					cerr << "tbbctlIn:attachFile: header CRC failure: " << filename << endl;
+					fclose(fd);
+					return False;
+				}      
+              
+        if (fnum==0){
+          startdate = headerpoint_p->Date;
+          startsample = headerpoint_p->SampleNr;
+          stopdate = headerpoint_p->Date;
+          stopsample = headerpoint_p->SampleNr + headerpoint_p->NoSamples;
+          maxblock = headerpoint_p->NoSamples;
+          sampleFreq = headerpoint_p->sampleFreq*1e6;
+        };
+        //AntIDs(fnum) = (headerpoint_p->station*256+headerpoint_p->RSP)*256+headerpoint_p->RCU;
+        AntIDs(fnum) = (1*256+headerpoint_p->RSP)*256+headerpoint_p->RCU;
+        for (block=0; block<numblocks(fnum); block++){
+          fseek(fd, (block*(long)TBBCTL_BLOCK_SIZE), SEEK_SET); 
+          ui = fread(headerpoint_p, 1, sizeof(tbbctl_head), fd);
+          if ( (ui != sizeof(tbbctl_head) )  ) {
+            cerr << "tbbctlIn:attachFile: Inconsistent file: " << filename << endl;
+            fclose(fd);
+            return False;
+          };
+          if (headerpoint_p->Date < startdate) {
+            startdate = headerpoint_p->Date;
+            startsample = headerpoint_p->SampleNr;
+          } else if ((headerpoint_p->Date==startdate) && (headerpoint_p->SampleNr<startsample)){
+            startsample = headerpoint_p->SampleNr;
+          };
+          if (headerpoint_p->Date > stopdate) {
+            stopdate = headerpoint_p->Date;
+            stopsample = headerpoint_p->SampleNr + headerpoint_p->NoSamples;
+          } else if ((headerpoint_p->Date==startdate) &&
+               ( (headerpoint_p->SampleNr+ headerpoint_p->NoSamples) > stopsample)){
+            stopsample = headerpoint_p->SampleNr + headerpoint_p->NoSamples;
+          };
+          if (headerpoint_p->NoSamples > maxblock) { maxblock = headerpoint_p->NoSamples; };
+          //cout << "file:" << filename <<" Date:" << headerpoint_p->Date << " start:" << headerpoint_p->SampleNr << endl;
+        };
+        fclose(fd);
+            }; // END: for (fnum=0;fnum<numchannels;fnum++)
+            tmpdouble = (stopdate-startdate)*sampleFreq+stopsample-startsample;
+            noSamples = (uint)tmpdouble;
+      #ifdef DEBUGGING_MESSAGES
+            cout << "tbbctlIn:attachFile: " << "Files " << filenames << " spans a range of " 
+                 << noSamples << " samples" << endl;
+      #endif
+            if ((noSamples*numchannels) > TBBCTLIN_MAXSAMPLES){
+        cout << "tbbctlIn:attachFile: " << "Files " << filenames 
+             << " contain more than "<< TBBCTLIN_MAXSAMPLES <<" samples! Truncating to " << TBBCTLIN_MAXSAMPLES/numchannels 
+             << " samples/channel!" << endl;
+        noSamples = TBBCTLIN_MAXSAMPLES/numchannels;
+            }
+            //Allocate memory
+            channeldata_p.resize(noSamples,numchannels);
+            channeldata_p=0;
+            tmppoint = (short*)malloc((maxblock+2)*sizeof(short));
+            if (tmppoint == NULL) {
+        cerr << "tbbctlIn:attachFile: Error while allocating temporary memory " << endl;
+        return False;	
+            };
+            for (fnum=0;fnum<numchannels;fnum++){
+        filename = filenames(fnum);
+        FILE *fd = fopen(filename.c_str(),"r");
+        for (block=0; block<numblocks(fnum); block++){
+          fseek(fd, (block*(long)TBBCTL_BLOCK_SIZE), SEEK_SET); 
+          fread(headerpoint_p, 1, sizeof(tbbctl_head), fd);
+          start = (uint)((headerpoint_p->Date-startdate)*sampleFreq + 
+             headerpoint_p->SampleNr-startsample);
+          if ( (start+headerpoint_p->NoSamples) <= noSamples) {
+						uint itemsToRead = headerpoint_p->NoSamples + sizeof(uint32_t) / 2; // also read payload CRC which is 2 shorts
+            fread(tmppoint, sizeof(short), itemsToRead, fd); 
+
+						// frame is read in, now do CRC32
+						uint32_t CRC32 = CRCchecker->CRC32_tbbdata(tmppoint, itemsToRead);
+						//std::cout << "Frame no " << block << ": Payload CRC = " << CRC32 << std::endl;      
+						if (CRC32 != 0)
+						{
+							cerr << "tbbctlIn:attachFile: CRC failure: " << filename << " block: " << block << endl;
+							fclose(fd);
+							return False;
+						}
+						
+            channeldata_p.column(fnum)(Slice(start,headerpoint_p->NoSamples)) = Vector<short>(IPosition(1,headerpoint_p->NoSamples),tmppoint,casa::SHARE);
+          };
+        };
+				
+        fclose(fd);
+				delete CRCchecker;
+            };
+            // Save the general data
+            headerpoint_p->Date = startdate;
+            headerpoint_p->SampleNr = startsample;
+            filenames_p = filenames;
+            NumAntennas_p = numchannels;
+            AntennaIDs_p = AntIDs;
+            datasize_p = noSamples;
 
 
-      // free the memory
-      free(tmppoint);
+            // free the memory
+            free(tmppoint);
 
-      setStreams();
-      setHeaderRecord();
-    } catch (AipsError x) {
-      cerr << "tbbctlIn:attachFile: " << x.getMesg() << endl;
-      return False;
-    }; 
-    return True;
-  }
+            setStreams();
+            setHeaderRecord();
+          } catch (AipsError x) {
+            cerr << "tbbctlIn:attachFile: " << x.getMesg() << endl;
+            return False;
+          }; 
+				
+          return True;
+        }
 
 
   Bool tbbctlIn::setStreams(){

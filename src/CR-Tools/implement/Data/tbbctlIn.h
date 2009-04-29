@@ -2,8 +2,8 @@
  | $Id                                                                   $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -167,7 +167,6 @@ namespace CR { // Namespace CR -- begin
     void summary (std::ostream &os);    
 
     // ------------------------------------------------------------------ Methods
-    
     /*!
       \brief Attach to a (another) lopes-eventfile
       
