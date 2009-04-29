@@ -34,7 +34,8 @@ namespace CR { // Namespace CR -- begin
   //__________________________________________________________ TimeFreqCoordinate
   
   TimeFreqCoordinate::TimeFreqCoordinate (bool const &timeAxisLast)
-    : TimeFreq()
+    : TimeFreq(),
+      CoordinateBase()
   {
     uint blocksPerFrame = 1;
     uint nofFrames      = 1;
@@ -51,7 +52,8 @@ namespace CR { // Namespace CR -- begin
 					  uint const &blocksPerFrame,
 					  uint const &nofFrames,
 					  bool const &timeAxisLast)
-    : TimeFreq(blocksize)
+    : TimeFreq(blocksize),
+      CoordinateBase()
   {
     init (CoordinateType(CoordinateType::Frequency),
 	  blocksPerFrame,
@@ -69,7 +71,8 @@ namespace CR { // Namespace CR -- begin
 					  bool const &timeAxisLast)
     : TimeFreq(blocksize,
 	       sampleFrequency,
-	       nyquistZone)
+	       nyquistZone),
+      CoordinateBase()
   {
     init (CoordinateType(CoordinateType::Frequency),
 	  blocksPerFrame,
@@ -87,7 +90,8 @@ namespace CR { // Namespace CR -- begin
 					  bool const &timeAxisLast)
     : TimeFreq(blocksize,
 	       sampleFrequency,
-	       nyquistZone)
+	       nyquistZone),
+      CoordinateBase()
   {
     init (CoordinateType(CoordinateType::Frequency),
 	  blocksPerFrame,
@@ -101,7 +105,8 @@ namespace CR { // Namespace CR -- begin
 					  uint const &blocksPerFrame,
 					  uint const &nofFrames,
 					  bool const &timeAxisLast)
-    : TimeFreq(timeFreq)
+    : TimeFreq(timeFreq),
+      CoordinateBase()
   {
     init (CoordinateType(CoordinateType::Frequency),
 	  blocksPerFrame,
@@ -113,6 +118,7 @@ namespace CR { // Namespace CR -- begin
   
   TimeFreqCoordinate::TimeFreqCoordinate (TimeFreqCoordinate const &other)
     : TimeFreq(other),
+      CoordinateBase(),
       coordType_p (CoordinateType(CoordinateType::Frequency))
   {
     copy (other);
@@ -349,7 +355,7 @@ namespace CR { // Namespace CR -- begin
   
   // ---------------------------------------------------------------------- shape
   
-  casa::IPosition TimeFreqCoordinate::shape () const
+  casa::IPosition TimeFreqCoordinate::shape ()
   {
     casa::IPosition shape(2);
     
@@ -544,7 +550,7 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------------ increment
   
-  Vector<double> TimeFreqCoordinate::increment () const
+  Vector<double> TimeFreqCoordinate::increment ()
   {
     Vector<double> cdelt (2);
 
@@ -561,7 +567,7 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------- worldAxisNames
   
-  Vector<casa::String> TimeFreqCoordinate::worldAxisNames () const
+  Vector<casa::String> TimeFreqCoordinate::worldAxisNames ()
   {
     Vector<casa::String> names (2);
     
@@ -578,7 +584,7 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------- worldAxisUnits
   
-  Vector<casa::String> TimeFreqCoordinate::worldAxisUnits () const
+  Vector<casa::String> TimeFreqCoordinate::worldAxisUnits ()
   {
     Vector<casa::String> units (2);
 
@@ -595,7 +601,7 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------- referencePixel
   
-  Vector<double> TimeFreqCoordinate::referencePixel () const
+  Vector<double> TimeFreqCoordinate::referencePixel ()
   {
     Vector<double> refPixel (2);
 
@@ -612,7 +618,7 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------- referenceValue
 
-  Vector<double> TimeFreqCoordinate::referenceValue () const
+  Vector<double> TimeFreqCoordinate::referenceValue ()
   {
     Vector<double> refValue (2);
     

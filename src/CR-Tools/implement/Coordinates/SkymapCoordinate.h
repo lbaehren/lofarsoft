@@ -32,6 +32,7 @@
 #include <coordinates/Coordinates/ObsInfo.h>
 
 // CR-Tools header files
+#include <Coordinates/CoordinateBase.h>
 #include <Coordinates/SkymapQuantity.h>
 #include <Coordinates/SpatialCoordinate.h>
 #include <Coordinates/TimeFreqCoordinate.h>
@@ -223,7 +224,7 @@ namespace CR { // Namespace CR -- begin
       
       \return nofAxes -- The number of coordinate axes.
     */
-    inline unsigned int nofAxes () const {
+    inline unsigned int nofAxes () {
       return nofAxes_p;
     }
     
@@ -365,30 +366,6 @@ namespace CR { // Namespace CR -- begin
     }
     
     /*!
-      \brief Conversion from pixel to world coordinates
-      
-      \retval world -- Values in world coordinates
-      \param pixel  -- Values in pixel coordinates
-    */
-    inline void toWorld (Vector<double> &world,
-			 Vector<double> const &pixel)
-      {
-	csys_p.toWorld (world,pixel);
-      }
-    
-    /*!
-      \brief Conversion from world to pixel coordinates
-
-      \retval pixel -- Values in pixel coordinates
-      \param world  -- Values in world coordinates
-    */
-    inline void toPixel (Vector<double> &pixel,
-			 const Vector<double> &world)
-      {
-	csys_p.toPixel (pixel,world);
-      }
-    
-    /*!
       \brief Get the name of the class
       
       \return className -- The name of the class, SkymapCoordinate.
@@ -413,6 +390,30 @@ namespace CR { // Namespace CR -- begin
 
     // ------------------------------------------------------------------ Methods
 
+    /*!
+      \brief Conversion from pixel to world coordinates
+      
+      \retval world -- Values in world coordinates
+      \param pixel  -- Values in pixel coordinates
+    */
+    inline void toWorld (Vector<double> &world,
+			 Vector<double> const &pixel)
+      {
+	csys_p.toWorld (world,pixel);
+      }
+    
+    /*!
+      \brief Conversion from world to pixel coordinates
+
+      \retval pixel -- Values in pixel coordinates
+      \param world  -- Values in world coordinates
+    */
+    inline void toPixel (Vector<double> &pixel,
+			 const Vector<double> &world)
+      {
+	csys_p.toPixel (pixel,world);
+      }
+    
     /*!
       \brief Retrieve the world axis values of the coordinates
 

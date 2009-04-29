@@ -484,9 +484,9 @@ namespace CR { // Namespace CR -- begin
               two coupled axes.
     */
 #ifdef HAVE_CASA
-    virtual casa::IPosition shape () const;
+    virtual casa::IPosition shape ();
 #else 
-    virtual vector<int> shape () const;
+    virtual vector<int> shape ();
 #endif
     
     /*!
@@ -495,9 +495,9 @@ namespace CR { // Namespace CR -- begin
       \return increment -- [time,freq] = \f$ [ \delta_t, \delta_\nu ] \f$
     */
 #ifdef HAVE_CASA
-    virtual casa::Vector<double> increment () const;
+    virtual casa::Vector<double> increment ();
 #else 
-    virtual vector<double> increment () const;
+    virtual vector<double> increment ();
 #endif
 
     /*!

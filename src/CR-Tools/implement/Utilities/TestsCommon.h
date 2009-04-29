@@ -121,7 +121,14 @@ namespace CR { // Namespace CR -- begin
 			      std::string const &observer="Lars Baehren");
   
   /*!
-    \brief Provide a summary of the image's properties
+    \brief Provide a summary of the properties of a casa::Coordinate object
+    
+    \param coord -- Coordinate object of which to show the properties.
+  */
+  void coordinate_summary (casa::Coordinate &coord);
+  
+  /*!
+    \brief Provide a summary of the properties of a casa::ImageInterface object
     
     Example output:
     \verbatim

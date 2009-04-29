@@ -23,6 +23,7 @@
 
 #include <Coordinates/CoordinateType.h>
 #include <Coordinates/SpatialCoordinate.h>
+#include <Utilities/TestsCommon.h>
 
 // Namespace usage
 using std::cerr;
@@ -45,7 +46,8 @@ using CR::SpatialCoordinate;
   \date 2008/08/28
 */
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                         test_SpatialCoordinate
 
 /*!
   \brief Test constructors for a new SpatialCoordinate object
@@ -55,10 +57,10 @@ using CR::SpatialCoordinate;
 */
 int test_SpatialCoordinate ()
 {
-  int nofFailedTests (0);
-  
   cout << "\n[tSpatialCoordinate::test_SpatialCoordinate]\n" << std::endl;
 
+  int nofFailedTests (0);
+  
   cout << "[1] Testing default constructor ..." << std::endl;
   try {
     SpatialCoordinate coord;

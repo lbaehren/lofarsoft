@@ -161,6 +161,12 @@ namespace CR { // Namespace CR -- begin
     <h3>Example(s)</h3>
 
     <ol>
+      <li>The default constructor 
+      \code
+      SpatialCoordinate coord;
+      \endcode
+      will set up coordinates corresponding to an all-sky map at 1 deg angular
+      resolution in local (Az,El) using STG projection.
       <li>Create a spatial coordinate consisting of a directional component in 
       a J2000 reference frame using a SIN projection and a radial component:
       \code
@@ -169,6 +175,11 @@ namespace CR { // Namespace CR -- begin
 			       "SIN")
       \endcode
     </ol>
+
+    \todo Either get rid of the constructor using combination
+    (CoordinateType::Types,refcode,projection) or provide reasonable default
+    shapes for the various combinations of reference codes and projections; the 
+    [120,120,1] settings work for (AZEL,STG), but don't make much sense otherwise.
     
   */  
   class SpatialCoordinate : public CoordinateBase {
@@ -194,21 +205,19 @@ namespace CR { // Namespace CR -- begin
       \brief Default constructr
       
       Creates a new SpatialCoordinate of type \e DirectionRadius:
-      - Reference  = AZEL
-      - Projection = STG
-      - Shape      = [120,120,1]
-      - Units      = ["deg","deg","m"]
-      - RefPixel   = [60,60,0]
-      - RefValue   = [0,90,1]
-      - Increment  = [1,1,1]
+      <ul>
+        <li>Reference  = AZEL
+        <li>Projection = STG
+        <li>Shape      = [120,120,1]
+        <li>Units      = ["deg","deg","m"]
+        <li>RefPixel   = [60,60,0]
+        <li>RefValue   = [0,90,1]
+        <li>Increment  = [-1,1,1]
+      </ul>
+      Default settings are such, that coordinates correspond to an all-sky map
+      at 1 deg resolution in local (Az,El) using STG projection.
     */
-    SpatialCoordinate ()
-      : CoordinateBase()
-      {
-	init (CoordinateType::DirectionRadius,
-	      "AZEL",
-	      "STG");
-      }
+    SpatialCoordinate ();
     
     /*!
       \brief Argumented constructor
@@ -316,7 +325,7 @@ namespace CR { // Namespace CR -- begin
       
       \return nofAxes -- The number of coordinate axes.
     */
-    inline unsigned int nofAxes () const {
+    inline unsigned int nofAxes () {
       return nofAxes_p;
     }
  
@@ -336,7 +345,7 @@ namespace CR { // Namespace CR -- begin
       \return shape -- The number of elements along the individual coordinate
               axes.
     */
-    inline IPosition shape () const {
+    inline IPosition shape () {
       return shape_p;
     }
 
@@ -605,7 +614,28 @@ namespace CR { // Namespace CR -- begin
     void init (CoordinateType::Types const &coordType,
 	       casa::String const &refcode="AZEL",
 	       casa::String const &projection="STG");
-
+    
+    /*!
+      \brief Initialize the object for a given coordinate type
+      
+      \param coordType  -- Type of coordinate for which to create an object.
+      \param refcode    -- Reference code for the celestial coordinate system, in
+             case the coordinate contains a DirectionCoordinate
+      \param projection -- Identifier for the spherical map projection, in case
+             the coordinate contains a DirectionCoordinate
+      \param refPixel  -- Reference pixel, CRPIX
+      \param refValue  -- Reference value, CRVAL
+      \param increment -- Coordinate increment, CDELT
+      \param shape     -- Number of elements along the coordinate axes
+    */
+    void init (CoordinateType::Types const &coordType,
+	       casa::String const &refcode,
+	       casa::String const &projection,
+	       casa::Vector<double> const &refPixel,
+	       Vector<Quantum<double> > const &refValue,
+	       Vector<Quantum<double> > const &increment,
+	       casa::IPosition const &shape);
+    
   };
   
 } // Namespace CR -- end

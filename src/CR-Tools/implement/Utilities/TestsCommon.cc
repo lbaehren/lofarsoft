@@ -72,6 +72,37 @@ namespace CR { // Namespace CR -- begin
     info.setObserver (observer);
     return info;
   }
+
+  //_____________________________________________________________________________
+  //                                                           coordinate_summary
+  
+  void coordinate_summary (casa::Coordinate &coord)
+  {
+    cout << "-- Coord. type      = " << coord.type()           << endl;
+    cout << "-- Coord. name      = " << coord.showType()       << endl;
+    cout << "-- nof. pixel axes  = " << coord.nPixelAxes()     << endl;
+    cout << "-- nof. world axes  = " << coord.nWorldAxes()     << endl;
+    cout << "-- World axis names = " << coord.worldAxisNames() << endl;
+    cout << "-- World axis units = " << coord.worldAxisUnits() << endl;
+    cout << "-- Reference value  = " << coord.referenceValue() << endl;
+    cout << "-- Reference pixel  = " << coord.referencePixel() << endl;
+    cout << "-- Increment        = " << coord.increment()      << endl;
+    
+    /* Test pixel to world conversion */
+    
+    int nofPixelAxes (coord.nPixelAxes());
+    casa::Vector<double> pixel (nofPixelAxes);
+    casa::Vector<double> world (nofPixelAxes);
+    
+    for (int n(0); n<nofPixelAxes; n++) {
+      pixel    = 0.0;
+      pixel(n) = 1.0;
+      //conversion
+      coord.toWorld(world,pixel);
+      // feedback
+      cout << "-- Pixel to World   = " << pixel << " -> " << world << endl;
+    }
+  }
   
   // ============================================================================
   //
@@ -230,7 +261,7 @@ namespace CR { // Namespace CR -- begin
 			     std::string const &prefix)
   {
     int ant;
-    int sky;
+//     int sky;
     std::ofstream outfile;
 
     std::cout << "-- Exporting the values of the antenna positions ..." << std::endl;

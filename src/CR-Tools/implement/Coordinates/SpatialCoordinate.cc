@@ -34,6 +34,17 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                            SpatialCoordinate
   
+  SpatialCoordinate::SpatialCoordinate ()
+    : CoordinateBase()
+  {
+    init (CoordinateType::DirectionRadius,
+	  "AZEL",
+	  "STG");
+  }
+  
+  //_____________________________________________________________________________
+  //                                                            SpatialCoordinate
+  
   SpatialCoordinate::SpatialCoordinate (casa::DirectionCoordinate const &direction,
 					casa::LinearCoordinate const &linear)
     : CoordinateBase()
@@ -89,10 +100,13 @@ namespace CR { // Namespace CR -- begin
 					casa::IPosition const &shape)
     : CoordinateBase()
   {
-    // basic initialization
     init (coordType,
 	  refcode,
-	  projection);
+	  projection,
+	  refPixel,
+	  refValue,
+	  increment,
+	  shape);
   }
   
   //_____________________________________________________________________________
@@ -154,7 +168,9 @@ namespace CR { // Namespace CR -- begin
   void SpatialCoordinate::summary (std::ostream &os)
   {
     os << "[SpatialCoordinate::summary]" << std::endl;
-    os << "-- Type of spatial coordinate   = " << type_p             << std::endl;
+    os << "-- Type of spatial coordinate   = " << type_p
+       << " (" << CoordinateType::getName(type_p) << ")" 
+       << std::endl;
     os << "-- nof. coordinate axes         = " << nofAxes()          << std::endl;
     os << "-- nof. coordinate objects      = " << nofCoordinates()   << std::endl;
     os << "-- nof. elements along the axes = " << shape()            << std::endl;
@@ -244,11 +260,141 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  //________________________________________________________________________ init
+  //_____________________________________________________________________________
+  //                                                                         init
   
   void SpatialCoordinate::init (CoordinateType::Types const &coordType,
 				casa::String const &refcode,
 				casa::String const &projection)
+  {
+    type_p = coordType;
+    
+    casa::Vector<double> refPixel(3);
+    Vector<Quantum<double> > refValue(3);
+    Vector<Quantum<double> > increment(3);
+    casa::IPosition nelem (3);
+
+    switch (coordType) {
+    case CoordinateType::DirectionRadius:
+      {
+	// Number of pixels along the coordinate axes
+	nelem(0) = 120;
+	nelem(1) = 120;
+	nelem(2) = 1;
+	// Reference pixel is center of map for directional components
+	refPixel(0) = nelem(0)/2;
+	refPixel(1) = nelem(1)/2;
+	refPixel(2) = 0;
+	// Reference value: local zenith
+	refValue(0) = Quantum<double>(0,"deg");
+	refValue(1) = Quantum<double>(90,"deg");
+	refValue(2) = Quantum<double>(1,"m");
+	// Coordinate increment
+	increment(0) = Quantum<double>(-1,"deg");
+	increment(1) = Quantum<double>(1,"deg");
+	increment(2) = Quantum<double>(1,"m");
+	
+	init (coordType,
+	      refcode,
+	      projection,
+	      refPixel,
+	      refValue,
+	      increment,
+	      nelem);
+      }
+      break;
+    case CoordinateType::Cartesian:
+      {
+	// Number of pixels along the coordinate axes
+	nelem(0) = 1;
+	nelem(1) = 1;
+	nelem(2) = 1;
+	// Reference pixel is center of map for directional components
+	refPixel(0) = 0;
+	refPixel(1) = 0;
+	refPixel(2) = 0;
+	// Reference value: local zenith
+	refValue(0) = Quantum<double>(0,"m");
+	refValue(1) = Quantum<double>(0,"m");
+	refValue(2) = Quantum<double>(0,"m");
+	// Coordinate increment
+	increment(0) = Quantum<double>(1,"m");
+	increment(1) = Quantum<double>(1,"m");
+	increment(2) = Quantum<double>(1,"m");
+	
+	init (coordType,
+	      refcode,
+	      projection,
+	      refPixel,
+	      refValue,
+	      increment,
+	      nelem);
+      }
+      break;
+    case CoordinateType::Spherical:
+      {
+	// Number of pixels along the coordinate axes
+	nelem = 1;
+	// Reference pixel is center of map for directional components
+	refPixel = 0;
+	// Reference value: coordinate origin
+	refValue(0) = Quantum<double>(0,"m");
+	refValue(1) = Quantum<double>(0,"deg");
+	refValue(2) = Quantum<double>(0,"deg");
+	// Coordinate increment
+	increment(0) = Quantum<double>(1,"m");
+	increment(1) = Quantum<double>(1,"deg");
+	increment(2) = Quantum<double>(1,"deg");
+	
+	init (coordType,
+	      refcode,
+	      projection,
+	      refPixel,
+	      refValue,
+	      increment,
+	      nelem);
+      }
+      break;
+    case CoordinateType::Cylindrical:
+      {
+	// Number of pixels along the coordinate axes
+	nelem = 1;
+	// Reference pixel is center of map for directional components
+	refPixel = 0;
+	// Reference value: coordinate origin
+	refValue(0) = Quantum<double>(0,"m");
+	refValue(1) = Quantum<double>(0,"deg");
+	refValue(2) = Quantum<double>(0,"m");
+	// Coordinate increment
+	increment(0) = Quantum<double>(1,"m");
+	increment(1) = Quantum<double>(1,"deg");
+	increment(2) = Quantum<double>(1,"m");
+	
+	init (coordType,
+	      refcode,
+	      projection,
+	      refPixel,
+	      refValue,
+	      increment,
+	      nelem);
+      }
+      break;
+    default:
+      init (CoordinateType::DirectionRadius);
+      break;
+    }
+  }
+
+  //_____________________________________________________________________________
+  //                                                                         init
+
+  void SpatialCoordinate::init (CoordinateType::Types const &coordType,
+				casa::String const &refcode,
+				casa::String const &projection,
+				casa::Vector<double> const &refPixel,
+				Vector<Quantum<double> > const &refValue,
+				Vector<Quantum<double> > const &increment,
+				casa::IPosition const &shape)
   {
     type_p = coordType;
 
@@ -258,15 +404,36 @@ namespace CR { // Namespace CR -- begin
 	// book-keeping
 	nofAxes_p        = 3;
 	nofCoordinates_p = 2;
-	shape_p          = IPosition(nofAxes_p,1);
-	// set up the coordinate objects
-	directionCoord_p = CoordinateType::makeDirectionCoordinate(refcode,
-								   projection);
+	setShape(shape);
+	// set up DirectionCoordinate
+	casa::MDirection::Types directionType  = MDirectionType(refcode);
+	casa::Projection::Type  projectionType = ProjectionType(projection);
+	casa::Matrix<double> xform(2,2);
+	xform            = 0.0;
+	xform.diagonal() = 1.0;
+	directionCoord_p = casa::DirectionCoordinate (directionType,
+						      casa::Projection(projectionType),
+						      refValue(0),
+						      refValue(1),
+						      increment(0),
+						      increment(1),
+						      xform,
+						      refPixel(0),
+						      refPixel(1));
+	// Set up LinearCoordinate
 	casa::Vector<casa::String> names (1,"Length");
-	casa::Vector<casa::String> units (1,"m");
-	linearCoord_p    = CoordinateType::makeLinearCoordinate(1,
-								names,
-								units);
+	Vector<Quantum<double> > crval (1);
+	Vector<Quantum<double> > cdelt (1);
+	Vector<double> crpix (1);
+	Matrix<double> pc (1,1);
+	crval(0) = refValue(2);
+	crpix(0) = refPixel(2);
+	cdelt(0) = increment(2);
+	linearCoord_p    = casa::LinearCoordinate (names,
+						   crval,
+						   cdelt,
+						   pc,
+						   crpix);
       }
       break;
     case CoordinateType::Cartesian:
@@ -275,12 +442,16 @@ namespace CR { // Namespace CR -- begin
 	nofAxes_p        = 3;
 	nofCoordinates_p = 1;
 	shape_p          = IPosition(nofAxes_p,1);
-	// set up the coordinate object
+	// Set up LinearCoordinate
 	casa::Vector<casa::String> names (nofAxes_p,"Length");
-	casa::Vector<casa::String> units (nofAxes_p,"m");
-	linearCoord_p    = CoordinateType::makeLinearCoordinate(nofAxes_p,
-								names,
-								units);
+	Matrix<double> pc (nofAxes_p,nofAxes_p);
+	pc            = 0.0;
+	pc.diagonal() = 1.0;
+	linearCoord_p = casa::LinearCoordinate (names,
+						refValue,
+						increment,
+						pc,
+						refPixel);
       }
       break;
     case CoordinateType::Spherical:
@@ -289,47 +460,52 @@ namespace CR { // Namespace CR -- begin
 	nofAxes_p        = 3;
 	nofCoordinates_p = 1;
 	shape_p          = IPosition(nofAxes_p,1);
-	// set up the coordinate object
+	// Set up LinearCoordinate
 	casa::Vector<casa::String> names (nofAxes_p);
-	casa::Vector<casa::String> units (nofAxes_p);
+	Matrix<double> pc (nofAxes_p,nofAxes_p);
 	names(0) = "Length";
 	names(1) = "Direction";
 	names(2) = "Direction";
-	units(0) = "m";
-	units(1) = "rad";
-	units(2) = "rad";
-	linearCoord_p    = CoordinateType::makeLinearCoordinate(nofAxes_p,
-								names,
-								units);
+	pc            = 0.0;
+	pc.diagonal() = 1.0;
+	linearCoord_p = casa::LinearCoordinate (names,
+						refValue,
+						increment,
+						pc,
+						refPixel);
       }
       break;
     case CoordinateType::Cylindrical:
       {
+	// book-keeping
 	nofAxes_p        = 3;
 	nofCoordinates_p = 1;
 	shape_p          = IPosition(nofAxes_p,1);
-	// set up the coordinate object
+	// Set up LinearCoordinate
 	casa::Vector<casa::String> names (nofAxes_p);
-	casa::Vector<casa::String> units (nofAxes_p);
+	Matrix<double> pc (nofAxes_p,nofAxes_p);
 	names(0) = "Length";
 	names(1) = "Direction";
 	names(2) = "Length";
-	units(0) = "m";
-	units(1) = "rad";
-	units(2) = "m";
-	linearCoord_p = CoordinateType::makeLinearCoordinate(nofAxes_p,
-							     names,
-							     units);
+	pc            = 0.0;
+	pc.diagonal() = 1.0;
+	linearCoord_p = casa::LinearCoordinate (names,
+						refValue,
+						increment,
+						pc,
+						refPixel);
       }
       break;
     default:
-      init (CoordinateType::DirectionRadius);
+      std::cerr << "[SpatialCoordinate::init]"
+		<< " Sorry, coordinate type not yet supported!"
+		<< std::endl;
       break;
-    }
+    };
   }
-
+  
   //______________________________________________________________ positionValues
-
+  
   Matrix<double> SpatialCoordinate::positionValues (bool const &fastedAxisFirst)
   {
     // determine the number of positions

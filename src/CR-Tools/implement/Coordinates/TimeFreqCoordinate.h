@@ -33,8 +33,9 @@
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 
 #include <crtools.h>
-#include <Coordinates/TimeFreq.h>
+#include <Coordinates/CoordinateBase.h>
 #include <Coordinates/CoordinateType.h>
+#include <Coordinates/TimeFreq.h>
 
 using casa::Vector;
 
@@ -202,7 +203,7 @@ namespace CR { // Namespace CR -- begin
     </ul>
     
   */  
-  class TimeFreqCoordinate : public TimeFreq {
+  class TimeFreqCoordinate : public TimeFreq, public CoordinateBase {
 
     //! The target domain for which the data are processed by the Beamformer
     CR::CoordinateType coordType_p;
@@ -347,7 +348,7 @@ namespace CR { // Namespace CR -- begin
       
       \return nofAxes -- The number of coordinate axes.
     */
-    inline unsigned int nofAxes () const {
+    inline unsigned int nofAxes () {
       return nofAxes_p;
     }
     
@@ -536,7 +537,7 @@ namespace CR { // Namespace CR -- begin
       \return shape -- [time,freq] = \f$ [ N_t , N_\nu] \f$ The number of elements
               along each of the two coupled axes.
     */
-    virtual casa::IPosition shape () const;
+    casa::IPosition shape ();
 
     /*!
       \brief Retrieve the world coordinates along the time axis
@@ -567,7 +568,7 @@ namespace CR { // Namespace CR -- begin
       \return names -- The names of the world axes, as retrieved through the
               <tt>casa::Coordinate::worldAxisNames()<tt> function.
     */
-    Vector<casa::String> worldAxisNames () const;
+    Vector<casa::String> worldAxisNames ();
     
     /*!
       \brief Get the units of the world axes
@@ -575,7 +576,7 @@ namespace CR { // Namespace CR -- begin
       \return units -- The units of the world axes, as retrieved through the
               <tt>casa::Coordinate::worldAxisUnits()<tt> function.
     */
-    Vector<casa::String> worldAxisUnits () const;
+    Vector<casa::String> worldAxisUnits ();
 
     /*!
       \brief Get the value of the reference pixel
@@ -583,7 +584,7 @@ namespace CR { // Namespace CR -- begin
       \return refPixel -- The value of the reference pixel, as retrieved through
               the <tt>casa::Coordinate::referencePixel()<tt> function.
     */
-    Vector<double> referencePixel() const;
+    Vector<double> referencePixel();
 
     /*!
       \brief Get the reference value for the world coordinates of the axes
@@ -594,7 +595,7 @@ namespace CR { // Namespace CR -- begin
 
       \return refValue -- [time,freq] = \f$ [ t_{\rm CRVAL}, \nu_{\rm CRVAL} ] \f$
     */
-    Vector<double> referenceValue () const;
+    Vector<double> referenceValue ();
 
     /*!
       \brief Get the matrix for the linear transformation
@@ -609,7 +610,7 @@ namespace CR { // Namespace CR -- begin
 
       \return increment -- [time,freq] = \f$ [ \delta_t, \delta_\nu ] \f$
     */
-    Vector<double> increment () const;
+    Vector<double> increment ();
 
     /*!
       \brief Conversion from pixel to world coordinates

@@ -29,10 +29,12 @@
 #include <string>
 
 // casacore header files
+#include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/String.h>
 #include <coordinates/Coordinates/CoordinateSystem.h>
 
+using casa::IPosition;
 using casa::String;
 using casa::Vector;
 
@@ -49,8 +51,6 @@ namespace CR { // Namespace CR -- begin
 
     \date 2009/04/15
 
-    \test tCoordinateBase.cc
-    
     <h3>Prerequisite</h3>
     
     <ul type="square">
@@ -114,16 +114,27 @@ namespace CR { // Namespace CR -- begin
     // ------------------------------------------------------------------ Methods
     
     /*!
+      \brief Get the number of coordinate axes
+      
+      \return nofAxes -- The number of coordinate axes.
+    */
+    virtual unsigned int nofAxes () =0;
+
+    /*!
+      \brief Get the number of elements along the coordinate axes
+      
+      \return shape -- The number of elements along the individual coordinate
+              axes.
+    */
+    virtual IPosition shape () =0;
+
+    /*!
       \brief Get the value of the reference pixel
 
       \return refPixel -- The value of the reference pixel, as retrieved through
               the <tt>casa::Coordinate::referencePixel()<tt> function.
     */
     virtual Vector<double> referencePixel() =0;
-    /*!
-      \brief Set the value of the reference pixel
-    */
-    virtual bool setReferencePixel(Vector<double> const &refPixel) =0;
 
     /*!
       \brief Get the reference value
@@ -132,18 +143,7 @@ namespace CR { // Namespace CR -- begin
               <tt>casa::Coordinate::referenceValue()<tt> function.
     */
     virtual Vector<double> referenceValue() =0;
-    /*!
-      \brief Set the value of the reference value
 
-
-      \param increment -- The value of the coordinate increment, as assigned
-             through the <tt>casa::Coordinate::setReferenceValue()<tt> function.
-      \param anglesInDegrees -- If the coordinate contains angular coordinates, 
-             are their values given in radians or degrees?
-    */
-    virtual bool setReferenceValue(Vector<double> const &refValue,
-				   bool const &anglesInDegrees=true) =0;
-    
     /*!
      \brief Get the value of the coordinate increment
       
@@ -151,16 +151,6 @@ namespace CR { // Namespace CR -- begin
               through the <tt>casa::Coordinate::increment()<tt> function.
     */
     virtual Vector<double> increment() =0;
-    /*!
-      \brief Set the value of the coordinate increment
-
-      \param increment -- The value of the coordinate increment, as assigned
-             through the <tt>casa::Coordinate::setIncrement()<tt> function.
-      \param anglesInDegrees -- If the coordinate contains angular coordinates, 
-             are their values given in radians or degrees?
-     */
-    virtual bool setIncrement(Vector<double> const &incr,
-			      bool const &anglesInDegrees=true) =0;
 
     /*!
       \brief Get the names of the world axes
@@ -169,13 +159,6 @@ namespace CR { // Namespace CR -- begin
               <tt>casa::Coordinate::worldAxisNames()<tt> function.
     */
     virtual Vector<String> worldAxisNames() =0;
-    /*!
-      \brief Set the names of the world axes
-
-      \param names -- The names of the world axes, as to be set through the
-             <tt>casa::Coordinate::setWorldAxisNames()<tt> function.
-    */
-    virtual bool setWorldAxisNames(Vector<String> const &names) =0;
 
     /*!
       \brief Get the units of the world axes
@@ -184,14 +167,7 @@ namespace CR { // Namespace CR -- begin
               <tt>casa::Coordinate::worldAxisUnits()<tt> function.
     */
     virtual Vector<String> worldAxisUnits() =0;
-    /*!
-      \brief Set the units of the world axes
 
-      \return units -- The units of the world axes, as to be set through the
-              <tt>casa::Coordinate::setWorldAxisUnits()<tt> function.
-    */
-    virtual bool setWorldAxisUnits(Vector<String> const &units) =0;
-    
     /*!
       \brief Conversion from pixel to world coordinates
 

@@ -107,6 +107,10 @@ namespace CR {  // Namespace CR -- begin
 	<li>Skymapper::setAntPositions -- as the Skymapper class itself is not
 	handling the actual data I/O, the antenna positions required by the
 	Beamformer need to be provided separately.
+	<li>Skymapper::setNearField -- switch the Beamformer to perform its
+	computation for the near-field geometry
+	<li>Skymapper::setFarField -- switch the Beamformer to perform its
+	computation for the far-field geometry
       </ul>
     </ul>
 
@@ -393,7 +397,11 @@ namespace CR {  // Namespace CR -- begin
     */
     bool processData (DataReader *dr);
 
-    // ------------------------------------------------------- Beamformer methods
+    // ==========================================================================
+    //
+    //  Beamformer 
+    //
+    // ==========================================================================
     
     /*!
       \brief Set the antenna positions
@@ -445,6 +453,30 @@ namespace CR {  // Namespace CR -- begin
       was encountered.
     */
     bool setBeamformer (Beamformer const &beamformer);
+
+    /*!
+      \brief Is the beamforming performed for far-field geometry?
+      
+      \return farField -- Returns \e true in case the beamforming is performed for
+              the far-field geometry.
+    */
+    inline bool farField () {
+      return beamformer_p.farField();
+    }
+    
+    /*!
+      \brief Perform beamforming for far-field geometry
+    */
+    inline void setFarField () {
+      beamformer_p.farField(true);
+    }
+    
+    /*!
+      \brief Perform beamforming for near-field geometry
+    */
+    inline void setNearField () {
+      beamformer_p.nearField(true);
+    }
     
     // ------------------------------------------------------------------- feedback
     

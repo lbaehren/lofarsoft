@@ -306,20 +306,22 @@ namespace CR { // Namespace CR -- begin
     }
   }
   
-  // ------------------------------------------------------- makeLinearCoordinate
+  //_____________________________________________________________________________
+  //                                                         makeLinearCoordinate
   
   LinearCoordinate
   CoordinateType::makeLinearCoordinate (unsigned int const &nofAxes)
   {
-    Vector<casa::String> names (nofAxes,"");
-    Vector<casa::String> units (nofAxes,"");
+    Vector<casa::String> names (nofAxes,"Length");
+    Vector<casa::String> units (nofAxes,"m");
     
     return makeLinearCoordinate (nofAxes,
 				 names,
 				 units);
   }
   
-  // ------------------------------------------------------- makeLinearCoordinate
+  //_____________________________________________________________________________
+  //                                                         makeLinearCoordinate
   
   LinearCoordinate
   CoordinateType::makeLinearCoordinate (unsigned int const &nofAxes,
@@ -354,7 +356,7 @@ namespace CR { // Namespace CR -- begin
 			       crpix);
     }
   }
-
+  
   // ----------------------------------------------------- makeSpectralCoordinate
   
   SpectralCoordinate CoordinateType::makeSpectralCoordinate (double const &refValue,

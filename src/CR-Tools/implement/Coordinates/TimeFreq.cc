@@ -198,11 +198,11 @@ namespace CR { // Namespace CR -- begin
   // ---------------------------------------------------------------------- shape
 
 #ifdef HAVE_CASA
-  casa::IPosition TimeFreq::shape () const {
+  casa::IPosition TimeFreq::shape () {
     return casa::IPosition (2,blocksize(),fftLength());
   }
 #else 
-  vector<int> TimeFreq::shape () const {
+  vector<int> TimeFreq::shape () {
     vector<int> shape(2);
     shape(0) = blockize();
     shape(1) = fftLength();
@@ -213,7 +213,7 @@ namespace CR { // Namespace CR -- begin
   // ------------------------------------------------------------------ increment
 
 #ifdef HAVE_CASA
-  casa::Vector<double> TimeFreq::increment () const 
+  casa::Vector<double> TimeFreq::increment ()
   {
     casa::Vector<double> vec (2);
 
@@ -223,7 +223,7 @@ namespace CR { // Namespace CR -- begin
     return vec;
   }
 #else 
-  vector<double> TimeFreq::increment () const
+  vector<double> TimeFreq::increment ()
   {
     vector<double> vec (2);
 

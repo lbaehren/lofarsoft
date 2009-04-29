@@ -108,12 +108,14 @@ int test_export2fits ()
   refcode.push_back("J2000");     /* mean equator and equinox at J2000.0 (FK5)       */
   refcode.push_back("GALACTIC");  /* galactic coordinates                            */
 
-  projection.push_back("AIT");
-  projection.push_back("CAR");
-  projection.push_back("MER");
-  projection.push_back("SIN");
-  projection.push_back("STG");
-  projection.push_back("TAN");
+  projection.push_back("AIR");    /* Airy                     */
+  projection.push_back("AIT");    /* Hammer-Aitoff            */
+  projection.push_back("CAR");    /* Cartesian                */
+  projection.push_back("MER");    /* Mercator                 */
+  projection.push_back("MOL");    /* Molweide                 */
+  projection.push_back("SIN");    /* Orthographics/synthesis  */
+  projection.push_back("STG");    /* Stereographic            */
+  projection.push_back("TAN");    /* Gnomonic                 */
 
   for (uint ref(0); ref<refcode.size(); ref++) {
     for (uint proj(0); proj<projection.size(); proj++) {
