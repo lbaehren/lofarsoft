@@ -147,18 +147,18 @@ int test_ppfimplements ()
     ACG gen(1, samples.nelements() );
     
     for(nSample=0; nSample < samples.nelements(); nSample++ ){
-             Normal rnd(&gen, 0.0, 0.1 );
+             Normal rnd(&gen, 0.0, 0.04 );
             Double nextExpRand = rnd() ;
-      samples(nSample) = nextExpRand ;
+      samples(nSample) = abs(nextExpRand) ;
     }
     // Resetting the generator, should get the same numbers.
     gen.reset () ;
     
   //  for( uint r=0; r< nofsegmentation; r++ ){
-  double sample_value =samples(16*dataBlockSize*3+400) ;
-        samples( 16*dataBlockSize*3+400) = 10.0*samples(16*dataBlockSize*3+400);
-	samples( 16*dataBlockSize*3+500) = 10.0*samples(16*dataBlockSize*3+500);
-	samples( 16*dataBlockSize*3+600) = 5.0;
+  //double sample_value =samples(16*dataBlockSize*3+400) ;
+   //     samples( 16*dataBlockSize*3+400) = 10.0*samples(16*dataBlockSize*3+400);
+	//samples( 16*dataBlockSize*3+500) = 10.0*samples(16*dataBlockSize*3+500);
+//	samples( 16*dataBlockSize*3+600) = 5.0;
 //	cout << "-- samples with a peak has been saved " << endl ;
 //	}
     

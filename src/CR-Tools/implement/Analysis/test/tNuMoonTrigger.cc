@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                    *
- *   Kalpana Singh (<mail>)                                                *
+ *   Copyright (C) 2009                                                  *
+ *   Kalpana Singh (<mail>)                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -24,7 +24,7 @@
 #include <Analysis/NuMoonTrigger.h>
 
 // Namespace usage
-using CR::NuMoonTrigger;
+using ::NuMoonTrigger;
 
 /*!
   \file tNuMoonTrigger.cc
@@ -35,7 +35,7 @@ using CR::NuMoonTrigger;
  
   \author Kalpana Singh
  
-  \date 2008/08/20
+  \date 2009/04/21
 */
 
 // -----------------------------------------------------------------------------
@@ -43,19 +43,20 @@ using CR::NuMoonTrigger;
 /*!
   \brief Test constructors for a new NuMoonTrigger object
 
-  \return nofFailedTests -- The number of failed tests.
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
 */
-int test_NuMoonTrigger ()
+int test_constructors ()
 {
+  std::cout << "\n[tNuMoonTrigger::test_constructors]\n" << std::endl;
+
   int nofFailedTests (0);
   
-  std::cout << "\n[test_NuMoonTrigger]\n" << std::endl;
-
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    NuMoonTrigger newNuMoonTrigger;
+    NuMoonTrigger newObject;
     //
-    newNuMoonTrigger.summary(); 
+    newObject.summary(); 
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -71,8 +72,7 @@ int main ()
   int nofFailedTests (0);
 
   // Test for the constructor(s)
-  nofFailedTests += test_NuMoonTrigger ();
-  
+  nofFailedTests += test_constructors ();
+
   return nofFailedTests;
 }
-
