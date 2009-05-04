@@ -78,6 +78,11 @@ const unsigned int delay_2008_start = 1200570000; // Do 17. Jan 11:40:00 UTC 200
 // Start of 63.5 and 68.1 MHz Phase Reference signal
 const unsigned int roof_setup_2_freq_start = 1202479000; // Fr Feb  8 13:56:40 UTC 2008
 
+// Tripole test
+const unsigned int tripole_2009_start = 1236086340; // 2009-03-03 13:19 UTC
+const unsigned int tripole_2009_stop = 1238505000; // 2009-03-31 13:10 UTC
+
+
 // define antenna IDs
 const int MAX_Antennas = 30;
 const int antennaIDs[] = 
@@ -1211,6 +1216,53 @@ void writeBadPeriods(void)
   if (!writer.AddData(True,antennaIDs[19],"Active",stop_date) )
     cerr << "\nERROR while writing field: Active" << endl;
 
+
+  // flag antennas 24 and 27 because of sign flip in LOPES 30 setup
+  start_date = 1144143600; // 2006-04-04 09:40 UTC
+  stop_date = LOPES_pol_start;
+  if (!writer.AddData("Sign flip Ant 24",antennaIDs[23],"HWSetup",start_date) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[23],"Active",start_date) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData(True,antennaIDs[23],"Active",stop_date) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  start_date = 1153319760; // 2006-07-19 14:36 UTC
+  if (!writer.AddData("Sign flip Ant 27",antennaIDs[26],"HWSetup",start_date) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[26],"Active",start_date) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData(True,antennaIDs[26],"Active",stop_date) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+
+  // tripole test March 2009, ant 24, 25 and 26 used for tripole
+  if (!writer.AddData("Test of tripole antenna",antennaIDs[23],"HWSetup",tripole_2009_start) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[23],"Active",tripole_2009_start) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[23],"HWSetup",tripole_2009_stop) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[23],"Active",tripole_2009_stop) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  if (!writer.AddData("Test of tripole antenna",antennaIDs[24],"HWSetup",tripole_2009_start) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[24],"Active",tripole_2009_start) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[24],"HWSetup",tripole_2009_stop) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[24],"Active",tripole_2009_stop) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  if (!writer.AddData("Test of tripole antenna",antennaIDs[25],"HWSetup",tripole_2009_start) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[25],"Active",tripole_2009_start) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[25],"HWSetup",tripole_2009_stop) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[25],"Active",tripole_2009_stop) )
+    cerr << "\nERROR while writing field: Active" << endl;
 }
 
 
@@ -1255,7 +1307,7 @@ int main (int argc, char *argv[])
     // writeTVRefPhases();		// checked in
     // TVshutdown();			// checked in
     // writeRoofRefPhases();		// checked in
-    writeTVsep2007RefPhases();
+    // writeTVsep2007RefPhases();
 
     // Add the measured dispersion of the LOPES 30 filter boxes
     //writePhaseCal();   //  checked in
@@ -1265,7 +1317,7 @@ int main (int argc, char *argv[])
 
     // add field "Active" to store information, when an antenna had problems
     // addActiveField(true);		// checked in
-    // writeBadPeriods();		// checked in
+    writeBadPeriods();		// checked in
 
     cout << "Writing finished: " << endl;
     writer.PrintSummary();
