@@ -1232,9 +1232,10 @@ void writeBadPeriods(void)
     cerr << "\nERROR while writing field: HWSetup" << endl;
   if (!writer.AddData(False,antennaIDs[26],"Active",start_date) )
     cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData(False,antennaIDs[26],"Active",Summer2006_change) )
+    cerr << "\nERROR while writing field: Active" << endl;
   if (!writer.AddData(True,antennaIDs[26],"Active",stop_date) )
     cerr << "\nERROR while writing field: Active" << endl;
-
 
   // tripole test March 2009, ant 24, 25 and 26 used for tripole
   if (!writer.AddData("Test of tripole antenna",antennaIDs[23],"HWSetup",tripole_2009_start) )
