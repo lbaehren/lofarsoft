@@ -30,10 +30,12 @@
 
 // casacore header files
 #include <casa/Arrays/IPosition.h>
+#include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/String.h>
 #include <coordinates/Coordinates/CoordinateSystem.h>
 
+using casa::Matrix;
 using casa::IPosition;
 using casa::String;
 using casa::Vector;
@@ -168,6 +170,15 @@ namespace CR { // Namespace CR -- begin
     */
     virtual Vector<String> worldAxisUnits() =0;
 
+    /*!
+      \brief Retrieve the world axis values for the coordinates
+
+      \param fastedAxisFirst -- Have the fasted varying axis first? 
+
+      \return values -- The world axis values for the coordinates
+    */
+    virtual Matrix<double> worldAxisValues (bool const &fastedAxisFirst=true) =0; 
+     
     /*!
       \brief Conversion from pixel to world coordinates
 

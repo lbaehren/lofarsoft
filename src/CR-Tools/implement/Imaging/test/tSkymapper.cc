@@ -251,7 +251,7 @@ int test_Beamformer (uint const &blocksize=1024)
   cout << "[4] Set positions and frequencies ..." << endl << std::flush;
   try {
     Vector<MVPosition> antPos (3);
-    Matrix<double> skyPos = coord.spatialCoordinate().positionValues();
+    Matrix<double> skyPos = coord.spatialCoordinate().worldAxisValues();
     Vector<double> freq   = coord.timeFreqCoordinate().frequencyValues();
     //
     antPos(0) = casa::MVPosition (100,0,0);

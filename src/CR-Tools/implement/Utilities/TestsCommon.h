@@ -253,6 +253,19 @@ namespace CR { // Namespace CR -- begin
   void test_getData (Matrix<DComplex> &data,
 		     casa::IPosition const &shape,
 		     bool const &antennaIndexFirst=false);
+
+  /*!
+    \brief Export coordinate values of a set of positions in space
+    
+    \param pos      -- [nofPositions,nofCoordinates] Array with the position values.
+    \param filename -- Name of the output file to which the positions will be
+           written.
+    \param screenSummary -- Also provide a short summary to the screen? If \e true,
+           then a small subset of the values will be written to standard output.
+  */
+  void test_exportPositions (Matrix<double> const &pos,
+			     std::string const &filename="positions.dat",
+			     bool const &screenSummary=false);
   
   /*!
     \brief Export the internal settings of the Beamformer

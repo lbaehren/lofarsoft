@@ -110,6 +110,8 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
+  //_____________________________________________________________________________
+
   CR::TimeFreqCoordinate test_TimeFreq (uint const &blocksize,
 					casa::Quantity const &sampleFreq,
 					uint const &nyquistZone,
@@ -124,6 +126,47 @@ namespace CR { // Namespace CR -- begin
     return timeFreq;
   }
 
+  //_____________________________________________________________________________
+  //                                                         test_exportPositions
+
+  void test_exportPositions (Matrix<double> const &pos,
+			     std::string const &filename,
+			     bool const &screenSummary)
+  {
+    casa::IPosition shape (pos.shape());
+    std::ofstream outfile;
+    int npos;
+    int ncoord;
+
+    // open the stream for the output file
+    outfile.open(filename.c_str(),std::ios::out);
+
+    for (npos=0; npos<shape(0); npos++) {
+      outfile << npos;
+      for (ncoord=0; ncoord<shape(1); ncoord++) {
+	outfile << "\t" << pos(npos,ncoord);
+      }
+      outfile << std::endl;
+    }
+
+    outfile.close();
+
+    /* Provide a short summary to standard output */
+    if (screenSummary) {
+      cout << "\t" << pos.row(0) << endl;
+      cout << "\t" << pos.row(1) << endl;
+      cout << "\t" << pos.row(2) << endl;
+      cout << "\t..." << endl;
+      cout << "\t" << pos.row(shape(0)/2-3) << endl;
+      cout << "\t" << pos.row(shape(0)/2-2) << endl;
+      cout << "\t" << pos.row(shape(0)/2-1) << endl;
+      cout << "\t..." << endl;
+      cout << "\t" << pos.row(shape(0)-3) << endl;
+      cout << "\t" << pos.row(shape(0)-2) << endl;
+      cout << "\t" << pos.row(shape(0)-1) << endl;
+    }
+  }
+  
   // ============================================================================
   //
   //  Module Imaging

@@ -1,0 +1,65 @@
+
+set term pdf color solid enhanced
+
+##_______________________________________________________________________________
+## Plot set of cartesian coordinates
+
+set xlabel "x"
+set ylabel "y"
+set zlabel "z"
+
+set output "positions-cartesian.pdf"
+splot "positions-cartesian.dat" u 2:3:4
+
+##_______________________________________________________________________________
+## Plot set of spherical coordinates
+
+set xlabel "theta"
+set ylabel "phi"
+set zlabel "r"
+
+set angles degrees
+set mapping spherical
+set parametric
+
+set output "positions-spherical.pdf"
+splot "positions-spherical.dat" u 3:4:2
+
+##_______________________________________________________________________________
+## Plot set of spherical coordinates
+
+set xlabel "theta"
+set ylabel "z"
+set zlabel "r"
+
+set angles degrees
+set mapping cylindrical
+set parametric
+
+set output "positions-cylindrical.pdf"
+splot "positions-cylindrical.dat" u 3:4:2
+
+##_______________________________________________________________________________
+## Plot set of DirectionRadius coordinates
+
+set xlabel "theta"
+set ylabel "phi"
+set zlabel "r"
+
+set angles radians
+set mapping spherical
+set parametric
+
+set output "positions-azel-sin.pdf"
+splot "positions-azel-sin.dat" u 2:3:4
+
+set output "positions-azel-stg.pdf"
+splot "positions-azel-stg.dat" u 2:3:4
+
+set output "positions-azel-zea.pdf"
+splot "positions-azel-zea.dat" u 2:3:4
+
+## combined plot
+
+set output "positions-directionRadius.pdf"
+splot "positions-azel-sin.dat" u 2:3:4, "positions-azel-stg.dat" u 2:3:4, "positions-azel-zea.dat" u 2:3:4

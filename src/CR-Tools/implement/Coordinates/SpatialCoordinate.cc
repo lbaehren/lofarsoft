@@ -164,6 +164,9 @@ namespace CR { // Namespace CR -- begin
   //  Parameters
   //
   // ============================================================================
+
+  //_____________________________________________________________________________
+  //                                                                      summary
   
   void SpatialCoordinate::summary (std::ostream &os)
   {
@@ -183,7 +186,8 @@ namespace CR { // Namespace CR -- begin
     os << "-- Direction reference code     = " << directionRefcode() << std::endl;
   }
 
-  // ----------------------------------------------------- setDirectionCoordinate
+  //_____________________________________________________________________________
+  //                                                       setDirectionCoordinate
   
   bool SpatialCoordinate::setDirectionCoordinate (DirectionCoordinate const &direction)
   {
@@ -201,7 +205,8 @@ namespace CR { // Namespace CR -- begin
     };
   }
 
-  // ----------------------------------------------------------- directionRefcode
+  //_____________________________________________________________________________
+  //                                                             directionRefcode
 
   String SpatialCoordinate::directionRefcode ()
   {
@@ -219,7 +224,8 @@ namespace CR { // Namespace CR -- begin
     };
   }
   
-  // ----------------------------------------------------------------- projection
+   //_____________________________________________________________________________
+  //                                                                    projection
 
   String SpatialCoordinate::projection ()
   {
@@ -234,7 +240,8 @@ namespace CR { // Namespace CR -- begin
     };
   }
 
-  //____________________________________________________________________ setShape
+  //_____________________________________________________________________________
+  //                                                                     setShape
   
   bool SpatialCoordinate::setShape (IPosition const &shape)
   {
@@ -426,9 +433,11 @@ namespace CR { // Namespace CR -- begin
 	Vector<Quantum<double> > cdelt (1);
 	Vector<double> crpix (1);
 	Matrix<double> pc (1,1);
-	crval(0) = refValue(2);
-	crpix(0) = refPixel(2);
-	cdelt(0) = increment(2);
+	crval(0)      = refValue(2);
+	crpix(0)      = refPixel(2);
+	cdelt(0)      = increment(2);
+	pc            = 0.0;
+	pc.diagonal() = 1.0;
 	linearCoord_p    = casa::LinearCoordinate (names,
 						   crval,
 						   cdelt,
@@ -504,9 +513,10 @@ namespace CR { // Namespace CR -- begin
     };
   }
   
-  //______________________________________________________________ positionValues
+  //_____________________________________________________________________________
+  //                                                              worldAxisValues
   
-  Matrix<double> SpatialCoordinate::positionValues (bool const &fastedAxisFirst)
+  Matrix<double> SpatialCoordinate::worldAxisValues (bool const &fastedAxisFirst)
   {
     // determine the number of positions
     uint nofPositions (1);
@@ -534,28 +544,42 @@ namespace CR { // Namespace CR -- begin
     casa::CoordinateSystem csys;
     toCoordinateSystem (csys);
 
+#ifdef DEBUGGING_MESSAGES
+    std::cout << "[SpatialCoordinate::worldAxisValues]" << std::endl;
+    std::cout << "-- Shape            = " << shape_p      << std::endl;
+    std::cout << "-- nof. positions   = " << nofPositions << std::endl;
+    std::cout << "-- Axis ordering    = " << axis         << std::endl;
+    std::cout << "-- World axis names = " << csys.worldAxisNames() << std::endl;
+    std::cout << "-- World axis units = " << csys.worldAxisUnits() << std::endl;
+    std::cout << "-- Reference pixel  = " << csys.referencePixel() << std::endl;
+    std::cout << "-- Reference value  = " << csys.referenceValue() << std::endl;
+    std::cout << "-- Increment        = " << csys.increment()      << std::endl;
+#endif
+
     /* Set up the arrays for the conversion and the returned values */
     Matrix<double> positions (nofPositions,nofAxes_p);
-    IPosition pos(nofAxes_p,0);
-    Vector<double> pixel (nofAxes_p,0);
-    Vector<double> world (nofAxes_p,0);
+    IPosition pos(nofAxes_p);
+    Vector<double> pixel (nofAxes_p);
+    Vector<double> world (nofAxes_p);
     uint npos (0);
     
     switch (type_p) {
     case CoordinateType::Direction:
-      break;
-      for (pos(1)=0; pos(1)<shape_p(axis(1)); pos(1)++) {
-	pixel(axis(1)) = pos(1);
-	for (pos(0)=0; pos(0)<shape_p(axis(0)); pos(0)++) {
-	  pixel(axis(0)) = pos(0);
-	  // conversion from pixel to world coordinates
-	  csys.toWorld (world,pixel);
-	  // copy result to returned array
-	  positions.row(npos) = world;
-	  // increment counter
-	  npos++;
+      {
+	for (pos(1)=0; pos(1)<shape_p(axis(1)); pos(1)++) {
+	  pixel(axis(1)) = pos(1);
+	  for (pos(0)=0; pos(0)<shape_p(axis(0)); pos(0)++) {
+	    pixel(axis(0)) = pos(0);
+	    // conversion from pixel to world coordinates
+	    csys.toWorld (world,pixel);
+	    // copy result to returned array
+	    positions.row(npos) = world;
+	    // increment counter
+	    npos++;
+	  }
 	}
       }
+      break;
     default:
       for (pos(2)=0; pos(2)<shape_p(axis(2)); pos(2)++) {
 	pixel(axis(2)) = pos(2);
@@ -963,15 +987,15 @@ namespace CR { // Namespace CR -- begin
 	break;
     case CoordinateType::DirectionRadius:
       {
-	Vector<casa::Double> dirPixel (2);
+	Vector<casa::Double> pixelDir (2);
 	Vector<casa::Double> dirWorld (2);
 	Vector<casa::Double> linPixel (1);
 	Vector<casa::Double> linWorld (2);
-	dirPixel(0) = pixel(0);
-	dirPixel(1) = pixel(1);
+	pixelDir(0) = pixel(0);
+	pixelDir(1) = pixel(1);
 	linPixel(0) = pixel(2);
 	// conversion
-	directionCoord_p.toWorld (dirWorld,dirPixel);
+	directionCoord_p.toWorld (dirWorld,pixelDir);
 	linearCoord_p.toWorld (linWorld,linPixel);
 	// copy to output
 	world(0) = dirWorld(0);
@@ -996,19 +1020,19 @@ namespace CR { // Namespace CR -- begin
 	break;
     case CoordinateType::DirectionRadius:
       {
-	Vector<casa::Double> dirPixel (2);
+	Vector<casa::Double> pixelDir (2);
 	Vector<casa::Double> linPixel (2);
 	Vector<casa::Double> dirWorld (2);
 	Vector<casa::Double> linWorld (1);
 	dirWorld(0) = world(0);
 	dirWorld(1) = world(1);
-	linWorld(0)    = world(2);
+	linWorld(0) = world(2);
 	// conversion
-	directionCoord_p.toPixel (dirPixel,dirWorld);
+	directionCoord_p.toPixel (pixelDir,dirWorld);
 	linearCoord_p.toPixel (linPixel,linWorld);
 	// copy to output
-	pixel(0) = dirPixel(0);
-	pixel(1) = dirPixel(1);
+	pixel(0) = pixelDir(0);
+	pixel(1) = pixelDir(1);
 	pixel(2) = linPixel(0);
       }
       break;
@@ -1018,16 +1042,23 @@ namespace CR { // Namespace CR -- begin
     }
   }
 
-  //__________________________________________________________ toCoordinateSystem
+  //_____________________________________________________________________________
+  //                                                           toCoordinateSystem
 
   void SpatialCoordinate::toCoordinateSystem (casa::CoordinateSystem &csys,
 					      bool const &append)
   {
+    /* If coordinates are not be simply be appended to an existing coordinate
+     * system, we need to clean up first.
+     */
     if (!append) {
       csys = casa::CoordinateSystem();
     }
     
     switch (type_p) {
+    case CoordinateType::Direction:
+      csys.addCoordinate (directionCoord_p);
+      break;
     case CoordinateType::DirectionRadius:
       csys.addCoordinate (directionCoord_p);
       csys.addCoordinate (linearCoord_p);
@@ -1036,6 +1067,15 @@ namespace CR { // Namespace CR -- begin
       csys.addCoordinate (linearCoord_p);
       break;
     };
+    
+#ifdef DEBUGGING_MESSAGES
+    std::cout << "[SpatialCoordinate::toCoordinateSystem]" << std::endl;
+    std::cout << "-- World axis names = " << csys.worldAxisNames() << std::endl;
+    std::cout << "-- World axis units = " << csys.worldAxisUnits() << std::endl;
+    std::cout << "-- Reference pixel  = " << csys.referencePixel() << std::endl;
+    std::cout << "-- Reference value  = " << csys.referenceValue() << std::endl;
+    std::cout << "-- Increment        = " << csys.increment()      << std::endl;
+#endif
   }
   
 } // Namespace CR -- end

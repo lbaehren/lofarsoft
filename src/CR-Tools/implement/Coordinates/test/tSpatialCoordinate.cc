@@ -172,7 +172,8 @@ int test_SpatialCoordinate ()
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                       test_wcs
 
 /*!
   \brief Test wrapping of parameter access and conversion functions
@@ -348,10 +349,39 @@ int test_wcs ()
     nofFailedTests++;
   }
 
+  cout << "[8] Test passing of coordinates to a coordinate system object" << endl;
+  try {
+    casa::CoordinateSystem csys;
+    casa::ObsInfo obsInfo;
+    CR::SpatialCoordinate coord;
+    
+    obsInfo.setTelescope("LOFAR");
+    obsInfo.setObserver("Lars Baehren");
+    
+    csys.setObsInfo (obsInfo);
+    
+    coord.toCoordinateSystem (csys,true);
+
+    cout << "-- Telescope        = " << csys.obsInfo().telescope() << endl;
+    cout << "-- Observer         = " << csys.obsInfo().observer()  << endl;
+    cout << "-- nof. coordinates = " << csys.nCoordinates()        << endl;
+    cout << "-- nof. pixel axes  = " << csys.nPixelAxes()          << endl;
+    cout << "-- nof. world axes  = " << csys.nWorldAxes()          << endl;
+    cout << "-- World axis names = " << csys.worldAxisNames()      << endl;
+    cout << "-- World axis units = " << csys.worldAxisUnits()      << endl;
+    cout << "-- Reference pixel  = " << csys.referencePixel()      << endl;
+    cout << "-- Reference value  = " << csys.referenceValue()      << endl;
+    cout << "-- Increment        = " << csys.increment()           << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                test_conversion
 
 /*!
   \brief Test the conversion between pixel coordinates and world coordinates
@@ -451,122 +481,150 @@ int test_conversion ()
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                           test_worldAxisValues
 
 /*!
-  \brief Test the various methods
+  \brief Test export of the world axis values
 
   \return nofFailedTests -- The number of failed tests encountered within this
           function.
 */
-int test_methods ()
+int test_worldAxisValues ()
 {
-  cout << "\n[tSpatialCoordinate::test_methods]\n" << endl;
+  cout << "\n[tSpatialCoordinate::test_worldAxisValues]\n" << endl;
 
   int nofFailedTests (0);
-  std::string telescope  = "LOFAR";
-  std::string observer   = "Lars Baehren";
-  std::string refcode    = "AZEL";
-  std::string projection = "SIN";
+  casa::IPosition shape (2);
 
-  cout << "[1] Test passing of coordinates to a coordinate system object" << endl;
+  std::cout << "[1] Cartesian coordinates ..." << std::endl;
   try {
-    casa::CoordinateSystem csys;
-    casa::ObsInfo obsInfo;
-    CR::SpatialCoordinate coord;
-    
-    obsInfo.setTelescope(telescope);
-    obsInfo.setObserver(observer);
-    
-    csys.setObsInfo (obsInfo);
-    
-    coord.toCoordinateSystem (csys,true);
-
-    cout << "-- Telescope        = " << csys.obsInfo().telescope() << endl;
-    cout << "-- Observer         = " << csys.obsInfo().observer()  << endl;
-    cout << "-- nof. coordinates = " << csys.nCoordinates()        << endl;
-    cout << "-- nof. pixel axes  = " << csys.nPixelAxes()          << endl;
-    cout << "-- nof. world axes  = " << csys.nWorldAxes()          << endl;
-    cout << "-- World axis names = " << csys.worldAxisNames()      << endl;
-    cout << "-- World axis units = " << csys.worldAxisUnits()      << endl;
-    cout << "-- Reference pixel  = " << csys.referencePixel()      << endl;
-    cout << "-- Reference value  = " << csys.referenceValue()      << endl;
-    cout << "-- Increment        = " << csys.increment()           << endl;
+    SpatialCoordinate coord (CoordinateType::Cartesian);
+    casa::IPosition nelem (3,20,20,10);
+    coord.setShape(nelem);
+    coord.summary();
+    // retrieve the values
+    Matrix<double> positions = coord.worldAxisValues();
+    shape                    = positions.shape();
+    // export the values
+    CR::test_exportPositions(positions,
+			     "positions-cartesian.dat",
+			     true);
   } catch (std::string message) {
-    cerr << message << endl;
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[2] Spherical coordinates ..." << std::endl;
+  try {
+    SpatialCoordinate coord (CoordinateType::Spherical);
+    casa::IPosition nelem (3,10,45,30);
+    Vector<double> refPixel (3);
+    refPixel(0) = 0;
+    refPixel(1) = nelem(1)/2;
+    refPixel(2) = nelem(2)/2;
+    coord.setShape(nelem);
+    coord.setReferencePixel(refPixel);
+    coord.summary();
+    CR::test_exportPositions(coord.worldAxisValues(),
+			     "positions-spherical.dat",
+			     true);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
     nofFailedTests++;
   }
 
-  cout << "[2] Retrieve world coordinates of the positions ..." << endl;
+  std::cout << "[3] Cylindrical coordinates ..." << std::endl;
   try {
-    bool fastestIsFirst (true);
-    SpatialCoordinate coord (CR::CoordinateType::DirectionRadius,
-			     refcode,
-			     projection);
-    coord.setShape(casa::IPosition(3,10,20,30));
-    
-    Matrix<double> positions = coord.positionValues(fastestIsFirst);
-    IPosition shape          = positions.shape();
-
-    cout << "-- Coordinate of type DirectionRadius:" << endl;
-    cout << "\t" << positions.row(0) << endl;
-    cout << "\t" << positions.row(1) << endl;
-    cout << "\t" << positions.row(2) << endl;
-    cout << "\t" << positions.row(3) << endl;
-    cout << "\t..." << endl;
-    cout << "\t" << positions.row(shape(0)-3) << endl;
-    cout << "\t" << positions.row(shape(0)-2) << endl;
-    cout << "\t" << positions.row(shape(0)-1) << endl;
-
-    // Cartesian coordinate
-
-    SpatialCoordinate coordCartesian (CR::CoordinateType::Cartesian,
-				      refcode,
-				      projection);
-    coordCartesian.setShape(casa::IPosition(3,10,20,30));
-    
-    positions = coordCartesian.positionValues(fastestIsFirst);
-    shape     = positions.shape();    
-
-    cout << "-- Coordinate of type Cartesian:" << endl;
-    cout << "\t" << positions.row(0) << endl;
-    cout << "\t" << positions.row(1) << endl;
-    cout << "\t" << positions.row(2) << endl;
-    cout << "\t" << positions.row(3) << endl;
-    cout << "\t..." << endl;
-    cout << "\t" << positions.row(shape(0)-3) << endl;
-    cout << "\t" << positions.row(shape(0)-2) << endl;
-    cout << "\t" << positions.row(shape(0)-1) << endl;
-
-    // Spherical coordinate
-
-    SpatialCoordinate coordSpherical (CR::CoordinateType::Spherical,
-				      refcode,
-				      projection);
-    coordSpherical.setShape(casa::IPosition(3,10,20,30));
-    
-    positions = coordSpherical.positionValues(fastestIsFirst);
-    shape     = positions.shape();    
-
-    cout << "-- Coordinate of type Spherical:" << endl;
-    cout << "\t" << positions.row(0) << endl;
-    cout << "\t" << positions.row(1) << endl;
-    cout << "\t" << positions.row(2) << endl;
-    cout << "\t" << positions.row(3) << endl;
-    cout << "\t..." << endl;
-    cout << "\t" << positions.row(shape(0)-3) << endl;
-    cout << "\t" << positions.row(shape(0)-2) << endl;
-    cout << "\t" << positions.row(shape(0)-1) << endl;
-
+    SpatialCoordinate coord (CoordinateType::Cylindrical);
+    casa::IPosition nelem (3,10,45,20);
+    coord.setShape(nelem);
+    coord.summary();
+    CR::test_exportPositions(coord.worldAxisValues(),
+			     "positions-cylindrical.dat",
+			     true);
   } catch (std::string message) {
-    cerr << message << endl;
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[4] DirectionRadius (AZEL,SIN) coordinates ..." << std::endl;
+  try {
+    SpatialCoordinate coord (CoordinateType::DirectionRadius,"AZEL","SIN");
+    casa::IPosition nelem (3,30,45,10);
+    Vector<double> refPixel (3);
+    Vector<double> refValue (3);
+    refPixel(0) = nelem(0)/2;
+    refPixel(1) = nelem(1)/2;
+    refPixel(2) = 0;
+    refValue(0) = 0;
+    refValue(1) = 90;
+    refValue(2) = 1;
+    coord.setShape(nelem);
+    coord.setReferencePixel(refPixel);
+    coord.setReferenceValue(refValue);
+    coord.summary();
+    CR::test_exportPositions(coord.worldAxisValues(),
+			     "positions-azel-sin.dat",
+			     true);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[4] DirectionRadius (AZEL,STG) coordinates ..." << std::endl;
+  try {
+    SpatialCoordinate coord (CoordinateType::DirectionRadius,"AZEL","STG");
+    casa::IPosition nelem (3,30,45,10);
+    Vector<double> refPixel (3);
+    Vector<double> refValue (3);
+    refPixel(0) = nelem(0)/2;
+    refPixel(1) = nelem(1)/2;
+    refPixel(2) = 0;
+    refValue(0) = 0;
+    refValue(1) = 90;
+    refValue(2) = 1;
+    coord.setShape(nelem);
+    coord.setReferencePixel(refPixel);
+    coord.setReferenceValue(refValue);
+    coord.summary();
+    CR::test_exportPositions(coord.worldAxisValues(),
+			     "positions-azel-stg.dat",
+			     true);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[5] DirectionRadius (AZEL,ZEA) coordinates ..." << std::endl;
+  try {
+    SpatialCoordinate coord (CoordinateType::DirectionRadius,"AZEL","ZEA");
+    casa::IPosition nelem (3,30,45,10);
+    Vector<double> refPixel (3);
+    Vector<double> refValue (3);
+    refPixel(0) = nelem(0)/2;
+    refPixel(1) = nelem(1)/2;
+    refPixel(2) = 0;
+    refValue(0) = 0;
+    refValue(1) = 90;
+    refValue(2) = 1;
+    coord.setShape(nelem);
+    coord.setReferencePixel(refPixel);
+    coord.setReferenceValue(refValue);
+    coord.summary();
+    CR::test_exportPositions(coord.worldAxisValues(),
+			     "positions-azel-zea.dat",
+			     true);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
     nofFailedTests++;
   }
 
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                           main
 
 int main ()
 {
@@ -578,8 +636,8 @@ int main ()
   nofFailedTests += test_wcs ();
   /* Test conversion between pixel and world coordinates */
   nofFailedTests += test_conversion();
-  /* Test methods */
-  nofFailedTests += test_methods();
+  /* Test export of world axis values */
+  nofFailedTests += test_worldAxisValues();
 
   return nofFailedTests;
 }

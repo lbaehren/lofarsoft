@@ -73,8 +73,7 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>casacore <a href="http://www.astron.nl/casacore/doc/html/classcasa_1_1Coordinate.html">Coordinate</a> class
-      <li>casacore <a href="http://www.astron.nl/casacore/doc/html/classcasa_1_1CoordinateSystem.html">CoordinateSystem</a> class
+      <li>casacore <a href="http://www.astron.nl/casacore/trunk/casacore/doc/html/group__Coordinates__module.html">Coordinates</a> module:
       <li>CR::CoordinateType
       <li>CR::SkymapCoordinate
     </ul>
@@ -142,6 +141,12 @@ namespace CR { // Namespace CR -- begin
 	<td>Cylindrical coordinates</td>
       </tr>
     </table>
+
+    \image html positions-cartesian.png
+
+    \image html positions-cylindrical.png
+
+    \image html positions-azel-stg.png
 
     Given the fact that we are potentially working with more but a single object
     of type casa::Coordinate we need to wrap the calls to function handling
@@ -471,22 +476,11 @@ namespace CR { // Namespace CR -- begin
       [0 2 0]
       \endverbatim
 
-      \return values --
-    */
-    Matrix<double> positionValues (bool const &fastedAxisFirst=true);
-
-    /*!
-      \brief Retrieve the world axis values of the spatial coordinate
-
-      This method is nothing but an alternate call to
-      SpatialCoordinate::positionValues, in order to provide a uniform interface
-      to the coordinate classes.
+      \param fastedAxisFirst -- Have fastest varying coordinate axis first?
 
       \return values -- The world axis values of the spatial coordinate
     */
-    inline Matrix<double> worldAxisValues (bool const &fastedAxisFirst=true) {
-      return positionValues (fastedAxisFirst);
-    }
+    Matrix<double> worldAxisValues (bool const &fastedAxisFirst=true);
     
     /*!
       \brief Get the value of the reference pixel

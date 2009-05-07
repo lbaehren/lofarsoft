@@ -182,7 +182,7 @@ namespace CR {  // Namespace CR -- begin
 
     /* Update the Beamformer */
     CoordinateType::Types spatialType = coord_p.spatialCoordinate().type();
-    Matrix<double> skyPos = coord_p.spatialCoordinate().positionValues();
+    Matrix<double> skyPos = coord_p.spatialCoordinate().worldAxisValues();
     Vector<double> freq   = coord_p.timeFreqCoordinate().frequencyValues();
 
     try {
@@ -280,7 +280,7 @@ namespace CR {  // Namespace CR -- begin
     
     try {
       CoordinateType::Types spatialType = coord_p.spatialCoordinate().type();
-      Matrix<double> skyPos = coord_p.spatialCoordinate().positionValues();
+      Matrix<double> skyPos = coord_p.spatialCoordinate().worldAxisValues();
       beamformer_p.setSkyPositions(skyPos,spatialType,false);
     } catch (casa::AipsError x) {
       std::cerr << "[Skymapper::initSkymapper] Failed setting sky positions!\n"

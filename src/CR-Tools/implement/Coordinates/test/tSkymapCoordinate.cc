@@ -459,7 +459,7 @@ int test_worldAxisValues ()
 
   cout << "[3] Retrieve position values ..." << endl;
   try {
-    Matrix<double> positions = coord.spatialCoordinate().positionValues();
+    Matrix<double> positions = coord.spatialCoordinate().worldAxisValues();
     IPosition shape          = positions.shape();
 
     cout << "\t" << positions.row(0) << endl;
