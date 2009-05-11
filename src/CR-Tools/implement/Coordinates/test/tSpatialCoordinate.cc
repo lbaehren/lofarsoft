@@ -497,7 +497,23 @@ int test_worldAxisValues ()
   int nofFailedTests (0);
   casa::IPosition shape (2);
 
-  std::cout << "[1] Cartesian coordinates ..." << std::endl;
+  std::cout << "[1] Default settings ..." << std::endl;
+  try {
+    SpatialCoordinate coord;
+    coord.summary();
+    // retrieve the values
+    Matrix<double> positions = coord.worldAxisValues();
+    shape                    = positions.shape();
+    // export the values
+    CR::test_exportPositions(positions,
+			     "positions-default.dat",
+			     true);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[2] Cartesian coordinates ..." << std::endl;
   try {
     SpatialCoordinate coord (CoordinateType::Cartesian);
     casa::IPosition nelem (3,20,20,10);
@@ -515,7 +531,7 @@ int test_worldAxisValues ()
     nofFailedTests++;
   }
   
-  std::cout << "[2] Spherical coordinates ..." << std::endl;
+  std::cout << "[3] Spherical coordinates ..." << std::endl;
   try {
     SpatialCoordinate coord (CoordinateType::Spherical);
     casa::IPosition nelem (3,10,45,30);
@@ -534,7 +550,7 @@ int test_worldAxisValues ()
     nofFailedTests++;
   }
 
-  std::cout << "[3] Cylindrical coordinates ..." << std::endl;
+  std::cout << "[4] Cylindrical coordinates ..." << std::endl;
   try {
     SpatialCoordinate coord (CoordinateType::Cylindrical);
     casa::IPosition nelem (3,10,45,20);
@@ -548,7 +564,7 @@ int test_worldAxisValues ()
     nofFailedTests++;
   }
 
-  std::cout << "[4] DirectionRadius (AZEL,SIN) coordinates ..." << std::endl;
+  std::cout << "[5] DirectionRadius (AZEL,SIN) coordinates ..." << std::endl;
   try {
     SpatialCoordinate coord (CoordinateType::DirectionRadius,"AZEL","SIN");
     casa::IPosition nelem (3,30,45,10);
@@ -572,7 +588,7 @@ int test_worldAxisValues ()
     nofFailedTests++;
   }
 
-  std::cout << "[4] DirectionRadius (AZEL,STG) coordinates ..." << std::endl;
+  std::cout << "[6] DirectionRadius (AZEL,STG) coordinates ..." << std::endl;
   try {
     SpatialCoordinate coord (CoordinateType::DirectionRadius,"AZEL","STG");
     casa::IPosition nelem (3,30,45,10);
@@ -596,7 +612,7 @@ int test_worldAxisValues ()
     nofFailedTests++;
   }
 
-  std::cout << "[5] DirectionRadius (AZEL,ZEA) coordinates ..." << std::endl;
+  std::cout << "[7] DirectionRadius (AZEL,ZEA) coordinates ..." << std::endl;
   try {
     SpatialCoordinate coord (CoordinateType::DirectionRadius,"AZEL","ZEA");
     casa::IPosition nelem (3,30,45,10);
