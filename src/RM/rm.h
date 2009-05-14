@@ -54,19 +54,21 @@ private:
   //! Right Ascension and Declination coords of cached los rm values
   double cached_ra, cached_dec;
 
+
+  // Public functions.
+public:
   //! Convert frequency vector to lambda squared vector
   vector<double> freqToLambdaSq(const vector<double> &frequency);
   //! Convert lambda squared vector to frequency vector
   vector<double> lambdaSqToFreq(const vector<double> &lambda_sq);
 
-
-  // Public functions.
-public:
   //! Calculate delta lambda squared steps from lower and higher frequency limits
   vector<double> deltaLambdaSq(	const vector<double> &freq_low, 
 			const vector<double> &freq_high,
 			bool freq=true);
 
+  //! Calculate integrated total intensity along one line of sight
+  vector<double> totalIntensity(vector<double> &, int);
 
   //! Default constructor.(external buffer handling independent of cube object)
   rm(int, int, int, double, ofstream &);
@@ -97,14 +99,16 @@ public:
   //! Rotation Measure computing algorithms
   //
   //! Brentjens and de Bruyn with the Inverse Fourier Transform
-  vector<double> inverseFourier(vector<double>,
-				vector<double>,
-				bool freq=true);
+  vector<double> inverseFourier(vector<double> intensity,
+				 vector<double> frequency,
+				 vector<double> delta_freq,
+				 bool freq);
   //! Frick and Stepanov wavelet algorithm
-  vector<double> wavelet(vector<double>,
-			 vector<double>,
-			 vector<double> wavelet_parameters,
-			 bool freq=true);
+  vector<double> wavelet(vector<double> intensity,
+			   vector<double> frequencies,
+			   vector<double> delta_freqs,
+			   vector<double> wavelet_parameters,
+			   bool freq);
   //! En&szlig;lin Information Theory Based algorithm
   vector<double> ift(vector<double>,
 		     vector<double>,

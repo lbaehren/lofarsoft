@@ -106,7 +106,10 @@ int main (int argc, char * const argv[]) {
 	ofstream file("rm.txt", ios::out); 
 
 	rm rm_cube(10,10,10,1.0, file);		// create a rm_cube from rm constructor
-	
+
+	lambdaSq=rm_cube.freqToLambdaSq(freq);	// test frequency to lambda squared conversion
+	freq=rm_cube.lambdaSqToFreq(lambdaSq);	// convert back to frequency
+
 	// Lattice and iteration over line of sight
 	// create Lattice shape and iterator
  	const uInt cursorSize = lattice_Q_float->advisedMaxPixels();
@@ -114,15 +117,13 @@ int main (int argc, char * const argv[]) {
  //	const IPosition cursorShape(2, lattice_Q_float->shape()(0), lattice_Q_float->shape()(1));
     
 	int i=0;
-	/*
 	RO_LatticeIterator<Float> iter(*lattice_Q_float, cursorShape);
 	for (iter.reset(); !iter.atEnd(); iter++) {
 		minMax(min, max, iter.cursor());
-		//cout << i++ << " Min = " << min << " Max = " << max << iter.cursor() << endl;		// debugging 
+		//cout << i++ << " Min = " << min << " Max = " << max << iter.cursor() << endl;		
 	}	
-       */
 
-	file.close();
+	//file.close();
 
 	#ifdef _debug
 	cout << "Finished: " << filename_Q << "!\n";	// Debug output

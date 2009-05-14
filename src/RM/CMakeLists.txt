@@ -321,7 +321,6 @@ set (link_libraries
 ## Build the library
 
 set (rm_sources
-#  fits.cpp
   rm.cpp
   )
 

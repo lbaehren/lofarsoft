@@ -2,12 +2,13 @@
 
     Author:		Sven Duscha (sduscha@mpa-garching.mpg.de)
     Date:		18-12-2008
-    Last change:	16-04-2009
+    Last change:	28-04-2009
 */
 
 
 #include <iostream>				// C++/STL iostream
-#include <math.h>					// mathematics library
+#include <math.h>				// mathematics library
+#include <string.h>
 
 #include <casa/Arrays.h>			// CASA library functions
 #include <casa/Arrays/Array.h>
@@ -67,30 +68,28 @@ rm::~rm()
   \return success -- 
 */
 //vector<double>rm::freqToLambdaSq(vector<double> &frequency);
-bool rm::freqToLambdaSq(const vector<double> &frequency, vector<double> &lambda_sq)
+vector<double> rm::freqToLambdaSq(const vector<double> &frequency)
 {
+  // lambda squared to be calculated, same size as frequency vector
+  vector<double> lambda_sq(frequency.size());	
+
   // constants
   double csq=89875517873681764.0;	// c^2
  
   // Check for data consistency
   if(frequency.size()==0)
   {
-    cerr << "rm::freqToLambdaSq: frequency vector size 0" << endl;
-    return false;
-  }
-  else if(frequency.size() != lambda_sq.size())
-  {
-    cerr << "rm::freqToLambdaSq: frequency and labda_sq vector sizes do not match" << endl;
-    return false;
+    throw "rm::freqToLambdaSq: frequency vector size 0";
   }
 
   // loop over frequency vector and compute lambda squared values
   for(unsigned int i=0; i<frequency.size(); i++)
   {
      lambda_sq[i]=csq/(frequency[i]*frequency[i]);
-     cout << "frequency = " << frequency[i] << "  lambda^2 = " << lambda_sq[i] << endl;
+     //cout << "frequency = " << frequency[i] << "  lambda^2 = " << lambda_sq[i] << endl;
   }
-  return true;
+  
+  return lambda_sq;	// return computed lambda squareds
 }
 
 
@@ -102,30 +101,28 @@ bool rm::freqToLambdaSq(const vector<double> &frequency, vector<double> &lambda_
   
   \return succes -- 
 */
-bool rm::lambdaSqToFreq(const vector<double> &lambda_sq, vector<double> &frequency)
+vector<double> rm::lambdaSqToFreq(const vector<double> &lambda_sq)
 {
+    // frequencies to be calculated from lambda squared, same size as lambda squared vector
+    vector<double> frequency(lambda_sq.size());		
+
     // constants
     double csq=89875517873681764.0;	// c^2
 
     // Check for data consistency
     if(lambda_sq.size()==0)
     {
-      cerr << "rm::lambdaSqToFreq: lambda_sq vector size 0" << endl;
-      return false;
-    }
-    else if(lambda_sq.size() != frequency.size())
-    {
-      cerr << "rm::freqToLambdaSq: frequency and labda_sq vector sizes do not match" << endl;
-      return false;
+      throw "rm::lambdaSqToFreq: lambda_sq vector size 0";
     }
 
     // loop over frequency vector and compute lambda squared values
     for(unsigned int i=0; i<lambda_sq.size(); i++)
     {
       frequency[i]=sqrt(csq/(lambda_sq[i]));
-      cout << "lambda^2 = " << lambda_sq[i] << "  frequency = " << frequency[i]  << endl;
+      //cout << "lambda^2 = " << lambda_sq[i] << "  frequency = " << frequency[i]  << endl;
     }
-    return true;
+    
+    return frequency;	// return computed frequencies
 }
 
 
@@ -141,19 +138,21 @@ bool rm::lambdaSqToFreq(const vector<double> &lambda_sq, vector<double> &frequen
 /*! Calculate the total intensity integrated over all channels
 
   \param frequencies --
-  \param totalIntensity --
   \param unit --
+
+  \return totalIntensity --
 */
 
-bool rm:totalIntensity(vector<double> frequencies, double &totalIntensity, string unit)
+vector<double> rm::totalIntensity(vector<double> &frequencies, int unit)
 {
+  vector<double> totalIntensity;
 
   // integrate over all frequencies in channel
   
   
   // convert to desired unit (given by string unit)
 
-  return true;
+  return totalIntensity;
 }
 
 
@@ -181,8 +180,7 @@ vector<double> rm::deltaLambdaSq( //vector<double> delta_lambda_sq,
   // check for valid parameters
   if(freq_low.size()==0 || freq_high.size()==0)		// either of the limit vectors is zero
   {
-    cerr << "rm::deltaLambdaSq: freq_low or freq_high vector 0" << endl;
-    return false;
+    throw "rm::deltaLambdaSq: freq_low or freq_high vector 0";
   }
   else if(freq_low.size()!=freq_high.size())		// freq_low and freq_high differ in size
   {
@@ -194,14 +192,8 @@ vector<double> rm::deltaLambdaSq( //vector<double> delta_lambda_sq,
     // convert lower and higher frequencies to lambda squared
     if(freq)
     {
-      if(freqToLambdaSq(&lambda_low, freq_high)==false)
-      {
-	throw << "rm:deltaLambdaSq: conversion of freq_high to lambda_sq failed";
-      }
-      else if(freqToLambdaSq(&lambda_high, freq_low)==false)
-      {
-	throw "rm:deltaLambdaSq: conversion of freq_low to lambda_sq failed";
-      }
+      lambda_low=freqToLambdaSq(freq_high);	// freq_high corresponds to low lambda
+      lambda_high=freqToLambdaSq(freq_low);	// freq_low corresponds to high lambda
     }
     else	// if limits were actually already given as lambda squareds just use these
     {
@@ -221,7 +213,7 @@ vector<double> rm::deltaLambdaSq( //vector<double> delta_lambda_sq,
 
   }
 
-  return delta_lambda_squared;		// return delta lambda squared vector
+  return delta_lambda_sq;		// return delta lambda squared vector
 }
 
 
@@ -246,18 +238,24 @@ vector<double>rm::inverseFourier(vector<double> intensity,
 				 vector<double> delta_freq,
 				 bool freq)
 {
-	vector<double>rm;	// rm values along the line of sight
+    vector<double>rm;	// rm values along the line of sight
 
 
-	if(freq)		// if given as frequency, convert to lambda squareds
-	{
-	  convertToLambdaSquared()	// convert frequency vector
-	  
-					// convert delta step vector
-	
-	}
+    if(freq)		// if given as frequency, convert to lambda squareds
+    {
+      //freqToLambdaSq()	// convert frequency vector
+      
+				    // convert delta step vector
+    
+    }
 
-	return rm;
+    // compute discrete Fourier sum
+    
+
+    // Parallelize?
+
+
+    return rm;
 }
 
 
