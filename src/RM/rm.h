@@ -54,9 +54,6 @@ private:
   //! Right Ascension and Declination coords of cached los rm values
   double cached_ra, cached_dec;
 
-
-  // Public functions.
-public:
   //! Convert frequency vector to lambda squared vector
   vector<double> freqToLambdaSq(const vector<double> &frequency);
   //! Convert lambda squared vector to frequency vector
@@ -66,21 +63,23 @@ public:
   vector<double> deltaLambdaSq(	const vector<double> &freq_low, 
 			const vector<double> &freq_high,
 			bool freq=true);
-
+  // Public functions.
+public:
   //! Calculate integrated total intensity along one line of sight
   vector<double> totalIntensity(vector<double> &, int);
 
   //! Default constructor.(external buffer handling independent of cube object)
-  rm(int, int, int, double, ofstream &);
+  rm(int depth, double stepsize);
 
+  //! Constructor with associated output stream 
+  rm(int, int, int, double, ofstream &);
 
   /*! \brief RM cube with associated Faraday buffer. One line of sight or two dimensional
   
       create a RM cube object with one (or a times b) associated Faraday line(s) (defaults: axis a=1 axis b=0)
       of sight, buffer is only given as reference
   */
-  rm(int, int, int, double, ostream &, Array<double> &faradaybuffer, int x=1, int y=0);
-  
+  rm(int, int, int, double, Array<double> &faradaybuffer, int x=1, int y=0);
   
   
   /*! \brief RM cube with a full Faraday plane (complete RA and Dec coverage of the image)
@@ -88,10 +87,10 @@ public:
       create a RM cube object with one associated Faraday plane buffer of dimensions x and y, and
       third dimension z (default 1)
  */
- rm(int, int, int, double, ostream &, Array<double> &faradayplanes, int x, int y, int z=1);
+ rm(int, int, int, double, Array<double> &faradayplanes, int x, int y, int z=1);
   
   
- /*!
+  /*!
    \brief Default destructor
   */
   ~rm();

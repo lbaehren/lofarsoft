@@ -2,7 +2,7 @@
 
     Author:		Sven Duscha (sduscha@mpa-garching.mpg.de)
     Date:		18-12-2008
-    Last change:	28-04-2009
+    Last change:	15-05-2009
 */
 
 
@@ -30,12 +30,10 @@ using namespace casa;		// namespace for functions from casacore
 /*!
   \brief Declare a new RM cube of size x (right ascension), y (declination), and depth and stepsize in Faraday depth
 
-  \param x, y, depth, stepsize, os -- 
- 
-  \return none --
+  \param depth --
+  \param stepsize -- 
 */
-
-rm::rm(int x, int y, int depth, double stepsize, ofstream &file)	// pass only reference to output stream!
+rm::rm(int depth, double stepsize)
 {
 	// declare RM cube of desired size and assign output stream
 	
@@ -44,7 +42,6 @@ rm::rm(int x, int y, int depth, double stepsize, ofstream &file)	// pass only re
 
 /*!
   \brief rm class destructor
-
 */
 
 rm::~rm()

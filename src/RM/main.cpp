@@ -94,21 +94,16 @@ int main (int argc, char * const argv[]) {
 			break;
 	}
 	
-	std::vector<double> freq(10), lambdaSq(10);	// Test frequency and lambda squared conversions 
 
-	// debug: create dummy frequency vector
-	for(unsigned int i=0; i <= lambdaSq.size(); i++)
-	{
-	  freq[i]=(i+1)*10.0;
-	  lambdaSq[i]=(i+1)*100.0;
-	}
-	
-	ofstream file("rm.txt", ios::out); 
+	// get image statistics to determin image size, frequency depth etc.
 
-	rm rm_cube(10,10,10,1.0, file);		// create a rm_cube from rm constructor
 
-	lambdaSq=rm_cube.freqToLambdaSq(freq);	// test frequency to lambda squared conversion
-	freq=rm_cube.lambdaSqToFreq(lambdaSq);	// convert back to frequency
+	// create buffer for one Faraday plane
+
+	// create a rm object with an associated two dimensional buffer
+
+
+	// Set up Faraday depths to be probed
 
 	// Lattice and iteration over line of sight
 	// create Lattice shape and iterator
