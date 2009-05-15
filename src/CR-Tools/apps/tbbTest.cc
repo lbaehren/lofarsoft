@@ -74,7 +74,6 @@ CRinvFFT *pipeline_p;
 DataReader *DataReader_p;
 
 
-
 //-----------------------------------------------------------  configCheckBool
 Bool configCheckBool(string value, string keyword){
   if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {

@@ -628,11 +628,11 @@ int main (int argc,
   // Test the various constructors for a Skymapper object
   nofFailedTests += test_Skymapper ();
   // Test the various methods for accessing internal data
-  nofFailedTests += test_methods();
+//   nofFailedTests += test_methods();
   // Test processing of data
-  nofFailedTests += test_processing (infile,
-				     blocksize,
-				     have_dataset);
+//   nofFailedTests += test_processing (infile,
+// 				     blocksize,
+// 				     have_dataset);
   
   return nofFailedTests;
 }

@@ -34,7 +34,7 @@ namespace CR { // Namespace CR -- begin
   //  Construction
   //
   // ============================================================================
-
+  
   // ---------------------------------------------------------------- StationBeam
   
   StationBeam::StationBeam ()
@@ -102,7 +102,7 @@ namespace CR { // Namespace CR -- begin
   
   void StationBeam::copy (StationBeam const &other)
   {;}
-
+  
   // ============================================================================
   //
   //  Parameters
@@ -281,6 +281,8 @@ namespace CR { // Namespace CR -- begin
     
   }
   
+  //_____________________________________________________________________________
+  //                                                                   tied_array
   
   Double StationBeam::tied_array( const Double& frequency,
 				  const Double& hr_angle,
@@ -933,17 +935,19 @@ Double StationBeam::beamwidth_hr(  const Double& source_declination,
       }       
 	       
  }         
-         
+
+
+//
 
 void StationBeam::generate_statistics_table( const Double& station_radii,
-	                                    const Vector<uint>& station_id,
-	                                    const Double& freq_init,
-		                            const Double& bandwidth,
-                                            const Double& freq_interval,
-		                            Vector<Double>& position_x,
-		                            Vector<Double>& position_y,
-                                            const Vector<Double>& legendre_root,
-             	                            const Vector<Double>& legendre_weight )  
+					     const Vector<uint>& station_id,
+					     const Double& freq_init,
+					     const Double& bandwidth,
+					     const Double& freq_interval,
+					     Vector<Double>& position_x,
+					     Vector<Double>& position_y,
+					     const Vector<Double>& legendre_root,
+					     const Vector<Double>& legendre_weight )  
 { 
   try {
   

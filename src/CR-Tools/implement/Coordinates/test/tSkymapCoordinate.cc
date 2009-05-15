@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include <Coordinates/SkymapCoordinate.h>
+#include <Utilities/TestsCommon.h>
 
 // Namespace usage
 using std::cout;
@@ -435,23 +436,37 @@ int test_worldAxisValues ()
 			  spatial,
 			  timeFreq);
   
-  cout << "[1] Retrieve time values ..." << endl;
+  cout << "[1] TimeFreqCoordinate::timeValues() ..." << endl;
   try {
     Vector<double> times = coord.timeFreqCoordinate().timeValues();
     
-    cout << "\t[" << times(0) << " " << times(1) << " " << times(2) << " ... "
+    cout << "\t[" << times(0)
+	 << " "   << times(1)
+	 << " "   << times(2) << " ... "
 	 << times(times.nelements()-1) << "]" << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
-
-  cout << "[2] Retrieve frequency values ..." << endl;
+  
+  cout << "[2] TimeFreqCoordinate::frequencyValues() ..." << endl;
   try {
     Vector<double> freq = coord.timeFreqCoordinate().frequencyValues();
     
     cout << "\t[" << freq(0) << " " << freq(1) << " " << freq(2) << " ... "
 	 << freq(freq.nelements()-1) << "]" << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] TimeFreqCoordinate::worldAxisValues() ..." << endl;
+  try {
+    Matrix<double> timeFreq = coord.timeFreqCoordinate().worldAxisValues();
+    
+    CR::test_exportPositions(timeFreq,
+			     "tSkymapCoordinate-timeFreqValues.dat",
+			     true);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;

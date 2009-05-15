@@ -35,6 +35,7 @@
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <coordinates/Coordinates/LinearCoordinate.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
+#include <coordinates/Coordinates/TabularCoordinate.h>
 #include <images/Images/PagedImage.h>
 
 using std::cerr;
@@ -55,7 +56,8 @@ using namespace casa;
   \author Lars B&auml;hren
 */
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                        summary
 
 /*!
   \brief Display some basic characteristics of an AIPS++ image tool
@@ -99,7 +101,8 @@ template void summary (const casa::PagedImage<casa::Double>& myimage);
 template void summary (const casa::PagedImage<casa::Complex>& myimage);
 template void summary (const casa::PagedImage<casa::DComplex>& myimage);
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                               coordinateSystem
 
 /*!
   \brief Create coordinate system object to be attached to an image
@@ -212,7 +215,8 @@ casa::CoordinateSystem coordinateSystem (std::string const telescope="LOFAR",
   return cs;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                   test_ObsInfo
 
 /*!
   \brief Test working with a casa::ObsInfo object
@@ -239,7 +243,7 @@ int test_ObsInfo ()
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
 
 /*!
   \brief Test working with AIPS++ CoordinateSystem objects
@@ -572,7 +576,85 @@ int test_PagedImage (vector<string> &images,
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                               test_lofarImages
+
+/*!
+  \brief Test creating examples of LOFAR images
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+*/
+int test_lofarImages ()
+{
+  int nofFailedTests (0);
+
+  casa::DirectionCoordinate directionCoord;
+  casa::TabularCoordinate radiusCoord;
+  casa::SpectralCoordinate freqCoord;
+  casa::LinearCoordinate timeCoord;
+
+  /* Distance axis coordinate (tabulated) */
+  try {
+    unsigned int nofPixels (7);
+    Vector<double> pixel (nofPixels);
+    Vector<double> world (nofPixels);
+    casa::String unit ("m");
+    casa::String name ("Length");
+
+    pixel(0) = 0;   world(0) = 0;
+    pixel(1) = 1;   world(1) = 1;
+    pixel(2) = 2;   world(2) = 2;
+    pixel(3) = 3;   world(3) = 5;
+    pixel(4) = 4;   world(4) = 10;
+    pixel(5) = 5;   world(5) = 20;
+    pixel(6) = 6;   world(6) = 50;
+
+    radiusCoord = casa::TabularCoordinate (pixel,world,unit,name);
+  }
+  catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  /* Time axis coordinate */
+  {
+    Vector<casa::String> names (1,"Time");
+    Vector<casa::String> units (1,"s");
+    Vector<casa::Double> crpix(1,0.0);
+    Vector<casa::Double> crval(1,0.0);
+    Vector<casa::Double> cdelt(1,1.0);
+    Matrix<casa::Double> pc(1,1,0.0);
+
+    pc.diagonal(1);
+
+    timeCoord = casa::LinearCoordinate  (names,
+					 units,
+					 crval,
+					 cdelt,
+					 pc,
+					 crpix);
+  }
+
+  /* Spectral axis coordinate */
+  {
+    double refPixel (0);
+    double refValue (80e6);
+    double increment (1e06);
+    Vector<String> names (1,"Frequency");
+    
+    freqCoord = casa::SpectralCoordinate (casa::MFrequency::TOPO,
+					  refValue,
+					  increment,
+					  refPixel);
+    freqCoord.setWorldAxisNames(names);
+  }
+
+  return nofFailedTests;
+}
+
+//_______________________________________________________________________________
+//                                                                         main()
 
 int main (int argc,
 	  char *argv[])
@@ -581,8 +663,11 @@ int main (int argc,
   bool putAt         = false;
   vector<string> images;
 
+  /* Test working with casacore paged images */
   nofFailedTests += test_PagedImage (images,
 				     putAt);
+  /* Test generating examples of LOFAR images */
+  nofFailedTests += test_lofarImages ();
   
   /* Clean up directory */
   for (unsigned int n(0); n<images.size(); n++) {

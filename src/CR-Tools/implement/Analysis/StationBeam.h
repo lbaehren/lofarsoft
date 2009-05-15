@@ -68,7 +68,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class StationBeam
     
-    \ingroup Analysis
+    \ingroup CR_Analysis
     
     \brief Brief description for class StationBeam
     
@@ -327,7 +327,20 @@ namespace CR { // Namespace CR -- begin
 		       Vector<Double>& position_y,
 		       const Vector<Double>& legendre_root,
 		       const Vector<Double>& legendre_weight );
-    
+
+    /*!
+      \param source_declination
+      \param source_hr_angle
+      \param station_radii
+      \param station_id
+      \param freq_init
+      \param bandwidth
+      \param freq_interval
+      \param position_x
+      \param position_y
+      \param legendre_root
+      \param legendre_weight
+    */
     Double min_power_moon( const Double& source_declination,
 			   const Double& source_hr_angle,
 			   const Double& station_radii,

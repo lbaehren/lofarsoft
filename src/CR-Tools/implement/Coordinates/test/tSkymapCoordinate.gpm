@@ -1,0 +1,12 @@
+
+
+set term pdf color solid enhanced
+set output "tSkymapCoordinates.pdf"
+
+##_______________________________________________________________________________
+## Plot frequency values
+
+set xlabel "Channel index"
+set xlabel "Frequency [Hz]"
+
+plot 'tSkymapCoordinate-timeValues.dat' 

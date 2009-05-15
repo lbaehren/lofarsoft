@@ -217,7 +217,7 @@ namespace CR { // Namespace CR -- begin
            uint nofelement = subBand_IDs.nelements() ;
 	   
 	   double base_p = 512/nofelement ;
-	   double power_ratio = pow(base_p,0.5) ;
+// 	   double power_ratio = pow(base_p,0.5) ;
 	   
            uint nOfColumns = generatedSubbands.ncolumn();
 	   
