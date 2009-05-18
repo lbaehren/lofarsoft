@@ -226,6 +226,7 @@ vector<double> rm::deltaLambdaSq( //vector<double> delta_lambda_sq,
     \param intensity --
     \param frequency --
     \param delta_freq --
+    \param faradayDepths - vector of Faraday depths at which the RM should be computed
     \param freq --
     
     \return rm --
@@ -233,15 +234,19 @@ vector<double> rm::deltaLambdaSq( //vector<double> delta_lambda_sq,
 vector<double>rm::inverseFourier(vector<double> intensity,
 				 vector<double> frequency,
 				 vector<double> delta_freq,
+				 casa::Unit units,
+				 vector<double> faradayDepths,
 				 bool freq)
 {
-    vector<double>rm;	// rm values along the line of sight
+    vector<double> rm;					// rm values along the line of sight
+    vector<double> lambdaSquared(frequency.size());	// values of lambda squared
+    vector<double>
 
+    faradayDepths; // loop variables
 
     if(freq)		// if given as frequency, convert to lambda squareds
     {
-      //freqToLambdaSq()	// convert frequency vector
-      
+      lambdaSquared=freqToLambdaSq(frequency)	// convert frequency vector      
 				    // convert delta step vector
     
     }

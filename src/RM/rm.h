@@ -36,6 +36,8 @@
 
 #include <vector>
 #include <iostream>			// streamed input output for rm cubes
+#include <casa/Unit.h>			// use CASA Unit class for Unit handling and conversion
+#include <casa/Quanta.h>		// ... and conversion
 #include <casa/Arrays.h>		// use CASA Arrays for storage of temporary Faraday buffers
 #include <casa/Arrays/Array.h>
 
@@ -54,6 +56,16 @@ private:
   //! Right Ascension and Declination coords of cached los rm values
   double cached_ra, cached_dec;
 
+  //! Units of RA and Dec
+  casa::Unit raUnit;
+  casa::Unit decUnit;
+
+  //! Units of input vectors (lamba squared or frequency) the cube was created from
+  casa::Unit spectralUnit;
+
+  //! Units of Faraday intensity in output cube
+  casa::Unit faradayUnit;
+  
   //! Convert frequency vector to lambda squared vector
   vector<double> freqToLambdaSq(const vector<double> &frequency);
   //! Convert lambda squared vector to frequency vector
@@ -63,6 +75,7 @@ private:
   vector<double> deltaLambdaSq(	const vector<double> &freq_low, 
 			const vector<double> &freq_high,
 			bool freq=true);
+
   // Public functions.
 public:
   //! Calculate integrated total intensity along one line of sight
@@ -98,16 +111,18 @@ public:
   //! Rotation Measure computing algorithms
   //
   //! Brentjens and de Bruyn with the Inverse Fourier Transform
-  vector<double> inverseFourier(vector<double> intensity,
-				 vector<double> frequency,
-				 vector<double> delta_freq,
-				 bool freq);
+  vector<double> inverseFourier(vector<double>,
+				vector<double>,
+				vector<double>,
+				bool freq=true);
+
   //! Frick and Stepanov wavelet algorithm
-  vector<double> wavelet(vector<double> intensity,
-			   vector<double> frequencies,
-			   vector<double> delta_freqs,
-			   vector<double> wavelet_parameters,
-			   bool freq);
+  vector<double> wavelet(vector<double>,
+			 vector<double>,
+			 vector<double>,
+			 vector<double> wavelet_parameters,
+			 bool freq=true);
+
   //! En&szlig;lin Information Theory Based algorithm
   vector<double> ift(vector<double>,
 		     vector<double>,
