@@ -102,6 +102,28 @@ include (FindPLplot)
 include (FindWCS)
 
 ## -----------------------------------------------------------------------------
+## Compiler flags
+
+if (HAVE_BLITZ)
+   add_definitions (-DHAVE_BLITZ)
+endif (HAVE_BLITZ)
+
+if (HAVE_GSL)
+   add_definitions (-DHAVE_GSL)
+endif (HAVE_GSL)
+
+if (HAVE_HDF5)
+   add_definitions (-DHAVE_HDF5)
+endif (HAVE_HDF5)
+
+## -----------------------------------------------------------------------------
+## Subdirectories
+
+add_subdirectory (data_inspection)
+add_subdirectory (testing)
+add_subdirectory (utilities)
+
+## -----------------------------------------------------------------------------
 ## Configuration summary
 
 if (contrib_VERBOSE_CONFIGURE)
@@ -115,10 +137,3 @@ if (contrib_VERBOSE_CONFIGURE)
   message (STATUS "Have WCS      = ${HAVE_WCSLIB}")
   message (STATUS "Have ZLIB     = ${HAVE_ZLIB}")
 endif (contrib_VERBOSE_CONFIGURE)
-
-## -----------------------------------------------------------------------------
-## Subdirectories
-
-add_subdirectory (data_inspection)
-add_subdirectory (testing)
-add_subdirectory (utilities)

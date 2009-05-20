@@ -6,7 +6,21 @@ set output "tSkymapCoordinates.pdf"
 ##_______________________________________________________________________________
 ## Plot frequency values
 
-set xlabel "Channel index"
 set xlabel "Frequency [Hz]"
+set ylabel "Time [s]"
 
-plot 'tSkymapCoordinate-timeValues.dat' 
+plot 'tSkymapCoordinate-timeFreq.dat' u 2:3
+
+##_______________________________________________________________________________
+## Plot position values
+
+set xlabel "Longitude"
+set ylabel "Latitude"
+set zlabel "Radial distance [m]"
+
+set angles radians
+set mapping spherical
+set parametric
+
+splot 'tSkymapCoordinate-position.dat' u 2:3:4
+

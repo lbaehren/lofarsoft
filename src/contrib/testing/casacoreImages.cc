@@ -37,6 +37,9 @@
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <coordinates/Coordinates/TabularCoordinate.h>
 #include <images/Images/PagedImage.h>
+#ifdef HAVE_HDF5
+#include <images/Images/HDF5Image.h>
+#endif
 
 using std::cerr;
 using std::cout;
@@ -59,6 +62,18 @@ using namespace casa;
 //_______________________________________________________________________________
 //                                                                        summary
 
+void summary (casa::CoordinateSystem &csys)
+{
+  cout << "-- World axis names = " << csys.worldAxisNames() << endl;
+  cout << "-- World axis units = " << csys.worldAxisUnits() << endl;
+  cout << "-- Reference pixel  = " << csys.referencePixel() << endl;
+  cout << "-- Reference value  = " << csys.referenceValue() << endl;
+  cout << "-- Increment        = " << csys.increment()      << endl;
+}
+
+//_______________________________________________________________________________
+//                                                                        summary
+
 /*!
   \brief Display some basic characteristics of an AIPS++ image tool
 
@@ -72,11 +87,11 @@ using namespace casa;
   -- is persistent  : 1
   -- is paged       : 1
   -- is writable    : 0
-  -- has pixel mask : 0
+1  -- has pixel mask : 0
   \endverbatim
 */
 template <class T>
-void summary (const casa::PagedImage<T>& myimage)
+void summary (const casa::ImageInterface<T>& myimage)
 {
   casa::IPosition shape (myimage.shape());
   int nofAxes (shape.nelements());
@@ -96,10 +111,10 @@ void summary (const casa::PagedImage<T>& myimage)
   cout << " -- has pixel mask   : " << myimage.hasPixelMask()  << endl;
 }
 
-template void summary (const casa::PagedImage<casa::Float>& myimage);
-template void summary (const casa::PagedImage<casa::Double>& myimage);
-template void summary (const casa::PagedImage<casa::Complex>& myimage);
-template void summary (const casa::PagedImage<casa::DComplex>& myimage);
+template void summary (const casa::ImageInterface<casa::Float>& myimage);
+template void summary (const casa::ImageInterface<casa::Double>& myimage);
+template void summary (const casa::ImageInterface<casa::Complex>& myimage);
+template void summary (const casa::ImageInterface<casa::DComplex>& myimage);
 
 //_______________________________________________________________________________
 //                                                               coordinateSystem
@@ -239,72 +254,6 @@ int test_ObsInfo ()
   cout << "\n[test_ObsInfo]" << endl;
 
   int nofFailedTests (0);
-
-  return nofFailedTests;
-}
-
-//_______________________________________________________________________________
-
-/*!
-  \brief Test working with AIPS++ CoordinateSystem objects
-
-  \return nofFailedTests -- The number of failed tests encountered within this
-          function.
-
-  CoordinateSystem is the normal interface to coordinate systems, typically
-  attached to an ImageInterface, however the coordinate system can be manipulated
-  on its own. CoordinateSystem is in turn composed from various classes derived
-  from the base class Coordinate.
-*/
-int test_CoordinateSystem ()
-{
-  cout << "\n[test_CoordinateSystem]" << endl;
-
-  int nofFailedTests (0);
-
-  cout << "\n[1] Construct linear coordinate and afterwards adjust parameters ..."
-       << endl;
-  try {
-    Vector<String> names (1,"Time");
-    Vector<String> units (1,"s");
-    Vector<Double> crval (1,0.0);
-    Vector<Double> cdelt (1,1.0);
-    Matrix<Double> pc    (1,1,1.0);
-    Vector<Double> crpix (1,0.0);
-    
-    LinearCoordinate axis (names,
-			   units,
-			   crval,
-			   cdelt,
-			   pc,
-			   crpix);
-
-    cout << " - initial values:" << endl;
-    cout << " -- names = " << axis.worldAxisNames() << endl;
-    cout << " -- units = " << axis.worldAxisUnits() << endl;
-    cout << " -- crpix = " << axis.referencePixel() << endl;
-    cout << " -- crval = " << axis.referenceValue() << endl;
-    cout << " -- cdelt = " << axis.increment()      << endl;
-
-    // adjust the axis parameters
-    crval(0) = 3600.0;
-    cdelt(0) = 60.0;
-
-    axis.setReferenceValue (crval);
-    axis.setIncrement (cdelt);
-
-    cout << " - modified values:" << endl;
-    cout << " -- names = " << axis.worldAxisNames() << endl;
-    cout << " -- units = " << axis.worldAxisUnits() << endl;
-    cout << " -- crpix = " << axis.referencePixel() << endl;
-    cout << " -- crval = " << axis.referenceValue() << endl;
-    cout << " -- cdelt = " << axis.increment()      << endl;
-    
-  } catch (AipsError x) {
-    cerr << "[casacoreImages::test_CoordinateSystem] " << x.getMesg() << endl;
-    nofFailedTests++;
-  }
-    
 
   return nofFailedTests;
 }
@@ -582,6 +531,12 @@ int test_PagedImage (vector<string> &images,
 /*!
   \brief Test creating examples of LOFAR images
 
+  Besides creating examples of potential types of LOFAR images -- standard survey
+  image, Rotation-Measure synthesis image, Cosmic Rays near-field image, etc. --
+  this function combines the various types of coordinate objects -- Direction,
+  Linear, Frequency, Tabular -- into a coordinate system object which then in
+  turn is attached to an image file.
+
   \return nofFailedTests -- The number of failed tests encountered within this
           function.
 */
@@ -589,16 +544,57 @@ int test_lofarImages ()
 {
   int nofFailedTests (0);
 
+  casa::CoordinateSystem csys;
   casa::DirectionCoordinate directionCoord;
   casa::TabularCoordinate radiusCoord;
   casa::SpectralCoordinate freqCoord;
   casa::LinearCoordinate timeCoord;
+  casa::IPosition nelem (5);
 
-  /* Distance axis coordinate (tabulated) */
+  nelem(0) = 120;  /* Longitude */
+  nelem(1) = 120;  /* Latitude  */
+  nelem(2) = 10;   /* Radius    */
+  nelem(3) = 513;  /* Frequency */
+  nelem(4) = 100;  /* Time      */
+  
+  cout << "[1] Creating direction axes coordinate ..." << endl;
   try {
-    unsigned int nofPixels (7);
-    Vector<double> pixel (nofPixels);
-    Vector<double> world (nofPixels);
+    casa::Vector<double> refPixel(2);
+    Vector<Quantum<double> > refValue(2);
+    Vector<Quantum<double> > increment(2);
+    casa::Matrix<double> xform(2,2);
+    // Reference pixel is center of map for directional components
+    refPixel(0) = nelem(0)/2;
+    refPixel(1) = nelem(1)/2;
+    // Reference value: local zenith
+    refValue(0) = Quantum<double>(0,"deg");
+    refValue(1) = Quantum<double>(90,"deg");
+    // Coordinate increment
+    increment(0) = Quantum<double>(-1,"deg");
+    increment(1) = Quantum<double>(1,"deg");
+    // Linear transform
+    xform            = 0.0;
+    xform.diagonal() = 1.0;
+    // DirectionCoordinate
+    directionCoord = casa::DirectionCoordinate (casa::MDirection::AZEL,
+						casa::Projection::STG,
+						refValue(0),
+						refValue(1),
+						increment(0),
+						increment(1),
+						xform,
+						refPixel(0),
+						refPixel(1));
+  }
+  catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Creating (tabulated) distance axis coordinate ..." << endl;
+  try {
+    Vector<double> pixel (nelem(2));
+    Vector<double> world (nelem(2));
     casa::String unit ("m");
     casa::String name ("Length");
 
@@ -609,6 +605,9 @@ int test_lofarImages ()
     pixel(4) = 4;   world(4) = 10;
     pixel(5) = 5;   world(5) = 20;
     pixel(6) = 6;   world(6) = 50;
+    pixel(7) = 7;   world(7) = 100;
+    pixel(8) = 8;   world(8) = 200;
+    pixel(9) = 9;   world(9) = 500;
 
     radiusCoord = casa::TabularCoordinate (pixel,world,unit,name);
   }
@@ -617,7 +616,7 @@ int test_lofarImages ()
     nofFailedTests++;
   }
 
-  /* Time axis coordinate */
+  cout << "[3] Creating (linear) time axis coordinate ..." << endl;
   {
     Vector<casa::String> names (1,"Time");
     Vector<casa::String> units (1,"s");
@@ -626,7 +625,7 @@ int test_lofarImages ()
     Vector<casa::Double> cdelt(1,1.0);
     Matrix<casa::Double> pc(1,1,0.0);
 
-    pc.diagonal(1);
+    pc.diagonal() = 1.0;
 
     timeCoord = casa::LinearCoordinate  (names,
 					 units,
@@ -636,7 +635,7 @@ int test_lofarImages ()
 					 crpix);
   }
 
-  /* Spectral axis coordinate */
+  cout << "[4] Creating spectral axis coordinate ..." << endl;
   {
     double refPixel (0);
     double refValue (80e6);
@@ -649,6 +648,36 @@ int test_lofarImages ()
 					  refPixel);
     freqCoord.setWorldAxisNames(names);
   }
+
+  cout << "[5] Adding coordinate objects to coordinate system ..." << endl;
+  try {
+    /* Add coodinate objects to coordinate system */
+    csys.addCoordinate(directionCoord);
+    csys.addCoordinate(radiusCoord);
+    csys.addCoordinate(timeCoord);
+    csys.addCoordinate(freqCoord);
+    /* Provide a summary of the assembled coordinate system */
+    summary (csys);
+  }
+  catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+#ifdef HAVE_HDF5
+  cout << "[6] Creating image on disk ..." << endl;
+  try {
+    TiledShape tile (nelem);
+    HDF5Image<double> image (tile,
+			     csys,
+			     String("lofarImage-cr.h5"));
+    summary(image);
+  }
+  catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+#endif
 
   return nofFailedTests;
 }
@@ -664,8 +693,8 @@ int main (int argc,
   vector<string> images;
 
   /* Test working with casacore paged images */
-  nofFailedTests += test_PagedImage (images,
-				     putAt);
+//   nofFailedTests += test_PagedImage (images,
+// 				     putAt);
   /* Test generating examples of LOFAR images */
   nofFailedTests += test_lofarImages ();
   

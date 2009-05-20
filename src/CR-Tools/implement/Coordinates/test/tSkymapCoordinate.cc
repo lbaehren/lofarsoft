@@ -422,16 +422,15 @@ int test_worldAxisValues ()
   casa::ObsInfo obsInfo;
   obsInfo.setTelescope (telescope);
   obsInfo.setObserver (observer);
-  // Coordinate objects
+  /* Time-Frequency coordinate */
   TimeFreqCoordinate timeFreq (blocksize,
 			       sampleFreq,
 			       nyquistZone,
 			       blocksPerFrame,
 			       nofFrames);
-  SpatialCoordinate spatial (CR::CoordinateType::DirectionRadius,
-			     refcode,
-			     projection);
-  spatial.setShape(casa::IPosition(3,20,20,10));
+  /* Spatial coordinate */
+  SpatialCoordinate spatial;
+  /* Skymap coordinate */
   SkymapCoordinate coord (obsInfo,
 			  spatial,
 			  timeFreq);
@@ -465,32 +464,26 @@ int test_worldAxisValues ()
     Matrix<double> timeFreq = coord.timeFreqCoordinate().worldAxisValues();
     
     CR::test_exportPositions(timeFreq,
-			     "tSkymapCoordinate-timeFreqValues.dat",
+			     "tSkymapCoordinate-timeFreq.dat",
 			     true);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  cout << "[3] Retrieve position values ..." << endl;
+  cout << "[3] SpatialCoordinate::worldAxisValues() ..." << endl;
   try {
     Matrix<double> positions = coord.spatialCoordinate().worldAxisValues();
-    IPosition shape          = positions.shape();
 
-    cout << "\t" << positions.row(0) << endl;
-    cout << "\t" << positions.row(1) << endl;
-    cout << "\t" << positions.row(2) << endl;
-    cout << "\t" << positions.row(3) << endl;
-    cout << "\t..." << endl;
-    cout << "\t" << positions.row(shape(0)-3) << endl;
-    cout << "\t" << positions.row(shape(0)-2) << endl;
-    cout << "\t" << positions.row(shape(0)-1) << endl;
+    CR::test_exportPositions(positions,
+			     "tSkymapCoordinate-position.dat",
+			     true);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  cout << "[4] Retrieve world axis values of skymap coordinates ..." << endl;
+  cout << "[4] SkymapCoordinate::worldAxisValues() ..." << endl;
   try{
     // adjust internal parameters not to exceed memory
     timeFreq.setBlocksize(100);
