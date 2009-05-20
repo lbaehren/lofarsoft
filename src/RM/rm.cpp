@@ -2,13 +2,14 @@
 
     Author:		Sven Duscha (sduscha@mpa-garching.mpg.de)
     Date:		18-12-2008
-    Last change:	15-05-2009
+    Last change:	19-05-2009
 */
 
 
 #include <iostream>				// C++/STL iostream
 #include <math.h>				// mathematics library
 #include <string.h>
+
 
 #include <casa/Arrays.h>			// CASA library functions
 #include <casa/Arrays/Array.h>
@@ -59,10 +60,9 @@ rm::~rm()
 /*!
   \brief Convert from frequencies to lambda squared
 
-  \param frequency -- 
-  \param lambda_sq --
+  \param frequency - Frequency vector 
 
-  \return success -- 
+  \return success - 1 on successful execution, 0 on error
 */
 //vector<double>rm::freqToLambdaSq(vector<double> &frequency);
 vector<double> rm::freqToLambdaSq(const vector<double> &frequency)
@@ -146,7 +146,6 @@ vector<double> rm::totalIntensity(vector<double> &frequencies, int unit)
 
   // integrate over all frequencies in channel
   
-  
   // convert to desired unit (given by string unit)
 
   return totalIntensity;
@@ -214,7 +213,7 @@ vector<double> rm::deltaLambdaSq( //vector<double> delta_lambda_sq,
 }
 
 
-/*! \brief Inverse Fourier Method for calculating the Rotation Measure
+/*! \brief Inverse Fourier Method for calculating the Rotation Measure at a single Faraday depth
     
     The inverse Fourier Transformation is the classical relation between the lambda squared space and Faraday
     space. Input images channel are not necessarily given in lambda squared wavelengths, but in frequency instead. If that is the case, a conversion function between lambda squared and frequency is used.
@@ -223,43 +222,104 @@ vector<double> rm::deltaLambdaSq( //vector<double> delta_lambda_sq,
     intensities measured at different frequencies 
     Special case (bool freq=false): the input vector is already given as a range of polarized intensities given at different lambda squareds
 
+    \param phi - Faraday depth to compute RM for
     \param intensity --
     \param frequency --
+    \param weights --
     \param delta_freq --
-    \param faradayDepths - vector of Faraday depths at which the RM should be computed
     \param freq --
     
-    \return rm --
+    \return rm - Single RM value computed for Faraday depth phi
 */
-vector<double>rm::inverseFourier(vector<double> intensity,
-				 vector<double> frequency,
-				 vector<double> delta_freq,
-				 casa::Unit units,
-				 vector<double> faradayDepths,
+complex<double> rm::inverseFourier(double &phi,
+				 vector<complex<double> > &intensity,
+				 vector<double> &frequency,
+				 vector<double> &weights,
+				 vector<double> &delta_frequency,
 				 bool freq)
 {
-    vector<double> rm;					// rm values along the line of sight
-    vector<double> lambdaSquared(frequency.size());	// values of lambda squared
-    vector<double>
+    vector<double> lambda_squared(frequency.size());
+    vector<double> delta_lambda_squared(delta_frequency.size());
+    
+    complex<double> exp_lambdafactor=0;		// exponential factor in direct FT
+    complex<double> rmpolint;			// rm value
+    int chan=0; 				// loop variables
+    const int numchannels=frequency.size();	// number of frequency channels
 
-    faradayDepths; // loop variables
+    double K=0;					// K factor for RM-synthesis
 
     if(freq)		// if given as frequency, convert to lambda squareds
     {
-      lambdaSquared=freqToLambdaSq(frequency)	// convert frequency vector      
-				    // convert delta step vector
-    
+      lambda_squared=freqToLambdaSq(frequency);			// convert frequency vector    
+      delta_lambda_squared=freqToLambdaSq(delta_frequency);  	// convert delta step vector   
+    }
+    else
+    {
+      lambda_squared=frequency;
+      delta_lambda_squared=delta_frequency;
     }
 
-    // compute discrete Fourier sum
+    // Compute weighting factor from weights
+    for (vector<double>::iterator it = weights.begin(); it!=weights.end(); ++it) 
+    {
+      cout << *it << endl;
+      K+=*it;
+    }
     
+    if(K!=0)	// Do not do a division by zero!
+      K=1/K;	// take inverse
 
-    // Parallelize?
 
+    // compute discrete Fourier sum by iterating over frequency vector
+    //
+    // P(phi) = K * expfactor * Sum_0^frequency.size() {P(lambda^2)*exp(lambda^2)}
+    //
+    for(chan=0; chan<numchannels; chan++)
+    {
+      // compute exponential factor
+      exp_lambdafactor=exp(-2*phi*lambda_squared[chan])*delta_frequency[chan];	// exp lambda_squared factor
+      rmpolint=rmpolint+(intensity[chan]*exp_lambdafactor);
+    }
 
-    return rm;
+    rmpolint=K*rmpolint;	// multiply with weighting
+
+    return rmpolint;
 }
 
+
+/*!
+    \brief Inverse Fourier Method for calculating the Rotation Measure for a set of Faraday depths
+
+    The inverse Fourier Transformation is the classical relation between the lambda squared space and Faraday
+    space. Input images channel are not necessarily given in lambda squared wavelengths, but in frequency instead. If that is the case, a conversion function between lambda squared and frequency is used.
+    
+    Normal case (bool freq=true, default): the input vector is a range of complex polarized intensities measured at different frequencies 
+    Special case (bool freq=false): the input vector is already given as a range of polarized intensities given at different lambda squareds
+
+    \param phi - Faraday depth to compute RM for
+    \param intensity - Polarized intensities
+    \param frequency - Frequencies (or lambda squareds) of polarized intensities
+    \param weights - Weights associated with each frequency (or lambda squared)
+    \param delta_freq - Delta frequency (or delta lambda squared) between frequencies
+    \param freq - If intensities are given as frequencies (true) or as lambda squared (false)
+    
+    \return rm - vector of RM values computed for Faraday depths phi
+*/
+vector<double>rm::inverseFourier(vector<double> &phi,
+				 vector<complex<double> > &intensity,
+				 vector<double> &frequency,
+				 vector<double> &weights,
+				 vector<double> &delta_freq,
+				 bool freq)
+{
+  vector<double> lambda_squared(frequency.size());
+  vector<double> delta_lambda_squared(delta_freq.size());
+  vector<double> rm;
+
+
+
+  return rm;
+}
 
 
 /*!
@@ -269,18 +329,21 @@ vector<double>rm::inverseFourier(vector<double> intensity,
   polarized intensities measured at different frequencies. Parameters a_min/a_max
   and b_min/b_max define ranges for wavelet parameter space probing.
 
-  \param intensity -- 
-  \param frequencies --
-  \param delta_freq --
-  \param wavelet_parameters -- 
-  \param freq -- 
+  \param phi - Faraday depth to compute RM for
+  \param intensity - Polarized intensities
+  \param frequency - Frequencies (or lambda squareds) of polarized intensities
+  \param weights - Weights associated with each frequency (or lambda squared)
+  \param delta_freq - Delta frequency (or delta lambda squared) between frequencies
+  \param freq - If intensities are given as frequencies (true) or as lambda squared (false)
   
-  \return rm --
- */
-vector<double> rm::wavelet(vector<double> intensity,
-			   vector<double> frequencies,
-			   vector<double> delta_freqs,
-			   vector<double> wavelet_parameters,
+  \return rm - vector of RM values computed for Faraday depths phi
+*/
+vector<double> rm::wavelet(vector<double> &phi,
+			   vector<complex<double> > &intensity,
+			   vector<double> &frequencies,
+			   vector<double> &weights,
+			   vector<double> &delta_freqs,
+			   vector<double> &wavelet_parameters,
 			   bool freq)
 {
   vector<double>rm;	// rm values along the line of sight

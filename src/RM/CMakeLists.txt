@@ -228,6 +228,8 @@ include_directories (BEFORE
   ${RM_BINARY_DIR}
   ${RM_SOURCE_DIR}
   ${RM_SOURCE_DIR}/implement
+  ${RM_SOURCE_DIR}/apps
+  ${RM_SOURCE_DIR}/test
   )
 
 ## External header files

@@ -2,7 +2,7 @@
 
     Author:		Sven Duscha (sduscha@mpa-garching.mpg.de)
     Date:		15-05-2009
-    Last change:	15-05-2009
+    Last change:	19-05-2009
 */
 
 
@@ -28,24 +28,61 @@ using namespace std;
 //===============================================================================
 
 /*!
-  \brief Default rmCube constructor, creates a RM cube with given dimensions
-
-  \param x --
-  \param y --
-  \param faradaySize
+  \brief Default destructor
 */
-rmCube::rmCube(int x, int y, int faradaySize)
+rmCube::~rmCube()
 {
-
 
 }
 
 
 /*!
-  \brief Default destructor
+  \brief rmCube constructor, creates a RM cube with given dimensions
+
+  \param x --
+  \param y --
+  \param faradaySize --
 */
-rmCube::~rmCube()
+rmCube::rmCube(int x, int y, int faradaySize, double stepsize)
 {
+  int steps=0;	// number of steps=faradaySize/stepsize
+  int i=0;	// loop variable
+
+  this->xSize=x;
+  this->ySize=y;
+  this->faradaySize=faradaySize;
+
+  // Use stepsize to create a vector of equally spaced Faraday depths
+  if(fmod(faradaySize, stepsize))
+  {
+    throw "rmCube: faradaySize is not an integral multiple of stepsize";
+  }
+  else
+  {
+    steps=faradaySize/stepsize;
+    this->faradayDepths.resize(steps);	// set faradayDepths vector's size to size of steps
+  
+    for(i=0; i<=steps; i++)
+    {
+      faradayDepths[i]=i*stepsize;
+    }
+  } 
+  
+}
+
+
+/*!
+  \brief Constructor with setting individual Faraday depth vector
+
+  \param x --
+  \param y --
+  \param faradayDepths --
+*/
+rmCube::rmCube(int x, int y, vector<double> faradayDepths)
+{
+
+
+
 
 }
 

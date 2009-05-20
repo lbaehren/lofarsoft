@@ -50,7 +50,7 @@ int main (int argc, char * const argv[]) {
 	Lattice<DComplex> *lattice_Q_dcomplex;
 
 	float min=0, max=0;		// DEBUG: using minMax() function on image
-
+	double phi=0;			// Faraday depth to probe for
 
 	if(argc<2)				// if no filenames was given, display usage/help (MUST change to 3!)
 	{
@@ -101,21 +101,31 @@ int main (int argc, char * const argv[]) {
 	// create buffer for one Faraday plane
 
 	// create a rm object with an associated two dimensional buffer
-
+	rm rm1();
 
 	// Set up Faraday depths to be probed
+	phi=0;
 
+
+	/*
 	// Lattice and iteration over line of sight
 	// create Lattice shape and iterator
  	const uInt cursorSize = lattice_Q_float->advisedMaxPixels();
 	const IPosition cursorShape = lattice_Q_float->niceCursorShape(cursorSize);
  //	const IPosition cursorShape(2, lattice_Q_float->shape()(0), lattice_Q_float->shape()(1));
-    
+	*/
+	IPosition latticeShape=(*lattice_Q_float).shape(); // get lattice' shape
+	
+	int chans=latticeShape(2);
+	const IPosition cursorShape(1,chans);		
+	IPosition axisPath(3,0,1,2);			// walk along frequency axis
+
+
 	int i=0;
 	RO_LatticeIterator<Float> iter(*lattice_Q_float, cursorShape);
 	for (iter.reset(); !iter.atEnd(); iter++) {
 		minMax(min, max, iter.cursor());
-		//cout << i++ << " Min = " << min << " Max = " << max << iter.cursor() << endl;		
+		cout << i++ << " Min = " << min << " Max = " << max << iter.cursor() << endl;		
 	}	
 
 	//file.close();

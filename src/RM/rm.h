@@ -36,10 +36,11 @@
 
 #include <vector>
 #include <iostream>			// streamed input output for rm cubes
-#include <casa/Unit.h>			// use CASA Unit class for Unit handling and conversion
-#include <casa/Quanta.h>		// ... and conversion
-#include <casa/Arrays.h>		// use CASA Arrays for storage of temporary Faraday buffers
-#include <casa/Arrays/Array.h>
+#include <complex>			// complex math functions
+#include <casa/Arrays/Array.h>		// use CASA Arrays as temporary buffers
+#include <casa/Quanta/Unit.h>		// use CASA Unit class for unit handling
+#include <casa/Quanta.h>		// ... and unit conversion
+
 
 // Namespace usage
 using namespace std;
@@ -110,23 +111,37 @@ public:
 		
   //! Rotation Measure computing algorithms
   //
-  //! Brentjens and de Bruyn with the Inverse Fourier Transform
-  vector<double> inverseFourier(vector<double>,
-				vector<double>,
-				vector<double>,
+  //! Brentjens and de Bruyn with the Inverse Fourier Transform for a single RM value
+  complex<double> inverseFourier(double &,
+				 vector<complex<double> > &,
+				 vector<double> &,
+				 vector<double> &,
+				 vector<double> &,
+				 bool freq=true);
+
+  //! Brentjens and de Bruyn with the Inverse Fourier Transform for complete set of RMs
+  vector<double> inverseFourier(vector<double> &,
+				vector<complex<double> > &,
+				vector<double> &,
+				vector<double> &,
+				vector<double> &,
 				bool freq=true);
 
+
   //! Frick and Stepanov wavelet algorithm
-  vector<double> wavelet(vector<double>,
-			 vector<double>,
-			 vector<double>,
-			 vector<double> wavelet_parameters,
+  vector<double> wavelet(vector<double> &,
+			 vector<complex<double> > &,
+			 vector<double> &,
+			 vector<double> &,
+			 vector<double> &,
+			 vector<double> &,
 			 bool freq=true);
 
   //! En&szlig;lin Information Theory Based algorithm
   vector<double> ift(vector<double>,
 		     vector<double>,
 		     bool freq=true);
+
   //! (Forward) Fourier Transform to get an image from an RM cube
   vector<double> fourierTransform(vector<double>, vector<double>, bool freq=true);
 

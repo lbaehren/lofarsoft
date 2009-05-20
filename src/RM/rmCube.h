@@ -61,8 +61,16 @@ class rmCube
     double *buffer; 			// pointer to buffer
     vector<int> bufferDimensions;	// dimensions of buffer (line, tile, plane,...)
   
+    // Keep variables that do not need to be computed for every single RM
+    double weightfactor;		// weighting factor
+  
+  
   public:
-    rmCube(int x, int y, int faradaySize);	// default constructor with dimensions
+    rmCube();					//!> constructor without initial values
+    rmCube(int x, int y, int faradaySize);	//!> default constructor with dimensions
+    //! construct a rmCube from given faradaySize and stepsize
+    rmCube(int x, int y, int faradaySize, double stepsize);
+    rmCube(int, int, vector<double>); 		//!> constructor giving individual faradayDepths vector
 
     ~rmCube();		// destructor
 
