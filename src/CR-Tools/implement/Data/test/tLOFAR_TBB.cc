@@ -393,7 +393,7 @@ int test_data (std::string const &filename)
   // create object to handle the data
   LOFAR_TBB data (filename,
 		  blocksize);
-  
+	
   cout << "[1] Reading one block of ADC values ..." << endl;
   try {
     casa::Matrix<double> fx = data.fx();
@@ -404,16 +404,22 @@ int test_data (std::string const &filename)
 	 << fx(1,0) << " "
 	 << fx(2,0) << " "
 	 << fx(3,0) << " .. ]" << endl;
-    cout << "-- ADC values [1] = ["
-	 << fx(0,1) << " "
-	 << fx(1,1) << " "
-	 << fx(2,1) << " "
-	 << fx(3,1) << " .. ]" << endl;
+//    cout << "-- ADC values [1] = ["
+//	 << fx(0,1) << " "
+//	 << fx(1,1) << " "
+//	 << fx(2,1) << " "
+//	 << fx(3,1) << " .. ]" << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
-  
+
+	// test changing the blocksize
+	blocksize = 10240;
+	cout << "[1a] changing blocksize from 1024 to " << blocksize << "...";
+	data.setBlocksize(blocksize);
+	cout << "changed." << endl;
+		
   cout << "[2] Reading one block of voltage values ..." << endl;
   try {
     casa::Matrix<double> voltage = data.voltage();
@@ -424,11 +430,11 @@ int test_data (std::string const &filename)
 	 << voltage(1,0) << " "
 	 << voltage(2,0) << " "
 	 << voltage(3,0) << " .. ]" << endl;
-    cout << "-- Voltage values [1] = ["
-	 << voltage(0,1) << " "
-	 << voltage(1,1) << " "
-	 << voltage(2,1) << " "
-	 << voltage(3,1) << " .. ]" << endl;
+//    cout << "-- Voltage values [1] = ["
+//	 << voltage(0,1) << " "
+//	 << voltage(1,1) << " "
+//	 << voltage(2,1) << " "
+//	 << voltage(3,1) << " .. ]" << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -444,16 +450,16 @@ int test_data (std::string const &filename)
 	 << fft(1,0) << " "
 	 << fft(2,0) << " "
 	 << fft(3,0) << " .. ]" << endl;
-    cout << "-- FFT values [1] = ["
-	 << fft(0,1) << " "
-	 << fft(1,1) << " "
-	 << fft(2,1) << " "
-	 << fft(3,1) << " .. ]" << endl;
+//    cout << "-- FFT values [1] = ["
+//	 << fft(0,1) << " "
+//	 << fft(1,1) << " "
+//	 << fft(2,1) << " "
+//	 << fft(3,1) << " .. ]" << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
-  
+
   cout << "[4] Reading calibrated FFT for one block of data ..." << endl;
   try {
     casa::Matrix<DComplex> calfft = data.calfft();
@@ -464,11 +470,11 @@ int test_data (std::string const &filename)
 	 << calfft(1,0) << " "
 	 << calfft(2,0) << " "
 	 << calfft(3,0) << " .. ]" << endl;
-    cout << "-- Cal. FFT values [1] = ["
-	 << calfft(0,1) << " "
-	 << calfft(1,1) << " "
-	 << calfft(2,1) << " "
-	 << calfft(3,1) << " .. ]" << endl;
+//    cout << "-- Cal. FFT values [1] = ["
+//	 << calfft(0,1) << " "
+//	 << calfft(1,1) << " "
+//	 << calfft(2,1) << " "
+//	 << calfft(3,1) << " .. ]" << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
