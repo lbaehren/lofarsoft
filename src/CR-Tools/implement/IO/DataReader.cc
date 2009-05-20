@@ -584,7 +584,7 @@ namespace CR {  //  Namespace CR -- begin
     }
     
     /*
-      Check and (if required) adjust the shape of the ADC2Voltage conversion
+      Check and (if required) adjust the shape of the fft2calfft conversion
       factors array
     */
     try {
@@ -593,12 +593,21 @@ namespace CR {  //  Namespace CR -- begin
 	// report what we are about to do
 #ifdef DEBUGGING_MESSAGES
 	cerr << "[DataReader::setBlocksize] WARNING!"
-	     << " Need to re-adjust fft2calfft array to keep internals consistent."
+	     << " Need to re-adjust fft2calfft array and selected channels array to keep internals consistent."
 	     << " The previously assigned values will be lost!"
 	     << endl;
 #endif
 	// adjust the first axis of the array
 	shape(0) = fftLength_p;
+	// FIX: the selected # of channels is invalid when the number of FFT channels has changed.
+	// Reset to all channels selected to prevent a crash down in setFFT2calFFT.
+	// Note: the handling of # selected channels < # total channels is currently incorrect and needs attention...
+	// See also setFFT2calFFT.
+
+	// correct the channel selection array ...
+	Vector<bool> frequencySelection (shape(0),true);
+	setSelectedChannels(frequencySelection);
+	// End fix.
 	Matrix<DComplex> fft2calfftNew (shape,1.0);
 	setFFT2calFFT (fft2calfftNew);
       }
@@ -1194,7 +1203,8 @@ void DataReader::setFFT2calFFT (Matrix<DComplex> const &fft2calfft)
     // adjust the size of the internal array
     fft2calfft_p.resize (fftLength_p,nofAntennas);
     fft2calfft_p = 1.0;
-    //
+    // NB. This loop cannot be right, as the dimension of selectedChannels_p can vary, 
+		// while looping over all channels and antennas... Causes segfault when not all channels are selected.
     for (uint antenna(0); antenna<nofAntennas; antenna++) {
       for (uint channel(0); channel<nofChannels; channel++) {
 	fft2calfft_p (selectedChannels_p(channel),selectedAntennas_p(antenna))
