@@ -154,9 +154,11 @@ public:
   //! Rotation Measure error estimation algorithms
 
   //! (assuming) a least squares error approximation
-  vector<double> rmErrorLsq(vector<double> intensities,
-			    vector<double> lambda_sqs,
-			    bool lambda_sq=true);
+  vector<double> rmErrorLsq(vector<double> &intensity, 
+			    vector<double> &lambda_sqs, 
+			    vector<double> &weights, 
+			    bool freq=true);
+
   //! Error estimate based on Bayesian statistics
   vector<double> rmErrorBayes(vector<double> intensities,
 			      vector<double> lambda_sqs,

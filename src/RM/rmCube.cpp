@@ -2,7 +2,7 @@
 
     Author:		Sven Duscha (sduscha@mpa-garching.mpg.de)
     Date:		15-05-2009
-    Last change:	19-05-2009
+    Last change:	22-05-2009
 */
 
 
@@ -32,7 +32,12 @@ using namespace std;
 */
 rmCube::~rmCube()
 {
+  if(buffer!=NULL)
+  {
 
+  }
+
+  // free memory of buffer
 }
 
 
@@ -51,6 +56,8 @@ rmCube::rmCube(int x, int y, int faradaySize, double stepsize)
   this->xSize=x;
   this->ySize=y;
   this->faradaySize=faradaySize;
+
+  this->buffer=NULL;	// set buffer to NULL (no buffer associated, yet)
 
   // Use stepsize to create a vector of equally spaced Faraday depths
   if(fmod(faradaySize, stepsize))
@@ -92,6 +99,10 @@ rmCube::rmCube(int x, int y, vector<double> faradayDepths)
 //  Methods
 //
 //===============================================================================
+//
+// Reading info from the object
+//
+//===============================================================================
 
 int rmCube::getXSize()
 {
@@ -123,14 +134,42 @@ int rmCube::getCurrentY()
 }
 
 
-void rmCube::setCurrentX(int currentX)
+//===============================================================================
+//
+// Writing info to the object
+//
+//===============================================================================
+
+int rmCube::setCurrentX(int currentX)
 {
-  this->currentX=currentX;
+  if(currentX >= this->xSize)
+  {
+    throw "rmCube::setCurrentX, value out of range";
+    return -1;
+  }
+  else
+  {
+    this->currentX=currentX;
+  }
+  
+  return 0;
 }
 
 
-void rmCube::setCurrentY(int currentY)
+int rmCube::setCurrentY(int currentY)
 {
-  this->currentY=currentY;
+
+  if(currentY >= this->ySize)
+  {
+    throw "rmCube::setCurrentY, value out of range";
+    return -1;
+  }
+  else
+  {
+    this->currentY=currentY;
+  }
+
+  return 0;
 }
+
 

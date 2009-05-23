@@ -35,34 +35,35 @@
 class rmCube
 {
   private:
-    int xSize;		// horizontal size in pixels
-    int ySize;		// vertical size in pixels
-    int faradaySize;	// total Farday range covered
+    int xSize;		//!> horizontal size in pixels
+    int ySize;		//!> vertical size in pixels
+    int faradaySize;	//!> total Farday range covered
 
-    int currentX;	// current X position in cube
-    int currentY;	// current Y position in cube
+    int currentX;	//!> current X position in cube
+    int currentY;	//!> current Y position in cube
+    int currentFaradayDepth;	//!> current Faraday Depth
 
     // Image plane dimensions
-    double ra;		// total RA of field
-    double dec;		// total DEC of field
-    double ra_low;	// lower limit (edge) of RA of field
-    double ra_high;	// upper limit (edge) of RA of field
-    double dec_low;	// lower limit (edge) of DEC of field
-    double dec_high;	// upper limit (edge) of DEC of field
+    double ra;		//!> total RA of field
+    double dec;		//!> total DEC of field
+    double ra_low;	//!> lower limit (edge) of RA of field
+    double ra_high;	//!> upper limit (edge) of RA of field
+    double dec_low;	//!> lower limit (edge) of DEC of field
+    double dec_high;	//!> upper limit (edge) of DEC of field
     
     // Faraday depth dimension
-    double faraday_low;
-    double faraday_high;
-    std::vector<double> faradayDepths;	// complete list of Faraday depths in RM cube
+    double faraday_low;			//!> lower limit of Faraday Depth computed
+    double faraday_high;		//!> upper limiit of Faraday Depth computed
+    std::vector<double> faradayDepths;	//!> complete list of Faraday depths in RM cube
     
-    std::string algorithm;			// algorithm used to compute RM
-    std::string errorEstimationAlgorithm;	// algorithm used for error estimation
+    std::string algorithm;			//!> algorithm used to compute RM
+    std::string errorEstimationAlgorithm;	//!> algorithm used for error estimation
 
-    double *buffer; 			// pointer to buffer
-    vector<int> bufferDimensions;	// dimensions of buffer (line, tile, plane,...)
+    double *buffer; 			//!> pointer to buffer for computed Faraday depths
+    vector<int> bufferDimensions;	//!> dimensions of buffer (line, tile, plane,...)
   
     // Keep variables that do not need to be computed for every single RM
-    double weightfactor;		// weighting factor
+    double weightfactor;		//!> weighting factor
   
   
   public:
@@ -72,43 +73,46 @@ class rmCube
     rmCube(int x, int y, int faradaySize, double stepsize);
     rmCube(int, int, vector<double>); 		//!> constructor giving individual faradayDepths vector
 
-    ~rmCube();		// destructor
+    ~rmCube();					//!> destructor
 
     // Methods to access attributes
-    int getXSize();
-    int getYSize();
-    int getFaradaySize();
-    int getCurrentX();
-    int getCurrentY();
+    int getXSize();			//!> get XSize of Faraday cube
+    int getYSize();			//!> get YSize of Faraday cube
+    int getFaradaySize();		//!> get FaradaySize of Faraday cube
+    int getCurrentX();			//!> get current X position in Faraday cube
+    int getCurrentY();			//!> get current Y position in Faraday cube
     
-    void setCurrentX(int currentX);
-    void setCurrentY(int currentY);
+    int setCurrentX(int currentX);	//!> set current X position in Faraday cube
+    int setCurrentY(int currentY);	//!> set current Y position in Faraday cube   
     
+    double getRA();			//!> get total RA of field
+    double getDec();			//!> get total Dec of field
+    double getRaLow();			//!> get the lower limit of RA in the field
+    double getDecLow();			//!> get the lower limit of Dec in the field
+    double getRaHigh();			//!> get the upper limit of RA in the field
+    double getDecHigh();		//!> get the upper limit of Dec in the field
     
-    double getRA();
-    double getDec();
-    double getRaLow();
-    double getDecLow();
-    double getRaHigh();
-    double getDecHigh();
-    
-    void setRA(double RA);
-    void setDec(double Dec);
-    void setRaLow(double ra);
-    void setDecLow();
-    void setRaHigh();
-    void setDecHigh();
+    void setRA(double RA);		//!> set the total RA of the field
+    void setDec(double Dec);		//!> set the total Dec of the field
+    void setRaLow(double ra);		//!> set the lower limit of RA of the field
+    void setDecLow();			//!> set the lower limit of Dec of the field
+    void setRaHigh();			//!> set the upper limit of RA of the field
+    void setDecHigh();			//!> set the upper limit of Dec of the field
 
-    double getFaradayLow();
-    double getFaradayHigh();
-    vector<double> getFaradayDepths();
-    void setFaradayLow(double faradayLow);
-    void setFaradayHigh(double faradayHigh);
+    double getFaradayLow();			//!> get the lower limit of Faraday depth of the Faraday cube
+    double getFaradayHigh();			//!> set the higher limit of Faraday depth of the Faraday cube
+    vector<double> getFaradayDepths();		//!> get a vector of Faraday Depths in the Faraday cube
+    int setFaradayLow(double faradayLow);	//!> set the lower limit of Faraday depth of the Faraday cube
+    int setFaradayHigh(double faradayHigh);	//!> set the higher limit of Faraday depth of the Faraday cube
     
-    int createBuffer(long long size);
+    int createBuffer(long long size);		//!> create buffer for computed Faraday depths
+    int createBufferPlane();			//!> create buffer for one Faraday plane
+    int createBufferCube();			//!> create buffer for the whole cube
 
-    vector<int> getBufferDimensions();
-    void setBufferDimensions(vector<int> dimensions);
+    vector<int> getBufferDimensions();			//!> get dimensions of buffer
+    int setBufferDimensions(vector<int> dimensions);	//!> set dimensions of buffer (i.e. plane, cube)
+  
+    // High-level functions
 };
 
 #endif

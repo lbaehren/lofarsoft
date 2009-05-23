@@ -386,12 +386,17 @@ vector<double> rm::wavelet(vector<double> &phi,
     \return rm_error --
 */
 
-vector<double> rm::rmErrorLsq(vector<double> intensity, vector<double> lambda_sqs, bool lambda_sq)
+vector<double> rm::rmErrorLsq(vector<double> &intensity, vector<double> &lambda_sqs, vector<double> &weights, bool freq)
 {
-	vector<double> rm_error;
+  vector<double> rm_error;
 
+  if(freq)
+  {
+    // convert to lambda_sqs
+  }
+  
 
-	return rm_error;
+  return rm_error;
 }
 
 
