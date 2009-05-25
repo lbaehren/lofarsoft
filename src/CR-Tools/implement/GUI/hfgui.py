@@ -227,7 +227,7 @@ class hfQtPlot(QtGui.QWidget):
         self.currentplotdataobject()["'Block"].touch()
     def hfsetBlocksize(self,i):
         print "Blocksize should be ",i
-#        self.currentplotdataobject()["'Blocksize"].set(i)
+        self.currentplotdataobject()["'Blocksize"].set(i)
     def currentplotdataobject(self):
         return self.currentplotpanelobject()["'PlotData"]
     def currentplotpanelobject(self):
