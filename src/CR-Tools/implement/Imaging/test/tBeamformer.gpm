@@ -1,6 +1,6 @@
 
 set term pdf color solid enhanced
-set output "tSpatialCoordinates.pdf"
+set output "tBeamformer.pdf"
 
 ##_______________________________________________________________________________
 ## Plot set of cartesian coordinates
@@ -40,9 +40,9 @@ splot "positions-cylindrical.dat" u 3:4:2
 ##_______________________________________________________________________________
 ## Plot set of DirectionRadius coordinates
 
-set xlabel "theta [rad]"
-set ylabel "phi [rad]"
-set zlabel "r [m]"
+set xlabel "theta"
+set ylabel "phi"
+set zlabel "r"
 
 set angles radians
 set mapping spherical

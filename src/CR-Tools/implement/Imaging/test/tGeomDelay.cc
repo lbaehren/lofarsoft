@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include <crtools.h>
+#include <Coordinates/SpatialCoordinate.h>
 #include <Imaging/GeomDelay.h>
 #include <Utilities/TestsCommon.h>
 #include "create_data.h"
@@ -31,6 +32,7 @@ using std::cout;
 using std::endl;
 using CR::CoordinateType;
 using CR::GeomDelay;
+using CR::SpatialCoordinate;
 
 /*!
   \file tGeomDelay.cc
@@ -250,7 +252,8 @@ int test_static_functions ()
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                   test_methods
 
 /*!
   \brief Test for the various methods of the class
@@ -464,7 +467,7 @@ int test_methods ()
   
   return nofFailedTests;
 }
-
+  
 // -----------------------------------------------------------------------------
 
 int main ()

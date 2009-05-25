@@ -496,7 +496,10 @@ int test_worldAxisValues ()
 
   int nofFailedTests (0);
   casa::IPosition shape (2);
-
+  Vector<double> refPixel (3);
+  Vector<double> refValue (3);
+  Vector<double> increment (3);
+  
   std::cout << "[1] Default settings ..." << std::endl;
   try {
     SpatialCoordinate coord;
@@ -535,7 +538,6 @@ int test_worldAxisValues ()
   try {
     SpatialCoordinate coord (CoordinateType::Spherical);
     casa::IPosition nelem (3,10,45,30);
-    Vector<double> refPixel (3);
     refPixel(0) = 0;
     refPixel(1) = nelem(1)/2;
     refPixel(2) = nelem(2)/2;
@@ -567,18 +569,21 @@ int test_worldAxisValues ()
   std::cout << "[5] DirectionRadius (AZEL,SIN) coordinates ..." << std::endl;
   try {
     SpatialCoordinate coord (CoordinateType::DirectionRadius,"AZEL","SIN");
-    casa::IPosition nelem (3,30,45,10);
-    Vector<double> refPixel (3);
-    Vector<double> refValue (3);
-    refPixel(0) = nelem(0)/2;
-    refPixel(1) = nelem(1)/2;
-    refPixel(2) = 0;
-    refValue(0) = 0;
-    refValue(1) = 90;
-    refValue(2) = 1;
+    casa::IPosition nelem (3,50,50,3);
+    refPixel(0)  = nelem(0)/2;
+    refPixel(1)  = nelem(1)/2;
+    refPixel(2)  = 0;
+    refValue(0)  = 0;
+    refValue(1)  = 90;
+    refValue(2)  = 1;
+    increment    = coord.increment();
+    increment(0) *= 2;
+    increment(1) *= 2;
+    increment(2) = 10;
     coord.setShape(nelem);
     coord.setReferencePixel(refPixel);
     coord.setReferenceValue(refValue);
+    coord.setIncrement(increment);
     coord.summary();
     CR::test_exportPositions(coord.worldAxisValues(),
 			     "positions-azel-sin.dat",
@@ -591,18 +596,21 @@ int test_worldAxisValues ()
   std::cout << "[6] DirectionRadius (AZEL,STG) coordinates ..." << std::endl;
   try {
     SpatialCoordinate coord (CoordinateType::DirectionRadius,"AZEL","STG");
-    casa::IPosition nelem (3,30,45,10);
-    Vector<double> refPixel (3);
-    Vector<double> refValue (3);
+    casa::IPosition nelem (3,50,50,3);
     refPixel(0) = nelem(0)/2;
     refPixel(1) = nelem(1)/2;
     refPixel(2) = 0;
     refValue(0) = 0;
     refValue(1) = 90;
     refValue(2) = 1;
+    increment    = coord.increment();
+    increment(0) *= 2;
+    increment(1) *= 2;
+    increment(2) = 10;
     coord.setShape(nelem);
     coord.setReferencePixel(refPixel);
     coord.setReferenceValue(refValue);
+    coord.setIncrement(increment);
     coord.summary();
     CR::test_exportPositions(coord.worldAxisValues(),
 			     "positions-azel-stg.dat",
@@ -615,18 +623,21 @@ int test_worldAxisValues ()
   std::cout << "[7] DirectionRadius (AZEL,ZEA) coordinates ..." << std::endl;
   try {
     SpatialCoordinate coord (CoordinateType::DirectionRadius,"AZEL","ZEA");
-    casa::IPosition nelem (3,30,45,10);
-    Vector<double> refPixel (3);
-    Vector<double> refValue (3);
+    casa::IPosition nelem (3,50,50,3);
     refPixel(0) = nelem(0)/2;
     refPixel(1) = nelem(1)/2;
     refPixel(2) = 0;
     refValue(0) = 0;
     refValue(1) = 90;
     refValue(2) = 1;
+    increment    = coord.increment();
+    increment(0) *= 2;
+    increment(1) *= 2;
+    increment(2) = 10;
     coord.setShape(nelem);
     coord.setReferencePixel(refPixel);
     coord.setReferenceValue(refValue);
+    coord.setIncrement(increment);
     coord.summary();
     CR::test_exportPositions(coord.worldAxisValues(),
 			     "positions-azel-zea.dat",

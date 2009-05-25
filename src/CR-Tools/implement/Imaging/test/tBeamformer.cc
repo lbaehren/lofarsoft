@@ -23,6 +23,7 @@
 
 #include <casa/BasicMath/Random.h>
 
+#include <Coordinates/SkymapCoordinate.h>
 #include <Imaging/Beamformer.h>
 #include <Utilities/TestsCommon.h>
 #include "create_data.h"
@@ -53,17 +54,21 @@ using CR::SkymapQuantity;
   \date 2007/06/13
 */
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                test_Beamformer
 
 /*!
   \brief Test constructors for a new Beamformer object
+
+  There are quite a number of ways in which a new Beamformer object can be
+  created, most importantly using an object of on the the base classes.
 
   \return nofFailedTests -- The number of failed tests.
 */
 int test_Beamformer (uint blocksize=1024,
 		     uint fftLength=513)
 {
-  cout << "\n[test_Beamformer]\n" << endl;
+  cout << "\n[tBeamformer::test_Beamformer]\n" << endl;
 
   int nofFailedTests (0);
   
@@ -241,10 +246,14 @@ int test_Beamformer (uint blocksize=1024,
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                test_parameters
 
 /*!
   \brief Test the methods providing access to internal parameters
+
+  \param blocksize -- The number of samples per input block of data
+  \param fftLength -- Output size of the FFT.
 
   \return nofFailedTests -- The number of failed test encountered within this
           function.
@@ -252,7 +261,7 @@ int test_Beamformer (uint blocksize=1024,
 int test_parameters (uint blocksize=1024,
 		     uint fftLength=513)
 {
-  cout << "\n[test_parameters]\n" << endl;
+  cout << "\n[tBeamformer::test_parameters]\n" << endl;
 
   int nofFailedTests (0);
   Beamformer bf;
@@ -350,11 +359,18 @@ int test_parameters (uint blocksize=1024,
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                   test_methods
 
+/*!
+  \brief Test the various public methods of the Beamformer class
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+*/
 int test_methods ()
 {
-  cout << "\n[test_methods]\n" << endl;
+  cout << "\n[tBeamformer::test_methods]\n" << endl;
 
   int nofFailedTests (0);
   Vector<casa::MVPosition> antPositions (3);
@@ -454,17 +470,21 @@ int test_methods ()
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                   test_weights
 
 /*!
   \brief Test modification of the Beamformer weights
+
+  \param blocksize -- The number of samples per input block of data
+  \param fftLength -- Output size of the FFT.
 
   \return nofFailedTests -- The number of failed tests.
 */
 int test_weights (uint blocksize=1024,
 		  uint fftLength=513)
 {
-  cout << "\n[test_weights]\n" << endl;
+  cout << "\n[tBeamformer::test_weights]\n" << endl;
 
   int nofFailedTests (0);
 
@@ -504,7 +524,128 @@ int test_weights (uint blocksize=1024,
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                               test_coordinates
+
+/*!
+  \brief Test extraction of parameters from the SkymapCoordinate class
+
+  In the case of the Skymapper class, where a Beamformer object is available
+  only as an internal element, all the configuration in terms of coordinates
+  is done through an instance of the SkymapCoordinate class.
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+*/
+int test_coordinates ()
+{
+  cout << "\n[tBeamformer::test_coordinates]\n" << endl;
+
+  int nofFailedTests (0);
+
+  /* Define antenna positions */
+  uint nofAntennas (4);
+  Vector<casa::MVPosition> antPositions (nofAntennas);
+  antPositions(0) = casa::MVPosition (100,0,0);
+  antPositions(1) = casa::MVPosition (0,100,0);
+  antPositions(2) = casa::MVPosition (-100,0,0);
+  antPositions(3) = casa::MVPosition (0,-100,0);
+
+  /* Define frequency values */
+  uint nofFreq (2);
+  Vector<double> frequencies (nofFreq);
+  frequencies(0) = 100e06;
+  frequencies(1) = 200e06;
+
+  /* Define data input */
+  Matrix<casa::DComplex> data;
+  CR::test_getData (data,nofAntennas,nofFreq,false);
+
+  cout << "[1] Geometrical weights for default SpatialCoordinate ..." << endl;
+  try {
+    // create coordinate object
+    SpatialCoordinate coord;
+    Vector<double> refValue = coord.referenceValue();
+    refValue(2) = 1000;
+    coord.setReferenceValue(refValue);
+    // retrieve position values
+    Matrix<double> positions = coord.worldAxisValues();
+    // Create object to hold geometrical phases
+    Beamformer bf;
+    bf.setAntPositions (antPositions);
+    bf.setSkyPositions (positions,
+			   CoordinateType::DirectionRadius,
+			   false);
+    bf.setFrequencies (frequencies);
+    bf.farField (true);
+    bf.summary();
+    // display geometrical delays
+    {
+      Matrix<double> delays = bf.delays();
+      //
+      cout << "-- Values of the geometrical delays [,pos]:" << endl;
+      cout << "\t" << delays.column(0) << endl;
+      cout << "\t" << delays.column(1) << endl;
+      cout << "\t" << delays.column(2) << endl;
+      cout << "\t" << delays.column(3) << endl;
+    }
+    // display geometrical phases
+    {
+      Cube<double> phases = bf.phases();
+      //
+      cout << "-- Values of the geometrical phases [,,pos]:" << endl;
+      cout << "\t[" << phases(0,0,0) << ", " << phases(0,1,0)
+	   << ", " << phases(0,2,0)  << ", " << phases(0,3,0)
+	   << "]" << endl;
+      cout << "\t[" << phases(0,0,1) << ", " << phases(0,1,1)
+	   << ", " << phases(0,2,1)  << ", " << phases(0,3,1)
+	   << "]" << endl;
+      cout << "\t[" << phases(0,0,2) << ", " << phases(0,1,2)
+	   << ", " << phases(0,2,2)  << ", " << phases(0,3,2)
+	   << "]" << endl;
+      cout << "\t[" << phases(0,0,3) << ", " << phases(0,1,3)
+	   << ", " << phases(0,2,3)  << ", " << phases(0,3,3)
+	   << "]" << endl;
+    }
+    // display geometrical weights
+    {
+      Cube<casa::DComplex> weights = bf.weights();
+      //
+      cout << "-- Values of the geometrical weights [,,pos]:" << endl;
+      cout << "\t[" << weights(0,0,0) << ", " << weights(0,1,0)
+	   << ", " << weights(0,2,0)  << ", " << weights(0,3,0)
+	   << "]" << endl;
+      cout << "\t[" << weights(0,0,1) << ", " << weights(0,1,1)
+	   << ", " << weights(0,2,1)  << ", " << weights(0,3,1)
+	   << "]" << endl;
+      cout << "\t[" << weights(0,0,2) << ", " << weights(0,1,2)
+	   << ", " << weights(0,2,2)  << ", " << weights(0,3,2)
+	   << "]" << endl;
+      cout << "\t[" << weights(0,0,3) << ", " << weights(0,1,3)
+	   << ", " << weights(0,2,3)  << ", " << weights(0,3,3)
+	   << "]" << endl;
+    }
+    // process block of data
+    {
+      Matrix<double> beam (bf.shapeBeam());
+      //
+      cout << "-- Processing block of input data ... " << endl;
+      bf.processData (beam,data);
+      cout << "-- Input data: " << endl;
+      cout << data << endl;
+      cout << "-- Beamformed data:" << endl;
+      cout << beam << endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+//_______________________________________________________________________________
+//                                                                test_processing
 
 /*!
   \brief Test processing of incoming data
@@ -512,12 +653,16 @@ int test_weights (uint blocksize=1024,
   Test the <tt>processData</tt> routines, which is responsible for converting
   incoming antennas (in the frequency domain) into beamformed data.
 
-  \return nofFailedTests -- The number of failed tests.
+  \param blocksize -- The number of samples per input block of data
+  \param fftLength -- Output size of the FFT.
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
 */
 int test_processing (uint blocksize=1024,
 		     uint fftLength=513)
 {
-  cout << "\n[test_processing]\n" << endl;
+  cout << "\n[tBeamformer::test_processing]\n" << endl;
 
   int nofFailedTests (0);
   bool status (true);
@@ -610,7 +755,8 @@ int test_processing (uint blocksize=1024,
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                           main
 
 int main ()
 {
@@ -622,6 +768,7 @@ int main ()
   if (!nofFailedTests) {
     nofFailedTests += test_parameters();
     nofFailedTests += test_methods();
+    nofFailedTests += test_coordinates();
     nofFailedTests += test_processing ();
   }
   

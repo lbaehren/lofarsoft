@@ -376,13 +376,17 @@ namespace CR { // Namespace CR -- begin
 	//____________________________________________________________
 	//                                        TRUE / FALSE / FALSE
 	if (bufferDelays_p) {
+#ifdef DEBUGGING_MESSAGES
 	  std::cout << "[Beamformer::setWeights] TRUE / FALSE / FALSE" << std::endl;
+#endif
 	  delays.reference(delays_p);
 	}
 	//____________________________________________________________
 	//                                       FALSE / FALSE / FALSE
 	else {
-	  std::cout << "[Beamformer::setWeights] FALSE / FALSE / FALSE" << std::endl;
+#ifdef DEBUGGING_MESSAGES
+ 	  std::cout << "[Beamformer::setWeights] FALSE / FALSE / FALSE" << std::endl;
+#endif
 	  GeomDelay::delays(delays);
 	}
 	/*
@@ -408,7 +412,7 @@ namespace CR { // Namespace CR -- begin
 	
       }
     }
-    
+
 #ifdef DEBUGGING_MESSAGES
     std::cout << "-- nof. antennas  = " << GeomDelay::nofAntPositions() << std::endl;
     std::cout << "-- nof. pointings = " << GeomDelay::nofSkyPositions() << std::endl;
@@ -531,26 +535,39 @@ namespace CR { // Namespace CR -- begin
 			       const casa::Array<DComplex> &data)
   {
     bool status (true);
+    // Shape of the array with the input data,         [freq,ant]
+    IPosition index (data.shape());
+    // Shape of the array with the beamformer weights, [freq,ant,sky]
+    IPosition shape = bfWeights_p.shape();
 
-    if (checkData(beam,data)) {
-
-      int direction(0);
-      casa::IPosition pos(2);                       // [freq,antenna]
-      casa::IPosition shape = bfWeights_p.shape();  // [freq,antenna,direction]
-      casa::Vector<DComplex> tmp (shape(0));
-
-      for (direction=0; direction<shape(2); direction++) {
-	beam_freq (tmp,
-		   data,
-		   direction,
-		   true);
-	beam.column(direction) = tmp;
-      }
+    try {
+      // Temporary storage of multiplication result
+      casa::DComplex tmp;
+      // Normalization for the number of antennas
+      double norm = 1/index(1);
       
-    } else {
-      return false;
+      for (int sky(0); sky<shape(2); sky++) {                 /* loop: sky positions */
+	for (index(0)=0; index(0)<shape(0); index(0)++) {     /* loop: frequencies   */
+	  tmp = 0;
+	  /*
+	   * Sum up the complex-valued contributions from the individual antennas
+	   */
+	  for (index(1)=0; index(1)<shape(1); index(1)++) {
+	    tmp += data(index)*bfWeights_p(index(0),index(1),sky);
+	  }
+	  /*
+	   * Assign the pixel value: square of absolute value of the previously 
+	   * computed sum.
+	   */
+	  beam(index(0),sky) = norm*tmp;
+	} // END : frequency
+      } // END : sky position
+      
+    } catch (std::string message) {
+      std::cerr << "[Beamformer::freq_power] " << message << std::endl;
+      status = false;
     }
-
+    
     return status;
   }
   
@@ -560,24 +577,32 @@ namespace CR { // Namespace CR -- begin
 			       const casa::Array<DComplex> &data)
   {
     bool status (true);
-    // Shape of the array with the input data,         [freq,antenna]
+    // Shape of the array with the input data,         [freq,ant]
     IPosition index (data.shape());
-    // Shape of the array with the beamformer weights, [freq,antenna,sky]
+    // Shape of the array with the beamformer weights, [freq,ant,sky]
     IPosition shape = bfWeights_p.shape();
-    
+
     try {
       // Temporary storage of multiplication result
       casa::DComplex tmp;
-      // initialize the array holding the beamformed data
-      beam = 0;
+      // Normalization for the number of antennas
+      double norm = 1/(index(1)*index(1));
       
-      for (int sky(0); sky<shape(2); sky++) {                 /* loop: sky positions  */
-	for (index(1)=0; index(1)<shape(1); index(1)++) {     /* loop: antennas       */
-	  for (index(0)=0; index(0)<shape(0); index(0)++) {   /* loop: frequencies    */
-	    tmp = data(index)*bfWeights_p(index(0),index(1),sky);
-	    beam(index(0),sky) += real(tmp*conj(tmp));
-	  } // END : frequency
-	} // END : antenna
+      for (int sky(0); sky<shape(2); sky++) {                 /* loop: sky positions */
+	for (index(0)=0; index(0)<shape(0); index(0)++) {     /* loop: frequencies   */
+	  tmp = 0;
+	  /*
+	   * Sum up the complex-valued contributions from the individual antennas
+	   */
+	  for (index(1)=0; index(1)<shape(1); index(1)++) {
+	    tmp += data(index)*bfWeights_p(index(0),index(1),sky);
+	  }
+	  /*
+	   * Assign the pixel value: square of absolute value of the previously 
+	   * computed sum.
+	   */
+	  beam(index(0),sky) = norm*real(tmp*conj(tmp));
+	} // END : frequency
       } // END : sky position
       
     } catch (std::string message) {
