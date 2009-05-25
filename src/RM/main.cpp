@@ -114,6 +114,7 @@ int main (int argc, char * const argv[]) {
 	const IPosition cursorShape = lattice_Q_float->niceCursorShape(cursorSize);
  //	const IPosition cursorShape(2, lattice_Q_float->shape()(0), lattice_Q_float->shape()(1));
 	*/
+	/*
 	IPosition latticeShape=(*lattice_Q_float).shape(); // get lattice' shape
 	
 	int chans=latticeShape(2);
@@ -127,8 +128,7 @@ int main (int argc, char * const argv[]) {
 		minMax(min, max, iter.cursor());
 		cout << i++ << " Min = " << min << " Max = " << max << iter.cursor() << endl;		
 	}	
-
-	//file.close();
+	*/
 
 	#ifdef _debug
 	cout << "Finished: " << filename_Q << "!\n";	// Debug output

@@ -63,8 +63,10 @@ class rmCube
     vector<int> bufferDimensions;	//!> dimensions of buffer (line, tile, plane,...)
   
     // Keep variables that do not need to be computed for every single RM
-    double weightfactor;		//!> weighting factor
-  
+    vector<double> lambda_sqs;		//!> lambda squareds of channels
+    vector<double> weights;		//!> weighting factors for channels
+    std::string weightingAlgorithm;	//!> algorithm used to compute weights
+    vector<double> rmsf;		//!> Rotation Measure Spread Function
   
   public:
     rmCube();					//!> constructor without initial values

@@ -29,13 +29,24 @@ using namespace casa;		// namespace for functions from casacore
 //===============================================================================
 
 /*!
+  \brief Default constructor
+*/
+rm::rm()
+{
+  // do nothing in particular
+}
+
+
+/*!
   \brief Declare a new RM cube of size x (right ascension), y (declination), and depth and stepsize in Faraday depth
 
-  \param depth --
+  \param depth - total Faraday depth size 
   \param stepsize -- 
 */
 rm::rm(int depth, double stepsize)
 {
+  // NOTE: This is now in rmCube class, soon depricated
+
 	// declare RM cube of desired size and assign output stream
 	
 	
@@ -60,9 +71,9 @@ rm::~rm()
 /*!
   \brief Convert from frequencies to lambda squared
 
-  \param frequency - Frequency vector 
+  \param frequency - frequency vector 
 
-  \return success - 1 on successful execution, 0 on error
+  \return lambda_sq - converted lambda squared vector
 */
 //vector<double>rm::freqToLambdaSq(vector<double> &frequency);
 vector<double> rm::freqToLambdaSq(const vector<double> &frequency)
@@ -93,10 +104,8 @@ vector<double> rm::freqToLambdaSq(const vector<double> &frequency)
 /*!
   \brief Convert from lambda squared to frequencies
   
-  \param lambda_sq -- 
-  \param frequency --
-  
-  \return succes -- 
+  \param lambda_sq - lambda squared vector
+  \return frequency - converted frequency vector
 */
 vector<double> rm::lambdaSqToFreq(const vector<double> &lambda_sq)
 {
@@ -134,13 +143,13 @@ vector<double> rm::lambdaSqToFreq(const vector<double> &lambda_sq)
 
 /*! Calculate the total intensity integrated over all channels
 
-  \param frequencies --
-  \param unit --
+  \param frequencies - polarized intensities
+  \param unit - unit of emission
 
-  \return totalIntensity --
+  \return totalIntensity - calculated integrated total intensity
 */
 
-vector<double> rm::totalIntensity(vector<double> &frequencies, int unit)
+vector<double> rm::totalIntensity(vector<double> &intensities, int &unit)
 {
   vector<double> totalIntensity;
 
@@ -155,11 +164,11 @@ vector<double> rm::totalIntensity(vector<double> &frequencies, int unit)
 
 /*! Calculate the step size delta_lambda_sq for each lambda_squared channel
     
-    \param freq_low --
-    \param freq_high --
-    \param freq
+    \param freq_low - lower limit frequencies
+    \param freq_high - upper limit frequencies
+    \param freq - bool if vectors are given in frequency (=true) or in lambda squared
     
-    \return delta_lambda_sq --
+    \return delta_lambda_sq - computed delta lambda squared vector
 */
 vector<double> rm::deltaLambdaSq( //vector<double> delta_lambda_sq, 
 			const vector<double> &freq_low, 
@@ -223,11 +232,11 @@ vector<double> rm::deltaLambdaSq( //vector<double> delta_lambda_sq,
     Special case (bool freq=false): the input vector is already given as a range of polarized intensities given at different lambda squareds
 
     \param phi - Faraday depth to compute RM for
-    \param intensity --
-    \param frequency --
-    \param weights --
-    \param delta_freq --
-    \param freq --
+    \param intensity - polarized intensities per channel
+    \param frequency - corresponding frequencies of channels
+    \param weights - weigths for each channel
+    \param delta_freq - delta frequencies between channels
+    \param freq - bool if input is given as frequency (=true) or lambda squared (=false)
     
     \return rm - Single RM value computed for Faraday depth phi
 */
@@ -248,6 +257,23 @@ complex<double> rm::inverseFourier(double &phi,
 
     double K=0;					// K factor for RM-synthesis
 
+
+    //-----------------------------------------------------------------------
+
+ 
+    // Compute weighting factor from weights
+    for (vector<double>::iterator it = weights.begin(); it!=weights.end(); ++it) 
+    {
+      cout << *it << endl;
+      K+=*it;
+    }
+    
+    if(K!=0)	// Do not do a division by zero!
+      K=1/K;	// take inverse
+      
+      
+
+    // conversion to delta_lambda_squared not needed anymore?
     if(freq)		// if given as frequency, convert to lambda squareds
     {
       lambda_squared=freqToLambdaSq(frequency);			// convert frequency vector    
@@ -259,15 +285,6 @@ complex<double> rm::inverseFourier(double &phi,
       delta_lambda_squared=delta_frequency;
     }
 
-    // Compute weighting factor from weights
-    for (vector<double>::iterator it = weights.begin(); it!=weights.end(); ++it) 
-    {
-      cout << *it << endl;
-      K+=*it;
-    }
-    
-    if(K!=0)	// Do not do a division by zero!
-      K=1/K;	// take inverse
 
 
     // compute discrete Fourier sum by iterating over frequency vector
@@ -276,14 +293,14 @@ complex<double> rm::inverseFourier(double &phi,
     //
     for(chan=0; chan<numchannels; chan++)
     {
-      // compute exponential factor
-      exp_lambdafactor=exp(-2*phi*lambda_squared[chan])*delta_frequency[chan];	// exp lambda_squared factor
-      rmpolint=rmpolint+(intensity[chan]*exp_lambdafactor);
+      // compute complex exponential factor
+      exp_lambdafactor=exp(complex<double>(0, -2*phi)*lambda_squared[chan]);
+      rmpolint=rmpolint+(intensity[chan]*exp_lambdafactor)*delta_frequency[chan];
     }
 
     rmpolint=K*rmpolint;	// multiply with weighting
 
-    return rmpolint;
+    return rmpolint;		// return complex polarized intensities per Faraday depth
 }
 
 
@@ -296,12 +313,12 @@ complex<double> rm::inverseFourier(double &phi,
     Normal case (bool freq=true, default): the input vector is a range of complex polarized intensities measured at different frequencies 
     Special case (bool freq=false): the input vector is already given as a range of polarized intensities given at different lambda squareds
 
-    \param phi - Faraday depth to compute RM for
-    \param intensity - Polarized intensities
-    \param frequency - Frequencies (or lambda squareds) of polarized intensities
-    \param weights - Weights associated with each frequency (or lambda squared)
-    \param delta_freq - Delta frequency (or delta lambda squared) between frequencies
-    \param freq - If intensities are given as frequencies (true) or as lambda squared (false)
+    \param &phi - Faraday depth to compute RM for
+    \param &intensity - Polarized intensities
+    \param &frequency - Frequencies (or lambda squareds) of polarized intensities
+    \param &weights - Weights associated with each frequency (or lambda squared)
+    \param &delta_freq - Delta frequency (or delta lambda squared) between frequencies
+    \param &freq - If intensities are given as frequencies (true) or as lambda squared (false)
     
     \return rm - vector of RM values computed for Faraday depths phi
 */
@@ -319,6 +336,60 @@ vector<double>rm::inverseFourier(vector<double> &phi,
 
 
   return rm;
+}
+
+
+/*!
+  \brief Compute the Rotation Measure Spread Function
+
+  The Rotation Measure Spread Function is a measure for the quality of the observation
+  to distinguish Faraday structures, similar to the PSF in conventional astronomy. In the rmclean function the calculated Rotation Measure is deconvoluted with the RMSF function. 
+
+  \param &phi - Faraday depth range over which the RMSF is computed
+  \param &frequency - Frequencies (or lambda squareds) of polarized intensities
+  \param &weights - Weights associated with each frequency (or lambda squared)
+  \param &delta_freq - Delta frequency (or delta lambda squared) between frequencies
+  \param &freq - If intensities are given as frequencies (true) or as lambda squared (false) 
+
+  \return RMSF - vector with RMSF over range as specified
+*/
+vector<complex<double> > rm::RMSF(vector<double> &phi,
+				  vector<double> &frequency,
+				  vector<double> &weights,
+				  vector<double> &delta_freq,
+				  bool freq)
+{
+  vector<complex<double> > rmsf(phi.size());		// calculated rmsf
+  vector<double> lambda_sqs(frequency.size());		// channels lambda squareds
+  vector<double> delta_lambda_sqs(frequency.size());	// delta_lambda_sqs
+  
+  unsigned int iphi=0, iweight=0;		// loop variables
+
+  // Convert to lambda squareds if values are given as frequency
+  if(freq)
+  {
+    lambda_sqs=freqToLambdaSq(frequency);
+    delta_lambda_sqs=freqToLambdaSq(delta_freq);
+  }
+  else
+  {
+    lambda_sqs=frequency;		// copy to lambda' place holdes
+    delta_lambda_sqs=delta_freq;	// copy to delta_lambda' place holdes
+  }
+
+  for(iphi=0; iphi <= phi.size(); iphi++)	// loop over all Faraday depths
+  {
+    // Since weights and lambda_sqs do correspond to each other and have the
+    // same length, we can use iweight to index lambda_sqs and delta_lambda_sqs, too
+    // Loop over all weights and compute Riemann's integral
+    for(iweight=0; iweight <= weights.size(); iweight++)
+    {
+      rmsf[iphi]=rmsf[iphi] + weights[iweight] * 
+      exp(complex<double>(0,-2*phi[iphi]*lambda_sqs[iweight])) *	 delta_lambda_sqs[iweight];					 
+    }
+  }
+  
+  return rmsf;	// return vector with calculated rmsf
 }
 
 
@@ -379,16 +450,16 @@ vector<double> rm::wavelet(vector<double> &phi,
     their frequency distribution; if bool freq is set to false, these are assumed to be
     given in lambda squared values
     
-    \param intensity --
-    \param lambda_sqs --
-    \param lambda_sq --
+    \param intensity - polarized intensities per channel
+    \param lambda_sqs - corresponding lambda squared values of channels
+    \param lambda_sq - bool if vectors are given in lambda squared (=true) or frequency
     
-    \return rm_error --
+    \return rm_error - computed RM error estimation
 */
 
 vector<double> rm::rmErrorLsq(vector<double> &intensity, vector<double> &lambda_sqs, vector<double> &weights, bool freq)
 {
-  vector<double> rm_error;
+  vector<double> rm_error(intensity.size());
 
   if(freq)
   {
@@ -406,16 +477,16 @@ vector<double> rm::rmErrorLsq(vector<double> &intensity, vector<double> &lambda_
     their frequency distribution; if bool freq is set to false, these are assumed to be
     given in lambda squared values
     
-    \param intensity --
-    \param lambda_sqs --
-    \param lambda_sq --
+    \param intensity - polarized intensities per channel
+    \param lambda_sqs - corresponding lambda squared values of channels
+    \param lambda_sq - bool if vectors are given in lambda squared (=true) or frequency
     
-    \return rm_error --
+    \return rm_error - computed RM error estimation
 */
 
-vector<double> rm::rmErrorBayes(vector<double> intensity, vector<double> lambda_sqs, bool lambda_sq)
+vector<double> rm::rmErrorBayes(vector<double> &intensity, vector<double> &lambda_sqs, bool lambda_sq)
 {
-	vector<double> rm_error;
+	vector<double> rm_error(intensity.size());
 
 
 	return rm_error;

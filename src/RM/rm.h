@@ -77,12 +77,15 @@ private:
 			const vector<double> &freq_high,
 			bool freq=true);
 
+  //! Calculate integrated total intensity along one line of sight
+  vector<double> totalIntensity(vector<double> &, int &);
+
   // Public functions.
 public:
-  //! Calculate integrated total intensity along one line of sight
-  vector<double> totalIntensity(vector<double> &, int);
+  //! Default constructor
+  rm();
 
-  //! Default constructor.(external buffer handling independent of cube object)
+  //! Constructor.(external buffer handling independent of cube object)
   rm(int depth, double stepsize);
 
   //! Constructor with associated output stream 
@@ -127,6 +130,12 @@ public:
 				vector<double> &,
 				bool freq=true);
 
+  //! Compute the Rotation Measure Spread Function (RMSF)
+  vector<complex<double> > RMSF(vector<double> &,
+			        vector<double> &,
+				vector<double> &,
+				vector<double> &,
+				bool freq=true);
 
   //! Frick and Stepanov wavelet algorithm
   vector<double> wavelet(vector<double> &,
@@ -143,13 +152,13 @@ public:
 		     bool freq=true);
 
   //! (Forward) Fourier Transform to get an image from an RM cube
-  vector<double> fourierTransform(vector<double>, vector<double>, bool freq=true);
+  vector<double> fourierTransform(vector<double> &, vector<double> &, bool freq=true);
 
   // Atmospheric correction of RM (contribution through atmosphere)
   // ??
 	
   //! Calculcate Faraday rotation RM contribution by atmosphere
-  double atmosphericFaradayRotation(double tec);
+  double atmosphericFaradayRotation(double &tec);
   
   //! Rotation Measure error estimation algorithms
 
@@ -160,8 +169,8 @@ public:
 			    bool freq=true);
 
   //! Error estimate based on Bayesian statistics
-  vector<double> rmErrorBayes(vector<double> intensities,
-			      vector<double> lambda_sqs,
+  vector<double> rmErrorBayes(vector<double> &intensities,
+			      vector<double> &lambda_sqs,
 			      bool lambda_sq=true);
 };
 
