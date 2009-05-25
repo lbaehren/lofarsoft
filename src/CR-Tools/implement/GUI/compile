@@ -1,6 +1,7 @@
 #
-#cd ~/LOFAR/usg/build/cr
 cd $LOFARSOFT/build/cr
-make -k hfget
-#cp implement/libhfget.so ../../release/lib/python
+MYDIR=$PWD
+make hfget
+cp implement/libhfget.so ../../release/lib/python
 #cp implement/libhfget.so ../../release/lib/
+cd $MYDIR
