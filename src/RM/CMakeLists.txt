@@ -327,7 +327,7 @@ set (rm_sources
   rmCube.cpp
   )
 
-add_library (rm ${rm_sources})
+add_library (rm  ${rm_sources})
 
 install (
   TARGETS rm

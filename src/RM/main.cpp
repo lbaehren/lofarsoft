@@ -17,6 +17,7 @@
 #include <iostream>						// STL iostream
 
 #include "rm.h"							// RM Synthesis class
+#include "rmCube.h"						// RM Cube class
 
 // casa includes (from /usr/local/include/casacore)
 #include <casa/Arrays.h>
@@ -100,13 +101,11 @@ int main (int argc, char * const argv[]) {
 
 	// create buffer for one Faraday plane
 
-	// create a rm object with an associated two dimensional buffer
-	rm rm1();
+	// create a rmCube object with an associated two dimensional buffer
+	rmCube FaradayCube(1024, 1024, 100, 5.0);
 
-	// Set up Faraday depths to be probed
-	phi=0;
-
-
+	FaradayCube.setFaradayDepths(-100, 100, 10); // Set up Faraday depths to be probed
+	FaradayCube.createBufferCube();		     // create buffer for whole RM cube
 	/*
 	// Lattice and iteration over line of sight
 	// create Lattice shape and iterator

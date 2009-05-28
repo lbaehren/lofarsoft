@@ -66,6 +66,7 @@ class rmCube
     vector<double> lambda_sqs;		//!> lambda squareds of channels
     vector<double> weights;		//!> weighting factors for channels
     std::string weightingAlgorithm;	//!> algorithm used to compute weights
+    std::string rmAlgorithm;		//!> algorithm used to compute cube
     vector<double> rmsf;		//!> Rotation Measure Spread Function
   
   public:
@@ -104,6 +105,8 @@ class rmCube
     double getFaradayLow();			//!> get the lower limit of Faraday depth of the Faraday cube
     double getFaradayHigh();			//!> set the higher limit of Faraday depth of the Faraday cube
     vector<double> getFaradayDepths();		//!> get a vector of Faraday Depths in the Faraday cube
+    void setFaradayDepths(vector<double> &);	//!> set Faraday depths of Cube
+    void setFaradayDepths(double low, double high, double stepsize); //!> set Faraday depths of Cube
     void setFaradayLow(double faradayLow);	//!> set the lower limit of Faraday depth of the Faraday cube
     void setFaradayHigh(double faradayHigh);	//!> set the higher limit of Faraday depth of the Faraday cube
     
@@ -118,13 +121,14 @@ class rmCube
     std::string getWeightingAlgorithm();	//!> get weihting Algorithm
     void setWeightingAlgorithm(std::string &);	//!> set weighting Algorithm
  
+    std::string getRMAlgorithm();		//!> get algorithm used to compute cube
+    void setRMAlgorithm(const std::string &);	//!> set algorithm used to compute cube
+ 
     vector<double> getLambdaSqs();		//!> get lambda squareds
     void setLambdaSqs(vector<double> &);	//!> set lambda squareds
  
     vector<double> getRMSF();			//!> get RMSF
- 
-    // High-level functions
-    void computeRMSF();
+    void computeRMSF();				//!> compute RMSF
 };
 
 #endif

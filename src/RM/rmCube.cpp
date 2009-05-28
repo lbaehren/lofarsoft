@@ -74,6 +74,16 @@ rmCube::rmCube(int x, int y, int faradaySize, double stepsize)
     }
   } 
   
+  // Set remaining attributes to defaults
+  this->currentX=0;
+  this->currentY=0;
+  this->currentFaradayDepth=0;
+  this->ra=0;
+  this->dec=0;
+  this->ra_low=0;
+  this->ra_high=0;
+  this->dec_low=0;
+  this->dec_high=0;
 }
 
 
@@ -242,7 +252,21 @@ vector<double> rmCube::getFaradayDepths()
 {
   return this->faradayDepths;
 }
-    
+
+
+void rmCube::setFaradayDepths(vector<double> &depths)
+{
+  this->faradayDepths=depths;
+}
+
+
+void rmCube::setFaradayDepths(double low, double high, double stepsize)
+{   
+  this->faraday_low=low;
+  this->faraday_high=high;
+  this->faradaySize=abs(high-low)*stepsize;
+}
+
 
 void rmCube::setFaradayLow(double faradayLow)
 {
@@ -318,6 +342,8 @@ int rmCube::createBufferPlane()
 
 int rmCube::createBufferCube()
 {
+  vector<int> dimensions(3);
+
   if(buffer==NULL)	// check if we have already a buffer
   {
    this->buffer=(double *) calloc(this->xSize*this->ySize*this->faradaySize, sizeof(double)); // allocate memory of size Bytes
@@ -327,6 +353,17 @@ int rmCube::createBufferCube()
     throw "rmCube::createBufferCube memory allocation failed";
     return -1;
    }
+   
+   // Set parameters
+   if(this->xSize > 0)
+    dimensions[0]=this->xSize;
+   if(this->ySize > 0)
+    dimensions[1]=this->ySize;
+   if(this->faradaySize > 0)
+    dimensions[2]=this->faradaySize;
+   
+   this->setBufferDimensions( dimensions );
+   
   }
   else
   {
@@ -372,6 +409,18 @@ std::string rmCube::getWeightingAlgorithm()
 void rmCube::setWeightingAlgorithm(std::string &weightingAlgorithm)
 {
   this->weightingAlgorithm=weightingAlgorithm;
+}
+
+
+std::string rmCube::getRMAlgorithm()
+{
+  return this->algorithm;
+}
+
+
+void rmCube::setRMAlgorithm(const std::string &algorithm)
+{
+  this->rmAlgorithm=algorithm;
 }
 
 
