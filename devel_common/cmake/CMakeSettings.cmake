@@ -113,9 +113,9 @@ if (NOT USG_CMAKE_CONFIG)
   
   set (bin_locations
     ${USG_INSTALL_PREFIX}/bin
+    /sw/bin
     /usr/bin
     /usr/local/bin
-    /sw/bin
     /app/usg/release/bin
     CACHE
     PATH
