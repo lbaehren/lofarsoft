@@ -91,7 +91,8 @@ namespace CR {  // Namespace CR -- begin
 
 		
 		// Create time and frequency axes.
-		casa::Vector<double> freqs = ts2.frequencyValues(antennanr); 			
+		casa::Vector<double> freqs = ts2.frequencyValues(antennanr);
+		//cout << freqs(0) << std::endl;
 		double samplefreq = ts2.sample_frequency_value()(antennanr);
 		string frequnit = ts2.sample_frequency_unit()(antennanr);
 		double timestep = 1 / samplefreq * ts2.blocksize();
@@ -360,14 +361,15 @@ namespace CR {  // Namespace CR -- begin
 	  // get the incrementvalues and units for the axes 
 	  std::string cd1(casa::String::toString(timeAxis_p.increment()(0)));
 	  std::string cd2(casa::String::toString(freqAxis_p.increment()(0)));
+	
 
 	  std::string tunit(timeAxis_p.worldAxisUnits()(0));
 	  std::string funit(freqAxis_p.worldAxisUnits()(0));
-	  
+	  std::string fnul(casa::String::toString(freqAxis_p.referenceValue()(0)));
 	
 	  // copy the values to char*, as it's the only thing CFITSIO can handle;
 	  cout << "timeunit: " << tunit << "   frequnit: " << funit << std::endl;
-	  char *cunit0, *cunit1, *cd11, *cd12;
+	  char *cunit0, *cunit1, *cd11, *cd12, *cval1;
 	  cunit0 = new char[tunit.length()+1];
 	  tunit.copy(cunit0, string::npos);
 	  cunit0[tunit.length()] = '\0';
@@ -383,6 +385,10 @@ namespace CR {  // Namespace CR -- begin
 	  cd12 = new char[cd2.length()+1];
 	  cd2.copy(cd12, string::npos);
 	  cd12[cd2.length()]='\0';
+	  
+	  cval1 = new char[fnul.length()+1];
+	  fnul.copy(cval1, string::npos);
+	  cval1[fnul.length()] = '\0';
 	  
 	  std::string outfile;
       fitsfile *fptr;
@@ -419,6 +425,7 @@ namespace CR {  // Namespace CR -- begin
 	  ffukys (fptr, "CD1_1", cd11, "Time axis scaling", &status);
 	  ffukys (fptr, "CD2_2", cd12, "Frequency axis scaling", &status);
 	  
+	  ffukys (fptr, "CRVAL2", cval1, "Frequency start", &status);
 	  
 	  //ADD start value CRVAL1 by start pixel CRPIX1 to complete the picture. This is needed for the second nyquist zone
 	  //CRVAL = (PIXEL - CRPIX1)*CD1_1 + CRVAL1
@@ -451,7 +458,7 @@ namespace CR {  // Namespace CR -- begin
 	  ffukys (fptr, "CUNIT1", cunit1, "Frequency axis units", &status);
 	  ffukys (fptr, "CD1_1", cd12, "Frequency axis scaling", &status);
       ffukys (fptr, "BUNIT", "log(averageSpectrum)", "Power axis", &status);
-
+      ffukys (fptr, "CRVAL1", cval1, "Frequency start", &status);
 	  ffukys (fptr, "EXTNAME", "Average Spectrum (logscale)", "Frequency spectrum averaged over time in logarithmic scale", &status);
 
 	  //Add powerspectrum
