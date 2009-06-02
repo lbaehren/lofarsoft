@@ -2,7 +2,7 @@
 
     Author:		Sven Duscha (sduscha@mpa-garching.mpg.de)
     Date:		18-12-2008
-    Last change:	19-05-2009
+    Last change:	28-05-2009
 */
 
 
@@ -149,7 +149,7 @@ vector<double> rm::lambdaSqToFreq(const vector<double> &lambda_sq)
   \return totalIntensity - calculated integrated total intensity
 */
 
-vector<double> rm::totalIntensity(vector<double> &intensities, int &unit)
+vector<double> rm::totalIntensity(const vector<double> &intensities, int unit)
 {
   vector<double> totalIntensity;
 
@@ -240,11 +240,11 @@ vector<double> rm::deltaLambdaSq( //vector<double> delta_lambda_sq,
     
     \return rm - Single RM value computed for Faraday depth phi
 */
-complex<double> rm::inverseFourier(double &phi,
-				 vector<complex<double> > &intensity,
-				 vector<double> &frequency,
-				 vector<double> &weights,
-				 vector<double> &delta_frequency,
+complex<double> rm::inverseFourier(double phi,
+				 const vector<complex<double> > &intensity,
+				 const vector<double> &frequency,
+				 const vector<double> &weights,
+				 const vector<double> &delta_frequency,
 				 bool freq)
 {
     vector<double> lambda_squared(frequency.size());
@@ -260,17 +260,16 @@ complex<double> rm::inverseFourier(double &phi,
 
     //-----------------------------------------------------------------------
 
- 
     // Compute weighting factor from weights
-    for (vector<double>::iterator it = weights.begin(); it!=weights.end(); ++it) 
+    for (vector<double>::const_iterator it = weights.begin(); it!=weights.end(); ++it) 
     {
-      cout << *it << endl;
       K+=*it;
     }
     
     if(K!=0)	// Do not do a division by zero!
       K=1/K;	// take inverse
-      
+    else	// otherwise...
+      K=1;	// ... use 1 as default
       
 
     // conversion to delta_lambda_squared not needed anymore?
@@ -322,20 +321,19 @@ complex<double> rm::inverseFourier(double &phi,
     
     \return rm - vector of RM values computed for Faraday depths phi
 */
-vector<double>rm::inverseFourier(vector<double> &phi,
-				 vector<complex<double> > &intensity,
-				 vector<double> &frequency,
-				 vector<double> &weights,
-				 vector<double> &delta_freq,
+vector<complex<double> >rm::inverseFourier(const vector<double> &phi,
+				 const vector<complex<double> > &intensity,
+				 const vector<double> &frequency,
+				 const vector<double> &weights,
+				 const vector<double> &delta_freq,
 				 bool freq)
 {
   vector<double> lambda_squared(frequency.size());
   vector<double> delta_lambda_squared(delta_freq.size());
-  vector<double> rm;
+  vector<complex<double> > rmpolint;		// polarized RM intensities per Faraday depth
 
 
-
-  return rm;
+  return rmpolint;	// return complex polarized intensities per Faraday depth
 }
 
 
@@ -353,10 +351,10 @@ vector<double>rm::inverseFourier(vector<double> &phi,
 
   \return RMSF - vector with RMSF over range as specified
 */
-vector<complex<double> > rm::RMSF(vector<double> &phi,
-				  vector<double> &frequency,
-				  vector<double> &weights,
-				  vector<double> &delta_freq,
+vector<complex<double> > rm::RMSF(const vector<double> &phi,
+				  const vector<double> &frequency,
+				  const vector<double> &weights,
+				  const vector<double> &delta_freq,
 				  bool freq)
 {
   vector<complex<double> > rmsf(phi.size());		// calculated rmsf
@@ -457,7 +455,7 @@ vector<double> rm::wavelet(vector<double> &phi,
     \return rm_error - computed RM error estimation
 */
 
-vector<double> rm::rmErrorLsq(vector<double> &intensity, vector<double> &lambda_sqs, vector<double> &weights, bool freq)
+vector<double> rm::rmErrorLsq(vector<complex<double> > &intensity, vector<double> &lambda_sqs, vector<double> &weights, bool freq)
 {
   vector<double> rm_error(intensity.size());
 
@@ -484,7 +482,7 @@ vector<double> rm::rmErrorLsq(vector<double> &intensity, vector<double> &lambda_
     \return rm_error - computed RM error estimation
 */
 
-vector<double> rm::rmErrorBayes(vector<double> &intensity, vector<double> &lambda_sqs, bool lambda_sq)
+vector<double> rm::rmErrorBayes(vector<complex<double> > &intensity, vector<double> &lambda_sqs, bool lambda_sq)
 {
 	vector<double> rm_error(intensity.size());
 

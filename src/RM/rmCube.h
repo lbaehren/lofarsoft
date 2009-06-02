@@ -32,7 +32,7 @@
 #include "rm.h"
 #include <vector>
 
-class rmCube
+class rmCube : public rm
 {
   private:
     int xSize;		//!> horizontal size in pixels

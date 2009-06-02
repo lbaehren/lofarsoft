@@ -14,7 +14,7 @@
   <h3>Prerequisite</h3>
   
   <ul type="square">
-  <li>[start filling in your text here]
+  <li> None
   </ul>
     
   <h3>Synopsis</h3>
@@ -78,7 +78,7 @@ private:
 			bool freq=true);
 
   //! Calculate integrated total intensity along one line of sight
-  vector<double> totalIntensity(vector<double> &, int &);
+  vector<double> totalIntensity(const vector<double> &, int);
 
   // Public functions.
 public:
@@ -115,26 +115,26 @@ public:
   //! Rotation Measure computing algorithms
   //
   //! Brentjens and de Bruyn with the Inverse Fourier Transform for a single RM value
-  complex<double> inverseFourier(double &,
-				 vector<complex<double> > &,
-				 vector<double> &,
-				 vector<double> &,
-				 vector<double> &,
+  complex<double> inverseFourier(const double,
+				 const vector<complex<double> > &,
+				 const vector<double> &,
+				 const vector<double> &,
+				 const vector<double> &,
 				 bool freq=true);
 
   //! Brentjens and de Bruyn with the Inverse Fourier Transform for complete set of RMs
-  vector<double> inverseFourier(vector<double> &,
-				vector<complex<double> > &,
-				vector<double> &,
-				vector<double> &,
-				vector<double> &,
+  vector<complex<double> > inverseFourier(const vector<double> &,
+				const vector<complex<double> > &,
+				const vector<double> &,
+				const vector<double> &,
+				const vector<double> &,
 				bool freq=true);
 
   //! Compute the Rotation Measure Spread Function (RMSF)
-  vector<complex<double> > RMSF(vector<double> &,
-			        vector<double> &,
-				vector<double> &,
-				vector<double> &,
+  vector<complex<double> > RMSF(const vector<double> &,
+			        const vector<double> &,
+				const vector<double> &,
+				const vector<double> &,
 				bool freq=true);
 
   //! Frick and Stepanov wavelet algorithm
@@ -163,13 +163,13 @@ public:
   //! Rotation Measure error estimation algorithms
 
   //! (assuming) a least squares error approximation
-  vector<double> rmErrorLsq(vector<double> &intensity, 
+  vector<double> rmErrorLsq(vector<complex<double> > &intensity, 
 			    vector<double> &lambda_sqs, 
 			    vector<double> &weights, 
 			    bool freq=true);
 
   //! Error estimate based on Bayesian statistics
-  vector<double> rmErrorBayes(vector<double> &intensities,
+  vector<double> rmErrorBayes(vector<complex<double> > &intensities,
 			      vector<double> &lambda_sqs,
 			      bool lambda_sq=true);
 };

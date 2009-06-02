@@ -344,9 +344,12 @@ int rmCube::createBufferCube()
 {
   vector<int> dimensions(3);
 
-  if(buffer==NULL)	// check if we have already a buffer
+  if(this->buffer==NULL)	// check if we have already a buffer
   {
-   this->buffer=(double *) calloc(this->xSize*this->ySize*this->faradaySize, sizeof(double)); // allocate memory of size Bytes
+   if(this->xSize > 0 && this->ySize > 0 && this->faradaySize > 0)
+   {
+      this->buffer=(double *) calloc(xSize*ySize*faradaySize, sizeof(double)); // allocate memory of size Bytes
+   }
 
    if(this->buffer==NULL)
    {
