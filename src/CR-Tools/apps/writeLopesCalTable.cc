@@ -1122,7 +1122,7 @@ void writeTVsep2007RefPhases(void)
         cerr << "\nERROR while writing field: SampleJumps" << endl;
       if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",delay_nov_07_start) )
         cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
-      // Reference Antenna 4 for new phase differences
+      // Reference Antenna 1 for new phase differences
       if (!writer.AddData(10101,antennaIDs[i],"PhaseRefAnt",delay_nov_07_start) )
         cerr << "\nERROR while writing field: PhaseRefAnt" << endl;
     }
@@ -1266,6 +1266,49 @@ void writeBadPeriods(void)
     cerr << "\nERROR while writing field: Active" << endl;
 }
 
+void writeTripoleDelays(void)
+{
+  // Set delays for tripole in March 2009
+  Vector<Double> delays(30);
+
+  delays(23) = -1260.39;
+  delays(24) = -1261.59;
+  delays(25) = -1262.11;
+
+  // Set reference Phases
+  Matrix<Double> PhaseRefPhases(30,2);
+  PhaseRefPhases(23,0) =   54.1; PhaseRefPhases(23,1) =   67.0;
+  PhaseRefPhases(24,0) =   12.6; PhaseRefPhases(24,1) =   44.6;
+  PhaseRefPhases(25,0) = -131.4; PhaseRefPhases(25,1) = -131.4;	// no error: same value
+
+  // Add the value for tripole antennas (24, 25, 26)
+  for (int i = 23; i < 26; ++i) {
+    cout << "Writing values for antenna: " << antennaIDs[i] << endl;
+
+    // Read delay before tripole and restore it after tripole phase
+    Double old_delay = 0.;
+    if (!reader.GetData(tripole_2009_start-1, antennaIDs[i], "Delay", &old_delay)) { 
+      cerr << "Error while reading field: Delay" << endl;
+    } else {
+      if (!writer.AddData(delays(i),antennaIDs[i],"Delay",tripole_2009_start) )
+        cerr << "\nERROR while writing field: Delay" << endl;
+      if (!writer.AddData(old_delay,antennaIDs[i],"Delay",tripole_2009_stop) )
+        cerr << "\nERROR while writing field: Delay" << endl;
+    }
+
+    Vector<Double> oldRefPhases;
+    if (!reader.GetData(tripole_2009_start-1, antennaIDs[i], "PhaseRefPhases", &oldRefPhases)) { 
+      cerr << "Error while reading field: PhaseRefPhases" << endl;
+    } else {
+      if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",tripole_2009_start) )
+        cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
+      if (!writer.AddData(oldRefPhases,antennaIDs[i],"PhaseRefPhases",tripole_2009_stop) )
+        cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
+    }
+  }
+}
+
+
 
 int main (int argc, char *argv[])
 {
@@ -1318,7 +1361,8 @@ int main (int argc, char *argv[])
 
     // add field "Active" to store information, when an antenna had problems
     // addActiveField(true);		// checked in
-    writeBadPeriods();		// checked in
+    //writeBadPeriods();		// checked in
+    writeTripoleDelays();
 
     cout << "Writing finished: " << endl;
     writer.PrintSummary();
