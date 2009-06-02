@@ -1275,6 +1275,8 @@ void writeTripoleDelays(void)
   delays(24) = -1261.59;
   delays(25) = -1262.11;
 
+  delays /= 1e9;
+
   // Set reference Phases
   Matrix<Double> PhaseRefPhases(30,2);
   PhaseRefPhases(23,0) =   54.1; PhaseRefPhases(23,1) =   67.0;
@@ -1361,8 +1363,8 @@ int main (int argc, char *argv[])
 
     // add field "Active" to store information, when an antenna had problems
     // addActiveField(true);		// checked in
-    //writeBadPeriods();		// checked in
-    writeTripoleDelays();
+    // writeBadPeriods();		// checked in
+    // writeTripoleDelays();	// checked in
 
     cout << "Writing finished: " << endl;
     writer.PrintSummary();
