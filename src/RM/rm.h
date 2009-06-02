@@ -41,6 +41,7 @@
 #include <casa/Quanta/Unit.h>		// use CASA Unit class for unit handling
 #include <casa/Quanta.h>		// ... and unit conversion
 
+#include "../DAL/implement/dalFITS.h"	// dalFITS file access
 
 // Namespace usage
 using namespace std;
@@ -153,6 +154,21 @@ public:
 
   //! (Forward) Fourier Transform to get an image from an RM cube
   vector<double> fourierTransform(vector<double> &, vector<double> &, bool freq=true);
+
+  
+  // Read frequency / lambda squared distributions from text files
+  //! read frequency distribution from a text file
+  vector<double> readFrequencies(const std::string &);
+
+  //! read lambda squareds from a text file
+  vector<double> readLambdaSquareds(const std::string &);
+
+  //! read frequencies and delta frequencies from a text file
+  vector<double> readFrequenciesAndDeltaFrequencies(const std::string &, vector<double> &);
+
+  //! read lambda squareds and delta squareds from a text file
+  vector<double> readLambdaSquaredsAndDeltaSquareds(const std::string &, vector<double> &);
+
 
   // Atmospheric correction of RM (contribution through atmosphere)
   // ??

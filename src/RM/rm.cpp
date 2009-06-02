@@ -489,3 +489,97 @@ vector<double> rm::rmErrorBayes(vector<complex<double> > &intensity, vector<doub
 
 	return rm_error;
 }
+
+
+
+
+/*!
+  \brief Read the distribution of measured frequencies from a text file
+  
+  \param filename -- name of txt file with frequency distribution
+
+  \return frequencies -- vector with frequencies
+*/
+vector<double> readFrequencies(const std::string filename)
+{
+  vector<double> frequencies;
+
+
+  // open text file
+
+
+
+  // read in linewise and write into frequencies vector (resize accordingly)
+
+
+  // return frequencies vector
+}
+
+
+/*!
+  \brief Read the distribution of measured lambda squareds from a text file
+  
+  \param filename -- name of txt file with lambda squared distribution
+
+  \return lambdaSquareds -- vector with lambda squareds
+*/
+vector<double> readLambdaSquareds(const std::string filename)
+{
+  vector<double> lambdaSquareds;
+
+
+  // open text file
+
+
+
+  // read in linewise and write into lambdaSquareds vector (resize accordingly)
+
+
+  // return frequencies vector
+}
+
+
+
+/*!
+  \brief Read the distribution of measured lambdaSquareds AND deltaLambdaSquareds from a text file
+  
+  \param filename -- name of txt file with lambda squared distribution
+  \param deltaFrequencies -- vector to keep delta Frequencies
+
+  \return lambdaSquareds -- vector with frequencies and delta frequencies
+*/
+vector<double> readFrequenciesAndDeltaFrequencies(const std::string &filename, vector<double> &deltaFrequencies)
+{
+  vector<double> frequencies;
+
+  // open text file
+
+
+
+  // read in linewise and write into lambdaSquareds vector (resize accordingly)
+
+
+  // return frequencies vector
+}
+
+
+/*!
+  \brief Read the distribution of measured lambdaSquareds AND deltaLambdaSquareds from a text file
+  
+  \param filename -- name of txt file with lambda squared and delta lambda squared distribution
+
+  \return lambdaSquareds -- vector with lambda squareds
+*/
+vector<double> readLambdaSquaredsAndDeltaSquareds(const std::string &filename,   vector<double> &deltaLambdaSquareds)
+{
+  vector<double> lambdaSquareds;
+
+  // open text file
+
+
+
+  // read in linewise and write into lambdaSquareds vector (resize accordingly)
+
+
+  // return frequencies vector
+}

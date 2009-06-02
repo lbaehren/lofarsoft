@@ -63,18 +63,18 @@ class rmCube : public rm
     vector<int> bufferDimensions;	//!> dimensions of buffer (line, tile, plane,...)
   
     // Keep variables that do not need to be computed for every single RM
-    vector<double> lambda_sqs;		//!> lambda squareds of channels
+    vector<double> lambdaSqs;		//!> lambda squareds of channels
     vector<double> weights;		//!> weighting factors for channels
     std::string weightingAlgorithm;	//!> algorithm used to compute weights
     std::string rmAlgorithm;		//!> algorithm used to compute cube
-    vector<double> rmsf;		//!> Rotation Measure Spread Function
+    vector<complex<double> > rmsf;	//!> Rotation Measure Spread Function
   
   public:
     rmCube();					//!> constructor without initial values
     rmCube(int x, int y, int faradaySize);	//!> default constructor with dimensions
     //! construct a rmCube from given faradaySize and stepsize
     rmCube(int x, int y, int faradaySize, double stepsize);
-    rmCube(int, int, vector<double>); 		//!> constructor giving individual faradayDepths vector
+    rmCube(int, int, vector<double>); 	//!> constructor giving individual faradayDepths vector
 
     ~rmCube();					//!> destructor
 
@@ -127,8 +127,11 @@ class rmCube : public rm
     vector<double> getLambdaSqs();		//!> get lambda squareds
     void setLambdaSqs(vector<double> &);	//!> set lambda squareds
  
-    vector<double> getRMSF();			//!> get RMSF
-    void computeRMSF();				//!> compute RMSF
+    vector<double> getWeights();		//!> get weights of cube frequencies
+    void setWeights(vector<double> &);		//!> set weights of cube frequencies
+ 
+    vector<complex<double> > getRMSF();		//!> get RMSF
+    void computeRMSF(const vector<double> &, const vector<double> &, bool);	//!> compute RMSF with inherited method from class rm
 };
 
 #endif

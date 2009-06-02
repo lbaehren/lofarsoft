@@ -392,14 +392,14 @@ void rmCube::setBufferDimensions(vector<int> &dimensions)
 
 vector<double> rmCube::getLambdaSqs()
 {
-  return this->lambda_sqs;
+  return this->lambdaSqs;
 }
 
 
 void rmCube::setLambdaSqs(vector<double> &lambdaSqs)
 {
   if(lambdaSqs.size())			// only if valid vector
-    this->lambda_sqs=lambdaSqs;
+    this->lambdaSqs=lambdaSqs;
 }
 
 
@@ -415,6 +415,21 @@ void rmCube::setWeightingAlgorithm(std::string &weightingAlgorithm)
 }
 
 
+vector<double> rmCube::getWeights()
+{
+  return this->weights;
+}
+
+
+void rmCube::setWeights(vector<double> &weights)
+{
+  if(weights.size() != 0)
+    this->weights=weights;
+  else
+    throw "rmCube::setWeights size=0";
+}
+
+
 std::string rmCube::getRMAlgorithm()
 {
   return this->algorithm;
@@ -427,14 +442,14 @@ void rmCube::setRMAlgorithm(const std::string &algorithm)
 }
 
 
-vector<double> rmCube::getRMSF()
+vector<complex<double> > rmCube::getRMSF()
 {
   return this->rmsf;
 }
 
 
-void rmCube::computeRMSF()
+void rmCube::computeRMSF(const vector<double> &lambdaSqs, const vector<double> &deltaLambdaSqs, bool freq=true)
 {
-
-
+  // use rmCube attributes (must be set) class rm method to compute RMSF
+  this->rmsf=rm::RMSF(faradayDepths, lambdaSqs, weights, deltaLambdaSqs, freq);
 }

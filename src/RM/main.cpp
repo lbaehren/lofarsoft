@@ -67,6 +67,7 @@ int main (int argc, char * const argv[]) {
 	float min=0, max=0;		// DEBUG: using minMax() function on image
 	vector<double> phi;		// Faraday depths to probe for
 	complex<double> rmpol;		// polarized intensity at Faraday depth probed for
+	vector<complex<double> > rmsf;	// Rotation Measure Spread Function
 
 
 	if(argc<3)	// if no filenames was given, display usage/help (MUST change to 3!)
@@ -193,14 +194,10 @@ int main (int argc, char * const argv[]) {
 	}
 	
 	
+	// call inverseFourier
+	rmpol=FaradayCube.inverseFourier(0, f, freq, weights,  delta_freq, false);
 
-	rmpol=FaradayCube.inverseFourier(0,
-				 f,
-				 freq,
-				 weights,
-				 delta_freq,
-				 false);	// call inverseFourier
-
+	FaradayCube.computeRMSF(freq, delta_freq, true);
 
 	/*
 	RO_LatticeIterator<Float> iter(*lattice_Q_float, cursorShape);
