@@ -270,7 +270,7 @@ int test_ppfimplements ()
       sliced_vector = samples( Slice( sample, dataBlockSize ) ) ;
       
       server.fft( FFTVector, sliced_vector ) ;
-      
+    //  cout << "FFT Vector of pof implement test file :" << FFTVector <<endl ;
       fft_implemented.column(i) = FFTVector ;
     
     sample = sample +dataBlockSize ;
@@ -308,9 +308,9 @@ int test_ppfimplements ()
 //     
            FFTVector = fft_maintained.column(k) ;
 // 	  
- 	  server.fft(IFFTVector, FFTVector ) ;
+ 	   server.fft(IFFTVector, FFTVector ) ;
 // 	  
- 	  for( uint a=0; a< dataBlockSize; a++ ) {
+ 	   for( uint a=0; a< dataBlockSize; a++ ) {
 // 	  
  	       timeSeries(k*1024+a)= IFFTVector(a) ;
 // 	       

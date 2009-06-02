@@ -168,14 +168,15 @@ namespace CR{ // Namespace  -- begin
     
     */
     NuMoonTrigger( std::string const &filename,
-    		   uint const& n_frames,
+    		   uint const& n_samples,
 		   double const& simTEC,
 		   double const& sampling_rate,
 		   uint const& nyquist_zone,
+		   uint const& time_int_bins,
 		   double const& TEC,
 		   const Vector<double>& ppf_coeff,
 		   const Vector<double>& ppf_invcoeff,
-		   const Vector<uint> freq_range,
+		   const Vector<double> freq_range,
 		   double const& peak_power,
 		   const Vector<uint>& RCU_id ) ;
     
@@ -227,7 +228,7 @@ namespace CR{ // Namespace  -- begin
     void summary (std::ostream &os);    
 
     // ------------------------------------------------------------------ Methods
-    
+    #ifdef HAVE_ROOT
   
   Matrix<double> reading_data( std::string const &filename,
     			       uint const& n_frames ) ;
@@ -243,7 +244,8 @@ namespace CR{ // Namespace  -- begin
 				  const Vector<double> freq_Vector ) ;
 
   Vector<double> ifft_data( Matrix<DComplex> const& data,
-    			    uint const& n_frames ) ;
+    			    uint const& n_frames,
+			    uint const& nyquist_zone ) ;
 		       
   Matrix<DComplex> ppf_implement( Vector<double>& samples,
                                   uint const& nyquist_zone,
@@ -253,51 +255,107 @@ namespace CR{ // Namespace  -- begin
                                	const Vector<double>& ppf_invcoeff,
 				const Vector<uint> subBand_ID )  ;
 
-  void PPFBand_vector( double const& sampling_rate,
-   	   	       uint const& nyquist_zone,
-		       const Vector<uint> freq_range ) ;
-						 								
+  Vector<uint> PPFBand_vector( double const& sampling_rate,
+   	   	       		uint const& nyquist_zone,
+		       		const Vector<double> freq_range ) ;
+
   Vector<double> freq_vector( double const& sampling_rate,
 		   	      uint const& nyquist_zone ) ;
 
   Matrix<DComplex> ppfdata_cutshort( Matrix<DComplex>& samples,
    				    Vector<uint> subband_ID ) ;
-				    
+    
   Matrix<double> cal_AvPower( Matrix<double> const& data_array,
   	       	 	     uint const& n_frames ) ;
 
   Vector<double> Sim_Signal( Vector<double> const& data,
     		 	    double const& simTEC,
 			    const Vector<double>& freq_Vector,
-			    double const& peak_power,
+			    double const& peak_height,
 			    double const& pulse_loc,
 			    double const& rnd_phase,
 			    Vector<DComplex> geom_Weights_factor  ) ;
-			    
+    
    Matrix<DComplex> weights_applied( Matrix<DComplex> const& data,
   			             Matrix<DComplex> const& geom_weights,
 				     uint const& rcu_id ) ;
 
    Matrix<DComplex> Geom_weights( const Vector<uint>& RCU_id,
 			          const Vector<double>& freq_vector ) ;     
-  			        
+				  
+   Matrix<double> Cleaned_data(  std::string const &filename,
+    				 uint const& n_samples,
+				 double const& simTEC,
+				 uint const& nyquist_zone,
+				 double const& peak_power,
+				 const Vector<uint>& RCU_id,
+				 double const& sampling_rate,
+				 double const& TEC,
+				 const Vector<double> freq_range ) ;
+				 
    Matrix<double> Added_SignalData(  std::string const &filename,
-    				     uint const& n_frames,
+    				     uint const& n_samples,
 				     double const& simTEC,
 				     uint const& nyquist_zone,
-  				     Matrix<DComplex> const& geom_weights,
 				     double const& peak_power,
 				     const Vector<uint>& RCU_id,
 				     double const& sampling_rate,
 				     double const& TEC,
-				     const Vector<uint> freq_range ) ;    
+				     const Vector<double> freq_range ) ;    
+				     
+  Vector<double> PPF_processed( std::string const &filename,
+    				uint const& n_samples,
+				double const& simTEC,
+				double const& sampling_rate,
+				uint const& nyquist_zone,
+				uint const& time_int_bins,
+  				double const& TEC,
+				const Vector<double>& ppf_coeff,
+		   		const Vector<double>& ppf_invcoeff,
+		  		const Vector<double> freq_range,
+				double const& peak_power,
+				const Vector<uint>& RCU_id ) ;
+				
+  Vector<double> FFT_processed( std::string const &filename,
+    				uint const& n_samples,
+				double const& simTEC,
+				double const& sampling_rate,
+				uint const& nyquist_zone,
+				uint const& time_int_bins,
+  				double const& TEC,
+				const Vector<double>& ppf_coeff,
+		   		const Vector<double>& ppf_invcoeff,
+		  		const Vector<double> freq_range,
+				double const& peak_power,
+				const Vector<uint>& RCU_id ) ;
+				
+  Vector<double> without_Signal(  std::string const &filename,
+    				  uint const& n_samples,
+				  double const& simTEC,
+				  double const& sampling_rate,
+				  uint const& nyquist_zone,
+				  uint const& time_int_bins,
+  				  double const& TEC,
+				  const Vector<double>& ppf_coeff,
+		   		  const Vector<double>& ppf_invcoeff,
+		  		  const Vector<double> freq_range,
+				  double const& peak_power,
+				  const Vector<uint>& RCU_id ) ;       
+  
+  
+     void root_ntuples( std::string const &filename,
+    			 uint const& n_samples,
+			 double const& simTEC,
+			 double const& sampling_rate,
+			 uint const& nyquist_zone,
+			 uint const& time_int_bins,
+  			 double const& TEC,
+			 const Vector<double>& ppf_coeff,
+		   	 const Vector<double>& ppf_invcoeff,
+		  	 const Vector<double> freq_range,
+			 double const& peak_power,
+			 const Vector<uint>& RCU_id ) ;
    
-  #ifdef HAVE_ROOT
-  
-  void root_ntuples( Matrix<double> const& data,
-    		     uint const& n_frames,
-		     uint const& nyquist_zone );
-  
   #endif    
  
  
