@@ -403,6 +403,21 @@ void rmCube::setLambdaSqs(vector<double> &lambdaSqs)
 }
 
 
+vector<double> rmCube::getDeltaLambdaSqs()
+{
+  return this->deltaLambdaSqs;
+}
+
+
+void rmCube::setDeltaLambdaSqs(vector<double> &deltaLambdaSqs)
+{
+  if(deltaLambdaSqs.size()!=0)
+    this->deltaLambdaSqs=deltaLambdaSqs;
+  else
+    throw "rmCube::setDeltaLambdaSqs size 0";
+}
+
+
 std::string rmCube::getWeightingAlgorithm()
 {
   return this->weightingAlgorithm;
@@ -453,3 +468,17 @@ void rmCube::computeRMSF(const vector<double> &lambdaSqs, const vector<double> &
   // use rmCube attributes (must be set) class rm method to compute RMSF
   this->rmsf=rm::RMSF(faradayDepths, lambdaSqs, weights, deltaLambdaSqs, freq);
 }
+
+
+/*
+/*!
+  \brief Compute RM with parameters from rmCube attributes
+  
+  \return RM along line of sight at Faraday Depths as defined in rmCube attribute
+*/
+/*
+vector<complex<double> > rmCube::inverseFourier()
+{
+  return rm::RMSF(faradayDepths, lambdaSqs, weights, deltaLambdaSqs, false);
+}
+*/

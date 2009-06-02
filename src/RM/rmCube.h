@@ -64,6 +64,7 @@ class rmCube : public rm
   
     // Keep variables that do not need to be computed for every single RM
     vector<double> lambdaSqs;		//!> lambda squareds of channels
+    vector<double> deltaLambdaSqs;	//!> delta lambda squareds that belong to RM cube input image
     vector<double> weights;		//!> weighting factors for channels
     std::string weightingAlgorithm;	//!> algorithm used to compute weights
     std::string rmAlgorithm;		//!> algorithm used to compute cube
@@ -127,11 +128,17 @@ class rmCube : public rm
     vector<double> getLambdaSqs();		//!> get lambda squareds
     void setLambdaSqs(vector<double> &);	//!> set lambda squareds
  
+    vector<double> getDeltaLambdaSqs();		//!> get delta lambda squareds
+    void setDeltaLambdaSqs(vector<double> &);	//!> set delta lambda squareds
+ 
     vector<double> getWeights();		//!> get weights of cube frequencies
     void setWeights(vector<double> &);		//!> set weights of cube frequencies
  
     vector<complex<double> > getRMSF();		//!> get RMSF
     void computeRMSF(const vector<double> &, const vector<double> &, bool);	//!> compute RMSF with inherited method from class rm
+
+    // overloaded inverseFourier function that uses lambdaSqs, deltaLambdaSqs and weights from rmCube attributes 
+    //vector<complex<double> > inverseFourier();
 };
 
 #endif
