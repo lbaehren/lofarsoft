@@ -204,13 +204,16 @@ int test_constructors (std::string const &filename)
 	//cout << "NUmber of rows in raw data array :" <<nROW << " and number of columns :" <<nCOLUMN<< endl;
 	casa::Vector<double> data_Vec = raw_data.column(0) ;
 	  
-	  double alpha (0.5);
-	  
-	  DataReader *dr;
-	
-          dr->setHanningFilter (alpha);
-	  Matrix<DComplex> fft_filtered (dr->fft());
-	  Matrix<Double> absoluteArray(amplitude (fft_filtered));
+// 	  double alpha (0.5);
+// 	  
+// 	  DataReader *dr;
+// 	
+//   ITS_Capture *capture = new ITS_Capture ( filename,
+// 					1024 );
+//   dr = capture;
+//           dr->setHanningFilter (alpha);
+// 	  Matrix<DComplex> fft_filtered (dr->fft());
+// 	  Matrix<Double> absoluteArray(amplitude (fft_filtered));
 	   
 	Matrix<DComplex> FFT_data = numooontrigger.fft_data( data_Vec,
 				 	                             n_frames,
@@ -329,7 +332,7 @@ Matrix<double>	power_ampl_FFTdata = amplitude( power_FFTdata )	;
         for( uint nSample=0; nSample < 513 ; nSample++ ){
 		 for( uint ncol=0; ncol<n_frames ; ncol++){
 	             
-		     logfile2 << absoluteArray(nSample,ncol) << "\t";
+		     logfile2 << FFT_ampl(nSample,ncol) << "\t";
 	   }
 	  logfile2 <<endl ;
 	}
