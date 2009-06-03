@@ -28,6 +28,7 @@
 #include <iostream>
 //#include <string>
 #include <Data/tbbctlIn.h>
+#include <stdint.h>
 
 namespace CR { // Namespace CR -- begin
   
