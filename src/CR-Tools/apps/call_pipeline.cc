@@ -1337,6 +1337,7 @@ int main (int argc, char *argv[])
   unsigned int gt = 0;
   char eventfilename[64] ;			         // Name of event file (first 64 characters)
   double CCheight, CCheight_NS;                          // CCheight will be used for EW polarization or ANY polarization
+  double CCwidth, CCwidth_NS;
   double CCheight_error, CCheight_error_NS;
   bool CCconverged, CCconvergedNS;                       // is true if the Gaussian fit to the CCbeam converged
   double Xheight, Xheight_NS;                            // CCheight will be used for EW polarization or ANY polarization
@@ -1533,6 +1534,7 @@ int main (int argc, char *argv[])
         roottree->Branch("ElL",&elevation,"ElL/D");
         roottree->Branch("Distance",&distanceResult,"Distance/D");	// radius of curvature
         roottree->Branch("CCheight",&CCheight,"CCheight/D");
+	roottree->Branch("CCwidth",&CCwidth,"CCwidth/D");
         roottree->Branch("CCheight_error",&CCheight_error,"CCheight_error/D");
         roottree->Branch("CCconverged",&CCconverged,"CCconverged/B");
         roottree->Branch("Xheight",&Xheight,"Xheight/D");
@@ -1559,6 +1561,7 @@ int main (int argc, char *argv[])
         roottree->Branch("ElL_EW",&ElL,"ElL_EW/D");
         roottree->Branch("Distance_EW",&distanceResult,"Distance_EW/D");	// radius of curvature
         roottree->Branch("CCheight_EW",&CCheight,"CCheight_EW/D");
+	roottree->Branch("CCwidth_EW",&CCwidth,"CCwidth_EW/D");
         roottree->Branch("CCheight_error_EW",&CCheight_error,"CCheight_error_EW/D");
         roottree->Branch("CCconverged_EW",&CCconverged,"CCconverged_EW/B");
         roottree->Branch("Xheight_EW",&Xheight,"Xheight_EW/D");
@@ -1585,6 +1588,7 @@ int main (int argc, char *argv[])
         roottree->Branch("ElL_NS",&ElL_NS,"ElL_NS/D");
         roottree->Branch("Distance_NS",&distanceResultNS,"Distance_NS/D");	// radius of curvature
         roottree->Branch("CCheight_NS",&CCheight_NS,"CCheight_NS/D");
+	roottree->Branch("CCwidth_NS",&CCwidth_NS,"CCwidth_NS/D");
         roottree->Branch("CCheight_error_NS",&CCheight_error_NS,"CCheight_error_NS/D");
         roottree->Branch("CCconverged_NS",&CCconverged,"CCconverged_NS/B");
         roottree->Branch("Xheight_NS",&Xheight_NS,"Xheight_NS/D");
@@ -1654,6 +1658,7 @@ int main (int argc, char *argv[])
       // reset all resuls to 0
       gt = 0;
       CCheight = 0, CCheight_NS = 0;
+      CCwidth = 0, CCwidth_NS = 0;
       CCheight_error = 0, CCheight_error_NS = 0;
       CCconverged = 0, CCconvergedNS = 0;
       Xheight = 0, Xheight_NS = 0;
@@ -1800,6 +1805,7 @@ int main (int argc, char *argv[])
           ElL = results.asDouble("Elevation");
           distanceResult = results.asDouble("Distance");
           CCheight = results.asDouble("CCheight");
+	  CCwidth = results.asDouble("CCwidth");
           CCheight_error = results.asDouble("CCheight_error");
           CCconverged = results.asBool("CCconverged");
           Xheight = results.asDouble("Xheight");
@@ -1895,6 +1901,7 @@ int main (int argc, char *argv[])
           ElL_NS = results.asDouble("Elevation");
           distanceResultNS = results.asDouble("Distance");
           CCheight_NS = results.asDouble("CCheight");
+	  CCwidth_NS = results.asDouble("CCwidth");
           CCheight_error_NS = results.asDouble("CCheight_error");
           CCconvergedNS = results.asBool("CCconverged");
           Xheight_NS = results.asDouble("Xheight");
