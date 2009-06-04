@@ -40,7 +40,9 @@ namespace CR { // Namespace CR -- begin
   LOFAR_TBB::LOFAR_TBB ()
     : TBB_Timeseries (),
       DataReader ()
-  { }
+  {
+    init ();
+  }
   
   // ------------------------------------------------------------------ LOFAR_TBB
   
@@ -137,7 +139,7 @@ namespace CR { // Namespace CR -- begin
       /* Variables describing the setup of the DataReader */
       os << "-- blocksize   [samples ] : " << blocksize_p                   << endl;
       os << "-- FFT length  [channels] : " << DataReader::fftLength()       << endl;
-      os << "-- Sample frequency [MHz] : " << DataReader::sampleFrequency() << endl;
+      os << "-- Sample frequency  [Hz] : " << DataReader::sampleFrequency() << endl;
       os << "-- Nyquist zone ......... : " << DataReader::nyquistZone()     << endl;
       
       /* The rest of the summary output is conditional, because given the number
@@ -189,24 +191,28 @@ namespace CR { // Namespace CR -- begin
     
     /*
      * Set the correct data for the time and frequency axis
+     * - sample frequency
+     * - nyquist zone
      */
 #ifdef HAVE_CASA
     // retrieve the values
-    casa::Vector<double> sampleFreq = TBB_Timeseries::sample_frequency_value();
-    // Feedback
-    std::cout << "-- sample frequencies = " << sampleFreq << std::endl;
+    casa::Vector<uint> nyquistZone            = TBB_Timeseries::nyquist_zone();
+    casa::Vector<casa::MFrequency> sampleFreq = TBB_Timeseries::sample_frequency();
     // adjust internal settings
     if (sampleFreq.nelements() > 0) {
-      sampleFrequency_p = sampleFreq(0);
+      nyquistZone_p     = nyquistZone(0);
+      sampleFrequency_p = sampleFreq(0).get("Hz").getValue();
     } else {
       std::cerr << "[LOFAR_TBB::init] Error retrieving sample frequency!"
 		<< std::endl;
     }
 #else
     // retrieve the values
+    std::vector<uint> nyquistZone = TBB_Timeseries::nyquist_zone();
     std::vector<double> sampleFreq = TBB_Timeseries::sample_frequency_value();
     // adjust internal settings
     if (sampleFreq.size() > 0) {
+      nyquistZone_p     = nyquistZone[0];
       sampleFrequency_p = sampleFreq[0];
     } else {
       std::cerr << "[LOFAR_TBB::init] Error retrieving sample frequency!"
