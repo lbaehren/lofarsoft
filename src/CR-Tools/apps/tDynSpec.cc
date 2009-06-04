@@ -85,7 +85,7 @@ int main (int argc, char *argv[])
   int fftblocksize = 1024;
   int nrblocks = 2500;
   int antennanr = 0;
-	int nyquist_zone_p = 1;
+	
 	
 	for(int argcounter(1); argcounter < argc; argcounter++){
 	    std::string topic = string(argv[argcounter]); 
@@ -117,10 +117,6 @@ int main (int argc, char *argv[])
 	                argcounter++;
 					antennanr = atoi(argv[argcounter]);
 					cout << "antenna used " << antennanr << endl;
-		} else if(topic == "-z"){
-			argcounter++;
-			nyquist_zone_p = atoi(argv[argcounter]);
-			cout << "nyquist zone " << nyquist_zone_p << endl;
 		} else {
 			cout << "specify at least an input file.";
 		}
@@ -131,9 +127,9 @@ int main (int argc, char *argv[])
 	ts2.summary();
 	TBB_Timeseries ts = TBB_Timeseries(filename);
 	ts.summary();
-	//cout << ts.DAL::TBB_DipoleDataset::nyquist_zone();
+
 	cout << "For testing, manually adjusting nyquistzone \n";
-	ts2.DataReader::setNyquistZone(nyquist_zone_p);
+
 	ts2.summary();
 	DynamicSpectrum Spectrum = DynamicSpectrum(ts2, nrblocks, antennanr);
 
