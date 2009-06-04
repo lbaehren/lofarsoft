@@ -422,10 +422,18 @@ namespace CR {  // Namespace CR -- begin
      */
     status = beamformer_p.processData (beam,
 				       data);
-    nofProcessedBlocks_p++;
+    
+#ifdef DEBUGGING_MESSAGES
+    std::cout << "[Skymapper::processData]" << std::endl;
+    std::cout << "-- Input data [freq,ant]: " << std::endl;
+    std::cout << "-- data      [,1]   = " << data.column(1)         << std::endl;
+    std::cout << "-- data      [1,]   = " << data.row(1)            << std::endl;
+    std::cout << "-- Beamformed data [freq,sky]:" << std::endl;
+    std::cout << "-- beam      [,1]   = " << beam.column(1)         << std::endl;
+    std::cout << "-- beam      [1,]   = " << beam.row(1)            << std::endl;
+#endif
 
-    // debugging output
-    std::cout << beam.row(1) << std::endl;
+    nofProcessedBlocks_p++;
 
     //________________________________________________________________
     /*

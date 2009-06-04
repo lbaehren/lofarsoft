@@ -194,10 +194,12 @@ namespace CR { // Namespace CR -- begin
     SkymapQuantity skymapType_p;
     //! Shape of the array with the beamformed data
     IPosition shapeBeam_p;
-    //! The weights applied by the Beamformer
-    casa::Cube<DComplex> bfWeights_p;
     //! Complex-valued antenna gains per antenna
     AntennaGain antennaGains_p;
+    //! The weights applied by the Beamformer
+    casa::Cube<DComplex> bfWeights_p;
+    //! Normalization factor
+    double norm_p;
     /*!
       \brief Pointer to the function performing the beamforming
      

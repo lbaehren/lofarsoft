@@ -190,6 +190,7 @@ namespace CR { // Namespace CR -- begin
     GeomWeight::operator= (other);
 
     skymapType_p = other.skymapType_p;
+    norm_p       = other.norm_p;
 
     shapeBeam_p.resize(other.shapeBeam_p.nelements());
     shapeBeam_p = other.shapeBeam_p;
@@ -220,8 +221,8 @@ namespace CR { // Namespace CR -- begin
   {
     bool status (true);
 
-    IPosition shape_of_weights = GeomWeight::shape();
-    int blocksize              = (shape_of_weights(0)-1)*2;
+    IPosition wShape = GeomWeight::shape();  //  [freq,ant,sky]
+    int blocksize    = (wShape(0)-1)*2;
 
     switch (skymapType.type()) {
     case SkymapQuantity::FREQ_FIELD:
@@ -230,37 +231,44 @@ namespace CR { // Namespace CR -- begin
       status = false;
 //       beamType_p    = beam;
 //       processData_p = &Beamformer::freq_field;
-//       shapeBeam_p   = IPosition(2,shape_of_weights(0),shape_of_weights(2));
+//       shapeBeam_p   = IPosition(2,wShape(0),wShape(2));
+//       norm_p        = 1.0/wShape(1);
       break;
     case SkymapQuantity::FREQ_POWER:
       skymapType_p  = skymapType;
       processData_p = &Beamformer::freq_power;
-      shapeBeam_p   = IPosition(2,shape_of_weights(0),shape_of_weights(2));
+      shapeBeam_p   = IPosition(2,wShape(0),wShape(2));
+      norm_p        = 1.0/(wShape(1)*wShape(1));
       break;
     case SkymapQuantity::TIME_FIELD:
       skymapType_p  = skymapType;
       processData_p = &Beamformer::time_field;
-      shapeBeam_p   = IPosition(2,blocksize,shape_of_weights(2));
+      shapeBeam_p   = IPosition(2,blocksize,wShape(2));
+      norm_p        = 1.0;
       break;
     case SkymapQuantity::TIME_POWER:
       skymapType_p  = skymapType;
       processData_p = &Beamformer::time_power;
-      shapeBeam_p   = IPosition(2,blocksize,shape_of_weights(2));
+      shapeBeam_p   = IPosition(2,blocksize,wShape(2));
+      norm_p        = 1.0;
       break;
     case SkymapQuantity::TIME_CC:
       skymapType_p  = skymapType;
       processData_p = &Beamformer::time_cc;
-      shapeBeam_p   = IPosition(2,blocksize,shape_of_weights(2));
+      shapeBeam_p   = IPosition(2,blocksize,wShape(2));
+      norm_p        = 1.0;
       break;
     case SkymapQuantity::TIME_P:
       skymapType_p  = skymapType;
       processData_p = &Beamformer::time_p;
-      shapeBeam_p   = IPosition(2,blocksize,shape_of_weights(2));
+      shapeBeam_p   = IPosition(2,blocksize,wShape(2));
+      norm_p        = 1.0;
       break;
     case SkymapQuantity::TIME_X:
       skymapType_p  = skymapType;
       processData_p = &Beamformer::time_x;
-      shapeBeam_p   = IPosition(2,blocksize,shape_of_weights(2));
+      shapeBeam_p   = IPosition(2,blocksize,wShape(2));
+      norm_p        = 1.0;
       break;
     default:
       std::cerr << "[Beamformer::setSkymapType]"
@@ -419,9 +427,9 @@ namespace CR { // Namespace CR -- begin
     std::cout << "-- shape(delays)  = " << GeomDelay::shape()           << std::endl;
     std::cout << "-- shape(phases)  = " << GeomPhase::shape()           << std::endl;
     std::cout << "-- shape(weights) = " << bfWeights_p.shape()          << std::endl;
-    std::cout << "-- weights[0,,]   = " << bfWeights_p.yzPlane(0)       << std::endl;
+    std::cout << "-- weights[,0,]   = " << bfWeights_p.xzPlane(0)       << std::endl;
 #endif
-    
+
     /*
      *  Update the shape information on the array returning the beamformed data
      */
@@ -543,8 +551,6 @@ namespace CR { // Namespace CR -- begin
     try {
       // Temporary storage of multiplication result
       casa::DComplex tmp;
-      // Normalization for the number of antennas
-      double norm = 1/index(1);
       
       for (int sky(0); sky<shape(2); sky++) {                 /* loop: sky positions */
 	for (index(0)=0; index(0)<shape(0); index(0)++) {     /* loop: frequencies   */
@@ -559,7 +565,7 @@ namespace CR { // Namespace CR -- begin
 	   * Assign the pixel value: square of absolute value of the previously 
 	   * computed sum.
 	   */
-	  beam(index(0),sky) = norm*tmp;
+	  beam(index(0),sky) = norm_p*tmp;
 	} // END : frequency
       } // END : sky position
       
@@ -581,15 +587,14 @@ namespace CR { // Namespace CR -- begin
     IPosition index (data.shape());
     // Shape of the array with the beamformer weights, [freq,ant,sky]
     IPosition shape = bfWeights_p.shape();
+    // Temporary storage of multiplication result
+    casa::DComplex tmp;
 
     try {
-      // Temporary storage of multiplication result
-      casa::DComplex tmp;
-      // Normalization for the number of antennas
-      double norm = 1/(index(1)*index(1));
-      
-      for (int sky(0); sky<shape(2); sky++) {                 /* loop: sky positions */
-	for (index(0)=0; index(0)<shape(0); index(0)++) {     /* loop: frequencies   */
+      /* BEGIN: sky positions */
+      for (int sky(0); sky<shape(2); sky++) {
+	/* BEGIN: frequencies   */
+	for (index(0)=0; index(0)<shape(0); index(0)++) {
 	  tmp = 0;
 	  /*
 	   * Sum up the complex-valued contributions from the individual antennas
@@ -601,7 +606,7 @@ namespace CR { // Namespace CR -- begin
 	   * Assign the pixel value: square of absolute value of the previously 
 	   * computed sum.
 	   */
-	  beam(index(0),sky) = norm*real(tmp*conj(tmp));
+	  beam(index(0),sky) = norm_p*real(tmp*conj(tmp));
 	} // END : frequency
       } // END : sky position
       
@@ -617,6 +622,7 @@ namespace CR { // Namespace CR -- begin
     std::cout << "-- shape(data)      = " << data.shape()           << std::endl;
     std::cout << "-- shape(weights)   = " << bfWeights_p.shape()    << std::endl;
     std::cout << "-- shape(beam)      = " << beam.shape()           << std::endl;
+    std::cout << "-- Normalization    = " << norm                   << std::endl;
     std::cout << "-- weights [1,,]    = " << bfWeights_p.yzPlane(1) << std::endl;
     std::cout << "-- beam      [,1]   = " << beam.column(1)         << std::endl;
     std::cout << "-- beam      [1,]   = " << beam.row(1)            << std::endl;

@@ -453,90 +453,65 @@ int test_methods (uint const &blocksize=1024)
           fucntion.
 */
 int test_processing (string const &infile,
-		     uint const &blocksize=256,
-		     bool have_dataset=false)
+		     uint const &blocksize,
+		     bool have_dataset)
 {
   cout << "\n[tSkymapper::test_processing]\n" << endl;
   
   int nofFailedTests     = 0;
+  
+  Matrix<casa::DComplex> data;
 
   std::string refcode    = "AZEL";
   std::string projection = "STG";
   uint nofFrames         = 10;
   uint nofBlocksPerFrame = 1;
-  uint nofAntennas       = 5;
+  uint nofAntennas       = 4;
+  double sampleFrequency = 200e06;
+  uint nyquistZone       = 1;
 
-  // Spatial coordinates
-  IPosition shape (3,120,120,1);
-  Vector<double> refPixel (3);
-  Vector<Quantum<double> > refValue (3);
-  Vector<Quantum<double> > increment (3);
-  //
-  refPixel(0)  = shape(0)/2.0;
-  refPixel(1)  = shape(1)/2.0;
-  refValue(0)  = Quantity(0.0,"deg");
-  refValue(1)  = Quantity(90.0,"deg");
-  refValue(2)  = Quantity(1.0,"m");
-  increment(0) = Quantity(1,"deg");
-  increment(1) = Quantity(1,"deg");
-  increment(2) = Quantity(1,"m");
-  //
-  SpatialCoordinate spatial (CoordinateType::DirectionRadius,
-			     refcode,
-			     projection,
-			     refPixel,
-			     refValue,
-			     increment,
-			     shape);
+  // Spatial coordinates: [120,120,1] @ AZEL, STG
+  SpatialCoordinate spatial;
   // Time-Frequency coordinate
   TimeFreqCoordinate timeFreq (blocksize,
+			       sampleFrequency,
+			       nyquistZone,
 			       nofBlocksPerFrame,
 			       nofFrames,
 			       true);
-  
   // Skymap coordinate
   SkymapCoordinate coord (CR::test_ObsInfo(),
 			  spatial,
 			  timeFreq);
-  
-  // Antenna positions
-  Matrix<double> antPositions (nofAntennas,3);
-  for (uint ant(0); ant<nofAntennas; ant++) {
-    antPositions(ant,0) = ant*100;
-    antPositions(ant,1) = ant*50;
-    antPositions(ant,2) = ant;
-  }
-  // EM quantity for which the skymap is computed
-  CR::SkymapQuantity skymapQuantity (SkymapQuantity::TIME_CC);
 
+  /* Define antenna positions */
+  Vector<casa::MVPosition> antPositions (nofAntennas);
+  antPositions(0) = casa::MVPosition (100,0,0);
+  antPositions(1) = casa::MVPosition (0,100,0);
+  antPositions(2) = casa::MVPosition (-100,0,0);
+  antPositions(3) = casa::MVPosition (0,-100,0);
+  
   //__________________________________________________________________
   // Process some mock-up data to test the functionality of the
   // Skymapper to properly set up its internals.
   
-  cout << "[1] Test processData() function ..." << endl;
+  cout << "[1] HDF5Image<double> for default SpatialCoordinate ... ..." << endl;
   try {
     /* Create Skymapper object to work with */
     Skymapper skymapper (coord,
 			 antPositions,
-			 "skymap_test1.img",
-			 Skymapper::PagedImage);
+			 "skymap-processing01.h5");
+    skymapper.setFarField();
     skymapper.summary();
-    /* Export the internal settings of embedded Beamformer object */
-    {
-      Beamformer bf = skymapper.beamformer();
-      CR::test_exportBeamformer (bf,"skymap");
-    }
-    /* Prepare some test data to process */
-    Matrix<casa::DComplex> data (timeFreq.fftLength(),
-				 nofAntennas);
-    
-    for (uint block(0); block<nofBlocksPerFrame*nofFrames; block++) {
-      /* Put some values into the data array passed to the method */
-      for (uint freq(0); freq<timeFreq.fftLength(); freq++) {
-	data.row(freq) = (block+1)*double(freq);
-      }
-      /* Process a block of data and write out the result */
-      skymapper.processData(data);
+    /* Process data to create an image */
+    for (uint n(0); n<nofBlocksPerFrame*nofFrames; n++) {
+      // create some input data
+      CR::test_getData (data,
+			nofAntennas,
+			timeFreq.fftLength(),
+			false);
+      // process the data
+      skymapper.processData (data);
     }
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;
@@ -550,7 +525,7 @@ int test_processing (string const &infile,
   try {
     bool status (true);
     casa::String error;
-    casa::PagedImage<float> image ("skymap_test1.img");
+    casa::HDF5Image<float> image ("skymap-processing01.h5");
 
     //
     cout << "-- Image name       = " << image.name()      << endl;
@@ -558,8 +533,13 @@ int test_processing (string const &infile,
     cout << "-- Image type       = " << image.imageType() << endl;
     cout << "-- World axis names = " << image.coordinates().worldAxisNames() << endl;
     cout << "-- World axis units = " << image.coordinates().worldAxisUnits() << endl;
+    cout << "-- Reference pixel  = " << image.coordinates().referencePixel() << endl;
+    cout << "-- Reference value  = " << image.coordinates().referenceValue() << endl;
+    cout << "-- Increment        = " << image.coordinates().increment()      << endl;
     // Convert the image to FITS
-    status = casa::ImageFITSConverter::ImageToFITS(error, image, "!skymap_test1.fits");
+    status = casa::ImageFITSConverter::ImageToFITS(error,
+						   image,
+						   "!skymap-processing01.fits");
     if (!status) {
       std::cout << error << std::endl;
     }
@@ -630,9 +610,9 @@ int main (int argc,
   // Test the various methods for accessing internal data
 //   nofFailedTests += test_methods();
   // Test processing of data
-//   nofFailedTests += test_processing (infile,
-// 				     blocksize,
-// 				     have_dataset);
+  nofFailedTests += test_processing (infile,
+				     blocksize,
+				     have_dataset);
   
   return nofFailedTests;
 }

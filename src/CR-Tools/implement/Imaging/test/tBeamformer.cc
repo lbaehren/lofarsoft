@@ -24,6 +24,7 @@
 #include <casa/BasicMath/Random.h>
 
 #include <Coordinates/SkymapCoordinate.h>
+#include <Coordinates/TimeFreq.h>
 #include <Imaging/Beamformer.h>
 #include <Utilities/TestsCommon.h>
 #include "create_data.h"
@@ -59,10 +60,10 @@ using CR::SkymapQuantity;
 
 /*!
   \brief Test constructors for a new Beamformer object
-
+  
   There are quite a number of ways in which a new Beamformer object can be
   created, most importantly using an object of on the the base classes.
-
+  
   \return nofFailedTests -- The number of failed tests.
 */
 int test_Beamformer (uint blocksize=1024,
@@ -537,7 +538,7 @@ int test_weights (uint blocksize=1024,
   \return nofFailedTests -- The number of failed tests encountered within this
           function.
 */
-int test_coordinates ()
+int test_coordinates (uint blocksize=512)
 {
   cout << "\n[tBeamformer::test_coordinates]\n" << endl;
 
@@ -552,16 +553,64 @@ int test_coordinates ()
   antPositions(3) = casa::MVPosition (0,-100,0);
 
   /* Define frequency values */
-  uint nofFreq (2);
-  Vector<double> frequencies (nofFreq);
-  frequencies(0) = 100e06;
-  frequencies(1) = 200e06;
-
+  double sampleFreq (200e06);
+  uint nyquistZone (1);
+  CR::TimeFreq tf (blocksize,
+		   sampleFreq,
+		   nyquistZone);
+  
   /* Define data input */
   Matrix<casa::DComplex> data;
-  CR::test_getData (data,nofAntennas,nofFreq,false);
+   CR::test_getData (data,nofAntennas,tf.fftLength(),false);
 
-  cout << "[1] Geometrical weights for default SpatialCoordinate ..." << endl;
+  cout << "[1] Geometrical delays for default SpatialCoordinate ..." << endl;
+  try {
+    // create coordinate object
+    SpatialCoordinate coord;
+    Vector<double> refValue = coord.referenceValue();
+    refValue(2) = 1000;
+    coord.setReferenceValue(refValue);
+    // retrieve position values
+    Matrix<double> positions = coord.worldAxisValues();
+    // Create object to hold geometrical phases
+    GeomDelay delay;
+    delay.farField(true);
+    delay.setAntPositions (antPositions);
+    delay.setSkyPositions (positions,
+			   CoordinateType::DirectionRadius,
+			   false);
+    //
+    CR::test_showGeomDelay(delay);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[2] Geometrical phases for default SpatialCoordinate ..." << endl;
+  try {
+    // create coordinate object
+    SpatialCoordinate coord;
+    Vector<double> refValue = coord.referenceValue();
+    refValue(2) = 1000;
+    coord.setReferenceValue(refValue);
+    // retrieve position values
+    Matrix<double> positions = coord.worldAxisValues();
+    // Create object to hold geometrical phases
+    GeomPhase phase;
+    phase.farField(true);
+    phase.setAntPositions (antPositions);
+    phase.setSkyPositions (positions,
+			   CoordinateType::DirectionRadius,
+			   false);
+    phase.setFrequencies (tf.frequencyValues());
+    //
+    CR::test_showGeomPhase(phase,4,4,10);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[3] Geometrical weights for default SpatialCoordinate ..." << endl;
   try {
     // create coordinate object
     SpatialCoordinate coord;
@@ -576,65 +625,25 @@ int test_coordinates ()
     bf.setSkyPositions (positions,
 			   CoordinateType::DirectionRadius,
 			   false);
-    bf.setFrequencies (frequencies);
+    bf.setFrequencies (tf.frequencyValues());
     bf.farField (true);
     bf.summary();
-    // display geometrical delays
-    {
-      Matrix<double> delays = bf.delays();
-      //
-      cout << "-- Values of the geometrical delays [,pos]:" << endl;
-      cout << "\t" << delays.column(0) << endl;
-      cout << "\t" << delays.column(1) << endl;
-      cout << "\t" << delays.column(2) << endl;
-      cout << "\t" << delays.column(3) << endl;
-    }
-    // display geometrical phases
-    {
-      Cube<double> phases = bf.phases();
-      //
-      cout << "-- Values of the geometrical phases [,,pos]:" << endl;
-      cout << "\t[" << phases(0,0,0) << ", " << phases(0,1,0)
-	   << ", " << phases(0,2,0)  << ", " << phases(0,3,0)
-	   << "]" << endl;
-      cout << "\t[" << phases(0,0,1) << ", " << phases(0,1,1)
-	   << ", " << phases(0,2,1)  << ", " << phases(0,3,1)
-	   << "]" << endl;
-      cout << "\t[" << phases(0,0,2) << ", " << phases(0,1,2)
-	   << ", " << phases(0,2,2)  << ", " << phases(0,3,2)
-	   << "]" << endl;
-      cout << "\t[" << phases(0,0,3) << ", " << phases(0,1,3)
-	   << ", " << phases(0,2,3)  << ", " << phases(0,3,3)
-	   << "]" << endl;
-    }
-    // display geometrical weights
-    {
-      Cube<casa::DComplex> weights = bf.weights();
-      //
-      cout << "-- Values of the geometrical weights [,,pos]:" << endl;
-      cout << "\t[" << weights(0,0,0) << ", " << weights(0,1,0)
-	   << ", " << weights(0,2,0)  << ", " << weights(0,3,0)
-	   << "]" << endl;
-      cout << "\t[" << weights(0,0,1) << ", " << weights(0,1,1)
-	   << ", " << weights(0,2,1)  << ", " << weights(0,3,1)
-	   << "]" << endl;
-      cout << "\t[" << weights(0,0,2) << ", " << weights(0,1,2)
-	   << ", " << weights(0,2,2)  << ", " << weights(0,3,2)
-	   << "]" << endl;
-      cout << "\t[" << weights(0,0,3) << ", " << weights(0,1,3)
-	   << ", " << weights(0,2,3)  << ", " << weights(0,3,3)
-	   << "]" << endl;
-    }
+    // display internal parameters
+    CR::test_showGeomWeight (bf);
     // process block of data
     {
       Matrix<double> beam (bf.shapeBeam());
       //
       cout << "-- Processing block of input data ... " << endl;
       bf.processData (beam,data);
-      cout << "-- Input data: " << endl;
-      cout << data << endl;
-      cout << "-- Beamformed data:" << endl;
-      cout << beam << endl;
+      cout << "-- Data values " << data.shape() << " :" << endl;
+      cout << "\t[,0]\t" << data.column(0) << endl;
+      cout << "\t[,1]\t" << data.column(1) << endl;
+      cout << "\t[,2]\t" << data.column(2) << endl;
+      cout << "-- Beamformed data " << beam.shape() << " :" << endl;
+      cout << "\t[,0]\t" << beam.column(0) << endl;
+      cout << "\t[,1]\t" << beam.column(1) << endl;
+      cout << "\t[,2]\t" << beam.column(2) << endl;
     }
   } catch (std::string message) {
     std::cerr << message << std::endl;
@@ -710,9 +719,7 @@ int test_processing (uint blocksize=1024,
     beam.resize(bf.shapeBeam());
     status = bf.processData (beam,data);
 #ifdef DEBUGGING_MESSAGES
-    cout << "-- Antenna positions    = " << bf.antPositions() << endl;
-    cout << "-- Sky positions        = " << bf.skyPositions() << endl;
-    cout << "-- Frequency values     = " << bf.frequencies()  << endl;
+    CR::test_showGeomPhase (bf);
     cout << "-- Beamformed data [,0] = " << beam.column(0)    << endl;
 #endif
   } catch (std::string message) {

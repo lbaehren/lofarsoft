@@ -293,20 +293,15 @@ namespace CR { // Namespace CR -- begin
   
   casa::Cube<double> GeomPhase::phases ()
   {
+
     if (bufferPhases_p) {
       /* If the values of the geometrical phases are buffered, all we need to
 	 do is return the array string them. */
       return phases_p;
     } else {
       casa::Cube<double> p;
-      /* If we need to compute the geometrical phases, check if at least the
-	 values of the delays are buffered. */
-      if (bufferDelays_p) {
-	phases(p,delays_p);
-      } else {
-	casa::Matrix<double> geomDelays = GeomDelay::delays();
-	phases(p,geomDelays);
-      }
+      // forward function call
+      phases (p);
       // return the phases
       return p;
     }
