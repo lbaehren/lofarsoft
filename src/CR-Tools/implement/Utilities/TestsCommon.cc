@@ -400,5 +400,135 @@ namespace CR { // Namespace CR -- begin
     
     /* Export the values of the geometrical phases */
   }  
+
+  //_____________________________________________________________________________
+  //                                                           test_showGeomDelay
+  
+  void test_showGeomDelay (CR::GeomDelay &delay,
+			   int nofSkyPositions,
+			   int nofDelays)
+  {
+    /* Display antenna positions */
+    {
+      Matrix<double> antPositions = delay.antPositions();
+      IPosition shape = antPositions.shape();  // [ant,3]
+      //
+      cout << "-- Antenna positions :" << endl;
+      for (int n(0); n<shape(0); n++) {
+	cout << "\t" << antPositions.row(n) << endl;
+      }
+    }
+    
+    /* Display sky positions */
+    {
+      Matrix<double> skyPositions = delay.skyPositions();
+      IPosition shape = skyPositions.shape();  // [sky,3]
+      //
+      if (nofSkyPositions > shape(0)) {
+	nofSkyPositions = shape(0);
+      }
+      //
+      cout << "-- Sky positions :" << endl;
+      for (int n(0); n<nofSkyPositions; n++) {
+	cout << "\t" << skyPositions.row(n) << endl;
+      }
+    }
+    
+    /* Display geometrical delays */
+    {
+      Matrix<double> delays = delay.delays();
+      IPosition shape       = delays.shape();  // [ant,sky]
+      //
+      if (nofDelays > shape(1)) {
+	nofDelays = shape(1);
+      }
+      //
+      cout << "-- Values of the geometrical delays [,pos]:" << endl;
+      for (int n(0); n<nofDelays; n++) {
+	cout << "\t" << delays.column(n) << endl;
+      }
+    }
+  }
+  
+  //_____________________________________________________________________________
+  //                                                           test_showGeomPhase
+  
+  void test_showGeomPhase (CR::GeomPhase &phase,
+			   int nofSkyPositions,
+			   int nofDelays,
+			   int nofPhases)
+  {
+    /* Display the parameters of the underlying GeomDelay object */
+    test_showGeomDelay (phase,
+			nofSkyPositions,
+			nofDelays);
+    
+    /* Display frequency values */
+    {
+      Vector<double> freq = phase.frequencies();
+      //
+      cout << "-- Frequency values :" << endl;
+      cout << "\t[" 
+	   << freq(0) << " "
+	   << freq(1) << " "
+	   << freq(2) << " "
+	   << freq(3) << " .. ]" << endl;
+    }
+    
+    // display geometrical phases
+    {
+      Cube<double> phases = phase.phases();
+      IPosition shape     = phases.shape();   // [freq,ant,sky]
+      //
+      if (nofSkyPositions > shape(2)) {
+	nofSkyPositions = shape(2);
+      }
+      //
+      cout << "-- Values of the geometrical phases [,,pos]:" << endl;
+      for (int n(0); n<nofSkyPositions; n++) {
+	cout << "\t[" << phases(1,0,n)
+	     << ", "  << phases(1,1,n)
+	     << ", "  << phases(1,2,n) 
+	     << ", "  << phases(1,3,n)
+	     << "]"   << endl;
+      }
+    }
+    
+  }
+
+  //_____________________________________________________________________________
+  //                                                          test_showGeomWeight
+  
+  void test_showGeomWeight (CR::GeomWeight &weight,
+			    int nofSkyPositions,
+			    int nofDelays,
+			    int nofPhases)
+  {
+    /* Display the parameters of the underlying GeomPhase object */
+    test_showGeomPhase (weight,
+			nofSkyPositions,
+			nofDelays,
+			nofPhases);
+    
+    // display geometrical weights
+    {
+      Cube<casa::DComplex> weights = weight.weights();
+      IPosition shape              = weights.shape();   // [freq,ant,sky]
+      int freq                     = 1;
+      //
+      if (nofSkyPositions > shape(2)) {
+	nofSkyPositions = shape(2);
+      }
+      //
+      cout << "-- Values of the geometrical weights [,,pos]:" << endl;
+      for (int sky(0); sky<nofSkyPositions; sky++) {
+	cout << "\t[" << weights(freq,0,sky);
+	for (int ant(1); ant<shape(1); ant++) {
+	  cout << ", "  << weights(freq,ant,sky);
+	}
+	cout << "]"   << endl;
+      }
+    }
+  }
   
 } // Namespace CR -- end
