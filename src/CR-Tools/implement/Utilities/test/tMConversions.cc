@@ -206,6 +206,49 @@ int test_MDirection ()
 //                                                                 test_MPosition
 
 /*!
+  \brief Test working with Measures of type MFrequency
+  
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function
+*/
+int test_MFrequency () 
+{
+  std::cout << "\n[tMConversions::test_MFrequency]\n" << endl;
+
+  int nofFailedTests (0);
+
+  std::cout << "[1] Default constructor ..." << endl;
+  try {
+    casa::MFrequency freq;
+    //
+    std::cout << "-- MFrequency()  = " << freq                 << endl;
+    std::cout << "                 = " << freq.get("Hz")       << endl;
+    std::cout << "                 = " << freq.get("Hz").get() << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] Construction from Quantity ..." << endl;
+  try {
+    casa::MFrequency freq (casa::Quantity(200,"MHz"));
+    //
+    std::cout << "-- MFrequency(Quantity) = " << freq           << endl;
+    std::cout << "                        = " << freq.get("Hz") << endl;
+    std::cout << "                        = " << freq.get("Hz").get() << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+
+
+  return nofFailedTests;
+}
+
+//_______________________________________________________________________________
+//                                                                 test_MPosition
+
+/*!
   \brief Test working with Measures of type MPosition
 
   \return nofFailedTests -- The number of failed tests encountered within this
@@ -329,6 +372,7 @@ int main ()
   int nofFailedTests (0);
 
   nofFailedTests += test_MeasValue();
+  nofFailedTests += test_MFrequency();
   nofFailedTests += test_MDirection();
   nofFailedTests += test_MPosition();
   nofFailedTests += test_operations ();

@@ -119,6 +119,11 @@ namespace CR { // Namespace CR -- begin
       casa::MDirection::Types mtype;
       mtype = MDirectionType ("B1950");
       \endcode
+      <li> Create a Measure to hold a frequency:
+      \code
+      casa::MFrequency freq1;
+      casa::MFrequency freq2 (casa::Quantity(200,"MHz"));
+      \endcode
     </ol>
     
   */
