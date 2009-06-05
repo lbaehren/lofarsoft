@@ -108,6 +108,8 @@ using CR::LopesEventIn;
   doDispersionCal        = true
   doDelayCal             = true
   doRFImitgation         = true
+  doFlagNotActiveAnts    = true
+  doAutoFlagging         = true
   polarization           = ANY
   plotStart              = -2.05e-6
   plotStop               = -1.60e-6
@@ -156,6 +158,8 @@ using CR::LopesEventIn;
     <li>correction of the dispersion (frequency dependent delay) is enabled,
     <li>correction of the general delay is enabled,
     <li>supresses narrow band noise (RFI),
+    <li>flags antennas marked as "not active" in the CalTables
+    <li>flags antennas due to bad signal (does not affect flagging by the phase
     <li>the analysis does not take care of the polarization of the antennas
         (select EW, NS or BOTH if you want to results for one (both) polarizations),
     <li>the plots start at -2.05 micro seconds and end at -1.60 micro seconds,
@@ -215,13 +219,13 @@ using CR::LopesEventIn;
 // Set default configuration values for the pipeline
 string caltablepath = caltable_lopes;
 string path = "";
-bool preferGrande    = false;     // per default prefer KASCADE reconstruction as input
-bool generatePlots   = true;      // the plot prefix will be the name of the event file
-bool generateSpectra = false;     // by default no spectra are plotted
-bool singlePlots     = false;     // by default there are no single plots for each antenna
-bool PlotRawData     = false;	  // by default there the raw data are not plotted
-bool CalculateMaxima = false;	  // by default the maxima are not calculated
-bool listCalcMaxima  = false;     // print calculated maxima in more user friendly way
+bool preferGrande    = false;        // per default prefer KASCADE reconstruction as input
+bool generatePlots   = true;         // the plot prefix will be the name of the event file
+bool generateSpectra = false;        // by default no spectra are plotted
+bool singlePlots     = false;        // by default there are no single plots for each antenna
+bool PlotRawData     = false;	      // by default there the raw data are not plotted
+bool CalculateMaxima = false;	      // by default the maxima are not calculated
+bool listCalcMaxima  = false;        // print calculated maxima in more user friendly way
 bool printShowerCoordinates=false;   // print the distance between antenna and shower core
 bool RotatePos = true; 	      // should be true if coordinates are given in KASKADE frame
 bool verbose = true;
@@ -230,8 +234,10 @@ bool simplexFit = true;
 int doTVcal = -1;		      // 1: yes, 0: no, -1: use default	
 bool doGainCal = true;		      // calibration of the electrical fieldstrength
 bool doDispersionCal = true;	      // application of the CalTable PhaseCal values	
-bool doDelayCal = true;		      // correction for the general delay of each antenna
+bool doDelayCal = true;              // correction for the general delay of each antenna
 bool doRFImitigation = true;	      // supresses narrow band noise (RFI)
+bool doFlagNotActiveAnts = true;     // flags antennas marked as "not active" in the CalTables
+bool doAutoFlagging = true;	      // flags antennas due to bad signal (does not affect flagging by the phase
 string polarization = "ANY";	      // polarization: ANY, EW, NS or BOTH
 bool both_pol = false;		      // Should both polarizations be processed?
 double plotStart = -2.05e-6;	      // in seconds
@@ -594,7 +600,6 @@ void readConfigFile (const string &filename)
           }
 	}
 
-
         if ( (keyword.compare("doRFImitigation")==0) || (keyword.compare("DoRFIMitigation")==0)
              || (keyword.compare("DoRFImitigation")==0) || (keyword.compare("dorfimitigation")==0)) {
           if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
@@ -607,6 +612,38 @@ void readConfigFile (const string &filename)
 	  } else {
             cerr << "\nError processing file \"" << filename <<"\".\n" ;
             cerr << "doRFImitigation must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+	}
+
+        if ( (keyword.compare("doFlagNotActiveAnts")==0) || (keyword.compare("DoFlagNotActiveAnts")==0)
+             || (keyword.compare("doflagnotactiveants")==0) || (keyword.compare("Doflagnotactiveants")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
+	    doFlagNotActiveAnts = true;
+	    cout << "doFlagNotActiveAnts set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
+	    doFlagNotActiveAnts = false;
+	    cout << "doFlagNotActiveAnts set to 'false'.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "doFlagNotActiveAnts must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+	}
+
+        if ( (keyword.compare("doAutoFlagging")==0) || (keyword.compare("doAutoFlagging")==0)
+             || (keyword.compare("doAutoFlagging")==0) || (keyword.compare("doAutoFlagging")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
+	    doAutoFlagging = true;
+	    cout << "doAutoFlagging set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
+	    doAutoFlagging = false;
+	    cout << "doAutoFlagging set to 'false'.\n";
+	  } else {
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "doAutoFlagging must be either 'true' or 'false'.\n";
             cerr << "\nProgram will continue skipping the problem." << endl;
           }
 	}
@@ -1415,6 +1452,8 @@ int main (int argc, char *argv[])
              << "doDispersionCal = true\n"
              << "doDelayCal = true\n"
              << "doRFImitigation = true\n"
+             << "doFlagNotActiveAnts = true\n"
+             << "doAutoFlagging = true\n"
              << "polarization = ANY\n"
              << "plotStart = -2.05e-6\n"
              << "plotStop = -1.60e-6\n"
@@ -1764,6 +1803,8 @@ int main (int argc, char *argv[])
                                                doDispersionCal,
                                                doDelayCal,
                                                doRFImitigation,
+                                               doFlagNotActiveAnts,
+                                               doAutoFlagging,
                                                upsamplingRate,
                                                polarization,
                                                singlePlots,
@@ -1857,6 +1898,8 @@ int main (int argc, char *argv[])
                                                doDispersionCal,
                                                doDelayCal,
                                                doRFImitigation,
+                                               doFlagNotActiveAnts,
+                                               doAutoFlagging,
                                                upsamplingRate,
                                                polarization,
                                                singlePlots,
@@ -1864,7 +1907,7 @@ int main (int argc, char *argv[])
                                                CalculateMaxima,
                                                listCalcMaxima,
                                                printShowerCoordinates,
-					       ignoreDistance);
+                                               ignoreDistance);
 
           /* make a postscript with a summary of all plots
            if summaryColumns = 0 the method does not create a summary. */

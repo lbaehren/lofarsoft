@@ -688,7 +688,7 @@ namespace CR { // Namespace CR -- begin
       // Create the Plot
       string label;
       label = "GT " + gtlabel.str() + " - CC-Beam and Power";
-      plotter.AddLabels("Time t [#gmsec]", "CC-Beam [#gmV/m/MHz]",label);
+      plotter.AddLabels("time t [#gmsec]", "CC-beam [#gmV/m/MHz]",label);
     
       // Add CC-beam
       plotter.PlotLine(xaxis(plotRange),ccbeam(plotRange),9,1);
@@ -791,7 +791,7 @@ namespace CR { // Namespace CR -- begin
       // Create the Plot
       string label;
       label = "GT " + gtlabel.str() + " - X-Beam and Power";
-      plotter.AddLabels("Time t [#gmsec]", "X-Beam [#gmV/m/MHz]",label);
+      plotter.AddLabels("time t [#gmsec]", "X-beam [#gmV/m/MHz]",label);
 
       // Add X-beam
       plotter.PlotLine(xaxis(plotRange),xbeam(plotRange),9,1);
@@ -933,7 +933,7 @@ namespace CR { // Namespace CR -- begin
         if (rawData)
             std::cout <<"Plotting the raw data FX\nAntenna ... ";
         else
-	    std::cout <<"Plotting the fieldstrength\n Antenna ..." ;
+	    std::cout <<"Plotting the field strength\n Antenna ..." ;
 
 
         for (unsigned int i = 0; i < antennaSelection.nelements(); i++){
@@ -963,13 +963,13 @@ namespace CR { // Namespace CR -- begin
             // Add labels
             if (calibrationMode)
             {
-              plotter.AddLabels("Time t [#gmsec]", "Voltage [V]",label);
+              plotter.AddLabels("time t [#gmsec]", "voltage [V]",label);
             } else
             {
               if (rawData)
-                plotter.AddLabels("Time t [#gmsec]", "Counts",label);
+                plotter.AddLabels("time t [#gmsec]", "counts",label);
               else
-                plotter.AddLabels("Time t [#gmsec]", "Fieldstrength #ge#d0#u [#gmV/m/MHz]",label);
+                plotter.AddLabels("time t [#gmsec]", "field strength #ge#d0#u [#gmV/m/MHz]",label);
             }
   
             // Plot (upsampled) trace
@@ -1001,7 +1001,7 @@ namespace CR { // Namespace CR -- begin
     	  std::cout <<"Plotting the raw data FX of all antennas to file: "
 	            << plotfilename << std::endl;
         else
-    	  std::cout <<"Plotting the fieldstrength of all antennas to file: "
+    	  std::cout <<"Plotting the field strength of all antennas to file: "
 	            << plotfilename << std::endl;
 
         // Initialize the plot giving xmin, xmax, ymin and ymax
@@ -1012,13 +1012,13 @@ namespace CR { // Namespace CR -- begin
 
         if (calibrationMode)
         {
-          plotter.AddLabels("Time t [#gmsec]", "Voltage [V]",label);
+          plotter.AddLabels("time t [#gmsec]", "Voltage [V]",label);
         } else
         {
           if (rawData)
-            plotter.AddLabels("Time t [#gmsec]", "Counts",label);
+            plotter.AddLabels("time t [#gmsec]", "counts",label);
           else
-            plotter.AddLabels("Time t [#gmsec]", "Fieldstrength #ge#d0#u [#gmV/m/MHz]",label);
+            plotter.AddLabels("time t [#gmsec]", "field strength #ge#d0#u [#gmV/m/MHz]",label);
         }
 
         // Create the plots looping through antennas
@@ -1147,7 +1147,7 @@ namespace CR { // Namespace CR -- begin
       plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
       // Add labels 
-      plotter.AddLabels("Frequency f [MHz]", "lg Amplitude",label);
+      plotter.AddLabels("frequency f [MHz]", "lg amplitude",label);
       label = "GT " + gtlabel.str() + " - " + antennanumber.str() +" Antennas";
 
       // Plot spectrum
@@ -1192,7 +1192,7 @@ namespace CR { // Namespace CR -- begin
             // Initialize the plot giving xmin, xmax, ymin and ymax
             plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
-            plotter.AddLabels("Frequency f [MHz]", "lg Amplitude",label);
+            plotter.AddLabels("frequency f [MHz]", "lg amplitude",label);
 
             // Plot spectrum
             plotter.PlotLine(xaxis(plotRange),yValues.column(i)(plotRange),color,1);
@@ -1224,7 +1224,7 @@ namespace CR { // Namespace CR -- begin
         plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
         // Add labels 
-        plotter.AddLabels("Frequency f [MHz]", "lg Amplitude",label);
+        plotter.AddLabels("frequency f [MHz]", "lg amplitude",label);
 
         antennanumber << ntrue(antennaSelection);
         label = "GT " + gtlabel.str() + " - " + antennanumber.str() + " Antennas";
@@ -1278,7 +1278,7 @@ namespace CR { // Namespace CR -- begin
       if (rawData)
         cout << "\nLooking for maxima in the envelope of the raw data FX: \n";
       else
-        cout << "\nLooking for maxima in the envelope of the calibrated fieldstrength: \n";
+        cout << "\nLooking for maxima in the envelope of the calibrated field strength: \n";
 
       // check if noise shall be calculated
       if ( cc_center != 1e99) {

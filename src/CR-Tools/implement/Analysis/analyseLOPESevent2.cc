@@ -126,6 +126,8 @@ namespace CR { // Namespace CR -- begin
 					  bool doDispersionCal,
 					  bool doDelayCal,
 					  bool doRFImitigation,
+					  bool doFlagNotActiveAnts,
+					  bool doAutoFlagging,
 					  Double UpSamplingRate,
 					  String Polarization,
 					  bool SinglePlots,
@@ -146,7 +148,7 @@ namespace CR { // Namespace CR -- begin
       // initialize the pipeline (flag not active antennas and antennas with bad signals)
       if (! SetupEvent(evname, doTVcal, FlaggedAntIDs, AntennaSelection, 
 		       UpSamplingRate, ExtraDelay, verbose, doGainCal, doDispersionCal, doDelayCal, doRFImitigation,
-                       true,true)) {
+                       doFlagNotActiveAnts, doAutoFlagging)) {
 	cerr << "analyseLOPESevent2::RunPipeline: " << "Error during SetupEvent()!" << endl;
 	return Record();
       }

@@ -313,38 +313,41 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Process one event using the CompletePipeline class
 
-      \param evname          - path to the eventfile to be processed
-      \param Az              - value for the azimuth direction [in deg] (e.g. from KASCADE)
-      \param El              - value for the elevation [in deg] (e.g. from KASCADE)
-      \param distance        - value for the distance parameter [in m]
-      \param XC              - x-position of the shower center [in m]
-      \param YC              - y-position of the shower center [in m]
-      \param RotatePos       - rotate the XC/YC position (set to False if XC/YC already
-                               in LOPES coordinates)
-      \param PlotPrefix      - prefix (including path) for the plots to be generated
-      \param generatePlots   - generate the postscript plots
-      \param generateSpectra - generate postscript plots of the spectrum
-      \param FlaggedAntIDs   - list of antenna IDs that are to be flagged.
-      \param verbose         - produce verbose output on the commandline.
-      \param simplexFit      - fit the direction with a simple simplex fit
-      \param ExtraDelay      - additional delay to shift the data in time.
-      \param doTVcal         - perform the phase calibration on the TV transmitter
-                               (1: yes, 0: no, -1: use default)
-      \param doGainCal       - apply calibration of electrical fieldstrength
-      \param doDispersionCal - correct for the dispersion (frequency dependend PhaseCal values)
-      \param doDelayCal      - correct for general delay of the antennas
-      \param doRFImitigation - suppresses narrow band noise
-      \param UpSamplingRate  - Samplerate for upsampling. If smaller than the original
-                               samplerate (80MHz for LOPES) then no upsampling is done.
-			            (Check the docs of <tt>UpSampledDR<\tt> for more info.)
-      \param Polarization    - Polarization type to select only part of the antennas 
-                               ("ANY": ignore antenna polarization)
-      \param SinglePlots     - makes a plot for each antenna
-      \param PlotRawData     - Plots the raw data FX
-      \param CalculateMaxima - Finds the maximum and the minimum of the trace in the plot range
-      \param listCalcMaxima  - output version of CalculateMax
+      \param evname              - path to the eventfile to be processed
+      \param Az                  - value for the azimuth direction [in deg] (e.g. from KASCADE)
+      \param El                  - value for the elevation [in deg] (e.g. from KASCADE)
+      \param distance            - value for the distance parameter [in m]
+      \param XC                  - x-position of the shower center [in m]
+      \param YC                  - y-position of the shower center [in m]
+      \param RotatePos           - rotate the XC/YC position (set to False if XC/YC already
+                                   in LOPES coordinates)
+      \param PlotPrefix          - prefix (including path) for the plots to be generated
+      \param generatePlots       - generate the postscript plots
+      \param generateSpectra     - generate postscript plots of the spectrum
+      \param FlaggedAntIDs       - list of antenna IDs that are to be flagged.
+      \param verbose             - produce verbose output on the commandline.
+      \param simplexFit          - fit the direction with a simple simplex fit
+      \param ExtraDelay          - additional delay to shift the data in time.
+      \param doTVcal             - perform the phase calibration on the TV transmitter
+                                   (1: yes, 0: no, -1: use default)
+      \param doGainCal           - apply calibration of electrical fieldstrength
+      \param doDispersionCal     - correct for the dispersion (frequency dependend PhaseCal values)
+      \param doDelayCal          - correct for general delay of the antennas
+      \param doRFImitigation     - suppresses narrow band noise
+      \param doFlagNotActiveAnts - flags antennas marked as "not active" in the CalTables
+      \param doAutoFlagging      - flags antennas due to bad signal (does not affect flagging by the phase 
+      \param UpSamplingRate      - Samplerate for upsampling. If smaller than the original
+                                   samplerate (80MHz for LOPES) then no upsampling is done.
+			                (Check the docs of <tt>UpSampledDR<\tt> for more info.)
+      \param Polarization        - Polarization type to select only part of the antennas 
+                                   ("ANY": ignore antenna polarization)
+      \param SinglePlots         - makes a plot for each antenna
+      \param PlotRawData         - Plots the raw data FX
+      \param CalculateMaxima     - Finds the maximum and the minimum of the trace in the plot range
+      \param listCalcMaxima      - output version of CalculateMax
       \param printShowerCoordinates -	 print the x,y and total distance between antenna and shower core in shower coordinates
-      \param ignoreDistance  -	ignores the given distance but tries to find it automatically 
+      \param ignoreDistance      -	ignores the given distance but tries to find it automatically 
+
       \return Record with the results.
     */
     Record RunPipeline (const string& evname,
@@ -366,6 +369,8 @@ namespace CR { // Namespace CR -- begin
 			bool doDispersionCal=true,
 			bool doDelayCal=true,
 			bool doRFImitigation=true,
+			bool doFlagNotActiveAnts=true,
+			bool doAutoFlagging=true,
 			Double UpSamplingRate=0.,
 			String Polarization="ANY",
 			bool SinglePlots=false,
