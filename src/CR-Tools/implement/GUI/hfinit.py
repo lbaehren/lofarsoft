@@ -3,6 +3,8 @@ pyoblist=[]
 PUSH=DIR.TO
 PULL=DIR.FROM
 
+maxnetlevel=999
+
 def hfERR(txt):
     print "Error:",txt
 
@@ -181,6 +183,27 @@ class DataList(list):
     def put_silent(self,value):
         for d in self: d.put_silent(value)
         return self
+    def storePyDBG(self,value):
+        for d in self: d.storePyDBG(value)
+        return self
+    def setVerbose(self,value):
+        for d in self: d.setVerbose(value)
+        return self
+    def setDebug(self,value):
+        for d in self: d.setDebug(value)
+        return self
+    def setDebugGUI(self,value):
+        for d in self: d.setDebugGUI(value)
+        return self
+    def setNetLevel(self,value):
+        for d in self: d.setNetLevel(value)
+        return self
+    def printStatus(self,value=True):
+        for d in self: d.printStatus(value)
+        return self
+    def clearModification(self):
+        for d in self: d.clearModification()
+        return self
     def val(self):
         "Returns a list of the values in the Data object list"
         ret=[]
@@ -205,6 +228,31 @@ class DataList(list):
         "Returns a list of the values in the Data object list in Complex number format"
         ret=[]
         for d in self: ret.append(d.getC())
+        return ret
+    def getDebugGUI(self):
+        "Returns a list of the GUI verbose flag in the Data object list."
+        ret=[]
+        for d in self: ret.append(d.getDebugGUI())
+        return ret
+    def getDebug(self):
+        "Returns a list of the Debug flag in the Data object list."
+        ret=[]
+        for d in self: ret.append(d.getDebug())
+        return ret
+    def getNetLevel(self):
+        "Returns a list of the NetLevels in the Data object list."
+        ret=[]
+        for d in self: ret.append(d.getNetLevel())
+        return ret
+    def getOid(self):
+        "Returns a list of the IDs in the Data object list."
+        ret=[]
+        for d in self: ret.append(d.getOid())
+        return ret
+    def getName(self):
+        "Returns a list of the Names in the Data object list."
+        ret=[]
+        for d in self: ret.append(d.getName())
         return ret
 
 def DataUnion(*dlist):
@@ -282,6 +330,9 @@ StringVec.__repr__=VecToPrintString
 def type2str(type):
     return {TYPE.POINTER:"ptr",TYPE.INTEGER:"int",TYPE.NUMBER:"float",TYPE.STRING:"str",TYPE.COMPLEX:"cmplx",TYPE.UNDEF:"undef"}[type]
 
+def object_all(self):
+    return self[self.getAllIDs()]
+
 def object_getitem(self,value):
     if type(value)==int:
         return self.Object(value)
@@ -296,6 +347,11 @@ def object_getitem(self,value):
             for i in ids:
                l.append(self.Object(i))
             return DataList(l)
+    if type(value)==IntVec:
+        l=list()
+        for i in value:
+            l.append(self.Object(i))
+        return DataList(l)
 
 def object_setitem(self,key,value):
     "Used to overload the assign operation for a data object with [] to set the content of the vector."
@@ -453,6 +509,9 @@ class _l():
 def object_hasPyQt(self):
     return not (self.getStoredPyQtObject() == None)
 
+def object_hasPyDBG(self):
+    return not (self.getStoredPyDBGObject() == None)
+
 def getStoredPyFuncObject(self):
     "Retrieves the user defined python function from the data object."
     oid=self.getOid()
@@ -462,6 +521,16 @@ def getStoredPyFuncObject(self):
 def setStoredPyFuncObject(self, pyob):
     "Keeps a python reference to the user defined python function in the data object, so that Python does not delete it."
     self.stored_pyfuncobj[self.getOid()]=pyob
+
+def getStoredPyDBGObject(self):
+    "Retrieves the user defined python DBG Object from the data object."
+    oid=self.getOid()
+    if self.stored_pydbgobj.has_key(oid): return self.stored_pydbgobj[oid]
+    else: return None
+    
+def setStoredPyDBGObject(self, pyob):
+    "Keeps a python reference to the user defined python DBG Object in the data object, so that Python does not delete it."
+    self.stored_pydbgobj[self.getOid()]=pyob
 
 def getStoredPyQtObject(self):
     "Retrieves the user defined python Qt Object from the data object."
@@ -488,7 +557,7 @@ def object_getT(self,Type):
     return ret
 
 class hfPyQtObject(QtCore.QObject):
-    "Base class for PyQtObjects that can be assigned to a Data object and take care of the PyQt Signals and Slots. The class has one slot: hfput(value), which receives a new value and assigns it to the object. It emits a signal hfupdated(QString) which contains the new value in an object, if it was changed. The method updated(object) is called from c++ and has as argument the object which was updated. self.obj should contain a reference to the Data object and needs to be set explicitly."
+    "Base class for PyQtObjects that can be assigned to a Data object and take care of the PyQt Signals and Slots. The class has one slot: hfput(value), which receives a new value and assigns it to the object. It emits a signal hfupdated(QString) which contains the new value in an object, if it was changed. The method updated(object) is called from c++ and has as argument the object which was updated. self.obj should contain a reference to the Data object and needs to be set explicitly. This is done by activatePyQt."
 #    def __init__(self,Type="QString"):   The presence of the __init__ routine cause problems ..., like: RuntimeError: underlying C/C++ object has been deleted
 #        self.type=Type
 #        return None
@@ -509,6 +578,21 @@ class hfPyQtObject(QtCore.QObject):
         return 0
 
 
+class hfPyDBGObject(QtCore.QObject):
+    "Base class for PyDBGObjects that can be assigned to a Data object and take care of interfacing with Python through user input."
+    def execute(self,d,s=""):
+        print eval(s);
+        app.processEvents()
+        return 0
+    def gui(self,d,s=""):        
+        d.nv(maxnetlevel)
+        d.globals["guifuncs"].DBGContinueButtonPressed=False
+        while not d.globals["guifuncs"].DBGContinueButtonPressed:
+            app.processEvents()
+        return 0
+
+dbg=hfPyDBGObject()
+
 def object_activatePyQt(self,Type="QString"):
     "Creates and stores a hfPyQtObject for communication via the SIGNAL/SLOT mechanism between PyQt and a Data object."
     obj=hfPyQtObject()
@@ -520,6 +604,10 @@ def object_activatePyQt(self,Type="QString"):
 def object_PyQt(self):
     "Returns the Python object which interfaces between the Data object and PyQt."
     return self.getStoredPyQtObject()
+    
+def object_PyDBG(self):
+    "Returns the Python object which interfaces between the Data object and Python."
+    return self.getStoredPyDBGObject()
     
 def object_SIGNAL(self,Type="QString"):
     "Returns the SIGNAL the Data Object will send when updated. Can be used for QObject.connect()."
@@ -670,11 +758,13 @@ def object_lshift(self,other):
 def DOTname(self):
     return self.getName()+"_"+str(self.getOid())
 
-def object_getDOT(self,maxnetlevel,details=1,reverse=False):
+def object_getDOT(self,maxnetlevel,details=1,reverse=False,highlight=False):
     "Returns the network connections of the object in a form suitable for exporting it in the DOT language format (www.graphviz.org)"
     name=DOTname(self)
     typ=type2str(self.getType())
     shape="egg"
+    fontname="Times"
+    fontsize=10
     label=self.getName().replace("-","__")
     netlevel=self.getNetLevel()
     if netlevel>maxnetlevel:
@@ -697,13 +787,20 @@ def object_getDOT(self,maxnetlevel,details=1,reverse=False):
             if not modified: color="green"
         if self.hasFunc() & self.hasData(): shape="octagon"
     props='label="'+label+'"'
+    props+=",fontname="+fontname
+    if fontsize>0: 
+        props+=",fixedsize=true"
+        props+=",height="+str(0.8*fontsize/10.)
+        props+=",width="+str(1.4*fontsize/10.)
+        props+=",fontsize="+str(fontsize)
+    if highlight: 
+        props+=",style=bold"
     props+=",shape="+shape
     props+=",color="+color
     out = name +" ["+props+"];"
     if not reverse:
-        l= self.listIDs(DIR.TO)
-        dirs=self.listDirs(DIR.TO)
-        modflags=self.listModFlags(DIR.TO)
+        l=IntVec(); dirs=DirVec(); modflags=StringVec(); names=StringVec();
+        self.getNeighboursList(DIR.TO,maxnetlevel,l,names,dirs,modflags)
         for i in range(len(l)):
             if len(out)>0:
                 out+="\n"
@@ -713,9 +810,8 @@ def object_getDOT(self,maxnetlevel,details=1,reverse=False):
                 if modflags[i]=="NULL.0": arrowcolor="black"
                 out += name + " -> " + DOTname(self[l[i]])+"[arrowhead="+arrowhead+",color="+arrowcolor+"];"
     else:
-        l= self.listIDs(DIR.FROM)
-        dirs=self.listDirs(DIR.FROM)
-        modflags=self.listModFlags(DIR.FROM)
+        l=IntVec(); dirs=IntVec(); modflags=StringVec(); names=StringVec();
+        self.getNeighbourList(DIR.FROM,maxnetlevel,l,names,dirs,modflags)
         for i in range(len(l)):
             if len(out)>0:
                 out+="\n";
@@ -754,8 +850,8 @@ class hfWrite_Str():
 
 def object_exportDOT(self,destination,maxnetlevel=999,details=1,reverse=False):
     "Exports the entire network structure into a .dot file or QByte array that can be viewed with graphviz or dotty"
-    
     l = self.getAllIDs()
+    myid=self.getOid()
     if destination=="FILE": 
         name=self.getName()
         fn=name+".dot" 
@@ -770,10 +866,11 @@ def object_exportDOT(self,destination,maxnetlevel=999,details=1,reverse=False):
     else: 
         print "Error - object_exportDOT: Destination",destination,"unknown!"
         return
-    OUT.write('digraph G {\nsize="8.25,11.6"; ratio=compress;\n')
+#    OUT.write('digraph G {\nsize="8.25,11.6"; ratio=compress;\n')
+    OUT.write('digraph G {\nsize="8.25,11.6"; ratio=auto;\n')
     n=0
     for i in l:
-        if ((n==0) | (i!=0)): OUT.write(self[i].getDOT(maxnetlevel,details,reverse)+"\n")
+        if ((n==0) | (i!=0)): OUT.write(self[i].getDOT(maxnetlevel,details,reverse,myid==i)+"\n")
         n+=1
     OUT.write("}\n")
     return OUT.close()
@@ -788,12 +885,14 @@ def object_net2qb(self,maxnetlevel=999):
     return qb
 
 def object_nview(self,maxnetlevel=999):
-    "Allows one to dsiplay the network an object is embedded in, in a QtWidget. self is the object, and maxnetlevel says how much detail is to be shown - increases in steps of powers of ten: 9,99,999,9999"
-    self.qsvg=QtSvg.QSvgWidget()
-    self.qsvg.setWindowTitle(self.getName()+" Network Display")
-    self.qsvg.load(object_net2qb(self,maxnetlevel))
-    self.qsvg.raise_()
-    self.qsvg.show()
+    "Allows one to display the network an object is embedded in, in a QtWidget. self is the object, and maxnetlevel says how much detail is to be shown - increases in steps of powers of ten: 9,99,999,9999"
+    if (type(self.globals["qsvg"])!=QtSvg.QSvgWidget):
+        self.globals["qsvg"]=QtSvg.QSvgWidget()
+        self.globals["qsvg"].resize(800,600)
+        self.globals["qsvg"].raise_()
+        self.globals["qsvg"].show()
+        self.globals["qsvg"].setWindowTitle(self.getName()+" Network Display")
+    self.globals["qsvg"].load(object_net2qb(self,maxnetlevel))
 #    fn=self.exportDOT("FILE",maxnetlevel)
 #    os.system("dot -Tsvg "+fn+" -o "+fn+".svg")
 
@@ -860,16 +959,49 @@ Data.getStoredPyFuncObject=getStoredPyFuncObject
 Data.setStoredPyFuncObject=setStoredPyFuncObject
 Data.getStoredPyQtObject=getStoredPyQtObject
 Data.setStoredPyQtObject=setStoredPyQtObject
+Data.getStoredPyDBGObject=getStoredPyDBGObject
+Data.setStoredPyDBGObject=setStoredPyDBGObject
 Data.PyFunc=Data.retrievePyFuncObject
 Data.activatePyQt=object_activatePyQt
 Data.hasPyQt=object_hasPyQt
+Data.hasPyDBG=object_hasPyDBG
 Data.connect=object_connect
 Data.PyQt=object_PyQt
+Data.PyDBG=object_PyDBG
 Data.SIGNAL=object_SIGNAL
 Data.SLOT=object_SLOT
 Data.getT=object_getT
 Data.getB=object_get_bool
 Data.getQ=object_get_QString
+Data.All=object_all
+#This isued to store some global shortcuts to Qt objects and GUIs that are used by all objects
+Data.globals={}
+
+
+def debugon(self,level=9999):
+    self.All().storePyDBG(dbg).setVerbose(level).setDebug(True)
+
+def debugoff(self):
+    self.All().setVerbose(0).setDebug(False)
+Data.debugon=debugon
+Data.debugoff=debugoff
+
+def debugguion(self,level=9999):
+    self.All().storePyDBG(dbg).setVerbose(level).setDebugGUI(True).setDebug(False)
+
+def debugguioff(self):
+    self.All().setVerbose(0).setDebugGUI(False)
+Data.debugguion=debugguion
+Data.debugguioff=debugguioff
+
+def verboseon(self,level=9999):
+    self.All().storePyDBG(dbg).setVerbose(level)
+
+def verboseoff(self):
+    self.All().setVerbose(0)
+
+Data.verboseon=verboseon
+Data.verboseoff=verboseoff
 
 
 #Extending mathgl to accept STL vectors 

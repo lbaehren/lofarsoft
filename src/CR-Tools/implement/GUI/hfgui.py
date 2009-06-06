@@ -72,15 +72,24 @@ CURSORMODE_ZOOM=2
 
 qpointf=QtCore.QPointF()
 
-def qtpowerzoom(self,scale):
+def qtpowerzoom(self,scalez):
+    scalez=-scalez
     s=self.parent().parent().size()
-    self.resize(int(s.width()*1.05**scale),int(s.height()*1.05**scale))
-    self.parent().resize(int(s.width()*1.05**scale),int(s.height()*1.05**scale))
+    self.zoomscalevalue=scalez
+    if hasattr(self,"aspectscalevalue"): scalew=self.aspectscalevalue
+    else: scalew=1.0
+    self.resize(int(s.width()*1.05**scalez*1.05**scalew),int(s.height()*1.05**scalez))
+    self.parent().resize(int(s.width()*1.05**scalez*1.05**scalew),int(s.height()*1.05**scalez))
 
-def qtpoweraspect(self,scale):
+def qtpoweraspect(self,scalew):
     s=self.parent().parent().size()
-    self.resize(int(s.width()*1.05**scale),int(s.width()))
-    self.parent().resize(int(s.width()*1.05**scale),int(s.width()))
+    self.aspectscalevalue=scalew
+    if hasattr(self,"zoomscalevalue"): scalez=self.zoomscalevalue
+    else: scalez=1.0
+    self.resize(int(s.width()*1.05**scalez*1.05**scalew),int(s.height()*1.05**scalez))
+    self.parent().resize(int(s.width()*1.05**scalez*1.05**scalew),int(s.height()*1.05**scalez))
+#    self.resize(int(s.width()*1.05**scale),int(s.width()))
+#    self.parent().resize(int(s.width()*1.05**scale),int(s.width()))
 
 QtSvg.QSvgWidget.zoom=qtpowerzoom
 QtSvg.QSvgWidget.aspect=qtpoweraspect
@@ -105,6 +114,8 @@ class hfQtPlot(QtGui.QWidget):
         self.img=(QtGui.QImage())
         self.rubberBand=False
         self.rubberOrigin=QtCore.QPoint()
+        self.consolelinecount=0
+        self.DBGContinueButtonPressed=True
     def setGraph(self,gr):
         self.gr=gr;
         self.createImage()
@@ -163,6 +174,29 @@ class hfQtPlot(QtGui.QWidget):
         paint.begin(self)
         paint.drawImage(qpointf,self.img)
         paint.end()
+    def hfDBGContinueButtonPressed(self):
+        self.DBGContinueButtonPressed=True
+    def hfDBGStartButtonPressed(self):
+        self.d.debugguion()
+        self.gui.consoleoutput.append(">> debugguion()")
+    def hfDBGStopButtonPressed(self):
+        self.d.debugoff()
+        self.d.debugguioff()
+        self.hfDBGContinueButtonPressed()
+        self.gui.consoleoutput.append(">> debugguioff()")
+    def hfConsoleInput(self):
+        self.consolelinecount=self.consolelinecount+1
+        txt=str(self.gui.consoleinput.text())
+        print "txt[0]=",txt[0]
+        self.consolelastinput=txt
+        self.gui.consoleinput.clear()
+        self.gui.consoleoutput.append("["+str(self.consolelinecount)+"]>> "+txt)
+        if txt[0]=='!':
+            s=str(txt[1:])
+            print "Exec.",s
+            exec s
+        else:
+            self.gui.consoleoutput.append(str(eval(str(txt))))
     def hfsetTextT(self,name,type):
         exec("nt=self.sender().text().to"+type+"()")
         if nt[1]: self.d[name].noSignal().set(nt[0])
@@ -222,9 +256,7 @@ class hfQtPlot(QtGui.QWidget):
         self.gui.yshiftslider.setValue(0)
         self.gui.yauto.setChecked(True)
     def hfsetBlock(self,i):
-        self.currentplotdataobject()["'Block"].set_silent(i)
-        self.currentplotdataobject()["'Block"].touch() ###This is a complete
-        self.currentplotdataobject()["'Block"].touch()
+        self.currentplotdataobject()["'Block"].set(i)
     def hfsetBlocksize(self,i):
         print "Blocksize should be ",i
         self.currentplotdataobject()["'Blocksize"].set(i)

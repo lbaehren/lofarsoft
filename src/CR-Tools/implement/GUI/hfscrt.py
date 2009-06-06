@@ -1,3 +1,13 @@
+dbg=hfPyDBGObject()
+x=d.All().storePyDBG(dbg).setVerbose(9999).setDebug(True).setVerboseGUI(True);
+d["File'Block"]=2
+
+d.AllVerbose(9999)
+
+d.AllVerbose(999)
+d["QtNetview'maxNetLevel"].setVerbose(0)
+d["QtNetview"].setVerbose(0)
+d["File'Block"]=2
 
 def mousePressEvent(self,event):
     print "Mouse pressed"

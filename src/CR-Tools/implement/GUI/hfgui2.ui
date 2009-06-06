@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1127</width>
-    <height>664</height>
+    <width>1121</width>
+    <height>719</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -14,6 +14,9 @@
   </property>
   <property name="toolTip" >
    <string>Aspect</string>
+  </property>
+  <property name="whatsThis" >
+   <string>Python Console Input</string>
   </property>
   <widget class="QWidget" name="centralwidget" >
    <widget class="QPushButton" name="pushButton" >
@@ -35,7 +38,7 @@
       <x>0</x>
       <y>5</y>
       <width>1121</width>
-      <height>611</height>
+      <height>667</height>
      </rect>
     </property>
     <property name="frameShape" >
@@ -149,6 +152,12 @@
         </property>
         <property name="orientation" >
          <enum>Qt::Vertical</enum>
+        </property>
+        <property name="invertedAppearance" >
+         <bool>false</bool>
+        </property>
+        <property name="invertedControls" >
+         <bool>false</bool>
         </property>
        </widget>
        <widget class="QSlider" name="networkaspectslider" >
@@ -1968,10 +1977,10 @@
         <widget class="QLabel" name="label_10" >
          <property name="geometry" >
           <rect>
-           <x>190</x>
+           <x>186</x>
            <y>6</y>
-           <width>37</width>
-           <height>17</height>
+           <width>41</width>
+           <height>20</height>
           </rect>
          </property>
          <property name="text" >
@@ -1991,7 +2000,7 @@
           <bool>true</bool>
          </property>
          <property name="currentIndex" >
-          <number>3</number>
+          <number>1</number>
          </property>
          <item>
           <property name="text" >
@@ -2189,7 +2198,7 @@
        <x>335</x>
        <y>545</y>
        <width>781</width>
-       <height>61</height>
+       <height>117</height>
       </rect>
      </property>
      <property name="frameShape" >
@@ -2198,6 +2207,109 @@
      <property name="frameShadow" >
       <enum>QFrame::Raised</enum>
      </property>
+     <widget class="QTextEdit" name="consoleoutput" >
+      <property name="geometry" >
+       <rect>
+        <x>2</x>
+        <y>6</y>
+        <width>777</width>
+        <height>85</height>
+       </rect>
+      </property>
+      <property name="toolTip" >
+       <string>Python Console Output</string>
+      </property>
+      <property name="whatsThis" >
+       <string>Python Console Output</string>
+      </property>
+      <property name="readOnly" >
+       <bool>true</bool>
+      </property>
+      <property name="acceptRichText" >
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="consoleinput" >
+      <property name="geometry" >
+       <rect>
+        <x>24</x>
+        <y>92</y>
+        <width>575</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="toolTip" >
+       <string>Python Console Input</string>
+      </property>
+      <property name="whatsThis" >
+       <string>PYthon Console Input</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_21" >
+      <property name="geometry" >
+       <rect>
+        <x>2</x>
+        <y>92</y>
+        <width>23</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>>></string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="DBGContinueButton" >
+      <property name="geometry" >
+       <rect>
+        <x>724</x>
+        <y>90</y>
+        <width>51</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Cont</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="DBGStopButton" >
+      <property name="geometry" >
+       <rect>
+        <x>680</x>
+        <y>90</y>
+        <width>51</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Stop</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="DBGStartButton" >
+      <property name="geometry" >
+       <rect>
+        <x>634</x>
+        <y>90</y>
+        <width>51</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Start</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_22" >
+      <property name="geometry" >
+       <rect>
+        <x>606</x>
+        <y>96</y>
+        <width>31</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>DBG:</string>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>
@@ -2206,7 +2318,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1127</width>
+     <width>1121</width>
      <height>22</height>
     </rect>
    </property>
@@ -2259,6 +2371,10 @@
     <slot>hfsetNetworkOn(bool)</slot>
     <slot>xaxisunitscale(QString)</slot>
     <slot>yaxisunitscale(QString)</slot>
+    <slot>hfConsoleInput()</slot>
+    <slot>hfDBGContinueButtonPressed()</slot>
+    <slot>hfDBGStartButtonPressed()</slot>
+    <slot>hfDBGStopButtonPressed()</slot>
    </slots>
   </customwidget>
   <customwidget>
@@ -2531,22 +2647,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>blocknumberslider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>blocknumber</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>236</x>
-     <y>193</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>251</x>
-     <y>178</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>blocknumber</sender>
    <signal>valueChanged(int)</signal>
    <receiver>blocknumberslider</receiver>
@@ -2735,6 +2835,86 @@
     <hint type="destinationlabel" >
      <x>346</x>
      <y>90</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>consoleinput</sender>
+   <signal>returnPressed()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfConsoleInput()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>444</x>
+     <y>666</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>776</x>
+     <y>549</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DBGContinueButton</sender>
+   <signal>clicked()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfDBGContinueButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>1074</x>
+     <y>670</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>1064</x>
+     <y>552</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DBGStopButton</sender>
+   <signal>clicked()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfDBGStopButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>1044</x>
+     <y>674</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>1030</x>
+     <y>552</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DBGStartButton</sender>
+   <signal>clicked()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfDBGStartButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>981</x>
+     <y>675</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>973</x>
+     <y>554</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>blocknumberslider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>blocknumber</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>236</x>
+     <y>193</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>251</x>
+     <y>178</y>
     </hint>
    </hints>
   </connection>

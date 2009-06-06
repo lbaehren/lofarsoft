@@ -39,11 +39,11 @@ class hffunc():
         if len(self.res)>1:
             for res in self.res:
                 self.resnames.append(self.res[res].objname)
-        #Check for paramter object and create it if necessary
+        #Check for paramters object and create it if necessary
             pobj=d["'Parameters="+'"'+self.parnames[0]+'"']
             if type(pobj)!=Data:
                 pobj=d.newObject("'Parameters")
-                pobj.setNetLevel(100)
+                pobj.setNetLevel(999)
                 pobj.put_silent(self.parnames)            
         self.getParameters() #create missing parameters objects if not yet present deeper down the net.
         self.setResults() ## make sure result Objects exist.
@@ -97,7 +97,7 @@ class hffunc():
             obj=self.data[name]
         #Still not found? Then create it attached to the Parameter Object
             if obj.notFound(): 
-                pobj=self.getParametersObject() # getPparameter object (and create if necessary)
+                pobj=self.getParametersObject() # getParameter object (and create if necessary)
                 obj=pobj.newObject(name)
                 obj.setNetLevel(100)
                 obj.put_silent(defval)
@@ -125,7 +125,7 @@ class hffunc():
         pobj=self.data[self.getParametersObjectName()]
         if pobj.notFound():
             pobj=self.data.newObject("'Parameters")
-            pobj.setNetLevel(100)
+            pobj.setNetLevel(999)
             pobj.put_silent(self.parnames)
         return pobj
     def getResultsObject(self): #and create it if necessary
@@ -133,7 +133,7 @@ class hffunc():
         obj=self.data[self.getResultsObjectName()]
         if obj.notFound():
             obj=self.data.newObject("Results")
-            obj.setNetLevel(100)
+            obj.setNetLevel(999)
             obj.put_silent(self.resnames)
         return obj
     def getParameters(self):
@@ -303,6 +303,7 @@ class hfPlotPanel(hffunc):
     "hfPlotPanel: Plots a panel and plots all linked PlotData Objects into it."
     def startup(self,d):
         if verbose: print "PlotPanel - Startup"
+        self.setParameter("GraphDataBuffer",None)
         self.setParameter("GraphObject",None)
         self.setParameter("xmin",0.)
         self.setParameter("xmax",1024.)
@@ -334,8 +335,11 @@ class hfPlotPanel(hffunc):
         if not type(self.GraphObject)==mglGraph:
             print "Error: PlotPanel - GraphObject not of type mglGraph!"
             return 1
-        xminval=min(toList(self.data["'Results=GraphDataBuffer'xminval"].val()))
-        xmaxval=max(toList(self.data["'Results=GraphDataBuffer'xmaxval"].val()))
+        gdbo=d["'Results=GraphDataBuffer"]
+        xminval=min(toList(gdbo["'xminval"].val()))
+        xmaxval=max(toList(gdbo["'xmaxval"].val()))
+        yminval=min(toList(gdbo["'yminval"].val()))
+        ymaxval=max(toList(gdbo["'ymaxval"].val()))
         if self.XAuto:
             xmin=xminval
             xmax=xmaxval
@@ -349,10 +353,6 @@ class hfPlotPanel(hffunc):
             delta=delta*(1.0+self.xscalestep)**-self.xscale
             xmin=x0-delta/2
             xmax=x0+delta/2
-        self.putResult("xmin",xmin)
-        self.putResult("xmax",xmax)
-        yminval=min(toList(d["'Results=GraphDataBuffer'yminval"].val()))
-        ymaxval=max(toList(d["'Results=GraphDataBuffer'ymaxval"].val()))
         if self.YAuto:
             ymin=yminval
             ymax=ymaxval
@@ -370,6 +370,8 @@ class hfPlotPanel(hffunc):
             ymax=y0+delta/2
         ymin=ymin-extra
         ymax=ymax+extra
+        self.putResult("xmin",xmin)
+        self.putResult("xmax",xmax)
         self.putResult("ymin",ymin)
         self.putResult("ymax",ymax)
 ##        self.GraphObject.Axis("log(y)")
@@ -435,12 +437,13 @@ class hfPlotWindow(hffunc):
 #        self.GraphObject.SetTuneTicks(False,-1.2)
         self.GraphObject.Title(self.Title,"iC",-1.5)
         self.PlotPanel=self.data["'PlotPanel"]
-        if type(self.PlotPanel)==Data: 
+#Find out how many PlotPanels are in the network 
+        if type(self.PlotPanel)==Data:  #One Object => just one panel
             self.PlotPanel.update()
             npanels=1
             nx=1
             ny=1
-        elif type(self.PlotPanel)==DataList:
+        elif type(self.PlotPanel)==DataList: #A Datalist is returned => more than one panel
             npanels=len(self.PlotPanel)
             if self.npanels>=0: npanels=min(self.npanels,npanels)
             if self.npanelsx<0: nx=int(ceil(sqrt(npanels)))
@@ -507,7 +510,7 @@ class hfQtNetview(hffunc):
         if verbose: print "QtNetview startup!"
         self.setParameter("GUI",None)
         self.setParameter("SVGWidget",None)
-        self.setParameter("maxNetLevel",100)
+        self.setParameter("maxNetLevel",99)
         return 0
     def initialize(self):
         "Called at the end of the startup routine. Will create the SVGWidget."

@@ -6,7 +6,7 @@
 
 extern int global_debuglevel;
 
-#define DBG_MODE 0
+#define DBG_MODE 1
 
 #include <string>
 #include <iostream>
@@ -64,13 +64,17 @@ extern int global_debuglevel;
 #define DBG2( T ) 
 #define DBG3( T ) 
 #else
-#define DBG if (global_debuglevel>0) MESSAGE
+/*#define DBG( T ) if (global_debuglevel>0) MESSAGE(T)
+#define DBG2( txt ) if (global_debuglevel>0) {cout << "[" << __FILE__ << "," << __LINE__ << "]: " << txt ;}
+#define DBG3( txt ) if (global_debuglevel>0) { txt ; }
+*/
+#define DBG( T ) if (global_debuglevel>0) {MESSAGE(T);}
 #define DBG2( txt ) if (global_debuglevel>0) {cout << "[" << __FILE__ << "," << __LINE__ << "]: " << txt ;}
 #define DBG3( txt ) if (global_debuglevel>0) { txt ; }
 #endif
 
 #if DBG_MODE == 2 
-#define D2BG if (global_debuglevel>1) MESSAGE
+#define D2BG( T ) if (global_debuglevel>1) MESSAGE(T)
 #define D2BG2( txt )  if (global_debuglevel>1) {cout << "[" << __FILE__ << "," << __LINE__ << "]: " << txt ;}
 #define D2BG3( txt )  if (global_debuglevel>1) { txt ;}
 #else

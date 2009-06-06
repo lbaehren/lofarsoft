@@ -1,4 +1,4 @@
 #
 #echo "pyuic4 disabled"
-pyuic4 hfgui2.ui | awk -f hfuiprep.awk  > hfgui2_ui.py
+/Library/Frameworks/Python.framework/Versions/2.6/bin/pyuic4 hfgui2.ui | awk -f hfuiprep.awk  > hfgui2_ui.py
 python -i hfstart.py

@@ -1,4 +1,12 @@
 
+number_of_antennas=8
+
+print "Using",number_of_antennas," antennas only!"
+print " "
+print "If you want to see more antennas, you need to change the variable number_of_antennas"
+print "in the file hfnet.py for now!"
+print " " 
+
 vf=FloatVec()
 vc=ComplexVec()
 vs=StringVec()
@@ -26,27 +34,27 @@ d >> _d("Filetype","LOPESEvent",_l(2)) \
 
 
 #Create a global Parameter object for the PlotPanel objects
-(("Parameters","PlotPanel",_l(90)) >> d["File"])
+(("Parameters","PlotPanel",_l(999)) >> d["File"])
 
 #Create several Antennas on the same level and add a Data object as placeholder
-d["File"] >> NewObjectRange("Antenna",1) >> ("Data",_f("dataRead","CR",TYPE.COMPLEX)) >>  ("UnitData",_f("Unit")) >> "yAxis"
+d["File"] >> NewObjectRange("Antenna",number_of_antennas) >> ("Data",_f("dataRead","CR",TYPE.COMPLEX)) >>  ("UnitData",_f("Unit")) >> "yAxis"
 
 d["Antenna"] >>  ("Data",_f("dataRead","CR",TYPE.NUMBER)) >>  ("UnitData",_f("Unit")) >> "xAxis"
 
-unitchooser >>  ("Parameters","UnitData",_l(90)) >> d["xAxis'UnitData"]
-unitchooser >>  ("Parameters","UnitData",_l(90)) >> d["yAxis'UnitData"]
+unitchooser >>  ("Parameters","UnitData",_l(999)) >> d["xAxis'UnitData"]
+unitchooser >>  ("Parameters","UnitData",_l(999)) >> d["yAxis'UnitData"]
 
 
 (d["xAxis'Parameters=UnitData'UnitPrefix=m"] >> d["xAxis'Parameters=UnitData"]) #.touch()
 (d["yAxis'Parameters=UnitData'UnitPrefix="] >> d["yAxis'Parameters=UnitData"]) #.touch()
 
-datatypechooser >> ("Parameters","Data",_l(90)) >> d["yAxis'Data"]
-datatypechooser >>  ("Parameters","Data",_l(90)) >> d["xAxis'Data"]
+datatypechooser >> ("Parameters","Data",_l(999)) >> d["yAxis'Data"]
+datatypechooser >>  ("Parameters","Data",_l(999)) >> d["xAxis'Data"]
 
 (d["Data'Parameters=Data'Datatype=Fx"] >> d["Data:yAxis'Parameters=Data"]).touch()
 (d["Data'Parameters=Data'Datatype=Time"] >> d["Data:xAxis'Parameters=Data"]).touch()
 
-("Color","b",_l(90)) >>(("Parameters","PlotData",_l(90)) >> d["File"])
+("Color","b",_l(90)) >>(("Parameters","PlotData",_l(999)) >> d["File"])
 
 
 ("GraphObject",_f(hfGraphObject),_l(1000)) >>  DataUnion(d["Antenna:Data"])
@@ -94,7 +102,7 @@ gui=hfm.ui # define an object which provides easy access to the GUI objects
 ("GUI",gui) >> d["QtPanel"] # and store it, so that the objects have access to the GUI. 
 
 
-d["QtPanel"]  >> ("QtNetview",_f(hfQtNetview),_l(999)) #Here this is used by the Network Display object
+d["QtPanel"]  >> ("QtNetview",_f(hfQtNetview),_l(100)) #Here this is used by the Network Display object
 
 d >> d["QtNetview"] # to not loose it, when the above connection is cut
 
@@ -105,6 +113,8 @@ d.touch()
 d["PlotWindow'npanels"].connect(gui.npanels)
 d["PlotWindow'npanelsx"].connect(gui.npanelsx)
 d["PlotWindow'npanelsy"].connect(gui.npanelsy)
+
+print d["QtNetview'maxNetLevel"]
 d["QtNetview'maxNetLevel"].connect(gui.netlevel,"setEditText")
 
 d["PlotPanel:xmin"].connect(gui.xmin)  ##OK the [0] shouldn't be necessary, but somehow the search does not work!
@@ -132,11 +142,22 @@ connect_action("loadfile","hfLoad")
 
 
 initializePyQtObjects(d)#This will send a PyQt signal from all objects to the GUI, so that the parameters are set in the GUI
-hfqtplot=d["QtPanel'PlotWidget"].getPy()
-hfqtplot.initializechooser()
 
+#This sets some aliases for frequently used GUI functions
+hfqtplot=d["QtPanel'PlotWidget"].getPy()
 guifuncs=d["QtPanel'PlotWidget"].getPy()
 gr=d["PlotWindow'GraphObject"].getPy()
+qsvg=d["QtNetview'SVGWidget"].getPy()
+
+d.globals["hfqtplot"]=d["QtPanel'PlotWidget"].getPy()
+d.globals["guifuncs"]=d["QtPanel'PlotWidget"].getPy()
+d.globals["gr"]=d["PlotWindow'GraphObject"].getPy()
+d.globals["qsvg"]=d["QtNetview'SVGWidget"].getPy()
+
+hfqtplot.initializechooser()
+
+##At the end clear all modification flags that might have been left hanging during teh build-up phase 
+d.All().clearModification()
 
 print "Attention: For perfomance reasons the Network Display is toggled off!"
 #print 'Use: d["QtPanel"] // d["QtNetview"] or toggle field in the GUI (bottom left)'
@@ -148,7 +169,11 @@ print 'A few tricks to help debugging:'
 print 'The GUI itself is accessed through the object "gui" (use dir(gui)) to see all the elements of the gui)'
 print 'To get access to the slots/functions in hfplot the GUI is connected to type  dir(guifuncs)'
 print "To access the mglGraph object use 'gr'."
-
+print "To debug while a network operation is performed an trace it through the net type:"
+print "x=d.All().storePyDBG(dbg).setVerbose(9999).setDebug(True) od debugon(d)"
+print "or if you want to use the GUI while debugging:"
+print "x=d.All().storePyDBG(dbg).setVerbose(9999).setDebugGUI(True) or debugguion(d)"
+print "you can use maxnetlevel=NNN to set the level of detail during the debug phase."  
 
 ##########End ....
 

@@ -25,7 +25,7 @@
 //#include <QtGui/QLabel>
 
 #define MAGICCODE 260966
-
+#define MAXNETLEVEL 999999
 #define SaveCall( REF ) if (!isDataObject( REF )) {ERROR(getName(true) << ": SaveCall - Data Object reference invalid. Network corrupt.");} else 
 
 
@@ -163,7 +163,7 @@ class DataFuncLibraryClass;
 */
 
 
-typedef vector<Data*> worm;
+typedef vector<Data*> dataworm;
 
 bool isDataObject(Data* obj);
 
@@ -264,6 +264,9 @@ class Data {
     bool autoupdate;
     bool updateable;
     longint verbose;
+    bool debug;
+    bool debuggui;
+
 /*! Flag which states whether the object is modified or not*/
     DIRECTION defdir;
 
@@ -283,8 +286,9 @@ class Data {
     unit_descr *unit_ptr;
     void *d_ptr; //Finally, this pointer points to the data 
     
+    PyObject * pydbg; //Contains a pointer to a Py object which is called during debugging steps.
     PyObject * pyqt; //Contains a pointer to a PyQT object which is used to send and received Qt SIGNALS
-    PyObject * py_func; //Contains a pointer to a Py object which contains a user-defined Python function (not yet implemented)
+    PyObject * py_func; //Contains a pointer to a Py object which contains a user-defined Python function
     
     //Finally, Finally, the pointer to the superior containing
     //information about the whole network 
@@ -293,17 +297,23 @@ class Data {
   };
   
   HString reference_descr_str(reference_descr *rd);
-  void printAllStatus(bool short_output=true,longint maxlevel=9999);
+  void printAllStatus(bool short_output=true,longint maxlevel=MAXNETLEVEL);
   
   void printDecendants (HString rootname="");
   
   void printStatus(bool short_output=true);
   HString Status(bool short_output=true);
   
-  vector<HString> listNames(DIRECTION dir);
-  vector<objectid> listIDs(DIRECTION dir);
-  vector<DIRECTION> listDirs(DIRECTION dir);
-  vector<HString> listModFlags(DIRECTION dir);
+  void addReferenceDescriptor(reference_descr rd, map<objectid,reference_descr> &l);
+  void join_map_ReferenceDescriptors(map<objectid,reference_descr> &l1, map<objectid,reference_descr> l2);
+  map<objectid,reference_descr> listNeighbours(DIRECTION dir,longint maxlevel);
+  void getNeighboursList(DIRECTION dir,longint maxlevel,  vector<objectid> &oids, vector<HString> &names, vector<DIRECTION> &dirs,  vector<HString> & flags);
+
+  vector<HString> listNeighbourNames(DIRECTION dir);
+  vector<objectid> listNeighbourIDs(DIRECTION dir,longint maxlevel=MAXNETLEVEL);
+  vector<DIRECTION> listNeighbourDirs(DIRECTION dir);
+  vector<HString> listNeighbourModFlags(DIRECTION dir);
+
   vector<objectid> getAllIDs();
 
   Vector_Selector *sel();
@@ -400,10 +410,11 @@ class Data {
   longint getNumberOfLinks(DIRECTION dir=DIR_BOTH);
   vector<modification_record> getModFlags(DIRECTION dir);
   HString strModFlag(modification_record mod);
+  bool ModFlagSet(modification_record mod);
 /*! only returns the local mod values - not a full check for modification. Used for inspection mainly */
   bool isModified();
 
-  worm*  Worm; /* A worm for the update check, containing pointers to all the objects to be updated */
+  dataworm*  Worm; /* A worm for the update check, containing pointers to all the objects to be updated */
 
   void setDefaultDirection(DIRECTION dir);
   DIRECTION getDefaultDirection();
@@ -431,7 +442,16 @@ class Data {
   bool Updateable();
   void setUpdateable(bool up=true);
   bool Silent(bool silent);
+
+  //  template <class T>
+  //bool Data::doVerbose(const vector<T> &v,const bool checkmod);	
+  bool Data::doVerbose();
+    
   longint setVerbose(longint verbose);
+  bool setDebugGUI(bool tf);
+  bool getDebugGUI();
+  bool setDebug(bool tf);
+  bool getDebug();
   bool Verbose();
   longint AllVerbose(longint verbose);
   bool Empty();
@@ -445,6 +465,7 @@ class Data {
   void setModification(objectid port, modification_record mod);
   void clearModification();
   void clearModificationTO(objectid port);
+  void printWorm();
   void executeUpdateWorm();
   void doAutoUpdate();
   void update();
@@ -468,6 +489,13 @@ class Data {
   PyObject* retrievePyQt();
   boost::python::handle<> retrievePyQtObject();
   void signalPyQt(HString signal);
+
+  Data& AllStorePyDBG(PyObject* pyobj);
+  Data& storePyDBG(PyObject* pyobj);
+  Data& deletePyDBG(PyObject* pyobj);
+  PyObject* retrievePyDBG();
+  boost::python::handle<> retrievePyDBGObject();
+  void signalPyDBG(HString signal,HString input);
 
   Data& storePyFunc(PyObject* pyobj);
   Data& deletePyFunc(PyObject* pyobj);

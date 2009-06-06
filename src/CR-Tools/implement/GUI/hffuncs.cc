@@ -721,7 +721,7 @@ public:
 	  oldfilename=Filename;
       } else if (Filetype=="LOFAR_TBB") {
 	CR::LOFAR_TBB* tbb = new CR::LOFAR_TBB(Filename,1024); ptr = tbb;
-	MSG("ATTENTION: Hardcoded initial NBlocksize to 1024!")
+	MSG("ATTENTION: Hardcoded initial NBlocksize to 1024!");
 	DBG("DataFunc_CR_dataReaderObject: tbb=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
 	opened=tbb!=NULL;
 	if (oldfilename!=Filename) {MSG("Filename="<<Filename);tbb->summary();};

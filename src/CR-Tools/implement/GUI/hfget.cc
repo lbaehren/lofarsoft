@@ -45,7 +45,7 @@ using namespace std;
 
 Data NullObject("NULL");
 
-int global_debuglevel = 2;
+int global_debuglevel = 0;
 
 void setDebug(int level) {global_debuglevel = level;}
 
@@ -681,9 +681,17 @@ HString Data::strModFlag(modification_record mod){
     return sout.str();
 }
 
-/*! \brief Return a vector of strings containing the modification flags in direction dir. See also listNames, listIDs.*/
+/*! 
+\brief Returns true if the modification flag is set, otherwise False.
+*/
 
-vector<HString> Data::listModFlags(DIRECTION dir){
+bool Data::ModFlagSet(modification_record mod){
+  return (mod.ref!=NULL);
+}
+
+/*! \brief Return a vector of strings containing the modification flags in direction dir. See also listNeighbourNames, listNeighbourIDs.*/
+
+vector<HString> Data::listNeighbourModFlags(DIRECTION dir){
   address i;
   vector<HString> vec;
   vector<modification_record> mods=getModFlags(dir);
@@ -761,6 +769,7 @@ HString Data::Status(bool short_output){
   sout << "datatype=" << datatype_txt(data.type) << endl;
   sout << "of_ptr=" << data.of_ptr << endl;
   sout << "d_ptr=" << data.d_ptr << endl;
+  sout << "pydbg=" << data.pydbg << endl;
   sout << "pyqt=" << data.pyqt << endl;
   sout << "py_func=" << data.py_func << endl;
   sout << "s_ptr=" << data.s_ptr << endl;
@@ -793,12 +802,14 @@ void Data::printDecendants(HString rootname){
   for (i=0; i<data.to.size(); ++i) {if (data.to[i]->ref!=NULL) {data.to[i]->ref->printDecendants(name);};};
 }
 
+
+
 /*!  \brief Provides a list of all names of objects linked to the
 current one in the direction DIR (DIR.FROM, DIR.TO, or DIR.BOTH). See
-also listIDs, listDirs, listModFlags
+also listNeighbourIDs, listNeighbourDirs, listNeighbourModFlags
 */
 
-vector<HString> Data::listNames(DIRECTION dir){
+vector<HString> Data::listNeighbourNames(DIRECTION dir){
     vector<HString> l;
     objectid i;
     if (dir==DIR_FROM || dir==DIR_BOTH) {
@@ -814,30 +825,141 @@ vector<HString> Data::listNames(DIRECTION dir){
     return l;
 }
 
+/*!
+\brief Adds a reference_descr (i.e. a struct referring to another object) to a list (map), but only if the objected pointed to is not yet part of the list to preserve uniqueness, whereby the ref_descr with a set mod flag has precedence. See listNeighbours.
+ */
+
+void Data::addReferenceDescriptor(reference_descr rd, map<objectid,reference_descr> &l){
+  map<objectid,reference_descr>::iterator p;
+  p=l.find(rd.oid);
+  if (p!=l.end()) {
+    if (ModFlagSet(rd.mod)) l[rd.oid]=rd;
+  } else {
+    /*There might be a way to speed this up, since we know that this key needs to be added and need not be found again first*/
+    l[rd.oid]=rd;
+  };
+}
 
 /*!
-\brief Provides a list/vector of all object IDs of objects linked to the current one in the direction DIR. See also listNames, listDirs, listModFlags.
+\brief Combines two lists (maps) of reference_descr (i.e. a struct referring to another object). Preserves uniqueness concerning objects, whereby the ref_descr with a set mod flag has precedence. The result is returned in the first map given as argument. See listNeighbours.
  */
-vector<objectid> Data::listIDs(DIRECTION dir){
-    vector<objectid> l;
-    objectid i;
+
+void Data::join_map_ReferenceDescriptors(map<objectid,reference_descr> &l1,map<objectid,reference_descr> l2){
+  map<objectid,reference_descr>::iterator p;
+  p=l2.begin();
+  while (p!=l2.end()) {
+    addReferenceDescriptor(p->second,l1);
+    p++;
+  };
+}
+/*!
+\brief Provides a list (actually a map) of references to objects linked to the current one in the direction DIR. Will ignore objects with a netlevel larger than maxlevel. See also listNeighbourNames, listNeighbourDirs, listNeighbourModFlags.
+ */
+
+map<objectid,Data::reference_descr> Data::listNeighbours(DIRECTION dir,longint maxlevel){
+  map<objectid,reference_descr> l;
+  reference_descr rd;
+    objectid i,oi,mi;
+    mi=getOid();
     if (dir==DIR_FROM || dir==DIR_BOTH) {
       for (i=0; i<data.from.size(); ++i) {
-	SaveCall(data.from[i]->ref) l.push_back(data.from[i]->ref->getOid());
+	SaveCall(data.from[i]->ref) {
+	  rd=*data.from[i];
+	  oi=rd.oid;
+	  if (oi!=mi) { // avoid infinite loops
+	    if (data.from[i]->ref->getNetLevel()<=maxlevel)
+	      {addReferenceDescriptor(rd,l);}
+	    else 
+	      {join_map_ReferenceDescriptors(l,data.from[i]->ref->listNeighbours(dir,maxlevel));};
+	  };
+	}
       };
     };
     if (dir==DIR_TO || dir==DIR_BOTH) {
       for (i=0; i<data.to.size(); ++i) {
-	SaveCall(data.to[i]->ref) l.push_back(data.to[i]->ref->getOid());
+	SaveCall(data.to[i]->ref) {
+	  rd=*data.to[i];
+	  oi=rd.oid;
+	  if (oi!=mi) { // avoid infinite loops
+	    if (data.to[i]->ref->getNetLevel()<=maxlevel)
+	      {addReferenceDescriptor(rd,l);}
+	    else 
+	      {join_map_ReferenceDescriptors(l,data.to[i]->ref->listNeighbours(dir,maxlevel));};
+	  };
+	}
       };
     };
     return l;
 }
 
+
 /*!
-\brief Provides a list of the PUSH/PULL direction of the all object links linked to the current one in the TO direction. See also listFromDirs, listToNames, listToIDs, listModFlags.
+\brief Returns (as arguments) vectors containing information about objects that are considered neighbours to the current object.
+
+This takes maxlevel into account, meaning that objects with a netlevel higher than maxlevel are transparently ignored. The vectors returned contain the names, IDs, and Direction, as well as the modification flags. If multiple links lead to the same object only one is returned - if one link contains a non-zero modflag, that one has preference. See listNeighbours.
  */
-vector<DIRECTION> Data::listDirs(DIRECTION dir){
+
+void Data::getNeighboursList(DIRECTION dir,longint maxlevel,  vector<objectid> &oids, vector<HString> &names, vector<DIRECTION> &dirs,  vector<HString> & flags){
+  // DBG3("getNeighboursList: dir=" << dir <<", maxlevel=" << "," << maxlevel);
+  map<objectid,reference_descr> l=listNeighbours(dir,maxlevel);
+  longint size=l.size();
+  //  DBG3("getNeighboursList: listNeighbours size=" << size);
+  map<objectid,reference_descr>::iterator p=l.begin();
+  names.clear(); names.reserve(size);
+  oids.clear(); oids.reserve(size);
+  dirs.clear(); dirs.reserve(size);
+  flags.clear(); flags.reserve(size);
+  while (p!=l.end()) {
+    names.push_back(p->second.name);
+    dirs.push_back(p->second.direction);
+    oids.push_back(p->second.oid);
+    flags.push_back(strModFlag(p->second.mod));
+    p++;
+  };
+}
+
+
+/*!
+\brief Provides a list/vector of all object IDs of objects linked to the current one in the direction DIR. See also listNeighbourNames, listNeighbourDirs, listNeighbourModFlags.
+
+ */
+vector<objectid> Data::listNeighbourIDs(DIRECTION dir,longint maxlevel){
+    vector<objectid> l;
+    objectid i,oi,mi;
+    mi=getOid();
+    if (dir==DIR_FROM || dir==DIR_BOTH) {
+      for (i=0; i<data.from.size(); ++i) {
+	SaveCall(data.from[i]->ref) {
+	  oi=data.from[i]->ref->getOid();
+	  if (oi!=mi) { // avoid infinite loops
+	    if (data.from[i]->ref->getNetLevel()<=maxlevel)
+	      {l.push_back(oi);}
+	    else 
+	      {vec_append(l,data.from[i]->ref->listNeighbourIDs(dir,maxlevel));};
+	  };
+	}
+      };
+    };
+    if (dir==DIR_TO || dir==DIR_BOTH) {
+      for (i=0; i<data.to.size(); ++i) {
+	SaveCall(data.to[i]->ref) {
+	  oi=data.to[i]->ref->getOid();
+	  if (oi!=mi) { // avoid infinite loops
+	    if (data.to[i]->ref->getNetLevel()<=maxlevel)
+	      {l.push_back(oi);}
+	    else 
+	      {vec_append(l,data.to[i]->ref->listNeighbourIDs(dir,maxlevel));};
+	  };
+	}
+      };
+    };
+    return vec_unique(l);
+}
+
+/*!
+\brief Provides a list of the PUSH/PULL direction of the all object links linked to the current one in the TO direction. See also listFromDirs, listToNames, listToIDs, listNeighbourModFlags.
+ */
+vector<DIRECTION> Data::listNeighbourDirs(DIRECTION dir){
     vector<DIRECTION> l;
     objectid i;
     if (dir==DIR_FROM || dir==DIR_BOTH) {
@@ -889,7 +1011,7 @@ level >=100, and system objects have level>=1000.
  */
 longint Data::getNetLevel(){return data.netlevel;}
 
-/*! \brief Get the Net level of the object.
+/*! \brief set the Net level of the object used for displaying the network.
 
 The netlevel represents a criterion for displaying objects in a
 network representation. Lower levels are more important. If the level
@@ -983,6 +1105,34 @@ void Data::setUpdateable(bool up){
   data.updateable=up;
 }
 
+
+/*! If this returns true the object will produce a short message everytime the get method is called. Usefulf for tracing network operations.
+ */
+
+//template <class T>
+//bool Data::doVerbose(const vector<T> &v,const bool checkmod)	{
+bool Data::doVerbose()	{
+  char in_c[256];
+  HString in;
+  cout << getName(true);
+  //  if (v.size()>0) {cout << v[0];};
+  //if (checkmod) {cout <<")* -> ";}
+  //else {cout <<") => ";};
+  cout <<" => ";
+  if (data.pydbg!=NULL) {
+    if (getDebugGUI()) {signalPyDBG("gui","");};
+    if (getDebug()) {
+      cout << "PyDBG>> "; cin.getline(in_c,256);
+      in=string(in_c); 
+      while (!(in=="" || in=="" || in=="end" || in=="quit" || in=="bye")) {
+	signalPyDBG("execute",in);
+	cout << "PyDBG>> "; cin.getline(in_c,256); in=string(in_c); 
+      };
+    };
+  };
+  return true;
+};
+
 /*! If this returns true the object will produce a short message everytime the get method is called. Usefulf for tracing network operations.
  */
 bool Data::Verbose(){return data.verbose>data.netlevel;}
@@ -999,6 +1149,61 @@ longint Data::setVerbose(longint verbose){
   old=data.verbose;
   data.verbose=verbose;
   return old;
+}
+
+/*! Set the debug mode on (in connection with verbose). 
+  
+  This will call the python prompt whenever a doVerbose statement is
+  encountered in the c++ code. This happens typically in the Data::get
+  method, but only if the verbose level is set higher than the current
+  netlevel of the object. Before doing this a python hfPyDBGObject()
+  has to be created and assigned to all objects where this is
+  desired. This hfPyDBGObject() is then called with the method
+  execute(input_string). The result is printed. 
+
+  The method will return the input state of the flag.
+ */
+bool Data::setDebug(bool tf){
+  if (this==&NullObject) {ERROR("setDebug: Operation on NullObject not allowed."); return false;};
+  data.debug=tf;
+  return data.debug;
+}
+
+/*! Return whether the debug state of the object is on or off (in connection with verbose - see setDebug). 
+
+ */
+
+bool Data::getDebug(){
+  if (this==&NullObject) {ERROR("setDebug: Operation on NullObject not allowed."); return false;};
+  return data.debug;
+}
+
+/*! Set the GUI verbose mode on (in connection with verbose). 
+  
+  This will update the netview window whenever a doVerbose statement is
+  encountered in the c++ code. This happens typically in the Data::get
+  method, but only if the verbose level is set higher than the current
+  netlevel of the object. Before doing this a python hfPyDBGObject()
+  has to be created and assigned to all objects where this is
+  desired. This hfPyDBGObject() is then called with the method
+  gui(). 
+
+  The method will return the input state of the flag.
+ */
+
+bool Data::setDebugGUI(bool tf){
+  if (this==&NullObject) {ERROR("setDebug: Operation on NullObject not allowed."); return false;};
+  data.debuggui=tf;
+  return data.debuggui;
+}
+
+/*! Return whether the GUI verbose state of the object is on or off (in connection with verbose - see setDebugGUI). 
+
+ */
+
+bool Data::getDebugGUI(){
+  if (this==&NullObject) {ERROR("setDebug: Operation on NullObject not allowed."); return false;};
+  return data.debuggui;
 }
 
 /*!  
@@ -1025,7 +1230,7 @@ DIRECTION Data::getDefaultDirection(){
 /*!
 \brief Sets in all objects the verbose level. 
 
-/*! The higher the verbose level, the more will be displayed. Goes
+    The higher the verbose level, the more will be displayed. Goes
     in logarithmic steps (9,99,999,9999). Uses the NetLevel of each
     object as comparison. If Verbose() returns true the object will
     produce a short message everytime the get method is
@@ -1052,6 +1257,8 @@ void Data::touch(){setModification();}
 
 \brief Set all modification flags and propagate the message through the net
 upwards (TO), if necessary.
+
+Probably outdated description following: ....
 
 If called without parameters then the object was directly modifed. As
 a consequence set the modification for all TO ports, and propagate the
@@ -1091,7 +1298,7 @@ void Data::setModification(){
     newmod.version=incVersion();
     newmod.ref=this;
 
-    if (Worm == NULL) {Worm = new worm;};
+    if (Worm == NULL) {Worm = new dataworm;};
 
     setModification(newmod);
 
@@ -1102,14 +1309,12 @@ void Data::setModification(){
     data.beingmodified=true;
 }
 
-/*! \brief This is just a convinience subroutine to setModification() 
+/*! \brief This is just a convenience subroutine to setModification() 
 
 */
 void Data::setModification(modification_record newmod){
 
     objectid size,i;
-
-
 
     //Increase the version number to create a unique version number
     //which will be passed through the network. In case the maximum
@@ -1130,8 +1335,8 @@ void Data::setModification(modification_record newmod){
       data.to[i]->mod=newmod;
       //In push mode notify any objects higher up in the food chain
       //about the modification. They will in turn notify objects higher
-      //up. The notification messagis a worm 
-      //The references of the to be updated objects will be added
+      //up. The notification message is stored in an "updateworm" 
+      //The references of the objects to be updated will be added
       //to the update-worm of the object that started this (who's
       //reference is contained in newmod, which is passed on higher).
       if ((data.to[i]->direction == PUSH || data.to[i]->direction == DIR_BOTH)) {
@@ -1150,14 +1355,24 @@ worm, i.e. through the list of objects, and update the objects.
 
  */
 
+void Data::printWorm(){
+  dataworm::const_iterator it;
+  cout << endl << "UpdateWorm(" << getName(true) << "): ";
+  for (it=Worm->begin(); it<Worm->end(); ++it) {
+    cout << (*it)->getName(true) << " -> ";
+  };
+  cout << "END(Worm)." << endl;
+}
+
 void Data::executeUpdateWorm(){
+  if (Verbose()) printWorm();
   if (Worm==NULL) {
     ERROR("executeUpdateWorm() name=" << getName(true) << ": Uninitialized UpdateWorm called ...");
     return;
   }
   if (!data.silent) {
     DBG("executeUpdateWorm(): executed by object " << getName(true) << ", worm.size=" << Worm->size());
-    worm::const_iterator it;
+    dataworm::const_iterator it;
     for (it=Worm->begin(); it<Worm->end(); ++it) {
       DBG("executeUpdateWorm(): executed by " << getName(true) << " -> update object worm.name=" << (*it)->getName(true));
       (*it)->doAutoUpdate();
@@ -1252,7 +1467,7 @@ bool Data::checkModification(){
   newmod.version=incVersion();
   newmod.ref=this;
 
-  if (Worm == NULL) {Worm = new worm;};
+  if (Worm == NULL) {Worm = new dataworm;};
 
   //check the modification in the respective FROM ports This will set
   //all modification flags in the FROM direction and create an update
@@ -1520,6 +1735,7 @@ longint Data::getNumberOfLinks(DIRECTION dir){
 
 
 /*!
+
   \brief Set a link to another object
 
 dir_type specifies whether the link is a push or a pull link. For a push link
@@ -1585,7 +1801,7 @@ objectid Data::setLink(Data *d,
     if (thisport>=0 && thisport < data.from.size()) {
       D2BG("setLink: using thisport len(mapfrom)="<<data.mapfrom.size()<<" removing name=" <<data.from[thisport]->name);
       data.mapfrom.erase(data.mapfrom.find(data.from[thisport]->name));
-      D2BG("setLink: using thisport len(mapfrom)="<<data.mapfrom.size()<<" adding name="<< rd->name);
+      D2BG("setLink: using thisport len(map::from)="<<data.mapfrom.size()<<" adding name="<< rd->name);
       data.mapfrom[rd->name]=thisport;
       data.from[thisport]=rd;
       return thisport;
@@ -1883,6 +2099,86 @@ boost::python::handle<> Data::retrievePyQtObject() {
     return boost::python::handle<>(boost::python::borrowed(data.pyqt));
 }
 
+/*!
+\brief Stores the same DBG python object in all data objects. Usefulf for debugging.
+ */
+
+Data& Data::AllStorePyDBG(PyObject* pyobj) {
+  if (this==&NullObject) {ERROR("AllStorePyDBG: Operation on NullObject not allowed."); return NullObject;};
+  HInteger i;
+  if (data.superior!=NULL) {
+    for (i=0; i<data.superior->data_objects.size(); ++i) {
+	data.superior->data_objects[i]->storePyDBG(pyobj);
+    };
+  } else {
+      ERROR("AllVerbose: No superior created yet, can't find any objects!");
+  };
+  return *this;
+}
+
+/*! \brief Call an attribute of the PyDBG function.
+
+ Invokes the internally stored PyDBG object and calls the method
+ specified in the input string. This is used, for example, to send an
+ execute() signal to Python.
+*/
+
+void Data::signalPyDBG(HString signal, HString input){
+  if (data.pydbg==NULL) return;
+  const char *AttribStr = signal.c_str();
+  //we need to check if the process attribute is present in the Python Object
+  if (!PyObject_HasAttrString(data.pydbg, AttribStr)) {
+    ERROR("signalPyDBG: Object does not have Attribute " << AttribStr << "."  << ", name=" << getName(true)); return;};
+  DBG("signalPyDBG(signal=" << signal <<"): name=" << getName(true) << ", input=" << input);
+  int ret=boost::python::call_method<int>(data.pydbg,AttribStr,boost::ref(*this),input.c_str());
+  if (ret!=0) {
+    ERROR("signalPyDBG(signal=" << signal <<") returned user-defined error code" << ret << ", name=" << getName(true));
+  };
+}
+
+/*! \brief Store a reference to a python QObject reference in the object.
+
+  The QObject is used as a hook, which can be called whenever a Debug
+  step is made. I.e. whenever a "verbose" line is encountered (in get)
+  then the debug function is called.
+
+  #REF: setPyDBG(Py), deletePyDBG, retrievePyDBG, retrievePyDBGObject
+ */
+Data& Data::storePyDBG(PyObject* pyobj) {
+  data.pydbg=pyobj;
+  return *this;
+}
+
+/*! \brief Delete the reference to the python QObject reference in the object.
+
+  The QObject is used to emit and receive Qt Signals to communicate with a GUI.
+
+  #REF: setPyDBG(Py), retrievePyDBG, storePyDBG, retrievePyDBGObject
+ */
+Data& Data::deletePyDBG(PyObject* pyobj) {
+  data.pydbg=NULL;
+  return *this;
+}
+
+/*! \brief Retrieve a reference to the Qt Object.
+
+  The QObject is used to emit and receive Qt Signals to communicate with a GUI.
+
+  #REF: deletePyDBG, storePyDBG, retrievePyDBGObject
+ */
+PyObject* Data::retrievePyDBG() {return data.pydbg;}
+
+
+/*! \brief Retrieve under python the Qt Object.
+
+  The QObject is used to emit and receive Qt Signals to communicate with a GUI.
+
+  #REF: deletePyDBG, retrievePyDBG, storePyDBG, retrievePyDBG
+ */
+boost::python::handle<> Data::retrievePyDBGObject() {
+    return boost::python::handle<>(boost::python::borrowed(data.pydbg));
+}
+
 /*! \brief Store a reference to a python function in the object.
 
   The python function is used to run user defined functions
@@ -2048,6 +2344,7 @@ void Data::put(objectid oid, vector<T> &vin) {
 
 \brief Do not set modification flag during next put operation
 
+TEST
 This method allows one to modify an object without setting the modification
 flag. This is valid only for the next operation. This should be used with
 care, since it can lead to an inconsistent network.
@@ -2071,16 +2368,41 @@ Data & Data::noSignal(){
     return *this;
 }
 
+/*! \brief Put a new value into the object data vector
+
+This is the basic mechanism to assign new data values. One can only
+assign whole vectors not individual elements. For convenienc the
+method putOne exists which has a scalar as input, but will then
+convert it to a vector and call put. If the object previously had no
+data vector, it will be created. If an existing data vector had a
+different type than the new vector, the old vector will be delete and
+the new one - of different type - will be created. After the data has
+been assigned a "setModification" call will be made to signal the
+network that a value has changed (which can cause other objects to
+reevalute). Also, if a connection to a PyQT GUI slot has been created,
+a "signalPyQT" call will be issued that allows the GUI to update the
+contents of the respective input field connected to this object.
+
+If, however the new vector is identical to the old vector, no action
+is undertaken and not signal or setModification call will be
+made. This avoids infinite loops, e.g. between GUI and data object and
+spares unnessecary reevaluation of the network. If that is desire, you
+need to call "touch".
+
+ */
 template <class T>
 void Data::put(vector<T> &vin) {
+  bool oldvec=true;
   if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return;};
   DEF_D_PTR(T);
   if (data.d_ptr==NULL) {
+    oldvec=false;
     DBG("Put Vector: name=" << data.name);
     data.origin=REF_MEMORY; 
     newVector(WhichType<T>());
     DBG("Put Vector: d_ptr=" << data.d_ptr << " data.type=" << data.type);
   } else if (data.type!=WhichType<T>()) {
+    oldvec=false;
     DBG("Delete Vector: name=" << data.name);
     DBG("Delete< Vector: d_ptr=" << data.d_ptr << " data.type=" << data.type);
     delData(); 
@@ -2089,12 +2411,17 @@ void Data::put(vector<T> &vin) {
     DBG("Put Vector: d_ptr=" << data.d_ptr << " data.type=" << data.type);
   };
   d_ptr_v=data.d_ptr;
-  (*d_ptr_T) = vin;
-  data.len=vin.size();
-  DBG("put: d_ptr=" << data.d_ptr << ", &vin=" << &vin << ", len=" << data.len);
-  setModification();  //Note that the data has changed
-  if (data.noSignal) {data.noSignal=false;}
-  else {signalPyQt("updated");}; //Tell a GUI, if present, that this has changed 
+  if (oldvec && ((*d_ptr_T) == vin)) {
+    /*Check whether the values are the same, if so, don't do anything - this avoids useless loops*/
+    DBG("put: name=" << getName(true) << " == Identical value - Put ignored");
+  } else {
+    (*d_ptr_T) = vin;
+    data.len=vin.size();
+    DBG("put: d_ptr=" << data.d_ptr << ", &vin=" << &vin << ", len=" << data.len);
+    setModification();  //Note that the data has changed
+    if (data.noSignal) {data.noSignal=false;}
+    else {signalPyQt("updated");}; //Tell a GUI, if present, that this has changed 
+  };
 }
 
 /*!
@@ -2202,6 +2529,7 @@ network. It also respects the AutoUpdate flag.
 */
 
 void Data::doAutoUpdate(){
+  if (Verbose()) doVerbose();
   if (isModified()) {
     if (hasFunc() && Updateable()) {
       if (doesAutoUpdate()) update();
@@ -2585,7 +2913,7 @@ void Data::get_1_(vector<T> &v){get(v);};
 
 template <class T> 
 void Data::get(vector<T> &v, Vector_Selector *vs) {
-  objectid checkmod;
+  objectid checkmod=false;
   DATATYPE type=WhichType<T>();
   DEF_D_PTR(T);
   ObjectFunctionClass* f_ptr=getFunction();
@@ -2613,11 +2941,6 @@ void Data::get(vector<T> &v, Vector_Selector *vs) {
 #include "switch-type.cc"
 	ERROR("get: Undefined Datatype encountered while retrieving vector." << " name=" << getName(true));
       };
-      if (Verbose()) {
-	cout << getName(true)<<"(";
-	if (v.size()>0) {cout << v[0];};
-	cout <<") -> ";
-      }
     };
   } else { //f_ptr != NULL - that means we need to execute a function
       DBG("get: Function " << f_ptr->getName() << " f_ptr=" << f_ptr);
@@ -2633,14 +2956,9 @@ void Data::get(vector<T> &v, Vector_Selector *vs) {
 	  ERROR("Error (get): Unknown type encountered while processing an object function."  << " name=" << getName(true));
 	};  //end switch types
 	data.len=v.size();
-	if (Verbose()) {
-	    cout << getName(true)<<"(";
-	    if (data.len>0) {cout << v[0];};
-	    cout <<")~ -> ";
-	};
       } else {  //function and vector (buffer) are present, so execute
 		//function if network in the from-direction has been
-		//modified, with output to internal data vector and
+	        //modified, with output to internal data vector and
 		//copy that to the output vector
 	checkmod=checkModification();
 	wormcreated=checkmod && Worm!=NULL && Worm->size()>0;
@@ -2653,16 +2971,11 @@ void Data::get(vector<T> &v, Vector_Selector *vs) {
 	    ERROR("Error (get): unknown type." << " name=" << getName(true) );
 	};
 	data.len=v.size();
-	if (Verbose()) {
-	    cout << getName(true)<<"(";
-	    if (data.len>0) {cout << v[0];};
-	    if (checkmod) {cout <<")* -> ";}
-	    else {cout <<")$ -> ";};
-	};
       }; //end else d_ptr!=0 && f_ptr!=0
   }; // end else f_ptr!=0
 
-  
+  //  if (Verbose()) doVerbose(v,checkmod);
+
   if (vs2!=NULL) {v=(*vs2).get(v);}; //Select on values if necessary ....
   clearModification();
   if (wormcreated) executeUpdateWorm();
@@ -2686,6 +2999,7 @@ Data::Data(HString name,superior_container * superior){
   data.of_ptr=NULL;
   data.d_ptr=NULL;
   data.pyqt=NULL;
+  data.pydbg=NULL;
   data.py_func=NULL;
   data.noMod=false;
   data.noSignal=false;
@@ -2695,6 +3009,8 @@ Data::Data(HString name,superior_container * superior){
   data.updateable=false;
   data.silent=false;
   data.verbose=0;
+  data.debuggui=false;
+  data.debug=false;
   data.defdir=PUSH;
   data.netlevel=1;
   setVersion(1);
