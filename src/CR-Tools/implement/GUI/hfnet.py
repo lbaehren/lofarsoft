@@ -1,5 +1,5 @@
 
-number_of_antennas=8
+number_of_antennas=4
 
 print "Using",number_of_antennas," antennas only!"
 print " "

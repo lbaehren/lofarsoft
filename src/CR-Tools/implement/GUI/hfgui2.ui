@@ -1956,7 +1956,7 @@
          </rect>
         </property>
         <property name="text" >
-         <string>Replot</string>
+         <string/>
         </property>
        </widget>
        <widget class="QFrame" name="frame_16" >
