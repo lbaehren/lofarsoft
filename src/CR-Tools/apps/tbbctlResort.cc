@@ -193,9 +193,11 @@ Bool resortTbbctlFile(string infile, string outfile, Bool allowHole){
 		     headerpoint->SampleNr-startsample+
 		     ((headerpoint->Date%2)*512))/maxblock;
       if ( (start>=0) && (start*TBBCTL_BLOCK_SIZE < outsize)){
+#ifdef DEBUGGING_MESSAGES
 	cout << " Date:" << headerpoint->Date << " start:" << headerpoint->SampleNr 
 	     << " -> Block " << start
 	     << endl;
+#endif
 	fseek(of, (start*(long)TBBCTL_BLOCK_SIZE), SEEK_SET);
 	ui = fwrite(tmppoint, 1, TBBCTL_BLOCK_SIZE, of);
       } else {
@@ -205,6 +207,87 @@ Bool resortTbbctlFile(string infile, string outfile, Bool allowHole){
     fclose(of);
     fclose(fd);
     free(tmppoint);  
+  } catch (AipsError x) {
+    cerr << "tbbctlResort:resortTbbctlFile: " << x.getMesg() << endl;
+    return False;
+  }; 
+  return True;
+  
+};
+
+
+void fixDate(tbbctl_head *headerpoint){
+  static bool oddSecond = false;
+  if (headerpoint->sampleFreq == 200) {
+    if ((headerpoint->Date%2)!=0) {
+      if (headerpoint->SampleNr == 199999488) {
+	headerpoint->Date -= 1;
+      } else {
+	headerpoint->SampleNr += 512;
+	oddSecond = true;
+      };    
+    } else if (oddSecond && (headerpoint->SampleNr == 199998464)) {
+      headerpoint->Date -= 1;
+      headerpoint->SampleNr += 512;
+    } else {
+      oddSecond = false;
+    };
+  } else if (headerpoint->sampleFreq == 160) {
+    if (headerpoint->SampleNr == 159998976) {
+      headerpoint->Date -= 1;
+    };
+  } else {
+    cerr << "fixDate: Unsupported samplerate!!!" << endl;
+  };
+};
+
+
+Bool dumpTimestamps(string infile, Bool doFixDates){
+  try {
+    //double sampleFreq;
+    uint ui, block, numblocks, olddate, oldsample;
+    int noSamples;
+    tbbctl_head *headerpoint;
+    struct stat filestat;
+    unsigned char *tmppoint=NULL;
+    FILE *fd; 
+ 
+
+    if (doFixDates) {
+      cout << "dumpTimestamps: dumping fixed timestamps!!!" << endl;
+    };
+    //Allocate memory
+    tmppoint = (unsigned char*)malloc(TBBCTL_BLOCK_SIZE);
+    if (tmppoint == NULL) {
+      cerr << "tbbctlResort:resortTbbctlFile: Error while allocating temporary memory " << endl;
+      return False;	
+    };
+    headerpoint = (tbbctl_head*)tmppoint;
+    stat(infile.c_str(), &filestat);
+    numblocks = filestat.st_size / TBBCTL_BLOCK_SIZE;
+    if (numblocks < 1) {
+      cerr << "tbbctlResort:resortTbbctlFile: File " << infile << "too small (smaller than one blocksize)." <<endl;
+      return False;
+    };
+    cout << " working on file: " << infile << endl;
+    fd = fopen(infile.c_str(),"r");
+    if (fd == NULL) {
+      cerr << "tbbctlResort:resortTbbctlFile: Can't open file: " << infile << endl;
+      return False;
+    };
+    for (block=0; block<numblocks; block++) {
+      fseek(fd, (block*(long)TBBCTL_BLOCK_SIZE), SEEK_SET); 
+      ui = fread(headerpoint, 1, sizeof(tbbctl_head), fd);
+      if (doFixDates) {
+	fixDate(headerpoint);
+      };
+      noSamples = (headerpoint->Date-olddate)*headerpoint->sampleFreq*1000000 + headerpoint->SampleNr-oldsample;
+      printf("olddate: %10i  oldsample: %9i, newdate: %10i newsample: %9i, diff: %i \n",
+	     olddate, oldsample, headerpoint->Date, headerpoint->SampleNr, noSamples);
+    olddate = headerpoint->Date;
+    oldsample = headerpoint->SampleNr;
+    };
+    fclose(fd);
   } catch (AipsError x) {
     cerr << "tbbctlResort:resortTbbctlFile: " << x.getMesg() << endl;
     return False;
@@ -228,6 +311,7 @@ int main (int argc, char *argv[]) {
     if ((argc < 3) || (argc > 3)) {
       std::cerr << "Wrong number of arguments in call of \"tbbctlResort\". The correct format is:\n";
       std::cerr << "tbbctlResort infile outfile\n" << std::endl;
+      std::cerr << "(OR:) tbbctlResort fileToDump -D\n" << std::endl;
       return 1;				// Exit the program
     };
     
@@ -237,7 +321,14 @@ int main (int argc, char *argv[]) {
     // Second argument is the file to write
     outfilename.assign(argv[2]);
 
-    cout << "Resorting: " <<  resortTbbctlFile(infilename,outfilename,True) << endl;
+    if (strcmp(argv[2],"-D")==0){
+      dumpTimestamps(infilename,false);
+    } else if (strcmp(argv[2],"-DF")==0) {
+      dumpTimestamps(infilename,true);
+    } else {      
+      cout << "Resorting. " << endl;
+      cout << "resorting-erg: " <<  resortTbbctlFile(infilename,outfilename,True) << endl;
+    };
 
   } catch (std::string message) {
   std::cerr << "tbbctlResort: " << message << std::endl;
