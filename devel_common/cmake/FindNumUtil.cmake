@@ -38,10 +38,12 @@ include (FindPython)
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (NUM_UTIL_INCLUDES num_util/num_util.h
+find_path (NUM_UTIL_INCLUDES num_util.h
   PATHS ${include_locations}
   PATH_SUFFIXES
   python
+  num_util
+  python/num_util
   python${PYTHON_VERSION}
   NO_DEFAULT_PATH
   )
