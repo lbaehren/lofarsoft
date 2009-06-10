@@ -166,16 +166,23 @@ if (CR_WITH_PYTHON)
 
   ## compiler instructions
   add_library (pycr MODULE
+    Analysis/DynamicSpectrum.cc
     Coordinates/CoordinateType.cc
     Coordinates/TimeFreq.cc
+    Data/LOFAR_TBB.cc
     IO/DataIterator.cc
     IO/DataReader.cc
+    Math/BasicFilter.cc
+    Math/HanningFilter.cc
+    Utilities/MConversions.cc
     BindingsBoostPython.cc
     )
   ## linker instructions
   target_link_libraries(pycr
     ${PYTHON_LIBRARIES}
     ${BOOST_LIBRARIES}
+    ${HDF5_LIBRARIES}
+    ${DAL_LIBRARIES}
     ${cr_link_libraries}
     )
   ## additional target properties

@@ -560,6 +560,7 @@ int test_processing (string const &infile,
     // update SkymapCoordinate
     coord.setObsInfo (CR::test_ObsInfo("LOPES"));
     //
+    timeFreq.setSampleFrequency(dr.sampleFrequency());
     timeFreq.setBlocksPerFrame(1);
     timeFreq.setNofFrames(10);
     coord.setTimeFreqCoordinate(timeFreq);

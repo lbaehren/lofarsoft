@@ -147,6 +147,10 @@ include (FindPython)
 include (FindROOT)
 include (FindWCS)
 
+if (CR_WITH_PYTHON)
+  include (FindPythonModules)
+endif (CR_WITH_PYTHON)
+
 ## =============================================================================
 ##
 ##  Handling of configuration/build/install options
@@ -251,11 +255,20 @@ if (CR_WITH_PYTHON)
     message (STATUS "[CR-Tools] Generation of Python bindings disabled; missing Boost!")
     set (CR_WITH_PYTHON OFF)
   endif (NOT HAVE_BOOST)
+  ## Required external package: NumPy
+  if (HAVE_NUMPY)
+    include_directories (${NUMPY_INCLUDES})
+  else (HAVE_NUMPY)
+    message (STATUS "[CR-Tools] Generation of Python bindings disabled; missing NumPy!")
+    set (CR_WITH_PYTHON OFF)
+  endif (HAVE_NUMPY)
   ## Required external package: NumUtil
-  if (NOT HAVE_NUM_UTIL)
+  if (HAVE_NUM_UTIL)
+    include_directories (${NUM_UTIL_INCLUDES})
+  else (HAVE_NUM_UTIL)
     message (STATUS "[CR-Tools] Generation of Python bindings disabled; missing NumUtil!")
     set (CR_WITH_PYTHON OFF)
-  endif (NOT HAVE_NUM_UTIL)
+  endif (HAVE_NUM_UTIL)
 
 endif (CR_WITH_PYTHON)
 

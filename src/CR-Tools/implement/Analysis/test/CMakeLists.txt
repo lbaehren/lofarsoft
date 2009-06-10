@@ -190,6 +190,7 @@ if (HAVE_STARTOOLS AND CR_WITH_PLOTTING AND CR_WITH_PYTHON)
   if (HAVE_LIBM AND HAVE_LIBUTIL)
     target_link_libraries (tCompletePipeline
       cr
+      ${POSTGRESQL_LIBRARIES}
       ${STARTOOLS_LIBRARIES}
       ${FFTW3_LIBRARIES}
       ${ROOT_LIBRARIES}
@@ -200,6 +201,7 @@ if (HAVE_STARTOOLS AND CR_WITH_PLOTTING AND CR_WITH_PYTHON)
   else (HAVE_LIBM AND HAVE_LIBUTIL)
     target_link_libraries (tCompletePipeline
       cr
+      ${POSTGRESQL_LIBRARIES}
       ${STARTOOLS_LIBRARIES}
       ${FFTW3_LIBRARIES}
       ${ROOT_LIBRARIES}
