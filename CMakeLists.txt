@@ -256,6 +256,8 @@ set (packages_external
   cfitsio
   hdf5
   mathgl
+  numpy
+  num_util
   plplot
   pyrap
   python
@@ -302,6 +304,8 @@ add_dependencies (casacore hdf5 cfitsio boost wcslib bison)
 add_dependencies (hdf5 szip)
 
 add_dependencies (mathgl hdf5 python swig)
+
+add_dependencies (num_util boost numpy)
 
 add_dependencies (pyrap casacore python)
 
