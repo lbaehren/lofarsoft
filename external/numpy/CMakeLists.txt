@@ -43,6 +43,8 @@ endif (NOT NUMPY_VERBOSE_CONFIGURE)
 
 include (FindNumPy)
 
+message (STATUS "-- NumPy library   = ${NUMPY_LIBRARIES}")
+
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
@@ -94,8 +96,7 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
     ## build and install the package
     add_custom_target (install
       COMMAND ${PYTHON_EXECUTABLE} setup.py install --home=${USG_INSTALL_PREFIX}
-      COMMAND rm -rf ${NUMPY_BINARY_DIR}/${NUMPY_TAR_ARCHIVE}
-      COMMAND rm -rf ${NUMPY_BINARY_DIR}/${NUMPY_DIRECTORY}
+      COMMAND rm -rf ${NUMPY_BINARY_DIR}/*
       WORKING_DIRECTORY ${NUMPY_BINARY_DIR}/${NUMPY_DIRECTORY}
       COMMENT "[NumPy] Installing package ..."
       )
