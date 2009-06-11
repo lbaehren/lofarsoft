@@ -57,11 +57,30 @@ set (CMAKE_FIND_LIBRARY_PREFIXES "" CACHE STRING
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
+find_path (NUMPY_ARRAYOBJECT_H numpy/arrayobject.h
+  PATHS
+  ${lib_locations}
+  PATH_SUFFIXES
+  python
+  python/numpy/core/include
+  NO_DEFAULT_PATH
+)
+
+find_path (NUMPY_NDARRAYOBJECT_H numpy/ndarrayobject.h
+  PATHS
+  ${lib_locations}
+  PATH_SUFFIXES
+  python
+  python/numpy/core/include
+  NO_DEFAULT_PATH
+)
+
 find_path (NUMPY_INCLUDES numpy/__multiarray_api.h numpy/multiarray_api.txt
   PATHS
   ${lib_locations}
   PATH_SUFFIXES
   python
+  python/numpy/core/include
   python${PYTHON_VERSION}
   python${PYTHON_VERSION}/site-packages/numpy
   python${PYTHON_VERSION}/site-packages/numpy/core/include
@@ -75,6 +94,8 @@ find_library (NUMPY_MULTIARRAY_LIBRARY multiarray
   PATHS
   ${lib_locations}
   PATH_SUFFIXES
+  python
+  python/numpy/core
   python${PYTHON_VERSION}/site-packages/numpy/core
   NO_DEFAULT_PATH
   )
@@ -86,6 +107,8 @@ find_library (NUMPY_SCALARMATH_LIBRARY scalarmath
   PATHS
   ${lib_locations}
   PATH_SUFFIXES
+  python
+  python/numpy/core
   python${PYTHON_VERSION}/site-packages/numpy/core
   NO_DEFAULT_PATH
   )
@@ -113,6 +136,7 @@ find_file (NUMPY_VERSION_PY version.py
   /usr/lib64
   /usr/local/lib64
   PATH_SUFFIXES
+  python/numpy
   python${PYTHON_VERSION}/site-packages/numpy
   NO_DEFAULT_PATH
   )
@@ -135,16 +159,6 @@ if (numpy_version_test_output)
   set (NUMPY_API_VERSION ${numpy_version_test_output})
   
 else (numpy_version_test_output)
-  
-  include (FindPython)
-  
-  if (NUMPY_INCLUDES)
-    find_file (NUMPY_NDARRAYOBJECT_H ndarrayobject.h
-      PATHS ${NUMPY_INCLUDES}
-      PATH_SUFFIXES numpy
-      NO_DEFAULT_PATH
-      )
-  endif (NUMPY_INCLUDES)
   
   if (NUMPY_NDARRAYOBJECT_H)
     file (STRINGS ${NUMPY_NDARRAYOBJECT_H} NPY_VERSION

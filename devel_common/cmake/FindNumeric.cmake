@@ -34,6 +34,8 @@
 
 include (CMakeSettings)
 
+include (FindPython)
+
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
