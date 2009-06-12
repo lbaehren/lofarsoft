@@ -39,6 +39,6 @@ endif (NOT PYTHON_MODULES_VERBOSE_CONFIGURE)
 ## -----------------------------------------------------------------------------
 ## Load the modules doing the actual search
 
-include (FindNumArray)
+include (FindNumarray)
 include (FindNumUtil)
 include (FindNumPy)
