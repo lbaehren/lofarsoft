@@ -162,6 +162,16 @@ if (CR_WITH_STARTOOLS)
       ${CASA_LIBRARIES}
       ${WCSLIB_LIBRARIES}
       )
+  else (HAVE_PLPLOT OR HAVE_PGPLOT)
+    target_link_libraries (tanalyseLOPESevent2
+      cr
+      ${STARTOOLS_LIBRARIES}
+      ${POSTGRESQL_LIBRARIES}
+      ${FFTW3_LIBRARIES}
+      ${ROOT_LIBRARIES}
+      ${CASA_LIBRARIES}
+      ${WCSLIB_LIBRARIES}
+      )
   endif (HAVE_PLPLOT OR HAVE_PGPLOT)
   if (PGPLOT_LIBRARIES AND X11_LIBRARIES)
     ## link instructions
