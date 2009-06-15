@@ -70,7 +70,7 @@ BOOST_PYTHON_MODULE (pycr)
 
   bpl::class_<CoordinateType>("CoordinateType")
     .def(bpl::init<>())
-    .def(bpl::init<uint>()) 
+    .def(bpl::init<CoordinateType::Types>()) 
     .def("className", &CoordinateType::className)
     .def("type", &CoordinateType::type)
     .def("name", &CoordinateType::name)
