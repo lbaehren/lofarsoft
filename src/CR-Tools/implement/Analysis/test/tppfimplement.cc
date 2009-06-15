@@ -387,7 +387,7 @@ int test_ppfimplements ()
 				
 	 uint ncRe = ppfReImp_data.ncolumn() ;
 	 
-	 uint nrRe = ppfReImp_data.nrow() ;
+// 	 uint nrRe = ppfReImp_data.nrow() ;
 	 
 	 Matrix<DComplex> ppfRemain_data( nofrows,ncRe,0.0);
 	 

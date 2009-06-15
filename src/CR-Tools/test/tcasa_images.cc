@@ -35,8 +35,8 @@
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <coordinates/Coordinates/LinearCoordinate.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
+#include <images/Images/ImageFITSConverter.h>
 #include <images/Images/PagedImage.h>
-// #include <images/Images/ImageFITSConverter.h>
 #include <lattices/Lattices/TiledShape.h>
 
 #ifdef HAVE_HDF5
@@ -45,6 +45,8 @@
 
 // CR-Tools header files
 #include <Coordinates/CoordinateType.h>
+#include <Coordinates/SpatialCoordinate.h>
+#include <Utilities/MConversions.h>
 #include <Utilities/TestsCommon.h>
 
 using std::cout;
@@ -77,7 +79,124 @@ const double pi (3.14159265);
 //
 // ==============================================================================
 
-// ------------------------------------------------------------------------------
+//_______________________________________________________________________________
+
+/*!
+  \brief Get list of reference codes for celestial coordinate systems
+
+  \return refcodes -- Vector with a list of reference codes for celestial
+          coordinate systems.
+*/
+std::vector<std::string> systemRefcodes ()
+{
+  std::vector<std::string> refcode;
+
+  refcode.push_back("AZEL");      /* topocentric Azimuth and Elevation (N through E) */
+  refcode.push_back("AZELSW");    /* topocentric Azimuth and Elevation (S through W) */
+  refcode.push_back("AZELNE");    /* topocentric Azimuth and Elevation (N through E) */
+  refcode.push_back("AZELGEO");   /* geodetic Azimuth and Elevation (N through E)    */
+  refcode.push_back("AZELSWGEO"); /* geodetic Azimuth and Elevation (S through W)    */
+  refcode.push_back("AZELNEGEO"); /* geodetic Azimuth and Elevation (N through E)    */
+  refcode.push_back("B1950");     /* mean epoch and ecliptic at B1950.0              */
+  refcode.push_back("ECLIPTIC");  /* ecliptic for J2000 equator and equinox          */
+  refcode.push_back("ICRS");      /* International Celestial reference system        */
+  refcode.push_back("J2000");     /* mean equator and equinox at J2000.0 (FK5)       */
+  refcode.push_back("GALACTIC");  /* galactic coordinates                            */
+
+  return refcode;
+}
+
+//_______________________________________________________________________________
+//                                                            directionCoordinate
+
+/*!
+  \param nelem      -- Number of pixel elements along the coordinate axes.
+  \param refcode    -- 
+  \param projection -- 
+*/
+casa::DirectionCoordinate directionCoordinate (std::vector<uint> const &nelem,
+					       std::string const &refcode="AZEL",
+					       std::string const &projection="STG")
+{
+  casa::Vector<double> refPixel(2);
+  Vector<Quantum<double> > refValue(2);
+  Vector<Quantum<double> > increment(2);
+  casa::Matrix<double> xform(2,2);
+  // Reference pixel is center of map for directional components
+  refPixel(0) = nelem[0]/2.0;
+  refPixel(1) = nelem[1]/2.0;
+  // Reference value: local zenith
+  refValue(0) = Quantum<double>(0,"deg");
+  refValue(1) = Quantum<double>(90,"deg");
+  // Coordinate increment
+  increment(0) = Quantum<double>(-1,"deg");
+  increment(1) = Quantum<double>(1,"deg");
+  // Linear transform
+  xform            = 0.0;
+  xform.diagonal() = 1.0;
+  
+  // DirectionCoordinate
+  return casa::DirectionCoordinate (CR::MDirectionType(refcode),
+				    CR::ProjectionType(projection),
+				    refValue(0),
+				    refValue(1),
+				    increment(0),
+				    increment(1),
+				    xform,
+				    refPixel(0),
+				    refPixel(1));
+}
+
+//_______________________________________________________________________________
+//                                                              tabularCoordinate
+
+/*
+  \brief Get a tabular coordinate
+
+  \param unit -- World axis unit of the coordinate.
+  \param name -- Name of the coordinate axis.
+  \param type -- Distribution of the tabulated values: "log", "group"
+
+  \return coord -- Tabular coordinate
+*/
+casa::TabularCoordinate tabularCoordinate (std::string const &unit="m",
+					   std::string const &name="Length",
+					   std::string const &type="log") 
+{
+  uint nelem (10);
+  Vector<double> pixel (nelem,0.0);
+  Vector<double> world (nelem,0.0);
+
+  if (type == "log") {
+    pixel(0) = 0;   world(0) = 0;
+    pixel(1) = 1;   world(1) = 1;
+    pixel(2) = 2;   world(2) = 2;
+    pixel(3) = 3;   world(3) = 5;
+    pixel(4) = 4;   world(4) = 10;
+    pixel(5) = 5;   world(5) = 20;
+    pixel(6) = 6;   world(6) = 50;
+    pixel(7) = 7;   world(7) = 100;
+    pixel(8) = 8;   world(8) = 200;
+    pixel(9) = 9;   world(9) = 500;
+  }
+  else if (type == "group") {
+    pixel(0) = 0;   world(0) = 1;
+    pixel(1) = 1;   world(1) = 2;
+    pixel(2) = 2;   world(2) = 3;
+    pixel(3) = 3;   world(3) = 10;
+    pixel(4) = 4;   world(4) = 11;
+    pixel(5) = 5;   world(5) = 12;
+    pixel(6) = 6;   world(6) = 13;
+    pixel(7) = 7;   world(7) = 101;
+    pixel(8) = 8;   world(8) = 102;
+    pixel(9) = 9;   world(9) = 103;
+  }
+  
+  return casa::TabularCoordinate (pixel,world,unit,name);
+}
+
+//_______________________________________________________________________________
+//                                                              radial_coordinate
 
 /*!
   \brief Create LinearCoordinate object for radial distance
@@ -110,7 +229,8 @@ casa::LinearCoordinate radial_coordinate (double const &referenceValue=0.0,
   return coord;
 }
 
-// ------------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                     image_csys
 
 /*!
   \brief Create the coordinate system attached to the image
@@ -153,15 +273,7 @@ casa::CoordinateSystem image_csys (std::string imageType="CR_SKYMAP",
     // Faraday rotation
     cs.addCoordinate (CR::CoordinateType::makeFaradayCoordinate());
     // Polarization
-    {
-      Vector<casa::Int> iquv(4);
-      iquv(0) = casa::Stokes::I;
-      iquv(1) = casa::Stokes::Q;
-      iquv(2) = casa::Stokes::U;
-      iquv(3) = casa::Stokes::V;
-      casa::StokesCoordinate coord(iquv);
-      cs.addCoordinate (coord);
-    }
+    cs.addCoordinate (CR::CoordinateType::makeStokesCoordinate());
   }
   else if (imageType == "RM_MAP") {
     // General observation information
@@ -181,6 +293,93 @@ casa::CoordinateSystem image_csys (std::string imageType="CR_SKYMAP",
 //  Testing routines
 //
 // ==============================================================================
+
+//_______________________________________________________________________________
+//                                                                   test_ObsInfo
+
+/*!
+  \brief Test working with a casa::ObsInfo object
+  
+  This class is used to record miscellaneous information about an observation.
+  At present it contains the following:
+
+  <ol>
+    <li>Telescope name
+    <li>Observer name
+    <li>Observation date
+    <li>Pointing centre (as distinct from the phase center or tangent point)
+  </ol>
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+*/
+int test_ObsInfo ()
+{
+  cout << "\n[test_ObsInfo]" << endl;
+
+  int nofFailedTests (0);
+
+  return nofFailedTests;
+}
+
+//_______________________________________________________________________________
+//                                                               test_export2fits
+
+/*!
+  \brief Test translation of WCS information during export to FITS
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+*/
+int test_export2fits ()
+{
+  cout << "\n[tcasacoremages::test_export2fits]\n" << endl;
+
+  int nofFailedTests (0);
+
+  bool status (true);
+  casa::String error;
+  std::string outfile;
+  std::vector<std::string> refcode = systemRefcodes();
+  std::vector<std::string> projection = CR::ProjectionNames();
+  casa::CoordinateSystem csys;
+  casa::IPosition shape (3,50,50,10);
+  casa::TiledShape tile (shape);
+
+  for (uint ref(0); ref<refcode.size(); ref++) {
+    for (uint proj(0); proj<projection.size(); proj++) {
+      // report tested combination
+      cout << "-- Testing " << refcode[ref] << " / " << projection[proj] << endl;
+      // base name of the output file
+      std::string filename = "image-" + refcode[ref] + "-" + projection[proj];
+      /// create spatial coordinate 
+      CR::SpatialCoordinate coord (CR::CoordinateType::DirectionRadius,
+				   refcode[ref],
+				   projection[proj]);
+      coord.toCoordinateSystem (csys,false);
+      csys.setObsInfo(CR::test_ObsInfo());
+      // create PagedImage ...
+      outfile = filename + ".img";
+      casa::PagedImage<float> image_paged (tile,
+					   csys,
+					   outfile);
+      // .. and export to FITS
+      outfile = "!" + filename + ".fits";
+      status = casa::ImageFITSConverter::ImageToFITS(error,
+						     image_paged,
+						     outfile);
+      // create HDF5Image
+#ifdef HAVE_HDF5
+      outfile = filename + ".h5";
+      casa::HDF5Image<float> image_hdf5 (tile,
+					 csys,
+					 outfile);
+#endif
+    }
+  }
+
+  return nofFailedTests;
+}
 
 // ------------------------------------------------------------------------------
 
@@ -206,7 +405,7 @@ int test_PagedImage ()
 					image_csys(),
 					"testimage_f.img");
     /* feedback */
-    CR::image_summary (imageFloat);
+    CR::summary (imageFloat);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -219,7 +418,7 @@ int test_PagedImage ()
 					  image_csys(),
 					  "testimage_d.img");
     /* feedback */
-    CR::image_summary (imageDouble);
+    CR::summary (imageDouble);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -257,19 +456,19 @@ int test_HDF5Image ()
     casa::HDF5Image<float> imageFloat (tshape,
 				       image_csys(),
 				       "hdf5image_f.h5");
-    CR::image_summary (imageFloat);
+    CR::summary (imageFloat);
     
     cout << "--> HDF5Image<double>" << endl;
     casa::HDF5Image<double> imageDouble (tshape,
 					 image_csys(),
 					 "hdf5image_d.h5");
-    CR::image_summary (imageDouble);
+    CR::summary (imageDouble);
     
     cout << "--> HDF5Image<casa::Complex>" << endl;
     casa::HDF5Image<casa::Complex> imageComplex (tshape,
 						 image_csys(),
 						 "hdf5image_c.h5");
-    CR::image_summary (imageComplex);
+    CR::summary (imageComplex);
     
   } catch (std::string message) {
     std::cerr << message << endl;
@@ -379,9 +578,32 @@ int create_lofar_images ()
   casa::String error;
 
   //__________________________________________________________________
+  // Create image holding standard sky image
+
+   std::cout << "[1] Create image holding standard sky image ..." << std::endl; 
+  try {
+    IPosition shape (4,4096,4096,1024,4);
+    casa::TiledShape tshape (shape);
+    
+    casa::CoordinateSystem cs;
+    // General observation information
+    cs.setObsInfo(CR::test_ObsInfo());
+    // Direction coordinate
+    cs.addCoordinate(CR::CoordinateType::makeDirectionCoordinate());
+    // Spectral coordinate
+    cs.addCoordinate(CR::CoordinateType::makeSpectralCoordinate());
+    // Stokes coordinate
+    cs.addCoordinate(CR::CoordinateType::makeStokesCoordinate());
+
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  //__________________________________________________________________
   // Create image holding RM cube
 
-  std::cout << "[1] Create image holding RM cube ..." << std::endl;
+  std::cout << "[2] Create image holding RM cube ..." << std::endl;
   try {
     IPosition shape (4,4096,4096,500,4);
     casa::TiledShape tshape (shape);
@@ -391,13 +613,13 @@ int create_lofar_images ()
 #ifdef HAVE_HDF5    
     casa::HDF5Image<double> image (tshape,
 				   image_csys(imageType),
-				   "lofar_rm_cube.h5");
+				   "lofar_rmc.h5");
 #else
     casa::PagedImage<double> image (tshape,
 				    image_csys(imageType),
-				    "lofar_rm_cube.img");
+				    "lofar_rmc.img");
 #endif
-    CR::image_summary(image);
+    CR::summary(image);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -406,7 +628,7 @@ int create_lofar_images ()
   //__________________________________________________________________
   // Create image holding RM map
   
-  std::cout << "[2] Create image holding RM map ..." << std::endl;
+  std::cout << "[3] Create image holding RM map ..." << std::endl;
   try {
     IPosition shape (2,4096,4096);
     casa::TiledShape tshape (shape);
@@ -416,13 +638,13 @@ int create_lofar_images ()
 #ifdef HAVE_HDF5    
     casa::HDF5Image<double> image (tshape,
 				   image_csys(imageType),
-				   "lofar_rm_map.h5");    
+				   "lofar_rmm.h5");    
 #else
     casa::PagedImage<double> image (tshape,
 				    image_csys(imageType),
-				    "lofar_rm_map.img");    
+				    "lofar_rmm.img");    
 #endif
-    CR::image_summary(image);
+    CR::summary(image);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -431,7 +653,7 @@ int create_lofar_images ()
   //__________________________________________________________________
   // Create image holding CR sky map
 
-  std::cout << "[3] Create image holding CR sky map ..." << std::endl;
+  std::cout << "[4] Create image holding CR sky map ..." << std::endl;
   try {
     IPosition shape (5,256,256,100,10,513);
     casa::TiledShape tshape (shape);
@@ -441,13 +663,13 @@ int create_lofar_images ()
 #ifdef HAVE_HDF5    
     casa::HDF5Image<double> image (tshape,
 				   image_csys(imageType),
-				   "lofar_cr_skymap.h5");    
+				   "lofar_crc.h5");    
 #else
     casa::PagedImage<double> image (tshape,
 				    image_csys(imageType),
-				    "lofar_cr_skymap.img");    
+				    "lofar_crc.img");    
 #endif
-    CR::image_summary(image);
+    CR::summary(image);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;

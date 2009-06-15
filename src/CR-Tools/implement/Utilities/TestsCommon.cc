@@ -74,9 +74,9 @@ namespace CR { // Namespace CR -- begin
   }
 
   //_____________________________________________________________________________
-  //                                                           coordinate_summary
+  //                                                          summary(Coordinate)
   
-  void coordinate_summary (casa::Coordinate &coord)
+  void summary (casa::Coordinate &coord)
   {
     cout << "-- Coord. type      = " << coord.type()           << endl;
     cout << "-- Coord. name      = " << coord.showType()       << endl;
@@ -102,6 +102,18 @@ namespace CR { // Namespace CR -- begin
       // feedback
       cout << "-- Pixel to World   = " << pixel << " -> " << world << endl;
     }
+  }
+
+  //_____________________________________________________________________________
+  //                                                    summary(CoordinateSystem)
+  
+  void summary (casa::CoordinateSystem &csys)
+  {
+    cout << "-- World axis names = " << csys.worldAxisNames() << endl;
+    cout << "-- World axis units = " << csys.worldAxisUnits() << endl;
+    cout << "-- Reference pixel  = " << csys.referencePixel() << endl;
+    cout << "-- Reference value  = " << csys.referenceValue() << endl;
+    cout << "-- Increment        = " << csys.increment()      << endl;
   }
   
   // ============================================================================

@@ -93,7 +93,7 @@ int test_Coordinate ()
 				     xform,
 				     refPixel(0),
 				     refPixel(1));
-    CR::coordinate_summary(coord);
+    CR::summary(coord);
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;

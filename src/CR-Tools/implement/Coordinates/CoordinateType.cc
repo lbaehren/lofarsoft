@@ -310,14 +310,24 @@ namespace CR { // Namespace CR -- begin
   //                                                         makeLinearCoordinate
   
   LinearCoordinate
-  CoordinateType::makeLinearCoordinate (unsigned int const &nofAxes)
+  CoordinateType::makeLinearCoordinate (unsigned int const &nofAxes,
+					casa::String const &name,
+					casa::String const &unit,
+					double const &refValue,
+					double const &increment,
+					double const &refPixel)
   {
-    Vector<casa::String> names (nofAxes,"Length");
-    Vector<casa::String> units (nofAxes,"m");
+    Vector<casa::String> names (nofAxes,name);
+    Vector<casa::String> units (nofAxes,unit);
+    Vector<double> crval (nofAxes,refValue);
+    Vector<double> cdelt (nofAxes,increment);
+    Vector<double> crpix (nofAxes,refPixel);
     
-    return makeLinearCoordinate (nofAxes,
-				 names,
-				 units);
+    return makeLinearCoordinate (names,
+				 units,
+				 crval,
+				 cdelt,
+				 crpix);
   }
   
   //_____________________________________________________________________________
@@ -357,14 +367,43 @@ namespace CR { // Namespace CR -- begin
     }
   }
   
-  // ----------------------------------------------------- makeSpectralCoordinate
+  //_____________________________________________________________________________
+  //                                                         makeLinearCoordinate
   
-  SpectralCoordinate CoordinateType::makeSpectralCoordinate (double const &refValue,
-							     double const &increment,
-							     double const &refPixel)
+  LinearCoordinate
+  CoordinateType::makeLinearCoordinate (Vector<casa::String> const &names,
+					Vector<casa::String> const &units,
+					Vector<double> const &refValue,
+					Vector<double> const &increment,
+					Vector<double> const &refPixel)
+  {
+    uint nelem = refValue.nelements();
+    Matrix<casa::Double> pc(nelem,nelem);
+    
+    pc = 0.0;
+    pc.diagonal(1);
+    
+    LinearCoordinate coord (names,
+			    units,
+			    refValue,
+			    increment,
+			    pc,
+			    refPixel);
+    
+    return coord;
+  }
+  
+  
+  //_____________________________________________________________________________
+  //                                                       makeSpectralCoordinate
+  
+  SpectralCoordinate
+  CoordinateType::makeSpectralCoordinate (double const &refValue,
+					  double const &increment,
+					  double const &refPixel)
   {
     Vector<String> names (1,"Frequency");
-
+    
     casa::SpectralCoordinate coord (casa::MFrequency::TOPO,
 				    refValue,
 				    increment,
@@ -374,12 +413,29 @@ namespace CR { // Namespace CR -- begin
     
     return coord;
   }
+
+  //_____________________________________________________________________________
+  //                                                         makeStokesCoordinate
   
-  // --------------------------------------------------------- makeTimeCoordinate
+  casa::StokesCoordinate CoordinateType::makeStokesCoordinate ()
+  {
+    Vector<casa::Int> iquv(4);
+    
+    iquv(0) = casa::Stokes::I;
+    iquv(1) = casa::Stokes::Q;
+    iquv(2) = casa::Stokes::U;
+    iquv(3) = casa::Stokes::V;
+    
+    return casa::StokesCoordinate (iquv);
+  }
   
-  LinearCoordinate CoordinateType::makeTimeCoordinate (double const &refValue,
-						       double const &increment,
-						       double const &refPixel)
+  //_____________________________________________________________________________
+  //                                                           makeTimeCoordinate
+  
+  LinearCoordinate
+  CoordinateType::makeTimeCoordinate (double const &refValue,
+				      double const &increment,
+				      double const &refPixel)
   {
     Vector<String> names (1,"Time");
     Vector<String> units (1,"s");

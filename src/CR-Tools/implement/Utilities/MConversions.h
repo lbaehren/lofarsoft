@@ -160,7 +160,15 @@ namespace CR { // Namespace CR -- begin
     \return tp -- Projection type
   */
   casa::Projection::Type ProjectionType (String const &refcode);
-
+  
+  /*!
+    \brief List of spherical map projections
+    
+    \return names -- Vector with a list of reference codes/names for spherical
+            map projections.
+  */
+  std::vector<std::string> ProjectionNames ();
+  
   // ============================================================================
   //
   //  Positions

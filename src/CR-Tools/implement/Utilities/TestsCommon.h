@@ -125,7 +125,12 @@ namespace CR { // Namespace CR -- begin
     
     \param coord -- Coordinate object of which to show the properties.
   */
-  void coordinate_summary (casa::Coordinate &coord);
+  void summary (casa::Coordinate &coord);
+  
+  /*!
+    \brief Print a summary of the properties of a coordinate system object
+  */
+  void summary (casa::CoordinateSystem &csys);
   
   /*!
     \brief Provide a summary of the properties of a casa::ImageInterface object
@@ -149,13 +154,21 @@ namespace CR { // Namespace CR -- begin
     \param image -- Image object derived from the ImageInterface class.
   */
   template <class T>
-    void image_summary (casa::ImageInterface<T> &image)
+    void summary (casa::ImageInterface<T> &image)
     {
       casa::CoordinateSystem cs = image.coordinates();
-
+      casa::IPosition shape (image.shape());
+      int nofAxes (shape.nelements());
+      double nofPixels (1.0);
+      
+      for (int n(0); n<nofAxes; n++) {
+	nofPixels *= shape(n);
+      }
+      
       cout << "-- Image type ............. : " << image.imageType()        << endl;
       cout << "-- Table name ............. : " << image.name()             << endl;
-      cout << "-- Image shape ............ : " << image.shape()            << endl;
+      cout << "-- Image shape ............ : " << shape                    << endl;
+      cout << "-- Number of pixels ....... : " << nofPixels                << endl;
       cout << "-- World axis names ....... : " << cs.worldAxisNames()      << endl;
       cout << "-- World axis units ....... : " << cs.worldAxisUnits()      << endl;
       cout << "-- Referemce pixel ........ : " << cs.referencePixel()      << endl;

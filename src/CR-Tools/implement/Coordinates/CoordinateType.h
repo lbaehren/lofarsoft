@@ -36,6 +36,7 @@
 #include <coordinates/Coordinates/Coordinate.h>
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <coordinates/Coordinates/LinearCoordinate.h>
+#include <coordinates/Coordinates/StokesCoordinate.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <coordinates/Coordinates/TabularCoordinate.h>
 
@@ -424,14 +425,24 @@ namespace CR { // Namespace CR -- begin
       \brief Create a LinearCoordinate object
       
       \param nofAxes -- The number of axes for which to create the coordinate
+      \param names     -- World axis names of the coordinate.
+      \param units     -- World axis units of the coordinate.
+      \param refValue  -- Reference value, CRVAL.
+      \param increment -- Coordinate increment, CDELT.
+      \param refPixel  -- Reference pixel, CRPIX.
       
       \return coord -- 
     */
-    static LinearCoordinate makeLinearCoordinate (unsigned int const &nofAxes=1);
+    static LinearCoordinate makeLinearCoordinate (unsigned int const &nofAxes=1,
+						  casa::String const &name="Length",
+						  casa::String const &unit="m",
+						  double const &refValue=0.0,
+						  double const &increment=0.0,
+						  double const &refPixel=1.0);
     
     /*!
       \brief Create a LinearCoordinate object
-      
+
       \param nofAxes -- The number of axes for which to create the coordinate
       \param names   -- World axis names of the coordinate.
       \param units   -- World axis units of the coordinate.
@@ -441,10 +452,27 @@ namespace CR { // Namespace CR -- begin
     static LinearCoordinate makeLinearCoordinate (unsigned int const &nofAxes,
 						  Vector<casa::String> const &names,
 						  Vector<casa::String> const &units);
-
+    
+    /*!
+      \brief Create a LinearCoordinate object
+      
+      \param names     -- World axis names of the coordinate.
+      \param units     -- World axis units of the coordinate.
+      \param refValue  -- Reference value, CRVAL.
+      \param increment -- Coordinate increment, CDELT.
+      \param refPixel  -- Reference pixel, CRPIX.
+      
+      \return coord -- 
+    */
+    static casa::LinearCoordinate makeLinearCoordinate (Vector<casa::String> const &names,
+							Vector<casa::String> const &units,
+							Vector<double> const &refValue,
+							Vector<double> const &increment,
+							Vector<double> const &refPixel);
+    
     /*!
       \brief Create a SpectralCoordinate object to hold a frequency axis
-
+      
       \param refValue   -- Reference value, CRVAL, [s]
       \param increment  -- Coordinate increment, CDELT, [s]
       \param refPixel   -- Reference pixel, CRPIX
@@ -454,6 +482,11 @@ namespace CR { // Namespace CR -- begin
     static SpectralCoordinate makeSpectralCoordinate (double const &refValue=0,
 						      double const &increment=0,
 						      double const &refPixel=0);
+
+    /*!
+      \brief Create a StokesCoordinate object
+    */
+    static casa::StokesCoordinate makeStokesCoordinate ();
     
     /*!
       \brief Create a LinearCoordinate object to hold a time coordinate

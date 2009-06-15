@@ -16,7 +16,6 @@ if (HAVE_CASACORE)
     casacoreMatrixAccess03
     casacoreMatrixAccess04
     casacoreMeasures
-    casacoreImages
     casacoreCoordinates
     casacore_Coordinates_ObsInfo
     )

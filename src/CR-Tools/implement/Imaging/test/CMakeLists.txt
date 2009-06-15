@@ -41,25 +41,6 @@ endforeach (src)
 ## ==============================================================================
 
 ##____________________________________________________________________
-## tcasacoreImages
-
-## compiler instructions
-add_executable (tcasacoreImages tcasacoreImages.cc)
-## linker instructions
-if (HAVE_HDF5) 
-  target_link_libraries (tcasacoreImages
-    cr
-    ${HDF5_LIBRARIES}
-    )
-else (HAVE_HDF5)
-  target_link_libraries (tcasacoreImages
-    cr
-    )
-endif (HAVE_HDF5)
-## testing
-add_test (tcasacoreImages tcasacoreImages)
-
-##____________________________________________________________________
 ## tSkymapper
 
 if (HAVE_DAL AND HAVE_HDF5 AND positions_lopes08)
