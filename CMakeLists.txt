@@ -199,7 +199,8 @@ add_custom_target (clean-build
   COMMAND rm -rf bison blitz boost
   COMMAND rm -rf casacore cfitsio cr
   COMMAND rm -rf dal flex hdf5 mathgl
-  COMMAND rm -rf plplot python root
+  COMMAND rm -rf numeric numpy num_util
+  COMMAND rm -rf plplot root
   COMMAND rm -rf startools swig szip
   COMMAND rm -rf wcslib wcstools
   WORKING_DIRECTORY ${USG_BUILD}
@@ -256,11 +257,12 @@ set (packages_external
   cfitsio
   hdf5
   mathgl
+  matplotlib
+  numeric
   numpy
   num_util
   plplot
   pyrap
-  python
   qt
   root
   sip
@@ -303,19 +305,19 @@ add_dependencies (casacore hdf5 cfitsio boost wcslib bison)
 
 add_dependencies (hdf5 szip)
 
-add_dependencies (mathgl hdf5 python swig)
+add_dependencies (mathgl hdf5 swig num_util)
+
+add_dependencies (matplotlib numpy)
 
 add_dependencies (num_util boost numpy)
 
-add_dependencies (pyrap casacore python)
-
-add_dependencies (python boost)
+add_dependencies (pyrap casacore num_util)
 
 add_dependencies (startools root)
 
 add_dependencies (wcslib boost flex)
 
-add_dependencies (plplot python swig)
+add_dependencies (plplot numpy swig)
 
 ##____________________________________________________________________
 ## Packages/Targets needing extra attention
@@ -398,15 +400,15 @@ add_custom_target (cr
 
 if (CR_WITH_STARTOOLS)
   if (CR_WITH_GUI)
-    add_dependencies (cr test-data dal startools mathgl)
+    add_dependencies (cr dal startools mathgl plplot)
   else (CR_WITH_GUI)
-    add_dependencies (cr test-data dal startools)
+    add_dependencies (cr dal startools plplot)
   endif (CR_WITH_GUI)
 else (CR_WITH_STARTOOLS)
   if (CR_WITH_GUI)
-    add_dependencies (cr test-data dal mathgl)
+    add_dependencies (cr dal mathgl plplot)
   else (CR_WITH_GUI)
-    add_dependencies (cr test-data dal)
+    add_dependencies (cr dal plplot)
   endif (CR_WITH_GUI)
 endif (CR_WITH_STARTOOLS)
 
