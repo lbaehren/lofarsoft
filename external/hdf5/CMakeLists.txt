@@ -35,14 +35,15 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   ${HDF5_SOURCE_DIR}/..
   ${HDF5_SOURCE_DIR}/../..
   ${HDF5_SOURCE_DIR}/../../..
-  ENV LOFARSOFT
+  $ENV{LOFARSOFT}
   )
 
 if (USG_ROOT)
   include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
 else (USG_ROOT)
-  message (FATAL_ERROR "[HDF5] Unable to locate additional CMake scripts!")
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
+
 
 ## ------------------------------------------------------------------------------
 ## Check for system-wide HDF5 library installation
@@ -65,23 +66,6 @@ endif (HDF5_MAJOR_VERSION LESS 1 OR HDF5_MINOR_VERSION LESS 8)
 if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   
   ## ----------------------------------------------------------------------------
-  ## Locate the installation area
-  
-  find_path (HDF5_prefix release_area.txt
-    PATHS
-    ${HDF5_SOURCE_DIR}
-    PATH_SUFFIXES
-    ../release
-    ../../release
-    ../../../release
-    NO_DEFAULT_PATH
-    )
-  
-  if (NOT HDF5_prefix)
-    message (FATAL_ERROR "[HDF5] Unable to locate the installation area")
-  endif (NOT HDF5_prefix)
-  
-  ## ----------------------------------------------------------------------------
   ## Compression/deflation libraries
 
   include (FindSZIP)
@@ -90,7 +74,7 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   ##__________________________________________________________________
   ## Build list of configuration parameters
 
-  set (HDF5_VERSION "1.8.2")
+  set (HDF5_VERSION "1.8.3")
   set (HDF5_DIRECTORY "hdf5-${HDF5_VERSION}")
   set (HDF5_TAR_ARCHIVE "${HDF5_DIRECTORY}.tar.gz")
   set (HDF5_URL "${USG_DOWNLOAD}/software/${HDF5_TAR_ARCHIVE}")
@@ -187,7 +171,7 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   ## Run "./configure [args]"
   
   add_custom_target (run_configure ALL
-    COMMAND ./configure --prefix=${HDF5_prefix} --bindir=${HDF5_prefix}/bin --includedir=${HDF5_prefix}/include/hdf5 ${HDF5_enable_cxx} ${HDF5_enable_hl} ${HDF5_enable_shared} ${HDF5_enable_static}
+    COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --bindir=${USG_INSTALL_PREFIX}/bin --includedir=${USG_INSTALL_PREFIX}/include/hdf5 ${HDF5_enable_cxx} ${HDF5_enable_hl} ${HDF5_enable_shared} ${HDF5_enable_static}
     WORKING_DIRECTORY ${HDF5_BINARY_DIR}/hdf5-${HDF5_VERSION}
     COMMENT "Configuring to build HDF5 library ..."
     )
@@ -204,27 +188,14 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
 
   ## Run "make install"
 
-  add_custom_target (run_install ALL
+  add_custom_target (install ALL
     COMMAND make install
+    COMMAND rm -rf ${HDF5_BINARY_DIR}/hdf5-${HDF5_VERSION}
     WORKING_DIRECTORY ${HDF5_BINARY_DIR}/hdf5-${HDF5_VERSION}
     COMMENT "Installing HDF5 library and header files ..."
     )
-  add_dependencies (run_install run_make)
+  add_dependencies (install run_make)
 
-  ##__________________________________________________________________
-  ## Post-installation clean-up: since the "--includedir" option does
-  ## not seem to be handled properly by the configure script, we need
-  ## to manually move the header files after installation
-
-  add_custom_target (install ALL
-    COMMAND mkdir -p hdf5 
-    COMMAND mv H5*.h hdf5
-    COMMAND mv hdf5*.h hdf5
-    COMMAND rm -rf ${HDF5_BINARY_DIR}/hdf5-${HDF5_VERSION}
-    WORKING_DIRECTORY ${HDF5_prefix}/include
-    )
-  add_dependencies (install run_install)
-  
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
