@@ -109,15 +109,27 @@ int  simpleImage(string const &infile,
     // Spatial coordinates
     cout << "testLOPESskymapping::simpleImage Setting up SpatialCoordinate"  << endl;
     std::string refcode    = "AZEL";
-    std::string projection = "SIN";
+    std::string projection = "STG";
     IPosition shape (3,30,30,3);
     SpatialCoordinate spatial (CoordinateType::DirectionRadius, refcode,projection);
     spatial.setShape(shape);
+    //set reference pixel, reference value, and coord increment
+    Vector<double> tmpvec;
+    tmpvec = spatial.referencePixel();
+    tmpvec(0) = 14.5; tmpvec(1)=14.5;  tmpvec(2)=0.;
+    spatial.setReferencePixel(tmpvec);
+    tmpvec = spatial.referenceValue();
+    tmpvec(0) = 180.; tmpvec(1)=90.;  tmpvec(2)=1000.;
+    spatial.setReferenceValue(tmpvec,true);
+    tmpvec = spatial.increment();
+    tmpvec(0) = 7.7; tmpvec(1)=7.7;  tmpvec(2)=10000.;
+    spatial.setIncrement(tmpvec,true);
     // Time-Frequency coordinate
     cout << "testLOPESskymapping::simpleImage Setting up TimeFreqCoordinate"  << endl;
     uint nofBlocksPerFrame = 64;
     uint nofFrames         = (dr.headerRecord().asInt("Filesize")/blocksize)/nofBlocksPerFrame;
     TimeFreqCoordinate timeFreq (blocksize, nofBlocksPerFrame, nofFrames,true);
+    timeFreq.setNyquistZone(2);
     // Skymap coordinate
     cout << "testLOPESskymapping::simpleImage Setting up SkymapCoordinate"  << endl;
     SkymapCoordinate coord (info,
@@ -139,7 +151,7 @@ int  simpleImage(string const &infile,
     Skymapper skymapper (coord,
 			 antPositions,
 			 outfile,
-			 Skymapper::PagedImage);
+			 Skymapper::HDF5Image);
     cout << "                                                         ... done."  << endl;
     skymapper.summary();
     
