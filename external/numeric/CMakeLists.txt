@@ -10,10 +10,10 @@ cmake_minimum_required (VERSION 2.5)
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (NUMERIC_FORCE_BUILD       "Force rebuild and local installation?"    NO  )
+option (NUMERIC_FORCE_BUILD       "Force rebuild and local installation?"      NO  )
 option (NUMERIC_CMAKE_BUILD       "Use CMake to configure and build NUMERIC?"  YES )
-option (NUMERIC_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
-option (NUMERIC_VERBOSE_BUILD     "Be verbose during build process?"         NO  )
+option (NUMERIC_VERBOSE_CONFIGURE "Be verbose during configuration?"           NO  )
+option (NUMERIC_VERBOSE_BUILD     "Be verbose during build process?"           NO  )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -35,6 +35,11 @@ endif (USG_ROOT)
 
 ## ------------------------------------------------------------------------------
 ## Check if the program/package/library is already available
+
+if (NOT NUMERIC_VERBOSE_CONFIGURE)
+  set (NUMERIC_FIND_QUIETLY YES )
+  set (PYTHON_FIND_QUIETLY YES )
+endif (NOT NUMERIC_VERBOSE_CONFIGURE)
 
 include (FindNumeric)
 
@@ -89,8 +94,8 @@ if (NOT HAVE_NUMERIC OR NUMERIC_FORCE_BUILD)
     ## build and install the package
     add_custom_target (install
       COMMAND ${PYTHON_EXECUTABLE} setup.py install --home=${USG_INSTALL_PREFIX}
-      COMMAND rm -rf ${NUMERIC_BINARY_DIR}/${NUMERIC_TAR_ARCHIVE}
       COMMAND rm -rf ${NUMERIC_BINARY_DIR}/${NUMERIC_DIRECTORY}
+      COMMAND rm -rf ${NUMERIC_BINARY_DIR}/CMake*
       WORKING_DIRECTORY ${NUMERIC_BINARY_DIR}/${NUMERIC_DIRECTORY}
       COMMENT "[Numeric] Installing package ..."
       )

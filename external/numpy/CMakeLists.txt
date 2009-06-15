@@ -43,8 +43,6 @@ endif (NOT NUMPY_VERBOSE_CONFIGURE)
 
 include (FindNumPy)
 
-message (STATUS "-- NumPy library   = ${NUMPY_LIBRARIES}")
-
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
