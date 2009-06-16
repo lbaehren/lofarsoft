@@ -33,7 +33,6 @@
 #include <casa/OS/Directory.h>
 #include <coordinates/Coordinates/ObsInfo.h>
 #include <images/Images/PagedImage.h>
-#include <images/Images/ImageFITSConverter.h>
 #ifdef HAVE_HDF5
 #include <images/Images/HDF5Image.h>
 #endif
@@ -73,6 +72,12 @@ using CR::TimeFreq;
 
 */
 
+// ==============================================================================
+//
+//  Helper functions
+//
+// ==============================================================================
+
 //_______________________________________________________________________________
 //                                                              cleanup_directory
 
@@ -106,6 +111,13 @@ int cleanup_directory ()
   
   return nofFailedTests;
 }
+
+// ==============================================================================
+//
+//  Test routines
+//
+// ==============================================================================
+
 
 //_______________________________________________________________________________
 //                                                            test_ImageInterface
@@ -524,25 +536,13 @@ int test_processing (string const &infile,
   cout << "[2] Reading back in previously created image file ..." << endl;
   try {
     bool status (true);
-    casa::String error;
+    /* Open previously created image */
     casa::HDF5Image<float> image ("skymap-processing01.h5");
-
-    //
-    cout << "-- Image name       = " << image.name()      << endl;
-    cout << "-- Image shape      = " << image.shape()     << endl;
-    cout << "-- Image type       = " << image.imageType() << endl;
-    cout << "-- World axis names = " << image.coordinates().worldAxisNames() << endl;
-    cout << "-- World axis units = " << image.coordinates().worldAxisUnits() << endl;
-    cout << "-- Reference pixel  = " << image.coordinates().referencePixel() << endl;
-    cout << "-- Reference value  = " << image.coordinates().referenceValue() << endl;
-    cout << "-- Increment        = " << image.coordinates().increment()      << endl;
+    /* Summary of image properties */
+    CR::summary (image);
     // Convert the image to FITS
-    status = casa::ImageFITSConverter::ImageToFITS(error,
-						   image,
-						   "!skymap-processing01.fits");
-    if (!status) {
-      std::cout << error << std::endl;
-    }
+    status = CR::image2fits (image,
+			     "skymap-processing01.fits");
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;
     nofFailedTests++;

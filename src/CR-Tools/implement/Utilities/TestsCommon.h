@@ -38,6 +38,7 @@
 #include <coordinates/Coordinates/CoordinateSystem.h>
 #include <coordinates/Coordinates/ObsInfo.h>
 #include <images/Images/ImageInterface.h>
+#include <images/Images/ImageFITSConverter.h>
 
 // CR-Tools header files
 #include <Coordinates/CoordinateType.h>
@@ -179,6 +180,61 @@ namespace CR { // Namespace CR -- begin
       cout << "-- Is the image persistent? : " << image.isPersistent() << endl;
       cout << "-- Is the image writable?   : " << image.isWritable()   << endl;
       cout << "-- Has the image a mask?    : " << image.hasPixelMask() << endl;
+    }
+  
+  //_______________________________________________________________________________
+  //                                                                     image2fits
+  
+  /*!
+    \brief Export casacore image to FITS file
+
+    \param image          -- Input casacore image to be exported to FITS.
+    \param outfile        -- Name of the created output FITS file.
+    \param degenerateLast -- If <tt>true</tt>, axes of length 1 will be written
+           last to the header.
+    \param allowOverwrite -- If <tt>true</tt>, allow <i>outfile</i> to be
+           overwritten if it already exists.
+    \param verbose        -- Be verbose during the operation.
+
+    \return status -- <tt>true</tt> if the conversion succeeds, <tt>false</tt>
+            otherwise.
+  */
+  template <class T>
+    bool image2fits (casa::ImageInterface<T> &image,
+		     std::string const &outfile="image.fits",
+		     bool const &degenerateLast=true,
+		     bool const &allowOverwrite=true,
+		     bool const &verbose=false)
+    {
+      casa::String error;
+      bool status          = true;
+      uint memoryInMB      = 64;
+      bool preferVelocity  = true;
+      bool opticalVelocity = true;
+      int BITPIX           = -32;
+      float minPix         = 1.0;
+      float maxPix         = -1.0;
+      
+      status = casa::ImageFITSConverter::ImageToFITS(error,
+						     image,
+						     outfile,
+						     memoryInMB,
+						     preferVelocity,
+						     opticalVelocity,
+						     BITPIX,
+						     minPix,
+						     maxPix,
+						     allowOverwrite,
+						     degenerateLast,
+						     verbose);
+      
+      if (!status) {
+	std::cerr << "[TestsCommon::image2fits] Error during export to FITS!"
+		  << std::endl;
+	std::cerr << error << std::endl;
+      }
+      
+      return status;
     }
   
   // ============================================================================
