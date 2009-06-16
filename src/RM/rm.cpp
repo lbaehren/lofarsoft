@@ -622,7 +622,7 @@ vector<double> rm::readFrequenciesAndDeltaFrequencies(const std::string &filenam
   
     if(infile.fail())
     {
-      throw "rm::readFrequencies failed to open file";
+      throw "rm::readFrequenciesAndDeltaFrequencies failed to open file";
     }
   
     while(infile.good())	// as long as we can read from the file...
@@ -672,7 +672,7 @@ vector<double> readLambdaSquaredsAndDeltaSquareds(const std::string &filename,  
   
     if(infile.fail())
     {
-      throw "rm::readFrequencies failed to open file";
+      throw "rm::readLambdaSquaredsAndDeltaSquareds failed to open file";
     }
   
     while(infile.good())	// as long as we can read from the file...
