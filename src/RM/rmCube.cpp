@@ -68,7 +68,7 @@ rmCube::rmCube(int x, int y, int faradaySize, double stepsize)
     steps=faradaySize/stepsize;
     this->faradayDepths.resize(steps);	// set faradayDepths vector's size to size of steps
   
-    for(i=0; i<=steps; i++)
+    for(i=0; i<steps; i++)
     {
       faradayDepths[i]=i*stepsize;
     }
@@ -280,67 +280,59 @@ void rmCube::setFaradayHigh(double faradayHigh)
 }
     
     
-int rmCube::createBuffer(long long size)
+void rmCube::createBuffer(long long size)
 {    
   if(buffer==NULL)	// check if we have already a buffer
   {
-   this->buffer=(double *) calloc(size, sizeof(double)); // allocate memory of size Bytes
+ //  this->buffer=(double *) calloc(size, sizeof(double)); // allocate memory of size Bytes
+    this->buffer= new double[size];	// allocate memory
 
-   if(this->buffer==NULL)
-   {
-    throw "rmCube::createBuffer memory allocation failed";
-    return -1;
+    if(this->buffer==NULL)
+    {
+      throw "rmCube::createBuffer memory allocation failed";
     }
   }
   else
   {
     throw "rmCube::createBuffer buffer exists";
-    return -1;
   }
-
-  return 0;
 }
 
 
-int rmCube::deleteBuffer()
+void rmCube::deleteBuffer()
 {
   if(this->buffer!=NULL)
   {
-    free(this->buffer); 
+//    free(this->buffer); 
+    delete buffer;
   }
   else
   {
     throw "rmCube::deleteBuffer";
-    return -1;
   }
-  
-  return 0;
 }
 
 
-int rmCube::createBufferPlane()
+void rmCube::createBufferPlane()
 {
   if(buffer==NULL)	// check if we have already a buffer
   {
-   this->buffer=(double *) calloc(this->xSize*this->ySize, sizeof(double)); // allocate memory for one Faraday plane
+//    this->buffer=(double *) calloc(this->xSize*this->ySize, sizeof(double)); // allocate memory for one Faraday plane
+    this->buffer= new double[xSize*ySize];
 
-   if(this->buffer==NULL)
-   {
-    throw "rmCube::createBufferPlane memory allocation failed";
-    return -1;
-   } 
+    if(this->buffer==NULL)
+    {
+      throw "rmCube::createBufferPlane memory allocation failed";
+    } 
   }
   else
   {
     throw "rmCube::createBufferPlane buffer already exists";
-    return -1;
   }
-
-  return 0;
 }
 
 
-int rmCube::createBufferCube()
+void rmCube::createBufferCube()
 {
   vector<int> dimensions(3);
 
@@ -348,13 +340,13 @@ int rmCube::createBufferCube()
   {
    if(this->xSize > 0 && this->ySize > 0 && this->faradaySize > 0)
    {
-      this->buffer=(double *) calloc(xSize*ySize*faradaySize, sizeof(double)); // allocate memory of size Bytes
+//       this->buffer=(double *) calloc(xSize*ySize*faradaySize, sizeof(double)); // allocate memory of size Bytes
+      this->buffer=new double[xSize*ySize*faradaySize];
    }
 
    if(this->buffer==NULL)
    {
     throw "rmCube::createBufferCube memory allocation failed";
-    return -1;
    }
    
    // Set parameters
@@ -371,10 +363,7 @@ int rmCube::createBufferCube()
   else
   {
     throw "rmCube::createBufferCube buffer already exists";
-    return -1;
   }
-
-  return 0;
 }
 
 
@@ -465,8 +454,11 @@ vector<complex<double> > rmCube::getRMSF()
 
 void rmCube::computeRMSF(const vector<double> &lambdaSqs, const vector<double> &deltaLambdaSqs, bool freq=true)
 {
-  // use rmCube attributes (must be set) class rm method to compute RMSF
-  this->rmsf=rm::RMSF(faradayDepths, lambdaSqs, weights, deltaLambdaSqs, freq);
+  if(faradayDepths.size()!=0)
+  {
+    // use rmCube attributes (must be set) class rm method to compute RMSF
+    this->rmsf=rm::RMSF(faradayDepths, lambdaSqs, weights, deltaLambdaSqs, freq);
+  }
 }
 
 

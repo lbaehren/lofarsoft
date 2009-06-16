@@ -2,13 +2,15 @@
 
     Author:		Sven Duscha (sduscha@mpa-garching.mpg.de)
     Date:		18-12-2008
-    Last change:	28-05-2009
+    Last change:	09-06-2009
 */
 
 
 #include <iostream>				// C++/STL iostream
+#include <fstream>				// file stream I/O
 #include <math.h>				// mathematics library
 #include <string.h>
+#include <assert.h>
 
 
 #include <casa/Arrays.h>			// CASA library functions
@@ -391,6 +393,7 @@ vector<complex<double> > rm::RMSF(const vector<double> &phi,
 }
 
 
+
 /*!
   \brief Wavelet Transform Method for calculating the Rotation Measure
 
@@ -484,10 +487,10 @@ vector<double> rm::rmErrorLsq(vector<complex<double> > &intensity, vector<double
 
 vector<double> rm::rmErrorBayes(vector<complex<double> > &intensity, vector<double> &lambda_sqs, bool lambda_sq)
 {
-	vector<double> rm_error(intensity.size());
+  vector<double> rm_error(intensity.size());
 
 
-	return rm_error;
+  return rm_error;
 }
 
 
@@ -500,19 +503,42 @@ vector<double> rm::rmErrorBayes(vector<complex<double> > &intensity, vector<doub
 
   \return frequencies -- vector with frequencies
 */
-vector<double> readFrequencies(const std::string filename)
+vector<double> rm::readFrequencies(const std::string &filename)
 {
-  vector<double> frequencies;
+  vector<double> frequencies;		// hold list of lambda squareds
+  double frequency;			// individual lambda squared read per line
 
+  //----------------------------------------------------------
+  // Check if filename is text file FITS file or HDF5 file
+  if(filename.find(".hdf5", 1)!=string::npos)	// if HDF5 use dal
+  {
+    // TODO
+    // use dal to read lambda Squareds and deltaLambdaSquareds from file
+  }
+  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  {
+    // TODO
+    // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+  }
+  else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
+  {
+    ifstream infile(const_cast<const char*>(filename.c_str()), ifstream::in);	// open file for reading
+  
+    if(infile.fail())
+    {
+      throw "rm::readFrequencies failed to open file";
+    }
+  
+    while(infile.good())	// as long as we can read from the file...
+    {
+      infile >> frequency;	// read double into temporary variable
+      frequencies.push_back (frequency);	// store in lambdaSquareds vector
+    }
 
-  // open text file
+    infile.close();		// close the text file
+  }
 
-
-
-  // read in linewise and write into frequencies vector (resize accordingly)
-
-
-  // return frequencies vector
+  return frequencies;	 // return frequencies vector
 }
 
 
@@ -523,19 +549,43 @@ vector<double> readFrequencies(const std::string filename)
 
   \return lambdaSquareds -- vector with lambda squareds
 */
-vector<double> readLambdaSquareds(const std::string filename)
+vector<double> rm::readLambdaSquareds(const std::string &filename)
 {
-  vector<double> lambdaSquareds;
+  vector<double> lambdaSquareds;	// hold list of lambda squareds
+  double lambdaSq;			// individual lambda squared read per line
 
+  //----------------------------------------------------------
+  // Check if filename is text file FITS file or HDF5 file
+  if(filename.find(".hdf5", 1)!=string::npos)	// if HDF5 use dal
+  {
+    // TODO
+    // use dal to read lambda Squareds and deltaLambdaSquareds from file
+  }
+  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  {
+    // TODO
+    // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+  }
+  else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
+  {
+    ifstream infile(const_cast<const char*>(filename.c_str()), ifstream::in);	// open file for reading
+  
+    if(infile.fail())
+    {
+      throw "rm::readLambdaSquareds failed to open file";
+    }
+  
+    while(infile.good())	// as long as we can read from the file...
+    {
+      infile >> lambdaSq;	// read double into temporary variable
+      lambdaSquareds.push_back (lambdaSq);	// store in lambdaSquareds vector
+      cout << lambdaSquareds[lambdaSquareds.size()-1] << endl;
+    }
 
-  // open text file
+    infile.close();		// close the text file
+  }
 
-
-
-  // read in linewise and write into lambdaSquareds vector (resize accordingly)
-
-
-  // return frequencies vector
+  return lambdaSquareds;	 // return frequencies vector
 }
 
 
@@ -543,43 +593,121 @@ vector<double> readLambdaSquareds(const std::string filename)
 /*!
   \brief Read the distribution of measured lambdaSquareds AND deltaLambdaSquareds from a text file
   
-  \param filename -- name of txt file with lambda squared distribution
-  \param deltaFrequencies -- vector to keep delta Frequencies
+  \param filename - name of txt file with lambda squared distribution
+  \param deltaFrequencies - vector to keep delta Frequencies
 
-  \return lambdaSquareds -- vector with frequencies and delta frequencies
+  \return lambdaSquareds - vector with frequencies and delta frequencies
 */
-vector<double> readFrequenciesAndDeltaFrequencies(const std::string &filename, vector<double> &deltaFrequencies)
+vector<double> rm::readFrequenciesAndDeltaFrequencies(const std::string &filename, vector<double> &deltaFrequencies)
 {
-  vector<double> frequencies;
+  double frequency=0;			// individual frequency read per line
+  double deltaFrequency=0;		// individual delta frequency read per line  
+  vector<double> frequencies;		// frequencies to be returned
 
-  // open text file
+  //----------------------------------------------------------
+  // Check if filename is text file FITS file or HDF5 file
+  if(filename.find(".hdf5", 1)!=string::npos)	// if HDF5 use dal
+  {
+    // TODO
+    // use dal to read lambda Squareds and deltaLambdaSquareds from file
+  }
+  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  {
+    // TODO
+    // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+  }
+  else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
+  {
+    ifstream infile(const_cast<const char*>(filename.c_str()), ifstream::in);	// open file for reading
+  
+    if(infile.fail())
+    {
+      throw "rm::readFrequencies failed to open file";
+    }
+  
+    while(infile.good())	// as long as we can read from the file...
+    {
+      infile >> frequency;			// read frequency (first column)
+      infile >> deltaFrequency;			// read delta Frequency (2nd coloumn)
+      frequencies.push_back (frequency);		// store in frequencies vector
+      deltaFrequencies.push_back (deltaFrequency);	// store in delta frequencies vector
+    }
 
+    infile.close();		// close the text file
+  }
 
-
-  // read in linewise and write into lambdaSquareds vector (resize accordingly)
-
-
-  // return frequencies vector
+  return frequencies;	  // return frequencies vector
 }
 
 
 /*!
   \brief Read the distribution of measured lambdaSquareds AND deltaLambdaSquareds from a text file
   
-  \param filename -- name of txt file with lambda squared and delta lambda squared distribution
+  \param filename - name of txt file with lambda squared and delta lambda squared distribution
+  \param deltaLambdaSquareds - vector with delta lambda squareds
 
-  \return lambdaSquareds -- vector with lambda squareds
+  \return lambdaSquareds - vector with lambda squareds
 */
 vector<double> readLambdaSquaredsAndDeltaSquareds(const std::string &filename,   vector<double> &deltaLambdaSquareds)
 {
-  vector<double> lambdaSquareds;
+  vector<double> lambdaSquareds;	// lambda squareds to be returned
+  double lambdaSq=0;			// individual frequency read per line
+  double deltaLambdaSq=0;		// individual delta frequency read per line  
 
-  // open text file
+  //----------------------------------------------------------
+  // Check if filename is text file FITS file or HDF5 file
+  if(filename.find(".hdf5", 1)!=string::npos)	// if HDF5 use dal
+  {
+    // TODO
+    // use dal to read lambda Squareds and deltaLambdaSquareds from file
+  }
+  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  {
+    // TODO
+    // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+  }
+  else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
+  {
+    ifstream infile(const_cast<const char*>(filename.c_str()), ifstream::in);	// open file for reading
+  
+    if(infile.fail())
+    {
+      throw "rm::readFrequencies failed to open file";
+    }
+  
+    while(infile.good())	// as long as we can read from the file...
+    {
+      infile >> lambdaSq;			// read frequency (first column)
+      infile >> deltaLambdaSq;			// read delta Frequency (2nd coloumn)
+      lambdaSquareds.push_back (lambdaSq);		// store in frequencies vector
+      deltaLambdaSquareds.push_back (deltaLambdaSq);	// store in delta frequencies vector
+    }
+
+    infile.close();		// close the text file
+  }
+
+  return lambdaSquareds;	  // return frequencies vector
+}
 
 
+/*!
+  \brief Write a vector (RM) out to file on disk (mainly for debugging)
+  
+  \param rm - vector containing data (double) to write to file
+  \param filename - name of file to create or append to
+  \param mode - write mode: overwrite, append
+*/
+void writeRMtoFile(vector<double> rm, const std::string &filename)
+{
+  unsigned int i=0;	// loop variable
+ 
+  ofstream outfile(const_cast<const char *>(filename.c_str()), ofstream::out);
 
-  // read in linewise and write into lambdaSquareds vector (resize accordingly)
+  for(i=0; i<rm.size(); i++)		// loop over vector
+  {
+    outfile << rm[i];			// write out data
+    outfile << endl;			// add endl
+  }
 
-
-  // return frequencies vector
+  outfile.flush();			// flush output file
 }

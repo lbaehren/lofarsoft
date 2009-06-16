@@ -18,6 +18,7 @@
 
 #include "rm.h"							// RM Synthesis class
 #include "rmCube.h"						// RM Cube class
+#include "../DAL/implement/dalFITS.h"
 
 // casa includes (from /usr/local/include/casacore)
 #include <casa/Arrays.h>
@@ -39,16 +40,17 @@
 
 using namespace std;
 using namespace casa;					// casa(core) namespace
+using namespace DAL;
 
 int main (int argc, char * const argv[]) {
+
+	try{
 
 //	Bool status;					// status of casa calls
 	String casaerror;				// error message of casa calls
 
-	double bzero=0;					// FITS scaling
-	double bscale=1;
-   	
 	unsigned int i=0;				// loop variable
+	unsigned int N=30;				// length of test vectors
 
 	// Q Image
 	LatticeBase *lattice_Q;				// lattice for Q input image, why do we need LatticeBase here?
@@ -64,7 +66,6 @@ int main (int argc, char * const argv[]) {
 	Lattice<DComplex> *lattice_U_dcomplex;
 	
 
-	float min=0, max=0;		// DEBUG: using minMax() function on image
 	vector<double> phi;		// Faraday depths to probe for
 	complex<double> rmpol;		// polarized intensity at Faraday depth probed for
 	vector<complex<double> > rmsf;	// Rotation Measure Spread Function
@@ -167,36 +168,52 @@ int main (int argc, char * const argv[]) {
 
 	// TEST: inverseFourier RM-Synthesis
 	// compute 30 pts along 0 to 29
-	vector<complex<double> > f(30);
-	vector<complex<double> > F(30);
-	vector<double> weights(30);	// weights
-	vector<double> freq(30);
-	vector<double> delta_freq(30);
+	vector<complex<double> > f(N);
+	vector<complex<double> > F(N);
+	vector<double> weights(N);	// weights
+	vector<double> freq(N);
+	vector<double> delta_freq(N);
+
+	// Test file read functions
+	freq=FaradayCube.readFrequenciesAndDeltaFrequencies("frequenciesDelta.txt", delta_freq);
 
 
 	// Generate Rectangular pulse in f (real)
-	for(i=0; i<=13; i++)
-	{
-	  f[i]=1.0;
-	}
-	f[14]=10.0; f[15]=10.0; f[16]=10.0; f[17]= 10.0;	//"Rectangular pulse"
-	for(i=18; i<f.size(); i++)
-	{
-	  f[i]=1.0;
-	}
-	
+
 	
 	for(i=0; i<weights.size(); i++)
 	{
-	  weights[i]=1;		// weight them all equally
-	  delta_freq[i]=1;	// use 1 as spacing
+	  weights[i]=1.0;	// weight them all equally
+	 // delta_freq[i]=1.0;	// use 1 as spacing
+	  
+	  cout << "delta_freq[" << i << "] = " << delta_freq[i] << endl;
+	  
 	  freq[i]=i;		// use 0 to 29 as freq
 	}
 	
 	
-	// call inverseFourier
-	rmpol=FaradayCube.inverseFourier(0, f, freq, weights,  delta_freq, false);
-
+	dalFITS fitsimage("Leiden_GEETEE_CS1_1.FITS", READONLY);
+	fitsimage.moveAbsoluteHDU(1);
+	
+	int naxis=0;
+	long naxes[3]={0,0,0};
+	
+	
+	naxis=fitsimage.getImgDim();
+	fitsimage.getImgSize(3 , naxes);
+	
+	double *buffer=new double[naxes[0]*naxes[1]];
+	
+	//fitsimage.readPlane(buffer, 1);
+	
+	
+	// call inverseFourier with phi=5
+	for(i=0; i<N; i++)
+	{
+	  rmpol=FaradayCube.inverseFourier(i, f, freq, weights,  delta_freq, false);
+	  cout << rmpol << endl;
+	}
+	 
 	FaradayCube.computeRMSF(freq, delta_freq, true);
 
 	/*
@@ -213,4 +230,12 @@ int main (int argc, char * const argv[]) {
 	#endif
 	
 	return 0;
+	
+	}
+	
+	catch(const char *s)
+	{
+	  cout << s << endl;
+	}
+	
 }

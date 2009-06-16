@@ -99,18 +99,8 @@ public:
   */
   rm(int, int, int, double, Array<double> &faradaybuffer, int x=1, int y=0);
   
+  rm(int, int, int, double, Array<double> &faradayplanes, int x, int y, int z=1);
   
-  /*! \brief RM cube with a full Faraday plane (complete RA and Dec coverage of the image)
-  
-      create a RM cube object with one associated Faraday plane buffer of dimensions x and y, and
-      third dimension z (default 1)
- */
- rm(int, int, int, double, Array<double> &faradayplanes, int x, int y, int z=1);
-  
-  
-  /*!
-   \brief Default destructor
-  */
   ~rm();
 		
   //! Rotation Measure computing algorithms
@@ -169,12 +159,14 @@ public:
   //! read lambda squareds and delta squareds from a text file
   vector<double> readLambdaSquaredsAndDeltaSquareds(const std::string &, vector<double> &);
 
+  //! Write a vector out to file
+  void writeRMtoFile(vector<double>, const std::string &filename);
 
   // Atmospheric correction of RM (contribution through atmosphere)
   // ??
 	
   //! Calculcate Faraday rotation RM contribution by atmosphere
-  double atmosphericFaradayRotation(double &tec);
+  double atmosphericFaradayRotation(vector<double> &tec);
   
   //! Rotation Measure error estimation algorithms
 

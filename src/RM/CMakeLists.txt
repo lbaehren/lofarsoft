@@ -313,6 +313,7 @@ message (STATUS "+============================================================+"
 ## =============================================================================
 
 set (link_libraries
+  ${DAL_LIBRARIES}
   ${CASA_LIBRARIES}
   ${HDF5_LIBRARIES}
   ${CFITSIO_LIBRARIES}

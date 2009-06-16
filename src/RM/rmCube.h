@@ -111,10 +111,10 @@ class rmCube : public rm
     void setFaradayLow(double faradayLow);	//!> set the lower limit of Faraday depth of the Faraday cube
     void setFaradayHigh(double faradayHigh);	//!> set the higher limit of Faraday depth of the Faraday cube
     
-    int createBuffer(long long size);		//!> create buffer for computed Faraday depths
-    int deleteBuffer();				//!> delete associated buffer
-    int createBufferPlane();			//!> create buffer for one Faraday plane
-    int createBufferCube();			//!> create buffer for the whole cube
+    void createBuffer(long long size);		//!> create buffer for computed Faraday depths
+    void deleteBuffer();			//!> delete associated buffer
+    void createBufferPlane();			//!> create buffer for one Faraday plane
+    void createBufferCube();			//!> create buffer for the whole cube
 
     vector<int> getBufferDimensions();			//!> get dimensions of buffer
     void setBufferDimensions(vector<int> &dimensions);	//!> set dimensions of buffer (i.e. plane, cube)
