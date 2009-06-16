@@ -71,6 +71,7 @@ foreach (python_version 2.6 2.5 2.4 2.3)
     else (PYTHON_PYTHONHOME)
       find_program (PYTHON_EXECUTABLE python${python_version}
 	PATHS ${bin_locations}
+	ENV PATH
 	NO_DEFAULT_PATH
 	)
     endif (PYTHON_PYTHONHOME)
