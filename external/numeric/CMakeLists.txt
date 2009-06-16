@@ -93,7 +93,7 @@ if (NOT HAVE_NUMERIC OR NUMERIC_FORCE_BUILD)
     
     ## build and install the package
     add_custom_target (install
-      COMMAND ${PYTHON_EXECUTABLE} setup.py install --home=${USG_INSTALL_PREFIX}
+      COMMAND ${PYTHON_EXECUTABLE} setup.py install --prefix= --home=${USG_INSTALL_PREFIX}
       COMMAND rm -rf ${NUMERIC_BINARY_DIR}/${NUMERIC_DIRECTORY}
       COMMAND rm -rf ${NUMERIC_BINARY_DIR}/CMake*
       WORKING_DIRECTORY ${NUMERIC_BINARY_DIR}/${NUMERIC_DIRECTORY}

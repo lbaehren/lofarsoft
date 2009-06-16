@@ -173,7 +173,7 @@ if (enable-numpy)
     
     ## build and install the package
     add_custom_target (numpy_install
-      COMMAND ${PYTHON_EXECUTABLE} setup.py install --home=${USG_INSTALL_PREFIX}
+      COMMAND ${PYTHON_EXECUTABLE} setup.py install --prefix= --home=${USG_INSTALL_PREFIX}
       COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${NUMPY_TAR_ARCHIVE}
       COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${NUMPY_DIRECTORY}
       WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUMPY_DIRECTORY}
@@ -307,7 +307,7 @@ if (enable-matplotlib)
     
     ## install the package
     add_custom_target (matplotlib_install
-      COMMAND ${PYTHON_EXECUTABLE} setup.py install --home=${USG_INSTALL_PREFIX}
+      COMMAND ${PYTHON_EXECUTABLE} setup.py install --prefix= --home=${USG_INSTALL_PREFIX}
       COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${MATPLOTLIB_TAR_ARCHIVE}
       COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${MATPLOTLIB_DIRECTORY}
       WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${MATPLOTLIB_DIRECTORY}
@@ -359,7 +359,7 @@ if (enable-numarray)
     
     ## install the package
     add_custom_target (numarray_install
-      COMMAND ${PYTHON_EXECUTABLE} setup.py install --home=${USG_INSTALL_PREFIX}
+      COMMAND ${PYTHON_EXECUTABLE} setup.py install --prefix= --home=${USG_INSTALL_PREFIX}
       COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${NUMARRAY_TAR_ARCHIVE}
       COMMAND rm -rf ${PYTHON_MODULES_BINARY_DIR}/${NUMARRAY_DIRECTORY}
       WORKING_DIRECTORY ${PYTHON_MODULES_BINARY_DIR}/${NUMARRAY_DIRECTORY}
