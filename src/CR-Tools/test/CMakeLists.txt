@@ -52,8 +52,8 @@ if (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
     tcasa_casa
     tcasa_casa_Quanta
     tcasa_casa_Containers
-    tcasa_tables
     tcasa_images
+    tcasa_tables
     tcasa_lattices
     tcasa_measures
     )
@@ -102,7 +102,11 @@ if (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
     ## testing
     add_test (${test} ${test})
   endforeach (test ${tests_casacore})
-  
+
+##  add_test (tcasa_images_test01 tcasa_images --paged)
+  add_test (tcasa_images_test02 tcasa_images --hdf5)
+  add_test (tcasa_images_test03 tcasa_images --lofar)
+
 endif (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
 
 ## -----------------------------------------------------------------------------

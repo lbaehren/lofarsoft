@@ -153,6 +153,14 @@ namespace CR { // Namespace CR -- begin
   casa::String MDirectionName (casa::MDirection::Types const &tp);
   
   /*!
+    \brief Get list of MDirection reference codes
+    
+    \return refcodes -- Vector with a list of MDirection reference codes for
+            celestial coordinate systems.
+  */
+  std::vector<std::string> MDirectionNames ();
+  
+  /*!
     \brief Get Projection type from reference code of the projection
 
     \param refcode -- Reference code of the projection, e.g. <i>AIT</i>

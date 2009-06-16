@@ -66,8 +66,9 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  // ------------------------------------------------------------- MDirectionType
-  
+  //_____________________________________________________________________________
+  //                                                               MDirectionType
+
   casa::MDirection::Types MDirectionType (String const &refcode)
   {
     bool ok (true);
@@ -83,13 +84,36 @@ namespace CR { // Namespace CR -- begin
     return tp;
   }
 
-  // ------------------------------------------------------------- MDirectionName
+  //_____________________________________________________________________________
+  //                                                               MDirectionName
 
   casa::String MDirectionName (casa::MDirection::Types const &tp)
   {
     casa::MDirection md;
 
     return md.showType(tp);
+  }
+
+  //_____________________________________________________________________________
+  //                                                              MDirectionNames
+
+  std::vector<std::string> MDirectionNames ()
+  {
+    std::vector<std::string> refcode;
+    
+    refcode.push_back("AZEL");      /* topocentric Azimuth and Elevation (N through E) */
+    refcode.push_back("AZELSW");    /* topocentric Azimuth and Elevation (S through W) */
+    refcode.push_back("AZELNE");    /* topocentric Azimuth and Elevation (N through E) */
+    refcode.push_back("AZELGEO");   /* geodetic Azimuth and Elevation (N through E)    */
+    refcode.push_back("AZELSWGEO"); /* geodetic Azimuth and Elevation (S through W)    */
+    refcode.push_back("AZELNEGEO"); /* geodetic Azimuth and Elevation (N through E)    */
+    refcode.push_back("B1950");     /* mean epoch and ecliptic at B1950.0              */
+    refcode.push_back("ECLIPTIC");  /* ecliptic for J2000 equator and equinox          */
+    refcode.push_back("ICRS");      /* International Celestial reference system        */
+    refcode.push_back("J2000");     /* mean equator and equinox at J2000.0 (FK5)       */
+    refcode.push_back("GALACTIC");  /* galactic coordinates                            */
+    
+    return refcode;
   }
 
   // ============================================================================
