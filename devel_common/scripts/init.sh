@@ -77,11 +77,8 @@ for PY_VERSION in 2.6 2.5 2.4
   fi
 }
 
-#############################################################################
-#
-#  Define the AIPSPATH environment variable, used to locate measures data
-#
-#############################################################################
+##______________________________________________________________________________
+## Define the AIPSPATH environment variable, used to locate measures data
 
 if test -z "$AIPSPATH" ; then
   export AIPSPATH=$LOFARSOFT
