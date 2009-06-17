@@ -1310,6 +1310,49 @@ void writeTripoleDelays(void)
   }
 }
 
+void writeTripolePositions(void)
+{
+  // Set polarization and positions for tripole in March 2009
+  Vector<String> Polarization(30);
+  Polarization(23) = "VE";
+  Polarization(24) = "NS";
+  Polarization(25) = "EW";
+
+  // Set Position
+  Matrix<Double> Position(3,30);
+  Position.column(23)(0) = -24.124+0.075; Position.column(23)(1) = -60.575-0.090; Position.column(23)(2) = 0.39-0.080;
+  Position.column(24)(0) = -24.124+0.075; Position.column(24)(1) = -60.575-0.090; Position.column(24)(2) = 0.39-0.080;
+  Position.column(25)(0) = -24.124+0.170; Position.column(25)(1) = -60.575-0.125; Position.column(25)(2) = 0.39+0.010;
+
+  // Write values for antenna 27, 29 and 30 for change in summer 2006
+  cout << "Writing tripole positions and polarization for March 2009." << endl;
+
+  for (int i = 23; i < 26; ++i) {
+    cout << "Writing values for antenna: " << antennaIDs[i] << endl;
+
+    // Read polarization before tripole and restore it after tripole phase
+    String old_polarization = "";
+    if (!reader.GetData(tripole_2009_start-1, antennaIDs[i], "Polarization", &old_polarization)) {
+      cerr << "Error while reading field: Polarization" << endl;
+    } else {
+      if (!writer.AddData(Polarization(i),antennaIDs[i],"Polarization",tripole_2009_start) )
+        cerr << "\nERROR while writing field: Polarization" << endl;
+      if (!writer.AddData(old_polarization,antennaIDs[i],"Polarization",tripole_2009_stop) )
+        cerr << "\nERROR while writing field: Polarization" << endl;
+    }
+
+    Vector<Double> oldPosition;
+    if (!reader.GetData(tripole_2009_start-1, antennaIDs[i], "Position", &oldPosition)) {
+      cerr << "Error while reading field: Position" << endl;
+    } else {
+      if (!writer.AddData(Position.column(i),antennaIDs[i],"Position",tripole_2009_start) )
+        cerr << "\nERROR while writing field: Position" << endl;
+      if (!writer.AddData(oldPosition,antennaIDs[i],"Position",tripole_2009_stop) )
+        cerr << "\nERROR while writing field: Position" << endl;
+    }
+  }
+}
+
 
 
 int main (int argc, char *argv[])
@@ -1365,6 +1408,7 @@ int main (int argc, char *argv[])
     // addActiveField(true);		// checked in
     // writeBadPeriods();		// checked in
     // writeTripoleDelays();	// checked in
+    //writeTripolePositions();  // checked in
 
     cout << "Writing finished: " << endl;
     writer.PrintSummary();
