@@ -74,46 +74,6 @@ using CR::TimeFreq;
 
 // ==============================================================================
 //
-//  Helper functions
-//
-// ==============================================================================
-
-//_______________________________________________________________________________
-//                                                              cleanup_directory
-
-/*!
-  \brief Clean up the directory once the tests have completed
-
-  \return nofFailedTests -- The number of failed operations; this e.g. might
-          happen if we try to remove a file/directory which does not exist
-	  because the test creating it in the first place failed.
-*/
-int cleanup_directory ()
-{
-  int nofFailedTests (0);
-
-  std::vector<std::string> images;
-
-  images.push_back ("tPagedImage01.img");
-  images.push_back ("tPagedImage02.img");
-  images.push_back ("tPagedImage03.img");
-  images.push_back ("tPagedImage04.img");
-  
-  for (unsigned int n(0); n<images.size(); n++) {
-    try {
-      casa::Directory dir (images[n].c_str());
-      dir.removeRecursive(); 
-    } catch (AipsError x) {
-      cerr << "[tSkymapper::cleanup_directory] " << x.getMesg() << endl;
-      nofFailedTests++;
-    }
-  }
-  
-  return nofFailedTests;
-}
-
-// ==============================================================================
-//
 //  Test routines
 //
 // ==============================================================================
@@ -474,8 +434,6 @@ int test_processing (string const &infile,
   
   Matrix<casa::DComplex> data;
 
-  std::string refcode    = "AZEL";
-  std::string projection = "STG";
   uint nofFrames         = 10;
   uint nofBlocksPerFrame = 1;
   uint nofAntennas       = 4;
@@ -553,6 +511,7 @@ int test_processing (string const &infile,
 
   cout << "[3] Process example LOPES data-set ..." << endl;
   try {
+    std::string outfile ("skymap-lopes.img");
     // set up DataReader for input of data
     CR::LopesEvent dr (dataset_lopes_example,
 		       blocksize);
@@ -567,9 +526,20 @@ int test_processing (string const &infile,
     // Create Skymapper object to work with
     Skymapper skymapper (coord,
 			 antPositions,
-			 "skymap_lopes.img",
+			 outfile,
 			 Skymapper::PagedImage);
     skymapper.summary();
+    /* Process data to create an image */
+    uint nofBlocks = timeFreq.blocksPerFrame()*timeFreq.nofFrames();
+    data.resize(dr.fftLength(),dr.nofAntennas());
+    for (uint n(0); n<nofBlocks; n++) {
+      data = dr.calfft();
+      dr.nextBlock();
+    }
+    /* Read the image back in and export to FITS */
+    casa::PagedImage<float> image (outfile);
+    CR::image2fits (image,
+		    "skymap-lopes.fits");
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_processing] " << x.getMesg() << endl;
     nofFailedTests++;

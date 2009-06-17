@@ -285,8 +285,8 @@ namespace CR { // Namespace CR -- begin
     case CoordinateType::DirectionRadius:
       {
 	// Number of pixels along the coordinate axes
-	nelem(0) = 120;
-	nelem(1) = 120;
+	nelem(0) = 240;
+	nelem(1) = 240;
 	nelem(2) = 1;
 	// Reference pixel is center of map for directional components
 	refPixel(0) = nelem(0)/2;

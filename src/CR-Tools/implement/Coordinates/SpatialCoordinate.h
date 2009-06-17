@@ -213,7 +213,7 @@ namespace CR { // Namespace CR -- begin
       <ul>
         <li>Reference  = AZEL
         <li>Projection = STG
-        <li>Shape      = [120,120,1]
+        <li>Shape      = [240,240,1]
         <li>Units      = ["deg","deg","m"]
         <li>RefPixel   = [60,60,0]
         <li>RefValue   = [0,90,1]
