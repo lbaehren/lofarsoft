@@ -24,7 +24,7 @@
 #
 #############################################################################
 
-SYSTEM_NAME=`uname -s`
+set SYSTEM_NAME = `uname -s`
 
 ##______________________________________________________________________________
 ## Check for the existence of the LOFARSOFT  environment variable
@@ -48,10 +48,18 @@ set path = ( $LOFARSOFT/release/bin $path )
 ##______________________________________________________________________________
 ##  Add the location of the libraries
 
-if ( "$SYSTEM_NAME" == "Darwin" ) then
-    setenv DYLD_LIBRARY_PATH $(LOFARSOFT)/release/lib:$(DYLD_LIBRARY_PATH)
+if ( "${SYSTEM_NAME}" == "Darwin" ) then
+  if ($?DYLD_LIBRARY_PATH) then
+    setenv DYLD_LIBRARY_PATH ${LOFARSOFT}/release/lib:${DYLD_LIBRARY_PATH}
+  else
+    setenv DYLD_LIBRARY_PATH ${LOFARSOFT}/release/lib
+  endif
 else 
-    setenv LD_LIBRARY_PATH $(LOFARSOFT)/release/lib:$(LD_LIBRARY_PATH)
+  if ($?LD_LIBRARY_PATH) then
+    setenv LD_LIBRARY_PATH ${LOFARSOFT}/release/lib:${LD_LIBRARY_PATH}
+  else
+    setenv LD_LIBRARY_PATH ${LOFARSOFT}/release/lib
+  endif
 endif
 
 #############################################################################
@@ -70,26 +78,26 @@ else
    setenv PYTHONPATH ${LOFARSOFT}/release/lib/python
 endif
 
-for PY_VERSION in 2.6 2.5 2.4 
-{
-  if test -d $LOFARSOFT/release/lib/python$PY_VERSION ; then
-    export PYTHONPATH=$LOFARSOFT/release/lib/python$PY_VERSION:$PYTHONPATH
+foreach PY_VERSION (2.6 2.5 2.4) 
+  if ( -d ${LOFARSOFT}/release/lib/python${PY_VERSION} ) then
+    setenv PYTHONPATH ${LOFARSOFT}/release/lib/python${PY_VERSION}:${PYTHONPATH}
   endif
 
-  if test -d $LOFARSOFT/release/lib/python$PY_VERSION/site-packages ; then
-    export PYTHONPATH=$LOFARSOFT/release/lib/python$PY_VERSION/site-packages:$PYTHONPATH
+  if ( -d ${LOFARSOFT}/release/lib/python${PY_VERSION}/site-packages ) then
+    setenv PYTHONPATH ${LOFARSOFT}/release/lib/python${PY_VERSION}/site-packages:${PYTHONPATH}
   endif
 
   ## Location of Fink-installed packages
 
-  if test -d /sw/lib/python$PY_VERSION/site-packages ; then
-    export PYTHONPATH=$PYTHONPATH:/sw/lib/python$PY_VERSION/site-packages
+  if ( -d /sw/lib/python${PY_VERSION}/site-packages ) then
+    setenv PYTHONPATH ${PYTHONPATH}:/sw/lib/python${PY_VERSION}/site-packages
   endif
 
-  if test -d /sw/lib/python$PY_VERSION/site-packages/PyQt4 ; then
-    export PYTHONPATH=$PYTHONPATH:/sw/lib/python$PY_VERSION/site-packages/PyQt4
+  if ( -d /sw/lib/python${PY_VERSION}/site-packages/PyQt4 ) then
+    setenv PYTHONPATH ${PYTHONPATH}:/sw/lib/python${PY_VERSION}/site-packages/PyQt4
   endif
-}
+
+end
 
 #############################################################################
 #
