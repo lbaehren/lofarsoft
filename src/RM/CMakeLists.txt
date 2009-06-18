@@ -279,6 +279,30 @@ endif (HAVE_ITPP)
 ##
 ## =============================================================================
 
+set (link_libraries
+  ${DAL_LIBRARIES}
+  ${CASA_LIBRARIES}
+  ${HDF5_LIBRARIES}
+  ${CFITSIO_LIBRARIES}
+  ${WCSLIB_LIBRARIES}
+  ${LAPACK_LIBRARIES}
+  )
+
+## Build the library
+
+set (rm_sources
+  rm.cpp
+  rmCube.cpp
+  )
+
+add_library (rm  ${rm_sources})
+
+install (
+  TARGETS rm
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
+
 if (RM_BUILD_EXTERNAL_TESTS)
   add_subdirectory (test)
 endif (RM_BUILD_EXTERNAL_TESTS)
@@ -309,49 +333,3 @@ message (STATUS " DAL_LIBRARIES ............ : ${DAL_LIBRARIES}")
 message (STATUS " ITPP_INCLUDES ............ : ${ITPP_INCLUDES}")
 message (STATUS " ITPP_LIBRARIES ........... : ${ITPP_LIBRARIES}")
 message (STATUS "+============================================================+")
-
-## =============================================================================
-##
-##  Configuration summary
-##
-## =============================================================================
-
-set (link_libraries
-  ${DAL_LIBRARIES}
-  ${CASA_LIBRARIES}
-  ${HDF5_LIBRARIES}
-  ${CFITSIO_LIBRARIES}
-  ${WCSLIB_LIBRARIES}
-  ${LAPACK_LIBRARIES}
-  )
-
-## Build the library
-
-set (rm_sources
-  rm.cpp
-  rmCube.cpp
-  )
-
-add_library (rm  ${rm_sources})
-
-install (
-  TARGETS rm
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  )
-
-## Build applications
-
-add_executable (rmsynth main.cpp)
-
-target_link_libraries (rmsynth
-  rm
-  ${link_libraries}
-  )
-
-install (
-  TARGETS rmsynth
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  )
