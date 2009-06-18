@@ -256,6 +256,7 @@ set (packages_external
   casacore
   cfitsio
   hdf5
+  itpp
   mathgl
   matplotlib
   numeric
@@ -420,7 +421,7 @@ add_custom_target (rm
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package RM ..."
   )
-add_dependencies (rm dal)
+add_dependencies (rm dal itpp)
 
 ##____________________________________________________________________
 ##                                                             smosaic
