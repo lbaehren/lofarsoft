@@ -288,21 +288,6 @@ set (link_libraries
   ${LAPACK_LIBRARIES}
   )
 
-## Build the library
-
-set (rm_sources
-  rm.cpp
-  rmCube.cpp
-  )
-
-add_library (rm  ${rm_sources})
-
-install (
-  TARGETS rm
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  )
-
 if (RM_BUILD_EXTERNAL_TESTS)
   add_subdirectory (test)
 endif (RM_BUILD_EXTERNAL_TESTS)
