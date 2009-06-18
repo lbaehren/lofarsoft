@@ -66,7 +66,7 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
   find_program (HAVE_CURL  curl  ${bin_locations} )
   find_program (HAVE_TAR   tar   ${bin_locations} )
 
-  set (SIP_VERSION "4.7.9")
+  set (SIP_VERSION "4.8.1")
   set (SIP_DIRECTORY "sip-${SIP_VERSION}")
   set (SIP_TAR_ARCHIVE "${SIP_DIRECTORY}.tar.gz")
   set (SIP_URL "http://www.riverbankcomputing.co.uk/static/Downloads/sip4/${SIP_TAR_ARCHIVE}")
@@ -117,7 +117,7 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
   ## run "./configure"
 
   add_custom_target (run_configure ALL
-    COMMAND python configure.py -b ${SIP_prefix}/bin -d ${SIP_prefix}/lib/python2.6/site-packages  -e ${SIP_prefix}/include/python2.6cp -v ${SIP_prefix}/share/sip
+    COMMAND python configure.py -b ${SIP_prefix}/bin -d ${SIP_prefix}/lib/python -e ${SIP_prefix}/include/sip -v ${SIP_prefix}/share/sip
     WORKING_DIRECTORY ${SIP_BINARY_DIR}/${SIP_DIRECTORY}
     COMMENT "[SIP] Running configure ..."
     )

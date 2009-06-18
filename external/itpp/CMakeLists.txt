@@ -38,9 +38,11 @@ endif (USG_ROOT)
 
 if (NOT ITPP_VERBOSE_CONFIGURE)
   set (FFTW3_FIND_QUIETLY  YES )
+  set (LAPACK_FIND_QUIETLY  YES )
 endif (NOT ITPP_VERBOSE_CONFIGURE)
 
 include (FindFFTW3)
+include (FindLAPACK)
 
 ## <-- begin build condition --------------------------------------------------->
 
