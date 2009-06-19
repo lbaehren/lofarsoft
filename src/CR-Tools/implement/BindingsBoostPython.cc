@@ -38,9 +38,11 @@
 // CR-Tools header files
 #include <Coordinates/CoordinateType.h>
 #include <Coordinates/TimeFreq.h>
+#include <Data/LOFAR_TBB.h>
 #include <IO/DataIterator.h>
 #include <IO/DataReader.h>
 #include <Math/HanningFilter.h>
+#include <Analysis/DynamicSpectrum.h>
 
 namespace bpl = boost::python;
 
@@ -49,6 +51,8 @@ using CR::DataIterator;
 using CR::DataReader;
 using CR::HanningFilter;
 using CR::TimeFreq;
+using CR::LOFAR_TBB;
+using CR::DynamicSpectrum;
 
 BOOST_PYTHON_MODULE (pycr)
 {
@@ -105,9 +109,27 @@ BOOST_PYTHON_MODULE (pycr)
   //
   //  implement/Imaging
   //
-  // ============================================================================
-
-  
+  // =============================================================================
+	
+    // ============================================================================
+	//
+	//  implement/Data
+	//
+	// ============================================================================
+	
+	//   bpl::class_<LOFAR_DipoleDataset>("LOFAR_DipoleDataset")
+	//     .def(bpl::init<>())
+	//     .def(bpl::init<std::string,std::string>())
+	//     ;
+	
+	void (LOFAR_TBB::*summary1)(bool const &, bool const &) = &LOFAR_TBB::summary;
+	void (LOFAR_TBB::*summary2)(ostream &, bool const &, bool const &) = &LOFAR_TBB::summary;
+	bpl::class_<LOFAR_TBB>("LOFAR_TBB")
+	   .def(bpl::init<>())
+	   .def(bpl::init<std::string,uint>())
+	   .def("summary",summary1)
+	   .def("summary",summary2)
+	;  
 
   // ============================================================================
   //
@@ -189,16 +211,7 @@ BOOST_PYTHON_MODULE (pycr)
 
 #endif
   
-  // ============================================================================
-  //
-  //  implement/Data
-  //
-  // ============================================================================
 
-//   bpl::class_<LOFAR_DipoleDataset>("LOFAR_DipoleDataset")
-//     .def(bpl::init<>())
-//     .def(bpl::init<std::string,std::string>())
-//     ;
 
   // ============================================================================
   //
@@ -211,7 +224,15 @@ BOOST_PYTHON_MODULE (pycr)
   //  implement/Utilities
   //
   // ============================================================================
-  
+    bool (DynamicSpectrum::*setFilename1)(std::string const &) = &DynamicSpectrum::setFilename;
+	bpl::class_<DynamicSpectrum>("DynamicSpectrum")
+	.def(bpl::init<CR::LOFAR_TBB,int,int>())
+    .def("setFilename", setFilename1)
+	.def("toFITS",&DynamicSpectrum::toFITS)
+	;
+   
+	
+	
   // ============================================================================
   
 }
