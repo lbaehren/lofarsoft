@@ -445,7 +445,7 @@ class Data {
 
   //  template <class T>
   //bool Data::doVerbose(const vector<T> &v,const bool checkmod);	
-  bool Data::doVerbose();
+  bool doVerbose();
     
   longint setVerbose(longint verbose);
   bool setDebugGUI(bool tf);

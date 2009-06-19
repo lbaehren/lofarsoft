@@ -40,7 +40,7 @@ using namespace std;
 
 #include "Data/LopesEventIn.h"
 #include "Data/LOFAR_TBB.h"
-#include "DAL/TBB_Timeseries.h"
+#include "dal/TBB_Timeseries.h"
 
 
 /*========================================================================
