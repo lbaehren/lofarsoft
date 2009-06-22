@@ -127,7 +127,7 @@ endif (BOOST_FIND_wave)
 
 set (BOOST_LIBRARIES "")
 
-foreach (boost_version 1_34_1 1_33_1)
+foreach (boost_version 1_39_0 1_36_0 1_34_1 1_33_1)
 
   ## Check for the header files ------------------
 
