@@ -11,7 +11,7 @@ cmake_minimum_required (VERSION 2.5)
 ## find script
 
 option (BOOST_FORCE_BUILD       "Force rebuild and local installation?"      NO  )
-option (BOOST_CMAKE_CUSTOM      "Use custom CMake environment for build?"    NO  )
+option (BOOST_CMAKE_CUSTOM      "Use custom CMake environment for build?"    YES )
 option (BOOST_VERBOSE_CONFIGURE "Be verbose during configuration?"           NO  )
 option (BOOST_VERBOSE_BUILD     "Be verbose during build process?"           NO  )
 
@@ -138,3 +138,8 @@ endif (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
 ## ------------------------------------------------------------------------------
 ## Additional targets
 
+add_custom_target (update_cmake
+  COMMAND rm ../boost_cmake.tgz
+  WORKING_DIRECTORY ${BOOST_SOURCE_DIR}/${BOOST_DIRECTORY}
+  COMMENT "[BOOST] Cleaning up build directory ..."
+  )
