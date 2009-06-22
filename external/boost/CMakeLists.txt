@@ -10,10 +10,14 @@ cmake_minimum_required (VERSION 2.5)
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (BOOST_FORCE_BUILD       "Force rebuild and local installation?"        NO  )
-option (BOOST_CMAKE_BUILD       "Use CMake to configure and build BOOST?"      YES )
-option (BOOST_VERBOSE_CONFIGURE "Be verbose during configuration?"             NO  )
-option (BOOST_VERBOSE_BUILD     "Be verbose during build process?"             NO  )
+option (BOOST_FORCE_BUILD       "Force rebuild and local installation?"      NO  )
+option (BOOST_CMAKE_CUSTOM      "Use custom CMake environment for build?"    NO  )
+option (BOOST_VERBOSE_CONFIGURE "Be verbose during configuration?"           NO  )
+option (BOOST_VERBOSE_BUILD     "Be verbose during build process?"           NO  )
+
+option (BOOST_BUILD_DEBUG       "Build debugging libraries?"                 NO )
+option (BOOST_BUILD_SHARED      "Build shared libraries?"                    NO )
+option (BOOST_BUILD_BCP         "Build shared libraries?"                    NO )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -67,21 +71,35 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
       COMMENT "[Boost] Expanding tar-archive ..."
       )
     
-    ## expand the tar-archive with the CMake files
-    add_custom_target (boost_expand_cmake
-      COMMAND ${tar_executable} -xvzf ${boost_cmake_tgz}
-      WORKING_DIRECTORY ${BOOST_BINARY_DIR}/${BOOST_DIRECTORY}
-      COMMENT "[Boost] Expanding tar-archive with CMake files ..."
-      )
-    add_dependencies (boost_expand_cmake boost_expand)
-    
-    ## configure the package
-    add_custom_target (boost_configure
-      COMMAND cmake .
-      WORKING_DIRECTORY ${BOOST_BINARY_DIR}/${BOOST_DIRECTORY}
-      COMMENT "[Boost] Configuring project ..."
-      )
-    add_dependencies (boost_configure boost_expand_cmake)
+    if (BOOST_CMAKE_CUSTOM)
+      
+      ## expand the tar-archive with the CMake files
+      add_custom_target (boost_expand_cmake
+	COMMAND ${tar_executable} -xvzf ${boost_cmake_tgz}
+	WORKING_DIRECTORY ${BOOST_BINARY_DIR}/${BOOST_DIRECTORY}
+	COMMENT "[Boost] Expanding tar-archive with CMake files ..."
+	)
+      add_dependencies (boost_expand_cmake boost_expand)
+      
+      ## configure the package
+      add_custom_target (boost_configure
+	COMMAND cmake .
+	WORKING_DIRECTORY ${BOOST_BINARY_DIR}/${BOOST_DIRECTORY}
+	COMMENT "[Boost] Configuring project ..."
+	)
+      add_dependencies (boost_configure boost_expand_cmake)
+      
+    else (BOOST_CMAKE_CUSTOM)
+      
+      ## configure the package
+      add_custom_target (boost_configure
+	COMMAND cmake . -DCMAKE_IS_EXPERIMENTAL=YES_I_KNOW -DBUILD_DEBUG:BOOL=${BOOST_BUILD_DEBUG} -DBUILD_SHARED:BOOL=${BOOST_BUILD_SHARED} -DBUILD_BCP:BOOL=${BOOST_BUILD_BCP} -DCMAKE_INSTALL_PREFIX:PATH=${USG_INSTALL_PREFIX}
+	WORKING_DIRECTORY ${BOOST_BINARY_DIR}/${BOOST_DIRECTORY}
+	COMMENT "[Boost] Configuring project ..."
+	)
+      add_dependencies (boost_configure boost_expand)
+      
+    endif (BOOST_CMAKE_CUSTOM)
     
     ## build the package
     add_custom_target (boost_build
