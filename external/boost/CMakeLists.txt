@@ -44,7 +44,7 @@ if (NOT BOOST_VERBOSE_CONFIGURE)
   set (BOOST_FIND_QUIETLY  YES )
 endif (NOT BOOST_VERBOSE_CONFIGURE)
 
-include (FindBOOST)
+include (FindBoost)
 
 find_file (boost_cmake_tgz boost_cmake.tgz ${BOOST_SOURCE_DIR})
 
