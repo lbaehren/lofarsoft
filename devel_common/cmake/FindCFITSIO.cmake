@@ -70,12 +70,6 @@ FIND_LIBRARY (CFITSIO_libm
   NO_DEFAULT_PATH
 )
 
-if (CFITSIO_libm)
-  list (APPEND CFITSIO_LIBRARIES ${CFITSIO_libm})
-else (CFITSIO_libm)
-  message (STATUS "Unable to find libm.")
-endif (CFITSIO_libm)
-
 ## [3] file access
 
 FIND_LIBRARY (CFITSIO_libnsl
