@@ -10,7 +10,7 @@
 	  - \ref configure_build_testdata
 	  - \ref configure_build_doc
 	  - \ref configure_build_clean
-	- \ref configure_build_dependencies
+	- \ref configure_build_trouble
 	
 	<hr>
 	
@@ -401,63 +401,46 @@
 
 	<hr>
 	
-	\section configure_build_dependencies Dependencies of the targets
-	
-	\verbatim	
-	mathgl
-	|-- hdf5
-	|   `-- szip
-	|-- python
-	|   `-- boost
-	`-- swig
-	
-	pyrap
-	|-- casacore
-	|   |-- hdf5
-	|   |   `-- szip
-	|   |-- cfitsio
-	|   |-- boost
-	|   |-- wcslib
-	|   |   |-- boost
-	|   |   `-- flex
-	|   `-- bison
-	`-- python
-	
-	startools
-	`-- root
-	
-	dal
-	`-- casacore
-	    |-- hdf5
-	    |   `-- szip
-	    |-- cfitsio
-	    |-- boost
-	    |-- wcslib
-	    |   |-- boost
-	    |   `-- flex
-	    `-- bison
+	\section configure_build_trouble Troubleshooting & Frequently asked questions
 
-	cr
-	|-- dal
-	|   `-- casacore
-	|       |-- hdf5
-	|       |   `-- szip
-	|       |-- cfitsio
-	|       |-- boost
-	|       |-- wcslib
-	|       |   |-- boost
-	|       |   `-- flex
-	|       `-- bison
-	|-- startools
-	|   `-- root
-	|-- mathgl
-	|   |-- hdf5
-	|   |   `-- szip
-	|   |-- python
-	|   |   `-- boost
-	|   `-- swig
-	`-- PyQt
-	    `-- SIP
-	\endverbatim
+	<dl>
+	  <dt>Question:</dt>
+	  <dd>"I seem to remember there was some script "build.sh" which would
+	  drive the build of the various packages; is this no longer supported?"</dd>
+	  <dt>Answer:</dt>
+	  <dd>Yes, initially the complete build and installation was run through a
+	  shell script, but this has been phased out in favor of having CMake do
+	  most of the job. The method therefore to build any of the packages is
+	  \code
+	  cd $LOFARSOFT/build
+	  make <package>
+	  \endcode</dd>
+
+	  <dt>Question:</dt>
+	  <dd>"When I am running a command like e.g. <tt>make dal</tt> from within
+	  the build directory, all I am getting is
+	  \verbatim
+	  make: *** No rule to make target `dal'.  Stop.
+	  \endverbatim
+	  Why is that?</dd>
+	  <dt>Answer:</dt>
+	  <dd>The most likely explanation is that you haven't yet run CMake to
+	  parse the master configuration script to create the list of build
+	  targets.
+	  \code
+	  cd $LOFARSOFT/build
+	  ./bootstrap
+	  \endcode
+	  Once you have done this you can use 
+	  \code
+	  make help
+	  \endcode
+	  to get the list of available targets which can be build through
+	  \code
+	  make <package>
+	  \endcode
+	  </dd>
+
+	</dl>
 
  */
