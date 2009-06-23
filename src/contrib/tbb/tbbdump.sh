@@ -5,7 +5,7 @@
         MonthTag=$(date +%m)
         YearTag=$(date +%Y)
 
-        export DireName="/home/eikelboom/data/hdf5data/$DayTag-$MonthTag-$YearTag/"
+        export DireName="/home/veen/data/$DayTag-$MonthTag-$YearTag/"
         mkdir -p "$DireName"
 
         export DumpLog="$DireName"dumplog.txt
@@ -37,6 +37,7 @@ AlphaFun ()					# This function checks if input is alphabetic
 	if [ "$AlphaTest" -ne 0 -o "$NChars" -eq 0 ]
 	 then echo "Wrong Input for type Character" | tee "$DumpLog"
 	 return 1
+         else return 0
 	fi
 }
 
@@ -63,6 +64,7 @@ IntegFun ()					# This function checks if input is integer
 	if [ "$IntegTest" -ne 0 -o "$NChars" -eq 0 ]
 	 then echo "Wrong Input for type Integer" | tee "$DumpLog"
 	 return 1
+         else return 0
 	fi
 }
 
@@ -75,7 +77,9 @@ TestFun ()					# This function tries to restore failing TBB's
         Station="$1"
 
         ssh "$Station"  tbbctl --stop   >> /dev/null
+        sleep 0.1
         ssh "$Station"  tbbctl --free   >> /dev/null
+        sleep 0.1
         ssh "$Station"  tbbctl --alloc  >> /dev/null
 
         sleep 2
@@ -83,6 +87,7 @@ TestFun ()					# This function tries to restore failing TBB's
 	TestTime=$(date)
 
         ssh "$Station"  tbbctl --rec    >> /dev/null
+        sleep 1
         ssh "$Station"  tbbctl --stop   >> /dev/null
 
 	TestTime=$(date)
@@ -109,8 +114,11 @@ TestFun ()					# This function tries to restore failing TBB's
 	TestTime=$(date)
 
         ssh "$Station"  tbbctl --free   >> /dev/null
+        sleep 0.1
         ssh "$Station"  tbbctl --alloc  >> /dev/null
+        sleep 0.1
         ssh "$Station"  tbbctl --rec    >> /dev/null
+        sleep 1.3
         ssh "$Station"  tbbctl --stop   >> /dev/null
         fi
 
@@ -196,33 +204,49 @@ RecordFun ()					# This function instructs the TBB's to record data
         ssh "$Station"  tbbctl --free
 
         if [ "$?" -ne 0 ]
-         then echo "$RecordTime There was an error when the tbb's were cleared" | tee \
+         then echo "#### $RecordTime There was an error when the tbb's were cleared" | tee \
          "$DumpLog"
          TestFun "$Station"
         fi
 
-        ssh "$Station"  tbbctl --alloc  --select="$RcuString"
-
+	sleep 0.1
+        ssh "$Station"  tbbctl --alloc  #--select="$RcuString"
         if [ "$?" -ne 0 ]
-         then echo "$RecordTime There was an error when the RCU's were allocated" | tee \
+         then echo "#### $RecordTime There was an error when the RCU's were allocated" | tee \
          "$DumpLog"
          TestFun "$Station"
         fi
 
-        ssh "$Station"  tbbctl --rec    --select="$RcuString"
-
+	sleep 0.1
+        ssh "$Station"  tbbctl --rec    #--select="$RcuString"
         if [ "$?" -ne 0 ]
-         then echo "$RecordTime There was an error when the recording took place" | tee |
+         then echo "#### $RecordTime There was an error when the recording took place" | tee |
          "$DumpLog"
          TestFun "$Station"
         fi
 
-        sleep 0.5
-        ssh "$Station"  tbbctl --stop   --select="$RcuString"
+	sleep 0.1
+        ssh "$Station"  tbbctl --mode=transient
+        if [ "$?" -ne 0 ]
+         then echo "#### $RecordTime There was an error when the recording took place" | tee |
+         "$DumpLog"
+         TestFun "$Station"
+        fi
+
+	sleep 0.1
+        ssh "$Station"  tbbctl --arpmode=1
+        if [ "$?" -ne 0 ]
+         then echo "#### $RecordTime There was an error when the recording took place" | tee |
+         "$DumpLog"
+         TestFun "$Station"
+        fi
+
+        sleep 1.5
+        ssh "$Station"  tbbctl --stop   #--select="$RcuString"
 
         if [ "$?" -ne 0 ]
          then TestFun "$Station"
-	 else echo "$RecordTime Data was recorded" >> "$DumpLog"
+	 else echo "#### $RecordTime Data was recorded" >> "$DumpLog"
         fi
 }
 
@@ -257,13 +281,14 @@ DumpFun ()					# This function instructs to dump data to CEP
 
         NElements=${#RcuArray[*]}
 
-        FlagPort=(0 0 0 0 0)
+        FlagPort=(0 0 0 0 0 0)
 
-        BoardString=(0 0 0 0 0)
+        BoardString=(0 0 0 0 0 0)
 
-        while [ "$Counter" -le "$NElements" ]
+        while [ "$Counter" -lt "$NElements" ]
          do
 
+	  echo "##### counter: $Counter  ; NElements: $NElements"
          RCUNumber=${RcuArray["$Counter"]}
 
          if [ "$RCUNumber" -ge 0 -a "$RCUNumber" -le 15 ]
@@ -316,21 +341,32 @@ DumpFun ()					# This function instructs to dump data to CEP
          BoardString["$Counter"]=${BoardString["$Counter"]:2}
          Port=${FlagPort["$Counter"]}
 
-         FileName="$Station-B$CounterT$HourTag:$MinuteTag:$SecondsTag".h5
+         FileName="$Station-B${Counter}T$HourTag:$MinuteTag:$SecondsTag".h5
          FullName="$DireName""$FileName"
 
-         if [ "$Port" -ne 0 ]
-          then nohup /bin/bash -e | ssh 10.181.0.3 /app64/usg/bin/tbb2h5 --ip "$IPaddress" \
-          --port "$Port" --outfile "$FullName" --timeoutRead "$Latency" &
-          ssh "$Station" tbbctl --readall="$Pages" --select="${BoardString[*]}"
-         fi
+         echo "#### Counter:$Counter Port:$Port BoardString:${BoardString[$Counter]}"	 
 
-         if ls -l "$FullName" | grep -qw [0,96,5384]
-          then echo "$DumpTime The *.hdf5 file produced was useless"  | tee "$DumpLog"
-          echo "$DumpTime Removing the last *.hdf5 file"              | tee "$DumpLog"
-          rm -f "$FullName"
-	  else echo "$DumpTime Data was dumped and converted at CEP" >> "$DumpLog"
-         fi
+         if [ "$Port" -ne 0 ]
+	     then 
+	     echo "#### tbb2h5-command:" ssh 10.181.0.1 /app64/usg/bin/tbb2h5 --ip "$IPaddress" \
+		 --port "$Port" --outfile "$FullName" --timeoutRead "$Latency"
+	     nohup /bin/bash -e | ssh 10.181.0.1 /app64/usg/bin/tbb2h5 --ip "$IPaddress" \
+		 --port "$Port" --outfile "$FullName" --timeoutRead "$Latency" &
+	     sleep 5
+	     echo "#### readall-command:" ssh "$Station" tbbctl --readall="$Pages" --select="${BoardString[$Counter]}"
+	     ssh "$Station" tbbctl --readall="$Pages" --select="${BoardString[$Counter]}"
+	     sleep $Latency
+	     sleep 0.5
+	     
+	     if ls -l "$FullName" | grep -qw [0,96,5384]
+		 then echo "$DumpTime The *.hdf5 file produced was useless"  | tee "$DumpLog"
+		 echo "$DumpTime Removing the last *.hdf5 file"              | tee "$DumpLog"
+		 rm -f "$FullName"
+	     else echo "$DumpTime Data was dumped and converted at CEP" >> "$DumpLog"
+	     fi
+	 fi
+          
+	 ((Counter=Counter+1))
 
         done
 }
@@ -344,9 +380,9 @@ ExitFun()					# This function kills tbbdump and all childeren
         echo "and local variables and functions are unset, if necessary"
 
         ssh "$Station" tbbctl --stop
-
-        ProcId=$(ssh 10.181.0.3 ps -C tbb2h5 -u eikelboom -o pid=)
-        ssh 10.181.0.3 kill -KILL "$ProcId"
+#CHANGE USERNAME
+        ProcId=$(ssh 10.181.0.1 ps -C tbb2h5 -u veen -o pid=)
+        ssh 10.181.0.1 kill -KILL "$ProcId"
 
         unset -f AdminFun IntegFun AlphaFun SetFun TestFun \
                  RecordFun DumpFun InputFun ExitFun
@@ -372,6 +408,7 @@ ExitFun()					# This function kills tbbdump and all childeren
 
 ############## This part below scans and stores user's input ############################
 
+echo ; echo ; echo "******************** starting to parse input ********************"
 
 InputFlag=("unset" "unset" "unset" "unset" "unset" "unset" "unset")	# Input analyzer
 
@@ -731,13 +768,16 @@ until [ "$#" -le 0 ]
 
 done
 
+echo ; echo ; echo "******************** finished parsing input ********************"
+
+
 ########################################################################################
 
 
 ############# This section determines when TBBDUMP stops ###############################
 
 
-        StopCommand=$(ExitFun "$Station")
+        StopCommand="ExitFun $Station"
 
         trap "$StopCommand" SIGHUP SIGINT SIGTERM SIGSTOP SIGURG
 
@@ -755,6 +795,7 @@ MainTime=$(date)				# Redefining because some time has passed
 
 ############# Checking the RSP board settings, altering them if necessary ##############
 
+echo ; echo ; echo "******************** starting setup ********************"
 
 echo "$MainTime Checking RSP board for current settings..." | tee "$DumpLog"
 
@@ -771,22 +812,25 @@ echo "Press Ctl-C to stop tbbdump"
 
 MainCounter=1
 
-while :
- do
+#while :
+# do
 
  MainTime=$(date)
 
  echo "$MainTime Start recording for Dump $MainCounter" >> "$DumpLog"
 
+echo ; echo ; echo "******************** start recording ********************"
+
  RecordFun "$Station" "${RcuArray[@]}" "flag"
 
  echo "$MainTime Data is dumped for Dump $MainCounter" >> "$DumpLog"
 
+echo ; echo ; echo "******************** start dumping ********************"
  DumpFun "$Station" "${RcuArray[@]}" "flag" "$TbbMode" "$Pages" "$Latency"
 
  ((MainCounter=MainCounter+1))
 
-done
+#done
 
 
 ############# END ############# END ############# END ############# END #################
