@@ -81,17 +81,18 @@ if (HAVE_DAL AND HAVE_ROOT)
   ## linker instructions
   target_link_libraries (tppfinversion
     cr
-    ${ROOT_LIBRARIES}
+    ${CASA_LIBRARIES}
     ${DAL_LIBRARIES}
     ${CASA_LIBRARIES}
     ${HDF5_LIBRARIES}
     ${CFITSIO_LIBRARIES}
+    ${ROOT_LIBRARIES}
     )
   target_link_libraries (tNuMoonTrigger
     cr
     ${ROOT_LIBRARIES}
     ${DAL_LIBRARIES}
-    ${CASA_LIBRARIES}
+#    ${CASA_LIBRARIES}
     ${HDF5_LIBRARIES}
     ${CFITSIO_LIBRARIES}
     )
