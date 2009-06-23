@@ -56,10 +56,27 @@ include (FindHDF5)
 ## if the there is a system-wide installation, it is the correct version of the
 ## library? If not we need to force a build from the provided source tree.
 
-if (HDF5_MAJOR_VERSION LESS 1 OR HDF5_MINOR_VERSION LESS 8)
-  message (STATUS "System-wide installation of HDF5 library found - but too old!")
+## Check for major version
+if (HDF5_MAJOR_VERSION LESS 1)
+  message (STATUS "System-wide HDF5 installation found - major version too small!")
   set (HDF5_FORCE_BUILD TRUE)
-endif (HDF5_MAJOR_VERSION LESS 1 OR HDF5_MINOR_VERSION LESS 8)
+else (HDF5_MAJOR_VERSION LESS 1)
+  message (STATUS "System-wide HDF5 installation found - major version ok.")
+  ## Check for major version
+  if (HDF5_MINOR_VERSION LESS 8)
+    message (STATUS "System-wide HDF5 installation found - minor version too small!")
+    set (HDF5_FORCE_BUILD TRUE)
+  else (HDF5_MINOR_VERSION LESS 8)
+    message (STATUS "System-wide HDF5 installation found - minor version ok.")
+    ## Check for release version
+    if (HDF5_RELEASE_VERSION LESS 3)
+      message (STATUS "System-wide HDF5 installation found - release version too small!")
+      set (HDF5_FORCE_BUILD TRUE)
+    else (HDF5_RELEASE_VERSION LESS 3)
+    message (STATUS "System-wide HDF5 installation found - release version ok.")
+    endif (HDF5_RELEASE_VERSION LESS 3)
+  endif (HDF5_MINOR_VERSION LESS 8)
+endif (HDF5_MAJOR_VERSION LESS 1)
 
 ## <-- begin build condition --------------------------------------------------->
 
