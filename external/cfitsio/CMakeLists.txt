@@ -75,13 +75,13 @@ if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
     if (CFITSIO_enable_lfs)
       if (CFITSIO_enable_reentrant)
 	add_custom_target (cfitsio_configure
-	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --enable-lfs --enable-reentrant
+	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --includedir=${USG_INSTALL_PREFIX}/include/cfitsio --enable-lfs --enable-reentrant
 	  WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}/cfitsio
 	  COMMENT "[CFITSIO] Configuring package ..."
 	  )
       else (CFITSIO_enable_reentrant)
 	add_custom_target (cfitsio_configure
-	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIXcd R} --enable-lfs
+	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --includedir=${USG_INSTALL_PREFIX}/include/cfitsio --enable-lfs
 	  WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}/cfitsio
 	  COMMENT "[CFITSIO] Configuring package ..."
 	  )
@@ -89,13 +89,13 @@ if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
     else (CFITSIO_enable_lfs)
       if (CFITSIO_enable_reentrant)
 	add_custom_target (cfitsio_configure
-	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --enable-reentrant
+	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --includedir=${USG_INSTALL_PREFIX}/include/cfitsio --enable-reentrant
 	  WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}/cfitsio
 	  COMMENT "[CFITSIO] Configuring package ..."
 	  )
       else (CFITSIO_enable_reentrant)
 	add_custom_target (cfitsio_configure
-	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX}
+	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --includedir=${USG_INSTALL_PREFIX}/include/cfitsio 
 	  WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}/cfitsio
 	  COMMENT "[CFITSIO] Configuring package ..."
 	  )
@@ -114,7 +114,9 @@ if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
     
     ## build and install the package
     add_custom_target (cfitsio_install
+      COMMAND mkdir -p ${USG_INSTALL_PREFIX}/include/cfitsio
       COMMAND make install
+      COMMAND mv ${USG_INSTALL_PREFIX}/include/*.h ${USG_INSTALL_PREFIX}/include/cfitsio
       WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}/cfitsio
       COMMENT "[CFITSIO] Installing package ..."
       )
