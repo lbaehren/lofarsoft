@@ -9,4 +9,4 @@ RcuMode=3
 TbbMode="transient"
 Pages=2000
 Latency=1.2
-CepDelay=0
+CepDelay=200

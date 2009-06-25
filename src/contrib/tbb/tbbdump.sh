@@ -246,22 +246,31 @@ RecordFun ()					# This function instructs the TBB's to record data
          "$DumpLog"
          TestFun "$Station"
         fi
-
-        sleep 1.5
-        ssh "$Station"  tbbctl --stop   #--select="$RcuString"
-
-        if [ "$?" -ne 0 ]
-         then TestFun "$Station"
-	 else echo "#### $RecordTime Data was recorded" >> "$DumpLog"
-        fi
+	
+	sleep 1.5
 }
 
 
 DumpFun ()					# This function instructs to dump data to CEP
 {
-        DumpTime=$(date)
+         
+
+		
+		 
+		  
+		DumpTime=$(date)
 
         Station="$1"
+		
+		
+        ssh "$Station"  tbbctl --stop   #--select="$RcuString"
+
+        if [ "$?" -ne 0 ]
+         then TestFun "$Station"
+	     else echo "#### $RecordTime Data was recorded" >> "$DumpLog"
+        fi
+		
+		
         shift
         Counter=0
 
@@ -790,7 +799,7 @@ until [ "$#" -le 0 ]
     AlphaFun "$1"
 
         case "$1" in
-         p | -p | P | -P | --config | --parameters)
+         --config)
           shift
           ConfigFile="$1"
           echo "$MainTime Config file set to    : $ConfigFile" >> "$DumpLog"
@@ -798,6 +807,14 @@ until [ "$#" -le 0 ]
           shift
         esac
 
+    AlphaFun "$1"
+	   
+	     case "$1" in
+		   --mode)
+		   shift
+		   Mode="$1"
+		   shift
+		 esac
 
 # Get dumplog file or show helpfile
 
@@ -954,9 +971,13 @@ echo ; echo ; echo "***********Done putting in (default) config values**********
   exit 1
 fi
 
-
+echo "Mode is:  $Mode"
+sleep 2
 ############# Checking the RSP board settings, altering them if necessary ##############
-
+if [ "X$Mode" != "Xdump" ]
+then
+   if [ "X$Mode" != "Xrestart" ]
+   then
 echo ; echo ; echo "******************** starting setup ********************"
 
 echo "$MainTime Checking RSP board for current settings..." >> "$DumpLog"
@@ -967,7 +988,7 @@ echo "$MainTime Starting up the repetitive Dumps" >> "$DumpLog"
 
 echo ""
 echo "Press Ctl-C to stop tbbdump"
-
+   fi
 
 ############# Starting the repetitive dumping ###########################################
 
@@ -986,10 +1007,17 @@ echo ; echo ; echo "******************** start recording ********************"
  RecordFun "$Station" "${RcuArray[@]}" "flag"
 
  echo "$MainTime Data is dumped for Dump $MainCounter" >> "$DumpLog"
+fi
 
+if [ "X$Mode" != "Xrecord" ]
+then
+  if [ "X$Mode" != "Xrestart" ]
+  then
 echo ; echo ; echo "******************** start dumping ********************"
- DumpFun "$Station" "${RcuArray[@]}" "flag" "$TbbMode" "$Pages" "$Latency" "$CepDelay"
 
+ DumpFun "$Station" "${RcuArray[@]}" "flag" "$TbbMode" "$Pages" "$Latency" "$CepDelay"
+fi
+fi
  ((MainCounter=MainCounter+1))
 
 #done
