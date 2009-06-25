@@ -1,0 +1,19 @@
+Options:     Values:
+--station    cs001c cs010c cs016c cs302c
+--frequency  160 200
+--rculist    numbers seperated by spaces or commas or a range like 1:10
+--rcumode    1 LBL 10-100
+             2 LBL 30-100
+             3 LBH 10-100
+             4 LBH 30-100
+             5 HBA 110-190
+             6 HBA 170-230
+             7 HBA 210-270
+--transient
+--subband
+--pages      nr pages
+--latency    (default 1 sec)
+--dumplog
+--help       (display this file)
+
+
