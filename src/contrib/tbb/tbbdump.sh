@@ -421,7 +421,7 @@ ExitFun()					# This function kills tbbdump and all childeren
 
 echo ; echo ; echo "******************** starting to parse input ********************"
 
-InputFlag=("unset" "unset" "unset" "unset" "unset" "unset" "unset" "unset")	# Input analyzer
+InputFlag=("unset" "unset" "unset" "unset" "unset" "unset" "unset" "unset" "unset")	# Input analyzer
 
 
 until [ "$#" -le 0 ]
@@ -783,8 +783,21 @@ until [ "$#" -le 0 ]
 	   sleep 2
 	  fi;;
 	esac
-	   
- 
+	
+   
+# Determining the config file
+
+    AlphaFun "$1"
+
+        case "$1" in
+         p | -p | P | -P | --config | --parameters)
+          shift
+          ConfigFile="$1"
+          echo "$MainTime Config file set to    : $ConfigFile" >> "$DumpLog"
+          InputFlag[8]="set"
+          shift
+        esac
+
 
 # Get dumplog file or show helpfile
 
@@ -828,25 +841,47 @@ echo ; echo ; echo "******************** finished parsing input ****************
 
 MainTime=$(date)				# Redefining because some time has passed
 
+if [ -s ./default_values ]
+  then
+  InputDetect=$(echo ${InputFlag[8]})
+  if [ "$InputDetect" == "unset" ]
+    then echo "$MainTime No config file set; using default values instead" >> "$DumpLog"
+        ConfigFile="./default_values"
+  fi
+
+
   InputDetect=$(echo ${InputFlag[0]})
   if [ "$InputDetect" == "unset" ]
-   then echo "$MainTime No station was defined; exiting tbbdump" >> "$DumpLog"
+   then
+   String00="$(cat $ConfigFile | grep Station)"
+   if [ $? -eq 0 ]
+   then String00=${String00/Station=/}
+   Station=$(echo "$String00")
+   echo "*************** station used is:    $Station ********************"
+   else echo "$MainTime No station was defined; exiting tbbdump" >> "$DumpLog"
    sleep 2
    exit 1
+   fi
   fi
 
   InputDetect=$(echo ${InputFlag[1]})
   if [ "$InputDetect" == "unset" ]
-   then echo "$MainTime No frequency input; using current station frequency" >> "$DumpLog"
-   String01=$(cat ./default_values | grep Frequency)
+   then echo "$MainTime No frequency input; using config value (default: current station frequency)" >> "$DumpLog"
+   String01=$(cat $ConfigFile | grep Frequency)
+   if [ $? -ne 0 ]
+   then String01=$(cat ./default_values | grep Frequency)
+   fi
    String01=${String01/Frequency=/}
    Frequency=$(echo "$String01")
   fi
 
   InputDetect=$(echo ${InputFlag[2]})
   if [ "$InputDetect" == "unset" ]
-   then echo "$MainTime No RCU's were defined; using default of 16 RCU's" >> "$DumpLog"
-   String02="$(cat ./default_values | grep RcuArray)"
+   then echo "$MainTime No RCU's were defined; using config value (default: first 16 RCU's)" >> "$DumpLog"
+   String02="$(cat $ConfigFile | grep RcuArray)"
+   if [ $? -ne 0 ]
+   then String02="$(cat ./default_values | grep RcuArray)"
+   fi
    String02="${String02/RcuArray=/}"
    String02="${String02//,/ }"
    RcuArray=($(echo $String02))
@@ -855,7 +890,10 @@ MainTime=$(date)				# Redefining because some time has passed
   InputDetect=$(echo ${InputFlag[3]})
   if [ "$InputDetect" == "unset" ]
    then echo "$MainTime No RCU Modes defined; using RCU Mode 4" >> "$DumpLog"
-   String03=$(cat ./default_values | grep RcuMode)
+   String03=$(cat $ConfigFile | grep RcuMode)
+   if [ $? -ne 0 ]
+   then String03=$(cat ./default_values | grep RcuMode)
+   fi
    String03=${String03/RcuMode=/}
    RcuMode=$(echo "$String03")
   fi
@@ -864,7 +902,10 @@ MainTime=$(date)				# Redefining because some time has passed
   if [ "$InputDetect" == "unset" ]
    then echo "$MainTime No tbb mode was defined; using transient mode as default" >> \
    "$DumpLog"
-   String04=$(cat ./default_values | grep TbbMode)
+   String04=$(cat $ConfigFile | grep TbbMode)
+   if [ $? -ne 0 ]
+   then String04=$(cat ./default_values | grep TbbMode)
+   fi
    String04=${String04/TbbMode=/}
    TbbMode=$(echo "$String04")
   fi
@@ -873,7 +914,10 @@ MainTime=$(date)				# Redefining because some time has passed
   if [ "$InputDetect" == "unset" ]
    then echo "$MainTime No input for amount of pages to be dumped; using \
    default of 2000" >> "$DumpLog"
-   String05=$(cat ./default_values | grep Pages)
+   String05=$(cat $ConfigFile | grep Pages)
+   if [ $? -ne 0 ]
+   then String05=$(cat ./default_values | grep Pages)
+   fi
    String05=${String05/Pages=/}
    Pages=$(echo "$String05")
   fi
@@ -882,19 +926,33 @@ MainTime=$(date)				# Redefining because some time has passed
   if [ "$InputDetect" == "unset" ]
    then echo "$MainTime No Latency was defined; using default of 0.2 s" >> \
    "$DumpLog"
-   String06=$(cat ./default_values | grep Latency)
+   String06=$(cat $ConfigFile | grep Latency)
+   if [ $? -ne 0 ]
+   then String06=$(cat ./default_values | grep Latency)
+   fi
    String06=${String06/Latency=/}
    Latency=$(echo "$String06")
   fi
+
 
   InputDetect=$(echo ${InputFlag[7]})
   if [ "$InputDetect" == "unset" ]
    then echo "$MainTime No CEP Delay was defined; using default value of 0 s" >> \
    "$DumpLog"
-   String07=$(cat ./default_values | grep CepDelay)
+   String07=$(cat $ConfigFile | grep CepDelay)
+   if [ $? -ne 0 ]
+   then String07=$(cat ./default_values | grep CepDelay)
+   fi
    String07=${String07/CepDelay=/}
    CepDelay=$(echo "$String07")
   fi
+echo ; echo ; echo "***********Done putting in (default) config values**********"
+
+
+  else echo "$MainTime No file named default_values was found; exiting tbbdump.sh"
+  sleep 2
+  exit 1
+fi
 
 
 ############# Checking the RSP board settings, altering them if necessary ##############
