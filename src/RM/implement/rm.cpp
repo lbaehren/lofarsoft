@@ -2,7 +2,7 @@
 
     Author:		Sven Duscha (sduscha@mpa-garching.mpg.de)
     Date:		18-12-2008
-    Last change:	09-06-2009
+    Last change:	24-06-2009
 */
 
 
@@ -22,7 +22,7 @@
 #include "rm.h"					// rm class declarations
 
 using namespace std;
-using namespace casa;		// namespace for functions from casacore
+//using namespace casa;		// namespace for functions from casacore
 
 //===============================================================================
 //
@@ -224,38 +224,115 @@ vector<double> rm::deltaLambdaSq( //vector<double> delta_lambda_sq,
 }
 
 
-/*! \brief Inverse Fourier Method for calculating the Rotation Measure at a single Faraday depth
+
+/*!
+	\brief Compute delta lambda squareds and lambda squared centres from image frequencies using a
+	top hat bandpass assumption
+	
+	\param &frequencies - vector with imaged frequencies
+	\param &bandwidths - delta frequencies
+	\param &lambda_centre_squareds - vector for computed lambda squared centre frequencies
+*/
+vector<double> rm::deltaLambdaSqTopHat( const vector<double> &frequencies,
+												const vector<double> &bandwidths,
+												vector<double> &lambda_centre_squareds)
+{
+	// constants
+	double csq=89875517873681764.0;				// c^2
+	// temporary variables
+	double frequencyquotient=0;					// temporary variable for frequency quotient
+	
+	vector<double> delta_lambda_squareds;		// delta lambda squared vector to be returned
+	
+	for(unsigned int i=0; i<frequencies.size(); i++)	// compute for all frequencies in vector
+	{
+		// lambda centre squareds
+		frequencyquotient=bandwidths[i]/frequencies[i];
+		lambda_centre_squareds[i]=csq/(pow(frequencies[i],2))*(1+0.75*pow(frequencyquotient, 2));
+	
+		// delta lambda squareds
+		delta_lambda_squareds[i]=2*csq*bandwidths[i]/pow(frequencies[i], 3)*(1+0.5*pow(frequencyquotient, 2));
+	}	
+	
+	return delta_lambda_squareds;
+}
+
+
+/*!
+	\brief Compute the weighted average of the observed lambda squareds
+	
+	\param &lambda_squareds - vector of observed lambda squareds
+	\param &weights - weighting vector for observed lambda squareds
+	
+	\return lambdaZero - weighted average of the observed lambda squareds
+*/
+double rm::weightedLambdaZero(vector<double> &lambda_squareds, vector<double> &weights)
+{
+	double lambdaZero=0;
+	double sumWeights=0;
+	double sumWeightedLambdas=0;
+	
+	//**********************************
+	if(lambda_squareds.size()==0)			// if lambda_squareds vector has zero length
+	{
+		throw "rm::weightedLambdaZero lambda_squareds has 0 size";
+	}
+	if(weights.size()==0 || weights.size()!=lambda_squareds.size())	// if weights vector has wrong length
+	{
+		throw "rm::weightedLambdaZero weights has invalid size";
+	}
+	
+	// lambdaZero=Sum(weights[i]*lambda_squareds[i]/weights[i]);
+	for(unsigned int i=0; i<weights.size(); i++)		// loop over all lambda_squareds
+	{
+		sumWeights += weights[i]*lambda_squareds[i];
+		sumWeightedLambdas += weights[i];
+	}
+	
+	if(sumWeights==0)
+	{
+		throw "rm::weightedLambdaZero sum of weights is 0";
+	}
+	else
+	{
+		lambdaZero=sumWeightedLambdas/sumWeights;
+	}
+	
+	return lambdaZero;
+}
+
+
+/*! 
+	\brief Inverse Fourier Method for calculating the Rotation Measure at a single Faraday depth
     
     The inverse Fourier Transformation is the classical relation between the lambda squared space and Faraday
-    space. Input images channel are not necessarily given in lambda squared wavelengths, but in frequency instead. If that is the case, a conversion function between lambda squared and frequency is used.
+    space. Input images channel are not necessarily given in lambda squared wavelengths, but in frequency instead. 
+	 If that is the case, a conversion function between lambda squared and frequency should be first used.
     
-    Normal case (bool freq=true, default): the input vector is a range of complex polarized 
-    intensities measured at different frequencies 
-    Special case (bool freq=false): the input vector is already given as a range of polarized intensities given at different lambda squareds
-
     \param phi - Faraday depth to compute RM for
     \param intensity - polarized intensities per channel
-    \param frequency - corresponding frequencies of channels
+    \param lambda_squared - corresponding frequencies of channels
     \param weights - weigths for each channel
-    \param delta_freq - delta frequencies between channels
-    \param freq - bool if input is given as frequency (=true) or lambda squared (=false)
+    \param delta_lambda_squared - delta lambda squared between channels
+	 \param lambdaZero - wavelength to derotate polarization vectors to, default 0
     
     \return rm - Single RM value computed for Faraday depth phi
 */
 complex<double> rm::inverseFourier(double phi,
 				 const vector<complex<double> > &intensity,
-				 const vector<double> &frequency,
+				 const vector<double> &lambda_squared,
 				 const vector<double> &weights,
-				 const vector<double> &delta_frequency,
-				 bool freq)
+				 const vector<double> &delta_lambda_squared,
+				 const double lambdaZero)
 {
-    vector<double> lambda_squared(frequency.size());
-    vector<double> delta_lambda_squared(delta_frequency.size());
+//    vector<double> lambda_squared(frequency.size());
+//    vector<double> delta_lambda_squared(delta_frequency.size());
     
-    complex<double> exp_lambdafactor=0;		// exponential factor in direct FT
-    complex<double> rmpolint;			// rm value
-    int chan=0; 				// loop variables
-    const int numchannels=frequency.size();	// number of frequency channels
+    complex<double> exp_lambdafactor=0;				// exponential factor in direct FT
+    complex<double> rmpolint;								// rm value
+	 double lambdaZeroSq=0;									// derotating lambdaZeroSquared
+    int chan=0; 												// loop variables
+    const int numchannels=lambda_squared.size();	// number of lambda squared channels
 
     double K=0;					// K factor for RM-synthesis
 
@@ -273,20 +350,9 @@ complex<double> rm::inverseFourier(double phi,
     else	// otherwise...
       K=1;	// ... use 1 as default
       
-
-    // conversion to delta_lambda_squared not needed anymore?
-    if(freq)		// if given as frequency, convert to lambda squareds
-    {
-      lambda_squared=freqToLambdaSq(frequency);			// convert frequency vector    
-      delta_lambda_squared=freqToLambdaSq(delta_frequency);  	// convert delta step vector   
-    }
-    else
-    {
-      lambda_squared=frequency;
-      delta_lambda_squared=delta_frequency;
-    }
-
-
+	 // If a derotating lambda Zero != 0 was given compute lambdaZeroSq
+	 if(lambdaZero)
+		lambdaZeroSq=lambdaZero*lambdaZero;
 
     // compute discrete Fourier sum by iterating over frequency vector
     //
@@ -294,9 +360,11 @@ complex<double> rm::inverseFourier(double phi,
     //
     for(chan=0; chan<numchannels; chan++)
     {
+		// Use Euler formula for exp_lambdafactor
+ 		exp_lambdafactor=complex<double>(cos(-2*phi*(lambda_squared[chan]-lambdaZeroSq)), sin(-2*phi*(lambda_squared[chan]-lambdaZeroSq)));	
       // compute complex exponential factor
-      exp_lambdafactor=exp(complex<double>(0, -2*phi)*lambda_squared[chan]);
-      rmpolint=rmpolint+(intensity[chan]*exp_lambdafactor)*delta_frequency[chan];
+//      exp_lambdafactor=exp(complex<double>(0, -2*phi)*lambda_squared[chan]);
+      rmpolint=rmpolint+(intensity[chan]*exp_lambdafactor)*delta_lambda_squared[chan];
     }
 
     rmpolint=K*rmpolint;	// multiply with weighting
@@ -309,34 +377,75 @@ complex<double> rm::inverseFourier(double phi,
     \brief Inverse Fourier Method for calculating the Rotation Measure for a set of Faraday depths
 
     The inverse Fourier Transformation is the classical relation between the lambda squared space and Faraday
-    space. Input images channel are not necessarily given in lambda squared wavelengths, but in frequency instead. If that is the case, a conversion function between lambda squared and frequency is used.
-    
-    Normal case (bool freq=true, default): the input vector is a range of complex polarized intensities measured at different frequencies 
-    Special case (bool freq=false): the input vector is already given as a range of polarized intensities given at different lambda squareds
+    space. Input images channel are not necessarily given in lambda squared wavelengths, but in frequency instead. 
+	 If that is the case, a conversion function between lambda squared and frequency should be used first.
 
-    \param &phi - Faraday depth to compute RM for
+ 	 If lambdaZero is given as an optional parameter (default 0) the polarization vectors are derotated to that
+    wavelength.
+
+    \param &phis - Faraday depth to compute RM for
     \param &intensity - Polarized intensities
-    \param &frequency - Frequencies (or lambda squareds) of polarized intensities
+    \param &lambda_squared - Lambda squareds of polarized intensities
     \param &weights - Weights associated with each frequency (or lambda squared)
-    \param &delta_freq - Delta frequency (or delta lambda squared) between frequencies
-    \param &freq - If intensities are given as frequencies (true) or as lambda squared (false)
+    \param &delta_lambda_squared - Delta lambda squared distance between intensities
+	 \param lambdaZero - lambda zero wavelength to derotate polarization vector to, default=0
     
     \return rm - vector of RM values computed for Faraday depths phi
 */
-vector<complex<double> >rm::inverseFourier(const vector<double> &phi,
+vector<complex<double> > rm::inverseFourier(const vector<double> &phis,
 				 const vector<complex<double> > &intensity,
-				 const vector<double> &frequency,
+				 const vector<double> &lambda_squared,
 				 const vector<double> &weights,
-				 const vector<double> &delta_freq,
-				 bool freq)
+				 const vector<double> &delta_lambda_squared,
+				 const double lambdaZero)
 {
-  vector<double> lambda_squared(frequency.size());
-  vector<double> delta_lambda_squared(delta_freq.size());
-  vector<complex<double> > rmpolint;		// polarized RM intensities per Faraday depth
+  vector<complex<double> > rmpolint(phis.size());		// polarized RM intensities per Faraday depth
 
+  complex<double> exp_lambdafactor=0;						// exponential factor in direct FT
+  double lambdaZeroSq=0;										// derotating lambdaZeroSquared
+  complex<double> phi;											// single phi value to be computed
+  int chan=0; 														// loop variable over channels
+  const int numchannels=lambda_squared.size();			// number of frequency channels
 
-  return rmpolint;	// return complex polarized intensities per Faraday depth
+  double K=0;														// K factor for RM-synthesis
+
+  //-----------------------------------------------------------------------
+
+  // Compute weighting factor from weights
+  for (vector<double>::const_iterator it = weights.begin(); it!=weights.end(); ++it) 
+  {
+    K+=*it;
+  }
+
+  if(K!=0)		// Do not do a division by zero!
+    K=1/K;		// take inverse
+  else			// otherwise...
+    K=1;			// ... use 1 as default    
+
+  // If a derotating lambda Zero != Zero was given compute lambdaZeroSq
+  if(lambdaZero)
+     lambdaZeroSq=lambdaZero*lambdaZero;
+
+  // compute discrete Fourier sum by iterating over frequency vector
+  //
+  // P(phi) = K * expfactor * Sum_0^frequency.size() {P(lambda^2)*exp(-2*i*phi*lambda^2)}
+  //
+  for(unsigned int i=0; i<phis.size(); i++)	// loop over Faraday depths given in phis vector 
+  {
+     for(chan=0; chan<numchannels; chan++)
+  	  {
+		  phi=phis[i];				// select phi from Faraday depths vector
+        // Use Euler formula for exp_lambdafactor
+	//	  exp_lambdafactor=(cos(-2*phi*(lambda_squared[chan]-lambdaZeroSq)), sin(-2*phi*(lambda_squared[chan]-lambdaZeroSq)));		// BUGGY! casa error?
+//       rmpolint[i]=rmpolint[i]+(intensity[chan]*exp_lambdafactor*delta_lambda_squared[chan]);
+     }
+
+     rmpolint[i]=K*rmpolint[i];	// multiply with weighting
+  }
+
+  return rmpolint;	// return vector of complex polarized intensities per Faraday depth
 }
+
 
 
 /*!
@@ -345,39 +454,25 @@ vector<complex<double> >rm::inverseFourier(const vector<double> &phi,
   The Rotation Measure Spread Function is a measure for the quality of the observation
   to distinguish Faraday structures, similar to the PSF in conventional astronomy. In the rmclean function the calculated Rotation Measure is deconvoluted with the RMSF function. 
 
-  \param &phi - Faraday depth range over which the RMSF is computed
-  \param &frequency - Frequencies (or lambda squareds) of polarized intensities
+  \param &phis - Faraday depth range over which the RMSF is computed
+  \param &lambda_squareds -  Lambda squareds of polarized intensities
   \param &weights - Weights associated with each frequency (or lambda squared)
-  \param &delta_freq - Delta frequency (or delta lambda squared) between frequencies
-  \param &freq - If intensities are given as frequencies (true) or as lambda squared (false) 
+  \param &delta_lambda_squared - Delta frequency (or delta lambda squared) between frequencies
+  \param lambdaZero - lambda zero wavelength to derotate polarization vector to, default=0
 
   \return RMSF - vector with RMSF over range as specified
 */
-vector<complex<double> > rm::RMSF(const vector<double> &phi,
-				  const vector<double> &frequency,
+vector<complex<double> > rm::RMSF(const vector<double> &phis,
+				  const vector<double> &lambda_squared,
 				  const vector<double> &weights,
-				  const vector<double> &delta_freq,
-				  bool freq)
+				  const vector<double> &delta_lambda_squared,
+				  const double lambdaZero)
 {
-  vector<complex<double> > rmsf(phi.size());		// calculated rmsf
-  vector<double> lambda_sqs(frequency.size());		// channels lambda squareds
-  vector<double> delta_lambda_sqs(frequency.size());	// delta_lambda_sqs
+  vector<complex<double> > rmsf(phis.size());		// calculated rmsf
   
   unsigned int iphi=0, iweight=0;		// loop variables
 
-  // Convert to lambda squareds if values are given as frequency
-  if(freq)
-  {
-    lambda_sqs=freqToLambdaSq(frequency);
-    delta_lambda_sqs=freqToLambdaSq(delta_freq);
-  }
-  else
-  {
-    lambda_sqs=frequency;		// copy to lambda' place holdes
-    delta_lambda_sqs=delta_freq;	// copy to delta_lambda' place holdes
-  }
-
-  for(iphi=0; iphi <= phi.size(); iphi++)	// loop over all Faraday depths
+  for(iphi=0; iphi < phis.size(); iphi++)	// loop over all Faraday depths
   {
     // Since weights and lambda_sqs do correspond to each other and have the
     // same length, we can use iweight to index lambda_sqs and delta_lambda_sqs, too
@@ -385,13 +480,68 @@ vector<complex<double> > rm::RMSF(const vector<double> &phi,
     for(iweight=0; iweight <= weights.size(); iweight++)
     {
       rmsf[iphi]=rmsf[iphi] + weights[iweight] * 
-      exp(complex<double>(0,-2*phi[iphi]*lambda_sqs[iweight])) *	 delta_lambda_sqs[iweight];					 
+      exp(complex<double>(0,-2*phis[iphi]*lambda_squared[iweight])) *	 delta_lambda_squared[iweight];					 
     }
   }
   
   return rmsf;	// return vector with calculated rmsf
 }
 
+
+/*!
+  \brief Compute the Rotation Measure Spread Function from observed frequencies
+
+  The Rotation Measure Spread Function is a measure for the quality of the observation
+  to distinguish Faraday structures, similar to the PSF in conventional astronomy. 
+  In the rmclean function the calculated Rotation Measure is deconvoluted with the RMSF function. 
+
+  \param &phis - Faraday depth range over which the RMSF is computed
+  \param &frequencies -  frequencies of polarized intensities
+  \param &weights - Weights associated with each frequency (or lambda squared)
+  \param &delta_frequencies - Delta frequency between frequencies
+  \param freqZero - frequency zero wavelength to derotate polarization vector to, default=0
+
+  \return RMSF - vector with RMSF over range as specified
+*/
+vector<complex<double> >rm::RMSFfreq(const vector<double> &phis,
+				  const vector<double> &frequencies,
+				  const vector<double> &weights,
+				  const vector<double> &delta_frequencies,
+				  const double freqZero)
+{
+  vector<complex<double> > rmsf(phis.size());				// calculated rmsf to be returned
+  vector<double> lambda_sqs(frequencies.size());
+  vector<double> delta_lambda_sqs(frequencies.size());
+  double lambdaZero=0;						// lambdaZero to rotate polarized vector to (converted from freqZero)
+  double lambdaZeroSq=0;					// derotated lambda squared
+  vector<double> tempFreqZero(1);		// temporary frequency vector needed to convert single frequency (only implemented for vectors)
+
+  unsigned int iphi=0, iweight=0;		// loop variables
+
+  //************************************************
+  lambda_sqs=freqToLambdaSq(frequencies);	// convert frequencies to lambda squareds
+  delta_lambda_sqs=freqToLambdaSq(delta_frequencies);
+  tempFreqZero[0]=freqZero;		// write derotating frequency into single temporary vector
+  lambdaZero=freqToLambdaSq(tempFreqZero)[0];
+
+
+  if(lambdaZero)
+     lambdaZeroSq=lambdaZero*lambdaZero;
+
+  for(iphi=0; iphi < phis.size(); iphi++)	// loop over all Faraday depths
+  {
+    // Since weights and lambda_sqs do correspond to each other and have the
+    // same length, we can use iweight to index lambda_sqs and delta_lambda_sqs, too
+    // Loop over all weights and compute Riemann's integral
+    for(iweight=0; iweight < weights.size(); iweight++)
+    {
+      rmsf[iphi]=rmsf[iphi] + weights[iweight] * 
+      exp(complex<double>(0,-2*phis[iphi]*(lambda_sqs[iweight]-lambdaZeroSq))) * delta_lambda_sqs[iweight];					 
+    }
+  }
+  
+  return rmsf;	// return vector with calculated rmsf
+}
 
 
 /*!
@@ -403,20 +553,19 @@ vector<complex<double> > rm::RMSF(const vector<double> &phi,
 
   \param phi - Faraday depth to compute RM for
   \param intensity - Polarized intensities
-  \param frequency - Frequencies (or lambda squareds) of polarized intensities
+  \param lambda_squared - Lambda squareds of polarized intensities
   \param weights - Weights associated with each frequency (or lambda squared)
-  \param delta_freq - Delta frequency (or delta lambda squared) between frequencies
-  \param freq - If intensities are given as frequencies (true) or as lambda squared (false)
+  \param delta_lambda_squared - Delta lambda squared) between frequencies
+  \param wavelet_parameters - vector with additional wavelet parameters (experimental)
   
   \return rm - vector of RM values computed for Faraday depths phi
 */
 vector<double> rm::wavelet(vector<double> &phi,
 			   vector<complex<double> > &intensity,
-			   vector<double> &frequencies,
+			   vector<double> &lambda_squared,
 			   vector<double> &weights,
-			   vector<double> &delta_freqs,
-			   vector<double> &wavelet_parameters,
-			   bool freq)
+			   vector<double> &delta_lambda_squared,
+			   vector<double> &wavelet_parameters)
 {
   vector<double>rm;	// rm values along the line of sight
   

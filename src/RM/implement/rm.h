@@ -75,11 +75,19 @@ private:
 
   //! Calculate delta lambda squared steps from lower and higher frequency limits
   vector<double> deltaLambdaSq(	const vector<double> &freq_low, 
-			const vector<double> &freq_high,
-			bool freq=true);
+											const vector<double> &freq_high,
+											bool freq=true);
+
+  //! Compute delta lambda squareds from frequencies using tophat function
+  vector<double> deltaLambdaSqTopHat(const vector<double> &frequency,
+												 const vector<double> &bandwidth,
+												 vector<double> &lambda_centre);
 
   //! Calculate integrated total intensity along one line of sight
   vector<double> totalIntensity(const vector<double> &, int);
+
+	//! Compute the weighted average lambda zero from the observed lambda squareds
+  double weightedLambdaZero(vector<double> &lambda_squareds, vector<double> &weights);
 
   // Public functions.
 public:
@@ -111,22 +119,29 @@ public:
 				 const vector<double> &,
 				 const vector<double> &,
 				 const vector<double> &,
-				 bool freq=true);
+				 const double lambdaZero=0);
 
   //! Brentjens and de Bruyn with the Inverse Fourier Transform for complete set of RMs
   vector<complex<double> > inverseFourier(const vector<double> &,
-				const vector<complex<double> > &,
-				const vector<double> &,
-				const vector<double> &,
-				const vector<double> &,
-				bool freq=true);
+														const vector<complex<double> > &,
+														const vector<double> &,
+														const vector<double> &,
+														const vector<double> &,
+														const double lambdaZero=0);
 
   //! Compute the Rotation Measure Spread Function (RMSF)
-  vector<complex<double> > RMSF(const vector<double> &,
-			        const vector<double> &,
-				const vector<double> &,
-				const vector<double> &,
-				bool freq=true);
+  vector<complex<double> > RMSF( const vector<double> &,
+			        						const vector<double> &,
+											const vector<double> &,
+											const vector<double> &,
+											const double lambdaZero=0);
+											
+											
+   vector<complex<double> > rm::RMSFfreq(const vector<double> &phis,    
+									  const vector<double> &frequencies,                     
+									  const vector<double> &weights,                         
+									  const vector<double> &delta_frequencies,               
+									  const double freqZero=0);										   
 
   //! Frick and Stepanov wavelet algorithm
   vector<double> wavelet(vector<double> &,
@@ -134,13 +149,11 @@ public:
 			 vector<double> &,
 			 vector<double> &,
 			 vector<double> &,
-			 vector<double> &,
-			 bool freq=true);
+			 vector<double> &);
 
   //! En&szlig;lin Information Theory Based algorithm
-  vector<double> ift(vector<double>,
-		     vector<double>,
-		     bool freq=true);
+  vector<double> ift(vector<double> &,
+		     vector<double> &);
 
   //! (Forward) Fourier Transform to get an image from an RM cube
   vector<double> fourierTransform(vector<double> &, vector<double> &, bool freq=true);
