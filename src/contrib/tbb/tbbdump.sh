@@ -828,6 +828,8 @@ echo ; echo ; echo "******************** finished parsing input ****************
 
 MainTime=$(date)				# Redefining because some time has passed
 
+ if [ -s ./default_values ]
+  then
  
   InputDetect=$(echo ${InputFlag[0]})
   if [ "$InputDetect" == "unset" ]
@@ -896,6 +898,12 @@ MainTime=$(date)				# Redefining because some time has passed
    String07=${String07/CepDelay=/}
    CepDelay=$(echo "$String07")
   fi
+
+  else echo "$MainTime No file named default_values was found; exiting tbbdump.sh"
+  sleep 2
+  exit 1
+ fi
+
 
 
 ############# Checking the RSP board settings, altering them if necessary ##############
