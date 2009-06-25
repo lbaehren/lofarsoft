@@ -326,6 +326,10 @@ DumpFun ()					# This function instructs to dump data to CEP
 
         Latency="$1"
         shift
+
+	CepDelay="$1"
+	shift
+
         Counter=0
 
         HourTag=$(date +%H)
@@ -357,6 +361,7 @@ DumpFun ()					# This function instructs to dump data to CEP
 		 --port "$Port" --outfile "$FullName" --timeoutRead "$Latency" &
 	     sleep 5
 	     echo "#### readall-command:" ssh "$Station" tbbctl --readall="$Pages" --select="${BoardString["$Counter"]}"
+	     ssh "$Station" tbbctl --cepdelay="$CepDelay"
 	     ssh "$Station" tbbctl --readall="$Pages" --select="${BoardString["$Counter"]}"
 	     sleep $Latency
 	     sleep 0.5
@@ -413,7 +418,7 @@ ExitFun()					# This function kills tbbdump and all childeren
 
 echo ; echo ; echo "******************** starting to parse input ********************"
 
-InputFlag=("unset" "unset" "unset" "unset" "unset" "unset" "unset")	# Input analyzer
+InputFlag=("unset" "unset" "unset" "unset" "unset" "unset" "unset" "unset")	# Input analyzer
 
 
 until [ "$#" -le 0 ]
@@ -753,6 +758,29 @@ until [ "$#" -le 0 ]
 	   sleep 2
 	  fi;;
 	esac
+
+
+# Determining CEP delay of data send by the TBB's
+
+	AlphaFun "$1"
+
+	case "$1" in
+	 c | -c | C | -C | --cepdelay)
+	  shift
+
+	  IntegFun "$1"
+
+	  if [ "$?" -eq 0 ]
+	   then CepDelay="$1"
+	   shift
+	   echo "$MainTime CEP Delay set to	: $CepDelay x 5 micros." >> "$DumpLog"
+	   InputFlag[7]="set"
+	   else echo "$MainTime CEP Delay set to default of 0 ms" >> "$DumpLog"
+	   InputFlag[7]="unset"
+	   sleep 2
+	  fi;;
+	esac
+	   
  
 
 # Get dumplog file or show helpfile
@@ -857,6 +885,15 @@ MainTime=$(date)				# Redefining because some time has passed
    Latency=$(echo "$String06")
   fi
 
+  InputDetect=$(echo ${InputFlag[7]})
+  if [ "$InputDetect" == "unset" ]
+   then echo "$MainTime No CEP Delay was defined; using default value of 0 s" >> \
+   "$DumpLog"
+   String07=$(cat ./default_values | grep CepDelay)
+   String07=${String07/CepDelay=/}
+   CepDelay=$(echo "$String07")
+  fi
+
 
 ############# Checking the RSP board settings, altering them if necessary ##############
 
@@ -891,9 +928,7 @@ echo ; echo ; echo "******************** start recording ********************"
  echo "$MainTime Data is dumped for Dump $MainCounter" >> "$DumpLog"
 
 echo ; echo ; echo "******************** start dumping ********************"
- DumpFun "$Station" "${RcuArray[@]}" "flag" "$TbbMode" "$Pages" "$Latency"
-
-echo "$LD_LIBRARY_PATH"
+ DumpFun "$Station" "${RcuArray[@]}" "flag" "$TbbMode" "$Pages" "$Latency" "$CepDelay"
 
  ((MainCounter=MainCounter+1))
 
