@@ -44,8 +44,9 @@ using casa::ObsInfo;
 using casa::PagedImage;
 using casa::TiledShape;
 
+#include <Analysis/CRinvFFT.h>
 #include <Coordinates/SkymapCoordinate.h>
-#include <Data/LopesEvent.h>
+#include <Data/LopesEventIn.h>
 #include <Imaging/Beamformer.h>
 #include <Imaging/Skymapper.h>
 #include <Utilities/ProgressBar.h>
@@ -512,10 +513,14 @@ int test_processing (string const &infile,
   cout << "[3] Process example LOPES data-set ..." << endl;
   try {
     std::string outfile ("skymap-lopes.img");
-    // set up DataReader for input of data
-    CR::LopesEvent dr (dataset_lopes_example,
-		       blocksize);
-    dr.summary();
+    /* Reading in event and setting up pipeline */
+    CR::LopesEventIn dr (infile,
+			 blocksize); 
+    CR::CRinvFFT pipeline;
+    casa::Record obsrec;
+    obsrec.define("LOPES",caltable_lopes);
+    pipeline.SetObsRecord(obsrec);
+    pipeline.InitEvent(&dr);
     // update SkymapCoordinate
     coord.setObsInfo (CR::test_ObsInfo("LOPES"));
     //

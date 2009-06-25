@@ -70,8 +70,6 @@
 #include <dal/BeamFormed.h>
 #include <dal/BeamGroup.h>
 #include <dal/TBB_Timeseries.h>
-#include <dal/TBB_StationGroup.h>
-#include <dal/TBB_DipoleDataset.h>
 
 /*CR-Tools header files*/
 
