@@ -5,7 +5,10 @@
         MonthTag=$(date +%m)
         YearTag=$(date +%Y)
 
-        export DireName="/home/eikelboom/data/$DayTag-$MonthTag-$YearTag/"
+	HomeDir="$HOME"
+	DumpUser=${HomeDir:6}
+
+        export DireName="$HomeDir/data/$DayTag-$MonthTag-$YearTag/"
         mkdir -p "$DireName"
 
         export DumpLog="$DireName"dumplog.txt
@@ -388,8 +391,8 @@ ExitFun()					# This function kills tbbdump and all childeren
         echo "and local variables and functions are unset, if necessary"
 
         ssh "$Station" tbbctl --stop
-#CHANGE USERNAME
-        ProcId=$(ssh 10.181.0.1 ps -C tbb2h5 -u eikelboom -o pid=)
+
+        ProcId=$(ssh 10.181.0.1 ps -C tbb2h5 -u "$DumpUser" -o pid=)
         ssh 10.181.0.1 kill -KILL "$ProcId"
 
         unset -f AdminFun IntegFun AlphaFun SetFun TestFun \
