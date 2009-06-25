@@ -15,7 +15,7 @@ Options:     Values:
 --latency    (default 1 sec)
 --dumplog
 --help       (display this file)
---CepDelay   (cep delay in 10^-5 s)
+--cepdelay   (cep delay in 10^-5 s)
 --config     (config file to be used)
 --mode       record:  setup the station and start recording
              dump:    stop recording and dump the data
