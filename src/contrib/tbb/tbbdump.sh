@@ -5,7 +5,7 @@
         MonthTag=$(date +%m)
         YearTag=$(date +%Y)
 
-        export DireName="/home/veen/data/$DayTag-$MonthTag-$YearTag/"
+        export DireName="/home/eikelboom/data/$DayTag-$MonthTag-$YearTag/"
         mkdir -p "$DireName"
 
         export DumpLog="$DireName"dumplog.txt
@@ -35,7 +35,7 @@ AlphaFun ()					# This function checks if input is alphabetic
 	((AlphaTest=FlagOne+FlagTwo))
 
 	if [ "$AlphaTest" -ne 0 -o "$NChars" -eq 0 ]
-	 then echo "Wrong Input for type Character" | tee "$DumpLog"
+	 then echo "Wrong Input for type Character" >> "$DumpLog"
 	 return 1
          else return 0
 	fi
@@ -62,7 +62,7 @@ IntegFun ()					# This function checks if input is integer
         ((IntegTest=FlagOne+FlagTwo))	
 
 	if [ "$IntegTest" -ne 0 -o "$NChars" -eq 0 ]
-	 then echo "Wrong Input for type Integer" | tee "$DumpLog"
+	 then echo "Wrong Input for type Integer" >> "$DumpLog"
 	 return 1
          else return 0
 	fi
@@ -72,7 +72,7 @@ IntegFun ()					# This function checks if input is integer
 TestFun ()					# This function tries to restore failing TBB's
 {
         TestTime=$(date)
-        echo "$TestTime There was an error" | tee "$DumpLog"
+        echo "$TestTime There was an error" >> "$DumpLog"
 
         Station="$1"
 
@@ -96,7 +96,7 @@ TestFun ()					# This function tries to restore failing TBB's
 
         if [ "$?" -ne 0 ]
          then ssh "$Station"    tbbctl --clear
-         echo "$TestTime Attempt to clear the tbb's"  | tee "$DumpLog"
+         echo "$TestTime Attempt to clear the tbb's" >> "$DumpLog"
          echo "Please wait 20 seconds..."
          sleep 20
 
@@ -106,8 +106,8 @@ TestFun ()					# This function tries to restore failing TBB's
 
          if [ "$?" -ne 0 ]
           then ssh "$Station"   tbbctl --reset
-          echo "$TestTime Clearing and subsequent freeing failed"    | tee "$DumpLog"
-          echo "$TestTime Attempt to reset the tbb"                  | tee "$DumpLog"
+          echo "$TestTime Clearing and subsequent freeing failed"    >> "$DumpLog"
+          echo "$TestTime Attempt to reset the tbb"                  >> "$DumpLog"
           sleep 45
          fi
 
@@ -127,9 +127,9 @@ TestFun ()					# This function tries to restore failing TBB's
 	ssh "$Station"  tbbctl --free   >> /dev/null
 
         if [ "$?" -ne 0 ]
-         then echo "$TestTime The Transient Buffer Boards seem to be unstable" | tee \
+         then echo "$TestTime The Transient Buffer Boards seem to be unstable" >> \
          "$DumpLog"
-         echo "$TestTime Exiting tbbdump" | tee "$DumpLog"
+         echo "$TestTime Exiting tbbdump" >> "$DumpLog"
          sleep 2
          ExitFun "$Station"
         fi
@@ -164,9 +164,12 @@ SetFun ()					# This function sets up the RSP boards
 
         TbbMode="$1"
 
+	if [ "$Frequency" -ne -1 ]
+	 then
         if ssh "$Station" rspctl --clock | grep -v "$Frequency"MHz
          then ssh "$Station" rspctl --clock="$Frequency"
         fi
+	fi
 
         RcUnits="${RcuArray}"
 
@@ -204,7 +207,7 @@ RecordFun ()					# This function instructs the TBB's to record data
         ssh "$Station"  tbbctl --free
 
         if [ "$?" -ne 0 ]
-         then echo "#### $RecordTime There was an error when the tbb's were cleared" | tee \
+         then echo "#### $RecordTime There was an error when the tbb's were cleared" >> \
          "$DumpLog"
          TestFun "$Station"
         fi
@@ -212,7 +215,7 @@ RecordFun ()					# This function instructs the TBB's to record data
 	sleep 0.1
         ssh "$Station"  tbbctl --alloc  #--select="$RcuString"
         if [ "$?" -ne 0 ]
-         then echo "#### $RecordTime There was an error when the RCU's were allocated" | tee \
+         then echo "#### $RecordTime There was an error when the RCU's were allocated" >> \
          "$DumpLog"
          TestFun "$Station"
         fi
@@ -220,7 +223,7 @@ RecordFun ()					# This function instructs the TBB's to record data
 	sleep 0.1
         ssh "$Station"  tbbctl --rec    #--select="$RcuString"
         if [ "$?" -ne 0 ]
-         then echo "#### $RecordTime There was an error when the recording took place" | tee |
+         then echo "#### $RecordTime There was an error when the recording took place" >> \
          "$DumpLog"
          TestFun "$Station"
         fi
@@ -228,7 +231,7 @@ RecordFun ()					# This function instructs the TBB's to record data
 	sleep 0.1
         ssh "$Station"  tbbctl --mode=transient
         if [ "$?" -ne 0 ]
-         then echo "#### $RecordTime There was an error when the recording took place" | tee |
+         then echo "#### $RecordTime There was an error when the recording took place" >> \
          "$DumpLog"
          TestFun "$Station"
         fi
@@ -236,7 +239,7 @@ RecordFun ()					# This function instructs the TBB's to record data
 	sleep 0.1
         ssh "$Station"  tbbctl --arpmode=1
         if [ "$?" -ne 0 ]
-         then echo "#### $RecordTime There was an error when the recording took place" | tee |
+         then echo "#### $RecordTime There was an error when the recording took place" >> \
          "$DumpLog"
          TestFun "$Station"
         fi
@@ -344,7 +347,7 @@ DumpFun ()					# This function instructs to dump data to CEP
          FileName="$Station-B${Counter}T$HourTag:$MinuteTag:$SecondsTag".h5
          FullName="$DireName""$FileName"
 
-         echo "#### Counter:$Counter Port:$Port BoardString:${BoardString[$Counter]}"	 
+         echo "#### Counter:$Counter Port:$Port BoardString:${BoardString["$Counter"]}"	 
 
          if [ "$Port" -ne 0 ]
 	     then 
@@ -353,16 +356,16 @@ DumpFun ()					# This function instructs to dump data to CEP
 	     nohup /bin/bash -e | ssh 10.181.0.1 /app64/usg/bin/tbb2h5 --ip "$IPaddress" \
 		 --port "$Port" --outfile "$FullName" --timeoutRead "$Latency" &
 	     sleep 5
-	     echo "#### readall-command:" ssh "$Station" tbbctl --readall="$Pages" --select="${BoardString[$Counter]}"
-	     ssh "$Station" tbbctl --readall="$Pages" --select="${BoardString[$Counter]}"
+	     echo "#### readall-command:" ssh "$Station" tbbctl --readall="$Pages" --select="${BoardString["$Counter"]}"
+	     ssh "$Station" tbbctl --readall="$Pages" --select="${BoardString["$Counter"]}"
 	     sleep $Latency
 	     sleep 0.5
 	     
-	     if ls -l "$FullName" | grep -qw [0,96,5384]
-		 then echo "$DumpTime The *.hdf5 file produced was useless"  | tee "$DumpLog"
-		 echo "$DumpTime Removing the last *.hdf5 file"              | tee "$DumpLog"
-		 rm -f "$FullName"
-	     else echo "$DumpTime Data was dumped and converted at CEP" >> "$DumpLog"
+	     if ls -l "$FullName" | grep -w 5384
+	      then echo "$DumpTime The *.hdf5 file produced was useless"  >> "$DumpLog"
+	      echo "$DumpTime Removing the last *.hdf5 file"              >> "$DumpLog"
+	      rm -f "$FullName"
+	      else echo "$DumpTime Data was dumped and converted at CEP" >> "$DumpLog"
 	     fi
 	 fi
           
@@ -381,14 +384,14 @@ ExitFun()					# This function kills tbbdump and all childeren
 
         ssh "$Station" tbbctl --stop
 #CHANGE USERNAME
-        ProcId=$(ssh 10.181.0.1 ps -C tbb2h5 -u veen -o pid=)
+        ProcId=$(ssh 10.181.0.1 ps -C tbb2h5 -u eikelboom -o pid=)
         ssh 10.181.0.1 kill -KILL "$ProcId"
 
         unset -f AdminFun IntegFun AlphaFun SetFun TestFun \
                  RecordFun DumpFun InputFun ExitFun
 
         ExitTime=$(date)
-        echo "$ExitTime tbbdump stopped on user's request" | tee "$DumpLog"
+        echo "$ExitTime tbbdump stopped on user's request" >> "$DumpLog"
 
         unset DireName
         unset DumpLog
@@ -428,25 +431,25 @@ until [ "$#" -le 0 ]
 	   cs001 | cs001c | CS001 | CS001C)
 	    shift
 	    Station="CS001C"
-	    echo "$MainTime Station set to     : $Station" | tee "$DumpLog"
+	    echo "$MainTime Station set to     : $Station" >> "$DumpLog"
 	    InputFlag[0]="set";;
 
 	   cs010 | cs010c | CS010 | CS010C)
 	    shift
 	    Station="CS010C"
-	    echo "$MainTime Station set to     : $Station" | tee "$DumpLog"
+	    echo "$MainTime Station set to     : $Station" >> "$DumpLog"
 	    InputFlag[0]="set";;
 
 	   cs016 | cs016c | CS016 | CS016C)
 	    shift
 	    Station="CS016C"
-	    echo "$MainTime Station set to     : $Station" | tee "$DumpLog"
+	    echo "$MainTime Station set to     : $Station" >> "$DumpLog"
 	    InputFlag[0]="set";;
 
 	   cs302 | cs302c | CS302 | CS302C)
 	    shift
 	    Station="CS302C"
-	    echo "$MainTime Station set to     : $Station" | tee "$DumpLog"
+	    echo "$MainTime Station set to     : $Station" >> "$DumpLog"
 	    InputFlag[0]="set";;
 	   *)
 	    echo "Wrong Station Declaration; exiting tbbdump" | tee "$DumpLog"
@@ -472,7 +475,7 @@ until [ "$#" -le 0 ]
 	   InputFlag[1]="set"
 	   echo "$MainTime Frequency set to   : $Frequency" >> "$DumpLog"
 	   else echo "$MainTime Wrong Declaration for Frequency; using current Station \
-	   Frequency" | tee "$DumpLog"
+	   Frequency" >> "$DumpLog"
 	   InputFlag[1]="unset"
 	   sleep 2
 	  fi;;
@@ -589,7 +592,7 @@ until [ "$#" -le 0 ]
 
             if [ "$OptFlag" -eq 1 ]
              then echo "Wrongful combination of colon(s) and comma(s) in RCU declaration; \
-             exiting tbbdump" | tee "$DumpLog"
+             exiting tbbdump" >> "$DumpLog"
              sleep 2
              exit 1
              else shift
@@ -601,7 +604,7 @@ until [ "$#" -le 0 ]
 
           done
 
-          echo " RCU's set to       : ${RcuArray[*]}" | tee "$DumpLog"
+          echo " RCU's set to       : ${RcuArray[*]}" >> "$DumpLog"
 
           if [ "$MainCounter" -ge 1 ]
            then InputFlag[2]="set"
@@ -679,6 +682,8 @@ until [ "$#" -le 0 ]
 
 	  done
 
+	  InputFlag[3]="set"
+
 	  done	
 
 	  echo "$MainTime RCU Modes set to   : ${ModeArray[*]}" >> "$DumpLog";;
@@ -720,9 +725,9 @@ until [ "$#" -le 0 ]
 	   then Pages="$1"
 	   shift
 	   echo "$MainTime Requested to dump   : $Pages pages" >> "$DumpLog"
-	   InputFlag[4]="set"
-	   else echo "$MainTime Pages set to default of 2000" | tee "$DumpLog"
-	   InputFlag[4]="unset"
+	   InputFlag[5]="set"
+	   else echo "$MainTime Pages set to default of 2000" >> "$DumpLog"
+	   InputFlag[5]="unset"
 	   sleep 2
 	  fi;;
 	esac
@@ -742,9 +747,9 @@ until [ "$#" -le 0 ]
 	   then Latency="$1"
 	   shift
 	   echo "$MainTime Latency set to      : $Latency s" >> "$DumpLog"
-	   InputFlag[5]="set"
-	   else echo "$MainTime Latency set to default of 1 s" | tee "$DumpLog"
-	   InputFlag[5]="unset"
+	   InputFlag[6]="set"
+	   else echo "$MainTime Latency set to default of 0.2 s" >> "$DumpLog"
+	   InputFlag[6]="unset"
 	   sleep 2
 	  fi;;
 	esac
@@ -792,16 +797,76 @@ echo ; echo ; echo "******************** finished parsing input ****************
 
 MainTime=$(date)				# Redefining because some time has passed
 
+ 
+  InputDetect=$(echo ${InputFlag[0]})
+  if [ "$InputDetect" == "unset" ]
+   then echo "$MainTime No station was defined; exiting tbbdump" >> "$DumpLog"
+   sleep 2
+   exit 1
+  fi
+
+  InputDetect=$(echo ${InputFlag[1]})
+  if [ "$InputDetect" == "unset" ]
+   then echo "$MainTime No frequency input; using current station frequency" >> "$DumpLog"
+   String01=$(cat ./default_values | grep Frequency)
+   String01=${String01/Frequency=/}
+   Frequency=$(echo "$String01")
+  fi
+
+  InputDetect=$(echo ${InputFlag[2]})
+  if [ "$InputDetect" == "unset" ]
+   then echo "$MainTime No RCU's were defined; using default of 16 RCU's" >> "$DumpLog"
+   String02="$(cat ./default_values | grep RcuArray)"
+   String02="${String02/RcuArray=/}"
+   String02="${String02//,/ }"
+   RcuArray=($(echo $String02))
+  fi
+
+  InputDetect=$(echo ${InputFlag[3]})
+  if [ "$InputDetect" == "unset" ]
+   then echo "$MainTime No RCU Modes defined; using RCU Mode 4" >> "$DumpLog"
+   String03=$(cat ./default_values | grep RcuMode)
+   String03=${String03/RcuMode=/}
+   RcuMode=$(echo "$String03")
+  fi
+
+  InputDetect=$(echo ${InputFlag[4]})
+  if [ "$InputDetect" == "unset" ]
+   then echo "$MainTime No tbb mode was defined; using transient mode as default" >> \
+   "$DumpLog"
+   String04=$(cat ./default_values | grep TbbMode)
+   String04=${String04/TbbMode=/}
+   TbbMode=$(echo "$String04")
+  fi
+
+  InputDetect=$(echo ${InputFlag[5]})
+  if [ "$InputDetect" == "unset" ]
+   then echo "$MainTime No input for amount of pages to be dumped; using \
+   default of 2000" >> "$DumpLog"
+   String05=$(cat ./default_values | grep Pages)
+   String05=${String05/Pages=/}
+   Pages=$(echo "$String05")
+  fi
+
+  InputDetect=$(echo ${InputFlag[6]})
+  if [ "$InputDetect" == "unset" ]
+   then echo "$MainTime No Latency was defined; using default of 0.2 s" >> \
+   "$DumpLog"
+   String06=$(cat ./default_values | grep Latency)
+   String06=${String06/Latency=/}
+   Latency=$(echo "$String06")
+  fi
+
 
 ############# Checking the RSP board settings, altering them if necessary ##############
 
 echo ; echo ; echo "******************** starting setup ********************"
 
-echo "$MainTime Checking RSP board for current settings..." | tee "$DumpLog"
+echo "$MainTime Checking RSP board for current settings..." >> "$DumpLog"
 
 SetFun "$Station" "$Frequency" "${RcuArray[@]}" "flag01" "${ModeArray[@]}" "flag02" "$TbbMode"
 
-echo "$MainTime Starting up the repetitive Dumps" | tee "$DumpLog"
+echo "$MainTime Starting up the repetitive Dumps" >> "$DumpLog"
 
 echo ""
 echo "Press Ctl-C to stop tbbdump"
@@ -827,6 +892,8 @@ echo ; echo ; echo "******************** start recording ********************"
 
 echo ; echo ; echo "******************** start dumping ********************"
  DumpFun "$Station" "${RcuArray[@]}" "flag" "$TbbMode" "$Pages" "$Latency"
+
+echo "$LD_LIBRARY_PATH"
 
  ((MainCounter=MainCounter+1))
 
