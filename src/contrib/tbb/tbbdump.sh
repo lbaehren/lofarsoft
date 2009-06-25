@@ -369,7 +369,7 @@ DumpFun ()					# This function instructs to dump data to CEP
 	     sleep $Latency
 	     sleep 0.5
 	     
-	     if ls -l "$FullName" | grep -q [0,96,5384]
+	     if ls -l "$FullName" | grep -qw [96,5384]
 	      then echo "$DumpTime The *.hdf5 file produced was useless"  >> "$DumpLog"
 	      echo "$DumpTime Removing the last *.hdf5 file"              >> "$DumpLog"
 	      rm -f "$FullName"
