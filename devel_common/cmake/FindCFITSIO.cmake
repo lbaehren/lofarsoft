@@ -64,19 +64,19 @@ endif (CFITSIO_libcfitsio)
 
 ## [2] math library
 
-FIND_LIBRARY (CFITSIO_libm
-  NAMES m
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-)
+#FIND_LIBRARY (CFITSIO_libm
+#  NAMES m
+#  PATHS ${lib_locations}
+#  NO_DEFAULT_PATH
+#)
 
 ## [3] file access
 
-FIND_LIBRARY (CFITSIO_libnsl
-  NAMES nsl
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  )
+#FIND_LIBRARY (CFITSIO_libnsl
+#  NAMES nsl
+#  PATHS ${lib_locations}
+#  NO_DEFAULT_PATH
+#  )
 
 if (CFITSIO_libnsl)
   list (APPEND CFITSIO_LIBRARIES ${CFITSIO_libnsl})
