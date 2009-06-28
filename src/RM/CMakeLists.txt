@@ -223,7 +223,7 @@ include_directories (BEFORE
   ${RM_BINARY_DIR}
   ${RM_SOURCE_DIR}
   ${RM_SOURCE_DIR}/implement
-  ${RM_SOURCE_DIR}/apps
+  ${RM_SOURCE_DIR}/apps/rmcmd
   ${RM_SOURCE_DIR}/test
   )
 
@@ -293,7 +293,8 @@ if (RM_BUILD_EXTERNAL_TESTS)
 endif (RM_BUILD_EXTERNAL_TESTS)
 
 add_subdirectory (implement)
-add_subdirectory (apps)
+add_subdirectory (apps/rmcmd)
+add_subdirectory (apps/rmdesktool)
 
 ## =============================================================================
 ##

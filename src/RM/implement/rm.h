@@ -37,11 +37,13 @@
 #include <vector>
 #include <iostream>			// streamed input output for rm cubes
 #include <complex>			// complex math functions
+
 #include <casa/Arrays/Array.h>		// use CASA Arrays as temporary buffers
 #include <casa/Quanta/Unit.h>		// use CASA Unit class for unit handling
 #include <casa/Quanta.h>		// ... and unit conversion
 
-#include "../DAL/implement/dalFITS.h"	// dalFITS file access
+
+#include "../../DAL/implement/dalFITS.h"	// dalFITS file access
 
 // Namespace usage
 using namespace std;
@@ -59,14 +61,14 @@ private:
   double cached_ra, cached_dec;
 
   //! Units of RA and Dec
-  casa::Unit raUnit;
-  casa::Unit decUnit;
+ // casa::Unit raUnit;
+ // casa::Unit decUnit;
 
   //! Units of input vectors (lamba squared or frequency) the cube was created from
-  casa::Unit spectralUnit;
+  //casa::Unit spectralUnit;
 
   //! Units of Faraday intensity in output cube
-  casa::Unit faradayUnit;
+  //casa::Unit faradayUnit;
   
   //! Convert frequency vector to lambda squared vector
   vector<double> freqToLambdaSq(const vector<double> &frequency);
