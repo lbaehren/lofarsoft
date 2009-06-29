@@ -368,9 +368,9 @@ DumpFun ()					# This function instructs to dump data to CEP
          if [ "$Port" -ne 0 ]
 	     then 
 	     echo "#### tbb2h5-command:" ssh 10.181.0.1 /app64/usg/bin/tbb2h5 --ip "$IPaddress" \
-		 --port "$Port" --outfile "$FullName" --timeoutRead "$Latency"
+		 --port "$Port" --outfile "$FullName" --timeoutRead "$Latency" "-F2 -C1"
 	     nohup /bin/bash -e | ssh 10.181.0.1 /app64/usg/bin/tbb2h5 --ip "$IPaddress" \
-		 --port "$Port" --outfile "$FullName" --timeoutRead "$Latency" &
+		 --port "$Port" --outfile "$FullName" --timeoutRead "$Latency" -F2 -C1 &
 	     sleep 5
 	     echo "#### readall-command:" ssh "$Station" tbbctl --readall="$Pages" --select="${BoardString["$Counter"]}"
 	     ssh "$Station" tbbctl --cepdelay="$CepDelay"
