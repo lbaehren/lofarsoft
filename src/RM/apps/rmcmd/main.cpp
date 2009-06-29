@@ -21,7 +21,7 @@
 #include "../../../DAL/implement/dalFITS.h"
 
 // casa includes (from /usr/local/include/casacore)
-
+/*
 #include <casa/Arrays.h>
 #include <casa/Arrays/Array.h>
 #include <casa/Logging/LogIO.h>
@@ -35,12 +35,12 @@
 #include <images/Images/ImageFFT.h>
 #include <images/Images/ImageStatistics.h>
 #include <images/Images/ImageInterface.h>
-
+*/
 
 #define _debug	
 
 using namespace std;
-using namespace casa;					// casa(core) namespace
+//using namespace casa;					// casa(core) namespace
 using namespace DAL;
 
 int main (int argc, char * const argv[]) {
@@ -74,10 +74,6 @@ int main (int argc, char * const argv[]) {
 	#endif
 
 
-	// create a rmCube object with an associated two dimensional buffer
-	rmCube FaradayCube(1024, 1024, 100, 5.0);
-	FaradayCube.setFaradayDepths(-100, 100, 10); // Set up Faraday depths to be probed
-	//FaradayCube.createBufferCube();		     // create buffer for whole RM cube
 
 
 	// TEST: inverseFourier RM-Synthesis
@@ -88,6 +84,25 @@ int main (int argc, char * const argv[]) {
 	vector<double> freq(N);
 	vector<double> delta_freq(N);
 
+
+	// Open Image and set parameters
+	dalFITS fitsimage("Leiden_GEETEE_CS1_1.FITS", READONLY);
+	fitsimage.moveAbsoluteHDU(1);
+
+	
+	int naxis=0;
+	long naxes[3]={0,0,0};
+	
+	
+	naxis=fitsimage.getImgDim();
+	fitsimage.getImgSize(3 , naxes);
+	
+	double *buffer=new double[naxes[0]*naxes[1]];
+
+
+	// create a rmCube object with an associated two dimensional buffer
+	rmCube FaradayCube(1024, 1024, 100, 5.0);
+	FaradayCube.setFaradayDepths(-100, 100, 10); // Set up Faraday depths to be probed
 	// Test file read functions
 	freq=FaradayCube.readFrequenciesAndDeltaFrequencies("frequenciesDelta.txt", delta_freq);
 
@@ -106,18 +121,6 @@ int main (int argc, char * const argv[]) {
 	}
 	
 	
-	dalFITS fitsimage("Leiden_GEETEE_CS1_1.FITS", READONLY);
-	fitsimage.moveAbsoluteHDU(1);
-	
-	int naxis=0;
-	long naxes[3]={0,0,0};
-	
-	
-	naxis=fitsimage.getImgDim();
-	fitsimage.getImgSize(3 , naxes);
-	
-	double *buffer=new double[naxes[0]*naxes[1]];
-	
 	//fitsimage.readPlane(buffer, 1);
 	
 	
@@ -128,16 +131,7 @@ int main (int argc, char * const argv[]) {
 	  cout << rmpol << endl;
 	}
 	 
-	FaradayCube.computeRMSF(freq, delta_freq, true);
-
-	/*
-	RO_LatticeIterator<Float> iter(*lattice_Q_float, cursorShape);
-	for (iter.reset(); !iter.atEnd(); iter++) {
-		minMax(min, max, iter.cursor());
-//  		cout << i++ << " Min = " << min << " Max = " << max << iter.cursor() << endl;		
-	}	
-	*/
-	
+	FaradayCube.computeRMSF(freq, delta_freq, true);	
 	
 	#ifdef _debug
 	cout << "Finished: " << filename_Q << "!\n";	// Debug output
