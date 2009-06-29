@@ -85,6 +85,11 @@ int main (int argc, char * const argv[]) {
 	vector<double> delta_freq(N);
 
 
+	// Need to test lambdaSquaredTopHat function with WSRT text file
+
+	// URGENT: need to verify with above deltaLambdas computation of RMSF!
+	
+
 	// Open Image and set parameters
 	dalFITS fitsimage("Leiden_GEETEE_CS1_1.FITS", READONLY);
 	fitsimage.moveAbsoluteHDU(1);
