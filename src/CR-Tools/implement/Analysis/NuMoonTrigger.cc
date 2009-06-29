@@ -109,6 +109,7 @@ namespace CR { // Namespace  -- begin
 
   //_____________________________________________________________________________
   //                                                                 reading_data
+#ifdef HAVE_ROOT
   
   Matrix<double> NuMoonTrigger::reading_data ( std::string const &filename,
 					       uint const& n_frames ) 
@@ -1562,7 +1563,6 @@ Geom_delay(j) =(source_distance(j)/speed_light)*(sqrt(1+((baseline_square-2*sour
   //_____________________________________________________________________________
   //                                                                 root_ntuples
   
-#ifdef HAVE_ROOT
     
   void NuMoonTrigger::root_ntuples( std::string const &filename,
 				    uint const& n_samples,
