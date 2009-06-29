@@ -139,11 +139,11 @@ public:
 											const double lambdaZero=0);
 											
 	// Compute the Roation Measure Spread Function from input frequencies
-   vector<complex<double> > rm::RMSFfreq(const vector<double> &phis,    
-									  const vector<double> &frequencies,                     
-									  const vector<double> &weights,                         
-									  const vector<double> &delta_frequencies,               
-									  const double freqZero=0);								   
+   vector<complex<double> > RMSFfreq(const vector<double> &phis,    
+									  			 const vector<double> &frequencies,                     
+									  			 const vector<double> &weights,                         
+									  			 const vector<double> &delta_frequencies,               
+									  			 const double freqZero=0);								   
 
   // Clean a RM vector line-of-sight down to threshold
   int RMClean(vector<double> &phis, double threshold);
