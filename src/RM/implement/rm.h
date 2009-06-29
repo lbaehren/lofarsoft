@@ -47,7 +47,7 @@
 
 // Namespace usage
 using namespace std;
-using namespace casa;
+//using namespace casa;
 
 class rm
 {
@@ -107,9 +107,9 @@ public:
       create a RM cube object with one (or a times b) associated Faraday line(s) (defaults: axis a=1 axis b=0)
       of sight, buffer is only given as reference
   */
-  rm(int, int, int, double, Array<double> &faradaybuffer, int x=1, int y=0);
+  rm(int, int, int, double, casa::Array<double> &faradaybuffer, int x=1, int y=0);
   
-  rm(int, int, int, double, Array<double> &faradayplanes, int x, int y, int z=1);
+  rm(int, int, int, double, casa::Array<double> &faradayplanes, int x, int y, int z=1);
   
   ~rm();
 		
@@ -131,21 +131,30 @@ public:
 														const vector<double> &,
 														const double lambdaZero=0);
 
-  //! Compute the Rotation Measure Spread Function (RMSF)
+  // Compute the Rotation Measure Spread Function (RMSF)
   vector<complex<double> > RMSF( const vector<double> &,
 			        						const vector<double> &,
 											const vector<double> &,
 											const vector<double> &,
 											const double lambdaZero=0);
 											
-											
+	// Compute the Roation Measure Spread Function from input frequencies
    vector<complex<double> > rm::RMSFfreq(const vector<double> &phis,    
 									  const vector<double> &frequencies,                     
 									  const vector<double> &weights,                         
 									  const vector<double> &delta_frequencies,               
-									  const double freqZero=0);										   
+									  const double freqZero=0);								   
 
-  //! Frick and Stepanov wavelet algorithm
+  // Clean a RM vector line-of-sight down to threshold
+  int RMClean(vector<double> &phis, double threshold);
+
+  // Clean a RM vector line-of-sight down to complex threshold (for Q and U)
+  int RMClean(complex<vector<double> > &complxrm, complex<double> threshold);
+
+  // Clean a complex RM vector line-of-sight down to threshold (threshold is the same for Q and U)
+  int RMClean(complex<vector<double> > &complxphis, double threshold);
+
+  // Frick and Stepanov wavelet algorithm
   vector<double> wavelet(vector<double> &,
 			 vector<complex<double> > &,
 			 vector<double> &,
@@ -153,7 +162,7 @@ public:
 			 vector<double> &,
 			 vector<double> &);
 
-  //! En&szlig;lin Information Theory Based algorithm
+  // En&szlig;lin Information Theory Based algorithm	(will be in separate wienerfilter class)
   vector<double> ift(vector<double> &,
 		     vector<double> &);
 

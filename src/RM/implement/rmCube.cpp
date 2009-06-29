@@ -96,10 +96,35 @@ rmCube::rmCube(int x, int y, int faradaySize, double stepsize)
 */
 rmCube::rmCube(int x, int y, vector<double> faradayDepths)
 {
+  // Check parameters for consistency
+  if(x<=0)
+	 throw "rmCube::rmCube x dimension is <=0";
+  if(y<=0)
+	 throw "rmCube::rmCube y dimension is <=0";
+  if(faradayDepths.size()==0)
+	 throw "rmCube::rmCube faradayDepths has size 0";
 
+  this->xSize=x;
+  this->ySize=y;
+  this->faradaySize=faradayDepths.size();
 
+  this->buffer=NULL;	// set buffer to NULL (no buffer associated, yet)
+  
+  // Set remaining attributes to defaults
+  this->currentX=0;
+  this->currentY=0;
+  this->currentFaradayDepth=0;
+  this->ra=0;
+  this->dec=0;
+  this->ra_low=0;
+  this->ra_high=0;
+  this->dec_low=0;
+  this->dec_high=0;
 
-
+  for(unsigned int i=0; i<faradayDepths.size(); i++)		// loop over faradayDepths vector given
+  {
+    faradayDepths[i]=faradayDepths[i];			// write Faraday depth into list to probe for
+  }
 }
 
 
@@ -285,7 +310,7 @@ void rmCube::createBuffer(long long size)
   if(buffer==NULL)	// check if we have already a buffer
   {
  //  this->buffer=(double *) calloc(size, sizeof(double)); // allocate memory of size Bytes
-    this->buffer= new double[size];	// allocate memory
+    this->buffer=new double[size];		// allocate memory for No. size of type double
 
     if(this->buffer==NULL)
     {
@@ -358,7 +383,6 @@ void rmCube::createBufferCube()
     dimensions[2]=this->faradaySize;
    
    this->setBufferDimensions( dimensions );
-   
   }
   else
   {
@@ -436,7 +460,7 @@ void rmCube::setWeights(vector<double> &weights)
 
 std::string rmCube::getRMAlgorithm()
 {
-  return this->algorithm;
+  return this->rmAlgorithm;
 }
 
 
@@ -459,6 +483,51 @@ void rmCube::computeRMSF(const vector<double> &lambdaSqs, const vector<double> &
     // use rmCube attributes (must be set) class rm method to compute RMSF
     this->rmsf=rm::RMSF(faradayDepths, lambdaSqs, weights, deltaLambdaSqs, freq);
   }
+}
+
+
+//****************************************************
+//
+// High-level RM computing functions
+//
+//****************************************************
+
+
+/*!
+	\brief Compute one Faraday plane with algorithm given in class attribute
+*/
+void rmCube::computePlane(double faradayDepth)
+{
+	if(rmAlgorithm=="")		// if algorithm was not set...
+		throw "rmCube::computePlane algorithm is not set";
+   else if(rmAlgorithm!="rmsynthesis" || rmAlgorithm!="wienerfilter" || rmAlgorithm!="wavelet")
+		throw "rmCube::computePlane unknown algorithm in attribute";
+  else if(faradayDepths.size()==0)
+	   throw "rmCube::computePlane faradayDepths attribute is not set";
+
+  // loop over x and y to compute one plane
+
+  // Problem need access to whole image Data, this is not abstracted yet
+}
+
+
+/*!
+	\brief Compute the whole cube with algorithm given in class attribute
+*/
+void rmCube::computeCube()
+{
+	if(rmAlgorithm=="")		// if algorithm was not set...
+		throw "rmCube::computeCube algorithm is not set";
+   else if(rmAlgorithm!="rmsynthesis" || rmAlgorithm!="wienerfilter" || rmAlgorithm!="wavelet")
+		throw "rmCube::computeCube unknown algorithm in attribute";
+   else if(faradayDepths.size()==0)
+		throw "rmCube::computeCube faradayDepths attribute is not set";
+
+
+
+	// loop over x and y for each plane in faradayDepths
+
+  // Problem need access to whole image Data, this is not abstracted yet
 }
 
 

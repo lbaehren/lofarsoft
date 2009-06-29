@@ -44,7 +44,7 @@ class rmCube : public rm
     int currentFaradayDepth;	//!> current Faraday Depth
 
     // Image plane dimensions
-    double ra;		//!> total RA of field
+    double ra;			//!> total RA of field
     double dec;		//!> total DEC of field
     double ra_low;	//!> lower limit (edge) of RA of field
     double ra_high;	//!> upper limit (edge) of RA of field
@@ -56,18 +56,17 @@ class rmCube : public rm
     double faraday_high;		//!> upper limiit of Faraday Depth computed
     std::vector<double> faradayDepths;	//!> complete list of Faraday depths in RM cube
     
-    std::string algorithm;			//!> algorithm used to compute RM
+    std::string rmAlgorithm;					//!> algorithm used to compute RM
     std::string errorEstimationAlgorithm;	//!> algorithm used for error estimation
 
     double *buffer; 			//!> pointer to buffer for computed Faraday depths
     vector<int> bufferDimensions;	//!> dimensions of buffer (line, tile, plane,...)
   
     // Keep variables that do not need to be computed for every single RM
-    vector<double> lambdaSqs;		//!> lambda squareds of channels
+    vector<double> lambdaSqs;			//!> lambda squareds of channels
     vector<double> deltaLambdaSqs;	//!> delta lambda squareds that belong to RM cube input image
-    vector<double> weights;		//!> weighting factors for channels
+    vector<double> weights;			//!> weighting factors for channels
     std::string weightingAlgorithm;	//!> algorithm used to compute weights
-    std::string rmAlgorithm;		//!> algorithm used to compute cube
     vector<complex<double> > rmsf;	//!> Rotation Measure Spread Function
   
   public:
@@ -136,6 +135,11 @@ class rmCube : public rm
  
     vector<complex<double> > getRMSF();		//!> get RMSF
     void computeRMSF(const vector<double> &, const vector<double> &, bool);	//!> compute RMSF with inherited method from class rm
+
+	 // High-level RM compute functions
+	 void computePlane(double faradayDepth);		// compute one Faraday plane for faradayDepth
+	 void computeCube();			// compute the whole Cube with paramaters from attributes
+    
 
     // overloaded inverseFourier function that uses lambdaSqs, deltaLambdaSqs and weights from rmCube attributes 
     //vector<complex<double> > inverseFourier();

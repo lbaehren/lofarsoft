@@ -12,17 +12,16 @@
 #include <string.h>
 #include <assert.h>
 
-
+/*
 #include <casa/Arrays.h>			// CASA library functions
 #include <casa/Arrays/Array.h>
 #include <casa/Utilities/DataType.h>
 #include <tables/Tables/TiledFileAccess.h>
 #include <lattices/Lattices/TiledShape.h>
-
+*/
 #include "rm.h"					// rm class declarations
 
 using namespace std;
-//using namespace casa;		// namespace for functions from casacore
 
 //===============================================================================
 //
@@ -361,7 +360,7 @@ complex<double> rm::inverseFourier(double phi,
     for(chan=0; chan<numchannels; chan++)
     {
 		// Use Euler formula for exp_lambdafactor
- 		exp_lambdafactor=complex<double>(cos(-2*phi*(lambda_squared[chan]-lambdaZeroSq)), sin(-2*phi*(lambda_squared[chan]-lambdaZeroSq)));	
+ 		exp_lambdafactor=complex<double>(cos(-2.0*phi*(lambda_squared[chan]-lambdaZeroSq)), sin(-2.0*phi*(lambda_squared[chan]-lambdaZeroSq)));	
       // compute complex exponential factor
 //      exp_lambdafactor=exp(complex<double>(0, -2*phi)*lambda_squared[chan]);
       rmpolint=rmpolint+(intensity[chan]*exp_lambdafactor)*delta_lambda_squared[chan];
@@ -403,9 +402,8 @@ vector<complex<double> > rm::inverseFourier(const vector<double> &phis,
 
   complex<double> exp_lambdafactor=0;						// exponential factor in direct FT
   double lambdaZeroSq=0;										// derotating lambdaZeroSquared
-  complex<double> phi;											// single phi value to be computed
-  int chan=0; 														// loop variable over channels
-  const int numchannels=lambda_squared.size();			// number of frequency channels
+  double phi=0;													// single phi value to be computed
+  const unsigned int numchannels=lambda_squared.size();			// number of frequency channels
 
   double K=0;														// K factor for RM-synthesis
 
@@ -432,12 +430,13 @@ vector<complex<double> > rm::inverseFourier(const vector<double> &phis,
   //
   for(unsigned int i=0; i<phis.size(); i++)	// loop over Faraday depths given in phis vector 
   {
-     for(chan=0; chan<numchannels; chan++)
+     for(unsigned int chan=0; chan<numchannels; chan++)
   	  {
 		  phi=phis[i];				// select phi from Faraday depths vector
         // Use Euler formula for exp_lambdafactor
-	//	  exp_lambdafactor=(cos(-2*phi*(lambda_squared[chan]-lambdaZeroSq)), sin(-2*phi*(lambda_squared[chan]-lambdaZeroSq)));		// BUGGY! casa error?
-//       rmpolint[i]=rmpolint[i]+(intensity[chan]*exp_lambdafactor*delta_lambda_squared[chan]);
+   // 	  ex_lambdafactor=(cos(-2*phi*(lambda_squared[chan]-lambdaZeroSq)), sin(-2*phi*(lambda_squared[chan]-lambdaZeroSq)));		// BUGGY! casa error?
+		  exp_lambdafactor=complex<double>(cos(-2.0*phi*(lambda_squared[chan]-lambdaZeroSq)), sin(-2.0*phi*(lambda_squared[chan]-lambdaZeroSq)) );  
+      rmpolint[i]=rmpolint[i]+(intensity[chan]*exp_lambdafactor*delta_lambda_squared[chan]);
      }
 
      rmpolint[i]=K*rmpolint[i];	// multiply with weighting
@@ -446,6 +445,56 @@ vector<complex<double> > rm::inverseFourier(const vector<double> &phis,
   return rmpolint;	// return vector of complex polarized intensities per Faraday depth
 }
 
+
+/*!
+	\brief Perform RM clean on a line-of-sight Q or U only vector down to threshold
+	
+	\param rm - line-of-sight vector with intensity in Q or U
+	\param threshold - threshold at which RM clean iterations stop
+	
+	\return int - number of clean iterations performed
+*/
+int rm::RMClean(vector<double> &rm, double threshold)
+{
+	int numiterations=0;
+	
+	
+	return numiterations;
+}
+
+
+/*!
+	\brief Perform RM clean on a line-of-sight P=Q + iU vector down to threshold
+	
+	\param rm - line-of-sight vector with complex polarized intensity P
+	\param threshold - threshold at which RM clean iterations stop (same for Q and U)
+	
+	\return int - number of clean iterations performed
+*/
+int rm::RMClean(complex<vector<double> > &complxrm, double threshold)
+{
+	int numiterations=0;
+	
+	
+	return numiterations;	
+}
+
+
+/*!
+	\brief Perform RM clean on a line-of-sight P=Q + iU vector down to complex threshold
+	
+	\param rm - line-of-sight vector with complex polarized intensity P
+	\param threshold - threshold at which RM clean iterations stop (complex threshold for Q and U separately)
+	
+	\return int - number of clean iterations performed
+*/
+int rm::RMClean(complex<vector<double> > &complxrm, complex<double> threshold)
+{
+	int numiterations=0;
+	
+	
+	return numiterations;	
+}
 
 
 /*!
@@ -480,7 +529,7 @@ vector<complex<double> > rm::RMSF(const vector<double> &phis,
     for(iweight=0; iweight <= weights.size(); iweight++)
     {
       rmsf[iphi]=rmsf[iphi] + weights[iweight] * 
-      exp(complex<double>(0,-2*phis[iphi]*lambda_squared[iweight])) *	 delta_lambda_squared[iweight];					 
+      exp(complex<double>(0,-2*phis[iphi]*lambda_squared[iweight])) * delta_lambda_squared[iweight];					 
     }
   }
   
