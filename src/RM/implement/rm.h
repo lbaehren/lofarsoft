@@ -70,16 +70,6 @@ private:
   //! Units of Faraday intensity in output cube
   //casa::Unit faradayUnit;
   
-  //! Convert frequency vector to lambda squared vector
-  vector<double> freqToLambdaSq(const vector<double> &frequency);
-  //! Convert lambda squared vector to frequency vector
-  vector<double> lambdaSqToFreq(const vector<double> &lambda_sq);
-
-  //! Calculate delta lambda squared steps from lower and higher frequency limits
-  vector<double> deltaLambdaSq(	const vector<double> &freq_low, 
-											const vector<double> &freq_high,
-											bool freq=true);
-
   //! Compute delta lambda squareds from frequencies using tophat function
   vector<double> deltaLambdaSqTopHat(const vector<double> &frequency,
 												 const vector<double> &bandwidth,
@@ -93,6 +83,17 @@ private:
 
   // Public functions.
 public:
+  //! Calculate delta lambda squared steps from lower and higher frequency limits
+  vector<double> deltaLambdaSq(	const vector<double> &freq_low, 
+											const vector<double> &freq_high,
+											bool freq=true);
+	
+  //! Convert frequency vector to lambda squared vector
+  vector<double> freqToLambdaSq(const vector<double> &frequency);
+  //! Convert lambda squared vector to frequency vector
+  vector<double> lambdaSqToFreq(const vector<double> &lambda_sq);
+	
+	
   //! Default constructor
   rm();
 
@@ -143,7 +144,15 @@ public:
 									  			 const vector<double> &frequencies,                     
 									  			 const vector<double> &weights,                         
 									  			 const vector<double> &delta_frequencies,               
-									  			 const double freqZero=0);								   
+									  			 const double freqZero=0);			
+									
+	//! Forward Fourier Transform to compute polarized intensities from RM for a selection of lambdas
+	vector<complex<double> > forwardFourier(const vector<double> &lambda_sqs,
+														 const vector<complex<double> > &rmpolint,
+														 const vector<double> &faradays,
+														 const vector<double> &weights,
+														 const vector<double> &delta_faradays,
+														 const double lambdaZero);					   
 
   // Clean a RM vector line-of-sight down to threshold
   int RMClean(vector<double> &phis, double threshold);
@@ -177,6 +186,9 @@ public:
   //! read lambda squareds from a text file
   vector<double> readLambdaSquareds(const std::string &);
 
+  //! read frequencies from file and compute delta frequencies from differences
+  vector<double> readFrequencies(const std::string &filename, vector<double> &deltafreqs);
+
   //! read frequencies and delta frequencies from a text file
   vector<double> readFrequenciesAndDeltaFrequencies(const std::string &, vector<double> &);
 
@@ -185,6 +197,9 @@ public:
 
   //! Write a vector out to file
   void writeRMtoFile(vector<double>, const std::string &filename);
+
+  //! Write a complex vector out to a file
+  void rm::writeRMtoFile(vector<complex<double> > rm, const std::string &filename);
 
   // Atmospheric correction of RM (contribution through atmosphere)
   // ??

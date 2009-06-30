@@ -83,7 +83,7 @@ vector<double> rm::freqToLambdaSq(const vector<double> &frequency)
   vector<double> lambda_sq(frequency.size());	
 
   // constants
-  double csq=89875517873681764.0;	// c^2
+  const double csq=89875517873681764.0;	// c^2
  
   // Check for data consistency
   if(frequency.size()==0)
@@ -177,7 +177,7 @@ vector<double> rm::deltaLambdaSq( //vector<double> delta_lambda_sq,
 			bool freq)
 {
   // vector containing the converted lambda squared bins
-  vector<double> delta_lambda_sq;
+  vector<double> delta_lambda_sq(freq_high.size());
 
   // lambda vectors for conversion
   vector<double> lambda_low(freq_high.size()), lambda_high(freq_low.size());
@@ -447,6 +447,53 @@ vector<complex<double> > rm::inverseFourier(const vector<double> &phis,
 
 
 /*!
+
+    \param &freqs - Faraday depth to compute RM for
+    \param &rmpolint - Polarized intensities for each Faraday depth
+    \param &lambda_squared - Lambda squareds of polarized intensities
+    \param &weights - Weights associated with each frequency (or lambda squared)
+    \param &delta_phis - Delta phi distance between intensities in Faraday space
+    
+    \return intensities - vector of polarized intensity computed over vector freqs
+*/
+vector<complex<double> > rm::forwardFourier(const vector<double> &lambda_sqs,
+				 const vector<complex<double> > &rmpolint,
+				 const vector<double> &faradays,
+				 const vector<double> &weights,
+				 const vector<double> &delta_faradays,
+				 const double lambdaZero)
+{
+  vector<complex<double> > intensities(lambda_sqs.size());	// polarized intensities for each frequency
+
+  complex<double> exp_lambdafactor=0;								// exponential factor in direct FT
+  double lambdasq=0;														// single lambda squared value to be computed
+  const unsigned int numfaradays=faradays.size();				// number of Faraday depths
+  const unsigned int numlambda_sqs=lambda_sqs.size();			// number of frequency channels to transform to
+
+  //-----------------------------------------------------------------------
+
+  // compute discrete Fourier sum by iterating over frequency vector
+  //
+  // P(phi) = K * expfactor * Sum_0^frequency.size() {P(lambda^2)*exp(-2*i*phi*lambda^2)}
+  //
+  for(unsigned int i=0; i<numlambda_sqs; i++)	// loop over lambda squareds given in phis vector 
+  {
+     for(unsigned int chan=0; chan<numfaradays; chan++)
+  	  {
+		  lambdasq=lambda_sqs[i];				// select lambda squared from lambda squareds vector
+        // Use Euler formula for exp_lambdafactor
+ 		  exp_lambdafactor=complex<double>(cos(+2.0*lambdasq*faradays[chan]), sin(+2.0*lambdasq*faradays[chan]) );  
+		  intensities[i]=intensities[i]+(rmpolint[chan]*exp_lambdafactor*delta_faradays[chan]);
+     }
+  }
+
+  return intensities;	// return vector of complex polarized intensities per Faraday depth
+}
+
+
+
+
+/*!
 	\brief Perform RM clean on a line-of-sight Q or U only vector down to threshold
 	
 	\param rm - line-of-sight vector with intensity in Q or U
@@ -501,7 +548,8 @@ int rm::RMClean(complex<vector<double> > &complxrm, complex<double> threshold)
   \brief Compute the Rotation Measure Spread Function
 
   The Rotation Measure Spread Function is a measure for the quality of the observation
-  to distinguish Faraday structures, similar to the PSF in conventional astronomy. In the rmclean function the calculated Rotation Measure is deconvoluted with the RMSF function. 
+  to distinguish Faraday structures, similar to the PSF in conventional astronomy. In
+  the rmclean function the calculated Rotation Measure is deconvoluted with the RMSF function. 
 
   \param &phis - Faraday depth range over which the RMSF is computed
   \param &lambda_squareds -  Lambda squareds of polarized intensities
@@ -517,23 +565,52 @@ vector<complex<double> > rm::RMSF(const vector<double> &phis,
 				  const vector<double> &delta_lambda_squared,
 				  const double lambdaZero)
 {
-  vector<complex<double> > rmsf(phis.size());		// calculated rmsf
-  
-  unsigned int iphi=0, iweight=0;		// loop variables
+  vector<complex<double> > foo(phis.size());					// calculated rmsf ATTENTION: rmCube has its own rmsf attribute
+  vector<double> lambda_squared_pi(lambda_squared.size());  	// scale lambda squareds to 0 to 2*Pi
+  unsigned int numchannels=lambda_squared.size();					// number of channels
 
-  for(iphi=0; iphi < phis.size(); iphi++)	// loop over all Faraday depths
+  complex<double> exp_factor;							// complex exponential factor
+  unsigned int weightssize=weights.size();		// size of weights vector
+  unsigned int phissize=phis.size();				// size of phis vector
+
+  //**************************************************
+  // Consistency check of input data
+  if(phis.size()==0)
+     throw "rm::RMSF phis vector has length 0";
+  if(lambda_squared.size()==0)
+     throw "rm::RMSF lambda_squared vector has length 0";
+  if(weights.size()==0)
+     throw "rm::RMSF";
+  if(delta_lambda_squared.size()==0)
+	  throw "rm::RMSF delta_lambda_squared vector has length 0";
+  // Doesn't check for all combinations of equality...
+  if(phis.size()!=lambda_squared.size() || weights.size()!=delta_lambda_squared.size())
+     throw "rm::RMSF input vectors differ in length";
+  if(foo.size()!=phis.size())
+     throw "rm::RMSF rmsf size is not equal to size of phis vector";
+
+  //***********************************************************
+ // rmsf.resize(phissize);		// set rmsf length to that of phis
+
+  // IMPORTANT: Map frequencies/lamdab to 2*Pi/N?
+  for(unsigned int i=0; i<numchannels; i++)
+  {
+	lambda_squared_pi[i]=lambda_squared[i]*M_PI/numchannels;
+  }	
+
+  for(unsigned int iphi=0; iphi < phissize; iphi++)	// loop over all Faraday depths
   {
     // Since weights and lambda_sqs do correspond to each other and have the
     // same length, we can use iweight to index lambda_sqs and delta_lambda_sqs, too
     // Loop over all weights and compute Riemann's integral
-    for(iweight=0; iweight <= weights.size(); iweight++)
+    for(unsigned int iweight=0; iweight < weightssize; iweight++)
     {
-      rmsf[iphi]=rmsf[iphi] + weights[iweight] * 
-      exp(complex<double>(0,-2*phis[iphi]*lambda_squared[iweight])) * delta_lambda_squared[iweight];					 
+   	 exp_factor=complex<double>(cos(-2*phis[iphi]*lambda_squared_pi[iweight]), sin(-2*phis[iphi]*lambda_squared_pi[iweight]));
+	    foo[iphi]=foo[iphi] + weights[iweight] * exp_factor * delta_lambda_squared[iweight];					 
     }
   }
   
-  return rmsf;	// return vector with calculated rmsf
+  return foo;	// return vector with calculated rmsf
 }
 
 
@@ -741,6 +818,64 @@ vector<double> rm::readFrequencies(const std::string &filename)
 
 
 /*!
+  \brief Read the distribution of measured frequencies from a text file
+  
+  \param filename -- name of txt file with frequency distribution
+  \param deltafreqs - vector to take delta frequencies (computed from difference)
+
+  \return frequencies -- vector with frequencies
+*/
+vector<double> rm::readFrequencies(const std::string &filename, vector<double> &deltafreqs)
+{
+  vector<double> frequencies;		// hold list of lambda squareds
+  double frequency=0;				// individual lambda squared read per line
+  double prev_frequency=0;			// value of previous frequency read
+  double difference=0;					// difference between current and previous frequency
+
+  //----------------------------------------------------------
+  // Check if filename is text file FITS file or HDF5 file
+  if(filename.find(".hdf5", 1)!=string::npos)	// if HDF5 use dal
+  {
+    // TODO
+    // use dal to read lambda Squareds and deltaLambdaSquareds from file
+  }
+  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  {
+    // TODO
+    // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+  }
+  else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
+  {
+    ifstream infile(const_cast<const char*>(filename.c_str()), ifstream::in);	// open file for reading
+  
+    if(infile.fail())
+    {
+      throw "rm::readFrequencies failed to open file";
+    }
+  
+    while(infile.good())	// as long as we can read from the file...
+    {
+      infile >> frequency;	// read double into temporary variable
+      frequencies.push_back (frequency);	// store in lambdaSquareds vector
+   	
+		if(prev_frequency!=0)
+		{
+	      difference=frequency-prev_frequency;
+			deltafreqs.push_back (difference);			// write into delta vector
+		}
+		prev_frequency=frequency;							// keep as previous frequency
+    }
+	 deltafreqs.push_back (difference);					// write last diff into delta vector
+
+    infile.close();		// close the text file
+  }
+
+  return frequencies;	 // return frequencies vector
+}
+
+
+
+/*!
   \brief Read the distribution of measured lambda squareds from a text file
   
   \param filename -- name of txt file with lambda squared distribution
@@ -846,7 +981,7 @@ vector<double> rm::readFrequenciesAndDeltaFrequencies(const std::string &filenam
 
   \return lambdaSquareds - vector with lambda squareds
 */
-vector<double> readLambdaSquaredsAndDeltaSquareds(const std::string &filename,   vector<double> &deltaLambdaSquareds)
+vector<double> rm::readLambdaSquaredsAndDeltaSquareds(const std::string &filename,   vector<double> &deltaLambdaSquareds)
 {
   vector<double> lambdaSquareds;	// lambda squareds to be returned
   double lambdaSq=0;			// individual frequency read per line
@@ -891,11 +1026,11 @@ vector<double> readLambdaSquaredsAndDeltaSquareds(const std::string &filename,  
 /*!
   \brief Write a vector (RM) out to file on disk (mainly for debugging)
   
-  \param rm - vector containing data (double) to write to file
+  \param rm - vector containing data (real double) to write to file
   \param filename - name of file to create or append to
   \param mode - write mode: overwrite, append
 */
-void writeRMtoFile(vector<double> rm, const std::string &filename)
+void rm::writeRMtoFile(vector<double> rm, const std::string &filename)
 {
   unsigned int i=0;	// loop variable
  
@@ -903,9 +1038,33 @@ void writeRMtoFile(vector<double> rm, const std::string &filename)
 
   for(i=0; i<rm.size(); i++)		// loop over vector
   {
-    outfile << rm[i];			// write out data
-    outfile << endl;			// add endl
+    outfile << rm[i];				// write out data
+    outfile << endl;					// add endl
   }
 
-  outfile.flush();			// flush output file
+  outfile.flush();					// flush output file
+}
+
+
+/*!
+  \brief Write a vector (RM) out to file on disk (mainly for debugging)
+  
+  \param rm - vector containing data (real double) to write to file
+  \param filename - name of file to create or append to
+  \param mode - write mode: overwrite, append
+*/
+void rm::writeRMtoFile(vector<complex<double> > rm, const std::string &filename)
+{
+  unsigned int i=0;	// loop variable
+ 
+  ofstream outfile(const_cast<const char *>(filename.c_str()), ofstream::out);
+
+  for(i=0; i<rm.size(); i++)			// loop over vector
+  {
+    outfile << rm[i].real() << "   ";			// write real part of data
+	 outfile << rm[i].imag();						// write imaginary part of data
+    outfile << endl;									// add endl
+  }
+
+  outfile.flush();						// flush output file
 }

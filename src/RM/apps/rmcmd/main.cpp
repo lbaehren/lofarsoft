@@ -50,11 +50,7 @@ int main (int argc, char * const argv[]) {
 //	Bool status;					// status of casa calls
 
 	unsigned int i=0;				// loop variable
-	unsigned int N=30;				// length of test vectors
-
-	vector<double> phi;		// Faraday depths to probe for
-	complex<double> rmpol;		// polarized intensity at Faraday depth probed for
-	vector<complex<double> > rmsf;	// Rotation Measure Spread Function
+	unsigned int N=300;				// length of test vectors
 
 
 	if(argc<3)	// if no filenames was given, display usage/help (MUST change to 3!)
@@ -77,18 +73,46 @@ int main (int argc, char * const argv[]) {
 
 
 	// TEST: inverseFourier RM-Synthesis
-	// compute 30 pts along 0 to 29
-	vector<complex<double> > f(N);
-	vector<complex<double> > F(N);
+	// compute 300 pts along 0 to 299
+	vector<double> phis(N);
+	vector<complex<double> > intensities(N);
 	vector<double> weights(N);	// weights
 	vector<double> freq(N);
 	vector<double> delta_freq(N);
-
+	vector<double> lambda_squared(N);
+	vector<double> delta_lambda_squared(N);
+	
+	vector<double> freq_low(N);		// lower limits of bandwidths
+	vector<double> freq_high(N);		// upper limits of bandwidths
+	
+	vector<complex<double> > rmsf(N);
+	complex<double> rmpol;		// polarized intensity at Faraday depth probed for
 
 	// Need to test lambdaSquaredTopHat function with WSRT text file
+	rmCube rm(1024, 1024, 100, 5);
+	
+	for(unsigned int i=0; i<N; i++)		// create Test data
+	{
+		phis[i]=i-150;							// from -150 to +150
+		freq[i]=323937500.0+i*312500.0;	// from Brentjens mosaic.freq text file
+		
+		weights[i]=1;							// set all weights to 1
+		delta_freq[i]=312500.0;
+		
+		// compute freq_low and freq_high limits for delta_lambda_squareds
+		freq_low[i]=323937500.0+i*312500-0.5*312500.0;
+		freq_high[i]=323937500.0+i*312500+0.5*312500.0;
+	}
+	
+	// Convert frequencies to lambda squareds and delta_lambda_squareds
+	lambda_squared=rm.freqToLambdaSq(freq);
+	delta_lambda_squared=rm.deltaLambdaSq(freq_low, freq_high, true);
+	
 
 	// URGENT: need to verify with above deltaLambdas computation of RMSF!
-	
+	rmsf=rm.RMSF(phis, lambda_squared, weights, delta_lambda_squared);
+
+	rm.writeRMtoFile(rmsf, "rmsf.dat");		// debug write RMSF to file
 
 	// Open Image and set parameters
 	dalFITS fitsimage("Leiden_GEETEE_CS1_1.FITS", READONLY);
@@ -132,11 +156,7 @@ int main (int argc, char * const argv[]) {
 	// call inverseFourier with phi=5
 	for(i=0; i<N; i++)
 	{
-	  rmpol=FaradayCube.inverseFourier(i, f, freq, weights,  delta_freq, false);
-	  cout << rmpol << endl;
 	}
-	 
-	FaradayCube.computeRMSF(freq, delta_freq, true);	
 	
 	#ifdef _debug
 	cout << "Finished: " << filename_Q << "!\n";	// Debug output
