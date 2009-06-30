@@ -1,3 +1,68 @@
+d=Data("ROOT")
+x=d 
+for i in range(5): x=x.newObject("TEST"+str(i+1))
+~d[4]
+~d[5]
+d.newObject("NEW")
+for i in range(150,201): ~d[i]
+
+x=d; 
+for i in range(100,201,2): x=x.newObject("NEW"+str(i+1))
+
+x=d["AntennaID=10101"].Chain(DIR.TO,["PlotWindow","Chooser","GraphObject","Datatype","UnitName","UnitPrefix","GraphDataBuffer","DataPipeline"],False)
+
+d.exportDOT("FILE",9)
+#dot -Tsvg ROOT.dot > ROOT.svg
+
+svg=d["QtNetview'SVGWidget"].getPy()
+r=svg.renderer()
+svg.load("ROOT.svg")
+
+r.matrixForElement("node1").mapRect(r.boundsOnElement("node50")) # with respect to default size
+r.defaultSize()
+
+
+need to manually compare relative position of QRectF wrt to actual screen position.
+
+svg.mousePressEvent=mousePressEvent
+
+def mousePressEvent(self,event):
+    print "Mouse pressed"
+    print "PosType=",type(event.pos())
+    print "Pos=",event.pos()
+
+
+    #Now set the link to the  unitchooser objects for the newly created antennas using the first existing object as an example
+    if (len(existingAntennaNames)>0) & (len(newAntennaNames)>0):
+        pdb.set_trace()
+        upfx=d[existingAntennaNames[0]+":xAxis'Parameters=UnitData'UnitPrefix"].FirstObject()
+        upfy=d[existingAntennaNames[0]+":yAxis'Parameters=UnitData'UnitPrefix"].FirstObject()
+#        dtx=d[existingAntennaNames[0]+":xAxis'Parameters=Data'Datatype"].FirstObject()
+#        dty=d[existingAntennaNames[0]+":yAxis'Parameters=Data'Datatype"].FirstObject()
+        for n in newAntennaNames:
+            upfx >> d[n+":xAxis'Parameters=UnitData"]
+            upfy >> d[n+":yAxis'Parameters=UnitData"]
+#            dtx >> d[n+":xAxis'Parameters=Data"]
+#            dty >> d[n+":yAxis'Parameters=Data"]
+
+
+
+d["PlotPanel'Parameters=PlotPanel"].Silent(True)
+~d["PlotPanel'Parameters=PlotPanel"]
+("Parameters","PlotPanel",_l(999)) >> DataUnion(d["PlotPanel"])
+d["PlotPanel'Parameters=PlotPanel"].Silent(False)
+d["PlotPanel'Parameters=PlotPanel"].touch()
+
+
+vf=FloatVec()
+lofarMainDir = os.environ.get('LOFARSOFT')
+hardcodedFileName = lofarMainDir + '/data/lopes/2007.01.31.23:59:33.960.event'
+d=Data("ROOT")
+d >> _d("Filename",hardcodedFileName,_l(90)) >> _d("File",_f("dataReaderObject","CR")) >> _d("Antenna",0) >>  ("Data",_f("dataRead","CR",TYPE.COMPLEX))
+
+
+
+
 dbg=hfPyDBGObject()
 x=d.All().storePyDBG(dbg).setVerbose(9999).setDebug(True).setVerboseGUI(True);
 d["File'Block"]=2
@@ -273,8 +338,6 @@ qw.img.save("qtest.jpg")
 qw.img.save(QtCore.QString("qtest.jpg"))
 
 
-from PyQt4 import QtGui,QtCore
-from mathgl import *
 gr = mglGraph();
 gr.Box();
 buffer='\t'; buffer=buffer.expandtabs(4*gr.GetWidth()*gr.GetHeight());

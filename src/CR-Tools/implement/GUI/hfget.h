@@ -99,10 +99,10 @@ bool parse_record_selection_to_vector (HString str,
 //------------------------------------------------------------------------
 
 template <class T>
-bool object_logic_cmpr(Data* o_ptr, T val);
+bool object_logic_cmpr(const Data* o_ptr, const T val);
 
 template <class T>
-bool object_logic_in_set(Data* o_ptr, vector<T> &set);
+bool object_logic_in_set(const Data* o_ptr, const vector<T> &set);
 
 // End object logic operators
 //------------------------------------------------------------------------

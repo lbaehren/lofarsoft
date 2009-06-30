@@ -1,3 +1,4 @@
+#pdb.set_trace()
 pyoblist=[]
 
 PUSH=DIR.TO
@@ -8,8 +9,81 @@ maxnetlevel=999
 def hfERR(txt):
     print "Error:",txt
 
+def mem(size="rss"):
+    """Generalization; memory sizes: rss, rsz, vsz."""
+    return int(os.popen('ps -p %d -o %s | tail -1' %
+                        (os.getpid(), size)).read())
+
+#Extending mathgl to accept STL vectors 
+def mglDataSetVec(self,vec):
+    mglDataSet(self,vec)
+
+mglData.SetVec = mglDataSetVec
+
+
+mglGraphZB=0
+mglGraphPS=1
+mglGraphGL=2
+mglGraphIDTF=3
+#mglGraphAB is not available - ZB is default
+
+def e(file): 
+    "short form form execfile(file.py)"
+    print "Loading",file+".py"
+    execfile(file+".py")
+
 help={}
 help["verbose"]="Use d.AllVerbose(True/False) to watch the execution of the network. The output is {Objectid}Name(data_vector[0])flag, where flag is one of the following: blank=no function, just data; ~=just a function, no data; *=function and data present and is modified; $=function and data present and is not modified."
+
+
+######Utilities
+def flatten(l):
+  out = []
+  for item in l:
+    if isinstance(item, (list, tuple)):
+      out.extend(flatten(item))
+    else:
+      out.append(item)
+  return out
+
+def ListElement2IntVecElements(l):
+    if len(l)==1: return int(l[0])
+    elif len(l)==2: return range(int(l[0]),int(l[1])+1)
+    else: return 0
+
+def text2IntVec(s):
+    return flatten(map(lambda x:ListElement2IntVecElements(x.split('..')),s.split(',')))
+
+def IntVec2NiceString(l):
+    s=""
+    if len(l)==0: return s
+    l.sort()
+    prev=l[0]
+    s+=str(prev)
+    rng=False
+    for i in l[1:]:
+        if (i==prev+1): 
+            rng=True
+        else:
+            if rng: s+=".."+str(prev)
+            rng=False
+            s+=","+str(i)
+        prev=i
+    return s
+            
+    
+#####
+
+
+def select(l,elems): 
+    "Returns the elements of list l, which are given in the list of the second argument."
+    return map(lambda i:l[i],elems)
+def Identity(x,*arg): return x
+def returnFalse(*arg): return False
+def returnTrue(*arg): return True
+def returnOne(*arg): return 1
+def returnEmptyDatalist(*arg): return DataList()
+
 
 def insert_object(self,l):
     if (type(l) in [tuple,list,DataParameterList]):
@@ -20,7 +94,6 @@ def initializeObject(self,value):
     "This function initializes a newly created data object with values and parameters. value can be a tuple, list, or DataParameterList. The first value of the tuple is the new, which is not used for an already created object. _f(func) defines a function, _l(n) defines the netlevel of the object for displaying. Everything else is used to set the value of the object (e.g. a number or a string)."
     if (type(value) in [tuple,list,DataParameterList]):
         for elem in value[1:]:
-            
             if hasattr(elem,"__hftype__"):
                 if (elem.__hftype__()=="_f"):
                     self.setFunc_f_silent(elem)
@@ -31,19 +104,59 @@ def initializeObject(self,value):
     return self
 
 def object_new(self,*arg):
-    "Creates a new object an initializes ist (see .create() and .initializeObject())"
+    "Creates a new object an initializes it (see .create() and .initializeObject())"
     tup=(arg)
     if (len(tup)>1): return self.create(tup[0]).initializeObject(tup)
     else: return self.create(tup[0])
+
+def strtovalue(s):
+    "Converts a string to either an Integer or a Float if it starts with a digit. Otherwise return the string"
+    if len(s)>0:
+        if s[0].isdigit():
+            val=float(s)
+            if val.is_integer(): val=int(val)
+        else: val=s
+    else: val=s
+    return val
+        
+def object_find_or_make(self,*arg):
+    "Find an object of name 'name' or creates it if not found and initializes it fit the parameteres in the argument list\
+    (see .create() and .initializeObject()).\
+    You can use '=' for searching, however, more complicated search paths are not supported yet. \
+    For example, the name of the object is considered to be the string until the first occurance of '='!\
+    Example: object_find_or_make(d,''NAME=1'',_l(99)).\
+    One can also specify a list of names: object_find_or_make(d,[''NAME=Eins'',''NAME=Zwei''],_l(99))."
+    tup=(arg)
+    names=tup[0]
+    if type(names)!=list: names=[names]
+    ret=DataList()
+    for name in names:
+        obj=self[name]
+        if obj.notFound():
+            if (PULL in tup): dir_type=PULL
+            elif (PUSH in tup): dir_type=PUSH
+            else: dir_type=DIR.NONE
+            pinit=tuple(set(tup[1:]).difference([PUSH,PULL,DIR.NONE]))
+            idx=name.find("=")
+            if idx>0:
+                val=strtovalue(name[idx+1:]) # value is everything after "="
+                name=name[:idx] #Only take name until the first "="
+                pinit=(name,val)+pinit
+            else: pinit=(name,)+pinit
+            ret.append(self.newObject(name,dir_type).initializeObject(pinit))
+#            if (len(tup)>1): ret.append(self.newObject(name,dir_type).initializeObject(pinit))
+#            else: ret.append(self.newObject(name,dir_type))
+        else: ret.append(obj)
+    return ret.unique()
 
 
 def MakeChooser(d,name,fields,values):
     "Create a chooser, which is a collection of objects which act like a record of similar records, containgin a set of parameters among which you can choose in a menu. The first parameter is the name of the chooser object. The second parameter is a tuple of parameter names that form one set. The third parameter is a tuple of tuple containing the parameter values which belong to the respective parameters."
     chooser=d.new("Chooser",name,_l(100))
     for val in values:
-        obj=(fields[0],val[0],_l(200)) >> chooser
+        obj=(fields[0],val[0],_l(2000)) >> chooser
         for i in range(1,len(fields)):
-          obj=(fields[i],val[i],_l(200)) >> obj
+          obj=(fields[i],val[i],_l(2000)) >> obj
     return chooser
 
 
@@ -72,12 +185,29 @@ def object_id(self):
     "Function to return ID number of an object. Used for make_uniqe" 
     return self.getOid()
 
+def object_Chain(self,dir,names,include_endpoints=True):
+    if type(names)==str: names=[names]
+    if type(names)==list: names=list2vec(names)
+    ids=self.FindChainID(dir,names,include_endpoints)
+    return self[ids]
+
+def object_search(self,s):
+    "Function to search all objects for one which contains the string s in its name"
+    l=DataList()
+    for dd in d.All():
+        if s in dd.getName(): l.append(dd)
+    if len(l)==1: return l[0]
+    else: return l
+
 def toList(val):
     "Returns val as a List, i.e leave it unchanged if it is already a list, or, for a scalar, create a one-element list"
     if type(val)==list: return val
     else: return [val]
 
-
+def make_unique_new(seq):  
+    x=set(seq)
+    return list(x.union(x))
+    
 def make_unique(seq, idfun=None):  
     "Returns a list which only contains unique members"
     # order preserving 
@@ -88,27 +218,34 @@ def make_unique(seq, idfun=None):
     else: result = [] 
     for item in seq: 
         marker = idfun(item) 
-        # in old Python versions: 
-        # if seen.has_key(marker) 
-        # but in new ones: 
         if marker in seen: continue 
         seen[marker] = 1 
         result.append(item) 
     return result
 
 def datalist_unique(self):
-    l=make_unique(self,object_id)
-    if len(l)==1: return l[0]
-    else: return l
+    return make_unique(self,object_id).unList()
 
-#Used for determining whether a search was successful If not, an
-#DataList will be returned that returns true and 0 for these
-#functions.
-def object_notFound(self): return False;
-def object_NFound(self): return 1;
+def datalist_unique_new(self): #Does not work for Data objects
+    x=set(self)
+    return DataList(x.union(x)).unList()
+
+def object_move(self,objfrom,objto):
+    "Moves this object linked to objfrom to be linked to  objto. The link to objto is cut."
+    sil0=self.Silent(True)
+    sil1=objfrom.Silent(True)
+    sil2=objto.Silent(True)
+    self >> objto
+    self // objfrom
+    self.wakeUp()
+    objto.wakeUp()
+    objfrom.wakeUp()
+    self.Silent(sil0)
+    objfrom.Silent(sil1)
+    objto.Silent(sil2)
 
 class DataList(list):
-    def datalist(self): return
+    def datalist(self,*args): map(lambda d:d.printStatus(1,*args),self)
     def __getitem__(self,idx):
         "If index is  a string then retrieve a list of data objects with that sting index from every data object in the list and create a new (flat) data list, otherwise return element idx"
         if type(idx)==str:  
@@ -117,12 +254,21 @@ class DataList(list):
                 el=d[idx]
                 if type(el)==DataList: dl.extend(el) ##make sure the list remains flat ...
                 else: dl.append(el)
-            return datalist_unique(dl)
+            return dl.unique()
         else:
             return list(self)[idx]
+    def isDataList(self):
+        "Used for determining whether this is a DataList object (which it is) and not a DataObject."
+        return True
+    def isSingleDataObject(self):
+        "Used for determining whether this is a single Data object (which it isn't) and not a DataList."
+        return False
     def notFound(self):
         "Used for determining whether a search was successful. If not, an empty DataList will be returned that returns true  for this function."
         return len(self)==0
+    def Found(self):
+        "Used for determining whether a search was successful and the Datalist contains one or more elements."
+        return len(self)>0
     def NFound(self):
         "Number of objects in the DataList. Same as len. Used for determining whether a search was successful. If not, an empty DataList will be returned that returns zero for this function. If one object is found an Object is returned."
         return len(self)
@@ -160,102 +306,166 @@ class DataList(list):
         else:
             for d in self: dl.append(d.__lshift__(value))
         return dl
+    def resetLink(self,value,*args):
+        "This will create a link between self and the other object (value).\
+        If the link already exists it will be overwritten with the \
+        current parameters or remain unchanged if the parameters are \
+        the same. Parameters are those of SetLink, i.e. the other\
+        object, followed by the the type of connection (PUSH/PULL) and \
+        the direction (DIR.TO/DIR.FROM). If there are two DataLists a link\
+        will be created between each corresponding element. If there is\
+        one object and a DataList, there will be a link between the object\
+        and each element in the DataList."
+        if (type(value)==DataList):  ## This means DataList >> DataList - here each member will be linked to the corresponding member in the other list
+            if len(self)==1 | len(value)==1: return self.unList().resetLink(value.unList(),*args) # here we convert a list to a single object and try again.
+            if not len(self)==len(value): 
+                hfERR("resetLink - Unable to set links between unequally long DataLists:",self, "and", value)
+                return DataList()
+            return DataList(map(lambda d1,d2:d1.resetLink_cc(d2,*args),self,value)) # here link every element of self with the corresponging element in value
+        return DataList(map(lambda d:d.resetLink_cc(value,*args),self)) # here link the single object value with every element of self 
     def delObject(self):
-        for d in self:
-            d.delObject()
+        "Will delete objects in the data list silently."
+        map(lambda d:d.delObject_silent(),self)
+        return DataList()
+    def __invert__(self): #    =>   ~[obj1,obj2,....]
+        "Will delete objects in the data list silently."
+        map(lambda d:d.delObject_silent(),self)
+    def find_or_make(self,*arg): #  
+        "Find an object of name 'name' or creates it if not found and initializes it fit the parameteres in the argument list\
+        (see .create() and .initializeObject()).\
+        You can use '=' for searching, however, more complicated search paths are not supported yet. \
+        For example, the name of the object is considered to be the string until the first occurance of '='!\
+        Example: object_find_or_make(d,''NAME=1'',_l(99)).\
+        One can also specify a list of names: object_find_or_make(d,[''NAME=Eins'',''NAME=Zwei''],_l(99))."
+        return DataList(map(lambda d:d.find_or_make(*arg),self))
+    def getAllIDs(self): #  
+        "Retrievs all objects IDs in the list."
+        return map(lambda d:d.getOid(),self)
+    def Tail(self,start=1): #  
+        "Retrievs the first object in the list."
+        if len(self)>start: return self[start:]
+        else: return DataList()
+    def FirstObject(self): #  
+        "Retrievs the first object in the list."
+        if len(self)>0: return self[0]
+        else: return DataList()
+    def LastObject(self): #  
+        "Retrievs the last object in the list."
+        if len(self)>0: return self[-1]
+        else: return DataList()
+    def unList(self):
+        "If DataList contains only a single element, return that one, rather than a list"
+        if len(self)==1: return self[0]
+        else: return self
+    def asList(self):
+        "Return a datalist, even if it is a single object."
+        return self
+    def getPy(self): #  
+        "Retrievs all Python objects from teh objects in the list."
+        return map(lambda d:d.getPy(),self)
     def connect(self,method,slot="setText",Type="QString",isSlot=True):
         self[0].connect(method,slot,Type,isSlot)
+        return self
     def update(self):
-        for d in self: d.update()
+        map(lambda d:d.update(),self)
+        return self
+    def wakeUp(self):
+        map(lambda d:d.wakeUp(),self)
         return self
     def touch(self):
-        for d in self: d.touch()
+        map(lambda d:d.touch(),self)
         return self
     def noSignal(self):
-        for d in self: d.noSignal()
+        map(lambda d:d.noSignal(),self)
         return self
     def set(self,value):
-        for d in self: d.set(value)
+        map(lambda d:d.set(value),self)
         return self
     def set_silent(self,value):
-        for d in self: d.set_silent(value)
+        map(lambda d:d.set_silent(value),self)
         return self
     def put_silent(self,value):
-        for d in self: d.put_silent(value)
+        map(lambda d:d.put_silent(value),self)
         return self
     def storePyDBG(self,value):
-        for d in self: d.storePyDBG(value)
+        map(lambda d:d.storePyDBG(value),self)
         return self
     def setVerbose(self,value):
-        for d in self: d.setVerbose(value)
+        map(lambda d:d.setVerbose(value),self)
         return self
     def setDebug(self,value):
-        for d in self: d.setDebug(value)
+        map(lambda d:d.setDebug(value),self)
         return self
     def setDebugGUI(self,value):
-        for d in self: d.setDebugGUI(value)
+        map(lambda d:d.setDebugGUI(value),self)
         return self
     def setNetLevel(self,value):
-        for d in self: d.setNetLevel(value)
+        map(lambda d:d.setNetLevel(value),self)
         return self
     def printStatus(self,value=True):
-        for d in self: d.printStatus(value)
+        map(lambda d:d.printStatus(value),self)
         return self
     def clearModification(self):
-        for d in self: d.clearModification()
+        map(lambda d:d.clearModification(),self)
         return self
+    def setFunc_f_silent(self,f):
+        "Assigns a function to each data object in the list using the _f mechanism to specify which function to assign."
+        map(lambda d:d.setFunc_f_silent(f),self)
+        return self
+    def setList(self,l):
+        "Assigns each member of the datalist the corresponding value in the input list l."
+        return DataList(map(lambda d,v:d.set(v),self,l))
+    def Silent(self,sil):
+        "Sets the silent flag of an object which can inhibit the update chain (but not the modification flagging): True or False."
+        ret=[]
+        if type(sil)==list:
+            for i in range(len(self)): ret.append(self[i].Silent(sil[i]))
+        else:
+            for d in self: ret.append(d.Silent(sil))
+        return ret
     def val(self):
         "Returns a list of the values in the Data object list"
-        ret=[]
-        for d in self: ret.append(d.val())
-        return ret
+        return map(lambda d:d.val(),self)
     def getS(self):
         "Returns a list of the values in the Data object list in String format"
-        ret=[]
-        for d in self: ret.append(d.getS())
-        return ret
+        return map(lambda d:d.getS(),self)
     def getI(self):
         "Returns a list of the values in the Data object list in Integer format"
-        ret=[]
-        for d in self: ret.append(d.getI())
-        return ret
+        return map(lambda d:d.getI(),self)
     def getN(self):
         "Returns a list of the values in the Data object list in floating point Number format"
-        ret=[]
-        for d in self: ret.append(d.getN())
-        return ret
+        return map(lambda d:d.getN(),self)
     def getC(self):
         "Returns a list of the values in the Data object list in Complex number format"
-        ret=[]
-        for d in self: ret.append(d.getC())
-        return ret
+        return map(lambda d:d.getC(),self)
     def getDebugGUI(self):
         "Returns a list of the GUI verbose flag in the Data object list."
-        ret=[]
-        for d in self: ret.append(d.getDebugGUI())
-        return ret
+        return map(lambda d:d.getDebugGUI(),self)
     def getDebug(self):
         "Returns a list of the Debug flag in the Data object list."
-        ret=[]
-        for d in self: ret.append(d.getDebug())
-        return ret
+        return map(lambda d:d.getDebug(),self)
     def getNetLevel(self):
         "Returns a list of the NetLevels in the Data object list."
-        ret=[]
-        for d in self: ret.append(d.getNetLevel())
-        return ret
+        return map(lambda d:d.getNetLevel(),self)
     def getOid(self):
         "Returns a list of the IDs in the Data object list."
-        ret=[]
-        for d in self: ret.append(d.getOid())
-        return ret
-    def getName(self):
+        return map(lambda d:d.getOid(),self)
+    def getName(self,longname=False):
         "Returns a list of the Names in the Data object list."
-        ret=[]
-        for d in self: ret.append(d.getName())
-        return ret
+        return map(lambda d:d.getName(longname),self)
+    def getSearchName(self,longname=False):
+        "Returns a list of the Names in the Data object list."
+        return map(lambda d:d.getSearchName(longname),self)
+    def getLinkDirection(self,neighbour):
+        "Returns the link direction between the current and its neighbouring object, given as an argument."
+        return map(lambda d:d.getLinkDirection(neighbour),self)
+    def getLinkDirectionType(self,neighbour):
+        "Returns the link direction type (PUSH or PULL) between the current and its neighbouring object, given as an argument."
+        return map(lambda d:d.getLinkDirectionType(neighbour),self)
+
 
 def DataUnion(*dlist):
+    "This is a class derived from DataList which is used in the construction of networks. The idea is that the objects in the DataUnion are treates as if they were one object. Hence if a link is created between a newobject and a DataUnion only one new object will be created, which is the linked to all elements of the Union. In contrast for a DataList, there would be a new Object created for each element in the List and linked to ist corresponding parent."
     if len(dlist)==1: 
         if type(dlist[0])==Data:
             return dlist[0]
@@ -270,7 +480,10 @@ class DataUnionClass(DataList):
             elif type(dl)==Data:
                 self.append(dl)
             else: print "DataUnionClass: unknown member type:",dl
-#value >> self
+    def __getitem__(self,idx):
+        "If index is a string then retrieve a list of data objects with that sting index from every data object in the list and create a new (flat) data list, otherwise return element idx"
+        return DataUnion(DataList(self)[idx])
+ #value >> self
     def __rrshift__(self,value):
         first=None
         if len(self)>=1: first=value >> self[0]
@@ -298,6 +511,23 @@ class DataUnionClass(DataList):
         for d in self[1:]: d << first 
         if len(first)>1: return first[0]
         else: return first
+    def newObject(self,*arg):
+        no=DataList()
+        if len(self)>0:
+            no=self.FirstObject().newObject(*arg) 
+        if len(self)>1:
+            no >> self.Tail()
+        return no    
+    def find_or_make(self,*arg):
+        no=DataList()
+        if len(self)>0:
+            no=self.FirstObject().find_or_make(*arg) 
+        if len(self)>1:
+            ld=self.getLinkDirection(no)
+            ldt=self.getLinkDirectionType(no)
+            map(lambda d:d.resetLink(no,ldt[0],ld[0]),self[1:])
+        return no    
+
 
 def stauchString(string,maxlen=20):
     if len(string)>maxlen:
@@ -333,6 +563,10 @@ def type2str(type):
 def object_all(self):
     return self[self.getAllIDs()]
 
+def object_asList(self):
+    "Returns the DataObject as a Data(Object)List."
+    return DataList([self])
+
 def object_getitem(self,value):
     if type(value)==int:
         return self.Object(value)
@@ -343,15 +577,9 @@ def object_getitem(self,value):
         elif len(ids)==1:
             return self.Object(ids[0])
         else:
-            l=list()
-            for i in ids:
-               l.append(self.Object(i))
-            return DataList(l)
-    if type(value)==IntVec:
-        l=list()
-        for i in value:
-            l.append(self.Object(i))
-        return DataList(l)
+            return DataList(map(lambda v:self.Object(v),ids))
+    if (type(value)==list) | (type(value)==IntVec) | (type(value)==IntVec):
+        return DataList(map(lambda v:self.Object(v),value))
 
 def object_setitem(self,key,value):
     "Used to overload the assign operation for a data object with [] to set the content of the vector."
@@ -361,6 +589,10 @@ def object_set_silent(self,value):
     sil=self.Silent(True)
     object_set(self,value)
     self.Silent(sil)
+    return self
+
+def object_setList(self,l):
+    self.set(l[0])
     return self
 
 def list2vec(lst):
@@ -379,6 +611,7 @@ def list2vec(lst):
     
 def vec2list(vec):
     "Convert a stl vector to a python list"
+    if type(vec)==list: return vec
     ret=[]
     ret.extend(vec)
     return ret
@@ -465,10 +698,10 @@ def object_val(self):
         elif typ==TYPE.COMPLEX:
             ret=self.getC()
         elif typ==TYPE.POINTER:
-            ret=self.getPy()
+            ret=self.getI()
         return ret
     else:
-        if (typ==TYPE.INTEGER | typ==TYPE.POINTER):
+        if ((typ==TYPE.INTEGER) | (typ==TYPE.POINTER)):
             v=IntVec()
         elif typ==TYPE.NUMBER:
             v=FloatVec()
@@ -476,6 +709,9 @@ def object_val(self):
             v=StringVec()
         elif typ==TYPE.COMPLEX:
             v=ComplexVec()
+        else:
+            v=FloatVec()
+            hfERR("Object "+self.getName()+": Type undefined.")
         self.get(v)
         return v
 
@@ -544,7 +780,9 @@ def setStoredPyQtObject(self, pyob):
 
 
 def initializePyQtObjects(self):
-    for obj in self.stored_pyqtobj.values(): obj.obj.signalPyQt("updated")
+    for obj in self.stored_pyqtobj.values(): 
+        print obj.obj
+        obj.obj.signalPyQt("updated")
 
 
 def object_get_bool(self): return bool(self.getI())
@@ -553,6 +791,7 @@ def object_get_QString(self): return QtCore.QString(self.getS())
 object_Type2Data_map={"int":"I","QString":"Q","float":"N","bool":"B","str":"S"}
 
 def object_getT(self,Type):
+    "Returns the value of an object as type 'Type'. The type name is based on the type definition used by PyQt."
     exec("ret=self.get"+object_Type2Data_map[Type]+"()")
     return ret
 
@@ -571,7 +810,14 @@ class hfPyQtObject(QtCore.QObject):
             hfERR("hfPyQtObject - no Data Object set")
             return -1
     def updated(self,object):
-        self.hfupdated(object.getT(self.type))
+        if len(object)==1:
+            self.hfupdated(object.getT(self.type))
+        else:
+            if (self.type!="QString") | (object.getType()!=TYPE.INTEGER): 
+                print object
+                hfERR("Only Conversion from Integer Lists to QString are supported for connecting an object to the GUI! (SLOT="+str(self.type)+", object="+str(object.getType())+")")
+                return -1
+            self.hfupdated(IntVec2NiceString(vec2list(object.val())))
         return 0
     def hfupdated(self,value):
         self.emit(QtCore.SIGNAL("hfupdated("+self.type+")"),value)
@@ -687,6 +933,25 @@ def object_invert(self):  # delObject
     "~data deletes an object."
     self.delObject()
 
+def object_delObject_silent(self):  
+    "~data deletes an object."
+    self.Silent(True)
+    self.delObject()
+
+def object_resetLink(self,value,*args):
+    "This will create a link between self and the other object (value).\
+    If the link already exists it will be overwritten with the \
+    current parameters or remain unchanged if the parameters are \
+    the same. Parameters are those of SetLink, i.e. the other\
+    object, followed by the the type of connection (PUSH/PULL) and \
+    the direction (DIR.TO/DIR.FROM). If there are two DataLists a link\
+    will be created between each corresponding element. If there is\
+    one object and a DataList, there will be a link between the object\
+    and each element in the DataList."
+    if (type(value)==DataList):  ## This means Object >> DataList 
+        if len(value)==1: return self.resetLink_cc(value.unList(),*args) # here we convert a list to a single object and try again.
+        return DataList(map(lambda d:self.resetLink_cc(d,*args),value)) # here link the single object value with every element of value
+    return self.resetLink_cc(value,*args)
 
 def object_xxshift(self,pre,other,dir):
     "Used to overload the shift operators. Is called by functions like object_rrshift etc. The >> or << operators can be used to connect two data objetcs or a dataobject and a string or tuple. In the latter case a new object is created with the name of the string the data object links to. The Tuple contains the name as first element and then additional initialization parameters, e.g. a value to be put in, a function (bracketed by _f()), or a NetLevel (use _l(level))"
@@ -697,7 +962,7 @@ def object_xxshift(self,pre,other,dir):
         other.setLink(self,dir)
 #        other.touch()
         return other
-    elif type(other)==DataList:
+    elif (type(other)==DataList) | (type(other)==DataUnionClass):
         for d in other:
             d.setLink(self,dir)
 #        other.touch()
@@ -787,14 +1052,15 @@ def object_getDOT(self,maxnetlevel,details=1,reverse=False,highlight=False):
             if not modified: color="green"
         if self.hasFunc() & self.hasData(): shape="octagon"
     props='label="'+label+'"'
-    props+=",fontname="+fontname
     if fontsize>0: 
+        props+=",fontname="+fontname
         props+=",fixedsize=true"
         props+=",height="+str(0.8*fontsize/10.)
         props+=",width="+str(1.4*fontsize/10.)
         props+=",fontsize="+str(fontsize)
     if highlight: 
         props+=",style=bold"
+        color="blue"
     props+=",shape="+shape
     props+=",color="+color
     out = name +" ["+props+"];"
@@ -850,10 +1116,11 @@ class hfWrite_Str():
 
 def object_exportDOT(self,destination,maxnetlevel=999,details=1,reverse=False):
     "Exports the entire network structure into a .dot file or QByte array that can be viewed with graphviz or dotty"
-    l = self.getAllIDs()
-    myid=self.getOid()
+    if self.isSingleDataObject(): l=self.All()
+    else: l=self
+    myself=self.FirstObject()
     if destination=="FILE": 
-        name=self.getName()
+        name=myself.getName()
         fn=name+".dot" 
         OUT=hfWrite_File(fn)
         OUT.write("#dot -Tgif "+fn+" -o "+name+".gif; xview "+name+".gif\n")
@@ -866,12 +1133,10 @@ def object_exportDOT(self,destination,maxnetlevel=999,details=1,reverse=False):
     else: 
         print "Error - object_exportDOT: Destination",destination,"unknown!"
         return
-#    OUT.write('digraph G {\nsize="8.25,11.6"; ratio=compress;\n')
-    OUT.write('digraph G {\nsize="8.25,11.6"; ratio=auto;\n')
-    n=0
-    for i in l:
-        if ((n==0) | (i!=0)): OUT.write(self[i].getDOT(maxnetlevel,details,reverse,myid==i)+"\n")
-        n+=1
+    OUT.write('digraph G {\n')
+#   OUT.write('digraph G {\nsize="8.25,11.6"; ratio=compress\n')
+#    OUT.write('digraph G {\nsize="8.25,11.6"; ratio=fill;\n')
+    map(lambda d:OUT.write(d.getDOT(maxnetlevel,details,reverse,myself==d)+"\n"),l)
     OUT.write("}\n")
     return OUT.close()
 
@@ -884,17 +1149,26 @@ def object_net2qb(self,maxnetlevel=999):
     p.terminate()
     return qb
 
-def object_nview(self,maxnetlevel=999):
+def object_nview(self,maxnetlevel=999,tofile=False):
     "Allows one to display the network an object is embedded in, in a QtWidget. self is the object, and maxnetlevel says how much detail is to be shown - increases in steps of powers of ten: 9,99,999,9999"
-    if (type(self.globals["qsvg"])!=QtSvg.QSvgWidget):
-        self.globals["qsvg"]=QtSvg.QSvgWidget()
-        self.globals["qsvg"].resize(800,600)
-        self.globals["qsvg"].raise_()
-        self.globals["qsvg"].show()
-        self.globals["qsvg"].setWindowTitle(self.getName()+" Network Display")
-    self.globals["qsvg"].load(object_net2qb(self,maxnetlevel))
-#    fn=self.exportDOT("FILE",maxnetlevel)
-#    os.system("dot -Tsvg "+fn+" -o "+fn+".svg")
+    if tofile:
+        fn=self.exportDOT("FILE",maxnetlevel)
+        print "Dot-file written to ",fn," use GraphViz to view. The following command will only work on MacOS in its current implementation."
+        os.system("open "+fn+" -a /Applications/Graphviz.app") 
+        return
+    docreate=True
+    if ("qsvg" in self.FirstObject().globals): docreate=type(self.FirstObject().globals["qsvg"])!=QtSvg.QSvgWidget
+    if docreate:
+        self.FirstObject().globals["qsvg"]=QtSvg.QSvgWidget()
+        self.FirstObject().globals["qsvg"].resize(800,600)
+        self.FirstObject().globals["qsvg"].raise_()
+        self.FirstObject().globals["qsvg"].setWindowTitle(self.FirstObject().getName()+" Network Display")
+    if not self.FirstObject().globals["qsvg"].isVisible(): self.FirstObject().globals["qsvg"].show()
+    self.FirstObject().globals["qsvg"].load(object_net2qb(self,maxnetlevel))
+
+def object_graphviz(self,maxnetlevel=999): 
+    "Allows one to view the network in GraphViz - launched as an external application."
+    self.nview(maxnetlevel,True)
 
 
 def object_putPyList_silent(self,l):
@@ -912,13 +1186,14 @@ Data.putPyList_silent=object_putPyList_silent
 Data.__eq__=object_equal
 Data.__repr__=object_print
 Data.__invert__=object_invert  #~data = delObject
-DataList.__invert__=object_invert  #~data = delObject
-Data.__rrshift__=object_rrshift   #newobject+setlink
-Data.__rshift__=object_rshift     #newobject+setlink
-Data.__rlshift__=object_rlshift   #newobject+setlink 
-Data.__lshift__=object_lshift     #newobject+setlink
+Data.delObject_silent=object_delObject_silent  
+Data.__rrshift__=object_rrshift   #newobject+setlink  >> obj
+Data.__rshift__=object_rshift     #newobject+setlink  obj >>
+Data.__rlshift__=object_rlshift   #newobject+setlink  <<  obj
+Data.__lshift__=object_lshift     #newobject+setlink  obj <<
 Data.__setitem__=object_setitem
 Data.__getitem__=object_getitem
+Data.move=object_move
 Data.put_silent=object_set_silent
 Data.set_silent=object_set_silent
 Data.__floordiv__=object_floordiv # // = dellink
@@ -946,11 +1221,18 @@ Data.exportDOT=object_exportDOT
 Data.nview=object_nview
 Data.nv=object_nview
 
-def datalist(self,maxnetlevel=9999):
-    self.printAllStatus(1,maxnetlevel)
+def datalist(self,maxnetlevel=9999,printdeletedobjects=False):
+    self.printAllStatus(1,maxnetlevel,printdeletedobjects)
 
-Data.notFound=object_notFound
-Data.NFound=object_NFound
+#Used for determining whether a search was successful If not, an
+#DataList will be returned that returns true and 0 for these
+#functions.
+Data.notFound=returnFalse
+Data.Found=returnTrue
+Data.NFound=returnOne
+
+Data.isSingleDataObject=returnTrue
+Data.isDataList=returnFalse
 Data.list = datalist
 Data.ls = datalist
 Data.stored_pyfuncobj={}
@@ -974,6 +1256,17 @@ Data.getT=object_getT
 Data.getB=object_get_bool
 Data.getQ=object_get_QString
 Data.All=object_all
+Data.search=object_search
+Data.find_or_make=object_find_or_make
+Data.Chain=object_Chain
+Data.resetLink=object_resetLink
+Data.LastObject=Identity
+Data.FirstObject=Identity
+Data.Tail=returnEmptyDatalist
+Data.unList=Identity
+Data.setList=object_setList
+Data.asList=object_asList
+
 #This isued to store some global shortcuts to Qt objects and GUIs that are used by all objects
 Data.globals={}
 
@@ -1004,20 +1297,11 @@ Data.verboseon=verboseon
 Data.verboseoff=verboseoff
 
 
-#Extending mathgl to accept STL vectors 
-def mglDataSetVec(self,vec):
-    mglDataSet(self,vec)
+DataList.unique=datalist_unique
+DataList.exportDOT=object_exportDOT
+DataList.nview=object_nview
+DataList.nv=object_nview
+DataList.ls=DataList.datalist
 
-mglData.SetVec = mglDataSetVec
-
-
-mglGraphZB=0
-mglGraphPS=1
-mglGraphGL=2
-mglGraphIDTF=3
-#mglGraphAB is not available - ZB is default
-
-def e(file): 
-    "short form form execfile(file.py)"
-    print "Loading",file+".py"
-    execfile(file+".py")
+Data.gv=object_graphviz
+DataList.gv=object_graphviz

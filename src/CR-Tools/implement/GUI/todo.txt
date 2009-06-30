@@ -56,7 +56,6 @@ hffuncs.cc:
  
 - Let the c++ functions als return DataObjects (or pointers), just like python
 
-
 - Change the search algorithm so that it goes stepwise through the net, one level after the next, returning all object links of the net level (violates locality, but the update worm has done that already ....)
 
 - Maybe introduce a "link updated", i.e. a message that tells
@@ -65,7 +64,11 @@ hffuncs.cc:
   only done once (when links changed) and then the parameters are
   directly linked internally.
 
-BUGS:
+- Think about the update worm: How does one make this more efficient
+if multiple results are being created -> perhaps by blocking teh
+Results object until all operations are performed!
+
+  BUGS:
 
 - hfgui.py - hfsetBlock : touch needs to be done twice - which is a bit of a waste ...
 

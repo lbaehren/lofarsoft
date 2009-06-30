@@ -43,6 +43,29 @@ using namespace std;
 #include "dal/TBB_Timeseries.h"
 
 
+/*!
+\brief Get the extension of the filename
+ */
+HString file_get_extension(HString filename){
+  HInteger size=filename.size();
+  HInteger pos=filename.rfind('.',size);
+  pos++;
+  if (pos>=size) {return "";}
+  else {return filename.substr(pos,size-pos);};
+}
+/*!
+\brief Determine the filetype based on the extension of the filename
+ */
+
+HString determine_filetype(HString filename){
+  HString ext=file_get_extension(filename);
+  HString typ="";
+  if (ext=="event") typ="LOPESEvent";
+  else if (ext=="h5") typ="LOFAR_TBB";
+  return typ;
+}
+
+
 /*========================================================================
   class ObjectFunctionClass
   ========================================================================
@@ -66,7 +89,7 @@ void ObjectFunctionClass::process_S(F_PARAMETERS_T(HString) ) {ERROR("ObjectFunc
 
 
 
-//This is a dummy funciton we need in order to fool the compiler
+//This is a dummy function we need in order to fool the compiler
 //so that templated methods of all typese are created ...
 //This calls all templated methods in the class
 //I currently don't know of a smater way doing this, after all the actual typing
@@ -77,6 +100,7 @@ void ObjectFunctionClass::instantiate_one(){
   T val; HString s = "";
   setParameter(s,val);
   getParameterDefault<T>(s);
+  putResult("",val);
 }; 
 //This ensures all templates for all known types are created
 //The user could change this and only create selected ones.
@@ -94,7 +118,7 @@ not found.  The external names are names of other objects in the network that
 contain the parameter values. If not given the object name is the parameter
 name plus a prefix (either ' or ":").
 
-I have to use explicit overloading, since 
+I have to use explicit overloading here
 */
 
 void ObjectFunctionClass::setParameter(HString internal_name, HPointer default_value, HString prefix, HString external_name){setParameterT(internal_name, default_value, prefix, external_name);};
@@ -110,13 +134,13 @@ void ObjectFunctionClass::setParameterT(HString internal_name, T default_value, 
   HString ext_name;
   if (external_name=="") {ext_name=internal_name;} else {ext_name=external_name;};
   ext_name=prefix+ext_name;
-  map<HString,parameter_item>::iterator it=parameter_list.find(internal_name);
+  pit=parameter_list.find(internal_name);
   parameter_item p_i;
   DBG("ObjectFunctionClass::setParameter: internal_name=" << internal_name 
       << ", ext_name=" << ext_name << ", default_value=" << default_value 
       << " Type=" << datatype_txt(type));
-  if (it != parameter_list.end()) {  //Name already exists
-    if ((it->second).type==type) {  // and type is the same
+  if (pit != parameter_list.end()) {  //Name already exists
+    if ((pit->second).type==type) {  // and type is the same
       *(static_cast<T*>(p_i.ptr))=default_value; //just assign a new value
       return;
     }
@@ -131,6 +155,131 @@ void ObjectFunctionClass::setParameterT(HString internal_name, T default_value, 
   set_ptr_to_value(p_i.ptr,p_i.type,default_value);
   parameter_list[internal_name]=p_i;
 }
+
+/*!
+\brief Retrieves all parameters from the network and create them, if they do not exist. 
+
+In this form it is only useful at the time of initialization. Since
+the value is not stored locally yet.
+
+ */
+void ObjectFunctionClass::getParameters(){
+  pit=parameter_list.begin();
+  SaveCall(data_pointer){
+    while (pit!=parameter_list.end()){
+      switch (pit->second.type) {
+#define SW_TYPE_COMM(EXT,TYPE)						\
+	data_pointer->getParameter(pit->second.name,*(static_cast<TYPE*>(pit->second.ptr)));
+#include "switch-type.cc"
+	ERROR("getParameters: Undefined Datatype encountered while retrieving vector." << " Object name=" << data_pointer->getName(true));
+      };
+      pit++;
+    };
+  };
+}
+
+HString ObjectFunctionClass::getParametersObjectName(){ 
+  return "'Parameters="+data_pointer->getName();
+}
+
+HString ObjectFunctionClass::getResultsObjectName(){ 
+  return ":Results="+data_pointer->getName();
+}
+
+
+/*! 
+\brief Find the object named "Parameters", which is linked to all
+objects containing parameters of the current (function) object. Create
+it, if not found.
+ */
+Data* ObjectFunctionClass::getParametersObject(){
+  DataList pobjs=data_pointer->Find(getParametersObjectName());
+  if (pobjs.size()==0) {
+    Data* pobj;
+    pobj=data_pointer->newObject("'Parameters");
+    pobj->setNetLevel(999);
+    vector<HString> parlist=getParameterList(data_pointer->getName());
+    pobj->put_silent(parlist);
+    return pobj;
+  } else {
+    return pobjs[0];
+  };
+}
+
+/*!  Find the object named "Result", which is linked to all
+objects containing results from the current (function) object. Create
+it, if not found.
+ */
+Data* ObjectFunctionClass::getResultsObject(){
+  DataList objs=data_pointer->Find(getResultsObjectName());
+  if (objs.size()==0) {
+    Data* obj;
+    obj=data_pointer->newObject("Results");
+    obj->setNetLevel(999);
+    obj->putOne_silent(data_pointer->getName());
+    return obj;
+  } else {
+    return objs[0];
+  };
+}
+
+
+/*!
+\brief Find (and create if necessary) an object containing the parameter "name" for an operation.
+Data* ObjectFunctionClass::getParameterObject(HString name){
+  Data* robj=getParametersObject(); //will be  created if it does not exist
+  DataList objs=robj->Find("'"+name); // First search Object linked to Results object
+  if (objs.size()==0) {
+    
+    Data* obj=data_pointer->insertNew(name,robj);
+    obj->setNetLevel(100);
+    return obj;}
+  else {
+    return objs[0];
+  };
+}
+ */
+
+/*!
+\brief Find (and create if necessary) an object containing the result of an operation.
+ */
+Data* ObjectFunctionClass::getResultObject(HString name){
+  Data* robj=getResultsObject(); //will be  created if it does not exist
+  DataList objs=robj->Find("'"+name); // First search Object linked to Results object
+  if (objs.size()==0) {
+    Data* obj=data_pointer->insertNew(name,robj);
+    obj->setNetLevel(100);
+    return obj;}
+  else {
+    return objs[0];
+  };
+}
+
+/*!
+
+\brief Stores the result of an operation in a result object, which will be created if necessary.
+
+This method will find create a result object (if necessary) and attach
+to it an object containing output of the operation from the currently
+active data object. Will be called at the end of a Data object
+function call.
+
+ */
+template <class T>  
+Data* ObjectFunctionClass::putVecResult(HString name,vector<T> vec){
+  Data* robj=getResultObject(name);
+  robj->put_silent(vec);
+  return data_pointer;
+}
+
+template <class T>  
+Data* ObjectFunctionClass::putResult(HString name,T val){
+  Data* robj=getResultObject(name);
+  robj->putOne_silent(val);
+  return data_pointer;
+}
+
+
 
 /*!
 Returns the external name (i.e. the name of the object to be accessed) of an internal parameter
@@ -230,7 +379,7 @@ void DataFuncDescriptor::setInfo(HString name, HString library, HString shortdoc
 }
 
 /*
-Used to describe the defaul behaviour during creation of function. Is a vector buffer present? And what is its type
+Used to describe the default behaviour during creation of function. Is a vector buffer present? And what is its type
 */
 void DataFuncDescriptor::setType(DATATYPE typ){fd.deftype=typ;}
 bool DataFuncDescriptor::getBuffered(){return fd.buffered;}
@@ -370,17 +519,6 @@ void DataFuncLibraryClass::dir(){
 //........................................................................
 
 
-/* Tests whether a pointer to a Data Object is valid */
-
-bool test_data_object_ptr(Data * dp){
-  if (dp!=NULL && dp!=&NullObject) {
-    if ((*dp).magiccode==MAGICCODE) {return true;};
-  };
-  ERROR("Error: Invalid data object pointer.");
-  return false;
-}
-
-
 /*
 ========================================================================
   Math functions
@@ -459,29 +597,38 @@ class DataFunc_Sys_Unit : public ObjectFunctionClass {
 public:  
   DEFINE_PROCESS_CALLS_NUMONLY 
 
-  DataFunc_Sys_Unit(Data * dp){ 
+  DataFunc_Sys_Unit(Data * dp) : ObjectFunctionClass(dp){
     //set the default parameters, which are by default integers - perhaps change to float numbers later??
     DBG("DataFunc_Sys_Unit: initialization called.");
     setParameter("UnitName", "");
     setParameter("UnitPrefix", "");
     setParameter("UnitScaleFactor", 1.0);
+    getParameters();
   }
 
   template <class T>
   void process(F_PARAMETERS) {
     GET_FUNC_PARAMETER_T(UnitScaleFactor,HNumber);
     dp->getFirstFromVector(*vp,vs);
-    address i,size=vp->size();
-    for (i=0; i<size;i++) {
-      (*vp)[i] = (*vp)[i]/UnitScaleFactor;
+    typedef typename vector<T>::iterator Tit; 
+    Tit it=vp->begin();
+    Tit end=vp->end();
+    while (it!=end) {
+      *it=*it/UnitScaleFactor;
+      it++;
     };
   }
 
   void process_S(F_PARAMETERS_T(HString)) {
-    vp->clear();
-    GET_FUNC_PARAMETER_T(UnitPrefix,HString);
-    GET_FUNC_PARAMETER_T(UnitName,HString);
-    vp->push_back(UnitPrefix + UnitName);
+    vector<HNumber> vec;
+    GET_FUNC_PARAMETER_T(UnitScaleFactor,HNumber);
+    dp->getFirstFromVector(vec,vs);
+    vector<HNumber>::iterator it=vec.begin(),end=vec.end();
+    vp->reserve(vec.size()); vp->clear();
+    while (it!=end) {
+      vp->push_back(mycast<HString>(*it/UnitScaleFactor));
+      it++;
+    };
   }
 };
 DATAFUNC_CONSTRUCTOR(Unit,Sys,"Multiplies the data with a unit scale factor and also returns the apropriate unit string.",NUMBER, false)
@@ -678,12 +825,11 @@ public:
   DEFINE_PROCESS_CALLS
   
   //  The function creates a CR-Tool data reader object and stores a pointer to it
-  DataFunc_CR_dataReaderObject (Data* dp){
-	DBG("DataFunc_CR_dataReaderObject: initialization called.");
-	//  D2BG2(dataset_lopes);
-	setParameter("Filename", dataset_lopes); //"/Users/acorstanje/usg/data/lopes/2007.01.31.23:59:33.960.event");
-	setParameter("Filetype", "LOPESEvent");
-	DBG("dataReaderObject: Initialization done.");
+  DataFunc_CR_dataReaderObject (Data* dp) : ObjectFunctionClass(dp){
+    DBG("DataFunc_CR_dataReaderObject: initialization called. dp=" <<dp << ", data_pointer=" << data_pointer);
+    setParameter("Filename", dataset_lopes); 
+    getParameters();
+    DBG("dataReaderObject: Initialization done.");
     }
 
     ~DataFunc_CR_dataReaderObject (){
@@ -695,16 +841,19 @@ public:
   template <class T>
   void process(F_PARAMETERS) {
       GET_FUNC_PARAMETER_T(Filename,HString);
-      GET_FUNC_PARAMETER_T(Filetype,HString);
+      HString Filetype = determine_filetype(Filename);
+
       static HString oldfilename="";
       bool opened;
-      void* ptr;
+      union{void* ptr; CR::DataReader* drp; CR::LOFAR_TBB* tbb; CR::LopesEventIn* lep;};
 
-      DBG("dataReaderObject: Retrieved filename parameter =" << Filename); // gets filename from hfnet.py
+      DBG("dataReaderObject: Retrieved filename parameter =" << Filename); // gets filename from object set in hfnet.py
 
+      // If a pointer to a DataReader was stored already in the data vector, delete that c++ object first
+      //before we create a new DataReader below (and store the Pointer in the data vector)
       if (vp->size()>0 && AsPtr(vp->at(0))!=NULL) {
-	DBG("dataReaderObject: Delete old data reader object " << AsPtr(vp->at(0))); // does this mean deleting itself?  
-	CR::DataReader* drp=reinterpret_cast<DataReader*>(AsPtr(vp->at(0)));
+	DBG("dataReaderObject: Delete old data reader object " << AsPtr(vp->at(0))); 
+	drp=reinterpret_cast<DataReader*>(AsPtr(vp->at(0)));
 	delete drp;
       }
       vp->clear();
@@ -714,13 +863,13 @@ public:
       
       DBG("DataFunc_CR_dataReaderObject: Opening File, Filename=" << Filename);
       if (Filetype=="LOPESEvent") {
-	  CR::LopesEventIn* lep = new CR::LopesEventIn; ptr = lep;
-	  DBG("DataFunc_CR_dataReaderObject: lep=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
-	  opened=lep->attachFile(Filename);
-	  if (oldfilename!=Filename) {MSG("Filename="<<Filename);lep->summary();};
-	  oldfilename=Filename;
+	lep = new CR::LopesEventIn;
+	DBG("DataFunc_CR_dataReaderObject: lep=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
+	opened=lep->attachFile(Filename);
+	if (oldfilename!=Filename) {MSG("Filename="<<Filename);lep->summary();};
+	oldfilename=Filename;
       } else if (Filetype=="LOFAR_TBB") {
-	CR::LOFAR_TBB* tbb = new CR::LOFAR_TBB(Filename,1024); ptr = tbb;
+	tbb = new CR::LOFAR_TBB(Filename,1024);
 	MSG("ATTENTION: Hardcoded initial NBlocksize to 1024!");
 	DBG("DataFunc_CR_dataReaderObject: tbb=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
 	opened=tbb!=NULL;
@@ -728,12 +877,15 @@ public:
 	oldfilename=Filename;
       } else {
 	  ERROR("DataFunc_CR_dataReaderObject: Unknown Filetype = " << Filetype  << ", name=" << dp->getName(true));
-	  vp->push_back(mycast<T>(NULL)); 
-	  return;
+	  opened=false;
       }
+
+      putResult("Filetype",Filetype);
+
       if (!opened){
-	  ERROR("DataFunc_CR_dataReaderObject: Opening file " << Filename << "failed." << ", name=" << dp->getName(true));
-	  vp->push_back(mycast<T>(NULL)); 
+	  ERROR("DataFunc_CR_dataReaderObject: Opening file " << Filename << " failed." << " Objectname=" << dp->getName(true));
+	  vp->push_back(mycast<T>(reinterpret_cast<HPointer>(Null_p))); 
+	  MSG("vp->size="<<vp->size()<<", v(0)="<<(*vp)[0]);
 	  return;
       };
 
@@ -741,6 +893,22 @@ public:
     //it. The object should actually me made read-only, since the pointer is
     //not to be changed by put ever again until the window is deleted
       vp->push_back(mycast<T>(ptr)); 
+
+      //Read the data Header, containing important information about the file (e.g. size)
+      casa::Record hdr=drp->headerRecord();
+
+      //      uint nfields=hdr.nfields();
+      //      uint i;
+      //      for (i=0; i<nfields; i++) {
+      //	MSG("hdr name="<<hdr.name(i) << " type="<<hdr.dataType(i));
+      //      };
+
+      //Now store File and Header information in Result objects
+      HInteger date=hdr.asuInt("Date"); putResult("Date",date);
+      HString observatory=hdr.asString("Observatory"); putResult("Observatory",observatory);
+      HInteger filesize=hdr.asInt("Filesize"); putResult("Filesize",filesize);
+      vector<HInteger> AntennaIDs; hdr.asArrayInt("AntennaIDs").tovector(AntennaIDs); putVecResult("AntennaIDs",AntennaIDs);
+      HInteger nofAntennas=drp->nofAntennas();putResult("nofAntennas",nofAntennas);
       DBG("DataFunc_CR_dataReaderObject: Success.");
   }
 };
@@ -763,7 +931,9 @@ void aipscol2stlvec(casa::Matrix<S> data, vector<T>& stlvec, HInteger col){
     
     nrow=data.nrow();
     ncol=data.ncolumn();
-
+    if (ncol>1) {
+      MSG("aipscol2stlvec: ncol="<<ncol <<" (nrow="<<nrow<<")");
+    };
     if (col>=ncol) {
 	ERROR("aipscol2stlvec: column number col=" << col << " is larger than total number of columns (" << ncol << ") in matrix.");
 	stlvec.clear();
@@ -809,11 +979,11 @@ public:
   DEFINE_PROCESS_CALLS 
 
   //  This function reads Data from an DataReader Object to read CR data
-  DataFunc_CR_dataRead (Data* dp){
+  DataFunc_CR_dataRead (Data* dp) : ObjectFunctionClass(dp){
     DBG("DataFunc_CR_dataRead: initialization called.");
 
     HPointer ptr=NULL;
-    setParameter("FileObject",  ptr);
+    setParameter("File",  ptr);
     setParameter("Antenna", 0);
     setParameter("Blocksize", -1);
     setParameter("Block", 0);
@@ -822,6 +992,7 @@ public:
     setParameter("Stride", 0);
     setParameter("Shift", 0);
     HString s="Fx"; setParameter("Datatype", s);
+    getParameters();
 
     //Now create a new, but empty data vector as buffer
     vector<HNumber> vec;
@@ -836,13 +1007,13 @@ public:
   void process(F_PARAMETERS) {
 
     //First retrieve the pointer to the pointer to the dataRead and check whether it is non-NULL.
-    GET_FUNC_PARAMETER_T(FileObject,HPointer);
-    DBG("FileObject=" << FileObject);
-    if (FileObject==NULL){
+    GET_FUNC_PARAMETER_T(File,HPointer);
+    DBG("File=" << File);
+    if (File==NULL){
 	ERROR("dataRead: pointer to FileObject is NULL, DataReader not found." << ", name=" << dp->getName(true)); 
 	return;
     };
-    DataReader *drp=reinterpret_cast<DataReader*>(FileObject); 
+    DataReader *drp=reinterpret_cast<DataReader*>(File); 
 
 
 //!!!One Needs to verify somehow that the parameters make sense !!!
@@ -855,11 +1026,15 @@ public:
     GET_FUNC_PARAMETER_T(Shift, HInteger);
     GET_FUNC_PARAMETER_T(Datatype, HString);
     
-    MSG("Antenna=" << Antenna);
-    MSG("nofAntennas=" << drp->nofAntennas());
+    DBG("Reading Antenna=" << Antenna);
+    DBG("nofAntennas=" << drp->nofAntennas());
     if (Antenna > drp->nofAntennas()-1) {ERROR("Requested Antenna number too large!");};
 
-    drp->setBlocksize(Blocksize);
+    if (Blocksize<1) {
+      drp->setBlocksize(maxBlocksize);
+    } else {
+      drp->setBlocksize(Blocksize);
+    };
     drp->setBlock(Block);
     drp->setStride(Stride);
     drp->setShift(Shift);

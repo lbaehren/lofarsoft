@@ -13,8 +13,12 @@ Here are some new things I tried to investigate Scipy:
 
 Install ipython 2.6 from fink
 installed matplotlib-py25 from fink
-ipython -i pylabplt.xlabel('Smarts')
+ipython -i pylab
+plt.xlabel('Smarts')
 
+To see a matplotlib figure in Qt see:
+In [4]: execfile("qt_mpl_bars.py")
+Figure is used to create a plot, which is plotted on Figure Canvas
 
 ------------------------------------------------------------------------
 

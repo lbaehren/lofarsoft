@@ -44,6 +44,12 @@ void qrun2(QLabel **label);
 void mglrun(mglGraphQT **mglwin);
 
 /*------------------------------------------------------------------------
+Some file utilities
+------------------------------------------------------------------------*/
+HString file_get_extension(HString filename);
+HString determine_filetype(HString filename);
+
+/*------------------------------------------------------------------------
 Some aips++ to stl vector conversions
 ------------------------------------------------------------------------*/
 template <class S, class T>
@@ -51,7 +57,6 @@ template <class S, class T>
 
 template <class S, class T>
     void aipsvec2stlvec(casa::Vector<S>& data, vector<T>& stlvec);
-
 
 
 /*========================================================================
@@ -147,6 +152,10 @@ private:
 #define GET_FUNC_PARAMETER( NAME ) T NAME=(dp->getParameter(getParameterName(#NAME),getParameterDefault<T>(#NAME)));
 #define GET_FUNC_PARAMETER_T( NAME, T ) T NAME=(dp->getParameter(getParameterName(#NAME),getParameterDefault<T>(#NAME)));
 
+#define SET_FUNC_RESULT_T( NAME, T ) T NAME=(dp->setParameter(getParameterName(#NAME),getParameterDefault<T>(#NAME)));
+
+
+
 class ObjectFunctionClass : public DataFuncDescriptor {
 
 public:
@@ -168,9 +177,22 @@ public:
   template <class T>
     T getParameterDefault(HString);
   
+  void getParameters();
+  
   HString getParameterName(HString);
 
   vector<HString> getParameterList(HString first_element="");
+
+  HString getResultsObjectName();
+  Data* getResultsObject();
+  Data* getResultObject(HString name);
+  HString getParametersObjectName();
+  Data* getParametersObject();
+  //  Data* getParameterObject(HString name);
+  template <class T>  
+    Data* putResult(HString name,T val);
+  template <class T>  
+    Data* putVecResult(HString name,vector<T> vec);
 
   template <class T>
     void instantiate_one();
@@ -187,12 +209,15 @@ public:
     This is a list of parameters that are being used internally for calculations in the function.  The value
     is either filled by a network object of a re-definable name or default parameter
    */
+  
   struct parameter_item {
     HString name;
     DATATYPE type;
     void* ptr;
   };
+
   map<HString,parameter_item> parameter_list;
+  map<HString,parameter_item>::iterator pit;
 };
 
 //------------------------------------------------------------------------

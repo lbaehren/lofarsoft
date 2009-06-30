@@ -437,8 +437,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>301</width>
-           <height>31</height>
+           <width>309</width>
+           <height>29</height>
           </rect>
          </property>
          <property name="frameShape" >
@@ -507,13 +507,16 @@
            </property>
           </item>
          </widget>
+         <zorder>label</zorder>
+         <zorder>plotterselection</zorder>
+         <zorder>xaxisunit</zorder>
         </widget>
         <widget class="QFrame" name="frame_9" >
          <property name="geometry" >
           <rect>
            <x>0</x>
            <y>30</y>
-           <width>291</width>
+           <width>305</width>
            <height>16</height>
           </rect>
          </property>
@@ -528,21 +531,54 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>41</width>
+            <width>65</width>
             <height>16</height>
            </rect>
           </property>
           <property name="text" >
-           <string>Color:</string>
+           <string>Antennas:</string>
           </property>
          </widget>
-         <widget class="QLineEdit" name="color" >
+         <widget class="QLineEdit" name="firstantenna" >
           <property name="geometry" >
            <rect>
-            <x>40</x>
+            <x>62</x>
             <y>0</y>
             <width>21</width>
             <height>16</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_23" >
+          <property name="geometry" >
+           <rect>
+            <x>84</x>
+            <y>0</y>
+            <width>16</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string>-</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="lastantenna" >
+          <property name="geometry" >
+           <rect>
+            <x>94</x>
+            <y>0</y>
+            <width>21</width>
+            <height>16</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="antennaselection" >
+          <property name="geometry" >
+           <rect>
+            <x>132</x>
+            <y>-2</y>
+            <width>173</width>
+            <height>22</height>
            </rect>
           </property>
          </widget>
@@ -680,6 +716,44 @@
           <bool>true</bool>
          </property>
         </widget>
+        <widget class="QCheckBox" name="logx" >
+         <property name="geometry" >
+          <rect>
+           <x>260</x>
+           <y>50</y>
+           <width>43</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="toolTip" >
+          <string>logarithmic x-axis</string>
+         </property>
+         <property name="whatsThis" >
+          <string>Selects whether x-axis scale is logarithmic</string>
+         </property>
+         <property name="text" >
+          <string>log</string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="logy" >
+         <property name="geometry" >
+          <rect>
+           <x>260</x>
+           <y>74</y>
+           <width>43</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="toolTip" >
+          <string>logarithmic y-axis</string>
+         </property>
+         <property name="whatsThis" >
+          <string>Selects whether y-axis scale is logarithmic</string>
+         </property>
+         <property name="text" >
+          <string>log</string>
+         </property>
+        </widget>
        </widget>
        <widget class="QFrame" name="frame_15" >
         <property name="geometry" >
@@ -755,18 +829,21 @@
            <rect>
             <x>222</x>
             <y>0</y>
-            <width>51</width>
+            <width>57</width>
             <height>21</height>
            </rect>
           </property>
           <property name="text" >
            <string>Auto</string>
           </property>
+          <property name="checked" >
+           <bool>true</bool>
+          </property>
          </widget>
          <widget class="QDial" name="yzoomdial" >
           <property name="geometry" >
            <rect>
-            <x>274</x>
+            <x>278</x>
             <y>0</y>
             <width>40</width>
             <height>40</height>
@@ -1233,7 +1310,7 @@
            <rect>
             <x>222</x>
             <y>18</y>
-            <width>49</width>
+            <width>53</width>
             <height>19</height>
            </rect>
           </property>
@@ -1246,9 +1323,9 @@
           <widget class="QLabel" name="label_14" >
            <property name="geometry" >
             <rect>
-             <x>16</x>
+             <x>18</x>
              <y>2</y>
-             <width>35</width>
+             <width>39</width>
              <height>17</height>
             </rect>
            </property>
@@ -1406,11 +1483,14 @@
           <property name="text" >
            <string>Auto</string>
           </property>
+          <property name="checked" >
+           <bool>true</bool>
+          </property>
          </widget>
          <widget class="QDial" name="xzoomdial" >
           <property name="geometry" >
            <rect>
-            <x>276</x>
+            <x>278</x>
             <y>0</y>
             <width>40</width>
             <height>40</height>
@@ -1888,7 +1968,7 @@
            <rect>
             <x>222</x>
             <y>18</y>
-            <width>49</width>
+            <width>51</width>
             <height>19</height>
            </rect>
           </property>
@@ -1901,7 +1981,7 @@
           <widget class="QLabel" name="label_13" >
            <property name="geometry" >
             <rect>
-             <x>16</x>
+             <x>18</x>
              <y>2</y>
              <width>37</width>
              <height>17</height>
@@ -2045,6 +2125,19 @@
          </property>
          <property name="checked" >
           <bool>false</bool>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_2" >
+         <property name="geometry" >
+          <rect>
+           <x>134</x>
+           <y>-2</y>
+           <width>53</width>
+           <height>32</height>
+          </rect>
+         </property>
+         <property name="text" >
+          <string>Redo</string>
          </property>
         </widget>
        </widget>
@@ -2241,8 +2334,11 @@
       <property name="toolTip" >
        <string>Python Console Input</string>
       </property>
+      <property name="statusTip" >
+       <string/>
+      </property>
       <property name="whatsThis" >
-       <string>PYthon Console Input</string>
+       <string>Python Console Input: Evaluate Python expressions. Use ! to execute a statement and, e.g., assign a variable. Note, however, that you need to declare a variable as global if you want to access it from the propmpt: "!global x=1" would work.</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_21" >
@@ -2375,6 +2471,12 @@
     <slot>hfDBGContinueButtonPressed()</slot>
     <slot>hfDBGStartButtonPressed()</slot>
     <slot>hfDBGStopButtonPressed()</slot>
+    <slot>hfReplotNetwork()</slot>
+    <slot>hflogXaxis(bool)</slot>
+    <slot>hflogYaxis(bool)</slot>
+    <slot>hffirstantenna()</slot>
+    <slot>hflastantenna()</slot>
+    <slot>hfantennaselection()</slot>
    </slots>
   </customwidget>
   <customwidget>
@@ -2915,6 +3017,102 @@
     <hint type="destinationlabel" >
      <x>251</x>
      <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>logy</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hflogYaxis(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>297</x>
+     <y>113</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>353</x>
+     <y>115</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>logx</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hflogXaxis(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>304</x>
+     <y>84</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>351</x>
+     <y>59</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfReplotNetwork()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>158</x>
+     <y>537</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>372</x>
+     <y>529</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>firstantenna</sender>
+   <signal>editingFinished()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hffirstantenna()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>74</x>
+     <y>70</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>355</x>
+     <y>126</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lastantenna</sender>
+   <signal>editingFinished()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hflastantenna()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>124</x>
+     <y>72</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>348</x>
+     <y>134</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>antennaselection</sender>
+   <signal>editingFinished()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfantennaselection()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>183</x>
+     <y>75</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>367</x>
+     <y>144</y>
     </hint>
    </hints>
   </connection>

@@ -106,6 +106,12 @@ typedef std::complex<double> HComplex;
 typedef std::string HString;
 typedef void* HPointer;
 
+//For some reaosns NULL is primarily interpreted as Integer by the
+//compiler (e.g., when it needs to determine the type of templated functions).
+//So, this forces NULL to really be a NULL pointer ...
+#define Null_p reinterpret_cast<HPointer>(NULL)
+
+
 /*!
   \brief Enumeration list of data types that can be used with data objects
 */

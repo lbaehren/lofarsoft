@@ -60,9 +60,12 @@ DEF_DATA_OID_NAME_FUNC_PYDEF_EXT( , FUNC  )
 
 
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_printStatus_overloads,printStatus,0,1)
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_printAllStatus_overloads,printAllStatus,0,2)
+  //  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_touch_overloads,touch,0,1)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_printAllStatus_overloads,printAllStatus,0,3)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_Status_overloads,Status,0,1)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_getName_overloads,getName,0,1)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_getSearchName_overloads,getSearchName,0,1)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_FindChainID_overloads,FindChainID,2,3)
 
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_listNeighbourIDs_overloads,listNeighbourIDs,1,2)
 
@@ -75,6 +78,10 @@ DEF_DATA_OID_NAME_FUNC_PYDEF_EXT( , FUNC  )
   //BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_update_overloads,update,0,1)
 
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_newObjects_ID_overloads,newObjects_ID,1,2)
+
+
+
+    Data& (Data::*Data_touch1)(bool) = &Data::touch;
 
     void (Data::*Data_delLink)(Data &) = &Data::delLink;
 
@@ -162,16 +169,19 @@ BOOST_PYTHON_MODULE(libhfget)
       .def("__getitem__",&Data::Object_Name,return_internal_reference<>())
       .def("Find",&Data::Object_Name,return_internal_reference<>())
       .def("Find",&Data::Object_ID,return_internal_reference<>())
+      .def("FindChainID", &Data::FindChainID,Data_FindChainID_overloads())
 
       .def("getType", &Data::getType)
       .def("setType", &Data::setType)
       .def("getName", &Data::getName,Data_getName_overloads())
+      .def("getSearchName", &Data::getSearchName,Data_getSearchName_overloads())
       .def("getNetLevel", &Data::getNetLevel)
       .def("setNetLevel", &Data::setNetLevel,return_internal_reference<>())
       .def("getVersion", &Data::getVersion)
       .def("setVersion", &Data::setVersion)
       .def("getOid", &Data::getOid)
       .def("getMod", &Data::getMod)
+      .def("getModFlags", &Data::getModFlagsStr)
       .def("setDefaultDirection", &Data::setDefaultDirection)
       .def("getDefaultDirection", &Data::getDefaultDirection)
       .def("isModified", &Data::isModified)
@@ -203,8 +213,10 @@ BOOST_PYTHON_MODULE(libhfget)
       .def("sendMessage", &Data::sendMessage) //not really implemented
       .def("getMessage", &Data::getMessage) //not really implemented
       .def("setPort", &Data::setPort)
-      .def("touch", &Data::touch)
-      .def("update", &Data::update)
+      .def("touch", &Data::touch_0,return_internal_reference<>())
+      .def("touch", Data_touch1,return_internal_reference<>())
+      .def("update", &Data::update,return_internal_reference<>())
+      .def("wakeUp", &Data::wakeUp,return_internal_reference<>())
       .def("updateAll", &Data::updateAll)
 
       .def("Status", &Data::Status,Data_Status_overloads())
@@ -218,7 +230,9 @@ BOOST_PYTHON_MODULE(libhfget)
       .def("getAllIDs", &Data::getAllIDs)
       .def("getNeighbourNames", &Data::getNeighbourNames)
       .def("getNeighboursList", &Data::getNeighboursList)
-
+      .def("getLinkDirection", &Data::getLinkDirection)
+      .def("getLinkDirectionType", &Data::getLinkDirectionType)
+ 
       .def("delLink", Data_delLink)
       .def("delLink", &Data::delLink_ID)
       //      .def("setLink", &Data::setLink_Name, Data_setLink_Name_overloads())
@@ -226,6 +240,9 @@ BOOST_PYTHON_MODULE(libhfget)
       .def("setLink", &Data::setLink_Ref_3,return_internal_reference<>())
       .def("setLink", &Data::setLink_Ref_2,return_internal_reference<>())
       .def("setLink", &Data::setLink_Ref_1,return_internal_reference<>())
+      .def("resetLink_cc", &Data::resetLink_Ref_3,return_internal_reference<>())
+      .def("resetLink_cc", &Data::resetLink_Ref_2,return_internal_reference<>())
+      .def("resetLink_cc", &Data::resetLink_Ref_1,return_internal_reference<>())
 
       .def("get", Data_get_I)
       .def("get", Data_get_N)
@@ -305,25 +322,26 @@ BOOST_PYTHON_MODULE(libhfget)
 
       .def("delData", &Data::delData)
       .def("delFunction", &Data::delFunction)
-      .def("setFunction", &Data::setFunction,Data_setFunction_overloads())
+      .def("setFunction", &Data::setFunction,return_internal_reference<>(),Data_setFunction_overloads())
       .def("delObject", &Data::delObject_ID)
       .def("delObject", &Data::delObject_Name)
       .def("delObject", &Data::delObject)
       .def("erase", &Data::erase,return_internal_reference<>())
       .def("erase", &Data::erase_1,return_internal_reference<>())
       .def("__ifloordiv__", &Data::erase_1,return_internal_reference<>()) // this is the "//=" operator
-      .def("insert", &Data::insert,return_internal_reference<>())
-      .def("insertNew", &Data::insertNew,return_internal_reference<>())
+      .def("insert", &Data::insert_Ref,return_internal_reference<>())
+      .def("insertNew", &Data::insertNew_Ref,return_internal_reference<>())
       .def("newObjects", &Data::newObjects_ID,Data_newObjects_ID_overloads())
       .def("newObject", &Data::newObject_Ref,return_internal_reference<>())
       .def("newObject", &Data::newObject_Ref_1,return_internal_reference<>())
-      .def("create", &Data::create,return_internal_reference<>())
+      .def("create", &Data::create_Ref,return_internal_reference<>())
       .def("IDs", &Data::IDs)
       .def("ID", &Data::ID)
 
       .def("Object", &Data::Object_ID,return_internal_reference<>())
       .def("Object", &Data::Object_Name,return_internal_reference<>())
       .def("Object", &Data::Object_Ref,return_internal_reference<>())
+
 
       /*
 #undef RPT_TEMPLATED_MEMBER_FUNCTION
@@ -383,9 +401,12 @@ DEF_TEMPLATED_MEMBER_FUNCTIONS
 
 boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_id<mglData>());
 
-def("mglDataSet", mglDataSetVecN);
-def("getptr", PyGetPtr);
-def("setDebug", setDebug);
+ def("mglDataSet", mglDataSetVecN);
+ def("pytointptr",getPointerFromPythonObject);
+ def("getptr", PyGetPtr);
+ def("setDebug", setDebug);
+ def("file_get_extension",file_get_extension);
+ def("determine_filetype",determine_filetype);
 
 //    def("setwidget", setwidget);
 //    def("mytest", mytest);
@@ -398,6 +419,17 @@ def("setDebug", setDebug);
     //    def("printvec", printvec);
     //def("split_str_into_vector", split_str_into_vector);
 }
+
+/*
+boost::python::object pytst(){
+  Data d;
+  boost::python::object o(d);
+  //  PyObject p(o);
+  //  return &o;
+}
+def("pytst",pytst);
+*/
+
     /*
     class_<X>("X")
         .def(init<>())

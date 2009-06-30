@@ -72,6 +72,13 @@ CURSORMODE_ZOOM=2
 
 qpointf=QtCore.QPointF()
 
+def tex2txt(s):
+    "Takes out tex control characters to make a tex string look nicer when printed on the screen as ASCII text."
+    s=s.replace("\\","")
+    s=s.replace("{","")
+    s=s.replace("}","")
+    return s
+
 def qtpowerzoom(self,scalez):
     scalez=-scalez
     s=self.parent().parent().size()
@@ -91,9 +98,12 @@ def qtpoweraspect(self,scalew):
 #    self.resize(int(s.width()*1.05**scale),int(s.width()))
 #    self.parent().resize(int(s.width()*1.05**scale),int(s.width()))
 
+def mousePressEvent(self,event):
+    print "Mouse pos=",event.pos(),QtCore.QPoint(event.pos());
+
 QtSvg.QSvgWidget.zoom=qtpowerzoom
 QtSvg.QSvgWidget.aspect=qtpoweraspect
-
+QtSvg.QSvgWidget.mousePressEvent=mousePressEvent
 
 class hfQtPlotConstructor(QtGui.QWidget):
     def __call__(self,parent):
@@ -145,7 +155,8 @@ class hfQtPlot(QtGui.QWidget):
         obj["'xmin"].set_silent(xy[0])
         obj["'xmax"].set_silent(xy[2])
         obj["'ymin"].set_silent(xy[1])
-        obj["'ymax"].set(xy[3])
+        obj["'ymax"].set_silent(xy[3])
+        obj["'Replot"].touch()
     def whichpanel(self,xs,ys):
         "Returns the number of rows and columns of panels displayed and returns an index to the panel which contains screen position xs,xy. Returns a tupel of the form (nx,ny,n) and calls SubPlot with this input."
         n=self.d["'PlotWindow:npanelsplotted"]
@@ -191,15 +202,17 @@ class hfQtPlot(QtGui.QWidget):
         self.consolelastinput=txt
         self.gui.consoleinput.clear()
         self.gui.consoleoutput.append("["+str(self.consolelinecount)+"]>> "+txt)
-        if txt[0]=='!':
-            s=str(txt[1:])
-            print "Exec.",s
-            exec s
-        else:
-            self.gui.consoleoutput.append(str(eval(str(txt))))
+        if txt[0]=='!': exec(str(txt[1:]))
+        else: self.gui.consoleoutput.append(str(eval(str(txt))))
     def hfsetTextT(self,name,type):
-        exec("nt=self.sender().text().to"+type+"()")
-        if nt[1]: self.d[name].noSignal().set(nt[0])
+        if type=="IntList":
+            t=str(self.sender().text())
+            if (t=="") | (t.isspace()): l=[]
+            else: l=text2IntVec(t)
+            self.d[name].noSignal().set(l)
+        else:
+            exec("nt=self.sender().text().to"+type+"()")
+            if nt[1]: self.d[name].noSignal().set(nt[0])
     def hfsetNPanels(self):
         self.hfsetTextT("'npanels","Int")
     def hfsetNPanelsx(self):
@@ -214,13 +227,18 @@ class hfQtPlot(QtGui.QWidget):
         self.hfsetTextT("'ymin","Double")
     def hfsetYMax(self):
         self.hfsetTextT("'ymax","Double")
+    def hflastantenna(self):
+        self.hfsetTextT("'LastAntenna","Int")
+    def hffirstantenna(self):
+        self.hfsetTextT("'FirstAntenna","Int")
+    def hfantennaselection(self):
+        self.hfsetTextT("'AntennaSelection","IntList")
     def hfLoad(self):
         qi=QtCore.QFileInfo(self.currentplotdataobject()["'Filename"].val())
-        f=str(QtGui.QFileDialog.getOpenFileName(hfm,"Load Data File",qi.absolutePath(),"*.event"))
+        f=str(QtGui.QFileDialog.getOpenFileName(hfm,"Load Data File",qi.absolutePath()," TimeSeries (*.event *.h5)"))
         if f=="": return
         qi=QtCore.QFileInfo(f)
         if qi.exists():
-            print "New File=",f
             self.currentplotdataobject()["'Filename"].set(f)
         else: hfERR("File "+f+"does not exist.")
     def netlevel(self,s):
@@ -229,24 +247,41 @@ class hfQtPlot(QtGui.QWidget):
     def hfsetNetworkOn(self,yesno):
         if yesno: (self.d >> self.d["'ROOT:QtNetview"]).touch()
         else: (self.d // self.d["'ROOT:QtNetview"]).touch()
+    def hfReplotNetwork(self):
+        self.currentplotpanelobject()["'Replot"].touch()
+#        self.d["'ROOT:QtNetview"].touch()
+    def hflogXaxis(self,yesno):
+        obj=self.currentplotpanelobject()
+        obj["'logX"].set_silent(int(yesno))
+        obj["'Replot"].touch()
+    def hflogYaxis(self,yesno):
+        obj=self.currentplotpanelobject()
+        obj["'logY"].set_silent(int(yesno))
+        obj["'Replot"].touch()
     def hfsetXAuto(self,yesno):
         obj=self.currentplotpanelobject()
         obj["'XAuto"].set_silent(yesno)
         obj["'xmin"].set_silent(min(toList(obj["xmin"].val())))
-        obj["'xmax"].set(max(toList(obj["xmax"].val())))
+        obj["'xmax"].set_silent(max(toList(obj["xmax"].val())))
+        obj["'Replot"].touch()
     def hfsetYAuto(self,yesno):
         obj=self.currentplotpanelobject()
         obj["'YAuto"].set_silent(yesno)
         obj["'ymin"].set_silent(min(toList(obj["ymin"].val())))
-        obj["'ymax"].set(max(toList(obj["ymax"].val())))
+        obj["'ymax"].set_silent(max(toList(obj["ymax"].val())))
+        obj["'Replot"].touch()
     def hfsetXShift(self,i):
-        self.currentplotpanelobject()["'xshift"].set(i)
+        self.currentplotpanelobject()["'xshift"].set_silent(i)
+        self.currentplotpanelobject()["'Replot"].touch()
     def hfsetYShift(self,i):
-        self.currentplotpanelobject()["'yshift"].set(i)
+        self.currentplotpanelobject()["'yshift"].set_silent(i)
+        self.currentplotpanelobject()["'Replot"].touch()
     def hfsetYScale(self,i):
-        self.currentplotpanelobject()["'yscale"].set(i)
+        self.currentplotpanelobject()["'yscale"].set_silent(i)
+        self.currentplotpanelobject()["'Replot"].touch()
     def hfsetXScale(self,i):
-        self.currentplotpanelobject()["'xscale"].set(i)
+        self.currentplotpanelobject()["'xscale"].set_silent(i)
+        self.currentplotpanelobject()["'Replot"].touch()
     def hfXReset(self):
         self.gui.xzoomdial.setValue(0)
         self.gui.xshiftslider.setValue(0)
@@ -258,7 +293,7 @@ class hfQtPlot(QtGui.QWidget):
     def hfsetBlock(self,i):
         self.currentplotdataobject()["'Block"].set(i)
     def hfsetBlocksize(self,i):
-        print "Blocksize should be ",i
+        print "Blocksize set to  ",i
         self.currentplotdataobject()["'Blocksize"].set(i)
     def currentplotdataobject(self):
         return self.currentplotpanelobject()["'PlotData"]
@@ -269,6 +304,7 @@ class hfQtPlot(QtGui.QWidget):
     def fillchooser(self,what,rootobj,parname,slot):
         "Fill the GUI selection (ComboBox) with the selections available in the chooser object."
         par=rootobj[parname]
+#        l=QtCore.QStringList(map(tex2txt,par["'Chooser'"+what].val())) #gives a list of all possible choices
         l=QtCore.QStringList(par["'Chooser'"+what].val()) #gives a list of all possible choices
         l.prepend("<None>")
         slot.clear()

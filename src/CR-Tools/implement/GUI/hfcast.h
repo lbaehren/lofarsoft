@@ -107,22 +107,22 @@ template <class T, class S>
 //------------------------------------------------------------------------
 
 template <class T>
-vector<T> vec_combine(vector<T> v1,vector<T> v2);
+vector<T> vec_combine(const vector<T> v1, const vector<T> v2);
 
 template <class T>
 void vec_append(vector<T> &v1,const vector<T> &v2);
 
 template <class T>
-HString vectostring(vector<T> v,address maxlen=8);
+HString vectostring(const vector<T> v,const address maxlen=8);
 
 template <class T>
-void printvec_noendl(vector<T> v,address maxlen=8);
+void printvec_noendl(const vector<T> v,const address maxlen=8);
 
 template <class T>
-void printvec(vector<T> v,address maxlen=8);
+void printvec(const vector<T> v,const address maxlen=8);
 
 template <class T, class S>
-void printvec_txt(vector<T> v, const char* (*f)(S));
+void printvec_txt(const vector<T> v, const char* (*f)(S));
 
 template <class T>
 DATATYPE WhichType();

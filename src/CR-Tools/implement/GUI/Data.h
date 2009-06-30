@@ -25,8 +25,10 @@
 //#include <QtGui/QLabel>
 
 #define MAGICCODE 260966
+#define MAGICCODE_DELETED 180455
 #define MAXNETLEVEL 999999
 #define SaveCall( REF ) if (!isDataObject( REF )) {ERROR(getName(true) << ": SaveCall - Data Object reference invalid. Network corrupt.");} else 
+#define SaveCall2( REF ) if (!isDataObject( REF )) {ERROR("SaveCall - Data Object reference invalid. Network corrupt.");} else 
 
 
 
@@ -37,6 +39,15 @@ using namespace std;
 class DataFuncDescriptor;
 class ObjectFunctionClass;
 class DataFuncLibraryClass; 
+
+//========================================================================
+//  DataList - A vector of Data object(s) (pointers in c++) 
+//========================================================================
+
+typedef vector<Data*> DataList;
+//class DataList : vector<Data*> {}
+
+vector<address> DataListtoIDs(const DataList dl);
 
 /*!
   \class Data 
@@ -160,12 +171,62 @@ class DataFuncLibraryClass;
   
   
   Later one could implement more complex logic, eg. "(Station>2&&Station<10):Data" ...
+
+  <h4>Note on Updating and Constructing a Network</h4>
+
+When building a PUSH network it is important to note that a network
+is updated proceeding from the top/end backwards to the root. So,
+first an update message is send forward propagating through the
+network. This is done via an "update worm" which crawls from the root
+of a tree to its top, reaching every branch. While doing so it will
+remember all objects (leaves) that ened updating. At the end the worm
+will trigger the topmost object to update first! This will then call
+objects down the tree as parameters. If those have been recognized as
+being in need for update, they will do so and in turn call objects
+further down the tree. When the update is complete teh worm will
+proceed to the next object further down. If that has been updated due
+to the previous update action, it will be skipped and the next object
+in the worm will be looked at until the entire worm is empty
+again. So, if an object down the tree is never called by any object
+higher up. It may be updated only AFTER a top-level object has been
+executed. It will be updated though, but the effects will only become
+visible the next time the top level object is executed!
+
+So, to make sure the data down the network is up-to-date, the objects
+down there need to be explicitly called by an object higher up the
+chain. If updating does not happen immediately, make sure the object
+in question is called, e.g. as a dummy parameter, somewhere in the
+network.
+
+Example: the PipelineLauncher object is called by PlotWindow in the CR
+network, since otherwise the number of plotpanels is not updated
+immediately. Its output is not needed in the PlotWindow function,
+however, its effect on the net is.
+
+I am not yet sure, whether that is a bug or a feature. Since the user
+really has to ensure self-consistency of the network him/herself when
+it comes to updating. The alternative would be to have all objects
+call all dependable objects down the net, but that would strike me as
+inefficient. So, this way you have a bit more control (and chances for
+errors...)
+
+
 */
 
 
 typedef vector<Data*> dataworm;
 
-bool isDataObject(Data* obj);
+bool isDataObject(const Data* obj, const bool notquiet=true);
+
+enum MOD_ACTION {MOD_UNDEF, MOD_DELETED, MOD_UPDATED, MOD_LINKCHANGED, MOD_CLEARED};
+
+struct modification_record {
+    MOD_ACTION action;
+    Data* ref;
+    longint version;
+  };
+  
+bool ModRecisValid(const modification_record mod);
 
 class Data {
   
@@ -173,18 +234,13 @@ class Data {
   
   int magiccode;
 
-  struct modification_record {
-    Data* ref;
-    longint version;
-  };
-  
   struct superior_container {
     /*! HPointer to the root Data object in a chain of object */
     Data * root;
     /*! The number of Data objects attached */
     objectid no_of_data_objects;
     /*! Vector of pointers to the attached Data objects */
-    vector<Data*> data_objects;
+    DataList data_objects;
     DataFuncLibraryClass *library_ptr;
   };
   
@@ -297,7 +353,7 @@ class Data {
   };
   
   HString reference_descr_str(reference_descr *rd);
-  void printAllStatus(bool short_output=true,longint maxlevel=MAXNETLEVEL);
+  void printAllStatus(bool short_output=true,longint maxlevel=MAXNETLEVEL, bool printdeletedobjects=false);
   
   void printDecendants (HString rootname="");
   
@@ -308,11 +364,16 @@ class Data {
   void join_map_ReferenceDescriptors(map<objectid,reference_descr> &l1, map<objectid,reference_descr> l2);
   map<objectid,reference_descr> listNeighbours(DIRECTION dir,longint maxlevel);
   void getNeighboursList(DIRECTION dir,longint maxlevel,  vector<objectid> &oids, vector<HString> &names, vector<DIRECTION> &dirs,  vector<HString> & flags);
+  DataList FindChain(const DIRECTION dir,const vector<HString> names, const bool include_endpoints=true);
+  vector<address> FindChainID(const DIRECTION dir,const vector<HString> names, const bool include_endpoints=true);
 
   vector<HString> listNeighbourNames(DIRECTION dir);
   vector<objectid> listNeighbourIDs(DIRECTION dir,longint maxlevel=MAXNETLEVEL);
   vector<DIRECTION> listNeighbourDirs(DIRECTION dir);
   vector<HString> listNeighbourModFlags(DIRECTION dir);
+
+  DIRECTION getLinkDirection(const Data & neighbour);
+  DIRECTION getLinkDirectionType(const Data & neighbour);
 
   vector<objectid> getAllIDs();
 
@@ -323,7 +384,7 @@ class Data {
   void setPort(objectid port, objectid refport, DIRECTION dir);
 
   vector<HString> getNeighbourNames(DIRECTION dir);
-  vector<Data*> getNeighbours(DIRECTION dir);
+  DataList getNeighbours(const DIRECTION dir);
   int getPort(Data & d, DIRECTION dir);
   reference_descr getLink(objectid port, DIRECTION dir);
 
@@ -333,9 +394,13 @@ class Data {
   Data* from(objectid port);
   Data* to(objectid port);
   
-  Data& create(HString name);
-  Data& insert(Data & d, Data & neighbour);
-  Data& insertNew(HString newname, Data & neighbour);
+  Data& create_Ref(HString name);
+  Data* create(HString name);
+  Data& insert_Ref(Data & d, Data & neighbour);
+  Data* insert(Data * d, Data * neighbour);
+  Data& insertNew_Ref(HString newname, Data & neighbour);
+  Data* insertNew(HString newname, Data * neighbour);
+
   Data& erase(Data &d,DIRECTION dir=DIR_TO);
   Data& erase_1(Data &d);
   
@@ -343,12 +408,13 @@ class Data {
   HString getProperty(HString name);
   
   
-  vector<Data*> find_immediate_relatives(HString name, DIRECTION dir);
+  DataList find_immediate_relatives(const HString name, const DIRECTION dir);
 
   template <class T>
-  vector<Data*> find_relatives(HString name,  vector<T> &elems, DIRECTION dir);
+    DataList find_relatives(const HString name,  const vector<T> &elems, const DIRECTION dir);
   
-  vector<Data*> Find(const HString s, const int rpos=0);
+  DataList Search(const HString s);
+  DataList Find(const HString s, const int rpos=0);
   
   vector<objectid> IDs(HString s);
   objectid ID(HString s);
@@ -382,33 +448,35 @@ class Data {
     void get_1_(vector<T> &v);
   
   template <class T>
-    T getParameter(HString name, T defval);
+    T getParameter(const HString name, const T defval);
   
   template <class T>
     void getFirstFromVector(vector<T> &v, Vector_Selector* vs);
   
   template <class T>
-    T getOne(address i=0); 
+    T getOne(const address i=0); 
   template <class T>
     T getOne_0_(); 
   
-  Data* find_name(HString name="", DIRECTION dir=DIR_FROM);
-  Data* find_names(vector<HString> names, vector<DIRECTION> dir);
+  Data* find_name(const HString name="", const DIRECTION dir=DIR_FROM);
+  Data* find_names(const vector<HString> names, const vector<DIRECTION> dir);
   
   DATATYPE getType();
-  void setType(DATATYPE typ);
+  void setType(const DATATYPE typ);
   address len();
   longint incVersion();
   longint getVersion();
   void setVersion(longint ver);
   longint getNetLevel();
   Data& setNetLevel(longint lev);
-  HString getName (bool longname=false);
+  HString getName (const bool longname=false);
+  HString getSearchName (const bool longname=false);
   objectid getOid ();
   HString getFuncName();
   address getMod();
   longint getNumberOfLinks(DIRECTION dir=DIR_BOTH);
   vector<modification_record> getModFlags(DIRECTION dir);
+  vector<HString> getModFlagsStr();
   HString strModFlag(modification_record mod);
   bool ModFlagSet(modification_record mod);
 /*! only returns the local mod values - not a full check for modification. Used for inspection mainly */
@@ -457,10 +525,12 @@ class Data {
   bool Empty();
   bool hasFunc();
   bool hasData();
-  void touch();
+  Data& touch_0();
+  Data& touch(const bool silent=false);
+  Data& wakeUp();
   bool checkModification();
   bool checkModification(objectid port, modification_record mod);
-  void setModification();
+  void setModification(const MOD_ACTION action=MOD_UPDATED);
   void setModification(modification_record newmod);
   void setModification(objectid port, modification_record mod);
   void clearModification();
@@ -468,7 +538,7 @@ class Data {
   void printWorm();
   void executeUpdateWorm();
   void doAutoUpdate();
-  void update();
+  Data& update();
   void updateAll();
   
   template <class T>
@@ -503,9 +573,9 @@ class Data {
   boost::python::handle<> retrievePyFuncObject();
 
   void delFunction();
-  void setFunction (HString name,
-		    HString library="Sys",
-		    DATATYPE typ=UNDEF);
+  Data& setFunction (const HString name,
+		    const HString library="Sys",
+		    const DATATYPE typ=UNDEF);
   
   void sendMessage (MSG_CODE msg,
 		    DIRECTION dir,
@@ -521,7 +591,7 @@ class Data {
   void delLink (objectid port,
 		DIRECTION dir,
 		bool del_other=true,
-		bool delete_empty=true);
+		bool delete_empty=false);
 
   void delLink (Data & d);
   
@@ -535,9 +605,15 @@ class Data {
 		   DIRECTION dir);
   
 
-  objectid setLink(Data *d, DIRECTION dir_type=DIR_NONE, DIRECTION dir=DIR_FROM , objectid otherport=-1, objectid thisport=-1);
-  Data& setLink_Ref_3(Data &d, DIRECTION dir_type=DIR_NONE, DIRECTION dir=DIR_FROM);
-  Data& setLink_Ref_2(Data &d, DIRECTION dir_type=DIR_NONE);
+  Data * resetLink(Data *d, const DIRECTION dir_type=DIR_NONE, const DIRECTION dir=DIR_FROM);
+  Data& resetLink_Ref_3(Data &d, const DIRECTION dir_type=DIR_NONE, const DIRECTION dir=DIR_FROM);
+  Data& resetLink_Ref_2(Data &d, const DIRECTION dir_type=DIR_NONE);
+  Data& resetLink_Ref_1(Data &d);
+
+
+  objectid setLink(Data* d, const DIRECTION dir_type=DIR_NONE, const DIRECTION dir=DIR_FROM , const objectid otherport=-1, const objectid thisport=-1);
+  Data& setLink_Ref_3(Data &d, const DIRECTION dir_type=DIR_NONE, const DIRECTION dir=DIR_FROM);
+  Data& setLink_Ref_2(Data &d, const DIRECTION dir_type=DIR_NONE);
   Data& setLink_Ref_1(Data &d);
   
   
@@ -581,9 +657,8 @@ class Data {
 
 //----Some Utilities
 
+HInteger getPointerFromPythonObject(PyObject* pyobj);
 vector<objectid> DPtrToOid(vector<Data*> vec); 
-bool test_data_object_ptr(Data * dp);
-
 
 //Global object that represents a Null object returned if no result is found.
 extern Data NullObject;
