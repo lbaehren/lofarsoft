@@ -1382,14 +1382,18 @@ int main (int argc, char *argv[])
   bool Xconverged, XconvergedNS;                         // is true if the Gaussian fit to the CCbeam converged
   double AzL, ElL, AzL_NS, ElL_NS;                       // Azimuth and Elevation
   double distanceResult = 0, distanceResultNS = 0;       // distance = radius of curvature
-  double R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0; // R_0 from lateral distribution fit
-  double eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0; // Epsilon from lateral distribution fit
+  double R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0;             // R_0 from lateral distribution exponential fit
+  double eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0;             // Epsilon from lateral distribution exponential fit
+  double chi2NDF = 0, chi2NDF_NS = 0;                                // Chi^2/NDF of lateral distribution exponential fit
+  double kPow = 0, sigkPow = 0, kPow_NS = 0, sigkPow_NS = 0;         // k from lateral distribution power law fit
+  double epsPow = 0, sigepsPow = 0, epsPow_NS = 0, sigepsPow_NS = 0; // Epsilon from lateral distribution power law fit
+  double chi2NDFPow = 0, chi2NDFPow_NS = 0;                          // Chi^2/NDF of lateral distribution power law fit
   map <int,PulseProperties> rawPulsesMap;                // pulse properties of pules in raw data traces
   map <int,PulseProperties> calibPulsesMap;              // pulse properties of pules in calibrated data traces
   PulseProperties* rawPulses[MAX_NUM_ANTENNAS];          // use array of pointers to store pulse properties in root tree
   PulseProperties* calibPulses[MAX_NUM_ANTENNAS];        // use array of pointers to store pulse properties in root tree
-  bool goodEW = false, goodNS = false;                   // true if reconstruction worked
-  double rmsCCbeam, rmsCCbeam_NS;			 // rms values of the beams in remote region
+  bool goodEW = false, goodNS = false;                // true if reconstruction worked
+  double rmsCCbeam, rmsCCbeam_NS;                        // rms values of the beams in remote region
   double rmsXbeam, rmsXbeam_NS;
   double rmsPbeam, rmsPbeam_NS;
   int CutCloseToCore, CutCloseToCore_NS;              // # of cut antennas in lateral distribution fit
@@ -1588,6 +1592,12 @@ int main (int argc, char *argv[])
           roottree->Branch("sigR_0",&sigR_0,"sigR_0/D");
           roottree->Branch("eps",&eps,"eps/D");
           roottree->Branch("sigeps",&sigeps,"sigeps/D");
+          roottree->Branch("chi2NDF",&chi2NDF,"chi2NDF/D");
+          roottree->Branch("kPow",&kPow,"kPow/D");
+          roottree->Branch("sigkPow",&sigkPow,"sigkPow/D");
+          roottree->Branch("epsPow",&epsPow,"epsPow/D");
+          roottree->Branch("sigepsPow",&sigepsPow,"sigepsPow/D");
+          roottree->Branch("chi2NDFPow",&chi2NDFPow,"chi2NDFPow/D");
           roottree->Branch("CutCloseToCore",&CutCloseToCore,"CutCloseToCore/I");
           roottree->Branch("CutSmallSignal",&CutSmallSignal,"CutSmallSignal/I");
           roottree->Branch("CutBadTiming",&CutBadTiming,"CutBadTiming/I");
@@ -1615,6 +1625,12 @@ int main (int argc, char *argv[])
           roottree->Branch("sigR_0_EW",&sigR_0,"sigR_0_EW/D");
           roottree->Branch("eps_EW",&eps,"eps_EW/D");
           roottree->Branch("sigeps_EW",&sigeps,"sigeps_EW/D");
+          roottree->Branch("chi2NDF_EW",&chi2NDF,"chi2NDF_EW/D");
+          roottree->Branch("kPow_EW",&kPow,"kPow_EW/D");
+          roottree->Branch("sigkPow_EW",&sigkPow,"sigkPow_EW/D");
+          roottree->Branch("epsPow_EW",&epsPow,"epsPow_EW/D");
+          roottree->Branch("sigepsPow_EW",&sigepsPow,"sigepsPow_EW/D");
+          roottree->Branch("chi2NDFPow_EW",&chi2NDFPow,"chi2NDFPow_EW/D");
           roottree->Branch("CutCloseToCore_EW",&CutCloseToCore,"CutCloseToCore_EW/I");
           roottree->Branch("CutSmallSignal_EW",&CutSmallSignal,"CutSmallSignal_EW/I");
           roottree->Branch("CutBadTiming_EW",&CutBadTiming,"CutBadTiming_EW/I");
@@ -1642,6 +1658,12 @@ int main (int argc, char *argv[])
           roottree->Branch("sigR_0_NS",&sigR_0_NS,"sigR_0_NS/D");
           roottree->Branch("eps_NS",&eps_NS,"eps_NS/D");
           roottree->Branch("sigeps_NS",&sigeps_NS,"sigeps_NS/D");
+          roottree->Branch("chi2NDF_NS",&chi2NDF_NS,"chi2NDF_NS/D");
+          roottree->Branch("kPow_NS",&kPow_NS,"kPow_NS/D");
+          roottree->Branch("sigkPow_NS",&sigkPow_NS,"sigkPow_NS/D");
+          roottree->Branch("epsPow_NS",&epsPow_NS,"epsPow_NS/D");
+          roottree->Branch("sigepsPow_NS",&sigepsPow_NS,"sigepsPow_NS/D");
+          roottree->Branch("chi2NDFPow_NS",&chi2NDFPow_NS,"chi2NDFPow_NS/D");
           roottree->Branch("CutCloseToCore_NS",&CutCloseToCore_NS,"CutCloseToCore_NS/I");
           roottree->Branch("CutSmallSignal_NS",&CutSmallSignal_NS,"CutSmallSignal_NS/I");
           roottree->Branch("CutBadTiming_NS",&CutBadTiming_NS,"CutBadTiming_NS/I");
@@ -1666,7 +1688,7 @@ int main (int argc, char *argv[])
       fstream ftest( (path+eventname).c_str());
       if(!ftest.is_open()) {
         cerr << "Unable to open "<<path+eventname<<endl;
-	continue;
+        continue;
       }
       ftest.close();
 
@@ -1689,7 +1711,7 @@ int main (int argc, char *argv[])
       string eventname_ =  eventname;
       // deletes the file path, if it exists    
       if (eventname_.find("/") != string::npos)
-	eventname_.erase(0,plotprefix.find_last_of('/')+1);
+        eventname_.erase(0,plotprefix.find_last_of('/')+1);
       // resize to 64 characters if longer
       eventname_.resize(64, char(0));
       strcpy (eventfilename, eventname_.c_str());
@@ -1707,6 +1729,10 @@ int main (int argc, char *argv[])
       distanceResult = 0, distanceResultNS = 0;
       R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0;
       eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0;
+      chi2NDF = 0, chi2NDF_NS = 0;
+      kPow = 0, sigkPow = 0, kPow_NS = 0, sigkPow_NS = 0;
+      epsPow = 0, sigepsPow = 0, epsPow_NS = 0, sigepsPow_NS = 0;
+      chi2NDFPow = 0, chi2NDFPow_NS = 0;
       rmsCCbeam = 0, rmsXbeam = 0, rmsPbeam = 0;
       rmsCCbeam_NS = 0, rmsXbeam_NS = 0, rmsPbeam_NS = 0;
       CutCloseToCore = 0, CutCloseToCore_NS = 0;
@@ -1724,8 +1750,7 @@ int main (int argc, char *argv[])
       // in this case an additional plotprefix is used
       string polPlotPrefix = "";
 
-      if ( calibrationMode )
-      {
+      if ( calibrationMode ) {
         // initialize the pipeline
         analyseLOPESevent2 eventPipeline;
         eventPipeline.initPipeline(obsrec);
@@ -1829,6 +1854,12 @@ int main (int argc, char *argv[])
             sigR_0 = results.asDouble("sigR_0");
             eps = results.asDouble("eps");
             sigeps = results.asDouble("sigeps");
+            chi2NDF = results.asDouble("chi2NDF");
+            kPow = results.asDouble("kPow");
+            sigkPow = results.asDouble("sigkPow");
+            epsPow = results.asDouble("epsPow");
+            sigepsPow = results.asDouble("sigepsPow");
+            chi2NDFPow = results.asDouble("chi2NDFPow");
             CutCloseToCore = results.asInt("CutCloseToCore");
             CutSmallSignal = results.asInt("CutSmallSignal");
             CutBadTiming = results.asInt("CutBadTiming");
@@ -1846,15 +1877,15 @@ int main (int argc, char *argv[])
           ElL = results.asDouble("Elevation");
           distanceResult = results.asDouble("Distance");
           CCheight = results.asDouble("CCheight");
-	  CCwidth = results.asDouble("CCwidth");
+          CCwidth = results.asDouble("CCwidth");
           CCheight_error = results.asDouble("CCheight_error");
           CCconverged = results.asBool("CCconverged");
           Xheight = results.asDouble("Xheight");
           Xheight_error = results.asDouble("Xheight_error");
           Xconverged = results.asBool("Xconverged");
-	  rmsCCbeam = results.asDouble("rmsCCbeam");
-	  rmsXbeam = results.asDouble("rmsXbeam");
-	  rmsPbeam = results.asDouble("rmsPbeam");
+          rmsCCbeam = results.asDouble("rmsCCbeam");
+          rmsXbeam = results.asDouble("rmsXbeam");
+          rmsPbeam = results.asDouble("rmsPbeam");
           gt = results.asuInt("Date");
          }
 
@@ -1924,6 +1955,12 @@ int main (int argc, char *argv[])
             sigR_0_NS = results.asDouble("sigR_0");
             eps_NS = results.asDouble("eps");
             sigeps_NS = results.asDouble("sigeps");
+            chi2NDF_NS = results.asDouble("chi2NDF_NS");
+            kPow_NS = results.asDouble("kPow_NS");
+            sigkPow_NS = results.asDouble("sigkPow_NS");
+            epsPow_NS = results.asDouble("epsPow_NS");
+            sigepsPow_NS = results.asDouble("sigepsPow_NS");
+            chi2NDFPow_NS = results.asDouble("chi2NDFPow_NS");
             CutCloseToCore_NS = results.asInt("CutCloseToCore");
             CutSmallSignal_NS = results.asInt("CutSmallSignal");
             CutBadTiming_NS = results.asInt("CutBadTiming");

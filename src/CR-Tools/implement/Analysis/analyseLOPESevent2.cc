@@ -878,48 +878,83 @@ namespace CR { // Namespace CR -- begin
       /* FIT */
       // do fit only if there are at least 3 good antennas left (otherwise set parameters to 0)!
       if (clean >= 3) {
-        TF1 *fitfunc;
-        fitfunc=new TF1("fitfunc","[0]*exp(-x/[1])",50,190);
-        fitfunc->SetParName(0,"#epsilon_{0}");
-        fitfunc->SetParName(1,"R_{0}");
-        //    fitfunc->SetParameter(0,20);
-        fitfunc->SetParameter(1,200);
-        fitfunc->GetXaxis()->SetRange(20,300);
-        //  fitfunc=new TF1("fitfunc","[0]*exp(-x/[1])+[2]",60,180);
-        //fitfunc->SetParameters(15,60,10000);
-        //  fitfunc->SetFillColor(19);
-        fitfunc->SetFillStyle(0);
-        fitfunc->SetLineWidth(2);
+        // fit exponential
+        TF1 *fitfuncExp;
+        fitfuncExp=new TF1("fitfuncExp","[0]*exp(-x/[1])",50,190);
+        fitfuncExp->SetParName(0,"#epsilon_{0}");
+        fitfuncExp->SetParName(1,"R_{0}");
+        fitfuncExp->SetParameter(1,200);
+        fitfuncExp->GetXaxis()->SetRange(20,300);
+        fitfuncExp->SetFillStyle(0);
+        fitfuncExp->SetLineWidth(2);
 
         cout << "------------------------------"<<endl;
-        latProClean->Fit(fitfunc, "WME");
+        latProClean->Fit(fitfuncExp, "");
         ptstats->Draw();
 
         // write fit results to record with other results
-        erg.define("eps",fitfunc->GetParameter(0));
-        erg.define("R_0",fitfunc->GetParameter(1));
-        erg.define("sigeps",fitfunc->GetParError(0));
-        erg.define("sigR_0",fitfunc->GetParError(1));
-        cout << "Result of fit:\n"
-             << "eps = " << fitfunc->GetParameter(0) << "\t +/- " << fitfunc->GetParError(0) << "\t µV/m/MHz\n"
-             << "R_0 = " << fitfunc->GetParameter(1) << "\t +/- " << fitfunc->GetParError(1) << "\t m\n"
+        erg.define("eps",fitfuncExp->GetParameter(0));
+        erg.define("R_0",fitfuncExp->GetParameter(1));
+        erg.define("sigeps",fitfuncExp->GetParError(0));
+        erg.define("sigR_0",fitfuncExp->GetParError(1));
+        erg.define("chi2NDF",fitfuncExp->GetChisquare()/double(fitfuncExp->GetNDF()));
+        cout << "Result of exponential fit eps * e^(-x/R_0):\n"
+             << "eps    = " << fitfuncExp->GetParameter(0) << "\t +/- " << fitfuncExp->GetParError(0) << "\t µV/m/MHz\n"
+             << "R_0    = " << fitfuncExp->GetParameter(1) << "\t +/- " << fitfuncExp->GetParError(1) << "\t m\n"
+             << "Chi^2  = " << fitfuncExp->GetChisquare() << "\t NDF " << fitfuncExp->GetNDF() << "\n"
              << endl;
+
+        // write plot to file
+        stringstream plotNameStream;
+        plotNameStream << filePrefix << GT << ".eps";
+        cout << "\nCreating plot: " << plotNameStream.str() << endl;
+        c1->Print(plotNameStream.str().c_str());
+
+        // fit power law
+        TF1 *fitfuncPow;
+        fitfuncPow=new TF1("fitfuncPow","[0]*x^[1]");
+        fitfuncPow->SetParName(0,"#epsilon_{0}");
+        fitfuncPow->SetParName(1,"k");
+        fitfuncPow->GetXaxis()->SetRange(20,300);
+        fitfuncPow->SetFillStyle(0);
+        fitfuncPow->SetLineWidth(2);
+        //fitfuncPow->SetLineColor(3);
+
+        cout << "------------------------------"<<endl;
+        latProClean->Fit(fitfuncPow, "");
+        ptstats->Draw();
+
+        // write fit results to record with other results
+        erg.define("epsPow",fitfuncPow->GetParameter(0));
+        erg.define("kPow",fitfuncPow->GetParameter(1));
+        erg.define("sigepsPow",fitfuncPow->GetParError(0));
+        erg.define("sigkPow",fitfuncPow->GetParError(1));
+        erg.define("chi2NDFPow",fitfuncPow->GetChisquare()/double(fitfuncPow->GetNDF()));
+        cout << "Result of power law fit epsPow * x ^ kPow:\n"
+             << "epsPow = " << fitfuncPow->GetParameter(0) << "\t +/- " << fitfuncPow->GetParError(0) << "\t µV/m/MHz\n"
+             << "kPow   = " << fitfuncPow->GetParameter(1) << "\t +/- " << fitfuncPow->GetParError(1) << "\t m\n"
+             << "Chi^2  = " << fitfuncPow->GetChisquare() << "\t NDF " << fitfuncPow->GetNDF() << "\n"
+             << endl;
+
+        // write plot to file
+        plotNameStream.str("");
+        plotNameStream << filePrefix << GT << "_pow.eps";
+        cout << "\nCreating plot: " << plotNameStream.str() << endl;
+        c1->Print(plotNameStream.str().c_str());
       } else {
         erg.define("eps",0.);
         erg.define("R_0",0.);
         erg.define("sigeps",0.);
         erg.define("sigR_0",0.);
+        erg.define("epsPow",0.);
+        erg.define("kPow",0.);
+        erg.define("sigepsPow",0.);
+        erg.define("sigkPow",0.);
         cout << "No fit was done, because less than 3 antennas are 'good':\n"
              << "eps = " << 0 << "\t +/- " << 0 << "\t µV/m/MHz\n"
              << "R_0 = " << 0 << "\t +/- " << 0 << "\t m\n"
              << endl;
       }
-
-      // write plot to file
-      stringstream plotNameStream;
-      plotNameStream << filePrefix << GT << ".eps";
-      cout << "\nCreating plot: " << plotNameStream.str() << endl;
-      c1->Print(plotNameStream.str().c_str());
 
     } catch (AipsError x) {
       cerr << "analyseLOPESevent2::fitLateralDistribution: " << x.getMesg() << endl;
