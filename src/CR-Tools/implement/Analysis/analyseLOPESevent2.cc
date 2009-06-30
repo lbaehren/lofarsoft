@@ -533,7 +533,7 @@ namespace CR { // Namespace CR -- begin
         latexfile << "\\begin{document}\n";
 
         // get list of generated plots and loop through the list
-        vector<string> plotlist = pipeline.getPlotList();
+        vector<string> plotlist = CompleteBeamPipe_p->getPlotList();
 
         for (unsigned int i = 0; i < plotlist.size(); i++) {
           // line break after #columns plots
@@ -588,19 +588,30 @@ namespace CR { // Namespace CR -- begin
       filenameStream << filePrefix << GT << ".dat";
       string filename = filenameStream.str();
 
-      cout << "\nWriting output for lateral distribution into file: " << filename << endl;
+      // loop through antenna and verify that there are at least 2 pulse informations
+      unsigned int NpulseInformation = 0;
+      for (unsigned int i=0 ; i < antennaIDs.size(); ++i)
+        if (calibPulses.find(antennaIDs(i)) != calibPulses.end())
+          ++NpulseInformation;
+      if (NpulseInformation < 2) {
+        cerr << "analyseLOPESevent2::createLateralOutput: " 
+             << "Event does not contain at least 2 good pulses!"
+             << endl;
+        return;
+      }
 
       // open file
       ofstream lateralfile;
       lateralfile.open(filename.c_str(), ofstream::out);
 
+      cout << "\nWriting output for lateral distribution into file: " << filename << endl;
 
       // get antenna positions and distances in shower coordinates
       Vector <double> distances = erg.asArrayDouble("distances");
       Matrix <double> antPos = toShower(beamPipe_p->GetAntPositions(), erg.asDouble("Azimuth"), erg.asDouble("Elevation"));
 
       // loop through antenna and create output for every antenna with existing pulse information
-      for (unsigned int i=0 ; i < antennaIDs.size(); i++)
+      for (unsigned int i=0 ; i < antennaIDs.size(); ++i)
         if (calibPulses.find(antennaIDs(i)) != calibPulses.end()) {
           lateralfile << i + 1 << "  "
                       << antPos.row(i)(0) << "  "
