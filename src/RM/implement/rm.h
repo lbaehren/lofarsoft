@@ -170,6 +170,23 @@ public:
 														 const vector<double> &delta_faradays,
 														 const double lambdaZero);					   
 
+	//! Forward Fourier Transform for Q only
+	vector<double> forwardFourierQ( const vector<double> &lambda_sqs,
+										     const vector<double> &rmpolint,
+											  const vector<double> &faradays,
+											  const vector<double> &weights,
+											  const vector<double> &delta_faradays,
+											  const double lambdaZero);
+
+
+	//! Forward Fourier Transform for U only
+	vector<double> forwardFourierU( const vector<double> &lambda_sqs,
+										     const vector<double> &rmpolint,
+											  const vector<double> &faradays,
+											  const vector<double> &weights,
+											  const vector<double> &delta_faradays,
+											  const double lambdaZero);
+
   // Clean a RM vector line-of-sight down to threshold
   int RMClean(vector<double> &phis, double threshold);
 

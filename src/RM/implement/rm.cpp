@@ -644,6 +644,98 @@ vector<complex<double> > rm::forwardFourier(const vector<double> &lambda_sqs,
 
 
 
+/*!
+	 \brief Q polarization only Forward Fourier Transform - inverse operation to RM-Synthesis
+
+    \param &freqs - Faraday depth to compute RM for
+    \param &rmpolint - Polarized intensities for each Faraday depth
+    \param &lambda_squared - Lambda squareds of polarized intensities
+    \param &weights - Weights associated with each frequency (or lambda squared)
+    \param &delta_phis - Delta phi distance between intensities in Faraday space
+    
+    \return Qintensities - vector Q of polarized intensity computed over vector freqs
+*/
+vector<double> rm::forwardFourierQ(const vector<double> &lambda_sqs,
+				 const vector<double> &rmpolint,
+				 const vector<double> &faradays,
+				 const vector<double> &weights,
+				 const vector<double> &delta_faradays,
+				 const double lambdaZero)
+{
+  vector<double> Qintensities(lambda_sqs.size());				// Q polarized intensities for each frequency
+
+  double exp_lambdafactor=0;											// exponential factor in direct FT
+  double lambdasq=0;														// single lambda squared value to be computed
+  const unsigned int numfaradays=faradays.size();				// number of Faraday depths
+  const unsigned int numlambda_sqs=lambda_sqs.size();			// number of frequency channels to transform to
+
+  //-----------------------------------------------------------------------
+
+  // compute discrete Fourier sum by iterating over frequency vector
+  //
+  // P(phi) = K * expfactor * Sum_0^frequency.size() {P(lambda^2)*exp(-2*i*phi*lambda^2)}
+  //
+  for(unsigned int i=0; i<numlambda_sqs; i++)	// loop over lambda squareds given in phis vector 
+  {
+     for(unsigned int chan=0; chan<numfaradays; chan++)
+  	  {
+		  lambdasq=lambda_sqs[i];				// select lambda squared from lambda squareds vector
+        // Use Euler formula for exp_lambdafactor
+ 		  exp_lambdafactor=cos(+2.0*lambdasq*faradays[chan]);  
+		  Qintensities[i]=Qintensities[i]+(rmpolint[chan]*exp_lambdafactor*delta_faradays[chan]);
+     }
+  }
+
+  return Qintensities;	// return vector of complex polarized intensities per Faraday depth
+}
+
+
+/*!
+	 \brief U polarization only Forward Fourier Transform - inverse operation to RM-Synthesis
+
+    \param &freqs - Faraday depth to compute RM for
+    \param &rmpolint - Polarized intensities for each Faraday depth
+    \param &lambda_squared - Lambda squareds of polarized intensities
+    \param &weights - Weights associated with each frequency (or lambda squared)
+    \param &delta_phis - Delta phi distance between intensities in Faraday space
+    
+    \return Qintensities - vector U of polarized intensity computed over vector freqs
+*/
+vector<double> rm::forwardFourierU(const vector<double> &lambda_sqs,
+				 const vector<double> &rmpolint,
+				 const vector<double> &faradays,
+				 const vector<double> &weights,
+				 const vector<double> &delta_faradays,
+				 const double lambdaZero)
+{
+  vector<double> Uintensities(lambda_sqs.size());				// Q polarized intensities for each frequency
+
+  double exp_lambdafactor=0;											// exponential factor in direct FT
+  double lambdasq=0;														// single lambda squared value to be computed
+  const unsigned int numfaradays=faradays.size();				// number of Faraday depths
+  const unsigned int numlambda_sqs=lambda_sqs.size();			// number of frequency channels to transform to
+
+  //-----------------------------------------------------------------------
+
+  // compute discrete Fourier sum by iterating over frequency vector
+  //
+  // P(phi) = K * expfactor * Sum_0^frequency.size() {P(lambda^2)*exp(-2*i*phi*lambda^2)}
+  //
+  for(unsigned int i=0; i<numlambda_sqs; i++)	// loop over lambda squareds given in phis vector 
+  {
+     for(unsigned int chan=0; chan<numfaradays; chan++)
+  	  {
+		  lambdasq=lambda_sqs[i];				// select lambda squared from lambda squareds vector
+        // Use Euler formula for exp_lambdafactor
+ 		  exp_lambdafactor=sin(+2.0*lambdasq*faradays[chan]);  
+		  Uintensities[i]=Uintensities[i]+(rmpolint[chan]*exp_lambdafactor*delta_faradays[chan]);
+     }
+  }
+
+  return Uintensities;	// return vector of complex polarized intensities per Faraday depth
+}
+
+
 
 /*!
 	\brief Perform RM clean on a line-of-sight Q or U only vector down to threshold
