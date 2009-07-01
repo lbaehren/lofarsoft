@@ -70,8 +70,10 @@ if (HAVE_BOOST)
 
   ## compiler instructions
   add_executable (boostProgramOptions boostProgramOptions.cc)
+  add_executable (boostThread boostThread.cc)
   ## linker instructions
   target_link_libraries (boostProgramOptions ${BOOST_LIBRARIES})
+  target_link_libraries (boostThread ${BOOST_LIBRARIES})
   ## testing
   add_test (boostProgramOptions_test1 boostProgramOptions)
   add_test (boostProgramOptions_test2 boostProgramOptions --help)
