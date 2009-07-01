@@ -345,6 +345,7 @@ class hfPlotPanel(hffunc):
         self.setParameter("xscalestep",0.05)
         self.setParameter("xshift",0)
         self.setParameter("yshift",0)
+        self.setParameter("Offset",0)
         self.setParameter("XAuto",int(True))
         self.setParameter("YAuto",int(True))
         self.setParameter("logX",int(False))
@@ -440,7 +441,7 @@ class hfPlotPanel(hffunc):
         self.putResult("ymax",ymax)
 #        if settrace: pdb.set_trace()
         if self.xAxisLabel=="": self.xAxisLabel=self.xAxisDatatype
-        if self.yAxisLabel=="": self.yAxisLabel=self.yAxisDatatype
+        if self.yAxisLabel=="": self.yAxisLabel=self.yAxisDatatype  
         if not self.xAxisUnit=="": self.xAxisLabel=self.xAxisLabel+" ["+self.xAxisUnitPrefix+self.xAxisUnit+"]"
         if not self.yAxisUnit=="": self.yAxisLabel=self.yAxisLabel+" ["+self.yAxisUnitPrefix+self.yAxisUnit+"]"
         self.GraphObject.Label("x",self.xAxisLabel,1)

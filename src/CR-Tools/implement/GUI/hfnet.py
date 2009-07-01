@@ -54,8 +54,8 @@ d["PlotPanel'logY"].connect(gui.logy,"setChecked","bool")
 
 d["DataPipeline'Block"].connect(gui.blocknumber,"setValue","int")
 #d["GlobalParameters'Blocksize"].connect(gui.blocksize,"setValue","int")
-d["Data'maxBlock"].connect(gui.blocknumber,"setMaximum","int",isSlot=False)
-d["Data'maxBlock"].connect(gui.blocknumberslider,"setMaximum","int",isSlot=False)
+d["Data:maxBlock"].FirstObject().connect(gui.blocknumber,"setMaximum","int",isSlot=False)
+d["Data:maxBlock"].FirstObject().connect(gui.blocknumberslider,"setMaximum","int",isSlot=False)
 d["Data'maxBlocksize"].connect(gui.blocksize,"setMaximum","int",isSlot=False)
 d["Data'maxBlocksize"].connect(gui.blocksizeslider,"setMaximum","int",isSlot=False)
 
@@ -104,6 +104,8 @@ print "x=d.All().storePyDBG(dbg).setVerbose(9999).setDebugGUI(True) or debugguio
 print "you can use maxnetlevel=NNN to set the level of detail during the debug phase."  
 
 ##########End ....
+#
+#d.new("Offset",_f("Offset")) ^ (d["x:Data"],d["x:UnitData"])
 
 #max_number_of_antennas=2
 #("MaxNumberOfAntennas",max_number_of_antennas) >> d["PipelineLauncher"]

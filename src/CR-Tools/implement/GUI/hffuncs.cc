@@ -703,6 +703,43 @@ public:
 DATAFUNC_CONSTRUCTOR(Square,Sys,"Squares the elements in the data vector.",INTEGER, false)
  
 
+class DataFunc_Sys_Offset : public ObjectFunctionClass {
+public:
+	
+	DEFINE_PROCESS_CALLS_NUMONLY 
+	
+	DataFunc_Sys_Offset(Data*dp){dp->setUpdateable(false);};
+	
+	template <class T>
+	void process(F_PARAMETERS) {
+		address i,size;
+		
+		/*
+		 
+		 !!!Actually the treatment of vector selection here and in the
+		 following is wrong/inefficient!!
+		 
+		 The function will only be called by get with a vector selector
+		 that is independent of the value (the vs1,vs2 split is already
+		 done within get), so selection could be done before calculation
+		 (and hence reduce processing time).
+		 
+		 */
+		
+		(*dp).getFirstFromVector(*vp,vs);
+		//This is bad - better use the setParameter method to also allow other than the first object to be accessed ...
+		size=(*vp).size();
+		T first=(*vp)[0];
+		for (i=0; i<size; i++) {(*vp)[i]=((*vp)[i]-first);};
+		//putResult("Offset",first);
+		if (vs != NULL) {(*vp) = (*vs).get(*vp);};
+	}
+	
+	void process_S(F_PARAMETERS_T(HString)) {};
+
+};
+DATAFUNC_CONSTRUCTOR(Offset,Sys,"Subtracts the first elements in the data vector from the entire data vector.",NUMBER, false)
+
 
 class DataFunc_Sys_Print : public ObjectFunctionClass {
 public:
@@ -987,9 +1024,9 @@ public:
     setParameter("Antenna", 0);
     setParameter("Blocksize", -1);
     setParameter("Block", 0);
-    setParameter("maxBlock", 63);
     setParameter("maxBlocksize", 65536);
-    setParameter("Stride", 0);
+    setParameter("Filesize", -1);
+	setParameter("Stride", 0);
     setParameter("Shift", 0);
     HString s="Fx"; setParameter("Datatype", s);
     getParameters();
@@ -1019,9 +1056,9 @@ public:
 //!!!One Needs to verify somehow that the parameters make sense !!!
     GET_FUNC_PARAMETER_T(Antenna, HInteger);
     GET_FUNC_PARAMETER_T(Blocksize,  HInteger);
-    GET_FUNC_PARAMETER_T(maxBlocksize,  HInteger);
+	GET_FUNC_PARAMETER_T(maxBlocksize,  HInteger);
+	GET_FUNC_PARAMETER_T(Filesize,  HInteger);
     GET_FUNC_PARAMETER_T(Block,  HInteger);
-    GET_FUNC_PARAMETER_T(maxBlock,  HInteger);
     GET_FUNC_PARAMETER_T(Stride,  HInteger);
     GET_FUNC_PARAMETER_T(Shift, HInteger);
     GET_FUNC_PARAMETER_T(Datatype, HString);
@@ -1030,14 +1067,13 @@ public:
     DBG("nofAntennas=" << drp->nofAntennas());
     if (Antenna > drp->nofAntennas()-1) {ERROR("Requested Antenna number too large!");};
 
-    if (Blocksize<1) {
-      drp->setBlocksize(maxBlocksize);
-    } else {
-      drp->setBlocksize(Blocksize);
-    };
+    if (Blocksize<1) Blocksize=maxBlocksize;
+	drp->setBlocksize(Blocksize);
     drp->setBlock(Block);
     drp->setStride(Stride);
     drp->setShift(Shift);
+	HInteger maxBlock=Filesize/Blocksize-1;	
+	putResult("maxBlock",maxBlock);
 
     Vector<uint> antennas(1,Antenna);
     drp->setSelectedAntennas(antennas);
@@ -1235,6 +1271,7 @@ void DataFunc_Sys_Library_publish(DataFuncLibraryClass* library_ptr){
   library_ptr->add(&DataFunc_Sys_Copy_Constructor);
   library_ptr->add(&DataFunc_Sys_Print_Constructor);
   library_ptr->add(&DataFunc_Sys_Square_Constructor);
+  library_ptr->add(&DataFunc_Sys_Offset_Constructor);
   library_ptr->add(&DataFunc_Sys_Range_Constructor);
   library_ptr->add(&DataFunc_Sys_Unit_Constructor);
 }
