@@ -446,7 +446,159 @@ vector<complex<double> > rm::inverseFourier(const vector<double> &phis,
 }
 
 
+/*! 
+	\brief Single Polarization Inverse Fourier Method for calculating the Rotation Measure at a single Faraday depth
+    
+    The inverse Fourier Transformation is the classical relation between the lambda squared space and Faraday
+    space. Input images channel are not necessarily given in lambda squared wavelengths, but in frequency instead. 
+	 If that is the case, a conversion function between lambda squared and frequency should be first used.
+
+    This method takes only a real intensity (Q or U) and computes the RM only for that Q and U.
+
+    \param phi - Faraday depth to compute RM for
+    \param intensity - intensity per channel for one polarization only
+    \param lambda_squared - corresponding frequencies of channels
+    \param weights - weigths for each channel
+    \param delta_lambda_squared - delta lambda squared between channels
+	 \param lambdaZero - wavelength to derotate polarization vectors to, default 0
+    
+    \return rm - Single RM value computed for Faraday depth phi
+*/
+complex<double> rm::inverseFourier(double phi,
+				 const vector<double> &intensity,
+				 const vector<double> &lambda_squared,
+				 const vector<double> &weights,
+				 const vector<double> &delta_lambda_squared,
+				 const double lambdaZero)
+{
+//    vector<double> lambda_squared(frequency.size());
+//    vector<double> delta_lambda_squared(delta_frequency.size());
+    
+    complex<double> exp_lambdafactor=0;				// exponential factor in direct FT
+    complex<double> rmpolint;								// rm value
+	 double lambdaZeroSq=0;									// derotating lambdaZeroSquared
+    int chan=0; 												// loop variables
+    const int numchannels=lambda_squared.size();	// number of lambda squared channels
+
+    double K=0;					// K factor for RM-synthesis
+
+
+    //-----------------------------------------------------------------------
+
+    // Compute weighting factor from weights
+    for (vector<double>::const_iterator it = weights.begin(); it!=weights.end(); ++it) 
+    {
+      K+=*it;
+    }
+    
+    if(K!=0)	// Do not do a division by zero!
+      K=1/K;	// take inverse
+    else	// otherwise...
+      K=1;	// ... use 1 as default
+      
+	 // If a derotating lambda Zero != 0 was given compute lambdaZeroSq
+	 if(lambdaZero)
+		lambdaZeroSq=lambdaZero*lambdaZero;
+
+    // compute discrete Fourier sum by iterating over frequency vector
+    //
+    // P(phi) = K * expfactor * Sum_0^frequency.size() {P(lambda^2)*exp(lambda^2)}
+    //
+    for(chan=0; chan<numchannels; chan++)
+    {
+		// Use Euler formula for exp_lambdafactor
+ 		exp_lambdafactor=complex<double>(cos(-2.0*phi*(lambda_squared[chan]-lambdaZeroSq)), sin(-2.0*phi*(lambda_squared[chan]-lambdaZeroSq)));	
+      // compute complex exponential factor
+//      exp_lambdafactor=exp(complex<double>(0, -2*phi)*lambda_squared[chan]);
+      rmpolint=rmpolint+(intensity[chan]*exp_lambdafactor)*delta_lambda_squared[chan];
+    }
+
+    rmpolint=K*rmpolint;	// multiply with weighting
+
+    return rmpolint;		// return complex polarized intensities per Faraday depth
+}
+
+
+
 /*!
+    \brief Inverse Fourier Method for calculating the Rotation Measure for a set of Faraday depths
+
+    The inverse Fourier Transformation is the classical relation between the lambda squared space and Faraday
+    space. Input images channel are not necessarily given in lambda squared wavelengths, but in frequency instead. 
+	 If that is the case, a conversion function between lambda squared and frequency should be used first.
+
+ 	 If lambdaZero is given as an optional parameter (default 0) the polarization vectors are derotated to that
+    wavelength.
+
+	 This function computes the RM for one polarization (Q or U) only.
+
+    \param &phis - Faraday depth to compute RM for
+    \param &intensity - intensities in one single polarization
+    \param &lambda_squared - Lambda squareds of polarized intensities
+    \param &weights - Weights associated with each frequency (or lambda squared)
+    \param &delta_lambda_squared - Delta lambda squared distance between intensities
+	 \param lambdaZero - lambda zero wavelength to derotate polarization vector to, default=0
+    
+    \return rm - vector of RM values computed for Faraday depths phi
+*/
+vector<complex<double> > rm::inverseFourier(const vector<double> &phis,
+				 const vector<double> &intensity,
+				 const vector<double> &lambda_squared,
+				 const vector<double> &weights,
+				 const vector<double> &delta_lambda_squared,
+				 const double lambdaZero)
+{
+  vector<complex<double> > rmpolint(phis.size());		// polarized RM intensities per Faraday depth
+
+  complex<double> exp_lambdafactor=0;						// exponential factor in direct FT
+  double lambdaZeroSq=0;										// derotating lambdaZeroSquared
+  double phi=0;													// single phi value to be computed
+  const unsigned int numchannels=lambda_squared.size();			// number of frequency channels
+
+  double K=0;														// K factor for RM-synthesis
+
+  //-----------------------------------------------------------------------
+
+  // Compute weighting factor from weights
+  for (vector<double>::const_iterator it = weights.begin(); it!=weights.end(); ++it) 
+  {
+    K+=*it;
+  }
+
+  if(K!=0)		// Do not do a division by zero!
+    K=1/K;		// take inverse
+  else			// otherwise...
+    K=1;			// ... use 1 as default    
+
+  // If a derotating lambda Zero != Zero was given compute lambdaZeroSq
+  if(lambdaZero)
+     lambdaZeroSq=lambdaZero*lambdaZero;
+
+  // compute discrete Fourier sum by iterating over frequency vector
+  //
+  // P(phi) = K * expfactor * Sum_0^frequency.size() {P(lambda^2)*exp(-2*i*phi*lambda^2)}
+  //
+  for(unsigned int i=0; i<phis.size(); i++)	// loop over Faraday depths given in phis vector 
+  {
+     for(unsigned int chan=0; chan<numchannels; chan++)
+  	  {
+		  phi=phis[i];				// select phi from Faraday depths vector
+        // Use Euler formula for exp_lambdafactor
+   // 	  ex_lambdafactor=(cos(-2*phi*(lambda_squared[chan]-lambdaZeroSq)), sin(-2*phi*(lambda_squared[chan]-lambdaZeroSq)));		// BUGGY! casa error?
+		  exp_lambdafactor=complex<double>(cos(-2.0*phi*(lambda_squared[chan]-lambdaZeroSq)), sin(-2.0*phi*(lambda_squared[chan]-lambdaZeroSq)) );  
+      rmpolint[i]=rmpolint[i]+(intensity[chan]*exp_lambdafactor*delta_lambda_squared[chan]);
+     }
+
+     rmpolint[i]=K*rmpolint[i];	// multiply with weighting
+  }
+
+  return rmpolint;	// return vector of complex polarized intensities per Faraday depth
+}
+
+
+
+/*!
+	 \brief Forward Fourier Transform - inverse operation to RM-Synthesis
 
     \param &freqs - Faraday depth to compute RM for
     \param &rmpolint - Polarized intensities for each Faraday depth
@@ -565,7 +717,7 @@ vector<complex<double> > rm::RMSF(const vector<double> &phis,
 				  const vector<double> &delta_lambda_squared,
 				  const double lambdaZero)
 {
-  vector<complex<double> > foo(phis.size());					// calculated rmsf ATTENTION: rmCube has its own rmsf attribute
+  vector<complex<double> > rmsfvec(phis.size());					// calculated rmsf ATTENTION: rmCube has its own rmsf attribute
   vector<double> lambda_squared_pi(lambda_squared.size());  	// scale lambda squareds to 0 to 2*Pi
   unsigned int numchannels=lambda_squared.size();					// number of channels
 
@@ -586,8 +738,7 @@ vector<complex<double> > rm::RMSF(const vector<double> &phis,
   // Doesn't check for all combinations of equality...
   if(phis.size()!=lambda_squared.size() || weights.size()!=delta_lambda_squared.size())
      throw "rm::RMSF input vectors differ in length";
-  if(foo.size()!=phis.size())
-     throw "rm::RMSF rmsf size is not equal to size of phis vector";
+
 
   //***********************************************************
  // rmsf.resize(phissize);		// set rmsf length to that of phis
@@ -606,11 +757,11 @@ vector<complex<double> > rm::RMSF(const vector<double> &phis,
     for(unsigned int iweight=0; iweight < weightssize; iweight++)
     {
    	 exp_factor=complex<double>(cos(-2*phis[iphi]*lambda_squared_pi[iweight]), sin(-2*phis[iphi]*lambda_squared_pi[iweight]));
-	    foo[iphi]=foo[iphi] + weights[iweight] * exp_factor * delta_lambda_squared[iweight];					 
+	    rmsfvec[iphi]=rmsfvec[iphi] + weights[iweight] * exp_factor * delta_lambda_squared[iweight];					 
     }
   }
   
-  return foo;	// return vector with calculated rmsf
+  return rmsfvec;		// return vector with calculated rmsf
 }
 
 
@@ -635,7 +786,7 @@ vector<complex<double> >rm::RMSFfreq(const vector<double> &phis,
 				  const vector<double> &delta_frequencies,
 				  const double freqZero)
 {
-  vector<complex<double> > rmsf(phis.size());				// calculated rmsf to be returned
+  vector<complex<double> > rmsfvec(phis.size());				// calculated rmsf to be returned
   vector<double> lambda_sqs(frequencies.size());
   vector<double> delta_lambda_sqs(frequencies.size());
   double lambdaZero=0;						// lambdaZero to rotate polarized vector to (converted from freqZero)
@@ -661,12 +812,12 @@ vector<complex<double> >rm::RMSFfreq(const vector<double> &phis,
     // Loop over all weights and compute Riemann's integral
     for(iweight=0; iweight < weights.size(); iweight++)
     {
-      rmsf[iphi]=rmsf[iphi] + weights[iweight] * 
+      rmsfvec[iphi]=rmsfvec[iphi] + weights[iweight] * 
       exp(complex<double>(0,-2*phis[iphi]*(lambda_sqs[iweight]-lambdaZeroSq))) * delta_lambda_sqs[iweight];					 
     }
   }
   
-  return rmsf;	// return vector with calculated rmsf
+  return rmsfvec;	// return vector with calculated rmsf
 }
 
 
@@ -1051,16 +1202,39 @@ void rm::writeRMtoFile(vector<double> rm, const std::string &filename)
   
   \param rm - vector containing data (real double) to write to file
   \param filename - name of file to create or append to
-  \param mode - write mode: overwrite, append
 */
 void rm::writeRMtoFile(vector<complex<double> > rm, const std::string &filename)
 {
-  unsigned int i=0;	// loop variable
- 
   ofstream outfile(const_cast<const char *>(filename.c_str()), ofstream::out);
 
-  for(i=0; i<rm.size(); i++)			// loop over vector
+  for(unsigned int i=0; i<rm.size(); i++)		// loop over vector
   {
+    outfile << rm[i].real() << "   ";			// write real part of data
+	 outfile << rm[i].imag();						// write imaginary part of data
+    outfile << endl;									// add endl
+  }
+
+  outfile.flush();						// flush output file
+}
+
+
+/*!
+  \brief Write a vector (RM) out to file on disk (mainly for debugging)
+  
+  \param lambdasq - vector containing the lambda squared wavelengths
+  \param rm - vector containing data (real double) to write to file
+  \param filename - name of file to create or append to
+*/
+void rm::writeRMtoFile(vector<double> &lambdasq, vector<complex<double> > &rm, const std::string &filename)
+{
+  if(lambdasq.size()!=rm.size())
+	 throw "rm::writeRMtoFile lambdasq and rm vector differ in size";
+	
+  ofstream outfile(const_cast<const char *>(filename.c_str()), ofstream::out);
+
+  for(unsigned int i=0; i<rm.size(); i++)		// loop over vector
+  {
+	 outfile << lambdasq[i] << "   ";			// write lambda squareds 
     outfile << rm[i].real() << "   ";			// write real part of data
 	 outfile << rm[i].imag();						// write imaginary part of data
     outfile << endl;									// add endl

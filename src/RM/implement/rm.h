@@ -131,6 +131,22 @@ public:
 														const vector<double> &,
 														const vector<double> &,
 														const double lambdaZero=0);
+	
+	//! Inverse Fourier transform for one polarization (Q or U) only to compute a single Faraday Depth													
+	complex<double> inverseFourier(double phi,
+											 const vector<double> &intensity,
+											 const vector<double> &lambda_squared,
+											 const vector<double> &weights,
+											 const vector<double> &delta_lambda_squared,
+											 const double lambdaZero);
+
+	//! Inverse Fourier transform for one polarization (Q or U) only to compute for a vector of Faraday Depths	
+	vector<complex<double> > inverseFourier(const vector<double> &phis,
+								  				 		const vector<double> &intensity,
+						  							   const vector<double> &lambda_squared,
+													   const vector<double> &weights,
+														const vector<double> &delta_lambda_squared,
+														const double lambdaZero);
 
   // Compute the Rotation Measure Spread Function (RMSF)
   vector<complex<double> > RMSF( const vector<double> &,
@@ -176,7 +192,7 @@ public:
 		     vector<double> &);
 
   //! (Forward) Fourier Transform to get an image from an RM cube
-  vector<double> fourierTransform(vector<double> &, vector<double> &, bool freq=true);
+  //vector<double> fourierTransform(vector<double> &, vector<double> &, bool freq=true);
 
   
   // Read frequency / lambda squared distributions from text files
@@ -199,7 +215,11 @@ public:
   void writeRMtoFile(vector<double>, const std::string &filename);
 
   //! Write a complex vector out to a file
-  void rm::writeRMtoFile(vector<complex<double> > rm, const std::string &filename);
+  void writeRMtoFile(vector<complex<double> > rm, const std::string &filename);
+
+  //! Write the lambda squareds ann the complex vector rm out to a file
+  void writeRMtoFile(vector<double> &lambdasq, vector<complex<double> > &rm, const std::string &filename);
+
 
   // Atmospheric correction of RM (contribution through atmosphere)
   // ??
