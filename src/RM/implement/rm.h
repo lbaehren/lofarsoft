@@ -246,11 +246,15 @@ public:
   
   //! Rotation Measure error estimation algorithms
 
+
+  //! Variance of the lambda squared distribution (helper function for rmErrorLsq)
+  double lambdaSqVariance(vector<double> &lambdaSq);
+
   //! (assuming) a least squares error approximation
-  vector<double> rmErrorLsq(vector<complex<double> > &intensity, 
-			    vector<double> &lambda_sqs, 
-			    vector<double> &weights, 
-			    bool freq=true);
+  double rmErrorLsq(double rmsnoisechan, double lambdaSqVariance, int Nchan, double P);
+
+  //! overloaded ErrorLsq function calling lambdaSqVariance internally
+  double rmErrorLsq(double rmsnoisechan, vector<double> &lambdaSqs, double P);
 
   //! Error estimate based on Bayesian statistics
   vector<double> rmErrorBayes(vector<complex<double> > &intensities,

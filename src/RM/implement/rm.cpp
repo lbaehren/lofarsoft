@@ -943,50 +943,80 @@ vector<double> rm::wavelet(vector<double> &phi,
 }
 
 
-// High-Level access functions to compute RM tiles/cubes
-
-// Wrapper function to perform RM synthesis on a tile of an image:
-// A section (or whole) image is taken as input, using the casacore LatticeBase class,
-// the algorithm used to compute the RM cube is specified via a function pointer
-// also implement multithreading into that?
+//********************************************************
 //
-
-//Lattice<double> rm::rmOnLattice(Lattice<double> imagetile,  algorithm)
-//{
-//	LatticeBase *lattice;
+//	Error estimation algorithms
 //
-//
-//
-//	return *lattice;
-//}
+//********************************************************
 
 
-// Error calculation algorithms
-
-/*! \brief Calculate RM error using LSQ approximation
-    
-    Input parameters are the vector of polarized intensities, along with a vector describing
-    their frequency distribution; if bool freq is set to false, these are assumed to be
-    given in lambda squared values
-    
-    \param intensity - polarized intensities per channel
-    \param lambda_sqs - corresponding lambda squared values of channels
-    \param lambda_sq - bool if vectors are given in lambda squared (=true) or frequency
-    
-    \return rm_error - computed RM error estimation
+/*!
+	\brief Compute lambda squared variance, used in rmErrorLsq function
+	
+	\param lambdaSq - vector with lambda squareds used in observation
+	
+	\return lambdaSqVariance - variance of lambda squared distribution
 */
-
-vector<double> rm::rmErrorLsq(vector<complex<double> > &intensity, vector<double> &lambda_sqs, vector<double> &weights, bool freq)
+double rm::lambdaSqVariance(vector<double> &lambdaSq)
 {
-  vector<double> rm_error(intensity.size());
+	double templambdaSqVariance=0;		// variance of lambda squared distribution
+	unsigned int N=lambdaSq.size();		// number of lambda squareds
+	
+	if(N==0)
+		throw "rm::lambdaSqVariance lambdaSq has length 0";
+	
+	for(unsigned int i=0; i<N; i++)
+	{	
+		templambdaSqVariance = templambdaSqVariance + (1/(N-1)*(pow(lambdaSq[i], 2) - 1/N*pow(lambdaSq[i],2) ));
+	}
+	
+	return templambdaSqVariance;
+}
 
-  if(freq)
-  {
-    // convert to lambda_sqs
-  }
-  
 
-  return rm_error;
+/*!
+	\brief Calculate the RM error with the least squared fit error estimation
+	
+	\param rmsnoisechan - rms noise per channel
+	\param lambdaSqVariance - variance of lambda squared distribution
+	\param Nchan - number of channels in observation
+	\param P - total polarized intensity integrated over all channels
+	
+	\return rmerror - error in polarized RM
+*/
+double rm::rmErrorLsq(double rmsnoisechan, double lambdaSqVariance, int Nchan, double P)
+{
+	double phiVariance=0;		// variance of phi
+	double rmerror=0;				// rmerror = sqrt(phi); standard deviation
+
+	phiVariance=pow(rmsnoisechan, 2)/(4*(Nchan-2)*pow(abs(P),2)*lambdaSqVariance);
+
+	rmerror=sqrt(phiVariance);
+
+	return rmerror;
+}
+
+
+double rm::rmErrorLsq(double rmsnoisechan, vector<double> &lambdaSqs, double P)
+{
+	double phiVariance=0;			// variance of phi
+	double rmerror=0;					// rmerror = sqrt(phi); standard deviation
+	double templambdaSqVariance=0;		// variance of lambda squareds computed with internal function
+	int Nchan=0;						// number of lambda squared channels
+
+	templambdaSqVariance=lambdaSqVariance(lambdaSqs);
+	Nchan=lambdaSqs.size();
+
+	if(Nchan==0)
+		throw "rm::rmErrorLsq number of channels is 0";
+	if(templambdaSqVariance < 0)
+		throw "rm::rmErrorLsq lambdaSqVariance < 0";
+
+	phiVariance=pow(rmsnoisechan, 2)/(4*(Nchan-2)*pow(abs(P),2)*templambdaSqVariance);
+
+	rmerror=sqrt(phiVariance);
+
+	return rmerror;	
 }
 
 
