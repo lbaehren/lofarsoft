@@ -96,6 +96,12 @@ namespace CR { // Namespace CR -- begin
     //! Time window cut for lateral distribution (pulse time must be close to cc-beam center)
     double lateralTimeCut;
 
+    //! Input antenna selection (manually flagged antennas)
+    Vector<Int> InputFlaggedAntIDs;
+
+    //! Selection of all antennas with the correct polarization
+    Vector<Bool> PolarizationAntennaSelection;
+
 
   public:
     

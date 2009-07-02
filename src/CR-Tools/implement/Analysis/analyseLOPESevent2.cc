@@ -145,6 +145,9 @@ namespace CR { // Namespace CR -- begin
 
       erg.define("goodReconstructed",false);  // will be set to true at the end of the reconstruction
 
+      // store a copy of the input antenna selection for later use
+      InputFlaggedAntIDs = FlaggedAntIDs.copy();
+
       // initialize the pipeline (flag not active antennas and antennas with bad signals)
       if (! SetupEvent(evname, doTVcal, FlaggedAntIDs, AntennaSelection, 
 		       UpSamplingRate, ExtraDelay, verbose, doGainCal, doDispersionCal, doDelayCal, doRFImitigation,
@@ -177,6 +180,11 @@ namespace CR { // Namespace CR -- begin
       CompleteBeamPipe_p->setSpectrumInterval(getSpectrumStart(),getSpectrumStop());
       CompleteBeamPipe_p->setPolarization(Polarization);
       CompleteBeamPipe_p->setCalibrationMode(false);
+
+      // create antenna selection of correct polarization
+      PolarizationAntennaSelection = AntennaSelection.copy();
+      PolarizationAntennaSelection.set(true);
+      CompleteBeamPipe_p->deselectectPolarization(beamformDR_p,PolarizationAntennaSelection);
 
       // Plot the raw data, if desired
       if (PlotRawData) {
@@ -332,12 +340,15 @@ namespace CR { // Namespace CR -- begin
 
       erg.define("goodReconstructed",false);  // will be set to true at the end of the reconstruction
 
+      // store a copy of the input antenna selection for later use
+      InputFlaggedAntIDs = FlaggedAntIDs.copy();
+
       pipeline_p->setVerbosity(verbose);
       // Generate the Data Reader
-      if (! lev_p->attachFile(evname) ){
-	cerr << "analyseLOPESevent::SetupEvent: " << "Failed to attach file: " << evname << endl;
-	return Record();
-      };
+      if (! lev_p->attachFile(evname) ) {
+        cerr << "analyseLOPESevent::SetupEvent: " << "Failed to attach file: " << evname << endl;
+        return Record();
+      }
 
       //  Enable/disable calibration steps of the FirstStagePipeline (must be done before InitEvent)
       //  parameters are initialized with 'true' by default
@@ -348,10 +359,10 @@ namespace CR { // Namespace CR -- begin
       pipeline_p->setFreqInterval(getFreqStart(),getFreqStop());
 
       // initialize the Data Reader
-      if (! pipeline_p->InitEvent(lev_p)){
-	cerr << "analyseLOPESevent2::CalibrationPipeline: " << "Failed to initialize the DataReader!" << endl;
-	return Record();
-      };
+      if (! pipeline_p->InitEvent(lev_p)) {
+        cerr << "analyseLOPESevent2::CalibrationPipeline: " << "Failed to initialize the DataReader!" << endl;
+        return Record();
+      }
 
       //  Enable/disable calibration steps for the SecondStagePipeline
       pipeline_p->doPhaseCal(false);
@@ -389,6 +400,11 @@ namespace CR { // Namespace CR -- begin
       CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
       CompleteBeamPipe_p->setSpectrumInterval(getSpectrumStart(),getSpectrumStop());
       CompleteBeamPipe_p->setCalibrationMode(true);
+
+      // create antenna selection of correct polarization
+      PolarizationAntennaSelection = AntennaSelection.copy();
+      PolarizationAntennaSelection.set(true);
+      CompleteBeamPipe_p->deselectectPolarization(lev_p,PolarizationAntennaSelection);
 
       // Plot the raw data, if desired
       if (PlotRawData)
@@ -621,6 +637,25 @@ namespace CR { // Namespace CR -- begin
                       << calibPulses[antennaIDs(i)].envelopeMaximum << "  "
                       << calibPulses[antennaIDs(i)].noise << "  "
                       << calibPulses[antennaIDs(i)].envelopeTime << endl;
+        } else {
+          // if the antenna was not flagged manually and has the correct polarization
+          // then wirte -1 in the output file
+          // break if antennaID was flagged
+          bool manuallyFlagged = false;
+          for (unsigned int j=0 ; j < InputFlaggedAntIDs.size(); ++j)
+            if (antennaIDs(i) == InputFlaggedAntIDs(j))
+              manuallyFlagged = true;
+
+          if ( !(manuallyFlagged) && PolarizationAntennaSelection(i) ) {
+            lateralfile << i + 1 << "  "
+                        << "-1" << "  "
+                        << "-1" << "  "
+                        << "-1" << "  "
+                        << i + 1 << "  "
+                        << "-1" << "  "
+                        << "-1" << "  "
+                        << "-1" << endl;
+          }
         }
 
      // final line

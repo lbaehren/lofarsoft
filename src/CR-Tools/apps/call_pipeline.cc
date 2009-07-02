@@ -1685,7 +1685,7 @@ int main (int argc, char *argv[])
       }
 
       // Check if file exists
-      fstream ftest( (path+eventname).c_str());
+      ifstream ftest( string(path+eventname).c_str());
       if(!ftest.is_open()) {
         cerr << "Unable to open "<<path+eventname<<endl;
         continue;
