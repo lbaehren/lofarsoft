@@ -1212,11 +1212,13 @@ Data& Data::setNetLevel(longint lev){
 
 */
 HString Data::getName(const bool longname){
-     if (!longname) return data.name;
-     ostringstream s;
-     s << "{" << getOid() << "}" << data.name;
-     return s.str();
- }
+  if (isDataObject(this)) {
+    if (!longname) return data.name;
+    ostringstream s;
+    s << "{" << getOid() << "}" << data.name;
+    return s.str();
+  };
+}
 
 /*!
 
@@ -2667,14 +2669,17 @@ void Data::put(objectid oid, vector<T> &vin) {
 
 \brief Do not set modification flag during next put operation
 
-TEST
 This method allows one to modify an object without setting the modification
 flag. This is valid only for the next operation. This should be used with
 care, since it can lead to an inconsistent network.
  */
-void Data::noMod(){
+
+Data* Data::noMod(){
     data.noMod=true;
+    return this;
 }
+
+Data& Data::noMod_Ref(){return *noMod();}
 
 /*!
 
@@ -3253,51 +3258,7 @@ HString Data::getFuncName(){
 }
 
 
-/*
-  Returns a parameter of an object. This means that for a relative of the current object is searched that has the name  "name". If found the value of that object is returned, otherwise a default value.
-
-*/
-template <class T>
-T Data::getParameter(const HString name, const T defval){
-    Data * obj;
-    Data * pobj;
-    //First search for the parameter object and create it, if not present
-    pobj = Ptr("'Parameters="+getName());
-    if (!isDataObject(pobj)) {
-      DBG("getParameter name=" <<getName(true) <<": Creating new parameter object (parameter: name=" << name << " and value defval=" << defval << ")");
-      pobj=newObject("'Parameters",data.defdir);
-      pobj->setNetLevel(100);
-      DBG("getParameter name=" <<getName(true) <<": new object =" << reinterpret_cast<void*>(pobj) << " isDataObject=" << tf_txt(isDataObject(pobj)) << " func_ptr=" << reinterpret_cast<void*>(data.of_ptr));
-
-      vector<HString> parlist;
-      if (!hasFunc()) {
-	parlist.push_back(getName());
-      } else {
-	parlist = data.of_ptr->getParameterList(getName());
-      };
-      pobj->put_silent(parlist);
-    };
-    //Now search for parameter after parameter object
-    obj = pobj->Ptr(name); 
-    //If not present search the entire net
-    if (!isDataObject(obj)) {
-      obj=Ptr(name);
-      if (!isDataObject(obj)) { 
-	//Still not found? Then create it locally.
-	DBG("getParameter name=" <<getName(true) <<": Creating new object with name=" << name << " and value defval=" << defval);
-	obj=pobj->newObject(name,data.defdir);
-	obj->setNetLevel(100);
-	obj->putOne_silent(defval);
-	return defval;
-      }
-    };
-    DBG("getParameter: name=" << name << " ptr=" << obj << " NullObject=" << &NullObject << " Empty=" << tf_txt(obj->Empty()));
-    DBG("getParameter: val=" << obj->getOne<T>());
-    return obj->getOne<T>();
-}
-
-
-/*
+/*!
 This looks for the first object that is available on port 0 and fill
 the data vector. This is mainly used by DataFunc functions to get the 
 vector to work on.
@@ -3925,7 +3886,6 @@ void instantiate_hfget(DATATYPE type){
 
 #define SW_TYPE_COMM(EXT,TYPE) \
 vectostring(*d_ptr_##EXT); \
-d.getParameter("NIX",*val_##EXT);\
 d.getFirstFromVector(*d_ptr_##EXT, &vs);\
 d.putOne(*val_##EXT);\
 d.putOne_silent(*val_##EXT);\

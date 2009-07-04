@@ -149,12 +149,8 @@ private:
 //Object Function - generic class that object functions are based on
 //------------------------------------------------------------------------
 
-#define GET_FUNC_PARAMETER( NAME ) T NAME=(dp->getParameter(getParameterName(#NAME),getParameterDefault<T>(#NAME)));
-#define GET_FUNC_PARAMETER_T( NAME, T ) T NAME=(dp->getParameter(getParameterName(#NAME),getParameterDefault<T>(#NAME)));
-
-#define SET_FUNC_RESULT_T( NAME, T ) T NAME=(dp->setParameter(getParameterName(#NAME),getParameterDefault<T>(#NAME)));
-
-
+#define GET_FUNC_PARAMETER( NAME ) T NAME=(getParameter(getParameterName(#NAME),getParameterDefault<T>(#NAME)));
+#define GET_FUNC_PARAMETER_T( NAME, T ) T NAME=(getParameter(getParameterName(#NAME),getParameterDefault<T>(#NAME)));
 
 class ObjectFunctionClass : public DataFuncDescriptor {
 
@@ -188,9 +184,13 @@ public:
   Data* getResultObject(HString name);
   HString getParametersObjectName();
   Data* getParametersObject();
-  //  Data* getParameterObject(HString name);
+  Data* getParameterObject(HString name);
+  template <class T>
+    T getParameter(const HString name, const T defval);
+  template <class T>
+    T putParameter(const HString name, const T val);
   template <class T>  
-    Data* putResult(HString name,T val);
+    Data* putResult(HString name, T val);
   template <class T>  
     Data* putVecResult(HString name,vector<T> vec);
 
@@ -236,11 +236,41 @@ preprocessor step.
 
 
 */
+#ifndef HF_MATH_FUNC
+#undef HF_MATH_FUNC
+#endif
+#ifndef HF_MATH_FUNC2
+#undef HF_MATH_FUNC2
+#endif
 
-//---square
-template<class T> inline T hf_square(const T v);
-template<>        inline HPointer hf_square<HPointer>(const HPointer v);
-template<>        inline HString  hf_square<HString>(const HString v);
+#define HF_MATH_FUNC( FUNC ) \
+  template<class T> inline T FUNC(const T v);				\
+  template<>        inline HString FUNC<HString>(const HString v);	\
+  template<>        inline HPointer FUNC<HPointer>(const HPointer v);	
+
+#define HF_MATH_FUNC2( FUNC ) \
+  template<class T, class S> inline T FUNC(const T v1, const S v2);\
+  inline HString FUNC(const HString v1, const HString v2); \
+  template<class S>        inline HString FUNC(const HString v1, const S v2); \
+  template<class S>        inline HString FUNC(const S v1, const HString v2); \
+  inline HPointer FUNC(const HPointer v1, const HPointer v2); \
+  template<class S>        inline HPointer FUNC(const HPointer v1, const S v2); \
+  template<class S>        inline HPointer FUNC(const S v1, const HPointer v2); 
+
+/*
+  template<>  inline HPointer FUNC<HPointer,HPointer>(const HPointer v1, const HPointer v2); \
+  template<>        inline HString FUNC<HString,HString>(const HString v1, const HString v2); \
+  */
+					
+
+HF_MATH_FUNC(hf_Square)
+HF_MATH_FUNC(hf_Sqrt)
+
+HF_MATH_FUNC2(hf_Sub)
+HF_MATH_FUNC2(hf_Mul)
+HF_MATH_FUNC2(hf_Add)
+HF_MATH_FUNC2(hf_Div)
+HF_MATH_FUNC2(hf_Pow)
 
 
 //--End Math functions-----------------------------------------------------

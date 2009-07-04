@@ -345,7 +345,7 @@ class hfPlotPanel(hffunc):
         self.setParameter("xscalestep",0.05)
         self.setParameter("xshift",0)
         self.setParameter("yshift",0)
-        self.setParameter("Offset",0)
+        self.setParameter("OffsetValue",0.0)
         self.setParameter("XAuto",int(True))
         self.setParameter("YAuto",int(True))
         self.setParameter("logX",int(False))
@@ -362,6 +362,7 @@ class hfPlotPanel(hffunc):
         self.setResult("xmax",1024.)
         self.setResult("ymin",-70.)
         self.setResult("ymax",70.)
+        if settrace: pdb.set_trace()
         return 0
     def process(self,d):
         if verbose: print "Processing hfPlotPanel."
@@ -439,9 +440,13 @@ class hfPlotPanel(hffunc):
         self.putResult("xmax",xmax)
         self.putResult("ymin",ymin)
         self.putResult("ymax",ymax)
-#        if settrace: pdb.set_trace()
+        if settrace: pdb.set_trace()
+        if self.OffsetValue==0: xoffsettxt=""
+        elif self.OffsetValue>0: xoffsettxt=" + "+str(self.OffsetValue)
+        else: xoffsettxt=" - "+str(abs(self.OffsetValue))
         if self.xAxisLabel=="": self.xAxisLabel=self.xAxisDatatype
-        if self.yAxisLabel=="": self.yAxisLabel=self.yAxisDatatype  
+        if self.yAxisLabel=="": self.yAxisLabel=self.yAxisDatatype
+        self.xAxisLabel+=xoffsettxt
         if not self.xAxisUnit=="": self.xAxisLabel=self.xAxisLabel+" ["+self.xAxisUnitPrefix+self.xAxisUnit+"]"
         if not self.yAxisUnit=="": self.yAxisLabel=self.yAxisLabel+" ["+self.yAxisUnitPrefix+self.yAxisUnit+"]"
         self.GraphObject.Label("x",self.xAxisLabel,1)

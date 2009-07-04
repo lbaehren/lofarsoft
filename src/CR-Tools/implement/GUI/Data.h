@@ -448,9 +448,6 @@ class Data {
     void get_1_(vector<T> &v);
   
   template <class T>
-    T getParameter(const HString name, const T defval);
-  
-  template <class T>
     void getFirstFromVector(vector<T> &v, Vector_Selector* vs);
   
   template <class T>
@@ -502,7 +499,8 @@ class Data {
   template <class T>
       void inspect(vector<T> &vec);
 
-  void noMod();
+  Data * noMod();
+  Data & noMod_Ref();
   Data & noSignal();
   bool needsUpdate(); //obsolete?
   bool doesAutoUpdate();

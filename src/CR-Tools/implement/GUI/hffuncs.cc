@@ -169,7 +169,7 @@ void ObjectFunctionClass::getParameters(){
     while (pit!=parameter_list.end()){
       switch (pit->second.type) {
 #define SW_TYPE_COMM(EXT,TYPE)						\
-	data_pointer->getParameter(pit->second.name,*(static_cast<TYPE*>(pit->second.ptr)));
+	getParameter(pit->second.name,*(static_cast<TYPE*>(pit->second.ptr)));
 #include "switch-type.cc"
 	ERROR("getParameters: Undefined Datatype encountered while retrieving vector." << " Object name=" << data_pointer->getName(true));
       };
@@ -196,7 +196,7 @@ Data* ObjectFunctionClass::getParametersObject(){
   DataList pobjs=data_pointer->Find(getParametersObjectName());
   if (pobjs.size()==0) {
     Data* pobj;
-    pobj=data_pointer->newObject("'Parameters");
+    pobj=data_pointer->newObject("'Parameters",data_pointer->getDefaultDirection());
     pobj->setNetLevel(999);
     vector<HString> parlist=getParameterList(data_pointer->getName());
     pobj->put_silent(parlist);
@@ -223,22 +223,49 @@ Data* ObjectFunctionClass::getResultsObject(){
   };
 }
 
+/*!
+\brief Find (and create if necessary) an object containing the
+parameter "name" for an operation.
+
+ First search for an object connected to a Parameters (note Plural)
+object, i.e. an object of name "Parameter" which by default islnked to
+all Parameter (note Singuar) objects.
+*/
+
+Data* ObjectFunctionClass::getParameterObject(HString name){
+  Data* pobj=getParametersObject(); //will be  created if it does not exist
+  DataList objs=pobj->Find("'"+name); // First search Object linked to Parameter object
+  if (objs.size()==0) {
+    objs=data_pointer->Find("'"+name); // Search entire net
+    if (objs.size()==0) { // Still not found? Then create it.
+      objs.push_back(pobj->newObject(name,data_pointer->getDefaultDirection()));
+      objs[0]->setNetLevel(100);
+    };
+  };
+  return objs[0];
+}
 
 /*!
-\brief Find (and create if necessary) an object containing the parameter "name" for an operation.
-Data* ObjectFunctionClass::getParameterObject(HString name){
-  Data* robj=getParametersObject(); //will be  created if it does not exist
-  DataList objs=robj->Find("'"+name); // First search Object linked to Results object
-  if (objs.size()==0) {
-    
-    Data* obj=data_pointer->insertNew(name,robj);
-    obj->setNetLevel(100);
-    return obj;}
-  else {
-    return objs[0];
+\brief Retrieve the corresponding parameter object (to name) and return its value. If object does not exist, create it and return and assign the default value
+*/
+
+template <class T>
+T ObjectFunctionClass::getParameter(const HString name, const T defval){
+  Data * obj=getParameterObject(name);
+  if (obj->Empty()) {
+    obj->noMod()->putOne(defval);
+    return defval;
+  } else {
+    return obj->getOne<T>();
   };
 }
- */
+
+template <class T>
+T ObjectFunctionClass::putParameter(const HString name, const T val){
+  Data * obj=getParameterObject(name);
+  obj->noMod()->putOne(val);
+}
+
 
 /*!
 \brief Find (and create if necessary) an object containing the result of an operation.
@@ -538,15 +565,48 @@ preprocessor step.
 //otherwise it becomes a nightmare. So, let's not add too many 
 //math functions at this point.
 
+#ifndef HF_MATH_FUNC
+#undef HF_MATH_FUNC
+#endif
+#ifndef HF_MATH_FUNC2
+#undef HF_MATH_FUNC2
+#endif
+
+#define HF_MATH_FUNC( FUNC ) \
+template<>        inline HString FUNC<HString>(const HString v){return mycast<HString>(FUNC(mycast<HComplex>(v)));};\
+template<>        inline HPointer FUNC<HPointer>(const HPointer v){return v;};\
+template<class T> inline T FUNC(const T v)
+
+#define HF_MATH_FUNC2( FUNC )						\
+  inline HString FUNC(const HString v1, const HString v2){return mycast<HString>(FUNC(mycast<HComplex>(v1),mycast<HComplex>(v2)));}; \
+  template<class S>        inline HString FUNC(const HString v1, const S v2){return mycast<HString>(FUNC(mycast<S>(v1),v2));}; \
+  template<class S>        inline HString FUNC(const S v1, const HString v2){return mycast<HString>(FUNC(v1,mycast<S>(v2)));}; \
+  inline HPointer FUNC(const HPointer v1, const HPointer v2){return mycast<HPointer>(FUNC(mycast<HInteger>(v1),mycast<HInteger>(v2)));}; \
+  template<class S>        inline HPointer FUNC(const HPointer v1, const S v2){return mycast<HPointer>(FUNC(mycast<S>(v1),v2));}; \
+  template<class S>        inline HPointer FUNC(const S v1, const HPointer v2){return mycast<HPointer>(FUNC(v1,mycast<S>(v2)));}; \
+  template<class T, class S> inline T FUNC(const T v1,const S v2)	
+
 //---square
-template<class T> inline T hf_square(const T v){return v*v;};
-template<>        inline HString hf_square<HString>(const HString v){return mycast<HString>(hf_square(mycast<HNumber>(v)));};
-template<>        inline HPointer hf_square<HPointer>(const HPointer v){return v;};
+//template<class T> inline T hf_square(const T v)
+HF_MATH_FUNC(hf_Sqrt){return sqrt(v);};
+HF_MATH_FUNC(hf_Square){return v*v;}; 
+HF_MATH_FUNC2(hf_Sub){return v1-v2;};
+HF_MATH_FUNC2(hf_Mul){return v1*v2;}; 
+HF_MATH_FUNC2(hf_Add){return v1+v2;}; 
+HF_MATH_FUNC2(hf_Div){return v1/v2;}; 
+HF_MATH_FUNC2(hf_Pow){return pow(v1,v2);}; 
+
+
+//template<>        inline HString hf_square<HString>(const HString v){return mycast<HString>(hf_square(mycast<HNumber>(v)));};
+//template<>        inline HPointer hf_square<HPointer>(const HPointer v){return v;};
+
 
 //---sqrt - square root
-template<class T> inline T hf_sqrt(const T v){return sqrt(v);};
-template<>        inline HString hf_sqrt<HString>(const HString v){return mycast<HString>(hf_sqrt(mycast<HNumber>(v)));};
-template<>        inline HPointer hf_sqrt<HPointer>(const HPointer v){return v;};
+//template<class T> inline T hf_sqrt(const T v)
+//# REPEAT_INLINE_TEMPLATE sqrt 
+
+//template<>        inline HString hf_sqrt<HString>(const HString v){return mycast<HString>(hf_sqrt(mycast<HNumber>(v)));};
+//template<>        inline HPointer hf_sqrt<HPointer>(const HPointer v){return v;};
 
 
 //--End Math functions-----------------------------------------------------
@@ -669,17 +729,6 @@ DATAFUNC_CONSTRUCTOR(Neighbours,Sys,"Returns a list of names of all neighbour ob
 //Name, Library, Description, Default Type, Buffered or not
 
 
-class DataFunc_Sys_Square : public ObjectFunctionClass {
-public:
-
-  DEFINE_PROCESS_CALLS 
-
-  DataFunc_Sys_Square(Data*dp){dp->setUpdateable(false);};
- 
-  template <class T>
-  void process(F_PARAMETERS) {
-    address i,size;
-    
     /*
 
     !!!Actually the treatment of vector selection here and in the
@@ -689,54 +738,60 @@ public:
     that is independent of the value (the vs1,vs2 split is already
     done within get), so selection could be done before calculation
     (and hence reduce processing time).
+
+    getFirstFromVector: This is bad - better use the setParameter method to also allow other than the first object to be accessed ...
     
     */
  
-    (*dp).getFirstFromVector(*vp,vs);
-    //This is bad - better use the setParameter method to also allow other than the first object to be accessed ...
-    size=(*vp).size();
-    for (i=0; i<size; i++) {(*vp)[i]=hf_square((*vp)[i]);};
-    
-    if (vs != NULL) {(*vp) = (*vs).get(*vp);};
-  }
-};
-DATAFUNC_CONSTRUCTOR(Square,Sys,"Squares the elements in the data vector.",INTEGER, false)
- 
+
+#define HF_MATH_DATAFUNC(NAME,DOC,TYP) \
+class DataFunc_Sys_##NAME : public ObjectFunctionClass {\
+public:\
+  DEFINE_PROCESS_CALLS \
+  DataFunc_Sys_##NAME(Data*dp){dp->setUpdateable(false);};\
+  template <class T>\
+  void process(F_PARAMETERS) {\
+    address i,size;\
+    (*dp).getFirstFromVector(*vp,vs);\
+    size=(*vp).size();\
+    for (i=0; i<size; i++) {(*vp)[i]=hf_##NAME((*vp)[i]);};\
+    if (vs != NULL) {(*vp) = (*vs).get(*vp);};\
+  }\
+};\
+DATAFUNC_CONSTRUCTOR(NAME,Sys,DOC,TYP, false)
+
+HF_MATH_DATAFUNC(Sqrt,"Takes the square root of the first object vector connected to the object.",NUMBER)
+HF_MATH_DATAFUNC(Square,"Takes the square root of the first object vector connected to the object.",NUMBER)
 
 class DataFunc_Sys_Offset : public ObjectFunctionClass {
 public:
 	
-	DEFINE_PROCESS_CALLS_NUMONLY 
+	DEFINE_PROCESS_CALLS 
 	
-	DataFunc_Sys_Offset(Data*dp){dp->setUpdateable(false);};
+	DataFunc_Sys_Offset(Data*dp): ObjectFunctionClass(dp){
+	  setParameter("OffsetValue", 0.0);
+	  setParameter("OffsetFixed", int(false));
+	  dp->setUpdateable(false);
+	};
 	
 	template <class T>
 	void process(F_PARAMETERS) {
-		address i,size;
-		
-		/*
-		 
-		 !!!Actually the treatment of vector selection here and in the
-		 following is wrong/inefficient!!
-		 
-		 The function will only be called by get with a vector selector
-		 that is independent of the value (the vs1,vs2 split is already
-		 done within get), so selection could be done before calculation
-		 (and hence reduce processing time).
-		 
-		 */
-		
-		(*dp).getFirstFromVector(*vp,vs);
-		//This is bad - better use the setParameter method to also allow other than the first object to be accessed ...
-		size=(*vp).size();
-		T first=(*vp)[0];
-		for (i=0; i<size; i++) {(*vp)[i]=((*vp)[i]-first);};
-		//putResult("Offset",first);
-		if (vs != NULL) {(*vp) = (*vs).get(*vp);};
+	  address i,size;
+	  T off;
+	  GET_FUNC_PARAMETER(OffsetValue);
+	  GET_FUNC_PARAMETER_T(OffsetFixed,HInteger);
+	  (*dp).getFirstFromVector(*vp,vs);
+	  //This is bad - better use the setParameter method to also allow other than the first object to be accessed ...
+	  size=(*vp).size();
+	  if (bool(OffsetFixed)) {
+	    off=OffsetValue;
+	  } else {
+	    off=(*vp)[0];
+	    putParameter("OffsetValue", off);
+	  };
+	  for (i=0; i<size; i++) {(*vp)[i]=hf_Sub((*vp)[i],off);};
+	  if (vs != NULL) {(*vp) = (*vs).get(*vp);};
 	}
-	
-	void process_S(F_PARAMETERS_T(HString)) {};
-
 };
 DATAFUNC_CONSTRUCTOR(Offset,Sys,"Subtracts the first elements in the data vector from the entire data vector.",NUMBER, false)
 
@@ -906,7 +961,7 @@ public:
 	if (oldfilename!=Filename) {MSG("Filename="<<Filename);lep->summary();};
 	oldfilename=Filename;
       } else if (Filetype=="LOFAR_TBB") {
-	tbb = new CR::LOFAR_TBB(Filename,1024);
+	tbb = new CR::LOFAR_TBB(Filename,32768);
 	MSG("ATTENTION: Hardcoded initial NBlocksize to 1024!");
 	DBG("DataFunc_CR_dataReaderObject: tbb=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
 	opened=tbb!=NULL;
@@ -1271,6 +1326,7 @@ void DataFunc_Sys_Library_publish(DataFuncLibraryClass* library_ptr){
   library_ptr->add(&DataFunc_Sys_Copy_Constructor);
   library_ptr->add(&DataFunc_Sys_Print_Constructor);
   library_ptr->add(&DataFunc_Sys_Square_Constructor);
+  library_ptr->add(&DataFunc_Sys_Sqrt_Constructor);
   library_ptr->add(&DataFunc_Sys_Offset_Constructor);
   library_ptr->add(&DataFunc_Sys_Range_Constructor);
   library_ptr->add(&DataFunc_Sys_Unit_Constructor);

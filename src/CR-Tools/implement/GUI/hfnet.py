@@ -105,7 +105,8 @@ print "you can use maxnetlevel=NNN to set the level of detail during the debug p
 
 ##########End ....
 #
-#d.new("Offset",_f("Offset")) ^ (d["x:Data"],d["x:UnitData"])
+#d["*AntennaSelection"]=[0]; d.new("Offset",_f("Offset")) ^ (d["x:UnitData"],d["x:xAxis"]); ~(d["PlotPanel'OffsetValue"]); d["Data'Block"]=1
+
 
 #max_number_of_antennas=2
 #("MaxNumberOfAntennas",max_number_of_antennas) >> d["PipelineLauncher"]

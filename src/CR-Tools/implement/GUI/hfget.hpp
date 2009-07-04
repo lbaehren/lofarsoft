@@ -80,6 +80,7 @@ DEF_DATA_OID_NAME_FUNC_PYDEF_EXT( , FUNC  )
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_newObjects_ID_overloads,newObjects_ID,1,2)
 
 
+  
 
     Data& (Data::*Data_touch1)(bool) = &Data::touch;
 
@@ -135,11 +136,12 @@ DEF_DATA_OID_NAME_FUNC_PYDEF_EXT( , FUNC  )
     HComplex(Data::*Data_getOne_C_0)() = &Data::getOne_0_<HComplex>;
     HString (Data::*Data_getOne_S_0)() = &Data::getOne_0_<HString>;
 
+/*
 HInteger(Data::*Data_getParameter_I)(HString, HInteger) = &Data::getParameter;
 HNumber (Data::*Data_getParameter_N)(HString, HNumber) = &Data::getParameter;
 HComplex(Data::*Data_getParameter_C)(HString, HComplex) = &Data::getParameter;
 HString (Data::*Data_getParameter_S)(HString, HString) = &Data::getParameter;
-
+*/
 
 
     
@@ -191,7 +193,7 @@ BOOST_PYTHON_MODULE(libhfget)
       .def("hasFunc", &Data::hasFunc)
       .def("hasData", &Data::hasData)
       .def("Silent", &Data::Silent)
-      .def("noMod", &Data::noMod)
+      .def("noMod", &Data::noMod_Ref,return_internal_reference<>())
       .def("noSignal", &Data::noSignal,return_internal_reference<>())
       .def("needsUpdate", &Data::needsUpdate)
       .def("doAutoUpdate", &Data::doAutoUpdate)
@@ -249,10 +251,11 @@ BOOST_PYTHON_MODULE(libhfget)
       .def("get", Data_get_C)
       .def("get", Data_get_S)
 
-      .def("getParameter", Data_getParameter_I)
+      /*      .def("getParameter", Data_getParameter_I)
       .def("getParameter", Data_getParameter_N)
       .def("getParameter", Data_getParameter_C)
       .def("getParameter", Data_getParameter_S)
+      */
 
       .def("inspect", Data_inspect_I)
       .def("inspect", Data_inspect_N)
