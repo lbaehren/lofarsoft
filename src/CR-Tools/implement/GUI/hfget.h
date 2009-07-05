@@ -33,11 +33,6 @@ class ObjectFunctionClass;
   same memory location. This allows calling a void with variables types (e.g.
   using a switch statement)
 */
-#define F_VECTOR_SELECTOR_DEFINITION( VS )  Vector_Selector *vs1,*vs2;	\
-  if (VS != NULL) {							\
-    if (VS->SelectorType()<=SEL_LIST) {vs1=VS;  vs2=NULL;}		\
-    else {vs1 = NULL; vs2=VS;};} else {vs1=NULL; vs2=NULL;}
-
 
 
 //------------------------------------------------------------------------

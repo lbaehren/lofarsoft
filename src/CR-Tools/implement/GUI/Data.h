@@ -218,6 +218,13 @@ typedef vector<Data*> dataworm;
 
 bool isDataObject(const Data* obj, const bool notquiet=true);
 
+template <class T, class S>
+void copycast_vec(void *ptr, vector<S> *op);
+
+template <class T, class S>
+void copycast_vec(void *ptr, vector<S> *op, Vector_Selector *vs);
+
+
 enum MOD_ACTION {MOD_UNDEF, MOD_DELETED, MOD_UPDATED, MOD_LINKCHANGED, MOD_CLEARED};
 
 struct modification_record {

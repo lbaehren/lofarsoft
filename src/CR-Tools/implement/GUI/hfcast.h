@@ -7,6 +7,13 @@
 //========================================================================
 //Convert the various data types into each other
 
+template<class T> T hfnull();
+template<> inline HString  hfnull<HString>();
+template<> inline HPointer hfnull<HPointer>();
+template<> inline HInteger hfnull<HInteger>();
+template<> inline HNumber  hfnull<HNumber>();
+template<> inline HComplex hfnull<HComplex>();
+
 //forward definition
 
 class Vector_Selector;

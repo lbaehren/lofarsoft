@@ -81,6 +81,24 @@ DataFuncDescriptor DataFunc_##LIB##_##NAME##_Constructor(Data * dp=NULL){\
   return fd;\
 }
 
+#define BEGIN_OBJECT_FUNCTION(LIB,NAME)				\
+class DataFunc_##LIB##_##NAME : public ObjectFunctionClass {	\
+public:\
+DEFINE_PROCESS_CALLS\
+ DataFunc_##LIB##_##NAME (Data* dp) : ObjectFunctionClass(dp){	\
+   dp->setUpdateable(O_UPDATEABLE);		\
+    startup();\
+    getParameters();\
+    }\
+ ~DataFunc_##LIB##_##NAME(){cleanup(); }
+ 
+
+#define END_OBJECT_FUNCTION(LIB,NAME)  }; DATAFUNC_CONSTRUCTOR( NAME , LIB , O_INFO , O_TYPE , O_BUFFERED );
+
+
+#define PUBLISH_OBJECT_FUNCTION(LIB,NAME) library_ptr->add(&DataFunc_##LIB##_##NAME##_Constructor)
+
+
 typedef DataFuncDescriptor (*ConstructorFunctionPointer)(Data*);
 
 /*!
@@ -149,8 +167,14 @@ private:
 //Object Function - generic class that object functions are based on
 //------------------------------------------------------------------------
 
-#define GET_FUNC_PARAMETER( NAME ) T NAME=(getParameter(getParameterName(#NAME),getParameterDefault<T>(#NAME)));
-#define GET_FUNC_PARAMETER_T( NAME, T ) T NAME=(getParameter(getParameterName(#NAME),getParameterDefault<T>(#NAME)));
+
+//#define GET_FUNC_PARAMETER( NAME ) T NAME=(getParameter(getParameterName(#NAME),getParameterDefault<T>(#NAME)));
+//#define GET_FUNC_PARAMETER_T( NAME, T ) T NAME=(getParameter(getParameterName(#NAME),getParameterDefault<T>(#NAME)));
+
+#define GET_FUNC_PARAMETER( NAME, TYP ) TYP NAME=(getParameter(getParameterName(#NAME),getParameterDefault<TYP>(#NAME)));
+#define SET_FUNC_PARAMETER( NAME, TYP , DEFVAL) setParameter(#NAME,mycast<TYP>(DEFVAL));
+
+
 
 class ObjectFunctionClass : public DataFuncDescriptor {
 
@@ -160,6 +184,9 @@ public:
   virtual void process_N(F_PARAMETERS_T(HNumber) );
   virtual void process_C(F_PARAMETERS_T(HComplex));
   virtual void process_S(F_PARAMETERS_T(HString) );
+
+  virtual void startup();
+  virtual void cleanup();
 
   void setParameter(HString internal_name, HPointer default_value, HString prefix="'", HString external_name="");
   void setParameter(HString internal_name, HInteger default_value, HString prefix="'", HString external_name="");
@@ -312,10 +339,7 @@ class DataFuncLibraryClass {
 //------------------------------------------------------------------------
 // Netwerk Object and Library functions
 //------------------------------------------------------------------------
-void DataFunc_Sys_Library_publish(DataFuncLibraryClass*);
-void DataFunc_Qt_Library_publish(DataFuncLibraryClass*);
-void DataFunc_CR_Library_publish(DataFuncLibraryClass*);
-void DataFunc_Py_Library_publish(DataFuncLibraryClass*);
+void DataFunc_Library_publish(DataFuncLibraryClass*);
 
 // End netwerk object functions
 //------------------------------------------------------------------------

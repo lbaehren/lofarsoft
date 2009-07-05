@@ -50,6 +50,7 @@ int global_debuglevel = 0;
 
 void setDebug(int level) {global_debuglevel = level;}
 
+
 //========================================================================
 // object logic operators
 //========================================================================
@@ -123,6 +124,12 @@ to loose information). mycast is the basic function which allows one to do that.
 
 */
 
+template<class T> T hfnull(){};
+template<> inline HString  hfnull<HString>(){HString null=""; return null;} 
+template<> inline HPointer hfnull<HPointer>(){return NULL;} 
+template<> inline HInteger hfnull<HInteger>(){return 0;} 
+template<> inline HNumber  hfnull<HNumber>(){return 0.0;} 
+template<> inline HComplex hfnull<HComplex>(){return 0.0;} 
 
 //Convert the various data types into each other:
 template<class S> inline HString mytostring(S v){std::ostringstream os; os << v; return os.str();}
@@ -188,7 +195,7 @@ vector<address> DataListtoIDs(const DataList dl){
 }
 
 
-/*! \brief Casts a vector of type S to a vector of type T. 
+/*! \brief Copy and convert a vector of type S to a vector of type T. 
 
 ptr is a void pointer to a vector of type T which will receive the
 copied data from vector<S> *sp.
@@ -196,27 +203,52 @@ copied data from vector<S> *sp.
 */
 
 template <class T, class S>
-void copycast_vec(void *ptr, vector<S> *sp) {
-  address i,s;
+void copycast_vec(void *ptr, vector<S> *op) {
   vector<T> *ip =  reinterpret_cast<vector<T>*>(ptr);
-  s=(*ip).size();
-  (*sp).clear();if ((*sp).capacity()<s) {(*sp).reserve(s);};
-  for (i=0;i<s;++i){(*sp).push_back(mycast<S>((*ip)[i]));};
+  typedef typename vector<T>::iterator Tit; 
+  typedef typename vector<S>::iterator Sit; 
+  Tit it1=ip->begin();
+  Tit end=ip->end();
+  if (it1==end) {op->clear();}
+  else {
+    op->assign(ip->size(),hfnull<S>()); //make the new vector equal in size and initialize with proper Null values
+    Sit it2=op->begin();
+    while (it1!=end) {
+      *it2=mycast<S>(*it1);
+      it1++; it2++;
+    };
+  };
 }
 
+
 template <class T, class S>
-void copycast_vec(void *ptr, vector<S> *sp, Vector_Selector *vs) {
-  if (vs==NULL) {copycast_vec<T,S>(ptr,sp); return;};
+void copycast_vec(void *ptr, vector<S> *op, Vector_Selector *vs) {
+  typedef typename vector<S>::iterator Sit; 
 
-  address i,s1,s2;
+  if (noSelection(vs)) {copycast_vec<T,S>(ptr,op); return;};
+
   vector<T> *ip =  reinterpret_cast<vector<T>*>(ptr);
-  vector<address> *it = (*vs).getList(*ip);
-  if (it==NULL) {copycast_vec<T,S>(ptr,sp); return;};
 
-  s1=(*it).size();  s2=(*ip).size();
-  (*sp).clear();if ((*sp).capacity()<s1) {(*sp).reserve(s1);};
-  for (i=0;i<s1;++i){
-    if ((*it)[i]<s2) {(*sp).push_back(mycast<S>((*ip)[(*it)[i]]));};
+  vector<address> *idx = vs->getList(ip); //Obtain a list of the elements to be selected
+  vector<address>::iterator it1 = idx->begin();
+  vector<address>::iterator itend = idx->end();
+    
+  if (it1==itend) {op->clear();return;};
+    
+  address size=ip->size();
+  op->resize(idx->size(),hfnull<S>()); 
+  Sit it2=op->begin();
+  while (it1!=itend) {
+    if (*it1<size) {
+      *it2=mycast<S>((*ip)[*it1]);
+      it2++;
+    };
+    it1++;
+  };
+  if (it2!=op->end()){
+    ERROR("copycast_vec: inconsistent selection index");
+    it2--;
+    op->erase(it2,op->end());
   };
 }
 
@@ -1030,6 +1062,8 @@ names in the "names" vector.
 
  */
 vector<address> Data::FindChainID(const DIRECTION dir,const vector<HString> names, const bool include_endpoints){
+  //  DataList dl=FindChain(dir,names,include_endpoints);
+  //vector<address> ad=DataListtoIDs(dl);
   return DataListtoIDs(FindChain(dir,names,include_endpoints));
 }
 
@@ -3266,13 +3300,15 @@ vector to work on.
 
 template <class T>
 void Data::getFirstFromVector(vector<T> &v, Vector_Selector* vs){
-  if (data.from.size()>0) {
-    if (data.from[0]->ref!=NULL) {
-      data.from[0]->ref->get(v,vs);
-    } else {
-      ERROR("getFirstFromVector: HPointer to first related object = NULL, object=" << getName());
+  for (address i=0;i<data.from.size();i++){
+    if (data.from[i]->name!="Parameters") {
+      SaveCall(data.from[i]->ref) {
+	data.from[i]->ref->get(v,vs);
+	i=data.from.size();
+      }
     };
-  } else {
+  };
+  if (i==data.from.size()) {
     ERROR("getFirstFromVector: No related object. Object=" << getName());
   };
 }
@@ -3283,11 +3319,9 @@ template <class T>
 void Data::get_1_(vector<T> &v){get(v);};
 
 
-//The vector Selector will overwrite the default Selector of the data set
-
-//The basic get function described above extensively
-
-//NOTE: the port parameter is currently unused. Remove if possible.
+/*!
+\brief The basic get function to retrieve an object value, which is described in general description more extensively
+*/
 
 template <class T> 
 void Data::get(vector<T> &v, Vector_Selector *vs) {
@@ -3298,16 +3332,25 @@ void Data::get(vector<T> &v, Vector_Selector *vs) {
   d_ptr_v = data.d_ptr;
   bool wormcreated=false;
 
-  Vector_Selector *s_ptr;
-  if (vs!=NULL) {s_ptr=vs;} else {s_ptr=data.s_ptr;};
-  F_VECTOR_SELECTOR_DEFINITION( s_ptr );
+  //Take the default Vector Selector of the object, if the parameter vs is NULL
+  Vector_Selector* s_ptr=data.s_ptr;
+  if (vs!=NULL) {s_ptr=vs;}  
+  
+  //Here the VectorSelector is split into an indexable part that can
+  //be applied before calculation and one that is applied afterwards
+  //since it is based on the vector's value.
+  Vector_Selector *vs1=NULL, *vs2=NULL;
+  if (isSelection(s_ptr)){
+    if (s_ptr->isIndexable()) vs1=s_ptr;
+    else vs2=s_ptr;
+  };
 
   DBG("get: name=" << data.name << ", vs1=" << vs1 << ", vs2=" << vs2);
 
   if (f_ptr==NULL) {   //No function but data with different type
     if (d_ptr_v==NULL) {
       if (data.from.size()>0) { //No function and no data. This object is only used to oranize the web in a nicer way.
-	getFirstFromVector(v,vs); //transparently pass through the values of the first attached object
+	getFirstFromVector(v,vs1); //transparently pass through the values of the first attached object
       } else {
 	DBG("No Data in Data Object!" << " name=" << getName(true)); 
       };
@@ -3343,8 +3386,8 @@ void Data::get(vector<T> &v, Vector_Selector *vs) {
 	DBG("GET: name=" << data.name << " checkmod=" << tf_txt(checkmod) << " worm created=" << tf_txt(wormcreated));
 	switch (data.type){
 #define SW_TYPE_COMM(EXT,TYPE)					\
-	    if (checkmod) {incVersion();f_ptr->process_##EXT(d_ptr_##EXT,this, vs1);}; \
-            copycast_vec<TYPE,T>(d_ptr_v, &v)
+	  if (checkmod) {incVersion();f_ptr->process_##EXT(d_ptr_##EXT,this,NULL);}; \
+            copycast_vec<TYPE,T>(d_ptr_v, &v,vs1);
 #include "switch-type.cc"
 	    ERROR("Error (get): unknown type." << " name=" << getName(true) );
 	};
@@ -3354,7 +3397,7 @@ void Data::get(vector<T> &v, Vector_Selector *vs) {
 
   //  if (Verbose()) doVerbose(v,checkmod);
 
-  if (vs2!=NULL) {v=(*vs2).get(v);}; //Select on values if necessary ....
+  if (vs2!=NULL) {vs2->select(&v);}; //Select on values if necessary ....
   clearModification();
   if (wormcreated) executeUpdateWorm();
 }
@@ -3402,15 +3445,9 @@ Data::Data(HString name,superior_container * superior){
     data.superior->root=this;
     data.superior->no_of_data_objects=1;
     data.superior->data_objects.push_back(this);
-    DBG("Data: Create new Data Func Library Class");
     data.superior->library_ptr=new DataFuncLibraryClass;
-    //Initialize the data function libraries - this should be automized
-    DBG("Data: Publish library functions Sys");
-    DataFunc_Sys_Library_publish(data.superior->library_ptr); 
-    DBG("Data: Publish library functions Py");
-    DataFunc_Py_Library_publish(data.superior->library_ptr); 
-    DBG("Data: Publish library functions CR");
-    DataFunc_CR_Library_publish(data.superior->library_ptr); 
+    //Initialize the data function libraries
+    DataFunc_Library_publish(data.superior->library_ptr); 
   } else {
     data.superior=superior;
     //The superior vector is densely filled, so expand it
@@ -3877,7 +3914,6 @@ void mglDataSetVecI(mglData* md, vector<HInteger> &vec){
 void instantiate_hfget(DATATYPE type){
 
   Data d;
-  Vector_Selector vs;
 
   DEF_D_PTR(HInteger);
   DEF_VAL(HInteger);
@@ -3886,7 +3922,7 @@ void instantiate_hfget(DATATYPE type){
 
 #define SW_TYPE_COMM(EXT,TYPE) \
 vectostring(*d_ptr_##EXT); \
-d.getFirstFromVector(*d_ptr_##EXT, &vs);\
+d.getFirstFromVector(*d_ptr_##EXT, NULL);\
 d.putOne(*val_##EXT);\
 d.putOne_silent(*val_##EXT);\
 d.put(*d_ptr_##EXT);\

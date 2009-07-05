@@ -25,6 +25,14 @@ enum SELECTORTYPE {
 
   \ingroup CR_GUI
 */
+
+
+const bool noSelection(const Vector_Selector *vs);
+const bool isSelection(const Vector_Selector *vs);
+
+template <class T> 
+void select_vector_elements(vector<T>* ip, vector<T>* op, vector<address>* idx);
+
 class Vector_Selector {
 
  public:
@@ -32,8 +40,11 @@ class Vector_Selector {
   template <class T>
     vector<T> get(const vector<T> &v);
 
+template <class T>
+  void select(vector<T>* vp);
+
   template <class T>
-    vector<address>* getList(const vector<T> &v);
+    vector<address>* getList(const vector<T>* v);
   
   void setRange(address start, address end, address inc=1);
 
@@ -45,6 +56,7 @@ class Vector_Selector {
   void setList(const vector<address> &vptr);
   void setOne(address start);
 
+  bool isIndexable();
   SELECTORTYPE SelectorType();
 
   template <class T>
@@ -69,6 +81,8 @@ private:
 
   //This needs to be made generic, so that all types can be dealt with.
   struct sel_limit {HNumber above, below;} s_limit;
+
+  bool isindex;
 
   vector<address> s_list;
   SELECTORTYPE type;

@@ -42,7 +42,6 @@ using namespace std;
 #include "Data/LOFAR_TBB.h"
 #include "dal/TBB_Timeseries.h"
 
-
 /*!
 \brief Get the extension of the filename
  */
@@ -87,7 +86,10 @@ void ObjectFunctionClass::process_N(F_PARAMETERS_T(HNumber) ) {ERROR("ObjectFunc
 void ObjectFunctionClass::process_C(F_PARAMETERS_T(HComplex)) {ERROR("ObjectFunctionClass: generic process call of function" << getName(true) << ", Call of Type HComplex not defined");};
 void ObjectFunctionClass::process_S(F_PARAMETERS_T(HString) ) {ERROR("ObjectFunctionClass: generic process call of function" << getName(true) << ", Call of Type HString not defined");};
 
-
+//These methods can be set by the programmer to initialize parametes
+//at the beginning or free allocated memory at destruction time
+void ObjectFunctionClass::startup(){};
+void ObjectFunctionClass::cleanup(){};
 
 //This is a dummy function we need in order to fool the compiler
 //so that templated methods of all typese are created ...
@@ -660,15 +662,15 @@ public:
   DataFunc_Sys_Unit(Data * dp) : ObjectFunctionClass(dp){
     //set the default parameters, which are by default integers - perhaps change to float numbers later??
     DBG("DataFunc_Sys_Unit: initialization called.");
-    setParameter("UnitName", "");
-    setParameter("UnitPrefix", "");
-    setParameter("UnitScaleFactor", 1.0);
+    SET_FUNC_PARAMETER(UnitName, HString, "");
+    SET_FUNC_PARAMETER(UnitPrefix, HString,"");
+    SET_FUNC_PARAMETER(UnitScaleFactor, HNumber, 1.0);
     getParameters();
   }
 
   template <class T>
   void process(F_PARAMETERS) {
-    GET_FUNC_PARAMETER_T(UnitScaleFactor,HNumber);
+    GET_FUNC_PARAMETER(UnitScaleFactor,HNumber);
     dp->getFirstFromVector(*vp,vs);
     typedef typename vector<T>::iterator Tit; 
     Tit it=vp->begin();
@@ -681,7 +683,7 @@ public:
 
   void process_S(F_PARAMETERS_T(HString)) {
     vector<HNumber> vec;
-    GET_FUNC_PARAMETER_T(UnitScaleFactor,HNumber);
+    GET_FUNC_PARAMETER(UnitScaleFactor,HNumber);
     dp->getFirstFromVector(vec,vs);
     vector<HNumber>::iterator it=vec.begin(),end=vec.end();
     vp->reserve(vec.size()); vp->clear();
@@ -755,7 +757,6 @@ public:\
     (*dp).getFirstFromVector(*vp,vs);\
     size=(*vp).size();\
     for (i=0; i<size; i++) {(*vp)[i]=hf_##NAME((*vp)[i]);};\
-    if (vs != NULL) {(*vp) = (*vs).get(*vp);};\
   }\
 };\
 DATAFUNC_CONSTRUCTOR(NAME,Sys,DOC,TYP, false)
@@ -763,37 +764,47 @@ DATAFUNC_CONSTRUCTOR(NAME,Sys,DOC,TYP, false)
 HF_MATH_DATAFUNC(Sqrt,"Takes the square root of the first object vector connected to the object.",NUMBER)
 HF_MATH_DATAFUNC(Square,"Takes the square root of the first object vector connected to the object.",NUMBER)
 
-class DataFunc_Sys_Offset : public ObjectFunctionClass {
-public:
+
+//------------------------------------------------------------------------
+#define O_INFO "Subtracts the first elements in the data vector from the entire data vector."
+#define O_TYPE NUMBER
+#define O_BUFFERED false
+#define O_UPDATEABLE false
+//------------------------------------------------------------------------
+BEGIN_OBJECT_FUNCTION(Sys,Offset)
+
+void startup(){
+  SET_FUNC_PARAMETER(OffsetValue, HNumber, 0.0);
+  SET_FUNC_PARAMETER(OffsetFixed, HInteger, int(false));
+}
 	
-	DEFINE_PROCESS_CALLS 
-	
-	DataFunc_Sys_Offset(Data*dp): ObjectFunctionClass(dp){
-	  setParameter("OffsetValue", 0.0);
-	  setParameter("OffsetFixed", int(false));
-	  dp->setUpdateable(false);
-	};
-	
-	template <class T>
-	void process(F_PARAMETERS) {
-	  address i,size;
-	  T off;
-	  GET_FUNC_PARAMETER(OffsetValue);
-	  GET_FUNC_PARAMETER_T(OffsetFixed,HInteger);
-	  (*dp).getFirstFromVector(*vp,vs);
-	  //This is bad - better use the setParameter method to also allow other than the first object to be accessed ...
-	  size=(*vp).size();
-	  if (bool(OffsetFixed)) {
-	    off=OffsetValue;
-	  } else {
-	    off=(*vp)[0];
-	    putParameter("OffsetValue", off);
-	  };
-	  for (i=0; i<size; i++) {(*vp)[i]=hf_Sub((*vp)[i],off);};
-	  if (vs != NULL) {(*vp) = (*vs).get(*vp);};
-	}
-};
-DATAFUNC_CONSTRUCTOR(Offset,Sys,"Subtracts the first elements in the data vector from the entire data vector.",NUMBER, false)
+template <class T>
+void process(F_PARAMETERS) {
+  GET_FUNC_PARAMETER(OffsetValue, HNumber);
+  GET_FUNC_PARAMETER(OffsetFixed,HInteger);
+
+  dp->getFirstFromVector(*vp,vs);
+
+  typedef typename vector<T>::iterator iterator_T; 
+  iterator_T it=vp->begin();
+  iterator_T end=vp->end();
+  if (it==end) {return;}
+
+  T off;
+  if (bool(OffsetFixed)) {
+    off=mycast<T>(OffsetValue);
+  } else {
+    off=*it;
+    putParameter("OffsetValue", off);
+  };
+
+  while (it!=end) {
+    *it=hf_Sub(*it,off);
+    it++;
+  };
+}
+END_OBJECT_FUNCTION(Sys,Offset)
+
 
 
 class DataFunc_Sys_Print : public ObjectFunctionClass {
@@ -826,9 +837,9 @@ public:
   DataFunc_Sys_Range (Data * dp){
     //set the default parameters, which are by default integers - perhaps change to float numbers later??
     DBG("DataFunc_Sys_Range: initialization called.");
-    setParameter("start", 0);
-    setParameter("end", 0);
-    setParameter("inc", 1);
+    SET_FUNC_PARAMETER(start, HInteger, 0);
+    SET_FUNC_PARAMETER(end, HInteger, 0);
+    SET_FUNC_PARAMETER(inc, HInteger, 1);
   }
 
   template <class T>
@@ -843,9 +854,9 @@ public:
     //instead. This may only be called once in the execution of a
     //function.
 
-    GET_FUNC_PARAMETER(start);
-    GET_FUNC_PARAMETER(end);
-    GET_FUNC_PARAMETER(inc);
+    GET_FUNC_PARAMETER(start,T);
+    GET_FUNC_PARAMETER(end,T);
+    GET_FUNC_PARAMETER(inc,T);
     if (inc==static_cast<T>(0)) {
       ERROR("DataFunc_Sys_Range: Increment inc=0!");
       return;
@@ -880,19 +891,6 @@ public:
 DATAFUNC_CONSTRUCTOR(Range,Sys,"Return a range of numbers (0,1,2,3,4,...N). Parameter objects: start=0, end=0, inc=1",INTEGER, false);
 
 
-/*
-Ideas to be done:
-
-Object "DataFile": Reads various columns (or Rows) from a data file and makes them available as data Objects.
-
-The Objects are filled by a python script, as are the DataColumn names. Leave the parsing to Python ...
-
-Define Objects. FileName, BlockSize, BlockNumber, BlockOffset, DataColumns, Type=ASCII
- pointing to Object "File", which then points to the data objects in DataColumns.
-
-*/
-
-
 //------------------------------------------------------------------------
 //End Sys Library
 //------------------------------------------------------------------------
@@ -906,89 +904,82 @@ Define Objects. FileName, BlockSize, BlockNumber, BlockOffset, DataColumns, Type
 
 */
 
+//------------------------------------------------------------------------
+#define O_INFO "Creates a DataReader object for reading CR data and stores its pointer."
+#define O_TYPE POINTER
+#define O_BUFFERED true
+#define O_UPDATEABLE true
+//------------------------------------------------------------------------
+BEGIN_OBJECT_FUNCTION(CR,dataReaderObject)
+//------------------------------------------------------------------------
 
-class DataFunc_CR_dataReaderObject : public ObjectFunctionClass {
+void startup(){
+  SET_FUNC_PARAMETER(Filename, HString, dataset_lopes); 
+}
 
-public:
-  //The following line is necessary to define the process methods for
-  //the various types which will all call the templated method process<T>.
-  //This emulates a templated virtual funcion.
+void cleanup(){
+  delete reinterpret_cast<CR::DataReader*>(data_pointer->getOne<HPointer>()); 
+}
 
-  DEFINE_PROCESS_CALLS
+template <class T>
+void process(F_PARAMETERS) {
+  GET_FUNC_PARAMETER(Filename,HString);
+  HString Filetype = determine_filetype(Filename);
   
-  //  The function creates a CR-Tool data reader object and stores a pointer to it
-  DataFunc_CR_dataReaderObject (Data* dp) : ObjectFunctionClass(dp){
-    DBG("DataFunc_CR_dataReaderObject: initialization called. dp=" <<dp << ", data_pointer=" << data_pointer);
-    setParameter("Filename", dataset_lopes); 
-    getParameters();
-    DBG("dataReaderObject: Initialization done.");
-    }
+  static HString oldfilename="";
+  bool opened;
+  union{void* ptr; CR::DataReader* drp; CR::LOFAR_TBB* tbb; CR::LopesEventIn* lep;};
+  
+  DBG("dataReaderObject: Retrieved filename parameter =" << Filename); // gets filename from object set in hfnet.py
 
-    ~DataFunc_CR_dataReaderObject (){
-      MSG("~DataFunc_CR_dataReaderObject: Deleting DataReader.");
-      delete reinterpret_cast<CR::DataReader*>(data_pointer->getOne<HPointer>()); 
-      DBG("~DataFunc_CR_dataReaderObject: Deleted.");
+  // If a pointer to a DataReader was stored already in the data vector, delete that c++ object first
+  //before we create a new DataReader below (and store the Pointer in the data vector)
+  if (vp->size()>0 && AsPtr(vp->at(0))!=NULL) {
+    DBG("dataReaderObject: Delete old data reader object " << AsPtr(vp->at(0))); 
+    drp=reinterpret_cast<DataReader*>(AsPtr(vp->at(0)));
+    delete drp;
   }
+  vp->clear();
   
-  template <class T>
-  void process(F_PARAMETERS) {
-      GET_FUNC_PARAMETER_T(Filename,HString);
-      HString Filetype = determine_filetype(Filename);
-
-      static HString oldfilename="";
-      bool opened;
-      union{void* ptr; CR::DataReader* drp; CR::LOFAR_TBB* tbb; CR::LopesEventIn* lep;};
-
-      DBG("dataReaderObject: Retrieved filename parameter =" << Filename); // gets filename from object set in hfnet.py
-
-      // If a pointer to a DataReader was stored already in the data vector, delete that c++ object first
-      //before we create a new DataReader below (and store the Pointer in the data vector)
-      if (vp->size()>0 && AsPtr(vp->at(0))!=NULL) {
-	DBG("dataReaderObject: Delete old data reader object " << AsPtr(vp->at(0))); 
-	drp=reinterpret_cast<DataReader*>(AsPtr(vp->at(0)));
-	delete drp;
-      }
-      vp->clear();
-
-      //Create the a pointer to the DataReader object and store the pointer
-      //Here we could have if statements depending on data types
+  //Create the a pointer to the DataReader object and store the pointer
+  //Here we could have if statements depending on data types
       
-      DBG("DataFunc_CR_dataReaderObject: Opening File, Filename=" << Filename);
-      if (Filetype=="LOPESEvent") {
-	lep = new CR::LopesEventIn;
-	DBG("DataFunc_CR_dataReaderObject: lep=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
-	opened=lep->attachFile(Filename);
-	if (oldfilename!=Filename) {MSG("Filename="<<Filename);lep->summary();};
-	oldfilename=Filename;
-      } else if (Filetype=="LOFAR_TBB") {
-	tbb = new CR::LOFAR_TBB(Filename,32768);
-	MSG("ATTENTION: Hardcoded initial NBlocksize to 1024!");
-	DBG("DataFunc_CR_dataReaderObject: tbb=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
-	opened=tbb!=NULL;
-	if (oldfilename!=Filename) {MSG("Filename="<<Filename);tbb->summary();};
-	oldfilename=Filename;
-      } else {
-	  ERROR("DataFunc_CR_dataReaderObject: Unknown Filetype = " << Filetype  << ", name=" << dp->getName(true));
-	  opened=false;
-      }
+  DBG("DataFunc_CR_dataReaderObject: Opening File, Filename=" << Filename);
+  if (Filetype=="LOPESEvent") {
+    lep = new CR::LopesEventIn;
+    DBG("DataFunc_CR_dataReaderObject: lep=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
+    opened=lep->attachFile(Filename);
+    if (oldfilename!=Filename) {MSG("Filename="<<Filename);lep->summary();};
+    oldfilename=Filename;
+  } else if (Filetype=="LOFAR_TBB") {
+    tbb = new CR::LOFAR_TBB(Filename,32768);
+    MSG("ATTENTION: Hardcoded initial NBlocksize to 1024!");
+    DBG("DataFunc_CR_dataReaderObject: tbb=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
+    opened=tbb!=NULL;
+    if (oldfilename!=Filename) {MSG("Filename="<<Filename);tbb->summary();};
+    oldfilename=Filename;
+  } else {
+    ERROR("DataFunc_CR_dataReaderObject: Unknown Filetype = " << Filetype  << ", name=" << dp->getName(true));
+    opened=false;
+  }
 
-      putResult("Filetype",Filetype);
+  putResult("Filetype",Filetype);
 
-      if (!opened){
-	  ERROR("DataFunc_CR_dataReaderObject: Opening file " << Filename << " failed." << " Objectname=" << dp->getName(true));
-	  vp->push_back(mycast<T>(reinterpret_cast<HPointer>(Null_p))); 
-	  MSG("vp->size="<<vp->size()<<", v(0)="<<(*vp)[0]);
-	  return;
-      };
+  if (!opened){
+    ERROR("DataFunc_CR_dataReaderObject: Opening file " << Filename << " failed." << " Objectname=" << dp->getName(true));
+    vp->push_back(mycast<T>(reinterpret_cast<HPointer>(Null_p))); 
+    MSG("vp->size="<<vp->size()<<", v(0)="<<(*vp)[0]);
+    return;
+  };
 
     //Store the pointer in the object, so that other objects can access
     //it. The object should actually me made read-only, since the pointer is
     //not to be changed by put ever again until the window is deleted
-      vp->push_back(mycast<T>(ptr)); 
+  vp->push_back(mycast<T>(ptr)); 
 
       //Read the data Header, containing important information about the file (e.g. size)
-      casa::Record hdr=drp->headerRecord();
-
+  casa::Record hdr=drp->headerRecord();
+      
       //      uint nfields=hdr.nfields();
       //      uint i;
       //      for (i=0; i<nfields; i++) {
@@ -996,19 +987,16 @@ public:
       //      };
 
       //Now store File and Header information in Result objects
-      HInteger date=hdr.asuInt("Date"); putResult("Date",date);
-      HString observatory=hdr.asString("Observatory"); putResult("Observatory",observatory);
-      HInteger filesize=hdr.asInt("Filesize"); putResult("Filesize",filesize);
-      vector<HInteger> AntennaIDs; hdr.asArrayInt("AntennaIDs").tovector(AntennaIDs); putVecResult("AntennaIDs",AntennaIDs);
-      HInteger nofAntennas=drp->nofAntennas();putResult("nofAntennas",nofAntennas);
-      DBG("DataFunc_CR_dataReaderObject: Success.");
-  }
-};
-
-//The following macro has to come at the of the definiton. It defines
-//a constructor function (no class) with a pointer that is called when
-//an object is assigned this function.
-DATAFUNC_CONSTRUCTOR(dataReaderObject,CR,"Creates a DataReader object for reading CR data and stores its pointer.",POINTER,true);
+  HInteger date=hdr.asuInt("Date"); putResult("Date",date);
+  HString observatory=hdr.asString("Observatory"); putResult("Observatory",observatory);
+  HInteger filesize=hdr.asInt("Filesize"); putResult("Filesize",filesize);
+  vector<HInteger> AntennaIDs; hdr.asArrayInt("AntennaIDs").tovector(AntennaIDs); putVecResult("AntennaIDs",AntennaIDs);
+  HInteger nofAntennas=drp->nofAntennas();putResult("nofAntennas",nofAntennas);
+  DBG("DataFunc_CR_dataReaderObject: Success.");
+}
+//------------------------------------------------------------------------
+END_OBJECT_FUNCTION(CR,dataReaderObject)
+//------------------------------------------------------------------------
 
 
 
@@ -1075,15 +1063,15 @@ public:
     DBG("DataFunc_CR_dataRead: initialization called.");
 
     HPointer ptr=NULL;
-    setParameter("File",  ptr);
-    setParameter("Antenna", 0);
-    setParameter("Blocksize", -1);
-    setParameter("Block", 0);
-    setParameter("maxBlocksize", 65536);
-    setParameter("Filesize", -1);
-	setParameter("Stride", 0);
-    setParameter("Shift", 0);
-    HString s="Fx"; setParameter("Datatype", s);
+    SET_FUNC_PARAMETER(File, HPointer, ptr);
+    SET_FUNC_PARAMETER(Antenna, HInteger, 0);
+    SET_FUNC_PARAMETER(Blocksize, HInteger, -1);
+    SET_FUNC_PARAMETER(Block, HInteger, 0);
+    SET_FUNC_PARAMETER(maxBlocksize, HInteger, 65536);
+    SET_FUNC_PARAMETER(Filesize, HInteger, -1);
+    SET_FUNC_PARAMETER(Stride, HInteger, 0);
+    SET_FUNC_PARAMETER(Shift, HInteger, 0);
+    SET_FUNC_PARAMETER(Datatype, HString, "Fx");
     getParameters();
 
     //Now create a new, but empty data vector as buffer
@@ -1099,7 +1087,7 @@ public:
   void process(F_PARAMETERS) {
 
     //First retrieve the pointer to the pointer to the dataRead and check whether it is non-NULL.
-    GET_FUNC_PARAMETER_T(File,HPointer);
+    GET_FUNC_PARAMETER(File,HPointer);
     DBG("File=" << File);
     if (File==NULL){
 	ERROR("dataRead: pointer to FileObject is NULL, DataReader not found." << ", name=" << dp->getName(true)); 
@@ -1109,14 +1097,14 @@ public:
 
 
 //!!!One Needs to verify somehow that the parameters make sense !!!
-    GET_FUNC_PARAMETER_T(Antenna, HInteger);
-    GET_FUNC_PARAMETER_T(Blocksize,  HInteger);
-	GET_FUNC_PARAMETER_T(maxBlocksize,  HInteger);
-	GET_FUNC_PARAMETER_T(Filesize,  HInteger);
-    GET_FUNC_PARAMETER_T(Block,  HInteger);
-    GET_FUNC_PARAMETER_T(Stride,  HInteger);
-    GET_FUNC_PARAMETER_T(Shift, HInteger);
-    GET_FUNC_PARAMETER_T(Datatype, HString);
+    GET_FUNC_PARAMETER(Antenna, HInteger);
+    GET_FUNC_PARAMETER(Blocksize,  HInteger);
+	GET_FUNC_PARAMETER(maxBlocksize,  HInteger);
+	GET_FUNC_PARAMETER(Filesize,  HInteger);
+    GET_FUNC_PARAMETER(Block,  HInteger);
+    GET_FUNC_PARAMETER(Stride,  HInteger);
+    GET_FUNC_PARAMETER(Shift, HInteger);
+    GET_FUNC_PARAMETER(Datatype, HString);
     
     DBG("Reading Antenna=" << Antenna);
     DBG("nofAntennas=" << drp->nofAntennas());
@@ -1321,23 +1309,17 @@ int ReadTextFile(string filename)
 //Publish the Libraries - used in Data object constructor
 //------------------------------------------------------------------------
 
-void DataFunc_Sys_Library_publish(DataFuncLibraryClass* library_ptr){
-  library_ptr->add(&DataFunc_Sys_Neighbours_Constructor);
-  library_ptr->add(&DataFunc_Sys_Copy_Constructor);
-  library_ptr->add(&DataFunc_Sys_Print_Constructor);
-  library_ptr->add(&DataFunc_Sys_Square_Constructor);
-  library_ptr->add(&DataFunc_Sys_Sqrt_Constructor);
-  library_ptr->add(&DataFunc_Sys_Offset_Constructor);
-  library_ptr->add(&DataFunc_Sys_Range_Constructor);
-  library_ptr->add(&DataFunc_Sys_Unit_Constructor);
-}
-
-void DataFunc_CR_Library_publish(DataFuncLibraryClass* library_ptr){
-  library_ptr->add(&DataFunc_CR_dataReaderObject_Constructor);
-  library_ptr->add(&DataFunc_CR_dataRead_Constructor);
-}
-
-void DataFunc_Py_Library_publish(DataFuncLibraryClass* library_ptr){
-  library_ptr->add(&DataFunc_Py_PyFunc_Constructor);
-}
+void DataFunc_Library_publish(DataFuncLibraryClass* library_ptr){
+  PUBLISH_OBJECT_FUNCTION(Sys,Neighbours);
+  PUBLISH_OBJECT_FUNCTION(Sys,Copy);
+  PUBLISH_OBJECT_FUNCTION(Sys,Print);
+  PUBLISH_OBJECT_FUNCTION(Sys,Square);
+  PUBLISH_OBJECT_FUNCTION(Sys,Sqrt);
+  PUBLISH_OBJECT_FUNCTION(Sys,Offset);
+  PUBLISH_OBJECT_FUNCTION(Sys,Range);
+  PUBLISH_OBJECT_FUNCTION(Sys,Unit);
+  PUBLISH_OBJECT_FUNCTION(CR,dataReaderObject);
+  PUBLISH_OBJECT_FUNCTION(CR,dataRead);
+  PUBLISH_OBJECT_FUNCTION(Py,PyFunc);
+};
  
