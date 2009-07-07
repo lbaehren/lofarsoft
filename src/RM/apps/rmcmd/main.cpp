@@ -50,7 +50,7 @@ int main (int argc, char * const argv[]) {
 //	Bool status;					// status of casa calls
 
 	unsigned int i=0;				// loop variable
-	unsigned int N=100;			// length of test vectors
+	unsigned int N=96;			// length of test vectors from Brentjens simulation
 
 
 	if(argc<3)	// if no filenames was given, display usage/help (MUST change to 3!)
@@ -74,7 +74,7 @@ int main (int argc, char * const argv[]) {
 
 	// TEST: inverseFourier RM-Synthesis
 	// compute 300 pts along 0 to 299
-	vector<double> phis(N);
+	vector<double> phis(300);
 	vector<complex<double> > intensities(N);
 	vector<double> weights(N);	// weights
 	vector<double> freq(N);
@@ -89,10 +89,14 @@ int main (int argc, char * const argv[]) {
 	rmCube rm(1024, 1024, 100, 5);
 	
 	// Faradayd depths to probe for
-	for(unsigned int i=0; i<N; i++)
+	for(unsigned int i=0; i<300; i++)
 	{
-		phis[i]=i-150;							// from -150 to +150
+		phis[i]=i-150.0;						// from -150 to +150
 	}
+	// Set weights
+	for(unsigned int i=0; i<N; i++)
+		weights[i]=1;							// all channels carry equal weight 1
+		
 	
 	// Load simulated Brentjens data from file
 	rm.readSimDataFromFile("sim4Brentjens.dat", lambda_squared, delta_lambda_squared, intensities);
