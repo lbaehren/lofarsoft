@@ -81,20 +81,21 @@ DataFuncDescriptor DataFunc_##LIB##_##NAME##_Constructor(Data * dp=NULL){\
   return fd;\
 }
 
-#define BEGIN_OBJECT_FUNCTION(LIB,NAME)				\
+#define BEGIN_OBJECT_FUNCTION(LIB,NAME)		\
 class DataFunc_##LIB##_##NAME : public ObjectFunctionClass {	\
 public:\
 DEFINE_PROCESS_CALLS\
  DataFunc_##LIB##_##NAME (Data* dp) : ObjectFunctionClass(dp){	\
    dp->setUpdateable(O_UPDATEABLE);		\
+    setParameters();\
     startup();\
     getParameters();\
     }\
  ~DataFunc_##LIB##_##NAME(){cleanup(); }
+
  
 
 #define END_OBJECT_FUNCTION(LIB,NAME)  }; DATAFUNC_CONSTRUCTOR( NAME , LIB , O_INFO , O_TYPE , O_BUFFERED );
-
 
 #define PUBLISH_OBJECT_FUNCTION(LIB,NAME) library_ptr->add(&DataFunc_##LIB##_##NAME##_Constructor)
 
@@ -174,6 +175,16 @@ private:
 #define GET_FUNC_PARAMETER( NAME, TYP ) TYP NAME=(getParameter(getParameterName(#NAME),getParameterDefault<TYP>(#NAME)));
 #define SET_FUNC_PARAMETER( NAME, TYP , DEFVAL) setParameter(#NAME,mycast<TYP>(DEFVAL));
 
+#define GET_FUNC_PARAMETER_AWK( NAME, TYP , DEFVAL) TYP NAME=(getParameter(getParameterName(#NAME),getParameterDefault<TYP>(#NAME)));
+#define SET_FUNC_PARAMETER_AWK( NAME, TYP , DEFVAL) setParameter(#NAME,mycast<TYP>(DEFVAL));
+
+#define INIT_FUNC_ITERATORS(IT,END)		   \
+  typedef typename vector<T>::iterator iterator_T; \
+  iterator_T IT=vp->begin(); \
+  iterator_T END=vp->end(); \
+  if (IT==END) {return;};   \
+
+
 
 
 class ObjectFunctionClass : public DataFuncDescriptor {
@@ -185,6 +196,7 @@ public:
   virtual void process_C(F_PARAMETERS_T(HComplex));
   virtual void process_S(F_PARAMETERS_T(HString) );
 
+  virtual void setParameters(){};
   virtual void startup();
   virtual void cleanup();
 

@@ -1,6 +1,10 @@
 #
-cd $LOFARSOFT/build/cr
+
 MYDIR=$PWD
+cd $LOFARSOFT/src/CR-Tools/implement/GUI
+./hfprep
+cd $LOFARSOFT/build/cr
+
 make hfget
 cp implement/libhfget.so ../../release/lib/python
 #cp implement/libhfget.so ../../release/lib/

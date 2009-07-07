@@ -1,9 +1,3 @@
-//================================================================================
-// ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfprep.awk
-//================================================================================
-//     File was generated from hffuncs_awk.cc on Wed Jul 08 00:45:41 CEST 2009
-//--------------------------------------------------------------------------------
-//
 //#define DBG_MODE 0
 //#define DBG_MODE 1
 
@@ -811,28 +805,10 @@ updateable: false
 Par: OffsetValue, HNumber, 0.0
 Par: OffsetFixed, HInteger, int(false)
 ------------------------------------------------------------------------------*/
-class DataFunc_Sys_Offset : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Sys_Offset (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Sys_Offset(){cleanup(); } 
- 
-void setParameters(){
-SET_FUNC_PARAMETER_AWK(OffsetValue, HNumber, 0.0);
-SET_FUNC_PARAMETER_AWK(OffsetFixed, HInteger, int(false));
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  GET_FUNC_PARAMETER_AWK(OffsetValue, HNumber, 0.0);
-  GET_FUNC_PARAMETER_AWK(OffsetFixed, HInteger, int(false));
 // The following line with $$ is a comment for the preprocessor, but
 // the bracket makes life easier for the editor since we have to add
 // one at the end of this block as well
+$$ { 
 dp->getFirstFromVector(*vp,vs);
 
  INIT_FUNC_ITERATORS(it,end);
@@ -853,7 +829,6 @@ while (it!=end) {
 
 //------------------------------------------------------------------------------
 //$END Function
-}; DATAFUNC_CONSTRUCTOR(Offset,Sys,"Subtracts the first elements in the data vector from the entire data vector.",NUMBER,false);
 //------------------------------------------------------------------------------
 
 
@@ -967,23 +942,7 @@ buffered: true
 updateable: true
 Par: Filename, HString, dataset_lopes
 ------------------------------------------------------------------------------*/
-class DataFunc_CR_dataReaderObject : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_CR_dataReaderObject (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(true);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_CR_dataReaderObject(){cleanup(); } 
- 
-void setParameters(){
-SET_FUNC_PARAMETER_AWK(Filename, HString, dataset_lopes);
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  GET_FUNC_PARAMETER_AWK(Filename, HString, dataset_lopes);
+$$ { 
 
 HString Filetype = determine_filetype(Filename);
   
@@ -1062,7 +1021,6 @@ void cleanup(){
 
 //------------------------------------------------------------------------------
 //$END Function
-}; DATAFUNC_CONSTRUCTOR(dataReaderObject,CR,"Creates a DataReader object for reading CR data and stores its pointer.",POINTER,true);
 //------------------------------------------------------------------------------
 
 
@@ -1378,8 +1336,6 @@ int ReadTextFile(string filename)
 
 void DataFunc_Library_publish(DataFuncLibraryClass* library_ptr){
   //$PUBLISH Function
-PUBLISH_OBJECT_FUNCTION(Sys,Offset);
-PUBLISH_OBJECT_FUNCTION(CR,dataReaderObject);
 
   PUBLISH_OBJECT_FUNCTION(Sys,Neighbours);
   PUBLISH_OBJECT_FUNCTION(Sys,Copy);
