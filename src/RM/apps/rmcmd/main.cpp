@@ -74,7 +74,7 @@ int main (int argc, char * const argv[]) {
 
 	// TEST: inverseFourier RM-Synthesis
 	// compute 300 pts along 0 to 299
-	vector<double> phis(300);
+	vector<double> phis(N);
 	vector<complex<double> > intensities(N);
 	vector<double> weights(N);	// weights
 	vector<double> freq(N);
@@ -82,68 +82,28 @@ int main (int argc, char * const argv[]) {
 	vector<double> lambda_squared(N);
 	vector<double> delta_lambda_squared(N);
 	
-	vector<double> freq_low(N);		// lower limits of bandwidths
-	vector<double> freq_high(N);		// upper limits of bandwidths
-	
 	vector<complex<double> > rmsf(N);
 	vector<complex<double> > rmpol(N);		// polarized intensity at Faraday depth probed for
 
 	// Need to test lambdaSquaredTopHat function with WSRT text file
 	rmCube rm(1024, 1024, 100, 5);
 	
-	for(unsigned int i=0; i<N; i++)		// create Test data
+	// Faradayd depths to probe for
+	for(unsigned int i=0; i<N; i++)
 	{
 		phis[i]=i-150;							// from -150 to +150
-		freq[i]=323937500.0+i*312500.0;	// from Brentjens mosaic.freq text file
-		
-		weights[i]=1;							// set all weights to 1
-		delta_freq[i]=312500.0;
-		
-		// compute freq_low and freq_high limits for delta_lambda_squareds
-		freq_low[i]=323937500.0+i*312500-0.5*312500.0;
-		freq_high[i]=323937500.0+i*312500+0.5*312500.0;
 	}
 	
-	// Convert frequencies to lambda squareds and delta_lambda_squareds
-	lambda_squared=rm.freqToLambdaSq(freq);
-	delta_lambda_squared=rm.deltaLambdaSq(freq_low, freq_high, true);
-	
-	
-	// Debug: fill up lambda_squared and delta_lambda_squared vector
-	for(unsigned int i=0; i<300; i++)	// fill up Faraday depths to probe for
-	   phis[i]=int(i)-150;						// from -150 to +150
-	
-	// Debugging demonstration: read polarized intensities from file
-	ifstream infile("wPtsmooth.dat");		// file with polarized intensities
-	double real=0, imag=0;	    				// real and imaginary part to read from file
-	
-	i=0;						// reset loop variable
-	double lambdasq=0; 	// single lambdasq to be read from file
-	
-	delta_lambda_squared[0]=0.0026179938779914945;
-	while(infile.good())
-	{
-		infile >> lambdasq;
-		infile >> real;	// read real part 
-		infile >> imag;	// read imaginary part
-		lambda_squared[i]=lambdasq;
-		intensities[i]=complex<double>(real, imag);		// write into intensities
-		i++;
-		if(i>=1)
-			delta_lambda_squared[i-1]=lambda_squared[i]-lambda_squared[i-1];
-		if(i==99)			// read only 100 channels for debugging
-			break;
-	}
-	
+	// Load simulated Brentjens data from file
+	rm.readSimDataFromFile("sim4Brentjens.dat", lambda_squared, delta_lambda_squared, intensities);
 	
 	// perform RM-Synthesis
-	rmpol=rm.inverseFourier(phis, intensities, lambda_squared, weights, delta_lambda_squared, 0);
-
-	rm.writeRMtoFile(phis, rmpol, "rmpolBrentjens.dat");
+	rmsf=rm.inverseFourier(phis, intensities, lambda_squared, weights, delta_lambda_squared, 0);
+	rm.writeRMtoFile(phis, rmsf, "rmpolBrentjens.dat");
+	
 	// URGENT: need to verify with above deltaLambdas computation of RMSF!
-	//rmsf=rm.RMSF(phis, lambda_squared, weights, delta_lambda_squared);
-
-	//rm.writeRMtoFile(rmsf, "rmsf.dat");		// debug write RMSF to file
+	rmsf=rm.RMSF(phis, lambda_squared, weights, delta_lambda_squared);
+	rm.writeRMtoFile(phis, rmsf, "rmsf.dat");		// debug write RMSF to file
 
 	// Open Image and set parameters
 	dalFITS fitsimage("Leiden_GEETEE_CS1_1.FITS", READONLY);
@@ -173,11 +133,6 @@ int main (int argc, char * const argv[]) {
 	for(i=0; i<weights.size(); i++)
 	{
 	  weights[i]=1.0;	// weight them all equally
-	 // delta_freq[i]=1.0;	// use 1 as spacing
-	  
-	  cout << "delta_freq[" << i << "] = " << delta_freq[i] << endl;
-	  
-	  freq[i]=i;		// use 0 to 29 as freq
 	}
 	
 	

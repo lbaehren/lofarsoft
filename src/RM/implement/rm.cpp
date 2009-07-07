@@ -810,12 +810,11 @@ vector<complex<double> > rm::RMSF(const vector<double> &phis,
 				  const double lambdaZero)
 {
   vector<complex<double> > rmsfvec(phis.size());					// calculated rmsf ATTENTION: rmCube has its own rmsf attribute
-  vector<double> lambda_squared_pi(lambda_squared.size());  	// scale lambda squareds to 0 to 2*Pi
-  unsigned int numchannels=lambda_squared.size();					// number of channels
 
   complex<double> exp_factor;							// complex exponential factor
   unsigned int weightssize=weights.size();		// size of weights vector
   unsigned int phissize=phis.size();				// size of phis vector
+
 
   //**************************************************
   // Consistency check of input data
@@ -828,18 +827,12 @@ vector<complex<double> > rm::RMSF(const vector<double> &phis,
   if(delta_lambda_squared.size()==0)
 	  throw "rm::RMSF delta_lambda_squared vector has length 0";
   // Doesn't check for all combinations of equality...
-  if(phis.size()!=lambda_squared.size() || weights.size()!=delta_lambda_squared.size())
+  if(weights.size()!=lambda_squared.size() || weights.size()!=delta_lambda_squared.size())
      throw "rm::RMSF input vectors differ in length";
-
+  if(lambda_squared.size() != delta_lambda_squared.size())
+	  throw "rm::RMSF lambda_squareds and delta_lambda_squareds vector differ in size";
 
   //***********************************************************
- // rmsf.resize(phissize);		// set rmsf length to that of phis
-
-  // IMPORTANT: Map frequencies/lamdab to 2*Pi/N?
-  for(unsigned int i=0; i<numchannels; i++)
-  {
-	lambda_squared_pi[i]=lambda_squared[i]*M_PI/numchannels;
-  }	
 
   for(unsigned int iphi=0; iphi < phissize; iphi++)	// loop over all Faraday depths
   {
@@ -848,7 +841,7 @@ vector<complex<double> > rm::RMSF(const vector<double> &phis,
     // Loop over all weights and compute Riemann's integral
     for(unsigned int iweight=0; iweight < weightssize; iweight++)
     {
-   	 exp_factor=complex<double>(cos(-2*phis[iphi]*lambda_squared_pi[iweight]), sin(-2*phis[iphi]*lambda_squared_pi[iweight]));
+   	 exp_factor=complex<double>(cos(-2*phis[iphi]*lambda_squared[iweight]), sin(-2*phis[iphi]*lambda_squared[iweight]));
 	    rmsfvec[iphi]=rmsfvec[iphi] + weights[iweight] * exp_factor * delta_lambda_squared[iweight];					 
     }
   }
@@ -1035,10 +1028,10 @@ double rm::rmErrorLsq(double rmsnoisechan, vector<double> &lambdaSqs, double P)
 
 vector<double> rm::rmErrorBayes(vector<complex<double> > &intensity, vector<double> &lambda_sqs, bool lambda_sq)
 {
-  vector<double> rm_error(intensity.size());
+  vector<double> rmerror(intensity.size());
 
 
-  return rm_error;
+  return rmerror;
 }
 
 
@@ -1077,10 +1070,15 @@ vector<double> rm::readFrequencies(const std::string &filename)
       throw "rm::readFrequencies failed to open file";
     }
   
+	 unsigned int i=0;
     while(infile.good())	// as long as we can read from the file...
     {
       infile >> frequency;	// read double into temporary variable
-      frequencies.push_back (frequency);	// store in lambdaSquareds vector
+
+		if(frequencies.size() > i)					// if there is sufficient space in frequencies vector...
+			frequencies[i]=frequency;				// write to index i
+		else												// otherwise		
+      	frequencies.push_back (frequency);	// push back into lambdaSquareds vector
     }
 
     infile.close();		// close the text file
@@ -1098,7 +1096,7 @@ vector<double> rm::readFrequencies(const std::string &filename)
 
   \return frequencies -- vector with frequencies
 */
-vector<double> rm::readFrequencies(const std::string &filename, vector<double> &deltafreqs)
+vector<double> rm::readFrequenciesDiffFrequencies(const std::string &filename, vector<double> &deltafreqs)
 {
   vector<double> frequencies;		// hold list of lambda squareds
   double frequency=0;				// individual lambda squared read per line
@@ -1126,10 +1124,15 @@ vector<double> rm::readFrequencies(const std::string &filename, vector<double> &
       throw "rm::readFrequencies failed to open file";
     }
   
-    while(infile.good())	// as long as we can read from the file...
+	 unsigned int i=0;					// vector index variable
+    while(infile.good())				// as long as we can read from the file...
     {
-      infile >> frequency;	// read double into temporary variable
-      frequencies.push_back (frequency);	// store in lambdaSquareds vector
+      infile >> frequency;				// read double into temporary variable
+
+		if(frequencies.size() > i)					// if there is sufficient space in frequencies vector...
+			frequencies[i]=frequency;				// write to index i
+		else												// otherwise
+      	frequencies.push_back (frequency);	// push back into lambdaSquareds vector
    	
 		if(prev_frequency!=0)
 		{
@@ -1181,11 +1184,15 @@ vector<double> rm::readLambdaSquareds(const std::string &filename)
       throw "rm::readLambdaSquareds failed to open file";
     }
   
+	 unsigned int i=0;		// vector index variable
     while(infile.good())	// as long as we can read from the file...
     {
       infile >> lambdaSq;	// read double into temporary variable
-      lambdaSquareds.push_back (lambdaSq);	// store in lambdaSquareds vector
-      cout << lambdaSquareds[lambdaSquareds.size()-1] << endl;
+		
+		if(lambdaSquareds.size() > i)					// if lambdaSquareds has sufficient size
+			lambdaSquareds[i]=lambdaSq;				// write to index i in vector
+		else
+      	lambdaSquareds.push_back (lambdaSq);	// push back into lambdaSquareds vector
     }
 
     infile.close();		// close the text file
@@ -1230,13 +1237,21 @@ vector<double> rm::readFrequenciesAndDeltaFrequencies(const std::string &filenam
     {
       throw "rm::readFrequenciesAndDeltaFrequencies failed to open file";
     }
-  
-    while(infile.good())	// as long as we can read from the file...
+
+    unsigned int i=0;						// vector index variable if vector has sufficient size
+    while(infile.good())					// as long as we can read from the file...
     {
-      infile >> frequency;			// read frequency (first column)
+      infile >> frequency;					// read frequency (first column)
       infile >> deltaFrequency;			// read delta Frequency (2nd coloumn)
-      frequencies.push_back (frequency);		// store in frequencies vector
-      deltaFrequencies.push_back (deltaFrequency);	// store in delta frequencies vector
+ 
+		if(frequencies.size() > i)								// if frequencies vector has sufficient size
+			frequencies[i]=frequency;							// store at index i
+		else
+     		frequencies.push_back (frequency);				// if delta frequencies vector has sufficient size
+		if(deltaFrequencies.size() > i)						// store at index i
+			deltaFrequencies[i]=deltaFrequency;
+		else
+      	deltaFrequencies.push_back (deltaFrequency);		// store in delta frequencies vector
     }
 
     infile.close();		// close the text file
@@ -1256,9 +1271,9 @@ vector<double> rm::readFrequenciesAndDeltaFrequencies(const std::string &filenam
 */
 vector<double> rm::readLambdaSquaredsAndDeltaSquareds(const std::string &filename,   vector<double> &deltaLambdaSquareds)
 {
-  vector<double> lambdaSquareds;	// lambda squareds to be returned
-  double lambdaSq=0;			// individual frequency read per line
-  double deltaLambdaSq=0;		// individual delta frequency read per line  
+  vector<double> lambdaSquareds;		// lambda squareds to be returned
+  double lambdaSq=0;						// individual frequency read per line
+  double deltaLambdaSq=0;				// individual delta frequency read per line  
 
   //----------------------------------------------------------
   // Check if filename is text file FITS file or HDF5 file
@@ -1281,18 +1296,86 @@ vector<double> rm::readLambdaSquaredsAndDeltaSquareds(const std::string &filenam
       throw "rm::readLambdaSquaredsAndDeltaSquareds failed to open file";
     }
   
-    while(infile.good())	// as long as we can read from the file...
+	 int i=0;									// vector index variable if vector has sufficient size
+    while(infile.good())					// as long as we can read from the file...
     {
-      infile >> lambdaSq;			// read frequency (first column)
+      infile >> lambdaSq;					// read frequency (first column)
       infile >> deltaLambdaSq;			// read delta Frequency (2nd coloumn)
-      lambdaSquareds.push_back (lambdaSq);		// store in frequencies vector
-      deltaLambdaSquareds.push_back (deltaLambdaSq);	// store in delta frequencies vector
+
+		if(static_cast<int>(lambdaSquareds.size()) > i)		// if there is size left in lambdasquareds and delta_lambda_squareds vectors
+		{ 
+			lambdaSquareds[i]=lambdaSq;
+		}
+		else
+		{
+			lambdaSquareds.push_back (lambdaSq);		// store in frequencies vector
+		}	
+		if(static_cast<int>(deltaLambdaSquareds.size()) > i)
+		{
+			deltaLambdaSquareds[i]=deltaLambdaSq;	
+		}	
+		else
+		{
+	      deltaLambdaSquareds.push_back (deltaLambdaSq);	// store in delta frequencies vector
+		}
     }
 
     infile.close();		// close the text file
   }
 
   return lambdaSquareds;	  // return frequencies vector
+}
+
+
+/*!
+	\brief Read lambda squareds, delta lambda squareds and complex data vector from a text file
+	
+	\param &filename - name of text file with simulated polarized emission data
+	\param &lambdasquareds - vector to store lambda squared values in
+	\param &delta_lambda_squareds - vector to store delta lambda squared values in
+	\param &intensities				-	vector<complex<double> > to store complex polarized intensities
+*/
+void rm::readSimDataFromFile(const std::string &filename, vector<double> &lambdasquareds, vector<double> &delta_lambda_squareds, vector<complex<double> > &intensities)
+{
+	ifstream infile(const_cast<const char*>(filename.c_str()), ifstream::in);		// file with lambda squareds
+	
+	double lambdasq=0;		// temporary variable for lambda sqaured per line
+   double deltalambdasq=0;	// temporary variable for delta lambda squared per line
+	double real=0;				// temporary variable for real part per line
+	double imag=0;				// temporary variable for imaginary part per line
+	complex<double> intensity;					// temporary complex intensity
+	int i=0;					// loop variable
+	
+	// Temporary vectors
+//	vector<complex<double> > intensities;
+
+   if(infile.fail())
+   {
+      throw "rn::readSimDataFromFile failed to open file";
+   }
+	
+	while(infile.good())
+	{
+		infile >> lambdasq >> deltalambdasq >> real >> imag;
+
+
+		if(static_cast<int>(lambdasquareds.size()) > i)		// if there is size left in lambdasquareds and delta_lambda_squareds vectors
+		{
+			lambdasquareds[i]=lambdasq;
+			delta_lambda_squareds[i]=deltalambdasq;
+			intensities[i]=complex<double>(real, imag);		
+		}
+		else		// otherwise use push back function to append at the end of the vector
+		{
+		   lambdasquareds.push_back(lambdasq);
+			delta_lambda_squareds.push_back(deltalambdasq);			
+			intensities.push_back(complex<double>(real, imag));		
+		}
+
+		i++;										// increment index into data vector
+	}
+	
+	infile.close();
 }
 
 

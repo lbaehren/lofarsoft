@@ -138,7 +138,7 @@ public:
 											 const vector<double> &lambda_squared,
 											 const vector<double> &weights,
 											 const vector<double> &delta_lambda_squared,
-											 const double lambdaZero);
+											 const double lambdaZero=0);
 
 	//! Inverse Fourier transform for one polarization (Q or U) only to compute for a vector of Faraday Depths	
 	vector<complex<double> > inverseFourier(const vector<double> &phis,
@@ -146,7 +146,7 @@ public:
 						  							   const vector<double> &lambda_squared,
 													   const vector<double> &weights,
 														const vector<double> &delta_lambda_squared,
-														const double lambdaZero);
+														const double lambdaZero=0);
 
   // Compute the Rotation Measure Spread Function (RMSF)
   vector<complex<double> > RMSF( const vector<double> &,
@@ -155,7 +155,7 @@ public:
 											const vector<double> &,
 											const double lambdaZero=0);
 											
-	// Compute the Roation Measure Spread Function from input frequencies
+	// Compute the Rotation Measure Spread Function from input frequencies
    vector<complex<double> > RMSFfreq(const vector<double> &phis,    
 									  			 const vector<double> &frequencies,                     
 									  			 const vector<double> &weights,                         
@@ -220,13 +220,17 @@ public:
   vector<double> readLambdaSquareds(const std::string &);
 
   //! read frequencies from file and compute delta frequencies from differences
-  vector<double> readFrequencies(const std::string &filename, vector<double> &deltafreqs);
+  vector<double> readFrequenciesDiffFrequencies(const std::string &filename, vector<double> &deltafreqs);
 
   //! read frequencies and delta frequencies from a text file
   vector<double> readFrequenciesAndDeltaFrequencies(const std::string &, vector<double> &);
 
   //! read lambda squareds and delta squareds from a text file
   vector<double> readLambdaSquaredsAndDeltaSquareds(const std::string &, vector<double> &);
+
+  //! read complete set of simulated data: lambdasq, delta lambda sq and complex intensity from file
+  void readSimDataFromFile(const string &filename, vector<double> &lambdasquareds, vector<double> &delta_lambda_squareds, vector<complex<double> > &intensities);
+
 
   //! Write a vector out to file
   void writeRMtoFile(vector<double>, const std::string &filename);
