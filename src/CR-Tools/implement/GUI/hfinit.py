@@ -319,7 +319,7 @@ class DataList(list):
         if (type(value)==DataList):  ## This means DataList >> DataList - here each member will be linked to the corresponding member in the other list
             if len(self)==1 | len(value)==1: return self.unList().resetLink(value.unList(),*args) # here we convert a list to a single object and try again.
             if not len(self)==len(value): 
-                hfERR("resetLink - Unable to set links between unequally long DataLists:",self, "and", value)
+                hfERR("resetLink - Unable to set links between unequally long DataLists:" + str(self)+ "and" + str(value))
                 return DataList()
             return DataList(map(lambda d1,d2:d1.resetLink_cc(d2,*args),self,value)) # here link every element of self with the corresponging element in value
         return DataList(map(lambda d:d.resetLink_cc(value,*args),self)) # here link the single object value with every element of self 
@@ -360,6 +360,9 @@ class DataList(list):
     def asList(self):
         "Return a datalist, even if it is a single object."
         return self
+    def getType(self): #  
+        "Retrievs the internally stored datatypes of all objects."
+        return map(lambda d:d.getType(),self)
     def getPy(self): #  
         "Retrievs all Python objects from teh objects in the list."
         return map(lambda d:d.getPy(),self)
@@ -415,6 +418,9 @@ class DataList(list):
     def setList(self,l):
         "Assigns each member of the datalist the corresponding value in the input list l."
         return DataList(map(lambda d,v:d.set(v),self,l))
+    def doSilent(self):
+        map(lambda d:d.doSilent(),self)
+        return self
     def Silent(self,sil):
         "Sets the silent flag of an object which can inhibit the update chain (but not the modification flagging): True or False."
         ret=[]

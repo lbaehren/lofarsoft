@@ -12,17 +12,17 @@
 #define F_PARAMETERS_h      F_PARAMETERS=NULL
 
 #define DEFINE_PROCESS_CALLS_NUMONLY\
-  void process_I(F_PARAMETERS_T(HInteger)) {process<HInteger>(F_PARAMETERS_CALL);}\
-  void process_N(F_PARAMETERS_T(HNumber) ) {process<HNumber>(F_PARAMETERS_CALL);}\
-  void process_C(F_PARAMETERS_T(HComplex)) {process<HComplex>(F_PARAMETERS_CALL);}
+  void process_I(F_PARAMETERS_T(HInteger)) {process<HInteger>(F_PARAMETERS_CALL);process_end();} \
+  void process_N(F_PARAMETERS_T(HNumber) ) {process<HNumber>(F_PARAMETERS_CALL);process_end();}\
+  void process_C(F_PARAMETERS_T(HComplex)) {process<HComplex>(F_PARAMETERS_CALL);process_end();}
 
 #define DEFINE_PROCESS_CALLS_WITHOUT_POINTER\
   DEFINE_PROCESS_CALLS_NUMONLY\
-  void process_S(F_PARAMETERS_T(HString) ) {process<HString>(F_PARAMETERS_CALL);}
+  void process_S(F_PARAMETERS_T(HString) ) {process<HString>(F_PARAMETERS_CALL);process_end();}
 
 #define DEFINE_PROCESS_CALLS\
   DEFINE_PROCESS_CALLS_WITHOUT_POINTER\
-  void process_P(F_PARAMETERS_T(HPointer)) {process<HPointer>(F_PARAMETERS_CALL);}
+  void process_P(F_PARAMETERS_T(HPointer)) {process<HPointer>(F_PARAMETERS_CALL);process_end();}
 
 #define DEFINE_PROCESS_CALLS_h\
   void process_P(F_PARAMETERS_T(HPointer));\
@@ -32,11 +32,11 @@
   void process_S(F_PARAMETERS_T(HString) )
 
 #define DEFINE_PROCESS_CALLS_IGNORE_DATATYPE\
-  void process_P(F_PARAMETERS_T(HPointer)) {process(F_PARAMETERS_CALL_NOVEC);}\
-  void process_I(F_PARAMETERS_T(HInteger)) {process(F_PARAMETERS_CALL_NOVEC);}\
-  void process_N(F_PARAMETERS_T(HNumber) ) {process(F_PARAMETERS_CALL_NOVEC);}\
-  void process_C(F_PARAMETERS_T(HComplex)) {process(F_PARAMETERS_CALL_NOVEC);}\
-  void process_S(F_PARAMETERS_T(HString) ) {process(F_PARAMETERS_CALL_NOVEC);}
+  void process_P(F_PARAMETERS_T(HPointer)) {process(F_PARAMETERS_CALL_NOVEC);process_end();}\
+  void process_I(F_PARAMETERS_T(HInteger)) {process(F_PARAMETERS_CALL_NOVEC);process_end();}\
+  void process_N(F_PARAMETERS_T(HNumber) ) {process(F_PARAMETERS_CALL_NOVEC);process_end();}\
+  void process_C(F_PARAMETERS_T(HComplex)) {process(F_PARAMETERS_CALL_NOVEC);process_end();}\
+  void process_S(F_PARAMETERS_T(HString) ) {process(F_PARAMETERS_CALL_NOVEC);process_end();}
 
 
 void qrun(MainWindow **label);
@@ -182,7 +182,7 @@ private:
   typedef typename vector<T>::iterator iterator_T; \
   iterator_T IT=vp->begin(); \
   iterator_T END=vp->end(); \
-  if (IT==END) {return;};   \
+  if (IT==END) {return;};  
 
 
 
@@ -196,9 +196,10 @@ public:
   virtual void process_C(F_PARAMETERS_T(HComplex));
   virtual void process_S(F_PARAMETERS_T(HString) );
 
-  virtual void setParameters(){};
+  virtual void setParameters();
   virtual void startup();
   virtual void cleanup();
+  void process_end();
 
   void setParameter(HString internal_name, HPointer default_value, HString prefix="'", HString external_name="");
   void setParameter(HString internal_name, HInteger default_value, HString prefix="'", HString external_name="");
@@ -224,6 +225,10 @@ public:
   HString getParametersObjectName();
   Data* getParametersObject();
   Data* getParameterObject(HString name);
+
+  Data* getParameterObjectPointer(HString);
+  void setParameterObjectPointer(HString, Data*);
+ 
   template <class T>
     T getParameter(const HString name, const T defval);
   template <class T>
@@ -257,6 +262,8 @@ public:
 
   map<HString,parameter_item> parameter_list;
   map<HString,parameter_item>::iterator pit;
+  map<HString,Data*> parameter_pointer;
+  map<HString,Data*>::iterator ppit;
 };
 
 //------------------------------------------------------------------------

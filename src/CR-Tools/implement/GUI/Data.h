@@ -225,7 +225,7 @@ template <class T, class S>
 void copycast_vec(void *ptr, vector<S> *op, Vector_Selector *vs);
 
 
-enum MOD_ACTION {MOD_UNDEF, MOD_DELETED, MOD_UPDATED, MOD_LINKCHANGED, MOD_CLEARED};
+enum MOD_ACTION {MOD_CLEARED,  MOD_UPDATED,  MOD_LINKCHANGED, MOD_DELETED, MOD_UNDEF};
 
 struct modification_record {
     MOD_ACTION action;
@@ -322,6 +322,8 @@ class Data {
     bool modified;
 
     bool silent;
+    bool tmpsilent;
+    bool linkpathchanged;
     bool noMod;
     bool noSignal;
     bool autoupdate;
@@ -515,6 +517,8 @@ class Data {
   bool Updateable();
   void setUpdateable(bool up=true);
   bool Silent(bool silent);
+  Data* doSilent();
+  Data& doSilent_Ref();
 
   //  template <class T>
   //bool Data::doVerbose(const vector<T> &v,const bool checkmod);	
@@ -540,7 +544,10 @@ class Data {
   void setModification(objectid port, modification_record mod);
   void clearModification();
   void clearModificationTO(objectid port);
+  HString strWorm();
   void printWorm();
+  Data* setLinkpathChanged(bool change);
+  bool getLinkpathChanged();
   void executeUpdateWorm();
   void doAutoUpdate();
   Data& update();

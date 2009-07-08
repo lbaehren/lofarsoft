@@ -6,7 +6,7 @@
 
 extern int global_debuglevel;
 
-#define DBG_MODE 1
+#define DBG_MODE 0
 
 #include <string>
 #include <iostream>

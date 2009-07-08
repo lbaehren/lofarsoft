@@ -274,6 +274,11 @@ char* reftype_txt(REFTYPE x){
   if (x <= REF_NONE && x >=0) {return REFTYPE_TXT[x];}  else {return "UNKNOWN_REF";};
 }
 
+char* modaction_txt(MOD_ACTION x){
+  char* MODACTION_TXT[MOD_UNDEF+1]={"MOD_CLEARED",  "MOD_UPDATED",  "MOD_LINKCHANGED", "MOD_DELETED", "MOD_UNDEF"};
+  if (x <= MOD_UNDEF && x >=0) {return MODACTION_TXT[x];}  else {return "UNKNOWN_MODACTION";};
+}
+
 char* datatype_txt(DATATYPE x){
   char* DATATYPE_TXT[6]={"HPointer","HInteger", "HNumber", "HComplex", "HString", "UNDEF"};
 //  DBG("datatype_txt: x=" << x);
@@ -663,7 +668,7 @@ vector<objectid> DPtrToOid(DataList objects)
 */
 
 bool ModRecisValid(modification_record mod){
-  return isDataObject(mod.ref) && mod.action>MOD_DELETED;
+  return isDataObject(mod.ref) && mod.action<MOD_DELETED;
 };
 
 bool operator== (const modification_record mod1, const modification_record mod2) {return mod1.ref==mod2.ref && mod1.version==mod2.version && mod1.action==mod2.action;}
@@ -737,6 +742,11 @@ vector<objectid> Data::getAllIDs(){
   return vec;
 }
 
+/*!  \brief Print the content of the object, including the status of
+all internal variables. If short_output = true, only a one-line
+summary is printed.
+
+ */
 void Data::printStatus(bool short_output){cout << Status(short_output) <<endl;}
 
 /*! \brief Return the number of modification flags which are set*/
@@ -774,8 +784,8 @@ vector<modification_record> Data::getModFlags(DIRECTION dir){
 HString Data::strModFlag(modification_record mod){
     std::ostringstream sout;
     if (mod.ref==NULL) {sout << "NULL.0";} 
-    else if (mod.action <= MOD_DELETED) {sout << "DELETED";} 
-    else {sout << mod.ref->getName(true) << "." << mod.version;};
+    else if (mod.action == MOD_DELETED) {sout << "DELETED." << mod.version;}
+    else {sout << mod.ref->getName(true) << "." << mod.version<< "." << modaction_txt(mod.action);};
     return sout.str();
 }
 
@@ -868,14 +878,34 @@ HString Data::Status(bool short_output){
   for (  i=0; i<data.to.size(); ++i) {sout <<"["<<i<<"] "; sout << this->reference_descr_str(data.to[i])<<endl;};
   sout << "From: "<<endl;  
   for (  i=0; i<data.from.size(); ++i) {sout <<"["<<i<<"] "; sout << this->reference_descr_str(data.from[i])<<endl;};
-  sout << "datatype=" << datatype_txt(data.type) << endl;
-  sout << "of_ptr=" << data.of_ptr << endl;
-  sout << "d_ptr=" << data.d_ptr << endl;
-  sout << "pydbg=" << data.pydbg << endl;
-  sout << "pyqt=" << data.pyqt << endl;
-  sout << "py_func=" << data.py_func << endl;
-  sout << "s_ptr=" << data.s_ptr << endl;
-
+  sout << "datatype = " << datatype_txt(data.type) << endl;
+#define PRINT_DATACONTENT(VAR)   sout << #VAR << " = " << data.VAR << endl;
+  sout << "of_ptr = " << data.of_ptr << endl;
+  sout << "d_ptr = " << data.d_ptr << endl;
+  sout << "pydbg = " << data.pydbg << endl;
+  sout << "pyqt = " << data.pyqt << endl;
+  sout << "py_func = " << data.py_func << endl;
+  sout << "s_ptr = " << data.s_ptr << endl;
+  PRINT_DATACONTENT(noMod);
+  PRINT_DATACONTENT(noSignal);
+  PRINT_DATACONTENT(modified);
+  PRINT_DATACONTENT(beingmodified);
+  PRINT_DATACONTENT(autoupdate);
+  PRINT_DATACONTENT(updateable);
+  PRINT_DATACONTENT(silent);
+  PRINT_DATACONTENT(tmpsilent);
+  PRINT_DATACONTENT(linkpathchanged);
+  PRINT_DATACONTENT(verbose);
+  PRINT_DATACONTENT(debuggui);
+  PRINT_DATACONTENT(debug);
+  PRINT_DATACONTENT(defdir);
+  PRINT_DATACONTENT(netlevel);
+  sout << "Worm = " << Worm <<endl;
+  if (Worm!=NULL) {
+    sout << "........................................................................";
+    sout << strWorm();
+  }
+  
   if (data.d_ptr!=NULL) {
     sout << "========================================================================"<<endl;
     sout << "data = ";
@@ -1325,6 +1355,22 @@ bool Data::Silent(bool silent){
   return old;
 }
 
+/*!  \brief Make an object temporarily silent. 
+
+That allows you to change the value of an object,
+without triggering an instant update of the net. The modification flag will be
+set however. To modify the object without setting the modifcation flag, use
+noMod.
+*/
+
+Data* Data::doSilent(){
+  data.tmpsilent=true;
+  return this;
+}
+
+Data& Data::doSilent_Ref(){return *doSilent();};
+
+
 /*!
 \brief checks whether an object needs updating
  */
@@ -1569,10 +1615,11 @@ void Data::setModification(const MOD_ACTION action){
 
     if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return;};
 
+    if (action>=MOD_LINKCHANGED) setLinkpathChanged(true);
+
     if (data.noMod) {
-	DBG("setModification: NO MODIFICATION since noMod=true.");
-	data.noMod=false;
-	return;
+      data.noMod=false;
+      return;
     }    
 
     /*
@@ -1594,8 +1641,9 @@ void Data::setModification(const MOD_ACTION action){
     //Now the worm is filled with object references. Go sequentially
     //along the worm and update the objects.
 
-    if (!data.silent) executeUpdateWorm();
+    executeUpdateWorm();
     data.beingmodified=false;
+    data.tmpsilent=false;
 }
 
 /*! \brief This is just a convenience subroutine to setModification() 
@@ -1617,6 +1665,8 @@ void Data::setModification(modification_record newmod){
 
     data.modified=true;
 
+    if (newmod.action>=MOD_LINKCHANGED) setLinkpathChanged(true);
+
     size=data.to.size();
     for (i=0; i<size; ++i) {
       //mark the port to the next higher object as modified - this
@@ -1637,6 +1687,25 @@ void Data::setModification(modification_record newmod){
 }
 
 /*!
+\brief Print content of the update Worm, which contains a list of all objects that need updating. Here return output as string.
+*/
+HString Data::strWorm(){
+  std::ostringstream sout;
+  dataworm::const_iterator it;
+  sout << endl << "UpdateWorm(" << getName(true) << "): ";
+  for (it=Worm->begin(); it<Worm->end(); ++it) {
+    sout << (*it)->getName(true) << " -> ";
+  };
+  sout << "END(Worm)." << endl;
+  return sout.str();
+}
+
+/*!
+\brief Print content of the update Worm, which contains a list of all objects that need updating. Here return output as string.
+*/
+void Data::printWorm(){cout << strWorm();}
+
+/*!
 \brief Execute the update worm which was created by setModification or checkModification
 
 The worm is filled with object references. The function goes sequentially along the
@@ -1644,28 +1713,18 @@ worm, i.e. through the list of objects, and update the objects.
 
  */
 
-void Data::printWorm(){
-  dataworm::const_iterator it;
-  cout << endl << "UpdateWorm(" << getName(true) << "): ";
-  for (it=Worm->begin(); it<Worm->end(); ++it) {
-    cout << (*it)->getName(true) << " -> ";
-  };
-  cout << "END(Worm)." << endl;
-}
-
 void Data::executeUpdateWorm(){
+  if (data.silent || data.tmpsilent) {return;};
   if (Verbose()) printWorm();
   if (Worm==NULL) {
     ERROR("executeUpdateWorm() name=" << getName(true) << ": Uninitialized UpdateWorm called ...");
     return;
   }
-  if (!data.silent) {
-    DBG("executeUpdateWorm(): executed by object " << getName(true) << ", worm.size=" << Worm->size());
-    dataworm::const_iterator it;
-    for (it=Worm->begin(); it<Worm->end(); ++it) {
-      DBG("executeUpdateWorm(): executed by " << getName(true) << " -> update object worm.name=" << (*it)->getName(true));
-      if (isDataObject(*it,false)) (*it)->doAutoUpdate();
-    };
+  DBG("executeUpdateWorm(): executed by object " << getName(true) << ", worm.size=" << Worm->size());
+  dataworm::const_iterator it;
+  for (it=Worm->begin(); it<Worm->end(); ++it) {
+    DBG("executeUpdateWorm(): executed by " << getName(true) << " -> update object worm.name=" << (*it)->getName(true));
+    if (isDataObject(*it,false)) (*it)->doAutoUpdate();
   };
   DBG("executeUpdateWorm(): clear Worm.");
   Worm -> clear();
@@ -1684,6 +1743,8 @@ void Data::setModification(objectid port, modification_record newmod){
 
   /*  if (data.beingmodified) MSG("setModification(port=" <<port<<", mod=" << strModFlag(newmod) <<"): name=" << getName(true) << " data.version=" <<getVersion() << ". Warning the object is being modified again, while another modification chain is already in progress. Maybe there is an inconsistent state of the network.");
    */
+
+  if (newmod.action>=MOD_LINKCHANGED) setLinkpathChanged(true);
 
   //store the modification in the respective FROM port, check for a circular network 
   if (port>=0 && port <data.from.size()) {
@@ -1855,6 +1916,7 @@ void Data::clearModification(){
     DBG("clearModification(): name=" << getName(true));
 
     data.modified = false;
+    data.tmpsilent=false;
 
     size=data.from.size();
     for (i=0; i<size; ++i) {
@@ -2112,6 +2174,8 @@ objectid Data::setLink(Data *d,
   newmod.action=MOD_LINKCHANGED;
   newmod.ref=this;
   newmod.version=0;
+  objectid retport=-2;
+  bool domod=oport<0;
 
   if (d == this) {
     ERROR("setLink: Object can't point to itself.");
@@ -2121,7 +2185,7 @@ objectid Data::setLink(Data *d,
     ERROR("setLink: Attempting to link Object to NullObject. It is likely that a wrong object name was specified.");
     return -1;
   }
-  if (dir == DIR_FROM || dir == DIR_BOTH) {
+  if (dir == DIR_FROM ) {
     if (oport<0) {
       if (thisport>=0  && thisport < data.from.size()) {
 	oport=(d->setLink(this, dirtype,DIR_TO,thisport));
@@ -2138,16 +2202,16 @@ objectid Data::setLink(Data *d,
       D2BG("setLink: using thisport len(map::from)="<<data.mapfrom.size()<<" adding name="<< rd->name);
       data.mapfrom[rd->name]=thisport;
       data.from[thisport]=rd;
-      return thisport;
+      retport=thisport;
     }
     else {
       data.mapfrom[rd->name]=data.from.size();
       data.from.push_back(rd);
-      return data.from.size()-1;
+      retport= data.from.size()-1;
     };
     //D2BG("setLink: data.from[len]->mod=" << data.from[data.from.size()-1]->mod);
     
-  } else if (dir == DIR_TO || dir == DIR_BOTH) {
+  } else if (dir == DIR_TO ) {
     if (oport<0) {
       if (thisport>=0  && thisport < data.to.size()) {
 	oport=(d->setLink(this, dirtype,DIR_FROM,thisport));
@@ -2164,16 +2228,22 @@ objectid Data::setLink(Data *d,
       D2BG("setLink: using thisport len(mapto)="<<data.mapto.size()<<" adding name=" << rd->name);
       data.mapto[rd->name]=thisport;
       data.to[thisport]=rd;
-      return thisport;
+      retport= thisport;
     }
     else {
       data.mapto[rd->name]=data.to.size();
       data.to.push_back(rd);
-      return data.to.size()-1;
+      retport=data.to.size()-1;
     };
     //D2BG("setLink: data.to[len]->mod=" << data.to[data.to.size()-1]->mod);
-  };
-  DOSILENT(setModification());
+  } else {
+    ERROR("setLink( I am =" << getName(true) << ", link to name=" << d->getName(true) << ", dir_type=" << direction_txt(dir_type)  << ", dir=" << direction_txt(dir) << ", otherport=" << otherport << ", thisport=" << thisport << " -- dir should be either TO or FROM!");
+  }
+  if (domod && dir_type==PUSH) {
+    if (dir==DIR_TO) doSilent()->setModification(newmod.action);
+    if (dir==DIR_FROM) d->doSilent()->setModification(newmod.action);
+  }
+  return retport;
 };
 
 //The next was used for python binding, creating _Name, _ID etc.
@@ -2714,6 +2784,24 @@ Data* Data::noMod(){
 }
 
 Data& Data::noMod_Ref(){return *noMod();}
+
+/*!  \brief A flag is set whenever the object received a modification
+message that a link further down the net was changed.
+
+ This is used by the object functions to determine whether they need
+to go through the net again and find the parameter objects.
+ */
+Data* Data::setLinkpathChanged(bool change){data.linkpathchanged=change;return this;}
+
+/*!  \brief Retrieve the flag which tells one whether the object had
+received a modification message that a link further down the net was
+changed.
+
+This is used by the object functions to determine whether they need
+to go through the net again and find the parameter objects.
+ */
+bool Data::getLinkpathChanged(){return data.linkpathchanged;}
+
 
 /*!
 
@@ -3429,6 +3517,8 @@ Data::Data(HString name,superior_container * superior){
   data.autoupdate=true;
   data.updateable=false;
   data.silent=false;
+  data.tmpsilent=false;
+  data.linkpathchanged=true;
   data.verbose=0;
   data.debuggui=false;
   data.debug=false;
@@ -3588,7 +3678,8 @@ Data& Data::erase(Data &d,DIRECTION dir)
     d.delLink(i,dir,false,false);
   };
   d.delObject();
-  if (!data.silent) touch();
+  //  if (!(data.silent || data.tmpsilent)) touch();
+  touch();
   return *this;
 }
 
@@ -3640,7 +3731,7 @@ void Data::delObject()
   };
   DBG("delObject: executeUpdateWorm");
 
-  if (!data.silent && size>0) executeUpdateWorm();
+  if (size>0) executeUpdateWorm();
 
   //Call Root object and delete itself...
   if (data.superior!=NULL) {

@@ -1,7 +1,7 @@
 //================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfprep.awk
 //================================================================================
-//     File was generated from hffuncs_awk.cc on Wed Jul 08 00:45:41 CEST 2009
+//     File was generated from hffuncs_awk.cc on Wed Jul 08 21:36:51 CEST 2009
 //--------------------------------------------------------------------------------
 //
 //#define DBG_MODE 0
@@ -94,9 +94,14 @@ void ObjectFunctionClass::process_S(F_PARAMETERS_T(HString) ) {ERROR("ObjectFunc
 
 //These methods can be set by the programmer to initialize parametes
 //at the beginning or free allocated memory at destruction time
-//void ObjectFunctionClass::setParameters(){};
+void ObjectFunctionClass::setParameters(){};
 void ObjectFunctionClass::startup(){};
 void ObjectFunctionClass::cleanup(){};
+void ObjectFunctionClass::process_end(){
+  DBG("setLinkpathChanged(false): " << data_pointer->getName(true) << ", funcname=" << getName(true));	      
+  data_pointer->setLinkpathChanged(false);	      
+};
+
 
 //This is a dummy function we need in order to fool the compiler
 //so that templated methods of all typese are created ...
@@ -237,22 +242,65 @@ Data* ObjectFunctionClass::getResultsObject(){
 parameter "name" for an operation.
 
  First search for an object connected to a Parameters (note Plural)
-object, i.e. an object of name "Parameter" which by default islnked to
+object, i.e. an object of name "Parameter" which by default is linked to
 all Parameter (note Singuar) objects.
+
+To improve efficiency, the pointer to the data objects are
+stored. Hence the second time the function is called one need not
+search for the object again. This happens only, when the network path
+was changed (link changed or object deleted/added).
+
+THIS ONLY WOKRS FOR PUSH CONNECTIONS - A VERSION FOR PULL CONNECTIONS
+IS NOT YET IMPLEMENTED.
 */
 
 Data* ObjectFunctionClass::getParameterObject(HString name){
-  Data* pobj=getParametersObject(); //will be  created if it does not exist
-  DataList objs=pobj->Find("'"+name); // First search Object linked to Parameter object
-  if (objs.size()==0) {
-    objs=data_pointer->Find("'"+name); // Search entire net
-    if (objs.size()==0) { // Still not found? Then create it.
-      objs.push_back(pobj->newObject(name,data_pointer->getDefaultDirection()));
-      objs[0]->setNetLevel(100);
+  if (data_pointer->getLinkpathChanged()) {
+    DBG("getParameter(" << data_pointer->getName(true) <<"): Searching object " << name);
+    Data* pobj=getParametersObject(); //will be  created if it does not exist
+    DataList objs=pobj->Find("'"+name); // First search Object linked to Parameter object
+    if (objs.size()==0) {
+      objs=data_pointer->Find("'"+name); // Search entire net
+      if (objs.size()==0) { // Still not found? Then create it.
+	objs.push_back(pobj->newObject(name,data_pointer->getDefaultDirection()));
+	objs[0]->setNetLevel(100);
+      };
     };
-  };
-  return objs[0];
+    setParameterObjectPointer(name,objs[0]);
+    return objs[0];
+  } else {
+    Data * obj=getParameterObjectPointer(name);
+    if (!isDataObject(obj)){
+      ERROR("getParameter(" << data_pointer->getName(true) <<"): Pointer to parameter " << name << " was not properly cached. System error.");
+      data_pointer->setLinkpathChanged(true);
+      obj=getParameterObject(name);
+    };
+    return obj;
+  }
+} 
+
+/*!
+
+\brief Retrieves the pointer to a parameter object (used for temporary
+cashing of the object pointer) - assumes that the network structure
+has not changed, since the last setParametersObjectPointer operation.
+
+ */
+
+
+Data* ObjectFunctionClass::getParameterObjectPointer(HString name){
+  ppit=parameter_pointer.find(name);
+  if (ppit==parameter_pointer.end()) return &NullObject;
+  else return ppit->second;
 }
+
+/*!
+
+\brief Stores the pointer to a parameter object for temporary cashing
+until the network has changed again
+
+ */
+void ObjectFunctionClass::setParameterObjectPointer(HString name, Data* ptr){ parameter_pointer[name]=ptr;}
 
 /*!
 \brief Retrieve the corresponding parameter object (to name) and return its value. If object does not exist, create it and return and assign the default value
@@ -661,46 +709,76 @@ A somewhat smarter preprocesser (like an (n)awk-script) could probably
 do that easily.
 */
 
+//------------------------------------------------------------------------------
+//$DEFINE PREPROCESSOR
+/*------------------------------------------------------------------------------
+$INDEX: Function Lib Name
+$BEGIN: Function class DataFunc_$Lib_$Name : public ObjectFunctionClass {	\
+public:\
+DEFINE_PROCESS_CALLS\
+ DataFunc_$Lib_$Name (Data* dp) : ObjectFunctionClass(dp){	\
+   dp->setUpdateable($updateable);		\
+    setParameters();\
+    startup();\
+    getParameters();\
+    }\
+ ~DataFunc_$Lib_$Name(){cleanup(); } \
+ \
+void setParameters(){\
+SET_FUNC_PARAMETER_AWK($*Par);\
+};\
+ \
+template <class T> void process(F_PARAMETERS) {\  
+  GET_FUNC_PARAMETER_AWK($*Par);
 
-class DataFunc_Sys_Unit : public ObjectFunctionClass {
-public:  
-  DEFINE_PROCESS_CALLS_NUMONLY 
+$END: Function }; DATAFUNC_CONSTRUCTOR($Name,$Lib,"$Info",$Type,$buffered);
+$PUBLISH: Function PUBLISH_OBJECT_FUNCTION($Lib,$Name); 
+------------------------------------------------------------------------------*/
 
-  DataFunc_Sys_Unit(Data * dp) : ObjectFunctionClass(dp){
-    //set the default parameters, which are by default integers - perhaps change to float numbers later??
-    DBG("DataFunc_Sys_Unit: initialization called.");
-    SET_FUNC_PARAMETER(UnitName, HString, "");
-    SET_FUNC_PARAMETER(UnitPrefix, HString,"");
-    SET_FUNC_PARAMETER(UnitScaleFactor, HNumber, 1.0);
+
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Sys
+Name: Unit
+Info: Multiplies the data with a unit scale factor and also returns the apropriate unit string.
+Type: NUMBER
+buffered: false
+updateable: false
+Par: UnitName, HString, ""
+Par: UnitPrefix, HString,""
+Par: UnitScaleFactor, HNumber, 1.0
+------------------------------------------------------------------------------*/
+class DataFunc_Sys_Unit : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Sys_Unit (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
     getParameters();
-  }
-
-  template <class T>
-  void process(F_PARAMETERS) {
-    GET_FUNC_PARAMETER(UnitScaleFactor,HNumber);
-    dp->getFirstFromVector(*vp,vs);
-    typedef typename vector<T>::iterator Tit; 
-    Tit it=vp->begin();
-    Tit end=vp->end();
-    while (it!=end) {
-      *it=*it/UnitScaleFactor;
-      it++;
-    };
-  }
-
-  void process_S(F_PARAMETERS_T(HString)) {
-    vector<HNumber> vec;
-    GET_FUNC_PARAMETER(UnitScaleFactor,HNumber);
-    dp->getFirstFromVector(vec,vs);
-    vector<HNumber>::iterator it=vec.begin(),end=vec.end();
-    vp->reserve(vec.size()); vp->clear();
-    while (it!=end) {
-      vp->push_back(mycast<HString>(*it/UnitScaleFactor));
-      it++;
-    };
-  }
+    }
+ ~DataFunc_Sys_Unit(){cleanup(); } 
+ 
+void setParameters(){
+SET_FUNC_PARAMETER_AWK(UnitName, HString, "");
+SET_FUNC_PARAMETER_AWK(UnitPrefix, HString,"");
+SET_FUNC_PARAMETER_AWK(UnitScaleFactor, HNumber, 1.0);
 };
-DATAFUNC_CONSTRUCTOR(Unit,Sys,"Multiplies the data with a unit scale factor and also returns the apropriate unit string.",NUMBER, false)
+ 
+template <class T> void process(F_PARAMETERS) {
+  GET_FUNC_PARAMETER_AWK(UnitName, HString, "");
+  GET_FUNC_PARAMETER_AWK(UnitPrefix, HString,"");
+  GET_FUNC_PARAMETER_AWK(UnitScaleFactor, HNumber, 1.0);
+  dp->getFirstFromVector(*vp,vs);
+  INIT_FUNC_ITERATORS(it,end);
+  while (it!=end) {*it=hf_Div(*it,UnitScaleFactor);it++;};
+}
+//------------------------------------------------------------------------------
+//$END Function
+}; DATAFUNC_CONSTRUCTOR(Unit,Sys,"Multiplies the data with a unit scale factor and also returns the apropriate unit string.",NUMBER,false);
+//------------------------------------------------------------------------------
+
 
 class DataFunc_Sys_Copy : public ObjectFunctionClass {
 public:  
@@ -771,32 +849,6 @@ DATAFUNC_CONSTRUCTOR(NAME,Sys,DOC,TYP, false)
 HF_MATH_DATAFUNC(Sqrt,"Takes the square root of the first object vector connected to the object.",NUMBER)
 HF_MATH_DATAFUNC(Square,"Takes the square root of the first object vector connected to the object.",NUMBER)
 
-
-//------------------------------------------------------------------------------
-//$DEFINE PREPROCESSOR
-/*------------------------------------------------------------------------------
-$INDEX: Function Lib Name
-$BEGIN: Function class DataFunc_$Lib_$Name : public ObjectFunctionClass {	\
-public:\
-DEFINE_PROCESS_CALLS\
- DataFunc_$Lib_$Name (Data* dp) : ObjectFunctionClass(dp){	\
-   dp->setUpdateable($updateable);		\
-    setParameters();\
-    startup();\
-    getParameters();\
-    }\
- ~DataFunc_$Lib_$Name(){cleanup(); } \
- \
-void setParameters(){\
-SET_FUNC_PARAMETER_AWK($*Par);\
-};\
- \
-template <class T> void process(F_PARAMETERS) {\  
-  GET_FUNC_PARAMETER_AWK($*Par);
-
-$END: Function  }; DATAFUNC_CONSTRUCTOR($Name,$Lib,"$Info",$Type,$buffered);
-$PUBLISH: Function PUBLISH_OBJECT_FUNCTION($Lib,$Name); 
-------------------------------------------------------------------------------*/
 
 
 //------------------------------------------------------------------------------
@@ -1219,6 +1271,12 @@ End DataFunc Object Library "CR"
 Python Interface Functions
 ------------------------------------------------------------------------*/
 
+//------------------------------------------------------------------------------
+// $xxxNEW: Function
+/*------------------------------------------------------------------------------
+Lib: Py
+Name: PyFunc
+------------------------------------------------------------------------------*/
 
 class DataFunc_Py_PyFunc : public ObjectFunctionClass {
 public:
@@ -1227,7 +1285,7 @@ public:
 
   DEFINE_PROCESS_CALLS_IGNORE_DATATYPE
   
-  DataFunc_Py_PyFunc (Data* dp){
+  DataFunc_Py_PyFunc (Data* dp): ObjectFunctionClass(dp){
     PyObject* pyobj = dp->retrievePyFunc();
 
     DBG("DataFunc_Py_PyFunc: initialization called.");
@@ -1378,6 +1436,7 @@ int ReadTextFile(string filename)
 
 void DataFunc_Library_publish(DataFuncLibraryClass* library_ptr){
   //$PUBLISH Function
+PUBLISH_OBJECT_FUNCTION(Sys,Unit);
 PUBLISH_OBJECT_FUNCTION(Sys,Offset);
 PUBLISH_OBJECT_FUNCTION(CR,dataReaderObject);
 
@@ -1388,7 +1447,7 @@ PUBLISH_OBJECT_FUNCTION(CR,dataReaderObject);
   PUBLISH_OBJECT_FUNCTION(Sys,Sqrt);
   //PUBLISH_OBJECT_FUNCTION(Sys,Offset);
   PUBLISH_OBJECT_FUNCTION(Sys,Range);
-  PUBLISH_OBJECT_FUNCTION(Sys,Unit);
+  //  PUBLISH_OBJECT_FUNCTION(Sys,Unit);
   //  PUBLISH_OBJECT_FUNCTION(CR,dataReaderObject);
   PUBLISH_OBJECT_FUNCTION(CR,dataRead);
   PUBLISH_OBJECT_FUNCTION(Py,PyFunc);
