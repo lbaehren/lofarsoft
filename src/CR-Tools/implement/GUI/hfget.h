@@ -51,6 +51,18 @@ class ObjectFunctionClass;
 //Utilities
 //========================================================================
 
+bool callSimplePyObjectMethod(PyObject* pyobj, HString method);
+
+template <class T> bool in_vector(const T elem, const vector<T> &v);
+template <class T> void vec_unique_copy_sorted(const vector<T> &v1,vector<T> &v2);
+template <class T> void vec_append(vector<T> &v1,const vector<T> &v2);
+template <class T> vector<T> vec_combine(const vector<T> v1,const vector<T> v2);
+template <class T> vector<T> vec_unique(const vector<T> &v);
+
+
+
+
+
 void * new_vector (DATATYPE type, address len);
 bool del_vector (void *p, DATATYPE type);
 bool del_value (void *p, DATATYPE type);

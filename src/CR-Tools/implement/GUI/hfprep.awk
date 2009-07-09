@@ -88,7 +88,7 @@ func begin() {
     process(ABEGIN[LASTTYPE])
 }
 
-/^ *\/\/ *\$DEFINE /{setdef=1;next}
+/^ *\/\/\$DEFINE /{setdef=1;next}
 
 # An ending comment line will terminate the definiton block and start the begin function 
 /^ *--+\*\// && (setdef || setnew) {
@@ -99,7 +99,7 @@ func begin() {
     }
 }
 
-/^ *\/\/ *\$NEW:/{setnew=1; 
+/^ *\/\/\$NEW:/{setnew=1; 
     LASTTYPE=$2;
     delary(INDX)
     next}

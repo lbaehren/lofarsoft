@@ -37,6 +37,11 @@ help["verbose"]="Use d.AllVerbose(True/False) to watch the execution of the netw
 
 
 ######Utilities
+
+def list2str(l): 
+    if len(l)==0: return ""
+    else: return reduce(lambda x,y:str(x)+" "+str(y),l)
+
 def flatten(l):
   out = []
   for item in l:
@@ -185,11 +190,18 @@ def object_id(self):
     "Function to return ID number of an object. Used for make_uniqe" 
     return self.getOid()
 
-def object_Chain(self,dir,names,include_endpoints=True):
+def object_Chain(self,dir,names,include_endpoints=True,monotonic=False):
     if type(names)==str: names=[names]
     if type(names)==list: names=list2vec(names)
-    ids=self.FindChainID(dir,names,include_endpoints)
-    return self[ids]
+    ids=self.FindChainID(dir,names,include_endpoints,monotonic)
+    return self[ids].unique()
+
+def object_asDataList(self):
+    return DataList([self])
+def object_getNeighbours(self,dir):
+    return self[self.listNeighbourIDs(dir)]
+def object_getNeighbour(self,dir):
+    return self[self.listNeighbourIDs(dir)].FirstObject()
 
 def object_search(self,s):
     "Function to search all objects for one which contains the string s in its name"
@@ -275,6 +287,12 @@ class DataList(list):
     def __floordiv__(self,other):
         for d in self: d // other
         return d
+    def __ifloordiv__(self,other):
+        map(lambda d1,d2:d1.erase(d2),self,other)
+        return self
+    def erase(self,other):
+        map(lambda d1,d2:d1.erase(d2),self,other)
+        return self
     def __rrshift__(self,value):
         dl=DataList()
         if (type(value)==DataList) & (len(self)>1): ## This means DataList >> DataList - here each member will be linked to the corresponding member in the other list
@@ -468,6 +486,16 @@ class DataList(list):
     def getLinkDirectionType(self,neighbour):
         "Returns the link direction type (PUSH or PULL) between the current and its neighbouring object, given as an argument."
         return map(lambda d:d.getLinkDirectionType(neighbour),self)
+    def getNeighbours(self,dir):
+        "Returns the immediate neighbours in direction DIR"
+        return DataList(map(lambda d:d.getNeighbours(dir),self))
+    def getNeighbour(self,dir):
+        "Returns the first immediate neighbour in direction DIR"
+        return DataList(map(lambda d:d.getNeighbour(dir),self))
+    def Chain(self,dir,names,include_endpoints=True,monotonic=False):
+        "Returns a list of objects between the current one and the ones specified in names. If monotnic=True the chain only looks for objects in the specified direction ,otherwise it will take the direction only for the first object into account. If endpoints=true, they will be included in the return list(s)"
+        return DataList(map(lambda d:d.Chain(dir,names,include_endpoints,monotonic),self))
+
 
 
 def DataUnion(*dlist):
@@ -727,7 +755,7 @@ def object_print(self):
 
 class _f():
     "This encapsulates a function name and library that will be used by Data.setFunction"
-    def __init__(self,funcname="Copy",library="Sys",functype=TYPE.UNDEF):
+    def __init__(self,funcname="Copy",library="",functype=TYPE.UNDEF):
         if type(funcname)==str:
             self.funcname=funcname
             self.library=library
@@ -787,7 +815,6 @@ def setStoredPyQtObject(self, pyob):
 
 def initializePyQtObjects(self):
     for obj in self.stored_pyqtobj.values(): 
-        print obj.obj
         obj.obj.signalPyQt("updated")
 
 
@@ -916,10 +943,15 @@ def object_setFunc_f(self,f):
     return self
 
 
-def object_setFunc(self,funcname="Copy",library="Sys",functype=TYPE.UNDEF):
+def object_setFunc(self,funcname="Copy",library="",functype=TYPE.UNDEF):
     "Assigns a function to a data object and returns it"
     self.setFunction(funcname,library,functype)
     return self
+
+#self //= other  - deletes the other objects but keeps the links to its neighbour
+def object_ifloordiv(self,other): 
+    if type(other)==str: return self.erase(self[other])
+    return self.erase(other)
 
 #self // other  - deletes a link in the to direction
 def object_floordiv(self,other): 
@@ -1202,8 +1234,9 @@ Data.__getitem__=object_getitem
 Data.move=object_move
 Data.put_silent=object_set_silent
 Data.set_silent=object_set_silent
-Data.__floordiv__=object_floordiv # // = dellink
-Data.__xor__=insert_object        #d ^ (d1,d2) = insert 
+Data.__floordiv__=object_floordiv # // - dellink
+Data.__ifloordiv__=object_ifloordiv #self //= other   - erase and keep link
+Data.__xor__=insert_object        #d ^ (d1,d2) - insert 
 Data.new=object_new
 Data.initializeObject=initializeObject
 Data.netsvg=object_net2qb
@@ -1272,6 +1305,10 @@ Data.Tail=returnEmptyDatalist
 Data.unList=Identity
 Data.setList=object_setList
 Data.asList=object_asList
+Data.getNeighbours=object_getNeighbours
+Data.getNeighbour=object_getNeighbour
+Data.asDataList=object_asDataList
+DataList.asDataList=Identity
 
 #This isued to store some global shortcuts to Qt objects and GUIs that are used by all objects
 Data.globals={}

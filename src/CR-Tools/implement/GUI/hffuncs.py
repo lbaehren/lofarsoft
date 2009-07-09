@@ -1,4 +1,5 @@
 #pdb.set_trace()
+setdebug=False 
 
 class NULL_Pointer():
     def null(self):
@@ -61,9 +62,9 @@ class hffunc():
             print "Process.", self.__doc__
             self.data.printStatus(True)
         return self.process(d)
-    def hfcleanup(self):
+    def hfcleanup(self,d):
         if verbose: print "Cleanup.", self.__doc__
-        return self.cleanup()
+        return self.cleanup(d)
     def startup(self,d):
         "Mainly used to define all the parameters and is called once during the creation of the function"
         if verbose: print "startup", self.__doc__
@@ -232,7 +233,7 @@ class hfGraphObject(hffunc):
         d.noMod()
         d.putPy(self.gr)
         return 0
-    def cleanup(self):
+    def cleanup(self,d):
         return 0
 
 class hfGraphDataBuffer(hffunc):
@@ -295,7 +296,7 @@ class hfGraphDataBuffer(hffunc):
             self.putResult("zminval",self.zdat.Minimal())
             self.putResult("zmaxval",self.zdat.Maximal())
         return 0
-    def cleanup(self):
+    def cleanup(self,d):
         return 0
 
 #self=d["Antenna=0:GraphDataBuffer"].PyFunc() 
@@ -322,7 +323,7 @@ class hfPlotData(hffunc):
         elif naxis==3: self.GraphObject.Plot(self.GraphDataBuffer[0],self.GraphDataBuffer[1],self.GraphDataBuffer[2],self.Color)
         self.GraphObject.SetBaseLineWidth(1); 
         return 0
-    def cleanup(self):
+    def cleanup(self,d):
         return 0
 
 #For debugging: type 
@@ -444,8 +445,14 @@ class hfPlotPanel(hffunc):
         if self.OffsetValue==0: xoffsettxt=""
         elif self.OffsetValue>0: xoffsettxt=" + "+str(self.OffsetValue)
         else: xoffsettxt=" - "+str(abs(self.OffsetValue))
-        if self.xAxisLabel=="": self.xAxisLabel=self.xAxisDatatype
-        if self.yAxisLabel=="": self.yAxisLabel=self.yAxisDatatype
+        xl=d["'x:UnitData"].Chain(DIR.TO,["xAxis","maxBlock"],False,True).getName()
+        yl=d["'y:UnitData"].Chain(DIR.TO,["yAxis","maxBlock"],False,True).getName()
+        if type(xl)==str: xfunctxt=""
+        else: xl.reverse(); xfunctxt=list2str(xl[:-1])+" "
+        if type(yl)==str: yfunctxt=""
+        else: yl.reverse(); yfunctxt=list2str(yl[:-1])+" "
+        if self.xAxisLabel=="": self.xAxisLabel=xfunctxt+self.xAxisDatatype
+        if self.yAxisLabel=="": self.yAxisLabel=yfunctxt+self.yAxisDatatype
         self.xAxisLabel+=xoffsettxt
         if not self.xAxisUnit=="": self.xAxisLabel=self.xAxisLabel+" ["+self.xAxisUnitPrefix+self.xAxisUnit+"]"
         if not self.yAxisUnit=="": self.yAxisLabel=self.yAxisLabel+" ["+self.yAxisUnitPrefix+self.yAxisUnit+"]"
@@ -466,7 +473,7 @@ class hfPlotPanel(hffunc):
         npanels=d["npanelsplotted"].val()
         self.GraphObject.Legend(3,"rL",-0.7*npanels**0.5)
         return 0
-    def cleanup(self):
+    def cleanup(self,d):
         return 0
 #For debugging: type 
 #self=d["Antenna=0:PlotPanel"].PyFunc() 
@@ -533,7 +540,7 @@ class hfPlotWindow(hffunc):
         self.GraphObject.Title("TEST-Title","iC")
         self.data.noMod(); self.data.putPy(self.GraphObject)
         return 0
-    def cleanup(self):
+    def cleanup(self,d):
         return 0
 
 class hfQtPanel(hffunc):

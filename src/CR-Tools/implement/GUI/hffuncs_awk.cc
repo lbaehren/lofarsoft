@@ -541,7 +541,9 @@ DataFuncLibraryClass::DataFuncLibraryClass(){
 
 DataFuncLibraryClass::~DataFuncLibraryClass(){}
 
-/* 
+/*! 
+  \brief Adds a function constructor to the library, so that it can be called later on
+
 Here provide the library with a pointer to the function constructing the object. 
 The constructor function will be called with construct=false, which means that
 only the Function Descriptor is returned, but no actual instance is created. 
@@ -551,18 +553,76 @@ constructor fucntion stored in the libray with construct=true is made,
 an instance is created on the heap, and the Function Descriptor will contain 
 an actual pointer to the class.
 */
-void DataFuncLibraryClass::add(ConstructorFunctionPointer c_ptr){
+void DataFuncLibraryClass::addFunc(ConstructorFunctionPointer c_ptr){
   DBG ("FuncLibrary: add");
   DataFuncDescriptor fd=(*c_ptr)(false);
   HString fname=fd.getName(true);
-  DBG ("FuncLibrary: add, name=" << fname);
+  HString name=fd.getName(false);
+  HString lib=fd.getLibrary();
+  addFuncnameToLibrary(name,lib);
   func_library[fname]=fd;
-  DBG("FuncLibrary: size=" << func_library.size());
 }
 
-//Retrieves the pointer to the function class
+/*!  \brief Adds the name of the function to a vector (list) of
+function names of the respective library. If the library does not yet
+exist, create it.
+
+ */
+
+void DataFuncLibraryClass::addFuncnameToLibrary(HString name,HString lib){
+  map<HString,vector<HString> >::iterator fit=func_library_members.find(lib);
+
+  if (fit==func_library_members.end()) {
+    vector<HString> newlib; //If library does not exist create a new library entry
+    func_library_members[lib]=newlib;
+    fit=func_library_members.find(lib);
+  };
+
+  if (!in_vector(name,fit->second)) {
+    (fit->second).push_back(name);
+  };
+}
+
+/*! 
+\brief Check whether a particular function name is in a particular library
+ */
+bool DataFuncLibraryClass::isFuncnameInLibrary(HString name, HString lib){
+  map<HString,vector<HString> >::iterator fit=func_library_members.find(lib);
+  if (fit==func_library_members.end()) return false;
+  return in_vector(name,fit->second);
+}
+
+
+/*! 
+
+\brief Searches all libraries and returns the name of the first one
+that contains a function of name "name". Returns "" if no match is
+found.
+
+ */
+
+HString DataFuncLibraryClass::findLibrary(HString name, bool fullname){
+  map<HString,vector<HString> >::iterator fit=func_library_members.begin();
+  bool found=false;
+  HString lib;
+  while (fit!=func_library_members.end() && !found) {
+    lib=fit->first;
+    if (isFuncnameInLibrary(name,lib)) found=true;
+    fit++;
+  };
+  if (found) {
+    if (fullname) return lib + ":" + name;
+    else return lib;
+  } else return "";
+}
+
+/*!
+Retrieves the pointer to the function class
+*/
 ObjectFunctionClass* DataFuncLibraryClass::f_ptr(HString name, HString library){
-  it=func_library.find(library+":"+name);
+  HString lib = library;
+  if (lib=="") lib=findLibrary(name);
+  it=func_library.find(lib+":"+name);
   if (it !=func_library.end()) {
     return (it->second).getFunction();
   } else {
@@ -570,9 +630,14 @@ ObjectFunctionClass* DataFuncLibraryClass::f_ptr(HString name, HString library){
   };
 }
 
-//Retrieves the struct describing the function class 
+/*!
+\brief Retrieves the struct describing the function class 
+*/
+
 DataFuncDescriptor* DataFuncLibraryClass::FuncDescriptor(HString name, HString library){
-  it=func_library.find(library+":"+name);
+  HString lib = library;
+  if (lib=="") lib=findLibrary(name);
+  it=func_library.find(lib+":"+name);
   if (it !=func_library.end()) {
     return &(it->second);
   } else {
@@ -580,16 +645,55 @@ DataFuncDescriptor* DataFuncLibraryClass::FuncDescriptor(HString name, HString l
   };
 }
 
-//Checks whether a function is in the library or not
+/*!
+\brief Checks whether a function is in the library or not
+*/
 bool DataFuncLibraryClass::inLibrary(HString name, HString library){
-  it=func_library.find(library+":"+name);
+  HString lib = library;
+  if (lib=="") lib=findLibrary(name);
+  it=func_library.find(lib+":"+name);
   return (it !=func_library.end());
 }
 
-//prints a directory of all functions in the Library
-void DataFuncLibraryClass::dir(){
+/*!
+\brief Prints a directory of all functions in all libraries
+*/
+vector<HString> DataFuncLibraryClass::listFunctions(bool doprint){
+  vector<HString> out;
+  HString s;
   for (it=func_library.begin();it!=func_library.end();it++) {
-    MSG((it->second).getName(true) << " - " << (it->second).getDocstring()); 
+    s=(it->second).getName(true) + " - " + (it->second).getDocstring(); 
+    out.push_back(s);
+    if (doprint) cout << s <<endl;
+  };
+  return out;
+}
+
+/*!
+\brief Returs a vector of all available library names. Also prints it if doprint=true.
+*/
+vector<HString> DataFuncLibraryClass::getLibraries(bool doprint){
+  vector<HString> out;
+  map<HString,vector<HString> >::iterator fit=func_library_members.begin();
+  while (fit!=func_library_members.end()) {
+    out.push_back(fit->first);
+    fit++;
+  };
+  if (doprint) printvec(out,out.size());
+  return out;
+}
+
+/*!
+\brief Returs a vector of all available library names. Also prints it if doprint=true.
+*/
+vector<HString> DataFuncLibraryClass::getFuncnames(HString library, bool doprint){
+  map<HString,vector<HString> >::iterator fit=func_library_members.find(library);
+  if (fit!=func_library_members.end()) {
+    if (doprint) printvec(fit->second,(fit->second).size());
+    return fit->second;
+  } else {
+    vector<HString> out; 
+    return out;
   };
 }
 
@@ -612,9 +716,6 @@ preprocessor step.
 
 */
 
-//!!!This should be automized by a #define command or nawk preprocesser
-//otherwise it becomes a nightmare. So, let's not add too many 
-//math functions at this point.
 
 #ifndef HF_MATH_FUNC
 #undef HF_MATH_FUNC
@@ -628,6 +729,7 @@ template<>        inline HString FUNC<HString>(const HString v){return mycast<HS
 template<>        inline HPointer FUNC<HPointer>(const HPointer v){return v;};\
 template<class T> inline T FUNC(const T v)
 
+
 #define HF_MATH_FUNC2( FUNC )						\
   inline HString FUNC(const HString v1, const HString v2){return mycast<HString>(FUNC(mycast<HComplex>(v1),mycast<HComplex>(v2)));}; \
   template<class S>        inline HString FUNC(const HString v1, const S v2){return mycast<HString>(FUNC(mycast<S>(v1),v2));}; \
@@ -639,26 +741,21 @@ template<class T> inline T FUNC(const T v)
 
 //---square
 //template<class T> inline T hf_square(const T v)
-HF_MATH_FUNC(hf_Sqrt){return sqrt(v);};
-HF_MATH_FUNC(hf_Square){return v*v;}; 
-HF_MATH_FUNC2(hf_Sub){return v1-v2;};
-HF_MATH_FUNC2(hf_Mul){return v1*v2;}; 
-HF_MATH_FUNC2(hf_Add){return v1+v2;}; 
-HF_MATH_FUNC2(hf_Div){return v1/v2;}; 
-HF_MATH_FUNC2(hf_Pow){return pow(v1,v2);}; 
 
+//$ITERATE MFUNC abs,acos,asin,atan,ceil,cos,cosh,exp,floor,log,log10,sin,sinh,sqrt,tan,tanh
+HF_MATH_FUNC(hf_$MFUNC){return $MFUNC(v);};
+//$ENDITERATE
 
-//template<>        inline HString hf_square<HString>(const HString v){return mycast<HString>(hf_square(mycast<HNumber>(v)));};
-//template<>        inline HPointer hf_square<HPointer>(const HPointer v){return v;};
+HF_MATH_FUNC(hf_square){return v*v;}; 
 
+HF_MATH_FUNC2(hf_sub){return v1-v2;};
+HF_MATH_FUNC2(hf_mul){return v1*v2;}; 
+HF_MATH_FUNC2(hf_add){return v1+v2;}; 
+HF_MATH_FUNC2(hf_div){return v1/v2;}; 
+HF_MATH_FUNC2(hf_pow){return pow(v1,v2);}; 
 
-//---sqrt - square root
-//template<class T> inline T hf_sqrt(const T v)
-//# REPEAT_INLINE_TEMPLATE sqrt 
-
-//template<>        inline HString hf_sqrt<HString>(const HString v){return mycast<HString>(hf_sqrt(mycast<HNumber>(v)));};
-//template<>        inline HPointer hf_sqrt<HPointer>(const HPointer v){return v;};
-
+template<class T> inline T hf_phase(const T v){return mycast<T>(0.0);};
+template<> inline HComplex hf_phase<HComplex>(const HComplex v){return arg(v);}
 
 //--End Math functions-----------------------------------------------------
 
@@ -746,81 +843,73 @@ Par: UnitScaleFactor, HNumber, 1.0
 $$ { 
   dp->getFirstFromVector(*vp,vs);
   INIT_FUNC_ITERATORS(it,end);
-  while (it!=end) {*it=hf_Div(*it,UnitScaleFactor);it++;};
+  while (it!=end) {*it=hf_div(*it,UnitScaleFactor);it++;};
 }
+//$END Function -----------------------------------------------------------------
+
+
+
 //------------------------------------------------------------------------------
-//$END Function
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Sys
+Name: copy
+Info: Copies the content of one object to the next.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+$${
+  dp->getFirstFromVector(*vp,vs);
+ }
+//$END Function -----------------------------------------------------------------
+
+
+
 //------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Sys
+Name: Neighbours
+Info: Returns a list of names of all neighbour objects, first in To direction and the in FROM direction separated by an empty string.
+Type: STRING
+buffered: false
+updateable: true
+------------------------------------------------------------------------------*/
+$${
+  vector<HString> vec;
+  vec=dp->getNeighbourNames(DIR_TO);
+  vec.push_back("");
+  vec_append(vec,dp->getNeighbourNames(DIR_FROM));
+  copycast_vec<T,HString>(vp,&vec);
+}
+//$END Function -----------------------------------------------------------------
 
 
-class DataFunc_Sys_Copy : public ObjectFunctionClass {
-public:  
-  DEFINE_PROCESS_CALLS 
+//$ITERATE MFUNC square,abs,acos,asin,atan,ceil,cos,cosh,exp,floor,log,log10,phase,sin,sinh,sqrt,tan,tanh
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: $MFUNC
+Info: Takes the $MFUNC of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+$${ 
+  dp->getFirstFromVector(*vp,vs);
 
-  DataFunc_Sys_Copy(Data*dp){dp->setUpdateable(false);};
-  
-  template <class T>
-  void process(F_PARAMETERS) {
-    (*dp).getFirstFromVector(*vp,vs);
-    //This is bad - better use the setParameter method to also allow other than the first object to be accessed ...
-    if (vs != NULL) {(*vp) = (*vs).get(*vp);};
-  }
-};
-DATAFUNC_CONSTRUCTOR(Copy,Sys,"Copies the content of one object to the next.",INTEGER, false)
-
-class DataFunc_Sys_Neighbours : public ObjectFunctionClass {
-public:  
-  DEFINE_PROCESS_CALLS 
-  
-  DataFunc_Sys_Neighbours(Data*dp){dp->setUpdateable(true);};
-
-  template <class T>
-  void process(F_PARAMETERS) {
-    vector<HString> vec;
-    vec=dp->getNeighbourNames(DIR_TO);
-    vec.push_back("");
-    vec_append(vec,dp->getNeighbourNames(DIR_FROM));
-    copycast_vec<T,HString>(vp,&vec);
-    if (vs != NULL) {(*vp) = (*vs).get(*vp);};
-  }
-};
-
-DATAFUNC_CONSTRUCTOR(Neighbours,Sys,"Returns a list of names of all neighbour objects, first in To direction and the in FROM direction separated by an empty string.",STRING, true)
-//Name, Library, Description, Default Type, Buffered or not
-
-
-    /*
-
-    !!!Actually the treatment of vector selection here and in the
-    following is wrong/inefficient!!
-    
-    The function will only be called by get with a vector selector
-    that is independent of the value (the vs1,vs2 split is already
-    done within get), so selection could be done before calculation
-    (and hence reduce processing time).
-
-    getFirstFromVector: This is bad - better use the setParameter method to also allow other than the first object to be accessed ...
-    
-    */
+  INIT_FUNC_ITERATORS(it,end);
  
+  while (it!=end) {
+   *it=hf_$MFUNC(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
 
-#define HF_MATH_DATAFUNC(NAME,DOC,TYP) \
-class DataFunc_Sys_##NAME : public ObjectFunctionClass {\
-public:\
-  DEFINE_PROCESS_CALLS \
-  DataFunc_Sys_##NAME(Data*dp){dp->setUpdateable(false);};\
-  template <class T>\
-  void process(F_PARAMETERS) {\
-    address i,size;\
-    (*dp).getFirstFromVector(*vp,vs);\
-    size=(*vp).size();\
-    for (i=0; i<size; i++) {(*vp)[i]=hf_##NAME((*vp)[i]);};\
-  }\
-};\
-DATAFUNC_CONSTRUCTOR(NAME,Sys,DOC,TYP, false)
-
-HF_MATH_DATAFUNC(Sqrt,"Takes the square root of the first object vector connected to the object.",NUMBER)
-HF_MATH_DATAFUNC(Square,"Takes the square root of the first object vector connected to the object.",NUMBER)
+//$ENDITERATE
 
 
 
@@ -853,99 +942,64 @@ if (bool(OffsetFixed)) {
  };
 
 while (it!=end) {
-  *it=hf_Sub(*it,off);
+  *it=hf_sub(*it,off);
   it++;
  };
 }
+//$END Function -----------------------------------------------------------------
+
 
 //------------------------------------------------------------------------------
-//$END Function
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Sys
+Name: print
+Info: Prints the contents of the data vector to stdout.
+Type: STRING
+buffered: false
+updateable: true
+------------------------------------------------------------------------------*/
+$${
+  dp->getFirstFromVector(*vp,vs);    //copy data vector from predecessor 
+  cout << dp->getName() << ": ";  //and print
+  printvec(*vp);
+}
+//$END Function -----------------------------------------------------------------
+
+
+
 //------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Sys
+Name: range
+Info: Return a range of numbers (0,1,2,3,4,...N). Parameter objects: start=0, end=0, inc=1
+Type: INTEGER
+buffered: false
+updateable: true
+Par: start,HInteger,0
+Par: end,HInteger,1
+Par: inc,HInteger,1
+------------------------------------------------------------------------------*/
+$${
+  HInteger i,size;
 
+  if (inc==0) {
+    ERROR("DataFunc_Sys_Range: Increment inc=0!");
+    return;
+  };
 
+  MSG("Range: vs1 VectorSelector not yet implemented!"); 
+  vp->clear(); 
+  size=floor(abs((end-start)/inc))+1;
+  if (vp->capacity()<size) {vp->reserve(size);};
 
-class DataFunc_Sys_Print : public ObjectFunctionClass {
-public:
-
-  DEFINE_PROCESS_CALLS 
-
-  DataFunc_Sys_Print(Data*dp){};
-
-  //Needs treatment of vector selector ...
-  template <class T>
-  void process(F_PARAMETERS) {
-    DBG("DataFunc_Sys_Print: process, data object pointer dp=" << dp);
-    (*dp).getFirstFromVector(*vp,vs);    //copy data vector from predecessor 
-    //This is bad - better use the setParameter method to also allow other than the first object to be accessed ...
-    cout << (*dp).getName() << ": ";  //and print
-    printvec(*vp);
-  }
-};
-DATAFUNC_CONSTRUCTOR(Print,Sys,"Prints contents of data vector to stdout.",STRING, false);
-
-
-
-class DataFunc_Sys_Range : public ObjectFunctionClass {
-public:
-
-  DEFINE_PROCESS_CALLS_NUMONLY
-
-  //  Define your own constructor to set the default parameters for the function
-  DataFunc_Sys_Range (Data * dp){
-    //set the default parameters, which are by default integers - perhaps change to float numbers later??
-    DBG("DataFunc_Sys_Range: initialization called.");
-    SET_FUNC_PARAMETER(start, HInteger, 0);
-    SET_FUNC_PARAMETER(end, HInteger, 0);
-    SET_FUNC_PARAMETER(inc, HInteger, 1);
-  }
-
-  template <class T>
-  void process(F_PARAMETERS) {
-    HInteger i,size;
-
-    //This macro will define and obtain set local variables with
-    //values from corresponding parameter objects (set by
-    //setParameter) or their default values, if they are not
-    //present. See init for those values. If one wants a
-    //specific/fixed datatype then use GET_FUNC_PARAMETER_T(NAME,TYPE)
-    //instead. This may only be called once in the execution of a
-    //function.
-
-    GET_FUNC_PARAMETER(start,T);
-    GET_FUNC_PARAMETER(end,T);
-    GET_FUNC_PARAMETER(inc,T);
-    if (inc==static_cast<T>(0)) {
-      ERROR("DataFunc_Sys_Range: Increment inc=0!");
-      return;
-    }
-    //Create the data vector to be returned
-    vp->clear(); 
-    size=floor(abs((end-start)/inc))+1;
-    if (vp->capacity()<size) {vp->reserve(size);};
-
-    //Fill the return data vector and make sure it is casted to the right output type
-    for (i=0;i<size;i++) {vp->push_back(static_cast<T>(i)*inc+start);};
+  //Fill the return data vector and make sure it is casted to the right output type
+  for (i=0;i<size;i++) {vp->push_back(mycast<T>(i*inc+start));};
     
-    //Perform a selection on the data vector, if necessary.  This
-    //could be done smarter for some selections, i.e., by splitting
-    //the vector selector into vs1 and vs2 as in Sys_Square ....
-    if (vs!=NULL) {(*vp)=vs->get(*vp);};
-  }
+}
+//$END Function -----------------------------------------------------------------
 
-  //Now we have to do some specialization for non-numeric datataypes.
-  //Again, this is not really nice, if we ever need to add an
-  //additional, non-numeric type. However, that could/should also be
-  //done with a macro once we have more than one of these cases!!  I
-  //tried this with an explicit specialization of the method process,
-  //using template<>, but the compiler didn't like that for some
-  //reasons.
-  void process_S(F_PARAMETERS_T(HString)) {
-    vector<HNumber> vn;
-    process<HNumber>(&vn, F_PARAMETERS_CALL_NOVEC);
-    copycast_vec<HNumber,HString>(&vn,vp);
-  }
-};
-DATAFUNC_CONSTRUCTOR(Range,Sys,"Return a range of numbers (0,1,2,3,4,...N). Parameter objects: start=0, end=0, inc=1",INTEGER, false);
 
 
 //------------------------------------------------------------------------
@@ -1050,9 +1104,9 @@ void cleanup(){
   delete reinterpret_cast<CR::DataReader*>(data_pointer->getOne<HPointer>()); 
 }
 
-//------------------------------------------------------------------------------
-//$END Function
-//------------------------------------------------------------------------------
+
+//$END Function ----------------------------------------------------------------
+
 
 
 
@@ -1107,97 +1161,63 @@ void aipsvec2stlvec(casa::Vector<S> data, vector<T>& stlvec){
     };
 }
 
-
-class DataFunc_CR_dataRead : public ObjectFunctionClass {
-public:
-  //The following line is necessary to define the process method for this class
-
-  DEFINE_PROCESS_CALLS 
-
-  //  This function reads Data from an DataReader Object to read CR data
-  DataFunc_CR_dataRead (Data* dp) : ObjectFunctionClass(dp){
-    DBG("DataFunc_CR_dataRead: initialization called.");
-
-    HPointer ptr=NULL;
-    SET_FUNC_PARAMETER(File, HPointer, ptr);
-    SET_FUNC_PARAMETER(Antenna, HInteger, 0);
-    SET_FUNC_PARAMETER(Blocksize, HInteger, -1);
-    SET_FUNC_PARAMETER(Block, HInteger, 0);
-    SET_FUNC_PARAMETER(maxBlocksize, HInteger, 65536);
-    SET_FUNC_PARAMETER(Filesize, HInteger, -1);
-    SET_FUNC_PARAMETER(Stride, HInteger, 0);
-    SET_FUNC_PARAMETER(Shift, HInteger, 0);
-    SET_FUNC_PARAMETER(Datatype, HString, "Fx");
-    getParameters();
-
-    //Now create a new, but empty data vector as buffer
-    vector<HNumber> vec;
-    dp->noMod(); dp->put(vec);     
-  }
-
-  ~DataFunc_CR_dataRead (){
-    MSG("~DataFunc_CR_dataRead: Here something probably needs to happen for destroying the plotter");
-  }
-  
-  template <class T>
-  void process(F_PARAMETERS) {
-
-    //First retrieve the pointer to the pointer to the dataRead and check whether it is non-NULL.
-    GET_FUNC_PARAMETER(File,HPointer);
-    DBG("File=" << File);
-    if (File==NULL){
-	ERROR("dataRead: pointer to FileObject is NULL, DataReader not found." << ", name=" << dp->getName(true)); 
-	return;
-    };
-    DataReader *drp=reinterpret_cast<DataReader*>(File); 
-
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: CR
+Name: dataRead
+Info: Function retrieving a vector from the dataReader.
+Type: COMPLEX
+buffered: true
+updateable: true
+Par: File, HPointer, NULL
+Par: Antenna, HInteger, 0
+Par: Blocksize, HInteger, -1
+Par: Block, HInteger, 0
+Par: maxBlocksize, HInteger, 65536
+Par: Filesize, HInteger, -1
+Par: Stride, HInteger, 0
+Par: Shift, HInteger, 0
+Par: Datatype, HString, "Fx"
+------------------------------------------------------------------------------*/
+$$ { 
+  //First retrieve the pointer to the pointer to the dataRead and check whether it is non-NULL.
+  if (File==NULL){
+    ERROR("dataRead: pointer to FileObject is NULL, DataReader not found." << ", name=" << dp->getName(true)); 
+    return;
+  };
+  DataReader *drp=reinterpret_cast<DataReader*>(File); 
 
 //!!!One Needs to verify somehow that the parameters make sense !!!
-    GET_FUNC_PARAMETER(Antenna, HInteger);
-    GET_FUNC_PARAMETER(Blocksize,  HInteger);
-	GET_FUNC_PARAMETER(maxBlocksize,  HInteger);
-	GET_FUNC_PARAMETER(Filesize,  HInteger);
-    GET_FUNC_PARAMETER(Block,  HInteger);
-    GET_FUNC_PARAMETER(Stride,  HInteger);
-    GET_FUNC_PARAMETER(Shift, HInteger);
-    GET_FUNC_PARAMETER(Datatype, HString);
-    
-    DBG("Reading Antenna=" << Antenna);
-    DBG("nofAntennas=" << drp->nofAntennas());
-    if (Antenna > drp->nofAntennas()-1) {ERROR("Requested Antenna number too large!");};
+  if (Antenna > drp->nofAntennas()-1) {ERROR("Requested Antenna number too large!");};
 
-    if (Blocksize<1) Blocksize=maxBlocksize;
-	drp->setBlocksize(Blocksize);
-    drp->setBlock(Block);
-    drp->setStride(Stride);
-    drp->setShift(Shift);
-	HInteger maxBlock=Filesize/Blocksize-1;	
-	putResult("maxBlock",maxBlock);
+  if (Blocksize<1) Blocksize=maxBlocksize;
+  drp->setBlocksize(Blocksize);
+  drp->setBlock(Block);
+  drp->setStride(Stride);
+  drp->setShift(Shift);
+  HInteger maxBlock=Filesize/Blocksize-1;	
+  putResult("maxBlock",maxBlock);
 
-    Vector<uint> antennas(1,Antenna);
-    drp->setSelectedAntennas(antennas);
+  Vector<uint> antennas(1,Antenna);
+  drp->setSelectedAntennas(antennas);
 //    Vector<uint> selantennas=drp->selectedAntennas();
 //    MSG("No of Selected Antennas" << drp->nofSelectedAntennas ()<< " SelectedAntennas[0]=" <<selantennas[0]);
 
-    if (Datatype=="Time") {aipsvec2stlvec(drp->timeValues(),*vp);}
-    else if (Datatype=="Frequency") {aipsvec2stlvec(drp->frequencyValues(),*vp);}
-    else if (Datatype=="Fx") {aipscol2stlvec(drp->fx(),*vp,0);}
-    else if (Datatype=="Voltage") {aipscol2stlvec(drp->voltage(),*vp,0);}
-    else if (Datatype=="invFFT") {aipscol2stlvec(drp->invfft(),*vp,0);}
-    else if (Datatype=="FFT") {aipscol2stlvec(drp->fft(),*vp,0);}
-    else if (Datatype=="CalFFT") {aipscol2stlvec(drp->calfft(),*vp,0);}
-    else {
-	ERROR("DataFunc_CR_dataRead: Datatype=" << Datatype << " is unknown." << ", name=" << dp->getName(true));
-	vp->clear();
-	return;
-    };
-  }
-};
-
-//The following macro has to come at the of the definiton. It defines
-//a constructor function (no class) with a pointer that is called when
-//an object is assigned this function.
-DATAFUNC_CONSTRUCTOR(dataRead,CR,"Function retrieving a vector from the dataReader.",NUMBER, true);
+  if (Datatype=="Time") {aipsvec2stlvec(drp->timeValues(),*vp);}
+  else if (Datatype=="Frequency") {aipsvec2stlvec(drp->frequencyValues(),*vp);}
+  else if (Datatype=="Fx") {aipscol2stlvec(drp->fx(),*vp,0);}
+  else if (Datatype=="Voltage") {aipscol2stlvec(drp->voltage(),*vp,0);}
+  else if (Datatype=="invFFT") {aipscol2stlvec(drp->invfft(),*vp,0);}
+  else if (Datatype=="FFT") {aipscol2stlvec(drp->fft(),*vp,0);}
+  else if (Datatype=="CalFFT") {aipscol2stlvec(drp->calfft(),*vp,0);}
+  else {
+    ERROR("DataFunc_CR_dataRead: Datatype=" << Datatype << " is unknown." << ", name=" << dp->getName(true));
+    vp->clear();
+    return;
+  };
+}
+//$END Function ----------------------------------------------------------------
 
 /*------------------------------------------------------------------------
 End DataFunc Object Library "CR"
@@ -1209,79 +1229,28 @@ Python Interface Functions
 ------------------------------------------------------------------------*/
 
 //------------------------------------------------------------------------------
-// $xxxNEW: Function
+//$NEW: Function
 /*------------------------------------------------------------------------------
 Lib: Py
 Name: PyFunc
+Info: Function to call a user-defined python object of type hffunc
+Type: POINTER
+buffered: false
+updateable: true
 ------------------------------------------------------------------------------*/
+$${
+  data_pointer->callSimplePyObjectMethod(data_pointer->retrievePyFunc(), "hfprocess");
+}
 
-class DataFunc_Py_PyFunc : public ObjectFunctionClass {
-public:
-  //This is necessary to define the process method for this function
-  //which in this case ignores the input vector:
+void startup(){
+  data_pointer->callSimplePyObjectMethod(data_pointer->retrievePyFunc(), "hfstartup");
+}
 
-  DEFINE_PROCESS_CALLS_IGNORE_DATATYPE
-  
-  DataFunc_Py_PyFunc (Data* dp): ObjectFunctionClass(dp){
-    PyObject* pyobj = dp->retrievePyFunc();
-
-    DBG("DataFunc_Py_PyFunc: initialization called.");
-    if (pyobj==NULL){
-      ERROR("PyFunc: pointer to PythonObject is NULL. Object PythonObject does not exist. Define PythonObject and use pytore before assigning PyFunc to this Object." << ", name=" << dp->getName(true)); 
-      return;
-    };
-
-    //Call the startup method if present
-    char AttribStr[] = "hfstartup";
-    //first we need to check if attribute is present in the Python Object
-    if (!PyObject_HasAttrString(pyobj, AttribStr)) {
-	ERROR("PyFunc: Object does not have Attribute " << AttribStr << ", name=" << dp->getName(true)); return;};
-    int ret=boost::python::call_method<int>(pyobj,AttribStr,boost::ref(*dp));
-    if (ret!=0) {
-	ERROR("PyFunc - startup method returned user-defined error code" << ret << ", name=" << dp->getName(true));
-    };
-  }
-
-    ~DataFunc_Py_PyFunc (){
-      Data * dp = data_pointer;
-      PyObject* pyobj = dp->retrievePyFunc();
-	
-	if (pyobj==NULL){ERROR("PyFunc: pointer to Python Object is NULL." << ", name=" << dp->getName(true)); return;};
-
-	char AttribStr[] = "hfcleanup";
-	//we need to check if the attribute is present in the Python Object
-	if (!PyObject_HasAttrString(pyobj, AttribStr)) {
-	    ERROR("PyFunc: Object does not have Attribute " << AttribStr << ", name=" << dp->getName(true) << "."); return;};
-	int ret=boost::python::call_method<int>(pyobj,AttribStr);
-	if (ret!=0) {
-	    ERROR("PyFunc - process method returned user-defined error code" << ret  << ", name=" << dp->getName(true));
-	};
-    }
+void cleanup(){
+  data_pointer->callSimplePyObjectMethod(data_pointer->retrievePyFunc(), "hfcleanup");
+}
  
-
-    void process(F_PARAMETERS_NOVEC){
-      PyObject* pyobj = dp->retrievePyFunc();
-
-	DBG("DataFunc_Py_PyFunc.process: pyobj=" << pyobj << " name=" << dp->getName(true));
-	if (pyobj==NULL){ERROR("PyFunc: pointer to Python Object is NULL."  << ", name=" << dp->getName(true)); return;};
-
-	char AttribStr[] = "hfprocess";
-	//we need to check if the process attribute is present in the Python Object
-	if (!PyObject_HasAttrString(pyobj, AttribStr)) {
-	    ERROR("PyFunc: Object does not have Attribute " << AttribStr << "."  << ", name=" << dp->getName(true)); return;};
-	DBG("DataFunc_Py_PyFunc.process: Call Python Object");
-	int ret=boost::python::call_method<int>(pyobj,AttribStr,boost::ref(*dp));
-	if (ret!=0) {
-	    ERROR("PyFunc - process method returned user-defined error code" << ret << ", name=" << dp->getName(true));
-	};
-    }
-};
-//The following macro has to come at the of the definiton. It defines
-//a constructor function (no class) with a pointer that is called when
-//an object is assigned this function.
-DATAFUNC_CONSTRUCTOR(PyFunc,Py,"Function to call a user-defined python object of type hffunc",POINTER,false);
-
-
+//$END Function ----------------------------------------------------------------
 
 //------------------------------------------------------------------------
 //Network functions
@@ -1373,17 +1342,5 @@ int ReadTextFile(string filename)
 
 void DataFunc_Library_publish(DataFuncLibraryClass* library_ptr){
   //$PUBLISH Function
-
-  PUBLISH_OBJECT_FUNCTION(Sys,Neighbours);
-  PUBLISH_OBJECT_FUNCTION(Sys,Copy);
-  PUBLISH_OBJECT_FUNCTION(Sys,Print);
-  PUBLISH_OBJECT_FUNCTION(Sys,Square);
-  PUBLISH_OBJECT_FUNCTION(Sys,Sqrt);
-  //PUBLISH_OBJECT_FUNCTION(Sys,Offset);
-  PUBLISH_OBJECT_FUNCTION(Sys,Range);
-  //  PUBLISH_OBJECT_FUNCTION(Sys,Unit);
-  //  PUBLISH_OBJECT_FUNCTION(CR,dataReaderObject);
-  PUBLISH_OBJECT_FUNCTION(CR,dataRead);
-  PUBLISH_OBJECT_FUNCTION(Py,PyFunc);
 };
  

@@ -1,9 +1,3 @@
-//================================================================================
-// ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfprep.awk
-//================================================================================
-//     File was generated from - on Fri Jul 10 01:22:23 CEST 2009
-//--------------------------------------------------------------------------------
-//
 #ifndef HFFUNCS_H
 #define HFFUNCS_H
 
@@ -317,22 +311,7 @@ template<>  inline HComplex hf_phase<HComplex>(const HComplex v);
 
 
 //$ITERATE MFUNC abs,acos,asin,atan,ceil,cos,cosh,exp,floor,log,log10,sin,sinh,sqrt,tan,tanh
-HF_MATH_FUNC(hf_atan)
-HF_MATH_FUNC(hf_ceil)
-HF_MATH_FUNC(hf_cos)
-HF_MATH_FUNC(hf_cosh)
-HF_MATH_FUNC(hf_exp)
-HF_MATH_FUNC(hf_floor)
-HF_MATH_FUNC(hf_log)
-HF_MATH_FUNC(hf_log10)
-HF_MATH_FUNC(hf_sin)
-HF_MATH_FUNC(hf_sinh)
-HF_MATH_FUNC(hf_sqrt)
-HF_MATH_FUNC(hf_abs)
-HF_MATH_FUNC(hf_tan)
-HF_MATH_FUNC(hf_acos)
-HF_MATH_FUNC(hf_tanh)
-HF_MATH_FUNC(hf_asin)
+HF_MATH_FUNC(hf_$MFUNC)
 //$ENDITERATE
 HF_MATH_FUNC(hf_square)
 

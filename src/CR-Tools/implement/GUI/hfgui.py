@@ -1,4 +1,3 @@
-
 #start designer 
 #pyuic4 hfgui.ui | head --lines=-1 > hfgui_ui.py
 #pyuic4 hfgui2.ui > hfgui2_ui.py
@@ -318,6 +317,11 @@ class hfQtPlot(QtGui.QWidget):
         self.fillchooser("Datatype",self.currentplotpanelobject()["'yAxis"],"'Parameters=Data",self.gui.ydatatype)
         self.fillchooser("UnitPrefix",self.currentplotpanelobject()["'xAxis"],"'Parameters=UnitData",self.gui.xaxisunit)
         self.fillchooser("UnitPrefix",self.currentplotpanelobject()["'yAxis"],"'Parameters=UnitData",self.gui.yaxisunit)
+        l=QtCore.QStringList(self.currentplotpanelobject().FirstObject().listFunctions("Math",False)); l.prepend("")
+        self.gui.add_fx.clear();  
+        self.gui.add_fx.addItems(l); 
+        self.gui.add_fx.setCurrentIndex(0)
+        self.gui.add_fy.clear();  self.gui.add_fy.addItems(l); self.gui.add_fy.setCurrentIndex(0)
     def chooser(self,s,what,par): ##hf ...
         "Function used to change the selection made in a data chooser object connected to parameter object 'par'. The new selection is 'what=s'"
         if s=="<None>": return
@@ -342,7 +346,47 @@ class hfQtPlot(QtGui.QWidget):
     def yaxisunitscale(self,s): ##hf ...
         "Slot used by the GUI to change the xAxis Unit scale"
         self.chooser(s,"UnitPrefix",self.currentplotpanelobject()["'yAxis'Parameters=UnitData"])
-
+    def hfadd_fx(self,s): ##hf ...
+        "Slot used by the GUI to add a function object into the x-Axis chain"
+        fname=str(s)
+        if fname=="": return
+        obj2=self.currentplotpanelobject()["'xAxis"]
+        obj1=obj2.getNeighbour(DIR.FROM)
+        map(lambda d1,d2:_d(fname,_f(fname)) ^ (d1,d2),obj1.asDataList(),obj2.asDataList())
+        self.currentplotpanelobject()["'Replot"].touch()
+    def hfadd_fy(self,s): ##hf ...
+        "Slot used by the GUI to add a function object into the y-Axis chain"
+        fname=str(s)
+        if fname=="": return
+        obj2=self.currentplotpanelobject()["'yAxis"]
+        obj1=obj2.getNeighbour(DIR.FROM)
+        map(lambda d1,d2:_d(fname,_f(fname)) ^ (d1,d2),obj1.asDataList(),obj2.asDataList())
+        self.currentplotpanelobject()["'Replot"].touch()
+    def hfremove_fy(self): 
+        base=self.currentplotpanelobject()["'y:UnitData"]
+        l=base.Chain(DIR.TO,["yAxis","maxBlock"],False,True)
+        if base.isDataList():
+            for dl in l:
+                for obj in dl[1:]: dl[0] //= obj
+        else: 
+            for obj in base[1:]: base[0] //= obj
+        self.gui.add_fy.setCurrentIndex(0)
+        self.currentplotpanelobject()["'Replot"].touch()
+    def hfremove_fx(self): 
+        base=self.currentplotpanelobject()["'x:UnitData"]
+        l=base.Chain(DIR.TO,["xAxis","maxBlock"],False,True)
+        if base.isDataList():
+            for dl in l:
+                for obj in dl[1:]: dl[0] //= obj
+        else: 
+            for obj in base[1:]: base[0] //= obj
+        self.gui.add_fx.setCurrentIndex(0)
+        self.currentplotpanelobject()["'Replot"].touch()
+    def hfview_fx(self): 
+        self.currentplotpanelobject()["'Antenna"].FirstObject()["x"].Chain(DIR.TO,["GraphDataBuffer","maxBlock"],False,True).gv()
+    def hfview_fy(self): 
+        self.currentplotpanelobject()["'Antenna"].FirstObject()["y"].Chain(DIR.TO,["GraphDataBuffer","maxBlock"],False,True).gv()
+        
 
 #Use 
 #self=d["QtPanel'PlotWidget"].getPy()
@@ -360,4 +404,3 @@ class hfMainWindow(QtGui.QMainWindow):
         hfqtplotwidget.hfqtpanel.gui=self.ui
         hfqtplotwidget.hfqtplot.gui=self.ui
         self.ui.setupUi(self)
-

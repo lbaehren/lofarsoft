@@ -59,13 +59,14 @@ DEF_DATA_OID_NAME_FUNC_PYDEF_EXT( , FUNC  )
 
 
 
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_listFunctions_overloads,listFunctions,0,2)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_printStatus_overloads,printStatus,0,1)
   //  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_touch_overloads,touch,0,1)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_printAllStatus_overloads,printAllStatus,0,3)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_Status_overloads,Status,0,1)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_getName_overloads,getName,0,1)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_getSearchName_overloads,getSearchName,0,1)
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_FindChainID_overloads,FindChainID,2,3)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_FindChainID_overloads,FindChainID,2,4)
 
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_listNeighbourIDs_overloads,listNeighbourIDs,1,2)
 
@@ -326,7 +327,9 @@ BOOST_PYTHON_MODULE(libhfget)
 
       .def("delData", &Data::delData)
       .def("delFunction", &Data::delFunction)
+      .def("listFunctions", &Data::listFunctions,Data_listFunctions_overloads())
       .def("setFunction", &Data::setFunction,return_internal_reference<>(),Data_setFunction_overloads())
+      //      .def("listFunctions", &Data::listFunctions)
       .def("delObject", &Data::delObject_ID)
       .def("delObject", &Data::delObject_Name)
       .def("delObject", &Data::delObject)

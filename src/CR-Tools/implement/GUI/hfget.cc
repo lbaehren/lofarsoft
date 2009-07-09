@@ -147,9 +147,9 @@ template<class T> inline T mycast(const HComplex v){return static_cast<T>(v);}
 
 //Convert Numbers to Numbers and loose information (round float, absolute of complex)
 template<>  inline HInteger mycast<HInteger>(HNumber v){return static_cast<HInteger>(floor(v+0.5));}
-template<>  inline HInteger mycast<HInteger>(HComplex v){return static_cast<HInteger>(floor(abs(v)+0.5));}
+template<>  inline HInteger mycast<HInteger>(HComplex v){return static_cast<HInteger>(floor(real(v)+0.5));}
 
-template<>  inline HNumber mycast<HNumber>(HComplex v){return abs(v);}
+template<>  inline HNumber mycast<HNumber>(HComplex v){return real(v);}
 
 //--Strings ------------------------------------------------------------
 
@@ -170,7 +170,7 @@ template<class T> inline T mycast(const HString v){T t; std::istringstream is(v)
 
 //Convert Type T to HPointer:
 template<> inline HPointer mycast(const HPointer v){return v;}
-template<> inline HPointer mycast(const HInteger v){return mycast<HPointer>(v);}
+template<> inline HPointer mycast(const HInteger v){return reinterpret_cast<HPointer>(v);}
 template<> inline HPointer mycast(const HNumber v){return reinterpret_cast<HPointer>(mycast<HInteger>(v));}
 template<> inline HPointer mycast(const HComplex v){return reinterpret_cast<HPointer>(mycast<HInteger>(v));}
 
@@ -415,7 +415,10 @@ bool in_vector(const T elem, const vector<T> &v){
   return ret;
 }
 
-/*!\brief Return a version of vector v, which contains each element only once.*/
+/*!\brief Return a version of vector v, which contains each element only once.
+
+Note this is better implemented using the stl  algorithms.!!!!
+*/
 template <class T>
 vector<T> vec_unique(const vector<T> &v){
   vector<T> v_out;
@@ -1091,10 +1094,8 @@ between the current object (in direction "dir") and the objects with
 names in the "names" vector.
 
  */
-vector<address> Data::FindChainID(const DIRECTION dir,const vector<HString> names, const bool include_endpoints){
-  //  DataList dl=FindChain(dir,names,include_endpoints);
-  //vector<address> ad=DataListtoIDs(dl);
-  return DataListtoIDs(FindChain(dir,names,include_endpoints));
+vector<address> Data::FindChainID(const DIRECTION dir,const vector<HString> names, const bool include_endpoints, const bool monotonic){
+  return DataListtoIDs(FindChain(dir,names,include_endpoints,monotonic));
 }
 
 
@@ -1107,9 +1108,11 @@ names in the "names" vector.
  */
 
 
-DataList Data::FindChain(const DIRECTION dir,const vector<HString> names, const bool include_endpoints){
+DataList Data::FindChain(const DIRECTION dir,const vector<HString> names, const bool include_endpoints, const bool monotonic){
   DataList newneighbours, neighbours, chain, endpoints;
   DataList::iterator it;
+  DIRECTION dir2 = DIR_BOTH;
+  if (monotonic) dir2=dir;
   
   chain.push_back(this);
   neighbours=getNeighbours(dir);
@@ -1135,7 +1138,7 @@ DataList Data::FindChain(const DIRECTION dir,const vector<HString> names, const 
     it=newneighbours.begin();
     while (it!=newneighbours.end()) {
       DBG2("NewNeighbour="<<(*it)->getName());
-      vec_append(neighbours,(*it)->getNeighbours(DIR_BOTH));
+      vec_append(neighbours,(*it)->getNeighbours(dir2));
       it++;
     };
     newneighbours.clear();
@@ -2077,7 +2080,7 @@ void Data::delLink(objectid port, DIRECTION dir, bool del_other,
     DBG("delLink(port=" << port <<", dir=" << direction_txt(dir) << ", del_other=" << tf_txt(del_other) <<") name=" << getName(false) <<": deleting myself.");
     delete this;
   }
-
+  doSilent()->setModification(MOD_LINKCHANGED);
 }
 
 /*!
@@ -2648,6 +2651,29 @@ boost::python::handle<> Data::retrievePyFuncObject() {
     return boost::python::handle<>(boost::python::borrowed(data.py_func));
 }
 
+/*! 
+
+\brief Calls a simple method (i.e., no return value, parameter is the
+current Data object) of a python object.
+
+ */
+bool Data::callSimplePyObjectMethod(PyObject* pyobj, HString method) {
+  if (pyobj==NULL){
+    ERROR("callSimplePyObjectMethod: pointer to PythonObject is NULL. Object PythonObject does not exist. Define PythonObject and use pytore before assigning PyFunc to this Object."); 
+    return false;
+  };
+  //first we need to check if attribute is present in the Python Object
+  if (!PyObject_HasAttrString(pyobj, method.c_str())) {
+    ERROR("callSimplePyObjectMethod: Object does not have Attribute " << method); return false;};
+  int ret=boost::python::call_method<int>(pyobj,method.c_str(),boost::ref(*this));
+  if (ret!=0) {
+    ERROR("callSimplePyObjectMethod - startup method returned user-defined error code" << ret);
+    return false;
+  };
+  return true;
+}
+
+
 
 /*! \brief Store a list of python object reference in the  Data buffer.
 
@@ -2904,7 +2930,7 @@ Data& Data::setFunction (const HString name,
       DBG("setFunction(" << name << "," << library << "," << datatype_txt(typ) << "): name=" << getName(true));
       if (data.of_ptr != NULL) {
 	//Check if it is the same function as the existing one.
-	if (data.of_ptr->getName()==name && data.of_ptr->getLibrary()==name && data.of_ptr->getType()==typ) return *this;
+	if (data.of_ptr->getName()==name && (data.of_ptr->getLibrary()==library || library=="") && data.of_ptr->getType()==typ) return *this;
 	else delFunction(); //Delete old function otherwise
       };
       DataFuncDescriptor fd = *(data.superior->library_ptr->FuncDescriptor(name,library));
@@ -2921,6 +2947,29 @@ Data& Data::setFunction (const HString name,
     return *this;
   };
   return *this;
+}
+
+/*!
+\brief Lists all possible object functions that are accessible in the functions library. 
+
+Returns a vecor of strings with the relevant information. If
+doprint=true the output will be printed to standard out.
+
+If lib=="" list all functions and their docstring. 
+If lib=="*" list only the names of the libraries.
+If lib=="libname" list only the function names available within a certain library.
+
+*/
+vector<HString> Data::listFunctions (HString lib, bool doprint){
+  if (data.superior->library_ptr!=NULL) {
+    if (lib=="") {return data.superior->library_ptr->listFunctions(doprint);}
+    else if (lib=="*") {return data.superior->library_ptr->getLibraries(doprint);}
+    else  {return data.superior->library_ptr->getFuncnames(lib,doprint);}
+  } else {
+    ERROR("listFunctions: Function library non-existent.");
+    vector<HString> nix;
+    return nix;
+  };
 }
 
 
@@ -3679,7 +3728,6 @@ Data& Data::erase(Data &d,DIRECTION dir)
   };
   d.delObject();
   //  if (!(data.silent || data.tmpsilent)) touch();
-  touch();
   return *this;
 }
 

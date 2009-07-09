@@ -373,8 +373,8 @@ class Data {
   void join_map_ReferenceDescriptors(map<objectid,reference_descr> &l1, map<objectid,reference_descr> l2);
   map<objectid,reference_descr> listNeighbours(DIRECTION dir,longint maxlevel);
   void getNeighboursList(DIRECTION dir,longint maxlevel,  vector<objectid> &oids, vector<HString> &names, vector<DIRECTION> &dirs,  vector<HString> & flags);
-  DataList FindChain(const DIRECTION dir,const vector<HString> names, const bool include_endpoints=true);
-  vector<address> FindChainID(const DIRECTION dir,const vector<HString> names, const bool include_endpoints=true);
+  DataList FindChain(const DIRECTION dir,const vector<HString> names, const bool include_endpoints=true, const bool monotonic=false);
+  vector<address> FindChainID(const DIRECTION dir,const vector<HString> names, const bool include_endpoints=true, const bool monotonic=false);
 
   vector<HString> listNeighbourNames(DIRECTION dir);
   vector<objectid> listNeighbourIDs(DIRECTION dir,longint maxlevel=MAXNETLEVEL);
@@ -584,11 +584,15 @@ class Data {
   PyObject* retrievePyFunc();
   boost::python::handle<> retrievePyFuncObject();
 
+  bool callSimplePyObjectMethod(PyObject* pyobj, HString method);
+
   void delFunction();
   Data& setFunction (const HString name,
-		    const HString library="Sys",
+		    const HString library="",
 		    const DATATYPE typ=UNDEF);
   
+  vector<HString> listFunctions (HString lib="", bool doprint=true);
+
   void sendMessage (MSG_CODE msg,
 		    DIRECTION dir,
 		    objectid count=0,

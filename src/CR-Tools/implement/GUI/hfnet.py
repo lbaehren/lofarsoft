@@ -45,7 +45,6 @@ d["PlotPanel:ymax"].connect(gui.ymax)
 d["*LastAntenna"].connect(gui.lastantenna)  #The * in front makes a global search for this name
 d["*FirstAntenna"].connect(gui.firstantenna)  
 d["*AntennaSelection"].connect(gui.antennaselection,"setText","QString")  
-print "Antenna selection connected"
 
 d["PlotPanel'YAuto"].connect(gui.yauto,"setChecked","bool")
 d["PlotPanel'XAuto"].connect(gui.xauto,"setChecked","bool")
@@ -87,66 +86,37 @@ hfqtplot.initializechooser()
 ##At the end clear all modification flags that might have been left hanging during the build-up phase 
 d.All().clearModification()
 
-print "Attention: For perfomance reasons the Network Display is toggled off!"
-#print 'Use: d["QtPanel"] // d["QtNetview"] or toggle field in the GUI (bottom left)'
+#Attention: For perfomance reasons the Network Display is toggled off!"
 d["QtPanel"] // d["QtNetview"]
 
 
-print '-------------------------------------'
-print 'A few tricks to help debugging:'
-print 'The GUI itself is accessed through the object "gui" (use dir(gui)) to see all the elements of the gui)'
-print 'To get access to the slots/functions in hfplot the GUI is connected to type  dir(guifuncs)'
-print "To access the mglGraph object use 'gr'."
-print "To debug while a network operation is performed an trace it through the net type:"
-print "x=d.All().storePyDBG(dbg).setVerbose(9999).setDebug(True) or debugon(d)"
-print "or if you want to use the GUI while debugging:"
-print "x=d.All().storePyDBG(dbg).setVerbose(9999).setDebugGUI(True) or debugguion(d)"
-print "you can use maxnetlevel=NNN to set the level of detail during the debug phase."  
 
 ##########End ....
 #
 #d["*AntennaSelection"]=[0]; d.new("Offset",_f("Offset")) ^ (d["x:UnitData"],d["x:xAxis"]); ~(d["PlotPanel'OffsetValue"]); d["Data'Block"]=1
 
+#_d("abs",_f("abs")) ^ (d["y:UnitData"],d["yAxis"])
 
-#max_number_of_antennas=2
-#("MaxNumberOfAntennas",max_number_of_antennas) >> d["PipelineLauncher"]
-
-#>> ("DataPipeline","",_l(90))
-
-#CRDataPipeline(datapipeline)
-
-#Choose one initial Unit
-#(d["xAxis'Parameters=UnitData'UnitPrefix=m"] >> d["xAxis'Parameters=UnitData"])
-#(d["yAxis'Parameters=UnitData'UnitPrefix="] >> d["yAxis'Parameters=UnitData"])
-#(d["Data'Parameters=Data'Datatype=Fx"] >> d["Data:yAxis'Parameters=Data"])
-#(d["Data'Parameters=Data'Datatype=Time"] >> d["Data:xAxis'Parameters=Data"])
-
-#plotwindow=PlotDataPipeline(d)
-
-#d["PlotWindow"]  >> ("QtPanel",_f(hfQtPanel)) 
-
-#number_of_antennas=d["Results=File'nofAntennas"].val()
-#print "Number of antennas in file =",number_of_antennas," antennas!"
-#number_of_antennas=min(number_of_antennas,max_number_of_antennas)
-#print "Using only",number_of_antennas,"Antennas!"
-#print "If you want to see more antennas, you need to change the variable max_number_of_antennas"
-#print "in the file hfnet.py for now!"
-
-#d["PlotPanel'Parameters=PlotPanel"].move(d["PlotPanel'GraphObject"],d["PlotPanel"])
-
-#The following can be used to create your own x-axis
-#d["Antenna"] >> ("Data",_f("Range"))>> ("UnitData",_f("Unit")) >> "xAxis" >> d["PlotData"]
-#d["xAxis'end"]=512
-
-
-#DataUnion(d["PlotPanel"]) >>  ("PlotWindow",_f(hfPlotWindow))
 #pdb.set_trace()
 
 """
 
+A few tricks to help debugging:
+-------------------------------
+
+The GUI itself is accessed through the object "gui" (use dir(gui)) to see all the elements of the gui)
+To get access to the slots/functions in hfplot the GUI is connected to type  dir(guifuncs)
+To access the mglGraph object use 'gr'.
+To debug while a network operation is performed an trace it through the net type:
+x=d.All().storePyDBG(dbg).setVerbose(9999).setDebug(True) or debugon(d)
+or if you want to use the GUI while debugging:
+x=d.All().storePyDBG(dbg).setVerbose(9999).setDebugGUI(True) or debugguion(d)
+you can use maxnetlevel=NNN to set the level of detail during the debug phase.  
 
 
 
+Language Examples:
+------------------
 
 d["Antenna=1:PlotPanel"] // d["Antenna=1:PlotPanel'Parameters"] >> d["File"]
 ~d["Antenna:PlotPanel'Parameters"]
@@ -158,11 +128,6 @@ d["Data'Parameters'Datatype"]="Fx"
 d["File'Parameters'end"]
 d["File'Parameters=Data'end"]=1023
 d["xAxis"] // d["PlotData"]
-
-
-############
-d["QtPanel"].update()
-d["QtNetview"].update()
 
 
 d["Antenna=1:PlotData"] >> d["Antenna=0:PlotPanel"]
