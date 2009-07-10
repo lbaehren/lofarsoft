@@ -365,21 +365,23 @@ class hfQtPlot(QtGui.QWidget):
     def hfremove_fy(self): 
         base=self.currentplotpanelobject()["'y:UnitData"]
         l=base.Chain(DIR.TO,["yAxis","maxBlock"],False,True)
+        if settrace: pdb.set_trace()
         if base.isDataList():
             for dl in l:
-                for obj in dl[1:]: dl[0] //= obj
+                for obj in dl.asDataList()[1:]: dl[0] //= obj
         else: 
-            for obj in base[1:]: base[0] //= obj
+            for obj in l.asDataList()[1:]: l[0] //= obj
         self.gui.add_fy.setCurrentIndex(0)
         self.currentplotpanelobject()["'Replot"].touch()
     def hfremove_fx(self): 
         base=self.currentplotpanelobject()["'x:UnitData"]
         l=base.Chain(DIR.TO,["xAxis","maxBlock"],False,True)
+        if settrace: pdb.set_trace()
         if base.isDataList():
             for dl in l:
-                for obj in dl[1:]: dl[0] //= obj
+                for obj in dl.asDataList()[1:]: dl[0] //= obj
         else: 
-            for obj in base[1:]: base[0] //= obj
+            for obj in l.asDataList()[1:]: l[0] //= obj
         self.gui.add_fx.setCurrentIndex(0)
         self.currentplotpanelobject()["'Replot"].touch()
     def hfview_fx(self): 

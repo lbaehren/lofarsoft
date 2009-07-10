@@ -285,8 +285,12 @@ class DataList(list):
         "Number of objects in the DataList. Same as len. Used for determining whether a search was successful. If not, an empty DataList will be returned that returns zero for this function. If one object is found an Object is returned."
         return len(self)
     def __floordiv__(self,other):
-        for d in self: d // other
-        return d
+        " d1 // d2 : Delete the link between the other objects and each object in the DataList. If other is also a DataLists, then remove the links pairwise." 
+        if other.isDataList(): 
+            map(lambda d1,d2:d1//d2,self,other)
+        else: 
+            for d in self: d // other
+        return other
     def __ifloordiv__(self,other):
         map(lambda d1,d2:d1.erase(d2),self,other)
         return self

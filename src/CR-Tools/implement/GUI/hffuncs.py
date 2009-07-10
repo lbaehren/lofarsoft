@@ -451,8 +451,8 @@ class hfPlotPanel(hffunc):
         else: xl.reverse(); xfunctxt=list2str(xl[:-1])+" "
         if type(yl)==str: yfunctxt=""
         else: yl.reverse(); yfunctxt=list2str(yl[:-1])+" "
-        if self.xAxisLabel=="": self.xAxisLabel=xfunctxt+self.xAxisDatatype
-        if self.yAxisLabel=="": self.yAxisLabel=yfunctxt+self.yAxisDatatype
+        if self.xAxisLabel=="": self.xAxisLabel=xfunctxt+str(self.xAxisDatatype)
+        if self.yAxisLabel=="": self.yAxisLabel=yfunctxt+str(self.yAxisDatatype)
         self.xAxisLabel+=xoffsettxt
         if not self.xAxisUnit=="": self.xAxisLabel=self.xAxisLabel+" ["+self.xAxisUnitPrefix+self.xAxisUnit+"]"
         if not self.yAxisUnit=="": self.yAxisLabel=self.yAxisLabel+" ["+self.yAxisUnitPrefix+self.yAxisUnit+"]"

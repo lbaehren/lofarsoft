@@ -1,7 +1,7 @@
 //================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfprep.awk
 //================================================================================
-//     File was generated from - on Fri Jul 10 01:22:23 CEST 2009
+//     File was generated from - on Fri Jul 10 15:11:05 CEST 2009
 //--------------------------------------------------------------------------------
 //
 //#define DBG_MODE 0
@@ -768,6 +768,8 @@ HF_MATH_FUNC(hf_asin){return asin(v);};
 //$ENDITERATE
 
 HF_MATH_FUNC(hf_square){return v*v;}; 
+HF_MATH_FUNC(hf_negative){return -v;}; 
+HF_MATH_FUNC(hf_ssqrt){if (v<0) return -sqrt(-v); else return sqrt(v);}; 
 
 HF_MATH_FUNC2(hf_sub){return v1-v2;};
 HF_MATH_FUNC2(hf_mul){return v1*v2;}; 
@@ -958,599 +960,7 @@ template <class T> void process(F_PARAMETERS) {
 }; DATAFUNC_CONSTRUCTOR(Neighbours,Sys,"Returns a list of names of all neighbour objects, first in To direction and the in FROM direction separated by an empty string.",STRING,false);
 
 
-//$ITERATE MFUNC square,abs,acos,asin,atan,ceil,cos,cosh,exp,floor,log,log10,phase,sin,sinh,sqrt,tan,tanh
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: tan
-Info: Takes the tan of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_tan : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_tan (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_tan(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_tan(*it);
-   it++;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(tan,Math,"Takes the tan of the first object vector connected to the object.",NUMBER,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: asin
-Info: Takes the asin of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_asin : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_asin (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_asin(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_asin(*it);
-   it++;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(asin,Math,"Takes the asin of the first object vector connected to the object.",NUMBER,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: tanh
-Info: Takes the tanh of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_tanh : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_tanh (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_tanh(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_tanh(*it);
-   it++;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(tanh,Math,"Takes the tanh of the first object vector connected to the object.",NUMBER,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: atan
-Info: Takes the atan of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_atan : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_atan (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_atan(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_atan(*it);
-   it++;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(atan,Math,"Takes the atan of the first object vector connected to the object.",NUMBER,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: ceil
-Info: Takes the ceil of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_ceil : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_ceil (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_ceil(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_ceil(*it);
-   it++;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(ceil,Math,"Takes the ceil of the first object vector connected to the object.",NUMBER,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: cos
-Info: Takes the cos of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_cos : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_cos (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_cos(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_cos(*it);
-   it++;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(cos,Math,"Takes the cos of the first object vector connected to the object.",NUMBER,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: cosh
-Info: Takes the cosh of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_cosh : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_cosh (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_cosh(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_cosh(*it);
-   it++;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(cosh,Math,"Takes the cosh of the first object vector connected to the object.",NUMBER,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: exp
-Info: Takes the exp of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_exp : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_exp (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_exp(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_exp(*it);
-   it++;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(exp,Math,"Takes the exp of the first object vector connected to the object.",NUMBER,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: floor
-Info: Takes the floor of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_floor : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_floor (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_floor(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_floor(*it);
-   it++;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(floor,Math,"Takes the floor of the first object vector connected to the object.",NUMBER,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: log
-Info: Takes the log of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_log : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_log (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_log(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_log(*it);
-   it++;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(log,Math,"Takes the log of the first object vector connected to the object.",NUMBER,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: log10
-Info: Takes the log10 of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_log10 : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_log10 (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_log10(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_log10(*it);
-   it++;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(log10,Math,"Takes the log10 of the first object vector connected to the object.",NUMBER,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: phase
-Info: Takes the phase of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_phase : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_phase (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_phase(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_phase(*it);
-   it++;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(phase,Math,"Takes the phase of the first object vector connected to the object.",NUMBER,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: sin
-Info: Takes the sin of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_sin : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_sin (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_sin(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_sin(*it);
-   it++;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(sin,Math,"Takes the sin of the first object vector connected to the object.",NUMBER,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: square
-Info: Takes the square of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_square : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_square (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_square(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_square(*it);
-   it++;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(square,Math,"Takes the square of the first object vector connected to the object.",NUMBER,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: sinh
-Info: Takes the sinh of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_sinh : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_sinh (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_sinh(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_sinh(*it);
-   it++;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(sinh,Math,"Takes the sinh of the first object vector connected to the object.",NUMBER,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: abs
-Info: Takes the abs of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_abs : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_abs (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_abs(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_abs(*it);
-   it++;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(abs,Math,"Takes the abs of the first object vector connected to the object.",NUMBER,false);
-
+//$ITERATE MFUNC square,negative,ssqrt,abs,acos,asin,atan,ceil,cos,cosh,exp,floor,log,log10,sin,sinh,sqrt,tan,tanh
 //------------------------------------------------------------------------------
 //$NEW: Function
 /*------------------------------------------------------------------------------
@@ -1587,7 +997,78 @@ template <class T> void process(F_PARAMETERS) {
 }
 //$END Function -----------------------------------------------------------------
 }; DATAFUNC_CONSTRUCTOR(sqrt,Math,"Takes the sqrt of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: abs
+Info: Takes the abs of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_abs : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_abs (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_abs(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
 
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_abs(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(abs,Math,"Takes the abs of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: tan
+Info: Takes the tan of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_tan : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_tan (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_tan(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_tan(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(tan,Math,"Takes the tan of the first object vector connected to the object.",NUMBER,false);
 //------------------------------------------------------------------------------
 //$NEW: Function
 /*------------------------------------------------------------------------------
@@ -1624,8 +1105,765 @@ template <class T> void process(F_PARAMETERS) {
 }
 //$END Function -----------------------------------------------------------------
 }; DATAFUNC_CONSTRUCTOR(acos,Math,"Takes the acos of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: tanh
+Info: Takes the tanh of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_tanh : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_tanh (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_tanh(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
 
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_tanh(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(tanh,Math,"Takes the tanh of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: asin
+Info: Takes the asin of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_asin : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_asin (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_asin(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_asin(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(asin,Math,"Takes the asin of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: atan
+Info: Takes the atan of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_atan : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_atan (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_atan(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_atan(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(atan,Math,"Takes the atan of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: ceil
+Info: Takes the ceil of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_ceil : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_ceil (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_ceil(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_ceil(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(ceil,Math,"Takes the ceil of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: cos
+Info: Takes the cos of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_cos : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_cos (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_cos(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_cos(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(cos,Math,"Takes the cos of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: cosh
+Info: Takes the cosh of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_cosh : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_cosh (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_cosh(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_cosh(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(cosh,Math,"Takes the cosh of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: exp
+Info: Takes the exp of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_exp : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_exp (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_exp(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_exp(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(exp,Math,"Takes the exp of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: floor
+Info: Takes the floor of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_floor : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_floor (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_floor(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_floor(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(floor,Math,"Takes the floor of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: log
+Info: Takes the log of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_log : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_log (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_log(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_log(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(log,Math,"Takes the log of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: log10
+Info: Takes the log10 of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_log10 : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_log10 (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_log10(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_log10(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(log10,Math,"Takes the log10 of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: square
+Info: Takes the square of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_square : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_square (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_square(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_square(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(square,Math,"Takes the square of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: sin
+Info: Takes the sin of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_sin : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_sin (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_sin(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_sin(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(sin,Math,"Takes the sin of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: negative
+Info: Takes the negative of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_negative : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_negative (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_negative(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_negative(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(negative,Math,"Takes the negative of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: sinh
+Info: Takes the sinh of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_sinh : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_sinh (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_sinh(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_sinh(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(sinh,Math,"Takes the sinh of the first object vector connected to the object.",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: ssqrt
+Info: Takes the ssqrt of the first object vector connected to the object.
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_ssqrt : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_ssqrt (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_ssqrt(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+ 
+  while (it!=end) {
+   *it=hf_ssqrt(*it);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(ssqrt,Math,"Takes the ssqrt of the first object vector connected to the object.",NUMBER,false);
 //$ENDITERATE
+
+#define phase arg
+//$ITERATE MFUNC phase,imag,conj,real
+
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: real
+Info: Retrieves real of the first object vector connected to the object.
+Type: COMPLEX
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_real : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_real (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_real(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  vector<HComplex>* cvp;
+  if (WhichType<T>()==COMPLEX) cvp=reinterpret_cast<vector<HComplex>*>(vp); // no need for new vector
+  else cvp=new vector<HComplex>;
+
+  dp->getFirstFromVector(*cvp,vs);
+  vp->resize(cvp->size(),hfnull<T>());
+
+  ITERATORS(HComplex,cvp,it1,end1);    
+  ITERATORS_T(vp,it2,end2);    
+ 
+  while (it1!=end1 && it2!=end2) {
+    *it2=mycast<T>(real(*it1));
+    it1++; it2++; 
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(real,Math,"Retrieves real of the first object vector connected to the object.",COMPLEX,false);
+
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: phase
+Info: Retrieves phase of the first object vector connected to the object.
+Type: COMPLEX
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_phase : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_phase (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_phase(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  vector<HComplex>* cvp;
+  if (WhichType<T>()==COMPLEX) cvp=reinterpret_cast<vector<HComplex>*>(vp); // no need for new vector
+  else cvp=new vector<HComplex>;
+
+  dp->getFirstFromVector(*cvp,vs);
+  vp->resize(cvp->size(),hfnull<T>());
+
+  ITERATORS(HComplex,cvp,it1,end1);    
+  ITERATORS_T(vp,it2,end2);    
+ 
+  while (it1!=end1 && it2!=end2) {
+    *it2=mycast<T>(phase(*it1));
+    it1++; it2++; 
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(phase,Math,"Retrieves phase of the first object vector connected to the object.",COMPLEX,false);
+
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: imag
+Info: Retrieves imag of the first object vector connected to the object.
+Type: COMPLEX
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_imag : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_imag (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_imag(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  vector<HComplex>* cvp;
+  if (WhichType<T>()==COMPLEX) cvp=reinterpret_cast<vector<HComplex>*>(vp); // no need for new vector
+  else cvp=new vector<HComplex>;
+
+  dp->getFirstFromVector(*cvp,vs);
+  vp->resize(cvp->size(),hfnull<T>());
+
+  ITERATORS(HComplex,cvp,it1,end1);    
+  ITERATORS_T(vp,it2,end2);    
+ 
+  while (it1!=end1 && it2!=end2) {
+    *it2=mycast<T>(imag(*it1));
+    it1++; it2++; 
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(imag,Math,"Retrieves imag of the first object vector connected to the object.",COMPLEX,false);
+
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: conj
+Info: Retrieves conj of the first object vector connected to the object.
+Type: COMPLEX
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_conj : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_conj (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_conj(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  vector<HComplex>* cvp;
+  if (WhichType<T>()==COMPLEX) cvp=reinterpret_cast<vector<HComplex>*>(vp); // no need for new vector
+  else cvp=new vector<HComplex>;
+
+  dp->getFirstFromVector(*cvp,vs);
+  vp->resize(cvp->size(),hfnull<T>());
+
+  ITERATORS(HComplex,cvp,it1,end1);    
+  ITERATORS_T(vp,it2,end2);    
+ 
+  while (it1!=end1 && it2!=end2) {
+    *it2=mycast<T>(conj(*it1));
+    it1++; it2++; 
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(conj,Math,"Retrieves conj of the first object vector connected to the object.",COMPLEX,false);
+//$ENDITERATE
+#undef phase
+
+
+
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: degree
+Info: Converts radians to degrees
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_degree : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_degree (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_degree(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+  //  HNumber fac=180.0/UnitScaleFactor/M_PI;
+  HNumber fac=180.0/M_PI;
+  while (it!=end) {
+    *it=hf_mul(*it,fac);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(degree,Math,"Converts radians to degrees",NUMBER,false);
+
 
 
 
@@ -1760,7 +1998,7 @@ template <class T> void process(F_PARAMETERS) {
   };
 
   MSG("Range: vs1 VectorSelector not yet implemented!"); 
-  vp->clear(); 
+
   size=floor(abs((end-start)/inc))+1;
   if (vp->capacity()<size) {vp->reserve(size);};
 
@@ -2181,9 +2419,12 @@ void DataFunc_Library_publish(DataFuncLibraryClass* library_ptr){
 PUBLISH_OBJECT_FUNCTION(Sys,Unit);
 PUBLISH_OBJECT_FUNCTION(Sys,copy);
 PUBLISH_OBJECT_FUNCTION(Sys,Neighbours);
+PUBLISH_OBJECT_FUNCTION(Math,sqrt);
+PUBLISH_OBJECT_FUNCTION(Math,abs);
 PUBLISH_OBJECT_FUNCTION(Math,tan);
-PUBLISH_OBJECT_FUNCTION(Math,asin);
+PUBLISH_OBJECT_FUNCTION(Math,acos);
 PUBLISH_OBJECT_FUNCTION(Math,tanh);
+PUBLISH_OBJECT_FUNCTION(Math,asin);
 PUBLISH_OBJECT_FUNCTION(Math,atan);
 PUBLISH_OBJECT_FUNCTION(Math,ceil);
 PUBLISH_OBJECT_FUNCTION(Math,cos);
@@ -2192,13 +2433,16 @@ PUBLISH_OBJECT_FUNCTION(Math,exp);
 PUBLISH_OBJECT_FUNCTION(Math,floor);
 PUBLISH_OBJECT_FUNCTION(Math,log);
 PUBLISH_OBJECT_FUNCTION(Math,log10);
-PUBLISH_OBJECT_FUNCTION(Math,phase);
-PUBLISH_OBJECT_FUNCTION(Math,sin);
 PUBLISH_OBJECT_FUNCTION(Math,square);
+PUBLISH_OBJECT_FUNCTION(Math,sin);
+PUBLISH_OBJECT_FUNCTION(Math,negative);
 PUBLISH_OBJECT_FUNCTION(Math,sinh);
-PUBLISH_OBJECT_FUNCTION(Math,abs);
-PUBLISH_OBJECT_FUNCTION(Math,sqrt);
-PUBLISH_OBJECT_FUNCTION(Math,acos);
+PUBLISH_OBJECT_FUNCTION(Math,ssqrt);
+PUBLISH_OBJECT_FUNCTION(Math,real);
+PUBLISH_OBJECT_FUNCTION(Math,phase);
+PUBLISH_OBJECT_FUNCTION(Math,imag);
+PUBLISH_OBJECT_FUNCTION(Math,conj);
+PUBLISH_OBJECT_FUNCTION(Math,degree);
 PUBLISH_OBJECT_FUNCTION(Sys,Offset);
 PUBLISH_OBJECT_FUNCTION(Sys,print);
 PUBLISH_OBJECT_FUNCTION(Sys,range);

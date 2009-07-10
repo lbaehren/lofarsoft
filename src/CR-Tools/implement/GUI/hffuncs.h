@@ -1,7 +1,7 @@
 //================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfprep.awk
 //================================================================================
-//     File was generated from - on Fri Jul 10 01:22:23 CEST 2009
+//     File was generated from - on Fri Jul 10 15:11:05 CEST 2009
 //--------------------------------------------------------------------------------
 //
 #ifndef HFFUNCS_H
@@ -190,6 +190,15 @@ private:
   iterator_T END=vp->end(); \
   if (IT==END) {return;};  
 
+#define ITERATORS(TYP,VEC,IT,END) \
+  vector<TYP>::iterator IT=VEC->begin();\
+  vector<TYP>::iterator END=VEC->end();
+
+#define ITERATORS_T(VEC,IT,END) \
+  typedef typename vector<T>::iterator iterator_TT; \
+  iterator_TT IT=VEC->begin();\
+  iterator_TT END=VEC->end();
+
 
 
 
@@ -335,6 +344,8 @@ HF_MATH_FUNC(hf_tanh)
 HF_MATH_FUNC(hf_asin)
 //$ENDITERATE
 HF_MATH_FUNC(hf_square)
+HF_MATH_FUNC(hf_negative)
+HF_MATH_FUNC(hf_ssqrt)
 
 
 HF_MATH_FUNC2(hf_sub)

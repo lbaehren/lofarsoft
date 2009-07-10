@@ -3513,7 +3513,7 @@ void Data::get(vector<T> &v, Vector_Selector *vs) {
 #include "switch-type.cc"
 	  ERROR("Error (get): Unknown type encountered while processing an object function."  << " name=" << getName(true));
 	};  //end switch types
-	data.len=v.size();
+	//	data.len=v.size();
       } else {  //function and vector (buffer) are present, so execute
 		//function if network in the from-direction has been
 	        //modified, with output to internal data vector and

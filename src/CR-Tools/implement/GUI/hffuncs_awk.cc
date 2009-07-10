@@ -747,6 +747,8 @@ HF_MATH_FUNC(hf_$MFUNC){return $MFUNC(v);};
 //$ENDITERATE
 
 HF_MATH_FUNC(hf_square){return v*v;}; 
+HF_MATH_FUNC(hf_negative){return -v;}; 
+HF_MATH_FUNC(hf_ssqrt){if (v<0) return -sqrt(-v); else return sqrt(v);}; 
 
 HF_MATH_FUNC2(hf_sub){return v1-v2;};
 HF_MATH_FUNC2(hf_mul){return v1*v2;}; 
@@ -886,7 +888,7 @@ $${
 //$END Function -----------------------------------------------------------------
 
 
-//$ITERATE MFUNC square,abs,acos,asin,atan,ceil,cos,cosh,exp,floor,log,log10,phase,sin,sinh,sqrt,tan,tanh
+//$ITERATE MFUNC square,negative,ssqrt,abs,acos,asin,atan,ceil,cos,cosh,exp,floor,log,log10,sin,sinh,sqrt,tan,tanh
 //------------------------------------------------------------------------------
 //$NEW: Function
 /*------------------------------------------------------------------------------
@@ -908,8 +910,69 @@ $${
   };
 }
 //$END Function -----------------------------------------------------------------
-
 //$ENDITERATE
+
+#define phase arg
+//$ITERATE MFUNC phase,imag,conj,real
+
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: $MFUNC
+Info: Retrieves $MFUNC of the first object vector connected to the object.
+Type: COMPLEX
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+$${ 
+  vector<HComplex>* cvp;
+  if (WhichType<T>()==COMPLEX) cvp=reinterpret_cast<vector<HComplex>*>(vp); // no need for new vector
+  else cvp=new vector<HComplex>;
+
+  dp->getFirstFromVector(*cvp,vs);
+  vp->resize(cvp->size(),hfnull<T>());
+
+  ITERATORS(HComplex,cvp,it1,end1);    
+  ITERATORS_T(vp,it2,end2);    
+ 
+  while (it1!=end1 && it2!=end2) {
+    *it2=mycast<T>($MFUNC(*it1));
+    it1++; it2++; 
+  };
+}
+//$END Function -----------------------------------------------------------------
+//$ENDITERATE
+#undef phase
+
+
+$$Par: UnitName, HString, "degr"
+$$Par: UnitPrefix, HString, ""
+$$Par: UnitScaleFactor, HNumber, 1.0
+
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: degree
+Info: Converts radians to degrees
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+$${ 
+  dp->getFirstFromVector(*vp,vs);
+
+  INIT_FUNC_ITERATORS(it,end);
+  //  HNumber fac=180.0/UnitScaleFactor/M_PI;
+  HNumber fac=180.0/M_PI;
+  while (it!=end) {
+    *it=hf_mul(*it,fac);
+   it++;
+  };
+}
+//$END Function -----------------------------------------------------------------
+
 
 
 
@@ -990,7 +1053,7 @@ $${
   };
 
   MSG("Range: vs1 VectorSelector not yet implemented!"); 
-  vp->clear(); 
+
   size=floor(abs((end-start)/inc))+1;
   if (vp->capacity()<size) {vp->reserve(size);};
 

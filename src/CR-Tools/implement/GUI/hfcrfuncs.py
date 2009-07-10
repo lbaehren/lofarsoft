@@ -45,7 +45,6 @@ def CRDataPipeline(self):
     newAntennaNames=list(desiredAntennaNames-existingAntennaNames)
     newAntennaNames.sort()
     existingAntennaNames=list(existingAntennaNames)
-#    if settrace: pdb.set_trace()
     dp=self.find_or_make("DataPipeline","",_l(90))
     dp.find_or_make("'Parameters=Data",_l(999)).find_or_make("'Blocksize",2048,_l(90))
     aobjects=(dp.find_or_make(AntennaObjectNames,_l(9)).find_or_make("Antenna")).setList(AntennaSelection)
@@ -53,9 +52,10 @@ def CRDataPipeline(self):
 #    yaxis=aobjects.find_or_make("y").find_or_make("Data",_f("dataRead","CR",TYPE.COMPLEX)).find_or_make("UnitData").find_or_make("yAxis")
     xaxis=aobjects.find_or_make("x").find_or_make("Data",_f("dataRead")).find_or_make("UnitData").find_or_make("xAxis")
     yaxis=aobjects.find_or_make("y").find_or_make("Data",_f("dataRead")).find_or_make("UnitData").find_or_make("yAxis")
-    xaxis=self["xAxis"]
-    yaxis=self["yAxis"]
-    datpars=self["Antenna'Parameters=Data"]
+#    if settrace: pdb.set_trace()
+    xaxis=self["Antenna"]["xAxis"]
+    yaxis=self["Antenna"]["yAxis"]
+    datpars=self["Antenna"]["'Parameters=Data"]
     datpars //self["DataPipeline"] # separate for a moment, so that the new ParameterObjects can be created ....
     datatypechooser.resetLink(DataUnion(xaxis["'Data"]).find_or_make("'Parameters=Data",_l(999)),DIR.NONE,DIR.TO)
     datatypechooser.resetLink(DataUnion(yaxis["'Data"]).find_or_make("'Parameters=Data",_l(999)),DIR.NONE,DIR.TO)
@@ -67,8 +67,16 @@ def CRDataPipeline(self):
     return [AntennaObjectNames,unwantedAntennaNames,newAntennaNames]
 
 def PlotDataPipeline(self):
-    gdb=self["yAxis"].find_or_make("GraphDataBuffer",_f(hfGraphDataBuffer))
-    self["xAxis"].resetLink(gdb,DIR.NONE,DIR.TO)
+    if settrace: pdb.set_trace()
+    #The following is a go example on intricacies of network
+    #programming. It is important to use double subscripts in the
+    #following, since the data pipelines before yAxis could have
+    #different lengths for different antennas. If that is so only one
+    #object (the closest) will be returned. By first searching for
+    #"Antenna" we start already with a DataList and then for each
+    #antenna pipeline yAxis is found independently
+    gdb=self["Antenna"]["yAxis"].find_or_make("GraphDataBuffer",_f(hfGraphDataBuffer))
+    self["Antenna"]["xAxis"].resetLink(gdb,DIR.NONE,DIR.TO)
     x=DataUnion(gdb["Results=GraphDataBuffer"])
     x=x.find_or_make("'Replot",DIR.NONE,DIR.TO)
     x=x.find_or_make("'GraphObject",_f(hfGraphObject),_l(1000))
