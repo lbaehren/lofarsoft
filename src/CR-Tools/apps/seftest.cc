@@ -23,8 +23,11 @@
 
 #include <crtools.h>
 #include <Data/tbbctlIn.h>
+#include <Data/LOFAR_TBB.h>
 
+using namespace std;
 using CR::tbbctlIn;  // Namespace usage
+using CR::LOFAR_TBB;
 
 /*
   \file ttbbctlIn.cc
@@ -49,9 +52,9 @@ void show_data (Matrix<Double> const &data)
 {
   std::cout << "  Data shape : " << data.shape() << std::endl;
   std::cout << "  Data ..... : "
-	    << data(1,1) << " "
-	    << data(2,1) << " "
-	    << data(3,1)
+	    << data(1,0) << " "
+	    << data(2,0) << " "
+	    << data(3,0)
 	    << std::endl;
 }
 
@@ -60,51 +63,52 @@ void show_data (Matrix<Double> const &data)
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_tbbctlIn ()
+int test_LOFAR_TBB ()
 {
   int nofFailedTests (0);
   
-  std::cout << "\n[test_tbbctlIn]\n" << std::endl;
+  std::cout << "\n[test_LOFAR_TBB]\n" << std::endl;
 
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    tbbctlIn newtbbctlIn;
-    //
+  
+	string filename =
+"/misc/usersb/student/swelles/usg/solburst-lopes30/2005.07.14.07:22:55.266.event";
+	 //"/misc/lofar/CS1_tbb/big_2008_03_06/big2008_03_06_1093.h5";
+	
+	cout<<"Everything's oke until now... 1\n";
+	
+	LOFAR_TBB newI(filename,1024);	// Reads in the datafile in filename into
+								// the structure(?) newI. newI then contains
+								// the methods defined in LOFAR_TBB. An
+								// example of a method is fx().
 
-    Vector<String> filenames(2);
-    filenames(0) = "/mnt/lofar/CS1_tbb/20071112_145210/rw_20071112_145210_0100.dat";
-    filenames(1) = "/mnt/lofar/CS1_tbb/20071112_145210/rw_20071112_145210_0101.dat";
-    //    filenames(2) = "/mnt/lofar/CS1_tbb/20071112_145210/rw_20071112_145210_0106.dat";
-    //    filenames(3) = "/mnt/lofar/CS1_tbb/20071112_145210/rw_20071112_145210_0107.dat";
-    //    filenames(4) = "/mnt/lofar/CS1_tbb/20071112_145210/rw_20071112_145210_0108.dat";
+	cout<<"Everything's oke until now... 2\n";
 
     std::cout << "[2] Testing attaching a file ..." << std::endl;
-    if (! newtbbctlIn.attachFile(filenames) ){
-      std::cout << "  Failed to attach file(s)!" << std::endl;
-      nofFailedTests++;
-      return nofFailedTests;
-    };
-    
+	
 
     std::cout << "[3] Testing retrieval of fx() data ..." << std::endl;
     Matrix<Double> data;
-    data = newtbbctlIn.fx();
+    data = newI.fx();
     show_data (data);
-    
+	
     std::cout << "[4] Testing retrieval of Voltage data ..." << std::endl;
-    data = newtbbctlIn.voltage();
+    data = newI.voltage();
     show_data(data);
-
-
+	
     std::cout << "[5] Testing header record ..." << std::endl;
-    for (uint i=0; i<newtbbctlIn.headerRecord().nfields(); i++) {
-      std::cout << "  Field No: " << i << " Name: " << newtbbctlIn.headerRecord().name(i) << std::endl;
+    for (uint i=0; i< newI.headerRecord().nfields(); i++) {
+      std::cout << "  Field No: " << i << " Name: " << newI.headerRecord().name(i) << std::endl;
     };
-    std::cout << "  Values:\n    Date: " << newtbbctlIn.headerRecord().asuInt("Date") << std::endl;
-    std::cout << "    Observatory: " << newtbbctlIn.headerRecord().asString("Observatory") << std::endl;
-    std::cout << "    IDs: " << newtbbctlIn.headerRecord().asArrayInt("AntennaIDs") << std::endl;
+    std::cout << "  Values:\n    Date: " << newI.headerRecord().asuInt("Date") << std::endl;
+    std::cout << "    Observatory: " << newI.headerRecord().asString("Observatory") << std::endl;
+    std::cout << "    IDs: " << newI.headerRecord().asArrayInt("AntennaIDs") << std::endl;
+	std::cout << "    Filesize: " << newI.headerRecord().asArrayInt("Filesize") << std::endl;
+//	std::cout << "    dDate: " << newtbbctlIn.headerRecord().asArrayInt("dDate") << std::endl;
 
-    newtbbctlIn.summary(); 
+	
+    newI.summary(); 
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -121,8 +125,10 @@ int main ()
 
   // Test for the constructor(s)
   {
-    nofFailedTests += test_tbbctlIn ();
+    nofFailedTests += test_LOFAR_TBB ();
   }
+  
+  
 
   return nofFailedTests;
 }

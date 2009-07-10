@@ -110,7 +110,7 @@ int  simpleImage(string const &infile,
     cout << "testLOPESskymapping::simpleImage Setting up SpatialCoordinate"  << endl;
     std::string refcode    = "AZEL";
     std::string projection = "STG";
-    IPosition shape (3,30,30,3);
+    IPosition shape (3,10,10,3);
     SpatialCoordinate spatial (CoordinateType::DirectionRadius, refcode,projection);
     spatial.setShape(shape);
     //set reference pixel, reference value, and coord increment
@@ -145,13 +145,15 @@ int  simpleImage(string const &infile,
     cout << antPositions <<endl;
     
     //________________________________________________________
-    // Set up the skymapper
+    // Set up the skymapper 
     
     cout << "testLOPESskymapping::simpleImage Setting up the Skymapper..."  << endl;
-    Skymapper skymapper (coord,
+	
+	Skymapper skymapper (coord,
 			 antPositions,
 			 outfile,
 			 Skymapper::HDF5Image);
+
     cout << "                                                         ... done."  << endl;
     skymapper.summary();
     
@@ -184,6 +186,7 @@ int  simpleImage(string const &infile,
 int main (int argc,
 	  char *argv[])
 {
+  
   uint nofFailedTests=0, blocksize=1024;
   std::string infile, outfile="testLOPESskymapping.img";
 

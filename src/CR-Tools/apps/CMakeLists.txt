@@ -236,51 +236,6 @@ if (HAVE_CASA OR HAVE_CASACORE)
   endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
-
-## -------------------------------------------------------------------
-## tDynSpec
-
-if (HAVE_CASA OR HAVE_CASACORE)
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
-    ## compiler instructions
-    add_executable (tDynSpec tDynSpec.cc)
-    ## linker instructions
-    target_link_libraries (tDynSpec
-      cr
-      ${DAL_LIBRARIES}
-      ${HDF5_LIBRARIES}
-      ${CFITSIO_LIBRARIES}
-      )
-    ## installation instructions
-    list (APPEND cr_apps tDynSpec)
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
-    message (STATUS "[CR-Tools] Unable to build executable tDynSpec.")
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
-endif (HAVE_CASA OR HAVE_CASACORE)
-
-## -------------------------------------------------------------------
-## tDynSpecInc
-
-if (HAVE_CASA OR HAVE_CASACORE)
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
-    ## compiler instructions
-    add_executable (tDynSpecInc tDynSpecInc.cc)
-    ## linker instructions
-    target_link_libraries (tDynSpecInc
-      cr
-      ${DAL_LIBRARIES}
-      ${HDF5_LIBRARIES}
-      ${CFITSIO_LIBRARIES}
-      )
-    ## installation instructions
-    list (APPEND cr_apps tDynSpecInc)
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
-    message (STATUS "[CR-Tools] Unable to build executable tDynSpecInc.")
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
-endif (HAVE_CASA OR HAVE_CASACORE)
-
-
-
 ## -------------------------------------------------------------------
 ## testLOPESskymapping
 
@@ -299,6 +254,27 @@ if (HAVE_CASACORE AND HAVE_DAL)
     list (APPEND cr_apps testLOPESskymapping)
   else (DAL_LIBRARIES AND HDF5_LIBRARIES)
     message (STATUS "[CR-Tools] Unable to build executable testLOPESskymapping.")
+  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
+endif (HAVE_CASACORE AND HAVE_DAL)
+
+## -------------------------------------------------------------------
+## seftestLOPESskymapping
+
+if (HAVE_CASACORE AND HAVE_DAL)
+  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    ## compiler instructions
+    add_executable (seftestLOPESskymapping seftestLOPESskymapping.cc)
+    ## linker instructions
+    target_link_libraries (seftestLOPESskymapping 
+      cr 
+      ${DAL_LIBRARIES}
+      ${HDF5_LIBRARIES}
+      ${CFITSIO_LIBRARIES}
+      )
+    ## installation instructions
+    list (APPEND cr_apps seftestLOPESskymapping)
+  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    message (STATUS "[CR-Tools] Unable to build executable seftestLOPESskymapping.")
   endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
 endif (HAVE_CASACORE AND HAVE_DAL)
 
@@ -341,6 +317,27 @@ if (HAVE_CASACORE AND HAVE_DAL)
     list (APPEND cr_apps checkimage)
   else (DAL_LIBRARIES AND HDF5_LIBRARIES)
     message (STATUS "[CR-Tools] Unable to build executable checkimage.")
+  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
+endif (HAVE_CASACORE AND HAVE_DAL)
+
+## -------------------------------------------------------------------
+## cccheck
+
+if (HAVE_CASACORE AND HAVE_DAL)
+  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    ## compiler instructions
+    add_executable (cccheck cccheck.cc)
+    ## linker instructions
+    target_link_libraries (cccheck 
+      cr 
+      ${DAL_LIBRARIES}
+      ${HDF5_LIBRARIES}
+      ${CFITSIO_LIBRARIES}
+      )
+    ## installation instructions
+    list (APPEND cr_apps cccheck)
+  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    message (STATUS "[CR-Tools] Unable to build executable cccheck.")
   endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
 endif (HAVE_CASACORE AND HAVE_DAL)
 
