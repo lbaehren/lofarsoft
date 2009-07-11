@@ -168,21 +168,21 @@ SetFun ()					# This function sets up the RSP boards
 
         TbbMode="$1"
 
-	if [ "$Frequency" -ne -1 ]
-	 then
-         if ssh "$Station" rspctl --clock | grep -v "$Frequency"MHz
-           then ssh "$Station" rspctl --clock="$Frequency"
-         fi
-	fi
+	#if [ "$Frequency" -ne -1 ]
+	# then
+    #    if ssh "$Station" rspctl --clock | grep -v "$Frequency"MHz
+    #     then ssh "$Station" rspctl --clock="$Frequency"
+    #    fi
+	#fi
 
-         RcUnits="${RcuArray}"
-    
-         while [ "$Counter" -le "$RcUnits" ]
-          do
-          ssh "$Station" rspctl --rcumode="${ModeArray["$Counter"]}" --select="${RcuArray["$Counter"]}"
-         ((Counter=Counter+1))
-        done
-    
+    #    RcUnits="${RcuArray}"
+    #
+    #   while [ "$Counter" -le "$RcUnits" ]
+    #     do
+    #     ssh "$Station" rspctl --rcumode="${ModeArray["$Counter"]}" --select="${RcuArray["$Counter"]}"
+    #     ((Counter=Counter+1))
+    #    done
+    #
         if ssh "$Station" rspctl --tbbmode | grep -v "$TbbMode"
           then ssh "$Station" rspctl --tbbmode="$TbbMode"
         fi
