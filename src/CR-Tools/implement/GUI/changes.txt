@@ -1,0 +1,31 @@
+$$2009-07-11-HF:
+
+hfget.cc:
+Added visit_markers. These are dropped during network searches in each
+visited object. Hence, a cicular network won't lead to an infinite
+loop.
+
+hffuncs.cc, GUI:
+Added subtraction, addition, multiplication (div and pow) functions. They look
+for an object named "Reference" and subtract that vector (or a single
+number) from an object data vector.
+
+hfcrfuncs.cc: 
+
+The GUI PipelineLauncher automatically determines the y-Axis data of
+the first antenna as the reference vector for subtraction, addition,
+multiplication (div and pow) functions. So, if you select "sub" in the
+"f(y)" part of the GUI, you will get the difference between the first
+antenna and all other ones. (Naturally the ref antenna will then
+become zero). Later the refence should be set through the GUI. You can
+always set the Reference antenna manually, e.g, by
+
+~d["Reference"]; d["Antenna=3:y:Data"] >> "Reference" >> d["DataPipeline"] 
+
+(Note, there is still a bug which can make this crash once in a while
+....) 
+
+It would be fairly easy to add a cross-correlation between two
+antennas in the same way. Modify the section after "//$ITERATE MFUNC
+sub,mul,add,div,pow" in hffuncs_awk.cc accordingly, by adding a
+cross-correlation function (see hf_mul as an example).

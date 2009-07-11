@@ -16,9 +16,10 @@ def CRFile(self,filename=""):
 
 def CRDelAntennaPipeline(self,antennaID):
     "Deletes the data and plotting pipeline associated with the specified antenna ID."
+    if settrace: pdb.set_trace()
     ao=self[antennaID]
     if ao.Found():
-        objs=ao.Chain(DIR.TO,["PlotWindow","Chooser","Replot","Datatype","UnitName","UnitPrefix","DataPipeline","Parameters=Data","Parameters=UnitData","Parameters=PlotPanel"],False)
+        objs=ao.FirstObject().Chain(DIR.TO,["PlotWindow","Chooser","Replot","Datatype","UnitName","UnitPrefix","DataPipeline","Parameters=Data","Parameters=UnitData","Parameters=PlotPanel","Reference"],False)
         ~objs
 
 settrace=False
@@ -45,14 +46,14 @@ def CRDataPipeline(self):
     newAntennaNames=list(desiredAntennaNames-existingAntennaNames)
     newAntennaNames.sort()
     existingAntennaNames=list(existingAntennaNames)
+    if settrace: pdb.set_trace()
     dp=self.find_or_make("DataPipeline","",_l(90))
+    reference=dp.find_or_make("'Reference",_l(9))
     dp.find_or_make("'Parameters=Data",_l(999)).find_or_make("'Blocksize",2048,_l(90))
     aobjects=(dp.find_or_make(AntennaObjectNames,_l(9)).find_or_make("Antenna")).setList(AntennaSelection)
-#    xaxis=aobjects.find_or_make("x").find_or_make("Data",_f("dataRead","CR",TYPE.COMPLEX)).find_or_make("UnitData").find_or_make("xAxis")
-#    yaxis=aobjects.find_or_make("y").find_or_make("Data",_f("dataRead","CR",TYPE.COMPLEX)).find_or_make("UnitData").find_or_make("yAxis")
     xaxis=aobjects.find_or_make("x").find_or_make("Data",_f("dataRead")).find_or_make("UnitData").find_or_make("xAxis")
     yaxis=aobjects.find_or_make("y").find_or_make("Data",_f("dataRead")).find_or_make("UnitData").find_or_make("yAxis")
-#    if settrace: pdb.set_trace()
+    reference.resetLink(aobjects.FirstObject()["y:Data"])
     xaxis=self["Antenna"]["xAxis"]
     yaxis=self["Antenna"]["yAxis"]
     datpars=self["Antenna"]["'Parameters=Data"]
@@ -63,7 +64,7 @@ def CRDataPipeline(self):
     unitchooser.resetLink(DataUnion(xaxis["'UnitData"]).find_or_make("'Parameters=UnitData",_l(999)),DIR.NONE,DIR.TO)
     unitchooser.resetLink(DataUnion(yaxis["'UnitData"]).find_or_make("'Parameters=UnitData",_l(999)),DIR.NONE,DIR.TO)
     xaxis["'UnitData"].setFunc_f_silent(_f("Unit")) 
-    yaxis["'UnitData"].setFunc_f_silent(_f("Unit")) 
+    yaxis["'UnitData"].setFunc_f_silent(_f("Unit"))
     return [AntennaObjectNames,unwantedAntennaNames,newAntennaNames]
 
 def PlotDataPipeline(self):

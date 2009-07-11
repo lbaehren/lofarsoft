@@ -225,7 +225,7 @@ template <class T, class S>
 void copycast_vec(void *ptr, vector<S> *op, Vector_Selector *vs);
 
 
-enum MOD_ACTION {MOD_CLEARED,  MOD_UPDATED,  MOD_LINKCHANGED, MOD_DELETED, MOD_UNDEF};
+enum MOD_ACTION {MOD_CLEARED, MOD_VISITED, MOD_UPDATED,  MOD_LINKCHANGED, MOD_DELETED, MOD_UNDEF};
 
 struct modification_record {
     MOD_ACTION action;
@@ -233,6 +233,8 @@ struct modification_record {
     longint version;
   };
   
+typedef modification_record visit_marker;
+
 bool ModRecisValid(const modification_record mod);
 
 class Data {
@@ -317,6 +319,8 @@ class Data {
     /*! If true then modifications are not passed on in a DIR_TO connection */
 
     longint version; 
+    longint visitmarkers; 
+    visit_marker received_visit_marker;
     longint netlevel; 
     bool beingmodified;
     bool modified;
@@ -421,6 +425,11 @@ class Data {
 
   template <class T>
     DataList find_relatives(const HString name,  const vector<T> &elems, const DIRECTION dir);
+
+  void dropVisitmarker(visit_marker vm);
+  visit_marker getNewVisitmarker(longint v=-1);
+  bool checkVisited(visit_marker vm);
+
   
   DataList Search(const HString s);
   DataList Find(const HString s, const int rpos=0);

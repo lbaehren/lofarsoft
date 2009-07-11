@@ -976,6 +976,63 @@ $${
 
 
 
+//$ITERATE MFUNC sub,mul,add,div,pow
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: $MFUNC
+Info: Performs the operation $MFUNC between the data vector and a reference object
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+$${ 
+  dp->getFirstFromVector(*vp,vs);
+  vector<T> rvec;
+  
+  Data* robj=dp->Ptr("'Reference");
+  if (!isDataObject(robj)) {
+    ERROR("Math Function $MFUNC (" << dp->getName(true) << ") - No Reference object found, no calculation performed.");
+    return;
+  }
+
+  robj->get(rvec,vs);
+  
+  if (rvec.size()==0) {
+    ERROR("Math Function $MFUNC (" << dp->getName(true) << ") - No data in Reference object found, no calculation performed.");
+    return;
+  }
+
+  INIT_FUNC_ITERATORS(it,end);
+
+  if (rvec.size()==1) {
+    T val = rvec[0];
+    while (it!=end) {
+      *it=hf_$MFUNC(*it,val);
+      it++;
+    };
+  } else {
+    typedef typename vector<T>::iterator iterator_TT;
+    iterator_TT it2=rvec.begin();
+    iterator_TT end2=rvec.end();
+    iterator_TT beg2=it2;
+    while (it!=end) {
+      *it=hf_$MFUNC(*it,*it2);
+      it++;it2++;
+      if (it2==end2) {it2=beg2;};
+    };
+  };
+}
+//$END Function -----------------------------------------------------------------
+//$ENDITERATE
+
+
+//========================================================================
+// END MATH LIBRARY FUNCTIONS
+//========================================================================
+
+
 //------------------------------------------------------------------------------
 //$NEW: Function
 /*------------------------------------------------------------------------------

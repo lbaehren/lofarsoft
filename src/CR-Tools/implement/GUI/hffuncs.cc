@@ -1,7 +1,7 @@
 //================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfprep.awk
 //================================================================================
-//     File was generated from - on Fri Jul 10 15:11:05 CEST 2009
+//     File was generated from - on Sat Jul 11 02:12:14 CEST 2009
 //--------------------------------------------------------------------------------
 //
 //#define DBG_MODE 0
@@ -1867,6 +1867,330 @@ template <class T> void process(F_PARAMETERS) {
 
 
 
+//$ITERATE MFUNC sub,mul,add,div,pow
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: div
+Info: Performs the operation div between the data vector and a reference object
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_div : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_div (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_div(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+  vector<T> rvec;
+  
+  Data* robj=dp->Ptr("'Reference");
+  if (!isDataObject(robj)) {
+    ERROR("Math Function div (" << dp->getName(true) << ") - No Reference object found, no calculation performed.");
+    return;
+  }
+
+  robj->get(rvec,vs);
+  
+  if (rvec.size()==0) {
+    ERROR("Math Function div (" << dp->getName(true) << ") - No data in Reference object found, no calculation performed.");
+    return;
+  }
+
+  INIT_FUNC_ITERATORS(it,end);
+
+  if (rvec.size()==1) {
+    T val = rvec[0];
+    while (it!=end) {
+      *it=hf_div(*it,val);
+      it++;
+    };
+  } else {
+    typedef typename vector<T>::iterator iterator_TT;
+    iterator_TT it2=rvec.begin();
+    iterator_TT end2=rvec.end();
+    iterator_TT beg2=it2;
+    while (it!=end) {
+      *it=hf_div(*it,*it2);
+      it++;it2++;
+      if (it2==end2) {it2=beg2;};
+    };
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(div,Math,"Performs the operation div between the data vector and a reference object",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: pow
+Info: Performs the operation pow between the data vector and a reference object
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_pow : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_pow (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_pow(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+  vector<T> rvec;
+  
+  Data* robj=dp->Ptr("'Reference");
+  if (!isDataObject(robj)) {
+    ERROR("Math Function pow (" << dp->getName(true) << ") - No Reference object found, no calculation performed.");
+    return;
+  }
+
+  robj->get(rvec,vs);
+  
+  if (rvec.size()==0) {
+    ERROR("Math Function pow (" << dp->getName(true) << ") - No data in Reference object found, no calculation performed.");
+    return;
+  }
+
+  INIT_FUNC_ITERATORS(it,end);
+
+  if (rvec.size()==1) {
+    T val = rvec[0];
+    while (it!=end) {
+      *it=hf_pow(*it,val);
+      it++;
+    };
+  } else {
+    typedef typename vector<T>::iterator iterator_TT;
+    iterator_TT it2=rvec.begin();
+    iterator_TT end2=rvec.end();
+    iterator_TT beg2=it2;
+    while (it!=end) {
+      *it=hf_pow(*it,*it2);
+      it++;it2++;
+      if (it2==end2) {it2=beg2;};
+    };
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(pow,Math,"Performs the operation pow between the data vector and a reference object",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: sub
+Info: Performs the operation sub between the data vector and a reference object
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_sub : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_sub (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_sub(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+  vector<T> rvec;
+  
+  Data* robj=dp->Ptr("'Reference");
+  if (!isDataObject(robj)) {
+    ERROR("Math Function sub (" << dp->getName(true) << ") - No Reference object found, no calculation performed.");
+    return;
+  }
+
+  robj->get(rvec,vs);
+  
+  if (rvec.size()==0) {
+    ERROR("Math Function sub (" << dp->getName(true) << ") - No data in Reference object found, no calculation performed.");
+    return;
+  }
+
+  INIT_FUNC_ITERATORS(it,end);
+
+  if (rvec.size()==1) {
+    T val = rvec[0];
+    while (it!=end) {
+      *it=hf_sub(*it,val);
+      it++;
+    };
+  } else {
+    typedef typename vector<T>::iterator iterator_TT;
+    iterator_TT it2=rvec.begin();
+    iterator_TT end2=rvec.end();
+    iterator_TT beg2=it2;
+    while (it!=end) {
+      *it=hf_sub(*it,*it2);
+      it++;it2++;
+      if (it2==end2) {it2=beg2;};
+    };
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(sub,Math,"Performs the operation sub between the data vector and a reference object",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: mul
+Info: Performs the operation mul between the data vector and a reference object
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_mul : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_mul (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_mul(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+  vector<T> rvec;
+  
+  Data* robj=dp->Ptr("'Reference");
+  if (!isDataObject(robj)) {
+    ERROR("Math Function mul (" << dp->getName(true) << ") - No Reference object found, no calculation performed.");
+    return;
+  }
+
+  robj->get(rvec,vs);
+  
+  if (rvec.size()==0) {
+    ERROR("Math Function mul (" << dp->getName(true) << ") - No data in Reference object found, no calculation performed.");
+    return;
+  }
+
+  INIT_FUNC_ITERATORS(it,end);
+
+  if (rvec.size()==1) {
+    T val = rvec[0];
+    while (it!=end) {
+      *it=hf_mul(*it,val);
+      it++;
+    };
+  } else {
+    typedef typename vector<T>::iterator iterator_TT;
+    iterator_TT it2=rvec.begin();
+    iterator_TT end2=rvec.end();
+    iterator_TT beg2=it2;
+    while (it!=end) {
+      *it=hf_mul(*it,*it2);
+      it++;it2++;
+      if (it2==end2) {it2=beg2;};
+    };
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(mul,Math,"Performs the operation mul between the data vector and a reference object",NUMBER,false);
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: add
+Info: Performs the operation add between the data vector and a reference object
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+class DataFunc_Math_add : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_add (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_add(){cleanup(); } 
+ 
+void setParameters(){
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  dp->getFirstFromVector(*vp,vs);
+  vector<T> rvec;
+  
+  Data* robj=dp->Ptr("'Reference");
+  if (!isDataObject(robj)) {
+    ERROR("Math Function add (" << dp->getName(true) << ") - No Reference object found, no calculation performed.");
+    return;
+  }
+
+  robj->get(rvec,vs);
+  
+  if (rvec.size()==0) {
+    ERROR("Math Function add (" << dp->getName(true) << ") - No data in Reference object found, no calculation performed.");
+    return;
+  }
+
+  INIT_FUNC_ITERATORS(it,end);
+
+  if (rvec.size()==1) {
+    T val = rvec[0];
+    while (it!=end) {
+      *it=hf_add(*it,val);
+      it++;
+    };
+  } else {
+    typedef typename vector<T>::iterator iterator_TT;
+    iterator_TT it2=rvec.begin();
+    iterator_TT end2=rvec.end();
+    iterator_TT beg2=it2;
+    while (it!=end) {
+      *it=hf_add(*it,*it2);
+      it++;it2++;
+      if (it2==end2) {it2=beg2;};
+    };
+  };
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(add,Math,"Performs the operation add between the data vector and a reference object",NUMBER,false);
+//$ENDITERATE
+
+
+//========================================================================
+// END MATH LIBRARY FUNCTIONS
+//========================================================================
+
+
 //------------------------------------------------------------------------------
 //$NEW: Function
 /*------------------------------------------------------------------------------
@@ -2443,6 +2767,11 @@ PUBLISH_OBJECT_FUNCTION(Math,phase);
 PUBLISH_OBJECT_FUNCTION(Math,imag);
 PUBLISH_OBJECT_FUNCTION(Math,conj);
 PUBLISH_OBJECT_FUNCTION(Math,degree);
+PUBLISH_OBJECT_FUNCTION(Math,div);
+PUBLISH_OBJECT_FUNCTION(Math,pow);
+PUBLISH_OBJECT_FUNCTION(Math,sub);
+PUBLISH_OBJECT_FUNCTION(Math,mul);
+PUBLISH_OBJECT_FUNCTION(Math,add);
 PUBLISH_OBJECT_FUNCTION(Sys,Offset);
 PUBLISH_OBJECT_FUNCTION(Sys,print);
 PUBLISH_OBJECT_FUNCTION(Sys,range);

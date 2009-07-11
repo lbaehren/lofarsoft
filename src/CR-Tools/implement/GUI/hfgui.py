@@ -364,7 +364,7 @@ class hfQtPlot(QtGui.QWidget):
         self.currentplotpanelobject()["'Replot"].touch()
     def hfremove_fy(self): 
         base=self.currentplotpanelobject()["'y:UnitData"]
-        l=base.Chain(DIR.TO,["yAxis","maxBlock"],False,True)
+        l=base.Chain(DIR.TO,["yAxis","maxBlock","Reference"],False,True)
         if settrace: pdb.set_trace()
         if base.isDataList():
             for dl in l:
@@ -375,7 +375,7 @@ class hfQtPlot(QtGui.QWidget):
         self.currentplotpanelobject()["'Replot"].touch()
     def hfremove_fx(self): 
         base=self.currentplotpanelobject()["'x:UnitData"]
-        l=base.Chain(DIR.TO,["xAxis","maxBlock"],False,True)
+        l=base.Chain(DIR.TO,["xAxis","maxBlock","Reference"],False,True)
         if settrace: pdb.set_trace()
         if base.isDataList():
             for dl in l:

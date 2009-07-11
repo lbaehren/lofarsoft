@@ -1113,10 +1113,11 @@ DataList Data::FindChain(const DIRECTION dir,const vector<HString> names, const 
   DataList::iterator it;
   DIRECTION dir2 = DIR_BOTH;
   if (monotonic) dir2=dir;
-  
+  HInteger oid;
   chain.push_back(this);
   neighbours=getNeighbours(dir);
   it=neighbours.begin();
+
   while (it!=neighbours.end()) {
     DBG2("Neighbour="<<(*it)->getName());
     if (!in_vector(*it,chain)) {
@@ -1137,7 +1138,7 @@ DataList Data::FindChain(const DIRECTION dir,const vector<HString> names, const 
     neighbours.clear();
     it=newneighbours.begin();
     while (it!=newneighbours.end()) {
-      DBG2("NewNeighbour="<<(*it)->getName());
+      D2BG("NewNeighbour="<<(*it)->getName());
       vec_append(neighbours,(*it)->getNeighbours(dir2));
       it++;
     };
@@ -1145,7 +1146,8 @@ DataList Data::FindChain(const DIRECTION dir,const vector<HString> names, const 
     //Now cycle over all these neighbours and determine which ones are new and not yet and endpoint object
     it=neighbours.begin();
     while (it!=neighbours.end()) {
-      DBG2("Neighbour2="<<(*it)->getName());
+      oid=(*it)->getOid();
+      D2BG("Neighbour2="<< (*it)->getName(true));
       if (!in_vector(*it,chain)) {
 	SaveCall(*it){
 	  if (!(in_vector((*it)->getName(),names) || in_vector((*it)->getSearchName(),names))) {
@@ -1741,7 +1743,8 @@ void Data::setModification(objectid port, modification_record newmod){
   if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return;};
 
   objectid size,i;
-  
+  bool circular=false;
+
   DBG("setModification(port=" <<port<<", mod=" << strModFlag(newmod) <<"): name=" << getName(true));
 
   /*  if (data.beingmodified) MSG("setModification(port=" <<port<<", mod=" << strModFlag(newmod) <<"): name=" << getName(true) << " data.version=" <<getVersion() << ". Warning the object is being modified again, while another modification chain is already in progress. Maybe there is an inconsistent state of the network.");
@@ -1752,8 +1755,8 @@ void Data::setModification(objectid port, modification_record newmod){
   //store the modification in the respective FROM port, check for a circular network 
   if (port>=0 && port <data.from.size()) {
     if (data.from[port]->mod==newmod) {
-      MSG("setModification(port=" <<port<<", mod=" << strModFlag(newmod) <<") name=" << getName(true) <<": Same modification flag received twice. Do you have a circular network?");
-      return;
+      DBG("setModification(port=" <<port<<", mod=" << strModFlag(newmod) <<") name=" << getName(true) <<": Same modification flag received twice. Do you have a circular network?");
+      circular=true;
     };
     data.from[port]->mod=newmod;
   } else {
@@ -1775,24 +1778,25 @@ void Data::setModification(objectid port, modification_record newmod){
 
   data.modified=true;
 
-  size=data.to.size();
-  for (i=0; i<size; ++i) {
-    //mark the port to the next higher object as modified - this
-    //will be queried from higher up when needed.
-    data.to[i]->mod=newmod;
-    //In push mode notify any objects higher up in the food chain
-    //about the modification. They will in turn notify objects higher
-    //up. The notification messagis a worm 
-    //The references of the to be updated objects will be added
-    //to the update-worm of the object that started this (who's
-    //reference is contained in newmod, which is passed on higher).
-    if ((data.to[i]->direction == PUSH || data.to[i]->direction == DIR_BOTH)) {
-      SaveCall(data.to[i]->ref) data.to[i]->ref->setModification(data.to[i]->port,newmod);
-    };
-  };   
-
-  //Add yourself to the update worm ...
-  if (ModRecisValid(newmod)) newmod.ref->Worm->push_back(this);
+  if (!circular) {
+    size=data.to.size();
+    for (i=0; i<size; ++i) {
+      //mark the port to the next higher object as modified - this
+      //will be queried from higher up when needed.
+      data.to[i]->mod=newmod;
+      //In push mode notify any objects higher up in the food chain
+      //about the modification. They will in turn notify objects higher
+      //up. The notification messagis a worm 
+      //The references of the to be updated objects will be added
+      //to the update-worm of the object that started this (who's
+      //reference is contained in newmod, which is passed on higher).
+      if ((data.to[i]->direction == PUSH || data.to[i]->direction == DIR_BOTH)) {
+	SaveCall(data.to[i]->ref) data.to[i]->ref->setModification(data.to[i]->port,newmod);
+      };
+    };   
+    //Add yourself to the update worm ...
+    if (ModRecisValid(newmod)) newmod.ref->Worm->push_back(this);
+  };
 }
 
 /*!  Check whether an object is modified an needs to be updated. Also,
@@ -1856,7 +1860,7 @@ bool Data::checkModification(objectid port, modification_record newmod){
 
   objectid size,i;
   bool modified=data.modified;
-
+  bool circular=false;
 
   DBG("checkModification(port=" <<port<<", newmod="<<strModFlag(newmod) <<"): name=" << getName(true) << " data.modified=" << tf_txt(data.modified));
 
@@ -1868,8 +1872,8 @@ bool Data::checkModification(objectid port, modification_record newmod){
     if (data.to[port]->mod.ref!=NULL ) {
       modified=true;
       if (data.to[port]->mod==newmod) {
-	MSG("checkModification(toport=" <<port<<", mod=" << strModFlag(newmod) <<") name=" << getName(true) <<": Same modification flag received twice. Do you have a circular network?");
-	return true;
+	DBG("checkModification(toport=" <<port<<", mod=" << strModFlag(newmod) <<") name=" << getName(true) <<": Same modification flag received twice. Do you have a circular network?");
+	circular=true;
       };
     };
   } else {
@@ -1880,9 +1884,10 @@ bool Data::checkModification(objectid port, modification_record newmod){
   //Now go deeper through the network in the FROM direction (even if
   //this is already modified)
   size=data.from.size();
-  for (i=0; i<size; ++i) {
-    if ((data.from[i]->direction == PULL || data.from[i]->direction == DIR_BOTH)) {
-      SaveCall(data.from[i]->ref) {
+  if (!circular) {
+    for (i=0; i<size; ++i) {
+      if ((data.from[i]->direction == PULL || data.from[i]->direction == DIR_BOTH)) {
+	SaveCall(data.from[i]->ref) {
 	  if (data.from[i]->mod==newmod) {
 	    MSG("checkModification(port=" <<port<<", mod=" << strModFlag(newmod) <<") name=" << getName(true) <<": Same modification flag received twice. Do you have a circular network?");
 	    return false;
@@ -1894,8 +1899,11 @@ bool Data::checkModification(objectid port, modification_record newmod){
 	      data.to[port]->mod=newmod;
 	    };
 	  };
-      };  
+	};  
+      };
     };
+
+    if (data.modified) {if (ModRecisValid(newmod)) newmod.ref->Worm->push_back(this);};
   };   
   
   //If the object is modified (i.e., if one object in FROM direction
@@ -1903,7 +1911,6 @@ bool Data::checkModification(objectid port, modification_record newmod){
   //the update worm
 
   //Add itself to the update worm, if the object itself is modified.
-  if (data.modified) {if (ModRecisValid(newmod)) newmod.ref->Worm->push_back(this);};
   return modified;
 }
 
@@ -3091,6 +3098,34 @@ The function returns true if the relative is found, and false if not.
   return vec;
 }
 
+/*!  
+\brief Leave a trail marker when searching the net, indicating
+that this object has been visited. Hence, a circular vist can be
+detected and stopped.
+*/
+void Data::dropVisitmarker(visit_marker vm){data.received_visit_marker=vm;}
+
+/*!  
+\brief Generate a new unique visitmarker, that can be dropped.
+*/
+visit_marker Data::getNewVisitmarker(longint v){
+  visit_marker vm;
+  if (v<0) {
+    data.visitmarkers++;
+    if (data.visitmarkers>=MAXVERSION) data.visitmarkers=0;
+  } else {data.visitmarkers=v;};
+  vm.action=MOD_VISITED;
+  vm.ref=this;
+  vm.version=data.visitmarkers;
+  return vm;
+}
+
+/*!
+\brief Check whether an object has already been visited, by looking
+for an identical visit marker.
+*/
+bool Data::checkVisited(visit_marker vm){return data.received_visit_marker==vm;}
+
 /*!Check if any of the immediate relatives in direction dir has a
 given name and return pointers to these object. Returns multiple
 pointers in vec if multiple names are present at the same level in the
@@ -3103,22 +3138,20 @@ DataList Data::find_relatives(const HString name, const vector<T> &elems, const 
   DataList neighbours,next_neighbours,result;
   address i,level=0,n_size,el_size=elems.size();
   bool found=false;
+  visit_marker vm=getNewVisitmarker();
   D2BG2("find_relatives("<<name<<", dir="<<direction_txt(dir)<<"): getName=" << getName(true)<<" elems=");D2BG3(printvec(elems));
   neighbours=getNeighbours(dir);
   n_size=neighbours.size();
   while (result.size()==0 && n_size>0) {
-    D2BG("level="<<++level << ", result.size()=" << result.size() << ", n_size=" << n_size);
     for (i=0;i<n_size; ++i) {
       found=false;
       SaveCall(neighbours[i]) {
-	D2BG(i << ": ptr=" << neighbours[i] <<", name=" << neighbours[i]->getName());
 	if (neighbours[i]->getName()==name) {
 	  if (el_size==0) found = true;  //No elements given, hence no further content-based selection necessary
 	  else found = object_logic_in_set(neighbours[i],elems); //Test whether contents of object is among those listed in elem
 	};
       };
       if (found) {
-	D2BG("Found!");
 	result.push_back(neighbours[i]);
       };
     };
@@ -3126,64 +3159,22 @@ DataList Data::find_relatives(const HString name, const vector<T> &elems, const 
     if (result.size()==0) {
       next_neighbours.clear();
       for (i=0;i<n_size;++i) {
-	D2BG("neighbours["<<i<<"]=" << neighbours[i] << ", magiccode=" << neighbours[i]->magiccode);
-	SaveCall(neighbours[i]) vec_append(next_neighbours,neighbours[i]->getNeighbours(dir));
+	SaveCall(neighbours[i]) {
+	  if (neighbours[i]!=this && !neighbours[i]->checkVisited(vm)) {// stop at circular network
+	    neighbours[i]->dropVisitmarker(vm);
+	    vec_append(next_neighbours,neighbours[i]->getNeighbours(dir)); 
+	  };
+	};
       };
-      D2BG("Calling vec_unique_copy");
       //vec_unique_copy(next_neighbours,neighbours);
       neighbours=vec_unique(next_neighbours);
       n_size=neighbours.size();
     };
   };
   //result=vec_unique(result); - This is done in Find again ...
-  D2BG2("find_relatives: result vector = "); D2BG3(printvec_txt(result,&datapointer_txt)); 
   return result;
 }
 
-//Check if any of the immediate relatives in direction dir has a given name and return
-//pointers to these object. Returns multiple pointers in vec if multiple names are present.
-//If not, seek the next generation of relatives. Returns only the relatives of the first object
-//to have relatives of the name searched for.
-/* OLD OLD OLD
-vector<Data*> Data::find_relatives(HString name, DIRECTION dir) {
-  objectid i;
-  vector<Data*> vec;
-  vector<reference_descr*> *p_ref;
-  vec=find_immediate_relatives(name,dir);
-  if (vec.size()==0) {
-    //search the next generation, if name is not found in the immediate vicinity
-    if (dir==DIR_TO) {p_ref = &data.to;} else {p_ref = &data.from;};
-    for (i=0;i<p_ref->size();++i){
-      vec_append(vec,(*p_ref)[i]->ref->find_relatives(name,dir));
-    };
-  };
-  return vec;
-}
-
-//find all relatives of name=name which have a value in vector elems
-template <class T>
-vector<Data*> Data::select_relatives(HString name, vector<T> &elems, DIRECTION dir) {
-  vector<Data*> vec1,vec2;
-  objectid i,s;
-  bool found;
-  vec1=find_relatives(name,dir);
-//  DBG2("find_relatives: name=" << name << " dir=" << direction_txt(dir) << " vec1="); D2BG3(printvec(vec1));
-  s=vec1.size();
-  for (i=0;i<s;++i){
-//    DBG2("in_set vec1[" << i << "] in ["); DBG3(printvec_noendl(elems)); DBG3(cout << "]" <<endl);
-    found=object_logic_in_set(vec1[i],elems);
-//    DBG("found=" << tf_txt(found));
-    if (found) {
-//	DBG2("Found! "); 
-      vec2.push_back(vec1[i]); 
-//      DBG("i=" << i << " vec2.size()=" << vec2.size()); 
-//      DBG3(vec2[vec2.size()-1]->printStatus());
-    };
-  };
-  return vec2;
-}
-
-*/
 
 //find objects of the given name (includes : and ' and selection specifications)
 //if rpos>0 then only take rpos objects from the right side
@@ -3352,31 +3343,23 @@ DataList Data::Find(const HString s, const int rpos) {
   if (this==&NullObject || s.size()==0) return vec_in;
   if (s[0]=='*' || s[0]=='=') return Search(s);
   parse_record_name_to_vector(s, names, dirs);
-  DBG("Find(s=" << s << ", rpos=" << rpos <<") [" << getName(true) << "]: Start"); 
-  D2BG2("Find(s=" << s << ", rpos=" << rpos <<") [" << getName(true) << "]: names="); D2BG3(printvec(names));
-  D2BG2("Find(s=" << s << ", rpos=" << rpos <<") [" << getName(true) << "]: Directions="); D2BG3(printvec_txt(dirs,&direction_txt)); 
+  DBG("Find(name="<<getName(true)<<", s=\"" << s << "\", rpos=" << rpos << ")");
+
   objectid i,beg=0,end=names.size()-1;
   objectid j,n;
   vec_in.push_back(this); n=1;
   if (rpos>0) {beg=max(end-rpos+1,0);};
   if (rpos<0) {end=end+rpos;};
-  D2BG("beg=" << beg << " end=" << end);
   for (i=beg;i<=end && n>0;++i) {
     //Check if the object names also have an additional condition,
-    //e.g. "Antenna=0,1,2". selection=trueif that is the case and the
+    //e.g. "Antenna=0,1,2". selection=true if that is the case and the
     //elements after '=' are in elems
     parse_record_selection_to_vector(names[i],name,elems);
-    D2BG2("Find(s=" << s << ", rpos=" << rpos <<") [" << getName(true) << "]: parse_record_selection_to_vector: names[" << i << "]=" << names[i] << " selection=" << tf_txt(selection) << " name=" << name << " elems="); 
-    D2BG3(printvec(elems));
     vec_out.clear(); 
     for (j=0;j<n;j++) {
-      D2BG("Find(s=" << s << ", rpos=" << rpos <<") [" << getName(true) << "]: pre_append : " << "j=" <<j << " n=" << n << " vec_out.size()=" << vec_out.size());
       vec_append(vec_out,vec_in[j]->find_relatives(name,elems,dirs[i]));
-      D2BG("Find(s=" << s << ", rpos=" << rpos <<") [" << getName(true) << "]: post_append: " << "j=" <<j << " n=" << n << " vec_out.size()=" << vec_out.size());
     };
     vec_in=vec_out; n=vec_in.size();
-    D2BG("Find(s=" << s << ", rpos=" << rpos <<") [" << getName(true) << "]: n=" << n << ", vec_in.size()=" << vec_in.size());
-    D2BG2("Find(s=" << s << ", rpos=" << rpos <<") [" << getName(true) << "]: vec_in="); D2BG3(printvec(vec_in));
   };
   return vec_unique(vec_in);
 }
@@ -3573,6 +3556,8 @@ Data::Data(HString name,superior_container * superior){
   data.debug=false;
   data.defdir=PUSH;
   data.netlevel=1;
+  data.visitmarkers=0;
+  data.received_visit_marker=getNewVisitmarker(0);
   setVersion(1);
   Worm = NULL;
 
