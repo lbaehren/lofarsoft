@@ -21,9 +21,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Data/../../../../external/casacore/lattices/lattices/Lattices/LatticeExprNode.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Arrays/Matrix.h>
+#include <lattices/Lattices/LatticeExprNode.h>
 
 using casa::Array;
 using casa::conj;
