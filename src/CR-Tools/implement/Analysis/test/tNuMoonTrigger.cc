@@ -57,150 +57,112 @@ Double posi_x[10] = { 1., 2., 3., 4., 5., 6., 7., 8., 9., 10.};
   \return nofFailedTests -- The number of failed tests encountered within this
           function.
 */
-int test_constructors (std::string const &filename)
+int test_constructors (std::string const &filename,
+		       unsigned int const  &n_samples=139264)
 {
   std::cout << "\n[tNuMoonTrigger::test_constructors]\n" << std::endl;
-
+  
   int nofFailedTests (0);
   
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    	NuMoonTrigger numooontrigger;
-	
-	//uint n_samples = 143015936 ;
-	//uint n_samples = 143015936 ;
-	uint n_samples = 139264 ;
-	
-//	DAL::TBB_Timeseries timeseries(filename) ;
-	  
-       //  ACG gen(1, n_frames );
+    NuMoonTrigger numooontrigger;
     
-//          for( uint nSample=0; nSample < n_frames; nSample++ ){
-//           		 Normal rnd(&gen, 0.0, 0.04 );
-//            		 Double nextExpRand = rnd() ;
-//      			 random_number(nSample) = abs(nextExpRand) ;
-//			 pulse_LocVector(nSample) =random_number(nSample)*1000 ;
-//			 rnd_PhaseVector(nSample) =random_number(nSample)*2*pi ; 
- //                }
-    		// Resetting the generator, should get the same numbers.
-//    		gen.reset () ;
-	 
-//	  uint nofSamples = n_frames*1024 ;
-	  
- 	  uint start =0 ;
- 	  
-//	  casa::Matrix<double> data = timeseries.fx( start,
-// 	  		      				n_samples ) ;
-// 	 
- 	 CR::LOFAR_TBB lofar_tbb( filename, n_samples ) ;
-	
-	 lofar_tbb.DataReader::setNyquistZone(2);
-
- 	casa::Matrix<double> data = lofar_tbb.fx( ) ;	
-	ofstream logfile11;
-//     
-         logfile11.open( "antenna_0.dat", ios::out );
-         for( uint nSample=0; nSample < n_samples ; nSample++ ){
- 		
- 	            logfile11 << data(nSample,0) << endl ;
- 	   }
- 	  
-	logfile11.close() ;
-
-	uint nofSamples =  data.nrow () ;
-	uint n_columns = data.ncolumn () ;
-	
-	cout << "number of samples : " << nofSamples << "number of columns :" << n_columns << endl ;
-	
-	double simTEC = 10.0 ;
-
-	double sampling_rate = 200e6 ;
-
-	uint nyquist_zone = 2 ;
-
-	uint time_int_bins =5 ;
-	
-	uint n_frames  = 136 ;
-	
-	double TEC = 10.0 ;
+    CR::LOFAR_TBB lofar_tbb( filename, n_samples ) ;
     
-	casa::Vector<double> ppfcoeff(16384,0.0) ;
-	
-	casa::Vector<double> ppfcoeff_inv(16384, 0.0) ;
-	
-	casa::Vector<double> antenna_0(n_samples, 0.0 ) ;
-	casa::Vector<double> antenna_1(n_samples, 0.0 ) ;
-	casa::Vector<double> antenna_2(n_samples, 0.0 ) ;
-	casa::Vector<double> antenna_3(n_samples, 0.0 ) ;
-	casa::Vector<double> antenna_4(n_samples, 0.0 ) ;
-	casa::Vector<double> antenna_5(n_samples, 0.0 ) ;
-	casa::Vector<double> antenna_6(n_samples, 0.0 ) ;
-	casa::Vector<double> antenna_7(n_samples, 0.0 ) ;
-		
-    	readAsciiVector( ppfcoeff,"Coeffs16384Kaiser-quant.dat" ) ;
+    lofar_tbb.DataReader::setNyquistZone(2);
     
-    	readAsciiVector( ppfcoeff_inv,"ppf_inv.dat" ) ;
-	
-	casa::Vector<double> freq_range(2,0.0) ;
+    casa::Matrix<double> data = lofar_tbb.fx( ) ;	
+    ofstream logfile11;
+    
+    logfile11.open( "antenna_0.dat", ios::out );
+    for( uint nSample=0; nSample < n_samples ; nSample++ ){
+      
+      logfile11 << data(nSample,0) << endl ;
+    }
+    
+    logfile11.close() ;
+    
+    uint nofSamples =  data.nrow () ;
+    uint n_columns  = data.ncolumn () ;
+    
+    cout << "number of samples : " << nofSamples << "number of columns :" << n_columns << endl ;
+    
+//     double simTEC        = 10.0 ;
+    double sampling_rate = 200e6 ;
+    uint nyquist_zone    = 2 ;
+//     uint time_int_bins   = 5 ;
+    uint n_frames        = 136 ;
+//     double TEC           = 10.0 ;
+//     double peak_power    = 49.0 ;
+    
+    casa::Vector<double> ppfcoeff(n_samples,0.0) ;
+    casa::Vector<double> ppfcoeff_inv(n_samples, 0.0) ;
+    casa::Vector<double> antenna_0 (n_samples, 0.0 ) ;
+    casa::Vector<double> antenna_1 (n_samples, 0.0 ) ;
+    casa::Vector<double> antenna_2 (n_samples, 0.0 ) ;
+    casa::Vector<double> antenna_3 (n_samples, 0.0 ) ;
+    casa::Vector<double> antenna_4 (n_samples, 0.0 ) ;
+    casa::Vector<double> antenna_5 (n_samples, 0.0 ) ;
+    casa::Vector<double> antenna_6 (n_samples, 0.0 ) ;
+    casa::Vector<double> antenna_7 (n_samples, 0.0 ) ;
+    
+    readAsciiVector( ppfcoeff,"Coeffs16384Kaiser-quant.dat" ) ;
+    
+    readAsciiVector( ppfcoeff_inv,"ppf_inv.dat" ) ;
+    
+    casa::Vector<double> freq_range(2,0.0) ;
+    
+    casa::Vector<uint> RCU_id(8,0) ;
+    
+    freq_range(0)= 130e6 ;
+    
+    freq_range(1) = 180e6 ;
+    
+    RCU_id(0) = 0;
+    RCU_id(1) = 1;
+    RCU_id(2) = 2;
+    RCU_id(3) = 3;
+    RCU_id(4) = 4;
+    RCU_id(5) = 5;
+    RCU_id(6) = 6;
+    RCU_id(7) = 7;
+    
+    double pi          = 3.14159265358979323846 ;
+//     uint dataBlockSize = 1024 ;
+//     uint nOfSegments   = 5 ;
+//     double peak_height = 500. ;
+//     double pulse_loc   = 600. ;
+//     double rnd_phase   = 0.2*pi ;
 
-	double peak_power = 49.0 ;
-
-	casa::Vector<uint> RCU_id(8,0) ;
-	
-	freq_range(0)= 130e6 ;
+    casa::Vector<double>freq_Vector = numooontrigger.freq_vector(  sampling_rate,
+								   nyquist_zone) ;
     
-    	freq_range(1) = 180e6 ;
+    readAsciiVector( antenna_0,"antenna_0.dat" ) ;
+    readAsciiVector( antenna_1,"antenna_1.dat" ) ;
+    readAsciiVector( antenna_2,"antenna_2.dat" ) ;
+    readAsciiVector( antenna_3,"antenna_3.dat" ) ;
+    readAsciiVector( antenna_4,"antenna_4.dat" ) ;
+    readAsciiVector( antenna_5,"antenna_5.dat" ) ;
+    readAsciiVector( antenna_6,"antenna_6.dat" ) ;
+    readAsciiVector( antenna_7,"antenna_7.dat" ) ;
     
-    	RCU_id(0) = 0;
-	RCU_id(1) = 1;
-	RCU_id(2) = 2;
-	RCU_id(3) = 3;
-	RCU_id(4) = 4;
-	RCU_id(5) = 5;
-	RCU_id(6) = 6;
-	RCU_id(7) = 7;
-	
-	uint dataBlockSize = 1024 ;
-	
-	uint nOfSegments = 5 ;
-	
-	//uint n_ele = data_vector.nelements() ;
-	//cout << "number of elements in data_vector " << n_ele << endl ;
-	double peak_height = 500. ;
-	
-	double pulse_loc = 600. ;
-	double pi = 3.14159265358979323846 ;
-	double rnd_phase = 0.2*pi ;
-	
-	
-	casa::Vector<double>freq_Vector = numooontrigger.freq_vector(  sampling_rate,
-		   	                				nyquist_zone) ;
-	
-	readAsciiVector( antenna_0,"antenna_0.dat" ) ;
-	readAsciiVector( antenna_1,"antenna_1.dat" ) ;
-	readAsciiVector( antenna_2,"antenna_2.dat" ) ;
-	readAsciiVector( antenna_3,"antenna_3.dat" ) ;
-	readAsciiVector( antenna_4,"antenna_4.dat" ) ;
-	readAsciiVector( antenna_5,"antenna_5.dat" ) ;
-	readAsciiVector( antenna_6,"antenna_6.dat" ) ;
-	readAsciiVector( antenna_7,"antenna_7.dat" ) ;
-	
-	uint n_rcu =8 ;
-	
-	casa::Matrix<double> raw_data(n_samples, n_rcu, 0.0 ) ;
-	
-	raw_data.column(0) = antenna_0 ;
-	raw_data.column(1) = antenna_1 ;
-	raw_data.column(2) = antenna_2 ;	
-	raw_data.column(3) = antenna_3 ;
-	raw_data.column(4) = antenna_4 ;
-	raw_data.column(5) = antenna_5 ;
-	raw_data.column(6) = antenna_6 ;
-	raw_data.column(7) = antenna_7 ;
-	
-	uint nROW = raw_data.nrow() ;
-	uint nCOLUMN = raw_data.ncolumn();
-	
+    uint n_rcu =8 ;
+    
+    casa::Matrix<double> raw_data(n_samples, n_rcu, 0.0 ) ;
+    
+    raw_data.column(0) = antenna_0 ;
+    raw_data.column(1) = antenna_1 ;
+    raw_data.column(2) = antenna_2 ;	
+    raw_data.column(3) = antenna_3 ;
+    raw_data.column(4) = antenna_4 ;
+    raw_data.column(5) = antenna_5 ;
+    raw_data.column(6) = antenna_6 ;
+    raw_data.column(7) = antenna_7 ;
+    
+    uint nROW    = raw_data.nrow() ;
+    uint nCOLUMN = raw_data.ncolumn();
+    
 	//cout << "NUmber of rows in raw data array :" <<nROW << " and number of columns :" <<nCOLUMN<< endl;
 	casa::Vector<double> data_Vec = raw_data.column(0) ;
 	  
@@ -395,26 +357,6 @@ Matrix<double>	power_ampl_FFTdata = amplitude( power_FFTdata )	;
 	 } 
         logfile7.close() ;
 	
-	
-	
-	
-  /*		
-	     
-	numooontrigger.root_ntuples( filename,
-    			   	n_samples,
-				simTEC,
-			 	sampling_rate,
-			 	nyquist_zone,
-			 	time_int_bins,
-  			 	TEC,
-			 	ppfcoeff,
-		   	 	ppfcoeff_inv,
-		  	 	freq_range,
-			 	peak_power,
-			 	RCU_id ) ;
-				
-   	 numooontrigger.summary(); 
-    */
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -423,7 +365,8 @@ Matrix<double>	power_ampl_FFTdata = amplitude( power_FFTdata )	;
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                           main
 
 int main ( int argc,
 	  char *argv[])
@@ -437,6 +380,7 @@ int main ( int argc,
     std::cerr << "Please provide a HDF5 filename.\n";
     return(DAL::FAIL);
   }
+
   // Test for the constructor(s)
   nofFailedTests += test_constructors (filename);
 
