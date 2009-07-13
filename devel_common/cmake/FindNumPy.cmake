@@ -164,7 +164,11 @@ else (numpy_version_test_output)
     file (STRINGS ${NUMPY_NDARRAYOBJECT_H} NPY_VERSION
       REGEX "NPY_VERSION"
       )
-    string (REGEX REPLACE "#define NPY_VERSION 0x" "" NUMPY_VERSION ${NPY_VERSION})
+    if (NPY_VERSION)
+      string (REGEX REPLACE "#define NPY_VERSION 0x" "" NUMPY_VERSION ${NPY_VERSION})
+    else (NPY_VERSION)
+      message (STATUS "[NumPy] Unable to extract version from header file.")
+    endif (NPY_VERSION)
   endif (NUMPY_NDARRAYOBJECT_H)
   
   find_file (NUMPY_TEST_PROGRAM TestNumPyVersion.cc
