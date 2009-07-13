@@ -78,7 +78,7 @@ namespace CR {  // Namespace CR -- begin
     //! Start of the data segment inside the data file/volume
     unsigned int dataStart_p;
     //! Offset w.r.t. to the start of the data segment
-    unsigned int shift_p;
+    int shift_p;
     //! Stride between two subsequent blocks of data
     long int stride_p;
     // Number of the data block
@@ -129,7 +129,7 @@ namespace CR {  // Namespace CR -- begin
     */
     DataIterator (unsigned int const &blocksize,
 		  long int const &stride,
-		  unsigned int const &shift);
+		  int const &shift);
     
     /*!
       \brief Argumented constructor
@@ -144,7 +144,7 @@ namespace CR {  // Namespace CR -- begin
     DataIterator (unsigned int const &blocksize,
 		  unsigned int const &dataStart,
 		  long int const &stride,
-		  unsigned int const &shift);
+		  int const &shift);
     
     /*!
       \brief Copy constructor
@@ -274,7 +274,7 @@ namespace CR {  // Namespace CR -- begin
       
       \return shift 
     */
-    inline unsigned int shift () const {
+    inline int shift () const {
       return shift_p;
     }
     
@@ -283,7 +283,7 @@ namespace CR {  // Namespace CR -- begin
       
       \param shift - Shift w.r.t. the start of the data segment (\f$ N_{\rm Start} \f$).
     */
-    void setShift (unsigned int const &shift);
+    void setShift (int const &shift);
     
     /*!
       \brief Set the shift between the start of the data segment and the first block.
@@ -292,7 +292,7 @@ namespace CR {  // Namespace CR -- begin
       
       \param shift - Shift in units of data samples.
     */
-    void setShiftInSamples (unsigned int const &shift);
+    void setShiftInSamples (int const &shift);
     
     /*!
       \brief Set the shift between the start of the data segment and the first block.
@@ -301,7 +301,7 @@ namespace CR {  // Namespace CR -- begin
       
       \param shift - Shift in units of blocks.
     */
-    void setShiftInBlocks (unsigned int const &shift);
+    void setShiftInBlocks (int const &shift);
     
     /*!
       \brief Get the current block number 

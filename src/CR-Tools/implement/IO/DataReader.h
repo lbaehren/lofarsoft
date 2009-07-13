@@ -685,8 +685,8 @@ namespace CR {  //  Namespace CR -- begin
 
     \return shift -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$
   */
-  inline uint shift () {
-    return iterator_p[0].shift();
+  inline int shift (unsigned int &index=0) {
+    return iterator_p[index].shift();
   }
 
   /*!
@@ -694,7 +694,22 @@ namespace CR {  //  Namespace CR -- begin
 
     \param shift -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$
   */
-  void setShift (uint const & shift);
+  void setShift (int const &shift);
+
+  /*!
+    \brief Set the shift between the start of the data segment and the first block.
+
+    \param shift -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$
+  */
+  void setShift (int const &shift,
+		 unsigned int const &index);
+
+  /*!
+    \brief Set the shift between the start of the data segment and the first block.
+
+    \param shift -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$
+  */
+  void setShift (std::vector<int> const &shift);
 
   /*!
    \brief Forward position pointer to the next block of data

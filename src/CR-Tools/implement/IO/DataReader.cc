@@ -723,10 +723,36 @@ namespace CR {  //  Namespace CR -- begin
   
   // ------------------------------------------------------------------- setShift
   
-  void DataReader::setShift (uint const &shift)
+  void DataReader::setShift (int const &shift)
   {
     for (unsigned int n(0); n<nofStreams_p; n++) {
       iterator_p[n].setShift(shift);
+    }
+  }
+  
+  // ------------------------------------------------------------------- setShift
+  
+  void DataReader::setShift (int const &shift,
+			     unsigned int const &index)
+  {
+    if (index<nofStreams_p) {
+      iterator_p[index].setShift(shift);
+    } else {
+      std::cerr << "[DataReader::setShift] Invalid index for stream!" << std::endl;
+    }
+  }
+  
+  // ------------------------------------------------------------------- setShift
+  
+  void DataReader::setShift (std::vector<int> const &shift)
+  {
+    if (shift.size() == nofStreams_p) {
+      for (unsigned int n(0); n<nofStreams_p; n++) {
+	iterator_p[n].setShift(shift[n]);
+      } 
+    } else {
+      std::cerr << "[DataReader::setShift]"
+		<< " Length of vector does not match nof. streams!" << std::endl;
     }
   }
   

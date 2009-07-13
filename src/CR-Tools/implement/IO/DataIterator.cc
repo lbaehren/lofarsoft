@@ -84,7 +84,7 @@ namespace CR {  // Namespace CR -- begin
   
   DataIterator::DataIterator (unsigned int const &blocksize,
 			      long int const &stride,
-			      unsigned int const &shift)
+			      int const &shift)
   {
     stepWidth_p = 1;
     //
@@ -103,7 +103,7 @@ namespace CR {  // Namespace CR -- begin
   DataIterator::DataIterator (unsigned int const &blocksize,
 			      unsigned int const &dataStart,
 			      long int const &stride,
-			      unsigned int const &shift)
+			      int const &shift)
   {
     stepWidth_p = 1;
     //
@@ -232,18 +232,18 @@ namespace CR {  // Namespace CR -- begin
   
   // ------------------------------------------------------- DataIterator::setShift
   
-  void DataIterator::setShift (unsigned int const &shift)
+  void DataIterator::setShift (int const &shift)
   {
     shift_p = shift;
     setPosition ();
   }
   
-  void DataIterator::setShiftInSamples (unsigned int const &shift)
+  void DataIterator::setShiftInSamples (int const &shift)
   {
     setShift (shift*stepWidth_p);
   }
   
-  void DataIterator::setShiftInBlocks (unsigned int const &shift)
+  void DataIterator::setShiftInBlocks (int const &shift)
   {
     setShiftInSamples (shift*blocksize_p);
   }
