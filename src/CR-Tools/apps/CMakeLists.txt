@@ -191,7 +191,7 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 
 if (HAVE_CASA OR HAVE_CASACORE)
 
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES AND CR_WITH_LEGACY)
+  if (DAL_LIBRARIES AND HDF5_LIBRARIES AND CR_WITH_LEGACY AND CR_WITH_PLOTTING)
 
     ## compiler instructions
     add_executable (tbbTest tbbTest.cc)
@@ -203,16 +203,11 @@ if (HAVE_CASA OR HAVE_CASACORE)
       )
     ## installation instructions
     list (APPEND cr_apps tbbTest)
-
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES AND CR_WITH_LEGACY)
-
+    
+  else (DAL_LIBRARIES AND HDF5_LIBRARIES AND CR_WITH_LEGACY AND CR_WITH_PLOTTING)
     message (STATUS "[CR-Tools] Unable to build executable tbbTest.")
-    message (STATUS "HAVE_DAL ..... = ${HAVE_DAL}")
-    message (STATUS "HAVE_HDF5 .... = ${HAVE_HDF5}")
-    message (STATUS "CR_WITH_LEGACY = ${CR_WITH_LEGACY}")
-
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES AND CR_WITH_LEGACY)
-
+  endif (DAL_LIBRARIES AND HDF5_LIBRARIES AND CR_WITH_LEGACY AND CR_WITH_PLOTTING)
+  
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
@@ -362,10 +357,10 @@ if (HAVE_CASACORE AND HAVE_DAL)
   endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
 endif (HAVE_CASACORE AND HAVE_DAL)
 
-## -------------------------------------------------------------------
-## cccheck
+##_______________________________________________________________________________
+##                                                                        cccheck
 
-if (HAVE_CASACORE AND HAVE_DAL)
+if (HAVE_CASACORE AND HAVE_DAL AND CR_WITH_PLOTTING)
   if (DAL_LIBRARIES AND HDF5_LIBRARIES)
     ## compiler instructions
     add_executable (cccheck cccheck.cc)
@@ -381,7 +376,7 @@ if (HAVE_CASACORE AND HAVE_DAL)
   else (DAL_LIBRARIES AND HDF5_LIBRARIES)
     message (STATUS "[CR-Tools] Unable to build executable cccheck.")
   endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
-endif (HAVE_CASACORE AND HAVE_DAL)
+endif (HAVE_CASACORE AND HAVE_DAL AND CR_WITH_PLOTTING)
 
 ## -------------------------------------------------------------------
 ## cccheck2
