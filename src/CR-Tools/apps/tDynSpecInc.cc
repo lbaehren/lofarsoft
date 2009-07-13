@@ -104,36 +104,37 @@ int main ()
   float sum, average;
   unsigned validsamples;
   stokesdata data;
-  int kmax=1;
+  int kmax=10;
   casa::Matrix<double> matrix(CHANNELS,kmax*SAMPLES);
   for(int k=0;k<kmax;k++){ 
     num = fread( &data, sizeof data, 1, pFile);
     if( !num) {
       cout << "Error, EOF reached.\n";
     }
+	  
     swap_endian( (char*)&(data.sequence_number) );
     
     //     cout << data.sequence_number << endl;
     float validsamples = 0;
     float sum =0;
     for(int time=0;time<SAMPLES;time++)
-      {
+	{
 	
 	//DAL::swapbytes((char*)&(data->sequence_number), 4);
 	//  cout << &data->samples[0][j] << " ";
 	
-	for(int channel=0;channel<CHANNELS;channel++){
-	  const float value =  data.samples[channel][time] ; 
-	  matrix(channel,time+k * SAMPLES ) = value;
+	  for(int channel=0;channel<CHANNELS;channel++){
+	     const float value =  data.samples[channel][time] ; 
+	     matrix(channel,time+k * SAMPLES ) = value;
 	  
-	  //cout <<  endl;
-	  if( !isnan( value ) ) {
-            sum += value;
-            validsamples++;
-	  }
-	}
+	     //cout <<  endl;
+	     if( !isnan( value ) ) {
+              sum += value;
+              validsamples++;
+	     }
+	   }
 	
-      }
+    }
     //  cout << endl;
     float average= sum / validsamples;
     float average0;
@@ -141,7 +142,7 @@ int main ()
     if(average > (average0 + 50)) cout << "------------------------------------------------------------------------\n";
     cout << "k= " << k << " " << min(matrix) << " min | max " << max(matrix) << " average " << average << endl;
     
-  }
+ }
 
   /* Plot the data to a PS file. */
   

@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2009                                                    *
- *   Sef Welles swelles@science.ru.nl)  			                       *
+ *   Sander ter Veen s.terveen@astro.ru.nl)  			                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -31,6 +31,7 @@ using casa::conj;
 #include <crtools.h>
 #include <Data/LopesEventIn.h>
 #include <Display/SimplePlot.h>
+#include <Data/LOFAR_TBB.h>
 
 using CR::SimplePlot;
 
@@ -39,9 +40,9 @@ using CR::SimplePlot;
 	
 	\ingroup CR_Applications
 	
-	\brief Make a cross-correlation between 2 antennas and write out a ps-file of it
+	\brief Make a cross-correlation between 2 antennas and write out a ps-file of it, but now for HDF5 data. To be merged later with ccheck.cc
 
-	\author Sef Welles
+	\author Sander ter Veen
 	
 	\date 2009/07/02
 */
@@ -51,22 +52,34 @@ using CR::SimplePlot;
 /*!
   \brief Read in a file, make the cc, and write out a ps.
 
-  \param infile       -- LOPES data set to use as data input
+  \param infile       -- first LOFAR data set to use as data input
+  \param infile2      -- second LOFAR data set to use as data input 
   \param outfile      -- (path-)name of the image-file to be generated
 
   \return nofFailedTests --  The number of failed tests encountered within this
           function (no tests implemented).
 */
-int ccmaker(string const &infile, string const &outfile)
+int ccmaker(string const &infile1, string const &infile2, string const &outfile, int const &blocksize, int const &offset1)//, int const &offset2)
 {
 	int nofFailedTests     = 0;
-	LopesEventIn *dr;
-	dr = new LopesEventIn(infile);
-	Matrix<DComplex> fftdata = dr->calfft();
+	LOFAR_TBB *dr1;
+	LOFAR_TBB *dr2;
+	dr1 = new LOFAR_TBB(infile1,blocksize);
+	dr2 = new LOFAR_TBB(infile2,blocksize);
+	int start1 = dr1->sample_number()[0];
+	dr1->setBlock(offset1);
+	int start2 = dr2->sample_number()[0];
+	int offset2=offset1-(start2-start1)/blocksize;
+	int difference=(start2-start1)%blocksize;
+	if(difference > blocksize/2) { difference-=blocksize; }
+	std::cout << " start1 " << start1 <<" ; start2 " << start2 << " ; offset1 " << offset1 << " ; offset2 " << offset2 << " ; difference " << difference << "\n";
 	
+    Matrix<DComplex> fftdata1 = dr1->calfft();
+	dr2->setBlock(offset2);
+	Matrix<DComplex> fftdata2 = dr2->calfft();
 	
 	Vector<DComplex> vecdata;
-	vecdata = fftdata.column(7) * conj(fftdata.column(4));
+	vecdata = fftdata1.column(0) * conj(fftdata2.column(0));
 	
 /*	std::cout <<"length of vecdata = " << vecdata.shape() << "\t" <<
 				"length of fftdata.column(0) = " << fftdata.column(0).shape() << "\t" <<
@@ -75,24 +88,27 @@ int ccmaker(string const &infile, string const &outfile)
 	Vector<Double> ccdata;
 	
 	
-	ccdata = dr->invfft(vecdata);
+	ccdata = dr1->invfft(vecdata);
 	Vector<Double> xvals;
-	xvals = dr->timeValues();
+	xvals = dr1->timeValues();
 
 	Vector<Double> empty;
-	int timesteps = 100;
+	int timesteps =40;//xvals.shape()[0];
 	Vector<Double> xx(timesteps);
 	Vector<Double> yy(timesteps);
 	
-	int startcounting = (int(ccdata.shape()[0]-timesteps)/2);
+	int startcounting = (int(ccdata.shape()[0]-timesteps)/2+difference);
 	for (int i=0; i < timesteps; i++){
-		xx[i] = xvals[i+startcounting];
+		xx[i] = xvals[i+startcounting]-(offset1+0.5)*blocksize*0.000000005-0.000000005*difference;
 		yy[i] = ccdata[i+startcounting];
 	}
-	
+	std::cout << "x_values = " << xx << std::endl;
+	std::cout << "y_values_" << offset1 << " = " << yy << std::endl;
 	SimplePlot myplotter;
-	myplotter.quickPlot(outfile, xx, yy, empty, empty,
-	"time-displacement (s)", "correlation", "correlation between antennas 8 and 5 in example.event");
+	std::string shortinfile1(infile1,39,11);
+	std::string shortinfile2(infile2,39,11);
+	std::string title = "correlation between " + shortinfile1 + " and \n" + shortinfile2;
+	myplotter.quickPlot(outfile, xx, yy, empty, empty, "time-displacement (s)", "correlation", title);
  /*newObject.quickPlot("tSimplePlot-line.ps", xval, yval, empty, empty,
     			"X-axis", "Y-Axis", "plotting-test with lines",
     			4, True, 1, False, False, True);
@@ -106,22 +122,34 @@ int main (int argc,
 {
   
   uint nofFailedTests=0;
-  std::string infile, outfile="ccimage.ps";
-
+  std::string infile1, infile2, outfile="ccimage3.ps";
+  int blocksize=1024, offset1=1, offset2=1;
   /*
     Check if filename of the dataset is provided on the command line;
   */
-  if (argc < 2) {
+  if (argc < 3) {
     std::cout << "No input dataset given. Using the example.event" << endl;
-	infile = "/Users/STV/Astro/Programming/usg/data/lopes/example.event";
+	infile1 = "/Users/STV/Astro/data/lightning/CS302C-B0T16:48:58.h5";
+	infile2 = "/Users/STV/Astro/data/lightning/CS302C-B0T16:48:58.h5";
   } else {
-    infile = argv[1];
-     if (argc > 2) {
-       outfile  = argv[2];
-     };
-  }
+    infile1 = argv[1];
+	infile2 = argv[2];  
+     if (argc > 3) {
+       outfile  = argv[3];
+	 }
+	 if (argc > 4) {
+		blocksize = atoi(argv[4]);
+	  }
+	  if (argc > 5) {
+	   offset1 = atoi(argv[5]);
+	 }
+  		 
+  };
+	
   
-  nofFailedTests += ccmaker (infile, outfile);
+
+	std::cout << outfile << "\n";
+   	nofFailedTests += ccmaker (infile1, infile2, outfile, blocksize, offset1);//, offset2);
   
   return nofFailedTests;
 }

@@ -258,7 +258,29 @@ if (HAVE_CASACORE AND HAVE_DAL)
 endif (HAVE_CASACORE AND HAVE_DAL)
 
 ## -------------------------------------------------------------------
+
+## CalDynSpec
+
+if (HAVE_CASA OR HAVE_CASACORE)
+  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    ## compiler instructions
+    add_executable (CalDynSpec CalDynSpec.cc)
+    ## linker instructions
+    target_link_libraries (CalDynSpec
+      cr
+      ${DAL_LIBRARIES}
+      ${HDF5_LIBRARIES}
+      ${CFITSIO_LIBRARIES}
+      )
+    ## installation instructions
+    list (APPEND cr_apps CalDynSpec)
+  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    message (STATUS "[CR-Tools] Unable to build executable CalDynSpec.")
+  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
+endif (HAVE_CASA OR HAVE_CASACORE)
+
 ## seftestLOPESskymapping
+
 
 if (HAVE_CASACORE AND HAVE_DAL)
   if (DAL_LIBRARIES AND HDF5_LIBRARIES)
@@ -338,6 +360,27 @@ if (HAVE_CASACORE AND HAVE_DAL)
     list (APPEND cr_apps cccheck)
   else (DAL_LIBRARIES AND HDF5_LIBRARIES)
     message (STATUS "[CR-Tools] Unable to build executable cccheck.")
+  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
+endif (HAVE_CASACORE AND HAVE_DAL)
+
+## -------------------------------------------------------------------
+## cccheck2
+
+if (HAVE_CASACORE AND HAVE_DAL)
+  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    ## compiler instructions
+    add_executable (cccheck2 cccheck2.cc)
+    ## linker instructions
+    target_link_libraries (cccheck2 
+      cr 
+      ${DAL_LIBRARIES}
+      ${HDF5_LIBRARIES}
+      ${CFITSIO_LIBRARIES}
+      )
+    ## installation instructions
+    list (APPEND cr_apps cccheck2)
+  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    message (STATUS "[CR-Tools] Unable to build executable cccheck2.")
   endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
 endif (HAVE_CASACORE AND HAVE_DAL)
 
