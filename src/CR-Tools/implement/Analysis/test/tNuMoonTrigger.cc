@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2009                                                  *
- *   Kalpana Singh (<mail>)                                                     *
+ *   Copyright (C) 2009                                                    *
+ *   Kalpana Singh (<mail>)                                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -128,7 +128,7 @@ int test_constructors (std::string const &filename,
     RCU_id(6) = 6;
     RCU_id(7) = 7;
     
-    double pi          = 3.14159265358979323846 ;
+//     double pi          = 3.14159265358979323846 ;
 //     uint dataBlockSize = 1024 ;
 //     uint nOfSegments   = 5 ;
 //     double peak_height = 500. ;

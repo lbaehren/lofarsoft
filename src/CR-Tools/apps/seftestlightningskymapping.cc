@@ -143,9 +143,9 @@ int  simpleImage(string const &infile,
 
     cout << "testlightningskymapping::simpleImage Retrieving the antenna positions"  << endl;
     Matrix<double> antPositions;
-	antPositions = 3827946.312, 459792.315, 5063989.756;
-	cout << "the antanna positions are: " << antPositions <<endl;	
-
+    antPositions = 3827946.312, 459792.315, 5063989.756;
+    cout << "the antanna positions are: " << antPositions <<endl;	
+    
 	/* If only a few antennas are selected:
     Matrix<double> subantPositions;
 	IPosition start1 (2,4,0), length1 (2,2,3), stride1 (2,3,1);

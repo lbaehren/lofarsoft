@@ -378,10 +378,10 @@ if (HAVE_CASACORE AND HAVE_DAL AND CR_WITH_PLOTTING)
   endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
 endif (HAVE_CASACORE AND HAVE_DAL AND CR_WITH_PLOTTING)
 
-## -------------------------------------------------------------------
-## cccheck2
+##_______________________________________________________________________________
+##                                                                       cccheck2
 
-if (HAVE_CASACORE AND HAVE_DAL)
+if (HAVE_CASACORE AND HAVE_DAL AND CR_WITH_PLOTTING)
   if (DAL_LIBRARIES AND HDF5_LIBRARIES)
     ## compiler instructions
     add_executable (cccheck2 cccheck2.cc)
@@ -397,10 +397,10 @@ if (HAVE_CASACORE AND HAVE_DAL)
   else (DAL_LIBRARIES AND HDF5_LIBRARIES)
     message (STATUS "[CR-Tools] Unable to build executable cccheck2.")
   endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
-endif (HAVE_CASACORE AND HAVE_DAL)
+endif (HAVE_CASACORE AND HAVE_DAL AND CR_WITH_PLOTTING)
 
-## -------------------------------------------------------------------
-## tbbStatistics
+##_______________________________________________________________________________
+##                                                                  tbbStatistics
 
 if (HAVE_CASA OR HAVE_CASACORE)
   if (DAL_LIBRARIES AND HDF5_LIBRARIES)
