@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------*
- | $Id:: cccheck.cc 2009-07-02 swelles        $ |
+ | $Id:: cccheck.cc 2009-07-02 swelles                                   $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2009                                                    *
- *   Sef Welles swelles@science.ru.nl)  			                       *
+ *   Sef Welles swelles@science.ru.nl)  		                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,13 +21,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Data/../../../../external/casacore/lattices/lattices/Lattices/LatticeExprNode.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Arrays/Matrix.h>
+#include <lattices/Lattices/LatticeExprNode.h>
 
 using casa::Array;
 using casa::conj;
 
+/* CR-Tools header files */
 #include <crtools.h>
 #include <Data/LopesEventIn.h>
 #include <Display/SimplePlot.h>
@@ -57,49 +58,52 @@ using CR::SimplePlot;
   \return nofFailedTests --  The number of failed tests encountered within this
           function (no tests implemented).
 */
-int ccmaker(string const &infile, string const &outfile)
+int ccmaker (string const &infile,
+	     string const &outfile)
 {
-	int nofFailedTests     = 0;
-	LopesEventIn *dr;
-	dr = new LopesEventIn(infile);
-	Matrix<DComplex> fftdata = dr->calfft();
-	
-	
-	Vector<DComplex> vecdata;
-	vecdata = fftdata.column(7) * conj(fftdata.column(4));
-	
+  int nofFailedTests     = 0;
+  LopesEventIn *dr;
+  dr = new LopesEventIn(infile);
+  Matrix<DComplex> fftdata = dr->calfft();
+  
+  
+  Vector<DComplex> vecdata;
+  vecdata = fftdata.column(7) * conj(fftdata.column(4));
+  
 /*	std::cout <<"length of vecdata = " << vecdata.shape() << "\t" <<
 				"length of fftdata.column(0) = " << fftdata.column(0).shape() << "\t" <<
 				"size of fftdata = " << fftdata.shape() << endl;
 */	
-	Vector<Double> ccdata;
-	
-	
-	ccdata = dr->invfft(vecdata);
-	Vector<Double> xvals;
-	xvals = dr->timeValues();
-
-	Vector<Double> empty;
-	int timesteps = 100;
-	Vector<Double> xx(timesteps);
-	Vector<Double> yy(timesteps);
-	
-	int startcounting = (int(ccdata.shape()[0]-timesteps)/2);
-	for (int i=0; i < timesteps; i++){
-		xx[i] = xvals[i+startcounting];
-		yy[i] = ccdata[i+startcounting];
-	}
-	
-	SimplePlot myplotter;
-	myplotter.quickPlot(outfile, xx, yy, empty, empty,
-	"time-displacement (s)", "correlation", "correlation between antennas 8 and 5 in example.event");
- /*newObject.quickPlot("tSimplePlot-line.ps", xval, yval, empty, empty,
+  Vector<Double> ccdata;
+  
+  
+  ccdata = dr->invfft(vecdata);
+  Vector<Double> xvals;
+  xvals = dr->timeValues();
+  
+  Vector<Double> empty;
+  int timesteps = 100;
+  Vector<Double> xx(timesteps);
+  Vector<Double> yy(timesteps);
+  
+  int startcounting = (int(ccdata.shape()[0]-timesteps)/2);
+  for (int i=0; i < timesteps; i++){
+    xx[i] = xvals[i+startcounting];
+    yy[i] = ccdata[i+startcounting];
+  }
+  
+  SimplePlot myplotter;
+  myplotter.quickPlot(outfile, xx, yy, empty, empty,
+		      "time-displacement (s)", "correlation", "correlation between antennas 8 and 5 in example.event");
+  /*newObject.quickPlot("tSimplePlot-line.ps", xval, yval, empty, empty,
     			"X-axis", "Y-Axis", "plotting-test with lines",
     			4, True, 1, False, False, True);
 */
 	return nofFailedTests;
 }
 
+//_______________________________________________________________________________
+//                                                                           main
 
 int main (int argc,
 	  char *argv[])
