@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id:: testLOPESskymapping.cc 2403 2009-03-05 15:03:49Z baehren        $ |
+ | $Id:: seftestlightningskymapping.cc 2009-07-13 swelles        $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2006                                                    *
@@ -41,7 +41,8 @@ using casa::TiledShape;
 
 #include <crtools.h>
 #include <Coordinates/SkymapCoordinate.h>
-#include <Data/LopesEventIn.h>
+//#include <Data/LopesEventIn.h>
+#include <Data/LOFAR_TBB.h>
 #include <Analysis/CRinvFFT.h>
 #include <Imaging/Beamformer.h>
 #include <Imaging/Skymapper.h>
@@ -54,15 +55,15 @@ using CR::Skymapper;
 using CR::TimeFreq;
 
 /*!
-  \file testLOPESskymapping.cc
+  \file seftestlightningskymapping.cc
 
   \ingroup CR_Applications
 
-  \brief Test the Skymapper with a LOPES event
+  \brief Test the Skymapper with a lightning event
  
-  \author Andreas Horneffer
+  \author Sef Welles
  
-  \date 2009/03/09
+  \date 2009/07/13
 
   <h3>Synopsis</h3>
 
@@ -73,7 +74,7 @@ using CR::TimeFreq;
 /*!
   \brief Test processing of the data to generate an image
 
-  \param infile       -- LOPES data set to use as data input
+  \param infile       -- lightning data set to use as data input
   \param outfile      -- (path-)name of the image-file to be generated
   \param blocksize    -- Number of samples per block of data.
 
@@ -88,14 +89,12 @@ int  simpleImage(string const &infile,
   try {    
     
     //________________________________________________________
-    cout << "testLOPESskymapping::simpleImage reading in event and setting up the pipeline"  << endl;
-    CR::LopesEventIn dr(infile, blocksize); 
+    cout << "testlightningskymapping::simpleImage reading in event and setting up the pipeline"  << endl;
+    CR::LOFAR_TBB dr(infile, blocksize); 
 	cout << "shape of dr = " << dr.shape() << endl;
     CR::CRinvFFT pipeline;
-	// cout << "shape of pipeline = " << pipeline.shape() << endl; Not possible!
     Record obsrec;
     obsrec.define("LOPES",caltable_lopes);
-	//cout << "shape of caltable = " << caltable_lopes.shape() << endl; Not possible!
     pipeline.SetObsRecord(obsrec);
     pipeline.InitEvent(&dr);
 
@@ -103,14 +102,14 @@ int  simpleImage(string const &infile,
     //________________________________________________________
     // Set up the skymap coordinates and infos
      // Observation info
-    cout << "testLOPESskymapping::simpleImage Setting up ObsInfo"  << endl;
-    std::string telescope  = "LOPES";
+    cout << "testlightningskymapping::simpleImage Setting up ObsInfo"  << endl;
+    std::string telescope  = "LOFAR CS302";
     std::string observer   = "John Doe";
     casa::ObsInfo info;
     info.setTelescope(telescope);
     info.setObserver(observer);
     // Spatial coordinates
-    cout << "testLOPESskymapping::simpleImage Setting up SpatialCoordinate"  << endl;
+    cout << "testlightningskymapping::simpleImage Setting up SpatialCoordinate"  << endl;
     std::string refcode    = "AZEL";
     std::string projection = "STG";
     IPosition shape (3,30,30,3);
@@ -128,13 +127,13 @@ int  simpleImage(string const &infile,
     tmpvec(0) = 7.7; tmpvec(1)=7.7;  tmpvec(2)=10000.;
     spatial.setIncrement(tmpvec,true);
     // Time-Frequency coordinate
-    cout << "testLOPESskymapping::simpleImage Setting up TimeFreqCoordinate"  << endl;
+    cout << "testlightningskymapping::simpleImage Setting up TimeFreqCoordinate"  << endl;
     uint nofBlocksPerFrame = 8 ;
     uint nofFrames         = (dr.headerRecord().asInt("Filesize")/blocksize)/nofBlocksPerFrame;
     TimeFreqCoordinate timeFreq (blocksize, nofBlocksPerFrame, nofFrames,true);
     timeFreq.setNyquistZone(2);
     // Skymap coordinate
-    cout << "testLOPESskymapping::simpleImage Setting up SkymapCoordinate"  << endl;
+    cout << "testlightningskymapping::simpleImage Setting up SkymapCoordinate"  << endl;
     SkymapCoordinate coord (info,
 			    spatial,
 			    timeFreq);
@@ -142,19 +141,22 @@ int  simpleImage(string const &infile,
     //________________________________________________________
     // retrieve the antenna positions
 
-    cout << "testLOPESskymapping::simpleImage Retrieving the antenna positions"  << endl;
+    cout << "testlightningskymapping::simpleImage Retrieving the antenna positions"  << endl;
     Matrix<double> antPositions;
+	antPositions = 3827946.312, 459792.315, 5063989.756;
+	cout << "the antanna positions are: " << antPositions <<endl;	
+
+	/* If only a few antennas are selected:
     Matrix<double> subantPositions;
 	IPosition start1 (2,4,0), length1 (2,2,3), stride1 (2,3,1);
     Slicer slicer1 (start1, length1, stride1);
-    antPositions = pipeline.GetAntPositions(&dr);
-	subantPositions = antPositions(slicer1);
+    subantPositions = antPositions(slicer1);
     cout << subantPositions <<endl;		// change for number of antennas
-    
+    */
     //________________________________________________________
     // Set up the skymapper 
     
-    cout << "testLOPESskymapping::simpleImage Setting up the Skymapper..."  << endl;
+    cout << "testlightningskymapping::simpleImage Setting up the Skymapper..."  << endl;
 	
 	Skymapper skymapper (coord,
 			 antPositions,		// change for number of antennas
@@ -165,30 +167,31 @@ int  simpleImage(string const &infile,
     skymapper.summary();
     
     //________________________________________________________
-    // process the event for 2 antennas
+    // process the event
 	
      
 
     uint nofBlocks = nofBlocksPerFrame * nofFrames;
 
     Matrix<casa::DComplex> data; 
-    Matrix<casa::DComplex> subdata; 
-	IPosition start (2,0,4), length (2,513,2), stride (2,1,3);
-   Slicer slicer (start, length, stride);
+    //Matrix<casa::DComplex> subdata; 
+	//IPosition start (2,0,4), length (2,513,2), stride (2,1,3);
+    //Slicer slicer (start, length, stride);
     for (uint blocknum=0; blocknum<nofBlocks; blocknum++){
-      cout << "testLOPESskymapping::simpleImage Processing block: " << blocknum << " out of: " 
+      cout << "testlightningskymapping::simpleImage Processing block: " << blocknum << " out of: " 
 	   << nofBlocks << endl;
       dr.setBlock(blocknum);
+	  cout<<"so far so good..." << endl;
       data = dr.fft();
-      subdata = data (slicer);
+      //subdata = data (slicer);
       skymapper.processData(data);	// change for number of antennas
     };
 	
    cout << "datashape = " << data.shape() << endl;
-   cout << "subdatashape = " << subdata.shape() << endl;
+   //cout << "subdatashape = " << subdata.shape() << endl;
 
   } catch (AipsError x) {
-    cerr << "[testLOPESskymapping::simpleImage] " << x.getMesg() << endl;
+    cerr << "[testlightningskymapping::simpleImage] " << x.getMesg() << endl;
     nofFailedTests++;
   }
   
@@ -200,18 +203,18 @@ int  simpleImage(string const &infile,
 int main (int argc,
 	  char *argv[])
 {
-  cout<<"Dit is de door Sef aangepaste versie van testLOPESskymapper"<<endl;
+  cout<<"Dit is de door Sef aangepaste versie van testLOPESskymapping"<<endl;
 
   uint nofFailedTests=0, blocksize=1024;
-  std::string infile, outfile="seftestLOPESskymapping.img";
+  std::string infile, outfile="seftestlightningskymapping.img";
 
   /*
     Check if filename of the dataset is provided on the command line; if only
     a fraction of the possible tests can be carried out.
   */
   if (argc < 2) {
-    std::cout << "Usage: testLOPESskymapping <input.event> [<output-image>]. Now using the example.event" << endl;
-	infile = "/users/student/swelles/usg/code/data/lopes/example.event";
+    std::cout << "Usage: testlightningskymapping <input.event> [<output-image>]. Now using CS302C-B0T16:48:58.h5" << endl;
+	infile = "/mnt/lofar/CS1_tbb/Fri26-06-2009/CS302C-B0T16:48:58.h5";
   } else {
     infile = argv[1];
      if (argc > 2) {
