@@ -153,8 +153,17 @@ if (SYSTEM_PACKAGES)
       message (STATUS "Unable to install Fink packages!")
     endif (fink_executable)
     
+  else (APPLE)
+
+    ## Set up the list of Debian packages to install through apt-get
+
+    set (debian_packages
+      libfreetype6-dev
+      libpng12-dev
+    )
+
   endif (APPLE)
-  
+ 
 endif (SYSTEM_PACKAGES)
 
 ## ==============================================================================
