@@ -202,7 +202,7 @@ int main (int argc, char *argv[])
 
     
 	//take the inverse of fft2calfft
-	fft2calfft =abs(fft2calfft)/(abs(fft2calfft)*abs(fft2calfft));
+	fft2calfft =conj(fft2calfft)/(abs(fft2calfft)*abs(fft2calfft));
 
 	
 	ts2.setFFT2calFFT 	(fft2calfft); 

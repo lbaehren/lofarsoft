@@ -98,6 +98,13 @@ int  simpleImage(string const &infile,
     pipeline.SetObsRecord(obsrec);
     pipeline.InitEvent(&dr);
 
+	  
+	// correct for the offset relative to antenna 0. Be aware that reading from the beginning of the file may give problems.
+	// casa::Vector< uint > offset = dr.sample_number();
+    // offset = -1*offset + offset[0];
+	// dr.setShift( (std::vector<int>) offset);
+	  
+	  
 
     //________________________________________________________
     // Set up the skymap coordinates and infos
@@ -144,7 +151,15 @@ int  simpleImage(string const &infile,
     cout << "testlightningskymapping::simpleImage Retrieving the antenna positions"  << endl;
     Matrix<double> antPositions;
     antPositions = 3827946.312, 459792.315, 5063989.756;
-    cout << "the antanna positions are: " << antPositions <<endl;	
+    cout << "the antanna positions are: " << antPositions <<endl;
+    /*
+	 0 and 1: 3827944.292,459792.072,5063991.294
+	 2: 3827942.397,459789.467,5063992.951
+	 3: 3827946.675,459782.252,5063990.392
+	 4: 3827956.998,459784.497,5063982.442
+	 5: 3827894.790,459786.107,5064028.98
+	*/
+
     
 	/* If only a few antennas are selected:
     Matrix<double> subantPositions;
@@ -177,6 +192,14 @@ int  simpleImage(string const &infile,
     //Matrix<casa::DComplex> subdata; 
 	//IPosition start (2,0,4), length (2,513,2), stride (2,1,3);
     //Slicer slicer (start, length, stride);
+	  
+	/*
+ 	 start and end of lightnign
+	 lightning in 16_48 from 963 ms till 1060 ms and some more spikes till 1200 ms  (block 188090, 207030, 234380)
+			   in 17_23 from 1158 ms till the end (block 22617 till nofBlocks)
+	           in 17_46 from 446 till 820 ms (block 87109 till 160160 )
+	*/ 
+	  
     for (uint blocknum=0; blocknum<nofBlocks; blocknum++){
       cout << "testlightningskymapping::simpleImage Processing block: " << blocknum << " out of: " 
 	   << nofBlocks << endl;
@@ -213,8 +236,8 @@ int main (int argc,
     a fraction of the possible tests can be carried out.
   */
   if (argc < 2) {
-    std::cout << "Usage: testlightningskymapping <input.event> [<output-image>]. Now using CS302C-B0T16:48:58.h5" << endl;
-	infile = "/mnt/lofar/CS1_tbb/Fri26-06-2009/CS302C-B0T16:48:58.h5";
+    std::cout << "Usage: testlightningskymapping <input.event> [<output-image>]. Now using lightning_17_23.h5" << endl;
+	infile = "/mnt/lofar/lightning/lightning_17_23.h5"; //contains 6 dipoles, other files are _16_48.h5 and _17_46.h5
   } else {
     infile = argv[1];
      if (argc > 2) {
