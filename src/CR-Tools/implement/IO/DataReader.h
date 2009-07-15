@@ -685,7 +685,7 @@ namespace CR {  //  Namespace CR -- begin
 
     \return shift -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$
   */
-  inline int shift (unsigned int &index=0) {
+  inline int shift (unsigned int const &index=0) {
     return iterator_p[index].shift();
   }
 
