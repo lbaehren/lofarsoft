@@ -77,27 +77,27 @@ int ccmaker(string const &infile1, string const &infile2, string const &outfile,
 	//if(difference > blocksize/2) { difference-=blocksize; }
 	std::cout << " start1 " << start1 <<" ; start2 " << start2 << " ; offset1 " << offset1 << " ; offset2 " << offset2 << " ; difference " << difference << "\n";
 	
-    Matrix<DComplex> fftdata1 = dr1->calfft();
-	fftdata1(0,0)=(0,0);
+	Matrix<DComplex> fftdata1 = dr1->calfft();
+	fftdata1(0,0)=DComplex(0,0);
 	std::cout << fftdata1(0,0);
 	dr2->setBlock(offset2);
 	Matrix<DComplex> fftdata2 = dr2->calfft();
-	fftdata2(0,0)=(0,0);
+	fftdata2(0,0)=DComplex(0,0);
 	std::cout << fftdata2(0,0);
 	Vector<DComplex> vecdata;
 	vecdata = fftdata1.column(0) * conj(fftdata2.column(0));
 	
-/*	std::cout <<"length of vecdata = " << vecdata.shape() << "\t" <<
-				"length of fftdata.column(0) = " << fftdata.column(0).shape() << "\t" <<
-				"size of fftdata = " << fftdata.shape() << endl;
-*/	
+	/*	std::cout <<"length of vecdata = " << vecdata.shape() << "\t" <<
+	  "length of fftdata.column(0) = " << fftdata.column(0).shape() << "\t" <<
+	  "size of fftdata = " << fftdata.shape() << endl;
+	*/	
 	Vector<Double> ccdata;
 	
 	
 	ccdata = dr1->invfft(vecdata);
 	Vector<Double> xvals;
 	xvals = dr1->timeValues();
-
+	
 	Vector<Double> empty;
 	int timesteps =zoom;//xvals.shape()[0];
 	Vector<Double> xx(timesteps);

@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id:: seftestlightningskymapping.cc 2009-07-13 swelles        $ |
+ | $Id:: seftestlightningskymapping.cc 2009-07-13 swelles                $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2006                                                    *
@@ -41,7 +41,6 @@ using casa::TiledShape;
 
 #include <crtools.h>
 #include <Coordinates/SkymapCoordinate.h>
-//#include <Data/LopesEventIn.h>
 #include <Data/LOFAR_TBB.h>
 #include <Analysis/CRinvFFT.h>
 #include <Imaging/Beamformer.h>
@@ -86,6 +85,7 @@ int  simpleImage(string const &infile,
 		 uint const &blocksize=1024)
 {
   int nofFailedTests     = 0;
+
   try {    
     
     //________________________________________________________
@@ -172,20 +172,20 @@ int  simpleImage(string const &infile,
     // Set up the skymapper 
     
     cout << "testlightningskymapping::simpleImage Setting up the Skymapper..."  << endl;
-	
-	Skymapper skymapper (coord,
+    
+    Skymapper skymapper (coord,
 			 antPositions,		// change for number of antennas
 			 outfile,
 			 Skymapper::HDF5Image);
-
+    
     cout << "                                                         ... done."  << endl;
     skymapper.summary();
     
     //________________________________________________________
     // process the event
-	
-     
-
+    
+    
+    
     uint nofBlocks = nofBlocksPerFrame * nofFrames;
 
     Matrix<casa::DComplex> data; 
