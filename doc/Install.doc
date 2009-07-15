@@ -10,7 +10,7 @@
 	  - \ref configure_build_testdata
 	  - \ref configure_build_doc
 	  - \ref configure_build_clean
-	- \ref configure_build_trouble
+	- \ref faq
 	
 	<hr>
 	
@@ -160,22 +160,18 @@
 	<table border=0>
 	  <tr>
 	    <td class="indexkey">Target</td>
-	    <td class="indexkey">Availability</td>
-		<td class="indexkey">Description</td>
+	    <td class="indexkey">Description</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b bison</td>
-		<td>[optional]</td>
-		<td>GNU Project parser generator (yacc replacement)</td>
+	    <td>[optional] GNU Project parser generator (yacc replacement)</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b blitz</td>
 		<td></td>
-		<td></td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b boost</td>
-		<td></td>
 		<td>A free peer-reviewed portable C++ source libraries. Amongst many
 		other things it contains \e Boost.Python, a C++ library which enables
 		seamless interoperability between C++ and the Python programming
@@ -184,95 +180,77 @@
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b casacore</td>
 		<td></td>
-		<td></td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b cfitsio</td>
 		<td></td>
-		<td></td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b flex</td>
-		<td>[optional]</td>
-		<td>Fast lexical analyzer generator</td>
+	    <td>[optional] Fast lexical analyzer generator</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b hdf5</td>
-		<td></td>
-		<td></td>
+	    <td></td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b mathgl</td>
-		<td></td>
-		<td>Library for the generation of scientific plots</td>
+	    <td>Library for the generation of scientific plots</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b plplot</td>
-		<td></td>
-		<td>Library for the generation of scientific plots</td>
+	    <td>Library for the generation of scientific plots</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b pyrap</td>
-		<td></td>
 		<td>Python bindings for casacore</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b python</td>
-		<td></td>
 		<td>A collection of Python packages: NumPy, Num_util, matplotlib</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b qt</td>
 		<td></td>
-		<td></td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b root</td>
-		<td></td>
-		<td></td>
+	    <td>[optional]</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b sip</td>
-		<td></td>
-		<td></td>
+	    <td></td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b startools</td>
-		<td></td>
-		<td></td>
+	    <td></td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b szip</td>
-		<td></td>
-		<td></td>
+	    <td></td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b swig</td>
-		<td></td>
-		<td></td>
+	    <td></td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b wcslib</td>
-		<td></td>
-		<td>Library implementing the WCS standard, central to a number of
+	    <td>Library implementing the WCS standard, central to a number of
 		astronomical data reduction packages.</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b wcstools</td>
-		<td></td>
-		<td></td>
+	    <td></td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b wget</td>
-		<td>[optional]</td>
-		<td>Non-interactive network downloader. GNU Wget is a
+	    <td>[optional] Non-interactive network downloader. GNU Wget is a
 	free utility for non-interactive download of files from the Web. It supports
 	HTTP, HTTPS, and FTP protocols, as well as retrieval through HTTP proxies.</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b zlib</td>
-		<td></td>
-		<td>Compression/decompression library.</td>
+	    <td>Compression/decompression library.</td>
 	  </tr>
 	</table>
 	
@@ -338,25 +316,22 @@
 	<table border=0>
 	  <tr>
 	    <td class="indexkey">Target</td>
-	    <td class="indexkey">Availability</td>
-		<td class="indexkey">Description</td>
+	    <td class="indexkey">Description</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b doc</td>
-		<td>[optional; requires Doxygen]</td>
-		<td>Create documentation for the source code using Doxygen.</td>
+	    <td>[optional; requires Doxygen] Create documentation for the source
+	    code using Doxygen.</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b doc-cmake</td>
-		<td></td>
-		<td>Create documentation for CMake; the resulting HTML file
-		\e CMake.html will be placed into $LOFARSOFT/doc.</td>
+	    <td>Create documentation for CMake; the resulting HTML file
+	    \e CMake.html will be placed into $LOFARSOFT/doc.</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b doc-ctest</td>
-		<td></td>
-		<td>Create documentation for CTest; the resulting HTML file
-		\e CTest.html will be placed into $LOFARSOFT/doc.</td>
+	    <td>Create documentation for CTest; the resulting HTML file
+	    	\e CTest.html will be placed into $LOFARSOFT/doc.</td>
 	  </tr>
 	</table>
 
@@ -367,80 +342,31 @@
 	<table border=0>
 	  <tr>
 	    <td class="indexkey">Target</td>
-	    <td class="indexkey">Availability</td>
-		<td class="indexkey">Description</td>
+	    <td class="indexkey">Description</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b clean-build</td>
-		<td></td>
-		<td>Clean up the build directory; this will remove everything except the
+	    <td>Clean up the build directory; this will remove everything except the
 		original files obatined with a fresh check-out (which of course means
 		you will need to again run <tt>./bootstrap</tt> before any
 		further action).</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b clean-doc</td>
-		<td></td>
-		<td>Clean up the documentation directory; this will remove all the
+	    <td>Clean up the documentation directory; this will remove all the
 		created HTML files and images created by Doxygen.</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b clean-release</td>
-		<td></td>
-		<td>Clean up the \e release directory and put it back into the state it
+	    <td>Clean up the \e release directory and put it back into the state it
 		was right after check-out of your working copy. \b Caution: If your
 		version of CMake is taken from \e release/bin you will need to run
 		<tt>./bootstrap</tt>.</td>
 	  </tr>
 	  <tr bgcolor="eeeeee">
 	    <td bgcolor="dddddd">\b clean-src</td>
-		<td></td>
-		<td></td>
+	    <td></td>
 	  </tr>
 	</table>
-
-	<hr>
-	
-	\section configure_build_trouble Troubleshooting & Frequently asked questions
-
-	<dl>
-	  <dt>Question:</dt>
-	  <dd>"I seem to remember there was some script "build.sh" which would
-	  drive the build of the various packages; is this no longer supported?"</dd>
-	  <dt>Answer:</dt>
-	  <dd>Yes, initially the complete build and installation was run through a
-	  shell script, but this has been phased out in favor of having CMake do
-	  most of the job. The method therefore to build any of the packages is
-	  \code
-	  cd $LOFARSOFT/build
-	  make <package>
-	  \endcode</dd>
-
-	  <dt>Question:</dt>
-	  <dd>"When I am running a command like e.g. <tt>make dal</tt> from within
-	  the build directory, all I am getting is
-	  \verbatim
-	  make: *** No rule to make target `dal'.  Stop.
-	  \endverbatim
-	  Why is that?</dd>
-	  <dt>Answer:</dt>
-	  <dd>The most likely explanation is that you haven't yet run CMake to
-	  parse the master configuration script to create the list of build
-	  targets.
-	  \code
-	  cd $LOFARSOFT/build
-	  ./bootstrap
-	  \endcode
-	  Once you have done this you can use 
-	  \code
-	  make help
-	  \endcode
-	  to get the list of available targets which can be build through
-	  \code
-	  make <package>
-	  \endcode
-	  </dd>
-
-	</dl>
 
  */
