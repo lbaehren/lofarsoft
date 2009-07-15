@@ -24,7 +24,15 @@
 #include <string>
 #include <vector>
 
+// CR-Tools header files
 #include <crtools.h>
+#include <Coordinates/CoordinateType.h>
+#include <Coordinates/TimeFreq.h>
+#include <Data/LOFAR_TBB.h>
+#include <IO/DataIterator.h>
+#include <IO/DataReader.h>
+#include <Math/HanningFilter.h>
+#include <Analysis/DynamicSpectrum.h>
 
 // Basic Python header
 #include <Python.h>
@@ -34,15 +42,6 @@
 #include <boost/python/object.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/extract.hpp>
-
-// CR-Tools header files
-#include <Coordinates/CoordinateType.h>
-#include <Coordinates/TimeFreq.h>
-#include <Data/LOFAR_TBB.h>
-#include <IO/DataIterator.h>
-#include <IO/DataReader.h>
-#include <Math/HanningFilter.h>
-#include <Analysis/DynamicSpectrum.h>
 
 namespace bpl = boost::python;
 
@@ -103,40 +102,40 @@ BOOST_PYTHON_MODULE (pycr)
 	 "Set the Nyquist zone in which the data where sampled")
     .def("referenceTime", &TimeFreq::referenceTime,
 	 "Get the reference time for the time axis")
-   ;
+    ;
   
   // ============================================================================
   //
   //  implement/Imaging
   //
   // =============================================================================
-	
-    // ============================================================================
-	//
-	//  implement/Data
-	//
-	// ============================================================================
-	
-	//   bpl::class_<LOFAR_DipoleDataset>("LOFAR_DipoleDataset")
-	//     .def(bpl::init<>())
-	//     .def(bpl::init<std::string,std::string>())
-	//     ;
-	
-	void (LOFAR_TBB::*summary1)(bool const &, bool const &) = &LOFAR_TBB::summary;
-	void (LOFAR_TBB::*summary2)(ostream &, bool const &, bool const &) = &LOFAR_TBB::summary;
-	bpl::class_<LOFAR_TBB>("LOFAR_TBB")
-	   .def(bpl::init<>())
-	   .def(bpl::init<std::string,uint>())
-	   .def("summary",summary1)
-	   .def("summary",summary2)
-	;  
-
+  
+  // ============================================================================
+  //
+  //  implement/Data
+  //
+  // ============================================================================
+  
+  //   bpl::class_<LOFAR_DipoleDataset>("LOFAR_DipoleDataset")
+  //     .def(bpl::init<>())
+  //     .def(bpl::init<std::string,std::string>())
+  //     ;
+  
+  void (LOFAR_TBB::*summary1)(bool const &, bool const &) = &LOFAR_TBB::summary;
+  void (LOFAR_TBB::*summary2)(ostream &, bool const &, bool const &) = &LOFAR_TBB::summary;
+  bpl::class_<LOFAR_TBB>("LOFAR_TBB")
+    .def(bpl::init<>())
+    .def(bpl::init<std::string,uint>())
+    .def("summary",summary1)
+    .def("summary",summary2)
+    ;  
+  
   // ============================================================================
   //
   //  implement/IO
   //
   // ============================================================================
-
+  
   /* DataIterator */
   
   bpl::class_<DataIterator>("DataIterator")
@@ -184,6 +183,7 @@ BOOST_PYTHON_MODULE (pycr)
   void (DataReader::*setBlocksize3)(uint const &,
 				    casa::Matrix<double> const &,
 				    casa::Matrix<casa::DComplex> const &) = &DataReader::setBlocksize;
+  void (DataReader::*setShift1)(int const &) = &DataReader::setShift;
   
   bpl::class_<DataReader>("DataReader")
     .def(bpl::init<>())
@@ -204,13 +204,12 @@ BOOST_PYTHON_MODULE (pycr)
     .def("stride", &DataReader::stride)
     .def("setStride", &DataReader::setStride)
     .def("shift", &DataReader::shift)
-    .def("setShift", &DataReader::setShift)
+    .def("setShift", setShift1)
     .def("nextBlock", &DataReader::nextBlock)
     .def("toStartBlock", &DataReader::toStartBlock)
     ;
 
 #endif
-  
 
 
   // ============================================================================

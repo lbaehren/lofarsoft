@@ -333,86 +333,88 @@ namespace CR {  // Namespace CR -- begin
   {
     return true;
   }
-
+  
   // ----------------------------------------------------------------------- toFITS
-
+  
 #ifdef HAVE_CFITSIO
   bool DynamicSpectrum::toFITS ()
   {
-	  // convert to floats and take the logarithm. If that value is zero, replace it woth the minimumvalue.
-	  //float minimum = (float) min(dynamicSpectrum_p);
-	  casa::Matrix<float> dynamicSpectrum_float;
-	  dynamicSpectrum_float.resize(dynamicSpectrum_p.shape());
-	  for (uint j=0; j<dynamicSpectrum_float.ncolumn(); j++) {
-		  for (uint i=0; i<dynamicSpectrum_float.nrow(); i++) {
-			  dynamicSpectrum_float(i,j) = (float) log(dynamicSpectrum_p(i,j));
-		  }      
-	  }
-	  
+    /*
+     * Convert to floats and take the logarithm. If that value is zero, replace
+     * it with the minimumvalue.
+     */
+    //float minimum = (float) min(dynamicSpectrum_p);
+    casa::Matrix<float> dynamicSpectrum_float(dynamicSpectrum_p.shape());
 
+    for (uint j=0; j<dynamicSpectrum_float.ncolumn(); j++) {
+      for (uint i=0; i<dynamicSpectrum_float.nrow(); i++) {
+	dynamicSpectrum_float(i,j) = (float) log(dynamicSpectrum_p(i,j));
+      }      
+    }
+    
     casa::IPosition shape = dynamicSpectrum_float.shape();
     int status            = 0;
     long naxis            = shape.nelements();
-	uint nelements        = dynamicSpectrum_float.nrow() * dynamicSpectrum_float.ncolumn();
+    uint nelements        = dynamicSpectrum_float.nrow() * dynamicSpectrum_float.ncolumn();
     long naxes[2]         = { shape(0), shape(1)};
-	long firstelement = 1;
+    long firstelement = 1;
     char *ctype[] = {"TIME","FREQ"};
-	 // char *cunit[] = {"sec","Hz"};
-	  // get the incrementvalues and units for the axes 
-	  std::string cd1(casa::String::toString(timeAxis_p.increment()(0)));
-	  std::string cd2(casa::String::toString(freqAxis_p.increment()(0)));
-	
-
-	  std::string tunit(timeAxis_p.worldAxisUnits()(0));
-	  std::string funit(freqAxis_p.worldAxisUnits()(0));
-	  std::string fnul(casa::String::toString(freqAxis_p.referenceValue()(0)));
-	
-	  // copy the values to char*, as it's the only thing CFITSIO can handle;
-	  cout << "timeunit: " << tunit << "   frequnit: " << funit << std::endl;
-	  char *cunit0, *cunit1, *cd11, *cd12, *cval1;
-	  cunit0 = new char[tunit.length()+1];
-	  tunit.copy(cunit0, string::npos);
-	  cunit0[tunit.length()] = '\0';
-	  
-	  cunit1 = new char[funit.length()+1];
-	  funit.copy(cunit1, string::npos);
-	  cunit1[funit.length()] = '\0';
-	  
-	  cd11 = new char[cd1.length()+1];
-	  cd1.copy(cd11, string::npos);
-	  cd11[cd1.length()]='\0';
-	  
-	  cd12 = new char[cd2.length()+1];
-	  cd2.copy(cd12, string::npos);
-	  cd12[cd2.length()]='\0';
-	  
-	  cval1 = new char[fnul.length()+1];
-	  fnul.copy(cval1, string::npos);
-	  cval1[fnul.length()] = '\0';
-	  
-	  std::string outfile;
-      fitsfile *fptr;
-	  std::cout << "shape: " << shape << std::endl;
-	  std::cout << "nelements: " << nelements << std::endl;  
+    // char *cunit[] = {"sec","Hz"};
+    // get the incrementvalues and units for the axes 
+    std::string cd1(casa::String::toString(timeAxis_p.increment()(0)));
+    std::string cd2(casa::String::toString(freqAxis_p.increment()(0)));
+    
+    
+    std::string tunit(timeAxis_p.worldAxisUnits()(0));
+    std::string funit(freqAxis_p.worldAxisUnits()(0));
+    std::string fnul(casa::String::toString(freqAxis_p.referenceValue()(0)));
+    
+    // copy the values to char*, as it's the only thing CFITSIO can handle;
+    cout << "timeunit: " << tunit << "   frequnit: " << funit << std::endl;
+    char *cunit0, *cunit1, *cd11, *cd12, *cval1;
+    cunit0 = new char[tunit.length()+1];
+    tunit.copy(cunit0, string::npos);
+    cunit0[tunit.length()] = '\0';
+    
+    cunit1 = new char[funit.length()+1];
+    funit.copy(cunit1, string::npos);
+    cunit1[funit.length()] = '\0';
+    
+    cd11 = new char[cd1.length()+1];
+    cd1.copy(cd11, string::npos);
+    cd11[cd1.length()]='\0';
+    
+    cd12 = new char[cd2.length()+1];
+    cd2.copy(cd12, string::npos);
+    cd12[cd2.length()]='\0';
+    
+    cval1 = new char[fnul.length()+1];
+    fnul.copy(cval1, string::npos);
+    cval1[fnul.length()] = '\0';
+    
+    std::string outfile;
+    fitsfile *fptr;
+    std::cout << "shape: " << shape << std::endl;
+    std::cout << "nelements: " << nelements << std::endl;  
     /* Adjust the filename such that existing data are overwritten */
-      outfile = "!" + filename_p + ".fits";
-	  std::cout << "write to: " << outfile.c_str() << std::endl;
+    outfile = "!" + filename_p + ".fits";
+    std::cout << "write to: " << outfile.c_str() << std::endl;
     /* Create FITS file on disk */
     fits_create_file (&fptr, outfile.c_str(), &status);
-	 		
+    
     /* Create primary array to take up the image data */
     fits_create_img (fptr, FLOAT_IMG, naxis, naxes, &status);
-	 
-	  
-	//NOTE: getStorage() is used to get a pointer to the actual data as the matrix also has MetaData. 
-	casa::Bool storage;
-	casa::Float* datapointer = dynamicSpectrum_float.getStorage(storage);
-	  
-	  
-	fits_write_img (fptr, TFLOAT, firstelement, nelements, datapointer, &status);
+    
+    
+    //NOTE: getStorage() is used to get a pointer to the actual data as the matrix also has MetaData. 
+    casa::Bool storage;
+    casa::Float* datapointer = dynamicSpectrum_float.getStorage(storage);
+    
+    
+    fits_write_img (fptr, TFLOAT, firstelement, nelements, datapointer, &status);
     //clean up the storage
-	dynamicSpectrum_float.putStorage(datapointer, storage);
-
+    dynamicSpectrum_float.putStorage(datapointer, storage);
+    
  	//set keywords for the axis
 	  //std::cout << " -- Set the keywords for the coordinate type" << std::endl;
 	  ffukys (fptr, "CTYPE1", ctype[0], "Time axis", &status);
