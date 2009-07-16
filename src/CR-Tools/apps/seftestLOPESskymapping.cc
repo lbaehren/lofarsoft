@@ -53,6 +53,9 @@ using CR::SkymapCoordinate;
 using CR::Skymapper;
 using CR::TimeFreq;
 
+#include <iostream> 
+#include <fstream>
+
 /*!
   \file testLOPESskymapping.cc
 
@@ -99,7 +102,45 @@ int  simpleImage(string const &infile,
     pipeline.SetObsRecord(obsrec);
     pipeline.InitEvent(&dr);
 
-
+	  //_______________________________________________________
+	  // Read input paramaters from inputfile seftestLOPESskymapping.dat
+	  
+  int pixels;
+  float increment;
+  int depth;
+  int blocksperframe;
+  int start[3]; 
+  int length[3];
+  int stride[3];
+  int  start1[3];
+  int length1[3];
+  int  stride1[3];
+  //Opens for reading the file
+  ifstream b_file ( "../../../src/CR-Tools/apps/seftestLOPESskymapping.dat" );
+  //Read file:
+  b_file>> pixels;
+  b_file>> increment;
+  b_file>> depth;
+  b_file>> blocksperframe;
+  for (int i=0;i<3;i++){
+	  b_file>> start[i];
+  }for (int i=0;i<3;i++){
+	  b_file>> length[i];
+  }for (int i=0;i<3;i++){
+	  b_file>> stride[i];
+  }for (int i=0;i<3;i++){  
+	  b_file>> start1[i];
+  }for (int i=0;i<3;i++){  
+	  b_file>> length1[i];
+  }for (int i=0;i<3;i++){  
+	  b_file>> stride1[i];
+  }
+  
+/*  cout << "pixels: "<<pixels<<endl;
+  cout<< "depth: " <<depth<<endl;
+  cout<<"blocksperframe: " << blocksperframe<<endl;
+  cout<<"starts: " <<start[0]<<" "<<start[1]<<" "<<start[2]<<endl;
+*/
     //________________________________________________________
     // Set up the skymap coordinates and infos
      // Observation info
@@ -113,23 +154,23 @@ int  simpleImage(string const &infile,
     cout << "testLOPESskymapping::simpleImage Setting up SpatialCoordinate"  << endl;
     std::string refcode    = "AZEL";
     std::string projection = "STG";
-    IPosition shape (3,30,30,3);
+    IPosition shape (3,pixels,pixels, depth);
     SpatialCoordinate spatial (CoordinateType::DirectionRadius, refcode,projection);
     spatial.setShape(shape);
     //set reference pixel, reference value, and coord increment
     Vector<double> tmpvec;
     tmpvec = spatial.referencePixel();
-    tmpvec(0) = 14.5; tmpvec(1)=14.5;  tmpvec(2)=0.;
+    tmpvec(0) = (pixels-1.)/2; tmpvec(1)=(pixels-1.)/2;  tmpvec(2)=0.;
     spatial.setReferencePixel(tmpvec);
     tmpvec = spatial.referenceValue();
-    tmpvec(0) = 180.; tmpvec(1)=90.;  tmpvec(2)=1000.;
+    tmpvec(0) = 180.; tmpvec(1)=90.;  tmpvec(2)=100000.;
     spatial.setReferenceValue(tmpvec,true);
     tmpvec = spatial.increment();
-    tmpvec(0) = 7.7; tmpvec(1)=7.7;  tmpvec(2)=10000.;
+    tmpvec(0) = increment; tmpvec(1)=increment;  tmpvec(2)=10000.;
     spatial.setIncrement(tmpvec,true);
     // Time-Frequency coordinate
     cout << "testLOPESskymapping::simpleImage Setting up TimeFreqCoordinate"  << endl;
-    uint nofBlocksPerFrame = 8 ;
+    uint nofBlocksPerFrame = blocksperframe ;
     uint nofFrames         = (dr.headerRecord().asInt("Filesize")/blocksize)/nofBlocksPerFrame;
     TimeFreqCoordinate timeFreq (blocksize, nofBlocksPerFrame, nofFrames,true);
     timeFreq.setNyquistZone(2);
@@ -145,8 +186,9 @@ int  simpleImage(string const &infile,
     cout << "testLOPESskymapping::simpleImage Retrieving the antenna positions"  << endl;
     Matrix<double> antPositions;
     Matrix<double> subantPositions;
-	IPosition start1 (2,4,0), length1 (2,2,3), stride1 (2,3,1);
-    Slicer slicer1 (start1, length1, stride1);
+	cout<<start1[0]<<" "<<start1[1]<<" "<<start1[2]<<endl;
+	IPosition start_1 (start1[0],start1[1],start1[2]), length_1 (length1[0],length1[1],length1[2]), stride_1 (stride1[0],stride1[1],stride1[2]);
+    Slicer slicer1 (start_1, length_1, stride_1);
     antPositions = pipeline.GetAntPositions(&dr);
 	subantPositions = antPositions(slicer1);
     cout << subantPositions <<endl;		// change for number of antennas
@@ -157,10 +199,10 @@ int  simpleImage(string const &infile,
     cout << "testLOPESskymapping::simpleImage Setting up the Skymapper..."  << endl;
 	
 	Skymapper skymapper (coord,
-			 antPositions,		// change for number of antennas
+			 subantPositions,		// change for number of antennas
 			 outfile,
 			 Skymapper::HDF5Image);
-
+	skymapper.setFarField();
     cout << "                                                         ... done."  << endl;
     skymapper.summary();
     
@@ -173,15 +215,15 @@ int  simpleImage(string const &infile,
 
     Matrix<casa::DComplex> data; 
     Matrix<casa::DComplex> subdata; 
-	IPosition start (2,0,4), length (2,513,2), stride (2,1,3);
-   Slicer slicer (start, length, stride);
+	IPosition start_ (start[0],start[1],start[2]), length_ (length[0],length[1],length[2]), stride_ (stride[0],stride[1],stride[2]);
+    Slicer slicer (start_, length_, stride_);
     for (uint blocknum=0; blocknum<nofBlocks; blocknum++){
       cout << "testLOPESskymapping::simpleImage Processing block: " << blocknum << " out of: " 
 	   << nofBlocks << endl;
       dr.setBlock(blocknum);
       data = dr.fft();
       subdata = data (slicer);
-      skymapper.processData(data);	// change for number of antennas
+      skymapper.processData(subdata);	// change for number of antennas
     };
 	
    cout << "datashape = " << data.shape() << endl;

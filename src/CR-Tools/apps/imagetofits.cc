@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 		// Regridding of input file
   	IPosition factors (imageIn.shape());
   	factors    = 1;
-  	factors(3) = 51;
+  	factors(3) = 513;
 //  	RebinImage::RebinImage(imageIn, factors);
    	RebinImage<Float> rb(imageIn, factors);
    	IPosition shapeOut = rb.shape();

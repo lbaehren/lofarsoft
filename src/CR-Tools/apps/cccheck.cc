@@ -117,7 +117,7 @@ int main (int argc,
   */
   if (argc < 2) {
     std::cout << "No input dataset given. Using the example.event" << endl;
-	infile = "/Users/STV/Astro/Programming/usg/data/lopes/example.event";
+	infile = "../../../data/lopes/example.event";
   } else {
     infile = argv[1];
      if (argc > 2) {

@@ -1,0 +1,43 @@
+10 23.1 1 64
+2 0 0
+2 513 8
+2 1 1
+2 0 0
+2 8 3
+2 1 1
+
+
+pixels increment depth blocksperframe
+start
+length
+stride
+start1
+length1
+stride1
+
+For a map of antennas 5 and 8 of 30x30 pixels and 8 timesteps:
+30 7.7 1 8
+2 0 4
+2 513 2
+2 1 3
+2 4 0
+2 2 3
+2 3 1
+
+For a map of all antennas of 30x30 pixels and 8 timesteps:
+30 7.7 1 8
+2 0 0
+2 513 8
+2 1 1
+2 0 0
+2 8 3
+2 1 1
+
+For a map of antennas 2, 5 and 8 of 30x30 pixels and 8 timesteps:
+30 7.7 1 8
+2 0 1
+2 513 3
+2 1 3
+2 1 0
+2 3 3
+2 3 1

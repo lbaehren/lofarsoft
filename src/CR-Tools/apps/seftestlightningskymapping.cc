@@ -150,7 +150,7 @@ int  simpleImage(string const &infile,
 
     cout << "testlightningskymapping::simpleImage Retrieving the antenna positions"  << endl;
     Matrix<double> antPositions;
-    antPositions = 3827946.312, 459792.315, 5063989.756;
+    antPositions = pipeline.GetAntPositions(&dr);
     cout << "the antanna positions are: " << antPositions <<endl;
     /*
 	 0 and 1: 3827944.292,459792.072,5063991.294
