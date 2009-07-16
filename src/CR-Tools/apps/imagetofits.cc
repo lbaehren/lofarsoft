@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 		// Regridding of input file
   	IPosition factors (imageIn.shape());
   	factors    = 1;
-  	factors(3) = 513;
+  	factors(3) = 27;
 //  	RebinImage::RebinImage(imageIn, factors);
    	RebinImage<Float> rb(imageIn, factors);
    	IPosition shapeOut = rb.shape();
@@ -59,7 +59,8 @@ int main(int argc, char *argv[])
    	TempImage<Float> imageOut(tShapeOut, coords); //srb.coordinates());
    	LatticeUtilities::copyDataAndMask(os, imageOut, rb);
    	ImageUtilities::copyMiscellaneous (imageOut, imageIn);
-  */		
+  */
+  cout<<"Hier gaat het nog goed...1"<<endl;		
   	ok = casa::ImageFITSConverter::ImageToFITS(error, rb, fitsName);
 
   } else if (datatype == "paged") {

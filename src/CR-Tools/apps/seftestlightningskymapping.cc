@@ -53,6 +53,7 @@ using CR::SkymapCoordinate;
 using CR::Skymapper;
 using CR::TimeFreq;
 
+#define HDF5_DISABLE_VERSION_CHECK 1
 /*!
   \file seftestlightningskymapping.cc
 
@@ -92,18 +93,69 @@ int  simpleImage(string const &infile,
     cout << "testlightningskymapping::simpleImage reading in event and setting up the pipeline"  << endl;
     CR::LOFAR_TBB dr(infile, blocksize); 
 	cout << "shape of dr = " << dr.shape() << endl;
+	cout << "shape of dr.fx() = " << dr.fx().shape() << endl;
     CR::CRinvFFT pipeline;
     Record obsrec;
     obsrec.define("LOPES",caltable_lopes);
     pipeline.SetObsRecord(obsrec);
     pipeline.InitEvent(&dr);
-
 	  
 	// correct for the offset relative to antenna 0. Be aware that reading from the beginning of the file may give problems.
-	// casa::Vector< uint > offset = dr.sample_number();
-    // offset = -1*offset + offset[0];
-	// dr.setShift( (std::vector<int>) offset);
+	 casa::Vector< uint > offset = dr.sample_number();
+     std::vector<int> offset1(offset.shape()[0]);
+	 for(int i=0; i<offset.shape()[0]; i++){
+	 	offset1[i] = -1*offset[i] + offset[0];
+	}
+	cout<<"offset = "<<offset<<endl;
+	cout<<"offset1 = "<<offset1<<endl;
+ 	cout<<"shift before = "<<dr.shift(3)<<endl;
+	dr.setBlock(230000);
+	cout << "somewhere in dr = " << dr.fx()[3] << endl;
+
+	dr.setShift(offset1);
+	cout<<"shift after = "<<dr.shift(3)<<endl;
+	dr.setBlock(230000);
+	cout << "somewhere in dr = " << dr.fx()[3] << endl;
+	
+  //_______________________________________________________
+  // Read input paramaters from inputfile seftestlightningskymapping.dat
 	  
+  int pixels;
+  float increment;
+  int depth;
+  int blocksperframe;
+  int start[3]; 
+  int length[3];
+  int stride[3];
+  int  start1[3];
+  int length1[3];
+  int  stride1[3];
+  //Opens for reading the file
+  ifstream b_file ( "../../../src/CR-Tools/apps/seftestlightningskymapping.dat" );
+  //Read file:
+  b_file>> pixels;
+  b_file>> increment;
+  b_file>> depth;
+  b_file>> blocksperframe;
+  for (int i=0;i<3;i++){
+	  b_file>> start[i];
+  }for (int i=0;i<3;i++){
+	  b_file>> length[i];
+  }for (int i=0;i<3;i++){
+	  b_file>> stride[i];
+  }for (int i=0;i<3;i++){  
+	  b_file>> start1[i];
+  }for (int i=0;i<3;i++){  
+	  b_file>> length1[i];
+  }for (int i=0;i<3;i++){  
+	  b_file>> stride1[i];
+  }
+  
+/*  cout << "pixels: "<<pixels<<endl;
+  cout<< "depth: " <<depth<<endl;
+  cout<<"blocksperframe: " << blocksperframe<<endl;
+  cout<<"starts: " <<start[0]<<" "<<start[1]<<" "<<start[2]<<endl;
+*/
 	  
 
     //________________________________________________________
@@ -119,25 +171,25 @@ int  simpleImage(string const &infile,
     cout << "testlightningskymapping::simpleImage Setting up SpatialCoordinate"  << endl;
     std::string refcode    = "AZEL";
     std::string projection = "STG";
-    IPosition shape (3,30,30,3);
+    IPosition shape (3,pixels,pixels,depth);
     SpatialCoordinate spatial (CoordinateType::DirectionRadius, refcode,projection);
     spatial.setShape(shape);
     //set reference pixel, reference value, and coord increment
     Vector<double> tmpvec;
     tmpvec = spatial.referencePixel();
-    tmpvec(0) = 14.5; tmpvec(1)=14.5;  tmpvec(2)=0.;
+    tmpvec(0) = (pixels-1.)/2; tmpvec(1)=(pixels-1.)/2; tmpvec(2)=0.;
     spatial.setReferencePixel(tmpvec);
     tmpvec = spatial.referenceValue();
     tmpvec(0) = 180.; tmpvec(1)=90.;  tmpvec(2)=1000.;
     spatial.setReferenceValue(tmpvec,true);
     tmpvec = spatial.increment();
-    tmpvec(0) = 7.7; tmpvec(1)=7.7;  tmpvec(2)=10000.;
+    tmpvec(0) = increment; tmpvec(1)=increment;  tmpvec(2)=10000.;
     spatial.setIncrement(tmpvec,true);
     // Time-Frequency coordinate
     cout << "testlightningskymapping::simpleImage Setting up TimeFreqCoordinate"  << endl;
-    uint nofBlocksPerFrame = 8 ;
-    uint nofFrames         = (dr.headerRecord().asInt("Filesize")/blocksize)/nofBlocksPerFrame;
-    TimeFreqCoordinate timeFreq (blocksize, nofBlocksPerFrame, nofFrames,true);
+    uint nofBlocksPerFrame = blocksperframe ;
+    uint nofFrames         = 1;
+    TimeFreqCoordinate timeFreq (blocksize, nofBlocksPerFrame, nofFrames,false);
     timeFreq.setNyquistZone(2);
     // Skymap coordinate
     cout << "testlightningskymapping::simpleImage Setting up SkymapCoordinate"  << endl;
@@ -149,36 +201,47 @@ int  simpleImage(string const &infile,
     // retrieve the antenna positions
 
     cout << "testlightningskymapping::simpleImage Retrieving the antenna positions"  << endl;
-    Matrix<double> antPositions;
-    antPositions = pipeline.GetAntPositions(&dr);
-    cout << "the antanna positions are: " << antPositions <<endl;
+    Matrix<double> antPositions(6,3);
+
+
     /*
-	 0 and 1: 3827944.292,459792.072,5063991.294
+	 0: 3827944.292,459792.072,5063991.294
+	 1: 3827944.292,459792.072,5063991.294
 	 2: 3827942.397,459789.467,5063992.951
 	 3: 3827946.675,459782.252,5063990.392
 	 4: 3827956.998,459784.497,5063982.442
 	 5: 3827894.790,459786.107,5064028.98
 	*/
-
+	
+    for (uInt j=0; j<antPositions.nrow(); j++) {
+       for (uInt i=0; i<antPositions.ncolumn(); i++) {
+          b_file >> antPositions(j,i);
+       }      
+    }
+	
+	Matrix<double> subantPositions;
+	cout<<start1[0]<<" "<<start1[1]<<" "<<start1[2]<<endl;
+	IPosition start_1 (start1[0],start1[1],start1[2]), length_1 (length1[0],length1[1],length1[2]), stride_1 (stride1[0],stride1[1],stride1[2]);
+	cout<<"bla1"<<endl;
+    Slicer slicer1 (start_1, length_1, stride_1);
+	cout<<"bla2"<<endl;
+	subantPositions = antPositions(slicer1);
+	cout << "the antanna positions are: " << subantPositions <<endl;
     
-	/* If only a few antennas are selected:
-    Matrix<double> subantPositions;
-	IPosition start1 (2,4,0), length1 (2,2,3), stride1 (2,3,1);
-    Slicer slicer1 (start1, length1, stride1);
-    subantPositions = antPositions(slicer1);
-    cout << subantPositions <<endl;		// change for number of antennas
-    */
+	
+    
     //________________________________________________________
     // Set up the skymapper 
     
     cout << "testlightningskymapping::simpleImage Setting up the Skymapper..."  << endl;
     
     Skymapper skymapper (coord,
-			 antPositions,		// change for number of antennas
+			 subantPositions,		// change for number of antennas
 			 outfile,
 			 Skymapper::HDF5Image);
     
     cout << "                                                         ... done."  << endl;
+	//skymapper.setAntPositions(antPositions)
     skymapper.summary();
     
     //________________________________________________________
@@ -189,29 +252,22 @@ int  simpleImage(string const &infile,
     uint nofBlocks = nofBlocksPerFrame * nofFrames;
 
     Matrix<casa::DComplex> data; 
-    //Matrix<casa::DComplex> subdata; 
-	//IPosition start (2,0,4), length (2,513,2), stride (2,1,3);
-    //Slicer slicer (start, length, stride);
-	  
-	/*
- 	 start and end of lightnign
-	 lightning in 16_48 from 963 ms till 1060 ms and some more spikes till 1200 ms  (block 188090, 207030, 234380)
-			   in 17_23 from 1158 ms till the end (block 22617 till nofBlocks)
-	           in 17_46 from 446 till 820 ms (block 87109 till 160160 )
-	*/ 
-	  
-    for (uint blocknum=0; blocknum<nofBlocks; blocknum++){
+	Matrix<casa::DComplex> subdata; 
+	IPosition start_ (start[0],start[1],start[2]), length_ (length[0],length[1],length[2]), stride_ (stride[0],stride[1],stride[2]);
+    Slicer slicer (start_, length_, stride_);
+	uint startblocknum = 226170;
+    for (uint blocknum=startblocknum; blocknum<startblocknum+nofBlocks; blocknum++){
       cout << "testlightningskymapping::simpleImage Processing block: " << blocknum << " out of: " 
 	   << nofBlocks << endl;
       dr.setBlock(blocknum);
 	  cout<<"so far so good..." << endl;
       data = dr.fft();
-      //subdata = data (slicer);
-      skymapper.processData(data);	// change for number of antennas
+      subdata = data (slicer);
+      skymapper.processData(subdata);
     };
 	
    cout << "datashape = " << data.shape() << endl;
-   //cout << "subdatashape = " << subdata.shape() << endl;
+   cout << "subdatashape = " << subdata.shape() << endl;
 
   } catch (AipsError x) {
     cerr << "[testlightningskymapping::simpleImage] " << x.getMesg() << endl;
