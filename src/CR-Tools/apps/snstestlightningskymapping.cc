@@ -81,28 +81,36 @@ using CR::TimeFreq;
   \return nofFailedTests --  The number of failed tests encountered within this
           fucntion.
 */
-#define upload
+//#define upload
+
 int  simpleImage(string const &infile,
 		 string const &outfile,
 		 uint const &blocksize=1024)
 {
   int nofFailedTests     = 0;
-#ifndef upload
+
   //_______________________________________________________
   // Read input paramaters from infile
- 
-   //Opens for reading the file
+  
+     //Opens for reading the file
   ifstream b_file ("../../../src/CR-Tools/apps/seftestlightningskymapping.dat"); 
   
   int ninputfiles;
   b_file >> ninputfiles;
   vector<string> inputfiles(ninputfiles);
-
+  CR::LOFAR_TBB **dr;
+  dr = new CR::LOFAR_TBB*[2] ; // 2 is number of objects, this should be ninputfiles	
+#ifndef upload
+	dr[0] = new CR::LOFAR_TBB(infile, blocksize);	
+  
+  // for testing i prefer just one inputfile and keep the rest the same to start with.	
+  /*	
   for(int i=0; i < ninputfiles ; i++){
   	b_file>> inputfiles[i];
-	CR::LOFAR_TBB dr[i](inputfiles[i], blocksize);
+	dr[i] = CR::LOFAR_TBB (inputfiles[i], blocksize);
   }
-  
+  */
+	
   int pixels;
   float increment;
   int depth;
@@ -147,30 +155,30 @@ int  simpleImage(string const &infile,
 	
 	
      
-	cout << "shape of dr = " << dr.shape() << endl;
-	cout << "shape of dr.fx() = " << dr.fx().shape() << endl;
+	cout << "shape of dr = " << dr[0]->shape() << endl;
+	cout << "shape of dr[0]->fx() = " << dr[0]->fx().shape() << endl;
     CR::CRinvFFT pipeline;
     Record obsrec;
     obsrec.define("LOPES",caltable_lopes);
     pipeline.SetObsRecord(obsrec);
-    pipeline.InitEvent(&dr);
+    pipeline.InitEvent(dr[0]);
 	  
 	// correct for the offset relative to antenna 0. Be aware that reading from the beginning of the file may give problems.
-	 casa::Vector< uint > offset = dr.sample_number();
+	 casa::Vector< uint > offset = dr[0]->sample_number();
      std::vector<int> offset1(offset.shape()[0]);
 	 for(int i=0; i<offset.shape()[0]; i++){
 	 	offset1[i] = -1*offset[i] + offset[0];
 	}
 	cout<<"offset = "<<offset<<endl;
 	cout<<"offset1 = "<<offset1<<endl;
- 	cout<<"shift before = "<<dr.shift(3)<<endl;
-	dr.setBlock(230000);
-	cout << "somewhere in dr = " << dr.fx()[3] << endl;
+ 	cout<<"shift before = "<<dr[0]->shift(3)<<endl;
+	dr[0]->setBlock(230000);
+	cout << "somewhere in dr = " << dr[0]->fx()[3] << endl;
 
-	dr.setShift(offset1);
-	cout<<"shift after = "<<dr.shift(3)<<endl;
-	dr.setBlock(230000);
-	cout << "somewhere in dr = " << dr.fx()[3] << endl;
+	dr[0]->setShift(offset1);
+	cout<<"shift after = "<<dr[0]->shift(3)<<endl;
+	dr[0]->setBlock(230000);
+	cout << "somewhere in dr = " << dr[0]->fx()[3] << endl;
 	
 
     //________________________________________________________
@@ -274,9 +282,9 @@ int  simpleImage(string const &infile,
     for (uint blocknum=startblocknum; blocknum<startblocknum+nofBlocks; blocknum++){
       cout << "testlightningskymapping::simpleImage Processing block: " << blocknum << " out of: " 
 	   << nofBlocks << endl;
-      dr.setBlock(blocknum);
+      dr[0]->setBlock(blocknum);
 	  cout<<"so far so good..." << endl;
-      data = dr.fft();
+      data = dr[0]->fft();
       subdata = data (slicer);
       skymapper.processData(subdata);
     };

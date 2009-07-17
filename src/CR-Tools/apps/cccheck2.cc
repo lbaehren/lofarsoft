@@ -73,6 +73,8 @@ int ccmaker(string const &infile1, string const &infile2, string const &outfile,
 	int start2 = dr2->sample_number()[0];
 	int offset2=offset1;//-(start2-start1)/blocksize;
 	int difference=start1-start2;
+	dr2->setBlock(offset2);
+	std::cout <<"fx()[222] before shift"<< dr2->fx()[0][222] << std::endl;
 	dr2->setShift(difference); //If the shifts are not the same they probably are allready set.
 	//if(difference > blocksize/2) { difference-=blocksize; }
 	std::cout << " start1 " << start1 <<" ; start2 " << start2 << " ; offset1 " << offset1 << " ; offset2 " << offset2 << " ; difference " << difference << "\n";
@@ -81,6 +83,7 @@ int ccmaker(string const &infile1, string const &infile2, string const &outfile,
 	fftdata1(0,0)=DComplex(0,0);
 	std::cout << fftdata1(0,0);
 	dr2->setBlock(offset2);
+	std::cout <<"fx()[222] after shift" << dr2->fx()[0][222] << std::endl;
 	Matrix<DComplex> fftdata2 = dr2->calfft();
 	fftdata2(0,0)=DComplex(0,0);
 	std::cout << fftdata2(0,0);
