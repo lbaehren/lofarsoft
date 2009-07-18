@@ -48,6 +48,19 @@ endif (NOT CFITSIO_VERBOSE_CONFIGURE)
 
 include (FindCFITSIO)
 
+## Check for major version
+if (CFITSIO_MAJOR_VERSION LESS 3)
+  message (STATUS "CFITSIO installation found - major version too small!")
+  set (CFITSIO_FORCE_BUILD TRUE)
+else (CFITSIO_MAJOR_VERSION LESS 3)
+  ## Check for major version
+  if (CFITSIO_MINOR_VERSION LESS 180)
+    message (STATUS "CFITSIO installation found - minor version too small!")
+    set (CFITSIO_FORCE_BUILD TRUE)
+  else (CFITSIO_MINOR_VERSION LESS 180)
+  endif (CFITSIO_MINOR_VERSION LESS 180)
+endif (CFITSIO_MAJOR_VERSION LESS 3)
+
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
