@@ -22,9 +22,13 @@
 
 # - Check for the presence of the CFITSIO library
 #
-#  HAVE_CFITSIO      = Do we have CFITSIO?
-#  CFITSIO_LIBRARIES = Set of libraries required for linking against CFITSIO
-#  CFITSIO_INCLUDES  = Directory where to find fitsio.h
+#  HAVE_CFITSIO          = Do we have CFITSIO?
+#  CFITSIO_LIBRARIES     = Set of libraries required for linking against CFITSIO
+#  CFITSIO_INCLUDES      = Directory where to find fitsio.h
+#  CFITSIO_VERSION       = Full version of the CFITSIO library (as deduced from 
+#                          fitsio.h)
+#  CFITSIO_MAJOR_VERSION = Major version of the CFITSIO library
+#  CFITSIO_MINOR_VERSION = Minor version of the CFITSIO library
 
 ## -----------------------------------------------------------------------------
 ## Search locations
@@ -85,6 +89,24 @@ else (CFITSIO_libnsl)
 endif (CFITSIO_libnsl)
 
 ## -----------------------------------------------------------------------------
+## Determine library version
+
+if (HAVE_FITSIO_H)
+  
+  ## extract full library version
+  file (STRINGS ${HAVE_FITSIO_H}/fitsio.h CFITSIO_VERSION
+    REGEX "CFITSIO_VERSION"
+    )
+  string (REGEX REPLACE "#define CFITSIO_VERSION " "" CFITSIO_VERSION ${CFITSIO_VERSION})
+
+  ## exctract the major version of the library
+  string(SUBSTRING ${CFITSIO_VERSION} 0 1 CFITSIO_MAJOR_VERSION)
+  ## extract the minor version fo the library
+  string(REGEX REPLACE "${CFITSIO_MAJOR_VERSION}." "" CFITSIO_MINOR_VERSION ${CFITSIO_VERSION})
+
+endif (HAVE_FITSIO_H)
+
+## -----------------------------------------------------------------------------
 ## Check libcfitsio for required symbols
 
 include (CheckLibraryExists)
@@ -119,8 +141,11 @@ ENDIF (CFITSIO_INCLUDES AND CFITSIO_LIBRARIES)
 IF (HAVE_CFITSIO)
   IF (NOT CFITSIO_FIND_QUIETLY)
     MESSAGE (STATUS "Found components for CFITSIO")
-    MESSAGE (STATUS "CFITSIO_LIBRARIES = ${CFITSIO_LIBRARIES}")
-    MESSAGE (STATUS "CFITSIO_INCLUDES  = ${CFITSIO_INCLUDES}")
+    MESSAGE (STATUS "CFITSIO_LIBRARIES     = ${CFITSIO_LIBRARIES}")
+    MESSAGE (STATUS "CFITSIO_INCLUDES      = ${CFITSIO_INCLUDES}")
+    message (STATUS "CFITSIO full version  = ${CFITSIO_VERSION}")
+    message (STATUS "CFITSIO major version = ${CFITSIO_MAJOR_VERSION}")
+    message (STATUS "CFITSIO minor version = ${CFITSIO_MINOR_VERSION}")
   ENDIF (NOT CFITSIO_FIND_QUIETLY)
 ELSE (HAVE_CFITSIO)
   IF (CFITSIO_FIND_REQUIRED)
@@ -136,6 +161,9 @@ MARK_AS_ADVANCED (
   CFITSIO_libm
   CFITSIO_INCLUDES
   CFITSIO_LIBRARIES
+  CFITSIO_VERSION
+  CFITSIO_MAJOR_VERSION
+  CFITSIO_MINOR_VERSION
   HAVE_FITSIO_H
   )
 
