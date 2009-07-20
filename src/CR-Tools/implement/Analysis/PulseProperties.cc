@@ -55,38 +55,40 @@
     distY(-1.),
     dist(-1.),
     noise(0.),
+    lateralExpHeight(-999999.),
+    lateralExpDeviation(-999999.),
+    lateralPowHeight(-999999.),
+    lateralPowDeviation(-999999.),
+    lateralCut(false),
     polarization("")
   {}
-  
+
   // ============================================================================
   //
   //  Destruction
   //
   // ============================================================================
-  
+
   PulseProperties::~PulseProperties ()
   {}
-  
+
   // ============================================================================
   //
   //  Parameters
   //
   // ============================================================================
-  
+
   void PulseProperties::summary (std::ostream &os)
   {
     os << "[PulseProperties] Summary of internal parameters." << std::endl;
   }
-  
-  
-  
+
+
   // ============================================================================
   //
   //  Methods
   //
   // ============================================================================
-  
-  
-  
+
 
 //} // Namespace CR -- end

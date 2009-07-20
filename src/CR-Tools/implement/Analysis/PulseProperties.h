@@ -112,14 +112,24 @@
     double dist;
     //! mean noise of a certain part of the trace (for lateral distribution analysis)
     double noise;
+    //! calculated pulse height for exponential lateral distribution
+    double lateralExpHeight;
+    //! relative deviation of calculated vs. measured pulse height
+    double lateralExpDeviation;
+    //! calculated pulse height for power law lateral distribution
+    double lateralPowHeight;
+    //! relative deviation of calculated vs. measured pulse height
+    double lateralPowDeviation;
+    //! will be set to true, if antenna did not pass the lateral distribution cuts
+    bool lateralCut;
     //! polarization
     std::string polarization;
 
     // --------------------------------------------------------------- Parameters
-    
+
     /*!
       \brief Get the name of the class
-      
+
       \return className -- The name of the class, PulseProperties.
     */
     inline std::string className () const {

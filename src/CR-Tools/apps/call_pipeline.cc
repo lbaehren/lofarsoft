@@ -29,6 +29,7 @@
 
 #include <crtools.h>
 #include <Analysis/analyseLOPESevent2.h>
+#include <Analysis/PulseProperties.h>
 
 using CR::analyseLOPESevent2;
 using CR::LopesEventIn;
@@ -1063,7 +1064,7 @@ void readConfigFile (const string &filename)
 
           if (temp != 9999999) { // will be false, if value is not of typ "double"
             lateralSNRcut = temp;
-	    cout << "lateralSNRcut set to: " << lateralSNRcut;
+	    cout << "lateralSNRcut set to: " << lateralSNRcut << endl;
 	  } else {
             cerr << "\nError processing file \"" << filename <<"\".\n" ;
             cerr << "lateralSNRcut must be of typ 'double'. \n";
@@ -1390,8 +1391,6 @@ int main (int argc, char *argv[])
   double chi2NDFPow = 0, chi2NDFPow_NS = 0;                          // Chi^2/NDF of lateral distribution power law fit
   map <int,PulseProperties> rawPulsesMap;                // pulse properties of pules in raw data traces
   map <int,PulseProperties> calibPulsesMap;              // pulse properties of pules in calibrated data traces
-  PulseProperties* rawPulses[MAX_NUM_ANTENNAS];          // use array of pointers to store pulse properties in root tree
-  PulseProperties* calibPulses[MAX_NUM_ANTENNAS];        // use array of pointers to store pulse properties in root tree
   bool goodEW = false, goodNS = false;                // true if reconstruction worked
   double rmsCCbeam, rmsCCbeam_NS;                        // rms values of the beams in remote region
   double rmsXbeam, rmsXbeam_NS;
@@ -1401,12 +1400,23 @@ int main (int argc, char *argv[])
   int CutBadTiming, CutBadTiming_NS;                  // # of cut antennas in lateral distribution fit
   int CutSNR, CutSNR_NS;                              // # of cut antennas in lateral distribution fit
   double latMeanDist, latMeanDist_NS;                 // mean distance of the antennas in the lateral distribution
+  PulseProperties* rawPulses[MAX_NUM_ANTENNAS];       // use array of pointers to store pulse properties in root tree
+  PulseProperties* calibPulses[MAX_NUM_ANTENNAS];     // use array of pointers to store pulse properties in root tree
+  PulseProperties* meanRawPulses[MAX_NUM_ANTENNAS];   // mean pulse properties of all events
+  PulseProperties* meanCalPulses[MAX_NUM_ANTENNAS];   // mean pulse properties of all events
+  unsigned int meanRawCounter[MAX_NUM_ANTENNAS], meanCalCounter[MAX_NUM_ANTENNAS];  // Counters for mean calculation
+  unsigned int meanResCounter[MAX_NUM_ANTENNAS];  // Counter for mean calculation of lateral distr. residuals
 
   try {
     // allocate space for arrays with pulse properties
     for (int i=0; i < MAX_NUM_ANTENNAS; i++) {
       rawPulses[i] = new PulseProperties();
       calibPulses[i] = new PulseProperties();
+      meanRawPulses[i] = new PulseProperties();
+      meanCalPulses[i] = new PulseProperties();
+      meanRawCounter[i] = 0;
+      meanCalCounter[i] = 0;
+      meanResCounter[i] = 0;
     }
 
 
@@ -2003,7 +2013,7 @@ int main (int argc, char *argv[])
       }
 
       // fill information in array for raw pulses
-      for ( map<int,PulseProperties>::iterator it=rawPulsesMap.begin() ; it != rawPulsesMap.end(); it++ ) {
+      for ( map<int,PulseProperties>::iterator it=rawPulsesMap.begin() ; it != rawPulsesMap.end(); ++it) {
         // check if antenna number lies in valid range
         if ( (it->second.antenna < 1) || (it->second.antenna >= MAX_NUM_ANTENNAS) ) {
           cerr << "\nWARNING: Antenna number in rawPulsesMap is out of range!" << endl;
@@ -2018,26 +2028,65 @@ int main (int argc, char *argv[])
             roottree->Branch(branchname.c_str(),"PulseProperties",&rawPulses[it->second.antenna-1]);
         }
       }
-      for ( map<int,PulseProperties>::iterator it=calibPulsesMap.begin() ; it != calibPulsesMap.end(); it++ )
 
       // fill information in array for calibrated pulses
-      for ( map<int,PulseProperties>::iterator it=calibPulsesMap.begin() ; it != calibPulsesMap.end(); it++ ) {
+      for ( map<int,PulseProperties>::iterator it=calibPulsesMap.begin() ; it != calibPulsesMap.end(); ++it) {
         // check if antenna number lies in valid range
         if ( (it->second.antenna < 1) || (it->second.antenna >= MAX_NUM_ANTENNAS) ) {
-          cerr << "\nWARNING: Antenna number in rawPulsesMap is out of range!" << endl;
+          cerr << "\nWARNING: Antenna number in calibPulsesMap is out of range!" << endl;
         } else {
-          *calibPulses[it->second.antenna-1] = it->second;
-          // create branch name
+          int antenna = it->second.antenna;
+          *calibPulses[antenna-1] = it->second;
+
+          // calculate mean: if no mean exists so far, replace it by the value itself
+          if (meanCalCounter[antenna-1] == 0) {
+            ++meanCalCounter[antenna-1];
+            meanCalPulses[antenna-1]->dist = it->second.dist;
+          } else {
+            ++meanCalCounter[antenna-1];
+            meanCalPulses[antenna-1]->dist = 
+              ((meanCalCounter[antenna-1] - 1) * meanCalPulses[antenna-1]->dist + it->second.dist) / meanCalCounter[antenna-1];
+          }
+          // calcutlate mean of lateral deviations (different counter, because of different antenna cut criteria
+          if (!(it->second.lateralCut) && (lateralDistribution)) {
+            if (meanResCounter[antenna-1] == 0) {
+              ++meanResCounter[antenna-1];
+              meanCalPulses[antenna-1]->lateralExpHeight = it->second.lateralExpHeight;
+              meanCalPulses[antenna-1]->lateralPowHeight = it->second.lateralPowHeight;
+              meanCalPulses[antenna-1]->lateralExpDeviation = it->second.lateralExpDeviation;
+              meanCalPulses[antenna-1]->lateralPowDeviation = it->second.lateralPowDeviation;
+            } else {
+              ++meanResCounter[antenna-1];
+              meanCalPulses[antenna-1]->lateralExpHeight = 
+                ((meanResCounter[antenna-1] - 1) * meanCalPulses[antenna-1]->lateralExpHeight + it->second.lateralExpHeight)
+                / meanResCounter[antenna-1];
+              meanCalPulses[antenna-1]->lateralPowHeight = 
+                ((meanResCounter[antenna-1] - 1) * meanCalPulses[antenna-1]->lateralPowHeight + it->second.lateralPowHeight)
+                / meanResCounter[antenna-1];
+              meanCalPulses[antenna-1]->lateralExpDeviation = 
+                ((meanResCounter[antenna-1] - 1) * meanCalPulses[antenna-1]->lateralExpDeviation + it->second.lateralExpDeviation)
+                / meanResCounter[antenna-1];
+              meanCalPulses[antenna-1]->lateralPowDeviation = 
+                ((meanResCounter[antenna-1] - 1) * meanCalPulses[antenna-1]->lateralPowDeviation + it->second.lateralPowDeviation)
+                / meanResCounter[antenna-1];
+            }
+          }
+
+          // create branch names
           stringstream antNumber(""); 
-          antNumber << it->second.antenna;
+          antNumber << antenna;
           string branchname = "Ant_" + antNumber.str() + "_cal.";
           // check if branch allready exists and if not, create it
+          if (! roottree->GetBranchStatus(branchname.c_str())) {
+            roottree->Branch(branchname.c_str(),"PulseProperties",&calibPulses[antenna-1]);
+          string branchname = "Ant_" + antNumber.str() + "_cal_mean.";
           if (! roottree->GetBranchStatus(branchname.c_str()))
-            roottree->Branch(branchname.c_str(),"PulseProperties",&calibPulses[it->second.antenna-1]);
+            roottree->Branch(branchname.c_str(),"PulseProperties",&meanCalPulses[antenna-1]);
+          }
         }
       }
 
-      // write output to root tree
+      // write information of last event to root file
       if (rootFileName != "") {
         // check if event was reconstructed or if also bad events shall be written to the root file
         if (goodEW || goodNS || writeBadEvents) {
@@ -2045,14 +2094,28 @@ int main (int argc, char *argv[])
           roottree->Fill();
           rootfile->Write("",TObject::kOverwrite);
         } else {
-          cout << "WARNING: Event is not written into root file because as badly reconstructed." << endl;
+          cout << "WARNING: Event is not written into root file because it is marked as badly reconstructed." << endl;
         }
       }
+
+
     }
 
-    // write and close root file
+    // print mean values of lateral distribution
+    if (lateralDistribution) {
+      cout << "\n\nMean values of lateral distribution of all events:\n"
+           << "antenna  cal. exp. height  cal. pow. height  exp. residual  pow. residual\n";
+      for (unsigned int i=0; i < MAX_NUM_ANTENNAS; ++i)
+        cout << i << " \t    "
+             << meanCalPulses[i]->lateralExpHeight << "\t     "
+             << meanCalPulses[i]->lateralPowHeight << "\t     "
+             << meanCalPulses[i]->lateralExpDeviation << "\t     "
+             << meanCalPulses[i]->lateralPowDeviation << "\n";
+    }
+
+    // close root file
     if (rootFileName != "") {
-      cout << "Closing root file: " << rootFileName << endl;
+      cout << "\nClosing root file: " << rootFileName << endl;
       rootfile->Close();
     }
 
@@ -2060,6 +2123,8 @@ int main (int argc, char *argv[])
     for (int i=0; i < MAX_NUM_ANTENNAS; i++) {
       delete rawPulses[i];
       delete calibPulses[i];
+      delete meanCalPulses[i];
+      delete meanRawPulses[i];
     }
 
     cout << "\nPipeline finished successfully.\n" << endl;

@@ -700,6 +700,7 @@ namespace CR { // Namespace CR -- begin
       Double_t fieldStrEr[Nant],distanceEr[Nant],distanceCleanEr[Nant],fieldStrCleanEr[Nant];
       Double_t noiseBgr[Nant], timePos[Nant];
       int antennaNumber[Nant];
+      int antID[Nant], antIDclean[Nant];
 
       // loop through antennas and fill the arrays
       unsigned int ant = 0;	// counting antennas with pulse information
@@ -710,6 +711,7 @@ namespace CR { // Namespace CR -- begin
            noiseBgr[ant] = calibPulses[antennaIDs(i)].noise;
            timePos[ant] = calibPulses[antennaIDs(i)].envelopeTime;
            antennaNumber[ant] = i+1;
+           antID[ant] = antennaIDs(i);
            ant++;
         }
       // consistancy check
@@ -749,6 +751,7 @@ namespace CR { // Namespace CR -- begin
         if (distance[i]<15) {
           CutCloseToCore++;
           cout << "analyseLOPESevent2::fitLateralDistribution: Antenna cut because close to core!" << endl;
+          calibPulses[antID[i]].lateralCut = true;
           continue;
         }
       */
@@ -756,6 +759,7 @@ namespace CR { // Namespace CR -- begin
         if (fieldStr[i]<1.5) {
           CutSmallSignal++;
           cout << "analyseLOPESevent2::fitLateralDistribution: Antenna cut because signal to small!" << endl;
+          calibPulses[antID[i]].lateralCut = true;
           continue;
         }
       */
@@ -767,6 +771,7 @@ namespace CR { // Namespace CR -- begin
           cout << "analyseLOPESevent2::fitLateralDistribution: Antenna " << antennaNumber[i] << " cut because of bad timing: "
                << "CCcenter = " << ccCenter*1e9 << " , pulse time = " << timePos[i]
                << endl;
+          calibPulses[antID[i]].lateralCut = true;
           continue;
         }
         // SNR >= 1 ?
@@ -775,6 +780,7 @@ namespace CR { // Namespace CR -- begin
           cout << "analyseLOPESevent2::fitLateralDistribution: Antenna " << antennaNumber[i] 
                << " cut because SNR lower than " << lateralSNRcut
                << endl;
+          calibPulses[antID[i]].lateralCut = true;
           continue;
         }
 
@@ -783,6 +789,7 @@ namespace CR { // Namespace CR -- begin
         distanceCleanEr[clean]= distanceEr[i];
         fieldStrClean[clean]  = fieldStr[i];
         fieldStrCleanEr[clean]= fieldStrEr[i];
+        antIDclean[clean]     = antID[i];
         clean++;
       }
 
@@ -976,6 +983,29 @@ namespace CR { // Namespace CR -- begin
         plotNameStream << filePrefix << GT << "_pow.eps";
         cout << "\nCreating plot: " << plotNameStream.str() << endl;
         c1->Print(plotNameStream.str().c_str());
+
+        // calculate residuals 
+        double eps = fitfuncExp->GetParameter(0);
+        double r_0 = fitfuncExp->GetParameter(1);
+        double epsPow = fitfuncPow->GetParameter(0);
+        double kPow = fitfuncPow->GetParameter(1);
+        for (unsigned int i=0 ; i < clean; ++i) {
+          double calculatedExp = eps * exp(-distanceClean[i]/r_0);
+          double deviationExp  = 1. - fieldStrClean[i]/calculatedExp;
+          double calculatedPow = epsPow * pow(distanceClean[i], kPow);
+          double deviationPow  = 1. - fieldStrClean[i]/calculatedPow;
+
+          calibPulses[antIDclean[i]].lateralExpHeight = calculatedExp;
+          calibPulses[antIDclean[i]].lateralExpDeviation = deviationExp;
+          calibPulses[antIDclean[i]].lateralPowHeight = calculatedPow;
+          calibPulses[antIDclean[i]].lateralPowDeviation = deviationPow;
+            /* debug output 
+            cout << "Residuals for Ant " << antIDclean[i] << ": "
+                 << "Exp: " << deviationExp*100 << "  \% \t"
+                 << "Pow: " << deviationPow*100 << "  \%"
+                 << endl;
+            */
+        }
       } else {
         erg.define("eps",0.);
         erg.define("R_0",0.);
