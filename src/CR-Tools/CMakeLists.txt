@@ -561,6 +561,7 @@ add_subdirectory (apps)
 ##
 ## =============================================================================
 
+find_program (bash_executable bash ${bin_locations})
 find_program (tar_executable tar ${bin_locations})
 find_program (gzip_executable gzip ${bin_locations})
 

@@ -721,6 +721,19 @@ namespace CR {  //  Namespace CR -- begin
     }
   }
   
+  // ---------------------------------------------------------------------- shift
+
+  std::vector<int> DataReader::shift ()
+  {
+    std::vector<int> s (nofStreams_p);
+
+    for (unsigned int n(0); n<nofStreams_p; n++) {
+      s[n] = iterator_p[n].shift();
+    }
+
+    return s;
+  }
+  
   // ------------------------------------------------------------------- setShift
   
   void DataReader::setShift (int const &shift)

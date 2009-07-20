@@ -683,16 +683,26 @@ namespace CR {  //  Namespace CR -- begin
   /*!
     \brief Get the shift between the start of the data segment and the first block.
 
-    \return shift -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$
+    \return shift -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$,
+            for all the streams managed by the DataReader
   */
-  inline int shift (unsigned int const &index=0) {
+  std::vector<int> shift ();
+
+  /*!
+    \brief Get the shift between the start of the data segment and the first block.
+
+    \return shift -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$,
+            for a single specified data stream
+  */
+  inline int shift (unsigned int const &index) {
     return iterator_p[index].shift();
   }
 
   /*!
     \brief Set the shift between the start of the data segment and the first block.
 
-    \param shift -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$
+    \param shift -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$;
+           this shift will be applied to all the streams managed by the DataReader.
   */
   void setShift (int const &shift);
 

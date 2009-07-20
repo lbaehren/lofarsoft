@@ -45,6 +45,10 @@ endforeach (src)
 
 if (HAVE_DAL AND HAVE_HDF5 AND positions_lopes08)
   
+  configure_file (${CR_SOURCE_DIR}/implement/Imaging/test/tSkymapper.sh
+    ${CR_BINARY_DIR}/implement/Imaging/test/tSkymapper.sh
+    )
+
   ## compiler instructions
   add_executable (tSkymapper tSkymapper.cc)
   ## linker instructions
