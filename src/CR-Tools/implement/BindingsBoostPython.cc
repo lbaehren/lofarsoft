@@ -175,15 +175,16 @@ BOOST_PYTHON_MODULE (pycr)
 
   /* DataReader */
 
-#ifndef __APPLE__
-
   void (DataReader::*setBlocksize1)(uint const &) = &DataReader::setBlocksize;
   void (DataReader::*setBlocksize2)(uint const &,
 				    casa::Matrix<double> const &) = &DataReader::setBlocksize;
   void (DataReader::*setBlocksize3)(uint const &,
 				    casa::Matrix<double> const &,
 				    casa::Matrix<casa::DComplex> const &) = &DataReader::setBlocksize;
+  void (DataReader::*shift1)(unsigned int const &) = &DataReader::shift;
   void (DataReader::*setShift1)(int const &) = &DataReader::setShift;
+  void (DataReader::*setShift2)(int const &,
+				unsigned int const &) = &DataReader::setShift;
   
   bpl::class_<DataReader>("DataReader")
     .def(bpl::init<>())
@@ -203,14 +204,12 @@ BOOST_PYTHON_MODULE (pycr)
     .def("setStartBlock", &DataReader::setStartBlock)
     .def("stride", &DataReader::stride)
     .def("setStride", &DataReader::setStride)
-    .def("shift", &DataReader::shift)
+    .def("shift", shift1)
     .def("setShift", setShift1)
+    .def("setShift", setShift2)
     .def("nextBlock", &DataReader::nextBlock)
     .def("toStartBlock", &DataReader::toStartBlock)
     ;
-
-#endif
-
 
   // ============================================================================
   //
@@ -223,15 +222,16 @@ BOOST_PYTHON_MODULE (pycr)
   //  implement/Utilities
   //
   // ============================================================================
-    bool (DynamicSpectrum::*setFilename1)(std::string const &) = &DynamicSpectrum::setFilename;
-	bpl::class_<DynamicSpectrum>("DynamicSpectrum")
-	.def(bpl::init<CR::LOFAR_TBB,int,int>())
+
+  bool (DynamicSpectrum::*setFilename1)(std::string const &) = &DynamicSpectrum::setFilename;
+  bpl::class_<DynamicSpectrum>("DynamicSpectrum")
+    .def(bpl::init<CR::LOFAR_TBB,int,int>())
     .def("setFilename", setFilename1)
-	.def("toFITS",&DynamicSpectrum::toFITS)
-	;
-   
-	
-	
+    .def("toFITS",&DynamicSpectrum::toFITS)
+    ;
+  
+  
+  
   // ============================================================================
   
 }
