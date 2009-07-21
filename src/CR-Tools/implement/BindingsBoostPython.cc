@@ -181,7 +181,7 @@ BOOST_PYTHON_MODULE (pycr)
   void (DataReader::*setBlocksize3)(uint const &,
 				    casa::Matrix<double> const &,
 				    casa::Matrix<casa::DComplex> const &) = &DataReader::setBlocksize;
-  void (DataReader::*shift1)(unsigned int const &) = &DataReader::shift;
+  int (DataReader::*shift1)(unsigned int const &) = &DataReader::shift;
   void (DataReader::*setShift1)(int const &) = &DataReader::setShift;
   void (DataReader::*setShift2)(int const &,
 				unsigned int const &) = &DataReader::setShift;
