@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2009                                                    *
- *   Kalpana Singh (<mail>)                                                *
+ *   Copyright (C) 2009                                                  *
+ *   Kalpana Singh (<mail>)                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -41,11 +41,18 @@ namespace CR { // Namespace  -- begin
 		   		uint const& nyquist_zone,
 				uint const& time_int_bins,
 		   		double const& TEC,
+				const double& source_latitude,
+				const double& source_longitude,
+		   		const double& pointing_latitude,
+		   		const double& pointing_longitude,
+		   		const Vector<double>& position_x,
+		   		const Vector<double>& position_y,
+		   		const Vector<double>& position_z,
+				const Vector<double>& gain_scale_factor,
 		   		const Vector<double>& ppf_coeff,
 		   		const Vector<double>& ppf_invcoeff,
 		   		const Vector<double> freq_range,
-				double const& peak_power,
-				const Vector<uint>& RCU_id ) 
+				double const& peak_height ) 
   			
  {
   //n_frames = 0 ;
@@ -106,101 +113,170 @@ namespace CR { // Namespace  -- begin
   //  Methods
   //
   // ============================================================================
-
-  //_____________________________________________________________________________
-  //                                                                 reading_data
-#ifdef HAVE_ROOT
-  
-  Matrix<double> NuMoonTrigger::reading_data ( std::string const &filename,
-					       uint const& n_frames ) 
-  {
-    Matrix<double> data ;
-    uint blocksize (1024);
-    uint nofSamples (n_frames*blocksize);
-    uint start (0);
+    #ifdef HAVE_ROOT
     
-    try {
-      /* Create object to connect to the data file*/
-      DAL::TBB_Timeseries timeseries;
-      /* Read a block of data */
-      data = timeseries.fx( start,
-			    nofSamples);
-    }
-    
-    catch ( AipsError x ){
-      cerr << " NuMoonTrigger::reading_data " << x.getMesg () << endl ;
-    }
-    
-    return data ;
-  }  
-  
-  //_____________________________________________________________________________
-  
+    Matrix<double> NuMoonTrigger::reading_data( std::string const &filename,
+    			       			uint const& n_frames ) 
+   {
+   	Matrix<double> data ;
+     try {
+     	  DAL::TBB_Timeseries timeseries() ;
+	  
+	 // uint nofSamples = n_frames*1024 ;
+	  
+	 // uint start =0 ;
+	  
+	//  data = timeseries.fx( start,
+	 // 		       nofSamples ) ;
+	  
+         }
+	
+       catch ( AipsError x ){
+       cerr << " NuMoonTrigger::reading_data " << x.getMesg () << endl ;
+        }
+      return data ;
+   }  
+       					
+//____________________________________________________________________________________________
+		     
     casa::Matrix<DComplex> NuMoonTrigger::fft_data( Vector<double>&  data,
     		 	     		            uint const& n_frames,
 					            uint const& nyquist_zone ) 
     {
-      uint dataBlockSize = 1024 ;
-      uint n_freqbins    = dataBlockSize/2+1 ;
-      Matrix<DComplex> fft_implemented( n_freqbins, n_frames, 0.0 );
-      
-      try {
-	FFTServer <double,DComplex> server ;
-	casa::Vector<double> sliced_vector(dataBlockSize, 0.0) ;
-	Vector<DComplex> FFTVector( n_freqbins, 0.0 ) ;
-	
-	int sample(0);
-	
-	for( uint i=0; i< n_frames; i++ ){
-	  
-	  casa::Vector<double> sliced_vector = data( Slice( sample, dataBlockSize )) ;
-	  
-	  server.fft( FFTVector, sliced_vector ) ;
-	  
-	  switch( nyquist_zone ){
-	    
-	  case 1:  
-	    fft_implemented.column(i) = FFTVector ;
-	    
-	    break ;
-	    
-	  case 2:
-	    for( uint channel(0); channel< n_freqbins; channel++ ){
-	      
-	      fft_implemented(channel, i )=conj( FFTVector( n_freqbins-channel-1)) ;
-	      
-	    }
-	    break ;
-	  }	
-	  sample = sample +dataBlockSize ;
-	  
-	}
-      }
-      
-      catch ( AipsError x ){
-	cerr << " NuMoonTrigger::fft_data " << x.getMesg () << endl ;
-	fft_implemented = Matrix<DComplex>() ;
-      }
-      
-      return fft_implemented;	
-    }
-  
-  //_____________________________________________________________________________
-  //                                                                  RFI_removal
-  
-  Matrix<DComplex> NuMoonTrigger::RFI_removal( Matrix<DComplex> fft_samples ) 
-  {
-    
-    
-    try {
-      uint n_row = fft_samples.nrow() ;
+    	  uint dataBlockSize = 1024 ;
 	   
-	   uint n_colum =fft_samples.ncolumn() ;
+	  uint n_freqbins = dataBlockSize/2+1 ;
+	  
+	  Matrix<DComplex> fft_implemented( n_freqbins, n_frames, 0.0 ) ;
+	         	  
+     try {
+       
+	  FFTServer <double,DComplex> server ;
+	  
+	  casa::Vector<double> sliced_vector(dataBlockSize, 0.0) ;
+    
+    	  Vector<DComplex> FFTVector( n_freqbins, 0.0 ) ;
+    
+    	  int sample(0);
+    
+   	  for( uint i=0; i< n_frames; i++ ){
+      
+     	 	 casa::Vector<double> sliced_vector = data( Slice( sample, dataBlockSize )) ;
+      
+      		 server.fft( FFTVector, sliced_vector ) ;
+      
+		  switch( nyquist_zone ){
+	  
+	  		case 1:  
+      		 		fft_implemented.column(i) = FFTVector ;
+				
+				break ;
+				
+			case 2:
+				for( uint channel(0); channel< n_freqbins; channel++ ){
+				
+					fft_implemented(channel, i )=conj( FFTVector( n_freqbins-channel-1)) ;
+					
+					}
+    				break ;
+			}	
+    		 sample = sample +dataBlockSize ;
+    		
+    		}
+	
+	}
+	
+       catch ( AipsError x ){
+
+       cerr << " NuMoonTrigger::fft_data " << x.getMesg () << endl ;
+       Matrix<DComplex>() ;
+       }
+     return  fft_implemented;	 
+   }
+//_____________________________________________________________________________________________
+
+    casa::Matrix<DComplex> NuMoonTrigger::zero_channel_flagging( Vector<double>&  data,
+    		 	     		                         uint const& n_frames,
+					                         uint const& nyquist_zone ) 
+    {
+    	  uint dataBlockSize = 1024 ;
+	  
+	  uint n_freqbins = dataBlockSize/2+1 ;
+	  
+	  Matrix<DComplex> fft_implemented( n_freqbins, n_frames, 0.0 ) ;
+	          	  
+     try {
+      	
+     	  FFTServer <double,DComplex> server ;
+	  
+	  casa::Vector<double> sliced_vector(dataBlockSize, 0.0) ;
+    
+    	  Vector<DComplex> FFTVector( n_freqbins, 0.0 ) ;
+    
+    	  int sample(0);
+    
+   	  for( uint i=0; i< n_frames; i++ ){
+      
+     	 	 casa::Vector<double> sliced_vector = data( Slice( sample, dataBlockSize )) ;
+      
+      		 server.fft( FFTVector, sliced_vector ) ;
+      		 FFTVector(0) =0.0 ;
+		 FFTVector(n_freqbins-1) = 0.0 ;
+		 
+		  switch( nyquist_zone ){
+	  
+	  		case 1:  
+				fft_implemented.column(i) = FFTVector ;
+				
+				break ;
+				
+			case 2:
+			
+				for( uint channel(0); channel< n_freqbins; channel++ ){
+				
+					fft_implemented(channel, i )=conj( FFTVector( n_freqbins-channel-1)) ;
+					
+					}
+    				break ;
+			}
+			
+    		 sample = sample +dataBlockSize ;
+    		
+    		}
+	
+	}
+	
+       catch ( AipsError x ){
+
+       cerr << " NuMoonTrigger::fft_data " << x.getMesg () << endl ;
+       Matrix<DComplex>() ;
+       }
+      return  fft_implemented;	
+   }
+
+
+        
+//_____________________________________________________________________________________________	      
+
+   Matrix<DComplex> NuMoonTrigger::RFI_removal( Matrix<DComplex> fft_samples ) 
+   {
+     
+     uint n_row = fft_samples.nrow() ;
+	   
+     uint n_colum =fft_samples.ncolumn() ;
+	   
+     casa::Matrix<DComplex> RFIMitigated_array( n_row, n_colum,0.0 ) ; 
+     
+     try {
+     	   casa::Vector<double>freq_Vector = NuMoonTrigger::freq_vector(  200e6,
+		   	                				 2) ;
 	   
      	  uint dataBlockSize = 1024 ;
 	  
 	  DComplex expo(0, 1);
 	   
+	 // uint n_freqbins = dataBlockSize/2+1 ;
+	  
 	  uint n_segments = 3 ; //n_freqbins/16 ;
 	  
 	  casa::Matrix<double> phase_array(n_row, n_colum,0.0 ) ;
@@ -208,11 +284,9 @@ namespace CR { // Namespace  -- begin
 	  
 	  casa::Matrix<double> amplitude_spectra(n_row, n_colum,0.0 ) ;
 	   
-	 amplitude_spectra = amplitude(fft_samples) ;
-	  //uint n_columns = phase_array.ncolumn() ;
-	  //casa::Matrix<double> phase_array = phase( fft_samples ) ;
-	  
-	  casa::Matrix<DComplex> array_phases( n_row, n_colum,0.0 ) ;
+	 amplitude_spectra = 1.0 ; //amplitude(fft_samples) ;
+	
+	 casa::Matrix<DComplex> array_phases( n_row, n_colum,0.0 ) ;
 	  
 	  for(uint i=0; i<n_row ; i++ ){
 	  
@@ -238,40 +312,167 @@ namespace CR { // Namespace  -- begin
 	 
 	  casa::Matrix<double> RFIrejected_absolutearray( n_row, n_colum,0.0 ) ;
 	  
-	  RFIrejected_absolutearray = RFIrejected_array*amplitude_spectra ;
-	  	      
+	  RFIrejected_absolutearray = RFIrejected_array ; //*amplitude_spectra ;
+	  //RFIrejected_absolutearray = amplitude_spectra ;
+	  
+	 // uint n_freq = freq_Vector.nelements() ;
+	
+	 // uint n_RFIremoved = RFIrejected_absolutearray.ncolumn() ;
+	  /*
+
+	  double f_init = 150e+6 ;
+		
+	  double f_final = 180e+6 ;
+	
+	  for( uint nc_RFI=0; nc_RFI< n_RFIremoved; nc_RFI++ ){
+	
+		for( uint fr=0; fr< n_freq; fr++ ){
+	
+			double frequency = freq_Vector(fr) ;
+		
+			if( frequency >f_init && frequency < f_final ){
+			
+				//cout << "frequency values :" << frequency <<endl ;
+			
+				RFIrejected_absolutearray(fr,nc_RFI) =0.0 ;
+				
+				}
+			}
+		}	
+*/ 
 	  casa::Matrix<DComplex> RFIreject_array( n_row, n_colum,0.0 ) ;  ;
 	  
+	  //convertArray( RFIreject_array,amplitude_spectra) ;
+
 	  convertArray( RFIreject_array, RFIrejected_absolutearray ) ;
-	  
-	  casa::Matrix<DComplex> RFIMitigated_array( n_row, n_colum,0.0 ) ;   
-	  
+	  	  
 	  RFIMitigated_array = RFIreject_array*array_phases  ;
 	  
-	  return RFIMitigated_array ;   
 	}
 	
        catch ( AipsError x ){
        cerr << " NuMoonTrigger::RFI_removal " << x.getMesg () << endl ;
-       return Matrix<DComplex> ();
+       Matrix<DComplex> ();
        }
-      
+       
+      return RFIMitigated_array ;   
    } 						
 
-   
+
+//_____________________________________________________________________________________
+
+  Matrix<DComplex> NuMoonTrigger::Average_effect_RFI( Matrix<DComplex> fft_samples,
+						      Matrix<DComplex> RFI_mitigated ) 
+   {
+     
+      uint n_row = fft_samples.nrow() ;
+	   
+      uint n_colum =fft_samples.ncolumn() ;
+ 
+      casa::Matrix<DComplex> RFI_Average_effect( n_row,n_colum,0.0);
+	    
+     try {
+            DComplex expo(0, 1);
+
+	    casa::Matrix<double> fft_phase_array( n_row, n_colum,0.0 ) ;
+	    
+	    fft_phase_array = phase( fft_samples );
+
+	    casa::Matrix<DComplex> fft_array_phases( n_row, n_colum,0.0 ) ;
+	  
+	    for(uint i=0; i<n_row ; i++ ){
+	  
+	  	for(uint j=0; j<n_colum; j++ ){
+		
+			double phase_value = fft_phase_array(i,j) ;
+			
+			fft_array_phases(i,j) = exp(expo*phase_value) ;
+			
+			}
+			
+		}
+			 
+	  
+	    casa::Matrix<double> fft_amplitude_spectra( n_row, n_colum,0.0 ) ;
+	   
+	    fft_amplitude_spectra = amplitude( fft_samples ) ;
+
+	    casa::Matrix<double> RFI_amplitude_spectra( n_row, n_colum,0.0 ) ;
+	   
+	    RFI_amplitude_spectra = amplitude( RFI_mitigated ) ;
+
+	    casa::Matrix<double> RFI_Bin_Average( n_row, n_colum, 0.0 ) ;
+
+	    for( uint col=0; col< n_colum; col++ ){
+
+	      casa::Vector<double> RFI_column_Vector = RFI_amplitude_spectra.column(col) ;
+
+	      for( uint row=0; row< n_row -10; row++ ){
+
+		casa::Vector<double> sort_RFI_vector = RFI_column_Vector( Slice( row,10 )) ; 
+
+		//double average_value = mean( sort_RFI_vector ) ;
+
+		double standard_deviation = stddev( sort_RFI_vector ) ;
+
+		RFI_Bin_Average( row,col )= standard_deviation ;
+	      }
+	    }
+	    
+	    casa::Vector<double> bin_av_filled = RFI_Bin_Average.row(n_row-11) ;
+
+	    for( uint l_row= n_row-10; l_row< n_row; l_row++ ){
+
+	      RFI_Bin_Average.row(l_row)= bin_av_filled ;
+
+	    }
+	     for( uint coll=0; coll< n_colum; coll++ ){
+
+	       //casa::Vector<double> RFI_column_Vector = RFI_amplitude_spectra.column(coll) ;
+
+	       //casa::Vector<double> fft_column_vector =  fft_amplitude_spectra.column(coll) ;
+
+	      for( uint roww=0; roww< n_row ; roww++ ){
+
+		double bin_average = RFI_Bin_Average(roww, coll) ;
+
+		if( fft_amplitude_spectra( roww,coll ) > 2*bin_average )
+
+		  { fft_amplitude_spectra( roww,coll ) =1.0 ;
+		    
+		    // cout << "fft bin content has made unity" << endl ;
+
+		  }
+	      }
+	     }
+	     
+	     casa::Matrix<DComplex> fft_complex_array( n_row, n_colum,0.0 ) ;  
+	     
+	     convertArray( fft_complex_array, fft_amplitude_spectra ) ;
+	     
+	     RFI_Average_effect = fft_complex_array*fft_array_phases ;
+
+         
+	}
+	
+       catch ( AipsError x ){
+       cerr << " NuMoonTrigger::Average_effect_RFI" << x.getMesg () << endl ;
+       Matrix<DComplex> ();
+       }
+       return RFI_Average_effect ;   
+   } 
+     
 //______________________________________________________________________________________
 
  Vector<double> NuMoonTrigger::freq_vector( double const& sampling_rate,
 		   	      		    uint const& nyquist_zone ) 
  {
    // casa::Vector<double> frequency_Vector ;
-	
+	Vector<double> frequency_Vector(513,0.0) ;
    try {
    
    	  double channel_width = sampling_rate/1024. ;			 
-	   
-	   Vector<double> frequency_Vector(513,0.0) ;
-	  
+	     
 	   Vector<uint> band_ID( 513, 0 ) ;
 	   
 	   Vector<uint> selected_channelID ;
@@ -307,14 +508,15 @@ namespace CR { // Namespace  -- begin
 				
     				break ;
 			}
-		
-	  return frequency_Vector ;   
+		   
  	}
 	
        catch ( AipsError x ){
        cerr << " NuMoonTrigger::freq_vector" << x.getMesg () << endl ;
-       return Vector<double>() ;
+       Vector<double>() ;
         }
+    
+    return frequency_Vector ;  
     
    }
    
@@ -325,6 +527,11 @@ namespace CR { // Namespace  -- begin
 						  const Vector<double> freq_Vector ) 
    {
    	
+   	uint n_cloumn = fft_samples.ncolumn() ;
+	  
+	uint n_row = fft_samples.nrow() ;
+	
+	casa::Matrix<DComplex> dispersed_modified_array( n_row, n_cloumn, 0.0 ) ;
 	
      try {
      		
@@ -337,18 +544,14 @@ namespace CR { // Namespace  -- begin
 	  uint dataBlockSize = 1024 ;
 	  
 	  uint n_freqbins = dataBlockSize/2+1 ;
-	  
-	  uint ncloumn = fft_samples.ncolumn() ;
-	  
-	  uint nrow = fft_samples.nrow() ;
-	  
+	    
 	  double DM = 1.34e+9*TEC*1.0 ;
 	  
 	  double t0 = 8.e+5/3.e+8 ;
 	  
 	  double modified_phase(0.0) ;
 	  
-	  casa::Matrix<double> phase_array(nrow, ncloumn, 0.0) ;
+	  casa::Matrix<double> phase_array(n_row, n_cloumn, 0.0) ;
 	  
 	  phase_array = ( phase(fft_samples));
 	  
@@ -356,13 +559,13 @@ namespace CR { // Namespace  -- begin
 	  
 	  uint n_rows = phase_array.nrow() ;
 	  //Matrix<double> phase_array = phase(fft_samples) ;
-	  casa::Matrix<DComplex> dispersed_modified_array( n_rows, n_columns, 0.0 ) ;
+	//  casa::Matrix<DComplex> dispersed_modified_array( n_rows, n_columns, 0.0 ) ;
 	  	  
-	  casa::Matrix<double> amp_array(nrow, ncloumn, 0.0) ;
+	  casa::Matrix<double> amp_array(n_row, n_cloumn, 0.0) ;
 	  
 	  amp_array = amplitude(fft_samples) ;
 	  	 
-	  casa::Matrix<DComplex> amp_amplified_array( nrow, ncloumn, 0.0 ) ; 
+	  casa::Matrix<DComplex> amp_amplified_array( n_row, n_cloumn, 0.0 ) ; 
 	  
 	  convertArray( amp_amplified_array, amp_array ) ;
 	   
@@ -385,29 +588,28 @@ namespace CR { // Namespace  -- begin
 		}
 	
 	   dispersed_modified_array =  amp_amplified_array*phase_modified_array  ;
-	  
-	  return dispersed_modified_array ;		
-     }
-     
-     catch ( AipsError x ){
+	    	
+         }
+	
+       catch ( AipsError x ){
        cerr << " NuMoonTrigger::de_dispersion " << x.getMesg () << endl ;
-       return Matrix<DComplex> ();
-     }
-     
+       Matrix<DComplex> ();
+	}
+     return dispersed_modified_array ;	 
    } 
-  
-  
-  //_____________________________________________________________________________   
-  
+   
+     
+//_____________________________________________________________________________   
+
    Vector<double> NuMoonTrigger::ifft_data( Matrix<DComplex> const& data,
     			    		   uint const& n_frames,
 					   uint const& nyquist_zone ) 
    {
-   	
+   	uint dataBlockSize = 1024 ;
+	
+	casa::Vector<double> timeSeries( dataBlockSize*n_frames, 0.0 ) ;
      try {
-     	   uint dataBlockSize = 1024 ;
-	  
-	   uint n_freqbins = dataBlockSize/2+1 ;
+     	   uint n_freqbins = dataBlockSize/2+1 ;
      	  
 	   casa::Vector<DComplex> FFTVector( n_freqbins,0.0) ;
 	   
@@ -415,9 +617,7 @@ namespace CR { // Namespace  -- begin
      	  
 	   casa::Vector<double> IFFTVector( dataBlockSize, 0.0 );
      
-     	   casa::Vector<double> timeSeries( dataBlockSize*n_frames, 0.0 ) ;
-           
-	   uint sample_n(0) ;
+     	   uint sample_n(0) ;
 	   
 	    for( uint i=0; i< n_frames; i++ ){
       
@@ -452,50 +652,51 @@ namespace CR { // Namespace  -- begin
             }
 	    
 	 // cout << "total sample number :" << sample_n << "number of frames : " << n_frames <<endl ;
-         return timeSeries ;
+         
 	 }
 	
        catch ( AipsError x ){
        cerr << " NuMoonTrigger::ifft_data " << x.getMesg () << endl ;
-        }
-     return Vector<Double> ();
+       Vector<Double> ();
+       }
+      return timeSeries ;
    }
    
    
 //__________________________________________________________________________________
 
        
-  Matrix<double> NuMoonTrigger::cal_AvPower( Matrix<double> const& data_array,
-  		              	   	     uint const& n_frames ) 
+  Vector<double> NuMoonTrigger::cal_AvPower( Vector<double> const& beamed_Array ) 
 				     
   {
-  	
-	
-     try {
-     
-       	  uint dataBlockSize = 1024 ;
+  	 uint dataBlockSize = 1024 ;
+	   
+       	 uint n_row = beamed_Array.nelements() ;
 	  
-	  uint n_column = data_array.ncolumn() ;
+	 uint n_frames= n_row/dataBlockSize ;
 	  
-	  Matrix<double> P5( dataBlockSize*n_frames-5, n_column, 0.0 ) ;
+	 Vector<double> Average_P5( n_frames, 0.0 ) ;
+	 
+      try {
+     	  
 	  
-	  Matrix<double> Average_power( n_frames,n_column, 0.0 ) ;
+	  Vector<double> P5( dataBlockSize-5-25-1, 0.0 ) ;
+	  // 5 is for 5 time block integration and 25 is to neglect end effect, 
+	  //an extra one needs to be subtracted to define exact number of pairs
+	  	  
+	  for(uint i=0; i<n_frames; i++ ){
 	  
-	  for(uint i=0; i<n_column; i++ ){
-	  
-	  	for( uint j=0; j<n_frames; j++ ){
-		
-			uint dataBlock = j*dataBlockSize ;
-		
-			double average_power(0.0) ;
+	  	double average_power(0.0) ;
 			
-			for( uint k=dataBlock; k< (j+1)*dataBlockSize-5 ; k++ ){
+			for( uint k=25; k< dataBlockSize-25 ; k++ ){
 			
 				double Power_5(0.0) ;
 				
 				for( uint l=k; l<(k+5); l++ ){
 				
-					double value = data_array(l,i) ;
+					uint count = i*1024+l ;
+				
+					double value = beamed_Array(count) ;
 					
 					//cout << " value of data array element :" << value << endl ;
 				
@@ -505,25 +706,26 @@ namespace CR { // Namespace  -- begin
 					
 					}
 					
-					P5(k,i) = Power_5 ;
+					//P5(k,i) = Power_5 ;
 					
 					average_power += Power_5 ;
 				}
 			
-			Average_power(j,i) = average_power/1024. ;
-	  
+			Average_P5(i) = average_power/(1024.-50.) ;
+	  		
 		}	  
-         }
-	return Average_power ;
+         
 		
       }
      
        catch ( AipsError x ){
        cerr << " NuMoonTrigger::cal_AvPower " << x.getMesg () << endl ;
-       return Matrix<double> ();
+       Vector<double> ();
        }
-	
+       
+     return Average_P5 ;  
   }   
+  
      
      
 //_____________________________________________________________________________________
@@ -532,11 +734,18 @@ namespace CR { // Namespace  -- begin
    						  uint const& nyquist_zone,
                                   		  const Vector<double>& ppf_coeff ) 
    {
+     uint dataBlockSize = 1024 ;
+     
+     uint n_element = samples.nelements() ;
+     
+     uint nColumns = n_element/dataBlockSize ;
+     
+     casa::Matrix<DComplex> sorted_Matrix(513,nColumns,0.0 ) ;
      
      try { 
-     	   uint dataBlockSize = 1024 ;
+     	   
      		
-           uint n_freqbins = dataBlockSize/2+1 ;
+           //uint n_freqbins = dataBlockSize/2+1 ;
 	   
 	   Matrix<DComplex> ppf_implemented ;
      	   
@@ -545,40 +754,60 @@ namespace CR { // Namespace  -- begin
 	   
 	  ppf_implemented = ppfimpl.FFTSamples( samples,
                                			 ppf_coeff ) ;
-						 
-          uint n_columns = ppf_implemented.ncolumn() ;
+	  uint n_columns = ppf_implemented.ncolumn() ;
 	  
-	  switch( nyquist_zone ){
+	  casa::Vector<DComplex> column_vector(1024,0.0) ;
 	  
-	  		case 1:  
-				for( uint i=0; i<n_columns ; i++ ){
-				
-					ppf_implemented.column(i) = ppf_implemented.column(i) ;
+	  casa::Vector<DComplex> sorted_vector(513,0.0) ;
+	  	  
+ 	  switch( nyquist_zone ){
+ 	  
+ 	  		case 1:  
+ 				for( uint i=0; i<n_columns ; i++ ){
+ 				
+ 					ppf_implemented.column(i) = ppf_implemented.column(i) ;
 					
-					}
-				
-				break ;
-				
-			case 2:
-			
-				for( uint i=0; i<n_columns ; i++ ){
-				
-					for( uint channel(0); channel< n_freqbins; channel++ ){
-				
-						ppf_implemented(channel, i )=conj( ppf_implemented(( n_freqbins-channel-1),i)) ;
+					column_vector = ppf_implemented.column(i) ;
+ 				
+					sorted_Matrix.column(i) = column_vector(Slice(0,513)) ;	
+ 					}
+ 								
+ 				break ;
+ 				
+ 			case 2:
+ 			
+ 				for( uint i=0; i<n_columns ; i++ ){
+ 				
+ 					for( uint channel(513); channel< dataBlockSize; channel++ ){
+ 						ppf_implemented(channel, i )=( ppf_implemented(channel,i)) ;
+ 						//ppf_implemented(channel, i )=conj( ppf_implemented(( dataBlockSize-channel-1),i)) ;
+ 					}
 					
-					}
-				}
-    				break ;
-			}	
-        return ppf_implemented ;   
+					column_vector = ppf_implemented.column(i) ;
+					
+					sorted_Matrix.column(i) = column_vector(Slice(511,513)) ;
+ 				}
+ 				
+     				break ;
+ 			}
+/*			
+	  for(uint NC=0; NC< n_columns; NC++){
+	  
+	  	column_vector = ppf_implemented.column(NC) ;
+		
+		sorted_vector = column_vector(Slice(0,513)) ;
+		
+		sorted_Matrix.column(NC) =sorted_vector ;
+		
+		}*/
+	       
      	}
 	
        catch ( AipsError x ){
        cerr << " NuMoonTrigger::ppf_implement " << x.getMesg () << endl ;
-       return Matrix<DComplex> ();
+       Matrix<DComplex> ();
        }
-      
+      return sorted_Matrix ;   
    } 
     
    
@@ -587,15 +816,15 @@ namespace CR { // Namespace  -- begin
  Matrix<DComplex> NuMoonTrigger::ppfdata_cutshort( Matrix<DComplex>& samples,
    						   Vector<uint> subband_ID ) 
     {
-              
-     try {
-	 
-     	  uint nOfelements = subband_ID.nelements() ;
+          uint nOfelements = subband_ID.nelements() ;
 	  
 	  uint n_columns = samples.ncolumn() ;
 	  
       	  Matrix<DComplex> sortened_array( 1024, n_columns, 0.0 ) ;
-	  
+	   
+     try {
+	 
+     	  
 	  for( uint i=0; i< nOfelements; i++ ){
 	  
 	  	uint band_ID = subband_ID(i) ;
@@ -605,14 +834,14 @@ namespace CR { // Namespace  -- begin
 		sortened_array.row( band_ID-1 ) = sample_vector ;
 		
 		}
-	 return sortened_array;
+	 
 	}
 	
        catch ( AipsError x ){
        cerr << " NuMoonTrigger::ppfdata_cutshort" << x.getMesg () << endl ;
-       return Matrix<DComplex> (); 
+       Matrix<DComplex> (); 
 	}
-     
+     return sortened_array;
    } 
     
  
@@ -623,11 +852,18 @@ namespace CR { // Namespace  -- begin
    				       	       uint const& nyquist_zone,
 				               const Vector<double> freq_range ) 
    {
-     
+        double init = freq_range(0) ;
+		
+	double final = freq_range(1) ;
+	
+	double channel_width = sampling_rate/1024. ;
+	
+	int number_channels = int((final-init)/channel_width) ;
+		 
+	Vector<uint> selected_channelID( number_channels, 0) ;
+	
      try {
-   	   double channel_width = sampling_rate/1024. ;			 
-	   
-	   Vector<double> frequency_vector(513,0.0) ;
+   	   Vector<double> frequency_vector(513,0.0) ;
 	   
 	   Vector<uint> band_ID( 513, 0 ) ;
 	   
@@ -661,16 +897,10 @@ namespace CR { // Namespace  -- begin
     				break ;
 			}
 			
-		double init = freq_range(0) ;
-		
-		double final = freq_range(1) ;
-		
+		//uint n_freqch = frequency_vector.nelements() ;
+			
 		uint k=0; 
-		
-		int number_channels = int((final-init)/channel_width) ;
-		 
-		Vector<uint> selected_channelID( number_channels, 0) ;
-		
+			
 		for( uint j=0; j<513; j++ ){
 		
 			double compare = frequency_vector(j)   ;
@@ -685,255 +915,298 @@ namespace CR { // Namespace  -- begin
 				
 			}
 		}
-	 return selected_channelID; 	
+	 
 	}
 	
        catch ( AipsError x ){
        cerr << " NuMoonTrigger::PPFBandID_vector" << x.getMesg () << endl ;
-       return Vector<uint> () ;
+       Vector<uint> () ;
 	}
       
+      return selected_channelID ; 
    } 
    
 //____________________________________________________________________________________________
  
-  Vector<double> NuMoonTrigger::ppf_inversion( const Matrix<DComplex>& FTData, 
-					       const Vector<double>& ppf_invcoeff,
-					       const Vector<uint> subBand_ID )  
-    
-  {
-    
-    
-    try {
-      Vector<Double> ppfinverted_Vector ;
-      
-      CR::ppfinversion ppf_Invert( FTData,
-				   ppf_invcoeff,
-				   subBand_ID ) ;
-      
-      ppfinverted_Vector = ppf_Invert.FIR_inversion( ppf_invcoeff,
-						     FTData,
-						     subBand_ID ) ;
-      return ppfinverted_Vector ;
-      
-    }
-    
-    catch ( AipsError x ){
-      cerr << " NuMoonTrigger::ppf_inversion " << x.getMesg () << endl ;
-      return Vector<Double>();
-    }
-    
-  } 
-  
-  //______________________________________________________________________________________
-   
-  Matrix<DComplex> NuMoonTrigger::Geom_weights( const Vector<uint>& RCU_id,
-					       const Vector<double>& freq_Vector ) 
-    {
-         
+   Vector<double> NuMoonTrigger::ppf_inversion( const Matrix<DComplex>& FTData, 
+                               			const Vector<double>& ppf_invcoeff,
+						const Vector<uint> subBand_ID )  
+						
+   {
+	Vector<Double> ppfinverted_Vector ;
+  	 
      try {
-      
-     	  double pi = 3.14159265358979323846 ;
-	  
-	  DComplex expo(0, 1);
-	  
-	  uint freq_channels = freq_Vector.nelements() ;
-	  
-	  uint nOfelements = RCU_id.nelements() ;
-	  
-	  double speed_light = 3e8 ;
-	  
-	  Matrix<DComplex> weight_factors( freq_channels, nOfelements, 0.0 ) ; 
-	  
-     	  double long_deg = 6.0 ;
-	  double long_min = 52.0 ;
-	  
-	  double radius = 6371e3 ;
-	  
-	  Vector<double> long_sec( 8, 0.0 ) ;
-	 
-	  long_sec(0) = 12.61461 ;
-	  long_sec(1) = 12.61461 ;
-	  long_sec(2) = 12.62020 ;
-	  long_sec(3) = 12.62020 ;
-	  long_sec(4) = 12.34627 ;
-	  long_sec(5) = 12.34627 ;
-	  long_sec(6) = 12.34070 ;
-	  long_sec(7) = 12.34070 ;	
-	    
-	  double lat_deg = 52.0 ;
-	  double lat_min = 54.0 ;
-	 
-	  Vector<double> lat_sec( 8, 0.0 ) ;
-	 
-	  lat_sec(0) = 47.90154 ;
-	  lat_sec(1) = 47.90154 ;
-	  lat_sec(2) = 48.06707 ;
-	  lat_sec(3) = 48.06707 ;
-	  lat_sec(4) = 48.07043 ;
-	  lat_sec(5) = 48.07043 ;
-	  lat_sec(6) = 47.90490 ;
-	  lat_sec(7) = 47.90490 ;
-	  
-	  Vector<double> height( 8, 0.0 ) ;
-	  height(0)= 51.163 ;
-	  height(1)= 51.163 ;
-	  height(2)= 51.020 ;
-	  height(3)= 51.020 ;
-	  height(4)= 51.020 ;
-	  height(5)= 51.020 ;
-	  height(6)= 51.163 ;
-	  height(7)= 51.163 ;
-	  
-	  Vector<double> height_diff( 8, 0.0 ) ;
-	  
-	  for( uint h =0; h<8; h++ ) {
-	  
-	  	  height_diff(h)= height(h) -height(0) ;
-	    }
-	  
-	  Vector<double> latitude( nOfelements, 0.0) ;
-	  Vector<double> longitude( nOfelements, 0.0 ) ;
-	  
-	  for( uint i=0; i< nOfelements; i++ ){
-	  
-	      // uint rcu_number = RCU_id(i) ;
-	       
-	  	latitude(i) = (pi/180.)*(lat_deg +(1./60.)*lat_min +(1./60.)*lat_sec(i)) ;
-		longitude(i) = (pi/180.)*(long_deg +(1./60.)*long_min +(1./60.)*long_sec(i)) ;
-		
-		}
-	  Vector<double> lat_diff( nOfelements, 0.0 ) ;
-	  Vector<double> long_diff( nOfelements, 0.0 ) ;	
-	  
-	  Vector<double> baseline( nOfelements, 0.0 ) ;
-	  
-	  Vector<double> source_distance( nOfelements, 0.0 ) ;
-	  
-	  Vector<double> Geom_delay( nOfelements, 0.0 ) ;
-	  
-	  double a, x, y, c ;
-	  
-	  for( uint j=0; j< nOfelements; j++ ){
-	  
-	  	//uint rcu_n = RCU_id(j) ;
-	  	
-		lat_diff(j) = latitude(j)- latitude(0) ;
-		long_diff(j) = longitude(j)- longitude(0) ;
-		
- a=(sin(0.5*lat_diff(j)))*(sin(0.5*lat_diff(j)))+cos(latitude(j))*cos(latitude(j))*(sin(0.5*long_diff(j)))*(sin(0.5*long_diff(j))) ;
-
-  		y = sqrt(a) ;
-	 	x = sqrt(1.-a) ;
-	 
-	 	c =2*atan2(y,x) ;
-	 
-	 	baseline(j) = radius*c ;
-		
-		source_distance(j)= sqrt((1.+height_diff(j))*(1.+height_diff(j))+baseline(j)*baseline(j)) ;
-		
-		double baseline_square = baseline(j)*baseline(j) ;
-		
-		double source_dis_square = source_distance(j)*source_distance(j) ;
-			        
-Geom_delay(j) =(source_distance(j)/speed_light)*(sqrt(1+((baseline_square-2*source_distance(j)*baseline(j))/(source_dis_square)))-1.) ;
-	 
-		
-	}
-	cout << " geom_0 :" << Geom_delay(0) << "\n" << " geom_1 :" << Geom_delay(1) << "\n" << " geom_2 :" << Geom_delay(2) << "\n" << " geom_3 :" << Geom_delay(3) << "\n" << " geom_4 :" << Geom_delay(4) << "\n" << " geom_5 :" << Geom_delay(5) << "\n" << " geom_6 :" << Geom_delay(6) << "\n" << " geom_7 :" << Geom_delay(7) << endl;
+     	  	   
+          CR::ppfinversion ppf_Invert( FTData,
+	  			       ppf_invcoeff,
+				       subBand_ID ) ;
+     
+         ppfinverted_Vector = ppf_Invert.FIR_inversion( ppf_invcoeff,
+	 	       		 		        FTData,
+		       		 		        subBand_ID ) ;
+        	 
+	 }
 	
-	//Geom_delay(1) = Geom_delay(0)-(pi/2.)/sampling_rate ;
-	
-	 for( uint g=0; g< nOfelements; g++ ){
-
-	 	for( uint f=0; f< freq_channels; f++ ){
-		
-			double freq_val = freq_Vector(f) ;
-			
-			double phase_factor = 2.*pi*freq_val*Geom_delay(g) ;
-			
-// 			if(g==1){
-//  				phase_factor =phase_factor + pi ;
-//  				}
-// 			if(g==2){
-// 				phase_factor =phase_factor - pi/3. ;
-//  				}
-// 			if(g==4){
-// 				phase_factor =phase_factor - 2.*pi/3. ;
-//  				}
-// 			if(g==5){
-// 				phase_factor =phase_factor + pi/3. ;
-//  				}	
-// 			if(g==6){
-// 				phase_factor =phase_factor + pi ;
-//  				}	
-// 			if(g==7){
-// 				phase_factor =phase_factor + 2.*pi/3. ;
-//  				}
-			weight_factors(f,g) = DComplex(cos(phase_factor),sin(phase_factor)) ;
-			
-			}
-		}	
-	 
-	  
-  	return weight_factors ;
-	
-       } 
        catch ( AipsError x ){
-       cerr << "  NuMoonTrigger::Geom_weights " << x.getMesg () << endl ;
-       return Matrix<DComplex> ();
-     }
+       cerr << " NuMoonTrigger::ppf_inversion " << x.getMesg () << endl ;
+        Vector<Double>();
+	}
+       
+       return ppfinverted_Vector ;
+   } 
    
-  }
   
   //____________________________________________________________________________________
+  
+   Matrix<double> NuMoonTrigger::phase_delay( const Vector<double>& freq_Vector,
+				              const double& source_latitude,
+					      const double& source_longitude,
+					      const Vector<double>& position_x,
+		   			      const Vector<double>& position_y,
+		   		              const Vector<double>& position_z ) 
+ 
+  {
+    	uint n_element = position_x.nelements() ;
+         
+	uint freq_channels = freq_Vector.nelements() ;
+	  
+	Matrix<double> phase_Delay(freq_channels, n_element, 0.0 ) ; 
+	
+     try { 
+     	  double pi = 3.14159265358979323846 ;
+	  
+     	  Vector<double> geomdelay = NuMoonTrigger::geom_Delay( source_latitude,
+								source_longitude,
+								position_x,
+								position_y,
+								position_z ) ;
+	  
+	  for( uint antenna=0; antenna< n_element; antenna++ ){
+	  
+	  	for( uint freq=0; freq< freq_channels; freq++ ){
+		
+			double frequency = freq_Vector(freq) ;
+			
+			double  delay = geomdelay( antenna ) ;
+		
+			phase_Delay(freq, antenna)= 2*pi*frequency*delay ;
+			
+			}
+		}
+     
+        
+	
+     } 
+       catch ( AipsError x ){
+       cerr << "  NuMoonTrigger::phase_Delay " << x.getMesg () << endl ;
+      Matrix<double>();
+     }
+   
+    return phase_Delay ;
+  } 
+  
+  //____________________________________________________________________________________
+  
+  Vector<double> NuMoonTrigger::geom_Delay( const double& source_latitude,
+			    		    const double& source_longitude,
+					    const Vector<double>& position_x,
+		   			    const Vector<double>& position_y,
+		   		            const Vector<double>& position_z )
+  {
+    	uint  RCU_channels = position_x.nelements() ;
+	
+	Vector<double> Geomdelay( RCU_channels, 0.0 ) ;
+	 
+     try { 
+     
+          DComplex expo(0, 1);
+	    
+	  double speed_light = 3e8 ;
+	  	
+	  double source_pos_x = cos(source_longitude)*cos(source_latitude) ;
+	  double source_pos_y = sin(source_longitude)*cos(source_latitude) ;
+	  double source_pos_z = sin(source_latitude) ; 
+ 
+	  Vector<double> ant_pos_x( RCU_channels, 0.0) ;
+	  Vector<double> ant_pos_y( RCU_channels, 0.0) ;
+	  Vector<double> ant_pos_z( RCU_channels, 0.0) ;  
+	 
+	  for( uint j=0; j< RCU_channels; j++ ){
+	 
+	 	ant_pos_x(j) = position_x(j)-position_x(0) ;
+		ant_pos_y(j) = position_y(j)-position_y(0) ;
+		ant_pos_z(j) = position_z(j)-position_z(0) ; //+ height(j) ;
+		
+		Geomdelay(j) = (1./speed_light)*(source_pos_x*ant_pos_x(j)+source_pos_y*ant_pos_y(j)+source_pos_z*ant_pos_z(j))   ;
+		//cout << "Geomdelay " << Geomdelay(j) <<endl ;
+		}
+		 
+         
+         } 
+        catch ( AipsError x ){
+        cerr << "  NuMoonTrigger::geom_Delay " << x.getMesg () << endl ;
+       Vector<double> ();
+      }
+     return Geomdelay ;
+  }	
+  
+  
+   //____________________________________________________________________________________
+  
+  Vector<int> NuMoonTrigger::integer_Delay( const double& source_latitude,
+			    		    const double& source_longitude,
+					    const double& sampling_frequency,
+					    const Vector<double>& position_x,
+		   			    const Vector<double>& position_y,
+		   		            const Vector<double>& position_z )
+  { 
+  	uint  RCU_channels = position_x.nelements() ;
+	
+	Vector<int> integer_delay( RCU_channels,0 );
+	
+     try {  
+     
+     Vector<double> geomdelay = NuMoonTrigger::geom_Delay( source_latitude,
+			    		                   source_longitude,
+							   position_x,
+							   position_y,
+							   position_z ) ;
+      uint n_element = geomdelay.nelements() ;
+         
+      for( uint i=0; i< n_element; i++ ){
+      
+      		double delay = geomdelay(i) ;
+		
+		int intDelay = int(delay*sampling_frequency) ;
+		
+		integer_delay(i) = intDelay ;
+		
+		}		
+     
+         
+        } 
+       catch ( AipsError x ){
+       cerr << "  NuMoonTrigger::integer_Delay " << x.getMesg () << endl ;
+      Vector<int> ();
+     }
+   return integer_delay ;
+  }	
+  
+  //____________________________________________________________________________________
+  
+  Vector<double> NuMoonTrigger::fraction_Delay( const double& source_latitude,
+			    		        const double& source_longitude,
+					        const double& sampling_frequency,
+			    		        const Vector<double>& position_x,
+		   	    			const Vector<double>& position_y,
+		   	    			const Vector<double>& position_z )
+  {
+  	uint  RCU_channels = position_x.nelements() ;
+	
+	Vector<double> fraction_delay( RCU_channels,0 );
+	
+     try {  	
+      	 
+	 Vector<double> geomdelay = NuMoonTrigger::geom_Delay( source_latitude,
+			    		                       source_longitude,
+							       position_x,
+							       position_y,
+							       position_z ) ;
+         uint n_element = geomdelay.nelements() ;
+               
+         for( uint i=0; i< n_element; i++ ){
+      
+      		double delay = geomdelay(i) ;
+		
+		double fracDelay = delay - (1./sampling_frequency)*(int(delay*sampling_frequency)) ;
+		
+		fraction_delay(i) = fracDelay ;
+		
+		}		
+             
+       } 
+       catch ( AipsError x ){
+       cerr << "  NuMoonTrigger::fraction_Delay " << x.getMesg () << endl ;
+      Vector<double> ();
+     }
+   return fraction_delay ;
+   
+  }		    
+ 
+  //____________________________________________________________________________________
 
+  
     Matrix<DComplex> NuMoonTrigger::weights_applied( Matrix<DComplex> const& data,
-  					             Matrix<DComplex> const& geom_weights,
+  					             Matrix<double> const& phase_Delay,
+						     const Vector<double>& gain_scale_factor,
 						     uint const& rcu_id ) 
   
     {
-    	
-     try {
-     
-     	   uint n_columns = data.ncolumn() ;
+    	uint n_columns = data.ncolumn() ;
 	   
-	   uint n_rows = data.nrow() ;
+	uint n_rows = data.nrow() ;
 	  
+	casa::Matrix<DComplex> phase_corrected_data(n_rows, n_columns, 0.0 ) ;
+	
+     try {
+        /*Matrix<double> NuMoonTrigger::phase_delay( const Vector<uint>& RCU_id,
+				               const Vector<double>& freq_Vector,
+				               const double& source_latitude,
+					       const double& source_longitude ) ; */
+	   DComplex expo(0, 1) ;
+	   	  
+	   casa::Matrix<double> data_phase( n_rows, n_columns, 0.0 ) ;
+	   
+	   casa::Matrix<double> data_amplitude( n_rows, n_columns, 0.0 ) ;
+	   	   
 	   casa::Matrix<DComplex> data_phase_corrected(n_rows, n_columns, 0.0 ) ;
 	   
-	   uint r_gmw = geom_weights.nrow() ;
-	     
-	   Vector<DComplex> geom_vector(r_gmw,0.0) ;
-	    
-	   geom_vector = geom_weights.column( rcu_id ) ;
+	   casa::Matrix<DComplex> data_amplitude_corrected(n_rows, n_columns, 0.0 ) ;
+	   	     
+	   Vector<double> phase_vector( n_rows,0.0) ;
 	   
-	   Vector<DComplex> data_vector( n_rows, 0.0 );
+	   Vector<double> data_phase_vector( n_rows,0.0 ) ;
 	   
-	   Vector<DComplex> weight_applied_vector( n_rows, 0.0 ) ;
-	   	   
+	   Vector<double> phase_modified_vector( n_rows, 0.0 ) ; 
+	   
+	   phase_vector = phase_Delay.column( rcu_id ) ;
+	   
+	   double gainScale = gain_scale_factor(rcu_id) ;
+	   
+	   data_phase = phase(data) ;
+	   
+	   data_amplitude = amplitude( data) ;
+	   
+	   data_amplitude = data_amplitude*gainScale ;
+	   
+	   convertArray( data_amplitude_corrected, data_amplitude ) ;
+	   
 	   for( uint i=0; i< n_columns; i++ ) {
 	   
-	   	data_vector = data.column(i) ;
+	   	data_phase_vector = data_phase.column(i) ;
+				
+		phase_modified_vector = data_phase_vector+phase_vector ;
 		
-		weight_applied_vector = data_vector*geom_vector ;
-		
-		DComplex weight_applied(0.0);
+		DComplex weight_applied(0.0) ;
 		
 		for( uint j=0; j< n_rows; j++ ){
 		
-			weight_applied = weight_applied_vector(j) ;
+			weight_applied = exp( expo*phase_modified_vector(j)) ;
 			
 			data_phase_corrected(j,i) = weight_applied ;
 		}
 	   }
-        return data_phase_corrected ;
+	      
+	   phase_corrected_data = data_amplitude_corrected*data_phase_corrected ;
+	
+        
      	} 
+	
        catch ( AipsError x ){
        cerr << "  NuMoonTrigger::weights_applied " << x.getMesg () << endl ;
-       return Matrix<DComplex> ();
+        Matrix<DComplex> ();
 	}
-   
+    return phase_corrected_data ;
   }
   //_________________________________________________________________
   
@@ -943,32 +1216,32 @@ Geom_delay(j) =(source_distance(j)/speed_light)*(sqrt(1+((baseline_square-2*sour
 					    double const& peak_height,
 					    double const& pulse_loc,
 					    double const& rnd_phase,
-					    Vector<DComplex> geom_Weights_factor  ) 
+					    Vector<double> geom_phase_factor,
+					    uint const& nyquist_zone  ) 
    {
-   		
+   	uint n_elements = data.nelements() ;
+	    
+	Vector<double> addedSignal( n_elements,0.0 ) ;
+	  	
      try {
      	
-     	  double pi = 3.14159265358979323846 ;
+     	  //TVirtualFFT *rftsim ;
+	  
+	  double pi = 3.14159265358979323846 ;
 	  
 	  uint dataBlockSize = 1024 ;
 	  
 	  uint n_freqbins = dataBlockSize/2 +1 ;
 	  
-     	  double DM, t0; // peak_height(0.0) ;
-	  
-	 // peak_height = sqrt(peak_power ) ;
-	  uint n_elements = data.nelements() ;
-	  cout << "data elements used for simulating signal in real data :" << n_elements <<endl ;
-	  
-	  Vector<double>  addedSignal( n_elements,0.0 ) ;
-	  
+     	  double DM, t0; 
+	    
 	  DComplex expo(0, 1);
 	  
 	  DComplex expr = exp(expo*0.0) ;
 	  
 	  casa::Vector<double> amp( n_freqbins, 0.0 ) ;
 	  
-	  casa::Vector<double> phase_s( n_freqbins, 0.0 ) ;
+	  casa::Vector<double> phase( n_freqbins, 0.0 ) ;
 	  
 	  casa::Vector<DComplex> phased_vector( n_freqbins, 0.0 ) ;
 	  
@@ -978,28 +1251,18 @@ Geom_delay(j) =(source_distance(j)/speed_light)*(sqrt(1+((baseline_square-2*sour
 	  
 	  t0 = 8.e+5/3.e+8 ;
 	  
-	  casa::Vector<double> geom_phase = phase(geom_Weights_factor) ;
-	  
-	 // double geom_phase ;   
-	   
 	  for( uint i=0; i< n_freqbins; i++ ) {
 	  
-	  //	cout << "peak height of the pulse that has to be added : "<< peak_height <<"\t" ;
+		amp(i) = (peak_height/1024) ;
 		
-		amp(i) = (peak_height/1024.) ;
-		
-	//	cout << "Amplitude of signal in a bin : " << amp(i) << endl ;
-		
-		phase_s(i) = rnd_phase + (1.-(pulse_loc/1024.))*2.*pi*i - geom_phase(i);
-		
-	//	cout << "Phase of signal that has been added : " << phase_s(i) <<endl ;
+		phase(i) = rnd_phase + (1-(pulse_loc/1024.))*2*pi*i-geom_phase_factor(i);
 		
 		double nu = freq_Vector(i) ;
 		
-		phase_s(i) -= 2.*pi*sqrt(1.-2.*DM/t0/(nu*nu))*nu*t0 -2.*pi*nu*t0 ;
+		phase(i) -= 2*pi*sqrt(1-2*DM/t0/(nu*nu))*nu*t0 -2*pi*nu*t0 ;
 		
-		phased_vector(i) = exp(expo*phase_s(i)) ;
-			
+		phased_vector(i) = exp(expo*phase(i)) ;
+		
 		}
 		
 	 casa::Vector<DComplex> amp_vector( n_freqbins, 0.0 )  ;
@@ -1007,20 +1270,22 @@ Geom_delay(j) =(source_distance(j)/speed_light)*(sqrt(1+((baseline_square-2*sour
 	 convertArray( amp_vector, amp ) ;
 	 
 	 casa::Vector<DComplex> dispersed_signalVector( n_freqbins, 0.0 ) ;
-	  
+	 
+	 casa::Vector<DComplex> nyquist_signalVector( n_freqbins, 0.0 ) ;
+	 
 	 dispersed_signalVector = amp_vector*phased_vector  ;
+		
+	 casa::Vector<double> signal_Vector ( dataBlockSize,0.0 ) ;
 	
-	casa::Vector<double> signal_Vector ( dataBlockSize,0.0 ) ;
+	 server.fft( signal_Vector, dispersed_signalVector ) ;
 	
-	server.fft( signal_Vector, dispersed_signalVector ) ;
+	 double signal(0.0) ;
 	
-	double signal(0.0) ;
-	
-  	for( uint j=0; j< dataBlockSize; j++ ) {
+  	 for( uint j=0; j< dataBlockSize; j++ ) {
 	  
  	        signal = 1024.*signal_Vector(j);   
 		
-		signal = 2.0*int(signal/2.0) ;
+		//signal += 2.0*int(data(j)/2.0) ;
 		
 		if(signal>2047) {signal=2047 ;} 
 		if(signal<-2048) {signal=-2048 ;} 
@@ -1030,253 +1295,499 @@ Geom_delay(j) =(source_distance(j)/speed_light)*(sqrt(1+((baseline_square-2*sour
 		addedSignal(j) = signal +data_value ;
 		
               }
-	      
-	
-	
-	return addedSignal ;	  
-     }
-     
-     catch ( AipsError x ){
+	 
+       }
+	       
+       catch ( AipsError x ){
        cerr << " NuMoonTrigger::Sim_Signal " << x.getMesg () << endl ;
-       return Vector<double>() ;
-     }
+        Vector<double>() ;
+	}
      
-     
+       return addedSignal ;	  
    }
+      
+   
+//_____________________________________________________________________________________
   
-  
-  //_____________________________________________________________________________________
-  
-  Matrix<double> NuMoonTrigger::Cleaned_data(  std::string const &filename,
-					       uint const& n_samples,
-					       double const& simTEC,
-					       uint const& nyquist_zone,
-					       double const& peak_power,
-					       const Vector<uint>& RCU_id,
-					       double const& sampling_rate,
-					       double const& TEC,
-					       const Vector<double> freq_range ) 
-  {
-    
-    
-    try {
-      
-      CR::LOFAR_TBB lofar_tbb( filename, n_samples ) ;
-      
-      casa::Matrix<double> data = lofar_tbb.fx( ) ;	
-      
-      CR::NuMoonTrigger moontrigger() ;
-      
-      uint nc_rcu = data.ncolumn() ;
-      
-      uint n_frames = n_samples/1024 ;
-      
-      casa::Vector<double> FREQvector = NuMoonTrigger::freq_vector( sampling_rate,
-								    nyquist_zone ) ;
-      casa::Matrix<double> Cleaned_data(n_samples, nc_rcu,0.0 ) ;  
-      
-      for( uint rcu=0; rcu< nc_rcu; rcu++ ) {
+     Matrix<double> NuMoonTrigger::Cleaned_data(  Matrix<double> const& data,
+    						    uint const& n_samples,
+					            double const& simTEC,
+						    uint const& nyquist_zone,
+						    double const& sampling_rate,
+						    double const& TEC,
+						    const Vector<double> freq_range ) 
+   {
+   	uint nc_rcu = data.ncolumn() ;
 	
-	casa::Vector<double> RCU_data = data.column( rcu ) ;
+   	 casa::Matrix<double> Cleaned_data(n_samples, nc_rcu,0.0 ) ;  
+	 
+     try {
+     	  
+	  //CR::LOFAR_TBB lofar_tbb( data, n_samples ) ;
+	   
+	  //casa::Matrix<double> data = lofar_tbb.fx( ) ;	
+	 
+	  CR::NuMoonTrigger moontrigger() ;
+	   
+	  uint n_frames = n_samples/1024 ;
+	  
+	  casa::Vector<double> FREQvector = NuMoonTrigger::freq_vector( sampling_rate,
+									nyquist_zone ) ;
+	  
+	   	     
+	  for( uint rcu=0; rcu< nc_rcu; rcu++ ) {
+	  
+	  	casa::Vector<double> RCU_data = data.column( rcu ) ;
+		
+		casa::Matrix<DComplex> FFTdata = NuMoonTrigger::fft_data( RCU_data,
+								 	  n_frames,
+								 	  nyquist_zone ) ;
+
+		casa::Matrix<DComplex> RFIremoved =NuMoonTrigger::RFI_removal( FFTdata ) ;
 	
-	casa::Matrix<DComplex> FFTdata = NuMoonTrigger::fft_data( RCU_data,
-								  n_frames,
-								  nyquist_zone ) ;
-	
-	casa::Matrix<DComplex> RFIremoved =NuMoonTrigger::RFI_removal( FFTdata ) ;
-	
-	casa::Matrix<DComplex> dispersed_Array = NuMoonTrigger::de_dispersion( RFIremoved,
-									       TEC,
-									       FREQvector ) ;
-	
-	casa::Vector<double> IFFT_Vector = NuMoonTrigger::ifft_data( dispersed_Array,
-								     n_frames,
-								     nyquist_zone ) ;
-	
-	Cleaned_data.column(rcu) = IFFT_Vector ;
-	
+		casa::Matrix<DComplex> dispersed_Array = NuMoonTrigger::de_dispersion( RFIremoved,
+										       TEC,
+										       FREQvector ) ;
+			
+		casa::Vector<double> IFFT_Vector = NuMoonTrigger::ifft_data( dispersed_Array,
+									     n_frames,
+									     nyquist_zone ) ;
+		
+		Cleaned_data.column(rcu) = IFFT_Vector ;
+		
+	       }
+	  
       }
-      
-      
-      return Cleaned_data ;	       
-    }
-    
-    catch ( AipsError x ){
-      cerr << " NuMoonTrigger:: Cleaned_data" << x.getMesg () << endl ;
-      return Matrix<double>() ;
-    }
-    
-    
-  }
+	       
+       catch ( AipsError x ){
+       cerr << " NuMoonTrigger:: Cleaned_data" << x.getMesg () << endl ;
+        Matrix<double>() ;
+	}
+     return Cleaned_data ;	    
+        
+   }
+ //_____________________________________________________________________________________
   
-  //_____________________________________________________________________________
-  //                                                             Added_SignalData
-  
-  Matrix<double> NuMoonTrigger::Added_SignalData( std::string const &filename,
-						  uint const& n_samples,
-						  double const& simTEC,
-						  uint const& nyquist_zone,
-						  double const& peak_power,
-						  const Vector<uint>& RCU_id,
-						  double const& sampling_rate,
-						  double const& TEC,
-						  const Vector<double> freq_range ) 
-  {
-    double pi = 3.14159265358979323846 ;
-    uint dataBlockSize = 1024 ;
-    uint n_frames = n_samples/dataBlockSize ;     
-    
+     Vector<double> NuMoonTrigger::BeamFormed_data(  Matrix<double> const& data,
+    						     uint const& n_samples,
+					             double const& simTEC,
+						     uint const& nyquist_zone,
+						     double const& sampling_rate,
+						     double const& TEC,
+						     const Vector<double> freq_range,
+		   				     const double& pointing_latitude,
+		   				     const double& pointing_longitude,
+						     const Vector<double>& gain_scale_factor,
+		   				     const Vector<double>& position_x,
+		   				     const Vector<double>& position_y,
+		   				     const Vector<double>& position_z ) 
+						     
+   {	uint n_row = data.nrow() ;
+   	
+	uint n_column = data.ncolumn() ;
+	
+	casa::Vector<double> beamformed_Vector( n_row, 0.0) ;
+	
     try {
-      casa::Vector<double> FREQvector = NuMoonTrigger::freq_vector( sampling_rate,
-								    nyquist_zone);
-      
-      Matrix<double> Cleaned_data = NuMoonTrigger::Cleaned_data(  filename,
-								  n_samples,
-								  simTEC,
-								  nyquist_zone,
-								  peak_power,
-								  RCU_id,
-								  sampling_rate,
-								  TEC,
-								  freq_range ) ;
-      
-      uint nc_rcu = Cleaned_data.ncolumn() ;
-      uint nr_rcu = Cleaned_data.nrow () ;
-      
-      casa::Matrix<double> Average_P = NuMoonTrigger::cal_AvPower( Cleaned_data,
-								   n_frames )  ;
-      casa::Vector<double> random_number( n_frames, 0.0 ) ;
-      
-      casa::Vector<double> pulse_LocVector( n_frames, 0.0 ) ;
-      
-      casa::Vector<double> rnd_PhaseVector( n_frames, 0.0 ) ;
-      
-      ACG gen(1, n_frames );
-      
-      for( uint nSample=0; nSample < n_frames; nSample++ ){
-	Normal rnd(&gen, 0.0, 0.04 );
-	Double nextExpRand = rnd() ;
-	random_number(nSample) = abs(nextExpRand) ;
-	pulse_LocVector(nSample) =random_number(nSample)*1000 ;
-	rnd_PhaseVector(nSample) =random_number(nSample)*2*pi ; 
-      }
-      // Resetting the generator, should get the same numbers.
-      gen.reset () ;
-      
-      casa::Matrix<DComplex> geomWeights  = NuMoonTrigger::Geom_weights( RCU_id,
-									 FREQvector ) ;
-      
-      casa::Matrix<double> AddedSignal_data(nr_rcu, nc_rcu, 0.0 ) ;
-      
-      for( uint columns=0; columns< nc_rcu; columns++ ) {	  
+
+	uint n_frames = n_row/1024 ;
+	 
+	Matrix<double> cleaned_data = NuMoonTrigger::Cleaned_data(  data,
+    						                     n_samples,
+					                             simTEC,
+						                     nyquist_zone,
+						                     sampling_rate,
+						                     TEC,
+						                     freq_range ) ;
+								     
+	casa::Vector<double> FREQvector = NuMoonTrigger::freq_vector( sampling_rate,
+								      nyquist_zone ) ;
+	  
+   	casa::Matrix<double> phases = NuMoonTrigger::phase_delay( FREQvector,
+				              			   pointing_latitude,
+					        		   pointing_longitude,
+					      			   position_x,
+		   			       			   position_y,
+		   		               			   position_z )  ;
 	
-	casa::Vector<double> antenna_data = Cleaned_data.column( columns ) ;
+	casa::Vector<double> column_CleanedVector( n_row, 0.0 );
 	
-	casa::Vector<DComplex> geom_Weight_Vector = geomWeights.column( columns ) ;
+	casa::Vector<double> sorted_Vector( 1024, 0.0) ;
 	
-	casa::Vector<double> signal_Added( dataBlockSize, 0.0) ;
+	casa::Matrix<DComplex> sorted_FFT_Vector( 513, 1, 0.0 ) ;
 	
-	uint initin_value =0 ;
+	casa::Vector<double> beamformed_IFFT( 1024, 0.0) ;
 	
-	casa::Vector<double> rejoined_Vector( n_frames*dataBlockSize,0.0) ;
+	casa::Matrix<DComplex> beamformed_FFT_dummy( 513, 1, 0.0 ) ;
 	
-	for( uint frame=0; frame< n_frames; frame++ ){
-	  
-	  double Average_power = Average_P( frame, columns ) ;
-	  
-	  casa::Vector<double> sort_vector = antenna_data( Slice(initin_value, dataBlockSize )) ;
-	  
-	  double pulse_loc = pulse_LocVector(frame) ;
-	  
-	  double random_phase = rnd_PhaseVector( frame ) ;
-	  
-	  double power_level =sqrt( Average_power*peak_power) ;
-	  
-	  Vector<double> signal_Added = NuMoonTrigger::Sim_Signal( sort_vector,
-								   simTEC,
-								   FREQvector,
-								   power_level,
-								   pulse_loc,
-								   random_phase,
-								   geom_Weight_Vector ) ;
-	  
-	  for( uint sample_number=0; sample_number< dataBlockSize; sample_number++ ){
-	    
-	    uint s_number = initin_value*dataBlockSize +sample_number ;
-	    
-	    rejoined_Vector( s_number ) = signal_Added( sample_number) ;
-	    
-	  }
-	  
-	  initin_value = initin_value +1 ;
-	  
+	uint init_Bin =0 ;
+		   
+	for( uint f=0; f< n_frames; f++ ){
+	
+		casa::Vector<DComplex> beamformed_FFT( 513, 0.0 );
+	
+		for( uint antenna=0; antenna< n_column; antenna++ ){
+		
+			column_CleanedVector = data.column(antenna);
+			
+			//uint n_cl = column_CleanedVector.nelements() ;
+			
+			sorted_Vector = column_CleanedVector( Slice( init_Bin, 1024 )) ;
+			
+			casa::Matrix<DComplex> sorted_FFT_Vector = NuMoonTrigger::fft_data( sorted_Vector,
+    		 	     		            					    1,
+											   nyquist_zone ) ;
+			
+			Matrix<DComplex> weight_Applied = NuMoonTrigger::weights_applied( sorted_FFT_Vector,
+  					             			 		  phases,
+						     			  		  gain_scale_factor,
+											  antenna ) ;
+			
+			beamformed_FFT = beamformed_FFT + weight_Applied.column(0) ;
+			
+		}
+		beamformed_FFT_dummy.column(0) = beamformed_FFT ;
+		
+		beamformed_IFFT = NuMoonTrigger::ifft_data( beamformed_FFT_dummy,
+    			    				     1,
+			    				    nyquist_zone ) ;
+		//uint n_b_IFFT = beamformed_IFFT.nelements() ;
+		
+		for( uint j=0; j< 1024; j++){
+		
+			beamformed_Vector(init_Bin+j) = (beamformed_IFFT(j)) ;
+		       }
+		init_Bin = init_Bin + 1024 ;
+		
 	}	
-	
-	AddedSignal_data.column( columns ) = rejoined_Vector ;
-	
+	    	       
       }
-      return AddedSignal_data ;
-    } 
-    catch ( AipsError x ){
-      cerr << "  NuMoonTrigger::Added_SignalData" << x.getMesg () << endl ;
-      return Matrix<double> ();
-    }
+	       
+       catch ( AipsError x ){
+       cerr << " NuMoonTrigger:: BeamFormed_data" << x.getMesg () << endl ;
+       Vector<double>() ;
+	}
+       return beamformed_Vector ;	
+ }
+  	       
+//____________________________________________________________________________________________	       
+    Matrix<double> NuMoonTrigger::Added_SignalData( Matrix<double> const& data,
+    						    uint const& n_samples,
+					            double const& simTEC,
+						    uint const& nyquist_zone,
+						    double const& peak_height,
+						    double const& sampling_rate,
+						    double const& TEC,
+				     		    const double& source_latitude,
+				     		    const double& source_longitude,
+		  		   		    const double& pointing_latitude,
+		  		   		    const double& pointing_longitude,
+				   		    const Vector<double>& gain_scale_factor,
+						    const Vector<double>& position_x,
+		   	    	  		    const Vector<double>& position_y,
+		   	    	                    const Vector<double>& position_z,
+						    const Vector<double> freq_range ) 
+  
+   {
+   	 uint nc_rcu =  data.ncolumn() ;
+	 
+	 uint nr_rcu =  data.nrow () ;
+	
+   	 casa::Matrix<double> AddedSignal_data(nr_rcu, nc_rcu, 0.0 ) ;
+	 
+     try {
+     	  NuMoonTrigger numooontrigger ;
+	  
+	  double pi = 3.14159265358979323846 ;
+     	  
+	  uint dataBlockSize = 1024 ;
+	  
+	  casa::Vector<double> FREQvector = NuMoonTrigger::freq_vector( sampling_rate,
+									nyquist_zone	) ;
+									
+									
+	  casa::Matrix<double> Cleaned_DATA = NuMoonTrigger::Cleaned_data(  data,
+    						    		     	   n_samples,
+								     	   simTEC,
+								     	   nyquist_zone,
+								           sampling_rate,
+								           TEC,
+								           freq_range ) ; 
+   	  
+	  casa::Vector<double> Beamed_data = NuMoonTrigger::BeamFormed_data(  Cleaned_DATA,
+	  								      n_samples,
+									      simTEC,
+									      nyquist_zone,
+									      sampling_rate,
+									      TEC,
+									      freq_range,
+									      pointing_latitude,
+									      pointing_longitude,
+									      gain_scale_factor,
+									      position_x,
+									      position_y,
+									      position_z ) ; 
+									      
+	   Vector<double> Average_P = NuMoonTrigger::cal_AvPower( Beamed_data ) ;
     
+	   uint n_frames = n_samples/1024 ;     
+	  
+	   uint freq_channels = FREQvector.nelements() ;
+	  
+	   casa::Matrix<double> phaseDelay( freq_channels, nc_rcu,0.0 );
+
+           casa::Vector<double> random_number( n_frames, 0.0 ) ;
+	  
+	   casa::Vector<double> pulse_LocVector( n_frames, 0.0 ) ;
+	  
+	   casa::Vector<double> rnd_PhaseVector( n_frames, 0.0 ) ;
+	  
+	   ACG gen(1, n_frames );
+    
+           for( uint nSample=0; nSample < n_frames; nSample++ ){
+           		 Normal rnd(&gen, 0.0, 0.01 ); // with 0.04 generated random number lies within range of unity
+            		 Double nextExpRand = rnd() ;
+      			 random_number(nSample) = abs(nextExpRand) ;
+			 pulse_LocVector(nSample) =random_number(nSample)*512+200 ; 
+			 rnd_PhaseVector(nSample) =random_number(nSample)*2*pi ; 
+                 }
+    		gen.reset () ;
+	  
+	  	phaseDelay = NuMoonTrigger::phase_delay( FREQvector,
+							 source_latitude,
+							 source_longitude,
+							 position_x,
+							 position_y,
+							 position_z ) ;
+         	  
+	  for( uint columns=0; columns< nc_rcu; columns++ ) {	  
+	 
+	 	casa::Vector<double> antenna_data =  Cleaned_DATA.column( columns ) ;
+		
+		casa::Vector<double> geom_Weight_Vector = phaseDelay.column( columns ) ;
+		
+		casa::Vector<double> signal_Added( dataBlockSize, 0.0) ;
+		
+		uint initin_value =0 ;
+		
+		double gain_factor = gain_scale_factor(columns) ;
+		
+		casa::Vector<double> rejoined_Vector( n_frames*dataBlockSize,0.0) ;
+
+		for( uint frame=0; frame< n_frames; frame++ ){
+		
+			double Average_power = Average_P( frame ) ;
+			
+			casa::Vector<double> sort_vector = antenna_data( Slice(initin_value, dataBlockSize )) ;
+		
+			double pulse_loc = pulse_LocVector(frame) ;
+			//cout << "pulse location : " << pulse_loc << endl ;
+			double random_phase = rnd_PhaseVector( frame ) ;
+			//cout << "random phase : " << random_phase <<endl ;
+			
+			double power_level = gain_factor*peak_height*sqrt( Average_power) ;
+			
+			signal_Added = numooontrigger.Sim_Signal(sort_vector,
+                         			  		 simTEC,
+					     			 FREQvector,
+					     			 power_level,
+					     			 pulse_loc,
+					    			 random_phase,
+					 			 geom_Weight_Vector ,
+								 nyquist_zone ) ;
+			if( frame<1){
+			ofstream logfile2;
+			logfile2.open("Sim_signal",ios::out );
+	
+			for( uint r=0; r<1024; r++){
+				logfile2<< signal_Added(r) << endl ;
+			}
+	 		logfile2.close(); 
+			}			
+			for( uint sample_number=0; sample_number< dataBlockSize; sample_number++ ){
+			
+				uint s_number = initin_value +sample_number ;
+			
+				rejoined_Vector( s_number ) = signal_Added( sample_number) ;
+				
+				}
+			//cout << "re joined vector :" << rejoined_Vector <<endl ;		
+			initin_value = initin_value + dataBlockSize ;
+		
+		}	
+		
+	   AddedSignal_data.column( columns ) = rejoined_Vector ;
+	   
+	 }
+      
+      } 
+       catch ( AipsError x ){
+       cerr << "  NuMoonTrigger::Added_SignalData" << x.getMesg () << endl ;
+       Matrix<double> ();
+       }
+       
+   return AddedSignal_data ;
   }
   
-  //_____________________________________________________________________________
-  //                                                               without_Signal
-  
-  Vector<double> NuMoonTrigger::without_Signal(  std::string const &filename,
+ //___________________________________________________________________________________
+ 
+  Vector<double> NuMoonTrigger::without_Signal(  Matrix<double> const& data,
     						 uint const& n_samples,
 					         double const& simTEC,
 						 double const& sampling_rate,
 						 uint const& nyquist_zone,
 						 uint const& time_int_bins,
   					         double const& TEC,
+						 const double& source_latitude,
+						 const double& source_longitude,
+						 const double& pointing_latitude,
+		   				 const double& pointing_longitude,
+		   				 const Vector<double>& gain_scale_factor,
+			    	  		 const Vector<double>& position_x,
+		   	    	  		 const Vector<double>& position_y,
+		   	    	  		 const Vector<double>& position_z,
 						 const Vector<double>& ppf_coeff,
 		   				 const Vector<double>& ppf_invcoeff,
 		  				 const Vector<double> freq_range,
-						 double const& peak_power,
-						 const Vector<uint>& RCU_id ) 
+						 double const& peak_height ) 
     {
     	
+	Vector<double> beamformed_Timeseries(n_samples,0.0) ;
 	
      try{
-    
-     	Matrix<double> Cleaned_data = NuMoonTrigger::Cleaned_data(  filename,
-    						    		    n_samples,
-					             		    simTEC,
-						     		    nyquist_zone,
-						     		    peak_power,
-						     		    RCU_id,
-						     		    sampling_rate,
-						     		    TEC,
-						     		    freq_range ) ;
-     	
+    	
+	  // uint n_rcu = data.ncolumn() ;
+	   
+	  // uint n_frames = n_samples/1024 ;
+	   
+	       	 
+	   casa::Matrix<double> Cleaned_DATA = NuMoonTrigger::Cleaned_data(  data,
+    						    		     	   n_samples,
+								     	   simTEC,
+								     	   nyquist_zone,
+								           sampling_rate,
+								           TEC,
+								           freq_range ) ;
+	       
+	    beamformed_Timeseries = NuMoonTrigger::BeamFormed_data( Cleaned_DATA,
+	   						     	     n_samples,
+								     simTEC,
+								     nyquist_zone,
+								     sampling_rate,
+								     TEC,
+								     freq_range,
+								     pointing_latitude,
+								     pointing_longitude,
+								     gain_scale_factor,
+								     position_x,
+								     position_y,
+								     position_z ) ; 
+        
+      } 
+       catch ( AipsError x ){
+       cerr << "  NuMoonTrigger::without_Signal" << x.getMesg () << endl ;
+        Vector<double> ();
+      }
+    return beamformed_Timeseries ;
+  }   
+
+//______________________________________________________________________________________
+
+    Vector<double> NuMoonTrigger::PPF_processed( Matrix<double> const& data,
+    						 uint const& n_samples,
+					         double const& simTEC,
+						 double const& sampling_rate,
+						 uint const& nyquist_zone,
+						 uint const& time_int_bins,
+  					         double const& TEC,
+				        	 const double& source_latitude,
+				         	 const double& source_longitude,
+						 const double& pointing_latitude,
+		   				 const double& pointing_longitude,
+		   				 const Vector<double>& gain_scale_factor,
+			    	  		 const Vector<double>& position_x,
+		   	    	  		 const Vector<double>& position_y,
+		   	    	  		 const Vector<double>& position_z,
+						 const Vector<double>& ppf_coeff,
+		   				 const Vector<double>& ppf_invcoeff,
+		  				 const Vector<double> freq_range,
+						 double const& peak_height ) 
+						 
+   {
+        casa::Vector<double> ppf_invertedData( n_samples, 0.0 ) ;
 	
-	   uint n_rcu = RCU_id.nelements() ;
+      try{
+            casa::Matrix<double> Added_Signal_data = NuMoonTrigger::Added_SignalData( data,
+    						    			      	    n_samples,
+										    simTEC, 
+										    nyquist_zone,
+										    peak_height,
+										    sampling_rate,
+										    TEC,
+										    source_latitude,
+										    source_longitude,
+										    pointing_latitude,
+										    pointing_longitude,
+										    gain_scale_factor,
+										    position_x,
+										    position_y,
+										    position_z,
+										    freq_range )  ;
+							
+		     			
+	   uint n_rcu = data.ncolumn() ;
 	   
-	   uint n_frames = n_samples/1024 ;
+	   casa::Vector<uint> selected_channelID = NuMoonTrigger::PPFBand_vector( sampling_rate,
+   	         		          					  nyquist_zone,
+	                                  					  freq_range ) ;
+          
 	   
-	   casa::Vector<double> FREQ_vector = NuMoonTrigger::freq_vector( sampling_rate,
-		   	               					  nyquist_zone ) ;
+	   uint number_bands = selected_channelID.nelements() ;
 	   
-	   casa::Matrix<DComplex> Geometric_weights = NuMoonTrigger::Geom_weights( RCU_id,
-					       					   FREQ_vector ) ;
+	   casa::Vector<double>selected_channels( 1024,0.0 ) ;
+	   
+	   double bandwidth = sampling_rate/1024. ;
+	   
+	   if (nyquist_zone==1){
+	   
+	   	for(uint nband=0; nband< number_bands; nband++ ){
+		
+			selected_channels( nband ) = selected_channelID(nband)*bandwidth ;
+			}
+		}
+	   if (nyquist_zone==2){
+	   
+	   	for(uint nband=0; nband< number_bands; nband++ ){
+		
+			selected_channels( nband ) = sampling_rate/2.0+selected_channelID(nband)*bandwidth ;
+			}
+		}
+	   
+	 
+	    uint n_frames = n_samples/1024 ;
+	   									
+	   casa::Matrix<double> Geometric_weights = NuMoonTrigger::phase_delay( selected_channels,
+				 						source_latitude,
+					        		 		source_longitude,
+										position_x,
+										position_y,
+										position_z ) ;
 										
            Matrix<DComplex> Beam_formed( 513, n_frames, 0.0 ) ;
        
 	   for( uint antenna=0; antenna< n_rcu; antenna++ ) {
 	   
-	   	casa::Vector<double> samples = Cleaned_data.column(antenna ) ;
+	   	casa::Vector<double> samples = Added_Signal_data.column( antenna ) ;
 		
-		casa::Matrix<DComplex> FFT_data = NuMoonTrigger::fft_data( samples,
-    		 	     						   n_frames,
-			     						   nyquist_zone ) ;
-				
-		casa::Matrix<DComplex> phase_corrected = NuMoonTrigger::weights_applied( FFT_data,
+		casa::Matrix<DComplex> ppf_data_antenna = NuMoonTrigger::ppf_implement( samples,
+                                  				 	 		nyquist_zone,
+									 		ppf_coeff ) ;
+		
+		//uint columns_ppfdata = ppf_data_antenna.ncolumn() ;
+		
+		casa::Matrix<DComplex> phase_corrected = NuMoonTrigger::weights_applied( ppf_data_antenna,
   					             					 Geometric_weights,
+											 gain_scale_factor,
 						      					 antenna ) ;
 		
 		DComplex beamed_value(0.0) ;
@@ -1293,421 +1804,438 @@ Geom_delay(j) =(source_distance(j)/speed_light)*(sqrt(1+((baseline_square-2*sour
 			
 		}
 		
-	    Beam_formed = Beam_formed*(1./n_rcu) ;
+	    //Beam_formed = Beam_formed*(1./n_rcu) ;
 	    
 	    casa::Matrix<DComplex> RFI_rejected = NuMoonTrigger::RFI_removal( Beam_formed ) ; 
-	   
+	    
 	    casa::Matrix<DComplex> de_dispersedData = NuMoonTrigger::de_dispersion( RFI_rejected,
 		      		  						    TEC,
-				  						    FREQ_vector ) ;
+				  						    selected_channels ) ;
+	   
 	    
-	    casa::Vector<double> IFFT_data = NuMoonTrigger::ifft_data( de_dispersedData,
-    			    						n_frames,
-									nyquist_zone ) ;
-																		    uint n_samples =  IFFT_data.nelements() ;
-	    
-	    casa::Vector<double> time_integrated( n_samples-time_int_bins, 0.0 ) ;
-	    
-	    for( uint nsample=0; nsample< n_samples-time_int_bins; nsample++ ){
-	    
-	    	for( uint t_bins=nsample; t_bins< (nsample+time_int_bins); t_bins++ ){
-		
-			time_integrated(nsample) += IFFT_data(t_bins)* IFFT_data(t_bins);
-			
-		}
-	    }
-	    
-	    return time_integrated ;
-     } 
-     catch ( AipsError x ){
-       cerr << "  NuMoonTrigger::without_Signal" << x.getMesg () << endl ;
-       return Vector<double> ();
-     }
-     
-    }   
-  
-  //______________________________________________________________________________________
-  
-  Vector<double> NuMoonTrigger::PPF_processed( std::string const &filename,
-					       uint const& n_samples,
-					       double const& simTEC,
-					       double const& sampling_rate,
-					       uint const& nyquist_zone,
-					       uint const& time_int_bins,
-					       double const& TEC,
-					       const Vector<double>& ppf_coeff,
-					       const Vector<double>& ppf_invcoeff,
-					       const Vector<double> freq_range,
-					       double const& peak_power,
-					       const Vector<uint>& RCU_id ) 
-    
-  {
-    casa::Vector<double> time_integrated;    
-    casa::Matrix<double> Added_Signa_data;
-    casa::Vector<uint> selected_channelID;
-    unsigned int blocksize (1024);
-
-    try{
-      Added_Signa_data = NuMoonTrigger::Added_SignalData( filename,
-							  n_samples,
-							  simTEC, 
-							  nyquist_zone,
-							  peak_power, 
-							  RCU_id, 
-							  sampling_rate,
-							  TEC,
-							  freq_range )  ;
-      uint n_rcu = RCU_id.nelements() ;
-      
-      selected_channelID = NuMoonTrigger::PPFBand_vector( sampling_rate,
-							  nyquist_zone,
-							  freq_range ) ;
-      
-      uint number_bands = selected_channelID.nelements() ;
-      
-      casa::Vector<double>selected_channels( blocksize,0.0 ) ;
-      
-      double bandwidth = sampling_rate/blocksize ;
-      
-      if (nyquist_zone==1){
+	    casa::Matrix<DComplex> selected_PPFdata = NuMoonTrigger::ppfdata_cutshort( de_dispersedData,
+   				    						       selected_channelID ) ;
 	
-	for(uint nband=0; nband< number_bands; nband++ ){
-	  
-	  selected_channels( nband ) = selected_channelID(nband)*bandwidth ;
+	    ppf_invertedData = NuMoonTrigger::ppf_inversion( selected_PPFdata,
+                					     ppf_invcoeff,
+				  			     selected_channelID )  ;
+							     
+// 	    uint n_samples =  ppf_invertedData.nelements() ;
+// 	    
+// 	    casa::Vector<double> time_integrated( n_samples-time_int_bins, 0.0 ) ;
+// 	    
+// 	    for( uint nsample=0; nsample< n_samples-time_int_bins; nsample++ ){
+// 	    
+// 	    	for( uint t_bins=nsample; t_bins< (nsample+time_int_bins); t_bins++ ){
+// 		
+// 			time_integrated(nsample) += ppf_invertedData(t_bins)*ppf_invertedData(t_bins) ;
+// 			
+// 			}
+//    		}
+// 	
+        
+	} 
+       catch ( AipsError x ){
+       cerr << "  NuMoonTrigger::PPF_processed" << x.getMesg () << endl ;
+        Vector<double> ();
 	}
-      }
-      if (nyquist_zone==2){
-	
-	for(uint nband=0; nband< number_bands; nband++ ){
-	  
-	  selected_channels( nband ) = sampling_rate/2.0+selected_channelID(nband)*bandwidth ;
-	}
-      }
-      
-      
-      uint n_frames = n_samples/1024 ;
-      
-      casa::Matrix<DComplex> Geometric_weights = NuMoonTrigger::Geom_weights( RCU_id,
-									      selected_channels ) ;
-      
-      Matrix<DComplex> Beam_formed( 513, n_frames, 0.0 ) ;
-      
-      for( uint antenna=0; antenna< n_rcu; antenna++ ) {
-	
-	casa::Vector<double> samples = Added_Signa_data.column( antenna ) ;
-	
-	casa::Matrix<DComplex> ppf_data_antenna = NuMoonTrigger::ppf_implement( samples,
-										nyquist_zone,
-										ppf_coeff ) ;
-	
-	casa::Matrix<DComplex> phase_corrected = NuMoonTrigger::weights_applied( ppf_data_antenna,
-										 Geometric_weights,
-										 antenna ) ;
-	
-	
-	DComplex beamed_value(0.0) ;
-	
-	for( uint frame=0; frame< n_frames; frame++ ){
-	  
-	  for( uint freQchannel =0 ; freQchannel< 513; freQchannel++ ){
-	    
-	    beamed_value = phase_corrected( freQchannel, frame);
-	    
-	    Beam_formed( freQchannel,frame) = Beam_formed( freQchannel,frame)+ beamed_value;
-	  }
-	}
-	
-      }
-      
-      Beam_formed = Beam_formed*(1./n_rcu) ;
-      
-      casa::Matrix<DComplex> RFI_rejected = NuMoonTrigger::RFI_removal( Beam_formed ) ; 
-      
-      casa::Matrix<DComplex> de_dispersedData = NuMoonTrigger::de_dispersion( RFI_rejected,
-									      TEC,
-									      selected_channels ) ;
-      
-      
-      casa::Matrix<DComplex> selected_PPFdata = NuMoonTrigger::ppfdata_cutshort( de_dispersedData,
-										 selected_channelID ) ;
-      
-      
-      
-      casa::Vector<double> ppf_invertedData = NuMoonTrigger::ppf_inversion( selected_PPFdata,
-									    ppf_invcoeff,
-									    selected_channelID )  ;
-      
-      
-      uint n_samples =  ppf_invertedData.nelements() ;
-      
-      time_integrated.resize( n_samples-time_int_bins);
-      
-      for( uint nsample=0; nsample< n_samples-time_int_bins; nsample++ ){
-	
-	for( uint t_bins=nsample; t_bins< (nsample+time_int_bins); t_bins++ ){
-	  
-	  time_integrated(nsample) += ppf_invertedData(t_bins)*ppf_invertedData(t_bins) ;
-	  
-	}
-      }
-      
-    } 
-    catch ( AipsError x ){
-      cerr << "  NuMoonTrigger::PPF_processed" << x.getMesg () << endl ;
-      time_integrated = Vector<double> ();
-    }
-    
-    return time_integrated;              
+   return ppf_invertedData ;    
   }  
-  
-  //_______________________________________________________________________________________
-  
-  Vector<double> NuMoonTrigger::FFT_processed( std::string const &filename,
-					       uint const& n_samples,
-					       double const& simTEC,
-					       double const& sampling_rate,
-					       uint const& nyquist_zone,
-					       uint const& time_int_bins,
-					       double const& TEC,
-					       const Vector<double>& ppf_coeff,
-					       const Vector<double>& ppf_invcoeff,
-					       const Vector<double> freq_range,
-					       double const& peak_power,
-					       const Vector<uint>& RCU_id ) 
-  {
-    casa::Matrix<double> Added_Signa_data;
     
-    try{
-      
-      Added_Signa_data = NuMoonTrigger::Added_SignalData( filename,
-							  n_samples,
-							  simTEC, 
-							  nyquist_zone,
-							  peak_power,
-							  RCU_id, 
-							  sampling_rate,
-							  TEC,
-							  freq_range )  ;
-      
-      uint n_rcu = RCU_id.nelements() ;
-      
-      uint n_frames = n_samples/1024 ;
-      
-      casa::Vector<double> FREQ_vector = NuMoonTrigger::freq_vector( sampling_rate,
-								     nyquist_zone ) ;
-      
-      casa::Matrix<DComplex> Geometric_weights = NuMoonTrigger::Geom_weights( RCU_id,
-									      FREQ_vector ) ;
-      
-      Matrix<DComplex> Beam_formed( 513, n_frames, 0.0 ) ;
-      
-      for( uint antenna=0; antenna< n_rcu; antenna++ ) {
+   //_______________________________________________________________________________________
+
+    Vector<double> NuMoonTrigger::FFT_processed( Matrix<double> const& data,
+    						 uint const& n_samples,
+					         double const& simTEC,
+						 double const& sampling_rate,
+						 uint const& nyquist_zone,
+						 uint const& time_int_bins,
+  					         double const& TEC,
+						 const double& source_latitude,
+						 const double& source_longitude,
+			    			 const double& pointing_latitude,
+		   				 const double& pointing_longitude,
+		   				 const Vector<double>& gain_scale_factor,
+			    	  		 const Vector<double>& position_x,
+		   	    			 const Vector<double>& position_y,
+		   	    			 const Vector<double>& position_z,
+						 const Vector<double>& ppf_coeff,
+		   				 const Vector<double>& ppf_invcoeff,
+		  				 const Vector<double> freq_range,
+						 double const& peak_height ) 
+    {
+    	Vector<double> timeSeries_FFT( n_samples,0.0 );
 	
-	casa::Vector<double> samples = Added_Signa_data.column(antenna ) ;
-	
-	casa::Matrix<DComplex> FFT_data = NuMoonTrigger::fft_data( samples,
-								   n_frames,
-								   nyquist_zone ) ;
-	
-	casa::Matrix<DComplex> phase_corrected = NuMoonTrigger::weights_applied( FFT_data,
-										 Geometric_weights,
-										 antenna ) ;
-	
-	DComplex beamed_value(0.0) ;
-	
-	for( uint frame=0; frame< n_frames; frame++ ){
-	  
-	  for( uint freQchannel =0 ; freQchannel< 513; freQchannel++ ){
-	    
-	    beamed_value = phase_corrected( freQchannel, frame);
-	    
-	    Beam_formed( freQchannel,frame) = Beam_formed( freQchannel,frame)+ beamed_value;
-	  }
-	}
-	
-      }
-      
-      Beam_formed = Beam_formed*(1./n_rcu) ;
-      
-      casa::Matrix<DComplex> RFI_rejected = NuMoonTrigger::RFI_removal( Beam_formed ) ; 
-      
-      casa::Matrix<DComplex> de_dispersedData = NuMoonTrigger::de_dispersion( RFI_rejected,
-									      TEC,
-									      FREQ_vector ) ;
-      
-      casa::Vector<double> IFFT_data = NuMoonTrigger::ifft_data( de_dispersedData,
-								 n_frames,
-								 nyquist_zone ) ;
-      uint n_samples =  IFFT_data.nelements() ;
-      
-      casa::Vector<double> time_integrated( n_samples-time_int_bins, 0.0 ) ;
-      
-      for( uint nsample=0; nsample< n_samples-time_int_bins; nsample++ ){
-	
-	for( uint t_bins=nsample; t_bins< (nsample+time_int_bins); t_bins++ ){
-	  
-	  time_integrated(nsample) += IFFT_data(t_bins)* IFFT_data(t_bins);
-	  
-	}
-      }
-      
-      return time_integrated ;
-    } 
-    catch ( AipsError x ){
-      cerr << "  NuMoonTrigger::FFT_processed" << x.getMesg () << endl ;
-      return Vector<double> ();
-    }
+     try{
     
+     	casa::Matrix<double> Added_Signal_data = NuMoonTrigger::Added_SignalData( data,
+    						    			       n_samples,
+									       simTEC, 
+									       nyquist_zone,
+									       peak_height,
+									       sampling_rate,
+									       TEC,
+									       source_latitude,
+									       source_longitude,
+									       pointing_latitude,
+									       pointing_longitude,
+									       gain_scale_factor,
+									       position_x,
+									       position_y,
+									       position_z,
+									       freq_range )  ;
+     
+    // Added_Signal_data = Added_Signal_data*512. ;
+        timeSeries_FFT = NuMoonTrigger::BeamFormed_data( Added_Signal_data,
+							n_samples,
+							simTEC,
+							nyquist_zone,
+							sampling_rate,
+							TEC,
+							freq_range,
+							pointing_latitude,
+							pointing_longitude,
+							gain_scale_factor,
+							position_x,
+							position_y,
+							position_z ) ;
+									
+	//timeSeries_FFT = timeSeries_FFT*73. ;
+// 	   uint n_rcu = data.columns() ;
+// 	   
+// 	   uint n_frames = n_samples/1024 ;
+// 	   
+// 	   casa::Vector<double> FREQ_vector = NuMoonTrigger::freq_vector( sampling_rate,
+// 		   	               					  nyquist_zone ) ;
+// 	   
+// 	   casa::Matrix<double> Geometric_weights = NuMoonTrigger::phase_delay( FREQ_vector,
+// 				 				 		source_latitude,
+// 					        		 		source_longitude,
+// 										position_x,
+// 										position_y,
+// 										position_z ) ;
+										
+//            Matrix<DComplex> Beam_formed( 513, n_frames, 0.0 ) ;
+//        
+// 	   for( uint antenna=0; antenna< n_rcu; antenna++ ) {
+// 	   
+// 	   	casa::Vector<double> samples = Added_Signal_data.column(antenna ) ;
+// 		
+// 		casa::Matrix<DComplex> FFT_data = NuMoonTrigger::fft_data( samples,
+//     		 	     						   n_frames,
+// 			     						   nyquist_zone ) ;
+// 				
+// 		casa::Matrix<DComplex> phase_corrected = NuMoonTrigger::weights_applied( FFT_data,
+//   					             					 Geometric_weights,
+// 						      					 antenna ) ;
+// 		
+// 		DComplex beamed_value(0.0) ;
+// 												
+// 		for( uint frame=0; frame< n_frames; frame++ ){
+// 		
+// 			for( uint freQchannel =0 ; freQchannel< 513; freQchannel++ ){
+// 			
+// 				beamed_value = phase_corrected( freQchannel, frame);
+// 			
+// 				Beam_formed( freQchannel,frame) = Beam_formed( freQchannel,frame)+ beamed_value;
+// 			 	}
+// 			}
+// 			
+// 		}
+// 		
+// 	    Beam_formed = Beam_formed*(1./n_rcu) ;
+// 	    
+// 	    casa::Matrix<DComplex> RFI_rejected = NuMoonTrigger::RFI_removal( Beam_formed ) ; 
+// 	   
+// 	    casa::Matrix<DComplex> de_dispersedData = NuMoonTrigger::de_dispersion( RFI_rejected,
+// 		      		  						    TEC,
+// 				  						    FREQ_vector ) ;
+// 	    
+// 	    casa::Vector<double> IFFT_data = NuMoonTrigger::ifft_data( de_dispersedData,
+//     			    						n_frames,
+// 									nyquist_zone ) ;
+// 																		    uint n_samples =  IFFT_data.nelements() ;
+// 	    
+// 	    casa::Vector<double> time_integrated( n_samples-time_int_bins, 0.0 ) ;
+// 	    
+// 	    for( uint nsample=0; nsample< n_samples-time_int_bins; nsample++ ){
+// 	    
+// 	    	for( uint t_bins=nsample; t_bins< (nsample+time_int_bins); t_bins++ ){
+// 		
+// 			time_integrated(nsample) += IFFT_data(t_bins)* IFFT_data(t_bins);
+// 			
+// 			}
+//    		}
+     
+       
+      } 
+       catch ( AipsError x ){
+       cerr << "  NuMoonTrigger::FFT_processed" << x.getMesg () << endl ;
+        Vector<double> ();
+	}
+     return timeSeries_FFT ;
   }   
-  
-  //_____________________________________________________________________________
-  //                                                                 root_ntuples
-  
-    
-  void NuMoonTrigger::root_ntuples( std::string const &filename,
-				    uint const& n_samples,
-				    double const& simTEC,
-				    double const& sampling_rate,
-				    uint const& nyquist_zone,
-				    uint const& time_int_bins,
-				    double const& TEC,
-				    const Vector<double>& ppf_coeff,
-				    const Vector<double>& ppf_invcoeff,
-				    const Vector<double> freq_range,
-				    double const& peak_power,
-				    const Vector<uint>& RCU_id )
+   
+    //_______________________________________________________________________________________
+
+/*   void NuMoonTrigger::root_histograms( const Vector<double>& IFFT_vector )
+   
+   {
+     cout << "To produce histogram to check for pulsed noise" << endl ;
+     
+     try {
+     
+     	 
+     	}
+     catch ( AipsError x ){
+    	   cerr << "  NuMoonTrigger::root_histograms" << x.getMesg () << endl ;
+          }
+   
+  } */  
+
+  //_________________________________________________________________________________________
+    void NuMoonTrigger::root_ntuples( Matrix<double> const& data,
+    					uint const& n_samples,
+					double const& simTEC,
+					double const& sampling_rate,
+					uint const& nyquist_zone,
+					uint const& time_int_bins,
+  					double const& TEC,
+					const double& source_latitude,
+					const double& source_longitude,
+			    		const double& pointing_latitude,
+		   			const double& pointing_longitude,
+		   			const Vector<double>& gain_scale_factor,
+			    	  	const Vector<double>& position_x,
+		   	    		const Vector<double>& position_y,
+		   	    		const Vector<double>& position_z,
+					const Vector<double>& ppf_coeff,
+		   			const Vector<double>& ppf_invcoeff,
+		  			const Vector<double> freq_range,
+					double const& peak_height )
     
   {
     
     cout << "To store data informaton in ntuples" << endl ;
     
     try {
-      
-//       std::string outFileNameR = "pulse_data.root" ;
-//       TFile *myOutput = new TFile( outFileNameR.c_str(), "RECREATE");
-      
-      //  TNtuple *eventuple_FFT = new TNtuple("eventuple_FFT","eventuple_FFT","time:frame:Average_P5:sample_value") ;
-      
-      //  TNtuple *eventuple_raw = new TNtuple("eventuple_raw","eventuple_raw","time:frame:Average_P5:sample_value") ;
-      
-      TNtuple *eventuple_PPF = new TNtuple("eventuple_PPF",
-					   "eventuple_PPF",
-					   "time:frame:Average_P5:sample_value");
-      
-      Matrix<double> Cleaned_data = NuMoonTrigger::Cleaned_data(  filename,
-    						    		  n_samples,
-					             		  simTEC,
-						     		  nyquist_zone,
-						     		  peak_power,
-						     		  RCU_id,
-						     		  sampling_rate,
-						     		  TEC,
-						     		  freq_range ) ;
-      
-      uint n_frames = n_samples/1024 ;
-      
-      casa::Matrix<double> Average_P = NuMoonTrigger::cal_AvPower( Cleaned_data,
-								   n_frames )  ;
-      
-      
-      
-      uint Av_columns = Average_P.ncolumn() ;
-      
-      uint Av_rows = Average_P.nrow() ;
-      
-      casa::Vector<double> Average_P5( Av_rows, 0.0 ) ;
-      
-      for( uint row=0; row< Av_rows; row++ ){
+    
+    char outFileNameR[256] = "pulse_data.root" ;
+    
+    TFile *myOutput = new TFile( outFileNameR, "RECREATE");
+  
+   TNtuple *eventuple_FFT = new TNtuple("eventuple_FFT","eventuple_FFT","time:frame:Average_P5:sample_value") ;
+    
+   TNtuple *eventuple_raw = new TNtuple("eventuple_raw","eventuple_raw","time:frame:Average_P5:sample_value") ;
+
+  // TNtuple *eventuple_PPF = new TNtuple("eventuple_PPF","eventuple_PPF","time:frame:Average_P5:sample_value") ;
+    
+     	  casa::Matrix<double> Cleaned_DATA = NuMoonTrigger::Cleaned_data(  data,
+    						    		     	   n_samples,
+								     	   simTEC,
+								     	   nyquist_zone,
+								           sampling_rate,
+								           TEC,
+								           freq_range ) ; 
+									     
+    casa::Vector<double> beamed_Array = NuMoonTrigger::BeamFormed_data(  Cleaned_DATA,
+    									 n_samples,
+									 simTEC,
+									 nyquist_zone,
+									 sampling_rate,
+									 TEC,
+									 freq_range,
+									 pointing_latitude,
+									 pointing_longitude,
+									 gain_scale_factor,
+									 position_x,
+									 position_y,
+									 position_z ) ;   
+  
+    casa::Vector<double> Average_P= NuMoonTrigger::cal_AvPower( beamed_Array ) ;
+    cout << "Average_P5 : " << Average_P <<endl ;
+    uint n_frames = n_samples/1024 ;
+    
+//     casa::Matrix<double> Added_Signal = NuMoonTrigger::Added_SignalData( data, 
+//     				     					 n_samples,
+// 				     					 simTEC,
+// 				     					 nyquist_zone,
+// 				     					 peak_height,
+// 				     					 sampling_rate,
+// 				     					 TEC,
+// 				     					 source_latitude,
+// 				     					 source_longitude,
+// 		  		     					 pointing_latitude,
+// 		  		     					 pointing_longitude,
+// 				     					 gain_scale_factor,
+// 			    	     					 position_x,
+// 		   	    	     					 position_y,
+// 		   	    	     					 position_z,
+// 				     					 freq_range ) ; 
+//   
+					
+    casa::Vector<double> No_Signal = NuMoonTrigger::without_Signal(  data,
+    								     n_samples,
+								     simTEC,
+								     sampling_rate,
+								     nyquist_zone,
+								     time_int_bins,
+								     TEC,
+								     source_latitude,
+								     source_longitude,
+								     pointing_latitude,
+								     pointing_longitude,
+								     gain_scale_factor,
+								     position_x,
+								     position_y,
+								     position_z,
+								     ppf_coeff,
+								     ppf_invcoeff,
+								     freq_range,
+								     peak_height ) ; 
+								     
+ 
+//	 uint n_sampless = No_Signal.nelements() ;	
+// 	 ofstream logfile31;
+// 	logfile31.open("NO_signal",ios::out );
+// 	
+// 	for( uint n=0;n< n_sampless; n++){
+// 		logfile31<< No_Signal(n)<< endl;
+// 	}
+// 	logfile31.close() ;
+// 	
+	 						     
+								     
+    casa::Vector<double> FFT_Signal = NuMoonTrigger::FFT_processed( data,
+    								    n_samples,
+								    simTEC,
+								    sampling_rate,
+								    nyquist_zone,
+								    time_int_bins,
+								    TEC,
+								    source_latitude,
+								    source_longitude,
+								    pointing_latitude,
+								    pointing_longitude,
+								    gain_scale_factor,
+								    position_x,
+								    position_y,
+								    position_z,
+								    ppf_coeff,
+								    ppf_invcoeff,
+								    freq_range,
+								    peak_height ) ;     
+
+	casa::Vector<double> Average_P_ws= NuMoonTrigger::cal_AvPower( FFT_Signal ) ;
 	
-    	for( uint col=0; col< Av_columns; col++ ){
-	  
-	  Average_P5( row) = Average_P5( row)+ Average_P( row, col) ;
-	  
+  //uint n_samples = FFT_Signal.nelements() ;
+  
+/* 
+ofstream logfile3;
+	logfile3.open("FFT_signal",ios::out );
+	
+	for( uint n=0;n< n_samples; n++){
+		logfile3<< FFT_Signal(n)<< endl;
 	}
-	Average_P5( row) = Average_P5( row)*(1./Av_columns) ;
-      }
-      
-      /*casa::Vector<double> time_integrated_WOSignal = NuMoonTrigger::without_Signal(  filename,
-	n_samples,
-	simTEC,
-	sampling_rate,
-	nyquist_zone,
-	time_int_bins,
-	TEC,
-	ppf_coeff,
-	ppf_invcoeff,
-	freq_range,
-	peak_power,
-	RCU_id )     ;
-	
-	casa::Vector<double> time_integrated_FFT =NuMoonTrigger::FFT_processed( filename,
-	n_samples,
-	simTEC,
-	sampling_rate,
-	nyquist_zone,
-	time_int_bins,
-	TEC,
-	ppf_coeff,
-	ppf_invcoeff,
-	freq_range,
-	peak_power,
-	RCU_id ) ;
-      */									    
-      casa::Vector<double> time_integrated_PPF = NuMoonTrigger::PPF_processed( filename,
-									       n_samples,
-									       simTEC,
-									       sampling_rate,
-									       nyquist_zone,
-									       time_int_bins,
-									       TEC,
-									       ppf_coeff,
-									       ppf_invcoeff,
-									       freq_range,
-									       peak_power,
-									       RCU_id ) ;
-      
-      
-      uint n_samples = time_integrated_PPF.nelements() ;
-      
-      for( uint timebin=0; timebin< n_samples; timebin++ ){
-	
-    	int frame_n = 1+ int(timebin/1024) ;
-	
-	//    	double sample_value_FFT = time_integrated_FFT(timebin) ;
-	
-	double sample_value_PPF = time_integrated_PPF(timebin) ;
-	
-	//	double sample_value_raw = time_integrated_WOSignal(timebin) ;
-	
-	double Average_value = Average_P5(frame_n ) ;
-	//	cout << "Average_value :" << Average_value << "sample value PPF :" << sample_value_PPF << endl ;
-	//	if( sample_value_FFT > 3.0*Average_value){
-	
-	//   eventuple_FFT->Fill( timebin, frame_n, Average_value, sample_value_FFT ) ;
-	//  cout << "eventuple has been filled " <<endl ;
-	//     }
-	if( sample_value_PPF > 1.0*Average_value){
+	logfile3.close() ;
+	*/
+   
+    
+    uint SAP =0 ;
+    
+    for( uint frame=0; frame< n_frames; frame++ ){
+    
+    	  uint sample_max = SAP+1024 ;
 	  
-	  eventuple_PPF->Fill( timebin, frame_n, Average_value, sample_value_PPF ) ;
+	  uint sample_min = SAP ;
 	  
+	  double Average_P5 = Average_P(frame ) ;
+	  
+	  //double Average_P_WS = Average_P_ws(frame) ;
+	  
+	  //double peak_power = peak_height*peak_height ;
+	  
+	  //uint bin_1 = 0 ;
+	  //uint bin_compared =2000 ;
+	  //double P_max = 0. ;
+	  
+	  for( uint sample= sample_min+50 ; sample< sample_max-50; sample++ ){
+	  
+	  	double bin_integrated =0 ;
+	  
+	  	for( uint j=sample; j<(sample+5); j++){
+		
+			double time_Bin = FFT_Signal(j) ;
+			
+			bin_integrated = bin_integrated + time_Bin*time_Bin ;
+			
+			}
+			if( bin_integrated > 3.0*Average_P5){
+			
+				cout << "Eventuple has been written at sample : "<< sample << endl ;
+						
+     				eventuple_FFT->Fill( sample, frame, Average_P5, bin_integrated/Average_P5 ) ;
+			
+				sample = sample_max-50 ;
+			}
+	        }
+	SAP = sample_max ;
+	}
+  
+  //  uint samples_n = No_Signal.nelements() ;
+  
+/*    
+    ofstream logfile1;
+    
+    logfile1.open( "p5", ios::out );*/
+    
+    uint s_m_e =0;
+    
+    for( uint fra=0; fra< n_frames; fra++ ){
+    
+    	  uint sample_max = s_m_e+1024 ;
+	  
+	  uint sample_min = s_m_e ;
+	  
+	  double Average_P5 = Average_P(fra ) ;
+	  	  		
+	  //double peak_power = peak_height*peak_height ;
+	  
+	 // uint bin_1 = 0 ;
+	  
+	  for( uint samp= sample_min+50 ; samp< sample_max-50; samp++ ){
+	  
+	  	double bin_int =0 ;
+	  
+	  	for( uint j=samp; j<(samp+5); j++){
+		
+			double t_Bin = No_Signal(j) ;
+			
+			bin_int = bin_int + t_Bin*t_Bin ;
+			
+			}
+				
+			if( bin_int > 3.0*Average_P5){
+
+			eventuple_raw->Fill( samp, fra, Average_P5, bin_int/Average_P5 ) ;
+			//uint bin_1 = bin_0 ;
+			samp = sample_max-50 ;
+			}
+	        }
+	s_m_e = sample_max ;
 	}
 	
-	//	if( sample_value_raw > 3.0*Average_value){
-	
-	//eventuple_raw->Fill( timebin, frame_n, Average_value, sample_value_raw ) ;
-	// }     
-      }
-      
-      //	eventuple_FFT->Write() ;
-      eventuple_PPF->Write() ;
-      //	eventuple_raw->Write() ;
+       eventuple_FFT->Write() ;
+//	eventuple_PPF->Write() ;
+	eventuple_raw->Write() ;
     } 
     catch ( AipsError x ){
-      cerr << "  NuMoonTrigger:: root_ntuple" << x.getMesg () << endl ;
+    cerr << "  NuMoonTrigger:: root_ntuple" << x.getMesg () << endl ;
     }
-    // return Matrix<DComplex> Geom_weights ;
+  // return Matrix<DComplex> Geom_weights ;
   }
   
-#endif 
   
-} // Namespace  -- end
+  #endif 
+      
+  } // Namespace  -- end

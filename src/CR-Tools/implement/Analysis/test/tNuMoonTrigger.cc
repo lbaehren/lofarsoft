@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2009                                                    *
- *   Kalpana Singh (<mail>)                                                *
+ *   Copyright (C) 2009                                                  *
+ *   Kalpana Singh (<mail>)                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -45,7 +45,14 @@ using namespace std;
 */
 Matrix<Double> posit_x(10,10,0.0) ;
 
-Double posi_x[10] = { 1., 2., 3., 4., 5., 6., 7., 8., 9., 10.};
+double ant_pos_x[73] ={ 3827966.965, 3827966.965, 3827964.913, 3827964.913, 3827967.532, 3827967.532, 3827970.151, 3827970.151, 3827972.770, 3827972.770, 3827965.481, 3827965.481, 3827968.099, 3827968.099, 3827970.718, 3827970.718, 3827973.338, 3827973.338,  3827975.957, 3827978.576, 3827978.576, 3827968.667, 3827968.667, 3827971.286, 3827971.286, 3827973.905, 3827973.905, 3827976.525, 3827976.525, 3827979.144, 3827981.763, 3827981.763, 3827974.473, 3827974.473, 3827977.092, 3827977.092, 3827979.712, 3827979.712, 3827982.331, 3827982.331, 3827980.279, 3827980.279, 3827982.899, 3827982.899,  3827887.569, 3827890.189, 3827890.189, 3827892.808, 3827892.808, 3827895.427, 3827895.427, 3827885.518, 3827885.518, 3827888.137, 3827888.137, 3827890.756, 3827890.756, 3827893.376, 3827893.376, 3827895.995, 3827898.614, 3827898.614, 3827891.324, 3827893.943, 3827893.943, 3827896.563, 3827896.563, 3827899.182, 3827899.182, 3827897.130, 3827897.130, 3827899.750, 3827899.750} ;
+
+double ant_pos_y[73] ={459738.871, 459738.871, 459727.827, 459727.827, 459731.613, 459731.613, 459735.400, 459735.400, 459739.186, 459739.186, 459720.570, 459720.570, 459724.356, 459724.356, 459728.143, 459728.143, 459731.929, 459731.929, 459735.716, 459739.502, 459739.502, 459717.098, 459717.098, 459720.885, 459720.885, 459724.671, 459724.671, 459728.458, 459728.458, 459732.244, 459736.031, 459736.031, 459717.414, 459717.414, 459721.200, 459721.200, 459724.987, 459724.987, 459728.773, 459728.773, 459717.730, 459717.730, 459721.516, 459721.516, 459810.001, 459813.788, 459813.788, 459817.574, 459817.574, 459821.361, 459821.361, 459798.957, 459798.957, 459802.743, 459802.743, 459806.529, 459806.529, 459810.316, 459810.316, 459814.103, 459817.889, 459817.889, 459799.272, 459803.059, 459803.059, 459806.845, 459806.845, 459810.632, 459810.632, 459799.588, 459799.588, 459803.375, 459803.375} ;
+
+double ant_pos_z[73] ={5063979.081, 5063979.081, 5063981.619, 5063981.619, 5063979.311, 5063979.311, 5063977.003, 5063977.003, 5063974.696, 5063974.696, 5063981.848, 5063981.848, 5063979.540, 5063979.540, 5063977.233, 5063977.233, 5063974.925, 5063974.925,  5063972.617, 5063970.310, 5063970.310, 5063979.770, 5063979.770, 5063977.462, 5063977.462, 5063975.155, 5063975.155, 5063972.846, 5063972.846, 5063970.539, 5063968.231, 5063968.231, 5063975.384, 5063975.384, 5063973.076, 5063973.076, 5063970.768, 5063970.768, 5063968.461, 5063968.461, 5063970.998, 5063970.998, 5063968.690, 5063968.690,  5064032.247, 5064029.938, 5064029.938, 5064027.631, 5064027.631, 5064025.323, 5064025.323, 5064034.783, 5064034.783, 5064032.476, 5064032.476, 5064030.168, 5064030.168, 5064027.860, 5064027.860, 5064025.553, 5064023.245, 5064023.245, 5064030.397, 5064028.090, 5064028.090, 5064025.782, 5064025.782, 5064023.474, 5064023.474, 5064026.012, 5064026.012, 5064023.703, 5064023.703} ;
+
+double scale_factor[73] ={1.0000, 0.6857, 0.8969, 0.6954, 0.7453, 0.8203, 1.2338, 0.3979, 0.8047, 0.7890, 1.0431, 0.6420, 1.0879, 0.6568, 1.2115, 1.2821, 0.6524, 0.5854, 0.4359, 3.4726, 0.8512, 0.7913, 1.3203, 0.4982, 1.1181, 1.1399, 0.5668, 0.5176, 0.3655, 1.2023, 0.5053, 1.0924, 0.9606, 0.9260, 0.7591, 0.3749, 1.2073, 1.2450, 0.9350, 0.3052, 1.3795, 0.6131, 0.6383, 1.2963, 0.6400, 0.6640, 0.9046, 0.5080, 1.1674, 1.2418, 0.8664, 0.6543, 0.5156, 0.3888, 0.3552, 0.4477, 0.4857, 0.6577, 1.0841, 1.0546, 1.3703, 0.8517, 0.9902, 0.9733, 1.0797, 1.2361, 0.5998, 0.8988, 1.2613, 0.6712, 0.9618, 1.3254, 0.7158} ;
+
 
 //std::string const &filename =/mnt/lofar/CS1_tbb/rw_20090417_181700.h5
 
@@ -57,316 +64,750 @@ Double posi_x[10] = { 1., 2., 3., 4., 5., 6., 7., 8., 9., 10.};
   \return nofFailedTests -- The number of failed tests encountered within this
           function.
 */
-int test_constructors (std::string const &filename,
-		       unsigned int const  &n_samples=139264)
+int test_constructors (std::string const &filename)
 {
   std::cout << "\n[tNuMoonTrigger::test_constructors]\n" << std::endl;
-  
+
   int nofFailedTests (0);
   
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    NuMoonTrigger numooontrigger;
-    
-    CR::LOFAR_TBB lofar_tbb( filename, n_samples ) ;
-    
-    lofar_tbb.DataReader::setNyquistZone(2);
-    
-    casa::Matrix<double> data = lofar_tbb.fx( ) ;	
-    ofstream logfile11;
-    
-    logfile11.open( "antenna_0.dat", ios::out );
-    for( uint nSample=0; nSample < n_samples ; nSample++ ){
+    	NuMoonTrigger numooontrigger;
+	
+	casa::Vector<double> antenna_posX( 73, 0.0 ) ;
+	casa::Vector<double> antenna_posY( 73, 0.0 ) ;
+	casa::Vector<double> antenna_posZ( 73, 0.0 ) ;
+	casa::Vector<double> gain_scale_factors( 73, 0.0) ;
+	
+	for( uint pos=0; pos < 73; pos++) {
+		antenna_posX(pos) = ant_pos_x[pos] ;
+		antenna_posY(pos) = ant_pos_y[pos] ;
+		antenna_posZ(pos) = ant_pos_z[pos] ;
+		gain_scale_factors(pos) = scale_factor[pos] ;
+	}
+	cout << "antenna positions have been defined : " <<endl ;
+		
+	uint n_samples = 600*1024 ;  // maximum 4000 can be read
+	
+/*
+  	 CR::LOFAR_TBB lofar_tbb( filename, n_samples ) ;
+ 	
+ 	 lofar_tbb.DataReader::setNyquistZone(2);
+
+ 	casa::Matrix<double> data = lofar_tbb.fx( ) ;	
+	
+	uint nSamples = data.nrow() ;
+	uint nAntenna = data.ncolumn() ;
+	
+	ofstream logfile11;
       
-      logfile11 << data(nSample,0) << endl ;
-    }
-    
-    logfile11.close() ;
-    
-    uint nofSamples =  data.nrow () ;
-    uint n_columns  = data.ncolumn () ;
-    
-    cout << "number of samples : " << nofSamples << "number of columns :" << n_columns << endl ;
-    
-//     double simTEC        = 10.0 ;
-    double sampling_rate = 200e6 ;
-    uint nyquist_zone    = 2 ;
-//     uint time_int_bins   = 5 ;
-    uint n_frames        = 136 ;
-//     double TEC           = 10.0 ;
-//     double peak_power    = 49.0 ;
-    
-    casa::Vector<double> ppfcoeff(n_samples,0.0) ;
-    casa::Vector<double> ppfcoeff_inv(n_samples, 0.0) ;
-    casa::Vector<double> antenna_0 (n_samples, 0.0 ) ;
-    casa::Vector<double> antenna_1 (n_samples, 0.0 ) ;
-    casa::Vector<double> antenna_2 (n_samples, 0.0 ) ;
-    casa::Vector<double> antenna_3 (n_samples, 0.0 ) ;
-    casa::Vector<double> antenna_4 (n_samples, 0.0 ) ;
-    casa::Vector<double> antenna_5 (n_samples, 0.0 ) ;
-    casa::Vector<double> antenna_6 (n_samples, 0.0 ) ;
-    casa::Vector<double> antenna_7 (n_samples, 0.0 ) ;
-    
-    readAsciiVector( ppfcoeff,"Coeffs16384Kaiser-quant.dat" ) ;
-    
-    readAsciiVector( ppfcoeff_inv,"ppf_inv.dat" ) ;
-    
-    casa::Vector<double> freq_range(2,0.0) ;
-    
-    casa::Vector<uint> RCU_id(8,0) ;
-    
-    freq_range(0)= 130e6 ;
-    
-    freq_range(1) = 180e6 ;
-    
-    RCU_id(0) = 0;
-    RCU_id(1) = 1;
-    RCU_id(2) = 2;
-    RCU_id(3) = 3;
-    RCU_id(4) = 4;
-    RCU_id(5) = 5;
-    RCU_id(6) = 6;
-    RCU_id(7) = 7;
-    
-//     double pi          = 3.14159265358979323846 ;
-//     uint dataBlockSize = 1024 ;
-//     uint nOfSegments   = 5 ;
-//     double peak_height = 500. ;
-//     double pulse_loc   = 600. ;
-//     double rnd_phase   = 0.2*pi ;
-
-    casa::Vector<double>freq_Vector = numooontrigger.freq_vector(  sampling_rate,
-								   nyquist_zone) ;
-    
-    readAsciiVector( antenna_0,"antenna_0.dat" ) ;
-    readAsciiVector( antenna_1,"antenna_1.dat" ) ;
-    readAsciiVector( antenna_2,"antenna_2.dat" ) ;
-    readAsciiVector( antenna_3,"antenna_3.dat" ) ;
-    readAsciiVector( antenna_4,"antenna_4.dat" ) ;
-    readAsciiVector( antenna_5,"antenna_5.dat" ) ;
-    readAsciiVector( antenna_6,"antenna_6.dat" ) ;
-    readAsciiVector( antenna_7,"antenna_7.dat" ) ;
-    
-    uint n_rcu =8 ;
-    
-    casa::Matrix<double> raw_data(n_samples, n_rcu, 0.0 ) ;
-    
-    raw_data.column(0) = antenna_0 ;
-    raw_data.column(1) = antenna_1 ;
-    raw_data.column(2) = antenna_2 ;	
-    raw_data.column(3) = antenna_3 ;
-    raw_data.column(4) = antenna_4 ;
-    raw_data.column(5) = antenna_5 ;
-    raw_data.column(6) = antenna_6 ;
-    raw_data.column(7) = antenna_7 ;
-    
-    uint nROW    = raw_data.nrow() ;
-    uint nCOLUMN = raw_data.ncolumn();
-    
-	//cout << "NUmber of rows in raw data array :" <<nROW << " and number of columns :" <<nCOLUMN<< endl;
-	casa::Vector<double> data_Vec = raw_data.column(0) ;
+           logfile11.open( "5_16_hdf5", ios::out );
 	  
-// 	  double alpha (0.5);
-// 	  
-// 	  DataReader *dr;
-// 	
-//   ITS_Capture *capture = new ITS_Capture ( filename,
-// 					1024 );
-//   dr = capture;
-//           dr->setHanningFilter (alpha);
-// 	  Matrix<DComplex> fft_filtered (dr->fft());
-// 	  Matrix<Double> absoluteArray(amplitude (fft_filtered));
+	   for( uint sample=0; sample < nSamples ; sample++ ) {
 	   
-	Matrix<DComplex> FFT_data = numooontrigger.fft_data( data_Vec,
-				 	                             n_frames,
-	 				                            nyquist_zone ) ;
-	Matrix<double>	FFT_ampl = amplitude( FFT_data )   ;
-	
-	Matrix<DComplex> RFI_rem =  numooontrigger.RFI_removal( FFT_data ) ;
- 	
-	Matrix<double>	RFI_rem_ampl = amplitude( RFI_rem )   ;
-	
-	casa::Matrix<DComplex> geom_Weights_factor= numooontrigger.Geom_weights(  RCU_id,
- 					        				  freq_Vector )   ;
- 	 cout << "geometrical weights have been calculated:" << endl ;
-	 
-	Matrix<DComplex> Beam_formed( 513, n_frames, 0.0 ) ;
-       
-        Matrix<double> Beam_formed_ampl( 513, n_frames, 0.0 ) ;
-       
-       casa::Matrix<double> in_phase(nROW, nCOLUMN, 0.0 ) ;
-       
-	for( uint antenna=0; antenna< nCOLUMN; antenna++ ) {
- 	
-		casa::Vector<double> data_vector = raw_data.column(antenna) ;
-		
-		casa::Vector<DComplex> geomWeights = geom_Weights_factor.column(antenna) ;
- 	
-			
-		Matrix<DComplex> FFTdata = numooontrigger.fft_data( data_vector,
-				 	                             n_frames,
-	 				                            nyquist_zone ) ;
-		
-		Matrix<DComplex> RFI_removed =  numooontrigger.RFI_removal( FFTdata ) ;
- 	
-		Matrix<DComplex> phase_corrected = numooontrigger.weights_applied( RFI_removed,
-   						             			   geom_Weights_factor,
- 							     	 		   antenna ) ;
- 		 cout << "geometrical weights have been applied for antenna :" << antenna << endl ;
-		DComplex beamed_value(0.0) ;
-												
-		for( uint frame=0; frame< n_frames; frame++ ){
-		
-			for( uint freQchannel =0 ; freQchannel< 513; freQchannel++ ){
-			
-				beamed_value = phase_corrected( freQchannel, frame);
-			
-				Beam_formed( freQchannel,frame) = Beam_formed( freQchannel,frame)+ beamed_value;
-			 	}
-			}
-			
+	   	      logfile11 << data(sample,15) << endl;
+	  	
 		}
-	
-		cout << "data is beamformed" <<endl ;
-	Beam_formed = Beam_formed*(1./n_rcu) ;
-	
-	Beam_formed_ampl = amplitude( Beam_formed ) ;
-	
-	Vector<double> IFFT_data = numooontrigger.ifft_data( Beam_formed,
-     				                              n_frames,
-	 						      nyquist_zone ) ;  
-	
-	cout << "IFFT has been calculated : "<< endl ;
-       // in_phase.column(antenna) = IFFT_data ;
-		  
-	Vector<double> Power_IFFT_data( nofSamples, 0.0 );
-	
-	Vector<double> Power_integrated( nofSamples-5, 0.0 );
- 
- 	for(uint l=0; l<nofSamples; l++){
-  
-  		double ifft_sample = IFFT_data(l) ;
-  		
-  		Power_IFFT_data(l)= ifft_sample*ifft_sample ;
-		//cout << "ifft_sample "  << ifft_sample << " Power IFFT data " << Power_IFFT_data(l) <<endl ;
-	}
- 
- Matrix<DComplex> power_FFTdata = numooontrigger.fft_data( Power_IFFT_data,
-				 	                   n_frames,
-	 				                    nyquist_zone ) ;
-Matrix<double>	power_ampl_FFTdata = amplitude( power_FFTdata )	;    
-	for(uint n=0; n<nofSamples-5; n++){
-		for( uint m=0; m<5; m++) {
 		
-			Power_integrated(n) += Power_IFFT_data(n+m) ;
-		}		
-	}	
-	
-	casa::Vector<double> Av_P5( n_frames, 0.0) ;
-	
-	for( uint frame=0; frame< n_frames; frame++){
-	
-		double averageP5(0.0) ;
-		for( uint av= frame*1024; av< frame*1024+1024; av++ ){
-	     
-			 averageP5 += Power_integrated(av) ;
-	 	}
-	 	averageP5 = averageP5/1024. ;
-		Av_P5(frame) = averageP5 ;
-		
-	//	cout << "number of frame : " <<frame << " has averageP5 " << averageP5 << endl ;
-	 }
+	logfile11.close() ;
 
-	 
-	ofstream logfile1;
-    
-        logfile1.open( "raw_0.dat", ios::out );
-        for( uint nSample=0; nSample < nofSamples ; nSample++ ){
-		
-	            logfile1 << data_Vec(nSample) << endl ;
-	   }
-	  
-        logfile1.close() ;
 	
-	ofstream logfile2;
+
+*/
+/*		
+	casa::Vector<double> Tile_1_column1(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_1_column2(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_1_column3(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_1_column4(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_1_column5(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_1_column6(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_1_column7(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_1_column8(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_1_column9(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_1_column10(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_1_column11(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_1_column12(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_1_column13(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_1_column14(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_1_column15(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_1_column16(n_samples, 0.0 ) ;
+	
+	casa::Vector<double> Tile_2_column1(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_2_column2(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_2_column3(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_2_column4(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_2_column5(n_samples, 0.0 ) ;
+	//casa::Vector<double> Tile_2_column6(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_2_column7(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_2_column8(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_2_column9(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_2_column10(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_2_column11(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_2_column12(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_2_column13(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_2_column14(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_2_column15(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_2_column16(n_samples, 0.0 ) ;
+	
+	casa::Vector<double> Tile_3_column1(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_3_column2(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_3_column3(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_3_column4(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_3_column5(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_3_column6(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_3_column7(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_3_column8(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_3_column9(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_3_column10(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_3_column11(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_3_column12(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_3_column13(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_3_column14(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_3_column15(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_3_column16(n_samples, 0.0 ) ;
+	
+	casa::Vector<double> Tile_4_column1(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_4_column2(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_4_column3(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_4_column4(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_4_column5(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_4_column6(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_4_column7(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_4_column8(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_4_column9(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_4_column10(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_4_column11(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_4_column12(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_4_column13(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_4_column14(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_4_column15(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_4_column16(n_samples, 0.0 ) ;
+
+	casa::Vector<double> Tile_5_column1(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_5_column2(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_5_column3(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_5_column4(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_5_column5(n_samples, 0.0 ) ;
+	//casa::Vector<double> Tile_5_column6(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_5_column7(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_5_column8(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_5_column9(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_5_column10(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_5_column11(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_5_column12(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_5_column13(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_5_column14(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_5_column15(n_samples, 0.0 ) ;
+	casa::Vector<double> Tile_5_column16(n_samples, 0.0 ) ;
+	
+// 	casa::Vector<double> Tile_ppf(n_samples, 0.0 ) ;
+// 	readAsciiVector( Tile_ppf,"5_ppf_hdf5") ;
+// 	
+	readAsciiVector( Tile_1_column1,"/mnt/lofar/ppfinversion/1_1_hdf5" ) ;
+	readAsciiVector( Tile_1_column2,"/mnt/lofar/ppfinversion/1_2_hdf5" ) ;
+	readAsciiVector( Tile_1_column3,"/mnt/lofar/ppfinversion/1_3_hdf5" ) ;
+	readAsciiVector( Tile_1_column4,"/mnt/lofar/ppfinversion/1_4_hdf5" ) ;
+	readAsciiVector( Tile_1_column5,"/mnt/lofar/ppfinversion/1_5_hdf5" ) ;
+	readAsciiVector( Tile_1_column6,"/mnt/lofar/ppfinversion/1_6_hdf5" ) ;
+	readAsciiVector( Tile_1_column7,"/mnt/lofar/ppfinversion/1_7_hdf5" ) ;
+	readAsciiVector( Tile_1_column8,"/mnt/lofar/ppfinversion/1_8_hdf5" ) ;
+	readAsciiVector( Tile_1_column9,"/mnt/lofar/ppfinversion/1_9_hdf5" ) ;
+	readAsciiVector( Tile_1_column10,"/mnt/lofar/ppfinversion/1_10_hdf5" ) ;
+	readAsciiVector( Tile_1_column11,"/mnt/lofar/ppfinversion/1_11_hdf5" ) ;
+	readAsciiVector( Tile_1_column12,"/mnt/lofar/ppfinversion/1_12_hdf5" ) ;
+	readAsciiVector( Tile_1_column13,"/mnt/lofar/ppfinversion/1_13_hdf5" ) ;
+	readAsciiVector( Tile_1_column14,"/mnt/lofar/ppfinversion/1_14_hdf5" ) ;
+	readAsciiVector( Tile_1_column15,"/mnt/lofar/ppfinversion/1_15_hdf5" ) ;
+	readAsciiVector( Tile_1_column16,"/mnt/lofar/ppfinversion/1_16_hdf5" ) ;
+		
+	readAsciiVector( Tile_2_column1,"/mnt/lofar/ppfinversion/2_1_hdf5" ) ;
+	readAsciiVector( Tile_2_column2,"/mnt/lofar/ppfinversion/2_2_hdf5" ) ;
+	readAsciiVector( Tile_2_column3,"/mnt/lofar/ppfinversion/2_3_hdf5" ) ;
+	readAsciiVector( Tile_2_column4,"/mnt/lofar/ppfinversion/2_4_hdf5" ) ;
+	readAsciiVector( Tile_2_column5,"/mnt/lofar/ppfinversion/2_5_hdf5" ) ;
+	//readAsciiVector( Tile_2_column6,"2_6_hdf" ) ;
+	readAsciiVector( Tile_2_column7,"/mnt/lofar/ppfinversion/2_7_hdf5" ) ;
+	readAsciiVector( Tile_2_column8,"/mnt/lofar/ppfinversion/2_8_hdf5" ) ;
+	readAsciiVector( Tile_2_column9,"/mnt/lofar/ppfinversion/2_9_hdf5" ) ;
+	readAsciiVector( Tile_2_column10,"/mnt/lofar/ppfinversion/2_10_hdf5" ) ;
+	readAsciiVector( Tile_2_column11,"/mnt/lofar/ppfinversion/2_11_hdf5" ) ;
+	readAsciiVector( Tile_2_column12,"/mnt/lofar/ppfinversion/2_12_hdf5" ) ;
+	readAsciiVector( Tile_2_column13,"/mnt/lofar/ppfinversion/2_13_hdf5" ) ;
+	readAsciiVector( Tile_2_column14,"/mnt/lofar/ppfinversion/2_14_hdf5" ) ;
+	readAsciiVector( Tile_2_column15,"/mnt/lofar/ppfinversion/2_15_hdf5" ) ;
+	readAsciiVector( Tile_2_column16,"/mnt/lofar/ppfinversion/2_16_hdf5" ) ;
+	cout <<"number of elements in vector Tile_2_column1 " << Tile_2_column2.nelements() << endl ;
+		
+
+	readAsciiVector( Tile_3_column1,"/mnt/lofar/ppfinversion/3_1_hdf5" ) ;
+	readAsciiVector( Tile_3_column2,"/mnt/lofar/ppfinversion/3_2_hdf5" ) ;
+	readAsciiVector( Tile_3_column3,"/mnt/lofar/ppfinversion/3_3_hdf5" ) ;
+	readAsciiVector( Tile_3_column4,"/mnt/lofar/ppfinversion/3_4_hdf5" ) ;
+	readAsciiVector( Tile_3_column5,"/mnt/lofar/ppfinversion/3_5_hdf5" ) ;
+	readAsciiVector( Tile_3_column6,"/mnt/lofar/ppfinversion/3_6_hdf5" ) ;
+	readAsciiVector( Tile_3_column7,"/mnt/lofar/ppfinversion/3_7_hdf5" ) ;
+	readAsciiVector( Tile_3_column8,"/mnt/lofar/ppfinversion/3_8_hdf5" ) ;
+	readAsciiVector( Tile_3_column9,"/mnt/lofar/ppfinversion/3_9_hdf5" ) ;
+	readAsciiVector( Tile_3_column10,"/mnt/lofar/ppfinversion/3_10_hdf5" ) ;
+	readAsciiVector( Tile_3_column11,"/mnt/lofar/ppfinversion/3_11_hdf5" ) ;
+	readAsciiVector( Tile_3_column12,"/mnt/lofar/ppfinversion/3_12_hdf5" ) ;
+	readAsciiVector( Tile_3_column13,"/mnt/lofar/ppfinversion/3_13_hdf5" ) ;
+	readAsciiVector( Tile_3_column14,"/mnt/lofar/ppfinversion/3_14_hdf5" ) ;
+	readAsciiVector( Tile_3_column15,"/mnt/lofar/ppfinversion/3_15_hdf5" ) ;
+	readAsciiVector( Tile_3_column16,"/mnt/lofar/ppfinversion/3_16_hdf5" ) ;
+	cout <<"number of elements in vector Tile_3_column1 " << Tile_3_column2.nelements() << endl ;
+		
+	readAsciiVector( Tile_4_column1,"/mnt/lofar/ppfinversion/4_1_hdf5" ) ;
+	readAsciiVector( Tile_4_column2,"/mnt/lofar/ppfinversion/4_2_hdf5" ) ;
+	readAsciiVector( Tile_4_column3,"/mnt/lofar/ppfinversion/4_3_hdf5" ) ;
+	readAsciiVector( Tile_4_column4,"/mnt/lofar/ppfinversion/4_4_hdf5" ) ;
+	readAsciiVector( Tile_4_column5,"/mnt/lofar/ppfinversion/4_5_hdf5" ) ;
+	readAsciiVector( Tile_4_column6,"/mnt/lofar/ppfinversion/4_6_hdf5" ) ;
+	readAsciiVector( Tile_4_column7,"/mnt/lofar/ppfinversion/4_7_hdf5" ) ;
+	readAsciiVector( Tile_4_column8,"/mnt/lofar/ppfinversion/4_8_hdf5" ) ;
+	readAsciiVector( Tile_4_column9,"/mnt/lofar/ppfinversion/4_9_hdf5" ) ;
+	readAsciiVector( Tile_4_column10,"/mnt/lofar/ppfinversion/4_10_hdf5" ) ;
+	readAsciiVector( Tile_4_column11,"/mnt/lofar/ppfinversion/4_11_hdf5" ) ;
+	readAsciiVector( Tile_4_column12,"/mnt/lofar/ppfinversion/4_12_hdf5" ) ;
+	readAsciiVector( Tile_4_column13,"/mnt/lofar/ppfinversion/4_13_hdf5" ) ;
+	readAsciiVector( Tile_4_column14,"/mnt/lofar/ppfinversion/4_14_hdf5" ) ;
+	readAsciiVector( Tile_4_column15,"/mnt/lofar/ppfinversion/4_15_hdf5" ) ;
+	readAsciiVector( Tile_4_column16,"/mnt/lofar/ppfinversion/4_16_hdf5" ) ;
+	
+	readAsciiVector( Tile_5_column1,"/mnt/lofar/ppfinversion/5_1_hdf5" ) ;
+	readAsciiVector( Tile_5_column2,"/mnt/lofar/ppfinversion/5_2_hdf5" ) ;
+	readAsciiVector( Tile_5_column3,"/mnt/lofar/ppfinversion/5_3_hdf5" ) ;
+	readAsciiVector( Tile_5_column4,"/mnt/lofar/ppfinversion/5_4_hdf5" ) ;
+	readAsciiVector( Tile_5_column5,"/mnt/lofar/ppfinversion/5_5_hdf5" ) ;
+	//readAsciiVector( Tile_5_column6,"5_6_hdf" ) ;
+	readAsciiVector( Tile_5_column7,"/mnt/lofar/ppfinversion/5_7_hdf5" ) ;
+	readAsciiVector( Tile_5_column8,"/mnt/lofar/ppfinversion/5_8_hdf5" ) ;
+	readAsciiVector( Tile_5_column9,"/mnt/lofar/ppfinversion/5_9_hdf5" ) ;
+	readAsciiVector( Tile_5_column10,"/mnt/lofar/ppfinversion/5_10_hdf5" ) ;
+	readAsciiVector( Tile_5_column11,"/mnt/lofar/ppfinversion/5_11_hdf5" ) ; 
+	readAsciiVector( Tile_5_column12,"/mnt/lofar/ppfinversion/5_12_hdf5" ) ;
+	readAsciiVector( Tile_5_column13,"/mnt/lofar/ppfinversion/5_13_hdf5" ) ;
+	readAsciiVector( Tile_5_column14,"/mnt/lofar/ppfinversion/5_14_hdf5" ) ;
+	readAsciiVector( Tile_5_column15,"/mnt/lofar/ppfinversion/5_15_hdf5" ) ;
+	readAsciiVector( Tile_5_column16,"/mnt/lofar/ppfinversion/5_16_hdf5" ) ;
+	
+	cout <<"number of elements in vector Tile_5_column1 " << Tile_5_column2.nelements() << endl ;
+	
+	casa::Matrix<double> raw_data(n_samples,73, 0.0 ) ;
+
+	raw_data.column(0) = Tile_1_column3 ;
+	raw_data.column(1) = Tile_1_column4 ;
+	raw_data.column(2) = Tile_1_column5 ;
+	raw_data.column(3) = Tile_1_column6 ;
+	raw_data.column(4) = Tile_1_column7 ;
+	raw_data.column(5) = Tile_1_column8 ;
+	raw_data.column(6) = Tile_1_column9 ;
+	raw_data.column(7) = Tile_1_column10 ;
+	raw_data.column(8) = Tile_1_column11 ;
+	raw_data.column(9) = Tile_1_column12 ;
+	raw_data.column(10) = Tile_1_column13 ;
+	raw_data.column(11) = Tile_1_column14 ;
+	raw_data.column(12) = Tile_1_column15 ;
+	raw_data.column(13) = Tile_1_column16 ;
+	
+	raw_data.column(14) = Tile_2_column1 ;
+	raw_data.column(15) = Tile_2_column2 ;
+	raw_data.column(16) = Tile_2_column3 ;
+	raw_data.column(17) = Tile_2_column4 ;
+	raw_data.column(18) = Tile_2_column5 ;
+	//raw_data.column(19) = Tile_2_column6 ;
+	raw_data.column(19) = Tile_2_column7 ;
+	raw_data.column(20) = Tile_2_column8 ;
+	raw_data.column(21) = Tile_2_column9 ;
+	raw_data.column(22) = Tile_2_column10 ;
+	raw_data.column(23) = Tile_2_column11 ;
+	raw_data.column(24) = Tile_2_column12 ;
+	raw_data.column(25) = Tile_2_column13 ;
+	raw_data.column(26) = Tile_2_column14 ;
+	raw_data.column(27) = Tile_2_column15 ;
+	raw_data.column(28) = Tile_2_column16 ;
+	
+	raw_data.column(29) = Tile_3_column2 ;
+	raw_data.column(30) = Tile_3_column3 ;
+	raw_data.column(31) = Tile_3_column4 ;
+	raw_data.column(32) = Tile_3_column5 ;
+	raw_data.column(33) = Tile_3_column6 ;
+	raw_data.column(34) = Tile_3_column7 ;
+	raw_data.column(35) = Tile_3_column8 ;
+	raw_data.column(36) = Tile_3_column9 ;
+	raw_data.column(37) = Tile_3_column10 ;
+	raw_data.column(38) = Tile_3_column11 ;
+	raw_data.column(39) = Tile_3_column12 ;
+	raw_data.column(40) = Tile_3_column13 ;
+	raw_data.column(41) = Tile_3_column14 ;
+	raw_data.column(42) = Tile_3_column15 ;
+	raw_data.column(43) = Tile_3_column16 ;
+	
+	raw_data.column(44) = Tile_4_column2 ;
+	raw_data.column(45) = Tile_4_column3 ;
+	raw_data.column(46) = Tile_4_column4 ;
+	raw_data.column(47) = Tile_4_column5 ;
+	raw_data.column(48) = Tile_4_column6 ;
+	raw_data.column(49) = Tile_4_column7 ;
+	raw_data.column(50) = Tile_4_column8 ;
+	raw_data.column(51) = Tile_4_column9 ;
+	raw_data.column(52) = Tile_4_column10 ;
+	raw_data.column(53) = Tile_4_column11 ;
+	raw_data.column(54) = Tile_4_column12 ;
+	raw_data.column(55) = Tile_4_column13 ;
+	raw_data.column(56) = Tile_4_column14 ;
+	raw_data.column(57) = Tile_4_column15 ;
+	raw_data.column(58) = Tile_4_column16 ;
+	
+	raw_data.column(59) = Tile_5_column2 ;
+	raw_data.column(60) = Tile_5_column3 ;
+	raw_data.column(61) = Tile_5_column4 ;
+	raw_data.column(62) = Tile_5_column5 ;
+	//raw_data.column(64) = Tile_5_column6 ;
+	raw_data.column(63) = Tile_5_column7 ;
+	raw_data.column(64) = Tile_5_column8 ;
+	raw_data.column(65) = Tile_5_column9 ;
+	raw_data.column(66) = Tile_5_column10 ;
+	raw_data.column(67) = Tile_5_column11 ;
+	raw_data.column(68) = Tile_5_column12 ;
+	raw_data.column(69) = Tile_5_column13 ;
+	raw_data.column(70) = Tile_5_column14 ;
+	raw_data.column(71) = Tile_5_column15 ;
+	raw_data.column(72) = Tile_5_column16 ;
+	
+	casa::Vector<double> ppfcoeff(16384,0.0) ;
+	casa::Vector<double> ppfcoeff_inv(16384, 0.0) ;
+	
+   	readAsciiVector( ppfcoeff,"Coeffs16384Kaiser-quant.dat" ) ;
+       	readAsciiVector( ppfcoeff_inv,"ppf_inv.dat" ) ;
+
+ 	double simTEC = 0.0 ;
+ 	double sampling_rate = 200e6 ;
+ 	uint nyquist_zone = 2 ;
+ 	uint time_int_bins =5 ;
+ 	double TEC = 0.0 ;
+ 	uint n_frames = 600 ;
+	//uint n_sample = 50*1024 ;
+	
+ 	double source_latitude = 45.0 ;
+ 	double source_longitude = 160.0 ;
+ 	double pointing_latitude = 49.0 ;
+ 	double pointing_longitude = 156.0 ;
      
-     logfile2.open( "FFT_data", ios::out );
-        for( uint nSample=0; nSample < 513 ; nSample++ ){
-		 for( uint ncol=0; ncol<n_frames ; ncol++){
-	             
-		     logfile2 << FFT_ampl(nSample,ncol) << "\t";
-	   }
-	  logfile2 <<endl ;
+ 	casa::Vector<double> freq_range(2,0.0) ;
+ 
+ 	double peak_height = 16.0 ;
+ 
+ 	freq_range(0)= 100e6 ;
+     
+     	freq_range(1) = 200e6 ;
+ 
+ 	uint dataBlockSize = 1024 ;
+	
+	casa::Matrix<double> sorted_matrix( 600*1024, 73, 0.0 ) ;
+ 	
+ 	//casa::Matrix<double> zero_freq_removed(n_samples,73,0.0);
+	
+ 	casa::Matrix<DComplex> fft_all_antenna(513,73,0.0) ;
+	
+	//for( uint ant=0; ant< 73; ant++ ){
+		uint ant=1;
+		casa::Vector<double> raw_vector = raw_data.column(ant) ;
+		
+		casa::Matrix<DComplex> FFTdata = numooontrigger.zero_channel_flagging( raw_vector,
+ 											n_frames,
+ 											nyquist_zone);
+ 		Vector<double> zero_freq_removed = numooontrigger.ifft_data( FFTdata,
+    			    						n_frames,
+									nyquist_zone ) ;
+									
+		//casa::Vector<double> antenna_vector = zero_freq_removed.column(1);
+		
+		Matrix<DComplex> ppf_data = numooontrigger.ppf_implement(zero_freq_removed,
+									nyquist_zone,
+									ppfcoeff );
+		uint ppf_row = ppf_data.nrow() ;
+		uint ppf_col = ppf_data.ncolumn() ;
+		
+		//Vector<DComplex> ppf_vector = ppf_data.column(0) ;
+		
+		Matrix<double> ampl_ppf_array = amplitude(ppf_data) ;
+	
+		Vector<double> Averaged_PPF(513,0.0) ;
+		
+		for(uint i=30; i<550; i++){ 
+			Averaged_PPF = Averaged_PPF + ampl_ppf_array.column(i) ;
+		}
+		Averaged_PPF = Averaged_PPF/520. ;
+		
+		ofstream logfile5;
+ 		logfile5.open("ampl_ppf_data",ios::out );
+ 	
+		
+ 		for( uint n=0;n< 513; n++){
+		
+			for( uint m=30; m<550; m++){
+		
+			logfile5<< ampl_ppf_array(n,m) << "\t" ;
+			}
+		logfile5 << endl ;
+		}
+		
+ 	 	logfile5.close() ;
+
+		
+		ofstream logfile6;
+ 		logfile6.open("ave_PPF",ios::out );
+ 	
+		
+ 		for( uint n=0;n< 513; n++){
+						
+			logfile6<< Averaged_PPF(n) << endl ;
+			}
+		
+		logfile6.close() ;
+*/
+		Vector<double> ampl_PPF_vector(513,0.0) ;
+		
+		readAsciiVector( ampl_PPF_vector,"ave_PPF" ) ;
+		
+		ampl_PPF_vector = ampl_PPF_vector/520. ;
+		
+// 		Matrix<DComplex> sorted_ppf(513,100,0.0) ;
+// 		uint j=0;
+// 		for(uint i=20; i<120; i++){
+// 		
+// 			sorted_ppf.column(j)=ppf_data.column(i);
+// 			j=j+1 ;
+// 			}
+		
+// 		 Matrix<DComplex> rfi_removed = numooontrigger.RFI_removal( sorted_ppf ) ;
+// 		 
+// 		 uint fra= 150 ;
+// 		 
+// 		 Vector<uint> PPF_Vector = numooontrigger.PPFBand_vector( sampling_rate,
+//    	   	       							  nyquist_zone,
+// 		       							  freq_range ) ;
+		 
+// 		 Vector<double> rfi_cleaned = numooontrigger.ppf_inversion( rfi_removed,
+//                                						    ppfcoeff_inv,
+// 									   PPF_Vector )  ;	
+// 		 //Matrix<double> rfi_cleaned = amplitude(rfi_removed) ;
+// 		  Vector<double> rfi_cleaned_vector = numooontrigger.ifft_data( rfi_removed,
+//     			    						fra,
+// 									nyquist_zone ) ;
+		//casa::Vector<double> sorted_vector = raw_vector(Slice(0, 50*1024)) ;
+		
+		//sorted_matrix.column(ant) = sorted_vector ;
+		
+		//}
+		
+		//Matrix<DComplex> RFI_removed(513,n_frames,0.0);
+ 		
+		//casa::Matrix<DComplex> FFTdata(513,n_frames,0.0);
+		
+	//	casa::Vector<double> ampl_PPF_vector(513,0.0) ;
+		 
+		//casa::Vector<double> ampl_FFT_vector = rfi_cleaned ;
+		//casa::Vector<double> IFFT_data(1024*n_frames,0.0) ;
+		
+	//	readAsciiVector( ampl_PPF_vector,"ave_PPF") ;
+		
+// 		double value(0.0) ;
+// 		double av_value(0.0) ;
+// 		
+// 		for( uint i=120; i<220; i++ ){
+// 			value =ampl_PPF_vector(i) ;
+// 			av_value = av_value +value ;
+// 			cout << "Average value : "<< av_value << "and value is " << value << endl ;
+// 		}
+// 		
+// 		for( uint i=120; i<480; i++ ){
+// 			ampl_PPF_vector(i) = av_value/100. ;
+// 		}
+// 		
+//  		double amplitude_min = min( ampl_PPF_vector ) ;
+//  		double amplitude_max = max( ampl_PPF_vector ) ;
+//  		
+//  		char outFileNameR[256] = "ampl_PPF_m.root" ;
+//  		TFile *myOutput = new TFile(outFileNameR,"RECREATE");
+//  		
+//  		TH1D *AveragedSpectrum ; 
+//  		AveragedSpectrum = new TH1D("AveragedSpectrum","AveragedSpectrum",513,1,513) ;
+//   		
+//   		AveragedSpectrum->SetMaximum( 2.08127e+08);//4400.59) ;//2.08127e+08);
+// 		
+// 		//AveragedSpectrum =new TH1D("f1","fitting first function",513,1,513) ;
+//   		
+//   		for( uint freq_channel =0; freq_channel< 513; freq_channel++){
+//   		
+//   			double amplitude_value = ampl_PPF_vector(freq_channel) ;
+//   					
+//   			AveragedSpectrum->SetBinContent(freq_channel+1,amplitude_value) ;
+//   			
+//   			}
+		
+ // 		AveragedSpectrum =new TH1D("AveragedSpectrum","AveragedSpectrum",513,0,30000) ;
+  		
+//    		for( uint freq_channel =0; freq_channel< 513; freq_channel++){
+//    		
+//    			double amplitude_value = ampl_PPF_vector(freq_channel) ;
+//    					
+//    			AveragedSpectrum->SetBinContent(freq_channel+1,amplitude_value) ;
+//    			
+//    			}
+//  		double par[4];
+// 		//double par2[9];
+// 		
+//  		TF1 *f1 = new TF1("f1","gaus",1,119) ;
+// 		TF1 *f2 = new TF1("f2","pol0",221,513) ;
+		//TF1 *f3 = new TF1("f3","expo",289,318) ;
+		//TF1 *f4 = new TF1("f4","pol0",322,393) ;
+		//TF1 *f5 = new TF1("f5","expo",397,410) ;
+ 		//TF1 *f6 = new TF1("f6","gaus",412,513);
+		
+// 		TF1 *total = new TF1("mstotal","gaus(0)+pol0(3)",1,513);
+	//+pol0(8)+expo(9)+gaus(11)",1,513);//+expo(7)+gaus(9)",1,513);+pol0(8)+expo(9)
+ 			
+//		total->SetLineColor(2) ;
+		
+//		AveragedSpectrum->Fit(f1,"R");
+//		AveragedSpectrum->Fit(f2,"R+");
+		//AveragedSpectrum->Fit(f3,"R+");
+		//AveragedSpectrum->Fit(f4,"R+");
+		//AveragedSpectrum->Fit(f5,"R+");
+		//AveragedSpectrum->Fit(f6,"R+");
+		//AveragedSpectrum->Fit(f7,"R+");
+		//AveragedSpectrum->Fit(f8,"R+");
+ 		//f2->SetLineColor(4) ;
+		
+ //		f1->GetParameters(&par[0]) ;
+ //		f2->GetParameters(&par[3]) ;
+ 		//f3->GetParameters(&par[6]) ;
+		//f4->GetParameters(&par[8]) ;
+		//f5->GetParameters(&par[9]) ;
+		//f6->GetParameters(&par[11]) ;
+		//f7->GetParameters(&par[11]) ;
+		//f8->GetParameters(&par[13]) ;
+		
+ //		total->SetParameters(par) ;
+		 		
+//		AveragedSpectrum->Fit(total,"R+") ;
+				
+//		AveragedSpectrum->Write();
+		
+//*****************************************************		
+		
+		
+ 	//	for( uint antenna=0; antenna< 73; antenna++ ){
+	
+// 		uint antenna =0 ; 
+//  	
+  	//	casa::Vector<double> data_vector = raw_data.column(antenna);
+//  		
+// 		  
+// 		casa::Matrix<DComplex>  FFTdata = numooontrigger.fft_data( data_vector,
+//                                   					   5,
+// 									   nyquist_zone ) ;
+// 									   
+// 		uint NR = FFTdata.nrow() ;
+// 		uint NC = FFTdata.ncolumn() ;
+// 		
+// 		casa::Vector<DComplex> ampl_vector(NR,0.0) ;
+// 		casa::Vector<double> ampl_FFT_vector(NR,0.0) ;
+// 		
+// 		for( uint i=0; i< NC; i++ ){
+// 		
+// 			ampl_vector = FFTdata.column(i) ;
+// 			cout << "ampl vector has been calculated for frame "<<i<<endl ;
+// 			//sorted_vector = ampl_vector(Slice(0,513)) ;
+// 			ampl_FFT_vector= ampl_FFT_vector+ amplitude(ampl_vector);
+// 			
+// 		}
+// 		//	RFI_removed = numooontrigger.RFI_removal( FFTdata ) ;
+// 									  
+//  		ofstream logfile5;
+// 	logfile5.open("ampl_FFT",ios::out );
+//  	
+//  	for( uint n=0;n< NR; n++){
+//  		logfile5<< ampl_FFT_vector(n)<< endl;
+//  	}
+//  	logfile5.close() ;
+
+							
+ 				
+// 		casa::Vector<double> IFFT_data= numooontrigger.ifft_data( FFTdata,
+//   								  n_frames,
+//   								  nyquist_zone ) ;
+//  				
+// 		zero_freq_removed.column(antenna) = IFFT_data ;
+// 		
+// 		}
+// 		
+			
+			//ampl_fft_vector = ampl_fft_vector/100. ;
+ 		
+ 		//}
+ 		
+	//	
+		
+// 	Matrix<double> ampl_PPF_data = amplitude(ppf_data) ;
+// 	uint ppf_co = ampl_PPF_data.ncolumn();
+// 	uint ppf_row = ampl_PPF_data.nrow();
+// 	
+// 	Vector<double> integrated_ampl(1024,0.0) ;
+// 	
+// 	for(uint co=25; co<75; co++){
+// 		
+// 		integrated_ampl = integrated_ampl + ampl_PPF_data.column(co) ;
+// 		
+// 		}	
+// 		
+// 	casa::Matrix<double> Cleaned_DATA = numooontrigger.Cleaned_data( zero_freq_removed ,
+//     						    		     	   n_samples,
+// 								     	   simTEC,
+// 								     	   nyquist_zone,
+// 								           sampling_rate,
+// 								           TEC,
+// 								           freq_range ) ; 
+// 									   
+// 	 Vector<double> beamedArray_wo = numooontrigger.BeamFormed_data(  Cleaned_DATA,
+//     				   					n_samples,
+// 			           					simTEC,
+// 				   					nyquist_zone,
+// 				   					sampling_rate,
+// 				   					TEC,
+// 				   					freq_range,
+// 		  		   					pointing_latitude,
+// 		  		   					pointing_longitude,
+// 				   					gain_scale_factors,
+// 		  		   					antenna_posX,
+// 		  		   					antenna_posY,
+// 		  		   					antenna_posZ ) ; 
+// 	uint n_elem = beamedArray_wo.nelements() ;	
+/*
+ 	ofstream logfile5;
+ 	logfile5.open("ampl_ppf_data",ios::out );
+ 	
+ 	for( uint n=0;n< 513; n++){
+		for(uint m=0; m<73; m++){
+ 		logfile5<< ampl_PPF_data(n,m)<< "\t";
+		}
+		logfile5<<endl ;
+ 	}
+ 	logfile5.close() ;
+
+	ofstream logfile6 ;
+	logfile6.open("int_ampl_ppf",ios::out);
+
+	for(uint g=0; g<513; g++){
+
+	double values = integrated_ampl(g);
+
+	logfile6 << values <<endl ;
 	}
-       logfile2.close() ;
-	
-              
-       ofstream logfile3;
-        logfile3.open( "RFI_0", ios::out );
-        for( uint Sample=0; Sample < 513 ; Sample++ ){
-	
-	   for( uint ncol=0; ncol<n_frames ; ncol++){
-	   
-	             logfile3 << RFI_rem_ampl(Sample,ncol) << "\t";
-               }
-             logfile3 <<endl ;
-	  }
-        logfile3.close() ;
-	
-	
-        ofstream logfile4;
-	logfile4.open( "Beam_formed", ios::out );
-        for( uint nSample=0; nSample < 513  ; nSample++ ){
-		for( uint ncol=0; ncol< n_frames; ncol++){
-		
-	        logfile4 << Beam_formed_ampl( nSample,ncol) << "\t" ;
-	    }
-	 logfile4 << endl;
-	 } 
-        logfile4.close() ;
-	
-	
-	ofstream logfile5;
-     
-     logfile5.open( "IFFT_data_0", ios::out );
-        for( uint nSample=0; nSample < nofSamples ; nSample++ ){
-		
-	            logfile5 << IFFT_data(nSample) << "\t" << Power_IFFT_data(nSample) << endl ;
-	   }
-	  
-        logfile5.close() ; 
-	
-	ofstream logfile6;
-     
-     logfile6.open( "power_integrated", ios::out );
-        for( uint nSample=0; nSample < nofSamples-5 ; nSample++ ){
-		
-	            logfile6 << Power_integrated(nSample) << endl ;
-	   }
-	  
-        logfile6.close() ;
-	
-	ofstream logfile7;
-	logfile7.open( "power_FFT", ios::out );
-        for( uint nSample=0; nSample < 513  ; nSample++ ){
-		for( uint ncol=0; ncol< n_frames; ncol++){
-		
-	        logfile7 << power_ampl_FFTdata( nSample,ncol) << "\t" ;
-	    }
-	 logfile7 << endl;
-	 } 
-        logfile7.close() ;
-	
+	logfile6.close() ;*/
+
+
+
+
+
+// 	 
+// 	 ofstream logfile1;
+// 	logfile1.open("clean_data",ios::out );
+// 	
+// 	for( uint r=0; r<4096; r++){
+// 		for( uint c=0; c< 73; c++){
+// 		 logfile1<< Cleaned_DATA(r,c) << "\t";
+// 		}
+// 	 logfile1<< endl ;
+// 	}
+// 	logfile1.close();
+// 	
+// 
+// 	casa::Matrix<double> Signal_Array = numooontrigger.Added_SignalData( zero_freq_removed , 
+//     				      						n_samples,
+// 				     						simTEC,
+// 				     						nyquist_zone,
+// 				     						peak_height,
+// 				     						sampling_rate,
+// 				      						TEC,
+// 				     						source_latitude,
+// 				     						source_longitude,
+// 		  		     						pointing_latitude,
+// 		  		     						pointing_longitude,
+// 				     						gain_scale_factors,
+// 			    	     						antenna_posX,
+// 		   	    	     						antenna_posY,
+// 		   	    	     						antenna_posZ,
+// 				     						freq_range ) ;  	
+// 								
+// 	
+// 	 ofstream logfile2;
+// 	logfile2.open("added_data",ios::out );
+// 	
+// 	for( uint rr=0; rr<4096; rr++){
+// 		for( uint cc=0; cc< 73; cc++){
+// 		 logfile2<< Signal_Array(rr,cc) << "\t";
+// 		}
+// 	 logfile2<< endl ;
+// 	}
+// 	logfile2.close();
+// 	
+// 	 Vector<double> beamedArray = numooontrigger.BeamFormed_data( Signal_Array ,
+//     				   					n_samples,
+// 			           					simTEC,
+// 				   					nyquist_zone,
+// 				   					sampling_rate,
+// 				   					TEC,
+// 				   					freq_range,
+// 		  		   					pointing_latitude,
+// 		  		   					pointing_longitude,
+// 				   					gain_scale_factors,
+// 		  		   					antenna_posX,
+// 		  		   					antenna_posY,
+// 		  		   					antenna_posZ ) ; 
+// 	uint n_ele = beamedArray.nelements() ;								
+// 	ofstream logfile3;
+// 	logfile3.open("Beamed",ios::out );
+// 	
+// 	for( uint n=0;n< n_ele; n++){
+// 		logfile3<< beamedArray(n)<< endl;
+// 	}
+// 	logfile3.close() ;
+ 	
+//   	numooontrigger.root_ntuples( zero_freq_removed,
+//       					n_samples,
+//   					simTEC,
+ //  					sampling_rate,
+  // 					nyquist_zone,
+  // 					time_int_bins,
+   //  					TEC,
+  // 					source_latitude,
+  // 					source_longitude,
+  // 			    		pointing_latitude,
+  // 		   			pointing_longitude,
+  // 		   			gain_scale_factors,
+  // 			    	  	antenna_posX,
+  // 		   	    		antenna_posY,
+  // 		   	    		antenna_posZ,
+ // 					ppfcoeff,
+  // 		   			ppfcoeff_inv,
+  // 		  			freq_range,
+  // 					peak_height )   ;  
+  
+ 				
+    	 numooontrigger.summary(); 
+   
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
   
-  return nofFailedTests;
+ return nofFailedTests;
 }
 
-//_______________________________________________________________________________
-//                                                                           main
+// -----------------------------------------------------------------------------
 
 int main ( int argc,
 	  char *argv[])
@@ -376,11 +817,11 @@ int main ( int argc,
   std::string filename;
   if (argc > 1) {
     filename = std::string(argv[1]);
+  //  filename2 = std::string(argv[2]);
   } else {
     std::cerr << "Please provide a HDF5 filename.\n";
     return(DAL::FAIL);
   }
-
   // Test for the constructor(s)
   nofFailedTests += test_constructors (filename);
 

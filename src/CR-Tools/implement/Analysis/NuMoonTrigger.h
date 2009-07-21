@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2009                                                  *
- *   Kalpana Singh (<mail>)                                                     *
+ *   Copyright (C) 2009                                                    *
+ *   Kalpana Singh (<mail>)                                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -70,6 +70,8 @@
 #include <dal/BeamFormed.h>
 #include <dal/BeamGroup.h>
 #include <dal/TBB_Timeseries.h>
+#include <dal/TBB_StationGroup.h>
+#include <dal/TBB_DipoleDataset.h>
 
 /*CR-Tools header files*/
 
@@ -97,6 +99,7 @@
 #include "TNtuple.h"
 #include "TMath.h"
 #include "TSpectrum.h"
+#include "TVirtualFFT.h"
 
 #endif
 
@@ -172,11 +175,18 @@ namespace CR{ // Namespace  -- begin
 		   uint const& nyquist_zone,
 		   uint const& time_int_bins,
 		   double const& TEC,
+		   const double& source_latitude,
+		   const double& source_longitude,
+		   const double& pointing_latitude,
+		   const double& pointing_longitude,
+		   const Vector<double>& position_x,
+		   const Vector<double>& position_y,
+		   const Vector<double>& position_z,
+		   const Vector<double>& gain_scale_factor,
 		   const Vector<double>& ppf_coeff,
 		   const Vector<double>& ppf_invcoeff,
 		   const Vector<double> freq_range,
-		   double const& peak_power,
-		   const Vector<uint>& RCU_id ) ;
+		   double const& peak_height ) ;
     
     /*!
       \brief Copy constructor
@@ -235,8 +245,15 @@ namespace CR{ // Namespace  -- begin
     		 	     uint const& n_frames,
 			     uint const& nyquist_zone ) ;
   
+  casa::Matrix<DComplex> zero_channel_flagging( Vector<double>&  data,
+     		                         	uint const& n_frames,
+					        uint const& nyquist_zone ) ;
+						
   Matrix<DComplex> RFI_removal( Matrix<DComplex> fft_samples ) ;
-		     
+
+  Matrix<DComplex> Average_effect_RFI( Matrix<DComplex> fft_samples,
+				       Matrix<DComplex> RFI_mitigated );
+
   Matrix<DComplex> de_dispersion( Matrix<DComplex> fft_samples,
 		      		  double const& TEC,
 				  const Vector<double> freq_Vector ) ;
@@ -263,8 +280,7 @@ namespace CR{ // Namespace  -- begin
   Matrix<DComplex> ppfdata_cutshort( Matrix<DComplex>& samples,
    				    Vector<uint> subband_ID ) ;
     
-  Matrix<double> cal_AvPower( Matrix<double> const& data_array,
-  	       	 	     uint const& n_frames ) ;
+  Vector<double> cal_AvPower( Vector<double> const& beamed_Array ) ;
 
   Vector<double> Sim_Signal( Vector<double> const& data,
     		 	    double const& simTEC,
@@ -272,87 +288,161 @@ namespace CR{ // Namespace  -- begin
 			    double const& peak_height,
 			    double const& pulse_loc,
 			    double const& rnd_phase,
-			    Vector<DComplex> geom_Weights_factor  ) ;
+			    Vector<double> geom_phase_factor,
+			    uint const& nyquist_zone ) ;
     
    Matrix<DComplex> weights_applied( Matrix<DComplex> const& data,
-  			             Matrix<DComplex> const& geom_weights,
-				     uint const& rcu_id ) ;
+  			             Matrix<double> const& phase_Delay,
+				     const Vector<double>& gain_scale_factor,
+			     	     uint const& rcu_id ) ;
 
-   Matrix<DComplex> Geom_weights( const Vector<uint>& RCU_id,
-			          const Vector<double>& freq_vector ) ;     
-				  
-   Matrix<double> Cleaned_data(  std::string const &filename,
+
+ Vector<double> geom_Delay( const double& source_latitude,
+			    const double& source_longitude,
+			    const Vector<double>& position_x,
+		   	    const Vector<double>& position_y,
+		   	    const Vector<double>& position_z ) ;  
+ 
+ Matrix<double> phase_delay( const Vector<double>& freq_Vector,
+		             const double& source_latitude,
+		             const double& source_longitude,
+			     const Vector<double>& position_x,
+		   	     const Vector<double>& position_y,
+		   	     const Vector<double>& position_z ) ;
+			     
+ Vector<int> integer_Delay( const double& source_latitude,
+			    const double& source_longitude,
+			    const double& sampling_frequency,
+			    const Vector<double>& position_x,
+		   	    const Vector<double>& position_y,
+		   	    const Vector<double>& position_z ) ;    
+  
+  Vector<double> fraction_Delay( const double& source_latitude,
+			    	 const double& source_longitude,
+				 const double& sampling_frequency,
+			    	 const Vector<double>& position_x,
+		   	    	 const Vector<double>& position_y,
+		   	    	 const Vector<double>& position_z );
+				 
+   Matrix<double> Cleaned_data(  Matrix<double> const& data,
     				 uint const& n_samples,
 				 double const& simTEC,
 				 uint const& nyquist_zone,
-				 double const& peak_power,
-				 const Vector<uint>& RCU_id,
 				 double const& sampling_rate,
 				 double const& TEC,
 				 const Vector<double> freq_range ) ;
-				 
-   Matrix<double> Added_SignalData(  std::string const &filename,
+   
+   Vector<double> BeamFormed_data(  Matrix<double> const& data,
+    				   uint const& n_samples,
+			           double const& simTEC,
+				   uint const& nyquist_zone,
+				   double const& sampling_rate,
+				   double const& TEC,
+				   const Vector<double> freq_range,
+		  		   const double& pointing_latitude,
+		  		   const double& pointing_longitude,
+				   const Vector<double>& gain_scale_factor,
+		  		   const Vector<double>& position_x,
+		  		   const Vector<double>& position_y,
+		  		   const Vector<double>& position_z ) ; 
+   
+   Matrix<double> Added_SignalData(  Matrix<double> const& data, 
     				     uint const& n_samples,
 				     double const& simTEC,
 				     uint const& nyquist_zone,
-				     double const& peak_power,
-				     const Vector<uint>& RCU_id,
+				     double const& peak_height,
 				     double const& sampling_rate,
 				     double const& TEC,
+				     const double& source_latitude,
+				     const double& source_longitude,
+		  		     const double& pointing_latitude,
+		  		     const double& pointing_longitude,
+				     const Vector<double>& gain_scale_factor,
+			    	     const Vector<double>& position_x,
+		   	    	     const Vector<double>& position_y,
+		   	    	     const Vector<double>& position_z,
 				     const Vector<double> freq_range ) ;    
-				     
-  Vector<double> PPF_processed( std::string const &filename,
+		     
+  Vector<double> PPF_processed( Matrix<double> const& data,
     				uint const& n_samples,
 				double const& simTEC,
 				double const& sampling_rate,
 				uint const& nyquist_zone,
 				uint const& time_int_bins,
   				double const& TEC,
+				const double& source_latitude,
+				const double& source_longitude,
+			    	const double& pointing_latitude,
+		   		const double& pointing_longitude,
+		   		const Vector<double>& gain_scale_factor,
+			    	const Vector<double>& position_x,
+		   	    	const Vector<double>& position_y,
+		   	    	const Vector<double>& position_z,
 				const Vector<double>& ppf_coeff,
 		   		const Vector<double>& ppf_invcoeff,
 		  		const Vector<double> freq_range,
-				double const& peak_power,
-				const Vector<uint>& RCU_id ) ;
+				double const& peak_height ) ;
 				
-  Vector<double> FFT_processed( std::string const &filename,
+  Vector<double> FFT_processed( Matrix<double> const& data,
     				uint const& n_samples,
 				double const& simTEC,
 				double const& sampling_rate,
 				uint const& nyquist_zone,
 				uint const& time_int_bins,
   				double const& TEC,
+				const double& source_latitude,
+				const double& source_longitude,
+			    	const double& pointing_latitude,
+		   		const double& pointing_longitude,
+		   		const Vector<double>& gain_scale_factor,
+			    	const Vector<double>& position_x,
+		   	    	const Vector<double>& position_y,
+		   	    	const Vector<double>& position_z,
 				const Vector<double>& ppf_coeff,
 		   		const Vector<double>& ppf_invcoeff,
 		  		const Vector<double> freq_range,
-				double const& peak_power,
-				const Vector<uint>& RCU_id ) ;
+				double const& peak_height ) ;
 				
-  Vector<double> without_Signal(  std::string const &filename,
+  Vector<double> without_Signal(  Matrix<double> const& data,
     				  uint const& n_samples,
 				  double const& simTEC,
 				  double const& sampling_rate,
 				  uint const& nyquist_zone,
 				  uint const& time_int_bins,
   				  double const& TEC,
+				  const double& source_latitude,
+				  const double& source_longitude,
+				  const double& pointing_latitude,
+		   		  const double& pointing_longitude,
+		   		  const Vector<double>& gain_scale_factor,
+			    	  const Vector<double>& position_x,
+		   	    	  const Vector<double>& position_y,
+		   	    	  const Vector<double>& position_z,
 				  const Vector<double>& ppf_coeff,
 		   		  const Vector<double>& ppf_invcoeff,
 		  		  const Vector<double> freq_range,
-				  double const& peak_power,
-				  const Vector<uint>& RCU_id ) ;       
+				  double const& peak_height ) ;       
   
   
-     void root_ntuples( std::string const &filename,
+     void root_ntuples( Matrix<double> const& data,
     			 uint const& n_samples,
 			 double const& simTEC,
 			 double const& sampling_rate,
 			 uint const& nyquist_zone,
 			 uint const& time_int_bins,
   			 double const& TEC,
+			 const double& source_latitude,
+			 const double& source_longitude,
+			 const double& pointing_latitude,
+		   	 const double& pointing_longitude,
+		   	 const Vector<double>& gain_scale_factor,
+			 const Vector<double>& position_x,
+		   	 const Vector<double>& position_y,
+		   	 const Vector<double>& position_z,
 			 const Vector<double>& ppf_coeff,
 		   	 const Vector<double>& ppf_invcoeff,
 		  	 const Vector<double> freq_range,
-			 double const& peak_power,
-			 const Vector<uint>& RCU_id ) ;
+			 double const& peak_height ) ;
    
   #endif    
  
@@ -366,10 +456,10 @@ namespace CR{ // Namespace  -- begin
     
     //! Unconditional deletion 
     void destroy(void);
-    
+   
   }; // Class NuMoonTrigger -- end
-  
+ 
 } // Namespace  -- end
 
 #endif /* NUMOONTRIGGER_H */
-  
+ 
