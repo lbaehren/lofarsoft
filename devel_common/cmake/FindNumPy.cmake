@@ -55,31 +55,49 @@ set (CMAKE_FIND_LIBRARY_PREFIXES "" CACHE STRING
   )
 
 ## -----------------------------------------------------------------------------
+## Let's assume the Python executable is smarter about finding NumPy than we
+## are, and try asking it before searching ourselves.
+## This is necessary to e.g. pick up the MacPorts NumPy installation, which
+## ends up in /opt/local/Library/Frameworks/Python.framework ...
+execute_process (
+  COMMAND ${PYTHON_EXECUTABLE} -c "import numpy, os; print os.path.dirname(numpy.__file__)"
+  OUTPUT_VARIABLE numpy_path
+  )
+if (numpy_path)
+  string (STRIP ${numpy_path} numpy_search_path)
+else (numpy_path)
+  set (numpy_search_path ${lib_locations})
+endif (numpy_path)
+
+## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (NUMPY_ARRAYOBJECT_H numpy/arrayobject.h
   PATHS
-  ${lib_locations}
+  ${numpy_search_path}
   PATH_SUFFIXES
   python
+  core/include
   python/numpy/core/include
   NO_DEFAULT_PATH
 )
 
 find_path (NUMPY_NDARRAYOBJECT_H numpy/ndarrayobject.h
   PATHS
-  ${lib_locations}
+  ${numpy_search_path}
   PATH_SUFFIXES
   python
+  core/include
   python/numpy/core/include
   NO_DEFAULT_PATH
 )
 
 find_path (NUMPY_INCLUDES numpy/__multiarray_api.h numpy/multiarray_api.txt
   PATHS
-  ${lib_locations}
+  ${numpy_search_path}
   PATH_SUFFIXES
   python
+  core/include
   python/numpy/core/include
   python${PYTHON_VERSION}
   python${PYTHON_VERSION}/site-packages/numpy
@@ -92,9 +110,10 @@ find_path (NUMPY_INCLUDES numpy/__multiarray_api.h numpy/multiarray_api.txt
 
 find_library (NUMPY_MULTIARRAY_LIBRARY multiarray
   PATHS
-  ${lib_locations}
+  ${numpy_search_path}
   PATH_SUFFIXES
   python
+  core
   python/numpy/core
   python${PYTHON_VERSION}/site-packages/numpy/core
   NO_DEFAULT_PATH
@@ -105,9 +124,10 @@ endif (NUMPY_MULTIARRAY_LIBRARY)
 
 find_library (NUMPY_SCALARMATH_LIBRARY scalarmath
   PATHS
-  ${lib_locations}
+  ${numpy_search_path}
   PATH_SUFFIXES
   python
+  core
   python/numpy/core
   python${PYTHON_VERSION}/site-packages/numpy/core
   NO_DEFAULT_PATH
@@ -119,7 +139,7 @@ endif (NUMPY_SCALARMATH_LIBRARY)
 ## -----------------------------------------------------------------------------
 ## Check for executables
 
-find_program (F2PY_EXECUTABLE f2py f2py${PYTHON_VERSION}
+find_program (F2PY_EXECUTABLE f2py f2py${PYTHON_VERSION} f2py-${PYTHON_VERSION}
   PATHS ${bin_locations}
   NO_DEFAULT_PATH
   )
@@ -132,7 +152,7 @@ find_program (F2PY_EXECUTABLE f2py f2py${PYTHON_VERSION}
 
 find_file (NUMPY_VERSION_PY version.py
   PATHS
-  ${lib_locations}
+  ${numpy_search_path}
   /usr/lib64
   /usr/local/lib64
   PATH_SUFFIXES
