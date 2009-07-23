@@ -56,13 +56,50 @@ if (PYTHON_PYTHONHOME)
 endif (PYTHON_PYTHONHOME)
 
 ## -----------------------------------------------------------------------------
+## Default Python versions
 
-foreach (python_version 2.6 2.5 2.4 2.3)
+set (python_version_list 2.6 2.5 2.4 2.3)
+set (python_bin_locations ${bin_locations})
+set (python_include_locations ${include_locations})
+set (python_lib_locations ${lib_locations})
+
+## But see if python_select knows about a specific preference
+find_program (PYTHON_SELECTOR python_select
+  PATHS ${bin_locations}
+  NO_DEFAULT_PATH
+  )
+
+if (PYTHON_SELECTOR)
+
+  execute_process (
+    COMMAND ${PYTHON_SELECTOR} -s
+    OUTPUT_VARIABLE python_default_version
+    )
+
+  if (python_default_version MATCHES ".*apple")
+    # Make sure we use the Apple Python if appropriate
+    set (python_bin_locations /usr/bin)
+    set (python_include_locations /usr/include)
+    set (python_lib_locations /usr/lib)
+    if (NOT PYTHON_FIND_QUIETLY)
+      message (STATUS "Setting paths for Apple supplied Python")
+    endif (NOT PYTHON_FIND_QUIETLY)
+  endif (python_default_version MATCHES ".*apple")
+
+  string (REGEX REPLACE "python(.)(.).*" "\\1.\\2;" python_version_list ${python_default_version})
+
+endif (PYTHON_SELECTOR)
+
+if (NOT PYTHON_FIND_QUIETLY)
+  message (STATUS "Checking for Python versions ${python_version_list}")
+endif (NOT PYTHON_FIND_QUIETLY)
+
+foreach (python_version ${python_version_list})
 
   if (NOT HAVE_PYTHON)
     
     ## Check for the Python executable
-    
+
     if (PYTHON_PYTHONHOME)
       find_program (PYTHON_EXECUTABLE python python${python_version}
 	PATHS ${PYTHON_PYTHONHOME} ${PYTHON_PYTHONHOME}/bin
@@ -70,7 +107,7 @@ foreach (python_version 2.6 2.5 2.4 2.3)
 	)
     else (PYTHON_PYTHONHOME)
       find_program (PYTHON_EXECUTABLE python${python_version}
-	PATHS ${bin_locations}
+	PATHS ${python_bin_locations}
 	ENV PATH
 	NO_DEFAULT_PATH
 	)
@@ -96,13 +133,13 @@ foreach (python_version 2.6 2.5 2.4 2.3)
     ## Check for the Python header files
     
     find_path (PYTHON_INCLUDES Python.h
-      PATHS ${include_locations}
+      PATHS ${python_include_locations}
       PATH_SUFFIXES python${python_version}
       NO_DEFAULT_PATH
       )
     
     find_path (HAVE_PYCONFIG_H pyconfig.h
-      PATHS ${include_locations}
+      PATHS ${python_include_locations}
       PATH_SUFFIXES python${python_version}
       NO_DEFAULT_PATH
       )
@@ -111,7 +148,7 @@ foreach (python_version 2.6 2.5 2.4 2.3)
     
     find_library (PYTHON_LIBRARIES python${python_version}
       PATHS
-      ${lib_locations}
+      ${python_lib_locations}
       PATH_SUFFIXES
       python${python_version}/config
       NO_DEFAULT_PATH

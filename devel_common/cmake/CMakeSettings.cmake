@@ -113,6 +113,7 @@ if (NOT USG_CMAKE_CONFIG)
   
   set (bin_locations
     ${USG_INSTALL_PREFIX}/bin
+    /opt/local/bin
     /sw/bin
     /usr/bin
     /usr/local/bin
