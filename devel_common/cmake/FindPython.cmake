@@ -84,6 +84,9 @@ if (PYTHON_SELECTOR)
     if (NOT PYTHON_FIND_QUIETLY)
       message (STATUS "Setting paths for Apple supplied Python")
     endif (NOT PYTHON_FIND_QUIETLY)
+  else (python_default_version MATCHES ".*apple")
+    # The headers should be available in the standard MacPorts location
+    list (APPEND python_include_locations /opt/local/Library/Frameworks/Python.framework/Headers)
   endif (python_default_version MATCHES ".*apple")
 
   string (REGEX REPLACE "python(.)(.).*" "\\1.\\2;" python_version_list ${python_default_version})
