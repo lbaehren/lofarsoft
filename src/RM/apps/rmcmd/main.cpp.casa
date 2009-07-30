@@ -66,8 +66,8 @@ int main (int argc, char * const argv[]) {
 	Lattice<DComplex> *lattice_U_dcomplex;
 	
 
-	vector<double> phi;		// Faraday depths to probe for
-	complex<double> rmpol;		// polarized intensity at Faraday depth probed for
+	vector<double> phi;					// Faraday depths to probe for
+	complex<double> rmpol;				// polarized intensity at Faraday depth probed for
 	vector<complex<double> > rmsf;	// Rotation Measure Spread Function
 
 

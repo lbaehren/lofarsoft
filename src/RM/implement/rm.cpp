@@ -865,15 +865,15 @@ vector<complex<double> > rm::RMSF(const vector<double> &phis,
 
   \return RMSF - vector with RMSF over range as specified
 */
-vector<complex<double> >rm::RMSFfreq(const vector<double> &phis,
+vector<complex<double> > rm::RMSFfreq(const vector<double> &phis,
 				  const vector<double> &frequencies,
 				  const vector<double> &weights,
 				  const vector<double> &delta_frequencies,
 				  const double freqZero)
 {
   vector<complex<double> > rmsfvec(phis.size());				// calculated rmsf to be returned
-  vector<double> lambda_sqs(frequencies.size());
-  vector<double> delta_lambda_sqs(frequencies.size());
+  vector<double> lambda_sqs(frequencies.size());				// vector to keep to lambda squared converted frequencies
+  vector<double> delta_lambda_sqs(frequencies.size());		// vector to keep to delta lambda squared converted frequencies
   double lambdaZero=0;						// lambdaZero to rotate polarized vector to (converted from freqZero)
   double lambdaZeroSq=0;					// derotated lambda squared
   vector<double> tempFreqZero(1);		// temporary frequency vector needed to convert single frequency (only implemented for vectors)

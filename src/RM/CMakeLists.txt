@@ -288,11 +288,12 @@ set (link_libraries
   ${LAPACK_LIBRARIES}
   )
 
+add_subdirectory (implement)
+
 if (RM_BUILD_EXTERNAL_TESTS)
   add_subdirectory (test)
 endif (RM_BUILD_EXTERNAL_TESTS)
 
-add_subdirectory (implement)
 add_subdirectory (apps/rmcmd)
 add_subdirectory (apps/rmdesktool)
 

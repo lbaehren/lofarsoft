@@ -187,14 +187,14 @@ public:
 											  const vector<double> &delta_faradays,
 											  const double lambdaZero);
 
-  // Clean a RM vector line-of-sight down to threshold
-  int RMClean(vector<double> &phis, double threshold);
+  // Clean a RM vector line-of-sight down to threshold  (will appear in rmclean class)
+//  int RMClean(vector<double> &phis, double threshold);
 
-  // Clean a RM vector line-of-sight down to complex threshold (for Q and U)
-  int RMClean(complex<vector<double> > &complxrm, complex<double> threshold);
+  // Clean a RM vector line-of-sight down to complex threshold (for Q and U) (will appear in rmclean class)
+//  int RMClean(complex<vector<double> > &complxrm, complex<double> threshold);
 
-  // Clean a complex RM vector line-of-sight down to threshold (threshold is the same for Q and U)
-  int RMClean(complex<vector<double> > &complxphis, double threshold);
+  // Clean a complex RM vector line-of-sight down to threshold (threshold is the same for Q and U) (will appear in rmclean class)
+//  int RMClean(complex<vector<double> > &complxrm, double threshold);
 
   // Frick and Stepanov wavelet algorithm
   vector<double> wavelet(vector<double> &,
@@ -208,11 +208,12 @@ public:
   vector<double> ift(vector<double> &,
 		     vector<double> &);
 
-  //! (Forward) Fourier Transform to get an image from an RM cube
-  //vector<double> fourierTransform(vector<double> &, vector<double> &, bool freq=true);
+  //*************************************************************************************
+  //
+  // Read frequency / lambda squared distributions from text (or later FITS/HDF5) files
+  //
+  //**************************************************************************************
 
-  
-  // Read frequency / lambda squared distributions from text files
   //! read frequency distribution from a text file
   vector<double> readFrequencies(const std::string &);
 
@@ -230,7 +231,6 @@ public:
 
   //! read complete set of simulated data: lambdasq, delta lambda sq and complex intensity from file
   void readSimDataFromFile(const string &filename, vector<double> &lambdasquareds, vector<double> &delta_lambda_squareds, vector<complex<double> > &intensities);
-
 
   //! Write a vector out to file
   void writeRMtoFile(vector<double>, const std::string &filename);

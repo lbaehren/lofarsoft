@@ -47,9 +47,6 @@ int main (int argc, char * const argv[]) {
 
 	try{
 
-//	Bool status;					// status of casa calls
-
-	unsigned int i=0;				// loop variable
 	unsigned int N=96;			// length of test vectors from Brentjens simulation
 
 
@@ -79,6 +76,8 @@ int main (int argc, char * const argv[]) {
 	vector<double> weights(N);	// weights
 	vector<double> freq(N);
 	vector<double> delta_freq(N);
+	vector<double> freq_low(N);
+	vector<double> freq_high(N);
 	vector<double> lambda_squared(N);
 	vector<double> delta_lambda_squared(N);
 	
@@ -96,6 +95,18 @@ int main (int argc, char * const argv[]) {
 	// Set weights
 	for(unsigned int i=0; i<N; i++)
 		weights[i]=1;							// all channels carry equal weight 1
+
+	// Frequency information from measurement
+	for(unsigned int i=0; i<N; i++)		// create Test data (only 96 channels though)
+	{
+		freq[i]=323937500.0+i*312500.0;	// from Brentjens mosaic.freq text file
+		delta_freq[i]=312500.0;
+
+		// compute freq_low and freq_high limits for delta_lambda_squareds
+		freq_low[i]=323937500.0+i*312500-0.5*312500.0;
+		freq_high[i]=323937500.0+i*312500+0.5*312500.0;
+	}
+
 		
 	
 	// Load simulated Brentjens data from file
@@ -105,9 +116,15 @@ int main (int argc, char * const argv[]) {
 	rmsf=rm.inverseFourier(phis, intensities, lambda_squared, weights, delta_lambda_squared, 0);
 	rm.writeRMtoFile(phis, rmsf, "rmpolBrentjens.dat");
 	
-	// URGENT: need to verify with above deltaLambdas computation of RMSF!
+	// need to verify with above deltaLambdas computation of RMSF!
 	rmsf=rm.RMSF(phis, lambda_squared, weights, delta_lambda_squared);
-	rm.writeRMtoFile(phis, rmsf, "rmsf.dat");		// debug write RMSF to file
+	rm.writeRMtoFile(phis, rmsf, "rmsf.dat");				// debug write RMSF to file
+
+	// verify with frequencies and delta frequencies computation of RMSF!
+	vector<complex<double> > rmsffreq(N);
+
+	rmsffreq=rm.RMSFfreq(phis, freq, weights, delta_freq);
+	rm.writeRMtoFile(phis, rmsf, "rmsffreq.dat");		// debug write RMSF to file
 
 	// Open Image and set parameters
 	dalFITS fitsimage("Leiden_GEETEE_CS1_1.FITS", READONLY);
@@ -127,26 +144,10 @@ int main (int argc, char * const argv[]) {
 	// create a rmCube object with an associated two dimensional buffer
 	rmCube FaradayCube(1024, 1024, 100, 5.0);
 	FaradayCube.setFaradayDepths(-100, 100, 10); // Set up Faraday depths to be probed
-	// Test file read functions
-	freq=FaradayCube.readFrequenciesAndDeltaFrequencies("frequenciesDelta.txt", delta_freq);
-
-
-	// Generate Rectangular pulse in f (real)
-
-	
-	for(i=0; i<weights.size(); i++)
-	{
-	  weights[i]=1.0;	// weight them all equally
-	}
 	
 	
 	//fitsimage.readPlane(buffer, 1);
 	
-	
-	// call inverseFourier with phi=5
-	for(i=0; i<N; i++)
-	{
-	}
 	
 	#ifdef _debug
 	cout << "Finished: " << filename_Q << "!\n";	// Debug output
