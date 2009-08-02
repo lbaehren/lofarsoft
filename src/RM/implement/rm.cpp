@@ -1,13 +1,13 @@
 /*! Implementation of rm class methods
 
-    Author:		Sven Duscha (sduscha@mpa-garching.mpg.de)
-    Date:		18-12-2008
-    Last change:	24-06-2009
+    Author:			Sven Duscha (sduscha@mpa-garching.mpg.de)
+    Date:			18-12-2008
+    Last change:	02-08-2009
 */
 
 
-#include <iostream>				// C++/STL iostream
-#include <fstream>				// file stream I/O
+//#include <iostream>				// C++/STL iostream
+//#include <fstream>				// file stream I/O
 #include <math.h>				// mathematics library
 #include <string.h>
 #include <assert.h>
@@ -1035,15 +1035,16 @@ vector<double> rm::rmErrorBayes(vector<complex<double> > &intensity, vector<doub
 }
 
 
+// Now (02.08.2009) all I/O functions are in the rmio class
 
-
-/*!
-  \brief Read the distribution of measured frequencies from a text file
+///*!
+//  \brief Read the distribution of measured frequencies from a text file
   
-  \param filename -- name of txt file with frequency distribution
+//  \param filename -- name of txt file with frequency distribution
 
-  \return frequencies -- vector with frequencies
-*/
+// \return frequencies -- vector with frequencies
+//*/
+/*
 vector<double> rm::readFrequencies(const std::string &filename)
 {
   vector<double> frequencies;		// hold list of lambda squareds
@@ -1086,16 +1087,17 @@ vector<double> rm::readFrequencies(const std::string &filename)
 
   return frequencies;	 // return frequencies vector
 }
-
-
-/*!
-  \brief Read the distribution of measured frequencies from a text file
-  
-  \param filename -- name of txt file with frequency distribution
-  \param deltafreqs - vector to take delta frequencies (computed from difference)
-
-  \return frequencies -- vector with frequencies
 */
+
+///*!
+//  \brief Read the distribution of measured frequencies from a text file
+//  
+//  \param filename -- name of txt file with frequency distribution
+//  \param deltafreqs - vector to take delta frequencies (computed from difference)
+//
+//  \return frequencies -- vector with frequencies
+//*/
+/*
 vector<double> rm::readFrequenciesDiffFrequencies(const std::string &filename, vector<double> &deltafreqs)
 {
   vector<double> frequencies;		// hold list of lambda squareds
@@ -1148,16 +1150,17 @@ vector<double> rm::readFrequenciesDiffFrequencies(const std::string &filename, v
 
   return frequencies;	 // return frequencies vector
 }
-
-
-
-/*!
-  \brief Read the distribution of measured lambda squareds from a text file
-  
-  \param filename -- name of txt file with lambda squared distribution
-
-  \return lambdaSquareds -- vector with lambda squareds
 */
+
+
+///*!
+//  \brief Read the distribution of measured lambda squareds from a text file
+// 
+//  \param filename -- name of txt file with lambda squared distribution
+//
+//  \return lambdaSquareds -- vector with lambda squareds
+//*/
+/*
 vector<double> rm::readLambdaSquareds(const std::string &filename)
 {
   vector<double> lambdaSquareds;	// hold list of lambda squareds
@@ -1200,17 +1203,18 @@ vector<double> rm::readLambdaSquareds(const std::string &filename)
 
   return lambdaSquareds;	 // return frequencies vector
 }
-
-
-
-/*!
-  \brief Read the distribution of measured lambdaSquareds AND deltaLambdaSquareds from a text file
-  
-  \param filename - name of txt file with lambda squared distribution
-  \param deltaFrequencies - vector to keep delta Frequencies
-
-  \return lambdaSquareds - vector with frequencies and delta frequencies
 */
+
+
+///*!
+//  \brief Read the distribution of measured lambdaSquareds AND deltaLambdaSquareds from a text file
+//  
+//  \param filename - name of txt file with lambda squared distribution
+//  \param deltaFrequencies - vector to keep delta Frequencies
+//
+//  \return lambdaSquareds - vector with frequencies and delta frequencies
+//*/
+/*
 vector<double> rm::readFrequenciesAndDeltaFrequencies(const std::string &filename, vector<double> &deltaFrequencies)
 {
   double frequency=0;			// individual frequency read per line
@@ -1259,16 +1263,17 @@ vector<double> rm::readFrequenciesAndDeltaFrequencies(const std::string &filenam
 
   return frequencies;	  // return frequencies vector
 }
-
-
-/*!
-  \brief Read the distribution of measured lambdaSquareds AND deltaLambdaSquareds from a text file
-  
-  \param filename - name of txt file with lambda squared and delta lambda squared distribution
-  \param deltaLambdaSquareds - vector with delta lambda squareds
-
-  \return lambdaSquareds - vector with lambda squareds
 */
+
+///*!
+//  \brief Read the distribution of measured lambdaSquareds AND deltaLambdaSquareds from a text file
+//  
+//  \param filename - name of txt file with lambda squared and delta lambda squared distribution
+//  \param deltaLambdaSquareds - vector with delta lambda squareds
+//
+//  \return lambdaSquareds - vector with lambda squareds
+//*/
+/*
 vector<double> rm::readLambdaSquaredsAndDeltaSquareds(const std::string &filename,   vector<double> &deltaLambdaSquareds)
 {
   vector<double> lambdaSquareds;		// lambda squareds to be returned
@@ -1325,16 +1330,17 @@ vector<double> rm::readLambdaSquaredsAndDeltaSquareds(const std::string &filenam
 
   return lambdaSquareds;	  // return frequencies vector
 }
-
-
-/*!
-	\brief Read lambda squareds, delta lambda squareds and complex data vector from a text file
-	
-	\param &filename - name of text file with simulated polarized emission data
-	\param &lambdasquareds - vector to store lambda squared values in
-	\param &delta_lambda_squareds - vector to store delta lambda squared values in
-	\param &intensities				-	vector<complex<double> > to store complex polarized intensities
 */
+
+///*!
+//	\brief Read lambda squareds, delta lambda squareds and complex data vector from a text file
+//	
+//	\param &filename - name of text file with simulated polarized emission data
+//	\param &lambdasquareds - vector to store lambda squared values in
+//	\param &delta_lambda_squareds - vector to store delta lambda squared values in
+//	\param &intensities				-	vector<complex<double> > to store complex polarized intensities
+//*/
+/*
 void rm::readSimDataFromFile(const std::string &filename, vector<double> &lambdasquareds, vector<double> &delta_lambda_squareds, vector<complex<double> > &intensities)
 {
 	ifstream infile(const_cast<const char*>(filename.c_str()), ifstream::in);		// file with lambda squareds
@@ -1377,15 +1383,16 @@ void rm::readSimDataFromFile(const std::string &filename, vector<double> &lambda
 	
 	infile.close();
 }
-
-
-/*!
-  \brief Write a vector (RM) out to file on disk (mainly for debugging)
-  
-  \param rm - vector containing data (real double) to write to file
-  \param filename - name of file to create or append to
-  \param mode - write mode: overwrite, append
 */
+
+///*!
+//  \brief Write a vector (RM) out to file on disk (mainly for debugging)
+//  
+//  \param rm - vector containing data (real double) to write to file
+//  \param filename - name of file to create or append to
+//  \param mode - write mode: overwrite, append
+//*/
+/*
 void rm::writeRMtoFile(vector<double> rm, const std::string &filename)
 {
   unsigned int i=0;	// loop variable
@@ -1400,14 +1407,15 @@ void rm::writeRMtoFile(vector<double> rm, const std::string &filename)
 
   outfile.flush();					// flush output file
 }
-
-
-/*!
-  \brief Write a vector (RM) out to file on disk (mainly for debugging)
-  
-  \param rm - vector containing data (real double) to write to file
-  \param filename - name of file to create or append to
 */
+
+///*!
+//  \brief Write a vector (RM) out to file on disk (mainly for debugging)
+//  
+//  \param rm - vector containing data (real double) to write to file
+//  \param filename - name of file to create or append to
+//*/
+/*
 void rm::writeRMtoFile(vector<complex<double> > rm, const std::string &filename)
 {
   ofstream outfile(const_cast<const char *>(filename.c_str()), ofstream::out);
@@ -1421,15 +1429,16 @@ void rm::writeRMtoFile(vector<complex<double> > rm, const std::string &filename)
 
   outfile.flush();						// flush output file
 }
-
-
-/*!
-  \brief Write a vector (RM) out to file on disk (mainly for debugging)
-  
-  \param lambdasq - vector containing the lambda squared wavelengths
-  \param rm - vector containing data (real double) to write to file
-  \param filename - name of file to create or append to
 */
+
+///*!
+//  \brief Write a vector (RM) out to file on disk (mainly for debugging)
+//  
+//  \param lambdasq - vector containing the lambda squared wavelengths
+//  \param rm - vector containing data (real double) to write to file
+//  \param filename - name of file to create or append to
+//*/
+/*
 void rm::writeRMtoFile(vector<double> &lambdasq, vector<complex<double> > &rm, const std::string &filename)
 {
   if(lambdasq.size()!=rm.size())
@@ -1447,3 +1456,4 @@ void rm::writeRMtoFile(vector<double> &lambdasq, vector<complex<double> > &rm, c
 
   outfile.flush();						// flush output file
 }
+*/

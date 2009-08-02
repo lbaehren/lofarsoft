@@ -3,9 +3,9 @@
   
   \ingroup RM
   
-  \brief Brief description for class rm
+  \brief Rotation Measure algorithms class
   
-  \author Sven Duscha
+  \author Sven Duscha (sduscha@mpa-garching.mpg.de)
   
   \date 28.01.09.
   
@@ -213,7 +213,7 @@ public:
   // Read frequency / lambda squared distributions from text (or later FITS/HDF5) files
   //
   //**************************************************************************************
-
+/* Now in rmio.h
   //! read frequency distribution from a text file
   vector<double> readFrequencies(const std::string &);
 
@@ -240,7 +240,7 @@ public:
 
   //! Write the lambda squareds ann the complex vector rm out to a file
   void writeRMtoFile(vector<double> &lambdasq, vector<complex<double> > &rm, const std::string &filename);
-
+*/
 
   // Atmospheric correction of RM (contribution through atmosphere)
   // ??

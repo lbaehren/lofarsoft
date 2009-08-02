@@ -30,9 +30,10 @@
 #define RM_CUBE_H
 
 #include "rm.h"
+#include "rmio.h"
 #include <vector>
 
-class rmCube : public rm
+class rmCube : public rm , public rmio
 {
   private:
     int xSize;		//!> horizontal size in pixels
@@ -59,22 +60,22 @@ class rmCube : public rm
     std::string rmAlgorithm;					//!> algorithm used to compute RM
     std::string errorEstimationAlgorithm;	//!> algorithm used for error estimation
 
-    double *buffer; 			//!> pointer to buffer for computed Faraday depths
-    vector<int> bufferDimensions;	//!> dimensions of buffer (line, tile, plane,...)
+    double *buffer; 									//!> pointer to buffer for computed Faraday depths
+    std::vector<int> bufferDimensions;			//!> dimensions of buffer (line, tile, plane,...)
   
     // Keep variables that do not need to be computed for every single RM
-    vector<double> lambdaSqs;			//!> lambda squareds of channels
-    vector<double> deltaLambdaSqs;	//!> delta lambda squareds that belong to RM cube input image
-    vector<double> weights;			//!> weighting factors for channels
-    std::string weightingAlgorithm;	//!> algorithm used to compute weights
-    vector<complex<double> > rmsf;	//!> Rotation Measure Spread Function
+    std::vector<double> lambdaSqs;				//!> lambda squareds of channels
+    std::vector<double> deltaLambdaSqs;		//!> delta lambda squareds that belong to RM cube input image
+    std::vector<double> weights;					//!> weighting factors for channels
+    std::string weightingAlgorithm;				//!> algorithm used to compute weights
+    std::vector<std::complex<double> > rmsf;	//!> Rotation Measure Spread Function
   
   public:
     rmCube();					//!> constructor without initial values
     rmCube(int x, int y, int faradaySize);	//!> default constructor with dimensions
     //! construct a rmCube from given faradaySize and stepsize
     rmCube(int x, int y, int faradaySize, double stepsize);
-    rmCube(int, int, vector<double>); 	//!> constructor giving individual faradayDepths vector
+    rmCube(int, int, std::vector<double>); 	//!> constructor giving individual faradayDepths vector
 
     ~rmCube();					//!> destructor
 
@@ -104,8 +105,8 @@ class rmCube : public rm
 
     double getFaradayLow();			//!> get the lower limit of Faraday depth of the Faraday cube
     double getFaradayHigh();			//!> set the higher limit of Faraday depth of the Faraday cube
-    vector<double> getFaradayDepths();		//!> get a vector of Faraday Depths in the Faraday cube
-    void setFaradayDepths(vector<double> &);	//!> set Faraday depths of Cube
+    std::vector<double> getFaradayDepths();		//!> get a vector of Faraday Depths in the Faraday cube
+    void setFaradayDepths(std::vector<double> &);	//!> set Faraday depths of Cube
     void setFaradayDepths(double low, double high, double stepsize); //!> set Faraday depths of Cube
     void setFaradayLow(double faradayLow);	//!> set the lower limit of Faraday depth of the Faraday cube
     void setFaradayHigh(double faradayHigh);	//!> set the higher limit of Faraday depth of the Faraday cube
@@ -115,26 +116,26 @@ class rmCube : public rm
     void createBufferPlane();			//!> create buffer for one Faraday plane
     void createBufferCube();			//!> create buffer for the whole cube
 
-    vector<int> getBufferDimensions();			//!> get dimensions of buffer
-    void setBufferDimensions(vector<int> &dimensions);	//!> set dimensions of buffer (i.e. plane, cube)
+    std::vector<int> getBufferDimensions();			//!> get dimensions of buffer
+    void setBufferDimensions(std::vector<int> &dimensions);	//!> set dimensions of buffer (i.e. plane, cube)
  
-    std::string getWeightingAlgorithm();	//!> get weihting Algorithm
-    void setWeightingAlgorithm(std::string &);	//!> set weighting Algorithm
+    std::string getWeightingAlgorithm();					//!> get weihting Algorithm
+    void setWeightingAlgorithm(std::string &);			//!> set weighting Algorithm
  
-    std::string getRMAlgorithm();		//!> get algorithm used to compute cube
-    void setRMAlgorithm(const std::string &);	//!> set algorithm used to compute cube
+    std::string getRMAlgorithm();							//!> get algorithm used to compute cube
+    void setRMAlgorithm(const std::string &);			//!> set algorithm used to compute cube
  
-    vector<double> getLambdaSqs();		//!> get lambda squareds
-    void setLambdaSqs(vector<double> &);	//!> set lambda squareds
+    std::vector<double> getLambdaSqs();					//!> get lambda squareds
+    void setLambdaSqs(vector<double> &);					//!> set lambda squareds
  
-    vector<double> getDeltaLambdaSqs();		//!> get delta lambda squareds
-    void setDeltaLambdaSqs(vector<double> &);	//!> set delta lambda squareds
+    std::vector<double> getDeltaLambdaSqs();				//!> get delta lambda squareds
+    void setDeltaLambdaSqs(std::vector<double> &);		//!> set delta lambda squareds
  
-    vector<double> getWeights();		//!> get weights of cube frequencies
-    void setWeights(vector<double> &);		//!> set weights of cube frequencies
+    std::vector<double> getWeights();						//!> get weights of cube frequencies
+    void setWeights(vector<double> &);						//!> set weights of cube frequencies
  
-    vector<complex<double> > getRMSF();		//!> get RMSF
-    void computeRMSF(const vector<double> &, const vector<double> &, bool);	//!> compute RMSF with inherited method from class rm
+    std::vector<std::complex<double> > getRMSF();		//!> get RMSF
+    void computeRMSF(const std::vector<double> &, const std::vector<double> &, bool);	//!> compute RMSF with inherited method from class rm
 
 	 // High-level RM compute functions
 	 void computePlane(double faradayDepth);		// compute one Faraday plane for faradayDepth
