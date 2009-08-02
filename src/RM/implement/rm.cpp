@@ -736,58 +736,6 @@ vector<double> rm::forwardFourierU(const vector<double> &lambda_sqs,
 }
 
 
-
-/*!
-	\brief Perform RM clean on a line-of-sight Q or U only vector down to threshold
-	
-	\param rm - line-of-sight vector with intensity in Q or U
-	\param threshold - threshold at which RM clean iterations stop
-	
-	\return int - number of clean iterations performed
-*/
-int rm::RMClean(vector<double> &rm, double threshold)
-{
-	int numiterations=0;
-	
-	
-	return numiterations;
-}
-
-
-/*!
-	\brief Perform RM clean on a line-of-sight P=Q + iU vector down to threshold
-	
-	\param rm - line-of-sight vector with complex polarized intensity P
-	\param threshold - threshold at which RM clean iterations stop (same for Q and U)
-	
-	\return int - number of clean iterations performed
-*/
-int rm::RMClean(complex<vector<double> > &complxrm, double threshold)
-{
-	int numiterations=0;
-	
-	
-	return numiterations;	
-}
-
-
-/*!
-	\brief Perform RM clean on a line-of-sight P=Q + iU vector down to complex threshold
-	
-	\param rm - line-of-sight vector with complex polarized intensity P
-	\param threshold - threshold at which RM clean iterations stop (complex threshold for Q and U separately)
-	
-	\return int - number of clean iterations performed
-*/
-int rm::RMClean(complex<vector<double> > &complxrm, complex<double> threshold)
-{
-	int numiterations=0;
-	
-	
-	return numiterations;	
-}
-
-
 /*!
   \brief Compute the Rotation Measure Spread Function
 
