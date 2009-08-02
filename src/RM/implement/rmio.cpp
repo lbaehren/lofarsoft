@@ -71,7 +71,8 @@ vector<double> rmio::readFrequencies(const std::string &filename)
 
   \return frequencies -- vector with frequencies
 */
-vector<double> rmio::readFrequenciesDiffFrequencies(const std::string &filename, vector<double> &deltafreqs)
+vector<double> rmio::readFrequenciesDiffFrequencies(	const std::string &filename, 
+																		vector<double> &deltafreqs)
 {
   vector<double> frequencies;		// hold list of lambda squareds
   double frequency=0;				// individual lambda squared read per line
@@ -186,7 +187,8 @@ vector<double> rmio::readLambdaSquareds(const std::string &filename)
 
   \return lambdaSquareds - vector with frequencies and delta frequencies
 */
-vector<double> rmio::readFrequenciesAndDeltaFrequencies(const std::string &filename, vector<double> &deltaFrequencies)
+vector<double> rmio::readFrequenciesAndDeltaFrequencies(	const std::string &filename, 
+																			vector<double> &deltaFrequencies)
 {
   double frequency=0;			// individual frequency read per line
   double deltaFrequency=0;		// individual delta frequency read per line  
@@ -244,7 +246,8 @@ vector<double> rmio::readFrequenciesAndDeltaFrequencies(const std::string &filen
 
   \return lambdaSquareds - vector with lambda squareds
 */
-vector<double> rmio::readLambdaSquaredsAndDeltaSquareds(const std::string &filename,   vector<double> &deltaLambdaSquareds)
+vector<double> rmio::readLambdaSquaredsAndDeltaSquareds(	const std::string &filename,  
+ 																			vector<double> &deltaLambdaSquareds)
 {
   vector<double> lambdaSquareds;		// lambda squareds to be returned
   double lambdaSq=0;						// individual frequency read per line
@@ -310,7 +313,10 @@ vector<double> rmio::readLambdaSquaredsAndDeltaSquareds(const std::string &filen
 	\param &delta_lambda_squareds - vector to store delta lambda squared values in
 	\param &intensities				-	vector<complex<double> > to store complex polarized intensities
 */
-void rmio::readSimDataFromFile(const std::string &filename, vector<double> &lambdasquareds, vector<double> &delta_lambda_squareds, vector<complex<double> > &intensities)
+void rmio::readSimDataFromFile(	const std::string &filename, 
+											vector<double> &lambdasquareds, 
+											vector<double> &delta_lambda_squareds, 
+											vector<complex<double> > &intensities)
 {
 	ifstream infile(const_cast<const char*>(filename.c_str()), ifstream::in);		// file with lambda squareds
 	
@@ -405,7 +411,9 @@ void rmio::writeRMtoFile(vector<complex<double> > rm, const std::string &filenam
   \param rm - vector containing data (real double) to write to file
   \param filename - name of file to create or append to
 */
-void rmio::writeRMtoFile(vector<double> &lambdasq, vector<complex<double> > &rm, const std::string &filename)
+void rmio::writeRMtoFile(	vector<double> &lambdasq, 
+									vector<complex<double> > &rm, 
+									const std::string &filename)
 {
   if(lambdasq.size()!=rm.size())
 	 throw "rmio::writeRMtoFile lambdasq and rm vector differ in size";
@@ -418,6 +426,61 @@ void rmio::writeRMtoFile(vector<double> &lambdasq, vector<complex<double> > &rm,
     outfile << rm[i].real() << "   ";			// write real part of data
 	 outfile << rm[i].imag();						// write imaginary part of data
     outfile << endl;									// add endl
+  }
+
+  outfile.flush();						// flush output file
+}
+
+
+/*!
+	\brief Write complex polarized intensities along side frequencies to file (generated from forward Transform)
+
+	\param frequencies - vector containing frequencies the polarized intensities are given
+	\param polint - vector containing complex polarized intensities
+	\param filename - name of text file to write to
+*/
+void rmio::writePolIntToFile(	std::vector<double> &frequencies, 
+										std::vector<std::complex<double> > &polint, 
+										const std::string &filename)
+{
+  if(frequencies.size()!=polint.size())
+	 throw "rmio::writePolIntToFile frequencies and polint vector differ in size";
+
+  ofstream outfile(const_cast<const char *>(filename.c_str()), ofstream::out);
+
+  for(unsigned int i=0; i<polint.size(); i++)		// loop over vector
+  {
+	 outfile << frequencies[i] << "   ";		// write lambda squareds 
+    outfile << polint[i].real() << "   ";		// write real part of data
+	 outfile << polint[i].imag();					// write imaginary part of data
+    outfile << endl;									// add endl
+  }
+
+  outfile.flush();									// flush output file
+}
+
+
+/*!
+	\brief Write single polarized intensities (Q or U) along side frequencies to file (generated from forward Transform)
+
+	\param frequencies - vector containing frequencies the polarized intensities are given
+	\param intensities - vector containing single polarized intensities (Q or U)
+	\param filename - name of text file to write to
+*/
+void rmio::writeIntToFile(	std::vector<double> &frequencies, 
+										std::vector<double> &intensities, 
+										const std::string &filename)
+{
+  if(frequencies.size()!=intensities.size())
+	 throw "rmio::writePolIntToFile frequencies and polint vector differ in size";
+
+  ofstream outfile(const_cast<const char *>(filename.c_str()), ofstream::out);
+
+  for(unsigned int i=0; i<intensities.size(); i++)		// loop over vector
+  {
+	 outfile << frequencies[i] << "   ";					// write lambda squareds 
+    outfile << intensities[i];								// write real part of data
+    outfile << endl;												// add endl
   }
 
   outfile.flush();						// flush output file

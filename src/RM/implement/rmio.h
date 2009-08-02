@@ -56,27 +56,45 @@ public:
   std::vector<double> readLambdaSquareds(const std::string &);
 
   //! read frequencies from file and compute delta frequencies from differences
-  std::vector<double> readFrequenciesDiffFrequencies(const std::string &filename, std::vector<double> &deltafreqs);
+  std::vector<double> readFrequenciesDiffFrequencies(	const std::string &filename, 
+																		std::vector<double> &deltafreqs);
 
   //! read frequencies and delta frequencies from a text file
-  std::vector<double> readFrequenciesAndDeltaFrequencies(const std::string &, std::vector<double> &);
+  std::vector<double> readFrequenciesAndDeltaFrequencies(const std::string &, 
+																			std::vector<double> &);
 
   //! read lambda squareds and delta squareds from a text file
-  std::vector<double> readLambdaSquaredsAndDeltaSquareds(const std::string &, std::vector<double> &);
+  std::vector<double> readLambdaSquaredsAndDeltaSquareds(const std::string &, 
+																			std::vector<double> &);
 
   //! read complete set of simulated data: lambdasq, delta lambda sq and complex intensity from file
-  void readSimDataFromFile(const std::string &filename, std::vector<double> &lambdasquareds, std::vector<double> &delta_lambda_squareds, std::vector<std::complex<double> > &intensities);
+  void readSimDataFromFile(const std::string &filename, 
+									std::vector<double> &lambdasquareds, 
+									std::vector<double> &delta_lambda_squareds, 
+									std::vector<std::complex<double> > &intensities);
 
   //! Write a vector out to file
-  void writeRMtoFile(std::vector<double>, const std::string &filename);
+  void writeRMtoFile(std::vector<double>, 
+							const std::string &filename);
 
   //! Write a complex vector out to a file
-  void writeRMtoFile(std::vector<std::complex<double> > rm, const std::string &filename);
+  void writeRMtoFile(std::vector<std::complex<double> > rm, 
+							const std::string &filename);
 
   //! Write the lambda squareds ann the complex vector rm out to a file
-  void writeRMtoFile(std::vector<double> &lambdasq, std::vector<std::complex<double> > &rm, const std::string &filename);
+  void writeRMtoFile(std::vector<double> &lambdasq, 
+							std::vector<std::complex<double> > &rm, 
+							const std::string &filename);
 	
-	
+  //! Write single polarized intensity (Q or U) to file along with frequencies
+  void writePolIntToFile(	std::vector<double> &frequencies, 
+								 	std::vector<std::complex<double> > &polint, 
+									const std::string &filename);
+
+  //! Write complex polarized intensity to file along with frequencies
+  void writeIntToFile(	std::vector<double> &frequencies, 
+								std::vector<double> &intensities, 
+								const std::string &filename);
 };
 
 #endif		// _RMIO_H_
