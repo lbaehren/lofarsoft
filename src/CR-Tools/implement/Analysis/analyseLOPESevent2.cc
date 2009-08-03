@@ -1027,6 +1027,239 @@ namespace CR { // Namespace CR -- begin
   }
 
 
+//---------------------------------------------------------------------------------------------------
+
+
+ bool analyseLOPESevent2::simpleSkymap (const string& filename,
+                                        const int& noBlocks,
+                                        const unsigned int& startBlock,
+                                        const unsigned int& endBlock,
+                                        const double& az_start,
+                                        const double& az_stop,
+                                        const double& az_d,
+                                        const double& ze_start,
+                                        const double& ze_stop,
+                                        const double& ze_d,
+                                        Vector<bool> AntennaSelection,
+                                        const double& distance,
+                                        const string& beamtype,
+					const double& hanning)
+ {
+   bool status=1;
+   try {
+     cout<<"Generating simple skymap..."<<endl;
+     CompleteBeamPipe_p = static_cast<CompletePipeline*>(beamPipe_p);
+     CompleteBeamPipe_p->InitEvent(beamformDR_p);
+     CompleteBeamPipe_p->setPhaseCenter(0,0);
+     int newblocksize = lev_p->blocksize() / noBlocks;
+     beamformDR_p->setBlocksize(newblocksize);
+     beamformDR_p->setHanningFilter(hanning);
+     cout<<"blocksize: "<<beamformDR_p->blocksize()<<endl;
+     string fname = filename;
+     fname.erase(fname.find_last_of("."), 6);
+     fname.append("-skymap");
+     beamformDR_p->setBlock(startBlock);
+
+     while( beamformDR_p->block() <= endBlock)
+     {
+       cout<<"Processing block "<< beamformDR_p->block()<<" ["<< beamformDR_p->block()-startBlock+1 << "/"<<endBlock-startBlock+1<<"]"<<endl;
+       cout<<"startTime: " << beamformDR_p->timeValues()[0]<<endl;
+       stringstream str;
+       str.clear();
+       str<< beamformDR_p->block();
+       string buf = str.str();
+       if(buf.length()==1) buf="000"+buf;
+       if(buf.length()==2) buf="00"+buf;
+       if(buf.length()==3) buf="0"+buf;
+       string ofname = fname+"-"+buf+".dat";
+       string psfname = fname+"-"+buf+".eps";
+       ofstream fout(ofname.c_str());
+
+       Vector<Double> power;
+       double max=0, min=0, pix;
+
+       // loop over all pixels
+       for(float it_ze=ze_start; it_ze<=ze_stop; it_ze+=ze_d)
+       {
+         float it_az=az_start;
+         while( it_az<=az_stop-az_d)
+         {
+           cout<<'\xd';
+           cout<<"["<<it_ze<<"]["<<it_az<<"]     ";
+           CompleteBeamPipe_p->setDirection(it_az, 90 - it_ze, distance);
+           if(beamtype.compare("CC")==0) power = CompleteBeamPipe_p->GetCCBeam(beamformDR_p, AntennaSelection, "ANY").copy();
+           else if (beamtype.compare("P")==0) power = CompleteBeamPipe_p->GetPBeam(beamformDR_p, AntennaSelection, "ANY").copy();
+           else if (beamtype.compare("X")==0) power = CompleteBeamPipe_p->GetXBeam(beamformDR_p, AntennaSelection, "ANY").copy();
+           else
+           {
+             cerr<<"Unknown beamtype: "<<beamtype<<endl;
+             return 0 ;
+           }
+           pix=mean(power);
+           fout<<it_az<<"  "<<it_ze<<"   "<<pix<<endl;
+           it_az += az_d;
+	   if(pix>max) max=pix;
+	   if(pix<min) min=pix;
+         }
+       }
+       fout.close();
+       cout<<'\xd'<<"frame finished...   \nWriting ps-file..."<<endl;
+       ifstream fin(ofname.c_str());
+ 
+       //generate the postscript file...
+       ofstream psout(psfname.c_str());
+       // writing ps-header...
+       psout<<"%!PS-Adobe-2.0 EPSF-2.0\n"
+           <<"%%DocumentFonts: Courier-Bold Helvetica-Bold\n"
+           <<"%%BoundingBox: -320 -340 360 310\n"
+           <<"%%Title: "<< psfname<<endl
+           <<"%%EndComments\n"
+           <<"gsave\n"
+           <<"/PSDict 200 dict def\n"
+           <<"PSDict begin\n"
+           <<"/a {arc} def\n"
+           <<"/s {stroke} def\n"
+           <<"/l {lineto} def\n"
+           <<"/m {moveto} def\n"
+           <<"/n {newpath} def\n"
+           <<"/rgb {setrgbcolor} def\n"
+           <<"/c {closepath} def\n"
+           <<"/f {fill} def\n"
+           <<"/gs {gsave} def\n"
+           <<"/gr {grestore} def\n"
+           <<"/cf {closepath fill} def\n"
+           <<"/lw {setlinewidth} def\n"
+           <<"end\n"
+           <<"PSDict begin\n"
+           <<"3 3 scale\n"
+           <<"0.1 lw \n\n";
+
+       double r=1,g=1,b=1;
+       float az, ze, ax, ay, x1, y1, x2, y2, x3, y3, x4, y4;
+	       
+       while(fin>>az>>ze>>pix)
+       {
+	psout.precision(3);
+        if(pix >=0)
+        {
+            if(pix <= 0.1 && pix >= 1.e-8)
+            {
+                r=1.-(8.+log10(pix))/7.;
+                g=1.-(8.+log10(pix))/7.;
+                b=1.-0.2*(8.+log10(pix))/7.;
+            }
+            else
+            {
+              if(pix> 0.1)
+              {
+                r=0;
+                g=0;
+                b=0.8;
+              }
+              if(pix< 1.e-8)
+              {
+                r=1;
+                g=1;
+                b=1;
+              }
+            }
+        }
+        else
+        {
+            if(pix >= -0.1 && pix <= -1.e-8)
+            {
+                r=1.-0.2*(8.+log10(-1.*pix))/7.;
+                g=1.-(8.+log10(-1.*pix))/7.;
+                b=1.-(8.+log10(-1.*pix))/7.;
+            }
+            else
+            {
+              if(pix< -0.1)
+              {
+                r=0.8;
+                g=0;
+                b=0.;
+              }
+              if(pix> -1.e-8)
+              {
+                r=1;
+                g=1;
+                b=1;
+              }
+            }
+        }
+
+
+           psout<<r<<" "<<g<<" "<<b<<" rgb ";
+           ax=-1.*ze*sin(az/180.*PI);
+           ay= ze*cos(az/180.*PI);
+           x1= ax+0.5*ze_d*sin(az/180.* PI) - (ze-ze_d/2.)*sin(az_d/2./180.* PI)*cos(az/180.* PI);
+           y1= ay-0.5*ze_d*cos(az/180.* PI) - (ze-ze_d/2.)*sin(az_d/2./180.* PI)*sin(az/180.* PI);
+           x2= ax+0.5*ze_d*sin(az/180.* PI) + (ze-ze_d/2.)*sin(az_d/2./180.* PI)*cos(az/180.* PI);
+           y2= ay-0.5*ze_d*cos(az/180.* PI) + (ze-ze_d/2.)*sin(az_d/2./180.* PI)*sin(az/180.* PI);
+           x3= ax-0.5*ze_d*sin(az/180.* PI) + (ze+ze_d/2.)*sin(az_d/2./180.* PI)*cos(az/180.* PI);
+           y3= ay+0.5*ze_d*cos(az/180.* PI) + (ze+ze_d/2.)*sin(az_d/2./180.* PI)*sin(az/180.* PI);
+           x4= ax-0.5*ze_d*sin(az/180.* PI) - (ze+ze_d/2.)*sin(az_d/2./180.* PI)*cos(az/180.* PI);
+           y4= ay+0.5*ze_d*cos(az/180.* PI) - (ze+ze_d/2.)*sin(az_d/2./180.* PI)*sin(az/180.* PI);
+           psout<<"n "<< x1<<" "<<y1<<" m "<< x2<<" "<<y2<<" l "<<x3<< " "<<y3<< " l "<< x4<<" "<<y4<<" l c gs f gr s\n";
+      }
+
+      // writing footer...
+     psout<<"0.000 0.000 0.800 rgb n 80 -55 m 85 -55 l 85 -50 l 80 -50 l 80 -55 l c gs f gr s\n"
+          <<"0.250 0.250 0.850 rgb n 80 -60 m 85 -60 l 85 -55 l 80 -55 l 80 -60 l c gs f gr s\n"
+          <<"0.500 0.500 0.900 rgb n 80 -65 m 85 -65 l 85 -60 l 80 -60 l 80 -65 l c gs f gr s\n"
+          <<"0.750 0.750 0.950 rgb n 80 -70 m 85 -70 l 85 -65 l 80 -65 l 80 -70 l c gs f gr s\n"
+          <<"1.000 1.000 1.000 rgb n 80 -75 m 85 -75 l 85 -70 l 80 -70 l 80 -75 l c gs f gr s\n"
+          <<"0.950 0.750 0.750 rgb n 80 -80 m 85 -80 l 85 -75 l 80 -75 l 80 -80 l c gs f gr s\n"
+          <<"0.900 0.500 0.500 rgb n 80 -85 m 85 -85 l 85 -80 l 80 -80 l 80 -85 l c gs f gr s\n"
+          <<"0.850 0.250 0.250 rgb n 80 -90 m 85 -90 l 85 -85 l 80 -85 l 80 -90 l c gs f gr s\n"
+          <<"0.800 0.000 0.000 rgb n 80 -95 m 85 -95 l 85 -90 l 80 -90 l 80 -95 l c gs f gr s\n";
+
+
+
+
+
+
+      psout.precision(2);
+      psout<<"0.0 0.0 0.0 rgb n 80 -50 m 85 -50 l 85 -95 l 80 -95 l 80 -50 l c s\n"
+           <<"0.0 0.0 0.0 rgb /Helvetica 5 selectfont\n"
+           <<"n 87 -47 m (CC-Beam: ) show\n"
+           <<"n 87 -55 m (1.e-1) show c n 87 -60 m (1.e-3) show c n 87 -65 m (1.e-5) show c\n"
+           <<"n 87 -70 m (1.e-7) show c n 87 -75 m (0.0) show c n 87 -80 m (-1.e-7) show c\n"
+           <<"n 87 -85 m (-1.e-5) show c n 87 -90 m (-1.e-3) show c n 87 -95 m (-1.e-1) show c\n";
+
+
+      psout<<"n -97 -110 m\n"
+           <<"0.0 0.0 0.0 rgb\n"
+           <<"/Helvetica 6 selectfont\n"
+           <<"("<<filename<<" - frame "<<buf<<"/"<< noBlocks<<") show c\n"
+           <<"n -2 92 m (N) show c\n"
+           <<"n -98 -3 m (E) show c\n"
+           <<"n -2 -98 m (S) show c\n"
+           <<"n 93 -3 m (W) show c\n"
+           <<"0.3 0.3 0.3 rgb 0.1 lw\n"
+           <<"n 0 0 "<< 90+0.5*ze_d <<" 0 360 a s\n"
+           <<"0 0 60 0 360 a s\n"
+           <<"0 0 30 0 360 a s\n"
+           <<-90-0.5*ze_d<<" 0 m  "<<90+0.5*ze_d<<" 0 l s\n"
+           <<"0 "<<-90-0.5*ze_d<<" m 0 "<< 90+0.5*ze_d<<" l s\n"
+           <<"grestore\n"
+           <<"end\n";
+       psout.close();
+       cout<<"finished writing of ps file...\n";
+
+
+       beamformDR_p->nextBlock();
+       CompleteBeamPipe_p->resetCachedFlag();
+       }
+
+   } catch (AipsError x) {
+     cerr << "analyseLOPESevent2::simpleSkymap: " << x.getMesg() << endl;
+     status=0;
+     }
+   return status;
+ }
+
 
 } // Namespace CR -- end
 

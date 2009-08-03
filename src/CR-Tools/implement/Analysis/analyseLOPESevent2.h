@@ -485,6 +485,42 @@ namespace CR { // Namespace CR -- begin
                                  const double& energy=0);
   };
 
+    /*!
+      /brief Generates a simple skymap 
+
+      \param filename   - the filename of the LOPES event
+      \param noBlocks   - number of blocks the event should be divided in
+      \param startBlock - number of the first block that should be used for the skymap (starting with 0)
+      \param endBlock   - number of the last block (if equal to startBlock only one frame is calculated)
+      \param az_start   - first value in azimuth range
+      \param az_stop    - upper boundary for azimuth range
+      \param az_d       - step width in azimuth
+      \param ze_start   - first value in zenith range
+      \param ze_stop    - upper boundary for zenith range
+      \param ze_d       - step width in zenith
+      \param AntennaSelection - boolean vector that indicates which antennas are activ
+      \param distance   - distance value that should be used for beamforming
+      \param beamtype   - type of calculated beam: "CC" (default), "P" or "X"
+      \param hanning    - alpha parameter of hanning filter, 0 means no filter is used
+    */
+
+    bool simpleSkymap (const string& filename,
+                       const int& noBlocks,
+                       const unsigned int& startBlock,
+                       const unsigned int& endBlock,
+                       const double& az_start,
+                       const double& az_stop,
+                       const double& az_d,
+                       const double& ze_start,
+                       const double& ze_stop,
+                       const double& ze_d,
+                       Vector<bool> AntennaSelection,
+                       const double& distance=10000.,
+                       const string& beamtype="CC",
+                       const double& hanning=0);
+
+  };
+
 } // Namespace CR -- end
 
 #endif /* HAVE_STARTOOLS */
