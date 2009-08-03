@@ -483,7 +483,6 @@ namespace CR { // Namespace CR -- begin
                                  const double& Xc=0,
                                  const double& Yc=0,
                                  const double& energy=0);
-  };
 
     /*!
       /brief Generates a simple skymap 
