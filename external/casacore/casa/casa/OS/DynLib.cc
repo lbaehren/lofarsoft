@@ -23,7 +23,12 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: DynLib.cc 20554 2009-03-31 03:22:03Z gervandiepen $
+//# $Id: DynLib.cc 20633 2009-06-15 10:14:55Z gervandiepen $
+
+//# For the time being assume that all systems have dlopen.
+#ifndef HAVE_DLOPEN
+# define HAVE_DLOPEN
+#endif
 
 //# Includes
 #include <casa/OS/DynLib.h>
@@ -37,8 +42,9 @@ using namespace std;
 namespace casa { //# NAMESPACE CASA - BEGIN
 
   DynLib::DynLib (const std::string& library,
+                  const std::string& prefix,
                   const std::string& funcName,
-                  Bool closeOnDestruction)
+                  bool closeOnDestruction)
     : itsHandle  (0),
       itsDoClose (closeOnDestruction)
   {
@@ -46,7 +52,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
     string ext;
     for (int i=0; i<4; ++i) {
       ext = (i%2==0 ? ".so" : ".dylib");
-      if (i == 2) pref = "libcasa_";
+      if (i == 2) pref = prefix;
       open (pref + library + ext);
       if (itsHandle) {
         break;
@@ -62,7 +68,14 @@ namespace casa { //# NAMESPACE CASA - BEGIN
                         ", but not its " + funcName + " function");
       }
       // Execute the register function.
-      reinterpret_cast<void(*)()>(initfunc)();
+      // We need to cast the void* from dlsym to a function pointer,
+      // a function without arguments returning void.
+      // This is not permitted as they are different kind of pointers,
+      // so the compiler might issue a warning.
+      // On RHEL4 gcc-3.4.6 gave an error for a reinterpret_cast,
+      // so we have to use a C-style cast.
+      ///      reinterpret_cast<void(*)()>(initfunc)();
+      ((void(*)())initfunc)();
     }
   }
 
@@ -86,7 +99,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
   void* DynLib::getFunc (const std::string& funcName)
   {
 #ifdef HAVE_DLOPEN
-    if (itsHandle) {
+    if (itsHandle ) {
       return dlsym (itsHandle, funcName.c_str());
     }
 #endif
