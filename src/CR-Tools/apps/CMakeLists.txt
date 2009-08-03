@@ -522,6 +522,35 @@ if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 endif (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 
 
+## -------------------------------------------------------------------
+## dynamicSpectrum
+
+if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
+
+  if (HAVE_PGPLOT OR HAVE_PLPLOT)
+    add_executable (dynamicSpectrum dynamicSpectrum.cc)
+    ## extra properties to take care of
+    if (APPLE)
+      set_target_properties (dynamicSpectrum
+        PROPERTIES
+        COMPILE_FLAGS "-fsigned-char -fno-common"
+        LINK_FLAGS "-bind_at_load"
+        )
+    endif (APPLE)
+    ## linker instructions
+    target_link_libraries (dynamicSpectrum
+      cr
+      ${STARTOOLS_LIBRARIES}
+      ${ROOT_LIBRARIES}
+      ${FFTW3_LIBRARIES}
+      ${POSTGRESQL_LIBRARIES}
+      )
+    ## installation instructions
+    list (APPEND cr_apps dynamicSpectrum)
+  endif (HAVE_PGPLOT OR HAVE_PLPLOT)
+
+endif (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
+
 
 ## -------------------------------------------------------------------
 
