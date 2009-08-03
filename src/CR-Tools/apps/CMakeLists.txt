@@ -503,6 +503,26 @@ if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 endif (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 
 
+##____________________________________________________________________
+## simpleSkymap
+
+if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
+  ## compiler instructions
+  add_executable (simpleSkymap simpleSkymap.cc)
+  ## linker instructions
+  target_link_libraries (simpleSkymap
+    cr
+     ${STARTOOLS_LIBRARIES}
+     ${ROOT_LIBRARIES}
+     ${FFTW3_LIBRARIES}
+     ${POSTGRESQL_LIBRARIES}
+    )
+  ## installation instructions
+  list (APPEND cr_apps simpleSkymap)
+endif (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
+
+
+
 ## -------------------------------------------------------------------
 
 ## Glish client programs
