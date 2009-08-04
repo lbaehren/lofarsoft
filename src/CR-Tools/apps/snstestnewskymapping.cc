@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id:: seftestlightningskymapping.cc 2009-07-13 swelles                $ |
+ | $Id:: snstestlightningskymapping.cc 2009-07-13 swelles                $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2006                                                    *
@@ -55,15 +55,15 @@ using CR::TimeFreq;
 
 #define HDF5_DISABLE_VERSION_CHECK 1
 /*!
-  \file seftestlightningskymapping.cc
+  \file snstestnewskymapping.cc
 
   \ingroup CR_Applications
 
-  \brief Test the Skymapper with a lightning event from different input files
+  \brief Test the Skymapper with different input files with multiple antennas
  
   \author Sander & Sef
  
-  \date 2009/07/13
+  \date 2009/08/04
 
   <h3>Synopsis</h3>
 
@@ -93,24 +93,63 @@ int  simpleImage(string const &infile,
   // Read input paramaters from infile
   
      //Opens for reading the file
-  ifstream b_file ("../../../src/CR-Tools/apps/snstestlightningskymapping.dat"); 
+  ifstream b_file ("../../../src/CR-Tools/apps/snstestnewskymapping.dat"); 
   
   int ninputfiles;
-  b_file >> ninputfiles;
+  int nantsinfile;
+  int nants=0;
   string pathname;
+  
+  b_file >> ninputfiles;
   b_file >> pathname;
   vector<string> inputfiles(ninputfiles);
-  CR::LOFAR_TBB **dr;
-  dr = new CR::LOFAR_TBB*[ninputfiles];
+  CR::LOFAR_TBB **drstart;
+  
+  drstart = new CR::LOFAR_TBB*[ninputfiles];
 #ifndef upload
   for(int i=0; i<ninputfiles; i++){
   	b_file>> inputfiles[i];
 	//cout<<endl<<i<<endl<<endl;
-  	dr[i] = new CR::LOFAR_TBB(pathname+inputfiles[i], blocksize);
+  	drstart[i] = new CR::LOFAR_TBB(pathname+inputfiles[i], blocksize);
+	nantsinfile = drstart[i]->fx().shape()[1];
+	nants+=nantsinfile;
+  }
+  cout<<"total number of antennas = "<<nants<<endl;
+	cout << "shape of drstart[0]->fx() = " << drstart[0]->fx().shape() << endl;
+  cout << "shape of drstart[0]->fft() = " << drstart[0]->fft().shape() << endl;
+	cout <<"drstart->fft for antenna "<<0<<" = "<<drstart[0]->fft()[0][0]<<endl;
+	cout <<"drstart->fft for antenna "<<1<<" = "<<drstart[0]->fft()[1][0]<<endl;
+
+  CR::LOFAR_TBB **dr;
+  dr = new CR::LOFAR_TBB*[nants];
+  int counter = 0;
+  for(int i=0; i<ninputfiles; i++){
+		nantsinfile = drstart[i]->fx().shape()[1];
+		for(int j=0; j<nantsinfile; j++){
+			Vector<Bool> antennasetter(nantsinfile);
+			antennasetter = False;
+			antennasetter[j]=True;
+			cout<<"antennasetter = "<<antennasetter<<endl;
+			cout<<"counter = "<<counter<<endl;
+		 	drstart[i]->setSelectedAntennas(antennasetter);
+			dr[counter] = drstart[i];
+			counter++;
+	}
   }
   
+	cout << "shape of dr[0] = " << dr[0]->shape() << endl;
+  cout << "shape of drstart[0]->fx() = " << drstart[0]->fx().shape() << endl;
+  cout << "shape of dr[0]->fx() = " << dr[0]->fx().shape() << endl;
+  cout << "shape of drstart[0]->fft() = " << drstart[0]->fft().shape() << endl;
+  cout << "shape of dr[0]->fft() = " << dr[0]->fft().shape() << endl;
 
-	
+	for(int i=0;i<nants;i++){
+		cout <<"dr->fft for antenna "<<i<<" = "<<dr[i]->fft()[0][0]<<endl;
+	}
+	cout <<"drstart->fft for antenna "<<0<<" = "<<drstart[0]->fft()[0][0]<<endl;
+	//cout <<"drstart->fft for antenna "<<1<<" = "<<drstart[0]->fft()[1][0]<<endl;
+
+  
   int pixels;
   float increment;
   int depth;
@@ -165,7 +204,7 @@ int  simpleImage(string const &infile,
   b_file>> ncoord;
   b_file>> coordstr;
   
-  //cout<<"coordstr = " <<coordstr<<endl;
+  cout<<"ncoord = " <<ncoord<<" (should be 3)"<<endl;
   
   start[0]=ndim;
   start[1]=startfreq;
@@ -198,39 +237,37 @@ int  simpleImage(string const &infile,
     
     //________________________________________________________
     cout << "testlightningskymapping::simpleImage reading in event and setting up the pipeline"  << endl;
-     
-	cout << "shape of dr[0] = " << dr[0]->shape() << endl;
-	cout << "shape of dr[0]->fx() = " << dr[0]->fx().shape() << endl;
+	
     CR::CRinvFFT pipeline;
-    Record obsrec;
+/*    Record obsrec;
     obsrec.define("LOPES",caltable_lopes);
     pipeline.SetObsRecord(obsrec);
     for(int i=0; i<ninputfiles; i++){
 	pipeline.InitEvent(dr[i]);
 	}
-	
-	// correct for the offset relative to antenna 0. Be aware that reading from the beginning of the file may give problems.
-	 std::vector< int > offset(ninputfiles);
-	 for(int i=0; i<ninputfiles; i++){
-	 offset[i] = dr[i]->sample_number()[0];
-	 }
-     std::vector<int> offset1(ninputfiles);
-	 for(int i=0; i<ninputfiles; i++){
-	 	offset1[i] = -1*offset[i] + offset[ninputfiles-1];
-	}
-	cout<<"offset = "<<offset<<endl;
-	cout<<"offset1 = "<<offset1<<endl;
- 	cout<<"shift before = "<<dr[3]->shift(0)<<endl;
-	dr[0]->setBlock(230000);
-	cout << "somewhere in dr = " << dr[3]->fx()[0][6] << endl;
-	
-	for(int i=0; i<ninputfiles; i++){
-	dr[i]->setShift(offset1[i]);
-	}
-	cout<<"shift after = "<<dr[3]->shift(0)<<endl;
-	dr[0]->setBlock(230000);
-	cout << "somewhere in dr = " << dr[3]->fx()[0][6] << endl;
-	
+*/	
+		// correct for the offset relative to antenna 0. Be aware that reading from the beginning of the file may give problems.
+		std::vector< int > offset(nants);
+		for(int i=0; i<nants; i++){
+		offset[i] = dr[i]->sample_number()[0];
+	  }
+    	std::vector<int> offset1(nants);
+	  for(int i=0; i<nants; i++){
+	 		offset1[i] = -1*offset[i] + offset[nants-1];
+		}
+		cout<<"offset = "<<offset<<endl;
+		cout<<"offset1 = "<<offset1<<endl;
+ 		cout<<"shift before = "<<dr[0]->shift(0)<<endl;
+		dr[0]->setBlock(230000);
+		cout << "somewhere in dr = " << dr[3]->fx()[0][6] << endl;
+		
+		for(int i=0; i<ninputfiles; i++){
+			dr[i]->setShift(offset1[i]);
+		}
+		cout<<"shift after = "<<dr[0]->shift(0)<<endl;
+		dr[0]->setBlock(230000);
+		cout << "somewhere in dr = " << dr[3]->fx()[0][6] << endl;
+
 
     //________________________________________________________
     // Set up the skymap coordinates and infos
@@ -275,14 +312,12 @@ int  simpleImage(string const &infile,
     // retrieve the antenna positions
 
     cout << "testlightningskymapping::simpleImage Retrieving the antenna positions"  << endl;
-    Matrix<double> antPositions(ninputfiles,3);
-
+    Matrix<double> antPositions(nants,3);
     for (uInt j=0; j<antPositions.nrow(); j++) {
        for (uInt i=0; i<antPositions.ncolumn(); i++) {
           b_file >> antPositions(j,i);
        }      
     }
-	
 	Matrix<double> subantPositions;
 	//cout<<start1[0]<<" "<<start1[1]<<" "<<start1[2]<<endl;
 	IPosition start_1 (start1[0],start1[1],start1[2]), length_1 (length1[0],length1[1],length1[2]), stride_1 (stride1[0],stride1[1],stride1[2]);
@@ -305,7 +340,8 @@ int  simpleImage(string const &infile,
 			 Skymapper::HDF5Image);
     
     cout << "                                                         ... done."  << endl;
-	skymapper.setFarField();				// Not for imaging lightning!!!
+
+		skymapper.setFarField();				// Not for imaging lightning!!!
     skymapper.summary();
     
     //________________________________________________________
@@ -315,28 +351,33 @@ int  simpleImage(string const &infile,
     
     uint nofBlocks = nofBlocksPerFrame * nofFrames;
 
-    Matrix<casa::DComplex> data(dr[0]->fftLength(),ninputfiles); 
-	Matrix<casa::DComplex> subdata; 
-	IPosition start_ (start[0],start[1],start[2]), length_ (length[0],length[1],length[2]), stride_ (stride[0],stride[1],stride[2]);
+    Matrix<casa::DComplex> data(dr[0]->fftLength(),nants); 
+	
+		Matrix<casa::DComplex> subdata; 
+		IPosition start_ (start[0],start[1],start[2]), length_ (length[0],length[1],length[2]), stride_ (stride[0],stride[1],stride[2]);
     Slicer slicer (start_, length_, stride_);
-	uint startblocknum = startblock;
+	
+		uint startblocknum = startblock;
+
+    cout << "Processing block: (out of "<<nofBlocks<<")"<<endl;
     for (uint blocknum=startblocknum; blocknum<startblocknum+nofBlocks; blocknum++){
-      cout << "testlightningskymapping::simpleImage Processing block: " << blocknum << " out of: " 
-	   << nofBlocks << endl;
-      for(int i=0; i<ninputfiles; i++){
-	  	dr[i]->setBlock(blocknum);
-	  	//cout<<"so far so good..." << endl;
+    	//if(blocknum%10==0){
+				cout << blocknum-startblocknum<<endl; 
+			//}
+      for(int i=0; i<nants; i++){
+	  		dr[i]->setBlock(blocknum);
+	  		//cout<<"so far so good..." << endl;
       	//cout<<dr[i]->fft().column(0)<<endl;
-		data[i] = dr[i]->fft().column(0);
-		for(int j=0; j < nfreq*30/100; j++){
-			data[i][j] = 0.;
-		}
-		for(int j=0; j < nfreq*10/100; j++){
-			data[i][nfreq-nfreq*10/100+j] = 0.;
-		}
+				data[i]  = dr[i]->fft().column(0);
+				for(int j=0; j < nfreq*30/100; j++){
+					data[i][j] = 0.;
+				}
+				for(int j=0; j < nfreq*10/100; j++){
+					data[i][nfreq-nfreq*10/100+j] = 0.;
+				}
       }
-	  subdata = data (slicer);
-      skymapper.processData(subdata);
+	  	subdata = data (slicer);
+    	skymapper.processData(subdata);		// Change if slicer is used!
     };
 	
    cout << "datashape = " << data.shape() << endl;
@@ -358,15 +399,15 @@ int main (int argc,
   cout<<"Dit is de door Sef & Sander aangepaste versie van testLOPESskymapping"<<endl;
 
   uint nofFailedTests=0, blocksize=1024;
-  std::string infile, outfile="snstestlightningskymapping.img";
+  std::string infile, outfile="snstestnewskymapping.img";
 
   /*
     Check if filename of the dataset is provided on the command line; if only
     a fraction of the possible tests can be carried out.
   */
   if (argc < 2) {
-    std::cout << "Usage: testlightningskymapping <inputfile.dat> [<output-image>]. Now using snstestlightningskymapping.dat" << endl;
-	infile = "../../../src/CR-Tools/apps/seftestlightningskymapping.dat"; 
+    std::cout << "Usage: testnewskymapping <inputfile.dat> [<output-image>]. Now using snstestnewskymapping.dat" << endl;
+	infile = "../../../src/CR-Tools/apps/seftestnewskymapping.dat"; 
   } else {
     infile = argv[1];
      if (argc > 2) {

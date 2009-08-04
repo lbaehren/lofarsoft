@@ -339,7 +339,27 @@ if (HAVE_CASACORE AND HAVE_DAL)
 endif (HAVE_CASACORE AND HAVE_DAL)
 
 ## -------------------------------------------------------------------##
+## snstestnewskymapping
 
+if (HAVE_CASACORE AND HAVE_DAL)
+  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    ## compiler instructions
+    add_executable (snstestnewskymapping snstestnewskymapping.cc)
+    ## linker instructions
+    target_link_libraries (snstestnewskymapping 
+      cr 
+      ${DAL_LIBRARIES}
+      ${HDF5_LIBRARIES}
+      ${CFITSIO_LIBRARIES}
+      )
+    ## installation instructions
+    list (APPEND cr_apps snstestnewskymapping)
+  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    message (STATUS "[CR-Tools] Unable to build executable snstestnewskymapping.")
+  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
+endif (HAVE_CASACORE AND HAVE_DAL)
+
+## -------------------------------------------------------------------##
 ## imagetofits
 
 if (HAVE_CASACORE AND HAVE_DAL)

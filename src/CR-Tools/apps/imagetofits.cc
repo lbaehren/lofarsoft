@@ -4,7 +4,7 @@
 #include <images/Images/HDF5Image.h>
 #include <images/Images/PagedImage.h>
 #include <images/Images/RebinImage.h>
-
+//#include <casa/Arrays/Slicer.h>
 using namespace casa;
 using namespace std;
 
@@ -14,8 +14,7 @@ int main(int argc, char *argv[])
   string datatype;
   
   /*
-    Check if filename of the dataset is provided on the command line; if only
-    a fraction of the possible tests can be carried out.
+    Check if filename of the dataset and the format are provided on the command line.
   */
   if (argc < 2) {
     cerr << "Usage: imagetofits <input.event> <datatype>\n"
@@ -36,15 +35,14 @@ int main(int argc, char *argv[])
   String error;
   Bool ok;
   
-  // Open the image and convert it to fits:
+  								// Open the image and convert it to fits:
   if (datatype == "hdf5") {
     HDF5Image<Float> imageIn (infile);
 	    
-		// Regridding of input file
+										// Regridding of input file:
   	IPosition factors (imageIn.shape());
   	factors    = 1;
   	factors(3) = 513;
-//  	RebinImage::RebinImage(imageIn, factors);
    	RebinImage<Float> rb(imageIn, factors);
    	IPosition shapeOut = rb.shape();
    	TiledShape tShapeOut(shapeOut);

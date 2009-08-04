@@ -257,17 +257,28 @@ int  simpleImage(string const &infile,
     Slicer slicer (start_, length_, stride_);
 	uint startblocknum = 226170;
     for (uint blocknum=startblocknum; blocknum<startblocknum+nofBlocks; blocknum++){
-      cout << "testlightningskymapping::simpleImage Processing block: " << blocknum << " out of: " 
-	   << nofBlocks << endl;
+    	cout << "testlightningskymapping::simpleImage Processing block: " << blocknum << " out of: " << nofBlocks << endl;
       dr.setBlock(blocknum);
-	  cout<<"so far so good..." << endl;
+	  	cout<<"so far so good..." << endl;
       data = dr.fft();
+			cout<<"data.shape() = "<<data.shape()<<endl;
+	  	int nfreq = length[1];
+			cout<<"nfreq = "<< nfreq<<endl;
+			for (int i=0; i < 6; i++){
+				for(int j=0; j < nfreq*30/100; j++){
+					data[i][j] = 0.;
+				}
+				for(int j=0; j < nfreq*10/100; j++){
+					data[i][nfreq-nfreq*10/100+j] = 0.;
+				}
+			}
+			cout<<"bad data filtered out"<<endl;
       subdata = data (slicer);
       skymapper.processData(subdata);
     };
 	
-   cout << "datashape = " << data.shape() << endl;
-   cout << "subdatashape = " << subdata.shape() << endl;
+   	cout << "datashape = " << data.shape() << endl;
+   	cout << "subdatashape = " << subdata.shape() << endl;
 
   } catch (AipsError x) {
     cerr << "[testlightningskymapping::simpleImage] " << x.getMesg() << endl;
