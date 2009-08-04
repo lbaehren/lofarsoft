@@ -212,6 +212,13 @@ namespace CR { // Namespace CR -- begin
     */
     Vector<Double> GetPhaseCalDelays(DataReader *dr);
     
+    /*!
+      \brief Reset the flag indicating that cached data are available
+    */
+    inline void resetCachedFlag() {
+      SecondStageCacheValid_p = False;
+    }
+
     
   private:
     
