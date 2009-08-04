@@ -81,6 +81,7 @@ if (UNIX)
       /usr/lib64/gcc/x86_64-suse-linux/4.3
       /usr/lib/gcc/x86_64-redhat-linux/3.4.3/32
       /usr/lib/gcc/x86_64-redhat-linux/3.4.3
+      /usr/lib/gcc/x86_64-redhat-linux/4.1.1
       /usr/lib/gcc/x86_64-redhat-linux/4.1.2
       )
   endif (APPLE)
