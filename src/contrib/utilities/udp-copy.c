@@ -159,7 +159,7 @@ int create_fd(char *arg, int is_output, enum proto *proto)
 
 void init(int argc, char **argv)
 {
-  if ((argc < 3)&&(argc > 5)) {
+  if ((argc < 3)||(argc > 5)) {
     fprintf(stderr, "Usage: \"%s src-addr dest-addr\", where addr is [tcp:|udp:]ip-addr:port or [file:]filename [blocksize [delay]]\n", argv[0]);
     exit(1);
   }
