@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: BasicSL.h 19848 2007-02-12 04:43:35Z Malte.Marquarding $
+//# $Id: BasicSL.h 20364 2008-06-30 06:10:38Z gervandiepen $
 
 
 #ifndef CASA_BASICSL_H
@@ -53,10 +53,10 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // The following functionality is available:
 // <ul>
 //  <li> Forward declarations
-//       <linkto group="Complexfwd.h#Complexfwd":description>
+//       <linkto group="Complexfwd.h#Complexfwd">
 //       Complexfwd</linkto>
 //       for complex numbers.
-//  <li> Class <linkto group="Complex.h#Complex_desc":description>
+//  <li> Class <linkto group="Complex.h#Complex_desc">
 //       Complex</linkto>
 //       to offer single and double precision complex numbers.
 //  <li> Class <linkto class=IComplex:description>

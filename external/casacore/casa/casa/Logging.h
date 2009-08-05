@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Logging.h 19848 2007-02-12 04:43:35Z Malte.Marquarding $
+//# $Id: Logging.h 20364 2008-06-30 06:10:38Z gervandiepen $
 
 #ifndef CASA_LOGGING_H
 #define CASA_LOGGING_H
@@ -311,7 +311,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //      much as we did previously.
 // <dt> 7.
 // <dd> LogMessages are relatively expensive to produces and consume. Use of 
-//      them in a very tight loop should either be <src>#ifdef</src>'d out as 
+//      them in a very tight loop should either be <src>ifdef</src>'d out as 
 //      in this example, or like:
 //      <srcblock>
 //      if (aips_debug_on) {

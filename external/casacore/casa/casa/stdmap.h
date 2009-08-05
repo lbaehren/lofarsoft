@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: stdmap.h 20299 2008-04-03 05:56:44Z gervandiepen $
+//# $Id: stdmap.h 20458 2008-12-02 12:49:56Z gervandiepen $
 
 #ifndef CASA_STDMAP_H
 #define CASA_STDMAP_H
@@ -53,7 +53,7 @@ using std::less;
 
 #if !defined(AIPS_AUTO_STL)
 # if defined(AIPS_GCC)
-#  if defined(AIPS_GCC3)
+#  if defined(AIPS_GCC3) || defined(AIPS_GCC4)
 #   define AIPS_MAP_AUX_TEMPLATES(T, U) \
 template class \
   std::_Rb_tree<T, std::pair<T const, U >, \

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: BasicMath.h 19848 2007-02-12 04:43:35Z Malte.Marquarding $
+//# $Id: BasicMath.h 20644 2009-06-25 11:54:24Z gervandiepen $
 
 
 #ifndef CASA_BASICMATH_H
@@ -33,6 +33,7 @@
 #include <casa/BasicMath/Functional.h>
 #include <casa/BasicMath/Math.h>
 #include <casa/BasicMath/Random.h>
+#include <casa/BasicMath/Primes.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
@@ -50,18 +51,22 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //
 // The following functionality is available:
 // <ul>
-//  <li> Templated functions <linkto group="Scalar conversion":description>
+//  <li> Templated functors that can be used with <src>std::transform</src>
+//       to apply functions like sin, near, sqrt, etc. to iterators on
+//       sequences like Array, Block, std::vector, etc.
+//  <li> Templated functions <linkto group="ConvertScalar.h#Scalar conversion">
 //       ConvertScalar</linkto>
 //       to convert scalars from one type to another.
 //  <li> Class <linkto class=Functional:description>
 //       Functional</linkto>
 //       to map a domain object into a range object.
-//  <li> Functions <linkto group="Math.h interface for AIPS++:description>
+//  <li> Functions <linkto group="Math.h#Math interface for casacore>
 //       Math</linkto>
 //       to interface to math.h and other scalar math functions.
 //  <li> Class <linkto class=Random:description>
 //       Random</linkto>
 //       to offer random number generators.
+// <li> <linkto class="Primes">Prime</linkto> numbers
 // </ul>
 //
 // <note role=tip> You may want to look at the individual header files

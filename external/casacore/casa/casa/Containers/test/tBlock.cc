@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tBlock.cc 20329 2008-06-06 07:59:22Z gervandiepen $
+//# $Id: tBlock.cc 20338 2008-06-19 05:58:02Z gervandiepen $
 
 //# Includes
 
@@ -51,8 +51,12 @@ void doit()
 
     Block<Int> bi1;                   // Block::Block()
     assert(bi1.nelements() == 0);     // Block::nelements()
+    assert(bi1.size() == 0);
+    assert(bi1.empty());
     Block<Int> bi2(100);              // Block::Block(uInt)
     assert(bi2.nelements() == 100);
+    assert(bi2.size() == 100);
+    assert(!bi2.empty());
     Block<Int> bi7(0);
     assert(bi7.nelements() == 0);
     Block<Int> bi3(200,5);            // Block::Block(uInt, T)

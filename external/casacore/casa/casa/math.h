@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: math.h 20299 2008-04-03 05:56:44Z gervandiepen $
+//# $Id: math.h 20458 2008-12-02 12:49:56Z gervandiepen $
 
 #ifndef CASA_STD_MATH_H
 #define CASA_STD_MATH_H
@@ -35,12 +35,14 @@
 //# Make sure any special macros are set
 #include <casa/aips.h>
 
-#if defined(__APPLE__)
+#if defined(__APPLE__) || defined(AIPS_DARWIN)
 #include <math.h>
 #include <ostream>
 #include <cmath>
 namespace casa { //# NAMESPACE CASA - BEGIN
     using std::isnan;
+    using std::isinf;
+    using std::isfinite;
 } //# NAMESPACE CASA - END
 #endif
 

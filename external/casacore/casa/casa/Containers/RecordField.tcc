@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: RecordField.tcc 19846 2007-02-12 03:11:58Z Malte.Marquarding $
+//# $Id: RecordField.tcc 20342 2008-06-19 10:05:13Z gervandiepen $
 
 
 #include <casa/Containers/RecordField.h>
@@ -62,7 +62,8 @@ RecordFieldPtr<T>::~RecordFieldPtr()
 
 template<class T>
 RecordFieldPtr<T>::RecordFieldPtr (const RecordFieldPtr<T>& other)
-: fieldPtr_p    (other.fieldPtr_p),
+: NoticeTarget  (),
+  fieldPtr_p    (other.fieldPtr_p),
   parent_p      (other.parent_p),
   fieldNumber_p (other.fieldNumber_p)
 {

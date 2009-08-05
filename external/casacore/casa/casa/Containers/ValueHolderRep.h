@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: ValueHolderRep.h 19381 2006-04-18 09:17:37Z gvandiep $
+//# $Id: ValueHolderRep.h 20527 2009-02-18 14:03:04Z gervandiepen $
 
 
 #ifndef CASA_VALUEHOLDERREP_H
@@ -33,6 +33,7 @@
 //# Includes
 #include <casa/aips.h>
 #include <casa/Utilities/DataType.h>
+#include <iosfwd>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
@@ -92,6 +93,9 @@ public:
   explicit ValueHolderRep (const Record& value);
   // </group>
 
+  // Create an empty N-dim array.
+  ValueHolderRep (uInt ndim, Bool dummy);
+
   // Destructor.
   ~ValueHolderRep();
 
@@ -138,11 +142,9 @@ public:
   // Construct the object from the value in a record.
   static ValueHolderRep* fromRecord (const Record& rec, const RecordFieldId&);
 
-  //# Write the ValueHolderRep to an output stream.
-  //# friend AipsIO& operator<< (AipsIO& os, const ValueHolderRep& vh);
-
-  //# Read the ValueHolderRep from an input stream.
-  //# friend AipsIO& operator>> (AipsIO& os, ValueHolderRep& vh);
+  // Write the ValueHolderRep to an output stream.
+  // Arrays are written as normal arrays using ArrayIO.h. 
+  std::ostream& write (std::ostream& os) const;
 
 private:
   // Forbid copy ctor and assignment.
@@ -155,6 +157,7 @@ private:
 
 
   Int      itsCount;
+  uInt     itsNdim;
   DataType itsType;
   union {
     Bool   itsBool;

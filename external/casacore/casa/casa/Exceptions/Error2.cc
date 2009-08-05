@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Error2.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: Error2.cc 20454 2008-12-02 12:41:01Z gervandiepen $
 
 #include <casa/Exceptions/Error.h>
 #include <casa/stdlib.h>
@@ -62,7 +62,9 @@ AbortError::AbortError(const Char *str,Category c)
 {
     cerr << "An unrecoverable error occurred: " << endl;
     cerr << str << endl;
+#ifndef CASACORE_NOEXIT
     exit(1);
+#endif
 }
 
 AbortError::AbortError(const String &str,Category c)
@@ -70,7 +72,9 @@ AbortError::AbortError(const String &str,Category c)
 {
     cerr << "An unrecoverable error occurred: " << endl;
     cerr << str << endl;
+#ifndef CASACORE_NOEXIT
     exit(1);
+#endif
 }
 
 AbortError::~AbortError() throw()

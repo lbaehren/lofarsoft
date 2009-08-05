@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: ValueHolder.cc 19009 2005-10-19 14:10:57Z gvandiep $
+//# $Id: ValueHolder.cc 20518 2009-02-05 13:34:30Z gervandiepen $
 
 
 #include <casa/Containers/ValueHolder.h>
@@ -93,6 +93,12 @@ ValueHolder::ValueHolder (const Complex& value)
 
 ValueHolder::ValueHolder (const DComplex& value)
   : itsRep (new ValueHolderRep(value))
+{
+  itsRep->link();
+}
+
+ValueHolder::ValueHolder (const Char* value)
+  : itsRep (new ValueHolderRep(String(value)))
 {
   itsRep->link();
 }
@@ -171,6 +177,12 @@ ValueHolder::ValueHolder (const Array<String>& value)
 
 ValueHolder::ValueHolder (const Record& value)
   : itsRep (new ValueHolderRep(value))
+{
+  itsRep->link();
+}
+
+ValueHolder::ValueHolder (uInt ndim, Bool dummy)
+  : itsRep (new ValueHolderRep(ndim, dummy))
 {
   itsRep->link();
 }

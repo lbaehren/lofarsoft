@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayMath.tcc 20557 2009-04-02 14:11:08Z gervandiepen $
+//# $Id: ArrayMath.tcc 20625 2009-06-12 00:27:08Z gervandiepen $
 
 #include <casa/iostream.h>
 
@@ -157,7 +157,6 @@ void minMax(T &minVal, T &maxVal,
   }
   size_t minp = 0;
   size_t maxp = 0;
-  size_t i = 0;
   T minv = array.data()[0];
   T maxv = minv;
   if (array.contiguousStorage()) {
@@ -217,7 +216,6 @@ void minMaxMasked(T &minVal, T &maxVal,
   }
   size_t minp = 0;
   size_t maxp = 0;
-  size_t i = 0;
   T minv = array.data()[0];
   T maxv = minv;
   if (array.contiguousStorage()  &&  weight.contiguousStorage()) {
@@ -281,9 +279,8 @@ void minMax(T &minVal, T &maxVal,
   }
   size_t minp;
   size_t maxp;
-  size_t i = 0;
-  T minv;
-  T maxv;
+  T minv = T();
+  T maxv = T();
   if (array.contiguousStorage()  &&  mask.contiguousStorage()) {
     typename Array<T>::const_contiter iter = array.cbegin();
     typename Array<Bool>::const_contiter miter = mask.cbegin();
@@ -855,6 +852,16 @@ template<class T> Array<T> floor(const Array<T> &a)
     return arrayTransformResult (a, casa::Floor<T>());
 }
 
+template<class T> Array<T> round(const Array<T> &a)
+{
+    return arrayTransformResult (a, casa::Round<T>());
+}
+
+template<class T> Array<T> sign(const Array<T> &a)
+{
+    return arrayTransformResult (a, casa::Sign<T>());
+}
+
 template<class T> Array<T> tan(const Array<T> &a)
 {
     return arrayTransformResult (a, casa::Tan<T>());
@@ -1066,7 +1073,7 @@ template<class T> T rms(const Array<T> &a)
 template<class T> T median(const Array<T> &a, Block<T> &tmp, Bool sorted,
 			   Bool takeEvenMean, Bool inPlace)
 {
-    T medval;
+    T medval=T();
     size_t nelem = a.nelements();
     if (nelem < 1) {
 	throw(ArrayError("::median(T*) - array needs at least 1 element"));
@@ -1157,6 +1164,31 @@ template<class T> T fractile(const Array<T> &a, Block<T>& tmp, Float fraction,
         fracval = data[n2];
     }
     return fracval;
+}
+
+template<typename T>
+Array<std::complex<T> > makeComplex(const Array<T> &left, const Array<T>& right)
+{
+  checkArrayShapes (left, right, "makeComplex");
+  Array<std::complex<T> > res(left.shape());
+  arrayContTransform (left, right, res,
+                      casa::MakeComplex<T,T,std::complex<T> >());
+  return res;
+}
+
+template<typename C, typename R>
+void setReal(Array<C> &carray, const Array<R> &rarray)
+{
+  checkArrayShapes (carray, rarray, "setReal");
+  // Cannot be done in place, because imag is taken from second operand.
+  arrayTransform (rarray, carray, carray, casa::MakeComplexImag<R,C,C>());
+}
+
+template<typename C, typename R>
+void setImag(Array<C> &carray, const Array<R> &rarray)
+{
+  checkArrayShapes (carray, rarray, "setImag");
+  arrayTransformInPlace (carray, rarray, casa::MakeComplexReal<C,R,C>());
 }
 
 

@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: RecordInterface.h 20254 2008-02-23 16:37:46Z gervandiepen $
+//# $Id: RecordInterface.h 20427 2008-11-17 13:46:17Z gervandiepen $
 
 
 #ifndef CASA_RECORDINTERFACE_H
@@ -77,7 +77,6 @@ class IPosition;
 // <ul>
 // <li> <linkto class=Record>Record</linkto>
 // <li> <linkto class=TableRecord>TableRecord</linkto>
-// <li> <linkto class=GlishRecord>GlishRecord</linkto>
 // </ul>
 // Presently, the scalar types are chosen to be compatible with the native
 // types of the Table system, viz: Bool, uChar, Short, Int, uInt, Float,
@@ -223,7 +222,15 @@ public:
     Bool isFixed() const;
 
     // How many fields does this structure have?
+    // <group>
     virtual uInt nfields() const = 0;
+    uInt size() const
+        { return nfields(); }
+    // </group>
+
+    // Is the record empty?
+    bool empty() const
+        { return size() == 0; }
 
     // Get the field number from the field name.
     // -1 is returned if the field name is unknown.
@@ -402,6 +409,26 @@ public:
     Array<Complex>  toArrayComplex (const RecordFieldId&) const; 
     Array<DComplex> toArrayDComplex(const RecordFieldId&) const;
     Array<String>   toArrayString  (const RecordFieldId&) const;
+    void toArray (const RecordFieldId& id, Array<Bool>& array) const
+      { array.reference (toArrayBool (id)); }
+    void toArray (const RecordFieldId& id, Array<uChar>& array) const
+      { array.reference (toArrayuChar (id)); }
+    void toArray (const RecordFieldId& id, Array<Short>& array) const
+      { array.reference (toArrayShort (id)); }
+    void toArray (const RecordFieldId& id, Array<Int>& array) const
+      { array.reference (toArrayInt (id)); }
+    void toArray (const RecordFieldId& id, Array<uInt>& array) const
+      { array.reference (toArrayuInt (id)); }
+    void toArray (const RecordFieldId& id, Array<Float>& array) const
+      { array.reference (toArrayFloat (id)); }
+    void toArray (const RecordFieldId& id, Array<Double>& array) const
+      { array.reference (toArrayDouble (id)); }
+    void toArray (const RecordFieldId& id, Array<Complex>& array) const
+      { array.reference (toArrayComplex (id)); }
+    void toArray (const RecordFieldId& id, Array<DComplex>& array) const
+      { array.reference (toArrayDComplex (id)); }
+    void toArray (const RecordFieldId& id, Array<String>& array) const
+      { array.reference (toArrayString (id)); }
     // </group>
 
     // Get value based on field name or number.
@@ -413,7 +440,7 @@ public:
     const Array<Float>&    asArrayfloat   (const RecordFieldId&) const;
     const Array<Double>&   asArraydouble  (const RecordFieldId&) const;
     // </group>
-    
+
     // Make a unique record representation
     // (for copy-on-write in RecordFieldPtr).
     virtual void makeUnique() = 0;

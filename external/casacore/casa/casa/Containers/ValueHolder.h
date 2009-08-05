@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: ValueHolder.h 19609 2006-09-14 03:31:16Z gvandiep $
+//# $Id: ValueHolder.h 20527 2009-02-18 14:03:04Z gervandiepen $
 
 
 #ifndef CASA_VALUEHOLDER_H
@@ -99,6 +99,9 @@ public:
   explicit ValueHolder (const Record& value);
   // </group>
 
+  // Create an empty N-dim array.
+  ValueHolder (uInt ndim, Bool dummy);
+
   // Create a ValueHolder from a ValueHolderRep.
   // It takes over the pointer and deletes it in the destructor.
   explicit ValueHolder (ValueHolderRep* rep)
@@ -150,17 +153,53 @@ public:
   const Record&         asRecord       () const;
   // </group>
 
+  // Get the data in a way useful for templates.
+  // <group>
+  void getValue (Bool& value) const            { value = asBool(); }
+  void getValue (uChar& value) const           { value = asuChar(); }
+  void getValue (Short& value) const           { value = asShort(); }
+  void getValue (uShort& value) const          { value = asuShort(); }
+  void getValue (Int& value) const             { value = asInt(); }
+  void getValue (uInt& value) const            { value = asuInt(); }
+  void getValue (Float& value) const           { value = asFloat(); }
+  void getValue (Double& value) const          { value = asDouble(); }
+  void getValue (Complex& value) const         { value = asComplex(); }
+  void getValue (DComplex& value) const        { value = asDComplex(); }
+  void getValue (String& value) const          { value = asString(); }
+  void getValue (Array<Bool>& value) const
+    { value.reference(asArrayBool()); }
+  void getValue (Array<uChar>& value) const
+    { value.reference(asArrayuChar()); }
+  void getValue (Array<Short>& value) const
+    { value.reference(asArrayShort()); }
+  void getValue (Array<uShort>& value) const
+    { value.reference(asArrayuShort()); }
+  void getValue (Array<Int>& value) const
+    { value.reference(asArrayInt()); }
+  void getValue (Array<uInt>& value) const
+    { value.reference(asArrayuInt()); }
+  void getValue (Array<Float>& value) const
+    { value.reference(asArrayFloat()); }
+  void getValue (Array<Double>& value) const
+    { value.reference(asArrayDouble()); }
+  void getValue (Array<Complex>& value) const
+    { value.reference(asArrayComplex()); }
+  void getValue (Array<DComplex>& value) const
+    { value.reference(asArrayDComplex()); }
+  void getValue (Array<String>& value) const
+    { value.reference(asArrayString()); }
+  // </group>
+
   // Put the value as a field in a record.
   void toRecord (Record&, const RecordFieldId&) const;
 
   // Construct the object from the value in a record.
   static ValueHolder fromRecord (const Record&, const RecordFieldId&);
 
-  //# Write the ValueHolder to an output stream.
-  //# friend AipsIO& operator<< (AipsIO& os, const ValueHolder& vh);
-
-  //# Read the ValueHolder from an input stream.
-  //# friend AipsIO& operator>> (AipsIO& os, ValueHolder& vh);
+  // Write the ValueHolder to an output stream.
+  // Arrays are written as normal arrays using ArrayIO.h. 
+  friend std::ostream& operator<< (std::ostream& os, const ValueHolder& vh)
+    { return vh.itsRep->write (os); }
 
 private:
   ValueHolderRep* itsRep;

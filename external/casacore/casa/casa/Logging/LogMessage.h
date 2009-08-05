@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: LogMessage.h 20259 2008-02-25 23:28:59Z gervandiepen $
+//# $Id: LogMessage.h 20364 2008-06-30 06:10:38Z gervandiepen $
 
 #ifndef CASA_LOGMESSAGE_H
 #define CASA_LOGMESSAGE_H
@@ -86,7 +86,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // }
 // </srcblock>
 // A more complete example is available in the module file 
-// <linkto module="Logging.h">Logging.h</linkto>.
+// <linkto module="Logging">Logging.h</linkto>.
 // </example>
 //
 // <todo asof="1996/07/23">

@@ -2,6 +2,7 @@ import sys
 import os
 import glob
 import re
+import string
 import platform
 
 def generate(env):
@@ -94,30 +95,41 @@ def generate(env):
         xf=env.get("extracflags", None)
         if xf:
             env.AppendUnique(CCFLAGS=_to_list(xf))
+        xf=env.get("extralibpath", None)
+        if xf:
+            env.AppendUnique(LIBPATH=_to_list(xf))
+        xf=env.get("extracpppath", None)
+        if xf:
+            env.AppendUnique(CPPPATH=_to_list(xf))
+        xf=env.get("extraldlibrarypath", None)
+        if xf:
+            ldname = sys.platform == "darwin" and "DYLD_LIBRARY_PATH" or \
+                "LD_LIBRARY_PATH"
+            env.AppendENVPath(ldname, _to_list(xf))
     # set the extra flags if available
     MergeFlags()
+
         
     def CheckFortran(conf):
-	    
+        
+        def getf2clib(fc):
+            fdict = {'gfortran': 'gfortran', 'g77': 'g2c', 'f77': 'f2c'}
+            return fdict[fc]
+        
 	if not conf.env.has_key("FORTRAN"):
 	    # auto-detect fortran
 	    detect_fortran = conf.env.Detect(['gfortran', 'g77', 'f77'])
 	    conf.env["FORTRAN"] = detect_fortran
-	    fdict = {'gfortran': 'gfortran', 'g77': 'g2c', 'f77': 'f2c'}
-	    f2clib = conf.env.get("f2clib", fdict[detect_fortran])
-	    if not conf.CheckLib(f2clib):
-		env.Exit(1)
-	else:
-	    if not conf.env.has_key("f2clib"):
-		print "A custom fortran compiler also needs f2clib defined"
-		env.Exit(1)
-	    else:
-		if not conf.CheckLib(env["f2clib"]):
-		    env.Exit(1)
+        f2clib = conf.env.get("f2clib", getf2clib(conf.env["FORTRAN"]))
+        if not conf.CheckLib(f2clib):
+            conf.env.Exit(1)
+
 	if conf.env["FORTRAN"].startswith("g77"):
             fflags = ["-Wno-globals", "-fno-second-underscore"]
-	    conf.env.Append(SHFORTRANFLAGS=fflags)
-	    conf.env.Append(FORTRANFLAGS=fflags)
+	    conf.env.AppendUnique(SHFORTRANFLAGS=fflags)
+	    conf.env.AppendUnique(FORTRANFLAGS=fflags)
+        conf.env.AppendUnique(SHFORTRANFLAGS=['-fPIC'])
+
     env.CheckFortran = CheckFortran
 
     def null_action(target, source, env): return 0

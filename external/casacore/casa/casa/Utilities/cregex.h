@@ -24,7 +24,7 @@
                            520 Edgemont Road
                            Charlottesville, VA 22903-2475 USA
 
-    $Id: cregex.h 20142 2007-11-06 22:35:21Z Malte.Marquarding $
+    $Id: cregex.h 20606 2009-05-19 08:05:56Z gervandiepen $
 */
 
 #ifndef CASA_CREGEX_H
@@ -39,7 +39,7 @@ extern "C" {
 /* Define number of parens for which we record the beginnings and ends.
    This affects how much space the `struct re_registers' type takes up.  */
 #ifndef RE_NREGS
-#define RE_NREGS 10
+#define RE_NREGS 32
 #endif
 
 #define BYTEWIDTH 8
@@ -129,8 +129,8 @@ extern int obscure_syntax;
    If not set, it does.  */
 #define RE_HAT_NOT_NEWLINE (1 << 11)
 
-/* If this bit is set, back references are recognized.
-   If not set, they aren't.  */
+/* If this bit is not set, back references are recognized.
+   If set, they aren't.  */
 #define RE_NO_BK_REFS (1 << 12)
 
 /* If this bit is set, back references must refer to a preceding
@@ -259,7 +259,7 @@ struct re_registers
 
 #if defined(__STDC__) || defined(__cplusplus)
 
-extern char *a2_re_compile_pattern (char *, int, struct re_pattern_buffer *);
+extern const char *a2_re_compile_pattern (char *, int, struct re_pattern_buffer *);
 extern int a2_re_set_syntax (int syntax);
 /* Is this really advertised?  */
 extern void a2_re_compile_fastmap (struct re_pattern_buffer *);
@@ -274,19 +274,19 @@ extern int a2_re_match_2 (struct re_pattern_buffer *, char *, int,
 		       char *, int, int, struct re_registers *, int);
 
 /* 4.2 bsd compatibility.  */
-// extern char *re_comp (char *);
+// extern const char *re_comp (char *);
 // extern int re_exec (char *);
 
 #else /* !__STDC__ */
 
-extern char *a2_re_compile_pattern ();
+extern const char *a2_re_compile_pattern ();
 /* Is this really advertised? */
 extern void a2_re_compile_fastmap ();
 extern int a2_re_search (), a2_re_search_2 ();
 extern int a2_re_match (), a2_re_match_2 ();
 
 /* 4.2 bsd compatibility.  */
-extern char *re_comp ();
+extern const char *re_comp ();
 extern int re_exec ();
 
 #endif /* __STDC__ */

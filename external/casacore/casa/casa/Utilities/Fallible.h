@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Fallible.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: Fallible.h 20622 2009-06-11 13:52:35Z gervandiepen $
 
 #ifndef CASA_FALLIBLE_H
 #define CASA_FALLIBLE_H
@@ -60,7 +60,7 @@ void AccessInvalidFallibleObject();
 // </etymology>
 
 // <synopsis> 
-// This class resembles the one in <cite>Scientific and Engineering C++</cite>
+// This class resembles the one in <em>Scientific and Engineering C++</em>
 // by Barton and Nackman. While it was written with that book closed, the
 // class is simple enough that resemblances likely remain.
 //
@@ -123,7 +123,7 @@ template<class T> class Fallible
 {
 public: 
     // The default constructor creates an invalid object.
-    Fallible() : isValid_p(False) {}
+    Fallible() : value_p(T()), isValid_p(False) {}
 
     // Create a valid object
     Fallible(const T &value) : value_p(value), isValid_p(True) {}

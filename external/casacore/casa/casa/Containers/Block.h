@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Block.h 20113 2007-08-28 11:12:18Z gervandiepen $
+//# $Id: Block.h 20338 2008-06-19 05:58:02Z gervandiepen $
 
 #ifndef CASA_BLOCK_H
 #define CASA_BLOCK_H
@@ -285,6 +285,9 @@ public:
   uInt size() const {return npts;}
   // </group>
 
+  // Is the block empty (i.e. no elements)?
+  Bool empty() const {return npts == 0;}
+
   // Define the STL-style iterators.
   // It makes it possible to iterate through all data elements.
   // <srcblock>
@@ -379,6 +382,7 @@ public:
    const T *storage() const {return (const T *)block_p.storage();}
    uInt nelements() const {return block_p.nelements();}
    uInt size() const {return block_p.size();}
+   Bool empty() const {return block_p.empty();}
  private:
    Block<void*> block_p;
  };

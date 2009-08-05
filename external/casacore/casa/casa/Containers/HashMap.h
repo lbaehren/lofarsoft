@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: HashMap.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: HashMap.h 20364 2008-06-30 06:10:38Z gervandiepen $
 
 #ifndef CASA_HASHMAP_H
 #define CASA_HASHMAP_H
@@ -260,12 +260,10 @@ public:
 //             <li> use of a hash table can be more efficient
 //             <li> there are a couple of Map classes currently:
 //               <ul>
-//                 <li> <linkto class=ListMap>ListMap</linkto>
 //                 <li> <linkto class=OrderedMap>OrderedMap</linkto>
 //                 <li> <linkto class=SimpleOrderedMap>SimpleOrderedMap</linkto>
 //               </ul>
-//               The first two <src>ListMap</src> and <src>OrderedMap</src>
-//               are derived from a map base class,
+//               <src>OrderedMap</src> is derived from a map base class,
 //               <linkto class=Map><src>Map</src></linkto> while
 //               <src>SimpleOrderedMap</src> is not. This collection of classes
 //               has resulted in confusion for the users. It is hoped that this

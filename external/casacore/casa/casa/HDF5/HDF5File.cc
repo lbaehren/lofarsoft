@@ -23,9 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: HDF5File.cc 20284 2008-03-13 12:58:07Z gervandiepen $
-
-#ifdef HAVE_HDF5
+//# $Id: HDF5File.cc 20600 2009-05-11 09:33:40Z gervandiepen $
 
 //# Includes
 #include <casa/HDF5/HDF5File.h>
@@ -34,6 +32,8 @@
 #include <casa/OS/RegularFile.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
+
+#ifdef HAVE_LIBHDF5
 
   HDF5File::HDF5File (const String& name,
 		      ByteIO::OpenOption option)
@@ -144,6 +144,42 @@ namespace casa { //# NAMESPACE CASA - BEGIN
     }
   }
 
-}
+#else
+
+  HDF5File::HDF5File (const String& name,
+		      ByteIO::OpenOption option)
+    : itsOption (option),
+      itsDelete (False)
+  {
+    setName (name);
+    doOpen();
+  }
+
+  HDF5File::~HDF5File()
+  {}
+
+  Bool HDF5File::isHDF5 (const String&)
+  {
+    return False;
+  }
+
+  void HDF5File::reopenRW()
+  {}
+
+  void HDF5File::close()
+  {}
+    
+  void HDF5File::reopen()
+  {}
+
+  void HDF5File::flush()
+  {}
+
+  void HDF5File::doOpen()
+  {
+    throw HDF5Error("HDF5 support is not compiled into this casacore version");
+  }
 
 #endif
+
+}

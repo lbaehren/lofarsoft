@@ -24,7 +24,7 @@
                            520 Edgemont Road
                            Charlottesville, VA 22903-2475 USA
 
-    $Id: cregex.cc 20182 2007-12-17 09:15:25Z gervandiepen $
+    $Id: cregex.cc 20620 2009-06-11 10:00:28Z gervandiepen $
 */
 
 
@@ -51,6 +51,7 @@
 #ifndef RE_DUP_MAX
 #include <regex.h>
 #endif
+
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
@@ -377,8 +378,9 @@ static void insert_op_2 (char, char *, char *_end, int, int);
    the `struct re_pattern_buffer' that bufp pointed to, after
    a2_re_compile_pattern returns. */
 
-char *
-a2_re_compile_pattern (char *pattern, int size, struct re_pattern_buffer *bufp)
+const char*
+a2_re_compile_pattern (char *pattern, int size,
+                       struct re_pattern_buffer *bufp)
 {
   register char *b = bufp->buffer;
   register char *p = pattern;
@@ -833,11 +835,9 @@ a2_re_compile_pattern (char *pattern, int size, struct re_pattern_buffer *bufp)
               /* Laststart should point to the start_memory that we are about
                  to push (unless the pattern has RE_NREGS or more ('s).  */
               *stackp++ = b - bufp->buffer;    
-	      if (regnum < RE_NREGS)
-	        {
-		  BUFPUSH (start_memory);
-		  BUFPUSH (regnum);
-	        }
+	      if (regnum >= RE_NREGS) goto too_many_paren;
+              BUFPUSH (start_memory);
+              BUFPUSH (regnum);
 	      *stackp++ = fixup_jump ? fixup_jump - bufp->buffer + 1 : 0;
 	      *stackp++ = regnum++;
 	      *stackp++ = begalt - bufp->buffer;
@@ -1153,25 +1153,36 @@ a2_re_compile_pattern (char *pattern, int size, struct re_pattern_buffer *bufp)
   return 0;
 
  invalid_pattern:
-  return "Invalid regular expression";
+  static const char* invpatt = "Invalid regular expression";
+  return invpatt;
 
  unmatched_open:
-  return "Unmatched \\(";
+  static const char* unmopen = "Unmatched \\(";
+  return unmopen;
 
  unmatched_close:
-  return "Unmatched \\)";
+  static const char* unmclose = "Unmatched \\)";
+  return unmclose;
 
  end_of_pattern:
-  return "Premature end of regular expression";
+  static const char* endpatt = "Premature end of regular expression";
+  return endpatt;
 
  nesting_too_deep:
-  return "Nesting too deep";
+  static const char* toodeep = "Nesting too deep";
+  return toodeep;
+
+ too_many_paren:
+  static const char* toomanyparen = "Too many parentheses";
+  return toomanyparen;
 
  too_big:
-  return "Regular expression too big";
+  static const char* toobig = "Regular expression too big";
+  return toobig;
 
  memory_exhausted:
-  return "Memory exhausted";
+  static const char* memexh = "Memory exhausted";
+  return memexh;
 }
 
 
@@ -1806,7 +1817,7 @@ real_a2_re_match_2 (struct re_pattern_buffer *pbufp,
 	    char *string2_arg, int size2,
 	    int pos,
 	    struct re_registers *regs,
-	    int mstop, cregex_allocator &alloca)
+	    int mstop, cregex_allocator &)
 {
   register unsigned char *p = (unsigned char *) pbufp->buffer;
 
@@ -2482,7 +2493,9 @@ a2_re_match_2 (struct re_pattern_buffer *pbufp,
 static int
 bcmp_translate (char *s1, char *s2, int len, unsigned char *translate)
 {
-  register char *p1 = s1, *p2 = s2;
+  // Use signed char instead of char to avoid compiler warnings
+  // about subscripting with a char.
+  register signed char *p1 = (signed char*)s1, *p2 = (signed char*)s2;
   while (len)
     {
       if (translate [*p1++] != translate [*p2++]) return 1;
@@ -2497,23 +2510,28 @@ bcmp_translate (char *s1, char *s2, int len, unsigned char *translate)
 
 static struct re_pattern_buffer re_comp_buf;
 
-char *
+const char*
 re_comp (char *s)
 {
+  static const char* noprev = "No previous regular expression";
+  static const char* memexh = "Memory exhausted";
   if (!s)
     {
-      if (!re_comp_buf.buffer)
-	return "No previous regular expression";
+      if (!re_comp_buf.buffer) {
+        return noprev;
+      }
       return 0;
     }
 
   if (!re_comp_buf.buffer)
     {
-      if (!(re_comp_buf.buffer = (char *) malloc (200)))
-	return "Memory exhausted";
+      if (!(re_comp_buf.buffer = (char *) malloc (200))) {
+	return memexh;
+      }
       re_comp_buf.allocated = 200;
-      if (!(re_comp_buf.fastmap = new char[1 << BYTEWIDTH]))
-	return "Memory exhausted";
+      if (!(re_comp_buf.fastmap = new char[1 << BYTEWIDTH])) {
+	return memexh;
+      }
     }
   return a2_re_compile_pattern (s, strlen (s), &re_comp_buf);
 }
