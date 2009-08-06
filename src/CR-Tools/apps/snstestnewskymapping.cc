@@ -82,12 +82,165 @@ using CR::TimeFreq;
           fucntion.
 */
 //#define upload	//uncomment to upload if it does not compile.
+casa::Vector<MVPosition> CS302_antenna_position_value(casa::Vector<Int> rcu_ids){
+	casa::Vector<MVPosition> all_positions;
+	casa::Vector<MVPosition> selected_positions;
+	all_positions.resize(48);
+	Int nrRCUs;
+	rcu_ids.shape(nrRCUs);
+	cout << "nr of RCUs: " << nrRCUs << endl;
+	selected_positions.resize(nrRCUs);
+	
+    all_positions(0)=MVPosition(0.000,0.000,0.000);//RCU0,1
+	all_positions(1)=MVPosition(0.000,2.550,0.000);//RCU2,3
+	all_positions(2)=MVPosition(2.250,1.350,0.000);//RCU4,5
+	all_positions(3)=MVPosition(2.250,-1.350,0.000);//RCU6,7
+	all_positions(4)=MVPosition(0.000,-2.550,0.000);//RCU8,9
+	all_positions(5)=MVPosition(-2.250,-1.350,0.000);//RCU10,11
+	all_positions(6)=MVPosition(-2.250,1.350,0.000);//RCU12,13
+	all_positions(7)=MVPosition(0.405,-5.786,0.000);//RCU14,15
+	all_positions(8)=MVPosition(-3.409,-4.692,0.000);//RCU16,17
+	all_positions(9)=MVPosition(-5.628,-1.403,0.000);//RCU18,19
+	all_positions(10)=MVPosition(-5.213,2.543,0.000);//RCU20,21
+	all_positions(11)=MVPosition(-2.359,5.299,0.000);//RCU22,23
+	all_positions(12)=MVPosition(1.599,5.575,0.000);//RCU24,25
+	all_positions(13)=MVPosition(4.808,3.243,0.000);//RCU26,27
+	all_positions(14)=MVPosition(5.768,-0.606,0.000);//RCU28,29
+	all_positions(15)=MVPosition(4.029,-4.172,0.000);//RCU30,31
+	all_positions(16)=MVPosition(5.867,-7.250,0.000);//RCU32,33
+	all_positions(17)=MVPosition(2.937,-9.438,0.000);//RCU34,35
+	all_positions(18)=MVPosition(-2.056,-10.119,0.000);//RCU36,37
+	all_positions(19)=MVPosition(-8.087,-6.048,0.000);//RCU38,39
+	all_positions(20)=MVPosition(-9.641,-3.219,0.000);//RCU40,41
+	all_positions(21)=MVPosition(-10.034,1.056,0.000);//RCU42,43
+	all_positions(22)=MVPosition(-7.920,4.754,0.000);//RCU44,45
+	all_positions(23)=MVPosition(-3.362,8.331,0.000);//RCU46,47
+	all_positions(24)=MVPosition(1.177,9.843,0.000);//RCU48,49
+	all_positions(25)=MVPosition(5.365,8.543,0.000);//RCU50,51
+	all_positions(26)=MVPosition(7.642,5.322,0.000);//RCU52,53
+	all_positions(27)=MVPosition(9.020,0.672,0.000);//RCU54,55
+	all_positions(28)=MVPosition(8.319,-3.940,0.000);//RCU56,57
+	all_positions(29)=MVPosition(7.905,-11.973,0.000);//RCU58,59
+	all_positions(30)=MVPosition(4.686,-14.025,0.000);//RCU60,61
+	all_positions(31)=MVPosition(1.561,-14.072,0.000);//RCU62,63
+	all_positions(32)=MVPosition(-6.074,-11.713,0.000);//RCU64,65
+	all_positions(33)=MVPosition(-9.040,-12.128,0.000);//RCU66,67
+	all_positions(34)=MVPosition(-12.203,-5.337,0.000);//RCU68,69
+	all_positions(35)=MVPosition(-13.111,-0.342,0.000);//RCU70,71
+	all_positions(36)=MVPosition(-14.322,4.832,0.000);//RCU72,73
+	all_positions(37)=MVPosition(-11.636,6.845,0.000);//RCU74,75
+	all_positions(38)=MVPosition(-8.210,10.139,0.000);//RCU76,77
+	all_positions(39)=MVPosition(-1.857,13.089,0.000);//RCU78,79
+	all_positions(40)=MVPosition(0.857,13.724,0.000);//RCU80,81
+	all_positions(41)=MVPosition(5.865,11.900,0.000);//RCU82,83
+	all_positions(42)=MVPosition(9.981,11.338,0.000);//RCU84,85
+	all_positions(43)=MVPosition(13.747,3.311,0.000);//RCU86,87
+	all_positions(44)=MVPosition(13.900,-0.670,0.000);//RCU88,89
+	all_positions(45)=MVPosition(13.136,-6.101,0.000);//RCU90,91
+	all_positions(46)=MVPosition(-65.054,0.000,0.000);//RCU92,93
+	all_positions(47)=MVPosition(0.000,65.054,0.000);//RCU94,95
+	/*			   
+	 14.698,-10.311,0.000,1,0
+	 15.232,-13.338,0.000,3,2
+	 1.377,-20.345,0.000,5,4
+	 -13.608,-14.411,0.000,7,6
+	 -17.281,-11.123,0.000,9,8
+	 -18.305,0.971,0.000,11,10
+	 -12.430,12.886,0.000,13,12
+	 -7.399,19.058,0.000,15,14
+	 6.837,16.723,0.000,17,16
+	 14.416,13.666,0.000,19,18
+	 18.192,4.459,0.000,21,20
+	 24.840,-0.328,0.000,23,22
+	 21.410,-12.882,0.000,25,24
+	 12.443,-22.123,0.000,27,26
+	 6.726,-24.705,0.000,29,28
+	 -1.476,-26.687,0.000,31,30
+	 -16.470,-17.401,0.000,33,32
+	 -21.667,-11.351,0.000,35,34
+	 -26.101,1.776,0.000,37,36
+	 -20.349,14.772,0.000,39,38
+	 -14.252,21.805,0.000,41,40
+	 -2.861,24.616,0.000,43,42
+	 13.224,23.568,0.000,45,44
+	 24.993,10.289,0.000,47,46
+	 34.641,0.400,0.000,49,48
+	 28.484,-13.172,0.000,51,50
+	 19.357,-24.589,0.000,53,52
+	 13.304,-29.830,0.000,55,54
+	 -5.553,-31.094,0.000,57,56
+	 -22.720,-25.520,0.000,59,58
+	 -30.213,-15.775,0.000,61,60
+	 -29.298,-6.451,0.000,63,62
+	 -33.339,7.631,0.000,65,64
+	 -23.863,24.118,0.000,67,66
+	 -16.634,29.422,0.000,69,68
+	 -1.557,34.648,0.000,71,70
+	 6.143,31.746,0.000,73,72
+	 24.552,22.482,0.000,75,74
+	 26.185,15.967,0.000,77,76
+	 32.238,17.636,0.000,79,78
+	 35.877,-21.401,0.000,81,80
+	 15.445,-36.911,0.000,83,82
+	 -4.028,-41.786,0.000,85,84
+	 -18.886,-35.621,0.000,87,86
+	 -41.007,3.644,0.000,89,88
+	 -28.864,22.439,0.000,91,90
+	 -20.085,36.257,0.000,93,92
+	 22.803,31.368,0.000,95,94
+	 */	
+	cout << "filled all_positions" << endl;
+	int rcu_id;
+	for(int i=0;i<nrRCUs;i++){
+		rcu_id=rcu_ids(i);
+		cout << "rcu id = " << rcu_id << endl;
+ 		selected_positions(i)=all_positions(rcu_id/2);///2);
+	}
+	
+	return selected_positions;
+	
+}
 
-int  simpleImage(string const &infile,
-		 string const &outfile,
-		 uint const &blocksize=1024)
-{
-  int nofFailedTests     = 0;
+
+
+//int  simpleImage(string const &infile,
+//		 string const &outfile,
+//		 uint const &blocksize=1024)
+//{
+//	int nofFailedTests     = 0;
+
+	
+int main (int argc,
+			  char *argv[])
+	{
+		cout<<"Dit is de door Sef & Sander aangepaste versie van testLOPESskymapping"<<endl;
+		
+		uint nofFailedTests=0, blocksize=1024;
+		std::string infile, outfile="snstestnewskymapping.img";
+		
+		/*
+		 Check if filename of the dataset is provided on the command line; if only
+		 a fraction of the possible tests can be carried out.
+		 */
+		if (argc < 2) {
+			std::cout << "Usage: testnewskymapping <inputfile.dat> [<output-image>]. Now using snstestnewskymapping.dat" << endl;
+			infile = "../../../src/CR-Tools/apps/seftestnewskymapping.dat"; 
+		} else {
+			infile = argv[1];
+			if (argc > 2) {
+				outfile  = argv[2];
+			};
+		}
+		
+		//nofFailedTests += simpleImage (infile,
+//									   outfile,
+//									   blocksize);
+		
+	
+	
+	
+	
+  
 
   //_______________________________________________________
   // Read input paramaters from infile
@@ -96,29 +249,41 @@ int  simpleImage(string const &infile,
   ifstream b_file ("../../../src/CR-Tools/apps/snstestnewskymapping.dat"); 
   
   int ninputfiles;
-  int nantsinfile;
+  //int nantsinfile;
   int nants=0;
+
   string pathname;
   int counter = 0;  
   b_file >> ninputfiles;
   b_file >> pathname;
   vector<string> inputfiles(ninputfiles);
+  vector<int> nantsinfile(ninputfiles);
+
+	
   CR::LOFAR_TBB **drstart;
-  
   drstart = new CR::LOFAR_TBB*[ninputfiles];
+ 
+  Vector< int >*rcu_ids;
+  rcu_ids=new Vector< int >[ninputfiles];	
+	
 #ifndef upload
   for(int i=0; i<ninputfiles; i++){
   	b_file>> inputfiles[i];
 	//cout<<endl<<i<<endl<<endl;
   	drstart[i] = new CR::LOFAR_TBB(pathname+inputfiles[i], blocksize);
-	nantsinfile = drstart[i]->fx().shape()[1];
-	nants+=nantsinfile;
+	nantsinfile[i] = drstart[i]->fx().shape()[1];
+	rcu_ids[i]=drstart[i]->channelID()%1000; 
+	cout << "rcus for file" << i << ": " << rcu_ids[i] << endl;
+	nants+=nantsinfile[i];
   }
   cout<<"total number of antennas = "<<nants<<endl;
-	cout << "shape of drstart[0]->fx() = " << drstart[0]->fx().shape() << endl;
+  cout << "shape of drstart[0]->fx() = " << drstart[0]->fx().shape() << endl;
   cout << "shape of drstart[0]->fft() = " << drstart[0]->fft().shape() << endl;
-	cout <<"drstart->fft for antenna "<<0<<" = "<<drstart[0]->fft()[0][0]<<endl;
-	cout <<"drstart->fft for antenna "<<1<<" = "<<drstart[0]->fft()[1][0]<<endl;
+  cout <<"drstart->fft for antenna "<<0<<" = "<<drstart[0]->fft()[0][0]<<endl;
+  cout <<"drstart->fft for antenna "<<1<<" = "<<drstart[0]->fft()[1][0]<<endl;
+	
+
+	
 
 /*  CR::LOFAR_TBB **dr;
   dr = new CR::LOFAR_TBB*[nants];
@@ -206,10 +371,61 @@ int  simpleImage(string const &infile,
   cout<<"blocksperframe: " << blocksperframe<<endl;
   cout<<"starts: " <<start[0]<<" "<<start[1]<<" "<<start[2]<<endl;
 */
-	  
+	
+	
+ // check out the antennaselection
+	
 
+   Vector< bool >*antennaselection;
+   antennaselection=new Vector< bool>[ninputfiles];
+//	
+//	Vector<uInt>* rcu_ids;
+//	rcu_ids=new Vector<uInt>[ninputfiles];
+   bool test;
+   string selection="even";
+	if(selection=="even"){
+		for(int i=0;i<ninputfiles;i++){
+			antennaselection[i] = (rcu_ids[i]%2==0);
+			cout << "Ant selection for file " << i << " = " << antennaselection[i] << endl;
+		}
+	} else if(selection=="odd"){
+		for(int i=0;i<ninputfiles;i++){
+			antennaselection[i] = (rcu_ids[i]%2==1);
+			cout << "Ant selection for file " << i << " = " << antennaselection[i] << endl;
+		}
+	} else {
+		cout <<"Another selection than odd or even is not implemented yet";
+	}
+		
+		
+	int nUsedants=0;
+	vector<int> nUsedantsinfile(ninputfiles);
+	Vector< int >*used_rcu_ids;
+	used_rcu_ids=new Vector< int >[ninputfiles];
+	
+	for(int i=0;i<ninputfiles;i++){
+		nUsedantsinfile[i]=0;
+		for(int j=0;j<nantsinfile[i];j++){
+			if(antennaselection[i][j]){nUsedantsinfile[i]++;}
+		}
+		used_rcu_ids[i].resize(nUsedantsinfile[i]);
+	    nUsedants+=nUsedantsinfile[i];
+		int counter=0;
+		for(int j=0;j<nantsinfile[i];j++){
+			if(antennaselection[i][j]){used_rcu_ids[i][counter]=rcu_ids[i][j]; counter++;}
+		}
+		cout << "used rcus for file " << i << " : " << used_rcu_ids[i] << endl;
+	}	
+	//nUsedants=nants;
+	//nUsedantsinfile=nantsinfile;
+  
 
-  try {    
+	
+	//used_rcu_ids=rcu_ids;
+		
+		
+		
+    try {    
     
     //________________________________________________________
     cout << "testlightningskymapping::simpleImage reading in event and setting up the pipeline"  << endl;
@@ -258,19 +474,45 @@ int  simpleImage(string const &infile,
     //________________________________________________________
     // retrieve the antenna positions
 
-    cout << "testlightningskymapping::simpleImage Retrieving the antenna positions"  << endl;
-    Matrix<double> antPositions(nants,3);
-    for (uInt j=0; j<antPositions.nrow(); j++) {
-       for (uInt i=0; i<antPositions.ncolumn(); i++) {
-          b_file >> antPositions(j,i);
-       }      
-    }
-		Matrix<double> subantPositions;
-		IPosition start_1 (ndim,startant,startcoord), length_1 (ndim,nant,ncoord), stride_1 (ndim,antstr,coordstr);
-    Slicer slicer1 (start_1, length_1, stride_1);
-		subantPositions = antPositions(slicer1);
-		cout << "the antanna positions are: " << subantPositions <<endl;
-  
+//    cout << "testlightningskymapping::simpleImage Retrieving the antenna positions"  << endl;
+//    Matrix<double> antPositions(nants,3);
+//    for (uInt j=0; j<antPositions.nrow(); j++) {
+//       for (uInt i=0; i<antPositions.ncolumn(); i++) {
+//          b_file >> antPositions(j,i);
+//       }      
+//    }
+//		Matrix<double> subantPositions;
+//		IPosition start_1 (ndim,startant,startcoord), length_1 (ndim,nant,ncoord), stride_1 (ndim,antstr,coordstr);
+//    Slicer slicer1 (start_1, length_1, stride_1);
+//		subantPositions = antPositions(slicer1);
+//		cout << "the antanna positions are: " << subantPositions <<endl;
+	  
+	//******* NEW METHOD ***************
+	  cout << "testlightningskymapping::simpleImage Retrieving the antenna positions"  << endl;
+	  Vector<MVPosition> subantPositions;
+	  Vector<MVPosition> tempantPositions;
+	  
+	  subantPositions.resize(nUsedants);
+	  uInt counter=0;
+	  Int nRCU;
+	  
+	  for(int i=0; i<ninputfiles; i++){
+		  
+		  used_rcu_ids[i].shape(nRCU);
+		  tempantPositions.resize(nRCU);
+		  
+		  tempantPositions = CS302_antenna_position_value(used_rcu_ids[i]);
+		  
+		  //nrRCUs = new int(0);
+		  
+		  for(int j=0; j<nRCU;j++){
+			  subantPositions(counter)=tempantPositions(j);
+			  cout<<counter;
+			  counter++;
+		  }		  
+	  }
+	  
+	  cout << subantPositions << endl;
 
     
     //________________________________________________________
@@ -285,7 +527,7 @@ int  simpleImage(string const &infile,
     
     cout << "                                                         ... done."  << endl;
 
-		skymapper.setFarField();				// Not for imaging lightning!!!
+	skymapper.setFarField();				// Not for imaging lightning!!!
     skymapper.summary();
     
     //________________________________________________________
@@ -296,17 +538,17 @@ int  simpleImage(string const &infile,
 		
     uint nofBlocks = nofBlocksPerFrame * nofFrames;
 
-    Matrix<casa::DComplex> data(drstart[0]->fftLength(),nants); 
+    Matrix<casa::DComplex> data(drstart[0]->fftLength(),nUsedants); 
 	
 		Matrix<casa::DComplex> subdata; 
 		IPosition start (ndim,startfreq,startant), length (ndim,nfreq,nant), stride (ndim,freqstr,antstr);
     Slicer slicer (start, length, stride);
 		
 																							// Sander's new implementation
-		casa::Vector<uint> offset(nantsinfile);
-		std::vector<int> offset1(nantsinfile);
+		casa::Vector<uint> offset(nantsinfile[ninputfiles-1]);
+		std::vector<int> offset1(nantsinfile[ninputfiles-1]);
 		int offset_zero;
-		offset_zero = drstart[ninputfiles-1]->sample_number()[nantsinfile-1];
+		offset_zero = drstart[ninputfiles-1]->sample_number()[nantsinfile[ninputfiles-1]-1];
 		
 		cout<<"offset 0 = "<<offset_zero<<endl;
 		cout <<"drstart->fft for antenna "<<0<<" = "<<drstart[0]->fft()[0][0]<<endl;
@@ -322,9 +564,10 @@ int  simpleImage(string const &infile,
 			counter = 0;
 	 		for(int i=0; i<ninputfiles; i++){
 				drstart[i]->setBlock(blocknum);
-				nantsinfile = drstart[i]->fx().shape()[1];
+				//nantsinfile = drstart[i]->fx().shape()[1];
 				offset = drstart[i]->sample_number();
-	  		for(int j=0; j<nantsinfile; j++){
+	  		for(int j=0; j<nantsinfile[i]; j++){
+				if(!antennaselection[i][j]){continue;} //skip antenna's that are not selected
 					offset1[j] = -1*offset[j] + offset_zero;
 					drstart[i]->setShift(offset1[j]);
 					
@@ -340,8 +583,8 @@ int  simpleImage(string const &infile,
 					}
  	 		  }
 			}
-	  	subdata = data (slicer);
-    	skymapper.processData(subdata);		// Change if slicer is used!
+	  	//subdata = data (slicer);
+       skymapper.processData(data);		// Change if slicer is used!
     };
 			
 		cout<<"offset = "<<offset<<endl;
@@ -358,34 +601,48 @@ int  simpleImage(string const &infile,
   return nofFailedTests;
 }
 
+
+
+/*!
+ \brief This will give the positions back from the selected antennes of the inner array of station CS302 in local coordinates. 
+ 
+ \param rcu_ids       -- casa::Vector<uint> with the selected RCUs
+ 
+ \return selected_positions --  The positions of the selected antenna's 
+*/
+
+
+
+
+
 // -----------------------------------------------------------------------------
 
-int main (int argc,
-	  char *argv[])
-{
-  cout<<"Dit is de door Sef & Sander aangepaste versie van testLOPESskymapping"<<endl;
-
-  uint nofFailedTests=0, blocksize=1024;
-  std::string infile, outfile="snstestnewskymapping.img";
-
-  /*
-    Check if filename of the dataset is provided on the command line; if only
-    a fraction of the possible tests can be carried out.
-  */
-  if (argc < 2) {
-    std::cout << "Usage: testnewskymapping <inputfile.dat> [<output-image>]. Now using snstestnewskymapping.dat" << endl;
-	infile = "../../../src/CR-Tools/apps/seftestnewskymapping.dat"; 
-  } else {
-    infile = argv[1];
-     if (argc > 2) {
-       outfile  = argv[2];
-     };
-  }
-  
-  nofFailedTests += simpleImage (infile,
-				 outfile,
-				 blocksize);
-  
-  return nofFailedTests;
-}
+//int main (int argc,
+//	  char *argv[])
+//{
+//  cout<<"Dit is de door Sef & Sander aangepaste versie van testLOPESskymapping"<<endl;
+//
+//  uint nofFailedTests=0, blocksize=1024;
+//  std::string infile, outfile="snstestnewskymapping.img";
+//
+//  /*
+//    Check if filename of the dataset is provided on the command line; if only
+//    a fraction of the possible tests can be carried out.
+//  */
+//  if (argc < 2) {
+//    std::cout << "Usage: testnewskymapping <inputfile.dat> [<output-image>]. Now using snstestnewskymapping.dat" << endl;
+//	infile = "../../../src/CR-Tools/apps/seftestnewskymapping.dat"; 
+//  } else {
+//    infile = argv[1];
+//     if (argc > 2) {
+//       outfile  = argv[2];
+//     };
+//  }
+//  
+//  nofFailedTests += simpleImage (infile,
+//				 outfile,
+//				 blocksize);
+//  
+//  return nofFailedTests;
+//}
 
