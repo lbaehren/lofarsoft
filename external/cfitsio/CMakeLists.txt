@@ -18,7 +18,7 @@ option (CFITSIO_VERBOSE_BUILD     "Be verbose during build process?"           N
 ## Options of the library itself
 
 option (CFITSIO_enable_lfs       "Enable large file system support?" YES )
-option (CFITSIO_enable_reentrant "Enable reentrant multithreading?"  YES )
+option (CFITSIO_enable_reentrant "Enable reentrant multithreading?"  NO  )
 option (CFITSIO_enable_hera      "Build for HERA project?"           NO  )
 
 ## ------------------------------------------------------------------------------
