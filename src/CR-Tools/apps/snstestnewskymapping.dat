@@ -2,8 +2,8 @@
 /mnt/lofar/lightning/
 lightning_17_23.h5 lightning_17_23.h5 
 
-10 23.1 1 10000. 5000.
-1 1 225500
+70 1 10000. 5000.
+1 1 226098
 
 2
 2 4 1
@@ -28,7 +28,7 @@ ninputfiles
 filedir
 filenames
 
-pixels increment depth startdepth depthstr
+pixels depth startdepth depthstr
 nframes blocksperframe startblock
 
 ndim

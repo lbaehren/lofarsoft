@@ -81,7 +81,7 @@ using CR::TimeFreq;
   \return nofFailedTests --  The number of failed tests encountered within this
           fucntion.
 */
-//#define upload	//comment to upload if it does not compile.
+//#define upload	//uncomment to upload if it does not compile.
 
 int  simpleImage(string const &infile,
 		 string const &outfile,
@@ -99,7 +99,7 @@ int  simpleImage(string const &infile,
   int nantsinfile;
   int nants=0;
   string pathname;
-  
+  int counter = 0;  
   b_file >> ninputfiles;
   b_file >> pathname;
   vector<string> inputfiles(ninputfiles);
@@ -120,7 +120,7 @@ int  simpleImage(string const &infile,
 	cout <<"drstart->fft for antenna "<<0<<" = "<<drstart[0]->fft()[0][0]<<endl;
 	cout <<"drstart->fft for antenna "<<1<<" = "<<drstart[0]->fft()[1][0]<<endl;
 
-  CR::LOFAR_TBB **dr;
+/*  CR::LOFAR_TBB **dr;
   dr = new CR::LOFAR_TBB*[nants];
   int counter = 0;
   for(int i=0; i<ninputfiles; i++){
@@ -131,10 +131,11 @@ int  simpleImage(string const &infile,
 			antennasetter[j]=True;
 			cout<<"antennasetter = "<<antennasetter<<endl;
 			cout<<"counter = "<<counter<<endl;
-		 	drstart[i]->setSelectedAntennas(antennasetter);
+		 	//drstart[i]->setSelectedAntennas(antennasetter);
+			//cout<<drstart[i]->selectedAntennas();
 			dr[counter] = drstart[i];
 			counter++;
-	}
+		}
   }
   
 	cout << "shape of dr[0] = " << dr[0]->shape() << endl;
@@ -146,6 +147,7 @@ int  simpleImage(string const &infile,
 	for(int i=0;i<nants;i++){
 		cout <<"dr->fft for antenna "<<i<<" = "<<dr[i]->fft()[0][0]<<endl;
 	}
+*/
 	cout <<"drstart->fft for antenna "<<0<<" = "<<drstart[0]->fft()[0][0]<<endl;
 	//cout <<"drstart->fft for antenna "<<1<<" = "<<drstart[0]->fft()[1][0]<<endl;
 
@@ -159,13 +161,6 @@ int  simpleImage(string const &infile,
   int nframes;
   int blocksperframe;
   int startblock;
-  
-  int start[3]; 
-  int length[3];
-  int stride[3];
-  int start1[3];
-  int length1[3];
-  int stride1[3];
 
   int ndim;
   int startant;
@@ -180,7 +175,7 @@ int  simpleImage(string const &infile,
 
   //Read file:
   b_file>> pixels;
-  b_file>> increment;
+  increment = 231./pixels;
   b_file>> depth;
   b_file>> startdepth;
   b_file>> depthstr;
@@ -206,25 +201,6 @@ int  simpleImage(string const &infile,
   
   cout<<"ncoord = " <<ncoord<<" (should be 3)"<<endl;
   
-  start[0]=ndim;
-  start[1]=startfreq;
-  start[2]=startant;
-  length[0]=ndim;
-  length[1]=nfreq;
-  length[2]=nant;
-  stride[0]=ndim;
-  stride[1]=freqstr;
-  stride[2]=antstr;
-  
-  start1[0]=ndim;
-  start1[1]=startant;
-  start1[2]=startcoord;
-  length1[0]=ndim;
-  length1[1]=nant;
-  length1[2]=ncoord;
-  stride1[0]=ndim;
-  stride1[1]=antstr;
-  stride1[2]=coordstr;
 /*  cout << "pixels: "<<pixels<<endl;
   cout<< "depth: " <<depth<<endl;
   cout<<"blocksperframe: " << blocksperframe<<endl;
@@ -239,35 +215,6 @@ int  simpleImage(string const &infile,
     cout << "testlightningskymapping::simpleImage reading in event and setting up the pipeline"  << endl;
 	
     CR::CRinvFFT pipeline;
-/*    Record obsrec;
-    obsrec.define("LOPES",caltable_lopes);
-    pipeline.SetObsRecord(obsrec);
-    for(int i=0; i<ninputfiles; i++){
-	pipeline.InitEvent(dr[i]);
-	}
-*/	
-		// correct for the offset relative to antenna 0. Be aware that reading from the beginning of the file may give problems.
-		std::vector< int > offset(nants);
-		for(int i=0; i<nants; i++){
-		offset[i] = dr[i]->sample_number()[0];
-	  }
-    	std::vector<int> offset1(nants);
-	  for(int i=0; i<nants; i++){
-	 		offset1[i] = -1*offset[i] + offset[nants-1];
-		}
-		cout<<"offset = "<<offset<<endl;
-		cout<<"offset1 = "<<offset1<<endl;
- 		cout<<"shift before = "<<dr[0]->shift(0)<<endl;
-		dr[0]->setBlock(230000);
-		cout << "somewhere in dr = " << dr[3]->fx()[0][6] << endl;
-		
-		for(int i=0; i<ninputfiles; i++){
-			dr[i]->setShift(offset1[i]);
-		}
-		cout<<"shift after = "<<dr[0]->shift(0)<<endl;
-		dr[0]->setBlock(230000);
-		cout << "somewhere in dr = " << dr[3]->fx()[0][6] << endl;
-
 
     //________________________________________________________
     // Set up the skymap coordinates and infos
@@ -318,16 +265,13 @@ int  simpleImage(string const &infile,
           b_file >> antPositions(j,i);
        }      
     }
-	Matrix<double> subantPositions;
-	//cout<<start1[0]<<" "<<start1[1]<<" "<<start1[2]<<endl;
-	IPosition start_1 (start1[0],start1[1],start1[2]), length_1 (length1[0],length1[1],length1[2]), stride_1 (stride1[0],stride1[1],stride1[2]);
-	//cout<<"bla1"<<endl;
+		Matrix<double> subantPositions;
+		IPosition start_1 (ndim,startant,startcoord), length_1 (ndim,nant,ncoord), stride_1 (ndim,antstr,coordstr);
     Slicer slicer1 (start_1, length_1, stride_1);
-	//cout<<"bla2"<<endl;
-	subantPositions = antPositions(slicer1);
-	cout << "the antanna positions are: " << subantPositions <<endl;
-    
-	
+		subantPositions = antPositions(slicer1);
+		cout << "the antanna positions are: " << subantPositions <<endl;
+  
+
     
     //________________________________________________________
     // Set up the skymapper 
@@ -347,39 +291,62 @@ int  simpleImage(string const &infile,
     //________________________________________________________
     // process the event
     
-    
-    
+ 
+		// correct for the offset relative to the last antenna. Be aware that reading from the beginning of the file may give problems.
+		
     uint nofBlocks = nofBlocksPerFrame * nofFrames;
 
-    Matrix<casa::DComplex> data(dr[0]->fftLength(),nants); 
+    Matrix<casa::DComplex> data(drstart[0]->fftLength(),nants); 
 	
 		Matrix<casa::DComplex> subdata; 
-		IPosition start_ (start[0],start[1],start[2]), length_ (length[0],length[1],length[2]), stride_ (stride[0],stride[1],stride[2]);
-    Slicer slicer (start_, length_, stride_);
-	
-		uint startblocknum = startblock;
-
+		IPosition start (ndim,startfreq,startant), length (ndim,nfreq,nant), stride (ndim,freqstr,antstr);
+    Slicer slicer (start, length, stride);
+		
+																							// Sander's new implementation
+		casa::Vector<uint> offset(nantsinfile);
+		std::vector<int> offset1(nantsinfile);
+		int offset_zero;
+		offset_zero = drstart[ninputfiles-1]->sample_number()[nantsinfile-1];
+		
+		cout<<"offset 0 = "<<offset_zero<<endl;
+		cout <<"drstart->fft for antenna "<<0<<" = "<<drstart[0]->fft()[0][0]<<endl;
+																			
+//	casa::Matrix< int > offset(ninputfiles,nantsinfile);
+//	casa::Matrix< int > offset1(ninputfiles,nantsinfile);
+		
     cout << "Processing block: (out of "<<nofBlocks<<")"<<endl;
-    for (uint blocknum=startblocknum; blocknum<startblocknum+nofBlocks; blocknum++){
+    for (uint blocknum=startblock; blocknum<startblock+nofBlocks; blocknum++){
     	//if(blocknum%10==0){
-				cout << blocknum-startblocknum<<endl; 
+				cout << blocknum-startblock<<endl; 
 			//}
-      for(int i=0; i<nants; i++){
-	  		dr[i]->setBlock(blocknum);
-	  		//cout<<"so far so good..." << endl;
-      	//cout<<dr[i]->fft().column(0)<<endl;
-				data[i]  = dr[i]->fft().column(0);
-				for(int j=0; j < nfreq*30/100; j++){
-					data[i][j] = 0.;
-				}
-				for(int j=0; j < nfreq*10/100; j++){
-					data[i][nfreq-nfreq*10/100+j] = 0.;
-				}
-      }
+			counter = 0;
+	 		for(int i=0; i<ninputfiles; i++){
+				drstart[i]->setBlock(blocknum);
+				nantsinfile = drstart[i]->fx().shape()[1];
+				offset = drstart[i]->sample_number();
+	  		for(int j=0; j<nantsinfile; j++){
+					offset1[j] = -1*offset[j] + offset_zero;
+					drstart[i]->setShift(offset1[j]);
+					
+	  	    cout<<"so far so good. counter i j = "<<counter<<" "<<i<<" "<<j<<endl;
+					cout<<drstart[i]->fft()[0][0]<<endl;
+    	  	data[counter] = drstart[i]->fft().column(j);
+					counter++;
+					for(int k=0; k < nfreq*30/100; k++){
+						data[i][j] = 0.;
+					}
+					for(int l=0; l < nfreq*10/100; l++){
+						data[i][nfreq-nfreq*10/100+j] = 0.;
+					}
+ 	 		  }
+			}
 	  	subdata = data (slicer);
     	skymapper.processData(subdata);		// Change if slicer is used!
     };
-	
+			
+		cout<<"offset = "<<offset<<endl;
+		cout<<"offset1 = "<<offset1<<endl;
+
    cout << "datashape = " << data.shape() << endl;
    cout << "subdatashape = " << subdata.shape() << endl;
 
