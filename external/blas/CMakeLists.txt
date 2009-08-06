@@ -9,10 +9,11 @@
 ##
 ## -----------------------------------------------------------------------------
 
+## Project name
 project (BLAS Fortran C)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.6)
 
 subdirs (
   cblas
@@ -44,7 +45,7 @@ else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
-include (FindG2C)
+include (FindGFortran)
 
 ## -----------------------------------------------------------------------------
 ## Build "libblas" first
