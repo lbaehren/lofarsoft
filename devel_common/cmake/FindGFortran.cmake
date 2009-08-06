@@ -88,14 +88,15 @@ if (UNIX)
 endif (UNIX)
 
 ## -----------------------------------------------------------------------------
-## Check for the compiler executable
+## Check for GFortran
+
+## Executable
 
 find_program (GFORTRAN_EXECUTABLE gfortran gfortran-4.3 gfortran-4.2  gfortran-4.1
   PATHS ${bin_locations}
   )
 
-## -----------------------------------------------------------------------------
-## Check for the header files
+## Header files
 
 find_path (GFORTRAN_INCLUDES libgfortran.h
   PATHS
@@ -106,6 +107,18 @@ find_path (GFORTRAN_INCLUDES libgfortran.h
   4.1.2/finclude
   NO_DEFAULT_PATH
   )
+
+## Library
+
+find_library (GFORTRAN_LIBRARY gfortran
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  )
+
+## -----------------------------------------------------------------------------
+## Check for G2C
+
+## Header files
 
 find_path (G2C_INCLUDES g2c.h
   PATHS
@@ -121,6 +134,18 @@ find_path (G2C_INCLUDES g2c.h
   i386-redhat-linux/3.4.6/include
   )
 
+## Library
+
+find_library (G2C_LIBRARY g2c
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  )
+
+## -----------------------------------------------------------------------------
+## Check for F2C
+
+## Header files
+
 find_path (F2C_INCLUDES f2c.h
   PATHS ${include_locations} /usr/lib/gcc /usr/lib/gcc-lib
   PATH_SUFFIXES
@@ -132,32 +157,9 @@ find_path (F2C_INCLUDES f2c.h
   i386-redhat-linux/3.4.6/include
   )
 
-## -----------------------------------------------------------------------------
-## Check for the library
+## Library 
 
-## libgfortran
-
-find_library (HAVE_LIBGFORTRAN gfortran
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  )
-
-if (HAVE_LIBGFORTRAN)
-  set (GFORTRAN_LIBRARIES ${HAVE_LIBGFORTRAN})
-endif (HAVE_LIBGFORTRAN)
-
-## libg2c
-
-find_library (G2C_LIBRARIES
-  NAMES gfortran f2c g2c gcc
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  )
-
-## libf2c
-
-find_library (F2C_LIBRARIES
-  NAMES f2c
+find_library (F2C_LIBRARY f2c
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )
@@ -165,27 +167,40 @@ find_library (F2C_LIBRARIES
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
+if (GFORTRAN_LIBRARY)
+  set (GFORTRAN_LIBRARIES ${GFORTRAN_LIBRARY})
+else (GFORTRAN_LIBRARY)
+  if (G2C_LIBRARY)
+    set (GFORTRAN_LIBRARIES ${G2C_LIBRARY})
+  else (G2C_LIBRARY)
+    if (F2C_LIBRARY)
+      set (GFORTRAN_LIBRARIES ${F2C_LIBRARY})
+    endif (F2C_LIBRARY)
+  endif (G2C_LIBRARY)
+endif (GFORTRAN_LIBRARY)
+
 ## GFortran
 
-if (GFORTRAN_INCLUDES AND GFORTRAN_LIBRARIES)
+if (GFORTRAN_INCLUDES AND GFORTRAN_LIBRARY)
   set (HAVE_GFORTRAN TRUE)
-else (GFORTRAN_INCLUDES AND GFORTRAN_LIBRARIES)
+else (GFORTRAN_INCLUDES AND GFORTRAN_LIBRARY)
   set (HAVE_GFORTRAN FALSE)
   if (NOT GFORTRAN_FIND_QUIETLY)
     if (NOT GFORTRAN_INCLUDES)
       message (STATUS "Unable to find GFortran header files!")
     endif (NOT GFORTRAN_INCLUDES)
-    if (NOT GFORTRAN_LIBRARIES)
+    if (NOT GFORTRAN_LIBRARY)
       message (STATUS "Unable to find GFortran library files!")
-    endif (NOT GFORTRAN_LIBRARIES)
+    endif (NOT GFORTRAN_LIBRARY)
   endif (NOT GFORTRAN_FIND_QUIETLY)
-endif (GFORTRAN_INCLUDES AND GFORTRAN_LIBRARIES)
+endif (GFORTRAN_INCLUDES AND GFORTRAN_LIBRARY)
 
 if (HAVE_GFORTRAN)
   if (NOT GFORTRAN_FIND_QUIETLY)
     message (STATUS "Found components for GFortran")
-    message (STATUS "GFORTRAN_INCLUDES  = ${GFORTRAN_INCLUDES}")
-    message (STATUS "GFORTRAN_LIBRARIES = ${GFORTRAN_LIBRARIES}")
+    message (STATUS "GFORTRAN_EXECUTABLE = ${GFORTRAN_EXECUTABLE}")
+    message (STATUS "GFORTRAN_INCLUDES   = ${GFORTRAN_INCLUDES}")
+    message (STATUS "GFORTRAN_LIBRARY    = ${GFORTRAN_LIBRARY}")
   endif (NOT GFORTRAN_FIND_QUIETLY)
 else (HAVE_GFORTRAN)
   if (GFORTRAN_FIND_REQUIRED)
@@ -195,29 +210,29 @@ endif (HAVE_GFORTRAN)
 
 ## g2c
 
-if (G2C_INCLUDES AND G2C_LIBRARIES)
+if (G2C_INCLUDES AND G2C_LIBRARY)
   set (HAVE_G2C TRUE)
-else (G2C_INCLUDES AND G2C_LIBRARIES)
+else (G2C_INCLUDES AND G2C_LIBRARY)
   set (HAVE_G2C FALSE)
   if (NOT GFORTRAN_FIND_QUIETLY)
     if (NOT G2C_INCLUDES)
-      message (STATUS "Unable to find G2c header files!")
+      message (STATUS "Unable to find G2C header files!")
     endif (NOT G2C_INCLUDES)
-    if (NOT G2C_LIBRARIES)
-      message (STATUS "Unable to find G2c library files!")
-    endif (NOT G2C_LIBRARIES)
+    if (NOT G2C_LIBRARY)
+      message (STATUS "Unable to find G2C library files!")
+    endif (NOT G2C_LIBRARY)
   endif (NOT GFORTRAN_FIND_QUIETLY)
-endif (G2C_INCLUDES AND G2C_LIBRARIES)
+endif (G2C_INCLUDES AND G2C_LIBRARY)
 
 if (HAVE_G2C)
   if (NOT GFORTRAN_FIND_QUIETLY)
-    message (STATUS "Found components for G2c")
+    message (STATUS "Found components for G2C")
     message (STATUS "G2C_INCLUDES  = ${G2C_INCLUDES}")
-    message (STATUS "G2C_LIBRARIES = ${G2C_LIBRARIES}")
+    message (STATUS "G2C_LIBRARY   = ${G2C_LIBRARY}")
   endif (NOT GFORTRAN_FIND_QUIETLY)
 else (HAVE_G2C)
   if (G2C_FIND_REQUIRED)
-    message (FATAL_ERROR "Could not find G2c!")
+    message (FATAL_ERROR "Could not find G2C!")
   endif (G2C_FIND_REQUIRED)
 endif (HAVE_G2C)
 
@@ -226,9 +241,9 @@ endif (HAVE_G2C)
 
 mark_as_advanced (
   GFORTRAN_INCLUDES
-  GFORTRAN_LIBRARIES
+  GFORTRAN_LIBRARY
   G2C_INCLUDES
-  G2C_LIBRARIES
+  G2C_LIBRARY
   F2C_INCLUDES
-  F2C_LIBRARIES
+  F2C_LIBRARY
   )
