@@ -74,10 +74,6 @@ endif (CASA_LIBRARIES)
 
 if (GFORTRAN_LIBRARIES)
   list (APPEND cr_link_libraries ${GFORTRAN_LIBRARIES})
-else (GFORTRAN_LIBRARIES)
-  if (G2C_LIBRARIES)
-    list (APPEND cr_link_libraries ${G2C_LIBRARIES})
-  endif (G2C_LIBRARIES)
 endif (GFORTRAN_LIBRARIES)
 
 if (LAPACK_LIBRARIES)

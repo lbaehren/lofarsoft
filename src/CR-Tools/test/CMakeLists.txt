@@ -65,10 +65,6 @@ if (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
   
   if (GFORTRAN_LIBRARIES) 
     list (APPEND tests_casacore_link_libs ${GFORTRAN_LIBRARIES})
-  else (GFORTRAN_LIBRARIES)
-    if (G2C_LIBRARIES) 
-      list (APPEND tests_casacore_link_libs ${G2C_LIBRARIES})
-    endif (G2C_LIBRARIES)
   endif (GFORTRAN_LIBRARIES)
   
   foreach (test ${tests_casacore})
