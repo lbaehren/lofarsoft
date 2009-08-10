@@ -97,19 +97,19 @@ if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
 
   add_custom_target (run_make ALL
     COMMAND make
+    COMMAND make install
     WORKING_DIRECTORY ${CASACORE_BINARY_DIR}/build
-    COMMENT "Start building casacore library ..."
+    COMMENT "Building and installing casacore ..."
     )
   add_dependencies (run_make run_configure)
 
   ## Run "make install"
 
   add_custom_target (install ALL
-    COMMAND make install
-    COMMAND rm -rf ${CASACORE_BINARY_DIR}/build
-    COMMAND rm -rf ${CASACORE_BINARY_DIR}/casacore
-    WORKING_DIRECTORY ${CASACORE_BINARY_DIR}/build
-    COMMENT "Installing casacore library and header files ..."
+    COMMAND rm -rf build
+    COMMAND rm -rf casacore
+    WORKING_DIRECTORY ${CASACORE_BINARY_DIR}
+    COMMENT "Cleaning up the build directory ..."
     )
   add_dependencies (install run_make)
 
