@@ -2015,227 +2015,160 @@ namespace CR { // Namespace  -- begin
 					double const& peak_height )
     
   {
-    
     cout << "To store data informaton in ntuples" << endl ;
     
     try {
-    
-    char outFileNameR[256] = "pulse_data.root" ;
-    
-    TFile *myOutput = new TFile( outFileNameR, "RECREATE");
-  
-   TNtuple *eventuple_FFT = new TNtuple("eventuple_FFT","eventuple_FFT","time:frame:Average_P5:sample_value") ;
-    
-   TNtuple *eventuple_raw = new TNtuple("eventuple_raw","eventuple_raw","time:frame:Average_P5:sample_value") ;
+      uint n_frames (n_samples/1024);
+      casa::Matrix<double> Cleaned_DATA;
+      casa::Vector<double> beamed_Array;
+      casa::Vector<double> No_Signal;
+      casa::Vector<double> FFT_Signal;
+      casa::Vector<double> Average_P;
 
-  // TNtuple *eventuple_PPF = new TNtuple("eventuple_PPF","eventuple_PPF","time:frame:Average_P5:sample_value") ;
-    
-     	  casa::Matrix<double> Cleaned_DATA = NuMoonTrigger::Cleaned_data(  data,
-    						    		     	   n_samples,
-								     	   simTEC,
-								     	   nyquist_zone,
-								           sampling_rate,
-								           TEC,
-								           freq_range ) ; 
-									     
-    casa::Vector<double> beamed_Array = NuMoonTrigger::BeamFormed_data(  Cleaned_DATA,
-    									 n_samples,
-									 simTEC,
-									 nyquist_zone,
-									 sampling_rate,
-									 TEC,
-									 freq_range,
-									 pointing_latitude,
-									 pointing_longitude,
-									 gain_scale_factor,
-									 position_x,
-									 position_y,
-									 position_z ) ;   
-  
-    casa::Vector<double> Average_P= NuMoonTrigger::cal_AvPower( beamed_Array ) ;
-    cout << "Average_P5 : " << Average_P <<endl ;
-    uint n_frames = n_samples/1024 ;
-    
-//     casa::Matrix<double> Added_Signal = NuMoonTrigger::Added_SignalData( data, 
-//     				     					 n_samples,
-// 				     					 simTEC,
-// 				     					 nyquist_zone,
-// 				     					 peak_height,
-// 				     					 sampling_rate,
-// 				     					 TEC,
-// 				     					 source_latitude,
-// 				     					 source_longitude,
-// 		  		     					 pointing_latitude,
-// 		  		     					 pointing_longitude,
-// 				     					 gain_scale_factor,
-// 			    	     					 position_x,
-// 		   	    	     					 position_y,
-// 		   	    	     					 position_z,
-// 				     					 freq_range ) ; 
-//   
-					
-    casa::Vector<double> No_Signal = NuMoonTrigger::without_Signal(  data,
-    								     n_samples,
-								     simTEC,
-								     sampling_rate,
-								     nyquist_zone,
-								     time_int_bins,
-								     TEC,
-								     source_latitude,
-								     source_longitude,
-								     pointing_latitude,
-								     pointing_longitude,
-								     gain_scale_factor,
-								     position_x,
-								     position_y,
-								     position_z,
-								     ppf_coeff,
-								     ppf_invcoeff,
-								     freq_range,
-								     peak_height ) ; 
-								     
- 
-//	 uint n_sampless = No_Signal.nelements() ;	
-// 	 ofstream logfile31;
-// 	logfile31.open("NO_signal",ios::out );
-// 	
-// 	for( uint n=0;n< n_sampless; n++){
-// 		logfile31<< No_Signal(n)<< endl;
-// 	}
-// 	logfile31.close() ;
-// 	
-	 						     
-								     
-    casa::Vector<double> FFT_Signal = NuMoonTrigger::FFT_processed( data,
-    								    n_samples,
-								    simTEC,
-								    sampling_rate,
-								    nyquist_zone,
-								    time_int_bins,
-								    TEC,
-								    source_latitude,
-								    source_longitude,
-								    pointing_latitude,
-								    pointing_longitude,
-								    gain_scale_factor,
-								    position_x,
-								    position_y,
-								    position_z,
-								    ppf_coeff,
-								    ppf_invcoeff,
-								    freq_range,
-								    peak_height ) ;     
+//       std::string outfile ("pulse_data.root");
 
-	casa::Vector<double> Average_P_ws= NuMoonTrigger::cal_AvPower( FFT_Signal ) ;
+      TNtuple *eventuple_FFT = new TNtuple ("eventuple_FFT",
+					    "eventuple_FFT",
+					    "time:frame:Average_P5:sample_value") ;
+      TNtuple *eventuple_raw = new TNtuple ("eventuple_raw",
+					    "eventuple_raw",
+					    "time:frame:Average_P5:sample_value") ;
+      /* Clean-up the data */
+      Cleaned_DATA = NuMoonTrigger::Cleaned_data(  data,
+						   n_samples,
+						   simTEC,
+						   nyquist_zone,
+						   sampling_rate,
+						   TEC,
+						   freq_range ) ; 
+      /* Retrieve the beamformed data */
+      beamed_Array = NuMoonTrigger::BeamFormed_data(  Cleaned_DATA,
+						      n_samples,
+						      simTEC,
+						      nyquist_zone,
+						      sampling_rate,
+						      TEC,
+						      freq_range,
+						      pointing_latitude,
+						      pointing_longitude,
+						      gain_scale_factor,
+						      position_x,
+						      position_y,
+						      position_z ) ;   
+      
+      Average_P = NuMoonTrigger::cal_AvPower( beamed_Array ) ;
+            
+      No_Signal = NuMoonTrigger::without_Signal(  data,
+						  n_samples,
+						  simTEC,
+						  sampling_rate,
+						  nyquist_zone,
+						  time_int_bins,
+						  TEC,
+						  source_latitude,
+						  source_longitude,
+						  pointing_latitude,
+						  pointing_longitude,
+						  gain_scale_factor,
+						  position_x,
+						  position_y,
+						  position_z,
+						  ppf_coeff,
+						  ppf_invcoeff,
+						  freq_range,
+						  peak_height ) ; 
+      
+      FFT_Signal = NuMoonTrigger::FFT_processed( data,
+						 n_samples,
+						 simTEC,
+						 sampling_rate,
+						 nyquist_zone,
+						 time_int_bins,
+						 TEC,
+						 source_latitude,
+						 source_longitude,
+						 pointing_latitude,
+						 pointing_longitude,
+						 gain_scale_factor,
+						 position_x,
+						 position_y,
+						 position_z,
+						 ppf_coeff,
+						 ppf_invcoeff,
+						 freq_range,
+						 peak_height ) ;     
+      
+      casa::Vector<double> Average_P_ws= NuMoonTrigger::cal_AvPower( FFT_Signal ) ;
+      
+      uint SAP (0);
+      uint sample_max (0);
+      uint sample_min (0);
+      double Average_P5 (0);
+      double time_Bin (0);
+      double bin_integrated (0);
+      
+      for( uint frame=0; frame< n_frames; frame++ ){
 	
-  //uint n_samples = FFT_Signal.nelements() ;
-  
-/* 
-ofstream logfile3;
-	logfile3.open("FFT_signal",ios::out );
+	sample_max = SAP+1024 ;
+	sample_min = SAP ;
+	Average_P5 = Average_P(frame ) ;
 	
-	for( uint n=0;n< n_samples; n++){
-		logfile3<< FFT_Signal(n)<< endl;
+	for( uint sample= sample_min+50 ; sample< sample_max-50; sample++ ){
+	  
+	  bin_integrated = 0;
+	  
+	  for (uint j=sample; j<(sample+5); j++) {
+	    time_Bin = FFT_Signal(j) ;
+	    bin_integrated = bin_integrated + time_Bin*time_Bin ;
+	  }
+	  if (bin_integrated > 3.0*Average_P5) {
+	    cout << "Eventuple has been written at sample : "<< sample << endl;
+	    eventuple_FFT->Fill (sample,
+				 frame,
+				 Average_P5,
+				 bin_integrated/Average_P5);
+	    sample = sample_max-50 ;
+	  }
 	}
-	logfile3.close() ;
-	*/
-   
-    
-    uint SAP =0 ;
-    
-    for( uint frame=0; frame< n_frames; frame++ ){
-    
-    	  uint sample_max = SAP+1024 ;
-	  
-	  uint sample_min = SAP ;
-	  
-	  double Average_P5 = Average_P(frame ) ;
-	  
-	  //double Average_P_WS = Average_P_ws(frame) ;
-	  
-	  //double peak_power = peak_height*peak_height ;
-	  
-	  //uint bin_1 = 0 ;
-	  //uint bin_compared =2000 ;
-	  //double P_max = 0. ;
-	  
-	  for( uint sample= sample_min+50 ; sample< sample_max-50; sample++ ){
-	  
-	  	double bin_integrated =0 ;
-	  
-	  	for( uint j=sample; j<(sample+5); j++){
-		
-			double time_Bin = FFT_Signal(j) ;
-			
-			bin_integrated = bin_integrated + time_Bin*time_Bin ;
-			
-			}
-			if( bin_integrated > 3.0*Average_P5){
-			
-				cout << "Eventuple has been written at sample : "<< sample << endl ;
-						
-     				eventuple_FFT->Fill( sample, frame, Average_P5, bin_integrated/Average_P5 ) ;
-			
-				sample = sample_max-50 ;
-			}
-	        }
 	SAP = sample_max ;
-	}
-  
-  //  uint samples_n = No_Signal.nelements() ;
-  
-/*    
-    ofstream logfile1;
-    
-    logfile1.open( "p5", ios::out );*/
-    
+      }
+      
     uint s_m_e =0;
     
-    for( uint fra=0; fra< n_frames; fra++ ){
-    
-    	  uint sample_max = s_m_e+1024 ;
-	  
-	  uint sample_min = s_m_e ;
-	  
-	  double Average_P5 = Average_P(fra ) ;
-	  	  		
-	  //double peak_power = peak_height*peak_height ;
-	  
-	 // uint bin_1 = 0 ;
-	  
-	  for( uint samp= sample_min+50 ; samp< sample_max-50; samp++ ){
-	  
-	  	double bin_int =0 ;
-	  
-	  	for( uint j=samp; j<(samp+5); j++){
-		
-			double t_Bin = No_Signal(j) ;
-			
-			bin_int = bin_int + t_Bin*t_Bin ;
-			
-			}
-				
-			if( bin_int > 3.0*Average_P5){
-
-			eventuple_raw->Fill( samp, fra, Average_P5, bin_int/Average_P5 ) ;
-			//uint bin_1 = bin_0 ;
-			samp = sample_max-50 ;
-			}
-	        }
-	s_m_e = sample_max ;
+    for( uint fra=0; fra< n_frames; fra++ ) {
+      sample_max = s_m_e+1024 ;
+      sample_min = s_m_e ;
+      Average_P5 = Average_P(fra ) ;
+      
+      for( uint samp= sample_min+50 ; samp< sample_max-50; samp++ ){
+	
+	double bin_int =0 ;
+	
+	for (uint j=samp; j<(samp+5); j++) {
+	  double t_Bin = No_Signal(j) ;
+	  bin_int = bin_int + t_Bin*t_Bin ;
 	}
 	
-       eventuple_FFT->Write() ;
-//	eventuple_PPF->Write() ;
-	eventuple_raw->Write() ;
+	if( bin_int > 3.0*Average_P5){
+	  
+	  eventuple_raw->Fill( samp, fra, Average_P5, bin_int/Average_P5 ) ;
+	  //uint bin_1 = bin_0 ;
+	  samp = sample_max-50 ;
+	}
+      }
+      s_m_e = sample_max ;
+    }
+    
+    eventuple_FFT->Write() ;
+    eventuple_raw->Write() ;
     } 
     catch ( AipsError x ){
-    cerr << "  NuMoonTrigger:: root_ntuple" << x.getMesg () << endl ;
+      cerr << "  NuMoonTrigger:: root_ntuple" << x.getMesg () << endl ;
     }
-  // return Matrix<DComplex> Geom_weights ;
+    // return Matrix<DComplex> Geom_weights ;
   }
   
   
-  #endif 
-      
-  } // Namespace  -- end
+#endif 
+  
+} // Namespace  -- end

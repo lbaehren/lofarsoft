@@ -76,7 +76,7 @@ endif (HAVE_HDF5)
 
 if (HAVE_DAL AND HAVE_ROOT)
   ## compiler instructions
-  add_executable (tNuMoonTrigger tNuMoonTrigger.cc)
+#  add_executable (tNuMoonTrigger tNuMoonTrigger.cc)
   add_executable (tppfinversion tppfinversion.cc)
   ## linker instructions
   target_link_libraries (tppfinversion
@@ -88,14 +88,13 @@ if (HAVE_DAL AND HAVE_ROOT)
     ${CFITSIO_LIBRARIES}
     ${ROOT_LIBRARIES}
     )
-  target_link_libraries (tNuMoonTrigger
-    cr
-    ${ROOT_LIBRARIES}
-    ${DAL_LIBRARIES}
-#    ${CASA_LIBRARIES}
-    ${HDF5_LIBRARIES}
-    ${CFITSIO_LIBRARIES}
-    )
+#  target_link_libraries (tNuMoonTrigger
+#    cr
+#    ${ROOT_LIBRARIES}
+#    ${DAL_LIBRARIES}
+#    ${HDF5_LIBRARIES}
+#    ${CFITSIO_LIBRARIES}
+#    )
   ## testing
   add_test (tppfinversion tppfinversion ${dataset_beamformed})
   ## installation
