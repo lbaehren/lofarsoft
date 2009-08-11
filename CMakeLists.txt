@@ -87,26 +87,24 @@ endif (SYSTEM_PACKAGES)
 ## ==============================================================================
 
 if (doxygen_executable)
+  ## Creation configuration file for Doxygen
+  configure_file (${USG_ROOT}/doc/Doxyfile.in ${USG_ROOT}/doc/Doxyfile)
+  ## Create documentation
   add_custom_target (doc
+    COMMAND cmake --help-html CMake.html
+    COMMAND ctest --help-html CTest.html
     COMMAND ${doxygen_executable}
-    WORKING_DIRECTORY ${USG_ROOT}/doc  
-    COMMENT "Creating Doxygen documentation for source code ..."
+    WORKING_DIRECTORY ${USG_ROOT}/doc
+    COMMENT "Creating browsable documentation in ${USG_ROOT}/doc ..."
     )
 else (doxygen_executable)
-  message (STATUS "Disabled generation of source documentation - missing Doxygen!")
+  add_custom_target (doc
+    COMMAND cmake --help-html CMake.html
+    COMMAND ctest --help-html CTest.html
+    WORKING_DIRECTORY ${USG_ROOT}/doc
+    COMMENT "Creating browsable documentation in ${USG_ROOT}/doc ..."
+    )
 endif (doxygen_executable)
-
-add_custom_target (doc-cmake
-  COMMAND cmake --help-html CMake.html
-  WORKING_DIRECTORY ${USG_ROOT}/doc  
-  COMMENT "Creating browsable documentation for CMake ..."
-  )
-
-add_custom_target (doc-ctest
-  COMMAND ctest --help-html CTest.html
-  WORKING_DIRECTORY ${USG_ROOT}/doc  
-  COMMENT "Creating browsable documentation for CTest ..."
-  )
 
 ## ==============================================================================
 ##
