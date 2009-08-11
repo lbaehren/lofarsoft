@@ -1,15 +1,16 @@
-2
-/mnt/lofar/lightning/
-lightning_17_23.h5 lightning_17_23.h5 
+3
+/mnt/lofar/CS1_tbb/Wed22-07-2009/
+CS302C-B0T22:46:57.h5 CS302C-B1T22:46:57.h5 CS302C-B2T22:46:57.h5
 
-70 1 10000. 5000.
-1 1 226098
+60 1 10000. 5000.
+1 100 100000
 
 2
 2 4 1
 0 513 1
 0 3 1
 
+all
 0	2.55	0
 0	2.55	0
 -2.36	5.3	0
@@ -36,7 +37,43 @@ startant	nant	antstr
 startfreq	nfreq	freqstr
 startcoord	ncoord	coordstr
 
+selection
 antennapositions
+
+
+
+
+
+
+
+
+
+1
+/mnt/lofar/lightning/
+lightning_17_23.h5  
+
+70 1 10000. 5000.
+1 1 226098
+
+2
+2 4 1
+0 513 1
+0 3 1
+
+even
+0	2.55	0
+0	2.55	0
+-2.36	5.3	0
+-10.03	1.06	0
+-9.04	-12.13	0
+0	65.05	0
+
+0	2.55	0
+0	2.55	0
+-2.36	5.3	0
+-10.03	1.06	0
+-9.04	-12.13	0
+0	65.05	0
 
 
 

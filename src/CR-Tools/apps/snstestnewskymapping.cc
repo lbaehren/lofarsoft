@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id:: snstestlightningskymapping.cc 2009-07-13 swelles                $ |
+ | $Id:: snstestnewskymapping.cc 2009-07-13 swelles                $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2006                                                    *
@@ -71,17 +71,17 @@ using CR::TimeFreq;
 
 // -----------------------------------------------------------------------------
 
-/*!
-  \brief Test processing of the data to generate an image
 
-  \param infile       -- input datafile with data input and program configurations
-  \param outfile      -- (path-)name of the image-file to be generated
-  \param blocksize    -- Number of samples per block of data.
-
-  \return nofFailedTests --  The number of failed tests encountered within this
-          fucntion.
-*/
 //#define upload	//uncomment to upload if it does not compile.
+
+/*!
+ \brief This will give the positions back from the selected antennes of the inner array of station CS302 in local coordinates. 
+ 
+ \param rcu_ids       -- casa::Vector<uint> with the selected RCUs
+ 
+ \return selected_positions --  The positions of the selected antenna's 
+*/
+
 casa::Vector<MVPosition> CS302_antenna_position_value(casa::Vector<Int> rcu_ids){
 	casa::Vector<MVPosition> all_positions;
 	casa::Vector<MVPosition> selected_positions;
@@ -91,7 +91,7 @@ casa::Vector<MVPosition> CS302_antenna_position_value(casa::Vector<Int> rcu_ids)
 	cout << "nr of RCUs: " << nrRCUs << endl;
 	selected_positions.resize(nrRCUs);
 	
-    all_positions(0)=MVPosition(0.000,0.000,0.000);//RCU0,1
+  all_positions(0)=MVPosition(0.000,0.000,0.000);//RCU0,1
 	all_positions(1)=MVPosition(0.000,2.550,0.000);//RCU2,3
 	all_positions(2)=MVPosition(2.250,1.350,0.000);//RCU4,5
 	all_positions(3)=MVPosition(2.250,-1.350,0.000);//RCU6,7
@@ -209,7 +209,18 @@ casa::Vector<MVPosition> CS302_antenna_position_value(casa::Vector<Int> rcu_ids)
 //{
 //	int nofFailedTests     = 0;
 
-	
+
+/*!
+  \brief Process the data to generate an image
+
+  \param infile       -- input datafile with data input and program configurations
+  \param outfile      -- (path-)name of the image-file to be generated
+  \param blocksize    -- Number of samples per block of data.
+
+  \return nofFailedTests --  The number of failed tests encountered within this
+          fucntion.
+*/
+
 int main (int argc,
 			  char *argv[])
 	{
@@ -224,7 +235,7 @@ int main (int argc,
 		 */
 		if (argc < 2) {
 			std::cout << "Usage: testnewskymapping <inputfile.dat> [<output-image>]. Now using snstestnewskymapping.dat" << endl;
-			infile = "../../../src/CR-Tools/apps/seftestnewskymapping.dat"; 
+			infile = "../../../src/CR-Tools/apps/snstestnewskymapping.dat"; 
 		} else {
 			infile = argv[1];
 			if (argc > 2) {
@@ -246,22 +257,22 @@ int main (int argc,
   // Read input paramaters from infile
   
      //Opens for reading the file
-  ifstream b_file ("../../../src/CR-Tools/apps/snstestnewskymapping.dat"); 
+  ifstream b_file (infile.c_str()); 
   
   int ninputfiles;
   //int nantsinfile;
   int nants=0;
 
   string pathname;
-  int counter = 0;  
+ 
   b_file >> ninputfiles;
   b_file >> pathname;
   vector<string> inputfiles(ninputfiles);
   vector<int> nantsinfile(ninputfiles);
 
 	
-  CR::LOFAR_TBB **drstart;
-  drstart = new CR::LOFAR_TBB*[ninputfiles];
+  CR::LOFAR_TBB **dr;
+  dr = new CR::LOFAR_TBB*[ninputfiles];
  
   Vector< int >*rcu_ids;
   rcu_ids=new Vector< int >[ninputfiles];	
@@ -270,17 +281,17 @@ int main (int argc,
   for(int i=0; i<ninputfiles; i++){
   	b_file>> inputfiles[i];
 	//cout<<endl<<i<<endl<<endl;
-  	drstart[i] = new CR::LOFAR_TBB(pathname+inputfiles[i], blocksize);
-	nantsinfile[i] = drstart[i]->fx().shape()[1];
-	rcu_ids[i]=drstart[i]->channelID()%1000; 
+  	dr[i] = new CR::LOFAR_TBB(pathname+inputfiles[i], blocksize);
+	nantsinfile[i] = dr[i]->fx().shape()[1];
+	rcu_ids[i]=dr[i]->channelID()%1000; 
 	cout << "rcus for file" << i << ": " << rcu_ids[i] << endl;
 	nants+=nantsinfile[i];
   }
   cout<<"total number of antennas = "<<nants<<endl;
-  cout << "shape of drstart[0]->fx() = " << drstart[0]->fx().shape() << endl;
-  cout << "shape of drstart[0]->fft() = " << drstart[0]->fft().shape() << endl;
-  cout <<"drstart->fft for antenna "<<0<<" = "<<drstart[0]->fft()[0][0]<<endl;
-  cout <<"drstart->fft for antenna "<<1<<" = "<<drstart[0]->fft()[1][0]<<endl;
+  cout << "shape of dr[0]->fx() = " << dr[0]->fx().shape() << endl;
+  cout << "shape of dr[0]->fft() = " << dr[0]->fft().shape() << endl;
+  cout <<"dr->fft for antenna "<<0<<" = "<<dr[0]->fft()[0][0]<<endl;
+  cout <<"dr->fft for antenna "<<1<<" = "<<dr[0]->fft()[1][0]<<endl;
 	
 
 	
@@ -289,32 +300,32 @@ int main (int argc,
   dr = new CR::LOFAR_TBB*[nants];
   int counter = 0;
   for(int i=0; i<ninputfiles; i++){
-		nantsinfile = drstart[i]->fx().shape()[1];
+		nantsinfile = dr[i]->fx().shape()[1];
 		for(int j=0; j<nantsinfile; j++){
 			Vector<Bool> antennasetter(nantsinfile);
 			antennasetter = False;
 			antennasetter[j]=True;
 			cout<<"antennasetter = "<<antennasetter<<endl;
 			cout<<"counter = "<<counter<<endl;
-		 	//drstart[i]->setSelectedAntennas(antennasetter);
-			//cout<<drstart[i]->selectedAntennas();
-			dr[counter] = drstart[i];
+		 	//dr[i]->setSelectedAntennas(antennasetter);
+			//cout<<dr[i]->selectedAntennas();
+			dr[counter] = dr[i];
 			counter++;
 		}
   }
   
 	cout << "shape of dr[0] = " << dr[0]->shape() << endl;
-  cout << "shape of drstart[0]->fx() = " << drstart[0]->fx().shape() << endl;
   cout << "shape of dr[0]->fx() = " << dr[0]->fx().shape() << endl;
-  cout << "shape of drstart[0]->fft() = " << drstart[0]->fft().shape() << endl;
+  cout << "shape of dr[0]->fx() = " << dr[0]->fx().shape() << endl;
+  cout << "shape of dr[0]->fft() = " << dr[0]->fft().shape() << endl;
   cout << "shape of dr[0]->fft() = " << dr[0]->fft().shape() << endl;
 
 	for(int i=0;i<nants;i++){
 		cout <<"dr->fft for antenna "<<i<<" = "<<dr[i]->fft()[0][0]<<endl;
 	}
 */
-	cout <<"drstart->fft for antenna "<<0<<" = "<<drstart[0]->fft()[0][0]<<endl;
-	//cout <<"drstart->fft for antenna "<<1<<" = "<<drstart[0]->fft()[1][0]<<endl;
+	cout <<"dr->fft for antenna "<<0<<" = "<<dr[0]->fft()[0][0]<<endl;
+	//cout <<"dr->fft for antenna "<<1<<" = "<<dr[0]->fft()[1][0]<<endl;
 
   
   int pixels;
@@ -337,6 +348,9 @@ int main (int argc,
   int startcoord;
   int ncoord;
   int coordstr;
+	
+  string selection;
+
 
   //Read file:
   b_file>> pixels;
@@ -366,7 +380,8 @@ int main (int argc,
   
   cout<<"ncoord = " <<ncoord<<" (should be 3)"<<endl;
   
-/*  cout << "pixels: "<<pixels<<endl;
+/*
+  cout << "pixels: "<<pixels<<endl;
   cout<< "depth: " <<depth<<endl;
   cout<<"blocksperframe: " << blocksperframe<<endl;
   cout<<"starts: " <<start[0]<<" "<<start[1]<<" "<<start[2]<<endl;
@@ -381,8 +396,8 @@ int main (int argc,
 //	
 //	Vector<uInt>* rcu_ids;
 //	rcu_ids=new Vector<uInt>[ninputfiles];
-   bool test;
-   string selection="even";
+
+  b_file >> selection;
 	if(selection=="even"){
 		for(int i=0;i<ninputfiles;i++){
 			antennaselection[i] = (rcu_ids[i]%2==0);
@@ -393,8 +408,13 @@ int main (int argc,
 			antennaselection[i] = (rcu_ids[i]%2==1);
 			cout << "Ant selection for file " << i << " = " << antennaselection[i] << endl;
 		}
+	} else if(selection=="all"){
+		for(int i=0;i<ninputfiles;i++){
+			antennaselection[i] = (rcu_ids[i]%2==1||rcu_ids[i]%2==0);
+			cout << "Ant selection for file " << i << " = " << antennaselection[i] << endl;
+		}
 	} else {
-		cout <<"Another selection than odd or even is not implemented yet";
+		cout <<"Another selection than odd, even or all is not implemented yet";
 	}
 		
 		
@@ -428,21 +448,21 @@ int main (int argc,
     try {    
     
     //________________________________________________________
-    cout << "testlightningskymapping::simpleImage reading in event and setting up the pipeline"  << endl;
+    cout << "testnewskymapping::simpleImage reading in event and setting up the pipeline"  << endl;
 	
     CR::CRinvFFT pipeline;
 
     //________________________________________________________
     // Set up the skymap coordinates and infos
      // Observation info
-    cout << "testlightningskymapping::simpleImage Setting up ObsInfo"  << endl;
+    cout << "testnewskymapping::simpleImage Setting up ObsInfo"  << endl;
     std::string telescope  = "LOFAR CS302";
     std::string observer   = "John Doe";
     casa::ObsInfo info;
     info.setTelescope(telescope);
     info.setObserver(observer);
     // Spatial coordinates
-    cout << "testlightningskymapping::simpleImage Setting up SpatialCoordinate"  << endl;
+    cout << "testnewskymapping::simpleImage Setting up SpatialCoordinate"  << endl;
     std::string refcode    = "AZEL";
     std::string projection = "STG";
     IPosition shape (3,pixels,pixels,depth);
@@ -460,13 +480,13 @@ int main (int argc,
     tmpvec(0) = increment; tmpvec(1)=increment;  tmpvec(2)=depthstr;
     spatial.setIncrement(tmpvec,true);
     // Time-Frequency coordinate
-    cout << "testlightningskymapping::simpleImage Setting up TimeFreqCoordinate"  << endl;
+    cout << "testnewskymapping::simpleImage Setting up TimeFreqCoordinate"  << endl;
     uint nofBlocksPerFrame = blocksperframe ;
     uint nofFrames         = nframes;
     TimeFreqCoordinate timeFreq (blocksize, nofBlocksPerFrame, nofFrames,false);
     timeFreq.setNyquistZone(2);
     // Skymap coordinate
-    cout << "testlightningskymapping::simpleImage Setting up SkymapCoordinate"  << endl;
+    cout << "testnewskymapping::simpleImage Setting up SkymapCoordinate"  << endl;
     SkymapCoordinate coord (info,
 			    spatial,
 			    timeFreq);
@@ -474,7 +494,7 @@ int main (int argc,
     //________________________________________________________
     // retrieve the antenna positions
 
-//    cout << "testlightningskymapping::simpleImage Retrieving the antenna positions"  << endl;
+//    cout << "testnewskymapping::simpleImage Retrieving the antenna positions"  << endl;
 //    Matrix<double> antPositions(nants,3);
 //    for (uInt j=0; j<antPositions.nrow(); j++) {
 //       for (uInt i=0; i<antPositions.ncolumn(); i++) {
@@ -488,7 +508,8 @@ int main (int argc,
 //		cout << "the antanna positions are: " << subantPositions <<endl;
 	  
 	//******* NEW METHOD ***************
-	  cout << "testlightningskymapping::simpleImage Retrieving the antenna positions"  << endl;
+	  cout << "testnewskymapping::simpleImage Retrieving the antenna positions"  << endl;
+		
 	  Vector<MVPosition> subantPositions;
 	  Vector<MVPosition> tempantPositions;
 	  
@@ -511,14 +532,21 @@ int main (int argc,
 			  counter++;
 		  }		  
 	  }
-	  
-	  cout << subantPositions << endl;
+/*		
+	  Matrix<double> antPositions(nRCU,3);
+    for (uInt j=0; j<antPositions.nrow(); j++) {
+       for (uInt i=0; i<antPositions.ncolumn(); i++) {
+          antPositions(j,i) = tempantPositions[j].getValue()[i];
+       }      
+    }
+*/
+	  cout << "The antenna positions are "<< subantPositions << endl;
 
     
     //________________________________________________________
     // Set up the skymapper 
     
-    cout << "testlightningskymapping::simpleImage Setting up the Skymapper..."  << endl;
+    cout << "testnewskymapping::simpleImage Setting up the Skymapper..."  << endl;
     
     Skymapper skymapper (coord,
 			 subantPositions,		// change for number of antennas
@@ -538,63 +566,74 @@ int main (int argc,
 		
     uint nofBlocks = nofBlocksPerFrame * nofFrames;
 
-    Matrix<casa::DComplex> data(drstart[0]->fftLength(),nUsedants); 
+    Matrix<casa::DComplex> data(dr[0]->fftLength(),nUsedants); 
 	
 		Matrix<casa::DComplex> subdata; 
 		IPosition start (ndim,startfreq,startant), length (ndim,nfreq,nant), stride (ndim,freqstr,antstr);
     Slicer slicer (start, length, stride);
 		
 																							// Sander's new implementation
-		casa::Vector<uint> offset(nantsinfile[ninputfiles-1]);
-		std::vector<int> offset1(nantsinfile[ninputfiles-1]);
+		//casa::Vector<uint> offset(nantsinfile[ninputfiles-1]);
+		//std::vector<int> offset1(nantsinfile[ninputfiles-1]);
+		
+   	Vector< uint >*offset;
+   	Vector< int >*offset1;
+		offset= new Vector< uint>[ninputfiles];
+		offset1=new Vector< int>[ninputfiles];
+		
 		int offset_zero;
-		offset_zero = drstart[ninputfiles-1]->sample_number()[nantsinfile[ninputfiles-1]-1];
+		offset_zero = dr[ninputfiles-1]->sample_number()[nantsinfile[ninputfiles-1]-1];
 		
 		cout<<"offset 0 = "<<offset_zero<<endl;
-		cout <<"drstart->fft for antenna "<<0<<" = "<<drstart[0]->fft()[0][0]<<endl;
-																			
-//	casa::Matrix< int > offset(ninputfiles,nantsinfile);
-//	casa::Matrix< int > offset1(ninputfiles,nantsinfile);
 		
-    cout << "Processing block: (out of "<<nofBlocks<<")"<<endl;
+ 		for(int i=0; i<ninputfiles; i++){
+			offset[i] = dr[i]->sample_number();
+			offset1[i].resize(offset[i].shape()[0]);
+	 		for(int j=0; j<nantsinfile[i]; j++){
+				offset1[i][j] = -1*offset[i][j] + offset_zero;
+			}
+			cout<<"offset["<<i<<"] = "<<offset[i]<<endl;
+			cout<<"offset1["<<i<<"] = "<<offset1[i]<<endl;
+		}
+		
+		cout <<"dr->fft for antenna "<<0<<" = "<<dr[0]->fft()[0][0]<<endl;
+																			
+		
     for (uint blocknum=startblock; blocknum<startblock+nofBlocks; blocknum++){
-    	//if(blocknum%10==0){
-				cout << blocknum-startblock<<endl; 
-			//}
+    	if(blocknum%10==0){
+			cout<<"Processing block "<<blocknum-startblock<<" out of "<<nofBlocks<<endl;
+			}
 			counter = 0;
 	 		for(int i=0; i<ninputfiles; i++){
-				drstart[i]->setBlock(blocknum);
-				//nantsinfile = drstart[i]->fx().shape()[1];
-				offset = drstart[i]->sample_number();
+				//cout<<"time for "<<i<<" = "<<dr[i]->time()<<endl;
+				dr[i]->setBlock(blocknum);
 	  		for(int j=0; j<nantsinfile[i]; j++){
-				if(!antennaselection[i][j]){continue;} //skip antenna's that are not selected
-					offset1[j] = -1*offset[j] + offset_zero;
-					drstart[i]->setShift(offset1[j]);
+					if(!antennaselection[i][j]){continue;} //skip antenna's that are not selected
 					
-	  	    cout<<"so far so good. counter i j = "<<counter<<" "<<i<<" "<<j<<endl;
-					cout<<drstart[i]->fft()[0][0]<<endl;
-    	  	data[counter] = drstart[i]->fft().column(j);
-					counter++;
+					dr[i]->setShift(offset1[i][j]);
+					
+	  	    //cout<<"so far so good. counter i j = "<<counter<<" "<<i<<" "<<j<<endl;
+					//cout<<dr[i]->fft()[0][0]<<endl;
+    	  	data[counter] = dr[i]->fft().column(j);
 					for(int k=0; k < nfreq*30/100; k++){
-						data[i][j] = 0.;
+						data[counter][k] = 0.;
 					}
-					for(int l=0; l < nfreq*10/100; l++){
-						data[i][nfreq-nfreq*10/100+j] = 0.;
+					for(int k=0; k < nfreq*10/100; k++){
+						data[counter][nfreq-nfreq*10/100+k] = 0.;
 					}
+					counter++;
+					//cout<<"weer een antenne toegevoegd..."<<endl;
  	 		  }
 			}
 	  	//subdata = data (slicer);
        skymapper.processData(data);		// Change if slicer is used!
     };
 			
-		cout<<"offset = "<<offset<<endl;
-		cout<<"offset1 = "<<offset1<<endl;
-
    cout << "datashape = " << data.shape() << endl;
-   cout << "subdatashape = " << subdata.shape() << endl;
+   //cout << "subdatashape = " << subdata.shape() << endl;
 
   } catch (AipsError x) {
-    cerr << "[testlightningskymapping::simpleImage] " << x.getMesg() << endl;
+    cerr << "[testnewskymapping::simpleImage] " << x.getMesg() << endl;
     nofFailedTests++;
   }
 #endif  
@@ -603,13 +642,7 @@ int main (int argc,
 
 
 
-/*!
- \brief This will give the positions back from the selected antennes of the inner array of station CS302 in local coordinates. 
- 
- \param rcu_ids       -- casa::Vector<uint> with the selected RCUs
- 
- \return selected_positions --  The positions of the selected antenna's 
-*/
+
 
 
 
