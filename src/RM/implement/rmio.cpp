@@ -332,7 +332,7 @@ void rmio::readSimDataFromFile(	const std::string &filename,
 
    if(infile.fail())
    {
-      throw "rn::readSimDataFromFile failed to open file";
+      throw "rmio::readSimDataFromFile failed to open file";
    }
 	
 	while(infile.good())
@@ -357,6 +357,98 @@ void rmio::readSimDataFromFile(	const std::string &filename,
 	}
 	
 	infile.close();
+}
+
+
+/*!
+	\brief Read a complex RMSF and its corresponding lambda squareds from a file
+*/
+void rmio::readRMSFfromFile(	vector<complex<double> > &rmsf,
+										const string &filename)
+{
+	double real=0, imag=0;		// real and imaginary part of RMSF intensity to read per line
+	unsigned int i=0;				// index / loop variable
+	
+  	//----------------------------------------------------------
+  	// Check if filename is text file FITS file or HDF5 file
+  	if(filename.find(".hdf5", 1)!=string::npos)	// if HDF5 use dal
+  	{
+    	// TODO
+    	// use dal to read lambda Squareds and deltaLambdaSquareds from file
+  	}
+  	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  	{
+    	// TODO
+    	// use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+  	}
+  	else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
+  	{
+		ifstream infile(const_cast<const char*>(filename.c_str()), ifstream::in);		// file with lambda squareds and RMSF complex intensities	
+
+	   if(infile.fail())
+	   {
+	      throw "rmio::readRMSFfromFile failed to open file";
+	   }
+	
+		while(infile.good())
+		{
+			infile >> real >>  imag;
+			
+			if(static_cast<int>(rmsf.size()) > i)		// if there is size left in lambdasquareds and delta_lambda_squareds vectors
+			{
+				rmsf[i]=complex<double>(real, imag);		
+			}
+			else		// otherwise use push back function to append at the end of the vector
+			{
+				rmsf.push_back(complex<double>(real, imag));		
+			}
+
+			i++;										// increment index into data vector
+		}
+	
+		infile.close();
+	}
+}
+
+
+/*!
+	\brief Write a complex RMSF and its corresponding lambda squareds to a file
+*/
+void writeRMSFtoFile(vector<complex<double> > &rmsf, const string &filename)
+{
+	// Check data integrity
+	if(rmsf.size()==0)
+	
+	//----------------------------------------------------------
+	// Check if filename is text file FITS file or HDF5 file
+	if(filename.find(".hdf5", 1)!=string::npos)	// if HDF5 use dal
+	{
+  		// TODO
+	   // use dal to read lambda Squareds and deltaLambdaSquareds from file
+	}
+	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+	{
+		// TODO
+	   // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+	}
+	else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
+	{
+	
+		ofstream outfile(const_cast<const char*>(filename.c_str()), ofstream::out);		// file with lambda squareds and RMSF complex intensities	
+
+		if(outfile.fail())
+		{
+			throw "rmio::writeRMSFtoFile failed to open file";
+		}
+	
+		for(unsigned int i=0; i < rmsf.size(); i++)
+		{
+			outfile << rmsf[i].real() << "   ";
+			outfile << rmsf[i].imag() << endl;
+		}
+		
+		outfile.flush();
+	}	
 }
 
 

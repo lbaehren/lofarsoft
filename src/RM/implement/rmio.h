@@ -73,6 +73,14 @@ public:
 									std::vector<double> &delta_lambda_squareds, 
 									std::vector<std::complex<double> > &intensities);
 
+  //! read a complex RMSF from a file
+  void readRMSFfromFile(	std::vector<std::complex<double> > &rmsf,
+									const std::string &filename);
+
+  //! write a complex RMSF to a file
+  void writeRMSFtoFile( std::vector<std::complex<double> > &rmsf,
+								const std::string &filename);
+
   //! Write a vector out to file
   void writeRMtoFile(std::vector<double>, 
 							const std::string &filename);
