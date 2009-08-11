@@ -77,8 +77,18 @@ public:
   void readRMSFfromFile(	std::vector<std::complex<double> > &rmsf,
 									const std::string &filename);
 
+  //! read a complex RMSF and its corresponding lambda squareds from a file
+  void readRMSFfromFile(std::vector<double> &lambdasquareds,
+								std::vector<std::complex<double> > &rmsf,
+								const std::string &filename);
+
   //! write a complex RMSF to a file
   void writeRMSFtoFile( std::vector<std::complex<double> > &rmsf,
+								const std::string &filename);
+
+  //! write a complex RMSF and its corresponding lambda squareds to a file
+  void writeRMSFtoFile( std::vector<double> &lambdasquareds,
+								std::vector<std::complex<double> > &rmsf, 
 								const std::string &filename);
 
   //! Write a vector out to file
