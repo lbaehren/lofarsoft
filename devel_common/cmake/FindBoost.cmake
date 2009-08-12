@@ -1,8 +1,9 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
+# | $Id:: FindBoost.cmake 2847 2009-07-21 13:01:29Z swinbank                  $ |
 # +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
+# |   **NB** Substantial changes by John Swinbank, July 2009.                   |
 # |                                                                             |
 # |   This program is free software; you can redistribute it and/or modify      |
 # |   it under the terms of the GNU General Public License as published by      |
@@ -75,12 +76,16 @@ if (BOOST_FIND_python_ONLY)
 
 endif (BOOST_FIND_python_ONLY)
 
+set (boost_headers boost/config.hpp)
+
 if (BOOST_FIND_date_time)
   list (APPEND boost_libraries boost_date_time)
+  list (APPEND boost_headers boost/date_time.hpp)
 endif (BOOST_FIND_date_time)
 
 if (BOOST_FIND_filesystem)
   list (APPEND boost_libraries boost_filesystem)
+  list (APPEND boost_headers boost/filesystem.hpp)
 endif (BOOST_FIND_filesystem)
 
 if (BOOST_FIND_iostreams)
@@ -89,14 +94,17 @@ endif (BOOST_FIND_iostreams)
 
 if (BOOST_FIND_program_options)
   list (APPEND boost_libraries boost_program_options)
+  list (APPEND boost_headers boost/program_options.hpp)
 endif (BOOST_FIND_program_options)
 
 if (BOOST_FIND_python)
   list (APPEND boost_libraries boost_python)
+  list (APPEND boost_headers boost/python.hpp)
 endif (BOOST_FIND_python)
 
 if (BOOST_FIND_regex)
   list (APPEND boost_libraries boost_regex)
+  list (APPEND boost_headers boost/regex.hpp)
 endif (BOOST_FIND_regex)
 
 if (BOOST_FIND_serialization)
@@ -105,6 +113,7 @@ endif (BOOST_FIND_serialization)
 
 if (BOOST_FIND_signals)
   list (APPEND boost_libraries boost_signals)
+  list (APPEND boost_headers boost/signals.hpp)
 endif (BOOST_FIND_signals)
 
 if (BOOST_FIND_system)
@@ -113,6 +122,7 @@ endif (BOOST_FIND_system)
 
 if (BOOST_FIND_thread)
   list (APPEND boost_libraries boost_thread)
+  list (APPEND boost_headers boost/thread.hpp)
 endif (BOOST_FIND_thread)
 
 if (BOOST_FIND_unit_test_framework)
@@ -121,6 +131,7 @@ endif (BOOST_FIND_unit_test_framework)
 
 if (BOOST_FIND_wave)
   list (APPEND boost_libraries boost_wave)
+  list (APPEND boost_headers boost/wave.hpp)
 endif (BOOST_FIND_wave)
 
 ## initialize list of detected libraries
@@ -132,24 +143,41 @@ foreach (boost_version 1_39_0 1_36_0 1_34_1 1_33_1)
   ## Check for the header files ------------------
 
   ## <boost/config.hpp>
-  find_path (BOOST_INCLUDES_tmp boost/config.hpp boost/python.hpp
-    PATHS ${include_locations}
-    PATH_SUFFIXES
-    boost-${boost_version}
-    boost
-    .
-    NO_DEFAULT_PATH
-    )
-
-  if (BOOST_INCLUDES_tmp)
+  set (continue_search 0)
+  foreach (hdr ${boost_headers})
+    find_path (BOOST_INCLUDES_${hdr} ${hdr}
+      PATHS ${include_locations}
+      PATH_SUFFIXES
+      boost-${boost_version}
+      boost
+      .
+      NO_DEFAULT_PATH
+      )
+    if (BOOST_INCLUDES_${hdr})
+      list (APPEND BOOST_INCLUDES_tmp ${BOOST_INCLUDES_${hdr}})
+    else (BOOST_INCLUDES_${hdr})
+      if (NOT BOOST_FIND_QUIETLY)
+        message (STATUS "Not found: ${hdr} version ${boost_version}")
+      endif (NOT BOOST_FIND_QUIETLY)
+      set (continue_search 1)
+    endif (BOOST_INCLUDES_${hdr})
+  endforeach (hdr)
+  list (REMOVE_DUPLICATES BOOST_INCLUDES_tmp)
+  list (LENGTH BOOST_INCLUDES_tmp num_includes)
+  if (num_includes EQUAL 1)
     get_filename_component (BOOST_INCLUDES ${BOOST_INCLUDES_tmp} ABSOLUTE)
-  endif (BOOST_INCLUDES_tmp)
+  else (num_includes EQUAL 1)
+    if (NOT BOOST_FIND_QUIETLY)
+      message (STATUS "Too many header directories for Boost ${boost_version}")
+    endif (NOT BOOST_FIND_QUIETLY)
+    set (continue_search 1)
+  endif (num_includes EQUAL 1)
 
   ## Check for the module libraries --------------
   
   foreach (lib ${boost_libraries})
     ## try to locate the library
-    find_library (BOOST_${lib} ${lib} ${lib}-gcc42-${boost_version} ${lib}-mt-${boost_version} ${lib}-gcc ${lib}-mt
+    find_library (BOOST_${lib} ${lib} ${lib}-gcc42-${boost_version} ${lib}-mt-${boost_version} ${lib}-gcc ${lib}-mt ${lib}-mt-d
       PATHS ${lib_locations}
       PATH_SUFFIXES boost boost-${boost_version}
       NO_DEFAULT_PATH
@@ -157,9 +185,20 @@ foreach (boost_version 1_39_0 1_36_0 1_34_1 1_33_1)
     ## check if location was successful
     if (BOOST_${lib})
       list (APPEND BOOST_LIBRARIES ${BOOST_${lib}})
-      set (continue_search 0)
+    else (BOOST_${lib})
+      set (continue_search 1)
     endif (BOOST_${lib})
   endforeach (lib)
+
+  if (NOT continue_search)
+    break ()
+  else (NOT continue_search)
+    if (NOT BOOST_FIND_QUIETLY)
+      message (STATUS "Boost ${boost_version} not found")
+    endif (NOT BOOST_FIND_QUIETLY)
+    set (BOOST_LIBRARIES "")
+    set (BOOST_INCLUDES "")
+  endif (NOT continue_search)
   
 endforeach (boost_version)
 
