@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/sh
 
 basedir=`pwd`
 
@@ -23,7 +23,7 @@ if test -z `which cmake` ; then {
 ## [2] If a version of CMake is installed, check if it is a recent
 ##     enough correct version.
 	
-    if [[ ${HAVE_CMAKE} == 1 ]] ; then {
+    if [ ${HAVE_CMAKE} -eq 1 ] ; then {
 		
         ## obtain version information
 		
@@ -33,11 +33,11 @@ if test -z `which cmake` ; then {
 	
 	## build condition
 		
-	if [[ ${CMAKE_MAJOR_VERSION} -lt ${REQUIRED_MAJOR_VERSION} ]] ; then {
+	if [ ${CMAKE_MAJOR_VERSION} -lt ${REQUIRED_MAJOR_VERSION} ] ; then {
 	    echo "CMake major version < ${REQUIRED_MAJOR_VERSION} ; build required";
 	    HAVE_CMAKE=0;
 	} else {
-	    if [[ ${CMAKE_MINOR_VERSION} -lt ${REQUIRED_MINOR_VERSION} ]] ; then {
+	    if [ ${CMAKE_MINOR_VERSION} -lt ${REQUIRED_MINOR_VERSION} ] ; then {
 		echo "CMake minor version < ${REQUIRED_MINOR_VERSION} ; build required";
 		HAVE_CMAKE=0;
 	    } fi
@@ -47,7 +47,7 @@ if test -z `which cmake` ; then {
 
     ## [3] If required initiate build of CMake from provided sources
 
-    if [[ ${HAVE_CMAKE} == 0 ]] ; then {
+    if [ ${HAVE_CMAKE} -eq 0 ] ; then {
 
     ## Check if the source code to build cmake is available; if this
     ## is not the case with error, since this is the bottom-most 

@@ -1,4 +1,4 @@
-#!/bin/bash
+
 ##-------------------------------------------------------------------------------
 ## $Id:: CMakeLists.txt 724 2007-09-10 10:17:21Z baehren                        $
 ##-------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ export LOFARSOFT=`pwd`
 
 tmp=`echo $PATH | tr ':' '\n' | grep $LOFARSOFT`
 
-if [ "$tmp" == "$LOFARSOFT/release/bin" ] ; then
+if [ "$tmp" = "$LOFARSOFT/release/bin" ] ; then
     echo "-- Adding release/bin to PATH..."
     export PATH=$PATH:$LOFARSOFT/release/bin
 fi
@@ -53,7 +53,7 @@ make_command ()
 {
   ## parallelize build on selected systems
 
-  if [ "$SYSTEM_NAME" == "Darwin" ] ; then
+  if [ "$SYSTEM_NAME" = "Darwin" ] ; then
     SYSTEM_NOF_CPU=5
   else
     ## try to determine the number of cores/CPUs
@@ -64,13 +64,13 @@ make_command ()
     fi
   fi
 
-  if [ "$HOSTNAME" == "ray" ] ; then
+  if [ "$HOSTNAME" = "ray" ] ; then
     ENABLE_MULTITHREADING=0;
   fi
 
   ## set make command based on control parameter
 
-  if [ "$ENABLE_MULTITHREADING" == "1" ] ; then 
+  if [ "$ENABLE_MULTITHREADING" = "1" ] ; then
     var_make="make -j $SYSTEM_NOF_CPU"
   else 
     var_make="make"
@@ -110,7 +110,7 @@ build_package ()
     if test -z "`make help | grep install`" ; then
 	echo "[`date`] No target install for $buildDir."
     else
-	if [[ ${REPORT_BUILD} == 1 ]] ; then
+	if [ ${REPORT_BUILD} -eq 1 ] ; then
 	    $var_make Experimental;
 	    $var_make install;
 	else
