@@ -38,17 +38,17 @@ if (NOT USG_ROOT)
     ${WCSLIB_SOURCE_DIR}/../../..
     ENV LOFARSOFT
     )
-  
-  if (USG_ROOT)
-    ## load general settings
-    include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-    ## check if package is installed already
-    set (WCSLIB_FIND_QUIETLY YES)
-    include (FindWCS)
-  else (USG_ROOT)
-    message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-  endif (USG_ROOT)
 endif (NOT USG_ROOT)
+
+if (USG_ROOT)
+  ## load general settings
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  ## check if package is installed already
+  set (WCSLIB_FIND_QUIETLY YES)
+  include (FindWCS)
+else (USG_ROOT)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+endif (USG_ROOT)
 
 ## <-- begin build condition --------------------------------------------------->
 
