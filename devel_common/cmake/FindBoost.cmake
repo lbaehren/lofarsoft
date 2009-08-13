@@ -1,5 +1,5 @@
 # +-----------------------------------------------------------------------------+
-# | $Id:: FindBoost.cmake 2847 2009-07-21 13:01:29Z swinbank                  $ |
+# | $Id::                                                                     $ |
 # +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
@@ -162,7 +162,11 @@ foreach (boost_version 1_39_0 1_36_0 1_34_1 1_33_1)
       set (continue_search 1)
     endif (BOOST_INCLUDES_${hdr})
   endforeach (hdr)
-  list (REMOVE_DUPLICATES BOOST_INCLUDES_tmp)
+  ## Remove possible duplicates from the list of includes
+  if (BOOST_INCLUDES_tmp)
+    list (REMOVE_DUPLICATES BOOST_INCLUDES_tmp)
+  endif (BOOST_INCLUDES_tmp)
+  ## Determine the number of entries in the list
   list (LENGTH BOOST_INCLUDES_tmp num_includes)
   if (num_includes EQUAL 1)
     get_filename_component (BOOST_INCLUDES ${BOOST_INCLUDES_tmp} ABSOLUTE)
