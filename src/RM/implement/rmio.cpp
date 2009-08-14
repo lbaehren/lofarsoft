@@ -417,15 +417,16 @@ void rmio::readRMSFfromFile(	vector<complex<double> > &rmsf,
 /*!
 	\brief Read a complex RMSF and its corresponding lambdasquareds from a file
 	
+	\param faradaydepths - vector with faraday depths the RMSF is based on
 	\param rmsf - complex vector containing rmsf intensities
 	\param filename - file to read from (can be FITS/HDF5 or txt file)
 */
-void rmio::readRMSFfromFile(	vector<double> &lambdasquareds,
+void rmio::readRMSFfromFile(	vector<double> &faradaydepths,
 										vector<complex<double> > &rmsf,
 										const string &filename)
 {
-	double real=0, imag=0;		// real and imaginary part of RMSF intensity to read per line
-	unsigned int i=0;				// index / loop variable
+	double faraday=0, real=0, imag=0;		// faraday,  real and imaginary part of RMSF intensity to read per line
+	unsigned int i=0;								// index / loop variable
 	
   	//----------------------------------------------------------
   	// Check if filename is text file FITS file or HDF5 file
@@ -450,7 +451,16 @@ void rmio::readRMSFfromFile(	vector<double> &lambdasquareds,
 	
 		while(infile.good())
 		{
-			infile >> real >>  imag;
+			infile >> faraday >> real >>  imag;
+
+			if(static_cast<unsigned int>(rmsf.size()) > i)		// if there is size left in lambdasquareds and delta_lambda_squareds vectors
+			{
+				faradaydepths[i]=faraday;		
+			}
+			else		// otherwise use push back function to append at the end of the vector
+			{
+				faradaydepths.push_back(faraday);		
+			}
 			
 			if(static_cast<unsigned int>(rmsf.size()) > i)		// if there is size left in lambdasquareds and delta_lambda_squareds vectors
 			{
@@ -475,11 +485,12 @@ void rmio::readRMSFfromFile(	vector<double> &lambdasquareds,
 	\param rmsf - complex vector with RMSF intensities in Q and U
 	\param filename - fileanme to write to (can be FITS/HDF5 or txt file)
 */
-void writeRMSFtoFile(vector<complex<double> > &rmsf, const string &filename)
+void rmio::writeRMSFtoFile(vector<complex<double> > &rmsf, const string &filename)
 {
 	// Check data integrity
 	if(rmsf.size()==0)
-	
+		throw "rmio::writeRMSFtoFile";
+		
 	//----------------------------------------------------------
 	// Check if filename is text file FITS file or HDF5 file
 	if(filename.find(".hdf5", 1)!=string::npos)	// if HDF5 use dal
@@ -516,16 +527,18 @@ void writeRMSFtoFile(vector<complex<double> > &rmsf, const string &filename)
 /*!
 	\brief Write a complex RMSF and its corresponding lambdasquareds to a file
 
+	\param faradaydepths - vector with faraday depths the RMSF is based on
 	\param rmsf - complex vector with RMSF intensities in Q and U
 	\param filename - fileanme to write to (can be FITS/HDF5 or txt file)
 */
-void writeRMSFtoFile(vector<double> &lambdasquareds,
+void rmio::writeRMSFtoFile(vector<double> &faradaydepths,
 							vector<complex<double> > &rmsf, 
 							const string &filename)
 {
 	// Check data integrity
 	if(rmsf.size()==0)
-	
+		throw "rmio::writeRMSFtoFile";
+		
 	//----------------------------------------------------------
 	// Check if filename is text file FITS file or HDF5 file
 	if(filename.find(".hdf5", 1)!=string::npos)	// if HDF5 use dal

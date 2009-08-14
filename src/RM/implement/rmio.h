@@ -78,7 +78,7 @@ public:
 									const std::string &filename);
 
   //! read a complex RMSF and its corresponding lambda squareds from a file
-  void readRMSFfromFile(std::vector<double> &lambdasquareds,
+  void readRMSFfromFile(std::vector<double> &faradaydepths,
 								std::vector<std::complex<double> > &rmsf,
 								const std::string &filename);
 
@@ -87,7 +87,7 @@ public:
 								const std::string &filename);
 
   //! write a complex RMSF and its corresponding lambda squareds to a file
-  void writeRMSFtoFile( std::vector<double> &lambdasquareds,
+  void writeRMSFtoFile( std::vector<double> &faradaydepths,
 								std::vector<std::complex<double> > &rmsf, 
 								const std::string &filename);
 
@@ -104,12 +104,12 @@ public:
 							std::vector<std::complex<double> > &rm, 
 							const std::string &filename);
 	
-  //! Write single polarized intensity (Q or U) to file along with frequencies
+  //! Write complex polarized intensity to file along with frequencies
   void writePolIntToFile(	std::vector<double> &frequencies, 
 								 	std::vector<std::complex<double> > &polint, 
 									const std::string &filename);
 
-  //! Write complex polarized intensity to file along with frequencies
+  //! Write single polarized intensity (Q or U) to file along with frequencies
   void writeIntToFile(	std::vector<double> &frequencies, 
 								std::vector<double> &intensities, 
 								const std::string &filename);
