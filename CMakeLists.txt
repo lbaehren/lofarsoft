@@ -50,7 +50,7 @@ option (TEST_DATASETS       "Download and install sample test datasets?"    NO )
 ## Options affecting the build of individual packages
 
 option (CR_WITH_GUI         "Build CR-Tools with graphical interface?"   NO  )
-option (CR_WITH_STARTOOLS   "Enable using routines from LOPES-Star?"     NO  )
+option (CR_WITH_STARTOOLS   "Enable using routines from LOPES-Star?"     YES )
 option (DAL_PYTHON_BINDINGS "Create python bindings for DAL?"            YES )
 
 ## ==============================================================================
@@ -239,7 +239,7 @@ add_dependencies (num_util boost numpy)
 
 add_dependencies (pyrap casacore num_util)
 
-add_dependencies (startools root)
+#add_dependencies (startools root)
 
 add_dependencies (wcslib boost flex)
 
