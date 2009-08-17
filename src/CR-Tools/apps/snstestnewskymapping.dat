@@ -1,29 +1,16 @@
 3
-/mnt/lofar/CS1_tbb/Wed22-07-2009/
-CS302C-B0T22:46:57.h5 CS302C-B1T22:46:57.h5 CS302C-B2T22:46:57.h5
-
-60 1 10000. 5000.
-1 100 100000
+/mnt/lofar/CS1_tbb/Wed29-07-2009/
+CS302C-B0T12:20:03.h5 CS302C-B1T12:20:03.h5 CS302C-B2T12:20:03.h5 
+60 1 1000000. 5000.
+1 100 100
 
 2
 2 4 1
 0 513 1
 0 3 1
 
-all
-0	2.55	0
-0	2.55	0
--2.36	5.3	0
--10.03	1.06	0
--9.04	-12.13	0
-0	65.05	0
-
-0	2.55	0
-0	2.55	0
--2.36	5.3	0
--10.03	1.06	0
--9.04	-12.13	0
-0	65.05	0
+odd
+outer
 
 ninputfiles
 filedir
@@ -38,12 +25,19 @@ startfreq	nfreq	freqstr
 startcoord	ncoord	coordstr
 
 selection
-antennapositions
+arrayspread
 
 
+3
+/mnt/lofar/CS1_tbb/Wed29-07-2009/
+CS302C-B2T12:20:03.h5  CS302C-B4T12:20:03.h5 CS302C-B5T12:20:03.h5
 
 
+CS302C-B2T11:38:03.h5 CS302C-B3T11:38:03.h5 CS302C-B4T11:38:03.h5 CS302C-B5T11:38:03.h5
 
+5
+/mnt/lofar/CS1_tbb/Thu13-08-2009/
+CS302C-B1T11:01:50.h5 CS302C-B2T11:01:50.h5 CS302C-B3T11:01:50.h5 CS302C-B4T11:01:50.h5 CS302C-B5T11:01:50.h5
 
 
 

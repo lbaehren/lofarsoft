@@ -139,56 +139,77 @@ casa::Vector<MVPosition> CS302_antenna_position_value(casa::Vector<Int> rcu_ids)
 	all_positions(45)=MVPosition(13.136,-6.101,0.000);//RCU90,91
 	all_positions(46)=MVPosition(-65.054,0.000,0.000);//RCU92,93
 	all_positions(47)=MVPosition(0.000,65.054,0.000);//RCU94,95
-	/*			   
-	 14.698,-10.311,0.000,1,0
-	 15.232,-13.338,0.000,3,2
-	 1.377,-20.345,0.000,5,4
-	 -13.608,-14.411,0.000,7,6
-	 -17.281,-11.123,0.000,9,8
-	 -18.305,0.971,0.000,11,10
-	 -12.430,12.886,0.000,13,12
-	 -7.399,19.058,0.000,15,14
-	 6.837,16.723,0.000,17,16
-	 14.416,13.666,0.000,19,18
-	 18.192,4.459,0.000,21,20
-	 24.840,-0.328,0.000,23,22
-	 21.410,-12.882,0.000,25,24
-	 12.443,-22.123,0.000,27,26
-	 6.726,-24.705,0.000,29,28
-	 -1.476,-26.687,0.000,31,30
-	 -16.470,-17.401,0.000,33,32
-	 -21.667,-11.351,0.000,35,34
-	 -26.101,1.776,0.000,37,36
-	 -20.349,14.772,0.000,39,38
-	 -14.252,21.805,0.000,41,40
-	 -2.861,24.616,0.000,43,42
-	 13.224,23.568,0.000,45,44
-	 24.993,10.289,0.000,47,46
-	 34.641,0.400,0.000,49,48
-	 28.484,-13.172,0.000,51,50
-	 19.357,-24.589,0.000,53,52
-	 13.304,-29.830,0.000,55,54
-	 -5.553,-31.094,0.000,57,56
-	 -22.720,-25.520,0.000,59,58
-	 -30.213,-15.775,0.000,61,60
-	 -29.298,-6.451,0.000,63,62
-	 -33.339,7.631,0.000,65,64
-	 -23.863,24.118,0.000,67,66
-	 -16.634,29.422,0.000,69,68
-	 -1.557,34.648,0.000,71,70
-	 6.143,31.746,0.000,73,72
-	 24.552,22.482,0.000,75,74
-	 26.185,15.967,0.000,77,76
-	 32.238,17.636,0.000,79,78
-	 35.877,-21.401,0.000,81,80
-	 15.445,-36.911,0.000,83,82
-	 -4.028,-41.786,0.000,85,84
-	 -18.886,-35.621,0.000,87,86
-	 -41.007,3.644,0.000,89,88
-	 -28.864,22.439,0.000,91,90
-	 -20.085,36.257,0.000,93,92
-	 22.803,31.368,0.000,95,94
-	 */	
+
+	cout << "filled all_positions" << endl;
+	int rcu_id;
+	for(int i=0;i<nrRCUs;i++){
+		rcu_id=rcu_ids(i);
+		cout << "rcu id = " << rcu_id << endl;
+ 		selected_positions(i)=all_positions(rcu_id/2);///2);
+	}
+	
+	return selected_positions;
+	
+}
+
+casa::Vector<MVPosition> CS302_antenna_position_value_outer(casa::Vector<Int> rcu_ids){
+	casa::Vector<MVPosition> all_positions;
+	casa::Vector<MVPosition> selected_positions;
+	all_positions.resize(48);
+	Int nrRCUs;
+	rcu_ids.shape(nrRCUs);
+	cout << "nr of RCUs: " << nrRCUs << endl;
+	selected_positions.resize(nrRCUs);
+	
+  all_positions(0)=MVPosition(14.698,-10.311,0.000);//RCU0,1
+	all_positions(1)=MVPosition(15.232,-13.338,0.000);//RCU2,3
+	all_positions(2)=MVPosition(1.377,-20.345,0.000);//RCU4,5
+	all_positions(3)=MVPosition(-13.608,-14.411,0.000);//RCU6,7
+	all_positions(4)=MVPosition(-17.281,-11.123,0.000);//RCU8,9
+	all_positions(5)=MVPosition(-18.305,0.971,0.000);//RCU10,11
+	all_positions(6)=MVPosition(-12.430,12.886,0.000);//RCU12,13
+	all_positions(7)=MVPosition(-7.399,19.058,0.000);//RCU14,15
+	all_positions(8)=MVPosition(6.837,16.723,0.000);//RCU16,17
+	all_positions(9)=MVPosition(14.416,13.666,0.000);//RCU18,19
+	all_positions(10)=MVPosition(18.192,4.459,0.000);//RCU20,21
+	all_positions(11)=MVPosition(24.840,-0.328,0.000);//RCU22,23
+	all_positions(12)=MVPosition(21.410,-12.882,0.000);//RCU24,25
+	all_positions(13)=MVPosition(12.443,-22.123,0.000);//RCU26,27
+	all_positions(14)=MVPosition(6.726,-24.705,0.000);//RCU28,29
+	all_positions(15)=MVPosition(-1.476,-26.687,0.000);//RCU30,31
+	all_positions(16)=MVPosition(-16.470,-17.401,0.000);//RCU32,33
+	all_positions(17)=MVPosition(-21.667,-11.351,0.000);//RCU34,35
+	all_positions(18)=MVPosition(-26.101,1.776,0.000);//RCU36,37
+	all_positions(19)=MVPosition(-20.349,14.772,0.000);//RCU38,39
+	all_positions(20)=MVPosition(-14.252,21.805,0.000);//RCU40,41
+	all_positions(21)=MVPosition(-2.861,24.616,0.000);//RCU42,43
+	all_positions(22)=MVPosition(13.224,23.568,0.000);//RCU44,45
+	all_positions(23)=MVPosition(24.993,10.289,0.000);//RCU46,47
+	all_positions(24)=MVPosition(34.641,0.400,0.000);//RCU48,49
+	all_positions(25)=MVPosition(28.484,-13.172,0.000);//RCU50,51
+	all_positions(26)=MVPosition(19.357,-24.589,0.000);//RCU52,53
+	all_positions(27)=MVPosition(13.304,-29.830,0.000);//RCU54,55
+	all_positions(28)=MVPosition(-5.553,-31.094,0.000);//RCU56,57
+	all_positions(29)=MVPosition(-22.720,-25.520,0.000);//RCU58,59
+	all_positions(30)=MVPosition(-30.213,-15.775,0.000);//RCU60,61
+	all_positions(31)=MVPosition(-29.298,-6.451,0.000);//RCU62,63
+	all_positions(32)=MVPosition(-33.339,7.631,0.000);//RCU64,65
+	all_positions(33)=MVPosition(-23.863,24.118,0.000);//RCU66,67
+	all_positions(34)=MVPosition(-16.634,29.422,0.000);//RCU68,69
+	all_positions(35)=MVPosition(-1.557,34.648,0.000);//RCU70,71
+	all_positions(36)=MVPosition(6.143,31.746,0.000);//RCU72,73
+	all_positions(37)=MVPosition(24.552,22.482,0.000);//RCU74,75
+	all_positions(38)=MVPosition(26.185,15.967,0.000);//RCU76,77
+	all_positions(39)=MVPosition(32.238,17.636,0.000);//RCU78,79
+	all_positions(40)=MVPosition(35.877,-21.401,0.000);//RCU80,81
+	all_positions(41)=MVPosition(15.445,-36.911,0.000);//RCU82,83
+	all_positions(42)=MVPosition(-4.028,-41.786,0.000);//RCU84,85
+	all_positions(43)=MVPosition(-18.886,-35.621,0.000);//RCU86,87
+	all_positions(44)=MVPosition(-41.007,3.644,0.000);//RCU88,89
+	all_positions(45)=MVPosition(-28.864,22.439,0.000);//RCU90,91
+	all_positions(46)=MVPosition(-20.085,36.257,0.000);//RCU92,93
+	all_positions(47)=MVPosition(22.803,31.368,0.000);//RCU94,95
+
 	cout << "filled all_positions" << endl;
 	int rcu_id;
 	for(int i=0;i<nrRCUs;i++){
@@ -349,6 +370,7 @@ int main (int argc,
   int ncoord;
   int coordstr;
 	
+	string arrayspread;
   string selection;
 
 
@@ -389,7 +411,6 @@ int main (int argc,
 	
 	
  // check out the antennaselection
-	
 
    Vector< bool >*antennaselection;
    antennaselection=new Vector< bool>[ninputfiles];
@@ -517,13 +538,19 @@ int main (int argc,
 	  uInt counter=0;
 	  Int nRCU;
 	  
+		b_file>>arrayspread;
+		
 	  for(int i=0; i<ninputfiles; i++){
 		  
 		  used_rcu_ids[i].shape(nRCU);
 		  tempantPositions.resize(nRCU);
 		  
-		  tempantPositions = CS302_antenna_position_value(used_rcu_ids[i]);
-		  
+			if(arrayspread=="inner"){
+				tempantPositions = CS302_antenna_position_value(used_rcu_ids[i]);
+		  } else if(arrayspread=="outer"){
+				tempantPositions = CS302_antenna_position_value_outer(used_rcu_ids[i]);
+			} else cout<<"Valid antennaspreads are 'inner' and 'outer'."<<endl;
+			
 		  //nrRCUs = new int(0);
 		  
 		  for(int j=0; j<nRCU;j++){
@@ -600,9 +627,9 @@ int main (int argc,
 																			
 		
     for (uint blocknum=startblock; blocknum<startblock+nofBlocks; blocknum++){
-    	if(blocknum%10==0){
+    	//if(blocknum%10==0){
 			cout<<"Processing block "<<blocknum-startblock<<" out of "<<nofBlocks<<endl;
-			}
+			//}
 			counter = 0;
 	 		for(int i=0; i<ninputfiles; i++){
 				//cout<<"time for "<<i<<" = "<<dr[i]->time()<<endl;
