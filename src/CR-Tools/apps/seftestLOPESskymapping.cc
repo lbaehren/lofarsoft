@@ -253,7 +253,7 @@ int main (int argc,
   */
   if (argc < 2) {
     std::cout << "Usage: testLOPESskymapping <input.event> [<output-image>]. Now using the example.event" << endl;
-	infile = "/users/student/swelles/usg/code/data/lopes/example.event";
+	infile = "$LOFARSOFT/data/lopes/example.event";
   } else {
     infile = argv[1];
      if (argc > 2) {

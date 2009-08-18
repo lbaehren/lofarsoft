@@ -304,10 +304,7 @@ int main (int argc,
 	//cout<<endl<<i<<endl<<endl;
   	dr[i] = new CR::LOFAR_TBB(pathname+inputfiles[i], blocksize);
 	nantsinfile[i] = dr[i]->fx().shape()[1];
-	rcu_ids[i]=dr[i]->channelID();
-	for(int j=0;j<rcu_ids[i].shape()[0];j++){
-  	rcu_ids[i] = (rcu_ids[i])[j]%1000; 
-	}
+	rcu_ids[i]=dr[i]->channelID()%1000; 
 	cout << "rcus for file" << i << ": " << rcu_ids[i] << endl;
 	nants+=nantsinfile[i];
   }
@@ -348,7 +345,7 @@ int main (int argc,
 		cout <<"dr->fft for antenna "<<i<<" = "<<dr[i]->fft()[0][0]<<endl;
 	}
 */
-	cout <<"dr->fft for antenna "<<0<<" = "<<dr[0]->fft().row(0)<<endl;
+	cout <<"dr->fft for antenna "<<0<<" = "<<dr[0]->fft().row[0]<<endl;
 	//cout <<"dr->fft for antenna "<<1<<" = "<<dr[0]->fft()[1][0]<<endl;
 
   
@@ -424,25 +421,17 @@ int main (int argc,
   b_file >> selection;
 	if(selection=="even"){
 		for(int i=0;i<ninputfiles;i++){
-		  for(int j=0;j<rcu_ids[i].shape()[0];j++){
-			  if((rcu_ids[i])[j]%2==0){
-			    (antennaselection[i])[j] = 1;
-			  }
-			}
+			antennaselection[i] = (rcu_ids[i]%2==0);
 			cout << "Ant selection for file " << i << " = " << antennaselection[i] << endl;
 		}
 	} else if(selection=="odd"){
 		for(int i=0;i<ninputfiles;i++){
-		  for(int j=0;j<rcu_ids[i].shape()[0];j++){
-			  if((rcu_ids[i])[j]%2==1){
-			    (antennaselection[i])[j] = 1;
-			  }
-			}
+			antennaselection[i] = (rcu_ids[i]%2==1);
 			cout << "Ant selection for file " << i << " = " << antennaselection[i] << endl;
 		}
 	} else if(selection=="all"){
 		for(int i=0;i<ninputfiles;i++){
-			antennaselection[i] = 1;
+			antennaselection[i] = (rcu_ids[i]%2==1||rcu_ids[i]%2==0);
 			cout << "Ant selection for file " << i << " = " << antennaselection[i] << endl;
 		}
 	} else {

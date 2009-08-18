@@ -110,12 +110,12 @@ int  simpleImage(string const &infile,
 	cout<<"offset1 = "<<offset1<<endl;
  	cout<<"shift before = "<<dr.shift(3)<<endl;
 	dr.setBlock(230000);
-	cout << "somewhere in dr = " << dr.fx()[3] << endl;
+	cout << "somewhere in dr = " << dr.fx().row(0)[3] << endl;
 
 	dr.setShift(offset1);
 	cout<<"shift after = "<<dr.shift(3)<<endl;
 	dr.setBlock(230000);
-	cout << "somewhere in dr = " << dr.fx()[3] << endl;
+	cout << "somewhere in dr = " << dr.fx().row(0)[3] << endl;
 	
   //_______________________________________________________
   // Read input paramaters from inputfile seftestlightningskymapping.dat
@@ -266,10 +266,10 @@ int  simpleImage(string const &infile,
 			cout<<"nfreq = "<< nfreq<<endl;
 			for (int i=0; i < 6; i++){
 				for(int j=0; j < nfreq*30/100; j++){
-					data[i][j] = 0.;
+					data.row(i)[j] = 0.;
 				}
 				for(int j=0; j < nfreq*10/100; j++){
-					data[i][nfreq-nfreq*10/100+j] = 0.;
+					data.row(i)[nfreq-nfreq*10/100+j] = 0.;
 				}
 			}
 			cout<<"bad data filtered out"<<endl;

@@ -222,14 +222,14 @@ int  simpleImage(string const &infile,
 	cout<<"offset1 = "<<offset1<<endl;
  	cout<<"shift before = "<<dr[3]->shift(0)<<endl;
 	dr[0]->setBlock(230000);
-	cout << "somewhere in dr = " << dr[3]->fx()[0][6] << endl;
+	cout << "somewhere in dr = " << dr[3]->fx().row(0)[6] << endl;
 	
 	for(int i=0; i<ninputfiles; i++){
 	dr[i]->setShift(offset1[i]);
 	}
 	cout<<"shift after = "<<dr[3]->shift(0)<<endl;
 	dr[0]->setBlock(230000);
-	cout << "somewhere in dr = " << dr[3]->fx()[0][6] << endl;
+	cout << "somewhere in dr = " << dr[3]->fx().row(0)[6] << endl;
 	
 
     //________________________________________________________
@@ -327,12 +327,12 @@ int  simpleImage(string const &infile,
 	  	dr[i]->setBlock(blocknum);
 	  	//cout<<"so far so good..." << endl;
       	//cout<<dr[i]->fft().column(0)<<endl;
-		data[i] = dr[i]->fft().column(0);
+		data.row(i) = dr[i]->fft().column(0);
 		for(int j=0; j < nfreq*30/100; j++){
-			data[i][j] = 0.;
+			data.row(i)[j] = 0.;
 		}
 		for(int j=0; j < nfreq*10/100; j++){
-			data[i][nfreq-nfreq*10/100+j] = 0.;
+			data.row(i)[nfreq-nfreq*10/100+j] = 0.;
 		}
       }
 	  subdata = data (slicer);
