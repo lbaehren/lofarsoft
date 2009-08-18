@@ -297,24 +297,23 @@ int main (int argc,
  
   Vector< int >*rcu_ids;
   rcu_ids=new Vector< int >[ninputfiles];	
-	
+  
 #ifndef upload
   for(int i=0; i<ninputfiles; i++){
-  	b_file>> inputfiles[i];
-	//cout<<endl<<i<<endl<<endl;
-  	dr[i] = new CR::LOFAR_TBB(pathname+inputfiles[i], blocksize);
-	nantsinfile[i] = dr[i]->fx().shape()[1];
-	rcu_ids[i]=dr[i]->channelID()%1000; 
-	cout << "rcus for file" << i << ": " << rcu_ids[i] << endl;
-	nants+=nantsinfile[i];
+    b_file>> inputfiles[i];
+    //cout<<endl<<i<<endl<<endl;
+    dr[i] = new CR::LOFAR_TBB(pathname+inputfiles[i], blocksize);
+    nantsinfile[i] = dr[i]->fx().shape()[1];
+    rcu_ids[i]=dr[i]->channelID()%1000; 
+    cout << "rcus for file" << i << ": " << rcu_ids[i] << endl;
+    nants+=nantsinfile[i];
   }
+  
   cout<<"total number of antennas = "<<nants<<endl;
   cout << "shape of dr[0]->fx() = " << dr[0]->fx().shape() << endl;
   cout << "shape of dr[0]->fft() = " << dr[0]->fft().shape() << endl;
   cout <<"dr->fft for antenna "<<0<<" = "<<dr[0]->fft().row(0)[0]<<endl;
   cout <<"dr->fft for antenna "<<1<<" = "<<dr[0]->fft().row(1)[0]<<endl;
-	
-
 	
 
 /*  CR::LOFAR_TBB **dr;
@@ -345,8 +344,8 @@ int main (int argc,
 		cout <<"dr->fft for antenna "<<i<<" = "<<dr[i]->fft()[0][0]<<endl;
 	}
 */
-	cout <<"dr->fft for antenna "<<0<<" = "<<dr[0]->fft().row[0]<<endl;
-	//cout <<"dr->fft for antenna "<<1<<" = "<<dr[0]->fft()[1][0]<<endl;
+  cout <<"dr->fft for antenna "<<0<<" = "<<dr[0]->fft().row(0)[0]<<endl;
+  //cout <<"dr->fft for antenna "<<1<<" = "<<dr[0]->fft()[1][0]<<endl;
 
   
   int pixels;
