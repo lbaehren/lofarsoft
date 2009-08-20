@@ -344,9 +344,9 @@ int main (int argc,
 		cout <<"dr->fft for antenna "<<i<<" = "<<dr[i]->fft()[0][0]<<endl;
 	}
 */
-  cout <<"dr->fft for antenna "<<0<<" = "<<dr[0]->fft().row(0)[0]<<endl;
-  //cout <<"dr->fft for antenna "<<1<<" = "<<dr[0]->fft()[1][0]<<endl;
 
+	cout <<"dr->fft for antenna "<<0<<" = "<<dr[0]->fft().row(0)<<endl;
+	//cout <<"dr->fft for antenna "<<1<<" = "<<dr[0]->fft()[1][0]<<endl;
   
   int pixels;
   float increment;
@@ -593,7 +593,8 @@ int main (int argc,
     uint nofBlocks = nofBlocksPerFrame * nofFrames;
 
     Matrix<casa::DComplex> data(dr[0]->fftLength(),nUsedants); 
-	
+	  cout << "datashape = " << data.shape() << endl;
+
 		Matrix<casa::DComplex> subdata; 
 		IPosition start (ndim,startfreq,startant), length (ndim,nfreq,nant), stride (ndim,freqstr,antstr);
     Slicer slicer (start, length, stride);
@@ -640,22 +641,23 @@ int main (int argc,
 					
 	  	    //cout<<"so far so good. counter i j = "<<counter<<" "<<i<<" "<<j<<endl;
 					//cout<<dr[i]->fft()[0][0]<<endl;
-    	  	data.row(counter) = dr[i]->fft().column(j);
+					//cout<<"shape of data.row(counter) = "<<data.column(counter).shape()<<endl;
+					//cout<<"shape of dr[i]->fft().column(j) = "<<dr[i]->fft().column(j).shape()<<endl;
+    	  	data.column(counter) = dr[i]->fft().column(j);
 					for(int k=0; k < nfreq*30/100; k++){
-						data.row(counter)[k] = 0.;
+						data.column(counter)[k] = 0.;
 					}
 					for(int k=0; k < nfreq*10/100; k++){
-						data.row(counter)[nfreq-nfreq*10/100+k] = 0.;
+						data.column(counter)[nfreq-nfreq*10/100+k] = 0.;
 					}
 					counter++;
 					//cout<<"weer een antenne toegevoegd..."<<endl;
  	 		  }
 			}
-	  	//subdata = data (slicer);
-       skymapper.processData(data);		// Change if slicer is used!
+     skymapper.processData(data);		// Change if slicer is used!
     };
 			
-   cout << "datashape = " << data.shape() << endl;
+   cout << "image generated" << endl;
    //cout << "subdatashape = " << subdata.shape() << endl;
 
   } catch (AipsError x) {
