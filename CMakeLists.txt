@@ -352,6 +352,16 @@ else (CR_WITH_STARTOOLS)
 endif (CR_WITH_STARTOOLS)
 
 ##____________________________________________________________________
+##                                                              pybdsm
+
+add_custom_target (pybdsm
+  COMMAND ./build_package.sh pybdsm ${USG_ROOT}/src/pybdsm
+  WORKING_DIRECTORY ${USG_BUILD}
+  COMMENT "Building package pybdsm ..."
+  )
+add_dependencies (pybdsm boost num_util)
+
+##____________________________________________________________________
 ##                                                                  RM
 
 add_custom_target (rm
