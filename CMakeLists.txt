@@ -375,7 +375,7 @@ add_dependencies (rm dal itpp)
 ##                                                             smosaic
 
 add_custom_target (smosaic
-  COMMAND ./build_package.sh rm ${USG_ROOT}/src/smosaic
+  COMMAND ./build_package.sh smosaic ${USG_ROOT}/src/smosaic
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package smosaic ..."
   )
