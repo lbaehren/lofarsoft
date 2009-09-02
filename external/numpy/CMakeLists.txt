@@ -80,7 +80,8 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
 
     ## create "site.cfg" used later on
 
-    file (WRITE ${NUMPY_BINARY_DIR}/site.cfg "library_dirs = /usr/lib, /usr/local/lib, /usr/lib64, /usr/local/lib64, /sw/lib \n")
+    file (WRITE ${NUMPY_BINARY_DIR}/site.cfg "[DEFAULT] \n")
+    file (APPEND ${NUMPY_BINARY_DIR}/site.cfg "library_dirs = /usr/lib, /usr/local/lib, /usr/lib64, /usr/local/lib64, /sw/lib \n")
     
     ## expand the tar-archive
     add_custom_target (numpy_expand
