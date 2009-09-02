@@ -161,18 +161,21 @@ find_file (NUMPY_VERSION_PY version.py
   NO_DEFAULT_PATH
   )
 
-if (NUMPY_VERSION_PY)
+if (NUMPY_VERSION_PY AND PYTHON_EXECUTABLE)
+  ## some basic feedback
+  message (STATUS "Found version.py - running Python to import module numpy.")
+  ## Run Python to import module numpy and print the version information
   execute_process (
-    COMMAND python -c "import numpy; print numpy.__version__"
+    COMMAND ${PYTHON_EXECUTABLE} -c "import numpy; print numpy.__version__"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     RESULT_VARIABLE numpy_version_test_result
     OUTPUT_VARIABLE numpy_version_test_output
     ERROR_VARIABLE numpy_version_test_error
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-else (NUMPY_VERSION_PY)
-  message (STATUS "[NumPy] Unable to locate version.py script!")
-endif (NUMPY_VERSION_PY)
+else (NUMPY_VERSION_PY AND PYTHON_EXECUTABLE)
+  message (STATUS "[NumPy] Unable to process version.py script!")
+endif (NUMPY_VERSION_PY AND PYTHON_EXECUTABLE)
 
 if (numpy_version_test_output)
 
