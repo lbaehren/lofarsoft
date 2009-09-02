@@ -485,6 +485,9 @@ int main (int argc,
     cout << "testnewskymapping::simpleImage Setting up SpatialCoordinate"  << endl;
     std::string refcode    = "AZEL";
     std::string projection = "STG";
+
+// With depth:
+
     IPosition shape (3,pixels,pixels,depth);
     SpatialCoordinate spatial (CoordinateType::DirectionRadius, refcode,projection);
     spatial.setShape(shape);
@@ -499,12 +502,32 @@ int main (int argc,
     tmpvec = spatial.increment();
     tmpvec(0) = increment; tmpvec(1)=increment;  tmpvec(2)=depthstr;
     spatial.setIncrement(tmpvec,true);
+		
+		
+		// Without depth:
+		/*
+		    IPosition shape (2,pixels,pixels);
+		    SpatialCoordinate spatial (CoordinateType::Direction, refcode,projection);
+    spatial.setShape(shape);
+    //set reference pixel, reference value, and coord increment
+    Vector<double> tmpvec;
+    tmpvec = spatial.referencePixel();
+    tmpvec(0) = (pixels-1.)/2; tmpvec(1)=(pixels-1.)/2;
+    spatial.setReferencePixel(tmpvec);
+    tmpvec = spatial.referenceValue();
+    tmpvec(0) = 180.; tmpvec(1)=90.;
+    spatial.setReferenceValue(tmpvec,true);
+    tmpvec = spatial.increment();
+    tmpvec(0) = increment; tmpvec(1)=increment;
+    spatial.setIncrement(tmpvec,true);
+*/
     // Time-Frequency coordinate
     cout << "testnewskymapping::simpleImage Setting up TimeFreqCoordinate"  << endl;
     uint nofBlocksPerFrame = blocksperframe ;
     uint nofFrames         = nframes;
     TimeFreqCoordinate timeFreq (blocksize, nofBlocksPerFrame, nofFrames,false);
-    timeFreq.setNyquistZone(2);
+    timeFreq.setNyquistZone(1);
+		timeFreq.setSampleFrequency(2e8);
     // Skymap coordinate
     cout << "testnewskymapping::simpleImage Setting up SkymapCoordinate"  << endl;
     SkymapCoordinate coord (info,
