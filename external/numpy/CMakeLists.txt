@@ -37,10 +37,12 @@ endif (USG_ROOT)
 ## Check if the program/package/library is already available
 
 if (NOT NUMPY_VERBOSE_CONFIGURE)
-  set (NUMPY_FIND_QUIETLY  YES )
-  set (PYTHON_FIND_QUIETLY YES )
+  set (LAPACK_FIND_QUIETLY  YES )
+  set (NUMPY_FIND_QUIETLY   YES )
+  set (PYTHON_FIND_QUIETLY  YES )
 endif (NOT NUMPY_VERBOSE_CONFIGURE)
 
+include (FindLAPACK)
 include (FindNumPy)
 
 ## <-- begin build condition --------------------------------------------------->
@@ -75,6 +77,10 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
   find_program (tar_executable tar ${bin_locations})
 
   if (have_numpy_tgz AND tar_executable)
+
+    ## create "site.cfg" used later on
+
+    file (WRITE ${NUMPY_BINARY_DIR}/site.cfg "library_dirs = /usr/lib, /usr/local/lib, /usr/lib64, /usr/local/lib64, /sw/lib \n")
     
     ## expand the tar-archive
     add_custom_target (numpy_expand
@@ -85,6 +91,7 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
     
     ## build the package
     add_custom_target (numpy_build
+      COMMAND mv ../site.cfg .
       COMMAND ${PYTHON_EXECUTABLE} setup.py build
       WORKING_DIRECTORY ${NUMPY_BINARY_DIR}/${NUMPY_DIRECTORY}
       COMMENT "[NumPy] Starting build ..."
