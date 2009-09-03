@@ -41,7 +41,7 @@ endif (USG_ROOT)
 ##
 ## ==============================================================================
 
-option (SEND_BUILD_REPORT   "Send a build report to the Dashboard server?"  NO  )
+option (ENABLE_DASHBOARD    "Send a build report to the Dashboard server?"  YES )
 option (POST_BUILD_CLEAN    "Clean up the build directory after a build?"   NO  )
 option (MULTITHREADED_BUILD "Enable multithreading during build?"           NO  )
 option (SYSTEM_PACKAGES     "Installation of required system packages?"     YES )
@@ -310,7 +310,7 @@ add_dependencies (bdsm cfitsio wcslib)
 ##                                           Data Access Library (DAL)
 
 add_custom_target (dal
-  COMMAND ./build_package.sh dal ${USG_ROOT}/src/DAL -DDAL_PYTHON_BINDINGS:BOOL=${DAL_PYTHON_BINDINGS}
+  COMMAND ./build_package.sh dal ${USG_ROOT}/src/DAL -DDAL_PYTHON_BINDINGS:BOOL=${DAL_PYTHON_BINDINGS} -DDAL_ENABLE_DASHBOARD:BOOL=${ENABLE_DASHBOARD}
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package DAL ..."
   )

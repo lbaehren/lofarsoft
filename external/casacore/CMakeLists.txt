@@ -1,8 +1,7 @@
 
 ## ------------------------------------------------------------------------------
 #
-#  CMake wrapper around the GNU Autotools-based configure/build of the CASACORE
-#  library.
+#  CMake wrapper around the installation of casacore from a proviced tar-archive
 #
 ## ------------------------------------------------------------------------------
 
@@ -42,22 +41,43 @@ else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
-
 ## ------------------------------------------------------------------------------
 ## Check for system-wide CASACORE library installation
 
-set (CASACORE_FIND_QUIETLY YES )
-set (HDF5_FIND_QUIETLY     YES )
+set (CASACORE_FIND_QUIETLY   YES )
+set (HDF5_FIND_QUIETLY       YES )
+set (LAPACK_FIND_QUIETLY     YES )
 
 include (FindCASACORE)
 include (FindHDF5)
+include (FindLAPACK)
+
+## ------------------------------------------------------------------------------
+## Update the tar-archive to the latest version of the source
+
+find_program (svn_executable     svn     PATHS ${bin_locations})
+find_program (tar_executable     tar     PATHS ${bin_locations})
+
+if (svn_executable AND tar_executable)
+  add_custom_target (update_archive
+    COMMAND rm -rf casacore
+    COMMAND ${svn_executable} co http://casacore.googlecode.com/svn/trunk casacore
+    COMMAND ${tar_executable} -cvzf casacore.tgz casacore --exclude .svn
+    COMMAND rm -rf casacore
+    WORKING_DIRECTORY ${CASACORE_SOURCE_DIR}
+    COMMENT "Retrieving latest version of casacore source code ..."
+    )
+endif (svn_executable AND tar_executable)  
 
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
   
-  find_program (svn_executable     svn     PATHS ${bin_locations})
-  find_program (tar_executable     tar     PATHS ${bin_locations})
+  find_path (HAVE_SYS_MTIO_H    sys/mtio.h   PATHS ${include_locations})
+  find_path (HAVE_SYS_TYPES_H   sys/types.h  PATHS ${include_locations})
+
+  message (STATUS "sys/mtio.h   = ${HAVE_SYS_MTIO_H}")
+  message (STATUS "sys/types.h  = ${HAVE_SYS_TYPES_H}")
   
   find_file (have_casacore_tgz   casacore.tgz             ${CASACORE_SOURCE_DIR} )
   find_file (have_cmake_tgz      cmake.tgz                ${CASACORE_SOURCE_DIR} )
@@ -125,17 +145,6 @@ if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
       WORKING_DIRECTORY ${CASACORE_BINARY_DIR}
       )
   endif (tar_executable)
-  
-  if (svn_executable AND tar_executable)
-    add_custom_target (casacore-update
-      COMMAND rm -rf casacore
-      COMMAND ${svn_executable} co http://casacore.googlecode.com/svn/trunk casacore
-      COMMAND ${tar_executable} -cvzf casacore.tgz casacore --exclude .svn
-      COMMAND rm -rf casacore
-      WORKING_DIRECTORY ${CASACORE_SOURCE_DIR}
-      COMMENT "Retrieving latest version of casacore source code ..."
-      )
-  endif (svn_executable AND tar_executable)
   
   ## <-- end build condition ----------------------------------------------------->
   

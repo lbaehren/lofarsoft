@@ -54,7 +54,6 @@ set (LAPACK_LIBRARIES "")
 find_library (HAVE_LIBLAPACK lapack
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
-  /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
   PATH_SUFFIXES lapack
   )
 
@@ -67,7 +66,6 @@ endif (HAVE_LIBLAPACK)
 find_library (HAVE_LIBCBLAS cblas
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
-  /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
   PATH_SUFFIXES lapack
   )
 
@@ -80,7 +78,6 @@ endif (HAVE_LIBCBLAS)
 find_library (HAVE_LIBBLAS blas
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
-  /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
   PATH_SUFFIXES lapack
   )
 
@@ -93,7 +90,6 @@ endif (HAVE_LIBBLAS)
 find_library (HAVE_LIBATLAS atlas
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
-  /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
   PATH_SUFFIXES lapack
   )
 
