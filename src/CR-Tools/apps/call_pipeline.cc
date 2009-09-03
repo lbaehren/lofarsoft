@@ -2104,11 +2104,10 @@ int main (int argc, char *argv[])
     // print mean values of lateral distribution
     if (lateralDistribution) {
       cout << "\n\nMean values of lateral distribution of all events:\n"
-           << "antenna  cal. exp. height  cal. pow. height  exp. residual  pow. residual\n";
+           << "antenna  distance  exp. residual  pow. residual\n";
       for (unsigned int i=0; i < MAX_NUM_ANTENNAS; ++i)
-        cout << i << " \t    "
-             << meanCalPulses[i]->lateralExpHeight << "\t     "
-             << meanCalPulses[i]->lateralPowHeight << "\t     "
+        cout << i+1 << " \t    "
+             << meanCalPulses[i]->dist << "\t     "
              << meanCalPulses[i]->lateralExpDeviation << "\t     "
              << meanCalPulses[i]->lateralPowDeviation << "\n";
     }

@@ -55,10 +55,10 @@
     distY(-1.),
     dist(-1.),
     noise(0.),
-    lateralExpHeight(-999999.),
-    lateralExpDeviation(-999999.),
-    lateralPowHeight(-999999.),
-    lateralPowDeviation(-999999.),
+    lateralExpHeight(0.),
+    lateralExpDeviation(0.),
+    lateralPowHeight(0.),
+    lateralPowDeviation(0.),
     lateralCut(false),
     polarization("")
   {}
