@@ -102,6 +102,8 @@
     double minimumTime;
     //! time when crossing half height
     double halfheightTime;
+    //! time shift by the beam forming
+    double geomDelay;
     //! FWHM
     double fwhm;
     //! antenna position in shower coordinates x

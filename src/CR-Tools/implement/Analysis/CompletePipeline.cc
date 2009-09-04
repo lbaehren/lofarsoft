@@ -1273,6 +1273,7 @@ namespace CR { // Namespace CR -- begin
       vector<double> fwhm;			// width of the pulse envelope
       vector<double> start_time;		// Stores the start time of the pulse (begin of FWHM)
       vector<double> noiseValues;		// Mean of trace in a region before the cc-beam
+      Vector<Double> geomDelays;		// geometrical delays of beamforming in getShiftedFFT
       bool calculate_noise = false;		// Is set to true if cc_center is not the default (1e99)
 
       if (rawData)
@@ -1305,12 +1306,17 @@ namespace CR { // Namespace CR -- begin
       timeValues = getUpsampledTimeAxis(dr,upsampling_exp);
 
       // Get the yValues of all selected antennas (raw data or fieldstrength)
-      if (rawData)
+      // and the geometrical delays applied during beam forming (0 for raw data)
+      if (rawData) {
         yValues = getUpsampledFX(dr,upsampling_exp, antennaSelection, true, calibrationMode);
+        geomDelays.resize(antennaIDs.size());
+        geomDelays.set(0);
         // first true means: offset will be substracted,
         // in calibrationMode the voltage will be used instead of ADC counts
-      else
+      } else {
         yValues = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
+        geomDelays = getGeomDelay().column(0);
+      }
 
       // check length of time axis and yValues traces for consistency
       if (timeValues.size() != yValues.column(0).size()) {
@@ -1516,6 +1522,7 @@ namespace CR { // Namespace CR -- begin
         pulse.envelopeTime = timeRange(envMaxtimevalue)*1e9;
         pulse.minimumTime = timeRange(mintimevalue)*1e9;
         pulse.halfheightTime = pulsestart*1e9;
+        pulse.geomDelay = geomDelays(i)*1e9;
         pulse.fwhm = (pulsestop-pulsestart)*1e9;
         pulse.noise = noise*1e6;
         pulse.polarization = Polarization;
@@ -1533,7 +1540,8 @@ namespace CR { // Namespace CR -- begin
              << setw(8) << timeRange(maxtimevalue)*1e6 << "   "
              << setw(8) << timeRange(mintimevalue)*1e6 << "       "
              << setw(8) << pulsestart*1e6 << "         "
-             << setw(8) << (pulsestop-pulsestart)*1e9 << std::endl;
+             << setw(8) << (pulsestop-pulsestart)*1e9 
+             << endl;
       } // for i
 
       // calculate the averages and the range if there is more than one value
@@ -1589,7 +1597,7 @@ namespace CR { // Namespace CR -- begin
              << " to " << max(static_cast< Vector<Double> >(envMaxima_time)) << "\n"
              << "Time average (max) [us]:   " << mean(static_cast< Vector<Double> >(envMaxima_time)) << "\n"
              << "Time average (start) [us]: " << mean(static_cast< Vector<Double> >(start_time)) << "\n"
-             << "FWHM average [ns]:         " << mean(static_cast< Vector<Double> >(fwhm)) << std::endl;
+             << "FWHM average [ns]:         " << mean(static_cast< Vector<Double> >(fwhm)) << endl;
       }
 
     } catch (AipsError x) {

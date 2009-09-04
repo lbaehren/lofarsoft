@@ -56,8 +56,9 @@ namespace CR { // Namespace CR -- begin
     DirParams_p.define("Curvature",tmpval);
     DirParams_p.define("Az",tmpval);
     tmpval=90.;
-    DirParams_p.define("El",tmpval);    
+    DirParams_p.define("El",tmpval);
     ExtraDelay_p = 0.;
+    GeomDelays_p = Matrix<double>();
   };
   
   // ============================================================================
@@ -245,8 +246,10 @@ namespace CR { // Namespace CR -- begin
 #endif
       Cube<DComplex> tmpCcube;
       tmpCcube = geomWeight.weights();
+      // store geometrical delays for later access
+      GeomDelays_p = geomWeight.delays().copy();
 #ifdef DEBUGGING_MESSAGES      
-      cout << "CRinvFFT::GetShiftedFFT: delays: " <<geomWeight.delays() << endl;
+      cout << "CRinvFFT::GetShiftedFFT: delays: " << GeomDelays_p << endl;
 #endif
 
       phaseGradients = Matrix<DComplex>(geomWeight.weights().nonDegenerate());

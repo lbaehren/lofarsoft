@@ -132,6 +132,7 @@ using CR::LopesEventIn;
   lateralOutputFile      = false
   lateralSNRcut          = 1.0;
   lateralTimeCut         = 15e-9;
+  calculateMeanValues    = false;
 
   \endverbatim
   This example means:
@@ -181,6 +182,7 @@ using CR::LopesEventIn;
     <li>there will be no file created, which has a special format for the lateral distribtion analysis
     <li>points with a SNR < 1.0 will be removed from the lateral distribution
     <li>points with a time position more than 15 ns away of the CC beam center will be removed
+    <li>no output of mean values of lateral distribution results
   </ul>
 
   <h3>Example</h3>
@@ -260,6 +262,7 @@ bool lateralDistribution = false;    // the lateral distribution will not be gen
 bool lateralOutputFile = false;      // no file for the lateral distribution will be created
 double lateralSNRcut = 1.0;            // SNR cut for removing points from lateral distribution
 double lateralTimeCut = 15e-9;         // Allowed time window +/- arround CC-beam-center for found peaks
+bool calculateMeanValues = false;    // calculate some mean values of all processed events
 
 // Event parameters for calling the pipeline
 string eventfilelistname("");			         // Name of the ASCII event list
@@ -1088,6 +1091,24 @@ void readConfigFile (const string &filename)
           }
         }
 
+        if ( (keyword.compare("calculateMeanValues")==0) || (keyword.compare("calculatemeanmalues")==0)
+             || (keyword.compare("Calculatemeanvalues")==0) || (keyword.compare("CalculateMeanValues")==0)) {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
+	    calculateMeanValues = true;
+	    cout << "calculateMeanValues set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
+	    calculateMeanValues = false;
+	    cout << "calculateMeanValues set to 'false'.\n";
+	  } else{
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "calculateMeanValues must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+	}
+
+
+
       }	// while(configfile.good())
 
       // close config file
@@ -1487,6 +1508,7 @@ int main (int argc, char *argv[])
              << "lateralOutputFile = false\n"
              << "lateralSNRcut = 1.0\n"
              << "lateralTimeCut = 25e-9\n"
+             << "calculateMeanValues = false"
              << "... \n"
              << endl;
         return 0;	// exit here
@@ -2080,7 +2102,7 @@ int main (int argc, char *argv[])
           if (! roottree->GetBranchStatus(branchname.c_str())) {
             roottree->Branch(branchname.c_str(),"PulseProperties",&calibPulses[antenna-1]);
           string branchname = "Ant_" + antNumber.str() + "_cal_mean.";
-          if (! roottree->GetBranchStatus(branchname.c_str()))
+          if ((calculateMeanValues) && (! roottree->GetBranchStatus(branchname.c_str())))
             roottree->Branch(branchname.c_str(),"PulseProperties",&meanCalPulses[antenna-1]);
           }
         }
@@ -2102,7 +2124,7 @@ int main (int argc, char *argv[])
     }
 
     // print mean values of lateral distribution
-    if (lateralDistribution) {
+    if ((calculateMeanValues) && (lateralDistribution)) {
       cout << "\n\nMean values of lateral distribution of all events:\n"
            << "antenna  distance  exp. residual  pow. residual\n";
       for (unsigned int i=0; i < MAX_NUM_ANTENNAS; ++i)

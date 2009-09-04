@@ -22,8 +22,10 @@
  ***************************************************************************/
 
 // Don't forget to run the following commands in implement/Analysis, if something has changed:
-// rm RootDict.*
-// rootcint RootDict.C -c PulseProperties.h
+/*
+ rm RootDict.*
+ rootcint RootDict.C -c PulseProperties.h
+*/
 
 #include <Analysis/PulseProperties.h>
 
@@ -50,6 +52,7 @@
     envelopeTime(0.),
     minimumTime(0.),
     halfheightTime(0.),
+    geomDelay(0.),
     fwhm(0.),
     distX(-1.),
     distY(-1.),

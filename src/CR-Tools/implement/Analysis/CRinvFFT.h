@@ -93,6 +93,9 @@ namespace CR { // Namespace CR -- begin
     //! Value of the extra delay
     Double ExtraDelay_p;
 
+    //! Geometrical delays from the beam forming in GetShiftedFFT
+    Matrix<double> GeomDelays_p;
+
     //@{
     //! Data for the polarization selection cache
     Bool ploAntSelValid_p;
@@ -179,6 +182,16 @@ namespace CR { // Namespace CR -- begin
       \return 
     */
     inline void setExtraDelay (Double extraDelay) { ExtraDelay_p = extraDelay;};
+
+
+    /*!
+      \brief Get the geometrical delays calculated by the beam forming in GetShiftedFFT
+
+      \param GeomDelays - gemometrical beam forming delays
+      
+      \return 
+    */
+    inline Matrix<double> getGeomDelay (void) { return GeomDelays_p;};
 
     /*!
       \brief Get the shifted antenna positions (i.e. coordinate origin is the phase center)
