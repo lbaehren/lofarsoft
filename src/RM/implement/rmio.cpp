@@ -3,11 +3,12 @@
 		File:				rmio.cpp
 		Author:			Sven Duscha (sduscha@mpa-garching.mpg.de)
 		Date:				01-08-2009
-		Last change:	02-08-2009
+		Last change:	06-09-2009
 */
 
 #include <iostream>				// C++/STL iostream
 #include <fstream>				// file stream I/O
+#include "dalFITS.h"
 #include "rmio.h"
 
 using namespace std;
@@ -384,7 +385,7 @@ void rmio::readRMSFfromFile(	vector<complex<double> > &rmsf,
     	// TODO
     	// use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
   	}
-  	else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
+  	else if(filename.find(".txt", 1)!=string::npos || filename.find(".dat", 1)!=string::npos)	// if it is text file
   	{
 		ifstream infile(const_cast<const char*>(filename.c_str()), ifstream::in);		// file with lambda squareds and RMSF complex intensities	
 
@@ -410,6 +411,10 @@ void rmio::readRMSFfromFile(	vector<complex<double> > &rmsf,
 		}
 	
 		infile.close();
+	}
+	else		// otherwise, if file extension was not recognized
+	{
+		throw "rmio::readRMSFfromFile file extension was not recognized";
 	}
 }
 
@@ -440,7 +445,7 @@ void rmio::readRMSFfromFile(	vector<double> &faradaydepths,
     	// TODO
     	// use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
   	}
-  	else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
+  	else if(filename.find(".txt", 1)!=string::npos || filename.find(".dat", 1)!=string::npos)	// if it is text file
   	{
 		ifstream infile(const_cast<const char*>(filename.c_str()), ifstream::in);		// file with lambda squareds and RMSF complex intensities	
 
@@ -475,6 +480,10 @@ void rmio::readRMSFfromFile(	vector<double> &faradaydepths,
 		}
 	
 		infile.close();
+	}
+	else		// otherwise, if file extension was not recognized
+	{
+		throw "rmio::readRMSFfromFile file extension was not recognized";
 	}
 }
 
@@ -515,7 +524,7 @@ void rmio::writeRMSFtoFile(vector<complex<double> > &rmsf, const string &filenam
 	
 		for(unsigned int i=0; i < rmsf.size(); i++)
 		{
-			outfile << rmsf[i].real() << "   ";
+			outfile << rmsf[i].real() << "\t";
 			outfile << rmsf[i].imag() << endl;
 		}
 		
@@ -551,7 +560,7 @@ void rmio::writeRMSFtoFile(vector<double> &faradaydepths,
 		// TODO
 	   // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
 	}
-	else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
+	else if(filename.find(".txt", 1)!=string::npos || filename.find(".dat", 1)!=string::npos)	// if it is text file
 	{
 	
 		ofstream outfile(const_cast<const char*>(filename.c_str()), ofstream::out);		// file with lambda squareds and RMSF complex intensities	
@@ -563,12 +572,15 @@ void rmio::writeRMSFtoFile(vector<double> &faradaydepths,
 	
 		for(unsigned int i=0; i < rmsf.size(); i++)
 		{
-			outfile << rmsf[i].real() << "   ";
+			outfile << faradaydepths[i] << "\t";
+			outfile << rmsf[i].real() << "\t";
 			outfile << rmsf[i].imag() << endl;
 		}
 		
 		outfile.flush();
-	}	
+	}
+	else
+		throw "rmio::writeRMSFtoFile unrecognized file extension";
 }
 
 
@@ -607,7 +619,7 @@ void rmio::writeRMtoFile(vector<complex<double> > rm, const std::string &filenam
 
   for(unsigned int i=0; i<rm.size(); i++)		// loop over vector
   {
-    outfile << rm[i].real() << "   ";			// write real part of data
+    outfile << rm[i].real() << "\t";			// write real part of data
 	 outfile << rm[i].imag();						// write imaginary part of data
     outfile << endl;									// add endl
   }
@@ -634,8 +646,8 @@ void rmio::writeRMtoFile(	vector<double> &lambdasq,
 
   for(unsigned int i=0; i<rm.size(); i++)		// loop over vector
   {
-	 outfile << lambdasq[i] << "   ";			// write lambda squareds 
-    outfile << rm[i].real() << "   ";			// write real part of data
+	 outfile << lambdasq[i] << "\t";			// write lambda squareds 
+    outfile << rm[i].real() << "\t";			// write real part of data
 	 outfile << rm[i].imag();						// write imaginary part of data
     outfile << endl;									// add endl
   }
@@ -662,8 +674,8 @@ void rmio::writePolIntToFile(	std::vector<double> &frequencies,
 
   for(unsigned int i=0; i<polint.size(); i++)		// loop over vector
   {
-	 outfile << frequencies[i] << "   ";		// write lambda squareds 
-    outfile << polint[i].real() << "   ";		// write real part of data
+	 outfile << frequencies[i] << "\t";		// write lambda squareds 
+    outfile << polint[i].real() << "\t";		// write real part of data
 	 outfile << polint[i].imag();					// write imaginary part of data
     outfile << endl;									// add endl
   }
@@ -690,10 +702,140 @@ void rmio::writeIntToFile(	std::vector<double> &frequencies,
 
   for(unsigned int i=0; i<intensities.size(); i++)		// loop over vector
   {
-	 outfile << frequencies[i] << "   ";					// write lambda squareds 
+	 outfile << frequencies[i] << "\t";					// write lambda squareds 
     outfile << intensities[i];								// write real part of data
     outfile << endl;												// add endl
   }
 
   outfile.flush();						// flush output file
+}
+
+
+
+//*************************************************************************************
+//
+// Image cube functions (internally only FITS implemented at first)
+//
+//**************************************************************************************
+
+/*!
+	\brief Check if the image cube is in correct format for RM-Synthesis
+
+	\param filename - name of image cube to check
+	\param hdu - optional give a HDU to check (default=1)
+	
+	\return check - true if image format is correct, false if not
+*/
+bool rmio::checkImageCube(const std::string &filename, int hdu=1)
+{
+	if(filename.size()==0 || filename=="")
+		throw "rmio::checkImageCube no filename provided";
+		
+	//----------------------------------------------------------
+	// Check if filename is text file FITS file or HDF5 file
+	if(filename.find(".hdf5", 1)!=string::npos)	// if HDF5 use dal
+	{
+  		// TODO
+	}
+	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+	{
+		// Open FITS image
+		
+		
+		// 3 axis
+
+		// 32-Bit double format (-32)
+
+		// complex value for P=Q+iU
+	}	
+	else
+	{
+		throw "rmio::checkImageCube unknown file extension";
+	}
+	
+	return false;
+}
+
+
+/*!
+	\brief Check if Q image cube is in correct format for RM-Synthesis
+
+	\param filename - name of image cube to check
+	\param hdu - optional give a HDU to check (default=1)
+	
+	\return check - true if image format is correct, false if not
+*/
+bool rmio::checkImageCubeQ(const std::string &filename, int hdu=1)
+{
+	if(filename.size()==0 || filename=="")
+		throw "rmio::checkImageCube no filename provided";
+			
+	//----------------------------------------------------------
+	// Check if filename is text file FITS file or HDF5 file
+	if(filename.find(".hdf5", 1)!=string::npos)			// if HDF5 use dal
+	{
+  		// TODO
+	}
+	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS
+	{
+		DAL::dalFITS fitsimage(filename, READONLY);				// create and open dalFITS image object
+		
+		if(fitsimage.getImgDim()!=3)							// must have 3 axes
+			throw "rmio::checkImageCubeQ image cube has wrong dimensions";
+		
+		if(fitsimage.getImgType()!=-32) 						// 32-Bit double format (-32)
+			throw "rmio::checkImageCubeQ pixel values are not in 32 bit";
+
+		fitsimage.close();										// close FITS image
+
+		return true;
+	}	
+	else
+	{
+		throw "rmio::checkImageCube unknown file extension";
+	}	
+	
+	return false;
+}
+
+
+/*!
+	\brief Check if U image cube is in correct format for RM-Synthesis
+
+	\param filename - name of image cube to check
+	\param hdu - optional give a HDU to check (default=1)
+	
+	\return check - true if image format is correct, false if not
+*/
+bool rmio::checkImageCubeU(const std::string &filename, int hdu=1)
+{
+	if(filename.size()==0 || filename=="")
+		throw "rmio::checkImageCube no filename provided";
+		
+	//----------------------------------------------------------
+	// Check if filename is text file FITS file or HDF5 file
+	if(filename.find(".hdf5", 1)!=string::npos || filename.find(".hdf5", 1)!=string::npos)				// if HDF5 use dal
+	{
+  		// TODO
+	}
+	else if(filename.find(".fits", 1)!=string::npos || filename.find(".FITS", 1)!=string::npos)		// if FITS file  use dalFITS 
+	{
+		DAL::dalFITS fitsimage(filename, READONLY);			// create and open dalFITS image object
+
+		if(fitsimage.getImgDim()!=3)			// must have 3 axes
+			throw "rmio::checkImageCubeU image cube has wrong dimensions";
+		
+		if(fitsimage.getImgType()!=-32) 		// 32-Bit double format (-32)
+			throw "rmio::checkImageCubeU pixel values are not in 32 bit";
+
+		fitsimage.close();										// close FITS image
+
+		return true;
+	}	
+	else
+	{
+		throw "rmio::checkImageCube unknown file extension";
+	}
+	
+	return false;
 }

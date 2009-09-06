@@ -38,12 +38,15 @@
 #include <iostream>			// streamed input output for rm cubes
 #include <complex>			// complex math functions
 
+/*
 #include <casa/Arrays/Array.h>		// use CASA Arrays as temporary buffers
 #include <casa/Quanta/Unit.h>		// use CASA Unit class for unit handling
 #include <casa/Quanta.h>		// ... and unit conversion
 
 
-#include "../../DAL/implement/dalFITS.h"	// dalFITS file access
+//#include "../../DAL/implement/dalFITS.h"	// dalFITS file access
+#include "dalFITS.h"	// dalFITS file access
+*/
 
 // Namespace usage
 using namespace std;
@@ -102,16 +105,7 @@ public:
 
   //! Constructor with associated output stream 
   rm(int, int, int, double, ofstream &);
-
-  /*! \brief RM cube with associated Faraday buffer. One line of sight or two dimensional
-  
-      create a RM cube object with one (or a times b) associated Faraday line(s) (defaults: axis a=1 axis b=0)
-      of sight, buffer is only given as reference
-  */
-  rm(int, int, int, double, casa::Array<double> &faradaybuffer, int x=1, int y=0);
-  
-  rm(int, int, int, double, casa::Array<double> &faradayplanes, int x, int y, int z=1);
-  
+ 
   ~rm();
 		
   //! Rotation Measure computing algorithms

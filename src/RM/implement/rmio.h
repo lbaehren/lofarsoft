@@ -113,6 +113,22 @@ public:
   void writeIntToFile(	std::vector<double> &frequencies, 
 								std::vector<double> &intensities, 
 								const std::string &filename);
+
+
+  //*************************************************************************************
+  //
+  // Image cube functions (internally only FITS implemented at first)
+  //
+  //**************************************************************************************
+
+  //! Check if image cube is in correct format for RM-Synthesis
+  bool checkImageCube(const std::string &filename, int hdu);
+
+  //! Check if Q image cube is in correct format for RM-Synthesis  
+  bool checkImageCubeQ(const std::string &filename, int hdu);
+
+  //! Check if U image cube is in correct format for RM-Synthesis
+  bool checkImageCubeU(const std::string &filename, int hdu);
 };
 
 #endif		// _RMIO_H_

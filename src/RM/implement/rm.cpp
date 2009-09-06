@@ -2,7 +2,7 @@
 
     Author:			Sven Duscha (sduscha@mpa-garching.mpg.de)
     Date:			18-12-2008
-    Last change:	02-08-2009
+    Last change:	02-09-2009
 */
 
 
@@ -39,28 +39,13 @@ rm::rm()
 
 
 /*!
-  \brief Declare a new RM cube of size x (right ascension), y (declination), and depth and stepsize in Faraday depth
-
-  \param depth - total Faraday depth size 
-  \param stepsize -- 
-*/
-rm::rm(int depth, double stepsize)
-{
-  // NOTE: This is now in rmCube class, soon depricated
-
-	// declare RM cube of desired size and assign output stream
-	
-	
-}
-
-/*!
   \brief rm class destructor
 */
 
 rm::~rm()
 { 
   // Free memory? Currently nothing to be done
-  cout << "rm destructor called" << endl;
+//  cout << "rm destructor called" << endl;
 }
 
 //===============================================================================
@@ -333,7 +318,7 @@ complex<double> rm::inverseFourier(double phi,
     int chan=0; 												// loop variables
     const int numchannels=lambda_squared.size();	// number of lambda squared channels
 
-    double K=0;					// K factor for RM-synthesis
+    double K=1;												// K weighting factor for RM-synthesis
 
 
     //-----------------------------------------------------------------------
@@ -405,7 +390,7 @@ vector<complex<double> > rm::inverseFourier(const vector<double> &phis,
   double phi=0;													// single phi value to be computed
   const unsigned int numchannels=lambda_squared.size();			// number of frequency channels
 
-  double K=0;														// K factor for RM-synthesis
+  double K=1;														// K weighting factor for RM-synthesis
 
   //-----------------------------------------------------------------------
 
@@ -434,7 +419,7 @@ vector<complex<double> > rm::inverseFourier(const vector<double> &phis,
   	  {
 		  phi=phis[i];				// select phi from Faraday depths vector
         // Use Euler formula for exp_lambdafactor
-   // 	  ex_lambdafactor=(cos(-2*phi*(lambda_squared[chan]-lambdaZeroSq)), sin(-2*phi*(lambda_squared[chan]-lambdaZeroSq)));		// BUGGY! casa error?
+   // 	  exp_lambdafactor=(cos(-2*phi*(lambda_squared[chan]-lambdaZeroSq)), sin(-2*phi*(lambda_squared[chan]-lambdaZeroSq)));		
 		  exp_lambdafactor=complex<double>(cos(-2.0*phi*(lambda_squared[chan]-lambdaZeroSq)), sin(-2.0*phi*(lambda_squared[chan]-lambdaZeroSq)) );  
       rmpolint[i]=rmpolint[i]+(intensity[chan]*exp_lambdafactor*delta_lambda_squared[chan]);
      }
@@ -555,7 +540,7 @@ vector<complex<double> > rm::inverseFourier(const vector<double> &phis,
   double phi=0;													// single phi value to be computed
   const unsigned int numchannels=lambda_squared.size();			// number of frequency channels
 
-  double K=0;														// K factor for RM-synthesis
+  double K=1;														// K factor for RM-synthesis
 
   //-----------------------------------------------------------------------
 
@@ -600,7 +585,7 @@ vector<complex<double> > rm::inverseFourier(const vector<double> &phis,
 /*!
 	 \brief Forward Fourier Transform - inverse operation to RM-Synthesis
 
-    \param &freqs - Faraday depth to compute RM for
+    \param &lambda_sqs - Lambda squareds to compute RM for
     \param &rmpolint - Polarized intensities for each Faraday depth
     \param &lambda_squared - Lambda squareds of polarized intensities
     \param &weights - Weights associated with each frequency (or lambda squared)
@@ -621,8 +606,21 @@ vector<complex<double> > rm::forwardFourier(const vector<double> &lambda_sqs,
   double lambdasq=0;														// single lambda squared value to be computed
   const unsigned int numfaradays=faradays.size();				// number of Faraday depths
   const unsigned int numlambda_sqs=lambda_sqs.size();			// number of frequency channels to transform to
+  double K=1;																// weighting factor per faraday depth
 
   //-----------------------------------------------------------------------
+
+  // Compute weighting factor from weights
+  for (vector<double>::const_iterator it = weights.begin(); it!=weights.end(); ++it) 
+  {
+    K+=*it;
+  }
+
+  if(K!=0)		// Do not do a division by zero!
+    K=1/K;		// take inverse
+  else			// otherwise...
+    K=1;			// ... use 1 as default    
+
 
   // compute discrete Fourier sum by iterating over frequency vector
   //
@@ -630,14 +628,16 @@ vector<complex<double> > rm::forwardFourier(const vector<double> &lambda_sqs,
   //
   for(unsigned int i=0; i<numlambda_sqs; i++)	// loop over lambda squareds given in phis vector 
   {
-     for(unsigned int chan=0; chan<numfaradays; chan++)
+     for(unsigned int depth=0; depth<numfaradays; depth++)
   	  {
 		  lambdasq=lambda_sqs[i];				// select lambda squared from lambda squareds vector
         // Use Euler formula for exp_lambdafactor
- 		  exp_lambdafactor=complex<double>(cos(+2.0*lambdasq*faradays[chan]), sin(+2.0*lambdasq*faradays[chan]) );  
-		  intensities[i]=intensities[i]+(rmpolint[chan]*exp_lambdafactor*delta_faradays[chan]);
+ 		  exp_lambdafactor=complex<double>(cos(+2.0*lambdasq*faradays[depth]), sin(+2.0*lambdasq*faradays[depth]) );  
+		  intensities[i]=intensities[i]+(rmpolint[depth]*exp_lambdafactor*delta_faradays[depth]);
      }
-  }
+  
+	  intensities[i]=K*intensities[i];		// multiply by weighting factor
+	}
 
   return intensities;	// return vector of complex polarized intensities per Faraday depth
 }
@@ -647,7 +647,7 @@ vector<complex<double> > rm::forwardFourier(const vector<double> &lambda_sqs,
 /*!
 	 \brief Q polarization only Forward Fourier Transform - inverse operation to RM-Synthesis
 
-    \param &freqs - Faraday depth to compute RM for
+    \param &lambda_sqs - lambda squareds to compute Q intensity for
     \param &rmpolint - Polarized intensities for each Faraday depth
     \param &lambda_squared - Lambda squareds of polarized intensities
     \param &weights - Weights associated with each frequency (or lambda squared)
@@ -693,7 +693,7 @@ vector<double> rm::forwardFourierQ(const vector<double> &lambda_sqs,
 /*!
 	 \brief U polarization only Forward Fourier Transform - inverse operation to RM-Synthesis
 
-    \param &freqs - Faraday depth to compute RM for
+    \param &lambda_sqs - lambda squareds to compute U intensity for
     \param &rmpolint - Polarized intensities for each Faraday depth
     \param &lambda_squared - Lambda squareds of polarized intensities
     \param &weights - Weights associated with each frequency (or lambda squared)
