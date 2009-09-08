@@ -226,7 +226,7 @@ namespace CR { // Namespace CR -- begin
 
   // ---------------------------------------------------- makeDirectionCoordinate
 
-  DirectionCoordinate CoordinateType::makeDirectionCoordinate ()
+  casa::DirectionCoordinate CoordinateType::makeDirectionCoordinate ()
   {
     return makeDirectionCoordinate (casa::MDirection::AZEL,
 				    casa::Projection::STG);
@@ -234,7 +234,7 @@ namespace CR { // Namespace CR -- begin
   
   // ---------------------------------------------------- makeDirectionCoordinate
   
-  DirectionCoordinate
+  casa::DirectionCoordinate
   CoordinateType::makeDirectionCoordinate (casa::String const &refcode,
 					   casa::String const &projection)
   {
@@ -244,7 +244,7 @@ namespace CR { // Namespace CR -- begin
   
   // ---------------------------------------------------- makeDirectionCoordinate
   
-  DirectionCoordinate
+  casa::DirectionCoordinate
   CoordinateType::makeDirectionCoordinate (casa::MDirection::Types const &directionType,
 					   casa::Projection::Type const &projectionType)
   {
@@ -269,7 +269,7 @@ namespace CR { // Namespace CR -- begin
   
   // ---------------------------------------------------- makeDirectionCoordinate
   
-  DirectionCoordinate
+  casa::DirectionCoordinate
   CoordinateType::makeDirectionCoordinate (casa::MDirection::Types const &directionType,
 					   casa::Projection::Type const &projectionType,
 					   Vector<Quantum<double> > const &refValue,

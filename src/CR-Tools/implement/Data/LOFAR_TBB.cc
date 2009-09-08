@@ -22,7 +22,6 @@
  ***************************************************************************/
 
 #include <Data/LOFAR_TBB.h>
-#include <Utilities/StringTools.h>
 
 using std::cout;
 using std::endl;

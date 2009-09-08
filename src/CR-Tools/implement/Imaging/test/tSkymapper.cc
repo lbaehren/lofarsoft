@@ -498,7 +498,7 @@ int test_processing (string const &infile,
     /* Open previously created image */
     casa::HDF5Image<float> image ("skymap-processing01.h5");
     /* Summary of image properties */
-    CR::summary (image);
+    DAL::summary (image);
     // Convert the image to FITS
     status = CR::image2fits (image,
 			     "skymap-processing01.fits");

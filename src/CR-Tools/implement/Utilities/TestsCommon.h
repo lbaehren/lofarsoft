@@ -41,10 +41,14 @@
 #include <images/Images/ImageFITSConverter.h>
 
 // CR-Tools header files
+#include <crtools.h>
 #include <Coordinates/CoordinateType.h>
 #include <Coordinates/TimeFreqCoordinate.h>
 #include <Imaging/Beamformer.h>
 #include <Imaging/GeomDelay.h>
+
+// DAL header files
+#include <dal/dalCommon.h>
 
 using std::cout;
 using std::endl;
@@ -132,55 +136,6 @@ namespace CR { // Namespace CR -- begin
     \brief Print a summary of the properties of a coordinate system object
   */
   void summary (casa::CoordinateSystem &csys);
-  
-  /*!
-    \brief Provide a summary of the properties of a casa::ImageInterface object
-    
-    Example output:
-    \verbatim
-    -- Image type ............. : HDF5Image
-    -- Table name ............. : /Users/lars/Code/lofar/usg/build/cr/test/lofar_cr_skymap.h5
-    -- Image shape ............ : [256, 256, 100, 10, 513]
-    -- World axis names ....... : [Longitude, Latitude, Distance, Time, Frequency]
-    -- World axis units ....... : [rad, rad, m, s, Hz]
-    -- Referemce pixel ........ : [0, 0, 0, 0, 0]
-    -- Reference value ........ : [0, 1.5708, 0, 0, 0]
-    -- Maximum cache size ..... : 0
-    -- Is the image paged? .... : 1
-    -- Is the image persistent? : 1
-    -- Is the image writable?   : 1
-    -- Has the image a mask?    : 0
-    \endverbatim
-    
-    \param image -- Image object derived from the ImageInterface class.
-  */
-  template <class T>
-    void summary (casa::ImageInterface<T> &image)
-    {
-      casa::CoordinateSystem cs = image.coordinates();
-      casa::IPosition shape (image.shape());
-      int nofAxes (shape.nelements());
-      double nofPixels (1.0);
-      
-      for (int n(0); n<nofAxes; n++) {
-	nofPixels *= shape(n);
-      }
-      
-      cout << "-- Image type ............. : " << image.imageType()        << endl;
-      cout << "-- Table name ............. : " << image.name()             << endl;
-      cout << "-- Image shape ............ : " << shape                    << endl;
-      cout << "-- Number of pixels ....... : " << nofPixels                << endl;
-      cout << "-- World axis names ....... : " << cs.worldAxisNames()      << endl;
-      cout << "-- World axis units ....... : " << cs.worldAxisUnits()      << endl;
-      cout << "-- Referemce pixel ........ : " << cs.referencePixel()      << endl;
-      cout << "-- Reference value ........ : " << cs.referenceValue()      << endl;
-      cout << "-- Increment .............. : " << cs.increment()           << endl;
-      cout << "-- Maximum cache size ..... : " << image.maximumCacheSize() << endl;
-      cout << "-- Is the image paged? .... : " << image.isPaged()      << endl;
-      cout << "-- Is the image persistent? : " << image.isPersistent() << endl;
-      cout << "-- Is the image writable?   : " << image.isWritable()   << endl;
-      cout << "-- Has the image a mask?    : " << image.hasPixelMask() << endl;
-    }
   
   //_______________________________________________________________________________
   //                                                                     image2fits

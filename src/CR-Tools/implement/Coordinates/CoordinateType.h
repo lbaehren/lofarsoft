@@ -45,7 +45,6 @@
 #include <Utilities/MConversions.h>
 
 using casa::Coordinate;
-using casa::DirectionCoordinate;
 using casa::LinearCoordinate;
 using casa::SpectralCoordinate;
 using casa::Matrix;
@@ -373,24 +372,11 @@ namespace CR { // Namespace CR -- begin
       
       \return coord -- Direction coordinate of AZEL coordinates in STG projection
     */
-    static DirectionCoordinate makeDirectionCoordinate ();
-
-    /*!
-      \brief Create a DirectionCoordinate object
-
-      \param directionType  -- Reference code for the celestial coordinate frame
-      \param projectionType -- Reference code for the sphercial map projection
-      
-      \return coord -- DirectionCoordinate object for the selected celestial
-              coordinate frame and map projection.
-    */
-    static
-      DirectionCoordinate makeDirectionCoordinate (casa::String const &refcode,
-						   casa::String const &projection);
+    static casa::DirectionCoordinate makeDirectionCoordinate ();
     
     /*!
       \brief Create a DirectionCoordinate object
-
+      
       \param directionType  -- Reference code for the celestial coordinate frame
       \param projectionType -- Reference code for the sphercial map projection
       
@@ -398,8 +384,22 @@ namespace CR { // Namespace CR -- begin
               coordinate frame and map projection.
     */
     static
-      DirectionCoordinate makeDirectionCoordinate (MDirection::Types const &directionType,
-						   Projection::Type const &projectionType);
+      casa::DirectionCoordinate makeDirectionCoordinate (casa::String const &refcode,
+							 casa::String const &projection);
+    
+    /*!
+      \brief Create a DirectionCoordinate object
+      
+      \param directionType  -- Reference code for the celestial coordinate frame
+      \param projectionType -- Reference code for the sphercial map projection
+      
+      \return coord -- DirectionCoordinate object for the selected celestial
+              coordinate frame and map projection.
+    */
+    static
+      casa::DirectionCoordinate
+      makeDirectionCoordinate (MDirection::Types const &directionType,
+			       Projection::Type const &projectionType);
     
     /*!
       \brief Create a DirectionCoordinate object
@@ -415,11 +415,12 @@ namespace CR { // Namespace CR -- begin
 	      parameters for the pixel to world conversion.
     */
     static
-      DirectionCoordinate makeDirectionCoordinate (MDirection::Types const &directionType,
-						   Projection::Type const &projectionType,
-						   Vector<Quantum<double> > const &refValue,
-						   Vector<Quantum<double> > const &increment,
-						   Vector<double> const &refPixel);
+      casa::DirectionCoordinate
+      makeDirectionCoordinate (MDirection::Types const &directionType,
+			       Projection::Type const &projectionType,
+			       Vector<Quantum<double> > const &refValue,
+			       Vector<Quantum<double> > const &increment,
+			       Vector<double> const &refPixel);
     
     /*!
       \brief Create a LinearCoordinate object

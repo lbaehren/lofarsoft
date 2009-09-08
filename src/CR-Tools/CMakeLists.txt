@@ -477,9 +477,6 @@ endif (HAVE_BOOST)
 
 if (HAVE_CFITSIO)
   include_directories (${CFITSIO_INCLUDES})
-  if (HAVE_WCSLIB)
-    set (WCSLIB_GETWCSTAB 1)
-  endif (HAVE_WCSLIB)
 endif (HAVE_CFITSIO)
 
 if (HAVE_DAL)

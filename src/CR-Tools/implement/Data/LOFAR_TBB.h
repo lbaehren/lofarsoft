@@ -24,19 +24,13 @@
 #ifndef LOFAR_TBB_H
 #define LOFAR_TBB_H
 
-// Standard library header files
-#include <iostream>
-#include <string>
-#include <vector>
-
-// CR-Tools header files
+/* CR-Tools header files */
 #include <crtools.h>
 #include <IO/DataReader.h>
+#include <Utilities/StringTools.h>
 
-// DAL header files
-#include <dal/Enumerations.h>
-#include <dal/TBB_Timeseries.h>
-
+/* casacore header files */
+#include <casa/aips.h>
 #include <casa/Arrays/ArrayIO.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/Matrix.h>
@@ -45,6 +39,13 @@
 #include <casa/Containers/Record.h>
 #include <casa/HDF5/HDF5File.h>
 #include <casa/HDF5/HDF5Record.h>
+
+#ifndef WCSLIB_GETWCSTAB
+ #define WCSLIB_GETWCSTAB
+#endif
+
+/* DAL header files */
+#include <dal/TBB_Timeseries.h>
 
 using casa::AipsError;
 
