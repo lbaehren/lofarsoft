@@ -352,6 +352,16 @@ else (CR_WITH_STARTOOLS)
 endif (CR_WITH_STARTOOLS)
 
 ##____________________________________________________________________
+##                                                              Pulsar
+
+add_custom_target (pulsar
+  COMMAND ./build_package.sh pulsar ${USG_ROOT}/src/Pulsar
+  WORKING_DIRECTORY ${USG_BUILD}
+  COMMENT "Building package Pulsar ..."
+  )
+add_dependencies (pulsar cfitsio)
+
+##____________________________________________________________________
 ##                                                              pybdsm
 
 add_custom_target (pybdsm
