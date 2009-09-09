@@ -35,7 +35,7 @@ endif (USG_ROOT)
 ##
 ## ==============================================================================
 
-option (PULSAR_ENABLE_TESTING     "Enable generation and running of tests?"    YES )
+option (PULSAR_ENABLE_TESTING     "Enable generation and running of tests?"    NO  )
 option (PULSAR_COMPILER_WARNINGS  "Enable standard set of compiler warnings?"  YES )
 option (PULSAR_DEBUGGING_MESSAGES "Print debugging information?"               NO  )
 option (PULSAR_VERBOSE_CONFIGURE  "Verbose output during configuration?"       NO  )
