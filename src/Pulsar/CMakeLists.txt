@@ -54,7 +54,7 @@ if (NOT PULSAR_VERBOSE_CONFIGURE)
   set (CFITSIO_FIND_QUIETLY     YES )
   set (GFORTRAN_FIND_QUIETLY    YES )
   set (GLIB_FIND_QUIETLY        YES )
-  set (PGPLOT_FIND_QUIETLY        YES )
+  set (PGPLOT_FIND_QUIETLY      YES )
 endif (NOT PULSAR_VERBOSE_CONFIGURE)
 
 ## Handle option: debugging messages on/off
@@ -148,7 +148,6 @@ endif (NOT HAVE_PGPLOT)
 ## header files of the PULSAR itself
 
 include_directories (
-  ${PULSAR_SOURCE_DIR}/implement
   ${PULSAR_SOURCE_DIR}/test
   ${PULSAR_SOURCE_DIR}/apps
   )
@@ -159,25 +158,27 @@ if (HAVE_CFITSIO)
   include_directories (${CFITSIO_INCLUDES})
   add_definitions (-DHAVE_CFITSIO)
 else (HAVE_CFITSIO)
-  message (STATUS "[PULSAR] Missing or incomplete installation of CFITSIO!")
+  message (SEND_ERROR "[PULSAR] Missing or incomplete installation of CFITSIO!")
 endif (HAVE_CFITSIO)
 
 if (HAVE_GLIB)
   include_directories (${GLIB_INCLUDES})
   add_definitions (-DHAVE_GLIB)
 else (HAVE_GLIB)
-  message (STATUS "[PULSAR] Missing or incomplete installation of GLIB!")
+  message (SEND_ERROR "[PULSAR] Missing or incomplete installation of GLIB!")
 endif (HAVE_GLIB)
 
 if (HAVE_PGPLOT)
   include_directories (${PGPLOT_INCLUDES})
   add_definitions (-DHAVE_PGPLOT)
-else (HAVE_PGPLOT)
-  message (STATUS "[PULSAR] Missing or incomplete installation of PGPLOT!")
+#else (HAVE_PGPLOT)
+#  message (SEND_ERROR "[PULSAR] Missing or incomplete installation of PGPLOT!")
 endif (HAVE_PGPLOT)
 
 ## -----------------------------------------------------------------------------
-## Installation
+## Installation - We install into $LOFARSOFT/release/share/pulsar to keep all
+## the components in one place but not have them interfere with possible other
+## installations of the same packages (e.g. FFTW3)
 
 find_path (prefix release_area.txt
   PATHS
@@ -190,7 +191,7 @@ find_path (prefix release_area.txt
 
 if (prefix)
   message (STATUS "Installation area located for package PULSAR.")
-  set (CMAKE_INSTALL_PREFIX ${prefix}) 
+  set (CMAKE_INSTALL_PREFIX ${prefix}/share/pulsar) 
 endif (prefix)
 
 # skip the full RPATH for the build tree
@@ -213,7 +214,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH YES)
 ##
 ## =============================================================================
 
-add_subdirectory (implement)
+add_subdirectory (external)
 add_subdirectory (apps)
 
 if (PULSAR_BUILD_TESTS)
