@@ -53,6 +53,8 @@ endif (PULSAR_ENABLE_TESTING)
 if (NOT PULSAR_VERBOSE_CONFIGURE)
   set (CFITSIO_FIND_QUIETLY     YES )
   set (GFORTRAN_FIND_QUIETLY    YES )
+  set (GLIB_FIND_QUIETLY        YES )
+  set (PGPLOT_FIND_QUIETLY        YES )
 endif (NOT PULSAR_VERBOSE_CONFIGURE)
 
 ## Handle option: debugging messages on/off
@@ -126,6 +128,20 @@ if (NOT HAVE_GFORTRAN)
   include (FindGFortran)
 endif (NOT HAVE_GFORTRAN)
 
+##__________________________________________________________
+## GLIB library
+
+if (NOT HAVE_GLIB)
+  include (FindGLIB)
+endif (NOT HAVE_GLIB)
+
+##__________________________________________________________
+## PGPLOT library
+
+if (NOT HAVE_PGPLOT)
+  include (FindPGPLOT)
+endif (NOT HAVE_PGPLOT)
+
 ## -----------------------------------------------------------------------------
 ## Include directories
 
@@ -145,6 +161,20 @@ if (HAVE_CFITSIO)
 else (HAVE_CFITSIO)
   message (STATUS "[PULSAR] Missing or incomplete installation of CFITSIO!")
 endif (HAVE_CFITSIO)
+
+if (HAVE_GLIB)
+  include_directories (${GLIB_INCLUDES})
+  add_definitions (-DHAVE_GLIB)
+else (HAVE_GLIB)
+  message (STATUS "[PULSAR] Missing or incomplete installation of GLIB!")
+endif (HAVE_GLIB)
+
+if (HAVE_PGPLOT)
+  include_directories (${PGPLOT_INCLUDES})
+  add_definitions (-DHAVE_PGPLOT)
+else (HAVE_PGPLOT)
+  message (STATUS "[PULSAR] Missing or incomplete installation of PGPLOT!")
+endif (HAVE_PGPLOT)
 
 ## -----------------------------------------------------------------------------
 ## Installation
