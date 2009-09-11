@@ -1,0 +1,28 @@
+#!/bin/bash
+
+BUILD_TYPE=Experimental
+BUILD_TARGET=dal
+
+## NO CHANGES BELOW THIS POINT ##
+
+export LOFARSOFT=`pwd`
+. ./devel_common/scripts/init.sh
+
+echo "LOFARSOFT    = ${LOFARSOFT}"
+echo "Build type   = ${BUILD_TYPE}"
+echo "Build target = ${BUILD_TARGET}"
+
+echo "-- Cleaning up directories ..."
+rm -rf release build
+
+echo "-- Updating working copy of source code ..."
+svn up
+
+echo "-- Starting up build of DAL ..."
+cd build
+./bootstrap
+make ${BUILD_TARGET}
+
+echo "-- Generating output for Dashboard server ..."
+cd $LOFARSOFT/build/${BUILD_TARGET}
+make ${BUILD_TYPE}
