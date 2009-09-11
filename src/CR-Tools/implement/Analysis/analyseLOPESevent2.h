@@ -447,12 +447,30 @@ namespace CR { // Namespace CR -- begin
 
     void storeShowerCoordinates (const Record& erg);
 
+
+    /*!
+      \brief Get the anntena IDs of the last processed events 
+
+      \return antennaIDs -- Antenna IDs of the last processed event
+    */
+    Vector<int> getAntennaIDs (void);
+
+
+    /*!
+      \brief Get the anntena positions of the last processed events 
+
+      \return antennaPos -- Antenna positions of the last processed event
+    */
+    Matrix<Double> getAntennaPositions(void);
+
+
     /*!
       \brief Creates a summary postscript of all created plots (uses LaTeX)
 
       \param filename - name of the file for the summary plot (without final ".ps").
       \param columns  - number of columns in the summary (if columns=0, nothing is done)
     */
+
     void summaryPlot (string filename,
                       unsigned int columns = 3);
 

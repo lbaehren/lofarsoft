@@ -522,6 +522,37 @@ namespace CR { // Namespace CR -- begin
     }
   }
 
+
+  Vector<int> analyseLOPESevent2::getAntennaIDs (void)
+  {
+    try {
+      // get AntennaIDs if there is an event
+      if (beamformDR_p != NULL) {
+        Vector<int> antennaIDs;
+        beamformDR_p->headerRecord().get("AntennaIDs",antennaIDs);
+        return antennaIDs;
+      }
+    } catch (AipsError x) {
+      cerr << "analyseLOPESevent2::getAntennaIDs: " << x.getMesg() << endl;
+    }
+    return Vector<int>();
+  }
+
+
+  Matrix<Double> analyseLOPESevent2::getAntennaPositions(void)
+  {
+    try {
+      // get AntennaIDs if there is an event
+      if (beamPipe_p != NULL) {
+        return beamPipe_p->GetAntPositions().copy();
+      }
+    } catch (AipsError x) {
+      cerr << "analyseLOPESevent2::getAntennaPositions: " << x.getMesg() << endl;
+    }
+    return Matrix<Double>();
+  }
+
+
   void analyseLOPESevent2::summaryPlot(string filename,
                                        unsigned int columns)
   {
