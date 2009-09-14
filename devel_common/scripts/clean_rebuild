@@ -1,16 +1,26 @@
 #!/bin/bash
 
-BUILD_TYPE=Experimental
-BUILD_TARGET=dal
+##_______________________________________________________________________________
+## Clean build of a specific high-level target in the USG code tree
 
-## NO CHANGES BELOW THIS POINT ##
+case $1 in 
+    "cr")
+	BUILD_TARGET=cr
+	;;
+    "dal")
+	BUILD_TARGET=dal
+	;;
+    "rm")
+	BUILD_TARGET=rm
+	;;
+    *)
+	echo "[clean_rebuild] No build target selected - please provide one!"
+	exit;
+	;;
+esac
 
 export LOFARSOFT=`pwd`
 . ./devel_common/scripts/init.sh
-
-echo "LOFARSOFT    = ${LOFARSOFT}"
-echo "Build type   = ${BUILD_TYPE}"
-echo "Build target = ${BUILD_TARGET}"
 
 echo "-- Cleaning up directories ..."
 rm -rf release build
@@ -22,6 +32,22 @@ echo "-- Starting up build of DAL ..."
 cd build
 ./bootstrap
 make ${BUILD_TARGET}
+
+##_______________________________________________________________________________
+## Test build with results send to Dashboard server
+
+case $2 in
+    "Experimental")
+	BUILD_TYPE=Experimental
+	;;
+    "Nightly")
+	BUILD_TYPE=Nightly
+	;;
+    *)
+	echo "[clean_rebuild] No build type selected for Dashboard."
+	exit;
+	;;
+esac
 
 echo "-- Generating output for Dashboard server ..."
 cd $LOFARSOFT/build/${BUILD_TARGET}
