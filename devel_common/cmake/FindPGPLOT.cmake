@@ -23,9 +23,10 @@
 # - Check for the presence of the PGPLOT library
 #
 # Defines the following variables:
-#  HAVE_PGPLOT       = 
-#  PGPLOT_INCLUDES   = Path to the PGPLOT header files
-#  PGPLOT_LIBRARIES  = Path to all parts of the PGPLOT library
+#  HAVE_PGPLOT        = 
+#  PGPLOT_INCLUDES    = Path to the PGPLOT header files
+#  PGPLOT_LIBRARIES   = Path to all parts of the PGPLOT library
+#  PGPLOT_LIBRARY_DIR = Path to the directory containing the PGPLOT libraries
 
 ## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
@@ -47,48 +48,49 @@ set (PGPLOT_LIBRARIES "")
 
 ## [1] libpgplot
 
-find_library (libpgplot
+find_library (PGPLOT_PGPLOT_LIBRARY
   NAMES pgplot
   PATHS ${lib_locations}
   PATH_SUFFIXES pgplot
   NO_DEFAULT_PATH
   )
 
-if (libpgplot)
-  list (APPEND PGPLOT_LIBRARIES ${libpgplot})
-else (libpgplot)
+if (PGPLOT_PGPLOT_LIBRARY)
+  list (APPEND PGPLOT_LIBRARIES ${PGPLOT_PGPLOT_LIBRARY})
+  get_filename_component(PGPLOT_LIBRARY_DIR ${PGPLOT_PGPLOT_LIBRARY} PATH)
+else (PGPLOT_PGPLOT_LIBRARY)
   message (STATUS "Warning: Unable to locate libpgplot!")
-endif (libpgplot)
+endif (PGPLOT_PGPLOT_LIBRARY)
 
 ## [2] libcpgplot
 
-find_library (libcpgplot
+find_library (PGPLOT_CPGPLOT_LIBRARY
   NAMES cpgplot
   PATHS ${lib_locations}
   PATH_SUFFIXES pgplot
   NO_DEFAULT_PATH
   )
 
-if (libcpgplot)
-  list (APPEND PGPLOT_LIBRARIES ${libcpgplot})
-else (libcpgplot)
+if (PGPLOT_CPGPLOT_LIBRARY)
+  list (APPEND PGPLOT_LIBRARIES ${PGPLOT_CPGPLOT_LIBRARY})
+else (PGPLOT_CPGPLOT_LIBRARY)
   message (STATUS "Warning: Unable to locate libcpgplot!")
-endif (libcpgplot)
+endif (PGPLOT_CPGPLOT_LIBRARY)
 
 ## [3] libXmPgplot
 
-find_library (libXmPgplot
+find_library (PGPLOT_XMPGPLOT_LIBRARY
   NAMES XmPgplot
   PATHS ${lib_locations}
   PATH_SUFFIXES pgplot
   NO_DEFAULT_PATH
   )
 
-if (libXmPgplot)
-  list (APPEND PGPLOT_LIBRARIES ${libXmPgplot})
-else (libXmPgplot)
+if (PGPLOT_XMPGPLOT_LIBRARY)
+  list (APPEND PGPLOT_LIBRARIES ${PGPLOT_XMPGPLOT_LIBRARY})
+else (PGPLOT_XMPGPLOT_LIBRARY)
   message (STATUS "Warning: Unable to locate libXmPgplot!")
-endif (libXmPgplot)
+endif (PGPLOT_XMPGPLOT_LIBRARY)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -125,4 +127,8 @@ endif (HAVE_PGPLOT)
 mark_as_advanced (
   PGPLOT_INCLUDES
   PGPLOT_LIBRARIES
+  PGPLOT_PGPLOT_LIBRARY
+  PGPLOT_CPGPLOT_LIBRARY
+  PGPLOT_XMPGPLOT_LIBRARY
+  PGPLOT_LIBRARY_DIR
   )
