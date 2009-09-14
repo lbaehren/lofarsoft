@@ -98,7 +98,11 @@ find_path (FFTW3_INCLUDES fftw3.h PATH ${include_locations})
 if (FFTW3_INCLUDES)
   include_directories (${FFTW3_INCLUDES})
   add_definitions (-DHAVE_FFTW3)
+else (FFTW3_INCLUDES)
+  message (SEND_ERROR "Missing FFTW3 header files - unable to build project!")
+  set (HAVE_FFTW3 FALSE)
 endif (FFTW3_INCLUDES)
+
 
 ## --- ROOT ------------------------------------------------
 
