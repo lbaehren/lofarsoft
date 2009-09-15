@@ -253,6 +253,8 @@ endif (PULSAR_BUILD_TESTS)
 ## -----------------------------------------------------------------------------
 ## Feedback
 
+if (PULSAR_VERBOSE_CONFIGURE)
+
 message (STATUS "+============================================================+")
 message (STATUS "| PULSAR: Summary of configuration settings                  |")
 message (STATUS "+------------------------------------------------------------+")
@@ -261,3 +263,5 @@ message (STATUS " Enable compiler warnings   = ${PULSAR_COMPILER_WARNINGS}")
 message (STATUS " Print debugging messages   = ${PULSAR_DEBUGGING_MESSAGES}")
 message (STATUS " Enable verbose configure   = ${PULSAR_VERBOSE_CONFIGURE}")
 message (STATUS "+------------------------------------------------------------+")
+
+endif (PULSAR_VERBOSE_CONFIGURE)
