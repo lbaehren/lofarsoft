@@ -26,12 +26,13 @@
 #
 # The following variables are set when GFORTRAN is found:
 #
-#  HAVE_GFORTRAN       = Set to true, if all components of GFORTRAN have been
-#                        found.
-#  GFORTRAN_EXECUTABLE = Excutable of the GFortran compiler
-#  GFORTRAN_INCLUDES   = Include path for the header files of GFORTRAN
-#  GFORTRAN_LIBRARIES  = Link these to use GFORTRAN
-#  GFORTRAN_LFLAGS     = Linker flags (optional)
+#  HAVE_GFORTRAN        = Set to true, if all components of GFORTRAN have been
+#                         found.
+#  GFORTRAN_EXECUTABLE  = Excutable of the GFortran compiler
+#  GFORTRAN_INCLUDES    = Include path for the header files of GFORTRAN
+#  GFORTRAN_LIBRARY     = Path to libgfortran
+#  GFORTRAN_LIBRARY_DIR = Directory within which libgfortran is located
+#  GFORTRAN_LFLAGS      = Linker flags (optional)
 #
 # The following variables are set when G2C is found:
 #
@@ -114,6 +115,10 @@ find_library (GFORTRAN_LIBRARY gfortran
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )
+
+if (GFORTRAN_LIBRARY)
+  get_filename_component(GFORTRAN_LIBRARY_DIR ${GFORTRAN_LIBRARY} PATH)
+endif (GFORTRAN_LIBRARY)
 
 ## -----------------------------------------------------------------------------
 ## Check for G2C
@@ -242,6 +247,7 @@ endif (HAVE_G2C)
 mark_as_advanced (
   GFORTRAN_INCLUDES
   GFORTRAN_LIBRARY
+  GFORTRAN_LIBRARY_DIR
   G2C_INCLUDES
   G2C_LIBRARY
   F2C_INCLUDES
