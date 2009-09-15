@@ -1,0 +1,5323 @@
+
+slalib/sla_config.h,659
+#define FC_MAIN 6,215
+#define HAVE_DLFCN_H 9,296
+#define HAVE_FC_MAIN 12,362
+#define HAVE_INTTYPES_H 15,446
+#define HAVE_MEMORY_H 18,531
+#define HAVE_RAND 21,607
+#define HAVE_RANDOM 24,681
+#define HAVE_STDINT_H 27,762
+#define HAVE_STDLIB_H 30,845
+#define HAVE_STRINGS_H 33,929
+#define HAVE_STRING_H 36,1013
+#define HAVE_SYS_STAT_H 39,1098
+#define HAVE_SYS_TYPES_H 42,1186
+#define HAVE_UNISTD_H 45,1272
+#define PACKAGE 48,1319
+#define PACKAGE_BUGREPORT 51,1421
+#define PACKAGE_NAME 54,1516
+#define PACKAGE_STRING 57,1603
+#define PACKAGE_TARNAME 60,1698
+#define PACKAGE_VERSION 63,1774
+#define STDC_HEADERS 66,1862
+#define VERSION 69,1918
+
+spigot2filterbank.c,49
+void spigot2sigprocfb(22,902
+int main(112,4077
+
+fftcalls.c,46
+void fftwcall(5,45
+void sgifftcall(129,4490
+
+fresnl.c,350
+#define PI 66,1335
+#define PIBYTWO 69,1432
+static double sn[sn77,1675
+static double sd[sd85,1881
+static double cn[cn96,2140
+static double cd[cd104,2350
+static double fn[fn115,2619
+static double fd[fd127,2951
+static double gn[gn142,3347
+static double gd[gd155,3710
+int fresnl(171,4107
+double polevl(267,6148
+double p1evl(290,6544
+
+readfile_cmd.c,666
+char *Program;Program20,365
+static int indexDefault[indexDefault23,392
+static Cmdline cmd 25,431
+checkFloatConversion(117,3348
+getIntOpt(137,3863
+getIntOpts(176,4773
+getLongOpt(250,6596
+getLongOpts(287,7483
+getFloatOpt(359,9259
+getFloatOpts(395,9997
+getDoubleOpt(463,11601
+getDoubleOpts(502,12470
+getStringOpt(577,14303
+getStringOpts(596,14727
+checkIntLower(647,15969
+checkIntHigher(662,16323
+checkLongLower(677,16678
+checkLongHigher(692,17036
+checkFloatLower(707,17395
+checkFloatHigher(722,17755
+checkDoubleLower(737,18116
+checkDoubleHigher(752,18479
+catArgv(767,18852
+showOptionValues(791,19311
+usage(1047,24912
+parseCmdline(1095,28376
+
+patchdata.c,41
+#define WORKLEN 10,305
+int main(16,375
+
+rfifind_cmd.c,645
+char *Program;Program20,364
+static Cmdline cmd 24,392
+checkFloatConversion(126,4155
+getIntOpt(146,4670
+getIntOpts(185,5580
+getLongOpt(259,7403
+getLongOpts(296,8290
+getFloatOpt(368,10066
+getFloatOpts(404,10804
+getDoubleOpt(472,12408
+getDoubleOpts(511,13277
+getStringOpt(586,15110
+getStringOpts(605,15534
+checkIntLower(656,16776
+checkIntHigher(671,17130
+checkLongLower(686,17485
+checkLongHigher(701,17843
+checkFloatLower(716,18202
+checkFloatHigher(731,18562
+checkDoubleLower(746,18923
+checkDoubleHigher(761,19286
+missingErr(776,19657
+catArgv(784,19846
+showOptionValues(808,20305
+usage(1073,27102
+parseCmdline(1131,31935
+
+birdzap.c,97
+int get_birdies(6,123
+int get_std_birds(92,2849
+int check_to_zap(166,5031
+void hunt(203,6239
+
+toas2dat_cmd.c,638
+char *Program;Program20,365
+static Cmdline cmd 24,393
+checkFloatConversion(70,1715
+getIntOpt(90,2230
+getIntOpts(129,3140
+getLongOpt(203,4963
+getLongOpts(240,5850
+getFloatOpt(312,7626
+getFloatOpts(348,8364
+getDoubleOpt(416,9968
+getDoubleOpts(455,10837
+getStringOpt(530,12670
+getStringOpts(549,13094
+checkIntLower(600,14336
+checkIntHigher(615,14690
+checkLongLower(630,15045
+checkLongHigher(645,15403
+checkFloatLower(660,15762
+checkFloatHigher(675,16122
+checkDoubleLower(690,16483
+checkDoubleHigher(705,16846
+missingErr(720,17217
+catArgv(728,17406
+showOptionValues(752,17865
+usage(839,19843
+parseCmdline(862,21170
+
+prepfold_utils.c,673
+static void slaStringExport(7,118
+void call_dgels(38,1110
+double switch_pfdot(72,2105
+double switch_pfdotdot(87,2340
+double fdot2phasedelay(102,2655
+double fdotdot2phasedelay(113,2834
+double phasedelay2fdot(124,3029
+double phasedelay2fdotdot(132,3182
+void set_posn(140,3345
+int read_floats(148,3628
+int read_shorts(159,4065
+int read_subbands(183,4853
+double *read_events(read_events230,6594
+int bary2topo(342,10057
+void init_prepfoldinfo(385,11558
+void print_prepfoldinfo(448,12871
+void write_prepfoldinfo(501,15236
+void read_prepfoldinfo(571,18668
+void delete_prepfoldinfo(707,24471
+void double2float(722,24785
+void correct_subbands_for_DM(732,24971
+
+dftfold_cmd.c,616
+char *Program;Program20,364
+static Cmdline cmd 24,392
+checkFloatConversion(70,1617
+getIntOpt(90,2132
+getIntOpts(129,3042
+getLongOpt(203,4865
+getLongOpts(240,5752
+getFloatOpt(312,7528
+getFloatOpts(348,8266
+getDoubleOpt(416,9870
+getDoubleOpts(455,10739
+getStringOpt(530,12572
+getStringOpts(549,12996
+checkIntLower(600,14238
+checkIntHigher(615,14592
+checkLongLower(630,14947
+checkLongHigher(645,15305
+checkFloatLower(660,15664
+checkFloatHigher(675,16024
+checkDoubleLower(690,16385
+checkDoubleHigher(705,16748
+catArgv(720,17121
+showOptionValues(744,17580
+usage(829,19460
+parseCmdline(853,20984
+
+mask.c,318
+void fill_mask(10,287
+void set_oldmask_bits(64,2256
+void unset_oldmask_bits(75,2570
+void free_mask(86,2831
+void read_mask(105,3294
+void calc_avgmedstd(151,5328
+int determine_padvals(179,6238
+void write_mask(236,8648
+int check_mask(270,10125
+static int find_num(363,13657
+static int merge_no_dupes(375,13897
+
+show_pfd.c,17
+int main(14,205
+
+minifft.c,378
+#define INTERPBINS 4,90
+#define MINRETURNSIG 8,216
+fftcand *search_fft(search_fft18,594
+void search_minifft(203,8130
+static int padfftlen(366,15420
+void print_rawbincand(418,16889
+float percolate_fftcands(435,17577
+float percolate_rawbincands(455,18125
+int not_already_there_rawbin(475,18715
+void compare_rawbin_cands(500,19350
+void file_rawbin_candidates(557,20957
+
+mpiprepsubband.c,450
+#define RAWDATA 16,288
+#define TDT 19,488
+#define LININTERP(22,546
+#define NEAREST_INT(26,744
+MPI_Datatype infodata_type;70,3382
+MPI_Datatype maskbase_type;71,3410
+static Cmdline *cmd;cmd73,3439
+static IFs ifs 74,3460
+static int blocklen 75,3485
+static int local_numdms 77,3588
+static PKMB_tapehdr hdr;78,3641
+int main(84,3714
+static int read_subbands(1102,42191
+static void convert_subbands(1118,42667
+static int get_data(1131,43053
+
+dump_spigot_zerolag.c,16
+int main(9,176
+
+orbint.c,229
+#define EDOT(7,232
+double *dorbint(dorbint11,291
+double keplars_eqn(41,1396
+void E_to_phib_BT(115,3448
+void E_to_v(133,3960
+void E_to_p(150,4398
+void E_to_phib(167,4855
+void E_to_z(181,5238
+double lin_interp_E(198,5730
+
+multi_prof_plot.c,27
+void multi_prof_plot(3,21
+
+un_sc_td.c,58
+#define HDRLEN 5,60
+#define DATLEN 6,79
+int main(8,101
+
+dispersion.c,413
+double tree_max_dm(3,21
+double smearing_from_bw(17,541
+double delay_from_dm(29,956
+double dm_from_delay(41,1318
+double *dedisp_delays(dedisp_delays53,1684
+void read_offsets(74,2510
+void dedisp(124,4281
+double *subband_delays(subband_delays173,6268
+double *subband_search_delays(subband_search_delays194,7096
+void dedisp_subbands(235,9054
+void float_dedisp(291,11432
+void combine_subbands(319,12380
+
+timetest.c,17
+int main(12,166
+
+fastffts.c,262
+long long good_factor(13,423
+void tablesixstepfft(38,1094
+void realfft(217,5849
+void tablesplitfft(295,8260
+void tablefft(309,8514
+double *maketable(maketable323,8770
+void fft_scramble(356,9479
+void tablefftraw(379,9846
+void tablesplitfftraw(410,10605
+
+testtree.c,63
+#define NUMCHAN 9,244
+#define NUMPTS 10,262
+int main(12,280
+
+search_bin_cmd.c,619
+char *Program;Program20,367
+static Cmdline cmd 24,395
+checkFloatConversion(100,2847
+getIntOpt(120,3362
+getIntOpts(159,4272
+getLongOpt(233,6095
+getLongOpts(270,6982
+getFloatOpt(342,8758
+getFloatOpts(378,9496
+getDoubleOpt(446,11100
+getDoubleOpts(485,11969
+getStringOpt(560,13802
+getStringOpts(579,14226
+checkIntLower(630,15468
+checkIntHigher(645,15822
+checkLongLower(660,16177
+checkLongHigher(675,16535
+checkFloatLower(690,16894
+checkFloatHigher(705,17254
+checkDoubleLower(720,17615
+checkDoubleHigher(735,17978
+catArgv(750,18351
+showOptionValues(774,18810
+usage(950,23200
+parseCmdline(998,26909
+
+bary.c,38
+#define MAXTIMES 3,21
+int main(9,91
+
+realfft.c,18
+int main(32,1181
+
+rfi_utils.c,306
+rfi *new_rfi(new_rfi4,42
+void write_rfi(22,523
+void read_rfi(37,1112
+void free_rfi(52,1681
+rfi *rfi_vector(rfi_vector59,1802
+void free_rfi_vector(78,2445
+void update_rfi(88,2634
+int find_rfi(113,3381
+int compare_rfi_freq(130,3876
+int compare_rfi_sigma(144,4162
+int compare_rfi_numobs(162,4570
+
+profile_cmd.c,768
+char *Program;Program20,377
+static Cmdline cmd 24,405
+static void checkFloatConversion(137,4332
+int getIntOpt(156,4925
+int getIntOpts(200,5931
+int getLongOpt(274,7942
+int getLongOpts(316,8916
+int getFloatOpt(388,10841
+int getFloatOpts(429,11648
+int getDoubleOpt(497,13402
+int getDoubleOpts(540,14357
+int getStringOpt(615,16380
+int getStringOpts(635,16841
+void checkIntLower(685,18203
+void checkIntHigher(701,18601
+void checkLongLower(717,19000
+void checkLongHigher(733,19402
+void checkFloatLower(749,19805
+void checkFloatHigher(765,20209
+void checkDoubleLower(781,20614
+void checkDoubleHigher(797,21021
+static char *catArgv(catArgv813,21429
+void showOptionValues(838,21941
+void usage(1133,29549
+Cmdline *parseCmdline(parseCmdline1198,33174
+
+exploredat.c,1684
+#define DEBUGOUT 15,217
+#define LOGMAXDISPNUM 18,302
+#define LOGMINDISPNUM 19,390
+#define LOGMINCHUNKLEN 20,475
+#define LOGMAXPTS 21,567
+#define LOGINITIALNUMPTS 22,617
+#define MAXDISPNUM 23,701
+#define MINDISPNUM 24,744
+#define MINCHUNKLEN 25,787
+#define MAXPTS 26,831
+#define INITIALNUMPTS 27,870
+#define AVGMED_COLOR 28,916
+#define STDDEV_COLOR 29,940
+#define LARGENUM 30,964
+#define SMALLNUM 31,988
+static long long Ndat;33,1014
+static infodata idata;34,1037
+static int mmap_file;36,1075
+static FILE *datfile;datfile38,1103
+static int plotstats 40,1132
+typedef struct datapart 44,1272
+   double tlo;45,1298
+   int nlo;46,1372
+   int nn;47,1447
+   float *data;data48,1519
+} datapart;49,1567
+typedef struct dataview 51,1580
+   double vdt;52,1606
+   float minval;53,1687
+   float maxval;54,1763
+   int centern;55,1839
+   int lon;56,1903
+   int zoomlevel;57,1967
+   int numsamps;58,2049
+   int dispnum;59,2132
+   int chunklen;60,2208
+   int numchunks;61,2305
+   float avgmeds[avgmeds62,2389
+   float stds[stds63,2472
+   float maxs[maxs64,2563
+   float mins[mins65,2636
+   float vals[vals66,2709
+} dataview;67,2786
+typedef struct basicstats 70,2800
+   double average;71,2828
+   double stdev;72,2847
+   double skewness;73,2864
+   double kurtosis;74,2884
+   double median;75,2904
+   double min;76,2922
+   double max;77,2937
+} basicstats;78,2952
+static basicstats *calc_stats(calc_stats81,2968
+static int plot_dataview(106,3769
+static dataview *get_dataview(get_dataview241,7760
+static datapart *get_datapart(get_datapart308,10016
+static void free_datapart(330,10499
+static void print_help(341,10651
+int main(365,11942
+
+cand_output.c,114
+#define COPYSIGN(1,0
+void file_reg_candidates(9,191
+void file_bin_candidates(126,5306
+#undef COPYSIGN240,9689
+
+search_rzw.c,286
+#define SHORTESTFFT 4,49
+#define FFTLENGTH 5,125
+static double dmaxarg1,15,683
+static double dmaxarg1, dmaxarg2;15,683
+#define DMAX(16,717
+int main(42,1941
+int not_already_there_rzw(488,15768
+void compare_rzw_cands(524,16699
+#undef SHORTESTFFT580,18274
+#undef LOSKIP581,18293
+
+prepsubband_cmd.c,644
+char *Program;Program20,368
+static Cmdline cmd 24,396
+checkFloatConversion(120,3675
+getIntOpt(140,4190
+getIntOpts(179,5100
+getLongOpt(253,6923
+getLongOpts(290,7810
+getFloatOpt(362,9586
+getFloatOpts(398,10324
+getDoubleOpt(466,11928
+getDoubleOpts(505,12797
+getStringOpt(580,14630
+getStringOpts(599,15054
+checkIntLower(650,16296
+checkIntHigher(665,16650
+checkLongLower(680,17005
+checkLongHigher(695,17363
+checkFloatLower(710,17722
+checkFloatHigher(725,18082
+checkDoubleLower(740,18443
+checkDoubleHigher(755,18806
+missingErr(770,19177
+catArgv(778,19366
+showOptionValues(802,19825
+usage(1048,25870
+parseCmdline(1104,30590
+
+test_multifiles.c,15
+int main(7,68
+
+prepfold_cmd.c,626
+char *Program;Program20,365
+static Cmdline cmd 24,393
+checkFloatConversion(272,9282
+getIntOpt(292,9797
+getIntOpts(331,10707
+getLongOpt(405,12530
+getLongOpts(442,13417
+getFloatOpt(514,15193
+getFloatOpts(550,15931
+getDoubleOpt(618,17535
+getDoubleOpts(657,18404
+getStringOpt(732,20237
+getStringOpts(751,20661
+checkIntLower(802,21903
+checkIntHigher(817,22257
+checkLongLower(832,22612
+checkLongHigher(847,22970
+checkFloatLower(862,23329
+checkFloatHigher(877,23689
+checkDoubleLower(892,24050
+checkDoubleHigher(907,24413
+catArgv(922,24786
+showOptionValues(946,25245
+usage(1668,43116
+parseCmdline(1814,55840
+
+median.c,72
+#define ELEM_SWAP(10,294
+float median(12,358
+#undef ELEM_SWAP71,1839
+
+bincand.c,88
+static double orbit_step(13,138
+int main(45,1055
+static double orbit_trial(509,16090
+
+djcl.c,20
+void slaDjcl(7,133
+
+get_candidates.c,162
+int read_rzw_cand(3,21
+int read_bin_cand(11,234
+int read_rawbin_cand(19,451
+void get_rzw_cand(27,669
+void get_bin_cand(40,1073
+void get_rawbin_cand(53,1474
+
+prepdata.c,258
+#define TDT 15,320
+#define LININTERP(18,378
+#define NEAREST_INT(22,576
+#define RAWDATA 24,647
+int main(40,1236
+static int read_floats(970,35955
+static int read_shorts(982,36415
+static int downsample(1005,37209
+static void update_infodata(1022,37647
+
+iomak.c,86
+void read_mak_input(3,23
+void read_mak_file(212,7843
+void write_mak_file(375,12873
+
+ioinf.c,94
+char bands[bands4,43
+char scopes[scopes6,125
+void readinf(12,282
+void writeinf(113,3449
+
+twopass.c,64
+long long find_blocksize(7,238
+void twopassfft_scratch(21,540
+
+PMsurv_phasemod.c,2374
+#define TWOPI 13,287
+#define MINORBP 17,413
+#define MINMINIBIN 20,489
+#define MINFREQ 23,557
+#define MAXFREQ 26,624
+#define OVERLAPFACT 32,875
+#define WORKBLOCK 35,951
+#define PRUNELEV 39,1106
+#define NEWLEV 42,1176
+#define OUTDIR 46,1263
+#define NUMMINIFFTS 49,1353
+static fftw_plan fftwplan[fftwplan56,1503
+static fftw_plan plan;57,1543
+typedef struct fftw_plan 59,1572
+   int decoy;60,1599
+} fftw_plan;61,1613
+static double *ffttables[ffttables62,1626
+static double *ffttables[NUMMINIFFTS], *table;table62,1626
+static int minifftlen[minifftlen66,1722
+static double threshold[threshold75,2134
+typedef struct FCOMPLEX 83,2387
+   float r;84,2413
+   float i;85,2456
+} fcomplex;86,2499
+typedef struct RAWBINCAND 90,2581
+   double full_N;91,2609
+   double full_T;92,2689
+   double full_lo_r;93,2769
+   double mini_N;94,2849
+   double mini_r;95,2929
+   double mini_power;96,3009
+   double mini_numsum;97,3089
+   double mini_sigma;98,3169
+   double psr_p;99,3249
+   double orb_p;100,3329
+} rawbincand;101,3409
+typedef struct INFO 105,3472
+   double dt;106,3494
+   double dm;107,3553
+   double T;108,3612
+   int N;109,3671
+   int file_cntr;110,3730
+   int ibeam;111,3789
+   char tape_lbl[tape_lbl112,3848
+   char pname[pname113,3907
+   char outfilebase[outfilebase114,3966
+   char rawheader[rawheader115,4025
+} info;116,4084
+int PMsurv_phasemod_search(141,5199
+#define ELEM_SWAP(308,11276
+static float median(310,11340
+static void make_plans(371,12844
+static void destroy_plans(380,13116
+static char *rmtrail(rmtrail388,13250
+static void info_from_header(404,13508
+static int prune_powers(425,14232
+static void realfft(450,14782
+static void cand_output(536,17436
+static void search_phasemod(622,20685
+#undef ELEM_SWAP663,22078
+#undef MINORBP664,22095
+#undef MINMINIBIN665,22110
+#undef MINFREQ666,22128
+#undef MAXFREQ667,22143
+#undef OVERLAPFACT668,22158
+#undef WORKBLOCK669,22177
+#undef PRUNELEV670,22194
+#undef NEWLEV671,22210
+#undef OUTDIR672,22224
+#undef NUMMINIFFTS673,22238
+#undef DEBUGOUT675,22273
+#define SWAP(682,22403
+static void tablesplitfft(685,22460
+static void tablefft(697,22719
+static double *maketable(maketable709,22980
+static void fft_scramble(742,23721
+static void tablefftraw(765,24095
+static void tablesplitfftraw(794,24859
+#undef TWOPI880,27206
+#undef SWAP882,27231
+
+zapbirds_cmd.c,616
+char *Program;Program20,365
+static Cmdline cmd 24,393
+checkFloatConversion(66,1707
+getIntOpt(86,2222
+getIntOpts(125,3132
+getLongOpt(199,4955
+getLongOpts(236,5842
+getFloatOpt(308,7618
+getFloatOpts(344,8356
+getDoubleOpt(412,9960
+getDoubleOpts(451,10829
+getStringOpt(526,12662
+getStringOpts(545,13086
+checkIntLower(596,14328
+checkIntHigher(611,14682
+checkLongLower(626,15037
+checkLongHigher(641,15395
+checkFloatLower(656,15754
+checkFloatHigher(671,16114
+checkDoubleLower(686,16475
+checkDoubleHigher(701,16838
+catArgv(716,17211
+showOptionValues(740,17670
+usage(813,19498
+parseCmdline(835,20968
+
+multibeam.c,1831
+#define MAXNUMCHAN 5,62
+static long long numpts_st[numpts_st8,145
+static long long numpts_st[MAXPATCHFILES], padpts_st[padpts_st8,145
+static long long numpts_st[MAXPATCHFILES], padpts_st[MAXPATCHFILES], N_st;8,145
+static int numblks_st[numblks_st9,220
+static int numblks_st[MAXPATCHFILES], nfilter_st,9,220
+static int numblks_st[MAXPATCHFILES], nfilter_st, filter_st 9,220
+static int decreasing_freqs_st,10,305
+static int decreasing_freqs_st, numchan_st,10,305
+static int decreasing_freqs_st, numchan_st, ptsperblk_st,10,305
+static int decreasing_freqs_st, numchan_st, ptsperblk_st, bytesperpt_st;10,305
+static double times_st[times_st11,378
+static double times_st[MAXPATCHFILES], mjds_st[mjds_st11,378
+static double elapsed_st[elapsed_st12,441
+static double elapsed_st[MAXPATCHFILES], T_st,12,441
+static double elapsed_st[MAXPATCHFILES], T_st, dt_st;12,441
+static double startblk_st[startblk_st13,495
+static double startblk_st[MAXPATCHFILES], endblk_st[endblk_st13,495
+static infodata idata_st[idata_st14,563
+static const unsigned char padval 15,604
+static unsigned char chanmask[chanmask16,683
+static unsigned char databuffer[databuffer17,726
+static int currentfile,18,771
+static int currentfile, currentblock;18,771
+static int bufferpts 19,809
+static int using_MPI 20,864
+static float clip_sigma_st 21,890
+void get_PKMB_static(26,1051
+void set_PKMB_static(35,1317
+void get_PKMB_file_info(51,1745
+void PKMB_update_infodata(176,7134
+int skip_to_PKMB_rec(209,8079
+int read_PKMB_rawblock(266,10076
+int read_PKMB_rawblocks(364,14118
+int read_PKMB(396,15184
+void get_PKMB_channel(521,19558
+int prep_PKMB_subbands(543,20465
+int read_PKMB_subbands(628,23819
+void PKMB_hdr_to_inf(673,25923
+void print_PKMB_hdr(751,28891
+void convert_PKMB_point(876,34920
+int clip_PKMB_times(909,36208
+
+rzwinterp.c,25
+void rzw_interp(25,1178
+
+bpp.c,2815
+static long long numpts_st[numpts_st6,114
+static long long numpts_st[MAXPATCHFILES], padpts_st[padpts_st6,114
+static long long numpts_st[MAXPATCHFILES], padpts_st[MAXPATCHFILES], N_st;6,114
+static long long filedatalen_st[filedatalen_st7,189
+static int numblks_st[numblks_st8,237
+static int bytesperpt_st,9,275
+static int bytesperpt_st, bytesperblk_st;9,275
+static int numchan_st,10,317
+static int numchan_st, numifs_st,10,317
+static int numchan_st, numifs_st, ptsperblk_st 10,317
+static double times_st[times_st11,379
+static double times_st[MAXPATCHFILES], mjds_st[mjds_st11,379
+static double elapsed_st[elapsed_st12,442
+static double elapsed_st[MAXPATCHFILES], T_st,12,442
+static double elapsed_st[MAXPATCHFILES], T_st, dt_st;12,442
+static double startblk_st[startblk_st13,496
+static double startblk_st[MAXPATCHFILES], endblk_st[endblk_st13,496
+static infodata idata_st[idata_st14,564
+static unsigned char databuffer[databuffer15,605
+static unsigned char databuffer[2 * MAXDATLEN], padvals[padvals15,605
+static unsigned char databuffer[2 * MAXDATLEN], padvals[MAXNUMCHAN], padval 15,605
+static unsigned char *splitbytes_buffer[splitbytes_buffer16,686
+static int currentfile,17,742
+static int currentfile, currentblock,17,742
+static int currentfile, currentblock, both_IFs_present 17,742
+static int bufferpts 18,802
+static int splitbytes_st[splitbytes_st20,933
+static double mid_freq_st,21,974
+static double mid_freq_st, ch1_freq_st,21,974
+static double mid_freq_st, ch1_freq_st, delta_freq_st;21,974
+static double chan_freqs[chan_freqs22,1029
+static int chan_index[chan_index23,1071
+static int chan_index[2 * MAXNUMCHAN], chan_mapping[chan_mapping23,1071
+static float clip_sigma_st 24,1140
+static int using_MPI 25,1174
+static double chan_freqs2[chan_freqs228,1207
+static int chan_index2[chan_index229,1250
+static int dfb_chan_lookup[dfb_chan_lookup31,1297
+static float sideband_lookup[sideband_lookup43,1534
+typedef struct chanmap 54,1822
+   double freq;55,1847
+   int index;56,1863
+   int mapping;57,1877
+} chanmap;58,1893
+void get_BCPM_static(66,2177
+void set_BCPM_static(76,2493
+void set_BPP_padvals(92,2969
+int compare_freq(109,3399
+int compare_index(131,3845
+static double UT_strings_to_MJD(146,4125
+static void swapendian_BPP_header(173,5055
+void calc_BPP_chans(283,10267
+void BPP_hdr_to_inf(400,14823
+void get_BPP_file_info(442,16638
+void BPP_update_infodata(619,24528
+int skip_to_BPP_rec(652,25472
+void print_BPP_hdr(709,27476
+int read_BPP_rawblock(761,29840
+int read_BPP_rawblocks(880,34854
+int read_BPP(911,35902
+void get_BPP_channel(1026,40271
+int prep_BPP_subbands(1105,43801
+int read_BPP_subbands(1210,48057
+void convert_BPP_one_IF(1257,50325
+void convert_BPP_sum_IFs(1278,50934
+void convert_BPP_point(1302,51766
+
+fitsfile.c,806
+static int verbose 80,3426
+static char fitserrmsg[fitserrmsg81,3487
+char *fitsrhead(fitsrhead85,3555
+char *fitsrsect(fitsrsect393,13361
+char *fitsrimage(fitsrimage531,17212
+int fitsropen(633,20087
+static int offset1 690,21493
+static int offset2 691,21517
+int fitsrtopen(698,21693
+static struct Keyword *pw;pw746,23333
+static int *lpnam;lpnam747,23397
+static int bfields 748,23465
+int fitsrthead(752,23570
+int fitsrtline(889,27458
+void fitsrtlset(941,29097
+short ftgeti2(951,29232
+int ftgeti4(967,29596
+float ftgetr4(983,29950
+double ftgetr8(999,30319
+int ftgetc(1015,30691
+int fitswimage(1039,31299
+int fitswext(1078,32269
+int fitswhdu(1114,33138
+int fitscimage(1228,36439
+int fitswhead(1398,41424
+int isfits(1449,42741
+int fitsheadsize(1489,43715
+void fitserr(1505,44069
+
+prepdata_cmd.c,642
+char *Program;Program20,365
+static Cmdline cmd 24,393
+checkFloatConversion(104,3179
+getIntOpt(124,3694
+getIntOpts(163,4604
+getLongOpt(237,6427
+getLongOpts(274,7314
+getFloatOpt(346,9090
+getFloatOpts(382,9828
+getDoubleOpt(450,11432
+getDoubleOpts(489,12301
+getStringOpt(564,14134
+getStringOpts(583,14558
+checkIntLower(634,15800
+checkIntHigher(649,16154
+checkLongLower(664,16509
+checkLongHigher(679,16867
+checkFloatLower(694,17226
+checkFloatHigher(709,17586
+checkDoubleLower(724,17947
+checkDoubleHigher(739,18310
+missingErr(754,18681
+catArgv(762,18870
+showOptionValues(786,19329
+usage(984,24225
+parseCmdline(1028,27999
+
+dat2sdat.c,41
+#define BUFFLEN 12,165
+int main(14,188
+
+prepsubband.c,461
+#define RAWDATA 14,248
+#define TDT 17,448
+#define LININTERP(20,506
+#define NEAREST_INT(24,704
+static int insubs 45,1914
+static Cmdline *cmd;cmd46,1937
+static IFs ifs 47,1958
+int main(53,2031
+static void write_data(964,35659
+static void write_subs(974,35926
+static void write_padding(984,36195
+static int read_subbands(1017,37241
+static int get_data(1071,39171
+static void print_percent_complete(1235,46194
+static void update_infodata(1252,46561
+
+xyline.c,315
+void cpgstart_ps(6,108
+void cpgstart_x(20,450
+void find_min_max_arr(32,693
+void dfind_min_max_arr(46,949
+void dxyline(60,1211
+void xyline(88,1755
+void dxybinned(119,2412
+void xybinned(147,2962
+void xyline2lab(178,3636
+void plot_spectrum(225,4871
+void plot_profile(277,6459
+int cpgnice_output_2(332,7947
+
+corr_prep.c,207
+void spread_with_pad(3,21
+void spread_no_pad(28,1101
+void paddata(43,1838
+void place_complex_kernel(58,2345
+void place_real_kernel(83,3454
+void chop_complex_ends(106,4484
+void chop_real_ends(134,5573
+
+rednoise.c,16
+int main(8,111
+
+powerplot.c,48
+void powerplot(3,21
+double plot_power(45,1040
+
+misc_utils.c,985
+#define ARCSEC2RAD 6,91
+#define SEC2RAD 10,221
+#define DMAX(14,345
+#define strMove(17,457
+char *rmtrail(rmtrail20,505
+char *rmlead(rmlead35,755
+char *remove_whitespace(remove_whitespace48,985
+char *strlower(strlower54,1111
+void split_path_file(67,1289
+int split_root_suffix(100,2394
+void strtofilename(127,3314
+long long next2_to_n(146,3690
+int gcd(157,3842
+float *gen_freqs(gen_freqs173,4064
+double *gen_dfreqs(gen_dfreqs190,4527
+void i_to_n(207,4997
+void rotate_1d(229,5357
+void drotate_1d(250,6111
+void frotate(271,6870
+void drotate(294,7584
+void stats(316,8292
+void dstats(361,9537
+void avg_var(406,10780
+void davg_dvar(440,11592
+inline void update_stats(474,12409
+void ra_dec_to_string(495,12856
+void ra_dec_from_string(514,13436
+double hms2hours(529,13954
+void hours2hms(535,14132
+void deg2dms(546,14379
+double dms2rad(565,14776
+double hms2rad(576,15132
+double mjd_sec_diff(582,15317
+double sphere_ang_diff(593,15594
+#undef DMAX627,16402
+
+rzinterp.c,120
+fcomplex **corr_rz_plane(corr_rz_plane3,21
+fcomplex *corr_rz_interp(corr_rz_interp116,4127
+void rz_interp(142,5424
+
+plotbincand.c,89
+#define ZOOMFACT 4,41
+#define ZOOMNEIGHBORS 5,67
+int main(17,208
+void usage(230,6605
+
+accelsearch_cmd.c,618
+char *Program;Program20,368
+static Cmdline cmd 24,396
+checkFloatConversion(90,2411
+getIntOpt(110,2926
+getIntOpts(149,3836
+getLongOpt(223,5659
+getLongOpts(260,6546
+getFloatOpt(332,8322
+getFloatOpts(368,9060
+getDoubleOpt(436,10664
+getDoubleOpts(475,11533
+getStringOpt(550,13366
+getStringOpts(569,13790
+checkIntLower(620,15032
+checkIntHigher(635,15386
+checkLongLower(650,15741
+checkLongHigher(665,16099
+checkFloatLower(680,16458
+checkFloatHigher(695,16818
+checkDoubleLower(710,17179
+checkDoubleHigher(725,17542
+catArgv(740,17915
+showOptionValues(764,18374
+usage(909,21890
+parseCmdline(949,24812
+
+solvopt.c,730
+#define max(19,560
+#define min(21,657
+#define errmes 23,693
+#define wrnmes 24,727
+#define error2 25,763
+#define error32 26,830
+#define error42 27,889
+#define error43 28,957
+#define error52 29,1021
+#define error62 30,1085
+#define error63 31,1151
+#define error5 32,1223
+#define error6 33,1265
+#define warn1 34,1315
+#define warn20 35,1406
+#define warn21 36,1471
+#define warn4 37,1546
+#define warn31 38,1592
+#define warn32 39,1655
+#define warn09 40,1727
+#define warn08 41,1774
+#define termwarn0 42,1832
+#define termwarn1 43,1883
+#define appwarn 44,1935
+#define endwarn1 45,2026
+#define endwarn2 46,2126
+#define endwarn3 47,2233
+#define endwarn4 48,2336
+#define allocerrstr 49,2451
+double solvopt(51,2496
+
+dftfold.c,138
+int main(10,140
+void read_dftvector(161,4525
+void write_dftvector(187,5366
+void init_dftvector(212,6196
+void free_dftvector(225,6529
+
+makewisdom.c,17
+int main(11,145
+
+dm_tree_main.c,236
+#define  STDOUT 43,1673
+#define  FOUT_MAX 44,1691
+#define FOPEN_MAX 45,1713
+#define ndim 47,1763
+#define  mdim 48,1781
+#define  ldim 49,1800
+#define  ndmmax 50,1818
+#define  mod(51,1838
+main(61,2057
+void processargs(741,24303
+
+shiftdata.c,63
+#define WORKLEN 11,283
+int main(19,440
+void fshift(110,3838
+
+prepfold.c,41
+#define RAWDATA 16,256
+int main(29,803
+
+amoeba.c,71
+#define SWAP(12,434
+void amoeba(18,624
+static double amotry(78,2430
+
+wapp_y.tab.c,5296
+#define YYBISON 47,2141
+#define YYBISON_VERSION 50,2182
+#define YYSKELETON_NAME 53,2235
+#define YYPURE 56,2290
+#define YYLSP_NEEDED 59,2332
+# define YYTOKENTYPE71,2643
+   enum yytokentype 74,2767
+     STRUCT 75,2789
+     LBRACE 76,2808
+     RBRACE 77,2827
+     SEMI 78,2846
+     LB 79,2863
+     RB 80,2878
+     DOUBLE 81,2893
+     INTEGER 82,2912
+     LONG 83,2932
+     LONGLONG 84,2949
+     FLOAT 85,2970
+     SHORT 86,2988
+     UNSIGNED 87,3006
+     CHARSTAR 88,3027
+     BYTE 89,3048
+     VAR 90,3065
+     COMMENT 91,3081
+#define STRUCT 95,3128
+#define LBRACE 96,3147
+#define RBRACE 97,3166
+#define SEMI 98,3185
+#define LB 99,3202
+#define RB 100,3217
+#define DOUBLE 101,3232
+#define INTEGER 102,3251
+#define LONG 103,3271
+#define LONGLONG 104,3288
+#define FLOAT 105,3309
+#define SHORT 106,3327
+#define UNSIGNED 107,3345
+#define CHARSTAR 108,3366
+#define BYTE 109,3387
+#define VAR 110,3404
+#define COMMENT 111,3420
+# define YYDEBUG 132,3655
+# undef YYERROR_VERBOSE137,3745
+# define YYERROR_VERBOSE 138,3769
+# define YYERROR_VERBOSE 140,3802
+# define YYTOKEN_TABLE 145,3892
+typedef union YYSTYPE149,3980
+         char *var;var151,4004
+         int tok;152,4024
+	YYSTYPE;155,4078
+# define yystype 156,4088
+# define YYSTYPE_IS_DECLARED 157,4150
+# define YYSTYPE_IS_TRIVIAL 158,4181
+# undef short169,4314
+typedef YYTYPE_UINT8 yytype_uint8;173,4356
+typedef unsigned char yytype_uint8;175,4397
+typedef YYTYPE_INT8 yytype_int8;179,4460
+typedef signed char yytype_int8;182,4593
+typedef short int yytype_int8;184,4632
+typedef YYTYPE_UINT16 yytype_uint16;188,4692
+typedef unsigned short int yytype_uint16;190,4735
+typedef YYTYPE_INT16 yytype_int16;194,4805
+typedef short int yytype_int16;196,4846
+#  define YYSIZE_T 201,4925
+#  define YYSIZE_T 203,4980
+#  define YYSIZE_T 207,5186
+#  define YYSIZE_T 209,5219
+#define YYSIZE_MAXIMUM 213,5267
+#   define YY_(219,5413
+#  define YY_(223,5499
+# define YYUSE(229,5636
+# define YYUSE(231,5673
+# define YYID(236,5803
+YYID 241,5939
+#    define YYSTACK_ALLOC 259,6211
+#    define YYSTACK_ALLOC 263,6374
+#    define alloca 266,6494
+#    define YYSTACK_ALLOC 268,6530
+#      define _STDLIB_H 273,6794
+#  define YYSTACK_FREE(282,6941
+#   define YYSTACK_ALLOC_MAXIMUM 288,7338
+#  define YYSTACK_ALLOC 291,7420
+#  define YYSTACK_FREE 292,7453
+#   define YYSTACK_ALLOC_MAXIMUM 294,7515
+#    define _STDLIB_H 301,7799
+#   define YYMALLOC 305,7861
+#   define YYFREE 312,8128
+union yyalloc327,8611
+  yytype_int16 yyss;329,8627
+  YYSTYPE yyvs;330,8648
+# define YYSTACK_GAP_MAXIMUM 334,8745
+# define YYSTACK_BYTES(338,8893
+#   define YYCOPY(346,9153
+#   define YYCOPY(349,9260
+# define YYSTACK_RELOCATE(365,9751
+#define YYFINAL 379,10149
+#define YYLAST 381,10208
+#define YYNTOKENS 384,10270
+#define YYNNTS 386,10333
+#define YYNRULES 388,10387
+#define YYNSTATES 390,10445
+#define YYUNDEFTOK 393,10541
+#define YYMAXUTOK 394,10563
+#define YYTRANSLATE(396,10588
+static const yytype_uint8 yytranslate[yytranslate400,10764
+static const yytype_uint8 yyprhs[yyprhs435,12916
+static const yytype_int8 yyrhs[yyrhs443,13199
+static const yytype_uint8 yyrline[yyrline457,13952
+static const char *const yytname[yytname468,14370
+static const yytype_uint16 yytoknum[yytoknum480,14794
+static const yytype_uint8 yyr1[yyr1488,15060
+static const yytype_uint8 yyr2[yyr2496,15361
+static const yytype_uint8 yydefact[yydefact506,15757
+static const yytype_int8 yydefgoto[yydefgoto516,16195
+#define YYPACT_NINF 523,16376
+static const yytype_int8 yypact[yypact524,16400
+static const yytype_int8 yypgoto[yypgoto534,16833
+#define YYTABLE_NINF 543,17159
+static const yytype_uint8 yytable[yytable544,17183
+static const yytype_int8 yycheck[yycheck555,17674
+static const yytype_uint8 yystos[yystos568,18261
+#define yyerrok	577,18668
+#define yyclearin	578,18703
+#define YYEMPTY	579,18740
+#define YYEOF	580,18762
+#define YYACCEPT	582,18780
+#define YYABORT	583,18814
+#define YYERROR	584,18847
+#define YYFAIL	591,19085
+#define YYRECOVERING(593,19116
+#define YYBACKUP(595,19157
+#define YYTERROR	613,19585
+#define YYERRCODE	614,19604
+#define YYRHSLOC(621,19810
+# define YYLLOC_DEFAULT(623,19869
+#  define YY_LOCATION_PRINT(649,20782
+#  define YY_LOCATION_PRINT(654,20962
+# define YYLEX 662,21107
+# define YYLEX 664,21148
+#  define YYFPRINTF 672,21306
+# define YYDPRINTF(675,21343
+# define YY_SYMBOL_PRINT(681,21450
+yy_symbol_value_print 701,21992
+yy_symbol_print 733,22660
+yy_stack_print 759,23506
+# define YY_STACK_PRINT(773,23808
+yy_reduce_print 787,24218
+# define YY_REDUCE_PRINT(811,24818
+int yydebug;819,25047
+# define YYDPRINTF(821,25081
+# define YY_SYMBOL_PRINT(822,25106
+# define YY_STACK_PRINT(823,25161
+# define YY_REDUCE_PRINT(824,25198
+# define YYINITDEPTH 830,25332
+# define YYMAXDEPTH 841,25688
+#   define yystrlen 850,25809
+yystrlen 856,25993
+#   define yystpcpy 873,26288
+yystpcpy 880,26524
+yytnamerr 908,27265
+yysyntax_error 955,28324
+      enum { YYERROR_VERBOSE_ARGS_MAXIMUM 968,28672
+yydestruct 1065,31493
+int yychar;1108,32222
+YYSTYPE yylval;1111,32287
+int yynerrs;1114,32343
+yyparse 1126,32525
+#define YYPOPSTACK(1179,33678
+#  undef YYSTACK_RELOCATE1267,36095
+void yyerror(1678,45388
+int yywrap(1685,45494
+
+swapendian.c,312
+#define SWAP(3,60
+static unsigned char tmpswap;6,119
+float swap_float(8,150
+double swap_double(20,371
+long double swap_longdouble(33,658
+long long swap_longlong(49,1037
+int swap_int(63,1342
+unsigned int swap_uint(75,1553
+short swap_short(87,1801
+unsigned short swap_ushort(98,1991
+#undef SWAP109,2218
+
+correlations.c,98
+fcomplex *complex_corr_conv(complex_corr_conv3,21
+float *real_corr_conv(real_corr_conv83,2847
+
+downsample_cmd.c,638
+char *Program;Program20,367
+static Cmdline cmd 24,395
+checkFloatConversion(56,1227
+getIntOpt(76,1742
+getIntOpts(115,2652
+getLongOpt(189,4475
+getLongOpts(226,5362
+getFloatOpt(298,7138
+getFloatOpts(334,7876
+getDoubleOpt(402,9480
+getDoubleOpts(441,10349
+getStringOpt(516,12182
+getStringOpts(535,12606
+checkIntLower(586,13848
+checkIntHigher(601,14202
+checkLongLower(616,14557
+checkLongHigher(631,14915
+checkFloatLower(646,15274
+checkFloatHigher(661,15634
+checkDoubleLower(676,15995
+checkDoubleHigher(691,16358
+missingErr(706,16729
+catArgv(714,16918
+showOptionValues(738,17377
+usage(780,18323
+parseCmdline(796,19066
+
+cldj.c,52
+static int mtab[mtab30,792
+double slaCldj(32,867
+
+chkio.c,324
+#  define fseeko 5,73
+#define SWAP(11,173
+static unsigned char tmpswap;14,232
+FILE *chkfopen(chkfopen16,263
+size_t chkfread(37,670
+size_t chkfwrite(51,950
+size_t chkfseek(65,1233
+size_t chkfileseek(73,1469
+long long chkfilelen(99,1980
+int read_int(126,2504
+float read_float(140,2832
+double read_double(154,3166
+
+mjd2cal.c,42
+char months[months7,98
+int main(20,461
+
+imio.c,376
+static int scale 65,3024
+void setscale(66,3086
+double getpix1(75,3222
+double getpix(95,4069
+void putpix1(166,5829
+void putpix(188,6656
+void addpix1(268,8498
+void addpix(290,9377
+void movepix(370,11393
+void getvec(616,18836
+void putvec(694,20903
+void imswap(781,23237
+void imswap2(832,24211
+void imswap4(855,24682
+void imswap8(884,25287
+int imswapped(920,26110
+
+multifiles.c,293
+#  define fseeko 5,78
+void print_multifile(9,117
+multifile *fopen_multifile(fopen_multifile27,770
+int fclose_multifile(95,3403
+int fread_multifile(111,3756
+int fwrite_multifile(152,5290
+int fseek_multifile(209,7744
+void rewind_multifile(279,10291
+long long ftell_multifile(285,10403
+
+atwood.c,100
+double *events_fdot_correct(events_fdot_correct3,21
+fcomplex *atwood_search(atwood_search22,631
+
+maximize_r.c,221
+#define FTOL 2,20
+static fcomplex *maxdata;maxdata11,216
+static int nummaxdata,12,242
+static int nummaxdata, max_kern_half_width;12,242
+static double power_call_r(14,287
+double max_r_arr(27,588
+#undef FTOL62,1601
+
+barycenter.c,73
+double doppler(3,21
+int read_resid_rec(13,365
+void barycenter(37,1257
+
+split_parkes_beams.c,115
+#define RECLEN 5,60
+#define NUMBEAMS 6,81
+#define ALLBEAMS 7,101
+int split_root_suffix(9,135
+int main(36,1055
+
+maximize_rz.c,227
+#define ZSCALE 3,21
+static fcomplex *maxdata;maxdata5,41
+static int nummaxdata,6,67
+static int nummaxdata, max_kern_half_width;6,67
+static double power_call_rz(11,232
+double max_rz_arr(23,504
+double max_rz_file(96,2526
+
+sigproc_fb.c,2209
+#define MAXNUMCHAN 5,63
+#define BLOCKLEN 6,87
+static sigprocfb *fb_st;fb_st9,169
+static infodata *idata_st;idata_st10,194
+static long long *numpts_st,numpts_st11,221
+static long long *numpts_st, *padpts_st,padpts_st11,221
+static long long *numpts_st, *padpts_st, N_st;11,221
+static int *numblks_st,numblks_st12,268
+static int *numblks_st, need_byteswap_st 12,268
+static int numchan_st,13,329
+static int numchan_st, ptsperblk_st,13,329
+static int numchan_st, ptsperblk_st, bytesperpt_st 13,329
+static double *times_st,times_st14,401
+static double *times_st, *mjds_st,mjds_st14,401
+static double *times_st, *mjds_st, Tdiam=14,401
+static double *elapsed_st,elapsed_st15,449
+static double *elapsed_st, T_st,15,449
+static double *elapsed_st, T_st, dt_st;15,449
+static double *startblk_st,startblk_st16,489
+static double *startblk_st, *endblk_st;endblk_st16,489
+static unsigned char padvals[padvals17,529
+static unsigned char padvals[MAXNUMCHAN], padval 17,529
+static int rawdatabuffer[rawdatabuffer18,585
+static unsigned char databuffer[databuffer19,634
+static int currentfile,20,690
+static int currentfile, currentblock;20,690
+static int bufferpts 21,728
+static float clip_sigma_st 22,783
+static int using_MPI 23,817
+static void send_string(28,969
+static void get_string(36,1160
+static int strings_equal(49,1484
+static void send_double(58,1629
+static void send_int(64,1803
+static void send_coords(70,1950
+static char *telescope_name(telescope_name82,2365
+static char *backend_name(backend_name128,3313
+void write_filterbank_header(201,4672
+int read_filterbank_header(239,6065
+void print_filterbank_header(339,10374
+void get_filterbank_static(375,12136
+void set_filterbank_static(383,12321
+void set_filterbank_padvals(398,12720
+void sigprocfb_to_inf(416,13158
+void get_filterbank_file_info(454,14716
+void filterbank_update_infodata(563,19852
+int skip_to_filterbank_rec(596,20803
+int read_filterbank_rawblock(654,22871
+int read_filterbank_rawblocks(748,26578
+int read_filterbank(779,27654
+void get_filterbank_channel(869,31071
+int prep_filterbank_subbands(890,31930
+int read_filterbank_subbands(976,35428
+void convert_filterbank_block(1020,37618
+
+profile.c,40
+#define WORKLEN 7,176
+int main(13,248
+
+transpose.c,123
+static int TOMS_gcd(3,21
+short transpose_bytes(16,216
+short transpose_float(150,3470
+short transpose_fcomplex(283,6686
+
+output.c,168
+#define COPYSIGN(1,0
+int nice_output_1(6,134
+int nice_output_2(119,3670
+void print_candidate(227,7513
+void print_bin_candidate(320,10949
+#undef COPYSIGN366,12991
+
+zapping.c,120
+#define MEDIANBINS 3,21
+float calc_median_powers(5,46
+fcomplex *get_rawbins(get_rawbins19,397
+void zapbirds(29,696
+
+quicklook.c,15
+int main(7,68
+
+gmrt.c,2097
+#define MAXNUMCHAN 5,57
+#define BLOCKLEN 6,81
+static long long numpts_st[numpts_st9,164
+static long long numpts_st[MAXPATCHFILES], padpts_st[padpts_st9,164
+static long long numpts_st[MAXPATCHFILES], padpts_st[MAXPATCHFILES], N_st;9,164
+static int numblks_st[numblks_st10,239
+static int numblks_st[MAXPATCHFILES], need_byteswap_st 10,239
+static int numchan_st,11,314
+static int numchan_st, ptsperblk_st,11,314
+static int numchan_st, ptsperblk_st, bytesperpt_st,11,314
+static int numchan_st, ptsperblk_st, bytesperpt_st, bytesperblk_st;11,314
+static double times_st[times_st12,382
+static double times_st[MAXPATCHFILES], mjds_st[mjds_st12,382
+static double elapsed_st[elapsed_st13,445
+static double elapsed_st[MAXPATCHFILES], T_st,13,445
+static double elapsed_st[MAXPATCHFILES], T_st, dt_st;13,445
+static double startblk_st[startblk_st14,499
+static double startblk_st[MAXPATCHFILES], endblk_st[endblk_st14,499
+static infodata idata_st[idata_st15,567
+static unsigned char padvals[padvals16,608
+static unsigned char padvals[MAXNUMCHAN], newpadvals[newpadvals16,608
+static unsigned char padvals[MAXNUMCHAN], newpadvals[MAXNUMCHAN], padval 16,608
+static short sdatabuffer[sdatabuffer17,688
+static unsigned char databuffer[databuffer18,737
+static int currentfile,19,793
+static int currentfile, currentblock;19,793
+static int bufferpts 20,831
+static float clip_sigma_st 21,886
+static unsigned char cdatabuffer[cdatabuffer22,920
+static int sb_flag;23,977
+static int bitshift 24,997
+static int bits;25,1022
+static char badch[badch26,1039
+static int using_MPI 27,1063
+void get_GMRT_static(30,1091
+void set_GMRT_static(38,1270
+void set_GMRT_padvals(53,1657
+void get_GMRT_file_info(71,2123
+void GMRT_update_infodata(153,5927
+int skip_to_GMRT_rec(186,6872
+int read_GMRT_rawblock(244,8922
+int read_GMRT_rawblocks(427,16809
+int read_GMRT(458,17855
+void get_GMRT_channel(548,21199
+int prep_GMRT_subbands(569,22034
+int read_GMRT_subbands(655,25453
+void GMRT_hdr_to_inf(699,27559
+void convert_GMRT_block(831,33116
+void convert_GMRT_block_8bit(923,36760
+
+realfft_4step.c,17
+int main(17,336
+
+sla.c,1663
+static void slaStringExport(96,2985
+void slaStringImport(153,4764
+void slaAddet 252,7547
+void slaAmp 278,8250
+void slaAmpqk 306,9018
+double slaAirmas(328,9630
+void slaCaldj 342,9986
+void slaDaf2r 366,10653
+void slaDav2m 387,11246
+void slaDcc2s 404,11771
+void slaDcs2c 421,12230
+void slaDd2tf 440,12779
+void slaDimxv 463,13462
+void slaDjcal 484,14127
+void slaDjcl 508,14818
+void slaDmat 537,15612
+void slaDmxm 578,16893
+void slaDmxv 602,17595
+double slaDbear 621,18200
+double slaDrange 638,18633
+double slaDranrm 648,18859
+double slaDsep 661,19209
+double slaDvdv(681,19751
+void slaDtf2d 701,20313
+void slaDtf2r 725,21015
+double slaDt 745,21552
+void slaDvn 758,21850
+void slaDvxv 775,22373
+void slaEcmat 793,22901
+double slaEpb 808,23293
+double slaEpb2d 818,23505
+double slaEpj 828,23715
+double slaEpj2d 838,23927
+double slaEqeqx 848,24139
+void slaEqgal 861,24467
+void slaFk45z 882,25057
+void slaFk54z 909,25916
+void slaGaleq 940,26868
+void slaGalsup 960,27409
+double slaGmst 977,27847
+void slaMappa 989,28140
+void slaMapqkz 1008,28733
+void slaPrebn 1032,29437
+void slaPrec 1052,30012
+float slaRverot 1073,30614
+float slaRvgalc 1093,31139
+float slaRvlg 1107,31471
+float slaRvlsrd 1121,31801
+float slaRvlsrk 1135,32137
+void slaSubet 1153,32586
+void slaSupgal 1176,33214
+void slaSvd 1203,33972
+void slaSvdsol 1276,35975
+void slaEvp 1350,38014
+void slaFk5hz 1383,38967
+void slaHfk5z 1410,39748
+void slaGeoc 1441,40602
+void slaDeuler 1464,41217
+void slaDe2h 1500,42156
+void slaDh2e 1524,42818
+slaOap 1566,44107
+slaObs(1641,46121
+slaPa 1694,47569
+slaDtt(1714,48021
+slaDat(1729,48307
+slaRdplan(1745,48674
+
+spigot.c,1948
+#define DEBUGOUT 10,163
+static SPIGOT_INFO *spigot;spigot18,372
+static infodata *idata_st;idata_st19,400
+static fftwf_plan fftplan;20,427
+static long long N_st;21,454
+static int decreasing_freqs_st 22,477
+static int numchan_st 23,549
+static int need_byteswap_st 24,617
+static int currentfile,25,700
+static int currentfile, currentblock,25,700
+static int currentfile, currentblock, bufferpts 25,700
+static double T_st,26,782
+static double T_st, dt_st,26,782
+static double T_st, dt_st, center_freq_st,26,782
+static double T_st, dt_st, center_freq_st, *window_st window_st26,782
+static float clip_sigma_st 27,844
+static float lag_factor[lag_factor28,892
+static float lag_factor[SPIGOT_MAXLAGLEN], lag_offset[lag_offset28,892
+static unsigned char padvals[padvals29,965
+static unsigned char padvals[SPIGOT_MAXLAGLEN], newpadvals[newpadvals29,965
+static unsigned char databuffer[databuffer30,1043
+static unsigned char databuffer[2 * SPIGOT_MAXDATLEN], padval 30,1043
+static unsigned char lagbuffer[lagbuffer31,1112
+static int using_MPI 32,1162
+static float lag_scale_env 33,1188
+static double *hanning_window(hanning_window41,1487
+void get_SPIGOT_static(52,1701
+void set_SPIGOT_static(63,2093
+void set_SPIGOT_padvals(81,2719
+static double UT_strings_to_MJD(102,3391
+int read_SPIGOT_header(116,3936
+void SPIGOT_INFO_to_inf(341,12148
+void print_SPIGOT_header(387,14053
+void get_SPIGOT_file_info(440,16695
+void SPIGOT_update_infodata(650,25895
+int skip_to_SPIGOT_rec(684,26971
+int read_SPIGOT_rawblock(742,29093
+int read_SPIGOT_rawblocks(853,33645
+int read_SPIGOT(885,34751
+void get_SPIGOT_channel(978,38104
+int prep_SPIGOT_subbands(1022,39785
+int read_SPIGOT_subbands(1108,43274
+void scale_rawlags(1157,45584
+void get_calibrated_lags(1287,50655
+void convert_SPIGOT_point(1320,51553
+static double inv_cerf(1540,59045
+#define NO 1563,59792
+#define YES 1564,59808
+static void vanvleck3lev(1575,60359
+
+makeinf.c,17
+int main(10,138
+
+sdat2dat.c,41
+#define BUFFLEN 12,165
+int main(14,188
+
+spigotSband2filterbank.c,47
+void spigot2sigprocfb(8,127
+int main(53,1601
+
+GBT350filterbank.c,47
+void spigot2sigprocfb(8,127
+int main(61,1658
+
+readfile.c,1467
+#define PAGELEN 15,252
+#define NUMTYPES 16,322
+    BYTE,41,1267
+    BYTE, FLOAT,41,1267
+    DOUBLE,42,1285
+    DOUBLE, FCPLEX,42,1285
+    DCPLEX,43,1306
+    DCPLEX, SHORT,43,1306
+    DCPLEX, SHORT, INT,43,1306
+    DCPLEX, SHORT, INT, LONG,43,1306
+    RZWCAND,44,1336
+    RZWCAND, BINCAND,44,1336
+    RZWCAND, BINCAND, POSITION,44,1336
+    PKMBHDR,45,1369
+    PKMBHDR, BCPMHDR,45,1369
+    PKMBHDR, BCPMHDR, WAPPHDR,45,1369
+    PKMBHDR, BCPMHDR, WAPPHDR, SPIGOTHDR,45,1369
+    PKMBHDR, BCPMHDR, WAPPHDR, SPIGOTHDR, SIGPROCHDR,45,1369
+    PKMBHDR, BCPMHDR, WAPPHDR, SPIGOTHDR, SIGPROCHDR, PSRFITSHDR45,1369
+} rawtypes;46,1434
+typedef struct fcplex 48,1447
+   float r;49,1471
+   float i;50,1483
+} fcplex;51,1495
+typedef struct dcplex 53,1506
+   double r;54,1530
+   double i;55,1543
+} dcplex;56,1556
+int type_sizes[type_sizes58,1567
+int objs_at_a_time[objs_at_a_time77,2095
+long N;104,3275
+double dt,105,3283
+double dt, nph;105,3283
+int main(111,3347
+int BYTE_print(406,13129
+int FLOAT_print(415,13297
+int DOUBLE_print(424,13454
+int FCPLEX_print(433,13615
+int DCPLEX_print(442,13799
+int SHORT_print(451,13985
+int INT_print(460,14139
+int LONG_print(469,14288
+int RZWCAND_print(478,14441
+int BINCAND_print(488,14645
+int POSITION_print(498,14832
+int PKMBHDR_print(508,15099
+int BCPMHDR_print(518,15285
+int WAPPHDR_print(528,15480
+int SPIGOTHDR_print(537,15621
+int PSRFITSHDR_print(546,15764
+int SIGPROCHDR_print(555,15911
+
+makedata.c,128
+double fwhm;7,133
+int main(13,194
+double modsin(259,6364
+double crab(267,6476
+double spike(316,7552
+double gauss(341,8139
+
+showmulti_dm.c,15
+int main(8,88
+
+prepfold_plot.c,287
+#define TEST_EQUAL(10,116
+#define TEST_CLOSE(14,263
+void minmax(28,772
+void dminmax(42,1035
+void scaleprof(57,1305
+void fscaleprof(81,1918
+void lininterp(105,2529
+static void autocal2d(120,2783
+void write_bestprof(162,3953
+void CSS_profs(279,9062
+void prepfold_plot(346,11439
+
+fminbr.c,78
+#define EPSILON 55,2287
+#define SQRT_EPSILON 56,2321
+double fminbr(58,2356
+
+read_fft.c,102
+fcomplex *read_fcomplex_file(read_fcomplex_file4,43
+float *read_float_file(read_float_file50,1557
+
+accelsearch.c,60
+static void print_percent_complete(20,368
+int main(41,869
+
+cal2mjd.c,17
+int main(14,283
+
+apprgrdn.c,59
+#define max(5,99
+#define min(7,196
+void apprgrdn(10,233
+
+zapbirds.c,581
+#define NUMBETWEEN 6,85
+#define FFTLEN 7,110
+#define BINSTOGET 8,140
+#define MAXPTSTOSHOW 9,181
+#define MAXBINSTOSHOW 10,210
+typedef struct birdie 16,305
+   double freq;17,329
+   double width;18,345
+} birdie;19,362
+static FILE *fftfile;fftfile21,373
+static int khw;22,395
+static fcomplex *kernel;kernel23,411
+static double T,24,436
+static double T, dr;24,436
+static birdie *birdie_create(birdie_create31,735
+static void birdie_free(44,1075
+static int birdie_compare(51,1187
+static void birdie_print(62,1400
+static void process_bird(71,1600
+int main(205,5985
+
+readpar.c,121
+#define DEBUGOUT 49,1682
+char *fortran_double_convert(fortran_double_convert51,1702
+int get_psr_from_parfile(65,1969
+
+window.c,57
+#define NPTS 4,41
+int main(10,111
+#undef NPTS170,4869
+
+select.c,92
+#define PRUNELEV 3,21
+#define NEWLEV 4,41
+int prune_powers(13,281
+void hpselect(44,1173
+
+rfifind.c,317
+#define RAWDATA 15,265
+int main(59,2605
+static void write_rfifile(742,29002
+static void write_statsfile(765,29903
+static void read_rfifile(784,30677
+static void read_statsfile(808,31636
+int read_subband_rawblocks(830,32566
+void get_subband(847,33088
+static int *get_prime_factors(get_prime_factors856,33325
+
+wapp_head_parse.c,541
+int wapp_incfile_length;1,0
+int linecount 12,216
+#define YY_INPUT(14,236
+void ignore(16,298
+struct HEADERP *yacc_input yacc_input25,446
+void got_construct(29,557
+struct HEADERP *head_parse(head_parse34,618
+int count_size(104,1904
+int key_sizes(118,2100
+int find_hdrval(141,2575
+int set_hdrval(164,3022
+int write_hdr(184,3371
+struct HEADERKEY *new_header(new_header194,3574
+void add_notchar(212,3921
+void add_array(226,4105
+void comment(242,4338
+void add_char(247,4376
+void head_input(259,4555
+void close_parse(281,5066
+
+toas2dat.c,173
+#define WORKLEN 8,128
+#define SECPERDAY 9,150
+#define MAXREAD 10,174
+unsigned long getfilelen(17,264
+int compare_doubles(32,567
+int read_toas(41,788
+int main(79,1588
+
+maximize_rzw.c,377
+#define ZSCALE 3,21
+#define WSCALE 4,40
+static fcomplex *maxdata;maxdata8,97
+static int nummaxdata,9,123
+static int nummaxdata, max_kern_half_width,9,123
+static int nummaxdata, max_kern_half_width, num_funct_calls 9,123
+static double solvopt_options[solvopt_options10,188
+static double power_call_rzw(63,2812
+double max_rzw_arr(78,3190
+double max_rzw_file(124,4651
+
+wapp.c,3137
+static long long numpts_st[numpts_st13,322
+static long long numpts_st[MAXPATCHFILES], padpts_st[padpts_st13,322
+static long long numpts_st[MAXPATCHFILES], padpts_st[MAXPATCHFILES], N_st;13,322
+static long long filedatalen_st[filedatalen_st14,397
+static int numblks_st[numblks_st15,445
+static int numblks_st[MAXPATCHFILES], corr_level_st,15,445
+static int numblks_st[MAXPATCHFILES], corr_level_st, decreasing_freqs_st 15,445
+static int bytesperpt_st,16,523
+static int bytesperpt_st, bytesperblk_st,16,523
+static int bytesperpt_st, bytesperblk_st, bits_per_samp_st;16,523
+static int numwapps_st 17,583
+static int need_byteswap_st,18,664
+static int need_byteswap_st, sampperblk_st,18,664
+static int need_byteswap_st, sampperblk_st, usewindow_st 18,664
+static double times_st[times_st19,726
+static double times_st[MAXPATCHFILES], mjds_st[mjds_st19,726
+static double elapsed_st[elapsed_st20,789
+static double elapsed_st[MAXPATCHFILES], T_st,20,789
+static double elapsed_st[MAXPATCHFILES], T_st, dt_st,20,789
+static double elapsed_st[MAXPATCHFILES], T_st, dt_st, dtus_st;20,789
+static double startblk_st[startblk_st21,852
+static double startblk_st[MAXPATCHFILES], endblk_st[endblk_st21,852
+static double corr_rate_st,22,920
+static double corr_rate_st, corr_scale_st;22,920
+static double center_freqs_st[center_freqs_st23,963
+static double center_freqs_st[WAPP_MAXNUMWAPPS], *window_st window_st23,963
+static infodata idata_st[idata_st24,1031
+static unsigned char padvals[padvals25,1072
+static unsigned char padvals[WAPP_MAXLAGLEN], newpadvals[newpadvals25,1072
+static unsigned char databuffer[databuffer26,1146
+static unsigned char databuffer[2 * WAPP_MAXDATLEN], padval 26,1146
+static unsigned char lagbuffer[lagbuffer27,1213
+static int currentfile,28,1261
+static int currentfile, currentblock;28,1261
+static int header_version_st,29,1299
+static int header_version_st, header_size_st;29,1299
+static int bufferpts 30,1345
+static fftwf_plan fftplan;31,1400
+static float clip_sigma_st 32,1427
+static int using_MPI 33,1475
+static double *hanning_window(hanning_window42,1814
+char *get_hdr_string(get_hdr_string53,2028
+double get_hdr_double(67,2343
+int get_hdr_int(83,2696
+long long get_hdr_longlong(99,3034
+double *get_hdr_double_arr(get_hdr_double_arr115,3405
+int *get_hdr_int_arr(get_hdr_int_arr141,4049
+void get_WAPP_static(166,4670
+void set_WAPP_static(175,4906
+void set_WAPP_padvals(190,5327
+void set_WAPP_HEADER_version(207,5792
+static double UT_strings_to_MJD(232,6657
+static double wappcorrect(244,7099
+static void WAPP_hdr_to_inf(268,7693
+void get_WAPP_file_info(331,10533
+void WAPP_update_infodata(565,21179
+int skip_to_WAPP_rec(598,22189
+void print_WAPP_hdr(657,24357
+int read_WAPP_rawblock(713,27564
+int read_WAPP_rawblocks(834,32686
+int read_WAPP(866,33770
+void get_WAPP_channel(959,37118
+int prep_WAPP_subbands(1003,38770
+int read_WAPP_subbands(1089,42232
+void convert_WAPP_point(1139,44515
+static double inv_cerf(1253,48152
+#define NO 1276,48899
+#define YES 1277,48915
+static void vanvleck9lev(1297,49773
+static void vanvleck3lev(1393,53629
+
+dcdflib.c,5470
+double algdiv(29,1103
+double alngam(85,2428
+#define hln2pi 120,3291
+#undef hln2pi202,5198
+double alnrel(204,5214
+double apser(235,6132
+double basym(272,7054
+double bcorr(383,10269
+double betaln(433,11718
+double bfrac(548,14520
+void bgrat(617,16015
+double bpser(706,18233
+void bratio(814,20766
+double brcmp1(1089,26477
+double brcomp(1240,29764
+double bup(1392,33047
+void cdfbet(1480,34863
+#define tol 1576,37895
+#define atol 1577,37914
+#define zero 1578,37935
+#define inf 1579,37957
+#define one 1580,37977
+#undef tol1883,43220
+#undef atol1884,43231
+#undef zero1885,43243
+#undef inf1886,43255
+#undef one1887,43266
+void cdfbin(1889,43279
+#define atol 1977,46245
+#define tol 1978,46266
+#define zero 1979,46285
+#define inf 1980,46307
+#define one 1981,46327
+#undef atol2288,51731
+#undef tol2289,51743
+#undef zero2290,51754
+#undef inf2291,51766
+#undef one2292,51777
+void cdfchi(2294,51790
+#define tol 2373,54380
+#define atol 2374,54399
+#define zero 2375,54420
+#define inf 2376,54442
+#undef tol2598,58137
+#undef atol2599,58148
+#undef zero2600,58160
+#undef inf2601,58172
+void cdfchn(2603,58185
+#define tent4 2693,61300
+#define tol 2694,61320
+#define atol 2695,61339
+#define zero 2696,61360
+#define one 2697,61382
+#define inf 2698,61414
+#undef tent42886,64727
+#undef tol2887,64740
+#undef atol2888,64751
+#undef zero2889,64763
+#undef one2890,64775
+#undef inf2891,64786
+void cdff(2893,64799
+#define tol 2980,67841
+#define atol 2981,67860
+#define zero 2982,67881
+#define inf 2983,67903
+#undef tol3231,72169
+#undef atol3232,72180
+#undef zero3233,72192
+#undef inf3234,72204
+void cdffnc(3236,72217
+#define tent4 3336,75910
+#define tol 3337,75930
+#define atol 3338,75949
+#define zero 3339,75970
+#define one 3340,75992
+#define inf 3341,76024
+#undef tent43574,80217
+#undef tol3575,80230
+#undef atol3576,80241
+#undef zero3577,80253
+#undef one3578,80265
+#undef inf3579,80276
+void cdfgam(3581,80289
+#define tol 3674,83380
+#define atol 3675,83399
+#define zero 3676,83420
+#define inf 3677,83442
+#undef tol3897,87270
+#undef atol3898,87281
+#undef zero3899,87293
+#undef inf3900,87305
+void cdfnbn(3902,87318
+#define tol 3999,90694
+#define atol 4000,90713
+#define inf 4001,90734
+#define one 4002,90754
+#undef tol4303,96047
+#undef atol4304,96058
+#undef inf4305,96070
+#undef one4306,96081
+void cdfnor(4308,96094
+void cdfpoi(4522,100898
+#define tol 4598,103450
+#define atol 4599,103469
+#define inf 4600,103490
+#undef tol4796,106789
+#undef atol4797,106800
+#undef inf4798,106812
+void cdft(4800,106825
+#define tol 4875,109283
+#define atol 4876,109302
+#define zero 4877,109323
+#define inf 4878,109345
+#define rtinf 4879,109365
+#define maxdf 4880,109387
+#undef tol5066,112590
+#undef atol5067,112601
+#undef zero5068,112613
+#undef inf5069,112625
+#undef rtinf5070,112636
+#undef maxdf5071,112649
+void cdftnc(5073,112664
+#define tent4 5146,115478
+#define tol 5147,115498
+#define atol 5148,115517
+#define zero 5149,115538
+#define one 5150,115560
+#define inf 5151,115592
+#undef tent45295,118467
+#undef tol5296,118480
+#undef atol5297,118491
+#undef zero5298,118503
+#undef one5299,118515
+#undef inf5300,118526
+void cumbet(5302,118539
+void cumbin(5379,120559
+void cumchi(5446,122462
+void cumchn(5496,123778
+#define dg(5544,125498
+#define qsmall(5545,125540
+#undef dg5677,128863
+#undef qsmall5678,128873
+void cumf(5680,128889
+#define half 5729,130359
+#define done 5730,130378
+#undef half5762,131070
+#undef done5763,131082
+void cumfnc(5765,131096
+#define qsmall(5829,132746
+#define half 5830,132802
+#define done 5831,132821
+#undef qsmall5938,135369
+#undef half5939,135383
+#undef done5940,135395
+void cumgam(5942,135409
+void cumnbn(6002,137011
+void cumnor(6067,139000
+void cumpoi(6281,146177
+void cumt(6332,147615
+void cumtnc(6395,149244
+#define one 6435,150501
+#define zero 6436,150519
+#define half 6437,150538
+#define two 6438,150557
+#define onep5 6439,150575
+#define conv 6440,150595
+#define tiny 6441,150615
+#undef one6617,154684
+#undef zero6618,154695
+#undef half6619,154707
+#undef two6620,154719
+#undef onep56621,154730
+#undef conv6622,154743
+#undef tiny6623,154755
+double devlpl(6625,154769
+double dinvnr(6667,155802
+#define maxit 6708,156805
+#define eps 6709,156823
+#define r2pi 6710,156843
+#define nhalf 6711,156877
+#define dennor(6712,156898
+#undef maxit6761,157762
+#undef eps6762,157775
+#undef r2pi6763,157786
+#undef nhalf6764,157798
+#undef dennor6765,157811
+static void E0000(6769,157847
+#define qxmon(6774,158121
+#undef qxmon7011,162444
+void dinvr(7013,162459
+void dstinv(7078,164863
+double dt1(7148,168297
+static void E0001(7220,170023
+#define ftol(7225,170273
+#undef ftol7407,173079
+void dzror(7409,173093
+void dstzr(7477,175688
+double erf1(7524,177895
+double erfc1(7599,180294
+double esum(7718,183533
+double exparg(7752,184193
+double fpser(7802,185300
+double gam1(7849,186249
+void gaminv(7918,188140
+double gamln(8346,198980
+double gamln1(8402,200426
+double Xgamm(8452,202276
+void grat1(8618,206174
+void gratio(8732,208590
+double gsumln(9203,220851
+double psi(9232,221537
+double rcomp(9436,227769
+double rexp(9472,228566
+double rlog(9506,229483
+double rlog1(9559,230635
+double spmpar(9612,231894
+double stvaln(9680,233928
+double fifdint(9746,235644
+double fifdmax1(9758,235979
+double fifdmin1(9772,236340
+double fifdsign(9786,236720
+long fifidint(9802,237135
+long fifmod(9812,237405
+
+downsample.c,15
+int main(8,96
+
+hget.c,912
+#define INT_MAX 65,3384
+#define SHRT_MAX 66,3458
+#define VLENGTH 68,3488
+static int use_saolib 71,3526
+static char val[val76,3577
+static int multiline 77,3607
+static int lhead0 79,3634
+int hlength(82,3766
+int gethlength(96,4144
+int hgeti4c(108,4376
+int hgeti4(137,5521
+int hgeti2(185,7011
+int hgetr4(232,8512
+int hgetra(269,9720
+int hgetdec(296,10758
+int hgetr8c(323,11794
+int hgetr8(353,12942
+int hgetl(390,14136
+int hgetdate(430,15396
+int hgetm(588,20390
+int hgetsc(661,22556
+int hgets(691,23774
+int hgetndec(725,24974
+char *hgetc(hgetc759,26186
+char *blsearch(blsearch948,31391
+char *ksearch(ksearch1042,34504
+double str2ra(1137,37611
+double str2dec(1154,37971
+char *strsrch(strsrch1227,39801
+char *strnsrch(strnsrch1241,40050
+char *strcsrch(strcsrch1303,41550
+char *strncsrch(strncsrch1317,41820
+int notnum(1417,44446
+int isnum(1431,44678
+int set_saolib(1493,46214
+
+searchmultidms.c,16
+int main(9,109
+
+show_pfd_cmd.c,617
+char *Program;Program20,365
+static Cmdline cmd 24,393
+checkFloatConversion(68,2040
+getIntOpt(88,2555
+getIntOpts(127,3465
+getLongOpt(201,5288
+getLongOpts(238,6175
+getFloatOpt(310,7951
+getFloatOpts(346,8689
+getDoubleOpt(414,10293
+getDoubleOpts(453,11162
+getStringOpt(528,12995
+getStringOpts(547,13419
+checkIntLower(598,14661
+checkIntHigher(613,15015
+checkLongLower(628,15370
+checkLongHigher(643,15728
+checkFloatLower(658,16087
+checkFloatHigher(673,16447
+checkDoubleLower(688,16808
+checkDoubleHigher(703,17171
+catArgv(718,17544
+showOptionValues(742,18003
+usage(826,20318
+parseCmdline(848,21988
+
+responses.c,440
+#define MIN_NUMDATA 3,21
+#define MIN_NUMORBPTS 4,48
+#define NUM_PTS_WDAT 5,120
+int r_resp_halfwidth(11,229
+int z_resp_halfwidth(29,1020
+int w_resp_halfwidth(68,2459
+void binary_velocity(92,3677
+int bin_resp_halfwidth(141,5261
+fcomplex *gen_r_response(gen_r_response165,6477
+fcomplex *gen_z_response(gen_z_response233,8763
+fcomplex *gen_w_response(gen_w_response324,12155
+fcomplex *gen_bin_response(gen_bin_response455,16397
+
+mpiprepsubband_cmd.c,644
+char *Program;Program20,371
+static Cmdline cmd 24,399
+checkFloatConversion(114,3466
+getIntOpt(134,3981
+getIntOpts(173,4891
+getLongOpt(247,6714
+getLongOpts(284,7601
+getFloatOpt(356,9377
+getFloatOpts(392,10115
+getDoubleOpt(460,11719
+getDoubleOpts(499,12588
+getStringOpt(574,14421
+getStringOpts(593,14845
+checkIntLower(644,16087
+checkIntHigher(659,16441
+checkLongLower(674,16796
+checkLongHigher(689,17154
+checkFloatLower(704,17513
+checkFloatHigher(719,17873
+checkDoubleLower(734,18234
+checkDoubleHigher(749,18597
+missingErr(764,18968
+catArgv(772,19157
+showOptionValues(796,19616
+usage(1023,25204
+parseCmdline(1075,29575
+
+taperaw.c,38
+#define BLOCKLEN 4,40
+int main(6,64
+
+fold.c,537
+#define WORKLEN 6,156
+#define DELAYS 9,230
+#define ONOFF 10,262
+#define LININTERP(13,329
+#define TEST_ONE(17,470
+#define ADDTOBUFFER(20,574
+static void dump_buffer(46,1593
+static void add_to_prof(91,2944
+void fold_errors(183,5667
+double foldfile(320,10285
+double simplefold(446,15660
+double fold(561,20009
+#undef WORKLEN761,28209
+#undef DELAYS762,28224
+#undef ONOFF763,28238
+#undef LININTERP764,28251
+#undef TEST_ONE765,28268
+void shift_prof(768,28286
+void combine_profs(808,29590
+void initialize_foldstats(874,32034
+
+psrorbit.c,16
+int main(9,108
+
+range_parse.c,288
+struct range 48,1607
+   int min;49,1622
+   int max;50,1634
+   int mult;51,1646
+int parse_ranges(106,3886
+static int str_to_int(226,6834
+int range_min(245,7211
+int range_max(252,7300
+int range_mult(259,7389
+void range_vals(266,7480
+int *ranges_to_ivect(ranges_to_ivect279,7699
+
+database.c,333
+static psrparams pulsardata[pulsardata4,40
+static int np 5,73
+static char num[num7,112
+int read_database(17,479
+void get_psr(70,2126
+void get_psrparams(103,3196
+int psr_number_from_name(126,3749
+int get_psr_at_epoch(162,4811
+int comp_psr_to_cand(217,6652
+int comp_bin_to_cand(373,12723
+int comp_rawbin_to_cand(489,17374
+
+ipmpar.c,20
+int ipmpar(68,2046
+
+clipping.c,108
+#define BLOCKSTOSKIP 3,21
+int new_clip_times(6,106
+int clip_times(130,4433
+int subs_clip_times(250,8593
+
+showmulti.c,15
+int main(8,88
+
+realfft_cmd.c,616
+char *Program;Program20,364
+static Cmdline cmd 24,392
+checkFloatConversion(66,1670
+getIntOpt(86,2185
+getIntOpts(125,3095
+getLongOpt(199,4918
+getLongOpts(236,5805
+getFloatOpt(308,7581
+getFloatOpts(344,8319
+getDoubleOpt(412,9923
+getDoubleOpts(451,10792
+getStringOpt(526,12625
+getStringOpts(545,13049
+checkIntLower(596,14291
+checkIntHigher(611,14645
+checkLongLower(626,15000
+checkLongHigher(641,15358
+checkFloatLower(656,15717
+checkFloatHigher(671,16077
+checkDoubleLower(686,16438
+checkDoubleHigher(701,16801
+catArgv(716,17174
+showOptionValues(740,17633
+usage(817,19435
+parseCmdline(838,20682
+
+randlib.c,1104
+#define ABS(5,78
+#define min(6,117
+#define max(7,159
+float genbet(9,223
+#define expmax 32,1138
+#define infnty 33,1162
+#define minlog 34,1184
+#undef expmax270,5569
+#undef infnty271,5583
+#undef minlog272,5597
+float genchi(274,5613
+float genexp(306,6578
+float genf(341,7754
+float gengam(399,9674
+void genmn(445,11310
+void genmul(497,13303
+float gennch(565,15278
+float gennf(612,16879
+float gennor(688,19554
+void genprm(723,20780
+float genunf(744,21511
+void gscgn(768,22325
+#define numg 781,22799
+#undef numg792,23044
+void gsrgs(794,23058
+void gssst(813,23636
+long ignbin(831,24153
+long ignnbn(1130,33396
+long ignpoi(1188,34933
+long ignuin(1461,43167
+#define maxnum 1479,43950
+#undef maxnum1514,44720
+#undef err11515,44734
+#undef err21516,44746
+long lennob(1518,44760
+long mltmod(1531,45005
+#define h 1546,45595
+#undef h1634,47115
+void phrtsd(1636,47126
+float ranf(1703,49098
+void setgmn(1727,49991
+float sexpo(1795,52291
+float sgamma(1864,54858
+float snorm(2128,63586
+float fsign(2266,68345
+void ftnstop(2279,68752
+float sdot(2288,68893
+void spofa(2330,70132
+
+sorter.c,465
+int compare_positions(39,1909
+int compare_floats(53,2179
+int compare_doubles(62,2394
+int compare_ints(71,2615
+int compare_powindex(81,2877
+int comp_bin_pow(96,3201
+int comp_bin_nfftbins(111,3535
+int compare_fourierprops(126,3897
+int compare_birds(141,4238
+float percolate(155,4500
+float percolate_bin(172,4961
+int remove_dupes(191,5470
+int remove_dupes_bin(223,6327
+int remove_dupes2(255,7227
+int remove_other(287,8115
+int remove_other_bin(318,9089
+
+search_bin.c,66
+#define MININCANDS 5,122
+#define MINORBP 8,196
+int main(24,742
+
+explorefft.c,1556
+#define DEBUGOUT 18,238
+#define LOGDISPLAYNUM 23,374
+#define LOGLOCALCHUNK 24,462
+#define LOGMINBINS 25,534
+#define LOGMAXBINS 26,582
+#define LOGINITIALNUMBINS 27,632
+#define DISPLAYNUM 28,713
+#define LOCALCHUNK 29,755
+#define MINBINS 30,797
+#define MAXBINS 31,836
+#define INITIALNUMBINS 32,875
+static long long N;34,922
+static long long Nfft;35,1005
+static double T;36,1069
+static float r0;37,1132
+static infodata idata;38,1207
+static int mmap_file;40,1245
+static FILE *fftfile;fftfile42,1273
+static double norm_const 44,1302
+static int numzaplist 45,1390
+static int lenzaplist 46,1478
+static bird *zaplist zaplist47,1568
+typedef struct fftpart 49,1598
+   int rlo;50,1623
+   int numamps;51,1691
+   float maxrawpow;52,1754
+   float *rawpowers;rawpowers53,1822
+   float *medians;medians54,1875
+   float *normvals;normvals55,1970
+   fcomplex *amps;amps56,2074
+} fftpart;57,2134
+typedef struct fftview 59,2146
+   double dr;60,2171
+   double centerr;61,2256
+   int lor;62,2326
+   int zoomlevel;63,2396
+   int numbins;64,2478
+   float maxpow;65,2568
+   float powers[powers66,2647
+   double rs[rs67,2718
+} fftview;68,2788
+static double plot_fftview(86,2947
+static fftview *get_fftview(get_fftview204,5970
+static fftpart *get_fftpart(get_fftpart289,8967
+static void free_fftpart(334,10426
+static double find_peak(348,10653
+static void print_help(374,11433
+static fftview *get_harmonic(get_harmonic400,12833
+static void plot_harmonics(426,13452
+static double harmonic_loop(470,14673
+int main(536,16749
+
+com.c,1151
+long Xm1,5,61
+long Xm1, Xm2,5,61
+long Xm1, Xm2, Xa1,5,61
+long Xm1, Xm2, Xa1, Xa2,5,61
+long Xm1, Xm2, Xa1, Xa2, Xcg1[Xcg15,61
+long Xm1, Xm2, Xa1, Xa2, Xcg1[32], Xcg2[Xcg25,61
+long Xm1, Xm2, Xa1, Xa2, Xcg1[32], Xcg2[32], Xqanti[Xqanti5,61
+long Xa1w,6,118
+long Xa1w, Xa2w,6,118
+long Xa1w, Xa2w, Xig1[Xig16,118
+long Xa1w, Xa2w, Xig1[32], Xig2[Xig26,118
+long Xa1w, Xa2w, Xig1[32], Xig2[32], Xlg1[Xlg16,118
+long Xa1w, Xa2w, Xig1[32], Xig2[32], Xlg1[32], Xlg2[Xlg26,118
+long Xa1w, Xa2w, Xig1[32], Xig2[32], Xlg1[32], Xlg2[32], Xa1vw,6,118
+long Xa1w, Xa2w, Xig1[32], Xig2[32], Xlg1[32], Xlg2[32], Xa1vw, Xa2vw;6,118
+void advnst(8,190
+#define numg 25,905
+#undef numg51,1609
+void getsd(53,1623
+#define numg 70,2365
+#undef numg89,2867
+long ignlgi(91,2881
+#define numg 106,3485
+#undef numg149,4642
+void initgn(151,4656
+#define numg 172,5599
+#undef numg213,6629
+void inrgcm(215,6643
+#define numg 227,7135
+#undef numg256,8023
+void setall(258,8037
+#define numg 277,8894
+#undef numg308,9694
+void setant(310,9708
+#define numg 332,10771
+#undef numg350,11235
+void setsd(352,11249
+#define numg 370,12029
+#undef numg390,12545
+
+dm_tree.c,109
+void dedisperse_tree(15,472
+void tree_stage(68,1992
+void fast_fold(142,3788
+void fastfold_stage(187,5572
+
+hput.c,439
+static int verbose 60,3092
+int hputi4(65,3242
+int hputi2(90,4229
+int hputr4(109,4675
+int hputr8(127,5121
+int hputnr8(145,5569
+int hputra(175,6397
+int hputdec(193,6862
+int hputl(212,7327
+int hputm(234,7885
+int hputs(311,9914
+int hputc(357,11261
+int hputcom(523,15340
+int hdel(621,17785
+int hadd(660,18629
+int hchange(706,19682
+void ra2str(741,20399
+void dec2str(873,23716
+void deg2str(1006,27138
+void num2str(1055,28427
+
+vectors.c,559
+float *gen_fvect(gen_fvect3,22
+double *gen_dvect(gen_dvect17,245
+fcomplex *gen_cvect(gen_cvect31,472
+short *gen_svect(gen_svect45,707
+int *gen_ivect(gen_ivect59,930
+long *gen_lvect(gen_lvect73,1145
+unsigned char *gen_bvect(gen_bvect87,1364
+rawtype *gen_rawvect(gen_rawvect101,1619
+unsigned char **gen_bmatrix(gen_bmatrix116,1912
+short **gen_smatrix(gen_smatrix146,2837
+int **gen_imatrix(gen_imatrix175,3707
+float **gen_fmatrix(gen_fmatrix204,4565
+double **gen_dmatrix(gen_dmatrix233,5435
+fcomplex **gen_cmatrix(gen_cmatrix262,6311
+
+twopass_real_inv.c,33
+void realfft_scratch_inv(10,363
+
+bincand_cmd.c,620
+char *Program;Program20,364
+static Cmdline cmd 24,392
+checkFloatConversion(104,2716
+getIntOpt(124,3231
+getIntOpts(163,4141
+getLongOpt(237,5964
+getLongOpts(274,6851
+getFloatOpt(346,8627
+getFloatOpts(382,9365
+getDoubleOpt(450,10969
+getDoubleOpts(489,11838
+getStringOpt(564,13671
+getStringOpts(583,14095
+checkIntLower(634,15337
+checkIntHigher(649,15691
+checkLongLower(664,16046
+checkLongHigher(679,16404
+checkFloatLower(694,16763
+checkFloatHigher(709,17123
+checkDoubleLower(724,17484
+checkDoubleHigher(739,17847
+catArgv(754,18220
+showOptionValues(778,18679
+usage(966,22998
+parseCmdline(1008,26157
+
+mpiprepsubband_utils.c,623
+MPI_Datatype infodata_type;9,134
+MPI_Datatype maskbase_type;10,162
+typedef struct MASKBASE 12,191
+   double timesigma;13,217
+   double freqsigma;14,294
+   double mjd;15,371
+   double dtint;16,448
+   double lofreq;17,525
+   double dfreq;18,602
+   int numchan;19,679
+   int numint;20,756
+   int ptsperint;21,833
+   int num_zap_chans;22,910
+   int num_zap_ints;23,987
+} maskbase;24,1064
+void make_maskbase_struct(27,1078
+void broadcast_mask(43,1483
+void make_infodata_struct(107,3997
+void write_data(137,4990
+void write_padding(147,5243
+void print_percent_complete(179,6256
+void update_infodata(196,6616
+
+weight_psrfits.c,47
+void read_wgts_and_offs(5,60
+int main(45,991
+
+twopass_real_fwd.c,33
+void realfft_scratch_fwd(10,363
+
+characteristics.c,462
+float get_numphotons(7,191
+double get_localpower(26,716
+double get_localpower3d(77,2112
+void get_derivs3d(139,4143
+void calc_props(193,6413
+void calc_binprops(265,9384
+void calc_rzwerrs(350,13095
+double extended_equiv_gaussian_sigma(396,14633
+double log_asymtotic_incomplete_gamma(417,15348
+double log_asymtotic_gamma(437,15872
+double candidate_sigma(454,16360
+double power_for_sigma(522,18416
+double chisqr(557,19520
+void switch_f_and_p(572,19926
+
+spigot2filterbank_cmd.c,618
+char *Program;Program20,374
+static Cmdline cmd 24,402
+checkFloatConversion(80,2127
+getIntOpt(100,2642
+getIntOpts(139,3552
+getLongOpt(213,5375
+getLongOpts(250,6262
+getFloatOpt(322,8038
+getFloatOpts(358,8776
+getDoubleOpt(426,10380
+getDoubleOpts(465,11249
+getStringOpt(540,13082
+getStringOpts(559,13506
+checkIntLower(610,14748
+checkIntHigher(625,15102
+checkLongLower(640,15457
+checkLongHigher(655,15815
+checkFloatLower(670,16174
+checkFloatHigher(685,16534
+checkDoubleLower(700,16895
+checkDoubleHigher(715,17258
+catArgv(730,17631
+showOptionValues(754,18090
+usage(872,20939
+parseCmdline(904,23116
+
+wapp_mkheaderlex.c,5920
+#define  YY_INT_ALIGNED 3,2
+#define FLEX_SCANNER7,80
+#define YY_FLEX_MAJOR_VERSION 8,101
+#define YY_FLEX_MINOR_VERSION 9,133
+#define YY_FLEX_SUBMINOR_VERSION 10,165
+#define FLEX_BETA12,234
+#define FLEXINT_H28,532
+#define __STDC_LIMIT_MACROS 38,813
+typedef int8_t flex_int8_t;42,873
+typedef uint8_t flex_uint8_t;43,901
+typedef int16_t flex_int16_t;44,931
+typedef uint16_t flex_uint16_t;45,961
+typedef int32_t flex_int32_t;46,993
+typedef uint32_t flex_uint32_t;47,1023
+typedef signed char flex_int8_t;49,1061
+typedef short int flex_int16_t;50,1094
+typedef int flex_int32_t;51,1126
+typedef unsigned char flex_uint8_t;52,1152
+typedef unsigned short int flex_uint16_t;53,1189
+typedef unsigned int flex_uint32_t;54,1231
+#define INT8_MIN 59,1336
+#define INT16_MIN 62,1399
+#define INT32_MIN 65,1466
+#define INT8_MAX 68,1537
+#define INT16_MAX 71,1599
+#define INT32_MAX 74,1663
+#define UINT8_MAX 77,1732
+#define UINT16_MAX 80,1796
+#define UINT32_MAX 83,1862
+#define YY_USE_CONST91,2012
+#define YY_USE_CONST97,2075
+#define yyconst 103,2167
+#define yyconst105,2195
+#define YY_NULL 109,2252
+#define YY_SC_TO_UI(116,2499
+#define BEGIN 122,2730
+#define YY_START 128,2929
+#define YYSTATE 129,2969
+#define YY_STATE_EOF(132,3052
+#define YY_NEW_FILE 135,3172
+#define YY_END_OF_BUFFER_CHAR 137,3211
+#define YY_BUF_SIZE 141,3300
+#define YY_STATE_BUF_SIZE 146,3428
+#define YY_TYPEDEF_YY_BUFFER_STATE149,3536
+typedef struct yy_buffer_state *YY_BUFFER_STATE;YY_BUFFER_STATE150,3571
+#define EOB_ACT_CONTINUE_SCAN 157,3676
+#define EOB_ACT_END_OF_FILE 158,3708
+#define EOB_ACT_LAST_MATCH 159,3738
+    #define YY_LESS_LINENO(161,3768
+#define yyless(164,3883
+#define YY_TYPEDEF_YY_SIZE_T185,4512
+typedef unsigned int yy_size_t;186,4541
+#define YY_STRUCT_YY_BUFFER_STATE190,4615
+struct yy_buffer_state191,4649
+	FILE *yy_input_file;yy_input_file193,4675
+	char *yy_ch_buf;yy_ch_buf195,4698
+	char *yy_buf_pos;yy_buf_pos196,4736
+	yy_size_t yy_buf_size;201,4879
+	int yy_n_chars;206,4989
+	int yy_is_our_buffer;212,5151
+	int yy_is_interactive;219,5389
+	int yy_at_bol;225,5556
+    int yy_bs_lineno;227,5573
+    int yy_bs_column;228,5619
+	int yy_fill_buffer;233,5754
+	int yy_buffer_status;235,5776
+#define YY_BUFFER_NEW 237,5800
+#define YY_BUFFER_NORMAL 238,5824
+#define YY_BUFFER_EOF_PENDING 249,6322
+static size_t yy_buffer_stack_top 255,6430
+static size_t yy_buffer_stack_max 256,6500
+static YY_BUFFER_STATE * yy_buffer_stack 257,6566
+#define YY_CURRENT_BUFFER 265,6834
+#define YY_CURRENT_BUFFER_LVALUE 272,7130
+static char yy_hold_char;275,7272
+static int yy_n_chars;276,7298
+int yyleng;277,7369
+static char *yy_c_buf_p yy_c_buf_p280,7427
+static int yy_init 281,7465
+static int yy_start 282,7526
+static int yy_did_buffer_switch_on_eof;287,7705
+#define YY_FLUSH_BUFFER 301,8225
+#define yy_new_buffer 311,8561
+#define yy_set_interactive(313,8601
+#define yy_set_bol(323,8877
+#define YY_AT_BOL(333,9120
+typedef unsigned char YY_CHAR;337,9203
+FILE *yyin yyin339,9235
+typedef int yy_state_type;341,9282
+int yylineno 345,9332
+#define yytext_ptr 348,9372
+#define YY_DO_BEFORE_ACTION 358,9725
+#define YY_NUM_RULES 365,9888
+#define YY_END_OF_BUFFER 366,9912
+struct yy_trans_info369,10021
+	flex_int32_t yy_verify;371,10045
+	flex_int32_t yy_nxt;372,10070
+static yyconst flex_int16_t yy_accept[yy_accept374,10096
+static yyconst flex_int32_t yy_ec[yy_ec387,10696
+static yyconst flex_int32_t yy_meta[yy_meta419,12418
+static yyconst flex_int16_t yy_base[yy_base426,12674
+static yyconst flex_int16_t yy_def[yy_def439,13314
+static yyconst flex_int16_t yy_nxt[yy_nxt452,13953
+static yyconst flex_int16_t yy_chk[yy_chk483,15587
+static yy_state_type yy_last_accepting_state;514,17221
+static char *yy_last_accepting_cpos;yy_last_accepting_cpos515,17267
+int yy_flex_debug 518,17331
+#define REJECT 523,17457
+#define yymore(524,17501
+#define YY_MORE_ADJ 525,17547
+#define YY_RESTORE_YY_MORE_OFFSET526,17569
+char *yytext;yytext527,17603
+#define SKIP(531,17681
+int cf 533,17740
+#define INITIAL 535,17753
+#define YY_EXTRA_TYPE 546,18055
+#define YY_READ_BUF_SIZE 585,18748
+#define ECHO 593,18966
+#define YY_INPUT(600,19158
+#define yyterminate(637,20072
+#define YY_START_STACK_INCR 642,20207
+#define YY_FATAL_ERROR(647,20297
+#define YY_DECL_IS_OURS 656,20530
+#define YY_DECL 660,20583
+#define YY_USER_ACTION667,20759
+#define YY_BREAK 672,20852
+#define YY_RULE_SETUP 675,20884
+static int yy_get_next_buffer 1011,28506
+    static yy_state_type yy_get_previous_state 1137,31624
+    static yy_state_type yy_try_NUL_trans 1169,32525
+static void yyunput 1193,33201
+    static int yyinput 1233,34264
+    void yyrestart 1310,36025
+    void yy_switch_to_buffer 1327,36386
+static void yy_load_buffer_state 1358,37229
+    YY_BUFFER_STATE yy_create_buffer 1372,37702
+    void yy_delete_buffer 1400,38393
+    static void yy_init_buffer 1423,38918
+    void yy_flush_buffer 1451,39651
+void yypush_buffer_state 1480,40337
+void yypop_buffer_state 1510,41102
+static void yyensure_buffer_stack 1529,41497
+YY_BUFFER_STATE yy_scan_buffer 1574,42901
+YY_BUFFER_STATE yy_scan_string 1611,43974
+YY_BUFFER_STATE yy_scan_bytes 1624,44380
+#define YY_EXIT_FAILURE 1655,45103
+static void yy_fatal_error 1658,45137
+#undef yyless1666,45316
+#define yyless(1667,45330
+int yyget_lineno 1686,45789
+FILE *yyget_in yyget_in1695,45883
+FILE *yyget_out yyget_out1703,45967
+int yyget_leng 1711,46067
+char *yyget_text yyget_text1720,46154
+void yyset_lineno 1729,46270
+void yyset_in 1741,46495
+void yyset_out 1746,46556
+int yyget_debug 1751,46621
+void yyset_debug 1756,46680
+static int yy_init_globals 1761,46750
+int yylex_destroy 1790,47432
+static void yy_flex_strncpy 1816,47986
+static int yy_flex_strlen 1825,48147
+void *yyalloc yyalloc1835,48264
+void *yyrealloc yyrealloc1840,48335
+void yyfree 1852,48791
+#define YYTABLES_NAME 1857,48885
+
+search_rzw_cmd.c,618
+char *Program;Program20,367
+static Cmdline cmd 24,395
+checkFloatConversion(90,2358
+getIntOpt(110,2873
+getIntOpts(149,3783
+getLongOpt(223,5606
+getLongOpts(260,6493
+getFloatOpt(332,8269
+getFloatOpts(368,9007
+getDoubleOpt(436,10611
+getDoubleOpts(475,11480
+getStringOpt(550,13313
+getStringOpts(569,13737
+checkIntLower(620,14979
+checkIntHigher(635,15333
+checkLongLower(650,15688
+checkLongHigher(665,16046
+checkFloatLower(680,16405
+checkFloatHigher(695,16765
+checkDoubleLower(710,17126
+checkDoubleHigher(725,17489
+catArgv(740,17862
+showOptionValues(764,18321
+usage(909,21765
+parseCmdline(948,24555
+
+check_parkes_raw.c,16
+int main(9,109
+
+corr_routines.c,95
+int corr_complex(5,46
+void stretch_fft(274,10324
+float *corr_loc_pow(corr_loc_pow308,11858
+
+rfifind_plot.c,94
+static double single_power_pdf(9,174
+static void plot_rfi(17,360
+void rfifind_plot(68,2229
+
+accel_utils.c,1537
+#  define inline 5,72
+#  undef inline7,106
+#define NEAREST_INT(20,279
+#define index_to_twon(23,349
+static inline int twon_to_index(26,416
+static inline int calc_required_z(38,539
+static inline double calc_required_r(47,837
+static inline int index_from_r(56,1139
+static inline int index_from_z(64,1374
+static void compare_rzw_cands(72,1609
+static int calc_fftlen(104,2683
+static void init_kernel(118,3143
+static void free_kernel(137,3746
+static void init_subharminfo(143,3812
+subharminfo **create_subharminfos(create_subharminfos164,4596
+static void free_subharminfo(196,6040
+void free_subharminfos(208,6251
+static accelcand *create_accelcand(create_accelcand228,6712
+void free_accelcand(246,7120
+static int compare_accelcand_sigma(259,7435
+GSList *sort_accelcands(sort_accelcands275,7831
+static GSList *insert_new_accelcand(insert_new_accelcand282,7981
+GSList *eliminate_harmonics(eliminate_harmonics363,10942
+void optimize_accelcand(440,14432
+static void center_string(469,15661
+static void write_val_with_err(489,16147
+void output_fundamentals(506,16645
+void output_harmonics(656,21679
+void print_accelcand(768,26059
+fcomplex *get_fourier_amplitudes(get_fourier_amplitudes778,26326
+ffdotpows *subharm_ffdot_plane(subharm_ffdot_plane791,26748
+ffdotpows *copy_ffdotpows(copy_ffdotpows889,29969
+void free_ffdotpows(905,30391
+void add_ffdotpows(913,30495
+GSList *search_ffdotpows(search_ffdotpows936,31222
+void deredden(968,32278
+void create_accelobs(1037,34477
+void free_accelobs(1285,43106
+
+polycos.c,516
+static double f0[f036,756
+static double f0[100], z4[z436,756
+static double f0[100], z4[100], rphase[rphase36,756
+static double f0[100], z4[100], rphase[100], mjdmid[mjdmid36,756
+static double f0[100], z4[100], rphase[100], mjdmid[100], mjd1mid[mjd1mid36,756
+    coeff[coeff37,828
+static int isets,38,848
+static int isets, nblk,38,848
+static int isets, nblk, ncoeff,38,848
+static int isets, nblk, ncoeff, icurr;38,848
+char *make_polycos(make_polycos42,970
+int getpoly(120,3484
+int phcalc(206,6242
+
+swap_endian.c,17
+int main(10,125
+
+psrfits.c,1212
+#define DEBUGOUT 7,100
+static struct spectra_info S;9,120
+static unsigned char *rawbuffer,rawbuffer10,150
+static unsigned char *rawbuffer, *ringbuffer,ringbuffer10,150
+static unsigned char *rawbuffer, *ringbuffer, *tmpbuffer;tmpbuffer10,150
+static float *offsets,offsets11,208
+static float *offsets, *scales;scales11,208
+static char *padvals=padvals12,240
+static int cur_file 13,285
+static int bufferspec 14,356
+static int using_MPI 15,432
+static double last_offs_sub 16,491
+#define TEST_CLOSE(23,775
+void get_PSRFITS_static(25,833
+void set_PSRFITS_static(36,1225
+void set_PSRFITS_padvals(59,2088
+static double DATEOBS_to_MJD(84,2890
+int is_PSRFITS(97,3335
+#define get_hdr_string(121,4090
+#define get_hdr_int(129,4552
+#define get_hdr_double(137,5012
+int read_PSRFITS_files(145,5475
+void print_PSRFITS_info(497,20084
+void spectra_info_to_inf(576,24336
+void get_PSRFITS_file_info(613,25719
+void PSRFITS_update_infodata(657,27508
+int skip_to_PSRFITS_samp(691,28496
+int read_PSRFITS_rawblock(745,30295
+int read_PSRFITS_rawblocks(979,41192
+int read_PSRFITS(1001,41926
+void get_PSRFITS_channel(1091,45661
+int prep_PSRFITS_subbands(1129,47121
+int read_PSRFITS_subbands(1224,51124
+
+rednoise_cmd.c,616
+char *Program;Program20,365
+static Cmdline cmd 24,393
+checkFloatConversion(60,1351
+getIntOpt(80,1866
+getIntOpts(119,2776
+getLongOpt(193,4599
+getLongOpts(230,5486
+getFloatOpt(302,7262
+getFloatOpts(338,8000
+getDoubleOpt(406,9604
+getDoubleOpts(445,10473
+getStringOpt(520,12306
+getStringOpts(539,12730
+checkIntLower(590,13972
+checkIntHigher(605,14326
+checkLongLower(620,14681
+checkLongHigher(635,15039
+checkFloatLower(650,15398
+checkFloatHigher(665,15758
+checkDoubleLower(680,16119
+checkDoubleHigher(695,16482
+catArgv(710,16855
+showOptionValues(734,17314
+usage(788,18589
+parseCmdline(809,19719
+
+../include/meminfo.h,328
+#define CODESIZE 5,256
+#define Ramsize 6,288
+#define CacheL1size 7,329
+#define CacheL2size 8,365
+#define Cacheburst 9,402
+#define Maxblocksize 10,435
+#define MAXREALFFT 11,474
+#define BIGFFTWSIZE 12,514
+#define KBF 13,552
+#define Cachetreshold 14,591
+#define Cacheburstblocksize 15,627
+#define Cacheblocksize 16,659
+
+../include/psrfits.h,1853
+#define MAXPFITSFILES 3,21
+struct spectra_info 5,49
+    char telescope[telescope6,71
+    char observer[observer7,117
+    char source[source8,164
+    char frontend[frontend9,207
+    char backend[backend10,252
+    char project_id[project_id11,310
+    char date_obs[date_obs12,360
+    char ra_str[ra_str13,438
+    char dec_str[dec_str14,508
+    char poln_type[poln_type15,574
+    char poln_order[poln_order16,641
+    long long N;17,711
+    double T;18,781
+    double dt;19,844
+    double fctr;20,895
+    double lo_freq;21,971
+    double hi_freq;22,1042
+    double orig_df;23,1114
+    double chan_dm;24,1199
+    double df;25,1271
+    double BW;26,1347
+    double ra2000;27,1416
+    double dec2000;28,1492
+    double azimuth;29,1568
+    double zenith_ang;30,1649
+    double beam_FWHM;31,1735
+    double time_per_subint;32,1782
+    int scan_number;33,1854
+    int tracking;34,1900
+    int orig_num_chan;35,1962
+    int num_channels;36,2032
+    int num_polns;37,2102
+    int summed_polns;38,2162
+    int FITS_typecode;39,2233
+    int bits_per_sample;40,2298
+    int bytes_per_spectra;41,2355
+    int samples_per_spectra;42,2436
+    int bytes_per_subint;43,2519
+    int spectra_per_subint;44,2583
+    int samples_per_subint;45,2649
+    int num_files;46,2715
+    int offs_sub_col;47,2781
+    int dat_wts_col;48,2864
+    int dat_offs_col;49,2946
+    int data_col;50,3029
+    int need_scale;51,3108
+    int need_offset;52,3183
+    int need_weight;53,3259
+    int need_flipband;54,3335
+    float clip_sigma;55,3411
+    long double start_MJD[start_MJD56,3487
+    fitsfile *files[files57,3578
+    int start_subint[start_subint58,3661
+    int num_subint[num_subint59,3736
+    long long start_spec[start_spec60,3808
+    long long num_spec[num_spec61,3898
+    long long num_pad[num_pad62,3970
+
+../include/rawtype.h,343
+typedef float rawtype_part;6,190
+#define _RAWTYPE_PART_DECLARED_7,218
+typedef struct FCOMPLEX 12,363
+  rawtype_part r,13,389
+  rawtype_part r, i;13,389
+} fcomplex;14,410
+#define _FCOMPLEX_DECLARED_15,422
+typedef fcomplex rawtype;20,548
+typedef rawtype TOMS_el_type;21,574
+#define MPI_rawtype 22,604
+#define _RAWTYPE_DECLARED_23,637
+
+../include/mask.h,720
+#define GOODDATA 1,0
+#define PADDING 2,22
+#define OLDMASK 3,44
+#define USERCHAN 4,66
+#define USERINTS 5,88
+#define BAD_POW 6,110
+#define BAD_STD 7,132
+#define BAD_AVG 8,154
+#define BADDATA 9,176
+#define USERZAP 10,219
+typedef struct MASK 13,278
+  double timesigma;14,301
+  double freqsigma;15,373
+  double mjd;16,445
+  double dtint;17,517
+  double lofreq;18,589
+  double dfreq;19,661
+  int numchan;20,733
+  int numint;21,805
+  int ptsperint;22,877
+  int num_zap_chans;23,949
+  int *zap_chans;zap_chans24,1021
+  int num_zap_ints;25,1093
+  int *zap_ints;zap_ints26,1165
+  int *num_chans_per_int;num_chans_per_int27,1237
+  int **chans;chans28,1309
+} mask;29,1381
+#define MASK_DEFINED30,1389
+
+../include/rednoise_cmd.h,402
+#define __rednoise_cmd__2,25
+typedef struct s_Cmdline 11,244
+  char startwidthP;13,324
+  int startwidth;14,344
+  int startwidthC;15,362
+  char endwidthP;17,430
+  int endwidth;18,448
+  int endwidthC;19,464
+  char endfreqP;21,556
+  double endfreq;22,573
+  int endfreqC;23,591
+  int argc;25,657
+  /*@null*/char **argv;argv26,669
+  char *full_cmd_line;full_cmd_line28,741
+} Cmdline;29,764
+
+../include/downsample_cmd.h,319
+#define __downsample_cmd__2,27
+typedef struct s_Cmdline 11,248
+  char factorP;13,330
+  int factor;14,346
+  int factorC;15,360
+  char outfileP;17,441
+  char* outfile;18,458
+  int outfileC;19,475
+  int argc;21,541
+  /*@null*/char **argv;argv22,553
+  char *full_cmd_line;full_cmd_line24,625
+} Cmdline;25,648
+
+../include/orbint.h,347
+#define PI 7,90
+#define TWOPI 10,185
+#define SOL 13,278
+#define DBLCORRECT 16,328
+#define MAXIT 19,377
+typedef struct orbitparams 23,429
+    double p;24,458
+    double e;25,528
+    double x;26,598
+    double w;27,668
+    double t;28,738
+    double pd;29,808
+    double wd;30,879
+} orbitparams;31,950
+#define ORBITPARAMS_TYPE 32,965
+
+../include/imio.h,24
+#define imio_h_31,1327
+
+../include/readfile_cmd.h,972
+#define __readfile_cmd__2,25
+typedef struct s_Cmdline 11,244
+  char pageP;13,322
+  char bytP;15,379
+  char sbytP;17,432
+  char fltP;19,500
+  char sfltP;21,563
+  char dblP;23,634
+  char sdblP;25,699
+  char fcxP;27,769
+  char sfcxP;29,832
+  char dcxP;31,903
+  char sdcxP;33,967
+  char shtP;35,1026
+  char sshtP;37,1080
+  char igrP;39,1139
+  char sigrP;41,1195
+  char lngP;43,1252
+  char slngP;45,1305
+  char rzwP;47,1381
+  char srzwP;49,1452
+  char binP;51,1528
+  char sbinP;53,1599
+  char posP;55,1671
+  char sposP;57,1737
+  char pkmbP;59,1806
+  char bcpmP;61,1863
+  char wappP;63,1920
+  char spigotP;65,1986
+  char filterbankP;67,2065
+  char psrfitsP;69,2134
+  char fortranP;71,2215
+  char indexP;73,2284
+  int *index;index74,2299
+  int indexC;75,2313
+  char nphP;77,2384
+  double nph;78,2397
+  int nphC;79,2411
+  int argc;81,2473
+  /*@null*/char **argv;argv82,2485
+  char *full_cmd_line;full_cmd_line84,2557
+} Cmdline;85,2580
+
+../include/ransomfft.h,503
+#define SWAP(10,157
+typedef struct FCOMPLEX 14,242
+    float r,15,268
+    float r, i;15,268
+} fcomplex;16,284
+#define _FCOMPLEX_DECLARED_17,296
+typedef struct DCOMPLEX 21,389
+    double r,22,415
+    double r, i;22,415
+} dcomplex;23,432
+#define _DCOMPLEX_DECLARED_24,444
+typedef fcomplex rawtype;28,536
+#define _RAWTYPE_DECLARED_29,562
+  #define COMPLEXFFT 36,706
+  #define COMPLEXFFT 40,839
+  #define COMPLEXFFT 44,956
+#define TWOPI 49,1025
+#define PI 52,1117
+#define PIBYTWO 55,1214
+
+../include/f77.h,12552
+#define CNF_MACROS99,3976
+#define CNF_CONST 111,4479
+#define CNF_CONST113,4509
+#define F77_EXTERNAL_NAME(124,4796
+#define F77_TRUE 132,4994
+#define F77_FALSE 133,5013
+#define F77_ISTRUE(138,5143
+#define F77_ISFALSE(139,5171
+#define F77_BLANK_COMMON 146,5313
+#define F77_NAMED_COMMON(147,5361
+#define F77_INTEGER_TYPE 159,5669
+#define F77_REAL_TYPE 160,5701
+#define F77_REAL_FUNCTION_TYPE 161,5735
+#define F77_DOUBLE_TYPE 162,5777
+#define F77_LOGICAL_TYPE 163,5812
+#define F77_CHARACTER_TYPE 164,5843
+#define F77_BYTE_TYPE 165,5875
+#define F77_WORD_TYPE 166,5914
+#define F77_UBYTE_TYPE 167,5951
+#define F77_UWORD_TYPE 168,5992
+#define F77_CHARACTER_ARG_TYPE 171,6118
+#define F77_CHARACTER_ARRAY_ARG_TYPE 172,6154
+#define F77_POINTER_TYPE 181,6623
+#define F77_SUBROUTINE(188,6780
+#define F77_INTEGER_FUNCTION(204,7479
+#define F77_REAL_FUNCTION(205,7551
+#define F77_DOUBLE_FUNCTION(206,7629
+#define F77_LOGICAL_FUNCTION(207,7700
+#define F77_CHARACTER_FUNCTION(208,7772
+#define F77_BYTE_FUNCTION(209,7832
+#define F77_WORD_FUNCTION(210,7901
+#define F77_UBYTE_FUNCTION(211,7970
+#define F77_UWORD_FUNCTION(212,8040
+#define F77_POINTER_FUNCTION(213,8110
+#define CHARACTER_RETURN_VALUE(218,8246
+#define CHARACTER_RETURN_ARG(219,8302
+#define INTEGER(227,8613
+#define REAL(228,8666
+#define DOUBLE(229,8719
+#define LOGICAL(230,8772
+#define BYTE(231,8825
+#define WORD(232,8878
+#define UBYTE(233,8931
+#define UWORD(234,8984
+#define POINTER(239,9155
+#define SUBROUTINE(242,9280
+#define INTEGER_FUNCTION(243,9315
+#define REAL_FUNCTION(244,9368
+#define DOUBLE_FUNCTION(245,9415
+#define LOGICAL_FUNCTION(246,9466
+#define CHARACTER_FUNCTION(247,9519
+#define BYTE_FUNCTION(248,9576
+#define WORD_FUNCTION(249,9623
+#define UBYTE_FUNCTION(250,9670
+#define UWORD_FUNCTION(251,9719
+#define POINTER_FUNCTION(252,9768
+#define INTEGER_ARRAY(256,9857
+#define REAL_ARRAY(257,9916
+#define DOUBLE_ARRAY(258,9975
+#define LOGICAL_ARRAY(259,10034
+#define BYTE_ARRAY(260,10093
+#define WORD_ARRAY(261,10152
+#define UBYTE_ARRAY(262,10211
+#define UWORD_ARRAY(263,10270
+#define POINTER_ARRAY(265,10330
+#define CHARACTER(277,10945
+#define TRAIL(278,11010
+#define CHARACTER_ARRAY(279,11061
+#define GENPTR_INTEGER(290,11575
+#define GENPTR_REAL(291,11601
+#define GENPTR_DOUBLE(292,11624
+#define GENPTR_CHARACTER(293,11649
+#define GENPTR_LOGICAL(294,11677
+#define GENPTR_BYTE(295,11703
+#define GENPTR_WORD(296,11726
+#define GENPTR_UBYTE(297,11749
+#define GENPTR_UWORD(298,11773
+#define GENPTR_POINTER(299,11797
+#define GENPTR_INTEGER_ARRAY(301,11824
+#define GENPTR_REAL_ARRAY(302,11856
+#define GENPTR_DOUBLE_ARRAY(303,11885
+#define GENPTR_CHARACTER_ARRAY(304,11916
+#define GENPTR_LOGICAL_ARRAY(305,11950
+#define GENPTR_BYTE_ARRAY(306,11982
+#define GENPTR_WORD_ARRAY(307,12011
+#define GENPTR_UBYTE_ARRAY(308,12040
+#define GENPTR_UWORD_ARRAY(309,12070
+#define GENPTR_POINTER_ARRAY(310,12100
+#define GENPTR_SUBROUTINE(312,12133
+#define GENPTR_INTEGER_FUNCTION(313,12162
+#define GENPTR_REAL_FUNCTION(314,12197
+#define GENPTR_DOUBLE_FUNCTION(315,12229
+#define GENPTR_CHARACTER_FUNCTION(316,12263
+#define GENPTR_LOGICAL_FUNCTION(317,12300
+#define GENPTR_BYTE_FUNCTION(318,12335
+#define GENPTR_WORD_FUNCTION(319,12367
+#define GENPTR_UBYTE_FUNCTION(320,12399
+#define GENPTR_UWORD_FUNCTION(321,12432
+#define GENPTR_POINTER_FUNCTION(322,12465
+#define DECLARE_INTEGER(331,12629
+#define DECLARE_REAL(332,12675
+#define DECLARE_DOUBLE(333,12718
+#define DECLARE_LOGICAL(334,12763
+#define DECLARE_BYTE(335,12809
+#define DECLARE_WORD(336,12852
+#define DECLARE_UBYTE(337,12895
+#define DECLARE_UWORD(338,12939
+#define DECLARE_POINTER(340,12984
+#define DECLARE_CHARACTER(342,13031
+#define DECLARE_INTEGER_ARRAY(348,13160
+#define DECLARE_REAL_ARRAY(349,13217
+#define DECLARE_DOUBLE_ARRAY(350,13271
+#define DECLARE_LOGICAL_ARRAY(351,13327
+#define DECLARE_BYTE_ARRAY(352,13384
+#define DECLARE_WORD_ARRAY(353,13438
+#define DECLARE_UBYTE_ARRAY(354,13492
+#define DECLARE_UWORD_ARRAY(355,13547
+#define DECLARE_POINTER_ARRAY(356,13602
+#define DECLARE_CHARACTER_ARRAY(357,13659
+#define DECLARE_CHARACTER_DYN(361,13844
+#define F77_CREATE_CHARACTER(363,13921
+#define DECLARE_INTEGER_ARRAY_DYN(367,14027
+#define DECLARE_REAL_ARRAY_DYN(368,14084
+#define DECLARE_DOUBLE_ARRAY_DYN(369,14138
+#define DECLARE_LOGICAL_ARRAY_DYN(370,14194
+#define DECLARE_BYTE_ARRAY_DYN(371,14251
+#define DECLARE_WORD_ARRAY_DYN(372,14305
+#define DECLARE_UBYTE_ARRAY_DYN(373,14359
+#define DECLARE_UWORD_ARRAY_DYN(374,14414
+#define DECLARE_POINTER_ARRAY_DYN(375,14469
+#define DECLARE_CHARACTER_ARRAY_DYN(376,14526
+#define F77_CREATE_CHARACTER_ARRAY(383,14902
+#define F77_CREATE_CHARACTER_ARRAY_M(385,15022
+#define F77_CREATE_LOGICAL_ARRAY(387,15107
+#define F77_CREATE_LOGICAL_ARRAY_M(389,15208
+#define F77_CREATE_INTEGER_ARRAY(390,15266
+#define F77_CREATE_REAL_ARRAY(391,15304
+#define F77_CREATE_DOUBLE_ARRAY(392,15339
+#define F77_CREATE_BYTE_ARRAY(393,15376
+#define F77_CREATE_UBYTE_ARRAY(394,15411
+#define F77_CREATE_WORD_ARRAY(395,15447
+#define F77_CREATE_UWORD_ARRAY(396,15482
+#define F77_CREATE_POINTER_ARRAY(397,15518
+#define F77_ASSOC_CHARACTER_ARRAY(403,15843
+#define F77_ASSOC_LOGICAL_ARRAY(404,15882
+#define F77_ASSOC_INTEGER_ARRAY(405,15919
+#define F77_ASSOC_REAL_ARRAY(406,15960
+#define F77_ASSOC_DOUBLE_ARRAY(407,15998
+#define F77_ASSOC_BYTE_ARRAY(408,16038
+#define F77_ASSOC_UBYTE_ARRAY(409,16076
+#define F77_ASSOC_WORD_ARRAY(410,16115
+#define F77_ASSOC_UWORD_ARRAY(411,16153
+#define F77_ASSOC_POINTER_ARRAY(412,16192
+#define F77_FREE_INTEGER(417,16356
+#define F77_FREE_REAL(418,16384
+#define F77_FREE_DOUBLE(419,16409
+#define F77_FREE_BYTE(420,16436
+#define F77_FREE_UBYTE(421,16461
+#define F77_FREE_WORD(422,16487
+#define F77_FREE_UWORD(423,16512
+#define F77_FREE_POINTER(424,16538
+#define F77_FREE_CHARACTER(425,16586
+#define F77_FREE_LOGICAL(426,16630
+#define F77_EXPORT_CHARACTER(430,16771
+#define F77_EXPORT_DOUBLE(431,16823
+#define F77_EXPORT_INTEGER(432,16858
+#define F77_EXPORT_LOGICAL(433,16894
+#define F77_EXPORT_REAL(434,16949
+#define F77_EXPORT_BYTE(435,16982
+#define F77_EXPORT_WORD(436,17015
+#define F77_EXPORT_UBYTE(437,17048
+#define F77_EXPORT_UWORD(438,17082
+#define F77_EXPORT_POINTER(439,17116
+#define F77_EXPORT_LOCATOR(440,17161
+#define F77_EXPORT_CHARACTER_ARRAY(447,17500
+#define F77_EXPORT_CHARACTER_ARRAY_P(449,17620
+#define F77_EXPORT_DOUBLE_ARRAY(451,17737
+#define F77_EXPORT_INTEGER_ARRAY(452,17799
+#define F77_EXPORT_LOGICAL_ARRAY(453,17863
+#define F77_EXPORT_REAL_ARRAY(455,17968
+#define F77_EXPORT_BYTE_ARRAY(456,18026
+#define F77_EXPORT_WORD_ARRAY(457,18084
+#define F77_EXPORT_UBYTE_ARRAY(458,18142
+#define F77_EXPORT_UWORD_ARRAY(459,18202
+#define F77_EXPORT_POINTER_ARRAY(460,18263
+#define F77_EXPORT_LOCATOR_ARRAY(462,18373
+#define F77_IMPORT_CHARACTER(466,18523
+#define F77_IMPORT_DOUBLE(467,18575
+#define F77_IMPORT_INTEGER(468,18610
+#define F77_IMPORT_LOGICAL(469,18646
+#define F77_IMPORT_REAL(470,18694
+#define F77_IMPORT_BYTE(471,18727
+#define F77_IMPORT_WORD(472,18760
+#define F77_IMPORT_UBYTE(473,18793
+#define F77_IMPORT_UWORD(474,18827
+#define F77_IMPORT_POINTER(475,18861
+#define F77_IMPORT_LOCATOR(476,18906
+#define F77_IMPORT_CHARACTER_ARRAY(483,19245
+#define F77_IMPORT_CHARACTER_ARRAY_P(485,19365
+#define F77_IMPORT_DOUBLE_ARRAY(487,19488
+#define F77_IMPORT_INTEGER_ARRAY(488,19527
+#define F77_IMPORT_LOGICAL_ARRAY(489,19567
+#define F77_IMPORT_REAL_ARRAY(491,19672
+#define F77_IMPORT_BYTE_ARRAY(492,19709
+#define F77_IMPORT_WORD_ARRAY(493,19746
+#define F77_IMPORT_UBYTE_ARRAY(494,19783
+#define F77_IMPORT_UWORD_ARRAY(495,19821
+#define F77_IMPORT_POINTER_ARRAY(496,19859
+#define F77_IMPORT_LOCATOR_ARRAY(498,19972
+#define F77_CALL(503,20135
+#define INTEGER_ARG(508,20239
+#define REAL_ARG(509,20266
+#define DOUBLE_ARG(510,20293
+#define LOGICAL_ARG(511,20320
+#define BYTE_ARG(512,20347
+#define WORD_ARG(513,20374
+#define UBYTE_ARG(514,20401
+#define UWORD_ARG(515,20428
+#define POINTER_ARG(516,20455
+#define CHARACTER_ARG(517,20482
+#define TRAIL_ARG(518,20509
+#define SUBROUTINE_ARG(520,20547
+#define INTEGER_FUNCTION_ARG(521,20576
+#define REAL_FUNCTION_ARG(522,20611
+#define DOUBLE_FUNCTION_ARG(523,20643
+#define LOGICAL_FUNCTION_ARG(524,20677
+#define CHARACTER_FUNCTION_ARG(525,20712
+#define BYTE_FUNCTION_ARG(526,20749
+#define WORD_FUNCTION_ARG(527,20781
+#define UBYTE_FUNCTION_ARG(528,20813
+#define UWORD_FUNCTION_ARG(529,20846
+#define POINTER_FUNCTION_ARG(530,20879
+#define INTEGER_ARRAY_ARG(532,20915
+#define REAL_ARRAY_ARG(533,20968
+#define DOUBLE_ARRAY_ARG(534,21018
+#define LOGICAL_ARRAY_ARG(535,21070
+#define BYTE_ARRAY_ARG(536,21123
+#define WORD_ARRAY_ARG(537,21173
+#define UBYTE_ARRAY_ARG(538,21223
+#define UWORD_ARRAY_ARG(539,21274
+#define POINTER_ARRAY_ARG(540,21325
+#define CHARACTER_ARRAY_ARG(541,21378
+#undef  F77_EXTERNAL_NAME562,22281
+#define F77_EXTERNAL_NAME(563,22307
+#undef  TRAIL570,22447
+#define TRAIL(571,22461
+#undef  DECLARE_CHARACTER576,22543
+#define DECLARE_CHARACTER(577,22569
+#undef  DECLARE_CHARACTER_ARRAY579,22665
+#define DECLARE_CHARACTER_ARRAY(580,22697
+#undef DECLARE_CHARACTER_DYN582,22796
+#define DECLARE_CHARACTER_DYN(583,22825
+#undef DECLARE_CHARACTER_ARRAY_DYN585,22904
+#define DECLARE_CHARACTER_ARRAY_DYN(586,22939
+#undef F77_CREATE_CHARACTER588,23024
+#define F77_CREATE_CHARACTER(589,23052
+#undef F77_CREATE_CHARACTER_ARRAY591,23122
+#define F77_CREATE_CHARACTER_ARRAY(592,23156
+#undef  TRAIL_ARG597,23339
+#define TRAIL_ARG(598,23357
+#define _F77_KR622,24013
+#undef  F77_BYTE_TYPE645,24547
+#define F77_BYTE_TYPE 646,24569
+#undef  F77_EXTERNAL_NAME654,24783
+#define F77_EXTERNAL_NAME(655,24809
+#undef  F77_CHARACTER_ARG_TYPE669,25114
+#define F77_CHARACTER_ARG_TYPE 670,25145
+#undef  F77_CHARACTER_ARRAY_ARG_TYPE671,25200
+#define F77_CHARACTER_ARRAY_ARG_TYPE 672,25237
+#undef  CHARACTER673,25298
+#define CHARACTER(674,25316
+#undef  TRAIL675,25381
+#define TRAIL(676,25395
+#undef  CHARACTER_ARRAY677,25412
+#define CHARACTER_ARRAY(678,25436
+#undef  GENPTR_CHARACTER679,25514
+#define GENPTR_CHARACTER(680,25539
+#undef  GENPTR_CHARACTER_ARRAY683,25671
+#define GENPTR_CHARACTER_ARRAY(684,25702
+#undef  F77_TRUE689,25802
+#define F77_TRUE 690,25819
+#undef  F77_ISTRUE691,25839
+#define F77_ISTRUE(692,25858
+#undef  F77_ISFALSE693,25890
+#define F77_ISFALSE(694,25910
+#undef  F77_BLANK_COMMON699,25992
+#define F77_BLANK_COMMON 700,26017
+#undef  DECLARE_CHARACTER705,26097
+#define DECLARE_CHARACTER(706,26123
+#undef  DECLARE_CHARACTER_ARRAY711,26359
+#define DECLARE_CHARACTER_ARRAY(712,26391
+#undef DECLARE_CHARACTER_DYN720,26728
+#define DECLARE_CHARACTER_DYN(721,26757
+#undef DECLARE_CHARACTER_ARRAY_DYN724,26935
+#define DECLARE_CHARACTER_ARRAY_DYN(725,26970
+#undef F77_CREATE_CHARACTER728,27160
+#define F77_CREATE_CHARACTER(729,27188
+#undef F77_CREATE_CHARACTER_ARRAY732,27386
+#define F77_CREATE_CHARACTER_ARRAY(733,27420
+#define F77_CREATE_CHARACTER_ARRAY_M(735,27544
+#undef F77_FREE_CHARACTER738,27759
+#define F77_FREE_CHARACTER(739,27785
+#undef  CHARACTER_ARG743,27902
+#define CHARACTER_ARG(744,27924
+#undef  CHARACTER_ARRAY_ARG745,27959
+#define CHARACTER_ARRAY_ARG(746,27987
+#undef  TRAIL_ARG747,28028
+#define TRAIL_ARG(748,28046
+#define _dec_unix 765,28518
+#define _dec_unix 768,28586
+#define _dec_unix 771,28655
+#define _dec_unix 774,28723
+#undef  F77_TRUE793,29463
+#define F77_TRUE 794,29480
+#undef  F77_ISTRUE795,29500
+#define F77_ISTRUE(796,29519
+#undef  F77_ISFALSE797,29551
+#define F77_ISFALSE(798,29571
+#define CNF_OLD_DEFINED890,32746
+#define cnf_calloc 892,32809
+#define cnf_copyf 893,32838
+#define cnf_cptr 894,32865
+#define cnf_creat 895,32890
+#define cnf_cref 896,32917
+#define cnf_crefa 897,32942
+#define cnf_creib 898,32969
+#define cnf_creim 899,32996
+#define cnf_crela 900,33023
+#define cnf_expch 901,33050
+#define cnf_expla 902,33077
+#define cnf_expn 903,33104
+#define cnf_exprt 904,33129
+#define cnf_exprta 905,33156
+#define cnf_exprtap 906,33185
+#define cnf_fptr 907,33216
+#define cnf_free 908,33241
+#define cnf_freef 909,33266
+#define cnf_impb 910,33293
+#define cnf_impbn 911,33318
+#define cnf_impch 912,33345
+#define cnf_impla 913,33372
+#define cnf_impn 914,33399
+#define cnf_imprt 915,33424
+#define cnf_imprta 916,33451
+#define cnf_imprtap 917,33480
+#define cnf_lenc 918,33511
+#define cnf_lenf 919,33536
+#define cnf_malloc 920,33561
+#define cnf_regp 921,33590
+#define cnf_uregp 922,33615
+
+../include/toas2dat_cmd.h,496
+#define __toas2dat_cmd__2,25
+typedef struct s_Cmdline 11,244
+  char numoutP;13,332
+  int numout;14,348
+  int numoutC;15,362
+  char dtP;17,440
+  double dt;18,452
+  int dtC;19,465
+  char t0P;21,546
+  double t0;22,558
+  int t0C;23,571
+  char outfileP;25,634
+  char* outfile;26,651
+  int outfileC;27,668
+  char textP;29,750
+  char floatP;31,834
+  char secP;33,905
+  int argc;35,968
+  /*@null*/char **argv;argv36,980
+  char *full_cmd_line;full_cmd_line38,1052
+} Cmdline;39,1075
+
+../include/rfifind_cmd.h,1469
+#define __rfifind_cmd__2,24
+typedef struct s_Cmdline 11,242
+  char outfileP;13,315
+  char* outfile;14,332
+  int outfileC;15,349
+  char pkmbP;17,420
+  char gmrtP;19,490
+  char bcpmP;21,580
+  char spigotP;23,659
+  char filterbankP;25,738
+  char psrfitsP;27,807
+  char wappP;29,903
+  char windowP;31,997
+  char numwappsP;33,1085
+  int numwapps;34,1103
+  int numwappsC;35,1119
+  char ifsP;37,1215
+  int ifs;38,1228
+  int ifsC;39,1239
+  char clipP;41,1342
+  float clip;42,1356
+  int clipC;43,1370
+  char noclipP;45,1462
+  char xwinP;47,1543
+  char nocomputeP;49,1611
+  char rfixwinP;51,1685
+  char rfipsP;53,1758
+  char timeP;55,1859
+  double time;56,1873
+  int timeC;57,1888
+  char blocksP;59,2002
+  int blocks;60,2018
+  int blocksC;61,2032
+  char timesigmaP;63,2118
+  float timesigma;64,2137
+  int timesigmaC;65,2156
+  char freqsigmaP;67,2245
+  float freqsigma;68,2264
+  int freqsigmaC;69,2283
+  char chantrigfracP;71,2384
+  float chantrigfrac;72,2406
+  int chantrigfracC;73,2428
+  char inttrigfracP;75,2531
+  float inttrigfrac;76,2552
+  int inttrigfracC;77,2573
+  char zapchanstrP;79,2753
+  char* zapchanstr;80,2773
+  int zapchanstrC;81,2793
+  char zapintsstrP;83,2973
+  char* zapintsstr;84,2993
+  int zapintsstrC;85,3013
+  char maskfileP;87,3094
+  char* maskfile;88,3112
+  int maskfileC;89,3130
+  int argc;91,3197
+  /*@null*/char **argv;argv92,3209
+  char *full_cmd_line;full_cmd_line94,3281
+} Cmdline;95,3304
+
+../include/plot2d.h,57
+#define EXIT_FAILURE 9,141
+#define EXIT_SUCCESS 12,192
+
+../include/dftfold_cmd.h,506
+#define __dftfold_cmd__2,24
+typedef struct s_Cmdline 11,242
+  char numvectP;13,323
+  int numvect;14,340
+  int numvectC;15,355
+  char rrP;17,424
+  double rr;18,436
+  int rrC;19,449
+  char ppP;21,499
+  double pp;22,511
+  int ppC;23,524
+  char ffP;25,578
+  double ff;26,590
+  int ffC;27,603
+  char normP;29,680
+  double norm;30,694
+  int normC;31,709
+  char fftnormP;33,792
+  int argc;35,859
+  /*@null*/char **argv;argv36,871
+  char *full_cmd_line;full_cmd_line38,943
+} Cmdline;39,966
+
+../include/spigot.h,1354
+#define SPIGOT_MAXPTSPERBLOCK 2,63
+#define SPIGOT_MAXLAGS 4,154
+#define SPIGOT_MAXDATLEN 6,274
+#define SPIGOT_MAXLAGLEN 9,444
+typedef struct SPIGOT_INFO{SPIGOT_INFO11,489
+  char instrument[instrument12,517
+  char software_vers[software_vers13,577
+  char telescope[telescope14,639
+  char object[object15,684
+  char observer[observer16,727
+  char project_id[project_id17,779
+  char obs_id[obs_id18,829
+  char date_obs[date_obs19,879
+  char time_obs[time_obs20,942
+  char time_sys[time_sys21,1003
+  char coord_sys[coord_sys22,1057
+  char pol_type[pol_type23,1117
+  char corr_mode[corr_mode24,1176
+  double ra;25,1228
+  double dec;26,1297
+  double az;27,1367
+  double el;28,1446
+  double dt_us;29,1527
+  double freq_ctr;30,1571
+  double bandwidth;31,1634
+  double MJD_obs;32,1692
+  double file_duration;33,1751
+  double elapsed_time;34,1832
+  double start_block;35,1920
+  double end_block;36,1987
+  int scan_number;37,2050
+  int header_len;38,2092
+  int sec_obs;39,2141
+  int tracking;40,2201
+  int num_samplers;41,2257
+  int summed_pols;42,2304
+  int upper_sideband;43,2357
+  int bits_per_lag;44,2403
+  int lags_per_sample;45,2440
+  int samples_per_file;46,2493
+  int first_spectrum;47,2556
+  int tot_num_samples;48,2637
+  int num_blocks;49,2703
+  int padding_samples;50,2778
+} SPIGOT_INFO;51,2859
+
+../include/makedata.h,963
+#define PI 12,221
+#define TWOPI 15,316
+#define DEGTORAD 18,414
+#define BUFFSIZE 21,498
+typedef struct MAKEDATA 23,565
+  char basefilenm[basefilenm24,591
+  char description[description25,667
+  long N;26,736
+  long next2_to_n;27,799
+  double dt;28,875
+  double T;29,942
+  char ptype[ptype30,1018
+  int pnum;31,1081
+  double fwhm;32,1157
+  char round[round33,1233
+  int roundnum;34,1296
+  double f;35,1372
+  double fd;36,1448
+  double fdd;37,1524
+  double p;38,1600
+  double pd;39,1676
+  double pdd;40,1752
+  double r;41,1828
+  double z;42,1904
+  double w;43,1980
+  double amp;44,2056
+  double phs;45,2132
+  double dc;46,2208
+  int binary;47,2284
+  orbitparams orb;48,2344
+  int ampmod;49,2420
+  double ampmoda;50,2496
+  double ampmodf;51,2572
+  double ampmodp;52,2648
+  char noisetype[noisetype53,2724
+  int noise;54,2791
+  double noisesig;55,2867
+  int numonoff;56,2943
+  double *onoff;onoff57,3005
+} makedata;58,3067
+
+../include/accel.h,2127
+#define ACCEL_USELEN 9,240
+#define ACCEL_NUMBETWEEN 10,266
+#define ACCEL_DR 12,324
+#define ACCEL_RDR 14,375
+#define ACCEL_DZ 16,427
+#define ACCEL_RDZ 18,476
+#define ACCEL_CLOSEST_R 20,553
+#define ACCEL_PADDING 22,644
+typedef struct accelobs{accelobs24,672
+  long long N;25,697
+  long long numbins;26,763
+  long long lobin;27,828
+  long long highestbin;28,897
+  int fftlen;29,967
+  int numharmstages;30,1033
+  int numz;31,1099
+  int numbetween;32,1154
+  int numzap;33,1228
+  int dat_input;34,1282
+  int mmap_file;35,1349
+  double dt;36,1408
+  double T;37,1471
+  double rlo;38,1525
+  double rhi;39,1585
+  double dr;40,1645
+  double zlo;41,1714
+  double zhi;42,1774
+  double dz;43,1834
+  double baryv;44,1888
+  float nph;45,1965
+  float sigma;46,2033
+  float *powcut;powcut47,2097
+  double *lobins;lobins48,2174
+  double *hibins;hibins49,2248
+  long long *numindep;numindep50,2323
+  FILE *fftfile;fftfile51,2399
+  FILE *workfile;workfile52,2463
+  fcomplex *fft;fft53,2538
+  char *rootfilenm;rootfilenm54,2621
+  char *candnm;candnm55,2690
+  char *accelnm;accelnm56,2766
+  char *workfilenm;workfilenm57,2840
+} accelobs;58,2916
+typedef struct accelcand{accelcand60,2929
+  float power;61,2955
+  float sigma;62,3016
+  int numharm;63,3088
+  double r;64,3144
+  double z;65,3204
+  double *pows;pows66,3265
+  double *hirs;hirs67,3329
+  double *hizs;hizs68,3392
+  rderivs *derivs;derivs69,3455
+} accelcand;70,3523
+typedef struct kernel{kernel72,3537
+  int z;73,3560
+  int fftlen;74,3621
+  int numgoodbins;75,3689
+  int numbetween;76,3761
+  int kern_half_width;77,3827
+  fcomplex *data;data78,3893
+} kernel;79,3945
+typedef struct subharminfo{subharminfo81,3956
+  int numharm;82,3984
+  int harmnum;83,4039
+  int zmax;84,4114
+  int numkern;85,4185
+  kernel *kern;kern86,4244
+  unsigned short *rinds;rinds87,4294
+} subharminfo;88,4360
+typedef struct ffdotpows{ffdotpows90,4376
+  int numrs;91,4402
+  int numzs;92,4462
+  int rlo;93,4523
+  int zlo;94,4579
+  float **powers;powers95,4636
+  unsigned short *rinds;rinds96,4685
+} ffdotpows;97,4751
+
+../include/prepfold.h,1240
+#define TDT 7,133
+#define LININTERP(10,191
+#define NEAREST_INT(14,389
+typedef struct plotflags 18,497
+  int events;19,524
+  int nosearch;20,538
+  int justprofs;21,554
+  int scaleparts;22,571
+  int allgrey;23,589
+} plotflags;24,604
+typedef struct PREPFOLDINFO 28,680
+  double *rawfolds;rawfolds29,710
+  double *dms;dms30,780
+  double *periods;periods31,831
+  double *pdots;pdots32,886
+  foldstats *stats;stats33,940
+  int numdms;34,997
+  int numperiods;35,1041
+  int numpdots;36,1089
+  int nsub;37,1135
+  int npart;38,1199
+  int proflen;39,1268
+  int numchan;40,1323
+  int pstep;41,1385
+  int pdstep;42,1459
+  int dmstep;43,1532
+  int ndmfact;44,1602
+  int npfact;45,1664
+  char *filenm;filenm46,1740
+  char *candnm;candnm47,1796
+  char *telescope;telescope48,1856
+  char *pgdev;pgdev49,1923
+  char rastr[rastr50,1972
+  char decstr[decstr51,2041
+  double dt;52,2110
+  double startT;53,2168
+  double endT;54,2242
+  double tepoch;55,2315
+  double bepoch;56,2376
+  double avgvoverc;57,2437
+  double lofreq;58,2494
+  double chan_wid;59,2560
+  double bestdm;60,2623
+  position topo;61,2659
+  position bary;62,2719
+  position fold;63,2779
+  orbitparams orb;64,2852
+} prepfoldinfo;65,2925
+
+../include/spigot2filterbank_cmd.h,696
+#define __spigot2filterbank_cmd__2,34
+typedef struct s_Cmdline 11,262
+  char outfileP;13,359
+  char* outfile;14,376
+  int outfileC;15,393
+  char nohdrP;17,474
+  char stdoutP;19,551
+  char floatsP;21,649
+  char zerolagsP;23,751
+  char skipP;25,837
+  int skip;26,851
+  int skipC;27,863
+  char numoutP;29,942
+  int numout;30,958
+  int numoutC;31,972
+  char downsampP;33,1049
+  int downsamp;34,1067
+  int downsampC;35,1083
+  char lokillP;37,1160
+  int lokill;38,1176
+  int lokillC;39,1190
+  char hikillP;41,1265
+  int hikill;42,1281
+  int hikillC;43,1295
+  int argc;45,1360
+  /*@null*/char **argv;argv46,1372
+  char *full_cmd_line;full_cmd_line48,1444
+} Cmdline;49,1467
+
+../include/presto.h,4647
+#define SQRT2 18,328
+#define DBLCORRECT 21,428
+#define PI 24,474
+#define TWOPI 27,569
+#define DEGTORAD 30,667
+#define RADTODEG 33,767
+#define PIBYTWO 36,863
+#define SOL 39,956
+#define SECPERJULYR 42,1017
+#define SECPERDAY 45,1075
+#define ARCSEC2RAD 48,1131
+#define SEC2RAD 51,1231
+#define __inline__54,1332
+#define MAXPATCHFILES 57,1420
+#define SUBSBLOCKLEN 59,1504
+#define SWAP(65,1627
+#define POWER(72,1834
+#define PHASE(80,2082
+#define RADIAN_PHASE(89,2388
+#define GET_BIT(94,2528
+#define SET_BIT(95,2581
+#define UNSET_BIT(96,2635
+#define NUMLOCPOWAVG 100,2817
+#define DELTAAVGBINS 104,2965
+#define NUMFINTBINS 108,3112
+  IF0,112,3186
+  IF0, IF1,112,3186
+  IF0, IF1, SUMIFS112,3186
+} IFs;113,3205
+  LOWACC,117,3280
+  LOWACC, HIGHACC117,3280
+} presto_interp_acc;118,3298
+  INTERBIN,122,3387
+  INTERBIN, INTERPOLATE122,3387
+} presto_interptype;123,3411
+  NO_CHECK_ALIASED,126,3448
+  NO_CHECK_ALIASED, CHECK_ALIASED126,3448
+} presto_checkaliased;127,3482
+  CONV,131,3583
+  CONV, CORR,131,3583
+  CONV, CORR, INPLACE_CONV,131,3583
+  CONV, CORR, INPLACE_CONV, INPLACE_CORR131,3583
+} presto_optype;132,3624
+  FFTDK,135,3657
+  FFTDK, FFTD,135,3657
+  FFTDK, FFTD, FFTK,135,3657
+  FFTDK, FFTD, FFTK, NOFFTS135,3657
+} presto_ffts;136,3685
+  RAW,139,3716
+  RAW, PREPPED,139,3716
+  RAW, PREPPED, FFT,139,3716
+  RAW, PREPPED, FFT, SAME139,3716
+} presto_datainf;140,3742
+typedef struct FFTCAND 142,3761
+  int nsum;143,3786
+  double p;144,3833
+  double r;145,3877
+  double sig;146,3926
+} fftcand;147,3998
+typedef struct POSITION 149,4010
+    float pow;150,4036
+    double p1;151,4107
+    double p2;152,4178
+    double p3;153,4249
+} position;154,4320
+typedef struct POWINDEX 156,4333
+    float pow;157,4359
+    long ind;158,4430
+} powindex;159,4500
+typedef struct RDERIVS 161,4513
+    double pow;162,4538
+    double phs;163,4601
+    double dpow;164,4664
+    double dphs;165,4727
+    double d2pow;166,4790
+    double d2phs;167,4853
+    double locpow;168,4916
+} rderivs;169,4979
+typedef struct FOURIERPROPS 171,4991
+    double r;172,5021
+    float rerr;173,5091
+    double z;174,5163
+    float zerr;175,5233
+    double w;176,5305
+    float werr;177,5375
+    float pow;178,5447
+    float powerr;179,5518
+    float sig;180,5590
+    float rawpow;181,5661
+    float phs;182,5733
+    float phserr;183,5804
+    float cen;184,5876
+    float cenerr;185,5947
+    float pur;186,6019
+    float purerr;187,6090
+    float locpow;188,6162
+} fourierprops;189,6234
+typedef struct BINARYPROPS 191,6251
+    double ppsr;192,6280
+    double fpsr;193,6354
+    double rpsr;194,6428
+    double pbin;195,6502
+    double rbin;196,6576
+    double z;197,6650
+    double asinic;198,6722
+    double rdetect;199,6796
+    long   nfftbins;200,6870
+    long   lowbin;201,6944
+    float  ppsrerr;202,7018
+    float  fpsrerr;203,7092
+    float  rpsrerr;204,7166
+    float  pbinerr;205,7240
+    float  rbinerr;206,7314
+    float  zerr;207,7388
+    float  asinicerr;208,7462
+    float  rdetecterr;209,7536
+    float  sig;210,7610
+    float  phs;211,7684
+    float  phserr;212,7758
+    float  cen;213,7832
+    float  cenerr;214,7906
+    float  pur;215,7980
+    float  purerr;216,8054
+    float  pow;217,8128
+    float  powerr;218,8202
+} binaryprops;219,8276
+typedef struct RAWBINCAND 221,8292
+  double full_N;222,8320
+  double full_T;223,8391
+  double full_lo_r;224,8462
+  double mini_N;225,8533
+  double mini_r;226,8604
+  double mini_power;227,8675
+  double mini_numsum;228,8746
+  double mini_sigma;229,8817
+  double psr_p;230,8888
+  double orb_p;231,8959
+} rawbincand;232,9030
+typedef struct RZWERRS 234,9045
+    double p;235,9070
+    double pd;236,9140
+    double pdd;237,9211
+    double f;238,9283
+    double fd;239,9353
+    double fdd;240,9424
+    float perr;241,9496
+    float pderr;242,9568
+    float pdderr;243,9640
+    float ferr;244,9712
+    float fderr;245,9784
+    float fdderr;246,9856
+} rzwerrs;247,9928
+typedef struct orbitparams 250,9965
+    double p;251,9994
+    double e;252,10064
+    double x;253,10134
+    double w;254,10204
+    double t;255,10274
+    double pd;256,10344
+    double wd;257,10415
+} orbitparams;258,10486
+#define ORBITPARAMS_TYPE 259,10501
+typedef struct foldstats 262,10536
+  double numdata;263,10563
+  double data_avg;264,10626
+  double data_var;265,10689
+  double numprof;266,10752
+  double prof_avg;267,10815
+  double prof_var;268,10878
+  double redchi;269,10941
+} foldstats;270,11004
+typedef struct bird{bird272,11018
+  double lobin;273,11039
+  double hibin;274,11055
+} bird;275,11071
+
+../include/multifiles.h,380
+#define DEFAULT_MAXLEN 4,40
+typedef struct MULTIFILE 6,75
+  int numfiles;7,102
+  int currentfile;8,174
+  long long currentpos;9,246
+  long long length;10,318
+  long long position;11,390
+  long long maxfilelen;12,462
+  long long *filelens;filelens13,534
+  char **filenames;filenames14,606
+  char mode[mode15,678
+  FILE **fileptrs;fileptrs16,750
+} multifile;17,822
+
+../include/sigproc_fb.h,561
+typedef struct SIGPROCFB 1,0
+  char inpfile[inpfile2,27
+  char source_name[source_name3,73
+  char ifstream[ifstream4,116
+  long long N;5,198
+  double tstart;6,268
+  double tsamp;7,314
+  double src_raj;8,366
+  double src_dej;9,429
+  double az_start;10,492
+  double za_start;11,547
+  double fch1;12,607
+  double foff;13,670
+  int machine_id;14,724
+  int telescope_id;15,789
+  int nchans;16,855
+  int nbits;17,916
+  int nifs;18,988
+  int nbeams;19,1041
+  int ibeam;20,1112
+  int sumifs;21,1174
+  int headerlen;22,1239
+} sigprocfb;23,1293
+
+../include/wapp_key.h,500
+struct HEADERKEY 1,0
+    void *next;next2,19
+    char *name;name3,35
+    int offset;4,51
+    int type;5,67
+    int len;6,81
+    int alen;7,124
+struct HEADERVAL 10,161
+    void *value;value11,180
+    struct HEADERKEY *key;key12,197
+struct HEADERP 15,228
+    struct HEADERKEY *head;head16,245
+    struct HEADERKEY *tail;tail17,273
+    char *buf;buf18,301
+    int offset;19,355
+    void *header;header20,435
+    int headlen;21,500
+    int fd;22,549
+    int yacc_offset;23,585
+
+../include/multibeam.h,1916
+#define RECLEN 1,0
+#define DATLEN 2,21
+#define HDRLEN 3,42
+#define SAMPPERBLK 4,61
+typedef struct PKMB_TAPEHDR 8,132
+  char program[program14,221
+  char version[version15,264
+  char tape_lbl[tape_lbl16,316
+  char file_cntr[file_cntr17,357
+  char blk_cntr[blk_cntr18,407
+  char date[date19,468
+  char mjd[mjd20,517
+  char ut_start[ut_start21,561
+  char lst_start[lst_start22,628
+  char coord_type[coord_type23,691
+  char ra_start[ra_start24,764
+  char dec_start[dec_start25,829
+  char gl_start[gl_start26,894
+  char gb_start[gb_start27,969
+  char fangle[fangle28,1044
+  char obs_time[obs_time29,1105
+  char comment[comment30,1158
+  char nfilter[nfilter31,1196
+  char chanbw[chanbw32,1265
+  char nchan[nchan33,1343
+  char freq_ch1[freq_ch134,1410
+  char samp_int[samp_int35,1482
+  char samp_grp[samp_grp36,1560
+  char samp_blk[samp_blk37,1638
+  char blk_sec[blk_sec38,1709
+  char fdctrl[fdctrl39,1782
+  char data[data40,1856
+  char ut_blk[ut_blk41,1935
+  char lst_blk[lst_blk42,2000
+  char ra_blk[ra_blk43,2062
+  char dec_blk[dec_blk44,2125
+  char gl_blk[gl_blk45,2188
+  char gb_blk[gb_blk46,2252
+  char zen_blk[zen_blk47,2314
+  char az_blk[az_blk48,2387
+  char atten[atten49,2461
+  char tpower[tpower50,2536
+  char nblk_read[nblk_read51,2609
+  char scan_ratel[scan_ratel52,2670
+  char scan_rateb[scan_rateb53,2741
+  char nbeam[nbeam54,2812
+  char ibeam[ibeam55,2864
+  char pname[pname56,2906
+  char cfg_file[cfg_file57,2970
+  char schd_file[schd_file58,3017
+  char nbits[nbits59,3066
+  char ddm[ddm60,3118
+  char nddch[nddch61,3179
+  char move[move62,3245
+  char pnterr[pnterr64,3403
+  char tree[tree65,3466
+  char ifilter[ifilter66,3546
+  char telid[telid67,3604
+  char pangle[pangle68,3663
+  char bsw[bsw69,3728
+  char cal_cycle[cal_cycle70,3788
+  char spare[spare71,3846
+} PKMB_tapehdr;72,3882
+
+../include/search_bin_cmd.h,1024
+#define __search_bin_cmd__2,27
+typedef struct s_Cmdline 11,248
+  char ncandP;13,333
+  int ncand;14,348
+  int ncandC;15,361
+  char minfftP;17,438
+  int minfft;18,454
+  int minfftC;19,468
+  char maxfftP;21,545
+  int maxfft;22,561
+  int maxfftC;23,575
+  char floP;25,640
+  float flo;26,653
+  int floC;27,666
+  char fhiP;29,729
+  float fhi;30,742
+  int fhiC;31,755
+  char rloP;33,820
+  int rlo;34,833
+  int rloC;35,844
+  char rhiP;37,910
+  int rhi;38,923
+  int rhiC;39,934
+  char lobinP;41,1011
+  int lobin;42,1026
+  int lobinC;43,1039
+  char overlapP;45,1141
+  double overlap;46,1158
+  int overlapC;47,1176
+  char harmsumP;49,1257
+  int harmsum;50,1274
+  int harmsumC;51,1289
+  char numbetweenP;53,1424
+  int numbetween;54,1444
+  int numbetweenC;55,1462
+  char stackP;57,1606
+  int stack;58,1621
+  int stackC;59,1634
+  char interbinP;61,1775
+  char noaliasP;63,1904
+  int argc;65,1971
+  /*@null*/char **argv;argv66,1983
+  char *full_cmd_line;full_cmd_line68,2055
+} Cmdline;69,2078
+
+../include/bpp.h,3983
+#define BPP_HEADER_SIZE	2,24
+#define MAXNUMCB 5,62
+#define MAXNUMDFB 6,81
+#define MAX_NUM_LO_BOARDS 7,112
+#define MAX_NUM_MF_BOARDS 8,147
+#define FB_CHAN_PER_BRD 9,195
+#define MAX_HARRIS_TAPS 10,221
+#define MAXREGS 11,249
+#define NIBPERREG 12,267
+#define MAXNUMCHAN 13,287
+#define PTSPERBLOCK 14,334
+#define MAXDATLEN 15,359
+#define NBOARDS 17,459
+#define NCHANPERBOARD 18,538
+#define NCHAN 19,617
+#define CB_VME_OUT_REG 20,696
+#define NBITS 21,775
+#define BITSPERBYTE 22,854
+#define TRUE 24,893
+#define FALSE 27,929
+#define	DATA_WORD	29,952
+#define	DATA_TYPE	30,1012
+#define	MAXSTATES	31,1075
+#define	MAXPACK	33,1177
+typedef struct BPP_SEARCH_HEADER{BPP_SEARCH_HEADER37,1318
+  char head[head38,1352
+  int header_version;39,1396
+  unsigned int scan_num;40,1475
+  double length_of_integration;43,1660
+  double samp_rate;44,1718
+  double ra_2000;45,1793
+  double dec_2000;46,1829
+  double tele_x;47,1866
+  double tele_y;48,1914
+  double tele_z;49,1962
+  double tele_inc;50,2010
+  double Fclk;51,2061
+  double Har_Clk;52,2105
+  double bandwidth;53,2168
+  double dfb_gain[dfb_gain54,2226
+  double aib_los[aib_los58,2344
+  double mf_filt_width[mf_filt_width59,2381
+  double mf_atten[mf_atten60,2424
+  double rf_lo;61,2462
+  int bit_mode;62,2540
+  int num_chans;63,2616
+  int lmst;64,2692
+  char target_name[target_name65,2743
+  char date[date66,2820
+  char start_time[start_time67,2886
+  int scan_file_number;68,2963
+  int file_size;69,3026
+  int tape_num;70,3069
+  int tape_file_number;71,3106
+  char obs_group[obs_group72,3163
+  int enabled_CBs;73,3237
+  int mb_start_address;74,3286
+  int mb_end_address;75,3365
+  int mb_start_board;76,3440
+  int mb_end_board;77,3490
+  int mb_vme_mid_address;78,3568
+  int mb_ack_enabled;79,3643
+  int start_from_ste;80,3707
+  int cb_sum_polarizations;84,3811
+  int cb_direct_mode;85,3888
+  int cb_eprom_mode[cb_eprom_mode86,3968
+  int cb_accum_length;87,4037
+  int tb_outs_reg;92,4231
+  int tb_ste;93,4302
+  int tb_stc;94,4351
+  int H_deci_factor;95,4417
+  int GenStat0,96,4462
+  int GenStat0, GenStat1,96,4462
+  int GenStat0, GenStat1, Ack_Reg;96,4462
+  int dfb_sram_length;101,4623
+  int ASYMMETRIC;102,4676
+  float dfb_sram_freqs[dfb_sram_freqs103,4734
+  int dfb_mixer_reg[dfb_mixer_reg105,4891
+  int dfb_conf_reg[dfb_conf_reg106,4969
+  int dfb_sram_addr_msb[dfb_sram_addr_msb107,5031
+  int i_hcoef[i_hcoef109,5155
+  int q_hcoef[q_hcoef110,5217
+  int tb_id;114,5288
+  int cb_id[cb_id115,5301
+  int dfb_id[dfb_id116,5324
+  int aib_if_switch;117,5349
+  int mb_rev,119,5479
+  int mb_rev, mb_serial;119,5479
+  int tb_rev,120,5504
+  int tb_rev, tb_serial;120,5504
+  int cb_rev[cb_rev121,5529
+  int cb_rev[MAXNUMCB], cb_serial[cb_serial121,5529
+  int dfb_rev[dfb_rev122,5574
+  int dfb_rev[MAXNUMDFB], dfb_serial[dfb_serial122,5574
+  int mb_xtal_freq;123,5623
+  int mf_serial[mf_serial124,5643
+  int mf_serial[MAX_NUM_MF_BOARDS], mf_rev[mf_rev124,5643
+  int lo_serial[lo_serial125,5706
+  int lo_serial[MAX_NUM_LO_BOARDS], lo_rev[lo_rev125,5706
+  int mb_long_ds0;126,5769
+  int dfb_sun_program[dfb_sun_program127,5842
+  int dfb_eprom[dfb_eprom128,5904
+  int dfb_sram_addr[dfb_sram_addr129,5962
+  int dfb_har_addr[dfb_har_addr130,6030
+  int dfb_clip_adc_neg8[dfb_clip_adc_neg8131,6098
+  int dfb_shften_[dfb_shften_132,6167
+  int dfb_fwd_[dfb_fwd_133,6233
+  int dfb_rvrs_[dfb_rvrs_134,6296
+  int dfb_asymmetric[dfb_asymmetric135,6360
+  double dfb_i_dc[dfb_i_dc136,6430
+  double dfb_q_dc[dfb_q_dc137,6505
+  double max_dfb_freq;138,6580
+  int aib_serial;144,6743
+  int aib_rev;145,6761
+  long long ll_file_offset;153,7122
+  long long ll_file_size;157,7329
+  char quad_word_boundary_filler[quad_word_boundary_filler158,7402
+  long double mjd_start;159,7439
+  char filler[filler160,7493
+  int BACKEND_TYPE;161,7515
+  int UPDATE_DONE;162,7535
+  int HEADER_TYPE;163,7554
+} BPP_SEARCH_HEADER;164,7573
+
+../include/prepdata_cmd.h,1012
+#define __prepdata_cmd__2,25
+typedef struct s_Cmdline 11,244
+  char outfileP;13,317
+  char* outfile;14,334
+  int outfileC;15,351
+  char pkmbP;17,422
+  char gmrtP;19,492
+  char bcpmP;21,582
+  char spigotP;23,661
+  char filterbankP;25,740
+  char psrfitsP;27,809
+  char wappP;29,905
+  char windowP;31,999
+  char numwappsP;33,1087
+  int numwapps;34,1105
+  int numwappsC;35,1121
+  char ifsP;37,1217
+  int ifs;38,1230
+  int ifsC;39,1241
+  char clipP;41,1344
+  float clip;42,1358
+  int clipC;43,1372
+  char noclipP;45,1464
+  char numoutP;47,1633
+  int numout;48,1649
+  int numoutC;49,1663
+  char downsampP;51,1742
+  int downsamp;52,1760
+  int downsampC;53,1776
+  char nobaryP;55,1841
+  char shortsP;57,1931
+  char de405P;59,2040
+  char dmP;61,2121
+  double dm;62,2133
+  int dmC;63,2146
+  char maskfileP;65,2219
+  char* maskfile;66,2237
+  int maskfileC;67,2255
+  int argc;69,2322
+  /*@null*/char **argv;argv70,2334
+  char *full_cmd_line;full_cmd_line72,2406
+} Cmdline;73,2429
+
+../include/profile_cmd.h,1553
+#define __profile_cmd__2,24
+typedef struct s_Cmdline 11,255
+  char phsP;13,329
+  double phs;14,342
+  int phsC;15,356
+  char pP;17,407
+  double p;18,418
+  int pC;19,430
+  char pdP;21,493
+  double pd;22,505
+  int pdC;23,518
+  char pddP;25,589
+  double pdd;26,602
+  int pddC;27,616
+  char fP;29,671
+  double f;30,682
+  int fC;31,694
+  char fdP;33,761
+  double fd;34,773
+  int fdC;35,786
+  char fddP;37,861
+  double fdd;38,874
+  int fddC;39,888
+  char proflenP;41,1030
+  int proflen;42,1047
+  int proflenC;43,1062
+  char psrnameP;45,1143
+  char* psrname;46,1160
+  int psrnameC;47,1177
+  char rzwcandP;49,1267
+  int rzwcand;50,1284
+  int rzwcandC;51,1299
+  char rzwfileP;53,1408
+  char* rzwfile;54,1425
+  int rzwfileC;55,1442
+  char bincandP;57,1573
+  int bincand;58,1590
+  int bincandC;59,1605
+  char onoffP;61,1951
+  char* onoff;62,1966
+  int onoffC;63,1981
+  char binaryP;65,2081
+  char pbP;67,2137
+  double pb;68,2149
+  int pbC;69,2162
+  char asinicP;71,2236
+  double asinic;72,2252
+  int asinicC;73,2269
+  char eP;75,2325
+  double e;76,2336
+  int eC;77,2348
+  char ToP;79,2412
+  double To;80,2424
+  int ToC;81,2437
+  char wP;83,2494
+  double w;84,2505
+  int wC;85,2517
+  char wdotP;87,2585
+  double wdot;88,2599
+  int wdotC;89,2614
+  char xwinP;91,2681
+  char psP;93,2754
+  char bothP;95,2844
+  char dispP;97,3013
+  char makefileP;99,3092
+  char noerrP;101,3153
+  int argc;103,3218
+  /*@null*/char **argv;argv104,3230
+  char *full_cmd_line;full_cmd_line106,3302
+} Cmdline;107,3325
+
+../include/prepsubband_cmd.h,1292
+#define __prepsubband_cmd__2,28
+typedef struct s_Cmdline 11,250
+  char outfileP;13,323
+  char* outfile;14,340
+  int outfileC;15,357
+  char pkmbP;17,428
+  char gmrtP;19,498
+  char bcpmP;21,588
+  char spigotP;23,667
+  char filterbankP;25,746
+  char psrfitsP;27,815
+  char wappP;29,911
+  char windowP;31,1005
+  char numwappsP;33,1093
+  int numwapps;34,1111
+  int numwappsC;35,1127
+  char ifsP;37,1223
+  int ifs;38,1236
+  int ifsC;39,1247
+  char clipP;41,1350
+  float clip;42,1364
+  int clipC;43,1378
+  char noclipP;45,1470
+  char subP;47,1548
+  char subdmP;49,1632
+  double subdm;50,1647
+  int subdmC;51,1663
+  char numoutP;53,1830
+  int numout;54,1846
+  int numoutC;55,1860
+  char nobaryP;57,1923
+  char de405P;59,2032
+  char lodmP;61,2122
+  double lodm;62,2136
+  int lodmC;63,2151
+  char dmstepP;65,2237
+  double dmstep;66,2253
+  int dmstepC;67,2270
+  char numdmsP;69,2339
+  int numdms;70,2355
+  int numdmsC;71,2369
+  char nsubP;73,2434
+  int nsub;74,2448
+  int nsubC;75,2460
+  char downsampP;77,2537
+  int downsamp;78,2555
+  int downsampC;79,2571
+  char maskfileP;81,2650
+  char* maskfile;82,2668
+  int maskfileC;83,2686
+  int argc;85,2753
+  /*@null*/char **argv;argv86,2765
+  char *full_cmd_line;full_cmd_line88,2837
+} Cmdline;89,2860
+
+../include/search_rzw_cmd.h,824
+#define __search_rzw_cmd__2,27
+typedef struct s_Cmdline 11,248
+  char ncandP;13,333
+  int ncand;14,348
+  int ncandC;15,361
+  char zloP;17,440
+  int zlo;18,453
+  int zloC;19,464
+  char zhiP;21,542
+  int zhi;22,555
+  int zhiC;23,566
+  char rloP;25,635
+  int rlo;26,648
+  int rloC;27,659
+  char rhiP;29,729
+  int rhi;30,742
+  int rhiC;31,753
+  char floP;33,819
+  int flo;34,832
+  int floC;35,843
+  char fhiP;37,910
+  int fhi;38,923
+  int fhiC;39,934
+  char lobinP;41,1011
+  int lobin;42,1026
+  int lobinC;43,1039
+  char zapfileP;45,1130
+  char* zapfile;46,1147
+  int zapfileC;47,1164
+  char baryvP;49,1326
+  double baryv;50,1341
+  int baryvC;51,1357
+  char photonP;53,1448
+  int argc;55,1514
+  /*@null*/char **argv;argv56,1526
+  char *full_cmd_line;full_cmd_line58,1598
+} Cmdline;59,1621
+
+../include/show_pfd_cmd.h,506
+#define __show_pfd_cmd__2,25
+typedef struct s_Cmdline 11,244
+  char noxwinP;13,359
+  char scalepartsP;15,438
+  char allgreyP;17,527
+  char justprofsP;19,613
+  char portraitP;21,707
+  char eventsP;23,801
+  char killsubsstrP;25,980
+  char* killsubsstr;26,1001
+  int killsubsstrC;27,1022
+  char killpartsstrP;29,1207
+  char* killpartsstr;30,1229
+  int killpartsstrC;31,1251
+  int argc;33,1322
+  /*@null*/char **argv;argv34,1334
+  char *full_cmd_line;full_cmd_line36,1406
+} Cmdline;37,1429
+
+../include/prepfold_cmd.h,3766
+#define __prepfold_cmd__2,25
+typedef struct s_Cmdline 11,244
+  char outfileP;13,317
+  char* outfile;14,334
+  int outfileC;15,351
+  char pkmbP;17,422
+  char gmrtP;19,492
+  char bcpmP;21,582
+  char spigotP;23,661
+  char filterbankP;25,740
+  char psrfitsP;27,809
+  char wappP;29,905
+  char windowP;31,999
+  char topoP;33,1088
+  char invertP;35,1162
+  char absphaseP;37,1248
+  char numwappsP;39,1338
+  int numwapps;40,1356
+  int numwappsC;41,1372
+  char ifsP;43,1468
+  int ifs;44,1481
+  int ifsC;45,1492
+  char clipP;47,1595
+  float clip;48,1609
+  int clipC;49,1623
+  char noclipP;51,1715
+  char de405P;53,1824
+  char noxwinP;55,1927
+  char runavgP;57,2034
+  char fineP;59,2134
+  char coarseP;61,2232
+  char slowP;63,2302
+  char searchpddP;65,2381
+  char searchfddP;67,2465
+  char nosearchP;69,2564
+  char nopsearchP;71,2641
+  char nopdsearchP;73,2719
+  char nodmsearchP;75,2795
+  char scalepartsP;77,2878
+  char allgreyP;79,2967
+  char justprofsP;81,3053
+  char dmP;83,3129
+  double dm;84,3141
+  int dmC;85,3154
+  char proflenP;87,3295
+  int proflen;88,3312
+  int proflenC;89,3327
+  char nsubP;91,3411
+  int nsub;92,3425
+  int nsubC;93,3437
+  char npartP;95,3530
+  int npart;96,3545
+  int npartC;97,3558
+  char pstepP;99,3657
+  int pstep;100,3672
+  int pstepC;101,3685
+  char pdstepP;103,3784
+  int pdstep;104,3800
+  int pdstepC;105,3814
+  char dmstepP;107,3911
+  int dmstep;108,3927
+  int dmstepC;109,3941
+  char npfactP;111,4038
+  int npfact;112,4054
+  int npfactC;113,4068
+  char ndmfactP;115,4152
+  int ndmfact;116,4169
+  int ndmfactC;117,4184
+  char pP;119,4250
+  double p;120,4261
+  int pC;121,4273
+  char pdP;123,4339
+  double pd;124,4351
+  int pdC;125,4364
+  char pddP;127,4438
+  double pdd;128,4451
+  int pddC;129,4465
+  char fP;131,4531
+  double f;132,4542
+  int fC;133,4554
+  char fdP;135,4624
+  double fd;136,4636
+  int fdC;137,4649
+  char fddP;139,4727
+  double fdd;140,4740
+  int fddC;141,4754
+  char pfactP;143,4836
+  double pfact;144,4851
+  int pfactC;145,4867
+  char ffactP;147,4951
+  double ffact;148,4966
+  int ffactC;149,4982
+  char phsP;151,5042
+  double phs;152,5055
+  int phsC;153,5069
+  char startTP;155,5154
+  double startT;156,5170
+  int startTC;157,5187
+  char endTP;159,5271
+  double endT;160,5285
+  int endTC;161,5300
+  char psrnameP;163,5378
+  char* psrname;164,5395
+  int psrnameC;165,5412
+  char parnameP;167,5500
+  char* parname;168,5517
+  int parnameC;169,5534
+  char polycofileP;171,5629
+  char* polycofile;172,5649
+  int polycofileC;173,5669
+  char timingP;175,5883
+  char* timing;176,5899
+  int timingC;177,5915
+  char rzwcandP;179,6004
+  int rzwcand;180,6021
+  int rzwcandC;181,6036
+  char rzwfileP;183,6131
+  char* rzwfile;184,6148
+  int rzwfileC;185,6165
+  char accelcandP;187,6257
+  int accelcand;188,6276
+  int accelcandC;189,6293
+  char accelfileP;191,6394
+  char* accelfile;192,6413
+  int accelfileC;193,6432
+  char binaryP;195,6536
+  char pbP;197,6592
+  double pb;198,6604
+  int pbC;199,6617
+  char asinicP;201,6691
+  double asinic;202,6707
+  int asinicC;203,6724
+  char eP;205,6780
+  double e;206,6791
+  int eC;207,6803
+  char ToP;209,6867
+  double To;210,6879
+  int ToC;211,6892
+  char wP;213,6949
+  double w;214,6960
+  int wC;215,6972
+  char wdotP;217,7040
+  double wdot;218,7054
+  int wdotC;219,7069
+  char maskfileP;221,7144
+  char* maskfile;222,7162
+  int maskfileC;223,7180
+  char eventsP;225,7272
+  char daysP;227,7382
+  char mjdsP;229,7434
+  char doubleP;231,7526
+  char offsetP;233,7633
+  double offset;234,7649
+  int offsetC;235,7666
+  int argc;237,7731
+  /*@null*/char **argv;argv238,7743
+  char *full_cmd_line;full_cmd_line240,7815
+} Cmdline;241,7838
+
+../include/mpiprepsubband_cmd.h,1205
+#define __mpiprepsubband_cmd__2,31
+typedef struct s_Cmdline 11,256
+  char outfileP;13,329
+  char* outfile;14,346
+  int outfileC;15,363
+  char pkmbP;17,434
+  char gmrtP;19,504
+  char bcpmP;21,594
+  char spigotP;23,673
+  char filterbankP;25,752
+  char psrfitsP;27,821
+  char wappP;29,917
+  char windowP;31,1011
+  char numwappsP;33,1099
+  int numwapps;34,1117
+  int numwappsC;35,1133
+  char ifsP;37,1229
+  int ifs;38,1242
+  int ifsC;39,1253
+  char clipP;41,1356
+  float clip;42,1370
+  int clipC;43,1384
+  char noclipP;45,1476
+  char numoutP;47,1645
+  int numout;48,1661
+  int numoutC;49,1675
+  char nobaryP;51,1738
+  char de405P;53,1847
+  char lodmP;55,1937
+  double lodm;56,1951
+  int lodmC;57,1966
+  char dmstepP;59,2052
+  double dmstep;60,2068
+  int dmstepC;61,2085
+  char numdmsP;63,2154
+  int numdms;64,2170
+  int numdmsC;65,2184
+  char nsubP;67,2249
+  int nsub;68,2263
+  int nsubC;69,2275
+  char downsampP;71,2352
+  int downsamp;72,2370
+  int downsampC;73,2386
+  char maskfileP;75,2465
+  char* maskfile;76,2483
+  int maskfileC;77,2501
+  int argc;79,2568
+  /*@null*/char **argv;argv80,2580
+  char *full_cmd_line;full_cmd_line82,2652
+} Cmdline;83,2675
+
+../include/slamac.h,627
+#define SLAMACHDEF2,19
+#define gmax(17,325
+#define gmin(20,424
+#define dint(23,532
+#define aint(26,646
+#define dnint(29,781
+#define anint(32,893
+#define dsign(35,997
+#define dmod(38,1074
+#define FALSE 43,1262
+#define TRUE 46,1319
+#define DPI 50,1351
+#define D2PI 53,1426
+#define D1B2PI 56,1506
+#define D4PI 59,1585
+#define D1B4PI 62,1665
+#define DPISQ 65,1746
+#define DSQRPI 68,1828
+#define DPIBY2 71,1931
+#define DD2R 74,2033
+#define DR2D 77,2135
+#define DAS2R 80,2245
+#define DR2AS 83,2358
+#define DH2R 86,2458
+#define DR2H 89,2556
+#define DS2R 92,2670
+#define DR2S 95,2785
+#define D15B2P 98,2906
+
+../include/zapbirds_cmd.h,496
+#define __zapbirds_cmd__2,25
+typedef struct s_Cmdline 11,244
+  char zapP;13,353
+  char zapfileP;15,455
+  char* zapfile;16,472
+  int zapfileC;17,489
+  char inzapfileP;19,591
+  char* inzapfile;20,610
+  int inzapfileC;21,629
+  char outzapfileP;23,732
+  char* outzapfile;24,752
+  int outzapfileC;25,772
+  char baryvP;27,881
+  double baryv;28,896
+  int baryvC;29,912
+  int argc;31,976
+  /*@null*/char **argv;argv32,988
+  char *full_cmd_line;full_cmd_line34,1060
+} Cmdline;35,1083
+
+../include/database.h,1112
+#define NP 2,40
+#define NBP 3,57
+typedef struct PSRDATA 6,155
+  char jname[jname7,180
+  char bname[bname8,244
+  char alias[alias9,308
+  double ra2000;10,372
+  double ra2000err;11,436
+  double dec2000;12,500
+  double dec2000err;13,564
+  double p;14,628
+  double perr;15,692
+  double pd;16,756
+  double pderr;17,820
+  double dm;18,884
+  double dmerr;19,948
+  double timepoch;20,1012
+  double binary;21,1076
+} psrdata;22,1140
+typedef struct BINPSRDATA 24,1152
+  double pb;25,1180
+  double pberr;26,1244
+  double x;27,1308
+  double xerr;28,1372
+  double e;29,1436
+  double eerr;30,1500
+  double w;31,1564
+  double werr;32,1628
+  double To;33,1692
+  double Toerr;34,1756
+} binpsrdata;35,1820
+typedef struct PSRPARAMS 39,1899
+  char jname[jname40,1926
+  char bname[bname41,1989
+  char alias[alias42,2052
+  double ra2000;43,2115
+  double dec2000;44,2178
+  double dm;45,2241
+  double timepoch;46,2304
+  double p;47,2367
+  double pd;48,2430
+  double pdd;49,2493
+  double f;50,2556
+  double fd;51,2619
+  double fdd;52,2682
+  orbitparams orb;53,2745
+} psrparams;54,2808
+
+../include/fitsfile.h,192
+#define fitsfile_h_31,1347
+struct Keyword 38,1525
+    char kname[kname39,1542
+    int lname;40,1592
+    int kn;41,1637
+    int kf;42,1679
+    int kl;43,1740
+#define FITSBLOCK 46,1785
+
+../include/slalib.h,24
+#define SLALIBHDEF2,19
+
+../include/realfft_cmd.h,435
+#define __realfft_cmd__2,24
+typedef struct s_Cmdline 11,242
+  char forwardP;13,334
+  char inverseP;15,416
+  char deleteP;17,503
+  char diskfftP;19,582
+  char memfftP;21,657
+  char tmpdirP;23,748
+  char* tmpdir;24,764
+  int tmpdirC;25,780
+  char outdirP;27,859
+  char* outdir;28,875
+  int outdirC;29,891
+  int argc;31,956
+  /*@null*/char **argv;argv32,968
+  char *full_cmd_line;full_cmd_line34,1040
+} Cmdline;35,1063
+
+../include/wapp.h,5111
+#define MAX_WAPP_HEADER_SIZE 4,59
+#define WAPP_MAXPTSPERBLOCK 6,146
+#define WAPP_MAXNUMWAPPS 8,229
+#define WAPP_DEADTIME 10,298
+#define WAPP_MAXLAGS 12,375
+#define WAPP_MAXDATLEN 14,462
+#define WAPP_MAXLAGLEN 16,590
+typedef struct WAPP_HEADERv1{WAPP_HEADERv118,631
+  int header_version;19,661
+  int header_size;20,738
+  double src_ra;27,1107
+  double src_dec;28,1178
+  double start_az;29,1251
+  double start_za;30,1321
+  double start_ast;31,1396
+  double start_lst;32,1452
+  double cent_freq;37,1666
+  double obs_time;38,1737
+  double samp_time;39,1812
+  double wapp_time;40,1873
+  double bandwidth;41,1951
+  int num_lags;42,2023
+  int scan_number;43,2101
+  char src_name[src_name44,2179
+  char obs_date[obs_date45,2256
+  char start_time[start_time46,2316
+  char project_id[project_id47,2395
+  char observers[observers48,2465
+  int nifs;49,2514
+  int level;50,2588
+  int sum;51,2665
+  int freqinversion;52,2742
+  long long timeoff;53,2817
+  int lagformat;54,2895
+  int lagtrunc;55,2971
+  double power_analog[power_analog56,3049
+} WAPP_HEADERv1;57,3117
+typedef struct WAPP_HEADERv2plus{WAPP_HEADERv2plus59,3135
+  int header_version;60,3169
+  int header_size;61,3246
+  char obs_type[obs_type62,3319
+  double src_ra;70,3757
+  double src_dec;71,3828
+  double start_az;72,3901
+  double start_za;73,3971
+  double start_ast;74,4046
+  double start_lst;75,4102
+  double cent_freq;80,4316
+  double obs_time;81,4387
+  double samp_time;82,4462
+  double wapp_time;83,4523
+  double bandwidth;84,4601
+  int num_lags;85,4673
+  int scan_number;86,4751
+  char src_name[src_name87,4829
+  char obs_date[obs_date88,4906
+  char start_time[start_time89,4966
+  char project_id[project_id90,5045
+  char observers[observers91,5115
+  int nifs;92,5164
+  int level;93,5238
+  int sum;94,5315
+  int freqinversion;95,5392
+  long long timeoff;96,5467
+  int lagformat;97,5545
+  int lagtrunc;99,5687
+  int firstchannel;103,5952
+  int nbins;104,6026
+  int isfolding;106,6162
+  int isalfa;107,6240
+  double dumptime;108,6318
+  double power_analog[power_analog109,6391
+  char padding[padding110,6459
+  int iflo_flip;111,6532
+} WAPP_HEADERv2plus;112,6611
+typedef struct WAPP_HEADERv9{WAPP_HEADERv9114,6633
+  int header_version;115,6663
+  int header_size;116,6740
+  char obs_type[obs_type117,6813
+  double src_ra;125,7251
+  double src_dec;126,7322
+  double start_az;127,7395
+  double start_za;128,7465
+  double start_ast;129,7540
+  double start_lst;130,7596
+  double cent_freq;135,7810
+  double obs_time;136,7881
+  double samp_time;137,7956
+  double wapp_time;138,8017
+  double bandwidth;139,8095
+  int num_lags;140,8167
+  int scan_number;141,8245
+  char src_name[src_name142,8323
+  char obs_date[obs_date143,8400
+  char start_time[start_time144,8460
+  char project_id[project_id145,8539
+  char observers[observers146,8609
+  char frontend[frontend147,8658
+  char backendmode[backendmode148,8708
+  char caltype[caltype149,8762
+  int nifs;150,8807
+  int level;151,8881
+  int sum;152,8958
+  int freqinversion;153,9035
+  long long timeoff;154,9110
+  int lagformat;155,9188
+  int lagtrunc;157,9330
+  int firstchannel;161,9595
+  int nbins;162,9669
+  int isfolding;164,9805
+  int isalfa;165,9854
+  int isdual;166,9900
+  int fold_bits;167,9958
+  int iflo_flip[iflo_flip168,10034
+  int attena;169,10095
+  int attenb;170,10156
+  double dumptime;171,10218
+  double power_analog[power_analog172,10291
+  double psr_dm;187,11018
+  double rphase[rphase188,11086
+  double psr_f0[psr_f0189,11147
+  double poly_tmid[poly_tmid190,11217
+  double coeff[coeff191,11297
+  int num_coeffs[num_coeffs192,11373
+  char hostname[hostname193,11426
+  double rfeed_offaz[rfeed_offaz195,11520
+  double rfeed_offza[rfeed_offza196,11596
+  double prfeed_offaz;197,11672
+  double prfeed_offza;198,11739
+  double alfa_raj[alfa_raj199,11806
+  double alfa_decj[alfa_decj200,11881
+  double alfa_az[alfa_az201,11958
+  double alfa_za[alfa_za202,12034
+  double alfa_ang;203,12109
+  double para_ang;204,12163
+  double syn1;206,12252
+  double synfrq[synfrq207,12311
+  unsigned char prfeed;208,12370
+  unsigned char shcl;209,12423
+  unsigned char sbshcl;210,12489
+  unsigned char rfnum;211,12561
+  unsigned char zmnormal;212,12630
+  unsigned char rfattn[rfattn213,12713
+  unsigned char ifnum;214,12767
+  unsigned char ifattn[ifattn215,12855
+  unsigned char fiber;216,12913
+  unsigned char ac2sw;217,12989
+  unsigned char if750nb;218,13071
+  unsigned char phbsig;219,13137
+  unsigned char hybrid;220,13210
+  unsigned char phblo;221,13270
+  unsigned char xfnormal;223,13356
+  unsigned char noise;224,13421
+  unsigned char ampgain[ampgain225,13464
+  unsigned char inpfrq;226,13522
+  unsigned char mixer[mixer227,13583
+  unsigned char vlbainp;228,13639
+  unsigned char syndest[syndest229,13700
+  unsigned char calsrc;230,13759
+  unsigned char vis30mhz;231,13808
+  unsigned char pwrmet;232,13854
+  unsigned char blank430;233,13913
+  unsigned char fill[fill234,13963
+} WAPP_HEADERv9;235,14002
+
+../include/clk_tck.h,22
+#define CLK_TCK 2,16
+
+../include/makeinf.h,1079
+#define TWOPI 11,206
+#define DEGTORAD 14,304
+#define NUMSCOPES 16,387
+#define NUMBANDS 17,408
+#define NUMFILTERS 18,429
+#define MAXNUMONOFF 19,451
+typedef struct INFODATA 21,475
+    double ra_s;22,501
+    double dec_s;23,563
+    double N;24,627
+    double dt;25,694
+    double fov;26,763
+    double mjd_f;27,825
+    double dm;28,888
+    double freq;29,949
+    double freqband;30,1011
+    double chan_wid;31,1077
+    double wavelen;32,1143
+    double waveband;33,1208
+    double energy;34,1274
+    double energyband;35,1338
+    double onoff[onoff36,1406
+    int num_chan;37,1482
+    int mjd_i;38,1545
+    int ra_h;39,1606
+    int ra_m;40,1666
+    int dec_d;41,1726
+    int dec_m;42,1787
+    int bary;43,1850
+    int numonoff;44,1910
+    char notes[notes45,1974
+    char name[name46,2040
+    char object[object47,2105
+    char instrument[instrument48,2173
+    char observer[observer49,2243
+    char analyzer[analyzer50,2312
+    char telescope[telescope51,2381
+    char band[band52,2450
+    char filt[filt53,2514
+} infodata;54,2577
+
+../include/accelsearch_cmd.h,855
+#define __accelsearch_cmd__2,28
+typedef struct s_Cmdline 11,250
+  char lobinP;13,342
+  int lobin;14,357
+  int lobinC;15,370
+  char numharmP;17,452
+  int numharm;18,469
+  int numharmC;19,484
+  char zmaxP;21,566
+  int zmax;22,580
+  int zmaxC;23,592
+  char sigmaP;25,662
+  float sigma;26,677
+  int sigmaC;27,692
+  char rloP;29,763
+  double rlo;30,776
+  int rloC;31,790
+  char rhiP;33,860
+  double rhi;34,873
+  int rhiC;35,887
+  char floP;37,980
+  double flo;38,993
+  int floC;39,1007
+  char fhiP;41,1101
+  double fhi;42,1114
+  int fhiC;43,1128
+  char photonP;45,1217
+  char zaplistP;47,1342
+  char* zaplist;48,1359
+  int zaplistC;49,1376
+  char baryvP;51,1482
+  double baryv;52,1497
+  int baryvC;53,1513
+  int argc;55,1577
+  /*@null*/char **argv;argv56,1589
+  char *full_cmd_line;full_cmd_line58,1661
+} Cmdline;59,1684
+
+../include/bincand_cmd.h,1056
+#define __bincand_cmd__2,24
+typedef struct s_Cmdline 11,242
+  char ploP;13,322
+  double plo;14,335
+  int ploC;15,349
+  char phiP;17,415
+  double phi;18,428
+  int phiC;19,442
+  char rloP;21,511
+  double rlo;22,524
+  int rloC;23,538
+  char rhiP;25,608
+  double rhi;26,621
+  int rhiC;27,635
+  char psrnameP;29,717
+  char* psrname;30,734
+  int psrnameC;31,751
+  char candnumP;33,840
+  int candnum;34,857
+  int candnumC;35,872
+  char candfileP;37,947
+  char* candfile;38,965
+  int candfileC;39,983
+  char usrP;41,1110
+  char pbP;43,1163
+  double pb;44,1175
+  int pbC;45,1188
+  char asinicP;47,1262
+  double asinic;48,1278
+  int asinicC;49,1295
+  char eP;51,1351
+  double e;52,1362
+  int eC;53,1374
+  char ToP;55,1438
+  double To;56,1450
+  int ToC;57,1463
+  char wP;59,1520
+  double w;60,1531
+  int wC;61,1543
+  char wdotP;63,1611
+  double wdot;64,1625
+  int wdotC;65,1640
+  char makefileP;67,1723
+  int argc;69,1791
+  /*@null*/char **argv;argv70,1803
+  char *full_cmd_line;full_cmd_line72,1875
+} Cmdline;73,1898
+
+../include/rdascat.h,25
+	implicit real*real1,0
+
+../include/rfifind.h,347
+#define RFI_NUMHARMSUM 1,0
+#define RFI_NUMBETWEEN 2,25
+#define RFI_LOBIN 3,50
+#define RFI_FRACTERROR 4,75
+#define NUM_RFI_VECT 5,104
+typedef struct RFI 7,131
+  float freq_avg;8,152
+  float freq_var;9,215
+  float sigma_avg;10,278
+  int numobs;11,341
+  unsigned char *times;times12,404
+  unsigned char *chans;chans13,467
+} rfi;14,530
+
+../include/dftfold.h,196
+typedef struct DFTVECTOR 3,22
+  int n;4,49
+  int numvect;5,122
+  double dt;6,195
+  double r;7,268
+  double norm;8,341
+  double T;9,414
+  fcomplex *vector;vector10,487
+} dftvector;11,560
+
+../include/fitshead.h,29
+#define _fitshead_h_33,1409
+
+../include/wapp_y.tab.h,801
+# define YYTOKENTYPE38,1653
+   enum yytokentype 41,1777
+     STRUCT 42,1799
+     LBRACE 43,1818
+     RBRACE 44,1837
+     SEMI 45,1856
+     LB 46,1873
+     RB 47,1888
+     DOUBLE 48,1903
+     INTEGER 49,1922
+     LONG 50,1942
+     LONGLONG 51,1959
+     FLOAT 52,1980
+     SHORT 53,1998
+     UNSIGNED 54,2016
+     CHARSTAR 55,2037
+     BYTE 56,2058
+     VAR 57,2075
+     COMMENT 58,2091
+#define STRUCT 62,2138
+#define LBRACE 63,2157
+#define RBRACE 64,2176
+#define SEMI 65,2195
+#define LB 66,2212
+#define RB 67,2227
+#define DOUBLE 68,2242
+#define INTEGER 69,2261
+#define LONG 70,2281
+#define LONGLONG 71,2298
+#define FLOAT 72,2319
+#define SHORT 73,2337
+#define UNSIGNED 74,2355
+#define CHARSTAR 75,2376
+#define BYTE 76,2397
+#define VAR 77,2414
+#define COMMENT 78,2430
+
+mkheader.y,76
+typedef union YYSTYPE84,
+         char *var;var15,
+         int tok;16,
+
+wapp_y.tab.h,103
+	YYSTYPE;92,
+# define yystype 93,
+# define YYSTYPE_IS_DECLARED 94,
+# define YYSTYPE_IS_TRIVIAL 95,
+
+../include/vectors.h,0
+
+../include/cdflib.h,0
+
+../include/randlib.h,0
+
+../include/misc_utils.h,0
+
+../include/gmrt.h,0
+
+../include/chkio.h,0
