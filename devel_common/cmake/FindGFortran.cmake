@@ -113,11 +113,16 @@ find_path (GFORTRAN_INCLUDES libgfortran.h
 
 find_library (GFORTRAN_LIBRARY gfortran
   PATHS ${lib_locations}
+  /usr/local/gfortran/lib
+  /opt/local/lib/gcc43
+  /usr/local/gfortran/lib/x86_64
   NO_DEFAULT_PATH
   )
 
 if (GFORTRAN_LIBRARY)
   get_filename_component(GFORTRAN_LIBRARY_DIR ${GFORTRAN_LIBRARY} PATH)
+else (GFORTRAN_LIBRARY)
+  message (STATUS "[FindGFortran] Unable to locate libgfortran!")
 endif (GFORTRAN_LIBRARY)
 
 ## -----------------------------------------------------------------------------
@@ -145,6 +150,12 @@ find_library (G2C_LIBRARY g2c
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )
+
+if (G2C_LIBRARY)
+  get_filename_component(G2C_LIBRARY_DIR ${G2C_LIBRARY} PATH)
+else (G2C_LIBRARY)
+  message (STATUS "[FindGFortran] Unable to locate libg2c!")
+endif (G2C_LIBRARY)
 
 ## -----------------------------------------------------------------------------
 ## Check for F2C
@@ -250,6 +261,7 @@ mark_as_advanced (
   GFORTRAN_LIBRARY_DIR
   G2C_INCLUDES
   G2C_LIBRARY
+  G2C_LIBRARY_DIR
   F2C_INCLUDES
   F2C_LIBRARY
   )
