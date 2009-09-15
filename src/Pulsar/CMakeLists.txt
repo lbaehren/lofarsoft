@@ -37,8 +37,8 @@ endif (USG_ROOT)
 
 option (PULSAR_ENABLE_TESTING     "Enable generation and running of tests?"    NO  )
 option (PULSAR_COMPILER_WARNINGS  "Enable standard set of compiler warnings?"  YES )
-option (PULSAR_DEBUGGING_MESSAGES "Print debugging information?"               NO  )
-option (PULSAR_VERBOSE_CONFIGURE  "Verbose output during configuration?"       NO  )
+option (PULSAR_DEBUGGING_MESSAGES "Print debugging information?"               YES )
+option (PULSAR_VERBOSE_CONFIGURE  "Verbose output during configuration?"       YES )
 
 ## Handle option: testing mode on/off
 
@@ -55,6 +55,8 @@ if (NOT PULSAR_VERBOSE_CONFIGURE)
   set (GFORTRAN_FIND_QUIETLY    YES )
   set (GLIB_FIND_QUIETLY        YES )
   set (PGPLOT_FIND_QUIETLY      YES )
+  set (NUMPY_FIND_QUIETLY       YES )
+  set (PYTHON_FIND_QUIETLY      YES )
 endif (NOT PULSAR_VERBOSE_CONFIGURE)
 
 ## Handle option: debugging messages on/off
@@ -122,13 +124,6 @@ if (NOT HAVE_CFITSIO)
 endif (NOT HAVE_CFITSIO)
 
 ##__________________________________________________________
-## GFortran library
-
-if (NOT HAVE_GFORTRAN)
-  include (FindGFortran)
-endif (NOT HAVE_GFORTRAN)
-
-##__________________________________________________________
 ## GLIB library
 
 if (NOT HAVE_GLIB)
@@ -141,6 +136,21 @@ endif (NOT HAVE_GLIB)
 if (NOT HAVE_PGPLOT)
   include (FindPGPLOT)
 endif (NOT HAVE_PGPLOT)
+
+##__________________________________________________________
+## GFortran library
+
+if (NOT HAVE_GFORTRAN)
+  include (FindGFortran)
+endif (NOT HAVE_GFORTRAN)
+
+##__________________________________________________________
+## PYTHON 
+
+if (NOT HAVE_PYTHON)
+  include (FindPython)
+  include (FindNumPy)
+endif (NOT HAVE_PYTHON)
 
 ## -----------------------------------------------------------------------------
 ## Include directories
@@ -168,12 +178,31 @@ else (HAVE_GLIB)
   message (SEND_ERROR "[PULSAR] Missing or incomplete installation of GLIB!")
 endif (HAVE_GLIB)
 
+if (HAVE_GFORTRAN)
+  include_directories (${GFORTRAN_INCLUDES})
+  add_definitions (-DHAVE_GFORTRAN)
+else (HAVE_GFORTRAN)
+##  message (SEND_ERROR "[PULSAR] Missing or incomplete installation of GFORTRAN!")
+  message (STATUS "[PULSAR] Missing or incomplete installation of GFORTRAN!")
+endif (HAVE_GFORTRAN)
+
 if (HAVE_PGPLOT)
   include_directories (${PGPLOT_INCLUDES})
   add_definitions (-DHAVE_PGPLOT)
-#else (HAVE_PGPLOT)
-#  message (SEND_ERROR "[PULSAR] Missing or incomplete installation of PGPLOT!")
+  set (PGPLOT_DIR ${PGPLOT_LIBRARY_DIR})
+else (HAVE_PGPLOT)
+  message (SEND_ERROR "[PULSAR] Missing or incomplete installation of PGPLOT!")
 endif (HAVE_PGPLOT)
+
+if (NOT HAVE_PYTHON) 
+  set (PULSAR_PYTHON_BINDINGS FALSE)
+  message (STATUS "[PULSAR] Unable to generate Python bindings; missing Python headers!")
+endif (NOT HAVE_PYTHON)
+
+if (NOT NUMPY_INCLUDES) 
+  set (PULSAR_PYTHON_BINDINGS FALSE)
+  message (STATUS "[PULSAR] Unable to generate Python bindings; missing NumPy headers!")
+endif (NOT NUMPY_INCLUDES)
 
 ## -----------------------------------------------------------------------------
 ## Installation - We install into $LOFARSOFT/release/share/pulsar to keep all
@@ -227,6 +256,8 @@ endif (PULSAR_BUILD_TESTS)
 message (STATUS "+============================================================+")
 message (STATUS "| PULSAR: Summary of configuration settings                  |")
 message (STATUS "+------------------------------------------------------------+")
-message (STATUS " Print debugging messages   = ${PULSAR_DEBUGGING_MESSAGES}")
 message (STATUS " Enable test programs       = ${PULSAR_ENABLE_TESTING}")
+message (STATUS " Enable compiler warnings   = ${PULSAR_COMPILER_WARNINGS}")
+message (STATUS " Print debugging messages   = ${PULSAR_DEBUGGING_MESSAGES}")
+message (STATUS " Enable verbose configure   = ${PULSAR_VERBOSE_CONFIGURE}")
 message (STATUS "+------------------------------------------------------------+")
