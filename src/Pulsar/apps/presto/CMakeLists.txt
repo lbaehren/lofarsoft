@@ -1,0 +1,26 @@
+##------------------------------------------------------------------------------
+## $Id:: CMakeLists.txt 2987 2009-09-04 12:43:48Z baehren                      $
+##------------------------------------------------------------------------------
+
+## Name of the project
+project (presto)
+
+## Minimum required version of CMake to configure the project
+cmake_minimum_required (VERSION 2.6)
+
+## =============================================================================
+##
+##  Project sub-directories and header locations
+##
+## =============================================================================
+
+include_directories (
+  ${presto_SOURCE_DIR}/include
+  )
+
+add_subdirectory (src)
+
+if (PULSAR_BUILD_TESTS)
+  add_subdirectory (tests)
+endif (PULSAR_BUILD_TESTS)
+
