@@ -14,6 +14,7 @@ option (CFITSIO_FORCE_BUILD       "Force rebuild and local installation?"      N
 option (CFITSIO_CMAKE_BUILD       "Use CMake to configure and build CFITSIO?"  YES )
 option (CFITSIO_VERBOSE_CONFIGURE "Be verbose during configuration?"           NO  )
 option (CFITSIO_VERBOSE_BUILD     "Be verbose during build process?"           NO  )
+option (CFITSIO_BUILD_TESTS       "Build the test programs?"                   NO  )
 
 ## Options of the library itself
 
@@ -68,7 +69,8 @@ if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
   ## ------------------------------------------------------------------------------
   ## 
 
-  set (CFITSIO_VERSION "3181")
+  set (CFITSIO_VERSION "3140")
+#  set (CFITSIO_VERSION "3181")
   set (CFITSIO_DIRECTORY "cfitsio${CFITSIO_VERSION}")
   set (CFITSIO_TAR_ARCHIVE "${CFITSIO_DIRECTORY}.tar.gz")
   
@@ -118,12 +120,21 @@ if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
     add_dependencies (cfitsio_configure cfitsio_expand)
     
     ## build the package
-    add_custom_target (cfitsio_build
-      COMMAND make
-      WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}/cfitsio
-      COMMENT "[CFITSIO] Starting build ..."
-      )
+      add_custom_target (cfitsio_build
+	COMMAND make
+	WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}/cfitsio
+	COMMENT "[CFITSIO] Starting building library ..."
+	)
     add_dependencies (cfitsio_build cfitsio_configure)
+    
+    if (CFITSIO_BUILD_TESTS)
+      add_custom_target (cfitsio_tests
+	COMMAND make fpack smem testprog speed
+	WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}/cfitsio
+	COMMENT "[CFITSIO] Start building test programs ..."
+	)
+      add_dependencies (cfitsio_tests cfitsio_build)
+    endif (CFITSIO_BUILD_TESTS)
     
     ## build and install the package
     add_custom_target (cfitsio_install
@@ -133,7 +144,11 @@ if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
       WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}/cfitsio
       COMMENT "[CFITSIO] Installing package ..."
       )
-    add_dependencies (cfitsio_install cfitsio_build)
+    if (CFITSIO_BUILD_TESTS)
+      add_dependencies (cfitsio_install cfitsio_tests cfitsio_build)
+    else (CFITSIO_BUILD_TESTS)
+      add_dependencies (cfitsio_install cfitsio_build)
+    endif (CFITSIO_BUILD_TESTS)
     
     ## post-install clean-up
     add_custom_target (install
