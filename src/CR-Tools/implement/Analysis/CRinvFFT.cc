@@ -122,7 +122,7 @@ namespace CR { // Namespace CR -- begin
     return True;    
   }
 
-  Matrix<Double> CRinvFFT::GetAntPositions(DataReader *dr){
+  Matrix<Double> CRinvFFT::GetAntPositions(DataReader *dr, bool substractReference){
     Matrix<Double> NewAntPos;
     try {
       if (!AntPosValid_p && dr==NULL){
@@ -154,7 +154,10 @@ namespace CR { // Namespace CR -- begin
       ReferencePos(1) = DirParams_p.asDouble("Xpos");
       NewAntPos.resize(nants,3);
       for (i=0;i<nants;i++){
-	NewAntPos.row(i) = AntPositions_p.column(i)-ReferencePos;
+        if (substractReference)
+          NewAntPos.row(i) = AntPositions_p.column(i)-ReferencePos;
+        else
+          NewAntPos.row(i) = AntPositions_p.column(i);
       };
     } catch (AipsError x) {
       cerr << "CRinvFFT::GetAntPositions: " << x.getMesg() << endl;

@@ -542,9 +542,9 @@ namespace CR { // Namespace CR -- begin
   Matrix<Double> analyseLOPESevent2::getAntennaPositions(void)
   {
     try {
-      // get AntennaIDs if there is an event
-      if (beamPipe_p != NULL) {
-        return beamPipe_p->GetAntPositions().copy();
+      // get antenna positions: not shifted for reference (core?) position
+      if ((beamPipe_p != NULL) && (beamformDR_p != NULL)) {
+        return beamPipe_p->GetAntPositions(beamformDR_p, false).copy();
       }
     } catch (AipsError x) {
       cerr << "analyseLOPESevent2::getAntennaPositions: " << x.getMesg() << endl;

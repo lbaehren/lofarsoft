@@ -196,14 +196,15 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the shifted antenna positions (i.e. coordinate origin is the phase center)
      
-      \param dr - Pointer to the (initialized) DataReader or NULL 
+      \param dr                 - Pointer to the (initialized) DataReader or NULL 
+      \param substractReference - Substract the reference position (default)
       
       \return the antenna positions
 
       If no DataReader is supplied then the positions from the last update are returned, which 
       may be outdated!
     */
-    Matrix<Double> GetAntPositions(DataReader *dr=NULL);
+    Matrix<Double> GetAntPositions(DataReader *dr=NULL, bool substractReference = true);
 
     // ------------------------------------------------------------------ Methods
     
