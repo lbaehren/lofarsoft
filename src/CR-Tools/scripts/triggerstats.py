@@ -20,45 +20,35 @@ def triggersFilteredByThreshold(listOfTriggers, threshold):
 	    outList.append(record)
     return outList
 
-# keys for our trigger dictionary
-RCUnr = 'RCUnr'
-seqnr = 'seqnr'
-time = 'time'
-sample = 'sample'
-sum = 'sum'
-nrSamples = 'nrSamples'
-peak = 'peak'
-powerBefore = 'powerBefore'
-powerAfter = 'powerAfter'
+# keys for our trigger dictionary; separate lists for some of the statistics
+RCUnrKey = 'RCUnr';             RCUnr = [] 
+seqnrKey = 'seqnr';             seqnr = []
+timeKey = 'time';               time = []
+sampleKey = 'sample';           sample = []
+sumKey = 'sum';                 sum = []
+nrSamplesKey = 'nrSamples';     nrSamples = []
+peakKey = 'peak';               peak = []
+powerBeforeKey = 'powerBefore'; powerBefore = []
+powerAfterKey = 'powerAfter';   powerAfter = [] 
 
-myKeys = [RCUnr, seqnr, time, sample, sum, nrSamples, peak, powerBefore, powerAfter]
-triggerReader = csv.DictReader(open('/Users/acorstanje/triggering/2009-09-03_TRIGGER5.dat'), myKeys, delimiter=' ')
+myKeys = [RCUnrKey, seqnrKey, timeKey, sampleKey, sumKey, nrSamplesKey, peakKey, powerBeforeKey, powerAfterKey]
+triggerReader = csv.DictReader(open('2009-09-03_TRIGGER5.dat'), myKeys, delimiter=' ')
 numTriggers = triggerReader.line_num # trigger records don't span multiple lines
 
 triggerList = []
 for record in triggerReader:
     triggerList.append(record)
 
-RCUnr = [] # these redefinitions will be gone soon...
-seqnr = []
-time = []
-sample = []
-sum = []
-nrSamples = []
-peak = []
-powerBefore = []
-powerAfter = []
-
 for record in triggerList:
-    RCUnr.append(int(record['RCUnr']))
-    seqnr.append(int(record['seqnr']))
-    time.append(int(record['time']))
-    sample.append(int(record['sample']))
-    sum.append(int(record['sum']))
-    nrSamples.append(int(record['nrSamples']))
-    peak.append(int(record['peak']))
-    powerBefore.append(int(record['powerBefore']))
-    powerAfter.append(int(record['powerAfter']))
+    RCUnr.append(int(record[RCUnrKey]))
+    seqnr.append(int(record[seqnrKey]))
+    time.append(int(record[timeKey]))
+    sample.append(int(record[sampleKey]))
+    sum.append(int(record[sumKey]))
+    nrSamples.append(int(record[nrSamplesKey]))
+    peak.append(int(record[peakKey]))
+    powerBefore.append(int(record[powerBeforeKey]))
+    powerAfter.append(int(record[powerAfterKey]))
 
 (y, x) = RCUhisto = numpy.histogram(RCUnr, 96, (0, 96)) # counts, bins
 
@@ -150,10 +140,37 @@ samplingRate = int(160e6)
 if (max(sample) > 160e6):
     samplingRate = int(200e6)
 
+# sort triggers on 'time', then on 'sample'
+
+def compare_by (fieldname1, fieldname2): # nested compare function for sorting a list of dicts.
+    # sorts first on fieldname 1, then on fieldname 2 (here: first on 'time', then on 'samplenr')
+    def compare_two_dicts (a, b):
+        if cmp(a[fieldname1], b[fieldname1]) == 0:
+            return cmp(a[fieldname2], b[fieldname2])
+        else:
+            return cmp(a[fieldname1], b[fieldname1])
+    return compare_two_dicts
+
+#triggerList[0][timeKey] = 5
+#triggerList[0][sampleKey] = 700
+#triggerList[1][timeKey] = 5
+#triggerList[1][sampleKey] = 750
+#triggerList[2][timeKey] = 10
+#triggerList[2][sampleKey] = 700
+#triggerList[3][timeKey] = 5
+#triggerList[3][sampleKey] = 699
+#triggerList[4][timeKey] = 4
+#triggerList[4][sampleKey] = 140000
+
+sortedTriggerList = sorted(triggerList, compare_by(timeKey, sampleKey) )
+
+# end sorting, now search for 'pulses' = coincident triggers within a timeWindow
+
 lastTime = 0; 
 timeWindow = 100000 # window for pulse in samples
 i = 0
-for record in triggerList:
+pulseIndices.append(0) # first pulse starts at 0
+for record in sortedTriggerList: # pulse search
     i+=1 # keep track of the index
     thisSecond = int(record['time'])
     thisSample = int(record['sample'])
@@ -165,5 +182,6 @@ for record in triggerList:
 
 def pulse(pulseIndices, triggerList, pulseno): # get list of triggers corresponding to 0-based pulseno.
     return triggerList[pulseIndices[pulseno]:pulseIndices[pulseno+1]]
-
+    
+    
 
