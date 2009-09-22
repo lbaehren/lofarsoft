@@ -1,3 +1,7 @@
+/*!
+  \ingroup presto
+*/
+
 #ifndef __accelsearch_cmd__
 #define __accelsearch_cmd__
 /*****

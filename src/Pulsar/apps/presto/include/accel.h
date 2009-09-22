@@ -1,3 +1,7 @@
+/*!
+  \ingroup presto
+*/
+
 #include <glib.h>
 #include "presto.h"
 #include "accelsearch_cmd.h"

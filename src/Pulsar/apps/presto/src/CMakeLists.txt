@@ -5,17 +5,54 @@
 
 set (presto_sources 
   amoeba.c
-  atwood.c barycenter.c birdzap.c cand_output.c
-  characteristics.c cldj.c chkio.c corr_prep.c corr_routines.c
-  correlations.c database.c dcdflib.c dispersion.c
-  fastffts.c fftcalls.c fminbr.c fold.c fresnl.c ioinf.c
-  get_candidates.c iomak.c ipmpar.c maximize_r.c maximize_rz.c
-  median.c minifft.c misc_utils.c clipping.c
-  orbint.c output.c read_fft.c responses.c
-  rzinterp.c rzwinterp.c select.c sorter.c swapendian.c
-  transpose.c twopass.c twopass_real_fwd.c
-  twopass_real_inv.c vectors.c multifiles.c mask.c
-  fitsfile.c hget.c hput.c imio.c
+  atwood.c
+  barycenter.c
+  birdzap.c
+  cand_output.c
+  characteristics.c
+  cldj.c
+  chkio.c
+  corr_prep.c
+  corr_routines.c
+  correlations.c
+  database.c
+  dcdflib.c
+  dispersion.c
+  fastffts.c
+  fftcalls.c
+  fminbr.c
+  fold.c
+  fresnl.c
+  ioinf.c
+  get_candidates.c
+  iomak.c
+  ipmpar.c
+  maximize_r.c
+  maximize_rz.c
+  median.c
+  minifft.c
+  misc_utils.c
+  clipping.c
+  orbint.c
+  output.c
+  read_fft.c
+  responses.c
+  rzinterp.c
+  rzwinterp.c
+  select.c
+  sorter.c
+  swapendian.c
+  transpose.c
+  twopass.c
+  twopass_real_fwd.c
+  twopass_real_inv.c
+  vectors.c
+  multifiles.c
+  mask.c
+  fitsfile.c
+  hget.c
+  hput.c
+  imio.c
 )
 
 set (presto_binaries
@@ -37,12 +74,19 @@ add_library (presto ${presto_sources})
 
 file (GLOB sla_sources slalib/*.f)
 
-#add_library (sla ${sla_sources})
-#set_target_properties (sla)
+add_library (sla ${sla_sources})
+set_target_properties (sla
+  LINKER_LANGUAGE Fortran
+  )
 
-## Executables
+## ==============================================================================
+##
+##  Executables
 ##
 ## ==============================================================================
+
+##__________________________________________________________
+## Commonly used sets of source files
 
 set (INSTRUMENTOBJS
   multibeam.c
@@ -54,104 +98,136 @@ set (INSTRUMENTOBJS
   wapp_head_parse.c
   wapp_y.tab.c
   psrfits.c
-)
+  )
 
 set (PLOT2DOBJS
   powerplot.c 
   xyline.c
-)
+  )
+
+##__________________________________________________________
+## Build instructions for executables
 
 add_executable (mpiprepsubband
   mpiprepsubband_cmd.c
   mpiprepsubband_utils.c
   mpiprepsubband.c
   ${INSTRUMENTOBJS}
-)
+  )
 
 add_executable (accelsearch
   accelsearch_cmd.c 
   accel_utils.c 
   accelsearch.c 
   zapping.c
-)
+  )
 
 add_executable (bary
   bary.c
-)
+  )
 
 add_executable (bincand
   bincand_cmd.c
   bincand.c
-)
+  )
 
 add_executable (dftfold
   dftfold_cmd.c 
   dftfold.c
-)
+  )
 
 add_executable (shiftdata
   shiftdata.c
-)
+  )
 
 add_executable (patchdata
   patchdata.c
-)
+  )
 
 add_executable (dat2sdat
   dat2sdat.c
-)
+  )
 
 add_executable (sdat2dat
   sdat2dat.c
-)
+  )
 
 add_executable (check_parkes_raw
-  check_parkes_raw.c multibeam.c
-)
+  check_parkes_raw.c
+  multibeam.c
+  )
 
 add_executable (downsample
-  downsample.c downsample_cmd.c
-)
+  downsample.c
+  downsample_cmd.c
+  )
 
 add_executable (split_parkes_beams
   split_parkes_beams.c
-)
+  )
 
 add_executable (test_multifiles
   test_multifiles.c
-)
+  )
 
 add_executable (rfifind
-  rfifind_cmd.c rfifind.c rfi_utils.c rfifind_plot.c range_parse.c ${INSTRUMENTOBJS} ${PLOT2DOBJS}
-)
+  rfifind_cmd.c
+  rfifind.c
+  rfi_utils.c
+  rfifind_plot.c
+  range_parse.c
+  ${INSTRUMENTOBJS}
+  ${PLOT2DOBJS}
+  )
 
 add_executable (prepdata
-  prepdata_cmd.c prepdata.c ${INSTRUMENTOBJS}
-)
+  prepdata_cmd.c
+  prepdata.c
+  ${INSTRUMENTOBJS}
+  )
 
 add_executable (prepsubband
-  prepsubband_cmd.c prepsubband.c ${INSTRUMENTOBJS}
-)
+  prepsubband_cmd.c
+  prepsubband.c
+  ${INSTRUMENTOBJS}
+  )
 
 add_executable (prepfold
-  prepfold_cmd.c prepfold.c prepfold_utils.c prepfold_plot.c least_squares.f polycos.c readpar.c ${INSTRUMENTOBJS} ${PLOT2DOBJS}
-)
+  prepfold_cmd.c
+  prepfold.c
+  prepfold_utils.c
+  prepfold_plot.c
+  least_squares.f
+  polycos.c
+  readpar.c
+  ${INSTRUMENTOBJS}
+  ${PLOT2DOBJS}
+  )
 
 add_executable (dump_spigot_zerolag
-  dump_spigot_zerolag.c spigot.c
-)
+  dump_spigot_zerolag.c
+  spigot.c
+  )
 
 add_executable (spigot2filterbank
-  spigot2filterbank_cmd.c spigot2filterbank.c spigot.c sigproc_fb.c sla.c
-)
+  spigot2filterbank_cmd.c
+  spigot2filterbank.c
+  spigot.c
+  sigproc_fb.c
+  sla.c
+  )
 
 add_executable (GBT350filterbank
-  GBT350filterbank.c spigot.c sigproc_fb.c
-)
+  GBT350filterbank.c
+  spigot.c
+  sigproc_fb.c
+  )
 
 add_executable (spigotSband2filterbank
-  spigotSband2filterbank.c spigot.c sigproc_fb.c
-)
+  spigotSband2filterbank.c
+  spigot.c
+  sigproc_fb.c
+  )
 
 add_executable (show_pfd
   show_pfd_cmd.c show_pfd.c prepfold_utils.c prepfold_plot.c least_squares.f range_parse.c ${PLOT2DOBJS}
@@ -185,73 +261,88 @@ add_executable (psrorbit
   psrorbit.c ${PLOT2DOBJS}
 )
 
-#add_executable (testbinresp
-#  ../test/testbinresp.c ${PLOT2DOBJS}
-#)
-
 add_executable (quicklook 
   quicklook.c
-)
+  )
 
 add_executable (readfile
   readfile_cmd.c readfile.c ${INSTRUMENTOBJS}
-)
+  )
 
 add_executable (realfft
   realfft_cmd.c realfft.c
-)
+  )
 
 add_executable (rednoise
   rednoise.c rednoise_cmd.c
-)
+  )
 
 add_executable (search_bin
-  search_bin_cmd.c search_bin.c
-)
+  search_bin_cmd.c
+  search_bin.c
+  )
 
 add_executable (search_rzw
-  search_rzw_cmd.c search_rzw.c
-)
+  search_rzw_cmd.c
+  search_rzw.c
+  )
 
 add_executable (taperaw
   taperaw.c
-)
+  )
 
 add_executable (toas2dat
-  toas2dat_cmd.c toas2dat.c
-)
+  toas2dat_cmd.c
+  toas2dat.c
+  )
 
 add_executable (un_sc_td
   un_sc_td.c
-)
+  )
 
 add_executable (swap_endian
   swap_endian.c
-)
+  )
 
 add_executable (window
-  window.c ${PLOT2DOBJS}
-)
+  window.c
+  ${PLOT2DOBJS}
+  )
 
 add_executable (zapbirds
-  zapbirds_cmd.c zapbirds.c zapping.c ${PLOT2DOBJS}
-)
+  zapbirds_cmd.c
+  zapbirds.c
+  zapping.c
+  ${PLOT2DOBJS}
+  )
 
 add_executable (explorefft
-  explorefft.c ${PLOT2DOBJS}
-)
+  explorefft.c
+  ${PLOT2DOBJS}
+  )
 
 add_executable (exploredat
-  exploredat.c ${PLOT2DOBJS}
-)
+  exploredat.c
+  ${PLOT2DOBJS}
+  )
 
 add_executable (weight_psrfits
-  weight_psrfits.c psrfits.c ${PLOT2DOBJS}
-)
+  weight_psrfits.c
+  psrfits.c
+  ${PLOT2DOBJS}
+  )
 
 
 #target_link_libraries (mpiprepsubband $(PRESTOLINK) -lcfitsio -lm)
 
+## ==============================================================================
+##
+##  Test programs
+## 
+## ==============================================================================
 
-
+add_executable (testbinresp
+  ${presto_SOURCE_DIR}/test/testbinresp.c
+  ${PLOT2DOBJS}
+  )
 

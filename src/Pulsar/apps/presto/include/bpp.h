@@ -1,3 +1,7 @@
+/*!
+  \ingroup presto
+*/
+
 #ifndef BPP_HEADER_SIZE
 #define BPP_HEADER_SIZE	32768
 #endif

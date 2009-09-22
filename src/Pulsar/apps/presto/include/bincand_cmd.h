@@ -1,3 +1,7 @@
+/*!
+  \ingroup presto
+*/
+
 #ifndef __bincand_cmd__
 #define __bincand_cmd__
 /*****
