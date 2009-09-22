@@ -68,11 +68,17 @@ set (presto_binaries
   rfifind zapbirds explorefft exploredat weight_psrfits
 )
 
+##__________________________________________________________
+## libpresto
+
 add_library (presto ${presto_sources})
 
+##__________________________________________________________
 ## libsla
 
 file (GLOB sla_sources slalib/*.f)
+
+set (CMAKE_Fortran_CREATE_STATIC_LIBRARY TRUE)
 
 add_library (sla ${sla_sources})
 set_target_properties (sla
@@ -343,7 +349,7 @@ add_executable (weight_psrfits
 ## ==============================================================================
 
 add_executable (testbinresp
-  ${presto_SOURCE_DIR}/test/testbinresp.c
+  ${presto_SOURCE_DIR}/tests/testbinresp.c
   ${PLOT2DOBJS}
   )
 
