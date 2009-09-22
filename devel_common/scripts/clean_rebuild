@@ -4,6 +4,9 @@
 ## Clean build of a specific high-level target in the USG code tree
 
 case $1 in 
+    "casacore")
+	BUILD_TARGET=casacore
+	;;
     "cr")
 	BUILD_TARGET=cr
 	;;

@@ -25,6 +25,8 @@
 # The following variables are set when HDF5 is found:
 #  HAVE_HDF5            = Set to true, if all components of HDF5 have been found.
 #  HDF5_INCLUDES        = Include path for the header files of HDF5
+#  HDF5_HDF5_LIBRARY    = Path to libhdf5
+#  HDF5_HDF5_HL_LIBRARY = Path to libhdf5_hl, the high-level interface
 #  HDF5_LIBRARIES       = Link these to use HDF5
 #  HDF5_MAJOR_VERSION   = Major version of the HDF5 library
 #  HDF5_MINOR_VERSION   = Minor version of the HDF5 library
@@ -69,29 +71,29 @@ find_path (HAVE_HDF5_HDF5_HL_H hdf5_hl.h
 
 ## [1] Core library
 
-find_library (libhdf5
+find_library (HDF5_HDF5_LIBRARY
   NAMES hdf5
   PATHS ${lib_locations}
   PATH_SUFFIXES hdf5
   NO_DEFAULT_PATH
 )
 
-if (libhdf5)
-  set (HDF5_LIBRARIES ${libhdf5})
-endif (libhdf5)
+if (HDF5_HDF5_LIBRARY)
+  set (HDF5_LIBRARIES ${HDF5_HDF5_LIBRARY})
+endif (HDF5_HDF5_LIBRARY)
 
 ## [2] Additional libraries
 
-FIND_LIBRARY (libhdf5_hl
+FIND_LIBRARY (HDF5_HDF5_HL_LIBRARY
   NAMES hdf5_hl
   PATHS ${lib_locations}
   PATH_SUFFIXES hdf5
   NO_DEFAULT_PATH
 )
 
-if (libhdf5_hl)
-  list (APPEND HDF5_LIBRARIES ${libhdf5_hl})
-endif (libhdf5_hl)
+if (HDF5_HDF5_HL_LIBRARY)
+  list (APPEND HDF5_LIBRARIES ${HDF5_HDF5_HL_LIBRARY})
+endif (HDF5_HDF5_HL_LIBRARY)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -217,6 +219,6 @@ mark_as_advanced (
   HDF5_MINOR_VERSION
   HDF5_RELEASE_VERSION
   HAVE_TESTHDF5VERSION
-  libhdf5
-  libhdf5_hl
+  HDF5_HDF5_LIBRARY
+  HDF5_HDF5_HL_LIBRARY
 )
