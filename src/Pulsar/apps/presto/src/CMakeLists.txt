@@ -76,6 +76,7 @@ file (GLOB sla_sources slalib/*.f)
 
 add_library (sla ${sla_sources})
 set_target_properties (sla
+  PROPERTIES
   LINKER_LANGUAGE Fortran
   )
 
