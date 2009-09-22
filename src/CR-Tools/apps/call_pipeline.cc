@@ -26,10 +26,12 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+#include <algorithm>
 
 #include <crtools.h>
 #include <Analysis/analyseLOPESevent2.h>
 #include <Analysis/PulseProperties.h>
+#include <Analysis/AntennasDisplay.h>
 
 using CR::analyseLOPESevent2;
 using CR::LopesEventIn;
@@ -263,6 +265,7 @@ bool lateralOutputFile = false;      // no file for the lateral distribution wil
 double lateralSNRcut = 1.0;            // SNR cut for removing points from lateral distribution
 double lateralTimeCut = 15e-9;         // Allowed time window +/- arround CC-beam-center for found peaks
 bool calculateMeanValues = false;    // calculate some mean values of all processed events
+bool showAntennas = true;           // Show antennas and magnitudes of incoming signals [added: mfranc]
 
 // Event parameters for calling the pipeline
 string eventfilelistname("");			         // Name of the ASCII event list
@@ -1107,7 +1110,21 @@ void readConfigFile (const string &filename)
           }
 	}
 
-
+        if ((keyword.compare("showAntennas") == 0) || (keyword.compare("ShowAntennas") == 0))
+        {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
+	    showAntennas = true;
+	    cout << "showAntennas set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
+	    showAntennas = false;
+	    cout << "showAntennas set to 'false'.\n";
+	  } else{
+            cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            cerr << "showAntennasA must be either 'true' or 'false'.\n";
+            cerr << "\nProgram will continue skipping the problem." << endl;
+          }
+        } //[added: mfranc]
 
       }	// while(configfile.good())
 
@@ -1707,6 +1724,7 @@ int main (int argc, char *argv[])
 
     // Process events from event file list
     while ( getNextEvent() ) {
+		
       // print information and process the event
       if (calibrationMode) {
         cout << "\nProcessing calibration event \"" << eventname << "\".\n" << endl;
@@ -1782,6 +1800,13 @@ int main (int argc, char *argv[])
       // in this case an additional plotprefix is used
       string polPlotPrefix = "";
 
+	  // Structure containg necessary structures to create plot
+	  // [added: mfranc]
+	  Vector <int>    antIDs;					   // vector containing antennas IDs
+	  Matrix <double> antPos;                      // matrix containing antennas positions		 
+	  map<int, PulseProperties>::iterator itBeg;   // iterator.begin() of pulsesMap
+	  map<int, PulseProperties>::iterator itEnd;   // iterator.end() if pulsesMap
+	  
       if ( calibrationMode ) {
         // initialize the pipeline
         analyseLOPESevent2 eventPipeline;
@@ -1819,6 +1844,15 @@ int main (int argc, char *argv[])
         // adding results to variables (needed to fill them into the root tree)
         goodEW = results.asBool("goodReconstructed");
         gt = results.asuInt("Date");
+		
+		// getting necessary data to plot
+		// [added: mfranc]
+		if(showAntennas)
+		{
+			antPos = eventPipeline.getAntennaPositions();
+			antIDs = eventPipeline.getAntennaIDs();
+		}
+		
       } else {
         if ( (polarization == "ANY") || (polarization == "EW") || both_pol) {
           if (both_pol) {
@@ -1919,6 +1953,14 @@ int main (int argc, char *argv[])
           rmsXbeam = results.asDouble("rmsXbeam");
           rmsPbeam = results.asDouble("rmsPbeam");
           gt = results.asuInt("Date");
+		  
+	      // getting necessary data to plot
+	      // [added: mfranc]
+		  if(showAntennas)
+		  {
+			  antPos = eventPipeline.getAntennaPositions();
+			  antIDs = eventPipeline.getAntennaIDs();
+		  }
          }
 
         if ( (polarization == "NS") || both_pol) {
@@ -2023,17 +2065,75 @@ int main (int argc, char *argv[])
 	  rmsXbeam_NS = results.asDouble("rmsXbeam");
 	  rmsPbeam_NS = results.asDouble("rmsPbeam");
           gt = results.asuInt("Date");
+		  
+		// getting necessary data to plot
+		// [added: mfranc]
+		if(showAntennas)
+		{
+			antPos = eventPipeline.getAntennaPositions();
+			antIDs = eventPipeline.getAntennaIDs();		
+		}
         }
-      }  // if...else (calibrationMode)
-
-
+	  }  // if...else (calibrationMode)
+	  
+		// Create plot of all antennas
+	    // [added: mfranc]
+		if(showAntennas)
+		{
+                  if(calibPulsesMap.size() != 0)
+                  {
+                        itBeg = calibPulsesMap.begin();	
+                        itEnd = calibPulsesMap.end();
+                        cout<<"The plot of all antennas will be created using calibrated pulses information"<<endl;
+		   
+                        AntennasDisplay ad;
+                        vector<double> allAntennasPosX;
+                        vector<double> allAntennasPosY;
+                        vector<int>    antIDsSTL;     
+                        
+                        antIDs.tovector(antIDsSTL);
+                        
+                        for (unsigned int i=0 ; i < antIDs.size(); i++)
+                        {
+                              allAntennasPosX.push_back(antPos.row(i)(0));
+                              allAntennasPosY.push_back(antPos.row(i)(1));
+                        }
+                        ad.setAllAntennas(allAntennasPosY, allAntennasPosX);
+                        // Attention the position are reversed !!!
+                        
+                        ad.setCore(core_x, core_y, azimuth, elevation);
+                        
+                        for(map<int, PulseProperties>::iterator it = itBeg; it != itEnd; it++)
+                        {
+                                    int                   id       = it->second.antennaID;
+                                    vector<int>::iterator loc      = std::find(antIDsSTL.begin(), antIDsSTL.end(), id);
+                                    
+                                    if(loc != antIDsSTL.end())
+                                    {
+                                             double xPos  = antPos.row(loc - antIDsSTL.begin())(0);
+                                             double yPos  = antPos.row(loc - antIDsSTL.begin())(1);
+                                             double magn  = it->second.maximum;
+                                             double time  = it->second.maximumTime;
+                                             int    polar = it->second.polarization.compare("NS") ? (int)ad.NS : (int)ad.EW;
+                                             // Attention the position are reversed !!!
+                                             ad.addNewAntenna(yPos, xPos, magn, time, polar);
+                                    }
+                        }
+                        size_t found = eventname.rfind(".event");
+                        string modifiedEventname = (found != string::npos) ? eventname.erase(found, eventname.length()) : eventname;
+                        ad.createPlot(modifiedEventname+ "_" + "map", "Event: " + modifiedEventname);
+               }
+               else
+                  cerr<<"The plot of all antennas will not be created because no calibrated pulse information has been found";
+	   }
+	   
       // process pulse properties
       // delete arrays
       for (int i=0; i < MAX_NUM_ANTENNAS; i++) {
         *rawPulses[i] = PulseProperties();
         *calibPulses[i] = PulseProperties();
       }
-
+		
       // fill information in array for raw pulses
       for ( map<int,PulseProperties>::iterator it=rawPulsesMap.begin() ; it != rawPulsesMap.end(); ++it) {
         // check if antenna number lies in valid range
@@ -2050,6 +2150,7 @@ int main (int argc, char *argv[])
             roottree->Branch(branchname.c_str(),"PulseProperties",&rawPulses[it->second.antenna-1]);
         }
       }
+
 
       // fill information in array for calibrated pulses
       for ( map<int,PulseProperties>::iterator it=calibPulsesMap.begin() ; it != calibPulsesMap.end(); ++it) {
@@ -2093,6 +2194,7 @@ int main (int argc, char *argv[])
                 / meanResCounter[antenna-1];
             }
           }
+		
 
           // create branch names
           stringstream antNumber(""); 
