@@ -2,16 +2,32 @@
 #
 #  triggerstats.py
 #  
+
 #
 #  Created by Arthur Corstanje on 9/1/09.
 #  Copyright (c) 2009 __MyCompanyName__. All rights reserved.
 #
 
+# list of free parameters (to be removed from this code...):
+# - input filename [ DONE ]
+# - (output directory)
+# - graph width/height
+# - number of points in the counts vs thresholds graph
+# - time window for coincidence check
+
 import csv
 from mathgl import *
 import numpy
+import sys
+
+if len(sys.argv) > 1:
+    fileName = sys.argv[1] 
+else:
+    fileName = '2009-08-04_TRIGGER.dat' #  that's just handy for rapid testing...
 
 #def nofTriggersFilteredByThreshold(listOfTriggers, threshold)
+
+numberOfRCUsperStation = 96;
 
 def triggersFilteredByThreshold(listOfTriggers, threshold):
     outList = []
@@ -32,7 +48,7 @@ powerBeforeKey = 'powerBefore'; powerBefore = []
 powerAfterKey = 'powerAfter';   powerAfter = [] 
 
 myKeys = [RCUnrKey, seqnrKey, timeKey, sampleKey, sumKey, nrSamplesKey, peakKey, powerBeforeKey, powerAfterKey]
-triggerReader = csv.DictReader(open('2009-09-03_TRIGGER5.dat'), myKeys, delimiter=' ')
+triggerReader = csv.DictReader(open(fileName), myKeys, delimiter=' ')
 numTriggers = triggerReader.line_num # trigger records don't span multiple lines
 
 triggerList = []
@@ -50,7 +66,7 @@ for record in triggerList:
     powerBefore.append(int(record[powerBeforeKey]))
     powerAfter.append(int(record[powerAfterKey]))
 
-(y, x) = RCUhisto = numpy.histogram(RCUnr, 96, (0, 96)) # counts, bins
+(y, x) = RCUhisto = numpy.histogram(RCUnr, 96, (0, 96)) # (counts, bins) comes out
 
 maxY = max(y)
 y = 1000.0 * y / max(y)
@@ -87,8 +103,8 @@ graph.WriteEPS("testSTATS.eps","Test Plot")
 # in counts per minute - extract first and last time
 
 totalTriggers = len(triggerList)
-firstTime = triggerList[0]['time']
-lastTime = triggerList[totalTriggers - 1]['time']
+firstTime = triggerList[0][timeKey]
+lastTime = triggerList[totalTriggers - 1][timeKey]
 firstTime = float(firstTime)
 lastTime = float(lastTime)
 minutes = (lastTime - firstTime) / 60.0 # time in minutes - time limiting should go here!
@@ -164,7 +180,9 @@ def compare_by (fieldname1, fieldname2): # nested compare function for sorting a
 
 sortedTriggerList = sorted(triggerList, compare_by(timeKey, sampleKey) )
 
-# end sorting, now search for 'pulses' = coincident triggers within a timeWindow
+# end sorting. Now search for 'pulses' = coincident triggers within a timeWindow
+# make a list of indices in triggerList; every index in pulseIndices is the start of a new 'pulse'. 
+# Pulse information can then be extracted just from the triggerList, as we know which ones belong together.
 
 lastTime = 0; 
 timeWindow = 100000 # window for pulse in samples
@@ -172,16 +190,54 @@ i = 0
 pulseIndices.append(0) # first pulse starts at 0
 for record in sortedTriggerList: # pulse search
     i+=1 # keep track of the index
-    thisSecond = int(record['time'])
-    thisSample = int(record['sample'])
+    thisSecond = int(record[timeKey])
+    thisSample = int(record[sampleKey])
     thisTime = samplingRate * thisSecond + thisSample
     
     if (abs(thisTime - lastTime) > timeWindow):
         lastTime = thisTime # start new pulse
 	pulseIndices.append(i) # at this index a new pulse begins
 
-def pulse(pulseIndices, triggerList, pulseno): # get list of triggers corresponding to 0-based pulseno.
+def pulse(pulseIndices, triggerList, pulseno): # get list of triggers corresponding to pulse number 'pulseno' (0-based)
     return triggerList[pulseIndices[pulseno]:pulseIndices[pulseno+1]]
     
-    
+# get pulses one by one, make histogram of # triggers per pulse. Scale to 'counts per minute'
+
+gX = mglData(numberOfRCUsperStation)
+for i in range(numberOfRCUsperStation):
+    gX[i] = i
+
+gY = mglData(numberOfRCUsperStation)
+
+lastIndex = -1;    
+for index in pulseIndices: # we can work only on the indices to get # RCUs 
+    gY[index - lastIndex] += 1.0 / minutes
+    lastIndex = index
+
+width=800  
+height=600
+mglGraphPS = 1
+graph = mglGraph(mglGraphPS, width, height)
+
+graph.Clf()
+graph.SetFontSize(2.0)
+# set y-min range so you can just see 1 count in the entire interval.
+yRangeMin = 0.95 / minutes
+graph.Title("Histogram of number of RCUs per pulse")
+
+graph.SetRanges(0.0, 30, yRangeMin, 2 * gY.Max('x')[0]) # needs better x-ranging!
+# make logplot
+graph.SetOrigin(0.0, yRangeMin) 
+graph.SetFunc("","lg(y)","") 
+graph.SetTicks('y',0)		 
+
+graph.SetTicks('x', 4.0, 4)
+
+graph.Axis("xy")
+graph.Grid()
+
+graph.Label("x","Number of RCUs",1)
+graph.Label("y","Counts per minute",1)
+graph.Bars(gX,gY); # a symbol plot would be prettier...
+graph.WriteEPS("testRCUsperPulse.eps","Test Plot")
 
