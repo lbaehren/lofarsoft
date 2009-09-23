@@ -10,14 +10,14 @@ cmake_minimum_required (VERSION 2.5)
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (BOOST_FORCE_BUILD       "Force rebuild and local installation?"      NO  )
-option (BOOST_CMAKE_CUSTOM      "Use custom CMake environment for build?"    YES )
-option (BOOST_VERBOSE_CONFIGURE "Be verbose during configuration?"           NO  )
-option (BOOST_VERBOSE_BUILD     "Be verbose during build process?"           NO  )
+option (BOOST_FORCE_BUILD       "Force rebuild and local installation?"     NO  )
+option (BOOST_CMAKE_CUSTOM      "Use custom CMake environment for build?"   YES )
+option (BOOST_VERBOSE_CONFIGURE "Be verbose during configuration?"          NO  )
+option (BOOST_VERBOSE_BUILD     "Be verbose during build process?"          NO  )
 
-option (BOOST_BUILD_DEBUG       "Build debugging libraries?"                 NO )
-option (BOOST_BUILD_SHARED      "Build shared libraries?"                    NO )
-option (BOOST_BUILD_BCP         "Build shared libraries?"                    NO )
+option (BOOST_BUILD_DEBUG       "Build debugging libraries?"                NO )
+option (BOOST_BUILD_SHARED      "Build shared libraries?"                   NO )
+option (BOOST_BUILD_BCP         "Build shared libraries?"                   NO )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -47,6 +47,40 @@ endif (NOT BOOST_VERBOSE_CONFIGURE)
 include (FindBoost)
 
 find_file (boost_cmake_tgz boost_cmake.tgz ${BOOST_SOURCE_DIR})
+
+## ------------------------------------------------------------------------------
+## Check if the located Boost installation is good enough by compiling a small
+## test program.
+
+if (HAVE_BOOST)
+  
+  find_file (HAVE_TESTBOOST TestBoost.cc
+    PATHS ${CMAKE_MODULE_PATH} ${USG_ROOT}
+    PATH_SUFFIXES devel_common/cmake
+    )
+  
+  if (HAVE_TESTBOOST) 
+    ## Augment the list of required libraries
+    list (APPEND CMAKE_REQUIRED_LIBRARIES ${BOOST_boost_program_options})
+    list (APPEND CMAKE_REQUIRED_LIBRARIES ${BOOST_LIBRARIES})
+    ## Try to compile the test program
+    try_compile(TESTBOOST_RESULT
+      ${CMAKE_BINARY_DIR}
+      ${HAVE_TESTBOOST}
+      CMAKE_FLAGS -DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}
+      COMPILE_DEFINITIONS -I${BOOST_INCLUDES} -I${BOOST_INCLUDES}/boost
+      OUTPUT_VARIABLE TESTBOOST_OUTPUT
+      )
+    ## some basic feedback
+    if (NOT TESTBOOST_RESULT)
+      message (STATUS "Found Boost installation seems incomplete - rebuilding!")
+      set (BOOST_FORCE_BUILD TRUE)
+    endif (NOT TESTBOOST_RESULT)
+  else (HAVE_TESTBOOST)
+    message (STATUS "[Boost] Unable to further test existing Boost installation.")
+  endif (HAVE_TESTBOOST)
+  
+endif (HAVE_BOOST)
 
 ## <-- begin build condition --------------------------------------------------->
 
