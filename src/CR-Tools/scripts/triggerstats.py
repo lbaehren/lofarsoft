@@ -244,3 +244,47 @@ graph.Label("y","Counts per minute",1)
 graph.Plot(gX,gY, ' o#'); 
 graph.WriteEPS("testRCUsperPulse.eps","Test Plot")
 
+# now get a histogram of total-sum per pulse (counts per minute)
+
+# make a list of all total-sums
+
+allTotalSums = []
+for i in range(len(pulseIndices) - 1):
+    thisPulse = pulse(pulseIndices, triggerList, i)
+    thisTotalSum = 0;
+    for record in thisPulse:
+        thisTotalSum += int(record[sumKey])
+    allTotalSums.append(thisTotalSum)
+
+print(len(allTotalSums))
+print(len(pulseIndices))
+  
+(y, x) = numpy.histogram(allTotalSums, 50)
+
+gY = mglData(len(y))
+gX = mglData(len(x))
+
+for i in range(len(y)):
+    gY[i] = float(y[i]) / minutes # counts per minute
+
+for i in range(len(x)):
+    gX[i] = float(x[i])
+    
+width=1200  
+height=600
+mglGraphPS = 1
+graph = mglGraph(mglGraphPS, width, height)
+
+graph.Clf()
+graph.SetFontSize(3.0)
+graph.SetRanges(0.0, float(max(x)), 0.0, float(max(y)) / minutes)
+#graph.SetTicks('x', 16.0, 4)
+
+graph.Axis("xy")
+graph.Grid()
+
+graph.Title("Histogram of total sum per pulse")
+graph.Label("x","total sum",1)
+graph.Label("y","Counts per minute",1)
+graph.Bars(gY);
+graph.WriteEPS("testSTATS_totalsum.eps","Test Plot")
