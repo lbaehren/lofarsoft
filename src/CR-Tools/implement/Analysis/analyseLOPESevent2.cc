@@ -929,9 +929,9 @@ namespace CR { // Namespace CR -- begin
       label << "GT " << GT;
       TText *text = easstats->AddText(label.str().c_str());
       text->SetTextSize(0.04);
-      label.str("");
-      label << "E_{g}  = " << energy;
-      text = easstats->AddText(label.str().c_str());
+      // label.str("");
+      // label << "E_{g}  = " << energy;
+      // text = easstats->AddText(label.str().c_str());
       label.str("");
       label << "#phi   = ";
       label.setf(ios::showpoint);
@@ -1058,6 +1058,266 @@ namespace CR { // Namespace CR -- begin
   }
 
 
+   // Function is based on fitLateralDistribution from AnalyseLopesEvent2
+   // [added: mfranc]
+
+   // Function is based on fitLateralDistribution from AnalyseLopesEvent2
+   // [added: mfranc]
+   void analyseLOPESevent2::fitTimeDistribution(const string& filePrefix, Record& erg, const double& Xc, const double& Yc)
+   {
+	  try
+	  {
+		  cout << "\nFitting time vs distance" << endl;
+
+		  // Get shower properties
+		  unsigned int GT = erg.asuInt  ("Date");
+		  double 	   az = erg.asDouble("Azimuth");
+		  double 	   el = erg.asDouble("Elevation");
+
+		  // get AntennaIDs to loop through pulse parameters
+		  Vector<int> antennaIDs;
+		  beamformDR_p->headerRecord().get("AntennaIDs",antennaIDs);
+
+		  // get antenna positions and distances in shower coordinates
+		  Vector <double> distances = erg.asArrayDouble("distances");
+		  
+		  // create arrays for plotting and fitting
+		  unsigned int Nant = calibPulses.size();
+		  Double_t timeVal  [Nant], distance  [Nant], distanceClean  [Nant], timeValClean  [Nant];
+		  Double_t timeValEr[Nant], distanceEr[Nant], distanceCleanEr[Nant], timeValCleanEr[Nant];
+		  Double_t noiseBgr [Nant], fieldStr  [Nant];
+		  int antennaNumber [Nant];
+		  int antID         [Nant], antIDclean[Nant];
+		  
+		  // loop through antennas and fill the arrays
+		  unsigned int ant = 0;	// counting antennas with pulse information
+		  for (unsigned int i=0 ; i < antennaIDs.size(); i++)
+			if (calibPulses.find(antennaIDs(i)) != calibPulses.end()) 
+			{
+			   distance     [ant] = distances(i);
+			   timeVal      [ant] = calibPulses[antennaIDs(i)].envelopeTime;
+			   fieldStr     [ant] = calibPulses[antennaIDs(i)].envelopeMaximum;
+			   noiseBgr     [ant] = calibPulses[antennaIDs(i)].noise;
+			   antennaNumber[ant] = i+1;
+			   antID        [ant] = antennaIDs(i);
+			   ant++;
+			}
+			
+		  // consistancy check
+		  if (ant != Nant)
+			cerr << "analyseLOPESevent2::fitTimeDistribution: Nant != number of antenna values\n" << endl; 
+		  
+		  Double_t timeMax=0;
+		  Double_t timeMin=0;
+		  Double_t maxdist=0;
+		  Double_t mindist=0;
+		  
+		  timeMin = *min_element(timeVal, timeVal + Nant);
+		  timeMax = *max_element(timeVal, timeVal + Nant);
+		  mindist = *min_element(distance, distance + Nant);
+		  maxdist = *max_element(distance, distance + Nant);
+		  
+
+		  // for cuts (counters)
+		  unsigned int CutBadTiming   = 0;
+		  unsigned int CutSNR         = 0;
+		  double       ccCenter       = erg.asDouble("CCcenter");
+		  double       xCenter        = erg.asDouble("Xcenter");
+
+		  // calculate errors and count number of clean (good) values
+		  unsigned int clean = 0;
+		  cout << "\nApplying quality cuts..." << endl;
+		  for (unsigned int i = 0; i < Nant; ++i) 
+		  {											
+			timeValEr [i] = 10; 				   // TODO: this should be based on some physical knowledge ...
+			distanceEr[i] = 10;		           	   // TODO: this should be based on some physical knowledge ...
+			 
+			/* Cuts taken from fitLateralDitribution */
+			// pulse time correct? (default: pulse at cc-beam center +/- 25ns)
+			if (abs(timeVal[i]*1e-9 - ccCenter) > lateralTimeCut) {
+			  CutBadTiming++;
+			  cout << "analyseLOPESevent2::fitTimeDistribution: Antenna " << antennaNumber[i] << " cut because of bad timing: "
+				   << "CCcenter = " << ccCenter*1e9 << " , pulse time = " << timeVal[i]
+				   << endl;
+			  continue;
+			}
+			// SNR >= 1 ?
+			if ( abs(fieldStr[i]/noiseBgr[i]) < lateralSNRcut) {
+			  CutSNR++;
+			  cout << "analyseLOPESevent2::fitTimeDistribution: Antenna " << antennaNumber[i] 
+				   << " cut because SNR lower than " << lateralSNRcut
+				   << endl;
+			  continue;
+			}		 
+			// TODO: get rid of this lateralTimeCut and lateralSNRcut
+			 
+			// store value as good value if it passed all the cuts
+			distanceClean[clean]   = distance[i];
+			distanceCleanEr[clean] = distanceEr[i];
+			timeValClean[clean]    = timeVal[i];
+			timeValCleanEr[clean]  = timeValEr[i];
+			antIDclean[clean]      = antID[i];
+			clean++;
+		  }
+
+		  // check if CC-beam was reconstructed (position inside of fit range)
+		  // oterwise don't consider any antenna as good
+		  if (!erg.asBool("CCconverged") ) {
+			clean = 0;
+			cout << "analyseLOPESevent2::fitLateralDistribution: Error: CC-beam did not converge." << endl; 
+		  }
+		  if ( (ccCenter < fitStart()) || (ccCenter > fitStop()) ) {
+			clean = 0;
+			cout << "analyseLOPESevent2::fitLateralDistribution: Error: CC-beam-center out of range (maybe fit did not converge)." << endl; 
+		  }
+		  // for consistency check if X-beam and CC-beam converged to the same peak
+		  if ( abs(xCenter -ccCenter) > getCCWindowWidth()/2.  ) {
+			clean = 0;
+			cout << "analyseLOPESevent2::fitLateralDistribution: Error: X-beam and CC-beam converged to different peaks!" << endl; 
+		  }
+
+		  cout << "\nAntennas in the Plot: " << ant << endl;
+		  cout << "Entries for fit: " << clean << endl;
+		  
+		  // calculate mean distance of the remaining antennas
+		  double latMeanDist = 0;
+		  if (clean > 0)
+			latMeanDist = Mean(clean, distanceClean);
+		  cout << "Mean distance of antennas surviving the cuts: " << latMeanDist << " m." << endl;
+		  // erg.define("latMeanDist",latMeanDist);
+		  // TODO: Define it differently or use the values which were previously calculated	  
+		  
+		  TGraphErrors *latPro      = new TGraphErrors (ant, distance, timeVal, distanceEr, timeValEr);
+		  double offsetY = 100;
+		  double offsetX = 50;
+		  TGraphErrors *latProClean = new TGraphErrors (clean, distanceClean,timeValClean,distanceCleanEr,timeValCleanEr);
+		  latPro->SetFillColor(1);
+		  latPro->SetLineColor(2);
+		  latPro->SetMarkerColor(2);
+		  latPro->SetMarkerStyle(20);
+		  latPro->SetMarkerSize(1.1);
+		  stringstream label;
+		  label << "Time vs distance distribution - " << GT;
+		  latPro->SetTitle(label.str().c_str());
+		  latPro->GetXaxis()->SetTitle("distance R [m]"); 
+		  latPro->GetYaxis()->SetTitle("time T [s]");
+		  latPro->GetXaxis()->SetTitleSize(0.05);
+		  latPro->GetYaxis()->SetTitleSize(0.05);
+		  latPro->GetYaxis()->SetRangeUser(timeMin - offsetY, timeMax + offsetY);
+		  latPro->GetXaxis()->SetRangeUser(mindist - offsetX, maxdist + offsetX);
+
+		  latProClean->SetLineColor(4);
+		  latProClean->SetMarkerColor(4);
+		  latProClean->SetMarkerStyle(20);
+		  latProClean->SetMarkerSize(1.1);
+		  // TODO: change the names of latPro and latProClean
+		  
+		  /* Canvas and Plotting */
+		  TCanvas *c1 = new TCanvas("c1","time vs distance distribution");
+		  c1->Range(-18.4356,-0.31111,195.528,2.19048);
+		  c1->SetFillColor(0);
+		  c1->SetBorderMode(0);
+		  c1->SetBorderSize(2);
+		  c1->SetLeftMargin(0.127768);
+		  c1->SetRightMargin(0.0715503);
+		  c1->SetTopMargin(0.0761421);
+		  c1->SetBottomMargin(0.124365);
+		  c1->SetFrameLineWidth(2);
+		  c1->SetFrameBorderMode(0);
+		  
+		  /* time vs distance plot */
+		  latPro->SetFillColor(0);
+		  latPro->Draw("AP");
+		  latProClean->Draw("same p");
+
+		  /* statistic box of fit */
+		  TPaveStats *ptstats = new TPaveStats(0.62,0.84,0.98,0.99,"brNDC");
+		  ptstats->SetName("stats");
+		  ptstats->SetBorderSize(2);
+		  ptstats->SetTextAlign(12);
+		  ptstats->SetFillColor(0);
+		  ptstats->SetOptStat(0);
+		  ptstats->SetOptFit(111);
+		  ptstats->Draw();
+		  latProClean->GetListOfFunctions()->Add(ptstats);
+		  ptstats->SetParent(latProClean->GetListOfFunctions());
+
+		  /* statistic box of EAS parameter */
+		  TPaveStats *easstats = new TPaveStats(0.45,0.84,0.62,0.99,"brNDC");
+		  easstats->SetBorderSize(2);
+		  easstats->SetTextAlign(12);
+		  easstats->SetFillColor(0);
+		  easstats->SetOptStat(0);
+		  easstats->SetOptFit(0);
+		  easstats->SetName("stats");
+		  
+		  /* create labels for the plot */
+		  label.str("");
+		  label << "GT " << GT;
+		  TText *text = easstats->AddText(label.str().c_str());
+		  text->SetTextSize(0.04);
+		  label.str("");
+		  label << "#phi   = ";
+		  label.setf(ios::showpoint);
+		  label.precision(4);
+		  label.width(5);
+		  label << az << "^{o}";
+		  text = easstats->AddText(label.str().c_str());
+		  label.str("");
+		  label << "#theta = ";
+		  label.setf(ios::showpoint);
+		  label.precision(4);
+		  label.width(5);
+		  label << 90-el << "^{o}";
+		  text = easstats->AddText(label.str().c_str());
+		  easstats->Draw();
+
+		  
+		  /* FIT */
+		  if (clean >= 3) 
+		  {
+			// fit polynomial
+			TF1 *fitFunc;
+			fitFunc=new TF1("fitFunc","[0]+[1]*x",50,190);
+			fitFunc->SetParName(0,"#epsilon_{0}");
+			fitFunc->SetParName(1,"R_{0}");
+			fitFunc->SetParameter(1,200);
+			fitFunc->GetXaxis()->SetRange(20,300);
+			fitFunc->SetFillStyle(0);
+			fitFunc->SetLineWidth(2);
+
+			cout << "------------------------------"<<endl;
+			latProClean->Fit(fitFunc, "");
+			ptstats->Draw();
+
+			// write fit results to record with other results
+			erg.define("FTD_eps",fitFunc->GetParameter(0));
+			erg.define("FTD_R_0",fitFunc->GetParameter(1));
+			erg.define("FTD_sigeps",fitFunc->GetParError(0));
+			erg.define("FTD_sigR_0",fitFunc->GetParError(1));
+			erg.define("FTD_chi2NDF",fitFunc->GetChisquare()/double(fitFunc->GetNDF()));
+			cout << "Results of fit"
+				 << "eps    = " << fitFunc->GetParameter(0) << "\t +/- " << fitFunc->GetParError(0) << "\t ms \n"
+				 << "R_0    = " << fitFunc->GetParameter(1) << "\t +/- " << fitFunc->GetParError(1) << "\t m \n"
+				 << "Chi^2  = " << fitFunc->GetChisquare() << "\t NDF " << fitFunc->GetNDF() << "\n"
+				 << endl;
+
+			// write plot to file
+			stringstream plotNameStream;
+			plotNameStream << filePrefix << GT <<".eps";
+			cout << "\nCreating plot: " << plotNameStream.str() << endl;
+			c1->Print(plotNameStream.str().c_str());
+		  }
+		  else
+		  {
+			cout<<"No fit was done, because less than 3 antennas are 'good':\n";
+		  }	  
+	  }
+	  catch (AipsError x) 
+	  {
+		  cerr << "analyseLOPESevent2::fitTimeDistribution: " << x.getMesg() << endl;
+      }
+   }   
 //---------------------------------------------------------------------------------------------------
 
 

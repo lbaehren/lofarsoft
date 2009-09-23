@@ -31,6 +31,7 @@
 #include <iomanip>
 #include <fstream>
 #include <string>
+#include <algorithm>
 
 #ifdef HAVE_STARTOOLS
 
@@ -502,6 +503,11 @@ namespace CR { // Namespace CR -- begin
                                  const double& Yc=0,
                                  const double& energy=0);
 
+	void fitTimeDistribution    (const string& filePrefix,
+								Record& erg,
+		                        const double& Xc = 0,
+                                const double& Yc = 0);						
+								 
     /*!
       /brief Generates a simple skymap 
 
