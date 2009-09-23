@@ -219,6 +219,504 @@ using CR::LopesEventIn;
 
 */
 
+// --- Classes enhancing config file reading ---
+const int          iDef  = 0;
+const unsigned int uiDef = 0;
+const double       dDef  = 0;
+const bool         bDef  = false;
+const string       sDef  = "";
+
+enum ObjectType
+{
+   _AnyType, _BoolType, _DoubleType, _IntType, _UintType, _StringType
+};
+
+template<class T>
+bool fromString(T &t, const string &s, std::ios_base& (*f)(ios_base&))
+{
+    istringstream iss(s);
+    return !(iss>>f>>t).fail();
+} // Utility function converting string to any type
+
+// Abstract class representing "any" type
+class AnyType
+{
+public:
+    virtual bool         setValue(string value)       { return false   ; }
+    virtual string       errorSetVal()                { return ""      ; }
+    virtual bool         bValue()
+    {
+      cerr<<"Error: calling bValue() on object which is not bool"<<endl;
+      return bDef; 
+    }
+    virtual double       dValue()
+    {
+      cerr<<"Error: calling dValue() on object which is not double"<<endl;
+      return dDef; 
+    }
+    virtual int          iValue()
+    {
+      cerr<<"Error: calling iValue() on object which is not int"<<endl;
+      return iDef; 
+    }
+    virtual unsigned int uiValue()
+    {
+      cerr<<"Error: calling uiValue() on object which is not uint"<<endl;
+      return uiDef; 
+    }
+    virtual string       sValue()
+    {
+      cerr<<"Error: calling sValue() on object which is not string"<<endl;
+      return sDef; 
+    }
+    virtual int          getType()                    { return (int)_AnyType; }
+};
+
+// Bool type
+class BoolType : public AnyType
+{
+public:
+    BoolType(bool value = bDef) { this->value = value; }
+
+    virtual bool    bValue     () { return this->value; }
+    virtual bool    setValue   (string value) 
+    {
+        bool result = fromString<bool>(this->value, value, std::boolalpha);
+        this->value = result ? this->value : this->defaultValue;
+        return result;
+    }
+    virtual string  errorSetVal() { return "Value must be 'bool' type."; }
+    virtual int     getType() { return (int)_BoolType; }
+private:
+    bool defaultValue;
+    bool value;
+};
+
+// Double type
+class DoubleType : public AnyType
+{
+public:
+    DoubleType(double value = dDef) { this->value = value; }
+
+    virtual double  dValue     () { return this->value; }  
+    virtual bool    setValue   (string value) 
+    {
+        bool result = fromString<double>(this->value, value, std::scientific);
+        this->value = result ? this->value : this->defaultValue;
+        return result;
+    }
+    virtual string  errorSetVal() { return "Value must be 'double' type."; }
+    virtual int     getType() { return (int)_DoubleType; }
+private:
+    double defaultValue;
+    double value;
+};
+
+// Integer type
+class IntType : public AnyType
+{
+public:
+    IntType(int value = iDef) { this->value = value; }
+
+    virtual int     iValue     () { return this->value; }
+    virtual bool    setValue   (string value)
+    {
+        bool result = fromString<int>(this->value, value, std::dec);
+        if(allowedValues.size() > 0)
+        {
+            vector<int>::iterator iter = find(allowedValues.begin(), allowedValues.end(), this->value);
+            result = result && (iter != allowedValues.end());
+        }
+        this->value = result ? this->value : this->defaultValue;
+        return result;
+    }
+    virtual string  errorSetVal() 
+    { 
+        stringstream errorMsg;
+        errorMsg << "Value must be 'int' type.";
+        if(allowedValues.size() > 0)
+        {
+            errorMsg << endl << "Allowed values : ";
+            for(unsigned int i=0; i<allowedValues.size(); i++)
+                errorMsg<< allowedValues[i] << " ";
+        }
+        return errorMsg.str();
+    }
+    virtual int     getType() { return (int)_IntType; }
+    // Additional functions
+    void setAllowedValues(vector<int> allowedValues) { this->allowedValues = allowedValues; }
+    void addAllowedValue (int allowedValue) { this->allowedValues.push_back(allowedValue); }
+private:
+    int         defaultValue;
+    int         value;
+    vector<int> allowedValues;
+};
+
+// Unsigned integer type
+class UintType : public AnyType
+{
+public:
+    UintType(unsigned int value = uiDef) { this->defaultValue = value; }
+
+    virtual unsigned int uiValue    () { return this->value; }
+    virtual bool         setValue   (string value)
+    {
+        if(value[0] == '-')
+            return false;
+        bool result = fromString<unsigned int>(this->value, value, std::dec) && (this->value >= 0);
+        this->value = result ? this->value : this->defaultValue;
+        return result;
+    }
+    virtual string       errorSetVal() { return "Value must be 'unsigned int' type."; }
+    virtual int          getType() { return (int)_UintType; }
+private:
+    unsigned int defaultValue;
+    unsigned int value;
+};
+
+// String type
+class StringType : public AnyType
+{
+public:
+    StringType(string value = sDef) { this->value  = value; }
+
+    virtual string sValue   () { return this->value; }
+    virtual bool   setValue (string value)
+    {
+        bool result = true;
+        if(allowedValues.size() > 0)
+        {
+            vector<string>::iterator iter = find(allowedValues.begin(), allowedValues.end(), value);
+            result = result && (iter != allowedValues.end());
+        }
+        this->value = result ? value : defaultValue;
+        return result;
+    }
+    virtual string  errorSetVal() 
+    { 
+        stringstream errorMsg;
+        errorMsg << "Value must be 'string' type.";
+        if(allowedValues.size() > 0)
+        {
+            errorMsg << endl << "Allowed values : ";
+            for(unsigned int i=0; i<allowedValues.size(); i++)
+                errorMsg<< allowedValues[i] << " ";
+        }
+        return errorMsg.str();
+    }
+    virtual int   getType() { return (int)_StringType; }
+    // Additional functions
+    void setAllowedValues(vector<string> allowedValues) { this->allowedValues = allowedValues; }
+    void addAllowedValue (string allowedValue) { this->allowedValues.push_back(allowedValue); }
+private:
+    string         defaultValue;
+    string         value;
+    vector<string> allowedValues;
+};
+
+class ConfigData
+{
+public:
+    ConfigData()
+    {
+        valueNotFound = new AnyType();
+
+        // Add antennas' flag values
+        addFlagged("10101", "1",  10101);
+        addFlagged("10102", "2",  10102);
+        addFlagged("10201", "3",  10201);
+        addFlagged("10202", "4",  10202);
+        addFlagged("20101", "5",  20101);
+        addFlagged("20102", "6",  20102);
+        addFlagged("20201", "7",  20201);
+        addFlagged("20202", "8",  20202);
+        addFlagged("30101", "9",  30101);
+        addFlagged("30102", "10", 30102);
+        addFlagged("40101", "11", 40101);
+        addFlagged("40102", "12", 40102);
+        addFlagged("40201", "13", 40201);
+        addFlagged("40202", "14", 40202);
+        addFlagged("50101", "15", 50101);
+        addFlagged("50102", "16", 50102);
+        addFlagged("50201", "17", 50201);
+        addFlagged("50202", "18", 50202);
+        addFlagged("60101", "19", 60101);
+        addFlagged("60102", "20", 60102);
+        addFlagged("70101", "21", 70101);
+        addFlagged("70102", "22", 70102);
+        addFlagged("70201", "23", 70201);
+        addFlagged("70202", "24", 70202);
+        addFlagged("80101", "25", 80101);
+        addFlagged("80102", "26", 80102);
+        addFlagged("80201", "27", 80201);
+        addFlagged("80202", "28", 80202);
+        addFlagged("90101", "29", 90101);
+        addFlagged("90102", "30", 90102);
+    }
+
+    ~ConfigData()
+    {
+        delete valueNotFound;
+        for(map<string, AnyType*>::iterator iter = data.begin(); iter != data.end(); iter++)
+            delete iter->second;
+    }
+
+    AnyType* operator[](string name)
+    {
+        toUpper(name);
+        if(checkExistence(name))
+            return data[name];
+        cerr<<"WARNING: The value : " << name << " has not been found"<<endl;
+        return valueNotFound;
+    }
+
+    void addType(string name, AnyType* type)
+    {
+        toUpper(name);
+        bool typeAdded = false;
+        if(checkName(name))
+        {
+            trim(name);
+            if(!checkExistence(name))
+            {
+                this->data[name] = type;
+                typeAdded = true;
+            }
+        }
+        if(!typeAdded)
+            delete type;
+    }
+
+    void addBool(string name, bool value = bDef)
+    {
+        toUpper(name);
+        if(checkName(name))
+        {
+            trim(name);
+            if(!checkExistence(name))
+                this->data[name] = new BoolType(value);
+        }
+    }
+    void addDouble(string name, double value = dDef)
+    {
+        toUpper(name);
+        if(checkName(name))
+        {
+            trim(name);
+            if(!checkExistence(name))
+                this->data[name] = new DoubleType(value);
+        }
+    }
+    void addInt(string name, int value = iDef)
+    {
+        toUpper(name);
+        if(checkName(name))
+        {
+            trim(name);
+            if(!checkExistence(name))
+                this->data[name] = new IntType(value);
+        }
+    }
+    void addUint(string name, unsigned int value = uiDef)
+    {
+        toUpper(name);
+        if(checkName(name))
+        {
+            trim(name);
+            if(!checkExistence(name))
+                this->data[name] = new UintType(value);
+        }
+    }
+    void addString(string name, string value = sDef)
+    {
+        toUpper(name);
+        if(checkName(name))
+        {
+            trim(name);
+            if(!checkExistence(name))
+                this->data[name] = new StringType(value);
+        }
+    }
+
+    void readConfigurationFile(string filename)
+    {
+        ifstream file(filename.c_str());
+        if(file.is_open())
+        {
+            while(!file.eof())
+            {
+                string line;
+                getline(file, line);
+                removeTabs(line);
+                trim(line);
+
+                if(line[0] != commentIndicator)
+                {
+                    if(line.find_first_of("=") != string::npos)
+                    {
+                        string varName          = line.substr(0, line.find_first_of("="));
+                        string value            = line.substr(line.find_first_of("=") + 1, line.length());
+                        string originalVarName  = varName;
+
+                        trim(varName);
+                        trim(value);
+
+                        toUpper(varName);
+
+                        // Special case - flagged antennas
+                        if(varName.compare("FLAGGED") == 0)
+                        {
+                            if(checkFlagged(value) != -1) {
+                                flagged.push_back(checkFlagged(value));
+                            } else {
+                              cerr<<endl<<"Error processing file \""<<filename<<"\"."<<endl;
+                              cerr<<varName<<": Antenna '"<<value<<"' is unknown!"<<endl;
+                              cerr<<"Program will continue skipping the problem."<<endl;
+                            }
+                        }
+                        else
+                        {
+                            if(checkExistence(varName))
+                            {
+                                if(!data[varName]->setValue(value))
+                                {
+                                    cerr<<endl<<"Error processing file \""<<filename<<"\"."<<endl;
+                                    cerr<<varName<<"\""<<" : "<<data[varName]->errorSetVal()<<endl;
+                                    cerr<<"Program will continue skipping the problem."<<endl;
+                                }
+                            }
+                            else
+                            {
+                                cerr<<endl<<"Error processing file \""<<filename<<"\"."<<endl;
+                                cerr<<varName<<" was not declared in call_pipeline.cc"<< endl;
+                                cerr<<"Program will continue skipping the problem."<<endl;
+                            }
+                        }
+                    }
+                }
+            }
+            // Another special case - path variable
+            if(checkExistence("PATH"))
+            {
+                string currentPathValue = data["PATH"]->sValue();
+                if((currentPathValue.length() > 1) && (currentPathValue[currentPathValue.length() - 1] != '/'))
+                    currentPathValue += "/";
+                data["PATH"]->setValue(currentPathValue);
+            }
+        }
+        else
+        {
+            cerr << "Failed to open file \"" << filename <<"\".\n";
+            cerr << "Program will continue with default configuration." << endl;
+        }
+    }
+    string showConfigData()
+    {
+      stringstream output(stringstream::in | stringstream::out);
+      for(map<string, AnyType*>::iterator iter = data.begin(); iter != data.end(); iter++)
+      {
+
+         output << iter->first << " = ";
+         switch(iter->second->getType())
+         {
+            case (int)_BoolType :
+               output << iter->second->bValue();
+               break;
+            case (int)_DoubleType :
+               output << iter->second->dValue();
+               break;
+            case (int)_IntType :
+               output << iter->second->iValue();
+               break;
+            case (int)_UintType :
+               output << iter->second->uiValue();
+               break;
+            case (int)_StringType :
+               output << iter->second->sValue();
+               break;
+         }
+         output<<endl;
+      }
+      output<<"Flagged antennas:"<<endl;
+      for(unsigned int i=0; i<flagged.size(); i++) {
+	output<<flagged[i]<<" \t";
+      }
+      output<<endl;
+      return output.str();
+    }
+    vector<int>  getFlagged() { return flagged; }
+private:
+    void addFlagged(string name1, string name2, int value)
+    {
+        flagged1[name1] = value;
+        flagged2[name2] = value;
+    }
+    bool checkExistence(string name)
+    {
+        toUpper(name);
+        map<string, AnyType*>::iterator iter = data.find(name);
+        if(iter != data.end())
+            return true;
+        return false;
+    }
+    bool checkName(string name)
+    {
+        // Names should have form: letter(letter|digit)*
+        // if(!isalpha(name[0]))
+        //    return false;
+        // for(unsigned int i=1; i<name.length(); i++)
+        //    if(!isalnum(name[i]))
+        //        return false;
+        // Temporarily leave no name restrictions
+        return true;
+    }
+    int checkFlagged(string name)
+    {
+        map<string, int>::iterator iter1 = flagged1.find(name);
+        if(iter1 != flagged1.end())
+            return flagged1[name];
+        map<string, int>::iterator iter2 = flagged2.find(name);
+        if(iter2 != flagged2.end())
+            return flagged2[name];
+        return -1;
+    }
+    void removeTabs(string& input)
+    {
+        for(unsigned int i=0; i<input.length(); i++)
+            if(input[i] == '\t')
+                input[i] = ' ';
+    }
+    void toUpper(string& input)
+    {
+        // Since the standard method is not supported by g++ compiler, the naive approach is being used
+        for(unsigned int i=0; i<input.length(); i++)
+           if(isalpha(input[i]))
+            input[i] = toupper(input[i]);
+    }
+    void trim(string& input)
+    {
+        input = input.erase(input.find_last_not_of(" ") + 1);
+        input = input.erase(0, input.find_first_not_of(" "));
+    }
+
+    map<string, int>   flagged1;
+    map<string, int>   flagged2;
+    vector<int>        flagged;
+
+    map<string, AnyType*> data;
+    AnyType*              valueNotFound;
+    const static char     commentIndicator = '#';
+};
+// ---------------------------------------------
+// NOTE: classes can be written even more general and therefore allow to perform serializaion and 
+// deserialization totally independent of ROOT library
+
+// NOTE: for the sake of proper architecture design those classes should be put in seperate files (which 
+// is rather useless in current design
+
+ConfigData config;
+
+
 // ------------- Global variables ----------------
 
 // Set default configuration values for the pipeline
@@ -291,848 +789,128 @@ char reconstruction = 'A';	// A = KASCADE reconstruction taken, G = Grande recon
 
 void readConfigFile (const string &filename)
 {
-  try
-  {
-      ifstream configfile;
-      configfile.open (filename.c_str(), ifstream::in);
-
-      // check if file could be opened
-      if (!(configfile.is_open())) {
-        cerr << "Failed to open file \"" << filename <<"\".\n";
-        cerr << "Program will continue with default configuration." << endl;
-        return;		// exit function
-      }
-
-      // look for the beginnig of the config data (after a line containing only and at least three '-' or '='	
-      string temp_read;
-      bool header_found= false;
-      while ((header_found== false) && (configfile.good())) {
-	configfile >> temp_read;
-        if ((temp_read.find("---") != string::npos) || (temp_read.find("===") != string::npos))
-	  header_found= true;
-      }
-	
-      // print warning if no header was found and assume there is none
-      if (header_found== false) {
-        configfile.close();  // close file
-        cout << "\nWarning: No header was found in configuration file \"" << filename <<"\".\n" ;
-        cout << "Program will continue normally.\n" << endl;
-        configfile.open (filename.c_str(), ifstream::in);  //reopen file to start at the beginning
-      }
-
-      while(configfile.good()) { // read configurations if configs_found
-        string keyword, value, equal_token;
-
-        // read in first keyword, then a token that should be '=' and afterward the value for the keyword
-        if (configfile.good()) configfile >> keyword;
-        if (configfile.good()) configfile >> equal_token;
-        if (configfile.good()) configfile >> value;
-
-        // check if end of file occured:
-        // keyword should contain "", if file is terminated be a new line
-        if (keyword == "") continue;	// go back to begin of while-loop 
-					// configfile.good() should be false now.
-
-        // check if syntax ("=") is correct		
-        if (equal_token.compare("=") != 0) {
-          cerr << "\nError processing file \"" << filename <<"\".\n" ;
-          cerr << "No '=' was found after \"" << keyword << "\".\n";
-          cerr << "\nProgram will continue skipping the problem." << endl;
-        }
-
-        // check keywords an set appropriate configurations
-
-        if ( (keyword.compare("path")==0) || (keyword.compare("Path")==0) ) {
-	  path = value;
-          // add final "/" if not allready there
-          if ( path[path.length()-1] != '/') path += "/";
-
-	  cout << "Path set to \"" << path << "\".\n";
-	}
-
-        if ( (keyword.compare("preferGrande")==0) || (keyword.compare("prefergrande")==0) ||
-             (keyword.compare("PreferGrande")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    preferGrande = true;
-	    cout << "preferGrande set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    preferGrande = false;
-	    cout << "preferGrande set to 'false'.\n";
-          } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "preferGrande must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("generateplots")==0) || (keyword.compare("GeneratePlots")==0) ||
-             (keyword.compare("generatePlots")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    generatePlots = true;
-	    cout << "GeneratePlots set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    generatePlots = false;
-	    cout << "GeneratePlots set to 'false'.\n";
-          } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "GeneratePlots must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("singleplots")==0) || (keyword.compare("SinglePlots")==0) ||
-             (keyword.compare("singlePlots")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    singlePlots = true;
-	    cout << "SinglePlots set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    singlePlots = false;
-	    cout << "SinglePlots set to 'false'.\n";
-          } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "SinglePlots must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("generateSpectra")==0) || (keyword.compare("GenerateSpectra")==0) ||
-             (keyword.compare("generatespectra")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    generateSpectra = true;
-	    cout << "GenerateSpectra set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    generateSpectra = false;
-	    cout << "GenerateSpectra set to 'false'.\n";
-          } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "GenerateSpectra must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("plotrawdata")==0) || (keyword.compare("PlotRawData")==0) ||
-             (keyword.compare("plotRawdata")==0) || (keyword.compare("plotRawData")==0) ) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    PlotRawData = true;
-	    cout << "PlotRawData set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    PlotRawData = false;
-	    cout << "PlotRawData set to 'false'.\n";
-          } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "PlotRawData must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("calculatemaxima")==0) || (keyword.compare("CalculateMaxima")==0) ||
-             (keyword.compare("Calculatemaxima")==0) || (keyword.compare("calculateMaxima")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    CalculateMaxima = true;
-	    cout << "CalculateMaxima set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    CalculateMaxima = false;
-	    cout << "CalculateMaxima set to 'false'.\n";
-          } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "CalculateMaxima must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("listcalcmaxima")==0) || (keyword.compare("ListCalcMaxima")==0) ||
-             (keyword.compare("listCalcMaxima")==0) ) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    listCalcMaxima = true;
-	    cout << "listCalcMaxima set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    listCalcMaxima = false;
-	    cout << "listCalcMaxima set to 'false'.\n";
-          } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "listCalcMaxima must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("printShowerCoordinates")==0) || (keyword.compare("printShowerCoordinates")==0) ||
-             (keyword.compare("printShowerCoordinates")==0) ) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    printShowerCoordinates = true;
-	    cout << "printShowerCoordinates set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    printShowerCoordinates = false;
-	    cout << "printShowerCoordinates set to 'false'.\n";
-          } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "printShowerCoordinates must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("rotatepos")==0) || (keyword.compare("RotatePos")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    RotatePos = true;
-	    cout << "RotatePos set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    RotatePos = false;
-	    cout << "RotatePos set to 'false'.\n";
-          } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "RotatePos must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("verbose")==0) || (keyword.compare("Verbose")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    verbose = true;
-	    cout << "Verbose set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    verbose = false;
-	    cout << "Verbose set to 'false'.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "Verbose must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("ignoredistance")==0) || (keyword.compare("ignoreDistance")==0) ||
-             (keyword.compare("IgnoreDistance")==0) || (keyword.compare("IgnoreDistance")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    ignoreDistance = true;
-	    cout << "ignoreDistance set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    ignoreDistance = false;
-	    cout << "ignoreDistance set to 'false'.\n";
-          } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "ignoreDistance must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("simplexfit")==0) || (keyword.compare("simplexFit")==0) || (keyword.compare("SimplexFit")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    simplexFit = true;
-	    cout << "SimplexFit set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    simplexFit = false;
-	    cout << "SimplexFit set to 'false'.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "SimplexFit must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-	}
-
-        if ( (keyword.compare("dotvcal")==0) || (keyword.compare("doTVcal")==0) 
-             || (keyword.compare("DoTVCal")==0) || (keyword.compare("doTVCal")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    doTVcal = 1;
-	    cout << "doTVcal set to 1 (TV calibration will be done.).\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    doTVcal = 0;
-	    cout << "doTVcal set to 0 (TV calibration won't be done.).\n";
-	  } else
-	  if ( (value.compare("default")==0) || (value.compare("Default")==0) || (value.compare("-1")==0) ) {
-	    doTVcal = -1;
-	    cout << "doTVcal set to -1 (default will be used).\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "doTVcal must be either -1 ('default'), 0 ('false') or 1 ('true').\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("doGaincal")==0) || (keyword.compare("doGainCal")==0)
-             || (keyword.compare("DoGainCal")==0) || (keyword.compare("dogaincal")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    doGainCal = true;
-	    cout << "doGainCal set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    doGainCal = false;
-	    cout << "doGainCal set to 'false'.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "doGainCal must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-	}
-
-        if ( (keyword.compare("doDispersioncal")==0) || (keyword.compare("doDispersionCal")==0)
-             || (keyword.compare("DoDispersionCal")==0) || (keyword.compare("dodispersioncal")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    doDispersionCal = true;
-	    cout << "doDispersionCal set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    doDispersionCal = false;
-	    cout << "doDispersionCal set to 'false'.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "doDispersionCal must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-	}
-
-        if ( (keyword.compare("doDelaycal")==0) || (keyword.compare("doDelayCal")==0)
-             || (keyword.compare("DoDelayCal")==0) || (keyword.compare("dodelaycal")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    doDelayCal = true;
-	    cout << "doDelayCal set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    doDelayCal = false;
-	    cout << "doDelayCal set to 'false'.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "doDelayCal must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-	}
-
-        if ( (keyword.compare("doRFImitigation")==0) || (keyword.compare("DoRFIMitigation")==0)
-             || (keyword.compare("DoRFImitigation")==0) || (keyword.compare("dorfimitigation")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    doRFImitigation = true;
-	    cout << "doRFImitigation set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    doRFImitigation = false;
-	    cout << "doRFImitigation set to 'false'.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "doRFImitigation must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-	}
-
-        if ( (keyword.compare("doFlagNotActiveAnts")==0) || (keyword.compare("DoFlagNotActiveAnts")==0)
-             || (keyword.compare("doflagnotactiveants")==0) || (keyword.compare("Doflagnotactiveants")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    doFlagNotActiveAnts = true;
-	    cout << "doFlagNotActiveAnts set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    doFlagNotActiveAnts = false;
-	    cout << "doFlagNotActiveAnts set to 'false'.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "doFlagNotActiveAnts must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-	}
-
-        if ( (keyword.compare("doAutoFlagging")==0) || (keyword.compare("doAutoFlagging")==0)
-             || (keyword.compare("doAutoFlagging")==0) || (keyword.compare("doAutoFlagging")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    doAutoFlagging = true;
-	    cout << "doAutoFlagging set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    doAutoFlagging = false;
-	    cout << "doAutoFlagging set to 'false'.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "doAutoFlagging must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-	}
-
-        if ( (keyword.compare("polarization")==0) || (keyword.compare("Polarization")==0)
-             || (keyword.compare("polarisation")==0) || (keyword.compare("Polarisation")==0)) {
-          if ( (value.compare("ANY")==0) || (value.compare("any")==0) ) {
-	    polarization = "ANY";
-            both_pol = false;
-	    cout << "polarization set to ANY (polarization won't be considered during analysis).\n";
-	  } else
-          if ( (value.compare("EW")==0) || (value.compare("ew")==0) ) {
-	    polarization = "EW";
-            both_pol = false;
-	    cout << "polarization set to EW (only EW antennas will be beamformed).\n";
-	  } else
-	  if ( (value.compare("NS")==0) || (value.compare("ns")==0) ) {
-	    polarization = "NS";
-            both_pol = false;
-	    cout << "polarization set to NS (only NS antennas will be beamformed).\n";
-	  } else
-	  if ( (value.compare("Both")==0) || (value.compare("BOTH")==0) || (value.compare("both")==0) ) {
-	    polarization = "BOTH";
-            both_pol = true;
-	    cout << "polarization set to BOTH (EW and NS antennas will be beamformed seperatly).\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "Polarization must be either ANY, EW, NS or BOTH.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("plotStart")==0) || (keyword.compare("PlotStart")==0) || (keyword.compare("plotstart")==0)) {
-          double temp = 9999999;
-          stringstream(value) >> temp;
-
-          if (temp != 9999999) { // will be false, if value is not of typ "double"
-            plotStart = temp;
-	    cout << "PlotStart set to " << plotStart << " seconds.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "PlotStart must be of typ 'double'. \n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("plotStop")==0) || (keyword.compare("PlotStop")==0) || (keyword.compare("plotstop")==0)
-            || (keyword.compare("plotEnd")==0) || (keyword.compare("PlotEnd")==0) || (keyword.compare("plotend")==0)) {
-          double temp = 9999999;
-          stringstream(value) >> temp;
-
-          if (temp != 9999999) { // will be false, if value is not of typ "double"
-            plotStop = temp;
-	    cout << "PlotStop set to " << plotStop << " seconds.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "PlotStop must be of typ 'double'. \n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("spectrumStart")==0) || (keyword.compare("SpectrumStart")==0) 
-            || (keyword.compare("spectrumstart")==0)) {
-          double temp = -9999999;
-          stringstream(value) >> temp;
-
-          if (temp != -9999999) { // will be false, if value is not of typ "double"
-            spectrumStart = temp;
-	    cout << "SpectrumStart set to " << spectrumStart << " Hz.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "SpectrumStart must be of typ 'double'. \n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-       if ( (keyword.compare("spectrumStop")==0) || (keyword.compare("SpectrumStop")==0) 
-            || (keyword.compare("spectrumstop")==0)) {
-          double temp = -9999999;
-          stringstream(value) >> temp;
-
-          if (temp != -9999999) { // will be false, if value is not of typ "double"
-            spectrumStop = temp;
-	    cout << "SpectrumStop set to " << spectrumStop << " Hz.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "SpectrumStop must be of typ 'double'. \n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-
-        if ( (keyword.compare("freqStart")==0) || (keyword.compare("FreqStart")==0) 
-            || (keyword.compare("freqstart")==0)) {
-          double temp = -9999999;
-          stringstream(value) >> temp;
-
-          if (temp != -9999999) { // will be false, if value is not of typ "double"
-            freqStart = temp;
-	    cout << "FreqStart set to " << freqStart << " Hz.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "FreqStart must be of typ 'double'. \n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-       if ( (keyword.compare("freqStop")==0) || (keyword.compare("FreqStop")==0) 
-            || (keyword.compare("freqstop")==0)) {
-          double temp = -9999999;
-          stringstream(value) >> temp;
-
-          if (temp != -9999999) { // will be false, if value is not of typ "double"
-            freqStop = temp;
-	    cout << "FreqStop set to " << freqStop << " Hz.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "FreqStop must be of typ 'double'. \n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("upsamplingRate")==0) || (keyword.compare("UpsamplingRate")==0) 
-	  || (keyword.compare("upsamplingrate")==0)) {
-          double temp = 9999999;
-          stringstream(value) >> temp;
-
-          if (temp != 9999999) {  // will be false, if value is not of typ "double"
-            upsamplingRate = temp;
-	    cout << "UpsamplingRate set to " << upsamplingRate << " Hz.\n";
-            // For upsampling rates < 80 MHz no upsampling will be done,
-            // but for upsampling rates between 80 and 160 MHz strange results
-            // may occur. So show a warning in this case:
-	    if ((upsamplingRate >= 80e6) && (upsamplingRate < 160e6))
-              cerr << "WARNING: UpsamplingRate should be larger than 160 MHz to obtain useful results.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "UpsamplingRate must be of typ 'double'. \n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("upsamplingExponent")==0) || (keyword.compare("UpsamplingExponent")==0) 
-	  || (keyword.compare("upsamplingexponent")==0)) {
-          unsigned int temp = 9999999;
-          stringstream(value) >> temp;
-
-          if (temp != 9999999) {  // will be false, if value is not of typ "int"
-            upsamplingExponent = temp;
-	    cout << "UpsamplingExponent set to " << upsamplingExponent<< ".\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "UpsamplingExponent must be of typ 'unsignend int'. \n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("summarycolumns")==0) || (keyword.compare("summaryColumns")==0)
-	  || (keyword.compare("SummaryColumns")==0)) {
-          unsigned int temp = 9999999;
-          stringstream(value) >> temp;
-
-          if (temp != 9999999) {  // will be false, if value is not of typ "int"
-            summaryColumns = temp;
-	    cout << "SummaryColumns set to " << summaryColumns << ".\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "SummaryColumns must be of typ 'unsignend int'. \n";
-            cerr << "Use 'summaryColumns = 0' if you don't want to hava a summary postscrict.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("ccwindowwidth")==0) || (keyword.compare("CCWindowWidth")==0) ||
-              (keyword.compare("CCwindowwidth")==0) || (keyword.compare("ccWindowWidth")==0))
-        {
-          double temp = 9999999;
-          stringstream(value) >> temp;
-
-          if (temp != 9999999) { // will be false, if value is not of typ "double"
-            ccWindowWidth = temp;
-	    cout << "ccWindowWidth set to " << ccWindowWidth << " seconds.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "ccWindowWidth must be of typ 'double'. \n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-	// flagg antennas
-        if ( (keyword.compare("flagged")==0) || (keyword.compare("Flagged")==0))
-        {
-          if ( (value.compare("10101")==0) || (value.compare("1")==0) ) {
-	    flagged.push_back(10101);
-	    cout << "Flagged antenna 1 (id = 10101).\n";
-	  } else
-          if ( (value.compare("10102")==0) || (value.compare("2")==0) ) {
-	    flagged.push_back(10102);
-	    cout << "Flagged antenna 2 (id = 10102).\n";
-	  } else
-          if ( (value.compare("10201")==0) || (value.compare("3")==0) ) {
-	    flagged.push_back(10201);
-	    cout << "Flagged antenna 3 (id = 10201).\n";
-	  } else
-          if ( (value.compare("10202")==0) || (value.compare("4")==0) ) {
-	    flagged.push_back(10202);
-	    cout << "Flagged antenna 4 (id = 10202).\n";
-	  } else
-          if ( (value.compare("20101")==0) || (value.compare("5")==0) ) {
-	    flagged.push_back(20101);
-	    cout << "Flagged antenna 5 (id = 20101).\n";
-	  } else
-          if ( (value.compare("20102")==0) || (value.compare("6")==0) ) {
-	    flagged.push_back(20102);
-	    cout << "Flagged antenna 6 (id = 20102).\n";
-	  } else
-          if ( (value.compare("20201")==0) || (value.compare("7")==0) ) {
-	    flagged.push_back(20201);
-	    cout << "Flagged antenna 7 (id = 20201).\n";
-	  } else
-          if ( (value.compare("20202")==0) || (value.compare("8")==0) ) {
-	    flagged.push_back(20202);
-	    cout << "Flagged antenna 8 (id = 20202).\n";
-	  } else
-          if ( (value.compare("30101")==0) || (value.compare("9")==0) ) {
-	    flagged.push_back(30101);
-	    cout << "Flagged antenna 9 (id = 30101).\n";
-	  } else
-          if ( (value.compare("30102")==0) || (value.compare("10")==0) ) {
-	    flagged.push_back(30102);
-	    cout << "Flagged antenna 10 (id = 30102).\n";
-	  } else
-          if ( (value.compare("40101")==0) || (value.compare("11")==0) ) {
-	    flagged.push_back(40101);
-	    cout << "Flagged antenna 11 (id = 40101).\n";
-	  } else
-          if ( (value.compare("40102")==0) || (value.compare("12")==0) ) {
-	    flagged.push_back(40102);
-	    cout << "Flagged antenna 12 (id = 40102).\n";
-	  } else
-          if ( (value.compare("40201")==0) || (value.compare("13")==0) ) {
-	    flagged.push_back(40201);
-	    cout << "Flagged antenna 13 (id = 40201).\n";
-	  } else
-          if ( (value.compare("40202")==0) || (value.compare("14")==0) ) {
-	    flagged.push_back(40202);
-	    cout << "Flagged antenna 14 (id = 40202).\n";
-	  } else
-          if ( (value.compare("50101")==0) || (value.compare("15")==0) ) {
-	    flagged.push_back(50101);
-	    cout << "Flagged antenna 15 (id = 50101).\n";
-	  } else
-          if ( (value.compare("50102")==0) || (value.compare("16")==0) ) {
-	    flagged.push_back(50102);
-	    cout << "Flagged antenna 16 (id = 50102).\n";
-	  } else
-          if ( (value.compare("50201")==0) || (value.compare("17")==0) ) {
-	    flagged.push_back(50201);
-	    cout << "Flagged antenna 17 (id = 50201).\n";
-	  } else
-          if ( (value.compare("50202")==0) || (value.compare("18")==0) ) {
-	    flagged.push_back(50202);
-	    cout << "Flagged antenna 18 (id = 50202).\n";
-	  } else
-          if ( (value.compare("60101")==0) || (value.compare("19")==0) ) {
-	    flagged.push_back(60101);
-	    cout << "Flagged antenna 19 (id = 60101).\n";
-	  } else
-          if ( (value.compare("60102")==0) || (value.compare("20")==0) ) {
-	    flagged.push_back(60102);
-	    cout << "Flagged antenna 20 (id = 60102).\n";
-	  } else
-          if ( (value.compare("70101")==0) || (value.compare("21")==0) ) {
-	    flagged.push_back(70101);
-	    cout << "Flagged antenna 21 (id = 70101).\n";
-	  } else
-          if ( (value.compare("70102")==0) || (value.compare("22")==0) ) {
-	    flagged.push_back(70102);
-	    cout << "Flagged antenna 22 (id = 70102).\n";
-	  } else
-          if ( (value.compare("70201")==0) || (value.compare("23")==0) ) {
-	    flagged.push_back(70201);
-	    cout << "Flagged antenna 23 (id = 70201).\n";
-	  } else
-          if ( (value.compare("70202")==0) || (value.compare("24")==0) ) {
-	    flagged.push_back(70202);
-	    cout << "Flagged antenna 24 (id = 70202).\n";
-	  } else
-          if ( (value.compare("80101")==0) || (value.compare("25")==0) ) {
-	    flagged.push_back(80101);
-	    cout << "Flagged antenna 25 (id = 80101).\n";
-	  } else
-          if ( (value.compare("80102")==0) || (value.compare("26")==0) ) {
-	    flagged.push_back(80102);
-	    cout << "Flagged antenna 26 (id = 80102).\n";
-	  } else
-          if ( (value.compare("80201")==0) || (value.compare("27")==0) ) {
-	    flagged.push_back(80201);
-	    cout << "Flagged antenna 27 (id = 80201).\n";
-	  } else
-          if ( (value.compare("80202")==0) || (value.compare("28")==0) ) {
-	    flagged.push_back(80202);
-	    cout << "Flagged antenna 28 (id = 80202).\n";
-	  } else
-          if ( (value.compare("90101")==0) || (value.compare("29")==0) ) {
-	    flagged.push_back(90101);
-	    cout << "Flagged antenna 29 (id = 90101).\n";
-	  } else
-          if ( (value.compare("90102")==0) || (value.compare("30")==0) ) {
-	    flagged.push_back(90102);
-	    cout << "Flagged antenna 30 (id = 90102).\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "'Flagged = ' must be followed by a valid antenna id.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("caltablepath")==0) || (keyword.compare("CalTablePath")==0) ) {
-	  caltablepath = value;
-	  cout << "CalTablePath set to \"" << caltablepath << "\".\n";
-	}
-
-        if ( (keyword.compare("rootfilename")==0) || (keyword.compare("Rootfilename")==0)
-           || (keyword.compare("rootFileName")==0) || (keyword.compare("RootFilename")==0)) {
-	  rootFileName = value;
-	  cout << "RootFilename set to \"" << rootFileName << "\".\n";
-	}
-
-        if ( (keyword.compare("rootfilemode")==0) || (keyword.compare("Rootfilemode")==0)
-           || (keyword.compare("rootFileMode")==0) || (keyword.compare("RootFileMode")==0)) {
-          if ( (value.compare("overwrite")==0) || (value.compare("OVERWRITE")==0)
-             || (value.compare("recreate")==0) || (value.compare("RECREATE")==0)) {
-	    rootFileMode = "RECREATE";
-	    cout << "RootFileMode set to RECREATE (existing root file will be overwritten).\n";
-   	  } else 
-          if ( (value.compare("update")==0) || (value.compare("Update")==0)
-             || (value.compare("UPDATE")==0) || (value.compare("append")==0)) {
-	    rootFileMode = "UPDATE";
-	    cout << "RootFileMode set to UPDATE (results are appended to existing root file).\n";
-   	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "RootFileMode must be RECREATE or UPDATE.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
- 
-        if ( (keyword.compare("writeBadEvents")==0) || (keyword.compare("writebadevents")==0)
-             || (keyword.compare("Writebadevents")==0) || (keyword.compare("WriteBadEvents")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    writeBadEvents = true;
-	    cout << "writeBadEvents set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    writeBadEvents = false;
-	    cout << "writeBadEvents set to 'false'.\n";
-	  } else{
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "writeBadEvents must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-	}
-
-        if ( (keyword.compare("calibration")==0) || (keyword.compare("calibration")==0)
-             || (keyword.compare("calibrationmode")==0) || (keyword.compare("CalibrationMode")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    calibrationMode = true;
-	    cout << "calibration set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    calibrationMode = false;
-	    cout << "calibration set to 'false'.\n";
-	  } else{
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "calibration must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-	}
-
-        if ( (keyword.compare("lateralOutputFile")==0) || (keyword.compare("lateraloutputfile")==0)
-             || (keyword.compare("Lateraloutputfile")==0) || (keyword.compare("LateralOutputFile")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    lateralOutputFile = true;
-	    cout << "lateralOutputFile set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    lateralOutputFile = false;
-	    cout << "lateralOutputFile set to 'false'.\n";
-	  } else{
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "lateralOutputFile must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-	}
-
-        if ( (keyword.compare("lateralDistribution")==0) || (keyword.compare("lateraldistribution")==0)
-             || (keyword.compare("Lateraldistribution")==0) || (keyword.compare("LateralDistribution")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    lateralDistribution = true;
-	    cout << "lateralDistribution set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    lateralDistribution = false;
-	    cout << "lateralDistribution set to 'false'.\n";
-	  } else{
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "lateralDistribution must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-	}
-
-        if ( (keyword.compare("LateralSNRcut")==0) || (keyword.compare("lateralsnrcut")==0) ||
-              (keyword.compare("lateralSNRcut")==0) || (keyword.compare("LateralSNRCut")==0))
-        {
-          double temp = 9999999;
-          stringstream(value) >> temp;
-
-          if (temp != 9999999) { // will be false, if value is not of typ "double"
-            lateralSNRcut = temp;
-	    cout << "lateralSNRcut set to: " << lateralSNRcut << endl;
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "lateralSNRcut must be of typ 'double'. \n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("LateralTimecut")==0) || (keyword.compare("lateraltimecut")==0) ||
-              (keyword.compare("lateralTimeCut")==0) || (keyword.compare("LateralTimeCut")==0))
-        {
-          double temp = 9999999;
-          stringstream(value) >> temp;
-
-          if (temp != 9999999) { // will be false, if value is not of typ "double"
-            lateralTimeCut = temp;
-	    cout << "lateralTimeCut set to " << lateralTimeCut << " seconds.\n";
-	  } else {
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "lateralTimeCut must be of typ 'double'. \n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        }
-
-        if ( (keyword.compare("calculateMeanValues")==0) || (keyword.compare("calculatemeanmalues")==0)
-             || (keyword.compare("Calculatemeanvalues")==0) || (keyword.compare("CalculateMeanValues")==0)) {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    calculateMeanValues = true;
-	    cout << "calculateMeanValues set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    calculateMeanValues = false;
-	    cout << "calculateMeanValues set to 'false'.\n";
-	  } else{
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "calculateMeanValues must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-	}
-
-        if ((keyword.compare("showAntennas") == 0) || (keyword.compare("ShowAntennas") == 0))
-        {
-          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) ) {
-	    showAntennas = true;
-	    cout << "showAntennas set to 'true'.\n";
-	  } else
-          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) ) {
-	    showAntennas = false;
-	    cout << "showAntennas set to 'false'.\n";
-	  } else{
-            cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            cerr << "showAntennasA must be either 'true' or 'false'.\n";
-            cerr << "\nProgram will continue skipping the problem." << endl;
-          }
-        } //[added: mfranc]
-
-      }	// while(configfile.good())
-
-      // close config file
-      configfile.close();
-  } catch (AipsError x) {
-    cerr << "call_pipeline:readConfigFile: " << x.getMesg() << endl;
-  }
+   config.addString("caltablepath", caltable_lopes);
+   config.addString("path", ""); 						    
+   config.addBool("preferGrande", false);        		// per default prefer KASCADE reconstruction as input
+   config.addBool("generatePlots", true);         		// the plot prefix will be the name of the event file
+   config.addBool("generateSpectra", false);        		// by default no spectra are plotted
+   config.addBool("singlePlots", false);        			// by default there are no single plots for each antenna
+   config.addBool("PlotRawData", false);	     	 		// by default there the raw data are not plotted
+   config.addBool("CalculateMaxima", false);	      		// by default the maxima are not calculated
+   config.addBool("listCalcMaxima", false);        		// print calculated maxima in more user friendly way
+   config.addBool("printShowerCoordinates", false);   		// print the distance between antenna and shower core
+   config.addBool("RotatePos", true); 	      			    // should be true if coordinates are given in KASKADE frame
+   config.addBool("verbose", true);
+   config.addBool("ignoreDistance", true);          		// distance value of the eventlist will be ignored
+   config.addBool("simplexFit", true);
+   config.addBool("doGainCal", true);		      		// calibration of the electrical fieldstrength
+   config.addBool("doDispersionCal", true);	      		// application of the CalTable PhaseCal values	
+   config.addBool("doDelayCal", true);              		// correction for the general delay of each antenna
+   config.addBool("doRFImitigation", true);	      		// supresses narrow band noise ("RFI)
+   config.addBool("doFlagNotActiveAnts", true);     		// flags antennas marked as "not active" in the CalTables
+   config.addBool("doAutoFlagging", true);	      		// flags antennas due to bad signal ("does not affect flagging by the phase
+   config.addBool("both_pol", false);		      		// Should both polarizations be processed?
+   config.addDouble("plotStart", -2.05e-6);	      		// in seconds
+   config.addDouble("plotStop", -1.60e-6);	      	    	// in seconds
+   config.addDouble("spectrumStart", 40e6);            	        // for plotting", in Hz
+   config.addDouble("spectrumStop", 80e6);	      	    	// for plotting", in Hz
+   config.addDouble("freqStart", 40e6);                	        // for analysis", in Hz
+   config.addDouble("freqStop", 80e6);	                	// for analysis", in Hz
+   config.addDouble("upsamplingRate", 0.);	      	    	// Upsampling Rate for new upsampling
+   config.addUint("upsamplingExponent", 0);  		    	// by default no upsampling will be done
+   config.addUint("summaryColumns", 0);      		    	// be default no summary of all plots
+   config.addDouble("ccWindowWidth", 0.045e-6);	      	        // width of window for CC-beam
+   config.addString("rootFileName", "");               	        // Name of root file for output
+   config.addBool("writeBadEvents", false);         		// also bad events are written into the root file ("if possible)
+   config.addBool("calibrationMode", false);	      		// Calibration mode is off by default
+   config.addBool("lateralDistribution", false);    		// the lateral distribution will not be generated
+   config.addBool("lateralOutputFile", false);      		// no file for the lateral distribution will be created
+   config.addDouble("lateralSNRcut", 1.0);            	        // SNR cut for removing points from lateral distribution
+   config.addDouble("lateralTimeCut", 15e-9);         	        // Allowed time window +/- arround CC-beam-center for found peaks
+   config.addBool("calculateMeanValues", false);   	 	// calculate some mean values of all processed events
+   config.addBool("showAntennas", true);           		// Show antennas and magnitudes of incoming signals [added: mfranc]
+
+   IntType* _doTVcal = new IntType(-1);                          // 1: yes, 0: no, -1: use default	
+   _doTVcal->addAllowedValue(1);
+   _doTVcal->addAllowedValue(0);
+   _doTVcal->addAllowedValue(-1);
+   config.addType("doTVcal", _doTVcal);
+
+   StringType* _polarization = new StringType("ANY");           // polarization: ANY, EW, NS or BOTH
+   _polarization->addAllowedValue("ANY");
+   _polarization->addAllowedValue("EW");
+   _polarization->addAllowedValue("NS");
+   _polarization->addAllowedValue("BOTH");
+   config.addType("polarization", _polarization);
+
+   StringType* _rootFileMode = new StringType("RECREATE");      // Mode, how to access root file
+   _rootFileMode->addAllowedValue("RECREATE");
+   _rootFileMode->addAllowedValue("UPDATE");
+   config.addType("rootFileMode", _rootFileMode);
+
+   config.readConfigurationFile(filename);
+   flagged = config.getFlagged();
+
+   cout<<"=== Configuration parameters ==="<<endl;
+   cout<<config.showConfigData();
+   cout<<"================================"<<endl;
+
+   //NOTE
+   //both_pol are misleadingly a config variable !!!
+   if((config["polarization"]->sValue().compare("EW") == 0) || (config["polarization"]->sValue().compare("NS") == 0) ||
+   (config["polarization"]->sValue().compare("ANY") == 0))
+      config["both_pol"]->setValue("false");
+   else
+      config["both_pol"]->setValue("true");
+
+   // NOTE
+   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   // One can now replace each global variable with the equivalent
+   // Example: Every occurence of caltablepath can be replaced with config["caltablepath"]->sValue()
+
+   caltablepath = config["caltablepath"]->sValue();
+   path = config["path"]->sValue();
+   preferGrande = config["preferGrande"]->bValue();
+   generatePlots = config["generatePlots"]->bValue();
+   generateSpectra = config["generateSpectra"]->bValue();
+   singlePlots = config["singlePlots"]->bValue();
+   PlotRawData = config["PlotRawData"]->bValue();
+   CalculateMaxima = config["CalculateMaxima"]->bValue();
+   listCalcMaxima = config["listCalcMaxima"]->bValue();
+   printShowerCoordinates = config["printShowerCoordinates"]->bValue();
+   RotatePos = config["RotatePos"]->bValue();
+   verbose = config["verbose"]->bValue();
+   ignoreDistance = config["ignoreDistance"]->bValue();
+   simplexFit = config["simplexFit"]->bValue();
+   doTVcal = config["doTVcal"]->iValue();
+   doGainCal = config["doGainCal"]->bValue();
+   doDispersionCal = config["doDispersionCal"]->bValue();
+   doDelayCal = config["doDelayCal"]->bValue();
+   doRFImitigation = config["doRFImitigation"]->bValue();
+   doFlagNotActiveAnts = config["doFlagNotActiveAnts"]->bValue();
+   doAutoFlagging = config["doAutoFlagging"]->bValue();
+   polarization = config["polarization"]->sValue();
+   both_pol = config["both_pol"]->bValue();
+   plotStart = config["plotStart"]->dValue();
+   plotStop = config["plotStop"]->dValue();
+   spectrumStart = config["spectrumStart"]->dValue();
+   spectrumStop = config["spectrumStop"]->dValue();
+   freqStart = config["freqStart"]->dValue();
+   freqStop = config["freqStop"]->dValue();
+   upsamplingRate = config["upsamplingRate"]->dValue();
+   upsamplingExponent = config["upsamplingExponent"]->uiValue();
+   summaryColumns = config["summaryColumns"]->uiValue();
+   ccWindowWidth = config["ccWindowWidth"]->dValue();
+   rootFileName = config["rootFileName"]->sValue();
+   rootFileMode = config["rootFileMode"]->sValue();
+   writeBadEvents = config["writeBadEvents"]->bValue();
+   calibrationMode = config["calibrationMode"]->bValue();
+   lateralDistribution = config["lateralDistribution"]->bValue();
+   lateralOutputFile = config["lateralOutputFile"]->bValue();
+   lateralSNRcut = config["lateralSNRcut"]->dValue();
+   lateralTimeCut = config["lateralTimeCut"]->dValue();
+   calculateMeanValues = config["calculateMeanValues"]->bValue();
+   showAntennas = config["showAntennas"]->bValue();
 }
 
 
