@@ -130,9 +130,12 @@ graph.Clf()
 graph.SetFontSize(2.0)
 
 graph.Title("# single triggers per minute, vs threshold")
-graph.SetRanges(0.0, gX.Max('x')[0], 0.01, gY.Max('x')[0]) # SetRanges goes before Axis to include ranges in axes
+
+# set y-min range so you can just see 1 count in the entire interval.
+yRangeMin = 0.95 / minutes
+graph.SetRanges(0.0, gX.Max('x')[0], yRangeMin, gY.Max('x')[0]) # SetRanges goes before Axis to include ranges in axes
  # min, max is complicated in mglData... the 'x' means first dimension not graph-x !
-graph.SetOrigin(0.0, 0.01)
+graph.SetOrigin(0.0, yRangeMin)
 
 graph.SetFunc("","lg(y)","") 
 graph.SetTicks('y',0)		 
@@ -144,7 +147,7 @@ graph.Axis() # comes after all definitions as before
 graph.Grid()
 graph.Label("x","threshold factor",1)
 graph.Label("y","Counts per minute",1)
-graph.Plot(gX,gY, 'b2');
+graph.Plot(gX,gY, ' o#'); # ' ' means no line; 'o' means o symbols; '#' means solid symbols.
 
 graph.WriteEPS("testSTATS_cpm.eps","Counts per minute")
 
@@ -238,6 +241,6 @@ graph.Grid()
 
 graph.Label("x","Number of RCUs",1)
 graph.Label("y","Counts per minute",1)
-graph.Bars(gX,gY); # a symbol plot would be prettier...
+graph.Plot(gX,gY, ' o#'); 
 graph.WriteEPS("testRCUsperPulse.eps","Test Plot")
 
