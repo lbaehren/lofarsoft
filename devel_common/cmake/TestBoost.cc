@@ -22,18 +22,53 @@
  ***************************************************************************/
 
 #include <iostream>
+#include <string>
 
-/* Include Boost header files */
-#include <boost/python/class.hpp>
-#include <boost/python/module.hpp>
-#include <boost/python/def.hpp>
+/* Boost header files */
+#include <boost/program_options.hpp>
+#include <boost/program_options/cmdline.hpp>
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/detail/cmdline.hpp>
 
-int main ()
+/* Namespace usage */
+namespace bpo = boost::program_options;
+
+//_______________________________________________________________________________
+//                                                           test_program_options
+
+int test_programm_options ()
+{
+  int status (1);
+  
+  bpo::options_description desc ("[TestBoost] Available command line options");
+  
+  desc.add_options ()
+    ("help,H", "Show help messages")
+    ("infile,I", bpo::value<std::string>(),
+     "Input data file from which to generate the image")
+    ("blocksize,B", bpo::value<unsigned int>(),
+     "Size of an individual block of data read from file, [samples].")
+    ("blocks_per_frame", bpo::value<int>(),
+     "Number of input data blocks combined into an output time-frame. (1)")
+    ;
+  
+//   bpo::variables_map vm;
+//   bpo::store (bpo::parse_command_line(argc,argv,desc), vm);
+  
+  return status;
+}
+
+//_______________________________________________________________________________
+//                                                                           main
+
+int main (int argc,
+	  char *argv[])
 {
   int result (1);
   std::string message;
   
-  /* Test 1 : */
+  /* Test module for handling command line options */
+  result =  test_programm_options ();
   
   return result;
 }

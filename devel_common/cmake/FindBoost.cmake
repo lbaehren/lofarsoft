@@ -193,7 +193,7 @@ foreach (boost_version 1_39_0 1_36_0 1_34_1 1_33_1)
       set (continue_search 1)
     endif (BOOST_${lib})
   endforeach (lib)
-
+  
   if (NOT continue_search)
     break ()
   else (NOT continue_search)
@@ -217,7 +217,7 @@ endforeach (boost_version)
 ##        report the symbol to be present in the library.
 
 if (BOOST_boost_python)
-
+  
   ## load CMake module required for checking symbols within a library
   include (CheckLibraryExists)
 
