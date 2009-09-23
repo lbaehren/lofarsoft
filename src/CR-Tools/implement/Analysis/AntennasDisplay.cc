@@ -176,8 +176,8 @@ AntennasDisplay::borders AntennasDisplay::getBorders (int plotsOffset)
 
    if(showCore)
    {
-      output.nValue = std::max(int(xCore + plotsOffset), output.nValue);
-      output.sValue = std::min(int(xCore - plotsOffset), output.sValue);
+      output.nValue = std::max(int(yCore + plotsOffset), output.nValue);
+      output.sValue = std::min(int(yCore - plotsOffset), output.sValue);
       output.eValue = std::max(int(xCore + plotsOffset), output.eValue);
       output.wValue = std::min(int(xCore - plotsOffset), output.wValue);
    }
@@ -317,7 +317,7 @@ TCanvas* AntennasDisplay::createPlot (std::string title, unsigned int width, uns
       double elevationMulValue   = (elevationPlotMax - elevationPlotMin) / (elevationMax - elevationMin);
       double elevationAddValue   = elevationPlotMax;
       double elevationMagnitude  = elevation * elevationMulValue + elevationAddValue;
-      azimuth                   *= PI / 180;
+      azimuth                   *= M_PI / 180;
 
       TArrow* arr = new TArrow(xCore, yCore,
                                elevationMagnitude * sin(azimuth) + xCore,

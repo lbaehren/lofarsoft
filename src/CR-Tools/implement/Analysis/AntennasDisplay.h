@@ -5,8 +5,6 @@
 #include <vector>
 #include <cmath>
 
-#define PI 3.141592
-
 #include <TArrow.h>
 #include <TLine.h>
 #include <TLegend.h>
