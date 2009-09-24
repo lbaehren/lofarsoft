@@ -152,6 +152,13 @@ if (NOT HAVE_PYTHON)
   include (FindNumPy)
 endif (NOT HAVE_PYTHON)
 
+##__________________________________________________________
+## X11 
+
+if (NOT HAVE_X11)
+  include (FindX11)
+endif (NOT HAVE_X11)
+
 ## -----------------------------------------------------------------------------
 ## Include directories
 
@@ -204,6 +211,10 @@ if (NOT NUMPY_INCLUDES)
   set (PULSAR_PYTHON_BINDINGS FALSE)
   message (STATUS "[PULSAR] Unable to generate Python bindings; missing NumPy headers!")
 endif (NOT NUMPY_INCLUDES)
+
+if (X11_FOUND)
+  include_directories (${X11_LIBRARIES})
+endif (X11_FOUND)
 
 ## -----------------------------------------------------------------------------
 ## Installation - We install into $LOFARSOFT/release/share/pulsar to keep all

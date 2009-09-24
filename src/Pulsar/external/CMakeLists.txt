@@ -84,19 +84,27 @@ add_dependencies (tempo_install tempo_build tempo_unpack)
 ##
 ## ==============================================================================
 
-set (ppgplot_version "1.1")
-set (ppgplot_name "ppgplot${ppgplot_version}-modified")
-set (ppgplot_directory "ppgplot/ppgplot${ppgplot_version}-modified")
-set (ppgplot_archive "${ppgplot_directory}.tar.gz")
+set (ppgplot_cmake_build TRUE)
 
-add_custom_target (ppgplot_unpack
-  COMMAND ${tar_executable} -xvzf ${PULSAR_SOURCE_DIR}/external/${ppgplot_archive}
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
-  COMMENT "Unpacking tar archive of PPGPLOT from ${PULSAR_SOURCE_DIR}/external/${ppgplot_archive} to ${PULSAR_BINARY_DIR}/apps..."
-  )
-
-get_filename_component(GFORTRAN_LIBRARY_DIR ${GFORTRAN_LIBRARY} PATH)
-
+if (ppgplot_cmake_build)
+  
+  add_subdirectory (ppgplot1.1-modified)
+  
+else (ppgplot_cmake_build)
+  
+  set (ppgplot_version "1.1")
+  set (ppgplot_name "ppgplot${ppgplot_version}-modified")
+  set (ppgplot_directory "ppgplot/ppgplot${ppgplot_version}-modified")
+  set (ppgplot_archive "${ppgplot_directory}.tar.gz")
+  
+  add_custom_target (ppgplot_unpack
+    COMMAND ${tar_executable} -xvzf ${PULSAR_SOURCE_DIR}/external/${ppgplot_archive}
+    WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
+    COMMENT "Unpacking tar archive of PPGPLOT from ${PULSAR_SOURCE_DIR}/external/${ppgplot_archive} to ${PULSAR_BINARY_DIR}/apps..."
+    )
+  
+  get_filename_component(GFORTRAN_LIBRARY_DIR ${GFORTRAN_LIBRARY} PATH)
+  
 add_custom_target (ppgplot_build
   COMMAND echo "Using PGPLOT include dir:" ${include_locations}
   COMMAND echo "Using PGPLOT library dir:" ${lib_locations} 
@@ -115,3 +123,5 @@ add_custom_target (ppgplot_install
   COMMENT "Install project PPGPLOT libraries into ${CMAKE_INSTALL_PREFIX}/lib..."
   )
 add_dependencies (ppgplot_install ppgplot_build ppgplot_unpack)
+
+endif (ppgplot_cmake_build)
