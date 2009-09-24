@@ -82,7 +82,7 @@ target_link_libraries (presto
 
 set_target_properties (presto
   PROPERTIES
-  COMPILE_FLAGS "-DDATABASE=${presto_SOURCE_DIR} -DFFTTYPE=USEFFTW  -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+  COMPILE_FLAGS "-DDATABASE='${presto_SOURCE_DIR}' -DFFTTYPE=USEFFTW  -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
   )
 
 add_dependencies (presto
