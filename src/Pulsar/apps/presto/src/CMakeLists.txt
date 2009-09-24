@@ -351,7 +351,7 @@ add_executable (weight_psrfits
 
 ## linker statements
 
-foreach (src presto_binaries)
+foreach (src ${presto_binaries})
   target_link_libraries (${src} presto)
 endforeach (src)
 
