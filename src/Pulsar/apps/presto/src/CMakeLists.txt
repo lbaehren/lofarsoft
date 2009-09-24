@@ -93,15 +93,7 @@ add_dependencies (presto
 ##__________________________________________________________
 ## libsla
 
-file (GLOB sla_sources slalib/*.f)
-
-set (CMAKE_Fortran_CREATE_STATIC_LIBRARY TRUE)
-
-add_library (sla ${sla_sources})
-set_target_properties (sla
-  PROPERTIES
-  LINKER_LANGUAGE Fortran
-  )
+add_subdirectory (slalib)
 
 ## ==============================================================================
 ##
