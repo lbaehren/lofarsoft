@@ -1,5 +1,10 @@
 
-add_library (ppgplot ppgplot.c)
+## compiler instructions
+remove_definitions (-dynamiclib -install_name)
+
+add_library (ppgplot MODULE
+  ppgplot.c
+  )
 
 ## additional target properties
 if (APPLE)
@@ -7,7 +12,7 @@ if (APPLE)
     PROPERTIES
     PREFIX ""
     SUFFIX .so
-    COMPILE_FLAGS "-DPYTHON -fpermissive"
+    COMPILE_FLAGS "-no-cpp-precomp -fpermissive -DNDEBUG -g"
     LINK_FLAGS "-fPIC -flat_namespace"
     )
 else (APPLE)
@@ -15,7 +20,7 @@ else (APPLE)
     PROPERTIES
     PREFIX ""
     SUFFIX .so
-    COMPILE_FLAGS -DPYTHON
+    COMPILE_FLAGS "-no-cpp-precomp -DNDEBUG -g"
     LINK_FLAGS "-fPIC -shared"
     )
 endif (APPLE)

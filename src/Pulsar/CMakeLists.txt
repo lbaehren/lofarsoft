@@ -149,6 +149,7 @@ endif (NOT HAVE_GFORTRAN)
 
 if (NOT HAVE_PYTHON)
   include (FindPython)
+  include (FindNumeric)
   include (FindNumPy)
 endif (NOT HAVE_PYTHON)
 
@@ -215,6 +216,13 @@ else (NUMPY_INCLUDES)
   set (PULSAR_PYTHON_BINDINGS FALSE)
   message (STATUS "[PULSAR] Unable to generate Python bindings; missing NumPy headers!")
 endif (NUMPY_INCLUDES)
+
+if (NUMERIC_INCLUDES) 
+  include_directories (${NUMERIC_INCLUDES} ${NUMERIC_INCLUDES}/Numeric)
+else (NUMERIC_INCLUDES) 
+  set (PULSAR_PYTHON_BINDINGS FALSE)
+  message (STATUS "[PULSAR] Unable to generate Python bindings; missing Numeric headers!")
+endif (NUMERIC_INCLUDES)
 
 if (X11_FOUND)
   include_directories (${X11_INCLUDE_DIR})
