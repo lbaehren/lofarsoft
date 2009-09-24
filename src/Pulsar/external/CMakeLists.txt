@@ -95,18 +95,19 @@ add_custom_target (ppgplot_unpack
   COMMENT "Unpacking tar archive of PPGPLOT from ${PULSAR_SOURCE_DIR}/external/${ppgplot_archive} to ${PULSAR_BINARY_DIR}/apps..."
   )
 
-## python build_ext -I ... -L ... build
+get_filename_component(GFORTRAN_LIBRARY_DIR ${GFORTRAN_LIBRARY} PATH)
 
 add_custom_target (ppgplot_build
   COMMAND echo "Using PGPLOT include dir:" ${include_locations}
-  COMMAND echo "Using PGPLOT library dir:" ${lib_locations} ${GFORTRAN_LIBRARIES}
-  COMMAND python setup.py build_ext -I"${include_locations}" -L"${lib_locations}" -L${GFORTRAN_LIBRARIES}
+  COMMAND echo "Using PGPLOT library dir:" ${lib_locations} 
+  COMMAND echo "check GFORTRAN_LIBRARIES:" ${GFORTRAN_LIBRARIES}
+  COMMAND echo "check GFORTRAN_LIBRARY:" ${GFORTRAN_LIBRARY_DIR}
+  COMMAND python setup.py build_ext -I"${include_locations}" -L"${lib_locations}" -L${GFORTRAN_LIBRARY_DIR}
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}
   COMMENT "Building project PPGPLOT in ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}..."
   COMMENT "Building project PPGPLOT with command: python setup.py build_ext -I${include_locations} -L${lib_locations} -L${GFORTRAN_LIBRARIES}"
   )
-## add_dependencies (ppgplot_build)
-## add_dependencies (ppgplot_build ppgplot_unpack)
+add_dependencies (ppgplot_build ppgplot_unpack)
 
 add_custom_target (ppgplot_install
   COMMAND cp ppgplot ${CMAKE_INSTALL_PREFIX}/bin
