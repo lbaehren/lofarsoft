@@ -1,4 +1,6 @@
 
+project (libsla C Fortran)
+
 file (GLOB sla_sources *.f)
 
 add_library (sla ${sla_sources})
