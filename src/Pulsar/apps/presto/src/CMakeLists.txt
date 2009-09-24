@@ -56,6 +56,7 @@ set (presto_sources
 )
 
 set (presto_binaries
+  mpiprepsubband
   makedata makeinf mjd2cal realfft quicklook
   search_bin search_rzw swap_endian prepdata
   check_parkes_raw bary shiftdata dftfold
@@ -130,7 +131,6 @@ add_executable (mpiprepsubband
   mpiprepsubband.c
   ${INSTRUMENTOBJS}
   )
-target_link_libraries (mpiprepsubband presto)
 
 add_executable (accelsearch
   accelsearch_cmd.c 
@@ -138,24 +138,20 @@ add_executable (accelsearch
   accelsearch.c 
   zapping.c
   )
-target_link_libraries (accelsearch presto)
 
 add_executable (bary
   bary.c
   )
-target_link_libraries (bary presto)
 
 add_executable (bincand
   bincand_cmd.c
   bincand.c
   )
-target_link_libraries (bincand presto)
 
 add_executable (dftfold
   dftfold_cmd.c 
   dftfold.c
   )
-target_link_libraries (dftfold presto)
 
 add_executable (shiftdata
   shiftdata.c
@@ -353,8 +349,11 @@ add_executable (weight_psrfits
   ${PLOT2DOBJS}
   )
 
+## linker statements
 
-#target_link_libraries (mpiprepsubband $(PRESTOLINK) -lcfitsio -lm)
+foreach (src presto_binaries)
+  target_link_library(${src} presto)
+endforeach (src)
 
 ## ==============================================================================
 ##
