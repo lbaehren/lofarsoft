@@ -277,8 +277,15 @@ graph = mglGraph(mglGraphPS, width, height)
 
 graph.Clf()
 graph.SetFontSize(3.0)
-graph.SetRanges(0.0, float(max(x)), 0.0, float(max(y)) / minutes)
+#graph.SetRanges(0.0, float(max(x)), 0.0, float(max(y)) / minutes)
 #graph.SetTicks('x', 16.0, 4)
+#graph.SetRanges(gX[0], gX.Max('x')[0], yRangeMin, 2 * gY.Max('x')[0]) 
+graph.SetRanges(0, gX.Max('x')[0], yRangeMin, 2 * gY.Max('x')[0])
+# make logplot
+graph.SetOrigin(0, yRangeMin) 
+graph.SetFunc("","lg(y)","") 
+graph.SetTicks('y',0)		 
+#graph.SetTicks('x',0)
 
 graph.Axis("xy")
 graph.Grid()
