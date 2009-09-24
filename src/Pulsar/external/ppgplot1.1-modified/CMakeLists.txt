@@ -33,4 +33,5 @@ target_link_libraries (ppgplot
 install (
   TARGETS ppgplot
   LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
   )
