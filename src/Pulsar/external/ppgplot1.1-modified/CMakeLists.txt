@@ -2,17 +2,17 @@
 ## compiler instructions
 remove_definitions (-dynamiclib -install_name)
 
-add_library (ppgplot MODULE
+add_library (ppgplot
   ppgplot.c
   )
 
 ## additional target properties
 if (APPLE)
-  set_target_properties (ppgplot
+  set_target_properties (ppgplot SHARED
     PROPERTIES
     PREFIX ""
     SUFFIX .so
-    COMPILE_FLAGS "-no-cpp-precomp -fpermissive -DNDEBUG -g"
+    COMPILE_FLAGS "-fpermissive -DNDEBUG -g"
     LINK_FLAGS "-fPIC -flat_namespace"
     )
 else (APPLE)
@@ -20,7 +20,7 @@ else (APPLE)
     PROPERTIES
     PREFIX ""
     SUFFIX .so
-    COMPILE_FLAGS "-no-cpp-precomp -DNDEBUG -g"
+    COMPILE_FLAGS "-DNDEBUG -g"
     LINK_FLAGS "-fPIC -shared"
     )
 endif (APPLE)
