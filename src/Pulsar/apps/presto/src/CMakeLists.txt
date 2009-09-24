@@ -74,6 +74,7 @@ set (presto_binaries
 add_library (presto ${presto_sources})
 
 target_link_libraries (presto
+  ppgplot
   ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a
   ${CFITSIO_LIBRARIES}
   ${GLIB_LIBRARIES}
@@ -81,7 +82,6 @@ target_link_libraries (presto
 
 add_dependencies (presto
   fftw_install
-  ppgplot_install
   tempo_install
   )
 
