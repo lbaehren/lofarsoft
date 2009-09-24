@@ -213,7 +213,7 @@ if (NOT NUMPY_INCLUDES)
 endif (NOT NUMPY_INCLUDES)
 
 if (X11_FOUND)
-  include_directories (${X11_LIBRARIES})
+  include_directories (${X11_INCLUDE_DIR})
 endif (X11_FOUND)
 
 ## -----------------------------------------------------------------------------
