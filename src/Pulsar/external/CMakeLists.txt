@@ -102,7 +102,7 @@ add_custom_target (ppgplot_build
   COMMAND echo "Using PGPLOT library dir:" ${lib_locations} 
   COMMAND echo "check GFORTRAN_LIBRARIES:" ${GFORTRAN_LIBRARIES}
   COMMAND echo "check GFORTRAN_LIBRARY:" ${GFORTRAN_LIBRARY_DIR}
-  COMMAND python setup.py build_ext -I"${include_locations}" -I"${NUMPY_INCLUDES}" -L"${lib_locations}" -L${GFORTRAN_LIBRARY_DIR} -L${PGPLOT_LIBRARY_DIR}
+  COMMAND python setup.py build_ext -I"${include_locations}" -I"${NUMPY_INCLUDES}" -I"${NUMPY_INCLUDES}/numpy" -L"${lib_locations}" -L${GFORTRAN_LIBRARY_DIR} -L${PGPLOT_LIBRARY_DIR}
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}
   COMMENT "Building project PPGPLOT in ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}..."
   COMMENT "Building project PPGPLOT with command: python setup.py build_ext -I${include_locations} -L${lib_locations} -L${GFORTRAN_LIBRARIES} -L${PGPLOT_LIBRARY_DIR}"
