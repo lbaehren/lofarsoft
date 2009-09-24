@@ -45,6 +45,8 @@ find_path (NUMERIC_INCLUDES arrayobject.h
   python
   python/numeric
   python/Numeric
+  python${PYTHON_VERSION}/numeric
+  python${PYTHON_VERSION}/Numeric
   NO_DEFAULT_PATH
   )
 
