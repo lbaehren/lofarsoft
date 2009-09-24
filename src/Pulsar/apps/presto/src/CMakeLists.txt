@@ -81,6 +81,8 @@ target_link_libraries (presto
 
 add_dependencies (presto
   fftw_install
+  ppgplot_install
+  tempo_install
   )
 
 ##__________________________________________________________
@@ -131,7 +133,7 @@ add_executable (mpiprepsubband
   mpiprepsubband.c
   ${INSTRUMENTOBJS}
   )
-target_link_library (mpiprepsubband presto)
+target_link_libraries (mpiprepsubband presto)
 
 add_executable (accelsearch
   accelsearch_cmd.c 
@@ -139,24 +141,24 @@ add_executable (accelsearch
   accelsearch.c 
   zapping.c
   )
-target_link_library (accelsearch presto)
+target_link_libraries (accelsearch presto)
 
 add_executable (bary
   bary.c
   )
-target_link_library (bary presto)
+target_link_libraries (bary presto)
 
 add_executable (bincand
   bincand_cmd.c
   bincand.c
   )
-target_link_library (bincand presto)
+target_link_libraries (bincand presto)
 
 add_executable (dftfold
   dftfold_cmd.c 
   dftfold.c
   )
-target_link_library (dftfold presto)
+target_link_libraries (dftfold presto)
 
 add_executable (shiftdata
   shiftdata.c
