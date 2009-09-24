@@ -12,27 +12,27 @@ set (fftw_archive "${fftw_directory}.tgz")
 
 add_custom_target (fftw_unpack
   COMMAND ${tar_executable} -xvzf ${PULSAR_SOURCE_DIR}/external/${fftw_archive}
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/implement
-  COMMENT "Unpacking tar archive of FFTW from ${PULSAR_SOURCE_DIR}/external/${fftw_archive} to ${PULSAR_BINARY_DIR}/implement ..."
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external
+  COMMENT "Unpacking tar archive of FFTW from ${PULSAR_SOURCE_DIR}/external/${fftw_archive} to ${PULSAR_BINARY_DIR}/external ..."
   )
 
 add_custom_target (fftw_configure
   COMMAND ./configure  --enable-shared --enable-single --prefix=${CMAKE_INSTALL_PREFIX} --enable-sse
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/implement/${fftw_name} 
-  COMMENT "Configuring project FFTW in ${PULSAR_BINARY_DIR}/implement/${fftw_name} ..."
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external/${fftw_name} 
+  COMMENT "Configuring project FFTW in ${PULSAR_BINARY_DIR}/external/${fftw_name} ..."
   )
 add_dependencies (fftw_configure fftw_unpack)
 
 add_custom_target (fftw_build
   COMMAND make 
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/implement/${fftw_name}
-  COMMENT "Building project FFTW in ${PULSAR_BINARY_DIR}/implement/${fftw_name}..."
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external/${fftw_name}
+  COMMENT "Building project FFTW in ${PULSAR_BINARY_DIR}/external/${fftw_name}..."
   )
 add_dependencies (fftw_build fftw_configure fftw_unpack)
 
 add_custom_target (fftw_install
   COMMAND make install
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/implement/${fftw_name}
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external/${fftw_name}
   COMMENT "Install project FFTW into ${CMAKE_INSTALL_PREFIX}..."
   )
 add_dependencies (fftw_install fftw_build fftw_configure fftw_unpack)
