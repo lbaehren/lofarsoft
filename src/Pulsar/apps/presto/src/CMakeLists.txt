@@ -73,6 +73,16 @@ set (presto_binaries
 
 add_library (presto ${presto_sources})
 
+target_link_libraries (presto
+  ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a
+  ${CFITSIO_LIBRARIES}
+  ${GLIB_LIBRARIES}
+  )
+
+add_dependencies (presto
+  fftw_install
+  )
+
 ##__________________________________________________________
 ## libsla
 
@@ -121,6 +131,7 @@ add_executable (mpiprepsubband
   mpiprepsubband.c
   ${INSTRUMENTOBJS}
   )
+target_link_library (mpiprepsubband presto)
 
 add_executable (accelsearch
   accelsearch_cmd.c 
@@ -128,20 +139,24 @@ add_executable (accelsearch
   accelsearch.c 
   zapping.c
   )
+target_link_library (accelsearch presto)
 
 add_executable (bary
   bary.c
   )
+target_link_library (bary presto)
 
 add_executable (bincand
   bincand_cmd.c
   bincand.c
   )
+target_link_library (bincand presto)
 
 add_executable (dftfold
   dftfold_cmd.c 
   dftfold.c
   )
+target_link_library (dftfold presto)
 
 add_executable (shiftdata
   shiftdata.c
