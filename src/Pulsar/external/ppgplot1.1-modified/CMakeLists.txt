@@ -6,6 +6,14 @@ add_library (ppgplot SHARED
   ppgplot.c
   )
 
+target_link_libraries (ppgplot
+  ${PGPLOT_LIBRARIES}
+  ${NUMPY_LIBRARIES}
+  ${PYTHON_LIBRARIES}
+  ${GFORTRAN_LIBRARIES}
+  ${X11_LIBRARIES}
+  )
+
 ## additional target properties
 if (APPLE)
   set_target_properties (ppgplot
@@ -24,14 +32,6 @@ else (APPLE)
     LINK_FLAGS "-fPIC -shared"
     )
 endif (APPLE)
-
-target_link_libraries (ppgplot
-  ${PGPLOT_LIBRARIES}
-  ${NUMPY_LIBRARIES}
-  ${PYTHON_LIBRARIES}
-  ${GFORTRAN_LIBRARIES}
-  ${X11_LIBRARIES}
-  )
 
 ## Installation
 
