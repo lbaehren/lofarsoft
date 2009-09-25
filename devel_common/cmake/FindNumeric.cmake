@@ -60,15 +60,61 @@ string (REGEX REPLACE "include/python/Numeric" "include/python" NUMERIC_INCLUDES
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-find_library (NUMERIC_LIBRARIES _numpy
-  PATHS ${lib_locations}
-  PATH_SUFFIXES
+set (lib_locations_extra 
   python
   python/numeric
   python/Numeric
   python/site-packages/Numeric
+  python${PYTHON_VERSION}/site-packages/numpy/core
+)
+
+## [1] _numpy
+
+find_library (NUMERIC_NUMPY_LIBRAY _numpy
+  PATHS ${lib_locations}
+  PATH_SUFFIXES ${lib_locations_extra}
   NO_DEFAULT_PATH
   )
+
+if (NUMERIC_NUMPY_LIBRAY)
+  list (APPEND NUMERIC_LIBRARIES ${NUMERIC_NUMPY_LIBRAY})
+endif (NUMERIC_NUMPY_LIBRAY)
+
+## [2] multiarray
+
+find_library (NUMERIC_MULTIARRAY_LIBRAY multiarray
+  PATHS ${lib_locations}
+  PATH_SUFFIXES ${lib_locations_extra}
+  NO_DEFAULT_PATH
+  )
+
+if (NUMERIC_MULTIARRAY_LIBRAY)
+  list (APPEND NUMERIC_LIBRARIES ${NUMERIC_MULTIARRAY_LIBRAY})
+endif (NUMERIC_MULTIARRAY_LIBRAY)
+
+## [3] arrayfns
+
+find_library (NUMERIC_ARRAYFNS_LIBRAY arrayfns
+  PATHS ${lib_locations}
+  PATH_SUFFIXES ${lib_locations_extra}
+  NO_DEFAULT_PATH
+  )
+
+if (NUMERIC_ARRAYFNS_LIBRAY)
+  list (APPEND NUMERIC_LIBRARIES ${NUMERIC_ARRAYFNS_LIBRAY})
+endif (NUMERIC_ARRAYFNS_LIBRAY)
+
+## [4] umath
+
+find_library (NUMERIC_UMATH_LIBRAY umath
+  PATHS ${lib_locations}
+  PATH_SUFFIXES ${lib_locations_extra}
+  NO_DEFAULT_PATH
+  )
+
+if (NUMERIC_UMATH_LIBRAY)
+  list (APPEND NUMERIC_LIBRARIES ${NUMERIC_UMATH_LIBRAY})
+endif (NUMERIC_UMATH_LIBRAY)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -105,4 +151,6 @@ endif (HAVE_NUMERIC)
 mark_as_advanced (
   NUMERIC_INCLUDES
   NUMERIC_LIBRARIES
+  NUMERIC_NUMPY_LIBRAY
+  NUMERIC_MULTIARRAY_LIBRAY
   )
