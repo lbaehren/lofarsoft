@@ -65,6 +65,7 @@ set (lib_locations_extra
   python/numeric
   python/Numeric
   python/site-packages/Numeric
+  python${PYTHON_VERSION}/site-packages/Numeric
   python${PYTHON_VERSION}/site-packages/numpy/core
 )
 
