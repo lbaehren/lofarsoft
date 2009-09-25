@@ -2,13 +2,13 @@
 ## compiler instructions
 remove_definitions (-dynamiclib -install_name)
 
-add_library (ppgplot
+add_library (ppgplot MODULE
   ppgplot.c
   )
 
 ## additional target properties
 if (APPLE)
-  set_target_properties (ppgplot SHARED
+  set_target_properties (ppgplot
     PROPERTIES
     PREFIX ""
     SUFFIX .so
