@@ -2,7 +2,7 @@
 ## compiler instructions
 remove_definitions (-dynamiclib -install_name)
 
-add_library (ppgplot MODULE
+add_library (ppgplot SHARED
   ppgplot.c
   )
 
