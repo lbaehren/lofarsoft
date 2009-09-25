@@ -36,17 +36,22 @@ include (CMakeSettings)
 
 include (FindPython)
 
+set (find_path_suffixes 
+  python
+  python/numeric
+  python/Numeric
+  python/site-packages/Numeric
+  python${PYTHON_VERSION}/site-packages/Numeric
+  python${PYTHON_VERSION}/site-packages/numpy/core
+)
+
+
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (NUMERIC_INCLUDES arrayobject.h
   PATHS ${include_locations}
-  PATH_SUFFIXES
-  python
-  python/numeric
-  python/Numeric
-  python${PYTHON_VERSION}/numeric
-  python${PYTHON_VERSION}/Numeric
+  PATH_SUFFIXES ${find_path_suffixes}
   NO_DEFAULT_PATH
   )
 
@@ -60,20 +65,13 @@ string (REGEX REPLACE "include/python/Numeric" "include/python" NUMERIC_INCLUDES
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-set (lib_locations_extra 
-  python
-  python/numeric
-  python/Numeric
-  python/site-packages/Numeric
-  python${PYTHON_VERSION}/site-packages/Numeric
-  python${PYTHON_VERSION}/site-packages/numpy/core
-)
+set (NUMERIC_LIBRARIES "")
 
 ## [1] _numpy
 
 find_library (NUMERIC_NUMPY_LIBRAY _numpy
   PATHS ${lib_locations}
-  PATH_SUFFIXES ${lib_locations_extra}
+  PATH_SUFFIXES ${find_path_suffixes}
   NO_DEFAULT_PATH
   )
 
@@ -85,7 +83,7 @@ endif (NUMERIC_NUMPY_LIBRAY)
 
 find_library (NUMERIC_MULTIARRAY_LIBRAY multiarray
   PATHS ${lib_locations}
-  PATH_SUFFIXES ${lib_locations_extra}
+  PATH_SUFFIXES ${find_path_suffixes}
   NO_DEFAULT_PATH
   )
 
@@ -97,7 +95,7 @@ endif (NUMERIC_MULTIARRAY_LIBRAY)
 
 find_library (NUMERIC_ARRAYFNS_LIBRAY arrayfns
   PATHS ${lib_locations}
-  PATH_SUFFIXES ${lib_locations_extra}
+  PATH_SUFFIXES ${find_path_suffixes}
   NO_DEFAULT_PATH
   )
 
@@ -109,7 +107,7 @@ endif (NUMERIC_ARRAYFNS_LIBRAY)
 
 find_library (NUMERIC_UMATH_LIBRAY umath
   PATHS ${lib_locations}
-  PATH_SUFFIXES ${lib_locations_extra}
+  PATH_SUFFIXES ${find_path_suffixes}
   NO_DEFAULT_PATH
   )
 
