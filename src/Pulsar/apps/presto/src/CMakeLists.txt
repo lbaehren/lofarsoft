@@ -79,6 +79,7 @@ target_link_libraries (presto
   ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a
   ${CFITSIO_LIBRARIES}
   ${GLIB_LIBRARIES}
+  ${NUMPY_LIBRARIES}
   ${NUMERIC_LIBRARIES}
   )
 
