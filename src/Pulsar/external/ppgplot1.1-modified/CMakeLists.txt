@@ -8,8 +8,8 @@ add_library (ppgplot SHARED
 
 target_link_libraries (ppgplot
   ${PGPLOT_LIBRARIES}
-  ${NUMPY_LIBRARIES}
   ${PYTHON_LIBRARIES}
+  ${NUMPY_LIBRARIES}
   ${GFORTRAN_LIBRARIES}
   ${X11_LIBRARIES}
   )
