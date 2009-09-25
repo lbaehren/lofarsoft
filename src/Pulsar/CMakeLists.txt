@@ -194,6 +194,10 @@ else (HAVE_GFORTRAN)
   message (STATUS "[PULSAR] Missing or incomplete installation of GFORTRAN!")
 endif (HAVE_GFORTRAN)
 
+if (GFORTRAN_EXECUTABLE)
+  set (CMAKE_Fortran_COMPILER ${GFORTRAN_EXECUTABLE})
+endif (GFORTRAN_EXECUTABLE)
+
 if (HAVE_PGPLOT)
   include_directories (${PGPLOT_INCLUDES})
   add_definitions (-DHAVE_PGPLOT)
