@@ -145,7 +145,7 @@ include (FindPOPT)
 include (FindPostgreSQL)
 include (FindPython)
 include (FindROOT)
-include (FindWCS)
+include (FindWCSLIB)
 
 if (CR_WITH_PYTHON)
   include (FindPythonModules)

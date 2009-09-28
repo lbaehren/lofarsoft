@@ -40,7 +40,7 @@ include (FindCASACORE)
 include (FindCFITSIO)
 include (FindHDF5)
 include (FindLAPACK)
-include (FindWCS)
+include (FindWCSLIB)
 
 ## =============================================================================
 ##

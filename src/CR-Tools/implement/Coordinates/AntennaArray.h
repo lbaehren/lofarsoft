@@ -111,7 +111,7 @@ namespace CR { // Namespace CR -- begin
       \param epoch -- Epoch (required for reference frame transformations)
     */
     AntennaArray (std::string const &name,
-		  casa::MEpoch const &epoch);
+		  casa::MPosition const &location);
     
     /*!
       \brief Argumented constructor

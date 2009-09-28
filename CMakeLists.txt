@@ -45,7 +45,7 @@ option (ENABLE_DASHBOARD    "Send a build report to the Dashboard server?"  YES 
 option (POST_BUILD_CLEAN    "Clean up the build directory after a build?"   NO  )
 option (MULTITHREADED_BUILD "Enable multithreading during build?"           NO  )
 option (SYSTEM_PACKAGES     "Installation of required system packages?"     YES )
-option (TEST_DATASETS       "Download and install sample test datasets?"    NO )
+option (TEST_DATASETS       "Download and install sample test datasets?"    NO  )
 
 ## Options affecting the build of individual packages
 
@@ -176,6 +176,7 @@ endif (svn_executable)
 ## ==============================================================================
 
 set (packages_external
+  blas
   blitz 
   boost
   casacore
@@ -227,7 +228,7 @@ endforeach (package_name)
 ##____________________________________________________________________
 ##                                        Dependencies of the packages
 
-add_dependencies (casacore hdf5 cfitsio boost wcslib bison)
+add_dependencies (casacore hdf5 cfitsio wcslib bison)
 
 add_dependencies (hdf5 szip)
 
@@ -379,7 +380,7 @@ add_custom_target (rm
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package RM ..."
   )
-add_dependencies (rm dal itpp)
+add_dependencies (rm itpp dal)
 
 ##____________________________________________________________________
 ##                                                             smosaic

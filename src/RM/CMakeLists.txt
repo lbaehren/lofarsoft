@@ -129,7 +129,7 @@ include (FindHDF5)
 include (FindITPP)
 include (FindLAPACK)
 include (FindPython)
-include (FindWCS)
+include (FindWCSLIB)
 
 ## =============================================================================
 ##

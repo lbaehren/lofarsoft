@@ -11,7 +11,7 @@ cmake_minimum_required (VERSION 2.5)
 ## find script
 
 option (ITPP_FORCE_BUILD       "Force rebuild and local installation?"    NO  )
-option (ITPP_CMAKE_BUILD       "Use CMake to configure and build IT++?"  YES )
+option (ITPP_CMAKE_BUILD       "Use CMake to configure and build IT++?"   YES )
 option (ITPP_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
 option (ITPP_VERBOSE_BUILD     "Be verbose during build process?"         NO  )
 

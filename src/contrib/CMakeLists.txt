@@ -99,7 +99,7 @@ include (FindGFortran)
 include (FindHDF5)
 include (FindLAPACK)
 include (FindPLplot)
-include (FindWCS)
+include (FindWCSLIB)
 
 ## -----------------------------------------------------------------------------
 ## Compiler flags

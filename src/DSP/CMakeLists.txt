@@ -121,7 +121,7 @@ if (DSP_cmake)
   endif (NOT HAVE_PGPLOT)
   ## -- WCSLIB ---------------
   if (NOT HAVE_WCSLIB) 
-    include (${DSP_cmake}/FindWCS.cmake)
+    include (${DSP_cmake}/FindWCSLIB.cmake)
   endif (NOT HAVE_WCSLIB)
 elseif (DSP_cmake)
   message (SEND_ERROR "Unable to locate additional CMake scripts!")
