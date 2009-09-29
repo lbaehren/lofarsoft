@@ -161,7 +161,7 @@ foreach (python_version ${python_version_list})
       python${python_version}/config
       NO_DEFAULT_PATH
       )
-    
+
     # Check if we have been able to find a consistent set of exectable,
     # header files and library. If this is the case, we stop looking for
     # such a combination in an older Python release.
@@ -169,6 +169,7 @@ foreach (python_version ${python_version_list})
     if (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
       set (PYTHON_VERSION ${python_version})
       set (HAVE_PYTHON TRUE)
+      list (APPEND PYTHON_LIBRARIES dl pthread util)
     else (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
       if (NOT PYTHON_FIND_QUIETLY)
 	message (STATUS "No consistent set of files found for Python ${python_version}")
