@@ -2,15 +2,14 @@
 ## compiler instructions
 remove_definitions (-dynamiclib -install_name)
 
-add_library (ppgplot SHARED
+add_library (ppgplot
   ppgplot.c
   )
 
 target_link_libraries (ppgplot
   ${PGPLOT_LIBRARIES}
-  ${PYTHON_LIBRARIES}
   ${NUMPY_LIBRARIES}
-  ${NUMERIC_LIBRARIES}
+  ${PYTHON_LIBRARIES}
   ${GFORTRAN_LIBRARIES}
   ${X11_LIBRARIES}
   )
