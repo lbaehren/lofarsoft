@@ -45,6 +45,18 @@ set (find_path_suffixes
   python${PYTHON_VERSION}/site-packages/numpy/core
 )
 
+## -----------------------------------------------------------------------------
+## As the shared libraries of a Python module typically do not contain the 
+## usual prefix, we need to remove it while searching for the NumPy libraries.
+## In order however not to affect other CMake modules we need to swap back in the
+## original prefixes once the end of this module is reached.
+
+set (TMP_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES})
+
+set (CMAKE_FIND_LIBRARY_PREFIXES "" CACHE STRING
+  "Library prefixes"
+  FORCE
+  )
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files

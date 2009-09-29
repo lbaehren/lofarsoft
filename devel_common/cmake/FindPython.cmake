@@ -222,4 +222,5 @@ endif (HAVE_PYTHON)
 mark_as_advanced (
   PYTHON_INCLUDES
   PYTHON_LIBRARIES
+  PYTHON_VERSION
   )
