@@ -3,10 +3,10 @@
 ##------------------------------------------------------------------------------
 
 ## Name of the project
-project (presto)
+#project (presto)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.6)
+#cmake_minimum_required (VERSION 2.6)
 
 ## =============================================================================
 ##
@@ -14,9 +14,7 @@ cmake_minimum_required (VERSION 2.6)
 ##
 ## =============================================================================
 
-include_directories (
-  ${presto_SOURCE_DIR}/include
-  )
+include_directories (${PULSAR_SOURCE_DIR}/apps/presto/include)
 
 add_subdirectory (src)
 
