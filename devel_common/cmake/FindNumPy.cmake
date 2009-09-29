@@ -59,6 +59,7 @@ set (CMAKE_FIND_LIBRARY_PREFIXES "" CACHE STRING
 ## are, and try asking it before searching ourselves.
 ## This is necessary to e.g. pick up the MacPorts NumPy installation, which
 ## ends up in /opt/local/Library/Frameworks/Python.framework ...
+
 execute_process (
   COMMAND ${PYTHON_EXECUTABLE} -c "import numpy, os; print os.path.dirname(numpy.__file__)"
   OUTPUT_VARIABLE numpy_path

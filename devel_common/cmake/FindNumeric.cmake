@@ -38,9 +38,15 @@ include (FindPython)
 
 set (find_path_suffixes 
   python
+  core/include
   python/numeric
+  python/numeric/core/include
   python/Numeric
+  python/Numeric/core/include
   python/site-packages/Numeric
+  python${PYTHON_VERSION}/numeric
+  python${PYTHON_VERSION}/Numeric
+  python${PYTHON_VERSION}/site-packages/numeric
   python${PYTHON_VERSION}/site-packages/Numeric
   python${PYTHON_VERSION}/site-packages/numpy/core
 )
@@ -59,9 +65,25 @@ set (CMAKE_FIND_LIBRARY_PREFIXES "" CACHE STRING
   )
 
 ## -----------------------------------------------------------------------------
+## Let's assume the Python executable is smarter about finding Numeric than we
+## are, and try asking it before searching ourselves.
+## This is necessary to e.g. pick up the MacPorts Numeric installation, which
+## ends up in /opt/local/Library/Frameworks/Python.framework ...
+
+execute_process (
+  COMMAND ${PYTHON_EXECUTABLE} -c "import Numeric, os; print os.path.dirname(Numeric.__file__)"
+  OUTPUT_VARIABLE numeric_path
+  )
+if (numeric_path)
+  string (STRIP ${numeric_path} numeric_search_path)
+else (numeric_path)
+  set (numeric_search_path ${lib_locations})
+endif (numeric_path)
+
+## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (NUMERIC_INCLUDES arrayobject.h
+find_path (NUMERIC_INCLUDES arrayobject.h ufuncobject.h
   PATHS ${include_locations}
   PATH_SUFFIXES ${find_path_suffixes}
   NO_DEFAULT_PATH
