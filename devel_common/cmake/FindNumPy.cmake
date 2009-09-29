@@ -120,8 +120,7 @@ find_library (NUMPY_MULTIARRAY_LIBRARY multiarray
   NO_DEFAULT_PATH
   )
 if (NUMPY_MULTIARRAY_LIBRARY)
-  get_filename_component (libmultiarray ${NUMPY_MULTIARRAY_LIBRARY} ABSOLUTE)
-  list (APPEND NUMPY_LIBRARIES ${libmultiarray})
+  list (APPEND NUMPY_LIBRARIES ${NUMPY_MULTIARRAY_LIBRARY})
 endif (NUMPY_MULTIARRAY_LIBRARY)
 
 find_library (NUMPY_SCALARMATH_LIBRARY scalarmath
