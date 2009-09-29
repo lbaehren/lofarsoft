@@ -10,6 +10,7 @@ target_link_libraries (ppgplot
   ${PGPLOT_LIBRARIES}
   ${PYTHON_LIBRARIES}
   ${NUMPY_LIBRARIES}
+  ${NUMERIC_LIBRARIES}
   ${GFORTRAN_LIBRARIES}
   ${X11_LIBRARIES}
   )
@@ -20,7 +21,7 @@ if (APPLE)
     PROPERTIES
     PREFIX ""
     SUFFIX .so
-    COMPILE_FLAGS "-fpermissive -DNDEBUG -g"
+    COMPILE_FLAGS "-bundle -DNDEBUG -g"
     LINK_FLAGS "-fPIC -flat_namespace"
     )
 else (APPLE)
