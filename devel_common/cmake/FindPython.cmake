@@ -42,6 +42,11 @@
 #
 
 ## -----------------------------------------------------------------------------
+## include guard
+
+if (NOT HAVE_PYTHON)
+
+## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
 
 include (CMakeSettings)
@@ -224,3 +229,5 @@ mark_as_advanced (
   PYTHON_LIBRARIES
   PYTHON_VERSION
   )
+
+endif (NOT HAVE_PYTHON)
