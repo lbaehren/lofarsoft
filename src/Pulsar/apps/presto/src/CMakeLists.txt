@@ -79,8 +79,11 @@ target_link_libraries (presto
   ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a
   ${CFITSIO_LIBRARIES}
   ${GLIB_LIBRARIES}
-  ${NUMPY_LIBRARIES}
-  ${NUMERIC_LIBRARIES}
+  ${PGPLOT_LIBRARIES}
+#  ${NUMPY_LIBRARIES}
+#  ${PYTHON_LIBRARIES}
+  ${GFORTRAN_LIBRARIES}
+  ${X11_LIBRARIES}
   )
 
 set_target_properties (presto
@@ -356,7 +359,7 @@ add_executable (weight_psrfits
 foreach (src ${presto_binaries})
   target_link_libraries (${src}
     presto
-    ${NUMPY_LIBRARIES}
+#    ${NUMPY_LIBRARIES}
     )
 endforeach (src)
 
