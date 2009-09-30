@@ -63,7 +63,7 @@ endif (PYTHON_PYTHONHOME)
 ## -----------------------------------------------------------------------------
 ## Default Python versions
 
-set (python_version_list 2.6 2.5 2.4 2.3)
+set (python_version_list 2.6 2.5)
 set (python_bin_locations ${bin_locations})
 set (python_include_locations ${include_locations})
 set (python_lib_locations ${lib_locations})
