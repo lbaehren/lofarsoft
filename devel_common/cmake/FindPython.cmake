@@ -153,12 +153,12 @@ foreach (python_version ${python_version_list})
       )
     
     ## Check for the Python library
-    
+
     find_library (PYTHON_LIBRARIES python${python_version}
       PATHS
       ${python_lib_locations}
       PATH_SUFFIXES
-      python${python_version}/config
+#      python${python_version}/config #fkbreitl: removed since lib in standard location were not found
       NO_DEFAULT_PATH
       )
 
@@ -175,9 +175,7 @@ foreach (python_version ${python_version_list})
 	message (STATUS "No consistent set of files found for Python ${python_version}")
       endif (NOT PYTHON_FIND_QUIETLY)
     endif (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
-    
   endif (NOT HAVE_PYTHON)
-  
 endforeach (python_version)
 
 ## -----------------------------------------------------------------------------
