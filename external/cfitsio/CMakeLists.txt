@@ -81,7 +81,7 @@ if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
     
     ## expand the tar-archive
     add_custom_target (cfitsio_expand
-      COMMAND ${tar_executable} -xvzf ${have_cfitsio_tgz}
+      COMMAND ${tar_executable} -xzf ${have_cfitsio_tgz}
       WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}
       COMMENT "[CFITSIO] Expanding tar-archive ..."
       )
