@@ -166,7 +166,7 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   ## Expand the tar-archive
   
   add_custom_target (expand_archive ALL
-    COMMAND tar -xvzf ${HDF5_TAR_ARCHIVE}
+    COMMAND tar -xzf ${HDF5_TAR_ARCHIVE}
     COMMAND rm ${HDF5_TAR_ARCHIVE}
     WORKING_DIRECTORY ${HDF5_BINARY_DIR}
     COMMENT "Expanding tar-archive ..."

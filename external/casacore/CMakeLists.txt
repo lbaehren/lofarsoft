@@ -94,8 +94,8 @@ if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
   ## Expand the tar-archive
   
   add_custom_target (expand_archive ALL
-    COMMAND ${tar_executable} -xvzf ${have_casacore_tgz}
-    COMMAND ${tar_executable} -xvzf ${have_cmake_tgz}
+    COMMAND ${tar_executable} -xzf ${have_casacore_tgz}
+    COMMAND ${tar_executable} -xzf ${have_cmake_tgz}
     COMMAND mkdir build
     WORKING_DIRECTORY ${CASACORE_BINARY_DIR}
     COMMENT "Expanding tar-archive ..."

@@ -100,7 +100,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
     
     ## expand the tar-archive
     add_custom_target (boost_expand
-      COMMAND ${tar_executable} -xvzf ${have_boost_tgz} --exclude *.html
+      COMMAND ${tar_executable} -xzf ${have_boost_tgz} --exclude *.html
       WORKING_DIRECTORY ${BOOST_BINARY_DIR}
       COMMENT "[Boost] Expanding tar-archive ..."
       )
