@@ -55,11 +55,10 @@ if (CFITSIO_MAJOR_VERSION LESS 3)
   set (CFITSIO_FORCE_BUILD TRUE)
 else (CFITSIO_MAJOR_VERSION LESS 3)
   ## Check for major version
-  if (CFITSIO_MINOR_VERSION LESS 180)
+  if (CFITSIO_MINOR_VERSION LESS 14)
     message (STATUS "CFITSIO installation found - minor version too small!")
     set (CFITSIO_FORCE_BUILD TRUE)
-  else (CFITSIO_MINOR_VERSION LESS 180)
-  endif (CFITSIO_MINOR_VERSION LESS 180)
+  endif (CFITSIO_MINOR_VERSION LESS 14)
 endif (CFITSIO_MAJOR_VERSION LESS 3)
 
 ## <-- begin build condition --------------------------------------------------->
