@@ -55,7 +55,6 @@ set (BOOST_FIND_unit_test_framework YES )
 set (BOOST_FIND_wave                YES )
 
 if (BOOST_FIND_python_ONLY)
-  
   if (NOT BOOST_FIND_QUIETLY)
     message (STATUS "[FindBoost] Configuration for boost_python only.")
   endif (NOT BOOST_FIND_QUIETLY)
@@ -138,7 +137,8 @@ endif (BOOST_FIND_wave)
 
 set (BOOST_LIBRARIES "")
 
-foreach (boost_version 1_39_0 1_36_0 1_34_1 1_33_1)
+#fkbreitl: added 1_39 for Boost on Scientific Linux, removed incompatible 1_33 
+foreach (boost_version 1_39_0 1_39 1_36_0 1_34_1) 
 
   ## Check for the header files ------------------
 
@@ -178,10 +178,11 @@ foreach (boost_version 1_39_0 1_36_0 1_34_1 1_33_1)
   endif (num_includes EQUAL 1)
 
   ## Check for the module libraries --------------
-  
+
   foreach (lib ${boost_libraries})
     ## try to locate the library
-    find_library (BOOST_${lib} ${lib} ${lib}-gcc42-${boost_version} ${lib}-mt-${boost_version} ${lib}-gcc ${lib}-mt ${lib}-mt-d
+    #fkbreitl added ${lib}-gcc41-mt-${boost_version} for Scientific Linux
+    find_library (BOOST_${lib} ${lib} ${lib}-gcc42-${boost_version} ${lib}-mt-${boost_version} ${lib}-gcc ${lib}-mt ${lib}-mt-d ${lib}-gcc41-mt-${boost_version}
       PATHS ${lib_locations}
       PATH_SUFFIXES boost boost-${boost_version}
       NO_DEFAULT_PATH
@@ -203,7 +204,7 @@ foreach (boost_version 1_39_0 1_36_0 1_34_1 1_33_1)
     set (BOOST_LIBRARIES "")
     set (BOOST_INCLUDES "")
   endif (NOT continue_search)
-  
+
 endforeach (boost_version)
 
 ## -----------------------------------------------------------------------------
