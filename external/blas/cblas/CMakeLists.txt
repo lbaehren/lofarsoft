@@ -6,6 +6,12 @@ add_subdirectory (lib)
 add_subdirectory (src)
 add_subdirectory (testing)
 
+## Build "libcblas" first
+
+FILE (GLOB cblas_sources src/*.f src/*.c)
+
+add_library (cblas ${cblas_sources})
+
 ## -----------------------------------------------------------------------------
 ## Test programs
 
@@ -15,6 +21,7 @@ set_target_properties (cblas_example1
   COMPILE_FLAGS -fPIC -O2 -fPIC
   LINKER_LANGUAGE Fortran
   )
+
 target_link_libraries (cblas_example1 cblas blas ${G2C_LIBRARIES})
 
 #add_executable (cblas_example2 cblas_example2.c)
@@ -24,4 +31,3 @@ target_link_libraries (cblas_example1 cblas blas ${G2C_LIBRARIES})
 #  LINKER_LANGUAGE Fortran
 #  )
 #target_link_libraries (cblas_example2 cblas blas ${G2C_LIBRARIES})
-
