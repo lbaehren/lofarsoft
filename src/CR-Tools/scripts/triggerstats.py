@@ -58,6 +58,10 @@ for record in triggerReader:
 for record in triggerList:
     RCUnr.append(int(record[RCUnrKey]))
     seqnr.append(int(record[seqnrKey]))
+    thisTime = int(record[timeKey])
+    if thisTime > 2.2e9: # Unix timestamps are signed ints, and they don't go that far...
+        print 'Invalid timestamp! ' + str(thisTime)
+
     time.append(int(record[timeKey]))
     sample.append(int(record[sampleKey]))
     sum.append(int(record[sumKey]))
@@ -109,6 +113,13 @@ firstTime = float(firstTime)
 lastTime = float(lastTime)
 minutes = (lastTime - firstTime) / 60.0 # time in minutes - time limiting should go here!
 # float roundoff problems ?!
+
+
+
+
+
+
+
 
 nofPoints=100
 stepsize = 1/3.0
@@ -187,7 +198,7 @@ sortedTriggerList = sorted(triggerList, compare_by(timeKey, sampleKey) )
 # make a list of indices in triggerList; every index in pulseIndices is the start of a new 'pulse'. 
 # Pulse information can then be extracted just from the triggerList, as we know which ones belong together.
 
-lastTime = 0; 
+lastTimeInSamples = 0; 
 timeWindow = 100000 # window for pulse in samples
 i = 0
 pulseIndices.append(0) # first pulse starts at 0
@@ -197,8 +208,8 @@ for record in sortedTriggerList: # pulse search
     thisSample = int(record[sampleKey])
     thisTime = samplingRate * thisSecond + thisSample
     
-    if (abs(thisTime - lastTime) > timeWindow):
-        lastTime = thisTime # start new pulse
+    if (abs(thisTime - lastTimeInSamples) > timeWindow):
+        lastTimeInSamples = thisTime # start new pulse
 	pulseIndices.append(i) # at this index a new pulse begins
 
 def pulse(pulseIndices, triggerList, pulseno): # get list of triggers corresponding to pulse number 'pulseno' (0-based)
@@ -295,3 +306,54 @@ graph.Label("x","total sum",1)
 graph.Label("y","Counts per minute",1)
 graph.Bars(gY);
 graph.WriteEPS("testSTATS_totalsum.eps","Test Plot")
+
+# make binned timeseries of trigger counts to see variations over time
+
+nBins = min(200, len(triggerList) / 10)
+
+timeBinSize = (lastTime - firstTime) / nBins # seconds
+#nBins = (lastTime - firstTime) / timeBinSize
+# use again numpy's histogram function
+(y, x) = numpy.histogram(time, int(nBins))
+
+width=1200  
+height=600
+mglGraphPS = 1
+graph = mglGraph(mglGraphPS, width, height)
+
+gY = mglData(len(y))
+gX = mglData(len(x))
+
+for i in range(len(y)):
+    gY[i] = float(y[i])
+
+for i in range(len(x)):
+    gX[i] = (float(x[i]) - firstTime) / 60.0
+    
+graph.Clf()
+graph.SetFontSize(3.0)
+graph.SetRanges(0.0, gX.Max('x')[0], 0.0, float(max(y)))
+#graph.SetTicks('x', 16.0, 4)
+
+graph.Axis("xy")
+graph.Grid()
+
+graph.Title("Time series of # triggers (binned)")
+graph.Label("x","Time (min)",1)
+graph.Label("y","Counts",1)
+graph.Bars(gY)
+
+#ggY = mglData(len(y),4)
+#for i in range(len(y)):
+#    ggY.Put(float(y[i]), i, 0)
+#    ggY.Put(float(y[i]) * 0.7*0.7, i, 1)
+#    ggY.Put(float(y[i]) * 0.7*0.7*0.7, i, 2)
+#    ggY.Put(float(y[i]) * 0.7*0.7*0.7*0.7, i, 3)
+
+#ggY=mglData(len(y))
+#for i in range(len(y)):
+#    ggY[i] = y[i] * 0.5
+#    
+#graph.Bars(ggY)
+
+graph.WriteEPS("testSTATS_timeseries.eps","Test Plot")
