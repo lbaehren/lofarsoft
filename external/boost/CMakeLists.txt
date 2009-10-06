@@ -95,15 +95,23 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
   
   find_file (have_boost_tgz ${BOOST_TAR_ARCHIVE} ${BOOST_SOURCE_DIR})
   find_program (tar_executable tar ${bin_locations})
-
+  
   if (have_boost_tgz AND tar_executable)
     
     ## expand the tar-archive
-    add_custom_target (boost_expand
-      COMMAND ${tar_executable} -xzf ${have_boost_tgz} --exclude *.html
-      WORKING_DIRECTORY ${BOOST_BINARY_DIR}
-      COMMENT "[Boost] Expanding tar-archive ..."
-      )
+    if (BOOST_VERBOSE_BUILD)
+      add_custom_target (boost_expand
+	COMMAND ${tar_executable} -xvzf ${have_boost_tgz} --exclude *.html
+	WORKING_DIRECTORY ${BOOST_BINARY_DIR}
+	COMMENT "[Boost] Expanding tar-archive ..."
+	)
+    else (BOOST_VERBOSE_BUILD)
+      add_custom_target (boost_expand
+	COMMAND ${tar_executable} -xzf ${have_boost_tgz} --exclude *.html
+	WORKING_DIRECTORY ${BOOST_BINARY_DIR}
+	COMMENT "[Boost] Expanding tar-archive ..."
+	)
+    endif (BOOST_VERBOSE_BUILD)
     
     if (BOOST_CMAKE_CUSTOM)
       

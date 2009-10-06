@@ -20,11 +20,12 @@ cmake_policy (VERSION 2.6)
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (HDF5_FORCE_BUILD  "Force rebuild and local installation" NO  )
-option (HDF5_BUILD_SHARED "Build shared version of the library?" YES )
-option (HDF5_BUILD_STATIC "Build static version of the library?" YES )
-option (HDF5_BUILD_CXX    "Build C++ interface to the library?"  NO  )
-option (HDF5_BUILD_HL     "Enable the high level library?"       YES )
+option (HDF5_FORCE_BUILD    "Force rebuild and local installation" NO  )
+option (HDF5_VERBOSE_BUILD  "Be verbose during build process?"     NO  )
+option (HDF5_BUILD_SHARED   "Build shared version of the library?" YES )
+option (HDF5_BUILD_STATIC   "Build static version of the library?" YES )
+option (HDF5_BUILD_CXX      "Build C++ interface to the library?"  NO  )
+option (HDF5_BUILD_HL       "Enable the high level library?"       YES )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -165,19 +166,28 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   ##__________________________________________________________________
   ## Expand the tar-archive
   
-  add_custom_target (expand_archive ALL
-    COMMAND tar -xzf ${HDF5_TAR_ARCHIVE}
-    COMMAND rm ${HDF5_TAR_ARCHIVE}
-    WORKING_DIRECTORY ${HDF5_BINARY_DIR}
-    COMMENT "Expanding tar-archive ..."
-    )
+  if (HDF5_VERBOSE_BUILD)
+    add_custom_target (expand_archive ALL
+      COMMAND tar -xvzf ${HDF5_TAR_ARCHIVE}
+      COMMAND rm ${HDF5_TAR_ARCHIVE}
+      WORKING_DIRECTORY ${HDF5_BINARY_DIR}
+      COMMENT "Expanding tar-archive ..."
+      )
+  else (HDF5_VERBOSE_BUILD)
+    add_custom_target (expand_archive ALL
+      COMMAND tar -xzf ${HDF5_TAR_ARCHIVE}
+      COMMAND rm ${HDF5_TAR_ARCHIVE}
+      WORKING_DIRECTORY ${HDF5_BINARY_DIR}
+      COMMENT "Expanding tar-archive ..."
+      )
+  endif (HDF5_VERBOSE_BUILD)
   add_dependencies (expand_archive download_archive)
   
   ##__________________________________________________________________
   ## Custom target wrapping the standard configure/build chain
-
+  
   ## Apply required patches
-
+  
   add_custom_target (apply_patches
     COMMAND cp ${HDF5_SOURCE_DIR}/zip_perf.c ${HDF5_DIRECTORY}/perform
     WORKING_DIRECTORY ${HDF5_BINARY_DIR}

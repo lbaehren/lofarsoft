@@ -19,9 +19,10 @@ cmake_policy (VERSION 2.6)
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (CASACORE_FORCE_BUILD  "Force rebuild and local installation" NO  )
-option (CASACORE_BUILD_SHARED "Build shared version of the library?" NO  )
-option (CASACORE_BUILD_STATIC "Build static version of the library?" YES )
+option (CASACORE_FORCE_BUILD    "Force rebuild and local installation"  NO  )
+option (CASACORE_VERBOSE_BUILD  "Be verbose during build process?"      NO  )
+option (CASACORE_BUILD_SHARED   "Build shared version of the library?"  NO  )
+option (CASACORE_BUILD_STATIC   "Build static version of the library?"  YES )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -93,6 +94,15 @@ if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
   ##__________________________________________________________________
   ## Expand the tar-archive
   
+if (CASACORE_VERBOSE_BUILD)
+  add_custom_target (expand_archive ALL
+    COMMAND ${tar_executable} -xvzf ${have_casacore_tgz}
+    COMMAND ${tar_executable} -xvzf ${have_cmake_tgz}
+    COMMAND mkdir build
+    WORKING_DIRECTORY ${CASACORE_BINARY_DIR}
+    COMMENT "Expanding tar-archive ..."
+    )
+else (CASACORE_VERBOSE_BUILD)
   add_custom_target (expand_archive ALL
     COMMAND ${tar_executable} -xzf ${have_casacore_tgz}
     COMMAND ${tar_executable} -xzf ${have_cmake_tgz}
@@ -100,6 +110,7 @@ if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
     WORKING_DIRECTORY ${CASACORE_BINARY_DIR}
     COMMENT "Expanding tar-archive ..."
     )
+endif (CASACORE_VERBOSE_BUILD)
   
   ##__________________________________________________________________
   ## Custom target wrapping the standard configure/build chain

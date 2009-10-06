@@ -5,6 +5,10 @@ project (CFITSIO)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.5)
 
+## Minimum required version of CFITSIO
+set (CFITSIO_REQUIRED_MAJOR_VERSION 3)
+set (CFITSIO_REQUIRED_MINOR_VERSION 14)
+
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the library from the provided source code, if no system
 ## installation can be found. In order to handle this properly, we use the CMake
@@ -50,16 +54,16 @@ endif (NOT CFITSIO_VERBOSE_CONFIGURE)
 include (FindCFITSIO)
 
 ## Check for major version
-if (CFITSIO_MAJOR_VERSION LESS 3)
+if (CFITSIO_MAJOR_VERSION LESS CFITSIO_REQUIRED_MAJOR_VERSION)
   message (STATUS "CFITSIO installation found - major version too small!")
   set (CFITSIO_FORCE_BUILD TRUE)
-else (CFITSIO_MAJOR_VERSION LESS 3)
+else (CFITSIO_MAJOR_VERSION LESS CFITSIO_REQUIRED_MAJOR_VERSION)
   ## Check for major version
-  if (CFITSIO_MINOR_VERSION LESS 14)
+  if (CFITSIO_MINOR_VERSION LESS CFITSIO_REQUIRED_MINOR_VERSION)
     message (STATUS "CFITSIO installation found - minor version too small!")
     set (CFITSIO_FORCE_BUILD TRUE)
-  endif (CFITSIO_MINOR_VERSION LESS 14)
-endif (CFITSIO_MAJOR_VERSION LESS 3)
+  endif (CFITSIO_MINOR_VERSION LESS CFITSIO_REQUIRED_MINOR_VERSION)
+endif (CFITSIO_MAJOR_VERSION LESS CFITSIO_REQUIRED_MAJOR_VERSION)
 
 ## <-- begin build condition --------------------------------------------------->
 
@@ -69,21 +73,28 @@ if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
   ## 
 
   set (CFITSIO_VERSION "3140")
-#  set (CFITSIO_VERSION "3181")
   set (CFITSIO_DIRECTORY "cfitsio${CFITSIO_VERSION}")
   set (CFITSIO_TAR_ARCHIVE "${CFITSIO_DIRECTORY}.tar.gz")
   
   find_file (have_cfitsio_tgz ${CFITSIO_TAR_ARCHIVE} ${CFITSIO_SOURCE_DIR})
   find_program (tar_executable tar ${bin_locations})
-
+  
   if (have_cfitsio_tgz AND tar_executable)
     
     ## expand the tar-archive
-    add_custom_target (cfitsio_expand
-      COMMAND ${tar_executable} -xzf ${have_cfitsio_tgz}
-      WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}
-      COMMENT "[CFITSIO] Expanding tar-archive ..."
-      )
+    if (CFITSIO_VERBOSE_BUILD)
+      add_custom_target (cfitsio_expand
+	COMMAND ${tar_executable} -xvzf ${have_cfitsio_tgz}
+	WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}
+	COMMENT "[CFITSIO] Expanding tar-archive ..."
+	)
+    else (CFITSIO_VERBOSE_BUILD)
+      add_custom_target (cfitsio_expand
+	COMMAND ${tar_executable} -xzf ${have_cfitsio_tgz}
+	WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}
+	COMMENT "[CFITSIO] Expanding tar-archive ..."
+	)
+    endif (CFITSIO_VERBOSE_BUILD)
     
     ## configure the package
     if (CFITSIO_enable_lfs)
