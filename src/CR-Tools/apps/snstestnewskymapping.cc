@@ -248,7 +248,7 @@ int main (int argc,
 		cout<<"Dit is de door Sef & Sander aangepaste versie van testLOPESskymapping"<<endl;
 		
 		uint nofFailedTests=0, blocksize=1024;
-		std::string infile, outfile="snstestnewskymapping.img";
+		std::string infile, outfile="snstestnewskymapping.h5";
 		
 		/*
 		 Check if filename of the dataset is provided on the command line; if only
@@ -369,7 +369,7 @@ int main (int argc,
   int ncoord;
   int coordstr;
 	
-	string arrayspread;
+  string arrayspread;
   string selection;
 
 
@@ -650,9 +650,13 @@ int main (int argc,
 																			
 		
     for (uint blocknum=startblock; blocknum<startblock+nofBlocks; blocknum++){
-    	//if(blocknum%10==0){
-			cout<<"Processing block "<<blocknum-startblock<<" out of "<<nofBlocks<<endl;
-			//}
+    	if(nofBlocks>20 && blocknum%10==0){
+			cout<<"Processing block "<<blocknum-startblock+1<<" out of "<<nofBlocks<<endl;
+	}		else if(nofBlocks <= 20){
+			  cout<<"Processing block "<<blocknum-startblock+1<<" out of "<<nofBlocks<<endl;
+			}
+
+			
 			counter = 0;
 	 		for(int i=0; i<ninputfiles; i++){
 				//cout<<"time for "<<i<<" = "<<dr[i]->time()<<endl;
@@ -670,16 +674,25 @@ int main (int argc,
 					for(int k=0; k < nfreq*30/100; k++){
 						data.column(counter)[k] = 0.;
 					}
-					for(int k=0; k < nfreq*10/100; k++){
-						data.column(counter)[nfreq-nfreq*10/100+k] = 0.;
+					for(int k=0; k < nfreq*15/100; k++){
+						data.column(counter)[nfreq-nfreq*15/100+k] = 0.;
 					}
-					counter++;
+					/*					for(int k=282*nfreq/513; k < 285*nfreq/513; k++){
+															  //cout<<data.column(counter)[k]<<endl;
+					  data.column(counter)[k] = data.column(counter)[281*nfreq/513];
+					  //cout<<data.column(counter)[k]<<endl;
+					}
+					*/
+														counter++;
 					//cout<<"weer een antenne toegevoegd..."<<endl;
  	 		  }
 			}
      skymapper.processData(data);		// Change if slicer is used!
     };
-			
+   
+
+
+    cout<<"obsDate = "<<info.obsDate()<<endl;
    cout << "image generated" << endl;
    //cout << "subdatashape = " << subdata.shape() << endl;
 

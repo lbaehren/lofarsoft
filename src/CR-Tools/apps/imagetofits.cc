@@ -1,3 +1,4 @@
+
 /*-------------------------------------------------------------------------*
  | $Id:: imagetofits.cc 															                   
  *-------------------------------------------------------------------------*
@@ -22,6 +23,7 @@
  ***************************************************************************/
 
 #include <crtools.h>
+#include <Utilities/TestsCommon.h>
 
 //#include <images/Images/ImageFITSConverter.h>
 #include <images/Images/HDF5Image.h>
@@ -31,19 +33,13 @@
 using namespace casa;
 using namespace std;
 
-#include <Utilities/TestsCommon.h>
-
-//_______________________________________________________________________________
-//                                                                           main
-
 int main(int argc, char *argv[])
 {
   string infile;
   string datatype;
   
   /*
-    Check if filename of the dataset and the format are provided on the command
-    line.
+    Check if filename of the dataset and the format are provided on the command line.
   */
   if (argc < 2) {
     cerr << "Usage: imagetofits <input.event> <datatype>\n"
@@ -56,6 +52,9 @@ int main(int argc, char *argv[])
       datatype = argv[2];
     };
   }
+
+
+
   
   String fitsName = "new.fits";
   String error;
@@ -64,49 +63,52 @@ int main(int argc, char *argv[])
   // Open the image and convert it to fits:
   if (datatype == "hdf5") {
     HDF5Image<Float> imageIn (infile);
-    // Regridding of input file:
-    IPosition factors (imageIn.shape());
-    factors    = 1;
-    factors(3) = 513;
-    RebinImage<Float> rb(imageIn, factors);
-    
-    /* Summary of image properties */
-    cout << "-- Summary of the original image:" << std::endl;
-    DAL::summary (imageIn);
-    cout << "-- Summary of the image after rebinning:" << std::endl;
-    DAL::summary (rb);
-    
-    
-    ok = CR::image2fits(rb, fitsName);	
-    
-    if(ok){
-      cout<<"Image converted to "<<fitsName<<"."<<endl;
-    }		
+		// Regridding of input file:
+		IPosition factors (imageIn.shape());
+		factors    = 1;
+		factors(3) = 513;
+		//factors(0) = 60;
+		//factors(1) = 60;
+
+		RebinImage<Float> rb(imageIn, factors);
+	
+	/* Summary of image properties */
+		cout << "-- Summary of the original image:" << std::endl;
+		DAL::summary (imageIn);
+		cout << "-- Summary of the image after rebinning:" << std::endl;
+		DAL::summary (rb);
+		
+	
+		ok = CR::image2fits(rb, fitsName);	
+	
+		if(ok){
+		cout<<"Image converted to "<<fitsName<<"."<<endl;
+	  }		
   } else if (datatype == "paged") {
     PagedImage<Float> imageIn (infile);
-    // Regridding of input file:
-    IPosition factors (imageIn.shape());
-    factors    = 1;
-    factors(3) = 513;
-    RebinImage<Float> rb(imageIn, factors);
-    
-    /* Summary of image properties */
-    cout << "-- Summary of the original image:" << std::endl;
-    DAL::summary (imageIn);
-    cout << "-- Summary of the image after rebinning:" << std::endl;
-    DAL::summary (rb);
-    
-    
-    ok = CR::image2fits(rb, fitsName);	
-    
-    if(ok){
-      cout<<"Image converted to "<<fitsName<<"."<<endl;
-    }		
+	// Regridding of input file:
+		IPosition factors (imageIn.shape());
+		factors    = 1;
+		factors(3) = 513;
+		RebinImage<Float> rb(imageIn, factors);
+
+	/* Summary of image properties */
+		cout << "-- Summary of the original image:" << std::endl;
+		DAL::summary (imageIn);
+		cout << "-- Summary of the image after rebinning:" << std::endl;
+		DAL::summary (rb);
+
+
+		ok = CR::image2fits(rb, fitsName);	
+	
+		if(ok){
+		cout<<"Image converted to "<<fitsName<<"."<<endl;
+	  }		
   } else {
     cerr << "Usage: imagetofits <input.event> <datatype>\n"
 	 << "Supported datatypes are 'hdf5' and 'paged'."
 	 << endl;
   }
-  
+ 
   return 0;
 }
