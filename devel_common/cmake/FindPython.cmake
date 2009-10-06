@@ -63,10 +63,10 @@ endif (PYTHON_PYTHONHOME)
 ## -----------------------------------------------------------------------------
 ## Default Python versions
 
-set (python_version_list 2.6 2.5)
-set (python_bin_locations ${bin_locations})
-set (python_include_locations ${include_locations})
-set (python_lib_locations ${lib_locations})
+set (python_version_list      2.6 2.5              )
+set (python_bin_locations     ${bin_locations}     )
+set (python_include_locations ${include_locations} )
+set (python_lib_locations     ${lib_locations}     )
 
 ## But see if python_select knows about a specific preference
 find_program (PYTHON_SELECTOR python_select
@@ -169,7 +169,6 @@ foreach (python_version ${python_version_list})
     if (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
       set (PYTHON_VERSION ${python_version})
       set (HAVE_PYTHON TRUE)
-      list (APPEND PYTHON_LIBRARIES dl pthread util) #fkbreitl for Scientific L
     else (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
       if (NOT PYTHON_FIND_QUIETLY)
 	message (STATUS "No consistent set of files found for Python ${python_version}")
