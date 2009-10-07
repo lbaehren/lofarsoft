@@ -95,6 +95,7 @@ set (include_locations
   /opt
   /sw/include
   /Developer/SDKs/MacOSX10.4u.sdk/usr/include
+  /Developer/SDKs/MacOSX10.5.sdk/usr/include
 )
 
 set (lib_locations
@@ -107,6 +108,7 @@ set (lib_locations
   /opt
   /sw/lib
   /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
+  /Developer/SDKs/MacOSX10.5.sdk/usr/lib
 )
 
 ## ------------------------------------------------------------------------------
