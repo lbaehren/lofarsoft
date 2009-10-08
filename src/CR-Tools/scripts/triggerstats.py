@@ -23,7 +23,7 @@ import sys
 if len(sys.argv) > 1:
     fileName = sys.argv[1] 
 else:
-    fileName = '2009-08-04_TRIGGER.dat' #  that's just handy for rapid testing...
+    fileName = '2009-09-03_TRIGGER5.dat' #  that's just handy for rapid testing...
 
 #def nofTriggersFilteredByThreshold(listOfTriggers, threshold)
 
@@ -32,8 +32,12 @@ numberOfRCUsperStation = 96;
 def triggersFilteredByThreshold(listOfTriggers, threshold):
     outList = []
     for record in listOfTriggers:
-        if float(record['peak']) / float(record['powerBefore']) >= threshold:
+        thisPeak = float(record['peak'])
+        thisPowerBefore = float(record['powerBefore'])
+        if thisPowerBefore == 0.0: 
 	    outList.append(record)
+        elif thisPeak / thisPowerBefore >= threshold:
+            outList.append(record)
     return outList
 
 # keys for our trigger dictionary; separate lists for some of the statistics
@@ -113,12 +117,6 @@ firstTime = float(firstTime)
 lastTime = float(lastTime)
 minutes = (lastTime - firstTime) / 60.0 # time in minutes - time limiting should go here!
 # float roundoff problems ?!
-
-
-
-
-
-
 
 
 nofPoints=100
