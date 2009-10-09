@@ -57,15 +57,23 @@ if (NOT HAVE_ITPP OR ITPP_FORCE_BUILD)
   
   find_file (have_itpp_tgz ${ITPP_TAR_ARCHIVE} ${ITPP_SOURCE_DIR})
   find_program (tar_executable tar ${bin_locations})
-
+  
   if (have_itpp_tgz AND tar_executable)
     
     ## expand the tar-archive
-    add_custom_target (itpp_expand
-      COMMAND ${tar_executable} -xvzf ${have_itpp_tgz}
-      WORKING_DIRECTORY ${ITPP_BINARY_DIR}
-      COMMENT "[IT++] Expanding tar-archive ..."
-      )
+    if (ITPP_VERBOSE_BUILD)
+      add_custom_target (itpp_expand
+	COMMAND ${tar_executable} -xvzf ${have_itpp_tgz}
+	WORKING_DIRECTORY ${ITPP_BINARY_DIR}
+	COMMENT "[IT++] Expanding tar-archive ..."
+	)
+    else (ITPP_VERBOSE_BUILD)
+      add_custom_target (itpp_expand
+	COMMAND ${tar_executable} -xzf ${have_itpp_tgz}
+	WORKING_DIRECTORY ${ITPP_BINARY_DIR}
+	COMMENT "[IT++] Expanding tar-archive ..."
+	)
+    endif (ITPP_VERBOSE_BUILD)
     
     ## configure the package
     if (HAVE_FFTW3)
@@ -74,6 +82,19 @@ if (NOT HAVE_ITPP OR ITPP_FORCE_BUILD)
 	WORKING_DIRECTORY ${ITPP_BINARY_DIR}/${ITPP_DIRECTORY}
 	COMMENT "[IT++] Configuring package ..."
 	)
+      if (LAPACK_BLAS_LIBRARY)
+	add_custom_target (itpp_configure
+	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --with-fft=${FFTW3_LIBRARIES} --with-fft-include=${FFTW3_INCLUDES} --with-blas=${LAPACK_BLAS_LIBRARY}
+	  WORKING_DIRECTORY ${ITPP_BINARY_DIR}/${ITPP_DIRECTORY}
+	  COMMENT "[IT++] Configuring package ..."
+	  )
+      else (LAPACK_BLAS_LIBRARY)
+	add_custom_target (itpp_configure
+	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --with-fft=${FFTW3_LIBRARIES} --with-fft-include=${FFTW3_INCLUDES} --without-blas
+	  WORKING_DIRECTORY ${ITPP_BINARY_DIR}/${ITPP_DIRECTORY}
+	  COMMENT "[IT++] Configuring package ..."
+	  )
+      endif (LAPACK_BLAS_LIBRARY)
     else (HAVE_FFTW3)
       add_custom_target (itpp_configure
 	COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --without-fft
@@ -117,6 +138,9 @@ endif (NOT HAVE_ITPP OR ITPP_FORCE_BUILD)
 message ("--------------------------------------------------")
 message ("   [IT++] Configuration summary.")
 message (" ")
+message (STATUS "BLAS library    = ${LAPACK_BLAS_LIBRARY}")
+message (STATUS "CBLAS library   = ${LAPACK_CBLAS_LIBRARY}")
+message (STATUS "LAPACK library  = ${LAPACK_LAPACK_LIBRARY}")
 message (STATUS "FFTW3_INCLUDES  = ${FFTW3_INCLUDES}")
 message (STATUS "FFTW3_LIBRARIES = ${FFTW3_LIBRARIES}")
 message ("--------------------------------------------------")
