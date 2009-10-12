@@ -31,8 +31,29 @@
 ##
 ## -----------------------------------------------------------------------------
 
-## -----------------------------------------------------------------------------
-## Library components to search for
+## ==============================================================================
+##
+##  Organization of casacore and its components
+##
+## ==============================================================================
+
+# Dependency tree of the casacore modules:
+#   casa         :  --
+#   scimath_f    :  casa
+#   scimath      :  scimath_f
+#   tables       :  casa
+#   measures     :  scimath, tables
+#   measures_f   :  scimath, tables
+#   lattices     ->  scimath, tables
+#   fits         ->  measures
+#   ms           ->  measures
+#   coordinates  ->  fits
+#   msfits       ->  fits, ms
+#   components   ->  coordinates
+#   images       ->  components, mirlib, lattices
+
+##__________________________________________________________
+## List of casacore modules
 
 set (casacore_modules
   casa
@@ -51,6 +72,27 @@ set (casacore_modules
   msvis
   )
 
+##__________________________________________________________
+## casacore library dependencies
+
+set (casacore_dependencies_components   coordinates                )
+set (casacore_dependencies_coordinates  fits                       )
+set (casacore_dependencies_fits         measures                   )
+set (casacore_dependencies_images       components lattices mirlib )
+set (casacore_dependencies_lattices     scimath tables             )
+set (casacore_dependencies_measures     scimath tables             )
+set (casacore_dependencies_measures_f   scimath tables             )
+set (casacore_dependencies_ms           measures                   )
+set (casacore_dependencies_msfits       fits ms                    )
+set (casacore_dependencies_scimath      scimath_f                  )
+set (casacore_dependencies_scimath_f    casa                       )
+set (casacore_dependencies_tables       casa                       )
+
+set (casacore_header_casa      casa/Arrays.h       )
+set (casacore_header_tables    tables/Tables.h     )
+set (casacore_header_scimath   scimath/Fitting.h   )
+set (casacore_header_measures  measures/Measures.h )
+
 set (casacore_headers
   casa/Arrays.h
   tables/Tables.h
@@ -66,6 +108,39 @@ set (casacore_headers
   msfits/MSFits.h
   msvis/MSVis.h
   )
+
+## ==============================================================================
+##
+##  Macro definitions
+##
+## ==============================================================================
+
+## Find the components of a given casacore module; the macro will try to locate
+## both the library as well as a representative header file (e.g. libcasa_tables
+## and tables/Tables.h).
+
+macro (casacore_find_module _name)
+
+  ## get upper-case version of the module name for book-keeping
+  string(TOUPPER ${_name} _NAME)
+
+  ## try to locate the library
+  find_library (CASACORE_${_NAME}_LIBRARY casa_${_name} ${_name}
+    PATHS ${lib_locations}
+    NO_DEFAULT_PATH
+    )
+  
+  if (CASACORE_${_NAME}_LIBRARY)
+    message (STATUS "CASACORE_${_NAME}_LIBRARY = ${CASACORE_${_NAME}_LIBRARY}")
+  endif (CASACORE_${_NAME}_LIBRARY)
+  
+endmacro (casacore_find_module _name)
+
+## ==============================================================================
+##
+##  Search for installation of casacore
+##
+## ==============================================================================
 
 ## -----------------------------------------------------------------------------
 ## Search locations
@@ -146,22 +221,6 @@ if (NOT CASACORE_FIND_QUIETLY)
   message (STATUS "[FindCASACORE] Check for the library ...")
 endif (NOT CASACORE_FIND_QUIETLY)
 
-## Dependency of the packages in casacore
-
-# casa        : --
-# tables      : casa
-# mirlib      : casa
-# scimath     : casa
-# measures    : tables scimath
-# fits        : measures
-# coordinates : fits
-# components  : coordinates
-# lattices    : tables scimath
-# ms          : measures
-# images      : components mirlib
-# msfits      : ms fits
-# msvis       : ms
-
 ## Locate the libraries themselves; keep in mind that the libraries follow
 ## the naming convention libcasa_<module>, e.g. libcasa_images.a
 
@@ -189,11 +248,6 @@ endforeach (casacore_lib)
 if (CASACORE_LIBRARIES)
   list (REVERSE CASACORE_LIBRARIES)
 endif (CASACORE_LIBRARIES)
-
-## -----------------------------------------------------------------------------
-## Check for symbols within individual libraries
-
-
 
 ## -----------------------------------------------------------------------------
 ## If detection successful, register package as found
