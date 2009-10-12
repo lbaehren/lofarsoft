@@ -20,7 +20,7 @@ cmake_policy (VERSION 2.6)
 ## find script
 
 option (CASACORE_FORCE_BUILD    "Force rebuild and local installation"  NO  )
-option (CASACORE_VERBOSE_BUILD  "Be verbose during build process?"      NO  )
+option (CASACORE_VERBOSE_BUILD  "Be verbose during build process?"      YES )
 option (CASACORE_BUILD_SHARED   "Build shared version of the library?"  NO  )
 option (CASACORE_BUILD_STATIC   "Build static version of the library?"  YES )
 
@@ -73,12 +73,6 @@ endif (svn_executable AND tar_executable)
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
-  
-  find_path (HAVE_SYS_MTIO_H    sys/mtio.h   PATHS ${include_locations})
-  find_path (HAVE_SYS_TYPES_H   sys/types.h  PATHS ${include_locations})
-
-  message (STATUS "sys/mtio.h   = ${HAVE_SYS_MTIO_H}")
-  message (STATUS "sys/types.h  = ${HAVE_SYS_TYPES_H}")
   
   find_file (have_casacore_tgz   casacore.tgz             ${CASACORE_SOURCE_DIR} )
   find_file (have_cmake_tgz      cmake.tgz                ${CASACORE_SOURCE_DIR} )
