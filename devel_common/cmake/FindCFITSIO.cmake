@@ -55,16 +55,16 @@ endif (HAVE_FITSIO_H)
 
 ## [1] core library
 
-FIND_LIBRARY (CFITSIO_libcfitsio
+FIND_LIBRARY (CFITSIO_CFITSIO_LIBRARY
   NAMES cfitsio
   PATHS ${lib_locations}
   PATH_SUFFIXES cfitsio
   NO_DEFAULT_PATH
 )
 
-if (CFITSIO_libcfitsio)
-  set (CFITSIO_LIBRARIES ${CFITSIO_libcfitsio})
-endif (CFITSIO_libcfitsio)
+if (CFITSIO_CFITSIO_LIBRARY)
+  set (CFITSIO_LIBRARIES ${CFITSIO_CFITSIO_LIBRARY})
+endif (CFITSIO_CFITSIO_LIBRARY)
 
 ## [2] math library
 
@@ -111,16 +111,16 @@ endif (HAVE_FITSIO_H)
 
 include (CheckLibraryExists)
 
-if (CFITSIO_libcfitsio)
+if (CFITSIO_CFITSIO_LIBRARY)
     foreach (libsymbol file_open ftp_open file_openfile ffopen ffopentest ffreopen)    
     check_library_exists (
-      ${CFITSIO_libcfitsio}
+      ${CFITSIO_CFITSIO_LIBRARY}
       ${libsymbol}
       ""
       libcfitsio_has_${libsymbol}
       )
   endforeach (libsymbol)
-endif (CFITSIO_libcfitsio)
+endif (CFITSIO_CFITSIO_LIBRARY)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -157,7 +157,7 @@ ENDIF (HAVE_CFITSIO)
 ## Mark as advanced ...
 
 MARK_AS_ADVANCED (
-  CFITSIO_libcfitsio
+  CFITSIO_CFITSIO_LIBRARY
   CFITSIO_libm
   CFITSIO_INCLUDES
   CFITSIO_LIBRARIES
