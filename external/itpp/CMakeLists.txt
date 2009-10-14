@@ -61,6 +61,7 @@ if (NOT HAVE_ITPP OR ITPP_FORCE_BUILD)
   if (have_itpp_tgz AND tar_executable)
     
     ## expand the tar-archive
+
     if (ITPP_VERBOSE_BUILD)
       add_custom_target (itpp_expand
 	COMMAND ${tar_executable} -xvzf ${have_itpp_tgz}
@@ -74,47 +75,40 @@ if (NOT HAVE_ITPP OR ITPP_FORCE_BUILD)
 	COMMENT "[IT++] Expanding tar-archive ..."
 	)
     endif (ITPP_VERBOSE_BUILD)
+
+    ## create script to run IT++ configuration
     
-    ## configure the package
     if (HAVE_FFTW3)
-      message (STATUS "[IT++] Configuring package with FFTW3 ...")
-      if (LAPACK_BLAS_LIBRARY)
-	message (STATUS "[IT++] Configuring package with BLAS ...")
-	add_custom_target (itpp_configure
-	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --with-fft=${FFTW3_LIBRARIES} --with-fft-include=${FFTW3_INCLUDES} --with-blas=${LAPACK_BLAS_LIBRARY}
-	  WORKING_DIRECTORY ${ITPP_BINARY_DIR}/${ITPP_DIRECTORY}
-	  COMMENT "[IT++] Configuring package ..."
-	  )
-      else (LAPACK_BLAS_LIBRARY)
-	message (STATUS "[IT++] Configuring package without BLAS ...")
-	add_custom_target (itpp_configure
-	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --with-fft=${FFTW3_LIBRARIES} --with-fft-include=${FFTW3_INCLUDES} --without-blas
-	  WORKING_DIRECTORY ${ITPP_BINARY_DIR}/${ITPP_DIRECTORY}
-	  COMMENT "[IT++] Configuring package ..."
-	  )
-      endif (LAPACK_BLAS_LIBRARY)
+      set (WITH_FFT ${FFTW3_LIBRARIES})
+      set (WITH_FFTW_INCLUDES ${FFTW3_INCLUDES})
     else (HAVE_FFTW3)
-      message (STATUS "[IT++] Configuring package without FFTW3 ...")
-      if (LAPACK_BLAS_LIBRARY)
-	message (STATUS "[IT++] Configuring package with BLAS ...")
-	add_custom_target (itpp_configure
-	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --without-fft --with-blas=${LAPACK_BLAS_LIBRARY}
-	  WORKING_DIRECTORY ${ITPP_BINARY_DIR}/${ITPP_DIRECTORY}
-	  COMMENT "[IT++] Configuring package ..."
-	  )
-      else (LAPACK_BLAS_LIBRARY)
-	message (STATUS "[IT++] Configuring package without BLAS ...")
-	add_custom_target (itpp_configure
-	  COMMAND ./configure --prefix=${USG_INSTALL_PREFIX} --without-fft --without-blas
-	  WORKING_DIRECTORY ${ITPP_BINARY_DIR}/${ITPP_DIRECTORY}
-	  COMMENT "[IT++] Configuring package ..."
-	  )
-      endif (LAPACK_BLAS_LIBRARY)
+      set (WITH_FFT "no")
+      set (WITH_FFTW_INCLUDES "no")
     endif (HAVE_FFTW3)
     
+    if (LAPACK_BLAS_LIBRARY)
+      set (WITH_BLAS ${LAPACK_BLAS_LIBRARY})
+    else (LAPACK_BLAS_LIBRARY)
+      set (WITH_BLAS "no")
+    endif (LAPACK_BLAS_LIBRARY)
+    
+    configure_file (${ITPP_SOURCE_DIR}/run_configure.in
+      ${ITPP_BINARY_DIR}/run_configure
+      )
+    
+    ## configure the package
+
+    add_custom_target (itpp_configure
+      COMMAND cp ../run_configure .
+      COMMAND chmod a+x run_configure
+      COMMAND ./run_configure
+      WORKING_DIRECTORY ${ITPP_BINARY_DIR}/${ITPP_DIRECTORY}
+      COMMENT "[IT++] Configuring package ..."
+      )  
     add_dependencies (itpp_configure itpp_expand)
     
     ## build the package
+
     add_custom_target (itpp_build
       COMMAND make
       WORKING_DIRECTORY ${ITPP_BINARY_DIR}/${ITPP_DIRECTORY}
@@ -122,7 +116,8 @@ if (NOT HAVE_ITPP OR ITPP_FORCE_BUILD)
       )
     add_dependencies (itpp_build itpp_configure)
     
-    ## build and install the package
+    ## install the package
+
     add_custom_target (install
       COMMAND make install
       COMMAND rm -rf ${ITPP_BINARY_DIR}/*
@@ -147,6 +142,7 @@ endif (NOT HAVE_ITPP OR ITPP_FORCE_BUILD)
 message ("--------------------------------------------------")
 message ("   [IT++] Configuration summary.")
 message (" ")
+message (STATUS "C++ compiler    = ${CMAKE_CXX_COMPILER}")
 message (STATUS "BLAS library    = ${LAPACK_BLAS_LIBRARY}")
 message (STATUS "CBLAS library   = ${LAPACK_CBLAS_LIBRARY}")
 message (STATUS "LAPACK library  = ${LAPACK_LAPACK_LIBRARY}")
