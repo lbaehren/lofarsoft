@@ -60,7 +60,7 @@ find_program (svn_executable     svn     PATHS ${bin_locations})
 find_program (tar_executable     tar     PATHS ${bin_locations})
 
 if (svn_executable AND tar_executable)
-  add_custom_target (update_archive
+  add_custom_target (update_casacore
     COMMAND rm -rf casacore
     COMMAND ${svn_executable} co http://casacore.googlecode.com/svn/trunk casacore
     COMMAND ${tar_executable} -cvzf casacore.tgz casacore --exclude .svn
@@ -92,7 +92,8 @@ if (CASACORE_VERBOSE_BUILD)
   add_custom_target (expand_archive ALL
     COMMAND ${tar_executable} -xvzf ${have_casacore_tgz}
     COMMAND ${tar_executable} -xvzf ${have_cmake_tgz}
-    COMMAND mkdir build
+    COMMAND rm -rf build
+    COMMAND mkdir -p build
     WORKING_DIRECTORY ${CASACORE_BINARY_DIR}
     COMMENT "Expanding tar-archive ..."
     )
@@ -100,7 +101,8 @@ else (CASACORE_VERBOSE_BUILD)
   add_custom_target (expand_archive ALL
     COMMAND ${tar_executable} -xzf ${have_casacore_tgz}
     COMMAND ${tar_executable} -xzf ${have_cmake_tgz}
-    COMMAND mkdir build
+    COMMAND rm -rf build
+    COMMAND mkdir -p build
     WORKING_DIRECTORY ${CASACORE_BINARY_DIR}
     COMMENT "Expanding tar-archive ..."
     )
