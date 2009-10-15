@@ -34,7 +34,13 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   tbbTools::tbbTools ()
-  {;}
+  {
+// initialize private vars that were previously declared 'static' inside meanFPGAtrigger  
+    pos1=0; pos2=0; pos3=0; pos4=0; pos5=0;
+    apos2=0; apos3=0; apos4=0;
+    pos6=False; isTrigger=False; doAfterTrigger=False; isAfterTrigger=False;
+    startcount=0; stopcount=0; startindex=0; startmean=0; psum=0; pmax=0; aftercount=0;
+   }
     
   // ============================================================================
   //
@@ -63,12 +69,12 @@ namespace CR { // Namespace CR -- begin
 				 Bool reset){
     try {
       int i,numPulses=0,outsize=100;
-      static int pos1=0, pos2=0, pos3=0, pos4=0, pos5=0, opos;
-      static int apos2=0, apos3=0, apos4=0;
-      static Bool pos6=False, isTrigger=False, doAfterTrigger=False, isAfterTrigger=False;
-      static int startcount=0, stopcount=0, startindex=0, startmean=0, psum=0, pmax=0, aftercount=0;
+//      static int pos1=0, pos2=0, pos3=0, pos4=0, pos5=0, opos;
+//      static int apos2=0, apos3=0, apos4=0;
+//      static Bool pos6=False, isTrigger=False, doAfterTrigger=False, isAfterTrigger=False;
+//      static int startcount=0, stopcount=0, startindex=0, startmean=0, psum=0, pmax=0, aftercount=0;
+//      Removed static vars as they are class vars. Using 'static' only works if you have just one instance of the class!      
       
-
       doAfterTrigger=False;
       if (reset) {
 	// start a new dataset, reset all internal variables.
@@ -163,6 +169,7 @@ namespace CR { // Namespace CR -- begin
       peak.resize(numPulses,True);
       meanval.resize(numPulses,True);
       afterval.resize(numPulses,True);
+      
     } catch (AipsError x) {
       cerr << "tbbTools::meanFPGAtrigger: " << x.getMesg() << endl;
       return False;

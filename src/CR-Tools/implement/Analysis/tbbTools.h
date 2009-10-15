@@ -188,7 +188,11 @@ namespace CR { // Namespace CR -- begin
 				 Double resolution=1024., Bool reset=True);
 
   private:
-        
+    int pos1, pos2, pos3, pos4, pos5, opos;
+    int apos2, apos3, apos4;
+    Bool pos6, isTrigger, doAfterTrigger, isAfterTrigger;
+    int startcount, stopcount, startindex, startmean, psum, pmax, aftercount;
+    
     /*!
       \brief Unconditional deletion 
     */
