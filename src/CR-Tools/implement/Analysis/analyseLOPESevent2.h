@@ -503,11 +503,19 @@ namespace CR { // Namespace CR -- begin
                                  const double& Yc=0,
                                  const double& energy=0);
 
-	void fitTimeDistribution    (const string& filePrefix,
-								Record& erg,
-		                        const double& Xc = 0,
-                                const double& Yc = 0);						
-								 
+    /*!
+      \brief Plots lateral distribution of arrival times
+
+      \param filePrefix - the filename will be prefix+GT+".dat".
+      \param erg        - results of the pipeline (results from the fit will be added)
+      \param XC         - x-position of the shower center [in m]
+      \param YC         - y-position of the shower center [in m]
+   */
+    void lateralTimeDistribution (const string& filePrefix,
+                                  Record& erg,
+                                  const double& Xc = 0,
+                                  const double& Yc = 0);
+
     /*!
       /brief Generates a simple skymap 
 
