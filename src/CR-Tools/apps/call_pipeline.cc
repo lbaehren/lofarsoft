@@ -73,6 +73,7 @@ using CR::LopesEventIn;
   <h3>Prerequisites</h3>
 
   You need at least one event list file (textfile) like the example files below:<br>
+  (remark: at the moment we are testing to read eventlists from root files instead)<br>
 
   \verbatim
   Example event list
@@ -89,9 +90,10 @@ using CR::LopesEventIn;
   If you don't want to process the events in the default manner<br>
   you can also provide a config file (textfile), e.g. config.txt:<br>
   \verbatim
-  example configuration file:
-  some lines of text above a line of '='
-  =================================================================  
+  # Example configuration file:
+  # Comments start with '#'.
+  # If an option is missing or misspelled, then the default value will be used.
+  # Default values are:
   caltablepath           = /home/schroeder/usg/data/lopes/LOPES-CalTable
   path                   = /home/schroeder/lopes/events
   RotatePos              = true
@@ -140,12 +142,12 @@ using CR::LopesEventIn;
   This example means:
   <ul>
     <li>the caltables are in $LOFARSOFT/data/LOPES/LOPES-CalTable; the main importance of this
-	variable is to locate the LOPES CalTable in case you have put it down in some non-standard
-	location - otherwise the configuration script will be able to locate it and place the path
-	into the "crtools.h" header file;
+        variable is to locate the LOPES CalTable in case you have put it down in some non-standard
+        location - otherwise the configuration script will be able to locate it and place the path
+        into the "crtools.h" header file;
     <li>the events are stored at a certain location;
     <li>the given positions are in the Kascade coordinate system and must be
-    rotated to the LOPES system;
+        rotated to the LOPES system;
     <li>in doubt the KASCADE (instead of Grande) reconstruction is taken as input,
     <li>there will be generated plots of the analaysed event,
     <li>a spectrum will be plotted for every antenna
@@ -171,7 +173,7 @@ using CR::LopesEventIn;
     <li>frequencies between 40 MHz and 80 MHz will be used for analysis,
     <li>the Lopes data will be upsampled to a sampling rate of 320 MHz (see below),
     <li>the upsampling of the calibrated antenna fieldstrengthes will be done by
-    a factor of 2^1 = 2,
+        a factor of 2^1 = 2,
     <li>there will by a summary postscript of all created plots,
     <li>time range to search for CC-beam-peak in lateral distribution studies is +/- 45 ns,
     <li>the antennas 10101 and 10102 are not considered in the analysis,
@@ -187,22 +189,25 @@ using CR::LopesEventIn;
     <li>no output of mean values of lateral distribution results
   </ul>
 
-  <h3>Example</h3>
+  <h3>Examples</h3>
 
   \verbatim
   ./call_pipeline --in eventlist.txt --config config.txt
+  ./call_pipeline --in eventlist.txt --config conf1.txt --config conf2.txt
   \endverbatim
+  In the second example the config values will be read from two files squentially.
+  In case of condractiory config options the last ones will be used.
 
   <h3>Upsampling</h3>
 
   Currently there are two upsampling methods implemented:
   <ol>
-    <li>The one called by setting an upsampling exponent uses the Upsampling
-    routines of LOPES-Star and has an effect only to the traces of single
-    antennas.
-    <li>The upsampling due to setting an upsamplingRate greater than 160 MHz
-    effects the whole analysis chain, including the CC-Beam. This method is
-    recommended if no upsampling of the raw data is needed.
+    <li>The one called by setting an 'upsampling exponent' uses the Upsampling
+        routines of LOPES-Star and has an effect only to the traces of single
+        antennas. It is recommend for time calibration only.
+    <li>The upsampling due to setting an 'upsamplingRate' greater than 160 MHz
+        effects the whole analysis chain, including the CC-Beam. This method is
+        recommended for standard analysis (if no upsampling of the raw data is needed).
   </ol>
   You should prefer 2^n * 80 MHz rates (e.g. 160, 320, 640, 1280, ...).
 
@@ -228,7 +233,12 @@ const string       sDef  = "";
 
 enum ObjectType
 {
-   _AnyType, _BoolType, _DoubleType, _IntType, _UintType, _StringType
+  _AnyType,
+  _BoolType,
+  _DoubleType,
+  _IntType,
+  _UintType,
+  _StringType
 };
 
 template<class T>
@@ -242,8 +252,8 @@ bool fromString(T &t, const string &s, std::ios_base& (*f)(ios_base&))
 class AnyType
 {
 public:
-    virtual bool         setValue(string value)       { return false   ; }
-    virtual string       errorSetVal()                { return ""      ; }
+    virtual bool         setValue(string value)       { return false; }
+    virtual string       errorSetVal()                { return ""; }
     virtual bool         bValue()
     {
       cerr<<"Error: calling bValue() on object which is not bool"<<endl;
@@ -298,7 +308,7 @@ class DoubleType : public AnyType
 public:
     DoubleType(double value = dDef) { this->value = value; }
 
-    virtual double  dValue     () { return this->value; }  
+    virtual double  dValue     () { return this->value; }
     virtual bool    setValue   (string value) 
     {
         bool result = fromString<double>(this->value, value, std::scientific);
@@ -322,8 +332,7 @@ public:
     virtual bool    setValue   (string value)
     {
         bool result = fromString<int>(this->value, value, std::dec);
-        if(allowedValues.size() > 0)
-        {
+        if(allowedValues.size() > 0) {
             vector<int>::iterator iter = find(allowedValues.begin(), allowedValues.end(), this->value);
             result = result && (iter != allowedValues.end());
         }
@@ -331,11 +340,10 @@ public:
         return result;
     }
     virtual string  errorSetVal() 
-    { 
+    {
         stringstream errorMsg;
         errorMsg << "Value must be 'int' type.";
-        if(allowedValues.size() > 0)
-        {
+        if(allowedValues.size() > 0) {
             errorMsg << endl << "Allowed values : ";
             for(unsigned int i=0; i<allowedValues.size(); i++)
                 errorMsg<< allowedValues[i] << " ";
@@ -384,8 +392,7 @@ public:
     virtual bool   setValue (string value)
     {
         bool result = true;
-        if(allowedValues.size() > 0)
-        {
+        if(allowedValues.size() > 0) {
             vector<string>::iterator iter = find(allowedValues.begin(), allowedValues.end(), value);
             result = result && (iter != allowedValues.end());
         }
@@ -396,8 +403,7 @@ public:
     { 
         stringstream errorMsg;
         errorMsg << "Value must be 'string' type.";
-        if(allowedValues.size() > 0)
-        {
+        if(allowedValues.size() > 0) {
             errorMsg << endl << "Allowed values : ";
             for(unsigned int i=0; i<allowedValues.size(); i++)
                 errorMsg<< allowedValues[i] << " ";
@@ -474,11 +480,9 @@ public:
     {
         toUpper(name);
         bool typeAdded = false;
-        if(checkName(name))
-        {
+        if(checkName(name)) {
             trim(name);
-            if(!checkExistence(name))
-            {
+            if(!checkExistence(name)) {
                 this->data[name] = type;
                 typeAdded = true;
             }
@@ -490,8 +494,7 @@ public:
     void addBool(string name, bool value = bDef)
     {
         toUpper(name);
-        if(checkName(name))
-        {
+        if(checkName(name)) {
             trim(name);
             if(!checkExistence(name))
                 this->data[name] = new BoolType(value);
@@ -500,8 +503,7 @@ public:
     void addDouble(string name, double value = dDef)
     {
         toUpper(name);
-        if(checkName(name))
-        {
+        if(checkName(name)) {
             trim(name);
             if(!checkExistence(name))
                 this->data[name] = new DoubleType(value);
@@ -510,8 +512,7 @@ public:
     void addInt(string name, int value = iDef)
     {
         toUpper(name);
-        if(checkName(name))
-        {
+        if(checkName(name)) {
             trim(name);
             if(!checkExistence(name))
                 this->data[name] = new IntType(value);
@@ -520,8 +521,7 @@ public:
     void addUint(string name, unsigned int value = uiDef)
     {
         toUpper(name);
-        if(checkName(name))
-        {
+        if(checkName(name)) {
             trim(name);
             if(!checkExistence(name))
                 this->data[name] = new UintType(value);
@@ -530,8 +530,7 @@ public:
     void addString(string name, string value = sDef)
     {
         toUpper(name);
-        if(checkName(name))
-        {
+        if(checkName(name)) {
             trim(name);
             if(!checkExistence(name))
                 this->data[name] = new StringType(value);
@@ -541,19 +540,15 @@ public:
     void readConfigurationFile(string filename)
     {
         ifstream file(filename.c_str());
-        if(file.is_open())
-        {
-            while(!file.eof())
-            {
+        if(file.is_open()) {
+            while(!file.eof()) {
                 string line;
                 getline(file, line);
                 removeTabs(line);
                 trim(line);
 
-                if(line[0] != commentIndicator)
-                {
-                    if(line.find_first_of("=") != string::npos)
-                    {
+                if(line[0] != commentIndicator) {
+                    if(line.find_first_of("=") != string::npos) {
                         string varName          = line.substr(0, line.find_first_of("="));
                         string value            = line.substr(line.find_first_of("=") + 1, line.length());
                         string originalVarName  = varName;
@@ -564,8 +559,7 @@ public:
                         toUpper(varName);
 
                         // Special case - flagged antennas
-                        if(varName.compare("FLAGGED") == 0)
-                        {
+                        if(varName.compare("FLAGGED") == 0) {
                             if(checkFlagged(value) != -1) {
                                 flagged.push_back(checkFlagged(value));
                             } else {
@@ -573,20 +567,14 @@ public:
                               cerr<<varName<<": Antenna '"<<value<<"' is unknown!"<<endl;
                               cerr<<"Program will continue skipping the problem."<<endl;
                             }
-                        }
-                        else
-                        {
-                            if(checkExistence(varName))
-                            {
-                                if(!data[varName]->setValue(value))
-                                {
+                        } else {
+                            if(checkExistence(varName)) {
+                                if(!data[varName]->setValue(value)) {
                                     cerr<<endl<<"Error processing file \""<<filename<<"\"."<<endl;
                                     cerr<<varName<<"\""<<" : "<<data[varName]->errorSetVal()<<endl;
                                     cerr<<"Program will continue skipping the problem."<<endl;
                                 }
-                            }
-                            else
-                            {
+                            } else {
                                 cerr<<endl<<"Error processing file \""<<filename<<"\"."<<endl;
                                 cerr<<varName<<" was not declared in call_pipeline.cc"<< endl;
                                 cerr<<"Program will continue skipping the problem."<<endl;
@@ -596,16 +584,13 @@ public:
                 }
             }
             // Another special case - path variable
-            if(checkExistence("PATH"))
-            {
+            if(checkExistence("PATH")) {
                 string currentPathValue = data["PATH"]->sValue();
                 if((currentPathValue.length() > 1) && (currentPathValue[currentPathValue.length() - 1] != '/'))
                     currentPathValue += "/";
                 data["PATH"]->setValue(currentPathValue);
             }
-        }
-        else
-        {
+        } else {
             cerr << "Failed to open file \"" << filename <<"\".\n";
             cerr << "Program will continue with default configuration." << endl;
         }
@@ -613,12 +598,9 @@ public:
     string showConfigData()
     {
       stringstream output(stringstream::in | stringstream::out);
-      for(map<string, AnyType*>::iterator iter = data.begin(); iter != data.end(); iter++)
-      {
-
+      for(map<string, AnyType*>::iterator iter = data.begin(); iter != data.end(); iter++) {
          output << iter->first << " = ";
-         switch(iter->second->getType())
-         {
+         switch(iter->second->getType()) {
             case (int)_BoolType :
                output << iter->second->bValue();
                break;
@@ -722,18 +704,6 @@ ConfigData config;
 // Set default configuration values for the pipeline
 string caltablepath = caltable_lopes;
 string path = "";
-bool preferGrande    = false;        // per default prefer KASCADE reconstruction as input
-bool generatePlots   = true;         // the plot prefix will be the name of the event file
-bool generateSpectra = false;        // by default no spectra are plotted
-bool singlePlots     = false;        // by default there are no single plots for each antenna
-bool PlotRawData     = false;	      // by default there the raw data are not plotted
-bool CalculateMaxima = false;	      // by default the maxima are not calculated
-bool listCalcMaxima  = false;        // print calculated maxima in more user friendly way
-bool printShowerCoordinates=false;   // print the distance between antenna and shower core
-bool RotatePos = true; 	      // should be true if coordinates are given in KASKADE frame
-bool verbose = true;
-bool ignoreDistance = true;          // distance value of the eventlist will be ignored
-bool simplexFit = true;
 int doTVcal = -1;		      // 1: yes, 0: no, -1: use default	
 bool doGainCal = true;		      // calibration of the electrical fieldstrength
 bool doDispersionCal = true;	      // application of the CalTable PhaseCal values	
@@ -789,54 +759,55 @@ char reconstruction = 'A';	// A = KASCADE reconstruction taken, G = Grande recon
 
 void readConfigFile (const string &filename)
 {
+   // define default configuration values
    config.addString("caltablepath", caltable_lopes);
-   config.addString("path", ""); 						    
-   config.addBool("preferGrande", false);        		// per default prefer KASCADE reconstruction as input
-   config.addBool("generatePlots", true);         		// the plot prefix will be the name of the event file
-   config.addBool("generateSpectra", false);        		// by default no spectra are plotted
-   config.addBool("singlePlots", false);        			// by default there are no single plots for each antenna
-   config.addBool("PlotRawData", false);	     	 		// by default there the raw data are not plotted
-   config.addBool("CalculateMaxima", false);	      		// by default the maxima are not calculated
-   config.addBool("listCalcMaxima", false);        		// print calculated maxima in more user friendly way
-   config.addBool("printShowerCoordinates", false);   		// print the distance between antenna and shower core
-   config.addBool("RotatePos", true); 	      			    // should be true if coordinates are given in KASKADE frame
+   config.addString("path", "");
+   config.addBool("preferGrande", false);		// per default prefer KASCADE reconstruction as input
+   config.addBool("generatePlots", true);         	// the plot prefix will be the name of the event file
+   config.addBool("generateSpectra", false);        	// by default no spectra are plotted
+   config.addBool("singlePlots", false);        	// by default there are no single plots for each antenna
+   config.addBool("PlotRawData", false);	     	// by default there the raw data are not plotted
+   config.addBool("CalculateMaxima", false);	      	// by default the maxima are not calculated
+   config.addBool("listCalcMaxima", false);        	// print calculated maxima in more user friendly way
+   config.addBool("printShowerCoordinates", false);   	// print the distance between antenna and shower core
+   config.addBool("RotatePos", true); 	      		// should be true if coordinates are given in KASKADE frame
    config.addBool("verbose", true);
-   config.addBool("ignoreDistance", true);          		// distance value of the eventlist will be ignored
+   config.addBool("ignoreDistance", true);          	// distance value of the eventlist will be ignored
    config.addBool("simplexFit", true);
-   config.addBool("doGainCal", true);		      		// calibration of the electrical fieldstrength
-   config.addBool("doDispersionCal", true);	      		// application of the CalTable PhaseCal values	
-   config.addBool("doDelayCal", true);              		// correction for the general delay of each antenna
-   config.addBool("doRFImitigation", true);	      		// supresses narrow band noise ("RFI)
-   config.addBool("doFlagNotActiveAnts", true);     		// flags antennas marked as "not active" in the CalTables
-   config.addBool("doAutoFlagging", true);	      		// flags antennas due to bad signal ("does not affect flagging by the phase
-   config.addBool("both_pol", false);		      		// Should both polarizations be processed?
-   config.addDouble("plotStart", -2.05e-6);	      		// in seconds
-   config.addDouble("plotStop", -1.60e-6);	      	    	// in seconds
-   config.addDouble("spectrumStart", 40e6);            	        // for plotting", in Hz
-   config.addDouble("spectrumStop", 80e6);	      	    	// for plotting", in Hz
-   config.addDouble("freqStart", 40e6);                	        // for analysis", in Hz
-   config.addDouble("freqStop", 80e6);	                	// for analysis", in Hz
-   config.addDouble("upsamplingRate", 0.);	      	    	// Upsampling Rate for new upsampling
-   config.addUint("upsamplingExponent", 0);  		    	// by default no upsampling will be done
-   config.addUint("summaryColumns", 0);      		    	// be default no summary of all plots
-   config.addDouble("ccWindowWidth", 0.045e-6);	      	        // width of window for CC-beam
-   config.addString("rootFileName", "");               	        // Name of root file for output
-   config.addBool("writeBadEvents", false);         		// also bad events are written into the root file ("if possible)
-   config.addBool("calibrationMode", false);	      		// Calibration mode is off by default
-   config.addBool("lateralDistribution", false);    		// the lateral distribution will not be generated
-   config.addBool("lateralOutputFile", false);      		// no file for the lateral distribution will be created
-   config.addDouble("lateralSNRcut", 1.0);            	        // SNR cut for removing points from lateral distribution
-   config.addDouble("lateralTimeCut", 15e-9);         	        // Allowed time window +/- arround CC-beam-center for found peaks
-   config.addBool("calculateMeanValues", false);   	 	// calculate some mean values of all processed events
-   config.addBool("showAntennas", true);           		// Show antennas and magnitudes of incoming signals [added: mfranc]
+   config.addBool("doGainCal", true);		      	// calibration of the electrical fieldstrength
+   config.addBool("doDispersionCal", true);	      	// application of the CalTable PhaseCal values	
+   config.addBool("doDelayCal", true);              	// correction for the general delay of each antenna
+   config.addBool("doRFImitigation", true);	      	// supresses narrow band noise ("RFI)
+   config.addBool("doFlagNotActiveAnts", true);     	// flags antennas marked as "not active" in the CalTables
+   config.addBool("doAutoFlagging", true);	      	// flags antennas due to bad signal (does not affect flagging by the phase)
+   config.addBool("both_pol", false);		      	// Should both polarizations be processed?
+   config.addDouble("plotStart", -2.05e-6);	      	// in seconds
+   config.addDouble("plotStop", -1.60e-6);	      	// in seconds
+   config.addDouble("spectrumStart", 40e6);            	// for plotting", in Hz
+   config.addDouble("spectrumStop", 80e6);	      	// for plotting", in Hz
+   config.addDouble("freqStart", 40e6);                	// for analysis", in Hz
+   config.addDouble("freqStop", 80e6);	                // for analysis", in Hz
+   config.addDouble("upsamplingRate", 0.);	      	// Upsampling Rate for new upsampling
+   config.addUint("upsamplingExponent", 0);  		// by default no upsampling will be done
+   config.addUint("summaryColumns", 0);      		// be default no summary of all plots
+   config.addDouble("ccWindowWidth", 0.045e-6);	      	// width of window for CC-beam
+   config.addString("rootFileName", "");               	// Name of root file for output
+   config.addBool("writeBadEvents", false);         	// also bad events are written into the root file ("if possible)
+   config.addBool("calibrationMode", false);	      	// Calibration mode is off by default
+   config.addBool("lateralDistribution", false);    	// the lateral distribution will not be generated
+   config.addBool("lateralOutputFile", false);      	// no file for the lateral distribution will be created
+   config.addDouble("lateralSNRcut", 1.0);            	// SNR cut for removing points from lateral distribution
+   config.addDouble("lateralTimeCut", 15e-9);         	// Allowed time window +/- arround CC-beam-center for found peaks
+   config.addBool("calculateMeanValues", false);   	// calculate some mean values of all processed events
+   config.addBool("showAntennas", true);           	// Show antennas and magnitudes of incoming signals [added: mfranc]
 
-   IntType* _doTVcal = new IntType(-1);                          // 1: yes, 0: no, -1: use default	
+   IntType* _doTVcal = new IntType(-1);                // 1: yes, 0: no, -1: use default	
    _doTVcal->addAllowedValue(1);
    _doTVcal->addAllowedValue(0);
    _doTVcal->addAllowedValue(-1);
    config.addType("doTVcal", _doTVcal);
 
-   StringType* _polarization = new StringType("ANY");           // polarization: ANY, EW, NS or BOTH
+   StringType* _polarization = new StringType("ANY");  // polarization: ANY (=don't care), EW, NS or BOTH
    _polarization->addAllowedValue("ANY");
    _polarization->addAllowedValue("EW");
    _polarization->addAllowedValue("NS");
@@ -868,20 +839,21 @@ void readConfigFile (const string &filename)
    // One can now replace each global variable with the equivalent
    // Example: Every occurence of caltablepath can be replaced with config["caltablepath"]->sValue()
 
+     // eingerückte schon ersetzt
    caltablepath = config["caltablepath"]->sValue();
    path = config["path"]->sValue();
-   preferGrande = config["preferGrande"]->bValue();
-   generatePlots = config["generatePlots"]->bValue();
-   generateSpectra = config["generateSpectra"]->bValue();
-   singlePlots = config["singlePlots"]->bValue();
-   PlotRawData = config["PlotRawData"]->bValue();
-   CalculateMaxima = config["CalculateMaxima"]->bValue();
-   listCalcMaxima = config["listCalcMaxima"]->bValue();
-   printShowerCoordinates = config["printShowerCoordinates"]->bValue();
-   RotatePos = config["RotatePos"]->bValue();
-   verbose = config["verbose"]->bValue();
-   ignoreDistance = config["ignoreDistance"]->bValue();
-   simplexFit = config["simplexFit"]->bValue();
+   //  preferGrande = config["preferGrande"]->bValue();
+   //  generatePlots = config["generatePlots"]->bValue();
+   //  generateSpectra = config["generateSpectra"]->bValue();
+   //  singlePlots = config["singlePlots"]->bValue();
+   //  PlotRawData = config["PlotRawData"]->bValue();
+   //  CalculateMaxima = config["CalculateMaxima"]->bValue();
+   //  listCalcMaxima = config["listCalcMaxima"]->bValue();
+   //  printShowerCoordinates = config["printShowerCoordinates"]->bValue();
+   //  RotatePos = config["RotatePos"]->bValue();
+   //  verbose = config["verbose"]->bValue();
+   //  ignoreDistance = config["ignoreDistance"]->bValue();
+   //  simplexFit = config["simplexFit"]->bValue();
    doTVcal = config["doTVcal"]->iValue();
    doGainCal = config["doGainCal"]->bValue();
    doDispersionCal = config["doDispersionCal"]->bValue();
@@ -1091,9 +1063,9 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
       inputTree->SetBranchAddress("Eventname",&Eventname);
 
       // as there is no radius of curvature in the file, set ignoreDistance to true
-      if (!ignoreDistance) {
-        ignoreDistance = true;
-        cout << "\nWARNING: ignoreDistance was set to 'true'!\n" << endl;
+      if (!config["ignoreDistance"]->bValue()) {
+        config["ignoreDistance"]->setValue("TRUE");
+        cout << "\nWARNING: OVERWRITING CONFIGURATION: ignoreDistance was set to 'true'!\n" << endl;
       }
 
       cout << "Opened file for readin: " << kascadeRootFile << endl;
@@ -1122,7 +1094,7 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
       // core is outside of 90 m radius, or if the core lies inside the Grande array
       // if Kascade shall be prefered, then switch to Grande only if it is inside the 
       // Grande Array and not inside the 90 m radius
-      if (preferGrande) {
+      if (config["preferGrande"]->bValue()) {
         if ( sqrt(Xc*Xc+Yc*Yc)>90 )
           grande = true;
         if ( (Xcg<-50) && (Ycg<-30) )
@@ -1225,7 +1197,7 @@ int main (int argc, char *argv[])
 
   try {
     // allocate space for arrays with pulse properties
-    for (int i=0; i < MAX_NUM_ANTENNAS; i++) {
+    for (int i=0; i < MAX_NUM_ANTENNAS; ++i) {
       rawPulses[i] = new PulseProperties();
       calibPulses[i] = new PulseProperties();
       meanRawPulses[i] = new PulseProperties();
@@ -1260,14 +1232,13 @@ int main (int argc, char *argv[])
              << "eventfile2 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n"
              << "... \n"
              << "\n\nUse the following file format for the config file\n"
-             << "('=' must be seperated by spaces): \n\n"
-             << "some lines of text\n"
-             << "===================================\n"
+             << "# comments by '#'\n\n"
+             << "# some comments if you like\n"
              << "caltablepath = /home/schroeder/usg/data/lopes/LOPES-CalTable\n"
              << "path = /home/schroeder/lopes/events\n"
              << "preferGrande = false\n"
              << "RotatePos = true\n"
-             << "GeneratePlots = true\n"
+             << "generatePlots = true\n"
              << "SinglePlots = true\n"
              << "PlotRawData = false\n"
              << "GenerateSpectra = true\n"
@@ -1404,7 +1375,7 @@ int main (int argc, char *argv[])
         roottree->Branch("ElL",&elevation,"ElL/D");
         roottree->Branch("Distance",&distanceResult,"Distance/D");	// radius of curvature
         roottree->Branch("CCheight",&CCheight,"CCheight/D");
-	roottree->Branch("CCwidth",&CCwidth,"CCwidth/D");
+        roottree->Branch("CCwidth",&CCwidth,"CCwidth/D");
         roottree->Branch("CCheight_error",&CCheight_error,"CCheight_error/D");
         roottree->Branch("CCconverged",&CCconverged,"CCconverged/B");
         roottree->Branch("Xheight",&Xheight,"Xheight/D");
@@ -1413,7 +1384,7 @@ int main (int argc, char *argv[])
         roottree->Branch("goodReconstructed",&goodEW,"goodReconstructed/B");
         roottree->Branch("rmsCCbeam",&rmsCCbeam,"rmsCCbeam/D");
         roottree->Branch("rmsXbeam",&rmsXbeam,"rmsXbeam/D");
-	roottree->Branch("rmsPbeam",&rmsPbeam,"rmsPbeam/D");
+        roottree->Branch("rmsPbeam",&rmsPbeam,"rmsPbeam/D");
         if (lateralDistribution) {
           roottree->Branch("R_0",&R_0,"R_0/D");
           roottree->Branch("sigR_0",&sigR_0,"sigR_0/D");
@@ -1437,7 +1408,7 @@ int main (int argc, char *argv[])
         roottree->Branch("ElL_EW",&ElL,"ElL_EW/D");
         roottree->Branch("Distance_EW",&distanceResult,"Distance_EW/D");	// radius of curvature
         roottree->Branch("CCheight_EW",&CCheight,"CCheight_EW/D");
-	roottree->Branch("CCwidth_EW",&CCwidth,"CCwidth_EW/D");
+        roottree->Branch("CCwidth_EW",&CCwidth,"CCwidth_EW/D");
         roottree->Branch("CCheight_error_EW",&CCheight_error,"CCheight_error_EW/D");
         roottree->Branch("CCconverged_EW",&CCconverged,"CCconverged_EW/B");
         roottree->Branch("Xheight_EW",&Xheight,"Xheight_EW/D");
@@ -1445,8 +1416,8 @@ int main (int argc, char *argv[])
         roottree->Branch("Xconverged_EW",&Xconverged,"Xconverged_EW/B");
         roottree->Branch("goodReconstructed_EW",&goodEW,"goodReconstructed_EW/B");
         roottree->Branch("rmsCCbeam_EW",&rmsCCbeam,"rmsCCbeam_EW/D");
-	roottree->Branch("rmsXbeam_EW",&rmsXbeam,"rmsXbeam_EW/D");
-	roottree->Branch("rmsPbeam_EW",&rmsPbeam,"rmsPbeam_EW/D");
+        roottree->Branch("rmsXbeam_EW",&rmsXbeam,"rmsXbeam_EW/D");
+        roottree->Branch("rmsPbeam_EW",&rmsPbeam,"rmsPbeam_EW/D");
         if (lateralDistribution) {
           roottree->Branch("R_0_EW",&R_0,"R_0_EW/D");
           roottree->Branch("sigR_0_EW",&sigR_0,"sigR_0_EW/D");
@@ -1470,7 +1441,7 @@ int main (int argc, char *argv[])
         roottree->Branch("ElL_NS",&ElL_NS,"ElL_NS/D");
         roottree->Branch("Distance_NS",&distanceResultNS,"Distance_NS/D");	// radius of curvature
         roottree->Branch("CCheight_NS",&CCheight_NS,"CCheight_NS/D");
-	roottree->Branch("CCwidth_NS",&CCwidth_NS,"CCwidth_NS/D");
+        roottree->Branch("CCwidth_NS",&CCwidth_NS,"CCwidth_NS/D");
         roottree->Branch("CCheight_error_NS",&CCheight_error_NS,"CCheight_error_NS/D");
         roottree->Branch("CCconverged_NS",&CCconverged,"CCconverged_NS/B");
         roottree->Branch("Xheight_NS",&Xheight_NS,"Xheight_NS/D");
@@ -1478,8 +1449,8 @@ int main (int argc, char *argv[])
         roottree->Branch("Xconverged_NS",&Xconverged,"Xconverged_NS/B");
         roottree->Branch("goodReconstructed_NS",&goodNS,"goodReconstructed_NS/B");
         roottree->Branch("rmsCCbeam_NS",&rmsCCbeam_NS,"rmsCCbeam_NS/D");
-	roottree->Branch("rmsXbeam_NS",&rmsXbeam_NS,"rmsXbeam_NS/D");
-	roottree->Branch("rmsPbeam_NS",&rmsPbeam_NS,"rmsPbeam_NS/D");
+        roottree->Branch("rmsXbeam_NS",&rmsXbeam_NS,"rmsXbeam_NS/D");
+        roottree->Branch("rmsPbeam_NS",&rmsPbeam_NS,"rmsPbeam_NS/D");
         if (lateralDistribution) {
           roottree->Branch("R_0_NS",&R_0_NS,"R_0_NS/D");
           roottree->Branch("sigR_0_NS",&sigR_0_NS,"sigR_0_NS/D");
@@ -1502,7 +1473,6 @@ int main (int argc, char *argv[])
 
     // Process events from event file list
     while ( getNextEvent() ) {
-		
       // print information and process the event
       if (calibrationMode) {
         cout << "\nProcessing calibration event \"" << eventname << "\".\n" << endl;
@@ -1578,13 +1548,12 @@ int main (int argc, char *argv[])
       // in this case an additional plotprefix is used
       string polPlotPrefix = "";
 
-	  // Structure containg necessary structures to create plot
-	  // [added: mfranc]
-	  Vector <int>    antIDs;					   // vector containing antennas IDs
-	  Matrix <double> antPos;                      // matrix containing antennas positions		 
-	  map<int, PulseProperties>::iterator itBeg;   // iterator.begin() of pulsesMap
-	  map<int, PulseProperties>::iterator itEnd;   // iterator.end() if pulsesMap
-	  
+      // Structure containg necessary structures to create event display plot [added: mfranc]
+      Vector <int>    antIDs;                          // vector containing antennas IDs
+      Matrix <double> antPos;                          // matrix containing antennas positions		 
+      map<int, PulseProperties>::iterator itBeg;       // iterator.begin() of pulsesMap
+      map<int, PulseProperties>::iterator itEnd;       // iterator.end() if pulsesMap
+
       if ( calibrationMode ) {
         // initialize the pipeline
         analyseLOPESevent2 eventPipeline;
@@ -1599,17 +1568,17 @@ int main (int argc, char *argv[])
         // call the pipeline with an extra delay = 0.
         results = eventPipeline.CalibrationPipeline (path+eventname,
                                                      plotprefix,
-                                                     generatePlots,
-                                                     generateSpectra,
+                                                     config["generatePlots"]->bValue(),
+                                                     config["generateSpectra"]->bValue(),
                                                      static_cast< Vector<int> >(flagged),
-                                                     verbose,
+                                                     config["verbose"]->bValue(),
                                                      doGainCal,
                                                      doDispersionCal,
                                                      false,		// never correct delays in calibration mode
                                                      doRFImitigation,
-                                                     singlePlots,
-                                                     PlotRawData,
-                                                     CalculateMaxima);
+                                                     config["singlePlots"]->bValue(),
+                                                     config["PlotRawData"]->bValue(),
+                                                     config["CalculateMaxima"]->bValue());
 
         // make a postscript with a summary of all plots
         // if summaryColumns = 0 the method does not create a summary.
@@ -1622,15 +1591,12 @@ int main (int argc, char *argv[])
         // adding results to variables (needed to fill them into the root tree)
         goodEW = results.asBool("goodReconstructed");
         gt = results.asuInt("Date");
-		
-		// getting necessary data to plot
-		// [added: mfranc]
-		if(showAntennas)
-		{
-			antPos = eventPipeline.getAntennaPositions();
-			antIDs = eventPipeline.getAntennaIDs();
-		}
-		
+
+        // getting necessary data to plot [added: mfranc]
+        if(showAntennas) {
+          antPos = eventPipeline.getAntennaPositions();
+          antIDs = eventPipeline.getAntennaIDs();
+        }
       } else {
         if ( (polarization == "ANY") || (polarization == "EW") || both_pol) {
           if (both_pol) {
@@ -1659,13 +1625,13 @@ int main (int argc, char *argv[])
                                                radiusOfCurvature,
                                                core_x,
                                                core_y,
-                                               RotatePos,
+                                               config["RotatePos"]->bValue(),
                                                plotprefix+polPlotPrefix,
-                                               generatePlots,
-                                               generateSpectra,
+                                               config["generatePlots"]->bValue(),
+                                               config["generateSpectra"]->bValue(),
                                                static_cast< Vector<int> >(flagged),
-                                               verbose,
-                                               simplexFit,
+                                               config["verbose"]->bValue(),
+                                               config["simplexFit"]->bValue(),
                                                0.,
                                                doTVcal,
                                                doGainCal,
@@ -1676,12 +1642,12 @@ int main (int argc, char *argv[])
                                                doAutoFlagging,
                                                upsamplingRate,
                                                polarization,
-                                               singlePlots,
-                                               PlotRawData,
-                                               CalculateMaxima,
-                                               listCalcMaxima,
-                                               printShowerCoordinates,
-                                               ignoreDistance);
+                                               config["singlePlots"]->bValue(),
+                                               config["PlotRawData"]->bValue(),
+                                               config["CalculateMaxima"]->bValue(),
+                                               config["listCalcMaxima"]->bValue(),
+                                               config["printShowerCoordinates"]->bValue(),
+                                               config["ignoreDistance"]->bValue());
 
           // make a postscript with a summary of all plots
           // if summaryColumns = 0 the method does not create a summary.
@@ -1731,15 +1697,13 @@ int main (int argc, char *argv[])
           rmsXbeam = results.asDouble("rmsXbeam");
           rmsPbeam = results.asDouble("rmsPbeam");
           gt = results.asuInt("Date");
-		  
-	      // getting necessary data to plot
-	      // [added: mfranc]
-		  if(showAntennas)
-		  {
-			  antPos = eventPipeline.getAntennaPositions();
-			  antIDs = eventPipeline.getAntennaIDs();
-		  }
-         }
+
+          // getting necessary data to plot [added: mfranc]
+          if(showAntennas) {
+            antPos = eventPipeline.getAntennaPositions();
+            antIDs = eventPipeline.getAntennaIDs();
+          }
+        }
 
         if ( (polarization == "NS") || both_pol) {
           if (both_pol) {
@@ -1768,13 +1732,13 @@ int main (int argc, char *argv[])
                                                radiusOfCurvature,
                                                core_x,
                                                core_y,
-                                               RotatePos,
+                                               config["RotatePos"]->bValue(),
                                                plotprefix+polPlotPrefix,
-                                               generatePlots,
-                                               generateSpectra,
+                                               config["generatePlots"]->bValue(),
+                                               config["generateSpectra"]->bValue(),
                                                static_cast< Vector<int> >(flagged),
-                                               verbose,
-                                               simplexFit,
+                                               config["verbose"]->bValue(),
+                                               config["simplexFit"]->bValue(),
                                                0.,
                                                doTVcal,
                                                doGainCal,
@@ -1785,12 +1749,12 @@ int main (int argc, char *argv[])
                                                doAutoFlagging,
                                                upsamplingRate,
                                                polarization,
-                                               singlePlots,
-                                               PlotRawData,
-                                               CalculateMaxima,
-                                               listCalcMaxima,
-                                               printShowerCoordinates,
-                                               ignoreDistance);
+                                               config["singlePlots"]->bValue(),
+                                               config["PlotRawData"]->bValue(),
+                                               config["CalculateMaxima"]->bValue(),
+                                               config["listCalcMaxima"]->bValue(),
+                                               config["printShowerCoordinates"]->bValue(),
+                                               config["ignoreDistance"]->bValue());
 
           /* make a postscript with a summary of all plots
            if summaryColumns = 0 the method does not create a summary. */
@@ -1833,85 +1797,75 @@ int main (int argc, char *argv[])
           ElL_NS = results.asDouble("Elevation");
           distanceResultNS = results.asDouble("Distance");
           CCheight_NS = results.asDouble("CCheight");
-	  CCwidth_NS = results.asDouble("CCwidth");
+          CCwidth_NS = results.asDouble("CCwidth");
           CCheight_error_NS = results.asDouble("CCheight_error");
           CCconvergedNS = results.asBool("CCconverged");
           Xheight_NS = results.asDouble("Xheight");
           Xheight_error_NS = results.asDouble("Xheight_error");
           XconvergedNS = results.asBool("Xconverged");
           rmsCCbeam_NS = results.asDouble("rmsCCbeam");
-	  rmsXbeam_NS = results.asDouble("rmsXbeam");
-	  rmsPbeam_NS = results.asDouble("rmsPbeam");
+          rmsXbeam_NS = results.asDouble("rmsXbeam");
+          rmsPbeam_NS = results.asDouble("rmsPbeam");
           gt = results.asuInt("Date");
-		  
-		// getting necessary data to plot
-		// [added: mfranc]
-		if(showAntennas)
-		{
-			antPos = eventPipeline.getAntennaPositions();
-			antIDs = eventPipeline.getAntennaIDs();		
-		}
+
+          // getting necessary data to plot [added: mfranc]
+          if(showAntennas) {
+            antPos = eventPipeline.getAntennaPositions();
+            antIDs = eventPipeline.getAntennaIDs();		
+          }
         }
-	  }  // if...else (calibrationMode)
-	  
-		// Create plot of all antennas
-	    // [added: mfranc]
-		if(showAntennas)
-		{
-                  if(calibPulsesMap.size() != 0)
-                  {
-                        itBeg = calibPulsesMap.begin();	
-                        itEnd = calibPulsesMap.end();
-                        cout<<"The plot of all antennas will be created using calibrated pulses information"<<endl;
-		   
-                        AntennasDisplay ad;
-                        vector<double> allAntennasPosX;
-                        vector<double> allAntennasPosY;
-                        vector<int>    antIDsSTL;     
-                        
-                        antIDs.tovector(antIDsSTL);
-                        
-                        for (unsigned int i=0 ; i < antIDs.size(); i++)
-                        {
-                              allAntennasPosX.push_back(antPos.row(i)(0));
-                              allAntennasPosY.push_back(antPos.row(i)(1));
-                        }
-                        ad.setAllAntennas(allAntennasPosY, allAntennasPosX);
-                        // Attention the position are reversed !!!
-                        
-                        ad.setCore(core_x, core_y, azimuth, elevation);
-                        
-                        for(map<int, PulseProperties>::iterator it = itBeg; it != itEnd; it++)
-                        {
-                                    int                   id       = it->second.antennaID;
-                                    vector<int>::iterator loc      = std::find(antIDsSTL.begin(), antIDsSTL.end(), id);
-                                    
-                                    if(loc != antIDsSTL.end())
-                                    {
-                                             double xPos  = antPos.row(loc - antIDsSTL.begin())(0);
-                                             double yPos  = antPos.row(loc - antIDsSTL.begin())(1);
-                                             double magn  = it->second.maximum;
-                                             double time  = it->second.maximumTime;
-                                             int    polar = it->second.polarization.compare("NS") ? (int)ad.NS : (int)ad.EW;
-                                             // Attention the position are reversed !!!
-                                             ad.addNewAntenna(yPos, xPos, magn, time, polar);
-                                    }
-                        }
-                        size_t found = eventname.rfind(".event");
-                        string modifiedEventname = (found != string::npos) ? eventname.erase(found, eventname.length()) : eventname;
-                        ad.createPlot(modifiedEventname+ "_" + "map", "Event: " + modifiedEventname);
-               }
-               else
-                  cerr<<"The plot of all antennas will not be created because no calibrated pulse information has been found";
-	   }
-	   
+      }  // if...else (calibrationMode)
+
+
+      // Create event display plot of all antennas [added: mfranc]
+      if(showAntennas) {
+        if(calibPulsesMap.size() != 0) {
+          itBeg = calibPulsesMap.begin();	
+          itEnd = calibPulsesMap.end();
+          cout << "Event display plot of all antennas will be created using calibrated pulses information." << endl;
+
+          AntennasDisplay ad;
+          vector<double> allAntennasPosX;
+          vector<double> allAntennasPosY;
+          vector<int>    antIDsSTL;
+          antIDs.tovector(antIDsSTL);
+
+          for (unsigned int i=0 ; i < antIDs.size(); i++) {
+            allAntennasPosX.push_back(antPos.row(i)(0));
+            allAntennasPosY.push_back(antPos.row(i)(1));
+          }
+          ad.setAllAntennas(allAntennasPosY, allAntennasPosX); // Attention: the position are reversed !!!
+
+          ad.setCore(core_x, core_y, azimuth, elevation);	// TODO: Check core and direction (probably wrong)
+
+          for(map<int, PulseProperties>::iterator it = itBeg; it != itEnd; ++it) {
+            int                   id       = it->second.antennaID;
+            vector<int>::iterator loc      = std::find(antIDsSTL.begin(), antIDsSTL.end(), id);
+
+            if(loc != antIDsSTL.end()) {
+              double xPos  = antPos.row(loc - antIDsSTL.begin())(0);
+              double yPos  = antPos.row(loc - antIDsSTL.begin())(1);
+              double magn  = it->second.envelopeMaximum;
+              double time  = it->second.geomDelay + it->second.envelopeTime;	// TODO: check time information
+              int    polar = it->second.polarization.compare("NS") ? (int)ad.NS : (int)ad.EW;
+              ad.addNewAntenna(yPos, xPos, magn, time, polar); // Attention: the position are reversed !!!
+            }
+          }
+          size_t found = eventname.rfind(".event");
+          string modifiedEventname = (found != string::npos) ? eventname.erase(found, eventname.length()) : eventname;
+          ad.createPlot(modifiedEventname+ "_" + "map", "Event: " + modifiedEventname);
+        } else {
+          cerr << "ERROR: Event display plot cannot be created because no calibrated pulse information has been found." << endl;
+        }
+      }
+
       // process pulse properties
       // delete arrays
       for (int i=0; i < MAX_NUM_ANTENNAS; i++) {
         *rawPulses[i] = PulseProperties();
         *calibPulses[i] = PulseProperties();
       }
-		
+
       // fill information in array for raw pulses
       for ( map<int,PulseProperties>::iterator it=rawPulsesMap.begin() ; it != rawPulsesMap.end(); ++it) {
         // check if antenna number lies in valid range
@@ -1972,7 +1926,6 @@ int main (int argc, char *argv[])
                 / meanResCounter[antenna-1];
             }
           }
-		
 
           // create branch names
           stringstream antNumber(""); 
@@ -2020,7 +1973,7 @@ int main (int argc, char *argv[])
       rootfile->Close();
     }
 
-    // free space
+    // free allocated memory
     for (int i=0; i < MAX_NUM_ANTENNAS; i++) {
       delete rawPulses[i];
       delete calibPulses[i];
