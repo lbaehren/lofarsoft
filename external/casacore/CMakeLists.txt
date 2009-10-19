@@ -84,33 +84,33 @@ if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
   set (CASACORE_DIRECTORY "casacore")
   set (CASACORE_TAR_ARCHIVE "${CASACORE_DIRECTORY}.tar.gz")
   set (CASACORE_URL "${USG_DOWNLOAD}/software/${CASACORE_TAR_ARCHIVE}")
-    
+  
   ##__________________________________________________________________
   ## Expand the tar-archive
   
-if (CASACORE_VERBOSE_BUILD)
-  add_custom_target (expand_archive ALL
-    COMMAND ${tar_executable} -xvzf ${have_casacore_tgz}
-    COMMAND ${tar_executable} -xvzf ${have_cmake_tgz}
-    COMMAND rm -rf build
-    COMMAND mkdir -p build
-    WORKING_DIRECTORY ${CASACORE_BINARY_DIR}
-    COMMENT "Expanding tar-archive ..."
-    )
-else (CASACORE_VERBOSE_BUILD)
-  add_custom_target (expand_archive ALL
-    COMMAND ${tar_executable} -xzf ${have_casacore_tgz}
-    COMMAND ${tar_executable} -xzf ${have_cmake_tgz}
-    COMMAND rm -rf build
-    COMMAND mkdir -p build
-    WORKING_DIRECTORY ${CASACORE_BINARY_DIR}
-    COMMENT "Expanding tar-archive ..."
-    )
-endif (CASACORE_VERBOSE_BUILD)
+  if (CASACORE_VERBOSE_BUILD)
+    add_custom_target (expand_archive ALL
+      COMMAND ${tar_executable} -xvzf ${have_casacore_tgz}
+      COMMAND ${tar_executable} -xvzf ${have_cmake_tgz}
+      COMMAND rm -rf build
+      COMMAND mkdir -p build
+      WORKING_DIRECTORY ${CASACORE_BINARY_DIR}
+      COMMENT "Expanding tar-archive ..."
+      )
+  else (CASACORE_VERBOSE_BUILD)
+    add_custom_target (expand_archive ALL
+      COMMAND ${tar_executable} -xzf ${have_casacore_tgz}
+      COMMAND ${tar_executable} -xzf ${have_cmake_tgz}
+      COMMAND rm -rf build
+      COMMAND mkdir -p build
+      WORKING_DIRECTORY ${CASACORE_BINARY_DIR}
+      COMMENT "Expanding tar-archive ..."
+      )
+  endif (CASACORE_VERBOSE_BUILD)
   
   ##__________________________________________________________________
   ## Custom target wrapping the standard configure/build chain
-
+  
   ## Run CMake
   
   add_custom_target (run_configure ALL
@@ -119,9 +119,9 @@ endif (CASACORE_VERBOSE_BUILD)
     COMMENT "Configuring to build casacore library ..."
     )
   add_dependencies (run_configure expand_archive)
-
+  
   ## Run "make"
-
+  
   add_custom_target (run_make ALL
     COMMAND make
     COMMAND make install
@@ -129,9 +129,9 @@ endif (CASACORE_VERBOSE_BUILD)
     COMMENT "Building and installing casacore ..."
     )
   add_dependencies (run_make run_configure)
-
+  
   ## Run "make install"
-
+  
   add_custom_target (install ALL
     COMMAND rm -rf build
     COMMAND rm -rf casacore
@@ -146,13 +146,13 @@ endif (CASACORE_VERBOSE_BUILD)
   ## [1] Update the tar-archive with the CMake scripts
   
   if (tar_executable)
-    add_custom_target (archive_configuration
+    add_custom_target (update_configuration
       COMMAND ${tar_executable} -cvzf cmake.tgz `find casacore -name CMakeLists.txt`
       COMMAND mv cmake.tgz ${CASACORE_SOURCE_DIR}
       WORKING_DIRECTORY ${CASACORE_BINARY_DIR}
       )
   endif (tar_executable)
-  
+
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
