@@ -1,4 +1,28 @@
-=== [1] Documentation ===
+_________________________________________________________________________________
+>>> Build high-level packages
+
+High-level build targets are available for a number of packages, which are build
+on top of other external components:
+
+  * [cr] CR-Tools
+  * [dal] Data Access Library
+  * [rm] Rotation Measure Synthesis 
+
+Once completing the check-out of the source code from the USG repository, the
+following steps are required:
+
+  cd $LOFARSOFT/build
+  ./bootstrap
+  make <package>
+
+So in order to e.g. build the DAL, run
+
+  make dal
+
+from within the "build" directory.
+
+_________________________________________________________________________________
+>>> Create Doxygen documentation
 
 Create a local version of the documentation:
 
