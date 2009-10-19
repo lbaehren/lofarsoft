@@ -122,9 +122,13 @@ class hfQtPlot(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         self.img=(QtGui.QImage())
         self.rubberBand=False
+        self.rubberBand2=False
         self.rubberOrigin=QtCore.QPoint()
         self.consolelinecount=0
         self.DBGContinueButtonPressed=True
+        self.mousemode="z"
+        self.mouse_selectmode="p"
+        self.presseventpos=()
     def setGraph(self,gr):
         self.gr=gr;
         self.createImage()
@@ -138,24 +142,106 @@ class hfQtPlot(QtGui.QWidget):
         self.update()
     def setData(self,data):
         self.d=data
+    def hfmouse_zoom(self): 
+        self.mousemode="z"
+        self.setMouseTracking(False)
+        self.setCursor(QtCore.Qt.ArrowCursor)
+    def hfmouse_value(self): 
+        self.mousemode="v"
+        self.setMouseTracking(True)
+        self.setCursor(QtCore.Qt.CrossCursor)
+    def hfmouse_select(self): 
+        self.mousemode="s"
+        self.setCursor(QtCore.Qt.PointingHandCursor)
+    def hfmouse_selectwhat(self,str): 
+        if str=="Values": self.mouse_selectmode="v"
+        elif str=="Data Sets": self.mouse_selectmode="d"
+        elif str=="Plot Panels": self.mouse_selectmode="p"
+        else: print "Programming Error: Mouse select mode unknown ..."
     def mousePressEvent(self,event):
-        self.rubberOrigin = QtCore.QPoint(event.pos());
-        if not self.rubberBand:
-            self.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self);
-        self.rubberBand.setGeometry(QtCore.QRect(self.rubberOrigin, QtCore.QSize()));
-        self.rubberBand.show();
+        if event.button()==QtCore.Qt.LeftButton: self.mousePressLeftEvent(event)        
+    def mousePressLeftEvent(self,event):
+        self.presseventpos=self.screenP2coord(event.pos())
+        if self.mousemode=="z":
+            self.rubberOrigin = QtCore.QPoint(event.pos());
+            if not self.rubberBand: self.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self);
+            self.rubberBand.setGeometry(QtCore.QRect(self.rubberOrigin, QtCore.QSize()));
+            self.rubberBand.show();
+        if self.mousemode=="s":
+            app.setOverrideCursor(QtCore.Qt.OpenHandCursor)
     def mouseMoveEvent(self,event):
-        self.rubberBand.setGeometry(QtCore.QRect(self.rubberOrigin, event.pos()).normalized())
+        if self.mousemode=="z":
+            self.rubberBand.setGeometry(QtCore.QRect(self.rubberOrigin, event.pos()).normalized())
+        if self.mousemode=="v":
+            pos=self.screenP2coord(event.pos())
+            txt="x="+str(pos[0])+"\n "+"y="+str(pos[1])+"\n"+"Panel="+str(pos[4])
+            self.gui.CursorValueLabel.setText(QtCore.QString(txt))
     def mouseReleaseEvent(self,event):
-        self.rubberBand.hide();
-        xy=self.screen2coord(self.rubberBand.geometry())
-        obj=self.currentplotpanelobject()
-        obj["'XAuto"].set_silent(int(False))
-        obj["'xmin"].set_silent(xy[0])
-        obj["'xmax"].set_silent(xy[2])
-        obj["'ymin"].set_silent(xy[1])
-        obj["'ymax"].set_silent(xy[3])
-        obj["'Replot"].touch()
+        if event.button()==QtCore.Qt.LeftButton: self.mouseReleaseLeftEvent(event)        
+    def mouseReleaseLeftEvent(self,event):
+        if self.mousemode=="z":
+            self.rubberBand.hide();
+            xy=self.screenR2coord(self.rubberBand.geometry())
+            obj=self.currentplotpanelobject()
+            obj["'XAuto"].set_silent(int(False))
+            obj["'xmin"].set_silent(xy[0])
+            obj["'xmax"].set_silent(xy[2])
+            obj["'ymin"].set_silent(xy[1])
+            obj["'ymax"].set_silent(xy[3])
+            obj["'Replot"].touch()
+        elif self.mousemode=="s":
+            app.restoreOverrideCursor()
+            pos=self.screenP2coord(event.pos())
+            npanel=pos[4]
+            npanelold=self.presseventpos[4]
+            if self.mouse_selectmode=="p":
+                panels=self.currentplotwindowobject()["'PlotPanel"].asList()
+                if npanel>=0 & npanel<len(panels):
+                    panel=panels[npanel]
+                    if npanel==npanelold:  ##Then this is just a select or deselect click
+                        name=panel.getName(True)+" #"+str(npanel)
+                        if panel.isNeighbour("SelectBoard"):
+                            panel // self.d["'SelectBoard"]
+                        else:
+                            panel >> self.d["'SelectBoard"]
+                        self.hfReplotNetwork()
+                    else:  ##Then this is a move event
+                        self.movepanels(self.d["'SelectBoard'PlotPanel"],panel)
+    def hfSelectAll(self):
+        if self.mouse_selectmode=="p": self.selectallpanels()
+    def hfDeselectAll(self):
+        if self.mouse_selectmode=="p": self.deselectallpanels()
+    def selectallpanels(self):
+        for p in self.currentplotwindowobject()["'PlotPanel"].asList():
+            if not p.isNeighbour("SelectBoard"): p >> self.d["'SelectBoard"]
+        self.hfReplotNetwork()
+    def deselectallpanels(self):
+        for p in self.currentplotwindowobject()["'PlotPanel"].asList():
+            if p.isNeighbour("SelectBoard"): p // self.d["'SelectBoard"]
+        self.hfReplotNetwork()
+    def movepanels(self,panels,panel):
+        "This will move the PlotData objects from the object in 'panels' to the panel object. Hence the data sets displayed previously in those panels will now be displayed in one plot panel."
+        if panel.Found():
+            for p in panels.asList():
+                if not p==panel:
+                    for pd in p["'PlotData"].asList(): 
+                        pd >> panel # Create the new link
+                    l=p.Chain(DIR.TO,["PlotWindow","SelectBoard"],False) # Find the result objects
+                    ~l # Delete the old plotpanelobject plus results
+            self.hfReplotNetwork()
+    def hfSplitPanels(self):
+        panels=self.d["'SelectBoard'PlotPanel"].asList()
+        for p in panels: self.splitpanel(p)
+    def splitpanel(self,panel):
+        "This will move the PlotData objects from the object in 'panel' to individual plot panels. Hence the data sets displayed previously in panel will now be displayed separately."
+        if panel.Found():
+            for pd in panel["'PlotData"].asList()[1:]: 
+                plotpanels=pd["PlotPanel"].asList() # find all plotpanel neighbours
+                if len(plotpanels)==1:
+                    x = pd >> ("PlotPanel",_f(hfPlotPanel)) # Create a new PlotPanel Object if none exists
+                    x["Results"] >> pd["PlotWindow"] 
+                pd // panel # OK, now delete the link to the old plotpanel
+            self.hfReplotNetwork()
     def whichpanel(self,xs,ys):
         "Returns the number of rows and columns of panels displayed and returns an index to the panel which contains screen position xs,xy. Returns a tupel of the form (nx,ny,n) and calls SubPlot with this input."
         n=self.d["'PlotWindow:npanelsplotted"]
@@ -166,14 +252,19 @@ class hfQtPlot(QtGui.QWidget):
             height=self.d["'Height"].val()
             npx=int(ceil(1.0*xs/width*nx))
             npy=int(ceil(1.0*ys/height*ny))
-            n=(npy-1)*ny+(npx-1)
+            n=(npy-1)*nx+(npx-1)
         else: 
             nx=1
             ny=1
             n=1
         self.gr.SubPlot(nx,ny,n)
         return (nx,ny,n)
-    def screen2coord(self,qr):
+    def screenP2coord(self,qp):
+        "Given a QPoint this will return the coordinates  in the current units chosed by the axis of the panel closest to the point. It will also return the total rows & columns, and index of the selected panel. Returns a tupel of the form: (x1,y1,nx,ny,n)"
+        npan=self.whichpanel(qp.x(),qp.y())
+        xy=self.gr.CalcXYZ(qp.x(),qp.y())
+        return (xy.x,xy.y) + npan
+    def screenR2coord(self,qr):
         "Given a QRectangle this will return the coordinates of the top left and bottom right corner in the current units chosed by the axis of the panel closest to the bottom left position. It wil also return the total rows & columns, and index of the selected panel. Returns a tupel of the form: (x1,y1,x2,y2,nx,ny,n)"
         npan=self.whichpanel(qr.left(),qr.bottom())
         xy1=self.gr.CalcXYZ(qr.left(),qr.bottom())
@@ -232,6 +323,12 @@ class hfQtPlot(QtGui.QWidget):
         self.hfsetTextT("'FirstAntenna","Int")
     def hfantennaselection(self):
         self.hfsetTextT("'AntennaSelection","IntList")
+    def hfDelete(self):
+        "This is called from the delete action in the GUI (Edit/Delete or backspace)."
+        for a in self.d["'SelectBoard'AntennaID"].asList().getSearchName():
+            print "Deleting",a
+            CRDelAntennaPipeline(self.d["'ROOT"],a)
+        self.hfReplotNetwork()
     def hfLoad(self):
         qi=QtCore.QFileInfo(self.currentplotdataobject()["'Filename"].val())
         f=str(QtGui.QFileDialog.getOpenFileName(hfm,"Load Data File",qi.absolutePath()," TimeSeries (*.event *.h5)"))

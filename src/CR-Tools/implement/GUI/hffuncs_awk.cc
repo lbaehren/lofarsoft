@@ -883,7 +883,7 @@ $${
   vec=dp->getNeighbourNames(DIR_TO);
   vec.push_back("");
   vec_append(vec,dp->getNeighbourNames(DIR_FROM));
-  copycast_vec<T,HString>(vp,&vec);
+  copycast_vec<HString,T>(&vec,vp);
 }
 //$END Function -----------------------------------------------------------------
 

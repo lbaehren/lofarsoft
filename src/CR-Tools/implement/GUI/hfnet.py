@@ -24,6 +24,9 @@ gui=hfm.ui # define an object which provides easy access to the GUI objects
 
 d["QtPanel"]  >> ("QtNetview",_f(hfQtNetview),_l(100)) #Here this is used by the Network Display object
 
+selectboard=d["QtPanel'SelectBoard"]
+selectboard.setFunc("Neighbours","Sys",TYPE.STRING)
+
 d >> d["QtNetview"] # to not loose it, when the above connection is cut
 
 d.All().clearModification() # to avoid re-initializing the DataReaderObject
@@ -65,7 +68,10 @@ d["PlotPanel'yshift"].connect(gui.yshiftslider,"setValue","int")
 
 #QtCore.QObject.connect(gui.loadfile,QtCore.SIGNAL("triggered()"),gui.HMainPlotter.hfLoad)
 connect_action("loadfile","hfLoad")
-
+connect_action("actionDelete","hfDelete")
+connect_action("actionSplit_Panels","hfSplitPanels")
+connect_action("actionSelect_All","hfSelectAll")
+connect_action("actionDeselect_All","hfDeselectAll")
 
 
 initializePyQtObjects(d)#This will send a PyQt signal from all objects to the GUI, so that the parameters are set in the GUI

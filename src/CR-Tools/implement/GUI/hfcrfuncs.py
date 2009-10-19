@@ -14,14 +14,20 @@ def CRFile(self,filename=""):
     fobj=(self >> _d("Filename",filename,_l(90)) >> _d("Parameters","File",_l(999)) >> _d("File",_f("dataReaderObject","CR"))).update()
     return fobj["Results"]
 
-def CRDelAntennaPipeline(self,antennaID):
-    "Deletes the data and plotting pipeline associated with the specified antenna ID."
+def CRAntennaPipelineChain(self,antennaID):
+    "Returns the data and plotting pipeline associated with the specified antenna ID."
     if settrace: pdb.set_trace()
     ao=self[antennaID]
     if ao.Found():
-        objs=ao.FirstObject().Chain(DIR.TO,["PlotWindow","Chooser","Replot","Datatype","UnitName","UnitPrefix","DataPipeline","Parameters=Data","Parameters=UnitData","Parameters=PlotPanel","Reference"],False)
-        ~objs
+        objs=ao.FirstObject().Chain(DIR.TO,["PlotWindow","Chooser","Replot","Datatype","UnitName","UnitPrefix","DataPipeline","Parameters=Data","Parameters=UnitData","Parameters=PlotPanel","Reference","SelectBoard"],False)
+        return objs
+    else: return DataList()
 
+def CRDelAntennaPipeline(self,antennaID):
+    "Deletes the data and plotting pipeline associated with the specified antenna ID."
+    objs=CRAntennaPipelineChain(self,antennaID)
+    if objs.Found(): ~objs
+    
 settrace=False
 
 def CRDataPipeline(self):

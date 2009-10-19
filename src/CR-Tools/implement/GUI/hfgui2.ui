@@ -52,8 +52,8 @@
       <rect>
        <x>335</x>
        <y>5</y>
-       <width>781</width>
-       <height>536</height>
+       <width>777</width>
+       <height>535</height>
       </rect>
      </property>
      <property name="frameShape" >
@@ -66,9 +66,9 @@
       <property name="geometry" >
        <rect>
         <x>5</x>
-        <y>0</y>
-        <width>771</width>
-        <height>531</height>
+        <y>36</y>
+        <width>765</width>
+        <height>491</height>
        </rect>
       </property>
       <property name="currentIndex" >
@@ -84,7 +84,7 @@
           <x>0</x>
           <y>0</y>
           <width>763</width>
-          <height>497</height>
+          <height>461</height>
          </rect>
         </property>
         <property name="baseSize" >
@@ -104,8 +104,8 @@
          <rect>
           <x>22</x>
           <y>20</y>
-          <width>743</width>
-          <height>481</height>
+          <width>733</width>
+          <height>439</height>
          </rect>
         </property>
         <property name="widgetResizable" >
@@ -115,7 +115,7 @@
          <property name="geometry" >
           <rect>
            <x>0</x>
-           <y>0</y>
+           <y>-33</y>
            <width>763</width>
            <height>495</height>
           </rect>
@@ -123,10 +123,10 @@
          <widget class="QtSvg.QSvgWidget" native="1" name="networkdisplay" >
           <property name="geometry" >
            <rect>
-            <x>-2</x>
-            <y>-2</y>
-            <width>725</width>
-            <height>465</height>
+            <x>0</x>
+            <y>32</y>
+            <width>711</width>
+            <height>421</height>
            </rect>
           </property>
          </widget>
@@ -182,6 +182,144 @@
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
+      </widget>
+     </widget>
+     <widget class="QFrame" name="frame_25" >
+      <property name="geometry" >
+       <rect>
+        <x>641</x>
+        <y>0</y>
+        <width>139</width>
+        <height>47</height>
+       </rect>
+      </property>
+      <property name="frameShape" >
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow" >
+       <enum>QFrame::Raised</enum>
+      </property>
+      <widget class="QLabel" name="CursorValueLabel" >
+       <property name="geometry" >
+        <rect>
+         <x>4</x>
+         <y>4</y>
+         <width>127</width>
+         <height>35</height>
+        </rect>
+       </property>
+       <property name="font" >
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text" >
+        <string/>
+       </property>
+       <property name="wordWrap" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="groupBox" >
+      <property name="geometry" >
+       <rect>
+        <x>6</x>
+        <y>-14</y>
+        <width>305</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="title" >
+       <string/>
+      </property>
+      <widget class="QRadioButton" name="mouse_zoom" >
+       <property name="geometry" >
+        <rect>
+         <x>4</x>
+         <y>22</y>
+         <width>101</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="toolTip" >
+        <string>Change the cursor to zoom into the data</string>
+       </property>
+       <property name="whatsThis" >
+        <string>Change the cursor to zoom into the data</string>
+       </property>
+       <property name="text" >
+        <string>Zoom</string>
+       </property>
+       <property name="checked" >
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="mouse_value" >
+       <property name="geometry" >
+        <rect>
+         <x>62</x>
+         <y>22</y>
+         <width>101</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="toolTip" >
+        <string>Give the (data) values at cursor position</string>
+       </property>
+       <property name="whatsThis" >
+        <string>Give the (data) values at cursor position</string>
+       </property>
+       <property name="text" >
+        <string>Value</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="mouse_select" >
+       <property name="geometry" >
+        <rect>
+         <x>126</x>
+         <y>22</y>
+         <width>101</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>Select</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="MouseSelectMode" >
+       <property name="geometry" >
+        <rect>
+         <x>188</x>
+         <y>18</y>
+         <width>111</width>
+         <height>26</height>
+        </rect>
+       </property>
+       <property name="currentIndex" >
+        <number>2</number>
+       </property>
+       <property name="maxVisibleItems" >
+        <number>10</number>
+       </property>
+       <property name="maxCount" >
+        <number>2147483646</number>
+       </property>
+       <item>
+        <property name="text" >
+         <string>Values</string>
+        </property>
+       </item>
+       <item>
+        <property name="text" >
+         <string>Data Sets</string>
+        </property>
+       </item>
+       <item>
+        <property name="text" >
+         <string>Plot Panels</string>
+        </property>
+       </item>
       </widget>
      </widget>
     </widget>
@@ -2563,19 +2701,61 @@
    </property>
    <widget class="QMenu" name="menuFile" >
     <property name="title" >
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="loadfile" />
    </widget>
+   <widget class="QMenu" name="menuEdit" >
+    <property name="title" >
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="actionDeselect_All" />
+    <addaction name="actionSelect_All" />
+    <addaction name="actionDelete" />
+    <addaction name="actionSplit_Panels" />
+   </widget>
    <addaction name="menuFile" />
+   <addaction name="menuEdit" />
   </widget>
   <widget class="QStatusBar" name="statusbar" />
   <action name="loadfile" >
    <property name="text" >
-    <string>Load ...</string>
+    <string>&amp;Load ...</string>
    </property>
    <property name="shortcut" >
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionDelete" >
+   <property name="text" >
+    <string>Delete</string>
+   </property>
+   <property name="shortcut" >
+    <string>Backspace</string>
+   </property>
+  </action>
+  <action name="actionSplit_Panels" >
+   <property name="text" >
+    <string>Split Panels</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionSelect_All" >
+   <property name="text" >
+    <string>Select All</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="actionDeselect_All" >
+   <property name="text" >
+    <string>Deselect All</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+D</string>
    </property>
   </action>
  </widget>
@@ -2626,6 +2806,10 @@
     <slot>hfadd_fy(QString)</slot>
     <slot>hfview_fx()</slot>
     <slot>hfview_fy()</slot>
+    <slot>hfmouse_zoom()</slot>
+    <slot>hfmouse_value()</slot>
+    <slot>hfmouse_select()</slot>
+    <slot>hfmouse_selectwhat(QString)</slot>
    </slots>
   </customwidget>
   <customwidget>
@@ -2834,38 +3018,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>networkzoom</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>networkdisplay</receiver>
-   <slot>zoom(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>345</x>
-     <y>118</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>709</x>
-     <y>365</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>networkaspectslider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>networkdisplay</receiver>
-   <slot>aspect(int)</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>426</x>
-     <y>56</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>753</x>
-     <y>322</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>xauto</sender>
    <signal>toggled(bool)</signal>
    <receiver>HMainPlotter</receiver>
@@ -3068,8 +3220,8 @@
      <y>86</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>344</x>
-     <y>71</y>
+     <x>343</x>
+     <y>96</y>
     </hint>
    </hints>
   </connection>
@@ -3084,8 +3236,8 @@
      <y>107</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>346</x>
-     <y>90</y>
+     <x>343</x>
+     <y>96</y>
     </hint>
    </hints>
   </connection>
@@ -3196,8 +3348,8 @@
      <y>84</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>351</x>
-     <y>59</y>
+     <x>343</x>
+     <y>96</y>
     </hint>
    </hints>
   </connection>
@@ -3358,6 +3510,102 @@
     <hint type="destinationlabel" >
      <x>374</x>
      <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mouse_zoom</sender>
+   <signal>clicked()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfmouse_zoom()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>371</x>
+     <y>60</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>384</x>
+     <y>159</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mouse_value</sender>
+   <signal>clicked()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfmouse_value()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>451</x>
+     <y>60</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>452</x>
+     <y>106</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mouse_select</sender>
+   <signal>clicked()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfmouse_select()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>498</x>
+     <y>60</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>544</x>
+     <y>99</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MouseSelectMode</sender>
+   <signal>currentIndexChanged(QString)</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfmouse_selectwhat(QString)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>637</x>
+     <y>47</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>869</x>
+     <y>104</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>networkzoom</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>networkdisplay</receiver>
+   <slot>zoom(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>361</x>
+     <y>230</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>493</x>
+     <y>230</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>networkaspectslider</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>networkdisplay</receiver>
+   <slot>aspect(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>796</x>
+     <y>104</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>809</x>
+     <y>128</y>
     </hint>
    </hints>
   </connection>

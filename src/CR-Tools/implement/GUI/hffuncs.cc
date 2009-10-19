@@ -1,7 +1,7 @@
 //================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfprep.awk
 //================================================================================
-//     File was generated from - on Sat Jul 11 02:12:14 CEST 2009
+//     File was generated from - on Fri Oct 16 15:40:19 CEST 2009
 //--------------------------------------------------------------------------------
 //
 //#define DBG_MODE 0
@@ -954,7 +954,7 @@ template <class T> void process(F_PARAMETERS) {
   vec=dp->getNeighbourNames(DIR_TO);
   vec.push_back("");
   vec_append(vec,dp->getNeighbourNames(DIR_FROM));
-  copycast_vec<T,HString>(vp,&vec);
+  copycast_vec<HString,T>(&vec,vp);
 }
 //$END Function -----------------------------------------------------------------
 }; DATAFUNC_CONSTRUCTOR(Neighbours,Sys,"Returns a list of names of all neighbour objects, first in To direction and the in FROM direction separated by an empty string.",STRING,false);

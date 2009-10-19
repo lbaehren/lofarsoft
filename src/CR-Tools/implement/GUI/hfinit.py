@@ -198,6 +198,8 @@ def object_Chain(self,dir,names,include_endpoints=True,monotonic=False):
 
 def object_asDataList(self):
     return DataList([self])
+def object_isNeighbour(self,name,dir=DIR.BOTH):
+    return name in self.listNeighbourNames(dir)
 def object_getNeighbours(self,dir):
     return self[self.listNeighbourIDs(dir)]
 def object_getNeighbour(self,dir):
@@ -496,6 +498,12 @@ class DataList(list):
     def getNeighbour(self,dir):
         "Returns the first immediate neighbour in direction DIR"
         return DataList(map(lambda d:d.getNeighbour(dir),self))
+    def listNeighbourNames(self,dir=DIR.BOTH):
+        "Returns a list of the Names of the immediate neighbours in direction dir=DIR.TO, DIR.FROM, or DIR.BOTH (default)."
+        return map(lambda d:d.listNeighbourNames(dir),self)
+    def isNeighbour(self,name,dir=DIR.BOTH):
+        "Returns a list of booleans indicating whether the members of the DataList have a neighbour with ObjectName 'name' in direction dir=DIR.TO, DIR.FROM, or DIR.BOTH (default)."
+        return map(lambda d:d.isNeighbour(name,dir),self)
     def Chain(self,dir,names,include_endpoints=True,monotonic=False):
         "Returns a list of objects between the current one and the ones specified in names. If monotnic=True the chain only looks for objects in the specified direction ,otherwise it will take the direction only for the first object into account. If endpoints=true, they will be included in the return list(s)"
         return DataList(map(lambda d:d.Chain(dir,names,include_endpoints,monotonic),self))
@@ -1311,6 +1319,7 @@ Data.setList=object_setList
 Data.asList=object_asList
 Data.getNeighbours=object_getNeighbours
 Data.getNeighbour=object_getNeighbour
+Data.isNeighbour=object_isNeighbour
 Data.asDataList=object_asDataList
 DataList.asDataList=Identity
 

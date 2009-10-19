@@ -307,7 +307,7 @@ class hfPlotData(hffunc):
         if verbose: print "Startup hfPlotData"
         self.setParameter("Antenna",0)
         self.setParameter("AntennaID","")
-        self.setParameter("Color","b")
+        self.setParameter("Color","")
         self.setParameter("GraphObject",None)
         self.setParameter("GraphDataBuffer",[None])
         return 0
@@ -317,10 +317,16 @@ class hfPlotData(hffunc):
         if verbose: print "self.GraphDataBuffer=",self.GraphDataBuffer
         if (self.GraphObject==None) | (self.GraphDataBuffer==[None]): return
         self.GraphObject.SetBaseLineWidth(1); 
-        self.GraphObject.AddLegend(str(self.Antenna)+": "+str(self.AntennaID),self.Color)
-        if naxis==1: self.GraphObject.Plot(self.GraphDataBuffer[0],self.Color) ## shouldn't happen
-        if naxis==2: self.GraphObject.Plot(self.GraphDataBuffer[0],self.GraphDataBuffer[1],self.Color)
-        elif naxis==3: self.GraphObject.Plot(self.GraphDataBuffer[0],self.GraphDataBuffer[1],self.GraphDataBuffer[2],self.Color)
+        if self.Color=="":
+            self.GraphObject.AddLegend(str(self.Antenna)+": "+str(self.AntennaID),self.GraphObject.currentcolor)
+            if naxis==1: self.GraphObject.Plot(self.GraphDataBuffer[0],self.GraphObject.currentcolor) ## shouldn't happen
+            if naxis==2: self.GraphObject.Plot(self.GraphDataBuffer[0],self.GraphDataBuffer[1],self.GraphObject.currentcolor)
+            elif naxis==3: self.GraphObject.Plot(self.GraphDataBuffer[0],self.GraphDataBuffer[1],self.GraphDataBuffer[2],self.GraphObject.currentcolor)
+        else:
+            self.GraphObject.AddLegend(str(self.Antenna)+": "+str(self.AntennaID),self.Color)
+            if naxis==1: self.GraphObject.Plot(self.GraphDataBuffer[0],self.Color) ## shouldn't happen
+            if naxis==2: self.GraphObject.Plot(self.GraphDataBuffer[0],self.GraphDataBuffer[1],self.Color)
+            elif naxis==3: self.GraphObject.Plot(self.GraphDataBuffer[0],self.GraphDataBuffer[1],self.GraphDataBuffer[2],self.Color)
         self.GraphObject.SetBaseLineWidth(1); 
         return 0
     def cleanup(self,d):
@@ -359,6 +365,7 @@ class hfPlotPanel(hffunc):
         self.setParameter("yAxisUnitPrefix","",objname="yAxis'UnitPrefix")
         self.setParameter("xAxisDatatype","",objname="xAxis'Datatype")
         self.setParameter("yAxisDatatype","",objname="yAxis'Datatype")
+        self.setParameter("ColorPalette","brcmyhlnqeupg")
         self.setResult("xmin",0.)
         self.setResult("xmax",1024.)
         self.setResult("ymin",-70.)
@@ -375,6 +382,7 @@ class hfPlotPanel(hffunc):
         xmaxval=max(toList(gdbo["'xmaxval"].val()))
         yminval=min(toList(gdbo["'yminval"].val()))
         ymaxval=max(toList(gdbo["'ymaxval"].val()))
+        self.selected=self.data.isNeighbour("SelectBoard")
         self.GraphObject.SetFontSize(3.)
         self.GraphObject.SetFontDef("rR:r")
         self.GraphObject.SetCut(False);
@@ -435,7 +443,8 @@ class hfPlotPanel(hffunc):
         self.GraphObject.SetTickTemplX("%.4g")
         self.GraphObject.SetTickTemplY("%.4g")
         self.GraphObject.Axis("xy")
-        self.GraphObject.Box("g")
+        if self.selected: self.GraphObject.Box("r")
+        else: self.GraphObject.Box("g")
         self.GraphObject.SetBaseLineWidth(1); 
         self.putResult("xmin",xmin)
         self.putResult("xmax",xmax)
@@ -445,8 +454,9 @@ class hfPlotPanel(hffunc):
         if self.OffsetValue==0: xoffsettxt=""
         elif self.OffsetValue>0: xoffsettxt=" + "+str(self.OffsetValue)
         else: xoffsettxt=" - "+str(abs(self.OffsetValue))
-        xl=d["'x:UnitData"].Chain(DIR.TO,["xAxis","maxBlock"],False,True).getName()
-        yl=d["'y:UnitData"].Chain(DIR.TO,["yAxis","maxBlock"],False,True).getName()
+ #ugly fix - to display potential functions (like exp, log, sqrt,...) before the axis labels
+        xl=d["'x:UnitData"].FirstObject().Chain(DIR.TO,["xAxis","maxBlock"],False,True).getName()
+        yl=d["'y:UnitData"].FirstObject().Chain(DIR.TO,["yAxis","maxBlock"],False,True).getName()
         if type(xl)==str: xfunctxt=""
         else: xl.reverse(); xfunctxt=list2str(xl[:-1])+" "
         if type(yl)==str: yfunctxt=""
@@ -461,12 +471,16 @@ class hfPlotPanel(hffunc):
         self.GraphObject.ClearLegend()
         if verbose: print "PlotPanel: plotted Box in Graphobject, calling PlotData"
         self.PlotData=self.data["'PlotData"]
+        self.GraphObject.currentcolor=self.ColorPalette[0]
         if type(self.PlotData)==Data: 
             self.PlotData.update()
         elif type(self.PlotData)==DataList: 
+            ci=0 # ColorIndex for Palette
             for dd in self.PlotData: 
                 if verbose: print "PlotPanel calling ",dd.getName(True) 
+                self.GraphObject.currentcolor=self.ColorPalette[ci]
                 dd.update()
+                ci=(ci+1) % len(self.ColorPalette)
         else:
             print "Error: PlotPanel - PlotData not found."
             return 1
@@ -549,8 +563,9 @@ class hfQtPanel(hffunc):
         if verbose: print "QtPanel startup!"
         self.setParameter("Parent",None)
         self.setParameter("Title","HFLPLOT")
-        self.setParameter("Width",760)
-        self.setParameter("Height",500)
+        self.setParameter("Width",765)
+        self.setParameter("Height",450)
+        self.setParameter("SelectBoard","")
         self.setParameter("PlotWidget",None)
         self.setParameter("PlotWindow",None)
         self.setParameter("GraphObject",None)
@@ -577,6 +592,7 @@ class hfQtPanel(hffunc):
         return 0
 
 #f=d["QtPanel"].PyFunc()
+#f.setSize(400,400)
 
 class hfQtNetview(hffunc):
     "hfQtNetview: Start a QtSVGWidget which shows the current network of objects."

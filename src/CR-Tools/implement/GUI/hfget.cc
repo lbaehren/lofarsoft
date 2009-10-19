@@ -3230,8 +3230,10 @@ Data* Data::Ptr(objectid oid) {
   if (data.superior!=NULL) {
     if (oid<data.superior->data_objects.size()){
       return (data.superior->data_objects[oid]);
-    } else {ERROR("Ptr: OID too large.");}}
-  else {ERROR("Ptr: No superior exists ...!? (internal error).");};
+    } else {
+      ERROR("Ptr: OID too large.");
+    }
+  } else {ERROR("Ptr: No superior exists ...!? (internal error).");};
   return &NullObject;
 }
 
