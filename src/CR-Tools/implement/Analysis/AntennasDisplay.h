@@ -5,15 +5,27 @@
 #include <vector>
 #include <cmath>
 
+#ifdef HAVE_ROOT
 #include <TArrow.h>
 #include <TLine.h>
 #include <TLegend.h>
 #include <TMarker.h>
 #include <TH1F.h>
 #include <TCanvas.h>
+#endif
 
 // (C) Marcin Franc [marcin.franc@gmail.com]
 
+/*!
+  <b>Note:</b>
+  
+  For the sake of clear architecture of classes (MVC design pattern)
+  utility methods operating on standard data types and methods strictly
+  realated to drawing should be put into separate classes. This hasn't been
+  done because the architecture of CR-Tools violates most of desing paradigms
+  anyway.
+  Therefore this note has strictly informational purpose
+ */
 class AntennasDisplay
 {
    public:
@@ -53,7 +65,9 @@ class AntennasDisplay
    void setCore (double xCore, double yCore, double azimuth, double elevation);
    // ======================
 
-   // === Default values for creating the plot ===
+   //____________________________________________________________________________
+   //                                        Default values for creating the plot
+
    // Width of resulting canvas
    const static int    _width               =  1024;
    // Height of resulting canvas
@@ -99,46 +113,83 @@ class AntennasDisplay
    const static double _elevationPlotMin    =  1;
    // Size of elevation's arrow
    const static double _elevationArrowSize  =  0.015;
-   // ============================================
 
+   //____________________________________________________________________________
+   //                                                                     Methods
+
+#ifdef HAVE_ROOT
    // Either one can call createPlot setting all parameters ...
-   TCanvas* createPlot (std::string title, unsigned int width = _width, unsigned int height = _height, unsigned int lineWidth = _lineWidth, double plotFittingStep = _plotFittingStep, unsigned int plotsOffset = _plotsOffset, unsigned int bckgFillColor = _bckgFillColor, unsigned int deadAntColor = _deadAntColor, unsigned int deadAntMarkerSize = _deadAntMarkerSize, unsigned int numberOfColorsInLeg = _numberOfColorsInLeg, unsigned int distanceOfLegColors = _distanceOfLegColors, unsigned int firstColorOfLeg = _firstColorOfLeg, unsigned int legBorderSize = _legBorderSize, unsigned int legFillColor = _legFillColor, double legTextSize = _legTextSize, double legStartPosX = _legStartPosX, double legStartPosY = _legStartPosY, double legEndPosX = _legEndPosX, double legEndPosY = _legEndPosY, double legEntrySeparation = _legEntrySeparation, double legMarkerSize = _legMarkerSize, double elevationPlotMax = _elevationPlotMax, double elevationPlotMin = _elevationPlotMin, double elevationArrowSize = _elevationArrowSize);
+   TCanvas* createPlot (std::string title,
+			unsigned int width = _width,
+			unsigned int height = _height,
+			unsigned int lineWidth = _lineWidth,
+			double plotFittingStep = _plotFittingStep,
+			unsigned int plotsOffset = _plotsOffset,
+			unsigned int bckgFillColor = _bckgFillColor,
+			unsigned int deadAntColor = _deadAntColor,
+			unsigned int deadAntMarkerSize = _deadAntMarkerSize,
+			unsigned int numberOfColorsInLeg = _numberOfColorsInLeg,
+			unsigned int distanceOfLegColors = _distanceOfLegColors,
+			unsigned int firstColorOfLeg = _firstColorOfLeg,
+			unsigned int legBorderSize = _legBorderSize,
+			unsigned int legFillColor = _legFillColor,
+			double legTextSize = _legTextSize,
+			double legStartPosX = _legStartPosX,
+			double legStartPosY = _legStartPosY,
+			double legEndPosX = _legEndPosX,
+			double legEndPosY = _legEndPosY,
+			double legEntrySeparation = _legEntrySeparation,
+			double legMarkerSize = _legMarkerSize,
+			double elevationPlotMax = _elevationPlotMax,
+			double elevationPlotMin = _elevationPlotMin,
+			double elevationArrowSize = _elevationArrowSize);
    // ... and then save the output ...
    bool     savePlot   (std::string filename, TCanvas* c);
-
    // ... or call the function below to invoke createPlot with default parameters
    bool     createPlot (std::string filename, std::string title);
+#endif
+   
+ private:
 
-   private:
-   // === Private variables ====
+   //____________________________________________________________________________
+   //                                                           Private variables
+
    std::vector<double> xCoordinates;
    std::vector<double> yCoordinates;
    std::vector<double> magnitudes;
    std::vector<double> times;
    std::vector<int>    polarizations;
-
+   
    std::vector<double> xCoordinatesALL;
    std::vector<double> yCoordinatesALL;
    bool                positionsGiven;
-
+   
    double              xCore;
    double              yCore;
    double              azimuth;
    double              elevation;
    bool                showCore;
-   // ==========================
 
-   // === Private methods - utility functions ===
+   //____________________________________________________________________________
+   //                                         Private methods - utility functions
+
    // Checking the activity of the anntenna having the position indicated by xCoordinate and yCoordinate
-   bool                checkActivity        (double xCoordinate, double yCoordinate);
+   bool                checkActivity        (double xCoordinate,
+					     double yCoordinate);
    // Gets absolute difference between value1 and value2
-   double              getAbsDifference     (double value1, double value2);
+   double              getAbsDifference     (double value1,
+					     double value2);
    // Gets plot borders
    borders             getBorders           (int plotsOffset);
    // Gets the positions of dead antennas
    deadAntennasPos     getDeadAntennas      ();
    // Gets the horizontal line
-   TLine*              getHorizontalLine    (double xCenter, double yCenter, double length, unsigned int thickness);
+#ifdef HAVE_ROOT
+   TLine*              getHorizontalLine    (double xCenter,
+					     double yCenter,
+					     double length,
+					     unsigned int thickness);
+#endif
    // Gets the minimum value of the given vector
    double              getMinimumValue      (std::vector<double>& inputData);
    // Gets the maximum value of the given vector
@@ -147,14 +198,15 @@ class AntennasDisplay
    // The speed of fitting relies on the precision of plotFittingStep value
    double              getMinimumDistance   (std::vector<double>& inputData1, std::vector<double>& inputData2, borders borderValues, double plotFittingStep);
    // Gets the difference of two vectors
-   std::vector<double> getSetDifference     (std::vector<double> inputData1, std::vector<double> inputData2);
+   std::vector<double> getSetDifference     (std::vector<double> inputData1,
+					     std::vector<double> inputData2);
    // Gets the vertical line
-   TLine*              getVerticalLine      (double xCenter, double yCenter, double length, unsigned int thickness);
+#ifdef HAVE_ROOT
+   TLine*              getVerticalLine      (double xCenter,
+					     double yCenter,
+					     double length,
+					     unsigned int thickness);
+#endif
    // ===========================================
 
-   // NOTE:
-   // For the sake of clear architecture of classes (MVC design pattern) utility methods operating on
-   // standard data types and methods strictly realated to drawing should be put into separate classes
-   // This hasn't been done because the architecture of CR-Tools violates most of desing paradigms anyway
-   // Therefore this note has strictly informational purpose
 };
