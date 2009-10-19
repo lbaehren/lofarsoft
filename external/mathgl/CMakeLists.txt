@@ -125,12 +125,18 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     PATH_SUFFIXES qt4-mac qt4-mac/bin qt4-x11 qt4-x11/bin
     NO_DEFAULT_PATH
     )
+  if (QT_MOC_EXECUTABLE)
+    set (MATHGL_ENABLE_QT NO)
+  endif (QT_MOC_EXECUTABLE) 
 
   find_program (QT_QMAKE_EXECUTABLE qmake
     PATHS ${bin_locations} /sw/lib /opt/casa/local/bin
     PATH_SUFFIXES qt4-mac qt4-mac/bin qt4-x11 qt4-x11/bin
     NO_DEFAULT_PATH
     )
+  if (QT_QMAKE_EXECUTABLE)
+    set (MATHGL_ENABLE_QT NO)
+  endif (QT_QMAKE_EXECUTABLE) 
 
   ## Libraries
 
@@ -141,7 +147,9 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     )
   if (QT_QTCORE_LIBRARY)
     list (APPEND QT_LIBRARIES ${QT_QTCORE_LIBRARY})
-  endif (QT_QTCORE_LIBRARY)
+  else (QT_QTCORE_LIBRARY)
+    set (MATHGL_ENABLE_QT NO)
+  endif (QT_QTCORE_LIBRARY) 
   
   find_library (QT_QTGUI_LIBRARY QtGui
     PATHS ${lib_locations}
