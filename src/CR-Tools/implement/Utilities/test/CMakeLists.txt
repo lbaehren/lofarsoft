@@ -11,7 +11,6 @@ set (tests
   tProgressBar
   tStringTools
   tTestsCommon
-  tTimestamp
   )
 
 ## -----------------------------------------------------------------------------
