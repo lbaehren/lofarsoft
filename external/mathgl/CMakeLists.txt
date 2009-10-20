@@ -119,113 +119,10 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   ##__________________________________________________________________
   ## Locate Qt4 libraries and header files
 
-  ## Executables
+  set (DESIRED_QT_VERSION 4)
 
-  find_program (QT_MOC_EXECUTABLE moc
-    PATHS ${bin_locations} /sw/lib /opt/casa/local/bin
-    PATH_SUFFIXES qt4-mac qt4-mac/bin qt4-x11 qt4-x11/bin
-    NO_DEFAULT_PATH
-    )
-  if (NO QT_MOC_EXECUTABLE)
-    set (MATHGL_ENABLE_QT NO)
-  endif (NO QT_MOC_EXECUTABLE)
+  include (FindQt)
 
-  find_program (QT_QMAKE_EXECUTABLE qmake
-    PATHS ${bin_locations} /sw/lib /opt/casa/local/bin
-    PATH_SUFFIXES qt4-mac qt4-mac/bin qt4-x11 qt4-x11/bin
-    NO_DEFAULT_PATH
-    )
-  if (NO QT_QMAKE_EXECUTABLE)
-    set (MATHGL_ENABLE_QT NO)
-  endif (NO QT_QMAKE_EXECUTABLE) 
-
-  ## Libraries
-
-  find_library (QT_QTCORE_LIBRARY QtCore
-    PATHS ${lib_locations}
-    PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/bin
-    NO_DEFAULT_PATH
-    )
-  if (QT_QTCORE_LIBRARY)
-    list (APPEND QT_LIBRARIES ${QT_QTCORE_LIBRARY})
-  else (QT_QTCORE_LIBRARY)
-    set (MATHGL_ENABLE_QT NO)
-  endif (QT_QTCORE_LIBRARY) 
-  
-  find_library (QT_QTGUI_LIBRARY QtGui
-    PATHS ${lib_locations}
-    PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
-    NO_DEFAULT_PATH
-    )
-  if (QT_QTGUI_LIBRARY)
-    list (APPEND QT_LIBRARIES ${QT_QTGUI_LIBRARY})
-  endif (QT_QTGUI_LIBRARY)
-
-  find_library (QT_QTDESIGNER_LIBRARY QtDesigner
-    PATHS ${lib_locations}
-    PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
-    NO_DEFAULT_PATH
-    )
-  if (QT_QTDESIGNER_LIBRARY)
-    list (APPEND QT_LIBRARIES ${QT_QTDESIGNER_LIBRARY})
-  endif (QT_QTDESIGNER_LIBRARY)
-  
-  find_library (QT_QTOPENGL_LIBRARY QtOpenGL
-    PATHS ${lib_locations}
-    PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
-    NO_DEFAULT_PATH
-    )
-  if (QT_QTOPENGL_LIBRARY)
-    list (APPEND QT_LIBRARIES ${QT_QTOPENGL_LIBRARY})
-  endif (QT_QTOPENGL_LIBRARY)
-
-  if (QT_LIBRARIES)
-    list(REVERSE QT_LIBRARIES)
-  endif (QT_LIBRARIES)
-  
-  ## locate the Qt4 header files
-
-  find_path (QT_INCLUDE_DIR QtCore/QTimer QtGui/QApplication
-    PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
-    PATH_SUFFIXES qt4-mac/include qt4-x11/include
-    )
-  if (NO QT_INCLUDE_DIR)
-    set (MATHGL_ENABLE_QT NO)
-  endif (NO QT_INCLUDE_DIR)
-  
-  ## QtCore
-  find_path (QT_QTCORE_INCLUDE_DIR QtCore/QTimer QtCore/qbasictimer.h
-    PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
-    PATH_SUFFIXES qt4-mac/include qt4-x11/include
-    )
-  if (QT_QTCORE_INCLUDE_DIR)
-    list (APPEND QT_INCLUDE_DIR ${QT_QTCORE_INCLUDE_DIR}/QtCore)
-  else (QT_QTCORE_INCLUDE_DIR) 
-    set (MATHGL_ENABLE_QT NO)
-  endif (QT_QTCORE_INCLUDE_DIR) 
-  
-  ## QtGui
-  find_path (QT_QTGUI_INCLUDE_DIR QtGui/QApplication QtGui/QMouseEvent
-    PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
-    PATH_SUFFIXES qt4-mac/include qt4-x11/include
-    )
-  if (QT_QTGUI_INCLUDE_DIR)
-    list (APPEND QT_INCLUDE_DIR ${QT_QTGUI_INCLUDE_DIR}/QtGui)
-  else (QT_QTGUI_INCLUDE_DIR)
-    set (MATHGL_ENABLE_QT NO)
-  endif (QT_QTGUI_INCLUDE_DIR)
-  
-  ## QtOpenGL
-  find_path (QT_QTOPENGL_INCLUDE_DIR QtOpenGL/QtOpenGL QtOpenGL/QGLWidget
-    PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
-    PATH_SUFFIXES qt4-mac/include qt4-x11/include
-    )
-  if (QT_QTOPENGL_INCLUDE_DIR)
-    list (APPEND QT_INCLUDE_DIR ${QT_QTOPENGL_INCLUDE_DIR}/QtOpenGL)
-  else (QT_QTOPENGL_INCLUDE_DIR)
-    set (MATHGL_ENABLE_QT NO)
-  endif (QT_QTOPENGL_INCLUDE_DIR)
-  
   ##__________________________________________________________________
   ## Check if a tar-archive with the source code is available already;
   ## if this is not the case we need to fetch it from the USg server.
@@ -349,6 +246,9 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   message (STATUS "GSL_INCLUDES                = ${GSL_INCLUDES}")
   message (STATUS "HDF5_INCLUDES               = ${HDF5_INCLUDES}")
   message (STATUS "NUMPY_INCLUDES              = ${NUMPY_INCLUDES}")
+  message (STATUS "DESIRED_QT_VERSION          = ${DESIRED_QT_VERSION}")
+  message (STATUS "QT3_INSTALLED               = ${QT3_INSTALLED}")
+  message (STATUS "QT4_INSTALLED               = ${QT4_INSTALLED}")
   message ("-------------------------------------------------------------")
 
   ## <-- end build condition ----------------------------------------------------->
