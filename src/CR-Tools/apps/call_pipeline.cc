@@ -42,9 +42,9 @@ using CR::LopesEventIn;
   \ingroup CR_Applications
 
   \brief Calls the LOPES analysis pipeline in "analyseLOPESevent2"
- 
+
   \author Frank Schr&ouml;der
- 
+
   \date 2008/20/05
 
   <h3>Motivation</h3>
@@ -60,7 +60,7 @@ using CR::LopesEventIn;
   \verbatim
   ./call_pipeline arguments
   \endverbatim
-  
+
   <ul>
     Requires one of the following arguments:
     <li> --in         eventfile list      list with LOPES event files (.event)
@@ -94,11 +94,12 @@ using CR::LopesEventIn;
   # Comments start with '#'.
   # If an option is missing or misspelled, then the default value will be used.
   # Default values are:
-  caltablepath           = /home/schroeder/usg/data/lopes/LOPES-CalTable
+  caltablepath           = $LOFARSOFT/data/LOPES/LOPES-CalTable
   path                   = /home/schroeder/lopes/events
   RotatePos              = true
   preferGrande           = false
   GeneratePlots          = true
+  EventDisplayPlot       = false
   GenerateSpectra        = true
   SinglePlots            = true
   PlotRawData            = false
@@ -131,62 +132,148 @@ using CR::LopesEventIn;
   rootfilename           = output.root
   rootfilemode           = recreate
   wirteBadEvents         = true
-  caliabration           = false
+  calibration            = false
   lateralDistribution    = false
   lateralOutputFile      = false
   lateralSNRcut          = 1.0;
   lateralTimeCut         = 15e-9;
   calculateMeanValues    = false;
-
   \endverbatim
-  This example means:
-  <ul>
-    <li>the caltables are in $LOFARSOFT/data/LOPES/LOPES-CalTable; the main importance of this
-        variable is to locate the LOPES CalTable in case you have put it down in some non-standard
-        location - otherwise the configuration script will be able to locate it and place the path
-        into the "crtools.h" header file;
-    <li>the events are stored at a certain location;
-    <li>the given positions are in the Kascade coordinate system and must be
-        rotated to the LOPES system;
-    <li>in doubt the KASCADE (instead of Grande) reconstruction is taken as input,
-    <li>there will be generated plots of the analaysed event,
-    <li>a spectrum will be plotted for every antenna
-    <li>produces a plot for each antenna,
-    <li>the raw ADC values (FX) are not plotted,
-    <li>calcutlates the time and the height of the maximum and the minimum in the plot range 
-    <li>prints a list of the absolut maxima in a more user friendly was
-    <li>prints the distance form the core to the antennas in shower coordinates
-    <li>there will be more text output during the analysis,
-    <li>the distance value will be estimateda and the value in the eventlist ignored
-    <li>the simplex fit of the arrival direction and radius of curvature is done,
-    <li>the TV calibration will be done by default,
-    <li>the electrical gain calibration (fieldstrength) will be done,
-    <li>correction of the dispersion (frequency dependent delay) is enabled,
-    <li>correction of the general delay is enabled,
-    <li>supresses narrow band noise (RFI),
-    <li>flags antennas marked as "not active" in the CalTables
-    <li>flags antennas due to bad signal (does not affect flagging by the phase
-    <li>the analysis does not take care of the polarization of the antennas
-        (select EW, NS or BOTH if you want to results for one (both) polarizations),
-    <li>the plots start at -2.05 micro seconds and end at -1.60 micro seconds,
-    <li>the plotted spectra start at 40 MHz seconds and end 80 MHz,
-    <li>frequencies between 40 MHz and 80 MHz will be used for analysis,
-    <li>the Lopes data will be upsampled to a sampling rate of 320 MHz (see below),
-    <li>the upsampling of the calibrated antenna fieldstrengthes will be done by
-        a factor of 2^1 = 2,
-    <li>there will by a summary postscript of all created plots,
-    <li>time range to search for CC-beam-peak in lateral distribution studies is +/- 45 ns,
-    <li>the antennas 10101 and 10102 are not considered in the analysis,
-    <li>the output of the pipeline is written to a root tree in the file "output.root".
-    <li>an old root file with the same name will be overwritten
-    <li>events with a bad reconstruction (e.g. simplex fit crashed) 
-        will be written to the root file.
-    <li>the analysis is run normally, not in calibration mode
-    <li>the lateral distribution will not be analysed
-    <li>there will be no file created, which has a special format for the lateral distribtion analysis
-    <li>points with a SNR < 1.0 will be removed from the lateral distribution
-    <li>points with a time position more than 15 ns away of the CC beam center will be removed
-    <li>no output of mean values of lateral distribution results
+
+  <h3>Configuration options </h3>
+  <ul> Useful options:
+    <li>\b Path             Status: <i>optional</i>  - normally required
+                            Location of the events in the event list. Setting a path is not neccessary if
+                            the events are in the current directory or if the full path is contained in the
+                            event list.
+    <li>\b polarization     Status: <i>optional</i>
+                            Polarizations to be analyzed. There are four possibilitys:
+                            \i ANY  The analysis does not take care of the polarization at all.
+                            \i EW   All none east-west antennas are flagged.
+                            \i NS   All none north-south antennas are flagged.
+                            \i BOTH Each event is analyzed twice: Once for EW and once for NS polarization.
+    <li>\b simplexFit       Status: <i>optional</i>
+                            By default the arrival direction and radius of curvature (distance) is optimized by
+                            a simplex fit, using the values in the event list as starting point. Only if you
+                            want to do the beam forming exactly in the direction and with the distance
+                            specified, then you should switch off the simplex fit.
+                            The fit has several steps:
+                            1. The optimal starting distance is determined (unless ignoreDistance = false)
+                            2. The simplex fit roughly optimizes the X-beam
+                            3. The simplex fit optimizes the CC-beam starting from the X-beam maximum
+    <li>\b ignoreDistance   Status: <i>optional</i> - important
+                            If set to true (default) then the distance value (curvature radius) for the beam
+                            forming will be estimated and the value in the eventlist ignored. That means that
+                            the value specified in the event list is completly ignored unless 'ignoreDistance'
+                            is set to false.
+    <li>\b upsamplingRate   Status: <i>optional</i> - recommended
+                            Calibrated traces will be upsampled to a upsampling rate specified in MHz.
+                            Recommended for CC-beam analysis: at least 320 MHz,
+                            For lateral distribution: at least 640 MHz.
+    <li>\b flagged          Status: <i>optional</i> - repeatable
+                            Manually flaggs antennas for the analysis. This keyword can be repeated
+                            several times, once for each antenna which has to be flagged.
+                            It has to be followed either by the antenna ID or the antenna number, e.g.:
+                            flagged = 5
+                            flagged = 20101
+    <li>\b GeneratePlots    Status: <i>optional</i>
+                            Can be set to false if no plots (e.g. CC beam) are wanted.
+    <li>\b SinglePlots      Status: <i>optional</i>
+                            Produces a plot for each individual antenna.
+    <li>\b plotStart        Status: <i>optional</i>
+    <li>\b plotStop         Status: <i>optional</i>
+                            Start and stop range for the plots. Take care:
+                            Also some analysis (e.g. pulse searching) is done only in the plot range.
+    <li>\b GenerateSpectra  Status: <i>optional</i> - not well tested
+                            A spectrum will be plotted for every antenna.
+    <li>\b spectrumStart    Status: <i>optional</i>
+    <li>\b spectrumStop     Frequency range for spectrum plots (maximal 40 - 80 MHz)
+    <li>\b summaryColumns   Status: <i>optional</i>
+                            There will by a summary postscript of all created plots with the specified
+                            number of columns (requires LateX), use 0 for no summary plot.
+    <li>\b rootfilename     Status: <i>optional</i>
+                            If a file name is specified (e.g. "output.root"), then the results of the
+                            pipeline are written into this root file.
+    <li>\b verbose          Status: <i>optional</i>
+                            Set to false to reduce the text output during the analysis.
+  </ul>
+  <ul> Options ocaisonally needed:
+    <li>\b CalTablePath     Status: <i>optional</i> - normally not neccessary 
+                            The caltables are in $LOFARSOFT/data/LOPES/LOPES-CalTable; the main importance 
+                            of this variable is to locate the LOPES CalTable in case you have put it down 
+                            in some non-standard location - otherwise the configuration script will be able
+                            to locate it and place the path into the "crtools.h" header file.
+    <li>\b RotatePos        Status: <i>for experts</i> - don't touch it
+                            If set to true (default), the given positions in the Kascade coordinate system
+                            are rotated to the LOPES system.
+    <li>\b EventDisplayPlot Status: <i>preliminary</i> - only partially working
+                            An event display plot containing amplitude and time information of each antenna.
+    <li>\b PlotRawData      Status: <i>optional</i>
+                            Plots the raw ADC values (FX).
+    <li>\b CalculateMaxima  Status: <i>optional</i>
+                            Calcutlates the time and the height of the pulse in the plot range for each
+                            antenna.
+    <li>\b doTVcal          Status: <i>optional</i>
+                            The TV (respectively beacon) calibration will be done by default (-1).
+                            Switch it off with 0 and on with 1.
+    <li>\b doGainCal        Status: <i>optional</i>
+                            The electrical gain calibration (fieldstrength)
+    <li>\b doDispersionCal  Status: <i>optional</i>
+                            Correction of the dispersion of the filter box (frequency dependent delay)
+    <li>\b doDelayCal       Status: <i>optional</i>
+                            Correction of the general delay
+    <li>\b doRFImitgation   Status: <i>optional</i>
+                            Supression of narrow band noise (RFI)
+    <li>\b doFlagNotActiveAnts Status: <i>optional</i>
+                            Flags antennas marked as "not active" in the CalTables
+                            (e.g. due to known problems or tests).
+    <li>\b doAutoFlagging   Status: <i>optional</i>
+                            Flags antennas due to bad signal (does not affect flagging by the TV calibration).
+    <li>\b freqStart        Status: <i>for experts</i>
+    <li>\b freqStop         Frequency range to be used in the analysis. This value has no effect if the
+                            limits are wide than the ones in the calibration tables (normally 43-74 MHz).
+                            A hanning filter will be used to supress the frequencies outside of the band.
+    <li>\b upsamplingExponent Status: <i>for experts</i> - for calibration an tests
+                            Upsampling of the calibrated antenna fieldstrengthes and raw data.
+                            Upsampling will be done to a rate of 2^upsamplingExponent * 80 MHz.
+    <li>\b ccWindowWidth    Status: <i>for experts</i>
+                            Time range to search for CC-beam-peak in lateral distribution studies,
+                            default is +/- 45 ns.
+    <li>\b wirteBadEvents   Status: <i>preliminary</i>
+                            Events with a bad reconstruction (e.g. simplex fit crashed) will be written 
+                            to the root file. Though, detection of bad reconstructions does not work reliable.
+    <li>\b calibration      Status: <i>for experts</i>
+                            Should be set to 'true' for the evaluation of time calibration measurements.
+    <li>\b PreferGrande     Status: <i>preliminary</i> - under test
+                            In doubt the KASCADE (instead of Grande) reconstruction is taken as input.
+  </ul>
+  <ul> Other options (for completeness):
+    <li>\b lateralOutputFile Status: <i>obsolete</i>
+                            Special output file for the lateral distribution analysis of S. Nehls.
+    <li>\b listCalcMaxima   Status: <i>obsolete</i>
+                            Prints a list of the absolut maxima in a special format used for the lateral
+                            distribution analysis of S. Nehls.
+    <li>\b printShowerCoordinatesStatus: <i>obsolete</i>
+                            Prints the distance form the core to the antennas in shower coordinates using a
+                            special output format of the lateral distribution analysis of S. Nehls.
+    <li>\b lateralDistribution Status: <i>preliminary</i> - use with care
+                            The lateral distribution of pulse amplitudes will be plotted and fitted.
+                            The applied cuts and the method itself is under test and investigation. Thus,
+                            don't use it, if you are not exactly sure, what you are doing. The physics results
+                            could be misleading.
+    <li>\b lateralSNRcut    Status: <i>preliminary</i>
+                            SNR cut for the lateral distribution.
+                            Caution: This feature is preliminary, not well tested, and might be removed.
+    <li>\b lateralTimeCut   Status: <i>preliminary</i>
+                            Points with a time position more than a certain value away of the CC beam 
+                            center will be removed from the lateral distribution.
+                            Caution: This feature is preliminary, not well tested, and might be removed.
+    <li>\b calculateMeanValues Status: <i>preliminary</i>
+                            Output of mean values of lateral distribution results.
+                            Caution: This feature is preliminary, not well tested, and might be removed.
+    <li>\b rootfilemode     Status: <i>unfinished</i>
+                            The only mode available at the moment is RECREATE. This means that an old root
+                            file with the same name will be overwritten.
   </ul>
 
   <h3>Examples</h3>
@@ -696,44 +783,14 @@ private:
 // NOTE: for the sake of proper architecture design those classes should be put in seperate files (which 
 // is rather useless in current design
 
-ConfigData config;
-
 
 // ------------- Global variables ----------------
 
+// Instance of configuration class (for read in of config file)
+ConfigData config;
+
 // Set default configuration values for the pipeline
-string caltablepath = caltable_lopes;
-string path = "";
-int doTVcal = -1;		      // 1: yes, 0: no, -1: use default	
-bool doGainCal = true;		      // calibration of the electrical fieldstrength
-bool doDispersionCal = true;	      // application of the CalTable PhaseCal values	
-bool doDelayCal = true;              // correction for the general delay of each antenna
-bool doRFImitigation = true;	      // supresses narrow band noise (RFI)
-bool doFlagNotActiveAnts = true;     // flags antennas marked as "not active" in the CalTables
-bool doAutoFlagging = true;	      // flags antennas due to bad signal (does not affect flagging by the phase
-string polarization = "ANY";	      // polarization: ANY, EW, NS or BOTH
 bool both_pol = false;		      // Should both polarizations be processed?
-double plotStart = -2.05e-6;	      // in seconds
-double plotStop = -1.60e-6;	      // in seconds
-double spectrumStart = 40e6;          // for plotting, in Hz
-double spectrumStop= 80e6;	      // for plotting, in Hz
-double freqStart = 40e6;              // for analysis, in Hz
-double freqStop= 80e6;	              // for analysis, in Hz
-double upsamplingRate = 0.;	      // Upsampling Rate for new upsampling
-unsigned int upsamplingExponent = 0;  // by default no upsampling will be done
-vector<Int> flagged;		      // use of STL-vector instead of CASA-vector due to support of push_back()
-unsigned int summaryColumns = 0;      // be default no summary of all plots
-double ccWindowWidth = 0.045e-6;      // width of window for CC-beam
-string rootFileName = "";             // Name of root file for output
-string rootFileMode = "RECREATE";     // Mode, how to access root file
-bool writeBadEvents = false;         // also bad events are written into the root file (if possible)
-bool calibrationMode = false;	      // Calibration mode is off by default
-bool lateralDistribution = false;    // the lateral distribution will not be generated
-bool lateralOutputFile = false;      // no file for the lateral distribution will be created
-double lateralSNRcut = 1.0;            // SNR cut for removing points from lateral distribution
-double lateralTimeCut = 15e-9;         // Allowed time window +/- arround CC-beam-center for found peaks
-bool calculateMeanValues = false;    // calculate some mean values of all processed events
-bool showAntennas = true;           // Show antennas and magnitudes of incoming signals [added: mfranc]
 
 // Event parameters for calling the pipeline
 string eventfilelistname("");			         // Name of the ASCII event list
@@ -764,6 +821,7 @@ void readConfigFile (const string &filename)
    config.addString("path", "");
    config.addBool("preferGrande", false);		// per default prefer KASCADE reconstruction as input
    config.addBool("generatePlots", true);         	// the plot prefix will be the name of the event file
+   config.addBool("eventDisplayPlot", true);           // Plot an event display (amplitudes + arrival times)
    config.addBool("generateSpectra", false);        	// by default no spectra are plotted
    config.addBool("singlePlots", false);        	// by default there are no single plots for each antenna
    config.addBool("PlotRawData", false);	     	// by default there the raw data are not plotted
@@ -780,7 +838,6 @@ void readConfigFile (const string &filename)
    config.addBool("doRFImitigation", true);	      	// supresses narrow band noise ("RFI)
    config.addBool("doFlagNotActiveAnts", true);     	// flags antennas marked as "not active" in the CalTables
    config.addBool("doAutoFlagging", true);	      	// flags antennas due to bad signal (does not affect flagging by the phase)
-   config.addBool("both_pol", false);		      	// Should both polarizations be processed?
    config.addDouble("plotStart", -2.05e-6);	      	// in seconds
    config.addDouble("plotStop", -1.60e-6);	      	// in seconds
    config.addDouble("spectrumStart", 40e6);            	// for plotting", in Hz
@@ -799,7 +856,6 @@ void readConfigFile (const string &filename)
    config.addDouble("lateralSNRcut", 1.0);            	// SNR cut for removing points from lateral distribution
    config.addDouble("lateralTimeCut", 15e-9);         	// Allowed time window +/- arround CC-beam-center for found peaks
    config.addBool("calculateMeanValues", false);   	// calculate some mean values of all processed events
-   config.addBool("showAntennas", true);           	// Show antennas and magnitudes of incoming signals [added: mfranc]
 
    IntType* _doTVcal = new IntType(-1);                // 1: yes, 0: no, -1: use default	
    _doTVcal->addAllowedValue(1);
@@ -820,69 +876,15 @@ void readConfigFile (const string &filename)
    config.addType("rootFileMode", _rootFileMode);
 
    config.readConfigurationFile(filename);
-   flagged = config.getFlagged();
 
    cout<<"=== Configuration parameters ==="<<endl;
    cout<<config.showConfigData();
    cout<<"================================"<<endl;
 
-   //NOTE
-   //both_pol are misleadingly a config variable !!!
-   if((config["polarization"]->sValue().compare("EW") == 0) || (config["polarization"]->sValue().compare("NS") == 0) ||
-   (config["polarization"]->sValue().compare("ANY") == 0))
-      config["both_pol"]->setValue("false");
+   if(config["polarization"]->sValue() == "BOTH")
+     both_pol = true;
    else
-      config["both_pol"]->setValue("true");
-
-   // NOTE
-   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   // One can now replace each global variable with the equivalent
-   // Example: Every occurence of caltablepath can be replaced with config["caltablepath"]->sValue()
-
-     // eingerückte schon ersetzt
-   caltablepath = config["caltablepath"]->sValue();
-   path = config["path"]->sValue();
-   //  preferGrande = config["preferGrande"]->bValue();
-   //  generatePlots = config["generatePlots"]->bValue();
-   //  generateSpectra = config["generateSpectra"]->bValue();
-   //  singlePlots = config["singlePlots"]->bValue();
-   //  PlotRawData = config["PlotRawData"]->bValue();
-   //  CalculateMaxima = config["CalculateMaxima"]->bValue();
-   //  listCalcMaxima = config["listCalcMaxima"]->bValue();
-   //  printShowerCoordinates = config["printShowerCoordinates"]->bValue();
-   //  RotatePos = config["RotatePos"]->bValue();
-   //  verbose = config["verbose"]->bValue();
-   //  ignoreDistance = config["ignoreDistance"]->bValue();
-   //  simplexFit = config["simplexFit"]->bValue();
-   doTVcal = config["doTVcal"]->iValue();
-   doGainCal = config["doGainCal"]->bValue();
-   doDispersionCal = config["doDispersionCal"]->bValue();
-   doDelayCal = config["doDelayCal"]->bValue();
-   doRFImitigation = config["doRFImitigation"]->bValue();
-   doFlagNotActiveAnts = config["doFlagNotActiveAnts"]->bValue();
-   doAutoFlagging = config["doAutoFlagging"]->bValue();
-   polarization = config["polarization"]->sValue();
-   both_pol = config["both_pol"]->bValue();
-   plotStart = config["plotStart"]->dValue();
-   plotStop = config["plotStop"]->dValue();
-   spectrumStart = config["spectrumStart"]->dValue();
-   spectrumStop = config["spectrumStop"]->dValue();
-   freqStart = config["freqStart"]->dValue();
-   freqStop = config["freqStop"]->dValue();
-   upsamplingRate = config["upsamplingRate"]->dValue();
-   upsamplingExponent = config["upsamplingExponent"]->uiValue();
-   summaryColumns = config["summaryColumns"]->uiValue();
-   ccWindowWidth = config["ccWindowWidth"]->dValue();
-   rootFileName = config["rootFileName"]->sValue();
-   rootFileMode = config["rootFileMode"]->sValue();
-   writeBadEvents = config["writeBadEvents"]->bValue();
-   calibrationMode = config["calibrationMode"]->bValue();
-   lateralDistribution = config["lateralDistribution"]->bValue();
-   lateralOutputFile = config["lateralOutputFile"]->bValue();
-   lateralSNRcut = config["lateralSNRcut"]->dValue();
-   lateralTimeCut = config["lateralTimeCut"]->dValue();
-   calculateMeanValues = config["calculateMeanValues"]->bValue();
-   showAntennas = config["showAntennas"]->bValue();
+     both_pol = false;
 }
 
 
@@ -968,7 +970,7 @@ bool getEventFromEventlist (const string &eventfilelistname)
 
       // in calibration mode the eventfile list contains only the event name
       // otherwise read azimuth, elevation, radiusOfCurvature and shower core
-      if ( !calibrationMode ) {
+      if ( !config["calibrationMode"]->bValue() ) {
         if (eventfilelist.good()) eventfilelist >> azimuth;
           else read_in_error = true;
         if (eventfilelist.good()) eventfilelist >> elevation;
@@ -991,7 +993,7 @@ bool getEventFromEventlist (const string &eventfilelistname)
       cerr << "Use the following file format: \n\n";
       cerr << "some lines of description (any text)\n";
       cerr << "==================================\n";
-      if (calibrationMode) {
+      if (config["calibrationMode"]->bValue()) {
         cerr << "eventfile1\n";
         cerr << "eventfile2\n";
       } else {
@@ -1234,12 +1236,13 @@ int main (int argc, char *argv[])
              << "\n\nUse the following file format for the config file\n"
              << "# comments by '#'\n\n"
              << "# some comments if you like\n"
-             << "caltablepath = /home/schroeder/usg/data/lopes/LOPES-CalTable\n"
+             << "caltablepath = $LOFARSOFT/data/lopes/LOPES-CalTable\n"
              << "path = /home/schroeder/lopes/events\n"
              << "preferGrande = false\n"
              << "RotatePos = true\n"
              << "generatePlots = true\n"
              << "SinglePlots = true\n"
+             << "eventDisplayPlot = false\n"
              << "PlotRawData = false\n"
              << "GenerateSpectra = true\n"
              << "CalculateMaxima = false\n"
@@ -1330,27 +1333,27 @@ int main (int argc, char *argv[])
     // prepare output in root file
     TFile *rootfile=NULL;
 
-    if (rootFileName != "") {
+    if (config["rootFileName"]->sValue() != "") {
       // open root file and create tree structure
-      rootfile = new TFile(rootFileName.c_str(),rootFileMode.c_str(),"Resulst of CR-Tools pipeline");
+      rootfile = new TFile(config["rootFileName"]->sValue().c_str(),config["rootFileMode"]->sValue().c_str(),"Resulst of CR-Tools pipeline");
       // check if file is open
       if (rootfile->IsZombie()) {
-        cerr << "\nError: Could not create file: " << rootFileName << "\n" << endl;
+        cerr << "\nError: Could not create file: " << config["rootFileName"]->sValue() << "\n" << endl;
         return 1;		// exit program
       }
     }
 
     // create tree and tree structure (depends on chosen polarization)
     TTree *roottree = NULL;
-    if (rootFileMode == "RECREATE");
+    if (config["rootFileMode"]->sValue() == "RECREATE");
       roottree = new TTree("T","LOPES");
-    if (rootFileMode == "UPDATE")
+    if (config["rootFileMode"]->sValue() == "UPDATE")
       roottree = (TTree*)rootfile->Get("T;1");
     roottree->Branch("Gt",&gt,"Gt/i");	// GT as unsigned int
     roottree->Branch("Eventname",&eventfilename,"Eventname/C");
 
     // the following branches are not used in the calibration mode
-    if ( !calibrationMode ) {
+    if ( !config["calibrationMode"]->bValue() ) {
       if (kascadeRootFile == "") {
         roottree->Branch("Xc",&core_x,"Xc/D");
         roottree->Branch("Yc",&core_y,"Yc/D");
@@ -1370,7 +1373,7 @@ int main (int argc, char *argv[])
       }
 
       // one result, if polarization = ANY
-      if (polarization == "ANY") {
+      if (config["polarization"]->sValue() == "ANY") {
         roottree->Branch("AzL",&azimuth,"AzL/D");
         roottree->Branch("ElL",&elevation,"ElL/D");
         roottree->Branch("Distance",&distanceResult,"Distance/D");	// radius of curvature
@@ -1385,7 +1388,7 @@ int main (int argc, char *argv[])
         roottree->Branch("rmsCCbeam",&rmsCCbeam,"rmsCCbeam/D");
         roottree->Branch("rmsXbeam",&rmsXbeam,"rmsXbeam/D");
         roottree->Branch("rmsPbeam",&rmsPbeam,"rmsPbeam/D");
-        if (lateralDistribution) {
+        if (config["lateralDistribution"]->bValue()) {
           roottree->Branch("R_0",&R_0,"R_0/D");
           roottree->Branch("sigR_0",&sigR_0,"sigR_0/D");
           roottree->Branch("eps",&eps,"eps/D");
@@ -1403,7 +1406,7 @@ int main (int argc, char *argv[])
           roottree->Branch("latMeanDist",&latMeanDist,"latMeanDist/D");
         }
       }
-      if ( (polarization == "EW") || (polarization == "BOTH")) {
+      if ( (config["polarization"]->sValue() == "EW") || (config["polarization"]->sValue() == "BOTH")) {
         roottree->Branch("AzL_EW",&AzL,"AzL_EW/D");
         roottree->Branch("ElL_EW",&ElL,"ElL_EW/D");
         roottree->Branch("Distance_EW",&distanceResult,"Distance_EW/D");	// radius of curvature
@@ -1418,7 +1421,7 @@ int main (int argc, char *argv[])
         roottree->Branch("rmsCCbeam_EW",&rmsCCbeam,"rmsCCbeam_EW/D");
         roottree->Branch("rmsXbeam_EW",&rmsXbeam,"rmsXbeam_EW/D");
         roottree->Branch("rmsPbeam_EW",&rmsPbeam,"rmsPbeam_EW/D");
-        if (lateralDistribution) {
+        if (config["lateralDistribution"]->bValue()) {
           roottree->Branch("R_0_EW",&R_0,"R_0_EW/D");
           roottree->Branch("sigR_0_EW",&sigR_0,"sigR_0_EW/D");
           roottree->Branch("eps_EW",&eps,"eps_EW/D");
@@ -1436,7 +1439,7 @@ int main (int argc, char *argv[])
           roottree->Branch("latMeanDist_EW",&latMeanDist,"latMeanDist_EW/D");
         }
       }
-      if ( (polarization == "NS") || (polarization == "BOTH")) {
+      if ( (config["polarization"]->sValue() == "NS") || (config["polarization"]->sValue() == "BOTH")) {
         roottree->Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
         roottree->Branch("ElL_NS",&ElL_NS,"ElL_NS/D");
         roottree->Branch("Distance_NS",&distanceResultNS,"Distance_NS/D");	// radius of curvature
@@ -1451,7 +1454,7 @@ int main (int argc, char *argv[])
         roottree->Branch("rmsCCbeam_NS",&rmsCCbeam_NS,"rmsCCbeam_NS/D");
         roottree->Branch("rmsXbeam_NS",&rmsXbeam_NS,"rmsXbeam_NS/D");
         roottree->Branch("rmsPbeam_NS",&rmsPbeam_NS,"rmsPbeam_NS/D");
-        if (lateralDistribution) {
+        if (config["lateralDistribution"]->bValue()) {
           roottree->Branch("R_0_NS",&R_0_NS,"R_0_NS/D");
           roottree->Branch("sigR_0_NS",&sigR_0_NS,"sigR_0_NS/D");
           roottree->Branch("eps_NS",&eps_NS,"eps_NS/D");
@@ -1474,7 +1477,7 @@ int main (int argc, char *argv[])
     // Process events from event file list
     while ( getNextEvent() ) {
       // print information and process the event
-      if (calibrationMode) {
+      if (config["calibrationMode"]->bValue()) {
         cout << "\nProcessing calibration event \"" << eventname << "\".\n" << endl;
       } else {
         cout << "\nProcessing event \"" << eventname << "\"\nwith azimuth " << azimuth << " °, elevation " << elevation
@@ -1483,9 +1486,9 @@ int main (int argc, char *argv[])
       }
 
       // Check if file exists
-      ifstream ftest( string(path+eventname).c_str());
+      ifstream ftest( string(config["path"]->sValue()+eventname).c_str());
       if(!ftest.is_open()) {
-        cerr << "Unable to open "<<path+eventname<<endl;
+        cerr << "Unable to open "<<config["path"]->sValue()+eventname<<endl;
         continue;
       }
       ftest.close();
@@ -1541,7 +1544,7 @@ int main (int argc, char *argv[])
 
       // Set observatory record to LOPES
       Record obsrec;
-      obsrec.define("LOPES",caltablepath);
+      obsrec.define("LOPES",config["caltablepath"]->sValue());
 
       // check for the polarizations, if both polarizations are required
       // then the pipeline has to be called twice (once for EW and once for NS);
@@ -1554,35 +1557,35 @@ int main (int argc, char *argv[])
       map<int, PulseProperties>::iterator itBeg;       // iterator.begin() of pulsesMap
       map<int, PulseProperties>::iterator itEnd;       // iterator.end() if pulsesMap
 
-      if ( calibrationMode ) {
+      if ( config["calibrationMode"]->bValue() ) {
         // initialize the pipeline
         analyseLOPESevent2 eventPipeline;
         eventPipeline.initPipeline(obsrec);
 
         // set parameters of pipeline
-        eventPipeline.setPlotInterval(plotStart,plotStop);
-        eventPipeline.setSpectrumInterval(spectrumStart,spectrumStop);
-        eventPipeline.setFreqInterval(freqStart,freqStop);
-        eventPipeline.setUpsamplingExponent(upsamplingExponent);
+        eventPipeline.setPlotInterval(config["plotStart"]->dValue(),config["plotStop"]->dValue());
+        eventPipeline.setSpectrumInterval(config["spectrumStart"]->dValue(),config["spectrumStop"]->dValue());
+        eventPipeline.setFreqInterval(config["freqStart"]->dValue(),config["freqStop"]->dValue());
+        eventPipeline.setUpsamplingExponent(config["upsamplingExponent"]->uiValue());
 
         // call the pipeline with an extra delay = 0.
-        results = eventPipeline.CalibrationPipeline (path+eventname,
+        results = eventPipeline.CalibrationPipeline (config["path"]->sValue()+eventname,
                                                      plotprefix,
                                                      config["generatePlots"]->bValue(),
                                                      config["generateSpectra"]->bValue(),
-                                                     static_cast< Vector<int> >(flagged),
+                                                     static_cast< Vector<int> >(config.getFlagged()),
                                                      config["verbose"]->bValue(),
-                                                     doGainCal,
-                                                     doDispersionCal,
+                                                     config["doGainCal"]->bValue(),
+                                                     config["doDispersionCal"]->bValue(),
                                                      false,		// never correct delays in calibration mode
-                                                     doRFImitigation,
+                                                     config["doRFImitigation"]->bValue(),
                                                      config["singlePlots"]->bValue(),
                                                      config["PlotRawData"]->bValue(),
                                                      config["CalculateMaxima"]->bValue());
 
         // make a postscript with a summary of all plots
         // if summaryColumns = 0 the method does not create a summary.
-        eventPipeline.summaryPlot(plotprefix+"-summary",summaryColumns);
+        eventPipeline.summaryPlot(plotprefix+"-summary",config["summaryColumns"]->uiValue());
 
         // get the pulse properties
         rawPulsesMap = eventPipeline.getRawPulseProperties();
@@ -1593,16 +1596,16 @@ int main (int argc, char *argv[])
         gt = results.asuInt("Date");
 
         // getting necessary data to plot [added: mfranc]
-        if(showAntennas) {
+        if(config["eventDisplayPlot"]->bValue()) {
           antPos = eventPipeline.getAntennaPositions();
           antIDs = eventPipeline.getAntennaIDs();
         }
       } else {
-        if ( (polarization == "ANY") || (polarization == "EW") || both_pol) {
+        if ( (config["polarization"]->sValue() == "ANY") || (config["polarization"]->sValue() == "EW") || both_pol) {
           if (both_pol) {
             cout << "Pipeline is started for East-West Polarization.\n" << endl;
             polPlotPrefix = "-EW";
-            polarization = "EW";	// do EW here
+            config["polarization"]->setValue("EW");	// do EW here
           }
 
           // initialize the pipeline
@@ -1610,16 +1613,16 @@ int main (int argc, char *argv[])
           eventPipeline.initPipeline(obsrec);
 
           // set parameters of pipeline
-          eventPipeline.setPlotInterval(plotStart,plotStop);
-          eventPipeline.setSpectrumInterval(spectrumStart,spectrumStop);
-          eventPipeline.setFreqInterval(freqStart,freqStop);
-          eventPipeline.setCCWindowWidth(ccWindowWidth);
-          eventPipeline.setUpsamplingExponent(upsamplingExponent);
-          eventPipeline.setLateralSNRcut(lateralSNRcut);
-          eventPipeline.setLateralTimeCut(lateralTimeCut);
+          eventPipeline.setPlotInterval(config["plotStart"]->dValue(),config["plotStop"]->dValue());
+          eventPipeline.setSpectrumInterval(config["spectrumStart"]->dValue(),config["spectrumStop"]->dValue());
+          eventPipeline.setFreqInterval(config["freqStart"]->dValue(),config["freqStop"]->dValue());
+          eventPipeline.setCCWindowWidth(config["ccWindowWidth"]->dValue());
+          eventPipeline.setUpsamplingExponent(config["upsamplingExponent"]->uiValue());
+          eventPipeline.setLateralSNRcut(config["lateralSNRcut"]->dValue());
+          eventPipeline.setLateralTimeCut(config["lateralTimeCut"]->dValue());
 
           // call the pipeline with an extra delay = 0.
-          results = eventPipeline.RunPipeline (path+eventname,
+          results = eventPipeline.RunPipeline (config["path"]->sValue()+eventname,
                                                azimuth,
                                                elevation,
                                                radiusOfCurvature,
@@ -1629,19 +1632,19 @@ int main (int argc, char *argv[])
                                                plotprefix+polPlotPrefix,
                                                config["generatePlots"]->bValue(),
                                                config["generateSpectra"]->bValue(),
-                                               static_cast< Vector<int> >(flagged),
+                                               static_cast< Vector<int> >(config.getFlagged()),
                                                config["verbose"]->bValue(),
                                                config["simplexFit"]->bValue(),
                                                0.,
-                                               doTVcal,
-                                               doGainCal,
-                                               doDispersionCal,
-                                               doDelayCal,
-                                               doRFImitigation,
-                                               doFlagNotActiveAnts,
-                                               doAutoFlagging,
-                                               upsamplingRate,
-                                               polarization,
+                                               config["doTVcal"]->iValue(),
+                                               config["doGainCal"]->bValue(),
+                                               config["doDispersionCal"]->bValue(),
+                                               config["doDelayCal"]->bValue(),
+                                               config["doRFImitigation"]->bValue(),
+                                               config["doFlagNotActiveAnts"]->bValue(),
+                                               config["doAutoFlagging"]->bValue(),
+                                               config["upsamplingRate"]->dValue(),
+                                               config["polarization"]->sValue(),
                                                config["singlePlots"]->bValue(),
                                                config["PlotRawData"]->bValue(),
                                                config["CalculateMaxima"]->bValue(),
@@ -1651,14 +1654,14 @@ int main (int argc, char *argv[])
 
           // make a postscript with a summary of all plots
           // if summaryColumns = 0 the method does not create a summary.
-          eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",summaryColumns);
+          eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",config["summaryColumns"]->uiValue());
 
           // create a special file for the lateral distribution output
-          if (lateralOutputFile)
+          if (config["lateralOutputFile"]->bValue())
             eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
 
           // generate the lateral distribution and get resutls
-          if (lateralDistribution) {
+          if (config["lateralDistribution"]->bValue()) {
             eventPipeline.fitLateralDistribution("lateral"+polPlotPrefix+"-",results, core_x, core_y);
             R_0 = results.asDouble("R_0");
             sigR_0 = results.asDouble("sigR_0");
@@ -1699,17 +1702,17 @@ int main (int argc, char *argv[])
           gt = results.asuInt("Date");
 
           // getting necessary data to plot [added: mfranc]
-          if(showAntennas) {
+          if(config["eventDisplayPlot"]->bValue()) {
             antPos = eventPipeline.getAntennaPositions();
             antIDs = eventPipeline.getAntennaIDs();
           }
         }
 
-        if ( (polarization == "NS") || both_pol) {
+        if ( (config["polarization"]->sValue() == "NS") || both_pol) {
           if (both_pol) {
             cout << "Pipeline is started for North-South Polarization.\n" << endl;
             polPlotPrefix = "-NS";
-            polarization = "NS";	// do NS here
+            config["polarization"]->setValue("NS");	// do NS here
           }
 
           // initialize the pipeline
@@ -1717,16 +1720,16 @@ int main (int argc, char *argv[])
           eventPipeline.initPipeline(obsrec);
 
           // set parameters of pipeline
-          eventPipeline.setPlotInterval(plotStart,plotStop);
-          eventPipeline.setSpectrumInterval(spectrumStart,spectrumStop);
-          eventPipeline.setFreqInterval(freqStart,freqStop);
-          eventPipeline.setCCWindowWidth(ccWindowWidth);
-          eventPipeline.setUpsamplingExponent(upsamplingExponent);
-          eventPipeline.setLateralSNRcut(lateralSNRcut);
-          eventPipeline.setLateralTimeCut(lateralTimeCut);
+          eventPipeline.setPlotInterval(config["plotStart"]->dValue(),config["plotStop"]->dValue());
+          eventPipeline.setSpectrumInterval(config["spectrumStart"]->dValue(),config["spectrumStop"]->dValue());
+          eventPipeline.setFreqInterval(config["freqStart"]->dValue(),config["freqStop"]->dValue());
+          eventPipeline.setCCWindowWidth(config["ccWindowWidth"]->dValue());
+          eventPipeline.setUpsamplingExponent(config["upsamplingExponent"]->uiValue());
+          eventPipeline.setLateralSNRcut(config["lateralSNRcut"]->dValue());
+          eventPipeline.setLateralTimeCut(config["lateralTimeCut"]->dValue());
 
           // call the pipeline with an extra delay = 0.
-          results = eventPipeline.RunPipeline (path+eventname,
+          results = eventPipeline.RunPipeline (config["path"]->sValue()+eventname,
                                                azimuth,
                                                elevation,
                                                radiusOfCurvature,
@@ -1736,19 +1739,19 @@ int main (int argc, char *argv[])
                                                plotprefix+polPlotPrefix,
                                                config["generatePlots"]->bValue(),
                                                config["generateSpectra"]->bValue(),
-                                               static_cast< Vector<int> >(flagged),
+                                               static_cast< Vector<int> >(config.getFlagged()),
                                                config["verbose"]->bValue(),
                                                config["simplexFit"]->bValue(),
                                                0.,
-                                               doTVcal,
-                                               doGainCal,
-                                               doDispersionCal,
-                                               doDelayCal,
-                                               doRFImitigation,
-                                               doFlagNotActiveAnts,
-                                               doAutoFlagging,
-                                               upsamplingRate,
-                                               polarization,
+                                               config["doTVcal"]->iValue(),
+                                               config["doGainCal"]->bValue(),
+                                               config["doDispersionCal"]->bValue(),
+                                               config["doDelayCal"]->bValue(),
+                                               config["doRFImitigation"]->bValue(),
+                                               config["doFlagNotActiveAnts"]->bValue(),
+                                               config["doAutoFlagging"]->bValue(),
+                                               config["upsamplingRate"]->dValue(),
+                                               config["polarization"]->sValue(),
                                                config["singlePlots"]->bValue(),
                                                config["PlotRawData"]->bValue(),
                                                config["CalculateMaxima"]->bValue(),
@@ -1758,14 +1761,14 @@ int main (int argc, char *argv[])
 
           /* make a postscript with a summary of all plots
            if summaryColumns = 0 the method does not create a summary. */
-          eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",summaryColumns);
+          eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",config["summaryColumns"]->uiValue());
 
           // create a special file for the lateral distribution output
-          if (lateralOutputFile)
+          if (config["lateralOutputFile"]->bValue())
             eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
 
           // generate the lateral distribution
-          if (lateralDistribution) {
+          if (config["lateralDistribution"]->bValue()) {
             eventPipeline.fitLateralDistribution("lateral"+polPlotPrefix+"-",results, core_x, core_y);
             R_0_NS = results.asDouble("R_0");
             sigR_0_NS = results.asDouble("sigR_0");
@@ -1809,16 +1812,16 @@ int main (int argc, char *argv[])
           gt = results.asuInt("Date");
 
           // getting necessary data to plot [added: mfranc]
-          if(showAntennas) {
+          if(config["eventDisplayPlot"]->bValue()) {
             antPos = eventPipeline.getAntennaPositions();
             antIDs = eventPipeline.getAntennaIDs();		
           }
         }
-      }  // if...else (calibrationMode)
+      }  // if...else (config["calibrationMode"]->bValue())
 
 
       // Create event display plot of all antennas [added: mfranc]
-      if(showAntennas) {
+      if(config["eventDisplayPlot"]->bValue()) {
         if(calibPulsesMap.size() != 0) {
           itBeg = calibPulsesMap.begin();	
           itEnd = calibPulsesMap.end();
@@ -1903,7 +1906,7 @@ int main (int argc, char *argv[])
               ((meanCalCounter[antenna-1] - 1) * meanCalPulses[antenna-1]->dist + it->second.dist) / meanCalCounter[antenna-1];
           }
           // calcutlate mean of lateral deviations (different counter, because of different antenna cut criteria
-          if (!(it->second.lateralCut) && (lateralDistribution)) {
+          if (!(it->second.lateralCut) && (config["lateralDistribution"]->bValue())) {
             if (meanResCounter[antenna-1] == 0) {
               ++meanResCounter[antenna-1];
               meanCalPulses[antenna-1]->lateralExpHeight = it->second.lateralExpHeight;
@@ -1935,17 +1938,17 @@ int main (int argc, char *argv[])
           if (! roottree->GetBranchStatus(branchname.c_str())) {
             roottree->Branch(branchname.c_str(),"PulseProperties",&calibPulses[antenna-1]);
           string branchname = "Ant_" + antNumber.str() + "_cal_mean.";
-          if ((calculateMeanValues) && (! roottree->GetBranchStatus(branchname.c_str())))
+          if ((config["calculateMeanValues"]->bValue()) && (! roottree->GetBranchStatus(branchname.c_str())))
             roottree->Branch(branchname.c_str(),"PulseProperties",&meanCalPulses[antenna-1]);
           }
         }
       }
 
       // write information of last event to root file
-      if (rootFileName != "") {
+      if (config["rootFileName"]->sValue() != "") {
         // check if event was reconstructed or if also bad events shall be written to the root file
-        if (goodEW || goodNS || writeBadEvents) {
-          cout << "Adding results to root tree and saving root file \"" << rootFileName << "\"\n" << endl;
+        if (goodEW || goodNS || config["writeBadEvents"]->bValue()) {
+          cout << "Adding results to root tree and saving root file \"" << config["rootFileName"]->sValue() << "\"\n" << endl;
           roottree->Fill();
           rootfile->Write("",TObject::kOverwrite);
         } else {
@@ -1957,7 +1960,7 @@ int main (int argc, char *argv[])
     }
 
     // print mean values of lateral distribution
-    if ((calculateMeanValues) && (lateralDistribution)) {
+    if ((config["calculateMeanValues"]->bValue()) && (config["lateralDistribution"]->bValue())) {
       cout << "\n\nMean values of lateral distribution of all events:\n"
            << "antenna  distance  exp. residual  pow. residual\n";
       for (unsigned int i=0; i < MAX_NUM_ANTENNAS; ++i)
@@ -1968,8 +1971,8 @@ int main (int argc, char *argv[])
     }
 
     // close root file
-    if (rootFileName != "") {
-      cout << "\nClosing root file: " << rootFileName << endl;
+    if (config["rootFileName"]->sValue() != "") {
+      cout << "\nClosing root file: " << config["rootFileName"]->sValue() << endl;
       rootfile->Close();
     }
 

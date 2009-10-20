@@ -1042,10 +1042,12 @@ namespace CR { // Namespace CR -- begin
         erg.define("R_0",0.);
         erg.define("sigeps",0.);
         erg.define("sigR_0",0.);
+        erg.define("chi2NDF",0.);
         erg.define("epsPow",0.);
         erg.define("kPow",0.);
         erg.define("sigepsPow",0.);
         erg.define("sigkPow",0.);
+        erg.define("chi2NDFPow",0.);
         cout << "No fit was done, because less than 3 antennas are 'good':\n"
              << "eps = " << 0 << "\t +/- " << 0 << "\t µV/m/MHz\n"
              << "R_0 = " << 0 << "\t +/- " << 0 << "\t m\n"
