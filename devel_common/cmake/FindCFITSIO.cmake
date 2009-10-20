@@ -93,16 +93,21 @@ endif (CFITSIO_libnsl)
 
 if (HAVE_FITSIO_H)
   
-  ## extract full library version
+  ## parse the header file for version string
   file (STRINGS ${HAVE_FITSIO_H}/fitsio.h CFITSIO_VERSION
     REGEX "CFITSIO_VERSION"
     )
-  string (REGEX REPLACE "#define CFITSIO_VERSION " "" CFITSIO_VERSION ${CFITSIO_VERSION})
-
-  ## exctract the major version of the library
-  string(SUBSTRING ${CFITSIO_VERSION} 0 1 CFITSIO_MAJOR_VERSION)
-  ## extract the minor version fo the library
-  string(REGEX REPLACE "${CFITSIO_MAJOR_VERSION}." "" CFITSIO_MINOR_VERSION ${CFITSIO_VERSION})
+  
+  if (CFITSIO_VERSION)
+    ## extract full library version
+    string (REGEX REPLACE "#define CFITSIO_VERSION " "" CFITSIO_VERSION ${CFITSIO_VERSION})
+    ## exctract the major version of the library
+    string(SUBSTRING ${CFITSIO_VERSION} 0 1 CFITSIO_MAJOR_VERSION)
+    ## extract the minor version fo the library
+    string(REGEX REPLACE "${CFITSIO_MAJOR_VERSION}." "" CFITSIO_MINOR_VERSION ${CFITSIO_VERSION})
+  else (CFITSIO_VERSION)
+    message (STATUS "Unable to extract CFITSIO version!")
+  endif (CFITSIO_VERSION)
 
 endif (HAVE_FITSIO_H)
 
