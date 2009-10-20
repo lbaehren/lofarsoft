@@ -1,6 +1,8 @@
 
 set (CMAKE_INSTALL_PREFIX  ${MATHGL_prefix} CACHE PATH "Installation prefix" FORCE)
 
+set (enable-double ${MATHGL_ENABLE_DOUBLE} CACHE BOOL "Enable double precision in MathGL library")
+
 ##____________________________________________________________________
 ## GNU Scientific Library
 

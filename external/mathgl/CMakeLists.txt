@@ -16,6 +16,7 @@ option (MATHGL_VERBOSE_BUILD     "Be verbose during build process?"       NO  )
 option (MATHGL_ENABLE_HDF5       "Enable support for HDF5?"               NO  )
 option (MATHGL_ENABLE_PYTHON     "Enable support for Python?"             YES )
 option (MATHGL_ENABLE_QT         "Enable support for Qt?"                 YES )
+option (MATHGL_ENABLE_DOUBLE     "Enable double precision?"               YES )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -125,18 +126,18 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     PATH_SUFFIXES qt4-mac qt4-mac/bin qt4-x11 qt4-x11/bin
     NO_DEFAULT_PATH
     )
-  if (QT_MOC_EXECUTABLE)
+  if (NO QT_MOC_EXECUTABLE)
     set (MATHGL_ENABLE_QT NO)
-  endif (QT_MOC_EXECUTABLE) 
+  endif (NO QT_MOC_EXECUTABLE)
 
   find_program (QT_QMAKE_EXECUTABLE qmake
     PATHS ${bin_locations} /sw/lib /opt/casa/local/bin
     PATH_SUFFIXES qt4-mac qt4-mac/bin qt4-x11 qt4-x11/bin
     NO_DEFAULT_PATH
     )
-  if (QT_QMAKE_EXECUTABLE)
+  if (NO QT_QMAKE_EXECUTABLE)
     set (MATHGL_ENABLE_QT NO)
-  endif (QT_QMAKE_EXECUTABLE) 
+  endif (NO QT_QMAKE_EXECUTABLE) 
 
   ## Libraries
 
@@ -188,7 +189,10 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
     PATH_SUFFIXES qt4-mac/include qt4-x11/include
     )
-
+  if (NO QT_INCLUDE_DIR)
+    set (MATHGL_ENABLE_QT NO)
+  endif (NO QT_INCLUDE_DIR)
+  
   ## QtCore
   find_path (QT_QTCORE_INCLUDE_DIR QtCore/QTimer QtCore/qbasictimer.h
     PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
@@ -196,6 +200,8 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     )
   if (QT_QTCORE_INCLUDE_DIR)
     list (APPEND QT_INCLUDE_DIR ${QT_QTCORE_INCLUDE_DIR}/QtCore)
+  else (QT_QTCORE_INCLUDE_DIR) 
+    set (MATHGL_ENABLE_QT NO)
   endif (QT_QTCORE_INCLUDE_DIR) 
   
   ## QtGui
@@ -205,8 +211,10 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     )
   if (QT_QTGUI_INCLUDE_DIR)
     list (APPEND QT_INCLUDE_DIR ${QT_QTGUI_INCLUDE_DIR}/QtGui)
+  else (QT_QTGUI_INCLUDE_DIR)
+    set (MATHGL_ENABLE_QT NO)
   endif (QT_QTGUI_INCLUDE_DIR)
-
+  
   ## QtOpenGL
   find_path (QT_QTOPENGL_INCLUDE_DIR QtOpenGL/QtOpenGL QtOpenGL/QGLWidget
     PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
@@ -214,8 +222,10 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     )
   if (QT_QTOPENGL_INCLUDE_DIR)
     list (APPEND QT_INCLUDE_DIR ${QT_QTOPENGL_INCLUDE_DIR}/QtOpenGL)
+  else (QT_QTOPENGL_INCLUDE_DIR)
+    set (MATHGL_ENABLE_QT NO)
   endif (QT_QTOPENGL_INCLUDE_DIR)
-
+  
   ##__________________________________________________________________
   ## Check if a tar-archive with the source code is available already;
   ## if this is not the case we need to fetch it from the USg server.
