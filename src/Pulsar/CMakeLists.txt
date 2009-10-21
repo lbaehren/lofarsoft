@@ -145,6 +145,13 @@ if (NOT HAVE_GFORTRAN)
 endif (NOT HAVE_GFORTRAN)
 
 ##__________________________________________________________
+## MPI
+
+if (NOT MPI_FOUND)
+  include (FindMPI)
+endif (NOT MPI_FOUND)
+
+##__________________________________________________________
 ## PYTHON 
 
 if (NOT HAVE_PYTHON)

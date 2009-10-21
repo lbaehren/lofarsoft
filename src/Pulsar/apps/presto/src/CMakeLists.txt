@@ -81,6 +81,7 @@ target_link_libraries (presto
   ${PGPLOT_LIBRARIES}
   ${GFORTRAN_LIBRARIES}
   ${X11_LIBRARIES}
+  ${MPI_LIBRARIES}
   )
 
 set_target_properties (presto
