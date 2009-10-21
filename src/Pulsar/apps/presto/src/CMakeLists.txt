@@ -368,7 +368,7 @@ endforeach (src)
 ## ==============================================================================
 
 install (
-  TARGETS presto sla
+  TARGETS presto
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
 #  ARCHIVE DESTINATION lib

@@ -15,3 +15,9 @@ set_target_properties (sla
   LINK_FLAGS "-fno-second-underscore"
   )
 
+install (
+  TARGETS sla
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+#  ARCHIVE DESTINATION lib
+  )
