@@ -3,7 +3,7 @@ enable_language(Fortran)
 
 #include_directories (${PULSAR_SOURCE_DIR}/apps/presto/src/slalib)
 
-file (GLOB sla_sources *.f)
+file (GLOB sla_sources *.f *.F)
 
 add_library (sla ${sla_sources})
 
