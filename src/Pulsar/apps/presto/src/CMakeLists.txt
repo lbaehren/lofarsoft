@@ -242,6 +242,7 @@ add_executable (GBT350filterbank
   spigot.c
   sigproc_fb.c
   )
+target_link_libraries (GBT350filterbank presto)
 
 add_executable (spigotSband2filterbank
   spigotSband2filterbank.c
@@ -351,15 +352,6 @@ add_executable (weight_psrfits
   psrfits.c
   ${PLOT2DOBJS}
   )
-
-## linker statements
-
-foreach (src ${presto_binaries})
-  target_link_libraries (${src}
-    presto
-#    ${NUMPY_LIBRARIES}
-    )
-endforeach (src)
 
 ## ==============================================================================
 ##
