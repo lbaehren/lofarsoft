@@ -21,10 +21,10 @@ set (WCSLIB_VERSION "${WCSLIB_VERSION_MAJOR}.${WCSLIB_VERSION_MINOR}")
 ## -----------------------------------------------------------------------------
 ## User defined build/install options
 
-option (WCSLIB_PYTHON_WRAPPER    "Generate Python wrapper for WCSLIB?"  YES )
 option (WCSLIB_VERBOSE_CONFIGURE "Verbose output during configuration?" NO  )
-option (WCSLIB_FORCE_BUILD       "Force rebuild and local installation" NO  )
+option (WCSLIB_FORCE_BUILD       "Force rebuild and local installation" YES )
 option (WCSLIB_ENABLE_TESTING    "Enable building and running tests?"   YES )
+option (WCSLIB_PYTHON_WRAPPER    "Generate Python wrapper for WCSLIB?"  YES )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -98,32 +98,34 @@ if (NOT HAVE_WCSLIB OR WCSLIB_FORCE_BUILD)
   ## Subdirectories
   
   add_subdirectory (${WCSLIB_SOURCE_DIR}/C)
-  add_subdirectory (${WCSLIB_SOURCE_DIR}/FORTRAN)
   add_subdirectory (${WCSLIB_SOURCE_DIR}/pgsbox)
+#  add_subdirectory (${WCSLIB_SOURCE_DIR}/FORTRAN)
   
   if (WCSLIB_PYTHON_WRAPPER AND HAVE_PYTHON)
     add_subdirectory (${WCSLIB_SOURCE_DIR}/Python)
+  else (WCSLIB_PYTHON_WRAPPER AND HAVE_PYTHON)
+    message (STATUS "Unable to create Python bindings for WCSLIB!")
   endif (WCSLIB_PYTHON_WRAPPER AND HAVE_PYTHON)
   
-## -----------------------------------------------------------------------------
-## Configuration summary
-
-message (STATUS " ")
-message (STATUS "============================================================")
-message (STATUS " ")
-message (STATUS "[WCSLIB] Configuration summary")
-message (STATUS "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE} ")
-message (STATUS "PYTHON_INCLUDES   = ${PYTHON_INCLUDES} ")
-message (STATUS "PYTHON_LIBRARIES  = ${PYTHON_LIBRARIES} ")
-message (STATUS "HAVE_PYCONFIG_H   = ${HAVE_PYCONFIG_H}")
-message (STATUS "WCSLIB_SOURCE_DIR = ${WCSLIB_SOURCE_DIR}")
-message (STATUS "WCSLIB_BINARY_DIR = ${WCSLIB_BINARY_DIR}")
-message (STATUS " ")
-message (STATUS "============================================================")
-message (STATUS " ")
-
-## <-- end build condition ----------------------------------------------------->
-
+  ## ---------------------------------------------------------------------------
+  ## Configuration summary
+  
+  message (STATUS " ")
+  message (STATUS "============================================================")
+  message (STATUS " ")
+  message (STATUS "[WCSLIB] Configuration summary")
+  message (STATUS "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE} ")
+  message (STATUS "PYTHON_INCLUDES   = ${PYTHON_INCLUDES} ")
+  message (STATUS "PYTHON_LIBRARIES  = ${PYTHON_LIBRARIES} ")
+  message (STATUS "HAVE_PYCONFIG_H   = ${HAVE_PYCONFIG_H}")
+  message (STATUS "WCSLIB_SOURCE_DIR = ${WCSLIB_SOURCE_DIR}")
+  message (STATUS "WCSLIB_BINARY_DIR = ${WCSLIB_BINARY_DIR}")
+  message (STATUS " ")
+  message (STATUS "============================================================")
+  message (STATUS " ")
+  
+  ## <-- end build condition --------------------------------------------------->
+  
 else (NOT HAVE_WCSLIB OR WCSLIB_FORCE_BUILD)
   message (STATUS "Found system-wide installation of WCSLIB; skipping rebuild!")
 endif (NOT HAVE_WCSLIB OR WCSLIB_FORCE_BUILD)
