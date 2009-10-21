@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -25,7 +25,10 @@
 #include <Analysis/tbbTools.h>
 #include <iostream>
 #include <iomanip>
-using CR::tbbctlIn;  // Namespace usage
+
+// Namespace usage
+using CR::tbbctlIn;
+using CR::tbbTools;
 
 Vector<String> filenames(1);
 /*!
@@ -40,9 +43,9 @@ Vector<String> filenames(1);
   \date 2007/11/07
  
   <h3>Synopsis</h3>
-	
-	Currently this routine also tests the TBBTools trigger algorithm. CRC checking from class CRCcheck is used in 
-  the tbbctlIn datareader.
+  
+  Currently this routine also tests the TBBTools trigger algorithm. CRC checking
+  from class CRCcheck is used in the tbbctlIn datareader.
 */
 
 // -----------------------------------------------------------------------------

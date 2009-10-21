@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ObservationData.cc,v 1.9 2007/05/02 09:37:10 bahren Exp $ */
+/* $Id$ */
 
 #include <Data/ObservationData.h>
 #include <Utilities/MConversions.h>

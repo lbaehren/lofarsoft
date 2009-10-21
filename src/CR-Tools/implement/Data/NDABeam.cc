@@ -142,7 +142,7 @@ bool NDABeam::setStreams ()
   Vector<Double> adc2voltage (DataReader::ADC2Voltage());
   Matrix<DComplex> fft2calfft (DataReader::fft2calfft());
   Vector<String> filenames (metadata_p.datafiles(true));
-  DataIterator *iterator;
+  CR::DataIterator *iterator;
   
   /*
     Configure the DataIterator objects: for NDABeam data, the values are
@@ -151,7 +151,7 @@ bool NDABeam::setStreams ()
   */
   
   uint nofStreams (filenames.nelements());
-  iterator = new DataIterator[nofStreams];
+  iterator = new CR::DataIterator[nofStreams];
   
   for (uint file (0); file<nofStreams; file++) {
     // data are stored as short integer

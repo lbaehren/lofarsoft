@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ObservationData.h,v 1.11 2006/11/27 10:54:04 bahren Exp $ */
+/* $Id$ */
 
 #ifndef OBSERVATIONDATA_H
 #define OBSERVATIONDATA_H
