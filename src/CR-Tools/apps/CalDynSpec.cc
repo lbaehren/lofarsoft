@@ -23,7 +23,6 @@
 
 #include <crtools.h>
 #include <Data/LOFAR_TBB.h>
-//#include <Data/TBB_Timeseries.h>
 #include <Display/SimplePlot.h>
 #include <Analysis/DynamicSpectrum.h>
 #include <cstdlib>
@@ -161,7 +160,7 @@ int main (int argc, char *argv[])
 	}
 	
 	
-	LOFAR_TBB ts2 = LOFAR_TBB(filename, fftblocksize);
+	CR::LOFAR_TBB ts2 = CR::LOFAR_TBB(filename, fftblocksize);
 	ts2.summary();
 	//TBB_Timeseries ts = TBB_Timeseries(filename);
     
@@ -252,7 +251,7 @@ int main (int argc, char *argv[])
 		timeunit = "ms";
 	} else{ timeunit = "1/" + frequnit;}
 	
-	DynamicSpectrum Spectrum = DynamicSpectrum();
+	CR::DynamicSpectrum Spectrum = CR::DynamicSpectrum();
 	Spectrum.setFrequencyAxis( freqs(0), freqs(1)-freqs(0), "Hz");
 	Spectrum.setTimeAxis( 0, timestep, timeunit);
 	Spectrum.setSpectrum(dynamicSpectrum_p);
