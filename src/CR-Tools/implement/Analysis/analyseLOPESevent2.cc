@@ -1096,7 +1096,7 @@ namespace CR { // Namespace CR -- begin
         if (calibPulses.find(antennaIDs(i)) != calibPulses.end()) 
         {
            distance     [ant] = distances(i);
-           timeVal      [ant] = calibPulses[antennaIDs(i)].envelopeTime;
+           timeVal      [ant] = calibPulses[antennaIDs(i)].geomDelay;// + calibPulses[antennaIDs(i)].envelopeTime;
            fieldStr     [ant] = calibPulses[antennaIDs(i)].envelopeMaximum;
            noiseBgr     [ant] = calibPulses[antennaIDs(i)].noise;
            antennaNumber[ant] = i+1;
@@ -1133,13 +1133,13 @@ namespace CR { // Namespace CR -- begin
 
         /* Cuts taken from fitLateralDitribution */
         // pulse time correct? (default: pulse at cc-beam center +/- 25ns)
-        if (abs(timeVal[i]*1e-9 - ccCenter) > lateralTimeCut) {
+        /*if (abs(timeVal[i]*1e-9 - ccCenter) > lateralTimeCut) {
           CutBadTiming++;
           cout << "analyseLOPESevent2::fitTimeDistribution: Antenna " << antennaNumber[i] << " cut because of bad timing: "
                << "CCcenter = " << ccCenter*1e9 << " , pulse time = " << timeVal[i]
                << endl;
           continue;
-        }
+        }*/
         // SNR >= 1 ?
         if ( abs(fieldStr[i]/noiseBgr[i]) < lateralSNRcut) {
           CutSNR++;

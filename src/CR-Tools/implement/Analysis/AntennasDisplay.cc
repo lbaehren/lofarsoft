@@ -15,41 +15,77 @@ AntennasDisplay::AntennasDisplay()
 //                                                                  addNewAntenna
 
 void AntennasDisplay::addNewAntenna (double xCoordinate,
-				     double yCoordinate,
-				     double magnitude,
-				     double time,
-				     int polarization)
+                                     double yCoordinate,
+                                     double magnitude,
+                                     double time,
+                                     int polarization)
 {
-  xCoordinates.push_back  (xCoordinate);
-  yCoordinates.push_back  (yCoordinate);
-  magnitudes.push_back    (magnitude);
-  times.push_back         (time);
-  polarizations.push_back (polarization);
+   // @@@ Latest changes @@@
+   bool notRepeated = true;
+
+   std::vector<double>::iterator iterX = std::find(xCoordinates.begin(), xCoordinates.end(), xCoordinate);
+   std::vector<double>::iterator iterY = std::find(yCoordinates.begin(), yCoordinates.end(), yCoordinate);
+
+   if((iterX != xCoordinates.end()) && (iterY != yCoordinates.end()))
+   {
+      for(unsigned int i=0; i<xCoordinates.size(); i++)
+         if(xCoordinates[i] == xCoordinate && yCoordinates[i] == yCoordinate)
+         {
+            notRepeated = false;
+            break;
+         }
+   }
+
+   if(notRepeated)
+   {
+     xCoordinates.push_back  (xCoordinate);
+     yCoordinates.push_back  (yCoordinate);
+     magnitudes.push_back    (magnitude);
+     times.push_back         (time);
+     polarizations.push_back (polarization);
+   } else {
+     std::cerr << "\nWARNING: AntennasDisplay::addNewAntenna: repeated coordinate!" << std::endl;
+   }
 }
 
 //_______________________________________________________________________________
 //                                                                 setAllAntennas
 
 bool AntennasDisplay::setAllAntennas (std::vector<double> xCoordinatesALL,
-				      std::vector<double> yCoordinatesALL)
+                                      std::vector<double> yCoordinatesALL)
 {
-  if(xCoordinatesALL.size() == yCoordinatesALL.size())
-    {
+   // @@@ Latest changes @@@
+   bool notRepeated = true;
+
+   for(unsigned int i=0; i<xCoordinatesALL.size(); i++)
+   {
+      for(unsigned int j=0; j<xCoordinatesALL.size(); j++)
+      {
+         if((xCoordinatesALL[i] == xCoordinatesALL[j]) && (i != j))
+            if(yCoordinatesALL[j] == yCoordinatesALL[j])
+               notRepeated = false;
+      }
+   }
+
+   if((xCoordinatesALL.size() == yCoordinatesALL.size()) && notRepeated)
+   {
       this->xCoordinatesALL = xCoordinatesALL;
       this->yCoordinatesALL = yCoordinatesALL;
       positionsGiven        = true;
       return true;
-    }
-  return false;
+   }
+   if(!notRepeated)
+     std::cerr << "\nWARNING: AntennasDisplay::setAllAntennas: repeated coordinate!" << std::endl;
+   return false;
 }
 
 //_______________________________________________________________________________
 //                                                                 setAllAntennas
 
 void AntennasDisplay::setCore (double xCore,
-			       double yCore,
-			       double azimuth,
-			       double elevation)
+                               double yCore,
+                               double azimuth,
+                               double elevation)
 {
   this->xCore     = xCore;
   this->yCore     = yCore;
@@ -62,7 +98,7 @@ void AntennasDisplay::setCore (double xCore,
 //                                                                  checkActivity
 
 bool AntennasDisplay::checkActivity (double xCoordinate,
-				     double yCoordinate)
+                                     double yCoordinate)
 {
   for(unsigned int i=0; i<xCoordinates.size(); i++)
     if((xCoordinates[i] == xCoordinate) && (yCoordinates[i] == yCoordinate))
@@ -74,7 +110,7 @@ bool AntennasDisplay::checkActivity (double xCoordinate,
 //                                                               getAbsDifference
 
 double AntennasDisplay::getAbsDifference (double value1,
-					  double value2)
+                                          double value2)
 {
   return (value1 - value2 >= 0) ? value1 - value2 : (value1 - value2) * (-1);
 }
@@ -87,28 +123,28 @@ AntennasDisplay::deadAntennasPos AntennasDisplay::getDeadAntennas()
   deadAntennasPos output;
   std::vector<double> differenceX = getSetDifference(xCoordinatesALL, xCoordinates);
   std::vector<double> differenceY = getSetDifference(yCoordinatesALL, yCoordinates);
-  
+
   // We cannot assume that all antennas have unique coordinates
   for(unsigned int i=0; i<differenceX.size(); i++)
     {
       for(unsigned int j=0; j<xCoordinatesALL.size(); j++)
-	if((xCoordinatesALL[j] == differenceX[i]) && (!checkActivity(xCoordinatesALL[j], yCoordinatesALL[j])))
-	  {
+        if((xCoordinatesALL[j] == differenceX[i]) && (!checkActivity(xCoordinatesALL[j], yCoordinatesALL[j])))
+          {
             output.xCoordinatesDEAD.push_back(xCoordinatesALL[j]);
             output.yCoordinatesDEAD.push_back(yCoordinatesALL[j]);
-	  }
+          }
     }
-  
+
   for(unsigned int i=0; i<differenceY.size(); i++)
     {
       for(unsigned int j=0; j<yCoordinatesALL.size(); j++)
-	if((yCoordinatesALL[j] == differenceY[i]) && (!checkActivity(xCoordinatesALL[j], yCoordinatesALL[j])))
-	  {
+        if((yCoordinatesALL[j] == differenceY[i]) && (!checkActivity(xCoordinatesALL[j], yCoordinatesALL[j])))
+          {
             output.xCoordinatesDEAD.push_back(xCoordinatesALL[j]);
             output.yCoordinatesDEAD.push_back(yCoordinatesALL[j]);
-	  }
+          }
     }
-  
+
   return output;
 }
 
@@ -129,46 +165,50 @@ double AntennasDisplay::getMaximumValue (std::vector<double>& inputData)
   return -1;
 }
 
-double AntennasDisplay::getMinimumDistance (std::vector<double>& inputData1, std::vector<double>& inputData2, borders borderValues, double plotFittingStep)
+double AntennasDisplay::getMinimumDistance (std::vector<double>& inputData1,
+                                            std::vector<double>& inputData2,
+                                            borders borderValues,
+                                            double plotFittingStep)
 {
   double maximumRadValue = 0;
   bool   overlapped      = false;
-  
+
   while(!overlapped)
     {
       for(unsigned int i=0; i<inputData1.size(); i++)
-	{
-	  if(!overlapped)
-	    {
-	      for(unsigned int j=0; j<inputData1.size(); j++)
-		{
+        {
+          if(!overlapped)
+            {
+              for(unsigned int j=0; j<inputData1.size(); j++)
+                {
                   if((inputData1[i] != inputData1[j]) && (inputData2[i] != inputData2[j]))
-		    {
-		      if(pow(inputData1[i] - inputData1[j], 2) + pow(inputData2[i] - inputData2[j], 2) <= pow(maximumRadValue, 2))
-			{
-			  overlapped = true;
-			  break;
-			}
-		    }
-		}
-	    }
-	  if
-	    (
-	     (getAbsDifference(inputData1[i], borderValues.eValue) < maximumRadValue) ||
-	     (getAbsDifference(inputData1[i], borderValues.wValue) < maximumRadValue) ||
-	     (getAbsDifference(inputData2[i], borderValues.nValue) < maximumRadValue) ||
-	     (getAbsDifference(inputData2[i], borderValues.sValue) < maximumRadValue)
-	     )
+                    {
+                      if(pow(inputData1[i] - inputData1[j], 2) + pow(inputData2[i] - inputData2[j], 2) <= pow(maximumRadValue, 2))
+                        {
+                          overlapped = true;
+                          break;
+                        }
+                    }
+                }
+            }
+          if
+            (
+             (getAbsDifference(inputData1[i], borderValues.eValue) < maximumRadValue) ||
+             (getAbsDifference(inputData1[i], borderValues.wValue) < maximumRadValue) ||
+             (getAbsDifference(inputData2[i], borderValues.nValue) < maximumRadValue) ||
+             (getAbsDifference(inputData2[i], borderValues.sValue) < maximumRadValue)
+             )
             overlapped = true;
-	}
+        }
       if(!overlapped)
-	maximumRadValue += plotFittingStep;
+        maximumRadValue += plotFittingStep;
     }
   
   return maximumRadValue*2;
 }
 
-std::vector<double> AntennasDisplay::getSetDifference(std::vector<double> inputData1, std::vector<double> inputData2)
+std::vector<double> AntennasDisplay::getSetDifference(std::vector<double> inputData1,
+                                                      std::vector<double> inputData2)
 {
    std::vector<double>           setDifference(inputData1.size()+inputData2.size());
    std::vector<double>::iterator iterator;
@@ -195,10 +235,10 @@ AntennasDisplay::borders AntennasDisplay::getBorders (int plotsOffset)
    }
    else
    {
-      output.nValue = (int)(getMinimumValue(yCoordinates) + plotsOffset);
-      output.sValue = (int)(getMaximumValue(yCoordinates) - plotsOffset);
-      output.eValue = (int)(getMinimumValue(xCoordinates) + plotsOffset);
-      output.wValue = (int)(getMaximumValue(xCoordinates) - plotsOffset);
+      output.nValue = (int)(getMaximumValue(yCoordinates) + plotsOffset);
+      output.sValue = (int)(getMinimumValue(yCoordinates) - plotsOffset);
+      output.eValue = (int)(getMaximumValue(xCoordinates) + plotsOffset);
+      output.wValue = (int)(getMinimumValue(xCoordinates) - plotsOffset);
    }
 
    output.nValue = std::max((int)(getMaximumValue(yCoordinates) + plotsOffset), output.nValue);
@@ -222,29 +262,29 @@ AntennasDisplay::borders AntennasDisplay::getBorders (int plotsOffset)
 
 #ifdef HAVE_ROOT
 TCanvas* AntennasDisplay::createPlot (std::string title,
-				      unsigned int width,
-				      unsigned int height,
-				      unsigned int lineWidth,
-				      double plotFittingStep,
-				      unsigned int plotsOffset,
-				      unsigned int bckgFillColor,
-				      unsigned int deadAntColor,
-				      unsigned int deadAntMarkerSize,
-				      unsigned int numberOfColorsInLeg,
-				      unsigned int distanceOfLegColors,
-				      unsigned int firstColorOfLeg,
-				      unsigned int legBorderSize,
-				      unsigned int legFillColor,
-				      double legTextSize,
-				      double legStartPosX,
-				      double legStartPosY,
-				      double legEndPosX,
-				      double legEndPosY,
-				      double legEntrySeparation,
-				      double legMarkerSize,
-				      double elevationPlotMax,
-				      double elevationPlotMin,
-				      double elevationArrowSize)
+                                      unsigned int width,
+                                      unsigned int height,
+                                      unsigned int lineWidth,
+                                      double plotFittingStep,
+                                      unsigned int plotsOffset,
+                                      unsigned int bckgFillColor,
+                                      unsigned int deadAntColor,
+                                      unsigned int deadAntMarkerSize,
+                                      unsigned int numberOfColorsInLeg,
+                                      unsigned int distanceOfLegColors,
+                                      unsigned int firstColorOfLeg,
+                                      unsigned int legBorderSize,
+                                      unsigned int legFillColor,
+                                      double legTextSize,
+                                      double legStartPosX,
+                                      double legStartPosY,
+                                      double legEndPosX,
+                                      double legEndPosY,
+                                      double legEntrySeparation,
+                                      double legMarkerSize,
+                                      double elevationPlotMax,
+                                      double elevationPlotMin,
+                                      double elevationArrowSize)
 {
    const unsigned int maxColorValue = 255; // ROOT's limitation
 
@@ -439,7 +479,8 @@ TCanvas* AntennasDisplay::createPlot (std::string title,
 //                                                                     createPlot
 
 #ifdef HAVE_ROOT
-bool AntennasDisplay::createPlot(std::string filename, std::string title)
+bool AntennasDisplay::createPlot(std::string filename,
+                                 std::string title)
 {
    TCanvas* c = createPlot(title);
    if(c != NULL)
@@ -466,9 +507,9 @@ bool AntennasDisplay::savePlot(std::string filename, TCanvas* c)
 
 #ifdef HAVE_ROOT
 TLine* AntennasDisplay::getVerticalLine (double xCenter,
-					 double yCenter,
-					 double length,
-					 unsigned int thickness)
+                                         double yCenter,
+                                         double length,
+                                         unsigned int thickness)
 {
    TLine* output = new TLine(xCenter, yCenter + length / 2, xCenter, yCenter - length / 2);
    output->SetLineWidth(thickness);
@@ -481,9 +522,9 @@ TLine* AntennasDisplay::getVerticalLine (double xCenter,
 
 #ifdef HAVE_ROOT
 TLine* AntennasDisplay::getHorizontalLine (double xCenter,
-					   double yCenter,
-					   double length,
-					   unsigned int thickness)
+                                           double yCenter,
+                                           double length,
+                                           unsigned int thickness)
 {
     TLine* output = new TLine(xCenter + length / 2, yCenter, xCenter - length / 2, yCenter);
     output->SetLineWidth(thickness);

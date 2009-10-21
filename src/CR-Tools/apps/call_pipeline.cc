@@ -94,186 +94,192 @@ using CR::LopesEventIn;
   # Comments start with '#'.
   # If an option is missing or misspelled, then the default value will be used.
   # Default values are:
-  caltablepath           = $LOFARSOFT/data/LOPES/LOPES-CalTable
-  path                   = /home/schroeder/lopes/events
-  RotatePos              = true
-  preferGrande           = false
-  GeneratePlots          = true
-  EventDisplayPlot       = false
-  GenerateSpectra        = true
-  SinglePlots            = true
-  PlotRawData            = false
-  CalculateMaxima        = false
-  listCalcMaxima         = false
-  printShowerCoordinates = false
-  verbose                = true
-  ignoreDistance         = true
-  simplexFit             = true
-  doTVcal                = default
-  doGainCal              = true
-  doDispersionCal        = true
-  doDelayCal             = true
-  doRFImitgation         = true
-  doFlagNotActiveAnts    = true
-  doAutoFlagging         = true
-  polarization           = ANY
-  plotStart              = -2.05e-6
-  plotStop               = -1.60e-6
-  spectrumStart          = 40e6
-  spectrumStop           = 80e-6
-  freqStart              = 40e6
-  freqStop               = 80e-6
-  upsamplingRate         = 320e6
-  upsamplingExponent     = 1
-  summaryColumns         = 3
-  ccWindowWidth          = 0.045e-6
-  flagged                = 10101
-  flagged                = 10102
-  rootfilename           = output.root
-  rootfilemode           = recreate
-  wirteBadEvents         = true
-  calibration            = false
-  lateralDistribution    = false
-  lateralOutputFile      = false
-  lateralSNRcut          = 1.0;
-  lateralTimeCut         = 15e-9;
-  calculateMeanValues    = false;
+  caltablepath            = $LOFARSOFT/data/LOPES/LOPES-CalTable
+  path                    = /home/schroeder/lopes/events
+  RotatePos               = true
+  preferGrande            = false
+  GeneratePlots           = true
+  EventDisplayPlot        = false
+  GenerateSpectra         = true
+  SinglePlots             = true
+  PlotRawData             = false
+  CalculateMaxima         = false
+  listCalcMaxima          = false
+  printShowerCoordinates  = false
+  verbose                 = true
+  ignoreDistance          = true
+  simplexFit              = true
+  doTVcal                 = -1
+  doGainCal               = true
+  doDispersionCal         = true
+  doDelayCal              = true
+  doRFImitgation          = true
+  doFlagNotActiveAnts     = true
+  doAutoFlagging          = true
+  polarization            = ANY
+  plotStart               = -2.05e-6
+  plotStop                = -1.60e-6
+  spectrumStart           = 40e6
+  spectrumStop            = 80e-6
+  freqStart               = 40e6
+  freqStop                = 80e-6
+  upsamplingRate          = 320e6
+  upsamplingExponent      = 1
+  summaryColumns          = 3
+  ccWindowWidth           = 0.045e-6
+  flagged                 = 10101
+  flagged                 = 10102
+  rootfilename            = output.root
+  rootfilemode            = recreate
+  wirteBadEvents          = true
+  calibration             = false
+  lateralDistribution     = false
+  lateralOutputFile       = false
+  lateralSNRcut           = 1.0
+  lateralTimeCut          = 15e-9
+  calculateMeanValues     = false
+  lateralTimeDistribution = false
   \endverbatim
 
   <h3>Configuration options </h3>
-  <ul> Useful options:
-    <li>\b Path             Status: <i>optional</i>  - normally required
+  <ul> Useful options:<br>
+    <li>\b Path             Status: <i>optional</i>  - normally required<br>
                             Location of the events in the event list. Setting a path is not neccessary if
                             the events are in the current directory or if the full path is contained in the
-                            event list.
-    <li>\b polarization     Status: <i>optional</i>
-                            Polarizations to be analyzed. There are four possibilitys:
-                            \i ANY  The analysis does not take care of the polarization at all.
-                            \i EW   All none east-west antennas are flagged.
-                            \i NS   All none north-south antennas are flagged.
-                            \i BOTH Each event is analyzed twice: Once for EW and once for NS polarization.
-    <li>\b simplexFit       Status: <i>optional</i>
+                            event list.<br>
+    <li>\b polarization     Status: <i>optional</i><br>
+                            Polarizations to be analyzed. There are four possibilitys:<br>
+                            \i ANY  The analysis does not take care of the polarization at all.<br>
+                            \i EW   All none east-west antennas are flagged.<br>
+                            \i NS   All none north-south antennas are flagged.<br>
+                            \i BOTH Each event is analyzed twice: Once for EW and once for NS polarization.<br>
+    <li>\b simplexFit       Status: <i>optional</i><br>
                             By default the arrival direction and radius of curvature (distance) is optimized by
                             a simplex fit, using the values in the event list as starting point. Only if you
                             want to do the beam forming exactly in the direction and with the distance
-                            specified, then you should switch off the simplex fit.
-                            The fit has several steps:
-                            1. The optimal starting distance is determined (unless ignoreDistance = false)
-                            2. The simplex fit roughly optimizes the X-beam
-                            3. The simplex fit optimizes the CC-beam starting from the X-beam maximum
-    <li>\b ignoreDistance   Status: <i>optional</i> - important
+                            specified, then you should switch off the simplex fit.<br>
+                            The fit has several steps:<br>
+                            1. The optimal starting distance is determined (unless ignoreDistance = false)<br>
+                            2. The simplex fit roughly optimizes the X-beam<br>
+                            3. The simplex fit optimizes the CC-beam starting from the X-beam maximum<br>
+    <li>\b ignoreDistance   Status: <i>optional</i> - important<br>
                             If set to true (default) then the distance value (curvature radius) for the beam
                             forming will be estimated and the value in the eventlist ignored. That means that
                             the value specified in the event list is completly ignored unless 'ignoreDistance'
-                            is set to false.
-    <li>\b upsamplingRate   Status: <i>optional</i> - recommended
-                            Calibrated traces will be upsampled to a upsampling rate specified in MHz.
-                            Recommended for CC-beam analysis: at least 320 MHz,
-                            For lateral distribution: at least 640 MHz.
-    <li>\b flagged          Status: <i>optional</i> - repeatable
+                            is set to false.<br>
+    <li>\b upsamplingRate   Status: <i>optional</i> - recommended<br>
+                            Calibrated traces will be upsampled to a upsampling rate specified in MHz.<br>
+                            Recommended for CC-beam analysis: at least 320 MHz,<br>
+                            For lateral distribution: at least 640 MHz.<br>
+    <li>\b flagged          Status: <i>optional</i> - repeatable<br>
                             Manually flaggs antennas for the analysis. This keyword can be repeated
                             several times, once for each antenna which has to be flagged.
-                            It has to be followed either by the antenna ID or the antenna number, e.g.:
-                            flagged = 5
-                            flagged = 20101
-    <li>\b GeneratePlots    Status: <i>optional</i>
-                            Can be set to false if no plots (e.g. CC beam) are wanted.
-    <li>\b SinglePlots      Status: <i>optional</i>
-                            Produces a plot for each individual antenna.
-    <li>\b plotStart        Status: <i>optional</i>
-    <li>\b plotStop         Status: <i>optional</i>
-                            Start and stop range for the plots. Take care:
-                            Also some analysis (e.g. pulse searching) is done only in the plot range.
-    <li>\b GenerateSpectra  Status: <i>optional</i> - not well tested
-                            A spectrum will be plotted for every antenna.
-    <li>\b spectrumStart    Status: <i>optional</i>
-    <li>\b spectrumStop     Frequency range for spectrum plots (maximal 40 - 80 MHz)
-    <li>\b summaryColumns   Status: <i>optional</i>
+                            It has to be followed either by the antenna ID or the antenna number, e.g.:<br>
+                            flagged = 5<br>
+                            flagged = 20101<br>
+    <li>\b GeneratePlots    Status: <i>optional</i><br>
+                            Can be set to false if no plots (e.g. CC beam) are wanted.<br>
+    <li>\b SinglePlots      Status: <i>optional</i><br>
+                            Produces a plot for each individual antenna.<br>
+    <li>\b plotStart        Status: <i>optional</i><br>
+    <li>\b plotStop         Status: <i>optional</i><br>
+                            Start and stop range for the plots. Take care:<br>
+                            Also some analysis (e.g. pulse searching) is done only in the plot range.<br>
+    <li>\b GenerateSpectra  Status: <i>optional</i> - not well tested<br>
+                            A spectrum will be plotted for every antenna.<br>
+    <li>\b spectrumStart    Status: <i>optional</i><br>
+    <li>\b spectrumStop     Frequency range for spectrum plots (maximal 40 - 80 MHz)<br>
+    <li>\b summaryColumns   Status: <i>optional</i><br>
                             There will by a summary postscript of all created plots with the specified
-                            number of columns (requires LateX), use 0 for no summary plot.
-    <li>\b rootfilename     Status: <i>optional</i>
+                            number of columns (requires LateX), use 0 for no summary plot.<br>
+    <li>\b rootfilename     Status: <i>optional</i><br>
                             If a file name is specified (e.g. "output.root"), then the results of the
-                            pipeline are written into this root file.
-    <li>\b verbose          Status: <i>optional</i>
-                            Set to false to reduce the text output during the analysis.
+                            pipeline are written into this root file.<br>
+    <li>\b verbose          Status: <i>optional</i><br>
+                            Set to false to reduce the text output during the analysis.<br>
   </ul>
-  <ul> Options ocaisonally needed:
-    <li>\b CalTablePath     Status: <i>optional</i> - normally not neccessary 
+  <ul> Options ocaisonally needed:<br>
+    <li>\b CalTablePath     Status: <i>optional</i> - normally not neccessary <br>
                             The caltables are in $LOFARSOFT/data/LOPES/LOPES-CalTable; the main importance 
                             of this variable is to locate the LOPES CalTable in case you have put it down 
                             in some non-standard location - otherwise the configuration script will be able
-                            to locate it and place the path into the "crtools.h" header file.
-    <li>\b RotatePos        Status: <i>for experts</i> - don't touch it
+                            to locate it and place the path into the "crtools.h" header file.<br>
+    <li>\b RotatePos        Status: <i>for experts</i> - don't touch it<br>
                             If set to true (default), the given positions in the Kascade coordinate system
-                            are rotated to the LOPES system.
-    <li>\b EventDisplayPlot Status: <i>preliminary</i> - only partially working
-                            An event display plot containing amplitude and time information of each antenna.
-    <li>\b PlotRawData      Status: <i>optional</i>
-                            Plots the raw ADC values (FX).
-    <li>\b CalculateMaxima  Status: <i>optional</i>
+                            are rotated to the LOPES system.<br>
+    <li>\b EventDisplayPlot Status: <i>preliminary</i> - only partially working<br>
+                            An event display plot containing amplitude and time information of each
+                            antenna.<br>
+    <li>\b PlotRawData      Status: <i>optional</i><br>
+                            Plots the raw ADC values (FX).<br>
+    <li>\b CalculateMaxima  Status: <i>optional</i><br>
                             Calcutlates the time and the height of the pulse in the plot range for each
-                            antenna.
-    <li>\b doTVcal          Status: <i>optional</i>
+                            antenna.<br>
+    <li>\b doTVcal          Status: <i>optional</i><br>
                             The TV (respectively beacon) calibration will be done by default (-1).
-                            Switch it off with 0 and on with 1.
-    <li>\b doGainCal        Status: <i>optional</i>
-                            The electrical gain calibration (fieldstrength)
-    <li>\b doDispersionCal  Status: <i>optional</i>
-                            Correction of the dispersion of the filter box (frequency dependent delay)
-    <li>\b doDelayCal       Status: <i>optional</i>
-                            Correction of the general delay
-    <li>\b doRFImitgation   Status: <i>optional</i>
-                            Supression of narrow band noise (RFI)
-    <li>\b doFlagNotActiveAnts Status: <i>optional</i>
+                            Switch it off with 0 and on with 1.<br>
+    <li>\b doGainCal        Status: <i>optional</i><br>
+                            The electrical gain calibration (fieldstrength)<br>
+    <li>\b doDispersionCal  Status: <i>optional</i><br>
+                            Correction of the dispersion of the filter box (frequency dependent delay)<br>
+    <li>\b doDelayCal       Status: <i>optional</i><br>
+                            Correction of the general delay<br>
+    <li>\b doRFImitgation   Status: <i>optional</i><br>
+                            Supression of narrow band noise (RFI)<br>
+    <li>\b doFlagNotActiveAnts Status: <i>optional</i><br>
                             Flags antennas marked as "not active" in the CalTables
-                            (e.g. due to known problems or tests).
-    <li>\b doAutoFlagging   Status: <i>optional</i>
-                            Flags antennas due to bad signal (does not affect flagging by the TV calibration).
-    <li>\b freqStart        Status: <i>for experts</i>
+                            (e.g. due to known problems or tests).<br>
+    <li>\b doAutoFlagging   Status: <i>optional</i><br>
+                            Flags antennas due to bad signal (does not affect flagging by the TV
+                            calibration).<br>
+    <li>\b freqStart        Status: <i>for experts</i><br>
     <li>\b freqStop         Frequency range to be used in the analysis. This value has no effect if the
                             limits are wide than the ones in the calibration tables (normally 43-74 MHz).
-                            A hanning filter will be used to supress the frequencies outside of the band.
-    <li>\b upsamplingExponent Status: <i>for experts</i> - for calibration an tests
+                            A hanning filter will be used to supress the frequencies outside of the band.<br>
+    <li>\b upsamplingExponent Status: <i>for experts</i> - for calibration an tests<br>
                             Upsampling of the calibrated antenna fieldstrengthes and raw data.
-                            Upsampling will be done to a rate of 2^upsamplingExponent * 80 MHz.
-    <li>\b ccWindowWidth    Status: <i>for experts</i>
+                            Upsampling will be done to a rate of 2^upsamplingExponent * 80 MHz.<br>
+    <li>\b ccWindowWidth    Status: <i>for experts</i><br>
                             Time range to search for CC-beam-peak in lateral distribution studies,
-                            default is +/- 45 ns.
-    <li>\b wirteBadEvents   Status: <i>preliminary</i>
+                            default is +/- 45 ns.<br>
+    <li>\b wirteBadEvents   Status: <i>preliminary</i><br>
                             Events with a bad reconstruction (e.g. simplex fit crashed) will be written 
-                            to the root file. Though, detection of bad reconstructions does not work reliable.
-    <li>\b calibration      Status: <i>for experts</i>
-                            Should be set to 'true' for the evaluation of time calibration measurements.
-    <li>\b PreferGrande     Status: <i>preliminary</i> - under test
-                            In doubt the KASCADE (instead of Grande) reconstruction is taken as input.
+                            to the root file. Though, detection of bad reconstructions does not work
+                            reliable.<br>
+    <li>\b calibration      Status: <i>for experts</i><br>
+                            Should be set to 'true' for the evaluation of time calibration measurements.<br>
+    <li>\b PreferGrande     Status: <i>preliminary</i> - under test<br>
+                            In doubt the KASCADE (instead of Grande) reconstruction is taken as input.<br>
   </ul>
-  <ul> Other options (for completeness):
-    <li>\b lateralOutputFile Status: <i>obsolete</i>
-                            Special output file for the lateral distribution analysis of S. Nehls.
-    <li>\b listCalcMaxima   Status: <i>obsolete</i>
+  <ul> Other options (for completeness):<br>
+    <li>\b lateralOutputFile Status: <i>obsolete</i><br>
+                            Special output file for the lateral distribution analysis of S. Nehls.<br>
+    <li>\b listCalcMaxima   Status: <i>obsolete</i><br>
                             Prints a list of the absolut maxima in a special format used for the lateral
-                            distribution analysis of S. Nehls.
-    <li>\b printShowerCoordinatesStatus: <i>obsolete</i>
+                            distribution analysis of S. Nehls.<br>
+    <li>\b printShowerCoordinatesStatus: <i>obsolete</i><br>
                             Prints the distance form the core to the antennas in shower coordinates using a
-                            special output format of the lateral distribution analysis of S. Nehls.
-    <li>\b lateralDistribution Status: <i>preliminary</i> - use with care
+                            special output format of the lateral distribution analysis of S. Nehls.<br>
+    <li>\b lateralDistribution Status: <i>preliminary</i> - use with care<br>
                             The lateral distribution of pulse amplitudes will be plotted and fitted.
                             The applied cuts and the method itself is under test and investigation. Thus,
                             don't use it, if you are not exactly sure, what you are doing. The physics results
-                            could be misleading.
-    <li>\b lateralSNRcut    Status: <i>preliminary</i>
-                            SNR cut for the lateral distribution.
-                            Caution: This feature is preliminary, not well tested, and might be removed.
-    <li>\b lateralTimeCut   Status: <i>preliminary</i>
+                            could be misleading.<br>
+    <li>\b lateralSNRcut    Status: <i>preliminary</i><br>
+                            SNR cut for the lateral distribution.<br>
+                            Caution: This feature is preliminary, not well tested, and might be removed.<br>
+    <li>\b lateralTimeCut   Status: <i>preliminary</i><br>
                             Points with a time position more than a certain value away of the CC beam 
-                            center will be removed from the lateral distribution.
-                            Caution: This feature is preliminary, not well tested, and might be removed.
-    <li>\b calculateMeanValues Status: <i>preliminary</i>
-                            Output of mean values of lateral distribution results.
-                            Caution: This feature is preliminary, not well tested, and might be removed.
-    <li>\b rootfilemode     Status: <i>unfinished</i>
+                            center will be removed from the lateral distribution.<br>
+                            Caution: This feature is preliminary, not well tested, and might be removed.<br>
+    <li>\b calculateMeanValues Status: <i>preliminary</i><br>
+                            Output of mean values of lateral distribution results.<br>
+                            Caution: This feature is preliminary, not well tested, and might be removed.<br>
+    <li>\b rootfilemode     Status: <i>unfinished</i><br>
                             The only mode available at the moment is RECREATE. This means that an old root
-                            file with the same name will be overwritten.
+                            file with the same name will be overwritten.<br>
+    <li>\b lateralTimeDistribution Status: <i>unfinished</i> - not tested, under development<br>
+                            Plots lateral distribution of pulse arrival times.<br>
   </ul>
 
   <h3>Examples</h3>
@@ -821,7 +827,7 @@ void readConfigFile (const string &filename)
    config.addString("path", "");
    config.addBool("preferGrande", false);		// per default prefer KASCADE reconstruction as input
    config.addBool("generatePlots", true);         	// the plot prefix will be the name of the event file
-   config.addBool("eventDisplayPlot", true);           // Plot an event display (amplitudes + arrival times)
+   config.addBool("eventDisplayPlot", false);           // Plot an event display (amplitudes + arrival times)
    config.addBool("generateSpectra", false);        	// by default no spectra are plotted
    config.addBool("singlePlots", false);        	// by default there are no single plots for each antenna
    config.addBool("PlotRawData", false);	     	// by default there the raw data are not plotted
@@ -856,6 +862,7 @@ void readConfigFile (const string &filename)
    config.addDouble("lateralSNRcut", 1.0);            	// SNR cut for removing points from lateral distribution
    config.addDouble("lateralTimeCut", 15e-9);         	// Allowed time window +/- arround CC-beam-center for found peaks
    config.addBool("calculateMeanValues", false);   	// calculate some mean values of all processed events
+   config.addBool("lateralTimeDistribution", false);   // the lateral time distribution will not be generated
 
    IntType* _doTVcal = new IntType(-1);                // 1: yes, 0: no, -1: use default	
    _doTVcal->addAllowedValue(1);
@@ -1277,7 +1284,8 @@ int main (int argc, char *argv[])
              << "lateralOutputFile = false\n"
              << "lateralSNRcut = 1.0\n"
              << "lateralTimeCut = 25e-9\n"
-             << "calculateMeanValues = false"
+             << "calculateMeanValues = false\n"
+             << "lateralTimeDistribution = false\n"
              << "... \n"
              << endl;
         return 0;	// exit here
@@ -1678,7 +1686,11 @@ int main (int argc, char *argv[])
             CutBadTiming = results.asInt("CutBadTiming");
             CutSNR = results.asInt("CutSNR");
             latMeanDist = results.asDouble("latMeanDist");
-         }
+          }
+
+          // plot lateral distribution of arrival times, if requested
+          if (config["lateralTimeDistribution"]->bValue())
+            eventPipeline.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",results, core_x, core_y);
 
           // get the pulse properties
           rawPulsesMap = eventPipeline.getRawPulseProperties();
@@ -1786,6 +1798,10 @@ int main (int argc, char *argv[])
             CutSNR_NS = results.asInt("CutSNR");
             latMeanDist_NS = results.asDouble("latMeanDist");
           }
+
+          // plot lateral distribution of arrival times, if requested
+          if (config["lateralTimeDistribution"]->bValue())
+            eventPipeline.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",results, core_x, core_y);
 
           // get the pulse properties and insert them into allready existing EW map
           // (which will be empty, if polarization = EW, but still existing
