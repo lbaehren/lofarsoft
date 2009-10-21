@@ -85,7 +85,7 @@ target_link_libraries (presto
 
 set_target_properties (presto
   PROPERTIES
-  COMPILE_FLAGS "-DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW  -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+  COMPILE_FLAGS "-DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
   )
 
 add_dependencies (presto
@@ -354,6 +354,10 @@ add_executable (weight_psrfits
 ## linker instructions
 
 foreach (src ${presto_binaries})
+  set_target_properties (${src}
+    PROPERTIES
+    COMPILE_FLAGS "-DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+  )
   target_link_libraries (${src} presto)
 endforeach (src)
 
