@@ -1,5 +1,5 @@
 
-project (libsla C Fortran)
+enable_language(Fortran)
 
 file (GLOB sla_sources *.f)
 
