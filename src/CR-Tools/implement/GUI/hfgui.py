@@ -366,6 +366,46 @@ class hfQtPlot(QtGui.QWidget):
         obj["'ymin"].set_silent(min(toList(obj["ymin"].val())))
         obj["'ymax"].set_silent(max(toList(obj["ymax"].val())))
         obj["'Replot"].touch()
+    def hfshift_left(self):
+        obj=self.currentplotpanelobject()
+        xmin=obj["'xmin"].val()
+        xmax=obj["'xmax"].val()
+        delta=(xmax-xmin)/2
+        obj["'xmin"].set_silent(xmin-delta)
+        obj["'xmax"].set_silent(xmax-delta)
+        obj["'XAuto"].set_silent(False)
+        obj["'xscale"].set_silent(1)
+        self.hfReplotNetwork()
+    def hfshift_right(self):
+        obj=self.currentplotpanelobject()
+        xmin=obj["'xmin"].val()
+        xmax=obj["'xmax"].val()
+        delta=(xmax-xmin)/2
+        obj["'xmin"].set_silent(xmin+delta)
+        obj["'xmax"].set_silent(xmax+delta)
+        obj["'xscale"].set_silent(1)
+        obj["'XAuto"].set_silent(False)
+        self.hfReplotNetwork()
+    def hfzoom_in(self):
+        obj=self.currentplotpanelobject()
+        xmin=obj["'xmin"].val()
+        xmax=obj["'xmax"].val()
+        delta=(xmax-xmin)/4
+        obj["'xmin"].set_silent(xmin+delta)
+        obj["'xmax"].set_silent(xmax-delta)
+        obj["'xscale"].set_silent(1)
+        obj["'XAuto"].set_silent(False)
+        self.hfReplotNetwork()
+    def hfzoom_out(self):
+        obj=self.currentplotpanelobject()
+        xmin=obj["'xmin"].val()
+        xmax=obj["'xmax"].val()
+        delta=(xmax-xmin)/4
+        obj["'xmin"].set_silent(xmin-delta)
+        obj["'xmax"].set_silent(xmax+delta)
+        obj["'xscale"].set_silent(1)
+        obj["'XAuto"].set_silent(False)
+        self.hfReplotNetwork()
     def hfsetXShift(self,i):
         self.currentplotpanelobject()["'xshift"].set_silent(i)
         self.currentplotpanelobject()["'Replot"].touch()

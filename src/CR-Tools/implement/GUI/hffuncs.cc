@@ -1,7 +1,7 @@
 //================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfprep.awk
 //================================================================================
-//     File was generated from - on Fri Oct 16 15:40:19 CEST 2009
+//     File was generated from - on Tue Oct 20 21:58:53 CEST 2009
 //--------------------------------------------------------------------------------
 //
 //#define DBG_MODE 0
@@ -2574,6 +2574,7 @@ template <class T> void process(F_PARAMETERS) {
   if (Antenna > drp->nofAntennas()-1) {ERROR("Requested Antenna number too large!");};
 
   if (Blocksize<1) Blocksize=maxBlocksize;
+  //  MSG("Blocksize =" << Blocksize <<", Block=" << Block);
   drp->setBlocksize(Blocksize);
   drp->setBlock(Block);
   drp->setStride(Stride);

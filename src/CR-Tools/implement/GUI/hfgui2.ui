@@ -2714,8 +2714,18 @@
     <addaction name="actionDelete" />
     <addaction name="actionSplit_Panels" />
    </widget>
+   <widget class="QMenu" name="menuView" >
+    <property name="title" >
+     <string>View</string>
+    </property>
+    <addaction name="actionZoom_in" />
+    <addaction name="actionZoom_out" />
+    <addaction name="actionShift_Right" />
+    <addaction name="actionShift_Left" />
+   </widget>
    <addaction name="menuFile" />
    <addaction name="menuEdit" />
+   <addaction name="menuView" />
   </widget>
   <widget class="QStatusBar" name="statusbar" />
   <action name="loadfile" >
@@ -2756,6 +2766,38 @@
    </property>
    <property name="shortcut" >
     <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionShift_Left" >
+   <property name="text" >
+    <string>Shift Left</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+Left</string>
+   </property>
+  </action>
+  <action name="actionShift_Right" >
+   <property name="text" >
+    <string>Shift Right</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+Right</string>
+   </property>
+  </action>
+  <action name="actionZoom_in" >
+   <property name="text" >
+    <string>Zoom in</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl++</string>
+   </property>
+  </action>
+  <action name="actionZoom_out" >
+   <property name="text" >
+    <string>Zoom out</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+-</string>
    </property>
   </action>
  </widget>
@@ -2810,6 +2852,10 @@
     <slot>hfmouse_value()</slot>
     <slot>hfmouse_select()</slot>
     <slot>hfmouse_selectwhat(QString)</slot>
+    <slot>hfzoom_in()</slot>
+    <slot>hfzoom_out()</slot>
+    <slot>hfshift_left()</slot>
+    <slot>hfshift_right()</slot>
    </slots>
   </customwidget>
   <customwidget>
@@ -3606,6 +3652,70 @@
     <hint type="destinationlabel" >
      <x>809</x>
      <y>128</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShift_Left</sender>
+   <signal>activated()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfshift_left()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>724</x>
+     <y>324</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShift_Right</sender>
+   <signal>activated()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfshift_right()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>724</x>
+     <y>324</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionZoom_in</sender>
+   <signal>triggered()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfzoom_in()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>724</x>
+     <y>324</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionZoom_out</sender>
+   <signal>triggered()</signal>
+   <receiver>HMainPlotter</receiver>
+   <slot>hfzoom_out()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>724</x>
+     <y>324</y>
     </hint>
    </hints>
   </connection>

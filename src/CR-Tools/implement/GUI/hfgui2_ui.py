@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'hfgui2.ui'
 #
-# Created: Mon Oct 19 14:00:41 2009
+# Created: Wed Oct 21 10:16:11 2009
 #      by: PyQt4 UI code generator 4.5.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -781,6 +781,8 @@ class Ui_MainWindow(object):
         self.menuFile.setObjectName("menuFile")
         self.menuEdit = QtGui.QMenu(self.menubar)
         self.menuEdit.setObjectName("menuEdit")
+        self.menuView = QtGui.QMenu(self.menubar)
+        self.menuView.setObjectName("menuView")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -795,13 +797,26 @@ class Ui_MainWindow(object):
         self.actionSelect_All.setObjectName("actionSelect_All")
         self.actionDeselect_All = QtGui.QAction(MainWindow)
         self.actionDeselect_All.setObjectName("actionDeselect_All")
+        self.actionShift_Left = QtGui.QAction(MainWindow)
+        self.actionShift_Left.setObjectName("actionShift_Left")
+        self.actionShift_Right = QtGui.QAction(MainWindow)
+        self.actionShift_Right.setObjectName("actionShift_Right")
+        self.actionZoom_in = QtGui.QAction(MainWindow)
+        self.actionZoom_in.setObjectName("actionZoom_in")
+        self.actionZoom_out = QtGui.QAction(MainWindow)
+        self.actionZoom_out.setObjectName("actionZoom_out")
         self.menuFile.addAction(self.loadfile)
         self.menuEdit.addAction(self.actionDeselect_All)
         self.menuEdit.addAction(self.actionSelect_All)
         self.menuEdit.addAction(self.actionDelete)
         self.menuEdit.addAction(self.actionSplit_Panels)
+        self.menuView.addAction(self.actionZoom_in)
+        self.menuView.addAction(self.actionZoom_out)
+        self.menuView.addAction(self.actionShift_Right)
+        self.menuView.addAction(self.actionShift_Left)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
+        self.menubar.addAction(self.menuView.menuAction())
 
         self.retranslateUi(MainWindow)
         self.tabwindow.setCurrentIndex(0)
@@ -856,6 +871,10 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.MouseSelectMode, QtCore.SIGNAL("currentIndexChanged(QString)"), self.HMainPlotter.hfmouse_selectwhat)
         QtCore.QObject.connect(self.networkzoom, QtCore.SIGNAL("sliderMoved(int)"), self.networkdisplay.zoom)
         QtCore.QObject.connect(self.networkaspectslider, QtCore.SIGNAL("sliderMoved(int)"), self.networkdisplay.aspect)
+        QtCore.QObject.connect(self.actionShift_Left, QtCore.SIGNAL("activated()"), self.HMainPlotter.hfshift_left)
+        QtCore.QObject.connect(self.actionShift_Right, QtCore.SIGNAL("activated()"), self.HMainPlotter.hfshift_right)
+        QtCore.QObject.connect(self.actionZoom_in, QtCore.SIGNAL("triggered()"), self.HMainPlotter.hfzoom_in)
+        QtCore.QObject.connect(self.actionZoom_out, QtCore.SIGNAL("triggered()"), self.HMainPlotter.hfzoom_out)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -951,6 +970,7 @@ class Ui_MainWindow(object):
         self.label_22.setText(QtGui.QApplication.translate("MainWindow", "DBG:", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "&File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuEdit.setTitle(QtGui.QApplication.translate("MainWindow", "&Edit", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuView.setTitle(QtGui.QApplication.translate("MainWindow", "View", None, QtGui.QApplication.UnicodeUTF8))
         self.loadfile.setText(QtGui.QApplication.translate("MainWindow", "&Load ...", None, QtGui.QApplication.UnicodeUTF8))
         self.loadfile.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+O", None, QtGui.QApplication.UnicodeUTF8))
         self.actionDelete.setText(QtGui.QApplication.translate("MainWindow", "Delete", None, QtGui.QApplication.UnicodeUTF8))
@@ -961,4 +981,12 @@ class Ui_MainWindow(object):
         self.actionSelect_All.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+A", None, QtGui.QApplication.UnicodeUTF8))
         self.actionDeselect_All.setText(QtGui.QApplication.translate("MainWindow", "Deselect All", None, QtGui.QApplication.UnicodeUTF8))
         self.actionDeselect_All.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+D", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionShift_Left.setText(QtGui.QApplication.translate("MainWindow", "Shift Left", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionShift_Left.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Left", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionShift_Right.setText(QtGui.QApplication.translate("MainWindow", "Shift Right", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionShift_Right.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Right", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionZoom_in.setText(QtGui.QApplication.translate("MainWindow", "Zoom in", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionZoom_in.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl++", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionZoom_out.setText(QtGui.QApplication.translate("MainWindow", "Zoom out", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionZoom_out.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+-", None, QtGui.QApplication.UnicodeUTF8))
 

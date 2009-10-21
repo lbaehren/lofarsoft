@@ -55,7 +55,7 @@ def CRDataPipeline(self):
     if settrace: pdb.set_trace()
     dp=self.find_or_make("DataPipeline","",_l(90))
     reference=dp.find_or_make("'Reference",_l(9))
-    dp.find_or_make("'Parameters=Data",_l(999)).find_or_make("'Blocksize",2048,_l(90))
+    dp.find_or_make("'Parameters=Data",_l(999)).find_or_make("'Blocksize",defaultblocksize,_l(90))
     aobjects=(dp.find_or_make(AntennaObjectNames,_l(9)).find_or_make("Antenna")).setList(AntennaSelection)
     xaxis=aobjects.find_or_make("x").find_or_make("Data",_f("dataRead")).find_or_make("UnitData").find_or_make("xAxis")
     yaxis=aobjects.find_or_make("y").find_or_make("Data",_f("dataRead")).find_or_make("UnitData").find_or_make("yAxis")

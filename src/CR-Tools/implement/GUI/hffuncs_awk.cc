@@ -1312,6 +1312,7 @@ $$ {
   if (Antenna > drp->nofAntennas()-1) {ERROR("Requested Antenna number too large!");};
 
   if (Blocksize<1) Blocksize=maxBlocksize;
+  //  MSG("Blocksize =" << Blocksize <<", Block=" << Block);
   drp->setBlocksize(Blocksize);
   drp->setBlock(Block);
   drp->setStride(Stride);
