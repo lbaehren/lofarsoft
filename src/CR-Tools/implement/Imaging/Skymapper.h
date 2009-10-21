@@ -402,34 +402,13 @@ namespace CR {  // Namespace CR -- begin
     //  Beamformer 
     //
     // ==========================================================================
-    
-    /*!
-      \brief Set the antenna positions
 
-      \param antPositions -- [antenna,3] array with the antenna positions.
-      \param type         -- Coordinate type as which the antenna positions are
-             provided; if necessary conversion is performed internally.
-      \param anglesInDegrees -- If the coordinates of the antenna positions
-             contain an angular component, is this component given in degrees?
-	     If set <tt>false</tt> the angular components are considered to be
-	     given in radians.
-    */
-    inline bool setAntPositions (Matrix<double> const &antPositions,
-				 CoordinateType::Types const &type,
-				 bool const &anglesInDegrees) {
-      return beamformer_p.setAntPositions(antPositions,
-					  type,
-					  anglesInDegrees);
-    }
-
-    /*!
-      \brief Set the antenna positions
-
-      \param antPositions -- Array with the antenna positions.
-    */
-    inline bool setAntPositions (Vector<MVPosition> const &antPositions) {
-      return beamformer_p.setAntPositions(antPositions);
-    }
+    //! Set the antenna positions
+    bool setAntPositions (Matrix<double> const &antPositions,
+			  CoordinateType::Types const &type,
+			  bool const &anglesInDegrees);
+    //! Set the antenna positions
+    bool setAntPositions (Vector<MVPosition> const &antPositions);
     
     // ----------------------------------------------------------------- Beamformer
     
@@ -477,6 +456,11 @@ namespace CR {  // Namespace CR -- begin
     inline void setNearField () {
       beamformer_p.nearField(true);
     }
+
+    //! Enable/Disable buffering of delays, phases and weights
+    bool setBeamformerBuffers (bool const &bufferDelays,
+			       bool const &bufferPhases,
+			       bool const &bufferWeights);
     
     // ------------------------------------------------------------------- feedback
     
@@ -553,36 +537,20 @@ namespace CR {  // Namespace CR -- begin
     
   private:
     
-    /*!
-      \brief Unconditional copying
-    */
+    //! Unconditional copying
     void copy (Skymapper const& other);
-    
     //! Unconditional deletion 
     void destroy(void);
-    
     /*!
       \brief Initialize the object's internal parameters
       
       \param coord -- Coordinates to be attached to the skymap.
     */
     void init (SkymapCoordinate const &coord);
-    
-    /*!
-      \brief Initialize the object's internal parameters
-      
-      \param coord        -- Coordinates to be attached to the skymap.
-      \param antPositions -- Antenna positions to be fed into the Beamformer
-    */
+    //! Initialize the object's internal parameters
     void init (SkymapCoordinate const &skymapCoord,
 	       Matrix<double> const &antPositions);
-    
-    /*!
-      \brief Initialize the object's internal parameters
-      
-      \param coord        -- Coordinates to be attached to the skymap.
-      \param antPositions -- Antenna positions to be fed into the Beamformer
-    */
+    //! Initialize the object's internal parameters
     void init (SkymapCoordinate const &skymapCoord,
 	       Vector<MVPosition> const &antPositions);
     
@@ -604,9 +572,7 @@ namespace CR {  // Namespace CR -- begin
     */
     void getData (Matrix<DComplex> &data);
     
-    /*!
-      \brief Default direction coordinates axis
-    */
+    //! Default direction coordinates axis
     DirectionCoordinate defaultDirectionAxis ();
     
     /*!
@@ -616,10 +582,7 @@ namespace CR {  // Namespace CR -- begin
       sky map", i.e. beamforming in the far-field of the telescope.
     */
     LinearCoordinate defaultDistanceAxis ();
-    
-    /*!
-      \brief Set the coordinates of the center of the skymap
-    */
+    //! Set the coordinates of the center of the skymap
     bool setSkymapCenter ();
     
   };

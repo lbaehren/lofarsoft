@@ -316,7 +316,7 @@ int test_Skymapper (uint const &blocksize=1024,
     // Skymap coordinate
     SkymapCoordinate coord (CR::test_ObsInfo(),
 			    spatial,
-			    test_TimeFreq(blocksize));
+			    CR::test_TimeFreq(blocksize));
     // Antenna positions
     uint nofAntennas (10);
     Matrix<double> antPositions (nofAntennas,3);

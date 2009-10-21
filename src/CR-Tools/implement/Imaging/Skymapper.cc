@@ -116,7 +116,8 @@ namespace CR {  // Namespace CR -- begin
   //
   // ============================================================================
   
-  // ------------------------------------------------------------------ operator=
+  //_____________________________________________________________________________
+  //                                                                    operator=
   
   Skymapper &Skymapper::operator= (Skymapper const &other)
   {
@@ -127,7 +128,8 @@ namespace CR {  // Namespace CR -- begin
     return *this;
   }
   
-  // ----------------------------------------------------------------------- copy
+  //_____________________________________________________________________________
+  //                                                                         copy
   
   void Skymapper::copy (Skymapper const& other)
   {
@@ -153,7 +155,8 @@ namespace CR {  // Namespace CR -- begin
   //
   // ============================================================================
 
-  // -------------------------------------------------------------- setBeamformer
+  //_____________________________________________________________________________
+  //                                                                setBeamformer
   
   bool Skymapper::setBeamformer (Beamformer const &beamformer)
   {
@@ -168,6 +171,38 @@ namespace CR {  // Namespace CR -- begin
     }
     
     return status;
+  }
+  
+  //_____________________________________________________________________________
+  //                                                              setAntPositions
+
+  /*!
+    \param antPositions -- [antenna,3] array with the antenna positions.
+    \param type         -- Coordinate type as which the antenna positions are
+           provided; if necessary conversion is performed internally.
+    \param anglesInDegrees -- If the coordinates of the antenna positions
+           contain an angular component, is this component given in degrees?
+	   If set <tt>false</tt> the angular components are considered to be
+	   given in radians.
+  */
+  bool Skymapper::setAntPositions (Matrix<double> const &antPositions,
+				   CoordinateType::Types const &type,
+				   bool const &anglesInDegrees)
+  {
+    return beamformer_p.setAntPositions(antPositions,
+					type,
+					anglesInDegrees);
+  }
+
+  //_____________________________________________________________________________
+  //                                                              setAntPositions
+  
+  /*!
+    \param antPositions -- Array with the antenna positions.
+  */
+  bool Skymapper::setAntPositions (Vector<MVPosition> const &antPositions)
+  {
+    return beamformer_p.setAntPositions(antPositions);
   }
   
   //_____________________________________________________________________________
@@ -197,6 +232,34 @@ namespace CR {  // Namespace CR -- begin
     return status;
   }
 
+  //_____________________________________________________________________________
+  //                                                         setBeamformerBuffers
+
+  /*!
+    \param bufferDelays  -- Buffer the values of the geometrical delays?
+    \param bufferPhases  -- Buffer the values of the geometrical phases?
+    \param bufferWeights -- Buffer the values of the geometrical weights?
+  */
+  bool Skymapper::setBeamformerBuffers (bool const &bufferDelays,
+					bool const &bufferPhases,
+					bool const &bufferWeights)
+  {
+    bool status (true);
+    
+    try {
+      beamformer_p.bufferDelays(bufferDelays);
+      beamformer_p.bufferPhases(bufferPhases);
+      beamformer_p.bufferWeights(bufferWeights);
+    } catch (casa::AipsError x) {
+      std::cerr << "[Skymapper::setBeamformerBuffers]" 
+		<< x.getMesg()
+		<< std::endl;
+      status = false;
+    }
+    
+    return status;
+  }
+  
   // ============================================================================
   //
   //  Methods
@@ -218,6 +281,10 @@ namespace CR {  // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                         init
 
+  /*!
+    \param skymapCoord  -- Coordinates to be attached to the skymap.
+    \param antPositions -- Antenna positions to be fed into the Beamformer
+  */
   void Skymapper::init (SkymapCoordinate const &skymapCoord,
 			Matrix<double> const &antPositions)
   {
@@ -243,6 +310,10 @@ namespace CR {  // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                         init
 
+  /*!
+    \param skymapCoord  -- Coordinates to be attached to the skymap.
+    \param antPositions -- Antenna positions to be fed into the Beamformer
+  */
   void Skymapper::init (SkymapCoordinate const &skymapCoord,
 			Vector<MVPosition> const &antPositions)
   {
