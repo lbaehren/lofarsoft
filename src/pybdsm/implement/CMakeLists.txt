@@ -27,9 +27,11 @@ set (cbdsm_wrapper_sources
 add_library (_cbdsm MODULE ${cbdsm_wrapper_sources})
 
 target_link_libraries (_cbdsm 
-  minpack port3
+  minpack
+  port3
   ${NUM_UTIL_LIBRARIES}
-  ${BOOST_boost_python})
+  ${BOOST_boost_python}
+  )
 
 set_target_properties (_cbdsm PROPERTIES PREFIX ""
   COMPILE_FLAGS "-Wall -Wextra -Wno-unused")
