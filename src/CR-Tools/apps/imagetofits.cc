@@ -37,23 +37,31 @@ int main(int argc, char *argv[])
 {
   string infile;
   string datatype;
+  int freqcomp;
   
   /*
     Check if filename of the dataset and the format are provided on the command line.
   */
   if (argc < 2) {
-    cerr << "Usage: imagetofits <input.event> <datatype>\n"
+    cerr << "Usage: imagetofits <input.event> <datatype> <frequency compression factor>\n"
 	 << "Supported datatypes are 'hdf5' and 'paged'."
 	 << endl;
     return 1;
   } else {
-    infile = argv[1];
-    if (argc > 2) {
-      datatype = argv[2];
-    };
-  }
-
-
+      infile = argv[1];
+      if (argc < 3) {
+      datatype = "hdf5";
+      freqcomp = 513;
+      } else {
+	datatype = argv[2];
+	if (argc < 4) {
+	  freqcomp = 513;
+	} else {
+	    freqcomp = atoi(argv[3]);
+          }
+        }
+    }
+  cout<<freqcomp<<endl;
 
   
   String fitsName = "new.fits";
@@ -66,7 +74,7 @@ int main(int argc, char *argv[])
 		// Regridding of input file:
 		IPosition factors (imageIn.shape());
 		factors    = 1;
-		factors(3) = 513;
+		factors(3) = freqcomp;
 		//factors(0) = 60;
 		//factors(1) = 60;
 
@@ -89,7 +97,7 @@ int main(int argc, char *argv[])
 	// Regridding of input file:
 		IPosition factors (imageIn.shape());
 		factors    = 1;
-		factors(3) = 513;
+		factors(3) = freqcomp;
 		RebinImage<Float> rb(imageIn, factors);
 
 	/* Summary of image properties */
@@ -105,7 +113,7 @@ int main(int argc, char *argv[])
 		cout<<"Image converted to "<<fitsName<<"."<<endl;
 	  }		
   } else {
-    cerr << "Usage: imagetofits <input.event> <datatype>\n"
+    cerr << "Usage: imagetofits <input.event> <datatype> <frequency compression factor>\n"
 	 << "Supported datatypes are 'hdf5' and 'paged'."
 	 << endl;
   }
