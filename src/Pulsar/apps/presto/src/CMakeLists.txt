@@ -363,6 +363,26 @@ endforeach (src)
 
 ## ==============================================================================
 ##
+##  Installation
+## 
+## ==============================================================================
+
+install (
+  TARGETS presto sla
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+#  ARCHIVE DESTINATION lib
+  )
+
+install (
+  TARGETS ${presto_binaries}
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+#  ARCHIVE DESTINATION lib
+  )
+
+## ==============================================================================
+##
 ##  Test programs
 ## 
 ## ==============================================================================

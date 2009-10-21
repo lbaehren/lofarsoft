@@ -14,3 +14,4 @@ set_target_properties (sla
   COMPILE_FLAGS "-fPIC -g -O2 -fno-second-underscore"
   LINK_FLAGS "-fno-second-underscore"
   )
+
