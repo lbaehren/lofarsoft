@@ -65,7 +65,8 @@ include (FindNumPy)
 ## -----------------------------------------------------------------------------
 ## Subdirectories
 
-add_subdirectory (${PYBDSM_SOURCE_DIR}/implement)
+add_subdirectory (implement)
+add_subdirectory (scripts)
 
 ## -----------------------------------------------------------------------------
 ## Installation
