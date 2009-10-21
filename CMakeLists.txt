@@ -370,7 +370,7 @@ add_custom_target (pybdsm
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Building package pybdsm ..."
   )
-add_dependencies (pybdsm boost num_util)
+add_dependencies (pybdsm boost num_util wcslib)
 
 ##____________________________________________________________________
 ##                                                                  RM
