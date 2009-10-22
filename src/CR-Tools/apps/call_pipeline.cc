@@ -125,13 +125,14 @@ using CR::LopesEventIn;
   freqStop                = 80e-6
   upsamplingRate          = 320e6
   upsamplingExponent      = 1
+  minBeamformingAntennas  = 4
   summaryColumns          = 3
   ccWindowWidth           = 0.045e-6
   flagged                 = 10101
   flagged                 = 10102
   rootfilename            = output.root
   rootfilemode            = recreate
-  wirteBadEvents          = true
+  writeBadEvents          = false
   calibration             = false
   lateralDistribution     = false
   lateralOutputFile       = false
@@ -142,7 +143,7 @@ using CR::LopesEventIn;
   \endverbatim
 
   <h3>Configuration options </h3>
-  <ul> Useful options:<br>
+  <b>Useful options:</b><br>
     <li>\b Path             Status: <i>optional</i>  - normally required<br>
                             Location of the events in the event list. Setting a path is not neccessary if
                             the events are in the current directory or if the full path is contained in the
@@ -188,7 +189,8 @@ using CR::LopesEventIn;
     <li>\b GenerateSpectra  Status: <i>optional</i> - not well tested<br>
                             A spectrum will be plotted for every antenna.<br>
     <li>\b spectrumStart    Status: <i>optional</i><br>
-    <li>\b spectrumStop     Frequency range for spectrum plots (maximal 40 - 80 MHz)<br>
+    <li>\b spectrumStop     Status: <i>optional</i><br>
+                            Frequency range for spectrum plots (maximal 40 - 80 MHz)<br>
     <li>\b summaryColumns   Status: <i>optional</i><br>
                             There will by a summary postscript of all created plots with the specified
                             number of columns (requires LateX), use 0 for no summary plot.<br>
@@ -197,8 +199,8 @@ using CR::LopesEventIn;
                             pipeline are written into this root file.<br>
     <li>\b verbose          Status: <i>optional</i><br>
                             Set to false to reduce the text output during the analysis.<br>
-  </ul>
-  <ul> Options ocaisonally needed:<br>
+  <br>
+  <b>Options ocaisonally needed:</b><br>
     <li>\b CalTablePath     Status: <i>optional</i> - normally not neccessary <br>
                             The caltables are in $LOFARSOFT/data/LOPES/LOPES-CalTable; the main importance 
                             of this variable is to locate the LOPES CalTable in case you have put it down 
@@ -233,12 +235,19 @@ using CR::LopesEventIn;
                             Flags antennas due to bad signal (does not affect flagging by the TV
                             calibration).<br>
     <li>\b freqStart        Status: <i>for experts</i><br>
-    <li>\b freqStop         Frequency range to be used in the analysis. This value has no effect if the
+    <li>\b freqStop         Status: <i>for experts</i><br>
+                            Frequency range to be used in the analysis. This value has no effect if the
                             limits are wide than the ones in the calibration tables (normally 43-74 MHz).
                             A hanning filter will be used to supress the frequencies outside of the band.<br>
     <li>\b upsamplingExponent Status: <i>for experts</i> - for calibration an tests<br>
                             Upsampling of the calibrated antenna fieldstrengthes and raw data.
                             Upsampling will be done to a rate of 2^upsamplingExponent * 80 MHz.<br>
+    <li>\b minBeamformingAntennas Status: <i>optional</i><br>
+                            Number of unflagged antennas required for beamforming. Antennas can be flagged
+                            for different reasons (e.g. manually, CalTables, low signal, mismatch of
+                            the different frequencies during the TV calibration). If not enough unflagged
+                            antennas are left, the pipeline will exit and the event will not be written
+                            to the root file with the results (unless 'wirteBadEvents' is set to 'true').
     <li>\b ccWindowWidth    Status: <i>for experts</i><br>
                             Time range to search for CC-beam-peak in lateral distribution studies,
                             default is +/- 45 ns.<br>
@@ -250,8 +259,8 @@ using CR::LopesEventIn;
                             Should be set to 'true' for the evaluation of time calibration measurements.<br>
     <li>\b PreferGrande     Status: <i>preliminary</i> - under test<br>
                             In doubt the KASCADE (instead of Grande) reconstruction is taken as input.<br>
-  </ul>
-  <ul> Other options (for completeness):<br>
+  <br>
+  <b>Other options (for completeness):</b><br>
     <li>\b lateralOutputFile Status: <i>obsolete</i><br>
                             Special output file for the lateral distribution analysis of S. Nehls.<br>
     <li>\b listCalcMaxima   Status: <i>obsolete</i><br>
@@ -280,7 +289,6 @@ using CR::LopesEventIn;
                             file with the same name will be overwritten.<br>
     <li>\b lateralTimeDistribution Status: <i>unfinished</i> - not tested, under development<br>
                             Plots lateral distribution of pulse arrival times.<br>
-  </ul>
 
   <h3>Examples</h3>
 
@@ -457,7 +465,7 @@ private:
 class UintType : public AnyType
 {
 public:
-    UintType(unsigned int value = uiDef) { this->defaultValue = value; }
+    UintType(unsigned int value = uiDef) { this->value = value;}
 
     virtual unsigned int uiValue    () { return this->value; }
     virtual bool         setValue   (string value)
@@ -852,6 +860,7 @@ void readConfigFile (const string &filename)
    config.addDouble("freqStop", 80e6);	                // for analysis", in Hz
    config.addDouble("upsamplingRate", 0.);	      	// Upsampling Rate for new upsampling
    config.addUint("upsamplingExponent", 0);  		// by default no upsampling will be done
+   config.addUint("minBeamformingAntennas", 4);  	// minimal numbers of antennas required for beam forming
    config.addUint("summaryColumns", 0);      		// be default no summary of all plots
    config.addDouble("ccWindowWidth", 0.045e-6);	      	// width of window for CC-beam
    config.addString("rootFileName", "");               	// Name of root file for output
@@ -1271,7 +1280,8 @@ int main (int argc, char *argv[])
              << "spectrumStart = 40e6\n"
              << "spectrumEnd = 80e6\n"
              << "upsamplingRate = 320e6\n"
-             << "upsamplingExponent = 1\n"
+             << "upsamplingExponent = 0\n"
+             << "minBeamformingAntennas = 4\n"
              << "summaryColumns = 3\n"
              << "ccWindowWidth = 0.045e-6\n"
              << "flagged = 10101\n"
@@ -1490,7 +1500,7 @@ int main (int argc, char *argv[])
       } else {
         cout << "\nProcessing event \"" << eventname << "\"\nwith azimuth " << azimuth << " °, elevation " << elevation
                   << " °, distance (radius of curvature) " << radiusOfCurvature << " m, core position X " << core_x
-                  << " m and core position Y " << core_y << " m.\n" << endl;
+                  << " m and core position Y " << core_y << " m." << endl;
       }
 
       // Check if file exists
@@ -1611,7 +1621,7 @@ int main (int argc, char *argv[])
       } else {
         if ( (config["polarization"]->sValue() == "ANY") || (config["polarization"]->sValue() == "EW") || both_pol) {
           if (both_pol) {
-            cout << "Pipeline is started for East-West Polarization.\n" << endl;
+            cout << "\nPipeline is started for East-West Polarization.\n" << endl;
             polPlotPrefix = "-EW";
             config["polarization"]->setValue("EW");	// do EW here
           }
@@ -1621,6 +1631,7 @@ int main (int argc, char *argv[])
           eventPipeline.initPipeline(obsrec);
 
           // set parameters of pipeline
+          eventPipeline.setMinBeamformingAntennasCut(config["minBeamformingAntennas"]->uiValue());
           eventPipeline.setPlotInterval(config["plotStart"]->dValue(),config["plotStop"]->dValue());
           eventPipeline.setSpectrumInterval(config["spectrumStart"]->dValue(),config["spectrumStop"]->dValue());
           eventPipeline.setFreqInterval(config["freqStart"]->dValue(),config["freqStop"]->dValue());
@@ -1722,7 +1733,7 @@ int main (int argc, char *argv[])
 
         if ( (config["polarization"]->sValue() == "NS") || both_pol) {
           if (both_pol) {
-            cout << "Pipeline is started for North-South Polarization.\n" << endl;
+            cout << "\nPipeline is started for North-South Polarization.\n" << endl;
             polPlotPrefix = "-NS";
             config["polarization"]->setValue("NS");	// do NS here
           }
@@ -1732,6 +1743,7 @@ int main (int argc, char *argv[])
           eventPipeline.initPipeline(obsrec);
 
           // set parameters of pipeline
+          eventPipeline.setMinBeamformingAntennasCut(config["minBeamformingAntennas"]->uiValue());
           eventPipeline.setPlotInterval(config["plotStart"]->dValue(),config["plotStop"]->dValue());
           eventPipeline.setSpectrumInterval(config["spectrumStart"]->dValue(),config["spectrumStop"]->dValue());
           eventPipeline.setFreqInterval(config["freqStart"]->dValue(),config["freqStop"]->dValue());

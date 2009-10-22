@@ -39,43 +39,46 @@
 #include <Analysis/CompletePipeline.h>
 
 namespace CR { // Namespace CR -- begin
-  
+
   /*!
     \class analyseLOPESevent2
-    
+
     \ingroup Analysis
-    
+
     \brief Brief description for class analyseLOPESevent2
-    
+
     \author Frank Schroeder
-    
+
     \date 2008/01/30
-    
+
     \test tanalyseLOPESevent2.cc
-    
+
     <h3>Prerequisite</h3>
-    
+
     <ul type="square">
       <li>[start filling in your text here]
     </ul>
-    
+
     <h3>Synopsis</h3>
 
     based on analyseLOPESevent by Andreas Horneffer
     this class is intended as a test place for upsampling
     and more flexible plots
-    
+
     <h3>Example(s)</h3>
-    
-  */  
+
+  */
   class analyseLOPESevent2 : public analyseLOPESevent {
-    
+
   protected:
 
     //! the new pipeline objects, one for the input, one for the upsampling (like CRinvFFT + LopesSTAR-upsampling)
     CompletePipeline pipeline, upsamplePipe;
     //! switcher to the used pipeline (pipeline or upsamplePipe)
     CompletePipeline *CompleteBeamPipe_p;
+
+    //! minimal number of unflagged antennas required for beam forming (default: 4)
+    unsigned int minBeamformingAntennas;
 
     //! upsampling will be done by a factor of 2^upsamplingExponent
     unsigned int upsamplingExponent;
@@ -105,43 +108,43 @@ namespace CR { // Namespace CR -- begin
 
 
   public:
-    
+
     // ------------------------------------------------------------- Construction
-    
+
     /*!
       \brief Default constructor
     */
     analyseLOPESevent2 ();
-    
+
     /*!
       \brief Copy constructor
-      
+
       \param other -- Another analyseLOPESevent2 object from which to create
              this new one.
     */
     analyseLOPESevent2 (analyseLOPESevent2 const &other);
-    
+
     // -------------------------------------------------------------- Destruction
 
     /*!
       \brief Destructor
     */
     ~analyseLOPESevent2 ();
-    
+
     // ---------------------------------------------------------------- Operators
-    
+
     /*!
       \brief Overloading of the copy operator
-      
+
       \param other -- Another analyseLOPESevent2 object from which to make a copy.
     */
     analyseLOPESevent2& operator= (analyseLOPESevent2 const &other); 
-    
+
     // --------------------------------------------------------------- Parameters
-    
+
     /*!
       \brief Get the name of the class
-      
+
       \return className -- The name of the class, analyseLOPESevent2.
     */
     std::string className () const {
@@ -162,7 +165,7 @@ namespace CR { // Namespace CR -- begin
 
 
     // ------------------------------------------------------------------ Methods
-    
+
     /*!
       \brief Get the upsampling exponent
 
@@ -171,8 +174,7 @@ namespace CR { // Namespace CR -- begin
     inline unsigned int getUpsamplingExponent () {
       return upsamplingExponent;
     }
-    
-    
+
     /*!
       \brief Set the upsampling exponent for LOPES-Star-Upsampling
 
@@ -180,6 +182,24 @@ namespace CR { // Namespace CR -- begin
     */
     inline void setUpsamplingExponent (unsigned int const &upExp) {
       upsamplingExponent = upExp;
+    }
+
+    /*!
+      \brief Get the minimal number of unflagged antennas required for beam forming
+
+      \return minBeamformingAntennas -- The upsampling factor is 2^upsamplingExponent
+    */
+    inline unsigned int getMinBeamformingAntennasCut () {
+      return minBeamformingAntennas;
+    }
+
+    /*!
+      \brief Set the minimal number of unflagged antennas required for beam forming
+
+      \param minAntennas --  minimal number of unflagged antennas required for beam forming
+    */
+    inline void setMinBeamformingAntennasCut (unsigned int const &minAntennas) {
+      minBeamformingAntennas = minAntennas;
     }
 
     /*!

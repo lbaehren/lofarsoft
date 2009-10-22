@@ -33,16 +33,17 @@
 #ifdef HAVE_STARTOOLS
 
 namespace CR { // Namespace CR -- begin
-  
+
   // ============================================================================
   //
   //  Construction
   //
   // ============================================================================
-  
+
   analyseLOPESevent2::analyseLOPESevent2 ()
     : analyseLOPESevent(),
       CompleteBeamPipe_p(NULL),
+      minBeamformingAntennas(4),
       upsamplingExponent(0),
       ccWindowWidth_p(0.045e-6),
       spectrumStart_p(40e6),
@@ -52,13 +53,13 @@ namespace CR { // Namespace CR -- begin
       lateralSNRcut(1.0),
       lateralTimeCut(25e-9)
   {;}
-  
+
   // ============================================================================
   //
   //  Destruction
   //
   // ============================================================================
-  
+
   analyseLOPESevent2::~analyseLOPESevent2 ()
   {
     // Set pipeline_p back to NULL (to avoid that analyseLOPESevent deletes pipeline)
@@ -72,11 +73,11 @@ namespace CR { // Namespace CR -- begin
   //  Parameters
   //
   // ============================================================================
-  
+
   void analyseLOPESevent2::summary (std::ostream &os)
   {;}
-  
- 
+
+
   // ============================================================================
   //
   //  Methods
@@ -84,7 +85,7 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
 
   // --------------------------------------------------------------- initPipeline
-  
+
   Bool analyseLOPESevent2::initPipeline(Record ObsRecord){
     try {
       clear();
@@ -101,65 +102,81 @@ namespace CR { // Namespace CR -- begin
     } catch (AipsError x) {
       cerr << "analyseLOPESevent2::initPipeline: " << x.getMesg() << endl;
       return False;
-    }; 
+    }
     return True;
   }; 
 
   // --------------------------------------------------------------- ProcessEvent
 
   Record analyseLOPESevent2::RunPipeline(const string& evname,
-					  Double Az,
-					  Double El,
-					  Double distance, 
-					  Double XC,
-					  Double YC,
-					  Bool RotatePos,
-					  string PlotPrefix, 
-					  Bool generatePlots,
-					  Bool generateSpectra,
-					  Vector<Int> FlaggedAntIDs, 
-					  Bool verbose,
-					  Bool simplexFit,
-					  Double ExtraDelay,
-					  int doTVcal,
-					  bool doGainCal,
-					  bool doDispersionCal,
-					  bool doDelayCal,
-					  bool doRFImitigation,
-					  bool doFlagNotActiveAnts,
-					  bool doAutoFlagging,
-					  Double UpSamplingRate,
-					  String Polarization,
-					  bool SinglePlots,
-					  bool PlotRawData,
-					  bool CalculateMaxima,
-					  bool listCalcMaxima,
-					  bool printShowerCoordinates,
-					  bool ignoreDistance) {
+                                         Double Az,
+                                         Double El,
+                                         Double distance, 
+                                         Double XC,
+                                         Double YC,
+                                         Bool RotatePos,
+                                         string PlotPrefix, 
+                                         Bool generatePlots,
+                                         Bool generateSpectra,
+                                         Vector<Int> FlaggedAntIDs, 
+                                         Bool verbose,
+                                         Bool simplexFit,
+                                         Double ExtraDelay,
+                                         int doTVcal,
+                                         bool doGainCal,
+                                         bool doDispersionCal,
+                                         bool doDelayCal,
+                                         bool doRFImitigation,
+                                         bool doFlagNotActiveAnts,
+                                         bool doAutoFlagging,
+                                         Double UpSamplingRate,
+                                         String Polarization,
+                                         bool SinglePlots,
+                                         bool PlotRawData,
+                                         bool CalculateMaxima,
+                                         bool listCalcMaxima,
+                                         bool printShowerCoordinates,
+                                         bool ignoreDistance) {
     Record erg;
     try {
       // ofstream latexfile;  // WARNING: causes problem in fitCR2gauss.cc line 200, left here for future tests
       Vector <Bool> AntennaSelection;
       Record fiterg;
-      Double center;		// position of the cc-beam (set in doPositionFitting)
+      Double center;                // position of the cc-beam (set in doPositionFitting)
 
+      // define default values for return record, to prevent crash of call_pipeline
+      // in the case of any error during RunPipeline
       erg.define("goodReconstructed",false);  // will be set to true at the end of the reconstruction
+      erg.define("Azimuth",double(0));
+      erg.define("Elevation",double(0));
+      erg.define("Distance",double(0));
+      erg.define("CCheight",double(0));
+      erg.define("CCwidth",double(0));
+      erg.define("CCheight_error",double(0));
+      erg.define("CCconverged",false);
+      erg.define("Xheight",double(0));
+      erg.define("Xheight_error",double(0));
+      erg.define("Xconverged",false);
+      erg.define("rmsCCbeam",double(0));
+      erg.define("rmsXbeam",double(0));
+      erg.define("rmsPbeam",double(0));
+      erg.define("Date",uInt(0));
 
       // store a copy of the input antenna selection for later use
       InputFlaggedAntIDs = FlaggedAntIDs.copy();
 
       // initialize the pipeline (flag not active antennas and antennas with bad signals)
       if (! SetupEvent(evname, doTVcal, FlaggedAntIDs, AntennaSelection, 
-		       UpSamplingRate, ExtraDelay, verbose, doGainCal, doDispersionCal, doDelayCal, doRFImitigation,
+                       UpSamplingRate, ExtraDelay, verbose, doGainCal, doDispersionCal, doDelayCal, doRFImitigation,
                        doFlagNotActiveAnts, doAutoFlagging)) {
-	cerr << "analyseLOPESevent2::RunPipeline: " << "Error during SetupEvent()!" << endl;
-	return Record();
+        cerr << "analyseLOPESevent2::RunPipeline: " << "Error during SetupEvent()!" << endl;
+        return erg;
       }
 
       // Check if any antennas are left unflagged (otherwise quit)
       if ( ntrue(AntennaSelection) == 0) {
         cerr << "analyseLOPESevent2::RunPipeline: " << "All antennas flagged!" << endl;
-        return Record();
+        return erg;
       }
 
       // storte GT in return record
@@ -169,9 +186,9 @@ namespace CR { // Namespace CR -- begin
       CompleteBeamPipe_p = static_cast<CompletePipeline*>(beamPipe_p);
       if (verbose) {
         if (CompleteBeamPipe_p == pipeline_p)
- 		 cout << "analyseLOPESevent2::RunPipeline: " << "Proceed without (new) upsampling." << endl;
+          cout << "analyseLOPESevent2::RunPipeline: " << "Proceed without (new) upsampling." << endl;
         else
- 		 cout << "analyseLOPESevent2::RunPipeline: " << "(New) upsampling enabled." << endl;
+          cout << "analyseLOPESevent2::RunPipeline: " << "(New) upsampling enabled." << endl;
       }
 
       // initialize Complete Pipeline
@@ -188,7 +205,7 @@ namespace CR { // Namespace CR -- begin
 
       // Plot the raw data, if desired
       if (PlotRawData) {
-	// plot upsampled raw data: either in seperated plots seperated or all traces in one plot
+        // plot upsampled raw data: either in seperated plots seperated or all traces in one plot
         if (SinglePlots)
           CompleteBeamPipe_p->plotAllAntennas(PlotPrefix+ "-raw", beamformDR_p, AntennaSelection, true,
                                               getUpsamplingExponent(),true);
@@ -196,29 +213,42 @@ namespace CR { // Namespace CR -- begin
           CompleteBeamPipe_p->plotAllAntennas(PlotPrefix + "-raw", beamformDR_p, AntennaSelection, false,
                                               getUpsamplingExponent(), true);
 
-	// calculate the maxima
+        // calculate the maxima
         if (CalculateMaxima)
           rawPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(), true);
       }
 
+      // Check if there are enough antennas left unflagged (otherwise quit)
+      // beam forming is not useful with only 3 or less antennas.
+      if ( ntrue(AntennaSelection) < minBeamformingAntennas) {
+        cerr << "analyseLOPESevent2::RunPipeline: " 
+             << "Bad event: only "
+             << ntrue(AntennaSelection)
+             << " antenna(s) left unflagged (at least "
+             << minBeamformingAntennas
+             << " required)."
+             << endl;
+        return erg;
+      }
+
       //perform the position fitting (if simplexFit = false, then only the PhaseCenter is set)
       if (! doPositionFitting(Az, El, distance, center, XC, YC, RotatePos,
-			      AntennaSelection, Polarization, simplexFit, verbose, ignoreDistance) ){
-	cerr << "analyseLOPESevent2::RunPipeline: " << "Error during doPositionFitting()!" << endl;
-	return Record();
+                              AntennaSelection, Polarization, simplexFit, verbose, ignoreDistance) ){
+        cerr << "analyseLOPESevent2::RunPipeline: " << "Error during doPositionFitting()!" << endl;
+        return erg;
       }
 
       // make gauss fit to CC-beam
       if (! GaussFitData(Az, El, distance, center, AntennaSelection, evname, erg, fiterg, 
-			 Polarization, verbose) ){
-	cerr << "analyseLOPESevent2::RunPipeline: " << "Error during GaussFitData()!" << endl;
-	return Record();
+                         Polarization, verbose) ){
+        cerr << "analyseLOPESevent2::RunPipeline: " << "Error during GaussFitData()!" << endl;
+        return erg;
       }
 
       // Generate plots
       if (generatePlots) {
         // Plot CC-beam; if fit has converged, then also plot the result of the fit
-    	if (fiterg.asBool("CCconverged"))
+            if (fiterg.asBool("CCconverged"))
           CompleteBeamPipe_p->plotCCbeam(PlotPrefix + "-CC", beamformDR_p, fiterg.asArrayDouble("Cgaussian"),
                                          AntennaSelection, filterStrength_p, remoteRange_p(0), remoteRange_p(1));
         else
@@ -226,7 +256,7 @@ namespace CR { // Namespace CR -- begin
                                          AntennaSelection, filterStrength_p, remoteRange_p(0), remoteRange_p(1));
 
         // Plot X-beam; if fit has converged, then also plot the result of the fit
-    	if (fiterg.asBool("Xconverged"))
+            if (fiterg.asBool("Xconverged"))
           CompleteBeamPipe_p->plotXbeam(PlotPrefix + "-X", beamformDR_p, fiterg.asArrayDouble("Xgaussian"),
                                         AntennaSelection, filterStrength_p, remoteRange_p(0), remoteRange_p(1) );
         else
@@ -237,13 +267,13 @@ namespace CR { // Namespace CR -- begin
         CompleteBeamPipe_p->plotAllAntennas(PlotPrefix + "-all", beamformDR_p, AntennaSelection, false,
                                             getUpsamplingExponent(),false);
 
-	// Plot of upsampled antenna traces (seperated) 
+        // Plot of upsampled antenna traces (seperated) 
         if (SinglePlots)
           CompleteBeamPipe_p->plotAllAntennas(PlotPrefix, beamformDR_p, AntennaSelection, true,
                                               getUpsamplingExponent(),false);
 
         // calculate the maxima
-	if (CalculateMaxima)
+        if (CalculateMaxima)
           calibPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),
                                                             false, fiterg.asDouble("CCcenter"));
         // user friendly list of calculated maxima
@@ -261,47 +291,47 @@ namespace CR { // Namespace CR -- begin
 
       // output of antnenna to core distances in shower coordinates, if requested
       if (printShowerCoordinates) printAntennaDistances(erg.asArrayDouble("distances"),
-                                                         toShower(beamPipe_p->GetAntPositions(), Az, El),	
+                                                         toShower(beamPipe_p->GetAntPositions(), Az, El),
                                                          El, Az, XC, YC, beamformDR_p->headerRecord().asInt("Date"));
-      storeShowerCoordinates(erg);	// store shower coordinates in every case
+      storeShowerCoordinates(erg);        // store shower coordinates in every case
 
       // give out the names of the created plots
       if (verbose) {
         vector<string> plotlist = CompleteBeamPipe_p->getPlotList();
-        std::cout <<"\nList of generated plots:\n";
+        cout <<"\nList of generated plots:\n";
         for (unsigned int i = 0; i < plotlist.size(); i++) std::cout << plotlist[i] << "\n";
-        std::cout << std::endl;
+        cout << endl;
       }
 
 
       // calculate the rms values of p-, cc- and xbeam in the remote region
       if (remoteRange_p(1) != 0 ) {
-	Slice remoteRegion( remoteRange_p(0),(remoteRange_p(1) - remoteRange_p(0)) );
-	Vector<Double> ccbeam, xbeam, pbeam;
-	
-	// get the beam data
-	ccbeam = CompleteBeamPipe_p->GetCCBeam(beamformDR_p, AntennaSelection, Polarization).copy();
+        Slice remoteRegion( remoteRange_p(0),(remoteRange_p(1) - remoteRange_p(0)) );
+        Vector<Double> ccbeam, xbeam, pbeam;
+
+        // get the beam data
+        ccbeam = CompleteBeamPipe_p->GetCCBeam(beamformDR_p, AntennaSelection, Polarization).copy();
         xbeam = CompleteBeamPipe_p->GetXBeam(beamformDR_p, AntennaSelection, Polarization).copy();
         pbeam = CompleteBeamPipe_p->GetPBeam(beamformDR_p, AntennaSelection, Polarization).copy();
 
         // smooth the data
         if (filterStrength_p > 0) {
-  	  StatisticsFilter<Double> mf(filterStrength_p,FilterType::MEAN);
-	  ccbeam = mf.filter(ccbeam);
-	  pbeam = mf.filter(pbeam);
+            StatisticsFilter<Double> mf(filterStrength_p,FilterType::MEAN);
+          ccbeam = mf.filter(ccbeam);
+          pbeam = mf.filter(pbeam);
           xbeam = mf.filter(xbeam);
-	}
+        }
 
         // removing offset
-	double ccBeamOffset = mean(ccbeam(remoteRegion));
-	double pBeamOffset  = mean(pbeam(remoteRegion));
+        double ccBeamOffset = mean(ccbeam(remoteRegion));
+        double pBeamOffset  = mean(pbeam(remoteRegion));
         double xBeamOffset  = mean(xbeam(remoteRegion));
-	ccbeam -= ccBeamOffset;
+        ccbeam -= ccBeamOffset;
         pbeam  -= pBeamOffset;
-	xbeam  -= xBeamOffset;
+        xbeam  -= xBeamOffset;
 
-	// calculating rms values
-	erg.define("rmsCCbeam",rms(ccbeam(remoteRegion)));
+        // calculating rms values
+        erg.define("rmsCCbeam",rms(ccbeam(remoteRegion)));
         erg.define("rmsPbeam",rms(pbeam(remoteRegion)));
         erg.define("rmsXbeam",rms(xbeam(remoteRegion)));
       }
@@ -310,7 +340,7 @@ namespace CR { // Namespace CR -- begin
       erg.define("goodReconstructed",true);  // assume that everything was fine, then this position is reached.
 
     } catch (AipsError x) {
-      std::cerr << "analyseLOPESevent2::RunPipeline: " << x.getMesg() << std::endl;
+      cerr << "analyseLOPESevent2::RunPipeline: " << x.getMesg() << endl;
       return Record();
     }
     return erg;
@@ -320,18 +350,18 @@ namespace CR { // Namespace CR -- begin
   // -------------------------------------- Process Calibration Event
 
   Record analyseLOPESevent2::CalibrationPipeline (const string& evname,
-						  string PlotPrefix, 
-						  Bool generatePlots,
-						  Bool generateSpectra,
-						  Vector<Int> FlaggedAntIDs, 
-						  Bool verbose,
-						  bool doGainCal,
-						  bool doDispersionCal,
-						  bool doDelayCal,
-						  bool doRFImitigation,
-						  bool SinglePlots,
-						  bool PlotRawData,
-						  bool CalculateMaxima)
+                                                  string PlotPrefix, 
+                                                  Bool generatePlots,
+                                                  Bool generateSpectra,
+                                                  Vector<Int> FlaggedAntIDs, 
+                                                  Bool verbose,
+                                                  bool doGainCal,
+                                                  bool doDispersionCal,
+                                                  bool doDelayCal,
+                                                  bool doRFImitigation,
+                                                  bool SinglePlots,
+                                                  bool PlotRawData,
+                                                  bool CalculateMaxima)
   {
     Record erg;
     try {
@@ -355,7 +385,7 @@ namespace CR { // Namespace CR -- begin
       pipeline_p->doGainCal(doGainCal);
       pipeline_p->doDispersionCal(doDispersionCal);
       pipeline_p->doDelayCal(doDelayCal);
-      pipeline_p->doFlagNotActiveAnts(false);		// use all antennas in calibration mode
+      pipeline_p->doFlagNotActiveAnts(false);                // use all antennas in calibration mode
       pipeline_p->setFreqInterval(getFreqStart(),getFreqStop());
 
       // initialize the Data Reader
@@ -376,21 +406,21 @@ namespace CR { // Namespace CR -- begin
       Vector<Int> AntennaIDs,selAntIDs;
       lev_p->headerRecord().get("AntennaIDs",AntennaIDs);
       if (nflagged >0){
-	for (i=0; i<nflagged; i++){
-	  id = FlaggedAntIDs(i);
-	  for (j=0; j<nants; j++){
-	    if (AntennaIDs(j) == id) {
-	      AntennaSelection(j) = False;
-	      id = 0;
-	      break;
-	    };
-	  };
-	  if (verbose && (id !=0)){
-	    cout << "analyseLOPESevent::SetupEvent: " << "AntennaID: " << id 
-		 << " not found -> no antenna flagged." << endl;
-	  };
-	};
-      };
+        for (i=0; i<nflagged; i++){
+          id = FlaggedAntIDs(i);
+          for (j=0; j<nants; j++){
+            if (AntennaIDs(j) == id) {
+              AntennaSelection(j) = False;
+              id = 0;
+              break;
+            };
+          };
+          if (verbose && (id !=0)){
+            cout << "analyseLOPESevent::SetupEvent: " << "AntennaID: " << id 
+                 << " not found -> no antenna flagged." << endl;
+          }
+        }
+      }
 
       // storte GT in return record
       erg.mergeField(lev_p->headerRecord(),"Date", RecordInterface::OverwriteDuplicates);
@@ -409,7 +439,7 @@ namespace CR { // Namespace CR -- begin
       // Plot the raw data, if desired
       if (PlotRawData)
       {
-	// plot upsampled raw data: either in seperated plots seperated or all traces in one plot
+        // plot upsampled raw data: either in seperated plots seperated or all traces in one plot
         if (SinglePlots)
           CompleteBeamPipe_p->plotAllAntennas(PlotPrefix+ "-raw", lev_p, AntennaSelection, true,
                                               getUpsamplingExponent(),true, true);
@@ -417,7 +447,7 @@ namespace CR { // Namespace CR -- begin
           CompleteBeamPipe_p->plotAllAntennas(PlotPrefix + "-raw", lev_p, AntennaSelection, false,
                                               getUpsamplingExponent(), true, false);
 
-	// calculate the maxima
+        // calculate the maxima
         if (CalculateMaxima)
           rawPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), true);
       }
@@ -434,7 +464,7 @@ namespace CR { // Namespace CR -- begin
                                               getUpsamplingExponent(),false, false);
 
         // calculate the maxima
-	if (CalculateMaxima)
+        if (CalculateMaxima)
           calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
       }
 
@@ -447,8 +477,7 @@ namespace CR { // Namespace CR -- begin
       }
 
       // give out the names of the created plots
-      if (verbose)		
-      {
+      if (verbose) {
         vector<string> plotlist = CompleteBeamPipe_p->getPlotList();
         std::cout <<"\nList of generated plots:\n";
         for (unsigned int i = 0; i < plotlist.size(); i++) std::cout << plotlist[i] << "\n";
@@ -457,11 +486,10 @@ namespace CR { // Namespace CR -- begin
 
       erg.define("goodReconstructed",true);  // assume that everything was fine, then this position is reached.
 
-    } catch (AipsError x) 
-    {
-      std::cerr << "analyseLOPESevent2::CalibrationPipeline: " << x.getMesg() << std::endl;
+    } catch (AipsError x) {
+      cerr << "analyseLOPESevent2::CalibrationPipeline: " << x.getMesg() << endl;
       return Record();
-    } 
+    }
     return erg;
   }
 
@@ -479,7 +507,7 @@ namespace CR { // Namespace CR -- begin
       if ( AntPos.nrow() != distances.size()) {
         cerr << "analyseLOPESevent2::printAntennaDistances: " 
              << "ERROR: number of distances and antenna positions are different!" <<  endl;
-        return;		// exit function without showing (confusing) results
+        return;                // exit function without showing (confusing) results
       }
 
       // print header
@@ -589,7 +617,7 @@ namespace CR { // Namespace CR -- begin
           // add plot to latexfile
           latexfile << "\\begin{minipage}[h]{" << (0.999/columns) 
                     << "\\textwidth}\\includegraphics[angle=-90,width=\\textwidth]{"
-                    << plotlist[i] << "}\\end{minipage}\n";	
+                    << plotlist[i] << "}\\end{minipage}\n";        
         }
         // finish the latex file and close it
         latexfile << "\\end{document}\n";
@@ -599,7 +627,7 @@ namespace CR { // Namespace CR -- begin
         string shellCommand = "latex " + latexfilename + " > /dev/null";  // don't show the output to stdout
         system(shellCommand.c_str());
 
-	// execute dvips to create postscript file
+        // execute dvips to create postscript file
         shellCommand = "dvips " + filename + " 2> /dev/null"; // don't show the output to stderr
         system(shellCommand.c_str());
 
@@ -640,9 +668,11 @@ namespace CR { // Namespace CR -- begin
       for (unsigned int i=0 ; i < antennaIDs.size(); ++i)
         if (calibPulses.find(antennaIDs(i)) != calibPulses.end())
           ++NpulseInformation;
-      if (NpulseInformation < 2) {
+      if (NpulseInformation < minBeamformingAntennas) {
         cerr << "analyseLOPESevent2::createLateralOutput: " 
-             << "Event does not contain at least 2 good pulses!"
+             << "Event does not contain at least "
+             << minBeamformingAntennas
+             << " good pulses!"
              << endl;
         return;
       }
@@ -734,7 +764,7 @@ namespace CR { // Namespace CR -- begin
       int antID[Nant], antIDclean[Nant];
 
       // loop through antennas and fill the arrays
-      unsigned int ant = 0;	// counting antennas with pulse information
+      unsigned int ant = 0;        // counting antennas with pulse information
       for (unsigned int i=0 ; i < antennaIDs.size(); i++)
         if (calibPulses.find(antennaIDs(i)) != calibPulses.end()) {
            distance[ant] = distances(i);
@@ -767,7 +797,7 @@ namespace CR { // Namespace CR -- begin
       for (unsigned int i = 0; i < Nant; ++i) {
         /* error of field strength = 19% + noise */
         fieldStrEr[i]=fieldStr[i]*0.19+noiseBgr[i];
-        distanceEr[i]=15;		// should probably be calculated instead
+        distanceEr[i]=15;                // should probably be calculated instead
 
         /* get largest distance and min and max field strength */
         if ( distance[i] > maxdist)
@@ -1119,7 +1149,7 @@ namespace CR { // Namespace CR -- begin
       maxdist = *max_element(distance, distance + Nant);
 
       // for cuts (counters)
-      unsigned int CutBadTiming   = 0;
+      // unsigned int CutBadTiming   = 0;
       unsigned int CutSNR         = 0;
       double       ccCenter       = erg.asDouble("CCcenter");
       double       xCenter        = erg.asDouble("Xcenter");
