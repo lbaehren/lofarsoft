@@ -31,6 +31,7 @@
 #include <casa/OS/Directory.h>
 #include <coordinates/Coordinates/ObsInfo.h>
 #include <images/Images/PagedImage.h>
+#include <time.h>
 
 using casa::AipsError;
 using casa::Array;
@@ -88,10 +89,9 @@ casa::Vector<MVPosition> CS302_antenna_position_value(casa::Vector<Int> rcu_ids)
 	all_positions.resize(48);
 	Int nrRCUs;
 	rcu_ids.shape(nrRCUs);
-	cout << "nr of RCUs: " << nrRCUs << endl;
 	selected_positions.resize(nrRCUs);
 	
-  all_positions(0)=MVPosition(0.000,0.000,0.000);//RCU0,1
+	all_positions(0)=MVPosition(0.000,0.000,0.000);//RCU0,1
 	all_positions(1)=MVPosition(0.000,2.550,0.000);//RCU2,3
 	all_positions(2)=MVPosition(2.250,1.350,0.000);//RCU4,5
 	all_positions(3)=MVPosition(2.250,-1.350,0.000);//RCU6,7
@@ -140,12 +140,10 @@ casa::Vector<MVPosition> CS302_antenna_position_value(casa::Vector<Int> rcu_ids)
 	all_positions(46)=MVPosition(-65.054,0.000,0.000);//RCU92,93
 	all_positions(47)=MVPosition(0.000,65.054,0.000);//RCU94,95
 
-	cout << "filled all_positions" << endl;
 	int rcu_id;
 	for(int i=0;i<nrRCUs;i++){
-		rcu_id=rcu_ids(i);
-		cout << "rcu id = " << rcu_id << endl;
- 		selected_positions(i)=all_positions(rcu_id/2);///2);
+	  rcu_id=rcu_ids(i);
+	  selected_positions(i)=all_positions(rcu_id/2);///2);
 	}
 	
 	return selected_positions;
@@ -158,10 +156,9 @@ casa::Vector<MVPosition> CS302_antenna_position_value_outer(casa::Vector<Int> rc
 	all_positions.resize(48);
 	Int nrRCUs;
 	rcu_ids.shape(nrRCUs);
-	cout << "nr of RCUs: " << nrRCUs << endl;
 	selected_positions.resize(nrRCUs);
 	
-  all_positions(0)=MVPosition(14.698,-10.311,0.000);//RCU0,1
+	all_positions(0)=MVPosition(14.698,-10.311,0.000);//RCU0,1
 	all_positions(1)=MVPosition(15.232,-13.338,0.000);//RCU2,3
 	all_positions(2)=MVPosition(1.377,-20.345,0.000);//RCU4,5
 	all_positions(3)=MVPosition(-13.608,-14.411,0.000);//RCU6,7
@@ -210,12 +207,10 @@ casa::Vector<MVPosition> CS302_antenna_position_value_outer(casa::Vector<Int> rc
 	all_positions(46)=MVPosition(-20.085,36.257,0.000);//RCU92,93
 	all_positions(47)=MVPosition(22.803,31.368,0.000);//RCU94,95
 
-	cout << "filled all_positions" << endl;
 	int rcu_id;
 	for(int i=0;i<nrRCUs;i++){
-		rcu_id=rcu_ids(i);
-		cout << "rcu id = " << rcu_id << endl;
- 		selected_positions(i)=all_positions(rcu_id/2);///2);
+	  rcu_id=rcu_ids(i);
+	  selected_positions(i)=all_positions(rcu_id/2);
 	}
 	
 	return selected_positions;
@@ -243,41 +238,37 @@ casa::Vector<MVPosition> CS302_antenna_position_value_outer(casa::Vector<Int> rc
 */
 
 int main (int argc,
-			  char *argv[])
-	{
-		cout<<"Dit is de door Sef & Sander aangepaste versie van testLOPESskymapping"<<endl;
-		
-		uint nofFailedTests=0, blocksize=1024;
-		std::string infile, outfile="snstestnewskymapping.h5";
-		
-		/*
-		 Check if filename of the dataset is provided on the command line; if only
-		 a fraction of the possible tests can be carried out.
-		 */
-		if (argc < 2) {
-			std::cout << "Usage: testnewskymapping <inputfile.dat> [<output-image>]. Now using snstestnewskymapping.dat" << endl;
-			infile = "../../../src/CR-Tools/apps/snstestnewskymapping.dat"; 
-		} else {
-			infile = argv[1];
-			if (argc > 2) {
-				outfile  = argv[2];
-			};
-		}
-		
-		//nofFailedTests += simpleImage (infile,
-//									   outfile,
-//									   blocksize);
-		
-	
-	
-	
-	
+	  char *argv[])
+{
+  // Calculate program run time:
+  time_t t1, t2;
+  t1 = time(NULL);
+  cout<<"Dit is de door Sef & Sander aangepaste versie van testLOPESskymapping"<<endl;
   
-
+  uint nofFailedTests=0, blocksize=1024, nfreq;
+  std::string infile, outfile="snstestnewskymapping.h5";
+  
+  /*
+    Check if filename of the dataset is provided on the command line; if only
+    a fraction of the possible tests can be carried out.
+  */
+  if (argc < 2) {
+    std::cout << "Usage: testnewskymapping <inputfile.dat> [<output-image>]. Now using snstestnewskymapping.dat" << endl;
+    infile = "../../../src/CR-Tools/apps/snstestnewskymapping.dat"; 
+  } else {
+    infile = argv[1];
+    if (argc > 2) {
+      outfile  = argv[2];
+      if (argc > 3) {
+	blocksize = atoi(argv[3]);
+      }
+    }
+  }
+  nfreq = blocksize/2+1;
   //_______________________________________________________
   // Read input paramaters from infile
   
-     //Opens for reading the file
+  //Opens for reading the file
   ifstream b_file (infile.c_str()); 
   
   int ninputfiles;
@@ -301,7 +292,6 @@ int main (int argc,
 #ifndef upload
   for(int i=0; i<ninputfiles; i++){
     b_file>> inputfiles[i];
-    //cout<<endl<<i<<endl<<endl;
     dr[i] = new CR::LOFAR_TBB(pathname+inputfiles[i], blocksize);
     nantsinfile[i] = dr[i]->fx().shape()[1];
     rcu_ids[i]=dr[i]->channelID()%1000; 
@@ -312,41 +302,6 @@ int main (int argc,
   cout<<"total number of antennas = "<<nants<<endl;
   cout << "shape of dr[0]->fx() = " << dr[0]->fx().shape() << endl;
   cout << "shape of dr[0]->fft() = " << dr[0]->fft().shape() << endl;
-  cout <<"dr->fft for antenna "<<0<<" = "<<dr[0]->fft().row(0)[0]<<endl;
-  cout <<"dr->fft for antenna "<<1<<" = "<<dr[0]->fft().row(1)[0]<<endl;
-	
-
-/*  CR::LOFAR_TBB **dr;
-  dr = new CR::LOFAR_TBB*[nants];
-  int counter = 0;
-  for(int i=0; i<ninputfiles; i++){
-		nantsinfile = dr[i]->fx().shape()[1];
-		for(int j=0; j<nantsinfile; j++){
-			Vector<Bool> antennasetter(nantsinfile);
-			antennasetter = False;
-			antennasetter[j]=True;
-			cout<<"antennasetter = "<<antennasetter<<endl;
-			cout<<"counter = "<<counter<<endl;
-		 	//dr[i]->setSelectedAntennas(antennasetter);
-			//cout<<dr[i]->selectedAntennas();
-			dr[counter] = dr[i];
-			counter++;
-		}
-  }
-  
-	cout << "shape of dr[0] = " << dr[0]->shape() << endl;
-  cout << "shape of dr[0]->fx() = " << dr[0]->fx().shape() << endl;
-  cout << "shape of dr[0]->fx() = " << dr[0]->fx().shape() << endl;
-  cout << "shape of dr[0]->fft() = " << dr[0]->fft().shape() << endl;
-  cout << "shape of dr[0]->fft() = " << dr[0]->fft().shape() << endl;
-
-	for(int i=0;i<nants;i++){
-		cout <<"dr->fft for antenna "<<i<<" = "<<dr[i]->fft()[0][0]<<endl;
-	}
-*/
-
-	cout <<"dr->fft for antenna "<<0<<" = "<<dr[0]->fft().row(0)<<endl;
-	//cout <<"dr->fft for antenna "<<1<<" = "<<dr[0]->fft()[1][0]<<endl;
   
   int pixels;
   float increment;
@@ -358,17 +313,6 @@ int main (int argc,
   int blocksperframe;
   int startblock;
 
-  int ndim;
-  int startant;
-  int nant;
-  int antstr;
-  int startfreq;
-  int nfreq;
-  int freqstr;
-  int startcoord;
-  int ncoord;
-  int coordstr;
-	
   string arrayspread;
   string selection;
 
@@ -380,92 +324,54 @@ int main (int argc,
   b_file>> startdepth;
   b_file>> depthstr;
   
-  //cout<<"depthstr = " <<depthstr<<endl;
-  
   b_file>> nframes;
   b_file>> blocksperframe;
   b_file>> startblock;
-  
-  //cout<<"startblock = " <<startblock<<endl;
-  
-  b_file>> ndim;
-  b_file>> startant;
-  b_file>> nant;
-  b_file>> antstr;
-  b_file>> startfreq;
-  b_file>> nfreq;
-  b_file>> freqstr;
-  b_file>> startcoord;
-  b_file>> ncoord;
-  b_file>> coordstr;
-  
-  cout<<"ncoord = " <<ncoord<<" (should be 3)"<<endl;
-  
-/*
-  cout << "pixels: "<<pixels<<endl;
-  cout<< "depth: " <<depth<<endl;
-  cout<<"blocksperframe: " << blocksperframe<<endl;
-  cout<<"starts: " <<start[0]<<" "<<start[1]<<" "<<start[2]<<endl;
-*/
 	
-	
+  b_file>> selection;
+  b_file>> arrayspread;
+
  // check out the antennaselection
 
-   Vector< bool >*antennaselection;
-   antennaselection=new Vector< bool>[ninputfiles];
-//	
-//	Vector<uInt>* rcu_ids;
-//	rcu_ids=new Vector<uInt>[ninputfiles];
+  Vector< bool >*antennaselection;
+  antennaselection=new Vector< bool>[ninputfiles];
 
-  b_file >> selection;
-	if(selection=="even"){
-		for(int i=0;i<ninputfiles;i++){
-			antennaselection[i] = (rcu_ids[i]%2==0);
-			cout << "Ant selection for file " << i << " = " << antennaselection[i] << endl;
-		}
-	} else if(selection=="odd"){
-		for(int i=0;i<ninputfiles;i++){
-			antennaselection[i] = (rcu_ids[i]%2==1);
-			cout << "Ant selection for file " << i << " = " << antennaselection[i] << endl;
-		}
-	} else if(selection=="all"){
-		for(int i=0;i<ninputfiles;i++){
-			antennaselection[i] = (rcu_ids[i]%2==1||rcu_ids[i]%2==0);
-			cout << "Ant selection for file " << i << " = " << antennaselection[i] << endl;
-		}
-	} else {
-		cout <<"Another selection than odd, even or all is not implemented yet";
-	}
+  if(selection=="even"){
+    for(int i=0;i<ninputfiles;i++){
+	antennaselection[i] = (rcu_ids[i]%2==0);
+    }
+  } else if(selection=="odd"){
+    for(int i=0;i<ninputfiles;i++){
+      antennaselection[i] = (rcu_ids[i]%2==1);
+    }
+  } else if(selection=="all"){
+    for(int i=0;i<ninputfiles;i++){
+      antennaselection[i] = (rcu_ids[i]%2==1||rcu_ids[i]%2==0);
+    }
+  } else {
+    cout <<"Another selection than odd, even or all is not implemented yet";
+  }
 		
-		
-	int nUsedants=0;
-	vector<int> nUsedantsinfile(ninputfiles);
-	Vector< int >*used_rcu_ids;
-	used_rcu_ids=new Vector< int >[ninputfiles];
-	
-	for(int i=0;i<ninputfiles;i++){
-		nUsedantsinfile[i]=0;
-		for(int j=0;j<nantsinfile[i];j++){
-			if(antennaselection[i][j]){nUsedantsinfile[i]++;}
-		}
-		used_rcu_ids[i].resize(nUsedantsinfile[i]);
-	    nUsedants+=nUsedantsinfile[i];
-		int counter=0;
-		for(int j=0;j<nantsinfile[i];j++){
-			if(antennaselection[i][j]){used_rcu_ids[i][counter]=rcu_ids[i][j]; counter++;}
-		}
-		cout << "used rcus for file " << i << " : " << used_rcu_ids[i] << endl;
-	}	
-	//nUsedants=nants;
-	//nUsedantsinfile=nantsinfile;
+  int nUsedants=0;
+  vector<int> nUsedantsinfile(ninputfiles);
+  Vector< int >*used_rcu_ids;
+  used_rcu_ids=new Vector< int >[ninputfiles];
   
-
-	
-	//used_rcu_ids=rcu_ids;
+  for(int i=0;i<ninputfiles;i++){
+    nUsedantsinfile[i]=0;
+    for(int j=0;j<nantsinfile[i];j++){
+      if(antennaselection[i][j]){nUsedantsinfile[i]++;}
+    }
+    used_rcu_ids[i].resize(nUsedantsinfile[i]);
+    nUsedants+=nUsedantsinfile[i];
+    int counter=0;
+    for(int j=0;j<nantsinfile[i];j++){
+      if(antennaselection[i][j]){used_rcu_ids[i][counter]=rcu_ids[i][j]; counter++;}
+    }
+    cout << "used rcus for file " << i << " : " << used_rcu_ids[i] << endl;
+  }	
 		
-		
-		
-    try {    
+  try {    
     
     //________________________________________________________
     cout << "testnewskymapping::simpleImage reading in event and setting up the pipeline"  << endl;
@@ -486,7 +392,7 @@ int main (int argc,
     std::string refcode    = "AZEL";
     std::string projection = "STG";
 
-// With depth:
+    // With depth:
 
     IPosition shape (3,pixels,pixels,depth);
     SpatialCoordinate spatial (CoordinateType::DirectionRadius, refcode,projection);
@@ -503,94 +409,53 @@ int main (int argc,
     tmpvec(0) = increment; tmpvec(1)=increment;  tmpvec(2)=depthstr;
     spatial.setIncrement(tmpvec,true);
 		
-		
-		// Without depth:
-		/*
-		    IPosition shape (2,pixels,pixels);
-		    SpatialCoordinate spatial (CoordinateType::Direction, refcode,projection);
-    spatial.setShape(shape);
-    //set reference pixel, reference value, and coord increment
-    Vector<double> tmpvec;
-    tmpvec = spatial.referencePixel();
-    tmpvec(0) = (pixels-1.)/2; tmpvec(1)=(pixels-1.)/2;
-    spatial.setReferencePixel(tmpvec);
-    tmpvec = spatial.referenceValue();
-    tmpvec(0) = 180.; tmpvec(1)=90.;
-    spatial.setReferenceValue(tmpvec,true);
-    tmpvec = spatial.increment();
-    tmpvec(0) = increment; tmpvec(1)=increment;
-    spatial.setIncrement(tmpvec,true);
-*/
     // Time-Frequency coordinate
     cout << "testnewskymapping::simpleImage Setting up TimeFreqCoordinate"  << endl;
     uint nofBlocksPerFrame = blocksperframe ;
     uint nofFrames         = nframes;
     TimeFreqCoordinate timeFreq (blocksize, nofBlocksPerFrame, nofFrames,false);
     timeFreq.setNyquistZone(1);
-		timeFreq.setSampleFrequency(2e8);
+    timeFreq.setSampleFrequency(2e8);
+    
     // Skymap coordinate
     cout << "testnewskymapping::simpleImage Setting up SkymapCoordinate"  << endl;
     SkymapCoordinate coord (info,
 			    spatial,
 			    timeFreq);
     
-    //________________________________________________________
-    // retrieve the antenna positions
-
-//    cout << "testnewskymapping::simpleImage Retrieving the antenna positions"  << endl;
-//    Matrix<double> antPositions(nants,3);
-//    for (uInt j=0; j<antPositions.nrow(); j++) {
-//       for (uInt i=0; i<antPositions.ncolumn(); i++) {
-//          b_file >> antPositions(j,i);
-//       }      
-//    }
-//		Matrix<double> subantPositions;
-//		IPosition start_1 (ndim,startant,startcoord), length_1 (ndim,nant,ncoord), stride_1 (ndim,antstr,coordstr);
-//    Slicer slicer1 (start_1, length_1, stride_1);
-//		subantPositions = antPositions(slicer1);
-//		cout << "the antanna positions are: " << subantPositions <<endl;
 	  
-	//******* NEW METHOD ***************
-	  cout << "testnewskymapping::simpleImage Retrieving the antenna positions"  << endl;
+    // Get the antenna positions
+    cout << "testnewskymapping::simpleImage Retrieving the antenna positions"  << endl;
 		
-	  Vector<MVPosition> subantPositions;
-	  Vector<MVPosition> tempantPositions;
+    Vector<MVPosition> subantPositions;
+    Vector<MVPosition> tempantPositions;
 	  
-	  subantPositions.resize(nUsedants);
-	  uInt counter=0;
-	  Int nRCU;
+    subantPositions.resize(nUsedants);
+    uInt counter=0;
+    Int nRCU;
 	  
-		b_file>>arrayspread;
 		
-	  for(int i=0; i<ninputfiles; i++){
+    for(int i=0; i<ninputfiles; i++){
+      
+      used_rcu_ids[i].shape(nRCU);
+      tempantPositions.resize(nRCU);
+      
+      if(arrayspread=="inner"){
+	tempantPositions = CS302_antenna_position_value(used_rcu_ids[i]);
+      } else if(arrayspread=="outer"){
+	tempantPositions = CS302_antenna_position_value_outer(used_rcu_ids[i]);
+      } else cout<<"Valid antennaspreads are 'inner' and 'outer'."<<endl;
+      
+      //nrRCUs = new int(0);
 		  
-		  used_rcu_ids[i].shape(nRCU);
-		  tempantPositions.resize(nRCU);
-		  
-			if(arrayspread=="inner"){
-				tempantPositions = CS302_antenna_position_value(used_rcu_ids[i]);
-		  } else if(arrayspread=="outer"){
-				tempantPositions = CS302_antenna_position_value_outer(used_rcu_ids[i]);
-			} else cout<<"Valid antennaspreads are 'inner' and 'outer'."<<endl;
-			
-		  //nrRCUs = new int(0);
-		  
-		  for(int j=0; j<nRCU;j++){
-			  subantPositions(counter)=tempantPositions(j);
-			  cout<<counter;
-			  counter++;
-		  }		  
-	  }
-/*		
-	  Matrix<double> antPositions(nRCU,3);
-    for (uInt j=0; j<antPositions.nrow(); j++) {
-       for (uInt i=0; i<antPositions.ncolumn(); i++) {
-          antPositions(j,i) = tempantPositions[j].getValue()[i];
-       }      
+      for(int j=0; j<nRCU;j++){
+	subantPositions(counter)=tempantPositions(j);
+	counter++;
+      }		  
     }
-*/
-	  cout << "The antenna positions are "<< subantPositions << endl;
 
+    cout << "The antenna positions are "<< subantPositions << endl;
+    
     
     //________________________________________________________
     // Set up the skymapper 
@@ -604,97 +469,88 @@ int main (int argc,
     
     cout << "                                                         ... done."  << endl;
 
-	skymapper.setFarField();				// Not for imaging lightning!!!
+    skymapper.setFarField();				// Not for imaging lightning!!!
     skymapper.summary();
     
     //________________________________________________________
     // process the event
     
  
-		// correct for the offset relative to the last antenna. Be aware that reading from the beginning of the file may give problems.
+    // correct for the offset relative to the last antenna. Be aware that reading from the beginning of the file may give problems, because of negative offsets.
 		
     uint nofBlocks = nofBlocksPerFrame * nofFrames;
 
     Matrix<casa::DComplex> data(dr[0]->fftLength(),nUsedants); 
-	  cout << "datashape = " << data.shape() << endl;
+    cout << "datashape = " << data.shape() << endl;
 
-		Matrix<casa::DComplex> subdata; 
-		IPosition start (ndim,startfreq,startant), length (ndim,nfreq,nant), stride (ndim,freqstr,antstr);
-    Slicer slicer (start, length, stride);
+    Vector< uint >*offset;
+    Vector< int >*offset1;
+    offset= new Vector< uint>[ninputfiles];
+    offset1=new Vector< int>[ninputfiles];
 		
-																							// Sander's new implementation
-		//casa::Vector<uint> offset(nantsinfile[ninputfiles-1]);
-		//std::vector<int> offset1(nantsinfile[ninputfiles-1]);
+    int offset_zero;
+    offset_zero = dr[ninputfiles-1]->sample_number()[nantsinfile[ninputfiles-1]-1];
 		
-   	Vector< uint >*offset;
-   	Vector< int >*offset1;
-		offset= new Vector< uint>[ninputfiles];
-		offset1=new Vector< int>[ninputfiles];
+    cout<<"offset 0 = "<<offset_zero<<endl;
 		
-		int offset_zero;
-		offset_zero = dr[ninputfiles-1]->sample_number()[nantsinfile[ninputfiles-1]-1];
+    for(int i=0; i<ninputfiles; i++){
+      offset[i] = dr[i]->sample_number();
+      offset1[i].resize(offset[i].shape()[0]);
+      for(int j=0; j<nantsinfile[i]; j++){
+	offset1[i][j] = -1*offset[i][j] + offset_zero;
+      }
+      //cout<<"offset["<<i<<"] = "<<offset[i]<<endl;
+      //cout<<"offset1["<<i<<"] = "<<offset1[i]<<endl;
+    }
 		
-		cout<<"offset 0 = "<<offset_zero<<endl;
-		
- 		for(int i=0; i<ninputfiles; i++){
-			offset[i] = dr[i]->sample_number();
-			offset1[i].resize(offset[i].shape()[0]);
-	 		for(int j=0; j<nantsinfile[i]; j++){
-				offset1[i][j] = -1*offset[i][j] + offset_zero;
-			}
-			cout<<"offset["<<i<<"] = "<<offset[i]<<endl;
-			cout<<"offset1["<<i<<"] = "<<offset1[i]<<endl;
-		}
-		
-		cout <<"dr->fft for antenna "<<0<<" = "<<dr[0]->fft().row(0)[0]<<endl;
+    //cout <<"dr->fft for antenna "<<0<<" = "<<dr[0]->fft().row(0)[0]<<endl;
 																			
-		
     for (uint blocknum=startblock; blocknum<startblock+nofBlocks; blocknum++){
-    	if(nofBlocks>20 && blocknum%10==0){
-			cout<<"Processing block "<<blocknum-startblock+1<<" out of "<<nofBlocks<<endl;
-	}		else if(nofBlocks <= 20){
-			  cout<<"Processing block "<<blocknum-startblock+1<<" out of "<<nofBlocks<<endl;
-			}
-
-			
-			counter = 0;
-	 		for(int i=0; i<ninputfiles; i++){
-				//cout<<"time for "<<i<<" = "<<dr[i]->time()<<endl;
-				dr[i]->setBlock(blocknum);
-	  		for(int j=0; j<nantsinfile[i]; j++){
-					if(!antennaselection[i][j]){continue;} //skip antenna's that are not selected
-					
-					dr[i]->setShift(offset1[i][j]);
-					
-	  	    //cout<<"so far so good. counter i j = "<<counter<<" "<<i<<" "<<j<<endl;
-					//cout<<dr[i]->fft()[0][0]<<endl;
-					//cout<<"shape of data.row(counter) = "<<data.column(counter).shape()<<endl;
-					//cout<<"shape of dr[i]->fft().column(j) = "<<dr[i]->fft().column(j).shape()<<endl;
-    	  	data.column(counter) = dr[i]->fft().column(j);
-					for(int k=0; k < nfreq*30/100; k++){
-						data.column(counter)[k] = 0.;
-					}
-					for(int k=0; k < nfreq*15/100; k++){
-						data.column(counter)[nfreq-nfreq*15/100+k] = 0.;
-					}
-					/*					for(int k=282*nfreq/513; k < 285*nfreq/513; k++){
-															  //cout<<data.column(counter)[k]<<endl;
-					  data.column(counter)[k] = data.column(counter)[281*nfreq/513];
-					  //cout<<data.column(counter)[k]<<endl;
-					}
-					*/
-														counter++;
-					//cout<<"weer een antenne toegevoegd..."<<endl;
- 	 		  }
-			}
-     skymapper.processData(data);		// Change if slicer is used!
+    	
+      if(nofBlocks>20 && blocknum%10==0){
+	cout<<"Processing block "<<blocknum-startblock+1<<" out of "<<nofBlocks<<endl;
+      } else if(nofBlocks <= 20){
+	cout<<"Processing block "<<blocknum-startblock+1<<" out of "<<nofBlocks<<endl;
+      }
+	
+      counter = 0;
+      for(int i=0; i<ninputfiles; i++){
+	//cout<<"time for "<<i<<" = "<<dr[i]->time()<<endl;
+	dr[i]->setHanningFilter(0.5);
+	dr[i]->setBlock(blocknum);
+	for(int j=0; j<nantsinfile[i]; j++){
+	  if(!antennaselection[i][j]){continue;} //skip antenna's that are not selected
+	  dr[i]->setShift(offset1[i][j]);
+	  data.column(counter) = dr[i]->fft().column(j);
+	  
+	  /*
+	  // Remove RFI:
+	  for(int k=0; k < 7*nfreq/513; k++){
+	  data.column(counter)[k+252*nfreq/513] = 0;
+	  data.column(counter)[k+300*nfreq/513] = 0;
+	  }
+	  */
+	  counter++;
+	  //cout<<"weer een antenne toegevoegd..."<<endl;
+	}
+      }
+      // Remove the low and high frequencies, which contain noise:
+      int startrow,nrows,startcol,ncol;
+      startcol = 0; ncol = nUsedants;
+      startrow = 0; nrows =  (nfreq*30)/100;
+      data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+      nrows = (nfreq*15)/100;
+      startrow = nfreq-nrows;
+      data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+      
+      skymapper.processData(data);
     };
    
+    cout << "Image "<<outfile<<" generated." << endl;
 
-
-    cout<<"obsDate = "<<info.obsDate()<<endl;
-   cout << "image generated" << endl;
-   //cout << "subdatashape = " << subdata.shape() << endl;
+   // Write out runtime
+   t2 = time(NULL);
+   cout<<"snstestskymapping has run for "<<(t2-t1)/3600<<" hours, "<<((t2-t1)%3600)/60<<" minutes, and "<<(t2-t1)%60<<" seconds."<<endl;
 
   } catch (AipsError x) {
     cerr << "[testnewskymapping::simpleImage] " << x.getMesg() << endl;
@@ -703,43 +559,3 @@ int main (int argc,
 #endif  
   return nofFailedTests;
 }
-
-
-
-
-
-
-
-
-
-// -----------------------------------------------------------------------------
-
-//int main (int argc,
-//	  char *argv[])
-//{
-//  cout<<"Dit is de door Sef & Sander aangepaste versie van testLOPESskymapping"<<endl;
-//
-//  uint nofFailedTests=0, blocksize=1024;
-//  std::string infile, outfile="snstestnewskymapping.img";
-//
-//  /*
-//    Check if filename of the dataset is provided on the command line; if only
-//    a fraction of the possible tests can be carried out.
-//  */
-//  if (argc < 2) {
-//    std::cout << "Usage: testnewskymapping <inputfile.dat> [<output-image>]. Now using snstestnewskymapping.dat" << endl;
-//	infile = "../../../src/CR-Tools/apps/seftestnewskymapping.dat"; 
-//  } else {
-//    infile = argv[1];
-//     if (argc > 2) {
-//       outfile  = argv[2];
-//     };
-//  }
-//  
-//  nofFailedTests += simpleImage (infile,
-//				 outfile,
-//				 blocksize);
-//  
-//  return nofFailedTests;
-//}
-

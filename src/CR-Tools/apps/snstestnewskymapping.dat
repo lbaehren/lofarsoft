@@ -1,23 +1,13 @@
 5
-/mnt/lofar/CS1_tbb/Fri26-06-2009/
-CS302C-B0T17:46:41X.h5
-CS302C-B1T17:46:41.h5
-CS302C-B2T17:46:41.h5
-CS302C-B4T17:46:41.h5
-CS302C-B5T17:46:41.h5
+/mnt/lofar/CS1_tbb/Thu13-08-2009/
+CS302C-B1T11:01:50.h5 CS302C-B2T11:01:50.h5 CS302C-B3T11:01:50.h5 CS302C-B4T11:01:50.h5 CS302C-B5T11:01:50.h5
 
 
-
-90 1 40000. 5000.
-50 1 110000
-
-2
-2 4 1
-0 513 1
-0 3 1
+10 1 100000000. 5000.
+1 10 100
 
 even
-inner
+outer
 
 ninputfiles
 filedir
@@ -25,11 +15,6 @@ filenames
 
 pixels depth startdepth depthstr
 nframes blocksperframe startblock
-
-ndim
-startant	nant	antstr
-startfreq	nfreq	freqstr
-startcoord	ncoord	coordstr
 
 selection
 arrayspread
