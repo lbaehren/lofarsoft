@@ -64,9 +64,13 @@ set (presto_binaries
   accelsearch prepsubband cal2mjd split_parkes_beams
   dat2sdat sdat2dat downsample rednoise un_sc_td bincand
   dump_spigot_zerolag spigot2filterbank
-  spigotSband2filterbank GBT350filterbank
-  psrorbit window plotbincand prepfold show_pfd
-  rfifind zapbirds explorefft exploredat weight_psrfits
+  spigotSband2filterbank GBT350filterbank test_multifiles
+)
+
+set (presto_fc_binaries
+  rfifind prepfold show_pfd plotbincand profile
+  psrorbit window zapbirds explorefft exploredat
+  weight_psrfits 
 )
 
 ##__________________________________________________________
@@ -359,6 +363,15 @@ foreach (src ${presto_binaries})
     PROPERTIES
     COMPILE_FLAGS "-DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
   )
+  target_link_libraries (${src} presto sla)
+endforeach (src)
+
+foreach (src ${presto_fc_binaries})
+  set_target_properties (${src}
+    PROPERTIES
+    LINKER_LANGUAGE Fortran
+    COMPILE_FLAGS "-DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+  )
   target_link_libraries (${src} presto)
 endforeach (src)
 
@@ -388,8 +401,8 @@ install (
 ## 
 ## ==============================================================================
 
-add_executable (testbinresp
-  ${presto_SOURCE_DIR}/tests/testbinresp.c
-  ${PLOT2DOBJS}
-  )
+##add_executable (testbinresp
+##  ${presto_SOURCE_DIR}/tests/testbinresp.c
+##  ${PLOT2DOBJS}
+##  )
 
