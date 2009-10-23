@@ -68,9 +68,13 @@ set (presto_binaries
 )
 
 set (presto_fc_binaries
-  rfifind prepfold show_pfd plotbincand profile
+  rfifind show_pfd plotbincand profile
   psrorbit window zapbirds explorefft exploredat
   weight_psrfits 
+)
+
+set (presto_fc_special_binaries
+  prepfold 
 )
 
 ##__________________________________________________________
@@ -370,9 +374,18 @@ foreach (src ${presto_fc_binaries})
   set_target_properties (${src}
     PROPERTIES
     LINKER_LANGUAGE Fortran
-    COMPILE_FLAGS "-DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+    COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
   )
   target_link_libraries (${src} presto)
+endforeach (src)
+
+foreach (src ${presto_fc_special_binaries})
+  set_target_properties (${src}
+    PROPERTIES
+    LINKER_LANGUAGE Fortran
+    COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+  )
+  target_link_libraries (${src} presto pgplot cfitsio)
 endforeach (src)
 
 ## ==============================================================================
