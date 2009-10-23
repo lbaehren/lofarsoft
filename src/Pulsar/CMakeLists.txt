@@ -57,6 +57,7 @@ if (NOT PULSAR_VERBOSE_CONFIGURE)
   set (PGPLOT_FIND_QUIETLY      YES )
   set (NUMPY_FIND_QUIETLY       YES )
   set (PYTHON_FIND_QUIETLY      YES )
+  set (MPI_FIND_QUIETLY      YES )
 endif (NOT PULSAR_VERBOSE_CONFIGURE)
 
 ## Handle option: debugging messages on/off
