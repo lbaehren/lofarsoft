@@ -25,7 +25,16 @@ if len(sys.argv) > 1:
 else:
     fileName = '2009-09-03_TRIGGER5.dat' #  that's just handy for rapid testing...
 
-#def nofTriggersFilteredByThreshold(listOfTriggers, threshold)
+def nofTriggersFilteredByThreshold(listOfTriggers, threshold):
+    n = 0
+    for record in listOfTriggers:
+        thisPeak = float(record['peak'])
+        thisPowerBefore = float(record['powerBefore'])
+        if thisPowerBefore == 0.0: 
+            n += 1
+        elif thisPeak / thisPowerBefore >= threshold:
+            n += 1
+    return n
 
 numberOfRCUsperStation = 96;
 
@@ -57,14 +66,18 @@ numTriggers = triggerReader.line_num # trigger records don't span multiple lines
 
 triggerList = []
 for record in triggerReader:
-    triggerList.append(record)
+    thisTime = int(record[timeKey])
+    if thisTime < 2.2e9: # Unix timestamps are signed ints, and they don't go that far...
+        triggerList.append(record)
+    else:
+        print 'Invalid timestamp! ' + str(thisTime)
 
 for record in triggerList:
     RCUnr.append(int(record[RCUnrKey]))
     seqnr.append(int(record[seqnrKey]))
-    thisTime = int(record[timeKey])
-    if thisTime > 2.2e9: # Unix timestamps are signed ints, and they don't go that far...
-        print 'Invalid timestamp! ' + str(thisTime)
+#    thisTime = int(record[timeKey])
+#    if thisTime > 2.2e9: # Unix timestamps are signed ints, and they don't go that far...
+#        print 'Invalid timestamp! ' + str(thisTime)
 
     time.append(int(record[timeKey]))
     sample.append(int(record[sampleKey]))
@@ -127,9 +140,9 @@ gY = mglData(nofPoints)
 
 for i in range(nofPoints):
     thisThreshold = startThreshold + float(i) * stepsize
-    filteredByThreshold = triggersFilteredByThreshold(triggerList, thisThreshold)
+    filteredByThreshold = nofTriggersFilteredByThreshold(triggerList, thisThreshold)
     gX[i] = thisThreshold
-    gY[i] = float(len(filteredByThreshold)) / minutes
+    gY[i] = filteredByThreshold / minutes
 
 width = 800
 height = 600
