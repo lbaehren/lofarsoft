@@ -41,10 +41,33 @@ make ${BUILD_TARGET}
 
 case $2 in
     "Experimental")
-	BUILD_TYPE=Experimental
+	echo "Experimental build for ${BUILD_TARGET} ..."
+	cd $LOFARSOFT/build/${BUILD_TARGET}
+	make Experimental
 	;;
     "Nightly")
-	BUILD_TYPE=Nightly
+	echo "Nightly build for ${BUILD_TARGET} ..."
+	cd $LOFARSOFT/build/${BUILD_TARGET}
+	make Nightly
+	;;
+    "Cluster")
+	echo "Cluster install of ${BUILD_TARGET} ..."
+	targetdir=/app64/usg
+	var_version=`cat $LOFARSOFT/.svn/dir-wcprops | grep code | grep trunk | tr "/" "\n" | grep [0-9]`
+	echo "SVN version = ${var_version}"
+	if test -d $targetdir ; then 
+	    echo "-- copying release directory to $targetdir ..."
+	    cd $targetdir
+	    cp -r $basedir/release release-$var_version
+	    echo "-- Cleaning up release directory ..."
+	    rm -rf release-$var_version/include
+	    echo "-- creating symbolic links ..."
+	    rm -f lib bin
+	    ln -s release-$var_version/bin .
+	    ln -s release-$var_version/lib .
+	else
+	    echo "Directory $targetdir does not exist - skipping cluster installation!"
+	fi
 	;;
     *)
 	echo "[clean_rebuild] No build type selected for Dashboard."
@@ -52,6 +75,3 @@ case $2 in
 	;;
 esac
 
-echo "-- Generating output for Dashboard server ..."
-cd $LOFARSOFT/build/${BUILD_TARGET}
-make ${BUILD_TYPE}
