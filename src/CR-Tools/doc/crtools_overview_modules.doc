@@ -1,0 +1,128 @@
+/*!
+  \page crtools_overview_modules CR-Tools :: Overview of modules and their functionality
+
+  - \ref crtools_module_analysis
+  - \ref crtools_module_calibration
+  - \ref crtools_module_coordinates
+
+  \section crtools_module_analysis Analysis
+
+  <table border=0>
+    <tr>
+      <td class="indexkey">Class/File</td>
+      <td class="indexkey">Functionality</td>
+      <td class="indexkey">Comments</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+
+  \section crtools_module_calibration Calibration
+
+  <table border=0>
+    <tr>
+      <td class="indexkey">Class/File</td>
+      <td class="indexkey">Functionality</td>
+      <td class="indexkey">Comments</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+
+  \section crtools_module_coordinates Coordinates
+
+  <table border=0>
+    <tr>
+      <td class="indexkey">Class/File</td>
+      <td class="indexkey">Functionality</td>
+      <td class="indexkey">Comments</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+
+  \section crtools_module_data Data
+
+  <table border=0>
+    <tr>
+      <td class="indexkey">Class/File</td>
+      <td class="indexkey">Functionality</td>
+      <td class="indexkey">Comments</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+
+  \section crtools_module_imaging Imaging
+
+  <table border=0>
+    <tr>
+      <td>Class/File</td>
+      <td>Functionality</td>
+      <td>Comments</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+
+  \section crtools_module_io IO
+
+  <table border=0>
+    <tr>
+      <td>Class/File</td>
+      <td>Functionality</td>
+      <td>Comments</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+
+*/

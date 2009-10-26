@@ -1,8 +1,0 @@
-/* $Id$ */
-
-/*!
-  \defgroup CR_Display CR-Tools :: Display module
-  \ingroup CR
-
-  \brief Display module for the CR-pipeline
-*/

@@ -1,0 +1,272 @@
+/*-------------------------------------------------------------------------*
+ | $Id:: templates.h 391 2007-06-13 09:25:11Z baehren                    $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
+// ------------------------------------------------------------------------------
+
+/*!
+  \defgroup CR Cosmic Rays (CR) analysis pipeline
+  
+  This documentation contains the description of the C/C++ components of the
+  software used for data inspection and reduction with the
+  <a href="http://www.astro.ru.nl/lopes">LOPES</a> and LOFAR/CR experiments.
+
+  <ul>
+    <li>\ref crtools_build
+    <ul>
+      <li>\ref crtools_basic_install
+      <li>\ref crtools_build_components
+      <li>\ref crtools_update_code
+      <li>\ref crtools_build_parameters
+      <li>\ref crtools_build_script
+    </ul>
+    <li>\ref crtools_source_tree
+    <li>\ref crtools_changes
+    <li>\ref tasks
+  </ul>
+
+  <h3>Prerequisite</h3>
+
+  <ul>
+    <li><a href="group__DAL.html">Data Access Library</a> (DAL)
+    <li><a href="http://www.astron.nl/casacore/doc/html">casacore API
+    documentation</a>
+  </ul>
+
+  \section crtools_build Configuration and build
+  
+
+  <hr>
+
+  \section crtools_basic_install Basic installation procedure
+
+  <ol>
+
+  <li><b>Get the source code:</b><br>
+  All the source code is available through the Subversion repository of the User
+  Software Group; in order to obtain a working copy run the following command:
+  \verbatim
+  svn co http://usg.lofar.org/svn/code/trunk usg
+  \endverbatim
+  
+  <li><b>Set up your environment:</b><br>
+  Once you have finished checking out the source code, you should set up your
+  environment: in the simplest case you can do everything from within your curent
+  shell (assuming bash here, but similar when working with tcsh).
+  \code
+  cd usg
+  export LOFARSOFT=`pwd`
+  . devel_common/scripts/init.sh
+  \endcode
+  In order to make the settings more permanent you should put the above into the
+  configuration file of your shell (<tt>.bashrc</tt> in the case of \e bash):
+  \code
+  export LOFARSOFT=<path to to root of the USG code tree>
+  . devel_common/scripts/init.sh
+  \endcode
+  
+  <li><b>Build the software:</b><br>
+  For the time being there are two build chains available:
+  <ol>
+    <li>Set up a CMake-based environemt using a bootstrap script:
+	\code
+	cd $LOFARSOFT/build
+	./bootstrap
+	make cr
+	\endcode
+    <li>Run a shell script which goes through a sequence of configuration and
+	build calls.
+	\code
+	cd $LOFARSOFT/build
+	./build.sh cr
+	\endcode
+	\e Note: This build chain is to be discontinued in the near future.
+  </ol>
+  For further control of the process see the section on \ref crtools_build_script
+  below.
+</ol>
+
+<hr>
+
+\section crtools_build_components Build individual components
+
+Once you have run \e CMake on the source code directory, you can start building the various libraries, test
+programs and application programs; all of these individual products are presented to the user as "build
+targets" which can either be generated all together or individually.
+
+<hr>
+
+\section crtools_update_code Update your working version of the code tree
+
+In order to keep up with ongoing changes in the code base -- and thereby getting
+access to the latest features made available -- you should be updating you
+working version of the code tree against the repository.
+
+\code
+cd build
+make update
+make cr
+\endcode
+
+<hr>
+
+\section crtools_build_parameters Optional build parameters
+  
+The behavior during configuration and the components included in the build
+can be controlled from a number of optional parameters:
+
+\verbatim
+option (CR_BUILD_TESTS          "Build the test programs?"                   YES )
+option (CR_BUILD_EXTERNAL_TESTS "Build test programs for external packages?" YES )
+option (CR_COMPILER_WARNINGS    "Enable standard set of compiler warnings?"  YES )
+option (CR_DEBUGGING_MESSAGES   "Print debugging information?"               NO  )
+option (CR_VERBOSE_CONFIGURE    "Verbose output during configuration?"       NO  )
+option (CR_WITH_LEGACY          "Include building legacy code?"              YES )
+option (CR_WITH_GLISH           "Support for Glish applications?"            NO  )
+option (CR_WITH_PYTHON          "Support for Python applications?"           NO  )
+option (CR_WITH_PLOTTING        "Support for generation of plots?"           YES )
+option (CR_WITH_GUI             "Build the graphical interface?"             YES )
+option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES )
+\endverbatim
+
+<ul>
+  <li>\b CR_BUILD_TESTS
+
+  Build the test programs? If enabled all the test programs in
+  ''implement/<Module>/test'' will be build.
+  
+  <li>\b CR_BUILD_EXTERNAL_TESTS
+
+  Build the test programs to test working with the various external packages
+  and libraries? If enabled the test programs in ''test'' will be build:
+  <ul>
+	<li>\e tcasa_casa.cc -- Test working with the classes in the ''casa''
+	module of casacore.
+	<li>\e tcasa_tables.cc -- Test working with the classes in the ''tables''
+	module of casacore.
+	<li>\e tcasa_coordinates -- Test working with the classes in the
+	''coordinates'' module of casacore.
+	<li>etc.
+  </ul>
+
+  <li>\b CR_ENABLE_TESTING
+
+  Enable running of the test programs? Enabling this option allows to collectively
+  run the test programs using ''CTest'' from within the build directory:
+  \verbatim
+  ctest
+  \endverbatim
+  In the future this will enable committing the logs from building and testing a
+  quality tracking dashboard.
+
+  <li>\b CR_DEBUGGING_MESSAGES
+
+  Optional pre-compiler setting, which allows enabling/disabling debugging
+  messages within the source code, e.g.
+  \code
+  #ifdef DEBUGGING_MESSAGES
+      cout << "[DataReader::DataReader ()]" << endl;
+  #endif 
+  \endcode
+
+  <li>\b CR_VERBOSE_CONFIGURE
+
+  Be verbose during the configuration stage; this will print out the various
+  variables set during the initial CMake run to configure for ''make''.
+
+  <li>\b CR_WITH_GLISH
+
+  Activate support for Glish applications? If set to \e FALSE, the software will
+  build using \e casacore.
+
+  <li>\b CR_WITH_PYTHON
+
+  Activate support for Python applications? \u Note: Currently needed for all
+  LOPES-Star applications! (Until someons sorts those that need python from those
+  that don't.)
+
+  <li>\b CR_WITH_GUI
+
+  Build the graphical user interface? -- If selected \e CMake will check if all
+  the required external components from
+  <ul>
+    <li>Python
+    <li>Boost
+    <li>Qt4
+  </ul>
+  are available; if any of them is missing building of the GUI is disabled and an
+  warning is thrown, indicating which external component is missing.
+
+  <li>\b CR_WITH_STARTOOLS
+
+  Enable the usage of additional routines from the LOPES-Star package? If no
+  installation of the package is found, usage of its routines is disabled.
+</ul>
+
+\b Examples:
+
+<ul>
+  <li>Switch off builing the test programs:
+  \verbatim
+  cmake ../../src/CR-Tools/ -DCR_BUILD_TESTS:BOOL=0
+  \endverbatim
+  
+  <li>Build the Glish-clients, but no external test programms:
+  \verbatim
+  cmake ../../src/CR-Tools/ -DCR_WITH_GLISH:BOOL=1 -DCR_BUILD_EXTERNAL_TESTS:BOOL=0 
+  \endverbatim
+</ul>
+
+<hr>
+
+\section crtools_build_script Build script options and parameters
+
+The build script \e build.sh has a number of option which you can use to enable
+or disable certain behaviour during the actual build phase:
+
+<ul>
+
+  <li>\b --report-build - Send build log to Dart Dashboard server <br>
+  If for some reason the build fails you should run the build script with the
+  additional option to generate a build/test report, which then is sent to the USG
+  Dashboard server; this will not only provide the feedback that something went
+  wrong with building the software on your machine, but also help to narrow down
+  where to look for the cause of the problem.
+  \verbatim
+  cd $LOFARSOFT/build
+  ./build.sh cr --report-build
+  \endverbatim
+  \b Note: While the server already is up and running, due to the settings on the
+  ASTRON firewall it currently isn't yet possible to submit logs from outside the
+  ASTRON network -- we are working on getting this resolved.
+  
+  <li>\b --multithreading - Enable multithreaded compile
+  \verbatim
+  cd $LOFARSOFT/build
+  ./build.sh cr --multithreading
+  \endverbatim
+
+</ul>
+
+<hr>
+
+*/

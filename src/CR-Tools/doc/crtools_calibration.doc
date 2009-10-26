@@ -1,9 +1,0 @@
-/* $Id$ */
-
-/*!
-  \defgroup Calibration CR-Tools :: Calibration module
-  \ingroup CR
-
-  \brief Calibration module for the CR-pipeline
-  
-*/
