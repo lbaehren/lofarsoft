@@ -247,7 +247,7 @@ using CR::LopesEventIn;
                             for different reasons (e.g. manually, CalTables, low signal, mismatch of
                             the different frequencies during the TV calibration). If not enough unflagged
                             antennas are left, the pipeline will exit and the event will not be written
-                            to the root file with the results (unless 'wirteBadEvents' is set to 'true').
+                            to the root file with the results (unless 'wirteBadEvents' is set to 'true').<br>
     <li>\b ccWindowWidth    Status: <i>for experts</i><br>
                             Time range to search for CC-beam-peak in lateral distribution studies,
                             default is +/- 45 ns.<br>
@@ -813,8 +813,16 @@ string eventname("");
 double azimuth=0, elevation=0, radiusOfCurvature=0, core_x=0, core_y=0;   // basic input parameters (e.g. from Kascade)
 
 // Variables of KASCADE root file
-float_t Az = 0, Ze = 0, Xc = 0, Yc = 0;
-float_t Azg = 0, Zeg = 0, Xcg = 0, Ycg = 0;
+float_t Az = 0, Ze = 0, Xc = 0, Yc = 0;			// KASCADE direction and core
+float_t Azg = 0, Zeg = 0, Xcg = 0, Ycg = 0;		// Grande direction and core
+float_t Size = 0, Sizeg = 0;				// Electron numbers (KASCADE + Grande)
+float_t Nmu = 0, Lmuo = 0, Sizmg = 0;			// Muon number, trucated muon number (KASCADE), Muon number (Grande)
+double_t geomag = 0;					// geomagnetic angle
+double_t lgE = 0, lg_errE = 0;				// estimated energy (KASCADE)
+double_t lgEg = 0, lg_errEg = 0;			// estimated energy (Grande)
+double_t lnMass = 0, ln_errMass = 0;			// estimated mass A (KASCADE)
+double_t lnMassg = 0, ln_errMassg = 0;			// estimated mass A (Grande)
+
 char reconstruction = 'A';	// A = KASCADE reconstruction taken, G = Grande reconstruction taken
 
 
@@ -1078,6 +1086,20 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
       inputTree->SetBranchAddress("Zeg",&Ze);
       inputTree->SetBranchAddress("Xcg",&Xc);
       inputTree->SetBranchAddress("Ycg",&Yc);
+      inputTree->SetBranchAddress("Size",&Size);
+      inputTree->SetBranchAddress("Sizeg",&Sizeg);
+      inputTree->SetBranchAddress("Nmu",&Nmu);
+      inputTree->SetBranchAddress("Lmuo",&Lmuo);
+      inputTree->SetBranchAddress("Sizmg",&Sizmg);
+      inputTree->SetBranchAddress("geomag",&geomag);
+      inputTree->SetBranchAddress("lgE",&lgE);
+      inputTree->SetBranchAddress("lg_errE",&lg_errE);
+      inputTree->SetBranchAddress("lgEg",&lgEg);
+      inputTree->SetBranchAddress("lg_errEg",&lg_errEg);
+      inputTree->SetBranchAddress("lnMass",&lnMass);
+      inputTree->SetBranchAddress("ln_errMass",&ln_errMass);
+      inputTree->SetBranchAddress("lnMassg",&lnMassg);
+      inputTree->SetBranchAddress("ln_errMassg",&ln_errMassg);
       inputTree->SetBranchAddress("Eventname",&Eventname);
 
       // as there is no radius of curvature in the file, set ignoreDistance to true
@@ -1206,6 +1228,7 @@ int main (int argc, char *argv[])
   int CutBadTiming, CutBadTiming_NS;                  // # of cut antennas in lateral distribution fit
   int CutSNR, CutSNR_NS;                              // # of cut antennas in lateral distribution fit
   double latMeanDist, latMeanDist_NS;                 // mean distance of the antennas in the lateral distribution
+  double latMeanDistCC, latMeanDistCC_NS;             // mean distance of the antennas used for the CC beam
   PulseProperties* rawPulses[MAX_NUM_ANTENNAS];       // use array of pointers to store pulse properties in root tree
   PulseProperties* calibPulses[MAX_NUM_ANTENNAS];     // use array of pointers to store pulse properties in root tree
   PulseProperties* meanRawPulses[MAX_NUM_ANTENNAS];   // mean pulse properties of all events
@@ -1387,6 +1410,20 @@ int main (int argc, char *argv[])
         roottree->Branch("Azg",&Azg,"Azg/F");
         roottree->Branch("Ze",&Ze,"Ze/F");
         roottree->Branch("Zeg",&Zeg,"Zeg/F");
+        roottree->Branch("Size",&Size,"Size/F");
+        roottree->Branch("Sizeg",&Sizeg,"Sizeg/F");
+        roottree->Branch("Nmu",&Nmu,"Nmu/F");
+        roottree->Branch("Lmuo",&Lmuo,"Lmuo/F");
+        roottree->Branch("Sizmg",&Sizmg,"Sizmg/F");
+        roottree->Branch("geomag",&geomag,"geomag/D");
+        roottree->Branch("lgE",&lgE,"lgE/D");
+        roottree->Branch("lg_errE",&lg_errE,"lg_errE/D");
+        roottree->Branch("lgEg",&lgEg,"lgEg/D");
+        roottree->Branch("lg_errEg",&lg_errEg,"lg_errEg/D");
+        roottree->Branch("lnMass",&lnMass,"lnMass/D");
+        roottree->Branch("ln_errMass",&ln_errMass,"ln_errMass/D");
+        roottree->Branch("lnMassg",&lnMassg,"lnMassg/D");
+        roottree->Branch("ln_errMassg",&ln_errMassg,"ln_errMassg/D");
         roottree->Branch("reconstruction",&reconstruction,"reconstruction/B");
       }
 
@@ -1406,6 +1443,7 @@ int main (int argc, char *argv[])
         roottree->Branch("rmsCCbeam",&rmsCCbeam,"rmsCCbeam/D");
         roottree->Branch("rmsXbeam",&rmsXbeam,"rmsXbeam/D");
         roottree->Branch("rmsPbeam",&rmsPbeam,"rmsPbeam/D");
+        roottree->Branch("latMeanDistCC",&latMeanDistCC,"latMeanDistCC/D");
         if (config["lateralDistribution"]->bValue()) {
           roottree->Branch("R_0",&R_0,"R_0/D");
           roottree->Branch("sigR_0",&sigR_0,"sigR_0/D");
@@ -1439,6 +1477,7 @@ int main (int argc, char *argv[])
         roottree->Branch("rmsCCbeam_EW",&rmsCCbeam,"rmsCCbeam_EW/D");
         roottree->Branch("rmsXbeam_EW",&rmsXbeam,"rmsXbeam_EW/D");
         roottree->Branch("rmsPbeam_EW",&rmsPbeam,"rmsPbeam_EW/D");
+        roottree->Branch("latMeanDistCC_EW",&latMeanDistCC,"latMeanDistCC_EW/D");
         if (config["lateralDistribution"]->bValue()) {
           roottree->Branch("R_0_EW",&R_0,"R_0_EW/D");
           roottree->Branch("sigR_0_EW",&sigR_0,"sigR_0_EW/D");
@@ -1472,6 +1511,7 @@ int main (int argc, char *argv[])
         roottree->Branch("rmsCCbeam_NS",&rmsCCbeam_NS,"rmsCCbeam_NS/D");
         roottree->Branch("rmsXbeam_NS",&rmsXbeam_NS,"rmsXbeam_NS/D");
         roottree->Branch("rmsPbeam_NS",&rmsPbeam_NS,"rmsPbeam_NS/D");
+        roottree->Branch("latMeanDistCC_NS",&latMeanDistCC_NS,"latMeanDistCC_NS/D");
         if (config["lateralDistribution"]->bValue()) {
           roottree->Branch("R_0_NS",&R_0_NS,"R_0_NS/D");
           roottree->Branch("sigR_0_NS",&sigR_0_NS,"sigR_0_NS/D");
@@ -1559,6 +1599,7 @@ int main (int argc, char *argv[])
       CutBadTiming = 0, CutBadTiming_NS = 0;
       CutSNR = 0, CutSNR_NS = 0;
       latMeanDist = 0, latMeanDist_NS = 0;
+      latMeanDistCC = 0, latMeanDistCC_NS = 0;
 
       // Set observatory record to LOPES
       Record obsrec;
@@ -1722,6 +1763,7 @@ int main (int argc, char *argv[])
           rmsCCbeam = results.asDouble("rmsCCbeam");
           rmsXbeam = results.asDouble("rmsXbeam");
           rmsPbeam = results.asDouble("rmsPbeam");
+          latMeanDistCC = results.asDouble("meandist");
           gt = results.asuInt("Date");
 
           // getting necessary data to plot [added: mfranc]
@@ -1798,17 +1840,17 @@ int main (int argc, char *argv[])
             sigR_0_NS = results.asDouble("sigR_0");
             eps_NS = results.asDouble("eps");
             sigeps_NS = results.asDouble("sigeps");
-            chi2NDF_NS = results.asDouble("chi2NDF_NS");
-            kPow_NS = results.asDouble("kPow_NS");
-            sigkPow_NS = results.asDouble("sigkPow_NS");
-            epsPow_NS = results.asDouble("epsPow_NS");
-            sigepsPow_NS = results.asDouble("sigepsPow_NS");
-            chi2NDFPow_NS = results.asDouble("chi2NDFPow_NS");
+            chi2NDF_NS = results.asDouble("chi2NDF");
+            kPow_NS = results.asDouble("kPow");
+            sigkPow_NS = results.asDouble("sigkPow");
+            epsPow_NS = results.asDouble("epsPow");
+            sigepsPow_NS = results.asDouble("sigepsPow");
+            chi2NDFPow_NS = results.asDouble("chi2NDFPow");
             CutCloseToCore_NS = results.asInt("CutCloseToCore");
             CutSmallSignal_NS = results.asInt("CutSmallSignal");
             CutBadTiming_NS = results.asInt("CutBadTiming");
             CutSNR_NS = results.asInt("CutSNR");
-            latMeanDist_NS = results.asDouble("latMeanDist");
+            latMeanDist_NS = results.asDouble("meandist");
           }
 
           // plot lateral distribution of arrival times, if requested
@@ -1837,6 +1879,7 @@ int main (int argc, char *argv[])
           rmsCCbeam_NS = results.asDouble("rmsCCbeam");
           rmsXbeam_NS = results.asDouble("rmsXbeam");
           rmsPbeam_NS = results.asDouble("rmsPbeam");
+          latMeanDistCC_NS = results.asDouble("latMeanDistCC");
           gt = results.asuInt("Date");
 
           // getting necessary data to plot [added: mfranc]

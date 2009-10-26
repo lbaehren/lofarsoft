@@ -160,6 +160,7 @@ namespace CR { // Namespace CR -- begin
       erg.define("rmsCCbeam",double(0));
       erg.define("rmsXbeam",double(0));
       erg.define("rmsPbeam",double(0));
+      erg.define("meandist",double(0));
       erg.define("Date",uInt(0));
 
       // store a copy of the input antenna selection for later use
@@ -765,7 +766,7 @@ namespace CR { // Namespace CR -- begin
 
       // loop through antennas and fill the arrays
       unsigned int ant = 0;        // counting antennas with pulse information
-      for (unsigned int i=0 ; i < antennaIDs.size(); i++)
+      for (unsigned int i=0 ; i < antennaIDs.size(); ++i)
         if (calibPulses.find(antennaIDs(i)) != calibPulses.end()) {
            distance[ant] = distances(i);
            fieldStr[ant] = calibPulses[antennaIDs(i)].envelopeMaximum;
@@ -773,7 +774,7 @@ namespace CR { // Namespace CR -- begin
            timePos[ant] = calibPulses[antennaIDs(i)].envelopeTime;
            antennaNumber[ant] = i+1;
            antID[ant] = antennaIDs(i);
-           ant++;
+           ++ant;
         }
       // consistancy check
       if (ant != Nant)
@@ -1112,6 +1113,9 @@ namespace CR { // Namespace CR -- begin
       // get antenna positions and distances in shower coordinates
       Vector <double> distances = erg.asArrayDouble("distances");
 
+      // get antenna positions: shifted for core position and in shower coordinates
+      Matrix <double> antPos = toShower(beamPipe_p->GetAntPositions(), erg.asDouble("Azimuth"), erg.asDouble("Elevation"));
+
       // create arrays for plotting and fitting
       unsigned int Nant = calibPulses.size();
       Double_t timeVal  [Nant], distance  [Nant], distanceClean  [Nant], timeValClean  [Nant];
@@ -1122,16 +1126,17 @@ namespace CR { // Namespace CR -- begin
 
       // loop through antennas and fill the arrays
       unsigned int ant = 0;  // counting antennas with pulse information
-      for (unsigned int i=0 ; i < antennaIDs.size(); i++)
-        if (calibPulses.find(antennaIDs(i)) != calibPulses.end()) 
-        {
-           distance     [ant] = distances(i);
+      for (unsigned int i=0 ; i < antennaIDs.size(); ++i)
+        if (calibPulses.find(antennaIDs(i)) != calibPulses.end()) {
            timeVal      [ant] = calibPulses[antennaIDs(i)].geomDelay;// + calibPulses[antennaIDs(i)].envelopeTime;
+           // add distance from the antenna to shower plane (z of shower coordinates)
+           timeVal      [ant] += antPos.row(i)(2) * 3;
+           distance     [ant] = distances(i);
            fieldStr     [ant] = calibPulses[antennaIDs(i)].envelopeMaximum;
            noiseBgr     [ant] = calibPulses[antennaIDs(i)].noise;
            antennaNumber[ant] = i+1;
            antID        [ant] = antennaIDs(i);
-           ant++;
+           ++ant;
         }
 
       // consistancy check
