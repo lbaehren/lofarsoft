@@ -251,7 +251,7 @@ using CR::LopesEventIn;
     <li>\b ccWindowWidth    Status: <i>for experts</i><br>
                             Time range to search for CC-beam-peak in lateral distribution studies,
                             default is +/- 45 ns.<br>
-    <li>\b wirteBadEvents   Status: <i>preliminary</i><br>
+    <li>\b writeBadEvents   Status: <i>preliminary</i><br>
                             Events with a bad reconstruction (e.g. simplex fit crashed) will be written 
                             to the root file. Though, detection of bad reconstructions does not work
                             reliable.<br>
@@ -1850,7 +1850,7 @@ int main (int argc, char *argv[])
             CutSmallSignal_NS = results.asInt("CutSmallSignal");
             CutBadTiming_NS = results.asInt("CutBadTiming");
             CutSNR_NS = results.asInt("CutSNR");
-            latMeanDist_NS = results.asDouble("meandist");
+            latMeanDist_NS = results.asDouble("latMeanDist");
           }
 
           // plot lateral distribution of arrival times, if requested
@@ -1879,7 +1879,7 @@ int main (int argc, char *argv[])
           rmsCCbeam_NS = results.asDouble("rmsCCbeam");
           rmsXbeam_NS = results.asDouble("rmsXbeam");
           rmsPbeam_NS = results.asDouble("rmsPbeam");
-          latMeanDistCC_NS = results.asDouble("latMeanDistCC");
+          latMeanDistCC_NS = results.asDouble("meandist");
           gt = results.asuInt("Date");
 
           // getting necessary data to plot [added: mfranc]
