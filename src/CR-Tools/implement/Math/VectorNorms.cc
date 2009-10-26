@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: Algebra.cc,v 1.2 2006/10/31 18:24:08 bahren Exp $*/
+/* $Id$*/
 
 #include <cmath>
 #include <Math/VectorNorms.h>

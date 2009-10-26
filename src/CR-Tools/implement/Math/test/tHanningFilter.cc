@@ -34,6 +34,8 @@ using casa::Double;
 using casa::Complex;
 using casa::Vector;
 
+using CR::HanningFilter;
+
 /*!
   \file tHanningFilter.cc
   

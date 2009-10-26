@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: VectorConversion.cc,v 1.4 2007/03/19 13:48:40 bahren Exp $*/
+/* $Id$*/
 
 #include <Math/VectorConversion.h>
 

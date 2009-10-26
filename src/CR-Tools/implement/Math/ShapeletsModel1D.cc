@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ShapeletsModel1D.cc,v 1.1 2005/07/15 10:10:37 bahren Exp $*/
+/* $Id$*/
 
 #include <Math/ShapeletsModel1D.h>
 

@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: StatisticsFilter.cc,v 1.9 2006/11/02 11:01:20 horneff Exp $*/
+/* $Id$*/
 
 #include <Math/StatisticsFilter.h>
 

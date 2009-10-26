@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: RangeSplitter.cc,v 1.1 2006/03/28 12:01:44 bahren Exp $*/
+/* $Id$*/
 
 #include <casa/BasicMath/Math.h>
 #include <scimath/Mathematics.h>
