@@ -573,6 +573,21 @@ endif (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 
 
 ## -------------------------------------------------------------------
+## genEventlist
+
+if (HAVE_ROOT)
+  add_executable (genEventlist genEventlist.cc)
+  ## linker instructions
+  target_link_libraries (genEventlist
+      ${ROOT_LIBRARIES}
+      )
+  ## installation instructions
+  list (APPEND cr_apps genEventlist)
+endif (HAVE_ROOT)
+
+
+
+## -------------------------------------------------------------------
 
 ## Glish client programs
 
