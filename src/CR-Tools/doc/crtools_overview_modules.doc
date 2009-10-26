@@ -94,9 +94,10 @@
       <td>Comments</td>
     </tr>
     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td>CR::GeomDelay</td>
+      <td>Class to handle the computation of geometrical delays as needed for
+       beamforming.</td>
+      <td>Supports far-field and near-field geometry.</td>
     </tr>
     <tr>
       <td></td>
