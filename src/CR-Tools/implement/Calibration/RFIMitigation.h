@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: RFIMitigation.h,v 1.12 2007/03/20 15:44:43 singh Exp $*/
+/* $Id$*/
 
 #ifndef _RFIMITIGATION_H_
 #define _RFIMITIGATION_H_

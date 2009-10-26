@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: PhaseCalibrationPlugin.cc,v 1.9 2007/03/26 14:23:29 singh Exp $*/
+/* $Id$*/
 
 #include <Calibration/PhaseCalibrationPlugin.h>
 

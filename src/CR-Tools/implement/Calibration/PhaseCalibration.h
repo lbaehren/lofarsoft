@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: PhaseCalibration.h,v 1.12 2007/03/26 13:15:30 bahren Exp $*/
+/* $Id$*/
 
 #ifndef PHASECALIBRATION_H
 #define PHASECALIBRATION_H

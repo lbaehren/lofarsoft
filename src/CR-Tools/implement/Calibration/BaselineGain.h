@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: BaselineGain.h,v 1.9 2007/04/13 13:44:29 bahren Exp $ */
+/* $Id$ */
 
 #ifndef BASELINEGAIN_H
 #define BASELINEGAIN_H

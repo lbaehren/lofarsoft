@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: CalTableWriter.cc,v 1.3 2006/10/31 18:23:24 bahren Exp $*/
+/* $Id$*/
 
 #include <Calibration/CalTableWriter.h>
 

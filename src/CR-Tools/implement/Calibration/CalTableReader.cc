@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: CalTableReader.cc,v 1.5 2007/01/15 14:41:09 horneff Exp $*/
+/* $Id$*/
 
 #include <Calibration/CalTableReader.h>
 

@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: CalTableCreator.h,v 1.3 2006/11/08 16:06:41 bahren Exp $*/
+/* $Id$*/
 
 #ifndef _CALTABLECREATOR_H_
 #define _CALTABLECREATOR_H_

@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 
-/* $Id: PhaseCalibration.cc,v 1.18 2007/03/26 13:15:30 bahren Exp $*/
+/* $Id$*/
 
 #include <Calibration/PhaseCalibration.h>
 

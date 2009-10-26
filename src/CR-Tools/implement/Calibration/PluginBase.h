@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: PluginBase.h,v 1.7 2006/10/05 09:45:41 horneff Exp $*/
+/* $Id$*/
 
 #ifndef _PLUGINBASE_H_
 #define _PLUGINBASE_H_

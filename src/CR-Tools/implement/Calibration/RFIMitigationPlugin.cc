@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: RFIMitigationPlugin.cc,v 1.9 2007/04/04 14:14:10 horneff Exp $*/
+/* $Id$*/
 
 #include <Calibration/RFIMitigationPlugin.h>
 

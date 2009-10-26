@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: TVCalibrationPlugin.h,v 1.3 2007/04/17 12:07:21 horneff Exp $*/
+/* $Id$*/
 
 #ifndef TVCALIBRATIONPLUGIN_H
 #define TVCALIBRATIONPLUGIN_H
