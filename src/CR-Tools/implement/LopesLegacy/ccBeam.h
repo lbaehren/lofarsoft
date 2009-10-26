@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ccBeam.h,v 1.4 2006/10/31 18:24:08 bahren Exp $*/
+/* $Id$*/
 
 #ifndef LOPES_CCBEAM_H
 #define LOPES_CCBEAM_H

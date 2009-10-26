@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: xBeam.h,v 1.2 2007/06/16 20:47:06 horneff Exp $*/
+/* $Id$*/
 
 #ifndef LOPES_XBEAM_H
 #define LOPES_XBEAM_H

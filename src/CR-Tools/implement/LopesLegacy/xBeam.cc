@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: xBeam.cc,v 1.4 2007/06/19 08:12:26 horneff Exp $*/
+/* $Id$*/
 
 #include <scimath/Mathematics/FFTServer.h>
 
