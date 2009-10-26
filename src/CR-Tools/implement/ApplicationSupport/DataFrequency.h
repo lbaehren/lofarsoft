@@ -21,7 +21,7 @@
 #ifndef DATAFREQUENCY_H
 #define DATAFREQUENCY_H
 
-/* $Id: DataFrequency.h,v 1.3 2006/10/31 18:24:08 bahren Exp $ */
+/* $Id$ */
 
 // C++ Standard library
 #include <iostream>

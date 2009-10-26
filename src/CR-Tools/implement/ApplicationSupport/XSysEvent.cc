@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: XSysEvent.cc,v 19.4 2004/11/30 17:51:11 ddebonis Exp $
+//# $Id$
 
 #if defined(AIPS_SUN4_X11R4)
 #define XTVAAPPINITIALIZE_CAST (Cardinal*)

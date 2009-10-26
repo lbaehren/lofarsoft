@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: XSysEvent.h,v 19.8 2006/12/22 05:33:29 gvandiep Exp $
+//# $Id$
 
 #ifndef TASKING_XSYSEVENT_H
 #define TASKING_XSYSEVENT_H

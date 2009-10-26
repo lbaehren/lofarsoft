@@ -22,7 +22,7 @@
 #ifndef OBSERVATIONMETA_H
 #define OBSERVATIONMETA_H
 
-/* $Id: ObservationMeta.h,v 1.6 2006/11/27 10:54:04 bahren Exp $ */
+/* $Id$ */
 
 // C++ Standard library
 #include <ostream>

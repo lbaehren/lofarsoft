@@ -5,7 +5,7 @@
  *
  */
 
-/* 	$Id: tim.h,v 1.2 2005/05/09 09:27:41 bahren Exp $	 */
+/* 	$Id$	 */
 
 
 #ifndef _TIM_H_

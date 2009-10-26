@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: DataCC.cc,v 1.8 2007/03/19 17:40:33 bahren Exp $ */
+/* $Id$ */
 
 #include <ApplicationSupport/DataCC.h>
 

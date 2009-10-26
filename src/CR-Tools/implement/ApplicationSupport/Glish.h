@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: Glish.h,v 19.4 2004/11/30 17:51:10 ddebonis Exp $
+//# $Id$
 
 #ifndef TASKING_GLISH_H
 #define TASKING_GLISH_H

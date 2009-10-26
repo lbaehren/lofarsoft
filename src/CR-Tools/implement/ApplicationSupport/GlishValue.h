@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //# 
-//# $Id: GlishValue.h,v 19.7 2006/12/22 05:33:29 gvandiep Exp $
+//# $Id$
 
 #ifndef TASKING_GLISHVALUE_H
 #define TASKING_GLISHVALUE_H

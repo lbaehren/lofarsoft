@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: GlishValue.cc,v 19.3 2004/11/30 17:51:11 ddebonis Exp $
+//# $Id$
 
 #include <Glish/Value.h>
 #include <ApplicationSupport/GlishArray.h>
