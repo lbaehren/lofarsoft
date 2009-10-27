@@ -6,7 +6,7 @@ targetdir=/opt/dal
 ## ----------------------------------------------------------------------------
 ## Update codebase and rebuild the DAL
 
-#./devel_common/scripts/clean_rebuild dal
+./devel_common/scripts/clean_rebuild dal
 
 ## ----------------------------------------------------------------------------
 ## Get SVN revision number
