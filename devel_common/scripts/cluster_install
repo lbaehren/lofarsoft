@@ -34,3 +34,9 @@ echo "-- creating symbolic links ..."
 rm -f lib bin
 ln -s release-$var_version/bin .
 ln -s release-$var_version/lib .
+
+echo "-- post-installation clean-up ..."
+
+rm -rf release-$var_version/doc
+rm -rf release-$var_version/man
+rm -rf release-$var_version/share
