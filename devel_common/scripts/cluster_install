@@ -6,14 +6,16 @@ targetdir=/opt/dal
 ## ----------------------------------------------------------------------------
 ## Update codebase and rebuild the DAL
 
-./devel_common/scripts/clean_rebuild dal
+#./devel_common/scripts/clean_rebuild dal
 
 ## ----------------------------------------------------------------------------
 ## Get SVN revision number
 
 echo "-- Extracting version number ..."
 
-var_version=`cat $basedir/.svn/all-wcprops | grep code | grep trunk | tr "/" "\n" | grep [0-9]`
+var_version=`cat $basedir/.svn/all-wcprops | grep code | grep trunk | grep -v CMakeLists | tr "/" "\n" | grep [0-9]`
+
+echo "--> Version number = ${var_version}"
 
 ## ----------------------------------------------------------------------------
 ## Copy the release directory to the installion target
@@ -26,12 +28,9 @@ cp -r $basedir/release release-$var_version
 echo "-- Cleaning up release directory ..."
 
 rm -rf release-$var_version/include
-#rm -rf release-$var_version/bin
 
 echo "-- creating symbolic links ..."
 
 rm -f lib bin
 ln -s release-$var_version/bin .
 ln -s release-$var_version/lib .
-
-
