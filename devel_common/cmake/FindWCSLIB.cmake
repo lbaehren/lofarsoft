@@ -43,11 +43,15 @@ find_path (WCSLIB_INCLUDES wcs/wcs.h wcslib/wcs.h
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-find_library (WCSLIB_LIBRARIES wcs
+find_library (WCSLIB_WCS_LIBRARY wcs
   PATHS ${lib_locations}
   PATH_SUFFIXES wcs wcslib darwin/lib linux_gnu/lib stable/linux_gnu/lib
   NO_DEFAULT_PATH
   )
+
+if (WCSLIB_WCS_LIBRARY)
+  set (WCSLIB_LIBRARIES ${WCSLIB_WCS_LIBRARY})
+endif (WCSLIB_WCS_LIBRARY)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -85,4 +89,5 @@ mark_as_advanced (
   HAVE_WCSLIB
   WCSLIB_INCLUDES
   WCSLIB_LIBRARIES
+  WCSLIB_WCS_LIBRARY
   )

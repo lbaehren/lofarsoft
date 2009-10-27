@@ -52,7 +52,7 @@ case $2 in
 	;;
     "Cluster")
 	echo "Cluster install of ${BUILD_TARGET} ..."
-	targetdir=/app64/usg
+	targetdir=/opt/dal
 	var_version=`cat $LOFARSOFT/.svn/all-wcprops | grep code | grep trunk | tr "/" "\n" | grep [0-9]`
 	echo "SVN version = ${var_version}"
 	if test -d $targetdir ; then 
