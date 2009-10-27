@@ -17,6 +17,7 @@ option (MATHGL_ENABLE_HDF5       "Enable support for HDF5?"               NO  )
 option (MATHGL_ENABLE_PYTHON     "Enable support for Python?"             YES )
 option (MATHGL_ENABLE_QT         "Enable support for Qt?"                 YES )
 option (MATHGL_ENABLE_DOUBLE     "Enable double precision?"               YES )
+option (MATHGL_DOWNLOAD_ARCHIVE  "Download archive of latest version?"    NO  )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -73,24 +74,20 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   set (MATHGL_URL "${USG_DOWNLOAD}/software/${MATHGL_TAR_ARCHIVE}")
 
   ##__________________________________________________________________
-  ## GNU Scientific Library
+  ## External libraries
+  
+  if (NOT MATHGL_VERBOSE_CONFIGURE)
+    set (GSL_FIND_QUIETLY YES)
+    set (HDF5_FIND_QUIETLY YES)
+  endif (NOT MATHGL_VERBOSE_CONFIGURE)
 
-  set (GSL_FIND_QUIETLY YES)
+  set (DESIRED_QT_VERSION 4)
 
   include (FindGSL)
+  include (FindHDF5)
+  include (FindOpenGL)
+  include (FindQt)
 
-  if (NOT HAVE_GSL)
-    message (SEND_ERROR "[MathGL] Unable to find GSL - please install!")
-  endif (NOT HAVE_GSL)
-
-  ##__________________________________________________________________
-  ## 
-  
-  if (MATHGL_ENABLE_HDF5)
-    set (HDF5_FIND_QUIETLY YES)
-    include (FindHDF5)
-  endif (MATHGL_ENABLE_HDF5)
-  
   ##__________________________________________________________________
   ## Python bindings
   
@@ -112,46 +109,47 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   endif (MATHGL_ENABLE_PYTHON)
 
   ##__________________________________________________________________
-  ## Locate OpenGL
-
-  include (FindOpenGL)
-  
-  ##__________________________________________________________________
-  ## Locate Qt4 libraries and header files
-
-  set (DESIRED_QT_VERSION 4)
-
-  include (FindQt)
-
-  ##__________________________________________________________________
   ## Check if a tar-archive with the source code is available already;
   ## if this is not the case we need to fetch it from the USg server.
   
-  find_file (have_mathgl_tgz ${MATHGL_TAR_ARCHIVE} ${MATHGL_SOURCE_DIR})
-  
-  if (have_mathgl_tgz)
-    add_custom_target (download_archive ALL
-      COMMAND cp ${have_mathgl_tgz} .
-      WORKING_DIRECTORY ${MATHGL_BINARY_DIR}
-      COMMENT "Copying tar-archive from USG_ROOT/external/mathgl ..."
-      )
-  else (have_mathgl_tgz)
-    if (HAVE_WGET)
-      add_custom_target (download_archive ALL
-	COMMAND wget -c ${MATHGL_URL}
-	WORKING_DIRECTORY ${MATHGL_BINARY_DIR}
-	)
-    else (HAVE_WGET)
-      if (HAVE_CURL)
+  find_file (have_mathgl_tgz 
+    mathgl-1.9.tgz
+    mathgl.tgz
+    PATHS ${MATHGL_SOURCE_DIR}
+    )
+
+  if (NOT have_mathgl_tgz)
+    set (MATHGL_DOWNLOAD_ARCHIVE YES)
+  else (NOT have_mathgl_tgz)
+    ## if the tar-archive with the source code cannot be found on the system, 
+    ## we try to fetch it from the USG server
+    if (MATHGL_DOWNLOAD_ARCHIVE)
+      if (HAVE_WGET)
 	add_custom_target (download_archive ALL
-	  COMMAND curl ${MATHGL_URL} -o ${MATHGL_TAR_ARCHIVE} -C -
-	  WORKING_DIRECTORY ${MATHGL_BINARY_DIR}
-	  )
-      else (HAVE_CURL)
-	message (FATAL_ERROR "[MathGL] No tool found to download tar-archive!")
-      endif (HAVE_CURL)
-    endif (HAVE_WGET)
-  endif (have_mathgl_tgz)
+          COMMAND wget -c ${MATHGL_URL}
+          WORKING_DIRECTORY ${MATHGL_BINARY_DIR}
+          )
+      else (HAVE_WGET)
+	if (HAVE_CURL)
+          add_custom_target (download_archive ALL
+            COMMAND curl ${MATHGL_URL} -o ${MATHGL_TAR_ARCHIVE} -C -
+            WORKING_DIRECTORY ${MATHGL_BINARY_DIR}
+            )
+	else (HAVE_CURL)
+          message (FATAL_ERROR "[MathGL] No tool found to download tar-archive!")
+	endif (HAVE_CURL)
+      endif (HAVE_WGET)
+    else (MATHGL_DOWNLOAD_ARCHIVE)
+      ## copy the tar-archive to the build directory ...
+      add_custom_target (download_archive ALL
+	COMMAND cp ${have_mathgl_tgz} .
+	WORKING_DIRECTORY ${MATHGL_BINARY_DIR}
+	COMMENT "Copying tar-archive from USG_ROOT/external/mathgl ..."
+	)
+      ## ... and update the variable storing its name
+      get_filename_component (MATHGL_TAR_ARCHIVE ${have_mathgl_tgz} NAME)
+    endif (MATHGL_DOWNLOAD_ARCHIVE)
+  endif (NOT have_mathgl_tgz)
   
   ##__________________________________________________________________
   ## Expand the tar-archive
