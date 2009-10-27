@@ -50,12 +50,5 @@ case $2 in
 	cd $LOFARSOFT/build/${BUILD_TARGET}
 	make Nightly
 	;;
-    *)
-	echo "[clean_rebuild] Unknown post-build option."
-	echo " "
-	echo " [Experimental|Nightly] "
-	echo " "
-	exit;
-	;;
 esac
 
