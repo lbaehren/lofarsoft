@@ -14,8 +14,38 @@
       <td class="indexkey">Comments</td>
     </tr>
     <tr>
+      <td>CR::CRflaggingPlugin</td>
+      <td>Flaggs antennas based on spikyness, high-power, low-power</td>
+      <td>LOPES "Plugin"</td>
+    </tr>
+    <tr>
+      <td>DataBlockStatistics</td>
+      <td>???</td>
+      <td>?</td>
+    </tr>
+    <tr>
+      <td>CR::dfitgauss</td>
+      <td>Fit a Gaussian to 1d-data </td>
+      <td>Same as the Glish routine</td>
+    </tr>
+    <tr>
+      <td>CR::DynamicSpectrum</td>
+      <td>Calculates Dynamic spectra and e.g. generates FITS files</td>
+      <td>CASA-heavy</td>
+    </tr>
+    <tr>
+      <td>CR::fitCR2gauss</td>
+      <td>Guipipeline-style X-Beam -> CC-Beam fitting</td>
       <td></td>
+    </tr>
+    <tr>
+      <td>PulseProperties</td>
+      <td>Storage container for pulse parameters</td>
       <td></td>
+    </tr>
+    <tr>
+      <td>CR::tbbTools</td>
+      <td>Simulation of TBB FPGA algorithms</td>
       <td></td>
     </tr>
     <tr>
@@ -34,9 +64,34 @@
       <td class="indexkey">Comments</td>
     </tr>
     <tr>
+      <td>AverageGain</td>
+      <td>Calculate baseline of spectra and then normalize the Spectra</td>
+      <td>uses BaselineGain</td>
+    </tr>
+    <tr>
+      <td>BaselineGain</td>
+      <td>Different ways to calculate the baseline of spectra</td>
       <td></td>
+    </tr>
+    <tr>
+      <td>CR::CalTableReader[/Writer/Creator]</td>
+      <td>LOPES CalTable calibration database</td>
       <td></td>
-      <td></td>
+    </tr>
+    <tr>
+      <td>CR::CalTableInterpolater</td>
+      <td>Interpolates CalTable-calibration data to needed grid</td>
+      <td>Includes multi-d interpolation routine</td>
+    </tr>
+    <tr>
+      <td>CR::RFIMitigation[/Plugin]</td>
+      <td>Flagging of RFI lines in a spectrum</td>
+      <td>IMHO unnecessary complicated</td>
+    </tr>
+    <tr>
+      <td>CR::TVCalibrationPlugin</td>
+      <td>LOPES-style phase calibration</td>
+      <td>LOPES "Plugin"</td>
     </tr>
     <tr>
       <td></td>
@@ -85,13 +140,33 @@
     </tr>
   </table>
 
+  \section crtools_module_display Display
+
+  <table border=0>
+    <tr>
+      <td class="indexkey">Class/File</td>
+      <td class="indexkey">Functionality</td>
+      <td class="indexkey">Comments</td>
+    </tr>
+    <tr>
+      <td>CR::SimplePlot</td>
+      <td>Routines for plotting into PS-files</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+
   \section crtools_module_imaging Imaging
 
   <table border=0>
     <tr>
-      <td>Class/File</td>
-      <td>Functionality</td>
-      <td>Comments</td>
+      <td class="indexkey">Class/File</td>
+      <td class="indexkey">Functionality</td>
+      <td class="indexkey">Comments</td>
     </tr>
     <tr>
       <td>CR::GeomDelay</td>
@@ -106,22 +181,27 @@
     </tr>
   </table>
 
-  \section crtools_module_io IO
+  \section crtools_module_math Math
 
   <table border=0>
     <tr>
-      <td>Class/File</td>
-      <td>Functionality</td>
-      <td>Comments</td>
+      <td class="indexkey">Class/File</td>
+      <td class="indexkey">Functionality</td>
+      <td class="indexkey">Comments</td>
     </tr>
     <tr>
-      <td></td>
-      <td></td>
+      <td>CR::HanningFilter</td>
+      <td>Generate array with (modified) Hanning window</td>
       <td></td>
     </tr>
     <tr>
+      <td>StatisticsFilter</td>
+      <td>Min/Max/Mean/Median/RMS/stddev - filter</td>
       <td></td>
-      <td></td>
+    </tr>
+    <tr>
+      <td>LinearRegression</td>
+      <td>Linear fit through data points</td>
       <td></td>
     </tr>
   </table>

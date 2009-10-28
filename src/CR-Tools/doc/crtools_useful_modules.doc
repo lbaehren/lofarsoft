@@ -1,0 +1,170 @@
+/*!
+  \page crtools_useful_modules CR-Tools :: Overview of Classes with general usability
+
+
+  <table border=0>
+    <tr>
+      <td class="indexkey">Module</td>
+      <td class="indexkey" align="center">Usab.*</td>
+      <td class="indexkey">Class/File</td>
+      <td class="indexkey">Functionality</td>
+      <td class="indexkey">Comments</td>
+    </tr>
+    <tr>
+      <td>Analysis</td>
+      <td align="center">+</td>
+      <td>CR::CRflaggingPlugin</td>
+      <td>Flaggs antennas based on spikyness, high-power, low-power</td>
+      <td>LOPES "Plugin"</td>
+    </tr>
+    <tr>
+      <td>Analysis</td>
+      <td align="center">+</td>
+      <td>DataBlockStatistics</td>
+      <td>Generate some statistics for a single block of time-series data.</td>
+      <td>not tested recently</td>
+    </tr>
+    <tr>
+      <td>Analysis</td>
+      <td align="center">++</td>
+      <td>CR::dfitgauss</td>
+      <td>Fit a Gaussian to 1d-data </td>
+      <td>Same as the Glish routine</td>
+    </tr>
+    <tr>
+      <td>Analysis</td>
+      <td align="center">O</td>
+      <td>CR::DynamicSpectrum</td>
+      <td>Calculates Dynamic spectra and e.g. generates FITS files</td>
+      <td>CASA-heavy</td>
+    </tr>
+    <tr>
+      <td>Analysis</td>
+      <td align="center">+</td>
+      <td>CR::fitCR2gauss</td>
+      <td>Guipipeline-style X-Beam -> CC-Beam fitting</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Analysis</td>
+      <td align="center">?</td>
+      <td>PulseProperties</td>
+      <td>Storage container for pulse parameters</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Analysis</td>
+      <td align="center">+</td>
+      <td>CR::tbbTools</td>
+      <td>Simulation of TBB FPGA algorithms</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Calibration</td>
+      <td align="center">+</td>
+      <td>AverageGain</td>
+      <td>Calculate baseline of spectra and then normalize the Spectra</td>
+      <td>uses BaselineGain, not tested recently</td>
+    </tr>
+    <tr>
+      <td>Calibration</td>
+      <td align="center">+</td>
+      <td>BaselineGain</td>
+      <td>Different ways to calculate the baseline of spectra</td>
+      <td>not tested recently</td>
+    </tr>
+    <tr>
+      <td>Calibration</td>
+      <td align="center">O</td>
+      <td>CR::CalTableReader[/Writer/Creator]</td>
+      <td>LOPES CalTable calibration database</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Calibration</td>
+      <td align="center">+</td>
+      <td>CR::CalTableInterpolater</td>
+      <td>Interpolates CalTable-calibration data to needed grid</td>
+      <td>Includes multi-d interpolation routine</td>
+    </tr>
+    <tr>
+      <td>Calibration</td>
+      <td align="center">+</td>
+      <td>CR::RFIMitigation[/Plugin]</td>
+      <td>Flagging of RFI lines in a spectrum</td>
+      <td>IMHO unnecessary complicated</td>
+    </tr>
+    <tr>
+      <td>Calibration</td>
+      <td align="center">O</td>
+      <td>CR::TVCalibrationPlugin</td>
+      <td>LOPES-style phase calibration</td>
+      <td>LOPES "Plugin"</td>
+    </tr>
+    <tr>
+      <td>Display</td>
+      <td align="center">++</td>
+      <td>CR::SimplePlot</td>
+      <td>Routines for plotting into PS-files</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Imaging</td>
+      <td align="center">++</td>
+      <td>CR::GeomDelay</td>
+      <td>Class to handle the computation of geometrical delays as needed for
+       beamforming.</td>
+      <td>Supports far-field and near-field geometry.</td>
+    </tr>
+    <tr>
+      <td>Math</td>
+      <td align="center">+</td>
+      <td>CR::HanningFilter</td>
+      <td>Generate array with (modified) Hanning window</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Math</td>
+      <td align="center">++</td>
+      <td>StatisticsFilter</td>
+      <td>Min/Max/Mean/Median/RMS/stddev - filter</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Math</td>
+      <td align="center">+</td>
+      <td>LinearRegression</td>
+      <td>Linear fit through data points</td>
+      <td></td>
+    </tr>
+      <td></td>
+      <td align="center"></td>
+      <td></td>
+      <td></td>
+      <td></td>
+  </table>
+
+  <h3>Usab.* = Usability Index:</h3>
+  <table border=0>
+     <tr>
+       <td class="indexkey" align="center">Value</td>
+       <td class="indexkey">Meaning</td>
+    </tr>
+    <tr>
+      <td align="center">?</td>
+      <td>Usability unkown</td>
+    </tr>
+    <tr>
+      <td align="center">O</td>
+      <td>Specialized Class, use it to "steal" code or have it modified</td>
+    </tr>
+    <tr>
+      <td align="center">+</td>
+      <td>Likely to be useful, give it a try before writing your own.</td>
+    </tr>
+    <tr>
+      <td align="center">++</td>
+      <td>Considered useful for general use. Think hard before writing your own stuff!</td>
+    </tr>
+
+*/
