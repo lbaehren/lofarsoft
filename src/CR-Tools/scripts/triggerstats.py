@@ -128,6 +128,8 @@ lastTime = triggerList[totalTriggers - 1][timeKey]
 firstTime = float(firstTime)
 lastTime = float(lastTime)
 minutes = (lastTime - firstTime) / 60.0 # time in minutes - time limiting should go here!
+if minutes == 0.0:
+    minutes = 1.0 / 60 # avoid div by zero
 # float roundoff problems ?!
 
 
