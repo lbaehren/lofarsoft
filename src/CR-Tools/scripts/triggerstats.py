@@ -1,13 +1,10 @@
-
 #
 #  triggerstats.py
 #  
-
 #
 #  Created by Arthur Corstanje on 9/1/09.
 #  Copyright (c) 2009 __MyCompanyName__. All rights reserved.
 #
-
 # list of free parameters (to be removed from this code...):
 # - input filename [ DONE ]
 # - (output directory)
@@ -23,7 +20,8 @@ import sys
 if len(sys.argv) > 1:
     fileName = sys.argv[1] 
 else:
-    fileName = '2009-09-03_TRIGGER5.dat' #  that's just handy for rapid testing...
+    fileName = '2009-09-03_TRIGGER5.dat'   #  that's just handy for rapid testing...
+    print 'No filename given; usage: python triggerstats.py <filename>. Using file ' + fileName + ' by default.'
 
 def nofTriggersFilteredByThreshold(listOfTriggers, threshold):
     n = 0
@@ -36,8 +34,6 @@ def nofTriggersFilteredByThreshold(listOfTriggers, threshold):
             n += 1
     return n
 
-numberOfRCUsperStation = 96;
-
 def triggersFilteredByThreshold(listOfTriggers, threshold):
     outList = []
     for record in listOfTriggers:
@@ -49,6 +45,7 @@ def triggersFilteredByThreshold(listOfTriggers, threshold):
             outList.append(record)
     return outList
 
+numberOfRCUsperStation = 96;
 # keys for our trigger dictionary; separate lists for some of the statistics
 RCUnrKey = 'RCUnr';             RCUnr = [] 
 seqnrKey = 'seqnr';             seqnr = []
@@ -90,7 +87,8 @@ for record in triggerList:
 (y, x) = RCUhisto = numpy.histogram(RCUnr, 96, (0, 96)) # (counts, bins) comes out
 
 maxY = max(y)
-y = 1000.0 * y / max(y)
+maxX = max(x)
+#y = 1000.0 * y / max(y)
 
 width=1200  
 height=600
@@ -115,6 +113,7 @@ graph.Axis("xy")
 graph.Grid()
 
 graph.Title("Number of triggers versus RCU number")
+graph.Puts(float(maxX) * 0.5,float(maxY)*1.05,0,"Total trigger count = " + str(len(triggerList)))
 graph.Label("x","RCU number",1)
 graph.Label("y","Counts",1)
 graph.Bars(gY);
@@ -148,16 +147,19 @@ width = 800
 height = 600
 graph = mglGraph(mglGraphPS, width, height)
 
-graph.Clf()
-graph.SetFontSize(2.0)
+maxX = gX.Max('x')[0]
+maxY = gY.Max('x')[0] # min, max is complicated in mglData... the 'x' means first dimension not graph-x !
 
-graph.Title("# single triggers per minute, vs threshold")
+graph.Clf()
+graph.SetFontSize(2.5)
 
 # set y-min range so you can just see 1 count in the entire interval.
 yRangeMin = 0.95 / minutes
-graph.SetRanges(0.0, gX.Max('x')[0], yRangeMin, gY.Max('x')[0]) # SetRanges goes before Axis to include ranges in axes
- # min, max is complicated in mglData... the 'x' means first dimension not graph-x !
+graph.SetRanges(0.0, maxX, yRangeMin, maxY) # SetRanges goes before Axis to include ranges in axes
 graph.SetOrigin(0.0, yRangeMin)
+
+graph.Title("Single triggers per minute, vs threshold")
+graph.Puts(float(maxX) * 0.5,float(maxY)*1.05,0,"Total triggers per minute = " + format(len(triggerList) / minutes, "8.1f"))
 
 graph.SetFunc("","lg(y)","") 
 graph.SetTicks('y',0)		 
@@ -340,16 +342,21 @@ for i in range(len(y)):
 
 for i in range(len(x)):
     gX[i] = (float(x[i]) - firstTime) / 60.0
+
+maxX = gX.Max('x')[0]
+maxY = float(max(y))
     
 graph.Clf()
 graph.SetFontSize(3.0)
-graph.SetRanges(0.0, gX.Max('x')[0], 0.0, float(max(y)))
+graph.SetRanges(0.0, maxX, 0.0, maxY)
 #graph.SetTicks('x', 16.0, 4)
 
 graph.Axis("xy")
 graph.Grid()
 
 graph.Title("Time series of # triggers (binned)")
+graph.Puts(float(maxX) * 0.5,float(maxY)*1.05,0,"Total trigger count = " + str(len(triggerList)) + "; bin width = " + format(timeBinSize, "4.1f") + " s")
+
 graph.Label("x","Time (min)",1)
 graph.Label("y","Counts",1)
 graph.Bars(gY)
