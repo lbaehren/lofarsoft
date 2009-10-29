@@ -68,13 +68,14 @@ set (presto_binaries
 )
 
 set (presto_fc_binaries
-  rfifind show_pfd plotbincand profile
+  rfifind plotbincand profile
   psrorbit window zapbirds explorefft exploredat
   weight_psrfits 
 )
 
 set (presto_fc_special_binaries
   prepfold 
+  show_pfd 
 )
 
 ##__________________________________________________________
@@ -106,6 +107,7 @@ add_dependencies (presto
 ## libsla
 
 add_subdirectory (slalib)
+add_subdirectory (fortran)
 
 ## ==============================================================================
 ##
@@ -225,7 +227,6 @@ add_executable (prepfold
   prepfold.c
   prepfold_utils.c
   prepfold_plot.c
-  least_squares.f
   polycos.c
   readpar.c
   ${INSTRUMENTOBJS}
@@ -258,7 +259,12 @@ add_executable (spigotSband2filterbank
   )
 
 add_executable (show_pfd
-  show_pfd_cmd.c show_pfd.c prepfold_utils.c prepfold_plot.c least_squares.f range_parse.c ${PLOT2DOBJS}
+  show_pfd_cmd.c 
+  show_pfd.c 
+  prepfold_utils.c 
+  prepfold_plot.c 
+  range_parse.c 
+  ${PLOT2DOBJS}
 )
 
 add_executable (makedata
@@ -385,7 +391,7 @@ foreach (src ${presto_fc_special_binaries})
     LINKER_LANGUAGE Fortran
     COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
   )
-  target_link_libraries (${src} presto pgplot cfitsio)
+  target_link_libraries (${src} presto fort pgplot cfitsio)
 endforeach (src)
 
 ## ==============================================================================
