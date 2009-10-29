@@ -150,6 +150,16 @@ casa::Vector<MVPosition> CS302_antenna_position_value(casa::Vector<Int> rcu_ids)
 	
 }
 
+
+/*!
+ \brief This will give the positions back from the selected antennes of the outer array of station CS302 in local coordinates. 
+ 
+ \param rcu_ids       -- casa::Vector<uint> with the selected RCUs
+ 
+ \return selected_positions --  The positions of the selected antenna's 
+*/
+
+
 casa::Vector<MVPosition> CS302_antenna_position_value_outer(casa::Vector<Int> rcu_ids){
 	casa::Vector<MVPosition> all_positions;
 	casa::Vector<MVPosition> selected_positions;
@@ -241,7 +251,7 @@ int main (int argc,
 	  char *argv[])
 {
   // Calculate program run time:
-  time_t t1, t2;
+  time_t t1, t2, t3;
   t1 = time(NULL);
   cout<<"Dit is de door Sef & Sander aangepaste versie van testLOPESskymapping"<<endl;
   
@@ -300,8 +310,6 @@ int main (int argc,
   }
   
   cout<<"total number of antennas = "<<nants<<endl;
-  cout << "shape of dr[0]->fx() = " << dr[0]->fx().shape() << endl;
-  cout << "shape of dr[0]->fft() = " << dr[0]->fft().shape() << endl;
   
   int pixels;
   float increment;
@@ -480,8 +488,9 @@ int main (int argc,
 		
     uint nofBlocks = nofBlocksPerFrame * nofFrames;
 
-    Matrix<casa::DComplex> data(dr[0]->fftLength(),nUsedants); 
+    Matrix<casa::DComplex> data(dr[0]->fftLength(),nUsedants), AmplitudesC; 
     cout << "datashape = " << data.shape() << endl;
+    AmplitudesC = data;
 
     Vector< uint >*offset;
     Vector< int >*offset1;
@@ -494,6 +503,7 @@ int main (int argc,
     cout<<"offset 0 = "<<offset_zero<<endl;
 		
     for(int i=0; i<ninputfiles; i++){
+      dr[i]->setHanningFilter(0.5);
       offset[i] = dr[i]->sample_number();
       offset1[i].resize(offset[i].shape()[0]);
       for(int j=0; j<nantsinfile[i]; j++){
@@ -504,54 +514,124 @@ int main (int argc,
     }
 		
     //cout <<"dr->fft for antenna "<<0<<" = "<<dr[0]->fft().row(0)[0]<<endl;
-																			
+    
+
+    // Calculate the average amplitudes per frequency and antenna for calibration.
+
+    Matrix<Double> Amplitudes(dr[0]->fftLength(),nUsedants);
+
     for (uint blocknum=startblock; blocknum<startblock+nofBlocks; blocknum++){
-    	
-      if(nofBlocks>20 && blocknum%10==0){
-	cout<<"Processing block "<<blocknum-startblock+1<<" out of "<<nofBlocks<<endl;
+
+      // Keep track of where we are:
+      if(nofBlocks>500 && blocknum%50==0){
+	cout<<"Calculating frequency correction for block "<<blocknum-startblock+1<<" out of "<<nofBlocks;
+      }	else if(nofBlocks<=500 && nofBlocks>20 && blocknum%10==0){
+	cout<<"Calculating frequency correction for block "<<blocknum-startblock+1<<" out of "<<nofBlocks;
       } else if(nofBlocks <= 20){
-	cout<<"Processing block "<<blocknum-startblock+1<<" out of "<<nofBlocks<<endl;
+	cout<<"Calculating frequency correction for block "<<blocknum-startblock+1<<" out of "<<nofBlocks<<endl;
       }
-	
+
       counter = 0;
       for(int i=0; i<ninputfiles; i++){
-	//cout<<"time for "<<i<<" = "<<dr[i]->time()<<endl;
-	dr[i]->setHanningFilter(0.5);
 	dr[i]->setBlock(blocknum);
 	for(int j=0; j<nantsinfile[i]; j++){
 	  if(!antennaselection[i][j]){continue;} //skip antenna's that are not selected
 	  dr[i]->setShift(offset1[i][j]);
 	  data.column(counter) = dr[i]->fft().column(j);
 	  
-	  /*
-	  // Remove RFI:
-	  for(int k=0; k < 7*nfreq/513; k++){
-	  data.column(counter)[k+252*nfreq/513] = 0;
-	  data.column(counter)[k+300*nfreq/513] = 0;
-	  }
-	  */
 	  counter++;
 	  //cout<<"weer een antenne toegevoegd..."<<endl;
 	}
       }
-      // Remove the low and high frequencies, which contain noise:
-      int startrow,nrows,startcol,ncol;
-      startcol = 0; ncol = nUsedants;
-      startrow = 0; nrows =  (nfreq*30)/100;
-      data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-      nrows = (nfreq*15)/100;
-      startrow = nfreq-nrows;
-      data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+      Amplitudes = Amplitudes + casa::amplitude(data);
+      cout<< Amplitudes(nofBlocks/2,0)<<endl;
+    }
+
+    for (uInt j=0; j<Amplitudes.ncolumn(); j++) {
+       for (uInt i=0; i<Amplitudes.nrow(); i++) {
+          Amplitudes(i,j) = Amplitudes(i,j)/nofBlocks;
+       }      
+    }
+    cout<< Amplitudes(nofBlocks/2,0)<<endl;
+    convertArray(AmplitudesC,Amplitudes);
+    cout<< AmplitudesC(nofBlocks/2,0)<<endl;
+    /*for(uInt j=0; j<Amplitudes.ncolumn(); j++) {
+      cout<<"Amplitudes for antenna "<<j<<" at freq 255,288,303 and 275:\t"<<Amplitudes(255,j)<<"\t"<<Amplitudes(288,j)<<"\t"<<Amplitudes(303,j)<<"\t"<<Amplitudes(275,j)<<endl;
+      }*/
+    
+    t2 =  time(NULL);
+    for (uint blocknum=startblock; blocknum<startblock+nofBlocks; blocknum++){
       
-      skymapper.processData(data);
+      // Keep track of where we are:
+      if(nofBlocks>500 && blocknum%50==0){
+	t3 =  time(NULL);
+	int timeleft = (int)(1.*(t3-t2)/(blocknum-startblock+1)*(nofBlocks-(blocknum-startblock+1)));
+	cout<<"Processing block "<<blocknum-startblock+1<<" out of "<<nofBlocks;
+	cout<<". Estimated time left: "<<timeleft/3600<<" hours, "<<(timeleft%3600)/60<<" minutes, and "<<timeleft%60<<" seconds."<<endl;
+      }	else if(nofBlocks<=500 && nofBlocks>20 && blocknum%10==0){
+	t3 =  time(NULL);
+	int timeleft = (int)(1.*(t3-t2)/(blocknum-startblock+1)*(nofBlocks-(blocknum-startblock+1))/60);
+	cout<<"Processing block "<<blocknum-startblock+1<<" out of "<<nofBlocks;
+	cout<<". Estimated time left: "<<timeleft/3600<<" hours, "<<timeleft/60<<" minutes, and "<<timeleft<<" seconds."<<endl;
+      } else if(nofBlocks <= 20){
+	cout<<"Processing block "<<blocknum-startblock+1<<" out of "<<nofBlocks<<endl;
+      }
+	
+    
+    counter = 0;
+    for(int i=0; i<ninputfiles; i++){
+      //cout<<"time for "<<i<<" = "<<dr[i]->time()<<endl;
+      dr[i]->setBlock(blocknum);
+      for(int j=0; j<nantsinfile[i]; j++){
+	if(!antennaselection[i][j]){continue;} //skip antenna's that are not selected
+	dr[i]->setShift(offset1[i][j]);
+	data.column(counter) = dr[i]->fft().column(j);
+	  
+	counter++;
+	//cout<<"weer een antenne toegevoegd..."<<endl;
+      }
+    }
+    // Remove the low and high frequencies, which contain noise:
+    int startrow,nrows,startcol,ncol;
+    startcol = 0; ncol = nUsedants;
+    startrow = 0; nrows =  (nfreq*30)/100;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    nrows = (nfreq*15)/100;
+    startrow = nfreq-nrows;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    
+    
+    // Remove RFI:
+    nrows = (nfreq*5)/513;  // Remove 2 frequency bins around peak frequency.
+
+    startrow = 253;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    startrow = 286;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    startrow = 301;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    
+    nrows = (nfreq*3)/513;  // Remove 1 frequency bin around peak frequency.
+    startrow = 338;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    startrow = 342;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+ 
+    data = data / AmplitudesC;
+    skymapper.processData(data);
+    
+    // Free virtual memory:
+    //for(int i=0; i<ninputfiles; i++){delete dr[i];}
+    //for(int i=0; i<ninputfiles; i++){dr[i] = new CR::LOFAR_TBB(pathname+inputfiles[i], blocksize);}
+    
     };
-   
-    cout << "Image "<<outfile<<" generated." << endl;
 
-   // Write out runtime
-   t2 = time(NULL);
-   cout<<"snstestskymapping has run for "<<(t2-t1)/3600<<" hours, "<<((t2-t1)%3600)/60<<" minutes, and "<<(t2-t1)%60<<" seconds."<<endl;
-
+    cout << "Image generated, and saved as " <<outfile<< endl;
+  
+    // Write out runtime
+    t2 = time(NULL);
+    cout<<"snstestskymapping has run for "<<(t2-t1)/3600<<" hours, "<<((t2-t1)%3600)/60<<" minutes, and "<<(t2-t1)%60<<" seconds."<<endl;
+    
   } catch (AipsError x) {
     cerr << "[testnewskymapping::simpleImage] " << x.getMesg() << endl;
     nofFailedTests++;
