@@ -586,6 +586,24 @@ if (HAVE_ROOT)
 endif (HAVE_ROOT)
 
 
+##____________________________________________________________________
+## tbbTriggerAnalysis
+
+if (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES)
+  
+  ## compiler instructions
+  add_executable (tbbTriggerAnalysis tbbTriggerAnalysis.cc)
+  ## linker instructions
+  target_link_libraries (tbbTriggerAnalysis
+    cr
+    ${DAL_LIBRARIES}
+    ${HDF5_LIBRARIES}
+    )
+  ## installation instructions
+  list (APPEND cr_apps tbbTriggerAnalysis)
+    
+endif (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES)
+
 
 ## -------------------------------------------------------------------
 
