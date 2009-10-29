@@ -1371,27 +1371,32 @@ $$ {
 
   address ncol;
 
-#define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) aipscol2stlvec(ary,*vp,Antenna); else aipscol2stlvec(ary,*vp,0)
+#define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) aipscol2stlvec(ary,*vp2,Antenna); else aipscol2stlvec(ary,*vp2,0); dp->noMod(); dp->put(*vp2)
 
   if (Datatype=="Time") {aipsvec2stlvec(drp->timeValues(),*vp);}
   else if (Datatype=="Frequency") {aipsvec2stlvec(drp->frequencyValues(),*vp);}
   else if (Datatype=="Fx") {
+    vector<HNumber>* vp2 = new vector<HNumber>;
     CasaMatrix<CasaNumber> ary=drp->fx();
     copy_ary2vp;
   }
   else if (Datatype=="Voltage") {
+    vector<HNumber>* vp2 = new vector<HNumber>;
     CasaMatrix<CasaNumber> ary=drp->voltage();
     copy_ary2vp;
   }
   else if (Datatype=="invFFT") {
+    vector<HNumber>* vp2 = new vector<HNumber>;
     CasaMatrix<CasaNumber> ary=drp->invfft();
     copy_ary2vp;
   }
   else if (Datatype=="FFT") {
+    vector<HComplex>* vp2 = new vector<HComplex>;
     CasaMatrix<CasaComplex> ary=drp->fft();
     copy_ary2vp;
   }
   else if (Datatype=="CalFFT") {
+    vector<HComplex>* vp2 = new vector<HComplex>;
     CasaMatrix<CasaComplex> ary=drp->calfft();
     copy_ary2vp;
   }

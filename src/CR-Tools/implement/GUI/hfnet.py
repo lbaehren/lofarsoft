@@ -1,6 +1,7 @@
 #pdb.set_trace()
 
 defaultblocksize=2**11
+#defaultblocksize=2**16
 print "--------------------------------------------"
 print "Default Blocksize set to ",defaultblocksize
 print "--------------------------------------------"
