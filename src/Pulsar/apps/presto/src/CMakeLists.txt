@@ -391,7 +391,7 @@ foreach (src ${presto_fc_special_binaries})
     LINKER_LANGUAGE Fortran
     COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
   )
-  target_link_libraries (${src} presto fort pgplot cfitsio)
+  target_link_libraries (${src} presto fort)
 endforeach (src)
 
 ## ==============================================================================
