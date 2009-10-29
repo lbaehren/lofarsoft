@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1121</width>
-    <height>719</height>
+    <width>1148</width>
+    <height>650</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -92,6 +92,9 @@
           <width>765</width>
           <height>510</height>
          </size>
+        </property>
+        <property name="focusPolicy" >
+         <enum>Qt::StrongFocus</enum>
         </property>
        </widget>
       </widget>
@@ -2695,7 +2698,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1121</width>
+     <width>1148</width>
      <height>22</height>
     </rect>
    </property>

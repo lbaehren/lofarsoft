@@ -8,6 +8,7 @@
 //using casa::Matrix;
 //using casa::String;
 //using casa::Vector;
+//using casa::Array;
 
 using namespace std;
 #include <boost/python/class.hpp>
@@ -25,6 +26,16 @@ using namespace std;
 #include <boost/python/operators.hpp>
 #include <boost/python/object_operators.hpp>
 #include <boost/thread/thread.hpp>
+
+#include <casa/string.h>
+#include <casa/Arrays.h>
+#include <casa/Arrays/Array.h>
+#include <casa/Arrays/ArrayMath.h>
+#include <casa/Arrays/IPosition.h>
+#include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/BasicSL/Complex.h>
+
 
 //#include <QtGui/QApplication>
 //#include <QtGui/QtGui>
@@ -946,10 +957,6 @@ $${
 #undef phase
 
 
-$$Par: UnitName, HString, "degr"
-$$Par: UnitPrefix, HString, ""
-$$Par: UnitScaleFactor, HNumber, 1.0
-
 //------------------------------------------------------------------------------
 //$NEW: Function
 /*------------------------------------------------------------------------------
@@ -972,6 +979,41 @@ $${
   };
 }
 //$END Function -----------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: casatest
+Info: Test conversion to casa arrays and squaring operations therewith
+Type: NUMBER
+buffered: false
+updateable: false
+------------------------------------------------------------------------------*/
+$${ 
+  dp->getFirstFromVector(*vp,vs);
+
+  T * storage = &((*vp)[0]);
+  casa::IPosition shape(1,vp->size()); //tell casa the size of the vector
+  casa::Vector<T> cvec(shape,storage,casa::SHARE); //Create casa Vector with data storage identical to the stl vector
+
+  //  INIT_FUNC_ITERATORS(it,end);
+
+  typedef typename casa::Vector<T>::contiter iterator_T;
+  iterator_T it=cvec.cbegin(); 
+  iterator_T end=cvec.cend();  
+
+  if (it==end) {return;};  
+
+  while (it!=end) {
+    *it=hf_mul(*it,*it);
+   it++;
+  };
+
+}
+//$END Function -----------------------------------------------------------------
+
 
 
 
@@ -1203,7 +1245,7 @@ union{void* ptr; CR::DataReader* drp; CR::LOFAR_TBB* tbb; CR::LopesEventIn* lep;
   vp->push_back(mycast<T>(ptr)); 
 
       //Read the data Header, containing important information about the file (e.g. size)
-  casa::Record hdr=drp->headerRecord();
+  CasaRecord hdr=drp->headerRecord();
       
       //      uint nfields=hdr.nfields();
       //      uint i;
@@ -1235,15 +1277,13 @@ void cleanup(){
  */
 
 template <class S, class T>
-void aipscol2stlvec(casa::Matrix<S> data, vector<T>& stlvec, HInteger col){
+void aipscol2stlvec(casa::Matrix<S> &data, vector<T>& stlvec, HInteger col){
     HInteger i,nrow,ncol;
 //    vector<HNumber>::iterator p;
     
     nrow=data.nrow();
     ncol=data.ncolumn();
-    if (ncol>1) {
-      MSG("aipscol2stlvec: ncol="<<ncol <<" (nrow="<<nrow<<")");
-    };
+    //    if (ncol>1) {MSG("aipscol2stlvec: ncol="<<ncol <<" (nrow="<<nrow<<")");};
     if (col>=ncol) {
 	ERROR("aipscol2stlvec: column number col=" << col << " is larger than total number of columns (" << ncol << ") in matrix.");
 	stlvec.clear();
@@ -1251,7 +1291,7 @@ void aipscol2stlvec(casa::Matrix<S> data, vector<T>& stlvec, HInteger col){
     }
 
     stlvec.resize(nrow);
-    casa::Vector<S> CASAVec = data.column(col);
+    CasaVector<S> CASAVec = data.column(col);
     
 //    p=stlvec.begin();
     
@@ -1267,7 +1307,7 @@ void aipscol2stlvec(casa::Matrix<S> data, vector<T>& stlvec, HInteger col){
  */
 
 template <class S, class T>
-void aipsvec2stlvec(casa::Vector<S> data, vector<T>& stlvec){
+void aipsvec2stlvec(CasaVector<S> data, vector<T>& stlvec){
     HInteger i,n;
 //    vector<R>::iterator p;
     
@@ -1281,13 +1321,14 @@ void aipsvec2stlvec(casa::Vector<S> data, vector<T>& stlvec){
     };
 }
 
+
 //------------------------------------------------------------------------------
 //$NEW: Function
 /*------------------------------------------------------------------------------
 Lib: CR
 Name: dataRead
 Info: Function retrieving a vector from the dataReader.
-Type: COMPLEX
+Type: NUMBER
 buffered: true
 updateable: true
 Par: File, HPointer, NULL
@@ -1309,7 +1350,10 @@ $$ {
   DataReader *drp=reinterpret_cast<DataReader*>(File); 
 
 //!!!One Needs to verify somehow that the parameters make sense !!!
-  if (Antenna > drp->nofAntennas()-1) {ERROR("Requested Antenna number too large!");};
+  if (Antenna > drp->nofAntennas()-1) {
+    ERROR("Requested Antenna number too large!");
+    return;
+  };
 
   if (Blocksize<1) Blocksize=maxBlocksize;
   //  MSG("Blocksize =" << Blocksize <<", Block=" << Block);
@@ -1320,18 +1364,37 @@ $$ {
   HInteger maxBlock=Filesize/Blocksize-1;	
   putResult("maxBlock",maxBlock);
 
-  Vector<uint> antennas(1,Antenna);
+  CasaVector<uint> antennas(1,Antenna);
   drp->setSelectedAntennas(antennas);
 //    Vector<uint> selantennas=drp->selectedAntennas();
 //    MSG("No of Selected Antennas" << drp->nofSelectedAntennas ()<< " SelectedAntennas[0]=" <<selantennas[0]);
 
+  address ncol;
+
+#define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) aipscol2stlvec(ary,*vp,Antenna); else aipscol2stlvec(ary,*vp,0)
+
   if (Datatype=="Time") {aipsvec2stlvec(drp->timeValues(),*vp);}
   else if (Datatype=="Frequency") {aipsvec2stlvec(drp->frequencyValues(),*vp);}
-  else if (Datatype=="Fx") {aipscol2stlvec(drp->fx(),*vp,0);}
-  else if (Datatype=="Voltage") {aipscol2stlvec(drp->voltage(),*vp,0);}
-  else if (Datatype=="invFFT") {aipscol2stlvec(drp->invfft(),*vp,0);}
-  else if (Datatype=="FFT") {aipscol2stlvec(drp->fft(),*vp,0);}
-  else if (Datatype=="CalFFT") {aipscol2stlvec(drp->calfft(),*vp,0);}
+  else if (Datatype=="Fx") {
+    CasaMatrix<CasaNumber> ary=drp->fx();
+    copy_ary2vp;
+  }
+  else if (Datatype=="Voltage") {
+    CasaMatrix<CasaNumber> ary=drp->voltage();
+    copy_ary2vp;
+  }
+  else if (Datatype=="invFFT") {
+    CasaMatrix<CasaNumber> ary=drp->invfft();
+    copy_ary2vp;
+  }
+  else if (Datatype=="FFT") {
+    CasaMatrix<CasaComplex> ary=drp->fft();
+    copy_ary2vp;
+  }
+  else if (Datatype=="CalFFT") {
+    CasaMatrix<CasaComplex> ary=drp->calfft();
+    copy_ary2vp;
+  }
   else {
     ERROR("DataFunc_CR_dataRead: Datatype=" << Datatype << " is unknown." << ", name=" << dp->getName(true));
     vp->clear();
@@ -1339,6 +1402,13 @@ $$ {
   };
 }
 //$END Function ----------------------------------------------------------------
+/*
+  else if (Datatype=="Fx") {aipscol2stlvec(drp->fx(),*vp,0);}
+  else if (Datatype=="Voltage") {aipscol2stlvec(drp->voltage(),*vp,0);}
+  else if (Datatype=="invFFT") {aipscol2stlvec(drp->invfft(),*vp,0);}
+  else if (Datatype=="FFT") {aipscol2stlvec(drp->fft(),*vp,0);}
+  else if (Datatype=="CalFFT") {aipscol2stlvec(drp->calfft(),*vp,0);}
+*/
 
 /*------------------------------------------------------------------------
 End DataFunc Object Library "CR"

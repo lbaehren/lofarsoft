@@ -106,6 +106,16 @@ typedef std::complex<double> HComplex;
 typedef std::string HString;
 typedef void* HPointer;
 
+//Define types that are being used for the data reader and the casa arrays
+typedef double CasaNumber;
+typedef casa::DComplex CasaComplex;
+typedef int CasaInteger;
+typedef casa::Record CasaRecord ;
+
+#define CasaMatrix casa::Matrix
+#define CasaArray casa::Array
+#define CasaVector casa::Vector
+
 //For some reaosns NULL is primarily interpreted as Integer by the
 //compiler (e.g., when it needs to determine the type of templated functions).
 //So, this forces NULL to really be a NULL pointer ...

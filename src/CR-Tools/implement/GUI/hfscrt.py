@@ -1,3 +1,6 @@
+
+
+
 d=Data("ROOT")
 x=d 
 for i in range(5): x=x.newObject("TEST"+str(i+1))

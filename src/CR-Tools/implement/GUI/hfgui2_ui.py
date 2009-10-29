@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'hfgui2.ui'
 #
-# Created: Wed Oct 21 10:16:11 2009
+# Created: Thu Oct 29 22:59:44 2009
 #      by: PyQt4 UI code generator 4.5.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1121, 719)
+        MainWindow.resize(1148, 650)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.pushButton = QtGui.QPushButton(self.centralwidget)
@@ -36,6 +36,7 @@ class Ui_MainWindow(object):
         self.HMainPlotter = hfQtPlotWidget(self.tab)
         self.HMainPlotter.setGeometry(QtCore.QRect(0, 0, 763, 461))
         self.HMainPlotter.setBaseSize(QtCore.QSize(765, 510))
+        self.HMainPlotter.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.HMainPlotter.setObjectName("HMainPlotter")
         self.tabwindow.addTab(self.tab, "")
         self.tab_2 = QtGui.QWidget()
@@ -775,7 +776,7 @@ class Ui_MainWindow(object):
         self.label_22.setObjectName("label_22")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1121, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1148, 22))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")

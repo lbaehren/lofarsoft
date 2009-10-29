@@ -3471,7 +3471,7 @@ void Data::get(vector<T> &v, Vector_Selector *vs) {
 
   if (f_ptr==NULL) {   //No function but data with different type
     if (d_ptr_v==NULL) {
-      if (data.from.size()>0) { //No function and no data. This object is only used to oranize the web in a nicer way.
+      if (data.from.size()>0) { //No function and no data. This object is only used to organize the web in a nicer way.
 	getFirstFromVector(v,vs1); //transparently pass through the values of the first attached object
       } else {
 	DBG("No Data in Data Object!" << " name=" << getName(true)); 
@@ -3508,8 +3508,13 @@ void Data::get(vector<T> &v, Vector_Selector *vs) {
 	DBG("GET: name=" << data.name << " checkmod=" << tf_txt(checkmod) << " worm created=" << tf_txt(wormcreated));
 	switch (data.type){
 #define SW_TYPE_COMM(EXT,TYPE)					\
-	  if (checkmod) {incVersion();f_ptr->process_##EXT(d_ptr_##EXT,this,NULL);}; \
-            copycast_vec<TYPE,T>(d_ptr_v, &v,vs1);
+	  if (checkmod) {incVersion();f_ptr->process_##EXT(d_ptr_##EXT,this,NULL);};
+#include "switch-type.cc"
+	    ERROR("Error (get): unknown type." << " name=" << getName(true) );
+	};
+	switch (data.type){
+#define SW_TYPE_COMM(EXT,TYPE)					\
+	  copycast_vec<TYPE,T>(d_ptr_v, &v,vs1);
 #include "switch-type.cc"
 	    ERROR("Error (get): unknown type." << " name=" << getName(true) );
 	};
