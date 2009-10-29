@@ -17,6 +17,7 @@ PROJECT (presto C Fortran)
 include_directories (${PULSAR_SOURCE_DIR}/apps/presto/include)
 
 add_subdirectory (src)
+add_subdirectory (bin)
 
 if (PULSAR_BUILD_TESTS)
   add_subdirectory (tests)
