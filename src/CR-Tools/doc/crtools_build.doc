@@ -1,8 +1,8 @@
-/* $Id$ */
-
-/**
+/*!
 
 \page crtools_build CR-Tools :: Configuration & Build
+
+<center><h2>CR-Tools :: Configuration & Build</h2></center>
 
 - \ref crtools_basic_install
 - \ref crtools_build_components

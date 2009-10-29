@@ -1,9 +1,19 @@
 /*!
   \page crtools_overview_modules CR-Tools :: Overview of modules and their functionality
 
-  - \ref crtools_module_analysis
-  - \ref crtools_module_calibration
-  - \ref crtools_module_coordinates
+  <center><h2>CR-Tools :: Overview of modules and their functionality</h2></center>
+  
+  <ul>
+    <li>\ref crtools_module_analysis
+    <li>\ref crtools_module_calibration
+    <li>\ref crtools_module_coordinates
+    <li>\ref crtools_module_data
+    <li>\ref crtools_module_imaging
+    <li>\ref crtools_module_io
+    <li>\ref crtools_module_math
+  </ul>
+
+  <hr>
 
   \section crtools_module_analysis Analysis
 
@@ -109,8 +119,8 @@
       <td class="indexkey">Comments</td>
     </tr>
     <tr>
-      <td></td>
-      <td></td>
+      <td>CR::TimeFreq</td>
+      <td>Container for the basic parameters in the time-frequency domain.</td>
       <td></td>
     </tr>
     <tr>
@@ -173,6 +183,36 @@
       <td>Class to handle the computation of geometrical delays as needed for
        beamforming.</td>
       <td>Supports far-field and near-field geometry.</td>
+    </tr>
+    <tr>
+      <td>CR::GeomPhase</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>CR::GeomWeight</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+
+  \section crtools_module_io IO
+
+  <table border=0>
+    <tr>
+      <td class="indexkey">Class/File</td>
+      <td class="indexkey">Functionality</td>
+      <td class="indexkey">Comments</td>
+    </tr>
+    <tr>
+      <td>CR::DataIterator</td>
+      <td></td>
+      <td></td>
     </tr>
     <tr>
       <td></td>
