@@ -408,7 +408,7 @@ install (
   )
 
 install (
-  TARGETS ${presto_binaries}
+  TARGETS ${presto_binaries} ${presto_fc_binaries} ${presto_fc_special_binaries}
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
