@@ -72,8 +72,10 @@ add_custom_target (tempo_build
 add_dependencies (tempo_build tempo_unpack)
 
 add_custom_target (tempo_install
-  COMMAND cp tempo ${CMAKE_INSTALL_PREFIX}/bin
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo_name}/src
+  COMMAND cp src/tempo ${CMAKE_INSTALL_PREFIX}/bin
+  COMMAND cp tempo.cfg tempo.hlp ${CMAKE_INSTALL_PREFIX}/bin
+  COMMAND cp -r tempo_ephem ${CMAKE_INSTALL_PREFIX}/bin
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo_name}/
   COMMENT "Install project Tempo to ${CMAKE_INSTALL_PREFIX}/bin..."
   )
 add_dependencies (tempo_install tempo_build tempo_unpack)
