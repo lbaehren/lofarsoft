@@ -3,7 +3,7 @@ enable_language(Fortran)
 
 include_directories (${PULSAR_SOURCE_DIR}/apps/presto/src/fortran)
 
-file (GLOB fort_sources *.f)
+file (GLOB fort_sources least_squares.f)
 
 add_library (fort ${fort_sources})
 
