@@ -122,7 +122,7 @@ namespace CR { // Namespace CR -- begin
 
   Vector<double> CompletePipeline::envelope(const Vector<double> &trace) const
   {
-    Vector<double> envelope(trace.size(),0);	// create vector to return envelope
+    Vector<double> envelope(trace.size(),0);        // create vector to return envelope
 
     try 
     {
@@ -173,7 +173,7 @@ namespace CR { // Namespace CR -- begin
 
         // set up variables
         String polarization_string;
-        bool first_message = true;	// for output
+        bool first_message = true;        // for output
 
         // loop through all AntennaIDs and deselect the ones with the wrong polarization
         for (unsigned int i=0; i<AntennaIDs.size(); i++)
@@ -191,7 +191,7 @@ namespace CR { // Namespace CR -- begin
                 cout << "Deselected antenna(s) without \"" << Polarization << "\" polarization: ";
                 first_message = false;
               }
-              cout << i+1 << " ";	// antenna number
+              cout << i+1 << " ";        // antenna number
             }
           } // if
         } // for
@@ -206,8 +206,8 @@ namespace CR { // Namespace CR -- begin
 
 
   Matrix<Double> CompletePipeline::getUpsampledFieldstrength (DataReader *dr,
-							      const int& upsampling_exp,
-							      Vector<Bool> antennaSelection)
+                                                              const int& upsampling_exp,
+                                                              Vector<Bool> antennaSelection)
   {
     try 
     {
@@ -223,48 +223,48 @@ namespace CR { // Namespace CR -- begin
 
       // check if upsampling shoud be done at all (if not, return not upsampled data)
       if (upsampling_exp < 1) {
-	return fieldstrength.copy(); 
+        return fieldstrength.copy(); 
       }
 
       // make antennaSelection unique, as casacore-Vectors are allways passed by reference
       antennaSelection.unique();
 
-      // Get the antenna selection from the DataReader if no selction was chosen 	
+      // Get the antenna selection from the DataReader if no selction was chosen         
       if (antennaSelection.nelements() == 0) {
-	antennaSelection = GetAntennaMask(dr);
+        antennaSelection = GetAntennaMask(dr);
       }
 
       // check if upsampling is done for the first time
       if (lastUpsamplingExponent == -1)
       {
         //create vector for flags showing which antenna is allready upsampled
-        upsampledAntennas.assign(GetAntennaMask(dr).nelements(),false);	// at the moment there are no upsampled antennas
+        upsampledAntennas.assign(GetAntennaMask(dr).nelements(),false);        // at the moment there are no upsampled antennas
       } 
 
       // consistency check: number of elements in antennaSelction and upsampledAntennas must be equal
       if ( upsampledAntennas.size() != antennaSelection.nelements() )
       {
         std::cerr << "CompletePipeline:getUpsampledFieldstrength: Number of elements in \"antennaSelection\" is inconsistent.\n" 
-		<< std::endl;
+                << std::endl;
         return upFieldStrength.copy();
       }
 
       // check if there are allready upsampled values and create todo-list
       vector<bool> upsamplingToDo;
-      upsamplingToDo.assign(upsampledAntennas.size(),true);		// form Vector of correct size
+      upsamplingToDo.assign(upsampledAntennas.size(),true);                // form Vector of correct size
       // maximum to do is the whole antenna selction
       for (unsigned int i=0; i < upsamplingToDo.size(); i++) {
-	upsamplingToDo[i] = antennaSelection(i);
+        upsamplingToDo[i] = antennaSelection(i);
       }
 
       // if the last upsampling exponent is the same es the current, there might be somthing done allready
       // if not, clear the upsampled flags
       if (lastUpsamplingExponent != upsampling_exp) {
-	upsampledAntennas.assign(upsampledAntennas.size(),false);
+        upsampledAntennas.assign(upsampledAntennas.size(),false);
       } else for (unsigned int i=0; i < upsamplingToDo.size(); i++) {
-	if (upsampledAntennas[i]) {
-	  upsamplingToDo[i] = false;
-	}
+        if (upsampledAntennas[i]) {
+          upsamplingToDo[i] = false;
+        }
       }
 
       // create upsampling factor by upsampling exponent
@@ -279,9 +279,9 @@ namespace CR { // Namespace CR -- begin
       // resize Matrix for upsampled traces if the last upsampling exponent is different from the new one
       if (lastUpsamplingExponent != upsampling_exp)
       {
-        upFieldStrength.resize(tracelength * upsampled, antennaSelection.nelements(), false);	// no need to copy old values
+        upFieldStrength.resize(tracelength * upsampled, antennaSelection.nelements(), false);        // no need to copy old values
         // set all traces initially to zero (not neccessary but makes the detection of errors easier)
-        upFieldStrength.set(0);	
+        upFieldStrength.set(0);        
       } 
 
       // do upsampling for each antenna in the todo-list
@@ -289,32 +289,32 @@ namespace CR { // Namespace CR -- begin
       for (unsigned int i = 0; i < antennaSelection.nelements(); i++) {
         if (upsamplingToDo[i]){
           std::cout << " " << i+1 << flush;
- 	  // copy the trace into the array
-	  for (unsigned int j = 0; j < tracelength; j++) {
+           // copy the trace into the array
+          for (unsigned int j = 0; j < tracelength; j++) {
             originalTrace[j] = fieldstrength.column(i)(j);
           }
 
-	  // do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
+          // do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
 
           // calcutlate Offset:
           double before = originalTrace[0];
 
           ZeroPaddingFFT(tracelength, originalTrace, upsampled-1, upsampledTrace);
  
-	  double offset = before - originalTrace[0];
-	
-  	  // copy upsampled trace into Matrix with antenna traces and subtract offset
+          double offset = before - originalTrace[0];
+        
+            // copy upsampled trace into Matrix with antenna traces and subtract offset
           // remark: as there is no offset in the original data, this step should be avoided
           // as soon as upsampling without pedestal correction is available
-	  for (unsigned int j = 0; j < tracelength*upsampled; j++) {
-	    upFieldStrength.column(i)(j) = upsampledTrace[j] + offset;
-	  }
-	  
+          for (unsigned int j = 0; j < tracelength*upsampled; j++) {
+            upFieldStrength.column(i)(j) = upsampledTrace[j] + offset;
+          }
+          
           /*
-	    Remark: tried to fasten data transfer from the array to the Matrix
-	    but did not work because arrays are of typ float but not double; as
-	    double is supported now, it can be tried again.
-	  */
+            Remark: tried to fasten data transfer from the array to the Matrix
+            but did not work because arrays are of typ float but not double; as
+            double is supported now, it can be tried again.
+          */
 
           // set flag, that data for this antenna are upsampled
           upsampledAntennas[i] = true;
@@ -342,10 +342,10 @@ namespace CR { // Namespace CR -- begin
 
  
   Matrix<Double> CompletePipeline::getUpsampledFX (DataReader *dr,
-						   const int& upsampling_exp,
-						   Vector<Bool> antennaSelection,
-						   const bool& offsetSubstraction,
-						   const bool& voltage)
+                                                   const int& upsampling_exp,
+                                                   Vector<Bool> antennaSelection,
+                                                   const bool& offsetSubstraction,
+                                                   const bool& voltage)
   {
     try 
     {
@@ -370,16 +370,16 @@ namespace CR { // Namespace CR -- begin
       // make antennaSelection unique, as casacore-Vectors are allways passed by reference
       antennaSelection.unique();
 
-      // Get the antenna selection from the DataReader if no selction was chosen 	
+      // Get the antenna selection from the DataReader if no selction was chosen         
       if (antennaSelection.nelements() == 0) {
-	antennaSelection = GetAntennaMask(dr);
+        antennaSelection = GetAntennaMask(dr);
       }
 
       // consistency check: number of elements in antennaSelction and rawData must be equal
       if ( rawData.ncolumn() != antennaSelection.nelements() )
       {
         std::cerr << "CompletePipeline:getUpsampledFX: Number of elements in \"antennaSelection\" is inconsistent.\n" 
-		<< std::endl;
+                << std::endl;
         return rawData.copy();
       }
 
@@ -401,29 +401,29 @@ namespace CR { // Namespace CR -- begin
       for (unsigned int i = 0; i < antennaSelection.nelements(); i++) if (antennaSelection(i))
       {
         std::cout << " " << i+1 << flush;
-	// copy the trace into the array
-	for (unsigned int j = 0; j < tracelength; j++) 
+        // copy the trace into the array
+        for (unsigned int j = 0; j < tracelength; j++) 
         {
           originalTrace[j] = rawData.column(i)(j);
         }
 
-	// do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
+        // do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
 
         // calcutlate Offset:
         double before = originalTrace[0];
 
         ZeroPaddingFFT(tracelength, originalTrace, upsampled-1, upsampledTrace);
 
-	double offset = before - originalTrace[0];
-	
-	// copy upsampled trace into Matrix with antenna traces and subtract offset
+        double offset = before - originalTrace[0];
+        
+        // copy upsampled trace into Matrix with antenna traces and subtract offset
         // if no offset correction is wanted
         // remember: ZeroPaddingFFT removes the offset automatically
         if (offsetSubstraction)
-	  for (unsigned int j = 0; j < tracelength*upsampled; j++)
+          for (unsigned int j = 0; j < tracelength*upsampled; j++)
             upData.column(i)(j) = upsampledTrace[j];
         else
-	  for (unsigned int j = 0; j < tracelength*upsampled; j++)
+          for (unsigned int j = 0; j < tracelength*upsampled; j++)
             upData.column(i)(j) = upsampledTrace[j] + offset;
       } 
       std::cout << " ... done" << endl;
@@ -446,7 +446,7 @@ namespace CR { // Namespace CR -- begin
 
 
   Vector<Double> CompletePipeline::getUpsampledTimeAxis (DataReader *dr,
-							 const int& upsampling_exp)
+                                                         const int& upsampling_exp)
   {
     try 
     {
@@ -613,18 +613,17 @@ namespace CR { // Namespace CR -- begin
 
 
   void CompletePipeline::plotCCbeam(const string& filename,
-				    DataReader *dr,
-				    Vector<Double> fittedCCbeam,
-				    Vector<Bool> antennaSelection,
-				    const int& filterStrength,
-				    const unsigned int& remoteStart,
-				    const unsigned int& remoteStop)
+                                    DataReader *dr,
+                                    Vector<Double> fittedCCbeam,
+                                    Vector<Bool> antennaSelection,
+                                    const int& filterStrength,
+                                    const unsigned int& remoteStart,
+                                    const unsigned int& remoteStop)
   {
-    try 
-    {
-      SimplePlot plotter;    			// define plotter
-      Vector<Double> xaxis, ccbeam, pbeam;	// values for plot
-      double xmax,xmin,ymin,ymax;		// Plotrange
+    try {
+      SimplePlot plotter;                            // define plotter
+      Vector<Double> xaxis, ccbeam, pbeam;        // values for plot
+      double xmax,xmin,ymin,ymax;                // Plotrange
       uInt gtdate;
       dr->headerRecord().get("Date",gtdate);
       stringstream gtlabel;
@@ -640,7 +639,7 @@ namespace CR { // Namespace CR -- begin
       // make antennaSelection unique, as casacore-Vectors are allways passed by reference
       antennaSelection.unique();
 
-      std::cout <<"Plotting the CC-beam and the Power-beam to file: " << plotfilename << std::endl;
+      cout <<"Plotting the CC-beam and the Power-beam to file: " << plotfilename << endl;
 
       // Get the time axis
       xaxis = (Vector<Double>)(dr->timeValues()); 
@@ -653,8 +652,7 @@ namespace CR { // Namespace CR -- begin
       pbeam  = GetPBeam(dr, antennaSelection, Polarization).copy();
 
       // smooth the data
-      if (filterStrength > 0)
-      {
+      if (filterStrength > 0) {
         StatisticsFilter<Double> mf(filterStrength,FilterType::MEAN);
         ccbeam = mf.filter(ccbeam);
         pbeam = mf.filter(pbeam);
@@ -662,8 +660,7 @@ namespace CR { // Namespace CR -- begin
 
       // calculate and substract offset (= noise, calculated as mean in remote region)
       // if no remote range was given, don't substract anything
-      if (remoteStop != 0)
-      {
+      if (remoteStop != 0) {
         Slice remoteRegion(remoteStart,(remoteStop-remoteStart));
         double ccBeamOffset = mean(ccbeam(remoteRegion));
         double pBeamOffset  = mean(pbeam(remoteRegion));
@@ -675,13 +672,13 @@ namespace CR { // Namespace CR -- begin
       xaxis *= 1e6;
       ccbeam *= 1e6;
       pbeam *= 1e6;
-    
+
       // define Plotrange
       xmin = min(xaxis(plotRange));
       xmax = max(xaxis(plotRange));
       ymin = min(min(ccbeam(plotRange)), min(pbeam(plotRange)))*1.05;
       ymax = max(max(ccbeam(plotRange)), max(pbeam(plotRange)))*1.05;
-      
+
       // Initialize the plots giving xmin, xmax, ymin and ymax
       plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
@@ -689,15 +686,14 @@ namespace CR { // Namespace CR -- begin
       string label;
       label = "GT " + gtlabel.str() + " - CC-Beam and Power";
       plotter.AddLabels("time t [#gmsec]", "CC-beam [#gmV/m/MHz]",label);
-    
+
       // Add CC-beam
       plotter.PlotLine(xaxis(plotRange),ccbeam(plotRange),9,1);
       // Add Power-beam
       plotter.PlotLine(xaxis(plotRange),pbeam(plotRange),8,1);
 
       // Add fitted beam, if supplied (must have correct length)
-      if (fittedCCbeam.size() == xaxis.size())
-      {
+      if (fittedCCbeam.size() == xaxis.size()) {
         fittedCCbeam.unique();
         fittedCCbeam *= 1e6;
         plotter.PlotLine(xaxis(plotRange),fittedCCbeam(plotRange),4,1);
@@ -706,27 +702,26 @@ namespace CR { // Namespace CR -- begin
       // Add filename to list of created plots
       plotlist.push_back(plotfilename);
 
-    } catch (AipsError x) 
-      {
-        std::cerr << "CompletePipeline:plotCCBeam: " << x.getMesg() << std::endl;
-      }; 
+    } catch (AipsError x) {
+        cerr << "CompletePipeline:plotCCBeam: " << x.getMesg() << endl;
+    }
   }
 
 
   void CompletePipeline::plotXbeam(const string& filename,
-				   DataReader *dr,
-				   Vector<Double> fittedXbeam,
-				   Vector<Bool> antennaSelection,
-				   const int& filterStrength,
-				   const unsigned int& remoteStart,
-				   const 
-				   unsigned int& remoteStop)
+                                   DataReader *dr,
+                                   Vector<Double> fittedXbeam,
+                                   Vector<Bool> antennaSelection,
+                                   const int& filterStrength,
+                                   const unsigned int& remoteStart,
+                                   const 
+                                   unsigned int& remoteStop)
   {
     try 
     {
-      SimplePlot plotter;    			// define plotter
-      Vector<Double> xaxis, xbeam, pbeam;	// values for plot
-      double xmax,xmin,ymin,ymax;		// Plotrange
+      SimplePlot plotter;                            // define plotter
+      Vector<Double> xaxis, xbeam, pbeam;        // values for plot
+      double xmax,xmin,ymin,ymax;                // Plotrange
  
       uInt gtdate;
       dr->headerRecord().get("Date",gtdate);
@@ -743,7 +738,7 @@ namespace CR { // Namespace CR -- begin
       // make antennaSelection unique, as casacore-Vectors are allways passed by reference
       antennaSelection.unique();
 
-      std::cout <<"Plotting the X-beam and the Power-beam to file: " << plotfilename << std::endl;
+      cout <<"Plotting the X-beam and the Power-beam to file: " << plotfilename << endl;
 
       // Get the time axis
       xaxis = (Vector<Double>)(dr->timeValues()); 
@@ -756,8 +751,7 @@ namespace CR { // Namespace CR -- begin
       pbeam = GetPBeam(dr, antennaSelection, Polarization).copy();
 
       // smooth the data
-      if (filterStrength > 0)
-      {
+      if (filterStrength > 0) {
         StatisticsFilter<Double> mf(filterStrength,FilterType::MEAN);
         xbeam = mf.filter(xbeam);
         pbeam = mf.filter(pbeam);
@@ -765,8 +759,7 @@ namespace CR { // Namespace CR -- begin
 
       // calcutlate and substract offset (= noise, calculated as mean in remote region)
       // if no remote range was given, don't substract anything
-      if (remoteStop != 0)
-      {
+      if (remoteStop != 0) {
         Slice remoteRegion(remoteStart,(remoteStop-remoteStart));
         double xBeamOffset = mean(xbeam(remoteRegion));
         double pBeamOffset = mean(pbeam(remoteRegion));
@@ -799,8 +792,7 @@ namespace CR { // Namespace CR -- begin
       plotter.PlotLine(xaxis(plotRange),pbeam(plotRange),8,1);
 
       // Add fitted beam, if supplied (must have correct length)
-      if (fittedXbeam.size() == xaxis.size())
-      {
+      if (fittedXbeam.size() == xaxis.size()) {
         fittedXbeam.unique();
         fittedXbeam *= 1e6;
         plotter.PlotLine(xaxis(plotRange),fittedXbeam(plotRange),4,1);
@@ -809,37 +801,35 @@ namespace CR { // Namespace CR -- begin
       // Add filename to list of created plots
       plotlist.push_back(plotfilename);
 
-    } catch (AipsError x) 
-      {
-        std::cerr << "CompletePipeline:plotXBeam: " << x.getMesg() << std::endl;
-      }; 
+    } catch (AipsError x) {
+        cerr << "CompletePipeline:plotXBeam: " << x.getMesg() << endl;
+    }
   }
 
 
   // Plot the timeshifted (= after beamforming) filedstrength of all antennas
   void CompletePipeline::plotAllAntennas(const string& filename,
-					 DataReader *dr,
-					 Vector<Bool> antennaSelection,
-					 const bool& seperated,
-					 const int& upsampling_exp,
-					 const bool& rawData,
-					 const bool& plotEnvelope)
+                                         DataReader *dr,
+                                         Vector<Bool> antennaSelection,
+                                         const bool& seperated,
+                                         const int& upsampling_exp,
+                                         const bool& rawData,
+                                         const bool& plotEnvelope)
   {
-    try 
-    {
-      SimplePlot plotter;    			// define plotter
-      Vector<Double> xaxis;			// xaxis
-      double xmax,xmin,ymin=0,ymax=0;		// Plotrange
-      Matrix<Double> yValues;			// y-values
-      Matrix<Double> upYvalues;			// upsampled y-values
-      int color = 3;				// starting color
+    try {
+      SimplePlot plotter;                            // define plotter
+      Vector<Double> xaxis;                        // xaxis
+      double xmax,xmin,ymin=0,ymax=0;                // Plotrange
+      Matrix<Double> yValues;                        // y-values
+      Matrix<Double> upYvalues;                        // upsampled y-values
+      int color = 3;                                // starting color
 
       // make antennaSelection unique, as casacore-Vectors are allways passed by reference
       antennaSelection.unique();
 
       // Get the antenna selection from the DataReader if no selction was chosen
       if (antennaSelection.nelements() == 0) {
-	antennaSelection = GetAntennaMask(dr);
+        antennaSelection = GetAntennaMask(dr);
       }
 
       // adopt the antennaSelection to the chosen polarization
@@ -849,16 +839,13 @@ namespace CR { // Namespace CR -- begin
       xaxis = static_cast< Vector<Double> >(dr->timeValues());
 
       // Get the yValues of all antennas (raw data or fieldstrength)
-      if (rawData)
-      {
+      if (rawData) {
         // get not upsampled data (upsampling exponent = 0)
         yValues = getUpsampledFX(dr,0, antennaSelection, false, calibrationMode);
         // Upsampled yValues (ADC offset will not be substracted)
         upYvalues = getUpsampledFX(dr,upsampling_exp, antennaSelection, false, calibrationMode);
         // use voltage instead of ADC values in calibrationMode
-      }
-      else
-      {
+      } else {
         if (calibrationMode) // don't use beamforming in calibration mode
           yValues = GetUnshiftedTimeSeries(dr).copy();
         else
@@ -874,8 +861,7 @@ namespace CR { // Namespace CR -- begin
 
       // check length of time axis and yValues traces for consistency
       if (upxaxis.size() != upYvalues.column(0).size())
-        std::cerr << "CompletePipeline:plotAllAntennas: WARNING: Length of time axis differs from length of the antenna traces!\n"
-           << std::endl;
+        cerr << "CompletePipeline:plotAllAntennas: WARNING: Length of time axis differs from length of the antenna traces!\n" << endl;
 
 
       // Define plotrange for not upsampled and upsampled data
@@ -894,15 +880,12 @@ namespace CR { // Namespace CR -- begin
 
       // find the minimal and maximal y values for the plot
       // do it with the upsampled data only as they are as least as heigh as the original ones
-      for (unsigned int i = 0; i < antennaSelection.nelements(); i++)
-        if (antennaSelection(i))		// consider only selected antennas
-        {
-          if ( ymin > min(upYvalues.column(i)(upplotRange)) ) {
-	    ymin = min(upYvalues.column(i)(upplotRange));
-	  }
-          if ( ymax < max(upYvalues.column(i)(upplotRange)) ) {
-	    ymax = max(upYvalues.column(i)(upplotRange));
-	  }
+      for (unsigned int i = 0; i < antennaSelection.nelements(); ++i)
+        if (antennaSelection(i)) {                // consider only selected antennas
+          if ( ymin > min(upYvalues.column(i)(upplotRange)) )
+            ymin = min(upYvalues.column(i)(upplotRange));
+          if ( ymax < max(upYvalues.column(i)(upplotRange)) )
+            ymax = max(upYvalues.column(i)(upplotRange));
         }
 
       // multiply ymin and ymax by 105% to have some space at the bottom and the top of the plot
@@ -923,34 +906,33 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> empty;
 
       // Make the plots (either all antennas together or seperated)
-      if (seperated)
-      {
+      if (seperated) {
         stringstream antennaid;
         Vector<Int> AntennaIDs;
         dr->headerRecord().get("AntennaIDs",AntennaIDs);
 
         // Create the plots for each individual antenna looping through antennas
         if (rawData)
-            std::cout <<"Plotting the raw data FX\nAntenna ... ";
+          cout <<"Plotting the raw data FX\nAntenna ... ";
         else
-	    std::cout <<"Plotting the field strength\n Antenna ..." ;
+          cout <<"Plotting the field strength\n Antenna ..." ;
 
 
         for (unsigned int i = 0; i < antennaSelection.nelements(); i++){
           // consider only selected antennas
           if (antennaSelection(i)){
             // create filename and label
-	    antennanumber.str("");
-	    antennanumber.clear();
+            antennanumber.str("");
+            antennanumber.clear();
             antennanumber << (i+1);
             antennaid << AntennaIDs(i);
 
             //set the plotfilename to filename + "-" + antennanumber.str() + ".ps";
             if ( (i+1) < 10 ){
                plotfilename = filename + "-0" + antennanumber.str() + ".ps";
-	    }else{
+            }else{
                plotfilename = filename + "-" + antennanumber.str() + ".ps";
-	    }
+            }
             //set label "GT - Ant.Nr"
             label = "GT " + gtlabel.str() + " - Antenna " + antennanumber.str();
 
@@ -961,17 +943,15 @@ namespace CR { // Namespace CR -- begin
             plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
             // Add labels
-            if (calibrationMode)
-            {
+            if (calibrationMode) {
               plotter.AddLabels("time t [#gmsec]", "voltage [V]",label);
-            } else
-            {
+            } else {
               if (rawData)
                 plotter.AddLabels("time t [#gmsec]", "counts",label);
               else
                 plotter.AddLabels("time t [#gmsec]", "field strength #ge#d0#u [#gmV/m/MHz]",label);
             }
-  
+
             // Plot (upsampled) trace
             plotter.PlotLine(upxaxis(upplotRange),upYvalues.column(i)(upplotRange),color,1);
             // Plot envelope
@@ -983,13 +963,13 @@ namespace CR { // Namespace CR -- begin
 
             // Add filename to list of created plots
             plotlist.push_back(plotfilename);
-  	    std::cout << " " << (i+1);
-            color++;					// another color for the next antenna
-            if (color >= 13) color = 3;			// there are only 16 colors available, 
-							// use only ten as there are 3x10 antenna
+              cout << " " << (i+1);
+            color++;                                        // another color for the next antenna
+            if (color >= 13) color = 3;                        // there are only 16 colors available, 
+                                                        // use only ten as there are 3x10 antenna
           }
-	}
-        std::cout << std::endl;
+        }
+        cout << endl;
       } else {  // if (seperated) => else
         // add the ".ps" to the filename
         plotfilename = filename + ".ps";
@@ -998,11 +978,9 @@ namespace CR { // Namespace CR -- begin
         //plotfilename = gtlabel.str() + ".ps";
 
         if (rawData)
-    	  std::cout <<"Plotting the raw data FX of all antennas to file: "
-	            << plotfilename << std::endl;
+          cout <<"Plotting the raw data FX of all antennas to file: " << plotfilename << endl;
         else
-    	  std::cout <<"Plotting the field strength of all antennas to file: "
-	            << plotfilename << std::endl;
+          cout <<"Plotting the field strength of all antennas to file: " << plotfilename << endl;
 
         // Initialize the plot giving xmin, xmax, ymin and ymax
         plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
@@ -1010,11 +988,9 @@ namespace CR { // Namespace CR -- begin
         antennanumber << ntrue(antennaSelection);
         label = "GT " + gtlabel.str() + " - " + antennanumber.str() + " Antennas";
 
-        if (calibrationMode)
-        {
+        if (calibrationMode) {
           plotter.AddLabels("time t [#gmsec]", "Voltage [V]",label);
-        } else
-        {
+        } else {
           if (rawData)
             plotter.AddLabels("time t [#gmsec]", "counts",label);
           else
@@ -1022,23 +998,22 @@ namespace CR { // Namespace CR -- begin
         }
 
         // Create the plots looping through antennas
-        for (unsigned int i = 0; i < antennaSelection.nelements(); i++)
-        if (antennaSelection(i))			// consider only selected antennas
-        {
-          // Plot (upsampled) trace
-          plotter.PlotLine(upxaxis(upplotRange),upYvalues.column(i)(upplotRange),color,1);
+        for (unsigned int i = 0; i < antennaSelection.nelements(); ++i)
+          if (antennaSelection(i)) {                        // consider only selected antennas
+            // Plot (upsampled) trace
+            plotter.PlotLine(upxaxis(upplotRange),upYvalues.column(i)(upplotRange),color,1);
 
-          color++;					// another color for the next antenna
-          if (color >= 13) color = 3;			// there are only 16 colors available, 
-							// use only ten as there are 3x10 antennas
-        }
+            color++;                                        // another color for the next antenna
+            if (color >= 13) color = 3;                        // there are only 16 colors available, 
+                                                          // use only ten as there are 3x10 antennas
+          }
 
         // Add filename to list of created plots
         plotlist.push_back(plotfilename);
       } // else
     } catch (AipsError x) {
-        std::cerr << "CompletePipeline:plotAllAntennas: " << x.getMesg() << std::endl;
-      }
+        cerr << "CompletePipeline:plotAllAntennas: " << x.getMesg() << endl;
+    }
   }
 
 
@@ -1048,17 +1023,17 @@ namespace CR { // Namespace CR -- begin
                                      const bool& seperated)
   {
     try {
-      SimplePlot plotter;    			// define plotter
-      Vector<Double> xaxis;			// xaxis
-      double xmax,xmin,ymin=0,ymax=0;		// Plotrange
-      int color = 3;				// starting color
+      SimplePlot plotter;                            // define plotter
+      Vector<Double> xaxis;                        // xaxis
+      double xmax,xmin,ymin=0,ymax=0;                // Plotrange
+      int color = 3;                                // starting color
 
       // make antennaSelection unique, as casacore-Vectors are allways passed by reference
       antennaSelection.unique();
 
       // Get the antenna selection from the DataReader if no selction was chosen
       if (antennaSelection.nelements() == 0) {
-	antennaSelection = GetAntennaMask(dr);
+        antennaSelection = GetAntennaMask(dr);
       }
 
       // adopt the antennaSelection to the chosen polarization
@@ -1083,7 +1058,7 @@ namespace CR { // Namespace CR -- begin
 
       // find the minimal and maximal y values for the plot
       for (unsigned int i = 0; i < antennaSelection.nelements(); i++)
-        if (antennaSelection(i)) {		// consider only selected antennas
+        if (antennaSelection(i)) {                // consider only selected antennas
           if ( ymin > min(yValues.column(i)(plotRange)) ) {
             ymin = min(yValues.column(i)(plotRange));
           }
@@ -1172,17 +1147,17 @@ namespace CR { // Namespace CR -- begin
           // consider only selected antennas
           if (antennaSelection(i)) {
             // create filename and label
-	    antennanumber.str("");
-	    antennanumber.clear();
+            antennanumber.str("");
+            antennanumber.clear();
             antennanumber << (i+1);
             antennaid << AntennaIDs(i);
 
             //set the plotfilename to filename + "-" + antennanumber.str() + ".ps";
-            if ( (i+1) < 10 ){
+            if ( (i+1) < 10 )
                plotfilename = filename + "-0" + antennanumber.str() + ".ps";
-	    }else{
+            else
                plotfilename = filename + "-" + antennanumber.str() + ".ps";
-	    }
+
             //set label "GT - Ant.Nr"
             label = "GT " + gtlabel.str() + " - Antenna " + antennanumber.str();
 
@@ -1200,11 +1175,11 @@ namespace CR { // Namespace CR -- begin
             // Add filename to list of created plots
             plotlist.push_back(plotfilename);
             cout << " " << (i+1);
-            color++;					// another color for the next antenna
-            if (color >= 13) color = 3;			// there are only 16 colors available, 
-							// use only ten as there are 3x10 antenna
+            color++;                                        // another color for the next antenna
+            if (color >= 13) color = 3;                        // there are only 16 colors available, 
+                                                        // use only ten as there are 3x10 antenna
           }
-	}
+        }
         cout << endl;
       } else {  // if (seperated) => else
         // add the ".ps" to the filename
@@ -1231,13 +1206,13 @@ namespace CR { // Namespace CR -- begin
 
         // Create the plots looping through antennas
         for (unsigned int i = 0; i < antennaSelection.nelements(); i++)
-          if (antennaSelection(i)) {		// consider only selected antennas
+          if (antennaSelection(i)) {                // consider only selected antennas
             // Plot spectrum
             plotter.PlotLine(xaxis(plotRange),yValues.column(i)(plotRange),color,1);
 
-            color++;					// another color for the next antenna
-            if (color >= 13) color = 3;			// there are only 16 colors available, 
-							// use only ten as there are 3x10 antennas
+            color++;                                        // another color for the next antenna
+            if (color >= 13) color = 3;                        // there are only 16 colors available, 
+                                                        // use only ten as there are 3x10 antennas
         }
 
         // Add filename to list of created plots
@@ -1245,36 +1220,36 @@ namespace CR { // Namespace CR -- begin
       } // else
     } catch (AipsError x) {
         cerr << "CompletePipeline:plotSpectra: " << x.getMesg() << std::endl;
-      }
+    }
   }
 
 
   map <int,PulseProperties> CompletePipeline::calculateMaxima(DataReader *dr,
-							      Vector<Bool> antennaSelection,
-							      const int& upsampling_exp,
-							      const bool& rawData,
-							      const double& cc_center)
+                                                              Vector<Bool> antennaSelection,
+                                                              const int& upsampling_exp,
+                                                              const bool& rawData,
+                                                              const double& cc_center)
   {
     map <int,PulseProperties> pulses;           // return value with pulse properties
     try {
-      Vector<Double> timeValues;		// time values
-      Vector<Double> timeRange;			// time values of pulse region (= plot region)
-      Vector<Double> timeRangeNoise;		// time values of noise region
-      Matrix<Double> yValues;			// y-values
-      Vector<Double> trace;			// trace currently processed
-      Vector<Double> traceNoise;		// trace with noise currently processed
-      Vector<Double> envTrace;			// envelope of trace currently processed
-      vector<double> envMaxima;			// Stores the calculated maxima of the env
-      vector<double> envMaxima_time;		// Stores the calculated time of the maxima of the env
-      vector<double> maxima;			// Stores the calculated maxima of the trace
-      vector<double> maxima_time;		// Stores the calculated time of the maxima
-      vector<double> minima;			// Stores the calculated minima of the trace
-      vector<double> minima_time;		// Stores the calculated time of the minima
-      vector<double> fwhm;			// width of the pulse envelope
-      vector<double> start_time;		// Stores the start time of the pulse (begin of FWHM)
-      vector<double> noiseValues;		// Mean of trace in a region before the cc-beam
-      Vector<Double> geomDelays;		// geometrical delays of beamforming in getShiftedFFT
-      bool calculate_noise = false;		// Is set to true if cc_center is not the default (1e99)
+      Vector<Double> timeValues;                // time values
+      Vector<Double> timeRange;                        // time values of pulse region (= plot region)
+      Vector<Double> timeRangeNoise;                // time values of noise region
+      Matrix<Double> yValues;                        // y-values
+      Vector<Double> trace;                        // trace currently processed
+      Vector<Double> traceNoise;                // trace with noise currently processed
+      Vector<Double> envTrace;                        // envelope of trace currently processed
+      vector<double> envMaxima;                        // Stores the calculated maxima of the env
+      vector<double> envMaxima_time;                // Stores the calculated time of the maxima of the env
+      vector<double> maxima;                        // Stores the calculated maxima of the trace
+      vector<double> maxima_time;                // Stores the calculated time of the maxima
+      vector<double> minima;                        // Stores the calculated minima of the trace
+      vector<double> minima_time;                // Stores the calculated time of the minima
+      vector<double> fwhm;                        // width of the pulse envelope
+      vector<double> start_time;                // Stores the start time of the pulse (begin of FWHM)
+      vector<double> noiseValues;                // Mean of trace in a region before the cc-beam
+      Vector<Double> geomDelays;                // geometrical delays of beamforming in getShiftedFFT
+      bool calculate_noise = false;                // Is set to true if cc_center is not the default (1e99)
 
       if (rawData)
         cout << "\nLooking for maxima in the envelope of the raw data FX: \n";
@@ -1290,9 +1265,9 @@ namespace CR { // Namespace CR -- begin
       // make antennaSelection unique, as casacore-Vectors are allways passed by reference
       antennaSelection.unique();
 
-      // Get the antenna selection from the DataReader if no selction was chosen 	
+      // Get the antenna selection from the DataReader if no selction was chosen         
       if (antennaSelection.nelements() == 0) {
-	antennaSelection = GetAntennaMask(dr);
+        antennaSelection = GetAntennaMask(dr);
       }
 
       // get AntennaIDs to store pulse parameters in corresponding map
@@ -1301,20 +1276,23 @@ namespace CR { // Namespace CR -- begin
 
       // adopt the antennaSelection to the chosen polarization
       deselectectPolarization(dr,antennaSelection);
- 
+
       // Get the (upsampled) time axis
       timeValues = getUpsampledTimeAxis(dr,upsampling_exp);
 
       // Get the yValues of all selected antennas (raw data or fieldstrength)
-      // and the geometrical delays applied during beam forming (0 for raw data)
-      if (rawData) {
+      if (rawData)
         yValues = getUpsampledFX(dr,upsampling_exp, antennaSelection, true, calibrationMode);
+            // first true means: offset will be substracted,
+            // in calibrationMode the voltage will be used instead of ADC counts
+      else
+        yValues = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
+
+      // and the geometrical delays applied during beam forming (0 for raw data or calibration mode)
+      if (rawData || calibrationMode) {
         geomDelays.resize(antennaIDs.size());
         geomDelays.set(0);
-        // first true means: offset will be substracted,
-        // in calibrationMode the voltage will be used instead of ADC counts
       } else {
-        yValues = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
         geomDelays = getGeomDelay().column(0);
       }
 
@@ -1369,7 +1347,7 @@ namespace CR { // Namespace CR -- begin
            <<  "----------------------------------------------------------------------------------------------------------------------\n";
 
       // find the maximal y values for all selected antennas
-      for (unsigned int i = 0; i < antennaSelection.nelements(); i++) 
+      for (unsigned int i = 0; i < antennaSelection.nelements(); ++i)
       if (antennaSelection(i)) {
         // Start with height 0 and search for heigher and lower values
         double maximum = 0;
@@ -1416,12 +1394,12 @@ namespace CR { // Namespace CR -- begin
           }
         } else {       // looking for local maxima
           // first look to the slope, if it is increasing or decreasing
-          int slope = 1;	// default: increasing trace
+          int slope = 1;        // default: increasing trace
           if ( trace(ccTime) < trace(ccTime-1) ) 
             slope = -1;         // change to -1 for a decreasing trace
 
           // find local maximum
-          unsigned int j = ccTime;	// counter
+          unsigned int j = ccTime;        // counter
           while( (j > 0) && (j < trace.size()-1) && (trace(j) < trace(j+slope)) ) {
             j += slope;
           }
@@ -1431,7 +1409,7 @@ namespace CR { // Namespace CR -- begin
           maximum = trace(j);
 
           // find local minimum
-          j = ccTime;	// counter
+          j = ccTime;        // counter
           while( (j > 0) && (j < trace.size()-1) && (trace(j) > trace(j-slope)) ) {
             j -= slope;
           }
@@ -1445,7 +1423,7 @@ namespace CR { // Namespace CR -- begin
             slope = -1;
           else
             slope = 1;
-          j = ccTime;	// counter
+          j = ccTime;        // counter
           while( (j > 0) && (j < envTrace.size()-1) && (envTrace(j) < envTrace(j+slope)) ) {
             j += slope;
           }
@@ -1602,7 +1580,7 @@ namespace CR { // Namespace CR -- begin
 
     } catch (AipsError x) {
         cerr << "CompletePipeline:caclulateMaxima: " << x.getMesg() << endl;
-      }
+    }
 
     return pulses;
   }
@@ -1610,28 +1588,27 @@ namespace CR { // Namespace CR -- begin
 
 
   void CompletePipeline::listCalcMaxima (DataReader *dr,
-					 Vector<Bool> antennaSelection,
-					 const int& upsampling_exp,
-					 const double& cc_center)
+                                         Vector<Bool> antennaSelection,
+                                         const int& upsampling_exp,
+                                         const double& cc_center)
   {
-    try 
-    {
-      Vector<Double> timeValues;		// time values
-      Vector<Double> timeRange;			// time values
-      Vector<Double> timeRangeNoise;		// time values
-      Matrix<Double> yValues;			// y-values
-      Vector<Double> trace;			// trace currently processed
-      Vector<Double> traceNoise;		// trace currently processed
-      vector<double> extrema;			// Stores the calculated extrema
-      vector<double> extrema_time;		// Stores the calculated time of the extrema
+    try {
+      Vector<Double> timeValues;                // time values
+      Vector<Double> timeRange;                        // time values
+      Vector<Double> timeRangeNoise;                // time values
+      Matrix<Double> yValues;                        // y-values
+      Vector<Double> trace;                        // trace currently processed
+      Vector<Double> traceNoise;                // trace currently processed
+      vector<double> extrema;                        // Stores the calculated extrema
+      vector<double> extrema_time;                // Stores the calculated time of the extrema
 
 
       // make antennaSelection unique, as casacore-Vectors are allways passed by reference
       antennaSelection.unique();
 
-      // Get the antenna selection from the DataReader if no selction was chosen 	
+      // Get the antenna selection from the DataReader if no selction was chosen         
       if (antennaSelection.nelements() == 0) {
-	antennaSelection = GetAntennaMask(dr);
+        antennaSelection = GetAntennaMask(dr);
       }
 
       // adopt the antennaSelection to the chosen polarization
@@ -1705,12 +1682,12 @@ namespace CR { // Namespace CR -- begin
           if ( extremum < maximum ) {
              extremum = maximum;
              extrematimevalue = j;
-	  }
+          }
           if (extremum < abs(minimum)){
              extremum = abs(minimum);
              extrematimevalue = j;
-	  }
-	}  
+          }
+        }
 
         extrema.push_back(extremum*1e6);
         extrema_time.push_back(timeRange(extrematimevalue)*1e6);
@@ -1719,24 +1696,24 @@ namespace CR { // Namespace CR -- begin
         traceNoise = yValues.column(i)(rangeNoise);
         // loop through the values and search for the heighest and lowest one
         for(unsigned int j = 0; j < timeRangeNoise.nelements(); j++)
-	{
-	  noise += abs(traceNoise(j));
-	}
-	noise /=timeRangeNoise.nelements();
+        {
+          noise += abs(traceNoise(j));
+        }
+        noise /=timeRangeNoise.nelements();
 
         // print the calculated values
         cout << setw(2) << i+1 << " " << setw(7) <<extremum*1e6 << " ";
-	cout << setw(8) << noise*1e+6  << " " << setw(8)<< timeRange(extrematimevalue)*1e6 ;
-	cout << endl;
-      }else{
+        cout << setw(8) << noise*1e+6  << " " << setw(8)<< timeRange(extrematimevalue)*1e6 ;
+        cout << endl;
+      } else {
         // antenna has bad data
         // get current trace
         traceNoise = yValues.column(i)(rangeNoise);
         // loop through the values and search for the heighest and lowest one
         for(unsigned int j = 0; j < timeRangeNoise.nelements(); j++) {
-	  noise += abs(traceNoise(j));
-	}
-	noise /=timeRangeNoise.nelements();
+          noise += abs(traceNoise(j));
+        }
+        noise /=timeRangeNoise.nelements();
         cout << std::setw(2) << i+1 << " 0.0      "<< setw(8) << noise*1e+6  << " 0.0" << endl;
       }
 
@@ -1757,44 +1734,44 @@ namespace CR { // Namespace CR -- begin
       FFTData = GetData(dr);
       uInt i,nants=FFTData.ncolumn(),nselants,blocksize=dr->blocksize();
       if (antennaSelection.nelements() != nants){
-	antennaSelection = Vector<Bool>(nants,True);
+        antennaSelection = Vector<Bool>(nants,True);
       }
       // Select Antennas according to Polarization
       if (Polarization != "ANY"){
-	uInt date;
-	dr->headerRecord().get("Date",date);
-	if (!ploAntSelValid_p || 
-	    (ploAntSelPol_p != Polarization) ||
-	    (ploAntSelDate_p != date)) {
-	  ploAntSel_p.resize(nants);
-	  ploAntSel_p = True;
-	  Vector<Int> AntennaIDs;
-	  String tempstring;
-	  dr->headerRecord().get("AntennaIDs",AntennaIDs);
-	  for (i=0;i<nants;i++){
-	    CTRead->GetData(date, AntennaIDs(i), "Polarization", &tempstring);
-	    if (tempstring != Polarization) {
-	      ploAntSel_p(i) = False;
-	    }
-	  } //for
-	  ploAntSelPol_p = Polarization;
-	  ploAntSelDate_p = date;
-	  ploAntSelValid_p = True;
-	} // if (!ploAntSelValid_p ...
-	// Apply polarization-based selection
-	antennaSelection = antennaSelection && ploAntSel_p;
+        uInt date;
+        dr->headerRecord().get("Date",date);
+        if (!ploAntSelValid_p || 
+            (ploAntSelPol_p != Polarization) ||
+            (ploAntSelDate_p != date)) {
+          ploAntSel_p.resize(nants);
+          ploAntSel_p = True;
+          Vector<Int> AntennaIDs;
+          String tempstring;
+          dr->headerRecord().get("AntennaIDs",AntennaIDs);
+          for (i=0;i<nants;i++){
+            CTRead->GetData(date, AntennaIDs(i), "Polarization", &tempstring);
+            if (tempstring != Polarization) {
+              ploAntSel_p(i) = False;
+            }
+          } //for
+          ploAntSelPol_p = Polarization;
+          ploAntSelDate_p = date;
+          ploAntSelValid_p = True;
+        } // if (!ploAntSelValid_p ...
+        // Apply polarization-based selection
+        antennaSelection = antennaSelection && ploAntSel_p;
       }
 
       nselants=ntrue(antennaSelection);
       if (nselants == 0) {
-	cerr << "CompletePipeline::GetUnshiftedTimeSeries: " << "No antennas selected/all antennas flagged!" << endl;
+        cerr << "CompletePipeline::GetUnshiftedTimeSeries: " << "No antennas selected/all antennas flagged!" << endl;
       }
 
       timeSeries.resize(blocksize,nselants);
-      unsigned int j=0;	// for counting antennas
+      unsigned int j=0;        // for counting antennas
       for (i=0;i<nants;i++){
-	if (antennaSelection(i)){
-	  timeSeries.column(j) = dr->invfft(FFTData.column(i));
+        if (antennaSelection(i)){
+          timeSeries.column(j) = dr->invfft(FFTData.column(i));
 
           // substract the pedastal (mean offset of the trace)
           if (substractPedastal == true)
@@ -1804,8 +1781,8 @@ namespace CR { // Namespace CR -- begin
              for (unsigned int k = 0; k < timeSeries.column(j).size(); k++)
                timeSeries.column(j)(k) -= pedastal;
           }
-	  j++;
-	}
+          j++;
+        }
       }
 
     } catch (AipsError x) {

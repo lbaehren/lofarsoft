@@ -300,7 +300,8 @@ namespace CR { // Namespace CR -- begin
       if (verbose) {
         vector<string> plotlist = CompleteBeamPipe_p->getPlotList();
         cout <<"\nList of generated plots:\n";
-        for (unsigned int i = 0; i < plotlist.size(); i++) std::cout << plotlist[i] << "\n";
+        for (unsigned int i = 0; i < plotlist.size(); i++) 
+          cout << plotlist[i] << "\n";
         cout << endl;
       }
 
@@ -480,9 +481,10 @@ namespace CR { // Namespace CR -- begin
       // give out the names of the created plots
       if (verbose) {
         vector<string> plotlist = CompleteBeamPipe_p->getPlotList();
-        std::cout <<"\nList of generated plots:\n";
-        for (unsigned int i = 0; i < plotlist.size(); i++) std::cout << plotlist[i] << "\n";
-        std::cout << std::endl;
+        cout <<"\nList of generated plots:\n";
+        for (unsigned int i = 0; i < plotlist.size(); i++) 
+          cout << plotlist[i] << "\n";
+        cout << endl;
       }
 
       erg.define("goodReconstructed",true);  // assume that everything was fine, then this position is reached.
