@@ -73,7 +73,7 @@ add_dependencies (tempo_build tempo_unpack)
 
 add_custom_target (tempo_install
   COMMAND cp src/tempo ${CMAKE_INSTALL_PREFIX}/bin
-  COMMAND cp tempo.cfg tempo.hlp ${CMAKE_INSTALL_PREFIX}/bin
+  COMMAND cp tempo.cfg tempo.hlp obsys.dat ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r tempo_ephem ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r clock ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r tzpar ${CMAKE_INSTALL_PREFIX}/bin
