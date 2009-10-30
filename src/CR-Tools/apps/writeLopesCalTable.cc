@@ -29,20 +29,20 @@ using CR::CalTableReader;
 
 /*!
   \file writeLopesCalTable.cc
-  
+
   \ingroup CR_Applications
 
   \brief for writing LOPES-CalTables
- 
-  \author Frank Schröder
- 
+
+  \author Frank Schröder, Katrin Link, Daniel Huber
+
   \date 2008/05/29
-    
+
   <h3>Motivation</h3>
 
   This application allows to write values to LOPES-Calibration-Tables.
   In this first version new values must be written into the source code.
-  
+
 
   <h3>Usage</h3>
   \verbatim
@@ -82,6 +82,10 @@ const unsigned int roof_setup_2_freq_start = 1202479000; // Fr Feb  8 13:56:40 U
 const unsigned int tripole_2009_start = 1236086340; // 2009-03-03 13:19 UTC
 const unsigned int tripole_2009_stop = 1238505000; // 2009-03-31 13:10 UTC
 
+// Sallaplusdipol test
+const unsigned int sallaplusdipol_2009_start = 1249045264; // 2009-07-31 13:01:04  UTC
+const unsigned int sallaplusdipol_2009_stop = 1256030087;   // 2009-10-20 09:14:47  UTC
+
 
 // define antenna IDs
 const int MAX_Antennas = 30;
@@ -103,8 +107,8 @@ void adjust_height_of_ant_14(void)
   position_14(0) = -52.069;
   position_14(1) = -54.610;
   position_14(2) = -0.2;
-  
-  
+
+
   cout << "Writing correct height for antenna: " << 40202 << endl;
 
   if (!writer.AddData(position_14,40202,"Position",LOPES30_start) )
@@ -117,19 +121,17 @@ void addActiveField(bool createfield = true)
 {
   if (createfield)
     if (!writer.AddField("Active", "Shows the status of an antenna (false means not active / problems)", "Double",
-    			  False,  IPosition::IPosition(), False, "HWSetup") )
+                              False,  IPosition::IPosition(), False, "HWSetup") )
         cerr << "\nERROR while adding field: Active" << endl;
-  
+
   // set Active to true of Antenna 1 for LOPES 10 and 30
-  for (int i = 0; i < 10; i++)
-  {
+  for (int i = 0; i < 10; i++) {
     cout << "Writing 'Active' for LOPES 10 for antenna: " << antennaIDs[i] << endl;
 
     if (!writer.AddData(True,antennaIDs[i],"Active",LOPES10_start) )
       cerr << "\nERROR while writing field: Active" << endl;
   }
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing 'Active' for LOPES 30 for antenna: " << antennaIDs[i] << endl;
 
     if (!writer.AddData(True,antennaIDs[i],"Active",LOPES30_start) )
@@ -143,7 +145,7 @@ void LopesPol_HWSetup(void)
 {
   String HWSetup0 = "Summer 2006 change";
   String HWSetup1 = "LOPES Dual Pol 16 EW, 14 NS";
-  String HWSetup2 = "LOPES Dual Pol 15 EW, 15 NS";	// Polarization of Ant 1 was changed later
+  String HWSetup2 = "LOPES Dual Pol 15 EW, 15 NS";        // Polarization of Ant 1 was changed later
 
   // Set Polarization
   Vector<String> Polarization(30);
@@ -180,47 +182,47 @@ void LopesPol_HWSetup(void)
 
   // Set Position
   Matrix<Double> Position(3,30);
-  Position.column(0)(0) = 79.61;	Position.column(0)(1) = -45.96;		Position.column(0)(2) = 	0;
-  Position.column(1)(0) = 111.425;	Position.column(1)(1) = -64.297;	Position.column(1)(2) = -0.464996;
-  Position.column(2)(0) = 36.12;	Position.column(2)(1) = -84.724;	Position.column(2)(2) = -0.347;
-  Position.column(3)(0) = 54.621;	Position.column(3)(1) = -52.915;	Position.column(3)(2) = -0.0599976;
-  Position.column(4)(0) = 22.68;	Position.column(4)(1) = -34.593;	Position.column(4)(2) = -0.0799942;
-  Position.column(5)(0) = 22.68;	Position.column(5)(1) = -34.593;	Position.column(5)(2) = -0.0799942;
-  Position.column(6)(0) = 2.114;	Position.column(6)(1) = 40.762;		Position.column(6)(2) = 0.00900269;
-  Position.column(7)(0) = 34.345;	Position.column(7)(1) = 22.469;		Position.column(7)(2) = 0.0570068;
-  Position.column(8)(0) = 72.799;	Position.column(8)(1) = -21.039;	Position.column(8)(2) = -0.086998;
-  Position.column(9)(0) = 91.021;	Position.column(9)(1) = 10.966;		Position.column(9)(2) = -0.190994;
-  Position.column(10)(0) = -64.335;	Position.column(10)(1) = -112.265;	Position.column(10)(2) = -0.275993;
-  Position.column(11)(0) = -45.981;	Position.column(11)(1) = -80.043;	Position.column(11)(2) = -0.239998;
-  Position.column(12)(0) = -84.665;	Position.column(12)(1) = -36.799;	Position.column(12)(2) = -0.194;
-  Position.column(13)(0) = -52.069;	Position.column(13)(1) = -54.61;	Position.column(13)(2) = -0.2;
-  Position.column(14)(0) = -91.563;	Position.column(14)(1) = -11.622;	Position.column(14)(2) = -0.145996;
-  Position.column(15)(0) = -73.138;	Position.column(15)(1) = 20.123;	Position.column(15)(2) = -0.0799942;
-  Position.column(16)(0) = -112.217;	Position.column(16)(1) = 63.405;	Position.column(16)(2) = 0.166;
-  Position.column(17)(0) = -80.264;	Position.column(17)(1) = 45.138;	Position.column(17)(2) = 0.0630035;
-  Position.column(18)(0) = -34.721;	Position.column(18)(1) = -23.298;	Position.column(18)(2) = -0.139;
-  Position.column(19)(0) = -34.721;	Position.column(19)(1) = -23.298;	Position.column(19)(2) = -0.139;
-  Position.column(20)(0) = -13.861;	Position.column(20)(1) = -98.158;	Position.column(20)(2) = 0.012001;
-  Position.column(21)(0) = 4.335;	Position.column(21)(1) = -66.264;	Position.column(21)(2) = 0.00200653;
-  Position.column(22)(0) = -41.354;	Position.column(22)(1) = 1.876;		Position.column(22)(2) = -0.192993;
-  Position.column(23)(0) = -23.045;	Position.column(23)(1) = 33.919;	Position.column(23)(2) = -0.306;
-  Position.column(24)(0) = -61.694;	Position.column(24)(1) = 77.362;	Position.column(24)(2) = -0.112;
-  Position.column(25)(0) = -29.84;	Position.column(25)(1) = 58.835;	Position.column(25)(2) = -0.271996;
-  Position.column(26)(0) = -7.826;	Position.column(26)(1) = -127.937;	Position.column(26)(2) = -0.178993;
-  Position.column(27)(0) = -7.826;	Position.column(27)(1) = -127.937;	Position.column(27)(2) = -0.178993;
-  Position.column(28)(0) = -13.861;	Position.column(28)(1) = -98.158;	Position.column(28)(2) = 0.012001;
-  Position.column(29)(0) = 4.335;	Position.column(29)(1) = -66.264;	Position.column(29)(2) = 0.00200653;
+  Position.column(0)(0) = 79.61;        Position.column(0)(1) = -45.96;                Position.column(0)(2) =         0;
+  Position.column(1)(0) = 111.425;        Position.column(1)(1) = -64.297;        Position.column(1)(2) = -0.464996;
+  Position.column(2)(0) = 36.12;        Position.column(2)(1) = -84.724;        Position.column(2)(2) = -0.347;
+  Position.column(3)(0) = 54.621;        Position.column(3)(1) = -52.915;        Position.column(3)(2) = -0.0599976;
+  Position.column(4)(0) = 22.68;        Position.column(4)(1) = -34.593;        Position.column(4)(2) = -0.0799942;
+  Position.column(5)(0) = 22.68;        Position.column(5)(1) = -34.593;        Position.column(5)(2) = -0.0799942;
+  Position.column(6)(0) = 2.114;        Position.column(6)(1) = 40.762;                Position.column(6)(2) = 0.00900269;
+  Position.column(7)(0) = 34.345;        Position.column(7)(1) = 22.469;                Position.column(7)(2) = 0.0570068;
+  Position.column(8)(0) = 72.799;        Position.column(8)(1) = -21.039;        Position.column(8)(2) = -0.086998;
+  Position.column(9)(0) = 91.021;        Position.column(9)(1) = 10.966;                Position.column(9)(2) = -0.190994;
+  Position.column(10)(0) = -64.335;        Position.column(10)(1) = -112.265;        Position.column(10)(2) = -0.275993;
+  Position.column(11)(0) = -45.981;        Position.column(11)(1) = -80.043;        Position.column(11)(2) = -0.239998;
+  Position.column(12)(0) = -84.665;        Position.column(12)(1) = -36.799;        Position.column(12)(2) = -0.194;
+  Position.column(13)(0) = -52.069;        Position.column(13)(1) = -54.61;        Position.column(13)(2) = -0.2;
+  Position.column(14)(0) = -91.563;        Position.column(14)(1) = -11.622;        Position.column(14)(2) = -0.145996;
+  Position.column(15)(0) = -73.138;        Position.column(15)(1) = 20.123;        Position.column(15)(2) = -0.0799942;
+  Position.column(16)(0) = -112.217;        Position.column(16)(1) = 63.405;        Position.column(16)(2) = 0.166;
+  Position.column(17)(0) = -80.264;        Position.column(17)(1) = 45.138;        Position.column(17)(2) = 0.0630035;
+  Position.column(18)(0) = -34.721;        Position.column(18)(1) = -23.298;        Position.column(18)(2) = -0.139;
+  Position.column(19)(0) = -34.721;        Position.column(19)(1) = -23.298;        Position.column(19)(2) = -0.139;
+  Position.column(20)(0) = -13.861;        Position.column(20)(1) = -98.158;        Position.column(20)(2) = 0.012001;
+  Position.column(21)(0) = 4.335;        Position.column(21)(1) = -66.264;        Position.column(21)(2) = 0.00200653;
+  Position.column(22)(0) = -41.354;        Position.column(22)(1) = 1.876;                Position.column(22)(2) = -0.192993;
+  Position.column(23)(0) = -23.045;        Position.column(23)(1) = 33.919;        Position.column(23)(2) = -0.306;
+  Position.column(24)(0) = -61.694;        Position.column(24)(1) = 77.362;        Position.column(24)(2) = -0.112;
+  Position.column(25)(0) = -29.84;        Position.column(25)(1) = 58.835;        Position.column(25)(2) = -0.271996;
+  Position.column(26)(0) = -7.826;        Position.column(26)(1) = -127.937;        Position.column(26)(2) = -0.178993;
+  Position.column(27)(0) = -7.826;        Position.column(27)(1) = -127.937;        Position.column(27)(2) = -0.178993;
+  Position.column(28)(0) = -13.861;        Position.column(28)(1) = -98.158;        Position.column(28)(2) = 0.012001;
+  Position.column(29)(0) = 4.335;        Position.column(29)(1) = -66.264;        Position.column(29)(2) = 0.00200653;
 
   // Write values for antenna 27, 29 and 30 for change in summer 2006
   cout << "Writing HW-Setup for small setup change of summer 2006." << endl;
-  
+
   if (!writer.AddData(HWSetup0,antennaIDs[26],"HWSetup",Summer2006_change) )
     cerr << "\nERROR while writing field: HWSetup" << endl;
   if (!writer.AddData(Polarization(26),antennaIDs[26],"Polarization",Summer2006_change) )
     cerr << "\nERROR while writing field: Polarization" << endl;
   if (!writer.AddData(Position.column(26),antennaIDs[26],"Position",Summer2006_change) )
     cerr << "\nERROR while writing field: Position" << endl;
- 
+
   if (!writer.AddData(HWSetup0,antennaIDs[28],"HWSetup",Summer2006_change) )
     cerr << "\nERROR while writing field: HWSetup" << endl;
   if (!writer.AddData(Polarization(28),antennaIDs[28],"Polarization",Summer2006_change) )
@@ -234,10 +236,9 @@ void LopesPol_HWSetup(void)
     cerr << "\nERROR while writing field: Polarization" << endl;
   if (!writer.AddData(Position.column(29),antennaIDs[29],"Position",Summer2006_change) )
     cerr << "\nERROR while writing field: Position" << endl;
-  
+
   // Write values for LOPES_pol_start
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing HW-Setup for dual polarization setup of dec 2006: " << antennaIDs[i] << endl;
 
     if (!writer.AddData(HWSetup1,antennaIDs[i],"HWSetup",LOPES_pol_start) )
@@ -252,8 +253,7 @@ void LopesPol_HWSetup(void)
   Polarization(0)  = "NS";
 
   // Write values for Ant1_rotation_start
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing HW-Setup of jan 2007 (after rotation of ant 1): " << antennaIDs[i] << endl;
 
     if (!writer.AddData(HWSetup2,antennaIDs[i],"HWSetup",Ant1_rotation_start) )
@@ -274,13 +274,12 @@ void rotate_antenna_model(unsigned int GTdate)
 
   // find antennas which must be rotatet (all NS polarized antennas)
   // read in values, rotate them if neccessary and write them back as new values
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Reading antenna polaristaion for: " << antennaIDs[i] << endl;
-    
+
     String polarization, oldPolarization;
     if (!reader.GetData(GTdate, antennaIDs[i], "Polarization", &polarization))
-    { 
+    {
       cerr << "Error while reading field: Polarization" << endl;
       return;
     }
@@ -292,108 +291,97 @@ void rotate_antenna_model(unsigned int GTdate)
     // set rotation flag to true, if antenna changed from EW to NS polarized
     if ((polarization == "NS") && (oldPolarization == "EW")) rotate(i) = true;
       else rotate(i) = false; 
-    
- 
+
+
     // rewrite values only if they have to be rotated!
-    if ( rotate(i) )
-    {     
+    if ( rotate(i) ) {
       // read in the AntennaGainFaktor
       Cube<Double> oldAntennaGainFaktor;  
-      if (!reader.GetData(LOPES30_start, antennaIDs[i], "AntennaGainFaktor", &oldAntennaGainFaktor))
-      { 
+      if (!reader.GetData(LOPES30_start, antennaIDs[i], "AntennaGainFaktor", &oldAntennaGainFaktor)) {
         cerr << "Error while reading field: AntennaGainFaktor" << endl;
         return;
       }
       Cube<Double> newAntennaGainFaktor = oldAntennaGainFaktor.copy();  
       // rotate AntennaGainFaktor by -90°
-      if ( rotate(i) )
-      {
+      if ( rotate(i) ) {
         cout << "Rotating AntennaGainFaktor by -90° for antenna: " << i+1 << endl;
         // shift values between 90° and 360° by -90° (fields 9 - 36 --> fields 0 - 27)
         for (int j = 0 ; j < 27; j++) newAntennaGainFaktor.xzPlane(j) = oldAntennaGainFaktor.xzPlane(j+9);
         // values from 270° - 360° = values from 10° - 90°
         for (int j = 27; j < 37; j++) newAntennaGainFaktor.xzPlane(j) = oldAntennaGainFaktor.xzPlane(j-27);
-      } 
+      }
       // write the data back as new values
       if (!writer.AddData(newAntennaGainFaktor, antennaIDs[i],"AntennaGainFaktor",GTdate) )
         cerr << "\nERROR while writing field: AntennaGainFaktor" << endl;     
-  
+
       // read in the AntennaAziGain
       Cube<Double> oldAntennaAziGain;  
-      if (!reader.GetData(LOPES30_start, antennaIDs[i], "AntennaAziGain", &oldAntennaAziGain))
-      { 
+      if (!reader.GetData(LOPES30_start, antennaIDs[i], "AntennaAziGain", &oldAntennaAziGain)) {
         cerr << "Error while reading field: AntennaAziGain" << endl;
         return;
       }
       Cube<Double> newAntennaAziGain = oldAntennaAziGain.copy();  
       // rotate AntennaAziGain by -90°
-      if ( rotate(i) )
-      {
+      if ( rotate(i) ) {
         // shift values between 90° and 360° by -90° (fields 9 - 36 --> fields 0 - 27)
         for (int j = 0 ; j < 27; j++) newAntennaAziGain.xzPlane(j) = oldAntennaAziGain.xzPlane(j+9);
         // values from 270° - 360° = values from 10° - 90°
         for (int j = 27; j < 37; j++) newAntennaAziGain.xzPlane(j) = oldAntennaAziGain.xzPlane(j-27);
-      } 
+      }
       // write the data back as new values
       if (!writer.AddData(newAntennaAziGain, antennaIDs[i],"AntennaAziGain",GTdate) )
-        cerr << "\nERROR while writing field: AntennaAziGain" << endl;   
-    
+        cerr << "\nERROR while writing field: AntennaAziGain" << endl;
+
       // read in the AntennaZeniGain
       Cube<Double> oldAntennaZeniGain;  
-      if (!reader.GetData(LOPES30_start, antennaIDs[i], "AntennaZeniGain", &oldAntennaZeniGain))
-      { 
+      if (!reader.GetData(LOPES30_start, antennaIDs[i], "AntennaZeniGain", &oldAntennaZeniGain)) {
         cerr << "Error while reading field: AntennaZeniGain" << endl;
         return;
       }
       Cube<Double> newAntennaZeniGain = oldAntennaZeniGain.copy();  
       // rotate AntennaZeniGain by -90°
-      if ( rotate(i) )
-      {
+      if ( rotate(i) ) {
         // shift values between 90° and 360° by -90° (fields 9 - 36 --> fields 0 - 27)
         for (int j = 0 ; j < 27; j++) newAntennaZeniGain.xzPlane(j) = oldAntennaZeniGain.xzPlane(j+9);
         // values from 270° - 360° = values from 10° - 90°
         for (int j = 27; j < 37; j++) newAntennaZeniGain.xzPlane(j) = oldAntennaZeniGain.xzPlane(j-27);
-      } 
+      }
       // write the data back as new values
       if (!writer.AddData(newAntennaZeniGain, antennaIDs[i],"AntennaZeniGain",GTdate) )
         cerr << "\nERROR while writing field: AntennaZeniGain" << endl;  
-    
+
       // read in the AntennaAziPhase
-      Cube<Double> oldAntennaAziPhase;  
-      if (!reader.GetData(LOPES30_start, antennaIDs[i], "AntennaAziPhase", &oldAntennaAziPhase))
-      { 
+      Cube<Double> oldAntennaAziPhase;
+      if (!reader.GetData(LOPES30_start, antennaIDs[i], "AntennaAziPhase", &oldAntennaAziPhase)) {
         cerr << "Error while reading field: AntennaAziPhase" << endl;
         return;
       }
       Cube<Double> newAntennaAziPhase = oldAntennaAziPhase.copy();  
       // rotate AntennaAziPhase by -90°
-      if ( rotate(i) )
-      {
+      if ( rotate(i) ) {
         // shift values between 90° and 360° by -90° (fields 9 - 36 --> fields 0 - 27)
         for (int j = 0 ; j < 27; j++) newAntennaAziPhase.xzPlane(j) = oldAntennaAziPhase.xzPlane(j+9);
         // values from 270° - 360° = values from 10° - 90°
         for (int j = 27; j < 37; j++) newAntennaAziPhase.xzPlane(j) = oldAntennaAziPhase.xzPlane(j-27);
-      } 
+      }
       // write the data back as new values
       if (!writer.AddData(newAntennaAziPhase, antennaIDs[i],"AntennaAziPhase",GTdate) )
         cerr << "\nERROR while writing field: AntennaAziPhase" << endl;  
-    
+
       // read in the AntennaZeniPhase
       Cube<Double> oldAntennaZeniPhase;  
-      if (!reader.GetData(LOPES30_start, antennaIDs[i], "AntennaZeniPhase", &oldAntennaZeniPhase))
-      { 
+      if (!reader.GetData(LOPES30_start, antennaIDs[i], "AntennaZeniPhase", &oldAntennaZeniPhase)) {
         cerr << "Error while reading field: AntennaZeniPhase" << endl;
         return;
       }
       Cube<Double> newAntennaZeniPhase = oldAntennaZeniPhase.copy();  
       // rotate AntennaZeniPhase by -90°
-      if ( rotate(i) )
-      {
+      if ( rotate(i) ) {
         // shift values between 90° and 360° by -90° (fields 9 - 36 --> fields 0 - 27)
         for (int j = 0 ; j < 27; j++) newAntennaZeniPhase.xzPlane(j) = oldAntennaZeniPhase.xzPlane(j+9);
         // values from 270° - 360° = values from 10° - 90°
         for (int j = 27; j < 37; j++) newAntennaZeniPhase.xzPlane(j) = oldAntennaZeniPhase.xzPlane(j-27);
-      } 
+      }
       // write the data back as new values
       if (!writer.AddData(newAntennaZeniPhase, antennaIDs[i],"AntennaZeniPhase",GTdate) )
         cerr << "\nERROR while writing field: AntennaZeniPhase" << endl;  
@@ -440,11 +428,11 @@ void interchange19_20()
 
   // read in the AntennaGainFaktor
   Cube<Double> AntennaGainFaktor19, AntennaGainFaktor20;
-  if (!reader.GetData(oldGT, antennaIDs[18], "AntennaGainFaktor", &AntennaGainFaktor19)) { 
+  if (!reader.GetData(oldGT, antennaIDs[18], "AntennaGainFaktor", &AntennaGainFaktor19)) {
         cerr << "Error while reading field: AntennaGainFaktor" << endl;
         return;
   }
-  if (!reader.GetData(oldGT, antennaIDs[19], "AntennaGainFaktor", &AntennaGainFaktor20)) { 
+  if (!reader.GetData(oldGT, antennaIDs[19], "AntennaGainFaktor", &AntennaGainFaktor20)) {
         cerr << "Error while reading field: AntennaGainFaktor" << endl;
         return;
   }
@@ -538,129 +526,129 @@ void writeDelays(void)
   Vector<Double> delay_nov(30);
   Vector<Double> delay_2008(30);
 
-  delay_apr(0)  = 0.		;
-  delay_apr(1)  = 2.52		;
-  delay_apr(2)  = -418.18	;
-  delay_apr(3)  = -414.67	;
-  delay_apr(4)  = -456.85	;
-  delay_apr(5)  = -459.98	;
-  delay_apr(6)  = -418.96	;
-  delay_apr(7)  = -418.57	;
-  delay_apr(8)  = -429.46	;
-  delay_apr(9)  = -431.46	;
-  delay_apr(10) = -1257.24	;
-  delay_apr(11) = -1258.	;
-  delay_apr(12) = -1252.56	;
-  delay_apr(13) = -1257.24	;
-  delay_apr(14) = -1260.8	;
-  delay_apr(15) = -1252.24	;
-  delay_apr(16) = -838.86	;
-  delay_apr(17) = -839.85	;
-  delay_apr(18) = -1256.78	;
-  delay_apr(19) = -1260.37	;
-  delay_apr(20) = -1002.88	;
-  delay_apr(21) = -1002.17	;
-  delay_apr(22) = -1012.89	;
-  delay_apr(23) = -1010.76	;
-  delay_apr(24) = -581.07	;
-  delay_apr(25) = -589.67	;
-  delay_apr(26) = -595.14	;
-  delay_apr(27) = -594.46	;
-  delay_apr(28) = -591.91	;
-  delay_apr(29) = -613.1	;
-  
-  delay_sep(0)  = 0.		;
-  delay_sep(1)  = 2.43		;
-  delay_sep(2)  = -416.82	;
-  delay_sep(3)  = -414.62	;
-  delay_sep(4)  = -456.8	;
-  delay_sep(5)  = -459.77	;
-  delay_sep(6)  = -417.7	;
-  delay_sep(7)  = -417.89	;
-  delay_sep(8)  = -428.75	;
-  delay_sep(9)  = -431.73	;
-  delay_sep(10) = -1227.02	;
-  delay_sep(11) = -1227.57	;
-  delay_sep(12) = -1222.09	;
-  delay_sep(13) = -1226.6	;
-  delay_sep(14) = -1229.98	;
-  delay_sep(15) = -1220.18	;
-  delay_sep(16) = -809.79	;
-  delay_sep(17) = -807.1	;
-  delay_sep(18) = -1224.47	;
-  delay_sep(19) = -1227.81	;
-  delay_sep(20) = -973.11	;
-  delay_sep(21) = -972.68	;
-  delay_sep(22) = -982.48	;
-  delay_sep(23) = -979.88	;
-  delay_sep(24) = -549.54	;
-  delay_sep(25) = -558.95	;
-  delay_sep(26) = -564.82	;
-  delay_sep(27) = -564.83	;
-  delay_sep(28) = -562.29	;
-  delay_sep(29) = -582.99	;
-				
-  delay_nov(0)  = 0.		;
-  delay_nov(1)  = 2.35		;
-  delay_nov(2)  = -416.79	;
-  delay_nov(3)  = -415.23	;
-  delay_nov(4)  = -457.38	;
-  delay_nov(5)  = -459.76	;
-  delay_nov(6)  = -418.59	;
-  delay_nov(7)  = -418.56	;
-  delay_nov(8)  = -429.29	;
-  delay_nov(9)  = -432.03	;
-  delay_nov(10) = -1229.64	;
-  delay_nov(11) = -1230.31	;
-  delay_nov(12) = -1225.	;
-  delay_nov(13) = -1229.68	;
-  delay_nov(14) = -1233.2	;
-  delay_nov(15) = -1223.43	;
-  delay_nov(16) = -810.07	;
-  delay_nov(17) = -810.93	;
-  delay_nov(18) = -1228.12	;
-  delay_nov(19) = -1231.8	;
-  delay_nov(20) = -951.95	;
-  delay_nov(21) = -951.95	;
-  delay_nov(22) = -960.93	;
-  delay_nov(23) = -959.37	;
-  delay_nov(24) = -529.29	;
-  delay_nov(25) = -537.89	;
-  delay_nov(26) = -544.14	;
-  delay_nov(27) = -543.75	;
-  delay_nov(28) = -541.01	;
-  delay_nov(29) = -562.5	;
+  delay_apr(0)  = 0.             ;
+  delay_apr(1)  = 2.52           ;
+  delay_apr(2)  = -418.18        ;
+  delay_apr(3)  = -414.67        ;
+  delay_apr(4)  = -456.85        ;
+  delay_apr(5)  = -459.98        ;
+  delay_apr(6)  = -418.96        ;
+  delay_apr(7)  = -418.57        ;
+  delay_apr(8)  = -429.46        ;
+  delay_apr(9)  = -431.46        ;
+  delay_apr(10) = -1257.24       ;
+  delay_apr(11) = -1258.         ;
+  delay_apr(12) = -1252.56       ;
+  delay_apr(13) = -1257.24       ;
+  delay_apr(14) = -1260.8        ;
+  delay_apr(15) = -1252.24       ;
+  delay_apr(16) = -838.86        ;
+  delay_apr(17) = -839.85        ;
+  delay_apr(18) = -1256.78       ;
+  delay_apr(19) = -1260.37       ;
+  delay_apr(20) = -1002.88       ;
+  delay_apr(21) = -1002.17       ;
+  delay_apr(22) = -1012.89       ;
+  delay_apr(23) = -1010.76       ;
+  delay_apr(24) = -581.07        ;
+  delay_apr(25) = -589.67        ;
+  delay_apr(26) = -595.14        ;
+  delay_apr(27) = -594.46        ;
+  delay_apr(28) = -591.91        ;
+  delay_apr(29) = -613.1         ;
 
-  delay_2008(0	) = 0		;
-  delay_2008(1	) = 2.34	;
-  delay_2008(2	) = -417.17	;
-  delay_2008(3	) = -414.78	;
-  delay_2008(4	) = -456.95	;
-  delay_2008(5	) = -459.13	;
-  delay_2008(6	) = -417.88	;
-  delay_2008(7	) = -417.73	;
-  delay_2008(8	) = -428.28	;
-  delay_2008(9	) = -431.14	;
-  delay_2008(10	) = -1229.82	;
-  delay_2008(11	) = -1229.37	;
-  delay_2008(12	) = -1224.38	;
-  delay_2008(13	) = -1228.82	;
-  delay_2008(14	) = -1233	;
-  delay_2008(15	) = -1223.35	;
-  delay_2008(16	) = -809.71	;
-  delay_2008(17	) = -810.14	;
-  delay_2008(18	) = -1231.86	;
-  delay_2008(19	) = -1227.7	;
-  delay_2008(20	) = -951.6	;
-  delay_2008(21	) = -950.48	;
-  delay_2008(22	) = -961.23	;
-  delay_2008(23	) = -958.83	;
-  delay_2008(24	) = -529.17	;
-  delay_2008(25	) = -537.94	;
-  delay_2008(26	) = -542.42	;
-  delay_2008(27	) = -543.16	;
-  delay_2008(28	) = -539.93	;
-  delay_2008(29	) = -560.44	;
+  delay_sep(0)  = 0.             ;
+  delay_sep(1)  = 2.43           ;
+  delay_sep(2)  = -416.82        ;
+  delay_sep(3)  = -414.62        ;
+  delay_sep(4)  = -456.8         ;
+  delay_sep(5)  = -459.77        ;
+  delay_sep(6)  = -417.7         ;
+  delay_sep(7)  = -417.89        ;
+  delay_sep(8)  = -428.75        ;
+  delay_sep(9)  = -431.73        ;
+  delay_sep(10) = -1227.02       ;
+  delay_sep(11) = -1227.57       ;
+  delay_sep(12) = -1222.09       ;
+  delay_sep(13) = -1226.6        ;
+  delay_sep(14) = -1229.98       ;
+  delay_sep(15) = -1220.18       ;
+  delay_sep(16) = -809.79        ;
+  delay_sep(17) = -807.1         ;
+  delay_sep(18) = -1224.47       ;
+  delay_sep(19) = -1227.81       ;
+  delay_sep(20) = -973.11        ;
+  delay_sep(21) = -972.68        ;
+  delay_sep(22) = -982.48        ;
+  delay_sep(23) = -979.88        ;
+  delay_sep(24) = -549.54        ;
+  delay_sep(25) = -558.95        ;
+  delay_sep(26) = -564.82        ;
+  delay_sep(27) = -564.83        ;
+  delay_sep(28) = -562.29        ;
+  delay_sep(29) = -582.99        ;
+
+  delay_nov(0)  = 0.             ;
+  delay_nov(1)  = 2.35           ;
+  delay_nov(2)  = -416.79        ;
+  delay_nov(3)  = -415.23        ;
+  delay_nov(4)  = -457.38        ;
+  delay_nov(5)  = -459.76        ;
+  delay_nov(6)  = -418.59        ;
+  delay_nov(7)  = -418.56        ;
+  delay_nov(8)  = -429.29        ;
+  delay_nov(9)  = -432.03        ;
+  delay_nov(10) = -1229.64       ;
+  delay_nov(11) = -1230.31       ;
+  delay_nov(12) = -1225.         ;
+  delay_nov(13) = -1229.68       ;
+  delay_nov(14) = -1233.2        ;
+  delay_nov(15) = -1223.43       ;
+  delay_nov(16) = -810.07        ;
+  delay_nov(17) = -810.93        ;
+  delay_nov(18) = -1228.12       ;
+  delay_nov(19) = -1231.8        ;
+  delay_nov(20) = -951.95        ;
+  delay_nov(21) = -951.95        ;
+  delay_nov(22) = -960.93        ;
+  delay_nov(23) = -959.37        ;
+  delay_nov(24) = -529.29        ;
+  delay_nov(25) = -537.89        ;
+  delay_nov(26) = -544.14        ;
+  delay_nov(27) = -543.75        ;
+  delay_nov(28) = -541.01        ;
+  delay_nov(29) = -562.5         ;
+
+  delay_2008(0) = 0              ;
+  delay_2008(1) = 2.34           ;
+  delay_2008(2) = -417.17        ;
+  delay_2008(3) = -414.78        ;
+  delay_2008(4) = -456.95        ;
+  delay_2008(5) = -459.13        ;
+  delay_2008(6) = -417.88        ;
+  delay_2008(7) = -417.73        ;
+  delay_2008(8) = -428.28        ;
+  delay_2008(9) = -431.14        ;
+  delay_2008(10) = -1229.82      ;
+  delay_2008(11) = -1229.37      ;
+  delay_2008(12) = -1224.38      ;
+  delay_2008(13) = -1228.82      ;
+  delay_2008(14) = -1233         ;
+  delay_2008(15) = -1223.35      ;
+  delay_2008(16) = -809.71       ;
+  delay_2008(17) = -810.14       ;
+  delay_2008(18) = -1231.86      ;
+  delay_2008(19) = -1227.7       ;
+  delay_2008(20) = -951.6        ;
+  delay_2008(21) = -950.48       ;
+  delay_2008(22) = -961.23       ;
+  delay_2008(23) = -958.83       ;
+  delay_2008(24) = -529.17       ;
+  delay_2008(25) = -537.94       ;
+  delay_2008(26) = -542.42       ;
+  delay_2008(27) = -543.16       ;
+  delay_2008(28) = -539.93       ;
+  delay_2008(29) = -560.44       ;
 
   // converstion from ns to s
   delay_apr /= 1e9;
@@ -714,19 +702,17 @@ void addRefAntField(bool createfield = true)
 {
   if (createfield)
     if (!writer.AddField("PhaseRefAnt", "Reference antenna for calculation of phase differences", "Double",
-    			  False,  IPosition::IPosition(), False, "Delay") )
+                              False,  IPosition::IPosition(), False, "Delay") )
         cerr << "\nERROR while adding field: PhaseRefAnt" << endl;
-  
+
   // set PhaseRefAnt to AntennaID of Antenna 1 for LOPES 10 and 30
-  for (int i = 0; i < 10; i++)
-  {
+  for (int i = 0; i < 10; i++) {
     cout << "Writing PhaseRefAnt of LOPES 10 for antenna: " << antennaIDs[i] << endl;
 
     if (!writer.AddData(10101,antennaIDs[i],"PhaseRefAnt",LOPES10_start) )
       cerr << "\nERROR while writing field: PhaseRefAnt" << endl;
   }
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing PhaseRefAnt of LOPES 30 for antenna: " << antennaIDs[i] << endl;
 
     if (!writer.AddData(10101,antennaIDs[i],"PhaseRefAnt",LOPES30_start) )
@@ -752,18 +738,15 @@ void TVshutdown(void)
   SampleJumps(3) = 1;
 
   // Add the value for all antennas
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing values for antenna: " << antennaIDs[i] << endl;
 
     // It is neccessary to write the Delay again, as the other fields
     // are junior fields an cannot be written alone
     Double old_delay = 0.;
-    if (!reader.GetData(TV_off, antennaIDs[i], "Delay", &old_delay))
-    { 
+    if (!reader.GetData(TV_off, antennaIDs[i], "Delay", &old_delay)) {
       cerr << "Error while reading field: Delay" << endl;
-    } else
-    {
+    } else {
       if (!writer.AddData(old_delay,antennaIDs[i],"Delay",TV_off) )
         cerr << "\nERROR while writing field: Delay" << endl;
       if (!writer.AddData(PhaseRefFreqs,antennaIDs[i],"PhaseRefFreqs",TV_off) )
@@ -831,18 +814,15 @@ void writeRoofRefPhases(void)
   SampleJumps(3) = 1;
 
   // Add the value for all antennas
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing values for antenna: " << antennaIDs[i] << endl;
 
     // It is neccessary to write the Delay again, as the other fields
     // are junior fields an cannot be written alone
     Double old_delay = 0.;
-    if (!reader.GetData(roof_setup_2_freq_start-1, antennaIDs[i], "Delay", &old_delay))
-    { 
+    if (!reader.GetData(roof_setup_2_freq_start-1, antennaIDs[i], "Delay", &old_delay)) {
       cerr << "Error while reading field: Delay" << endl;
-    } else
-    {
+    } else {
       if (!writer.AddData(old_delay,antennaIDs[i],"Delay",roof_setup_2_freq_start) )
         cerr << "\nERROR while writing field: Delay" << endl;
       if (!writer.AddData(PhaseRefFreqs,antennaIDs[i],"PhaseRefFreqs",roof_setup_2_freq_start) )
@@ -870,36 +850,36 @@ void writeTVRefPhases(void)
   // antenna 1 to NS and the other antenna rotations
 
   /* 
-  PhaseRefPhases(0,0)  = 0	;	  PhaseRefPhases(0,1)  = 0	;	  PhaseRefPhases(0,2)  = 0	;
-  PhaseRefPhases(1,0)  = 119.1	;	  PhaseRefPhases(1,1)  = -121.7	;	  PhaseRefPhases(1,2)  = -109.5	;
-  PhaseRefPhases(2,0)  = -120	;	  PhaseRefPhases(2,1)  = 119.1	;	  PhaseRefPhases(2,2)  = 164.6	;
-  PhaseRefPhases(3,0)  = -57.1	;	  PhaseRefPhases(3,1)  = -174.4	;	  PhaseRefPhases(3,2)  = -121	;
-  PhaseRefPhases(4,0)  = 45.1	;	  PhaseRefPhases(4,1)  = -120.8	;	  PhaseRefPhases(4,2)  = -19.3	;
-  PhaseRefPhases(5,0)  = -165.1	;	  PhaseRefPhases(5,1)  = 21.2	;	  PhaseRefPhases(5,2)  = 99	;
-  PhaseRefPhases(6,0)  = 71.1	;	  PhaseRefPhases(6,1)  = 153.4	;	  PhaseRefPhases(6,2)  = -131.3	;
-  PhaseRefPhases(7,0)  = 31.5	;	  PhaseRefPhases(7,1)  = -78.1	;	  PhaseRefPhases(7,2)  = -7.7	;
-  PhaseRefPhases(8,0)  = 39.3	;	  PhaseRefPhases(8,1)  = -73.5	;	  PhaseRefPhases(8,2)  = -11.4	;
-  PhaseRefPhases(9,0)  = -97.1	;	  PhaseRefPhases(9,1)  = 118.9	;	  PhaseRefPhases(9,2)  = 166.8	;
-  PhaseRefPhases(10,0) = 122.9	;	  PhaseRefPhases(10,1) = 35.7	;	  PhaseRefPhases(10,2) = -169.8	;
-  PhaseRefPhases(11,0) = -98.65	;	  PhaseRefPhases(11,1) = 124.3	;	  PhaseRefPhases(11,2) = -73.1	;
-  PhaseRefPhases(12,0) = 154.5	;	  PhaseRefPhases(12,1) = 13.1	;	  PhaseRefPhases(12,2) = 167.7	;
-  PhaseRefPhases(13,0) = 69.9	;	  PhaseRefPhases(13,1) = 29.5	;	  PhaseRefPhases(13,2) = -152.4	;
-  PhaseRefPhases(14,0) = 144.6	;	  PhaseRefPhases(14,1) = 125.4	;	  PhaseRefPhases(14,2) = -62	;
-  PhaseRefPhases(15,0) = 78.2	;	  PhaseRefPhases(15,1) = 34.2	;	  PhaseRefPhases(15,2) = -155.3	;
-  PhaseRefPhases(16,0) = -132.8	;	  PhaseRefPhases(16,1) = 79.7	;	  PhaseRefPhases(16,2) = -133.5	;
-  PhaseRefPhases(17,0) = 28.2	;	  PhaseRefPhases(17,1) = -1.3	;	  PhaseRefPhases(17,2) = 146.6	;
-  PhaseRefPhases(18,0) = 172.8	;	  PhaseRefPhases(18,1) = 152	;	  PhaseRefPhases(18,2) = -71.8	;
-  PhaseRefPhases(19,0) = 26.64	;	  PhaseRefPhases(19,1) = 112.2	;	  PhaseRefPhases(19,2) = -97.4	;
-  PhaseRefPhases(20,0) = -68.1	;	  PhaseRefPhases(20,1) = 68.1	;	  PhaseRefPhases(20,2) = -168.2	;
-  PhaseRefPhases(21,0) = 34.6	;	  PhaseRefPhases(21,1) = -172.1	;	  PhaseRefPhases(21,2) = -60.3	;
-  PhaseRefPhases(22,0) = 99.7	;	  PhaseRefPhases(22,1) = 13.2	;	  PhaseRefPhases(22,2) = 147.7	;
-  PhaseRefPhases(23,0) = 15.4	;	  PhaseRefPhases(23,1) = -104.8	;	  PhaseRefPhases(23,2) = 30.9	;
-  PhaseRefPhases(24,0) = -73.1	;	  PhaseRefPhases(24,1) = 6.2	;	  PhaseRefPhases(24,2) = 124	;
-  PhaseRefPhases(25,0) = -72.1	;	  PhaseRefPhases(25,1) = 152.8	;	  PhaseRefPhases(25,2) = -107.5	;
-  PhaseRefPhases(26,0) = -77.7	;	  PhaseRefPhases(26,1) = -96.4	;	  PhaseRefPhases(26,2) = -33.2	;
-  PhaseRefPhases(27,0) = -158	;	  PhaseRefPhases(27,1) = -152.9	;	  PhaseRefPhases(27,2) = -86.5	;
-  PhaseRefPhases(28,0) = -116.4	;	  PhaseRefPhases(28,1) = -4.5	;	  PhaseRefPhases(28,2) = 80.7	;
-  PhaseRefPhases(29,0) = 155.4	;	  PhaseRefPhases(29,1) = -114.2	;	  PhaseRefPhases(29,2) = -41	;
+  PhaseRefPhases(0,0)  = 0        ;          PhaseRefPhases(0,1)  = 0        ;          PhaseRefPhases(0,2)  = 0        ;
+  PhaseRefPhases(1,0)  = 119.1        ;          PhaseRefPhases(1,1)  = -121.7        ;          PhaseRefPhases(1,2)  = -109.5        ;
+  PhaseRefPhases(2,0)  = -120        ;          PhaseRefPhases(2,1)  = 119.1        ;          PhaseRefPhases(2,2)  = 164.6        ;
+  PhaseRefPhases(3,0)  = -57.1        ;          PhaseRefPhases(3,1)  = -174.4        ;          PhaseRefPhases(3,2)  = -121        ;
+  PhaseRefPhases(4,0)  = 45.1        ;          PhaseRefPhases(4,1)  = -120.8        ;          PhaseRefPhases(4,2)  = -19.3        ;
+  PhaseRefPhases(5,0)  = -165.1        ;          PhaseRefPhases(5,1)  = 21.2        ;          PhaseRefPhases(5,2)  = 99        ;
+  PhaseRefPhases(6,0)  = 71.1        ;          PhaseRefPhases(6,1)  = 153.4        ;          PhaseRefPhases(6,2)  = -131.3        ;
+  PhaseRefPhases(7,0)  = 31.5        ;          PhaseRefPhases(7,1)  = -78.1        ;          PhaseRefPhases(7,2)  = -7.7        ;
+  PhaseRefPhases(8,0)  = 39.3        ;          PhaseRefPhases(8,1)  = -73.5        ;          PhaseRefPhases(8,2)  = -11.4        ;
+  PhaseRefPhases(9,0)  = -97.1        ;          PhaseRefPhases(9,1)  = 118.9        ;          PhaseRefPhases(9,2)  = 166.8        ;
+  PhaseRefPhases(10,0) = 122.9        ;          PhaseRefPhases(10,1) = 35.7        ;          PhaseRefPhases(10,2) = -169.8        ;
+  PhaseRefPhases(11,0) = -98.65        ;          PhaseRefPhases(11,1) = 124.3        ;          PhaseRefPhases(11,2) = -73.1        ;
+  PhaseRefPhases(12,0) = 154.5        ;          PhaseRefPhases(12,1) = 13.1        ;          PhaseRefPhases(12,2) = 167.7        ;
+  PhaseRefPhases(13,0) = 69.9        ;          PhaseRefPhases(13,1) = 29.5        ;          PhaseRefPhases(13,2) = -152.4        ;
+  PhaseRefPhases(14,0) = 144.6        ;          PhaseRefPhases(14,1) = 125.4        ;          PhaseRefPhases(14,2) = -62        ;
+  PhaseRefPhases(15,0) = 78.2        ;          PhaseRefPhases(15,1) = 34.2        ;          PhaseRefPhases(15,2) = -155.3        ;
+  PhaseRefPhases(16,0) = -132.8        ;          PhaseRefPhases(16,1) = 79.7        ;          PhaseRefPhases(16,2) = -133.5        ;
+  PhaseRefPhases(17,0) = 28.2        ;          PhaseRefPhases(17,1) = -1.3        ;          PhaseRefPhases(17,2) = 146.6        ;
+  PhaseRefPhases(18,0) = 172.8        ;          PhaseRefPhases(18,1) = 152        ;          PhaseRefPhases(18,2) = -71.8        ;
+  PhaseRefPhases(19,0) = 26.64        ;          PhaseRefPhases(19,1) = 112.2        ;          PhaseRefPhases(19,2) = -97.4        ;
+  PhaseRefPhases(20,0) = -68.1        ;          PhaseRefPhases(20,1) = 68.1        ;          PhaseRefPhases(20,2) = -168.2        ;
+  PhaseRefPhases(21,0) = 34.6        ;          PhaseRefPhases(21,1) = -172.1        ;          PhaseRefPhases(21,2) = -60.3        ;
+  PhaseRefPhases(22,0) = 99.7        ;          PhaseRefPhases(22,1) = 13.2        ;          PhaseRefPhases(22,2) = 147.7        ;
+  PhaseRefPhases(23,0) = 15.4        ;          PhaseRefPhases(23,1) = -104.8        ;          PhaseRefPhases(23,2) = 30.9        ;
+  PhaseRefPhases(24,0) = -73.1        ;          PhaseRefPhases(24,1) = 6.2        ;          PhaseRefPhases(24,2) = 124        ;
+  PhaseRefPhases(25,0) = -72.1        ;          PhaseRefPhases(25,1) = 152.8        ;          PhaseRefPhases(25,2) = -107.5        ;
+  PhaseRefPhases(26,0) = -77.7        ;          PhaseRefPhases(26,1) = -96.4        ;          PhaseRefPhases(26,2) = -33.2        ;
+  PhaseRefPhases(27,0) = -158        ;          PhaseRefPhases(27,1) = -152.9        ;          PhaseRefPhases(27,2) = -86.5        ;
+  PhaseRefPhases(28,0) = -116.4        ;          PhaseRefPhases(28,1) = -4.5        ;          PhaseRefPhases(28,2) = 80.7        ;
+  PhaseRefPhases(29,0) = 155.4        ;          PhaseRefPhases(29,1) = -114.2        ;          PhaseRefPhases(29,2) = -41        ;
 
   // Add the value for all antennas
   cout << "Writing TV reference phases for LOPES 30, GT = " << delay_apr_07_start << endl;
@@ -913,47 +893,46 @@ void writeTVRefPhases(void)
   */
 
   // Set reference phases from apr/may 2007 for LOPES Dual Pol (after rotation of antenna 1)
-  PhaseRefPhases(0,0)  = 0	;	  PhaseRefPhases(0,1)  = 0	;	  PhaseRefPhases(0,2)  = 0	;
-  PhaseRefPhases(1,0)  = -123.9	;	  PhaseRefPhases(1,1)  = 14.7	;	  PhaseRefPhases(1,2)  = -27.2	;
-  PhaseRefPhases(2,0)  = -163.8	;	  PhaseRefPhases(2,1)  = 134.7	;	  PhaseRefPhases(2,2)  = 126	;
-  PhaseRefPhases(3,0)  = 79.9	;	  PhaseRefPhases(3,1)  = -42.1	;	  PhaseRefPhases(3,2)  = -36.2	;
-  PhaseRefPhases(4,0)  = -176.2	;	  PhaseRefPhases(4,1)  = 14.1	;	  PhaseRefPhases(4,2)  = 62	;
-  PhaseRefPhases(5,0)  = 86	;	  PhaseRefPhases(5,1)  = -78.6	;	  PhaseRefPhases(5,2)  = -59.8	;
-  PhaseRefPhases(6,0)  = 68.9	;	  PhaseRefPhases(6,1)  = 134	;	  PhaseRefPhases(6,2)  = 166.2	;
-  PhaseRefPhases(7,0)  = -31.3	;	  PhaseRefPhases(7,1)  = 174.1	;	  PhaseRefPhases(7,2)  = -174.4	;
-  PhaseRefPhases(8,0)  = 178.5	;	  PhaseRefPhases(8,1)  = 64.7	;	  PhaseRefPhases(8,2)  = 82.6	;
-  PhaseRefPhases(9,0)  = -95.1	;	  PhaseRefPhases(9,1)  = 104.4	;	  PhaseRefPhases(9,2)  = 118	;
-  PhaseRefPhases(10,0) = 89	;	  PhaseRefPhases(10,1) = 0.1	;	  PhaseRefPhases(10,2) = 80.5	;
-  PhaseRefPhases(11,0) = 35.5	;	  PhaseRefPhases(11,1) = -98.6	;	  PhaseRefPhases(11,2) = 20	;
-  PhaseRefPhases(12,0) = -70.3	;	  PhaseRefPhases(12,1) = 142.2	;	  PhaseRefPhases(12,2) = -107.5	;
-  PhaseRefPhases(13,0) = 9.4	;	  PhaseRefPhases(13,1) = -6.1	;	  PhaseRefPhases(13,2) = 88.9	;
-  PhaseRefPhases(14,0) = 113	;	  PhaseRefPhases(14,1) = 64.7	;	  PhaseRefPhases(14,2) = 159.2	;
-  PhaseRefPhases(15,0) = -147.4	;	  PhaseRefPhases(15,1) = 165.8	;	  PhaseRefPhases(15,2) = -69.9	;
-  PhaseRefPhases(16,0) = -1.3	;	  PhaseRefPhases(16,1) = -150.8	;	  PhaseRefPhases(16,2) = -52.3	;
-  PhaseRefPhases(17,0) = -32.6	;	  PhaseRefPhases(17,1) = -19.6	;	  PhaseRefPhases(17,2) = 72.4	;
-  PhaseRefPhases(18,0) = -49.9	;	  PhaseRefPhases(18,1) = -67.7	;	  PhaseRefPhases(18,2) = 24.2	;
-  PhaseRefPhases(19,0) = -134.6	;	  PhaseRefPhases(19,1) = -169.8	;	  PhaseRefPhases(19,2) = -45.3	;
-  PhaseRefPhases(20,0) = -88.5	;	  PhaseRefPhases(20,1) = 93.8	;	  PhaseRefPhases(20,2) = 169.4	;
-  PhaseRefPhases(21,0) = 24.8	;	  PhaseRefPhases(21,1) = -134.6	;	  PhaseRefPhases(21,2) = -67	;
-  PhaseRefPhases(22,0) = -68.7	;	  PhaseRefPhases(22,1) = -139.8	;	  PhaseRefPhases(22,2) = -43.3	;
-  PhaseRefPhases(23,0) = 171.2	;	  PhaseRefPhases(23,1) = 101	;	  PhaseRefPhases(23,2) = -168.2	;
-  PhaseRefPhases(24,0) = -101.1	;	  PhaseRefPhases(24,1) = 34.4	;	  PhaseRefPhases(24,2) = 103.4	;
-  PhaseRefPhases(25,0) = 55.9	;	  PhaseRefPhases(25,1) = -30.7	;	  PhaseRefPhases(25,2) = 40.4	;
-  PhaseRefPhases(26,0) = 49.3	;	  PhaseRefPhases(26,1) = 122	;	  PhaseRefPhases(26,2) = 137.1	;
-  PhaseRefPhases(27,0) = 174.2	;	  PhaseRefPhases(27,1) = -150.5	;	  PhaseRefPhases(27,2) = -117.3	;
-  PhaseRefPhases(28,0) = -128.7	;	  PhaseRefPhases(28,1) = 23.1	;	  PhaseRefPhases(28,2) = 52.4	;
-  PhaseRefPhases(29,0) = 139.6	;	  PhaseRefPhases(29,1) = -71.5	;	  PhaseRefPhases(29,2) = -48.4	;
+  PhaseRefPhases(0,0)  = 0        ;          PhaseRefPhases(0,1)  = 0        ;          PhaseRefPhases(0,2)  = 0        ;
+  PhaseRefPhases(1,0)  = -123.9        ;          PhaseRefPhases(1,1)  = 14.7        ;          PhaseRefPhases(1,2)  = -27.2        ;
+  PhaseRefPhases(2,0)  = -163.8        ;          PhaseRefPhases(2,1)  = 134.7        ;          PhaseRefPhases(2,2)  = 126        ;
+  PhaseRefPhases(3,0)  = 79.9        ;          PhaseRefPhases(3,1)  = -42.1        ;          PhaseRefPhases(3,2)  = -36.2        ;
+  PhaseRefPhases(4,0)  = -176.2        ;          PhaseRefPhases(4,1)  = 14.1        ;          PhaseRefPhases(4,2)  = 62        ;
+  PhaseRefPhases(5,0)  = 86        ;          PhaseRefPhases(5,1)  = -78.6        ;          PhaseRefPhases(5,2)  = -59.8        ;
+  PhaseRefPhases(6,0)  = 68.9        ;          PhaseRefPhases(6,1)  = 134        ;          PhaseRefPhases(6,2)  = 166.2        ;
+  PhaseRefPhases(7,0)  = -31.3        ;          PhaseRefPhases(7,1)  = 174.1        ;          PhaseRefPhases(7,2)  = -174.4        ;
+  PhaseRefPhases(8,0)  = 178.5        ;          PhaseRefPhases(8,1)  = 64.7        ;          PhaseRefPhases(8,2)  = 82.6        ;
+  PhaseRefPhases(9,0)  = -95.1        ;          PhaseRefPhases(9,1)  = 104.4        ;          PhaseRefPhases(9,2)  = 118        ;
+  PhaseRefPhases(10,0) = 89        ;          PhaseRefPhases(10,1) = 0.1        ;          PhaseRefPhases(10,2) = 80.5        ;
+  PhaseRefPhases(11,0) = 35.5        ;          PhaseRefPhases(11,1) = -98.6        ;          PhaseRefPhases(11,2) = 20        ;
+  PhaseRefPhases(12,0) = -70.3        ;          PhaseRefPhases(12,1) = 142.2        ;          PhaseRefPhases(12,2) = -107.5        ;
+  PhaseRefPhases(13,0) = 9.4        ;          PhaseRefPhases(13,1) = -6.1        ;          PhaseRefPhases(13,2) = 88.9        ;
+  PhaseRefPhases(14,0) = 113        ;          PhaseRefPhases(14,1) = 64.7        ;          PhaseRefPhases(14,2) = 159.2        ;
+  PhaseRefPhases(15,0) = -147.4        ;          PhaseRefPhases(15,1) = 165.8        ;          PhaseRefPhases(15,2) = -69.9        ;
+  PhaseRefPhases(16,0) = -1.3        ;          PhaseRefPhases(16,1) = -150.8        ;          PhaseRefPhases(16,2) = -52.3        ;
+  PhaseRefPhases(17,0) = -32.6        ;          PhaseRefPhases(17,1) = -19.6        ;          PhaseRefPhases(17,2) = 72.4        ;
+  PhaseRefPhases(18,0) = -49.9        ;          PhaseRefPhases(18,1) = -67.7        ;          PhaseRefPhases(18,2) = 24.2        ;
+  PhaseRefPhases(19,0) = -134.6        ;          PhaseRefPhases(19,1) = -169.8        ;          PhaseRefPhases(19,2) = -45.3        ;
+  PhaseRefPhases(20,0) = -88.5        ;          PhaseRefPhases(20,1) = 93.8        ;          PhaseRefPhases(20,2) = 169.4        ;
+  PhaseRefPhases(21,0) = 24.8        ;          PhaseRefPhases(21,1) = -134.6        ;          PhaseRefPhases(21,2) = -67        ;
+  PhaseRefPhases(22,0) = -68.7        ;          PhaseRefPhases(22,1) = -139.8        ;          PhaseRefPhases(22,2) = -43.3        ;
+  PhaseRefPhases(23,0) = 171.2        ;          PhaseRefPhases(23,1) = 101        ;          PhaseRefPhases(23,2) = -168.2        ;
+  PhaseRefPhases(24,0) = -101.1        ;          PhaseRefPhases(24,1) = 34.4        ;          PhaseRefPhases(24,2) = 103.4        ;
+  PhaseRefPhases(25,0) = 55.9        ;          PhaseRefPhases(25,1) = -30.7        ;          PhaseRefPhases(25,2) = 40.4        ;
+  PhaseRefPhases(26,0) = 49.3        ;          PhaseRefPhases(26,1) = 122        ;          PhaseRefPhases(26,2) = 137.1        ;
+  PhaseRefPhases(27,0) = 174.2        ;          PhaseRefPhases(27,1) = -150.5        ;          PhaseRefPhases(27,2) = -117.3        ;
+  PhaseRefPhases(28,0) = -128.7        ;          PhaseRefPhases(28,1) = 23.1        ;          PhaseRefPhases(28,2) = 52.4        ;
+  PhaseRefPhases(29,0) = 139.6        ;          PhaseRefPhases(29,1) = -71.5        ;          PhaseRefPhases(29,2) = -48.4        ;
 
   // Add the value for all antennas
   cout << "Writing TV reference phases for LOPES POL (after rotation of antenna1), GT = " << Ant1_rotation_start << endl;
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing values for antenna: " << antennaIDs[i] << endl;
 
     if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",Ant1_rotation_start) )
       cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
   }
-  
+
   // Substract effect of antenna 1 rotation and write the corrected values for LOPES_pol_start
   // this correction was calculated by measruing the change of the phase differences due to
   // the rotation of antenna 1
@@ -961,45 +940,41 @@ void writeTVRefPhases(void)
   correction(0) = 153.1761;
   correction(1) = 145.8167;
   correction(2) = 89.09;
-  
+
   // apply corrections (begin with antenna 2, as the reference ant 1, stays at phasediff 0)
   for (int i = 1; i < MAX_Antennas; i++)
-    for (int j = 0; j < 3; j++)
-    {
+    for (int j = 0; j < 3; j++) {
       PhaseRefPhases(i,j) -= correction(j);
       // reduce phase to -180° to 180°
       while ( PhaseRefPhases(i,j) >  180 ) PhaseRefPhases(i,j) -= 360;
       while ( PhaseRefPhases(i,j) < -180 ) PhaseRefPhases(i,j) += 360;
     }
-   
+
   // Add the value for all antennas
   cout << "Writing TV reference phases for LOPES POL (before rotation of antenna1), GT = " << LOPES_pol_start << endl;
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing values for antenna: " << antennaIDs[i] << endl;
 
     if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",LOPES_pol_start) )
       cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
   }
 
-  
   // correct phases of antennas which have been rotated to NS in december 2006
-  PhaseRefPhases(2,0)  += -179.	;	  PhaseRefPhases(2,1)  += 113.9	;	  PhaseRefPhases(2,2)  += 125.9	;
-  PhaseRefPhases(5,0)  += -121.1;	  PhaseRefPhases(5,1)  += -143.5;	  PhaseRefPhases(5,2)  += -121.2;
-  PhaseRefPhases(6,0)  += 144.8	;	  PhaseRefPhases(6,1)  += 152.5	;	  PhaseRefPhases(6,2)  += 154.8	;
-  PhaseRefPhases(9,0)  += 128.5	;	  PhaseRefPhases(9,1)  += 145.7	;	  PhaseRefPhases(9,2)  += 133.8	;
-  PhaseRefPhases(10,0) += 170.7	;	  PhaseRefPhases(10,1) += 175.1	;	  PhaseRefPhases(10,2) += -169.1;
-  PhaseRefPhases(13,0) += 172.7	;	  PhaseRefPhases(13,1) += 165.	;	  PhaseRefPhases(13,2) += -153.1;
-  PhaseRefPhases(14,0) += 171.	;	  PhaseRefPhases(14,1) += -164.7;	  PhaseRefPhases(14,2) += -166.9;
-  PhaseRefPhases(17,0) += -178.7;	  PhaseRefPhases(17,1) += 143.5	;	  PhaseRefPhases(17,2) += 153.6	;
-  PhaseRefPhases(19,0) += -74.6	;	  PhaseRefPhases(19,1) += 42.9	;	  PhaseRefPhases(19,2) += 33.1	;
-  PhaseRefPhases(22,0) += 141.9	;	  PhaseRefPhases(22,1) += 166.8	;	  PhaseRefPhases(22,2) += 155.3	;
-  PhaseRefPhases(25,0) += -152.1;	  PhaseRefPhases(25,1) += -146.2;	  PhaseRefPhases(25,2) += -161.2;
-  
+  PhaseRefPhases(2,0)  += -179.        ;          PhaseRefPhases(2,1)  += 113.9        ;          PhaseRefPhases(2,2)  += 125.9        ;
+  PhaseRefPhases(5,0)  += -121.1;          PhaseRefPhases(5,1)  += -143.5;          PhaseRefPhases(5,2)  += -121.2;
+  PhaseRefPhases(6,0)  += 144.8        ;          PhaseRefPhases(6,1)  += 152.5        ;          PhaseRefPhases(6,2)  += 154.8        ;
+  PhaseRefPhases(9,0)  += 128.5        ;          PhaseRefPhases(9,1)  += 145.7        ;          PhaseRefPhases(9,2)  += 133.8        ;
+  PhaseRefPhases(10,0) += 170.7        ;          PhaseRefPhases(10,1) += 175.1        ;          PhaseRefPhases(10,2) += -169.1;
+  PhaseRefPhases(13,0) += 172.7        ;          PhaseRefPhases(13,1) += 165.        ;          PhaseRefPhases(13,2) += -153.1;
+  PhaseRefPhases(14,0) += 171.        ;          PhaseRefPhases(14,1) += -164.7;          PhaseRefPhases(14,2) += -166.9;
+  PhaseRefPhases(17,0) += -178.7;          PhaseRefPhases(17,1) += 143.5        ;          PhaseRefPhases(17,2) += 153.6        ;
+  PhaseRefPhases(19,0) += -74.6        ;          PhaseRefPhases(19,1) += 42.9        ;          PhaseRefPhases(19,2) += 33.1        ;
+  PhaseRefPhases(22,0) += 141.9        ;          PhaseRefPhases(22,1) += 166.8        ;          PhaseRefPhases(22,2) += 155.3        ;
+  PhaseRefPhases(25,0) += -152.1;          PhaseRefPhases(25,1) += -146.2;          PhaseRefPhases(25,2) += -161.2;
+
   // Add the value for all antennas
   cout << "Writing TV reference phases for LOPES 30, GT = " << delay_apr_07_start << endl;
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing values for antenna: " << antennaIDs[i] << endl;
 
     if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",delay_apr_07_start) )
@@ -1007,42 +982,41 @@ void writeTVRefPhases(void)
   }
 
   // Set reference phases from early sep 2007 for LOPES Dual Pol
-  PhaseRefPhases(0,0)  = 0	;	  PhaseRefPhases(0,1)  = 0	;	  PhaseRefPhases(0,2)  = 0	;
-  PhaseRefPhases(1,0)  = -66.9	;	  PhaseRefPhases(1,1)  = -3.2	;	  PhaseRefPhases(1,2)  = -9.2	;
-  PhaseRefPhases(2,0)  = -113.5	;	  PhaseRefPhases(2,1)  = 105	;	  PhaseRefPhases(2,2)  = 130.3	;
-  PhaseRefPhases(3,0)  = 144.8	;	  PhaseRefPhases(3,1)  = -56.8	;	  PhaseRefPhases(3,2)  = -17.4	;
-  PhaseRefPhases(4,0)  = -116.7	;	  PhaseRefPhases(4,1)  = -8	;	  PhaseRefPhases(4,2)  = 75.5	;
-  PhaseRefPhases(5,0)  = 152.5	;	  PhaseRefPhases(5,1)  = -105.1	;	  PhaseRefPhases(5,2)  = -37.9	;
-  PhaseRefPhases(6,0)  = 123.3	;	  PhaseRefPhases(6,1)  = 104.6	;	  PhaseRefPhases(6,2)  = 176.3	;
-  PhaseRefPhases(7,0)  = 32.83	;	  PhaseRefPhases(7,1)  = 145.2	;	  PhaseRefPhases(7,2)  = -163.8	;
-  PhaseRefPhases(8,0)  = -129.1	;	  PhaseRefPhases(8,1)  = 30.3	;	  PhaseRefPhases(8,2)  = 91.8	;
-  PhaseRefPhases(9,0)  = 23.6	;	  PhaseRefPhases(9,1)  = 90.4	;	  PhaseRefPhases(9,2)  = 163.5	;
-  PhaseRefPhases(10,0) = -172.3	;	  PhaseRefPhases(10,1) = -55.2	;	  PhaseRefPhases(10,2) = 71.8	;
-  PhaseRefPhases(11,0) = 143.6	;	  PhaseRefPhases(11,1) = -144	;	  PhaseRefPhases(11,2) = 9.1	;
-  PhaseRefPhases(12,0) = 26.1	;	  PhaseRefPhases(12,1) = 91.5	;	  PhaseRefPhases(12,2) = -119.1	;
-  PhaseRefPhases(13,0) = 106.6	;	  PhaseRefPhases(13,1) = -57	;	  PhaseRefPhases(13,2) = 79.6	;
-  PhaseRefPhases(14,0) = -143	;	  PhaseRefPhases(14,1) = 9.2	;	  PhaseRefPhases(14,2) = 142.1	;
-  PhaseRefPhases(15,0) = -41.6	;	  PhaseRefPhases(15,1) = 122.2	;	  PhaseRefPhases(15,2) = -78.9	;
-  PhaseRefPhases(16,0) = 103.3	;	  PhaseRefPhases(16,1) = 162.8	;	  PhaseRefPhases(16,2) = -59.9	;
-  PhaseRefPhases(17,0) = 69.7	;	  PhaseRefPhases(17,1) = -66.4	;	  PhaseRefPhases(17,2) = 59.1	;
-  PhaseRefPhases(18,0) = 56.9	;	  PhaseRefPhases(18,1) = -117.9	;	  PhaseRefPhases(18,2) = 7.4	;
-  PhaseRefPhases(19,0) = -27.6	;	  PhaseRefPhases(19,1) = 137.1	;	  PhaseRefPhases(19,2) = -62.13	;
-  PhaseRefPhases(20,0) = -172.8	;	  PhaseRefPhases(20,1) = 178.5	;	  PhaseRefPhases(20,2) = -75.7	;
-  PhaseRefPhases(21,0) = -56.11	;	  PhaseRefPhases(21,1) = -52.12	;	  PhaseRefPhases(21,2) = 49.3	;
-  PhaseRefPhases(22,0) = -163.5	;	  PhaseRefPhases(22,1) = -64.3	;	  PhaseRefPhases(22,2) = 70.5	;
-  PhaseRefPhases(23,0) = 90.1	;	  PhaseRefPhases(23,1) = 174.7	;	  PhaseRefPhases(23,2) = -60.4	;
-  PhaseRefPhases(24,0) = 178.5	;	  PhaseRefPhases(24,1) = 115.3	;	  PhaseRefPhases(24,2) = -142.4	;
-  PhaseRefPhases(25,0) = -27.2	;	  PhaseRefPhases(25,1) = 51.7	;	  PhaseRefPhases(25,2) = 157.1	;
-  PhaseRefPhases(26,0) = 2.9	;	  PhaseRefPhases(26,1) = -158.2	;	  PhaseRefPhases(26,2) = -110.2	;
-  PhaseRefPhases(27,0) = 108.6	;	  PhaseRefPhases(27,1) = -58.1	;	  PhaseRefPhases(27,2) = 22.6	;
-  PhaseRefPhases(28,0) = 162.6	;	  PhaseRefPhases(28,1) = 112.1	;	  PhaseRefPhases(28,2) = 178.5	;
-  PhaseRefPhases(29,0) = 40.9	;	  PhaseRefPhases(29,1) = -7.7	;	  PhaseRefPhases(29,2) = 55.3	;
+  PhaseRefPhases(0,0)  = 0        ;          PhaseRefPhases(0,1)  = 0        ;          PhaseRefPhases(0,2)  = 0        ;
+  PhaseRefPhases(1,0)  = -66.9        ;          PhaseRefPhases(1,1)  = -3.2        ;          PhaseRefPhases(1,2)  = -9.2        ;
+  PhaseRefPhases(2,0)  = -113.5        ;          PhaseRefPhases(2,1)  = 105        ;          PhaseRefPhases(2,2)  = 130.3        ;
+  PhaseRefPhases(3,0)  = 144.8        ;          PhaseRefPhases(3,1)  = -56.8        ;          PhaseRefPhases(3,2)  = -17.4        ;
+  PhaseRefPhases(4,0)  = -116.7        ;          PhaseRefPhases(4,1)  = -8        ;          PhaseRefPhases(4,2)  = 75.5        ;
+  PhaseRefPhases(5,0)  = 152.5        ;          PhaseRefPhases(5,1)  = -105.1        ;          PhaseRefPhases(5,2)  = -37.9        ;
+  PhaseRefPhases(6,0)  = 123.3        ;          PhaseRefPhases(6,1)  = 104.6        ;          PhaseRefPhases(6,2)  = 176.3        ;
+  PhaseRefPhases(7,0)  = 32.83        ;          PhaseRefPhases(7,1)  = 145.2        ;          PhaseRefPhases(7,2)  = -163.8        ;
+  PhaseRefPhases(8,0)  = -129.1        ;          PhaseRefPhases(8,1)  = 30.3        ;          PhaseRefPhases(8,2)  = 91.8        ;
+  PhaseRefPhases(9,0)  = 23.6        ;          PhaseRefPhases(9,1)  = 90.4        ;          PhaseRefPhases(9,2)  = 163.5        ;
+  PhaseRefPhases(10,0) = -172.3        ;          PhaseRefPhases(10,1) = -55.2        ;          PhaseRefPhases(10,2) = 71.8        ;
+  PhaseRefPhases(11,0) = 143.6        ;          PhaseRefPhases(11,1) = -144        ;          PhaseRefPhases(11,2) = 9.1        ;
+  PhaseRefPhases(12,0) = 26.1        ;          PhaseRefPhases(12,1) = 91.5        ;          PhaseRefPhases(12,2) = -119.1        ;
+  PhaseRefPhases(13,0) = 106.6        ;          PhaseRefPhases(13,1) = -57        ;          PhaseRefPhases(13,2) = 79.6        ;
+  PhaseRefPhases(14,0) = -143        ;          PhaseRefPhases(14,1) = 9.2        ;          PhaseRefPhases(14,2) = 142.1        ;
+  PhaseRefPhases(15,0) = -41.6        ;          PhaseRefPhases(15,1) = 122.2        ;          PhaseRefPhases(15,2) = -78.9        ;
+  PhaseRefPhases(16,0) = 103.3        ;          PhaseRefPhases(16,1) = 162.8        ;          PhaseRefPhases(16,2) = -59.9        ;
+  PhaseRefPhases(17,0) = 69.7        ;          PhaseRefPhases(17,1) = -66.4        ;          PhaseRefPhases(17,2) = 59.1        ;
+  PhaseRefPhases(18,0) = 56.9        ;          PhaseRefPhases(18,1) = -117.9        ;          PhaseRefPhases(18,2) = 7.4        ;
+  PhaseRefPhases(19,0) = -27.6        ;          PhaseRefPhases(19,1) = 137.1        ;          PhaseRefPhases(19,2) = -62.13        ;
+  PhaseRefPhases(20,0) = -172.8        ;          PhaseRefPhases(20,1) = 178.5        ;          PhaseRefPhases(20,2) = -75.7        ;
+  PhaseRefPhases(21,0) = -56.11        ;          PhaseRefPhases(21,1) = -52.12        ;          PhaseRefPhases(21,2) = 49.3        ;
+  PhaseRefPhases(22,0) = -163.5        ;          PhaseRefPhases(22,1) = -64.3        ;          PhaseRefPhases(22,2) = 70.5        ;
+  PhaseRefPhases(23,0) = 90.1        ;          PhaseRefPhases(23,1) = 174.7        ;          PhaseRefPhases(23,2) = -60.4        ;
+  PhaseRefPhases(24,0) = 178.5        ;          PhaseRefPhases(24,1) = 115.3        ;          PhaseRefPhases(24,2) = -142.4        ;
+  PhaseRefPhases(25,0) = -27.2        ;          PhaseRefPhases(25,1) = 51.7        ;          PhaseRefPhases(25,2) = 157.1        ;
+  PhaseRefPhases(26,0) = 2.9        ;          PhaseRefPhases(26,1) = -158.2        ;          PhaseRefPhases(26,2) = -110.2        ;
+  PhaseRefPhases(27,0) = 108.6        ;          PhaseRefPhases(27,1) = -58.1        ;          PhaseRefPhases(27,2) = 22.6        ;
+  PhaseRefPhases(28,0) = 162.6        ;          PhaseRefPhases(28,1) = 112.1        ;          PhaseRefPhases(28,2) = 178.5        ;
+  PhaseRefPhases(29,0) = 40.9        ;          PhaseRefPhases(29,1) = -7.7        ;          PhaseRefPhases(29,2) = 55.3        ;
 
 
   // Add the value for all antennas
   cout << "Writing TV reference phases for LOPES POL, GT = " << delay_sep_07_start << endl;
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing values for antenna: " << antennaIDs[i] << endl;
 
     if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",delay_sep_07_start) )
@@ -1063,36 +1037,36 @@ void writeTVsep2007RefPhases(void)
 
   // Set reference Phases
   Matrix<Double> PhaseRefPhases(30,2);
-  PhaseRefPhases(0,0) =0;  	PhaseRefPhases(0,1) =0;
-  PhaseRefPhases(1,0) =-121.4;  PhaseRefPhases(1,1) =-41.2;
-  PhaseRefPhases(2,0) =-167.3;  PhaseRefPhases(2,1) =122.6;
-  PhaseRefPhases(3,0) =78.1;  	PhaseRefPhases(3,1) =-44.8;
-  PhaseRefPhases(4,0) =-174;  	PhaseRefPhases(4,1) =68.4;
-  PhaseRefPhases(5,0) =93.1;  	PhaseRefPhases(5,1) =-58.4;
-  PhaseRefPhases(6,0) =66.9;  	PhaseRefPhases(6,1) =149.2;
-  PhaseRefPhases(7,0) =-28.4;  	PhaseRefPhases(7,1) =170.5;
-  PhaseRefPhases(8,0) =163.4;  	PhaseRefPhases(8,1) =55.8;
-  PhaseRefPhases(9,0) =-95.4;  	PhaseRefPhases(9,1) =108.8;
-  PhaseRefPhases(10,0) =-172.3; PhaseRefPhases(10,1) =128.9;
-  PhaseRefPhases(11,0) =140.6;  PhaseRefPhases(11,1) =50.2;
-  PhaseRefPhases(12,0) =34.1;  	PhaseRefPhases(12,1) =-72.4;
-  PhaseRefPhases(13,0) =127.8;  PhaseRefPhases(13,1) =132.2;
-  PhaseRefPhases(14,0) =-141.9; PhaseRefPhases(14,1) =-149.6;
-  PhaseRefPhases(15,0) =-47.1;  PhaseRefPhases(15,1) =-37.1;
-  PhaseRefPhases(16,0) =97.4;  	PhaseRefPhases(16,1) =-24.5;
-  PhaseRefPhases(17,0) =64.9; 	PhaseRefPhases(17,1) =107.5;
-  PhaseRefPhases(18,0) =51.2;  	PhaseRefPhases(18,1) =53.2;
-  PhaseRefPhases(19,0) =-26.4;  PhaseRefPhases(19,1) =-6.4;
-  PhaseRefPhases(20,0) =-156.7; PhaseRefPhases(20,1) =-18.5;
-  PhaseRefPhases(21,0) =-48.4;  PhaseRefPhases(21,1) =110.6;
-  PhaseRefPhases(22,0) =-142.5; PhaseRefPhases(22,1) =146.7;
-  PhaseRefPhases(23,0) =99.6; 	PhaseRefPhases(23,1) =0.7;
-  PhaseRefPhases(24,0) =-164.5; PhaseRefPhases(24,1) =-86.7;
-  PhaseRefPhases(25,0) =-9.8; 	PhaseRefPhases(25,1) =-150.2;
-  PhaseRefPhases(26,0) =-2.1;  	PhaseRefPhases(26,1) =-46.7;
-  PhaseRefPhases(27,0) =96;  	PhaseRefPhases(27,1) =59.9;
-  PhaseRefPhases(28,0) =165.2;  PhaseRefPhases(28,1) =-130.9;
-  PhaseRefPhases(29,0) =64.6;  	PhaseRefPhases(29,1) =130.3;
+  PhaseRefPhases(0,0) =0;          PhaseRefPhases(0,1) =0;
+  PhaseRefPhases(1,0) =-121.4;     PhaseRefPhases(1,1) =-41.2;
+  PhaseRefPhases(2,0) =-167.3;     PhaseRefPhases(2,1) =122.6;
+  PhaseRefPhases(3,0) =78.1;       PhaseRefPhases(3,1) =-44.8;
+  PhaseRefPhases(4,0) =-174;       PhaseRefPhases(4,1) =68.4;
+  PhaseRefPhases(5,0) =93.1;       PhaseRefPhases(5,1) =-58.4;
+  PhaseRefPhases(6,0) =66.9;       PhaseRefPhases(6,1) =149.2;
+  PhaseRefPhases(7,0) =-28.4;      PhaseRefPhases(7,1) =170.5;
+  PhaseRefPhases(8,0) =163.4;      PhaseRefPhases(8,1) =55.8;
+  PhaseRefPhases(9,0) =-95.4;      PhaseRefPhases(9,1) =108.8;
+  PhaseRefPhases(10,0) =-172.3;    PhaseRefPhases(10,1) =128.9;
+  PhaseRefPhases(11,0) =140.6;     PhaseRefPhases(11,1) =50.2;
+  PhaseRefPhases(12,0) =34.1;      PhaseRefPhases(12,1) =-72.4;
+  PhaseRefPhases(13,0) =127.8;     PhaseRefPhases(13,1) =132.2;
+  PhaseRefPhases(14,0) =-141.9;    PhaseRefPhases(14,1) =-149.6;
+  PhaseRefPhases(15,0) =-47.1;     PhaseRefPhases(15,1) =-37.1;
+  PhaseRefPhases(16,0) =97.4;      PhaseRefPhases(16,1) =-24.5;
+  PhaseRefPhases(17,0) =64.9;      PhaseRefPhases(17,1) =107.5;
+  PhaseRefPhases(18,0) =51.2;      PhaseRefPhases(18,1) =53.2;
+  PhaseRefPhases(19,0) =-26.4;     PhaseRefPhases(19,1) =-6.4;
+  PhaseRefPhases(20,0) =-156.7;    PhaseRefPhases(20,1) =-18.5;
+  PhaseRefPhases(21,0) =-48.4;     PhaseRefPhases(21,1) =110.6;
+  PhaseRefPhases(22,0) =-142.5;    PhaseRefPhases(22,1) =146.7;
+  PhaseRefPhases(23,0) =99.6;      PhaseRefPhases(23,1) =0.7;
+  PhaseRefPhases(24,0) =-164.5;    PhaseRefPhases(24,1) =-86.7;
+  PhaseRefPhases(25,0) =-9.8;      PhaseRefPhases(25,1) =-150.2;
+  PhaseRefPhases(26,0) =-2.1;      PhaseRefPhases(26,1) =-46.7;
+  PhaseRefPhases(27,0) =96;        PhaseRefPhases(27,1) =59.9;
+  PhaseRefPhases(28,0) =165.2;     PhaseRefPhases(28,1) =-130.9;
+  PhaseRefPhases(29,0) =64.6;      PhaseRefPhases(29,1) =130.3;
 
   // Set Sample jumps
   Vector<Double> SampleJumps(4);
@@ -1102,18 +1076,15 @@ void writeTVsep2007RefPhases(void)
   SampleJumps(3) = 1;
 
   // Add the value for all antennas
-  for (int i = 0; i < MAX_Antennas; i++)
-  {
+  for (int i = 0; i < MAX_Antennas; i++) {
     cout << "Writing values for antenna: " << antennaIDs[i] << endl;
 
     // It is neccessary to write the Delay again, as the other fields
     // are junior fields an cannot be written alone
     Double old_delay = 0.;
-    if (!reader.GetData(delay_nov_07_start-1, antennaIDs[i], "Delay", &old_delay))
-    { 
+    if (!reader.GetData(delay_nov_07_start-1, antennaIDs[i], "Delay", &old_delay)) {
       cerr << "Error while reading field: Delay" << endl;
-    } else
-    {
+    } else {
       if (!writer.AddData(old_delay,antennaIDs[i],"Delay",delay_nov_07_start) )
         cerr << "\nERROR while writing field: Delay" << endl;
       if (!writer.AddData(PhaseRefFreqs,antennaIDs[i],"PhaseRefFreqs",delay_nov_07_start) )
@@ -1174,7 +1145,7 @@ void writePhaseCal(void)
   {96.6457,118.316,137.308,154.393,170.55,-174.453,-159.964,-146.725,-133.935,-122.126,-111.017,-101.15,-92.2554,-85.0779,-79.1076,-73.658,-68.646,-63.6209,-58.4047,-53.5364,-48.6024,-44.2941,-39.6563,-34.8774,-31.1097,-27.6101,-24.5953,-21.7809,-19.8077,-18.0185,-16.965,-15.6392,-14.7884,-14.0077,-13.2134,-11.7388,-10.3171,-9.11333,-7.33867,-5.69485,-3.80592,-2.27727,-0.591943,1.06979,2.69398,3.91844,4.73516,4.93702,4.73733,4.94278,4.46182,3.71091,2.99944,2.01615,0.932763,0.466842,0.2343,0.0805783,-0.633253,-1.0319,-1.06824,-0.430868,-0.0231,0.865278,2.68073,4.43887,5.66042,6.80147,7.55582,8.46247,8.57582,8.31136,7.97731,7.59206,6.69801,5.48476,4.49561,3.49265,2.7192,1.41845,-3.55271e-15,-1.30115,-2.3356,-3.18736,-3.54681,-3.78046,-3.58411,-3.30946,-3.04431,-2.38897,-2.02522,-0.124368,1.01928,2.92124,3.7702,4.63481,5.30279,6.08562,6.73902,7.17928,7.53009,7.54262,7.21849,7.09182,6.98678,7.07883,7.70568,8.37542,8.95593,9.65572,10.4332,11.7792,13.1546,14.816,16.3909,17.5974,18.8404,20.1516,21.5951,23.3478,24.9128,26.4666,28.1904,30.0834,32.1936,34.9364,38.1787,41.9251,46.9858,53.5426,60.5464,68.1409,76.3453,84.8266,93.5174,102.517,111.531,120.719,129.69,138.631,146.86,154.392,161.206,167.346,172.891,177.952,-176.974,-172.095,-167.49,-163.795,-161.164,-160.536,-162.599,-168.528,-178.511,165.503,144.469,119.823,95.3897,69.8601,43.349}};
 
   // create PhaseCal values into matrix
-  // PhaseCal Value is e ^ + i*phase	(amplitude should be one)
+  // PhaseCal Value is e ^ + i*phase        (amplitude should be one)
   // I am not sure about the sign, but probalby it has to be +
   Matrix<DComplex> PhaseCal (161,30);
   for (unsigned int i = 0; i < PhaseCal.ncolumn(); i++)
@@ -1196,6 +1167,8 @@ void writePhaseCal(void)
 // Sets the field "Active" to false for bad periods of antennas
 void writeBadPeriods(void)
 {
+  cout << "\nSetting field 'Acitve' to false for bad periods.\n" << endl;
+
   // test of an 19 /20 after discovery of the cable interchange
   unsigned int start_date = 1228219200; // 2008-12-02 12:00:00 UTC
   unsigned int stop_date = 1228753800; // 2008-12-08 16:30:00 UTC
@@ -1217,7 +1190,366 @@ void writeBadPeriods(void)
     cerr << "\nERROR while writing field: Active" << endl;
 
 
-  // flag antennas 24 and 27 because of sign flip in LOPES 30 setup
+  // flag antenna 5 because RCU dismounted
+  unsigned int start_flag5_0 = 1132738933; // 2005-11-23 09:42 UTC
+  unsigned int stop_flag5_0 = 1133098982; // 2005-11-27 13:43:02 UTC
+  if (!writer.AddData("flag antenna 5",antennaIDs[4],"HWSetup",start_flag5_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[4],"Active",start_flag5_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("First LOPES30 setup",antennaIDs[4],"HWSetup",stop_flag5_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[4],"Active",stop_flag5_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 5 because testings
+  unsigned int start_flag5_1 = 1134125909; // 2005-12-09 10:58:29 UTC 
+  unsigned int stop_flag5_1 = 1134140815; // 2005-12-09 15:06:55 UTC
+  if (!writer.AddData("flag antenna 5",antennaIDs[4],"HWSetup",start_flag5_1) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[4],"Active",start_flag5_1) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("First LOPES30 setup",antennaIDs[4],"HWSetup",stop_flag5_1) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[4],"Active",stop_flag5_1) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 13 for test measurements am 4.4.2006
+  unsigned int start_flag13_0 = 1144153327; // 2006-04-04 12:22:07 UTC
+  unsigned int stop_flag13_0 = 1144195199; // 2006-04-04 23:59:59 UTC
+  if (!writer.AddData("flag antenna 13",antennaIDs[12],"HWSetup",start_flag13_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[12],"Active",start_flag13_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("First LOPES30 setup",antennaIDs[12],"HWSetup",stop_flag13_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[12],"Active",stop_flag13_0) )
+    cerr << "\nERROR while writing field: Active" << endl; 
+
+  // flag antenna 13 for test measurements
+  unsigned int start_flag13_1 = 1144675440; // 2006-04-10 13:24:00 UTC
+  unsigned int stop_flag13_1 = 1144687200; // 2006-04-10 16:40:00 UTC
+  if (!writer.AddData("flag antenna 13",antennaIDs[12],"HWSetup",start_flag13_1) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[12],"Active",start_flag13_1) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("First LOPES30 setup",antennaIDs[12],"HWSetup",stop_flag13_1) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[12],"Active",stop_flag13_1) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 13 for test measurements
+  unsigned int start_flag13_3 = 1145343000; // 2006-04-18 06:50:00 UTC
+  unsigned int stop_flag13_3 = 1145375520; // 2006-04-18 15:52:00 UTC
+  if (!writer.AddData("flag antenna 13",antennaIDs[12],"HWSetup",start_flag13_3) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[12],"Active",start_flag13_3) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("First LOPES30 setup",antennaIDs[12],"HWSetup",stop_flag13_3) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[12],"Active",stop_flag13_3) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 13 for test measurements
+  unsigned int start_flag13_4 = 1145448000; // 2006-04-19 12:00:00 UTC
+  unsigned int stop_flag13_4 = 1145468160; // 2006-04-19 17:36:00 UTC
+  if (!writer.AddData("flag antenna 13",antennaIDs[12],"HWSetup",start_flag13_4) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[12],"Active",start_flag13_4) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("First LOPES30 setup",antennaIDs[12],"HWSetup",stop_flag13_4) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[12],"Active",stop_flag13_4) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 13 for test measurements
+  unsigned int start_flag13_5 = 1145534640; // 2006-04-20 12:04:00 UTC
+  unsigned int stop_flag13_5 = 1145554380; // 2006-04-20 17:33:00 UTC
+  if (!writer.AddData("flag antenna 13",antennaIDs[12],"HWSetup",start_flag13_5) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[12],"Active",start_flag13_5) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("First LOPES30 setup",antennaIDs[12],"HWSetup",stop_flag13_5) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[12],"Active",stop_flag13_5) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 13 for test measurements
+  unsigned int start_flag13_6 = 1145604241; // 2006-04-21 07:24:01 UTC
+  unsigned int stop_flag13_6 = 1145637003; // 2006-04-21 16:30:03 UTC
+  if (!writer.AddData("flag antenna 13",antennaIDs[12],"HWSetup",start_flag13_6) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[12],"Active",start_flag13_6) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("First LOPES30 setup",antennaIDs[12],"HWSetup",stop_flag13_6) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[12],"Active",stop_flag13_6) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag 9902 antennas because of power supply problems
+  for (int i = 10; i < 20; ++i) {
+    unsigned int start_flag9902_0 = 1146651009; // 2006-05-03 10:10:09 UTC  
+    unsigned int stop_flag9902_0 = 1150808422; // 2006-06-20 13:00:22 UTC
+    if (!writer.AddData("flag antennas 9902",antennaIDs[i],"HWSetup",start_flag9902_0) )
+      cerr << "\nERROR while writing field: HWSetup" << endl;
+    if (!writer.AddData(False,antennaIDs[i],"Active",start_flag9902_0) )
+      cerr << "\nERROR while writing field: Active" << endl;
+    if (!writer.AddData("First LOPES30 setup",antennaIDs[i],"HWSetup",stop_flag9902_0) )
+      cerr << "\nERROR while writing field: HWSetup" << endl;
+    if (!writer.AddData(True,antennaIDs[i],"Active",stop_flag9902_0) )
+      cerr << "\nERROR while writing field: Active" << endl;
+  }
+
+  // flag antenna 19, problems 
+  unsigned int start_flag19_0 = 1164786469; // 2006-11-29 07:47:49 UTC
+  unsigned int stop_flag19_0 = 1164794425; // 2006-11-29 10:00:25 UTC
+  if (!writer.AddData("flag antenna 19",antennaIDs[18],"HWSetup",start_flag19_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[18],"Active",start_flag19_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("First LOPES30 setup",antennaIDs[18],"HWSetup",stop_flag19_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[18],"Active",stop_flag19_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 1 during change of pol 
+  unsigned int start_flag1_1 = 1169644646; // 2007-01-24 13:17:26 UTC
+  unsigned int stop_flag1_1 = 1169644773; // 2007-01-24 13:19:33 UTC
+  if (!writer.AddData("flag antenna 1",antennaIDs[0],"HWSetup",start_flag1_1) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[0],"Active",start_flag1_1) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[0],"HWSetup",stop_flag1_1) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[0],"Active",stop_flag1_1) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 8
+  unsigned int start_flag8_0 = 1171635325; // 2007-02-16 14:15:25 UTC
+  unsigned int stop_flag8_0 = 1171635792; // 2007-02-16 14:23:12 UTC
+  if (!writer.AddData("flag antenna 8",antennaIDs[7],"HWSetup",start_flag8_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[7],"Active",start_flag8_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[7],"HWSetup",stop_flag8_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[7],"Active",stop_flag8_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 5+6 for testings
+  unsigned int start_flag5_2 = 1172826167; // 2007-003-02 09:02:47 UTC
+  unsigned int stop_flag5_2 = 1172833970; // 2007-003-02 11:12:50 UTC
+  if (!writer.AddData("flag antenna 5",antennaIDs[4],"HWSetup",start_flag5_2) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[4],"Active",start_flag5_2) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[4],"HWSetup",stop_flag5_2) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[4],"Active",stop_flag5_2) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  unsigned int start_flag6_0 = 1172826167; // 2007-003-02 09:02:47 UTC 
+  unsigned int stop_flag6_0 = 1172833970; // 2007-003-02 11:12:50 UTC
+  if (!writer.AddData("flag antenna 6",antennaIDs[5],"HWSetup",start_flag6_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[5],"Active",start_flag6_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[5],"HWSetup",stop_flag6_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[5],"Active",stop_flag6_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 5+6 for delay tests
+  unsigned int start_flag5_3 = 1173187543; // 2007-03-06 13:25:43 UTC
+  unsigned int stop_flag5_3 = 1173193626; // 2007-03-06 15:07:06 UTC
+  if (!writer.AddData("flag antenna 5",antennaIDs[4],"HWSetup",start_flag5_3) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[4],"Active",start_flag5_3) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[4],"HWSetup",stop_flag5_3) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[4],"Active",stop_flag5_3) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  unsigned int start_flag6_1 = 1173187543; // 2007-03-06 13:25:43 UTC 
+  unsigned int stop_flag6_1 = 1173193626; // 2007-03-06 15:07:06 UTC
+  if (!writer.AddData("flag antenna 6",antennaIDs[5],"HWSetup",start_flag6_1) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[5],"Active",start_flag6_1) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[5],"HWSetup",stop_flag6_1) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[5],"Active",stop_flag6_1) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 5+6 for temperature tests
+  unsigned int start_flag5_4 = 1177305560; // 2007-04-23 05:19:20 UTC
+  unsigned int stop_flag5_4 = 1177393363; // 2007-04-24 05:42:43 UTC
+  if (!writer.AddData("flag antenna 5",antennaIDs[4],"HWSetup",start_flag5_4) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[4],"Active",start_flag5_4) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[4],"HWSetup",stop_flag5_4) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[4],"Active",stop_flag5_4) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  unsigned int start_flag6_2 = 1177305560; // 2007-04-23 05:19:20 UTC 
+  unsigned int stop_flag6_2 = 1177393363; // 2007-04-24 05:42:43 UTC
+  if (!writer.AddData("flag antenna 6",antennaIDs[5],"HWSetup",start_flag6_2) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[5],"Active",start_flag6_2) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[5],"HWSetup",stop_flag6_2) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[5],"Active",stop_flag6_2) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 5+6 because of signal problems
+  unsigned int start_flag5_5 = 1186047640; // 2007-08-02 09:40:40 UTC
+  unsigned int stop_flag5_5 = 1187103980; // 2007-08-14 15:06:20 UTC
+  if (!writer.AddData("flag antenna 5",antennaIDs[4],"HWSetup",start_flag5_5) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[4],"Active",start_flag5_5) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[4],"HWSetup",stop_flag5_5) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[4],"Active",stop_flag5_5) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  unsigned int start_flag6_3 = 1186047640; // 2007-08-02 09:40:40 UTC 
+  unsigned int stop_flag6_3 = 1187103980; // 2007-08-14 15:06:20 UTC
+  if (!writer.AddData("flag antenna 6",antennaIDs[5],"HWSetup",start_flag6_3) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[5],"Active",start_flag6_3) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[5],"HWSetup",stop_flag6_3) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[5],"Active",stop_flag6_3) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 25 because of bad signals
+  unsigned int start_flag25_0 = 1187654400; // 2007-08-21 00:00:00 UTC
+  unsigned int stop_flag25_0 = 1187706442; // 2007-08-21 14:27:22 UTC
+  if (!writer.AddData("flag antenna 25",antennaIDs[24],"HWSetup",start_flag25_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[24],"Active",start_flag25_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[24],"HWSetup",stop_flag25_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[24],"Active",stop_flag25_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 5+6 because of noise problems
+  unsigned int start_flag5_6 = 1187773538; // 2007-08-22 09:05:38 UTC
+  unsigned int stop_flag5_6 = 1187790965; // 2007-08-22 13:56:05 UTC
+  if (!writer.AddData("flag antenna 5",antennaIDs[4],"HWSetup",start_flag5_6) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[4],"Active",start_flag5_6) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[4],"HWSetup",stop_flag5_6) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[4],"Active",stop_flag5_6) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  unsigned int start_flag6_4 = 1187773538; // 2007-08-22 09:05:38 UTC 
+  unsigned int stop_flag6_4 = 1187790965; // 2007-08-22 13:56:05 UTC
+  if (!writer.AddData("flag antenna 6",antennaIDs[5],"HWSetup",start_flag6_4) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[5],"Active",start_flag6_4) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[5],"HWSetup",stop_flag6_4) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[5],"Active",stop_flag6_4) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 24 
+  unsigned int start_flag24_1 = 1189728000; // 2007-09-14 00:00:00 UTC
+  unsigned int stop_flag24_1 = 1190113795; // 2007-09-18 11:09:55 UTC
+  if (!writer.AddData("flag antenna 24",antennaIDs[23],"HWSetup",start_flag24_1) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[23],"Active",start_flag24_1) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[23],"HWSetup",stop_flag24_1) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[23],"Active",stop_flag24_1) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 3+4 for phase check
+  unsigned int start_flag3_0 = 1203930205; // 2008-02-25 09:03:25 UTC
+  unsigned int stop_flag3_0 = 1204110565; // 2008-02-27 11:09:25 UTC
+  if (!writer.AddData("flag antenna 3",antennaIDs[2],"HWSetup",start_flag3_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[2],"Active",start_flag3_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[2],"HWSetup",stop_flag3_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[2],"Active",stop_flag3_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  unsigned int start_flag4_0 = 1203930205; // 2008-02-25 09:03:25 UTC 
+  unsigned int stop_flag4_0 = 1204110565; // 2008-02-27 11:09:25 UTC
+  if (!writer.AddData("flag antenna 4",antennaIDs[3],"HWSetup",start_flag4_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[3],"Active",start_flag4_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[3],"HWSetup",stop_flag4_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[3],"Active",stop_flag4_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 1+4 for phase test
+  unsigned int start_flag1_0 = 1207180800; // 2008-04-03 00:00:00 UTC
+  unsigned int stop_flag1_0 = 1207267199; // 2008-04-03 23:59:59 UTC
+  if (!writer.AddData("flag antenna 1",antennaIDs[0],"HWSetup",start_flag1_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[0],"Active",start_flag1_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[0],"HWSetup",stop_flag1_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[0],"Active",stop_flag1_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  unsigned int start_flag4_1 = 1207180800; // 2008-04-03 00:00:00 UTC 
+  unsigned int stop_flag4_1 = 1207267199; // 2008-04-03 23:59:59 UTC
+  if (!writer.AddData("flag antenna 4",antennaIDs[3],"HWSetup",start_flag4_1) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[3],"Active",start_flag4_1) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[3],"HWSetup",stop_flag4_1) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[3],"Active",stop_flag4_1) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag 9910 antennas because of pulse measurements
+  for (int i = 0; i < 10; ++i) {
+    unsigned int start_flag9910_0 = 1217922139; // 2008-08-05 07:42:19 UTC  
+    unsigned int stop_flag9910_0 = 1217933292; // 2008-08-05 10:48:12 UTC
+    if (!writer.AddData("flag antennas 9910",antennaIDs[i],"HWSetup",start_flag9910_0) )
+      cerr << "\nERROR while writing field: HWSetup" << endl;
+    if (!writer.AddData(False,antennaIDs[i],"Active",start_flag9910_0) )
+      cerr << "\nERROR while writing field: Active" << endl;
+    if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[i],"HWSetup",stop_flag9910_0) )
+      cerr << "\nERROR while writing field: HWSetup" << endl;
+    if (!writer.AddData(True,antennaIDs[i],"Active",stop_flag9910_0) )
+      cerr << "\nERROR while writing field: Active" << endl;
+  }
+
+  // flag 9910 antennas because of problems
+  for (int i = 0; i < 10; ++i) {
+    unsigned int start_flag9910_1 = 1222646400; // 2008-09-29 00:00:00 UTC  
+    unsigned int stop_flag9910_1 = 1222675200; // 2008-09-29 10:00:00 local time
+    if (!writer.AddData("flag antennas 9910",antennaIDs[i],"HWSetup",start_flag9910_1) )
+      cerr << "\nERROR while writing field: HWSetup" << endl;
+    if (!writer.AddData(False,antennaIDs[i],"Active",start_flag9910_1) )
+      cerr << "\nERROR while writing field: Active" << endl;
+    if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[i],"HWSetup",stop_flag9910_1) )
+      cerr << "\nERROR while writing field: HWSetup" << endl;
+    if (!writer.AddData(True,antennaIDs[i],"Active",stop_flag9910_1) )
+      cerr << "\nERROR while writing field: Active" << endl;
+  }
+
+  // flag antennas 24 
   start_date = 1144143600; // 2006-04-04 09:40 UTC
   stop_date = LOPES_pol_start;
   if (!writer.AddData("Sign flip Ant 24",antennaIDs[23],"HWSetup",start_date) )
@@ -1227,6 +1559,7 @@ void writeBadPeriods(void)
   if (!writer.AddData(True,antennaIDs[23],"Active",stop_date) )
     cerr << "\nERROR while writing field: Active" << endl;
 
+  //and 27 because of sign flip in LOPES 30 setup
   start_date = 1153319760; // 2006-07-19 14:36 UTC
   if (!writer.AddData("Sign flip Ant 27",antennaIDs[26],"HWSetup",start_date) )
     cerr << "\nERROR while writing field: HWSetup" << endl;
@@ -1264,7 +1597,36 @@ void writeBadPeriods(void)
     cerr << "\nERROR while writing field: HWSetup" << endl;
   if (!writer.AddData(True,antennaIDs[25],"Active",tripole_2009_stop) )
     cerr << "\nERROR while writing field: Active" << endl;
+
+  // sallaplusdipole test august 2009, ant 23, 25 and 26 used for tripole
+  if (!writer.AddData("Test of sallaplusdipole antenna",antennaIDs[22],"HWSetup",sallaplusdipol_2009_start) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[22],"Active",sallaplusdipol_2009_start) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[22],"HWSetup",sallaplusdipol_2009_stop) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[22],"Active",sallaplusdipol_2009_stop) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  if (!writer.AddData("Test of sallaplusdipole antenna",antennaIDs[24],"HWSetup",sallaplusdipol_2009_start) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[24],"Active",sallaplusdipol_2009_start) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[24],"HWSetup",sallaplusdipol_2009_stop) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[24],"Active",sallaplusdipol_2009_stop) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  if (!writer.AddData("Test of sallaplusdipole antenna",antennaIDs[25],"HWSetup",sallaplusdipol_2009_start) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[25],"Active",sallaplusdipol_2009_start) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[25],"HWSetup",sallaplusdipol_2009_stop) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[25],"Active",sallaplusdipol_2009_stop) )
+    cerr << "\nERROR while writing field: Active" << endl;
 }
+
 
 void writeTripoleDelays(void)
 {
@@ -1281,7 +1643,7 @@ void writeTripoleDelays(void)
   Matrix<Double> PhaseRefPhases(30,2);
   PhaseRefPhases(23,0) =   54.1; PhaseRefPhases(23,1) =   67.0;
   PhaseRefPhases(24,0) =   12.6; PhaseRefPhases(24,1) =   44.6;
-  PhaseRefPhases(25,0) = -131.4; PhaseRefPhases(25,1) = -131.4;	// no error: same value
+  PhaseRefPhases(25,0) = -131.4; PhaseRefPhases(25,1) = -131.4;        // no error: same value
 
   // Add the value for tripole antennas (24, 25, 26)
   for (int i = 23; i < 26; ++i) {
@@ -1353,6 +1715,182 @@ void writeTripolePositions(void)
   }
 }
 
+void set_new_positions(void)    // new gps measurement 12.08.2009
+{
+  Matrix<Double> Position(3,30);
+  Position.column(0)(0) = 81.17;       Position.column(0)(1) = -44.84;        Position.column(0)(2) =  0;
+  Position.column(1)(0) = 113.79;      Position.column(1)(1) = -64.57;        Position.column(1)(2) = -0.08;
+  Position.column(2)(0) = 37.85;       Position.column(2)(1) = -84.66;        Position.column(2)(2) = 0.07;
+  Position.column(3)(0) = 55.63;       Position.column(3)(1) = -52.13;        Position.column(3)(2) = -0.009;
+  Position.column(4)(0) = 22.75;       Position.column(4)(1) = -34.42;        Position.column(4)(2) = 0.04;
+  Position.column(5)(0) = 22.75;       Position.column(5)(1) = -34.42;        Position.column(5)(2) = 0.04;
+  Position.column(6)(0) = 3.77;        Position.column(6)(1) = 42.29;         Position.column(6)(2) = -0.009;
+  Position.column(7)(0) = 36.54;       Position.column(7)(1) = 23.99;         Position.column(7)(2) = 0.04;
+  Position.column(8)(0) = 74.54;       Position.column(8)(1) = -19.7;         Position.column(8)(2) = -0.07;
+  Position.column(9)(0) = 92.19;       Position.column(9)(1) = 11.57;         Position.column(9)(2) = -0.17;
+  Position.column(10)(0) = -63.73;     Position.column(10)(1) = -111.3;       Position.column(10)(2) = 0.15;
+  Position.column(11)(0) = -45.91;     Position.column(11)(1) = -78.9;        Position.column(11)(2) = 0.18;
+  Position.column(12)(0) = -84.15;     Position.column(12)(1) = -35.4;        Position.column(12)(2) = 0.22;
+  Position.column(13)(0) = -51.72;     Position.column(13)(1) = -53.65;       Position.column(13)(2) = 0.12;
+  Position.column(14)(0) = -91.04;     Position.column(14)(1) = -10.2;        Position.column(14)(2) = 0.24;
+  Position.column(15)(0) = -72.27;     Position.column(15)(1) = 21.47;        Position.column(15)(2) = 0.34;
+  Position.column(16)(0) = -111.27;    Position.column(16)(1) = 65.18;        Position.column(16)(2) = 0.41;
+  Position.column(17)(0) = -79.22;     Position.column(17)(1) = 46.66;        Position.column(17)(2) = 0.41;
+  Position.column(18)(0) = -34.21;     Position.column(18)(1) = -21.64;       Position.column(18)(2) = 0.15;
+  Position.column(19)(0) = -34.21;     Position.column(19)(1) = -21.64;       Position.column(19)(2) = 0.15;
+  Position.column(20)(0) = -13.21;     Position.column(20)(1) = -97.07;       Position.column(20)(2) = 0.41;
+  Position.column(21)(0) = 5.26;       Position.column(21)(1) = -65.29;       Position.column(21)(2) = 0.38;
+  Position.column(22)(0) = -41.27;     Position.column(22)(1) = 3.4;          Position.column(22)(2) = 0.2;
+  Position.column(23)(0) = -21.85;     Position.column(23)(1) = 35.65;        Position.column(23)(2) = 0.09;
+  Position.column(24)(0) = -60.82;     Position.column(24)(1) = 79.24;        Position.column(24)(2) = 0.3;
+  Position.column(25)(0) = -29.81;     Position.column(25)(1) = 60.6;         Position.column(25)(2) = 0.15;
+  Position.column(26)(0) = -6.61;      Position.column(26)(1) = -126.91;      Position.column(26)(2) = 0.28;
+  Position.column(27)(0) = -6.61;      Position.column(27)(1) = -126.91;      Position.column(27)(2) = 0.28;
+  Position.column(28)(0) = -13.21;     Position.column(28)(1) = -97.07;       Position.column(28)(2) = 0.41;
+  Position.column(29)(0) = 5.26;       Position.column(29)(1) = -65.29;       Position.column(29)(2) = 0.38;
+
+  for (int i = 0; i < MAX_Antennas; i++) {
+    cout << "Writing new measured positions  2009-08-12: " << antennaIDs[i] << endl;
+    if (!writer.AddData(Position.column(i),antennaIDs[i],"Position",LOPES_pol_start) )
+      cerr << "\nERROR while writing field: Position" << endl;
+  }
+
+}
+
+void writeSallaplusdipolDelays(void)
+{
+  // Set delays for sallaplusdipol in August 2009
+  Vector<Double> delays(30);
+
+  delays(22) = -1267.86;
+  delays(24) = -1270.86;
+  delays(25) = -1276.87;
+
+  delays /= 1e9;
+
+  // Set reference Phases
+  Matrix<Double> PhaseRefPhases(30,2);
+  PhaseRefPhases(22,0) =   -119.4; PhaseRefPhases(22,1) =   155.8;
+  PhaseRefPhases(24,0) =   -6.425; PhaseRefPhases(24,1) =   51.71;
+  PhaseRefPhases(25,0) =    -27.59; PhaseRefPhases(25,1) = 35.99; 
+
+  // Add the value for sallaplusdipol antennas (23, 25, 26)
+  cout << "Writing values for antenna: " << antennaIDs[22] << endl;
+
+    // Read delay before salaplusdipol and restore it after sallaplsudipol phase
+  Double old_delay = 0.;
+    if (!reader.GetData(sallaplusdipol_2009_start-1, antennaIDs[22], "Delay", &old_delay)) {
+      cerr << "Error while reading field: Delay" << endl;
+    } else {
+      if (!writer.AddData(delays(22),antennaIDs[22],"Delay",sallaplusdipol_2009_start) )
+        cerr << "\nERROR while writing field: Delay" << endl;
+      if (!writer.AddData(old_delay,antennaIDs[22],"Delay",sallaplusdipol_2009_stop) )
+        cerr << "\nERROR while writing field: Delay" << endl;
+    }
+
+    Vector<Double> oldRefPhases;
+    if (!reader.GetData(sallaplusdipol_2009_start-1, antennaIDs[22], "PhaseRefPhases", &oldRefPhases)) {
+      cerr << "Error while reading field: PhaseRefPhases" << endl;
+    } else {
+      if (!writer.AddData(PhaseRefPhases.row(22),antennaIDs[22],"PhaseRefPhases",sallaplusdipol_2009_start) )
+        cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
+      if (!writer.AddData(oldRefPhases,antennaIDs[22],"PhaseRefPhases",sallaplusdipol_2009_stop) )
+        cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
+    }
+
+
+  for (int i = 24; i < 26; ++i) {
+    cout << "Writing values for antenna: " << antennaIDs[i] << endl;
+
+    // Read delay before salaplusdipol and restore it after sallaplsudipol phase
+    Double old_delay = 0.;
+    if (!reader.GetData(sallaplusdipol_2009_start-1, antennaIDs[i], "Delay", &old_delay)) {
+      cerr << "Error while reading field: Delay" << endl;
+    } else {
+      if (!writer.AddData(delays(i),antennaIDs[i],"Delay",sallaplusdipol_2009_start) )
+        cerr << "\nERROR while writing field: Delay" << endl;
+      if (!writer.AddData(old_delay,antennaIDs[i],"Delay",sallaplusdipol_2009_stop) )
+        cerr << "\nERROR while writing field: Delay" << endl;
+    }
+
+    Vector<Double> oldRefPhases;
+    if (!reader.GetData(sallaplusdipol_2009_start-1, antennaIDs[i], "PhaseRefPhases", &oldRefPhases)) {
+      cerr << "Error while reading field: PhaseRefPhases" << endl;
+    } else {
+      if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",sallaplusdipol_2009_start) )
+        cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
+      if (!writer.AddData(oldRefPhases,antennaIDs[i],"PhaseRefPhases",sallaplusdipol_2009_stop) )
+        cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
+    }
+  }
+}
+
+void writeSallaplusdipolPositions(void)
+{
+  // Set polarization and positions for Sallaplusdipol in august 2009
+  Vector<String> Polarization(30);
+  Polarization(22) = "VE";
+  Polarization(24) = "NS";
+  Polarization(25) = "EW";
+
+  // Set Position
+  Matrix<Double> Position(3,30);
+  Position.column(22)(0) = -22.29; Position.column(22)(1) = -59.69; Position.column(22)(2) = -0.28+0.60;
+  Position.column(24)(0) = -22.29; Position.column(24)(1) = -59.69; Position.column(24)(2) = -0.28;
+  Position.column(25)(0) = -22.29; Position.column(25)(1) = -59.69; Position.column(25)(2) = -0.28;
+
+  // Write values for antenna 23
+  cout << "Writing sallaplusdipol positions and polarization for august 2009." << endl;
+
+  cout << "Writing values for antenna: " << antennaIDs[22] << endl;
+    // Read polarization before tripole and restore it after tripole phase
+    String old_polarization = "";
+    if (!reader.GetData(sallaplusdipol_2009_start-1, antennaIDs[22], "Polarization", &old_polarization)) {
+      cerr << "Error while reading field: Polarization" << endl;
+    } else {
+      if (!writer.AddData(Polarization(22),antennaIDs[22],"Polarization",sallaplusdipol_2009_start) )
+        cerr << "\nERROR while writing field: Polarization" << endl;
+      if (!writer.AddData(old_polarization,antennaIDs[22],"Polarization",sallaplusdipol_2009_stop) )
+        cerr << "\nERROR while writing field: Polarization" << endl;
+    }
+
+    Vector<Double> oldPosition;
+    if (!reader.GetData(sallaplusdipol_2009_start-1, antennaIDs[22], "Position", &oldPosition)) {
+      cerr << "Error while reading field: Position" << endl;
+    } else {
+      if (!writer.AddData(Position.column(22),antennaIDs[22],"Position",sallaplusdipol_2009_start) )
+        cerr << "\nERROR while writing field: Position" << endl;
+      if (!writer.AddData(oldPosition,antennaIDs[22],"Position",sallaplusdipol_2009_stop) )
+        cerr << "\nERROR while writing field: Position" << endl;
+    }
+
+
+  for (int i = 24; i < 26; ++i) {
+    cout << "Writing values for antenna: " << antennaIDs[i] << endl;
+
+    // Read polarization before Sallaplusdipole and restore it after Sallaplusdipol phase
+    String old_polarization = "";
+    if (!reader.GetData(sallaplusdipol_2009_start-1, antennaIDs[i], "Polarization", &old_polarization)) {
+      cerr << "Error while reading field: Polarization" << endl;
+    } else {
+      if (!writer.AddData(Polarization(i),antennaIDs[i],"Polarization",sallaplusdipol_2009_start) )
+        cerr << "\nERROR while writing field: Polarization" << endl;
+      if (!writer.AddData(old_polarization,antennaIDs[i],"Polarization",sallaplusdipol_2009_stop) )
+        cerr << "\nERROR while writing field: Polarization" << endl;
+    }
+
+    Vector<Double> oldPosition;
+    if (!reader.GetData(sallaplusdipol_2009_start-1, antennaIDs[i], "Position", &oldPosition)) {
+      cerr << "Error while reading field: Position" << endl;
+    } else {
+      if (!writer.AddData(Position.column(i),antennaIDs[i],"Position",sallaplusdipol_2009_start) )
+        cerr << "\nERROR while writing field: Position" << endl;
+      if (!writer.AddData(oldPosition,antennaIDs[i],"Position",sallaplusdipol_2009_stop) )
+        cerr << "\nERROR while writing field: Position" << endl;
+    }
+  }
+}
+
 
 
 int main (int argc, char *argv[])
@@ -1388,27 +1926,32 @@ int main (int argc, char *argv[])
     //addRefAntField(true); // set to true to also create the field
 
     // Rotate Antennagainfaktors for NS-polarised antennas, allready checked in:
-    //rotate_antenna_model(Summer2006_change);	// rotates antenna 27, 29 and 30
-    //rotate_antenna_model(LOPES_pol_start);	// rotates everything except antenna 1
+    //rotate_antenna_model(Summer2006_change);        // rotates antenna 27, 29 and 30
+    //rotate_antenna_model(LOPES_pol_start);        // rotates everything except antenna 1
     //rotate_antenna_model(Ant1_rotation_start);  // rotates antenna 1
 
     // write TV reference phase differences and reference phase diffrences for roof setup
-    // writeTVRefPhases();		// checked in
-    // TVshutdown();			// checked in
-    // writeRoofRefPhases();		// checked in
+    // writeTVRefPhases();                // checked in
+    // TVshutdown();                        // checked in
+    // writeRoofRefPhases();                // checked in
     // writeTVsep2007RefPhases();
 
     // Add the measured dispersion of the LOPES 30 filter boxes
     //writePhaseCal();   //  checked in
 
     // interchange antenna 19 and 20
-    //interchange19_20();		// checked in
+    //interchange19_20();                // checked in
 
     // add field "Active" to store information, when an antenna had problems
-    // addActiveField(true);		// checked in
-    // writeBadPeriods();		// checked in
-    // writeTripoleDelays();	// checked in
+    //  addActiveField(true);                // checked in
+     writeBadPeriods();                // checked in
+    // writeTripoleDelays();        // checked in
     //writeTripolePositions();  // checked in
+
+    // TODO
+    // writeSallaplusdipolDelays();
+    // writeSallaplusdipolPositions(); 
+    // set_new_positions();
 
     cout << "Writing finished: " << endl;
     writer.PrintSummary();
