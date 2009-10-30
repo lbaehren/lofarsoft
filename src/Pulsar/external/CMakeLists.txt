@@ -76,6 +76,7 @@ add_custom_target (tempo_install
   COMMAND cp tempo.cfg tempo.hlp obsys.dat ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r tempo_ephem ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r clock ${CMAKE_INSTALL_PREFIX}/bin
+  COMMAND cp -r test ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r tzpar ${CMAKE_INSTALL_PREFIX}/bin
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo_name}/
   COMMENT "Install project Tempo to ${CMAKE_INSTALL_PREFIX}/bin..."
