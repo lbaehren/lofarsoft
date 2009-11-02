@@ -16,6 +16,7 @@ import csv
 from mathgl import *
 import numpy
 import sys
+from math import *
 
 if len(sys.argv) > 1:
     fileName = sys.argv[1] 
@@ -112,7 +113,12 @@ graph.SetTicks('x', 16.0, 4)
 graph.Axis("xy")
 graph.Grid()
 
-graph.Title("Number of triggers versus RCU number")
+
+#graph.Title("Number of triggers versus RCU number")
+graph.SetFontSize(6.0)
+graph.Puts(float(maxX) * 0.5, float(maxY) * 1.15, 0, "Number of triggers versus RCU number")
+graph.SetFontSize(3.0) # Work-around for MathGL 1.9 bug in mglGraph.Title()
+
 graph.Puts(float(maxX) * 0.5,float(maxY)*1.05,0,"Total trigger count = " + str(len(triggerList)))
 graph.Label("x","RCU number",1)
 graph.Label("y","Counts",1)
@@ -153,14 +159,18 @@ maxX = gX.Max('x')[0]
 maxY = gY.Max('x')[0] # min, max is complicated in mglData... the 'x' means first dimension not graph-x !
 
 graph.Clf()
-graph.SetFontSize(2.5)
+graph.SetFontSize(3.0)
 
 # set y-min range so you can just see 1 count in the entire interval.
 yRangeMin = 0.95 / minutes
 graph.SetRanges(0.0, maxX, yRangeMin, maxY) # SetRanges goes before Axis to include ranges in axes
 graph.SetOrigin(0.0, yRangeMin)
 
-graph.Title("Single triggers per minute, vs threshold")
+graph.SetFontSize(5.0)
+#graph.Title("Single triggers per minute, vs threshold")
+graph.Puts(float(maxX) * 0.5, float(maxY) * 1.15, 0, "Single triggers per minute, vs threshold")
+graph.SetFontSize(3.0)
+
 graph.Puts(float(maxX) * 0.5,float(maxY)*1.05,0,"Total triggers per minute = " + format(len(triggerList) / minutes, "8.1f"))
 
 graph.SetFunc("","lg(y)","") 
@@ -173,7 +183,7 @@ graph.Axis() # comes after all definitions as before
 graph.Grid()
 graph.Label("x","threshold factor",1)
 graph.Label("y","Counts per minute",1)
-graph.Plot(gX,gY, ' o#'); # ' ' means no line; 'o' means o symbols; '#' means solid symbols.
+graph.Plot(gX,gY, 'b o#'); # ' ' means no line; 'o' means o symbols; '#' means solid symbols.
 
 graph.WriteEPS("testSTATS_cpm.eps","Counts per minute")
 
@@ -267,7 +277,7 @@ graph.Grid()
 
 graph.Label("x","Number of RCUs",1)
 graph.Label("y","Counts per minute",1)
-graph.Plot(gX,gY, ' o#'); 
+graph.Plot(gX,gY, 'b o#'); 
 graph.WriteEPS("testRCUsperPulse.eps","Test Plot")
 
 # now get a histogram of total-sum per pulse (counts per minute)
@@ -356,7 +366,11 @@ graph.SetRanges(0.0, maxX, 0.0, maxY)
 graph.Axis("xy")
 graph.Grid()
 
-graph.Title("Time series of # triggers (binned)")
+#graph.Title("Time series of # triggers (binned)")
+graph.SetFontSize(6.0)
+graph.Puts(float(maxX) * 0.5, float(maxY) * 1.15, 0, "Time series of triggers (binned)")
+graph.SetFontSize(3.0)
+
 graph.Puts(float(maxX) * 0.5,float(maxY)*1.05,0,"Total trigger count = " + str(len(triggerList)) + "; bin width = " + format(timeBinSize, "4.1f") + " s")
 
 graph.Label("x","Time (min)",1)
