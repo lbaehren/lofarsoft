@@ -1712,42 +1712,6 @@ int main (int argc, char *argv[])
                                                config["printShowerCoordinates"]->bValue(),
                                                config["ignoreDistance"]->bValue());
 
-          // make a postscript with a summary of all plots
-          // if summaryColumns = 0 the method does not create a summary.
-          eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",config["summaryColumns"]->uiValue());
-
-          // create a special file for the lateral distribution output
-          if (config["lateralOutputFile"]->bValue())
-            eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
-
-          // generate the lateral distribution and get resutls
-          if (config["lateralDistribution"]->bValue()) {
-            eventPipeline.fitLateralDistribution("lateral"+polPlotPrefix+"-",results, core_x, core_y);
-            R_0 = results.asDouble("R_0");
-            sigR_0 = results.asDouble("sigR_0");
-            eps = results.asDouble("eps");
-            sigeps = results.asDouble("sigeps");
-            chi2NDF = results.asDouble("chi2NDF");
-            kPow = results.asDouble("kPow");
-            sigkPow = results.asDouble("sigkPow");
-            epsPow = results.asDouble("epsPow");
-            sigepsPow = results.asDouble("sigepsPow");
-            chi2NDFPow = results.asDouble("chi2NDFPow");
-            CutCloseToCore = results.asInt("CutCloseToCore");
-            CutSmallSignal = results.asInt("CutSmallSignal");
-            CutBadTiming = results.asInt("CutBadTiming");
-            CutSNR = results.asInt("CutSNR");
-            latMeanDist = results.asDouble("latMeanDist");
-          }
-
-          // plot lateral distribution of arrival times, if requested
-          if (config["lateralTimeDistribution"]->bValue())
-            eventPipeline.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",results, core_x, core_y);
-
-          // get the pulse properties
-          rawPulsesMap = eventPipeline.getRawPulseProperties();
-          calibPulsesMap = eventPipeline.getCalibPulseProperties();
-
           // adding results to variables (needed to fill them into the root tree)
           goodEW = results.asBool("goodReconstructed");
           AzL = results.asDouble("Azimuth");
@@ -1766,10 +1730,52 @@ int main (int argc, char *argv[])
           latMeanDistCC = results.asDouble("meandist");
           gt = results.asuInt("Date");
 
-          // getting necessary data to plot [added: mfranc]
-          if(config["eventDisplayPlot"]->bValue()) {
-            antPos = eventPipeline.getAntennaPositions();
-            antIDs = eventPipeline.getAntennaIDs();
+          // if event was good reconstructed, then try additional steps
+          if (goodEW) {
+            // make a postscript with a summary of all plots
+            // if summaryColumns = 0 the method does not create a summary.
+            eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",config["summaryColumns"]->uiValue());
+
+            // create a special file for the lateral distribution output
+            if (config["lateralOutputFile"]->bValue())
+              eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
+
+            // generate the lateral distribution and get resutls
+            if (config["lateralDistribution"]->bValue()) {
+              eventPipeline.fitLateralDistribution("lateral"+polPlotPrefix+"-",results, core_x, core_y);
+              R_0 = results.asDouble("R_0");
+              sigR_0 = results.asDouble("sigR_0");
+              eps = results.asDouble("eps");
+              sigeps = results.asDouble("sigeps");
+              chi2NDF = results.asDouble("chi2NDF");
+              kPow = results.asDouble("kPow");
+              sigkPow = results.asDouble("sigkPow");
+              epsPow = results.asDouble("epsPow");
+              sigepsPow = results.asDouble("sigepsPow");
+              chi2NDFPow = results.asDouble("chi2NDFPow");
+              CutCloseToCore = results.asInt("CutCloseToCore");
+              CutSmallSignal = results.asInt("CutSmallSignal");
+              CutBadTiming = results.asInt("CutBadTiming");
+              CutSNR = results.asInt("CutSNR");
+              latMeanDist = results.asDouble("latMeanDist");
+            }
+
+            // plot lateral distribution of arrival times, if requested
+            if (config["lateralTimeDistribution"]->bValue())
+              eventPipeline.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",results, core_x, core_y);
+
+            // get the pulse properties
+            rawPulsesMap = eventPipeline.getRawPulseProperties();
+            calibPulsesMap = eventPipeline.getCalibPulseProperties();
+
+            // getting necessary data to plot [added: mfranc]
+            if(config["eventDisplayPlot"]->bValue()) {
+              antPos = eventPipeline.getAntennaPositions();
+              antIDs = eventPipeline.getAntennaIDs();
+            }
+          } else {
+            cout << "\nEvent '" << eventname << "' could not be reconstructed for '"
+                 << config["polarization"]->sValue() << "' polarization, skipping..." << endl;
           }
         }
 
@@ -1825,45 +1831,6 @@ int main (int argc, char *argv[])
                                                config["printShowerCoordinates"]->bValue(),
                                                config["ignoreDistance"]->bValue());
 
-          /* make a postscript with a summary of all plots
-           if summaryColumns = 0 the method does not create a summary. */
-          eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",config["summaryColumns"]->uiValue());
-
-          // create a special file for the lateral distribution output
-          if (config["lateralOutputFile"]->bValue())
-            eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
-
-          // generate the lateral distribution
-          if (config["lateralDistribution"]->bValue()) {
-            eventPipeline.fitLateralDistribution("lateral"+polPlotPrefix+"-",results, core_x, core_y);
-            R_0_NS = results.asDouble("R_0");
-            sigR_0_NS = results.asDouble("sigR_0");
-            eps_NS = results.asDouble("eps");
-            sigeps_NS = results.asDouble("sigeps");
-            chi2NDF_NS = results.asDouble("chi2NDF");
-            kPow_NS = results.asDouble("kPow");
-            sigkPow_NS = results.asDouble("sigkPow");
-            epsPow_NS = results.asDouble("epsPow");
-            sigepsPow_NS = results.asDouble("sigepsPow");
-            chi2NDFPow_NS = results.asDouble("chi2NDFPow");
-            CutCloseToCore_NS = results.asInt("CutCloseToCore");
-            CutSmallSignal_NS = results.asInt("CutSmallSignal");
-            CutBadTiming_NS = results.asInt("CutBadTiming");
-            CutSNR_NS = results.asInt("CutSNR");
-            latMeanDist_NS = results.asDouble("latMeanDist");
-          }
-
-          // plot lateral distribution of arrival times, if requested
-          if (config["lateralTimeDistribution"]->bValue())
-            eventPipeline.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",results, core_x, core_y);
-
-          // get the pulse properties and insert them into allready existing EW map
-          // (which will be empty, if polarization = EW, but still existing
-          map <int,PulseProperties> newPulses(eventPipeline.getRawPulseProperties());
-          rawPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
-          newPulses = eventPipeline.getCalibPulseProperties();
-          calibPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
-
           // adding results to variables (needed to fill them into the root tree)
           goodNS = results.asBool("goodReconstructed");
           AzL_NS = results.asDouble("Azimuth");
@@ -1882,10 +1849,55 @@ int main (int argc, char *argv[])
           latMeanDistCC_NS = results.asDouble("meandist");
           gt = results.asuInt("Date");
 
-          // getting necessary data to plot [added: mfranc]
-          if(config["eventDisplayPlot"]->bValue()) {
-            antPos = eventPipeline.getAntennaPositions();
-            antIDs = eventPipeline.getAntennaIDs();		
+          // if event was good reconstructed, then try additional steps
+          if (goodNS) {
+            /* make a postscript with a summary of all plots
+             if summaryColumns = 0 the method does not create a summary. */
+            eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",config["summaryColumns"]->uiValue());
+
+            // create a special file for the lateral distribution output
+            if (config["lateralOutputFile"]->bValue())
+              eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
+
+            // generate the lateral distribution
+            if (config["lateralDistribution"]->bValue()) {
+              eventPipeline.fitLateralDistribution("lateral"+polPlotPrefix+"-",results, core_x, core_y);
+              R_0_NS = results.asDouble("R_0");
+              sigR_0_NS = results.asDouble("sigR_0");
+              eps_NS = results.asDouble("eps");
+              sigeps_NS = results.asDouble("sigeps");
+              chi2NDF_NS = results.asDouble("chi2NDF");
+              kPow_NS = results.asDouble("kPow");
+              sigkPow_NS = results.asDouble("sigkPow");
+              epsPow_NS = results.asDouble("epsPow");
+              sigepsPow_NS = results.asDouble("sigepsPow");
+              chi2NDFPow_NS = results.asDouble("chi2NDFPow");
+              CutCloseToCore_NS = results.asInt("CutCloseToCore");
+              CutSmallSignal_NS = results.asInt("CutSmallSignal");
+              CutBadTiming_NS = results.asInt("CutBadTiming");
+              CutSNR_NS = results.asInt("CutSNR");
+              latMeanDist_NS = results.asDouble("latMeanDist");
+            }
+
+            // plot lateral distribution of arrival times, if requested
+            if (config["lateralTimeDistribution"]->bValue())
+              eventPipeline.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",results, core_x, core_y);
+
+            // get the pulse properties and insert them into allready existing EW map
+            // (which will be empty, if polarization = EW, but still existing
+            map <int,PulseProperties> newPulses(eventPipeline.getRawPulseProperties());
+            rawPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
+            newPulses = eventPipeline.getCalibPulseProperties();
+            calibPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
+
+            // getting necessary data to plot [added: mfranc]
+            if(config["eventDisplayPlot"]->bValue()) {
+              antPos = eventPipeline.getAntennaPositions();
+              antIDs = eventPipeline.getAntennaIDs();
+            }
+          } else {
+            cout << "\nEvent '" << eventname << "' could not be reconstructed for '"
+                 << config["polarization"]->sValue() << "' polarization, skipping..." << endl;
           }
         }
       }  // if...else (config["calibrationMode"]->bValue())
