@@ -1104,9 +1104,11 @@ namespace CR { // Namespace CR -- begin
       cout << "\nPlotting time vs distance" << endl;
 
       // Get shower properties
-      unsigned int GT = erg.asuInt  ("Date");
-      double       az = erg.asDouble("Azimuth");
-      double       el = erg.asDouble("Elevation");
+      unsigned int GT       = erg.asuInt  ("Date");
+      double       az       = erg.asDouble("Azimuth");
+      double       el       = erg.asDouble("Elevation");
+      double       ccCenter = erg.asDouble("CCcenter");
+      double       xCenter  = erg.asDouble("Xcenter");
 
       // get AntennaIDs to loop through pulse parameters
       Vector<int> antennaIDs;
@@ -1130,9 +1132,12 @@ namespace CR { // Namespace CR -- begin
       unsigned int ant = 0;  // counting antennas with pulse information
       for (unsigned int i=0 ; i < antennaIDs.size(); ++i)
         if (calibPulses.find(antennaIDs(i)) != calibPulses.end()) {
-           timeVal      [ant] = calibPulses[antennaIDs(i)].geomDelay;// + calibPulses[antennaIDs(i)].envelopeTime;
-           // add distance from the antenna to shower plane (z of shower coordinates)
-           timeVal      [ant] += antPos.row(i)(2) * 3;
+           // Pulse time relative to shower plane and relative to CC time
+           // = geom. delay from beam forming (as it is substracted during analysis) + 
+           // time of pulse in trace (- CC beam time, to get an average of 0).
+           timeVal      [ant] = antPos.row(i)(2) / lightspeed * 1e9;	// defined in Math/Constants.h
+           timeVal      [ant] += calibPulses[antennaIDs(i)].geomDelay;
+           timeVal      [ant] += calibPulses[antennaIDs(i)].envelopeTime - ccCenter*1e9;
            distance     [ant] = distances(i);
            fieldStr     [ant] = calibPulses[antennaIDs(i)].envelopeMaximum;
            noiseBgr     [ant] = calibPulses[antennaIDs(i)].noise;
@@ -1158,8 +1163,6 @@ namespace CR { // Namespace CR -- begin
       // for cuts (counters)
       // unsigned int CutBadTiming   = 0;
       unsigned int CutSNR         = 0;
-      double       ccCenter       = erg.asDouble("CCcenter");
-      double       xCenter        = erg.asDouble("Xcenter");
 
       // calculate errors and count number of clean (good) values
       unsigned int clean = 0;
@@ -1235,7 +1238,7 @@ namespace CR { // Namespace CR -- begin
       label << "Time vs distance distribution - " << GT;
       latPro->SetTitle(label.str().c_str());
       latPro->GetXaxis()->SetTitle("distance R [m]"); 
-      latPro->GetYaxis()->SetTitle("time T [s]");
+      latPro->GetYaxis()->SetTitle("time T [ns]");
       latPro->GetXaxis()->SetTitleSize(0.05);
       latPro->GetYaxis()->SetTitleSize(0.05);
       latPro->GetYaxis()->SetRangeUser(timeMin - offsetY, timeMax + offsetY);
@@ -1311,10 +1314,13 @@ namespace CR { // Namespace CR -- begin
       if (clean >= 3) {
         // fit polynomial
         TF1 *fitFunc;
-        fitFunc=new TF1("fitFunc","[0]+[1]*x",50,190);
-        fitFunc->SetParName(0,"#epsilon_{0}");
-        fitFunc->SetParName(1,"R_{0}");
-        fitFunc->SetParameter(1,200);
+        fitFunc=new TF1("fitFunc","[0]+[1]*(sqrt([2]**2+x**2)-[2])",50,190);
+        fitFunc->SetParName(0,"offset");
+        fitFunc->SetParName(1,"1/c");
+        fitFunc->SetParName(2,"R_curv");
+        fitFunc->SetParameter(0,0);
+        fitFunc->FixParameter(1,1e9/lightspeed);
+        fitFunc->SetParameter(2,1000);
         fitFunc->GetXaxis()->SetRange(20,300);
         fitFunc->SetFillStyle(0);
         fitFunc->SetLineWidth(2);
@@ -1324,14 +1330,14 @@ namespace CR { // Namespace CR -- begin
         ptstats->Draw();
 
         // write fit results to record with other results
-        erg.define("FTD_eps",fitFunc->GetParameter(0));
-        erg.define("FTD_R_0",fitFunc->GetParameter(1));
-        erg.define("FTD_sigeps",fitFunc->GetParError(0));
-        erg.define("FTD_sigR_0",fitFunc->GetParError(1));
+        erg.define("FTD_offset",fitFunc->GetParameter(0));
+        erg.define("FTD_R_curv",fitFunc->GetParameter(2));
+        erg.define("FTD_sigoffset",fitFunc->GetParError(0));
+        erg.define("FTD_sigR_curv",fitFunc->GetParError(2));
         erg.define("FTD_chi2NDF",fitFunc->GetChisquare()/double(fitFunc->GetNDF()));
         cout << "Results of fit"
-             << "eps    = " << fitFunc->GetParameter(0) << "\t +/- " << fitFunc->GetParError(0) << "\t ms \n"
-             << "R_0    = " << fitFunc->GetParameter(1) << "\t +/- " << fitFunc->GetParError(1) << "\t m \n"
+             << "offset = " << fitFunc->GetParameter(0) << "\t +/- " << fitFunc->GetParError(0) << "\t ns \n"
+             << "R_curv = " << fitFunc->GetParameter(2) << "\t +/- " << fitFunc->GetParError(2) << "\t m \n"
              << "Chi^2  = " << fitFunc->GetChisquare() << "\t NDF " << fitFunc->GetNDF() << "\n"
              << endl;
 
