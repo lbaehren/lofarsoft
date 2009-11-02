@@ -1944,14 +1944,14 @@ int main (int argc, char *argv[])
 
     // add field "Active" to store information, when an antenna had problems
     //  addActiveField(true);                // checked in
-     writeBadPeriods();                // checked in
+    // writeBadPeriods();                // checked in
     // writeTripoleDelays();        // checked in
     //writeTripolePositions();  // checked in
 
     // TODO
     // writeSallaplusdipolDelays();
     // writeSallaplusdipolPositions(); 
-    // set_new_positions();
+    set_new_positions();
 
     cout << "Writing finished: " << endl;
     writer.PrintSummary();
