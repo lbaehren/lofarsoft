@@ -229,6 +229,75 @@ casa::Vector<MVPosition> CS302_antenna_position_value_outer(casa::Vector<Int> rc
 
 
 
+casa::Vector<MVPosition> CS302_antenna_position_value_HBA(casa::Vector<Int> rcu_ids){
+	//centered in between the two HBA ears at: 6.848936680 52.901732509 60.242
+	casa::Vector<MVPosition> all_positions;
+	casa::Vector<MVPosition> selected_positions;
+	all_positions.resize(48);
+	Int nrRCUs;
+	rcu_ids.shape(nrRCUs);
+	selected_positions.resize(nrRCUs);
+	
+	all_positions(	0	)=MVPosition(	-37.75	,	-35.09	,	0.01	);//RCU	0	,	1
+	all_positions(	1	)=MVPosition(	-34.31	,	-38.92	,	0.01	);//RCU	2	,	3
+	all_positions(	2	)=MVPosition(	-45.03	,	-34.71	,	0.01	);//RCU	4	,	5
+	all_positions(	3	)=MVPosition(	-41.58	,	-38.54	,	0.01	);//RCU	6	,	7
+	all_positions(	4	)=MVPosition(	-38.13	,	-42.36	,	0.01	);//RCU	8	,	9
+	all_positions(	5	)=MVPosition(	-34.69	,	-46.19	,	0.01	);//RCU	10	,	11
+	all_positions(	6	)=MVPosition(	-52.3	,	-34.33	,	0.01	);//RCU	12	,	13
+	all_positions(	7	)=MVPosition(	-48.85	,	-38.16	,	0.01	);//RCU	14	,	15
+	all_positions(	8	)=MVPosition(	-45.41	,	-41.98	,	0.01	);//RCU	16	,	17
+	all_positions(	9	)=MVPosition(	-41.96	,	-45.81	,	0.01	);//RCU	18	,	19
+	all_positions(	10	)=MVPosition(	-38.51	,	-49.64	,	0.01	);//RCU	20	,	21
+	all_positions(	11	)=MVPosition(	-35.06	,	-53.46	,	0.01	);//RCU	22	,	23
+	all_positions(	12	)=MVPosition(	-56.13	,	-37.78	,	0.01	);//RCU	24	,	25
+	all_positions(	13	)=MVPosition(	-52.68	,	-41.61	,	0.01	);//RCU	26	,	27
+	all_positions(	14	)=MVPosition(	-49.23	,	-45.43	,	0.01	);//RCU	28	,	29
+	all_positions(	15	)=MVPosition(	-45.79	,	-49.26	,	0.01	);//RCU	30	,	31
+	all_positions(	16	)=MVPosition(	-42.34	,	-53.09	,	0.02	);//RCU	32	,	33
+	all_positions(	17	)=MVPosition(	-38.89	,	-56.91	,	0.02	);//RCU	34	,	35
+	all_positions(	18	)=MVPosition(	-56.51	,	-45.05	,	0.02	);//RCU	36	,	37
+	all_positions(	19	)=MVPosition(	-53.06	,	-48.88	,	0.02	);//RCU	38	,	39
+	all_positions(	20	)=MVPosition(	-49.61	,	-52.71	,	0.02	);//RCU	40	,	41
+	all_positions(	21	)=MVPosition(	-46.17	,	-56.53	,	0.02	);//RCU	42	,	43
+	all_positions(	22	)=MVPosition(	-56.88	,	-52.33	,	0.02	);//RCU	44	,	45
+	all_positions(	23	)=MVPosition(	-53.44	,	-56.15	,	0.02	);//RCU	46	,	47
+	all_positions(	24	)=MVPosition(	53.44	,	56.15	,	-0.02	);//RCU	48	,	49
+	all_positions(	25	)=MVPosition(	56.88	,	52.33	,	-0.02	);//RCU	50	,	51
+	all_positions(	26	)=MVPosition(	46.16	,	56.53	,	-0.02	);//RCU	52	,	53
+	all_positions(	27	)=MVPosition(	49.61	,	52.71	,	-0.02	);//RCU	54	,	55
+	all_positions(	28	)=MVPosition(	53.06	,	48.88	,	-0.02	);//RCU	56	,	57
+	all_positions(	29	)=MVPosition(	56.51	,	45.05	,	-0.02	);//RCU	58	,	59
+	all_positions(	30	)=MVPosition(	38.89	,	56.91	,	-0.02	);//RCU	60	,	61
+	all_positions(	31	)=MVPosition(	42.34	,	53.09	,	-0.02	);//RCU	62	,	63
+	all_positions(	32	)=MVPosition(	45.78	,	49.26	,	-0.02	);//RCU	64	,	65
+	all_positions(	33	)=MVPosition(	49.23	,	45.43	,	-0.02	);//RCU	66	,	67
+	all_positions(	34	)=MVPosition(	52.68	,	41.61	,	-0.02	);//RCU	68	,	69
+	all_positions(	35	)=MVPosition(	56.13	,	37.78	,	-0.02	);//RCU	70	,	71
+	all_positions(	36	)=MVPosition(	35.06	,	53.46	,	-0.02	);//RCU	72	,	73
+	all_positions(	37	)=MVPosition(	38.51	,	49.64	,	-0.02	);//RCU	74	,	75
+	all_positions(	38	)=MVPosition(	41.96	,	45.81	,	-0.02	);//RCU	76	,	77
+	all_positions(	39	)=MVPosition(	45.41	,	41.99	,	-0.02	);//RCU	78	,	79
+	all_positions(	40	)=MVPosition(	48.85	,	38.16	,	-0.01	);//RCU	80	,	81
+	all_positions(	41	)=MVPosition(	52.3	,	34.33	,	-0.01	);//RCU	82	,	83
+	all_positions(	42	)=MVPosition(	34.68	,	46.19	,	-0.02	);//RCU	84	,	85
+	all_positions(	43	)=MVPosition(	38.13	,	42.37	,	-0.01	);//RCU	86	,	87
+	all_positions(	44	)=MVPosition(	41.58	,	38.54	,	-0.01	);//RCU	88	,	89
+	all_positions(	45	)=MVPosition(	45.03	,	34.71	,	-0.01	);//RCU	90	,	91
+	all_positions(	46	)=MVPosition(	34.31	,	38.92	,	-0.01	);//RCU	92	,	93
+	all_positions(	47	)=MVPosition(	37.75	,	35.09	,	-0.01	);//RCU	94	,	95
+	
+	
+	int rcu_id;
+	for(int i=0;i<nrRCUs;i++){
+		rcu_id=rcu_ids(i);
+		selected_positions(i)=all_positions(rcu_id/2);
+	}
+	
+	return selected_positions;
+	
+}
+
 //int  simpleImage(string const &infile,
 //		 string const &outfile,
 //		 uint const &blocksize=1024)
@@ -452,7 +521,9 @@ int main (int argc,
 	tempantPositions = CS302_antenna_position_value(used_rcu_ids[i]);
       } else if(arrayspread=="outer"){
 	tempantPositions = CS302_antenna_position_value_outer(used_rcu_ids[i]);
-      } else cout<<"Valid antennaspreads are 'inner' and 'outer'."<<endl;
+	  } else if(arrayspread=="HBA"){
+		  tempantPositions = CS302_antenna_position_value_HBA(used_rcu_ids[i]);
+      } else cout<<"Valid antennaspreads are 'inner' , 'outer' and 'HBA' ."<<endl;
       
       //nrRCUs = new int(0);
 		  
