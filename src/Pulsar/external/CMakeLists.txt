@@ -57,13 +57,6 @@ add_custom_target (tempo_unpack
   COMMENT "Unpacking tar archive of Tempo from ${PULSAR_SOURCE_DIR}/external/${tempo_archive} to ${PULSAR_BINARY_DIR}/apps..."
   )
 
-add_custom_target (tempo_ephem_unpack
-  COMMAND ${tar_executable} -xvzf ${PULSAR_SOURCE_DIR}/external/${tempo_ephem_archive}
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
-  COMMENT "Unpacking tar archive of Tempo Ephem from ${PULSAR_SOURCE_DIR}/external/${tempo_ephem_archive} to ${PULSAR_BINARY_DIR}/apps..."
-  )
-add_dependencies (tempo_unpack tempo_ephem_unpack)
-
 add_custom_target (tempo_build
   COMMAND make 
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo_name}/src
@@ -75,7 +68,6 @@ add_custom_target (tempo_install
   COMMAND cp src/tempo ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND sed -e \"s|CMAKE_CHANGE|${CMAKE_INSTALL_PREFIX}|g\" tempo.cfg > ${CMAKE_INSTALL_PREFIX}/bin/tempo.cfg
   COMMAND cp tempo.hlp obsys.dat ${CMAKE_INSTALL_PREFIX}/bin
-  COMMAND cp -r tempo_ephem ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r clock ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r test ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r tzpar ${CMAKE_INSTALL_PREFIX}/bin
@@ -83,7 +75,6 @@ add_custom_target (tempo_install
   COMMENT "Copying tempo executable to ${CMAKE_INSTALL_PREFIX}/bin..."
   COMMENT "Executing sed command: sed 's|CMAKE_CHANGE|$CMAKE_INSTALL_PREFIX|g' tempo.cfg > ${CMAKE_INSTALL_PREFIX}/bin/tempo.cfg"
   COMMENT "Copying tempo.hlp and obsys.dat ${CMAKE_INSTALL_PREFIX}/bin..."
-  COMMENT "Copying tempo_ephem directory to ${CMAKE_INSTALL_PREFIX}/bin..."
   COMMENT "Copying clock directory to ${CMAKE_INSTALL_PREFIX}/bin..."
   COMMENT "Copying test directory to ${CMAKE_INSTALL_PREFIX}/bin..."
   COMMENT "Copying tzpar directory to ${CMAKE_INSTALL_PREFIX}/bin..."
