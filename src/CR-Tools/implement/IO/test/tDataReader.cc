@@ -46,30 +46,8 @@ using CR::DataReader;
   \date 2005/05/15
 */
 
-// ----------------------------------------------------------------- test_Record
-
-/*!
-  \brief Tests for working with the Record container
-*/
-void test_Record ()
-{
-  cout << "\n[test_Record]\n" << std::endl;
-
-  // Set up description of the record fields
-  casa::RecordDesc ITSMetadataDesc;
-
-  ITSMetadataDesc.addField ("description", TpString);
-  ITSMetadataDesc.addField ("current_status", TpString);
-  ITSMetadataDesc.addField ("observation_owner", TpString);
-  ITSMetadataDesc.addField ("interval", TpInt);
-  ITSMetadataDesc.addField ("current_iteration", TpInt);
-
-  // create the record from the record description
-  casa::Record ITSMetadataRec (ITSMetadataDesc);
-
-}
-
-// -------------------------------------------------------------- test_DataReader
+//_______________________________________________________________________________
+//                                                                test_DataReader
 
 /*!
   \brief Test constructors for a new DataReader object
@@ -181,25 +159,28 @@ int test_headerRecord ()
   return nofFailedTests;
 }
 
-// ------------------------------------------------------------- test_dataStreams
+//_______________________________________________________________________________
+//                                                              test_DataIterator
 
 /*!
   \brief Test working with file streams as they are used for reading of data
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_dataStreams ()
+int test_DataIterator ()
 {
-  cout << "\n[test_dataStreams]\n" << std::endl;
+  cout << "\n[tDataReader::test_DataIterator]\n" << std::endl;
 
   int nofFailedTests (0);
   uint blocksize (128);
   uint nofFiles (5);
-  DataIterator *iterators;
+  CR::DataIterator *iterators;
 
   try {
-    iterators = new DataIterator[nofFiles];
+    iterators = new CR::DataIterator[nofFiles];
     
+    std::cout << "File\tBlocksize" << std::endl;
+
     for (uint file (0); file<nofFiles; file++) {
       iterators[file].setBlocksize(blocksize);
       cout << file << "\t" << iterators[file].blocksize() << endl;
@@ -565,7 +546,8 @@ int test_processing ()
   return nofFailedTests;
 }
 
-// ----------------------------------------------------------------- main routine
+//_______________________________________________________________________________
+//                                                                           main
 
 int main (int argc,
           char *argv[])
@@ -579,21 +561,17 @@ int main (int argc,
 
   if (nofFailedTests == 0) {
     nofFailedTests += test_conversionArrays (blocksize);
-//     nofFailedTests += test_dataStreams ();
+    nofFailedTests += test_DataIterator ();
     nofFailedTests += test_headerRecord ();
-    nofFailedTests += test_selection ();
-    nofFailedTests += test_time(blocksize);
-    nofFailedTests += test_frequency (blocksize);
-    nofFailedTests += test_processing();
+//     nofFailedTests += test_selection ();
+//     nofFailedTests += test_time(blocksize);
+//     nofFailedTests += test_frequency (blocksize);
+//     nofFailedTests += test_processing();
   } else {
     std::cerr << "[tDataReader]"
       "Little sense trying to test object methods without valid object..."
 	      << std::endl;
   }
   
-  {
-    test_Record ();
-  }
-
   return nofFailedTests;
 }

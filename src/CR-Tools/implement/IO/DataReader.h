@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp           $ |
+ | $Id$ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -50,7 +50,6 @@
 
 using namespace std;
 using namespace casa;
-using namespace CR;
 
 namespace CR {  //  Namespace CR -- begin
   
@@ -70,7 +69,8 @@ namespace CR {  //  Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/scimath/implement/Mathematics/FFTServer.html">FFTServer</a>
+      <li>[casacore] Array<T>
+      <li>[casacore] FFTServer
       <li>[CR] DataIterator
     </ul>
     
@@ -238,24 +238,22 @@ namespace CR {  //  Namespace CR -- begin
   */
   class DataReader : public TimeFreq {
     
+    //! Is the (ADC->Voltage) conversion array available?
+    bool haveADC2Voltage_p;
+    //! Is the (FFT->CalFFT) conversion array available?
+    bool haveFFT2CalFFT_p;
     //! Conversion from ADC values to voltages, [sample,antenna]
-    Matrix<Double> adc2voltage_p;
-    
+    Matrix<Double> ADC2Voltage_p;
     //! Conversion from raw to calibrated FFT [channel,antenna]
-    Matrix<DComplex> fft2calfft_p;
-    
+    Matrix<DComplex> FFT2CalFFT_p;
     //! Selection of the antennas
     Vector<uint> antennas_p;
-    
     //! Enable/Disable frequency channel selection
     Bool selectChannels_p;
-    
     //! Hanning filter to be applied to the time-domain data (optional)
     HanningFilter<Double> hanningFilter_p;
-    
     //! Apply the Hanning filter to the data?
     Bool applyHanning_p;
-    
     //! At which block of the data volume do we start reading data
     uint startBlock_p;
     
@@ -358,80 +356,23 @@ namespace CR {  //  Namespace CR -- begin
     
     // --------------------------------------------------------------- Construction
     
-    /*!
-      \brief Default constructor
-      
-      This is the default constructor for a new DataReader object; this will not
-      enable the actual reading of data, but otherwise represents a fully
-      operational object.
-      
-      \verbatim
-      - blocksize   = 1
-      - FFT length  = 1
-      - nof. files  = 1
-      - adc2voltage = [1]
-      - fft2calfft  = [(1,0)]
-      \endverbatim
-    */
+    //! Default constructor
     DataReader ();
-    
-    /*!
-      \brief Argumented constructor
-      
-      \param blocksize   -- Size of a block of data, [samples]
-    */
+    //! Argumented constructor
     DataReader (uint const &blocksize);
-    
-    /*!
-      \brief Argumented constructor
-      
-	  \param blocksize       -- Blocksize, [samples]
-	  \param sampleFrequency -- Sample frequency in the ADC, [Hz]
-	  \param nyquistZone     -- Nyquist zone,  [1]
-	*/
+    //! Argumented constructor
     DataReader (uint const &blocksize,
 		uint const &nyquistZone,
 		Double const &samplerate);
-    
-  /*!
-    \brief Argumented constructor
-
-    \param blocksize   -- Size of a block of data, [samples]
-    \param adc2voltage -- Multiplication factors for conversion from ADC values
-                          to voltages
-    \param fft2calfft  -- Multiplication factors for conversion from raw to
-                          calibrated FFT
-  */
-  DataReader (uint const &blocksize,
-	      Vector<Double> const &adc2voltage,
-	      Matrix<DComplex> const &fft2calfft);
-
-  /*!
-    \brief Argumented constructor
-
-    \param blocksize   -- Size of a block of data, [samples]
-    \param adc2voltage -- Multiplication factors for conversion from ADC values
-                          to voltages
-    \param fft2calfft  -- Multiplication factors for conversion from raw to
-                          calibrated FFT
-  */
-  DataReader (uint const &blocksize,
-	      Matrix<Double> const &adc2voltage,
-	      Matrix<DComplex> const &fft2calfft);
-
-  /*!
-    \brief Argumented constructor
-
-    \todo implentation incomplete
-
-    \param filename    -- Name of the file from which to read in the data
-    \param blocksize   -- Size of a block of data, [samples]
-    \param var         -- Variable type as which the data are stored in the file
-    \param adc2voltage -- Multiplication factors for conversion from ADC values
-                          to voltages
-    \param fft2calfft  -- Multiplication factors for conversion from raw to
-                          calibrated FFT
-  */
+    //! Argumented constructor
+    DataReader (uint const &blocksize,
+		Vector<Double> const &adc2voltage,
+		Matrix<DComplex> const &fft2calfft);
+    //! Argumented constructor
+    DataReader (uint const &blocksize,
+		Matrix<Double> const &adc2voltage,
+		Matrix<DComplex> const &fft2calfft);
+    //! Argumented constructor
   template <class T> 
     DataReader (String const &filename,
 		uint const &blocksize,
@@ -456,9 +397,7 @@ namespace CR {  //  Namespace CR -- begin
 
   // ---------------------------------------------------------------- Destruction
 
-  /*!
-    \brief Destructor
-  */
+  //! Destructor
   virtual ~DataReader ();
 
   // ------------------------------------------------------------------ Operators
@@ -472,38 +411,16 @@ namespace CR {  //  Namespace CR -- begin
 
   // ----------------------------------------------------------------- Parameters
   
-  /*!
-    \brief Set the blocksize, \f$ N_{\rm Blocksize} \f$
-    
-    \param blocksize -- Blocksize, [samples]
-  */
+  //! Set the blocksize, \f$ N_{\rm Blocksize} \f$
   void setBlocksize (uint const &blocksize);
-
-  /*!
-    \brief Set the blocksize, \f$ N_{\rm Blocksize} \f$
-    
-    \param blocksize -- Blocksize, [samples]
-    \param adc2voltage -- [sample,antenna] Weights to convert raw ADC samples to
-                          voltages
-  */
+  //! Set the blocksize, \f$ N_{\rm Blocksize} \f$
   void setBlocksize (uint const &blocksize,
 		     Matrix<double> const &adc2voltage);
-  
-  /*!
-    \brief Set the blocksize, \f$ N_{\rm Blocksize} \f$
-    
-    \param blocksize   -- Blocksize, [samples]
-    \param adc2voltage -- [sample,antenna] Weights to convert raw ADC samples to
-                          voltages
-    \param fft2calfft  -- [channel,antenna]
-  */
+  //! Set the blocksize, \f$ N_{\rm Blocksize} \f$
   void setBlocksize (uint const &blocksize,
 		     Matrix<double> const &adc2voltage,
 		     Matrix<DComplex> const &fft2calfft);
-  
-  /*!
-    \brief Provide a summary of the internal parameters to standard output
-   */
+  //! Provide a summary of the internal parameters to standard output
   inline void summary () {
     summary (std::cout);
   }
@@ -539,29 +456,10 @@ namespace CR {  //  Namespace CR -- begin
     \return fx2voltage -- Weights to convert raw ADC samples to voltages
   */
   inline Matrix<Double> ADC2Voltage () const {
-    return adc2voltage_p;
+    return ADC2Voltage_p;
   }
 
-  /*!
-    \brief Set the weights for conversion from raw ADC samples to voltages
-
-    Kepp in mind, that there two possible shapes in which the data will be 
-    accepted:
-    <ol>
-      <li>nelem == nofSelectedAntennas() : only conversion values for the 
-      selected antennas are provided.
-      <li>nelem == nofAntennas() : conversion values for all antennas in the 
-      dataset are provided; this is the more secure method, as this will allow
-      for later re-selection of antennas without affecting the proper conversion
-      from ADC values to voltages.
-    </ol>
-    This routine assignes a single conversion value to each antenna; in case 
-    you want to use this step to also flag in the time domain, use the method
-    below.
-
-    \param adc2voltage -- [sample,antenna] Weights to convert raw ADC samples to
-                          voltages
-  */
+  //! Set the weights for conversion from raw ADC samples to voltages
   void setADC2Voltage (Vector<Double> const &adc2voltage);
 
   /*!
@@ -609,7 +507,7 @@ namespace CR {  //  Namespace CR -- begin
 			  accounting for the slope of the bandpass filter.
   */
   inline Matrix<DComplex> fft2calfft () const {
-    return fft2calfft_p;
+    return FFT2CalFFT_p;
   }
 
   /*!
@@ -721,14 +619,10 @@ namespace CR {  //  Namespace CR -- begin
   */
   void setShift (std::vector<int> const &shift);
 
-  /*!
-   \brief Forward position pointer to the next block of data
-   */
+  //! Forward position pointer to the next block of data
   void nextBlock ();
 
-  /*!
-    \brief Go back to the block at which we start reading the data
-  */
+  //! Go back to the block at which we start reading the data
   inline void toStartBlock () {
     setBlock (startBlock_p);
   }
@@ -743,81 +637,70 @@ namespace CR {  //  Namespace CR -- begin
 
   // -------------------------------------------------------------------- Methods
 
-  /*!
-    \brief Get the raw time series after ADC conversion
-    
-    \return fx -- [sample,antenna] Raw ADC time series, [Counts]
-  */
+  //! Get the raw time series after ADC conversion
   virtual Matrix<Double> fx ();
-
-  /*!
-    \brief Get the voltage time series
-    
-    \return voltage -- [sample,antenna] Voltage time series, [Volt]
-  */
+  //! Get the raw time series after ADC conversion
+  virtual void fx (Matrix<Double> &data);
+  //! Get the voltage time series
   virtual Matrix<Double> voltage ();
-
-  /*!
-    \brief Raw FFT of the voltage time series
-    
-    \return fft -- [channel,antenna] Raw FFT of the voltage time series
-
-    <b>Note:</b> Depending on the Nyquist-zone the FFTed data may be flipped! 
-    Use the <tt>invfft()</tt> function for the inverse FFT.
-  */
+  //! Get the voltage time series
+  virtual void voltage (Matrix<Double> &data);
+  //! Raw FFT of the voltage time series
   virtual Matrix<DComplex> fft ();
-
-  /*!
-    \brief Get the calibrated FFT
-    
-    \return calfft -- [channel,antenna] Calibrated FFT, i.e. spectra after correction for the antenna
-                      gain-curves.
-  */
+  //! Raw FFT of the voltage time series
+  virtual void fft (Matrix<DComplex> &data);
+  //! Get the calibrated FFT
   virtual Matrix<DComplex> calfft ();
-
+  //! Get the calibrated FFT
+  virtual void calfft (Matrix<DComplex> &data);
+  
   /*!
     \brief Do the inverse Fourier transform. (On the calfft data.)
-
-    \return tsdata -- [sample,antenna] Reconstructed time series data, ["calibrated" Volts]
+    
+    \return tsdata -- [sample,antenna] Reconstructed time series data,
+    ["calibrated" Volts]
   */
-    virtual inline Matrix<Double> invfft() {
-      return invfft(calfft());
-    };
-
+  virtual inline Matrix<Double> invfft() {
+    return invfft(calfft());
+  };
+  
   /*!
     \brief Do the inverse Fourier transform.
-
+    
     \param fftdata -- Matrix with the fft-data as output from <tt>fft()</tt> or <tt>calfft()</tt>.
-
+    
     \return tsdata -- [sample,antenna] Reconstructed time series data, [depends on input]
   */
-    virtual Matrix<Double> invfft (Matrix<DComplex> fftdata);
-
+  virtual Matrix<Double> invfft (Matrix<DComplex> fftdata);
+  
   /*!
     \brief Do the inverse Fourier transform. on a single antenna trace
-
+    
     \param fftdata -- Vector with the fft-data as output from <tt>fft()</tt> or <tt>calfft()</tt>.
-
+    
     \return tsdata -- [sample] Reconstructed time series data, [depends on input]
   */
-    virtual Vector<Double> invfft (Vector<DComplex> fftdata);
-
-
+  virtual Vector<Double> invfft (Vector<DComplex> fftdata);
+  
+  
+  //! Get the cross-correlation spectra
+  virtual Cube<DComplex> ccSpectra (Bool const &fromCalFFT=True);
+  
   /*!
     \brief Get the cross-correlation spectra
-
+    
+    \retval ccSpectra -- Data cube with the cross-correlation spectra,
+    [nfreq,nant,nant]
     \param fromCalFFT -- Cross-correlation spectra from the calibrated FFT data? If
-                         set to <i>False</i>, the cross-correlation is carried out on
-			 the raw FFT.
-
-    \return ccSpectra -- Data cube with the cross-correlation spectra,
-                         [nfreq,nant,nant]
+    set to <i>False</i>, the cross-correlation is carried out on
+    the raw FFT.
   */
-  virtual Cube<DComplex> ccSpectra (Bool const &fromCalFFT=True);
-
+  virtual void ccSpectra (Cube<DComplex> &data,
+			  Bool const &fromCalFFT=True);
+  
   /*!
     \brief Get the visibilities
-
+    
     \param fromCalFFT -- Cross-correlation spectra from the calibrated FFT data? If
                          set to <i>False</i>, the cross-correlation is carried out
 			 on the raw FFT.
@@ -945,9 +828,11 @@ namespace CR {  //  Namespace CR -- begin
   /*!
     \brief Set the numbers of the frequency channels selected for processing
 
-    \param channelSelection -- 
+    \param channelSelection -- Array with the indices of the antennas to be
+           selected.
 
-    \return status -- 
+    \return status -- Status of the operation; returns <tt>false</tt> in case
+            an error was encountered.
   */
   Bool setSelectedChannels (Vector<uint> const &channelSelection);
 
@@ -956,7 +841,8 @@ namespace CR {  //  Namespace CR -- begin
 
     \param channelSelection -- 
 
-    \return status -- 
+    \return status -- Status of the operation; returns <tt>false</tt> in case
+            an error was encountered.
   */
   Bool setSelectedChannels (Vector<Bool> const &channelSelection);
 
@@ -1031,12 +917,10 @@ namespace CR {  //  Namespace CR -- begin
     \param betaRise  -- Width before beginning of the plateau
     \param betaFall  -- Width after end of the plateau. beta + betaRise + betaFall must equal 1.
   */
- 
   void setHanningFilter (double const &alpha,
 			 uint const &beta,
                          uint const &betaRise, 
 			 uint const &betaFall);
-
 
   /*!
     \brief Get the name of the class
@@ -1049,36 +933,16 @@ namespace CR {  //  Namespace CR -- begin
   
   private:
   
-  /*!
-    \brief Unconditional copying
-  */
+  //! Unconditional copying
   void copy (DataReader const &other);
-  
-  /*!
-    \brief Unconditional deletion 
-  */
+  //! Unconditional deletion 
   void destroy(void);
-
-  /*!
-    \brief Initialization to default parameters
-    
-    \param blocksize   -- Size of a block of data, [samples]
-  */
+  //! Initialization of internal parameters
   void init (uint const &blocksize);
-
-  /*!
-    \brief Initialization
-    
-    \param blocksize   -- Size of a block of data, [samples]
-  */
+  //! Initialization of internal parameters
   void init (uint const &blocksize,
 	     uint const &nyquistZone,
 	     Double const &samplerate);
-
-  /*!
-    \brief Select the frequency channels
-  */
-  Matrix<DComplex> selectChannels (Matrix<DComplex> const &data);
 };
 
 }  //  Namespace CR -- end

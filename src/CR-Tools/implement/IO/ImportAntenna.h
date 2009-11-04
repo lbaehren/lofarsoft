@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: importAntenna.h,v 1.5 2007/03/12 08:41:07 huege Exp $*/
+/* $Id$*/
 
 #ifndef IMPORTANTENNA_H
 #define IMPORTANTENNA_H

@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: simulation2fftMatrix.h,v 1.2 2007/03/12 10:20:00 horneff Exp $*/
+/* $Id$*/
 
 #ifndef SIMULATION2FFTMATRIX_H
 #define SIMULATION2FFTMATRIX_H

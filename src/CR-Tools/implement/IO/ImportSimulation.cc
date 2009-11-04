@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ImportSimulation.cc,v 1.3 2006/10/16 13:07:45 huege Exp $*/
+/* $Id$*/
 
 #include <IO/ImportSimulation.h>
 

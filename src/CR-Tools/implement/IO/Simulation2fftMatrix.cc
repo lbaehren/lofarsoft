@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: Simulation2fftMatrix.cc,v 1.3 2007/03/27 14:38:46 horneff Exp $*/
+/* $Id$*/
 
 #include <IO/Simulation2fftMatrix.h>
 #include <scimath/Mathematics/FFTServer.h>
