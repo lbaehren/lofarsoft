@@ -31,7 +31,8 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  // ------------------------------------------------------------------- TimeFreq
+  //_____________________________________________________________________________
+  //                                                                     TimeFreq
   
   TimeFreq::TimeFreq ()
   {
@@ -41,7 +42,8 @@ namespace CR { // Namespace CR -- begin
     referenceTime_p   = 0;
   }
   
-  // ------------------------------------------------------------------- TimeFreq
+  //_____________________________________________________________________________
+  //                                                                     TimeFreq
   
   TimeFreq::TimeFreq (uint const &blocksize)
   {
@@ -51,7 +53,8 @@ namespace CR { // Namespace CR -- begin
     referenceTime_p   = 0;
   }
 
-  // ------------------------------------------------------------------- TimeFreq
+  //_____________________________________________________________________________
+  //                                                                     TimeFreq
   
   TimeFreq::TimeFreq (uint const &blocksize,
 		      double const &sampleFrequency,
@@ -63,7 +66,8 @@ namespace CR { // Namespace CR -- begin
     referenceTime_p   = 0;
   }
   
-  // ------------------------------------------------------------------- TimeFreq
+  //_____________________________________________________________________________
+  //                                                                     TimeFreq
   
   TimeFreq::TimeFreq (uint const &blocksize,
 		      casa::Quantity const &sampleFrequency,
@@ -75,7 +79,8 @@ namespace CR { // Namespace CR -- begin
     referenceTime_p   = 0;
   }
   
-  // ------------------------------------------------------------------- TimeFreq
+  //_____________________________________________________________________________
+  //                                                                     TimeFreq
   
   TimeFreq::TimeFreq (uint const &blocksize,
 		      double const &sampleFrequency,
@@ -88,7 +93,8 @@ namespace CR { // Namespace CR -- begin
     referenceTime_p   = referenceTime;
   }
   
-  // ------------------------------------------------------------------- TimeFreq
+  //_____________________________________________________________________________
+  //                                                                     TimeFreq
   
   TimeFreq::TimeFreq (uint const &blocksize,
 		      casa::Quantity const &sampleFrequency,
@@ -101,7 +107,8 @@ namespace CR { // Namespace CR -- begin
     setReferenceTime (referenceTime);
   }
   
-  // ------------------------------------------------------------------- TimeFreq
+  //_____________________________________________________________________________
+  //                                                                     TimeFreq
   
   TimeFreq::TimeFreq (TimeFreq const &other)
   {
@@ -113,6 +120,9 @@ namespace CR { // Namespace CR -- begin
   //  Destruction
   //
   // ============================================================================
+  
+  //_____________________________________________________________________________
+  //                                                                    ~TimeFreq
   
   TimeFreq::~TimeFreq ()
   {
@@ -173,6 +183,20 @@ namespace CR { // Namespace CR -- begin
   
   // -------------------------------------------------------------------- summary
   
+  /*!
+    \param os -- Output stream to which the summary is written.
+    
+    For an object created via the default constructor, the output should be
+    \verbatim
+    -- Fundamental parameters:
+    Blocksize      [samples] = 1
+    Sample frequency    [Hz] = 8e+07
+    Nyquist zone             = 1
+    -- Derived quantities:
+    Sample interval      [s] = 1.25e-08
+    Frequency increment [Hz] = 8e+07
+    \endverbatim
+  */
   void TimeFreq::summary (std::ostream &os)
   {
     os << "[TimeFreqSkymap] Summary of internal parameters." << std::endl;
@@ -202,10 +226,10 @@ namespace CR { // Namespace CR -- begin
     return casa::IPosition (2,blocksize(),fftLength());
   }
 #else 
-  vector<int> TimeFreq::shape () {
-    vector<int> shape(2);
-    shape(0) = blockize();
-    shape(1) = fftLength();
+  std::vector<int> TimeFreq::shape () {
+    std::vector<int> shape(2);
+    shape[0] = blockize();
+    shape[1] = fftLength();
     return shape;
   }
 #endif
@@ -223,9 +247,9 @@ namespace CR { // Namespace CR -- begin
     return vec;
   }
 #else 
-  vector<double> TimeFreq::increment ()
+  std::vector<double> TimeFreq::increment ()
   {
-    vector<double> vec (2);
+    std::vector<double> vec (2);
 
     vec[0] = sampleInterval();
     vec[1] = sampleFrequency_p/blocksize_p;
@@ -275,12 +299,12 @@ namespace CR { // Namespace CR -- begin
     return frequencies;
   }  
 #else
-  vector<double> TimeFreq::frequencyValues ()
+  std::vector<double> TimeFreq::frequencyValues ()
   {
     uint nofChannels (fftLength());
     double incr (TimeFreq::increment()(1));
-    vector<double> band (frequencyRange());
-    vector<double> frequencies (nofChannels);
+    std::vector<double> band (frequencyRange());
+    std::vector<double> frequencies (nofChannels);
     
     for (uint k(0); k<nofChannels; k++) {
       frequencies[k] = band[0] + k*incr;
@@ -329,12 +353,12 @@ namespace CR { // Namespace CR -- begin
       return selectedFrequencies;
     }
 #else
-  vector<double> TimeFreq::frequencyValues (vector<bool> const &selection)
+  std::vector<double> TimeFreq::frequencyValues (std::vector<bool> const &selection)
   {
     uint channel (0);
     uint nofChannels (fftLength());
-    vector<double> frequencies (frequencyValues());
-    vector<double> selectedFrequencies;
+    std::vector<double> frequencies (frequencyValues());
+    std::vector<double> selectedFrequencies;
     
     /*
       Check if the selection vector has the same number of elements as the
@@ -398,12 +422,12 @@ namespace CR { // Namespace CR -- begin
     return frequencyValues (selection);
   }
 #else
-  vector<double> TimeFreq::frequencyValues (vector<double> const &range)
+  std::vector<double> TimeFreq::frequencyValues (std::vector<double> const &range)
   {
     uint nofChannels (fftLength());
     uint nofSelectedChannels (0);
-    vector<bool> selection (nofChannels);
-    vector<double> frequencies (frequencyValues());
+    std::vector<bool> selection (nofChannels);
+    std::vector<double> frequencies (frequencyValues());
 
     for (uint channel (0); channel<nofChannels; channel++) {
       if (frequencies[channel]>range[0] && frequencies[channel]<range[1]) {
@@ -447,10 +471,10 @@ namespace CR { // Namespace CR -- begin
     return frequencyValues(range);
   }
 #else
-  vector<double> TimeFreq::frequencyValues (double const &min,
-					    double const &max)
+  std::vector<double> TimeFreq::frequencyValues (double const &min,
+						 double const &max)
   {
-    vector<double> range (2);
+    std::vector<double> range (2);
 
     if (min <= max) {
       range[0] = min;
@@ -463,55 +487,76 @@ namespace CR { // Namespace CR -- begin
     return frequencyValues(range);
   }
 #endif
-  
-  // ----------------------------------------------------------------- timeValues
 
+  //_____________________________________________________________________________
+  //                                                                 sampleValues
+  
+#ifdef HAVE_CASA
+  casa::Vector<uint> TimeFreq::sampleValues (uint const &sampleOffset,
+					     bool const &offsetIsBlock)
+  {
+    casa::Vector<uint> values (blocksize_p);
+    
+    if (offsetIsBlock) {
+      values = blocksize_p*sampleOffset;
+    } else {
+      values = sampleOffset;
+    }
+    
+    for (uint n(0); n<blocksize_p; n++) {
+      values(n) += n;
+    }
+    
+    return values;
+  }
+#else 
+  std::vector<uint> TimeFreq::sampleValues (uint const &sampleOffset,
+					    bool const &offsetIsBlock)
+  {
+    std::vector<uint> values (blocksize_p);
+    
+    if (offsetIsBlock) {
+      for (uint n(0); n<blocksize_p; n++) {
+	values(n) = blocksize_p*sampleOffset+n;
+      }
+    } else {
+      for (uint n(0); n<blocksize_p; n++) {
+	values(n) = sampleOffset+n;
+      }
+    }
+    
+    return values;
+  }
+#endif
+  
+  //_____________________________________________________________________________
+  //                                                                   timeValues
+  
 #ifdef HAVE_CASA
   casa::Vector<double> TimeFreq::timeValues (uint const &sampleOffset,
 					     bool const &offsetIsBlock)
   {
-    casa::Vector<uint> sampleValues (blocksize_p);
-
-    if (offsetIsBlock) {
-      sampleValues = blocksize_p*sampleOffset;
-    } else {
-      sampleValues = sampleOffset;
-    }
-    
-    for (uint n(0); n<blocksize_p; n++) {
-      sampleValues(n) += n;
-    }
-    
-    return timeValues (sampleValues);
+    // Get the sample values for the current block ...
+    casa::Vector<uint> samples = sampleValues(sampleOffset,
+					      offsetIsBlock);
+    // ... and convert these values to time
+    return timeValues (samples);
   }
 #else  
-  vector<double> TimeFreq::timeValues (uint const &sampleOffset,
+  std::vector<double> TimeFreq::timeValues (uint const &sampleOffset,
 				       bool const &offsetIsBlock)
   {
-    if (offsetIsBlock) {
-      /* Offset is given by the block number */
-      vector<uint> sampleValues (blocksize_p,sampleOffset*blocksize_p);
-      
-      for (uint n(0); n<blocksize_p; n++) {
-	sampleValues[n] += n;
-      }
-      
-      return timeValues (sampleValues);
-    } else {
-      /* Offset is given in number of samples */
-      vector<uint> sampleValues (blocksize_p,sampleOffset);
-      
-      for (uint n(0); n<blocksize_p; n++) {
-	sampleValues[n] += n;
-      }
-      
-      return timeValues (sampleValues);
-    }
+    // Get the sample values for the current block ...
+    std::vector<uint> samples = sampleValues(sampleOffset,
+					     offsetIsBlock);
+    // ... and convert these values to time
+    return timeValues (samples);
   }
 #endif
   
-  // ----------------------------------------------------------------- timeValues
-
+  //_____________________________________________________________________________
+  //                                                                   timeValues
+  
 #ifdef HAVE_CASA
   casa::Vector<double> TimeFreq::timeValues (casa::Vector<uint> const &sampleValues)
   {
@@ -536,10 +581,10 @@ namespace CR { // Namespace CR -- begin
     
   }
 #else  
-  vector<double> TimeFreq::timeValues (vector<uint> const &sampleValues)
+  std::vector<double> TimeFreq::timeValues (std::vector<uint> const &sampleValues)
   {
     uint nelem (sampleValues.size());
-    vector<double> times (blocksize_p);
+    std::vector<double> times (blocksize_p);
 
     /*
       Since the function accepts vector of sample values of arbitray shape,
@@ -568,7 +613,8 @@ namespace CR { // Namespace CR -- begin
 
 #ifdef HAVE_CASA
   
-  // ------------------------------------------------------------ sampleFrequency
+  //_____________________________________________________________________________
+  //                                                              sampleFrequency
 
   double TimeFreq::sampleFrequency (casa::String const &unit)
   {
@@ -592,7 +638,7 @@ namespace CR { // Namespace CR -- begin
   
   // ------------------------------------------------------------------- timeAxis
   
-  LinearCoordinate TimeFreq::timeAxis ()
+  casa::LinearCoordinate TimeFreq::timeAxis ()
   {    
     double refValue (0.0);
     double increment (sampleInterval());
@@ -605,9 +651,9 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------------- timeAxis
   
-  LinearCoordinate TimeFreq::timeAxis (double const &crval,
-				       double const &cdelt,
-				       double const &crpix)
+  casa::LinearCoordinate TimeFreq::timeAxis (double const &crval,
+					     double const &cdelt,
+					     double const &crpix)
   {
     uint nofAxes (1);
 
@@ -621,17 +667,17 @@ namespace CR { // Namespace CR -- begin
     pc            = 0.0;
     pc.diagonal() = 1.0;
 
-    return LinearCoordinate (names,
-			     units,
-			     refVal,
-			     inc,
-			     pc,
-			     refPix);
+    return casa::LinearCoordinate (names,
+				   units,
+				   refVal,
+				   inc,
+				   pc,
+				   refPix);
   }
   
   // -------------------------------------------------------------- frequencyAxis
 
-  SpectralCoordinate TimeFreq::frequencyAxis ()
+  casa::SpectralCoordinate TimeFreq::frequencyAxis ()
   {
     double crval    = frequencyRange()(0);
     double cdelt    = increment()(1);

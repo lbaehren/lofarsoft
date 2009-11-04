@@ -40,8 +40,6 @@
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <measures/Measures/MFrequency.h>
 
-using std::vector;
-using casa::LinearCoordinate;
 using casa::SpectralCoordinate;
 using casa::Vector;
 
@@ -312,36 +310,17 @@ namespace CR { // Namespace CR -- begin
       return "TimeFreq";
     }
     
-    /*!
-      \brief Provide a summary of the internal status
-
-      For an object created via the default constructor, the output should be
-      \verbatim
-      -- Fundamental parameters:
-       Blocksize      [samples] = 1
-       Sample frequency    [Hz] = 8e+07
-       Nyquist zone             = 1
-      -- Derived quantities:
-       Sample interval      [s] = 1.25e-08
-       Frequency increment [Hz] = 8e+07
-      \endverbatim
-    */
+    //! Provide a summary of the internal status
     inline void summary () {
       summary (std::cout);
     }
 
-    /*!
-      \brief Provide a summary of the internal status
-
-      \param os -- Output stream to which the summary is written.
-    */
+    //! Provide a summary of the internal status
     void summary (std::ostream &os);    
 
     
     // ------------------------------------------------------ Internal parameters
 
-    // --- blocksize ---------------------------------------
-    
     /*!
       \brief Get the blocksize, \f$ N_{\rm Blocksize} \f$
 
@@ -404,8 +383,6 @@ namespace CR { // Namespace CR -- begin
       setSampleFrequency (sampleFrequency.getValue("Hz"));
     }
     
-    // --- nyquistZone -------------------------------------
-
     /*!
       \brief Get the Nyquist zone, \f$ N_{\rm Nyquist} \f$
 
@@ -421,8 +398,6 @@ namespace CR { // Namespace CR -- begin
       \param nyquistZone -- Nyquist zone,  [1]
     */
     virtual void setNyquistZone (uint const &nyquistZone);
-
-    // --- referenceTime -----------------------------------
 
     /*!
       \brief Get the reference time, i.e. the start of the time axis
@@ -486,7 +461,7 @@ namespace CR { // Namespace CR -- begin
 #ifdef HAVE_CASA
     virtual casa::IPosition shape ();
 #else 
-    virtual vector<int> shape ();
+    virtual std::vector<int> shape ();
 #endif
     
     /*!
@@ -497,7 +472,7 @@ namespace CR { // Namespace CR -- begin
 #ifdef HAVE_CASA
     virtual casa::Vector<double> increment ();
 #else 
-    virtual vector<double> increment ();
+    virtual std::vector<double> increment ();
 #endif
 
     /*!
@@ -526,7 +501,7 @@ namespace CR { // Namespace CR -- begin
 #ifdef HAVE_CASA
     casa::Vector<double> frequencyValues ();
 #else
-    vector<double> frequencyValues ();
+    std::vector<double> frequencyValues ();
 #endif
     
     /*!
@@ -539,7 +514,7 @@ namespace CR { // Namespace CR -- begin
 #ifdef HAVE_CASA
     casa::Vector<double> frequencyValues (casa::Vector<bool> const &selection);
 #else
-    vector<double> frequencyValues (vector<bool> const &selection);
+    std::vector<double> frequencyValues (std::vector<bool> const &selection);
 #endif
     
     /*!
@@ -552,7 +527,7 @@ namespace CR { // Namespace CR -- begin
 #ifdef HAVE_CASA
     casa::Vector<double> frequencyValues (casa::Vector<double> const &range);
 #else
-    vector<double> frequencyValues (vector<double> const &range);
+    std::vector<double> frequencyValues (std::vector<double> const &range);
 #endif
 
     /*!
@@ -569,13 +544,26 @@ namespace CR { // Namespace CR -- begin
     casa::Vector<double> frequencyValues (double const &min,
 					  double const &max);
 #else
-    vector<double> frequencyValues (double const &min,
-				    double const &max);
+    std::vector<double> frequencyValues (double const &min,
+					 double const &max);
 #endif
 
     /*!
-      \brief Get the values along the time axis
+      \brief Get the sample values along the time axis
 
+      \return sampleValues -- 
+    */
+#ifdef HAVE_CASA
+    virtual casa::Vector<uint> sampleValues (uint const &sampleOffset=0,
+					     bool const &offsetIsBlock=false);
+#else 
+    virtual std::vector<uint> sampleValues (uint const &sampleOffset=0,
+					    bool const &offsetIsBlock=false);
+#endif
+    
+    /*!
+      \brief Get the values along the time axis
+      
       \return timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
               a data block of length \f$ N_{\rm Blocksize} \f$ with zero offset;
 	      i.e. this function returns the first \f$ N_{\rm Blocksize} \f$ time
@@ -586,7 +574,7 @@ namespace CR { // Namespace CR -- begin
       return timeValues (0);
     }
 #else 
-    virtual inline vector<double> timeValues () {
+    virtual inline std::vector<double> timeValues () {
       return timeValues (0);
     }
 #endif
@@ -604,8 +592,8 @@ namespace CR { // Namespace CR -- begin
     casa::Vector<double> timeValues (uint const &sampleOffset,
 				     bool const &offsetIsBlock=false);
 #else
-    vector<double> timeValues (uint const &sampleOffset,
-			       bool const &offsetIsBlock=false);
+    std::vector<double> timeValues (uint const &sampleOffset,
+				    bool const &offsetIsBlock=false);
 #endif
     
     /*!
@@ -620,7 +608,7 @@ namespace CR { // Namespace CR -- begin
 #ifdef HAVE_CASA
     casa::Vector<double> timeValues (casa::Vector<uint> const &sampleValues);
 #else
-    vector<double> timeValues (vector<uint> const &sampleValues);
+    std::vector<double> timeValues (std::vector<uint> const &sampleValues);
 #endif
 
     // ---------------------------------- Optional methods which require casacore
@@ -632,7 +620,7 @@ namespace CR { // Namespace CR -- begin
       
       \return coord -- The time axis as linear coordinate
     */
-    LinearCoordinate timeAxis ();
+    casa::LinearCoordinate timeAxis ();
     
     /*!
       \brief [optional:CASA] Create time axis coordinate from parameters
@@ -643,9 +631,9 @@ namespace CR { // Namespace CR -- begin
       
       \return coord -- The time axis as linear coordinate
     */
-    LinearCoordinate timeAxis (double const &crval,
-			       double const &cdelt,
-			       double const &crpix);
+    casa::LinearCoordinate timeAxis (double const &crval,
+				     double const &cdelt,
+				     double const &crpix);
     
     /*!
       \brief [optional:CASA] Create frequency axis coordinate from parameters
