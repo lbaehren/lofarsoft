@@ -5,107 +5,151 @@
 #include<sstream>
 #include<time.h>
 
+/* Root header files */
 #include<TFile.h>
 #include<TTree.h>
 #include<TMath.h>
 #include<TCut.h>
 
-
 using namespace std;
 using namespace TMath;
 
+///***** Preparing Energy and primary Mass functions reconstructed by KASCADE (Ralph's formulas) ******///
+double D=(-186.5562)+(1222.6562)*exp(-110.*100./994186.38); //atm depht at KASCADE level
+double xatte=158.;
+double xattm=823.;
+double dwb1, lgNe0, lgNmu0, lgEn, lnM; //Ne, Nmu En in log, Mass in ln
+double varNe, varNmu, dEdTheta, varTheta, errlgEn, errlnM, dMassdTheta;
+//variables from "QGSjet2+FLUKA"
+double matrix[2][2]={{0.31753, 0.66273},{-7.04813, 9.62589}};
+double vector[]={1.79453, -4.19989};
 
-   ///***** Preparing Energy and primary Mass functions reconstructed by KASCADE (Ralph's formulas) ******///
-    double D=(-186.5562)+(1222.6562)*exp(-110.*100./994186.38); //atm depht at KASCADE level
-    double xatte=158.;
-    double xattm=823.;
-    double dwb1, lgNe0, lgNmu0, lgEn, lnM; //Ne, Nmu En in log, Mass in ln
-    double varNe, varNmu, dEdTheta, varTheta, errlgEn, errlnM, dMassdTheta;
-    //variables from "QGSjet2+FLUKA"
-    double matrix[2][2]={{0.31753, 0.66273},{-7.04813, 9.62589}};
-    double vector[]={1.79453, -4.19989};
+//_______________________________________________________________________________
+//                                                                     lg_EnergyK
 
+/*!
+  \brief Energy function
+  
+  \param lgNe
+  \param lgNmu
+  \param theta
+*/
+double lg_EnergyK (double lgNe,
+		   double lgNmu,
+		   double theta){ 
+  // transform to average 0-18deg sizes
+  dwb1=(D/cos((theta)/57.29578))-(D*1.025);
+  lgNe0=lgNe+(dwb1/xatte/log(10.));
+  lgNmu0=lgNmu+(dwb1/xattm/log(10.));
+  //variables from "QGSjet2+FLUKA"
+  double pare[]={ 1.93499, 0.25788, 0.66704, 0.07507, 0.09277, -0.16131};
+  
+  lgEn = pare[0] + pare[1]*lgNe0 + pare[2]*lgNmu0;
+  lgEn += pare[3]*lgNe0*lgNe0 + pare[4]*lgNmu0*lgNmu0 + pare[5]*lgNe0*lgNmu0;
+  return lgEn; //in log
+}
 
-    // Energy function***********************
-    double lg_EnergyK(double lgNe, double lgNmu, double theta){ 
-     // transform to average 0-18deg sizes
-     dwb1=(D/cos((theta)/57.29578))-(D*1.025);
-     lgNe0=lgNe+(dwb1/xatte/log(10.));
-     lgNmu0=lgNmu+(dwb1/xattm/log(10.));
-    //variables from "QGSjet2+FLUKA"
-     double pare[]={ 1.93499, 0.25788, 0.66704, 0.07507, 0.09277, -0.16131};
+//_______________________________________________________________________________
+//                                                                 err_lg_EnergyK
 
-     lgEn = pare[0] + pare[1]*lgNe0 + pare[2]*lgNmu0;
-     lgEn += pare[3]*lgNe0*lgNe0 + pare[4]*lgNmu0*lgNmu0 + pare[5]*lgNe0*lgNmu0;
-     return lgEn; //in log
-    }
-    // Energy error function***********************
-    double err_lg_EnergyK(double theta, double errlgNe, double errlgNmu, double errTheta){
+/*!
+  \brief Energy error function
 
-     varNe = pow(matrix[0][0]*errlgNe,2);
-     varNmu = pow(matrix[0][1]*errlgNmu,2);
-     dEdTheta = D/log(10.) * (matrix[0][0]/xatte+matrix[0][1]/xattm);
-     dEdTheta *= sin((theta)/57.29578) / pow(cos((theta)/57.29578),2); 
-     varTheta = pow(dEdTheta*(errTheta/57.29578),2);
+  \param theta
+  \param errlgNe
+  \param errlgNmu
+  \param errTheta
+*/
+double err_lg_EnergyK (double theta,
+		       double errlgNe,
+		       double errlgNmu,
+		       double errTheta){
+  
+  varNe = pow(matrix[0][0]*errlgNe,2);
+  varNmu = pow(matrix[0][1]*errlgNmu,2);
+  dEdTheta = D/log(10.) * (matrix[0][0]/xatte+matrix[0][1]/xattm);
+  dEdTheta *= sin((theta)/57.29578) / pow(cos((theta)/57.29578),2); 
+  varTheta = pow(dEdTheta*(errTheta/57.29578),2);
+  
+  errlgEn=sqrt(varNe + varNmu + varTheta);
+  return errlgEn;
+}
 
-     errlgEn=sqrt(varNe + varNmu + varTheta);
-     return errlgEn;
-    }
-    // Mass function***********************
-    double lg_Mass(double lgNe, double lgNmu, double theta){
-     // transform to average 0-18deg sizes
-     dwb1=(D/cos((theta)/57.29578))-(D*1.025);
-     lgNe0=lgNe+(dwb1/xatte/log(10.));
-     lgNmu0=lgNmu+(dwb1/xattm/log(10.));
-    //variables from "QGSjet2+FLUKA"
-     double parm[]={  -6.64185, -4.90102, 8.36298, -2.63904, -3.09907, 5.62201};
+//_______________________________________________________________________________
+//                                                                        lg_Mass
 
-     lnM = parm[0] + parm[1]*lgNe0 + parm[2]*lgNmu0;
-     lnM += parm[3]*lgNe0*lgNe0 + parm[4]*lgNmu0*lgNmu0 + parm[5]*lgNe0*lgNmu0;
-     return lnM; //in ln
-    }
-    // Mass error function***********************
-     double err_lg_Mass(double theta, double errlgNe, double errlgNmu, double errTheta){
+/*!
+  \brief Mass function
+*/
+double lg_Mass (double lgNe,
+		double lgNmu,
+		double theta){
+  // transform to average 0-18deg sizes
+  dwb1=(D/cos((theta)/57.29578))-(D*1.025);
+  lgNe0=lgNe+(dwb1/xatte/log(10.));
+  lgNmu0=lgNmu+(dwb1/xattm/log(10.));
+  //variables from "QGSjet2+FLUKA"
+  double parm[]={  -6.64185, -4.90102, 8.36298, -2.63904, -3.09907, 5.62201};
+  
+  lnM = parm[0] + parm[1]*lgNe0 + parm[2]*lgNmu0;
+  lnM += parm[3]*lgNe0*lgNe0 + parm[4]*lgNmu0*lgNmu0 + parm[5]*lgNe0*lgNmu0;
+  return lnM; //in ln
+}
 
-      varNe = pow(matrix[1][0]*errlgNe,2);
-      varNmu = pow(matrix[1][1]*errlgNmu,2);
-      dMassdTheta = D/log(10.) * (matrix[1][0]/xatte+matrix[1][1]/xattm);
-      dMassdTheta *= sin((theta)/57.29578) / pow(cos((theta)/57.29578),2); 
-      varTheta = pow(dMassdTheta*(errTheta/57.29578),2);
- 
-      errlnM=sqrt(varNe + varNmu + varTheta);
-      return errlnM;
- }
+//_______________________________________________________________________________
+//                                                                    err_lg_Mass
 
+/*!
+  \brief Mass error function
+*/
+double err_lg_Mass (double theta,
+		    double errlgNe,
+		    double errlgNmu,
+		    double errTheta){
+  
+  varNe = pow(matrix[1][0]*errlgNe,2);
+  varNmu = pow(matrix[1][1]*errlgNmu,2);
+  dMassdTheta = D/log(10.) * (matrix[1][0]/xatte+matrix[1][1]/xattm);
+  dMassdTheta *= sin((theta)/57.29578) / pow(cos((theta)/57.29578),2); 
+  varTheta = pow(dMassdTheta*(errTheta/57.29578),2);
+  
+  errlnM=sqrt(varNe + varNmu + varTheta);
+  return errlnM;
+}
+
+//_______________________________________________________________________________
+//                                                                           main
 
 int main(int argc, char* argv[]){
   if(argc!=4&&argc!=3){
-
+    
     cout<<"\n Application to generate a eventlist based on TCut selection of a ROOT-Tree."<<endl
         <<" Syntax: ./genEventlist SEL10.root options.cfg [\"optional selection string\"] "<<endl
         <<" Where the optional selection string can be sth. like \"Nmu>5e5\"."<<endl
         <<" For more information look at README. "<<endl<<endl;
-
+    
     cout<<"Wrong number of arguments!"<<endl;
     exit(1);
-    }
-
-
-  // Processing the config-file to set standart-cuts and give a minimum and maximum geomagnetic angle 
-  // and energy **************************************************************************************
-
+  }
+  
+  
+  /*
+   * Processing the config-file to set standart-cuts and give a minimum and
+   * maximum geomagnetic angle and energy
+   */
+  
   ifstream conf(argv[2]);
   string buf;
   stringstream opt;
   char tmp[256];
-
+  
   // variables to read in
   string cut_str, fn2005, fn2006, fn2007, fn2008, fn2009, namebase="eventlist";
   Double_t geomag_min=0, geomag_max=90, energy_min=0, energy_max=1e20;
   Bool_t createInfoFile, Grande;	
-
+  
   while (conf.getline(tmp,256)){
-
+    
     opt.clear();
     opt.str(tmp);
     opt>>buf;

@@ -317,8 +317,8 @@ if (HAVE_CASACORE AND HAVE_DAL)
   endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
 endif (HAVE_CASACORE AND HAVE_DAL)
 
-## -------------------------------------------------------------------##
-## snstestlightningskymapping
+##_______________________________________________________________________________
+##                                                     snstestlightningskymapping
 
 if (HAVE_CASACORE AND HAVE_DAL)
   if (DAL_LIBRARIES AND HDF5_LIBRARIES)
@@ -338,8 +338,8 @@ if (HAVE_CASACORE AND HAVE_DAL)
   endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
 endif (HAVE_CASACORE AND HAVE_DAL)
 
-## -------------------------------------------------------------------##
-## snstestnewskymapping
+##_______________________________________________________________________________
+##                                                           snstestnewskymapping
 
 if (HAVE_CASACORE AND HAVE_DAL)
   if (DAL_LIBRARIES AND HDF5_LIBRARIES)
@@ -359,8 +359,8 @@ if (HAVE_CASACORE AND HAVE_DAL)
   endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
 endif (HAVE_CASACORE AND HAVE_DAL)
 
-## -------------------------------------------------------------------##
-## imagetofits
+##_______________________________________________________________________________
+##                                                                    imagetofits
 
 if (HAVE_CASACORE AND HAVE_DAL)
   if (DAL_LIBRARIES AND HDF5_LIBRARIES)
@@ -380,8 +380,8 @@ if (HAVE_CASACORE AND HAVE_DAL)
   endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
 endif (HAVE_CASACORE AND HAVE_DAL)
 
-## -------------------------------------------------------------------
-## checkimage
+##_______________________________________________________________________________
+##                                                                     checkimage
 
 if (HAVE_CASACORE AND HAVE_DAL)
   if (DAL_LIBRARIES AND HDF5_LIBRARIES)
@@ -468,8 +468,8 @@ if (HAVE_CASA OR HAVE_CASACORE)
   endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
-## -------------------------------------------------------------------
-## calculatePhaseBehaviour
+##_______________________________________________________________________________
+##                                                        calculatePhaseBehaviour
 
 if (HAVE_STARTOOLS AND HAVE_PLPLOT)
   add_executable (calculatePhaseBehaviour calculatePhaseBehaviour.cc)
@@ -492,9 +492,8 @@ if (HAVE_STARTOOLS AND HAVE_PLPLOT)
   list (APPEND cr_apps calculatePhaseBehaviour)
 endif (HAVE_STARTOOLS AND HAVE_PLPLOT)
 
-
-## -------------------------------------------------------------------
-## plotLopesRaw
+##_______________________________________________________________________________
+##                                                                   plotLopesRaw
 
 if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 
@@ -522,9 +521,8 @@ if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 
 endif (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 
-
-##____________________________________________________________________
-## simpleSkymap
+##_______________________________________________________________________________
+##                                                                   simpleSkymap
 
 if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
   ## compiler instructions
@@ -541,9 +539,8 @@ if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
   list (APPEND cr_apps simpleSkymap)
 endif (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 
-
-## -------------------------------------------------------------------
-## dynamicSpectrum
+##_______________________________________________________________________________
+##                                                                dynamicSpectrum
 
 if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 
@@ -571,9 +568,8 @@ if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 
 endif (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 
-
-## -------------------------------------------------------------------
-## genEventlist
+##_______________________________________________________________________________
+##                                                                   genEventlist
 
 if (HAVE_ROOT)
   add_executable (genEventlist genEventlist.cc)
@@ -585,9 +581,8 @@ if (HAVE_ROOT)
   list (APPEND cr_apps genEventlist)
 endif (HAVE_ROOT)
 
-
-##____________________________________________________________________
-## tbbTriggerAnalysis
+##_______________________________________________________________________________
+##                                                             tbbTriggerAnalysis
 
 if (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES AND HAVE_BOOST)
   

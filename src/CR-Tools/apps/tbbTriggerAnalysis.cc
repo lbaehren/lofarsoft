@@ -33,6 +33,7 @@
 using std::cout;
 using std::endl;
 using CR::LOFAR_TBB;
+using CR::tbbTools;
 
 /*!
  \file tbbTriggerAnalysis
