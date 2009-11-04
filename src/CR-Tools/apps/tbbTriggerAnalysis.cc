@@ -98,7 +98,7 @@ template <class T> void appendToVector(casa::Vector<T>& first, casa::Vector<T> l
 }
 
 void addFPGATriggersToList(uint rcu, Vector<Int> &index, Vector<Int> &sum, Vector<Int> &width, Vector<Int> &peak, 
-                           Vector<Int> &meanval, Vector<Int> &afterval, Vector<TBBTrigger> &listToAppend)
+                           Vector<Int> &meanval, Vector<Int> &afterval, Vector<TBBTrigger> &listToAppend, FILE * triggerOutputFile)
 {
   Vector<TBBTrigger> newList;
   uint len = index.nelements();
@@ -118,6 +118,31 @@ void addFPGATriggersToList(uint rcu, Vector<Int> &index, Vector<Int> &sum, Vecto
     
     newList(i) = newTBBTrigger;
   }
+  if (triggerOutputFile != NULL)
+  {
+    for(uint i=0; i< newList.nelements(); i++)
+    {
+      TBBTrigger thisTrigger = newList(i);
+//      triggerCount[thisTrigger.itsRcuNr]++;
+      if (thisTrigger.itsRcuNr == 0)
+      {
+        //      cout << thisTrigger.itsRcuNr << ", " << thisTrigger.itsSampleNr << ", " << thisTrigger.itsSum << ", " << thisTrigger.itsNrSamples << ", "
+        //     << thisTrigger.itsPeakValue << ", " << thisTrigger.itsValueBefore << endl;
+      }
+      printf("%d %u %u %u %u %u %u %u %u\n", thisTrigger.itsRcuNr, thisTrigger.itsSeqNr, thisTrigger.itsTime, thisTrigger.itsSampleNr, thisTrigger.itsSum, 
+             thisTrigger.itsNrSamples, thisTrigger.itsPeakValue, thisTrigger.itsValueBefore, thisTrigger.itsValueAfter);
+      
+      fprintf(triggerOutputFile, "%d %u %u %u %u %u %u %u %u\n", thisTrigger.itsRcuNr, thisTrigger.itsSeqNr, thisTrigger.itsTime, thisTrigger.itsSampleNr, thisTrigger.itsSum, 
+              thisTrigger.itsNrSamples, thisTrigger.itsPeakValue, thisTrigger.itsValueBefore, thisTrigger.itsValueAfter);
+  
+//      for (uint i=0; i<nofAntennas; i++)
+//      {
+//        cout << "RCU " << i << " had " << triggerCount[i] << " triggers." << endl;
+//      }
+    }
+  } // end for
+  
+  
   appendToVector(listToAppend, newList);
 }
 
@@ -129,7 +154,7 @@ void addFPGATriggersToList(uint rcu, Vector<Int> &index, Vector<Int> &sum, Vecto
  \param filename -- Name of the HDF5 dataset to work with
  \param triggerList -- A list in which we output the trigger info
  */
-void triggerAnalysisOnFile (std::string const &filename, Vector<TBBTrigger> &triggerList)
+void triggerAnalysisOnFile (std::string const &filename, Vector<TBBTrigger> &triggerList, FILE * triggerOutputFile)
 {
   cout << "Starting trigger analysis on file: " << filename << endl;
   
@@ -139,10 +164,10 @@ void triggerAnalysisOnFile (std::string const &filename, Vector<TBBTrigger> &tri
   LOFAR_TBB data (filename,
 		  blocksize);
   // cout << "Starting at block: " << data.block() << endl;
+
+  uint nofBlocks = data.data_length()[0] / blocksize; // assuming same size for all antennas...
   
- 
-  uint nofBlocks = 195000 * 1024 / blocksize; // hack...
-  //nofBlocks = 100;
+//  nofBlocks = 1000;
   cout << nofBlocks << " = blocks to be processed, blocksize = " << blocksize << endl;
   
   uint nofDipoles = data.nofDipoleDatasets();
@@ -165,16 +190,16 @@ void triggerAnalysisOnFile (std::string const &filename, Vector<TBBTrigger> &tri
   
   for (uint block = 0; block < nofBlocks; block++) 
   {
+    fx = data.fx();
     for (uint rcu = 0; rcu < nofAntennas; rcu++)
     {
       // get the data for the current block
-      fx = data.fx();
       tempArray = fx.column(rcu); // overloaded operator: copies vector or pointer assignment?
       
-      for (uint k=0; k<10; k++)
-      {
-        cout << "RCU " << rcu << " sample " << k + block * blocksize << ": " << tempArray(k) << endl;
-      }
+//      for (uint k=0; k<10; k++)
+//      {
+//        cout << "RCU " << rcu << " sample " << k + block * blocksize << ": " << tempArray(k) << endl;
+//      }
       
       bool reset = (block == 0) ? True : False;
       if (block % 10 == 0)
@@ -183,7 +208,7 @@ void triggerAnalysisOnFile (std::string const &filename, Vector<TBBTrigger> &tri
         //    cout << tempArray[0] << " " << tempArray[1] << " " << tempArray[2] << "  " << tempArray[3] << endl;
         cout << "Triggering...";
       }
-      bool ok = tbbToolsArray[rcu].meanFPGAtrigger(tempArray, 8, 8, 5, 4096, 0, index, sum, width, peak, meanval, afterval, reset);
+      bool ok = tbbToolsArray[rcu].meanFPGAtrigger(tempArray, 4, 8, 5, 4096, 0, index, sum, width, peak, meanval, afterval, reset);
       if (ok == False)
       {
         cerr << "Error doing TBBTools trigger algorithm!" << endl;
@@ -211,7 +236,7 @@ void triggerAnalysisOnFile (std::string const &filename, Vector<TBBTrigger> &tri
         appendToVector(allmeanval, meanval);
         appendToVector(allafterval, afterval);
         
-        addFPGATriggersToList(rcu, index, sum, width, peak, meanval, afterval, triggerList);
+        addFPGATriggersToList(rcu, index, sum, width, peak, meanval, afterval, triggerList, triggerOutputFile);
       } // end if
     } // end loop over RCUs   
     
@@ -267,39 +292,20 @@ int main (int argc,
   std::string filename = argv[1];
  
   Vector<TBBTrigger> triggerList; // the result of the analysis is stored here.
-  triggerAnalysisOnFile(filename, triggerList);
-
+  char *outputFilename = "/Users/acorstanje/triggering/outputTriggers.dat";
+  FILE * triggerFile = fopen(outputFilename, "w"); // overwrites existing file...
+  
+  triggerAnalysisOnFile(filename, triggerList, triggerFile);
+  fclose(triggerFile);
+  
   uint nofAntennas = 96;
   uint triggerCount[nofAntennas];
   for (uint i=0; i<nofAntennas; i++)
   { triggerCount[i]=0; }
   
-  char *outputFilename = "/Users/acorstanje/triggering/outputTriggers.dat";
-  FILE * triggerFile = fopen(outputFilename, "w"); // overwrites existing file...
+ 
   
-  for(uint i=0; i< triggerList.nelements(); i++)
-  {
-    TBBTrigger thisTrigger = triggerList(i);
-    triggerCount[thisTrigger.itsRcuNr]++;
-    if (thisTrigger.itsRcuNr == 0)
-    {
-      //      cout << thisTrigger.itsRcuNr << ", " << thisTrigger.itsSampleNr << ", " << thisTrigger.itsSum << ", " << thisTrigger.itsNrSamples << ", "
-      //     << thisTrigger.itsPeakValue << ", " << thisTrigger.itsValueBefore << endl;
-    }
-    printf("%d %u %u %u %u %u %u %u %u\n", thisTrigger.itsRcuNr, thisTrigger.itsSeqNr, thisTrigger.itsTime, thisTrigger.itsSampleNr, thisTrigger.itsSum, 
-           thisTrigger.itsNrSamples, thisTrigger.itsPeakValue, thisTrigger.itsValueBefore, thisTrigger.itsValueAfter);
     
-    if (triggerFile != NULL)
-    {
-      fprintf(triggerFile, "%d %u %u %u %u %u %u %u %u\n", thisTrigger.itsRcuNr, thisTrigger.itsSeqNr, thisTrigger.itsTime, thisTrigger.itsSampleNr, thisTrigger.itsSum, 
-              thisTrigger.itsNrSamples, thisTrigger.itsPeakValue, thisTrigger.itsValueBefore, thisTrigger.itsValueAfter);
-    }
-    for (uint i=0; i<nofAntennas; i++)
-    {
-      cout << "RCU " << i << " had " << triggerCount[i] << " triggers." << endl;
-    }
-  }
-  
   
   return 0;
 }
