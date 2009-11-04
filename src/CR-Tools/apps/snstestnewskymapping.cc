@@ -524,9 +524,9 @@ int main (int argc,
 
       // Keep track of where we are:
       if(nofBlocks>500 && blocknum%50==0){
-	cout<<"Calculating frequency correction for block "<<blocknum-startblock+1<<" out of "<<nofBlocks;
+	cout<<"Calculating frequency correction for block "<<blocknum-startblock+1<<" out of "<<nofBlocks<<endl;
       }	else if(nofBlocks<=500 && nofBlocks>20 && blocknum%10==0){
-	cout<<"Calculating frequency correction for block "<<blocknum-startblock+1<<" out of "<<nofBlocks;
+	cout<<"Calculating frequency correction for block "<<blocknum-startblock+1<<" out of "<<nofBlocks<<endl;
       } else if(nofBlocks <= 20){
 	cout<<"Calculating frequency correction for block "<<blocknum-startblock+1<<" out of "<<nofBlocks<<endl;
       }
@@ -540,11 +540,10 @@ int main (int argc,
 	  data.column(counter) = dr[i]->fft().column(j);
 	  
 	  counter++;
-	  //cout<<"weer een antenne toegevoegd..."<<endl;
 	}
       }
       Amplitudes = Amplitudes + casa::amplitude(data);
-      cout<< Amplitudes(nofBlocks/2,0)<<endl;
+      //cout<< Amplitudes(nofBlocks/2,0)<<endl;
     }
 
     for (uInt j=0; j<Amplitudes.ncolumn(); j++) {
@@ -565,14 +564,14 @@ int main (int argc,
       // Keep track of where we are:
       if(nofBlocks>500 && blocknum%50==0){
 	t3 =  time(NULL);
-	int timeleft = (int)(1.*(t3-t2)/(blocknum-startblock+1)*(nofBlocks-(blocknum-startblock+1)));
+	int timeleft = (int)(1.*(((t3-t2)/(blocknum-startblock+1))*(nofBlocks-(blocknum-startblock)+1)));
 	cout<<"Processing block "<<blocknum-startblock+1<<" out of "<<nofBlocks;
 	cout<<". Estimated time left: "<<timeleft/3600<<" hours, "<<(timeleft%3600)/60<<" minutes, and "<<timeleft%60<<" seconds."<<endl;
       }	else if(nofBlocks<=500 && nofBlocks>20 && blocknum%10==0){
 	t3 =  time(NULL);
-	int timeleft = (int)(1.*(t3-t2)/(blocknum-startblock+1)*(nofBlocks-(blocknum-startblock+1))/60);
+	int timeleft = (int)(1.*(((t3-t2)/(blocknum-startblock+1))*(nofBlocks-(blocknum-startblock)+1)));
 	cout<<"Processing block "<<blocknum-startblock+1<<" out of "<<nofBlocks;
-	cout<<". Estimated time left: "<<timeleft/3600<<" hours, "<<timeleft/60<<" minutes, and "<<timeleft<<" seconds."<<endl;
+	cout<<". Estimated time left: "<<timeleft/3600<<" hours, "<<(timeleft%3600)/60<<" minutes, and "<<timeleft%60<<" seconds."<<endl;
       } else if(nofBlocks <= 20){
 	cout<<"Processing block "<<blocknum-startblock+1<<" out of "<<nofBlocks<<endl;
       }
@@ -602,6 +601,49 @@ int main (int argc,
     
     
     // Remove RFI:
+    
+    /*
+    // For 090729, 11:38, even:
+    nrows = (nfreq*11)/513;  // Remove 5 frequency bins around peak frequency.
+    startrow = 205;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    startrow = 242;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    */
+    /*
+    // For 090729, 11:38, odd:
+    nrows = (nfreq*11)/513;  // Remove 5 frequency bins around peak frequency.
+    startrow = 205;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    nrows = (nfreq*21)/513;  // Remove 10 frequency bins around peak frequency.
+    startrow = 237;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    nrows = (nfreq*7)/513;  // Remove 3 frequency bins around peak frequency.
+    startrow = 279;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    nrows = (nfreq*5)/513;  // Remove 2 frequency bins around peak frequency.
+    startrow = 309;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    */
+    /*
+    // For 090729, 12:20, odd:
+    nrows = (nfreq*5)/513;  // Remove 2 frequency bins around peak frequency.
+    startrow = 208;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    startrow = 253;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    startrow = 279;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    nrows = (nfreq*13)/513;  // Remove 6 frequency bins around peak frequency.
+    startrow = 282;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    nrows = (nfreq*3)/513;  // Remove 1 frequency bins around peak frequency.
+    startrow = 408;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    */
+ 
+    /*
+    // For 090813, 11:01:
     nrows = (nfreq*5)/513;  // Remove 2 frequency bins around peak frequency.
 
     startrow = 253;
@@ -610,13 +652,18 @@ int main (int argc,
     data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
     startrow = 301;
     data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-    
+        
     nrows = (nfreq*3)/513;  // Remove 1 frequency bin around peak frequency.
     startrow = 338;
     data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
     startrow = 342;
     data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
- 
+    startrow = 349;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    startrow = 369;
+    data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+    */
+    
     data = data / AmplitudesC;
     skymapper.processData(data);
     
