@@ -42,7 +42,7 @@ endif
 
 echo "-- Add the LOFAR executables to the path"
 
-set path = ( $LOFARSOFT/release/bin $path )
+set path = ( $LOFARSOFT/release/bin $LOFARSOFT/release/share/pulsar/bin $path )
 
 
 ##______________________________________________________________________________
@@ -50,15 +50,15 @@ set path = ( $LOFARSOFT/release/bin $path )
 
 if ( "${SYSTEM_NAME}" == "Darwin" ) then
   if ($?DYLD_LIBRARY_PATH) then
-    setenv DYLD_LIBRARY_PATH ${LOFARSOFT}/release/lib:${DYLD_LIBRARY_PATH}
+    setenv DYLD_LIBRARY_PATH ${LOFARSOFT}/release/lib:${LOFARSOFT}/release/share/pulsar/lib:${DYLD_LIBRARY_PATH}
   else
-    setenv DYLD_LIBRARY_PATH ${LOFARSOFT}/release/lib
+    setenv DYLD_LIBRARY_PATH ${LOFARSOFT}/release/lib:${LOFARSOFT}/release/share/pulsar/lib
   endif
 else 
   if ($?LD_LIBRARY_PATH) then
-    setenv LD_LIBRARY_PATH ${LOFARSOFT}/release/lib:${LD_LIBRARY_PATH}
+    setenv LD_LIBRARY_PATH ${LOFARSOFT}/release/lib:${LOFARSOFT}/release/share/pulsar/lib:${LD_LIBRARY_PATH}
   else
-    setenv LD_LIBRARY_PATH ${LOFARSOFT}/release/lib
+    setenv LD_LIBRARY_PATH ${LOFARSOFT}/release/lib:${LOFARSOFT}/release/share/pulsar/lib
   endif
 endif
 
@@ -72,10 +72,10 @@ echo "-- Add the Python libraries to the existing search path"
 
 if ($?PYTHONPATH) then
    if ( $PYTHONPATH != $LOFARSOFT/release/lib ) then   
-      setenv PYTHONPATH ${LOFARSOFT}/release/lib/python:${PYTHONPATH}
+      setenv PYTHONPATH ${LOFARSOFT}/release/lib/python:${LOFARSOFT}/release/share/pulsar/bin:${PYTHONPATH}
    endif
 else 
-   setenv PYTHONPATH ${LOFARSOFT}/release/lib/python
+   setenv PYTHONPATH ${LOFARSOFT}/release/lib/python:${LOFARSOFT}/release/share/pulsar/bin
 endif
 
 foreach PY_VERSION (2.6 2.5 2.4) 
@@ -108,6 +108,24 @@ end
 if ($?AIPSPATH) then
     setenv AIPSPATH ${LOFARSOFT}
 endif
+
+#############################################################################
+#
+#  Define the Pulsar software environment variables
+#
+#############################################################################
+
+if ($?TEMPO) then
+   echo "-- Warning, resetting your TEMPO environment variable from:"
+   echo "           $TEMPO to ${LOFARSOFT}/release/share/pulsar/bin"
+endif
+setenv TEMPO ${LOFARSOFT}/release/share/pulsar/bin
+
+if ($?PRESTO) then
+   echo "-- Warning, resetting your PRESTO environment variable from:"
+   echo "           $PRESTO to ${LOFARSOFT}/release/share/pulsar/bin"
+endif
+setenv PRESTO ${LOFARSOFT}/release/share/pulsar/bin
 
 #############################################################################
 #                    Finished configuration                                 #  

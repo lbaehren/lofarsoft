@@ -36,24 +36,24 @@ else  # only execute the following if LOFARSOFT is set
 ##______________________________________________________________________________
 ##  Add the LOFAR executables to the path
 
-export PATH=$LOFARSOFT/release/bin:$PATH
+export PATH=$LOFARSOFT/release/bin:$LOFARSOFT/release/share/pulsar/bin:$PATH
 
 ##______________________________________________________________________________
 ##  Add the location of the libraries
 
 if [ "$SYSTEM_NAME" == "Darwin" ] ; then
-    export DYLD_LIBRARY_PATH=$LOFARSOFT/release/lib:$DYLD_LIBRARY_PATH
+    export DYLD_LIBRARY_PATH=$LOFARSOFT/release/lib:$LOFARSOFT/release/share/pulsar/lib:$DYLD_LIBRARY_PATH
 else 
-    export LD_LIBRARY_PATH=$LOFARSOFT/release/lib:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=$LOFARSOFT/release/lib:$LOFARSOFT/release/share/pulsar/lib:$LD_LIBRARY_PATH
 fi
 
 ##______________________________________________________________________________
 ## Add the Python libraries to the existing search path
 
 if test -z "$PYTHONPATH" ; then
-  export PYTHONPATH=$LOFARSOFT/release/lib/python
+  export PYTHONPATH=$LOFARSOFT/release/lib/python:$LOFARSOFT/release/share/pulsar/bin
 else
-  export PYTHONPATH=$LOFARSOFT/release/lib/python:$PYTHONPATH
+  export PYTHONPATH=$LOFARSOFT/release/lib/python:$LOFARSOFT/release/share/pulsar/bin:$PYTHONPATH
 fi
 
 for PY_VERSION in 2.6 2.5 2.4 
@@ -83,6 +83,21 @@ for PY_VERSION in 2.6 2.5 2.4
 if test -z "$AIPSPATH" ; then
   export AIPSPATH=$LOFARSOFT
 fi
+
+##______________________________________________________________________________
+## Define the Pulsar software environment variables
+
+if test ! -z "$TEMPO" ; then
+  echo "-- Warning, resetting your TEMPO environment variable from:"
+  echo "           $TEMPO to ${LOFARSOFT}/release/share/pulsar/bin"
+fi
+export TEMPO=${LOFARSOFT}/release/share/pulsar/bin
+
+if test ! -z "$PRESTO" ; then
+  echo "-- Warning, resetting your PRESTO environment variable from:"
+  echo "           $PRESTO to ${LOFARSOFT}/release/share/pulsar/bin"
+fi
+export TEMPO=${LOFARSOFT}/release/share/pulsar/bin
 
 #############################################################################
 #                    Finished configuration                                 #  
