@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id:: cccheck.cc 2009-07-02 swelles                                   $ |
+ | $id:: cccheck.cc 2009-07-02 swelles                                   $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2009                                                    *
@@ -62,8 +62,8 @@ int ccmaker (string const &infile,
 	     string const &outfile)
 {
   int nofFailedTests     = 0;
-  LopesEventIn *dr;
-  dr = new LopesEventIn(infile);
+  CR::LopesEventIn *dr;
+  dr = new CR::LopesEventIn(infile);
   Matrix<DComplex> fftdata = dr->calfft();
   
   

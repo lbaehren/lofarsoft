@@ -4,7 +4,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2009                                                    *
- *   Sander ter Veen s.terveen@astro.ru.nl)  			                       *
+ *   Sander ter Veen s.terveen@astro.ru.nl)  			           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -60,65 +60,70 @@ using CR::SimplePlot;
   \return nofFailedTests --  The number of failed tests encountered within this
           function (no tests implemented).
 */
-int ccmaker(string const &infile1, string const &infile2, string const &outfile, int const &blocksize, int const &offset1, int zoom=40)//, int const &offset2)
+int ccmaker (string const &infile1,
+	     string const &infile2,
+	     string const &outfile,
+	     int const &blocksize,
+	     int const &offset1,
+	     int zoom=40)//, int const &offset2)
 {
-	int nofFailedTests     = 0;
-	LOFAR_TBB *dr1;
-	LOFAR_TBB *dr2;
-	dr1 = new LOFAR_TBB(infile1,blocksize);
-	dr2 = new LOFAR_TBB(infile2,blocksize);
-	//second
-	int start1 = dr1->sample_number()[0];
-	dr1->setBlock(offset1);
-	int start2 = dr2->sample_number()[0];
-	int offset2=offset1;//-(start2-start1)/blocksize;
-	int difference=start1-start2;
-	dr2->setBlock(offset2);
-	std::cout <<"fx()[222] before shift"<< dr2->fx().row(0)[222] << std::endl;
-	dr2->setShift(difference); //If the shifts are not the same they probably are allready set.
-	//if(difference > blocksize/2) { difference-=blocksize; }
-	std::cout << " start1 " << start1 <<" ; start2 " << start2 << " ; offset1 " << offset1 << " ; offset2 " << offset2 << " ; difference " << difference << "\n";
-	
-	Matrix<DComplex> fftdata1 = dr1->calfft();
-	fftdata1(0,0)=DComplex(0,0);
-	std::cout << fftdata1(0,0);
-	dr2->setBlock(offset2);
-	std::cout <<"fx()[222] after shift" << dr2->fx().row(0)[222] << std::endl;
-	Matrix<DComplex> fftdata2 = dr2->calfft();
-	fftdata2(0,0)=DComplex(0,0);
-	std::cout << fftdata2(0,0);
-	Vector<DComplex> vecdata;
-	vecdata = fftdata1.column(0) * conj(fftdata2.column(0));
-	
-	/*	std::cout <<"length of vecdata = " << vecdata.shape() << "\t" <<
-	  "length of fftdata.column(0) = " << fftdata.column(0).shape() << "\t" <<
-	  "size of fftdata = " << fftdata.shape() << endl;
-	*/	
-	Vector<Double> ccdata;
-	
-	
-	ccdata = dr1->invfft(vecdata);
-	Vector<Double> xvals;
-	xvals = dr1->timeValues();
-	
-	Vector<Double> empty;
-	int timesteps =zoom;//xvals.shape()[0];
-	Vector<Double> xx(timesteps);
-	Vector<Double> yy(timesteps);
-	
-	int startcounting = (int(ccdata.shape()[0]-timesteps)/2);
-	for (int i=0; i < timesteps; i++){
-		xx[i] = xvals[i+startcounting]-(offset1+0.5)*blocksize*0.000000005;
-		yy[i] = ccdata[i+startcounting];
-	}
-	std::cout << "x_values = " << xx << std::endl;
-	std::cout << "y_values_" << offset1 << " = " << yy << std::endl;
-	SimplePlot myplotter;
-	std::string shortinfile1(infile1,39,11);
-	std::string shortinfile2(infile2,39,11);
-	std::string title = "correlation between " + shortinfile1 + " and \n" + shortinfile2;
-	myplotter.quickPlot(outfile, xx, yy, empty, empty, "time-displacement (s)", "correlation", title);
- /*newObject.quickPlot("tSimplePlot-line.ps", xval, yval, empty, empty,
+  int nofFailedTests     = 0;
+  CR::LOFAR_TBB *dr1;
+  CR::LOFAR_TBB *dr2;
+  dr1 = new CR::LOFAR_TBB(infile1,blocksize);
+  dr2 = new CR::LOFAR_TBB(infile2,blocksize);
+  //second
+  int start1 = dr1->sample_number()[0];
+  dr1->setBlock(offset1);
+  int start2 = dr2->sample_number()[0];
+  int offset2=offset1;//-(start2-start1)/blocksize;
+  int difference=start1-start2;
+  dr2->setBlock(offset2);
+  std::cout <<"fx()[222] before shift"<< dr2->fx().row(0)[222] << std::endl;
+  dr2->setShift(difference); //If the shifts are not the same they probably are allready set.
+  //if(difference > blocksize/2) { difference-=blocksize; }
+  std::cout << " start1 " << start1 <<" ; start2 " << start2 << " ; offset1 " << offset1 << " ; offset2 " << offset2 << " ; difference " << difference << "\n";
+  
+  Matrix<DComplex> fftdata1 = dr1->calfft();
+  fftdata1(0,0)=DComplex(0,0);
+  std::cout << fftdata1(0,0);
+  dr2->setBlock(offset2);
+  std::cout <<"fx()[222] after shift" << dr2->fx().row(0)[222] << std::endl;
+  Matrix<DComplex> fftdata2 = dr2->calfft();
+  fftdata2(0,0)=DComplex(0,0);
+  std::cout << fftdata2(0,0);
+  Vector<DComplex> vecdata;
+  vecdata = fftdata1.column(0) * conj(fftdata2.column(0));
+  
+  /*	std::cout <<"length of vecdata = " << vecdata.shape() << "\t" <<
+    "length of fftdata.column(0) = " << fftdata.column(0).shape() << "\t" <<
+    "size of fftdata = " << fftdata.shape() << endl;
+  */	
+  Vector<Double> ccdata;
+  
+  
+  ccdata = dr1->invfft(vecdata);
+  Vector<Double> xvals;
+  xvals = dr1->timeValues();
+  
+  Vector<Double> empty;
+  int timesteps =zoom;//xvals.shape()[0];
+  Vector<Double> xx(timesteps);
+  Vector<Double> yy(timesteps);
+  
+  int startcounting = (int(ccdata.shape()[0]-timesteps)/2);
+  for (int i=0; i < timesteps; i++){
+    xx[i] = xvals[i+startcounting]-(offset1+0.5)*blocksize*0.000000005;
+    yy[i] = ccdata[i+startcounting];
+  }
+  std::cout << "x_values = " << xx << std::endl;
+  std::cout << "y_values_" << offset1 << " = " << yy << std::endl;
+  SimplePlot myplotter;
+  std::string shortinfile1(infile1,39,11);
+  std::string shortinfile2(infile2,39,11);
+  std::string title = "correlation between " + shortinfile1 + " and \n" + shortinfile2;
+  myplotter.quickPlot(outfile, xx, yy, empty, empty, "time-displacement (s)", "correlation", title);
+  /*newObject.quickPlot("tSimplePlot-line.ps", xval, yval, empty, empty,
     			"X-axis", "Y-Axis", "plotting-test with lines",
     			4, True, 1, False, False, True);
 */

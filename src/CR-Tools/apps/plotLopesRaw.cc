@@ -1,6 +1,7 @@
 #include<sstream>
 
 #include <Analysis/analyseLOPESevent2.h>
+#include <Display/SimplePlot.h>
 
 using CR::analyseLOPESevent2;
 using CR::LopesEventIn;
@@ -62,10 +63,10 @@ int main(int argc, char* argv[])
 	}
 	plotname.append("-raw.ps");
 
-	LopesEventIn event(argv[c]);
+	CR::LopesEventIn event(argv[c]);
 	cout<< "Generating plot "<<plotname<<endl;
 
-	SimplePlot plotter;        			// define plotter
+	CR::SimplePlot plotter;        			// define plotter
         Vector<Double> xaxis;      			// values for plot
         double xmax,xmin,ymin=0,ymax=0;               	// Plotrange
 	Matrix<Double> yValues;                   	// y-values
