@@ -263,14 +263,19 @@ namespace CR {  //  Namespace CR -- begin
       return timeJDR_;
     }
     
-    uint&   timeJDR(uint in)
-      {timeJDR_ = in;   return timeJDR_;}
+    uint&   timeJDR(uint in) {
+      timeJDR_ = in;
+      return timeJDR_;
+    }
     
-    uint&   timeTL()
-      {return timeTL_;}
+    uint&   timeTL() {
+      return timeTL_;
+    }
     
-    uint&   timeTL(uint in)
-      {timeTL_ = in;    return timeTL_;}
+    uint&   timeTL(uint in) {
+      timeTL_ = in;
+      return timeTL_;
+    }
     
     /*!
       \brief Get the type of the recorded event.
@@ -304,71 +309,49 @@ namespace CR {  //  Namespace CR -- begin
     uint&   timeLTL(uint in)
       {timeLTL_ = in;   return timeLTL_;}
     
-    /*!
-      \brief Set/Get the observatory number
-    */
+    //! Set/Get the observatory number
     uint&   observatory()
       {return observatory_;}
     
     uint&   observatory(uint in)
       {observatory_ = in;   return observatory_;}
     
-    /*!
-      \brief Open a Lopes event file and read its header
-    */
+    //! Open a Lopes event file and read its header
     void    readHeader(const char* name);
     
-    /*!
-      \brief Create a Lopes event file
-    */
+    //! Create a Lopes event file
     void createEvent (const char* name,
 		      fstream* handle);
     
-    /*!
-      \brief Open an event file
-    */
+    //! Open an event file
     void openEvent (const char* name,
 		    fstream* handle,
 		    int* handle_beg,
 		    int* handle_end);
     
-    /*!
-      \brief Start reading a header at a filehandle
-    */
+    //! Start reading a header at a filehandle
     void    readHeaderHere(fstream* handle);
     
-    /*!
-      \brief Start reading file contents at a filehandle
-    */
+    //! Start reading file contents at a filehandle
     void readContentsHere (fstream* handle,
 			   int* handle_beg,
 			   int* handle_end);
     
-    /*!
-      \brief Write a lopes event file
-    */
+    //! Write a lopes event file
     void writeEvent(const char* name);
     
-    /*!
-      \brief Open a Lopes event file and write its header
-    */
+    //! Open a Lopes event file and write its header
     void writeHeader(const char* name);
     
-    /*!
-      \brief Start writing a header at a filehandle
-    */
+    //! Start writing a header at a filehandle
     void writeHeaderHere(fstream* handle,
 			 int* handle_beg,
 			 int* handle_end);
     
-    /*!
-      \brief Write all channel data at a filehandle
-    */
+    //! Write all channel data at a filehandle
     void    writeContentsHere(fstream* handle);
     
-    /*!
-      \brief Write channel data at a filehandle
-    */
+    //! Write channel data at a filehandle
     void    writeChannelHere(fstream* handle, uint c_num);
     
     Data*   dataSetById(uint id);
@@ -383,9 +366,7 @@ namespace CR {  //  Namespace CR -- begin
     
     // -- Summary to output stream ------------------------------------------------
     
-    /*!
-      \brief Summary of the data stored in the object (stdout)
-    */
+    //! Summary of the data stored in the object (stdout)
     void summary () {
       summary (std::cout);
     }
@@ -399,18 +380,10 @@ namespace CR {  //  Namespace CR -- begin
     
     // -- Functionality within the DataReader framework ---------------------------
     
-    /*!
-      \brief Get the raw time series after ADC
-      
-      For an LopesEvent object the lowest level of access to the data is slightly
-      different as is the case for e.g. ITSCapture: the recorded data are small
-      enough to completely fit into memory (and automatically held there after
-      creation of a new LopesEvent object). Instead of initiating another read
-      from the disk file, we here directly operate on the buffered data.
-      
-      \return fx -- Raw ADC time series, [Counts]
-    */
+    //! Get the raw time series after ADC
     Matrix<Double> fx ();  
+    //! Get the raw time series after ADC
+    void fx (Matrix<Double> & data);  
     
   protected:
     
@@ -442,9 +415,7 @@ namespace CR {  //  Namespace CR -- begin
     */
     void init ();
     
-    /*!
-      \brief Initialize the internal parameters
-    */
+    //! Initialize the internal parameters
     void init (const char* name);
   };
   

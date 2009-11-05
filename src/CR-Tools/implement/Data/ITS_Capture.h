@@ -193,6 +193,7 @@ class ITS_Capture : public DataReader {
     \return fx -- Raw ADC time series, [Counts]
   */
   Matrix<Double> fx ();
+  void fx (Matrix<Double> &data);
 
  private:
 

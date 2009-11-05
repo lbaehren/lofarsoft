@@ -187,7 +187,9 @@ namespace CR { // Namespace CR -- begin
               values for the selected data channels (dipoles).
     */
     casa::Matrix<double> fx ();
-    
+    //! Get a block of raw time-series data for the available data channels
+    void fx (casa::Matrix<double> &data);
+
     /*!
       \brief Set the record with the header information
       

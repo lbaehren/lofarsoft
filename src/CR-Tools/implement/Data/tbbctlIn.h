@@ -122,9 +122,7 @@ namespace CR { // Namespace CR -- begin
     
     // ------------------------------------------------------------- Construction
     
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     tbbctlIn ();
     
     /*!
@@ -135,10 +133,8 @@ namespace CR { // Namespace CR -- begin
     tbbctlIn(Vector<String> const &filenames);
 
     // -------------------------------------------------------------- Destruction
-    
-    /*!
-      \brief Destructor
-    */
+ 
+    //! Destructor
     ~tbbctlIn ();
     
     // ---------------------------------------------------------------- Operators
@@ -154,16 +150,11 @@ namespace CR { // Namespace CR -- begin
       return "tbbctlIn";
     }
 
-    /*!
-      \brief Provide a summary of the internal status
-    */
+    //! Provide a summary of the internal status
     inline void summary () {
       summary (std::cout);
     }
-
-    /*!
-      \brief Provide a summary of the internal status
-    */
+    //! Provide a summary of the internal status
     void summary (std::ostream &os);    
 
     // ------------------------------------------------------------------ Methods
@@ -183,6 +174,9 @@ namespace CR { // Namespace CR -- begin
     */
     Matrix<Double> fx();
 
+    //! Return the raw ADC time series, in ADC-counts
+    void fx(Matrix<Double> &data);
+
 
   protected:
     /*!
@@ -201,17 +195,11 @@ namespace CR { // Namespace CR -- begin
     */
     bool setHeaderRecord();
     
-    
   private:
         
-    /*!
-      \brief Unconditional deletion 
-    */
+    //! Unconditional deletion 
     void destroy(void);
-
-    /*!
-      \brief Initialization 
-    */
+    //! Initialization 
     void init ();
         
   };

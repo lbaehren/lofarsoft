@@ -597,14 +597,42 @@ namespace CR {  //  Namespace CR -- begin
     return status;
   }
   
-  //____________________________________________________________________________ fx
+  //_____________________________________________________________________________
+  //                                                                           fx
   
+  /*!
+    For an LopesEvent object the lowest level of access to the data is slightly
+    different as is the case for e.g. ITSCapture: the recorded data are small
+    enough to completely fit into memory (and automatically held there after
+    creation of a new LopesEvent object). Instead of initiating another read
+    from the disk file, we here directly operate on the buffered data.
+    
+    \return fx -- Raw ADC time series, [Counts]
+  */
   Matrix<Double> LopesEvent::fx ()
+  {
+    Matrix<Double> data (blocksize_p,
+			 DataReader::nofSelectedAntennas());
+    
+    LopesEvent::fx (data);
+    
+    return data;
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                           fx
+  
+  void LopesEvent::fx (Matrix<Double> &fx)
   {
     uint antenna (0);
     uint sample (0);
     uint nofSelectedAntennas (DataReader::nofSelectedAntennas());
-    Matrix<Double> fx (blocksize_p,nofSelectedAntennas);
+    casa::IPosition shape (blocksize_p,nofSelectedAntennas);
+
+    /* Check the shape of the array returning the data */
+    if (fx.shape() != shape) {
+      fx.resize(shape);
+    }
     
     /*
      * If data are extracted from the internal data array, the original stepping
@@ -622,8 +650,7 @@ namespace CR {  //  Namespace CR -- begin
 	fx(sample,antenna) = data->data(offset+sample);
       }
     }
-    
-    return fx;
+
   }
   
 }  //  Namespace CR -- end

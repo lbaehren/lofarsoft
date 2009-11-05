@@ -29,7 +29,7 @@ using CR::TestdataGenerator;
 /*!
   \file tTestdataGenerator.cc
 
-  \ingroup Data
+  \ingroup CR_Data
 
   \brief A collection of test routines for the TestdataGenerator class
  

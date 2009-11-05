@@ -29,11 +29,11 @@ using CR::SkymapOrientation;
 /*!
   \file tSkymapOrientation.cc
 
-  \ingroup Imaging
+  \ingroup CR_Imaging
 
   \brief A collection of test routines for the SkymapOrientation class
  
-  \author Lars Baehren
+  \author Lars B&auml;hren
  
   \date 2009/01/13
 */

@@ -146,28 +146,17 @@ namespace CR { // Namespace CR -- begin
     
     // -------------------------------------------------------------- Destruction
 
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     ~LopesEventIn();
     
     // ------------------------------------------------------------------ Methods
     
-    /*!
-      \brief Attach to a (another) lopes-eventfile
-      
-      \param filename -- name (incl. path) of the lopes-eventfile to be read.
-
-      \return ok -- True if successfull
-    */
-    Bool attachFile(String filename);
-
-    /*!
-      \brief return the raw ADC time series, in ADC-counts
-      
-      \return Matrix with the data
-    */
-    Matrix<Double> fx();
+    //! Attach to a (another) lopes-eventfile
+    Bool attachFile (String filename);
+    //! Return the raw ADC time series, in ADC-counts
+    Matrix<Double> fx ();
+    //! Return the raw ADC time series, in ADC-counts
+    void fx (Matrix<Double> &data);
     
     // --------------------------------------------------------------- Parameters
     
@@ -299,19 +288,11 @@ namespace CR { // Namespace CR -- begin
     
   private:
     
-    /*!
-      \brief Unconditional copying
-    */
+    //! Unconditional copying
     void copy (LopesEventIn const &other);
-    
-    /*!
-      \brief Unconditional deletion 
-    */
+    //! Unconditional deletion 
     void destroy(void);
-
-    /*!
-      \brief Initialization 
-    */
+    //! Initialization 
     void init ();
     
   };

@@ -216,23 +216,16 @@ class NDABeam : public DataReader {
 
   // -------------------------------------------------------------------- Methods
 
-  /*!
-    \brief Get the raw time series after ADC conversion
-    
-    \return fx -- Raw ADC time series, [Counts]
-  */
+  //! Get the raw time series after ADC conversion
   Matrix<Double> fx ();
-
+  //! Get the raw time series after ADC conversion
+  void fx (Matrix<Double> &data);
+  
  private:
-
-  /*!
-    \brief Unconditional copying
-  */
+  
+  //! Unconditional copying
   void copy (NDABeam const &other);
-
-  /*!
-    \brief Unconditional deletion 
-  */
+  //! Unconditional deletion 
   void destroy(void);
 
  protected:

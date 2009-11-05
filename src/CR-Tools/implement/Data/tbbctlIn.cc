@@ -333,22 +333,51 @@ namespace CR { // Namespace CR -- begin
     return True;
   };
 
-  // ------------------------------------------------------------------------- fx
+  //_______________________________________________________________________________
+  //                                                                             fx
 
-  Matrix<Double> tbbctlIn::fx () {
+  /*!
+    \return Matrix with the data, [sample,antenna]
+  */
+  Matrix<Double> tbbctlIn::fx ()
+  {
+    Matrix<Double> data (DataReader::blocksize(),
+			 DataReader::nofSelectedAntennas());
+    
+    tbbctlIn::fx (data);
+    
+    return data;
+  }
+  
+  //_______________________________________________________________________________
+  //                                                                             fx
+  
+  /*!
+    \retval Matrix with the data, [sample,antenna]
+  */
+  void tbbctlIn::fx (Matrix<Double> &data)
+  {
     uint antenna;
     uint startsample;
-    uint nofSelectedAntennas(DataReader::nofSelectedAntennas());
-    Matrix<Double> fx(DataReader::blocksize(),nofSelectedAntennas);
-    Matrix<Short> fx_short(DataReader::blocksize(),nofSelectedAntennas);
+    casa::IPosition shape (2,
+			   DataReader::blocksize(),
+			   DataReader::nofSelectedAntennas());
+    uint nofSelectedAntennas (DataReader::nofSelectedAntennas());
+    Matrix<Short> fx_short(shape);
     
+    /* Check the shape of the array returning the data */
+    if (data.shape() != shape) {
+      data.resize(shape);
+    }
+    
+    /* Retrieve the data */
     for (antenna=0; antenna<nofSelectedAntennas; antenna++) {
       startsample = iterator_p[selectedAntennas_p(antenna)].position();
       fx_short.column(antenna) = channeldata_p.column(selectedAntennas_p(antenna))(Slice(startsample,DataReader::blocksize()));
     };
-    convertArray(fx,fx_short);
-    
-    return fx;
-  }
 
+    /* Convert the type of the array values */
+    convertArray(data,fx_short);
+  }
+  
 } // Namespace CR -- end

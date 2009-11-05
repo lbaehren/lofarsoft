@@ -100,6 +100,11 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
+  /*!
+    \param filename -- name (incl. path) of the lopes-eventfile to be read.
+    
+    \return ok -- True if successfull
+  */
   Bool LopesEventIn::attachFile(String filename){
     int i;
     uint ui,tmpchan,tmplen;
@@ -242,23 +247,49 @@ namespace CR { // Namespace CR -- begin
     }; 
     return true;
   };
-  
-  
+
+  //_____________________________________________________________________________
+  //                                                                           fx
+
+  /*!
+    \return Matrix with the data, [sample,antenna]
+  */
   Matrix<Double> LopesEventIn::fx ()
+  {
+    Matrix<Double> data (DataReader::blocksize(),
+			 DataReader::nofSelectedAntennas());
+
+    LopesEventIn::fx (data);
+
+    return data;
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                           fx
+  
+  /*!
+    \retval Matrix with the data, [sample,antenna]
+  */
+  void LopesEventIn::fx (Matrix<Double> &data)
   {
     uint antenna;
     uint startsample;
-    uint nofSelectedAntennas(DataReader::nofSelectedAntennas());
-    Matrix<Double> fx(DataReader::blocksize(),nofSelectedAntennas);
-    Matrix<Short> fx_short(DataReader::blocksize(),nofSelectedAntennas);
+    casa::IPosition shape (2,
+			   DataReader::blocksize(),
+			   DataReader::nofSelectedAntennas());
+    uint nofSelectedAntennas (DataReader::nofSelectedAntennas());
+    Matrix<Short> fx_short(shape);
+    
+    /* Check the shape of the array returning the data */
+    if (data.shape() != shape) {
+      data.resize(shape);
+    }
     
     for (antenna=0; antenna<nofSelectedAntennas; antenna++) {
       startsample = iterator_p[selectedAntennas_p(antenna)].position();
       fx_short.column(antenna) = channeldata_p.column(selectedAntennas_p(antenna))(Slice(startsample,DataReader::blocksize()));
     };
-    convertArray(fx,fx_short);
-    
-    return fx;
+    convertArray(data,fx_short);
   }
   
 

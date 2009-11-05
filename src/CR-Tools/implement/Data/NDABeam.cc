@@ -193,17 +193,40 @@ bool NDABeam::setStreams ()
   return status;
 }
 
-// --------------------------------------------------------------------------- fx
+//_______________________________________________________________________________
+//                                                                             fx
 
+/*!
+  \return fx -- Raw ADC time series, [Counts]
+*/
 Matrix<Double> NDABeam::fx ()
+{
+  Matrix<Double> data (blocksize_p,
+		       DataReader::nofSelectedAntennas());
+
+  NDABeam::fx (data);
+
+  return data;
+}
+
+//_______________________________________________________________________________
+//                                                                             fx
+
+/*!
+  \retval fx -- Raw ADC time series, [Counts]
+*/
+void NDABeam::fx (Matrix<Double> &data)
 {
   uint i (0);
   int errstat(0);
   short tmpData[blocksize_p];
   uint nofSelectedAntennas (DataReader::nofSelectedAntennas());
-  // Data vector returned after reading is completed
-  Matrix<Double> data (blocksize_p,
-		      nofSelectedAntennas);
+  casa::IPosition shape (2,blocksize_p,nofSelectedAntennas);
+
+  /* Check the shape of the array to return the result */
+  if (data.shape() != shape) {
+    data.resize(shape);
+  }
   
   // -----------------------------------------------------------------
   // Go to the position in the file, from to start reading data
@@ -233,6 +256,4 @@ Matrix<Double> NDABeam::fx ()
       data = 0.0;
     }
   }
-
-  return data;
 }
