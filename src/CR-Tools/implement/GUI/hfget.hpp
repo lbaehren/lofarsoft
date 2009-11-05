@@ -57,7 +57,7 @@ DEF_DATA_OID_NAME_FUNC_PYDEF_EXT( , FUNC  )
 
 //========================================================================
 
-
+//BOOST_PYTHON_FUNCTION_OVERLOADS(hRunningAverageVec_N,hRunningAverageVec<HNumber>,2,4)
 
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_listFunctions_overloads,listFunctions,0,2)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Data_printStatus_overloads,printStatus,0,1)
@@ -408,12 +408,22 @@ DEF_TEMPLATED_MEMBER_FUNCTIONS
 
 boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_id<mglData>());
 
- def("mglDataSet", mglDataSetVecN);
+ def("mglDataSetVecN", mglDataSetVecN);
  def("pytointptr",getPointerFromPythonObject);
  def("getptr", PyGetPtr);
  def("setDebug", setDebug);
  def("file_get_extension",file_get_extension);
  def("determine_filetype",determine_filetype);
+ def("hRunningAverage",hRunningAverageVec_N);
+ def("hRunningAverage",hRunningAverageVec_I);
+ def("hRunningAverage",hRunningAverageVec_C);
+ def("hWeights",hWeights);
+
+ enum_<hWEIGHTS>("hWEIGHTS")
+   .value("FLAT",WEIGHTS_FLAT)
+   .value("LINEAR",WEIGHTS_LINEAR)
+   .value("GAUSSIAN", WEIGHTS_GAUSSIAN);
+
 
 //    def("setwidget", setwidget);
 //    def("mytest", mytest);

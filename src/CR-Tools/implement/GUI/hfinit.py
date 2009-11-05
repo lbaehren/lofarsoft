@@ -15,10 +15,11 @@ def mem(size="rss"):
                         (os.getpid(), size)).read())
 
 #Extending mathgl to accept STL vectors 
-def mglDataSetVec(self,vec):
-    mglDataSet(self,vec)
 
-mglData.SetVec = mglDataSetVec
+#def mglDataSetVec(self,vec):
+#    mglDataSet(self,vec)
+
+mglData.SetVec = mglDataSetVecN
 
 
 mglGraphZB=0

@@ -439,7 +439,7 @@ class hfPlotPanel(hffunc):
             self.GraphObject.SetRanges(xmin,xmax,ymin,ymax)
             self.GraphObject.AdjustTicks("y")
         self.GraphObject.SetFunc(xfunc,yfunc,"");
-        self.GraphObject.SetTuneTicks(False,-1.2)
+        self.GraphObject.SetTuneTicks(True,-1.2)
         self.GraphObject.SetTickTemplX("%.4g")
         self.GraphObject.SetTickTemplY("%.4g")
         self.GraphObject.Axis("xy")

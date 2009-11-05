@@ -1,7 +1,7 @@
 //================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfprep.awk
 //================================================================================
-//     File was generated from - on Thu Oct 29 23:56:39 CET 2009
+//     File was generated from - on Thu Nov 05 20:54:25 CET 2009
 //--------------------------------------------------------------------------------
 //
 //#define DBG_MODE 0
@@ -53,6 +53,7 @@ using namespace std;
 #include <GUI/hfcast.h> 
 #include <GUI/hfget.h>
 #include <GUI/hffuncs.h>  
+#include <GUI/hfanalysis.h>  
 #include <crtools.h>
 
 #include "Data/LopesEventIn.h"
@@ -832,7 +833,12 @@ situation. I'd prefer a dynamic solution.
 
 A somewhat smarter preprocesser (like an (n)awk-script) could probably
 do that easily.
+
+AND IN FACT THAT IS WHAT FOLLOWS NOW ....
 */
+
+//The folllowing are definitions that will be picked up by an
+//awkscript and applied to the subsequent functions.
 
 //------------------------------------------------------------------------------
 //$DEFINE PREPROCESSOR
@@ -969,6 +975,48 @@ template <class T> void process(F_PARAMETERS) {
 }
 //$END Function -----------------------------------------------------------------
 }; DATAFUNC_CONSTRUCTOR(Neighbours,Sys,"Returns a list of names of all neighbour objects, first in To direction and the in FROM direction separated by an empty string.",STRING,false);
+
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: RunningAverage
+Info: Calculates the running averages over multiple samples of an vector using flat, linear, or Gaussian weighting 
+Type: NUMBER
+buffered: false
+updateable: false
+Par: RunningAverageWeightType, HString, "GAUSSIAN"
+Par: RunningAverageLength, HInteger, 7
+------------------------------------------------------------------------------*/
+class DataFunc_Math_RunningAverage : public ObjectFunctionClass { 
+public:
+DEFINE_PROCESS_CALLS
+ DataFunc_Math_RunningAverage (Data* dp) : ObjectFunctionClass(dp){	
+   dp->setUpdateable(false);		
+    setParameters();
+    startup();
+    getParameters();
+    }
+ ~DataFunc_Math_RunningAverage(){cleanup(); } 
+ 
+void setParameters(){
+SET_FUNC_PARAMETER_AWK(RunningAverageWeightType, HString, "GAUSSIAN");
+SET_FUNC_PARAMETER_AWK(RunningAverageLength, HInteger, 7);
+};
+ 
+template <class T> void process(F_PARAMETERS) {
+  GET_FUNC_PARAMETER_AWK(RunningAverageWeightType, HString, "GAUSSIAN");
+  GET_FUNC_PARAMETER_AWK(RunningAverageLength, HInteger, 7);
+  vector<T> tmpvec;
+  hWEIGHTS wtype=WEIGHTS_LINEAR;
+  if (RunningAverageWeightType=="GAUSSIAN") wtype=WEIGHTS_GAUSSIAN;
+  else if (RunningAverageWeightType=="FLAT") wtype=WEIGHTS_FLAT;
+  dp->getFirstFromVector(tmpvec,vs);
+  hRunningAverageVec(tmpvec,*vp, RunningAverageLength, wtype);
+}
+//$END Function -----------------------------------------------------------------
+}; DATAFUNC_CONSTRUCTOR(RunningAverage,Math,"Calculates the running averages over multiple samples of an vector using flat, linear, or Gaussian weighting",NUMBER,false);
+
 
 
 //$ITERATE MFUNC square,negative,ssqrt,abs,acos,asin,atan,ceil,cos,cosh,exp,floor,log,log10,sin,sinh,sqrt,tan,tanh
@@ -2651,10 +2699,18 @@ template <class T> void process(F_PARAMETERS) {
 
   address ncol;
 
-#define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) aipscol2stlvec(ary,*vp2,Antenna); else aipscol2stlvec(ary,*vp2,0); dp->noMod(); dp->put(*vp2)
+  #define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) aipscol2stlvec(ary,*vp2,Antenna); else aipscol2stlvec(ary,*vp2,0); dp->noMod(); dp->put(*vp2)
 
-  if (Datatype=="Time") {aipsvec2stlvec(drp->timeValues(),*vp);}
-  else if (Datatype=="Frequency") {aipsvec2stlvec(drp->frequencyValues(),*vp);}
+  //#define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) *vp2=ary.column(Antenna).tovec(); else *vp2=ary.column(0).tovec(); dp->noMod(); dp->put(*vp2)
+
+  if (Datatype=="Time") {
+    //    vector<HNumber>* vp2; *vp2 = drp->timeValues().tovec();
+    aipsvec2stlvec(drp->timeValues(),*vp);
+  }
+  else if (Datatype=="Frequency") {
+    //vector<HNumber>* vp2; *vp2 = drp->frequencyValues().tovec();
+    aipsvec2stlvec(drp->frequencyValues(),*vp);
+  }
   else if (Datatype=="Fx") {
     vector<HNumber>* vp2 = new vector<HNumber>;
     CasaMatrix<CasaNumber> ary=drp->fx();
@@ -2837,6 +2893,7 @@ void DataFunc_Library_publish(DataFuncLibraryClass* library_ptr){
 PUBLISH_OBJECT_FUNCTION(Sys,Unit);
 PUBLISH_OBJECT_FUNCTION(Sys,copy);
 PUBLISH_OBJECT_FUNCTION(Sys,Neighbours);
+PUBLISH_OBJECT_FUNCTION(Math,RunningAverage);
 PUBLISH_OBJECT_FUNCTION(Math,sqrt);
 PUBLISH_OBJECT_FUNCTION(Math,abs);
 PUBLISH_OBJECT_FUNCTION(Math,tan);

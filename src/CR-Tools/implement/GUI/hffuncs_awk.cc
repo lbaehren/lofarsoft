@@ -47,6 +47,7 @@ using namespace std;
 #include <GUI/hfcast.h> 
 #include <GUI/hfget.h>
 #include <GUI/hffuncs.h>  
+#include <GUI/hfanalysis.h>  
 #include <crtools.h>
 
 #include "Data/LopesEventIn.h"
@@ -811,7 +812,12 @@ situation. I'd prefer a dynamic solution.
 
 A somewhat smarter preprocesser (like an (n)awk-script) could probably
 do that easily.
+
+AND IN FACT THAT IS WHAT FOLLOWS NOW ....
 */
+
+//The folllowing are definitions that will be picked up by an
+//awkscript and applied to the subsequent functions.
 
 //------------------------------------------------------------------------------
 //$DEFINE PREPROCESSOR
@@ -897,6 +903,29 @@ $${
   copycast_vec<HString,T>(&vec,vp);
 }
 //$END Function -----------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//$NEW: Function
+/*------------------------------------------------------------------------------
+Lib: Math
+Name: RunningAverage
+Info: Calculates the running averages over multiple samples of an vector using flat, linear, or Gaussian weighting 
+Type: NUMBER
+buffered: false
+updateable: false
+Par: RunningAverageWeightType, HString, "GAUSSIAN"
+Par: RunningAverageLength, HInteger, 7
+------------------------------------------------------------------------------*/
+$$ { 
+  vector<T> tmpvec;
+  hWEIGHTS wtype=WEIGHTS_LINEAR;
+  if (RunningAverageWeightType=="GAUSSIAN") wtype=WEIGHTS_GAUSSIAN;
+  else if (RunningAverageWeightType=="FLAT") wtype=WEIGHTS_FLAT;
+  dp->getFirstFromVector(tmpvec,vs);
+  hRunningAverageVec(tmpvec,*vp, RunningAverageLength, wtype);
+}
+//$END Function -----------------------------------------------------------------
+
 
 
 //$ITERATE MFUNC square,negative,ssqrt,abs,acos,asin,atan,ceil,cos,cosh,exp,floor,log,log10,sin,sinh,sqrt,tan,tanh
@@ -1371,10 +1400,18 @@ $$ {
 
   address ncol;
 
-#define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) aipscol2stlvec(ary,*vp2,Antenna); else aipscol2stlvec(ary,*vp2,0); dp->noMod(); dp->put(*vp2)
+  #define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) aipscol2stlvec(ary,*vp2,Antenna); else aipscol2stlvec(ary,*vp2,0); dp->noMod(); dp->put(*vp2)
 
-  if (Datatype=="Time") {aipsvec2stlvec(drp->timeValues(),*vp);}
-  else if (Datatype=="Frequency") {aipsvec2stlvec(drp->frequencyValues(),*vp);}
+  //#define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) *vp2=ary.column(Antenna).tovec(); else *vp2=ary.column(0).tovec(); dp->noMod(); dp->put(*vp2)
+
+  if (Datatype=="Time") {
+    //    vector<HNumber>* vp2; *vp2 = drp->timeValues().tovec();
+    aipsvec2stlvec(drp->timeValues(),*vp);
+  }
+  else if (Datatype=="Frequency") {
+    //vector<HNumber>* vp2; *vp2 = drp->frequencyValues().tovec();
+    aipsvec2stlvec(drp->frequencyValues(),*vp);
+  }
   else if (Datatype=="Fx") {
     vector<HNumber>* vp2 = new vector<HNumber>;
     CasaMatrix<CasaNumber> ary=drp->fx();

@@ -1,4 +1,11 @@
+vf=list2vec((1.0,2,3,2.,1.,3.,4.,2.,1.))
+v=FloatVec()
+w=hWeights(3,hWEIGHTS.LINEAR)
+hRunningAverage(vf,v,3,hWEIGHTS.GAUSSIAN)
 
+vi1=list2vec((1,2,3,2,1,3,4,2,1))
+vi2=IntVec()
+hRunningAverage(vi1,vi2,3,hWEIGHTS.GAUSSIAN)
 
 
 d=Data("ROOT")

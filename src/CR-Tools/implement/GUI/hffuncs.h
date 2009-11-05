@@ -1,7 +1,7 @@
 //================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfprep.awk
 //================================================================================
-//     File was generated from - on Thu Oct 29 23:56:40 CET 2009
+//     File was generated from - on Thu Nov 05 20:54:26 CET 2009
 //--------------------------------------------------------------------------------
 //
 #ifndef HFFUNCS_H
