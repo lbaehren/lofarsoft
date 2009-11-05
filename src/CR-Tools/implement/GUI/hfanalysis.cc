@@ -218,10 +218,16 @@ void hRunningAverageVec(vector<T> &vec_in,vector<T> &vec_out, address wlen, hWEI
   return;
 } 
 
+/*!
+\brief Dummy function used for formal reasons by the GUI
+ */
 void hRunningAverageVec(vector<HString> &vec_in,vector<HString> &vec_out, address wlen, hWEIGHTS wtype) {
   vec_out=vec_in;
   MSG("hRunningAverageVec<HString>: not yet implemented");
 }
+/*!
+\brief Dummy function used for formal reasons by the GUI
+ */
 void hRunningAverageVec(vector<HPointer> &vec_in,vector<HPointer> &vec_out, address wlen, hWEIGHTS wtype) {
   vec_out=vec_in;
   MSG("hRunningAverageVec<HPointer>: not implemented");
