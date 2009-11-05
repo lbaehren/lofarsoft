@@ -1247,6 +1247,19 @@ namespace CR {  //  Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                 visibilities
   
+  /*!
+    \param fromCalFFT -- Cross-correlation spectra from the calibrated FFT data? If
+           set to <i>False</i>, the cross-correlation is carried out
+	   on the raw FFT.
+    
+    \return vis -- The visibilities
+
+    \todo The antenna combinations for the baselines must be provided as well;
+    either this information is stored internally, when computing the visibilities
+    or is computed on the fly when requested.
+    \todo We need an additional switch, to include/exclude the auto-correlation
+    products (this feature is required when passing data to the MSSimulator).
+  */
   Matrix<DComplex> DataReader::visibilities (Bool const &fromCalFFT)
   {
     int antenna1 (0);

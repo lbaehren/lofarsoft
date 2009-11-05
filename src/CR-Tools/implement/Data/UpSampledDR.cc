@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -163,14 +163,37 @@ namespace CR { // Namespace CR -- begin
     return true;
   };
 
-  // ------------------------------------------------------------------------- fx
+  //_____________________________________________________________________________
+  //                                                                           fx
+  
+  /*!
+    \return Matrix with the data
+  */
+  Matrix<Double> UpSampledDR::fx()
+  {
+    Matrix<Double> data;
 
-  Matrix<Double> UpSampledDR::fx() {
-    Matrix<Double> fx;
+    UpSampledDR::fx(data);
+
+    return data;
+  }
+
+  //_____________________________________________________________________________
+  //                                                                           fx
+
+  /*!
+    \retval Matrix with the data
+  */
+  void UpSampledDR::fx(Matrix<Double> &fx)
+  {
     try {
       uint nofSelectedAntennas(DataReader::nofSelectedAntennas());
       if (nofSelectedAntennas >0) {
-	uint antenna, sourceAnt, startsample, origSourceBlockNo, sourceBlockNo;
+	uint antenna (0);
+	uint sourceAnt (0);
+	uint startsample (0);
+	uint origSourceBlockNo (0);
+	uint sourceBlockNo (0);
 	uint sourceBlockSize=inpDR_p->blocksize(), sendBlocksize=DataReader::blocksize();
 	uint restoreBlocksize, restoreFFTlen, sendoffset;
 	Double SampleFreqRatio = DataReader::sampleFrequency()/inpDR_p->sampleFrequency();
@@ -203,7 +226,7 @@ namespace CR { // Namespace CR -- begin
 	if (sendoffset+sendBlocksize > restoreBlocksize) {
 	  cerr << "UpSampledDR::fx: " << "Inconsistent parameters!" <<endl;
 	  cerr << "                 " << "Requested block on source block boundary." << endl;
-	  return Matrix<Double>();	  
+	  fx = Matrix<Double>();	  
 	};
 #ifdef DEBUGGING_MESSAGES      
 	cout << "UpSampledDR::fx:" << " SampleFreqRatio: " << SampleFreqRatio 
@@ -267,9 +290,7 @@ namespace CR { // Namespace CR -- begin
       };
     } catch (AipsError x) {
       cerr << "UpSampledDR::fx: " << x.getMesg() << endl;
-      return Matrix<Double>();
     }; 
-    return fx;
   }
   
 

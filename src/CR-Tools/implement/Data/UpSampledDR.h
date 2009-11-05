@@ -111,16 +111,12 @@ namespace CR { // Namespace CR -- begin
     
     // ------------------------------------------------------------- Construction
     
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     UpSampledDR ();
         
     // -------------------------------------------------------------- Destruction
 
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     ~UpSampledDR ();
         
     // --------------------------------------------------------------- Parameters
@@ -134,9 +130,7 @@ namespace CR { // Namespace CR -- begin
       return "UpSampledDR";
     }
 
-    /*!
-      \brief Provide a summary of the internal status
-    */
+    //! Provide a summary of the internal status
     inline void summary () {
       summary (std::cout);
     }
@@ -164,18 +158,19 @@ namespace CR { // Namespace CR -- begin
       
       \return ok -- True if successfull
     */
-    Bool setup(DataReader *inputDR, double newSampleFrequency, 
-	       Bool UseCalFFT=True, SecondStagePipeline *inpPipeline=NULL);
+    Bool setup (DataReader *inputDR,
+		double newSampleFrequency, 
+		Bool UseCalFFT=True,
+		SecondStagePipeline *inpPipeline=NULL);
 
-    /*!
-      \brief return the upsampled data in the original units.
-      
-      \return Matrix with the data
-    */
+    //! Return the upsampled data in the original units.
     Matrix<Double> fx();
+    //! Return the upsampled data in the original units.
+    void fx(Matrix<Double> &data);
     
   protected:
 
+    //! Set up the data streams - nothing to do here.
     bool setStreams() { return true;};
 
     /*!
