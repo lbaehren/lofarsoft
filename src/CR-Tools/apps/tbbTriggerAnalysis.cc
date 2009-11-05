@@ -29,6 +29,13 @@
 
 #include <casa/Arrays/Matrix.h>
 
+// includes for program command-line options
+#include <boost/program_options.hpp>
+#include <boost/program_options/cmdline.hpp>
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/detail/cmdline.hpp>
+namespace bpo = boost::program_options;
+
 /* Namespace usage */
 using std::cout;
 using std::endl;
@@ -54,6 +61,8 @@ using CR::tbbTools;
  where <tt>filename</tt> points to a existing LOFAR TBB data set in HDF5
  format.
  */
+
+bool verbose = false;
 
 typedef struct 
   {
@@ -130,9 +139,11 @@ void addFPGATriggersToList(uint rcu, Vector<Int> &index, Vector<Int> &sum, Vecto
         //      cout << thisTrigger.itsRcuNr << ", " << thisTrigger.itsSampleNr << ", " << thisTrigger.itsSum << ", " << thisTrigger.itsNrSamples << ", "
         //     << thisTrigger.itsPeakValue << ", " << thisTrigger.itsValueBefore << endl;
       }
-      printf("%d %u %u %u %u %u %u %u %u\n", thisTrigger.itsRcuNr, thisTrigger.itsSeqNr, thisTrigger.itsTime, thisTrigger.itsSampleNr, thisTrigger.itsSum, 
-             thisTrigger.itsNrSamples, thisTrigger.itsPeakValue, thisTrigger.itsValueBefore, thisTrigger.itsValueAfter);
-      
+      if (verbose == true)
+      {
+        printf("%d %u %u %u %u %u %u %u %u\n", thisTrigger.itsRcuNr, thisTrigger.itsSeqNr, thisTrigger.itsTime, thisTrigger.itsSampleNr, thisTrigger.itsSum, 
+               thisTrigger.itsNrSamples, thisTrigger.itsPeakValue, thisTrigger.itsValueBefore, thisTrigger.itsValueAfter);
+      }
       fprintf(triggerOutputFile, "%d %u %u %u %u %u %u %u %u\n", thisTrigger.itsRcuNr, thisTrigger.itsSeqNr, thisTrigger.itsTime, thisTrigger.itsSampleNr, thisTrigger.itsSum, 
               thisTrigger.itsNrSamples, thisTrigger.itsPeakValue, thisTrigger.itsValueBefore, thisTrigger.itsValueAfter);
   
@@ -155,12 +166,10 @@ void addFPGATriggersToList(uint rcu, Vector<Int> &index, Vector<Int> &sum, Vecto
  \param filename -- Name of the HDF5 dataset to work with
  \param triggerList -- A list in which we output the trigger info
  */
-void triggerAnalysisOnFile (std::string const &filename, Vector<TBBTrigger> &triggerList, FILE * triggerOutputFile)
+void triggerAnalysisOnFile (std::string const &filename, uint blocksize, Vector<TBBTrigger> &triggerList, FILE * triggerOutputFile, uint threshold, uint start, uint stop, uint windowSize, uint rcuOffset)
 {
   cout << "Starting trigger analysis on file: " << filename << endl;
-  
-  uint blocksize (1024 * 1);
-  
+   
   // create object to handle the data
   LOFAR_TBB data (filename,
 		  blocksize);
@@ -183,8 +192,6 @@ void triggerAnalysisOnFile (std::string const &filename, Vector<TBBTrigger> &tri
 
   tbbTools * tbbToolsArray = new tbbTools[96];
   
-  //  tbbTools * mySecondTbbTools = new tbbTools;
-  //Vector<double> dataVector = data.column(0);
   Vector<int> index, sum, width, peak, meanval, afterval; // output for trigger function
   Vector<int> allindex, allsum, allwidth, allpeak, allmeanval, allafterval;
   uint nofAntennas = data.nofAntennas();
@@ -192,6 +199,13 @@ void triggerAnalysisOnFile (std::string const &filename, Vector<TBBTrigger> &tri
   for (uint block = 0; block < nofBlocks; block++) 
   {
     fx = data.fx();
+    if (block % (10 * blocksize / 102400) == 0)
+    {
+      cout << "Block = " << block << "; " << (100.0 * block / nofBlocks) << " %" << endl;
+      //    cout << tempArray[0] << " " << tempArray[1] << " " << tempArray[2] << "  " << tempArray[3] << endl;
+      //        cout << "Triggering...";
+    }
+    
     for (uint rcu = 0; rcu < nofAntennas; rcu++)
     {
       // get the data for the current block
@@ -203,23 +217,17 @@ void triggerAnalysisOnFile (std::string const &filename, Vector<TBBTrigger> &tri
 //      }
       
       bool reset = (block == 0) ? True : False;
-      if (block % 10 == 0)
-      {
-        cout << "Block = " << block << endl;
-        //    cout << tempArray[0] << " " << tempArray[1] << " " << tempArray[2] << "  " << tempArray[3] << endl;
-        cout << "Triggering...";
-      }
-      bool ok = tbbToolsArray[rcu].meanFPGAtrigger(tempArray, 4, 8, 5, 4096, 0, index, sum, width, peak, meanval, afterval, reset);
+      bool ok = tbbToolsArray[rcu].meanFPGAtrigger(tempArray, threshold, start, stop, windowSize, 0, index, sum, width, peak, meanval, afterval, reset);
       if (ok == False)
       {
         cerr << "Error doing TBBTools trigger algorithm!" << endl;
       }
       
       //bool ok2 = mySecondTbbTools->meanFPGAtrigger(tempArray, 3, 8, 5, 4096, 0, index, sum, width, peak, meanval, afterval, reset);
-      if (block % 10 == 0)
-      {
-        cout << "appending stuff...";
-      }
+//      if (block % 10 == 0)
+//      {
+//        cout << "appending stuff...";
+//      }
       if (index.shape()(0) > 0)
       {
         //  if (allindex.shape()(0) > 0)
@@ -237,14 +245,14 @@ void triggerAnalysisOnFile (std::string const &filename, Vector<TBBTrigger> &tri
         appendToVector(allmeanval, meanval);
         appendToVector(allafterval, afterval);
         
-        addFPGATriggersToList(rcu, index, sum, width, peak, meanval, afterval, triggerList, triggerOutputFile);
+        addFPGATriggersToList(rcu + rcuOffset, index, sum, width, peak, meanval, afterval, triggerList, triggerOutputFile);
       } // end if
     } // end loop over RCUs   
     
-    if (block % 10 == 0)
-    {
-      cout << "Done." << endl;
-    }
+//    if (block % 10 == 0)
+//    {
+//      cout << "Done." << endl;
+//    }
     data.nextBlock();
   } // end loop over data blocks
   
@@ -282,31 +290,137 @@ int main (int argc,
    Check if filename of the dataset is provided on the command line; if not
    exit the program.
    */
-  if (argc < 2) {
-    std::cerr << "[tbbTriggerAnalysis] Too few parameters!" << endl;
-    std::cerr << "" << endl;
-    std::cerr << "  tbbTriggerAnalysis <filename>" << endl;
-    std::cerr << "" << endl;
+  
+  std::string inputFilename; 
+  const char * outputFilename;
+  
+  uint blocksize = 102400;
+  uint threshold = 8;
+  uint start = 8;
+  uint stop = 5;
+  uint windowSize = 4096;
+  uint rcuOffset = 0;
+    
+  bpo::options_description desc ("[tbbTriggerAnalysis] Available command line options");
+  
+  desc.add_options ()
+  ("help,H", "Show help messages")
+  ("outfile,O",bpo::value<std::string>(), "Name of the output trigger-log file (default = ""outputTriggers.dat"") ")
+  ("infile,I", bpo::value<std::string>(), "Name of the input LOFAR_TBB HDF5 dataset (required)")
+  ("blocksize,B", bpo::value<int>(), "Blocksize used for reading HDF5 file (default = 102400)")
+  
+  ("threshold,T", bpo::value<int>(), "Threshold factor for triggering algorithm (default = 8)")
+  ("start,S", bpo::value<int>(), "Start condition for triggering (default = 8)")
+  ("stop,P", bpo::value<int>(), "Stop condition for triggering (default = 5)")
+  ("windowsize,W", bpo::value<int>(), "Trigger window-size (default = 4096)")
+  ("rcuoffset,R", bpo::value<int>(), "RCU number offset of first antenna in file. Used when processing multiple files (default = 0)")
+  ("verbose,V", "Verbose mode on, list triggers on standard output")
+  ;
+  
+  
+  bpo::variables_map vm;
+  bpo::store (bpo::parse_command_line(argc,argv,desc), vm);
+  
+  if (vm.count("help") || argc == 1)
+  {
+    cout << "\n" << desc << endl;
+    return 0;
+  }
+  
+  if (vm.count("verbose"))
+  {
+    verbose=true;
+  }
+  
+  if (vm.count("infile"))
+  {
+    inputFilename = vm["infile"].as<std::string>();
+  }
+  else
+  {
+    cerr << "Error: no input file given!" << endl;
+    cerr << desc << endl;
     return -1;
   }
   
-  std::string filename = argv[1];
- 
+  if (vm.count("outfile"))
+  {
+    std::string thisString = vm["outfile"].as<std::string>();
+    
+    outputFilename = thisString.c_str();
+    cout << "Output file set to: " << thisString << endl;
+  } else
+  {
+    cout << "Warning: no output file given. Using ""outputTriggers.dat"" by default" << endl;
+    outputFilename = "outputTriggers.dat";
+  }
+  
+  if (vm.count("blocksize"))
+  {
+    threshold = vm["blocksize"].as<int>();
+    cout << "Blocksize set to " << blocksize << endl;
+  } else
+  {
+    cout << "Blocksize not set; using blocksize = " << blocksize << " by default. " << endl;
+  }
+  
+  if (vm.count("threshold"))
+  {
+    threshold = vm["threshold"].as<int>();
+    cout << "Threshold set to " << threshold << endl;
+  } else
+  {
+    cout << "Threshold not set; using threshold = " << threshold << " by default. " << endl;
+  }
+  
+  if (vm.count("start"))
+  {
+    start = vm["start"].as<int>();
+    cout << "Start condition set to " << start << endl;
+  } else
+  {
+    cout << "Start condition not set; using start = " << start << " by default. " << endl;
+  }
+  
+  if (vm.count("stop"))
+  {
+    stop = vm["stop"].as<int>();
+    cout << "Stop condition set to " << stop << endl;
+  } else
+  {
+    cout << "Stop condition not set; using stop = " << stop << " by default. " << endl;
+  }
+  
+  if (vm.count("windowsize"))
+  {
+    windowSize = vm["windowsize"].as<int>();
+    cout << "Window size set to " << windowSize << endl;
+  } else
+  {
+    cout << "Window size not set; using windowSize = " << windowSize << " by default. " << endl;
+  }
+  
+  if (vm.count("rcuoffset"))
+  {
+    rcuOffset = vm["rcuoffset"].as<int>();
+    cout << "RCU number offset set to " << rcuOffset << endl;
+  } else
+  {
+    cout << "RCU number offset not set; using rcuOffset = " << rcuOffset << " by default. " << endl;
+  }
+// start analysis program
+  
   Vector<TBBTrigger> triggerList; // the result of the analysis is stored here.
-  char *outputFilename = "/Users/acorstanje/triggering/outputTriggers.dat";
+  //char *outputFilename = "/Users/acorstanje/triggering/outputTriggers.dat";
   FILE * triggerFile = fopen(outputFilename, "w"); // overwrites existing file...
   
-  triggerAnalysisOnFile(filename, triggerList, triggerFile);
+  triggerAnalysisOnFile(inputFilename, blocksize, triggerList, triggerFile, threshold, start, stop, windowSize, rcuOffset);
   fclose(triggerFile);
   
   uint nofAntennas = 96;
   uint triggerCount[nofAntennas];
   for (uint i=0; i<nofAntennas; i++)
   { triggerCount[i]=0; }
-  
- 
-  
-    
   
   return 0;
 }
