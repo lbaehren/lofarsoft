@@ -1600,6 +1600,8 @@ int main (int argc, char *argv[])
       CutSNR = 0, CutSNR_NS = 0;
       latMeanDist = 0, latMeanDist_NS = 0;
       latMeanDistCC = 0, latMeanDistCC_NS = 0;
+      rawPulsesMap = map <int,PulseProperties>();
+      calibPulsesMap = map <int,PulseProperties>();
 
       // Set observatory record to LOPES
       Record obsrec;
@@ -1612,7 +1614,7 @@ int main (int argc, char *argv[])
 
       // Structure containg necessary structures to create event display plot [added: mfranc]
       Vector <int>    antIDs;                          // vector containing antennas IDs
-      Matrix <double> antPos;                          // matrix containing antennas positions		 
+      Matrix <double> antPos;                          // matrix containing antennas positions
       map<int, PulseProperties>::iterator itBeg;       // iterator.begin() of pulsesMap
       map<int, PulseProperties>::iterator itEnd;       // iterator.end() if pulsesMap
 
@@ -1955,9 +1957,9 @@ int main (int argc, char *argv[])
       // fill information in array for raw pulses
       for ( map<int,PulseProperties>::iterator it=rawPulsesMap.begin() ; it != rawPulsesMap.end(); ++it) {
         // check if antenna number lies in valid range
-        if ( (it->second.antenna < 1) || (it->second.antenna >= MAX_NUM_ANTENNAS) ) {
+        if ( (it->second.antenna < 1) || (it->second.antenna >= MAX_NUM_ANTENNAS) )
           cerr << "\nWARNING: Antenna number in rawPulsesMap is out of range!" << endl;
-        } else {
+        else {
           *rawPulses[it->second.antenna-1] = it->second;
           // create branch name
           stringstream antNumber(""); 
@@ -1969,13 +1971,12 @@ int main (int argc, char *argv[])
         }
       }
 
-
       // fill information in array for calibrated pulses
       for ( map<int,PulseProperties>::iterator it=calibPulsesMap.begin() ; it != calibPulsesMap.end(); ++it) {
         // check if antenna number lies in valid range
-        if ( (it->second.antenna < 1) || (it->second.antenna >= MAX_NUM_ANTENNAS) ) {
+        if ( (it->second.antenna < 1) || (it->second.antenna >= MAX_NUM_ANTENNAS) )
           cerr << "\nWARNING: Antenna number in calibPulsesMap is out of range!" << endl;
-        } else {
+        else {
           int antenna = it->second.antenna;
           *calibPulses[antenna-1] = it->second;
 

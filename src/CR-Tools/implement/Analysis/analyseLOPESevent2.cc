@@ -199,10 +199,13 @@ namespace CR { // Namespace CR -- begin
       CompleteBeamPipe_p->setPolarization(Polarization);
       CompleteBeamPipe_p->setCalibrationMode(false);
 
-      // create antenna selection of correct polarization
+      // create antenna selection of correct polarization (for Steffen's lateral output)
       PolarizationAntennaSelection = AntennaSelection.copy();
       PolarizationAntennaSelection.set(true);
       CompleteBeamPipe_p->deselectectPolarization(beamformDR_p,PolarizationAntennaSelection);
+
+      // flag antennas with wrong polarization for normal analysis
+      CompleteBeamPipe_p->deselectectPolarization(beamformDR_p,AntennaSelection);
 
       // Plot the raw data, if desired
       if (PlotRawData) {
@@ -432,11 +435,6 @@ namespace CR { // Namespace CR -- begin
       CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
       CompleteBeamPipe_p->setSpectrumInterval(getSpectrumStart(),getSpectrumStop());
       CompleteBeamPipe_p->setCalibrationMode(true);
-
-      // create antenna selection of correct polarization
-      PolarizationAntennaSelection = AntennaSelection.copy();
-      PolarizationAntennaSelection.set(true);
-      CompleteBeamPipe_p->deselectectPolarization(lev_p,PolarizationAntennaSelection);
 
       // Plot the raw data, if desired
       if (PlotRawData)

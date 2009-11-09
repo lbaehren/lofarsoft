@@ -124,8 +124,7 @@ namespace CR { // Namespace CR -- begin
   {
     Vector<double> envelope(trace.size(),0);        // create vector to return envelope
 
-    try 
-    {
+    try {
       // get length of trace
       unsigned int tracelength = trace.size();
 
@@ -146,9 +145,8 @@ namespace CR { // Namespace CR -- begin
       // delete arrays
       delete[] envelopeTrace;
 
-    } catch (AipsError x) 
-    {
-        std::cerr << "CompletePipeline::envelope: " << x.getMesg() << std::endl;
+    } catch (AipsError x) {
+        cerr << "CompletePipeline::envelope: " << x.getMesg() << endl;
     }
 
     return envelope;
@@ -158,11 +156,9 @@ namespace CR { // Namespace CR -- begin
   void CompletePipeline::deselectectPolarization(DataReader *dr,
                                                  Vector<Bool> &antennaSelection)
   {
-    try 
-    {
+    try {
       // Deselect antennas not matching the polarization (except if it is ANY)
-      if (Polarization != "ANY")
-      {
+      if (Polarization != "ANY") {
         // get the date of the current event
         unsigned int date;
         dr->headerRecord().get("Date",date);
@@ -176,18 +172,14 @@ namespace CR { // Namespace CR -- begin
         bool first_message = true;        // for output
 
         // loop through all AntennaIDs and deselect the ones with the wrong polarization
-        for (unsigned int i=0; i<AntennaIDs.size(); i++)
-        {
+        for (unsigned int i=0; i<AntennaIDs.size(); ++i) {
           CTRead->GetData(date, AntennaIDs(i), "Polarization", &polarization_string);
-          if (polarization_string != static_cast<String>(Polarization))
-          {
+          if (polarization_string != static_cast<String>(Polarization)) {
             antennaSelection(i) = false;
 
             // produce output
-            if (verbose)
-            {
-              if (first_message)
-              {
+            if (verbose) {
+              if (first_message) {
                 cout << "Deselected antenna(s) without \"" << Polarization << "\" polarization: ";
                 first_message = false;
               }
@@ -198,10 +190,9 @@ namespace CR { // Namespace CR -- begin
         // write end of line if there was any output
         if ( (verbose) && (! first_message) ) cout << endl;
       } // if
-    } catch (AipsError x) 
-      {
-        std::cerr << "CompletePipeline::deselectectPolarization " << x.getMesg() << std::endl;
-      }
+    } catch (AipsError x) {
+        cerr << "CompletePipeline::deselectectPolarization " << x.getMesg() << endl;
+    }
   }
 
 
@@ -209,8 +200,7 @@ namespace CR { // Namespace CR -- begin
                                                               const int& upsampling_exp,
                                                               Vector<Bool> antennaSelection)
   {
-    try 
-    {
+    try {
       // Get the (not yet upsampled) fieldstrength of all antennas
       // (don't pass antennaSelection to get full number of columns in the Matrix)
       Matrix<Double> fieldstrength;
@@ -235,17 +225,15 @@ namespace CR { // Namespace CR -- begin
       }
 
       // check if upsampling is done for the first time
-      if (lastUpsamplingExponent == -1)
-      {
+      if (lastUpsamplingExponent == -1) {
         //create vector for flags showing which antenna is allready upsampled
         upsampledAntennas.assign(GetAntennaMask(dr).nelements(),false);        // at the moment there are no upsampled antennas
       } 
 
       // consistency check: number of elements in antennaSelction and upsampledAntennas must be equal
-      if ( upsampledAntennas.size() != antennaSelection.nelements() )
-      {
-        std::cerr << "CompletePipeline:getUpsampledFieldstrength: Number of elements in \"antennaSelection\" is inconsistent.\n" 
-                << std::endl;
+      if ( upsampledAntennas.size() != antennaSelection.nelements() ) {
+        cerr << "CompletePipeline:getUpsampledFieldstrength: Number of elements in \"antennaSelection\" is inconsistent.\n" 
+             << endl;
         return upFieldStrength.copy();
       }
 
@@ -277,18 +265,17 @@ namespace CR { // Namespace CR -- begin
       double* upsampledTrace = new double[tracelength * upsampled];
 
       // resize Matrix for upsampled traces if the last upsampling exponent is different from the new one
-      if (lastUpsamplingExponent != upsampling_exp)
-      {
+      if (lastUpsamplingExponent != upsampling_exp) {
         upFieldStrength.resize(tracelength * upsampled, antennaSelection.nelements(), false);        // no need to copy old values
         // set all traces initially to zero (not neccessary but makes the detection of errors easier)
-        upFieldStrength.set(0);        
-      } 
+        upFieldStrength.set(0);
+      }
 
       // do upsampling for each antenna in the todo-list
-      std::cout << "Upsampling the calibrated data by a factor of " << upsampled << " ...\nAntenna:" << flush;
+      cout << "Upsampling the calibrated data by a factor of " << upsampled << " ...\nAntenna:" << flush;
       for (unsigned int i = 0; i < antennaSelection.nelements(); i++) {
-        if (upsamplingToDo[i]){
-          std::cout << " " << i+1 << flush;
+        if (upsamplingToDo[i]) {
+          cout << " " << i+1 << flush;
            // copy the trace into the array
           for (unsigned int j = 0; j < tracelength; j++) {
             originalTrace[j] = fieldstrength.column(i)(j);
@@ -300,16 +287,16 @@ namespace CR { // Namespace CR -- begin
           double before = originalTrace[0];
 
           ZeroPaddingFFT(tracelength, originalTrace, upsampled-1, upsampledTrace);
- 
+
           double offset = before - originalTrace[0];
-        
-            // copy upsampled trace into Matrix with antenna traces and subtract offset
+
+          // copy upsampled trace into Matrix with antenna traces and subtract offset
           // remark: as there is no offset in the original data, this step should be avoided
           // as soon as upsampling without pedestal correction is available
           for (unsigned int j = 0; j < tracelength*upsampled; j++) {
             upFieldStrength.column(i)(j) = upsampledTrace[j] + offset;
           }
-          
+
           /*
             Remark: tried to fasten data transfer from the array to the Matrix
             but did not work because arrays are of typ float but not double; as
@@ -318,9 +305,9 @@ namespace CR { // Namespace CR -- begin
 
           // set flag, that data for this antenna are upsampled
           upsampledAntennas[i] = true;
-        } 
-      } 
-      std::cout << " ... done" << endl;
+        }
+      }
+      cout << " ... done" << endl;
 
       // set last upsampling exponent to current value
       lastUpsamplingExponent = upsampling_exp;
@@ -331,24 +318,22 @@ namespace CR { // Namespace CR -- begin
 
       // Return upsampled traces 
       return upFieldStrength.copy();
-    } catch (AipsError x) 
-      {
-        std::cerr << "CompletePipeline:getUpsampledFieldstrength: " << x.getMesg() << std::endl;
-      }; 
+    } catch (AipsError x) {
+        cerr << "CompletePipeline:getUpsampledFieldstrength: " << x.getMesg() << endl;
+    }
 
     // return dummy to avoid warning (this command is reached only in case of an error).
     return Matrix<Double>();
   }
 
- 
+
   Matrix<Double> CompletePipeline::getUpsampledFX (DataReader *dr,
                                                    const int& upsampling_exp,
                                                    Vector<Bool> antennaSelection,
                                                    const bool& offsetSubstraction,
                                                    const bool& voltage)
   {
-    try 
-    {
+    try {
       // Get the (not yet upsampled) raw data of all antennas
       Matrix<Double> rawData;
       if (voltage) rawData = dr->voltage();
@@ -356,8 +341,7 @@ namespace CR { // Namespace CR -- begin
 
       // substract pedastal in calibration mode
       if (calibrationMode)
-        for (unsigned int i=0; i < rawData.ncolumn(); i++)
-        {
+        for (unsigned int i=0; i < rawData.ncolumn(); i++) {
           double pedastal = mean(rawData.column(i));
           //cout << "Pedastal = " << pedastal << endl;
           for (unsigned int j = 0; j < rawData.column(i).size(); j++)
@@ -365,7 +349,8 @@ namespace CR { // Namespace CR -- begin
         }
 
       // check if upsampling shoud be done at all (if not, return not upsampled data)
-      if (upsampling_exp < 1) return rawData.copy(); 
+      if (upsampling_exp < 1)
+        return rawData.copy();
 
       // make antennaSelection unique, as casacore-Vectors are allways passed by reference
       antennaSelection.unique();
@@ -376,10 +361,9 @@ namespace CR { // Namespace CR -- begin
       }
 
       // consistency check: number of elements in antennaSelction and rawData must be equal
-      if ( rawData.ncolumn() != antennaSelection.nelements() )
-      {
-        std::cerr << "CompletePipeline:getUpsampledFX: Number of elements in \"antennaSelection\" is inconsistent.\n" 
-                << std::endl;
+      if ( rawData.ncolumn() != antennaSelection.nelements() ) {
+        cerr << "CompletePipeline:getUpsampledFX: Number of elements in \"antennaSelection\" is inconsistent.\n" 
+             << endl;
         return rawData.copy();
       }
 
@@ -397,36 +381,34 @@ namespace CR { // Namespace CR -- begin
       Matrix<Double> upData(tracelength * upsampled, antennaSelection.nelements(), 0);
 
       // do upsampling for each antenna in the antennaSelection
-      std::cout << "Upsampling the raw data by a factor of " << upsampled << " ...\nAntenna:" << flush;
-      for (unsigned int i = 0; i < antennaSelection.nelements(); i++) if (antennaSelection(i))
-      {
-        std::cout << " " << i+1 << flush;
-        // copy the trace into the array
-        for (unsigned int j = 0; j < tracelength; j++) 
-        {
-          originalTrace[j] = rawData.column(i)(j);
+      cout << "Upsampling the raw data by a factor of " << upsampled << " ...\nAntenna:" << flush;
+      for (unsigned int i = 0; i < antennaSelection.nelements(); i++) 
+        if (antennaSelection(i)) {
+          cout << " " << i+1 << flush;
+          // copy the trace into the array
+          for (unsigned int j = 0; j < tracelength; j++)
+            originalTrace[j] = rawData.column(i)(j);
+
+          // do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
+
+          // calcutlate Offset:
+          double before = originalTrace[0];
+
+          ZeroPaddingFFT(tracelength, originalTrace, upsampled-1, upsampledTrace);
+
+          double offset = before - originalTrace[0];
+
+          // copy upsampled trace into Matrix with antenna traces and subtract offset
+          // if no offset correction is wanted
+          // remember: ZeroPaddingFFT removes the offset automatically
+          if (offsetSubstraction)
+            for (unsigned int j = 0; j < tracelength*upsampled; j++)
+              upData.column(i)(j) = upsampledTrace[j];
+          else
+            for (unsigned int j = 0; j < tracelength*upsampled; j++)
+              upData.column(i)(j) = upsampledTrace[j] + offset;
         }
-
-        // do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
-
-        // calcutlate Offset:
-        double before = originalTrace[0];
-
-        ZeroPaddingFFT(tracelength, originalTrace, upsampled-1, upsampledTrace);
-
-        double offset = before - originalTrace[0];
-        
-        // copy upsampled trace into Matrix with antenna traces and subtract offset
-        // if no offset correction is wanted
-        // remember: ZeroPaddingFFT removes the offset automatically
-        if (offsetSubstraction)
-          for (unsigned int j = 0; j < tracelength*upsampled; j++)
-            upData.column(i)(j) = upsampledTrace[j];
-        else
-          for (unsigned int j = 0; j < tracelength*upsampled; j++)
-            upData.column(i)(j) = upsampledTrace[j] + offset;
-      } 
-      std::cout << " ... done" << endl;
+      cout << " ... done" << endl;
 
       // delete arrays
       delete[] originalTrace;
@@ -434,10 +416,9 @@ namespace CR { // Namespace CR -- begin
 
       // Return upsampled traces 
       return upData.copy();
-    } catch (AipsError x) 
-      {
-        std::cerr << "CompletePipeline:getUpsampledFX: " << x.getMesg() << std::endl;
-      }; 
+    } catch (AipsError x) {
+        cerr << "CompletePipeline:getUpsampledFX: " << x.getMesg() << endl;
+    }
 
     // return dummy to avoid warning (this command is reached only in case of an error).
     return Matrix<Double>();
@@ -448,10 +429,10 @@ namespace CR { // Namespace CR -- begin
   Vector<Double> CompletePipeline::getUpsampledTimeAxis (DataReader *dr,
                                                          const int& upsampling_exp)
   {
-    try 
-    {
+    try {
       // Check if upsampling shoud be done at all (if not, return not upsampled time axis)
-      if (upsampling_exp < 1) return static_cast< Vector<Double> >(dr->timeValues());
+      if (upsampling_exp < 1)
+        return static_cast< Vector<Double> >(dr->timeValues());
 
       // Check if upampling should be done be the same factor as last time
       // in this case, return the old values
@@ -474,12 +455,11 @@ namespace CR { // Namespace CR -- begin
       upTimeValues.resize(time_length*upsampled, false);
 
       // copy old values to the right place and fill space inbetween 
-      for (long int i = time_length-1; i >= 0; i--)
-      {
+      for (long int i = time_length-1; i >= 0; i--) {
         // move existing time value to the right place
         upTimeValues(i*upsampled) = timeaxis(i);
         // create new values
-        for (unsigned int j = 1; j < upsampled; j++) 
+        for (unsigned int j = 1; j < upsampled; j++)
           upTimeValues(i*upsampled+j) = upTimeValues(i*upsampled) + j*sampleTime;
       }
 
@@ -488,10 +468,9 @@ namespace CR { // Namespace CR -- begin
 
       // Return upsampled xaxis
       return upTimeValues.copy();
-    } catch (AipsError x) 
-      {
-        std::cerr << "CompletePipeline:getUpsampledTimeAxis: " << x.getMesg() << std::endl;
-      }; 
+    } catch (AipsError x) {
+        cerr << "CompletePipeline:getUpsampledTimeAxis: " << x.getMesg() << endl;
+    }
 
     // return dummy to avoid warning (this command is reached only in case of an error).
     return Vector<Double>();
@@ -503,7 +482,7 @@ namespace CR { // Namespace CR -- begin
     try {
       // check if plotStart is <= plotStop
       if (plotStop_p < plotStart_p) {
-        cerr << "CompletePipeline:calculatePlotRange: Error: plotStop_p is greater than plotStart_p!" << std::endl;
+        cerr << "CompletePipeline:calculatePlotRange: Error: plotStop_p is greater than plotStart_p!" << endl;
         return Slice(0,0);
       }
       unsigned int startsample = ntrue(xaxis<plotStart_p);     //number of elements smaller then starting value of plot range
@@ -511,14 +490,14 @@ namespace CR { // Namespace CR -- begin
 
       // check for consistency
       if (startsample >= xaxis.size())
-        cerr << "CompletePipeline:calculatePlotRange: plot start is too large!" << std::endl;
+        cerr << "CompletePipeline:calculatePlotRange: plot start is too large!" << endl;
       else if (startsample == stopsample)
-        cerr << "CompletePipeline:calculatePlotRange: plot range is too small!" << std::endl;
+        cerr << "CompletePipeline:calculatePlotRange: plot range is too small!" << endl;
 
       // create Slice with plotRange
       return Slice(startsample,(stopsample-startsample));
     } catch (AipsError x) {
-        cerr << "CompletePipeline:calculatePlotRange: " << x.getMesg() << std::endl;
+        cerr << "CompletePipeline:calculatePlotRange: " << x.getMesg() << endl;
     }
 
     // return dummy to avoid warning (this command is reached only in case of an error).
@@ -530,7 +509,7 @@ namespace CR { // Namespace CR -- begin
     try {
       // check if spectrumStart is <= spectrumStop
       if (spectrumStop_p < spectrumStart_p) {
-        cerr << "CompletePipeline:calculateSpectrumRange: Error: spectrumStop_p is greater than spectrumStart_p!" << std::endl;
+        cerr << "CompletePipeline:calculateSpectrumRange: Error: spectrumStop_p is greater than spectrumStart_p!" << endl;
         return Slice(0,0);
       }
       unsigned int startsample = ntrue(xaxis<spectrumStart_p);     //number of elements smaller then starting value
@@ -538,14 +517,14 @@ namespace CR { // Namespace CR -- begin
 
       // check for consistency
       if (startsample >= xaxis.size())
-        cerr << "CompletePipeline:calculateSpectrumRange: spectrum start is too large!" << std::endl;
+        cerr << "CompletePipeline:calculateSpectrumRange: spectrum start is too large!" << endl;
       else if (startsample == stopsample)
-        cerr << "CompletePipeline:calculateSpectrumRange: selected interval of the spectrum is too small!" << std::endl;
+        cerr << "CompletePipeline:calculateSpectrumRange: selected interval of the spectrum is too small!" << endl;
 
       // create Slice with range for plot
       return Slice(startsample,(stopsample-startsample));
     } catch (AipsError x) {
-        cerr << "CompletePipeline:calculateSpectrumRange: " << x.getMesg() << std::endl;
+        cerr << "CompletePipeline:calculateSpectrumRange: " << x.getMesg() << endl;
     }
 
     // return dummy to avoid warning (this command is reached only in case of an error).
@@ -558,7 +537,7 @@ namespace CR { // Namespace CR -- begin
     try {
       // check if plotStart is <= plotStop
       if (ccBeamcenter == 0.0) {
-        cerr << "CompletePipeline:calculateNoiseRange: Error: CC-beam did not converged !" << std::endl;
+        cerr << "CompletePipeline:calculateNoiseRange: Error: CC-beam did not converged !" << endl;
         return Slice(0,0);
       }
 
@@ -567,7 +546,7 @@ namespace CR { // Namespace CR -- begin
       int stopsample = ntrue(xaxis<ccBeamcenter-5*ccWindowWidth_p);
 
       if (startsample >= stopsample) {
-        cerr << "CompletePipeline:calculateNoiseRange: Error: range is too small!" << std::endl;
+        cerr << "CompletePipeline:calculateNoiseRange: Error: range is too small!" << endl;
         return Slice(0,0);
       }
 
@@ -580,7 +559,7 @@ namespace CR { // Namespace CR -- begin
       // create Slice with noiseRange
       return  Slice((startsample),(stopsample-startsample));
     } catch (AipsError x) {
-        cerr << "CompletePipeline:calculateNoiseRange: " << x.getMesg() << std::endl;
+        cerr << "CompletePipeline:calculateNoiseRange: " << x.getMesg() << endl;
     }
 
     // return dummy to avoid warning (this command is reached only in case of an error).
@@ -593,7 +572,7 @@ namespace CR { // Namespace CR -- begin
     try {
       // check if ccBeam has converged
       if (ccBeamcenter == 0.0) {
-        cerr << "CompletePipeline:calculateCCRange: Error: CC-beam did not converged !" << std::endl;
+        cerr << "CompletePipeline:calculateCCRange: Error: CC-beam did not converged !" << endl;
         return Slice(0,0);
       }
       //number of elements smaller then CC-center minus window size
@@ -604,7 +583,7 @@ namespace CR { // Namespace CR -- begin
       // create Slice with plotRangeNoise
       return Slice(startsample,(stopsample-startsample));
     } catch (AipsError x) {
-        cerr << "CompletePipeline:calculateCCRange: " << x.getMesg() << std::endl;
+        cerr << "CompletePipeline:calculateCCRange: " << x.getMesg() << endl;
     }
 
     // return dummy to avoid warning (this command is reached only in case of an error).
@@ -1219,7 +1198,7 @@ namespace CR { // Namespace CR -- begin
         plotlist.push_back(plotfilename);
       } // else
     } catch (AipsError x) {
-        cerr << "CompletePipeline:plotSpectra: " << x.getMesg() << std::endl;
+        cerr << "CompletePipeline:plotSpectra: " << x.getMesg() << endl;
     }
   }
 
