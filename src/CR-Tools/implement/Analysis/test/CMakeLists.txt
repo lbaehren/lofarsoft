@@ -259,14 +259,7 @@ if (CR_WITH_PLOTTING)
   ## compiler instructions
   add_executable (tStationBeam tStationBeam.cc)
   ## linker instructions
-  if (PLPLOT_LIBRARIES)
-    target_link_libraries (tStationBeam
-      cr
-      ${CASA_LIBRARIES}
-      ${PLPLOT_LIBRARIES}
-      ${X11_LIBRARIES}
-      )
-  endif (PLPLOT_LIBRARIES)
+  target_link_libraries (tStationBeam cr)
   if (APPLE)
     set_target_properties (tStationBeam
       PROPERTIES
