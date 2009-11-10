@@ -38,8 +38,9 @@
 #include <measures/Measures/MeasConvert.h>
 #include <measures/Measures/MeasFrame.h>
 
+/* CR-Tools headers */
 #include <Data/ObservationData.h>
-#include <Utilities/MConversions.h>
+#include <Coordinates/MConversions.h>
 
 using std::cout;
 using std::endl;

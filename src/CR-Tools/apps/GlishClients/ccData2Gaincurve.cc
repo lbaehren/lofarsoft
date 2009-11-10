@@ -18,8 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ccData2Gaincurve.cc,v 1.7 2007/05/02 08:14:14 bahren Exp $ */
-
 // C++ Standard library
 #include <stdlib.h>
 #include <iomanip>
