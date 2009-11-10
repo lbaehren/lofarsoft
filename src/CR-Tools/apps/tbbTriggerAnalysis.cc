@@ -107,19 +107,24 @@ template <class T> void appendToVector(casa::Vector<T>& first, casa::Vector<T> l
   }
 }
 
-void addFPGATriggersToList(uint rcu, Vector<Int> &index, Vector<Int> &sum, Vector<Int> &width, Vector<Int> &peak, 
+void addFPGATriggersToList(uint rcu, uint startTime, uint startSample, Vector<Int> &index, Vector<Int> &sum, Vector<Int> &width, Vector<Int> &peak, 
                            Vector<Int> &meanval, Vector<Int> &afterval, Vector<TBBTrigger> &listToAppend, FILE * triggerOutputFile)
 {
   Vector<TBBTrigger> newList;
   uint len = index.nelements();
   newList.resize(len, True);
+  uint samplingRate = 200000000; // hardcoded sampling rate, get it out of here...
   for(uint i = 0; i < len; i++)
   {
     TBBTrigger newTBBTrigger;
     newTBBTrigger.itsRcuNr = rcu;
     newTBBTrigger.itsSeqNr = index(i) / 1024;
-    newTBBTrigger.itsTime = index(i) / 200000000;
-    newTBBTrigger.itsSampleNr = index(i) % 200000000; // hardcoded sampling rate, get it out of here...
+    uint time = startTime + index(i) / samplingRate;
+    uint sampleNr = index(i) % samplingRate + startSample;
+    time += sampleNr / samplingRate;
+    sampleNr %= samplingRate;
+    newTBBTrigger.itsTime = time;
+    newTBBTrigger.itsSampleNr = sampleNr; 
     newTBBTrigger.itsSum = sum(i);
     newTBBTrigger.itsNrSamples = width(i);
     newTBBTrigger.itsPeakValue = peak(i);
@@ -176,6 +181,10 @@ void triggerAnalysisOnFile (std::string const &filename, uint blocksize, Vector<
   // cout << "Starting at block: " << data.block() << endl;
 
   uint nofBlocks = data.data_length()[0] / blocksize; // assuming same size for all antennas...
+  
+  uint startTime = data.headerRecord().asInt("Date");
+//  uint startSample = data.headerRecord().asInt("StartSample"); // NOT IMPLEMENTED
+  casa::Vector<uint> startSampleNumbers = data.sample_number();
   
 //  nofBlocks = 1000;
   cout << nofBlocks << " = blocks to be processed, blocksize = " << blocksize << endl;
@@ -245,7 +254,7 @@ void triggerAnalysisOnFile (std::string const &filename, uint blocksize, Vector<
         appendToVector(allmeanval, meanval);
         appendToVector(allafterval, afterval);
         
-        addFPGATriggersToList(rcu + rcuOffset, index, sum, width, peak, meanval, afterval, triggerList, triggerOutputFile);
+        addFPGATriggersToList(rcu + rcuOffset, startTime, startSampleNumbers(rcu), index, sum, width, peak, meanval, afterval, triggerList, triggerOutputFile);
       } // end if
     } // end loop over RCUs   
     
