@@ -13,11 +13,11 @@ inline HNumber funcGaussian(HNumber x,
 
 //! Calculate the running average of an array of Numbers.
 template <class T> 
-void hRunningAverageT (const vector<T>::iterator idata_start,
-		       const vector<T>::iterator idata_end,
-		       const vector<T>::iterator odata_start,
-		       const vector<HNumber>::iterator weights_start,
-		       const vector<HNumber>::iterator weights_end);
+void hRunningAverageT (const typename vector<T>::iterator idata_start,
+		       const typename vector<T>::iterator idata_end,
+		       const typename vector<T>::iterator odata_start,
+		       const typename vector<HNumber>::iterator weights_start,
+		       const typename vector<HNumber>::iterator weights_end);
 
 //! Calculate the running average of an array of Numbers.
 template <class T>

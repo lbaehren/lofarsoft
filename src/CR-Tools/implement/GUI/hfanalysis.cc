@@ -160,11 +160,11 @@ vector<HNumber> hWeights(address wlen, hWEIGHTS wtype){
   hence different types of arrays/vectors can be used.
 */
 template <class T> 
-void hRunningAverageT (const vector<T>::iterator idata_start,
-		       const vector<T>::iterator idata_end,
-		       const vector<T>::iterator odata_start,
-		       const vector<HNumber>::iterator weights_start,
-		       const vector<HNumber>::iterator weights_end)
+void hRunningAverageT (const typename vector<T>::iterator idata_start,
+		       const typename vector<T>::iterator idata_end,
+		       const typename vector<T>::iterator odata_start,
+		       const typename vector<HNumber>::iterator weights_start,
+		       const typename vector<HNumber>::iterator weights_end)
 {
   address l=(weights_end-weights_start);
   /* Index of the central element of the weights vector (i.e., where it
