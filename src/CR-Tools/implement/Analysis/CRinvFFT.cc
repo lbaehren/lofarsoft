@@ -41,7 +41,7 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                     CRinvFFT
   
-  CRinvFFT::CRinvFF ()
+  CRinvFFT::CRinvFFT ()
     : CR::SecondStagePipeline()
   {
     init();

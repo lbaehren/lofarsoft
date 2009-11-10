@@ -292,49 +292,15 @@ namespace CR {  //  Namespace CR -- begin
     */
     virtual bool setHeaderRecord ();
     
-    /*!
-      \brief Initialization of internal parameters
-      
-      \param blocksize   -- Size of a block of data, [samples]
-      \param adc2voltage -- [antenna] Multiplication factors for conversion
-                            from ADC values to voltages
-      \param fft2calfft  -- [channel,antenna] Multiplication factors for
-                            conversion from raw to calibrated FFT
-    */
+    //! Initialization of internal parameters
     void init (uint const &blocksize,
 	       Vector<Double> const &adc2voltage,
 	       Matrix<DComplex> const &fft2calfft);
-    
-    /*!
-      \brief Initialization of internal parameters
-      
-      \param blocksize   -- Size of a block of data, [samples]
-      \param adc2voltage -- [sample,antenna] Multiplication factors for
-                            conversion from ADC values to voltages
-      \param fft2calfft  -- [channel,antenna] Multiplication factors for
-                            conversion from raw to calibrated FFT
-    */
+    //! Initialization of internal parameters
     void init (uint const &blocksize,
 	       Matrix<Double> const &adc2voltage,
 	       Matrix<DComplex> const &fft2calfft);
-    
-    /*!
-      \brief Initialize the internal structure of the DataReader
-      
-      \param blocksize   -- Size of a block of data, [samples]
-      \param antennas    -- Antennas included in the experiment/observation and
-                            containing valid data files
-      \param adc2voltage -- Multiplication factors for conversion from ADC values
-                            to voltages
-      \param fft2calfft  -- Multiplication factors for conversion from raw to
-                            calibrated FFT
-      \param filenames   -- Names of the files from which to read in the data
-      \param iterators   -- Set of DataIterator objects used for navigation within
-                            the file streams.
-      
-      This is the primary method for the derived classes to initialize the
-      underlying DataReader object handling conversion of data.
-    */
+    //! Initialize the internal structure of the DataReader
     void init (uint const &blocksize,
 	       Vector<uint> const &antennas,
 	       Vector<Double> const &adc2voltage,
@@ -455,9 +421,7 @@ namespace CR {  //  Namespace CR -- begin
 
     \return fx2voltage -- Weights to convert raw ADC samples to voltages
   */
-  inline Matrix<Double> ADC2Voltage () const {
-    return ADC2Voltage_p;
-  }
+  Matrix<Double> ADC2Voltage ();
 
   //! Set the weights for conversion from raw ADC samples to voltages
   void setADC2Voltage (Vector<Double> const &adc2voltage);
@@ -506,9 +470,7 @@ namespace CR {  //  Namespace CR -- begin
                           transform on the voltages to calibrated spectra,
 			  accounting for the slope of the bandpass filter.
   */
-  inline Matrix<DComplex> fft2calfft () const {
-    return FFT2CalFFT_p;
-  }
+  Matrix<DComplex> fft2calfft ();
 
   /*!
     \brief Set the weights for conversion from raw to calibrated FFT

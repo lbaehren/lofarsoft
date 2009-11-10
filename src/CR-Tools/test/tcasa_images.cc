@@ -46,7 +46,7 @@
 // CR-Tools header files
 #include <Coordinates/CoordinateType.h>
 #include <Coordinates/SpatialCoordinate.h>
-#include <Utilities/MConversions.h>
+#include <Coordinates/MConversions.h>
 #include <Utilities/TestsCommon.h>
 
 using std::cout;

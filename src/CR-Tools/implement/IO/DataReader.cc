@@ -394,6 +394,13 @@ namespace CR {  //  Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                         init
   
+  /*!
+    \param blocksize   -- Size of a block of data, [samples]
+    \param adc2voltage -- [sample,antenna] Multiplication factors for
+           conversion from ADC values to voltages
+    \param fft2calfft  -- [channel,antenna] Multiplication factors for
+           conversion from raw to calibrated FFT
+  */
   void DataReader::init (uint const &blocksize,
 			 Matrix<Double> const &adc2voltage,
 			 Matrix<DComplex> const &fft2calfft)
@@ -483,6 +490,21 @@ namespace CR {  //  Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                         init
   
+  /*!
+    \param blocksize   -- Size of a block of data, [samples]
+    \param antennas    -- Antennas included in the experiment/observation and
+           containing valid data files
+    \param adc2voltage -- Multiplication factors for conversion from ADC values
+           to voltages
+    \param fft2calfft  -- Multiplication factors for conversion from raw to
+           calibrated FFT
+    \param filenames   -- Names of the files from which to read in the data
+    \param iterators   -- Set of DataIterator objects used for navigation within
+           the file streams.
+    
+    This is the primary method for the derived classes to initialize the
+    underlying DataReader object handling conversion of data.
+  */
   void DataReader::init (uint const &blocksize,
 			 Vector<uint> const &antennas,
 			 Vector<Double> const &adc2voltage,
@@ -678,6 +700,33 @@ namespace CR {  //  Namespace CR -- begin
     }
     
     return frequencies;
+  }
+
+  //_____________________________________________________________________________
+  //                                                                  ADC2Voltage
+
+  Matrix<Double> DataReader::ADC2Voltage ()
+  {
+    if (haveADC2Voltage_p) {
+      return ADC2Voltage_p;
+    } else {
+      return Matrix<Double> (blocksize_p,nofSelectedAntennas(),1.0);
+    }
+  }
+
+  //_____________________________________________________________________________
+  //                                                                  ADC2Voltage
+
+  Matrix<DComplex> DataReader::fft2calfft ()
+  {
+    if (haveFFT2CalFFT_p) {
+      return FFT2CalFFT_p;
+    } else {
+      casa::IPosition shape (2,
+			     fftLength_p,
+			     nofSelectedAntennas());
+      return Matrix<DComplex> (shape,1.0);
+    }
   }
 
   //_____________________________________________________________________________
