@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Lars Bahren (<mail>)                                                     *
+ *   Copyright (C) 2006                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,8 +21,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #include <Data/ITSCorrelation.h>
 
 // ==============================================================================
@@ -31,13 +29,22 @@
 //
 // ==============================================================================
 
+//_______________________________________________________________________________
+//                                                                 ITSCorrelation
+
 ITSCorrelation::ITSCorrelation ()
 {;}
+
+//_______________________________________________________________________________
+//                                                                 ITSCorrelation
 
 ITSCorrelation::ITSCorrelation (String const &metafile)
 {
   setMetafile (metafile);
 }
+
+//_______________________________________________________________________________
+//                                                                 ITSCorrelation
 
 ITSCorrelation::ITSCorrelation (ITSCorrelation const &other)
 {
@@ -82,6 +89,9 @@ void ITSCorrelation::copy (ITSCorrelation const &other)
 //
 // ==============================================================================
 
+//_______________________________________________________________________________
+//                                                                    setMetafile
+
 void ITSCorrelation::setMetafile (String const &metafile)
 {
   bool status (true);
@@ -113,15 +123,38 @@ Bool ITSCorrelation::setStreams ()
 //
 // ==============================================================================
 
+//_______________________________________________________________________________
+//                                                                      ccSpectra
+
 Cube<DComplex> ITSCorrelation::ccSpectra (Bool const &fromCalFFT)
 {
   uint nofSelectedAntennas (DataReader::nofSelectedAntennas());
   
-  Cube<DComplex> out (nofSelectedAntennas,
+  Cube<DComplex> data (nofSelectedAntennas,
 		      nofSelectedAntennas,
 		      fftLength_p);
+
+  ITSCorrelation::ccSpectra (data,fromCalFFT);
   
-  out = 0.0;
-  
-  return out;
+  return data;
+}
+
+//_______________________________________________________________________________
+//                                                                      ccSpectra
+
+void ITSCorrelation::ccSpectra (Cube<DComplex> &data,
+				Bool const &fromCalFFT)
+{
+  uint nofSelectedAntennas (DataReader::nofSelectedAntennas());
+  casa::IPosition shape (3,
+			 nofSelectedAntennas,
+			 nofSelectedAntennas,
+			 fftLength_p);
+
+  /* Check the shape of the array returning the data */
+  if (data.shape() != shape) {
+    data.resize(shape);
+  }
+
+  data = 0.0;
 }

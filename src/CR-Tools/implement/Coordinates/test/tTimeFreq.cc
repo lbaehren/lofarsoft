@@ -75,12 +75,14 @@ void show_frequencies (vector<double> const &freq,
   
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                  test_TimeFreq
 
 /*!
   \brief Test constructors for a new TimeFreq object
 
-  \return nofFailedTests -- The number of failed tests.
+  \return nofFailedTests -- The number of failed tests encountered with in this
+          function.
 */
 int test_TimeFreq ()
 {
@@ -94,9 +96,7 @@ int test_TimeFreq ()
   cout << "[1] Testing default constructor ..." << endl;
   try {
     TimeFreq data;
-    
     data.summary();
-    
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;

@@ -50,20 +50,27 @@ using namespace std;
 /*========================================================================
   class ObjectFunctionClass
   ========================================================================
-
+  
   Generic class that object functions are based on
 */
 
 
 /*!
- \brief Returns function value of a Gaussian distribution with spread sigma and median value mu at position x. 
- */
-inline HNumber funcGaussian(HNumber x, HNumber sigma, HNumber mu){return exp(-(x-mu)*(x-mu)/(2*sigma*sigma))/(sigma*sqrt(2*casa::C::pi));};
+  \param x     - Position at which the Gaussian is evaluated
+  \param sigma - Spread of the Gaussian
+  \param mu    - Median value of the Gaussian
+*/
+inline HNumber funcGaussian (HNumber x,
+			     HNumber sigma,
+			     HNumber mu)
+{
+  return exp(-(x-mu)*(x-mu)/(2*sigma*sigma))/(sigma*sqrt(2*casa::C::pi));
+};
 
 /*!
-\brief Returns vector of weights of length len with constant weights normalized to give a sum of unity. Can be used by hRunningAverageT.
- */
-vector<HNumber> hFlatWeights(address wlen){
+  \brief Returns vector of weights of length len with constant weights normalized to give a sum of unity. Can be used by hRunningAverageT.
+*/
+vector<HNumber> hFlatWeights (address wlen) {
   vector<HNumber> weights(wlen,1.0/wlen);
   return weights;
 }
@@ -129,45 +136,47 @@ vector<HNumber> hWeights(address wlen, hWEIGHTS wtype){
   return weights;
 }
 
+//_______________________________________________________________________________
+//                                                               hRunningAverageT
 
 /*!
+  \param idata_start: STL Iterator pointing to the first element of an array with
+         input values.
+  \param idata_end: STL Iterator pointing to the end of the input vector
+  \param odata_start: STL Iterator pointing to the first element of an array
+         which will contain input values. The array must have the same size as
+	 *start_data_in and be initialized to zero.
+  \param weights_start: STL Iterator pointing to the first element of an array
+         with weights values that allows one to specify weights to be applied
+	 to the neighbouring samples before averaging. The weights should be
+	 normalized to unity.
+  \param  weights_end: STL Iterator pointing to the end (last plus one element!)
+          of an array with weights
 
-\brief Calculate the running average of an array of Numbers.
-
-idata_start: STL Iterator pointing to the first element of an array with input values.
-
-idata_end: STL Iterator pointing to the end of the input vector
-
-odata_start: STL Iterator pointing to the first element of an array
-which will contain input values. The array must have the same size as
-*start_data_in and be initialized to zero.
-
-
-weights_start: STL Iterator pointing to the first element of an array with weights
-values that allows one to specify weights to be applied to the
-neighbouring samples before averaging. The weights should be
-normalized to unity.
-
-weights_end: STL Iterator pointing to the end (last plus one element!) of an array with weights
-
-
-Attention: Note that it is assumed that the output array is
-initialized, has the same length as the input array, and is
-initialized with zeros!! If the array values are nonzero, they will
-simply be added to the input vector. This is done so that the memory
-allocation of a vector/array is handled by the user, hence different
-types of arrays/vectors can be used.
+  Attention: Note that it is assumed that the output array is initialized, has
+  the same length as the input array, and is initialized with zeros!! If the
+  array values are nonzero, they will simply be added to the input vector. This
+  is done so that the memory allocation of a vector/array is handled by the user,
+  hence different types of arrays/vectors can be used.
 */
-
 template <class T> 
-void hRunningAverageT(const VecTit idata_start, const VecTit idata_end,const VecTit odata_start, const VecNit weights_start,const VecNit weights_end){
-
+void hRunningAverageT (const vector<T>::iterator idata_start,
+		       const vector<T>::iterator idata_end,
+		       const vector<T>::iterator odata_start,
+		       const vector<HNumber>::iterator weights_start,
+		       const vector<HNumber>::iterator weights_end)
+{
   address l=(weights_end-weights_start);
-  address middle=l/2;  //index of the central element of the weights vector (i.e., where it typically would peak)
+  /* Index of the central element of the weights vector (i.e., where it
+     typically would peak) */
+  address middle=l/2;
+  /* To avoid too many rounding errors with Integers */
+  T fac = l*10;
 
-  T fac = l*10; //to avoid too many rounding errors with Integers
-
-  typename vector<T>::iterator dit,dit2,din=idata_start,dout=odata_start;
+  typename vector<T>::iterator dit;
+  typename vector<T>::iterator dit2;
+  typename vector<T>::iterator din=idata_start;
+  typename vector<T>::iterator dout=odata_start;
   vector<HNumber>::iterator wit;
 
   while (din!=idata_end) {
@@ -186,108 +195,166 @@ void hRunningAverageT(const VecTit idata_start, const VecTit idata_end,const Vec
   return;
 } 
 
+//_______________________________________________________________________________
+//                                                               hRunningAverageT
+
 /*!
-
-\brief Overloaded function to automatically calculate weights
-
- */
+  \brief Overloaded function to automatically calculate weights
+*/
 template <class T> 
-void hRunningAverageT(const VecTit idata_start, const VecTit idata_end,const VecTit odata_start, address wlen, hWEIGHTS wtype){
+void hRunningAverageT (const VecTit idata_start,
+		       const VecTit idata_end,
+		       const VecTit odata_start,
+		       address wlen,
+		       hWEIGHTS wtype)
+{
   vector<HNumber> weights=hWeights(wlen,wtype);
-  hRunningAverageT<T>(idata_start,idata_end,odata_start, weights.begin(),weights.end());
+  hRunningAverageT<T> (idata_start,
+		       idata_end,
+		       odata_start,
+		       weights.begin(),
+		       weights.end());
 }
 
+//_______________________________________________________________________________
+//                                                         hRunningAverageCasaVec
+
 /*!
-\brief Wrapper to hRunningAverageT for CASA Vectors
- */
+  \brief Wrapper to hRunningAverageT for CASA Vectors
+*/
 template <class T>
-void hRunningAverageCasaVec(casa::Vector<T> &vec_in,casa::Vector<T> &vec_out, address wlen, hWEIGHTS wtype) {
+void hRunningAverageCasaVec (casa::Vector<T> &vec_in,
+			     casa::Vector<T> &vec_out,
+			     address wlen,
+			     hWEIGHTS wtype)
+{
   //  vec_out.assign(vec_in.size(),mycast<T>(0.0));
   typedef typename vector<T>::iterator Tit;
-  hRunningAverageT<T>(static_cast<Tit>(vec_in.cbegin()),static_cast<Tit>(vec_in.cend()),static_cast<Tit>(vec_in.cend()),wlen,wtype);
+  hRunningAverageT<T> (static_cast<Tit>(vec_in.cbegin()),
+		       static_cast<Tit>(vec_in.cend()),
+		       static_cast<Tit>(vec_in.cend()),
+		       wlen,
+		       wtype);
   return;
 } 
 
+//_______________________________________________________________________________
+//                                                             hRunningAverageVec
+
 /*!
-\brief Wrapper to hRunningAverageT for STL Vectors
- */
+  \brief Wrapper to hRunningAverageT for STL Vectors
+*/
 template <class T>
-void hRunningAverageVec(vector<T> &vec_in,vector<T> &vec_out, address wlen, hWEIGHTS wtype) {
+void hRunningAverageVec (vector<T> &vec_in,
+			 vector<T> &vec_out,
+			 address wlen,
+			 hWEIGHTS wtype)
+{
   vec_out.assign(vec_in.size(),mycast<T>(0.0));
-  hRunningAverageT<T>(vec_in.begin(),vec_in.end(),vec_out.begin(),wlen,wtype);
+  hRunningAverageT<T> (vec_in.begin(),
+		       vec_in.end(),
+		       vec_out.begin(),
+		       wlen,
+		       wtype);
   return;
 } 
 
+//_______________________________________________________________________________
+//                                                             hRunningAverageVec
+
 /*!
-\brief Dummy function used for formal reasons by the GUI
- */
-void hRunningAverageVec(vector<HString> &vec_in,vector<HString> &vec_out, address wlen, hWEIGHTS wtype) {
+  \brief Dummy function used for formal reasons by the GUI
+*/
+void hRunningAverageVec (vector<HString> &vec_in,
+			 vector<HString> &vec_out,
+			 address wlen,
+			 hWEIGHTS wtype)
+{
   vec_out=vec_in;
   MSG("hRunningAverageVec<HString>: not yet implemented");
 }
+
+//_______________________________________________________________________________
+//                                                             hRunningAverageVec
+
 /*!
-\brief Dummy function used for formal reasons by the GUI
- */
-void hRunningAverageVec(vector<HPointer> &vec_in,vector<HPointer> &vec_out, address wlen, hWEIGHTS wtype) {
+  \brief Dummy function used for formal reasons by the GUI
+*/
+void hRunningAverageVec (vector<HPointer> &vec_in,
+			 vector<HPointer> &vec_out,
+			 address wlen,
+			 hWEIGHTS wtype)
+{
   vec_out=vec_in;
   MSG("hRunningAverageVec<HPointer>: not implemented");
 }
 
 /*!
-
-\brief Calculate the running average of an array of Numbers. Wrapper
-for hRunningAverageT using pointers instead of iterators.
-
-start_data_in: Pointer to the first element of an array with input values.
-
-start_data_out: Pointer to the first element of an array which will contain input values. The array must have the same size as *start_data_in and be initialized to zero.
-
-datalen: length of input and output array
-
-start_weights: Pointer to the first element of an array with weights
-values that allows one to specify weights to be applied to the
-neighbouring samples before averaging. The weights should be
-normalized to unity.
-
-weightslen: number of weights
-
-Attention: Note that it is assumed that the output array is
-initialized, has the same length as the input array, and is
-initialized with zeros!! If the array values are nonzero, they will
-simply be added to the input vector. This is done so that the memory
-allocation of a vector/array is handled by the user, hence different
-types of arrays/vectors can be used.
+  
+  \brief Calculate the running average of an array of Numbers. Wrapper
+  for hRunningAverageT using pointers instead of iterators.
+  
+  start_data_in: Pointer to the first element of an array with input values.
+  
+  start_data_out: Pointer to the first element of an array which will contain input values. The array must have the same size as *start_data_in and be initialized to zero.
+  
+  datalen: length of input and output array
+  
+  start_weights: Pointer to the first element of an array with weights
+  values that allows one to specify weights to be applied to the
+  neighbouring samples before averaging. The weights should be
+  normalized to unity.
+  
+  weightslen: number of weights
+  
+  Attention: Note that it is assumed that the output array is
+  initialized, has the same length as the input array, and is
+  initialized with zeros!! If the array values are nonzero, they will
+  simply be added to the input vector. This is done so that the memory
+  allocation of a vector/array is handled by the user, hence different
+  types of arrays/vectors can be used.
 */
 
 template <class T>
-void hRunningAverageN(T * start_data_in, T * start_data_out, address datalen, HNumber * start_weights, address weightslen) {
+void hRunningAverageN (T * start_data_in,
+		       T * start_data_out,
+		       address datalen,
+		       HNumber * start_weights,
+		       address weightslen)
+{
+  /* Set up the iterators which are passed to the underlying function */
   typedef typename vector<T>::iterator Tit;
   typedef typename vector<HNumber>::iterator Nit;
   Tit idata_start=static_cast<Tit>(start_data_in);
   Tit odata_start=static_cast<Tit>(start_data_out);
   Nit weights_start=static_cast<Nit>(start_weights);
-  hRunningAverageT(idata_start, idata_start+datalen, odata_start, weights_start, weights_start+weightslen);
+  /* Compute running average */
+  hRunningAverageT (idata_start,
+		    idata_start+datalen,
+		    odata_start,
+		    weights_start,
+		    weights_start+weightslen);
 }
 
 /*!
-\brief This is needed to produce a Boost Python wrapper to the templated function hRunningAverage for a specific type. 
-
-Those definitions should actually better go into the .hpp file
- */
+  \brief This is needed to produce a Boost Python wrapper to the templated function hRunningAverage for a specific type. 
+  
+  Those definitions should actually better go into the .hpp file
+*/
 
 void (*hRunningAverageVec_N)(vector<HNumber > &vec_in,vector<HNumber > &vec_out, address wlen, hWEIGHTS wtype) = &hRunningAverageVec;
 void (*hRunningAverageVec_I)(vector<HInteger> &vec_in,vector<HInteger> &vec_out, address wlen, hWEIGHTS wtype) = &hRunningAverageVec;
 void (*hRunningAverageVec_C)(vector<HComplex> &vec_in,vector<HComplex> &vec_out, address wlen, hWEIGHTS wtype) = &hRunningAverageVec;
 
 /*
-Actually you need to define new functions that take 2 or 3 parameters only to makes use of parameter defaulting in Python...
-
-void (*hRunningAverageVec_N_3)(vector<HNumber > &vec_in,vector<HNumber > &vec_out, address len) = &hRunningAverageVec;
-void (*hRunningAverageVec_I_3)(vector<HInteger> &vec_in,vector<HInteger> &vec_out, address len) = &hRunningAverageVec;
-void (*hRunningAverageVec_C_3)(vector<HComplex> &vec_in,vector<HComplex> &vec_out, address len) = &hRunningAverageVec;
-void (*hRunningAverageVec_N_2)(vector<HNumber > &vec_in,vector<HNumber > &vec_out) = &hRunningAverageVec;
-void (*hRunningAverageVec_I_2)(vector<HInteger> &vec_in,vector<HInteger> &vec_out) = &hRunningAverageVec;
-void (*hRunningAverageVec_C_2)(vector<HComplex> &vec_in,vector<HComplex> &vec_out) = &hRunningAverageVec;
+  Actually you need to define new functions that take 2 or 3 parameters only to makes use of parameter defaulting in Python...
+  
+  void (*hRunningAverageVec_N_3)(vector<HNumber > &vec_in,vector<HNumber > &vec_out, address len) = &hRunningAverageVec;
+  void (*hRunningAverageVec_I_3)(vector<HInteger> &vec_in,vector<HInteger> &vec_out, address len) = &hRunningAverageVec;
+  void (*hRunningAverageVec_C_3)(vector<HComplex> &vec_in,vector<HComplex> &vec_out, address len) = &hRunningAverageVec;
+  void (*hRunningAverageVec_N_2)(vector<HNumber > &vec_in,vector<HNumber > &vec_out) = &hRunningAverageVec;
+  void (*hRunningAverageVec_I_2)(vector<HInteger> &vec_in,vector<HInteger> &vec_out) = &hRunningAverageVec;
+  void (*hRunningAverageVec_C_2)(vector<HComplex> &vec_in,vector<HComplex> &vec_out) = &hRunningAverageVec;
 */
 
 
@@ -295,5 +362,3 @@ void dummy_instantitate_templates(){
   casa::Vector<HNumber> v;
   hRunningAverageCasaVec(v, v,5,WEIGHTS_GAUSSIAN);
 }
-
-

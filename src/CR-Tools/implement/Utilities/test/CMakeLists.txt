@@ -7,7 +7,6 @@
 
 set (tests
   tMasking
-  tMConversions
   tProgressBar
   tStringTools
   tTestsCommon

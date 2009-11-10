@@ -68,7 +68,8 @@ namespace CR { // Namespace CR -- begin
   
   //_____________________________________________________________________________
   //                                                                     TimeFreq
-  
+
+#ifdef HAVE_CASA  
   TimeFreq::TimeFreq (uint const &blocksize,
 		      casa::Quantity const &sampleFrequency,
 		      uint const &nyquistZone)
@@ -78,7 +79,8 @@ namespace CR { // Namespace CR -- begin
     nyquistZone_p     = nyquistZone;
     referenceTime_p   = 0;
   }
-  
+#endif  
+
   //_____________________________________________________________________________
   //                                                                     TimeFreq
   
@@ -96,6 +98,7 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                     TimeFreq
   
+#ifdef HAVE_CASA
   TimeFreq::TimeFreq (uint const &blocksize,
 		      casa::Quantity const &sampleFrequency,
 		      uint const &nyquistZone,
@@ -106,6 +109,7 @@ namespace CR { // Namespace CR -- begin
     nyquistZone_p     = nyquistZone;
     setReferenceTime (referenceTime);
   }
+#endif
   
   //_____________________________________________________________________________
   //                                                                     TimeFreq
@@ -690,28 +694,28 @@ namespace CR { // Namespace CR -- begin
   
   // -------------------------------------------------------------- frequencyAxis
   
-  SpectralCoordinate TimeFreq::frequencyAxis (double const &crval,
-					      double const &cdelt,
-					      double const &crpix)
+  casa::SpectralCoordinate TimeFreq::frequencyAxis (double const &crval,
+						    double const &cdelt,
+						    double const &crpix,
+						    double const &restfreq)
   {
-    double restfreq  = 1.420405752E9;
     double refValue  = crval;
     double increment = cdelt;
     double refPixel  = crpix;
-
-    SpectralCoordinate axis (casa::MFrequency::TOPO,
-			     refValue,
-			     increment,
-			     refPixel,
-			     restfreq);
-
+    
+    casa::SpectralCoordinate axis (casa::MFrequency::TOPO,
+				   refValue,
+				   increment,
+				   refPixel,
+				   restfreq);
+    
     // Add the world axis-name
     casa::Vector<casa::String> names  (1,"Frequency");
     axis.setWorldAxisNames(names);
     
     return axis;
   }
-
-  #endif
-
+  
+#endif
+  
 } // Namespace CR -- end

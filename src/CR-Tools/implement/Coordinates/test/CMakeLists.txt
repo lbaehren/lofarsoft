@@ -11,6 +11,7 @@ set (tests
   tCoordinateType
   tCoordinateGrid
   tGridCoordinate
+  tMConversions
   tPolarCoordinate
   tPositionVector
   tSkymapCoordinate

@@ -49,7 +49,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \file MConversions.h
 
-    \ingroup CR_Utilities
+    \ingroup CR_Coordinates
     
     \brief A set of functions for conversions of CASA Measures
     

@@ -21,7 +21,7 @@
 /* $Id$ */
 
 #include <Data/ObservationData.h>
-#include <Utilities/MConversions.h>
+#include <Coordinates/MConversions.h>
 
 using std::cerr;
 using std::cout;

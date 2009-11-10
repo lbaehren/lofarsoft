@@ -200,17 +200,39 @@ Bool ITS_Beam::setStreams ()
   return status;
 }
 
-// --------------------------------------------------------------------------- fx
+//_______________________________________________________________________________
+//                                                                             fx
 
 Matrix<Double> ITS_Beam::fx ()
+{
+  Matrix<Double> data (blocksize_p,
+		       DataReader::nofSelectedAntennas());
+
+  ITS_Beam::fx (data);
+  
+  return data;
+}
+
+//_______________________________________________________________________________
+//                                                                             fx
+
+/*!
+  \return fx -- Raw ADC time series, [Counts]
+*/
+void ITS_Beam::fx (Matrix<Double> &data)
 {
   uint i (0);
   int errstat(0);
   float tmpData[blocksize_p];
   uint nofSelectedAntennas (DataReader::nofSelectedAntennas());
-  // Data vector returned after reading is completed
-  Matrix<Double> data (blocksize_p,
-		      nofSelectedAntennas);
+  casa::IPosition shape (2,
+			 blocksize_p,
+			 DataReader::nofSelectedAntennas());
+  
+  /* Check the shape of the array returning the data */
+  if (data.shape() != shape) {
+    data.resize(shape);
+  }
   
   // -----------------------------------------------------------------
   // Go to the position in the file, from to start reading data
@@ -240,6 +262,4 @@ Matrix<Double> ITS_Beam::fx ()
       data = 0.0;
     }
   }
-  
-  return data;
 }

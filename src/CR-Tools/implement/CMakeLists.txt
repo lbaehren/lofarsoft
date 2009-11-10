@@ -170,7 +170,7 @@ if (CR_WITH_PYTHON)
     IO/DataReader.cc
     Math/BasicFilter.cc
     Math/HanningFilter.cc
-    Utilities/MConversions.cc
+    Coordinates/MConversions.cc
     BindingsBoostPython.cc
     )
   ## linker instructions

@@ -38,18 +38,26 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  CRinvFFT::CRinvFFT()
-    : CR::SecondStagePipeline() {
+  //_____________________________________________________________________________
+  //                                                                     CRinvFFT
+  
+  CRinvFFT::CRinvFF ()
+    : CR::SecondStagePipeline()
+  {
     init();
   }
   
-  void CRinvFFT::init(){
-    AntPosValid_p = False;
-    ploAntSelValid_p = False;
+  //_____________________________________________________________________________
+  //                                                                         init
+  
+  void CRinvFFT::init()
+  {
+    AntPosValid_p       = False;
+    ploAntSelValid_p    = False;
     AntGainInterpInit_p = False;
-
+    
     InterAntGain_p = NULL;
-
+    
     Double tmpval=0.;
     DirParams_p.define("Xpos",tmpval);
     DirParams_p.define("Ypos",tmpval);
@@ -88,7 +96,13 @@ namespace CR { // Namespace CR -- begin
   void CRinvFFT::summary ()
   {;}
   
-  Bool CRinvFFT::setPhaseCenter(Double XC, Double YC, Bool rotate){
+  //_____________________________________________________________________________
+  //                                                               setPhaseCenter
+
+  Bool CRinvFFT::setPhaseCenter (Double XC,
+				 Double YC,
+				 Bool rotate)
+  {
     try {
       if (rotate) {
 	Double XCn,YCn;
@@ -110,7 +124,13 @@ namespace CR { // Namespace CR -- begin
     return True;    
   };
 
-  Bool CRinvFFT::setDirection(Double AZ, Double EL, Double Curvature){
+  //_____________________________________________________________________________
+  //                                                                 setDirection
+
+  Bool CRinvFFT::setDirection (Double AZ,
+			       Double EL,
+			       Double Curvature)
+  {
     try {
       DirParams_p.define("Az",AZ);
       DirParams_p.define("El",EL);
@@ -122,7 +142,12 @@ namespace CR { // Namespace CR -- begin
     return True;    
   }
 
-  Matrix<Double> CRinvFFT::GetAntPositions(DataReader *dr, bool substractReference){
+  //_____________________________________________________________________________
+  //                                                              GetAntPositions
+
+  Matrix<Double> CRinvFFT::GetAntPositions (DataReader *dr,
+					    bool substractReference)
+  {
     Matrix<Double> NewAntPos;
     try {
       if (!AntPosValid_p && dr==NULL){
@@ -174,8 +199,10 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
+  //_____________________________________________________________________________
+  //                                                               initGainInterp
 
-  Bool CRinvFFT::initGainInterp(DataReader *dr){
+  Bool CRinvFFT::initGainInterp (DataReader *dr){
     Bool success=True;
     try {
       if (InterAntGain_p != NULL) {delete InterAntGain_p;};
@@ -197,8 +224,11 @@ namespace CR { // Namespace CR -- begin
     return success;
   };
 
-  
-  Matrix<DComplex> CRinvFFT::GetShiftedFFT(DataReader *dr){
+  //_____________________________________________________________________________
+  //                                                                GetShiftedFFT
+
+  Matrix<DComplex> CRinvFFT::GetShiftedFFT (DataReader *dr)
+  {
     Matrix<DComplex> FFTdata;
     try {
       Vector<Int> AntennaIDs;
@@ -206,7 +236,7 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> tmpvec;
       dr->headerRecord().get("Date",date);
       dr->headerRecord().get("AntennaIDs",AntennaIDs);
-
+      
       // ***** getting the phase gradients
       // update the antenna positions (if needed)
       if (!AntPosValid_p || (posCachedDate_p != dr->headerRecord().asuInt("Date")) ){
@@ -328,7 +358,8 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  Matrix<Double> CRinvFFT::GetTimeSeries(DataReader *dr, Vector<Bool> antennaSelection,
+  Matrix<Double> CRinvFFT::GetTimeSeries(DataReader *dr,
+					 Vector<Bool> antennaSelection,
 					 String Polarization){
     Matrix<Double> timeSeries;
     try {
@@ -365,8 +396,8 @@ namespace CR { // Namespace CR -- begin
 #ifdef DEBUGGING_MESSAGES      
 	  cout << endl ;
 #endif
-	  ploAntSelPol_p = Polarization;
-	  ploAntSelDate_p = date;
+	  ploAntSelPol_p   = Polarization;
+	  ploAntSelDate_p  = date;
 	  ploAntSelValid_p = True;
 	};// if (!ploAntSelValid_p ...
 	// Apply polarization-based selection
@@ -391,8 +422,13 @@ namespace CR { // Namespace CR -- begin
     return timeSeries;
   }
 
-  Vector<Double> CRinvFFT::GetCCBeam(DataReader *dr, Vector<Bool> antennaSelection,
-				     String Polarization){
+  //_____________________________________________________________________________
+  //                                                                    GetCCBeam
+  
+  Vector<Double> CRinvFFT::GetCCBeam (DataReader *dr,
+				      Vector<Bool> antennaSelection,
+				      String Polarization)
+  {
     Vector<Double> ccBeamData;
     try {
       Matrix<Double> TimeSeries;
@@ -412,8 +448,13 @@ namespace CR { // Namespace CR -- begin
     return ccBeamData;
   }
 
-  Vector<Double> CRinvFFT::GetXBeam(DataReader *dr, Vector<Bool> antennaSelection,
-				    String Polarization){
+  //_____________________________________________________________________________
+  //                                                                     GetXBeam
+  
+  Vector<Double> CRinvFFT::GetXBeam (DataReader *dr,
+				     Vector<Bool> antennaSelection,
+				     String Polarization)
+  {
     Vector<Double> xBeamData;
     try {
       Matrix<Double> TimeSeries;
@@ -433,8 +474,13 @@ namespace CR { // Namespace CR -- begin
     return xBeamData;
   }
 
-  Vector<Double> CRinvFFT::GetPBeam(DataReader *dr, Vector<Bool> antennaSelection,
-				    String Polarization){
+  //_____________________________________________________________________________
+  //                                                                     GetPBeam
+  
+  Vector<Double> CRinvFFT::GetPBeam (DataReader *dr,
+				     Vector<Bool> antennaSelection,
+				     String Polarization)
+  {
     Vector<Double> pBeamData;
     try {
       Matrix<Double> TimeSeries;
@@ -458,13 +504,16 @@ namespace CR { // Namespace CR -- begin
     return pBeamData;
   }
   
-  Bool CRinvFFT::GetTCXP(DataReader *dr,
-			 Matrix<Double> & TimeSeries, 
-			 Vector<Double> & ccBeamData,
-			 Vector<Double> & xBeamData, 
-			 Vector<Double> & pBeamData,
-			 Vector<Bool> antennaSelection,
-			 String Polarization) {
+  //_____________________________________________________________________________
+  //                                                                      GetTCXP
+  
+  Bool CRinvFFT::GetTCXP (DataReader *dr,
+			  Matrix<Double> & TimeSeries, 
+			  Vector<Double> & ccBeamData,
+			  Vector<Double> & xBeamData, 
+			  Vector<Double> & pBeamData,
+			  Vector<Bool> antennaSelection,
+			  String Polarization) {
     try {
       TimeSeries = GetTimeSeries(dr, antennaSelection, Polarization);
       if (TimeSeries.ncolumn() > 1) {

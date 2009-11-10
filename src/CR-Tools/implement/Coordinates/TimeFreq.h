@@ -32,6 +32,7 @@
 #include <crtools.h>
 
 // Header files from CASA library
+#ifdef HAVE_CASA
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/String.h>
@@ -39,9 +40,9 @@
 #include <coordinates/Coordinates/LinearCoordinate.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <measures/Measures/MFrequency.h>
-
-using casa::SpectralCoordinate;
 using casa::Vector;
+#endif
+
 
 namespace CR { // Namespace CR -- begin
   
@@ -241,9 +242,11 @@ namespace CR { // Namespace CR -- begin
 	     but the base units.
       \param nyquistZone     -- Nyquist zone,  [1]
     */
+#ifdef HAVE_CASA
     TimeFreq (uint const &blocksize,
 	      casa::Quantity const &sampleFrequency,
 	      uint const &nyquistZone);
+#endif 
     
     /*!
       \brief Argumented constructor
@@ -270,10 +273,12 @@ namespace CR { // Namespace CR -- begin
              casa::Quantity, thereby enabling passing the value in units other
 	     but the base units.
     */
+#ifdef HAVE_CASA
     TimeFreq (uint const &blocksize,
 	      casa::Quantity const &sampleFrequency,
 	      uint const &nyquistZone,
 	      casa::Quantity const &referenceTime);
+#endif
     
     /*!
       \brief Copy constructor
@@ -635,24 +640,24 @@ namespace CR { // Namespace CR -- begin
 				     double const &cdelt,
 				     double const &crpix);
     
-    /*!
-      \brief [optional:CASA] Create frequency axis coordinate from parameters
-    */
-    SpectralCoordinate frequencyAxis ();
+    //! [optional:CASA] Create frequency axis coordinate from parameters
+    casa::SpectralCoordinate frequencyAxis ();
 
     /*!
       \brief [optional:CASA] Create frequency axis coordinate from parameters
       
-      \param crval -- Reference value in world coordinates, [Hz]
-      \param cdelt -- Increment along the coordinate axis, [Hz]
-      \param crpix -- Reference pixel
+      \param crval    -- Reference value in world coordinates, [Hz]
+      \param cdelt    -- Increment along the coordinate axis, [Hz]
+      \param crpix    -- Reference pixel
+      \param restfreq -- Rest frequency
       
       \return coord -- The frequency axis as spectral coordinate
     */
-    SpectralCoordinate frequencyAxis (double const &crval,
-				      double const &cdelt,
-				      double const &crpix);
-
+    casa::SpectralCoordinate frequencyAxis (double const &crval,
+					    double const &cdelt,
+					    double const &crpix,
+					    double const &restfreq=1.420405752E9);
+    
 #endif
     
   private:

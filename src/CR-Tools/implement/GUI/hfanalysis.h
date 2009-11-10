@@ -6,13 +6,26 @@
 #define VecNit typename vector<HNumber>::iterator
 #define VecCit typename vector<HComplex>::iterator
 
-inline HNumber funcGaussian(HNumber x, HNumber sigma=1.0, HNumber mu=0.0);
+//! function value of a Gaussian distribution
+inline HNumber funcGaussian(HNumber x,
+			    HNumber sigma=1.0,
+			    HNumber mu=0.0);
 
+//! Calculate the running average of an array of Numbers.
 template <class T> 
-void hRunningAverageT(const VecTit idata_start, const VecTit idata_end,const VecTit odata_start, const VecNit weights_start,const VecNit weights_end);
+void hRunningAverageT (const vector<T>::iterator idata_start,
+		       const vector<T>::iterator idata_end,
+		       const vector<T>::iterator odata_start,
+		       const vector<HNumber>::iterator weights_start,
+		       const vector<HNumber>::iterator weights_end);
 
+//! Calculate the running average of an array of Numbers.
 template <class T>
-void hRunningAverageN(T* start_data_in, T* start_data_out, address datalen, HNumber * start_weights, address weightslen);
+void hRunningAverageN (T* start_data_in,
+		       T* start_data_out,
+		       address datalen,
+		       HNumber * start_weights,
+		       address weightslen);
 
 
 enum hWEIGHTS {WEIGHTS_FLAT,WEIGHTS_LINEAR,WEIGHTS_GAUSSIAN};

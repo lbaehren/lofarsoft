@@ -21,8 +21,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #ifndef ITSCORRELATION_H
 #define ITSCORRELATION_H
 
@@ -38,7 +36,7 @@ using CR::DataReader;
 
   \brief Brief description for class ITSCorrelation
 
-  \author Lars Bahren
+  \author Lars B&auml;hren
 
   \date 2006/05/16
 
@@ -60,10 +58,8 @@ class ITSCorrelation : public DataReader {
 
   //! Metadata of the experiment
   ITSMetadata metadata_p;
-
   //! Frequency channels selected in the experiment
   Vector<uint> frequencyChannels_p;
-
   //! Baselines for the visibility data, [2,nofBaselines]
   Matrix<uint> baselines_p;
 
@@ -71,9 +67,7 @@ class ITSCorrelation : public DataReader {
 
   // --------------------------------------------------------------- Construction
 
-  /*!
-    \brief Default constructor
-  */
+  //! Default constructor
   ITSCorrelation ();
 
   /*!
@@ -93,9 +87,7 @@ class ITSCorrelation : public DataReader {
 
   // ---------------------------------------------------------------- Destruction
 
-  /*!
-    \brief Destructor
-  */
+  //! Destructor
   ~ITSCorrelation ();
 
   // ------------------------------------------------------------------ Operators
@@ -131,17 +123,15 @@ class ITSCorrelation : public DataReader {
                          [nfreq,nant,nant]
   */
   Cube<DComplex> ccSpectra (Bool const &fromCalFFT=True);
+  //! Get the cross-correlation spectra
+  void ccSpectra (Cube<DComplex> &data,
+		  Bool const &fromCalFFT=True);
 
  private:
 
-  /*!
-    \brief Unconditional copying
-  */
+  //! Unconditional copying
   void copy (ITSCorrelation const &other);
-
-  /*!
-    \brief Unconditional deletion 
-  */
+  //! Unconditional deletion 
   void destroy(void);
 
  protected:

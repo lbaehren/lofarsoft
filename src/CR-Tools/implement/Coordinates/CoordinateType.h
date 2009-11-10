@@ -42,7 +42,7 @@
 
 // CR-Tools
 #include <crtools.h>
-#include <Utilities/MConversions.h>
+#include <Coordinates/MConversions.h>
 
 using casa::Coordinate;
 using casa::LinearCoordinate;

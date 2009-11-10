@@ -21,7 +21,7 @@
 /* $Id$*/
 
 #include <ApplicationSupport/SkymapperTools.h>
-#include <Utilities/MConversions.h>
+#include <Coordinates/MConversions.h>
 
 using CR::ObservationData;
 using CR::SkymapGrid;

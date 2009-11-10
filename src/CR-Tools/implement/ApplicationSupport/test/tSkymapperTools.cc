@@ -18,15 +18,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
+/* casacore header files */
 #include <casa/aips.h>
 #include <casa/System/Aipsrc.h>
 #include <casa/Exceptions/Error.h>
 #include <images/Images/PagedImage.h>
 
+/* CR-Tools header files */
 #include <ApplicationSupport/SkymapperTools.h>
-#include <Utilities/MConversions.h>
+#include <Coordinates/MConversions.h>
 
 /*!
   \file tSkymapperTools.cc

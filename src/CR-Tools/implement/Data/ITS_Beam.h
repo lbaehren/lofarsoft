@@ -33,7 +33,6 @@
 
 using CR::DataReader;
 
-
 /*!
   \class ITS_Beam
 
@@ -138,9 +137,7 @@ class ITS_Beam : public DataReader {
 
   // --------------------------------------------------------------- Construction
 
-  /*!
-    \brief Default constructor
-   */
+  //! Default constructor
   ITS_Beam ();
 
   /*!
@@ -183,9 +180,7 @@ class ITS_Beam : public DataReader {
 
   // ---------------------------------------------------------------- Destruction
 
-  /*!
-    \brief Destructor
-  */
+  //! Destructor
   ~ITS_Beam ();
 
   // ------------------------------------------------------------------ Operators
@@ -254,23 +249,16 @@ class ITS_Beam : public DataReader {
 
   // -------------------------------------------------------------------- Methods
 
-  /*!
-    \brief Get the raw time series after ADC conversion
-    
-    \return fx -- Raw ADC time series, [Counts]
-  */
+  //! Get the raw time series after ADC conversion
   Matrix<Double> fx ();
+  //! Get the raw time series after ADC conversion
+  void fx (Matrix<Double> &data);
 
  private:
 
-  /*!
-    \brief Unconditional copying
-  */
+  //! Unconditional copying
   void copy (ITS_Beam const &other);
-
-  /*!
-    \brief Unconditional deletion 
-  */
+  //! Unconditional deletion 
   void destroy(void);
 
  protected:
