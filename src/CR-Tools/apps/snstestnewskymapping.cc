@@ -396,6 +396,7 @@ int main (int argc,
   string arrayspread;
   string selection;
 
+  
 
   //Read file:
   b_file>> pixels;
@@ -407,8 +408,9 @@ int main (int argc,
   b_file>> nframes;
   b_file>> blocksperframe;
   b_file>> startblock;
-	
+	cout << "startblock = " << startblock << endl;
   b_file>> selection;
+	cout << "selection = "<< selection << endl;
   b_file>> arrayspread;
 
  // check out the antennaselection
@@ -429,7 +431,7 @@ int main (int argc,
       antennaselection[i] = (rcu_ids[i]%2==1||rcu_ids[i]%2==0);
     }
   } else {
-    cout <<"Another selection than odd, even or all is not implemented yet";
+    cout <<"Another selection than odd, even or all is not implemented yet " << selection;
   }
 		
   int nUsedants=0;
@@ -464,9 +466,12 @@ int main (int argc,
     cout << "testnewskymapping::simpleImage Setting up ObsInfo"  << endl;
     std::string telescope  = "LOFAR CS302";
     std::string observer   = "John Doe";
-    casa::ObsInfo info;
-    info.setTelescope(telescope);
-    info.setObserver(observer);
+	uint MStime = dr[0]->time()(0);
+	casa::MEpoch obsDate(MVEpoch(Quantity(MStime/86400.+40587, "d")),MEpoch::Ref(MEpoch::UTC));
+	casa::ObsInfo info;
+	info.setTelescope(telescope);
+	info.setObserver(observer);
+	info.setObsDate(obsDate);
     // Spatial coordinates
     cout << "testnewskymapping::simpleImage Setting up SpatialCoordinate"  << endl;
     std::string refcode    = "AZEL";
@@ -495,7 +500,8 @@ int main (int argc,
     uint nofFrames         = nframes;
     TimeFreqCoordinate timeFreq (blocksize, nofBlocksPerFrame, nofFrames,false);
     timeFreq.setNyquistZone(1);
-    timeFreq.setSampleFrequency(2e8);
+	if(arrayspread=="HBA"){ timeFreq.setNyquistZone(2); cout << "using nyquistzone 2\n";}
+	timeFreq.setSampleFrequency(2e8);
     
     // Skymap coordinate
     cout << "testnewskymapping::simpleImage Setting up SkymapCoordinate"  << endl;
@@ -667,9 +673,9 @@ int main (int argc,
     // Remove the low and high frequencies, which contain noise:
     int startrow,nrows,startcol,ncol;
     startcol = 0; ncol = nUsedants;
-    startrow = 0; nrows =  (nfreq*30)/100;
+    startrow = 0; nrows =  (nfreq*40)/100;
     data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-    nrows = (nfreq*15)/100;
+    nrows = (nfreq*40)/100;
     startrow = nfreq-nrows;
     data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
     
@@ -737,6 +743,22 @@ int main (int argc,
     startrow = 369;
     data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
     */
+		
+	/*    
+		 // For Crab pulse 1
+		 nrows = (nfreq*12)/513;  // Remove 2 frequency bins around peak frequency.
+		 
+		 startrow = 152;
+		nrows = (nfreq*16)/513;
+		 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+		 startrow = 350;
+		 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+		 		 	
+		 nrows = (nfreq*3)/513;  // Remove 2 frequency bins around peak frequency.
+		startrow = 419;
+		data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
+	*/	
+	
     
     data = data / AmplitudesC;
     skymapper.processData(data);
