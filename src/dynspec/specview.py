@@ -2,7 +2,7 @@
 
 """Program for ploting a spectrum from beam formed HDF5 files."""
 
-import pydal, pylab, numpy as np, time, sys, warnings, pyfits, rebin, os
+import pydal, pylab as pl, numpy as np, time, sys, warnings, pyfits, rebin, os
 
 #if (len(sys.argv) < 2): sys.exit("Usage: spectrum.py path")
 
@@ -14,9 +14,9 @@ filenames=['obs108_CS302LBA.h5','obs108_RS307HBA.h5','obs108_RS503HBA.h5']
 #filenames=['obs108_CS302LBA.h5']
 #os.listdir('.') #sys.argv[1]
     
-pylab.ion()
-pylab.rcParams['font.size']=15
-pylab.hold(False)
+pl.ion()
+pl.rcParams['font.size']=15
+pl.hold(False)
 warnings.simplefilter("ignore",DeprecationWarning)
 Fits_data=np.empty((0))
 
@@ -62,21 +62,20 @@ for filename_h5 in filenames:
         if (s%10==0 or s==Beam.nofSubbands()-3):
             print 'processing subband ',s,'(',time.time()-tstart,'s)'
             vmin=np.min(np.log(Spectrum.compress((Spectrum>1).flat)))
-            sp=pylab.imshow(np.log(Spectrum),extent=(0,dt,fmax,fmin),vmin=vmin,
+            sp=pl.imshow(np.log(Spectrum),extent=(0,dt,fmax,fmin),vmin=vmin,
                             aspect='auto', interpolation='nearest', vmax=imax)
             canvas=sp.figure.canvas
             try:   canvas.blit(sp.figure.bbox)
-            except AttributeError: pylab.draw(); canvas.blit(sp.figure.bbox)
+            except AttributeError: pl.draw(); canvas.blit(sp.figure.bbox)
     offset=offset+Beam.nofSubbands()
 
-pylab.grid()
-pylab.colorbar(fraction=0.07, pad=0)
-pylab.title(filename_h5[0:6])
-pylab.xlabel('time [s]')
-pylab.ylabel('subband no.')  #pylab.ylabel('frequency [MHz]')
+pl.grid()
+cb=pl.colorbar(fraction=0.07, pad=0); cb.set_label("log10(intenisty)")
+pl.title(filename_h5[0:6])
+pl.xlabel('time [s]')
+pl.ylabel('subband no.')  #pl.ylabel('frequency [MHz]')
 #np.savez("preview.npz",Spectrum=Spectrum, dt=dt)
 #Spectrum=np.load("Spectrum.npz")
-pylab.savefig(filename_h5[0:6]+".png")
+pl.savefig(filename_h5[0:6]+".png")
 print time.time()-tstart,"s"
-pylab.show()
-
+pl.show()
