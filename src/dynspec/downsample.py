@@ -2,7 +2,7 @@
 
 """Program for downsampling beam formed HDF5 files."""
 
-import pydal, pylab, numpy, time, sys, warnings, pyfits, rebin, os
+import pydal, pylab, numpy as np, time, sys, warnings, pyfits, rebin, os
 
 display=True
 
@@ -26,12 +26,10 @@ duration=samples*DDS.getAttribute_int("DOWNSAMPLE_RATE") \
 ds=1000
 ns=int(samples/ds)*ds
 dt=duration*ns/samples
-Subbands=numpy.empty((Beam.nofSubbands(),int(samples/ds)))
+Subbands=np.zeros((Beam.nofSubbands(),int(samples/ds)))
 nsub=Beam.nofSubbands()
 
 print "samples: ",samples," ns:",ns," ds: ",ds
-
-if display:    pylab.draw()
 
 for s in range(nsub):
     tstart=time.time()
@@ -39,17 +37,19 @@ for s in range(nsub):
     Subbands[s,]=subband
     print 'rebinning subband',s,' (',time.time()-tstart,'s)'
     if display:
-        sp=pylab.imshow(numpy.log(Subbands),extent=(0,dt,nsub,0),
+        vmin=np.min(np.log(Spectrum.compress((Spectrum>1).flat)))
+        sp=pylab.imshow(np.log(Subbands),extent=(0,dt,nsub,0), vmin=vmin,
                         aspect='auto', interpolation='nearest')
         canvas=sp.figure.canvas
-        canvas.blit(sp.figure.bbox)
+        try:   canvas.blit(sp.figure.bbox)
+        except AttributeError: pylab.draw(); canvas.blit(sp.figure.bbox)
         
 pylab.colorbar(fraction=0.07, pad=0)
 pylab.xlabel('time [s]')
 pylab.ylabel('frequency [MHz]')
 pylab.title(filename_h5)
-#numpy.savez("preview.npz",Subbands=Subbands, dt=dt)
-#Subbands=numpy.load("Subbands.npz")
+#np.savez("preview.npz",Subbands=Subbands, dt=dt)
+#Subbands=np.load("Subbands.npz")
 #pylab.savefig(filename+".png")
 HDU = pyfits.PrimaryHDU(Subbands)
 HDU.writeto(filename_fits)
