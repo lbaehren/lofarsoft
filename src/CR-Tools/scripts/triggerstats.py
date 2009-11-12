@@ -46,6 +46,27 @@ def triggersFilteredByThreshold(listOfTriggers, threshold):
             outList.append(record)
     return outList
 
+def triggersFilteredByRCUNumber(listOfTriggers, rcu):
+    outList = []
+    for record in listOfTriggers:
+        if int(record[RCUnrKey]) == rcu:
+            outList.append(record)
+    return outList
+
+def listOfTimeDifferences(listOfTriggers, rcu):
+    firstTime = int(listOfTriggers[0][timeKey])
+    print firstTime
+    lastTime = 0
+    i=0
+    for record in listOfTriggers:
+        if int(record[RCUnrKey]) == rcu:
+            i += 1
+            thisTime = int(record[timeKey])
+            thisSample = int(record[sampleKey])
+            diff = thisTime + float(thisSample) / 200.0e6 - lastTime
+            print str(i) + ': ' + str(diff)
+            lastTime = thisTime + float(thisSample / 200.0e6)
+
 numberOfRCUsperStation = 96;
 # keys for our trigger dictionary; separate lists for some of the statistics
 RCUnrKey = 'RCUnr';             RCUnr = [] 
@@ -224,7 +245,7 @@ sortedTriggerList = sorted(triggerList, compare_by(timeKey, sampleKey) )
 # Pulse information can then be extracted just from the triggerList, as we know which ones belong together.
 
 lastTimeInSamples = 0; 
-timeWindow = 100000 # window for pulse in samples
+timeWindow = 10000 # window for pulse in samples
 i = 0
 pulseIndices.append(0) # first pulse starts at 0
 for record in sortedTriggerList: # pulse search
@@ -259,12 +280,15 @@ mglGraphPS = 1
 graph = mglGraph(mglGraphPS, width, height)
 
 graph.Clf()
-graph.SetFontSize(2.0)
+graph.SetFontSize(2.5)
 # set y-min range so you can just see 1 count in the entire interval.
 yRangeMin = 0.95 / minutes
 graph.Title("Histogram of number of RCUs per pulse")
 
 graph.SetRanges(0.0, 30, yRangeMin, 2 * gY.Max('x')[0]) # needs better x-ranging!
+
+graph.Puts(float(30) * 0.5, 2 * gY.Max('x')[0]*1.05, 0, "Coincidence window size = " + format(timeWindow, "6.0f"))
+
 # make logplot
 graph.SetOrigin(0.0, yRangeMin) 
 graph.SetFunc("","lg(y)","") 
