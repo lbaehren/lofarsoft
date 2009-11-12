@@ -90,13 +90,13 @@ add_dependencies (tempo_install tempo_build tempo_unpack)
 ##
 ## ==============================================================================
 
-set (ppgplot_cmake_build TRUE)
+#set (ppgplot_cmake_build TRUE)
 
-if (ppgplot_cmake_build)
+#if (ppgplot_cmake_build)
   
   add_subdirectory (ppgplot1.1-modified)
   
-else (ppgplot_cmake_build)
+#else (ppgplot_cmake_build)
   
   set (ppgplot_version "1.1")
   set (ppgplot_name "ppgplot${ppgplot_version}-modified")
@@ -110,18 +110,21 @@ else (ppgplot_cmake_build)
     )
   
   get_filename_component(GFORTRAN_LIBRARY_DIR ${GFORTRAN_LIBRARY} PATH)
-  
+
+configure_file (
+    ${PULSAR_SOURCE_DIR}/external/ppgplot/setup.py.in
+    ${PULSAR_SOURCE_DIR}/external/ppgplot/setup.py
+)
+
 add_custom_target (ppgplot_build
-  COMMAND echo "Using PGPLOT include dir:" ${include_locations}
-  COMMAND echo "Using PGPLOT library dir:" ${lib_locations} 
-  COMMAND echo "check GFORTRAN_LIBRARIES:" ${GFORTRAN_LIBRARIES}
-  COMMAND echo "check GFORTRAN_LIBRARY:" ${GFORTRAN_LIBRARY_DIR}
-  COMMAND python setup.py build_ext -I"${include_locations}" -I"${NUMPY_INCLUDES}" -I"${NUMPY_INCLUDES}/numpy" -L"${lib_locations}" -L${GFORTRAN_LIBRARY_DIR} -L${PGPLOT_LIBRARY_DIR}
+  COMMAND cp ${PULSAR_SOURCE_DIR}/external/ppgplot/setup.py ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}/setup.py
+  COMMAND python setup.py build_ext
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}
   COMMENT "Building project PPGPLOT in ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}..."
-  COMMENT "Building project PPGPLOT with command: python setup.py build_ext -I${include_locations} -L${lib_locations} -L${GFORTRAN_LIBRARIES} -L${PGPLOT_LIBRARY_DIR}"
+  COMMENT "Building project PPGPLOT with command: python ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}/setup.py build_ext"
   )
 add_dependencies (ppgplot_build ppgplot_unpack)
+
 
 add_custom_target (ppgplot_install
   COMMAND cp ppgplot ${CMAKE_INSTALL_PREFIX}/bin
@@ -130,4 +133,4 @@ add_custom_target (ppgplot_install
   )
 add_dependencies (ppgplot_install ppgplot_build ppgplot_unpack)
 
-endif (ppgplot_cmake_build)
+#endif (ppgplot_cmake_build)
