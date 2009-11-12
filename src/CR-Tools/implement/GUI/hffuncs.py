@@ -383,8 +383,8 @@ class hfPlotPanel(hffunc):
         yminval=min(toList(gdbo["'yminval"].val()))
         ymaxval=max(toList(gdbo["'ymaxval"].val()))
         self.selected=self.data.isNeighbour("SelectBoard")
-        self.GraphObject.SetFontSize(3.)
         self.GraphObject.SetFontDef("rR:r")
+        self.GraphObject.SetFontSize(3.)
         self.GraphObject.SetCut(False);
         self.GraphObject.SetBaseLineWidth(1); 
         self.GraphObject.SetTickLen(0.3);
@@ -440,8 +440,8 @@ class hfPlotPanel(hffunc):
             self.GraphObject.AdjustTicks("y")
         self.GraphObject.SetFunc(xfunc,yfunc,"");
         self.GraphObject.SetTuneTicks(True,-1.2)
-        self.GraphObject.SetTickTemplX("%.4g")
-        self.GraphObject.SetTickTemplY("%.4g")
+        self.GraphObject.SetXTT("%.4g")
+        self.GraphObject.SetYTT("%.4g")
         self.GraphObject.Axis("xy")
         if self.selected: self.GraphObject.Box("r")
         else: self.GraphObject.Box("g")

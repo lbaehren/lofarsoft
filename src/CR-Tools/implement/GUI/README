@@ -1,3 +1,9 @@
+DON'T READ THIS - COMPLETELY OUTDATED ....
+
+
+ cp /Users/falcke/LOFAR/usg/build/mathgl/mathgl/widgets/libmgl-qt*dylib /Users/falcke/LOFAR/usg/release/lib/
+
+
 ------------------------------------------------------------------------
                  README File for hfplot/hfget 
          - the (eventually) hyper-flexible plotting package -
