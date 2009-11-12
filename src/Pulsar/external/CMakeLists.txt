@@ -94,7 +94,7 @@ add_dependencies (tempo_install tempo_build tempo_unpack)
 
 #if (ppgplot_cmake_build)
   
-  add_subdirectory (ppgplot1.1-modified)
+#  add_subdirectory (ppgplot1.1-modified)
   
 #else (ppgplot_cmake_build)
   
