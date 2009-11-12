@@ -19,6 +19,13 @@ include_directories (${PULSAR_SOURCE_DIR}/apps/presto/include)
 add_subdirectory (src)
 add_subdirectory (bin)
 add_subdirectory (clig)
+add_subdirectory (python)
+
+add_custom_target (presto_includes
+  COMMAND cp include/* ${CMAKE_INSTALL_PREFIX}/include/
+  WORKING_DIRECTORY ${PULSAR_SOURCE_DIR}/apps/presto
+  COMMENT "Install presto include files from ${PULSAR_SOURCE_DIR}/apps/presto/include into ${CMAKE_INSTALL_PREFIX}/include..."
+  )
 
 if (PULSAR_BUILD_TESTS)
   add_subdirectory (tests)
