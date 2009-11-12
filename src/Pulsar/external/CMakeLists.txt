@@ -118,18 +118,18 @@ configure_file (
 
 add_custom_target (ppgplot_build
   COMMAND cp ${PULSAR_SOURCE_DIR}/external/ppgplot/setup.py ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}/setup.py
-  COMMAND python setup.py build_ext
+  COMMAND python setup.py build_ext --inplace
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}
   COMMENT "Building project PPGPLOT in ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}..."
-  COMMENT "Building project PPGPLOT with command: python ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}/setup.py build_ext"
+  COMMENT "Building project PPGPLOT with command: python ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}/setup.py build_ext --inplace"
   )
 add_dependencies (ppgplot_build ppgplot_unpack)
 
 
 add_custom_target (ppgplot_install
-  COMMAND cp ppgplot ${CMAKE_INSTALL_PREFIX}/bin
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}/src
-  COMMENT "Install project PPGPLOT libraries into ${CMAKE_INSTALL_PREFIX}/lib..."
+  COMMAND cp ppgplot.so ${CMAKE_INSTALL_PREFIX}/bin
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}
+  COMMENT "Install project PPGPLOT library ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}/ppgplot.so into ${CMAKE_INSTALL_PREFIX}/lib..."
   )
 add_dependencies (ppgplot_install ppgplot_build ppgplot_unpack)
 
