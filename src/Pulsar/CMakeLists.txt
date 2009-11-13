@@ -272,6 +272,16 @@ if (prefix)
   set (CMAKE_INSTALL_PREFIX ${prefix}/share/pulsar) 
 endif (prefix)
 
+if (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
+  message (STATUS "[PULSAR] Installation location ${CMAKE_INSTALL_PREFIX} exists!")
+else (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
+  message (STATUS "[PULSAR] Installation location ${CMAKE_INSTALL_PREFIX} does not exist!")
+  message (STATUS "[PULSAR] Creating installation location ${CMAKE_INSTALL_PREFIX}")
+  EXECUTE_PROCESS( COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX})
+  EXECUTE_PROCESS( COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/bin)
+  EXECUTE_PROCESS( COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/lib)
+endif (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
+
 # skip the full RPATH for the build tree
 set (CMAKE_SKIP_BUILD_RPATH YES)
 
