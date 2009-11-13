@@ -24,6 +24,11 @@ add_custom_target (ppgplot_bindings_build
   )
 
 add_custom_target (ppgplot_bindings_install
+  COMMAND rm -rf ${CMAKE_BINARY_DIR}/apps/presto/python/*
+  COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/ppgplot_src ${CMAKE_BINARY_DIR}/apps/presto/python
+  COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/presto_src ${CMAKE_BINARY_DIR}/apps/presto/python
+  COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/wrappers ${CMAKE_BINARY_DIR}/apps/presto/python
+  COMMAND cp ${CMAKE_SOURCE_DIR}/apps/presto/python/setup.py ${CMAKE_BINARY_DIR}/apps/presto/python/
   COMMAND ${PYTHON_EXECUTABLE} setup.py install --home=${CMAKE_INSTALL_PREFIX}/lib/python
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/presto/python
   COMMENT "Installing project presto python bingings for ${PULSAR_BINARY_DIR}/apps/presto/python ..."
