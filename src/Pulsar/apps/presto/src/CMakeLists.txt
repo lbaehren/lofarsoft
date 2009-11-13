@@ -104,6 +104,8 @@ add_dependencies (presto
   bf2presto_install
   presto_includes
   presto_pyscripts_install
+  presto_pylibscripts_install
+  presto_clig_install
   )
 
 ##__________________________________________________________
