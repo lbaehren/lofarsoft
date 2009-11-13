@@ -33,3 +33,4 @@ add_custom_target (ppgplot_bindings_install
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/presto/python
   COMMENT "Installing project presto python bingings for ${PULSAR_BINARY_DIR}/apps/presto/python ..."
   )
+add_dependencies (ppgplot_bindings_install presto_pyscripts_install presto)
