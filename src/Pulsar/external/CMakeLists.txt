@@ -127,7 +127,7 @@ add_dependencies (ppgplot_build ppgplot_unpack)
 
 
 add_custom_target (ppgplot_install
-  COMMAND cp ppgplot.so ${CMAKE_INSTALL_PREFIX}/bin
+  COMMAND cp ppgplot.so ${CMAKE_INSTALL_PREFIX}/lib
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}
   COMMENT "Install project PPGPLOT library ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}/ppgplot.so into ${CMAKE_INSTALL_PREFIX}/lib..."
   )
