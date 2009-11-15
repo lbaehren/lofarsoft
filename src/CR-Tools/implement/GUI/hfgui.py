@@ -531,6 +531,7 @@ class hfQtPlot(QtGui.QWidget):
 #self=d["QtPanel'PlotWidget"].getPy()
 #to get access to the above functions
 #e.g. self.xdatatype
+#in hfnet.py this is already defined as "qtgui"
 
 
 execfile("hfgui2_ui.py")

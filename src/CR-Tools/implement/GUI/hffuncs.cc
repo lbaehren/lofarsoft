@@ -1,7 +1,7 @@
 //================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfprep.awk
 //================================================================================
-//     File was generated from - on Do Nov 12 11:10:23 CET 2009
+//     File was generated from - on Sat Nov 14 23:14:53 CET 2009
 //--------------------------------------------------------------------------------
 //
 //#define DBG_MODE 0
@@ -123,8 +123,10 @@ void ObjectFunctionClass::process_end(){
 //the compiler knows which methods to create.
 template <class T>
 void ObjectFunctionClass::instantiate_one(){
-  T val; HString s = "";
+  vector<T> vec; T val; HString s = "";
   setParameter(s,val);
+  getParameter(s,vec);
+  putParameter(s,vec);
   getParameterDefault<T>(s);
   putResult("",val);
 }; 
@@ -315,7 +317,7 @@ until the network has changed again
 void ObjectFunctionClass::setParameterObjectPointer(HString name, Data* ptr){ parameter_pointer[name]=ptr;}
 
 /*!
-\brief Retrieve the corresponding parameter object (to name) and return its value. If object does not exist, create it and return and assign the default value
+\brief Retrieve the corresponding parameter object (with name "name") and return its value. If object does not exist, create it and return and assign the default value
 */
 
 template <class T>
@@ -329,10 +331,46 @@ T ObjectFunctionClass::getParameter(const HString name, const T defval){
   };
 }
 
+/*!
+\brief Retrieve the corresponding parameter object (with name "name") and return its value in the vector (vec). If object does not exist, create it and return and assign the default values which are assumed to be in vec. 
+*/
+
+template <class T>
+void ObjectFunctionClass::getParameter(const HString name, vector<T> &vec){
+  Data * obj=getParameterObject(name);
+  if (obj->Empty()) {
+    obj->noMod()->put(vec);
+  } else {
+    obj->get(vec);
+  };
+}
+
+/*!
+This will look for a parameter object of name "name" and then store in it (using "put") the value val.
+
+A parameter object is in principle a normal object, but there is a
+particular order for searching for it (e.g., looking for one that is
+connected to an object called "Parameter" that belongs to the current
+object).
+ */
 template <class T>
 T ObjectFunctionClass::putParameter(const HString name, const T val){
   Data * obj=getParameterObject(name);
   obj->noMod()->putOne(val);
+}
+
+/*!
+This will look for a parameter object of name "name" and then store in it (using "put") the vector vec.
+
+A parameter object is in principle a normal object, but there is a
+particular order for searching for it (e.g., looking for one that is
+connected to an object called "Parameter" that belongs to the current
+object).
+ */
+template <class T>
+T ObjectFunctionClass::putParameter(const HString name, vector<T>& vec){
+  Data * obj=getParameterObject(name);
+  obj->noMod()->put(vec);
 }
 
 
@@ -362,7 +400,7 @@ function call.
 
  */
 template <class T>  
-Data* ObjectFunctionClass::putVecResult(HString name,vector<T> vec){
+Data* ObjectFunctionClass::putResult(HString name,vector<T> vec){
   Data* robj=getResultObject(name);
   robj->put_silent(vec);
   return data_pointer;
@@ -405,7 +443,7 @@ vector<HString> ObjectFunctionClass::getParameterList(HString first_element) {
   if (first_element!="") vec.push_back(first_element);
   while (it != parameter_list.end()) {
     vec.push_back((it->second).name);
-    it++;
+    ++it;
   };
   return vec;
 }
@@ -445,7 +483,7 @@ ObjectFunctionClass::~ObjectFunctionClass(){
   while (it !=parameter_list.end()){
     DBG("~ObjectFunctionClass(): delete parameter " << (it->second).name);
     del_value ((it->second).ptr,(it->second).type);
-    it++;
+    ++it;
   };
 };
 
@@ -679,7 +717,7 @@ bool DataFuncLibraryClass::inLibrary(HString name, HString library){
 vector<HString> DataFuncLibraryClass::listFunctions(bool doprint){
   vector<HString> out;
   HString s;
-  for (it=func_library.begin();it!=func_library.end();it++) {
+  for (it=func_library.begin();it!=func_library.end();++it) {
     s=(it->second).getName(true) + " - " + (it->second).getDocstring(); 
     out.push_back(s);
     if (doprint) cout << s <<endl;
@@ -856,10 +894,12 @@ DEFINE_PROCESS_CALLS\
  ~DataFunc_$Lib_$Name(){cleanup(); } \
  \
 void setParameters(){\
+SET_FUNC_VECPARAMETER_AWK($*VecPar);\
 SET_FUNC_PARAMETER_AWK($*Par);\
 };\
  \
 template <class T> void process(F_PARAMETERS) {\  
+  GET_FUNC_VECPARAMETER_AWK($*VecPar);\
   GET_FUNC_PARAMETER_AWK($*Par);
 
 $END: Function }; DATAFUNC_CONSTRUCTOR($Name,$Lib,"$Info",$Type,$buffered);
@@ -903,7 +943,7 @@ template <class T> void process(F_PARAMETERS) {
   GET_FUNC_PARAMETER_AWK(UnitScaleFactor, HNumber, 1.0);
   dp->getFirstFromVector(*vp,vs);
   INIT_FUNC_ITERATORS(it,end);
-  while (it!=end) {*it=hf_div(*it,UnitScaleFactor);it++;};
+  while (it!=end) {*it=hf_div(*it,UnitScaleFactor);++it;};
 }
 //$END Function -----------------------------------------------------------------
 }; DATAFUNC_CONSTRUCTOR(Unit,Sys,"Multiplies the data with a unit scale factor and also returns the apropriate unit string.",NUMBER,false);
@@ -1051,7 +1091,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_sqrt(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1087,7 +1127,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_abs(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1123,7 +1163,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_tan(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1159,7 +1199,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_acos(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1195,7 +1235,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_tanh(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1231,7 +1271,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_asin(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1267,7 +1307,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_atan(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1303,7 +1343,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_ceil(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1339,7 +1379,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_cos(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1375,7 +1415,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_cosh(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1411,7 +1451,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_exp(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1447,7 +1487,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_floor(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1483,7 +1523,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_log(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1519,7 +1559,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_log10(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1555,7 +1595,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_square(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1591,7 +1631,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_sin(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1627,7 +1667,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_negative(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1663,7 +1703,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_sinh(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1699,7 +1739,7 @@ template <class T> void process(F_PARAMETERS) {
  
   while (it!=end) {
    *it=hf_ssqrt(*it);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1916,7 +1956,7 @@ template <class T> void process(F_PARAMETERS) {
   HNumber fac=180.0/M_PI;
   while (it!=end) {
     *it=hf_mul(*it,fac);
-   it++;
+   ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1964,7 +2004,7 @@ template <class T> void process(F_PARAMETERS) {
 
   while (it!=end) {
     *it=hf_mul(*it,*it);
-   it++;
+   ++it;
   };
 
 }
@@ -2023,7 +2063,7 @@ template <class T> void process(F_PARAMETERS) {
     T val = rvec[0];
     while (it!=end) {
       *it=hf_div(*it,val);
-      it++;
+      ++it;
     };
   } else {
     typedef typename vector<T>::iterator iterator_TT;
@@ -2032,7 +2072,7 @@ template <class T> void process(F_PARAMETERS) {
     iterator_TT beg2=it2;
     while (it!=end) {
       *it=hf_div(*it,*it2);
-      it++;it2++;
+      ++it;it2++;
       if (it2==end2) {it2=beg2;};
     };
   };
@@ -2086,7 +2126,7 @@ template <class T> void process(F_PARAMETERS) {
     T val = rvec[0];
     while (it!=end) {
       *it=hf_pow(*it,val);
-      it++;
+      ++it;
     };
   } else {
     typedef typename vector<T>::iterator iterator_TT;
@@ -2095,7 +2135,7 @@ template <class T> void process(F_PARAMETERS) {
     iterator_TT beg2=it2;
     while (it!=end) {
       *it=hf_pow(*it,*it2);
-      it++;it2++;
+      ++it;it2++;
       if (it2==end2) {it2=beg2;};
     };
   };
@@ -2149,7 +2189,7 @@ template <class T> void process(F_PARAMETERS) {
     T val = rvec[0];
     while (it!=end) {
       *it=hf_sub(*it,val);
-      it++;
+      ++it;
     };
   } else {
     typedef typename vector<T>::iterator iterator_TT;
@@ -2158,7 +2198,7 @@ template <class T> void process(F_PARAMETERS) {
     iterator_TT beg2=it2;
     while (it!=end) {
       *it=hf_sub(*it,*it2);
-      it++;it2++;
+      ++it;it2++;
       if (it2==end2) {it2=beg2;};
     };
   };
@@ -2212,7 +2252,7 @@ template <class T> void process(F_PARAMETERS) {
     T val = rvec[0];
     while (it!=end) {
       *it=hf_mul(*it,val);
-      it++;
+      ++it;
     };
   } else {
     typedef typename vector<T>::iterator iterator_TT;
@@ -2221,7 +2261,7 @@ template <class T> void process(F_PARAMETERS) {
     iterator_TT beg2=it2;
     while (it!=end) {
       *it=hf_mul(*it,*it2);
-      it++;it2++;
+      ++it;it2++;
       if (it2==end2) {it2=beg2;};
     };
   };
@@ -2275,7 +2315,7 @@ template <class T> void process(F_PARAMETERS) {
     T val = rvec[0];
     while (it!=end) {
       *it=hf_add(*it,val);
-      it++;
+      ++it;
     };
   } else {
     typedef typename vector<T>::iterator iterator_TT;
@@ -2284,7 +2324,7 @@ template <class T> void process(F_PARAMETERS) {
     iterator_TT beg2=it2;
     while (it!=end) {
       *it=hf_add(*it,*it2);
-      it++;it2++;
+      ++it;it2++;
       if (it2==end2) {it2=beg2;};
     };
   };
@@ -2293,17 +2333,11 @@ template <class T> void process(F_PARAMETERS) {
 }; DATAFUNC_CONSTRUCTOR(add,Math,"Performs the operation add between the data vector and a reference object",NUMBER,false);
 //$ENDITERATE
 
-
-//========================================================================
-// END MATH LIBRARY FUNCTIONS
-//========================================================================
-
-
 //------------------------------------------------------------------------------
 //$NEW: Function
 /*------------------------------------------------------------------------------
-Lib: Sys
-Name: Offset
+Lib: Math
+Name: SubtractOffset
 Info: Subtracts the first elements in the data vector from the entire data vector.
 Type: NUMBER
 buffered: false
@@ -2311,16 +2345,16 @@ updateable: false
 Par: OffsetValue, HNumber, 0.0
 Par: OffsetFixed, HInteger, int(false)
 ------------------------------------------------------------------------------*/
-class DataFunc_Sys_Offset : public ObjectFunctionClass { 
+class DataFunc_Math_SubtractOffset : public ObjectFunctionClass { 
 public:
 DEFINE_PROCESS_CALLS
- DataFunc_Sys_Offset (Data* dp) : ObjectFunctionClass(dp){	
+ DataFunc_Math_SubtractOffset (Data* dp) : ObjectFunctionClass(dp){	
    dp->setUpdateable(false);		
     setParameters();
     startup();
     getParameters();
     }
- ~DataFunc_Sys_Offset(){cleanup(); } 
+ ~DataFunc_Math_SubtractOffset(){cleanup(); } 
  
 void setParameters(){
 SET_FUNC_PARAMETER_AWK(OffsetValue, HNumber, 0.0);
@@ -2347,11 +2381,16 @@ if (bool(OffsetFixed)) {
 
 while (it!=end) {
   *it=hf_sub(*it,off);
-  it++;
+  ++it;
  };
 }
 //$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(Offset,Sys,"Subtracts the first elements in the data vector from the entire data vector.",NUMBER,false);
+}; DATAFUNC_CONSTRUCTOR(SubtractOffset,Math,"Subtracts the first elements in the data vector from the entire data vector.",NUMBER,false);
+
+
+//========================================================================
+// END MATH LIBRARY FUNCTIONS
+//========================================================================
 
 
 //------------------------------------------------------------------------------
@@ -2456,6 +2495,55 @@ template <class T> void process(F_PARAMETERS) {
 
 */
 
+/*!
+  \brief The function converts a column in an aips++ matrix to an stl vector
+ */
+
+template <class S, class T>
+void aipscol2stlvec(casa::Matrix<S> &data, vector<T>& stlvec, const HInteger col){
+    HInteger i,nrow,ncol;
+//    vector<HNumber>::iterator p;
+    
+    nrow=data.nrow();
+    ncol=data.ncolumn();
+    //    if (ncol>1) {MSG("aipscol2stlvec: ncol="<<ncol <<" (nrow="<<nrow<<")");};
+    if (col>=ncol) {
+	ERROR("aipscol2stlvec: column number col=" << col << " is larger than total number of columns (" << ncol << ") in matrix.");
+	stlvec.clear();
+	return;
+    }
+
+    stlvec.resize(nrow);
+    CasaVector<S> CASAVec = data.column(col);
+    
+//    p=stlvec.begin();
+    
+    for (i=0;i<nrow;i++) {
+//	*p=mycast<T>(CASAVec[i]); 
+	stlvec[i]=mycast<T>(CASAVec[i]); 
+//	p++;
+    };
+}
+
+/*!
+  \brief The function converts an aips++ vector to an stl vector
+ */
+
+template <class S, class T>
+void aipsvec2stlvec(CasaVector<S>& data, vector<T>& stlvec){
+    HInteger i,n;
+//    vector<R>::iterator p;
+    
+    n=data.size();
+    stlvec.resize(n);
+//    p=stlvec.begin();
+    for (i=0;i<n;i++) {
+//	*p=mycast<T>(data[i]); 
+	stlvec[i]=mycast<T>(data[i]); 
+//	p++;
+    };
+}
+
 
 //------------------------------------------------------------------------------
 //$NEW: Function
@@ -2506,6 +2594,8 @@ union{void* ptr; CR::DataReader* drp; CR::LOFAR_TBB* tbb; CR::LopesEventIn* lep;
   //Create the a pointer to the DataReader object and store the pointer
   //Here we could have if statements depending on data types
       
+  vector<HInteger> Offsets,SampNum;
+
   DBG("DataFunc_CR_dataReaderObject: Opening File, Filename=" << Filename);
   if (Filetype=="LOPESEvent") {
     lep = new CR::LopesEventIn;
@@ -2514,11 +2604,18 @@ union{void* ptr; CR::DataReader* drp; CR::LOFAR_TBB* tbb; CR::LopesEventIn* lep;
     if (oldfilename!=Filename) {MSG("Filename="<<Filename);lep->summary();};
     oldfilename=Filename;
   } else if (Filetype=="LOFAR_TBB") {
-    tbb = new CR::LOFAR_TBB(Filename,32768);
-    MSG("ATTENTION: Hardcoded initial NBlocksize to 1024!");
+    tbb = new CR::LOFAR_TBB(Filename,1024);
     DBG("DataFunc_CR_dataReaderObject: tbb=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
     opened=tbb!=NULL;
     if (oldfilename!=Filename) {MSG("Filename="<<Filename);tbb->summary();};
+    if (opened) {
+      CasaVector<int> OffsetsCasa = tbb->sample_offset();
+      //      CasaVector<unsigned int> SampNumCasa = tbb->sample_number();
+      //int l; OffsetsCasa.shape(l);
+      //MSG("Offsets len =" << l); 
+      //aipsvec2stlvec(SampNumCasa, SampNum);
+      aipsvec2stlvec(OffsetsCasa, Offsets);
+      };
     oldfilename=Filename;
   } else {
     ERROR("DataFunc_CR_dataReaderObject: Unknown Filetype = " << Filetype  << ", name=" << dp->getName(true));
@@ -2526,6 +2623,7 @@ union{void* ptr; CR::DataReader* drp; CR::LOFAR_TBB* tbb; CR::LopesEventIn* lep;
   }
 
   putResult("Filetype",Filetype);
+  putResult("Offsets",Offsets);
 
   if (!opened){
     ERROR("DataFunc_CR_dataReaderObject: Opening file " << Filename << " failed." << " Objectname=" << dp->getName(true));
@@ -2552,8 +2650,9 @@ union{void* ptr; CR::DataReader* drp; CR::LOFAR_TBB* tbb; CR::LopesEventIn* lep;
   HInteger date=hdr.asuInt("Date"); putResult("Date",date);
   HString observatory=hdr.asString("Observatory"); putResult("Observatory",observatory);
   HInteger filesize=hdr.asInt("Filesize"); putResult("Filesize",filesize);
-  vector<HInteger> AntennaIDs; hdr.asArrayInt("AntennaIDs").tovector(AntennaIDs); putVecResult("AntennaIDs",AntennaIDs);
+  vector<HInteger> AntennaIDs; hdr.asArrayInt("AntennaIDs").tovector(AntennaIDs); putResult("AntennaIDs",AntennaIDs);
   HInteger nofAntennas=drp->nofAntennas();putResult("nofAntennas",nofAntennas);
+
   DBG("DataFunc_CR_dataReaderObject: Success.");
 }
 
@@ -2566,56 +2665,6 @@ void cleanup(){
 }; DATAFUNC_CONSTRUCTOR(dataReaderObject,CR,"Creates a DataReader object for reading CR data and stores its pointer.",POINTER,true);
 
 
-
-
-/*!
-  \brief The function converts a column in an aips++ matrix to an stl vector
- */
-
-template <class S, class T>
-void aipscol2stlvec(casa::Matrix<S> &data, vector<T>& stlvec, HInteger col){
-    HInteger i,nrow,ncol;
-//    vector<HNumber>::iterator p;
-    
-    nrow=data.nrow();
-    ncol=data.ncolumn();
-    //    if (ncol>1) {MSG("aipscol2stlvec: ncol="<<ncol <<" (nrow="<<nrow<<")");};
-    if (col>=ncol) {
-	ERROR("aipscol2stlvec: column number col=" << col << " is larger than total number of columns (" << ncol << ") in matrix.");
-	stlvec.clear();
-	return;
-    }
-
-    stlvec.resize(nrow);
-    CasaVector<S> CASAVec = data.column(col);
-    
-//    p=stlvec.begin();
-    
-    for (i=0;i<nrow;i++) {
-//	*p=mycast<T>(CASAVec[i]); 
-	stlvec[i]=mycast<T>(CASAVec[i]); 
-//	p++;
-    };
-}
-
-/*!
-  \brief The function converts an aips++ vector to an stl vector
- */
-
-template <class S, class T>
-void aipsvec2stlvec(CasaVector<S> data, vector<T>& stlvec){
-    HInteger i,n;
-//    vector<R>::iterator p;
-    
-    n=data.size();
-    stlvec.resize(n);
-//    p=stlvec.begin();
-    for (i=0;i<n;i++) {
-//	*p=mycast<T>(data[i]); 
-	stlvec[i]=mycast<T>(data[i]); 
-//	p++;
-    };
-}
 
 
 //------------------------------------------------------------------------------
@@ -2636,6 +2685,7 @@ Par: Filesize, HInteger, -1
 Par: Stride, HInteger, 0
 Par: Shift, HInteger, 0
 Par: Datatype, HString, "Fx"
+VecPar: Offsets, HInteger
 ------------------------------------------------------------------------------*/
 class DataFunc_CR_dataRead : public ObjectFunctionClass { 
 public:
@@ -2649,6 +2699,7 @@ DEFINE_PROCESS_CALLS
  ~DataFunc_CR_dataRead(){cleanup(); } 
  
 void setParameters(){
+SET_FUNC_VECPARAMETER_AWK(Offsets, HInteger);
 SET_FUNC_PARAMETER_AWK(File, HPointer, NULL);
 SET_FUNC_PARAMETER_AWK(Antenna, HInteger, 0);
 SET_FUNC_PARAMETER_AWK(Blocksize, HInteger, -1);
@@ -2661,6 +2712,7 @@ SET_FUNC_PARAMETER_AWK(Datatype, HString, "Fx");
 };
  
 template <class T> void process(F_PARAMETERS) {
+  GET_FUNC_VECPARAMETER_AWK(Offsets, HInteger);
   GET_FUNC_PARAMETER_AWK(File, HPointer, NULL);
   GET_FUNC_PARAMETER_AWK(Antenna, HInteger, 0);
   GET_FUNC_PARAMETER_AWK(Blocksize, HInteger, -1);
@@ -2688,7 +2740,13 @@ template <class T> void process(F_PARAMETERS) {
   drp->setBlocksize(Blocksize);
   drp->setBlock(Block);
   drp->setStride(Stride);
-  drp->setShift(Shift);
+  if (Offsets.size()>0) {
+    MSG("setShift: Antenna="<< Antenna <<", Shift=" << Shift-Offsets[Antenna]); 
+    drp->setShift(Shift-Offsets[Antenna]);
+  } else {
+    drp->setShift(Shift);
+  };
+
   HInteger maxBlock=Filesize/Blocksize-1;	
   putResult("maxBlock",maxBlock);
 
@@ -2705,11 +2763,18 @@ template <class T> void process(F_PARAMETERS) {
 
   if (Datatype=="Time") {
     //    vector<HNumber>* vp2; *vp2 = drp->timeValues().tovec();
-    aipsvec2stlvec(drp->timeValues(),*vp);
+    CasaVector<double> val = drp->timeValues();
+    aipsvec2stlvec(val,*vp);
   }
   else if (Datatype=="Frequency") {
     //vector<HNumber>* vp2; *vp2 = drp->frequencyValues().tovec();
-    aipsvec2stlvec(drp->frequencyValues(),*vp);
+    CasaVector<double> val = drp->frequencyValues();
+    aipsvec2stlvec(val,*vp);
+  }
+  else if (Datatype=="Position") {
+    //vector<HNumber>* vp2; *vp2 = drp->frequencyValues().tovec();
+    CasaVector<unsigned int> val = drp->positions();
+    aipsvec2stlvec(val,*vp);
   }
   else if (Datatype=="Fx") {
     vector<HNumber>* vp2 = new vector<HNumber>;
@@ -2924,7 +2989,7 @@ PUBLISH_OBJECT_FUNCTION(Math,pow);
 PUBLISH_OBJECT_FUNCTION(Math,sub);
 PUBLISH_OBJECT_FUNCTION(Math,mul);
 PUBLISH_OBJECT_FUNCTION(Math,add);
-PUBLISH_OBJECT_FUNCTION(Sys,Offset);
+PUBLISH_OBJECT_FUNCTION(Math,SubtractOffset);
 PUBLISH_OBJECT_FUNCTION(Sys,print);
 PUBLISH_OBJECT_FUNCTION(Sys,range);
 PUBLISH_OBJECT_FUNCTION(CR,dataReaderObject);

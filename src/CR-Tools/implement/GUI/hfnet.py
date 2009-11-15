@@ -2,13 +2,14 @@
 
 defaultblocksize=2**10
 #defaultblocksize=2**16
+#print "--------------------------------------------"
+#print "Default Blocksize set to ",defaultblocksize
+#print "--------------------------------------------"
+#print "This can be edited in the file hfnet.py until the datareader bug is fixed."
+
 print "--------------------------------------------"
-print "Requires mathgl version 1.10 or higer!!!!!"
+print "Requires mathgl version 1.10 or higher!!!!!"
 print "--------------------------------------------"
-print "--------------------------------------------"
-print "Default Blocksize set to ",defaultblocksize
-print "--------------------------------------------"
-print "This can be edited in the file hfnet.py until the datareader bug is fixed."
 
 import pdb
 vf=FloatVec()
@@ -29,6 +30,7 @@ hfm=hfMainWindow(hfQtPlotWidget)
 hfm.raise_() # put it on top of all other windows
 hfm.show()  # and make it visible
 gui=hfm.ui # define an object which provides easy access to the GUI objects
+qtgui=d["QtPanel'PlotWidget"].getPy() # The object that contains the user GUI functions 
 
 ("GUI",gui) >> d["QtPanel"] # and store it, so that the objects have access to the GUI. 
 
@@ -65,7 +67,7 @@ d["PlotPanel'logX"].connect(gui.logx,"setChecked","bool")
 d["PlotPanel'logY"].connect(gui.logy,"setChecked","bool")
 
 d["DataPipeline'Block"].connect(gui.blocknumber,"setValue","int")
-#d["GlobalParameters'Blocksize"].connect(gui.blocksize,"setValue","int")
+d["DataPipeline'Blocksize"].connect(gui.blocksize,"setValue","int")
 d["Data:maxBlock"].FirstObject().connect(gui.blocknumber,"setMaximum","int",isSlot=False)
 d["Data:maxBlock"].FirstObject().connect(gui.blocknumberslider,"setMaximum","int",isSlot=False)
 d["Data'maxBlocksize"].connect(gui.blocksize,"setMaximum","int",isSlot=False)

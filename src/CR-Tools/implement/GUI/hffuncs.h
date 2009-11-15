@@ -1,7 +1,7 @@
 //================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfprep.awk
 //================================================================================
-//     File was generated from - on Do Nov 12 11:10:24 CET 2009
+//     File was generated from - on Sat Nov 14 23:14:53 CET 2009
 //--------------------------------------------------------------------------------
 //
 #ifndef HFFUNCS_H
@@ -181,8 +181,11 @@ private:
 #define GET_FUNC_PARAMETER( NAME, TYP ) TYP NAME=(getParameter(getParameterName(#NAME),getParameterDefault<TYP>(#NAME)));
 #define SET_FUNC_PARAMETER( NAME, TYP , DEFVAL) setParameter(#NAME,mycast<TYP>(DEFVAL));
 
-#define GET_FUNC_PARAMETER_AWK( NAME, TYP , DEFVAL) TYP NAME=(getParameter(getParameterName(#NAME),getParameterDefault<TYP>(#NAME)));
-#define SET_FUNC_PARAMETER_AWK( NAME, TYP , DEFVAL) setParameter(#NAME,mycast<TYP>(DEFVAL));
+#define GET_FUNC_PARAMETER_AWK( NAME, TYP , DEFVAL) TYP NAME=(getParameter(getParameterName(#NAME),getParameterDefault<TYP>(#NAME)))
+#define SET_FUNC_PARAMETER_AWK( NAME, TYP , DEFVAL) setParameter(#NAME,mycast<TYP>(DEFVAL))
+
+#define GET_FUNC_VECPARAMETER_AWK( NAME, TYP ) vector<TYP> NAME; getParameter(#NAME,NAME)
+#define SET_FUNC_VECPARAMETER_AWK( NAME, TYP ) vector<TYP> NAME; getParameter(#NAME,NAME)
 
 #define INIT_FUNC_ITERATORS(IT,END)		   \
   typedef typename vector<T>::iterator iterator_T; \
@@ -245,13 +248,17 @@ public:
   void setParameterObjectPointer(HString, Data*);
  
   template <class T>
+    void getParameter(const HString name, vector<T> &vec);
+  template <class T>
+    T putParameter(const HString name, vector<T> & vec);
+  template <class T>
     T getParameter(const HString name, const T defval);
   template <class T>
     T putParameter(const HString name, const T val);
   template <class T>  
-    Data* putResult(HString name, T val);
+    Data* putResult(HString name,vector<T> vec);
   template <class T>  
-    Data* putVecResult(HString name,vector<T> vec);
+    Data* putResult(HString name, T val);
 
   template <class T>
     void instantiate_one();

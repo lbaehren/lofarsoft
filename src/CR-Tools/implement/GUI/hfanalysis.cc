@@ -45,17 +45,47 @@ using namespace std;
 #include <GUI/hffuncs.h>  
 #include <crtools.h>
 
+/* Some explanations...
 
+See hfanalysis.h for actual definition
+
+#define STLVectorIteratorT typename vector<T>::iterator
+#define STLVectorIteratorI typename vector<HInteger>::iterator
+#define STLVectorIteratorN typename vector<HNumber>::iterator
+#define STLVectorIteratorC typename vector<HComplex>::iterator
+
+
+//Example on how to create a casa Vector with data storage identical to the stl vector:
+
+HInteger * storage = &(Offsets[0]);
+casa::IPosition shape(1,Offsets.size()); //tell casa the size of the vector
+CasaVector<HInteger> OffsetsCasa(shape,storage,casa::SHARE); 
+
+*/
+
+//Needed to create a Python wrapper for a function of a templated STL
+//vector of Integer, Number, Complex, and String type containing 0
+//extra parameters
+#define PythonWrapper_VecINCS_0_Parameters(FUNC) \
+  void (*FUNC##_I)(vector<HInteger> &vec) = &FUNC; \
+  void (*FUNC##_N)(vector<HNumber > &vec) = &FUNC; \
+  void (*FUNC##_C)(vector<HComplex > &vec) = &FUNC; \
+  void (*FUNC##_S)(vector<HString > &vec) = &FUNC
+#define PythonWrapper_VecINCS_1_TParameters(FUNC)  \
+  void (*FUNC##_I)(vector<HInteger> &vec,HInteger) = &FUNC;    \
+  void (*FUNC##_N)(vector<HNumber > &vec,HNumber) = &FUNC;	   \
+  void (*FUNC##_C)(vector<HComplex > &vec,HComplex) = &FUNC; \
+  void (*FUNC##_S)(vector<HString > &vec,HString) = &FUNC
 
 /*========================================================================
-  class ObjectFunctionClass
+  hfanalysis
   ========================================================================
-  
-  Generic class that object functions are based on
+  Collection of basic algorithms to operate on vectors
 */
 
 
 /*!
+  Implementation of the Gaussfunction
   \param x     - Position at which the Gaussian is evaluated
   \param sigma - Spread of the Gaussian
   \param mu    - Median value of the Gaussian
@@ -160,11 +190,11 @@ vector<HNumber> hWeights(address wlen, hWEIGHTS wtype){
   hence different types of arrays/vectors can be used.
 */
 template <class T> 
-void hRunningAverageT (const typename vector<T>::iterator idata_start,
-		       const typename vector<T>::iterator idata_end,
-		       const typename vector<T>::iterator odata_start,
-		       const typename vector<HNumber>::iterator weights_start,
-		       const typename vector<HNumber>::iterator weights_end)
+void hRunningAverageT (const STLVectorIteratorT idata_start,
+		       const STLVectorIteratorT idata_end,
+		       const STLVectorIteratorT odata_start,
+		       const STLVectorIteratorN weights_start,
+		       const STLVectorIteratorN weights_end)
 {
   address l=(weights_end-weights_start);
   /* Index of the central element of the weights vector (i.e., where it
@@ -173,10 +203,10 @@ void hRunningAverageT (const typename vector<T>::iterator idata_start,
   /* To avoid too many rounding errors with Integers */
   T fac = l*10;
 
-  typename vector<T>::iterator dit;
-  typename vector<T>::iterator dit2;
-  typename vector<T>::iterator din=idata_start;
-  typename vector<T>::iterator dout=odata_start;
+  STLVectorIteratorT dit;
+  STLVectorIteratorT dit2;
+  STLVectorIteratorT din=idata_start;
+  STLVectorIteratorT dout=odata_start;
   vector<HNumber>::iterator wit;
 
   while (din!=idata_end) {
@@ -202,9 +232,9 @@ void hRunningAverageT (const typename vector<T>::iterator idata_start,
   \brief Overloaded function to automatically calculate weights
 */
 template <class T> 
-void hRunningAverageT (const VecTit idata_start,
-		       const VecTit idata_end,
-		       const VecTit odata_start,
+void hRunningAverageT (const STLVectorIteratorT idata_start,
+		       const STLVectorIteratorT idata_end,
+		       const STLVectorIteratorT odata_start,
 		       address wlen,
 		       hWEIGHTS wtype)
 {
@@ -229,7 +259,7 @@ void hRunningAverageCasaVec (casa::Vector<T> &vec_in,
 			     hWEIGHTS wtype)
 {
   //  vec_out.assign(vec_in.size(),mycast<T>(0.0));
-  typedef typename vector<T>::iterator Tit;
+  typedef STLVectorIteratorT Tit;
   hRunningAverageT<T> (static_cast<Tit>(vec_in.cbegin()),
 		       static_cast<Tit>(vec_in.cend()),
 		       static_cast<Tit>(vec_in.cend()),
@@ -323,8 +353,8 @@ void hRunningAverageN (T * start_data_in,
 		       address weightslen)
 {
   /* Set up the iterators which are passed to the underlying function */
-  typedef typename vector<T>::iterator Tit;
-  typedef typename vector<HNumber>::iterator Nit;
+  typedef STLVectorIteratorT Tit;
+  typedef STLVectorIteratorN Nit;
   Tit idata_start=static_cast<Tit>(start_data_in);
   Tit odata_start=static_cast<Tit>(start_data_out);
   Nit weights_start=static_cast<Nit>(start_weights);
@@ -357,6 +387,68 @@ void (*hRunningAverageVec_C)(vector<HComplex> &vec_in,vector<HComplex> &vec_out,
   void (*hRunningAverageVec_C_2)(vector<HComplex> &vec_in,vector<HComplex> &vec_out) = &hRunningAverageVec;
 */
 
+//------------------------------------------------------------------------
+//Collection of simple functions operating on Vectors
+//------------------------------------------------------------------------
+
+
+//_______________________________________________________________________________
+//                                                               hNegate
+
+/*!
+
+  \brief The function will multiply each element in the vector with
+  -1. The input vector is also the output vector
+
+  \param data_start: STL Iterator pointing to the first element of an array with
+         input values.
+  \param data_end: STL Iterator pointing to the end of the input vector
+*/
+template <class T> 
+void hNegate (const STLVectorIteratorT data_start,
+	      const STLVectorIteratorT data_end
+	      )
+{
+  STLVectorIteratorT it=data_start;
+  T fac = mycast<T>(-1);
+  while (it!=data_end) {
+    *it=hf_mul(*it,fac);
+    ++it;
+  };
+} 
+
+//------Wrappers to hNegate --------
+template <class T> inline void hNegate (vector<T> &vec) {hNegate<T> (vec.begin(),vec.end());}
+template <class T> inline void hNegate (casa::Vector<T> &vec) {hNegate<T> (static_cast<STLVectorIteratorT>(vec.cbegin()),static_cast<STLVectorIteratorT>(vec.cbegin()));}
+PythonWrapper_VecINCS_0_Parameters(hNegate);
+//------End Wrappers to hNegate --------
+
+/*!
+
+  \brief Fills a vector with a constant number
+
+  \param data_start: STL Iterator pointing to the first element of an array with
+         input values.
+  \param data_end: STL Iterator pointing to the end of the input vector
+*/
+template <class T> 
+void hFill (const STLVectorIteratorT data_start,
+	    const STLVectorIteratorT data_end,
+	    T val
+	      )
+{
+  STLVectorIteratorT it=data_start;
+  while (it!=data_end) {
+    *it=val;
+    ++it;
+  };
+} 
+
+//------Wrappers to hFill --------
+template <class T> inline void hFill (vector<T> &vec, T val) {hFill<T> (vec.begin(),vec.end(),val);}
+template <class T> inline void hFill (casa::Vector<T> &vec, T val) {hFill<T> (static_cast<STLVectorIteratorT>(vec.cbegin()),static_cast<STLVectorIteratorT>(vec.cbegin()),val);}
+PythonWrapper_VecINCS_1_TParameters(hFill);
+//------End Wrappers to hFill --------
 
 void dummy_instantitate_templates(){
   casa::Vector<HNumber> v;

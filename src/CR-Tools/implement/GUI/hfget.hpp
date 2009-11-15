@@ -13,6 +13,8 @@ execfile("hfget.py")
 */
 
 
+#define hPyExposeINCS(FUNC)  def(#FUNC,FUNC##_I);def(#FUNC,FUNC##_N);def(#FUNC,FUNC##_C);def(#FUNC,FUNC##_S)
+#define hPyExposeINC(FUNC)  def(#FUNC,FUNC##_I);def(#FUNC,FUNC##_N);def(#FUNC,FUNC##_C)
 
 //Assignment of function pointers
 #define DEF_DATA_OID_NAME_FUNC_PY( TYPE, FUNC  ) \
@@ -418,6 +420,12 @@ boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_i
  def("hRunningAverage",hRunningAverageVec_I);
  def("hRunningAverage",hRunningAverageVec_C);
  def("hWeights",hWeights);
+
+ hPyExposeINCS(hNegate);
+ hPyExposeINCS(hFill);
+ 
+
+
 
  enum_<hWEIGHTS>("hWEIGHTS")
    .value("FLAT",WEIGHTS_FLAT)

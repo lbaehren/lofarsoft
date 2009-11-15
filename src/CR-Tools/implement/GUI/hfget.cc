@@ -140,6 +140,10 @@ template<class T> inline T mycast(const T v){return v;}
 
 //--Numbers ------------------------------------------------------------
 
+//Some Special cases to avoid ambiguity, hence first convert to common basic type
+template<class T> inline T mycast(const unsigned int v){return mycast<T>(static_cast<HInteger>(v));}
+
+
 //Convert to arbitrary class T if not specified otherwise
 template<class T> inline T mycast(const HPointer v){return mycast<T>(reinterpret_cast<HInteger>(v));}
 template<class T> inline T mycast(const HInteger v){return static_cast<T>(v);}
@@ -4046,6 +4050,7 @@ void mglDataSetVecI(mglData* md, vector<HInteger> &vec){
 void instantiate_hfget(DATATYPE type){
 
   Data d;
+  unsigned int ui;
 
   DEF_D_PTR(HInteger);
   DEF_VAL(HInteger);
@@ -4054,6 +4059,7 @@ void instantiate_hfget(DATATYPE type){
 
 #define SW_TYPE_COMM(EXT,TYPE) \
 vectostring(*d_ptr_##EXT); \
+ mycast<TYPE>(ui);\
 d.getFirstFromVector(*d_ptr_##EXT, NULL);\
 d.putOne(*val_##EXT);\
 d.putOne_silent(*val_##EXT);\

@@ -229,7 +229,7 @@ class hfGraphObject(hffunc):
         return 0
     def process(self,d):
         self.gr=mglGraph(mglGraphZB)
-        self.gr.LoadFont(self.FontName,self.FontPath)
+        print" Load Font disabled in hffuncs.py - self.gr.LoadFont(self.FontName,self.FontPath)"
         d.noMod()
         d.putPy(self.gr)
         return 0
@@ -384,7 +384,7 @@ class hfPlotPanel(hffunc):
         ymaxval=max(toList(gdbo["'ymaxval"].val()))
         self.selected=self.data.isNeighbour("SelectBoard")
         self.GraphObject.SetFontDef("rR:r")
-        self.GraphObject.SetFontSize(3.)
+        self.GraphObject.SetFontSize(9.)
         self.GraphObject.SetCut(False);
         self.GraphObject.SetBaseLineWidth(1); 
         self.GraphObject.SetTickLen(0.3);
@@ -466,8 +466,10 @@ class hfPlotPanel(hffunc):
         self.xAxisLabel+=xoffsettxt
         if not self.xAxisUnit=="": self.xAxisLabel=self.xAxisLabel+" ["+self.xAxisUnitPrefix+self.xAxisUnit+"]"
         if not self.yAxisUnit=="": self.yAxisLabel=self.yAxisLabel+" ["+self.yAxisUnitPrefix+self.yAxisUnit+"]"
+        self.GraphObject.SetFontSize(7.)
         self.GraphObject.Label("x",self.xAxisLabel,1)
         self.GraphObject.Label("y",self.yAxisLabel,1)
+        self.GraphObject.SetFontSize(5.)
         self.GraphObject.ClearLegend()
         if verbose: print "PlotPanel: plotted Box in Graphobject, calling PlotData"
         self.PlotData=self.data["'PlotData"]
@@ -516,7 +518,7 @@ class hfPlotWindow(hffunc):
             return 1
 #        print self.PipelineLauncher," --- ",d.getModFlags()
         self.GraphObject.Clf(self.BackgroundColor[0],self.BackgroundColor[1],self.BackgroundColor[2])
-#        self.GraphObject.Title(self.Title,"iC",-1.5)
+        self.GraphObject.Title(self.Title,"iC",-1.5)
         self.PlotPanel=self.data["'PlotPanel"]
 #Find out how many PlotPanels are in the network 
         if type(self.PlotPanel)==Data:  #One Object => just one panel
@@ -551,7 +553,6 @@ class hfPlotWindow(hffunc):
         else:
             print "Error: PlotWindow - PlotPanel not found."
             return 1
-        self.GraphObject.Title("TEST-Title","iC")
         self.data.noMod(); self.data.putPy(self.GraphObject)
         return 0
     def cleanup(self,d):

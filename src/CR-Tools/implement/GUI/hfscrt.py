@@ -1,3 +1,11 @@
+d["Filename"]="/Users/falcke/LOFAR/usg/data/lofar/RS307C-readfullsecond.h5"
+d["Data'Block"]=30
+d["Data'Blocksize"]=63488
+d["Data'Block"]=598
+qtgui.hfadd_fy("abs")
+qtgui.hfadd_fy("RunningAverage")
+
+
 vf=list2vec((1.0,2,3,2.,1.,3.,4.,2.,1.))
 v=FloatVec()
 w=hWeights(3,hWEIGHTS.LINEAR)
