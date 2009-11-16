@@ -84,7 +84,6 @@ set (libs
   Thread
   freetype
   Gui
-  pthread
   )
 
 foreach (lib ${libs})

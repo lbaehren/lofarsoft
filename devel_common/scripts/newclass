@@ -281,16 +281,16 @@ esac
 ## (e) Namespace settings
 
 case $var_useNamespace in
-  n)
+    n)
 	echo " --> Removing namespace markers";
-    cat $var_class.h | grep -v Namespace > tmp.h && mv tmp.h $var_class.h
-    cat $var_class.cc | grep -v Namespace > tmp.cc && mv tmp.cc $var_class.cc
+	cat $var_class.h | grep -v Namespace > tmp.h && mv tmp.h $var_class.h
+	cat $var_class.cc | grep -v Namespace > tmp.cc && mv tmp.cc $var_class.cc
 	cd test
-    cat t$var_class.cc | grep -v Namespace > tmp.cc && mv tmp.cc t$var_class.cc
+	cat t$var_class.cc | grep -v Namespace > tmp.cc && mv tmp.cc t$var_class.cc
 	cd ..
-  ;;
-  *)
-  ;;
+	;;
+    *)
+	;;
 esac
 
 # ------------------------------------------------------------------------------
@@ -313,11 +313,11 @@ case $var_yn in
 	svn propset svn:keywords Id implement/$var_module/$var_class.h
 	svn propset svn:keywords Id implement/$var_module/$var_class.cc
 	svn propset svn:keywords Id implement/$var_module/test/t$var_class.cc
-    ;;
+	;;
     n)
 	echo " --> Please remember adding the new files to the CVS repository!!";
-    ;;
+	;;
     *)
 	echo "[newClass] $var_yn"
-    ;;
+	;;
 esac;

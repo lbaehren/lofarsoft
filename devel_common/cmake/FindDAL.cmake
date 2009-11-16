@@ -36,7 +36,7 @@ include (CMakeSettings)
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (DAL_INCLUDES dal.h dalData.h dalFilter.h
+find_path (DAL_INCLUDES dalCommon.h dalData.h dalFilter.h
   PATHS ${include_locations}
   PATH_SUFFIXES dal
   NO_DEFAULT_PATH

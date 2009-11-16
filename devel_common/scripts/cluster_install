@@ -40,3 +40,4 @@ echo "-- post-installation clean-up ..."
 rm -rf release-$var_version/doc
 rm -rf release-$var_version/man
 rm -rf release-$var_version/share
+rm -rf release-$var_version/release_area.txt
