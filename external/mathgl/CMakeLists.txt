@@ -113,6 +113,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   ## if this is not the case we need to fetch it from the USg server.
   
   find_file (have_mathgl_tgz 
+    mathgl-1.10.tgz
     mathgl-1.9.tgz
     mathgl.tgz
     PATHS ${MATHGL_SOURCE_DIR}
