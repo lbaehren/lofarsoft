@@ -132,6 +132,7 @@ using CR::LopesEventIn;
   flagged                 = 10102
   rootfilename            = output.root
   rootfilemode            = recreate
+  writeAllAntennas        = true
   writeBadEvents          = false
   calibration             = false
   lateralDistribution     = false
@@ -251,6 +252,9 @@ using CR::LopesEventIn;
     <li>\b ccWindowWidth    Status: <i>for experts</i><br>
                             Time range to search for CC-beam-peak in lateral distribution studies,
                             default is +/- 45 ns.<br>
+    <li>\b writeAllAntennas Status: <i>preliminary</i><br>
+                            Writes all antennas (except those flagged in the config file) in the root file, 
+                            even the ones flagged during the analysis (with zeros).<br>
     <li>\b writeBadEvents   Status: <i>preliminary</i><br>
                             Events with a bad reconstruction (e.g. simplex fit crashed) will be written 
                             to the root file. Though, detection of bad reconstructions does not work
@@ -728,6 +732,16 @@ public:
       return output.str();
     }
     vector<int>  getFlagged() { return flagged; }
+    int checkFlagged(string name)
+    {
+        map<string, int>::iterator iter1 = flagged1.find(name);
+        if(iter1 != flagged1.end())
+            return flagged1[name];
+        map<string, int>::iterator iter2 = flagged2.find(name);
+        if(iter2 != flagged2.end())
+            return flagged2[name];
+        return -1;
+    }
 private:
     void addFlagged(string name1, string name2, int value)
     {
@@ -752,16 +766,6 @@ private:
         //        return false;
         // Temporarily leave no name restrictions
         return true;
-    }
-    int checkFlagged(string name)
-    {
-        map<string, int>::iterator iter1 = flagged1.find(name);
-        if(iter1 != flagged1.end())
-            return flagged1[name];
-        map<string, int>::iterator iter2 = flagged2.find(name);
-        if(iter2 != flagged2.end())
-            return flagged2[name];
-        return -1;
     }
     void removeTabs(string& input)
     {
@@ -873,6 +877,7 @@ void readConfigFile (const string &filename)
    config.addDouble("ccWindowWidth", 0.045e-6);	      	// width of window for CC-beam
    config.addString("rootFileName", "");               	// Name of root file for output
    config.addBool("writeBadEvents", false);         	// also bad events are written into the root file ("if possible)
+   config.addBool("writeAllAntennas", true);         	// write all antennas (even the ones without information) to root file
    config.addBool("calibrationMode", false);	      	// Calibration mode is off by default
    config.addBool("lateralDistribution", false);    	// the lateral distribution will not be generated
    config.addBool("lateralOutputFile", false);      	// no file for the lateral distribution will be created
@@ -1531,6 +1536,32 @@ int main (int argc, char *argv[])
         }
       }
     } //if
+
+    // add brances for all unflagged antennas if requested
+    if ( (config["writeAllAntennas"]->bValue()) && (config["CalculateMaxima"]->bValue()) ) {
+      vector<int> flagged = config.getFlagged();
+      for (int i = 0; i < MAX_NUM_ANTENNAS; ++i) {
+        stringstream antNumber(""); 
+        antNumber << i+1;
+        // check if antenna is flagged in config file
+        int antID = config.checkFlagged(antNumber.str());
+        if ( (antID > 0) && (find(flagged.begin(), flagged.end(), antID) != flagged.end()) ) {
+          // create brances for raw data, calibrated data and mesn
+          if ( config["PlotRawData"]->bValue() ) {
+            string branchname = "Ant_" + antNumber.str() + "_raw.";
+            roottree->Branch(branchname.c_str(),"PulseProperties",&rawPulses[i]);
+          }
+
+          string branchname = "Ant_" + antNumber.str() + "_cal.";
+          roottree->Branch(branchname.c_str(),"PulseProperties",&calibPulses[i]);
+
+          if ( config["calculateMeanValues"]->bValue() ) {
+            string branchname = "Ant_" + antNumber.str() + "_cal_mean.";
+            roottree->Branch(branchname.c_str(),"PulseProperties",&meanCalPulses[i]);
+          }
+        }
+      }
+    }
 
     // Process events from event file list
     while ( getNextEvent() ) {

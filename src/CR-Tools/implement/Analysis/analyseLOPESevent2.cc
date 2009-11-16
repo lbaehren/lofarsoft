@@ -1420,6 +1420,9 @@ namespace CR { // Namespace CR -- begin
                  cerr<<"Unknown beamtype: "<<beamtype<<endl;
                  return 0 ;
               }
+           // choose mean of beam value in block interval (not maximum)
+           // maximum would be better if there is a beam
+           // mean is usefull for noise, to avoid random coherence
            pix=mean(power);
            fout<<it_az<<"  "<<it_ze<<"   "<<pix<<endl;
            it_az += az_d;
