@@ -1,0 +1,356 @@
+cmake_minimum_required(VERSION 2.6)
+project(ExternalProjectTest NONE)
+
+include(ExternalProject)
+
+find_package(CVS)
+find_package(Subversion)
+
+set(base "${CMAKE_BINARY_DIR}/CMakeExternals")
+set(binary_base "${base}/Build")
+set_property(DIRECTORY PROPERTY EP_BASE ${base})
+
+if(NOT DEFINED can_build_tutorial_step5)
+  set(can_build_tutorial_step5 1)
+
+  # Tutorial Step5 cannot build correctly using Visual Studio 6
+  # on Windows 98 if the path of its build tree exceeds 72
+  # characters in length... So don't attempt to build it
+  # in a long path on Win98:
+  #
+  if(CMAKE_SYSTEM STREQUAL "Windows-4.10")
+    string(LENGTH "${binary_base}/TutorialStep5-Local" n)
+    if(n GREATER 72)
+      set(can_build_tutorial_step5 0)
+    endif()
+  endif()
+endif()
+
+message(STATUS "can_build_tutorial_step5='${can_build_tutorial_step5}'")
+
+
+# Empty projects that test all the known ExternalProject_Add argument key words:
+#
+set(proj MinimalNoOpProject)
+ExternalProject_Add(${proj}
+  BUILD_COMMAND ""
+  CONFIGURE_COMMAND ""
+  DOWNLOAD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+
+set(proj EmptyNoOpProject)
+ExternalProject_Add(${proj}
+  BUILD_COMMAND ""
+  CMAKE_ARGS ""
+  CONFIGURE_COMMAND ""
+  CVS_REPOSITORY ""
+  CVS_MODULE ""
+  CVS_TAG ""
+  DEPENDS "MinimalNoOpProject"
+  DOWNLOAD_COMMAND ""
+  INSTALL_COMMAND ""
+  PATCH_COMMAND ""
+  SVN_REPOSITORY ""
+  SVN_REVISION ""
+  TEST_COMMAND ""
+  URL ""
+  UPDATE_COMMAND ""
+)
+
+
+# Local DIR:
+#
+if(can_build_tutorial_step5)
+  set(proj TutorialStep5-Local)
+  ExternalProject_Add(${proj}
+    URL "${CMAKE_CURRENT_SOURCE_DIR}/../Tutorial/Step5"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
+    TEST_BEFORE_INSTALL 1
+  )
+  ExternalProject_Get_Property(${proj} install_dir)
+  set(TutorialStep5_install_dir ${install_dir})
+
+  set(proj TutorialStep5-Local-TestAfterInstall)
+  ExternalProject_Add(${proj}
+    URL "${CMAKE_CURRENT_SOURCE_DIR}/../Tutorial/Step5"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
+    TEST_AFTER_INSTALL 1
+  )
+endif()
+
+
+# Local TAR:
+#
+set(proj TutorialStep1-LocalTAR)
+ExternalProject_Add(${proj}
+  URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1.tar"
+  LIST_SEPARATOR ::
+  PATCH_COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/Step1Patch.cmake
+  CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+             -DTEST_LIST:STRING=A::B::C
+  INSTALL_COMMAND ""
+)
+
+set(proj TutorialStep1-LocalNoDirTAR)
+ExternalProject_Add(${proj}
+  URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.tar"
+  LIST_SEPARATOR @@
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
+             -DTEST_LIST:STRING=1@@2@@3
+  INSTALL_COMMAND ""
+)
+ExternalProject_Add_Step(${proj} mypatch
+  COMMAND ${CMAKE_COMMAND} -E echo "This is a custom external project step."
+  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/Step1Patch.cmake
+  WORKING_DIRECTORY <SOURCE_DIR>
+  DEPENDEES download
+  DEPENDERS configure
+  )
+
+
+# Local TGZ:
+#
+set(proj TutorialStep1-LocalTGZ)
+ExternalProject_Add(${proj}
+  URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1.tgz"
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
+  INSTALL_COMMAND ""
+)
+
+set(proj TutorialStep1-LocalNoDirTGZ)
+ExternalProject_Add(${proj}
+  URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.tgz"
+  CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+  INSTALL_COMMAND ""
+)
+
+
+set(do_cvs_tests 0)
+
+if(CVS_EXECUTABLE)
+  set(do_cvs_tests 1)
+endif()
+
+if(do_cvs_tests AND NOT UNIX)
+  if("${CVS_EXECUTABLE}" MATCHES "cygwin")
+    message(STATUS "No ExternalProject cvs tests with cygwin cvs.exe outside cygwin!")
+    set(do_cvs_tests 0)
+  endif()
+endif()
+
+if(do_cvs_tests)
+  # Unzip/untar the CVS repository in our source folder so that other
+  # projects below may use it to test CVS args of ExternalProject_Add
+  #
+  set(proj SetupLocalCVSRepository)
+  set(local_cvs_repo "${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/CVS")
+  ExternalProject_Add(${proj}
+    SOURCE_DIR ${local_cvs_repo}
+    URL ${CMAKE_CURRENT_SOURCE_DIR}/cvsrepo.tgz
+    BUILD_COMMAND ""
+    CONFIGURE_COMMAND ${CVS_EXECUTABLE} --version
+    INSTALL_COMMAND ""
+  )
+
+  # CVS by date stamp:
+  #
+  set(proj TutorialStep1-CVS-20090626)
+  ExternalProject_Add(${proj}
+    CVS_REPOSITORY "${local_cvs_repo}"
+    CVS_MODULE "TutorialStep1"
+    CVS_TAG "-D2009-06-26 16:50:00 UTC"
+    UPDATE_COMMAND ""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalCVSRepository"
+  )
+
+  # CVS by tag:
+  #
+  set(proj TutorialStep1-CVS-testtag1)
+  ExternalProject_Add(${proj}
+    CVS_REPOSITORY "${local_cvs_repo}"
+    CVS_MODULE "TutorialStep1"
+    CVS_TAG -rtesttag1
+    UPDATE_COMMAND ""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalCVSRepository"
+  )
+
+  # Live CVS / HEAD (no CVS_TAG):
+  #
+  set(proj TutorialStep1-CVS-HEAD)
+  ExternalProject_Add(${proj}
+    CVS_REPOSITORY "${local_cvs_repo}"
+    CVS_MODULE "TutorialStep1"
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalCVSRepository"
+    DEPENDS "EmptyNoOpProject"
+    DEPENDS "TutorialStep1-LocalTAR"
+    DEPENDS "TutorialStep1-LocalNoDirTAR"
+    DEPENDS "TutorialStep1-LocalTGZ"
+    DEPENDS "TutorialStep1-LocalNoDirTGZ"
+    DEPENDS "TutorialStep1-CVS-20090626"
+    DEPENDS "TutorialStep1-CVS-testtag1"
+  )
+endif()
+
+
+set(do_svn_tests 0)
+
+if(Subversion_SVN_EXECUTABLE)
+  set(do_svn_tests 1)
+endif()
+
+# Only do svn tests with svn >= version 1.2
+#
+if(do_svn_tests)
+  execute_process(COMMAND ${Subversion_SVN_EXECUTABLE} --version
+    OUTPUT_VARIABLE Subversion_VERSION_SVN
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  string(REGEX REPLACE "^(.*\n)?svn, version ([.0-9]+).*"
+    "\\2" Subversion_VERSION_SVN "${Subversion_VERSION_SVN}")
+  message(STATUS "Subversion_VERSION_SVN='${Subversion_VERSION_SVN}'")
+
+  if(Subversion_VERSION_SVN VERSION_LESS 1.2)
+    message(STATUS "No ExternalProject svn tests with svn client less than version 1.2")
+    set(do_svn_tests 0)
+  endif()
+endif()
+
+# Only do svn tests in cygwin/cygwin or not-cygwin/not-cygwin arrangements:
+#
+if(do_svn_tests)
+  if(CMAKE_CURRENT_BINARY_DIR MATCHES "cygdrive/" AND
+     NOT "${Subversion_SVN_EXECUTABLE}" MATCHES "cygwin")
+    message(STATUS "No ExternalProject svn tests with non-cygwin svn client in a /cygdrive based build")
+    set(do_svn_tests 0)
+  endif()
+endif()
+
+if(do_svn_tests)
+  # Unzip/untar the SVN repository in our source folder so that other
+  # projects below may use it to test SVN args of ExternalProject_Add
+  #
+  set(proj SetupLocalSVNRepository)
+  set(local_svn_repo "${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/SVN")
+  set(local_svn_repo_url "file:///${local_svn_repo}/TutorialStep1")
+  ExternalProject_Add(${proj}
+    SOURCE_DIR ${local_svn_repo}
+    URL ${CMAKE_CURRENT_SOURCE_DIR}/svnrepo.tgz
+    BUILD_COMMAND ""
+    CONFIGURE_COMMAND ${Subversion_SVN_EXECUTABLE} --version
+    INSTALL_COMMAND ""
+  )
+
+  # SVN by date stamp:
+  #
+  set(proj TutorialStep1-SVN-20090626)
+  ExternalProject_Add(${proj}
+    SVN_REPOSITORY "${local_svn_repo_url}"
+    SVN_REVISION "-r{2009-06-26 16:50:00 +0000}"
+    UPDATE_COMMAND ""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalSVNRepository"
+  )
+
+  # SVN by revision number:
+  #
+  set(proj TutorialStep1-SVN-r2)
+  ExternalProject_Add(${proj}
+    SVN_REPOSITORY "${local_svn_repo_url}"
+    SVN_REVISION "-r2"
+    UPDATE_COMMAND ""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalSVNRepository"
+  )
+
+  # Live SVN / trunk (no SVN_REVISION):
+  #
+  set(proj TutorialStep1-SVN-trunk)
+  ExternalProject_Add(${proj}
+    SVN_REPOSITORY "${local_svn_repo_url}"
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalSVNRepository"
+  )
+endif()
+
+
+# Test the testable built/installed products:
+#
+enable_testing()
+
+
+# Do at least a smoke test of a built executable from each
+# project's build directory...
+#
+# BuildTree tests:
+#
+if(can_build_tutorial_step5)
+  add_test(TutorialStep5-Local-BuildTreeTest
+    "${binary_base}/TutorialStep5-Local/Tutorial" 42)
+  set_property(TEST TutorialStep5-Local-BuildTreeTest
+    APPEND PROPERTY LABELS Step5 BuildTree)
+endif()
+
+add_test(TutorialStep1-LocalTAR-BuildTreeTest
+  "${binary_base}/TutorialStep1-LocalTAR/EP-Tutorial" 36)
+set_property(TEST TutorialStep1-LocalTAR-BuildTreeTest
+  APPEND PROPERTY LABELS TAR)
+
+add_test(TutorialStep1-LocalNoDirTAR-BuildTreeTest
+  "${binary_base}/TutorialStep1-LocalNoDirTAR/EP-Tutorial" 25)
+
+add_test(TutorialStep1-LocalTGZ-BuildTreeTest
+  "${binary_base}/TutorialStep1-LocalTGZ/Tutorial" 16)
+set_property(TEST TutorialStep1-LocalTGZ-BuildTreeTest
+  APPEND PROPERTY LABELS TGZ)
+
+add_test(TutorialStep1-LocalNoDirTGZ-BuildTreeTest
+  "${binary_base}/TutorialStep1-LocalNoDirTGZ/Tutorial" 9)
+
+if(do_cvs_tests)
+  add_test(TutorialStep1-CVS-20090626-BuildTreeTest
+    "${binary_base}/TutorialStep1-CVS-20090626/Tutorial" 4)
+
+  add_test(TutorialStep1-CVS-testtag1-BuildTreeTest
+    "${binary_base}/TutorialStep1-CVS-testtag1/Tutorial" 64)
+
+  add_test(TutorialStep1-CVS-HEAD-BuildTreeTest
+    "${binary_base}/TutorialStep1-CVS-HEAD/Tutorial" 81)
+endif()
+
+if(do_svn_tests)
+  add_test(TutorialStep1-SVN-20090626-BuildTreeTest
+    "${binary_base}/TutorialStep1-SVN-20090626/Tutorial" 100)
+
+  add_test(TutorialStep1-SVN-r2-BuildTreeTest
+    "${binary_base}/TutorialStep1-SVN-r2/Tutorial" 99)
+
+  add_test(TutorialStep1-SVN-trunk-BuildTreeTest
+    "${binary_base}/TutorialStep1-SVN-trunk/Tutorial" 98)
+endif()
+
+
+# InstallTree tests:
+#
+if(can_build_tutorial_step5)
+  add_test(TutorialStep5-InstallTreeTest
+    "${TutorialStep5_install_dir}/bin/Tutorial" 49)
+  set_property(TEST TutorialStep5-InstallTreeTest
+    APPEND PROPERTY LABELS Step5 InstallTree)
+endif()
