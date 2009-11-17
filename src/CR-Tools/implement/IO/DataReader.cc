@@ -588,6 +588,9 @@ namespace CR {  //  Namespace CR -- begin
     
     ADC2Voltage_p.resize(1,1);
     FFT2CalFFT_p.resize(1,1);
+
+    selectedChannels_p.resize(fftLength_p);
+    casa::indgen(selectedChannels_p);
     
     /* Update the blocksize parameter for the set of DataIterators. */
     for (unsigned int n(0); n<nofStreams_p; n++) {
@@ -676,15 +679,14 @@ namespace CR {  //  Namespace CR -- begin
 
   Vector<Double> DataReader::frequencyValues (Bool const &onlySelected)
   {
-    uint nofChannels (0);
+    uint nofChannels = selectedChannels_p.nelements();
     uint channel (0);
     Vector<Double> frequencies;
     
     // Get the values of all frequency channels
     casa::Vector<double> freq (TimeFreq::frequencyValues());
     
-    if (onlySelected) {
-      nofChannels = nofSelectedChannels();
+    if (onlySelected && nofChannels) {
       frequencies.resize (nofChannels);
       //
       for (channel=0; channel<nofChannels; channel++) {

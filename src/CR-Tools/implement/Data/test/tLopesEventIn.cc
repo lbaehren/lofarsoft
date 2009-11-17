@@ -29,6 +29,10 @@
 /* CR-Tools header files */
 #include <Data/LopesEventIn.h>
 
+/* Namespace usage */
+using std::cout;
+using std::endl;
+
 /*!
   \file tLopesEventIn.cc
 
@@ -52,12 +56,12 @@
 template <class T>
 void show_data (Matrix<T> const &data)
 {
-  std::cout << "  Data shape : " << data.shape() << std::endl;
-  std::cout << "  Data ..... : "
+  cout << "  Data shape : " << data.shape() << endl;
+  cout << "  Data ..... : "
 	    << data(1,1) << " "
 	    << data(2,1) << " "
 	    << data(3,1)
-	    << std::endl;
+	    << endl;
 }
 
 //_______________________________________________________________________________
@@ -71,7 +75,7 @@ void show_data (Matrix<T> const &data)
 */
 int test_arrays()
 {
-  std::cout << "\n[tLopesEventIn::test_arrays]\n" << std::endl;
+  cout << "\n[tLopesEventIn::test_arrays]\n" << endl;
 
   int nofFailedTests (0);
   
@@ -138,11 +142,11 @@ int test_arrays()
 */
 int test_construction (std::string const &filename)
 {
-  std::cout << "\n[test_construction]\n" << std::endl;
+  cout << "\n[test_construction]\n" << endl;
 
   int nofFailedTests (0);
   
-  std::cout << "[1] Testing default constructor ..." << std::endl;
+  cout << "[1] Testing default constructor ..." << endl;
   try {
     CR::LopesEventIn event;
     event.summary();
@@ -151,7 +155,7 @@ int test_construction (std::string const &filename)
     nofFailedTests++;
   };
   
-  std::cout << "[2] Testing construction with filename ..." << std::endl;
+  cout << "[2] Testing construction with filename ..." << endl;
   try {
     CR::LopesEventIn event (filename);
     event.summary();
@@ -174,20 +178,20 @@ int test_construction (std::string const &filename)
 */
 int test_data (std::string const &filename)
 {
-  std::cout << "\n[tLopesEventIn::test_data]\n" << std::endl;
+  cout << "\n[tLopesEventIn::test_data]\n" << endl;
 
   int nofFailedTests (0);
   CR::LopesEventIn newObject (filename);
   
-  std::cout << "[1] Testing retrieval of fx() data ..." << std::endl;
+  cout << "[1] Testing retrieval of fx() data ..." << endl;
   try {
     Matrix<Double> data;
     //
-    std::cout << "--> LopesEventIn::fx()" << std::endl;
+    cout << "--> LopesEventIn::fx()" << endl;
     data = newObject.fx();
     show_data (data);
     //
-    std::cout << "--> LopesEventIn::fx(Matrix<double>&)" << std::endl;
+    cout << "--> LopesEventIn::fx(Matrix<double>&)" << endl;
     data = 0.0;
     newObject.fx(data);
     show_data (data);
@@ -196,15 +200,15 @@ int test_data (std::string const &filename)
     nofFailedTests++;
   };
   
-  std::cout << "[2] Testing retrieval of voltage() data ..." << std::endl;
+  cout << "[2] Testing retrieval of voltage() data ..." << endl;
   try {
     Matrix<Double> data;
     //
-    std::cout << "--> LopesEventIn::voltage()" << std::endl;
+    cout << "--> LopesEventIn::voltage()" << endl;
     data = newObject.voltage();
     show_data (data);
     //
-    std::cout << "--> LopesEventIn::voltage(Matrix<double>&)" << std::endl;
+    cout << "--> LopesEventIn::voltage(Matrix<double>&)" << endl;
     data = 0.0;
     newObject.voltage(data);
     show_data (data);
@@ -213,15 +217,15 @@ int test_data (std::string const &filename)
     nofFailedTests++;
   };
   
-  std::cout << "[3] Testing retrieval of fft() data ..." << std::endl;
+  cout << "[3] Testing retrieval of fft() data ..." << endl;
   try {
     Matrix<DComplex> data;
     //
-    std::cout << "--> LopesEventIn::fft()" << std::endl;
+    cout << "--> LopesEventIn::fft()" << endl;
     data = newObject.fft();
     show_data (data);
     //
-    std::cout << "--> LopesEventIn::fft(Matrix<DComplex>&)" << std::endl;
+    cout << "--> LopesEventIn::fft(Matrix<DComplex>&)" << endl;
     data = 0.0;
     newObject.fft(data);
     show_data (data);
@@ -230,15 +234,15 @@ int test_data (std::string const &filename)
     nofFailedTests++;
   };
 
-  std::cout << "[4] Testing retrieval of calfft() data ..." << std::endl;
+  cout << "[4] Testing retrieval of calfft() data ..." << endl;
   try {
     Matrix<DComplex> data;
     //
-    std::cout << "--> LopesEventIn::calfft()" << std::endl;
+    cout << "--> LopesEventIn::calfft()" << endl;
     data = newObject.calfft();
     show_data (data);
     //
-    std::cout << "--> LopesEventIn::calfft(Matrix<DComplex>&)" << std::endl;
+    cout << "--> LopesEventIn::calfft(Matrix<DComplex>&)" << endl;
     data = 0.0;
     newObject.calfft(data);
     show_data (data);
@@ -262,35 +266,25 @@ int test_data (std::string const &filename)
 */
 int test_parameters (std::string const &filename)
 {
-  std::cout << "\n[tLopesEventIn::test_parameters]\n" << std::endl;
+  cout << "\n[tLopesEventIn::test_parameters]\n" << endl;
 
   int nofFailedTests (0);
   CR::LopesEventIn event (filename);
   unsigned int blocksize = event.blocksize();
+  int steps (6);
   
-  std::cout << "[1] Adjust blocksize ..." << std::endl;
+  cout << "[1] Adjust blocksize ..." << endl;
   try {
-    std::cout << "-- blocksize  = " << event.blocksize()   << std::endl;
-    std::cout << "-- shape(fx)  = " << event.fx().shape()  << std::endl;
-    std::cout << "-- shape(fft) = " << event.fft().shape() << std::endl;
-    //
-    blocksize /= 2;
-    event.setBlocksize (blocksize);
-    std::cout << "-- blocksize  = " << event.blocksize()   << std::endl;
-    std::cout << "-- shape(fx)  = " << event.fx().shape()  << std::endl;
-    std::cout << "-- shape(fft) = " << event.fft().shape() << std::endl;
-    //
-    blocksize /= 2;
-    event.setBlocksize (blocksize);
-    std::cout << "-- blocksize  = " << event.blocksize()   << std::endl;
-    std::cout << "-- shape(fx)  = " << event.fx().shape()  << std::endl;
-    std::cout << "-- shape(fft) = " << event.fft().shape() << std::endl;
-    //
-    blocksize /= 2;
-    event.setBlocksize (blocksize);
-    std::cout << "-- blocksize  = " << event.blocksize()   << std::endl;
-    std::cout << "-- shape(fx)  = " << event.fx().shape()  << std::endl;
-    std::cout << "-- shape(fft) = " << event.fft().shape() << std::endl;
+    for (int n(0); n<steps; ++n) {
+      // Display parameter values
+      cout << "-- blocksize   = " << event.blocksize()   << endl;
+      cout << "-- shape(fx)   = " << event.fx().shape()  << endl;
+      cout << "-- shape(fft)  = " << event.fft().shape() << endl;
+      cout << "-- shape(freq) = " << event.frequencyValues().shape() << endl;
+      // Adjust the blocksize
+      blocksize /= 2;
+      event.setBlocksize (blocksize);
+    }
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
@@ -310,24 +304,24 @@ int test_parameters (std::string const &filename)
 */
 int test_header (std::string const &filename)
 {
-  std::cout << "\n[tLopesEventIn::test_header]\n" << std::endl;
-
+  cout << "\n[tLopesEventIn::test_header]\n" << endl;
+  
   int nofFailedTests (0);
   CR::LopesEventIn event (filename);
   
-  std::cout << "[1] Testing header record ..." << std::endl;
+  cout << "[1] Testing header record ..." << endl;
   try {
     for (uint i=0; i<event.headerRecord().nfields(); i++) {
-      std::cout << "  Field No: " << i
-		<< " Name: " << event.headerRecord().name(i)
-		<< std::endl;
+      cout << "  Field No: " << i
+	   << " Name: " << event.headerRecord().name(i)
+	   << endl;
     };
-    std::cout << "  Values:\n    Date: "
-	      << event.headerRecord().asuInt("Date") << std::endl;
-    std::cout << "    Observatory: "
-	      << event.headerRecord().asString("Observatory") << std::endl;
-    std::cout << "    IDs: "
-	      << event.headerRecord().asArrayInt("AntennaIDs") << std::endl;
+    cout << "  Values:\n    Date: "
+	 << event.headerRecord().asuInt("Date") << endl;
+    cout << "    Observatory: "
+	 << event.headerRecord().asString("Observatory") << endl;
+    cout << "    IDs: "
+	 << event.headerRecord().asArrayInt("AntennaIDs") << endl;
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
@@ -343,16 +337,16 @@ int main (int argc, char *argv[])
 {
   int nofFailedTests (0);
   std::string filename ("example.event");
-
+  
   /* Check if a filename has been provided on the command line */
   if (argc > 1) {
     std::string tmp = argv[1];
     filename        = tmp;
   }
-
+  
   // Timing tests for different array access schemes
   nofFailedTests += test_arrays ();
-
+  
   // Test for the constructor(s)
   nofFailedTests += test_construction (filename);
   // Test access to the data
@@ -361,6 +355,6 @@ int main (int argc, char *argv[])
   nofFailedTests += test_parameters (filename);
   // Test working with the header record
   nofFailedTests += test_header (filename);
-
+  
   return nofFailedTests;
 }
