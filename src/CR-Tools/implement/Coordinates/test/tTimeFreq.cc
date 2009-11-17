@@ -132,7 +132,8 @@ int test_TimeFreq ()
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                           test_sampleFrequency
 
 /*!
   \brief Test access to and manipulation of the sample frequency
@@ -261,7 +262,8 @@ int test_sampleFrequency ()
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                test_timeValues
 
 /*!
   \brief Test retrival of the values along the time axis
@@ -329,7 +331,8 @@ int test_timeValues ()
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                           test_frequencyValues
 
 /*!
   \brief Test retrival of the values along the frequency axis
@@ -425,7 +428,8 @@ int test_frequencyValues ()
 }
 #endif
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                            test_coordinateAxes
 
 /*!
   \brief Test creation go coordinate axes from the time-frequency parameters
@@ -485,7 +489,44 @@ int test_coordinateAxes ()
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                 test_blocksize
+
+/*!
+  \brief Test manipulation of the blocksize and its effects on derived quantities
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_blocksize ()
+{
+  cout << "\n[tTimeFreq::test_blocksize]\n" << endl;
+
+  int nofFailedTests (0);
+
+  uint blocksize (2048);
+  double sampleFrequency (80e06);
+  uint nyquistZone (1);
+  TimeFreq data (blocksize,sampleFrequency,nyquistZone);
+
+  int steps (5);
+
+  for (int n(0); n<steps; ++n) {
+    std::cout << "-- blocksize="  << data.blocksize() 
+	      << "\tfftLength="   << data.fftLength() 
+	      << "\tshape(time)=" << data.timeValues().shape()
+	      << "\tshape(freq)=" << data.frequencyValues().shape()
+	      << std::endl;
+    // update the blocksize
+    blocksize /= 2;
+    data.setBlocksize(blocksize);
+  }
+
+  
+  return nofFailedTests;
+}
+
+//_______________________________________________________________________________
+//                                                                           main
 
 int main ()
 {
@@ -502,7 +543,9 @@ int main ()
   nofFailedTests += test_frequencyValues ();
 #endif
   // Test conversion of parameters to coordinate axes
-  nofFailedTests += test_coordinateAxes ();
+  nofFailedTests += test_coordinateAxes();
+  // Test Manipulation of the blocksize
+  nofFailedTests += test_blocksize();
   
   return nofFailedTests;
 }
