@@ -66,7 +66,7 @@ namespace CR { // Namespace CR -- begin
     tmpval=90.;
     DirParams_p.define("El",tmpval);
     ExtraDelay_p = 0.;
-    GeomDelays_p = Matrix<double>();
+    GeomDelays_p.resize();
   };
   
   // ============================================================================
@@ -217,6 +217,9 @@ namespace CR { // Namespace CR -- begin
       success = success && InterAntGain_p->SetAxisValue(1,dr->frequencyValues());
      
       AntGainInterpInit_p = success;      
+#ifdef DEBUGGING_MESSAGES      
+      cout << "CRinvFFT::initGainInterp() successfully finished! "  << endl;
+#endif
     } catch (AipsError x) {
       cerr << "CRinvFFT::initGainInterp: " << x.getMesg() << endl;
       return False;
@@ -280,7 +283,10 @@ namespace CR { // Namespace CR -- begin
       Cube<DComplex> tmpCcube;
       tmpCcube = geomWeight.weights();
       // store geometrical delays for later access
-      GeomDelays_p = geomWeight.delays().copy();
+      //This also changes the shape of GeomDelays_p
+      GeomDelays_p.assign(geomWeight.delays());
+      //I think this is not really needed, but it'll ease some peoples mind.
+      GeomDelays_p.unique();
 #ifdef DEBUGGING_MESSAGES      
       cout << "CRinvFFT::GetShiftedFFT: delays: " << GeomDelays_p << endl;
 #endif
@@ -318,6 +324,11 @@ namespace CR { // Namespace CR -- begin
 	  //CTRead->GetData(date, AntennaIDs(i), "FrequencyBand", &tmpvec);
 	  //cout << "CRinvFFT::GetShiftedFFT: tmpCvec:" << tmpCvec.shape() << " tmparr:"<<tmparr.shape()
 	  //     << " phaseGradients:"<< phaseGradients.shape() << endl;
+#ifdef DEBUGGING_MESSAGES      
+	  cout << "CRinvFFT::GetShiftedFFT: AntGain-shape: " << tmparr.shape() 
+	       << " tmpCvec.shape(): "  << tmpCvec.shape() 
+	       << " Freq-shape: " << dr->frequencyValues().shape() << endl;
+#endif
 	  convertArray(tmpCvec,Vector<Double>(tmparr));
 	  // compute 1.947/delta_nu/sqrt(Gain)
 	  //   1.947        = constant (at least for LOPES)
