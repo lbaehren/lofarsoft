@@ -1545,7 +1545,7 @@ int main (int argc, char *argv[])
         antNumber << i+1;
         // check if antenna is flagged in config file
         int antID = config.checkFlagged(antNumber.str());
-        if ( (antID > 0) && (find(flagged.begin(), flagged.end(), antID) != flagged.end()) ) {
+        if ( (antID > 0) && (find(flagged.begin(), flagged.end(), antID) == flagged.end()) ) {
           // create brances for raw data, calibrated data and mesn
           if ( config["PlotRawData"]->bValue() ) {
             string branchname = "Ant_" + antNumber.str() + "_raw.";
