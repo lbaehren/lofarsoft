@@ -87,17 +87,17 @@ fi
 ##______________________________________________________________________________
 ## Define the Pulsar software environment variables
 
-if test ! -z "$TEMPO" ; then
+if test  ! -z "$TEMPO"  -a  "$TEMPO" != "${LOFARSOFT}/release/share/pulsar/bin" ; then
   echo "-- Warning, resetting your TEMPO environment variable from:"
   echo "           $TEMPO to ${LOFARSOFT}/release/share/pulsar/bin"
 fi
 export TEMPO=${LOFARSOFT}/release/share/pulsar/bin
 
-if test ! -z "$PRESTO" ; then
+if test ! -z "$PRESTO" -a  "$PRESTO" != "${LOFARSOFT}/release/share/pulsar/bin" ; then
   echo "-- Warning, resetting your PRESTO environment variable from:"
   echo "           $PRESTO to ${LOFARSOFT}/release/share/pulsar/bin"
 fi
-export TEMPO=${LOFARSOFT}/release/share/pulsar/bin
+export PRESTO=${LOFARSOFT}/release/share/pulsar/bin
 
 #############################################################################
 #                    Finished configuration                                 #  
