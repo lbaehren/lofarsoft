@@ -46,6 +46,8 @@ include (FindROOT)
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
+
+  include (ExternalProject)
   
   ## ------------------------------------------------------------------------------
   ## Locate the installation area
