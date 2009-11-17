@@ -73,6 +73,7 @@ if (NOT HAVE_PYRAP OR Pyrap_FORCE_BUILD)
   include (FindCASACORE)
   include (FindHDF5)
   include (FindPython)
+  include (FindNumarray)
 
   if (HAVE_BOOST)
     include_directories (${BOOST_INCLUDES})
@@ -94,9 +95,16 @@ if (NOT HAVE_PYRAP OR Pyrap_FORCE_BUILD)
   endif (HAVE_HDF5)
 
   if (NUMPY_INCLUDES)
+    message (STATUS "[pyrap] Support for NumPy enabled!")
     include_directories (${NUMPY_INCLUDES})
     add_definitions (-DAIPS_USENUMPY)
   endif (NUMPY_INCLUDES)
+
+  if (HAVE_NUMARRAY)
+    message (STATUS "[pyrap] Support for NumArray enabled!")
+    include_directories (${NUMARRAY_INCLUDES})
+    add_definitions (-DAIPS_USENUMARRAY)
+  endif (HAVE_NUMARRAY)
   
   ## ------------------------------------------------------------------------------
   ## Location of header files
@@ -118,8 +126,15 @@ if (NOT HAVE_PYRAP OR Pyrap_FORCE_BUILD)
   add_subdirectory (pyrap_quanta/trunk)
   add_subdirectory (pyrap_tables/trunk)
 
+  ## ------------------------------------------------------------------------------
+  ## Configuration summary
+
+  message (STATUS "Boost found    = ${HAVE_BOOST}")
+  message (STATUS "Casacore found = ${HAVE_CASACORE}")
+
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_PYRAP OR Pyrap_FORCE_BUILD)
   message (STATUS "Found system-wide installation of Pyrap; skipping rebuild!")
 endif (NOT HAVE_PYRAP OR Pyrap_FORCE_BUILD)
+
