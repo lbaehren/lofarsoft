@@ -113,11 +113,11 @@ def ConnectGUIButtons(d):
     d["PlotPanel'logY"].connect(gui.logy,"setChecked","bool")
 #
     d["DataPipeline'Block"].connect(gui.blocknumber,"setValue","int")
-    d["DataPipeline'Blocksize"].connect(gui.blocksize,"setValue","int")
+    d["DataPipeline'Blocksize"].connect(gui.blocksize)
     d["Data:maxBlock"].FirstObject().connect(gui.blocknumber,"setMaximum","int",isSlot=False)
     d["Data:maxBlock"].FirstObject().connect(gui.blocknumberslider,"setMaximum","int",isSlot=False)
-    d["Data'maxBlocksize"].connect(gui.blocksize,"setMaximum","int",isSlot=False)
-    d["Data'maxBlocksize"].connect(gui.blocksizeslider,"setMaximum","int",isSlot=False)
+#    d["Data'maxBlocksize"].connect(gui.blocksize,"setMaximum","int",isSlot=False)
+#    d["Data'maxBlocksize"].connect(gui.blocksizeslider,"setMaximum","int",isSlot=False)
 #
     d["PlotPanel'xscale"].connect(gui.xzoomdial,"setValue","int")
     d["PlotPanel'yscale"].connect(gui.yzoomdial,"setValue","int")
@@ -156,6 +156,11 @@ class CRPipelineLauncher(hffunc):
         qtgui=d["QtPanel'PlotWidget"].getPy() # The object that contains the user GUI functions 
         ("GUI",gui) >> d["QtPanel"] # and store it, so that the objects have access to the GUI. 
         d["QtPanel"]  >> ("QtNetview",_f(hfQtNetview),_l(100)) #Here this is used by the Network Display object
+        #Creating some Validators for inputfields
+        qvblocksize=QtGui.QIntValidator(gui.blocksize)
+        qvblocksize.setRange(0,d["Data'maxBlocksize"].getI())
+        gui.blocksize.setValidator(qvblocksize)
+
 #
         return 0
     def process(self,d):

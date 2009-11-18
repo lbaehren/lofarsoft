@@ -430,9 +430,15 @@ class hfQtPlot(QtGui.QWidget):
         self.gui.yshiftslider.setValue(0)
         self.gui.yauto.setChecked(True)
     def hfsetBlock(self,i):
-        self.currentplotdataobject()["'Block"].set(i)
-    def hfsetBlocksize(self,i):
-        self.currentplotdataobject()["'Blocksize"].set(i)
+        self.currentplotdataobject()["'Block"].set(max(min(min(d["Data:maxBlock"].asList().val()),i),0))
+    def hfsetBlockPressed(self):
+        self.hfsetBlock(self.sender().text().toInt()[0])
+    def hfsetBlocksize(self,txt):
+        size=min(txt.toInt()[0],self.currentplotdataobject()["'maxBlocksize"].getI())
+        if size*(self.currentplotdataobject()["'Block"].getI()+1)>self.currentplotdataobject()["'Filesize"].getI(): self.currentplotdataobject()["'Block"].set_silent(0)
+        self.currentplotdataobject()["'Blocksize"].set(size)
+    def hfsetBlocksizePressed(self):
+        self.hfsetBlocksize(self.sender().text())
     def currentplotdataobject(self):
         return self.currentplotpanelobject()["'PlotData"]
     def currentplotpanelobject(self):
