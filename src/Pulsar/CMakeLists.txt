@@ -282,6 +282,14 @@ else (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
   EXECUTE_PROCESS( COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/lib)
 endif (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
 
+if (EXISTS "${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
+  message (STATUS "[PULSAR] Makewisdom has already been run; skipping!")
+  set (PRESTO_MAKEWISDOM FALSE)
+else (EXISTS "${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
+  message (STATUS "[PULSAR] Makewisdom not been run;  adding to make queue")
+  set (PRESTO_MAKEWISDOM TRUE)
+endif (EXISTS "${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
+
 # skip the full RPATH for the build tree
 set (CMAKE_SKIP_BUILD_RPATH YES)
 
