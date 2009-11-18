@@ -56,7 +56,6 @@ set (presto_sources
 )
 
 set (presto_binaries
-  mpiprepsubband
   makedata makeinf mjd2cal realfft quicklook
   search_bin search_rzw swap_endian prepdata
   check_parkes_raw bary shiftdata dftfold
@@ -76,6 +75,14 @@ set (presto_fc_binaries
 set (presto_fc_special_binaries
   prepfold 
   show_pfd 
+)
+
+set (presto_mpi_binaries
+  mpiprepsubband
+)
+
+set (presto_makewisdom_binaries
+  makewisdom
 )
 
 ##__________________________________________________________
@@ -370,12 +377,29 @@ add_executable (weight_psrfits
   psrfits.c
   ${PLOT2DOBJS}
   )
+  
+add_executable (makewisdom
+  makewisdom.c
+  )
 
 ## linker instructions
 
 foreach (src ${presto_binaries})
   set_target_properties (${src}
     PROPERTIES
+    COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+  )
+  target_link_libraries (${src} presto sla)
+endforeach (src)
+
+## Enable MPI build for these binaries
+
+foreach (src ${presto_mpi_binaries})
+  set_target_properties (${src}
+    PROPERTIES
+#    CMAKE_COMMAND ${MPI_COMPILER}
+#    COMPILER_LANGUAGE ${MPI_COMPILER}
+#    LINKER_LANGUAGE ${MPI_COMPILER}
     COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
   )
   target_link_libraries (${src} presto sla)
@@ -398,6 +422,32 @@ foreach (src ${presto_fc_special_binaries})
   )
   target_link_libraries (${src} presto fort)
 endforeach (src)
+
+add_custom_target (presto_prep
+  COMMAND touch ${PULSAR_SOURCE_DIR}/apps/presto/src/*_cmd.c
+  WORKING_DIRECTORY ${PULSAR_SOURCE_DIR}/apps/presto/src
+  COMMENT "Performing of 'make prep' command as 'touch ${PULSAR_SOURCE_DIR}/apps/presto/src/*_cmd.c'"
+  )
+
+foreach (src ${presto_makewisdom_binaries})
+  set_target_properties (${src}
+    PROPERTIES
+    COMPILE_FLAGS "-fPIC -DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O3 -ffast-math -W"
+  )
+  target_link_libraries(${src}   
+   ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a
+   m)
+endforeach (src)
+
+if (PRESTO_MAKEWISDOM)
+add_custom_target (presto_makewisdom
+  COMMAND ./makewisdom
+  COMMAND cp fftw_wisdom.txt ${CMAKE_INSTALL_PREFIX}/lib/
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/presto/src
+  COMMENT "Executing '${PULSAR_BINARY_DIR}/makewisdom' followed by 'cp ${PULSAR_BINARY_DIR}/apps/presto/src/fftw_wisdom.txt ${CMAKE_INSTALL_PREFIX}/lib/'"
+  )
+add_dependencies (presto_makewisdom makewisdom)
+endif (PRESTO_MAKEWISDOM)
 
 ## ==============================================================================
 ##
