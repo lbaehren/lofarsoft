@@ -175,6 +175,13 @@ endif (svn_executable)
 ##
 ## ==============================================================================
 
+## Packages handled directly through CMake
+
+add_subdirectory (${USG_EXTERNAL}/swig)
+add_subdirectory (${USG_EXTERNAL}/itpp)
+
+## Packages with build handled through shell script
+
 set (packages_external
   blas
   blitz 
@@ -182,7 +189,6 @@ set (packages_external
   casacore
   cfitsio
   hdf5
-  itpp
   mathgl
   matplotlib
   numeric
@@ -195,7 +201,6 @@ set (packages_external
   sip
   startools
   szip
-  swig
   wcslib
   wcstools
   zlib
