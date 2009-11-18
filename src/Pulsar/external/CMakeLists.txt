@@ -66,7 +66,7 @@ add_dependencies (tempo_build tempo_unpack)
 
 add_custom_target (tempo_install
   COMMAND cp src/tempo ${CMAKE_INSTALL_PREFIX}/bin
-  COMMAND sed -e \"s|CMAKE_CHANGE|${CMAKE_INSTALL_PREFIX}|g\" tempo.cfg > ${CMAKE_INSTALL_PREFIX}/bin/tempo.cfg
+  COMMAND sed -e \"s|CMAKE_CHANGE|${CMAKE_INSTALL_PREFIX}/bin|g\" tempo.cfg > ${CMAKE_INSTALL_PREFIX}/bin/tempo.cfg
   COMMAND cp tempo.hlp obsys.dat ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r ephem ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r clock ${CMAKE_INSTALL_PREFIX}/bin
