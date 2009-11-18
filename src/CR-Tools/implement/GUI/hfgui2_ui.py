@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'hfgui2.ui'
 #
-# Created: Sun Nov 15 00:54:17 2009
+# Created: Wed Nov 18 02:33:25 2009
 #      by: PyQt4 UI code generator 4.5.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -46,7 +46,7 @@ class Ui_MainWindow(object):
         self.networkscrollarea.setWidgetResizable(False)
         self.networkscrollarea.setObjectName("networkscrollarea")
         self.scrollAreaWidgetContents = QtGui.QWidget(self.networkscrollarea)
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, -33, 763, 495))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 763, 495))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.networkdisplay = QtSvg.QSvgWidget(self.scrollAreaWidgetContents)
         self.networkdisplay.setGeometry(QtCore.QRect(0, 32, 711, 421))
@@ -697,7 +697,7 @@ class Ui_MainWindow(object):
         self.blocksize = QtGui.QSpinBox(self.frame_19)
         self.blocksize.setGeometry(QtCore.QRect(122, 4, 149, 27))
         self.blocksize.setMinimum(1)
-        self.blocksize.setMaximum(65563)
+        self.blocksize.setMaximum(1048576)
         self.blocksize.setProperty("value", QtCore.QVariant(1024))
         self.blocksize.setObjectName("blocksize")
         self.label_12 = QtGui.QLabel(self.frame_19)
@@ -824,8 +824,8 @@ class Ui_MainWindow(object):
         self.MouseSelectMode.setCurrentIndex(2)
         self.netlevel.setCurrentIndex(1)
         QtCore.QObject.connect(self.npanels, QtCore.SIGNAL("returnPressed()"), self.HMainPlotter.hfsetNPanels)
-        QtCore.QObject.connect(self.quit, QtCore.SIGNAL("clicked()"), MainWindow.close)
-        QtCore.QObject.connect(self.replot, QtCore.SIGNAL("clicked()"), self.HMainPlotter.repaint)
+        QtCore.QObject.connect(self.quit, QtCore.SIGNAL("clicked()"), self.HMainPlotter.quit)
+        QtCore.QObject.connect(self.replot, QtCore.SIGNAL("clicked()"), self.HMainPlotter.hfReplotNetwork)
         QtCore.QObject.connect(self.npanelsx, QtCore.SIGNAL("returnPressed()"), self.HMainPlotter.hfsetNPanelsx)
         QtCore.QObject.connect(self.npanelsy, QtCore.SIGNAL("returnPressed()"), self.HMainPlotter.hfsetNPanelsy)
         QtCore.QObject.connect(self.xmin, QtCore.SIGNAL("returnPressed()"), self.HMainPlotter.hfsetXMin)
@@ -939,6 +939,7 @@ class Ui_MainWindow(object):
         self.label_13.setText(QtGui.QApplication.translate("MainWindow", "Reset", None, QtGui.QApplication.UnicodeUTF8))
         self.xreset.setText(QtGui.QApplication.translate("MainWindow", "x", None, QtGui.QApplication.UnicodeUTF8))
         self.quit.setText(QtGui.QApplication.translate("MainWindow", "Quit", None, QtGui.QApplication.UnicodeUTF8))
+        self.replot.setText(QtGui.QApplication.translate("MainWindow", "Replot", None, QtGui.QApplication.UnicodeUTF8))
         self.label_10.setText(QtGui.QApplication.translate("MainWindow", "Level:", None, QtGui.QApplication.UnicodeUTF8))
         self.netlevel.setItemText(0, QtGui.QApplication.translate("MainWindow", "9", None, QtGui.QApplication.UnicodeUTF8))
         self.netlevel.setItemText(1, QtGui.QApplication.translate("MainWindow", "99", None, QtGui.QApplication.UnicodeUTF8))

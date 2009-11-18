@@ -1,7 +1,7 @@
 //================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfprep.awk
 //================================================================================
-//     File was generated from - on Sat Nov 14 23:14:53 CET 2009
+//     File was generated from - on Wed Nov 18 01:49:56 CET 2009
 //--------------------------------------------------------------------------------
 //
 //#define DBG_MODE 0
@@ -2495,55 +2495,6 @@ template <class T> void process(F_PARAMETERS) {
 
 */
 
-/*!
-  \brief The function converts a column in an aips++ matrix to an stl vector
- */
-
-template <class S, class T>
-void aipscol2stlvec(casa::Matrix<S> &data, vector<T>& stlvec, const HInteger col){
-    HInteger i,nrow,ncol;
-//    vector<HNumber>::iterator p;
-    
-    nrow=data.nrow();
-    ncol=data.ncolumn();
-    //    if (ncol>1) {MSG("aipscol2stlvec: ncol="<<ncol <<" (nrow="<<nrow<<")");};
-    if (col>=ncol) {
-	ERROR("aipscol2stlvec: column number col=" << col << " is larger than total number of columns (" << ncol << ") in matrix.");
-	stlvec.clear();
-	return;
-    }
-
-    stlvec.resize(nrow);
-    CasaVector<S> CASAVec = data.column(col);
-    
-//    p=stlvec.begin();
-    
-    for (i=0;i<nrow;i++) {
-//	*p=mycast<T>(CASAVec[i]); 
-	stlvec[i]=mycast<T>(CASAVec[i]); 
-//	p++;
-    };
-}
-
-/*!
-  \brief The function converts an aips++ vector to an stl vector
- */
-
-template <class S, class T>
-void aipsvec2stlvec(CasaVector<S>& data, vector<T>& stlvec){
-    HInteger i,n;
-//    vector<R>::iterator p;
-    
-    n=data.size();
-    stlvec.resize(n);
-//    p=stlvec.begin();
-    for (i=0;i<n;i++) {
-//	*p=mycast<T>(data[i]); 
-	stlvec[i]=mycast<T>(data[i]); 
-//	p++;
-    };
-}
-
 
 //------------------------------------------------------------------------------
 //$NEW: Function
@@ -2574,85 +2525,55 @@ SET_FUNC_PARAMETER_AWK(Filename, HString, dataset_lopes);
 template <class T> void process(F_PARAMETERS) {
   GET_FUNC_PARAMETER_AWK(Filename, HString, dataset_lopes);
 
-HString Filetype = determine_filetype(Filename);
-  
-static HString oldfilename="";
-bool opened;
-union{void* ptr; CR::DataReader* drp; CR::LOFAR_TBB* tbb; CR::LopesEventIn* lep;};
-  
   DBG("dataReaderObject: Retrieved filename parameter =" << Filename); // gets filename from object set in hfnet.py
 
-  // If a pointer to a DataReader was stored already in the data vector, delete that c++ object first
-  //before we create a new DataReader below (and store the Pointer in the data vector)
-  if (vp->size()>0 && AsPtr(vp->at(0))!=NULL) {
-    DBG("dataReaderObject: Delete old data reader object " << AsPtr(vp->at(0))); 
-    drp=reinterpret_cast<DataReader*>(AsPtr(vp->at(0)));
-    delete drp;
-  }
-  vp->clear();
+  //Results Objects
+  HInteger date;
+  HString observatory;
+  HInteger filesize;
+  HInteger nofAntennas;
+  address maxBlocksize;
+  HString Filetype;
+  vector<HInteger> AntennaIDs; 
+  vector<HInteger> Offsets;
   
   //Create the a pointer to the DataReader object and store the pointer
   //Here we could have if statements depending on data types
-      
-  vector<HInteger> Offsets,SampNum;
 
-  DBG("DataFunc_CR_dataReaderObject: Opening File, Filename=" << Filename);
-  if (Filetype=="LOPESEvent") {
-    lep = new CR::LopesEventIn;
-    DBG("DataFunc_CR_dataReaderObject: lep=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
-    opened=lep->attachFile(Filename);
-    if (oldfilename!=Filename) {MSG("Filename="<<Filename);lep->summary();};
-    oldfilename=Filename;
-  } else if (Filetype=="LOFAR_TBB") {
-    tbb = new CR::LOFAR_TBB(Filename,1024);
-    DBG("DataFunc_CR_dataReaderObject: tbb=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
-    opened=tbb!=NULL;
-    if (oldfilename!=Filename) {MSG("Filename="<<Filename);tbb->summary();};
-    if (opened) {
-      CasaVector<int> OffsetsCasa = tbb->sample_offset();
-      //      CasaVector<unsigned int> SampNumCasa = tbb->sample_number();
-      //int l; OffsetsCasa.shape(l);
-      //MSG("Offsets len =" << l); 
-      //aipsvec2stlvec(SampNumCasa, SampNum);
-      aipsvec2stlvec(OffsetsCasa, Offsets);
-      };
-    oldfilename=Filename;
-  } else {
-    ERROR("DataFunc_CR_dataReaderObject: Unknown Filetype = " << Filetype  << ", name=" << dp->getName(true));
-    opened=false;
-  }
+  union{HIntPointer iptr; HPointer ptr; CR::DataReader* drp;};
 
-  putResult("Filetype",Filetype);
-  putResult("Offsets",Offsets);
+  //Close previous file if it was stored in the vector
+  if (vp->size()>0) hCloseFile(AsIPtr(vp->at(0)));
+  vp->clear();
 
-  if (!opened){
-    ERROR("DataFunc_CR_dataReaderObject: Opening file " << Filename << " failed." << " Objectname=" << dp->getName(true));
-    vp->push_back(mycast<T>(reinterpret_cast<HPointer>(Null_p))); 
-    MSG("vp->size="<<vp->size()<<", v(0)="<<(*vp)[0]);
-    return;
-  };
+  //Open the file and retrieve pointer to DataReader object
+  iptr=hOpenFile(Filename, Offsets);
 
-    //Store the pointer in the object, so that other objects can access
-    //it. The object should actually me made read-only, since the pointer is
-    //not to be changed by put ever again until the window is deleted
+  //Store the pointer in the object, so that other objects can access
+  //it. The object should actually me made read-only, since the pointer is
+  //not to be changed by put ever again until the window is deleted
+
   vp->push_back(mycast<T>(ptr)); 
 
-      //Read the data Header, containing important information about the file (e.g. size)
+  //Read out some header information ...
   CasaRecord hdr=drp->headerRecord();
-      
-      //      uint nfields=hdr.nfields();
-      //      uint i;
-      //      for (i=0; i<nfields; i++) {
-      //	MSG("hdr name="<<hdr.name(i) << " type="<<hdr.dataType(i));
-      //      };
+  date=hdr.asuInt("Date");
+  observatory=hdr.asString("Observatory");
+  filesize=hdr.asInt("Filesize");
+  hdr.asArrayInt("AntennaIDs").tovector(AntennaIDs);
+  nofAntennas=drp->nofAntennas();
+  Filetype = determine_filetype(Filename);
+  maxBlocksize=min(filesize, 1048576);
 
-      //Now store File and Header information in Result objects
-  HInteger date=hdr.asuInt("Date"); putResult("Date",date);
-  HString observatory=hdr.asString("Observatory"); putResult("Observatory",observatory);
-  HInteger filesize=hdr.asInt("Filesize"); putResult("Filesize",filesize);
-  vector<HInteger> AntennaIDs; hdr.asArrayInt("AntennaIDs").tovector(AntennaIDs); putResult("AntennaIDs",AntennaIDs);
-  HInteger nofAntennas=drp->nofAntennas();putResult("nofAntennas",nofAntennas);
-
+  //... and store it in results objects
+  putResult("Date",date);
+  putResult("Observatory",observatory);
+  putResult("Filesize",filesize);
+  putResult("nofAntennas",nofAntennas);
+  putResult("maxBlocksize",maxBlocksize);
+  putResult("Filetype",Filetype);
+  putResult("AntennaIDs",AntennaIDs);
+  putResult("Offsets",Offsets);
   DBG("DataFunc_CR_dataReaderObject: Success.");
 }
 
@@ -2679,8 +2600,8 @@ updateable: true
 Par: File, HPointer, NULL
 Par: Antenna, HInteger, 0
 Par: Blocksize, HInteger, -1
+Par: maxBlocksize, HInteger, 1048576
 Par: Block, HInteger, 0
-Par: maxBlocksize, HInteger, 65536
 Par: Filesize, HInteger, -1
 Par: Stride, HInteger, 0
 Par: Shift, HInteger, 0
@@ -2703,8 +2624,8 @@ SET_FUNC_VECPARAMETER_AWK(Offsets, HInteger);
 SET_FUNC_PARAMETER_AWK(File, HPointer, NULL);
 SET_FUNC_PARAMETER_AWK(Antenna, HInteger, 0);
 SET_FUNC_PARAMETER_AWK(Blocksize, HInteger, -1);
+SET_FUNC_PARAMETER_AWK(maxBlocksize, HInteger, 1048576);
 SET_FUNC_PARAMETER_AWK(Block, HInteger, 0);
-SET_FUNC_PARAMETER_AWK(maxBlocksize, HInteger, 65536);
 SET_FUNC_PARAMETER_AWK(Filesize, HInteger, -1);
 SET_FUNC_PARAMETER_AWK(Stride, HInteger, 0);
 SET_FUNC_PARAMETER_AWK(Shift, HInteger, 0);
@@ -2716,106 +2637,20 @@ template <class T> void process(F_PARAMETERS) {
   GET_FUNC_PARAMETER_AWK(File, HPointer, NULL);
   GET_FUNC_PARAMETER_AWK(Antenna, HInteger, 0);
   GET_FUNC_PARAMETER_AWK(Blocksize, HInteger, -1);
+  GET_FUNC_PARAMETER_AWK(maxBlocksize, HInteger, 1048576);
   GET_FUNC_PARAMETER_AWK(Block, HInteger, 0);
-  GET_FUNC_PARAMETER_AWK(maxBlocksize, HInteger, 65536);
   GET_FUNC_PARAMETER_AWK(Filesize, HInteger, -1);
   GET_FUNC_PARAMETER_AWK(Stride, HInteger, 0);
   GET_FUNC_PARAMETER_AWK(Shift, HInteger, 0);
   GET_FUNC_PARAMETER_AWK(Datatype, HString, "Fx");
-  //First retrieve the pointer to the pointer to the dataRead and check whether it is non-NULL.
-  if (File==NULL){
-    ERROR("dataRead: pointer to FileObject is NULL, DataReader not found." << ", name=" << dp->getName(true)); 
-    return;
-  };
-  DataReader *drp=reinterpret_cast<DataReader*>(File); 
-
-//!!!One Needs to verify somehow that the parameters make sense !!!
-  if (Antenna > drp->nofAntennas()-1) {
-    ERROR("Requested Antenna number too large!");
-    return;
-  };
-
   if (Blocksize<1) Blocksize=maxBlocksize;
-  //  MSG("Blocksize =" << Blocksize <<", Block=" << Block);
-  drp->setBlocksize(Blocksize);
-  drp->setBlock(Block);
-  drp->setStride(Stride);
-  if (Offsets.size()>0) {
-    MSG("setShift: Antenna="<< Antenna <<", Shift=" << Shift-Offsets[Antenna]); 
-    drp->setShift(Shift-Offsets[Antenna]);
-  } else {
-    drp->setShift(Shift);
-  };
-
+  hReadFile(*vp,AsIPtr(File),Datatype,Antenna,Blocksize,Block,Stride,Shift,Offsets); 
   HInteger maxBlock=Filesize/Blocksize-1;	
   putResult("maxBlock",maxBlock);
-
-  CasaVector<uint> antennas(1,Antenna);
-  drp->setSelectedAntennas(antennas);
-//    Vector<uint> selantennas=drp->selectedAntennas();
-//    MSG("No of Selected Antennas" << drp->nofSelectedAntennas ()<< " SelectedAntennas[0]=" <<selantennas[0]);
-
-  address ncol;
-
-  #define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) aipscol2stlvec(ary,*vp2,Antenna); else aipscol2stlvec(ary,*vp2,0); dp->noMod(); dp->put(*vp2)
-
-  //#define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) *vp2=ary.column(Antenna).tovec(); else *vp2=ary.column(0).tovec(); dp->noMod(); dp->put(*vp2)
-
-  if (Datatype=="Time") {
-    //    vector<HNumber>* vp2; *vp2 = drp->timeValues().tovec();
-    CasaVector<double> val = drp->timeValues();
-    aipsvec2stlvec(val,*vp);
-  }
-  else if (Datatype=="Frequency") {
-    //vector<HNumber>* vp2; *vp2 = drp->frequencyValues().tovec();
-    CasaVector<double> val = drp->frequencyValues();
-    aipsvec2stlvec(val,*vp);
-  }
-  else if (Datatype=="Position") {
-    //vector<HNumber>* vp2; *vp2 = drp->frequencyValues().tovec();
-    CasaVector<unsigned int> val = drp->positions();
-    aipsvec2stlvec(val,*vp);
-  }
-  else if (Datatype=="Fx") {
-    vector<HNumber>* vp2 = new vector<HNumber>;
-    CasaMatrix<CasaNumber> ary=drp->fx();
-    copy_ary2vp;
-  }
-  else if (Datatype=="Voltage") {
-    vector<HNumber>* vp2 = new vector<HNumber>;
-    CasaMatrix<CasaNumber> ary=drp->voltage();
-    copy_ary2vp;
-  }
-  else if (Datatype=="invFFT") {
-    vector<HNumber>* vp2 = new vector<HNumber>;
-    CasaMatrix<CasaNumber> ary=drp->invfft();
-    copy_ary2vp;
-  }
-  else if (Datatype=="FFT") {
-    vector<HComplex>* vp2 = new vector<HComplex>;
-    CasaMatrix<CasaComplex> ary=drp->fft();
-    copy_ary2vp;
-  }
-  else if (Datatype=="CalFFT") {
-    vector<HComplex>* vp2 = new vector<HComplex>;
-    CasaMatrix<CasaComplex> ary=drp->calfft();
-    copy_ary2vp;
-  }
-  else {
-    ERROR("DataFunc_CR_dataRead: Datatype=" << Datatype << " is unknown." << ", name=" << dp->getName(true));
-    vp->clear();
-    return;
-  };
 }
 //$END Function ----------------------------------------------------------------
 }; DATAFUNC_CONSTRUCTOR(dataRead,CR,"Function retrieving a vector from the dataReader.",NUMBER,true);
-/*
-  else if (Datatype=="Fx") {aipscol2stlvec(drp->fx(),*vp,0);}
-  else if (Datatype=="Voltage") {aipscol2stlvec(drp->voltage(),*vp,0);}
-  else if (Datatype=="invFFT") {aipscol2stlvec(drp->invfft(),*vp,0);}
-  else if (Datatype=="FFT") {aipscol2stlvec(drp->fft(),*vp,0);}
-  else if (Datatype=="CalFFT") {aipscol2stlvec(drp->calfft(),*vp,0);}
-*/
+
 
 /*------------------------------------------------------------------------
 End DataFunc Object Library "CR"
@@ -2952,7 +2787,7 @@ int ReadTextFile(string filename)
 //------------------------------------------------------------------------
 //Publish the Libraries - used in Data object constructor
 //------------------------------------------------------------------------
-
+//Note that this will be filled in by the preprocessor 
 void DataFunc_Library_publish(DataFuncLibraryClass* library_ptr){
   //$PUBLISH Function
 PUBLISH_OBJECT_FUNCTION(Sys,Unit);
@@ -2997,3 +2832,8 @@ PUBLISH_OBJECT_FUNCTION(CR,dataRead);
 PUBLISH_OBJECT_FUNCTION(Py,PyFunc);
 };
  
+void dummy_instantiate(){
+  vector<HInteger> Offsets;
+  CasaVector<int> OffsetsCasa;
+  aipsvec2stlvec(OffsetsCasa, Offsets);
+}

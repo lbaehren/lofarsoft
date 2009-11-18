@@ -118,7 +118,7 @@
          <property name="geometry" >
           <rect>
            <x>0</x>
-           <y>-33</y>
+           <y>0</y>
            <width>763</width>
            <height>495</height>
           </rect>
@@ -2174,7 +2174,7 @@
          </rect>
         </property>
         <property name="text" >
-         <string/>
+         <string>Replot</string>
         </property>
        </widget>
        <widget class="QFrame" name="frame_16" >
@@ -2383,7 +2383,7 @@
            <number>1</number>
           </property>
           <property name="maximum" >
-           <number>65563</number>
+           <number>1048576</number>
           </property>
           <property name="value" >
            <number>1024</number>
@@ -2859,6 +2859,8 @@
     <slot>hfzoom_out()</slot>
     <slot>hfshift_left()</slot>
     <slot>hfshift_right()</slot>
+    <slot>quit()</slot>
+    <slot>slot1()</slot>
    </slots>
   </customwidget>
   <customwidget>
@@ -2893,16 +2895,16 @@
   <connection>
    <sender>quit</sender>
    <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
+   <receiver>HMainPlotter</receiver>
+   <slot>quit()</slot>
    <hints>
     <hint type="sourcelabel" >
      <x>287</x>
      <y>603</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>563</x>
-     <y>331</y>
+     <x>724</x>
+     <y>324</y>
     </hint>
    </hints>
   </connection>
@@ -2910,7 +2912,7 @@
    <sender>replot</sender>
    <signal>clicked()</signal>
    <receiver>HMainPlotter</receiver>
-   <slot>repaint()</slot>
+   <slot>hfReplotNetwork()</slot>
    <hints>
     <hint type="sourcelabel" >
      <x>47</x>

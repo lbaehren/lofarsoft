@@ -1,15 +1,15 @@
 #        pdb.set_trace()
+#This File is so incredibly ugly .... (hf)
 
 def UnitChooser(self):
     return MakeChooser(self,"Unit",("UnitPrefix","UnitScaleFactor"),(("",1.0),("f",10.**-15),("p",10.**-12),("n",10.**-9),("{\\mu}",10.**-6),("m",10.**-3),("c",10.**-2),("d",10.**-1),("h",10.**2),("k",10.**3),("M",10.**6),("G",10.**9),("T",10.**12),("P",10.**15),("E",10.**18),("Z",10.**21)))
 
 def LOPESDatatypeChooser(self):
-    return MakeChooser(self,"Datatype",("Datatype","UnitName","Axis"),(("Time","s","x"),("Position","","x"),("Frequency","Hz","x"),("Fx","Counts","y"),("Voltage","V","y"),("CalFFT","","y"),("invFFT","","y")))
+    return MakeChooser(self,"Datatype",("Datatype","UnitName","Axis"),(("Time","s","x"),("Frequency","Hz","x"),("Fx","Counts","y"),("Voltage","V","y"),("FFT","","y"),("invFFT","","y")))
 
 def CRFile(self,filename=""):
     if filename=="": 
         lofarMainDir = os.environ.get('LOFARSOFT')
-#        filename = lofarMainDir + '/data/lopes/2007.01.31.23:59:33.960.event'
         filename = lofarMainDir + '/data/lopes/example.event'
     fobj=(self >> _d("Filename",filename,_l(90)) >> _d("Parameters","File",_l(999)) >> _d("File",_f("dataReaderObject","CR"))).update()
     return fobj["Results"]
@@ -91,6 +91,40 @@ def PlotDataPipeline(self):
     gdb["Results=GraphDataBuffer"].find_or_make("PlotData",_f(hfPlotData)).find_or_make("PlotPanel",_f(hfPlotPanel))
     (DataUnion(gdb["Results=PlotPanel"]).find_or_make(":PlotWindow",_f(hfPlotWindow))).find_or_make("QtPanel",_f(hfQtPanel)) 
 
+
+def ConnectGUIButtons(d):
+    global gui
+    d["PlotWindow'npanels"].connect(gui.npanels)
+    d["PlotWindow'npanelsx"].connect(gui.npanelsx)
+    d["PlotWindow'npanelsy"].connect(gui.npanelsy)
+#
+    d["PlotPanel:xmin"].connect(gui.xmin)  
+    d["PlotPanel:ymin"].connect(gui.ymin)  
+    d["PlotPanel:xmax"].connect(gui.xmax)  
+    d["PlotPanel:ymax"].connect(gui.ymax)  
+#
+    d["*LastAntenna"].connect(gui.lastantenna)  #The * in front makes a global search for this name
+    d["*FirstAntenna"].connect(gui.firstantenna)  
+    d["*AntennaSelection"].connect(gui.antennaselection,"setText","QString")  
+#
+    d["PlotPanel'YAuto"].connect(gui.yauto,"setChecked","bool")
+    d["PlotPanel'XAuto"].connect(gui.xauto,"setChecked","bool")
+    d["PlotPanel'logX"].connect(gui.logx,"setChecked","bool")
+    d["PlotPanel'logY"].connect(gui.logy,"setChecked","bool")
+#
+    d["DataPipeline'Block"].connect(gui.blocknumber,"setValue","int")
+    d["DataPipeline'Blocksize"].connect(gui.blocksize,"setValue","int")
+    d["Data:maxBlock"].FirstObject().connect(gui.blocknumber,"setMaximum","int",isSlot=False)
+    d["Data:maxBlock"].FirstObject().connect(gui.blocknumberslider,"setMaximum","int",isSlot=False)
+    d["Data'maxBlocksize"].connect(gui.blocksize,"setMaximum","int",isSlot=False)
+    d["Data'maxBlocksize"].connect(gui.blocksizeslider,"setMaximum","int",isSlot=False)
+#
+    d["PlotPanel'xscale"].connect(gui.xzoomdial,"setValue","int")
+    d["PlotPanel'yscale"].connect(gui.yzoomdial,"setValue","int")
+    d["PlotPanel'xshift"].connect(gui.xshiftslider,"setValue","int")
+    d["PlotPanel'yshift"].connect(gui.yshiftslider,"setValue","int")
+
+
 class CRPipelineLauncher(hffunc):
     "CRPipelineLauncher: Start or update the CR Pipeline"
     def startup(self,d):
@@ -111,6 +145,18 @@ class CRPipelineLauncher(hffunc):
         PlotDataPipeline(d)
         d.noMod()
         d.set(result[0])
+#
+        print "Initializing Plotting Network"
+        global hfQtPlotWidget,hfm,gui,qtgui
+        hfQtPlotWidget=hfQtPlotConstructor(d["QtPanel"])
+        hfm=hfMainWindow(hfQtPlotWidget)
+        hfm.raise_() # put it on top of all other windows
+        hfm.show()  # and make it visible
+        gui=hfm.ui # define an object which provides easy access to the GUI objects
+        qtgui=d["QtPanel'PlotWidget"].getPy() # The object that contains the user GUI functions 
+        ("GUI",gui) >> d["QtPanel"] # and store it, so that the objects have access to the GUI. 
+        d["QtPanel"]  >> ("QtNetview",_f(hfQtNetview),_l(100)) #Here this is used by the Network Display object
+#
         return 0
     def process(self,d):
         AntennaObjectNames,unwantedAntennaNames,newAntennaNames=CRDataPipeline(d)
@@ -125,5 +171,6 @@ class CRPipelineLauncher(hffunc):
             dgb.Silent(True)
             dgb.touch().Silent(False)
         d["QtPanel"].update()
+        ConnectGUIButtons(d)
         return 0
 

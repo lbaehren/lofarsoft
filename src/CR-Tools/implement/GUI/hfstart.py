@@ -7,6 +7,7 @@ from libhfget import *
 app = QtGui.QApplication(sys.argv)
 
 execfile("hfinit.py")
+execfile("hfpywrappers.py")
 execfile("hffuncs.py")
 execfile("hfgui.py")
 execfile("hfcrfuncs.py")

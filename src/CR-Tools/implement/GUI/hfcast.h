@@ -62,6 +62,7 @@ template<> inline HPointer mycast(const HComplex v);
 #define AsNum mycast<HNumber>
 #define AsInt mycast<HInteger>
 #define AsPtr mycast<HPointer>
+#define AsIPtr mycast<HIntPointer>
 #define AsStr mycast<HString>
 #define AsCpx mycast<HComplex>
 

@@ -129,6 +129,9 @@ class hfQtPlot(QtGui.QWidget):
         self.mousemode="z"
         self.mouse_selectmode="p"
         self.presseventpos=()
+    def quit(self):
+        print "Quitting GUI and Python ...."
+        exit()
     def setGraph(self,gr):
         self.gr=gr;
         self.createImage()
@@ -429,7 +432,6 @@ class hfQtPlot(QtGui.QWidget):
     def hfsetBlock(self,i):
         self.currentplotdataobject()["'Block"].set(i)
     def hfsetBlocksize(self,i):
-        print "Blocksize set to  ",i
         self.currentplotdataobject()["'Blocksize"].set(i)
     def currentplotdataobject(self):
         return self.currentplotpanelobject()["'PlotData"]

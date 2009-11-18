@@ -45,6 +45,10 @@ using namespace std;
 #include <GUI/hffuncs.h>  
 #include <crtools.h>
 
+#include "Data/LopesEventIn.h"
+#include "Data/LOFAR_TBB.h"
+#include "dal/TBB_Timeseries.h"
+
 /* Some explanations...
 
 See hfanalysis.h for actual definition
@@ -76,6 +80,266 @@ CasaVector<HInteger> OffsetsCasa(shape,storage,casa::SHARE);
   void (*FUNC##_N)(vector<HNumber > &vec,HNumber) = &FUNC;	   \
   void (*FUNC##_C)(vector<HComplex > &vec,HComplex) = &FUNC; \
   void (*FUNC##_S)(vector<HString > &vec,HString) = &FUNC
+#define PythonWrapper_VecINCS_8_Parameters(FUNC,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8)   \
+  void (*FUNC##_I)(vector<HInteger> &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8) = &FUNC; \
+  void (*FUNC##_N)(vector<HNumber > &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8) = &FUNC; \
+  void (*FUNC##_C)(vector<HComplex > &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8) = &FUNC; \
+  void (*FUNC##_S)(vector<HString > &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8) = &FUNC
+#define PythonWrapper_VecINCSP_8_Parameters(FUNC,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8)   \
+  void (*FUNC##_I)(vector<HInteger> &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8) = &FUNC; \
+  void (*FUNC##_N)(vector<HNumber > &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8) = &FUNC; \
+  void (*FUNC##_C)(vector<HComplex > &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8) = &FUNC; \
+  void (*FUNC##_P)(vector<HPointer > &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8) = &FUNC; \
+  void (*FUNC##_S)(vector<HString > &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8) = &FUNC
+
+
+//------------------------------------------------------------------------
+// Conversion Rountines
+//------------------------------------------------------------------------
+
+/*!
+  \brief The function converts a column in an aips++ matrix to an stl vector
+ */
+
+template <class S, class T>
+void aipscol2stlvec(casa::Matrix<S> &data, vector<T>& stlvec, const HInteger col){
+    HInteger i,nrow,ncol;
+//    vector<HNumber>::iterator p;
+    
+    nrow=data.nrow();
+    ncol=data.ncolumn();
+    //    if (ncol>1) {MSG("aipscol2stlvec: ncol="<<ncol <<" (nrow="<<nrow<<")");};
+    if (col>=ncol) {
+	ERROR("aipscol2stlvec: column number col=" << col << " is larger than total number of columns (" << ncol << ") in matrix.");
+	stlvec.clear();
+	return;
+    }
+
+    stlvec.resize(nrow);
+    CasaVector<S> CASAVec = data.column(col);
+    
+//    p=stlvec.begin();
+    
+    for (i=0;i<nrow;i++) {
+//	*p=mycast<T>(CASAVec[i]); 
+	stlvec[i]=mycast<T>(CASAVec[i]); 
+//	p++;
+    };
+}
+
+/*!
+  \brief The function converts an aips++ vector to an stl vector
+ */
+
+template <class S, class T>
+void aipsvec2stlvec(CasaVector<S>& data, vector<T>& stlvec){
+    HInteger i,n;
+//    vector<R>::iterator p;
+    
+    n=data.size();
+    stlvec.resize(n);
+//    p=stlvec.begin();
+    for (i=0;i<n;i++) {
+//	*p=mycast<T>(data[i]); 
+	stlvec[i]=mycast<T>(data[i]); 
+//	p++;
+    };
+}
+
+
+
+//------------------------------------------------------------------------
+// I/O DataReader Access functions
+//------------------------------------------------------------------------
+
+
+/*! 
+Function to close a file with a datareader object providing the pointer to the object as an integer
+*/
+void hCloseFile(HIntPointer iptr) {
+  union{void* ptr; CR::DataReader* drp;};
+  ptr=AsPtr(iptr);
+  if (ptr!=Null_p) delete drp;
+}
+
+/*! 
+  Function to open a file with a datareader object and returning the pointer to the object as an integer
+ */
+HIntPointer hOpenFile(HString Filename, vector<HInteger> & Offsets) {
+  
+  bool opened;
+  union{HIntPointer iptr; void* ptr; CR::DataReader* drp; CR::LOFAR_TBB* tbb; CR::LopesEventIn* lep;};
+
+  //Create the a pointer to the DataReader object and store the pointer
+      
+  DBG("DataFunc_CR_dataReaderObject: Opening File, Filename=" << Filename);
+  HString Filetype = determine_filetype(Filename);
+  if (Filetype=="LOPESEvent") {
+    lep = new CR::LopesEventIn;
+    DBG("DataFunc_CR_dataReaderObject: lep=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
+    opened=lep->attachFile(Filename);
+    MSG("Opening File="<<Filename);lep->summary();
+  } else if (Filetype=="LOFAR_TBB") {
+    tbb = new CR::LOFAR_TBB(Filename,1024);
+    DBG("DataFunc_CR_dataReaderObject: tbb=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
+    opened=tbb!=NULL;
+    MSG("Opening File="<<Filename);tbb->summary();
+    if (opened) {
+      CasaVector<int> OffsetsCasa = tbb->sample_offset();
+      aipsvec2stlvec(OffsetsCasa, Offsets);
+      };
+  } else {
+    ERROR("DataFunc_CR_dataReaderObject: Unknown Filetype = " << Filetype  << ", Filename=" << Filename);
+    opened=false;
+  }
+  
+  if (!opened){
+    ERROR("DataFunc_CR_dataReaderObject: Opening file " << Filename << " failed.");
+    return AsIPtr(Null_p);
+  };
+
+  
+  //Read the data Header, containing important information about the file (e.g. size)
+  CasaRecord hdr=drp->headerRecord();
+  uint i,nfields=hdr.nfields();
+  for (i=0; i<nfields; i++) MSG("hdr name="<<hdr.name(i) << " type="<<hdr.dataType(i));
+
+  //return value
+  return iptr;
+}
+
+//------------------------------------------------------------------------
+/*! Read data from a Datareader object (pointer in iptr) into an stl vector 
+
+
+Example on how to use this with the PYthon wrapper
+
+offsets=IntVec()
+datareader_ptr=hOpenFile("/Users/falcke/LOFAR/usg/data/lofar/RS307C-readfullsecond.h5", offsets)
+
+fdata=FloatVec()
+idata=IntVec()
+cdata=ComplexVec()
+sdata=StringVec()
+Datatype="Fx"
+Antenna=1
+Blocksize=1024
+Block=10
+Stride=0
+Shift=0
+hReadFile(idata,datareader_ptr,Datatype,Antenna,Blocksize,Block,Stride,Shift,offsets)
+hCloseFile(datareader_ptr)
+
+The data will then be in the vector idata. You can covert that to a
+Python list with l=vec2list(idata) (defined in hfinit.py)
+
+ */
+template <class T> 
+void hReadFile(vector<T> & vec,
+	       const HIntPointer iptr,
+	       const HString Datatype,
+	       const HInteger Antenna,
+	       const HInteger Blocksize,
+	       const HInteger Block,
+	       const HInteger Stride,
+	       const HInteger Shift,
+	       vector<HInteger> & Offsets) 
+{
+  
+  DataReader *drp=reinterpret_cast<DataReader*>(iptr); 
+  
+  //First retrieve the pointer to the pointer to the dataRead and check whether it is non-NULL.
+  if (drp==Null_p){
+    ERROR("dataRead: pointer to FileObject is NULL, DataReader not found."); 
+    return;
+  };
+
+//!!!One Needs to verify somehow that the parameters make sense !!!
+  if (Antenna > drp->nofAntennas()-1) {
+    ERROR("Requested Antenna number too large!");
+    return;
+  };
+  drp->setBlocksize(Blocksize);
+  drp->setBlock(Block);
+  drp->setStride(Stride);
+  if (Offsets.size()>0) {
+    drp->setShift(Shift-Offsets[Antenna]);
+  } else {
+    drp->setShift(Shift);
+  };
+
+  CasaVector<uint> antennas(1,Antenna);
+  //  drp->setSelectedAntennas(antennas);
+
+//    Vector<uint> selantennas=drp->selectedAntennas();
+//    MSG("No of Selected Antennas" << drp->nofSelectedAntennas ()<< " SelectedAntennas[0]=" <<selantennas[0]);
+
+  address ncol;
+
+  #define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) aipscol2stlvec(ary,vec,Antenna); else aipscol2stlvec(ary,vec,0); 
+
+  //#define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) *vp2=ary.column(Antenna).tovec(); else *vp2=ary.column(0).tovec(); dp->noMod(); dp->put(*vp2)
+
+  if (Datatype=="Time") {
+    //    vector<HNumber>* vp2; *vp2 = drp->timeValues().tovec();
+    CasaVector<double> val = drp->timeValues();
+    aipsvec2stlvec(val,vec);
+  }
+  else if (Datatype=="Frequency") {
+    //vector<HNumber>* vp2; *vp2 = drp->frequencyValues().tovec();
+    CasaVector<double> val = drp->frequencyValues();
+    aipsvec2stlvec(val,vec);
+  }
+  else if (Datatype=="Fx") {
+    //    vector<HNumber>* vp2 = new vector<HNumber>;
+    CasaMatrix<CasaNumber> ary=drp->fx();
+    copy_ary2vp;
+  }
+  else if (Datatype=="Voltage") {
+    //    vector<HNumber>* vp2 = new vector<HNumber>;
+    CasaMatrix<CasaNumber> ary=drp->voltage();
+    copy_ary2vp;
+  }
+  else if (Datatype=="invFFT") {
+    //    vector<HNumber>* vp2 = new vector<HNumber>;
+    CasaMatrix<CasaNumber> ary=drp->invfft();
+    copy_ary2vp;
+  }
+  else if (Datatype=="FFT") {
+    //    vector<HComplex>* vp2 = new vector<HComplex>;
+    CasaMatrix<CasaComplex> ary=drp->fft();
+    copy_ary2vp;
+  }
+  else if (Datatype=="CalFFT") {
+    //    vector<HComplex>* vp2 = new vector<HComplex>;
+    CasaMatrix<CasaComplex> ary=drp->calfft();
+    copy_ary2vp;
+  }
+  else {
+    ERROR("DataFunc_CR_dataRead: Datatype=" << Datatype << " is unknown.");
+    vec.clear();
+    return;
+  };
+  return;
+}
+
+/*
+  else if (Datatype=="Fx") {aipscol2stlvec(drp->fx(),*vp,0);}
+  else if (Datatype=="Voltage") {aipscol2stlvec(drp->voltage(),*vp,0);}
+  else if (Datatype=="invFFT") {aipscol2stlvec(drp->invfft(),*vp,0);}
+  else if (Datatype=="FFT") {aipscol2stlvec(drp->fft(),*vp,0);}
+  else if (Datatype=="CalFFT") {aipscol2stlvec(drp->calfft(),*vp,0);}
+*/
+
+PythonWrapper_VecINCSP_8_Parameters(hReadFile,\
+				   const HIntPointer iptr,\
+				   const HString Datatype,\
+				   const HInteger Antenna,\
+				   const HInteger Blocksize,\
+				   const HInteger Block,\
+				   const HInteger Stride,\
+				   const HInteger Shift,\
+				   vector<HInteger> & Offsets);
 
 /*========================================================================
   hfanalysis
@@ -189,7 +453,8 @@ vector<HNumber> hWeights(address wlen, hWEIGHTS wtype){
   is done so that the memory allocation of a vector/array is handled by the user,
   hence different types of arrays/vectors can be used.
 */
-template <class T> 
+
+template <class T>
 void hRunningAverageT (const STLVectorIteratorT idata_start,
 		       const STLVectorIteratorT idata_end,
 		       const STLVectorIteratorT odata_start,

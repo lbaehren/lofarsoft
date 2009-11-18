@@ -25,16 +25,7 @@ CRFile(d) >> ("PipelineLauncher",_f(CRPipelineLauncher))
 
 #To use the designer hfQtPlotWidget needs to be explicitly created here
 #Probably we can also do this as a function ...
-hfQtPlotWidget=hfQtPlotConstructor(d["QtPanel"])
-hfm=hfMainWindow(hfQtPlotWidget)
-hfm.raise_() # put it on top of all other windows
-hfm.show()  # and make it visible
-gui=hfm.ui # define an object which provides easy access to the GUI objects
-qtgui=d["QtPanel'PlotWidget"].getPy() # The object that contains the user GUI functions 
 
-("GUI",gui) >> d["QtPanel"] # and store it, so that the objects have access to the GUI. 
-
-d["QtPanel"]  >> ("QtNetview",_f(hfQtNetview),_l(100)) #Here this is used by the Network Display object
 
 selectboard=d["QtPanel'SelectBoard"]
 selectboard.setFunc("Neighbours","Sys",TYPE.STRING)
@@ -44,39 +35,9 @@ d >> d["QtNetview"] # to not loose it, when the above connection is cut
 d.All().clearModification() # to avoid re-initializing the DataReaderObject
 
 ##Now setting up some connections to the GUI ... will be done in the code, since we need to do the object selection.
-d["PlotWindow'npanels"].connect(gui.npanels)
-d["PlotWindow'npanelsx"].connect(gui.npanelsx)
-d["PlotWindow'npanelsy"].connect(gui.npanelsy)
-
-#print d["QtNetview'maxNetLevel"]
-
+ConnectGUIButtons(d)
 d["QtNetview'maxNetLevel"].connect(gui.netlevel,"setEditText")
 
-d["PlotPanel:xmin"].connect(gui.xmin)  
-d["PlotPanel:ymin"].connect(gui.ymin)  
-d["PlotPanel:xmax"].connect(gui.xmax)  
-d["PlotPanel:ymax"].connect(gui.ymax)  
-
-d["*LastAntenna"].connect(gui.lastantenna)  #The * in front makes a global search for this name
-d["*FirstAntenna"].connect(gui.firstantenna)  
-d["*AntennaSelection"].connect(gui.antennaselection,"setText","QString")  
-
-d["PlotPanel'YAuto"].connect(gui.yauto,"setChecked","bool")
-d["PlotPanel'XAuto"].connect(gui.xauto,"setChecked","bool")
-d["PlotPanel'logX"].connect(gui.logx,"setChecked","bool")
-d["PlotPanel'logY"].connect(gui.logy,"setChecked","bool")
-
-d["DataPipeline'Block"].connect(gui.blocknumber,"setValue","int")
-d["DataPipeline'Blocksize"].connect(gui.blocksize,"setValue","int")
-d["Data:maxBlock"].FirstObject().connect(gui.blocknumber,"setMaximum","int",isSlot=False)
-d["Data:maxBlock"].FirstObject().connect(gui.blocknumberslider,"setMaximum","int",isSlot=False)
-d["Data'maxBlocksize"].connect(gui.blocksize,"setMaximum","int",isSlot=False)
-d["Data'maxBlocksize"].connect(gui.blocksizeslider,"setMaximum","int",isSlot=False)
-
-d["PlotPanel'xscale"].connect(gui.xzoomdial,"setValue","int")
-d["PlotPanel'yscale"].connect(gui.yzoomdial,"setValue","int")
-d["PlotPanel'xshift"].connect(gui.xshiftslider,"setValue","int")
-d["PlotPanel'yshift"].connect(gui.yshiftslider,"setValue","int")
 
 #QtCore.QObject.connect(gui.loadfile,QtCore.SIGNAL("triggered()"),gui.HMainPlotter.hfLoad)
 connect_action("loadfile","hfLoad")

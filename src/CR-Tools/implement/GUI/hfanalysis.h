@@ -16,6 +16,39 @@
   extern void (*FUNC##_N)(vector<HNumber > &vec,HNumber); \
   extern void (*FUNC##_C)(vector<HComplex > &vec,HComplex); \
   extern void (*FUNC##_S)(vector<HString > &vec,HString)
+#define DefPythonWrapper_VecINCS_8_Parameters(FUNC,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8)   \
+  extern void (*FUNC##_I)(vector<HInteger> &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8);	  \
+  extern void (*FUNC##_N)(vector<HNumber > &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8); \
+  extern void (*FUNC##_C)(vector<HComplex > &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8); \
+  extern void (*FUNC##_S)(vector<HString > &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8)
+
+//!Function to close a file with a datareader object providing the pointer to the object as an integer
+void hCloseFile(HIntPointer iptr);
+
+//!Function to create a DataReader Object returning an integer containing the pointer (for Python)
+HIntPointer hOpenFile(HString Filename, vector<HInteger> & Offsets);
+
+//! Read data from a Datareader object (pointer in iptr) into an stl vector 
+template <class T> 
+void hReadFile(vector<T> & vec,
+	       const HIntPointer iptr,
+	       const HString Datatype,
+	       const HInteger Antenna,
+	       const HInteger Blocksize,
+	       const HInteger Block,
+	       const HInteger Stride,
+	       const HInteger Shift,
+	       vector<HInteger> & Offsets); 
+
+DefPythonWrapper_VecINCS_8_Parameters(hReadFile,
+				   const HIntPointer iptr,
+				   const HString Datatype,
+				   const HInteger Antenna,
+				   const HInteger Blocksize,
+				   const HInteger Block,
+				   const HInteger Stride,
+				   const HInteger Shift,
+				      vector<HInteger> & Offsets);
 
 //! function value of a Gaussian distribution
 inline HNumber funcGaussian(HNumber x,

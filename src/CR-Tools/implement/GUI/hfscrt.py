@@ -1,10 +1,50 @@
-d["Filename"]="/Users/falcke/LOFAR/usg/data/lofar/RS307C-readfullsecond.h5"
+offsets=IntVec()
+datareader_ptr=hOpenFile("/Users/falcke/LOFAR/usg/data/lofar/RS307C-readfullsecond.h5", offsets)
+
+offsets=IntVec()
+datareader_ptr=hOpenFile("/Users/falcke/LOFAR/usg/data/lopes/example.event", offsets)
+
+
+fdata=FloatVec()
+idata=IntVec()
+cdata=ComplexVec()
+sdata=StringVec()
+Datatype="Fx"
+Antenna=1
+Blocksize=1024
+Block=10
+Stride=0
+Shift=0
+hReadFile(idata,datareader_ptr,Datatype,Antenna,Blocksize,Block,Stride,Shift,offsets)
+
+d["*AntennaSelection"]=0
 d["Data'Block"]=30
+d["Data'Blocksize"]=1024*32
+d["Filename"]="/Users/falcke/LOFAR/usg/data/lofar/RS307C-readfullsecond.h5"
+
+
+d["Data'Block"]=30
+d["Filename"]="/Users/falcke/LOFAR/usg/data/lofar/RS307C-readfullsecond.h5"
 d["Data'Blocksize"]=63488
 d["Data'Block"]=598
 qtgui.hfadd_fy("abs")
 qtgui.hfadd_fy("RunningAverage")
+qtgui.hfsetYAuto(False)
 
+offsets=IntVec()
+datareader_ptr=hOpenFile("/Users/falcke/LOFAR/usg/data/lofar/RS307C-readfullsecond.h5", offsets)
+
+fdata=FloatVec()
+idata=IntVec()
+cdata=ComplexVec()
+sdata=StringVec()
+Datatype="Fx"
+Antenna=1
+Blocksize=1024
+Block=10
+Stride=0
+Shift=0
+hReadFile(idata,datareader_ptr,Datatype,Antenna,Blocksize,Block,Stride,Shift,offsets)
 
 vf=list2vec((1.0,2,3,2.,1.,3.,4.,2.,1.))
 v=FloatVec()

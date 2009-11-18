@@ -83,7 +83,9 @@ extern int global_debuglevel;
 #define D2BG3( T ) 
 #endif
 
+
 typedef long int longint; /* should be at least 64 bits */
+typedef int HIntPointer; /* This should be an integer that has the same length as a Pointer*/
 
 typedef /*long*/ int address ;
 //This is used to identify each data field uniquely
@@ -106,6 +108,7 @@ typedef std::complex<double> HComplex;
 typedef std::string HString;
 typedef void* HPointer;
 
+
 //Define types that are being used for the data reader and the casa arrays
 typedef double CasaNumber;
 typedef casa::DComplex CasaComplex;
@@ -116,11 +119,10 @@ typedef casa::Record CasaRecord ;
 #define CasaArray casa::Array
 #define CasaVector casa::Vector
 
-//For some reaosns NULL is primarily interpreted as Integer by the
+//For some reasons NULL is primarily interpreted as Integer by the
 //compiler (e.g., when it needs to determine the type of templated functions).
 //So, this forces NULL to really be a NULL pointer ...
 #define Null_p reinterpret_cast<HPointer>(NULL)
-
 
 /*!
   \brief Enumeration list of data types that can be used with data objects

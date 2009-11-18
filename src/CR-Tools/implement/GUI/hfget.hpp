@@ -416,6 +416,9 @@ boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_i
  def("setDebug", setDebug);
  def("file_get_extension",file_get_extension);
  def("determine_filetype",determine_filetype);
+ def("hOpenFile",hOpenFile);
+ def("hCloseFile",hCloseFile);
+
  def("hRunningAverage",hRunningAverageVec_N);
  def("hRunningAverage",hRunningAverageVec_I);
  def("hRunningAverage",hRunningAverageVec_C);
@@ -423,9 +426,8 @@ boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_i
 
  hPyExposeINCS(hNegate);
  hPyExposeINCS(hFill);
+ hPyExposeINCS(hReadFile);
  
-
-
 
  enum_<hWEIGHTS>("hWEIGHTS")
    .value("FLAT",WEIGHTS_FLAT)
