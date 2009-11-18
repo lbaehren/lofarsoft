@@ -3,7 +3,7 @@
 project (SWIG)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the library from the provided source code, if no system
@@ -91,86 +91,31 @@ if (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)
   set (SWIG_URL "${USG_DOWNLOAD}/software/${SWIG_TAR_ARCHIVE}")
 
   ##__________________________________________________________________
-  ## Check if a tar-archive with the source code is available already;
-  ## if this is not the case we need to fetch it from the USg server.
-  
+  ## Build the project
+
+  include (ExternalProject)
+
   find_file (have_swig_tgz ${SWIG_TAR_ARCHIVE} ${SWIG_SOURCE_DIR})
   
   if (have_swig_tgz)
-    add_custom_target (download_archive
-      COMMAND cp ${have_swig_tgz} .
-      WORKING_DIRECTORY ${SWIG_BINARY_DIR}
-      COMMENT "Copying tar-archive from ${USG_ROOT}/external/swig ..."
+    ExternalProject_Add (swig
+      PREFIX ${USG_ROOT}/build/swig
+      DOWNLOAD_DIR ${SWIG_BINARY_DIR}/swig
+      SOURCE_DIR ${SWIG_BINARY_DIR}/swig
+      URL ${have_swig_tgz}
+      CONFIGURE_COMMAND ${SWIG_BINARY_DIR}/swig/configure --prefix=${SWIG_prefix}
       )
   else (have_swig_tgz)
-    if (HAVE_WGET)
-      add_custom_target (download_archive
-	COMMAND wget -c ${SWIG_URL}
-	WORKING_DIRECTORY ${SWIG_BINARY_DIR}
-	)
-    else (HAVE_WGET)
-      if (HAVE_CURL)
-	add_custom_target (download_archive ALL
-	  COMMAND curl ${SWIG_URL} -o ${SWIG_TAR_ARCHIVE} -C -
-	  WORKING_DIRECTORY ${SWIG_BINARY_DIR}
-	  )
-      else (HAVE_CURL)
-	message (FATAL_ERROR "[SWIG] No tool found to download tar-archive!")
-      endif (HAVE_CURL)
-    endif (HAVE_WGET)
+    ExternalProject_Add (swig
+      PREFIX ${USG_ROOT}/build/swig
+      DOWNLOAD_DIR ${SWIG_BINARY_DIR}/swig
+      SOURCE_DIR ${SWIG_BINARY_DIR}/swig
+      URL ${SWIG_URL}
+      CONFIGURE_COMMAND ${SWIG_BINARY_DIR}/swig/configure --prefix=${SWIG_prefix}
+      )
   endif (have_swig_tgz)
   
-  ##__________________________________________________________________
-  ## Expand the tar-archive
-  
-  add_custom_target (expand_archive
-    COMMAND tar -xvzf ${SWIG_TAR_ARCHIVE}
-    WORKING_DIRECTORY ${SWIG_BINARY_DIR}
-    COMMENT "Expanding tar-archive ..."
-    )
-  add_dependencies (expand_archive download_archive)
-
-  ##__________________________________________________________________
-  ## Configure and build the project
-
-  #  X features:
-  #    --x-includes=DIR    X include files are in DIR
-  #    --x-libraries=DIR   X library files are in DIR
-  #
-  #  System types:
-  #    --build=BUILD     configure for building on BUILD [guessed]
-  #    --host=HOST       cross-compile to build programs to run on HOST [BUILD]
-
-  ## run "./configure"
-
-  add_custom_target (run_configure ALL
-    COMMAND ./configure --prefix=${SWIG_prefix}
-    WORKING_DIRECTORY ${SWIG_BINARY_DIR}/${SWIG_DIRECTORY}
-    COMMENT "[SWIG] Running configure ..."
-    )
-  add_dependencies (run_configure expand_archive)
-  
-  ## run "make"
-
-  add_custom_target (run_make ALL
-    COMMAND make
-    WORKING_DIRECTORY ${SWIG_BINARY_DIR}/${SWIG_DIRECTORY}
-    COMMENT "[SWIG] Starting build ..."
-    )
-  add_dependencies (run_make run_configure)
-  
-  ## run "make install"
-
-  add_custom_target (install ALL
-    COMMAND make install
-    COMMAND rm -rf ${SWIG_BINARY_DIR}/${SWIG_TAR_ARCHIVE}
-    COMMAND rm -rf ${SWIG_BINARY_DIR}/${SWIG_DIRECTORY}
-    WORKING_DIRECTORY ${SWIG_BINARY_DIR}/${SWIG_DIRECTORY}
-    COMMENT "[SWIG] Installing software and cleaning up ..."
-    )
-  add_dependencies (install run_make)
-
-  ## <-- end build condition ----------------------------------------------------->
+## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)
   message (STATUS "Found system-wide installation of Swig; skipping rebuild!")

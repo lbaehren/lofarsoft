@@ -48,87 +48,45 @@ include (FindLAPACK)
 
 if (NOT HAVE_ITPP OR ITPP_FORCE_BUILD)
   
-  ## ------------------------------------------------------------------------------
-  ## 
-
-  set (ITPP_VERSION "4.0.6")
-  set (ITPP_DIRECTORY "itpp-${ITPP_VERSION}")
-  set (ITPP_TAR_ARCHIVE "${ITPP_DIRECTORY}.tar.gz")
+  ## create script to run IT++ configuration
   
-  find_file (have_itpp_tgz ${ITPP_TAR_ARCHIVE} ${ITPP_SOURCE_DIR})
-  find_program (tar_executable tar ${bin_locations})
+  if (HAVE_FFTW3)
+    set (WITH_FFT ${FFTW3_LIBRARIES})
+    set (WITH_FFTW_INCLUDES ${FFTW3_INCLUDES})
+  else (HAVE_FFTW3)
+    set (WITH_FFT "no")
+    set (WITH_FFTW_INCLUDES "no")
+  endif (HAVE_FFTW3)
   
-  if (have_itpp_tgz AND tar_executable)
-    
-    ## expand the tar-archive
+  if (LAPACK_BLAS_LIBRARY)
+    set (WITH_BLAS ${LAPACK_BLAS_LIBRARY})
+  else (LAPACK_BLAS_LIBRARY)
+    set (WITH_BLAS "no")
+  endif (LAPACK_BLAS_LIBRARY)
+  
+  configure_file (${ITPP_SOURCE_DIR}/run_configure.in
+    ${ITPP_BINARY_DIR}/itpp/run_configure
+    )
+  
+  ##__________________________________________________________________
+  ## Build the project
 
-    if (ITPP_VERBOSE_BUILD)
-      add_custom_target (itpp_expand
-	COMMAND ${tar_executable} -xvzf ${have_itpp_tgz}
-	WORKING_DIRECTORY ${ITPP_BINARY_DIR}
-	COMMENT "[IT++] Expanding tar-archive ..."
-	)
-    else (ITPP_VERBOSE_BUILD)
-      add_custom_target (itpp_expand
-	COMMAND ${tar_executable} -xzf ${have_itpp_tgz}
-	WORKING_DIRECTORY ${ITPP_BINARY_DIR}
-	COMMENT "[IT++] Expanding tar-archive ..."
-	)
-    endif (ITPP_VERBOSE_BUILD)
+  include (ExternalProject)
+  
+  find_file (have_itpp_tgz itpp-4.0.6.tar.gz  ${ITPP_SOURCE_DIR})
 
-    ## create script to run IT++ configuration
-    
-    if (HAVE_FFTW3)
-      set (WITH_FFT ${FFTW3_LIBRARIES})
-      set (WITH_FFTW_INCLUDES ${FFTW3_INCLUDES})
-    else (HAVE_FFTW3)
-      set (WITH_FFT "no")
-      set (WITH_FFTW_INCLUDES "no")
-    endif (HAVE_FFTW3)
-    
-    if (LAPACK_BLAS_LIBRARY)
-      set (WITH_BLAS ${LAPACK_BLAS_LIBRARY})
-    else (LAPACK_BLAS_LIBRARY)
-      set (WITH_BLAS "no")
-    endif (LAPACK_BLAS_LIBRARY)
-    
-    configure_file (${ITPP_SOURCE_DIR}/run_configure.in
-      ${ITPP_BINARY_DIR}/run_configure
+  if (have_itpp_tgz)
+    ExternalProject_Add (itpp
+      PREFIX ${ITPP_BINARY_DIR}
+      DOWNLOAD_DIR ${ITPP_BINARY_DIR}/itpp
+      SOURCE_DIR ${ITPP_BINARY_DIR}/itpp
+      URL ${have_itpp_tgz}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${ITPP_BINARY_DIR}/itpp/run_configure
       )
-    
-    ## configure the package
-
-    add_custom_target (itpp_configure
-      COMMAND cp ../run_configure .
-      COMMAND chmod a+x run_configure
-      COMMAND ./run_configure
-      WORKING_DIRECTORY ${ITPP_BINARY_DIR}/${ITPP_DIRECTORY}
-      COMMENT "[IT++] Configuring package ..."
-      )  
-    add_dependencies (itpp_configure itpp_expand)
-    
-    ## build the package
-
-    add_custom_target (itpp_build
-      COMMAND make
-      WORKING_DIRECTORY ${ITPP_BINARY_DIR}/${ITPP_DIRECTORY}
-      COMMENT "[IT++] Starting build ..."
-      )
-    add_dependencies (itpp_build itpp_configure)
-    
-    ## install the package
-
-    add_custom_target (install
-      COMMAND make install
-      COMMAND rm -rf ${ITPP_BINARY_DIR}/*
-      WORKING_DIRECTORY ${ITPP_BINARY_DIR}/${ITPP_DIRECTORY}
-      COMMENT "[IT++] Installing package ..."
-      )
-    add_dependencies (install itpp_build)
-    
-  else (have_itpp_tgz AND tar_executable)
-    message (STATUS "[IT++] Unable to install - missing tar-archive!")
-  endif (have_itpp_tgz AND tar_executable)
+  else (have_itpp_tgz)
+    status (WARNING "[IT++] Unable to build project - no sources found!")
+  endif (have_itpp_tgz)
   
   ## <-- end build condition ----------------------------------------------------->
   
