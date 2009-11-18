@@ -34,3 +34,14 @@ add_custom_target (ppgplot_bindings_install
   COMMENT "Installing project presto python bingings for ${PULSAR_BINARY_DIR}/apps/presto/python ..."
   )
 add_dependencies (ppgplot_bindings_install presto_pyscripts_install presto)
+
+add_custom_target (presto_fftfit
+  COMMAND rm -rf ${CMAKE_BINARY_DIR}/apps/presto/python/fftfit_src
+  COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/fftfit_src ${CMAKE_BINARY_DIR}/apps/presto/python
+  COMMAND ${F2PY_EXECUTABLE} -c fftfit_src/fftfit.pyf fftfit_src/*.f 
+  COMMAND cp fftfit.so ${CMAKE_INSTALL_PREFIX}/lib/python
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/apps/presto/python
+  COMMENT "Executing ${F2PY_EXECUTABLE} -c ${CMAKE_BINARY_DIR}/apps/presto/python/fftfit_src/fftfit.pyf ${CMAKE_BINARY_DIR}/apps/presto/python/fftfit_src/*.f ..."
+  COMMAND echo "Installed fftfit.so to ${CMAKE_INSTALL_PREFIX}/lib/python"
+  )
+#add_dependencies (presto_fftfit ppgplot_bindings_build)
