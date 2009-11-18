@@ -3,7 +3,7 @@
 project (ITPP)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.8)
 
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the library from the provided source code, if no system
@@ -63,18 +63,26 @@ if (NOT HAVE_ITPP OR ITPP_FORCE_BUILD)
   else (LAPACK_BLAS_LIBRARY)
     set (WITH_BLAS "no")
   endif (LAPACK_BLAS_LIBRARY)
+
+  ## Create wrapper for the configure command
   
   configure_file (${ITPP_SOURCE_DIR}/run_configure.in
-    ${ITPP_BINARY_DIR}/itpp/run_configure
+    ${ITPP_BINARY_DIR}/run_configure
+    )
+
+  file(
+    COPY ${ITPP_BINARY_DIR}/run_configure
+    DESTINATION ${ITPP_BINARY_DIR}/itpp
+    FILE_PERMISSIONS OWNER_EXECUTE OWNER_READ GROUP_EXECUTE GROUP_READ
     )
   
   ##__________________________________________________________________
   ## Build the project
-
+  
   include (ExternalProject)
   
   find_file (have_itpp_tgz itpp-4.0.6.tar.gz  ${ITPP_SOURCE_DIR})
-
+  
   if (have_itpp_tgz)
     ExternalProject_Add (itpp
       PREFIX ${ITPP_BINARY_DIR}
