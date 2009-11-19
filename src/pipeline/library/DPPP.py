@@ -82,7 +82,7 @@ class DPPP(WSRTrecipe):
                               'bin/dppp_node.py')]
         # arguments for 'dppp_node'
         opts += [sysconfig.lofar_root()]
-        opts += [os.path.realpath(self.inputs['parset-file'])]
+        opts += [os.path.abspath(self.inputs['parset-file'])]
         opts += [self.inputs['output-dir']]
         if self.inputs['dryrun']:
             opts += ['dry']

@@ -51,7 +51,7 @@ class MakeVDS(WSRTrecipe):
     
     def __init__(self):
         WSRTrecipe.__init__(self)
-        self.inputs['cluster-name'] = 'lioffen'
+        self.inputs['cluster-name'] = 'lioff'
         self.inputs['observation']  = ''
         self.inputs['directory']    = None
         self.helptext = """

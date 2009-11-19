@@ -71,4 +71,7 @@ class Observation(WSRTingredient):
 ## Stand alone execution code ------------------------------------------
 if __name__ == '__main__':
     import sys
-    print Observation(*sys.argv[1:]).ms_files()
+    if len(sys.argv) < 3:
+        print 'Usage:', sys.argv[0], '<cluster-name> <observation> [directory]'
+    else:
+        print Observation(*sys.argv[1:]).ms_files()

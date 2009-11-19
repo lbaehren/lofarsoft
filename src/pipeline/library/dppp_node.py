@@ -68,10 +68,14 @@ try:
     parset['msout'] = msout
     parset.writeToFile(parsetfile)
 except IOError, e:
-    logging.error('Failed to open parset-file: %s' % e)
+    logging.error('Failed to open parset-file: %s',  e)
     sys.exit(1)
 
 # Start IDPPP
-logging.info('Start processing: %s', msn)
-os.system(os.path.join(lroot, 'bin/CS1_IDPPP') + ' ' + parsetfile + ' 0')
-logging.info('CS1_IDPPP finished')
+cmd = os.path.join(lroot, 'bin/CS1_IDPPP') + ' ' + parsetfile + ' 0'
+if dry == 'dry':
+    logging.info('Dry run: %s', cmd)
+else:
+    logging.info('Start processing: %s', msn)
+    os.system(cmd)
+    logging.info('CS1_IDPPP finished')

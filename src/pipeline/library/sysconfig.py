@@ -34,7 +34,7 @@ def lofar_root():
     SysConfigError will be raised."""
     import os
     try:
-        return os.path.realpath(os.environ['LOFARROOT'])
+        return os.path.abspath(os.environ['LOFARROOT'])
     except KeyError:
         raise SysConfigError, "environment variable LOFARROOT is not defined"
     
@@ -50,11 +50,11 @@ def locate(filename, path_list = sysconfpath()):
     Return the canonical path of `filename' (eliminating any symbolic links),
     as soon as a match is found. If no match is found None is returned
     (implicitly)."""
-    from os.path import realpath, isfile, join, pathsep
+    from os.path import abspath, isfile, join, pathsep
     for path in path_list:
         name = join(path, filename)
         if isfile(name):
-            return realpath(name)
+            return abspath(name)
     raise IOError, filename + " not found in " + pathsep.join(path_list)
 
 

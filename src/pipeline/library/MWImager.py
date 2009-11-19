@@ -63,7 +63,7 @@ class MWImager(WSRTrecipe):
         """Implementation of the WSRTrecipe.go() interface. This function does
         the actual work by calling the WSRTrecipe.cook_system() method."""
         opts = []
-        opts += [os.path.realpath(self.inputs['parset-file']) \
+        opts += [os.path.abspath(self.inputs['parset-file']) \
                  if self.inputs['parset-file'] is not None else '']
         opts += [sysconfig.clusterdesc_file(self.inputs['cluster-name']) \
                  if self.inputs['cluster-name'] is not None else '']

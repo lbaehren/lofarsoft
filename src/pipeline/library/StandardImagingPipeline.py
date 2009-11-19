@@ -83,8 +83,8 @@ class StandardImagingPipeline(WSRTrecipe):
         if self.inputs['make-vds-files']:
             inputs = WSRTingredient()
             outputs = WSRTingredient()
+            inputs['cluster-name'] = self.inputs['cluster-name']
             inputs['observation']  = self.inputs['observation']
-#            inputs['cluster-name'] = self.inputs['cluster-name']
             inputs['directory']    = self.inputs['input-dir']
             sts = self.cook_recipe('MakeVDS', inputs, outputs)
             if sts:
