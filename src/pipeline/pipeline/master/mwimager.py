@@ -33,14 +33,6 @@ class mwimager(LOFARrecipe):
         self.logger.info("Starting MWImager run")
         super(mwimager, self).go()
 
-        if not self.inputs['working_directory']:
-            self.inputs['working_directory'] = self.config.get(
-                'mwimager', 'working_directory'
-            )
-            self.logger.info("Using %s for working directory" % 
-                (self.inputs['working_directory'],)
-            )
-
         # Patch GVDS filename into parset
         self.logger.info("Setting up MWImager configuration")
         temp_parset_filename = utilities.patch_parset(
@@ -68,7 +60,7 @@ class mwimager(LOFARrecipe):
                         self.config.get('mwimager', 'executable'),
                         temp_parset_filename,
                         self.config.get('cluster', 'clusterdesc'),
-                        self.inputs['working_directory'],
+                        self._input_or_default('working_directory'),
                         log_location,
                     ],
                     env=env,
