@@ -154,6 +154,16 @@ class sip(LOFARrecipe):
 #            self.logger.warn("sextractor reports failure")
 #            return 1
 
+        self.logger.info("Calling results collector")
+        inputs = LOFARinput(self.inputs)
+        inputs['args'] = outputs['images']
+        inputs['clobber'] = True
+        outputs = LOFARoutput()
+        if self.cook_recipe('collector', inputs, outputs):
+            self.logger.warn("collector reports failure")
+            return 1
+
+
         return 0
 
 if __name__ == '__main__':
