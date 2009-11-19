@@ -1,4 +1,5 @@
 import os
+import utilities
 from cuisine.WSRTrecipe import WSRTrecipe
 from IPython.kernel import client as IPclient
 from ConfigParser import SafeConfigParser as ConfigParser
