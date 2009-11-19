@@ -16,7 +16,7 @@ class flagger(pyraprunner):
             help="initial sky model (in makesourcedb format)"
         )
         self.optionparser.add_option(
-            '-n', '--n-factor',
+            '--n-factor',
             dest="n_factor",
             type="float",
             help="Custom factor for flagging threshold"
