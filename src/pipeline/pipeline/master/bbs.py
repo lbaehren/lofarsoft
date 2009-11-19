@@ -171,14 +171,15 @@ class bbs(LOFARrecipe):
             self.logger.info("Running BBS")
             self.logger.debug("Executing: %s" % " ".join(bbs_cmd))
             if not self.inputs['dry_run']:
-                with closing(open(log_location, 'w')) as log:
-                    result = check_call(
-                        bbs_cmd,
-                        env=env,
-                        stdout=log,
-                        stderr=log,
-                        cwd=log_root
-                    )
+                with utilities.log_time(self.logger):
+                    with closing(open(log_location, 'w')) as log:
+                        result = check_call(
+                            bbs_cmd,
+                            env=env,
+                            stdout=log,
+                            stderr=log,
+                            cwd=log_root
+                        )
             else:
                 self.logger.info("Dry run: execution skipped")
                 result = 0

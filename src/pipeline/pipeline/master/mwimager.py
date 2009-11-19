@@ -107,13 +107,14 @@ class mwimager(LOFARrecipe):
             self.logger.info("Running MWImager")
             self.logger.debug("Executing: %s" % " ".join(mwimager_cmd))
             if not self.inputs['dry_run']:
-                with closing(open(log_location, 'w')) as log:
-                    result = check_call(
-                        mwimager_cmd,
-                        env=env,
-                        stdout=log,
-                        stderr=log
-                        )
+                with utilities.log_time(self.logger):
+                    with closing(open(log_location, 'w')) as log:
+                        result = check_call(
+                            mwimager_cmd,
+                            env=env,
+                            stdout=log,
+                            stderr=log
+                            )
             else:
                 self.logger.info("Dry run: execution skipped")
                 result = 0
