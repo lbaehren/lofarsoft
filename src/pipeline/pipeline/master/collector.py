@@ -79,28 +79,33 @@ class collector(LOFARrecipe):
             except subprocess.CalledProcessError:
                 self.logger.warn("No images moved from %s" % (node))
         
-        self.logger.info("Quality check")
         image_names = glob.glob("%s/%s" % (results_dir, self.inputs['image_re']))
-        for filename in image_names:
-            self.logger.debug(filename)
-            subband = re.search('(SB\d+)', os.path.basename(filename)).group()
-            stats_path = os.path.join(
-                self.config.get('layout', 'results_directory'),
-                "%s.stats.log" % (subband)
-            )
-            figure_path = os.path.join(
-                self.config.get('layout', 'results_directory'),
-                "%s.histo.pdf" % (subband)
-            )
+        self.logger.info("Quality check")
+        try:
             qcheck = __import__(self.inputs['qcheck'])
-            try:
-                qcheck.run(
-                    filename, logfile=stats_path, plot=figure+path,
-                    logger=logging.getLogger(self.logger.name + ".qcheck")
+            for filename in image_names:
+                self.logger.debug(filename)
+                subband = re.search('(SB\d+)', os.path.basename(filename)).group()
+                stats_path = os.path.join(
+                    self.config.get('layout', 'results_directory'),
+                    "%s.stats.log" % (subband)
                 )
-            except Exception, e:
-                self.logger.warn("Quality check failed on %s" % (filename))
-                self.logger.warn(str(e))
+                figure_path = os.path.join(
+                    self.config.get('layout', 'results_directory'),
+                    "%s.histo.pdf" % (subband)
+                )
+                try:
+                    qcheck.run(
+                        filename, logfile=stats_path, plot=figure+path,
+                        logger=logging.getLogger(self.logger.name + ".qcheck")
+                    )
+                except Exception, e:
+                    self.logger.warn("Quality check failed on %s" % (filename))
+                    self.logger.warn(str(e))
+        except ImportError:
+            self.logger.warn(
+                "Quality check module (%s) not found; not checking image quality"
+            )
 
         self.logger.info("Generating FITS files")
         fits_files = []
