@@ -1,7 +1,9 @@
 import sys, datetime, logging, os
 from pipeline.support.lofarrecipe import LOFARrecipe
 from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
+from pipeline.support.lofarexceptions import PipelineException
 import pipeline.support.utilities as utilities
+
 
 class control(LOFARrecipe):
     """
@@ -31,6 +33,7 @@ class control(LOFARrecipe):
         inputs['args'] = datafiles
         inputs.update(self.config.items(configblock))
         del(inputs['recipe']) # Never a required input
+        del(inputs['recipe_directories']) # Never a required input
         outputs = LOFARoutput()
         if self.cook_recipe(recipe, inputs, outputs):
             self.logger.warn(
@@ -44,18 +47,17 @@ class control(LOFARrecipe):
         raise NotImplementedError
 
     def go(self):
-        try:
-            super(control, self).go()
-            self._setup()
-        except Exception, e:
-            # Until _setup() completes, we have no log handlers
-            print "**** Pipeline setup failed"
-            print "**** Error was: %s" % (str(e))
+        super(control, self).go()
+        self._setup()
 
         self.logger.info(
             "Standard Imaging Pipeline (%s) starting." %
             (self.name,)
         )
+
+        # Now set up an IPython cluster
+        self.logger.info("Deploying IPython cluster.")
+
 
         try:
             self.pipeline_logic()

@@ -59,6 +59,22 @@ class WSRTrecipe(object):
         self.helptext = """LOFAR/WSRT pipeline framework"""
         self.recipe_path = ['.']
 
+    def _log_error(self, e):
+        # Sometimes, an exception will be thrown before we have any loggers
+        # defined that can handle it. Check if that's the case, and, if so,
+        # dump it to stderr.
+        handled = len(self.logger.handlers) > 0
+        my_logger = self.logger
+        while my_logger.parent:
+            my_logger = my_logger.parent
+            if len(my_logger.handlers) > 0 and my_logger is not my_logger.root:
+                handled = True
+        if handled:
+            self.logger.exception('Exception caught: ' + str(e))
+        else:
+            print >> sys.stderr, "***** Exception occurred with no log handlers"
+            print >> sys.stderr, "*****", str(e)
+
     def help(self):
         """Shows helptext and inputs and outputs of the recipe"""
         print self.helptext
@@ -109,7 +125,7 @@ class WSRTrecipe(object):
         try:
             status = self.go()
         except Exception, e:
-            self.logger.exception('Exception caught: ' + str(e))
+            self._log_error(e)
             self.outputs = None ## We're not generating any results we have
                                 ## confidence in
             return 1
@@ -157,7 +173,7 @@ class WSRTrecipe(object):
             self.outputs = results[self.name]['outputs']
             self.run(name)
         except Exception, e:
-            self.logger.exception('Exception caught: ' + str(e))
+            self._log_error(e)
             self.outputs = None ## We're not generating any results we have
                                 ## confidence in
             return 0
