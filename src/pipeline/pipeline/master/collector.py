@@ -30,7 +30,7 @@ class collector(LOFARrecipe):
         self.logger.info("Generating FITS files")
         fits_files = []
         for filename in glob.glob(
-            "%s/image.i.*" % (self.config.get('layout', 'results_directory')
+            "%s/image.i.*" % (self.config.get('layout', 'results_directory'))
         ):
             self.logger.debug(filename)
             subband = os.path.basename(filename).split('.')[2]
@@ -63,6 +63,6 @@ class collector(LOFARrecipe):
                 
         return 0
 
-if __name__ = '__main__':
+if __name__ == '__main__':
     sys.exit(locals()[locals()['__file__'].split('.')[0]]().main())
 
