@@ -37,11 +37,15 @@ class sip(LOFARrecipe):
         self.logger.info("Copying data to compute nodes")
         inputs = LOFARinput(self.inputs)
         inputs['args'] = ms_names
+        inputs['destination'] = os.path.join(
+            self.config.get("mwimager", "working_directory"),
+            self.inputs['job_name']
+        )
         outputs = LOFARoutput()
         if self.cook_recipe('copier', inputs, outputs):
             self.logger.warn("copier reports failure")
             return 1
-        ms_names = self.outputs['ms_names']
+        ms_names = outputs['ms_names']
 
         self.logger.info("Calling DPPP")
         inputs = LOFARinput(self.inputs)
