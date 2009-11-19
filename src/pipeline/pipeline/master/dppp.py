@@ -112,10 +112,10 @@ class TestPipeline(WSRTrecipe):
                 depend=utilities.check_for_path,
                 dependargs=(ms_name, available_list)
             )
-#            tasks.append(tc.run(task))
-#        tc.barrier(tasks)
-#        for task in tasks:
-#            tc.get_task_result(task)
+            tasks.append(tc.run(task))
+        tc.barrier(tasks)
+        for task in tasks:
+            tc.get_task_result(task)
 
         # Save space on engines by clearing out old file lists
         mec.execute("clear_available_list(\"%s\")" % (available_list,))
@@ -149,8 +149,8 @@ class TestPipeline(WSRTrecipe):
             )
             tasks.append(tc.run(task))
         tc.barrier(tasks)
-#        for task in tasks:
-#            print tc.get_task_result(task)
+        for task in tasks:
+            tc.get_task_result(task)
 
         # Combine VDS files to produce GDS
         executable = '/app/lofar/dev/bin/combinevds'
