@@ -6,6 +6,7 @@ from contextlib import closing
 # Local helpers
 from pipeline.support.lofarrecipe import LOFARrecipe
 import pipeline.support.utilities as utilities
+from pipeline.support.clusterdesc import ClusterDesc
 
 class bbs(LOFARrecipe):
     def __init__(self):
@@ -67,7 +68,7 @@ class bbs(LOFARrecipe):
         self.logger.info("Starting BBS run")
         super(bbs, self).go()
 
-        clusterdesc = utilities.ClusterDesc(
+        clusterdesc = ClusterDesc(
             self.config.get('cluster', 'clusterdesc')
         )
 
@@ -208,11 +209,8 @@ class bbs(LOFARrecipe):
                 utilities.move_log(log_file, destination)
 
         # Now pull in the logs from the individual cluster nodes
-        clusterdesc = utilities.ClusterDesc(
-            self.config.get('cluster', 'clusterdesc')
-        )
         self.logger.debug("Copying remote logs to %s"  % (log_root))
-        for node in clusterdesc['ComputeNodes']:
+        for node in clusterdesc.get('ComputeNodes'):
             self.logger.debug("Node: %s" % (node))
             try:
                 check_call(
