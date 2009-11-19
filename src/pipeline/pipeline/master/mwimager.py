@@ -43,12 +43,9 @@ class mwimager(LOFARrecipe):
             self.config.get('layout', 'parset_directory')
         )
 
-        env = os.environ
-        env.update({
-            "PATH": self.config.get('mwimager', 'env_path'),
-            "LD_LIBRARY_PATH": self.config.get('mwimager', 'env_ld_library_path'),
-            "LOFARROOT": self.config.get('mwimager', 'env_lofarroot')
-        })
+        env = utilities.read_initscript(
+            self.config.get('mwimager', 'initscript')
+        )
         
         # For the overall MWimgager log
         log_location = "%s/%s" % (

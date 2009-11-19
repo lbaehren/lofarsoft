@@ -77,12 +77,9 @@ class bbs(LOFARrecipe):
         if not os.access(self.inputs['skymodel'], os.R_OK):
             raise IOError
 
-        env = os.environ
-        env.update({
-            "PATH": self.config.get('bbs', 'env_path'),
-            "LD_LIBRARY_PATH": self.config.get('bbs', 'env_ld_library_path'),
-            "LOFARROOT": self.config.get('bbs', 'env_lofarroot')
-        })
+        env = utilities.read_initscript(
+            self.config.get('bbs', 'initscript')
+        )
         
         log_location = "%s/%s" % (
             self.config.get('layout', 'log_directory'),

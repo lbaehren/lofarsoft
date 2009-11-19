@@ -2,7 +2,7 @@ from __future__ import with_statement
 from contextlib import closing
 from cuisine.parset import Parset
 from tempfile import mkstemp
-import os, errno, shutil
+import os, errno, shutil, subprocess
 
 class ClusterDesc(dict):
     def __init__(self, filename):
@@ -66,4 +66,18 @@ def create_directory(dirname):
 def move_log(log_file, destination):
     create_directory(destination)
     shutil.move(log_file, destination)
+
+def read_initscript(filename, shell="/bin/sh"):
+    # Return a dict of the environment after sourcing
+    # the given script in a shell.
+    p = subprocess.Popen(
+        ['. %s ; env' % (filename)],
+        shell=True,
+        executable=shell,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    so, se = p.communicate()
+    return dict([x.split('=', 1) for x in so.strip().split('\n')])
+
 
