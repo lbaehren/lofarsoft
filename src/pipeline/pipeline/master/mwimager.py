@@ -1,5 +1,5 @@
 from __future__ import with_statement
-import sys, os
+import sys, os, tempfile, glob, shutil
 from subprocess import check_call, CalledProcessError
 from contextlib import closing
 
@@ -47,17 +47,23 @@ class mwimager(LOFARrecipe):
             "LD_LIBRARY_PATH": self.config.get('mwimager', 'env_ld_library_path')
         })
         
+        # For the overall MWimgager log
         log_location = "%s/%s" % (
             self.config.get('layout', 'log_directory'),
             self.config.get('mwimager', 'log')
         )
         self.logger.debug("Logging to %s" % (log_location))
+        # Individual subband logs go in a temporary directory
+        # to be sorted out later.
+        log_root = "%s/%s" % (tempfile.mkdtemp(), self.config.get('mwimager', 'log'))
+        self.logger.debug("Logs dumped with root %s" % (log_root))
+
         mwimager_cmd = [
             self.config.get('mwimager', 'executable'),
             temp_parset_filename,
             self.config.get('cluster', 'clusterdesc'),
             self._input_or_default('working_directory'),
-            log_location,
+            log_root
         ]
         try:
             self.logger.info("Running MWImager")
@@ -73,14 +79,51 @@ class mwimager(LOFARrecipe):
             else:
                 self.logger.info("Dry run: execution skipped")
                 result = 0
-            return result
         except CalledProcessError:
             self.logger.exception("Call to mwimager failed")
             return 1
         finally:
             os.unlink(temp_parset_filename)
 
-        return 0
+        # Now sort the log files into
+        # appropriate places
+        # This is ugly!
+        self.logger.info("Moving logfiles")
+        for log_file in glob.glob("%s%s" % (log_root, "*")):
+            self.logger.debug("Processing %s" % (log_file))
+            ms_name = ""
+            with closing(open(log_file)) as file:
+                for line in file.xreadlines():
+                    split_line = line.split('=')
+                    if split_line[0] == "Cimager.dataset":
+                        ms_name = os.path.basename(split_line[1].rstrip())
+                        break
+            if not ms_name:
+                self.logger.info("Couldn't identify file for %s" % (log_file))
+            else:
+                destination = "%s/%s/%s" % (
+                    self.config.get('layout', 'log_directory'),
+                    ms_name,
+                    self.config.get('mwimager', 'log')
+                )
+                self.logger.debug(
+                    "Moving logfile %s to %s" % (log_file, destination)
+                )
+                # Make sure the destination dir exists
+                try:
+                    os.makedirs(os.dirname(destination))
+                except OSerror, failure:
+                    if failure.errono != errno.EEXIST:
+                        raise
+                shutil.move(log_file, destination)
+        try:
+            self.logger.debug("Removing temporary log directory")
+            os.rmdir(os.path.dirname(log_root))
+        except OSError, failure:
+            self.logger.info("Failed to remove temporary directory")
+            self.logger.debug(failure)
+
+        return result
 
 if __name__ == '__main__':
     sys.exit(mwimager().main())
