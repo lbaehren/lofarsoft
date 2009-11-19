@@ -59,7 +59,7 @@ class mwimager(LOFARrecipe):
             self.logger.warn("vdsmaker reports failure")
             return 1
 
-        self.outputs["images"] = []
+        self.outputs["data"] = []
 
         # Patch GVDS filename into parset
         self.logger.debug("Setting up MWImager configuration")
@@ -125,11 +125,12 @@ class mwimager(LOFARrecipe):
             ms_name, image_name = "", ""
             with closing(open(log_file)) as file:
                 for line in file.xreadlines():
-                    try:
-                        image_name = line.split("Setting up new empty image ")[1].rstrip()
-                        break
-                    except IndexError:
-                        pass
+                    if 'Cimager.Images.Names' in line.strip():
+                        try:
+                            image_name = line.strip().split("=")[1].lstrip("['").rstrip("]'")
+                            break
+                        except IndexError:
+                            pass
                 file.seek(0)
                 for line in file.xreadlines():
                     split_line = line.split('=')
@@ -140,7 +141,7 @@ class mwimager(LOFARrecipe):
                 self.logger.info("Couldn't identify image for %s "% (log_file))
             else:
                 self.logger.debug("Found image: %s" % (image_name))
-                self.outputs["images"].append(image_name)
+                self.outputs["data"].append(image_name)
             if not ms_name:
                 self.logger.info("Couldn't identify file for %s" % (log_file))
             else:

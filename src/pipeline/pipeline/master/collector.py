@@ -3,7 +3,7 @@ from pipeline.support.lofarrecipe import LOFARrecipe
 from pipeline.support.ipython import LOFARTask
 from pipeline.support.clusterdesc import ClusterDesc
 import pipeline.support.utilities as utilities
-import os, os.path, glob, subprocess, sys, numpy, pyfits, shutil
+import os, os.path, glob, subprocess, sys, numpy, pyfits, shutil, errno, re
 
 class collector(LOFARrecipe):
     """
@@ -18,43 +18,31 @@ class collector(LOFARrecipe):
     def __init__(self):
         super(collector, self).__init__()
         self.optionparser.add_option(
-            '--clobber',
-            dest="clobber",
-            help="Clobber results directory if already exists",
-            action="store_true"
-        )
-        self.optionparser.add_option(
             '--image-re',
             dest="image_re",
             help="Regular expression to match CASA image names",
-            default="image*"
         )
         self.optionparser.add_option(
             '--working-directory',
             dest="working_directory",
             help="Working directory containing images on compute nodes",
-            default=None
         )
 
     def go(self):
         self.logger.info("Starting data collector run")
         super(collector, self).go()
 
-        if self.inputs['clobber'] and os.access(self.config.get('layout', 'results_directory'), os.W_OK):
-            self.logger.info("Cleaning results directory")
-            for file in glob.glob("%s/*" % self.config.get('layout', 'results_directory')):
-                exec_string = ['/bin/rm', '-rf', '%s' % file]
-                subprocess.check_call(exec_string)
-
         clusterdesc = ClusterDesc(
             self.config.get('cluster', 'clusterdesc')
         )
         results_dir = self.config.get('layout', 'results_directory')
+        try:
+            os.makedirs(results_dir)
+        except OSError, failure:
+            if failure.errno != errno.EEXIST:
+                raise
+
         self.logger.debug("Copying CASA images to to %s"  % (results_dir))
-        if self.inputs['working_directory'] == None:
-            self.inputs['working_directory'] = self.config.get(
-                'mwimager', 'working_directory'
-            )
         for node in clusterdesc.get('ComputeNodes'):
             self.logger.debug("Node: %s" % (node))
             try:
@@ -81,7 +69,7 @@ class collector(LOFARrecipe):
         image_names = glob.glob("%s/%s" % (results_dir, self.inputs['image_re']))
         for filename in image_names:
             self.logger.debug(filename)
-            subband = os.path.basename(filename).split('.')[1]
+            subband = re.search('(SB\d+)', os.path.basename(filename)).group()
             output = os.path.join(
                 self.config.get('layout', 'results_directory'),
                 "%s.fits" % (subband)
@@ -97,21 +85,24 @@ class collector(LOFARrecipe):
                 stderr=subprocess.STDOUT
             )
 
-        self.logger.info("Averaging results")
-        result = reduce(
-            numpy.add,
-            (pyfits.getdata(file) for file in fits_files)
-        ) / len(fits_files)
+        if len(fits_files) > 1:
+            self.logger.info("Averaging results")
+            result = reduce(
+                numpy.add,
+                (pyfits.getdata(file) for file in fits_files)
+            ) / len(fits_files)
 
-        self.logger.info("Writing averaged FITS file")
-        hdulist = pyfits.HDUList(pyfits.PrimaryHDU(result))
-        hdulist[0].header = pyfits.getheader(fits_files[0])
-        hdulist.writeto(
-            os.path.join(
-                self.config.get('layout', 'results_directory'),
-                self.config.get('fitswriter', 'averaged')
+            self.logger.info("Writing averaged FITS file")
+            hdulist = pyfits.HDUList(pyfits.PrimaryHDU(result))
+            hdulist[0].header = pyfits.getheader(fits_files[0])
+            hdulist.writeto(
+                os.path.join(
+                    self.config.get('layout', 'results_directory'),
+                    self.config.get('fitswriter', 'averaged')
+                )
             )
-        )
+        else:
+            self.logger.info("Only 1 FITS image found; not averaging")
                 
         return 0
 
