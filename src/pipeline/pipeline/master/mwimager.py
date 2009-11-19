@@ -112,7 +112,7 @@ class mwimager(LOFARrecipe):
                 # Make sure the destination dir exists
                 try:
                     os.makedirs(os.dirname(destination))
-                except OSerror, failure:
+                except OSError, failure:
                     if failure.errono != errno.EEXIST:
                         raise
                 shutil.move(log_file, destination)
