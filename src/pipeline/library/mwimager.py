@@ -27,7 +27,7 @@
 from WSRTrecipe import WSRTrecipe
 import sys
 
-class MWimager(WSRTrecipe):
+class MWImager(WSRTrecipe):
     """Class wrapper around the mwimager script that is used to start the
     distributed Master-Worker imager."""
     def __init__(self):
@@ -58,4 +58,4 @@ class MWimager(WSRTrecipe):
 
 ## Stand alone execution code ------------------------------------------
 if __name__ == '__main__':
-    sys.exit(MWimager().main())
+    sys.exit(MWImager().main())

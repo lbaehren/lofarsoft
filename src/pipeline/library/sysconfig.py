@@ -24,29 +24,42 @@
 
 """System configuration utilities"""
 
+class SysConfigError(Exception):
+    """Exception class for SysConfig errors"""
+    pass
 
+def lofar_root():
+    """Return the LOFAR root directory, which is stored in the environment
+    variable LOFARROOT, as an absolute path. If LOFARROOT is not defined, a
+    SysConfigError will be raised."""
+    import os
+    try:
+        return os.path.realpath(os.environ['LOFARROOT'])
+    except KeyError:
+        raise SysConfigError, "environment variable LOFARROOT is not defined"
+    
 def sysconfpath():
     """Return the search path for system configuration files."""
     import os
     return [os.path.join(x, y)
-            for x in ['.', os.environ['LOFARROOT'], os.environ['HOME']]
+            for x in ['.', lofar_root(), os.environ['HOME']]
             for y in ['etc', '']]
-
 
 def locate(filename, path_list = sysconfpath()):
     """Locate the file `filename' in the directories specified in `path_list'.
-    Return filename including absolute path, as soon as a match is found. If
-    no match is found None is returned (implicitly)."""
-    from os.path import abspath, isfile, join, pathsep
+    Return the canonical path of `filename' (eliminating any symbolic links),
+    as soon as a match is found. If no match is found None is returned
+    (implicitly)."""
+    from os.path import realpath, isfile, join, pathsep
     for path in path_list:
         name = join(path, filename)
         if isfile(name):
-            return abspath(name)
+            return realpath(name)
     raise IOError, filename + " not found in " + pathsep.join(path_list)
 
 
 def cluster_desc_file(cluster_name):
-    """Return the name of the cluster description file. It's name is the
+    """Return the name of the cluster description file. Its name is the
     concatenation of the cluster name and the file extension '.clusterdesc'.
-    It is search for in the directories returned by sysconfpath()."""
+    It is searched for in the directories returned by sysconfpath()."""
     return locate(cluster_name + '.clusterdesc')

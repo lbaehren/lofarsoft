@@ -26,6 +26,7 @@
 
 from WSRTrecipe import WSRTrecipe
 from parset import Parset
+import sysconfig
 
 import os
 import sys
@@ -35,17 +36,6 @@ class MakeVDSError(Exception):
     """Exception class for MakeVDS errors"""
     pass
     
-
-def locate(filename, path_list):
-    """Locate the file `filename' in the directories specified in `path_list'.
-    Return filename including absolute path, as soon as a match is found. If
-    no match is found None is returned (implicitly)."""
-    from os.path import abspath, isfile, join
-    for path in path_list:
-        name = join(path, filename)
-        if isfile(name):
-            return abspath(name)
-
 
 class MakeVDS(WSRTrecipe):
     """Generate a VDS files for all MS-files that belong to the specified
@@ -66,11 +56,6 @@ class MakeVDS(WSRTrecipe):
         self.helptext = """
         This function generates vds files for the MS files that comprise the
         given observation."""
-        self.sysconfpath = [os.path.join(x, y)
-                            for x in ['',
-                                      os.environ['LOFARROOT'],
-                                      os.environ['HOME']]
-                            for y in ['etc', '']]
         
     
     ## Code to generate results ----------------------------------------
@@ -79,12 +64,13 @@ class MakeVDS(WSRTrecipe):
         the actual work by calling the WSRTrecipe.cook_system() method several
         times."""
         
-        _obs = self.inputs['observation']
-        _dir = self.inputs['directory']
+        obs_ = self.inputs['observation']
+        dir_ = self.inputs['directory']
 
-        observation = os.path.join(_dir, _obs) if _dir else _obs
-        clusterdesc = locate(self.inputs['cluster-name'] + '.clusterdesc',
-                             self.sysconfpath)
+        observation = os.path.join(dir_, obs_) if dir_ else obs_
+        clusterdesc = sysconfig.locate(self.inputs['cluster-name'] + 
+                                       '.clusterdesc',
+                                       sysconfig.sysconfpath())
         if not clusterdesc:
             raise MakeVDSError('Cluster description file not found')
 
@@ -115,7 +101,7 @@ class MakeVDS(WSRTrecipe):
             return 0
 
         self.print_message('Generating gds file from vds files')
-        opts = [_obs + '.gds']
+        opts = [obs_ + '.gds']
         opts.extend(vds_files)
         if self.cook_system('combinevds', opts):
             self.print_error('combinevds failed!')
