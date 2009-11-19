@@ -26,6 +26,7 @@
 
 from WSRTrecipe import WSRTrecipe
 from parset import Parset
+from observation import Observation
 import sysconfig
 
 import os
@@ -63,45 +64,30 @@ class MakeVDS(WSRTrecipe):
         """Implementation of the WSRTrecipe.go() interface. This function does
         the actual work by calling the WSRTrecipe.cook_system() method several
         times."""
+
+        observation = Observation(self.inputs['observation'],
+                                  self.inputs['cluster-name'],
+                                  self.inputs['directory'])
         
-        obs_ = self.inputs['observation']
-        dir_ = self.inputs['directory']
+        clusterdesc = sysconfig.cluster_desc_file(self.inputs['cluster-name'])
+        ms_files = observation.ms_files()
+        vds_files = [f + '.vds' for f in ms_files]
 
-        observation = os.path.join(dir_, obs_) if dir_ else obs_
-        clusterdesc = sysconfig.locate(self.inputs['cluster-name'] + 
-                                       '.clusterdesc',
-                                       sysconfig.sysconfpath())
-        if not clusterdesc:
-            raise MakeVDSError('Cluster description file not found')
+        if len(ms_files) == 0:
+            self.print_warning('no files to process!')
+            return 0
 
-        self.print_debug('Cluster description file: ' + clusterdesc)
-        self.print_debug('Observation file pattern: ' + observation)
-        
-        mount_points = Parset(clusterdesc).getStringVector('MountPoints')
-        self.print_debug('mount_points = ' + str(mount_points))
-
-        pats = [observation + '_SB[0-9]*.MS', observation + '_SB[0-9]*.ms']
-        dirs = [os.path.join(mp, pat) for mp in mount_points for pat in pats]
         fail = 0
-        vds_files = []
-        for _dir in dirs:
-            self.print_debug('Searching for ' + str(pats) + ' in ' + _dir)
-            for _ms in glob.glob(_dir):
-                vds = _ms + '.vds'
-                vds_files.append(vds)
-                self.print_message('Processing file ' + _ms)
-                fail += self.cook_system('makevds', [clusterdesc, _ms, vds])
+        for (ms, vds) in zip(ms_files, vds_files):
+            self.print_message('Processing file ' + ms)
+            fail += self.cook_system('makevds', [clusterdesc, ms, vds])
 
         if fail:
             self.print_error(str(fail) + ' makevds process(es) failed!')
             return 1
 
-        if len(vds_files) == 0:
-            self.print_warning('no files to process!')
-            return 0
-
         self.print_message('Generating gds file from vds files')
-        opts = [obs_ + '.gds']
+        opts = [self.inputs['observation'] + '.gds']
         opts.extend(vds_files)
         if self.cook_system('combinevds', opts):
             self.print_error('combinevds failed!')

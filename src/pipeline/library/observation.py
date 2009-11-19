@@ -47,14 +47,14 @@ class Observation(WSRTingredient):
           - glob_pattern: pattern used when matching MS-files.
         """
         WSRTingredient.__init__(self)
-        clusterdesc = sysconfig.locate(cluster_name + '.clusterdesc')
+        clusterdesc = sysconfig.cluster_desc_file(cluster_name)
         self.observation = os.path.join(directory, observation) \
                            if directory else observation
         self.ms_pattern = [self.observation + p for p in glob_pattern]
         self.mount_points = Parset(clusterdesc).getStringVector('MountPoints')
-        print "observation:", self.observation
-        print "ms_pattern:", self.ms_pattern
-        print "mount_points:", self.mount_points
+##        print "observation:", self.observation
+##        print "ms_pattern:", self.ms_pattern
+##        print "mount_points:", self.mount_points
 
     def ms_files(self):
         """
