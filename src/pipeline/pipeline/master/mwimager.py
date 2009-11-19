@@ -49,6 +49,12 @@ class mwimager(LOFARrecipe):
             dest="askapsoft_path",
             help="Path to cimager.sh"
         )
+        self.optionparser.add_option(
+            '--casa',
+            dest="casa",
+            help="Use the CASA lwimager",
+            action="store_true"
+        )
 
     def go(self):
         self.logger.info("Starting MWImager run")
@@ -103,6 +109,8 @@ class mwimager(LOFARrecipe):
             ),
             log_root
         ]
+        if self.inputs['casa'] is True or self.inputs['casa'] == "True":
+            mwimager_cmd.insert(1, '-casa')
         try:
             self.logger.info("Running MWImager")
             self.logger.debug("Executing: %s" % " ".join(mwimager_cmd))
