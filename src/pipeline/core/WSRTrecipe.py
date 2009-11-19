@@ -38,7 +38,9 @@ class WSRTrecipe:
                 else:
                     print '            ' + k.ljust(20) + ': [Default: ' + str(self.inputs[k]) + ']'
             else:
-                if type(self.inputs[k]) == list:
+                if self.inputs[k] is None:
+                    print '            ' + k.ljust(20) + ': [Optional: no default]'
+                elif type(self.inputs[k]) == list:
                     print '            ' + k.ljust(20) + ': [No Default: can be a list]'
                 else:
                     if type(self.inputs[k]) == bool:
@@ -123,8 +125,8 @@ class WSRTrecipe:
         We assume all inputs either need defaults or need to be initialized by the user
         this doesn't work for ints/floats with default value 0, instead of False use 'F'"""
         for k in self.inputs.keys():
+            if (self.inputs[k] is None) or (type(self.inputs[k]) is bool): continue
             if not self.inputs[k]:
-                if type(self.inputs[k]) == bool: continue
                 self.print_debug(self.name + ' missing argument ' + k)
                 return 0
         return 1
