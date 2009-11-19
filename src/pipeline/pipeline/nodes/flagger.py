@@ -5,7 +5,7 @@ import numpy
 from pipeline.support.lofarnode import LOFARnode
 from pipeline.support.utilities import log_time
 
-def flagger_node(LOFARnode):
+class flagger_node(LOFARnode):
     """
     Flag out CORRECTED_DATA greater than some maximum value.
     """
