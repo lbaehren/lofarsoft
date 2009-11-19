@@ -7,10 +7,10 @@ from pipeline.support.utilities import create_directory, log_time
 from pipeline.support.lofarnode import LOFARnode
 
 class makevds_node(LOFARnode):
+    """
+    Make a VDS file for the input MS in a specificed location.
+    """
     def run(self, infile, clusterdesc, outfile, executable):
-        # Make VDS file for input MS in specifed location
-        # The dev version of makevds appears to make more comprehensive VDS files
-        # (including the FileName field) than the stable version.
         with log_time(self.logger):
             self.logger.info("Processing: %s" % (infile))
             try:
