@@ -1,6 +1,7 @@
-from pipeline.master.pipeline import pipeline
+import sys, os
+from pipeline.master.control import control
 
-class sip(pipeline):
+class sip(control):
     def pipeline_logic(self):
         datafiles = self.run_task("vdsreader")
         datafiles = self.run_task("dppp", datafiles)
@@ -12,3 +13,5 @@ class sip(pipeline):
         self.outputs['average'] = self.run_task("collector")
         self.run_task("sourcefinder", self.outputs['average'])
        
+if __name__ == '__main__':
+    sys.exit(eval(os.path.splitext(os.path.basename(sys.argv[0]))[0])().main())
