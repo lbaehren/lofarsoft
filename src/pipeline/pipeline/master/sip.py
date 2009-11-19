@@ -34,18 +34,18 @@ class sip(LOFARrecipe):
             return 1
         ms_names = outputs['ms_names']
 
-        self.logger.info("Copying data to compute nodes")
-        inputs = LOFARinput(self.inputs)
-        inputs['args'] = ms_names
-        inputs['destination'] = os.path.join(
-            self.config.get("dppp", "working_directory"),
-            self.inputs['job_name']
-        )
-        outputs = LOFARoutput()
-        if self.cook_recipe('copier', inputs, outputs):
-            self.logger.warn("copier reports failure")
-            return 1
-        ms_names = outputs['ms_names']
+#        self.logger.info("Copying data to compute nodes")
+#        inputs = LOFARinput(self.inputs)
+#        inputs['args'] = ms_names
+#        inputs['destination'] = os.path.join(
+#            self.config.get("dppp", "working_directory"),
+#            self.inputs['job_name']
+#        )
+#        outputs = LOFARoutput()
+#        if self.cook_recipe('copier', inputs, outputs):
+#            self.logger.warn("copier reports failure")
+#            return 1
+#        ms_names = outputs['ms_names']
 
         self.logger.info("Calling DPPP")
         inputs = LOFARinput(self.inputs)
@@ -116,7 +116,7 @@ class sip(LOFARrecipe):
         # Trim off any bad section of the data
         self.logger.info("Calling local flagger")
         inputs = LOFARinput(self.inputs)
-        inputs['args'] = processed_filenames
+        inputs['args'] = trimmed_outnames
         inputs['n_factor'] = 2.0
         inputs['suffix'] = ".flagged"
         outputs = LOFARoutput()
@@ -145,14 +145,14 @@ class sip(LOFARrecipe):
             return 1
         # The SIP will return the names of the generated images
         self.outputs['images'] = outputs['images']
-
-        self.logger.info("Calling source extractor")
-        inputs = LOFARinput(self.inputs)
-        inputs['args'] = outputs['images']
-        outputs = LOFARoutput()
-        if self.cook_recipe('sextractor', inputs, outputs):
-            self.logger.warn("sextractor reports failure")
-            return 1
+#
+#        self.logger.info("Calling source extractor")
+#        inputs = LOFARinput(self.inputs)
+#        inputs['args'] = outputs['images']
+#        outputs = LOFARoutput()
+#        if self.cook_recipe('sextractor', inputs, outputs):
+#            self.logger.warn("sextractor reports failure")
+#            return 1
 
         return 0
 
