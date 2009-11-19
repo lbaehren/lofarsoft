@@ -1,5 +1,5 @@
 from fabric.api import env, hosts, run, put, get, env, require
-from pipeline.support.utilities import ClusterDesc
+from pipeline.support.clusterdesc import ClusterDesc
 
 from ConfigParser import SafeConfigParser as ConfigParser
 from pipeline import __path__ as config_path
@@ -10,11 +10,11 @@ script_path = config.get('deploy', 'script_path')
 
 def controller_host(clusterdesc=config.get('cluster', 'clusterdesc')):
     clusterdesc = ClusterDesc(clusterdesc)
-    env.hosts = [clusterdesc['HeadNode']]
+    env.hosts = clusterdesc.get('HeadNode')
 
 def engine_hosts(clusterdesc=config.get('cluster', 'clusterdesc')):
     clusterdesc = ClusterDesc(clusterdesc)
-    env.hosts = clusterdesc['ComputeNodes']
+    env.hosts = clusterdesc.get('ComputeNodes')
 
 def start_controller(controlpath=config.get('DEFAULT', 'runtime_directory')):
     require('hosts', provided_by=[controller_host])
