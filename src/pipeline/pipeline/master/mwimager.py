@@ -1,5 +1,5 @@
 from __future__ import with_statement
-import sys, os, tempfile, glob, shutil
+import sys, os, tempfile, glob, shutil, errno
 from subprocess import check_call, CalledProcessError
 from contextlib import closing
 
@@ -113,7 +113,7 @@ class mwimager(LOFARrecipe):
                 try:
                     os.makedirs(os.dirname(destination))
                 except OSError, failure:
-                    if failure.errono != errno.EEXIST:
+                    if failure.errno != errno.EEXIST:
                         raise
                 shutil.move(log_file, destination)
         try:
