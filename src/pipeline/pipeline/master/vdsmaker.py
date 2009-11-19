@@ -1,5 +1,5 @@
 import sys, os, tempfile
-from subprocess import check_call
+from subprocess import check_call, CalledProcessError
 
 from pipeline.support.ipython import LOFARTask
 
