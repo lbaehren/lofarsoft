@@ -114,7 +114,8 @@ class bbs(LOFARrecipe):
                         bbs_cmd,
                         env=env,
                         stdout=log,
-                        stderr=log
+                        stderr=log,
+                        cwd=working_dir
                         )
             else:
                 self.logger.info("Dry run: execution skipped")
