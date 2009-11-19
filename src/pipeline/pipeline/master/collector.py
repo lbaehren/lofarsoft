@@ -3,7 +3,7 @@ from pipeline.support.lofarrecipe import LOFARrecipe
 from pipeline.support.ipython import LOFARTask
 from pipeline.support.clusterdesc import ClusterDesc
 import pipeline.support.utilities as utilities
-import os, os.path, glob, subprocess, sys, numpy, pyfits, shutil, errno, re
+import os, os.path, glob, subprocess, sys, numpy, pyfits, shutil, errno, re, logging
 
 class collector(LOFARrecipe):
     """
@@ -26,6 +26,11 @@ class collector(LOFARrecipe):
             '--working-directory',
             dest="working_directory",
             help="Working directory containing images on compute nodes",
+        )
+        self.optionparser.add_option(
+            '--qcheck',
+            dest="qcheck",
+            help="Location of qcheck module"
         )
         self.optionparser.add_option(
             '--image2fits',
@@ -74,9 +79,31 @@ class collector(LOFARrecipe):
             except subprocess.CalledProcessError:
                 self.logger.warn("No images moved from %s" % (node))
         
+        self.logger.info("Quality check")
+        image_names = glob.glob("%s/%s" % (results_dir, self.inputs['image_re']))
+        for filename in image_names:
+            self.logger.debug(filename)
+            subband = re.search('(SB\d+)', os.path.basename(filename)).group()
+            stats_path = os.path.join(
+                self.config.get('layout', 'results_directory'),
+                "%s.stats.log" % (subband)
+            )
+            figure_path = os.path.join(
+                self.config.get('layout', 'results_directory'),
+                "%s.histo.pdf" % (subband)
+            )
+            qcheck = __import__(self.inputs['qcheck'])
+            try:
+                qcheck.run(
+                    filename, logfile=stats_path, plot=figure+path,
+                    logger=logging.getLogger(self.logger.name + ".qcheck")
+                )
+            except Exception, e:
+                self.logger.warn("Quality check failed on %s" % (filename))
+                self.logger.warn(str(e))
+
         self.logger.info("Generating FITS files")
         fits_files = []
-        image_names = glob.glob("%s/%s" % (results_dir, self.inputs['image_re']))
         for filename in image_names:
             self.logger.debug(filename)
             subband = re.search('(SB\d+)', os.path.basename(filename)).group()
