@@ -2,26 +2,16 @@
 from __future__ import with_statement
 from contextlib import closing
 from subprocess import check_call, CalledProcessError
-from tempfile import mkstemp
-from ConfigParser import SafeConfigParser as ConfigParser
 import os.path
-import logging, logging.handlers
 
 # External
 from cuisine.parset import Parset
+from pipeline.support.lofarnode import LOFARnode
 from pipeline.support.utilities import patch_parset, create_directory
 from pipeline.support.lofarexceptions import ExecutableMissing
 import pipeline.support.utilities as utilities
 
-class dppp_node(object):
-    def __init__(self, loghost="lfe001", logport=logging.handlers.DEFAULT_TCP_LOGGING_PORT, loglevel=logging.INFO):
-        import platform
-        self.logger = logging.getLogger('node.%s.%s' % (platform.node(), self.__class__.__name__))
-        self.logger.setLevel(logging.DEBUG)
-        if loghost:
-            socketHandler = logging.handlers.SocketHandler(loghost, logport)
-            self.logger.addHandler(socketHandler)
-
+class dppp_node(LOFARnode):
     def run(self, infile, outfile, parset, log_location, executable, initscript):
         # We need to patch the parset with the correct input/output MS names.
         self.logger.info("Processing %s" % (infile,))

@@ -1,15 +1,28 @@
-import cPickle, logging.handlers, SocketServer, struct, threading, select
-from ConfigParser import SafeConfigParser as ConfigParser
+import cPickle
+import logging.handlers
+import SocketServer
+import struct
+import threading
+import select
+import socket
+from contextlib import contextmanager
 
-from pipeline.support.clusterdesc import ClusterDesc
-from pipeline import __path__ as config_path
-config = ConfigParser()
-config.read("%s/pipeline.cfg" % (config_path[0],))
-clusterdesc = ClusterDesc(config.get('cluster', 'clusterdesc'))
-head_node = clusterdesc.get('HeadNode')[0]
+@contextmanager
+def clusterlogger(
+    logger,
+    host=None,
+    port=logging.handlers.DEFAULT_TCP_LOGGING_PORT
+):
+    if not host:
+        host = scoket.gethostname()
+    logserver = LogRecordSocketReceiver(logger)
+    logserver.start()
+    yield logserver.server_address
+    logserver.stop()
 
 class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
-    """Handler for a streaming logging request.
+    """
+    Handler for a streaming logging request.
 
     This basically logs the record using whatever logging policy is
     configured locally.
@@ -40,31 +53,38 @@ class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
         self.server.logger.handle(record)
 
 class LogRecordSocketReceiver(SocketServer.ThreadingTCPServer):
-    """simple TCP socket-based logging receiver suitable for testing.
+    """
+    simple TCP socket-based logging receiver suitable for testing.
     """
 
     allow_reuse_address = 1
 
-    def __init__(self, logger, host=head_node,
-                 port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
-                 handler=LogRecordStreamHandler):
+    def __init__(self,
+        logger,
+        host=None,
+        port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+        handler=LogRecordStreamHandler
+    ):
+        # If not specified, asssume local hostname
+        if not host:
+            host = socket.gethostname()
         SocketServer.ThreadingTCPServer.__init__(self, (host, port), handler)
-        self.abort = 0
+        self.abort = False
         self.timeout = 1
         self.logger = logger
 
-    def serve_until_stopped(self):
+    def start(self):
         def loop_in_thread():
             while not self.abort:
-                rd, wr, ex = select.select([self.socket.fileno()],
-                                           [], [],
-                                           self.timeout)
+                rd, wr, ex = select.select(
+                    [self.socket.fileno()], [], [], self.timeout
+                )
                 if rd:
                     self.handle_request()
         self.runthread = threading.Thread(target=loop_in_thread)
         self.runthread.start()
 
     def stop(self):
-        self.abort = 1
+        self.abort = True
         self.runthread.join()
         self.server_close()
