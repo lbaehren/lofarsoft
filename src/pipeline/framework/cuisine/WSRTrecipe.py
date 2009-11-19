@@ -74,7 +74,7 @@ class WSRTrecipe(object):
             logging.debug("Unable to open parset")
         (options, args) = self.optionparser.parse_args(opts)
         self.inputs = vars(options)
-        self.args = args
+        self.inputs['args'] = args
         if options.help:
             return 1
         else:
