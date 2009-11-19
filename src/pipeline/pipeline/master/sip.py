@@ -25,8 +25,27 @@ class sip(LOFARrecipe):
 
         self.logger.info("Standard Imaging Pipeline starting.")
 
+        self.logger.info("Reading VDS file")
+        inputs = LOFARinput(self.inputs)
+        inputs['gvds'] = self.config.get("layout", "gvds")
+        outputs = LOFARoutput()
+        if self.cook_recipe('vdsreader', inputs, outputs):
+            self.logger.warn("vdsreader reports failure")
+            return 1
+        ms_names = outputs['ms_names']
+
+        self.logger.info("Copying data to compute nodes")
+        inputs = LOFARinput(self.inputs)
+        inputs['args'] = ms_names
+        outputs = LOFARoutput()
+        if self.cook_recipe('copier', inputs, outputs):
+            self.logger.warn("copier reports failure")
+            return 1
+        ms_names = self.outputs['ms_names']
+
         self.logger.info("Calling DPPP")
         inputs = LOFARinput(self.inputs)
+        inputs['args'] = ms_names
         outputs = LOFARoutput()
         if self.cook_recipe('dppp', inputs, outputs):
             self.logger.warn("DPPP reports failure")

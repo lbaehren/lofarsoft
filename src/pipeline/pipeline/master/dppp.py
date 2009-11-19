@@ -15,11 +15,6 @@ class dppp(LOFARrecipe):
     def __init__(self):
         super(dppp, self).__init__()
         self.optionparser.add_option(
-            '-g', '--g(v)ds-file',
-            dest="gvds",
-            help="G(V)DS file describing data to be processed"
-        )
-        self.optionparser.add_option(
             '-p', '--parset',
             dest="parset",
             help="Parset containing configuration for DPPP"
@@ -34,32 +29,27 @@ class dppp(LOFARrecipe):
         self.logger.info("Starting DPPP run")
         super(dppp, self).go()
 
-        try:
-            gvds = utilities.get_parset(
-                self._input_or_default('gvds')
-            )
-        except:
-            self.logger.error("Unable to read G(V)DS file")
-            raise
-
         job_directory = self.config.get("layout", "job_directory")
+        ms_names = self.inputs['args']
 
         tc, mec = self._get_cluster()
         mec.push_function(
             dict(
-                run_dppp=run_dppp
+                run_dppp=run_dppp,
+                "build_available_list": utilities.build_available_list,
+                "clear_available_list": utilities.clear_available_list
             )
         )
         self.logger.info("Pushed functions to cluster")
 
-        # We read the GVDS file to find the names of all the data files we're
-        # going to process, then push this list out to the engines so they can
-        # let us know which we have available
-        ms_names = [
-            gvds["Part%d.FileName" % (part_no,)] 
-            for part_no in xrange(int(gvds["NParts"]))
-        ]
-
+        self.logger.info("Building list of data available on engines")
+        available_list = "%s%s" % (
+            self.inputs['job_name'], self.__class__.__name__
+        )
+        mec.push(dict(filenames=ms_names))
+        mec.execute(
+            "build_available_list(\"%s\")" % (available_list,)
+        )
 
         tasks = []
         outnames = []
@@ -86,6 +76,8 @@ class dppp(LOFARrecipe):
                     log_location=log_location
                 ),
                 pull="result"
+                depend=utilities.check_for_path,
+                dependargs=(ms_name, available_list)
             )
             self.logger.info("Scheduling processing of %s" % (ms_name,))
             if not self.inputs['dry_run']:
