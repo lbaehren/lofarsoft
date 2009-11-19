@@ -19,7 +19,6 @@ Solver.scales = [0, 3]
 Solver.type = Dirty
 Solver.verbose = True
 datacolumn = DATA
-dataset = /data/users/swinbank/pipeline_runtime/jobs/L2007_03463/vds/L2007_03463.dppp.gds
 minUV = 1.0
 ncycles = 0
 restore = False

@@ -6,6 +6,7 @@ from ConfigParser import SafeConfigParser as ConfigParser
 # Cusine core
 from cuisine.WSRTrecipe import WSRTrecipe
 from cuisine.ingredient import WSRTingredient
+from cuisine.parset import Parset
 
 # Local helpers
 import utilities
@@ -15,7 +16,17 @@ from pipeline import __path__ as config_path
 
 class mwimager(WSRTrecipe):
     def __init__(self):
-        super(dppp, self).__init__()
+        super(mwimager, self).__init__()
+        self.optionparser.add_option(
+            '-j', '--job-name', 
+            dest="job_name",
+            help="Job Name"
+        )
+        self.optionparser.add_option(
+            '-r', '--runtime-directory', 
+            dest="runtime_directory",
+            help="Runtime Directory"
+        )
         self.optionparser.add_option(
             '-p', '--parset', 
             dest="parset",
@@ -34,18 +45,13 @@ class mwimager(WSRTrecipe):
 
     def go(self):
         self.logger.info("Starting MWImager run")
+        print self.inputs['gvds']
 
         config = ConfigParser({
             "job_name": self.inputs["job_name"],
             "runtime_directory": self.inputs["runtime_directory"]
         })
         config.read("%s/pipeline.cfg" % (config_path[0],))
-
-        try:
-            gvds = utilities.get_parset(self.inputs['gvds'])
-        except:
-            self.logger.error("Unable to read G(V)DS file")
-            raise
 
         if not self.inputs['working_directory']:
             self.inputs['working_directory'] = config.get(
@@ -63,7 +69,7 @@ class mwimager(WSRTrecipe):
                 (self.inputs['parset'],)
             )
         try:
-            if not os.access(parset, os.R_OK):
+            if not os.access(self.inputs['parset'], os.R_OK):
                 raise IOError
         except IOError:
             self.logger.error("MWImager parset not found")
@@ -71,30 +77,42 @@ class mwimager(WSRTrecipe):
 
         # Patch GVDS filename into parset
         self.logger.info("Setting up MWImager configuration")
-        temp_parset_filename = mkstemp()[1]
+        temp_parset_filename = mkstemp(
+            dir=config.get('layout', 'parset_directory')
+        )[1]
         temp_parset = Parset()
         temp_parset.readFromFile(self.inputs['parset'])
-        temp_parset['dataset'] = gvds
+        temp_parset['dataset'] = self.inputs['gvds']
         temp_parset.writeToFile(temp_parset_filename)
 
-        env = {
+        env = os.environ
+        env.update({
             "PATH": config.get('mwimager', 'env_path'),
             "LD_LIBRARY_PATH": config.get('mwimager', 'env_ld_library_path')
-        }
+        })
         
-        self.logger.info("Running MWImager")
-        check_call(
-            [
-                config.get('mwimager', 'executable'),
-                temp_parset_filename,
-                config.get('cluster', 'clusterdesc'),
-                self.inputs['working_directory']
-            ],
-            env=env
+        log_location = "%s/%s" % (
+            config.get('layout', 'log_directory'),
+            "/mwimager.log"
         )
-
-        # Clean up when done
-        os.unlink(temp_parset_filename)
+        try:
+            self.logger.info("Running MWImager")
+            with closing(open(log_location, 'w')) as log:
+                result = check_call(
+                    [
+                        config.get('mwimager', 'executable'),
+                        temp_parset_filename,
+                        config.get('cluster', 'clusterdesc'),
+                        self.inputs['working_directory'],
+                        log_location,
+                        'dry'
+                    ],
+                    env=env,
+                    stdout=log
+                )
+            return result
+        finally:
+            os.unlink(temp_parset_filename)
 
 if __name__ == '__main__':
     sys.exit(mwimager().main())
