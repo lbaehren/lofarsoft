@@ -35,7 +35,9 @@ class dppp(LOFARrecipe):
         super(dppp, self).go()
 
         try:
-            gvds = utilities.get_parset(self.inputs['gvds'])
+            gvds = utilities.get_parset(
+                self._input_or_default(['gvds'])
+            )
         except:
             self.logger.error("Unable to read G(V)DS file")
             raise
@@ -80,7 +82,7 @@ class dppp(LOFARrecipe):
                 push=dict(
                     ms_name=ms_name,
                     ms_outname=outnames[-1],
-                    parset=self.inputs['parset'],
+                    parset=self._input_or_default('parset'),
                     log_location=log_location
                 ),
                 pull="result"

@@ -38,8 +38,8 @@ class mwimager(LOFARrecipe):
         # Patch GVDS filename into parset
         self.logger.debug("Setting up MWImager configuration")
         temp_parset_filename = utilities.patch_parset(
-            self.inputs['parset'],
-            {'dataset': self.inputs['gvds']},
+            self._input_or_default('parset'),
+            {'dataset': self._input_or_default('gvds')},
             self.config.get('layout', 'parset_directory')
         )
 
@@ -83,7 +83,6 @@ class mwimager(LOFARrecipe):
             self.logger.exception("Call to mwimager failed")
             result = 1
         finally:
-            pass
             os.unlink(temp_parset_filename)
 
         # Now parse the log files to:

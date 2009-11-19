@@ -57,35 +57,6 @@ class LOFARrecipe(WSRTrecipe):
             if not os.access(self.inputs['runtime_directory'], os.F_OK):
                 raise IOError, "Runtime directory doesn't exist"
 
-        # If our inputs have a parset field, but one isn't specified, try
-        # using a default
-        if self.inputs.has_key('parset'):
-            if not self.inputs['parset']:
-                self.inputs['parset'] = os.path.join(
-                    self.config.get("layout", "parset_directory"),
-                    self.config.get(self.__class__.__name__, "parset")
-                )
-                self.logger.info("Using %s for %s parset" % 
-                    (self.inputs['parset'], self.__class__.__name__)
-                )
-            if not os.access(self.inputs['parset'], os.R_OK):
-                raise IOError, "Can't read parset"
-
-        # If our inputs have a gvds field, but one isn't specified, try
-        # using a default.
-        if self.inputs.has_key('gvds'):
-            if not self.inputs['gvds']:
-                self.inputs['gvds'] = os.path.join(
-                    self.config.get("layout", "vds_directory"),
-                    self.config.get(self.__class__.__name__, "default_gvds")
-                )
-                self.logger.info("Using %s for %s GVDS" %
-                    (self.inputs['gvds'], self.__class__.__name__)
-                )
-            if not os.access(self.inputs['gvds'], os.R_OK):
-                raise IOError, "Can't read GVDS"
-            
-
     def _get_cluster(self):
         self.logger.info("Connecting to IPython cluster")
         try:
@@ -105,4 +76,3 @@ class LOFARrecipe(WSRTrecipe):
         if not self.inputs[key]:
             self.inputs[key] = self.config.get(section or self.__class__.__name__, key)
         return self.inputs[key]
-        

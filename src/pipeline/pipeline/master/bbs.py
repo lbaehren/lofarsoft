@@ -94,8 +94,8 @@ class bbs(LOFARrecipe):
             "--db-user", self._input_or_default('db_user'),
             "--cluster-desc", self.config.get('cluster', 'clusterdesc'),
             "--key", self.inputs['key'],
-            self.inputs['gvds'],
-            self.inputs['parset'],
+            self._input_or_default('gvds'),
+            self._input_or_default('parset'),
             self._input_or_default('skymodel'),
             self._input_or_default('working_directory')
             ]
