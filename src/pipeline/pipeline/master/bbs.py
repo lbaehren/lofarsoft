@@ -132,20 +132,24 @@ class bbs(LOFARrecipe):
             result = 1
 
         self.logger.info("Moving logfiles")
-        for log_file in glob.glob("%s%s%s" % (
-            log_root, self.inputs[key], "control*log")
+        self.logger.debug("%s/%s_%s" % ( log_root, self.inputs["key"], "control*log"))
+        self.logger.debug( glob.glob("%s/%s_%s" % (
+            log_root, self.inputs["key"], "control*log")
+        ))
+        for log_file in glob.glob("%s/%s_%s" % (
+            log_root, self.inputs["key"], "control*log")
         ):
             self.logger.debug("Processing %s" % (log_file))
             shutil.move(log_file, self.config.get('layout', 'log_directory'))
-        for log_file in glob.glob("%s%s%s" % (
-            log_root, self.inputs[key], "calibrate*log*")
+        for log_file in glob.glob("%s/%s_%s" % (
+            log_root, self.inputs["key"], "calibrate*log*")
         ):
             self.logger.debug("Processing %s" % (log_file))
             ms_name = ""
             with closing(open(log_file)) as file:
                 for line in file.xreadlines():
-                    if line.split()[0] == "part:"
-                        ms_name = os.path.basename(split_line[1].rstrip())
+                    if line.split() and line.split()[0] == "part:":
+                        ms_name = os.path.basename(line.split()[1].rstrip())
                         break
             if not ms_name:
                 self.logger.info("Couldn't identify file for %s" % (log_file))
@@ -159,8 +163,8 @@ class bbs(LOFARrecipe):
                 )
                 utilities.move_log(log_file, destination)
 
-        for log_file in glob.glob("%s%s%s" % (
-            log_root, self.inputs[key], "setupparmdb*log*")
+        for log_file in glob.glob("%s/%s_%s" % (
+            log_root, self.inputs["key"], "setupparmdb*log*")
         ):
             self.logger.debug("Processing %s" % (log_file))
             ms_name = ""
@@ -178,13 +182,16 @@ class bbs(LOFARrecipe):
                 )
                 utilities.move_log(log_file, destination)
 
-        for log_file in glob.glob("%s%s%s" % (
-            log_root, self.inputs[key], "setupsourcedb*log*")
+        for log_file in glob.glob("%s/%s_%s" % (
+            log_root, self.inputs["key"], "setupsourcedb*log*")
         ):
             self.logger.debug("Processing %s" % (log_file))
             ms_name = ""
             with closing(open(log_file)) as file:
-                ms_name = os.path.dirname(file.readline().split()[1])
+                for line in file.xreadlines():
+                    if line.split() and line.split()[0] == "Create":
+                        ms_name = os.path.dirname(line.split()[1])
+                        break
             if not ms_name:
                 self.logger.info("Couldn't identify file for %s" % (log_file))
             else:
@@ -198,7 +205,7 @@ class bbs(LOFARrecipe):
                 utilities.move_log(log_file, destination)
         try:
             self.logger.debug("Removing temporary log directory")
-            os.rmdir(os.path.dirname(log_root))
+            shutil.rmtree(log_root)
         except OSError, failure:
             self.logger.info("Failed to remove temporary directory")
             self.logger.debug(failure)
