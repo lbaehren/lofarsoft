@@ -37,10 +37,25 @@ class DPPP(WSRTrecipe):
     def __init__(self):
         WSRTrecipe.__init__(self)
         self.inputs['parset-file']  = 'dppp.parset'
-        self.inputs['cluster-name'] = ''
-        self.inputs['directory']    = None
-        self.inputs['dryrun']       = None
-        self.helptext = """This function runs the distributed DPPP"""
+        self.inputs['cluster-name'] = 'lioff'
+        self.inputs['observation']  = ''
+        self.inputs['output-dir']   = '/data/' + os.environ['USER']
+        self.inputs['dryrun']       = False
+        self.helptext = """
+        This function runs the distributed DPPP
+        Usage: DPPP [OPTION...]
+        --parset-file        parameter set filename for DPPP
+                             (default: 'dppp.parset')
+        --cluster-name       name of the cluster to be used for processing
+                             (default: 'lioff')
+        --observation        name of the observation (e.g. L2007_03463)
+                             (no default)
+        --output-dir         directory for the output MS-files;
+                             only needed when VDS-files are missing
+                             (optional; default: '/data/${USER}')
+        --dryrun             do a dry run
+                             (default: no)
+        """
 
 
     ## Code to generate results ----------------------------------------
@@ -48,39 +63,31 @@ class DPPP(WSRTrecipe):
         """Implementation of the WSRTrecipe.go() interface. This function does
         the actual work by calling the WSRTrecipe.cook_system() method."""
 
-        # Get the name of the GDS or VDS file describing the MS-files that
-        # comprise one observation.
-        dataset = Parset(self.inputs['parset-file'])['dataset']
-        observation = os.path.splitext(dataset)[0]
-        clusterdesc = \
-                    sysconfig.cluster_desc_file(self.inputs['cluster-name'])
+        dataset = self.inputs['observation'] + '.gds'
+        clusterdesc = sysconfig.clusterdesc_file(self.inputs['cluster-name'])
 
-        directory = self.inputs['directory'] \
-                    if self.inputs['directory'] \
-                    else os.path.join('/data/scratch', observation)
-
-##        # create the directory if it doesn't exist already
-##        os.makedirs(directory)
-
+        self.print_debug('dataset = ' + dataset)
+        self.print_debug('clusterdesc = ' + clusterdesc)
+        
         opts = []
         # arguments for 'startdistproc'
         opts += ['-mode', '0']
         opts += ['-nomasterhost']
         opts += ['-dsn', dataset]
         opts += ['-cdn',
-                 sysconfig.cluster_desc_file(self.inputs['cluster-name'])]
+                 sysconfig.clusterdesc_file(self.inputs['cluster-name'])]
         opts += ['-logfile', 'dppp.log']
         # program started by 'startdistproc'
         opts += [os.path.join(sysconfig.lofar_root(),
-                              'bin/CS1_Offline_pipeline_node.py')]
-        # arguments for 'CS1_Offline_pipeline_node'
+                              'bin/dppp_node.py')]
+        # arguments for 'dppp_node'
         opts += [sysconfig.lofar_root()]
         opts += [os.path.realpath(self.inputs['parset-file'])]
-        opts += [directory]
+        opts += [self.inputs['output-dir']]
         if self.inputs['dryrun']:
             opts += ['dry']
 
-        print opts
+        self.print_message('startdistproc ' + ' '.join(opts))
         sts = self.cook_system('startdistproc', opts)
         return sts
     

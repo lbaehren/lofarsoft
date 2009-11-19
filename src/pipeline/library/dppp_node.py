@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 from parset import Parset
-import sys, os, time, logging
+import sys, os, time, logging, socket
 
 # Set the logging level of the root logger.
 logging.getLogger().setLevel(logging.DEBUG)
+
+logging.info('Running on node %s', socket.gethostname())
 
 # Add six empty arguments to handle missing arguments. 
 sys.argv.extend(6*[''])
@@ -51,9 +53,12 @@ if wd:
 wd = os.getcwd()
 logging.info('Current working directory: %s', wd)
 
+# Parset filename for the current run.
+parsetfile = 'CS1_IDPPP.%02d.parset' % int(seqnr)
+
 # Clean up working directory
-os.system('rm -rf %s *.parset' % msout)
-logging.info('Removed %s' % msout)
+os.system('rm -rf %s %s' % (msout, parsetfile))
+logging.info('Removed %s, and %s' % (msout, parsetfile))
 
 # Create a parset file for the current run
 logging.info("Creating parset-file")
@@ -61,7 +66,6 @@ try:
     parset  = Parset(psn)
     parset['msin'] = msin
     parset['msout'] = msout
-    parsetfile = 'CS1_IDPPP.%02d.parset' % int(seqnr)
     parset.writeToFile(parsetfile)
 except IOError, e:
     logging.error('Failed to open parset-file: %s' % e)

@@ -58,7 +58,7 @@ def locate(filename, path_list = sysconfpath()):
     raise IOError, filename + " not found in " + pathsep.join(path_list)
 
 
-def cluster_desc_file(cluster_name):
+def clusterdesc_file(cluster_name):
     """Return the name of the cluster description file. Its name is the
     concatenation of the cluster name and the file extension '.clusterdesc'.
     It is searched for in the directories returned by sysconfpath()."""

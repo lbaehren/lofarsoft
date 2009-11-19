@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  standard_imaging_pipeline.py: Script to run the distributed Default Pre-Processor Pipeline
+#  StandardImagingPipeline.py: Script to run the Standard Imaging Pipeline.
 #
 #  Copyright (C) 2002-2008
 #  ASTRON (Netherlands Foundation for Research in Astronomy)
@@ -22,7 +22,7 @@
 #
 #  $Id$
 
-"""Script to run the distributed Default Pre-Processor Pipeline"""
+"""Script to run the Standard Imaging Pipeline"""
 
 from WSRTrecipe import WSRTrecipe
 from ingredient import WSRTingredient
@@ -35,25 +35,68 @@ import os
 import sys
 
 class StandardImagingPipeline(WSRTrecipe):
-    """This is the recipe for the LOFAR standard imagaging pipeline."""
+    """This is the recipe for the LOFAR Standard Imagaging Pipeline."""
     def __init__(self):
         WSRTrecipe.__init__(self)
-        self.inputs['dppp-parset']  = 'dppp.parset'
+        self.inputs['dppp-parset']     = 'dppp.parset'
         self.inputs['mwimager-parset'] = 'mwimager.parset'
-        self.inputs['cluster-name'] = ''
-        self.inputs['directory']    = None
-        self.inputs['dryrun']       = None
-        self.helptext = """This is the recipe for the LOFAR standard
-        imagaging pipeline"""
+        self.inputs['cluster-name']    = 'lioff'
+        self.inputs['observation']     = ''
+        self.inputs['make-vds-files']  = False
+        self.inputs['input-dir']       = None
+        self.inputs['output-dir']      = None
+        self.inputs['dryrun']          = False
+        self.helptext = """
+        This is the recipe for the LOFAR standard imagaging pipeline.
+        
+        Usage: StandardImagingPipeline [OPTION...]
+        --dppp-parset        parameter set filename for DPPP
+                             (default: 'dppp.parset')
+        --mwimager-parset    parameter set filename for MWImager
+                             (default: 'mwimager.parset')
+        --cluster-name       name of the cluster to be used for processing
+                             (default: 'lioff')
+        --observation        name of the observation to be processed
+                             (no default)
+        --make-vds-files     create VDS files
+                             (default: no)
+        --input-dir          directory for the input MS-files;
+                             only needed when VDS files are missing
+                             (optional; no default)
+        --output-dir         directory for the output MS-files;
+                             only needed when VDS files are missing
+                             (optional; default: '/data/${USER}/<observation>')
+        --dryrun             do a dry run
+                             (default: no)
+        """
 
 
     ## Code to generate results ----------------------------------------
     def go(self):
         """Implementation of the WSRTrecipe.go() interface."""
 
+        if self.inputs['output-dir'] is None:
+            self.inputs['output-dir']  = '/data/' + os.environ['USER'] + \
+                                         '/' + self.inputs['observation']
+
+        # Create VDS files for the MS-files in the observation, if requested.
+        if self.inputs['make-vds-files']:
+            inputs = WSRTingredient()
+            outputs = WSRTingredient()
+            inputs['observation']  = self.inputs['observation']
+#            inputs['cluster-name'] = self.inputs['cluster-name']
+            inputs['directory']    = self.inputs['input-dir']
+            sts = self.cook_recipe('MakeVDS', inputs, outputs)
+            if sts:
+                print "MakeVDS returned with status", sts
+                return sts
+        
         # Run the Default Preprocessor Pipeline (DPPP)
         inputs = WSRTingredient(Parset(self.inputs['dppp-parset']))
         inputs['cluster-name'] = self.inputs['cluster-name']
+        inputs['observation'] = self.inputs['observation']
+        inputs['output-dir'] = self.inputs['output-dir']
+        inputs['dryrun'] = self.inputs['dryrun']
         outputs = WSRTingredient()
         sts = self.cook_recipe('DPPP', inputs, outputs)
         if sts:
@@ -62,6 +105,9 @@ class StandardImagingPipeline(WSRTrecipe):
 
         # Run the Master-Worker Imager (mwimager)
         inputs = WSRTingredient(Parset(self.inputs['mwimager-parset']))
+        inputs['cluster-name'] = self.inputs['cluster-name']
+        inputs['observation'] = self.inputs['observation']
+        inputs['output-dir'] = self.inputs['output-dir']
         outputs = WSRTingredient()
         sts = self.cook_recipe('MWImager', inputs, outputs)
         if sts:

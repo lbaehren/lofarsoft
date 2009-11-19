@@ -25,34 +25,56 @@
 """Script to run the mwimager"""
 
 from WSRTrecipe import WSRTrecipe
-import sys
+import sysconfig
+
+import os.path, sys
 
 class MWImager(WSRTrecipe):
     """Class wrapper around the mwimager script that is used to start the
     distributed Master-Worker imager."""
     def __init__(self):
         WSRTrecipe.__init__(self)
-        self.inputs['parset-file'] = 'mwimager.parset'
-        self.inputs['clusterdesc'] = None
-        self.inputs['workingdir']  = None
-        self.inputs['logfile']     = None
-        self.inputs['dryrun']      = None
-        self.helptext = """This function runs the mwimager"""
+        self.inputs['parset-file']  = 'mwimager.parset'
+        self.inputs['cluster-name'] = 'lioff'
+        self.inputs['observation']  = ''
+        self.inputs['output-dir']   = None
+        self.inputs['logfile']      = None
+        self.inputs['dryrun']       = False
+        self.helptext = """
+        This is the recipe for the LOFAR Master-Worker Imager.
+
+        Usage: MWImager [OPTION...]
+        --parset-file        parameter set filename for MWImager
+                             (default: 'mwimager.parset')
+        --cluster-name       name of the cluster to be used for processing
+                             (default: 'lioff')
+        --observation        name of the observation (e.g. L2007_03463)
+                             (no default)
+        --output-dir         directory where images will be stored
+                             (default: same directory as MS)
+        --logfile            root name of logfile of each subprocess
+                             (default 'mwimager.log')
+        --dryrun             do a dry run
+                             (default: no)
+        """
 
     ## Code to generate results ----------------------------------------
     def go(self):
         """Implementation of the WSRTrecipe.go() interface. This function does
         the actual work by calling the WSRTrecipe.cook_system() method."""
         opts = []
-        for k in ['parset-file', 'clusterdesc', 'workingdir', 'logfile']:
-            if self.inputs[k] is None: 
-                opts.append('')
-            else: 
-                opts.append(self.inputs[k])
-        if self.inputs['dryrun']:
-            opts.append('dry')
+        opts += [os.path.realpath(self.inputs['parset-file']) \
+                 if self.inputs['parset-file'] is not None else '']
+        opts += [sysconfig.clusterdesc_file(self.inputs['cluster-name']) \
+                 if self.inputs['cluster-name'] is not None else '']
+        opts += [self.inputs['output-dir'] \
+                 if self.inputs['output-dir'] is not None else '']
+        opts += [self.inputs['logfile'] \
+                 if self.inputs['logfile'] is not None else '']
+        opts += ['dry' if self.inputs['dryrun'] else '']
+
+        self.print_message('mwimager ' + ' '.join(opts))
         sts = self.cook_system('mwimager', opts)
-        print "mwimager returned with status:", sts
         return sts
 
 

@@ -26,7 +26,7 @@
 
 from WSRTrecipe import WSRTrecipe
 from parset import Parset
-from observation import Observation
+from Observation import Observation
 import sysconfig
 
 import os
@@ -51,13 +51,22 @@ class MakeVDS(WSRTrecipe):
     
     def __init__(self):
         WSRTrecipe.__init__(self)
-        self.inputs['observation'] = ''
-        self.inputs['directory'] = None
-        self.inputs['cluster-name'] = ''
+        self.inputs['cluster-name'] = 'lioffen'
+        self.inputs['observation']  = ''
+        self.inputs['directory']    = None
         self.helptext = """
         This function generates vds files for the MS files that comprise the
-        given observation."""
-        
+        given observation.
+
+        Usage: MakeVDS [OPTION...]
+        --cluster-name       name of the cluster where the data resides
+                             (default: 'lioff')
+        --observation        name of the observation (e.g. L2007_03463)
+                             (no default)
+        --directory          directory, relative to the mount point, where
+                             the input data is stored (e.g. /lifs001/pipeline);
+                             if None, use directory <mount-point>/<observation>
+        """
     
     ## Code to generate results ----------------------------------------
     def go(self):
@@ -65,11 +74,11 @@ class MakeVDS(WSRTrecipe):
         the actual work by calling the WSRTrecipe.cook_system() method several
         times."""
 
-        observation = Observation(self.inputs['observation'],
-                                  self.inputs['cluster-name'],
+        observation = Observation(self.inputs['cluster-name'],
+                                  self.inputs['observation'],
                                   self.inputs['directory'])
         
-        clusterdesc = sysconfig.cluster_desc_file(self.inputs['cluster-name'])
+        clusterdesc = sysconfig.clusterdesc_file(self.inputs['cluster-name'])
         ms_files = observation.ms_files()
         vds_files = [f + '.vds' for f in ms_files]
 

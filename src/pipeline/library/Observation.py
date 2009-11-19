@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  observation.py: Class containing meta-data of an observation
+#  Observation.py: Class containing meta-data of an observation
 #
 #  Copyright (C) 2002-2008
 #  ASTRON (Netherlands Foundation for Research in Astronomy)
@@ -34,22 +34,21 @@ import glob
 class Observation(WSRTingredient):
     """Class containing meta-data of an observation"""
 
-
-    def __init__(self, observation, cluster_name, directory = None,
+    def __init__(self, cluster_name, observation, directory = None,
                  glob_pattern = ['*SB[0-9]*.MS']):
         """
         Constructor.
-          - observation:  name of the observation (e.g. L2007_03463).
-          - cluster_name: name of the cluster where the data resides
-                          (e.g. lifs).
-          - directory:    directory, relative to the mount point, where
-                          the data is stored (e.g. /lifs001/pipeline);
-                          if None, use directory <mount-point>/<observation>
-          - glob_pattern: pattern used when matching MS-files;
-                          if None, use '*SB[0-9]*.MS'
+          - cluster_name:   name of the cluster where the data resides
+                            (e.g. lifs).
+          - observation:    name of the observation (e.g. L2007_03463).
+          - directory:      directory, relative to the mount point, where
+                            the data is stored (e.g. /lifs001/pipeline);
+                            if None, use directory <mount-point>/<observation>
+          - glob_pattern:   pattern used when matching MS-files;
+                            if None, use '*SB[0-9]*.MS'
         """
         WSRTingredient.__init__(self)
-        clusterdesc = sysconfig.cluster_desc_file(cluster_name)
+        clusterdesc = sysconfig.clusterdesc_file(cluster_name)
         self.observation = directory if directory else observation
         self.ms_pattern = [os.path.join(self.observation, p) \
                            for p in glob_pattern]
