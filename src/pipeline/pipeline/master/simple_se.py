@@ -111,5 +111,5 @@ class simple_se(LOFARrecipe):
         return 0
 
 if __name__ == '__main__':
-    sys.exit(eval(os.path.basename(sys.argv[0]).rstrip('.py'))().main())
+    sys.exit(eval(os.path.splitext(os.path.basename(sys.argv[0]))[0])().main())
 
