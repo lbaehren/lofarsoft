@@ -59,6 +59,7 @@ class mwimager(LOFARrecipe):
             self.config.get('layout', 'log_directory'),
             self.config.get('mwimager', 'log')
         )
+        self.logger.debug("Logging to %s" % (log_location)")
         try:
             self.logger.info("Running MWImager")
             with closing(open(log_location, 'w')) as log:
