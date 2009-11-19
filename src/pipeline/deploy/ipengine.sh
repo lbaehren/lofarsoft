@@ -8,13 +8,21 @@ mkdir -p $PIDPATH
 
 case "$2" in
   start) 
-         /sbin/start-stop-daemon --start -b -m --pidfile $PIDPATH/ipengine.pid \
-           --exec /data/users/swinbank/app/bin/ipengine -- \
-           --furl-file=$CONTROLPATH/engine.furl \
-           --logfile=$PIDPATH/log
+         NCPU=`cat /proc/cpuinfo | grep ^processor | wc -l`
+         for CPU in `seq 1 $NCPU`
+            do
+                 /sbin/start-stop-daemon --start -b -m             \
+                   --pidfile $PIDPATH/ipengine$CPU.pid             \
+                   --exec /data/users/swinbank/app/bin/ipengine -- \
+                   --furl-file=$CONTROLPATH/engine.furl            \
+                   --logfile=$PIDPATH/log
+            done
          ;;
   stop)
-         /sbin/start-stop-daemon --stop --pidfile $PIDPATH/ipengine.pid
+         for PIDFILE in $PIDPATH/ipengine*.pid
+             do
+                 /sbin/start-stop-daemon --stop --pidfile $PIDFILE
+             done
          ;;
   *)
          echo "Usage: $0 <controlpath> {start|stop}" >&2
