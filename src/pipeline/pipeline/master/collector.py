@@ -29,11 +29,6 @@ class collector(LOFARrecipe):
             help="Working directory containing images on compute nodes",
         )
         self.optionparser.add_option(
-            '--qcheck',
-            dest="qcheck",
-            help="Location of qcheck module"
-        )
-        self.optionparser.add_option(
             '--image2fits',
             dest="image2fits",
             help="Location of image2fits tool (from casacore)"
@@ -80,35 +75,8 @@ class collector(LOFARrecipe):
             except subprocess.CalledProcessError:
                 self.logger.warn("No images moved from %s" % (node))
         
-        image_names = glob.glob("%s/%s" % (results_dir, self.inputs['image_re']))
-        self.logger.info("Quality check")
-        try:
-            qcheck = imp.load_source('qcheck', self.inputs['qcheck'])
-            for filename in image_names:
-                self.logger.debug(filename)
-                subband = re.search('(SB\d+)', os.path.basename(filename)).group()
-                stats_path = os.path.join(
-                    self.config.get('layout', 'results_directory'),
-                    "%s.stats.log" % (subband)
-                )
-                figure_path = os.path.join(
-                    self.config.get('layout', 'results_directory'),
-                    "%s.histo.pdf" % (subband)
-                )
-                try:
-                    qcheck.run(
-                        filename, logfile=stats_path, plot=figure_path,
-                        logger=logging.getLogger(self.logger.name + ".qcheck")
-                    )
-                except Exception, e:
-                    self.logger.warn("Quality check failed on %s" % (filename))
-                    self.logger.warn(str(e))
-        except ImportError:
-            self.logger.warn(
-                "Quality check module (%s) not found; not checking image quality" % (self.inputs['qcheck'])
-            )
-
         self.logger.info("Generating FITS files")
+        image_names = glob.glob("%s/%s" % (results_dir, self.inputs['image_re']))
         fits_files = []
         for filename in image_names:
             self.logger.debug(filename)
