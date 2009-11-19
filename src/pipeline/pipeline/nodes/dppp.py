@@ -21,7 +21,11 @@ def run_dppp(infile, outfile, parset, log_location):
 
     # We need to patch the parset with the correct input/output MS names.
     temp_parset_filename = patch_parset(
-        parset, {'msin': infile, 'msout': outfile}
+        parset, {
+            'msin': infile,
+            'msout': outfile,
+#            'clusterdesc': config.get('cluster', 'clusterdesc')
+        }
     )
 
     try:
@@ -40,8 +44,10 @@ def run_dppp(infile, outfile, parset, log_location):
                 stdout=log
             )
         return result
-    except CalledProcessError, e:
-        raise "DPPP failed"
+    except CalledProcessError:
+        # For CalledProcessError isn't properly propagated by IPython
+        # Temporary workaround...
+        raise Exception
 
     finally:
         os.unlink(temp_parset_filename)
