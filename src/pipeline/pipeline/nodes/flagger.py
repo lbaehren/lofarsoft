@@ -5,7 +5,7 @@ from twisted.python import log
 from pyrap.tables import table
 import numpy
 
-def flag_data(input, output):
+def flag_data(input, output, max_value):
     try:
         t = table(input)
         t2 = t.copy(output, deep=True)
@@ -16,7 +16,7 @@ def flag_data(input, output):
         raise
     try:
         for i, data in enumerate(t.getcol('CORRECTED_DATA')):
-            if max([abs(val) for val in data[0]]) > 200.0:
+            if max([abs(val) for val in data[0]]) > max_value:
                 t.putcell('FLAG', i, numpy.array([[True, True, True, True]]))
                 t.putcell('FLAG_ROW', i, True)
         t.close()

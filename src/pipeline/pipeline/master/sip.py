@@ -40,6 +40,7 @@ class sip(LOFARrecipe):
         self.logger.info("Calling local flagger")
         inputs = LOFARinput(self.inputs)
         inputs['args'] = processed_filenames
+        inoputs['n_factor'] = 2.0
         inputs['suffix'] = ".flagged"
         outputs = LOFARoutput()
         if self.cook_recipe('flagger', inputs, outputs):
