@@ -1,4 +1,4 @@
-allcolumns = False
+allcolumns = True
 bandpass = 0
 existing = False
 fixed = 5

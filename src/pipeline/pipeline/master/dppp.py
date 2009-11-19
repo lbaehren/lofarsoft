@@ -91,10 +91,22 @@ class dppp(LOFARrecipe):
         for task in tasks:
             ##### Print failing tasks?
             ##### Abort if all tasks failed?
-            print tc.get_task_result(task)
+            res = tc.get_task_result(task)
+            if res.failure:
+                print res.failure
 
         # Save space on engines by clearing out old file lists
         mec.execute("clear_available_list(\"%s\")" % (available_list,))
+
+        # Now set up a colmaker recipe to insert missing columns in the
+        # processed data
+        self.logger.info("Calling colmaker")
+        inputs = LOFARinput(self.inputs)
+        inputs['args'] = outnames
+        outputs = LOFARoutput()
+        if self.cook_recipe('colmaker', inputs, outputs):
+            self.logger.warn("colmaker reports failure")
+            return 1
 
         # Now set up a vdsmaker recipe to build a GDS file describing the
         # processed data
