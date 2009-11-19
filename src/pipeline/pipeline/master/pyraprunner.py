@@ -5,6 +5,7 @@ from pipeline.support.ipython import LOFARTask
 # Local helpers
 from pipeline.support.lofarrecipe import LOFARrecipe
 import pipeline.support.utilities as utilities
+from pipeline.support.clusterlogger import clusterlogger
 
 class pyraprunner(LOFARrecipe):
     """
@@ -53,33 +54,38 @@ class pyraprunner(LOFARrecipe):
         mec.execute(
             "build_available_list(\"%s\")" % (available_list,)
         )
-        tasks = []
-        outnames = []
-        for ms_name in ms_names:
-            outnames.append(ms_name + self.inputs['suffix'])
-            execute_string = "result = %s(ms_name, \"%s\", %s)" % (
-                function_name, outnames[-1], self._generate_arguments()
+
+        with clusterlogger(self.logger) as (loghost, logport):
+            self.logger.debug("Logging to %s:%d" % (loghost, logport))
+            tasks = []
+            outnames = []
+            for ms_name in ms_names:
+                outnames.append(ms_name + self.inputs['suffix'])
+                execute_string = "result = %s(ms_name, \"%s\", %s)" % (
+                    function_name, outnames[-1], self._generate_arguments()
+                )
+                task = LOFARTask(
+                    execute_string,
+                    push=dict(
+                        ms_name=ms_name,
+                        loghost=loghost,
+                        logport=logport
+                    ),
+                    pull="result",
+                    depend=utilities.check_for_path,
+                    dependargs=(ms_name, available_list)
+                )
+                self.logger.info("Scheduling processing of %s" % (ms_name,))
+                tasks.append(tc.run(task))
+            self.logger.info(
+                "Waiting for all %s tasks to complete" %
+                (self.__class__.__name__)
             )
-            task = LOFARTask(
-                execute_string,
-                push=dict(
-                    ms_name=ms_name,
-                ),
-                pull="result",
-                depend=utilities.check_for_path,
-                dependargs=(ms_name, available_list)
-            )
-            self.logger.info("Scheduling processing of %s" % (ms_name,))
-            tasks.append(tc.run(task))
-        self.logger.info(
-            "Waiting for all %s tasks to complete" %
-            (self.__class__.__name__)
-        )
-        tc.barrier(tasks)
-        for task in tasks:
-            res = tc.get_task_result(task)
-            if res.failure:
-                print res.failure
+            tc.barrier(tasks)
+            for task in tasks:
+                res = tc.get_task_result(task)
+                if res.failure:
+                    print res.failure
 
         self.outputs['data'] = outnames
 
