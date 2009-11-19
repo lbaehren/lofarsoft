@@ -5,10 +5,23 @@
 LOFAR Standard Imaging Pipeline documentation
 =============================================
 
-Contents:
+This document provides a brief overview of the so-called "pipeline framework"
+developed for supporting LOFAR pipelines, and describes how it has been used
+to assemble a prototype "standard imaging pipeline".
+
+The framework aims to make it possible to manage a variety of different
+processing steps in a flexible yet consistent way, while running them in
+parallel across the LOFAR offline cluster.
+
+The standard imaging pipeline will accept raw data from the LOFAR correlator,
+pre-process it, calibrate it, image it, and update the sky model with the
+sources detected in the data.
 
 .. toctree::
    :maxdepth: 2
+
+   framework/index.rst
+   pipeline/index.rst
 
 Indices and tables
 ==================
