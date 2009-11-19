@@ -1,4 +1,3 @@
-from fabric.api import env
 from __future__ import with_statement
 from contextlib import closing
 
@@ -14,5 +13,3 @@ class ClusterDesc(dict):
                     if value[0] == '[' and value[-1] == ']':
                         value = [val.strip() for val in value[1:-1].split(',')]
                     self[key.strip()] = value
-
-env.roledefs = ClusterDesc('lioff.clusterdesc')
