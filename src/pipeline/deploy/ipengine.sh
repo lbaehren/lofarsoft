@@ -1,6 +1,6 @@
-export PYTHONPATH="/data/users/swinbank/app/lib/python2.5/site-packages:/app/usg/release/lib/python"
-export PATH="/data/users/swinbank/app/bin:/usr/local/bin:/usr/bin:/bin:/usr/games"
-export LD_LIBRARY_PATH="/data/users/swinbank/app/lib/"
+export PYTHONPATH="/data/users/swinbank/app/lib/python2.5/site-packages:/app/usg/release/lib/python:/app/pyrap/lib"
+export PATH="/data/users/swinbank/app/bin:/usr/local/bin:/usr/bin:/bin"
+export LD_LIBRARY_PATH="/data/users/swinbank/app/lib/:/app/pyrap/lib:/app/casacore/lib"
 CONTROLPATH=$1
 PIDPATH=$CONTROLPATH/engines/`hostname`
 
