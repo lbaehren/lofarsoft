@@ -57,6 +57,12 @@ class bbs(LOFARrecipe):
             help="Database name"
         )
 
+        self.optionparser.add_option(
+            '--instrument-db',
+            dest="instrument_db",
+            help="Instrumnet database location"
+        )
+
     def go(self):
         self.logger.info("Starting BBS run")
         super(bbs, self).go()
@@ -93,6 +99,7 @@ class bbs(LOFARrecipe):
             "--db-user", self._input_or_default('db_user'),
             "--cluster-desc", self.config.get('cluster', 'clusterdesc'),
             "--key", self._input_or_default('key'),
+            "--instrument-db", self._input_or_default('instrument_db'),
             self._input_or_default('gvds'),
             self._input_or_default('parset'),
             self._input_or_default('skymodel'),
