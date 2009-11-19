@@ -24,9 +24,9 @@
 
 """Script to run the mwimager"""
 
-from WSRTrecipe import WSRTrecipe
-from parset import Parset
-import sysconfig
+from lofar.pipeline.WSRTrecipe import WSRTrecipe
+from lofar.pipeline.parset import Parset
+from lofar.pipeline import sysconfig
 
 import os.path, sys
 
@@ -39,7 +39,8 @@ class MWImager(WSRTrecipe):
         self.inputs['cluster-name'] = 'lioff'
         self.inputs['observation']  = ''
         self.inputs['output-dir']   = None
-        self.inputs['logfile']      = None
+        self.inputs['vds-dir']      = None
+        self.inputs['logfile']      = 'mwimager.log'
         self.inputs['dryrun']       = False
         self.helptext = """
         This is the recipe for the LOFAR Master-Worker Imager.
@@ -55,6 +56,8 @@ class MWImager(WSRTrecipe):
                              (default: same directory as MS)
         --logfile            root name of logfile of each subprocess
                              (default 'mwimager.log')
+        --vds-dir            directory where the VDS-files reside;
+                             (default: '/users/${USER}/data/<observation>')
         --dryrun             do a dry run
                              (default: no)
         """
@@ -63,21 +66,32 @@ class MWImager(WSRTrecipe):
     def go(self):
         """Implementation of the WSRTrecipe.go() interface. This function does
         the actual work by calling the WSRTrecipe.cook_system() method."""
+        clusterdesc = sysconfig.clusterdesc_file(self.inputs['cluster-name'])
+        output_dir = self.inputs['output-dir'] \
+                     if self.inputs['output-dir'] \
+                     else os.path.join('/data', os.environ['USER'],
+                                       self.inputs['observation'])
+        vds_dir = self.inputs['vds-dir'] \
+                  if self.inputs['vds-dir'] \
+                  else os.path.join('/users', os.environ['USER'], 'data',
+                                    self.inputs['observation'])
+        dataset = os.path.join(vds_dir, self.inputs['observation'] + '.gds')
 
+        self.print_debug('clusterdesc = ' + clusterdesc)
+        self.print_debug('output_dir = ' + output_dir)
+        self.print_debug('vds_dir = ' + vds_dir)
+        self.print_debug('dataset = ' + dataset)
+    
         # Put the correct dataset into the parset-file
         ps = Parset(self.inputs['parset-file'])
-        ps['dataset'] = self.inputs['observation'] + '.gds'
+        ps['dataset'] = dataset
         ps.writeToFile(self.inputs['parset-file'])
         
         opts = []
-        opts += [os.path.abspath(self.inputs['parset-file']) \
-                 if self.inputs['parset-file'] is not None else '']
-        opts += [sysconfig.clusterdesc_file(self.inputs['cluster-name']) \
-                 if self.inputs['cluster-name'] is not None else '']
-        opts += [self.inputs['output-dir'] \
-                 if self.inputs['output-dir'] is not None else '']
-        opts += [self.inputs['logfile'] \
-                 if self.inputs['logfile'] is not None else '']
+        opts += [os.path.abspath(self.inputs['parset-file'])]
+        opts += [clusterdesc]
+        opts += [output_dir]
+        opts += [self.inputs['logfile']]
         opts += ['dry' if self.inputs['dryrun'] else '']
 
         self.print_message('mwimager ' + ' '.join(opts))

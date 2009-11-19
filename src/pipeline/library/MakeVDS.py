@@ -24,10 +24,10 @@
 
 """Class for generating VDS-files from MS-files"""
 
-from WSRTrecipe import WSRTrecipe
-from parset import Parset
-from Observation import Observation
-import sysconfig
+from lofar.pipeline.WSRTrecipe import WSRTrecipe
+from lofar.pipeline.parset import Parset
+from lofar.pipeline.Observation import Observation
+from lofar.pipeline import sysconfig
 
 import os
 import sys

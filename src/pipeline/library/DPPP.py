@@ -24,9 +24,9 @@
 
 """Script to run the distributed Default Pre-Processor Pipeline"""
 
-from WSRTrecipe import WSRTrecipe
-from parset import Parset
-import sysconfig
+from lofar.pipeline.WSRTrecipe import WSRTrecipe
+from lofar.pipeline.parset import Parset
+from lofar.pipeline import sysconfig
 
 import os
 import sys
@@ -87,9 +87,9 @@ class DPPP(WSRTrecipe):
         opts += ['-mode', '0']
         opts += ['-nomasterhost']
         opts += ['-dsn', dataset]
-        opts += ['-cdn',
-                 sysconfig.clusterdesc_file(self.inputs['cluster-name'])]
+        opts += ['-cdn', clusterdesc]
         opts += ['-logfile', 'dppp.log']
+        opts += ['-dry' if self.inputs['dryrun'] else '-nodry']
         # program started by 'startdistproc'
         opts += [os.path.join(sysconfig.lofar_root(),
                               'bin/dppp_node.py')]
@@ -98,8 +98,6 @@ class DPPP(WSRTrecipe):
         opts += [os.path.abspath(self.inputs['parset-file'])]
         opts += [output_dir]
         opts += [vds_dir]
-        if self.inputs['dryrun']:
-            opts += ['dry']
 
         self.print_message('startdistproc ' + ' '.join(opts))
         if self.cook_system('startdistproc', opts):

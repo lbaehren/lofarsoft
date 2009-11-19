@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from parset import Parset
-import sys, os, time, logging, socket
+
+import os, sys, logging, socket
 
 # Set the logging level of the root logger.
 logging.getLogger().setLevel(logging.DEBUG)
@@ -15,7 +15,7 @@ try:
     (seqnr, msn, lroot, psn, wd, vdsdir, dry) = sys.argv[5:12]
 except ValueError:
     print 'usage:', os.path.basename(sys.argv[0]), 'dummy dummy dummy dummy', \
-          'rank ms-part lofarroot parset-file wd dry'
+          'rank ms-part lofarroot parset-file wd vds-dir [no]dry'
     sys.exit(1)
 
 # Show input arguments
@@ -26,6 +26,19 @@ logging.debug('psn   = %s', psn)
 logging.debug('wd    = %s', wd)
 logging.debug('vdsdir= %s', vdsdir)
 logging.debug('dry   = %s', dry)
+
+# Before we can import LOFAR stuff, we need to adjust sys.path. 
+# Source lofarinit.sh in a shell to get the LOFAR-specific PYTHONPATH,
+# and prepend it to sys.path
+cmd = '. ' + os.path.join(lroot, 'lofarinit.sh') + '; echo $PYTHONPATH';
+pypath = os.popen(cmd).read().strip().split(':')
+logging.debug("Adding '%s' to sys.path", ":".join(pypath))
+for p in reversed(pypath):
+    sys.path.insert(1, p)
+
+# Now we can import LOFAR stuff
+from lofar.pipeline.parset import Parset
+
 
 # Get name of input MS from VDS file, until IDPPP can handle VDS files.
 msin = Parset(msn).getString('Name')
@@ -107,11 +120,12 @@ else:
 # to correct the key/value pair FileSys.
 logging.info('Patching VDS file')
 # Try to figure out the mount point using 'df'.
-mp = os.popen("df . | sed -n 2p | cut -d' ' -f1").read().strip()
-logging.info('FileSys = %s', mp)
+mp = os.popen("df . ").read().split()[-1]
+filesys = hostname + ':' + mp
+logging.info('FileSys = %s', filesys)
 if dry != 'dry':
     ps = Parset(vds)
-    ps['FileSys'] = mp
+    ps['FileSys'] = filesys
     ps.writeToFile(vds)
 
 
