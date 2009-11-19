@@ -1,6 +1,6 @@
 import sys, os, tempfile
 from subprocess import check_call
-from ConfigParser import RawConfigParser
+from ConfigParser import SafeConfigParser as ConfigParser
 
 # Cusine core
 from cuisine.WSRTrecipe import WSRTrecipe
@@ -21,8 +21,6 @@ def make_vds(infile, clusterdesc, outfile, log_location):
 class vdsmaker(WSRTrecipe):
     def __init__(self):
         super(vdsmaker, self).__init__()
-        self.config = RawConfigParser()
-        self.config.read("%s/pipeline.cfg" % (config_path[0],))
 
         self.optionparser.add_option(
             '-j', '--job-name', 
@@ -36,16 +34,19 @@ class vdsmaker(WSRTrecipe):
         )
 
     def go(self):
+        config = ConfigParser({
+            "job_name": self.inputs["job_name"],
+            "runtime_directory": self.inputs["runtime_directory"]
+        })
+        config.read("%s/pipeline.cfg" % (config_path[0],))
+
         ms_names = self.inputs['args']
 
-        job_directory = "%s/jobs/%s" % (
-            self.inputs['runtime_directory'],
-            self.inputs['job_name']
-        )
+        job_directory = config.get("layout", "job_directory")
 
         try:
-            tc  = IPclient.TaskClient(self.inputs['runtime_directory'] + '/task.furl')
-            mec = IPclient.MultiEngineClient(self.inputs['runtime_directory'] + '/multiengine.furl')
+            tc  = IPclient.TaskClient(config.get('cluster', 'task_furl'))
+            mec = IPclient.MultiEngineClient(config.get('cluster', 'multiengine_furl'))
             mec.push_function(
                 dict(
                     make_vds=make_vds,
@@ -66,12 +67,12 @@ class vdsmaker(WSRTrecipe):
         mec.execute(
             "build_available_list(\"%s\")" % (available_list,)
         )
-        clusterdesc = "%s/lioff.clusterdesc" % (self.inputs['runtime_directory'],)
+        clusterdesc = config.get('cluster', 'clusterdesc')
         tasks = []
         vdsnames = []
         for ms_name in ms_names:
-            log_location = "%s/logs/%s/makevds.log" % (
-                job_directory,
+            log_location = "%s/%s/makevds.log" % (
+                config.get("layout", "log_directory"),
                 os.path.basename(ms_name)
             )
             vdsnames.append(
@@ -89,7 +90,7 @@ class vdsmaker(WSRTrecipe):
                 depend=utilities.check_for_path,
                 dependargs=(ms_name, available_list)
             )
-            self.logger.info("Scheduling processing of %s", ms_name")
+            self.logger.info("Scheduling processing of %s" % (ms_name,))
             tasks.append(tc.run(task))
         self.logger.info("Waiting for all makevds tasks to complete")
         tc.barrier(tasks)
@@ -98,7 +99,7 @@ class vdsmaker(WSRTrecipe):
 
         # Combine VDS files to produce GDS
         self.logger.info("Combining VDS files")
-        executable = self.config.get('VDS', 'combinevds')
+        executable = config.get('VDS', 'combinevds')
         gvds_out   = "%s/%s" % (self.inputs['directory'], self.inputs['gds'])
         check_call([executable, gvds_out] + vdsnames)
 #        for file in vdsnames:

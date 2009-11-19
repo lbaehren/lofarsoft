@@ -4,7 +4,7 @@ from contextlib import closing
 from subprocess import check_call
 from tempfile import mkstemp
 from os.path import dirname
-from ConfigParser import RawConfigParser
+from ConfigParser import SafeConfigParser as ConfigParser
 import os, errno
 
 # External
@@ -14,7 +14,7 @@ from cuisine.parset import Parset
 from pipeline import __path__ as config_path
 
 def run_dppp(infile, outfile, parset, log_location):
-    config = RawConfigParser()
+    config = ConfigParser()
     config.read("%s/pipeline.cfg" % (config_path[0],))
     executable = config.get('DPPP', 'executable')
 
