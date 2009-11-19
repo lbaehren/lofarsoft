@@ -88,7 +88,12 @@ def log_time(logger):
     try:
         yield
     finally:
-        resource_usage = resource.getrusage(resource.RUSAGE_CHILDREN)
+        resource_usage = [
+            x + y for x, y in zip(
+                resource.getrusage(resource.RUSAGE_CHILDREN),
+                resource.getrusage(resource.RUSAGE_SELF)
+            )
+        ]
         logger.warn(
             "Node total time %.4fs; user time: %.4fs; system time: %.4fs" % (
                 time.time() - start_time, resource_usage[0], resource_usage[1]
