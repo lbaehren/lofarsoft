@@ -73,11 +73,6 @@ class vdsmaker(LOFARrecipe):
             tasks = []
             vdsnames = []
             for ms_name in ms_names:
-                log_location = "%s/%s/%s.log" % (
-                    self.config.get("layout", "log_directory"),
-                    os.path.basename(ms_name),
-                    self.config.get("vds", "log"),
-                )
                 vdsnames.append(
                     "%s/%s.vds" % (self.inputs['directory'], os.path.basename(ms_name))
                 )
@@ -87,7 +82,6 @@ class vdsmaker(LOFARrecipe):
                         ms_name=ms_name,
                         vds_name=vdsnames[-1],
                         clusterdesc=clusterdesc,
-                        log_location=log_location,
                         executable=self.inputs['makevds'],
                         loghost=loghost,
                         logport=logport
