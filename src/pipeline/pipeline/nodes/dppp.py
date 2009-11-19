@@ -1,7 +1,7 @@
 # Python standard library
 from __future__ import with_statement
 from contextlib import closing
-from subprocess import check_call
+from subprocess import check_call, CalledProcessError
 from tempfile import mkstemp
 from os.path import dirname
 from ConfigParser import SafeConfigParser as ConfigParser
@@ -40,6 +40,9 @@ def run_dppp(infile, outfile, parset, log_location):
                 stdout=log
             )
         return result
+    except CalledProcessError, e:
+        raise "DPPP failed"
+
     finally:
         os.unlink(temp_parset_filename)
 

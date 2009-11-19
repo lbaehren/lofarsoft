@@ -208,17 +208,20 @@ class bbs(LOFARrecipe):
         self.logger.debug("Copying remote logs to %s"  % (log_root))
         for node in clusterdesc['ComputeNodes']:
             self.logger.debug("Node: %s" % (node))
-            result = check_call(
-                [
-                    "ssh",
-                    node,
-                    "--",
-                    "mv",
-                    "%s/%s*log" % (
-                        self._input_or_default('working_directory'), self.inputs['key']
-                    ),
-                    log_root
-                ])
+            try:
+                result = check_call(
+                    [
+                        "ssh",
+                        node,
+                        "--",
+                        "mv",
+                        "%s/%s*log" % (
+                            self._input_or_default('working_directory'), self.inputs['key']
+                        ),
+                        log_root
+                    ])
+            except CalledProcessError:
+                self.logger.warn("No logs moved on %s" % (node))
         for log_file in glob.glob("%s/%s_%s" % (
             log_root, self.inputs["key"], "kernel*log*")
         ):

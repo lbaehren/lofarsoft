@@ -24,6 +24,11 @@ class dppp(LOFARrecipe):
             dest="parset",
             help="Parset containing configuration for DPPP"
         )
+        self.optionparser.add_option(
+            '-w', '--working-directory',
+            dest="working_directory",
+            help="Working directory used on compute nodes"
+        )
 
     def go(self):
         self.logger.info("Starting DPPP run")
@@ -41,8 +46,8 @@ class dppp(LOFARrecipe):
         mec.push_function(
             dict(
                 run_dppp=run_dppp,
-                build_available_list=utilities.build_available_list,
-                clear_available_list=utilities.clear_available_list
+#                build_available_list=utilities.build_available_list,
+#                clear_available_list=utilities.clear_available_list
             )
         )
         self.logger.info("Pushed functions to cluster")
@@ -56,17 +61,24 @@ class dppp(LOFARrecipe):
         ]
 
         # Construct list of available files on engines
-        self.logger.info("Building list of data available on engines")
-        available_list = "%s%s" % (self.inputs['job_name'], "dppp")
-        mec.push(dict(filenames=ms_names))
-        mec.execute(
-            "build_available_list(\"%s\")" % (available_list,)
-        )
+#        self.logger.info("Building list of data available on engines")
+#        available_list = "%s%s" % (self.inputs['job_name'], "dppp")
+#        mec.push(dict(filenames=ms_names))
+#        mec.execute(
+#            "build_available_list(\"%s\")" % (available_list,)
+#        )
 
         tasks = []
         outnames = []
         for ms_name in ms_names:
-            outnames.append(ms_name + ".dppp")
+#            outnames.append(ms_name + ".dppp")
+#            outnames.append("/data/swinbank/L2009_13244/" + os.path.basename(ms_name) + ".dppp")
+            outnames.append(os.path.join(
+                self._input_or_default('working_directory'),
+                self.inputs['job_name'],
+                os.path.basename(ms_name) + ".dppp"
+            )
+
             log_location = "%s/%s/%s" % (
                 self.config.get('layout', 'log_directory'),
                 os.path.basename(ms_name),
@@ -81,11 +93,12 @@ class dppp(LOFARrecipe):
                     log_location=log_location
                 ),
                 pull="result",
-                depend=utilities.check_for_path,
-                dependargs=(ms_name, available_list)
+#                depend=utilities.check_for_path,
+#                dependargs=(ms_name, available_list)
             )
             self.logger.info("Scheduling processing of %s" % (ms_name,))
-            tasks.append(tc.run(task))
+            if not self.inputs['dry_run']:
+                tasks.append(tc.run(task))
         self.logger.info("Waiting for all DPPP tasks to complete")
         tc.barrier(tasks)
         for task in tasks:
@@ -96,10 +109,11 @@ class dppp(LOFARrecipe):
                 print res.failure
 
         # Save space on engines by clearing out old file lists
-        mec.execute("clear_available_list(\"%s\")" % (available_list,))
+#        mec.execute("clear_available_list(\"%s\")" % (available_list,))
 
         # Now set up a colmaker recipe to insert missing columns in the
         # processed data
+
         self.logger.info("Calling colmaker")
         inputs = LOFARinput(self.inputs)
         inputs['args'] = outnames

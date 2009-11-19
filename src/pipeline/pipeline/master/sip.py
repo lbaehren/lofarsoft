@@ -1,4 +1,4 @@
-import sys, logging
+import sys, datetime, logging
 from pipeline.support.lofarrecipe import LOFARrecipe
 from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
 import pipeline.support.utilities as utilities
@@ -9,7 +9,7 @@ class sip(LOFARrecipe):
     """
     def go(self):
         # Let's log to file before we get started
-        handler = logging.FileHandler('pipeline.log')
+        handler = logging.FileHandler('pipeline.log_%s_%s' % (self.inputs['job_name'], str(datetime.datetime.now())))
         formatter = logging.Formatter(
             "%(asctime)s - %(levelname)s - %(name)s:  %(message)s",
             "%Y-%m-%d %H:%M:%S"
