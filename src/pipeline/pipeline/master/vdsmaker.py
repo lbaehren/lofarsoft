@@ -8,7 +8,7 @@ from pipeline.support.lofarrecipe import LOFARrecipe
 import pipeline.support.utilities as utilities
 from pipeline.support.clusterlogger import clusterlogger
 
-def make_vds(infile, clusterdesc, outfile):
+def make_vds(infile, clusterdesc, outfile, executable):
     from pipeline.nodes.vdsmaker import makevds_node
     return makevds_node(loghost=loghost, logport=logport).run(
         infile,
@@ -77,7 +77,7 @@ class vdsmaker(LOFARrecipe):
                     "%s/%s.vds" % (self.inputs['directory'], os.path.basename(ms_name))
                 )
                 task = LOFARTask(
-                    "result = make_vds(ms_name, clusterdesc, vds_name, log_location,  executable)",
+                    "result = make_vds(ms_name, clusterdesc, vds_name, executable)",
                     push=dict(
                         ms_name=ms_name,
                         vds_name=vdsnames[-1],
