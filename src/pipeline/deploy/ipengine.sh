@@ -1,4 +1,4 @@
-export PYTHONPATH="/data/users/swinbank/app/lib/python2.5/site-packages:/app/usg/release/lib/python:/app/pyrap/lib"
+export PYTHONPATH="/data/users/swinbank/app/lib/python2.5/site-packages:/app/usg/release/lib/python:/app/pyrap/lib:/app/numpy/numpy-1.2.1/lib/python2.5/site-packages"
 export PATH="/data/users/swinbank/app/bin:/usr/local/bin:/usr/bin:/bin"
 export LD_LIBRARY_PATH="/data/users/swinbank/app/lib/:/app/pyrap/lib:/app/casacore/lib"
 CONTROLPATH=$1
