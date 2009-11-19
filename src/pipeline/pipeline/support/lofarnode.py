@@ -1,5 +1,6 @@
 import platform
 import logging, logging.handlers
+import os
 
 class LOFARnode(object):
     """
@@ -14,13 +15,14 @@ class LOFARnode(object):
         self.logger = logging.getLogger(
             'node.%s.%s' % (platform.node(), self.__class__.__name__)
         )
-
-        # Log messages are filtered on the server side: we have plenty of
-        # bandwidth, and it's conceptually simpler.
         self.logger.setLevel(logging.DEBUG)
         if loghost:
-            socketHandler = logging.handlers.SocketHandler(loghost, logport)
-            self.logger.addHandler(socketHandler)
+            self.mySocketHandler = logging.handlers.SocketHandler(loghost, logport)
+            self.logger.addHandler(self.mySocketHandler)
+
+    def __del__(self):
+        # Remove our log handler to avoid duplicate entries
+        self.logger.removeHandler(self.mySocketHandler)
 
     def run(self):
         # Override in subclass.
