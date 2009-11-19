@@ -45,6 +45,7 @@ class mwimager(LOFARrecipe):
         env.update({
             "PATH": self.config.get('mwimager', 'env_path'),
             "LD_LIBRARY_PATH": self.config.get('mwimager', 'env_ld_library_path')
+            "LOFARROOT": self.config.get('mwimager', 'env_lofarroot')
         })
         
         # For the overall MWimgager log
@@ -111,7 +112,7 @@ class mwimager(LOFARrecipe):
                 )
                 # Make sure the destination dir exists
                 try:
-                    os.makedirs(os.dirname(destination))
+                    os.makedirs(os.path.dirname(destination))
                 except OSError, failure:
                     if failure.errno != errno.EEXIST:
                         raise
