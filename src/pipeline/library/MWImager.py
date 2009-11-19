@@ -25,6 +25,7 @@
 """Script to run the mwimager"""
 
 from WSRTrecipe import WSRTrecipe
+from parset import Parset
 import sysconfig
 
 import os.path, sys
@@ -62,6 +63,12 @@ class MWImager(WSRTrecipe):
     def go(self):
         """Implementation of the WSRTrecipe.go() interface. This function does
         the actual work by calling the WSRTrecipe.cook_system() method."""
+
+        # Put the correct dataset into the parset-file
+        ps = Parset(self.inputs['parset-file'])
+        ps['dataset'] = self.inputs['observation'] + '.gds'
+        ps.writeToFile(self.inputs['parset-file'])
+        
         opts = []
         opts += [os.path.abspath(self.inputs['parset-file']) \
                  if self.inputs['parset-file'] is not None else '']
@@ -74,8 +81,11 @@ class MWImager(WSRTrecipe):
         opts += ['dry' if self.inputs['dryrun'] else '']
 
         self.print_message('mwimager ' + ' '.join(opts))
-        sts = self.cook_system('mwimager', opts)
-        return sts
+        if self.cook_system('mwimager', opts):
+            self.print_error('mwimager failed!')
+            return 1
+        
+        return 0
 
 
 ## Stand alone execution code ------------------------------------------

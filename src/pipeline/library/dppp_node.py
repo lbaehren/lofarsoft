@@ -5,13 +5,14 @@ import sys, os, time, logging, socket
 # Set the logging level of the root logger.
 logging.getLogger().setLevel(logging.DEBUG)
 
-logging.info('Running on node %s', socket.gethostname())
+hostname = socket.gethostname()
+logging.info('Running on node %s', hostname)
 
 # Add six empty arguments to handle missing arguments. 
-sys.argv.extend(6*[''])
+sys.argv.extend(7*[''])
 try:
     # The first four arguments are dummy.
-    (seqnr, msn, lroot, psn, wd, dry) = sys.argv[5:11]
+    (seqnr, msn, lroot, psn, wd, vdsdir, dry) = sys.argv[5:12]
 except ValueError:
     print 'usage:', os.path.basename(sys.argv[0]), 'dummy dummy dummy dummy', \
           'rank ms-part lofarroot parset-file wd dry'
@@ -23,6 +24,7 @@ logging.debug('msn   = %s', msn)
 logging.debug('lroot = %s', lroot)
 logging.debug('psn   = %s', psn)
 logging.debug('wd    = %s', wd)
+logging.debug('vdsdir= %s', vdsdir)
 logging.debug('dry   = %s', dry)
 
 # Get name of input MS from VDS file, until IDPPP can handle VDS files.
@@ -45,10 +47,8 @@ if msin == msout:
     logging.error("Input MS and output MS cannot be the same")
     sys.exit(1)
 
-# The VDS file will be created on a cross-mounted disk,
-# replacing '/data' with '/users'.
-vd = os.path.join(wd.replace('/data', '/users'), 'data')
-vds = vd + '/' + os.path.basename(msout) + '.vds'
+# Output VDS file; will be stored in directory 'vdsdir', using output MS name.
+vds = vdsdir + '/' + os.path.basename(msout) + '.vds'
 logging.info('Output VDS: %s', vds)
 
 # Create working dir if it doesn't exist and change to it.
@@ -60,8 +60,8 @@ wd = os.getcwd()
 logging.info('Current working directory: %s', wd)
 
 # Create the output directory for the VDS file if it doesn't exist yet.
-if not os.path.exists(vd):
-    os.makedirs(vd)
+if not os.path.exists(vdsdir):
+    os.makedirs(vdsdir)
 
 # Parset filename for the current run.
 parsetfile = 'CS1_IDPPP.%02d.parset' % int(seqnr)
@@ -83,7 +83,7 @@ if dry == 'dry':
     logging.info('Dry run: %s', cmd)
 else:
     logging.info('Start processing: %s', msn)
-    sts = os.system(cmd)
+    sts = os.system(cmd) / 256
     if sts:
         logging.error('CS1_IDPPP returned with error status %d', sts)
         sys.exit(sts)
@@ -96,9 +96,19 @@ if dry == 'dry':
     logging.info('Dry run: %s', cmd)
 else:
     logging.info('Creating VDS file %s', vds)
-    sts = os.system(cmd)
+    sts = os.system(cmd) / 256
     if sts:
         logging.error('makevds returned with an error status %d', sts)
         sys.exit(sts)
     else:
         logging.info('makevds finished')
+
+# Argh! And now for the really ugly part. We must patch the VDS-file,
+# to correct the key/value pair FileSys. This is REALLY NOT PORTABLE!
+ps = Parset(vds)
+ps['FileSys'] = hostname + ':' + '/data'
+ps.writeToFile(vds)
+
+
+# Note: Maybe I should replace each os.system() call with a call to popen(),
+# followed by waitpid() -- ref. Python 2.5 manual sec. 17.1.3.3

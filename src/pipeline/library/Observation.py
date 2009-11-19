@@ -35,7 +35,7 @@ class Observation(WSRTingredient):
     """Class containing meta-data of an observation"""
 
     def __init__(self, cluster_name, observation, directory = None,
-                 glob_pattern = ['*SB[0-9]*.MS']):
+                 glob_pattern = None):
         """
         Constructor.
           - cluster_name:   name of the cluster where the data resides
@@ -45,23 +45,28 @@ class Observation(WSRTingredient):
                             the data is stored (e.g. /lifs001/pipeline);
                             if None, use directory <mount-point>/<observation>
           - glob_pattern:   pattern used when matching MS-files;
-                            if None, use '*SB[0-9]*.MS'
+                            if None, use <observation>/SB[0-9]*.MS and
+                            <observation>_SB[0-9]*.MS.
         """
         WSRTingredient.__init__(self)
-        clusterdesc = sysconfig.clusterdesc_file(cluster_name)
-        self.observation = directory if directory else observation
-        self.ms_pattern = [os.path.join(self.observation, p) \
-                           for p in glob_pattern]
-        self.mount_points = Parset(clusterdesc).getStringVector('MountPoints')
+        self.mount_points = Parset(sysconfig.clusterdesc_file(cluster_name)).\
+                            getStringVector('MountPoints')
+        if glob_pattern is None:
+            glob_pattern = [os.path.join(observation, 'SB[0-9]*.MS'),
+                            observation + '_SB[0-9]*.MS']
+        if directory:
+            self.ms_pat = [os.path.join(directory, p) for p in glob_pattern]
+        else:
+            self.ms_pat = glob_pattern
 
     def ms_files(self):
         """
         Return a list of all the MS-files that comprise the current
-        observation. MS-files are searched in self.directory on all mounted
-        disks in the cluster.
+        observation. MS-files are searched on all mounted disks using
+        self.ms_pat as glob pattern.
         """
         dirs = [os.path.join(mp, pat) 
-                for mp in self.mount_points for pat in self.ms_pattern]
+                for mp in self.mount_points for pat in self.ms_pat]
         files = []
         for d in dirs:
             files.extend(glob.glob(d))
