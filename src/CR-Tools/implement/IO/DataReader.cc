@@ -620,49 +620,17 @@ namespace CR {  //  Namespace CR -- begin
   {
     DataReader::setBlocksize (blocksize);
     DataReader::setADC2Voltage (adc2voltage);
-    
-    /*
-      Check and (if required) adjust the shape of the fft2calfft conversion
-      factors array
-    */
-    try {
-      IPosition shape = FFT2CalFFT_p.shape();
-      if (uint(shape(0)) != fftLength_p) {
-	// report what we are about to do
-#ifdef DEBUGGING_MESSAGES
-	cerr << "[DataReader::setBlocksize] WARNING!"
-	     << " Need to re-adjust fft2calfft array and selected channels array to keep internals consistent."
-	     << " The previously assigned values will be lost!"
-	     << endl;
-#endif
-	// adjust the first axis of the array
-	shape(0) = fftLength_p;
-	// FIX: the selected # of channels is invalid when the number of FFT channels has changed.
-	// Reset to all channels selected to prevent a crash down in setFFT2calFFT.
-	// Note: the handling of # selected channels < # total channels is currently incorrect and needs attention...
-	// See also setFFT2calFFT.
-
-	// correct the channel selection array ...
-	Vector<bool> frequencySelection (shape(0),true);
-	setSelectedChannels(frequencySelection);
-	// End fix.
-	Matrix<DComplex> fft2calfftNew (shape,1.0);
-	setFFT2calFFT (fft2calfftNew);
-      }
-    } catch (std::string message) {
-      cerr << "[DataReader::setBlocksize] " << message << endl;
-    }
   }
-
+  
   //_____________________________________________________________________________
   //                                                                 setBlocksize
-
+  
   /*!
     \brief Set the blocksize, \f$ N_{\rm Blocksize} \f$
     
     \param blocksize   -- Blocksize, [samples]
     \param adc2voltage -- [sample,antenna] Weights to convert raw ADC samples to
-                          voltages
+           voltages
     \param fft2calfft  -- [channel,antenna]
   */
   void DataReader::setBlocksize (uint const &blocksize,
@@ -1137,11 +1105,7 @@ namespace CR {  //  Namespace CR -- begin
       }
     }
     else {
-      for (antenna=0; antenna<nofSelectedAntennas; antenna++) {
-	for (channel=0; channel<nofSelectedChannels; channel++) {
-	  data (channel,antenna) = in(channel,antenna);
-	}
-      }
+      data = in;
     }
 
   }
@@ -1441,23 +1405,41 @@ namespace CR {  //  Namespace CR -- begin
     }
   }
   
-  // ---------------------------------------------------------------- setFFT2calFFT
+  //_____________________________________________________________________________
+  //                                                                setFFT2calFFT
   
-  void DataReader::setFFT2calFFT (Matrix<DComplex> const &fft2calfft)
+  /*!
+    \param fft2calfft -- Weights to convert the output of the Fourier transform
+           on the voltages to calibrated spectra, accounting for the slope of
+	   the bandpass filter.
+    \return status -- Status of the operation; returns <tt>True</tt> in case
+            the conversion array was successfully stored, <tt>False</tt> 
+	    otherwise.
+  */
+  bool DataReader::setFFT2calFFT (Matrix<DComplex> const &fft2calfft)
   {
     bool status (true);
-    IPosition shape (fft2calfft.shape());  //  [channel,antenna]
+    IPosition shape (2);
     unsigned int nofChannels (fftLength_p);
-    unsigned int  nofAntennas         = DataReader::nofAntennas();
-    unsigned int  nofSelectedAntennas = DataReader::nofSelectedAntennas();
-    unsigned int  nofSelectedChannels = DataReader::nofSelectedChannels();
+    unsigned int nofAntennas         = DataReader::nofAntennas();
+    unsigned int nofSelectedAntennas = DataReader::nofSelectedAntennas();
+    unsigned int nofSelectedChannels = DataReader::nofSelectedChannels();
+    
+    /* Get the shape of the current conversion array */
+    if (haveFFT2CalFFT_p) {
+      shape = fft2calfft.shape();
+    } else {
+      shape = casa::IPosition (2,
+			       nofSelectedChannels,
+			       nofSelectedAntennas);
+    }
     
     /*
-      Check consistence between array with conversion factors and the array holding
-      the selected channels; of course the latter once cannot have more elements as
-      the first one - if this is the case though, we have to correct this.
-    */
-    
+     * Check consistence between array with conversion factors and the array
+     * holding the selected channels; of course the latter once cannot have more
+     * elements as the first one - if this is the case though, we have to correct
+     * this.
+     */
     if (uint(shape(0)) < nofSelectedChannels) {
       // report what we are about to to
       cerr << "[DataReader::setFFT2calFFT] WARNING!"
@@ -1522,27 +1504,32 @@ namespace CR {  //  Namespace CR -- begin
 #endif
     
     /*
-      If all the test we have been running up to this point hacve succeeded,
-      we are clear to go copy the provided input values to internal storage
-    */
+     * If all the test we have been running up to this point hacve succeeded,
+     * we are clear to go copy the provided input values to internal storage
+     */
     if (status) {
-      // adjust the size of the internal array
+      uint antenna(0);
+      uint channel(0);
+      /* Adjust the size of the internal array */
       FFT2CalFFT_p.resize (fftLength_p,nofAntennas);
       FFT2CalFFT_p = 1.0;
-      // NB. This loop cannot be right, as the dimension of selectedChannels_p can vary, 
-      // while looping over all channels and antennas... Causes segfault when not all channels are selected.
-      for (uint antenna(0); antenna<nofAntennas; antenna++) {
-	for (uint channel(0); channel<nofChannels; channel++) {
+      /* nof. antennas & nof. channels have been adjusted before */
+      for (antenna=0; antenna<nofAntennas; antenna++) {
+	for (channel=0; channel<nofChannels; channel++) {
 	  FFT2CalFFT_p (selectedChannels_p(channel),selectedAntennas_p(antenna))
 	    = fft2calfft(channel,antenna);
 	}
       }
+      /* Do the book-keeping */
+      haveFFT2CalFFT_p = true;
     }
+    
+    return status;
   }
-
+  
   //_____________________________________________________________________________
   //                                                             setHanningFilter
-
+  
   void DataReader::setHanningFilter (double const &alpha)
   {
     if (alpha == 0.0) {

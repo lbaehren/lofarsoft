@@ -472,14 +472,8 @@ namespace CR {  //  Namespace CR -- begin
   */
   Matrix<DComplex> fft2calfft ();
 
-  /*!
-    \brief Set the weights for conversion from raw to calibrated FFT
-
-    \param fft2calfft -- Weights to convert the output of the Fourier
-                         transform on the voltages to calibrated spectra,
-			 accounting for the slope of the bandpass filter.
-  */
-  void setFFT2calFFT (Matrix<DComplex> const &fft2calfft);
+  //! Set the weights for conversion from raw to calibrated FFT
+  bool setFFT2calFFT (Matrix<DComplex> const &fft2calfft);
 
   /*!
     \brief Get the record with the header information
