@@ -41,6 +41,8 @@ class sip(LOFARrecipe):
         if self.cook_recipe('mwimager', inputs, outputs):
             self.logger.warn("MWImager reports failure")
             return 1
+        # The SIP will return the names of the generated images
+        self.outputs['images'] = outputs['images']
 
         self.logger.info("Calling source extractor")
         inputs = LOFARinput(self.inputs)
