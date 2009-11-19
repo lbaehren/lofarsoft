@@ -3,13 +3,19 @@ from __future__ import with_statement
 from contextlib import closing
 from subprocess import check_call
 from os.path import dirname
+from ConfigParser import RawConfigParser
 import os, errno
+
+# Root directory for config file
+from pipeline import __path__ as config_path
 
 def make_vds(infile, clusterdesc, outfile, log_location):
     # Make VDS file for input MS in specifed location
     # The dev version of makevds appears to make more comprehensive VDS files
     # (including the FileName field) than the stable version.
-    executable = "/app/lofar/dev/bin/makevds"
+    self.config = RawConfigParser()
+    self.config.read("%s/pipeline.cfg" % (config_path[0],))
+    executable = config.get('VDS', 'makevds')
 
     try:
         # Make the log directory

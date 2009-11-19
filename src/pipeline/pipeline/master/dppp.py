@@ -35,6 +35,8 @@ class dppp(WSRTrecipe):
         )
 
     def go(self):
+        self.logger.info("Starting DPPP run")
+
         try:
             gvds = utilities.get_parset(self.inputs['gvds'])
         except:
@@ -67,6 +69,8 @@ class dppp(WSRTrecipe):
             self.logger.error("Unable to initialise cluster")
             raise utilities.ClusterError
 
+        self.logger.info("Cluster initialised")
+
         # We read the GVDS file to find the names of all the data files we're
         # going to process, then push this list out to the engines so they can
         # let us know which we have available
@@ -76,6 +80,7 @@ class dppp(WSRTrecipe):
         ]
 
         # Construct list of available files on engines
+        self.logger.info("Building list of data available on engines")
         available_list = "%s%s" % (self.inputs['job_name'], "dppp")
         mec.push(dict(ms_names=ms_names))
         mec.execute(
@@ -102,16 +107,20 @@ class dppp(WSRTrecipe):
                 depend=utilities.check_for_path,
                 dependargs=(ms_name, available_list)
             )
-#            tasks.append(tc.run(task))
-#        tc.barrier(tasks)
-#        for task in tasks:
-#            tc.get_task_result(task)
+            self.logger.info("Scheduling processing of %s" % (ms_name,))
+            tasks.append(tc.run(task))
+        self.logger.info("Waiting for all DPPP tasks to complete")
+        tc.barrier(tasks)
+        for task in tasks:
+            print tc.get_task_result(task)
+        raw_input()
 
         # Save space on engines by clearing out old file lists
         mec.execute("clear_available_list(\"%s\")" % (available_list,))
 
         # Now set up a vdsmaker recipe to build a GDS file describing the
         # processed data
+        self.logger.info("Calling vdsmaker")
         inputs = WSRTingredient()
         inputs['job_name'] = self.inputs['job_name']
         inputs['runtime_directory'] = self.inputs['runtime_directory']

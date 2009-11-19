@@ -1,5 +1,6 @@
 import sys, os, tempfile
 from subprocess import check_call
+from ConfigParser import RawConfigParser
 
 # Cusine core
 from cuisine.WSRTrecipe import WSRTrecipe
@@ -10,6 +11,9 @@ from IPython.kernel import client as IPclient
 # Local helpers
 import utilities
 
+# Root directory for config file
+from pipeline import __path__ as config_path
+
 def make_vds(infile, clusterdesc, outfile, log_location):
     from pipeline.nodes.vdsmaker import make_vds
     return make_vds(infile, clusterdesc, outfile, log_location)
@@ -17,6 +21,9 @@ def make_vds(infile, clusterdesc, outfile, log_location):
 class vdsmaker(WSRTrecipe):
     def __init__(self):
         super(vdsmaker, self).__init__()
+        self.config = RawConfigParser()
+        self.config.read("%s/pipeline.cfg" % (config_path[0],))
+
         self.optionparser.add_option(
             '-j', '--job-name', 
             dest="job_name",
@@ -50,7 +57,10 @@ class vdsmaker(WSRTrecipe):
             self.logger.error("Unable to initialise cluster")
             raise utilities.ClusterError
 
+        self.logger.info("Cluster initialised")
+
         # Build VDS files for each of the newly created MeasurementSets
+        self.logger.info("Building list of data available on engines")
         available_list = "%s%s" % (self.inputs['job_name'], "dppp-vds")
         mec.push(dict(ms_names=ms_names))
         mec.execute(
@@ -64,7 +74,6 @@ class vdsmaker(WSRTrecipe):
                 job_directory,
                 os.path.basename(ms_name)
             )
-#            vdsnames.append(tempfile.mkstemp(dir=job_directory)[1])
             vdsnames.append(
                 "%s/%s.vds" % (self.inputs['directory'], os.path.basename(ms_name))
             )
@@ -80,13 +89,16 @@ class vdsmaker(WSRTrecipe):
                 depend=utilities.check_for_path,
                 dependargs=(ms_name, available_list)
             )
+            self.logger.info("Scheduling processing of %s", ms_name")
             tasks.append(tc.run(task))
+        self.logger.info("Waiting for all makevds tasks to complete")
         tc.barrier(tasks)
         for task in tasks:
             tc.get_task_result(task)
 
         # Combine VDS files to produce GDS
-        executable = '/app/lofar/dev/bin/combinevds'
+        self.logger.info("Combining VDS files")
+        executable = self.config.get('VDS', 'combinevds')
         gvds_out   = "%s/%s" % (self.inputs['directory'], self.inputs['gds'])
         check_call([executable, gvds_out] + vdsnames)
 #        for file in vdsnames:

@@ -4,13 +4,19 @@ from contextlib import closing
 from subprocess import check_call
 from tempfile import mkstemp
 from os.path import dirname
+from ConfigParser import RawConfigParser
 import os, errno
 
 # External
 from cuisine.parset import Parset
 
+# Root directory for config file
+from pipeline import __path__ as config_path
+
 def run_dppp(infile, outfile, parset, log_location):
-    executable = "/app/lofar/stable/bin/CS1_IDPPP"
+    config = RawConfigParser()
+    config.read("%s/pipeline.cfg" % (config_path[0],))
+    executable = config.get('DPPP', 'executable')
 
     # We need to patch the parset with the correct input/output MS names.
     temp_parset_filename = mkstemp()[1]
