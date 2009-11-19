@@ -42,7 +42,7 @@ def run_dppp(infile, outfile, parset, log_location):
         return result
     except ExecutableMissing, e:
         with closing(open(log_location, 'w')) as log:
-            log.write("%s not found" % (e.args[0])
+            log.write("%s not found" % (e.args[0]))
         raise
     except CalledProcessError, e:
         # For CalledProcessError isn't properly propagated by IPython

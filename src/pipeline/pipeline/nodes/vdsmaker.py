@@ -33,7 +33,7 @@ def make_vds(infile, clusterdesc, outfile, log_location):
         return result
     except ExecutableMissing, e:
         with closing(open(log_location, 'w')) as log:
-            log.write("%s not found" % (e.args[0])
+            log.write("%s not found" % (e.args[0]))
         raise
 
 

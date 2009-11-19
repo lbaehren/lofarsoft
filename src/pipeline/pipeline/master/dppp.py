@@ -110,6 +110,7 @@ class dppp(LOFARrecipe):
             res = tc.get_task_result(task)
             if res.failure:
                 self.logger.warn("Task %s failed" % (task))
+                self.logger.warn(res)
                 failure = True
         if failure:
             return 1
