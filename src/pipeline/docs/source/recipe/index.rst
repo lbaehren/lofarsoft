@@ -18,6 +18,8 @@ In the "original" :mod:`Cuisine` framework, and in the extended LOFAR pipeline
 version, the fundamental job of the recipe author is to extend the base class
 by overriding the :meth:`go` method.
 
+Relevant Cuisine Classes
+------------------------
 
 .. class:: WSRTrecipe()
 
@@ -101,8 +103,8 @@ by overriding the :meth:`go` method.
 
         The :attr:`~WSRTrecipe.optionparser` is used for validating all inputs
         to the recipe. Therefore, any additional inputs required by derived
-        recipes should be declared in their own ``__init__()`` methods. An
-        example is shown below.
+        recipes should be declared in their own ``__init__()`` methods. See
+        the :ref:`recipe-example` below.
 
 
 .. class:: WSRTingredient()
@@ -110,6 +112,9 @@ by overriding the :meth:`go` method.
     :class:`WSRTingredient` supports all the features of a standard Python
     :class:`dict`.
 
+
+LOFAR Extensions
+----------------
 
 .. class:: LOFARrecipe()
 
@@ -160,7 +165,8 @@ by overriding the :meth:`go` method.
 
         :meth:`LOFARrecipe.go` performs some initialisation of the recipe. It
         should therefore not simply be ignored by derived classes, but called
-        at the start of their own ``go()`` methods. See the example below.
+        at the start of their own ``go()`` methods. See the
+        :ref:`recipe-example` below.
 
         :meth:`~LOFARrecipe.go` ensures that a job name is defined, that a
         configuration file is available (and defined in
@@ -191,6 +197,8 @@ by overriding the :meth:`go` method.
     It ensures that the ingredient always provides the required keys,
     ``job_name``, ``runtime_directory``, ``config`` and ``dry_run``.
 
+
+.. _recipe-example:
 
 Example
 -------
