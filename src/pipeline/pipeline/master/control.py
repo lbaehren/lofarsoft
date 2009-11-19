@@ -12,7 +12,7 @@ class PipelineRecipeFailed(PipelineException):
 class PipelineReceipeNotFound(PipelineException):
     pass
 
-class pipeline(LOFARrecipe):
+class control(LOFARrecipe):
     """
     The LOFAR Standard Imaging Pipeline.
     """
@@ -50,7 +50,7 @@ class pipeline(LOFARrecipe):
         raise NotImplementedError
 
     def go(self):
-        super(pipeline, self).go()
+        super(control, self).go()
         self._setup()
         self.logger.info(
             "Standard Imaging Pipeline (%s) starting." %
@@ -66,4 +66,4 @@ class pipeline(LOFARrecipe):
         return 0
 
 if __name__ == '__main__':
-    sys.exit(pipeline().main())
+    sys.exit(control().main())
