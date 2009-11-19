@@ -3,7 +3,8 @@ from pipeline.support.lofarrecipe import LOFARrecipe
 from pipeline.support.ipython import LOFARTask
 from pipeline.support.clusterdesc import ClusterDesc
 import pipeline.support.utilities as utilities
-import os, os.path, glob, subprocess, sys, numpy, pyfits, shutil, errno, re, logging
+import os, os.path, glob, subprocess, sys, numpy
+import pyfits, shutil, errno, re, logging, imp
 
 class collector(LOFARrecipe):
     """
@@ -82,7 +83,7 @@ class collector(LOFARrecipe):
         image_names = glob.glob("%s/%s" % (results_dir, self.inputs['image_re']))
         self.logger.info("Quality check")
         try:
-            qcheck = __import__(self.inputs['qcheck'])
+            qcheck = imp.load_source('qcheck', self.inputs['qcheck'])
             for filename in image_names:
                 self.logger.debug(filename)
                 subband = re.search('(SB\d+)', os.path.basename(filename)).group()
@@ -96,7 +97,7 @@ class collector(LOFARrecipe):
                 )
                 try:
                     qcheck.run(
-                        filename, logfile=stats_path, plot=figure+path,
+                        filename, logfile=stats_path, plot=figure_path,
                         logger=logging.getLogger(self.logger.name + ".qcheck")
                     )
                 except Exception, e:
@@ -104,7 +105,7 @@ class collector(LOFARrecipe):
                     self.logger.warn(str(e))
         except ImportError:
             self.logger.warn(
-                "Quality check module (%s) not found; not checking image quality"
+                "Quality check module (%s) not found; not checking image quality" % (self.inputs['qcheck'])
             )
 
         self.logger.info("Generating FITS files")
