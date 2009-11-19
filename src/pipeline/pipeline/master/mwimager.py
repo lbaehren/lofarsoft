@@ -44,6 +44,11 @@ class mwimager(LOFARrecipe):
             dest="log",
             help="Log file"
         )
+        self.optionparser.add_option(
+            '--askapsoft-path',
+            dest="askapsoft_path",
+            help="Path to cimager.sh"
+        )
 
     def go(self):
         self.logger.info("Starting MWImager run")
@@ -72,7 +77,10 @@ class mwimager(LOFARrecipe):
             self.config.get('layout', 'parset_directory')
         )
 
+        # Initscript for basic LOFAR utilities
         env = utilities.read_initscript(self.inputs['initscript'])
+        # Also add the path for cimager.sh
+        env['PATH'] = "%s:%s" % (self.inputs['askapsoft_path'], env['PATH'])
         
         # For the overall MWimgager log
         log_location = "%s/%s" % (
