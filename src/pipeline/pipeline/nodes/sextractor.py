@@ -1,5 +1,6 @@
 # Python standard library
 from __future__ import with_statement
+from contextlib import closing
 from subprocess import check_call
 from tempfile import mkdtemp
 from ConfigParser import SafeConfigParser as ConfigParser
@@ -11,8 +12,9 @@ from pipeline import __path__ as config_path
 
 from tkp_lib.accessors import FitsFile
 from tkp_lib.image import ImageData
+from tkp_lib.database import connection
 
-def sextract(filename):
+def sextract(filename, dataset):
     config = ConfigParser()
     config.read("%s/pipeline.cfg" % (config_path[0],))
     image2fits = config.get('sextractor', 'image2fits')
@@ -28,12 +30,13 @@ def sextract(filename):
         cwd=os.path.dirname(filename)
     )
 
-    image = ImageData(FitsFile(fitsfile))
+    image = ImageData(FitsFile(fitsfile), dataset=dataset)
     sr = image.sextract()
-#    sr.savetoDB()
+    with closing(connection()) as con:
+        sr.savetoDB(con)
     
     rmtree(tempdir)
-    return (len(sr))
+    return len(sr)
 
 if __name__ == "__main__":
     from sys import argv

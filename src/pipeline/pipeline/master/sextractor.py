@@ -6,10 +6,12 @@ from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
 from pipeline.support.ipython import LOFARTask
 import pipeline.support.utilities as utilities
 
-def sextract(image):
+from tkp_lib.dataset import DataSet
+
+def sextract(image, dataset):
     # Run on engine to source extract
     from pipeline.nodes.sextractor import sextract
-    return sextract(image)
+    return sextract(image, dataset)
 
 class sextractor(LOFARrecipe):
     def __init__(self):
@@ -51,11 +53,15 @@ class sextractor(LOFARrecipe):
         )
 
         tasks = []
+
+        dataset = DataSet(self.inputs['job_name'])
+
         for image_name in image_names:
             task = LOFARTask(
-                "result = sextract(image_name)",
+                "result = sextract(image_name, dataset)",
                 push=dict(
                     image_name=image_name,
+                    dataset=dataset,
                 ),
                 pull="result",
                 depend=utilities.check_for_path,
@@ -69,6 +75,7 @@ class sextractor(LOFARrecipe):
             ##### Print failing tasks?
             ##### Abort if all tasks failed?
             res = tc.get_task_result(task)
+            self.logger.info("Found %d sources" % (res['result']))
             if res.failure:
                 print res.failure
 
