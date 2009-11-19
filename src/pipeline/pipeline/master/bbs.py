@@ -118,7 +118,7 @@ class bbs(LOFARrecipe):
             self.logger.debug("Executing: %s" % " ".join(bbs_cmd))
             if not self.inputs['dry_run']:
                 with closing(open(log_location, 'w')) as log:
-                    result = check_call(
+                    check_call(
                         bbs_cmd,
                         env=env,
                         stdout=log,
