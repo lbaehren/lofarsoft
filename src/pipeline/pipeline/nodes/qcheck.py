@@ -36,10 +36,8 @@ class qcheck_node(LOFARnode):
             for plugin in pluginlist:
                 try:
                     qcheck = imp.load_source('qcheck', plugin)
-                    print qcheck
                 except ImportError:
                     self.logger.warn("Quality check module (%s) not found" % (plugin))
-                    break
                 try:
                     qcheck.run(infile, outputdir=outputdir, loggers=loggers)
                 except Exception, e:
