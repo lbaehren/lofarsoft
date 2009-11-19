@@ -1,5 +1,5 @@
 import sys
-from pyraprunner import pyraprunner
+from pipeline.support.pyraprunner import pyraprunner
 
 class excluder(pyraprunner):
     @staticmethod

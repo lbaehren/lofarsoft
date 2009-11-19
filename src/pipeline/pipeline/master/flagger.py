@@ -1,5 +1,5 @@
 import sys, os
-from pyraprunner import pyraprunner
+from pipeline.support.pyraprunner import pyraprunner
 from pipeline.support.sourcelist import SourceList
 
 class flagger(pyraprunner):
