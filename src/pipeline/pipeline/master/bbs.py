@@ -1,5 +1,5 @@
 from __future__ import with_statement
-import sys, os, logging
+import sys, os, logging, tempfile
 from subprocess import check_call, CalledProcessError
 from contextlib import closing
 
@@ -109,6 +109,10 @@ class bbs(LOFARrecipe):
         if self.logger.level <= logging.INFO and self.logger.level != logging.NOTSET:
             bbs_cmd.insert(1, '-v')
 
+        # Use a temporary directory to grab all the logs.
+        working_dir = tempfile.mkdtemp()
+        self.logger.debug("Logs dumped to %s" % (working_dir))
+
         try:
             self.logger.info("Running BBS")
             self.logger.info("Executing: %s" % " ".join(bbs_cmd))
@@ -117,7 +121,8 @@ class bbs(LOFARrecipe):
                     bbs_cmd,
                     env=env,
                     stdout=log,
-                    stderr=log
+                    stderr=log,
+                    cwd=working_dir
                     )
             return result
         except CalledProcessError:
