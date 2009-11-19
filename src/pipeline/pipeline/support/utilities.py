@@ -84,18 +84,22 @@ def locked_ms(ms_name):
 
 @contextmanager
 def log_time(logger):
-    start_time = time.time()
-    try:
-        yield
-    finally:
-        resource_usage = [
+    def get_rusage():
+        return [
             x + y for x, y in zip(
                 resource.getrusage(resource.RUSAGE_CHILDREN),
                 resource.getrusage(resource.RUSAGE_SELF)
             )
         ]
+
+    start_time = time.time()
+    start_rusage = get_rusage()
+    try:
+        yield
+    finally:
+        total_rusage = [x - y for x, y in zip(get_rusage(), start_rusage)]
         logger.info(
             "Node total time %.4fs; user time: %.4fs; system time: %.4fs" % (
-                time.time() - start_time, resource_usage[0], resource_usage[1]
+                time.time() - start_time, total_rusage[0], total_rusage[1]
             )
         )
