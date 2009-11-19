@@ -33,6 +33,8 @@ class mwimager(LOFARrecipe):
         self.logger.info("Starting MWImager run")
         super(mwimager, self).go()
 
+        self.outputs["images"] = []
+
         # Patch GVDS filename into parset
         self.logger.debug("Setting up MWImager configuration")
         temp_parset_filename = utilities.patch_parset(
@@ -85,21 +87,34 @@ class mwimager(LOFARrecipe):
             result = 1
         finally:
             pass
-#            os.unlink(temp_parset_filename)
+            os.unlink(temp_parset_filename)
 
-        # Now sort the log files into
-        # appropriate places
+        # Now parse the log files to:
+        # 1: find the name of the images that have been written
+        # 2: save the logs in appropriate places
         # This is ugly!
-        self.logger.info("Moving logfiles")
+        self.logger.info("Parsing logfiles")
         for log_file in glob.glob("%s%s" % (log_root, "*")):
             self.logger.debug("Processing %s" % (log_file))
-            ms_name = ""
+            ms_name, image_name = "", ""
             with closing(open(log_file)) as file:
+                for line in file.xreadlines():
+                    try:
+                        image_name = line.split("Setting up new empty image ")[1].rstrip()
+                        break
+                    except IndexError:
+                        pass
+                file.seek(0)
                 for line in file.xreadlines():
                     split_line = line.split('=')
                     if split_line[0] == "Cimager.dataset":
                         ms_name = os.path.basename(split_line[1].rstrip())
                         break
+            if not image_name:
+                self.logger.info("Couldn't identify image for %s "% (log_file))
+            else:
+                self.logger.debug("Found image: %s" % (image_name))
+                self.outputs["images"].append(image_name)
             if not ms_name:
                 self.logger.info("Couldn't identify file for %s" % (log_file))
             else:
