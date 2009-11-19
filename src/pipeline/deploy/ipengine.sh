@@ -1,5 +1,4 @@
 export PYTHONPATH="/home/swinbank/apps/lib/python2.5/site-packages/:/opt/LofIm/daily/pyrap/lib:/opt/LofIm/daily/lofar/lib/python2.5/site-packages:/opt/pythonlibs/lib/python/site-packages"
-export PATH="/home/swinbank/apps/bin:/usr/local/bin:/usr/bin:/bin"
 export LD_LIBRARY_PATH="/home/swinbank/apps/lib:/opt/LofIm/daily/pyrap/lib:/opt/LofIm/daily/casacore/lib:/opt/LofIm/daily/lofar/lib:/opt/wcslib/lib/:/opt/hdf5/lib"
 CONTROLPATH=$1
 PIDPATH=$CONTROLPATH/engines/`hostname`
