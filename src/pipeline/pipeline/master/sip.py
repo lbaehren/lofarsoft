@@ -1,4 +1,4 @@
-import sys, datetime, logging
+import sys, datetime, logging, os.path
 from pipeline.support.lofarrecipe import LOFARrecipe
 from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
 import pipeline.support.utilities as utilities
