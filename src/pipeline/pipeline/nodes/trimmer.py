@@ -6,7 +6,6 @@ from pyrap.tables import table
 
 def trim_ms(input, output, start_seconds, end_seconds):
     # Remove data from the start and/or end of a MeasurementSet.
-    # NB if output MS exists, it will be clobbered.
     copy_columns = ",".join([
         'UVW', 'FLAG', 'FLAG_CATEGORY', 'WEIGHT', 'SIGMA', 'ANTENNA1',
         'ANTENNA2', 'ARRAY_ID', 'DATA_DESC_ID', 'EXPOSURE', 'FEED1', 'FEED2',

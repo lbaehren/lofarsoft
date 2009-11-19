@@ -45,9 +45,7 @@ class dppp(LOFARrecipe):
         tc, mec = self._get_cluster()
         mec.push_function(
             dict(
-                run_dppp=run_dppp,
-#                build_available_list=utilities.build_available_list,
-#                clear_available_list=utilities.clear_available_list
+                run_dppp=run_dppp
             )
         )
         self.logger.info("Pushed functions to cluster")
@@ -60,19 +58,10 @@ class dppp(LOFARrecipe):
             for part_no in xrange(int(gvds["NParts"]))
         ]
 
-        # Construct list of available files on engines
-#        self.logger.info("Building list of data available on engines")
-#        available_list = "%s%s" % (self.inputs['job_name'], "dppp")
-#        mec.push(dict(filenames=ms_names))
-#        mec.execute(
-#            "build_available_list(\"%s\")" % (available_list,)
-#        )
 
         tasks = []
         outnames = []
         for ms_name in ms_names:
-#            outnames.append(ms_name + ".dppp")
-#            outnames.append("/data/swinbank/L2009_13244/" + os.path.basename(ms_name) + ".dppp")
             outnames.append(
                 os.path.join(
                     self._input_or_default('working_directory'),
@@ -94,9 +83,7 @@ class dppp(LOFARrecipe):
                     parset=self.inputs['parset'],
                     log_location=log_location
                 ),
-                pull="result",
-#                depend=utilities.check_for_path,
-#                dependargs=(ms_name, available_list)
+                pull="result"
             )
             self.logger.info("Scheduling processing of %s" % (ms_name,))
             if not self.inputs['dry_run']:
@@ -115,8 +102,17 @@ class dppp(LOFARrecipe):
         if failure:
             return 1
 
-        # Save space on engines by clearing out old file lists
-#        mec.execute("clear_available_list(\"%s\")" % (available_list,))
+        # Drop known-bad stations
+        self.logger.info("Calling excluder")
+        inputs = LOFARinput(self.inputs)
+        inputs['station'] = "DE001LBA"
+        inputs['suffix'] = ".excluded"
+        inputs['args'] = outnames
+        outputs = LOFARoutput()
+        if self.cook_recipe('excluder', inputs, outputs):
+            self.logger.warn("excluder reports failure")
+            return 1
+        excluded_outnames = outputs['data']
 
         # Trim off any bad section of the data
         self.logger.info("Calling trimmer")
@@ -124,34 +120,22 @@ class dppp(LOFARrecipe):
         inputs['start_seconds'] = 300.0
         inputs['end_seconds'] = 300.0
         inputs['suffix'] = ".trimmed"
-        inputs['args'] = outnames
+        inputs['args'] = excluded_outnames
         outputs = LOFARoutput()
         if self.cook_recipe('trimmer', inputs, outputs):
             self.logger.warn("trimmer reports failure")
             return 1
         trimmed_outnames = outputs['data']
 
-        # Drop known-bad stations
-        self.logger.info("Calling excluder")
-        inputs = LOFARinput(self.inputs)
-        inputs['station'] = "DE001LBA"
-        inputs['suffix'] = ".excluded"
-        inputs['args'] = trimmed_outnames
-        outputs = LOFARoutput()
-        if self.cook_recipe('excluder', inputs, outputs):
-            self.logger.warn("excluder reports failure")
-            return 1
-        excluded_outnames = outputs['data']
-
         # Now set up a colmaker recipe to insert missing columns in the
         # processed data
-        self.logger.info("Calling colmaker")
-        inputs = LOFARinput(self.inputs)
-        inputs['args'] = excluded_outnames
-        outputs = LOFARoutput()
-        if self.cook_recipe('colmaker', inputs, outputs):
-            self.logger.warn("colmaker reports failure")
-            return 1
+#        self.logger.info("Calling colmaker")
+#        inputs = LOFARinput(self.inputs)
+#        inputs['args'] = trimmed_outnames
+#        outputs = LOFARoutput()
+#        if self.cook_recipe('colmaker', inputs, outputs):
+#            self.logger.warn("colmaker reports failure")
+#            return 1
 
         # Now set up a vdsmaker recipe to build a GDS file describing the
         # processed data

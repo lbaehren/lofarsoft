@@ -3,7 +3,7 @@ from pyraprunner import pyraprunner
 
 def remote_function(input, output, station):
     from pipeline.nodes.excluder import exclude_stations
-    return exclude_station(input, output, station)
+    return exclude_stations(input, output, station)
 
 class excluder(pyraprunner):
     def __init__(self):
