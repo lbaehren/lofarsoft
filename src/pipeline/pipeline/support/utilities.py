@@ -2,7 +2,7 @@ from __future__ import with_statement
 from contextlib import closing, contextmanager
 from cuisine.parset import Parset
 from tempfile import mkstemp
-import os, errno, shutil, subprocess
+import os, errno, shutil, subprocess, time, resource
 
 class ClusterError(Exception):
     pass
@@ -81,3 +81,16 @@ def locked_ms(ms_name):
         os.close(my_fd)
     finally:
         os.unlink(lock_name)
+
+@contextmanager
+def log_time(logger):
+    start_time = time.time()
+    try:
+        yield
+    finally:
+        resource_usage = resource.getrusage(resource.RUSAGE_CHILDREN)
+        logger.warn(
+            "Node total time %.4fs; user time: %.4fs; system time: %.4fs" % (
+                time.time() - start_time, resource_usage[0], resource_usage[1]
+            )
+        )
