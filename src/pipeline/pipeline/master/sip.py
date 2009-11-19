@@ -31,6 +31,7 @@ class sip(LOFARrecipe):
         self.logger.addHandler(handler)
 
     def run_task(self, configblock, datafiles=[]):
+        self.logger.info("Running task: %s" % (configblock,))
         recipe = self.config.get(configblock, "recipe")
         inputs = LOFARinput(self.inputs)
         inputs['args'] = datafiles
@@ -57,7 +58,8 @@ class sip(LOFARrecipe):
             datafiles = self.run_task("bbs", datafiles)
             datafiles = self.run_task("local_flag", datafiles)
             self.outputs['images'] = self.run_task("mwimager", datafiles)
-            self.run_task("collector")
+            self.outputs['average'] = self.run_task("collector")
+            self.run_task("sourcefinder", self.outputs['average'])
         except SIPException, message:
             self.logger.error(message)
             return 1
