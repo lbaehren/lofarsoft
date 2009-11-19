@@ -66,5 +66,3 @@ def read_initscript(filename, shell="/bin/sh"):
     )
     so, se = p.communicate()
     return dict([x.split('=', 1) for x in so.strip().split('\n')])
-
-

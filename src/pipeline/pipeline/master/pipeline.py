@@ -3,16 +3,16 @@ from pipeline.support.lofarrecipe import LOFARrecipe
 from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
 import pipeline.support.utilities as utilities
 
-class SIPException(Exception):
+class PipelineException(Exception):
     pass
 
-class SIPRecipeFailed(SIPException):
+class PipelineRecipeFailed(PipelineException):
     pass
 
-class SIPReceipeNotFound(SIPException):
+class PipelineReceipeNotFound(PipelineException):
     pass
 
-class sip(LOFARrecipe):
+class pipeline(LOFARrecipe):
     """
     The LOFAR Standard Imaging Pipeline.
     """
@@ -42,29 +42,28 @@ class sip(LOFARrecipe):
             self.logger.warn(
                 "%s reports failure (using %s recipe)" % (configblock, recipe)
             )
-            raise SIPRecipeFailed("%s failed", configblock)
+            raise PipelineRecipeFailed("%s failed", configblock)
         return outputs['data']
 
+    def pipeline_logic(self):
+        # Define pipeline logic here in subclasses
+        raise NotImplementedError
+
     def go(self):
-        super(sip, self).go()
+        super(pipeline, self).go()
         self._setup()
-        self.logger.info("Standard Imaging Pipeline starting.")
+        self.logger.info(
+            "Standard Imaging Pipeline (%s) starting." %
+            (self.name,)
+        )
 
         try:
-            datafiles = self.run_task("vdsreader")
-            datafiles = self.run_task("dppp", datafiles)
-            datafiles = self.run_task("exclude_DE001LBA", datafiles)
-            datafiles = self.run_task("trim_300", datafiles)
-            datafiles = self.run_task("bbs", datafiles)
-            datafiles = self.run_task("local_flag", datafiles)
-            self.outputs['images'] = self.run_task("mwimager", datafiles)
-            self.outputs['average'] = self.run_task("collector")
-            self.run_task("sourcefinder", self.outputs['average'])
-        except SIPException, message:
+            self.pipeline_logic()
+        except PipelineException, message:
             self.logger.error(message)
             return 1
 
         return 0
 
 if __name__ == '__main__':
-    sys.exit(sip().main())
+    sys.exit(pipeline().main())
