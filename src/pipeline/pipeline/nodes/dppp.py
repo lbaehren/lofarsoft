@@ -31,7 +31,6 @@ class dppp_node(LOFARnode):
                 if not os.access(executable, os.X_OK):
                     raise ExecutableMissing(executable)
                 with closing(open(log_location, 'w')) as log:
-                    raise
                     # What is the '1' for? Required by DP3...
                     cmd = [executable, temp_parset_filename, '1']
                     self.logger.debug("Running: %s" % (' '.join(cmd),))
