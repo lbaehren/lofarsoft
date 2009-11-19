@@ -47,6 +47,15 @@ a summary of the capabilities of the system, to the `Notes on IPython
 <http://www.lofar.org/operations/lib/exe/fetch.php?media=software:tkp_notes_on_ipython.pdf>`_
 document on the `LOFAR wiki <http://www.lofar.org/operations/>`_.
 
+A slight enhancement to the standard 0.9 IPython release is included with the
+pipeline system. We subclass :class:`IPython.kernel.task.StringTask` to create
+:class:`pipeline.support.LOFARTask`. This adds the ``dependargs`` named
+argument to the standard :class:`~IPython.kernel.task.StringTask`, which, in
+turn, is fed to the tasks's :meth:`depend` method. This makes the dependency
+system significantly more useful. See, for example, the :ref:`dppp-recipe`
+recipe for an example of its use.
+
+
 .. _distproc-blurb:
 
 distproc

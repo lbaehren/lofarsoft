@@ -1,3 +1,5 @@
+.. _dppp-recipe:
+
 ====
 DPPP
 ====
