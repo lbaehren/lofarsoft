@@ -22,9 +22,11 @@
 #
 #  $Id$
 
-from WSRTrecipe import *
+from WSRTrecipe import WSRTrecipe
 
-class mwimager(WSRTrecipe):
+class MWimager(WSRTrecipe):
+    """Class wrapper around the mwimager script that is used to start the
+    distributed Master-Worker imager."""
     def __init__(self):
         WSRTrecipe.__init__(self)
         self.inputs['parset-file'] = 'mwimager.parset'
@@ -36,13 +38,16 @@ class mwimager(WSRTrecipe):
 
     ## Code to generate results ----------------------------------------
     def go(self):
+        """Implementation of the WSRTrecipe.go() interface. This function does
+        the actual work by calling the WSRTrecipe.cook_system() method."""
         opts = []
         for k in ['parset-file', 'clusterdesc', 'workingdir', 'logfile']:
             if self.inputs[k] is None: 
                 opts.append('')
             else: 
                 opts.append(self.inputs[k])
-        if self.inputs['dryrun']: opts.append('dry')
+        if self.inputs['dryrun']:
+            opts.append('dry')
         sts = self.cook_system('mwimager', opts)
         print "mwimager returned with status:", sts
         return sts
@@ -50,5 +55,5 @@ class mwimager(WSRTrecipe):
 
 ## Stand alone execution code ------------------------------------------
 if __name__ == '__main__':
-    standalone = mwimager()
-    standalone.main()
+    __standalone__ = MWimager()
+    __standalone__.main()
