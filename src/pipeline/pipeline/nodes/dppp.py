@@ -19,7 +19,7 @@ def run_dppp(infile, outfile, parset):
 
     try:
         # What is the '1' for? Required by DP3...
-        check_call([executable, temp_parset_filename, '1'])
+        return check_call([executable, temp_parset_filename, '1'])
     finally:
         unlink(temp_parset_filename)
 
