@@ -32,11 +32,20 @@ class LOFARrecipe(WSRTrecipe):
             help="Dry run",
             action="store_true"
         )
+        self.optionparser.add_option(
+            '--start-time',
+            dest="start_time",
+            help="[Expert use] Pipeline start time"
+        )
 
     def go(self):
         # Every recipe needs a job identifier
         if not self.inputs["job_name"]:
             raise PipelineException("Job undefined")
+
+        if not self.inputs["start_time"]:
+            import datetime
+            self.inputs["start_time"] = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
 
         # If a config file hasn't been specified, use the default
         if not self.inputs["config"]:
@@ -44,9 +53,12 @@ class LOFARrecipe(WSRTrecipe):
             self.inputs["config"] = os.path.join(config_path[0], 'pipeline.cfg')
             self.logger.debug("Using default configuration file")
 
+        self.logger.debug("Pipeline start time: %s" % self.inputs['start_time'])
+
         self.config = ConfigParser({
             "job_name": self.inputs["job_name"],
-            "runtime_directory": self.inputs["runtime_directory"]
+            "runtime_directory": self.inputs["runtime_directory"],
+            "start_time": self.inputs["start_time"]
         })
         self.config.read(self.inputs["config"])
 

@@ -72,19 +72,7 @@ class collector(LOFARrecipe):
                             results_dir
                     ]
                 self.logger.info(exec_string)
-                subprocess.check_call(
-                    [
-                        "ssh",
-                        node,
-                        "--",
-                        "mv",
-                        "%s/%s/%s" % (
-                            self.inputs['working_directory'],
-                            self.inputs['job_name'],
-                            self.inputs['image_re']
-                        ),
-                        results_dir
-                    ])
+                subprocess.check_call(exec_string)
             except subprocess.CalledProcessError:
                 self.logger.warn("No images moved from %s" % (node))
         

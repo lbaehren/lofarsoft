@@ -1,4 +1,4 @@
-import sys, datetime, logging, os.path
+import sys, datetime, logging, os
 from pipeline.support.lofarrecipe import LOFARrecipe
 from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
 import pipeline.support.utilities as utilities
@@ -18,9 +18,9 @@ class sip(LOFARrecipe):
     """
     def _setup(self):
         # Set up logging to file
-        handler = logging.FileHandler('%s/pipeline.log.%s' % (
-                self.config.get("layout", "log_directory"),
-                str(datetime.datetime.now())
+        os.makedirs(self.config.get("layout", "log_directory"))
+        handler = logging.FileHandler('%s/pipeline.log' % (
+                self.config.get("layout", "log_directory")
             )
         )
         formatter = logging.Formatter(
