@@ -25,8 +25,8 @@ logging.debug('psn   = %s', psn)
 logging.debug('wd    = %s', wd)
 logging.debug('dry   = %s', dry)
 
-# Input MS; strip off '.vds' until IDPPP can handle VDS files.
-msin = os.path.splitext(msn)[0]
+# Get name of input MS from VDS file, until IDPPP can handle VDS files.
+msin = Parset(msn).getString('Name')
 logging.info('Input MS: %s', msin)
 
 if msin == "":
@@ -45,6 +45,12 @@ if msin == msout:
     logging.error("Input MS and output MS cannot be the same")
     sys.exit(1)
 
+# The VDS file will be created on a cross-mounted disk,
+# replacing '/data' with '/users'.
+vd = os.path.join(wd.replace('/data', '/users'), 'data')
+vds = vd + '/' + os.path.basename(msout) + '.vds'
+logging.info('Output VDS: %s', vds)
+
 # Create working dir if it doesn't exist and change to it.
 if wd:
     if not os.path.exists(wd):
@@ -52,6 +58,10 @@ if wd:
     os.chdir(wd)
 wd = os.getcwd()
 logging.info('Current working directory: %s', wd)
+
+# Create the output directory for the VDS file if it doesn't exist yet.
+if not os.path.exists(vd):
+    os.makedirs(vd)
 
 # Parset filename for the current run.
 parsetfile = 'CS1_IDPPP.%02d.parset' % int(seqnr)
@@ -62,20 +72,33 @@ logging.info('Removed %s, and %s' % (msout, parsetfile))
 
 # Create a parset file for the current run
 logging.info("Creating parset-file")
-try:
-    parset  = Parset(psn)
-    parset['msin'] = msin
-    parset['msout'] = msout
-    parset.writeToFile(parsetfile)
-except IOError, e:
-    logging.error('Failed to open parset-file: %s',  e)
-    sys.exit(1)
+parset  = Parset(psn)
+parset['msin'] = msin
+parset['msout'] = msout
+parset.writeToFile(parsetfile)
 
 # Start IDPPP
-cmd = os.path.join(lroot, 'bin/CS1_IDPPP') + ' ' + parsetfile + ' 0'
+cmd = os.path.join(lroot, 'bin/CS1_IDPPP') + ' ' + parsetfile + ' 1'
 if dry == 'dry':
     logging.info('Dry run: %s', cmd)
 else:
     logging.info('Start processing: %s', msn)
-    os.system(cmd)
-    logging.info('CS1_IDPPP finished')
+    sts = os.system(cmd)
+    if sts:
+        logging.error('CS1_IDPPP returned with error status %d', sts)
+        sys.exit(sts)
+    else:
+        logging.info('CS1_IDPPP finished')
+
+# Now create a VDS file (until IDPPP can do this)
+cmd = os.path.join(lroot, 'bin/makevds') + ' "" ' + msout + ' ' + vds
+if dry == 'dry':
+    logging.info('Dry run: %s', cmd)
+else:
+    logging.info('Creating VDS file %s', vds)
+    sts = os.system(cmd)
+    if sts:
+        logging.error('makevds returned with an error status %d', sts)
+        sys.exit(sts)
+    else:
+        logging.info('makevds finished')
