@@ -29,7 +29,7 @@ class LOFARrecipe(WSRTrecipe):
             help="Configuration file"
         )
         self.optionparser.add_option(
-            '-d', '--dry-run',
+            '-n', '--dry-run',
             dest="dry_run",
             help="Dry run",
             action="store_true"
