@@ -18,4 +18,4 @@ framework.
 ``sip.py``
 ----------
 
-.. literalinclude:: ../../../pipeline/master/sip.py
+.. literalinclude:: ../../../sip.py

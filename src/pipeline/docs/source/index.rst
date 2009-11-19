@@ -22,6 +22,7 @@ sources detected in the data.
 
    framework/index.rst
    recipe/index.rst
+   parallel/index.rst
    pipeline/index.rst
    sip/index.rst
 

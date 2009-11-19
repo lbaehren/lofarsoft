@@ -157,12 +157,21 @@ LOFAR Extensions
                 ``config``. See the :ref:`config-file` section for details on
                 how this file can be accessed.
 
-            -d, --dry-run
+            -n, --dry-run
 
                 If this option is specfied, :attr:`~WSRTrecipe.inputs` has
                 ``dry_run`` set to ``True``. This may optionally be used by
                 pipeline components to skip parts of their processing for test
                 processes.
+
+            --start-time
+
+                *Expert use*. Pipeline logs, results, etc are stored according
+                to pipeline start time. This option exists so that the various
+                pipeline components can communicate the appropriate
+                information between themselves. It may also be invoked on the
+                command line, but this should only be done in exceptional
+                circumstances.
 
     .. method:: go(self)
 
@@ -186,19 +195,13 @@ LOFAR Extensions
         cluster specified in the recipe's configuration file. This is designed
         for internal use within the recipe.
 
-    .. method:: _input_or_default(self, key, section=None)
-
-        If ``self.inputs[key]`` exists but isn't populated, attempt to load it
-        from the recipe's configuration file. If ``section`` is specified,
-        look in that section of the file; otherwise, the section is given by
-        the recipe name.
-
-
 .. class:: LOFARinput
 
     :class:`LOFARinput` is a specialised form of :class:`WSRTingredient`.
     It ensures that the ingredient always provides the required keys,
-    ``job_name``, ``runtime_directory``, ``config`` and ``dry_run``.
+    ``job_name``, ``runtime_directory``, ``config``, ``dry_run`` and
+    ``start_time``. These correspond to the options required by
+    :class:`LOFARrecipe`, above.
 
 .. class:: LOFARoutput
 

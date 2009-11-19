@@ -82,6 +82,8 @@ as part of the configuration::
   >>> config.read("%s/%s" % (config_path[0], "pipeline.cfg"))
 
 
+.. _ipython-deploy:
+
 Initialising the cluster
 ------------------------
 
