@@ -1,20 +1,28 @@
-from fabric.api import env, hosts, run, put, get
+from fabric.api import env, hosts, run, put, get, env, require
 import fabsupport
 
-clusterdesc = fabsupport.ClusterDesc('lioff.clusterdesc')
+script_path = '/home/swinbank/Work/lofar_pipes/deploy'
 
-@hosts(clusterdesc['HeadNode'])
+def controller_host(clusterdesc):
+    clusterdesc = fabsupport.ClusterDesc(clusterdesc)
+    env.hosts = [clusterdesc['HeadNode']]
+
+def engine_hosts(clusterdesc):
+    clusterdesc = fabsupport.ClusterDesc(clusterdesc)
+    env.hosts = clusterdesc['ComputeNodes']
+
 def run_controller(controlpath="/data/users/swinbank/pipeline_runtime"):
-    run("bash %s/ipython/ipcontroller.sh %s start" % (controlpath, controlpath))
+    require('hosts', provided_by=[controller_host])
+    run("bash %s/ipcontroller.sh %s start" % (script_path, controlpath))
 
-@hosts(clusterdesc['HeadNode'])
 def stop_controller(controlpath="/data/users/swinbank/pipeline_runtime"):
-    run("bash %s/ipython/ipcontroller.sh %s stop" % (controlpath, controlpath))
+    require('hosts', provided_by=[controller_host])
+    run("bash %s/ipcontroller.sh %s stop" % (script_path, controlpath))
 
-@hosts(*clusterdesc['ComputeNodes'])
-def run_engines(controlpath="/data/users/swinbank/pipeline_runtime"):
-    run("bash %s/ipython/ipengine.sh %s start" % (controlpath, controlpath))
+def run_engine(controlpath="/data/users/swinbank/pipeline_runtime"):
+    require('hosts', provided_by=[engine_hosts])
+    run("bash %s/ipengine.sh %s start" % (script_path, controlpath))
 
-@hosts(*clusterdesc['ComputeNodes'])
-def stop_engines(controlpath="/data/users/swinbank/pipeline_runtime"):
-    run("bash %s/ipython/ipengine.sh %s stop" % (controlpath, controlpath))
+def stop_engine(controlpath="/data/users/swinbank/pipeline_runtime"):
+    require('hosts', provided_by=[engine_hosts])
+    run("bash %s/ipengine.sh %s stop" % (script_path, controlpath))
