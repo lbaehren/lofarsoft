@@ -83,7 +83,7 @@ if dry == 'dry':
     logging.info('Dry run: %s', cmd)
 else:
     logging.info('Start processing: %s', msn)
-    sts = os.system(cmd) / 256
+    sts = os.WEXITSTATUS(os.system(cmd))
     if sts:
         logging.error('CS1_IDPPP returned with error status %d', sts)
         sys.exit(sts)
@@ -96,18 +96,23 @@ if dry == 'dry':
     logging.info('Dry run: %s', cmd)
 else:
     logging.info('Creating VDS file %s', vds)
-    sts = os.system(cmd) / 256
+    sts = os.WEXITSTATUS(os.system(cmd))
     if sts:
         logging.error('makevds returned with an error status %d', sts)
         sys.exit(sts)
     else:
         logging.info('makevds finished')
 
-# Argh! And now for the really ugly part. We must patch the VDS-file,
-# to correct the key/value pair FileSys. This is REALLY NOT PORTABLE!
-ps = Parset(vds)
-ps['FileSys'] = hostname + ':' + '/data'
-ps.writeToFile(vds)
+# Argh!! And now for the really ugly part. We must patch the VDS-file,
+# to correct the key/value pair FileSys.
+logging.info('Patching VDS file')
+# Try to figure out the mount point using 'df'.
+mp = os.popen("df . | sed -n 2p | cut -d' ' -f1").read().strip()
+logging.info('FileSys = %s', mp)
+if dry != 'dry':
+    ps = Parset(vds)
+    ps['FileSys'] = mp
+    ps.writeToFile(vds)
 
 
 # Note: Maybe I should replace each os.system() call with a call to popen(),

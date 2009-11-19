@@ -110,9 +110,10 @@ class DPPP(WSRTrecipe):
         self.print_message('Generating gds file from vds files')
         opts = [dataset]
         opts += glob.glob(os.path.join(vds_dir, '*.vds'))
-        if self.cook_system('combinevds', opts):
-            self.print_error('combinevds failed!')
-            return 1
+        if not self.inputs['dryrun']:
+            if self.cook_system('combinevds', opts):
+                self.print_error('combinevds failed!')
+                return 1
 
         return 0
 
