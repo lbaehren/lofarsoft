@@ -1,5 +1,4 @@
-import sys, os, tempfile
-from subprocess import check_call
+import sys, os
 
 # Cusine core
 from cuisine.WSRTrecipe import WSRTrecipe
@@ -11,22 +10,14 @@ from IPython.kernel import client as IPclient
 # Local helpers
 import utilities
 
-#from pipeline.nodes.dppp import run_dppp
-#from pipeline.nodes.vdsmaker import make_vds
-
 def run_dppp(ms_name, ms_outname, parset, log_location):
     # Run on engine to process data with DPPP
     from pipeline.nodes.dppp import run_dppp
     return run_dppp(ms_name, ms_outname, parset, log_location)
 
-def make_vds(infile, clusterdesc, outfile, log_location):
-    from pipeline.nodes.vdsmaker import make_vds
-    return make_vds(infile, clusterdesc, outfile, log_location)
-
-
-class TestPipeline(WSRTrecipe):
+class dppp(WSRTrecipe):
     def __init__(self):
-        super(TestPipeline, self).__init__()
+        super(dppp, self).__init__()
         self.optionparser.add_option(
             '-j', '--job-name', 
             dest="job_name",
@@ -68,7 +59,6 @@ class TestPipeline(WSRTrecipe):
             mec.push_function(
                 dict(
                     run_dppp=run_dppp,
-                    make_vds=make_vds,
                     build_available_list=utilities.build_available_list,
                     clear_available_list=utilities.clear_available_list
                 )
@@ -120,46 +110,18 @@ class TestPipeline(WSRTrecipe):
         # Save space on engines by clearing out old file lists
         mec.execute("clear_available_list(\"%s\")" % (available_list,))
 
-        # Build VDS files for each of the newly created MeasurementSets
-        available_list = "%s%s" % (self.inputs['job_name'], "dppp-vds")
-        mec.push(dict(ms_names=outnames))
-        mec.execute(
-            "build_available_list(\"%s\")" % (available_list,)
-        )
-        clusterdesc = "%s/lioff.clusterdesc" % (self.inputs['runtime_directory'],)
-        tasks = []
-        vdsnames = []
-        for ms_name in outnames:
-            log_location = "%s/logs/%s/makevds.log" % (
-                job_directory,
-                os.path.basename(ms_name)
-            )
-            vdsnames.append(tempfile.mkstemp(dir=job_directory)[1])
-            task = IPclient.StringTask(
-                "result = make_vds(ms_name, clusterdesc, vds_name, log_location)",
-                push=dict(
-                    ms_name=ms_name,
-                    vds_name=vdsnames[-1],
-                    clusterdesc=clusterdesc,
-                    log_location=log_location
-                ),
-                pull="result",
-                depend=utilities.check_for_path,
-                dependargs=(ms_name, available_list)
-            )
-            tasks.append(tc.run(task))
-        tc.barrier(tasks)
-        for task in tasks:
-            tc.get_task_result(task)
-
-        # Combine VDS files to produce GDS
-        executable = '/app/lofar/dev/bin/combinevds'
-        gvds_out   = '%s/dppp.gds' % (job_directory,)
-        check_call([executable, gvds_out] + vdsnames)
-#        for file in vdsnames:
-#            os.unlink(file)
-        self.outputs['gds'] = gvds_out
+        # Now set up a vdsmaker recipe to build a GDS file describing the
+        # processed data
+        inputs = WSRTingredient()
+        inputs['job_name'] = self.inputs['job_name']
+        inputs['runtime_directory'] = self.inputs['runtime_directory']
+        inputs['gds'] = "%s/%s.dppp.gds" % (job_directory, self.inputs['job_name'])
+        inputs['args'] = outnames
+        outputs = WSRTingredient()
+        sts = self.cook_recipe('vdsmaker', inputs, outputs)
+        
+        self.outputs['gds'] = outputs['gds']
 
 
 if __name__ == '__main__':
-    sys.exit(TestPipeline().main())
+    sys.exit(dppp().main())
