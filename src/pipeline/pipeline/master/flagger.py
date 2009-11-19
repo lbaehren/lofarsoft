@@ -18,7 +18,7 @@ class flagger(pyraprunner):
         self.optionparser.add_option(
             '-n', '--n-factor',
             dest="n_factor",
-            type="float"
+            type="float",
             help="Custom factor for flagging threshold"
         )
 
