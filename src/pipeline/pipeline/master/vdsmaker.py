@@ -8,13 +8,13 @@ from pipeline.support.lofarrecipe import LOFARrecipe
 import pipeline.support.utilities as utilities
 from pipeline.support.clusterlogger import clusterlogger
 
-def make_vds(infile, clusterdesc, outfile, log_location):
+def make_vds(infile, clusterdesc, outfile):
     from pipeline.nodes.vdsmaker import makevds_node
     return makevds_node(loghost=loghost, logport=logport).run(
         infile,
         clusterdesc,
         outfile,
-        log_location
+        executable
     )
 
 class vdsmaker(LOFARrecipe):
@@ -29,6 +29,18 @@ class vdsmaker(LOFARrecipe):
             '--directory',
             dest="directory",
             help="Directory for output files"
+        )
+        self.optionparser.add_option(
+            '--makevds',
+            dest="makevds",
+            help="makevds executable"
+            default="/opt/lofar/daily/gnu_opt/bin/combinevds"
+        )
+        self.optionparser.add_option(
+            '--combinevds',
+            dest="combinevds",
+            help="combinevds executable"
+            default="/opt/lofar/daily/gnu_opt/bin/makevds"
         )
 
     def go(self):
@@ -70,12 +82,13 @@ class vdsmaker(LOFARrecipe):
                     "%s/%s.vds" % (self.inputs['directory'], os.path.basename(ms_name))
                 )
                 task = LOFARTask(
-                    "result = make_vds(ms_name, clusterdesc, vds_name, log_location)",
+                    "result = make_vds(ms_name, clusterdesc, vds_name, log_location,  executable)",
                     push=dict(
                         ms_name=ms_name,
                         vds_name=vdsnames[-1],
                         clusterdesc=clusterdesc,
                         log_location=log_location,
+                        executable=self.inputs['makevds'],
                         loghost=loghost,
                         logport=logport
                     ),
@@ -94,7 +107,7 @@ class vdsmaker(LOFARrecipe):
 
         # Combine VDS files to produce GDS
         self.logger.info("Combining VDS files")
-        executable = self.config.get('vds', 'combinevds')
+        executable = self.inputs['combinevds']
         gvds_out   = "%s/%s" % (self.inputs['directory'], self.inputs['gvds'])
         try:
             check_call([executable, gvds_out] + vdsnames)

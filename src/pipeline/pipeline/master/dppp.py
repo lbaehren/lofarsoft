@@ -25,7 +25,7 @@ class dppp(LOFARrecipe):
         self.optionparser.add_option(
             '--executable',
             dest="executable",
-            help="DPPP Executable"
+            help="DPPP executable"
         )
         self.optionparser.add_option(
             '--initscript',
