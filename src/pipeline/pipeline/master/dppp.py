@@ -47,6 +47,14 @@ class dppp(WSRTrecipe):
         })
         config.read("%s/pipeline.cfg" % (config_path[0],))
 
+        # If we didn't get a GDS file on the command line, look for one in the
+        # job's default VDS directory
+        if not self.inputs['gvds']:
+            self.inputs['gvds'] = "%s/%s.gvds" % (
+                config.get('layout', 'vds_directory'),
+                self.inputs['job_name']
+            )
+            self.logger.info("Using %s for initial data" % (self.inputs['gvds'],))
         try:
             gvds = utilities.get_parset(self.inputs['gvds'])
         except:
@@ -132,7 +140,7 @@ class dppp(WSRTrecipe):
         self.logger.info("Calling vdsmaker")
         inputs = WSRTingredient()
         inputs['job_name'] = self.inputs['job_name']
-        inputs['runtime_directory'] = self.inputs['runtime_directory']
+        inputs['runtime_directory'] = config.get('DEFAULT', 'runtime_directory')
         inputs['directory'] = config.get('layout', 'vds_directory')
         inputs['gds'] = config.get('DPPP', 'gds_output')
         inputs['args'] = outnames
