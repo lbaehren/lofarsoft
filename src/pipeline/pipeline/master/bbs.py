@@ -37,7 +37,7 @@ class bbs(LOFARrecipe):
             '-f', '--force',
             dest="force",
             help="Automatically clean control database, sky model parmdb, and instrument model parmdb",
-            default=True
+            action="store_true"
         )
         self.optionparser.add_option(
             '--db-host',
@@ -107,15 +107,18 @@ class bbs(LOFARrecipe):
 
         try:
             self.logger.info("Running BBS")
-            self.logger.info("Executing: %s" % " ".join(bbs_cmd))
-            with closing(open(log_location, 'w')) as log:
-                result = check_call(
-                    bbs_cmd,
-                    env=env,
-                    stdout=log,
-                    stderr=log,
-                    cwd=working_dir
-                    )
+            self.logger.debug("Executing: %s" % " ".join(bbs_cmd))
+            if not self.inputs['dry_run']:
+                with closing(open(log_location, 'w')) as log:
+                    result = check_call(
+                        bbs_cmd,
+                        env=env,
+                        stdout=log,
+                        stderr=log
+                        )
+            else:
+                self.logger.info("Dry run: execution skipped")
+                result = 0
             return result
         except CalledProcessError:
             self.logger.exception("Call to BBS failed")

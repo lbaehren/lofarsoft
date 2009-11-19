@@ -34,7 +34,7 @@ class mwimager(LOFARrecipe):
         super(mwimager, self).go()
 
         # Patch GVDS filename into parset
-        self.logger.info("Setting up MWImager configuration")
+        self.logger.debug("Setting up MWImager configuration")
         temp_parset_filename = utilities.patch_parset(
             self.inputs['parset'],
             {'dataset': self.inputs['gvds']},
@@ -52,21 +52,33 @@ class mwimager(LOFARrecipe):
             self.config.get('mwimager', 'log')
         )
         self.logger.debug("Logging to %s" % (log_location))
+        mwimager_cmd = [
+            self.config.get('mwimager', 'executable'),
+            temp_parset_filename,
+            self.config.get('cluster', 'clusterdesc'),
+            self.inputs['working_directory'],
+            log_location,
+        ]
         try:
             self.logger.info("Running MWImager")
-            with closing(open(log_location, 'w')) as log:
-                result = check_call(
-                    [
-                        self.config.get('mwimager', 'executable'),
-                        temp_parset_filename,
-                        self.config.get('cluster', 'clusterdesc'),
-                        self._input_or_default('working_directory'),
-                        log_location,
-                    ],
-                    env=env,
-                    stdout=log,
-                    stderr=log
-                    )
+            self.logger.debug("Executing: %s" % " ".join(mwimager_cmd))
+            if not self.inputs['dry_run']:
+                with closing(open(log_location, 'w')) as log:
+                    result = check_call(
+                        [
+                            self.config.get('mwimager', 'executable'),
+                            temp_parset_filename,
+                            self.config.get('cluster', 'clusterdesc'),
+                            self.inputs['working_directory'],
+                            log_location,
+                        ],
+                        env=env,
+                        stdout=log,
+                        stderr=log
+                        )
+            else:
+                self.logger.info("Dry run: execution skipped")
+                result = 0
             return result
         except CalledProcessError:
             self.logger.exception("Call to mwimager failed")

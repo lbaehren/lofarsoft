@@ -28,6 +28,12 @@ class LOFARrecipe(WSRTrecipe):
             dest="config",
             help="Configuration file"
         )
+        self.optionparser.add_option(
+            '--dry-run',
+            dest="dry_run",
+            help="Dry run",
+            action="store_true"
+        )
 
     def go(self):
         # Every recipe needs a job identifier
@@ -46,6 +52,13 @@ class LOFARrecipe(WSRTrecipe):
         })
         self.config.read(self.inputs["config"])
 
+        if not self.inputs['runtime_directory']:
+            self.inputs["runtime_directory"] = self.config.get(
+                "DEFAULT", "runtime_directory"
+            )
+            if not os.access(self.inputs['runtime_directory'], os.F_OK):
+                raise IOError, "Runtime directory doesn't exist"
+
         # If our inputs have a parset field, but one isn't specified, try
         # using a default
         if self.inputs.has_key('parset'):
@@ -58,7 +71,7 @@ class LOFARrecipe(WSRTrecipe):
                     (self.inputs['parset'], self.__class__.__name__)
                 )
             if not os.access(self.inputs['parset'], os.R_OK):
-                raise IOError
+                raise IOError, "Can't read parset"
 
         # If our inputs have a gvds field, but one isn't specified, try
         # using a default.
@@ -72,7 +85,7 @@ class LOFARrecipe(WSRTrecipe):
                     (self.inputs['gvds'], self.__class__.__name__)
                 )
             if not os.access(self.inputs['gvds'], os.R_OK):
-                raise IOError
+                raise IOError, "Can't read GVDS"
             
 
     def _get_cluster(self):

@@ -37,8 +37,8 @@ class PipelineCook(WSRTCook):
 
     def copy_inputs(self):
         self.recipe.inputs = vars(self.recipe.optionparser.get_default_values())
-        for k in self.inputs.keys()
-            if not self.recipe.inputs.has_key(k):
+        for k in self.inputs.keys():
+            if not self.recipe.inputs.has_key(k) and k != "args":
                 self.logger.warn("%s has no argument %s" % (self.task, k))
             else:
                 self.recipe.inputs[k] = self.inputs[k]

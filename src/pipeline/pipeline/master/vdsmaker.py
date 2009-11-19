@@ -14,6 +14,16 @@ def make_vds(infile, clusterdesc, outfile, log_location):
 class vdsmaker(LOFARrecipe):
     def __init__(self):
         super(vdsmaker, self).__init__()
+        self.optionparser.add_option(
+            '-g', '--gds',
+            dest="gds",
+            help="Output file name"
+        )
+        self.optionparser.add_option(
+            '--directory',
+            dest="directory",
+            help="Directory for output files"
+        )
 
     def go(self):
         super(vdsmaker, self).go()

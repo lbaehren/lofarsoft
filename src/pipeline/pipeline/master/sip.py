@@ -16,18 +16,21 @@ class sip(LOFARrecipe):
 
         self.logger.info("Calling DPPP")
         inputs = LOFARinput(self.inputs)
-        inputs['gvds']   = None # Use default
-        inputs['parset'] = None # Use default
         outputs = LOFARoutput()
         if self.cook_recipe('dppp', inputs, outputs):
             self.logger.warn("DPPP reports failure")
             return 1
 
+        self.logger.info("Calling BBS")
+        inputs = LOFARinput(self.inputs)
+        inputs['force'] = True
+        outputs = LOFARoutput()
+        if self.cook_recipe('bbs', inputs, outputs):
+            self.logger.warn("BBS reports failure")
+            return 1
+
         self.logger.info("Calling MWImager")
         inputs = LOFARinput(self.inputs)
-        inputs['gvds']              = None # Use default
-        inputs['parset']            = None # Use default
-        inputs['working_directory'] = None # Use default
         outputs = LOFARoutput()
         if self.cook_recipe('mwimager', inputs, outputs):
             self.logger.warn("MWImager reports failure")
