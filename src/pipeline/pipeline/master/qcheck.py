@@ -18,6 +18,11 @@ class qcheck(LOFARrecipe):
     def __init__(self):
         super(qcheck, self).__init__()
         self.optionparser.add_option(
+            '-w', '--working-directory',
+            dest="working_directory",
+            help="Working directory used on compute nodes"
+        )
+        self.optionparser.add_option(
             '--plugins',
             dest="plugins",
             help="[Expert use] Quality check plugins"
@@ -27,7 +32,12 @@ class qcheck(LOFARrecipe):
         super(qcheck, self).go()
         self.logger.info("Quality check system starting")
 
-        image_names = self.inputs['args']
+        image_names = [
+            os.path.join(
+                self.inputs['working_directory'], self.inputs['job_name'], filename
+            )
+            for filename in self.inputs['args']
+        ]
         plugins = utilities.string_to_list(self.inputs['plugins'])
         self.logger.info("Using plugins: %s" % (str(plugins)))
 

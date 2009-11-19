@@ -175,7 +175,7 @@ def run(filename, logfile=None, plot=False, outputdir=False, loggers=False):
     try:
         table = ptables.table(filename, ack=False)
     except RuntimeError:  # pyrap is just a wrapper around C++, so no proper exceptions are thrown
-        logging.getLogger("main").error("Error: image %s not properly opened" % filename)
+        loggers['main'].error("Error: image %s not properly opened" % filename)
         return
     names = {}
     for part in ('col', 'field'):
