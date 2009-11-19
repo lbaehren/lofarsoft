@@ -1,3 +1,11 @@
+"""
+This is a model imaging pipeline definition.
+
+Although it should be runnable as it stands, the user is encouraged to copy it
+to a job directory and customise it as appropriate for the particular task at
+hand.
+"""
+
 import sys, os
 from pipeline.master.control import control
 

@@ -1,4 +1,4 @@
-import os
+import os, sys
 import utilities
 from lofarexceptions import PipelineException
 from cuisine.WSRTrecipe import WSRTrecipe
@@ -49,9 +49,17 @@ class LOFARrecipe(WSRTrecipe):
 
         # If a config file hasn't been specified, use the default
         if not self.inputs["config"]:
-            from pipeline import __path__ as config_path
-            self.inputs["config"] = os.path.join(config_path[0], 'pipeline.cfg')
-            self.logger.debug("Using default configuration file")
+            # Possible config files, in order of preference:
+            conf_locations = (
+                os.path.join(sys.path[0], 'pipeline.cfg'),
+                os.path.join(os.path.expanduser('~'), '.pipeline.cfg')
+            )
+            for path in conf_locations:
+                if os.access(path):
+                    self.inputs["config"] = path
+                    break
+            if not self.inputs["config"]:
+                raise PipelineException("Configuration file not found")
 
         self.logger.debug("Pipeline start time: %s" % self.inputs['start_time'])
 
