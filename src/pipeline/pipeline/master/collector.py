@@ -104,6 +104,7 @@ class collector(LOFARrecipe):
         else:
             self.logger.info("Only 1 FITS image found; not averaging")
                 
+        self.outputs['data'] = image_names
         return 0
 
 if __name__ == '__main__':
