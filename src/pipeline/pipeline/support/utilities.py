@@ -94,7 +94,7 @@ def log_time(logger):
                 resource.getrusage(resource.RUSAGE_SELF)
             )
         ]
-        logger.warn(
+        logger.info(
             "Node total time %.4fs; user time: %.4fs; system time: %.4fs" % (
                 time.time() - start_time, resource_usage[0], resource_usage[1]
             )
