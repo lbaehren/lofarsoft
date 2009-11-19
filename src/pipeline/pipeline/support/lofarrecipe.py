@@ -55,7 +55,7 @@ class LOFARrecipe(WSRTrecipe):
                 os.path.join(os.path.expanduser('~'), '.pipeline.cfg')
             )
             for path in conf_locations:
-                if os.access(path):
+                if os.access(path, os.R_OK):
                     self.inputs["config"] = path
                     break
             if not self.inputs["config"]:
