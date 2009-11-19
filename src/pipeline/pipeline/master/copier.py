@@ -1,6 +1,7 @@
 # Local helpers
 from pipeline.support.lofarrecipe import LOFARrecipe
 import pipeline.support.utilities as utilities
+import os.path
 
 class copier(LOFARrecipe):
     """
@@ -14,8 +15,10 @@ class copier(LOFARrecipe):
             help="Destination directory on compute nodes"
         )
 
-    def go(self)
+    def go(self):
         self.logger.info("Starting copier run")
+        super(copier, self).go()
+
         tc, mec = self._get_cluster()
 
         mec.execute('import shutil')
@@ -26,7 +29,7 @@ class copier(LOFARrecipe):
                 self.inputs['destination'],
                 os.path.basename(file)
             )
-            for file in selt.inputs['args']
+            for file in self.inputs['args']
         ]
         self.logger.debug(destinations)
 

@@ -36,8 +36,8 @@ class dppp(LOFARrecipe):
         mec.push_function(
             dict(
                 run_dppp=run_dppp,
-                "build_available_list": utilities.build_available_list,
-                "clear_available_list": utilities.clear_available_list
+                build_available_list=utilities.build_available_list,
+                clear_available_list=utilities.clear_available_list
             )
         )
         self.logger.info("Pushed functions to cluster")
@@ -75,7 +75,7 @@ class dppp(LOFARrecipe):
                     parset=self._input_or_default('parset'),
                     log_location=log_location
                 ),
-                pull="result"
+                pull="result",
                 depend=utilities.check_for_path,
                 dependargs=(ms_name, available_list)
             )

@@ -17,17 +17,19 @@ class vdsreader(LOFARrecipe):
 
     def go(self):
         self.logger.info("Starting vdsreader run")
+        super(vdsreader, self).go()
+
         try:
             gvds = utilities.get_parset(self.inputs['gvds'])
         except:
             self.logger.error("Unable to read G(V)DS file")
             raise
         
-        self.logger.inf("Building list of measurementsets")
-        ms_names = (
+        self.logger.info("Building list of measurementsets")
+        ms_names = [
             gvds["Part%d.FileName" % (part_no,)]
             for part_no in xrange(int(gvds["NParts"]))
-        )
+        ]
         self.logger.debug(ms_names)
 
         self.outputs['ms_names'] = ms_names
