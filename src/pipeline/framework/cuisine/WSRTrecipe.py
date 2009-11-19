@@ -15,6 +15,10 @@ from traceback import format_exc
 class RecipeError(cook.CookError):
     pass
 
+class NullLogHandler(logging.Handler):
+    def emit(self, record):
+        pass
+
 class WSRTrecipe(object):
     """Base class for recipes, pipelines are created by calling the cook_*
     methods.  Most subclasses should only need to reimplement go() and add
@@ -61,10 +65,7 @@ class WSRTrecipe(object):
     def main_init(self):
         """Main initialization for stand alone execution, reading input from
         the command line"""
-        logging.basicConfig(
-            format="%(asctime)s - %(levelname)s - %(name)s:  %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S"
-        )
+        logging.getLogger().addHandler(NullLogHandler())
         self.logger = logging.getLogger(self.name)
         opts = sys.argv[1:]
         try:
