@@ -17,7 +17,7 @@ AM_PATH_PYTHON
 
 dnl Check for LOFAR specific things
 lofar_INIT
-dnl lofar_PYTHON(1)
+lofar_INTERNAL(LCS/pytools,pytools,,,,"")
 
 dnl Output Makefiles
 AC_OUTPUT(
