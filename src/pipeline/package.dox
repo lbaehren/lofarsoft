@@ -1,0 +1,6 @@
+// \ingroup CEP
+
+// \defgroup Pipeline Offline Processing Pipeline
+// The Offline Processing Pipeline consists of scripts to run the different
+// components, like DPPP, Calibration, and Imaging in the correct order. 
+

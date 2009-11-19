@@ -1,0 +1,7 @@
+# Example cluster definition file.
+
+ClusterName = lioff
+HeadNode = lioffen
+ComputeNodes = [ lioff021, lioff022, lioff023, lioff024, lioff025, lioff026, lioff027, lioff028, lioff029, lioff030 ]
+LocalDisks = [ /data ]
+MountPoints = [ /lifs001, /lifs002, /lifs003, /lifs004, /lifs005, /lifs006, /lifs007, /lifs008, /lifs009, /lifs010, /lifs011, /lifs012 ]
