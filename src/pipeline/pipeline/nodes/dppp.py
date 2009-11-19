@@ -52,7 +52,6 @@ class dppp_node(LOFARnode):
             except CalledProcessError, e:
                 # For CalledProcessError isn't properly propagated by IPython
                 # Temporary workaround...
-                self.logger.warn("HELLO!")
                 self.logger.error(str(e))
                 raise Exception
             finally:
