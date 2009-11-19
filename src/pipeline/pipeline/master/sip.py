@@ -38,7 +38,7 @@ class sip(LOFARrecipe):
         inputs = LOFARinput(self.inputs)
         inputs['args'] = ms_names
         inputs['destination'] = os.path.join(
-            self.config.get("mwimager", "working_directory"),
+            self.config.get("dppp", "working_directory"),
             self.inputs['job_name']
         )
         outputs = LOFARoutput()
