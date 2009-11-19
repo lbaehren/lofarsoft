@@ -19,16 +19,19 @@ class control(LOFARrecipe):
     def _setup(self):
         # Set up logging to file
         os.makedirs(self.config.get("layout", "log_directory"))
-        handler = logging.FileHandler('%s/pipeline.log' % (
+        stream_handler = logging.StreamHandler(sys.stdout)
+        file_handler = logging.FileHandler('%s/pipeline.log' % (
                 self.config.get("layout", "log_directory")
             )
         )
         formatter = logging.Formatter(
-            "%(asctime)s - %(levelname)s - %(name)s:  %(message)s",
+            "%(asctime)s %(levelname)-7s %(name)s: %(message)s",
             "%Y-%m-%d %H:%M:%S"
         )
-        handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
+        stream_handler.setFormatter(formatter)
+        file_handler.setFormatter(formatter)
+        self.logger.addHandler(stream_handler)
+        self.logger.addHandler(file_handler)
 
     def run_task(self, configblock, datafiles=[]):
         self.logger.info("Running task: %s" % (configblock,))
