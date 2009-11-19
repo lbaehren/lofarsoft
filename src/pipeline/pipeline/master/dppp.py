@@ -97,8 +97,12 @@ class dppp(LOFARrecipe):
                 dependargs=(ms_name, available_list)
             )
             self.logger.info("Scheduling processing of %s" % (ms_name,))
+            if self.inputs['dry_run'] == "False":
+                self.inputs['dry_run'] = False
             if not self.inputs['dry_run']:
                 tasks.append(tc.run(task))
+            else:
+                self.logger.info("Dry run: scheduling skipped")
         self.logger.info("Waiting for all DPPP tasks to complete")
         tc.barrier(tasks)
         failure = False
