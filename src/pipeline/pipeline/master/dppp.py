@@ -36,7 +36,7 @@ class dppp(LOFARrecipe):
 
         try:
             gvds = utilities.get_parset(
-                self._input_or_default(['gvds'])
+                self._input_or_default('gvds')
             )
         except:
             self.logger.error("Unable to read G(V)DS file")
