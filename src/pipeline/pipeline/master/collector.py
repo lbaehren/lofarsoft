@@ -27,6 +27,16 @@ class collector(LOFARrecipe):
             dest="working_directory",
             help="Working directory containing images on compute nodes",
         )
+        self.optionparser.add_option(
+            '--image2fits',
+            dest="image2fits",
+            help="Location of image2fits tool (from casacore)"
+        )
+        self.optionparser.add_option(
+            '--averaged-name',
+            dest="averaged_name",
+            help="Filename for averaged FITS image"
+        )
 
     def go(self):
         self.logger.info("Starting data collector run")
@@ -77,7 +87,7 @@ class collector(LOFARrecipe):
             fits_files.append(output)
             subprocess.check_call(
                 [
-                    self.config.get('fitswriter', 'executable'),
+                    self.inputs['image2fits'],
                     'in=%s' % (filename),
                     'out=%s' % (output)
                 ],
@@ -85,7 +95,7 @@ class collector(LOFARrecipe):
                 stderr=subprocess.STDOUT
             )
 
-        if len(fits_files) > 1:
+        if len(fits_files) > 0:
             self.logger.info("Averaging results")
             result = reduce(
                 numpy.add,
@@ -95,16 +105,17 @@ class collector(LOFARrecipe):
             self.logger.info("Writing averaged FITS file")
             hdulist = pyfits.HDUList(pyfits.PrimaryHDU(result))
             hdulist[0].header = pyfits.getheader(fits_files[0])
-            hdulist.writeto(
-                os.path.join(
-                    self.config.get('layout', 'results_directory'),
-                    self.config.get('fitswriter', 'averaged')
+            averaged_file = os.path.join(
+                        self.config.get('layout', 'results_directory'),
+                        self.inputs['averaged_name']
                 )
-            )
+            hdulist.writeto(averaged_file)
+            self.outputs['data'] = (averaged_file,)
+            self.logger.info("Wrote: %s" % self.outputs['data'])
         else:
-            self.logger.info("Only 1 FITS image found; not averaging")
+            self.logger.info("No FITS image found; not averaging")
+            self.ouputs['data'] = None
                 
-        self.outputs['data'] = image_names
         return 0
 
 if __name__ == '__main__':
