@@ -10,6 +10,7 @@ def flagger_node(LOFARnode):
     """
     def run(input, output, max_value):
         with log_time(self.logger): 
+            self.logger.info("Processing: %s" % (input))
             try:
                 t = table(input)
                 t2 = t.copy(output, deep=True)
