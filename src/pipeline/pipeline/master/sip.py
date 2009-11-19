@@ -156,7 +156,6 @@ class sip(LOFARrecipe):
 
         self.logger.info("Calling results collector")
         inputs = LOFARinput(self.inputs)
-        inputs['args'] = outputs['images']
         inputs['clobber'] = True
         outputs = LOFARoutput()
         if self.cook_recipe('collector', inputs, outputs):
