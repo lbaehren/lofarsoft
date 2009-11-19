@@ -1,5 +1,5 @@
 from __future__ import with_statement
-import sys, os
+import sys, os, logging
 from subprocess import check_call, CalledProcessError
 from contextlib import closing
 
@@ -21,7 +21,7 @@ class bbs(LOFARrecipe):
         self.optionparser.add_option(
             '-p', '--parset', 
             dest="parset",
-            help="MWImager configuration parset"
+            help="BBS configuration parset"
         )
         self.optionparser.add_option(
             '-s', '--skymodel', 
@@ -56,7 +56,7 @@ class bbs(LOFARrecipe):
         )
 
     def go(self):
-        self.logger.info("Starting MWImager run")
+        self.logger.info("Starting BBS run")
         super(bbs, self).go()
 
         if not self.inputs['working_directory']:
@@ -105,11 +105,13 @@ class bbs(LOFARrecipe):
         if self.inputs['force']:
             bbs_cmd.insert(1, '-f')
         # Should BBS verbosity be linked to that of the pipeline, or should be
-        # be a separate setting? For now, make it verbose...
-        bbs_cmd.insert(1, '-v')
-        
+        # be a separate setting?
+        if self.logger.level <= logging.INFO and self.logger.level != logging.NOTSET:
+            bbs_cmd.insert(1, '-v')
+
         try:
             self.logger.info("Running BBS")
+            self.logger.info("Executing: %s" % " ".join(bbs_cmd))
             with closing(open(log_location, 'w')) as log:
                 result = check_call(
                     bbs_cmd,
@@ -119,10 +121,8 @@ class bbs(LOFARrecipe):
                     )
             return result
         except CalledProcessError:
-            self.logger.exception("Call to mwimager failed")
+            self.logger.exception("Call to BBS failed")
             return 1
-        finally:
-            os.unlink(temp_parset_filename)
 
         return 0
 
