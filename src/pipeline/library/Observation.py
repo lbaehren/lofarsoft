@@ -28,33 +28,32 @@ from ingredient import WSRTingredient
 from parset import Parset
 import sysconfig
 
-import os
+import os.path
 import glob
 
 class Observation(WSRTingredient):
     """Class containing meta-data of an observation"""
-    
+
+
     def __init__(self, observation, cluster_name, directory = None,
-                 glob_pattern = ['_SB[0-9]*.MS']):
+                 glob_pattern = ['*SB[0-9]*.MS']):
         """
         Constructor.
-          - observation: name of the observation (e.g. L2007_03463).
+          - observation:  name of the observation (e.g. L2007_03463).
           - cluster_name: name of the cluster where the data resides
-            (e.g. lifs).
-          - directory [optional]: directory where the data is stored;
-            None means directly below the mount-point
-            (e.g. /lifs001/L2007_03463_SB0.MS).
-          - glob_pattern: pattern used when matching MS-files.
+                          (e.g. lifs).
+          - directory:    directory, relative to the mount point, where
+                          the data is stored (e.g. /lifs001/pipeline);
+                          if None, use directory <mount-point>/<observation>
+          - glob_pattern: pattern used when matching MS-files;
+                          if None, use '*SB[0-9]*.MS'
         """
         WSRTingredient.__init__(self)
         clusterdesc = sysconfig.cluster_desc_file(cluster_name)
-        self.observation = os.path.join(directory, observation) \
-                           if directory else observation
-        self.ms_pattern = [self.observation + p for p in glob_pattern]
+        self.observation = directory if directory else observation
+        self.ms_pattern = [os.path.join(self.observation, p) \
+                           for p in glob_pattern]
         self.mount_points = Parset(clusterdesc).getStringVector('MountPoints')
-##        print "observation:", self.observation
-##        print "ms_pattern:", self.ms_pattern
-##        print "mount_points:", self.mount_points
 
     def ms_files(self):
         """
@@ -68,5 +67,9 @@ class Observation(WSRTingredient):
         for d in dirs:
             files.extend(glob.glob(d))
         return files
-#        return [glob.glob(d) for d in dirs]  ## Hmm, returns list of list
 
+
+## Stand alone execution code ------------------------------------------
+if __name__ == '__main__':
+    import sys
+    print Observation(*sys.argv[1:]).ms_files()
