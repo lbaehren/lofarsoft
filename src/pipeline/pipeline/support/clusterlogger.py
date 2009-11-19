@@ -67,3 +67,4 @@ class LogRecordSocketReceiver(SocketServer.ThreadingTCPServer):
     def stop(self):
         self.abort = 1
         self.runthread.join()
+        self.server_close()
