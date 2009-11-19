@@ -1,6 +1,3 @@
-# Root directory for config file
-from pipeline import __path__ as config_path
-
 from twisted.python import log
 from pyrap.tables import table
 
