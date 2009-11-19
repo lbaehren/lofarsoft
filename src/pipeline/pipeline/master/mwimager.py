@@ -147,7 +147,7 @@ class mwimager(LOFARrecipe):
                 destination = "%s/%s/%s" % (
                     self.config.get('layout', 'log_directory'),
                     ms_name,
-                    inputs['log']
+                    self.inputs['log']
                 )
                 self.logger.debug(
                     "Moving logfile %s to %s" % (log_file, destination)
