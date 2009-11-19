@@ -125,7 +125,7 @@ class dppp(LOFARrecipe):
         inputs['end_seconds'] = 300.0
         inputs['suffix'] = "trimmed"
         inputs['args'] = outnames
-        outputs = LOFARourput()
+        outputs = LOFARoutput()
         if self.cook_recipe('trimmer', inputs, outputs):
             self.logger.warn("trimmer reports failure")
             return 1
