@@ -118,12 +118,24 @@ class dppp(LOFARrecipe):
         # Save space on engines by clearing out old file lists
 #        mec.execute("clear_available_list(\"%s\")" % (available_list,))
 
+        # Trim off any bad section of the data
+        self.logger.info("Calling trimmer")
+        inputs = LOFARinput(self.inputs)
+        inputs['start_seconds'] = 300.0
+        inputs['end_seconds'] = 300.0
+        inputs['suffix'] = "trimmed"
+        inputs['args'] = outnames
+        outputs = LOFARourput()
+        if self.cook_recipe('trimmer', inputs, outputs):
+            self.logger.warn("trimmer reports failure")
+            return 1
+        trimmed_outnames = outputs['data']
+
         # Now set up a colmaker recipe to insert missing columns in the
         # processed data
-
         self.logger.info("Calling colmaker")
         inputs = LOFARinput(self.inputs)
-        inputs['args'] = outnames
+        inputs['args'] = trimmed_outnames
         outputs = LOFARoutput()
         if self.cook_recipe('colmaker', inputs, outputs):
             self.logger.warn("colmaker reports failure")
@@ -135,7 +147,7 @@ class dppp(LOFARrecipe):
         inputs = LOFARinput(self.inputs)
         inputs['directory'] = self.config.get('layout', 'vds_directory')
         inputs['gds'] = self.config.get('dppp', 'gds_output')
-        inputs['args'] = outnames
+        inputs['args'] = trimmed_outnames
         outputs = LOFARoutput()
         if self.cook_recipe('vdsmaker', inputs, outputs):
             self.logger.warn("vdsmaker reports failure")
@@ -143,7 +155,6 @@ class dppp(LOFARrecipe):
         else:
             self.outputs['gds'] = outputs['gds']
             return 0
-
 
 if __name__ == '__main__':
     sys.exit(dppp().main())
