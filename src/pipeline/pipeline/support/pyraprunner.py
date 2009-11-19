@@ -86,7 +86,8 @@ class pyraprunner(LOFARrecipe):
             for task in tasks:
                 res = tc.get_task_result(task)
                 if res.failure:
-                    print res.failure
+                    self.logger.error(res.failure)
+                    return 1
 
         self.outputs['data'] = outnames
 

@@ -1,3 +1,4 @@
+from __future__ import with_statement
 from pyrap.tables import table
 import numpy
 
