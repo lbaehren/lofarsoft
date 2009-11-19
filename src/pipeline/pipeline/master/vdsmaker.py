@@ -1,6 +1,8 @@
 import sys, os, tempfile
 from subprocess import check_call
 
+from IPython.kernel import client as IPclient
+
 # Local helpers
 from pipeline.support.lofarrecipe import LOFARrecipe
 import pipeline.support.utilities as utilities
@@ -42,7 +44,7 @@ class vdsmaker(LOFARrecipe):
         for ms_name in ms_names:
             log_location = "%s/%s/%s.log" % (
                 self.config.get("layout", "log_directory"),
-                os.path.basename(ms_name)
+                os.path.basename(ms_name),
                 self.config.get("vds", "log"),
             )
             vdsnames.append(

@@ -1,3 +1,4 @@
+import os
 from cuisine.WSRTrecipe import WSRTrecipe
 from IPython.kernel import client as IPclient
 from ConfigParser import SafeConfigParser as ConfigParser
@@ -35,7 +36,7 @@ class LOFARrecipe(WSRTrecipe):
         # If a config file hasn't been specified, use the default
         if not self.inputs["config"]:
             from pipeline import __path__ as config_path
-            self.inputs["config"] = "%s/pipeline.cfg" % (config_path,)
+            self.inputs["config"] = "%s/pipeline.cfg" % (config_path[0],)
             self.logger.debug("Using default configuration file")
 
         self.config = ConfigParser({
@@ -46,7 +47,7 @@ class LOFARrecipe(WSRTrecipe):
 
         # If our inputs have a parset field, but one isn't specified, try
         # using a default
-        if self.input.has_key('parset'):
+        if self.inputs.has_key('parset'):
             if not self.inputs['parset']:
                 self.inputs['parset'] = "%s/%s" % (
                     self.config.get("layout", "parset_directory"),

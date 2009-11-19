@@ -3,6 +3,9 @@ import sys, os
 # Cusine core
 from cuisine.ingredient import WSRTingredient
 
+# IPython
+from IPython.kernel import client as IPclient
+
 # Local helpers
 from pipeline.support.lofarrecipe import LOFARrecipe
 import pipeline.support.utilities as utilities
@@ -86,7 +89,7 @@ class dppp(LOFARrecipe):
                 push=dict(
                     ms_name=ms_name,
                     ms_outname=outnames[-1],
-                    parset=parset,
+                    parset=self.inputs['parset'],
                     log_location=log_location
                 ),
                 pull="result",
@@ -112,6 +115,7 @@ class dppp(LOFARrecipe):
         inputs['directory'] = self.config.get('layout', 'vds_directory')
         inputs['gds'] = self.config.get('dppp', 'gds_output')
         inputs['args'] = outnames
+        inputs['config'] = self.inputs['config']
         outputs = WSRTingredient()
         sts = self.cook_recipe('vdsmaker', inputs, outputs)
         
