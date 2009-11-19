@@ -61,7 +61,6 @@ class trimmer(LOFARrecipe):
                 self.inputs['start_seconds'],
                 self.inputs['end_seconds']
             )
-            print "Executing: ", execute_string
             task = LOFARTask(
                 execute_string,
                 push=dict(

@@ -49,11 +49,10 @@ class excluder(LOFARrecipe):
         outnames = []
         for ms_name in ms_names:
             outnames.append(ms_name + self.inputs['suffix'])
-            execute_string = "result = exclude_station(ms_name, \"%s\", %f, %f)" % (
+            execute_string = "result = exclude_station(ms_name, \"%s\", \"%s\")" % (
                 outnames[-1],
                 self.inputs['station'],
             )
-            print "Executing: ", execute_string
             task = LOFARTask(
                 execute_string,
                 push=dict(
