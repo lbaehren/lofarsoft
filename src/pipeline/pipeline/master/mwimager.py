@@ -44,7 +44,7 @@ class mwimager(LOFARrecipe):
         env = os.environ
         env.update({
             "PATH": self.config.get('mwimager', 'env_path'),
-            "LD_LIBRARY_PATH": self.config.get('mwimager', 'env_ld_library_path')
+            "LD_LIBRARY_PATH": self.config.get('mwimager', 'env_ld_library_path'),
             "LOFARROOT": self.config.get('mwimager', 'env_lofarroot')
         })
         
