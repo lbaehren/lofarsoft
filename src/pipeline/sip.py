@@ -11,6 +11,7 @@ class sip(control):
         datafiles = self.run_task("local_flag", datafiles)
         self.outputs['images'] = self.run_task("mwimager", datafiles)
         self.outputs['average'] = self.run_task("collector")
+        self.run_task("qcheck", self.outputs['images'])
         self.run_task("sourcefinder", self.outputs['average'])
        
 if __name__ == '__main__':
