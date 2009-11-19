@@ -47,6 +47,8 @@ a summary of the capabilities of the system, to the `Notes on IPython
 <http://www.lofar.org/operations/lib/exe/fetch.php?media=software:tkp_notes_on_ipython.pdf>`_
 document on the `LOFAR wiki <http://www.lofar.org/operations/>`_.
 
+.. _distproc-blurb:
+
 distproc
 --------
 An alternative method of starting a distributed process across the cluster is
@@ -77,6 +79,8 @@ two file tyes:
 
 The information contained in this files is used by both the task distribution
 systems to schedule jobs on the appropriate compute nodes.
+
+.. _fabric-blurb:
 
 Fabric
 ------

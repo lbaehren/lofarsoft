@@ -1,3 +1,5 @@
+.. _recipe-docs:
+
 =====================
 Constructing a recipe
 =====================
@@ -152,7 +154,8 @@ LOFAR Extensions
                   from pipeline import __path__ as config_path
 
                 It is stored in :attr:`~WSRTrecipe.inputs` as
-                ``config``.
+                ``config``. See the :ref:`config-file` section for details on
+                how this file can be accessed.
 
             -d, --dry-run
 
@@ -191,11 +194,34 @@ LOFAR Extensions
         the recipe name.
 
 
-.. class:: LOFARingredient
+.. class:: LOFARinput
 
-    :class:`LOFARingredient` is a specialised form of :class:`WSRTingredient`.
+    :class:`LOFARinput` is a specialised form of :class:`WSRTingredient`.
     It ensures that the ingredient always provides the required keys,
     ``job_name``, ``runtime_directory``, ``config`` and ``dry_run``.
+
+.. class:: LOFARoutput
+
+    :class:`LOFARoutput` matches :class:`LOFARinput` as the container for
+    outputs of a recipe.
+
+
+Invocation and return values
+----------------------------
+
+Pipeline recipes may indicate their successful (or otherwise) termination by
+returning a value of 0 (for success) or an integer (failure). Beyond this,
+standard meanings for return codes have not been defined: they should be
+agreed between the callee and the caller.
+
+When invoked from the command line, the result should recipe should be
+accessed via its :meth:`main` method. See the :ref:`recipe-example` below for
+how this can be conveniently organised.
+
+When one recipe wishes to call another, it should use it's own
+:meth:`cook_recipe` method. For instance::
+
+    self.cook_recipe('recipe_name', inputs, outputs)
 
 
 .. _recipe-example:
@@ -205,6 +231,7 @@ Example
 
 A trivial recipe could be constructed as follows::
 
+    import sys
     from pipeline.support.lofarrecipe import LOFARrecipe
 
     class NewRecipe(LOFARrecipe):
@@ -216,10 +243,20 @@ A trivial recipe could be constructed as follows::
             super(NewRecipe, self).go()
             self.outputs['dummy'] = self.inputs['dummy']
 
+    if __name__ == '__main__':
+        sys.exit(NewRecipe().main())
+
+It could then be invoked as follows:
+
+.. code-block:: bash
+
+    $ python NewRecipe.py -j job_name --dummy dummy_argument
+    Results:
+    dummy = dummy_argument
+
 .. rubric:: Footnotes
 
 .. [#f1] In an ideal world, these would be implemented as Abstract Base
   Classes, so they *cannot* be instantiated. However, this is precluded by the
   necessity of Python 2.5 compatibility.
-
 

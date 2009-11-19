@@ -1,15 +1,20 @@
-==============================
-The Standard Imaginge Pipeline
-==============================
+=================================
+Standard Imaging Pipeline recipes
+=================================
 
 Here we outline the various components which make up LOFAR's Standard Imaging
-Pipeline and how they can be combined to form a coherent whole.
+Pipeline and how they can be combined to form a coherent whole. These
+components are made available as pipeline recipes; the reader is encouraged to
+be familiar with the :ref:`recipe-docs` section.
 
-The SIP recipe
---------------
+.. toctree::
+    :maxdepth: 1
 
-The SIP recipe -- ``sip.py`` -- demonstrates the basic functions of an
-imaging pipeline.
-
-.. literalinclude:: ../../../pipeline/master/sip.py
+    sip
+    dppp
+    colmaker
+    vdsmaker
+    bbs
+    mwimager
+    sextractor
 
