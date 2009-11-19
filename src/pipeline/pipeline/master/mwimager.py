@@ -4,7 +4,6 @@ from subprocess import check_call
 from contextlib import closing
 
 # Cusine core
-from cuisine.ingredient import WSRTingredient
 from cuisine.parset import Parset
 
 # Local helpers
@@ -77,9 +76,13 @@ class mwimager(LOFARrecipe):
                     stderr=log
                     )
             return result
+        except CalledProcessError:
+            self.logger.exception("Call to mwimager failed")
+            return 1
         finally:
-            pass
-#            os.unlink(temp_parset_filename)
+            os.unlink(temp_parset_filename)
+
+        return 0
 
 if __name__ == '__main__':
     sys.exit(mwimager().main())

@@ -73,13 +73,17 @@ class vdsmaker(LOFARrecipe):
         self.logger.info("Combining VDS files")
         executable = self.config.get('vds', 'combinevds')
         gvds_out   = "%s/%s" % (self.inputs['directory'], self.inputs['gds'])
-        check_call([executable, gvds_out] + vdsnames)
-#        for file in vdsnames:
-#            os.unlink(file)
-        self.outputs['gds'] = gvds_out
+        try:
+            check_call([executable, gvds_out] + vdsnames)
+            self.outputs['gds'] = gvds_out
+            return 0
+        except CalledProcessError:
+            self.logger.exception("Call to combinevds failed")
+            return 1
+        finally:
+            # Save space on engines by clearing out old file lists
+            mec.execute("clear_available_list(\"%s\")" % (available_list,))
 
-       # Save space on engines by clearing out old file lists
-        mec.execute("clear_available_list(\"%s\")" % (available_list,))
 
 
 if __name__ == '__main__':
