@@ -1,13 +1,11 @@
 import sys, os
 
-# Cusine core
-from cuisine.ingredient import WSRTingredient
-
 # IPython
 from IPython.kernel import client as IPclient
 
 # Local helpers
 from pipeline.support.lofarrecipe import LOFARrecipe
+from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
 import pipeline.support.utilities as utilities
 
 def run_dppp(ms_name, ms_outname, parset, log_location):
@@ -93,6 +91,8 @@ class dppp(LOFARrecipe):
         self.logger.info("Waiting for all DPPP tasks to complete")
         tc.barrier(tasks)
         for task in tasks:
+            ##### Print failing tasks?
+            ##### Abort if all tasks failed?
             print tc.get_task_result(task)
 
         # Save space on engines by clearing out old file lists
@@ -101,17 +101,17 @@ class dppp(LOFARrecipe):
         # Now set up a vdsmaker recipe to build a GDS file describing the
         # processed data
         self.logger.info("Calling vdsmaker")
-        inputs = WSRTingredient()
-        inputs['job_name'] = self.inputs['job_name']
-        inputs['runtime_directory'] = self.config.get('DEFAULT', 'runtime_directory')
+        inputs = LOFARinput(self.inputs)
         inputs['directory'] = self.config.get('layout', 'vds_directory')
         inputs['gds'] = self.config.get('dppp', 'gds_output')
         inputs['args'] = outnames
-        inputs['config'] = self.inputs['config']
-        outputs = WSRTingredient()
-        sts = self.cook_recipe('vdsmaker', inputs, outputs)
-        
-        self.outputs['gds'] = outputs['gds']
+        outputs = LOFARoutput()
+        if self.cook_recipe('vdsmaker', inputs, outputs):
+            self.logger.warn("vdsmaker reports failure")
+            return 1
+        else:
+            self.outputs['gds'] = outputs['gds']
+            return 0
 
 
 if __name__ == '__main__':
