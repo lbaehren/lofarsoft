@@ -1,11 +1,9 @@
 import sys, os
 
-# IPython
-from IPython.kernel import client as IPclient
-
 # Local helpers
 from pipeline.support.lofarrecipe import LOFARrecipe
 from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
+from pipeline.support.ipython import LOFARTask
 import pipeline.support.utilities as utilities
 
 def run_dppp(ms_name, ms_outname, parset, log_location):
@@ -74,7 +72,7 @@ class dppp(LOFARrecipe):
                 os.path.basename(ms_name),
                 self.config.get('dppp', 'log')
             )
-            task = IPclient.StringTask(
+            task = LOFARTask(
                 "result = run_dppp(ms_name, ms_outname, parset, log_location)",
                 push=dict(
                     ms_name=ms_name,

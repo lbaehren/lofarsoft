@@ -1,7 +1,7 @@
 import sys, os, tempfile
 from subprocess import check_call
 
-from IPython.kernel import client as IPclient
+from pipeline.support.ipython import LOFARTask
 
 # Local helpers
 from pipeline.support.lofarrecipe import LOFARrecipe
@@ -50,7 +50,7 @@ class vdsmaker(LOFARrecipe):
             vdsnames.append(
                 "%s/%s.vds" % (self.inputs['directory'], os.path.basename(ms_name))
             )
-            task = IPclient.StringTask(
+            task = LOFARTask(
                 "result = make_vds(ms_name, clusterdesc, vds_name, log_location)",
                 push=dict(
                     ms_name=ms_name,
