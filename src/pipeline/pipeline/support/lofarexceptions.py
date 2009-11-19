@@ -1,5 +1,11 @@
+class ExecutableMissing(Exception):
+    pass
+
 class PipelineException(Exception):
     pass
 
-class ExecutableMissing(Exception):
+class PipelineRecipeFailed(PipelineException):
+    pass
+
+class PipelineReceipeNotFound(PipelineException):
     pass
