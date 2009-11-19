@@ -23,6 +23,7 @@ sources detected in the data.
    framework/index.rst
    recipe/index.rst
    pipeline/index.rst
+   sip/index.rst
 
 Indices and tables
 ==================
