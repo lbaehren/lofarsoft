@@ -137,6 +137,8 @@ class dppp(LOFARrecipe):
 #            self.logger.warn("colmaker reports failure")
 #            return 1
 
+        self.outputs['filenames'] = trimmed_outnames
+
         # Now set up a vdsmaker recipe to build a GDS file describing the
         # processed data
         self.logger.info("Calling vdsmaker")
