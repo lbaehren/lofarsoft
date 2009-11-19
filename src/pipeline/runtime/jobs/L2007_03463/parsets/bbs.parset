@@ -1,0 +1,17 @@
+Strategy.Stations = []
+Strategy.InputColumn = DATA
+Strategy.TimeWindow = []
+Strategy.ChunkSize = 0
+Strategy.UseSolver = F
+Strategy.Correlation.Selection = CROSS
+Strategy.Correlation.Type = []
+Strategy.Steps = [predict]
+
+Step.predict.Baselines.Station1 = []
+Step.predict.Baselines.Station2 = []
+Step.predict.Model.Sources      = []
+Step.predict.Model.Components = []
+Step.predict.Correlation.Selection = CROSS
+Step.predict.Correlation.Type = []
+Step.predict.Operation      = PREDICT
+Step.predict.OutputColumn   = MODEL_DATA
