@@ -33,13 +33,13 @@ hostname = socket.gethostname()
 logging.info('Running on node %s', hostname)
 
 # Add empty arguments to handle missing arguments. 
-sys.argv.extend(8*[''])
+sys.argv.extend(9*[''])
 try:
     # The first four arguments are dummy.
-    (seqnr, msn, fsys, lroot, psn, wd, vdsdir, dry) = sys.argv[5:13]
+    (seqnr, msn, fsys, msnvds, lroot, psn, wd, vdsdir, dry) = sys.argv[5:14]
 except ValueError:
     print 'usage:', os.path.basename(sys.argv[0]), 'dummy dummy dummy dummy', \
-          'rank ms-part filesys lofarroot parset-file wd vds-dir [no]dry'
+          'rank ms-part filesys ms-part-vds lofarroot parset-file wd vds-dir [no]dry'
     sys.exit(1)
 
 # Show input arguments
@@ -65,7 +65,8 @@ from lofar.pipeline.parset import Parset
 
 
 # Get name of input MS from VDS file, until IDPPP can handle VDS files.
-msin = Parset(msn).getString('Name')
+#msin = Parset(msn).getString('Name')
+msin = msn
 logging.info('Input MS: %s', msin)
 
 if msin == "":
