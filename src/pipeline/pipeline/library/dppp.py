@@ -7,11 +7,12 @@ from os import unlink
 from cuisine.parset import Parset
 
 def run_dppp(infile, outfile, parset):
-    executable = "/app/lofar/dev/bin/CS1_IDPPP"
+    executable = "/app/lofar/stable/bin/CS1_IDPPP"
 
     # We need to patch the parset with the correct input/output MS names.
     temp_parset_filename = mkstemp()[1]
-    temp_parset = Parset().readFromFile(parset)
+    temp_parset = Parset()
+    temp_parset.readFromFile(parset)
     temp_parset['msin'] = infile
     temp_parset['msout'] = outfile
     temp_parset.writeToFile(temp_parset_filename)
