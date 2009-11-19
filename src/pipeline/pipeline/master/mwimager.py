@@ -56,7 +56,7 @@ class mwimager(LOFARrecipe):
             self.config.get('mwimager', 'executable'),
             temp_parset_filename,
             self.config.get('cluster', 'clusterdesc'),
-            self.inputs['working_directory'],
+            self._input_or_default('working_directory'),
             log_location,
         ]
         try:
@@ -65,13 +65,7 @@ class mwimager(LOFARrecipe):
             if not self.inputs['dry_run']:
                 with closing(open(log_location, 'w')) as log:
                     result = check_call(
-                        [
-                            self.config.get('mwimager', 'executable'),
-                            temp_parset_filename,
-                            self.config.get('cluster', 'clusterdesc'),
-                            self.inputs['working_directory'],
-                            log_location,
-                        ],
+                        mwimager_cmd,
                         env=env,
                         stdout=log,
                         stderr=log
