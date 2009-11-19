@@ -30,7 +30,7 @@ def build_available_list(listname):
     import os
     from IPython.kernel.engineservice import get_engine
     available = [
-        ms_name for ms_name in ms_names if os.access(ms_name, os.R_OK)
+        filename for filename in filenames if os.access(filename, os.R_OK)
     ]
     properties = get_engine(id).properties
     properties[listname] = available
