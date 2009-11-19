@@ -32,7 +32,7 @@ class qcheck(LOFARrecipe):
         super(qcheck, self).go()
         self.logger.info("Quality check system starting")
 
-        image_names = [
+        self.outputs['data'] = [
             os.path.join(
                 self.inputs['working_directory'], self.inputs['job_name'], filename
             )
@@ -53,17 +53,18 @@ class qcheck(LOFARrecipe):
 
         self.logger.info("Building list of data available on engines")
         available_list = "%s%s" % (self.inputs['job_name'], "qcheck")
-        mec.push(dict(filenames=image_names))
+        mec.push(dict(filenames=self.outputs['data']))
         mec.execute(
             "build_available_list(\"%s\")" % (available_list,)
         )
         clusterdesc = self.config.get('cluster', 'clusterdesc')
 
 
+        self.outputs['data'] = []
         with clusterlogger(self.logger) as (loghost, logport):
             self.logger.debug("Logging to %s:%d" % (loghost, logport))
             tasks = []
-            for image_name in image_names:
+            for image_name in self.outputs['data']:
                 task = LOFARTask(
                     "result = run_qcheck(infile, pluginlist, outputdir)",
                     push=dict(
