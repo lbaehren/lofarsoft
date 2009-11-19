@@ -16,7 +16,7 @@ from pipeline import __path__ as config_path
 
 def run_dppp(infile, outfile, parset, log_location):
     config = ConfigParser()
-    config.read("%s/pipeline.cfg" % (config_path[0],))
+    config.read(os.path.join(config_path[0], 'pipeline.cfg'))
     executable = config.get('dppp', 'executable')
 
     # We need to patch the parset with the correct input/output MS names.

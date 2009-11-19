@@ -14,7 +14,7 @@ def make_vds(infile, clusterdesc, outfile, log_location):
     # The dev version of makevds appears to make more comprehensive VDS files
     # (including the FileName field) than the stable version.
     config = ConfigParser()
-    config.read("%s/pipeline.cfg" % (config_path[0],))
+    config.read(os.path.join(config_path[0], 'pipeline.cfg'))
     executable = config.get('vds', 'makevds')
 
     try:

@@ -27,7 +27,7 @@ def sextract(filename, dataset):
         image2fits = config.get('sextractor', 'image2fits')
 
         tempdir = mkdtemp(dir='/data/swinbank')
-        fitsfile = "%s/%s.fits" % (tempdir, os.path.basename(filename))
+        fitsfile = os.path.join(tempdir, os.path.basename(filename) + ".fits")
 
         command_line = [image2fits, "in=%s" % (os.path.basename(filename)), "out=%s" % (fitsfile)]
         cwd = os.path.dirname(filename)
@@ -39,7 +39,7 @@ def sextract(filename, dataset):
 
         image = ImageData(FitsFile(fitsfile), dataset=dataset)
     except Exception, inst:
-        return "ERRRRRRROR: %s on %s, %s" % (str((type(inst))), platform.node(), fitsfile)
+        return "ERROR: %s on %s, %s" % (str((type(inst))), platform.node(), fitsfile)
 
     sr = image.sextract()
     with closing(connection()) as con:
