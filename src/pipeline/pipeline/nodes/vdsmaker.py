@@ -2,9 +2,10 @@
 from __future__ import with_statement
 from contextlib import closing
 from subprocess import check_call
-from os.path import dirname
 from ConfigParser import SafeConfigParser as ConfigParser
-import os, errno
+import os.path
+
+from pipeline.support.utilities import create_directory
 
 # Root directory for config file
 from pipeline import __path__ as config_path
@@ -17,13 +18,7 @@ def make_vds(infile, clusterdesc, outfile, log_location):
     config.read(os.path.join(config_path[0], 'pipeline.cfg'))
     executable = config.get('vds', 'makevds')
 
-    try:
-        # Make the log directory
-        os.makedirs(dirname(log_location))
-    except OSError, failure:
-        # It's ok if the directory already exists
-        if failure.errno != errno.EEXIST:
-            raise
+    create_directory(os.path.dirname(log_location))
 
     with closing(open(log_location, 'w')) as log:
         log.write("Executing: %s %s %s %s" %(executable, clusterdesc, infile, outfile))

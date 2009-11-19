@@ -3,13 +3,12 @@ from __future__ import with_statement
 from contextlib import closing
 from subprocess import check_call, CalledProcessError
 from tempfile import mkstemp
-from os.path import dirname
 from ConfigParser import SafeConfigParser as ConfigParser
-import os, errno
+import os.path
 
 # External
 from cuisine.parset import Parset
-from pipeline.support.utilities import patch_parset
+from pipeline.support.utilities import patch_parset, create_directory
 
 # Root directory for config file
 from pipeline import __path__ as config_path
@@ -28,13 +27,8 @@ def run_dppp(infile, outfile, parset, log_location):
         }
     )
 
-    try:
-        # Make the log directory
-        os.makedirs(dirname(log_location))
-    except OSError, failure:
-        # It's ok if the directory already exists
-        if failure.errno != errno.EEXIST:
-            raise
+    create_directory(os.path.dirname(log_location))
+    create_directory(os.path.dirname(outfile))
 
     try:
         # What is the '1' for? Required by DP3...

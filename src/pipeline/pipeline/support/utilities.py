@@ -55,11 +55,15 @@ def patch_parset(parset, data, output_dir=None):
     temp_parset.writeToFile(temp_parset_filename)
     return temp_parset_filename
 
-def move_log(log_file, destination):
+def create_directory(dirname):
+    # Recursively create a directory, without failing if it already exists
     try:
-        os.makedirs(destination)
+        os.makedirs(dirname)
     except OSError, failure:
         if failure.errno != errno.EEXIST:
             raise
+
+def move_log(log_file, destination):
+    create_directory(destination)
     shutil.move(log_file, destination)
 

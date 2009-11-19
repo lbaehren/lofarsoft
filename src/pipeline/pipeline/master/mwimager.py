@@ -126,13 +126,7 @@ class mwimager(LOFARrecipe):
                 self.logger.debug(
                     "Moving logfile %s to %s" % (log_file, destination)
                 )
-                # Make sure the destination dir exists
-                try:
-                    os.makedirs(os.path.dirname(destination))
-                except OSError, failure:
-                    if failure.errno != errno.EEXIST:
-                        raise
-                shutil.move(log_file, destination)
+                utilities.move_log(log_file, destination)
         try:
             self.logger.debug("Removing temporary log directory")
             os.rmdir(os.path.dirname(log_root))
