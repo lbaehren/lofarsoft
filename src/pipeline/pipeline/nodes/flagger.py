@@ -9,7 +9,7 @@ def flagger_node(LOFARnode):
     """
     Flag out CORRECTED_DATA greater than some maximum value.
     """
-    def run(input, output, max_value):
+    def run(self, input, output, max_value):
         with log_time(self.logger): 
             self.logger.info("Processing: %s" % (input))
             try:
