@@ -76,8 +76,7 @@ class dppp(LOFARrecipe):
         )
 
         with clusterlogger(self.logger) as (loghost, logport):
-            self.logger.info(loghost)
-            self.logger.info(logport)
+            self.logger.debug("Logging to %s:%d" % (loghost, logport))
             tasks = []
             outnames = []
             for ms_name in ms_names:
