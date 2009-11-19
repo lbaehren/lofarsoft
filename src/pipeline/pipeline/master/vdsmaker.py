@@ -15,8 +15,8 @@ class vdsmaker(LOFARrecipe):
     def __init__(self):
         super(vdsmaker, self).__init__()
         self.optionparser.add_option(
-            '-g', '--gds',
-            dest="gds",
+            '-g', '--gvds',
+            dest="gvds",
             help="Output file name"
         )
         self.optionparser.add_option(
@@ -82,10 +82,10 @@ class vdsmaker(LOFARrecipe):
         # Combine VDS files to produce GDS
         self.logger.info("Combining VDS files")
         executable = self.config.get('vds', 'combinevds')
-        gvds_out   = "%s/%s" % (self.inputs['directory'], self.inputs['gds'])
+        gvds_out   = "%s/%s" % (self.inputs['directory'], self.inputs['gvds'])
         try:
             check_call([executable, gvds_out] + vdsnames)
-            self.outputs['gds'] = gvds_out
+            self.outputs['gvds'] = gvds_out
             return 0
         except CalledProcessError:
             self.logger.exception("Call to combinevds failed")

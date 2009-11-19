@@ -50,11 +50,60 @@ class sip(LOFARrecipe):
         if self.cook_recipe('dppp', inputs, outputs):
             self.logger.warn("DPPP reports failure")
             return 1
-        processed_filenames = outputs['filenames']
+        ms_names = outputs['ms_names']
+
+        # Drop known-bad stations
+        self.logger.info("Calling excluder")
+        inputs = LOFARinput(self.inputs)
+        inputs['station'] = "DE001LBA"
+        inputs['suffix'] = ".excluded"
+        inputs['args'] = ms_names
+        outputs = LOFARoutput()
+        if self.cook_recipe('excluder', inputs, outputs):
+            self.logger.warn("excluder reports failure")
+            return 1
+        excluded_outnames = outputs['data']
+
+        # Trim off any bad section of the data
+        self.logger.info("Calling trimmer")
+        inputs = LOFARinput(self.inputs)
+        inputs['start_seconds'] = 300.0
+        inputs['end_seconds'] = 300.0
+        inputs['suffix'] = ".trimmed"
+        inputs['args'] = excluded_outnames
+        outputs = LOFARoutput()
+        if self.cook_recipe('trimmer', inputs, outputs):
+            self.logger.warn("trimmer reports failure")
+            return 1
+        trimmed_outnames = outputs['data']
+
+        # Now set up a colmaker recipe to insert missing columns in the
+        # processed data
+#        self.logger.info("Calling colmaker")
+#        inputs = LOFARinput(self.inputs)
+#        inputs['args'] = trimmed_outnames
+#        outputs = LOFARoutput()
+#        if self.cook_recipe('colmaker', inputs, outputs):
+#            self.logger.warn("colmaker reports failure")
+#            return 1
+
+        # Now set up a vdsmaker recipe to build a GDS file describing the
+        # processed data
+        self.logger.info("Calling vdsmaker")
+        inputs = LOFARinput(self.inputs)
+        inputs['directory'] = self.config.get('layout', 'vds_directory')
+        inputs['gvds'] = self.config.get('dppp', 'gvds_output')
+        inputs['args'] = trimmed_outnames
+        outputs = LOFARoutput()
+        if self.cook_recipe('vdsmaker', inputs, outputs):
+            self.logger.warn("vdsmaker reports failure")
+            return 1
+        gvds = outputs['gvds']
 
         self.logger.info("Calling BBS")
         inputs = LOFARinput(self.inputs)
         inputs['force'] = True
+        inputs['gvds'] = gvds
         outputs = LOFARoutput()
         if self.cook_recipe('bbs', inputs, outputs):
             self.logger.warn("BBS reports failure")
@@ -75,19 +124,19 @@ class sip(LOFARrecipe):
         self.logger.info("Calling vdsmaker")
         inputs = LOFARinput(self.inputs)
         inputs['directory'] = self.config.get('layout', 'vds_directory')
-        inputs['gds'] = "flagged.gds"
+        inputs['gvds'] = "flagged.gvds"
         inputs['args'] = flagged_outnames
         outputs = LOFARoutput()
         if self.cook_recipe('vdsmaker', inputs, outputs):
             self.logger.warn("vdsmaker reports failure")
             return 1
         else:
-            self.outputs['gds'] = outputs['gds']
-        flagged_gds = outputs['gds']
+            self.outputs['gvds'] = outputs['gvds']
+        flagged_gvds = outputs['gvds']
 
         self.logger.info("Calling MWImager")
         inputs = LOFARinput(self.inputs)
-        inputs['gvds'] = flagged_gds
+        inputs['gvds'] = flagged_gvds
         outputs = LOFARoutput()
         if self.cook_recipe('mwimager', inputs, outputs):
             self.logger.warn("MWImager reports failure")

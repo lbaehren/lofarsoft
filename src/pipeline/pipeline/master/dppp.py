@@ -95,58 +95,8 @@ class dppp(LOFARrecipe):
                 failure = True
         if failure:
             return 1
-
-        # Drop known-bad stations
-        self.logger.info("Calling excluder")
-        inputs = LOFARinput(self.inputs)
-        inputs['station'] = "DE001LBA"
-        inputs['suffix'] = ".excluded"
-        inputs['args'] = outnames
-        outputs = LOFARoutput()
-        if self.cook_recipe('excluder', inputs, outputs):
-            self.logger.warn("excluder reports failure")
-            return 1
-        excluded_outnames = outputs['data']
-
-        # Trim off any bad section of the data
-        self.logger.info("Calling trimmer")
-        inputs = LOFARinput(self.inputs)
-        inputs['start_seconds'] = 300.0
-        inputs['end_seconds'] = 300.0
-        inputs['suffix'] = ".trimmed"
-        inputs['args'] = excluded_outnames
-        outputs = LOFARoutput()
-        if self.cook_recipe('trimmer', inputs, outputs):
-            self.logger.warn("trimmer reports failure")
-            return 1
-        trimmed_outnames = outputs['data']
-
-        # Now set up a colmaker recipe to insert missing columns in the
-        # processed data
-#        self.logger.info("Calling colmaker")
-#        inputs = LOFARinput(self.inputs)
-#        inputs['args'] = trimmed_outnames
-#        outputs = LOFARoutput()
-#        if self.cook_recipe('colmaker', inputs, outputs):
-#            self.logger.warn("colmaker reports failure")
-#            return 1
-
-        self.outputs['filenames'] = trimmed_outnames
-
-        # Now set up a vdsmaker recipe to build a GDS file describing the
-        # processed data
-        self.logger.info("Calling vdsmaker")
-        inputs = LOFARinput(self.inputs)
-        inputs['directory'] = self.config.get('layout', 'vds_directory')
-        inputs['gds'] = self.config.get('dppp', 'gds_output')
-        inputs['args'] = trimmed_outnames
-        outputs = LOFARoutput()
-        if self.cook_recipe('vdsmaker', inputs, outputs):
-            self.logger.warn("vdsmaker reports failure")
-            return 1
-        else:
-            self.outputs['gds'] = outputs['gds']
-            return 0
+        self.outputs['ms_names'] = outnames
+        return 0
 
 if __name__ == '__main__':
     sys.exit(dppp().main())
