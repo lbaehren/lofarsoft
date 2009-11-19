@@ -1,6 +1,6 @@
-export PYTHONPATH="/data/users/swinbank/app/lib/python2.5/site-packages:/app/usg/release/lib/python:/app/pyrap/lib:/app/numpy/numpy-1.2.1/lib/python2.5/site-packages"
-export PATH="/data/users/swinbank/app/bin:/usr/local/bin:/usr/bin:/bin"
-export LD_LIBRARY_PATH="/data/users/swinbank/app/lib/:/app/pyrap/lib:/app/casacore/lib"
+export PYTHONPATH="/home/swinbank/apps/lib/python2.5/site-packages:/opt/pyrap/lib"
+export PATH="/home/swinbank/apps/bin:/usr/local/bin:/usr/bin:/bin"
+export LD_LIBRARY_PATH="/home/swinbank/apps/lib/:/opt/pyrap/lib:/opt/casacore/lib"
 CONTROLPATH=$1
 PIDPATH=$CONTROLPATH/engines/`hostname`
 
@@ -13,7 +13,7 @@ case "$2" in
             do
                  /sbin/start-stop-daemon --start -b -m             \
                    --pidfile $PIDPATH/ipengine$CPU.pid             \
-                   --exec /data/users/swinbank/app/bin/ipengine -- \
+                   --exec /home/swinbank/apps/bin/ipengine -- \
                    --furl-file=$CONTROLPATH/engine.furl            \
                    --logfile=$PIDPATH/log
             done
