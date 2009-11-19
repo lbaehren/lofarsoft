@@ -10,7 +10,8 @@ case "$2" in
   start) 
          /sbin/start-stop-daemon --start -b -m --pidfile $PIDPATH/ipengine.pid \
            --exec /data/users/swinbank/app/bin/ipengine -- \
-           --furl-file=$CONTROLPATH/engine.furl
+           --furl-file=$CONTROLPATH/engine.furl \
+           --logfile=$PIDPATH/log
          ;;
   stop)
          /sbin/start-stop-daemon --stop --pidfile $PIDPATH/ipengine.pid

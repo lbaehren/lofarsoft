@@ -11,7 +11,8 @@ case "$2" in
            --exec /data/users/swinbank/app/bin/ipcontroller -- -xy \
            --engine-furl-file=$CONTROLPATH/engine.furl \
            --task-furl-file=$CONTROLPATH/task.furl \
-           --multiengine-furl-file=$CONTROLPATH/multiengine.furl
+           --multiengine-furl-file=$CONTROLPATH/multiengine.furl \
+           --logfile=$CONTROLPATH/ipc.log
          ;;
   stop)
          /sbin/start-stop-daemon --stop --pidfile $CONTROLPATH/ipc.pid
