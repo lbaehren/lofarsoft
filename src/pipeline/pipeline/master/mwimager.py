@@ -62,7 +62,10 @@ class mwimager(LOFARrecipe):
             self.config.get('mwimager', 'executable'),
             temp_parset_filename,
             self.config.get('cluster', 'clusterdesc'),
-            self._input_or_default('working_directory'),
+            os.path.join(
+                self._input_or_default('working_directory'),
+                self.inputs['job_name']
+            ),
             log_root
         ]
         try:

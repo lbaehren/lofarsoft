@@ -96,8 +96,11 @@ class bbs(LOFARrecipe):
             self._input_or_default('gvds'),
             self._input_or_default('parset'),
             self._input_or_default('skymodel'),
-            self._input_or_default('working_directory')
-            ]
+            os.path.join(
+                self._input_or_default('working_directory'),
+                self.inputs['job_name']
+            )
+        ]
         if self.inputs['force']:
             bbs_cmd.insert(1, '-f')
         # Should BBS verbosity be linked to that of the pipeline, or should be
