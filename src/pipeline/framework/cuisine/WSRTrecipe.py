@@ -48,6 +48,7 @@ class WSRTrecipe(object):
         )
 
         self.helptext = """LOFAR/WSRT pipeline framework"""
+        self.recipe_path = ['.']
 
     def help(self):
         """Shows helptext and inputs and outputs of the recipe"""
@@ -175,7 +176,7 @@ class WSRTrecipe(object):
     ## Problem is you might need all of them in a recipe describing a pipeline
     def cook_recipe(self, recipe, inputs, outputs):
         """Execute another recipe/pipeline as part of this one"""
-        c = cook.PipelineCook(recipe, inputs, outputs, self.logger)
+        c = cook.PipelineCook(recipe, inputs, outputs, self.logger, self.recipe_path)
         c.spawn()
 
     def cook_system(self, command, options):

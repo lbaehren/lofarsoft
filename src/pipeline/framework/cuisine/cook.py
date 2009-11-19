@@ -1,5 +1,5 @@
 #from message import ErrorLevel, NotifyLevel, VerboseLevel, DebugLevel
-import time, os, select, pty, fcntl, sys, logging
+import time, os, select, pty, fcntl, sys, logging, imp
 
 class CookError(Exception):
     """Base class for all exceptions raised by this module."""
@@ -16,11 +16,11 @@ class WSRTCook(object):
         self.logger   = logger
 
 class PipelineCook(WSRTCook):
-    def __init__(self, task, inputs, outputs, logger):
+    def __init__(self, task, inputs, outputs, logger, recipe_path):
         super(PipelineCook, self).__init__(task, inputs, outputs, logger)
         try:
-            exec(eval("'from %s import %s' % (task, task)"))
-            exec(eval("'self.recipe = %s()' % task"))
+            module = imp.load_module(task, *imp.find_module(task, recipe_path))
+            self.recipe = getattr(module, task)()
             self.recipe.logger = logging.getLogger("%s.%s" % (self.logger.name, task))
             self.recipe.logger.setLevel(self.logger.level)
         except Exception, e:
