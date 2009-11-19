@@ -5,11 +5,19 @@ from pipeline.support.lofarrecipe import LOFARrecipe
 from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
 from pipeline.support.ipython import LOFARTask
 import pipeline.support.utilities as utilities
+from pipeline.support.clusterlogger import LogRecordSocketReceiver
 
 def run_dppp(ms_name, ms_outname, parset, log_location, executable, initscript):
     # Run on engine to process data with DPPP
-    from pipeline.nodes.dppp import run_dppp
-    return run_dppp(ms_name, ms_outname, parset, log_location, executable, initscript)
+    from pipeline.nodes.dppp import dppp_node
+    return dppp_node().run(
+        ms_name,
+        ms_outname,
+        parset,
+        log_location,
+        executable,
+        initscript
+    )
 
 class dppp(LOFARrecipe):
     def __init__(self):
@@ -66,6 +74,10 @@ class dppp(LOFARrecipe):
             "build_available_list(\"%s\")" % (available_list,)
         )
 
+        # Start listening for log messages from the nodes
+        logserver = LogRecordSocketReceiver(self.logger)
+        logserver.serve_until_stopped()
+
         tasks = []
         outnames = []
         for ms_name in ms_names:
@@ -105,6 +117,10 @@ class dppp(LOFARrecipe):
                 self.logger.info("Dry run: scheduling skipped")
         self.logger.info("Waiting for all DPPP tasks to complete")
         tc.barrier(tasks)
+
+        # All nodes stopped working; shut down log listener
+        logserver.stop()
+
         failure = False
         for task in tasks:
             ##### Print failing tasks?
