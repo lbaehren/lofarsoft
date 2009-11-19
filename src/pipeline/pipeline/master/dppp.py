@@ -8,8 +8,18 @@ from utilities import ClusterError, get_parset, check_for_path
 from IPython.kernel import client as IPclient
 
 def run_dppp(ms_name, ms_outname, parset):
+    # Run on engine to process data with DPPP
     from pipeline.nodes.dppp import run_dppp
     return run_dppp(ms_name, ms_outname, parset)
+
+def build_available_list():
+    # Run on engine to construct list of locally-stored data
+    from twisted.python import log
+    log.msg('building available list')
+    import os
+    from IPython.kernel.engineservice import get_engine
+    engineapi = get_engine(id)
+    engineapi.properties['available'] = [ms_name for ms_name in ms_names if os.access(ms_name, os.R_OK)]
 
 class TestPipeline(WSRTrecipe):
     def __init__(self):
@@ -51,15 +61,21 @@ class TestPipeline(WSRTrecipe):
         try:
             tc  = IPclient.TaskClient(self.inputs['runtime_directory'] + '/task.furl')
             mec = IPclient.MultiEngineClient(self.inputs['runtime_directory'] + '/multiengine.furl')
-            mec.push_function(dict(run_dppp=run_dppp))
+            mec.push_function(dict(run_dppp=run_dppp, build_available_list=build_available_list))
         except:
             self.logger.error("Unable to initialise cluster")
             raise ClusterError
 
+        # We read the GVDS file to find the names of all the data files we're
+        # going to process, then push this list out to the engines so they can
+        # let us know which we have available
         ms_names = [
             gvds["Part%d.FileName" % (part_no,)] 
             for part_no in xrange(int(gvds["NParts"]))
         ]
+
+        mec.push(dict(ms_names=ms_names))
+        mec.execute("build_available_list()")
 
         parset = "%s/jobs/%s/dppp.parset" % (
             self.inputs['runtime_directory'], 
