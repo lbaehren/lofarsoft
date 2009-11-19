@@ -118,7 +118,7 @@ class bbs(LOFARrecipe):
             self.logger.debug("Executing: %s" % " ".join(bbs_cmd))
             if not self.inputs['dry_run']:
                 with closing(open(log_location, 'w')) as log:
-                    check_call(
+                    result = check_call(
                         bbs_cmd,
                         env=env,
                         stdout=log,
@@ -209,7 +209,7 @@ class bbs(LOFARrecipe):
         for node in clusterdesc['ComputeNodes']:
             self.logger.debug("Node: %s" % (node))
             try:
-                result = check_call(
+                check_call(
                     [
                         "ssh",
                         node,
