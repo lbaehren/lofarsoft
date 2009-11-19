@@ -59,8 +59,6 @@ class qcheck(LOFARrecipe):
         )
         clusterdesc = self.config.get('cluster', 'clusterdesc')
 
-
-        self.outputs['data'] = []
         with clusterlogger(self.logger) as (loghost, logport):
             self.logger.debug("Logging to %s:%d" % (loghost, logport))
             tasks = []
