@@ -123,7 +123,7 @@ class dppp(LOFARrecipe):
         inputs = LOFARinput(self.inputs)
         inputs['start_seconds'] = 300.0
         inputs['end_seconds'] = 300.0
-        inputs['suffix'] = "trimmed"
+        inputs['suffix'] = ".trimmed"
         inputs['args'] = outnames
         outputs = LOFARoutput()
         if self.cook_recipe('trimmer', inputs, outputs):
@@ -131,11 +131,23 @@ class dppp(LOFARrecipe):
             return 1
         trimmed_outnames = outputs['data']
 
+        # Drop known-bad stations
+        self.logger.info("Calling excluder")
+        inputs = LOFARinput(self.inputs)
+        inputs['station'] = "DE001LBA"
+        inputs['suffix'] = ".excluded"
+        inputs['args'] = trimmed_outnames
+        outputs = LOFARoutput()
+        if self.cook_recipe('excluder', inputs, outputs):
+            self.logger.warn("excluder reports failure")
+            return 1
+        excluded_outnames = outputs['data']
+
         # Now set up a colmaker recipe to insert missing columns in the
         # processed data
         self.logger.info("Calling colmaker")
         inputs = LOFARinput(self.inputs)
-        inputs['args'] = trimmed_outnames
+        inputs['args'] = excluded_outnames
         outputs = LOFARoutput()
         if self.cook_recipe('colmaker', inputs, outputs):
             self.logger.warn("colmaker reports failure")
