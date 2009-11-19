@@ -3,7 +3,6 @@ import sys, os
 
 # Local helpers
 from pipeline.support.lofarrecipe import LOFARrecipe
-from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
 from pipeline.support.ipython import LOFARTask
 import pipeline.support.utilities as utilities
 from pipeline.support.clusterlogger import clusterlogger
