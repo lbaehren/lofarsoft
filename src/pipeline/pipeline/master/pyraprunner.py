@@ -26,7 +26,7 @@ class pyraprunner(LOFARrecipe):
             help="Suffix to add to trimmed data (default: overwrite existing)"
         )
 
-    def _generate_arguments(self);
+    def _generate_arguments(self):
         return ''
 
     def go(self):
@@ -38,7 +38,7 @@ class pyraprunner(LOFARrecipe):
         function_name = self.__class__.__name__ + "_remote"
         mec.push_function(
             {
-                function_name: remote_function,
+                function_name: self.remote_function,
                 "build_available_list": utilities.build_available_list,
                 "clear_available_list": utilities.clear_available_list
             }
@@ -57,7 +57,7 @@ class pyraprunner(LOFARrecipe):
         outnames = []
         for ms_name in ms_names:
             outnames.append(ms_name + self.inputs['suffix'])
-            executable_string = "result = %s(ms_name, \"%s\", %s)" % (
+            execute_string = "result = %s(ms_name, \"%s\", %s)" % (
                 function_name, outnames[-1], self._generate_arguments()
             )
             task = LOFARTask(

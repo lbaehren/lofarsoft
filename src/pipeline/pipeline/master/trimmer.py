@@ -6,6 +6,11 @@ def remote_function(input, output, start_seconds, end_seconds):
     return trim_ms(input, output, start_seconds, end_seconds)
 
 class trimmer(pyraprunner):
+    @staticmethod
+    def remote_function(input, output, start_seconds, end_seconds):
+        from pipeline.nodes.trimmer import trim_ms
+        return trim_ms(input, output, start_seconds, end_seconds)
+
     def __init__(self):
         super(trimmer, self).__init__()
         self.optionparser.add_option(
