@@ -30,8 +30,7 @@ class sextractor(LOFARrecipe):
         mec.push_function(
             dict(
                 sextract=sextract,
-                build_available_list=utilities.build_available_list,
-                clear_available_list=utilities.clear_available_list
+                build_available_list=utilities.build_available_list
             )
         )
         self.logger.info("Pushed functions to cluster")
@@ -75,10 +74,15 @@ class sextractor(LOFARrecipe):
             ##### Print failing tasks?
             ##### Abort if all tasks failed?
             res = tc.get_task_result(task)
-            self.logger.info("Found %d sources" % (res['result']))
+            self.logger.info(res)
             if res.failure:
                 print res.failure
 
+        mec.push_function(
+            dict(
+                clear_available_list=utilities.clear_available_list
+            )
+        )
         # Save space on engines by clearing out old file lists
         mec.execute("clear_available_list(\"%s\")" % (available_list,))
 

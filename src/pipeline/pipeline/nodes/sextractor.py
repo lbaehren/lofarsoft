@@ -14,33 +14,44 @@ from tkp_lib.accessors import FitsFile
 from tkp_lib.image import ImageData
 from tkp_lib.database import connection
 
+from tkp_lib.dataset import DataSet
+
 def sextract(filename, dataset):
-    config = ConfigParser()
-    config.read("%s/pipeline.cfg" % (config_path[0],))
-    image2fits = config.get('sextractor', 'image2fits')
+    # Hack around MonetDB concurrency issues(!)
+    import time, random
+    time.sleep(random.randint(0,60))
 
-    tempdir = mkdtemp()
-    fitsfile = "%s/temp.fits" % (tempdir)
+    try:
+        config = ConfigParser()
+        config.read("%s/pipeline.cfg" % (config_path[0],))
+        image2fits = config.get('sextractor', 'image2fits')
 
-    command_line = [image2fits, "in=%s" % (os.path.basename(filename)), "out=%s" % (fitsfile)]
-    cwd = os.path.dirname(filename)
+        tempdir = mkdtemp(dir='/data/swinbank')
+        fitsfile = "%s/%s.fits" % (tempdir, os.path.basename(filename))
 
-    check_call(
-        command_line,
-        cwd=os.path.dirname(filename)
-    )
+        command_line = [image2fits, "in=%s" % (os.path.basename(filename)), "out=%s" % (fitsfile)]
+        cwd = os.path.dirname(filename)
 
-    image = ImageData(FitsFile(fitsfile), dataset=dataset)
+        check_call(
+            command_line,
+            cwd=os.path.dirname(filename)
+        )
+
+        image = ImageData(FitsFile(fitsfile), dataset=dataset)
+    except Exception, inst:
+        return "ERRRRRRROR: %s on %s, %s" % (str((type(inst))), platform.node(), fitsfile)
+
     sr = image.sextract()
     with closing(connection()) as con:
         sr.savetoDB(con)
     
     rmtree(tempdir)
-    return len(sr)
+    return "%s found %d sources" % (filename, len(sr))
 
 if __name__ == "__main__":
     from sys import argv
+    dataset = DataSet("command line")
     try:
-        sextract(argv[1])
+        sextract(argv[1], dataset)
     except:
         print "Usage: sextractor [filename]"
