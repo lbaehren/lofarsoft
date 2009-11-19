@@ -14,7 +14,6 @@ class vdsreader(LOFARrecipe):
             help="G(V)DS file describing data to be processed"
         )
 
-
     def go(self):
         self.logger.info("Starting vdsreader run")
         super(vdsreader, self).go()
@@ -32,5 +31,5 @@ class vdsreader(LOFARrecipe):
         ]
         self.logger.debug(ms_names)
 
-        self.outputs['ms_names'] = ms_names
+        self.outputs['data'] = ms_names
         return 0

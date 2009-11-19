@@ -6,14 +6,29 @@ from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
 from pipeline.support.ipython import LOFARTask
 import pipeline.support.utilities as utilities
 
-def run_dppp(ms_name, ms_outname, parset, log_location):
+def run_dppp(ms_name, ms_outname, parset, log_location, executable, initscript):
     # Run on engine to process data with DPPP
     from pipeline.nodes.dppp import run_dppp
-    return run_dppp(ms_name, ms_outname, parset, log_location)
+    return run_dppp(ms_name, ms_outname, parset, log_location, executable, initscript)
 
 class dppp(LOFARrecipe):
     def __init__(self):
         super(dppp, self).__init__()
+        self.optionparser.add_option(
+            '--executable',
+            dest="executable",
+            help="DPPP Executable"
+        )
+        self.optionparser.add_option(
+            '--initscript',
+            dest="initscript",
+            help="DPPP initscript"
+        )
+        self.optionparser.add_option(
+            '--log',
+            dest="log",
+            help="Log file name"
+        )
         self.optionparser.add_option(
             '-p', '--parset',
             dest="parset",
@@ -56,7 +71,7 @@ class dppp(LOFARrecipe):
         for ms_name in ms_names:
             outnames.append(
                 os.path.join(
-                    self._input_or_default('working_directory'),
+                    self.inputs['working_directory'],
                     self.inputs['job_name'],
                     os.path.basename(ms_name) + ".dppp"
                 )
@@ -68,12 +83,14 @@ class dppp(LOFARrecipe):
                 self.config.get('dppp', 'log')
             )
             task = LOFARTask(
-                "result = run_dppp(ms_name, ms_outname, parset, log_location)",
+                "result = run_dppp(ms_name, ms_outname, parset, log_location, executable, initscript)",
                 push=dict(
                     ms_name=ms_name,
                     ms_outname=outnames[-1],
-                    parset=self._input_or_default('parset'),
-                    log_location=log_location
+                    parset=self.inputs['parset'],
+                    log_location=log_location,
+                    executable=self.inputs['executable'],
+                    initscript=self.inputs['initscript']
                 ),
                 pull="result",
                 depend=utilities.check_for_path,
@@ -92,10 +109,11 @@ class dppp(LOFARrecipe):
             if res.failure:
                 self.logger.warn("Task %s failed" % (task))
                 self.logger.warn(res)
+                self.logger.warn(res.failure.getTraceback())
                 failure = True
         if failure:
             return 1
-        self.outputs['ms_names'] = outnames
+        self.outputs['data'] = outnames
         return 0
 
 if __name__ == '__main__':

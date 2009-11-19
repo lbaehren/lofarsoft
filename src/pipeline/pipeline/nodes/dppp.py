@@ -12,14 +12,7 @@ from pipeline.support.utilities import patch_parset, create_directory
 from pipeline.support.lofarexceptions import ExecutableMissing
 import pipeline.support.utilities as utilities
 
-# Root directory for config file
-from pipeline import __path__ as config_path
-
-def run_dppp(infile, outfile, parset, log_location):
-    config = ConfigParser()
-    config.read(os.path.join(config_path[0], 'pipeline.cfg'))
-    executable = config.get('dppp', 'executable')
-
+def run_dppp(infile, outfile, parset, log_location, executable, initscript):
     # We need to patch the parset with the correct input/output MS names.
     temp_parset_filename = patch_parset(
         parset, {
@@ -31,9 +24,7 @@ def run_dppp(infile, outfile, parset, log_location):
     create_directory(os.path.dirname(log_location))
     create_directory(os.path.dirname(outfile))
 
-    env = utilities.read_initscript(
-        config.get('dppp', 'initscript')
-    )
+    env = utilities.read_initscript(initscript)
 
     try:
         if not os.access(executable, os.X_OK):

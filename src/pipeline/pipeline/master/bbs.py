@@ -5,12 +5,23 @@ from contextlib import closing
 
 # Local helpers
 from pipeline.support.lofarrecipe import LOFARrecipe
+from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
 import pipeline.support.utilities as utilities
 from pipeline.support.clusterdesc import ClusterDesc
 
 class bbs(LOFARrecipe):
     def __init__(self):
         super(bbs, self).__init__()
+        self.optionparser.add_option(
+            '--executable',
+            dest="executable",
+            help="Executable to be run (ie, calibrate script)"
+        )
+        self.optionparser.add_option(
+            '--initscript',
+            dest="initscript",
+            help="Initscript to source (ie, lofarinit.sh)"
+        )
         self.optionparser.add_option(
             '-g', '--g(v)ds-file',
             dest="gvds",
@@ -57,59 +68,95 @@ class bbs(LOFARrecipe):
             dest="db_name",
             help="Database name"
         )
-
         self.optionparser.add_option(
             '--instrument-db',
             dest="instrument_db",
             help="Instrumnet database location"
+        )
+        self.optionparser.add_option(
+            '--log',
+            dest="log",
+            help="Log file"
         )
 
     def go(self):
         self.logger.info("Starting BBS run")
         super(bbs, self).go()
 
+        # Now set up a vdsmaker recipe to build a GDS file describing the
+        # processed data
+        self.logger.info("Calling vdsmaker")
+        inputs = LOFARinput(self.inputs)
+        inputs['directory'] = self.config.get('layout', 'vds_directory')
+        inputs['gvds'] = self.inputs['gvds']
+        inputs['args'] = self.inputs['args']
+        outputs = LOFARoutput()
+        if self.cook_recipe('vdsmaker', inputs, outputs):
+            self.logger.warn("vdsmaker reports failure")
+            return 1
+
         clusterdesc = ClusterDesc(
             self.config.get('cluster', 'clusterdesc')
         )
 
-        if not self.inputs['skymodel']:
-            self.inputs['skymodel'] = "%s/%s" % (
-                self.config.get("layout", "parset_directory"),
-                self.config.get("bbs", "skymodel")
-            )
-            self.logger.info("Using %s for %s skymodel" % 
-                (self.inputs['parset'], "BBS")
-            )
-        if not os.access(self.inputs['skymodel'], os.R_OK):
+        self.inputs['gvds'] = os.path.join(
+            self.config.get("layout", "vds_directory"),
+            self.inputs['gvds']
+        )
+        self.logger.info("Using %s for %s gvds" %
+            (self.inputs['gvds'], "BBS")
+        )
+        if not os.access(self.inputs['gvds'], os.R_OK):
+            self.logger.info("couldn't find gvds")
             raise IOError
 
-        env = utilities.read_initscript(
-            self.config.get('bbs', 'initscript')
+        self.inputs['skymodel'] = os.path.join(
+            self.config.get("layout", "parset_directory"),
+            self.inputs['skymodel']
         )
+        self.logger.info("Using %s for %s skymodel" %
+            (self.inputs['skymodel'], "BBS")
+        )
+        if not os.access(self.inputs['skymodel'], os.R_OK):
+            self.logger.info("couldn't find skymodel")
+            raise IOError
+
+        self.inputs['parset'] = os.path.join(
+            self.config.get("layout", "parset_directory"),
+            self.inputs['parset']
+        )
+        self.logger.info("Using %s for %s parset" %
+            (self.inputs['parset'], "BBS")
+        )
+        if not os.access(self.inputs['parset'], os.R_OK):
+            self.logger.info("couldn't find parset")
+            raise IOError
+
+        env = utilities.read_initscript(self.inputs['initscript'])
         
         log_location = "%s/%s" % (
             self.config.get('layout', 'log_directory'),
-            self.config.get('bbs', 'log')
+            self.inputs['log'],
         )
         self.logger.debug("Logging to %s" % (log_location))
         self.logger.debug("Building BBS command string")
         bbs_cmd = [
-            self.config.get('bbs', 'executable'),
-            "--db", self._input_or_default('db_host'),
-            "--db-name", self._input_or_default('db_name'),
-            "--db-user", self._input_or_default('db_user'),
+            self.inputs['executable'],
+            "--db", self.inputs['db_host'],
+            "--db-name", self.inputs['db_name'],
+            "--db-user", self.inputs['db_user'],
             "--cluster-desc", self.config.get('cluster', 'clusterdesc'),
-            "--key", self._input_or_default('key'),
-            "--instrument-db", self._input_or_default('instrument_db'),
-            self._input_or_default('gvds'),
-            self._input_or_default('parset'),
-            self._input_or_default('skymodel'),
+            "--key", self.inputs['key'],
+            "--instrument-db", self.inputs['instrument_db'],
+            self.inputs['gvds'],
+            self.inputs['parset'],
+            self.inputs['skymodel'],
             os.path.join(
-                self._input_or_default('working_directory'),
+                self.inputs['working_directory'],
                 self.inputs['job_name']
             )
         ]
-        if self.inputs['force']:
+        if self.inputs['force'] is True or self.inputs['force'] == "True":
             bbs_cmd.insert(1, '-f')
         # Should BBS verbosity be linked to that of the pipeline, or should be
         # be a separate setting?
@@ -220,7 +267,7 @@ class bbs(LOFARrecipe):
                         "--",
                         "mv",
                         "%s/%s/%s*log" % (
-                            self._input_or_default('working_directory'),
+                            self.inputs['working_directory'],
                             self.inputs['job_name'],
                             self.inputs['key']
                         ),
@@ -256,6 +303,9 @@ class bbs(LOFARrecipe):
         except OSError, failure:
             self.logger.info("Failed to remove temporary directory")
             self.logger.debug(failure)
+
+        # Output filenames are the same as the input
+        self.outputs['data'] = self.inputs['args']
 
         return result
 

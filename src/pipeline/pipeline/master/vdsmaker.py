@@ -1,9 +1,8 @@
 import sys, os, tempfile
 from subprocess import check_call, CalledProcessError
 
-from pipeline.support.ipython import LOFARTask
-
 # Local helpers
+from pipeline.support.ipython import LOFARTask
 from pipeline.support.lofarrecipe import LOFARrecipe
 import pipeline.support.utilities as utilities
 
@@ -93,8 +92,7 @@ class vdsmaker(LOFARrecipe):
         finally:
             # Save space on engines by clearing out old file lists
             mec.execute("clear_available_list(\"%s\")" % (available_list,))
-
-
+        self.logger.info("vdsmaker done")
 
 if __name__ == '__main__':
     sys.exit(vdsmaker().main())

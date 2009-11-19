@@ -8,11 +8,22 @@ from cuisine.parset import Parset
 
 # Local helpers
 from pipeline.support.lofarrecipe import LOFARrecipe
+from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
 import pipeline.support.utilities as utilities
 
 class mwimager(LOFARrecipe):
     def __init__(self):
         super(mwimager, self).__init__()
+        self.optionparser.add_option(
+            '--executable',
+            dest="executable",
+            help="Executable to be run (ie, mwimager script)"
+        )
+        self.optionparser.add_option(
+            '--initscript',
+            dest="initscript",
+            help="Initscript to source (ie, lofarinit.sh)"
+        )
         self.optionparser.add_option(
             '-g', '--g(v)ds-file',
             dest="gvds",
@@ -28,42 +39,58 @@ class mwimager(LOFARrecipe):
             dest="working_directory",
             help="Working directory used on compute nodes"
         )
+        self.optionparser.add_option(
+            '--log',
+            dest="log",
+            help="Log file"
+        )
 
     def go(self):
         self.logger.info("Starting MWImager run")
         super(mwimager, self).go()
+
+        self.logger.info("Calling vdsmaker")
+        inputs = LOFARinput(self.inputs)
+        inputs['directory'] = self.config.get('layout', 'vds_directory')
+        inputs['gvds'] = self.inputs['gvds']
+        inputs['args'] = self.inputs['args']
+        outputs = LOFARoutput()
+        if self.cook_recipe('vdsmaker', inputs, outputs):
+            self.logger.warn("vdsmaker reports failure")
+            return 1
 
         self.outputs["images"] = []
 
         # Patch GVDS filename into parset
         self.logger.debug("Setting up MWImager configuration")
         temp_parset_filename = utilities.patch_parset(
-            self._input_or_default('parset'),
-            {'dataset': self._input_or_default('gvds')},
+            self.inputs['parset'],
+            {'dataset': os.path.join(
+                self.config.get('layout', 'vds_directory'), self.inputs['gvds']
+                )
+            },
             self.config.get('layout', 'parset_directory')
         )
 
-        env = utilities.read_initscript(
-            self.config.get('mwimager', 'initscript')
-        )
+        env = utilities.read_initscript(self.inputs['initscript'])
         
         # For the overall MWimgager log
         log_location = "%s/%s" % (
             self.config.get('layout', 'log_directory'),
-            self.config.get('mwimager', 'log')
+            self.inputs['log']
         )
         self.logger.debug("Logging to %s" % (log_location))
         # Individual subband logs go in a temporary directory
         # to be sorted out later.
-        log_root = "%s/%s" % (tempfile.mkdtemp(), self.config.get('mwimager', 'log'))
+        log_root = os.path.join(tempfile.mkdtemp(), self.inputs['log'])
         self.logger.debug("Logs dumped with root %s" % (log_root))
 
         mwimager_cmd = [
-            self.config.get('mwimager', 'executable'),
+            self.inputs['executable'],
             temp_parset_filename,
             self.config.get('cluster', 'clusterdesc'),
             os.path.join(
-                self._input_or_default('working_directory'),
+                self.inputs['working_directory'],
                 self.inputs['job_name']
             ),
             log_root
@@ -120,7 +147,7 @@ class mwimager(LOFARrecipe):
                 destination = "%s/%s/%s" % (
                     self.config.get('layout', 'log_directory'),
                     ms_name,
-                    self.config.get('mwimager', 'log')
+                    inputs['log']
                 )
                 self.logger.debug(
                     "Moving logfile %s to %s" % (log_file, destination)

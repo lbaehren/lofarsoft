@@ -24,8 +24,8 @@ class trimmer(pyraprunner):
 
     def _generate_arguments(self):
         return "%f, %f" %  (
-            self.inputs['start_seconds'],
-            self.inputs['end_seconds']
+            float(self.inputs['start_seconds']),
+            float(self.inputs['end_seconds'])
         )
 
 if __name__ == '__main__':

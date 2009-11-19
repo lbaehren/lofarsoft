@@ -23,19 +23,18 @@ class flagger(pyraprunner):
         )
 
     def _generate_arguments(self):
-        if not self.inputs['skymodel']:
-            self.inputs['skymodel'] = "%s/%s" % (
-                self.config.get("layout", "parset_directory"),
-                self.config.get("bbs", "skymodel")
-            )
-            self.logger.info("Using %s for %s skymodel" %
-                (self.inputs['skymodel'], "flagger")
-            )
+        self.inputs['skymodel'] = os.path.join(
+            self.config.get("layout", "parset_directory"),
+            self.inputs['skymodel']
+        )
+        self.logger.info("Using %s for %s skymodel" %
+            (self.inputs['skymodel'], "flagger")
+        )
         if not os.access(self.inputs['skymodel'], os.R_OK):
             raise IOError
 
         sl = SourceList(self.inputs['skymodel'])
-        return self.inputs['n_factor'] * sum(float(s['I']) for s in sl)
+        return float(self.inputs['n_factor']) * sum(float(s['I']) for s in sl)
 
 if __name__ == '__main__':
     sys.exit(flagger().main())
