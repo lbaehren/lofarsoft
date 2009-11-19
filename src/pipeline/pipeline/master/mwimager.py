@@ -62,7 +62,6 @@ class mwimager(LOFARrecipe):
         try:
             self.logger.info("Running MWImager")
             with closing(open(log_location, 'w')) as log:
-                print log_location
                 result = check_call(
                     [
                         self.config.get('mwimager', 'executable'),
