@@ -26,6 +26,7 @@ class sip(LOFARrecipe):
         if self.cook_recipe('dppp', inputs, outputs):
             self.logger.warn("DPPP reports failure")
             return 1
+        processed_filenames = outputs['filenames']
 
         self.logger.info("Calling BBS")
         inputs = LOFARinput(self.inputs)
@@ -35,8 +36,33 @@ class sip(LOFARrecipe):
             self.logger.warn("BBS reports failure")
             return 1
 
+        # Trim off any bad section of the data
+        self.logger.info("Calling local flagger")
+        inputs = LOFARinput(self.inputs)
+        inputs['args'] = processed_filenames
+        inputs['suffix'] = ".flagged"
+        outputs = LOFARoutput()
+        if self.cook_recipe('flagger', inputs, outputs):
+            self.logger.warn("flagger reports failure")
+            return 1
+        flagged_outnames = outputs['data']
+
+        self.logger.info("Calling vdsmaker")
+        inputs = LOFARinput(self.inputs)
+        inputs['directory'] = self.config.get('layout', 'vds_directory')
+        inputs['gds'] = "flagged.gds"
+        inputs['args'] = flagged_outnames
+        outputs = LOFARoutput()
+        if self.cook_recipe('vdsmaker', inputs, outputs):
+            self.logger.warn("vdsmaker reports failure")
+            return 1
+        else:
+            self.outputs['gds'] = outputs['gds']
+        flagged_gds = outputs['gds']
+
         self.logger.info("Calling MWImager")
         inputs = LOFARinput(self.inputs)
+        inputs['gvds'] = flagged_gds
         outputs = LOFARoutput()
         if self.cook_recipe('mwimager', inputs, outputs):
             self.logger.warn("MWImager reports failure")
