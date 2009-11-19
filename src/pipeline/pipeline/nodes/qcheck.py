@@ -7,10 +7,9 @@ from pipeline.support.utilities import log_time
 
 class qcheck_node(LOFARnode):
     """
-    Make a VDS file for the input MS in a specificed location.
+    Run quality check modules on an image.
     """
     def run(self, infile, pluginlist, logfile):
-            
         with log_time(self.logger):
             self.logger.info("Processing: %s" % (infile))
 
