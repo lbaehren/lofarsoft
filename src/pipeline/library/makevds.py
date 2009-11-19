@@ -49,10 +49,14 @@ def locate(filename, path_list):
 
 class MakeVDS(WSRTrecipe):
     """Generate a VDS files for all MS-files that belong to the specified
-    observation. The argument `cluster-name' is used to locate a cluster
-    description file, which (among other information) contains a list of mount
-    points to use when searching for MS-files. Use the argument `directory' if
-    the MS-files are located in a directory below the mount points."""
+    observation.
+    The argument `cluster-name' is used to locate a cluster description file,
+    which (among other information) contains a list of mount points to use
+    when searching for MS-files. Use the argument `directory' if the MS-files
+    are located in a directory below the mount points.
+    After the VDS files have been generated a GDS file (which is like a
+    concatenation of all VDS files) is generated and stored in the current
+    directory."""
     
     def __init__(self):
         WSRTrecipe.__init__(self)
@@ -93,16 +97,31 @@ class MakeVDS(WSRTrecipe):
         pats = [observation + '_SB[0-9]*.MS', observation + '_SB[0-9]*.ms']
         dirs = [os.path.join(mp, pat) for mp in mount_points for pat in pats]
         fail = 0
+        vds_files = []
         for _dir in dirs:
             self.print_debug('Searching for ' + str(pats) + ' in ' + _dir)
             for _ms in glob.glob(_dir):
-                fail += self.cook_system('makevds', [clusterdesc, _ms])
+                vds = _ms + '.vds'
+                vds_files.append(vds)
+                self.print_message('Processing file ' + _ms)
+                fail += self.cook_system('makevds', [clusterdesc, _ms, vds])
+
         if fail:
-            self.print_error(fail + ' makevds process(es) failed!')
+            self.print_error(str(fail) + ' makevds process(es) failed!')
             return 1
-        else:
-            self.print_notification('all makevds process(es) ran successfully.')
+
+        if len(vds_files) == 0:
+            self.print_warning('no files to process!')
             return 0
+
+        self.print_message('Generating gds file from vds files')
+        opts = [_obs + '.gds']
+        opts.extend(vds_files)
+        if self.cook_system('combinevds', opts):
+            self.print_error('combinevds failed!')
+            return 1
+
+        return 0
 
 ## Stand alone execution code ------------------------------------------
 if __name__ == '__main__':
