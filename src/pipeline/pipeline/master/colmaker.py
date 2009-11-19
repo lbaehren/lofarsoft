@@ -2,19 +2,18 @@ import sys, os, tempfile
 from subprocess import check_call
 
 from pipeline.support.ipython import LOFARTask
-
-# Local helpers
 from pipeline.support.lofarrecipe import LOFARrecipe
 import pipeline.support.utilities as utilities
+from pipeline.support.clusterlogger import clusterlogger
 
 def make_columns(file):
-    from pipeline.nodes.colmaker import make_columns
-    return make_columns(file)
+    from pipeline.nodes.colmaker import makecolumns_node
+    return makecolumns_node(loghost=loghost, logport=logport).run(file)
 
 class colmaker(LOFARrecipe):
-    def __init__(self):
-        super(colmaker, self).__init__()
-
+    """
+    Add imaging columns to inputs using pyrap.
+    """
     def go(self):
         super(colmaker, self).go()
 
@@ -39,20 +38,24 @@ class colmaker(LOFARrecipe):
         )
         clusterdesc = self.config.get('cluster', 'clusterdesc')
         tasks = []
-        for ms_name in ms_names:
-            task = LOFARTask(
-                "result = make_columns(ms_name)",
-                push=dict(
-                    ms_name=ms_name,
-                ),
-                pull="result",
-                depend=utilities.check_for_path,
-                dependargs=(ms_name, available_list)
-            )
-            self.logger.info("Scheduling processing of %s" % (ms_name,))
-            tasks.append(tc.run(task))
-        self.logger.info("Waiting for all colmaker tasks to complete")
-        tc.barrier(tasks)
+
+        with clusterlogger(self.logger) as (loghost, logport):
+            for ms_name in ms_names:
+                task = LOFARTask(
+                    "result = make_columns(ms_name)",
+                    push=dict(
+                        ms_name=ms_name,
+                        loghost=loghost,
+                        logport=logport
+                    ),
+                    pull="result",
+                    depend=utilities.check_for_path,
+                    dependargs=(ms_name, available_list)
+                )
+                self.logger.info("Scheduling processing of %s" % (ms_name,))
+                tasks.append(tc.run(task))
+            self.logger.info("Waiting for all colmaker tasks to complete")
+            tc.barrier(tasks)
         for task in tasks:
             res = tc.get_task_result(task)
             if res.failure:

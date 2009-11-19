@@ -1,22 +1,16 @@
-# Root directory for config file
-from pipeline import __path__ as config_path
-
-from twisted.python import log
 import pyrap.tables
 
-def make_columns(file):
-    # Attempt to insert MODEL_DATA and CORRECTED_DATA columns into MS, in the
-    # hope it'll persuade BBS to run.
-    try:
-        pyrap.tables.addImagingColumns(file)
-    except ValueError:
-        log.msg('Add imaging columns failed: they probably already exist.')
+from pipeline.support.lofarnode import LOFARnode
+from pipeline.support.utilities import log_time
 
-if __name__ == "__main__":
-    from sys import argv
-    try:
-        make_columns(argv[1])
-    except:
-        print "Usage: colmaker [file]"
-
-
+class makecolumns_node(LOFARnode):
+    """
+    Add imaging columns to a given MS using pyrap.
+    """
+    def run(self, file)
+        with log_time(self.logger):
+            self.logger.info("Processing: %s" % (file))
+            try:
+                pyrap.tables.addImagingColumns(file)
+            except ValueError:
+                self.logger.debug('Add imaging columns failed: already exist?')
