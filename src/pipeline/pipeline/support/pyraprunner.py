@@ -1,3 +1,4 @@
+from __future__ import with_statement
 import sys
 
 from pipeline.support.ipython import LOFARTask
