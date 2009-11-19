@@ -113,7 +113,7 @@ class sip(LOFARrecipe):
         self.logger.info("Calling local flagger")
         inputs = LOFARinput(self.inputs)
         inputs['args'] = processed_filenames
-        inoputs['n_factor'] = 2.0
+        inputs['n_factor'] = 2.0
         inputs['suffix'] = ".flagged"
         outputs = LOFARoutput()
         if self.cook_recipe('flagger', inputs, outputs):
@@ -124,19 +124,17 @@ class sip(LOFARrecipe):
         self.logger.info("Calling vdsmaker")
         inputs = LOFARinput(self.inputs)
         inputs['directory'] = self.config.get('layout', 'vds_directory')
-        inputs['gvds'] = "flagged.gvds"
+        inputs['gvds'] = "%s.flagged.gvds" % (self.inputs['job_name'],)
         inputs['args'] = flagged_outnames
         outputs = LOFARoutput()
         if self.cook_recipe('vdsmaker', inputs, outputs):
             self.logger.warn("vdsmaker reports failure")
             return 1
-        else:
-            self.outputs['gvds'] = outputs['gvds']
-        flagged_gvds = outputs['gvds']
+        self.outputs['gvds'] = outputs['gvds']
 
         self.logger.info("Calling MWImager")
         inputs = LOFARinput(self.inputs)
-        inputs['gvds'] = flagged_gvds
+        inputs['gvds'] = self.outputs['gvds']
         outputs = LOFARoutput()
         if self.cook_recipe('mwimager', inputs, outputs):
             self.logger.warn("MWImager reports failure")
