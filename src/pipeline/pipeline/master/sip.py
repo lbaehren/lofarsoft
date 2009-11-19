@@ -3,6 +3,8 @@ from pipeline.support.lofarrecipe import LOFARrecipe
 from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
 import pipeline.support.utilities as utilities
 
+import logging
+
 class sip(LOFARrecipe):
     """
     The LOFAR Standard Imaging Pipeline.
@@ -11,6 +13,15 @@ class sip(LOFARrecipe):
         super(sip, self).__init__()
 
     def go(self):
+        # Let's log to file before we get started
+        handler = logging.FileHandler('pipeline.log')
+        formatter = logging.Formatter(
+            "%(asctime)s - %(levelname)s - %(name)s:  %(message)s",
+            "%Y-%m-%d %H:%M:%S"
+        )
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
+
         self.logger.info("Standard Imaging Pipeline starting up")
         super(sip, self).go()
 

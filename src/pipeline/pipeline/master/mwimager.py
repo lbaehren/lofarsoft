@@ -84,7 +84,8 @@ class mwimager(LOFARrecipe):
             self.logger.exception("Call to mwimager failed")
             result = 1
         finally:
-            os.unlink(temp_parset_filename)
+            pass
+#            os.unlink(temp_parset_filename)
 
         # Now sort the log files into
         # appropriate places
