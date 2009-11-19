@@ -1,64 +1,33 @@
 import sys, os, tempfile
 from subprocess import check_call
-from ConfigParser import SafeConfigParser as ConfigParser
-
-# Cusine core
-from cuisine.WSRTrecipe import WSRTrecipe
-
-# IPython client
-from IPython.kernel import client as IPclient
 
 # Local helpers
-import utilities
-
-# Root directory for config file
-from pipeline import __path__ as config_path
+from pipeline.support.lofarrecipe import LOFARrecipe
+import pipeline.support.utilities as utilities
 
 def make_vds(infile, clusterdesc, outfile, log_location):
     from pipeline.nodes.vdsmaker import make_vds
     return make_vds(infile, clusterdesc, outfile, log_location)
 
-class vdsmaker(WSRTrecipe):
+class vdsmaker(LOFARrecipe):
     def __init__(self):
         super(vdsmaker, self).__init__()
 
-        self.optionparser.add_option(
-            '-j', '--job-name', 
-            dest="job_name",
-            help="Job Name"
-        )
-        self.optionparser.add_option(
-            '-r', '--runtime-directory', 
-            dest="runtime_directory",
-            help="Runtime Directory"
-        )
-
     def go(self):
-        config = ConfigParser({
-            "job_name": self.inputs["job_name"],
-            "runtime_directory": self.inputs["runtime_directory"]
-        })
-        config.read("%s/pipeline.cfg" % (config_path[0],))
+        super(vdsmaker, self).go()
 
         ms_names = self.inputs['args']
+        job_directory = self.config.get("layout", "job_directory")
 
-        job_directory = config.get("layout", "job_directory")
-
-        try:
-            tc  = IPclient.TaskClient(config.get('cluster', 'task_furl'))
-            mec = IPclient.MultiEngineClient(config.get('cluster', 'multiengine_furl'))
-            mec.push_function(
-                dict(
-                    make_vds=make_vds,
-                    build_available_list=utilities.build_available_list,
-                    clear_available_list=utilities.clear_available_list
-                )
+        tc, mec = self._get_cluster()
+        mec.push_function(
+            dict(
+                make_vds=make_vds,
+                build_available_list=utilities.build_available_list,
+                clear_available_list=utilities.clear_available_list
             )
-        except:
-            self.logger.error("Unable to initialise cluster")
-            raise utilities.ClusterError
-
-        self.logger.info("Cluster initialised")
+        )
+        self.logger.info("Pushed functions to cluster")
 
         # Build VDS files for each of the newly created MeasurementSets
         self.logger.info("Building list of data available on engines")
@@ -67,13 +36,14 @@ class vdsmaker(WSRTrecipe):
         mec.execute(
             "build_available_list(\"%s\")" % (available_list,)
         )
-        clusterdesc = config.get('cluster', 'clusterdesc')
+        clusterdesc = self.config.get('cluster', 'clusterdesc')
         tasks = []
         vdsnames = []
         for ms_name in ms_names:
-            log_location = "%s/%s/makevds.log" % (
-                config.get("layout", "log_directory"),
+            log_location = "%s/%s/%s.log" % (
+                self.config.get("layout", "log_directory"),
                 os.path.basename(ms_name)
+                self.config.get("vds", "log"),
             )
             vdsnames.append(
                 "%s/%s.vds" % (self.inputs['directory'], os.path.basename(ms_name))
@@ -99,7 +69,7 @@ class vdsmaker(WSRTrecipe):
 
         # Combine VDS files to produce GDS
         self.logger.info("Combining VDS files")
-        executable = config.get('VDS', 'combinevds')
+        executable = self.config.get('vds', 'combinevds')
         gvds_out   = "%s/%s" % (self.inputs['directory'], self.inputs['gds'])
         check_call([executable, gvds_out] + vdsnames)
 #        for file in vdsnames:

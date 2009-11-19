@@ -1,57 +1,40 @@
 import sys, os
-from ConfigParser import SafeConfigParser as ConfigParser
 
 # Cusine core
-from cuisine.WSRTrecipe import WSRTrecipe
 from cuisine.ingredient import WSRTingredient
 
-# IPython client
-from IPython.kernel import client as IPclient
-
 # Local helpers
-import utilities
-
-# Root directory for config file
-from pipeline import __path__ as config_path
+from pipeline.support.lofarrecipe import LOFARrecipe
+import pipeline.support.utilities as utilities
 
 def run_dppp(ms_name, ms_outname, parset, log_location):
     # Run on engine to process data with DPPP
     from pipeline.nodes.dppp import run_dppp
     return run_dppp(ms_name, ms_outname, parset, log_location)
 
-class dppp(WSRTrecipe):
+class dppp(LOFARrecipe):
     def __init__(self):
         super(dppp, self).__init__()
-        self.optionparser.add_option(
-            '-j', '--job-name', 
-            dest="job_name",
-            help="Job Name"
-        )
-        self.optionparser.add_option(
-            '-r', '--runtime-directory', 
-            dest="runtime_directory",
-            help="Runtime Directory"
-        )
         self.optionparser.add_option(
             '-g', '--g(v)ds-file',
             dest="gvds",
             help="G(V)DS file describing data to be processed"
         )
+        self.optionparser.add_option(
+            '-p', '--parset',
+            dest="parset",
+            help="Parset containing configuration for DPPP"
+        )
 
     def go(self):
         self.logger.info("Starting DPPP run")
-
-        config = ConfigParser({
-            "job_name": self.inputs["job_name"],
-            "runtime_directory": self.inputs["runtime_directory"]
-        })
-        config.read("%s/pipeline.cfg" % (config_path[0],))
+        super(dppp, self).go()
 
         # If we didn't get a GDS file on the command line, look for one in the
         # job's default VDS directory
         if not self.inputs['gvds']:
             self.inputs['gvds'] = "%s/%s.gvds" % (
-                config.get('layout', 'vds_directory'),
+                self.config.get('layout', 'vds_directory'),
                 self.inputs['job_name']
             )
             self.logger.info("Using %s for initial data" % (self.inputs['gvds'],))
@@ -61,33 +44,17 @@ class dppp(WSRTrecipe):
             self.logger.error("Unable to read G(V)DS file")
             raise
 
-        job_directory = config.get("layout", "job_directory")
+        job_directory = self.config.get("layout", "job_directory")
 
-        try:
-            parset = "%s/dppp.parset" % (
-                config.get("layout", "parset_directory"),
+        tc, mec = self._get_cluster()
+        mec.push_function(
+            dict(
+                run_dppp=run_dppp,
+                build_available_list=utilities.build_available_list,
+                clear_available_list=utilities.clear_available_list
             )
-            if not os.access(parset, os.R_OK):
-                raise IOError
-        except IOError:
-            self.logger.error("DPPP parset not found")
-            raise
-            
-        try:
-            tc  = IPclient.TaskClient(config.get('cluster', 'task_furl'))
-            mec = IPclient.MultiEngineClient(config.get('cluster', 'multiengine_furl'))
-            mec.push_function(
-                dict(
-                    run_dppp=run_dppp,
-                    build_available_list=utilities.build_available_list,
-                    clear_available_list=utilities.clear_available_list
-                )
-            )
-        except:
-            self.logger.error("Unable to initialise cluster")
-            raise utilities.ClusterError
-
-        self.logger.info("Cluster initialised")
+        )
+        self.logger.info("Pushed functions to cluster")
 
         # We read the GVDS file to find the names of all the data files we're
         # going to process, then push this list out to the engines so they can
@@ -109,9 +76,10 @@ class dppp(WSRTrecipe):
         outnames = []
         for ms_name in ms_names:
             outnames.append(ms_name + ".dppp")
-            log_location = "%s/%s/dppp.log" % (
-                config.get('layout', 'log_directory'),
-                os.path.basename(ms_name)
+            log_location = "%s/%s/%s" % (
+                self.config.get('layout', 'log_directory'),
+                os.path.basename(ms_name),
+                self.config.get('dppp', 'log')
             )
             task = IPclient.StringTask(
                 "result = run_dppp(ms_name, ms_outname, parset, log_location)",
@@ -140,9 +108,9 @@ class dppp(WSRTrecipe):
         self.logger.info("Calling vdsmaker")
         inputs = WSRTingredient()
         inputs['job_name'] = self.inputs['job_name']
-        inputs['runtime_directory'] = config.get('DEFAULT', 'runtime_directory')
-        inputs['directory'] = config.get('layout', 'vds_directory')
-        inputs['gds'] = config.get('DPPP', 'gds_output')
+        inputs['runtime_directory'] = self.config.get('DEFAULT', 'runtime_directory')
+        inputs['directory'] = self.config.get('layout', 'vds_directory')
+        inputs['gds'] = self.config.get('dppp', 'gds_output')
         inputs['args'] = outnames
         outputs = WSRTingredient()
         sts = self.cook_recipe('vdsmaker', inputs, outputs)

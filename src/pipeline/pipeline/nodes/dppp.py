@@ -9,6 +9,7 @@ import os, errno
 
 # External
 from cuisine.parset import Parset
+from pipeline.support.utilities import patch_parset
 
 # Root directory for config file
 from pipeline import __path__ as config_path
@@ -16,15 +17,12 @@ from pipeline import __path__ as config_path
 def run_dppp(infile, outfile, parset, log_location):
     config = ConfigParser()
     config.read("%s/pipeline.cfg" % (config_path[0],))
-    executable = config.get('DPPP', 'executable')
+    executable = config.get('dppp', 'executable')
 
     # We need to patch the parset with the correct input/output MS names.
-    temp_parset_filename = mkstemp()[1]
-    temp_parset = Parset()
-    temp_parset.readFromFile(parset)
-    temp_parset['msin'] = infile
-    temp_parset['msout'] = outfile
-    temp_parset.writeToFile(temp_parset_filename)
+    temp_parset_filename = patch_parset(
+        parset, {'msin': infile, 'msout': outfile}
+    )
 
     try:
         # Make the log directory

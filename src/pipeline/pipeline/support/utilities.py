@@ -1,4 +1,5 @@
 from cuisine.parset import Parset
+from tempfile import mkstemp
 
 class ClusterError(Exception):
     pass
@@ -27,3 +28,13 @@ def check_for_path(properties, dependargs):
         return dependargs[0] in properties[dependargs[1]]
     except NameError:
         return False
+
+def patch_parset(parset, data, output_dir=None):
+    # We want to be able to update parsets on the fly, for instance to add the
+    # names of data files which need processing into a standard configuration
+    temp_parset_filename = mkstemp(dir=output_dir)[1]
+    temp_parset = get_parset(parset)
+    for k, v in data.items():
+        temp_parset[k] = v
+    temp_parset.writeToFile(temp_parset_filename)
+    return temp_parset_filename

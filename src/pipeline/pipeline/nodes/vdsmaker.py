@@ -15,7 +15,7 @@ def make_vds(infile, clusterdesc, outfile, log_location):
     # (including the FileName field) than the stable version.
     config = ConfigParser()
     config.read("%s/pipeline.cfg" % (config_path[0],))
-    executable = config.get('VDS', 'makevds')
+    executable = config.get('vds', 'makevds')
 
     try:
         # Make the log directory
