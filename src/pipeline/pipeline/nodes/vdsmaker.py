@@ -1,5 +1,6 @@
 # Python standard library
 from __future__ import with_statement
+import os
 from subprocess import Popen, CalledProcessError, PIPE, STDOUT
 
 from pipeline.support.lofarexceptions import ExecutableMissing
