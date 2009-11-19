@@ -32,8 +32,9 @@ class control(LOFARrecipe):
         inputs = LOFARinput(self.inputs)
         inputs['args'] = datafiles
         inputs.update(self.config.items(configblock))
-        del(inputs['recipe']) # Never a required input
-        del(inputs['recipe_directories']) # Never a required input
+        # These inputs are never required:
+        for inp in ('recipe', 'recipe_directories', 'lofarroot', 'default_working_directory'):
+            del(inputs[inp])
         outputs = LOFARoutput()
         if self.cook_recipe(recipe, inputs, outputs):
             self.logger.warn(
