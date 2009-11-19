@@ -52,16 +52,13 @@ class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
     def handleLogRecord(self, record):
         # Manually check the level against the pipeline's root logger.
         # Not sure this should be necessary, but it seems to work...
-        if record.levelno >= self.server.logger.root.level:
+        if record.levelno >= self.server.logger.level:
             self.server.logger.handle(record)
 
 class LogRecordSocketReceiver(SocketServer.ThreadingTCPServer):
     """
     simple TCP socket-based logging receiver suitable for testing.
     """
-
-    allow_reuse_address = 1
-
     def __init__(self,
         logger,
         host=None,
