@@ -1,5 +1,5 @@
 from __future__ import with_statement
-from contextlib import closing
+from contextlib import closing, contextmanager
 from cuisine.parset import Parset
 from tempfile import mkstemp
 import os, errno, shutil, subprocess
@@ -66,3 +66,18 @@ def read_initscript(filename, shell="/bin/sh"):
     )
     so, se = p.communicate()
     return dict([x.split('=', 1) for x in so.strip().split('\n')])
+
+@contextmanager
+def locked_ms(ms_name):
+    # If this fails, we'll raise an OSError 17 (EEXIST)
+    lock_extension = "_lock"
+    lock_name = os.path.join(
+        ms_name,
+        lock_extension
+    )
+    try:
+        my_fd = os.open(lock_name, os.O_EXCL | os.O_CREAT)
+        yield ms_name
+        os.close(my_fd)
+    finally:
+        os.unlink(lock_name)
