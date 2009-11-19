@@ -50,7 +50,10 @@ class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
         return cPickle.loads(data)
 
     def handleLogRecord(self, record):
-        self.server.logger.handle(record)
+        # Manually check the level against the pipeline's root logger.
+        # Not sure this should be necessary, but it seems to work...
+        if record.levelno >= self.server.logger.root.level:
+            self.server.logger.handle(record)
 
 class LogRecordSocketReceiver(SocketServer.ThreadingTCPServer):
     """
