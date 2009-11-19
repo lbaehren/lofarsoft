@@ -8,8 +8,14 @@ class sip(LOFARrecipe):
     The LOFAR Standard Imaging Pipeline.
     """
     def go(self):
-        # Let's log to file before we get started
-        handler = logging.FileHandler('pipeline.log_%s_%s' % (self.inputs['job_name'], str(datetime.datetime.now())))
+        super(sip, self).go()
+
+        # Set up logging to file
+        handler = logging.FileHandler('%s/pipeline.log.%s' % (
+                self.config.get("layout", "log_directory"),
+                str(datetime.datetime.now())
+            )
+        )
         formatter = logging.Formatter(
             "%(asctime)s - %(levelname)s - %(name)s:  %(message)s",
             "%Y-%m-%d %H:%M:%S"
@@ -17,8 +23,7 @@ class sip(LOFARrecipe):
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
 
-        self.logger.info("Standard Imaging Pipeline starting up")
-        super(sip, self).go()
+        self.logger.info("Standard Imaging Pipeline starting.")
 
         self.logger.info("Calling DPPP")
         inputs = LOFARinput(self.inputs)
