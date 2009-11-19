@@ -33,7 +33,7 @@ class colmaker(LOFARrecipe):
         # Build VDS files for each of the newly created MeasurementSets
         self.logger.info("Building list of data available on engines")
         available_list = "%s%s" % (self.inputs['job_name'], "colmaker")
-        mec.push(dict(ms_names=ms_names))
+        mec.push(dict(filenames=ms_names))
         mec.execute(
             "build_available_list(\"%s\")" % (available_list,)
         )
