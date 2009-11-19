@@ -26,8 +26,14 @@ class collector(LOFARrecipe):
         self.optionparser.add_option(
             '--image-re',
             dest="image_re",
-            help="Regular expression to match CASA image names"
+            help="Regular expression to match CASA image names",
             default="image*"
+        )
+        self.optionparser.add_option(
+            '--working-directory',
+            dest="working_directory",
+            help="Working directory containing images on compute nodes",
+            default=None
         )
 
     def go(self):
@@ -43,33 +49,51 @@ class collector(LOFARrecipe):
         clusterdesc = ClusterDesc(
             self.config.get('cluster', 'clusterdesc')
         )
-        results_dir = self.config.get('layout', 'results_directory'),
+        results_dir = self.config.get('layout', 'results_directory')
         self.logger.debug("Copying CASA images to to %s"  % (results_dir))
+        if self.inputs['working_directory'] == None:
+            self.inputs['working_directory'] = self.config.get(
+                'mwimager', 'working_directory'
+            )
         for node in clusterdesc.get('ComputeNodes'):
             self.logger.debug("Node: %s" % (node))
             try:
-                check_call(
+                exec_string = [
+                            "ssh",
+                            node,
+                            "--",
+                            "cp",
+                            "-r",
+                            "%s/%s/%s" % (
+                                self.inputs['working_directory'],
+                                self.inputs['job_name'],
+                                self.inputs['image_re']
+                            ),
+                            results_dir
+                    ]
+                self.logger.info(exec_string)
+                subprocess.check_call(
                     [
                         "ssh",
                         node,
                         "--",
                         "mv",
                         "%s/%s/%s" % (
-                            self._input_or_default('working_directory'),
+                            self.inputs['working_directory'],
                             self.inputs['job_name'],
                             self.inputs['image_re']
                         ),
                         results_dir
                     ])
-            except CalledProcessError:
+            except subprocess.CalledProcessError:
                 self.logger.warn("No images moved from %s" % (node))
         
         self.logger.info("Generating FITS files")
         fits_files = []
-        image_names = glob.glob("%s/%s" % (results_dir, self.inputs['image_re'])
+        image_names = glob.glob("%s/%s" % (results_dir, self.inputs['image_re']))
         for filename in image_names:
             self.logger.debug(filename)
-            subband = os.path.basename(filename).split('.')[2]
+            subband = os.path.basename(filename).split('.')[1]
             output = os.path.join(
                 self.config.get('layout', 'results_directory'),
                 "%s.fits" % (subband)
