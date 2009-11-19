@@ -30,14 +30,21 @@ def run_dppp(infile, outfile, parset, log_location):
     create_directory(os.path.dirname(log_location))
     create_directory(os.path.dirname(outfile))
 
+    env = utilities.read_initscript(
+        self.config.get('dppp', 'initscript')
+    )
+
     try:
         if not os.access(executable, os.X_OK):
             raise ExecutableMissing(executable)
         with closing(open(log_location, 'w')) as log:
             # What is the '1' for? Required by DP3...
+            cmd = [executable, temp_parset_filename, '1']
+            log.write(' '.join(cmd))
             result = check_call(
-                [executable, temp_parset_filename, '1'],
-                stdout=log
+                cmd,
+                stdout=log,
+                env=env
             )
         return result
     except ExecutableMissing, e:
