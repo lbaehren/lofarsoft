@@ -26,8 +26,7 @@ class qcheck_node(LOFARnode):
 
             for plugin in pluginlist:
                 try:
-                    #qcheck = imp.load_source('qcheck', plugin)
-                    qcheck = imp.load_source('qcheck', '/home/swinbank/qcheck.py')
+                    qcheck = imp.load_source('qcheck', plugin)
                     print qcheck
                 except ImportError:
                     self.logger.warn("Quality check module (%s) not found" % (plugin))
