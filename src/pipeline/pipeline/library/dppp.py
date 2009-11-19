@@ -7,7 +7,7 @@ from os import unlink
 from cuisine.parset import Parset
 
 def run_dppp(infile, outfile, parset):
-    executable = "CS1_IDPPP"
+    executable = "/app/lofar/dev/bin/CS1_IDPPP"
 
     # We need to patch the parset with the correct input/output MS names.
     temp_parset_filename = mkstemp()[1]
@@ -17,9 +17,11 @@ def run_dppp(infile, outfile, parset):
     temp_parset.writeToFile(temp_parset_filename)
 
     try:
-        check_call([executable, temp_parset_filename])
+        # What is the '1' for? Required by DP3...
+        check_call([executable, temp_parset_filename, '1'])
     finally:
         unlink(temp_parset_filename)
 
 if __name__ == "__main__":
-    run_dppp(ARGV[0], ARGV[1], ARGV[2])
+    from sys import argv
+    run_dppp(argv[1], argv[2], argv[3])
