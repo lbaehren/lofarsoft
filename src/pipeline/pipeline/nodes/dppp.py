@@ -9,6 +9,7 @@ import os.path
 # External
 from cuisine.parset import Parset
 from pipeline.support.utilities import patch_parset, create_directory
+from pipeline.support.lofarexceptions import ExecutableMissing
 
 # Root directory for config file
 from pipeline import __path__ as config_path
@@ -31,13 +32,19 @@ def run_dppp(infile, outfile, parset, log_location):
     create_directory(os.path.dirname(outfile))
 
     try:
-        # What is the '1' for? Required by DP3...
+        if not os.access(executable, os.X_OK):
+            raise ExecutableMissing(executable)
         with closing(open(log_location, 'w')) as log:
+            # What is the '1' for? Required by DP3...
             result = check_call(
                 [executable, temp_parset_filename, '1'],
                 stdout=log
             )
         return result
+    except ExecutableMissing, e:
+        with closing(open(log_location, 'w')) as log:
+            log.write("%s not found" % (e.args[0])
+        raise
     except CalledProcessError:
         # For CalledProcessError isn't properly propagated by IPython
         # Temporary workaround...

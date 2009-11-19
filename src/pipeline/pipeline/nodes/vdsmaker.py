@@ -5,6 +5,7 @@ from subprocess import check_call
 from ConfigParser import SafeConfigParser as ConfigParser
 import os.path
 
+from pipeline.support.lofarexceptions import ExecutableMissing
 from pipeline.support.utilities import create_directory
 
 # Root directory for config file
@@ -20,13 +21,21 @@ def make_vds(infile, clusterdesc, outfile, log_location):
 
     create_directory(os.path.dirname(log_location))
 
-    with closing(open(log_location, 'w')) as log:
-        log.write("Executing: %s %s %s %s" %(executable, clusterdesc, infile, outfile))
-        result = check_call(
-            [executable, clusterdesc, infile, outfile],
-            stdout=log
-        )
-    return result
+    try:
+        if not os.access(executable, os.X_OK):
+            raise ExecutableMissing(executable)
+        with closing(open(log_location, 'w')) as log:
+            log.write("Executing: %s %s %s %s" %(executable, clusterdesc, infile, outfile))
+            result = check_call(
+                [executable, clusterdesc, infile, outfile],
+                stdout=log
+            )
+        return result
+    except ExecutableMissing, e:
+        with closing(open(log_location, 'w')) as log:
+            log.write("%s not found" % (e.args[0])
+        raise
+
 
 if __name__ == "__main__":
     from sys import argv
