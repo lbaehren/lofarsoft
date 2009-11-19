@@ -34,13 +34,13 @@ class vdsmaker(LOFARrecipe):
             '--makevds',
             dest="makevds",
             help="makevds executable",
-            default="/opt/lofar/daily/gnu_opt/bin/combinevds"
+            default="/opt/lofar/daily/gnu_opt/bin/makevds"
         )
         self.optionparser.add_option(
             '--combinevds',
             dest="combinevds",
             help="combinevds executable",
-            default="/opt/lofar/daily/gnu_opt/bin/makevds"
+            default="/opt/lofar/daily/gnu_opt/bin/combinevds"
         )
 
     def go(self):
