@@ -40,6 +40,12 @@ class bbs(LOFARrecipe):
             action="store_true"
         )
         self.optionparser.add_option(
+            '--key',
+            dest="key",
+            help="Key to identify BBS session",
+            default="default_bbs"
+        )
+        self.optionparser.add_option(
             '--db-host',
             dest="db_host",
             help="Database host with optional port"
@@ -89,6 +95,7 @@ class bbs(LOFARrecipe):
             "--db-name", self._input_or_default('db_name'),
             "--db-user", self._input_or_default('db_user'),
             "--cluster-desc", self.config.get('cluster', 'clusterdesc'),
+            "--key", self.inputs['key'],
             self.inputs['gvds'],
             self.inputs['parset'],
             self._input_or_default('skymodel'),
