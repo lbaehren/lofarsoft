@@ -22,6 +22,7 @@ class PipelineCook(WSRTCook):
             exec(eval("'from %s import %s' % (task, task)"))
             exec(eval("'self.recipe = %s()' % task"))
             self.recipe.logger = logging.getLogger("%s.%s" % (self.logger.name, task))
+            self.recipe.logger.setLevel(self.logger.level)
         except Exception, e:
             self.logger.exception("Exception caught: " + str(e))
             self.recipe = None
