@@ -12,7 +12,7 @@ def trim_ms(input, output, start_seconds, end_seconds):
 
 class trimmer(LOFARrecipe):
     def __init__(self):
-        super(colmaker, self).__init__()
+        super(trimmer, self).__init__()
         self.optionparser.add_option(
             '--start-seconds',
             dest="start_seconds",
@@ -58,9 +58,12 @@ class trimmer(LOFARrecipe):
         outnames = []
         for ms_name in ms_names:
             outnames.append(ms_name + self.inputs['suffix'])
-            execute_string = "result = trimmer(ms_name, %s, %f, %f)" % (
-                outnames[-1], start_seconds, end_seconds
+            execute_string = "result = trim_ms(ms_name, \"%s\", %f, %f)" % (
+                outnames[-1],
+                self.inputs['start_seconds'],
+                self.inputs['end_seconds']
             )
+            print "Executing: ", execute_string
             task = LOFARTask(
                 execute_string,
                 push=dict(
