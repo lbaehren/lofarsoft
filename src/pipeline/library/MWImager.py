@@ -54,10 +54,10 @@ class MWImager(WSRTrecipe):
                              (no default)
         --output-dir         directory where images will be stored
                              (default: same directory as MS)
-        --logfile            root name of logfile of each subprocess
-                             (default 'mwimager.log')
         --vds-dir            directory where the VDS-files reside;
                              (default: '/users/${USER}/data/<observation>')
+        --logfile            root name of logfile of each subprocess
+                             (default 'mwimager.log')
         --dryrun             do a dry run
                              (default: no)
         """

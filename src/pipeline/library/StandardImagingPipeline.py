@@ -24,12 +24,10 @@
 
 """Script to run the Standard Imaging Pipeline"""
 
-from WSRTrecipe import WSRTrecipe
-from ingredient import WSRTingredient
-#from dppp import DPPP
-#from mwimager import MWImager
-from parset import Parset
-import sysconfig
+from lofar.pipeline.WSRTrecipe import WSRTrecipe
+from lofar.pipeline.ingredient import WSRTingredient
+from lofar.pipeline.parset import Parset
+from lofar.pipeline import sysconfig
 
 import os
 import sys
@@ -45,7 +43,7 @@ class StandardImagingPipeline(WSRTrecipe):
         self.inputs['make-vds-files']  = True
         self.inputs['input-dir']       = None
         self.inputs['output-dir']      = None
-        self.inputs['vds-output-dir']  = None
+        self.inputs['vds-dir']         = None
         self.inputs['dryrun']          = False
         self.helptext = """
         This is the recipe for the LOFAR standard imagaging pipeline.
@@ -60,14 +58,14 @@ class StandardImagingPipeline(WSRTrecipe):
         --observation        name of the observation to be processed
                              (no default)
         --make-vds-files     create VDS files
-                             (default: no)
+                             (default: yes)
         --input-dir          directory for the input MS-files;
                              only needed when VDS files are missing
                              (optional; no default)
         --output-dir         directory for the output MS-files;
                              only needed when VDS files are missing
                              (optional; default: '/data/${USER}/<obs>')
-        --vds-output-dir     directory for the output VDS-files;
+        --vds-dir            directory for the output VDS-files;
                              only needed until IDPPP creates these files
                              (optional; default: '/users/${USER}/data/<obs>)
         --dryrun             do a dry run
@@ -85,17 +83,18 @@ class StandardImagingPipeline(WSRTrecipe):
             self.inputs['output-dir']  = '/data/' + os.environ['USER'] + \
                                          '/' + obs
 
-        if self.inputs['vds-output-dir'] is None:
-            self.inputs['vds-output-dir'] = '/users/' + os.environ['USER'] + \
-                                            '/data/' + obs
+        if self.inputs['vds-dir'] is None:
+            self.inputs['vds-dir'] = '/users/' + os.environ['USER'] + \
+                                     '/data/' + obs
             
         # Create VDS files for the MS-files in the observation, if requested.
         if self.inputs['make-vds-files']:
             inputs = WSRTingredient()
             outputs = WSRTingredient()
             inputs['cluster-name'] = self.inputs['cluster-name']
-            inputs['observation']  = self.inputs['observation']
-            inputs['directory']    = self.inputs['input-dir']
+            inputs['observation'] = self.inputs['observation']
+            inputs['input-dir'] = self.inputs['input-dir']
+            inputs['dryrun'] = self.inputs['dryrun']
             sts = self.cook_recipe('MakeVDS', inputs, outputs)
             if sts:
                 print "MakeVDS returned with status", sts
@@ -106,7 +105,7 @@ class StandardImagingPipeline(WSRTrecipe):
         inputs['cluster-name'] = self.inputs['cluster-name']
         inputs['observation'] = self.inputs['observation']
         inputs['output-dir'] = self.inputs['output-dir']
-        inputs['vds-output-dir'] = self.inputs['vds-output-dir']
+        inputs['vds-dir'] = self.inputs['vds-dir']
         inputs['dryrun'] = self.inputs['dryrun']
         outputs = WSRTingredient()
         sts = self.cook_recipe('DPPP', inputs, outputs)
@@ -122,6 +121,9 @@ class StandardImagingPipeline(WSRTrecipe):
         inputs['cluster-name'] = self.inputs['cluster-name']
         inputs['observation'] = self.inputs['observation']
         inputs['output-dir'] = self.inputs['output-dir']
+        inputs['vds-dir'] = self.inputs['vds-dir']
+        inputs['dryrun'] = self.inputs['dryrun']
+        
         outputs = WSRTingredient()
         sts = self.cook_recipe('MWImager', inputs, outputs)
         if sts:

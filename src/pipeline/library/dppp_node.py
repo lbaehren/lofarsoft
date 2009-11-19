@@ -1,4 +1,28 @@
 #!/usr/bin/env python
+#
+#  dppp_node.py: script to run DPPP on a single node
+#
+#  Copyright (C) 2002-2008
+#  ASTRON (Netherlands Foundation for Research in Astronomy)
+#  P.O.Box 2, 7990 AA Dwingeloo, The Netherlands, seg@astron.nl
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#  $Id$
+
+"""Script to run DPPP on a single node"""
 
 import os, sys, logging, socket
 
@@ -64,10 +88,14 @@ if msin == msout:
 vds = vdsdir + '/' + os.path.basename(msout) + '.vds'
 logging.info('Output VDS: %s', vds)
 
-# Create working dir if it doesn't exist and change to it.
+# Create working dir if it doesn't exist and change to it. Working directory
+# `wd' may already have been created by another instance of dppp_node.py. So
+# wrap os.makedirs() in a try-except block.
 if wd:
-    if not os.path.exists(wd):
+    try:
         os.makedirs(wd)
+    except OSError, e:
+        logging.info(e)
     os.chdir(wd)
 wd = os.getcwd()
 logging.info('Current working directory: %s', wd)
