@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  filename: one line description
+#  makevds.py: Class for generating VDS-files from MS-files.
 #
 #  Copyright (C) 2002-2008
 #  ASTRON (Netherlands Foundation for Research in Astronomy)
@@ -22,7 +22,7 @@
 #
 #  $Id$
 
-"""Docstring"""
+"""Class for generating VDS-files from MS-files"""
 
 from WSRTrecipe import WSRTrecipe
 from parset import Parset
@@ -106,5 +106,4 @@ class MakeVDS(WSRTrecipe):
 
 ## Stand alone execution code ------------------------------------------
 if __name__ == '__main__':
-    __standalone__ = MakeVDS()
-    sys.exit(__standalone__.main())
+    sys.exit(MakeVDS().main())

@@ -22,7 +22,10 @@
 #
 #  $Id$
 
+"""Script to run the mwimager"""
+
 from WSRTrecipe import WSRTrecipe
+import sys
 
 class MWimager(WSRTrecipe):
     """Class wrapper around the mwimager script that is used to start the
@@ -55,5 +58,4 @@ class MWimager(WSRTrecipe):
 
 ## Stand alone execution code ------------------------------------------
 if __name__ == '__main__':
-    __standalone__ = MWimager()
-    __standalone__.main()
+    sys.exit(MWimager().main())
