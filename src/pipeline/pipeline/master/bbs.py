@@ -59,14 +59,6 @@ class bbs(LOFARrecipe):
         self.logger.info("Starting BBS run")
         super(bbs, self).go()
 
-        if not self.inputs['working_directory']:
-            self.inputs['working_directory'] = self.config.get(
-                'bbs', 'working_directory'
-            )
-            self.logger.info("Using %s for working directory" % 
-                (self.inputs['working_directory'],)
-            )
-
         if not self.inputs['skymodel']:
             self.inputs['skymodel'] = "%s/%s" % (
                 self.config.get("layout", "parset_directory"),
