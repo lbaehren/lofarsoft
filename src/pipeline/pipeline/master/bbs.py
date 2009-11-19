@@ -3,9 +3,6 @@ import sys, os, logging, tempfile, glob, shutil
 from subprocess import check_call, CalledProcessError
 from contextlib import closing
 
-# Cusine core
-from cuisine.parset import Parset
-
 # Local helpers
 from pipeline.support.lofarrecipe import LOFARrecipe
 import pipeline.support.utilities as utilities
@@ -65,6 +62,10 @@ class bbs(LOFARrecipe):
         self.logger.info("Starting BBS run")
         super(bbs, self).go()
 
+        clusterdesc = utilities.ClusterDesc(
+            self.config.get('cluster', 'clusterdesc')
+        )
+
         if not self.inputs['skymodel']:
             self.inputs['skymodel'] = "%s/%s" % (
                 self.config.get("layout", "parset_directory"),
@@ -109,7 +110,7 @@ class bbs(LOFARrecipe):
             bbs_cmd.insert(1, '-v')
 
         # Use a temporary directory to grab all the logs.
-        log_root = tempfile.mkdtemp()
+        log_root = tempfile.mkdtemp(dir=self.config.get('layout', 'log_directory'))
         self.logger.debug("Logs dumped to %s" % (log_root))
 
         try:
@@ -132,10 +133,6 @@ class bbs(LOFARrecipe):
             result = 1
 
         self.logger.info("Moving logfiles")
-        self.logger.debug("%s/%s_%s" % ( log_root, self.inputs["key"], "control*log"))
-        self.logger.debug( glob.glob("%s/%s_%s" % (
-            log_root, self.inputs["key"], "control*log")
-        ))
         for log_file in glob.glob("%s/%s_%s" % (
             log_root, self.inputs["key"], "control*log")
         ):
@@ -190,7 +187,7 @@ class bbs(LOFARrecipe):
             with closing(open(log_file)) as file:
                 for line in file.xreadlines():
                     if line.split() and line.split()[0] == "Create":
-                        ms_name = os.path.dirname(line.split()[1])
+                        ms_name = os.path.basename(os.path.dirname(line.split()[1]))
                         break
             if not ms_name:
                 self.logger.info("Couldn't identify file for %s" % (log_file))
@@ -203,6 +200,47 @@ class bbs(LOFARrecipe):
                     "Moving logfile %s to %s" % (log_file, destination)
                 )
                 utilities.move_log(log_file, destination)
+
+        # Now pull in the logs from the individual cluster nodes
+        clusterdesc = utilities.ClusterDesc(
+            self.config.get('cluster', 'clusterdesc')
+        )
+        self.logger.debug("Copying remote logs to %s"  % (log_root))
+        for node in clusterdesc['ComputeNodes']:
+            self.logger.debug("Node: %s" % (node))
+            result = check_call(
+                [
+                    "ssh",
+                    node,
+                    "--",
+                    "mv",
+                    "%s/%s*log" % (
+                        self._input_or_default('working_directory'), self.inputs['key']
+                    ),
+                    log_root
+                ])
+        for log_file in glob.glob("%s/%s_%s" % (
+            log_root, self.inputs["key"], "kernel*log*")
+        ):
+            self.logger.debug("Processing %s" % (log_file))
+            ms_name = ""
+            with closing(open(log_file)) as file:
+                for line in file.xreadlines():
+                    if line.split(":") and line.split(":")[0] == "INFO - Observation part":
+                        ms_name = os.path.basename(line.split()[6].rstrip())
+                        break
+            if not ms_name:
+                self.logger.info("Couldn't identify file for %s" % (log_file))
+            else:
+                destination = "%s/%s" % (
+                    self.config.get('layout', 'log_directory'),
+                    ms_name
+                )
+                self.logger.debug(
+                    "Moving logfile %s to %s" % (log_file, destination)
+                )
+                utilities.move_log(log_file, destination)
+
         try:
             self.logger.debug("Removing temporary log directory")
             shutil.rmtree(log_root)
