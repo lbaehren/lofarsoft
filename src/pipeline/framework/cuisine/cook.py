@@ -36,12 +36,12 @@ class PipelineCook(WSRTCook):
             raise CookError (self.task + ' failed')
 
     def copy_inputs(self):
-        for k in self.inputs.keys():
-            self.recipe.inputs[k] = self.inputs[k]
-#            if self.recipe.optionparser.has_option('--' + k):
-#                self.recipe.inputs[k] = self.inputs[k]
-#            else:
-#                self.logger.debug(self.task + ' has no argument ' + str(k))
+        self.recipe.inputs = vars(self.recipe.optionparser.get_default_values())
+        for k in self.inputs.keys()
+            if not self.recipe.inputs.has_key(k):
+                self.logger.warn("%s has no argument %s" % (self.task, k))
+            else:
+                self.recipe.inputs[k] = self.inputs[k]
 
     def copy_outputs(self):
         if self.recipe.outputs == None:
