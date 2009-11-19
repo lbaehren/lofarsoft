@@ -3,7 +3,7 @@ import sys
 from cuisine.WSRTrecipe import WSRTrecipe
 from cuisine.ingredient import WSRTingredient
 
-from utilities import ClusterError, get_parset
+from utilities import ClusterError, get_parset, check_for_path
 
 from IPython.kernel import client as IPclient
 
@@ -34,14 +34,24 @@ class TestPipeline(WSRTrecipe):
             self.logger.error("Unable to connect to cluster")
             raise ClusterError
 
-
-        filenames = [
+        ms_names = [
             gvds["Part%d.FileName" % (part_no,)] 
             for part_no in xrange(int(gvds["NParts"]))
         ]
 
-
-
+        tasks = []
+        for ms_name in ms_names:
+            task = IPclient.StringTask(
+                "result = ms_name",
+                push=dict(ms_name=ms_name),
+                pull="result",
+                depend=check_for_path,
+                dependargs=ms_name
+            )
+            tasks.append(tc.run(task))
+        tc.barrier(tasks)
+        for task in tasks:
+            print tc.get_task_result(task)
 
         print self.inputs
 

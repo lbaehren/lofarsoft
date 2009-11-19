@@ -8,3 +8,6 @@ def get_parset(parset):
     p.readFromFile(parset)
     return p
 
+def check_for_path(properties, filename):
+    import os
+    return os.access(filename, os.R_OK)
