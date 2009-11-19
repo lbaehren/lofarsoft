@@ -4,7 +4,6 @@ from contextlib import closing
 from subprocess import check_call, CalledProcessError
 import os.path
 
-from cuisine.parset import Parset
 from pipeline.support.lofarnode import LOFARnode
 from pipeline.support.utilities import patch_parset, create_directory, log_time
 from pipeline.support.lofarexceptions import ExecutableMissing
