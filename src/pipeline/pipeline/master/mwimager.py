@@ -1,6 +1,6 @@
 from __future__ import with_statement
 import sys, os
-from subprocess import check_call
+from subprocess import check_call, CalledProcessError
 from contextlib import closing
 
 # Cusine core
