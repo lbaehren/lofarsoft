@@ -81,7 +81,7 @@ class TestPipeline(WSRTrecipe):
         tasks = []
         for ms_name in ms_names:
             ms_outname = ms_name + ".dppp"
-            log_location = "%s/%s/dppp.log" % (
+            log_location = "%s/logs/%s/dppp.log" % (
                 job_directory,
                 os.path.basename(ms_name)
             )
