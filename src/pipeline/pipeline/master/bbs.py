@@ -130,7 +130,7 @@ class bbs(LOFARrecipe):
                         stdout=log,
                         stderr=log,
                         cwd=log_root
-                        )
+                    )
             else:
                 self.logger.info("Dry run: execution skipped")
                 result = 0
