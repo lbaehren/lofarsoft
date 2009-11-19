@@ -1,6 +1,6 @@
 SUBDIRS = Core library 
 
-ACLOCAL_AMFLAGS = -I $(top_srcdir)/autoconf_share
+ACLOCAL_AMFLAGS = -I autoconf_share
 
 EXTRA_DIST = Makefile.common
 
