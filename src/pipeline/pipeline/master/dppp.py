@@ -73,10 +73,12 @@ class dppp(LOFARrecipe):
         for ms_name in ms_names:
 #            outnames.append(ms_name + ".dppp")
 #            outnames.append("/data/swinbank/L2009_13244/" + os.path.basename(ms_name) + ".dppp")
-            outnames.append(os.path.join(
-                self._input_or_default('working_directory'),
-                self.inputs['job_name'],
-                os.path.basename(ms_name) + ".dppp"
+            outnames.append(
+                os.path.join(
+                    self._input_or_default('working_directory'),
+                    self.inputs['job_name'],
+                    os.path.basename(ms_name) + ".dppp"
+                )
             )
 
             log_location = "%s/%s/%s" % (
@@ -101,12 +103,16 @@ class dppp(LOFARrecipe):
                 tasks.append(tc.run(task))
         self.logger.info("Waiting for all DPPP tasks to complete")
         tc.barrier(tasks)
+        failure = False
         for task in tasks:
             ##### Print failing tasks?
             ##### Abort if all tasks failed?
             res = tc.get_task_result(task)
             if res.failure:
-                print res.failure
+                self.logger.warn("Task %s failed" % (task))
+                failure = True
+        if failure:
+            return 1
 
         # Save space on engines by clearing out old file lists
 #        mec.execute("clear_available_list(\"%s\")" % (available_list,))
