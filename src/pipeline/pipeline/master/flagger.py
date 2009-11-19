@@ -1,4 +1,4 @@
-import sys
+import sys, os
 from pyraprunner import pyraprunner
 from pipeline.support.sourcelist import SourceList
 
@@ -29,7 +29,7 @@ class flagger(pyraprunner):
                 self.config.get("bbs", "skymodel")
             )
             self.logger.info("Using %s for %s skymodel" %
-                (self.inputs['parset'], "flagger")
+                (self.inputs['skymodel'], "flagger")
             )
         if not os.access(self.inputs['skymodel'], os.R_OK):
             raise IOError
