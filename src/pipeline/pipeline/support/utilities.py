@@ -99,7 +99,7 @@ def log_time(logger):
     finally:
         total_rusage = [x - y for x, y in zip(get_rusage(), start_rusage)]
         logger.info(
-            "Node total time %.4fs; user time: %.4fs; system time: %.4fs" % (
+            "Total time %.4fs; user time: %.4fs; system time: %.4fs" % (
                 time.time() - start_time, total_rusage[0], total_rusage[1]
             )
         )
