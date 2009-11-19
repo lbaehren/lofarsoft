@@ -92,7 +92,6 @@ class vdsmaker(LOFARrecipe):
                 )
                 self.logger.info("Scheduling processing of %s" % (ms_name,))
                 tasks.append(tc.run(task))
-                self.logger.info(tasks[-1])
             self.logger.info("Waiting for all makevds tasks to complete")
             tc.barrier(tasks)
 

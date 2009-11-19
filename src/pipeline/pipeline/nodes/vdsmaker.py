@@ -24,7 +24,6 @@ class makevds_node(LOFARnode):
             self.logger.debug("Running: %s" % (' '.join(cmd,)))
             makevds_process = Popen(cmd, stdout=PIPE, stderr=STDOUT)
             result = makevds_process.wait()
-            self.logger.debug(makevds_process.stdout.read())
             if result != 0:
                 raise CalledProcessError(result, cmd)
             return result
