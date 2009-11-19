@@ -1,17 +1,12 @@
-import sys
+import sys, logging
 from pipeline.support.lofarrecipe import LOFARrecipe
 from pipeline.support.lofaringredient import LOFARinput, LOFARoutput
 import pipeline.support.utilities as utilities
-
-import logging
 
 class sip(LOFARrecipe):
     """
     The LOFAR Standard Imaging Pipeline.
     """
-    def __init__(self):
-        super(sip, self).__init__()
-
     def go(self):
         # Let's log to file before we get started
         handler = logging.FileHandler('pipeline.log')
