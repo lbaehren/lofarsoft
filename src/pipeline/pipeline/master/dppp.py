@@ -33,14 +33,6 @@ class dppp(LOFARrecipe):
         self.logger.info("Starting DPPP run")
         super(dppp, self).go()
 
-        # If we didn't get a GDS file on the command line, look for one in the
-        # job's default VDS directory
-        if not self.inputs['gvds']:
-            self.inputs['gvds'] = "%s/%s.gvds" % (
-                self.config.get('layout', 'vds_directory'),
-                self.inputs['job_name']
-            )
-            self.logger.info("Using %s for initial data" % (self.inputs['gvds'],))
         try:
             gvds = utilities.get_parset(self.inputs['gvds'])
         except:

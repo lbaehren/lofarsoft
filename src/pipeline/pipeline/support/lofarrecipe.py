@@ -58,6 +58,20 @@ class LOFARrecipe(WSRTrecipe):
                 )
             if not os.access(self.inputs['parset'], os.R_OK):
                 raise IOError
+
+        # If our inputs have a gvds field, but one isn't specified, try
+        # using a default.
+        if self.inputs.has_key('gvds'):
+            if not self.inputs['gvds']:
+                self.inputs['gvds'] = "%s/%s" % (
+                    self.config.get("layout", "vds_directory"),
+                    self.config.get(self.__class__.__name__, "default_gvds")
+                )
+                self.logger.info("Using %s for %s GVDS" %
+                    (self.inputs['gvds'], self.__class__.__name__)
+                )
+            if not os.access(self.inputs['gvds'], os.R_OK):
+                raise IOError
             
 
     def _get_cluster(self):

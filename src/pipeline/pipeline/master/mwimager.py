@@ -1,5 +1,7 @@
+from __future__ import with_statement
 import sys, os
 from subprocess import check_call
+from contextlib import closing
 
 # Cusine core
 from cuisine.ingredient import WSRTingredient
@@ -61,6 +63,7 @@ class mwimager(LOFARrecipe):
         try:
             self.logger.info("Running MWImager")
             with closing(open(log_location, 'w')) as log:
+                print log_location
                 result = check_call(
                     [
                         self.config.get('mwimager', 'executable'),
@@ -68,14 +71,15 @@ class mwimager(LOFARrecipe):
                         self.config.get('cluster', 'clusterdesc'),
                         self.inputs['working_directory'],
                         log_location,
-                        'dry'
                     ],
                     env=env,
-                    stdout=log
-                )
+                    stdout=log,
+                    stderr=log
+                    )
             return result
         finally:
-            os.unlink(temp_parset_filename)
+            pass
+#            os.unlink(temp_parset_filename)
 
 if __name__ == '__main__':
     sys.exit(mwimager().main())
