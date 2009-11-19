@@ -24,7 +24,6 @@ def run_dppp(infile, outfile, parset, log_location):
         parset, {
             'msin': infile,
             'msout': outfile,
-#            'clusterdesc': config.get('cluster', 'clusterdesc')
         }
     )
 
@@ -45,9 +44,11 @@ def run_dppp(infile, outfile, parset, log_location):
         with closing(open(log_location, 'w')) as log:
             log.write("%s not found" % (e.args[0])
         raise
-    except CalledProcessError:
+    except CalledProcessError, e:
         # For CalledProcessError isn't properly propagated by IPython
         # Temporary workaround...
+        with closing(open(log_location, 'w')) as log:
+            log.write(str(e))
         raise Exception
 
     finally:
