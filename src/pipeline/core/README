@@ -1,0 +1,8 @@
+This free software under the GNU Public Licence. See the file COPYING.
+Copyright (c) ASTRON
+
+If you are not using the Eric3 IDE you can ignore the .e3p files
+as these are the Eric3 project files (currently for version 3.6.
+
+These scripts are the base classes for the scripts in the
+WSRTpipeline_library. See the documentation in WSRTpipeline_library/doc.

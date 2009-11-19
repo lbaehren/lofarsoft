@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Project SYSTEM "Project-3.8.dtd">
+<!-- Project file for project Pipeline -->
+<!-- Saved: 2007-03-20, 14:22:42 -->
+<!-- Copyright (C) 2007 Adriaan Renting,  -->
+<Project version="3.8">
+  <ProgLanguage mixed="0">Python</ProgLanguage>
+  <UIType>Qt</UIType>
+  <Description></Description>
+  <Version>0.1</Version>
+  <Author>Adriaan Renting</Author>
+  <Email></Email>
+  <Sources>
+    <Source>
+      <Name>cook.py</Name>
+    </Source>
+    <Source>
+      <Name>ingredient.py</Name>
+    </Source>
+    <Source>
+      <Name>pipeline.py</Name>
+    </Source>
+    <Source>
+      <Name>message.py</Name>
+    </Source>
+    <Source>
+      <Name>job_parser.py</Name>
+    </Source>
+    <Source>
+      <Name>files.py</Name>
+    </Source>
+    <Source>
+      <Name>pipeline_manager_config.py</Name>
+    </Source>
+    <Source>
+      <Name>WSRTrecipe.py</Name>
+    </Source>
+  </Sources>
+  <Forms>
+  </Forms>
+  <Translations>
+  </Translations>
+  <Interfaces>
+  </Interfaces>
+  <Others>
+  </Others>
+  <Vcs>
+    <VcsType>None</VcsType>
+  </Vcs>
+  <FiletypeAssociations>
+    <FiletypeAssociation pattern="*.ui.h" type="FORMS" />
+    <FiletypeAssociation pattern="*.ui" type="FORMS" />
+    <FiletypeAssociation pattern="*.idl" type="INTERFACES" />
+    <FiletypeAssociation pattern="*.py" type="SOURCES" />
+    <FiletypeAssociation pattern="*.ptl" type="SOURCES" />
+  </FiletypeAssociations>
+</Project>
