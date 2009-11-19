@@ -10,6 +10,7 @@ import os.path
 from cuisine.parset import Parset
 from pipeline.support.utilities import patch_parset, create_directory
 from pipeline.support.lofarexceptions import ExecutableMissing
+import pipeline.support.utilities as utilities
 
 # Root directory for config file
 from pipeline import __path__ as config_path
@@ -31,7 +32,7 @@ def run_dppp(infile, outfile, parset, log_location):
     create_directory(os.path.dirname(outfile))
 
     env = utilities.read_initscript(
-        self.config.get('dppp', 'initscript')
+        config.get('dppp', 'initscript')
     )
 
     try:
