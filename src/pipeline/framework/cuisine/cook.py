@@ -37,10 +37,11 @@ class PipelineCook(WSRTCook):
 
     def copy_inputs(self):
         for k in self.inputs.keys():
-            if self.recipe.optionparser.has_option('--' + k):
-                self.recipe.inputs[k] = self.inputs[k]
-            else:
-                self.logger.debug(self.task + ' has no argument ' + str(k))
+            self.recipe.inputs[k] = self.inputs[k]
+#            if self.recipe.optionparser.has_option('--' + k):
+#                self.recipe.inputs[k] = self.inputs[k]
+#            else:
+#                self.logger.debug(self.task + ' has no argument ' + str(k))
 
     def copy_outputs(self):
         if self.recipe.outputs == None:
