@@ -16,6 +16,11 @@ class RecipeError(cook.CookError):
     pass
 
 class NullLogHandler(logging.Handler):
+    """
+    A handler for the logging module, which does nothing.
+    Provides a sink, so that loggers with no other handlers defined do
+    nothing rather than spewing unformatted garbage.
+    """
     def emit(self, record):
         pass
 
@@ -65,6 +70,7 @@ class WSRTrecipe(object):
     def main_init(self):
         """Main initialization for stand alone execution, reading input from
         the command line"""
+        # The root logger has a null handler; we'll override in recipes.
         logging.getLogger().addHandler(NullLogHandler())
         self.logger = logging.getLogger(self.name)
         opts = sys.argv[1:]
