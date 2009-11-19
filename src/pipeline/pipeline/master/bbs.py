@@ -34,9 +34,10 @@ class bbs(LOFARrecipe):
             help="Working directory used on compute nodes"
         )
         self.optionparser.add_option(
-            '--no-force',
-            dest="no_force",
-            help="Disable automatic cleanof control database, sky model parmdb, and instrument model parmdb"
+            '-f', '--force',
+            dest="force",
+            help="Automatically clean control database, sky model parmdb, and instrument model parmdb",
+            default=True
         )
         self.optionparser.add_option(
             '--db-host',
@@ -66,6 +67,17 @@ class bbs(LOFARrecipe):
                 (self.inputs['working_directory'],)
             )
 
+        if not self.inputs['skymodel']:
+            self.inputs['skymodel'] = "%s/%s" % (
+                self.config.get("layout", "parset_directory"),
+                self.config.get("bbs", "skymodel")
+            )
+            self.logger.info("Using %s for %s skymodel" % 
+                (self.inputs['parset'], "BBS")
+            )
+        if not os.access(self.inputs['skymodel'], os.R_OK):
+            raise IOError
+
         env = os.environ
         env.update({
             "PATH": self.config.get('bbs', 'env_path'),
@@ -81,44 +93,38 @@ class bbs(LOFARrecipe):
         self.logger.debug("Building BBS command string")
         bbs_cmd = [
             self.config.get('bbs', 'executable'),
-            "--db", self._input_or_default['db_host'],
-            "--db-name", self._input_or_default['db_name'],
-            "--db-user", self._input_or_default['db_user'],
+            "--db", self._input_or_default('db_host'),
+            "--db-name", self._input_or_default('db_name'),
+            "--db-user", self._input_or_default('db_user'),
             "--cluster-desc", self.config.get('cluster', 'clusterdesc'),
-            self._input_or_default('gvds'),
-            self._input_or_default('parset'),
+            self.inputs['gvds'],
+            self.inputs['parset'],
             self._input_or_default('skymodel'),
             self._input_or_default('working_directory')
-        ]
-        # if not self.inputs['no_force']:
-        bbs_cmd.insert(1, '-f')
-        # Check our verbosity
+            ]
+        if self.inputs['force']:
+            bbs_cmd.insert(1, '-f')
+        # Should BBS verbosity be linked to that of the pipeline, or should be
+        # be a separate setting? For now, make it verbose...
         bbs_cmd.insert(1, '-v')
-        print bbs_cmd
-
-#        try:
-#            self.logger.info("Running BBS")
-#            with closing(open(log_location, 'w')) as log:
-#                result = check_call(
-#                    [
-#                        self.config.get('bbs', 'executable'),
-#                        temp_parset_filename,
-#                        self.config.get('cluster', 'clusterdesc'),
-#                        self.inputs['working_directory'],
-#                        log_location,
-#                    ],
-#                    env=env,
-#                    stdout=log,
-#                    stderr=log
-#                    )
-#            return result
-#        except CalledProcessError:
-#            self.logger.exception("Call to mwimager failed")
-#            return 1
-#        finally:
-#            os.unlink(temp_parset_filename)
+        
+        try:
+            self.logger.info("Running BBS")
+            with closing(open(log_location, 'w')) as log:
+                result = check_call(
+                    bbs_cmd,
+                    env=env,
+                    stdout=log,
+                    stderr=log
+                    )
+            return result
+        except CalledProcessError:
+            self.logger.exception("Call to mwimager failed")
+            return 1
+        finally:
+            os.unlink(temp_parset_filename)
 
         return 0
 
 if __name__ == '__main__':
-    sys.exit(mwimager().main())
+    sys.exit(bbs().main())

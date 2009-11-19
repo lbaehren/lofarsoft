@@ -86,12 +86,12 @@ class LOFARrecipe(WSRTrecipe):
         self.logger.info("Cluster initialised")
         return tc, mec
 
-    def _input_or_default(self, key, section=self.__class__.__name__):
+    def _input_or_default(self, key, section=None):
         # If the input array has a given key which doesn't have a value, see
         # if we can pull one out of the config file & return that.
-        if not self.inputs.has_key('key'):
+        if not self.inputs.has_key(key):
             self.logger.debug("Not populating non-extant input key")
-        if not self.inputs['key']:
-            self.inputs[key] = self.config.get(section, key)
+        if not self.inputs[key]:
+            self.inputs[key] = self.config.get(section or self.__class__.__name__, key)
         return self.inputs[key]
         
