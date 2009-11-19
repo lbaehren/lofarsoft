@@ -1,5 +1,5 @@
 from __future__ import with_statement
-import sys, os, logging, tempfile
+import sys, os, logging, tempfile, glob, shutil
 from subprocess import check_call, CalledProcessError
 from contextlib import closing
 
@@ -109,8 +109,8 @@ class bbs(LOFARrecipe):
             bbs_cmd.insert(1, '-v')
 
         # Use a temporary directory to grab all the logs.
-        working_dir = tempfile.mkdtemp()
-        self.logger.debug("Logs dumped to %s" % (working_dir))
+        log_root = tempfile.mkdtemp()
+        self.logger.debug("Logs dumped to %s" % (log_root))
 
         try:
             self.logger.info("Running BBS")
@@ -122,17 +122,88 @@ class bbs(LOFARrecipe):
                         env=env,
                         stdout=log,
                         stderr=log,
-                        cwd=working_dir
+                        cwd=log_root
                         )
             else:
                 self.logger.info("Dry run: execution skipped")
                 result = 0
-            return result
         except CalledProcessError:
             self.logger.exception("Call to BBS failed")
-            return 1
+            result = 1
 
-        return 0
+        self.logger.info("Moving logfiles")
+        for log_file in glob.glob("%s%s%s" % (
+            log_root, self.inputs[key], "control*log")
+        ):
+            self.logger.debug("Processing %s" % (log_file))
+            shutil.move(log_file, self.config.get('layout', 'log_directory'))
+        for log_file in glob.glob("%s%s%s" % (
+            log_root, self.inputs[key], "calibrate*log*")
+        ):
+            self.logger.debug("Processing %s" % (log_file))
+            ms_name = ""
+            with closing(open(log_file)) as file:
+                for line in file.xreadlines():
+                    if line.split()[0] == "part:"
+                        ms_name = os.path.basename(split_line[1].rstrip())
+                        break
+            if not ms_name:
+                self.logger.info("Couldn't identify file for %s" % (log_file))
+            else:
+                destination = "%s/%s" % (
+                    self.config.get('layout', 'log_directory'),
+                    ms_name
+                )
+                self.logger.debug(
+                    "Moving logfile %s to %s" % (log_file, destination)
+                )
+                utilities.move_log(log_file, destination)
+
+        for log_file in glob.glob("%s%s%s" % (
+            log_root, self.inputs[key], "setupparmdb*log*")
+        ):
+            self.logger.debug("Processing %s" % (log_file))
+            ms_name = ""
+            with closing(open(log_file)) as file:
+                ms_name = os.path.basename(file.readline().split()[5])
+            if not ms_name:
+                self.logger.info("Couldn't identify file for %s" % (log_file))
+            else:
+                destination = "%s/%s" % (
+                    self.config.get('layout', 'log_directory'),
+                    ms_name
+                )
+                self.logger.debug(
+                    "Moving logfile %s to %s" % (log_file, destination)
+                )
+                utilities.move_log(log_file, destination)
+
+        for log_file in glob.glob("%s%s%s" % (
+            log_root, self.inputs[key], "setupsourcedb*log*")
+        ):
+            self.logger.debug("Processing %s" % (log_file))
+            ms_name = ""
+            with closing(open(log_file)) as file:
+                ms_name = os.path.dirname(file.readline().split()[1])
+            if not ms_name:
+                self.logger.info("Couldn't identify file for %s" % (log_file))
+            else:
+                destination = "%s/%s" % (
+                    self.config.get('layout', 'log_directory'),
+                    ms_name
+                )
+                self.logger.debug(
+                    "Moving logfile %s to %s" % (log_file, destination)
+                )
+                utilities.move_log(log_file, destination)
+        try:
+            self.logger.debug("Removing temporary log directory")
+            os.rmdir(os.path.dirname(log_root))
+        except OSError, failure:
+            self.logger.info("Failed to remove temporary directory")
+            self.logger.debug(failure)
+
+        return result
 
 if __name__ == '__main__':
     sys.exit(bbs().main())

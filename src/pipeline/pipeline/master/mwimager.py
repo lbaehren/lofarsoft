@@ -81,7 +81,7 @@ class mwimager(LOFARrecipe):
                 result = 0
         except CalledProcessError:
             self.logger.exception("Call to mwimager failed")
-            return 1
+            result = 1
         finally:
             os.unlink(temp_parset_filename)
 

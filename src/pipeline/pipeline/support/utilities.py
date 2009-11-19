@@ -1,5 +1,6 @@
 from cuisine.parset import Parset
 from tempfile import mkstemp
+import os
 
 class ClusterError(Exception):
     pass
@@ -38,3 +39,12 @@ def patch_parset(parset, data, output_dir=None):
         temp_parset[k] = v
     temp_parset.writeToFile(temp_parset_filename)
     return temp_parset_filename
+
+def move_log(log, destination):
+    try:
+        os.makedirs(destination)
+    except OSError, failure:
+        if failure.errono != errno.EEXIST:
+            raise
+    shutil.move(log_file, destination)
+
