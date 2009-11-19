@@ -46,7 +46,7 @@ class dppp(WSRTrecipe):
             self.inputs['job_name']
         )
         try:
-            parset = "%s/dppp.parset" % (job_directory,)
+            parset = "%s/parsets/dppp.parset" % (job_directory,)
             if not os.access(parset, os.R_OK):
                 raise IOError
         except IOError:
@@ -102,10 +102,10 @@ class dppp(WSRTrecipe):
                 depend=utilities.check_for_path,
                 dependargs=(ms_name, available_list)
             )
-            tasks.append(tc.run(task))
-        tc.barrier(tasks)
-        for task in tasks:
-            tc.get_task_result(task)
+#            tasks.append(tc.run(task))
+#        tc.barrier(tasks)
+#        for task in tasks:
+#            tc.get_task_result(task)
 
         # Save space on engines by clearing out old file lists
         mec.execute("clear_available_list(\"%s\")" % (available_list,))
@@ -115,7 +115,8 @@ class dppp(WSRTrecipe):
         inputs = WSRTingredient()
         inputs['job_name'] = self.inputs['job_name']
         inputs['runtime_directory'] = self.inputs['runtime_directory']
-        inputs['gds'] = "%s/%s.dppp.gds" % (job_directory, self.inputs['job_name'])
+        inputs['directory'] = "%s/vds" % (job_directory,)
+        inputs['gds'] = "%s.dppp.gds" % (self.inputs['job_name'])
         inputs['args'] = outnames
         outputs = WSRTingredient()
         sts = self.cook_recipe('vdsmaker', inputs, outputs)

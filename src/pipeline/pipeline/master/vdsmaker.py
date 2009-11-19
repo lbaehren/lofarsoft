@@ -64,7 +64,10 @@ class vdsmaker(WSRTrecipe):
                 job_directory,
                 os.path.basename(ms_name)
             )
-            vdsnames.append(tempfile.mkstemp(dir=job_directory)[1])
+#            vdsnames.append(tempfile.mkstemp(dir=job_directory)[1])
+            vdsnames.append(
+                "%s/%s.vds" % (self.inputs['directory'], os.path.basename(ms_name))
+            )
             task = IPclient.StringTask(
                 "result = make_vds(ms_name, clusterdesc, vds_name, log_location)",
                 push=dict(
@@ -84,10 +87,10 @@ class vdsmaker(WSRTrecipe):
 
         # Combine VDS files to produce GDS
         executable = '/app/lofar/dev/bin/combinevds'
-        gvds_out   = self.inputs['gds']
+        gvds_out   = "%s/%s" % (self.inputs['directory'], self.inputs['gds'])
         check_call([executable, gvds_out] + vdsnames)
-        for file in vdsnames:
-            os.unlink(file)
+#        for file in vdsnames:
+#            os.unlink(file)
         self.outputs['gds'] = gvds_out
 
        # Save space on engines by clearing out old file lists
