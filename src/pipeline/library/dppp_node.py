@@ -32,14 +32,14 @@ logging.getLogger().setLevel(logging.DEBUG)
 hostname = socket.gethostname()
 logging.info('Running on node %s', hostname)
 
-# Add six empty arguments to handle missing arguments. 
-sys.argv.extend(7*[''])
+# Add empty arguments to handle missing arguments. 
+sys.argv.extend(8*[''])
 try:
     # The first four arguments are dummy.
-    (seqnr, msn, lroot, psn, wd, vdsdir, dry) = sys.argv[5:12]
+    (seqnr, msn, fsys, lroot, psn, wd, vdsdir, dry) = sys.argv[5:13]
 except ValueError:
     print 'usage:', os.path.basename(sys.argv[0]), 'dummy dummy dummy dummy', \
-          'rank ms-part lofarroot parset-file wd vds-dir [no]dry'
+          'rank ms-part filesys lofarroot parset-file wd vds-dir [no]dry'
     sys.exit(1)
 
 # Show input arguments
