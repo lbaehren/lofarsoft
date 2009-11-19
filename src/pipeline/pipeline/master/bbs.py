@@ -183,9 +183,10 @@ class bbs(LOFARrecipe):
             else:
                 self.logger.info("Dry run: execution skipped")
                 result = 0
-        except CalledProcessError:
+        except CalledProcessError, e:
             self.logger.exception("Call to BBS failed")
             result = 1
+            return result
 
         self.logger.info("Moving logfiles")
         for log_file in glob.glob("%s/%s_%s" % (
