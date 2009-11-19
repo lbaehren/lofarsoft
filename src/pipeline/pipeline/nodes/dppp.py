@@ -1,18 +1,28 @@
-import sys
+# Python standard library
+from subprocess import check_call
+from tempfile import mkstemp
+from os import unlink
 
-from cuisine.WSRTrecipe import WSRTrecipe
-from cuisine.ingredient import WSRTingredient
+# External
+from cuisine.parset import Parset
 
-from IPython.kernel import client as IPclient
+def run_dppp(infile, outfile, parset):
+    executable = "/app/lofar/stable/bin/CS1_IDPPP"
 
-class TestPipeline(WSRTrecipe):
-    def __init__(self):
-        super(TestPipeline, self).__init__()
-        self.tc = IPclient.TaskClient('/data/users/swinbank/pipeline_runtime/task.furl')
+    # We need to patch the parset with the correct input/output MS names.
+    temp_parset_filename = mkstemp()[1]
+    temp_parset = Parset()
+    temp_parset.readFromFile(parset)
+    temp_parset['msin'] = infile
+    temp_parset['msout'] = outfile
+    temp_parset.writeToFile(temp_parset_filename)
 
-    def go(self):
-        result = self.tc.map(lambda x: x**2, range(3200))
-        print result
+    try:
+        # What is the '1' for? Required by DP3...
+        check_call([executable, temp_parset_filename, '1'])
+    finally:
+        unlink(temp_parset_filename)
 
-if __name__ == '__main__':
-    sys.exit(TestPipeline().main())
+if __name__ == "__main__":
+    from sys import argv
+    run_dppp(argv[1], argv[2], argv[3])

@@ -1,28 +1,49 @@
-# Python standard library
-from subprocess import check_call
-from tempfile import mkstemp
-from os import unlink
+import sys
 
-# External
-from cuisine.parset import Parset
+from cuisine.WSRTrecipe import WSRTrecipe
+from cuisine.ingredient import WSRTingredient
 
-def run_dppp(infile, outfile, parset):
-    executable = "/app/lofar/stable/bin/CS1_IDPPP"
+from utilities import ClusterError, get_parset
 
-    # We need to patch the parset with the correct input/output MS names.
-    temp_parset_filename = mkstemp()[1]
-    temp_parset = Parset()
-    temp_parset.readFromFile(parset)
-    temp_parset['msin'] = infile
-    temp_parset['msout'] = outfile
-    temp_parset.writeToFile(temp_parset_filename)
+from IPython.kernel import client as IPclient
 
-    try:
-        # What is the '1' for? Required by DP3...
-        check_call([executable, temp_parset_filename, '1'])
-    finally:
-        unlink(temp_parset_filename)
+class TestPipeline(WSRTrecipe):
+    def __init__(self):
+        super(TestPipeline, self).__init__()
+        self.optionparser.add_option(
+            '-r', '--runtime-directory', 
+            dest="runtime_directory",
+            help="Runtime Directory"
+        )
+        self.optionparser.add_option(
+            '-g', '--g(v)ds-file',
+            dest="gvds",
+            help="G(V)DS file describing data to be processed"
+        )
 
-if __name__ == "__main__":
-    from sys import argv
-    run_dppp(argv[1], argv[2], argv[3])
+    def go(self):
+        try:
+            gvds = get_parset(self.inputs['gvds'])
+        except:
+            self.logger.error("Unable to read G(V)DS file")
+            raise
+
+        try:
+            tc = IPclient.TaskClient(self.inputs['runtime_directory'] + '/task.furl')
+        except:
+            self.logger.error("Unable to connect to cluster")
+            raise ClusterError
+
+
+        filenames = [
+            gvds["Part%d.FileName" % (part_no,)] 
+            for part_no in xrange(int(gvds["NParts"]))
+        ]
+
+
+
+
+        print self.inputs
+
+if __name__ == '__main__':
+    sys.exit(TestPipeline().main())
