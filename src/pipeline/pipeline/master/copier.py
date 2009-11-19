@@ -39,7 +39,8 @@ class copier(LOFARrecipe):
                 lambda x: shutil.copytree(x[0], x[1]),
                 zip(self.inputs['args'], destinations)
             )
-        except:
+        except Exception, e:
+            self.logger.exception('Failed to copy files on cluster')
             return 1
 
         self.outputs['ms_names'] = destinations
