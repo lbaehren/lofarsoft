@@ -221,8 +221,10 @@ class bbs(LOFARrecipe):
                         node,
                         "--",
                         "mv",
-                        "%s/%s*log" % (
-                            self._input_or_default('working_directory'), self.inputs['key']
+                        "%s/%s/%s*log" % (
+                            self._input_or_default('working_directory'),
+                            self.inputs['job_name'],
+                            self.inputs['key']
                         ),
                         log_root
                     ])
