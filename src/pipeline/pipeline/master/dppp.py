@@ -33,11 +33,6 @@ class dppp(LOFARrecipe):
             help="DPPP initscript"
         )
         self.optionparser.add_option(
-            '--log',
-            dest="log",
-            help="Log file name"
-        )
-        self.optionparser.add_option(
             '-p', '--parset',
             dest="parset",
             help="Parset containing configuration for DPPP"
@@ -88,10 +83,9 @@ class dppp(LOFARrecipe):
                         )
                     )
 
-                    log_location = "%s/%s/%s" % (
+                    log_location = os.path.join(
                         self.config.get('layout', 'log_directory'),
-                        os.path.basename(ms_name),
-                        self.config.get('dppp', 'log')
+                        'dppp'
                     )
                     task = LOFARTask(
                         "result = run_dppp(ms_name, ms_outname, parset, log_location, executable, initscript)",
