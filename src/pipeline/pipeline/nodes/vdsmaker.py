@@ -7,7 +7,9 @@ import os, errno
 
 def make_vds(infile, clusterdesc, outfile, log_location):
     # Make VDS file for input MS in specifed location
-    executable = "/app/lofar/stable/bin/makevds"
+    # The dev version of makevds appears to make more comprehensive VDS files
+    # (including the FileName field) than the stable version.
+    executable = "/app/lofar/dev/bin/makevds"
 
     try:
         # Make the log directory
@@ -18,6 +20,7 @@ def make_vds(infile, clusterdesc, outfile, log_location):
             raise
 
     with closing(open(log_location, 'w')) as log:
+        log.write("Executing: %s %s %s %s" %(executable, clusterdesc, infile, outfile))
         result = check_call(
             [executable, clusterdesc, infile, outfile],
             stdout=log
