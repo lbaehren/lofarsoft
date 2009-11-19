@@ -6,23 +6,17 @@ from pipeline.support.lofarrecipe import LOFARrecipe
 import pipeline.support.utilities as utilities
 from pipeline.support.clusterlogger import clusterlogger
 
-def run_qcheck(infile, pluginlist, logfile):
+def run_qcheck(infile, pluginlist, outputdir):
     from pipeline.nodes.qcheck import qcheck_node
     return qcheck_node(loghost=loghost, logport=logport).run(
         infile,
         pluginlist,
-        logfile
+        outputdir
     )
 
 class qcheck(LOFARrecipe):
     def __init__(self):
         super(qcheck, self).__init__()
-        self.optionparser.add_option(
-            '--log-suffix',
-            dest="log_suffix",
-            help="Suffix for log filename",
-            default=".stats.log"
-        )
         self.optionparser.add_option(
             '--plugins',
             dest="plugins",
@@ -61,11 +55,11 @@ class qcheck(LOFARrecipe):
             tasks = []
             for image_name in image_names:
                 task = LOFARTask(
-                    "result = run_qcheck(infile, pluginlist, logfile)",
+                    "result = run_qcheck(infile, pluginlist, outputdir)",
                     push=dict(
                         infile=image_name,
                         pluginlist=plugins,
-                        logfile=image_name+self.inputs['log_suffix'],
+                        outputdir=self.config.get('layout', 'results_directory'),
                         loghost=loghost,
                         logport=logport
                     ),

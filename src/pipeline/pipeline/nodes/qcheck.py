@@ -8,11 +8,16 @@ class qcheck_node(LOFARnode):
     """
     Run quality check modules on an image.
     """
-    def run(self, infile, pluginlist, logfile):
+    def run(self, infile, pluginlist, outputdir):
         with log_time(self.logger):
             self.logger.info("Processing: %s" % (infile))
 
-            file_handler = logging.FileHandler(logfile, mode='w') 
+            file_handler = logging.FileHandler(os.path.join(
+                    outputdir,
+                    os.path.basename(infile) + ".qcheck.log"
+                ),
+                mode='w'
+            )
             file_handler.setFormatter(logging.Formatter("%(message)s"))
             file_logger = logging.getLogger('main')
             file_logger.addHandler(file_handler)
@@ -30,7 +35,7 @@ class qcheck_node(LOFARnode):
                     self.logger.warn("Quality check module (%s) not found" % (plugin))
                     break
                 try:
-                    qcheck.run(infile, loggers=loggers)
+                    qcheck.run(infile, outputdir=outputdir, loggers=loggers)
                 except Exception, e:
                     self.logger.warn("Quality check failed on %s" % (infile))
                     self.logger.exception(str(e))
