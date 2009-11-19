@@ -1,3 +1,4 @@
+from __future__ import with_statement
 import sys, os, tempfile
 from subprocess import check_call, CalledProcessError
 
@@ -5,10 +6,16 @@ from subprocess import check_call, CalledProcessError
 from pipeline.support.ipython import LOFARTask
 from pipeline.support.lofarrecipe import LOFARrecipe
 import pipeline.support.utilities as utilities
+from pipeline.support.clusterlogger import clusterlogger
 
 def make_vds(infile, clusterdesc, outfile, log_location):
-    from pipeline.nodes.vdsmaker import make_vds
-    return make_vds(infile, clusterdesc, outfile, log_location)
+    from pipeline.nodes.vdsmaker import makevds_node
+    return makevds_node(loghost=loghost, logport=logport).run(
+        infile,
+        clusterdesc,
+        outfile,
+        log_location
+    )
 
 class vdsmaker(LOFARrecipe):
     def __init__(self):
@@ -48,33 +55,40 @@ class vdsmaker(LOFARrecipe):
             "build_available_list(\"%s\")" % (available_list,)
         )
         clusterdesc = self.config.get('cluster', 'clusterdesc')
-        tasks = []
-        vdsnames = []
-        for ms_name in ms_names:
-            log_location = "%s/%s/%s.log" % (
-                self.config.get("layout", "log_directory"),
-                os.path.basename(ms_name),
-                self.config.get("vds", "log"),
-            )
-            vdsnames.append(
-                "%s/%s.vds" % (self.inputs['directory'], os.path.basename(ms_name))
-            )
-            task = LOFARTask(
-                "result = make_vds(ms_name, clusterdesc, vds_name, log_location)",
-                push=dict(
-                    ms_name=ms_name,
-                    vds_name=vdsnames[-1],
-                    clusterdesc=clusterdesc,
-                    log_location=log_location
-                ),
-                pull="result",
-                depend=utilities.check_for_path,
-                dependargs=(ms_name, available_list)
-            )
-            self.logger.info("Scheduling processing of %s" % (ms_name,))
-            tasks.append(tc.run(task))
-        self.logger.info("Waiting for all makevds tasks to complete")
-        tc.barrier(tasks)
+
+        with clusterlogger(self.logger) as (loghost, logport):
+            self.logger.debug("Logging to %s:%d" % (loghost, logport))
+            tasks = []
+            vdsnames = []
+            for ms_name in ms_names:
+                log_location = "%s/%s/%s.log" % (
+                    self.config.get("layout", "log_directory"),
+                    os.path.basename(ms_name),
+                    self.config.get("vds", "log"),
+                )
+                vdsnames.append(
+                    "%s/%s.vds" % (self.inputs['directory'], os.path.basename(ms_name))
+                )
+                task = LOFARTask(
+                    "result = make_vds(ms_name, clusterdesc, vds_name, log_location)",
+                    push=dict(
+                        ms_name=ms_name,
+                        vds_name=vdsnames[-1],
+                        clusterdesc=clusterdesc,
+                        log_location=log_location,
+                        loghost=loghost,
+                        logport=logport
+                    ),
+                    pull="result",
+                    depend=utilities.check_for_path,
+                    dependargs=(ms_name, available_list)
+                )
+                self.logger.info("Scheduling processing of %s" % (ms_name,))
+                tasks.append(tc.run(task))
+                self.logger.info(tasks[-1])
+            self.logger.info("Waiting for all makevds tasks to complete")
+            tc.barrier(tasks)
+
         for task in tasks:
             tc.get_task_result(task)
 
