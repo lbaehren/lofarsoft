@@ -1,25 +1,19 @@
 import sys, os
 
+# Cusine core
 from cuisine.WSRTrecipe import WSRTrecipe
 from cuisine.ingredient import WSRTingredient
 
-from utilities import ClusterError, get_parset, check_for_path
-
+# IPython client
 from IPython.kernel import client as IPclient
+
+# Local helpers
+import utilities
 
 def run_dppp(ms_name, ms_outname, parset, log_location):
     # Run on engine to process data with DPPP
     from pipeline.nodes.dppp import run_dppp
     return run_dppp(ms_name, ms_outname, parset, log_location)
-
-def build_available_list():
-    # Run on engine to construct list of locally-stored data
-    from twisted.python import log
-    log.msg('building available list')
-    import os
-    from IPython.kernel.engineservice import get_engine
-    engineapi = get_engine(id)
-    engineapi.properties['available'] = [ms_name for ms_name in ms_names if os.access(ms_name, os.R_OK)]
 
 class TestPipeline(WSRTrecipe):
     def __init__(self):
@@ -42,7 +36,7 @@ class TestPipeline(WSRTrecipe):
 
     def go(self):
         try:
-            gvds = get_parset(self.inputs['gvds'])
+            gvds = utilities.get_parset(self.inputs['gvds'])
         except:
             self.logger.error("Unable to read G(V)DS file")
             raise
@@ -62,10 +56,16 @@ class TestPipeline(WSRTrecipe):
         try:
             tc  = IPclient.TaskClient(self.inputs['runtime_directory'] + '/task.furl')
             mec = IPclient.MultiEngineClient(self.inputs['runtime_directory'] + '/multiengine.furl')
-            mec.push_function(dict(run_dppp=run_dppp, build_available_list=build_available_list))
+            mec.push_function(
+                dict(
+                    run_dppp=run_dppp,
+                    build_available_list=utilities.build_available_list,
+                    clear_available_list=utilities.clear_available_list
+                )
+            )
         except:
             self.logger.error("Unable to initialise cluster")
-            raise ClusterError
+            raise utilities.ClusterError
 
         # We read the GVDS file to find the names of all the data files we're
         # going to process, then push this list out to the engines so they can
@@ -75,8 +75,12 @@ class TestPipeline(WSRTrecipe):
             for part_no in xrange(int(gvds["NParts"]))
         ]
 
+        # Construct list of available files on engines
+        available_list = "%s%s" % (self.inputs['job_name'], "dppp")
         mec.push(dict(ms_names=ms_names))
-        mec.execute("build_available_list()")
+        mec.execute(
+            "build_available_list(\"%s\")" % (available_list,)
+        )
 
         tasks = []
         for ms_name in ms_names:
@@ -94,13 +98,16 @@ class TestPipeline(WSRTrecipe):
                     log_location=log_location
                 ),
                 pull="result",
-                depend=check_for_path,
-                dependargs=ms_name
+                depend=utilities.check_for_path,
+                dependargs=(ms_name, available_list)
             )
             tasks.append(tc.run(task))
         tc.barrier(tasks)
         for task in tasks:
             tc.get_task_result(task)
+
+        # Save space on engines by clearing out old file lists
+        mec.execute("clear_available_list(\"%s\")" % (available_list,))
 
 if __name__ == '__main__':
     sys.exit(TestPipeline().main())

@@ -41,4 +41,7 @@ def run_dppp(infile, outfile, parset, log_location):
 
 if __name__ == "__main__":
     from sys import argv
-    run_dppp(argv[1], argv[2], argv[3], argv[4])
+    try:
+        run_dppp(argv[1], argv[2], argv[3], argv[4])
+    except:
+        print "Usage: dppp [infile] [outfile] [parset] [logfile]"
