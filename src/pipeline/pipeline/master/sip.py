@@ -58,15 +58,15 @@ class sip(LOFARrecipe):
 
         # Drop known-bad stations
         self.logger.info("Calling excluder")
-        inputs = LOFARinput(self.inputs)
-        inputs['station'] = "DE001LBA"
-        inputs['suffix'] = ".excluded"
-        inputs['args'] = ms_names
-        outputs = LOFARoutput()
-        if self.cook_recipe('excluder', inputs, outputs):
-            self.logger.warn("excluder reports failure")
-            return 1
-        excluded_outnames = outputs['data']
+#        inputs = LOFARinput(self.inputs)
+#        inputs['station'] = "DE001LBA"
+#        inputs['suffix'] = ".excluded"
+#        inputs['args'] = ms_names
+#        outputs = LOFARoutput()
+#        if self.cook_recipe('excluder', inputs, outputs):
+#            self.logger.warn("excluder reports failure")
+#            return 1
+#        excluded_outnames = outputs['data']
 
         # Trim off any bad section of the data
         self.logger.info("Calling trimmer")
@@ -74,7 +74,7 @@ class sip(LOFARrecipe):
         inputs['start_seconds'] = 300.0
         inputs['end_seconds'] = 300.0
         inputs['suffix'] = ".trimmed"
-        inputs['args'] = excluded_outnames
+        inputs['args'] = ms_names
         outputs = LOFARoutput()
         if self.cook_recipe('trimmer', inputs, outputs):
             self.logger.warn("trimmer reports failure")
