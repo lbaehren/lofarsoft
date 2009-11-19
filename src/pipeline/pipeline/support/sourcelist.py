@@ -12,15 +12,16 @@ class SourceList(list):
     def __init__(self, filename):
         # Default format if we can't read one from the file
         format = (
-            "name", "type", "Ra", "Dec", "I", "Q", "U", "V",
-            "Spectralindex", "Major", "Minor", "Phi"
+            "Name", "Type", "Ra", "Dec", "I", "Q", "U", "V",
+            "ReferenceFrequency='60e6'", "SpectralIndexDegree='0'",
+            "SpectralIndex:0='0.0'", "Major", "Minor", "Phi"
         )
         with open(filename, 'r') as file:
             try:
                 # Maybe the first line is a comma-separated format string...
-                first_line = file.readline().strip()
-                if first_line[0] == "#":
-                    format = map(str.strip, first_line[1:].split(","))
+                first_line = file.readline().strip().split()
+                if first_line.split()[-1] == "format":
+                    format = map(str.strip, first_line[3:-10].split(","))
                 else:
                     raise
             except:
