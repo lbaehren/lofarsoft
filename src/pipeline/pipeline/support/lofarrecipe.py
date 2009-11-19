@@ -43,7 +43,7 @@ class LOFARrecipe(WSRTrecipe):
         # If a config file hasn't been specified, use the default
         if not self.inputs["config"]:
             from pipeline import __path__ as config_path
-            self.inputs["config"] = "%s/pipeline.cfg" % (config_path[0],)
+            self.inputs["config"] = os.path.join(config_path[0], 'pipeline.cfg')
             self.logger.debug("Using default configuration file")
 
         self.config = ConfigParser({
@@ -63,7 +63,7 @@ class LOFARrecipe(WSRTrecipe):
         # using a default
         if self.inputs.has_key('parset'):
             if not self.inputs['parset']:
-                self.inputs['parset'] = "%s/%s" % (
+                self.inputs['parset'] = os.path.join(
                     self.config.get("layout", "parset_directory"),
                     self.config.get(self.__class__.__name__, "parset")
                 )
@@ -77,7 +77,7 @@ class LOFARrecipe(WSRTrecipe):
         # using a default.
         if self.inputs.has_key('gvds'):
             if not self.inputs['gvds']:
-                self.inputs['gvds'] = "%s/%s" % (
+                self.inputs['gvds'] = os.path.join(
                     self.config.get("layout", "vds_directory"),
                     self.config.get(self.__class__.__name__, "default_gvds")
                 )
