@@ -62,7 +62,9 @@ class LOFARrecipe(WSRTrecipe):
         })
         self.config.read(self.inputs["config"])
 
-        self.recipe_path = [x.strip() for x in self.config.get('DEFAULT', "recipe_directories").strip('[] ').split(',')]
+        self.recipe_path = utilities.string_to_list(
+            self.config.get('DEFAULT', "recipe_directories")
+        )
 
         if not self.inputs['runtime_directory']:
             self.inputs["runtime_directory"] = self.config.get(

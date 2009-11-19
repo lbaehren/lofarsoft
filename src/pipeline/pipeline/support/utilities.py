@@ -103,3 +103,9 @@ def log_time(logger):
                 time.time() - start_time, total_rusage[0], total_rusage[1]
             )
         )
+
+def string_to_list(my_string):
+    """
+    Convert a list-like string (as in pipeline.cfg) to a list of values.
+    """
+    return [x.strip() for x in my_string.strip('[] ').split(',')]
