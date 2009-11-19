@@ -11,11 +11,11 @@ from contextlib import contextmanager
 def clusterlogger(
     logger,
     host=None,
-    port=logging.handlers.DEFAULT_TCP_LOGGING_PORT
+    port=0
 ):
     if not host:
-        host = scoket.gethostname()
-    logserver = LogRecordSocketReceiver(logger)
+        host = socket.gethostname()
+    logserver = LogRecordSocketReceiver(logger, host=host, port=port)
     logserver.start()
     yield logserver.server_address
     logserver.stop()
