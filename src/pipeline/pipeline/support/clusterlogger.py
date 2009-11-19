@@ -5,6 +5,7 @@ import struct
 import threading
 import select
 import socket
+import signal # KeyboardInterrupt guaranteed to main thread if signal is "available". Hm.
 from contextlib import contextmanager
 
 @contextmanager
@@ -17,7 +18,11 @@ def clusterlogger(
         host = socket.gethostname()
     logserver = LogRecordSocketReceiver(logger, host=host, port=port)
     logserver.start()
-    yield logserver.server_address
+    try:
+        yield logserver.server_address
+    except KeyboardInterrupt:
+        logserver.stop()
+        raise
     logserver.stop()
 
 class LogRecordStreamHandler(SocketServer.StreamRequestHandler):
