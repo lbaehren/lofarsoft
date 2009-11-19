@@ -17,6 +17,7 @@ from tkp_lib.database import connection
 from tkp_lib.dataset import DataSet
 
 def sextract(filename, dataset):
+    raise NotImplementedError
     # Hack around MonetDB concurrency issues(!)
     import time, random
     time.sleep(random.randint(0,60))
