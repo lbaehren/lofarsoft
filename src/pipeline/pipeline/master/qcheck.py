@@ -1,8 +1,6 @@
 from __future__ import with_statement
-import sys, os, tempfile
-from subprocess import check_call, CalledProcessError
+import sys, os
 
-# Local helpers
 from pipeline.support.ipython import LOFARTask
 from pipeline.support.lofarrecipe import LOFARrecipe
 import pipeline.support.utilities as utilities
@@ -49,7 +47,6 @@ class qcheck(LOFARrecipe):
         )
         self.logger.info("Pushed functions to cluster")
 
-        # Build VDS files for each of the newly created MeasurementSets
         self.logger.info("Building list of data available on engines")
         available_list = "%s%s" % (self.inputs['job_name'], "qcheck")
         mec.push(dict(filenames=image_names))
