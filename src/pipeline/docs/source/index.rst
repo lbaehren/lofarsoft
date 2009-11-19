@@ -21,6 +21,7 @@ sources detected in the data.
    :maxdepth: 2
 
    framework/index.rst
+   recipe/index.rst
    pipeline/index.rst
 
 Indices and tables

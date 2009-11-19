@@ -2,6 +2,8 @@
 Building a pipeline
 ===================
 
+.. _pipeline-layout:
+
 Pipeline layout
 ---------------
 The pipeline system is designed to be organised in a standard directory

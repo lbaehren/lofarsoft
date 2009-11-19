@@ -25,8 +25,10 @@ modificatins have been made. These include:
   framework, which handles configuration files and command line options in a
   uniform way.)
 
-* Reworked logging system using the ``logging`` module from the Python
-  standard library.
+* Reworked logging system using the ``logging`` module from the `Python
+  standard library <http://docs.python.org/library/optparse.html>`_. This
+  provides a flexible way of configuring logging formats and destinations,
+  included logging to files or TCP sockets.
 
 * Assorted bug-fixes and tweaks.
 
