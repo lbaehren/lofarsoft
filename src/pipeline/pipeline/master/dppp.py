@@ -7,10 +7,10 @@ from utilities import ClusterError, get_parset, check_for_path
 
 from IPython.kernel import client as IPclient
 
-def run_dppp(ms_name, ms_outname, parset):
+def run_dppp(ms_name, ms_outname, parset, log_location):
     # Run on engine to process data with DPPP
     from pipeline.nodes.dppp import run_dppp
-    return run_dppp(ms_name, ms_outname, parset)
+    return run_dppp(ms_name, ms_outname, parset, log_location)
 
 def build_available_list():
     # Run on engine to construct list of locally-stored data
@@ -47,11 +47,12 @@ class TestPipeline(WSRTrecipe):
             self.logger.error("Unable to read G(V)DS file")
             raise
 
+        job_directory = "%s/jobs/%s" % (
+            self.inputs['runtime_directory'],
+            self.inputs['job_name']
+        )
         try:
-            parset = "%s/jobs/%s/dppp.parset" % (
-                self.inputs['runtime_directory'], 
-                self.inputs['job_name']
-            )
+            parset = "%s/dppp.parset" % (job_directory,)
             if not os.access(parset, os.R_OK):
                 raise IOError
         except IOError:
@@ -77,17 +78,21 @@ class TestPipeline(WSRTrecipe):
         mec.push(dict(ms_names=ms_names))
         mec.execute("build_available_list()")
 
-        parset = "%s/jobs/%s/dppp.parset" % (
-            self.inputs['runtime_directory'], 
-            self.inputs['job_name']
-        )
-
         tasks = []
         for ms_name in ms_names:
             ms_outname = ms_name + ".dppp"
+            log_location = "%s/%s/dppp.log" % (
+                job_directory,
+                os.path.basename(ms_name)
+            )
             task = IPclient.StringTask(
-                "result = run_dppp(ms_name, ms_outname, parset)",
-                push=dict(ms_name=ms_name, ms_outname=ms_outname, parset=parset),
+                "result = run_dppp(ms_name, ms_outname, parset, log_location)",
+                push=dict(
+                    ms_name=ms_name,
+                    ms_outname=ms_outname,
+                    parset=parset,
+                    log_location=log_location
+                ),
                 pull="result",
                 depend=check_for_path,
                 dependargs=ms_name
@@ -95,9 +100,7 @@ class TestPipeline(WSRTrecipe):
             tasks.append(tc.run(task))
         tc.barrier(tasks)
         for task in tasks:
-            print tc.get_task_result(task)
-
-        print self.inputs
+            tc.get_task_result(task)
 
 if __name__ == '__main__':
     sys.exit(TestPipeline().main())
