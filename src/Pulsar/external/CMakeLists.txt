@@ -17,7 +17,8 @@ add_custom_target (fftw_unpack
   )
 
 add_custom_target (fftw_configure
-  COMMAND ./configure  --enable-shared --enable-single --prefix=${CMAKE_INSTALL_PREFIX} --enable-sse
+#  COMMAND ./configure  --enable-shared --enable-single --prefix=${CMAKE_INSTALL_PREFIX} --enable-sse
+  COMMAND ./configure  --enable-shared --enable-single --prefix=${CMAKE_INSTALL_PREFIX}
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external/${fftw_name} 
   COMMENT "Configuring project FFTW in ${PULSAR_BINARY_DIR}/external/${fftw_name} ..."
   )
