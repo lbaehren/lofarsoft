@@ -465,8 +465,9 @@ find_file (positions_lopes08 positions_lopes08.dat
 ## CR-Tools header files
 
 include_directories (BEFORE
-  ${CR_BINARY_DIR}
   ${CR_SOURCE_DIR}/implement
+  ${CR_BINARY_DIR}
+  ${CR_BINARY_DIR}/implement/GUI
   )
 
 ## External header files
