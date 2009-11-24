@@ -13,6 +13,7 @@
 
 set (cr_modules
   Analysis
+  Analysis/Utils
   Calibration
   Coordinates
   Data
