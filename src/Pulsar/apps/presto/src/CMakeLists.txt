@@ -88,7 +88,7 @@ set (presto_makewisdom_binaries
 ##__________________________________________________________
 ## libpresto
 
-add_library (presto ${presto_sources})
+add_library (presto SHARED ${presto_sources})
 
 target_link_libraries (presto
   ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a
@@ -100,10 +100,35 @@ target_link_libraries (presto
   ${MPI_LIBRARIES}
   )
 
-set_target_properties (presto
-  PROPERTIES
-  COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
-  )
+#target_link_libraries (presto
+#  ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a
+#  /opt/local/lib/libfftw3f.a
+#  ${CFITSIO_LIBRARIES}
+#  ${GLIB_LIBRARIES}
+#  ${PGPLOT_LIBRARIES}
+#  ${GFORTRAN_LIBRARIES}
+#  ${X11_LIBRARIES}
+#  ${MPI_LIBRARIES}
+#  )
+
+
+if (UNIX)
+ if (APPLE)
+   set_target_properties (presto
+     PROPERTIES
+     SUFFIX .dylib
+     COMPILE_FLAGS "-g -O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+     LINK_FLAGS "-dynamiclib"
+     )
+ else (APPLE)
+   set_target_properties (presto
+     PROPERTIES
+     SUFFIX .so
+     COMPILE_FLAGS "-g -O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+     LINK_FLAGS "-shared"
+     )
+ endif (APPLE)
+endif (UNIX)
 
 add_dependencies (presto
   fftw_install
@@ -113,6 +138,7 @@ add_dependencies (presto
   presto_pyscripts_install
   presto_pylibscripts_install
   presto_clig_install
+  presto_cat_install
   )
 
 ##__________________________________________________________
@@ -387,9 +413,9 @@ add_executable (makewisdom
 foreach (src ${presto_binaries})
   set_target_properties (${src}
     PROPERTIES
-    COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+    COMPILE_FLAGS "-g -O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
   )
-  target_link_libraries (${src} presto sla)
+  target_link_libraries (${src} presto sla ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${libm})
 endforeach (src)
 
 ## Enable MPI build for these binaries
@@ -397,30 +423,31 @@ endforeach (src)
 foreach (src ${presto_mpi_binaries})
   set_target_properties (${src}
     PROPERTIES
-#    CMAKE_COMMAND ${MPI_COMPILER}
-#    COMPILER_LANGUAGE ${MPI_COMPILER}
-#    LINKER_LANGUAGE ${MPI_COMPILER}
-    COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+###    CMAKE_COMMAND ${MPI_COMPILER}
+###    COMPILER_LANGUAGE ${MPI_COMPILER}
+###    LINKER_LANGUAGE ${MPI_COMPILER}
+    COMPILE_FLAGS "-g -O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
   )
-  target_link_libraries (${src} presto sla)
+  target_link_libraries (${src} presto ${MPI_LIBRARIES} ${CFITSIO_LIBRARIES} ${libm})
 endforeach (src)
 
 foreach (src ${presto_fc_binaries})
   set_target_properties (${src}
     PROPERTIES
     LINKER_LANGUAGE Fortran
-    COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+    COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
   )
-  target_link_libraries (${src} presto)
+  target_link_libraries (${src} presto ${CFITSIO_LIBRARIES} ${libm})
 endforeach (src)
 
 foreach (src ${presto_fc_special_binaries})
   set_target_properties (${src}
     PROPERTIES
     LINKER_LANGUAGE Fortran
-    COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+    COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
   )
-  target_link_libraries (${src} presto fort)
+  target_link_libraries (${src} presto fort ${libpthread} ${libz} ${libdl} ${libm})
+#  target_link_libraries (${src} presto fort X11 ${libpthread} png ${libz} ${libdl} ${libm})
 endforeach (src)
 
 add_custom_target (presto_prep
@@ -432,11 +459,10 @@ add_custom_target (presto_prep
 foreach (src ${presto_makewisdom_binaries})
   set_target_properties (${src}
     PROPERTIES
-    COMPILE_FLAGS "-fPIC -DDATABASE='\"${presto_SOURCE_DIR}/lib\"' -DFFTTYPE=USEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O3 -ffast-math -W"
+    COMPILE_FLAGS "-fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O3 -ffast-math -W"
+    LINKER_FLAGS "-fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O3 -ffast-math -W"
   )
-  target_link_libraries(${src}   
-   ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a
-   m)
+  target_link_libraries(${src} ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a m)
 endforeach (src)
 
 if (PRESTO_MAKEWISDOM)
@@ -444,10 +470,16 @@ add_custom_target (presto_makewisdom
   COMMAND ./makewisdom
   COMMAND cp fftw_wisdom.txt ${CMAKE_INSTALL_PREFIX}/lib/
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/presto/src
-  COMMENT "Executing '${PULSAR_BINARY_DIR}/makewisdom' followed by 'cp ${PULSAR_BINARY_DIR}/apps/presto/src/fftw_wisdom.txt ${CMAKE_INSTALL_PREFIX}/lib/'"
+  COMMENT "Executing '${PULSAR_BINARY_DIR}//apps/presto/src/makewisdom' followed by 'cp ${PULSAR_BINARY_DIR}/apps/presto/src/fftw_wisdom.txt ${CMAKE_INSTALL_PREFIX}/lib/'"
   )
 add_dependencies (presto_makewisdom makewisdom)
 endif (PRESTO_MAKEWISDOM)
+
+add_custom_target (presto_cat_install
+  COMMAND cp pulsars.cat ${CMAKE_INSTALL_PREFIX}/lib/
+  WORKING_DIRECTORY ${PULSAR_SOURCE_DIR}/apps/presto/lib
+  COMMENT "Executing 'cp ${PULSAR_SOURCE_DIR}/apps/presto/lib/pulsars.cat ${CMAKE_INSTALL_PREFIX}/lib/'"
+  )
 
 ## ==============================================================================
 ##
@@ -463,7 +495,7 @@ install (
   )
 
 install (
-  TARGETS ${presto_binaries} ${presto_fc_binaries} ${presto_fc_special_binaries}
+  TARGETS ${presto_binaries} ${presto_fc_binaries} ${presto_fc_special_binaries} 
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
