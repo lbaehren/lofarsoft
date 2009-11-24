@@ -13,7 +13,6 @@
 
 set (cr_modules
   Analysis
-  Analysis/Utils
   Calibration
   Coordinates
   Data
@@ -41,6 +40,10 @@ if (CR_WITH_GLISH)
     list (APPEND cr_sources templates.cc)
   endif (HAVE_CASA)
 endif (CR_WITH_GLISH)
+
+if (HAVE_FFTW3)
+  list (APPEND cr_modules Analysis/Utils)
+endif (HAVE_FFTW3)
 
 ##__________________________________________________________
 ## Collect source files to be compiled into the library
@@ -215,87 +218,7 @@ endif (CR_WITH_PYTHON)
 ## =============================================================================
 
 if (CR_WITH_GUI)
-  
-  ## list of source files in this module
-  file (GLOB libhfget_sources 
-#    GUI/cell.cpp
-#    GUI/finddialog.cpp
-#    GUI/gotocelldialog.cpp
-#    GUI/mainwindow.cpp
-#    GUI/sortdialog.cpp
-#    GUI/spreadsheet.cpp
-#    GUI/plotter.cpp
-    GUI/VectorSelector.cc
-    GUI/hffuncs.cc
-    GUI/hfget.cc
-#    GUI/hfqt.cc
-#    GUI/qrc_spreadsheet.cpp
-#    GUI/qrc_plotter.cpp
-#    GUI/moc_finddialog.cpp
-#    GUI/moc_gotocelldialog.cpp
-#    GUI/moc_mainwindow.cpp
-#    GUI/moc_sortdialog.cpp
-#   GUI/moc_spreadsheet.cpp
-#    GUI/moc_plotter.cpp
-#    GUI/moc_hfqt.cpp
-    )
-  
-  ## include directories
-  
-  if (QT4_INCLUDES AND GTK_INCLUDES AND BOOST_INCLUDES)
-    set (libhfget_includes "-I${GTK_INCLUDES} -I${BOOST_INCLUDES}")
-  endif (QT4_INCLUDES AND GTK_INCLUDES AND BOOST_INCLUDES)
-
-  if (QT4_INCLUDES)
-    include_directories (${QT4_INCLUDES})
-  endif (QT4_INCLUDES)
-
-  if (MATHGL_INCLUDES)
-    include_directories (${MATHGL_INCLUDES})
-  endif (MATHGL_INCLUDES)
-
-  ## compiler instructions
-  add_library (hfget MODULE
-    ${libhfget_sources}
-    )
-  
-  ## linker instructions
-  target_link_libraries (hfget
-    cr
-    ${DAL_LIBRARIES}
-    ${HDF5_LIBRARIES}
-    ${CASA_LIBRARIES}
-    ${QT4_LIBRARIES}
-    ${MATHGL_LIBRARIES}
-    ${PYTHON_LIBRARIES}
-    ${BOOST_LIBRARIES}
-    )
-
-  ## Additional properties
-  if (APPLE)
-    set_target_properties (hfget
-      PROPERTIES
-      PREFIX "lib"
-      SUFFIX .so
-      COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -fpermissive -DQT_GUI_LIB -DQT_CORE_LIB -I${CR_SOURCE_DIR}/implement/GUI ${libhfget_includes}"
-      LINK_FLAGS "-fPIC -flat_namespace -Wl"
-      )
-  else (APPLE)
-    set_target_properties (hfget
-      PROPERTIES
-      PREFIX "lib"
-      SUFFIX .so
-      COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -DQT_GUI_LIB -DQT_CORE_LIB -I${CR_SOURCE_DIR}/implement/GUI ${libhfget_includes}"
-      LINK_FLAGS "-fPIC -shared -shared -Wl"
-      )
-  endif (APPLE)
-  
-  ## installation
-  install (
-    TARGETS hfget
-    LIBRARY DESTINATION lib/python
-    )
-  
+  add_subdirectory (GUI)
 endif (CR_WITH_GUI)
 
 ## =============================================================================
@@ -306,6 +229,6 @@ endif (CR_WITH_GUI)
 
 if (CR_BUILD_TESTS)
   foreach (cr_module ${cr_modules})
-    ADD_SUBDIRECTORY ("${cr_module}/test")
+    add_subdirectory ("${cr_module}/test")
   endforeach (cr_module)
 endif (CR_BUILD_TESTS)

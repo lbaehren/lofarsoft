@@ -23,132 +23,116 @@
 
 #include <Math/BasicFilter.h>
 
-// ==============================================================================
-//
-//  Construction
-//
-// ==============================================================================
-
-template <class T>
-BasicFilter<T>::BasicFilter ()
-{
-  Vector<T> weights (1,1);
-  setWeights(weights);
-}
-
-template <class T>
-BasicFilter<T>::BasicFilter (const unsigned int& blocksize)
-{
-  Vector<T> weights (blocksize,1);
-  setWeights(weights);
-}
-
-template <class T>
-BasicFilter<T>::BasicFilter (const Vector<T>& weights)
-{
-  setWeights(weights);
-}
-
-template <class T>
-BasicFilter<T>::BasicFilter (const BasicFilter<T>& other)
-{
-  copy (other);
-}
-
-// ==============================================================================
-//
-//  Destruction
-//
-// ==============================================================================
-
-template <class T>
-BasicFilter<T>::~BasicFilter ()
-{
-  destroy();
-}
-
-// ==============================================================================
-//
-//  Operators
-//
-// ==============================================================================
-
-// ------------------------------------------------------------ BasicFilter::copy
-
-template <class T>
-void BasicFilter<T>::copy (BasicFilter<T> const& other)
-{
-  blocksize_p = other.blocksize_p;
+namespace CR {  // Namespace CR -- begin
+  
+  // ============================================================================
   //
-  weights_p.resize (blocksize_p);
-  weights_p = other.weights_p;
-}
+  //  Construction
+  //
+  // ============================================================================
 
-// --------------------------------------------------------- BasicFilter::destroy
-
-template <class T>
-void BasicFilter<T>::destroy ()
-{;}
-
-// ------------------------------------------------------- BasicFilter::operator=
-
-template <class T>
-BasicFilter<T> &BasicFilter<T>::operator= (BasicFilter<T> const &other)
-{
-  if (this != &other) {
-    destroy ();
+  //_____________________________________________________________________________
+  //                                                                  BasicFilter
+  
+  template <class T>
+  BasicFilter<T>::BasicFilter ()
+  {
+    Vector<T> weights (1,1);
+    setWeights(weights);
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                  BasicFilter
+  
+  template <class T>
+  BasicFilter<T>::BasicFilter (const unsigned int& blocksize)
+  {
+    Vector<T> weights (blocksize,1);
+    setWeights(weights);
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                  BasicFilter
+  
+  template <class T>
+  BasicFilter<T>::BasicFilter (const Vector<T>& weights)
+  {
+    setWeights(weights);
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                  BasicFilter
+  
+  template <class T>
+  BasicFilter<T>::BasicFilter (const BasicFilter<T>& other)
+  {
     copy (other);
   }
-  return *this;
-}
-
-// ==============================================================================
-//
-//  Methods
-//
-// ==============================================================================
-
-// ------------------------------------------------------ BasicFilter::setWeights
-
-template <class T>
-void BasicFilter<T>::setWeights (const Vector<T>& weights)
-{
-  blocksize_p = weights.nelements();
+  
+  // ============================================================================
   //
-  weights_p.resize(blocksize_p);
-  weights_p = weights;
-}
-
-// ---------------------------------------------------------- BasicFilter::filter
-
-template <class T>
-void BasicFilter<T>::filter (Vector<T>& data)
-{
-  // only apply if number of elements if correct
-  if (blocksize_p == data.nelements()) {
-    data *= weights_p;
+  //  Destruction
+  //
+  // ============================================================================
+  
+  /* everything defined as inline */
+  
+  // ============================================================================
+  //
+  //  Operators
+  //
+  // ============================================================================
+  
+  //_____________________________________________________________________________
+  //                                                                         copy
+  
+  template <class T>
+  void BasicFilter<T>::copy (BasicFilter<T> const& other)
+  {
+    blocksize_p = other.blocksize_p;
+    //
+    weights_p.resize (blocksize_p);
+    weights_p = other.weights_p;
   }
-}
-
-template <class T>
-void BasicFilter<T>::filter (Vector<T> filteredData,
-			     const Vector<T>& data)
-{
-  filteredData.resize (data.shape());
+  
+  //_____________________________________________________________________________
+  //                                                                      destroy
+  
+  template <class T>
+  void BasicFilter<T>::destroy ()
+  {;}
+  
+  //_____________________________________________________________________________
+  //                                                                    operator=
+  
+  template <class T>
+  BasicFilter<T> &BasicFilter<T>::operator= (BasicFilter<T> const &other)
+  {
+    if (this != &other) {
+      destroy ();
+      copy (other);
+    }
+    return *this;
+  }
+  
+  // ============================================================================
   //
-  filteredData = data;
-  filter (filteredData);
-}
+  //  Methods
+  //
+  // ============================================================================
 
-
-// =============================================================================
-//
-//  Template instantiation
-//
-// =============================================================================
-
-template class BasicFilter<casa::Int>;
-template class BasicFilter<casa::Float>;
-template class BasicFilter<casa::Double>;
-template class BasicFilter<casa::Complex>;
-template class BasicFilter<casa::DComplex>;
+  /* everything defined as inline */
+  
+  // ============================================================================
+  //
+  //  Template instantiation
+  //
+  // ============================================================================
+  
+  template class BasicFilter<casa::Int>;
+  template class BasicFilter<casa::Float>;
+  template class BasicFilter<casa::Double>;
+  template class BasicFilter<casa::Complex>;
+  template class BasicFilter<casa::DComplex>;
+  
+}  // Namespace CR -- end

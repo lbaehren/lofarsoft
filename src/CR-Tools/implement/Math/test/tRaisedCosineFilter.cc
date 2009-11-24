@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005                                                  *
- *   Lars Bahren (<mail>)                                                     *
+ *   Copyright (C) 2005                                                    *
+ *   Lars Bahren (bahren@astron.nl)                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,8 +17,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-/* $Id$*/
 
 #include <Math/RaisedCosineFilter.h>
 
@@ -41,9 +39,9 @@
 
   \return nofFailedTests -- The number of failed tests.
 */
-Int test_RaisedCosineFilter ()
+int test_RaisedCosineFilter ()
 {
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
   
   return nofFailedTests;
 }
@@ -52,12 +50,10 @@ Int test_RaisedCosineFilter ()
 
 int main ()
 {
-  Int nofFailedTests (0);
-
+  int nofFailedTests (0);
+  
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_RaisedCosineFilter ();
-  }
-
+  nofFailedTests += test_RaisedCosineFilter ();
+  
   return nofFailedTests;
 }

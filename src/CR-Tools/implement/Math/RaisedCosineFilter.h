@@ -39,109 +39,81 @@
 // LOPES-Tools header files
 #include <Math/BasicFilter.h>
 
-#include <casa/namespace.h>
-/*!
-  \class RaisedCosineFilter
-
-  \ingroup CR_Math
-
-  \brief Brief description for class RaisedCosineFilter
-
-  \author Lars B&auml;hren
-
-  \date 2005/11/17
-
-  \test tRaisedCosineFilter.cc
-
-  <h3>Prerequisite</h3>
-
-  <ul type="square">
-    <li>[CR] BasicFilter
-  </ul>
-
-  <h3>Synopsis</h3>
-
-  <h3>Example(s)</h3>
-
-*/
-
-template <class T> class RaisedCosineFilter : public BasicFilter<T> {
-  
-  int blocksize_p;
-  int deltaRise_p;
-  int deltaFall_p;
-  T alpha_p;
-  
- public:
-  
-  // --- Construction -----------------------------------------------------------
+namespace CR {  // Namespace CR -- begin
   
   /*!
-    \brief Constructor
+    \class RaisedCosineFilter
     
-    \param blocksize -- 
-    \param delta     -- 
-  */
-  RaisedCosineFilter (const int& blocksize,
-		const int& delta);
-  
-  /*!
-    \brief Constructor
+    \ingroup CR_Math
     
-    \param blocksize -- 
-    \param deltaRise -- 
-    \param deltaFall -- 
-  */
-  RaisedCosineFilter (const int& blocksize,
-		const int& deltaRise,
-		const int& deltaFall);
-  
-  /*!
-    \brief Constructor
+    \brief Brief description for class RaisedCosineFilter
     
-    \param blocksize          -- 
-    \param transitionFraction -- (Symmetric) Fraction of the blocksize, over
-                                 which the transition between 0 and 1 takes 
-				 place.
-  */
-  RaisedCosineFilter (const int& blocksize,
-		const T& transitionFraction);
-  
-  /*!
-    \brief Constructor
+    \author Lars B&auml;hren
     
-    \param blocksize      -- 
-    \param transitionRise -- 
-    \param transitionFall -- 
+    \date 2005/11/17
+    
+    \test tRaisedCosineFilter.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type="square">
+      <li>[CR] BasicFilter
+    </ul>
+    
+    <h3>Synopsis</h3>
+    
+    <h3>Example(s)</h3>
+    
   */
-  RaisedCosineFilter (const int& blocksize,
-		const T& transitionRise,
-		const T& transitionFall);
+  template <class T> class RaisedCosineFilter : public BasicFilter<T> {
+
+    //! Control parameter for the rising slope of the filter shape
+    int deltaRise_p;
+    //! Control parameter for the falling slope of the filter shape
+    int deltaFall_p;
+    //! Control parameter for the middle part of the filter shape
+    T alpha_p;
+    
+  public:
+    
+    // --- Construction -----------------------------------------------------------
+    
+    //! Argumented constructor
+    RaisedCosineFilter (unsigned int const &blocksize,
+			int const &delta);
+    //! Argumented constructor
+    RaisedCosineFilter (unsigned int const &blocksize,
+			int const &deltaRise,
+			int const &deltaFall);
+    //! Argumented constructor
+    RaisedCosineFilter (unsigned int const &blocksize,
+			T const &transitionFraction);
+    //! Argumented constructor
+    RaisedCosineFilter (unsigned int const &blocksize,
+			T const &transitionRise,
+			T const &transitionFall);
+    
+    // --- Destruction ------------------------------------------------------------
+    
+    ~RaisedCosineFilter ();
+    
+    // --- Methods ----------------------------------------------------------------
+    
+    vector<int> delta ();
+    
+    vector<T> transitionFraction ();
+    
+  private:
+    
+    //! Initialization of the internal filter parameters
+    void init (const int& blocksize,
+	       const int& deltaRise,
+	       const int& deltaFall);
+    //! Computation of the filter weights
+    void setWeights ();
   
-  // --- Destruction ------------------------------------------------------------
+  };
   
-  ~RaisedCosineFilter ();
-  
-  // --- Methods ----------------------------------------------------------------
-  
-  vector<int> delta ();
-  
-  vector<T> transitionFraction ();
-  
- private:
-  
-  /*!
-    \brief Initialization of the internal filter parameters
-  */
-  void init (const int& blocksize,
-	     const int& deltaRise,
-	     const int& deltaFall);
-  
-  /*!
-    \brief Computation of the filter weights
-  */
-  void setWeights ();
-  
-};
+}  // Namespace CR -- end
 
 #endif /* _RAISEDCOSINEFILTER_H_ */

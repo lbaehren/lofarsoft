@@ -1,0 +1,81 @@
+
+##_______________________________________________________________________________
+## Include directories
+
+if (QT4_INCLUDES AND GTK_INCLUDES AND BOOST_INCLUDES)
+  set (libhfget_includes "-I${GTK_INCLUDES} -I${BOOST_INCLUDES}")
+endif (QT4_INCLUDES AND GTK_INCLUDES AND BOOST_INCLUDES)
+
+if (QT4_INCLUDES)
+  include_directories (${QT4_INCLUDES})
+endif (QT4_INCLUDES)
+
+if (MATHGL_INCLUDES)
+  include_directories (${MATHGL_INCLUDES})
+endif (MATHGL_INCLUDES)
+
+##_______________________________________________________________________________
+## Pre-processing of the source files
+
+add_custom_target (hfget_awk
+  COMMAND gawk -f hfiter.awk hffuncs_awk.cc | gawk -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.cc
+  WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement/GUI
+  COMMAND "Running awk to generate source files ..."
+  )
+
+##_______________________________________________________________________________
+## Create the library
+
+## List of source files
+
+file (GLOB libhfget_sources 
+  VectorSelector.cc
+  hffuncs.cc
+  hfget.cc
+  ${CR_BINARY_DIR}/implement/GUI/*.cc
+  )
+
+## compiler instructions
+
+add_library (hfget MODULE ${libhfget_sources})
+add_dependencies (hfget hfget_awk)
+
+## linker instructions
+
+target_link_libraries (hfget
+  cr
+  ${DAL_LIBRARIES}
+  ${HDF5_LIBRARIES}
+  ${CASA_LIBRARIES}
+  ${QT4_LIBRARIES}
+  ${MATHGL_LIBRARIES}
+  ${PYTHON_LIBRARIES}
+  ${BOOST_LIBRARIES}
+  )
+
+## Additional target properties
+if (APPLE)
+  set_target_properties (hfget
+    PROPERTIES
+    PREFIX "lib"
+    SUFFIX .so
+    COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -fpermissive -DQT_GUI_LIB -DQT_CORE_LIB -I${CR_SOURCE_DIR}/implement/GUI ${libhfget_includes}"
+    LINK_FLAGS "-fPIC -flat_namespace -Wl"
+    )
+else (APPLE)
+  set_target_properties (hfget
+    PROPERTIES
+    PREFIX "lib"
+    SUFFIX .so
+    COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -DQT_GUI_LIB -DQT_CORE_LIB -I${CR_SOURCE_DIR}/implement/GUI ${libhfget_includes}"
+    LINK_FLAGS "-fPIC -shared -shared -Wl"
+    )
+endif (APPLE)
+
+##_______________________________________________________________________________
+## Installation
+
+install (
+  TARGETS hfget
+  LIBRARY DESTINATION lib/python
+  )

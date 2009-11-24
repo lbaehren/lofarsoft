@@ -96,9 +96,7 @@ namespace CR { // Namespace CR -- begin
     
     // ------------------------------------------------------------- Construction
 
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     LOFAR_TBB ();
     
     /*!
@@ -129,9 +127,7 @@ namespace CR { // Namespace CR -- begin
     
     // -------------------------------------------------------------- Destruction
 
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     ~LOFAR_TBB ();
     
     // ---------------------------------------------------------------- Operators
@@ -167,9 +163,7 @@ namespace CR { // Namespace CR -- begin
 	       listChannelIDs);
     }
 
-    /*!
-      \brief Provide a summary of the internal status
-    */
+    //! Provide a summary of the internal status
     void summary (std::ostream &os,
 		  bool const &listStationGroups=false,
 		  bool const &listChannelIDs=false);    
@@ -231,14 +225,9 @@ namespace CR { // Namespace CR -- begin
     */
     bool init ();
 
-    /*!
-      \brief Unconditional copying
-    */
+    //! Unconditional copying
     void copy (LOFAR_TBB const &other);
-    
-    /*!
-      \brief Unconditional deletion 
-    */
+    //! Unconditional deletion 
     void destroy(void);
     
   };
