@@ -72,10 +72,10 @@ echo "-- Add the Python libraries to the existing search path"
 
 if ($?PYTHONPATH) then
    if ( $PYTHONPATH != $LOFARSOFT/release/lib ) then   
-      setenv PYTHONPATH ${LOFARSOFT}/release/lib/python:${LOFARSOFT}/release/share/pulsar/bin:${LOFARSOFT}/release/share/pulsar/lib/python/lib/python:${PYTHONPATH}
+      setenv PYTHONPATH ${LOFARSOFT}/release/lib/python:${LOFARSOFT}/release/share/pulsar/bin:${LOFARSOFT}/release/share/pulsar/lib/python:${PYTHONPATH}
    endif
 else 
-   setenv PYTHONPATH ${LOFARSOFT}/release/lib/python:${LOFARSOFT}/release/share/pulsar/bin:${LOFARSOFT}/release/share/pulsar/lib/python/lib/python
+   setenv PYTHONPATH ${LOFARSOFT}/release/lib/python:${LOFARSOFT}/release/share/pulsar/bin:${LOFARSOFT}/release/share/pulsar/lib/python
 endif
 
 foreach PY_VERSION (2.6 2.5 2.4) 
