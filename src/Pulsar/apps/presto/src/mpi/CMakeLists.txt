@@ -18,6 +18,8 @@ project (presto_mpi C)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.6)
 
+set (CMAKE_VERBOSE_MAKEFILE TRUE CACHE BOOL "Verbose Makefile" FORCE)
+
 ## ==============================================================================
 ##
 ##  Build instructions
