@@ -10,7 +10,7 @@ if (MPI_COMPILER)
 endif (MPI_COMPILER)
 
 SET (CMAKE_C_COMPILER_INIT mpicc)
-set (CMAKE_C_COMPILER ${MPI_COMPILER})
+set (CMAKE_C_COMPILER ${MPI_COMPILER} CACHE FILEPATH "Compiler" FORCE)
 
 ## Name of the project
 project (presto_mpi C)
