@@ -10,7 +10,7 @@ if (MPI_COMPILER)
 endif (MPI_COMPILER)
 
 SET (CMAKE_C_COMPILER_INIT mpicc)
-#SET (CMAKE_CXX_COMPILER_INIT mpic++)
+set (CMAKE_C_COMPILER ${MPI_COMPILER})
 
 ## Name of the project
 project (presto_mpi C)
