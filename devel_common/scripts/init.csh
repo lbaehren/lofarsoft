@@ -42,7 +42,7 @@ endif
 
 echo "-- Add the LOFAR executables to the path"
 
-set path = ( $LOFARSOFT/release/bin $LOFARSOFT/release/share/pulsar/bin $path )
+set path = ( $LOFARSOFT/release/share/pulsar/bin $LOFARSOFT/release/bin $path )
 
 
 ##______________________________________________________________________________
@@ -50,15 +50,15 @@ set path = ( $LOFARSOFT/release/bin $LOFARSOFT/release/share/pulsar/bin $path )
 
 if ( "${SYSTEM_NAME}" == "Darwin" ) then
   if ($?DYLD_LIBRARY_PATH) then
-    setenv DYLD_LIBRARY_PATH ${LOFARSOFT}/release/lib:${LOFARSOFT}/release/share/pulsar/lib:${DYLD_LIBRARY_PATH}
+    setenv DYLD_LIBRARY_PATH ${LOFARSOFT}/release/share/pulsar/lib:${LOFARSOFT}/release/lib:${DYLD_LIBRARY_PATH}
   else
-    setenv DYLD_LIBRARY_PATH ${LOFARSOFT}/release/lib:${LOFARSOFT}/release/share/pulsar/lib
+    setenv DYLD_LIBRARY_PATH ${LOFARSOFT}/release/share/pulsar/lib:${LOFARSOFT}/release/lib
   endif
 else 
   if ($?LD_LIBRARY_PATH) then
-    setenv LD_LIBRARY_PATH ${LOFARSOFT}/release/lib:${LOFARSOFT}/release/share/pulsar/lib:${LD_LIBRARY_PATH}
+    setenv LD_LIBRARY_PATH ${LOFARSOFT}/release/share/pulsar/lib:${LOFARSOFT}/release/lib:${LD_LIBRARY_PATH}
   else
-    setenv LD_LIBRARY_PATH ${LOFARSOFT}/release/lib:${LOFARSOFT}/release/share/pulsar/lib
+    setenv LD_LIBRARY_PATH ${LOFARSOFT}/release/share/pulsar/lib:${LOFARSOFT}/release/lib
   endif
 endif
 
@@ -115,17 +115,17 @@ endif
 #
 #############################################################################
 
-if ($?TEMPO) then
+if (($?TEMPO) && ($TEMPO != "${LOFARSOFT}/release/share/pulsar/bin")) then
    echo "-- Warning, resetting your TEMPO environment variable from:"
    echo "           $TEMPO to ${LOFARSOFT}/release/share/pulsar/bin"
 endif
 setenv TEMPO ${LOFARSOFT}/release/share/pulsar/bin
 
-if ($?PRESTO) then
+if (($?PRESTO) && ($PRESTO != "${LOFARSOFT}/release/share/pulsar")) then
    echo "-- Warning, resetting your PRESTO environment variable from:"
-   echo "           $PRESTO to ${LOFARSOFT}/release/share/pulsar/bin"
+   echo "           $PRESTO to ${LOFARSOFT}/release/share/pulsar"
 endif
-setenv PRESTO ${LOFARSOFT}/release/share/pulsar/bin
+setenv PRESTO ${LOFARSOFT}/release/share/pulsar
 
 #############################################################################
 #                    Finished configuration                                 #  

@@ -36,15 +36,15 @@ else  # only execute the following if LOFARSOFT is set
 ##______________________________________________________________________________
 ##  Add the LOFAR executables to the path
 
-export PATH=$LOFARSOFT/release/bin:$LOFARSOFT/release/share/pulsar/bin:$PATH
+export PATH=$LOFARSOFT/release/share/pulsar/bin:$LOFARSOFT/release/bin:$PATH
 
 ##______________________________________________________________________________
 ##  Add the location of the libraries
 
 if [ "$SYSTEM_NAME" == "Darwin" ] ; then
-    export DYLD_LIBRARY_PATH=$LOFARSOFT/release/lib:$LOFARSOFT/release/share/pulsar/lib:$DYLD_LIBRARY_PATH
+    export DYLD_LIBRARY_PATH=$LOFARSOFT/release/share/pulsar/lib:$LOFARSOFT/release/lib:$DYLD_LIBRARY_PATH
 else 
-    export LD_LIBRARY_PATH=$LOFARSOFT/release/lib:$LOFARSOFT/release/share/pulsar/lib:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=$LOFARSOFT/release/share/pulsar/lib:$LOFARSOFT/release/lib:$LD_LIBRARY_PATH
 fi
 
 ##______________________________________________________________________________
@@ -95,9 +95,9 @@ export TEMPO=${LOFARSOFT}/release/share/pulsar/bin
 
 if test ! -z "$PRESTO" -a  "$PRESTO" != "${LOFARSOFT}/release/share/pulsar/bin" ; then
   echo "-- Warning, resetting your PRESTO environment variable from:"
-  echo "           $PRESTO to ${LOFARSOFT}/release/share/pulsar/bin"
+  echo "           $PRESTO to ${LOFARSOFT}/release/share/pulsar"
 fi
-export PRESTO=${LOFARSOFT}/release/share/pulsar/bin
+export PRESTO=${LOFARSOFT}/release/share/pulsar
 
 #############################################################################
 #                    Finished configuration                                 #  
