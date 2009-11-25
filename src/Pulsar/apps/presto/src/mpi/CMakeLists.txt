@@ -1,12 +1,14 @@
 
-SET(CMAKE_C_COMPILER_INIT mpic++)
-SET(CMAKE_CXX_COMPILER_INIT mpic++)
+SET (CMAKE_C_COMPILER_INIT mpic++)
+SET (CMAKE_CXX_COMPILER_INIT mpic++)
 
 ## Name of the project
 project (presto_mpi)
 
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.6)
+
+set (CMAKE_C_COMPILER ${MPI_COMPILER} CACHE FILEPATH "MPI compiler" FORCE)
 
 ## List of binaries to build
 
