@@ -93,7 +93,7 @@ if test  ! -z "$TEMPO"  -a  "$TEMPO" != "${LOFARSOFT}/release/share/pulsar/bin" 
 fi
 export TEMPO=${LOFARSOFT}/release/share/pulsar/bin
 
-if test ! -z "$PRESTO" -a  "$PRESTO" != "${LOFARSOFT}/release/share/pulsar/bin" ; then
+if test ! -z "$PRESTO" -a  "$PRESTO" != "${LOFARSOFT}/release/share/pulsar" ; then
   echo "-- Warning, resetting your PRESTO environment variable from:"
   echo "           $PRESTO to ${LOFARSOFT}/release/share/pulsar"
 fi
