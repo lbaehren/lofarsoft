@@ -36,8 +36,8 @@ if os.name == "posix":
 #    else:
 #        print >>sys.stderr, "PGPLOT_DIR env var not defined!"
     if os.environ.has_key("PRESTO"):
-        presto_library_dirs.append(os.path.join(os.environ["PRESTO"], "../lib"))
-        presto_include_dirs.append(os.path.join(os.environ["PRESTO"], "../include"))
+        presto_library_dirs.append(os.path.join(os.environ["PRESTO"], "lib"))
+        presto_include_dirs.append(os.path.join(os.environ["PRESTO"], ".include"))
     else:
         print >>sys.stderr, "PRESTO env var not defined!"
 else:
