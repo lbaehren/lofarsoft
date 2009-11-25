@@ -49,6 +49,17 @@ find_path (GLIB_INCLUDES glib.h
   NO_DEFAULT_PATH
   )
 
+find_path (GLIB_glibh_INCLUDES glib.h
+  PATHS ${include_locations}
+  PATH_SUFFIXES
+  glib
+  glib/include
+  glib-2.0
+  glib-2.0/glib
+  glib-2.0/include
+  NO_DEFAULT_PATH
+  )
+
 ## adjust the include path
 
 string (REGEX REPLACE "include/glib-2.0/glib" "include/glib-2.0" GLIB_INCLUDES ${GLIB_INCLUDES})
@@ -56,6 +67,17 @@ string (REGEX REPLACE "include/glib-2.0/glib" "include/glib-2.0" GLIB_INCLUDES $
 ## [2] further header files might be in a slightly different location
 
 find_path (glibconfig_h glibconfig.h
+  PATHS ${lib_locations}
+  PATH_SUFFIXES
+  glib
+  glib/include
+  glib-2.0
+  glib-2.0/glib
+  glib-2.0/include
+  NO_DEFAULT_PATH
+  )
+
+find_path (GLIB_glibconfh_INCLUDES glibconfig.h
   PATHS ${lib_locations}
   PATH_SUFFIXES
   glib
@@ -86,6 +108,11 @@ find_library (GLIB_LIBRARIES glib glib-2.0
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
+
+if (GLIB_LIBRARIES)
+  get_filename_component(GLIB_LIBRARY_DIR ${GLIB_LIBRARIES} PATH)
+  message (STATUS "GLIB_LIBRARY_DIR  = ${GLIB_LIBRARY_DIR}")
+endif (GLIB_LIBRARIES)
 
 if (GLIB_INCLUDES AND GLIB_LIBRARIES)
   set (HAVE_GLIB TRUE)
@@ -118,5 +145,8 @@ endif (HAVE_GLIB)
 
 mark_as_advanced (
   GLIB_INCLUDES
+  GLIB_glibh_INCLUDES
+  GLIB_glibconfh_INCLUDES
   GLIB_LIBRARIES
+  GLIB_LIBRARY_DIR
   )
