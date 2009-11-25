@@ -115,15 +115,19 @@ endif
 #
 #############################################################################
 
-if ((${?TEMPO}) && (${TEMPO} != "${LOFARSOFT}/release/share/pulsar/bin")) then
+if (${?TEMPO}) then
+  if (${TEMPO} != "${LOFARSOFT}/release/share/pulsar/bin") then
    echo "-- Warning, resetting your TEMPO environment variable from:"
    echo "           $TEMPO to ${LOFARSOFT}/release/share/pulsar/bin"
+  endif
 endif
 setenv TEMPO ${LOFARSOFT}/release/share/pulsar/bin
 
-if ((${?PRESTO}) && (${PRESTO} != "${LOFARSOFT}/release/share/pulsar")) then
+if (${?PRESTO}) then 
+  if (${PRESTO} != "${LOFARSOFT}/release/share/pulsar") then
    echo "-- Warning, resetting your PRESTO environment variable from:"
    echo "           $PRESTO to ${LOFARSOFT}/release/share/pulsar"
+  endif
 endif
 setenv PRESTO ${LOFARSOFT}/release/share/pulsar
 
