@@ -11,13 +11,16 @@ import numpy
 define_macros = []
 undef_macros = []
 extra_compile_args = []
-include_dirs = []
+include_dirs = ["/Users/lars/Code/lofar/usg/src/Pulsar/../../release/share/pulsar/include", "PGPLOT_INCLUDES-NOTFOUND"]
+#library_dirs = ["/Users/lars/Code/lofar/usg/src/Pulsar/../../release/share/pulsar/lib", ""]
+library_dirs = []
 
-ppgplot_libraries = ["cpgplot", "pgplot", "X11", "png", "m", "g2c"]
-ppgplot_library_dirs = ["/usr/X11R6/lib"]
+#ppgplot_libraries = ["cpgplot", "pgplot", "X11", "png", "m", "g2c"]
+ppgplot_libraries = ["cpgplot", "pgplot", "X11", "png", "m"]
+ppgplot_library_dirs = [""]
 
 presto_libraries = ["presto", "fftw3f", "m"]
-presto_library_dirs = []
+presto_library_dirs = ["/Users/lars/Code/lofar/usg/src/Pulsar/../../release/share/pulsar/lib"]
 
 # Use NumPy instead of Numeric or numarray
 make_extension = Extension
@@ -28,11 +31,11 @@ presto_include_dirs = include_dirs
 undef_macros.append('USE_NUMARRAY')
 
 if os.name == "posix":
-    if os.environ.has_key("PGPLOT_DIR"):
-        ppgplot_library_dirs.append(os.environ["PGPLOT_DIR"])
-        ppgplot_include_dirs.append(os.environ["PGPLOT_DIR"])
-    else:
-        print >>sys.stderr, "PGPLOT_DIR env var not defined!"
+#    if os.environ.has_key("PGPLOT_DIR"):
+#        ppgplot_library_dirs.append(os.environ["PGPLOT_DIR"])
+#        ppgplot_include_dirs.append(os.environ["PGPLOT_INCLUDES"])
+#    else:
+#        print >>sys.stderr, "PGPLOT_DIR env var not defined!"
     if os.environ.has_key("PRESTO"):
         presto_library_dirs.append(os.path.join(os.environ["PRESTO"], "lib"))
         presto_include_dirs.append(os.path.join(os.environ["PRESTO"], "include"))
@@ -66,6 +69,6 @@ setup(name="PRESTO",
       description="Python interfaces to PGPLOT and PRESTO",
       author="Scott Ransom (ppgplot from Nick Patavlis)",
       author_email="sransom@nrao.edu",
-      packages=['ppgplot', "presto"],
-      package_dir={'ppgplot':'ppgplot_src','presto':'presto_src'},
-      ext_modules=[ext_ppgplot,ext_presto])
+      packages=["presto", 'ppgplot'],
+      package_dir={'presto':'presto_src', 'ppgplot':'ppgplot_src'},
+      ext_modules=[ext_presto, ext_ppgplot])
