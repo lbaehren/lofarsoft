@@ -77,10 +77,6 @@ set (presto_fc_special_binaries
   show_pfd 
 )
 
-set (presto_mpi_binaries
-  mpiprepsubband
-)
-
 set (presto_makewisdom_binaries
   makewisdom
 )
@@ -174,14 +170,12 @@ set (PLOT2DOBJS
   )
 
 ##__________________________________________________________
-## Build instructions for executables
+## Source files in subdirectories
 
-add_executable (mpiprepsubband
-  mpiprepsubband_cmd.c
-  mpiprepsubband_utils.c
-  mpiprepsubband.c
-  ${INSTRUMENTOBJS}
-  )
+add_subdirectory (mpi)
+
+##__________________________________________________________
+## Build instructions for executables
 
 add_executable (accelsearch
   accelsearch_cmd.c 
@@ -416,19 +410,6 @@ foreach (src ${presto_binaries})
     COMPILE_FLAGS "-g -O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
   )
   target_link_libraries (${src} presto sla ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${libm})
-endforeach (src)
-
-## Enable MPI build for these binaries
-
-foreach (src ${presto_mpi_binaries})
-  set_target_properties (${src}
-    PROPERTIES
-###    CMAKE_COMMAND ${MPI_COMPILER}
-###    COMPILER_LANGUAGE ${MPI_COMPILER}
-###    LINKER_LANGUAGE ${MPI_COMPILER}
-    COMPILE_FLAGS "-g -O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
-  )
-  target_link_libraries (${src} presto ${MPI_LIBRARIES} ${CFITSIO_LIBRARIES} ${libm})
 endforeach (src)
 
 foreach (src ${presto_fc_binaries})
