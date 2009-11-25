@@ -282,6 +282,14 @@ else (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
   EXECUTE_PROCESS( COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/lib)
 endif (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
 
+if (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/../../../build/pulsar/apps/presto/src")
+  message (STATUS "[PULSAR] Build location ${CMAKE_INSTALL_PREFIX}/../../../build/pulsar/apps/presto/src exists!")
+else (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/../../../build/pulsar/apps/presto/src")
+  message (STATUS "[PULSAR] Creating location ${CMAKE_INSTALL_PREFIX}/../../../build/pulsar/apps/presto/src")
+  EXECUTE_PROCESS( COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/../../../build/pulsar/apps/presto/src)
+endif (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/../../../build/pulsar/apps/presto/src")
+
+
 if (EXISTS "${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
   message (STATUS "[PULSAR] Makewisdom has already been run; skipping!")
   set (PRESTO_MAKEWISDOM FALSE)
