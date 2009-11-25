@@ -14,15 +14,21 @@ set (presto_mpi_binaries
   mpiprepsubband
 )
 
+## List of source components
 
-## Build instructions for the binaries
-
-add_executable (mpiprepsubband
+set (mpiprepsubband_sources
   mpiprepsubband_cmd.c
   mpiprepsubband_utils.c
   mpiprepsubband.c
-  ${INSTRUMENTOBJS}
   )
+
+foreach (src ${INSTRUMENTOBJS})
+  list (APPEND mpiprepsubband_sources ${presto_mpi_SOURCE_DIR}/../${src})
+endforeach (src)
+
+add_executable (mpiprepsubband ${mpiprepsubband_sources})
+
+## Build instructions for the binaries
 
 foreach (src ${presto_mpi_binaries})
   ## Target properties
