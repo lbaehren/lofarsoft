@@ -11,15 +11,15 @@ import numpy
 define_macros = []
 undef_macros = []
 extra_compile_args = []
-include_dirs = ["${PGPLOT_INCLUDES}", "${CMAKE_INSTALL_PREFIX}/include"]
-library_dirs = ["${PGPLOT_LIBRARY_DIR}", "${CMAKE_INSTALL_PREFIX}/lib"]
+include_dirs = ["${CMAKE_INSTALL_PREFIX}/include", "${PGPLOT_INCLUDES}"]
+library_dirs = ["${CMAKE_INSTALL_PREFIX}/lib", "${PGPLOT_LIBRARY_DIR}"]
 
 #ppgplot_libraries = ["cpgplot", "pgplot", "X11", "png", "m", "g2c"]
 ppgplot_libraries = ["cpgplot", "pgplot", "X11", "png", "m"]
 ppgplot_library_dirs = ["${PGPLOT_LIBRARY_DIR}"]
 
 presto_libraries = ["presto", "fftw3f", "m"]
-presto_library_dirs = []
+presto_library_dirs = ["${CMAKE_INSTALL_PREFIX}/lib"]
 
 # Use NumPy instead of Numeric or numarray
 make_extension = Extension
@@ -37,7 +37,7 @@ if os.name == "posix":
 #        print >>sys.stderr, "PGPLOT_DIR env var not defined!"
     if os.environ.has_key("PRESTO"):
         presto_library_dirs.append(os.path.join(os.environ["PRESTO"], "lib"))
-        presto_include_dirs.append(os.path.join(os.environ["PRESTO"], ".include"))
+        presto_include_dirs.append(os.path.join(os.environ["PRESTO"], "include"))
     else:
         print >>sys.stderr, "PRESTO env var not defined!"
 else:
