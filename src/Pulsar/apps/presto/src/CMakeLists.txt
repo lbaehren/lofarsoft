@@ -476,9 +476,9 @@ add_dependencies (presto_makewisdom makewisdom)
 endif (PRESTO_MAKEWISDOM)
 
 add_custom_target (presto_cat_install
-  COMMAND cp pulsars.cat ${CMAKE_INSTALL_PREFIX}/lib/
+  COMMAND cp pulsars.cat parkes_birds.txt psr_catalog.txt aliases.txt a2x.ps a2xshell.ps ${CMAKE_INSTALL_PREFIX}/lib/
   WORKING_DIRECTORY ${PULSAR_SOURCE_DIR}/apps/presto/lib
-  COMMENT "Executing 'cp ${PULSAR_SOURCE_DIR}/apps/presto/lib/pulsars.cat ${CMAKE_INSTALL_PREFIX}/lib/'"
+  COMMENT "Executing 'copy from ${PULSAR_SOURCE_DIR}/apps/presto/lib of pulsars.cat parkes_birds.txt psr_catalog.txt aliases.txt a2x.ps a2xshell.ps to ${CMAKE_INSTALL_PREFIX}/lib/'"
   )
 
 ## ==============================================================================
