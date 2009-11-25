@@ -221,12 +221,14 @@ void MGFunction::fcn_gradient(double *buf) const
       double V  = p[0] * f->val;
 
       *(buf++) = f->val;
-      *(buf++) = (V * (f1*cs/p[3] - f2*sn/p[4]));
-      *(buf++) = (V * (f1*sn/p[3] + f2*cs/p[4]));
-      if (m_gaul[gidx] == G_Gaussian) {
-	*(buf++) = (V * f1*f1/p[3]);
-	*(buf++) = (V * f2*f2/p[4]);
-	*(buf++) = (V * deg * f1 * f2 * (p[3]/p[4] - p[4]/p[3]));
+      if (m_gaul[gidx] == G_Gaussian || m_gaul[gidx] == G_Reduced_Gaussian) {
+        *(buf++) = (V * (f1*cs/p[3] - f2*sn/p[4]));
+        *(buf++) = (V * (f1*sn/p[3] + f2*cs/p[4]));
+        if (m_gaul[gidx] == G_Gaussian) {
+          *(buf++) = (V * f1*f1/p[3]);
+          *(buf++) = (V * f2*f2/p[4]);
+          *(buf++) = (V * deg * f1 * f2 * (p[3]/p[4] - p[4]/p[3]));
+        }
       }
     }
   assert(buf - chk == (int)(m_ndata * m_npar));
@@ -255,12 +257,14 @@ void MGFunction::fcn_diff_gradient(double *buf) const
       double V  = - p[0] * f->val; // EXTRA MINUS SIGN INCLUDED
 
       *(buf++) = - f->val; // EXTRA MINUS SIGN INCLUDED
-      *(buf++) = (V * (f1*cs/p[3] - f2*sn/p[4]));
-      *(buf++) = (V * (f1*sn/p[3] + f2*cs/p[4]));
-      if (m_gaul[gidx] == G_Gaussian) {
-	*(buf++) = (V * f1*f1/p[3]);
-	*(buf++) = (V * f2*f2/p[4]);
-	*(buf++) = (V * deg * f1 * f2 * (p[3]/p[4] - p[4]/p[3]));
+      if (m_gaul[gidx] == G_Gaussian || m_gaul[gidx] == G_Reduced_Gaussian) {
+        *(buf++) = (V * (f1*cs/p[3] - f2*sn/p[4]));
+        *(buf++) = (V * (f1*sn/p[3] + f2*cs/p[4]));
+        if (m_gaul[gidx] == G_Gaussian) {
+          *(buf++) = (V * f1*f1/p[3]);
+          *(buf++) = (V * f2*f2/p[4]);
+          *(buf++) = (V * deg * f1 * f2 * (p[3]/p[4] - p[4]/p[3]));
+        }
       }
     }
   assert(buf - chk == (int)(m_ndata * m_npar));
@@ -295,12 +299,14 @@ void MGFunction::fcn_transposed_gradient(double *buf) const
       double V  = p[0] * f->val;
 
       buf[(0 + ggidx)*m_ndata + didx] = f->val;
-      buf[(1 + ggidx)*m_ndata + didx] = (V * (f1*cs/p[3] - f2*sn/p[4]));
-      buf[(2 + ggidx)*m_ndata + didx] = (V * (f1*sn/p[3] + f2*cs/p[4]));
-      if (m_gaul[gidx] == G_Gaussian) {
-	buf[(3 + ggidx)*m_ndata + didx] = (V * f1*f1/p[3]);
-	buf[(4 + ggidx)*m_ndata + didx] = (V * f2*f2/p[4]);
-	buf[(5 + ggidx)*m_ndata + didx] = (V * deg * f1 * f2 * (p[3]/p[4] - p[4]/p[3]));
+      if (m_gaul[gidx] == G_Gaussian || m_gaul[gidx] == G_Reduced_Gaussian) {
+        buf[(1 + ggidx)*m_ndata + didx] = (V * (f1*cs/p[3] - f2*sn/p[4]));
+        buf[(2 + ggidx)*m_ndata + didx] = (V * (f1*sn/p[3] + f2*cs/p[4]));
+        if (m_gaul[gidx] == G_Gaussian) {
+          buf[(3 + ggidx)*m_ndata + didx] = (V * f1*f1/p[3]);
+          buf[(4 + ggidx)*m_ndata + didx] = (V * f2*f2/p[4]);
+          buf[(5 + ggidx)*m_ndata + didx] = (V * deg * f1 * f2 * (p[3]/p[4] - p[4]/p[3]));
+        }
       }
       ggidx += m_gaul[gidx];
     }
@@ -332,12 +338,14 @@ void MGFunction::fcn_diff_transposed_gradient(double *buf) const
       double V  = - p[0] * f->val; // EXTRA MINUS SIGN INCLUDED
 
       buf[(0 + ggidx)*m_ndata + didx] = - f->val; // EXTRA MINUS SIGN INCLUDED
-      buf[(1 + ggidx)*m_ndata + didx] = (V * (f1*cs/p[3] - f2*sn/p[4]));
-      buf[(2 + ggidx)*m_ndata + didx] = (V * (f1*sn/p[3] + f2*cs/p[4]));
-      if (m_gaul[gidx] == G_Gaussian) {
-	buf[(3 + ggidx)*m_ndata + didx] = (V * f1*f1/p[3]);
-	buf[(4 + ggidx)*m_ndata + didx] = (V * f2*f2/p[4]);
-	buf[(5 + ggidx)*m_ndata + didx] = (V * deg * f1 * f2 * (p[3]/p[4] - p[4]/p[3]));
+      if (m_gaul[gidx] == G_Gaussian || m_gaul[gidx] == G_Reduced_Gaussian) {
+        buf[(1 + ggidx)*m_ndata + didx] = (V * (f1*cs/p[3] - f2*sn/p[4]));
+        buf[(2 + ggidx)*m_ndata + didx] = (V * (f1*sn/p[3] + f2*cs/p[4]));
+        if (m_gaul[gidx] == G_Gaussian) {
+          buf[(3 + ggidx)*m_ndata + didx] = (V * f1*f1/p[3]);
+          buf[(4 + ggidx)*m_ndata + didx] = (V * f2*f2/p[4]);
+          buf[(5 + ggidx)*m_ndata + didx] = (V * deg * f1 * f2 * (p[3]/p[4] - p[4]/p[3]));
+        }
       }
       ggidx += m_gaul[gidx];
     }
@@ -374,12 +382,14 @@ void MGFunction::fcn_partial_gradient(double *buf) const
       double f2 = f->f2;
       double V  = f->val;
 
-      buf[(0 + ggidx)*m_ndata + didx] = (V * (f1*cs/p[3] - f2*sn/p[4]));
-      buf[(1 + ggidx)*m_ndata + didx] = (V * (f1*sn/p[3] + f2*cs/p[4]));
-      if (m_gaul[gidx] == G_Gaussian) {
-	buf[(2 + ggidx)*m_ndata + didx] = (V * f1*f1/p[3]);
-	buf[(3 + ggidx)*m_ndata + didx] = (V * f2*f2/p[4]);
-	buf[(4 + ggidx)*m_ndata + didx] = (V * deg * f1 * f2 * (p[3]/p[4] - p[4]/p[3]));
+      if (m_gaul[gidx] == G_Gaussian || m_gaul[gidx] == G_Reduced_Gaussian) {
+        buf[(0 + ggidx)*m_ndata + didx] = (V * (f1*cs/p[3] - f2*sn/p[4]));
+        buf[(1 + ggidx)*m_ndata + didx] = (V * (f1*sn/p[3] + f2*cs/p[4]));
+        if (m_gaul[gidx] == G_Gaussian) {
+          buf[(2 + ggidx)*m_ndata + didx] = (V * f1*f1/p[3]);
+          buf[(3 + ggidx)*m_ndata + didx] = (V * f2*f2/p[4]);
+          buf[(4 + ggidx)*m_ndata + didx] = (V * deg * f1 * f2 * (p[3]/p[4] - p[4]/p[3]));
+        }
       }
       ggidx += m_gaul[gidx] - 1;
     }

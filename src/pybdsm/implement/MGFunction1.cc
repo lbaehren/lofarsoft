@@ -213,8 +213,9 @@ void MGFunction::register_class()
   using boost::python::arg;
 
   enum_<Gtype>("Gtype")
-    .value("g6", G_Gaussian)
+    .value("g1", G_Amplitude_Only)
     .value("g3", G_Reduced_Gaussian)
+    .value("g6", G_Gaussian)
     ;
 
   class_<MGFunction,

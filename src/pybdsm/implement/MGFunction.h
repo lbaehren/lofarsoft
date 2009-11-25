@@ -52,6 +52,7 @@ class MGFunction
   // High-level Python interface
   ////////////////////////////////
   enum Gtype {
+    G_Amplitude_Only = 1,
     G_Reduced_Gaussian = 3,
     G_Gaussian = 6,
   };
