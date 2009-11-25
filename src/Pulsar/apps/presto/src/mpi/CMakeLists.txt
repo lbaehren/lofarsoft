@@ -10,7 +10,7 @@ if (MPI_COMPILER)
 endif (MPI_COMPILER)
 
 SET (CMAKE_C_COMPILER_INIT mpicc)
-set (CMAKE_C_COMPILER ${MPI_COMPILER} CACHE FILEPATH "Compiler" FORCE)
+SET (CMAKE_CXX_COMPILER_INIT mpic++)
 
 ## Name of the project
 project (presto_mpi C)
@@ -19,6 +19,21 @@ project (presto_mpi C)
 cmake_minimum_required (VERSION 2.6)
 
 set (CMAKE_VERBOSE_MAKEFILE TRUE CACHE BOOL "Verbose Makefile" FORCE)
+
+## ==============================================================================
+##
+##  Configuration settings
+##
+## ==============================================================================
+
+include (CMakeForceCompiler)
+
+# this one is important
+SET(CMAKE_SYSTEM_NAME mpi)
+
+# specify the cross compiler
+CMAKE_FORCE_C_COMPILER (mpicc GNU)
+CMAKE_FORCE_CXX_COMPILER (mpic++ GNU)
 
 ## ==============================================================================
 ##
