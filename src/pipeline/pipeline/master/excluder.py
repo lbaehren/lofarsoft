@@ -4,8 +4,8 @@ from pipeline.support.pyraprunner import pyraprunner
 class excluder(pyraprunner):
     @staticmethod
     def remote_function(input, output, station):
-        from pipeline.nodes.excluder import exclude_stations
-        return exclude_stations(input, output, station)
+        from pipeline.nodes.excluder import excluder_node
+        return excluder_node(loghost=loghost, logport=logport).run(input, output, station)
 
     def __init__(self):
         super(excluder, self).__init__()
