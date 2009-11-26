@@ -50,6 +50,8 @@ class dppp(LOFARrecipe):
         job_directory = self.config.get("layout", "job_directory")
         ms_names = self.inputs['args']
 
+        # Connect to the IPython cluster and initialise it with
+        # the funtions we need.
         tc, mec = self._get_cluster()
         mec.push_function(
             dict(
@@ -60,6 +62,8 @@ class dppp(LOFARrecipe):
         )
         self.logger.info("Pushed functions to cluster")
 
+        # Use build_available_list() to determine which SBs are available
+        # on each engine; we use this for dependency resolution later.
         self.logger.info("Building list of data available on engines")
         available_list = "%s%s" % (
             self.inputs['job_name'], self.__class__.__name__
@@ -69,11 +73,16 @@ class dppp(LOFARrecipe):
             "build_available_list(\"%s\")" % (available_list,)
         )
 
+        # clusterlogger context manager accepts networked logging
+        # from compute nodes.
         with clusterlogger(self.logger) as (loghost, logport):
+            # Timer for total DPPP job execution
             with utilities.log_time(self.logger):
                 self.logger.debug("Logging to %s:%d" % (loghost, logport))
                 tasks = []
                 outnames = []
+                # Iterate over SB names, building and scheduling a DPPP job
+                # for each one.
                 for ms_name in ms_names:
                     outnames.append(
                         os.path.join(
@@ -82,7 +91,6 @@ class dppp(LOFARrecipe):
                             os.path.basename(ms_name) + ".dppp"
                         )
                     )
-
                     log_location = os.path.join(
                         self.config.get('layout', 'log_directory'),
                         'dppp'
@@ -110,6 +118,8 @@ class dppp(LOFARrecipe):
                         tasks.append(tc.run(task))
                     else:
                         self.logger.info("Dry run: scheduling skipped")
+
+                # Wait for all jobs to finish
                 self.logger.info("Waiting for all DPPP tasks to complete")
                 tc.barrier(tasks)
 

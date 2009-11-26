@@ -23,10 +23,11 @@ log_format = "log4cplus.appender.FILE.layout.ConversionPattern=%x %D{%d-%m-%y %H
 
 class dppp_node(LOFARnode):
     def run(self, infile, outfile, parset, log_location, executable, initscript):
+        # Time execution of this job
         with log_time(self.logger):
             self.logger.info("Processing %s" % (infile,))
 
-            # We need to patch the parset with the correct input/output MS names.
+            # Patch the parset with the correct input/output MS names.
             temp_parset_filename = patch_parset(
                 parset, {
                     'msin': infile,
@@ -34,16 +35,23 @@ class dppp_node(LOFARnode):
                 }
             )
 
+            # Create output directories and ensure the environment
+            # is initialised for DPPP run
             create_directory(log_location)
             create_directory(os.path.dirname(outfile))
-
             env = utilities.read_initscript(initscript)
 
             try:
                 if not os.access(executable, os.X_OK):
                     raise ExecutableMissing(executable)
+
+                # DPPP looks for a log_prop file in its working directory
+                # We create a temporary directory with the right log_prop,
+                # run DPPP there, then delete it again when we're done.
                 working_dir = tempfile.mkdtemp()
-                log_prop_filename = os.path.join(working_dir, os.path.basename(executable) + ".log_prop")
+                log_prop_filename = os.path.join(
+                    working_dir, os.path.basename(executable) + ".log_prop"
+                )
                 with open(log_prop_filename, 'w') as log_prop_file:
                     log_prop_file.write(log_prop % {'filename': os.path.join(
                             log_location,
@@ -51,6 +59,9 @@ class dppp_node(LOFARnode):
                         )}
                     )
                     log_prop_file.write(log_format)
+
+                # We use subprocess.check_call() to spawn DPPP and check 
+                # its exit status.
                 # What is the '1' for? Required by DP3...
                 cmd = [executable, temp_parset_filename, '1']
                 self.logger.debug("Running: %s" % (' '.join(cmd),))
@@ -71,6 +82,7 @@ class dppp_node(LOFARnode):
                 self.logger.error(str(e))
                 raise Exception
             finally:
+                # Clean up tempoerary files.
                 os.unlink(temp_parset_filename)
                 shutil.rmtree(working_dir)
 
