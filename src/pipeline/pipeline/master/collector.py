@@ -3,6 +3,7 @@ from pipeline.support.lofarrecipe import LOFARrecipe
 from pipeline.support.ipython import LOFARTask
 from pipeline.support.clusterdesc import ClusterDesc
 import pipeline.support.utilities as utilities
+from skim import run as create_hdf5
 import os, os.path, glob, subprocess, sys, numpy
 import pyfits, shutil, errno, re, logging, imp
 
@@ -116,7 +117,14 @@ class collector(LOFARrecipe):
         else:
             self.logger.info("No FITS image found; not averaging")
             self.ouputs['data'] = None
-                
+
+        self.logger.info("Creating HDF5 file")
+        create_hdf5(
+            self.config.get('layout', 'job_directory'),
+            self.inputs['start_time'],
+            self.logger
+        )
+
         return 0
 
 if __name__ == '__main__':
