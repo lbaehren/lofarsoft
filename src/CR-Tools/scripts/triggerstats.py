@@ -228,6 +228,7 @@ def makeTriggersVersusThresholdPlot(triggerList):
     gY = mglData(nofPoints)
 
     for i in range(nofPoints):
+        print str(i) + "th point for threshold plot"
         thisThreshold = startThreshold + float(i) * stepsize
         filteredByThreshold = nofTriggersFilteredByThreshold(triggerList, thisThreshold)
         gX[i] = thisThreshold
@@ -444,14 +445,23 @@ def makeBinnedTimeSeriesOfTriggers(triggerList): # works on global 'time' list
     graph.WriteEPS("timeSeriesOfTriggers.eps","Binned timeseries of triggers")
 
 def runFullAnalysis():
+    print "Reading trigger list..."
     triggerList = readTriggerListFromCSVFile(fileName)
+    print "Making lists per key..."
     makeListsPerKey(triggerList)
+    print "Making triggers versus RCU histogram..."
     makeTriggersVersusRCUHistogram(triggerList)
+    print "Making triggers versus threshold plot..."
     makeTriggersVersusThresholdPlot(triggerList)
+    print "Sorting trigger list..."
     sortedTriggerList = sortedTriggerListByTimeAndSample(triggerList)
+    print "Making coincident pulse list..."
     pulseIndices = coincidentPulseIndicesInTriggerList(sortedTriggerList, timeWindowForCoincidence)
+    print "Making numer of RCUs per pulse plot..."
     makeNumberOfRCUsPerPulsePlot(sortedTriggerList, pulseIndices)
-    makeHistogramOfTotalSumInPulses(sortedTriggerList, pulseIndices)
+    
+    #makeHistogramOfTotalSumInPulses(sortedTriggerList, pulseIndices)
+    print "Making binned time-series of triggers..."
     makeBinnedTimeSeriesOfTriggers(triggerList)
 
 # main
