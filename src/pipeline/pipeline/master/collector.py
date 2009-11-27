@@ -119,10 +119,12 @@ class collector(LOFARrecipe):
             self.ouputs['data'] = None
 
         self.logger.info("Creating HDF5 file")
+        hdf5logger = logging.getLogger(self.logger.name + ".hdf5")
+        hdf5logger.setLevel(logging.INFO)
         create_hdf5(
             self.config.get('layout', 'job_directory'),
             self.inputs['start_time'],
-            self.logger
+            hdf5logger
         )
 
         return 0
