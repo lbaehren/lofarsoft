@@ -47,7 +47,6 @@ class vdsmaker(LOFARrecipe):
         super(vdsmaker, self).go()
 
         ms_names = self.inputs['args']
-        job_directory = self.config.get("layout", "job_directory")
 
         tc, mec = self._get_cluster()
         mec.push_function(
