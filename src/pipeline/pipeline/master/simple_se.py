@@ -11,51 +11,26 @@ from tkp_lib.dataset   import DataSet
 from tkp_lib.image     import ImageData
 from tkp_lib.accessors import FitsFile
 from tkp_lib.dbplots   import plotAssocCloudByXSource
+from tkp_lib.dbregion  import createRegionByImage
 import tkp_lib.database as database
 
-region_local = "SELECT '# Region file format: DS9 version 4.0' UNION SELECT '# Filename: %s' UNION SELECT 'global color=green font=\"helvetica 10 normal\" select=1 highlite=1 edit=1 move=1 delete=1 include=1 fixed=0 source' UNION SELECT 'fk5' UNION SELECT CONCAT('circle(', ra, ',', decl, ',0.025) #color=blue') FROM extractedsources WHERE image_id = %s;"
-region_wenss = "SELECT '# Region file format: DS9 version 4.0' UNION SELECT '# Filename: %s' UNION SELECT 'global color=green font=\"helvetica 10 normal\" select=1 highlite=1 edit=1 move=1 delete=1 include=1 fixed=0 source' UNION SELECT 'fk5' UNION SELECT CONCAT('circle(', ra, ',', decl, ',0.025) #color=red') FROM catalogedsources,catalogs WHERE catname = 'WENSS' AND catid = cat_id AND ra BETWEEN %f AND %f AND decl BETWEEN %f AND %f;" 
 associations = """
 SELECT
-    x1.xtrsrcid, x1.ra, x1.decl, x1.I_Peak, catalogs.catname, cs.ra, cs.decl, a.assoc_weight, a.assoc_distance_arcsec
-    FROM extractedsources x1
-        LEFT OUTER JOIN
-            assoccatsources a ON xtrsrc_id = xtrsrcid
-        LEFT OUTER JOIN
-            catalogedsources cs ON assoc_catsrc_id = catsrcid
-        LEFT OUTER JOIN
-            catalogs ON cat_id = catid
-    WHERE
-        x1.image_id = %d
-    ORDER BY
-        I_Peak;
+    x1.xtrsrcid, x1.ra, x1.decl, x1.i_peak, x1.i_int, c.catname, c1.ra, c1.decl, a1.assoc_distance_arcsec
+FROM
+    extractedsources x1
+LEFT OUTER JOIN
+    assoccatsources a1 ON x1.xtrsrcid = a1.xtrsrc_id
+LEFT OUTER JOIN
+    catalogedsources c1 ON a1.assoc_catsrc_id = c1.catsrcid
+LEFT OUTER JOIN
+    catalogs c ON c.catid = c1.cat_id
+WHERE
+    image_id = %d
+ORDER BY
+    x1.I_Peak;
 """
 
-def image_region(image):
-    """
-    Find max and min RA & dec in an image by checking the corner positions.
-    """
-    ra_max, dec_max = image.pix_to_position([0,0])
-    ra_min, dec_min = ra_max, dec_max
-
-    corners = (
-        (0, image.ydim-1),
-        (image.xdim-1, 0),
-        (image.xdim-1, image.ydim-1),
-    )
-
-    for corner in corners:
-        ra, dec = image.pix_to_position(corner)
-        ra_max  = max(ra_max, ra)
-        ra_min  = min(ra_min, ra)
-        dec_max = max(dec_max, dec)
-        dec_min = min(dec_min, dec)
-
-    if (ra_max - ra_min) > 180:
-        ra_max, ra_min = ra_min, ra_max
-
-    return ra_min, ra_max, dec_min, dec_max
-    
 class simple_se(LOFARrecipe):
     """
     Run source extraction on FITS images on the front-end.
@@ -83,7 +58,7 @@ class simple_se(LOFARrecipe):
             '--associations',
             dest="associations",
             help="Filename for association list",
-            default="assocation.list"
+            default="association.list"
         )
 
     def go(self):
@@ -105,34 +80,14 @@ class simple_se(LOFARrecipe):
                 self.logger.info("Generating source associations")
                 database.assocXSrc2XSrc(image.id, con)
                 database.assocXSrc2Cat(image.id, con)
+                self.logger.info("Querying for region file")
+                createRegionByImage(image.id[0], con,
+                    os.path.join(
+                        os.path.dirname(file),
+                        self.inputs['detected_regions']
+                    ), logger=self.logger
+                )
                 with closing(con.cursor()) as cur:
-                    self.logger.info("Querying for local region file")
-                    my_query = region_local % (file, int(image.id[0]))
-                    self.logger.debug(my_query)
-                    cur.execute(my_query)
-                    with open(
-                        os.path.join(
-                            os.path.dirname(file),
-                            self.inputs['detected_regions']
-                        ),
-                        'w'
-                    ) as output_file:
-                        for line in cur.fetchall():
-                            output_file.write(line[0] + '\n')
-                    self.logger.info("Querying for WENSS region file")
-                    params = [file,] + list(image_region(image))
-                    my_query = region_wenss % tuple(params)
-                    self.logger.debug(my_query)
-                    cur.execute(my_query)
-                    with open(
-                        os.path.join(
-                            os.path.dirname(file),
-                            self.inputs['wenss_regions']
-                        ),
-                        'w'
-                    ) as output_file:
-                        for line in cur.fetchall():
-                            output_file.write(line[0] + '\n')
                     self.logger.info("Querying for association list")
                     my_query = associations % (image.id)
                     self.logger.debug(my_query)
