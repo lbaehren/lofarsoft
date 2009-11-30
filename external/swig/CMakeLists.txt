@@ -29,7 +29,7 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
 if (USG_ROOT)
   include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
 else (USG_ROOT)
-  message (FATAL_ERROR "[SWIG] Unable to locate additional CMake scripts!")
+  message (FATAL_ERROR "[Swig] Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
 ## ------------------------------------------------------------------------------
@@ -45,12 +45,12 @@ if (SWIG_FOUND)
     message (STATUS "SWIG_VERSION    = ${SWIG_VERSION}")
   endif (SWIG_VERBOSE_CONFIGURE)
   
-  string (COMPARE GREATER ${SWIG_VERSION} "1.3.31" SWIG_VERSION_OK)
+  string (COMPARE GREATER ${SWIG_VERSION} "1.3.38" SWIG_VERSION_OK)
 
   if (SWIG_VERSION_OK)
     set (HAVE_SWIG TRUE)
   else (SWIG_VERSION_OK)
-    message (STATUS "SWIG version too old - forcing build of newer version!")
+    message (STATUS "[Swig] System version too old - forcing rebuild!")
     set (HAVE_SWIG FALSE)
   endif (SWIG_VERSION_OK)
 else (SWIG_FOUND)
@@ -61,39 +61,12 @@ endif (SWIG_FOUND)
 
 if (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)
   
-  ##__________________________________________________________________
-  ## Locate the installation area
-  
-  find_path (SWIG_prefix release_area.txt
-    PATHS
-    ${SWIG_SOURCE_DIR}
-    PATH_SUFFIXES
-    ../release
-    ../../release
-    ../../../release
-    NO_DEFAULT_PATH
-    )
-  
-  if (NOT SWIG_prefix)
-    message (FATAL_ERROR "[Swig] Unable to locate the installation area")
-  endif (NOT SWIG_prefix)
-  
-  ##__________________________________________________________________
-  ## Tools and definitions
+  include (ExternalProject)
 
-  find_program (HAVE_WGET  wget  ${bin_locations} )
-  find_program (HAVE_CURL  curl  ${bin_locations} )
-  find_program (HAVE_TAR   tar   ${bin_locations} )
-
-  set (SWIG_VERSION "1.3.38")
+  set (SWIG_VERSION "1.3.40")
   set (SWIG_DIRECTORY "swig-${SWIG_VERSION}")
   set (SWIG_TAR_ARCHIVE "${SWIG_DIRECTORY}.tar.gz")
   set (SWIG_URL "${USG_DOWNLOAD}/software/${SWIG_TAR_ARCHIVE}")
-
-  ##__________________________________________________________________
-  ## Build the project
-
-  include (ExternalProject)
 
   find_file (have_swig_tgz ${SWIG_TAR_ARCHIVE} ${SWIG_SOURCE_DIR})
   
@@ -103,20 +76,17 @@ if (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)
       DOWNLOAD_DIR ${SWIG_BINARY_DIR}/swig
       SOURCE_DIR ${SWIG_BINARY_DIR}/swig
       URL ${have_swig_tgz}
-      CONFIGURE_COMMAND ${SWIG_BINARY_DIR}/swig/configure --prefix=${SWIG_prefix}
+      CONFIGURE_COMMAND ${SWIG_BINARY_DIR}/swig/configure --prefix=${USG_INSTALL_PREFIX}
       )
   else (have_swig_tgz)
-    ExternalProject_Add (swig
-      PREFIX ${USG_ROOT}/build/swig
-      DOWNLOAD_DIR ${SWIG_BINARY_DIR}/swig
-      SOURCE_DIR ${SWIG_BINARY_DIR}/swig
-      URL ${SWIG_URL}
-      CONFIGURE_COMMAND ${SWIG_BINARY_DIR}/swig/configure --prefix=${SWIG_prefix}
-      )
+    status (WARNING "[Swig] Unable to build project - no sources found!")
   endif (have_swig_tgz)
   
 ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)
-  message (STATUS "[Swig] Found system-wide installation; skipping rebuild!")
+  add_custom_target (swig
+    WORKING_DIRECTORY ${SWIG_BINARY_DIR}
+    COMMENT "[Swig] Found system-wide installation; skipping rebuild!"
+    )
 endif (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)
