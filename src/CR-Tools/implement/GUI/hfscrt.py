@@ -1,3 +1,5 @@
+v=d["Antenna=0:y:Data"].val()
+
 offsets=IntVec()
 datareader_ptr=hOpenFile("/Users/falcke/LOFAR/usg/data/lofar/RS307C-readfullsecond.h5", offsets)
 

@@ -387,7 +387,7 @@ class hfPlotPanel(hffunc):
         self.GraphObject.SetFontSize(9.)
         self.GraphObject.SetCut(False);
         self.GraphObject.SetBaseLineWidth(1); 
-        self.GraphObject.SetTickLen(0.3);
+        self.GraphObject.SetTickLen(0.1,2);
         if self.XAuto:
             xmin=xminval
             xmax=xmaxval
@@ -429,7 +429,7 @@ class hfPlotPanel(hffunc):
             self.GraphObject.SetRanges(xmin,xmax,ymin,ymax)
         else: 
             self.GraphObject.SetRanges(xmin,xmax,ymin,ymax)
-            self.GraphObject.AdjustTicks('x')
+#            self.GraphObject.AdjustTicks('x')
         if self.logY: 
             yfunc="lg(y)"
             ymin=10**ymin;ymax=10**ymax;
@@ -437,11 +437,12 @@ class hfPlotPanel(hffunc):
             self.GraphObject.SetRanges(xmin,xmax,ymin,ymax)
         else: 
             self.GraphObject.SetRanges(xmin,xmax,ymin,ymax)
-            self.GraphObject.AdjustTicks("y")
+#            self.GraphObject.AdjustTicks("y")
         self.GraphObject.SetFunc(xfunc,yfunc,"");
+        self.GraphObject.SetXTT("%g")
+        self.GraphObject.SetYTT("%g")
         self.GraphObject.SetTuneTicks(True,-1.2)
-        self.GraphObject.SetXTT("%.4g")
-        self.GraphObject.SetYTT("%.4g")
+        self.GraphObject.AdjustTicks('xy')
         self.GraphObject.Axis("xy")
         if self.selected: self.GraphObject.Box("r")
         else: self.GraphObject.Box("g")
@@ -500,11 +501,12 @@ class hfPlotWindow(hffunc):
     def startup(self,d):
         if verbose: print "PlotWindow - Startup"
         self.setParameter("Title","")
+        self.setParameter("Filename","")
         self.setParameter("BackgroundColor",[1.0,1.0,1.0])
         self.setParameter("npanels",-1)
         self.setParameter("npanelsx",-1)
         self.setParameter("npanelsy",-1)
-#        self.setParameter("ZoomFactor",2)
+        self.setParameter("ZoomFactor",1.6) # Make sure this is float()!
         self.setParameter("PipelineLauncher",[""])
         self.setParameter("GraphObject",None)
         self.setResult("npanelsplotted",0)
@@ -518,7 +520,9 @@ class hfPlotWindow(hffunc):
             return 1
 #        print self.PipelineLauncher," --- ",d.getModFlags()
         self.GraphObject.Clf(self.BackgroundColor[0],self.BackgroundColor[1],self.BackgroundColor[2])
-        self.GraphObject.Title(self.Title,"iC",-1.5)
+        self.GraphObject.SetPlotFactor(self.ZoomFactor)
+        if self.Title=="":  self.GraphObject.Title(self.Filename,"iC:k",-0.7)
+        else: self.GraphObject.Title(self.Title,"iC:k",-0.8)
         self.PlotPanel=self.data["'PlotPanel"]
 #Find out how many PlotPanels are in the network 
         if type(self.PlotPanel)==Data:  #One Object => just one panel
@@ -529,7 +533,6 @@ class hfPlotWindow(hffunc):
             self.putResult("npanelsplottedx",nx)
             self.putResult("npanelsplottedy",ny)
             self.GraphObject.SubPlot(1,1,0)
-#            self.GraphObject.SetPlotFactor(self.ZoomFactor)
             self.PlotPanel.update()
         elif type(self.PlotPanel)==DataList: #A Datalist is returned => more than one panel
             npanels=len(self.PlotPanel)

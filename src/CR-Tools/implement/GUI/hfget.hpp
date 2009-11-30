@@ -425,6 +425,9 @@ boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_i
  def("hWeights",hWeights);
 
  hPyExposeINCS(hNegate);
+ hPyExposeINCS(hSum);
+ hPyExposeINCS(hMean);
+ hPyExposeINCS(hMedian);
  hPyExposeINCS(hFill);
  hPyExposeINCS(hReadFile);
  

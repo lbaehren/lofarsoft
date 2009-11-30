@@ -57,7 +57,7 @@ See hfanalysis.h for actual definition
 #define STLVectorIteratorI typename vector<HInteger>::iterator
 #define STLVectorIteratorN typename vector<HNumber>::iterator
 #define STLVectorIteratorC typename vector<HComplex>::iterator
-
+#define IterValueType typename Iter::value_type
 
 //Example on how to create a casa Vector with data storage identical to the stl vector:
 
@@ -70,11 +70,30 @@ CasaVector<HInteger> OffsetsCasa(shape,storage,casa::SHARE);
 //Needed to create a Python wrapper for a function of a templated STL
 //vector of Integer, Number, Complex, and String type containing 0
 //extra parameters
+
+
+
+
+
 #define PythonWrapper_VecINCS_0_Parameters(FUNC) \
+  void FUNC (vector<HPointer > &vec) {} \
   void (*FUNC##_I)(vector<HInteger> &vec) = &FUNC; \
   void (*FUNC##_N)(vector<HNumber > &vec) = &FUNC; \
   void (*FUNC##_C)(vector<HComplex > &vec) = &FUNC; \
   void (*FUNC##_S)(vector<HString > &vec) = &FUNC
+#define PythonWrapper_VecINC_VecOut_0_Parameters(FUNC) \
+  void FUNC (vector<HPointer > &vec,vector<HPointer > &vec) {}	       \
+  void (*FUNC##_I)(vector<HInteger> &vec,vector<HInteger> &vec) = &FUNC;		       \
+  void (*FUNC##_N)(vector<HNumber > &vec) = &FUNC; \
+  void (*FUNC##_C)(vector<HComplex > &vec) = &FUNC; \
+  void (*FUNC##_S)(vector<HString > &vec) = &FUNC
+#define PythonWrapper_TVecINC_0_Parameters(FUNC)     \
+  HPointer FUNC (vector<HPointer > &vec) {return Null_p;}\
+  HString FUNC (vector<HString > &vec) {return "";}\
+  HString (*FUNC##_S)(vector<HString > &vec) = &FUNC;\
+  HInteger (*FUNC##_I)(vector<HInteger> &vec) = &FUNC;	\
+  HNumber (*FUNC##_N) (vector<HNumber > &vec) = &FUNC;	\
+  HComplex (*FUNC##_C)(vector<HComplex > &vec) = &FUNC
 #define PythonWrapper_VecINCS_1_TParameters(FUNC)  \
   void (*FUNC##_I)(vector<HInteger> &vec,HInteger) = &FUNC;    \
   void (*FUNC##_N)(vector<HNumber > &vec,HNumber) = &FUNC;	   \
@@ -92,6 +111,14 @@ CasaVector<HInteger> OffsetsCasa(shape,storage,casa::SHARE);
   void (*FUNC##_P)(vector<HPointer > &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8) = &FUNC; \
   void (*FUNC##_S)(vector<HString > &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8) = &FUNC
 
+#define VecWrappers_TFunc_Vec_0_Parameters(FUNC)			\
+  template <class T> inline T FUNC(vector<T> &vec) {return FUNC(vec.begin(),vec.end());} \
+  template <class T> inline T FUNC(casa::Vector<T> &vec) {return FUNC(vec.cbegin(),vec.cend());} 
+#define VecWrappers_TFunc_VecCopy_0_Parameters(FUNC)			\
+  template <class T> inline T FUNC(vector<T> &vec) {vector<T> vec_copy(vec.begin(),vec.end()); return FUNC(vec_copy.begin(),vec_copy.end());} \
+  template <class T> inline T FUNC(casa::Vector<T> &vec) {vector<T> vec_copy(vec.cbegin(),vec.cend()); return FUNC(vec_copy.begin(),vec_copy.end());} 
+
+// template <class T> inline T FUNC(casa::Vector<T> &vec) {return FUNC<STLVectorIteratorT,T>(static_cast<STLVectorIteratorT>(vec.cbegin()),static_cast<STLVectorIteratorT>(vec.cend()));} 
 
 //------------------------------------------------------------------------
 // Conversion Rountines
@@ -438,7 +465,7 @@ vector<HNumber> hWeights(address wlen, hWEIGHTS wtype){
          input values.
   \param idata_end: STL Iterator pointing to the end of the input vector
   \param odata_start: STL Iterator pointing to the first element of an array
-         which will contain input values. The array must have the same size as
+         which will contain output values. The array must have the same size as
 	 *start_data_in and be initialized to zero.
   \param weights_start: STL Iterator pointing to the first element of an array
          with weights values that allows one to specify weights to be applied
@@ -714,6 +741,124 @@ template <class T> inline void hFill (vector<T> &vec, T val) {hFill<T> (vec.begi
 template <class T> inline void hFill (casa::Vector<T> &vec, T val) {hFill<T> (static_cast<STLVectorIteratorT>(vec.cbegin()),static_cast<STLVectorIteratorT>(vec.cbegin()),val);}
 PythonWrapper_VecINCS_1_TParameters(hFill);
 //------End Wrappers to hFill --------
+
+/*!
+  \brief Performs a sum over the values in a vector and returns the value
+
+The functions contains no check for an overrun!
+
+  \param data_start: STL Iterator pointing to the first element of an array with input
+  values.  
+
+  \param data_end: STL Iterator pointing to the end of the
+  input vector
+*/
+template <class Iter> 
+IterValueType hSum(const Iter data_start,const Iter data_end)
+{
+  typedef IterValueType T;
+  T sum=mycast<T>(0);
+  Iter it=data_start;
+  while (it!=data_end) {sum+=*it; ++it;};
+  return sum;
+} 
+
+//Generate wrappers for STL Vectors, CASA Vectors, and Python(STLVectors)
+//------------------------------------------------------------------------
+PythonWrapper_TVecINC_0_Parameters(hSum);
+VecWrappers_TFunc_Vec_0_Parameters(hSum);
+//------------------------------------------------------------------------
+
+/*!
+  \brief Returns the mean value of all elements in a vector
+
+  \param data_start: STL Iterator pointing to the first element of an array with
+         input values.
+  \param data_end: STL Iterator pointing to the end of the input vector
+
+  (Could actually be realized as inline function ....)
+*/
+template <class Iter> 
+IterValueType hMean (const Iter data_start,const Iter data_end)
+{
+  typedef IterValueType T;
+  T mean=hSum(data_start,data_end);
+  if (data_end!=data_start) mean/=mycast<T>(data_end-data_start); 
+  //The cast is neccesary since my compiler refuses to divide a
+  //complex number (actually Casa?) by an integer - weird!
+  return mean;
+} 
+//Generate wrappers for STL Vectors, CASA Vectors, and Python(STLVectors)
+//------------------------------------------------------------------------
+PythonWrapper_TVecINC_0_Parameters(hMean);
+VecWrappers_TFunc_Vec_0_Parameters(hMean);
+//------------------------------------------------------------------------
+
+/*!  \brief Returns the median value of the elements in a
+  (scratch) vector. 
+
+  Attention!!! The vector will be sorted first. Hence, if you want to
+  keep the data in its original order, you need to copy the data first
+  to a scratch vector and then call this function with the scratch vector!
+
+  \param data_start: STL Iterator pointing to the first element of an array with
+         input values.
+  \param data_end: STL Iterator pointing to the end of the input vector
+
+*/
+template <class Iter> 
+IterValueType hMedian(const Iter data_start, const Iter data_end)
+{
+  address len2=mycast<address>(data_end-data_start)/2;
+  sort(data_start,data_end);
+  if (data_end!=data_start) return *(data_start+len2);
+  else return mycast<IterValueType>(0);
+} 
+//Generate wrappers for STL Vectors, CASA Vectors, and Python(STLVectors)
+//------------------------------------------------------------------------
+PythonWrapper_TVecINC_0_Parameters(hMedian);
+VecWrappers_TFunc_VecCopy_0_Parameters(hMedian);
+
+/*!  \brief Downsample the input vector to a smaller output vector, by
+     replacing subsequent blocks of values by their mean value. The
+     block size is automatically chosen such that the input vector
+     fits exactly into the output vector. All blocks have the same
+     length with a possible exception of the last block.
+
+
+  \param idata_start: Iterator pointing to the first element of an array with
+         input values.
+
+  \param idata_end: Iterator pointing to the end of the input vector
+
+  \param odata_start: Iterator pointing to the first element of an array
+         which will contain output values.
+
+  \param odata_end: Iterator pointing to the last element of an array
+         which will contain output values. The length of the output
+         vector should be smaller or equal to the input vector.
+
+
+*/
+
+template <class Iter> 
+void hDownsample (const Iter idata_start,
+		  const Iter idata_end,
+		  const Iter odata_start,
+		  const Iter odata_end)
+{
+  address ilen=(idata_end-idata_start);
+  address olen=(odata_end-odata_start);
+  address blen=max(ilen/(olen-1),0); 
+  //use max to avoid infinite loobs if output vector is too large
+  Iter it2,it1=idata_start;
+  Iter ito=odata_start;
+  while (it1!=idata_end) {
+    it2=min(it1+blen,idata_end);
+    *ito=hMean(it1,it2);
+    it1=it2; ++ito;
+  }
+}
 
 void dummy_instantitate_templates(){
   casa::Vector<HNumber> v;
