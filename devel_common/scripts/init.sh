@@ -26,6 +26,9 @@
 
 SYSTEM_NAME=`uname -s`
 
+# If not running interactively, don't do anything
+ [ -z "$PS1" ] && return
+ 
 ##______________________________________________________________________________
 ## Check for the existence of the LOFARSOFT  environment variable
 

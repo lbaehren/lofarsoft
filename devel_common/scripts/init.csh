@@ -26,6 +26,11 @@
 
 set SYSTEM_NAME = `uname -s`
 
+# If not running interactively, don't do anything
+if ( ! $?prompt ) then
+   exit 0
+endif
+
 ##______________________________________________________________________________
 ## Check for the existence of the LOFARSOFT  environment variable
 
