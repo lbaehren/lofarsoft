@@ -3,7 +3,7 @@
 project (MATPLOTLIB)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.8)
 
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the library from the provided source code, if no system
@@ -48,66 +48,31 @@ include (FindMatplotlib)
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_MATPLOTLIB OR MATPLOTLIB_FORCE_BUILD)
-  
-  ## ------------------------------------------------------------------------------
-  ## Locate the installation area
-  
-  find_path (MATPLOTLIB_prefix release_area.txt
-    PATHS
-    ${MATPLOTLIB_SOURCE_DIR}
-    PATH_SUFFIXES
-    ../release
-    ../../release
-    ../../../release
-    NO_DEFAULT_PATH
-    )
-  
-  if (NOT MATPLOTLIB_prefix)
-    message (FATAL_ERROR "Unable to locate the installation area")
-  endif (NOT MATPLOTLIB_prefix)
-  
-  ## ------------------------------------------------------------------------------
-  ## 
 
-  set (MATPLOTLIB_VERSION "0.98.5.3")
-  set (MATPLOTLIB_DIRECTORY "matplotlib-${MATPLOTLIB_VERSION}")
-  set (MATPLOTLIB_TAR_ARCHIVE "${MATPLOTLIB_DIRECTORY}.tar.gz")
+  include (ExternalProject)
   
-  find_file (have_matplotlib_tgz ${MATPLOTLIB_TAR_ARCHIVE} ${MATPLOTLIB_SOURCE_DIR})
-  find_program (tar_executable tar ${bin_locations})
-
-  if (have_matplotlib_tgz AND tar_executable)
-    
-    ## expand the tar-archive
-    add_custom_target (matplotlib_expand
-      COMMAND ${tar_executable} -xvzf ${have_matplotlib_tgz}
-      WORKING_DIRECTORY ${MATPLOTLIB_BINARY_DIR}
-      COMMENT "[Matplotlib] Expanding tar-archive ..."
+  find_file (have_matplotlib_tgz matplotlib-0.98.5.3.tar.gz ${MATPLOTLIB_SOURCE_DIR})
+  
+  if (have_matplotlib_tgz)
+    ExternalProject_Add (matplotlib
+      PREFIX ${MATPLOTLIB_BINARY_DIR}
+      DOWNLOAD_DIR ${MATPLOTLIB_BINARY_DIR}
+      SOURCE_DIR ${MATPLOTLIB_BINARY_DIR}
+      URL ${have_matplotlib_tgz}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${MATPLOTLIB_BINARY_DIR}/setup.py build
+      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${MATPLOTLIB_BINARY_DIR}/setup.py install --home=${USG_INSTALL_PREFIX}
       )
-    
-    ## build the package
-    add_custom_target (matplotlib_build
-      COMMAND ${PYTHON_EXECUTABLE} setup.py build
-      WORKING_DIRECTORY ${MATPLOTLIB_BINARY_DIR}/${MATPLOTLIB_DIRECTORY}
-      COMMENT "[Matplotlib] Starting build ..."
-      )
-    add_dependencies (matplotlib_build matplotlib_expand)
-    
-    ## build and install the package
-    add_custom_target (install
-      COMMAND ${PYTHON_EXECUTABLE} setup.py install --home=${USG_INSTALL_PREFIX}
-      COMMAND rm -rf ${MATPLOTLIB_BINARY_DIR}/*
-      WORKING_DIRECTORY ${MATPLOTLIB_BINARY_DIR}/${MATPLOTLIB_DIRECTORY}
-      COMMENT "[Matplotlib] Installing package ..."
-      )
-    add_dependencies (install matplotlib_build)
-    
-  else (have_matplotlib_tgz AND tar_executable)
-    message (STATUS "[Matplotlib] Unable to install - missing tar-archive!")
-  endif (have_matplotlib_tgz AND tar_executable)
+  else (have_matplotlib_tgz)
+    status (WARNING "[Matplotlib] Unable to build project - no sources found!")
+  endif (have_matplotlib_tgz)
   
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_MATPLOTLIB OR MATPLOTLIB_FORCE_BUILD)
-  message (STATUS "Found system-wide installation of MATPLOTLIB; skipping rebuild!")
+  add_custom_target (matplotlib
+    WORKING_DIRECTORY ${MATPLOTLIB_BINARY_DIR}
+    COMMENT "[Matplotlib] Found system-wide installation; skipping rebuild!"
+    )
+  message (STATUS "[Matplotlib] Found system-wide installation; skipping rebuild!")
 endif (NOT HAVE_MATPLOTLIB OR MATPLOTLIB_FORCE_BUILD)

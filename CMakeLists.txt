@@ -175,26 +175,17 @@ endif (svn_executable)
 ##
 ## ==============================================================================
 
-## Packages handled directly through CMake
-
-add_subdirectory (${USG_EXTERNAL}/swig)
-add_subdirectory (${USG_EXTERNAL}/itpp)
-
 ## Packages with build handled through shell script
 
 set (packages_external
   blas
-  blitz 
   boost
   casacore
   cfitsio
   hdf5
   mathgl
-  matplotlib
-  numeric
   numpy
   num_util
-  plplot
   pyrap
   qt
   root
@@ -217,6 +208,16 @@ endif (NOT flex_executable)
 if (NOT wget_executable)
   list (APPEND packages_external wget)
 endif (NOT wget_executable)
+
+## Packages handled directly through CMake
+
+add_subdirectory (${USG_EXTERNAL}/blitz)
+add_subdirectory (${USG_EXTERNAL}/matplotlib)
+add_subdirectory (${USG_EXTERNAL}/numeric)
+add_subdirectory (${USG_EXTERNAL}/plplot)
+add_subdirectory (${USG_EXTERNAL}/swig)
+add_subdirectory (${USG_EXTERNAL}/itpp)
+#add_subdirectory (${USG_EXTERNAL}/wcstools)
 
 ##____________________________________________________________________
 ## generic build instructions for the packages

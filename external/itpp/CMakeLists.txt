@@ -99,19 +99,23 @@ if (NOT HAVE_ITPP OR ITPP_FORCE_BUILD)
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_ITPP OR ITPP_FORCE_BUILD)
-  message (STATUS "Found system-wide installation of ITPP; skipping rebuild!")
+  message (STATUS "[IT++] Found system-wide installation; skipping rebuild!")
 endif (NOT HAVE_ITPP OR ITPP_FORCE_BUILD)
 
 ## ------------------------------------------------------------------------------
 ## Configuration summary
 
-message ("--------------------------------------------------")
-message ("   [IT++] Configuration summary.")
-message (" ")
-message (STATUS "C++ compiler    = ${CMAKE_CXX_COMPILER}")
-message (STATUS "BLAS library    = ${LAPACK_BLAS_LIBRARY}")
-message (STATUS "CBLAS library   = ${LAPACK_CBLAS_LIBRARY}")
-message (STATUS "LAPACK library  = ${LAPACK_LAPACK_LIBRARY}")
-message (STATUS "FFTW3_INCLUDES  = ${FFTW3_INCLUDES}")
-message (STATUS "FFTW3_LIBRARIES = ${FFTW3_LIBRARIES}")
-message ("--------------------------------------------------")
+if (ITPP_VERBOSE_CONFIGURE) 
+
+  message ("--------------------------------------------------")
+  message ("   [IT++] Configuration summary.")
+  message (" ")
+  message (STATUS "C++ compiler    = ${CMAKE_CXX_COMPILER}")
+  message (STATUS "BLAS library    = ${LAPACK_BLAS_LIBRARY}")
+  message (STATUS "CBLAS library   = ${LAPACK_CBLAS_LIBRARY}")
+  message (STATUS "LAPACK library  = ${LAPACK_LAPACK_LIBRARY}")
+  message (STATUS "FFTW3_INCLUDES  = ${FFTW3_INCLUDES}")
+  message (STATUS "FFTW3_LIBRARIES = ${FFTW3_LIBRARIES}")
+  message ("--------------------------------------------------")
+
+endif (ITPP_VERBOSE_CONFIGURE)

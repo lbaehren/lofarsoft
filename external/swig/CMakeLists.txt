@@ -10,9 +10,9 @@ cmake_minimum_required (VERSION 2.8)
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (SWIG_FORCE_BUILD       "Force rebuild and local installation?"  NO  )
-option (SWIG_VERBOSE_CONFIGURE "Be verbose during configuration?"       YES )
-option (SWIG_VERBOSE_BUILD     "Be verbose during build process?"       NO  )
+option (SWIG_FORCE_BUILD       "Force rebuild and local installation?"  NO )
+option (SWIG_VERBOSE_CONFIGURE "Be verbose during configuration?"       NO )
+option (SWIG_VERBOSE_BUILD     "Be verbose during build process?"       NO )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -118,5 +118,5 @@ if (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)
 ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)
-  message (STATUS "Found system-wide installation of Swig; skipping rebuild!")
+  message (STATUS "[Swig] Found system-wide installation; skipping rebuild!")
 endif (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)

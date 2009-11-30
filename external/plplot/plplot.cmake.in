@@ -41,6 +41,6 @@ set (BUILD_TEST ON CACHE BOOL "Build test programs?")
 ##_______________________________________________________________________________
 ## Installation
 
-set (CMAKE_INSTALL_PREFIX       ${PLPLOT_prefix}  CACHE  PATH  "Installation prefix" FORCE) 
-set (CMAKE_INSTALL_EXEC_PREFIX  ${PLPLOT_prefix}  CACHE  PATH  "Installation prefix" FORCE)
-set (PYTHON_INSTDIR             ${PLPLOT_prefix}/lib/python CACHE PATH "Python prefix" FORCE)
+set (CMAKE_INSTALL_PREFIX       ${USG_INSTALL_PREFIX}  CACHE  PATH  "Installation prefix" FORCE) 
+set (CMAKE_INSTALL_EXEC_PREFIX  ${USG_INSTALL_PREFIX}  CACHE  PATH  "Installation prefix" FORCE)
+set (PYTHON_INSTDIR             ${USG_INSTALL_PREFIX}/lib/python CACHE PATH "Python prefix" FORCE)
