@@ -11,6 +11,8 @@ or
 python
 execfile("hfget.py")
 */
+#define HF_PP_FILETYPE PYTHON // Tell the preprocessor (for generating wrappers) that this is a c++ source code file //DOES NOT WORK with CAT need to do it manually
+#define HF_PP_GENERATE_WRAPPERS HF_PP_GENERATE_WRAPPERS_PYTHON
 
 
 #define hPyExposeINCS(FUNC)  def(#FUNC,FUNC##_I);def(#FUNC,FUNC##_N);def(#FUNC,FUNC##_C);def(#FUNC,FUNC##_S)
@@ -424,9 +426,11 @@ boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_i
  def("hRunningAverage",hRunningAverageVec_C);
  def("hWeights",hWeights);
 
+ // hPyExposeINCS(hMean);
+#include "hfanalysis.cc.h"
+
  hPyExposeINCS(hNegate);
  hPyExposeINCS(hSum);
- hPyExposeINCS(hMean);
  hPyExposeINCS(hMedian);
  hPyExposeINCS(hFill);
  hPyExposeINCS(hReadFile);
@@ -480,3 +484,7 @@ def("pytst",pytst);
     // Compile check only...
 }
     */
+
+#ifndef HF_PP_GENERATE_WRAPPERS
+#undef HF_PP_GENERATE_WRAPPERS 
+#endif

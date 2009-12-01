@@ -3,6 +3,8 @@
 
 #include <mgl/mgl_qt.h>
 
+#include <GUI/Data.h>
+
 #define F_PARAMETERS        vector<T> *vp, Data *dp, Vector_Selector *vs
 #define F_PARAMETERS_NOVEC                 Data *dp, Vector_Selector *vs                       
 #define F_PARAMETERS_DEF    vector<T> *vp; Data *dp; Vector_Selector *vs
@@ -39,9 +41,11 @@
   void process_S(F_PARAMETERS_T(HString) ) {process(F_PARAMETERS_CALL_NOVEC);process_end();}
 
 
+/*
 void qrun(MainWindow **label);
 void qrun2(QLabel **label);
 void mglrun(mglGraphQT **mglwin);
+*/
 
 /*------------------------------------------------------------------------
 Some file utilities

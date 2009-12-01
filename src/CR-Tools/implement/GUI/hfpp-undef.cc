@@ -1,5 +1,10 @@
+#ifdef HF_PP_FUNCTYPE_T
+#undef HF_PP_FUNCTYPE_T
+#endif
+
 #undef HF_PP_FUNCNAME
 #undef HF_PP_FUNCTYPE
+#undef HF_PP_FUNCBRIEF
 
 #undef HF_PP_NVECS
 #undef HF_PP_NPAR

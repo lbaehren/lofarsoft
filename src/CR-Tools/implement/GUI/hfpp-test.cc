@@ -4,6 +4,8 @@ test with
 
 gcc -E -I/Users/falcke/LOFAR/usg/release/include hfpp-test.cc | gawk '/^#/{next} /^[ ]*$/{next} {print}'
 
+or for an actual file 
+gcc -E -I/Users/falcke/LOFAR/usg/release/include -I/Users/falcke/LOFAR/usg/src/CR-Tools/implement hfanalysis.cc | gawk '/^#/{next} /^[ ]*$/{next} {print}' > tst
 
 Bug fixes:
 /Users/falcke/LOFAR/usg/release/include/boost/preprocessor/seq/first_n.hpp:17:52: error: boost/preprocessor/seq/detail/split.hpp: No such file or directory
@@ -13,19 +15,20 @@ change to: #include <boost/preprocessor/detail/split.hpp>
 
 */
 //--------------------------------------------------------------------------------
-#include <GUI/hfprep.hpp>
+#include "hfpp.h"
+#define HF_PP_FILETYPE CC  // Tell the preprocessor that this is a c++ source code file
+//#define HF_PP_FILETYPE hFILE  // Tell the preprocessor that this is a header file
+//#define HF_PP_FILETYPE hPYTHON  // Tell the preprocessor that this is a header file for Python expose
 // --------------------------------------------------------------------------------
-// kept the two files in one for testing. Later the part below until
-// "END hfprep.hpp" should be put in a separate file
-
-
 
 //--------------------------------------------------------------------------------
 //Now define actual functions
 //--------------------------------------------------------------------------------
-#include "hfpp-undef.cc"
+
+
 //$FILENAME: HFILE=$SELF.h
-//$WRITE_TO HFILE START:
+//$COPY_TO HFILE START:
+#include "hfpp-undef.cc"
 #define HF_PP_FUNCNAME TEST  //The Name of the function
 #define HF_PP_FUNCTYPE void  //Return value type of function
 #define HF_PP_NVECS 2 //Number of (input/output) vectors
@@ -46,15 +49,14 @@ does something like
 return TEST( vec0.begin(),vec0.end() , vec1.begin(),vec1.end(), var_a , var_b , var_c)
 return TEST( vec0.cbegin(),vec0.cend() , vec1.cbegin(),vec1.cend(), var_a , var_b , var_c)
 */
+HF_PP_PYTHON_EXPOSE
+HF_PP_GENERATE_WRAPPERS 
+//$COPY_TO HFILE END --------------------------------------------------
 
-//$WRITE_TO HFILE: HF_PP_GENERATE_WRAPPERS_hFILE 
-/*Now undefine the definitions above*/
+//$COPY_TO HFILE START --------------------------------------------------
 #include "hfpp-undef.cc"
-//$WRITE_TO HFILE END --------------------------------------------------
-
-//$COPY_TO_HFILE START --------------------------------------------------
 #define HF_PP_FUNCNAME FOO  //The Name of the function
-#define HF_PP_FUNCTYPE HInteger  //Return value type of function
+#define HF_PP_FUNCTYPE_T 1  //Return value type of function is templated with type T of vector
 #define HF_PP_NVECS 1 //Number of (input/output) vectors
 
 #define HF_PP_PAR0 (para,HInteger,128,"Parameter A")  //Definition of one input parameter
@@ -64,6 +66,5 @@ return TEST( vec0.cbegin(),vec0.cend() , vec1.cbegin(),vec1.cend(), var_a , var_
 #define HF_PP_VEC_WRAPPER_CODE_CASA return HF_PP_FUNCNAME(HF_PP_PAR_VECTORITERATORS(CASA),HF_PP_PAR_PARAMETERS)
 
 HF_PP_GENERATE_WRAPPERS 
-#include "hfpp-undef.cc"
-//$COPY_TO_HFILE END --------------------------------------------------
+//$COPY_TO HFILE END --------------------------------------------------
 

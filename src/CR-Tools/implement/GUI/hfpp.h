@@ -8,17 +8,26 @@
 #include <boost/preprocessor/enum.hpp>
 #include <boost/preprocessor/tuple.hpp>
 #include <boost/preprocessor/repeat.hpp>
+#include <boost/preprocessor/comparison/equal.hpp>
 
 //Defines datatypes to iterate wrappers over
 #define HF_PP_NUMERIC_TYPES (HInteger)(HNumber)(HComplex)
-#define HF_PP_NON_NUMERIC_TYPES (HPointer)(HString)
+#define HF_PP_STRING_TYPES (HString)
+#define HF_PP_POINTER_TYPES (HPointer)
+#define HF_PP_NON_NUMERIC_TYPES HF_PP_STRING_TYPES HF_PP_POINTER_TYPES 
 #define HF_PP_ALL_TYPES HF_PP_NUMERIC_TYPES HF_PP_NON_NUMERIC_TYPES
+#define HF_PP_ALL_PYTHONTYPES HF_PP_NUMERIC_TYPES HF_PP_STRING_TYPES
 
 
 /*
 
 Here is an example input template to generate wrappers for a function
-//$FILENAME: HFILE=$SELF.h
+//$FILENAME: HFILE=$SELF.h  // This the outputfile that the awk splitter will write source code to
+
+#define HF_PP_FILETYPE CC  // Tell the preprocessor that this is a c++ source code file
+//#define HF_PP_FILETYPE hFILE  // Tell the preprocessor that this is a header file
+//#define HF_PP_FILETYPE hPYTHON  // Tell the preprocessor that this is a header file for Python expose
+
 //$WRITE_TO HFILE START:
 #define HF_PP_FUNCNAME TEST  //The Name of the function
 #define HF_PP_FUNCTYPE void  //Return value type of function
@@ -48,6 +57,11 @@ Here is an example input template to generate wrappers for a function
 
 */
 
+//This is a simple trick to test whether a specific variable is set to true or not at all (=false)
+#define HF_PP_IS_SET_TESTHF_PP_FUNCTYPE_T 0
+#define HF_PP_IS_SET_TEST1 1
+#define HF_PP_IS_SET_TEST0 0
+#define HF_PP_IS_SET(WAT) BOOST_PP_CAT(HF_PP_IS_SET_TEST,WAT)
 
 //generate the name of the Nth vector (e.g. vec0 for N=0) 
 #define HF_PP_VECTORNAME(NMAX,N,data) BOOST_PP_CAT(vec,N)
@@ -86,11 +100,13 @@ will give
 //Gives a list of the c++ definitions of all (i.e. N=NPAR) scalar parameters
 #define HF_PP_DEF_PARAMETERS BOOST_PP_ENUM(HF_PP_NPAR,HF_PP_DEF_PARAMETER_N,T)
 #define HF_PP_PAR_PARAMETERS BOOST_PP_ENUM(HF_PP_NPAR,HF_PP_PAR_PARAMETER_N,T)
+//Adds a preceding comma to the parameterlist if nonzero so that this can be concatenated with another parameterlist
+#define HF_PP_PAR_PARAMETERS_COMMA BOOST_PP_COMMA_IF(HF_PP_NPAR) HF_PP_PAR_PARAMETERS
 
 //Create the entire parameter list consisting of the defintions of vectors and the other parameters
 //HF_PP_PAR_PARLIST will give the list without the type definition
 #define HF_PP_DEF_PARLIST(T,VECTYPE) HF_PP_DEF_VECTORLIST(T,HF_PP_NVECS,VECTYPE) BOOST_PP_COMMA_IF(HF_PP_NPAR) HF_PP_DEF_PARAMETERS
-#define HF_PP_PAR_PARLIST(T,VECTYPE) HF_PP_PAR_VECTORLIST(HF_PP_NVECS) BOOST_PP_COMMA_IF(HF_PP_NPAR) HF_PP_PAR_PARAMETERS
+#define HF_PP_PAR_PARLIST(T,VECTYPE) HF_PP_PAR_VECTORLIST(HF_PP_NVECS) HF_PP_PAR_PARAMETERS_COMMA
 /*
 
 HF_PP_DEF_PARLIST(T,STL)
@@ -116,13 +132,17 @@ for formal reasons (i.e. typically HString and HPointer functions).
 
  */
 //Definitions and initialization of the external variables which hold the pointer to the functions to be exposed to Python
-#define HF_PP_PYTHON_WRAPPER_CODE(NIL,FUNC,T) HF_PP_FUNCTYPE (*BOOST_PP_CAT(FUNC,T))(HF_PP_DEF_PARLIST(T,STL)) = &FUNC; 
-#define HF_PP_PYTHON_WRAPPER_DUMMY_CODE(R,FUNC,T) HF_PP_FUNCTYPE FUNC (HF_PP_DEF_PARLIST(T,STL)) {}
+#define HF_PP_GET_FUNCTYPE(TYPE) BOOST_PP_IF(HF_PP_IS_SET(HF_PP_FUNCTYPE_T),TYPE,HF_PP_FUNCTYPE)
+#define HF_PP_PYTHON_WRAPPER_CODE(NIL,FUNC,TYPE) HF_PP_GET_FUNCTYPE(TYPE) (*BOOST_PP_CAT(FUNC,TYPE))(HF_PP_DEF_PARLIST(TYPE,STL)) = &FUNC; 
+#define HF_PP_PYTHON_WRAPPER_DUMMY_CODE(NIL,FUNC,TYPE) HF_PP_GET_FUNCTYPE(TYPE) FUNC (HF_PP_DEF_PARLIST(TYPE,STL)) {}
 #define HF_PP_MAKE_PYTHON_WRAPPERS(FUNC,TYPE_LIST) BOOST_PP_SEQ_FOR_EACH(HF_PP_PYTHON_WRAPPER_CODE,FUNC,TYPE_LIST)
 #define HF_PP_MAKE_PYTHON_WRAPPERS_DUMMY(FUNC,TYPE_LIST) BOOST_PP_SEQ_FOR_EACH(HF_PP_PYTHON_WRAPPER_DUMMY_CODE,FUNC,TYPE_LIST)
 
+#define HF_PP_PYTHON_EXPOSE_CODE(NIL,FUNC,TYPE) def(#FUNC,BOOST_PP_CAT(FUNC,TYPE));
+#define HF_PP_PYTHON_EXPOSE BOOST_PP_SEQ_FOR_EACH(HF_PP_PYTHON_EXPOSE_CODE,HF_PP_FUNCNAME,HF_PP_ALL_PYTHONTYPES)
+
 //Generate the defintions of the external variables which hold the pointer to the functions to be exposed to Python - to be included in the hFILE
-#define HF_PP_PYTHON_WRAPPER_CODE_hFILE(NIL,FUNC,T) extern HF_PP_FUNCTYPE (*BOOST_PP_CAT(FUNC,T))(HF_PP_DEF_PARLIST(T,STL)); 
+#define HF_PP_PYTHON_WRAPPER_CODE_hFILE(NIL,FUNC,T) extern HF_PP_GET_FUNCTYPE(T) (*BOOST_PP_CAT(FUNC,T))(HF_PP_DEF_PARLIST(T,STL)); 
 #define HF_PP_MAKE_PYTHON_WRAPPERS_hFILE BOOST_PP_SEQ_FOR_EACH(HF_PP_PYTHON_WRAPPER_CODE_hFILE,HF_PP_FUNCNAME,HF_PP_ALL_TYPES)
 
 /*
@@ -135,8 +155,9 @@ extern void (*TESTHInteger)( vector<HInteger> & vec0 , vector<HInteger> & vec1 ,
 
 
 #define HF_PP_NUM_PYTHON_WRAPPERS \
-  HF_PP_MAKE_PYTHON_WRAPPERS(HF_PP_FUNCNAME,HF_PP_NUMERIC_TYPES) \
-  HF_PP_MAKE_PYTHON_WRAPPERS_DUMMY(HF_PP_FUNCNAME,HF_PP_NON_NUMERIC_TYPES) 
+  HF_PP_MAKE_PYTHON_WRAPPERS_DUMMY(HF_PP_FUNCNAME,HF_PP_NON_NUMERIC_TYPES) \
+  HF_PP_MAKE_PYTHON_WRAPPERS(HF_PP_FUNCNAME,HF_PP_ALL_TYPES)
+
 /*
 HF_PP_NUM_PYTHON_WRAPPERS
 
@@ -147,22 +168,24 @@ void (*TESTHInteger)( vector<HInteger> & vec0 , vector<HInteger> & vec1 , HInteg
 */
 
 #define HF_PP_VEC_WRAPPERS\
-  template <class T> inline HF_PP_FUNCTYPE HF_PP_FUNCNAME(HF_PP_DEF_PARLIST(T,STL)) {HF_PP_VEC_WRAPPER_CODE_STL;} \
-  template <class T> inline HF_PP_FUNCTYPE HF_PP_FUNCNAME(HF_PP_DEF_PARLIST(T,CASA)) {HF_PP_VEC_WRAPPER_CODE_CASA;} 
+  template <class T> inline HF_PP_GET_FUNCTYPE(T) HF_PP_FUNCNAME(HF_PP_DEF_PARLIST(T,STL)) {HF_PP_VEC_WRAPPER_CODE_STL;} \
+  template <class T> inline HF_PP_GET_FUNCTYPE(T) HF_PP_FUNCNAME(HF_PP_DEF_PARLIST(T,CASA)) {HF_PP_VEC_WRAPPER_CODE_CASA;} 
 
 #define HF_PP_VEC_WRAPPERS_hFILE\
-  template <class T> inline HF_PP_FUNCTYPE HF_PP_FUNCNAME (HF_PP_DEF_PARLIST(T,STL)); \
-  template <class T> inline HF_PP_FUNCTYPE HF_PP_FUNCNAME (HF_PP_DEF_PARLIST(T,CASA)); 
+  template <class T> inline HF_PP_GET_FUNCTYPE(T) HF_PP_FUNCNAME (HF_PP_DEF_PARLIST(T,STL)); \
+  template <class T> inline HF_PP_GET_FUNCTYPE(T) HF_PP_FUNCNAME (HF_PP_DEF_PARLIST(T,CASA)); 
 
-#define HF_PP_GENERATE_WRAPPERS \
-HF_PP_NUM_PYTHON_WRAPPERS \
-HF_PP_VEC_WRAPPERS
-
+#define HF_PP_GENERATE_WRAPPERS_CC HF_PP_NUM_PYTHON_WRAPPERS HF_PP_VEC_WRAPPERS
 #define HF_PP_GENERATE_WRAPPERS_hFILE HF_PP_VEC_WRAPPERS_hFILE HF_PP_MAKE_PYTHON_WRAPPERS_hFILE
+#define HF_PP_GENERATE_WRAPPERS_PYTHON HF_PP_PYTHON_EXPOSE
+
+//Choose the correct wrapper appropriate for the current type of file (.cc, .h, python exposer)
+//#define HF_PP_GENERATE_WRAPPERS_FILE(TYPE) BOOST_PP_CAT(TYPE,_HF_PP_GENERATE_WRAPPERS)
+//#define HF_PP_GENERATE_WRAPPERS_FILE(TYPE) TYPE##_HF_PP_GENERATE_WRAPPERS
+//#define HF_PP_GENERATE_WRAPPERS HF_PP_GENERATE_WRAPPERS_FILE(HF_PP_FILETYPE) 
 
 //--------------------------------------------------------------------------------
-// END hfpp.hpp
+// END hfpp.h
 //--------------------------------------------------------------------------------
-
 
 #endif

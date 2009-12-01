@@ -11,43 +11,14 @@
 //using casa::Array;
 
 using namespace std;
-#include <boost/python/class.hpp>
-#include <boost/python/module.hpp>
-#include <boost/python/def.hpp>
-
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include <boost/python/implicit.hpp>
-#include <boost/python/enum.hpp>
-#include <boost/python/overloads.hpp>
-#include <boost/python/args.hpp>
-#include <boost/python/tuple.hpp>
-#include <boost/python/class.hpp>
-#include <boost/python/return_internal_reference.hpp>
-#include <boost/python/operators.hpp>
-#include <boost/python/object_operators.hpp>
-#include <boost/thread/thread.hpp>
-
-#include <casa/string.h>
-#include <casa/Arrays.h>
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/ArrayMath.h>
-#include <casa/Arrays/IPosition.h>
-#include <casa/Arrays/Matrix.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/BasicSL/Complex.h>
-#include <casa/BasicSL/Constants.h>
 
 
-#include <GUI/hfdefs.h>
-#include <GUI/hfcast.h> 
-#include <GUI/hfget.h>
 #include <GUI/hfanalysis.h>
-#include <GUI/hffuncs.awk.h>  
-#include <crtools.h>
 
-#include "Data/LopesEventIn.h"
-#include "Data/LOFAR_TBB.h"
-#include "dal/TBB_Timeseries.h"
+//Some definitions needed for the preprosessor programming
+//$FILENAME: HFILE=$SELF.h  // Split awk output to this filename plus .h
+#define HF_PP_FILETYPE CC  // Tell the preprocessor (for generating wrappers) that this is a c++ source code file //DOES NOT WORK with CAT need to do it manually
+#define HF_PP_GENERATE_WRAPPERS HF_PP_GENERATE_WRAPPERS_CC
 
 /* Some explanations...
 
@@ -70,9 +41,6 @@ CasaVector<HInteger> OffsetsCasa(shape,storage,casa::SHARE);
 //Needed to create a Python wrapper for a function of a templated STL
 //vector of Integer, Number, Complex, and String type containing 0
 //extra parameters
-
-
-
 
 
 #define PythonWrapper_VecINCS_0_Parameters(FUNC) \
@@ -764,11 +732,25 @@ IterValueType hSum(const Iter data_start,const Iter data_end)
   return sum;
 } 
 
+
+
 //Generate wrappers for STL Vectors, CASA Vectors, and Python(STLVectors)
 //------------------------------------------------------------------------
 PythonWrapper_TVecINC_0_Parameters(hSum);
 VecWrappers_TFunc_Vec_0_Parameters(hSum);
 //------------------------------------------------------------------------
+
+//$COPY_TO HFILE START --------------------------------------------------
+#include "hfpp-undef.cc"
+#define HF_PP_FUNCNAME hMean  //The Name of the function
+#define HF_PP_FUNCBRIEF "Returns the mean value of all elements in a vector"
+#define HF_PP_FUNCTYPE_T 1     //Return value type of function is templated with T
+#define HF_PP_NVECS 1 //Number of (input/output) vectors
+#define HF_PP_NPAR 0  //Number of other parameters
+#define HF_PP_VEC_WRAPPER_CODE_STL return HF_PP_FUNCNAME(HF_PP_PAR_VECTORITERATORS(STL) HF_PP_PAR_PARAMETERS_COMMA)
+#define HF_PP_VEC_WRAPPER_CODE_CASA return HF_PP_FUNCNAME(HF_PP_PAR_VECTORITERATORS(CASA) HF_PP_PAR_PARAMETERS_COMMA)
+HF_PP_GENERATE_WRAPPERS
+//$COPY_TO END --------------------------------------------------
 
 /*!
   \brief Returns the mean value of all elements in a vector
@@ -777,7 +759,6 @@ VecWrappers_TFunc_Vec_0_Parameters(hSum);
          input values.
   \param data_end: STL Iterator pointing to the end of the input vector
 
-  (Could actually be realized as inline function ....)
 */
 template <class Iter> 
 IterValueType hMean (const Iter data_start,const Iter data_end)
@@ -789,11 +770,9 @@ IterValueType hMean (const Iter data_start,const Iter data_end)
   //complex number (actually Casa?) by an integer - weird!
   return mean;
 } 
-//Generate wrappers for STL Vectors, CASA Vectors, and Python(STLVectors)
-//------------------------------------------------------------------------
-PythonWrapper_TVecINC_0_Parameters(hMean);
-VecWrappers_TFunc_Vec_0_Parameters(hMean);
-//------------------------------------------------------------------------
+
+
+
 
 /*!  \brief Returns the median value of the elements in a
   (scratch) vector. 

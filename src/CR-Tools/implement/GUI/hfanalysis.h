@@ -1,6 +1,27 @@
 #ifndef HFANALYSIS_H
 #define HFANALYSIS_H
 
+#include <casa/string.h>
+#include <casa/Arrays.h>
+#include <casa/Arrays/Array.h>
+#include <casa/Arrays/ArrayMath.h>
+#include <casa/Arrays/IPosition.h>
+#include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/BasicSL/Complex.h>
+#include <casa/BasicSL/Constants.h>
+
+
+#include <GUI/hfdefs.h>
+#include <GUI/hfcast.h> 
+#include <GUI/hffuncs.awk.h>  
+#include <crtools.h>
+
+#include "Data/LopesEventIn.h"
+#include "Data/LOFAR_TBB.h"
+
+#include <GUI/hfpp.h>
+
 //========================================================================
 //End Preprocessor Definitions
 //========================================================================
@@ -10,6 +31,10 @@
 #define STLVectorIteratorN typename vector<HNumber>::iterator
 #define STLVectorIteratorC typename vector<HComplex>::iterator
 #define IterValueType typename Iter::value_type
+
+#define HF_PP_FILETYPE hFILE // Tell the preprocessor (for generating wrappers) that this is a c++ source code file //DOES NOT WORK with CAT need to do it manually
+#define HF_PP_GENERATE_WRAPPERS HF_PP_GENERATE_WRAPPERS_hFILE
+#include "hfanalysis.cc.h"
 
 #define DefPythonWrapper_VecINCS_0_Parameters(FUNC) \
   void FUNC (vector<HPointer > &vec);		    \
@@ -138,11 +163,15 @@ typename Iter::value_type hSum(const Iter data_start, const Iter data_end);
 DefVecWrappers_TFunc_Vec_0_Parameters(hSum);
 DefPythonWrapper_TVecINC_0_Parameters(hSum);
 
+
 //! Returns the mean value of all elements in a vector
-template <class Iter> 
+/*template <class Iter> 
 typename Iter::value_type hMean(const Iter data_start, const Iter data_end);
 DefVecWrappers_TFunc_Vec_0_Parameters(hMean);
 DefPythonWrapper_TVecINC_0_Parameters(hMean);
+*/
+
+
 
 //! Returns the median value of all elements in a vector
 template <class Iter> 
@@ -159,4 +188,11 @@ extern void (*hRunningAverageVec_I_2)(vector<HInteger> &vec_in,vector<HInteger> 
 extern void (*hRunningAverageVec_C_2)(vector<HComplex> &vec_in,vector<HComplex> &vec_out);
 */
 
+#endif
+
+#ifdef HF_PP_GENERATE_WRAPPERS
+#undef HF_PP_GENERATE_WRAPPERS 
+#endif
+#ifdef HF_PP_FILETYPE
+#undef HF_PP_FILETYPE
 #endif
