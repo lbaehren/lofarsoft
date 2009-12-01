@@ -69,10 +69,18 @@ else (NOT HAVE_FINK OR FINK_FORCE_BUILD)
 endif (NOT HAVE_FINK OR FINK_FORCE_BUILD)
 
 ## ------------------------------------------------------------------------------
+## Check code tree settings
+
+# test -r /sw/bin/init.sh && . /sw/bin/init.sh
+
+# Trees: local/main stable/main stable/crypto unstable/main unstable/crypto
+
+## ------------------------------------------------------------------------------
 ## Install Fink packages
 
 if (HAVE_FINK)
   add_custom_target (fink_packages
+    COMMAND ${HAVE_FINK} selfupdate
     COMMAND ${HAVE_FINK} install atlas
     COMMAND ${HAVE_FINK} install bison
     COMMAMD ${HAVE_FINK} install doxygen
