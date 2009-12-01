@@ -14,13 +14,14 @@
 
 import csv
 from mathgl import *
-import numpy
+#import numpy
 import sys
 from math import *
 
 numberOfRCUsperStation = 96;
 mglGraphPS = 1
 timeWindowForCoincidence = 10000 # window for coincident pulse in samples
+#totalNumberOfTriggers = 0
 
 # keys for our trigger dictionary; separate lists for some of the statistics
 RCUnrKey = 'RCUnr';             RCUnr = [] 
@@ -83,19 +84,25 @@ def listOfTimeDifferences(listOfTriggers, rcu):
             print str(i) + ': ' + str(diff)
             lastTime = thisTime + float(thisSample / 200.0e6)
 
-def readTriggerListFromCSVFile(filename):
+def readTriggerListFromCSVFile(filename): # directly make histogram, not making triggerList
     myKeys = [RCUnrKey, seqnrKey, timeKey, sampleKey, sumKey, nrSamplesKey, peakKey, powerBeforeKey, powerAfterKey]
     triggerReader = csv.DictReader(open(fileName), myKeys, delimiter=' ')
-    numTriggers = triggerReader.line_num # trigger records don't span multiple lines
-
-    triggerList = []
+   # numTriggers = triggerReader.line_num # trigger records don't span multiple lines
+   # print numTriggers
+#    triggerList = []
+    rcuCount = [0] * numberOfRCUsperStation; # creates a list of 96 zeros
+    
     for record in triggerReader:
         thisTime = int(record[timeKey])
         if thisTime < 2.2e9: # Unix timestamps are signed ints, and they don't go that far...
-            triggerList.append(record)
+#            triggerList.append(record)
+            thisRCU = int(record[RCUnrKey])
+            rcuCount[thisRCU] += 1
         else:
             print 'Invalid timestamp! ' + str(thisTime)
-    return triggerList        
+    totalNumberOfTriggers = triggerReader.line_num
+    print totalNumberOfTriggers
+    return rcuCount        
     
 def makeListsPerKey(triggerList): # makes globals, which is not good
     for record in triggerList:
@@ -175,9 +182,11 @@ def timeSpanInMinutes(triggerList): # also fractional minutes
         minutes = 1.0 / 60 # avoid div by zero
     return minutes
           
-def makeTriggersVersusRCUHistogram(triggerList): # also uses RCUnr global input
-    (y, x) = RCUhisto = numpy.histogram(RCUnr, 96, (0, 96)) # (counts, bins) comes out
-
+def makeTriggersVersusRCUHistogram(rcuCount): # also uses RCUnr global input
+#    (y, x) = RCUhisto = numpy.histogram(RCUnr, 96, (0, 96)) # (counts, bins) comes out
+    print totalNumberOfTriggers
+    x = range(96)
+    y = rcuCount
     maxY = max(y)
     maxX = max(x)
     #y = 1000.0 * y / max(y)
@@ -208,7 +217,7 @@ def makeTriggersVersusRCUHistogram(triggerList): # also uses RCUnr global input
     graph.Puts(float(maxX) * 0.5, float(maxY) * 1.15, 0, "Number of triggers versus RCU number")
     graph.SetFontSize(3.0) # Work-around for MathGL 1.9 bug in mglGraph.Title()
 
-    graph.Puts(float(maxX) * 0.5,float(maxY)*1.05,0,"Total trigger count = " + str(len(triggerList)))
+    graph.Puts(float(maxX) * 0.5,float(maxY)*1.05,0,"Total trigger count = " + str(totalNumberOfTriggers) )
     graph.Label("x","RCU number",1)
     graph.Label("y","Counts",1)
     graph.Bars(gY);
@@ -446,23 +455,23 @@ def makeBinnedTimeSeriesOfTriggers(triggerList): # works on global 'time' list
 
 def runFullAnalysis():
     print "Reading trigger list..."
-    triggerList = readTriggerListFromCSVFile(fileName)
-    print "Making lists per key..."
-    makeListsPerKey(triggerList)
+    rcuCount = readTriggerListFromCSVFile(fileName)
+  #  print "Making lists per key..."
+   # makeListsPerKey(triggerList)
     print "Making triggers versus RCU histogram..."
-    makeTriggersVersusRCUHistogram(triggerList)
-    print "Sorting trigger list..."
-    sortedTriggerList = sortedTriggerListByTimeAndSample(triggerList)
-    print "Making coincident pulse list..."
-    pulseIndices = coincidentPulseIndicesInTriggerList(sortedTriggerList, timeWindowForCoincidence)
-    print "Making numer of RCUs per pulse plot..."
-    makeNumberOfRCUsPerPulsePlot(sortedTriggerList, pulseIndices)
+    makeTriggersVersusRCUHistogram(rcuCount)
+ #   print "Sorting trigger list..."
+ #   sortedTriggerList = sortedTriggerListByTimeAndSample(triggerList)
+ #   print "Making coincident pulse list..."
+ #   pulseIndices = coincidentPulseIndicesInTriggerList(sortedTriggerList, timeWindowForCoincidence)
+ #   print "Making numer of RCUs per pulse plot..."
+ #   makeNumberOfRCUsPerPulsePlot(sortedTriggerList, pulseIndices)
     
     #makeHistogramOfTotalSumInPulses(sortedTriggerList, pulseIndices)
-    print "Making binned time-series of triggers..."
-    makeBinnedTimeSeriesOfTriggers(triggerList)
-    print "Making triggers versus threshold plot..."
-    makeTriggersVersusThresholdPlot(triggerList)
+ #   print "Making binned time-series of triggers..."
+ #   makeBinnedTimeSeriesOfTriggers(triggerList)
+ #   print "Making triggers versus threshold plot..."
+ #   makeTriggersVersusThresholdPlot(triggerList)
 
 # main
 runFullAnalysis()
