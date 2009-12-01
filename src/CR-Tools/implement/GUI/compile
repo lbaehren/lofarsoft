@@ -2,10 +2,10 @@
 
 MYDIR=$PWD
 cd $LOFARSOFT/src/CR-Tools/implement/GUI
-./hfprep
+#./hfprep
 cd $LOFARSOFT/build/cr
 
 make hfget
-cp implement/libhfget.so ../../release/lib/python
-cp implement/libhfget.so ../../release/lib/
+#cp implement/libhfget.so ../../release/lib/python
+#cp implement/libhfget.so ../../release/lib/
 cd $MYDIR

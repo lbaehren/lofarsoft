@@ -46,7 +46,7 @@ using namespace std;
 #include <GUI/hfdefs.h>
 #include <GUI/hfcast.h> 
 #include <GUI/hfget.h>
-#include <GUI/hffuncs.awk.h">  
+#include <GUI/hffuncs.awk.h>
 #include <GUI/hfanalysis.h>  
 #include <crtools.h>
 

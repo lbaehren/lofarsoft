@@ -111,12 +111,13 @@ CasaVector<HInteger> OffsetsCasa(shape,storage,casa::SHARE);
   void (*FUNC##_P)(vector<HPointer > &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8) = &FUNC; \
   void (*FUNC##_S)(vector<HString > &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8) = &FUNC
 
-#define VecWrappers_TFunc_Vec_0_Parameters(FUNC)			\
-  template <class T> inline T FUNC(vector<T> &vec) {return FUNC(vec.begin(),vec.end());} \
-  template <class T> inline T FUNC(casa::Vector<T> &vec) {return FUNC(vec.cbegin(),vec.cend());} 
 #define VecWrappers_TFunc_VecCopy_0_Parameters(FUNC)			\
   template <class T> inline T FUNC(vector<T> &vec) {vector<T> vec_copy(vec.begin(),vec.end()); return FUNC(vec_copy.begin(),vec_copy.end());} \
   template <class T> inline T FUNC(casa::Vector<T> &vec) {vector<T> vec_copy(vec.cbegin(),vec.cend()); return FUNC(vec_copy.begin(),vec_copy.end());} 
+
+#define VecWrappers_TFunc_Vec_0_Parameters(FUNC)			\
+  template <class T> inline T FUNC(vector<T> &vec) {return FUNC(vec.begin(),vec.end());} \
+  template <class T> inline T FUNC(casa::Vector<T> &vec) {return FUNC(vec.begin(),vec.end());} 
 
 // template <class T> inline T FUNC(casa::Vector<T> &vec) {return FUNC<STLVectorIteratorT,T>(static_cast<STLVectorIteratorT>(vec.cbegin()),static_cast<STLVectorIteratorT>(vec.cend()));} 
 
