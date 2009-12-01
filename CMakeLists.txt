@@ -44,7 +44,6 @@ endif (USG_ROOT)
 option (ENABLE_DASHBOARD    "Send a build report to the Dashboard server?"  YES )
 option (POST_BUILD_CLEAN    "Clean up the build directory after a build?"   NO  )
 option (MULTITHREADED_BUILD "Enable multithreading during build?"           NO  )
-option (SYSTEM_PACKAGES     "Installation of required system packages?"     YES )
 option (TEST_DATASETS       "Download and install sample test datasets?"    NO  )
 
 ## Options affecting the build of individual packages
@@ -69,16 +68,6 @@ find_program (flex_executable    flex    PATHS ${bin_locations})
 find_program (svn_executable     svn     PATHS ${bin_locations})
 find_program (tar_executable     tar     PATHS ${bin_locations})
 find_program (wget_executable    wget    PATHS ${bin_locations})
-
-## ==============================================================================
-##
-##  Installation of required system packages
-##
-## ==============================================================================
-
-if (SYSTEM_PACKAGES)
-  include (InstallSystemPackages)
-endif (SYSTEM_PACKAGES)
 
 ## ==============================================================================
 ##
