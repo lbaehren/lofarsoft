@@ -36,11 +36,7 @@ endif (USG_ROOT)
 ## ------------------------------------------------------------------------------
 ## Check if the program/package/library is already available
 
-if (NOT FINK_VERBOSE_CONFIGURE)
-  set (FINK_FIND_QUIETLY  YES )
-endif (NOT FINK_VERBOSE_CONFIGURE)
-
-#include (FindFink)
+find_program (HAVE_FINK fink ${bin_locations})
 
 ## <-- begin build condition --------------------------------------------------->
 
@@ -75,22 +71,24 @@ endif (NOT HAVE_FINK OR FINK_FORCE_BUILD)
 ## ------------------------------------------------------------------------------
 ## Install Fink packages
 
-add_custom_target (fink_packages
-  COMMAND fink install atlas
-  COMMAND fink install bison
-  COMMAMD find install doxygen
-  COMMAND fink install flex
-  COMMAND fink install fftw3
-  COMMAND fink install fftw3-shlibs
-  COMMAND fink install gfortran-shlibs
-  COMMAND fink install gsl
-  COMMAND fink install gsl-shlibs
-  COMMAND fink install numpy-py26
-  COMMAND fink install qt4-mac
-  COMMAND fink install sip-py26
-  COMMAND fink install swig
-  COMMAND fink install pyqt4-py26
-  COMMAND fink install wget
-  COMMENT "[Fink] Installing system packages ..."
-  WORKING_DIRCTORY ${FINK_SOURCE_DIR}
-  )
+if (HAVE_FINK)
+  add_custom_target (fink_packages
+    COMMAND ${HAVE_FINK} install atlas
+    COMMAND ${HAVE_FINK} install bison
+    COMMAMD ${HAVE_FINK} install doxygen
+    COMMAND ${HAVE_FINK} install flex
+    COMMAND ${HAVE_FINK} install fftw3
+    COMMAND ${HAVE_FINK} install fftw3-shlibs
+    COMMAND ${HAVE_FINK} install gfortran-shlibs
+    COMMAND ${HAVE_FINK} install gsl
+    COMMAND ${HAVE_FINK} install gsl-shlibs
+    COMMAND ${HAVE_FINK} install numpy-py26
+    COMMAND ${HAVE_FINK} install qt4-mac
+    COMMAND ${HAVE_FINK} install sip-py26
+    COMMAND ${HAVE_FINK} install swig
+    COMMAND ${HAVE_FINK} install pyqt4-py26
+    COMMAND ${HAVE_FINK} install wget
+    COMMENT "[Fink] Installing system packages ..."
+    WORKING_DIRCTORY ${FINK_SOURCE_DIR}
+    )
+endif (HAVE_FINK)
