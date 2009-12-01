@@ -42,7 +42,7 @@ using namespace std;
 #include <GUI/hfcast.h> 
 #include <GUI/hfget.h>
 #include <GUI/hfanalysis.h>
-#include <GUI/hffuncs.h>  
+#include <GUI/hffuncs.awk.h>  
 #include <crtools.h>
 
 #include "Data/LopesEventIn.h"

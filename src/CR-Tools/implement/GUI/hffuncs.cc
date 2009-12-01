@@ -1,9 +1,3 @@
-//================================================================================
-// ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfprep.awk
-//================================================================================
-//     File was generated from - on Wed Nov 25 23:29:40 CET 2009
-//--------------------------------------------------------------------------------
-//
 //#define DBG_MODE 0
 //#define DBG_MODE 1
 
@@ -52,7 +46,7 @@ using namespace std;
 #include <GUI/hfdefs.h>
 #include <GUI/hfcast.h> 
 #include <GUI/hfget.h>
-#include <GUI/hffuncs.h>  
+#include <GUI/hffuncs.awk.h">  
 #include <GUI/hfanalysis.h>  
 #include <crtools.h>
 
@@ -799,22 +793,7 @@ template<class T> inline T FUNC(const T v)
 //template<class T> inline T hf_square(const T v)
 
 //$ITERATE MFUNC abs,acos,asin,atan,ceil,cos,cosh,exp,floor,log,log10,sin,sinh,sqrt,tan,tanh
-HF_MATH_FUNC(hf_atan){return atan(v);};
-HF_MATH_FUNC(hf_ceil){return ceil(v);};
-HF_MATH_FUNC(hf_cos){return cos(v);};
-HF_MATH_FUNC(hf_cosh){return cosh(v);};
-HF_MATH_FUNC(hf_exp){return exp(v);};
-HF_MATH_FUNC(hf_floor){return floor(v);};
-HF_MATH_FUNC(hf_log){return log(v);};
-HF_MATH_FUNC(hf_log10){return log10(v);};
-HF_MATH_FUNC(hf_sin){return sin(v);};
-HF_MATH_FUNC(hf_sinh){return sinh(v);};
-HF_MATH_FUNC(hf_sqrt){return sqrt(v);};
-HF_MATH_FUNC(hf_abs){return abs(v);};
-HF_MATH_FUNC(hf_tan){return tan(v);};
-HF_MATH_FUNC(hf_acos){return acos(v);};
-HF_MATH_FUNC(hf_tanh){return tanh(v);};
-HF_MATH_FUNC(hf_asin){return asin(v);};
+HF_MATH_FUNC(hf_$MFUNC){return $MFUNC(v);};
 //$ENDITERATE
 
 HF_MATH_FUNC(hf_square){return v*v;}; 
@@ -920,33 +899,12 @@ Par: UnitName, HString, ""
 Par: UnitPrefix, HString,""
 Par: UnitScaleFactor, HNumber, 1.0
 ------------------------------------------------------------------------------*/
-class DataFunc_Sys_Unit : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Sys_Unit (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Sys_Unit(){cleanup(); } 
- 
-void setParameters(){
-SET_FUNC_PARAMETER_AWK(UnitName, HString, "");
-SET_FUNC_PARAMETER_AWK(UnitPrefix, HString,"");
-SET_FUNC_PARAMETER_AWK(UnitScaleFactor, HNumber, 1.0);
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  GET_FUNC_PARAMETER_AWK(UnitName, HString, "");
-  GET_FUNC_PARAMETER_AWK(UnitPrefix, HString,"");
-  GET_FUNC_PARAMETER_AWK(UnitScaleFactor, HNumber, 1.0);
+$$ { 
   dp->getFirstFromVector(*vp,vs);
   INIT_FUNC_ITERATORS(it,end);
   while (it!=end) {*it=hf_div(*it,UnitScaleFactor);++it;};
 }
 //$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(Unit,Sys,"Multiplies the data with a unit scale factor and also returns the apropriate unit string.",NUMBER,false);
 
 
 
@@ -960,25 +918,10 @@ Type: NUMBER
 buffered: false
 updateable: false
 ------------------------------------------------------------------------------*/
-class DataFunc_Sys_copy : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Sys_copy (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Sys_copy(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
+$${
   dp->getFirstFromVector(*vp,vs);
  }
 //$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(copy,Sys,"Copies the content of one object to the next.",NUMBER,false);
 
 
 
@@ -992,21 +935,7 @@ Type: STRING
 buffered: false
 updateable: true
 ------------------------------------------------------------------------------*/
-class DataFunc_Sys_Neighbours : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Sys_Neighbours (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(true);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Sys_Neighbours(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
+$${
   vector<HString> vec;
   vec=dp->getNeighbourNames(DIR_TO);
   vec.push_back("");
@@ -1014,7 +943,6 @@ template <class T> void process(F_PARAMETERS) {
   copycast_vec<HString,T>(&vec,vp);
 }
 //$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(Neighbours,Sys,"Returns a list of names of all neighbour objects, first in To direction and the in FROM direction separated by an empty string.",STRING,false);
 
 //------------------------------------------------------------------------------
 //$NEW: Function
@@ -1028,25 +956,7 @@ updateable: false
 Par: RunningAverageWeightType, HString, "GAUSSIAN"
 Par: RunningAverageLength, HInteger, 7
 ------------------------------------------------------------------------------*/
-class DataFunc_Math_RunningAverage : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_RunningAverage (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_RunningAverage(){cleanup(); } 
- 
-void setParameters(){
-SET_FUNC_PARAMETER_AWK(RunningAverageWeightType, HString, "GAUSSIAN");
-SET_FUNC_PARAMETER_AWK(RunningAverageLength, HInteger, 7);
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  GET_FUNC_PARAMETER_AWK(RunningAverageWeightType, HString, "GAUSSIAN");
-  GET_FUNC_PARAMETER_AWK(RunningAverageLength, HInteger, 7);
+$$ { 
   vector<T> tmpvec;
   hWEIGHTS wtype=WEIGHTS_LINEAR;
   if (RunningAverageWeightType=="GAUSSIAN") wtype=WEIGHTS_GAUSSIAN;
@@ -1055,7 +965,6 @@ template <class T> void process(F_PARAMETERS) {
   hRunningAverageVec(tmpvec,*vp, RunningAverageLength, wtype);
 }
 //$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(RunningAverage,Math,"Calculates the running averages over multiple samples of an vector using flat, linear, or Gaussian weighting",NUMBER,false);
 
 
 
@@ -1064,686 +973,23 @@ template <class T> void process(F_PARAMETERS) {
 //$NEW: Function
 /*------------------------------------------------------------------------------
 Lib: Math
-Name: sqrt
-Info: Takes the sqrt of the first object vector connected to the object.
+Name: $MFUNC
+Info: Takes the $MFUNC of the first object vector connected to the object.
 Type: NUMBER
 buffered: false
 updateable: false
 ------------------------------------------------------------------------------*/
-class DataFunc_Math_sqrt : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_sqrt (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_sqrt(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
+$${ 
   dp->getFirstFromVector(*vp,vs);
 
   INIT_FUNC_ITERATORS(it,end);
  
   while (it!=end) {
-   *it=hf_sqrt(*it);
+   *it=hf_$MFUNC(*it);
    ++it;
   };
 }
 //$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(sqrt,Math,"Takes the sqrt of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: abs
-Info: Takes the abs of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_abs : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_abs (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_abs(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_abs(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(abs,Math,"Takes the abs of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: tan
-Info: Takes the tan of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_tan : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_tan (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_tan(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_tan(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(tan,Math,"Takes the tan of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: acos
-Info: Takes the acos of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_acos : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_acos (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_acos(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_acos(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(acos,Math,"Takes the acos of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: tanh
-Info: Takes the tanh of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_tanh : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_tanh (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_tanh(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_tanh(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(tanh,Math,"Takes the tanh of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: asin
-Info: Takes the asin of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_asin : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_asin (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_asin(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_asin(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(asin,Math,"Takes the asin of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: atan
-Info: Takes the atan of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_atan : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_atan (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_atan(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_atan(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(atan,Math,"Takes the atan of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: ceil
-Info: Takes the ceil of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_ceil : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_ceil (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_ceil(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_ceil(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(ceil,Math,"Takes the ceil of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: cos
-Info: Takes the cos of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_cos : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_cos (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_cos(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_cos(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(cos,Math,"Takes the cos of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: cosh
-Info: Takes the cosh of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_cosh : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_cosh (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_cosh(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_cosh(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(cosh,Math,"Takes the cosh of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: exp
-Info: Takes the exp of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_exp : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_exp (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_exp(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_exp(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(exp,Math,"Takes the exp of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: floor
-Info: Takes the floor of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_floor : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_floor (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_floor(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_floor(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(floor,Math,"Takes the floor of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: log
-Info: Takes the log of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_log : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_log (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_log(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_log(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(log,Math,"Takes the log of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: log10
-Info: Takes the log10 of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_log10 : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_log10 (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_log10(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_log10(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(log10,Math,"Takes the log10 of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: square
-Info: Takes the square of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_square : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_square (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_square(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_square(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(square,Math,"Takes the square of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: sin
-Info: Takes the sin of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_sin : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_sin (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_sin(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_sin(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(sin,Math,"Takes the sin of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: negative
-Info: Takes the negative of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_negative : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_negative (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_negative(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_negative(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(negative,Math,"Takes the negative of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: sinh
-Info: Takes the sinh of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_sinh : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_sinh (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_sinh(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_sinh(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(sinh,Math,"Takes the sinh of the first object vector connected to the object.",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: ssqrt
-Info: Takes the ssqrt of the first object vector connected to the object.
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_ssqrt : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_ssqrt (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_ssqrt(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-
-  INIT_FUNC_ITERATORS(it,end);
- 
-  while (it!=end) {
-   *it=hf_ssqrt(*it);
-   ++it;
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(ssqrt,Math,"Takes the ssqrt of the first object vector connected to the object.",NUMBER,false);
 //$ENDITERATE
 
 #define phase arg
@@ -1753,27 +999,13 @@ template <class T> void process(F_PARAMETERS) {
 //$NEW: Function
 /*------------------------------------------------------------------------------
 Lib: Math
-Name: real
-Info: Retrieves real of the first object vector connected to the object.
+Name: $MFUNC
+Info: Retrieves $MFUNC of the first object vector connected to the object.
 Type: COMPLEX
 buffered: false
 updateable: false
 ------------------------------------------------------------------------------*/
-class DataFunc_Math_real : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_real (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_real(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
+$${ 
   vector<HComplex>* cvp;
   if (WhichType<T>()==COMPLEX) cvp=reinterpret_cast<vector<HComplex>*>(vp); // no need for new vector
   else cvp=new vector<HComplex>;
@@ -1785,141 +1017,11 @@ template <class T> void process(F_PARAMETERS) {
   ITERATORS_T(vp,it2,end2);    
  
   while (it1!=end1 && it2!=end2) {
-    *it2=mycast<T>(real(*it1));
+    *it2=mycast<T>($MFUNC(*it1));
     it1++; it2++; 
   };
 }
 //$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(real,Math,"Retrieves real of the first object vector connected to the object.",COMPLEX,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: phase
-Info: Retrieves phase of the first object vector connected to the object.
-Type: COMPLEX
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_phase : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_phase (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_phase(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  vector<HComplex>* cvp;
-  if (WhichType<T>()==COMPLEX) cvp=reinterpret_cast<vector<HComplex>*>(vp); // no need for new vector
-  else cvp=new vector<HComplex>;
-
-  dp->getFirstFromVector(*cvp,vs);
-  vp->resize(cvp->size(),hfnull<T>());
-
-  ITERATORS(HComplex,cvp,it1,end1);    
-  ITERATORS_T(vp,it2,end2);    
- 
-  while (it1!=end1 && it2!=end2) {
-    *it2=mycast<T>(phase(*it1));
-    it1++; it2++; 
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(phase,Math,"Retrieves phase of the first object vector connected to the object.",COMPLEX,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: imag
-Info: Retrieves imag of the first object vector connected to the object.
-Type: COMPLEX
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_imag : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_imag (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_imag(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  vector<HComplex>* cvp;
-  if (WhichType<T>()==COMPLEX) cvp=reinterpret_cast<vector<HComplex>*>(vp); // no need for new vector
-  else cvp=new vector<HComplex>;
-
-  dp->getFirstFromVector(*cvp,vs);
-  vp->resize(cvp->size(),hfnull<T>());
-
-  ITERATORS(HComplex,cvp,it1,end1);    
-  ITERATORS_T(vp,it2,end2);    
- 
-  while (it1!=end1 && it2!=end2) {
-    *it2=mycast<T>(imag(*it1));
-    it1++; it2++; 
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(imag,Math,"Retrieves imag of the first object vector connected to the object.",COMPLEX,false);
-
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: conj
-Info: Retrieves conj of the first object vector connected to the object.
-Type: COMPLEX
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_conj : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_conj (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_conj(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  vector<HComplex>* cvp;
-  if (WhichType<T>()==COMPLEX) cvp=reinterpret_cast<vector<HComplex>*>(vp); // no need for new vector
-  else cvp=new vector<HComplex>;
-
-  dp->getFirstFromVector(*cvp,vs);
-  vp->resize(cvp->size(),hfnull<T>());
-
-  ITERATORS(HComplex,cvp,it1,end1);    
-  ITERATORS_T(vp,it2,end2);    
- 
-  while (it1!=end1 && it2!=end2) {
-    *it2=mycast<T>(conj(*it1));
-    it1++; it2++; 
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(conj,Math,"Retrieves conj of the first object vector connected to the object.",COMPLEX,false);
 //$ENDITERATE
 #undef phase
 
@@ -1934,21 +1036,7 @@ Type: NUMBER
 buffered: false
 updateable: false
 ------------------------------------------------------------------------------*/
-class DataFunc_Math_degree : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_degree (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_degree(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
+$${ 
   dp->getFirstFromVector(*vp,vs);
 
   INIT_FUNC_ITERATORS(it,end);
@@ -1960,7 +1048,6 @@ template <class T> void process(F_PARAMETERS) {
   };
 }
 //$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(degree,Math,"Converts radians to degrees",NUMBER,false);
 
 
 //------------------------------------------------------------------------------
@@ -1973,21 +1060,7 @@ Type: NUMBER
 buffered: false
 updateable: false
 ------------------------------------------------------------------------------*/
-class DataFunc_Math_casatest : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_casatest (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_casatest(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
+$${ 
   dp->getFirstFromVector(*vp,vs);
 
   T * storage = &((*vp)[0]);
@@ -2009,7 +1082,6 @@ template <class T> void process(F_PARAMETERS) {
 
 }
 //$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(casatest,Math,"Test conversion to casa arrays and squaring operations therewith",NUMBER,false);
 
 
 
@@ -2020,40 +1092,26 @@ template <class T> void process(F_PARAMETERS) {
 //$NEW: Function
 /*------------------------------------------------------------------------------
 Lib: Math
-Name: div
-Info: Performs the operation div between the data vector and a reference object
+Name: $MFUNC
+Info: Performs the operation $MFUNC between the data vector and a reference object
 Type: NUMBER
 buffered: false
 updateable: false
 ------------------------------------------------------------------------------*/
-class DataFunc_Math_div : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_div (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_div(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
+$${ 
   dp->getFirstFromVector(*vp,vs);
   vector<T> rvec;
   
   Data* robj=dp->Ptr("'Reference");
   if (!isDataObject(robj)) {
-    ERROR("Math Function div (" << dp->getName(true) << ") - No Reference object found, no calculation performed.");
+    ERROR("Math Function $MFUNC (" << dp->getName(true) << ") - No Reference object found, no calculation performed.");
     return;
   }
 
   robj->get(rvec,vs);
   
   if (rvec.size()==0) {
-    ERROR("Math Function div (" << dp->getName(true) << ") - No data in Reference object found, no calculation performed.");
+    ERROR("Math Function $MFUNC (" << dp->getName(true) << ") - No data in Reference object found, no calculation performed.");
     return;
   }
 
@@ -2062,7 +1120,7 @@ template <class T> void process(F_PARAMETERS) {
   if (rvec.size()==1) {
     T val = rvec[0];
     while (it!=end) {
-      *it=hf_div(*it,val);
+      *it=hf_$MFUNC(*it,val);
       ++it;
     };
   } else {
@@ -2071,266 +1129,13 @@ template <class T> void process(F_PARAMETERS) {
     iterator_TT end2=rvec.end();
     iterator_TT beg2=it2;
     while (it!=end) {
-      *it=hf_div(*it,*it2);
+      *it=hf_$MFUNC(*it,*it2);
       ++it;it2++;
       if (it2==end2) {it2=beg2;};
     };
   };
 }
 //$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(div,Math,"Performs the operation div between the data vector and a reference object",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: pow
-Info: Performs the operation pow between the data vector and a reference object
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_pow : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_pow (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_pow(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-  vector<T> rvec;
-  
-  Data* robj=dp->Ptr("'Reference");
-  if (!isDataObject(robj)) {
-    ERROR("Math Function pow (" << dp->getName(true) << ") - No Reference object found, no calculation performed.");
-    return;
-  }
-
-  robj->get(rvec,vs);
-  
-  if (rvec.size()==0) {
-    ERROR("Math Function pow (" << dp->getName(true) << ") - No data in Reference object found, no calculation performed.");
-    return;
-  }
-
-  INIT_FUNC_ITERATORS(it,end);
-
-  if (rvec.size()==1) {
-    T val = rvec[0];
-    while (it!=end) {
-      *it=hf_pow(*it,val);
-      ++it;
-    };
-  } else {
-    typedef typename vector<T>::iterator iterator_TT;
-    iterator_TT it2=rvec.begin();
-    iterator_TT end2=rvec.end();
-    iterator_TT beg2=it2;
-    while (it!=end) {
-      *it=hf_pow(*it,*it2);
-      ++it;it2++;
-      if (it2==end2) {it2=beg2;};
-    };
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(pow,Math,"Performs the operation pow between the data vector and a reference object",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: sub
-Info: Performs the operation sub between the data vector and a reference object
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_sub : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_sub (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_sub(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-  vector<T> rvec;
-  
-  Data* robj=dp->Ptr("'Reference");
-  if (!isDataObject(robj)) {
-    ERROR("Math Function sub (" << dp->getName(true) << ") - No Reference object found, no calculation performed.");
-    return;
-  }
-
-  robj->get(rvec,vs);
-  
-  if (rvec.size()==0) {
-    ERROR("Math Function sub (" << dp->getName(true) << ") - No data in Reference object found, no calculation performed.");
-    return;
-  }
-
-  INIT_FUNC_ITERATORS(it,end);
-
-  if (rvec.size()==1) {
-    T val = rvec[0];
-    while (it!=end) {
-      *it=hf_sub(*it,val);
-      ++it;
-    };
-  } else {
-    typedef typename vector<T>::iterator iterator_TT;
-    iterator_TT it2=rvec.begin();
-    iterator_TT end2=rvec.end();
-    iterator_TT beg2=it2;
-    while (it!=end) {
-      *it=hf_sub(*it,*it2);
-      ++it;it2++;
-      if (it2==end2) {it2=beg2;};
-    };
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(sub,Math,"Performs the operation sub between the data vector and a reference object",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: mul
-Info: Performs the operation mul between the data vector and a reference object
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_mul : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_mul (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_mul(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-  vector<T> rvec;
-  
-  Data* robj=dp->Ptr("'Reference");
-  if (!isDataObject(robj)) {
-    ERROR("Math Function mul (" << dp->getName(true) << ") - No Reference object found, no calculation performed.");
-    return;
-  }
-
-  robj->get(rvec,vs);
-  
-  if (rvec.size()==0) {
-    ERROR("Math Function mul (" << dp->getName(true) << ") - No data in Reference object found, no calculation performed.");
-    return;
-  }
-
-  INIT_FUNC_ITERATORS(it,end);
-
-  if (rvec.size()==1) {
-    T val = rvec[0];
-    while (it!=end) {
-      *it=hf_mul(*it,val);
-      ++it;
-    };
-  } else {
-    typedef typename vector<T>::iterator iterator_TT;
-    iterator_TT it2=rvec.begin();
-    iterator_TT end2=rvec.end();
-    iterator_TT beg2=it2;
-    while (it!=end) {
-      *it=hf_mul(*it,*it2);
-      ++it;it2++;
-      if (it2==end2) {it2=beg2;};
-    };
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(mul,Math,"Performs the operation mul between the data vector and a reference object",NUMBER,false);
-//------------------------------------------------------------------------------
-//$NEW: Function
-/*------------------------------------------------------------------------------
-Lib: Math
-Name: add
-Info: Performs the operation add between the data vector and a reference object
-Type: NUMBER
-buffered: false
-updateable: false
-------------------------------------------------------------------------------*/
-class DataFunc_Math_add : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_add (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_add(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  dp->getFirstFromVector(*vp,vs);
-  vector<T> rvec;
-  
-  Data* robj=dp->Ptr("'Reference");
-  if (!isDataObject(robj)) {
-    ERROR("Math Function add (" << dp->getName(true) << ") - No Reference object found, no calculation performed.");
-    return;
-  }
-
-  robj->get(rvec,vs);
-  
-  if (rvec.size()==0) {
-    ERROR("Math Function add (" << dp->getName(true) << ") - No data in Reference object found, no calculation performed.");
-    return;
-  }
-
-  INIT_FUNC_ITERATORS(it,end);
-
-  if (rvec.size()==1) {
-    T val = rvec[0];
-    while (it!=end) {
-      *it=hf_add(*it,val);
-      ++it;
-    };
-  } else {
-    typedef typename vector<T>::iterator iterator_TT;
-    iterator_TT it2=rvec.begin();
-    iterator_TT end2=rvec.end();
-    iterator_TT beg2=it2;
-    while (it!=end) {
-      *it=hf_add(*it,*it2);
-      ++it;it2++;
-      if (it2==end2) {it2=beg2;};
-    };
-  };
-}
-//$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(add,Math,"Performs the operation add between the data vector and a reference object",NUMBER,false);
 //$ENDITERATE
 
 //------------------------------------------------------------------------------
@@ -2345,28 +1150,10 @@ updateable: false
 Par: OffsetValue, HNumber, 0.0
 Par: OffsetFixed, HInteger, int(false)
 ------------------------------------------------------------------------------*/
-class DataFunc_Math_SubtractOffset : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Math_SubtractOffset (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(false);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Math_SubtractOffset(){cleanup(); } 
- 
-void setParameters(){
-SET_FUNC_PARAMETER_AWK(OffsetValue, HNumber, 0.0);
-SET_FUNC_PARAMETER_AWK(OffsetFixed, HInteger, int(false));
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  GET_FUNC_PARAMETER_AWK(OffsetValue, HNumber, 0.0);
-  GET_FUNC_PARAMETER_AWK(OffsetFixed, HInteger, int(false));
 // The following line with $$ is a comment for the preprocessor, but
 // the bracket makes life easier for the editor since we have to add
 // one at the end of this block as well
+$$ { 
 dp->getFirstFromVector(*vp,vs);
 
  INIT_FUNC_ITERATORS(it,end);
@@ -2385,7 +1172,6 @@ while (it!=end) {
  };
 }
 //$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(SubtractOffset,Math,"Subtracts the first elements in the data vector from the entire data vector.",NUMBER,false);
 
 
 //========================================================================
@@ -2403,27 +1189,12 @@ Type: STRING
 buffered: false
 updateable: true
 ------------------------------------------------------------------------------*/
-class DataFunc_Sys_print : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Sys_print (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(true);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Sys_print(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
+$${
   dp->getFirstFromVector(*vp,vs);    //copy data vector from predecessor 
   cout << dp->getName() << ": ";  //and print
   printvec(*vp);
 }
 //$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(print,Sys,"Prints the contents of the data vector to stdout.",STRING,false);
 
 
 
@@ -2440,27 +1211,7 @@ Par: start,HInteger,0
 Par: end,HInteger,1
 Par: inc,HInteger,1
 ------------------------------------------------------------------------------*/
-class DataFunc_Sys_range : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Sys_range (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(true);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Sys_range(){cleanup(); } 
- 
-void setParameters(){
-SET_FUNC_PARAMETER_AWK(start,HInteger,0);
-SET_FUNC_PARAMETER_AWK(end,HInteger,1);
-SET_FUNC_PARAMETER_AWK(inc,HInteger,1);
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  GET_FUNC_PARAMETER_AWK(start,HInteger,0);
-  GET_FUNC_PARAMETER_AWK(end,HInteger,1);
-  GET_FUNC_PARAMETER_AWK(inc,HInteger,1);
+$${
   HInteger i,size;
 
   if (inc==0) {
@@ -2478,7 +1229,6 @@ template <class T> void process(F_PARAMETERS) {
     
 }
 //$END Function -----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(range,Sys,"Return a range of numbers (0,1,2,3,4,...N). Parameter objects: start=0, end=0, inc=1",INTEGER,false);
 
 
 
@@ -2507,23 +1257,7 @@ buffered: true
 updateable: true
 Par: Filename, HString, dataset_lopes
 ------------------------------------------------------------------------------*/
-class DataFunc_CR_dataReaderObject : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_CR_dataReaderObject (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(true);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_CR_dataReaderObject(){cleanup(); } 
- 
-void setParameters(){
-SET_FUNC_PARAMETER_AWK(Filename, HString, dataset_lopes);
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  GET_FUNC_PARAMETER_AWK(Filename, HString, dataset_lopes);
+$$ { 
 
   DBG("dataReaderObject: Retrieved filename parameter =" << Filename); // gets filename from object set in hfnet.py
 
@@ -2583,7 +1317,6 @@ void cleanup(){
 
 
 //$END Function ----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(dataReaderObject,CR,"Creates a DataReader object for reading CR data and stores its pointer.",POINTER,true);
 
 
 
@@ -2608,48 +1341,13 @@ Par: Shift, HInteger, 0
 Par: Datatype, HString, "Fx"
 VecPar: Offsets, HInteger
 ------------------------------------------------------------------------------*/
-class DataFunc_CR_dataRead : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_CR_dataRead (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(true);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_CR_dataRead(){cleanup(); } 
- 
-void setParameters(){
-SET_FUNC_VECPARAMETER_AWK(Offsets, HInteger);
-SET_FUNC_PARAMETER_AWK(File, HPointer, NULL);
-SET_FUNC_PARAMETER_AWK(Antenna, HInteger, 0);
-SET_FUNC_PARAMETER_AWK(Blocksize, HInteger, -1);
-SET_FUNC_PARAMETER_AWK(maxBlocksize, HInteger, 1048576);
-SET_FUNC_PARAMETER_AWK(Block, HInteger, 0);
-SET_FUNC_PARAMETER_AWK(Filesize, HInteger, -1);
-SET_FUNC_PARAMETER_AWK(Stride, HInteger, 0);
-SET_FUNC_PARAMETER_AWK(Shift, HInteger, 0);
-SET_FUNC_PARAMETER_AWK(Datatype, HString, "Fx");
-};
- 
-template <class T> void process(F_PARAMETERS) {
-  GET_FUNC_VECPARAMETER_AWK(Offsets, HInteger);
-  GET_FUNC_PARAMETER_AWK(File, HPointer, NULL);
-  GET_FUNC_PARAMETER_AWK(Antenna, HInteger, 0);
-  GET_FUNC_PARAMETER_AWK(Blocksize, HInteger, -1);
-  GET_FUNC_PARAMETER_AWK(maxBlocksize, HInteger, 1048576);
-  GET_FUNC_PARAMETER_AWK(Block, HInteger, 0);
-  GET_FUNC_PARAMETER_AWK(Filesize, HInteger, -1);
-  GET_FUNC_PARAMETER_AWK(Stride, HInteger, 0);
-  GET_FUNC_PARAMETER_AWK(Shift, HInteger, 0);
-  GET_FUNC_PARAMETER_AWK(Datatype, HString, "Fx");
+$$ { 
   if (Blocksize<1) Blocksize=maxBlocksize;
   hReadFile(*vp,AsIPtr(File),Datatype,Antenna,Blocksize,Block,Stride,Shift,Offsets); 
   HInteger maxBlock=Filesize/Blocksize-1;	
   putResult("maxBlock",maxBlock);
 }
 //$END Function ----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(dataRead,CR,"Function retrieving a vector from the dataReader.",NUMBER,true);
 
 
 /*------------------------------------------------------------------------
@@ -2671,21 +1369,7 @@ Type: POINTER
 buffered: false
 updateable: true
 ------------------------------------------------------------------------------*/
-class DataFunc_Py_PyFunc : public ObjectFunctionClass { 
-public:
-DEFINE_PROCESS_CALLS
- DataFunc_Py_PyFunc (Data* dp) : ObjectFunctionClass(dp){	
-   dp->setUpdateable(true);		
-    setParameters();
-    startup();
-    getParameters();
-    }
- ~DataFunc_Py_PyFunc(){cleanup(); } 
- 
-void setParameters(){
-};
- 
-template <class T> void process(F_PARAMETERS) {
+$${
   data_pointer->callSimplePyObjectMethod(data_pointer->retrievePyFunc(), "hfprocess");
 }
 
@@ -2698,7 +1382,6 @@ void cleanup(){
 }
  
 //$END Function ----------------------------------------------------------------
-}; DATAFUNC_CONSTRUCTOR(PyFunc,Py,"Function to call a user-defined python object of type hffunc",POINTER,false);
 
 //------------------------------------------------------------------------
 //Network functions
@@ -2790,46 +1473,6 @@ int ReadTextFile(string filename)
 //Note that this will be filled in by the preprocessor 
 void DataFunc_Library_publish(DataFuncLibraryClass* library_ptr){
   //$PUBLISH Function
-PUBLISH_OBJECT_FUNCTION(Sys,Unit);
-PUBLISH_OBJECT_FUNCTION(Sys,copy);
-PUBLISH_OBJECT_FUNCTION(Sys,Neighbours);
-PUBLISH_OBJECT_FUNCTION(Math,RunningAverage);
-PUBLISH_OBJECT_FUNCTION(Math,sqrt);
-PUBLISH_OBJECT_FUNCTION(Math,abs);
-PUBLISH_OBJECT_FUNCTION(Math,tan);
-PUBLISH_OBJECT_FUNCTION(Math,acos);
-PUBLISH_OBJECT_FUNCTION(Math,tanh);
-PUBLISH_OBJECT_FUNCTION(Math,asin);
-PUBLISH_OBJECT_FUNCTION(Math,atan);
-PUBLISH_OBJECT_FUNCTION(Math,ceil);
-PUBLISH_OBJECT_FUNCTION(Math,cos);
-PUBLISH_OBJECT_FUNCTION(Math,cosh);
-PUBLISH_OBJECT_FUNCTION(Math,exp);
-PUBLISH_OBJECT_FUNCTION(Math,floor);
-PUBLISH_OBJECT_FUNCTION(Math,log);
-PUBLISH_OBJECT_FUNCTION(Math,log10);
-PUBLISH_OBJECT_FUNCTION(Math,square);
-PUBLISH_OBJECT_FUNCTION(Math,sin);
-PUBLISH_OBJECT_FUNCTION(Math,negative);
-PUBLISH_OBJECT_FUNCTION(Math,sinh);
-PUBLISH_OBJECT_FUNCTION(Math,ssqrt);
-PUBLISH_OBJECT_FUNCTION(Math,real);
-PUBLISH_OBJECT_FUNCTION(Math,phase);
-PUBLISH_OBJECT_FUNCTION(Math,imag);
-PUBLISH_OBJECT_FUNCTION(Math,conj);
-PUBLISH_OBJECT_FUNCTION(Math,degree);
-PUBLISH_OBJECT_FUNCTION(Math,casatest);
-PUBLISH_OBJECT_FUNCTION(Math,div);
-PUBLISH_OBJECT_FUNCTION(Math,pow);
-PUBLISH_OBJECT_FUNCTION(Math,sub);
-PUBLISH_OBJECT_FUNCTION(Math,mul);
-PUBLISH_OBJECT_FUNCTION(Math,add);
-PUBLISH_OBJECT_FUNCTION(Math,SubtractOffset);
-PUBLISH_OBJECT_FUNCTION(Sys,print);
-PUBLISH_OBJECT_FUNCTION(Sys,range);
-PUBLISH_OBJECT_FUNCTION(CR,dataReaderObject);
-PUBLISH_OBJECT_FUNCTION(CR,dataRead);
-PUBLISH_OBJECT_FUNCTION(Py,PyFunc);
 };
  
 void dummy_instantiate(){

@@ -20,12 +20,15 @@ endif (MATHGL_INCLUDES)
 find_program (gawk_executable gawk awk ${bin_locations})
 
 if (gawk_executable)
+  ## process input files
   add_custom_target (hfget_awk
-    COMMAND ${gawk_executable} -f hfiter.awk hffuncs_awk.cc | gawk -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.cc
-    COMMAND ${gawk_executable} -f hfiter.awk hffuncs_awk.h | gawk -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.h
+    COMMAND ${gawk_executable} -f hfiter.awk hffuncs.cc | gawk -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.awk.cc
+    COMMAND ${gawk_executable} -f hfiter.awk hffuncs.h | gawk -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.awk.h
     WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement/GUI
     COMMAND "Running awk to generate source files ..."
     )
+  ## augment include path
+  include_directories (${CR_BINARY_DIR}/implement/GUI ${CR_BINARY_DIR}/implement)
 else (gawk_executable)
   message (WARNING "Unable to process source files -- missing awk/gawk!")
 endif (gawk_executable)
@@ -37,7 +40,7 @@ endif (gawk_executable)
 
 file (GLOB libhfget_sources 
   VectorSelector.cc
-  hffuncs.cc
+  hfanalysis.cc
   hfget.cc
   ${CR_BINARY_DIR}/implement/GUI/*.cc
   )

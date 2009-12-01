@@ -34,7 +34,7 @@ using namespace std;
 #include "hfcast.h" 
 #include "VectorSelector.h"
 #include "hfget.h"
-#include "hffuncs.h"  
+#include "hffuncs.awk.h"  
 #include "hfanalysis.h"  
 #include <time.h>
 
