@@ -27,7 +27,7 @@
 #include <crtools.h>
 #include <Calibration/CalTableReader.h>
 #include <Data/LopesEventIn.h>
-#include <Display/SimplePlot.h>
+#include <Utilities/SimplePlot.h>
 #include <startools/reconstruction.hh>
 
 using namespace CR;

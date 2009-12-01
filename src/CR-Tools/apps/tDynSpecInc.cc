@@ -21,13 +21,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+/* CR-Tools headers */
 #include <crtools.h>
 #include <Data/LOFAR_TBB.h>
-#include <Display/SimplePlot.h>
+#include <Utilities/SimplePlot.h>
+
+/* Standard headers */
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+
 using namespace std;
+
 /*
   \file ttbbctlIn.cc
 

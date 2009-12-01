@@ -32,7 +32,7 @@
 #include <casa/BasicSL/Complex.h>
 #include <casa/namespace.h>
 
-#include <Display/SimplePlot.h>
+#include <Utilities/SimplePlot.h>
 #include <Analysis/StationBeam.h>
 
 using CR::StationBeam;

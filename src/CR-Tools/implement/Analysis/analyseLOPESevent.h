@@ -36,7 +36,7 @@
 #include <Analysis/fitCR2gauss.h>
 #include <Data/LopesEventIn.h>
 #include <Data/UpSampledDR.h>
-#include <Display/SimplePlot.h>
+#include <Utilities/SimplePlot.h>
 #include <Coordinates/SkymapQuantity.h>
 
 // CASA/casacore header files

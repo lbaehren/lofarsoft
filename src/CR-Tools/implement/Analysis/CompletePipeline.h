@@ -37,7 +37,7 @@
 // This class is derived form CRinvFFT an adds upsampling
 #include <Analysis/CRinvFFT.h>
 // For Plots:
-#include <Display/SimplePlot.h>
+#include <Utilities/SimplePlot.h>
 // For Upsampling:
 #include <startools/reconstruction.hh>
 

@@ -21,12 +21,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Display/SimplePlot.h>
+#include <Utilities/SimplePlot.h>
 
 /*!
   \file tSimplePlot.cc
 
-  \ingroup Display
+  \ingroup CR_Utilities
 
   \brief A collection of test routines for SimplePlot
  

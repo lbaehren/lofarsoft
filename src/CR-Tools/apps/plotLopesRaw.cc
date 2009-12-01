@@ -1,7 +1,7 @@
 #include<sstream>
 
 #include <Analysis/analyseLOPESevent2.h>
-#include <Display/SimplePlot.h>
+#include <Utilities/SimplePlot.h>
 
 using CR::analyseLOPESevent2;
 using CR::LopesEventIn;

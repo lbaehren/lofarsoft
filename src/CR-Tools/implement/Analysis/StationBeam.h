@@ -59,7 +59,7 @@
 #include <casa/namespace.h>
 
 #ifdef CR_WITH_PLOTTING
-#include <Display/SimplePlot.h>
+#include <Utilities/SimplePlot.h>
 using CR::SimplePlot;
 #endif
 

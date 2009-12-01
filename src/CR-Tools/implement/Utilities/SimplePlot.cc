@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Display/SimplePlot.h>
+#include <Utilities/SimplePlot.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -79,16 +79,16 @@ namespace CR { // Namespace CR -- begin
   
   // ------------------------------------------------------------------- InitPlot
   
-  Bool SimplePlot::InitPlot(String file,
-			    Double xmin,
-			    Double xmax,
-			    Double ymin, 
-			    Double ymax,
-			    Int axis,
-			    Int just,
-			    Int col,
-			    Int cheight, 
-			    Int linewidth){
+  Bool SimplePlot::InitPlot (String file,
+			     Double xmin,
+			     Double xmax,
+			     Double ymin, 
+			     Double ymax,
+			     Int axis,
+			     Int just,
+			     Int col,
+			     Int cheight, 
+			     Int linewidth){
     try {
 #ifdef HAVE_PLPLOT
       plend();
@@ -115,7 +115,7 @@ namespace CR { // Namespace CR -- begin
   };
   
   // ------------------------------------------------------------------- PlotLine
-
+  
   Bool SimplePlot::PlotLine(Vector<Double> xvals,
 			    Vector<Double> yvals,
 			    Int col,
@@ -124,7 +124,7 @@ namespace CR { // Namespace CR -- begin
 #ifdef HAVE_PLPLOT
       int i,npoints;
       PLFLT *plxval, *plyval;
-
+      
       if (xvals.nelements() != yvals.nelements()){
 	cerr << "SimplePlot::PlotLine: " << "x- and y-vector of different length!" << endl;
 	return False;

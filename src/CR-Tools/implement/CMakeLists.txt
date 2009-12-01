@@ -29,10 +29,6 @@ if (CR_WITH_LEGACY)
   list (APPEND cr_modules LopesLegacy)
 endif (CR_WITH_LEGACY)
 
-if (CR_WITH_PLOTTING)
-  list (APPEND cr_modules Display)
-endif (CR_WITH_PLOTTING)
-
 if (CR_WITH_GLISH)
   list (APPEND cr_modules ApplicationSupport)
   ## additional sources-files
@@ -68,6 +64,11 @@ else (CR_WITH_STARTOOLS)
   list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/analyseLOPESevent2.cc)
   list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/PulseProperties.cc)
 endif (CR_WITH_STARTOOLS)
+
+if (NOT CR_WITH_PLOTTING)
+  list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Utilities/SimplePlot.cc)
+endif (NOT CR_WITH_PLOTTING)
+
 
 ## ------------------------------------------------------------------------------
 ## Assemble list of external libraries against which to link

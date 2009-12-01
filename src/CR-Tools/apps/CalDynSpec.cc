@@ -23,7 +23,7 @@
 
 #include <crtools.h>
 #include <Data/LOFAR_TBB.h>
-#include <Display/SimplePlot.h>
+#include <Utilities/SimplePlot.h>
 #include <Analysis/DynamicSpectrum.h>
 #include <cstdlib>
 #define PLOT_DATA_PS 0

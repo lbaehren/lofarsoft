@@ -31,7 +31,7 @@ using casa::conj;
 
 #include <crtools.h>
 #include <Data/LopesEventIn.h>
-#include <Display/SimplePlot.h>
+#include <Utilities/SimplePlot.h>
 #include <Data/LOFAR_TBB.h>
 
 using CR::SimplePlot;

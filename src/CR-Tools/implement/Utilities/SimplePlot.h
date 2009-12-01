@@ -2,8 +2,8 @@
  | $Id$ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -61,20 +61,20 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class SimplePlot
     
-    \ingroup CR_Display
+    \ingroup CR_Utilities
     
     \brief Generate simple (postscript) plots with PLplot or the CASA pgplotter interface
     
     \author Andreas Horneffer
-
+    
     \date 2007/06/19
-
+    
     \test tSimplePlot.cc
     
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[start filling in your text here]
+    <li>[start filling in your text here]
     </ul>
     
     <h3>Synopsis</h3>
@@ -86,21 +86,17 @@ namespace CR { // Namespace CR -- begin
     
     Int ppCharacterHeight;
     Int ppLineWidth;
-
+    
   public:
     
     // ------------------------------------------------------------- Construction
     
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     SimplePlot ();
         
     // -------------------------------------------------------------- Destruction
 
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     ~SimplePlot ();
         
     // --------------------------------------------------------------- Parameters
@@ -114,16 +110,12 @@ namespace CR { // Namespace CR -- begin
       return "SimplePlot";
     }
 
-    /*!
-      \brief Provide a summary of the internal status
-    */
+    //! Provide a summary of the internal status
     inline void summary () {
       summary (std::cout);
     }
 
-    /*!
-      \brief Provide a summary of the internal status
-    */
+    //! Provide a summary of the internal status
     void summary (std::ostream &os);    
 
     // ------------------------------------------------------------------ Methods
@@ -269,10 +261,20 @@ namespace CR { // Namespace CR -- begin
       <b>Note:</b> The <tt>plshades()</tt> function does a linear interpolation while plotting.
     */
 
-    Bool quick2Dplot(String file, Matrix<Double> zvals, Double xmin, Double xmax, 
-		     Double ymin, Double ymax,	     
-		     String xlabel=String(), String ylabel=String(), String toplabel=String(),
-		     Bool printingplot=False, int nLevels=20, int nClevels=0, int cCol=2, int ColMapIndex=1);
+    Bool quick2Dplot (String file,
+		      Matrix<Double> zvals,
+		      Double xmin,
+		      Double xmax, 
+		      Double ymin,
+		      Double ymax,	     
+		      String xlabel=String(),
+		      String ylabel=String(),
+		      String toplabel=String(),
+		      Bool printingplot=False,
+		      int nLevels=20,
+		      int nClevels=0,
+		      int cCol=2,
+		      int ColMapIndex=1);
 
    /*!
       \brief Add contour lines to an existing 2d plot
@@ -290,8 +292,14 @@ namespace CR { // Namespace CR -- begin
 
       Uses the plplot library, i.e. no output with pgplot. 
     */
-    Bool addContourLines(Matrix<Double> zvals, Double xmin, Double xmax, Double ymin, Double ymax,
-			 int nClevels, int cCol=2, int style=1);
+    Bool addContourLines (Matrix<Double> zvals,
+			  Double xmin,
+			  Double xmax,
+			  Double ymin,
+			  Double ymax,
+			  int nClevels,
+			  int cCol=2,
+			  int style=1);
 
    /*!
       \brief Add contour lines to an existing 2d plot
@@ -309,8 +317,14 @@ namespace CR { // Namespace CR -- begin
 
       Uses the plplot library, i.e. no output with pgplot. 
     */
-    Bool addContourLines(Matrix<Double> zvals, Double xmin, Double xmax, Double ymin, Double ymax,
-			 Vector<double> CLevels, int cCol=2, int style=1);
+    Bool addContourLines (Matrix<Double> zvals,
+			  Double xmin,
+			  Double xmax,
+			  Double ymin,
+			  Double ymax,
+			  Vector<double> CLevels,
+			  int cCol=2,
+			  int style=1);
 
   protected:
 
@@ -326,14 +340,10 @@ namespace CR { // Namespace CR -- begin
 
   private:
         
-    /*!
-      \brief Unconditional deletion 
-    */
+    //! Unconditional deletion 
     void destroy(void);
  
-    /*!
-      \brief Unconditional deletion 
-    */
+    //! Unconditional deletion 
     void init(void);
 
   }; // class SimplePlot -- end
