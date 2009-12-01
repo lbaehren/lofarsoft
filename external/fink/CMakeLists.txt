@@ -66,5 +66,31 @@ if (NOT HAVE_FINK OR FINK_FORCE_BUILD)
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_FINK OR FINK_FORCE_BUILD)
-  message (STATUS "[Fink] Found system-wide installation; skipping rebuild!")
+  add_custom_target (fink
+    WORKING_DIRECTORY ${PLPLOT_BINARY_DIR}
+    COMMENT "[Fink] Found system-wide installation; skipping rebuild!"
+    )
 endif (NOT HAVE_FINK OR FINK_FORCE_BUILD)
+
+## ------------------------------------------------------------------------------
+## Install Fink packages
+
+add_custom_target (fink_packages
+  COMMAND fink install atlas
+  COMMAND fink install bison
+  COMMAMD find install doxygen
+  COMMAND fink install flex
+  COMMAND fink install fftw3
+  COMMAND fink install fftw3-shlibs
+  COMMAND fink install gfortran-shlibs
+  COMMAND fink install gsl
+  COMMAND fink install gsl-shlibs
+  COMMAND fink install numpy-py26
+  COMMAND fink install qt4-mac
+  COMMAND fink install sip-py26
+  COMMAND fink install swig
+  COMMAND fink install pyqt4-py26
+  COMMAND fink install wget
+  COMMENT "[Fink] Installing system packages ..."
+  WORKING_DIRCTORY ${FINK_SOURCE_DIR}
+  )

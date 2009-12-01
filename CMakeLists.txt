@@ -216,7 +216,6 @@ if (APPLE)
 endif (APPLE)
 
 add_subdirectory (${USG_EXTERNAL}/blitz)
-add_subdirectory (${USG_EXTERNAL}/fink)
 add_subdirectory (${USG_EXTERNAL}/matplotlib)
 add_subdirectory (${USG_EXTERNAL}/numeric)
 add_subdirectory (${USG_EXTERNAL}/plplot)
