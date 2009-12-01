@@ -17,12 +17,18 @@ endif (MATHGL_INCLUDES)
 ##_______________________________________________________________________________
 ## Pre-processing of the source files
 
-add_custom_target (hfget_awk
-  COMMAND gawk -f hfiter.awk hffuncs_awk.cc | gawk -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.cc
-  COMMAND gawk -f hfiter.awk hffuncs_awk.h | gawk -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.h
-  WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement/GUI
-  COMMAND "Running awk to generate source files ..."
-  )
+find_program (gawk_executable gawk awk ${bin_locations})
+
+if (gawk_executable)
+  add_custom_target (hfget_awk
+    COMMAND ${gawk_executable} -f hfiter.awk hffuncs_awk.cc | gawk -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.cc
+    COMMAND ${gawk_executable} -f hfiter.awk hffuncs_awk.h | gawk -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.h
+    WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement/GUI
+    COMMAND "Running awk to generate source files ..."
+    )
+else (gawk_executable)
+  message (WARNING "Unable to process source files -- missing awk/gawk!")
+endif (gawk_executable)
 
 ##_______________________________________________________________________________
 ## Create the library
