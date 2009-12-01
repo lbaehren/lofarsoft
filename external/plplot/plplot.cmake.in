@@ -17,6 +17,14 @@ set (ENABLE_pygcw  OFF CACHE BOOL "Enable bindings for Python.gcw?")
 set (ENABLE_octave OFF CACHE BOOL "Enable bindings for Octave?")
 set (ENABLE_tcl    OFF CACHE BOOL "Enable bindings for Tcl?")
 
+if (HAVE_NUMPY)
+  set (NUMERIC_INCLUDE_PATH ${NUMPY_INCLUDES} CACHE PATH "NumPy include directory.")
+  set (PYTHON_NUMERIC_NAME  "numpy" CACHE INTERNAL "Python numeric package")
+  set (HAVE_NUMPY TRUE CACHE BOOL "Have Python NumPy package?")
+else (HAVE_NUMPY)
+  set (HAVE_NUMPY FALSE CACHE BOOL "Have Python NumPy package?")
+endif (HAVE_NUMPY)
+
 ##_______________________________________________________________________________
 ## Device drivers
 

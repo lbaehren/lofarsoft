@@ -44,15 +44,15 @@ include (FindPLplot)
 if (NOT HAVE_PLPLOT OR PLPLOT_FORCE_BUILD)
   
   ##__________________________________________________________________
-  ## Python.Numeric header files
+  ## Additional CMake modules
 
   include (ExternalProject)
-  include (FindNumeric)
+  include (FindNumPy)
 
-  if (NUMERIC_INCLUDES)
-    include_directories (${NUMERIC_INCLUDES})
-  endif (NUMERIC_INCLUDES)
-  
+  if (NOT HAVE_NUMPY)
+    include (FindNumeric)
+  endif (NOT HAVE_NUMPY)
+
   ##__________________________________________________________________
   ## Configure and build the project
 
