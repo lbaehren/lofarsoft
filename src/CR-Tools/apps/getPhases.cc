@@ -23,7 +23,7 @@
 
 #include <crtools.h>
 #include <Analysis/FirstStagePipeline.h>
-#include <Data/LopesEventIn.h>
+#include <IO/LopesEventIn.h>
 
 /*!
   \file getPhases.cc

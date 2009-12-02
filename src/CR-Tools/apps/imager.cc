@@ -31,7 +31,7 @@
 
 #include <crtools.h>
 #include <Data/LOFAR_TBB.h>
-#include <Data/LopesEventIn.h>
+#include <IO/LopesEventIn.h>
 #include <Imaging/Skymapper.h>
 #include <IO/DataReader.h>
 

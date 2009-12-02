@@ -30,7 +30,7 @@ using casa::Array;
 using casa::conj;
 
 #include <crtools.h>
-#include <Data/LopesEventIn.h>
+#include <IO/LopesEventIn.h>
 #include <Utilities/SimplePlot.h>
 #include <Data/LOFAR_TBB.h>
 

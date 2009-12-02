@@ -41,7 +41,7 @@
 #include <Calibration/PluginBase.h>
 #include <Calibration/RFIMitigation.h>
 #include <Data/ITS_Capture.h>
-#include <Data/LopesEvent.h>
+#include <IO/LopesEvent.h>
 #include <IO/DataReader.h>
 
 #include <casa/namespace.h>

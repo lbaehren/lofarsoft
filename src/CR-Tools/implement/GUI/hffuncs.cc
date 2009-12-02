@@ -50,7 +50,7 @@ using namespace std;
 #include <GUI/hfanalysis.h>  
 #include <crtools.h>
 
-#include "Data/LopesEventIn.h"
+#include "IO/LopesEventIn.h"
 #include "Data/LOFAR_TBB.h"
 #include "dal/TBB_Timeseries.h"
 

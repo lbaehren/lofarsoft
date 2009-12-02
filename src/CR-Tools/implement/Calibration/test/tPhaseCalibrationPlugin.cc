@@ -30,10 +30,10 @@
 #include <Calibration/PluginBase.h>
 #include <Calibration/PhaseCalibration.h>
 #include <Calibration/PhaseCalibrationPlugin.h>
-#include <Data/LopesEventIn.h>
+#include <IO/LopesEventIn.h>
 #include <IO/DataReader.h>
 #include <Data/ITS_Capture.h>
-#include <Data/LopesEvent.h>
+#include <IO/LopesEvent.h>
 
 using namespace CR;
 

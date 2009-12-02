@@ -22,7 +22,7 @@
  ***************************************************************************/
 
 #include <Data/UpSampledDR.h>
-#include <Data/LopesEventIn.h>
+#include <IO/LopesEventIn.h>
 
 // Namespace usage
 using CR::UpSampledDR;

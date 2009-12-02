@@ -24,7 +24,7 @@
 #include <casa/Exceptions/Error.h>
 
 #include <Analysis/SecondStagePipeline.h>
-#include <Data/LopesEventIn.h>
+#include <IO/LopesEventIn.h>
 
 using CR::LopesEventIn;
 using CR::SecondStagePipeline;

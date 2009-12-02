@@ -40,11 +40,11 @@ using casa::PagedImage;
 using casa::TiledShape;
 
 #include <crtools.h>
-#include <Coordinates/SkymapCoordinate.h>
-#include <Data/LopesEventIn.h>
 #include <Analysis/CRinvFFT.h>
+#include <Coordinates/SkymapCoordinate.h>
 #include <Imaging/Beamformer.h>
 #include <Imaging/Skymapper.h>
+#include <IO/LopesEventIn.h>
 #include <Utilities/ProgressBar.h>
 
 using CR::Beamformer;

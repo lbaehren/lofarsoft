@@ -22,7 +22,7 @@
 
 #include <Calibration/TVCalibrationPlugin.h>
 #include <Analysis/FirstStagePipeline.h>
-#include <Data/LopesEventIn.h>
+#include <IO/LopesEventIn.h>
 
 /*!
   \file tTVCalibrationPlugin.cc

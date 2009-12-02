@@ -26,7 +26,7 @@
 // CR-Tools header files
 #include <crtools.h>
 #include <Calibration/CalTableReader.h>
-#include <Data/LopesEventIn.h>
+#include <IO/LopesEventIn.h>
 #include <Utilities/SimplePlot.h>
 #include <startools/reconstruction.hh>
 

@@ -45,7 +45,7 @@ endif (HAVE_PLPLOT)
 ## Installation
 
 install (
-  TARGETS ${tests} tSimplePlot
+  TARGETS ${tests}
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

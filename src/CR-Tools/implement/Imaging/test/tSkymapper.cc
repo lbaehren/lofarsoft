@@ -46,7 +46,7 @@ using casa::TiledShape;
 
 #include <Analysis/CRinvFFT.h>
 #include <Coordinates/SkymapCoordinate.h>
-#include <Data/LopesEventIn.h>
+#include <IO/LopesEventIn.h>
 #include <Imaging/Beamformer.h>
 #include <Imaging/Skymapper.h>
 #include <Utilities/ProgressBar.h>

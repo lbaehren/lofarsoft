@@ -20,18 +20,18 @@
 
 /* $Id$*/
 
-// Standard library
+// Standard header files
 #include <fstream>
-// AIPS++/CASA
+// casacore header files
 #include <scimath/Mathematics.h>
 #include <scimath/Mathematics/FFTServer.h>
-// LOPES-Tools
-#include <Beamforming/ccBeam.h>
+// CR-Tools header files
+#include <Imaging/Beamforming.h>
 
 /*!
-  \file tccBeam.cc
+  \file tBeamforming.cc
 
-  \brief A collection of test routines for ccBeam
+  \brief A collection of test routines for tBeamforming
  
   \author Lars B&auml;hren
  
@@ -83,22 +83,6 @@ void ccbeam2ascii (const String& filename,
   }
 
   outfile.close();
-}
-
-// ------------------------------------------------------------------ test_ccBeam
-
-int test_ccBeam ()
-{
-  int nofFailedTests (0);
-
-  try {
-    ccBeam<Float,Complex> cc;
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-    nofFailedTests++;
-  }
-  
-  return nofFailedTests;
 }
 
 // -------------------------------------------------------------------- test_beam
@@ -164,10 +148,8 @@ int main ()
 {
   int nofFailedTests (0);
 
-  // Test for the constructor(s)
-  {
-    nofFailedTests += test_ccBeam ();
-  }
-
+  // Test computation of cc-beam
+  nofFailedTests += test_beam ();
+  
   return nofFailedTests;
 }

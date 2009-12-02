@@ -19,8 +19,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: dynamicspectrum.cc,v 1.14 2006/10/31 18:37:08 bahren Exp $ */
-
 /*!
   \file dynamicspectrum.cc
 

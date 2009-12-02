@@ -25,10 +25,8 @@
 #include <scimath/Mathematics/FFTServer.h>
 // CR-Tools
 #include <Analysis/CRinvFFT.h>
-#include <LopesLegacy/ccBeam.h>
-#include <LopesLegacy/xBeam.h>
 #include <Analysis/CRdelayPlugin.h>
-
+#include <Imaging/Beamforming.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -445,8 +443,7 @@ namespace CR { // Namespace CR -- begin
       Matrix<Double> TimeSeries;
       TimeSeries = GetTimeSeries(dr, antennaSelection, Polarization);
       if (TimeSeries.ncolumn() > 1) {
-	LOPES::ccBeam<Double,DComplex> cc;
-	ccBeamData = cc.ccbeam(TimeSeries);
+	ccBeamData = CR::calc_ccbeam<Double,DComplex> (TimeSeries);
       } else if (TimeSeries.ncolumn() == 1) {
 	ccBeamData = abs(TimeSeries.column(0));
       } else {
@@ -471,12 +468,11 @@ namespace CR { // Namespace CR -- begin
       Matrix<Double> TimeSeries;
       TimeSeries = GetTimeSeries(dr, antennaSelection, Polarization);
       if (TimeSeries.ncolumn() > 1) {
-	LOPES::xBeam<Double,DComplex> xx;
-	xBeamData = xx.xbeam(TimeSeries);
+	xBeamData = CR::calc_xbeam<Double,DComplex> (TimeSeries);
       } else if (TimeSeries.ncolumn() == 1) {
 	xBeamData = abs(TimeSeries.column(0));
       } else {
-	xBeamData = Vector<Double>();
+	xBeamData = casa::Vector<Double>();
       };						 
     } catch (AipsError x) {
       cerr << "CRinvFFT::GetXBeam: " << x.getMesg() << endl;
@@ -528,10 +524,8 @@ namespace CR { // Namespace CR -- begin
     try {
       TimeSeries = GetTimeSeries(dr, antennaSelection, Polarization);
       if (TimeSeries.ncolumn() > 1) {
-	LOPES::ccBeam<Double,DComplex> cc;
-	ccBeamData = cc.ccbeam(TimeSeries);
-	LOPES::xBeam<Double,DComplex> xx;
-	xBeamData = xx.xbeam(TimeSeries);
+	ccBeamData = CR::calc_ccbeam<Double,DComplex>(TimeSeries);
+	xBeamData  = CR::calc_xbeam<Double,DComplex> (TimeSeries);
 	
 	Int i,nants=TimeSeries.ncolumn();
 	pBeamData = square(TimeSeries.column(nants-1));

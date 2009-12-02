@@ -56,9 +56,9 @@
 #include <ApplicationSupport/GlishRecord.h>
 #include <ApplicationSupport/ParameterFromRecord.h>
 #include <ApplicationSupport/Beamformer.h>
-#include <LopesLegacy/ccBeam.h>
-#include <Data/LopesEvent.h>
+#include <IO/LopesEvent.h>
 #include <Data/ITSCapture.h>
+#include <Imaging/Beamforming.h>
 #include <IO/DataReader.h>
 #include <Math.h>
 #include <Data/ObservationData.h>

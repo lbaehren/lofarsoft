@@ -21,7 +21,7 @@
 /* $Id$*/
 
 #include <Analysis/CRinvFFT.h>
-#include <Data/LopesEventIn.h>
+#include <IO/LopesEventIn.h>
 #include <Analysis/fitCR2gauss.h>
 
 /*!

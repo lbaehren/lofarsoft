@@ -32,7 +32,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <Data/Data.h>
-#include <Data/LopesEvent.h>
+#include <IO/LopesEvent.h>
 
 using namespace std;
 

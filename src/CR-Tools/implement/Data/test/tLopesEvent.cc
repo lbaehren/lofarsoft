@@ -21,13 +21,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #include <casa/aips.h>
 #include <casa/iostream.h>
 #include <casa/Exceptions/Error.h>
 
-#include <Data/LopesEvent.h>
+#include <IO/LopesEvent.h>
 
 using CR::Data;
 using CR::DataReader;

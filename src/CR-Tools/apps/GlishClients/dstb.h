@@ -63,8 +63,8 @@
 #include <Calibration/RFIMitigation.h>
 #include <IO/DataReader.h>
 #include <Data/ITSCapture.h>
-#include <Data/LopesEvent.h>
-#include <Data/LopesEventIn.h>
+#include <IO/LopesEvent.h>
+#include <IO/LopesEventIn.h>
 #include <Data/ObservationData.h>
 #include <Utilities/ProgressBar.h>
 #include <Utilities/StringTools.h>

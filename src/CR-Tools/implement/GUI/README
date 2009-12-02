@@ -168,7 +168,7 @@ Sample event:
 ~/LOFAR/usg/data/lopes/2007.01.31.23:59:33.960.event
 
 
-#include "Data/LopesEventIn.h"
+#include "IO/LopesEventIn.h"
 #include "Data/LOFAR_TBB.h"
 
 

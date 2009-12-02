@@ -29,7 +29,7 @@
 
 #include <ApplicationSupport/DataReaderTools.h>
 #include <Data/ITSCapture.h>
-#include <Data/LopesEvent.h>
+#include <IO/LopesEvent.h>
 
 using namespace std;
 using namespace CR;

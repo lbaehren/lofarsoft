@@ -1,9 +1,0 @@
-#!/bin/sh
-
-##
-##  
-##
-
-cd /home/lars/coding/lofar/usg/build
-
-make tUseROOT && ./CR-Pipeline/test/tUseROOT && root timeseries.C

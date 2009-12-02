@@ -31,7 +31,7 @@
 #include <crtools.h>
 #include <Analysis/inverseFFT.h>
 #include <Data/ITS_Capture.h>
-#include <Data/LopesEvent.h>
+#include <IO/LopesEvent.h>
 #include <IO/DataReader.h>
 
 using casa::DComplex;

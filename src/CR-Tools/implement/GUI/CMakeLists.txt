@@ -22,13 +22,16 @@ find_program (gawk_executable gawk awk ${bin_locations})
 if (gawk_executable)
   ## process input files
   add_custom_target (hfget_awk
-    COMMAND ${gawk_executable} -f hfiter.awk hffuncs.cc |${gawk_executable}  -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.awk.cc
-    COMMAND ${gawk_executable} -f hfiter.awk hffuncs.h |${gawk_executable}  -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.awk.h
+    COMMAND ${gawk_executable} -f hfiter.awk hffuncs.cc | ${gawk_executable} -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.awk.cc
+    COMMAND ${gawk_executable} -f hfiter.awk hffuncs.h | ${gawk_executable} -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.awk.h
     WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement/GUI
     COMMENT "Running awk to generate source files ..."
     )
   ## augment include path
-  include_directories (${CR_BINARY_DIR}/implement/GUI ${CR_BINARY_DIR}/implement)
+  include_directories (
+    ${CR_BINARY_DIR}/implement
+    ${CR_BINARY_DIR}/implement/GUI
+    )
 else (gawk_executable)
   message (WARNING "Unable to process source files -- missing awk/gawk!")
 endif (gawk_executable)

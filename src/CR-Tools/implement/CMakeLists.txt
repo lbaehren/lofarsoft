@@ -25,10 +25,6 @@ set (cr_modules
 ##__________________________________________________________
 ## Optional modules depending on user selection
 
-if (CR_WITH_LEGACY)
-  list (APPEND cr_modules LopesLegacy)
-endif (CR_WITH_LEGACY)
-
 if (CR_WITH_GLISH)
   list (APPEND cr_modules ApplicationSupport)
   ## additional sources-files

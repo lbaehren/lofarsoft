@@ -205,46 +205,6 @@ class Phasing {
 				 const Vector<Double> &direction,
 				 const Vector<Double> &antennaPosition);
   
-  // === Geometrical delays ====================================================
-  
-  /*!
-    \brief Calculate the light travel delay, [sec].
-
-    Calculate the light travel delay, \f$ \tau \f$, for a source at position
-    \f$ \vec \rho \f$ and an antenna at position \f$ \vec x \f$ away from the
-    phase center; this method assumes delay computation for the far-field
-    regime.
-    
-    \param direction       - Direction of the beam.
-    \param antennaPosition - 3dim antenna position.
-  */
-  static Double geometricalDelay (const Vector<Double> &direction,
-				  const Vector<Double> &antennaPosition);
-
-  /*!
-    \brief Calculate the light travel delay, [sec], for a set of antennae.
-
-    \param direction        - Direction of the beam.
-    \param antennaPositions - 3dim antenna positions.
-  */
-  static Vector<Double> geometricalDelay (const Vector<Double> &direction,
-					  const Matrix<Double> &antennaPosition);
-  
-  /*!
-    \brief Calculate the light travel delay, [sec].
-    
-    Calculate the light travel delay, \f$ \tau \f$, for a source at position
-    \f$ \vec \rho \f$ and an antenna at position \f$ \vec x \f$ away from the
-    phase center.
-
-    \param azel            - Source position for which the geometric delay is 
-                             computed.
-    \param antennaPosition - 3D antenna position.
-    \param nearField       - Use delay formula for a source in the near field?
-  */
-  static Double geometricalDelay (const Vector<Double> &azel,
-				  const Vector<Double> &antennaPosition,
-				  Bool nearField);
  private:
 
   static Double PI_p;

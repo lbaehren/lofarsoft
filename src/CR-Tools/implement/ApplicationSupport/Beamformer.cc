@@ -27,7 +27,7 @@ using namespace std;
 
 // custom C++ classes
 #include <ApplicationSupport/Beamformer.h>
-#include <LopesLegacy/ccBeam.h>
+#include <Imaging/Beamforming.h>
 
 const Double rad2deg = 180.0/C::pi;
 const Double deg2rad = C::pi/180.0;
@@ -575,7 +575,6 @@ void Beamformer::crossCorrBeam (Matrix<Double>& skymap,
   int pixel (0);
   int freq (0);
   int antenna (0);
-  ccBeam<Double,DComplex> cc (blocksize);
   Matrix<DComplex> tmp (data.shape());
 
   skymap.resize (blocksize,shape_p(1));
@@ -588,8 +587,8 @@ void Beamformer::crossCorrBeam (Matrix<Double>& skymap,
       }
     }
     // (2) compute cc-beam
-    skymap.column(pixel) = cc.ccbeam(tmp,
-				     blocksize);
+    skymap.column(pixel) = CR::calc_ccbeam<Double,DComplex> (tmp,
+							     blocksize);
   }
 }
 

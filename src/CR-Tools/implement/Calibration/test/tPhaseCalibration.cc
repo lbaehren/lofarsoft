@@ -41,8 +41,8 @@
 #include <Calibration/PluginBase.h>
 #include <Calibration/PhaseCalibration.h>
 #include <Data/ITS_Capture.h>
-#include <Data/LopesEvent.h>
-#include <Data/LopesEventIn.h>
+#include <IO/LopesEvent.h>
+#include <IO/LopesEventIn.h>
 #include <IO/DataReader.h>
 
 #include <casa/namespace.h>

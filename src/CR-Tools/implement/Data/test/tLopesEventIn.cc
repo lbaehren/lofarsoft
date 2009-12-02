@@ -27,7 +27,7 @@
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 /* CR-Tools header files */
-#include <Data/LopesEventIn.h>
+#include <IO/LopesEventIn.h>
 
 /* Namespace usage */
 using std::cout;
