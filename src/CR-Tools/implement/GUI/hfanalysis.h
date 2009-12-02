@@ -17,7 +17,7 @@
 #include <GUI/hffuncs.awk.h>  
 #include <crtools.h>
 
-#include "Data/LopesEventIn.h"
+#include "IO/LopesEventIn.h"
 #include "Data/LOFAR_TBB.h"
 
 #include <GUI/hfpp.h>
@@ -34,7 +34,7 @@
 
 #undef HF_PP_FILETYPE
 #define HF_PP_FILETYPE() (hFILE)  // Tell the preprocessor (for generating wrappers) that this is a c++ header file (brackets are crucial)
-#include "hwrappers-hfanalysis.cc.h"  // include wrapper definitions generated automatically from source
+#include "hfwrappers-hfanalysis.cc.h"  // include wrapper definitions generated automatically from source
 
 #define DefPythonWrapper_VecINCS_0_Parameters(FUNC) \
   void FUNC (vector<HPointer > &vec);		    \
@@ -138,24 +138,6 @@ void hRunningAverageVec(vector<HPointer> &vec_in,vector<HPointer> &vec_out, addr
 extern void (*hRunningAverageVec_N)(vector<HNumber > &vec_in,vector<HNumber > &vec_out, address len, hWEIGHTS wtype);
 extern void (*hRunningAverageVec_I)(vector<HInteger> &vec_in,vector<HInteger> &vec_out, address len, hWEIGHTS wtype);
 extern void (*hRunningAverageVec_C)(vector<HComplex> &vec_in,vector<HComplex> &vec_out, address len, hWEIGHTS wtype);
-
-//!Negate a vector (multiply with -1) 
-template <class T> 
-void hNegate (const STLVectorIteratorT data_start,
-	      const STLVectorIteratorT data_end);
-template <class T> inline void hNegate (vector<T> &vec);
-template <class T> inline void hNegate (casa::Vector<T> &vec);
-DefPythonWrapper_VecINCS_0_Parameters(hNegate);
-
-//!Fill a vector with a constant value
-template <class T> 
-void hFill (const STLVectorIteratorT data_start,
-	    const STLVectorIteratorT data_end,
-	    T val);
-template <class T> inline void hFill (vector<T> &vec, T val);
-template <class T> inline void hFill (casa::Vector<T> &vec, T val);
-
-DefPythonWrapper_VecINCS_1_TParameters(hFill);
 
 
 #endif

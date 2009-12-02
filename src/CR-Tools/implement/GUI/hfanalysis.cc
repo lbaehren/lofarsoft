@@ -16,7 +16,7 @@ using namespace std;
 #include <GUI/hfanalysis.h>
 
 //Some definitions needed for the preprosessor programming
-//$FILENAME: HFILE=hwrappers-$SELF.h  // Copy source code (where specified with COPY_TO HFILE START) to the file hwrappers-hfanalysis.cc.h
+//$FILENAME: HFILE=hfwrappers-$SELF.h  // Copy source code (where specified with COPY_TO HFILE START) to the file hwrappers-hfanalysis.cc.h
 
 #undef HF_PP_FILETYPE
 #define HF_PP_FILETYPE() (CC)  // Tell the preprocessor (for generating wrappers) that this is a c++ source code file (brackets are crucial)
@@ -657,6 +657,16 @@ void (*hRunningAverageVec_C)(vector<HComplex> &vec_in,vector<HComplex> &vec_out,
 //_______________________________________________________________________________
 //                                                               hNegate
 
+//$COPY_TO HFILE START --------------------------------------------------
+#include "hfpp-undef.cc"
+#define HF_PP_FUNCNAME hNegate  //The Name of the function
+//.......................................................................
+#define HF_PP_FUNCBRIEF "Multiplies each element in the vector with -1."
+#define HF_PP_FUNCTYPE void     //Return value type of function
+#define HF_PP_NVECS 1 //Number of (input/output) vectors
+#define HF_PP_NPAR 0  //Number of other parameters
+#include "hfdefaultwrappercode.h"
+//$COPY_TO END --------------------------------------------------
 /*!
 
   \brief The function will multiply each element in the vector with
@@ -666,24 +676,17 @@ void (*hRunningAverageVec_C)(vector<HComplex> &vec_in,vector<HComplex> &vec_out,
          input values.
   \param data_end: STL Iterator pointing to the end of the input vector
 */
-template <class T> 
-void hNegate (const STLVectorIteratorT data_start,
-	      const STLVectorIteratorT data_end
-	      )
+template <class Iter> 
+void hNegate(const Iter data_start,const Iter data_end)
 {
-  STLVectorIteratorT it=data_start;
+  typedef IterValueType T;
+  Iter it=data_start;
   T fac = mycast<T>(-1);
   while (it!=data_end) {
     *it=hf_mul(*it,fac);
     ++it;
   };
-} 
-
-//------Wrappers to hNegate --------
-template <class T> inline void hNegate (vector<T> &vec) {hNegate<T> (vec.begin(),vec.end());}
-template <class T> inline void hNegate (casa::Vector<T> &vec) {hNegate<T> (static_cast<STLVectorIteratorT>(vec.cbegin()),static_cast<STLVectorIteratorT>(vec.cbegin()));}
-PythonWrapper_VecINCS_0_Parameters(hNegate);
-//------End Wrappers to hNegate --------
+}
 
 /*!
 
@@ -693,24 +696,36 @@ PythonWrapper_VecINCS_0_Parameters(hNegate);
          input values.
   \param data_end: STL Iterator pointing to the end of the input vector
 */
-template <class T> 
-void hFill (const STLVectorIteratorT data_start,
-	    const STLVectorIteratorT data_end,
-	    T val
-	      )
+//$COPY_TO HFILE START --------------------------------------------------
+#include "hfpp-undef.cc"
+#define HF_PP_FUNCNAME hFill  //The Name of the function
+//.......................................................................
+#define HF_PP_FUNCBRIEF "Fills a vector with a constant value."
+#define HF_PP_FUNCTYPE void  //Return value type of function
+#define HF_PP_NVECS 1 //Number of (input/output) vectors
+#define HF_PP_NPAR 1  //Number of other parameters
+#define HF_PP_PAR0 (fill_value,T,0,"Value to fill vector with.",HF_PP_TEMPLATED_TYPE,HF_PP_PASS_AS_VALUE)  //Definition of input parameter
+#include "hfdefaultwrappercode.h"
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  \brief Fills a vector with a constant value.
+
+  \param data_start: STL Iterator pointing to the first element of an array with
+         input values.
+  \param data_end: STL Iterator pointing to the end of the input vector
+
+  \param fill_value: Value to fill vector with
+*/
+template <class Iter> 
+void hFill(const Iter data_start,const Iter data_end, const IterValueType fill_value)
 {
-  STLVectorIteratorT it=data_start;
+  Iter it=data_start;
   while (it!=data_end) {
-    *it=val;
+    *it=fill_value;
     ++it;
   };
-} 
-
-//------Wrappers to hFill --------
-template <class T> inline void hFill (vector<T> &vec, T val) {hFill<T> (vec.begin(),vec.end(),val);}
-template <class T> inline void hFill (casa::Vector<T> &vec, T val) {hFill<T> (static_cast<STLVectorIteratorT>(vec.cbegin()),static_cast<STLVectorIteratorT>(vec.cbegin()),val);}
-PythonWrapper_VecINCS_1_TParameters(hFill);
-//------End Wrappers to hFill --------
+}
 
 
 //$COPY_TO HFILE START --------------------------------------------------
@@ -846,6 +861,116 @@ IterValueType hMedian(const Iter data_start, const Iter data_end)
 
 */
 
+
+//$COPY_TO HFILE START --------------------------------------------------
+#include "hfpp-undef.cc"
+#define HF_PP_FUNCNAME hStdDev  //The Name of the function
+//.......................................................................
+#define HF_PP_FUNCBRIEF "Calculates the standard deviation around a mean value."
+#define HF_PP_FUNCTYPE_T 1     //Return value type of function is templated with T
+#define HF_PP_NVECS 1 //Number of (input/output) vectors
+#define HF_PP_NPAR 1  //Number of other parameters
+#define HF_PP_PAR0 (mean,T,0,"Mean value of vector.",HF_PP_TEMPLATED_TYPE,HF_PP_PASS_AS_VALUE)  //Definition of input parameter
+#include "hfdefaultwrappercode.h"
+//$COPY_TO END --------------------------------------------------
+
+/*!
+  \brief Calculates the standard deviation around a mean value.
+
+  \param data_start: STL Iterator pointing to the first element of an array with input
+  values.  
+
+  \param data_end: STL Iterator pointing to the end of the
+  input vector
+
+  \param mean: The mean value of the vector, which needs to be provided
+*/
+template <class Iter> 
+IterValueType hStdDev(const Iter data_start,const Iter data_end, const IterValueType mean)
+{
+  typedef IterValueType T;
+  T scrt,sum=mycast<T>(0);
+  address len=mycast<address>(data_end-data_start);
+  Iter it=data_start;
+  while (it!=data_end) {
+    scrt=hf_sub(*it,mean);
+    sum+=hf_mul(scrt,scrt);
+    ++it;
+  };
+  if (len>1) return hf_sqrt(hf_div(sum,mycast<T>(len-1)));
+  else return hf_sqrt(sum);
+} 
+
+//$COPY_TO HFILE START --------------------------------------------------
+#include "hfpp-undef.cc"
+#define HF_PP_FUNCNAME hStdDev  //The Name of the function
+#define HF_PP_VARIANT 1 //Indicating that this is an overloaded function
+//.......................................................................
+#define HF_PP_FUNCBRIEF "Calculates the standard deviation around a mean value."
+#define HF_PP_FUNCTYPE_T 1     //Return value type of function is templated with T
+#define HF_PP_NVECS 1 //Number of (input/output) vectors
+#define HF_PP_NPAR 0  //Number of other parameters
+#include "hfdefaultwrappercode.h"
+//$COPY_TO END --------------------------------------------------
+
+/*!
+  \brief Calculates the standard deviation around the mean value.
+
+  This is a convenience overload function that calculates the mean value automatically.
+
+  \param data_start: STL Iterator pointing to the first element of an array with input
+  values.  
+
+  \param data_end: STL Iterator pointing to the end of the
+  input vector
+
+*/
+template <class Iter> 
+IterValueType hStdDev(const Iter data_start,const Iter data_end)
+{
+  return hStdDev(data_start,data_end,hMean(data_start,data_end));
+} 
+
+//$COPY_TO HFILE START --------------------------------------------------
+#include "hfpp-undef.cc"
+#define HF_PP_FUNCNAME hDownsample  //The Name of the function
+//.......................................................................
+#define HF_PP_FUNCBRIEF "Resamples (by averaging) an input vector to fit the size of the output vector."
+#define HF_PP_FUNCTYPE void   //Return value type of function is templated with T
+#define HF_PP_NVECS 2 //Number of (input/output) vectors
+#define HF_PP_NPAR 0  //Number of other parameters
+#include "hfdefaultwrappercode.h"
+
+//Define a 2nd convenience wrapper function where the length is specified and vector is resized
+#define HF_PP_VARIANT 1
+#undef HF_PP_NPAR
+#define HF_PP_NPAR 1  //Number of other parameters
+#define HF_PP_PAR0 (len,HInteger,1,"Length of output vector.",HF_PP_NON_TEMPLATED_TYPE,HF_PP_PASS_AS_VALUE)  //Definition of input parameter
+#define HF_PP_VEC_WRAPPER_CODE_STL \
+  HF_PP_VECTORNAME(1).resize(len,mycast<T>(0));\
+  return HF_PP_FUNCNAME (HF_PP_PAR_VECTORLIST(HF_PP_NVECS))
+#define HF_PP_VEC_WRAPPER_CODE_CASA \
+  HF_PP_VECTORNAME(1).resize(len);\
+  return HF_PP_FUNCNAME (HF_PP_PAR_VECTORLIST(HF_PP_NVECS))
+HF_PP_GENERATE_WRAPPERS
+
+//$COPY_TO END --------------------------------------------------
+/*
+#undef HF_PP_VARIANT
+#undef HF_PP_NVEC
+#define HF_PP_VARIANT 2
+#undef HF_PP_NPAR
+#undef HF_PP_NVEC 1
+--->#define HF_PP_FUNCTYPE void   //Return value type of function is templated with T
+#define HF_PP_VEC_WRAPPER_CODE_STL \
+  HF_PP_VECTORNAME(1).resize(len,mycast<T>(0));\
+  return HF_PP_FUNCNAME (HF_PP_PAR_VECTORLIST(HF_PP_NVECS))
+#define HF_PP_VEC_WRAPPER_CODE_CASA \
+  HF_PP_VECTORNAME(1).resize(len);\
+  return HF_PP_FUNCNAME (HF_PP_PAR_VECTORLIST(HF_PP_NVECS))
+HF_PP_GENERATE_WRAPPERS
+*/
+
 template <class Iter> 
 void hDownsample (const Iter idata_start,
 		  const Iter idata_end,
@@ -855,13 +980,14 @@ void hDownsample (const Iter idata_start,
   address ilen=(idata_end-idata_start);
   address olen=(odata_end-odata_start);
   address blen=max(ilen/(olen-1),0); 
-  //use max to avoid infinite loobs if output vector is too large
+  //use max to avoid infinite loops if output vector is too large
   Iter it2,it1=idata_start;
   Iter ito=odata_start;
   while (it1!=idata_end) {
     it2=min(it1+blen,idata_end);
     *ito=hMean(it1,it2);
-    it1=it2; ++ito;
+    it1=it2; 
+    ++ito; 
   }
 }
 

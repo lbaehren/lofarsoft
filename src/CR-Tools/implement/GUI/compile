@@ -2,7 +2,7 @@
 
 MYDIR=$PWD
 cd $LOFARSOFT/src/CR-Tools/implement/GUI
-gawk -f hfsplit2h.awk hfanalysis.cc
+#gawk -f hfsplit2h.awk hfanalysis.cc
 
 #./hfprep
 cd $LOFARSOFT/build/cr

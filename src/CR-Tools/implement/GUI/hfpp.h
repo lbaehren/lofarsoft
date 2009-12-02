@@ -19,6 +19,11 @@
 #define HF_PP_ALL_TYPES HF_PP_NUMERIC_TYPES HF_PP_NON_NUMERIC_TYPES
 #define HF_PP_ALL_PYTHONTYPES HF_PP_NUMERIC_TYPES HF_PP_STRING_TYPES
 
+//Used for nicer source code to 
+#define HF_PP_PASS_AS_REFERENCE 1
+#define HF_PP_PASS_AS_VALUE 0
+#define HF_PP_TEMPLATED_TYPE 1
+#define HF_PP_NON_TEMPLATED_TYPE 0
 
 /*
 
@@ -34,9 +39,9 @@ Here is an example input template to generate wrappers for a function
 #define HF_PP_FUNCTYPE void  //Return value type of function
 #define HF_PP_NVECS 2 //Number of (input/output) vectors
 #define HF_PP_NPAR 3 //Number of scalar parameters
-#define HF_PP_PAR0 (var_a, HInteger, 128, "Length of a block") //Input Parameter
-#define HF_PP_PAR1 (var_b, HInteger, 128, "Length of a block")
-#define HF_PP_PAR2 (var_c, HInteger, 128, "Length of a block")
+#define HF_PP_PAR0 (var_a, HInteger, 128, "Length of a block",HF_PP_TEMPLATED_TYPE,HF_PP_PASS_AS_REFERENCE) //Input Parameter
+#define HF_PP_PAR1 (var_b, T, 128, "Length of a block",HF_PP_TEMPLATED_TYPE,HF_PP_PASS_AS_VALUE)
+#define HF_PP_PAR2 (var_c, HInteger, 128, "Length of a block",HF_PP_NON_TEMPLATED_TYPE,HF_PP_PASS_AS_VALUE))
 
 //Now define the c++ commands that are executed in order to call the underlying function
 #define HF_PP_VEC_WRAPPER_CODE_STL return HF_PP_FUNCNAME(HF_PP_PAR_VECTORITERATORS(STL),HF_PP_PAR_PARAMETERS)
@@ -59,23 +64,34 @@ Here is an example input template to generate wrappers for a function
 */
 
 //This is a simple trick to test whether a specific variable is set to true or not at all (=false)
-#define HF_PP_IS_SET_TESTHF_PP_FUNCTYPE_T 0
-#define HF_PP_IS_SET_TEST1 1
 #define HF_PP_IS_SET_TEST0 0
+#define HF_PP_IS_SET_TEST1 1
+#define HF_PP_IS_SET_TEST2 1
+#define HF_PP_IS_SET_TEST3 1
+#define HF_PP_IS_SET_TEST4 1
+#define HF_PP_IS_SET_TEST5 1
+#define HF_PP_IS_SET_TEST6 1
+#define HF_PP_IS_SET_TEST7 1
+#define HF_PP_IS_SET_TEST8 1
+#define HF_PP_IS_SET_TEST9 1
+#define HF_PP_IS_SET_TEST10 1
+#define HF_PP_IS_SET_TESTHF_PP_FUNCTYPE_T 0
+#define HF_PP_IS_SET_TESTHF_PP_VARIANT 0
 #define HF_PP_IS_SET(WAT) BOOST_PP_CAT(HF_PP_IS_SET_TEST,WAT)
 
 //generate the name of the Nth vector (e.g. vec0 for N=0) 
-#define HF_PP_VECTORNAME(NMAX,N,data) BOOST_PP_CAT(vec,N)
+#define HF_PP_VECTORNAME(N) BOOST_PP_CAT(vec,N)
+#define HF_PP_VECTORNAME3(NMAX,N,data) HF_PP_VECTORNAME(N)
 #define HF_PP_VECTORITERATOR_STL(NMAX,N,data) BOOST_PP_CAT(vec,N).begin(),BOOST_PP_CAT(vec,N).end()
 #define HF_PP_VECTORITERATOR_CASA(NMAX,N,data) BOOST_PP_CAT(vec,N).cbegin(),BOOST_PP_CAT(vec,N).cend()
 
 //definition of an STL vector of type T and number N=0,1,2... 
-#define HF_PP_DEF_VECTOR_STL(NMAX,N,T) vector<T> & HF_PP_VECTORNAME(NMAX,N,T)
-#define HF_PP_DEF_VECTOR_CASA(NMAX,N,T) casa::Vector<T> & HF_PP_VECTORNAME(NMAX,N,T)
+#define HF_PP_DEF_VECTOR_STL(NMAX,N,T) vector<T> & HF_PP_VECTORNAME3(NMAX,N,T)
+#define HF_PP_DEF_VECTOR_CASA(NMAX,N,T) casa::Vector<T> & HF_PP_VECTORNAME3(NMAX,N,T)
 
 //produce the c++ definitions of N vectors of type T using the container type VECTYPE (e.g., STL or CASA) 
 #define HF_PP_DEF_VECTORLIST(T,N,VECTYPE) BOOST_PP_ENUM(N, BOOST_PP_CAT(HF_PP_DEF_VECTOR_,VECTYPE),T)
-#define HF_PP_PAR_VECTORLIST(N) BOOST_PP_ENUM(N, HF_PP_VECTORNAME,T)
+#define HF_PP_PAR_VECTORLIST(N) BOOST_PP_ENUM(N, HF_PP_VECTORNAME3,T)
 //HF_PP_DEF_VECTORLIST(T,2,STL) will call HF_PP_DEF_VECTOR_STL/CASA to give:
 //  vector<T> & vec0, vector<T> & vec1
 
@@ -95,18 +111,18 @@ will give
 
 
 //Gives the c++ definition of the Nth (scalar) parameter
-#define HF_PP_DEF_PARAMETER_N(NMAX,N,T) BOOST_PP_TUPLE_ELEM(4,1,BOOST_PP_CAT(HF_PP_PAR,N)) BOOST_PP_TUPLE_ELEM(4,0,BOOST_PP_CAT(HF_PP_PAR,N)) 
-#define HF_PP_PAR_PARAMETER_N(NMAX,N,T) BOOST_PP_TUPLE_ELEM(4,0,BOOST_PP_CAT(HF_PP_PAR,N)) 
+#define HF_PP_DEF_PARAMETER_N(NMAX,N,T) BOOST_PP_IF(BOOST_PP_TUPLE_ELEM(6,4,BOOST_PP_CAT(HF_PP_PAR,N)),T,BOOST_PP_TUPLE_ELEM(6,1,BOOST_PP_CAT(HF_PP_PAR,N))) BOOST_PP_IF(BOOST_PP_TUPLE_ELEM(6,5,BOOST_PP_CAT(HF_PP_PAR,N)),&,) BOOST_PP_TUPLE_ELEM(6,0,BOOST_PP_CAT(HF_PP_PAR,N)) 
+#define HF_PP_PAR_PARAMETER_N(NMAX,N,T) BOOST_PP_TUPLE_ELEM(6,0,BOOST_PP_CAT(HF_PP_PAR,N)) 
 
 //Gives a list of the c++ definitions of all (i.e. N=NPAR) scalar parameters
-#define HF_PP_DEF_PARAMETERS BOOST_PP_ENUM(HF_PP_NPAR,HF_PP_DEF_PARAMETER_N,T)
+#define HF_PP_DEF_PARAMETERS(T) BOOST_PP_ENUM(HF_PP_NPAR,HF_PP_DEF_PARAMETER_N,T)
 #define HF_PP_PAR_PARAMETERS BOOST_PP_ENUM(HF_PP_NPAR,HF_PP_PAR_PARAMETER_N,T)
 //Adds a preceding comma to the parameterlist if nonzero so that this can be concatenated with another parameterlist
 #define HF_PP_PAR_PARAMETERS_COMMA BOOST_PP_COMMA_IF(HF_PP_NPAR) HF_PP_PAR_PARAMETERS
 
 //Create the entire parameter list consisting of the defintions of vectors and the other parameters
 //HF_PP_PAR_PARLIST will give the list without the type definition
-#define HF_PP_DEF_PARLIST(T,VECTYPE) HF_PP_DEF_VECTORLIST(T,HF_PP_NVECS,VECTYPE) BOOST_PP_COMMA_IF(HF_PP_NPAR) HF_PP_DEF_PARAMETERS
+#define HF_PP_DEF_PARLIST(T,VECTYPE) HF_PP_DEF_VECTORLIST(T,HF_PP_NVECS,VECTYPE) BOOST_PP_COMMA_IF(HF_PP_NPAR) HF_PP_DEF_PARAMETERS(T)
 #define HF_PP_PAR_PARLIST(T,VECTYPE) HF_PP_PAR_VECTORLIST(HF_PP_NVECS) HF_PP_PAR_PARAMETERS_COMMA
 /*
 
@@ -134,16 +150,17 @@ for formal reasons (i.e. typically HString and HPointer functions).
  */
 //Definitions and initialization of the external variables which hold the pointer to the functions to be exposed to Python
 #define HF_PP_GET_FUNCTYPE(TYPE) BOOST_PP_IF(HF_PP_IS_SET(HF_PP_FUNCTYPE_T),TYPE,HF_PP_FUNCTYPE)
-#define HF_PP_PYTHON_WRAPPER_CODE(NIL,FUNC,TYPE) HF_PP_GET_FUNCTYPE(TYPE) (*BOOST_PP_CAT(FUNC,TYPE))(HF_PP_DEF_PARLIST(TYPE,STL)) = &FUNC; 
+#define HF_PP_PYTHON_POINTER_VARIABLE(FUNC,TYPE) BOOST_PP_CAT(BOOST_PP_CAT(FUNC,TYPE),BOOST_PP_IF(HF_PP_IS_SET(HF_PP_VARIANT),HF_PP_VARIANT,))
+#define HF_PP_PYTHON_WRAPPER_CODE(NIL,FUNC,TYPE) HF_PP_GET_FUNCTYPE(TYPE) (*HF_PP_PYTHON_POINTER_VARIABLE(FUNC,TYPE))(HF_PP_DEF_PARLIST(TYPE,STL)) = &FUNC; 
 #define HF_PP_PYTHON_WRAPPER_DUMMY_CODE(NIL,FUNC,TYPE) HF_PP_GET_FUNCTYPE(TYPE) FUNC (HF_PP_DEF_PARLIST(TYPE,STL)) {}
 #define HF_PP_MAKE_PYTHON_WRAPPERS(FUNC,TYPE_LIST) BOOST_PP_SEQ_FOR_EACH(HF_PP_PYTHON_WRAPPER_CODE,FUNC,TYPE_LIST)
 #define HF_PP_MAKE_PYTHON_WRAPPERS_DUMMY(FUNC,TYPE_LIST) BOOST_PP_SEQ_FOR_EACH(HF_PP_PYTHON_WRAPPER_DUMMY_CODE,FUNC,TYPE_LIST)
 
-#define HF_PP_PYTHON_EXPOSE_CODE(NIL,FUNC,TYPE) def(#FUNC,BOOST_PP_CAT(FUNC,TYPE));
+#define HF_PP_PYTHON_EXPOSE_CODE(NIL,FUNC,TYPE) def(#FUNC,HF_PP_PYTHON_POINTER_VARIABLE(FUNC,TYPE));
 #define HF_PP_PYTHON_EXPOSE BOOST_PP_SEQ_FOR_EACH(HF_PP_PYTHON_EXPOSE_CODE,HF_PP_FUNCNAME,HF_PP_ALL_PYTHONTYPES)
 
 //Generate the defintions of the external variables which hold the pointer to the functions to be exposed to Python - to be included in the hFILE
-#define HF_PP_PYTHON_WRAPPER_CODE_hFILE(NIL,FUNC,T) extern HF_PP_GET_FUNCTYPE(T) (*BOOST_PP_CAT(FUNC,T))(HF_PP_DEF_PARLIST(T,STL)); 
+#define HF_PP_PYTHON_WRAPPER_CODE_hFILE(NIL,FUNC,T) extern HF_PP_GET_FUNCTYPE(T) (*HF_PP_PYTHON_POINTER_VARIABLE(FUNC,T))(HF_PP_DEF_PARLIST(T,STL)); 
 #define HF_PP_MAKE_PYTHON_WRAPPERS_hFILE BOOST_PP_SEQ_FOR_EACH(HF_PP_PYTHON_WRAPPER_CODE_hFILE,HF_PP_FUNCNAME,HF_PP_ALL_TYPES)
 
 /*

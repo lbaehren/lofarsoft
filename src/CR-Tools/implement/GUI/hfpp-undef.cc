@@ -6,6 +6,7 @@
 #undef HF_PP_ALT_FUNCNAME
 #undef HF_PP_FUNCTYPE
 #undef HF_PP_FUNCBRIEF
+#undef HF_PP_VARIANT
 
 #undef HF_PP_NVECS
 #undef HF_PP_NPAR

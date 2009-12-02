@@ -24,6 +24,7 @@ if (gawk_executable)
   add_custom_target (hfget_awk
     COMMAND ${gawk_executable} -f hfiter.awk hffuncs.cc | ${gawk_executable} -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.awk.cc
     COMMAND ${gawk_executable} -f hfiter.awk hffuncs.h | ${gawk_executable} -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.awk.h
+    COMMAND ${gawk_executable} -f hfsplit2h.awk hfanalysis.cc
     WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement/GUI
     COMMENT "Running awk to generate source files ..."
     )

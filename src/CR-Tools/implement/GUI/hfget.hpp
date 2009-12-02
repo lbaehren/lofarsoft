@@ -425,10 +425,7 @@ boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_i
  def("hRunningAverage",hRunningAverageVec_C);
  def("hWeights",hWeights);
 
-#include "hwrappers-hfanalysis.cc.h"
-
- hPyExposeINCS(hNegate);
- hPyExposeINCS(hFill);
+#include "hfwrappers-hfanalysis.cc.h"
  hPyExposeINCS(hReadFile);
  
 

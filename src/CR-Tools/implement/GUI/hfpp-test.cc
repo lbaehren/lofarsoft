@@ -33,9 +33,12 @@ change to: #include <boost/preprocessor/detail/split.hpp>
 #define HF_PP_FUNCTYPE void  //Return value type of function
 #define HF_PP_NVECS 2 //Number of (input/output) vectors
 #define HF_PP_NPAR 3 //Number of scalar parameters
-#define HF_PP_PAR0 (var_a, HInteger, 128, "Length of a block") //Input Parameter
-#define HF_PP_PAR1 (var_b, HInteger, 128, "Length of a block")
-#define HF_PP_PAR2 (var_c, HInteger, 128, "Length of a block")
+
+//Parameter definiton is ordered as (name, Type    , default, Description, templated type T, pass-as-reference/return value)
+
+#define HF_PP_PAR0 (var_a, HInteger, 128, "Length of a block",0,0) //Input Parameter
+#define HF_PP_PAR1 (var_b,        T, 128, "Length of a block",1,0)
+#define HF_PP_PAR2 (var_c, HInteger, 128, "Length of a block",0,1)
 
 //Now define the c++ commands that are executed in order to call the underlying function
 #define HF_PP_VEC_WRAPPER_CODE_STL return HF_PP_FUNCNAME(HF_PP_PAR_VECTORITERATORS(STL),HF_PP_PAR_PARAMETERS)
@@ -56,10 +59,11 @@ HF_PP_GENERATE_WRAPPERS
 //$COPY_TO HFILE START --------------------------------------------------
 #include "hfpp-undef.cc"
 #define HF_PP_FUNCNAME FOO  //The Name of the function
+#define HF_PP_VARIANT 2 // Define if this is an overload 
 #define HF_PP_FUNCTYPE_T 1  //Return value type of function is templated with type T of vector
 #define HF_PP_NVECS 1 //Number of (input/output) vectors
 
-#define HF_PP_PAR0 (para,HInteger,128,"Parameter A")  //Definition of one input parameter
+#define HF_PP_PAR0 (para,HInteger,128,"Parameter A",0,0)  //Definition of one input parameter
 #define HF_PP_NPAR 1                                  //Number of scalar parameters
 
 #define HF_PP_VEC_WRAPPER_CODE_STL return HF_PP_FUNCNAME(HF_PP_PAR_VECTORITERATORS(STL),HF_PP_PAR_PARAMETERS)
@@ -67,6 +71,10 @@ HF_PP_GENERATE_WRAPPERS
 
 HF_PP_GENERATE_WRAPPERS
 
+HF_PP_GENERATE_WRAPPERS_hFILE
+HF_PP_GENERATE_WRAPPERS_PYTHON
+
 
 //$COPY_TO HFILE END --------------------------------------------------
 
+#define HF_PP_PARX (name,val,type,HInteger,value,128,doc,"Parameter A")  //Definition of one input parameter

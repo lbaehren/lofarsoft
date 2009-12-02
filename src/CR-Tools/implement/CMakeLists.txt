@@ -33,9 +33,9 @@ if (CR_WITH_GLISH)
   endif (HAVE_CASA)
 endif (CR_WITH_GLISH)
 
-if (HAVE_FFTW3)
-  list (APPEND cr_modules Analysis/Utils)
-endif (HAVE_FFTW3)
+#if (HAVE_FFTW3)
+#  list (APPEND cr_modules Analysis/Utils)
+#endif (HAVE_FFTW3)
 
 ##__________________________________________________________
 ## Collect source files to be compiled into the library
