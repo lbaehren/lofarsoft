@@ -17,10 +17,12 @@ from mathgl import *
 #import numpy
 import sys
 from math import *
+import os
 
 numberOfRCUsperStation = 96;
 mglGraphPS = 1
 timeWindowForCoincidence = 10000 # window for coincident pulse in samples
+latestTimeInFile = -1 # needed for determining bin-sizes in non-24-hour plots
 #totalNumberOfTriggers = 0
 
 # keys for our trigger dictionary; separate lists for some of the statistics
@@ -86,11 +88,25 @@ def listOfTimeDifferences(listOfTriggers, rcu):
 
 def readTriggerListFromCSVFile(filename): # directly make histogram, not making triggerList
     myKeys = [RCUnrKey, seqnrKey, timeKey, sampleKey, sumKey, nrSamplesKey, peakKey, powerBeforeKey, powerAfterKey]
-    triggerReader = csv.DictReader(open(fileName), myKeys, delimiter=' ')
+    lastTimeReader = csv.DictReader(os.popen("tail -1 " + fileName), myKeys, delimiter=' ')
+    global latestTimeInFile
+    for record in lastTimeReader:
+        latestTimeInFile = int(record[timeKey])
+        print latestTimeInFile
+    if latestTimeInFile > 2.2e9:
+        print "Error reading latest timestamp in the file!"
+    
    # numTriggers = triggerReader.line_num # trigger records don't span multiple lines
    # print numTriggers
 #    triggerList = []
     rcuCount = [0] * numberOfRCUsperStation; # creates a list of 96 zeros
+    
+    triggerReader = csv.DictReader(open(fileName), myKeys, delimiter=' ')
+    firstRecord = triggerReader.next()
+    firstTime = int(firstRecord[timeKey])
+    lastTime = latestTimeInFile
+    nBins = 200 # bins for time-series
+    timeSeriesHistogram = [0] * nBins
     
     for record in triggerReader:
         thisTime = int(record[timeKey])
@@ -98,9 +114,14 @@ def readTriggerListFromCSVFile(filename): # directly make histogram, not making 
 #            triggerList.append(record)
             thisRCU = int(record[RCUnrKey])
             rcuCount[thisRCU] += 1
+            
+            timeSeriesIndex = int(nBins * float(thisTime - firstTime) / float(lastTime - firstTime + 0.01)) # epsilon to remove boundary effect when thisTime = lastTime           
+            timeSeriesHistogram[timeSeriesIndex] += 1       
         else:
             print 'Invalid timestamp! ' + str(thisTime)
+    global totalNumberOfTriggers
     totalNumberOfTriggers = triggerReader.line_num
+    plotBinnedTimeSeriesOfTriggers(timeSeriesHistogram, firstTime, lastTime)
     print totalNumberOfTriggers
     return rcuCount        
     
@@ -141,8 +162,7 @@ def sortedTriggerListByTimeAndSample(inputList): # sort triggers on 'time', then
 
     return sorted(inputList, compare_by(timeKey, sampleKey) )
     
-    
-    
+  
 def coincidentPulseIndicesInTriggerList(sortedTriggerList, timeWindowInSamples): # input list is assumed to be time-sorted!
     pulseIndices = []
     # we have to guess the sampling rate! Well, let's look at the max value for 'sample'...
@@ -385,14 +405,12 @@ def makeHistogramOfTotalSumInPulses(sortedTriggerList, pulseIndices):
     graph.WriteEPS("totalSumPerPulse.eps","Histogram of total sum per pulse")
 
 
-def makeBinnedTimeSeriesOfTriggers(triggerList): # works on global 'time' list
+
+def plotBinnedTimeSeriesOfTriggers(binnedData, firstTime, lastTime): 
     # make binned timeseries of trigger counts to see variations over time
-
-    nBins = min(200, len(triggerList) / 10)
-    totalTriggers = len(triggerList)
-    firstTime = int(triggerList[0][timeKey])
-    lastTime = int(triggerList[totalTriggers - 1][timeKey])
-
+    
+    nBins = len(binnedData)
+    
     timeBinSize = float(lastTime - firstTime) / nBins # seconds
     print nBins
     print firstTime
@@ -400,8 +418,10 @@ def makeBinnedTimeSeriesOfTriggers(triggerList): # works on global 'time' list
     print timeBinSize
     #nBins = (lastTime - firstTime) / timeBinSize
     # use again numpy's histogram function
-    (y, x) = numpy.histogram(time, int(nBins))
-
+    #(y, x) = numpy.histogram(time, int(nBins))
+    
+    x = [timeBinSize * float(k) for k in range(nBins)] # look, I can write compact Python statements! ;)
+    y = binnedData
     width=1200  
     height=600
     mglGraphPS = 1
@@ -414,7 +434,7 @@ def makeBinnedTimeSeriesOfTriggers(triggerList): # works on global 'time' list
         gY[i] = float(y[i])
 
     for i in range(len(x)):
-        gX[i] = (float(x[i]) - firstTime) / 60.0
+        gX[i] = float(x[i]) / 60.0
 
     maxX = gX.Max('x')[0]
     maxY = float(max(y))
@@ -432,7 +452,7 @@ def makeBinnedTimeSeriesOfTriggers(triggerList): # works on global 'time' list
     graph.Puts(float(maxX) * 0.5, float(maxY) * 1.15, 0, "Time series of triggers (binned)")
     graph.SetFontSize(3.0)
 
-    graph.Puts(float(maxX) * 0.5,float(maxY)*1.05,0,"Total trigger count = " + str(len(triggerList)) + "; bin width = " + format(timeBinSize, "4.1f") + " s")
+    graph.Puts(float(maxX) * 0.5,float(maxY)*1.05,0,"Total trigger count = " + str(totalNumberOfTriggers) + "; bin width = " + format(timeBinSize, "4.1f") + " s")
 
     graph.Label("x","Time (min)",1)
     graph.Label("y","Counts",1)
