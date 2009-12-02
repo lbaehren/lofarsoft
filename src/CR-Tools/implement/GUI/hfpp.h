@@ -9,6 +9,7 @@
 #include <boost/preprocessor/tuple.hpp>
 #include <boost/preprocessor/repeat.hpp>
 #include <boost/preprocessor/comparison/equal.hpp>
+#include <boost/preprocessor/facilities/expand.hpp>
 
 //Defines datatypes to iterate wrappers over
 #define HF_PP_NUMERIC_TYPES (HInteger)(HNumber)(HComplex)
@@ -167,6 +168,9 @@ void (*TESTHInteger)( vector<HInteger> & vec0 , vector<HInteger> & vec1 , HInteg
 
 */
 
+#define HF_PP_VEC_WRAPPER_CODE_STL_DEFAULT(FUNC) return FUNC(HF_PP_PAR_VECTORITERATORS(STL) HF_PP_PAR_PARAMETERS_COMMA)
+#define HF_PP_VEC_WRAPPER_CODE_CASA_DEFAULT(FUNC) return FUNC(HF_PP_PAR_VECTORITERATORS(CASA) HF_PP_PAR_PARAMETERS_COMMA)
+
 #define HF_PP_VEC_WRAPPERS\
   template <class T> inline HF_PP_GET_FUNCTYPE(T) HF_PP_FUNCNAME(HF_PP_DEF_PARLIST(T,STL)) {HF_PP_VEC_WRAPPER_CODE_STL;} \
   template <class T> inline HF_PP_GET_FUNCTYPE(T) HF_PP_FUNCNAME(HF_PP_DEF_PARLIST(T,CASA)) {HF_PP_VEC_WRAPPER_CODE_CASA;} 
@@ -180,9 +184,9 @@ void (*TESTHInteger)( vector<HInteger> & vec0 , vector<HInteger> & vec1 , HInteg
 #define HF_PP_GENERATE_WRAPPERS_PYTHON HF_PP_PYTHON_EXPOSE
 
 //Choose the correct wrapper appropriate for the current type of file (.cc, .h, python exposer)
-//#define HF_PP_GENERATE_WRAPPERS_FILE(TYPE) BOOST_PP_CAT(TYPE,_HF_PP_GENERATE_WRAPPERS)
-//#define HF_PP_GENERATE_WRAPPERS_FILE(TYPE) TYPE##_HF_PP_GENERATE_WRAPPERS
-//#define HF_PP_GENERATE_WRAPPERS HF_PP_GENERATE_WRAPPERS_FILE(HF_PP_FILETYPE) 
+//This allows one to generate wrappers of different kind, depending on the file type one is using
+#define HF_PP_GENERATE_WRAPPERS_FILE(TYPE) HF_PP_GENERATE_WRAPPERS_##TYPE
+#define HF_PP_GENERATE_WRAPPERS BOOST_PP_EXPAND(HF_PP_GENERATE_WRAPPERS_FILE HF_PP_FILETYPE())
 
 //--------------------------------------------------------------------------------
 // END hfpp.h

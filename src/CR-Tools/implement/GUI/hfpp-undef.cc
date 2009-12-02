@@ -3,6 +3,7 @@
 #endif
 
 #undef HF_PP_FUNCNAME
+#undef HF_PP_ALT_FUNCNAME
 #undef HF_PP_FUNCTYPE
 #undef HF_PP_FUNCBRIEF
 

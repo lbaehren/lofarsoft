@@ -32,9 +32,9 @@
 #define STLVectorIteratorC typename vector<HComplex>::iterator
 #define IterValueType typename Iter::value_type
 
-#define HF_PP_FILETYPE hFILE // Tell the preprocessor (for generating wrappers) that this is a c++ source code file //DOES NOT WORK with CAT need to do it manually
-#define HF_PP_GENERATE_WRAPPERS HF_PP_GENERATE_WRAPPERS_hFILE
-#include "hfanalysis.cc.h"
+#undef HF_PP_FILETYPE
+#define HF_PP_FILETYPE() (hFILE)  // Tell the preprocessor (for generating wrappers) that this is a c++ header file (brackets are crucial)
+#include "hwrappers-hfanalysis.cc.h"  // include wrapper definitions generated automatically from source
 
 #define DefPythonWrapper_VecINCS_0_Parameters(FUNC) \
   void FUNC (vector<HPointer > &vec);		    \
@@ -157,42 +157,6 @@ template <class T> inline void hFill (casa::Vector<T> &vec, T val);
 
 DefPythonWrapper_VecINCS_1_TParameters(hFill);
 
-//! Performs a sum over the values in a vector
-template <class Iter> 
-typename Iter::value_type hSum(const Iter data_start, const Iter data_end);
-DefVecWrappers_TFunc_Vec_0_Parameters(hSum);
-DefPythonWrapper_TVecINC_0_Parameters(hSum);
-
-
-//! Returns the mean value of all elements in a vector
-/*template <class Iter> 
-typename Iter::value_type hMean(const Iter data_start, const Iter data_end);
-DefVecWrappers_TFunc_Vec_0_Parameters(hMean);
-DefPythonWrapper_TVecINC_0_Parameters(hMean);
-*/
-
-
-
-//! Returns the median value of all elements in a vector
-template <class Iter> 
-IterValueType hMedian(const Iter data_start, const Iter data_end);
-DefVecWrappers_TFunc_Vec_0_Parameters(hMedian);
-DefPythonWrapper_TVecINC_0_Parameters(hMedian);
-
-/*
-extern void (*hRunningAverageVec_N_3)(vector<HNumber > &vec_in,vector<HNumber > &vec_out, address len);
-extern void (*hRunningAverageVec_I_3)(vector<HInteger> &vec_in,vector<HInteger> &vec_out, address len);
-extern void (*hRunningAverageVec_C_3)(vector<HComplex> &vec_in,vector<HComplex> &vec_out, address len);
-extern void (*hRunningAverageVec_N_2)(vector<HNumber > &vec_in,vector<HNumber > &vec_out);
-extern void (*hRunningAverageVec_I_2)(vector<HInteger> &vec_in,vector<HInteger> &vec_out);
-extern void (*hRunningAverageVec_C_2)(vector<HComplex> &vec_in,vector<HComplex> &vec_out);
-*/
 
 #endif
-
-#ifdef HF_PP_GENERATE_WRAPPERS
-#undef HF_PP_GENERATE_WRAPPERS 
-#endif
-#ifdef HF_PP_FILETYPE
 #undef HF_PP_FILETYPE
-#endif

@@ -16,9 +16,10 @@ using namespace std;
 #include <GUI/hfanalysis.h>
 
 //Some definitions needed for the preprosessor programming
-//$FILENAME: HFILE=$SELF.h  // Split awk output to this filename plus .h
-#define HF_PP_FILETYPE CC  // Tell the preprocessor (for generating wrappers) that this is a c++ source code file //DOES NOT WORK with CAT need to do it manually
-#define HF_PP_GENERATE_WRAPPERS HF_PP_GENERATE_WRAPPERS_CC
+//$FILENAME: HFILE=hwrappers-$SELF.h  // Copy source code (where specified with COPY_TO HFILE START) to the file hwrappers-hfanalysis.cc.h
+
+#undef HF_PP_FILETYPE
+#define HF_PP_FILETYPE() (CC)  // Tell the preprocessor (for generating wrappers) that this is a c++ source code file (brackets are crucial)
 
 /* Some explanations...
 
@@ -711,6 +712,18 @@ template <class T> inline void hFill (casa::Vector<T> &vec, T val) {hFill<T> (st
 PythonWrapper_VecINCS_1_TParameters(hFill);
 //------End Wrappers to hFill --------
 
+
+//$COPY_TO HFILE START --------------------------------------------------
+#include "hfpp-undef.cc"
+#define HF_PP_FUNCNAME hSum  //The Name of the function
+//.......................................................................
+#define HF_PP_FUNCBRIEF "Performs a sum over the values in a vector and returns the value"
+#define HF_PP_FUNCTYPE_T 1     //Return value type of function is templated with T
+#define HF_PP_NVECS 1 //Number of (input/output) vectors
+#define HF_PP_NPAR 0  //Number of other parameters
+#include "hfdefaultwrappercode.h"
+//$COPY_TO END --------------------------------------------------
+
 /*!
   \brief Performs a sum over the values in a vector and returns the value
 
@@ -732,24 +745,15 @@ IterValueType hSum(const Iter data_start,const Iter data_end)
   return sum;
 } 
 
-
-
-//Generate wrappers for STL Vectors, CASA Vectors, and Python(STLVectors)
-//------------------------------------------------------------------------
-PythonWrapper_TVecINC_0_Parameters(hSum);
-VecWrappers_TFunc_Vec_0_Parameters(hSum);
-//------------------------------------------------------------------------
-
 //$COPY_TO HFILE START --------------------------------------------------
 #include "hfpp-undef.cc"
 #define HF_PP_FUNCNAME hMean  //The Name of the function
+//.......................................................................
 #define HF_PP_FUNCBRIEF "Returns the mean value of all elements in a vector"
 #define HF_PP_FUNCTYPE_T 1     //Return value type of function is templated with T
 #define HF_PP_NVECS 1 //Number of (input/output) vectors
 #define HF_PP_NPAR 0  //Number of other parameters
-#define HF_PP_VEC_WRAPPER_CODE_STL return HF_PP_FUNCNAME(HF_PP_PAR_VECTORITERATORS(STL) HF_PP_PAR_PARAMETERS_COMMA)
-#define HF_PP_VEC_WRAPPER_CODE_CASA return HF_PP_FUNCNAME(HF_PP_PAR_VECTORITERATORS(CASA) HF_PP_PAR_PARAMETERS_COMMA)
-HF_PP_GENERATE_WRAPPERS
+#include "hfdefaultwrappercode.h"
 //$COPY_TO END --------------------------------------------------
 
 /*!
@@ -772,6 +776,30 @@ IterValueType hMean (const Iter data_start,const Iter data_end)
 } 
 
 
+//$COPY_TO HFILE START --------------------------------------------------
+#include "hfpp-undef.cc"
+#define HF_PP_FUNCNAME hMedian  //The Name of the function
+//.......................................................................
+#define HF_PP_FUNCBRIEF "Returns the median value of the elements in a (scratch) vector."
+#define HF_PP_FUNCTYPE_T 1     //Return value type of function is templated with T
+#define HF_PP_NVECS 1 //Number of (input/output) vectors
+#define HF_PP_NPAR 0  //Number of other parameters
+#define HF_PP_VEC_WRAPPER_CODE_STL \
+  vector<T> vec_copy(HF_PP_VECTORITERATOR_STL(N,0,N));\
+  return hMedian(vec_copy.begin(),vec_copy.end())	   
+#define HF_PP_VEC_WRAPPER_CODE_CASA \
+  vector<T> vec_copy(HF_PP_VECTORITERATOR_CASA(N,0,N));\
+  return hMedian(vec_copy.begin(),vec_copy.end())			
+HF_PP_GENERATE_WRAPPERS
+
+#undef HF_PP_FUNCNAME
+#undef HF_PP_FUNCBRIEF
+//Define a 2nd convenience wrapper function - needs a different name 
+#define HF_PP_ALT_FUNCNAME hMedian
+#define HF_PP_FUNCNAME hMedianSort  //The Name of the function
+#define HF_PP_FUNCBRIEF "Returns the median value of the elements in a vector and sorts the element of the vector (slightly faster that hMedian)."
+#include "hfdefaultwrappercode.h"
+//$COPY_TO END --------------------------------------------------
 
 
 /*!  \brief Returns the median value of the elements in a
@@ -794,10 +822,7 @@ IterValueType hMedian(const Iter data_start, const Iter data_end)
   if (data_end!=data_start) return *(data_start+len2);
   else return mycast<IterValueType>(0);
 } 
-//Generate wrappers for STL Vectors, CASA Vectors, and Python(STLVectors)
-//------------------------------------------------------------------------
-PythonWrapper_TVecINC_0_Parameters(hMedian);
-VecWrappers_TFunc_VecCopy_0_Parameters(hMedian);
+
 
 /*!  \brief Downsample the input vector to a smaller output vector, by
      replacing subsequent blocks of values by their mean value. The
@@ -844,3 +869,4 @@ void dummy_instantitate_templates(){
   casa::Vector<HNumber> v;
   hRunningAverageCasaVec(v, v,5,WEIGHTS_GAUSSIAN);
 }
+#undef HF_PP_FILETYPE

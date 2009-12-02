@@ -16,7 +16,7 @@ change to: #include <boost/preprocessor/detail/split.hpp>
 */
 //--------------------------------------------------------------------------------
 #include "hfpp.h"
-#define HF_PP_FILETYPE CC  // Tell the preprocessor that this is a c++ source code file
+#define HF_PP_FILETYPE() (CC)  // Tell the preprocessor that this is a c++ source code file
 //#define HF_PP_FILETYPE hFILE  // Tell the preprocessor that this is a header file
 //#define HF_PP_FILETYPE hPYTHON  // Tell the preprocessor that this is a header file for Python expose
 // --------------------------------------------------------------------------------
@@ -65,6 +65,8 @@ HF_PP_GENERATE_WRAPPERS
 #define HF_PP_VEC_WRAPPER_CODE_STL return HF_PP_FUNCNAME(HF_PP_PAR_VECTORITERATORS(STL),HF_PP_PAR_PARAMETERS)
 #define HF_PP_VEC_WRAPPER_CODE_CASA return HF_PP_FUNCNAME(HF_PP_PAR_VECTORITERATORS(CASA),HF_PP_PAR_PARAMETERS)
 
-HF_PP_GENERATE_WRAPPERS 
+HF_PP_GENERATE_WRAPPERS
+
+
 //$COPY_TO HFILE END --------------------------------------------------
 
