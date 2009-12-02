@@ -28,7 +28,7 @@
 // Standard library header files
 #include <iostream>
 #include <assert.h>
-#include <complex.h>
+#include <complex>
 #include "fftw3.h" 
 #include <math.h>
 //CR-Tools
@@ -67,7 +67,7 @@ namespace CR { // Namespace CR -- begin
     See tFFTtoFreq.cc
 
   */  
-  class FFTtoFreq:public ToFreqDomain{
+   class FFTtoFreq:public ToFreqDomain{
   public:
     FFTtoFreq(uint size=1024);
     ~FFTtoFreq();
@@ -77,7 +77,7 @@ namespace CR { // Namespace CR -- begin
     double GetAmp(uint channel);
     double GetReal(uint channel);
     double GetImag(uint channel);
-    complex double GetComplex(uint channel);
+    mydcomplex GetComplex(uint channel);
     
   private:
     void init();

@@ -28,7 +28,7 @@
 // Standard library header files
 #include <iostream>
 #include <assert.h>
-#include <complex.h>
+#include <complex>
 #include "fftw3.h" 
 #include <math.h>
 //CR-Tools
@@ -78,8 +78,8 @@ namespace CR { // Namespace CR -- begin
     double GetAmp(uint channel);
     double GetReal(uint channel);
     double GetImag(uint channel);
-    complex double GetComplex(uint channel);
-    const complex double * GetComplexP(){return outcomplex;}
+    mydcomplex GetComplex(uint channel);
+    const fftw_complex * GetComplexP(){return outcomplex;}
  
  private:
     void init();

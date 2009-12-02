@@ -28,11 +28,13 @@
 #include <iostream>
 #include <assert.h>
 #include <vector>
+#include <complex>
 
 
 
 // CR-Tools header files
 #include <crtools.h>
+#include <Analysis/Utils/ToFreqDomain.h>
 
 using namespace std;
 
@@ -68,7 +70,7 @@ namespace CR { // Namespace CR -- begin
   public:
     ToTimeDomain(){};
     ~ToTimeDomain(){};
-    virtual void Convert(const vector<complex double> &in)=0;
+    virtual void Convert(const vector<mydcomplex> &in)=0;
 
     virtual double GetAmp(uint channel) =0;
     virtual const vector<double> GetBlock() =0;

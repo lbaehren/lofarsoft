@@ -72,17 +72,18 @@ namespace CR { // Namespace CR -- begin
   
   void InvPolyPhaseFilter::AddBlock(){
     for(uint i=0;i<blocksize;i++){
-      itsData[startpos+i]=outreal[i];
+      itsData[startpos+i]=outreal[i]; //normalized
     }
     startpos+=blocksize;
     if(startpos>=nrTaps*blocksize) startpos=0;
   }
 
-  void InvPolyPhaseFilter::Convert(const vector<complex double > & in){
+  void InvPolyPhaseFilter::Convert(const vector<mydcomplex > & in){
     assert(in.size()==blocksize/2+1);
-    for(uint i=0;i<blocksize/2+1;i++)
-      incomplex[i] = in[i];
-    
+    for(uint i=0;i<blocksize/2+1;i++){
+      incomplex[i][0] = real(in[i]);
+      incomplex[i][1] = imag(in[i]);
+    }
     fftw_execute(pc2r);
     AddBlock();
     get_invppf();

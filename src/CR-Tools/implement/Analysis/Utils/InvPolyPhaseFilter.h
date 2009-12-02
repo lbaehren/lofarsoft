@@ -28,7 +28,7 @@
 // Standard library header files
 #include <iostream>
 #include <assert.h>
-#include <complex.h>
+#include <complex>
 #include "fftw3.h" 
 #include <math.h>
 //CR-Tools
@@ -72,7 +72,7 @@ namespace CR { // Namespace CR -- begin
     InvPolyPhaseFilter(uint size=1024,uint nrtaps=16);
     ~InvPolyPhaseFilter();
     void setWeights(const vector<double> &weights){itsWeights= weights;}
-    void Convert(const vector<complex double> &in);
+    void Convert(const vector<mydcomplex> &in);
     
     double GetAmp(uint itime);
     const vector<double> GetBlock();

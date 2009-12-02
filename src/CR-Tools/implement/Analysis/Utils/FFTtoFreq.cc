@@ -66,23 +66,23 @@ namespace CR { // Namespace CR -- begin
 
   
   double FFTtoFreq::GetPhase(uint channel){
-    return carg(outcomplex[channel]);
+    return arg(mydcomplex(outcomplex[channel][0],outcomplex[channel][1]));
   }
   double FFTtoFreq::GetAmp(uint channel){
-    double re = creal(outcomplex[channel]);
-    double im = cimag(outcomplex[channel]);
-    return sqrt(re*re+im*im);
-
+//     double re = creal(outcomplex[channel]);
+//     double im = cimag(outcomplex[channel]);
+//     return sqrt(re*re+im*im);
+    return sqrt(outcomplex[channel][0]*outcomplex[channel][0]+outcomplex[channel][1]*outcomplex[channel][1]);
   }
   double FFTtoFreq::GetReal(uint channel){
-    return creal(outcomplex[channel]);
+    return outcomplex[channel][0];
   }
   double FFTtoFreq::GetImag(uint channel){
-    return cimag(outcomplex[channel]);
+    return outcomplex[channel][1];
   }
   
-   complex double FFTtoFreq::GetComplex(uint channel){
-    return outcomplex[channel];
+  mydcomplex FFTtoFreq::GetComplex(uint channel){
+    return mydcomplex(outcomplex[channel][0], outcomplex[channel][1]);
   }
   
   

@@ -35,27 +35,25 @@ namespace CR { // Namespace CR -- begin
 
 
   void SimpleBeamFormer::Clear(){
-    itsBeam.assign(pixels*nofChannels,0+0*I);
+    itsBeam.assign(pixels*nofChannels,mydcomplex(0.,0.));
   }
   
   double SimpleBeamFormer::GetPhase(uint pixelnr,uint channelnr){
-    return carg(itsBeam[channelnr*pixels+pixelnr]);
+    return arg(itsBeam[channelnr*pixels+pixelnr]);
   }
 
   double SimpleBeamFormer::GetAmp(uint pixelnr,uint channelnr)
   {
-    double re = creal(itsBeam[channelnr*pixels+pixelnr]);
-    double im = cimag(itsBeam[channelnr*pixels+pixelnr]);
-    return sqrt(re*re+im*im);
+    return abs(itsBeam[channelnr*pixels+pixelnr]);
   }
   double SimpleBeamFormer::GetReal(uint pixelnr,uint channelnr){
-    return creal(itsBeam[channelnr*pixels+pixelnr]);
+    return real(itsBeam[channelnr*pixels+pixelnr]);
   }
   double SimpleBeamFormer::GetImag(uint pixelnr,uint channelnr){
-    return cimag(itsBeam[channelnr*pixels+pixelnr]);
+    return imag(itsBeam[channelnr*pixels+pixelnr]);
   }
   
-  complex double SimpleBeamFormer::GetComplex(uint pixelnr,uint channelnr){
+  mydcomplex SimpleBeamFormer::GetComplex(uint pixelnr,uint channelnr){
     return itsBeam[channelnr*pixels+pixelnr];
   }
   
@@ -99,13 +97,13 @@ namespace CR { // Namespace CR -- begin
 
 
   void SimpleBeamFormer::Add(double Amp, double Phase, int iant, double freq,uint pixelnr,uint channel_nr,bool real_imag){
-    complex double data = Amp*cos(Phase)+Amp*sin(Phase)*I;
+    mydcomplex data = mydcomplex(Amp*cos(Phase),Amp*sin(Phase));
     Add(data,iant,freq,pixelnr);
   }
 
-  void SimpleBeamFormer::Add(complex double data,int iant, double freq,uint pixelnr,uint channelnr){
+  void SimpleBeamFormer::Add(mydcomplex data,int iant, double freq,uint pixelnr,uint channelnr){
     double delay = delays[pixelnr*nofAntennas+iant]*freq;
-    itsBeam[channelnr*pixels+pixelnr]+=data*(cos(delay)+sin(delay)*I);
+    itsBeam[channelnr*pixels+pixelnr]+=data*mydcomplex(cos(delay),sin(delay));
   }
   
 

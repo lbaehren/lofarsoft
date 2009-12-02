@@ -30,10 +30,13 @@
 #include <assert.h>
 #include <math.h>
 #include <vector>
-#include <complex.h>
+#include <complex>
 //CR-Tools
 
 #include <crtools.h>
+
+#include <Analysis/Utils/ToFreqDomain.h>
+
 
 using namespace std;
 
@@ -66,6 +69,7 @@ namespace CR { // Namespace CR -- begin
     See tSimpleBeamFormer.cc
 
   */  
+
   class SimpleBeamFormer{
   public:
     static const double pi = 3.141592653589793238462643383279502884197169 ;
@@ -75,14 +79,14 @@ namespace CR { // Namespace CR -- begin
     ~SimpleBeamFormer();
     
     void Add(double Amp, double Phase, int iant, double freq,uint pixelnr,uint channelnr=0,bool real_imag=false);
-    void Add(complex double data, int iant, double freq,uint pixelnr,uint channelnr=0);
+    void Add(mydcomplex data, int iant, double freq,uint pixelnr,uint channelnr=0);
     
     double GetPhase(uint pixelnr,uint channelnr=0);
     double GetAmp(uint pixelnr,uint channelnr=0);
     double GetReal(uint pixelnr,uint channelnr=0);
     double GetImag(uint pixelnr,uint channelnr=0);
-    complex double GetComplex(uint pixelnr,uint channelnr=0);
-    const vector<complex double> GetComplexBlock(){return itsBeam;}
+    mydcomplex GetComplex(uint pixelnr,uint channelnr=0);
+    const vector<mydcomplex> GetComplexBlock(){return itsBeam;}
     /*!
       \brief Set the antenna positions(x,y,z in m, sizeof vector=3*nofAntennas)
     */
@@ -92,7 +96,7 @@ namespace CR { // Namespace CR -- begin
   private:
     void setDelays();
     void init();
-    vector<complex double> itsBeam;
+    vector<mydcomplex> itsBeam;
     int nofAntennas;
     uint pixels;
     uint nofChannels;

@@ -75,23 +75,21 @@ namespace CR { // Namespace CR -- begin
   }
   
   double PolyPhaseFilter::GetPhase(uint channel){
-    return carg(outcomplex[channel]);
+    return arg(mydcomplex(outcomplex[channel][0],outcomplex[channel][1]));
   }
   double PolyPhaseFilter::GetAmp(uint channel){
-    double re = norm*creal(outcomplex[channel]);
-    double im = norm*cimag(outcomplex[channel]);
-    return sqrt(re*re+im*im);
+    return norm*sqrt(outcomplex[channel][0]*outcomplex[channel][0]+outcomplex[channel][1]*outcomplex[channel][1]);
 
   }
   double PolyPhaseFilter::GetReal(uint channel){
-    return norm*creal(outcomplex[channel]);
+    return norm*(outcomplex[channel][0]);
   }
   double PolyPhaseFilter::GetImag(uint channel){
-    return norm*cimag(outcomplex[channel]);
+    return norm*(outcomplex[channel][1]);
   }
   
-  complex double PolyPhaseFilter::GetComplex(uint channel){
-    return norm*outcomplex[channel];
+  mydcomplex PolyPhaseFilter::GetComplex(uint channel){
+    return norm*mydcomplex(outcomplex[channel][0],outcomplex[channel][1]);
   }
   
   

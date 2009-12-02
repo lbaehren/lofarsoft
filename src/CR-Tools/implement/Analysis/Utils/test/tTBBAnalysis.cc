@@ -136,8 +136,8 @@ int test_TBB (const char *filelist,
 
     //NOW start processing
     vector<double> out;
-    vector<complex double> in_invppf;
-    in_invppf.assign(blocksize/2+1,0+0*I);
+    vector<CR::mydcomplex> in_invppf;
+    in_invppf.assign(blocksize/2+1,CR::mydcomplex(0.,0.));
 
 
 
@@ -155,7 +155,7 @@ int test_TBB (const char *filelist,
 	  for(int ifreq=0;ifreq<nr_channels;ifreq++){
 	    double freq=100.e6+freqVec[ifreq]*100.e6/513;
 	    //get the converted data from ppf
-	    complex double data = conj(ppf.GetComplex(blocksize/2-freqVec[ifreq]));  //2nd nyquistzone
+	    CR::mydcomplex data = conj(ppf.GetComplex(blocksize/2-freqVec[ifreq]));  //2nd nyquistzone
 	    for(uint ix=0;ix<nr_pixels;ix++)
 	      //form the beam
 	      beam.Add(data,iant,freq,ix,ifreq);

@@ -25,9 +25,12 @@
 #define TOFREQDOMAIN_H
 
 // Standard library header files
+#include <complex>
 #include <iostream>
 #include <assert.h>
 #include <vector>
+
+
 
 
 
@@ -64,6 +67,8 @@ namespace CR { // Namespace CR -- begin
     See tToFreqDomain.cc
 
   */  
+  typedef complex<double> mydcomplex;
+
   class ToFreqDomain{
   public:
     ToFreqDomain(){};
@@ -75,7 +80,7 @@ namespace CR { // Namespace CR -- begin
     virtual double GetReal(uint channel) =0;
     virtual double GetImag(uint channel) =0;
 
-    virtual complex double GetComplex(uint channel) =0;
+    virtual mydcomplex GetComplex(uint channel) =0;
 
     
 /*     void setNyquistZone(uint nzone){nyquistZone=nzone;} */

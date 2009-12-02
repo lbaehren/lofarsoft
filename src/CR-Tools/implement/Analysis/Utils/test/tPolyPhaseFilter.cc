@@ -9,7 +9,7 @@
 
 
 
-int test_PPF(const char *weightsfile,vector<complex double> &freqdat)
+int test_PPF(const char *weightsfile,vector<CR::mydcomplex> &freqdat)
 {
   int nofFailedTests (0);
   
@@ -55,7 +55,7 @@ int test_PPF(const char *weightsfile,vector<complex double> &freqdat)
 }
 
 
-int test_PPFinv(const char *weightsfile,const vector<complex double> &freqdat,vector<double> &timeseries)
+int test_PPFinv(const char *weightsfile,const vector<CR::mydcomplex> &freqdat,vector<double> &timeseries)
 {
   int nofFailedTests (0);
   
@@ -110,7 +110,7 @@ int main (int argc,
   } else {
     ppfweights  = argv[1];
     ppfinvweights = argv[2];
-    vector<complex double> freqdat;
+    vector<CR::mydcomplex> freqdat;
     vector<double> timeseries;
    // [1] Test for the constructor(s)
     nofFailedTests += test_PPF (ppfweights,freqdat);
