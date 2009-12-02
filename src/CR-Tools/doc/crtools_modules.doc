@@ -467,20 +467,6 @@
 
 // ==============================================================================
 //
-//  CR-Tools/implement/Display
-//
-// ==============================================================================
-
-/*!
-  \defgroup CR_Display CR-Tools :: Display module
-
-  \ingroup CR
-
-  \brief Display module for the CR-pipeline
-*/
-
-// ==============================================================================
-//
 //  CR-Tools/implement/GUI
 //
 // ==============================================================================
@@ -814,23 +800,6 @@ for (uint block(0); block<nofBlocks; block++) {
   \ingroup CR
 
   \brief IO module for the CR-pipeline
-*/
-
-// ==============================================================================
-//
-//  CR-Tools/implement/LopesLegacy
-//
-// ==============================================================================
-
-/*!
-  \defgroup LopesLegacy CR-Tools :: LopesLegacy module
-
-  \ingroup CR
-
-  \brief LopesLegacy module for the CR-pipeline
-  
-  This module contains a collection of legacy code inherited from the earlier
-  LOPES-Tools.
 */
 
 // ==============================================================================
