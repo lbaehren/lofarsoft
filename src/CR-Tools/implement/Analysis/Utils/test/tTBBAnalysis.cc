@@ -5,7 +5,17 @@
 #include <Analysis/Utils/InvPolyPhaseFilter.h>
 #include <Analysis/Utils/SimpleBeamFormer.h>
 
-void get_antennas(const char * antPosFile,vector<double> &antPositions){
+//_______________________________________________________________________________
+//                                                                   get_antennas
+
+/*!
+  \brief Get the antenna position from a file
+
+  \param antPosFile    -- File with the antenna positions
+  \retval antPositions -- Antenna positions, [y1,x1,z1,y2,x2,z2,...]
+*/
+void get_antennas (const char * antPosFile,
+		   vector<double> &antPositions){
   //reference position =(0,0,0)!
   //get antenna positions;  
   ifstream pos;
@@ -24,8 +34,19 @@ void get_antennas(const char * antPosFile,vector<double> &antPositions){
   pos.close();
 }
 
+//_______________________________________________________________________________
+//                                                                       test_TBB
 
-int test_TBB(const char *filelist, const char *antPosFile, const char *weightsfile, const char *invweightsfile ){
+/*
+  \param filelist       -- List of data files
+  \param antPosFile     -- File with the antenna positions
+  \param weightsfile    -- File with the weights for the PPF
+  \param invweightsfile -- File with the weights for the PPF inversion
+*/
+int test_TBB (const char *filelist,
+	      const char *antPosFile,
+	      const char *weightsfile,
+	      const char *invweightsfile ){
   //example how to form a beam from TBB data using ppf and ppfinv to get back to timedomain
   int nofFailedTests (0);
 
@@ -172,6 +193,8 @@ int test_TBB(const char *filelist, const char *antPosFile, const char *weightsfi
 
 }
 
+//_______________________________________________________________________________
+//                                                                           main
 
 int main (int argc,
 	  char *argv[])
