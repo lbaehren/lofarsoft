@@ -107,21 +107,32 @@ def readTriggerListFromCSVFile(filename): # directly make histogram, not making 
     lastTime = latestTimeInFile
     nBins = 200 # bins for time-series
     timeSeriesHistogram = [0] * nBins
+    timeSeriesProfileCount = [[0]*nBins] * 96
+  #  print timeSeriesProfileCount
+  #  print timeSeriesProfileCount[9][0]
+    timeSeriesProfileValue = [[0]*nBins] * 96
     
     for record in triggerReader:
         thisTime = int(record[timeKey])
         if thisTime < 2.2e9: # Unix timestamps are signed ints, and they don't go that far...
 #            triggerList.append(record)
             thisRCU = int(record[RCUnrKey])
+            thisPowerBefore = int(record[powerBeforeKey])
             rcuCount[thisRCU] += 1
             
-            timeSeriesIndex = int(nBins * float(thisTime - firstTime) / float(lastTime - firstTime + 0.01)) # epsilon to remove boundary effect when thisTime = lastTime           
-            timeSeriesHistogram[timeSeriesIndex] += 1       
+            timeSeriesIndex = int(nBins * float(thisTime - firstTime) / float(lastTime - firstTime + 0.000001)) # epsilon to remove boundary effect when thisTime = lastTime           
+            timeSeriesHistogram[timeSeriesIndex] += 1  
+  #          print thisRCU
+  #          print timeSeriesIndex
+            timeSeriesProfileCount[thisRCU][timeSeriesIndex] += 1
+            timeSeriesProfileValue[thisRCU][timeSeriesIndex] += thisPowerBefore     
         else:
             print 'Invalid timestamp! ' + str(thisTime)
     global totalNumberOfTriggers
     totalNumberOfTriggers = triggerReader.line_num
     plotBinnedTimeSeriesOfTriggers(timeSeriesHistogram, firstTime, lastTime)
+    plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstTime, lastTime)
+    
     print totalNumberOfTriggers
     return rcuCount        
     
@@ -472,6 +483,79 @@ def plotBinnedTimeSeriesOfTriggers(binnedData, firstTime, lastTime):
     #graph.Bars(ggY)
 
     graph.WriteEPS("timeSeriesOfTriggers.eps","Binned timeseries of triggers")
+
+def plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstTime, lastTime): 
+    # make profile histogram timeseries of noise level ('power before') to see variations over time
+    
+    nBins = len(timeSeriesProfileCount[0])
+    
+    timeBinSize = float(lastTime - firstTime) / nBins # seconds
+    print nBins
+    print firstTime
+    print lastTime
+    print timeBinSize
+    #nBins = (lastTime - firstTime) / timeBinSize
+    # use again numpy's histogram function
+    #(y, x) = numpy.histogram(time, int(nBins))
+    
+    x = [timeBinSize * float(k) for k in range(nBins)] # look, I can write compact Python statements! ;)
+  
+    width=1200  
+    height=1200
+    mglGraphPS = 1
+    graph = mglGraph(mglGraphPS, width, height)
+
+    gY = mglData(nBins, 96)
+    gX = mglData(nBins, 96)
+#    eY = mglData(nBins) # standard-deviation to be added...
+#    eX = mglData(nBins)
+    for RCU in range(96):
+        for i in range(nBins):
+            if timeSeriesProfileCount[RCU][i] != 0:
+                gY.Put(5.0 * RCU + float(timeSeriesProfileValue[RCU][i]) / float(timeSeriesProfileCount[RCU][i]), i, RCU)
+            else:
+                gY.Put(NaN, i, RCU)
+            gX.Put(float(x[i]) / 60.0, i, RCU)
+            
+    maxX = float(lastTime - firstTime) / 60.0
+    maxY = gY.Max('xy')[0]
+    print 'max'
+    print maxX
+    print maxY    
+    graph.Clf()
+    graph.SetFontSize(3.0)
+    graph.SetRanges(0.0, maxX, 0.0, 500.0)
+    #graph.SetTicks('x', 16.0, 4)
+
+    graph.Axis("xy")
+    graph.Grid()
+
+    #graph.Title("Time series of # triggers (binned)")
+    graph.SetFontSize(6.0)
+    graph.Puts(float(maxX) * 0.5, float(2000) * 1.15, 0, "Profile histogram of noise level")
+    graph.SetFontSize(3.0)
+
+    graph.Puts(float(maxX) * 0.5,float(maxY)*1.05,0,"Total trigger count = " + str(totalNumberOfTriggers) + "; bin width = " + format(timeBinSize, "4.1f") + " s")
+
+    graph.Label("x","Time (min)",1)
+    graph.Label("y","Counts",1)
+    graph.Plot(gX, gY)
+
+    #ggY = mglData(len(y),4)
+    #for i in range(len(y)):
+    #    ggY.Put(float(y[i]), i, 0)
+    #    ggY.Put(float(y[i]) * 0.7*0.7, i, 1)
+    #    ggY.Put(float(y[i]) * 0.7*0.7*0.7, i, 2)
+    #    ggY.Put(float(y[i]) * 0.7*0.7*0.7*0.7, i, 3)
+
+    #ggY=mglData(len(y))
+    #for i in range(len(y)):
+    #    ggY[i] = y[i] * 0.5
+    #    
+    #graph.Bars(ggY)
+
+    graph.WriteEPS("noiseProfileHistogram.eps","Profile histogram of noise level")
+
 
 def runFullAnalysis():
     print "Reading trigger list..."
