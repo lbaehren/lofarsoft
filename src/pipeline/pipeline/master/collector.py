@@ -4,8 +4,9 @@ from pipeline.support.ipython import LOFARTask
 from pipeline.support.clusterdesc import ClusterDesc
 import pipeline.support.utilities as utilities
 from skim import run as create_hdf5
+import pyrap.images
 import os, os.path, glob, subprocess, sys, numpy
-import pyfits, shutil, errno, re, logging, imp
+import shutil, errno, re, logging, imp
 
 class collector(LOFARrecipe):
     """
@@ -37,7 +38,7 @@ class collector(LOFARrecipe):
         self.optionparser.add_option(
             '--averaged-name',
             dest="averaged_name",
-            help="Filename for averaged FITS image"
+            help="Base filename for averaged images"
         )
 
     def go(self):
@@ -76,8 +77,29 @@ class collector(LOFARrecipe):
             except subprocess.CalledProcessError:
                 self.logger.warn("No images moved from %s" % (node))
         
-        self.logger.info("Generating FITS files")
         image_names = glob.glob("%s/%s" % (results_dir, self.inputs['image_re']))
+        if len(image_names) > 0:
+            self.logger.info("Averaging results")
+            result = reduce(
+                numpy.add,
+                (pyrap.images.image(file).getdata() for file in image_names)
+            ) / len(image_names)
+
+            self.logger.info("Writing averaged files")
+            averaged_file = os.path.join(
+                        self.config.get('layout', 'results_directory'),
+                        self.inputs['averaged_name']
+            )
+            output = pyrap.images.image(averaged_file + ".img", values=result)
+            self.logger.info("Wrote: %s" % (averaged_file + ".img",))
+            output.tofits(averaged_file + ".fits")
+            self.logger.info("Wrote: %s" % (averaged_file + ".fits",))
+            self.outputs['data'] = (averaged_file + ".fits",)
+        else:
+            self.logger.info("No FITS image found; not averaging")
+            self.ouputs['data'] = None
+
+        self.logger.info("Generating FITS files")
         fits_files = []
         for filename in image_names:
             self.logger.debug(filename)
@@ -96,27 +118,6 @@ class collector(LOFARrecipe):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT
             )
-
-        if len(fits_files) > 0:
-            self.logger.info("Averaging results")
-            result = reduce(
-                numpy.add,
-                (pyfits.getdata(file) for file in fits_files)
-            ) / len(fits_files)
-
-            self.logger.info("Writing averaged FITS file")
-            hdulist = pyfits.HDUList(pyfits.PrimaryHDU(result))
-            hdulist[0].header = pyfits.getheader(fits_files[0])
-            averaged_file = os.path.join(
-                        self.config.get('layout', 'results_directory'),
-                        self.inputs['averaged_name']
-                )
-            hdulist.writeto(averaged_file)
-            self.outputs['data'] = (averaged_file,)
-            self.logger.info("Wrote: %s" % self.outputs['data'])
-        else:
-            self.logger.info("No FITS image found; not averaging")
-            self.ouputs['data'] = None
 
         self.logger.info("Creating HDF5 file")
         hdf5logger = logging.getLogger(self.logger.name + ".hdf5")
