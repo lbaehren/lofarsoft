@@ -36,6 +36,7 @@ set (PLD_hp7580    OFF CACHE BOOL "Enable driver hp7580")
 set (PLD_lj_hpgl   OFF CACHE BOOL "Enable driver lj_hpgl")
 set (PLD_svg       OFF CACHE BOOL "Enable driver svg")
 set (PLD_svgcairo  OFF CACHE BOOL "Enable driver svncairo")
+set (PLD_xcairo    OFF CACHE BOOL "Enable driver xcairo")
 
 if (APPLE)
   set (PLD_wxwidgets OFF CACHE BOOL "Enable driver wxwidgets")
