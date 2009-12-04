@@ -83,6 +83,7 @@ if (doxygen_executable)
     COMMAND cmake --help-html CMake.html
     COMMAND ctest --help-html CTest.html
     COMMAND ${doxygen_executable}
+    COMMAND rm -f *.tmp
     WORKING_DIRECTORY ${USG_ROOT}/doc
     COMMENT "Creating browsable documentation in ${USG_ROOT}/doc ..."
     )
