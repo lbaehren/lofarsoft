@@ -74,6 +74,11 @@ endif (NOT HAVE_FINK OR FINK_FORCE_BUILD)
 # test -r /sw/bin/init.sh && . /sw/bin/init.sh
 
 # Trees: local/main stable/main stable/crypto unstable/main unstable/crypto
+# UseBinaryDist: false
+
+if (HAVE_FINK)
+  find_file (have_fink_conf fink.conf /sw/etc)
+endif (HAVE_FINK)
 
 ## ------------------------------------------------------------------------------
 ## Install Fink packages
@@ -81,6 +86,8 @@ endif (NOT HAVE_FINK OR FINK_FORCE_BUILD)
 if (HAVE_FINK)
   add_custom_target (fink_packages
     COMMAND ${HAVE_FINK} selfupdate
+    COMMAND ${HAVE_FINK} index
+    COMMAND ${HAVE_FINK} scanpackages
     COMMAND ${HAVE_FINK} install atlas
     COMMAND ${HAVE_FINK} install bison
     COMMAMD ${HAVE_FINK} install doxygen
