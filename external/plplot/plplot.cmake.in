@@ -2,6 +2,8 @@
 ## -------------------------------------------------------------------
 ## Language bindings
 
+set (enable-all OFF CACHE BOOL "Enable all features")
+
 ## building of dynamic libraries needs to be enabled to create Python
 ## bindings; otherwise the Python bindings are disabled
 set (BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries?")
@@ -26,6 +28,17 @@ else (HAVE_NUMPY)
 endif (HAVE_NUMPY)
 
 ##_______________________________________________________________________________
+## Graphics libraries
+
+include (FindGIF)
+
+if (GIF_FOUND OR HAVE_GIF)
+  set (enable-gif ON CACHE BOOL "Enable gif support")
+else (GIF_FOUND OR HAVE_GIF)
+  set (enable-gif ON CACHE BOOL "Enable gif support")
+endif (GIF_FOUND OR HAVE_GIF)
+
+##_______________________________________________________________________________
 ## Device drivers
 
 set (ENABLE_DYNDRIVERS OFF CACHE BOOL "Enable dynamic drivers?")
@@ -34,7 +47,9 @@ set (PLD_aqt       OFF CACHE BOOL "Enable driver aqt")
 set (PLD_hp7470    OFF CACHE BOOL "Enable driver hp7470")
 set (PLD_hp7580    OFF CACHE BOOL "Enable driver hp7580")
 set (PLD_lj_hpgl   OFF CACHE BOOL "Enable driver lj_hpgl")
+set (PLD_psttf     OFF CACHE BOOL "Enable driver psttf")
 set (PLD_svg       OFF CACHE BOOL "Enable driver svg")
+set (PLD_pdfcairo  OFF CACHE BOOL "Enable driver pdfcairo")
 set (PLD_svgcairo  OFF CACHE BOOL "Enable driver svncairo")
 set (PLD_xcairo    OFF CACHE BOOL "Enable driver xcairo")
 
