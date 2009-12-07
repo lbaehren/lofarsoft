@@ -34,8 +34,6 @@
     <li>\ref crtools_source_tree
     <li>\ref crtools_build
     <li>\ref crtools_overview_modules
-    <li>\ref crtools_changes
-    <li>\ref tasks
   </ul>
 
   \section crtools_source_tree Organization of the source code

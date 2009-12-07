@@ -3,23 +3,8 @@
 ## $Id:: CMakeLists.txt 575 2007-08-17 14:04:03Z baehren                        $
 ##-------------------------------------------------------------------------------
 
-## -------------------------------------------------------------------
-## imagefromfits  WCSLIB MIRLIB LAPACK F77 CFITSIO
-
-#if (HAVE_CASACORE OR HAVE_CASA)
-#  if (HAVE_CFITSIO)
-#    add_executable (imagefromfits imagefromfits.cc)
-#    target_link_libraries (imagefromfits
-#      ${CASA_LIBRARIES}
-#      ${CFITSIO_LIBRARIES}
-#      ${LAPACK_LIBRARIES}
-#      ${CPGPLOT_LIBRARIES}
-#      )
-#  endif (HAVE_CFITSIO)
-#endif (HAVE_CASACORE OR HAVE_CASA)
-  
 ##____________________________________________________________________
-## getPhases
+##                                                           getPhases
 
 if (HAVE_CASA OR HAVE_CASACORE)
     add_executable (getPhases getPhases.cc)
@@ -32,7 +17,7 @@ else (HAVE_CASA OR HAVE_CASACORE)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ##____________________________________________________________________
-## reas2event
+##                                                          reas2event
 
 if (HAVE_CASA OR HAVE_CASACORE)
   add_executable (reas2event reas2event.cc)
@@ -50,7 +35,7 @@ else (HAVE_CASA OR HAVE_CASACORE)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ##____________________________________________________________________
-## simStationBeam
+##                                                      simStationBeam
 
 if (HAVE_CASACORE)
   if (HAVE_PGPLOT OR HAVE_PLPLOT)
@@ -65,7 +50,7 @@ else (HAVE_CASACORE)
 endif (HAVE_CASACORE)
 
 ##____________________________________________________________________
-## imager
+##                                                              imager
 
 if (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
   ## compiler instructions
@@ -73,7 +58,7 @@ if (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
   ## linker instructions
   target_link_libraries (imager
     cr
-    ${BOOST_LIBRARIES}
+    ${BOOST_PROGRAM_OPTIONS_LIBRARY}
     ${DAL_LIBRARIES}
     ${HDF5_LIBRARIES}
     )
@@ -86,7 +71,7 @@ if (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
 endif (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
 
 ##____________________________________________________________________
-## trigrun
+##                                                             trigrun
 
 if (HAVE_POPT AND LAPACK_LIBRARIES)
   ## compiler instructions
