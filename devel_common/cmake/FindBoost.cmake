@@ -180,19 +180,22 @@ foreach (boost_version 1_39_0 1_39 1_36_0 1_34_1)
   ## Check for the module libraries --------------
 
   foreach (lib ${boost_libraries})
+    ## convert library name to variable ("<NAME>_LIBRARY")
+    string (TOUPPER ${lib} _lib)
+    set (_lib_cache ${_lib}_LIBRARY)
+    message (STATUS "Checking for ${_lib} ...")
     ## try to locate the library
-    #fkbreitl added ${lib}-gcc41-mt-${boost_version} for Scientific Linux
-    find_library (BOOST_${lib} ${lib} ${lib}-gcc42-${boost_version} ${lib}-mt-${boost_version} ${lib}-gcc ${lib}-mt ${lib}-mt-d ${lib}-gcc41-mt-${boost_version}
+    find_library (${_lib_cache} ${lib} ${lib}-gcc42-${boost_version} ${lib}-mt-${boost_version} ${lib}-gcc ${lib}-mt ${lib}-mt-d ${lib}-gcc41-mt-${boost_version}
       PATHS ${lib_locations}
       PATH_SUFFIXES boost boost-${boost_version}
       NO_DEFAULT_PATH
       )
     ## check if location was successful
-    if (BOOST_${lib})
-      list (APPEND BOOST_LIBRARIES ${BOOST_${lib}})
-    else (BOOST_${lib})
+    if (${_lib_cache})
+      list (APPEND BOOST_LIBRARIES ${${_lib_cache}})
+    else (${_lib_cache})
       set (continue_search 1)
-    endif (BOOST_${lib})
+    endif (${_lib_cache})
   endforeach (lib)
   
   if (NOT continue_search)
