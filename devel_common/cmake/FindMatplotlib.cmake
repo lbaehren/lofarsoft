@@ -101,7 +101,7 @@ find_file (MATPLOTLIB_NXUTILS_PY nxutils.py
 if (MATPLOTLIB_PYLAB_PY)
   ## have python load the module and print its version
   execute_process (
-    COMMAND python -c "import matplotlib; print matplotlib.__version__"
+    COMMAND ${PYTHON_EXECUTABLE} -c "import matplotlib; print matplotlib.__version__"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     RESULT_VARIABLE matplotlib_version_test_result
     OUTPUT_VARIABLE matplotlib_version_test_output

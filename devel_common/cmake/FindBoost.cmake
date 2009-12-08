@@ -183,7 +183,6 @@ foreach (boost_version 1_39_0 1_39 1_36_0 1_34_1)
     ## convert library name to variable ("<NAME>_LIBRARY")
     string (TOUPPER ${lib} _lib)
     set (_lib_cache ${_lib}_LIBRARY)
-    message (STATUS "Checking for ${_lib} ...")
     ## try to locate the library
     find_library (${_lib_cache} ${lib} ${lib}-gcc42-${boost_version} ${lib}-mt-${boost_version} ${lib}-gcc ${lib}-mt ${lib}-mt-d ${lib}-gcc41-mt-${boost_version}
       PATHS ${lib_locations}
