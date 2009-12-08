@@ -30,14 +30,6 @@ endif (HAVE_NUMPY)
 ##_______________________________________________________________________________
 ## Graphics libraries
 
-include (FindGIF)
-
-if (GIF_FOUND OR HAVE_GIF)
-  set (enable-gif ON CACHE BOOL "Enable gif support")
-else (GIF_FOUND OR HAVE_GIF)
-  set (enable-gif ON CACHE BOOL "Enable gif support")
-endif (GIF_FOUND OR HAVE_GIF)
-
 set (_CAIRO_FOUND OFF CACHE BOOL )
 
 ##_______________________________________________________________________________
@@ -69,8 +61,9 @@ endif (APPLE)
 set (BUILD_TEST ON CACHE BOOL "Build test programs?")
 
 ##_______________________________________________________________________________
-## Installation
+## CMake internal variables
 
+set (CMAKE_FIND_LIBRARY_PREFIXES "lib" CACHE STRING "Library prefixes" FORCE)
 set (CMAKE_INSTALL_PREFIX       ${USG_INSTALL_PREFIX}  CACHE  PATH  "Installation prefix" FORCE) 
 set (CMAKE_INSTALL_EXEC_PREFIX  ${USG_INSTALL_PREFIX}  CACHE  PATH  "Installation prefix" FORCE)
 set (PYTHON_INSTDIR             ${USG_INSTALL_PREFIX}/lib/python CACHE PATH "Python prefix" FORCE)
