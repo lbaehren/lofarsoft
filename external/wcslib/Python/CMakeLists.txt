@@ -12,7 +12,7 @@ include_directories(
 
 if (BOOST_boost_python AND PYTHON_EXECUTABLE)
   add_library (wcslib MODULE ${WCSLIB_wrapper_sources})
-  target_link_libraries (wcslib wcs ${BOOST_boost_python})
+  target_link_libraries (wcslib wcs ${BOOST_PYTHON_LIBRARY})
   set_target_properties (wcslib PROPERTIES PREFIX "")
 else (BOOST_boost_python AND PYTHON_EXECUTABLE)
   message(ERROR "Python wrappers could not be built")
