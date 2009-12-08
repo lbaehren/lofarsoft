@@ -38,7 +38,7 @@
 #include <casa/Exceptions/Error.h>
 #include <casa/Utilities/Assert.h>
 
-#include <Utilities/TestsCommon.h>
+#include "testing_common.h"
 
 using std::cout;
 using std::endl;
@@ -46,7 +46,7 @@ using std::endl;
 /*!
   \file tcasa_casa_Containers.cc
 
-  \ingroup CR_test
+  \ingroup contrib
 
   \brief A number of tests for clases in the casacore casa/Containers module
 

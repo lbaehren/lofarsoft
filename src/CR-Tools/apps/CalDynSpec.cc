@@ -22,7 +22,7 @@
  ***************************************************************************/
 
 #include <crtools.h>
-#include <Data/LOFAR_TBB.h>
+#include <IO/LOFAR_TBB.h>
 #include <Utilities/SimplePlot.h>
 #include <Analysis/DynamicSpectrum.h>
 #include <cstdlib>

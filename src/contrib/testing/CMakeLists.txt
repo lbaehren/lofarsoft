@@ -18,6 +18,7 @@ if (HAVE_CASACORE)
     casacoreMeasures
     casacoreCoordinates
     casacore_Coordinates_ObsInfo
+    tcasa_casa
     )
 
   foreach (src ${tests})
@@ -53,10 +54,82 @@ if (HAVE_CASACORE)
   ## testing
   add_test (casacoreCubeAccess_test1 casacoreCubeAccess test1)
   add_test (casacoreCubeAccess_test2 casacoreCubeAccess test2)
+
+  if (HAVE_CRTOOLS)
+  ## compiler instructions
+  add_executable (tcasa_images tcasa_images.cc)
+  ## linker instructions
+  target_link_libraries (tcasa_images ${CASA_LIBRARIES} ${CRTOOLS_CR_LIBRARY})
+  ## testing
+    add_test (tcasa_images_test02 tcasa_images --hdf5)
+    add_test (tcasa_images_test03 tcasa_images --lofar)
+  endif (HAVE_CRTOOLS)
   
 else (HAVE_CASACORE)
   message (STATUS "Missing casacore - skipping tests!")
 endif (HAVE_CASACORE)
+
+## ==============================================================================
+##
+##  Tests for casacore/CASA
+##
+## ==============================================================================
+
+if (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
+
+  set (tests_casacore
+    tcasa_casa_Quanta
+    tcasa_casa_Containers
+    tcasa_tables
+    tcasa_lattices
+    tcasa_measures
+    )
+  
+  set (tests_casacore_link_libs ${LAPACK_LIBRARIES})
+  list (APPEND tests_casacore_link_libs ${CFITSIO_LIBRARIES})
+  list (APPEND tests_casacore_link_libs ${WCSLIB_LIBRARIES})
+  list (APPEND tests_casacore_link_libs ${LAPACK_LIBRARIES})
+  
+  if (GFORTRAN_LIBRARIES) 
+    list (APPEND tests_casacore_link_libs ${GFORTRAN_LIBRARIES})
+  endif (GFORTRAN_LIBRARIES)
+  
+  foreach (test ${tests_casacore})
+    ## compiler instructions
+    add_executable (${test} ${test}.cc)
+    ## additional properties
+    if (HAVE_HDF5)
+      set_target_properties (${test}
+	PROPERTIES
+	COMPILE_FLAGS "-I${HDF5_INCLUDES}"
+	)
+      ## linker instructions
+      target_link_libraries (${test}
+	${CASA_LIBRARIES}
+	${WCSLIB_LIBRARIES}
+	${LAPACK_LIBRARIES}
+	${HDF5_LIBRARIES}
+	)
+    else (HAVE_HDF5)
+      set_target_properties (${test}
+	PROPERTIES
+	COMPILE_FLAGS "-I${CR_BINARY_DIR}"
+	)
+      ## linker instructions
+      target_link_libraries (${test}
+	${CASA_LIBRARIES}
+	${WCSLIB_LIBRARIES}
+	${LAPACK_LIBRARIES}
+	)
+    endif (HAVE_HDF5)
+    ## testing
+    add_test (${test} ${test})
+  endforeach (test ${tests_casacore})
+  
+  
+else (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
+  message (STATUS "Missing casacore/CASA - skipping tests!")
+endif (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
 
 ## ==============================================================================
 ##
@@ -149,24 +222,6 @@ endif (HAVE_HDF5)
 
 ## ==============================================================================
 ##
-##  Tests for GNU Scientific Library (GSL)
-##
-## ==============================================================================
-
-if (HAVE_GSL)
-
-  add_executable (gsl gsl.cc)
-
-  target_link_libraries (gsl ${GSL_LIBRARIES})
-
-  add_test (gsl gsl)
-
-else (HAVE_GSL)
-  message (STATUS "Missing GNU Scientic Library (GSL) - skipping tests!")
-endif (HAVE_GSL)
-
-## ==============================================================================
-##
 ##  Tests for Blitz++
 ##
 ## ==============================================================================
@@ -192,6 +247,32 @@ endif (HAVE_BLITZ)
 
 ## ==============================================================================
 ##
+##  Tests for CFITSIO
+##
+## ==============================================================================
+
+if (HAVE_CFITSIO)
+
+  ## compiler instructions
+  add_executable (test_cfitsio test_cfitsio.cc)
+  set_target_properties (test_cfitsio
+    PROPERTIES
+    COMPILE_FLAGS "-I${CFITSIO_INCLUDES}"
+    )
+  ## linker instructions
+  target_link_libraries (test_cfitsio ${CFITSIO_LIBRARIES})
+  ## testing
+  add_test (test_cfitsio test_cfitsio)
+  ## installation
+  install (
+    TARGETS test_cfitsio
+    RUNTIME DESTINATION bin
+    )
+
+endif (HAVE_CFITSIO)
+
+## ==============================================================================
+##
 ## Tests for the Data Access Library (DAL)
 ##
 ## ==============================================================================
@@ -214,4 +295,22 @@ if (HAVE_DAL AND HAVE_CASACORE AND HAVE_HDF5)
   ## testing
   add_test (test_dal test_dal ${dataset_tbb})
 endif (HAVE_DAL AND HAVE_CASACORE AND HAVE_HDF5)
+
+## ==============================================================================
+##
+##  Tests for GNU Scientific Library (GSL)
+##
+## ==============================================================================
+
+if (HAVE_GSL)
+
+  add_executable (gsl gsl.cc)
+
+  target_link_libraries (gsl ${GSL_LIBRARIES})
+
+  add_test (gsl gsl)
+
+else (HAVE_GSL)
+  message (STATUS "Missing GNU Scientic Library (GSL) - skipping tests!")
+endif (HAVE_GSL)
 

@@ -23,9 +23,9 @@
 
 #include <crtools.h>
 
-#include <Data/LOFAR_TBB.h>
-#include <Utilities/StringTools.h>
 #include <Analysis/tbbTools.h>
+#include <IO/LOFAR_TBB.h>
+#include <Utilities/StringTools.h>
 
 #include <casa/Arrays/Matrix.h>
 

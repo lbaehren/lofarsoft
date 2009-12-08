@@ -51,7 +51,7 @@ using namespace std;
 #include <crtools.h>
 
 #include "IO/LopesEventIn.h"
-#include "Data/LOFAR_TBB.h"
+#include "IO/LOFAR_TBB.h"
 #include "dal/TBB_Timeseries.h"
 
 /*!

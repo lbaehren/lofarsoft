@@ -24,9 +24,6 @@
 #include <Analysis/NuMoonTrigger.h>
 
 #include <crtools.h>
-#include <crtools.h>
-#include <Data/LOFAR_TBB.h>
-#include <IO/DataReader.h>
 
 // Namespace usage
 using CR::NuMoonTrigger;

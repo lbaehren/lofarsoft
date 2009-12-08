@@ -166,9 +166,9 @@ if (CR_WITH_PYTHON)
     Analysis/DynamicSpectrum.cc
     Coordinates/CoordinateType.cc
     Coordinates/TimeFreq.cc
-    Data/LOFAR_TBB.cc
     IO/DataIterator.cc
     IO/DataReader.cc
+    IO/LOFAR_TBB.cc
     Math/BasicFilter.cc
     Math/HanningFilter.cc
     Coordinates/MConversions.cc

@@ -28,7 +28,7 @@
 #include <crtools.h>
 #include <Coordinates/CoordinateType.h>
 #include <Coordinates/TimeFreq.h>
-#include <Data/LOFAR_TBB.h>
+#include <IO/LOFAR_TBB.h>
 #include <IO/DataIterator.h>
 #include <IO/DataReader.h>
 #include <Math/HanningFilter.h>

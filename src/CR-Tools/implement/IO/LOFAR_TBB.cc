@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Data/LOFAR_TBB.h>
+#include <IO/LOFAR_TBB.h>
 
 using std::cout;
 using std::endl;

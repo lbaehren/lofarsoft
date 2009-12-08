@@ -23,7 +23,7 @@
 
 #include <crtools.h>
 
-#include <Data/LOFAR_TBB.h>
+#include <IO/LOFAR_TBB.h>
 #include <Utilities/StringTools.h>
 
 #include <casa/Arrays/Matrix.h>
@@ -36,7 +36,7 @@ using CR::LOFAR_TBB;
 /*!
   \file tLOFAR_TBB.cc
 
-  \ingroup CR_Data
+  \ingroup IO
 
   \brief A collection of test routines for the CR::LOFAR_TBB class
  

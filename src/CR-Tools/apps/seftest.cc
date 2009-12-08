@@ -23,7 +23,7 @@
 
 #include <crtools.h>
 #include <Data/tbbctlIn.h>
-#include <Data/LOFAR_TBB.h>
+#include <IO/LOFAR_TBB.h>
 
 using namespace std;
 using CR::tbbctlIn;  // Namespace usage

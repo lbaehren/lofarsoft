@@ -41,7 +41,7 @@ using casa::TiledShape;
 
 #include <crtools.h>
 #include <Coordinates/SkymapCoordinate.h>
-#include <Data/LOFAR_TBB.h>
+#include <IO/LOFAR_TBB.h>
 #include <Analysis/CRinvFFT.h>
 #include <Imaging/Beamformer.h>
 #include <Imaging/Skymapper.h>

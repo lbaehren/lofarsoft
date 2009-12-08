@@ -30,7 +30,7 @@
 #include <Analysis/tbbTools.h>
 #include <Calibration/RFIMitigationPlugin.h>
 #include <Data/tbbctlIn.h>
-#include <Data/LOFAR_TBB.h>
+#include <IO/LOFAR_TBB.h>
 
 // Glish includes
 #include <casa/Arrays/Matrix.h>

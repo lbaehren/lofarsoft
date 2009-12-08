@@ -37,6 +37,8 @@
 /*!
   \class casa_casa
 
+  \ingroup contrib
+
   \brief Test using casacore classes as private data in a custom class
 
   \author Larrs B&auml;hren

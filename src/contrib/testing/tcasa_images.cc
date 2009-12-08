@@ -47,7 +47,7 @@
 #include <Coordinates/CoordinateType.h>
 #include <Coordinates/SpatialCoordinate.h>
 #include <Coordinates/MConversions.h>
-#include <Utilities/TestsCommon.h>
+#include "testing_common.h"
 
 using std::cout;
 using std::endl;

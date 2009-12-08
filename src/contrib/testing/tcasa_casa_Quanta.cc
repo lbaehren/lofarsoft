@@ -44,7 +44,7 @@
 #include <casa/Quanta/MVTime.h>
 #include <casa/Quanta/MVPosition.h>
 
-#include <Utilities/TestsCommon.h>
+#include "testing_common.h"
 
 using casa::Array;
 using casa::Block;

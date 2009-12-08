@@ -56,7 +56,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class LOFAR_TBB
     
-    \ingroup CR_Data
+    \ingroup IO
     
     \brief Interface between Data Access Library (DAL) and DataReader framework
     

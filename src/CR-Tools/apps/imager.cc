@@ -30,10 +30,10 @@
 #include <boost/program_options/detail/cmdline.hpp>
 
 #include <crtools.h>
-#include <Data/LOFAR_TBB.h>
-#include <IO/LopesEventIn.h>
 #include <Imaging/Skymapper.h>
 #include <IO/DataReader.h>
+#include <IO/LOFAR_TBB.h>
+#include <IO/LopesEventIn.h>
 
 using std::cerr;
 using std::cout;

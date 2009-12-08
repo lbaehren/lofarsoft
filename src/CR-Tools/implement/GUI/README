@@ -169,7 +169,7 @@ Sample event:
 
 
 #include "IO/LopesEventIn.h"
-#include "Data/LOFAR_TBB.h"
+#include "IO/LOFAR_TBB.h"
 
 
 void dataReaderTest(){

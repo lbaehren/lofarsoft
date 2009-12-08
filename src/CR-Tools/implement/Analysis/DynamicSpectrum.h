@@ -31,6 +31,7 @@ extern "C" {
 }
 #endif
 
+/* casacore header files */
 #include <casa/Arrays.h>
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/Vector.h>
@@ -39,7 +40,9 @@ extern "C" {
 #include <coordinates/Coordinates/LinearCoordinate.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <coordinates/Coordinates/CoordinateSystem.h>
-#include <Data/LOFAR_TBB.h>
+
+/* CR-Tools header files */
+#include <IO/LOFAR_TBB.h>
 
 using casa::Quantum;
 using casa::String;

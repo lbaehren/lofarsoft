@@ -54,14 +54,13 @@
 #include <casa/Exceptions/Error.h>
 #include <casa/HDF5/HDF5File.h>
 #include <casa/HDF5/HDF5Record.h>
+#include <scimath/Mathematics/FFTServer.h>
 #include <tables/Tables/Table.h>
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/SetupNewTab.h>
 #include <tables/Tables/ScalarColumn.h>
 #include <tables/Tables/ScaColDesc.h>
 #include <tables/Tables/ScaRecordColDesc.h>
-
-#include <scimath/Mathematics/FFTServer.h>
 
 /*DAL header files*/
 
@@ -83,13 +82,11 @@
 #include <Coordinates/TimeFreq.h>
 #include <Imaging/GeomWeight.h>
 #include <Imaging/Beamformer.h>
-
-#include <Data/LOFAR_TBB.h>
+#include <IO/LOFAR_TBB.h>
 #include <Utilities/StringTools.h>
+
 /* ROOT header files */
-
 #ifdef HAVE_ROOT
-
 #include "TH2.h"
 #include "TFile.h"
 #include "TH1.h"
@@ -100,7 +97,6 @@
 #include "TMath.h"
 #include "TSpectrum.h"
 #include "TVirtualFFT.h"
-
 #endif
 
 using std::cout ;

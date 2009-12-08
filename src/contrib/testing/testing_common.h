@@ -35,7 +35,8 @@
   \author Lars B&auml;hren
 */
 
-// ------------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                        runtime
 
 /*!
   \brief Compute runtime of an operation based on start and end time
@@ -52,7 +53,8 @@ double runtime (clock_t const &start,
   return ((double)( end - start ) / (double)CLOCKS_PER_SEC );
 }
 
-// ------------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                             nof_array_elements
 
 /*!
   \brief Get a list of array sidelength values for setting up array shapes
@@ -78,5 +80,29 @@ std::vector<int> nof_array_elements ()
   nelem.push_back(5000);
   nelem.push_back(10000);
 
+  return nelem;
+}
+
+//_______________________________________________________________________________
+//                                                                number_sequence
+
+std::vector<int> number_sequence () {
+  // vector returning the result
+  std::vector<int> nelem;
+  // generate sequence
+  nelem.push_back(1);
+  nelem.push_back(2);
+  nelem.push_back(5);
+  nelem.push_back(10);
+  nelem.push_back(20);
+  nelem.push_back(50);
+  nelem.push_back(100);
+  nelem.push_back(200);
+  nelem.push_back(500);
+  nelem.push_back(1000);
+  nelem.push_back(2000);
+  nelem.push_back(5000);
+  nelem.push_back(10000);
+  // return sequence of numbers
   return nelem;
 }

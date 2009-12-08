@@ -32,7 +32,7 @@
 #include <fitsio.h>
 #endif
 
-#include <Data/LOFAR_TBB.h>
+#include <IO/LOFAR_TBB.h>
 
 using std::cerr;
 using std::cout;
