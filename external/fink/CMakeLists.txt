@@ -88,7 +88,7 @@ if (HAVE_FINK)
     COMMAND ${HAVE_FINK} selfupdate
     COMMAND ${HAVE_FINK} index
     COMMAND ${HAVE_FINK} scanpackages
-    COMMAND ${HAVE_FINK} install atlas
+#    COMMAND ${HAVE_FINK} install atlas
     COMMAND ${HAVE_FINK} install bison
     COMMAMD ${HAVE_FINK} install doxygen
     COMMAND ${HAVE_FINK} install flex
