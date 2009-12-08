@@ -34,12 +34,12 @@
 #include <casa/namespace.h>
 #include <scimath/Mathematics/FFTServer.h>
 
-#include <Data/rawSubbandIn.h>
-#include <Data/tbbctlIn.h>
 #include <Analysis/SubbandID.h>
 #include <Analysis/ppfimplement.h>
 #include <Analysis/ppfinversion.h>
 #include <Analysis/ionoCalibration.h>
+#include <Data/tbbctlIn.h>
+#include <IO/RawSubbandIn.h>
 
 using namespace CR ;
 
@@ -49,7 +49,7 @@ using CR::ppfinversion ;
 using CR::ionoCalibration ;
 using CR::SubbandID ;
 using CR::tbbctlIn ;
-using CR::rawSubbandIn ;
+using CR::RawSubbandIn ;
 
 /*!
   \file tppfimplement.cc
@@ -97,7 +97,7 @@ int test_ppfimplement ()
     ionoCalibration iono_cal ;
     SubbandID band_ID ;
     tbbctlIn newtbbctlIn ;
-    rawSubbandIn newrawSubbandIn ;  
+    RawSubbandIn newRawSubbandIn ;  
   } catch ( AipsError x){
     cerr << x.getMesg() << endl;
   }
@@ -135,7 +135,7 @@ int test_ppfimplements ()
     ionoCalibration iono_cal ;
     SubbandID band_ID ;
     tbbctlIn newtbbctlIn ;
-    rawSubbandIn newrawSubbandIn ;  
+    RawSubbandIn newRawSubbandIn ;  
     
     /*
      *  Gaussian (random) noise generation

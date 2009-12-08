@@ -20,6 +20,7 @@ set (tests
   tSimulation2fftMatrix
   ttoLOPESgrid
   tTSmatrix2Event
+  tRawSubbandIn
   )
 
 if (HAVE_HDF5)

@@ -50,9 +50,9 @@
 namespace CR { // Namespace CR -- begin
   
   /*!
-    \class rawSubbandIn
+    \class RawSubbandIn
     
-    \ingroup CR_Data
+    \ingroup IO
     
     \brief Read in the raw dump of subband data
     
@@ -60,7 +60,7 @@ namespace CR { // Namespace CR -- begin
 
     \date 2008/03/07
 
-    \test trawSubbandIn.cc
+    \test tRawSubbandIn.cc
     
     <h3>Prerequisite</h3>
     
@@ -73,8 +73,8 @@ namespace CR { // Namespace CR -- begin
     <h3>Example(s)</h3>
     
   */  
-  class rawSubbandIn {
-
+  class RawSubbandIn {
+    
     //public:
   protected:
     
@@ -92,7 +92,7 @@ namespace CR { // Namespace CR -- begin
       int16_t    beamlet2beams[54];
       uint32_t   dummy2;
     };
-
+    
     struct BlockHeader {
       uint32_t   magic; // 0x2913D852
       int32_t    coarseDelayApplied[8];
@@ -105,9 +105,9 @@ namespace CR { // Namespace CR -- begin
 	uint32_t    end;   // exclusive
       } flagsRanges[8][16];
     };
-
+    
     struct FileHeader FHead;
-
+    
     int numblocks;
     double firstdate,lastdate;
     Vector<Double> blockdates;   
@@ -117,32 +117,26 @@ namespace CR { // Namespace CR -- begin
     
     // ------------------------------------------------------------- Construction
     
-    /*!
-      \brief Default constructor
-    */
-    rawSubbandIn ();
+    //! Default constructor
+    RawSubbandIn ();
     
     // -------------------------------------------------------------- Destruction
     
-    /*!
-      \brief Destructor
-    */
-    ~rawSubbandIn ();
+    //! Destructor
+    ~RawSubbandIn ();
     
     // --------------------------------------------------------------- Parameters
     
     /*!
       \brief Get the name of the class
       
-      \return className -- The name of the class, rawSubbandIn.
+      \return className -- The name of the class, RawSubbandIn.
     */
     std::string className () const {
-      return "rawSubbandIn";
+      return "RawSubbandIn";
     }
 
-    /*!
-      \brief Provide a summary of the internal status
-    */
+    //! Provide a summary of the internal status
     inline void summary () {
       summary (std::cout);
     }

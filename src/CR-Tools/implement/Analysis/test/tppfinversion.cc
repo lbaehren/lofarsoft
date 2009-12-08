@@ -37,7 +37,7 @@
 #include <Analysis/ppfimplement.h>
 #include <Analysis/SubbandID.h>
 
-#include <Data/rawSubbandIn.h>
+#include <IO/RawSubbandIn.h>
 #include <Data/tbbctlIn.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Arrays/ArrayMath.h>
@@ -45,7 +45,7 @@
 using CR::ppfinversion ;
 using CR::ppfimplement ;
 using CR::tbbctlIn ;
-using CR::rawSubbandIn ;
+using CR::RawSubbandIn ;
 using CR::SubbandID ;
 using DAL::TBB_Timeseries ;
 
@@ -104,7 +104,7 @@ int test_ppfinversion (std::string const &filename)
     SubbandID band_ID ;
     
     tbbctlIn newtbbctlIn ;
-    rawSubbandIn newrawSubbandIn ;
+    RawSubbandIn newRawSubbandIn ;
     
    for(uint p=0; p< 48; p++){
       subband_freq(p) = band_freq[p] ;
@@ -283,7 +283,7 @@ int test_inversions (std::string const &filename)
     ppfinversion ppf_inv ;
     ppfimplement ppf_imp ;
     tbbctlIn newtbbctlIn ;
-    rawSubbandIn newrawSubbandIn ;     
+    RawSubbandIn newRawSubbandIn ;     
     
     Matrix<DComplex> ppfimplement = ppf_imp.FFTSamples( samples,
                                                         ppfcoeff );

@@ -27,6 +27,10 @@
 // Standard library header files
 #include <iostream>
 #include <string>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <time.h>
 
 // AIPS++/CASA header files
 #include <casa/aips.h>

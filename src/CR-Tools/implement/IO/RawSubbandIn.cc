@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Data/rawSubbandIn.h>
+#include <IO/RawSubbandIn.h>
 
 
 
@@ -34,7 +34,7 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  rawSubbandIn::rawSubbandIn ()
+  RawSubbandIn::RawSubbandIn ()
   {;}
   
   
@@ -44,12 +44,12 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  rawSubbandIn::~rawSubbandIn ()
+  RawSubbandIn::~RawSubbandIn ()
   {
     destroy();
   }
   
-  void rawSubbandIn::destroy ()
+  void RawSubbandIn::destroy ()
   {;}
   
   // ============================================================================
@@ -58,10 +58,10 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  void rawSubbandIn::summary (std::ostream &os)
+  void RawSubbandIn::summary (std::ostream &os)
   {;}
   
-  double rawSubbandIn::ntohd(double in){
+  double RawSubbandIn::ntohd(double in){
     double out;
     uint8_t *inp,*outp;
     uint i;
@@ -81,7 +81,7 @@ namespace CR { // Namespace CR -- begin
     return out;
   };
 
-  Int64 rawSubbandIn::ntohll(Int64 in){
+  Int64 RawSubbandIn::ntohll(Int64 in){
     Int64 out;
     uint8_t *inp,*outp;
     uint i;
@@ -101,7 +101,7 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  Bool rawSubbandIn::attachFile(String Filename){
+  Bool RawSubbandIn::attachFile(String Filename){
     try {
       int veclen=0;
       size_t datalen,datasize;
@@ -110,12 +110,12 @@ namespace CR { // Namespace CR -- begin
 
       FILE *fd = fopen(Filename.c_str(),"r");
       if (fd == NULL) {
-	cerr << "rawSubbandIn:attachFile: Can't open file: " << Filename << endl;
+	cerr << "RawSubbandIn:attachFile: Can't open file: " << Filename << endl;
 	return False;
       };
       ok = readFileHeader(fd, FHead);
       if (!ok) {
-	cerr << "rawSubbandIn:attachFile: Error while reading file-header of: " << Filename << endl;
+	cerr << "RawSubbandIn:attachFile: Error while reading file-header of: " << Filename << endl;
 	fclose(fd);
 	return False;
       };
@@ -125,7 +125,7 @@ namespace CR { // Namespace CR -- begin
       } else {
 	datasize = datalen;
       };
-      //cout << "rawSubbandIn:attachFile: datalen: " << dec << datalen << " datasize: " << datasize <<endl;
+      //cout << "RawSubbandIn:attachFile: datalen: " << dec << datalen << " datasize: " << datasize <<endl;
 
       numblocks=0;
       veclen = 1000;
@@ -144,16 +144,16 @@ namespace CR { // Namespace CR -- begin
 	  //cout << "block: " << numblocks  << " position: " << ftell(fd) 
 	  //     << " date: " << blockdates(numblocks-1) - firstdate <<endl;
 	} else {
-// 	  cout << "rawSubbandIn:attachFile: Failed to read block-header " << dec << numblocks+1 
+// 	  cout << "RawSubbandIn:attachFile: Failed to read block-header " << dec << numblocks+1 
 // 	       << " of file " << Filename << " (end of file?)." << endl;
-	  cout << "rawSubbandIn:attachFile: Found: " << dec << numblocks << " Blocks in File: "
+	  cout << "RawSubbandIn:attachFile: Found: " << dec << numblocks << " Blocks in File: "
 	       << Filename << endl;
 	  break;
 	};
 	if (numblocks >= veclen){
 	  veclen += 1000;
 	  blockdates.resize(veclen,True);
-	  cout << "rawSubbandIn:attachFile Increased blockdates-vector size at " << numblocks 
+	  cout << "RawSubbandIn:attachFile Increased blockdates-vector size at " << numblocks 
 	       << " blocks." << endl;
 	};
       };
@@ -162,13 +162,13 @@ namespace CR { // Namespace CR -- begin
       OpenedFile = Filename;
       fclose(fd);
     } catch (AipsError x) {
-      cerr << "rawSubbandIn:attachFile: " << x.getMesg() << endl;
+      cerr << "RawSubbandIn:attachFile: " << x.getMesg() << endl;
       return False;
     }; 
     return True;
   };
 
-  Matrix<DComplex> rawSubbandIn::getData(Double startdate, int nSamples, int pol){
+  Matrix<DComplex> RawSubbandIn::getData(Double startdate, int nSamples, int pol){
     Matrix<DComplex> data(nSamples,FHead.nrBeamlets,0.);
     try {
       int bnum,datalen,sample,beamlet,nsamples,npol,sindex,ui;
@@ -180,13 +180,13 @@ namespace CR { // Namespace CR -- begin
       
       stopdate = startdate + nSamples/FHead.sampleRate;
       if (stopdate >= lastdate){
-	cerr << "rawSubbandIn:getData: " << "Too many samples requested! (stopdate >= lastdate)" << endl;
+	cerr << "RawSubbandIn:getData: " << "Too many samples requested! (stopdate >= lastdate)" << endl;
 	return Matrix<DComplex>();
       }
       
       FILE *fd = fopen(OpenedFile.c_str(),"r");
       if (fd == NULL) {
-	cerr << "rawSubbandIn:getData: Can't open file: " << OpenedFile << endl;
+	cerr << "RawSubbandIn:getData: Can't open file: " << OpenedFile << endl;
 	return Matrix<DComplex>();
       };
       fseek(fd, sizeof(struct FileHeader), SEEK_CUR);
@@ -198,7 +198,7 @@ namespace CR { // Namespace CR -- begin
       short *datap;
       datap = (short int *)malloc(datalen);
       if (datap == NULL){
-	cerr << "rawSubbandIn:getData: " << "Unable to allocate temporary memory" << endl;
+	cerr << "RawSubbandIn:getData: " << "Unable to allocate temporary memory" << endl;
 	fclose(fd);
 	return Matrix<DComplex>();
       }
@@ -214,11 +214,11 @@ namespace CR { // Namespace CR -- begin
 	} else {
 	  ok = readBlockHeader(fd, BHead); 
 	  if (!ok) {
-	    cerr << "rawSubbandIn:getData: " << "Failed to read header of Block "<<  bnum << endl;
+	    cerr << "RawSubbandIn:getData: " << "Failed to read header of Block "<<  bnum << endl;
 	    break;
 	  };
 	  if (abs(blockdates(bnum)-BHead.time[0]/FHead.sampleRate)>1e-7) {
-	    cerr << "rawSubbandIn:getData: " << "Inconsistent state: blockdates != BHead.time" << endl;
+	    cerr << "RawSubbandIn:getData: " << "Inconsistent state: blockdates != BHead.time" << endl;
 	    cerr << "blockdates: " << blockdates(bnum)-firstdate 
 		 << " BHead.time: " << (BHead.time[0]/FHead.sampleRate)-firstdate 
 		 << " bnum "<< bnum << endl;
@@ -226,7 +226,7 @@ namespace CR { // Namespace CR -- begin
 	  };
 	  ui = fread(datap, 1, datalen, fd);
 	  if ( ui != datalen ) {
-	    cerr << "rawSubbandIn:getData: Failed to read in full datablock. "  << endl;
+	    cerr << "RawSubbandIn:getData: Failed to read in full datablock. "  << endl;
 	  };
 	  for (sample=0; sample<(int)FHead.nrSamplesPerBeamlet; sample++){
 	    sindex = (int)ceil((blockdates(bnum)-startdate)*FHead.sampleRate)+sample;
@@ -243,13 +243,13 @@ namespace CR { // Namespace CR -- begin
       free(datap);
       fclose(fd);
     } catch (AipsError x) {
-      cerr << "rawSubbandIn:getData: " << x.getMesg() << endl;
+      cerr << "RawSubbandIn:getData: " << x.getMesg() << endl;
       return Matrix<DComplex>();
     }; 
     return data;
   }
 
-  Vector<Int> rawSubbandIn::getSubbandIndices(){
+  Vector<Int> RawSubbandIn::getSubbandIndices(){
     Vector<Int> out(36);
     out(0) = 256; out(1) = 259; out(2) = 262; out(3) = 265; out(4) = 268;
     out(5) = 271; out(6) = 274; out(7) = 277; out(8) = 280; out(9) = 283;
@@ -265,13 +265,13 @@ namespace CR { // Namespace CR -- begin
     return out;
   };
 
-  Bool rawSubbandIn::readFileHeader(FILE *fd, FileHeader &FHead){
+  Bool RawSubbandIn::readFileHeader(FILE *fd, FileHeader &FHead){
     int ui,i;
     FileHeader tmphead;
     
     ui = fread(&tmphead, 1, sizeof(FileHeader), fd);
     if ( (ui != sizeof(FileHeader) )  ) {
-      cerr << "rawSubbandIn::readFileHeader: Inconsitent file: too small. "  << endl;
+      cerr << "RawSubbandIn::readFileHeader: Inconsitent file: too small. "  << endl;
       return False;
     };
     FHead.magic = ntohl(tmphead.magic);
@@ -296,18 +296,18 @@ namespace CR { // Namespace CR -- begin
     if (FHead.magic == 0x3F8304EC) {
       return True;
     } else {
-      cerr << "rawSubbandIn::readFileHeader: Inconsitent file: bad magic!" << endl;
+      cerr << "RawSubbandIn::readFileHeader: Inconsitent file: bad magic!" << endl;
       return False;
     };
   };
 
-  Bool rawSubbandIn::readBlockHeader(FILE *fd, BlockHeader &BHead){
+  Bool RawSubbandIn::readBlockHeader(FILE *fd, BlockHeader &BHead){
     int ui,i,j;
     BlockHeader tmphead;
     
     ui = fread(&tmphead, 1, sizeof(BlockHeader), fd);
     if ( (ui != sizeof(BlockHeader) )  ) {
-      cerr << "rawSubbandIn::readBlockHeader: File too small, or last block found."  << endl;
+      cerr << "RawSubbandIn::readBlockHeader: File too small, or last block found."  << endl;
       return False;
     };
     BHead.magic = ntohl(tmphead.magic);
@@ -325,7 +325,7 @@ namespace CR { // Namespace CR -- begin
     if (BHead.magic == 0x2913D852) {
       return True;
     } else {
-      cerr << "rawSubbandIn::readBlockHeader: Inconsitent file: bad magic!" << endl;
+      cerr << "RawSubbandIn::readBlockHeader: Inconsitent file: bad magic!" << endl;
       return False;
     };
   };

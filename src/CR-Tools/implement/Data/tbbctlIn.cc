@@ -22,11 +22,8 @@
  ***************************************************************************/
 
 #include <Data/tbbctlIn.h>
-#include <Data/CRCcheck.h>       
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <time.h>
+#include <IO/CRCcheck.h>       
+
 #define TBBCTLIN_MAXSAMPLES 0x4000000
 
 namespace CR { // Namespace CR -- begin

@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,16 +21,16 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Data/rawSubbandIn.h>
+#include <IO/RawSubbandIn.h>
 
-using CR::rawSubbandIn;  // Namespace usage
+using CR::RawSubbandIn;  // Namespace usage
 
 /*!
-  \file trawSubbandIn.cc
+  \file tRawSubbandIn.cc
 
-  \ingroup CR_Data
+  \ingroup IO
 
-  \brief A collection of test routines for the rawSubbandIn class
+  \brief A collection of test routines for the RawSubbandIn class
  
   \author Andreas Horneffer
  
@@ -40,40 +40,40 @@ using CR::rawSubbandIn;  // Namespace usage
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test constructors for a new rawSubbandIn object
+  \brief Test constructors for a new RawSubbandIn object
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_rawSubbandIn ()
+int test_RawSubbandIn ()
 {
   int nofFailedTests (0);
   
-  std::cout << "\n[test_rawSubbandIn]\n" << std::endl;
+  std::cout << "\n[test_RawSubbandIn]\n" << std::endl;
 
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    rawSubbandIn newrawSubbandIn;
+    RawSubbandIn newRawSubbandIn;
     //
 
-    newrawSubbandIn.attachFile("/mnt/lofar/kalpana/raw1.out");
+    newRawSubbandIn.attachFile("/mnt/lofar/kalpana/raw1.out");
     
     Matrix<DComplex> data;
-    data = newrawSubbandIn.getData(1.204812466000e+09,10,0);
+    data = newRawSubbandIn.getData(1.204812466000e+09,10,0);
 
     cout << endl << data(0,0) << ";" << data(0,1) << ";" << data(1,0) << endl;
     // This works with casa, but not with casacore
     //cout << endl << data << endl;
     
-    /*        rawSubbandIn::FileHeader FileHead;
-    rawSubbandIn::BlockHeader BlockHead;
+    /*        RawSubbandIn::FileHeader FileHead;
+    RawSubbandIn::BlockHeader BlockHead;
 
     FILE *fd = fopen("/mnt/lofar/kalpana/raw1.out","r");
 
     Bool ok;
 
-    ok = newrawSubbandIn.readFileHeader(fd,FileHead);
+    ok = newRawSubbandIn.readFileHeader(fd,FileHead);
     cout << "readFileHeader successfull: "<<ok<<endl;
-    cout << "FileHeadlen: "<< hex << sizeof(rawSubbandIn::FileHeader) << endl;
+    cout << "FileHeadlen: "<< hex << sizeof(RawSubbandIn::FileHeader) << endl;
     cout << "FileHead.magic: " << FileHead.magic << endl;
     cout << "FileHead.bitsPerSample: " << dec << (int)FileHead.bitsPerSample << endl;
     cout << "FileHead.nrPolarizations: " << (int)FileHead.nrPolarizations << endl;
@@ -94,7 +94,7 @@ int test_rawSubbandIn ()
 	 << FileHead.beamlet2beams[17] << "-" << FileHead.beamlet2beams[18] << "-" 
 	 << FileHead.beamlet2beams[53] << endl;
 
-    ok = newrawSubbandIn.readBlockHeader(fd,BlockHead);
+    ok = newRawSubbandIn.readBlockHeader(fd,BlockHead);
     cout << endl << "readBlockHeader successfull: "<<ok<<endl;
     cout << "BlockHead.magic: " << hex << BlockHead.magic << endl;
     cout << "BlockHead.coarseDelayApplied: " << dec<< BlockHead.coarseDelayApplied[0] << ","
@@ -129,7 +129,7 @@ int main ()
 
   // Test for the constructor(s)
   {
-    nofFailedTests += test_rawSubbandIn ();
+    nofFailedTests += test_RawSubbandIn ();
   }
 
   return nofFailedTests;

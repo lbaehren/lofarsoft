@@ -13,7 +13,6 @@
 
 set (tests
   tData
-  tDataFlag
   tITS_Beam
   tITSMetadata
   tLopesEvent
@@ -22,7 +21,6 @@ set (tests
   tObservationData
   tTIM40Header
   ttbbctlIn
-  trawSubbandIn
   tUpSampledDR
   )
 

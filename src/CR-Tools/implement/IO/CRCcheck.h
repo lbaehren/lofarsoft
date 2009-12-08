@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2009                                                  *
- *   Arthur Corstanje (<mail>)                                                     *
+ *   Copyright (C) 2009                                                    *
+ *   Arthur Corstanje (<mail>)                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -25,17 +25,18 @@
 #define CRCCHECK_H
 
 // Standard library header files
-#include <iostream>
-//#include <string>
-#include <Data/tbbctlIn.h>
 #include <stdint.h>
+#include <iostream>
+
+// CR-Tools header files
+#include <Data/tbbctlIn.h>
 
 namespace CR { // Namespace CR -- begin
   
   /*!
     \class CRCcheck
     
-    \ingroup CR_Data
+    \ingroup IO
     
     \brief Class to check CRCs of raw TBB data. 
     
@@ -53,12 +54,15 @@ namespace CR { // Namespace CR -- begin
     
     <h3>Synopsis</h3>
     
-		This class checks CRCs of TBB data as read from the tbbctl --readpage command. It can (and should) also 
-	  be used to do a CRC check on incoming TBB data at CEP. However currently the algorithm, as ported from 
-	  a Python script by Astron, is not very fast - about 7 MB/s on a 2.4 GHz CPU... 
-	  The generic CRC methods use 16-bit data buffers as input. This is not the usual char-buffer, but it prevents
-	  problems with endian-ness when working on 16-bits data.
-	 
+    This class checks CRCs of TBB data as read from the tbbctl --readpage command.
+    It can (and should) also be used to do a CRC check on incoming TBB data at
+    CEP. However currently the algorithm, as ported from a Python script by
+    Astron, is not very fast - about 7 MB/s on a 2.4 GHz CPU...
+
+    The generic CRC methods use 16-bit data buffers as input. This is not the
+    usual char-buffer, but it prevents problems with endian-ness when working
+    on 16-bits data.
+    
     <h3>Example(s)</h3>
     
   */  
@@ -120,40 +124,41 @@ namespace CR { // Namespace CR -- begin
 
 		
     // ------------------------------------------------------------------ Methods
-		/*! 
-		 \brief Generic CRC16 method, working on 16-bits input
-		 
-		 \param buffer -- unsigned 16-bits input
-		 \param length -- buffer length
-		 \return CRC16 -- CRC16 of buffer
-		*/
-		uint16_t CRC16(uint16_t * buffer, uint32_t length);
-		/*! 
-		 \brief Generic CRC32 method, working on 16-bits input
-		 
-		 \param buffer -- unsigned 16-bits input
-		 \param length -- buffer length
-		 \return CRC32 -- CRC32 of buffer
-		 */
+
+    /*! 
+      \brief Generic CRC16 method, working on 16-bits input
+      
+      \param buffer -- unsigned 16-bits input
+      \param length -- buffer length
+      \return CRC16 -- CRC16 of buffer
+    */
+    uint16_t CRC16(uint16_t * buffer, uint32_t length);
+    /*! 
+      \brief Generic CRC32 method, working on 16-bits input
+      
+      \param buffer -- unsigned 16-bits input
+      \param length -- buffer length
+      \return CRC32 -- CRC32 of buffer
+    */
     
-		uint32_t CRC32(uint16_t * buffer, uint32_t length);
-		/*! 
-		 \brief Check CRC16 of TBB raw data header record.
-		 
-		 \param header -- TBB header record
-		 \return CRC16 -- CRC16 of header - should be zero if OK.
-		 */		
+    uint32_t CRC32(uint16_t * buffer, uint32_t length);
+    /*! 
+      \brief Check CRC16 of TBB raw data header record.
+      
+      \param header -- TBB header record
+      \return CRC16 -- CRC16 of header - should be zero if OK.
+    */		
     uint16_t headerCRC(tbbctl_head* header);
-		/*! 
-		 \brief Check CRC32 of TBB raw data payload (the ADC data).
-		 
-		 \param buffer -- buffer of ADC data + payload CRC32, as 16-bit short (signed).
-		 \return CRC32 -- CRC32 of data - should be zero if OK.
-		 */		
-		uint32_t CRC32_tbbdata(short * buffer, uint32_t length);
+    /*! 
+      \brief Check CRC32 of TBB raw data payload (the ADC data).
+      
+      \param buffer -- buffer of ADC data + payload CRC32, as 16-bit short (signed).
+      \return CRC32 -- CRC32 of data - should be zero if OK.
+    */		
+    uint32_t CRC32_tbbdata(short * buffer, uint32_t length);
     
   private:
-	    //! Unconditional copying
+    //! Unconditional copying
     void copy (CRCcheck const &other);
     
     //! Unconditional deletion 
@@ -164,4 +169,4 @@ namespace CR { // Namespace CR -- begin
 } // Namespace CR -- end
 
 #endif /* CRCCHECK_H */
-  
+
