@@ -28,11 +28,6 @@ else (HAVE_NUMPY)
 endif (HAVE_NUMPY)
 
 ##_______________________________________________________________________________
-## Graphics libraries
-
-set (_CAIRO_FOUND OFF CACHE BOOL )
-
-##_______________________________________________________________________________
 ## Device drivers
 
 set (ENABLE_DYNDRIVERS OFF CACHE BOOL "Enable dynamic drivers?")
