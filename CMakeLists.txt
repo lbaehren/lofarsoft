@@ -169,7 +169,6 @@ endif (svn_executable)
 
 set (packages_external
   blas
-  boost
   casacore
   cfitsio
   hdf5
@@ -206,6 +205,8 @@ if (APPLE)
 endif (APPLE)
 
 add_subdirectory (${USG_EXTERNAL}/blitz)
+add_subdirectory (${USG_EXTERNAL}/boost)
+add_subdirectory (${USG_EXTERNAL}/fftw3)
 add_subdirectory (${USG_EXTERNAL}/matplotlib)
 add_subdirectory (${USG_EXTERNAL}/numeric)
 add_subdirectory (${USG_EXTERNAL}/plplot)
