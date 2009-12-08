@@ -1148,7 +1148,9 @@ void create_accelobs(accelobs * obs, infodata * idata, Cmdline * cmd, int usemma
    if (!obs->dat_input) {
       obs->fftfile = chkfopen(cmd->argv[0], "rb");
       obs->numbins = chkfilelen(obs->fftfile, sizeof(fcomplex));
-      if (usemmap) {
+      if (usemmap) 
+      {
+#ifdef USEMMAP
          fclose(obs->fftfile);
          obs->fftfile = NULL;
          printf("Memory mapping the input FFT.  This may take a while...\n");
@@ -1160,7 +1162,10 @@ void create_accelobs(accelobs * obs, infodata * idata, Cmdline * cmd, int usemma
          }
          obs->fft = (fcomplex *) mmap(0, sizeof(fcomplex) * obs->numbins, PROT_READ,
                                       MAP_SHARED, obs->mmap_file, 0);
-      } else {
+#endif
+      }
+      else 
+      {
          obs->mmap_file = 0;
       }
    }

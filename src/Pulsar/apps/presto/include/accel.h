@@ -45,7 +45,7 @@ typedef struct accelobs{
   double zlo;          /* Minimum fourier fdot to search */
   double zhi;          /* Maximum fourier fdot to search */
   double dz;           /* Stepsize in fourier fdot */
-  double baryv;        /* Average barycentric velocity during observation */
+//  double baryv;        /* Average barycentric velocity during observation */
   float nph;           /* Freq 0 level if requested, 0 otherwise */
   float sigma;         /* Cutoff sigma to choose a candidate */
   float *powcut;       /* Cutoff powers to choose a cand (per harmsummed) */

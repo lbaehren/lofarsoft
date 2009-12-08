@@ -60,10 +60,14 @@ set (presto_binaries
   search_bin search_rzw swap_endian prepdata
   check_parkes_raw bary shiftdata dftfold
   patchdata readfile toas2dat taperaw
-  accelsearch prepsubband cal2mjd split_parkes_beams
+  prepsubband cal2mjd split_parkes_beams
   dat2sdat sdat2dat downsample rednoise un_sc_td bincand
   dump_spigot_zerolag spigot2filterbank
   spigotSband2filterbank GBT350filterbank test_multifiles
+)
+
+set (presto_glib_binaries
+  accelsearch
 )
 
 set (presto_fc_binaries
@@ -113,14 +117,14 @@ if (UNIX)
    set_target_properties (presto
      PROPERTIES
      SUFFIX .dylib
-     COMPILE_FLAGS "-g -O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+     COMPILE_FLAGS "-g -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
      LINK_FLAGS "-dynamiclib"
      )
  else (APPLE)
    set_target_properties (presto
      PROPERTIES
      SUFFIX .so
-     COMPILE_FLAGS "-g -O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+     COMPILE_FLAGS "-g -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
      LINK_FLAGS "-shared"
      )
  endif (APPLE)
@@ -407,10 +411,20 @@ add_executable (makewisdom
 foreach (src ${presto_binaries})
   set_target_properties (${src}
     PROPERTIES
-    COMPILE_FLAGS "-g -O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+    COMPILE_FLAGS "-g -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
   )
   target_link_libraries (${src} presto sla ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${libm})
 endforeach (src)
+
+foreach (src ${presto_glib_binaries})
+  set_target_properties (${src}
+    PROPERTIES
+#    COMPILE_FLAGS "-g -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+    COMPILE_FLAGS "-g -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+  )
+  target_link_libraries (${src} presto ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${GLIB_LIBRARIES} ${libm})
+endforeach (src)
+
 
 foreach (src ${presto_fc_binaries})
   set_target_properties (${src}
