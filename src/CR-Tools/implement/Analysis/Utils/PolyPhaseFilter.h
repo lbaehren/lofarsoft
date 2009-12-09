@@ -73,7 +73,6 @@ namespace CR { // Namespace CR -- begin
     ~PolyPhaseFilter();
     void setWeights(const vector<double> &weights){itsWeights= weights;}
     void Convert(const vector<double> &in);
-    
     double GetPhase(uint channel);
     double GetAmp(uint channel);
     double GetReal(uint channel);

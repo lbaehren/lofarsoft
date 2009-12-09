@@ -70,16 +70,15 @@ namespace CR { // Namespace CR -- begin
     uint imax=0;
     uint maxdat=0;
     //get reference time;
-    uint time0= (daldata[0]->stationGroups().begin())->time()(0);
+    uint time0= (daldata[0]->stationGroup(0)).time()(0);
     for (uint idat =0;idat<nr_files;idat++){
-      vector<TBB_StationGroup> stationgr =daldata[idat]->stationGroups() ; 
-      
-      uint dipoles = daldata[idat]->nofDipoleDatasets() ;
+      uint nofGroups = daldata[idat]->nofStationGroups();
+       uint dipoles = daldata[idat]->nofDipoleDatasets() ;
    
-      for(vector<TBB_StationGroup>::iterator stati=stationgr.begin();stati != stationgr.end();stati++)
+      for(uint stati=0;stati <nofGroups;stati++)
 	{
  
-	  TBB_StationGroup stat= *stati;
+	  TBB_StationGroup stat= daldata[idat]->stationGroup(stati);
 	  casa::Vector<uint> samplenr = stat.sample_number();
 	  casa::Vector<uint> timenr = stat.time();
 	  for(uint idip=dipstart;idip<dipoles;idip+=dipstep){
@@ -106,12 +105,13 @@ namespace CR { // Namespace CR -- begin
     nofAntennas=0;
     //Now fill vector with offsets
     for (uint idat =0;idat<nr_files;idat++){
-      vector<TBB_StationGroup> stationgr =daldata[idat]->stationGroups() ; 
+      uint nofGroups = daldata[idat]->nofStationGroups();
       
       uint dipoles = daldata[idat]->nofDipoleDatasets() ;
-      for(vector<TBB_StationGroup>::iterator stati=stationgr.begin();stati != stationgr.end();stati++)
+       for(uint stati=0;stati <nofGroups;stati++)
 	{
-	  TBB_StationGroup stat= *stati;     
+ 
+	  TBB_StationGroup stat= daldata[idat]->stationGroup(stati);
 	  // set sample at which to start reading
 	  casa::Vector<uint> lths = stat.data_length();
 	  
@@ -150,7 +150,7 @@ namespace CR { // Namespace CR -- begin
     assert(ant<nofAntennas);
     vector<uint> dipoleSelection(1);
     dipoleSelection[0] = dipnr[ant];
-    out= (daldata[filenr[ant]]->stationGroups()[0]).fx(offsets[ant] + startSample,
+    out= (daldata[filenr[ant]]->stationGroup(0)).fx(offsets[ant] + startSample,
 						       blocksize,
 						       dipoleSelection);
     

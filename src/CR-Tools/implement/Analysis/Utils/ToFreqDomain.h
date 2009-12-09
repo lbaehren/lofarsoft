@@ -72,7 +72,7 @@ namespace CR { // Namespace CR -- begin
   class ToFreqDomain{
   public:
     ToFreqDomain(){};
-    ~ToFreqDomain(){};
+    virtual ~ToFreqDomain(){};
     virtual void Convert(const vector<double> &in)=0;
 
     virtual double GetPhase(uint channel) =0;

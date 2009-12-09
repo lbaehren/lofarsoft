@@ -25,7 +25,6 @@
 
 
 namespace CR { // Namespace CR -- begin
-
   SimpleBeamFormer::SimpleBeamFormer(uint nr_chan):pixels(0),nofChannels(nr_chan){
     Clear();
   }
@@ -33,28 +32,30 @@ namespace CR { // Namespace CR -- begin
   SimpleBeamFormer::~SimpleBeamFormer(){
   }
 
+  double SimpleBeamFormer::pi = 3.141592653589793238462643383279502884197169 ;
+  double SimpleBeamFormer::speed_light = 299792458.;
 
   void SimpleBeamFormer::Clear(){
     itsBeam.assign(pixels*nofChannels,mydcomplex(0.,0.));
   }
   
   double SimpleBeamFormer::GetPhase(uint pixelnr,uint channelnr){
-    return arg(itsBeam[channelnr*pixels+pixelnr]);
+    return arg(itsBeam[pixelnr*nofChannels+channelnr]);
   }
 
   double SimpleBeamFormer::GetAmp(uint pixelnr,uint channelnr)
   {
-    return abs(itsBeam[channelnr*pixels+pixelnr]);
+    return abs(itsBeam[pixelnr*nofChannels+channelnr]);
   }
   double SimpleBeamFormer::GetReal(uint pixelnr,uint channelnr){
-    return real(itsBeam[channelnr*pixels+pixelnr]);
+    return real(itsBeam[pixelnr*nofChannels+channelnr]);
   }
   double SimpleBeamFormer::GetImag(uint pixelnr,uint channelnr){
-    return imag(itsBeam[channelnr*pixels+pixelnr]);
+    return imag(itsBeam[pixelnr*nofChannels+channelnr]);
   }
   
   mydcomplex SimpleBeamFormer::GetComplex(uint pixelnr,uint channelnr){
-    return itsBeam[channelnr*pixels+pixelnr];
+    return itsBeam[pixelnr*nofChannels+channelnr];
   }
   
   
@@ -67,7 +68,7 @@ namespace CR { // Namespace CR -- begin
     Az=az;El=el;
     assert(az.size()==el.size());
     pixels = az.size();
-    itsBeam.resize(pixels);
+    itsBeam.resize(pixels*nofChannels);
     setDelays();
 
   }
@@ -96,14 +97,14 @@ namespace CR { // Namespace CR -- begin
   }
 
 
-  void SimpleBeamFormer::Add(double Amp, double Phase, int iant, double freq,uint pixelnr,uint channel_nr,bool real_imag){
+  void SimpleBeamFormer::Add(double Amp, double Phase, int iant, double freq,uint pixelnr,uint channel_nr,double offset,bool real_imag){
     mydcomplex data = mydcomplex(Amp*cos(Phase),Amp*sin(Phase));
     Add(data,iant,freq,pixelnr);
   }
 
-  void SimpleBeamFormer::Add(mydcomplex data,int iant, double freq,uint pixelnr,uint channelnr){
-    double delay = delays[pixelnr*nofAntennas+iant]*freq;
-    itsBeam[channelnr*pixels+pixelnr]+=data*mydcomplex(cos(delay),sin(delay));
+  void SimpleBeamFormer::Add(mydcomplex data,int iant, double freq,uint pixelnr,uint channelnr,double offset){
+    double phase_delay = delays[pixelnr*nofAntennas+iant]*freq+offset;
+    itsBeam[pixelnr*nofChannels+channelnr]+=data*mydcomplex(cos(phase_delay),sin(phase_delay));
   }
   
 

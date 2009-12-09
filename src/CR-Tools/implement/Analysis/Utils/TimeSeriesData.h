@@ -64,7 +64,7 @@ namespace CR { // Namespace CR -- begin
   class TimeSeriesData{
   public:
     TimeSeriesData(){};
-    ~TimeSeriesData(){};
+    virtual ~TimeSeriesData(){};
     
     virtual  void getTimeSeries(vector<double>& out,uint blocksize,int ant, uint startSample) const =0 ;
       

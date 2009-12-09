@@ -50,7 +50,8 @@ namespace CR { // Namespace CR -- begin
     incomplex = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (blocksize/2+1));
     outreal = (double*) fftw_malloc(sizeof(double) * (blocksize));
     
-    pc2r= fftw_plan_dft_c2r_1d(blocksize, incomplex, outreal, FFTW_MEASURE );
+    pc2r= fftw_plan_dft_c2r_1d(blocksize, incomplex, outreal, FFTW_MEASURE|FFTW_PRESERVE_INPUT );
+    resetFreq();
   }
 
 
@@ -77,18 +78,37 @@ namespace CR { // Namespace CR -- begin
     startpos+=blocksize;
     if(startpos>=nrTaps*blocksize) startpos=0;
   }
-
+  
+  void InvPolyPhaseFilter::setFreqBin(uint bin,mydcomplex value){
+    assert(bin<blocksize/2+1);
+    incomplex[bin][0] = real(value);
+    incomplex[bin][1] = imag(value);
+  }
+ 
+  void InvPolyPhaseFilter::resetFreq(){
+     for(uint i=0;i<blocksize/2+1;i++){
+      incomplex[i][0] = 0.;
+      incomplex[i][1] = 0.;
+     }
+  }
+  
   void InvPolyPhaseFilter::Convert(const vector<mydcomplex > & in){
     assert(in.size()==blocksize/2+1);
     for(uint i=0;i<blocksize/2+1;i++){
       incomplex[i][0] = real(in[i]);
       incomplex[i][1] = imag(in[i]);
     }
+    Convert();
+  }
+  
+  void InvPolyPhaseFilter::Convert(){
     fftw_execute(pc2r);
     AddBlock();
     get_invppf();
+
   }
-  
+
+
   double InvPolyPhaseFilter::GetAmp(uint itime){
      return itsTimeData[itime];
 

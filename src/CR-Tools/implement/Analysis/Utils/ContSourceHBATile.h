@@ -90,7 +90,7 @@ namespace CR { // Namespace CR -- begin
 	    for(int iy=0;iy<2;iy++)
 	      {
 		//sin(a+b)+sin(a-b)=sin(a)*2*cos(b);
-		double delay = cos((1./speed_light)*(source_pos_x*(1.5-ix)*1.25+source_pos_y*(1.5-iy)*1.25)*2*pi*simFreq[ifreq]) ;
+		double delay = cos((1./299792458.)*(source_pos_x*(1.5-ix)*1.25+source_pos_y*(1.5-iy)*1.25)*2*3.14159265*simFreq[ifreq]) ;
 		//	    cout<<"offset "<<ix<<":"<<iy<<" = "<<delay<<endl;
 		tile_offsets[ifreq]+=delay/8.;
 	      }
@@ -109,11 +109,11 @@ namespace CR { // Namespace CR -- begin
       az=a;el=e;
       initTileWeights();
      }
-    virtual double evaluate(double time){
+    double evaluate(double time){
       double val=0.;
       for(uint ifreq=0;ifreq<nr_simfreq;ifreq++)
 	{
-	  val+=simAmp[ifreq]*sin((time)*2*pi*simFreq[ifreq])*tile_offsets[ifreq];
+	  val+=simAmp[ifreq]*sin((time)*2*3.14159265*simFreq[ifreq])*tile_offsets[ifreq];
 	}
       return val;
     }

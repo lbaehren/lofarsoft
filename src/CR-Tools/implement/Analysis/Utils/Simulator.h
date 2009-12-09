@@ -68,9 +68,6 @@ namespace CR { // Namespace CR -- begin
   */  
   class Simulator:public TimeSeriesData{
   public:
-    static const double pi = 3.141592653589793238462643383279502884197169 ;
-    static  const double speed_light = 299792458;
-
 
     typedef enum {
       /*!

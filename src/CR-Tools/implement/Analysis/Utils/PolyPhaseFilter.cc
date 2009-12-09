@@ -73,7 +73,6 @@ namespace CR { // Namespace CR -- begin
     fftw_execute(pr2c);
 
   }
-  
   double PolyPhaseFilter::GetPhase(uint channel){
     return arg(mydcomplex(outcomplex[channel][0],outcomplex[channel][1]));
   }

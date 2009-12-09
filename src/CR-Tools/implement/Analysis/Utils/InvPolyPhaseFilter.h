@@ -73,7 +73,9 @@ namespace CR { // Namespace CR -- begin
     ~InvPolyPhaseFilter();
     void setWeights(const vector<double> &weights){itsWeights= weights;}
     void Convert(const vector<mydcomplex> &in);
-    
+    void Convert();
+    void resetFreq();//init to 0
+    void setFreqBin(uint bin,mydcomplex value);
     double GetAmp(uint itime);
     const vector<double> GetBlock();
     vector<double> GetEBlock();

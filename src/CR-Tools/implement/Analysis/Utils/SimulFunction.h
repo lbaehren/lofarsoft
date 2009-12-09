@@ -72,7 +72,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Destructor
     */
-    ~SimulFunction (){}
+    virtual ~SimulFunction (){}
    /*!
       \brief Get the name of the class
       
@@ -133,10 +133,6 @@ namespace CR { // Namespace CR -- begin
 
 
   class SimulContSource: public SimulFunction{
-  public:
-    static const  double pi = 3.141592653589793238462643383279502884197169 ;
-    static  const double speed_light = 299792458;
-
 
   public:
     SimulContSource():
@@ -147,7 +143,7 @@ namespace CR { // Namespace CR -- begin
       
     ~SimulContSource(){}
     
-    virtual std::string className () const {
+    std::string className () const {
       return "SIMULCONTSOURCE";
     }
    
@@ -160,17 +156,17 @@ namespace CR { // Namespace CR -- begin
 
     
 
-    virtual double evaluate(double time){
+    double evaluate(double time){
       double val=0.;
       for(uint ifreq=0;ifreq<nr_simfreq;ifreq++)
 	{
-	  val+=simAmp[ifreq]*sin((time)*2*pi*simFreq[ifreq]);
+	  val+=simAmp[ifreq]*sin((time)*2*3.14159265*simFreq[ifreq]);
 	}
       return val;
     }
 
   protected:
-    virtual void init(){
+    void init(){
       simAmp.resize(nr_simfreq);
       simFreq.resize(nr_simfreq);
       double freqbin2=(highend-lowend)/nr_simfreq;

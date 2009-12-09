@@ -69,7 +69,7 @@ namespace CR { // Namespace CR -- begin
   class ToTimeDomain{
   public:
     ToTimeDomain(){};
-    ~ToTimeDomain(){};
+    virtual ~ToTimeDomain(){};
     virtual void Convert(const vector<mydcomplex> &in)=0;
 
     virtual double GetAmp(uint channel) =0;

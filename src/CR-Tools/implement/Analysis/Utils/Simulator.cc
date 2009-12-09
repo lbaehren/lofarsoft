@@ -22,12 +22,13 @@
  ***************************************************************************/
 
 #include <Analysis/Utils/Simulator.h>
+ 
 
 
 namespace CR { // Namespace CR -- begin
 
 
-  Simulator::Simulator():myFunction(0),Az(0.),El(0.5*pi),SampleFreq(200.e6),TimeBin(5e-9),nofAntennas(-1),use_user_function(false)
+  Simulator::Simulator():myFunction(0),Az(0.),El(0.5*3.14),SampleFreq(200.e6),TimeBin(5e-9),nofAntennas(-1),use_user_function(false)
   {
     init();
   }
@@ -90,7 +91,7 @@ namespace CR { // Namespace CR -- begin
     double source_pos_y = sin(az)*cos(el) ;
     double source_pos_z = sin(el) ; 
     
-    double delay = (1./speed_light)*(source_pos_x*antPos[ant*3+0]+source_pos_y*antPos[ant*3+1]+source_pos_z*antPos[ant*3+2])  ;
+    double delay = (1./ 299792458)*(source_pos_x*antPos[ant*3+0]+source_pos_y*antPos[ant*3+1]+source_pos_z*antPos[ant*3+2])  ;
    
     double time = (starttime)*timestep-delay;
 
