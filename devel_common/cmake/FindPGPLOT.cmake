@@ -37,7 +37,7 @@ include (CMakeSettings)
 ## Check for the header files
 
 FIND_PATH (PGPLOT_INCLUDES cpgplot.h
-  PATHS ${include_locations}
+  PATHS ${include_locations} ${lib_locations}
   PATH_SUFFIXES pgplot
   )
 
