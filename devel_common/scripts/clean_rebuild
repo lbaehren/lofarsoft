@@ -13,6 +13,9 @@ case $1 in
     "dal")
 	BUILD_TARGET=dal
 	;;
+    "pybdsm")
+	BUILD_TARGET=pybdsm
+	;;
     "rm")
 	BUILD_TARGET=rm
 	;;

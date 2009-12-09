@@ -59,6 +59,9 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   //
   // ============================================================================
   
+  //_____________________________________________________________________________
+  //                                                                    operator=
+  
   <newClass>& <newClass>::operator= (<newClass> const &other)
   {
     if (this != &other) {
@@ -67,6 +70,9 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
     }
     return *this;
   }
+  
+  //_____________________________________________________________________________
+  //                                                                         copy
   
   void <newClass>::copy (<newClass> const &other)
   {;}
@@ -77,13 +83,14 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   //
   // ============================================================================
   
+  //_____________________________________________________________________________
+  //                                                                      summary
+  
   void <newClass>::summary (std::ostream &os)
   {
     os << "[<newClass>] Summary of internal parameters." << std::endl;
   }
-  
-  
-  
+
   // ============================================================================
   //
   //  Methods
