@@ -125,15 +125,17 @@ namespace CR { // Namespace CR -- begin
     os << "[LOFAR_TBB] Summary of object properties" << endl;
 
       os << "-- Name of data file .... : " << filename_p            << endl;
-      os << "-- HDF5 file ID ......... : " << fileID_p              << endl;
+      os << "-- HDF5 file ID ......... : " << location_p              << endl;
     
-    if (fileID_p > 0) {
+    if (location_p > 0) {
+      DAL::CommonAttributes attr = commonAttributes();
       /* Variables describing the dataset itself */
-      os << "-- Telescope ............ : " << telescope()           << endl;
-      os << "-- Observer ............. : " << observer()            << endl;
-      os << "-- Project .............. : " << project()             << endl;
-      os << "-- nof. station groups .. : " << groups_p.size()       << endl;
-      os << "-- nof. data channels ... : " << nofDipoleDatasets()   << endl;
+      os << "-- Telescope            : " << attr.telescope()     << endl;
+      os << "-- Observer             : " << attr.observer()      << endl;
+      os << "-- Project              : " << attr.projectTitle()  << endl;
+      os << "-- Observation ID       : " << attr.observationID() << endl;
+      os << "-- nof. station groups  : " << stationGroups_p.size()      << endl;
+      os << "-- nof. dipole datasets : " << nofDipoleDatasets()  << endl;
       
       /* Variables describing the setup of the DataReader */
       os << "-- blocksize   [samples ] : " << blocksize_p                   << endl;
@@ -150,8 +152,10 @@ namespace CR { // Namespace CR -- begin
       }
       
       if (listStationGroups) {
-	for (uint station(0); station<groups_p.size(); station++) {
-	  groups_p[station].summary();
+	std::map<std::string,DAL::TBB_StationGroup>::iterator it;
+
+	for (it=stationGroups_p.begin(); it!=stationGroups_p.end(); ++it) {
+	  (*it).second.summary();
 	}
       }
     }
@@ -175,7 +179,7 @@ namespace CR { // Namespace CR -- begin
     
     /* Check if we are actually connected to a dataset */
     
-    if (fileID_p < 0) {
+    if (location_p < 0) {
       std::cerr << "[LOFAR_TBB::init] Not connected to dataset!" << std::endl;
       return false;
     }
