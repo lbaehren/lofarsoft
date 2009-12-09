@@ -180,38 +180,39 @@ void LopesPol_HWSetup(void)
   Polarization(28) = "NS";
   Polarization(29) = "NS";
 
-  // Set Position
+  // Set positions
+  // average of 2 measurements with new GPS, corrected for center of KASCADE coordinate system
   Matrix<Double> Position(3,30);
-  Position.column(0)(0) = 79.61;        Position.column(0)(1) = -45.96;                Position.column(0)(2) =         0;
-  Position.column(1)(0) = 111.425;        Position.column(1)(1) = -64.297;        Position.column(1)(2) = -0.464996;
-  Position.column(2)(0) = 36.12;        Position.column(2)(1) = -84.724;        Position.column(2)(2) = -0.347;
-  Position.column(3)(0) = 54.621;        Position.column(3)(1) = -52.915;        Position.column(3)(2) = -0.0599976;
-  Position.column(4)(0) = 22.68;        Position.column(4)(1) = -34.593;        Position.column(4)(2) = -0.0799942;
-  Position.column(5)(0) = 22.68;        Position.column(5)(1) = -34.593;        Position.column(5)(2) = -0.0799942;
-  Position.column(6)(0) = 2.114;        Position.column(6)(1) = 40.762;                Position.column(6)(2) = 0.00900269;
-  Position.column(7)(0) = 34.345;        Position.column(7)(1) = 22.469;                Position.column(7)(2) = 0.0570068;
-  Position.column(8)(0) = 72.799;        Position.column(8)(1) = -21.039;        Position.column(8)(2) = -0.086998;
-  Position.column(9)(0) = 91.021;        Position.column(9)(1) = 10.966;                Position.column(9)(2) = -0.190994;
-  Position.column(10)(0) = -64.335;        Position.column(10)(1) = -112.265;        Position.column(10)(2) = -0.275993;
-  Position.column(11)(0) = -45.981;        Position.column(11)(1) = -80.043;        Position.column(11)(2) = -0.239998;
-  Position.column(12)(0) = -84.665;        Position.column(12)(1) = -36.799;        Position.column(12)(2) = -0.194;
-  Position.column(13)(0) = -52.069;        Position.column(13)(1) = -54.61;        Position.column(13)(2) = -0.2;
-  Position.column(14)(0) = -91.563;        Position.column(14)(1) = -11.622;        Position.column(14)(2) = -0.145996;
-  Position.column(15)(0) = -73.138;        Position.column(15)(1) = 20.123;        Position.column(15)(2) = -0.0799942;
-  Position.column(16)(0) = -112.217;        Position.column(16)(1) = 63.405;        Position.column(16)(2) = 0.166;
-  Position.column(17)(0) = -80.264;        Position.column(17)(1) = 45.138;        Position.column(17)(2) = 0.0630035;
-  Position.column(18)(0) = -34.721;        Position.column(18)(1) = -23.298;        Position.column(18)(2) = -0.139;
-  Position.column(19)(0) = -34.721;        Position.column(19)(1) = -23.298;        Position.column(19)(2) = -0.139;
-  Position.column(20)(0) = -13.861;        Position.column(20)(1) = -98.158;        Position.column(20)(2) = 0.012001;
-  Position.column(21)(0) = 4.335;        Position.column(21)(1) = -66.264;        Position.column(21)(2) = 0.00200653;
-  Position.column(22)(0) = -41.354;        Position.column(22)(1) = 1.876;                Position.column(22)(2) = -0.192993;
-  Position.column(23)(0) = -23.045;        Position.column(23)(1) = 33.919;        Position.column(23)(2) = -0.306;
-  Position.column(24)(0) = -61.694;        Position.column(24)(1) = 77.362;        Position.column(24)(2) = -0.112;
-  Position.column(25)(0) = -29.84;        Position.column(25)(1) = 58.835;        Position.column(25)(2) = -0.271996;
-  Position.column(26)(0) = -7.826;        Position.column(26)(1) = -127.937;        Position.column(26)(2) = -0.178993;
-  Position.column(27)(0) = -7.826;        Position.column(27)(1) = -127.937;        Position.column(27)(2) = -0.178993;
-  Position.column(28)(0) = -13.861;        Position.column(28)(1) = -98.158;        Position.column(28)(2) = 0.012001;
-  Position.column(29)(0) = 4.335;        Position.column(29)(1) = -66.264;        Position.column(29)(2) = 0.00200653;
+  Position.column(0)(0) = 79.73;       Position.column(0)(1) = -45.6;         Position.column(0)(2) =  1.12;
+  Position.column(1)(0) = 111.59;      Position.column(1)(1) = -63.98;        Position.column(1)(2) = 1.05;
+  Position.column(2)(0) = 36.31;       Position.column(2)(1) = -84.52;        Position.column(2)(2) = 1.19;
+  Position.column(3)(0) = 54.8;        Position.column(3)(1) = -52.61;        Position.column(3)(2) = 1.13;
+  Position.column(4)(0) = 22.72;       Position.column(4)(1) = -34.17;        Position.column(4)(2) = 1.07;
+  Position.column(5)(0) = 22.72;       Position.column(5)(1) = -34.17;        Position.column(5)(2) = 1.07;
+  Position.column(6)(0) = 2.18;        Position.column(6)(1) = 41.15;         Position.column(6)(2) = 1.21;
+  Position.column(7)(0) = 34.48;       Position.column(7)(1) = 22.88;         Position.column(7)(2) = 1.16;
+  Position.column(8)(0) = 72.72;       Position.column(8)(1) = -20.68;        Position.column(8)(2) = 1.06;
+  Position.column(9)(0) = 91.02;       Position.column(9)(1) = 11.28;         Position.column(9)(2) = 0.96;
+  Position.column(10)(0) = -64.1;      Position.column(10)(1) = -111.95;      Position.column(10)(2) = 1.27;
+  Position.column(11)(0) = -45.77;     Position.column(11)(1) = -79.76;       Position.column(11)(2) = 1.3;
+  Position.column(12)(0) = -84.46;     Position.column(12)(1) = -36.48;       Position.column(12)(2) = 1.35;
+  Position.column(13)(0) = -52.31;     Position.column(13)(1) = -54.49;       Position.column(13)(2) = 1.25;
+  Position.column(14)(0) = -91.37;     Position.column(14)(1) = -11.36;       Position.column(14)(2) = 1.38;
+  Position.column(15)(0) = -72.91;     Position.column(15)(1) = 20.41;        Position.column(15)(2) = 1.47;
+  Position.column(16)(0) = -111.81;    Position.column(16)(1) = 63.48;        Position.column(16)(2) = 1.53;
+  Position.column(17)(0) = -79.92;     Position.column(17)(1) = 45.56;        Position.column(17)(2) = 1.53;
+  Position.column(18)(0) = -34.37;     Position.column(18)(1) = -22.83;       Position.column(18)(2) = 1.28;
+  Position.column(19)(0) = -34.37;     Position.column(19)(1) = -22.83;       Position.column(19)(2) = 1.28;
+  Position.column(20)(0) = -13.7;      Position.column(20)(1) = -97.84;       Position.column(20)(2) = 1.53;
+  Position.column(21)(0) = 4.51;       Position.column(21)(1) = -65.93;       Position.column(21)(2) = 1.5;
+  Position.column(22)(0) = -41.18;     Position.column(22)(1) = 2.16;         Position.column(22)(2) = 1.32;
+  Position.column(23)(0) = -22.79;     Position.column(23)(1) = 34.33;        Position.column(23)(2) = 1.21;
+  Position.column(24)(0) = -61.46;     Position.column(24)(1) = 77.65;        Position.column(24)(2) = 1.43;
+  Position.column(25)(0) = -29.63;     Position.column(25)(1) = 59.18;        Position.column(25)(2) = 1.28;
+  Position.column(26)(0) = -7.55;      Position.column(26)(1) = -127.63;      Position.column(26)(2) = 1.39;
+  Position.column(27)(0) = -7.55;      Position.column(27)(1) = -127.63;      Position.column(27)(2) = 1.39;
+  Position.column(28)(0) = -13.7;      Position.column(28)(1) = -97.84;       Position.column(28)(2) = 1.53;
+  Position.column(29)(0) = 4.51;       Position.column(29)(1) = -65.93;       Position.column(29)(2) = 1.5;
 
   // Write values for antenna 27, 29 and 30 for change in summer 2006
   cout << "Writing HW-Setup for small setup change of summer 2006." << endl;
@@ -1715,48 +1716,6 @@ void writeTripolePositions(void)
   }
 }
 
-void set_new_positions(void)    // new gps measurement 12.08.2009
-{
-  Matrix<Double> Position(3,30);
-  Position.column(0)(0) = 81.17;       Position.column(0)(1) = -44.84;        Position.column(0)(2) =  0;
-  Position.column(1)(0) = 113.79;      Position.column(1)(1) = -64.57;        Position.column(1)(2) = -0.08;
-  Position.column(2)(0) = 37.85;       Position.column(2)(1) = -84.66;        Position.column(2)(2) = 0.07;
-  Position.column(3)(0) = 55.63;       Position.column(3)(1) = -52.13;        Position.column(3)(2) = -0.009;
-  Position.column(4)(0) = 22.75;       Position.column(4)(1) = -34.42;        Position.column(4)(2) = 0.04;
-  Position.column(5)(0) = 22.75;       Position.column(5)(1) = -34.42;        Position.column(5)(2) = 0.04;
-  Position.column(6)(0) = 3.77;        Position.column(6)(1) = 42.29;         Position.column(6)(2) = -0.009;
-  Position.column(7)(0) = 36.54;       Position.column(7)(1) = 23.99;         Position.column(7)(2) = 0.04;
-  Position.column(8)(0) = 74.54;       Position.column(8)(1) = -19.7;         Position.column(8)(2) = -0.07;
-  Position.column(9)(0) = 92.19;       Position.column(9)(1) = 11.57;         Position.column(9)(2) = -0.17;
-  Position.column(10)(0) = -63.73;     Position.column(10)(1) = -111.3;       Position.column(10)(2) = 0.15;
-  Position.column(11)(0) = -45.91;     Position.column(11)(1) = -78.9;        Position.column(11)(2) = 0.18;
-  Position.column(12)(0) = -84.15;     Position.column(12)(1) = -35.4;        Position.column(12)(2) = 0.22;
-  Position.column(13)(0) = -51.72;     Position.column(13)(1) = -53.65;       Position.column(13)(2) = 0.12;
-  Position.column(14)(0) = -91.04;     Position.column(14)(1) = -10.2;        Position.column(14)(2) = 0.24;
-  Position.column(15)(0) = -72.27;     Position.column(15)(1) = 21.47;        Position.column(15)(2) = 0.34;
-  Position.column(16)(0) = -111.27;    Position.column(16)(1) = 65.18;        Position.column(16)(2) = 0.41;
-  Position.column(17)(0) = -79.22;     Position.column(17)(1) = 46.66;        Position.column(17)(2) = 0.41;
-  Position.column(18)(0) = -34.21;     Position.column(18)(1) = -21.64;       Position.column(18)(2) = 0.15;
-  Position.column(19)(0) = -34.21;     Position.column(19)(1) = -21.64;       Position.column(19)(2) = 0.15;
-  Position.column(20)(0) = -13.21;     Position.column(20)(1) = -97.07;       Position.column(20)(2) = 0.41;
-  Position.column(21)(0) = 5.26;       Position.column(21)(1) = -65.29;       Position.column(21)(2) = 0.38;
-  Position.column(22)(0) = -41.27;     Position.column(22)(1) = 3.4;          Position.column(22)(2) = 0.2;
-  Position.column(23)(0) = -21.85;     Position.column(23)(1) = 35.65;        Position.column(23)(2) = 0.09;
-  Position.column(24)(0) = -60.82;     Position.column(24)(1) = 79.24;        Position.column(24)(2) = 0.3;
-  Position.column(25)(0) = -29.81;     Position.column(25)(1) = 60.6;         Position.column(25)(2) = 0.15;
-  Position.column(26)(0) = -6.61;      Position.column(26)(1) = -126.91;      Position.column(26)(2) = 0.28;
-  Position.column(27)(0) = -6.61;      Position.column(27)(1) = -126.91;      Position.column(27)(2) = 0.28;
-  Position.column(28)(0) = -13.21;     Position.column(28)(1) = -97.07;       Position.column(28)(2) = 0.41;
-  Position.column(29)(0) = 5.26;       Position.column(29)(1) = -65.29;       Position.column(29)(2) = 0.38;
-
-  for (int i = 0; i < MAX_Antennas; i++) {
-    cout << "Writing new measured positions  2009-08-12: " << antennaIDs[i] << endl;
-    if (!writer.AddData(Position.column(i),antennaIDs[i],"Position",LOPES_pol_start) )
-      cerr << "\nERROR while writing field: Position" << endl;
-  }
-
-}
-
 void writeSallaplusdipolDelays(void)
 {
   // Set delays for sallaplusdipol in August 2009
@@ -1917,7 +1876,7 @@ int main (int argc, char *argv[])
 
     // execute requested function to change CalTable
     // adjust_height_of_ant_14(); // allready checked in
-    // LopesPol_HWSetup();        // allready checked in
+    LopesPol_HWSetup();        // allready checked in
 
     // Changes to Delay-Table , allready checked in
     //writeDelays();
@@ -1946,12 +1905,10 @@ int main (int argc, char *argv[])
     //  addActiveField(true);                // checked in
     // writeBadPeriods();                // checked in
     // writeTripoleDelays();        // checked in
-    //writeTripolePositions();  // checked in
+    writeTripolePositions();  // checked in
 
-    // TODO
     // writeSallaplusdipolDelays();
-    // writeSallaplusdipolPositions(); 
-    set_new_positions();
+    writeSallaplusdipolPositions(); 
 
     cout << "Writing finished: " << endl;
     writer.PrintSummary();
