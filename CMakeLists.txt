@@ -7,10 +7,10 @@
 project (LUS)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 
 ## Enforced CMake policy 
-cmake_policy (VERSION 2.6)
+cmake_policy (VERSION 2.8)
 
 ## ==============================================================================
 ##
@@ -183,7 +183,6 @@ set (packages_external
   szip
   wcslib
   wcstools
-  zlib
   )
 
 if (NOT bison_executable)
@@ -194,25 +193,9 @@ if (NOT flex_executable)
   list (APPEND packages_external flex)
 endif (NOT flex_executable)
 
-if (NOT wget_executable)
-  list (APPEND packages_external wget)
-endif (NOT wget_executable)
-
 ## Packages handled directly through CMake
 
-if (APPLE)
-  add_subdirectory (${USG_EXTERNAL}/fink)
-endif (APPLE)
-
-add_subdirectory (${USG_EXTERNAL}/blitz)
-add_subdirectory (${USG_EXTERNAL}/boost)
-add_subdirectory (${USG_EXTERNAL}/fftw3)
-add_subdirectory (${USG_EXTERNAL}/matplotlib)
-add_subdirectory (${USG_EXTERNAL}/numeric)
-add_subdirectory (${USG_EXTERNAL}/plplot)
-add_subdirectory (${USG_EXTERNAL}/swig)
-add_subdirectory (${USG_EXTERNAL}/itpp)
-#add_subdirectory (${USG_EXTERNAL}/wcstools)
+add_subdirectory (${USG_ROOT}/external)
 
 ##____________________________________________________________________
 ## generic build instructions for the packages

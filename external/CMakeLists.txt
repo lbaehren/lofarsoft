@@ -1,13 +1,16 @@
 
-add_subdirectory(bison)
-add_subdirectory(flex)
+add_subdirectory (blitz)
+add_subdirectory (boost)
+add_subdirectory (fftw3)
+add_subdirectory (glibc)
+add_subdirectory (itpp)
+add_subdirectory (matplotlib)
+add_subdirectory (numeric)
+add_subdirectory (plplot)
+add_subdirectory (swig)
+add_subdirectory (valgrind)
 
-add_subdirectory(wcslib)
-add_subdirectory(cfitsio)
-add_subdirectory(szip)
-add_subdirectory(zlib)
+if (APPLE)
+  add_subdirectory (${USG_EXTERNAL}/fink)
+endif (APPLE)
 
-add_subdirectory(casacore)
-
-add_subdirectory(boost)
-add_subdirectory(wcstools)
