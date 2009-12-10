@@ -1038,12 +1038,12 @@ namespace CR {  //  Namespace CR -- begin
       case 6:
 	{
 	  if (selectChannels_p) {
-	    for (channel=0; channel<fftLength_p; channel++) {
-	      data(channel,antenna) = conj(outColumn(fftLength_p-channel-1));
+	    for (channel=0; channel<nofChannels; channel++) {
+	      data(channel,antenna) = conj(outColumn(fftLength_p-selectedChannels_p(channel)-1));
 	    }
 	  } else {
-	    for (channel=0; channel<fftLength_p; channel++) {
-	      data(channel,antenna) = conj(outColumn(fftLength_p-selectedChannels_p(channel)-1));
+	    for (channel=0; channel<nofChannels; channel++) {
+	      data(channel,antenna) = conj(outColumn(fftLength_p-channel-1));
 	    }
 	  }
 	}
