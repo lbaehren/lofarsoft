@@ -104,11 +104,14 @@ namespace CR { // Namespace CR -- begin
     try {
       if (rotate) {
 	Double XCn,YCn;
-	// Rotation by 15.0 degrees; remark: the exact value is 15.7 but in the
-	// value used in the KRETA-evaluation is 15.0, too.
-	// cos 15° = 0.965925826  ;  sin 15° = 0.258819045
-	XCn = XC*0.965925826+YC*0.258819045;
-	YCn = XC*-0.258819045+YC*0.965925826;
+	// Rotation by 15.25 degrees
+	// (GPS measurement of angle between KASCADE and LOPES coordinate system)
+	// remark: the value in the Gauss-Kürger coordinate system is 15.7°
+	// which would correspond to 15.23° to geographic north
+	// Value used in the KRETA-evaluation is 15.0°.
+	// cos 15.25° = 0.964787323  ;  sin 15.25° = 0.263031214
+	XCn = XC*0.964787323+YC*0.263031214;
+	YCn = XC*-0.263031214+YC*0.964787323;
 	DirParams_p.define("Xpos",XCn);
 	DirParams_p.define("Ypos",YCn);
       } else {
