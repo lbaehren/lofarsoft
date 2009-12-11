@@ -52,7 +52,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
   ##__________________________________________________________________
   ## Configure and build the project
 
-  set (boost_version "1_39_0")
+  set (boost_version "1_40_0")
 
   find_file (have_boost_tgz   boost_${boost_version}.tar.gz ${BOOST_SOURCE_DIR})
   find_file (have_boost_cmake boost_cmake.tgz               ${BOOST_SOURCE_DIR})
