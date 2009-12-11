@@ -1112,7 +1112,7 @@ void writePhaseCal(void)
   double freqAxis[] =  {4e+07,4.025e+07,4.05e+07,4.075e+07,4.1e+07,4.125e+07,4.15e+07,4.175e+07,4.2e+07,4.225e+07,4.25e+07,4.275e+07,4.3e+07,4.325e+07,4.35e+07,4.375e+07,4.4e+07,4.425e+07,4.45e+07,4.475e+07,4.5e+07,4.525e+07,4.55e+07,4.575e+07,4.6e+07,4.625e+07,4.65e+07,4.675e+07,4.7e+07,4.725e+07,4.75e+07,4.775e+07,4.8e+07,4.825e+07,4.85e+07,4.875e+07,4.9e+07,4.925e+07,4.95e+07,4.975e+07,5e+07,5.025e+07,5.05e+07,5.075e+07,5.1e+07,5.125e+07,5.15e+07,5.175e+07,5.2e+07,5.225e+07,5.25e+07,5.275e+07,5.3e+07,5.325e+07,5.35e+07,5.375e+07,5.4e+07,5.425e+07,5.45e+07,5.475e+07,5.5e+07,5.525e+07,5.55e+07,5.575e+07,5.6e+07,5.625e+07,5.65e+07,5.675e+07,5.7e+07,5.725e+07,5.75e+07,5.775e+07,5.8e+07,5.825e+07,5.85e+07,5.875e+07,5.9e+07,5.925e+07,5.95e+07,5.975e+07,6e+07,6.025e+07,6.05e+07,6.075e+07,6.1e+07,6.125e+07,6.15e+07,6.175e+07,6.2e+07,6.225e+07,6.25e+07,6.275e+07,6.3e+07,6.325e+07,6.35e+07,6.375e+07,6.4e+07,6.425e+07,6.45e+07,6.475e+07,6.5e+07,6.525e+07,6.55e+07,6.575e+07,6.6e+07,6.625e+07,6.65e+07,6.675e+07,6.7e+07,6.725e+07,6.75e+07,6.775e+07,6.8e+07,6.825e+07,6.85e+07,6.875e+07,6.9e+07,6.925e+07,6.95e+07,6.975e+07,7e+07,7.025e+07,7.05e+07,7.075e+07,7.1e+07,7.125e+07,7.15e+07,7.175e+07,7.2e+07,7.225e+07,7.25e+07,7.275e+07,7.3e+07,7.325e+07,7.35e+07,7.375e+07,7.4e+07,7.425e+07,7.45e+07,7.475e+07,7.5e+07,7.525e+07,7.55e+07,7.575e+07,7.6e+07,7.625e+07,7.65e+07,7.675e+07,7.7e+07,7.725e+07,7.75e+07,7.775e+07,7.8e+07,7.825e+07,7.85e+07,7.875e+07,7.9e+07,7.925e+07,7.95e+07,7.975e+07,8e+07};
   Vector<double> PhaseCalFreq(vector<double> (freqAxis,freqAxis+sizeof(freqAxis)/sizeof(freqAxis[0])) );
 
-  // construct Matrixx with PhaseCal values
+  // construct Matrix with PhaseCal values
   double phasecals[][161] =
   {{-129.569,-129.129,-128.696,-127.648,-125.852,-123.403,-120.111,-116.013,-109.994,-102.707,-92.8544,-81.8489,-71.0527,-62.3397,-54.2214,-45.6668,-35.7816,-25.6155,-16.2622,-9.03965,-3.31797,1.4012,5.24625,7.71226,9.17607,10.8891,12.2222,13.0776,13.1318,13.5286,14.0603,14.7677,15.7958,17.2513,20.2762,23.471,26.6979,29.7201,32.5585,34.5548,35.2773,35.8882,35.945,35.9831,35.0877,33.6831,32.438,30.7097,28.909,26.9117,25.046,23.3524,21.7232,20.1014,18.9755,19.0028,19.5827,20.1867,20.5998,22.3603,24.5491,25.8683,26.9636,27.8563,29.0162,29.0755,27.8564,27.8278,26.7945,25.8771,24.3486,22.7374,21.38,18.1383,15.2436,12.2485,9.56359,7.33087,5.16424,2.64862,-0,-2.65312,-3.96084,-4.43887,-4.06729,-3.24791,-1.73033,0.605845,1.83232,2.6799,3.56749,6.30213,8.92805,10.7737,10.1548,9.21876,7.87832,6.57783,4.94168,2.82775,0.752368,-1.92709,-4.86075,-7.8619,-10.7824,-13.3283,-15.6803,-17.7133,-19.9346,-21.9098,-23.7161,-24.6384,-23.4725,-20.8691,-17.2279,-12.6881,-8.52882,-5.11859,-0.458599,2.99536,5.679,6.65013,6.79536,6.23125,6.00973,4.99202,4.10486,0.844602,-2.11276,-4.22168,-3.1227,-2.14353,-0.257348,1.67383,4.49341,8.81989,15.3127,24.1562,34.4248,43.4068,50.5442,56.1456,61.6247,66.3645,71.6548,78.141,87.1166,97.7728,108.938,119.151,127.989,135.012,140.598,144.989,148.495,151.296,153.512,154.973,155.837,156.191,156.164},
   {-134.914,-134.597,-134.066,-133.064,-131.209,-128.764,-125.15,-121.115,-115.304,-108.409,-99.5208,-89.713,-79.3783,-69.6711,-60.7584,-51.7962,-42.681,-33.3444,-24.9605,-18.0134,-11.7675,-6.9955,-2.61543,0.842914,3.16153,5.47117,7.24584,8.83392,10.0526,10.8868,12.0175,12.9294,14.1186,15.5733,17.4854,19.7472,21.5393,23.6137,25.2398,26.4885,27.2475,27.8195,28.2444,28.4311,28.2555,27.3144,26.6224,25.7245,24.5493,23.3229,22.4836,21.1642,20.4317,19.4695,18.5581,18.7874,18.7245,19.0153,18.9873,19.3788,20.1609,20.5801,20.8197,20.6669,20.731,20.4664,19.7516,19.0571,18.6646,17.6312,16.4949,15.3209,14.1318,12.2085,10.0224,8.24854,6.65181,5.19078,3.66155,2.14053,-0,-1.30993,-1.97805,-2.07528,-1.68191,-1.15634,-0.767963,0.23801,0.0655833,0.169706,0.0495192,1.04345,1.70739,2.00869,1.36085,0.363144,-0.822703,-1.78695,-3.08426,-4.35819,-6.0125,-7.83088,-10.0052,-11.7913,-13.4853,-14.9337,-16.4123,-17.3938,-18.494,-19.6341,-19.9785,-19.7907,-18.7808,-16.8608,-14.7066,-12.4341,-10.359,-8.81508,-6.47227,-4.36151,-2.96988,-2.24501,-1.9324,-1.66819,-1.64013,-1.8588,-1.79749,-2.90307,-3.8672,-3.68253,-2.03775,-0.0354812,2.69379,5.60656,9.65914,14.19,20.2525,27.8815,35.2941,42.2165,48.5949,54.5351,61.244,68.0237,75.9679,85.6917,96.5666,107.542,117.588,125.864,132.819,138.281,142.92,146.116,148.619,150.545,151.871,152.218,152.565,152.169,151.202},
@@ -1851,6 +1851,73 @@ void writeSallaplusdipolPositions(void)
 }
 
 
+// Write ElGainCal values:
+// Data are read in from AmpFact-file from Steffen's root scripts for amplitude calibration
+void writeElGainCal(void)
+{
+  const string path = "/users/iklx/lopesuser/amplitude_calibration/ampFact/";
+  const string files[] = {"Amp01", "Amp02", "Amp03", "Amp04", "Amp05", "Amp06", "Amp07", "Amp08", "Amp09", "Amp10",
+                          "Amp11", "Amp12", "Amp13", "Amp14", "Amp15", "Amp16", "Amp17", "Amp18", "Amp19", "Amp20",
+                          "Amp21", "Amp22", "Amp23", "Amp24", "Amp25", "Amp26", "Amp27", "Amp28", "Amp29", "Amp30"};
+  // construct casacore Vectors with frequency values:
+  // first create array, secondly a stl-vector and then a casacore Vector
+  double freqAxis[] =  {4e+07, 4.1e+07, 4.2e+07, 4.3e+07, 4.4e+07, 4.5e+07, 4.6e+07, 4.7e+07, 4.8e+07, 4.9e+07, 5e+07, 5.1e+07, 5.2e+07, 5.3e+07, 5.4e+07, 5.5e+07, 5.6e+07, 5.7e+07, 5.8e+07, 5.9e+07, 6e+07, 6.1e+07, 6.2e+07, 6.3e+07, 6.4e+07, 6.5e+07, 6.6e+07, 6.7e+07, 6.8e+07, 6.9e+07, 7e+07, 7.1e+07, 7.2e+07, 7.3e+07, 7.4e+07, 7.5e+07, 7.6e+07, 7.7e+07, 7.8e+07, 7.9e+07, 8e+07};
+  unsigned int Nfreqs = sizeof(freqAxis)/sizeof(freqAxis[0]);
+  Vector<double> ElGainCalFreq(vector<double> (freqAxis,freqAxis+Nfreqs));
+
+  // Create Vector to store ElCainCal values for each antenna
+  Vector<double> ElGainCal(ElGainCalFreq.copy());
+  ElGainCal.set(0);
+  
+  ifstream infile;
+  double freq, gain, error;
+  
+  
+    // Add the value for all antennas
+  for (int i = 0; i < MAX_Antennas; i++) {
+    infile.open(string(path+files[i]).c_str(), ifstream::in);
+    // check if file could be opened
+    if (!(infile.is_open())) {
+      cerr << "Failed to open file \"" << path+files[i] <<"\"." << endl;
+      return;
+    }
+    
+    for (unsigned int j = 0; j < Nfreqs; j++) {
+      if (!(infile.good())) {
+        cerr << "File \"" << path+files[i] <<"\" is not good." << endl;
+        return;
+      }
+      infile >> freq >> gain >> error;
+
+      // calculate gain factor, and avoid very large values for band limits
+      if (gain < 1)
+        ElGainCal(j) = 1;
+      else
+        ElGainCal(j) = 1 / sqrt(gain);
+        
+      // cout << freq << " Gain = " << gain << " Error = " << error << " factor = " << ElGainCalFreq(j) << endl;
+
+      // check if frequency is consistent
+      if ( abs(freqAxis[j]/freq-1e6) > 0.01)  {
+        cerr << "Frequencies are inconsistent." << endl;
+        return;
+      }
+    }
+    infile.close();
+    
+    cout << "Writing ElGainCal values for dual polarization setup of dec 2006: " << antennaIDs[i] << endl;
+    if (!writer.AddData(ElGainCalFreq,antennaIDs[i],"ElGainCalFreq",LOPES_pol_start) )
+      cerr << "\nERROR while writing field: ElGainCalFreq" << endl;
+    if (!writer.AddData(ElGainCal,antennaIDs[i],"ElGainCal",LOPES_pol_start) )
+      cerr << "\nERROR while writing field: ElGainCal" << endl;  
+  }
+
+  
+  // first: read in values for the start of LOPES-dual pol
+  
+  
+}
+
 
 int main (int argc, char *argv[])
 {
@@ -1876,11 +1943,13 @@ int main (int argc, char *argv[])
 
     // execute requested function to change CalTable
     // adjust_height_of_ant_14(); // allready checked in
-    LopesPol_HWSetup();        // allready checked in
+    //LopesPol_HWSetup();        // allready checked in
 
     // Changes to Delay-Table , allready checked in
     //writeDelays();
 
+    writeElGainCal();
+    
     // Rewrite field for variable reference antenna
     //addRefAntField(true); // set to true to also create the field
 
@@ -1905,10 +1974,11 @@ int main (int argc, char *argv[])
     //  addActiveField(true);                // checked in
     // writeBadPeriods();                // checked in
     // writeTripoleDelays();        // checked in
-    writeTripolePositions();  // checked in
+    // writeTripolePositions();  // checked in
 
     // writeSallaplusdipolDelays();
-    writeSallaplusdipolPositions(); 
+    // writeSallaplusdipolPositions(); 
+    
 
     cout << "Writing finished: " << endl;
     writer.PrintSummary();
