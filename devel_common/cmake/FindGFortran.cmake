@@ -119,6 +119,7 @@ find_library (GFORTRAN_LIBRARY gfortran
   /usr/local/gfortran/lib
   /opt/local/lib/gcc43
   /usr/local/gfortran/lib/x86_64
+  $ENV{LD_LIBRARY_PATH}
   NO_DEFAULT_PATH
   )
 
