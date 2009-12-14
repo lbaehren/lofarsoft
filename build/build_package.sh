@@ -20,7 +20,7 @@ FORCE_BUILD=0;
 CLEAN_BUILD=0;
 REPORT_BUILD=0;
 BUILD_TESTS=0;
-ENABLE_MULTITHREADING=1;
+ENABLE_MULTITHREADING=0;
 
 ##______________________________________________________________________________
 ## Environment variables; in particular we need to ensure, the CMake binary can 
