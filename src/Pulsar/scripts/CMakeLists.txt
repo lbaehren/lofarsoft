@@ -10,4 +10,4 @@ add_custom_target (scripts_install
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/scripts
   COMMENT "Install extra processing scripts into ${CMAKE_INSTALL_PREFIX}/bin..."
   )
-
+add_dependencies (scripts_install)
