@@ -320,6 +320,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH YES)
 
 add_subdirectory (external)
 add_subdirectory (apps)
+add_subdirectory (scripts)
 
 if (PULSAR_BUILD_TESTS)
   add_subdirectory (test)
