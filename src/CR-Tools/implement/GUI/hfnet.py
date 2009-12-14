@@ -1,14 +1,8 @@
 #pdb.set_trace()
 
 defaultblocksize=2**10
-#defaultblocksize=2**16
-#print "--------------------------------------------"
-#print "Default Blocksize set to ",defaultblocksize
-#print "--------------------------------------------"
-#print "This can be edited in the file hfnet.py until the datareader bug is fixed."
-
 print "--------------------------------------------"
-print "Requires mathgl version 1.10 or higher!!!!!"
+print "              CR-TOOLS GUI"
 print "--------------------------------------------"
 
 import pdb

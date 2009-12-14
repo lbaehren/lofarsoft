@@ -45,8 +45,8 @@ endif (gawk_executable)
 file (GLOB libhfget_sources 
   VectorSelector.cc
   hfanalysis.cc
-  hfget.cc
   ${CR_BINARY_DIR}/implement/GUI/*.cc
+  hfget.cc
   )
 
 ## compiler instructions

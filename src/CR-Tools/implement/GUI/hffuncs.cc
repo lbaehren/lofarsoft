@@ -808,6 +808,7 @@ HF_MATH_FUNC2(hf_pow){return pow(v1,v2);};
 
 template<class T> inline T hf_phase(const T v){return mycast<T>(0.0);};
 template<> inline HComplex hf_phase<HComplex>(const HComplex v){return arg(v);}
+template<class T> inline T phase(const T v) {return arg(v);}
 
 //--End Math functions-----------------------------------------------------
 
@@ -992,7 +993,6 @@ $${
 //$END Function -----------------------------------------------------------------
 //$ENDITERATE
 
-#define phase arg
 //$ITERATE MFUNC phase,imag,conj,real
 
 //------------------------------------------------------------------------------
@@ -1023,8 +1023,6 @@ $${
 }
 //$END Function -----------------------------------------------------------------
 //$ENDITERATE
-#undef phase
-
 
 //------------------------------------------------------------------------------
 //$NEW: Function
@@ -1467,12 +1465,20 @@ int ReadTextFile(string filename)
   };
 }
 
+#undef HF_PP_FILETYPE
+#define HF_PP_FILETYPE() (GUI)  // Tell the preprocessor (for generating wrappers) that from here on this is the part where the atomatic function wrappers are generated. 
+#include "hfwrappers-hfanalysis.cc.h"  // include wrapper definitions generated automatically from source
+
+
 //------------------------------------------------------------------------
 //Publish the Libraries - used in Data object constructor
 //------------------------------------------------------------------------
 //Note that this will be filled in by the preprocessor 
 void DataFunc_Library_publish(DataFuncLibraryClass* library_ptr){
   //$PUBLISH Function
+#undef HF_PP_FILETYPE
+#define HF_PP_FILETYPE() (GUIPUBLISH)  // Tell the preprocessor (for generating wrappers) that from here on this is the part where the functions are published (and hence the WRAPPER generation macro is identified as such).
+#include "hfwrappers-hfanalysis.cc.h"  // include wrapper definitions generated automatically from source
 };
  
 void dummy_instantiate(){
@@ -1480,3 +1486,4 @@ void dummy_instantiate(){
   CasaVector<int> OffsetsCasa;
   aipsvec2stlvec(OffsetsCasa, Offsets);
 }
+#undef HF_PP_FILETYPE

@@ -46,10 +46,10 @@
 #define DefPythonWrapper_TVecINC_0_Parameters(FUNC)     \
   HPointer FUNC (vector<HPointer > &vec);		 \
   HString  FUNC (vector<HString > &vec);		 \
-  extern HString (*FUNC##_S)(vector<HString > &vec);\ 
+  extern HString (*FUNC##_S)(vector<HString > &vec);\
   extern HInteger (*FUNC##_I)(vector<HInteger> &vec);	\
   extern HNumber (*FUNC##_N)(vector<HNumber > &vec) ;	\
-  extern HComplex (*FUNC##_C)(vector<HComplex > &vec); 
+  extern HComplex (*FUNC##_C)(vector<HComplex > &vec);
 
 #define DefVecWrappers_TFunc_Vec_0_Parameters(FUNC)	\
   template <class T> inline T FUNC (vector<T> &vec);		\

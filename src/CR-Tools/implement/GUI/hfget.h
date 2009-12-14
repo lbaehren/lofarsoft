@@ -58,6 +58,7 @@ template <class T> void vec_unique_copy_sorted(const vector<T> &v1,vector<T> &v2
 template <class T> void vec_append(vector<T> &v1,const vector<T> &v2);
 template <class T> vector<T> vec_combine(const vector<T> v1,const vector<T> v2);
 template <class T> vector<T> vec_unique(const vector<T> &v);
+template <class T> void copyvec(vector<T> & v1, vector<T> & v2);
 
 
 

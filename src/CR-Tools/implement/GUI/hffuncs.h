@@ -71,15 +71,15 @@ This class stores informations about the functions that are being used in an obj
 
 */
 #define DATAFUNC_CONSTRUCTOR( NAME, LIB, INFO, TYP, BUFFERED)			\
-DataFuncDescriptor DataFunc_##LIB##_##NAME##_Constructor(Data * dp=NULL){\
+  DataFuncDescriptor BOOST_PP_CAT(BOOST_PP_CAT(BOOST_PP_CAT(BOOST_PP_CAT(DataFunc_,LIB),_),NAME),_Constructor) (Data * dp=NULL){ \
   DataFuncDescriptor fd;\
-  fd.setInfo(#NAME,#LIB,INFO); \
+  fd.setInfo(BOOST_PP_STRINGIZE(NAME),BOOST_PP_STRINGIZE(LIB),INFO);	\
   fd.setType(TYP);\
   fd.setBuffered(BUFFERED);\
-  fd.setConstructor(&DataFunc_##LIB##_##NAME##_Constructor);\
+  fd.setConstructor(&  BOOST_PP_CAT(BOOST_PP_CAT(BOOST_PP_CAT(BOOST_PP_CAT(DataFunc_,LIB),_),NAME),_Constructor));\
   if (dp!=NULL) {\
-    fd.setFunction(new DataFunc_##LIB##_##NAME(dp));\
-    fd.getFunction()->setInfo(#NAME,#LIB,INFO); \
+    fd.setFunction(new  BOOST_PP_CAT(BOOST_PP_CAT(BOOST_PP_CAT(DataFunc_,LIB),_),NAME) (dp));\
+    fd.getFunction()->setInfo(BOOST_PP_STRINGIZE(NAME),BOOST_PP_STRINGIZE(LIB),INFO); \
   } \
   else {fd.setFunction(NULL);};\
   return fd;\
@@ -101,7 +101,7 @@ DEFINE_PROCESS_CALLS\
 
 #define END_OBJECT_FUNCTION(LIB,NAME)  }; DATAFUNC_CONSTRUCTOR( NAME , LIB , O_INFO , O_TYPE , O_BUFFERED );
 
-#define PUBLISH_OBJECT_FUNCTION(LIB,NAME) library_ptr->addFunc(&DataFunc_##LIB##_##NAME##_Constructor)
+#define PUBLISH_OBJECT_FUNCTION(LIB,NAME) library_ptr->addFunc(&  BOOST_PP_CAT(BOOST_PP_CAT(BOOST_PP_CAT(BOOST_PP_CAT(DataFunc_,LIB),_),NAME),_Constructor) )
 
 
 typedef DataFuncDescriptor (*ConstructorFunctionPointer)(Data*);
@@ -316,6 +316,7 @@ preprocessor step.
 
 template<class T> inline T hf_phase(const T v);
 template<>  inline HComplex hf_phase<HComplex>(const HComplex v);
+template<class T> inline T phase(const T v);
 
 
 #define HF_MATH_FUNC2( FUNC ) \

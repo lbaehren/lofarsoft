@@ -530,9 +530,9 @@ class hfQtPlot(QtGui.QWidget):
         self.gui.add_fx.setCurrentIndex(0)
         self.currentplotpanelobject()["'Replot"].touch()
     def hfview_fx(self): 
-        self.currentplotpanelobject()["'Antenna"].FirstObject()["x"].Chain(DIR.TO,["GraphDataBuffer","maxBlock"],False,True).gv()
+        self.currentplotpanelobject()["'Antenna"].FirstObject()["x"].Chain(DIR.TO,["x","Antenna","Parameters=Data","Parameters=UnitData","GraphDataBuffer","maxBlock","Reference"],False,True).gv(999)
     def hfview_fy(self): 
-        self.currentplotpanelobject()["'Antenna"].FirstObject()["y"].Chain(DIR.TO,["GraphDataBuffer","maxBlock"],False,True).gv()
+        self.currentplotpanelobject()["'Antenna"].FirstObject()["y"].Chain(DIR.BOTH,["y","Antenna","Parameters=Data","Parameters=UnitData","GraphDataBuffer","maxBlock","Reference"],False,True).gv(999)
         
 
 #Use 

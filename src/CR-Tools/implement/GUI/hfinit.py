@@ -245,6 +245,7 @@ def datalist_unique_new(self): #Does not work for Data objects
     x=set(self)
     return DataList(x.union(x)).unList()
 
+
 def object_move(self,objfrom,objto):
     "Moves this object linked to objfrom to be linked to  objto. The link to objto is cut."
     sil0=self.Silent(True)
@@ -366,6 +367,17 @@ class DataList(list):
     def getAllIDs(self): #  
         "Retrievs all objects IDs in the list."
         return map(lambda d:d.getOid(),self)
+    def sort(self,key=""): 
+        "Sort the Data objects based on their contents. An optional key can be specified to \
+        select actually different objects that are attached to the current datalist and which \
+        contain the values instead. So, d['PlotPanel'].sort(\"':Antenna\") will sort all\
+        potpanels, but based on the antenna number. Attention: Make sure there is only one key object\
+        attached per Data list element."
+        if key=="": l1=self.val()
+        else: l1=self[key].val()
+        l2=map(lambda x,y:(x,y),l1,range(len(l1)))
+        l2.sort()
+        return DataList(map(lambda i:self[i[1]],l2))
     def Tail(self,start=1): #  
         "Retrievs the first object in the list."
         if len(self)>start: return self[start:]

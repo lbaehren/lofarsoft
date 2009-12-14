@@ -434,6 +434,28 @@ vector<T> vec_unique(const vector<T> &v){
   return v_out;
 }
 
+/*!
+
+\brief Simply copies the contents of one STL vector to the other
+ */
+template <class T>
+void copyvec(vector<T> & v1, vector<T> &v2) {
+  typedef typename vector<T>::iterator Tit; 
+  Tit it1=v1.begin();
+  Tit end=v1.end();
+  if (it1==end) {v2.clear();}
+  else {
+    v2.assign(v1.size(),hfnull<T>()); //make the new vector equal in size and initialize with proper Null values
+    Tit it2=v2.begin();
+    while (it1!=end) {
+      *it2=*it1;
+      it1++; it2++;
+    };
+  };
+}
+
+
+
 template <class T>
 HString vectostring(const vector<T> v,const address maxlen=8){
   int i;
@@ -1325,7 +1347,7 @@ doing a get.
  */
  DATATYPE Data::getType(){
    if (data.type==UNDEF) {   
-     if (Empty()) {          
+     if (!hasData()) {          
        if (data.from.size()>0) {
 	 SaveCall(data.from[0]->ref){
 	   return data.from[0]->ref->getType(); //Transparently pass type through from first connected object
@@ -4061,6 +4083,7 @@ void instantiate_hfget(DATATYPE type){
 vectostring(*d_ptr_##EXT); \
  mycast<TYPE>(ui);\
 d.getFirstFromVector(*d_ptr_##EXT, NULL);\
+ copyvec(*d_ptr_##EXT,*d_ptr_##EXT);	\
 d.putOne(*val_##EXT);\
 d.putOne_silent(*val_##EXT);\
 d.put(*d_ptr_##EXT);\

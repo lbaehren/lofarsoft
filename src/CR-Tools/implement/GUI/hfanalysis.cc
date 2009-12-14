@@ -665,6 +665,7 @@ void (*hRunningAverageVec_C)(vector<HComplex> &vec_in,vector<HComplex> &vec_out,
 #define HF_PP_FUNCTYPE void     //Return value type of function
 #define HF_PP_NVECS 1 //Number of (input/output) vectors
 #define HF_PP_NPAR 0  //Number of other parameters
+#define HF_PP_GUI_LIBRARY Math
 #include "hfdefaultwrappercode.h"
 //$COPY_TO END --------------------------------------------------
 /*!
@@ -702,9 +703,12 @@ void hNegate(const Iter data_start,const Iter data_end)
 //.......................................................................
 #define HF_PP_FUNCBRIEF "Fills a vector with a constant value."
 #define HF_PP_FUNCTYPE void  //Return value type of function
+#define HF_PP_GUI_LIBRARY Math
 #define HF_PP_NVECS 1 //Number of (input/output) vectors
 #define HF_PP_NPAR 1  //Number of other parameters
-#define HF_PP_PAR0 (fill_value,T,0,"Value to fill vector with.",HF_PP_TEMPLATED_TYPE,HF_PP_PASS_AS_VALUE)  //Definition of input parameter
+#define HF_PP_PAR0 (fill_value,HInteger,0,"Value to fill vector with.",HF_PP_TEMPLATED_TYPE,HF_PP_PASS_AS_VALUE)  //Definition of input parameter
+#define HF_PP_NO_GUI 1 //Don't generate a wrapper for the GUI (use overloaded function) 
+#define HF_PP_GUI_LIBRARY Math
 #include "hfdefaultwrappercode.h"
 //$COPY_TO END --------------------------------------------------
 /*!
@@ -733,9 +737,12 @@ void hFill(const Iter data_start,const Iter data_end, const IterValueType fill_v
 #define HF_PP_FUNCNAME hSum  //The Name of the function
 //.......................................................................
 #define HF_PP_FUNCBRIEF "Performs a sum over the values in a vector and returns the value"
+#define HF_PP_GUI_LIBRARY Math
 #define HF_PP_FUNCTYPE_T 1     //Return value type of function is templated with T
 #define HF_PP_NVECS 1 //Number of (input/output) vectors
 #define HF_PP_NPAR 0  //Number of other parameters
+#define HF_PP_GUI_LIBRARY Math
+#define HF_PP_GUI_RETURN_POLICY  HF_PP_GUI_RETURN_SCALAR
 #include "hfdefaultwrappercode.h"
 //$COPY_TO END --------------------------------------------------
 
@@ -756,7 +763,7 @@ IterValueType hSum(const Iter data_start,const Iter data_end)
   typedef IterValueType T;
   T sum=mycast<T>(0);
   Iter it=data_start;
-  while (it!=data_end) {sum+=*it; ++it;};
+  while (it<=data_end) {sum+=*it; ++it;};
   return sum;
 } 
 
@@ -765,9 +772,12 @@ IterValueType hSum(const Iter data_start,const Iter data_end)
 #define HF_PP_FUNCNAME hMean  //The Name of the function
 //.......................................................................
 #define HF_PP_FUNCBRIEF "Returns the mean value of all elements in a vector"
+#define HF_PP_GUI_LIBRARY Math
 #define HF_PP_FUNCTYPE_T 1     //Return value type of function is templated with T
 #define HF_PP_NVECS 1 //Number of (input/output) vectors
 #define HF_PP_NPAR 0  //Number of other parameters
+#define HF_PP_GUI_LIBRARY Math
+#define HF_PP_GUI_RETURN_POLICY  HF_PP_GUI_RETURN_SCALAR
 #include "hfdefaultwrappercode.h"
 //$COPY_TO END --------------------------------------------------
 
@@ -795,10 +805,12 @@ IterValueType hMean (const Iter data_start,const Iter data_end)
 #include "hfpp-undef.cc"
 #define HF_PP_FUNCNAME hMedian  //The Name of the function
 //.......................................................................
-#define HF_PP_FUNCBRIEF "Returns the median value of the elements in a (scratch) vector."
+#define HF_PP_FUNCBRIEF "Returns the median value of the elements in a vector."
 #define HF_PP_FUNCTYPE_T 1     //Return value type of function is templated with T
 #define HF_PP_NVECS 1 //Number of (input/output) vectors
 #define HF_PP_NPAR 0  //Number of other parameters
+#define HF_PP_GUI_LIBRARY Math
+#define HF_PP_GUI_RETURN_POLICY  HF_PP_GUI_RETURN_SCALAR
 #define HF_PP_VEC_WRAPPER_CODE_STL \
   vector<T> vec_copy(HF_PP_VECTORITERATOR_STL(N,0,N));\
   return hMedian(vec_copy.begin(),vec_copy.end())	   
@@ -839,34 +851,12 @@ IterValueType hMedian(const Iter data_start, const Iter data_end)
 } 
 
 
-/*!  \brief Downsample the input vector to a smaller output vector, by
-     replacing subsequent blocks of values by their mean value. The
-     block size is automatically chosen such that the input vector
-     fits exactly into the output vector. All blocks have the same
-     length with a possible exception of the last block.
-
-
-  \param idata_start: Iterator pointing to the first element of an array with
-         input values.
-
-  \param idata_end: Iterator pointing to the end of the input vector
-
-  \param odata_start: Iterator pointing to the first element of an array
-         which will contain output values.
-
-  \param odata_end: Iterator pointing to the last element of an array
-         which will contain output values. The length of the output
-         vector should be smaller or equal to the input vector.
-
-
-*/
-
-
 //$COPY_TO HFILE START --------------------------------------------------
 #include "hfpp-undef.cc"
 #define HF_PP_FUNCNAME hStdDev  //The Name of the function
 //.......................................................................
 #define HF_PP_FUNCBRIEF "Calculates the standard deviation around a mean value."
+#define HF_PP_NO_GUI 1 //Don't generate a wrapper for the GUI (use overloaded function) 
 #define HF_PP_FUNCTYPE_T 1     //Return value type of function is templated with T
 #define HF_PP_NVECS 1 //Number of (input/output) vectors
 #define HF_PP_NPAR 1  //Number of other parameters
@@ -907,6 +897,8 @@ IterValueType hStdDev(const Iter data_start,const Iter data_end, const IterValue
 #define HF_PP_VARIANT 1 //Indicating that this is an overloaded function
 //.......................................................................
 #define HF_PP_FUNCBRIEF "Calculates the standard deviation around a mean value."
+#define HF_PP_GUI_LIBRARY Math
+#define HF_PP_GUI_RETURN_POLICY  HF_PP_GUI_RETURN_SCALAR
 #define HF_PP_FUNCTYPE_T 1     //Return value type of function is templated with T
 #define HF_PP_NVECS 1 //Number of (input/output) vectors
 #define HF_PP_NPAR 0  //Number of other parameters
@@ -936,6 +928,9 @@ IterValueType hStdDev(const Iter data_start,const Iter data_end)
 #define HF_PP_FUNCNAME hDownsample  //The Name of the function
 //.......................................................................
 #define HF_PP_FUNCBRIEF "Resamples (by averaging) an input vector to fit the size of the output vector."
+#define HF_PP_GUI_LIBRARY Math
+#define HF_PP_GUI_RETURN_POLICY  HF_PP_GUI_RETURN_NEW_VECTOR
+#define HF_PP_NO_GUI 1
 #define HF_PP_FUNCTYPE void   //Return value type of function is templated with T
 #define HF_PP_NVECS 2 //Number of (input/output) vectors
 #define HF_PP_NPAR 0  //Number of other parameters
@@ -944,14 +939,18 @@ IterValueType hStdDev(const Iter data_start,const Iter data_end)
 //Define a 2nd convenience wrapper function where the length is specified and vector is resized
 #define HF_PP_VARIANT 1
 #undef HF_PP_NPAR
+#undef HF_PP_NO_GUI //Now use this variant for making a GUI wrapper
 #define HF_PP_NPAR 1  //Number of other parameters
-#define HF_PP_PAR0 (len,HInteger,1,"Length of output vector.",HF_PP_NON_TEMPLATED_TYPE,HF_PP_PASS_AS_VALUE)  //Definition of input parameter
+#define HF_PP_PAR0 (downsample_factor,address,8,"Factor by which input vector is to be reduced.",HF_PP_NON_TEMPLATED_TYPE,HF_PP_PASS_AS_VALUE)  //Definition of input parameter
+//Now define your own wrapper code
+#undef HF_PP_VEC_WRAPPER_CODE_STL
+#undef HF_PP_VEC_WRAPPER_CODE_CASA
 #define HF_PP_VEC_WRAPPER_CODE_STL \
-  HF_PP_VECTORNAME(1).resize(len,mycast<T>(0));\
-  return HF_PP_FUNCNAME (HF_PP_PAR_VECTORLIST(HF_PP_NVECS))
+  HF_PP_VECTORNAME(1).resize(HF_PP_VECTORNAME(0).size()/downsample_factor); \
+  HF_PP_FUNCNAME (HF_PP_PAR_VECTORLIST(HF_PP_NVECS))
 #define HF_PP_VEC_WRAPPER_CODE_CASA \
-  HF_PP_VECTORNAME(1).resize(len);\
-  return HF_PP_FUNCNAME (HF_PP_PAR_VECTORLIST(HF_PP_NVECS))
+  HF_PP_VECTORNAME(1).resize(*(HF_PP_VECTORNAME(0).shape().begin())/downsample_factor); \
+  HF_PP_FUNCNAME (HF_PP_PAR_VECTORLIST(HF_PP_NVECS))
 HF_PP_GENERATE_WRAPPERS
 
 //$COPY_TO END --------------------------------------------------
@@ -971,24 +970,53 @@ HF_PP_GENERATE_WRAPPERS
 HF_PP_GENERATE_WRAPPERS
 */
 
+/*!  \brief Downsample the input vector to a smaller output vector, by
+     replacing subsequent blocks of values by their mean value. The
+     block size is automatically chosen such that the input vector
+     fits exactly into the output vector. All blocks have the same
+     length with a possible exception of the last block.
+
+
+  \param idata_start: Iterator pointing to the first element of an array with
+         input values.
+
+  \param idata_end: Iterator pointing to the end of the input vector
+
+  \param odata_start: Iterator pointing to the first element of an array
+         which will contain output values.
+
+  \param odata_end: Iterator pointing to the last element of an array
+         which will contain output values. The length of the output
+         vector should be smaller or equal to the input vector.
+
+
+*/
+
+
 template <class Iter> 
 void hDownsample (const Iter idata_start,
 		  const Iter idata_end,
 		  const Iter odata_start,
 		  const Iter odata_end)
 {
+  if (odata_start>=odata_end) return; //If size 0 do nothing 
+  if (idata_start>=idata_end) return; //If size 0 do nothing 
   address ilen=(idata_end-idata_start);
   address olen=(odata_end-odata_start);
-  address blen=max(ilen/(olen-1),0); 
+  address blen=max(ilen/(olen-1),1); 
   //use max to avoid infinite loops if output vector is too large
   Iter it2,it1=idata_start;
-  Iter ito=odata_start;
-  while (it1!=idata_end) {
+  Iter ito=odata_start,ito_end=odata_end-1; 
+  //only produce the first N-1 blocks in the output vector
+  while (it1<idata_end && ito<ito_end) {
     it2=min(it1+blen,idata_end);
+    //    cout << "it1="<< &(*it1) << ", it2=" << &(*it2) <<endl; 
+    //    if (ito<odata_end & ito>=odata_start) *ito=hMean(it1,it2);
     *ito=hMean(it1,it2);
     it1=it2; 
     ++ito; 
-  }
+    }
+  *ito=hMean(it2,idata_end);
 }
 
 void dummy_instantitate_templates(){

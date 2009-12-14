@@ -509,6 +509,7 @@ class hfPlotWindow(hffunc):
         self.setParameter("ZoomFactor",1.6) # Make sure this is float()!
         self.setParameter("PipelineLauncher",[""])
         self.setParameter("GraphObject",None)
+        self.setParameter("SortPanelKey","'Antenna")
         self.setResult("npanelsplotted",0)
         self.setResult("npanelsplottedx",0)
         self.setResult("npanelsplottedy",0)
@@ -535,7 +536,8 @@ class hfPlotWindow(hffunc):
             self.GraphObject.SubPlot(1,1,0)
             self.PlotPanel.update()
         elif type(self.PlotPanel)==DataList: #A Datalist is returned => more than one panel
-            npanels=len(self.PlotPanel)
+            PlotPanelList=self.PlotPanel.sort(self.SortPanelKey)
+            npanels=len(PlotPanelList)
             if self.npanels>=0: npanels=min(self.npanels,npanels)
             if self.npanelsx<0: nx=int(ceil(sqrt(npanels)))
             else: nx=self.npanelsx
@@ -545,8 +547,8 @@ class hfPlotWindow(hffunc):
             self.putResult("npanelsplotted",npanels)
             self.putResult("npanelsplottedx",nx)
             self.putResult("npanelsplottedy",ny)
-            if verbose: print "nx,ny=",nx,ny," No. of PlotPanel Objects=",len(self.PlotPanel)
-            for dd in self.PlotPanel: 
+            if verbose: print "nx,ny=",nx,ny," No. of PlotPanel Objects=",len(PlotPanelList)
+            for dd in PlotPanelList: 
                 if n<npanels:
                     self.GraphObject.SubPlot(nx,ny,n)
 #                    self.GraphObject.SetPlotFactor(self.ZoomFactor)
