@@ -69,12 +69,14 @@ if (UNIX)
     ENDIF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
     ## generic locations (Fink installation)
     list (APPEND lib_locations
+      /sw/lib/gcc4.4/lib
       /sw/lib/gcc4.3/lib
       /sw/lib/gcc4.2/lib
       /sw/lib/gcc4.1/lib
       )
   else (APPLE)
     list (APPEND lib_locations
+      /usr/lib/gcc/i486-linux-gnu/4.4
       /usr/lib/gcc/i486-linux-gnu/4.3
       /usr/lib/gcc/i486-linux-gnu/4.2
       /usr/lib/gcc/i486-linux-gnu/4.1
