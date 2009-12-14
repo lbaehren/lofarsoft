@@ -33,6 +33,7 @@ namespace CR { // Namespace CR -- begin
   ImportSimulation::ImportSimulation ()
     : itsAzimuthAngle(0.0),
       itsElevationAngle(0.0),
+      itsParameterFileVersion(0),
       itsShowerTheta(0.0),
       itsShowerPhi(0.0),
       itsLowerWindowBoundary(1e10),
@@ -117,6 +118,15 @@ namespace CR { // Namespace CR -- begin
 	    ss << value;      // feed the value into the stringstream for conversion
 	    
 	    // now check for the individual entries
+	    if (type.find("ParameterFileVersion") < tend)
+	      {
+		ss >> itsParameterFileVersion;
+		if (itsParameterFileVersion >= 22)
+		{ algorithmOk = true; } // as of REAS3, only equidistant algorithms available
+		continue;
+	      }
+
+
 	    if (type.find("ShowerZenithAngle") < tend)
 	      {
 		ss >> itsShowerTheta;

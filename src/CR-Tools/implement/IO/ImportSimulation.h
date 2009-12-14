@@ -178,6 +178,7 @@ namespace CR { // Namespace CR -- begin
     
     Double itsAzimuthAngle;
     Double itsElevationAngle;
+    Int itsParameterFileVersion;
     Double itsShowerTheta;
     Double itsShowerPhi;
     Double itsLowerWindowBoundary;
