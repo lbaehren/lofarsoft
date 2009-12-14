@@ -54,9 +54,9 @@ fi
 ## Add the Python libraries to the existing search path
 
 if test -z "$PYTHONPATH" ; then
-  export PYTHONPATH=$LOFARSOFT/release/lib/python:$LOFARSOFT/release/share/pulsar/bin:$LOFARSOFT/release/share/pulsar/lib/python:
+  export PYTHONPATH=$LOFARSOFT/release/lib/python:$LOFARSOFT/release/share/pulsar/bin:$LOFARSOFT/release/share/pulsar/lib/python:$LOFARSOFT/build/cr/implement/GUI:
 else
-  export PYTHONPATH=$LOFARSOFT/release/lib/python:$LOFARSOFT/release/share/pulsar/bin:$LOFARSOFT/release/share/pulsar/lib/python:$PYTHONPATH
+  export PYTHONPATH=$LOFARSOFT/release/lib/python:$LOFARSOFT/release/share/pulsar/bin:$LOFARSOFT/release/share/pulsar/lib/python:$LOFARSOFT/build/cr/implement/GUI:$PYTHONPATH
 fi
 
 for PY_VERSION in 2.6 2.5 2.4 
