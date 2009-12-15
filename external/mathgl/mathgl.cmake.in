@@ -30,8 +30,7 @@ set (HDF5_INCLUDE_DIR ${HDF5_INCLUDES} CACHE PATH "HDF5 header files")
 ##____________________________________________________________________
 ## Bindings for Qt widgets
 
-## This section no longer is required -- with the latest version of MathGL
-## the Qt configuration seems to work properly.
+set (enable-qt         ${MATHGL_ENABLE_QT} CACHE BOOL "Enable Qt extension")
 
 ##____________________________________________________________________
 ## Add include directories
