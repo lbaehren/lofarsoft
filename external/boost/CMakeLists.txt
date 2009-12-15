@@ -54,6 +54,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
   ## Configure and build the project
 
   set (boost_version "1_40_0")
+  set (boost_preprocessor ${USG_ROOT}/release/include/boost/preprocessor)
 
   find_file (have_boost_tgz   boost_${boost_version}.tar.gz ${BOOST_SOURCE_DIR})
   find_file (have_boost_cmake boost_cmake.tgz               ${BOOST_SOURCE_DIR})
@@ -75,10 +76,10 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
       )
     ## Post-installation patch of include paths
     ExternalProject_Add_Step (boost boost_step1
-      COMMAND ${ln_executable} -s detail seq/detail
+      COMMAND ${ln_executable} -s ${boost_preprocessor}/detail ${boost_preprocessor}/seq/detail
       COMMENT "Creating symbolic link seq/detail -> detail"
       DEPENDEES install
-      WORKING_DIRECTORY ${USG_ROOT}/release/include/boost/preprocessor
+      WORKING_DIRECTORY ${boost_preprocessor}
       )
   else (have_boost_tgz)
     message (WARNING "[Boost++] Unable to build project - no sources found!")
