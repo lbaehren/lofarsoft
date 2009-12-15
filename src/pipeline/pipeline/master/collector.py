@@ -101,8 +101,8 @@ class collector(LOFARrecipe):
             self.logger.info("Wrote: %s" % (averaged_file + ".fits",))
             self.outputs['data'] = (averaged_file + ".fits",)
         else:
-            self.logger.info("No FITS image found; not averaging")
-            self.ouputs['data'] = None
+            self.logger.info("No images found; not averaging")
+            self.outputs['data'] = None
 
         self.logger.info("Generating FITS files")
         fits_files = []
