@@ -48,6 +48,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
 
   include (ExternalProject)
   find_program (tar_executable tar ${bin_locations})
+  find_program (ln_executable  ln  ${bin_locations})
 
   ##__________________________________________________________________
   ## Configure and build the project
@@ -63,6 +64,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
     )
 
   if (have_boost_tgz)
+    ## Basic install of the package
     ExternalProject_Add (boost
       PREFIX ${BOOST_BINARY_DIR}
       DOWNLOAD_DIR ${BOOST_BINARY_DIR}/boost
@@ -70,6 +72,14 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
       SOURCE_DIR ${BOOST_BINARY_DIR}/boost
       URL ${have_boost_tgz}
       CMAKE_ARGS -C ${BOOST_BINARY_DIR}/boost.cmake
+      )
+    ## Post-installation patch of include paths
+    ExternalProject_Add_Step (boost boost_step1
+      COMMAND ${ln_executable} -s detail seq/detail
+      COMMENT "Creating symbolic link seq/detail -> detail"
+      DEPENDEES install
+      DEPENDERS complete
+      WORKING_DIRECTORY ${USG_ROOT}/release/include/boost/preprocessor
       )
   else (have_boost_tgz)
     message (WARNING "[Boost++] Unable to build project - no sources found!")
