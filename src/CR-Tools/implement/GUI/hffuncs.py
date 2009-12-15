@@ -1,4 +1,9 @@
 #pdb.set_trace()
+execfile("hfimport.py")
+from hfinit import *
+from hfpywrappers import *
+import hfgui
+
 setdebug=False 
 
 class NULL_Pointer():
@@ -370,6 +375,7 @@ class hfPlotPanel(hffunc):
         self.setResult("xmax",1024.)
         self.setResult("ymin",-70.)
         self.setResult("ymax",70.)
+        self.setResult("PanelPosition",0)
         if settrace: pdb.set_trace()
         return 0
     def process(self,d):
@@ -534,6 +540,7 @@ class hfPlotWindow(hffunc):
             self.putResult("npanelsplottedx",nx)
             self.putResult("npanelsplottedy",ny)
             self.GraphObject.SubPlot(1,1,0)
+            self.PlotPanel[":PanelPosition"]=0
             self.PlotPanel.update()
         elif type(self.PlotPanel)==DataList: #A Datalist is returned => more than one panel
             PlotPanelList=self.PlotPanel.sort(self.SortPanelKey)
@@ -554,6 +561,7 @@ class hfPlotWindow(hffunc):
 #                    self.GraphObject.SetPlotFactor(self.ZoomFactor)
                     if verbose: print "Processing Plotpanel",dd.getName(True)
                     dd.update()
+                    dd[":PanelPosition"]=n
                 n+=1
         else:
             print "Error: PlotWindow - PlotPanel not found."
@@ -580,7 +588,7 @@ class hfQtPanel(hffunc):
         if verbose: print "QtPanel - initialize."
         "Called at the end of the startup routine. Will create the PlotWidget and insert it into the PlotWidget Object."
         if self.PlotWidget == None:
-            self.PlotWidget=hfQtPlot()
+            self.PlotWidget=hfgui.hfQtPlot()
 #        d["'PlotWidget"].putPy_silent(self.PlotWidget)
 #        d["'PlotWidget"].setNetLevel(999)
             self.obj.PlotWidget.putPy_silent(self.PlotWidget)
@@ -612,7 +620,7 @@ class hfQtNetview(hffunc):
         "Called at the end of the startup routine. Will create the SVGWidget."
         if self.SVGWidget == None:
             if not self.GUI==None:
-                if "networkdisplay" in dir(gui): 
+                if "networkdisplay" in dir(hfglobal.gui): 
                     self.SVGWidget = self.GUI.networkdisplay
             if self.SVGWidget == None:
                 self.SVGWidget=QtSvg.QSvgWidget()

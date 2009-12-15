@@ -4,4 +4,5 @@ cd $LOFARSOFT/src/CR-Tools/implement/GUI
 #PYTHONPATH=$LOFARSOFT/build/cr/implement/GUI:$PYTHONPATH
 #/Library/Frameworks/Python.framework/Versions/2.6/bin/pyuic4 hfgui2.ui | awk -f hfuiprep.awk  > hfgui2_ui.py
 pyuic4 hfgui2.ui | awk -f hfuiprep.awk  > hfgui2_ui.py
+#pyuic4 hfgui2.ui > hfgui2_ui.py
 python -i hfstart.py

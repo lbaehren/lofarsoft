@@ -1,4 +1,14 @@
 #pdb.set_trace()
+execfile("hfimport.py")
+
+hfQtPlotWidget=0
+
+from hfinit import *
+from hfpywrappers import *
+from hffuncs import *
+from hfgui import *
+#from hfcrfuncs import *
+
 
 defaultblocksize=2**10
 print "--------------------------------------------"
@@ -14,7 +24,7 @@ vi=IntVec()
 d=Data("ROOT")
 unitchooser=UnitChooser(d) 
 datatypechooser=LOPESDatatypeChooser(d)
-CRFile(d) >> ("PipelineLauncher",_f(CRPipelineLauncher))
+CRFile(d) >> ("PipelineLauncher",x_f(CRPipelineLauncher))
 
 
 #To use the designer hfQtPlotWidget needs to be explicitly created here
@@ -30,7 +40,7 @@ d.All().clearModification() # to avoid re-initializing the DataReaderObject
 
 ##Now setting up some connections to the GUI ... will be done in the code, since we need to do the object selection.
 ConnectGUIButtons(d)
-d["QtNetview'maxNetLevel"].connect(gui.netlevel,"setEditText")
+d["QtNetview'maxNetLevel"].connect(hfglobal.gui.netlevel,"setEditText")
 
 
 #QtCore.QObject.connect(gui.loadfile,QtCore.SIGNAL("triggered()"),gui.HMainPlotter.hfLoad)
@@ -67,9 +77,9 @@ d["QtPanel"] // d["QtNetview"]
 
 ##########End ....
 #
-#d["*AntennaSelection"]=[0]; d.new("Offset",_f("Offset")) ^ (d["x:UnitData"],d["x:xAxis"]); ~(d["PlotPanel'OffsetValue"]); d["Data'Block"]=1
+#d["*AntennaSelection"]=[0]; d.new("Offset",x_f("Offset")) ^ (d["x:UnitData"],d["x:xAxis"]); ~(d["PlotPanel'OffsetValue"]); d["Data'Block"]=1
 
-#_d("abs",_f("abs")) ^ (d["y:UnitData"],d["yAxis"])
+#x_d("abs",x_f("abs")) ^ (d["y:UnitData"],d["yAxis"])
 
 #pdb.set_trace()
 
@@ -121,7 +131,7 @@ d["PlotWindow'GraphObject"].touch()
 d["Antenna=0,1,3"] # returns three objects belonging to antenna 0,1, and 3.
 newobj=d.create("TEST")  # creates a new object
 ~newobj #deletes it right away
-newobj.initializeObject("NAME",val,_f(FUNC),_l(netlevel)) # initializes it
+newobj.initializeObject("NAME",val,x_f(FUNC),x_l(netlevel)) # initializes it
 newobj ^ (d,d[1])  # inserts a new object between two other objects
 d.new("TEST",1) ^ (d[0],d[1])   #inserts a new object with initialization paramters 
 d // d["TEST"]  ## separates a link between two objects

@@ -1,3 +1,8 @@
+#========================================================================================
+from hfinit import *
+from hfpywrappers import *
+import hffuncs
+
 #start designer 
 #pyuic4 hfgui.ui | head --lines=-1 > hfgui_ui.py
 #pyuic4 hfgui2.ui > hfgui2_ui.py
@@ -5,6 +10,8 @@
 #delete last line: from hfQtPlot import hfQtPlot
 
 #pyuic4 hfplotterparameters.ui | head -n -1 > hfplotterparameters_ui.py
+
+#execfile("hfimport.py")
 
 '''
 
@@ -171,7 +178,7 @@ class hfQtPlot(QtGui.QWidget):
             self.rubberBand.setGeometry(QtCore.QRect(self.rubberOrigin, QtCore.QSize()));
             self.rubberBand.show();
         if self.mousemode=="s":
-            app.setOverrideCursor(QtCore.Qt.OpenHandCursor)
+            hfglobal.app.setOverrideCursor(QtCore.Qt.OpenHandCursor)
     def mouseMoveEvent(self,event):
         if self.mousemode=="z":
             self.rubberBand.setGeometry(QtCore.QRect(self.rubberOrigin, event.pos()).normalized())
@@ -193,14 +200,13 @@ class hfQtPlot(QtGui.QWidget):
             obj["'ymax"].set_silent(xy[3])
             obj["'Replot"].touch()
         elif self.mousemode=="s":
-            app.restoreOverrideCursor()
+            hfglobal.app.restoreOverrideCursor()
             pos=self.screenP2coord(event.pos())
             npanel=pos[4]
             npanelold=self.presseventpos[4]
             if self.mouse_selectmode=="p":
-                panels=self.currentplotwindowobject()["'PlotPanel"].asList()
-                if npanel>=0 & npanel<len(panels):
-                    panel=panels[npanel]
+                panel=self.currentplotwindowobject()["'PlotPanel:PanelPosition="+str(npanel)+"'PlotPanel"]
+                if panel.Found():
                     if npanel==npanelold:  ##Then this is just a select or deselect click
                         name=panel.getName(True)+" #"+str(npanel)
                         if panel.isNeighbour("SelectBoard"):
@@ -241,7 +247,7 @@ class hfQtPlot(QtGui.QWidget):
             for pd in panel["'PlotData"].asList()[1:]: 
                 plotpanels=pd["PlotPanel"].asList() # find all plotpanel neighbours
                 if len(plotpanels)==1:
-                    x = pd >> ("PlotPanel",_f(hfPlotPanel)) # Create a new PlotPanel Object if none exists
+                    x = pd >> ("PlotPanel",x_f(hffuncs.hfPlotPanel)) # Create a new PlotPanel Object if none exists
                     x["Results"] >> pd["PlotWindow"] 
                 pd // panel # OK, now delete the link to the old plotpanel
             self.hfReplotNetwork()
@@ -334,7 +340,7 @@ class hfQtPlot(QtGui.QWidget):
         self.hfReplotNetwork()
     def hfLoad(self):
         qi=QtCore.QFileInfo(self.currentplotdataobject()["'Filename"].val())
-        f=str(QtGui.QFileDialog.getOpenFileName(hfm,"Load Data File",qi.absolutePath()," TimeSeries (*.event *.h5)"))
+        f=str(QtGui.QFileDialog.getOpenFileName(hfglobal.hfm,"Load Data File",qi.absolutePath()," TimeSeries (*.event *.h5)"))
         if f=="": return
         qi=QtCore.QFileInfo(f)
         if qi.exists():
@@ -430,7 +436,7 @@ class hfQtPlot(QtGui.QWidget):
         self.gui.yshiftslider.setValue(0)
         self.gui.yauto.setChecked(True)
     def hfsetBlock(self,i):
-        self.currentplotdataobject()["'Block"].set(max(min(min(d["Data:maxBlock"].asList().val()),i),0))
+        self.currentplotdataobject()["'Block"].set(max(min(min(self.d["'Data:maxBlock"].asList().val()),i),0))
     def hfsetBlockPressed(self):
         self.hfsetBlock(self.sender().text().toInt()[0])
     def hfsetBlocksize(self,txt):
@@ -497,7 +503,7 @@ class hfQtPlot(QtGui.QWidget):
         if fname=="": return
         obj2=self.currentplotpanelobject()["'xAxis"]
         obj1=obj2.getNeighbour(DIR.FROM)
-        map(lambda d1,d2:_d(fname,_f(fname)) ^ (d1,d2),obj1.asDataList(),obj2.asDataList())
+        map(lambda d1,d2:x_d(fname,x_f(fname)) ^ (d1,d2),obj1.asDataList(),obj2.asDataList())
         self.currentplotpanelobject()["'Replot"].touch()
     def hfadd_fy(self,s): ##hf ...
         "Slot used by the GUI to add a function object into the y-Axis chain"
@@ -505,7 +511,7 @@ class hfQtPlot(QtGui.QWidget):
         if fname=="": return
         obj2=self.currentplotpanelobject()["'yAxis"]
         obj1=obj2.getNeighbour(DIR.FROM)
-        map(lambda d1,d2:_d(fname,_f(fname)) ^ (d1,d2),obj1.asDataList(),obj2.asDataList())
+        map(lambda d1,d2:x_d(fname,x_f(fname)) ^ (d1,d2),obj1.asDataList(),obj2.asDataList())
         self.currentplotpanelobject()["'Replot"].touch()
     def hfremove_fy(self): 
         base=self.currentplotpanelobject()["'y:UnitData"]

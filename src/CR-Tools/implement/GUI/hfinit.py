@@ -1,4 +1,8 @@
 #pdb.set_trace()
+import hfglobal
+execfile("hfimport.py")
+settrace=False
+
 pyoblist=[]
 
 PUSH=DIR.TO
@@ -97,13 +101,13 @@ def insert_object(self,l):
         return (self,l[1])
 
 def initializeObject(self,value):
-    "This function initializes a newly created data object with values and parameters. value can be a tuple, list, or DataParameterList. The first value of the tuple is the new, which is not used for an already created object. _f(func) defines a function, _l(n) defines the netlevel of the object for displaying. Everything else is used to set the value of the object (e.g. a number or a string)."
+    "This function initializes a newly created data object with values and parameters. value can be a tuple, list, or DataParameterList. The first value of the tuple is the new, which is not used for an already created object. x_f(func) defines a function, x_l(n) defines the netlevel of the object for displaying. Everything else is used to set the value of the object (e.g. a number or a string)."
     if (type(value) in [tuple,list,DataParameterList]):
         for elem in value[1:]:
             if hasattr(elem,"__hftype__"):
-                if (elem.__hftype__()=="_f"):
+                if (elem.__hftype__()=="x_f"):
                     self.setFunc_f_silent(elem)
-                if (elem.__hftype__()=="_l"):
+                if (elem.__hftype__()=="x_l"):
                     self.setNetLevel(elem.level)
             else:
                 object_set_silent(self,elem)
@@ -130,8 +134,8 @@ def object_find_or_make(self,*arg):
     (see .create() and .initializeObject()).\
     You can use '=' for searching, however, more complicated search paths are not supported yet. \
     For example, the name of the object is considered to be the string until the first occurance of '='!\
-    Example: object_find_or_make(d,''NAME=1'',_l(99)).\
-    One can also specify a list of names: object_find_or_make(d,[''NAME=Eins'',''NAME=Zwei''],_l(99))."
+    Example: object_find_or_make(d,''NAME=1'',x_l(99)).\
+    One can also specify a list of names: object_find_or_make(d,[''NAME=Eins'',''NAME=Zwei''],x_l(99))."
     tup=(arg)
     names=tup[0]
     if type(names)!=list: names=[names]
@@ -158,16 +162,16 @@ def object_find_or_make(self,*arg):
 
 def MakeChooser(d,name,fields,values):
     "Create a chooser, which is a collection of objects which act like a record of similar records, containgin a set of parameters among which you can choose in a menu. The first parameter is the name of the chooser object. The second parameter is a tuple of parameter names that form one set. The third parameter is a tuple of tuple containing the parameter values which belong to the respective parameters."
-    chooser=d.new("Chooser",name,_l(100))
+    chooser=d.new("Chooser",name,x_l(100))
     for val in values:
-        obj=(fields[0],val[0],_l(2000)) >> chooser
+        obj=(fields[0],val[0],x_l(2000)) >> chooser
         for i in range(1,len(fields)):
-          obj=(fields[i],val[i],_l(2000)) >> obj
+          obj=(fields[i],val[i],x_l(2000)) >> obj
     return chooser
 
 
 class DataParameterList(list):
-    "Container class to keep initialization parameters for creating new objects. Used by >> and << or ^ (i.e., insert). This can be created, e.g., by using _d(name,par,_f(func),_l(netlevel))."
+    "Container class to keep initialization parameters for creating new objects. Used by >> and << or ^ (i.e., insert). This can be created, e.g., by using _d(name,par,x_f(func),x_l(netlevel))."
     def __init__(self,*dlist):
         self.extend((dlist))
     def __xor__(self,value):   #
@@ -176,10 +180,17 @@ class DataParameterList(list):
         return obj;
 
 
-def _d(*arg): 
+#def _d(*arg): 
+#    x=DataParameterList()
+#    x.extend(arg)
+#    return x
+
+
+def x_d(*arg): 
     x=DataParameterList()
     x.extend(arg)
     return x
+
 
 def NewObjectRange(name,n1,n2=None,inc=1):
     'Creates a list of the form [("Name",i1),("Name",i2),("Name",i3),...], where the ii are generated accordingto the input parameters n1,n2,inc which are the same parameters as used for range(). The result can be used to create multiple new objects, e.g. d >> NeObjectRange("Name",5)], to create multiple paths in the network. Name obviously is the name of the objects.'
@@ -361,8 +372,8 @@ class DataList(list):
         (see .create() and .initializeObject()).\
         You can use '=' for searching, however, more complicated search paths are not supported yet. \
         For example, the name of the object is considered to be the string until the first occurance of '='!\
-        Example: object_find_or_make(d,''NAME=1'',_l(99)).\
-        One can also specify a list of names: object_find_or_make(d,[''NAME=Eins'',''NAME=Zwei''],_l(99))."
+        Example: object_find_or_make(d,''NAME=1'',x_l(99)).\
+        One can also specify a list of names: object_find_or_make(d,[''NAME=Eins'',''NAME=Zwei''],x_l(99))."
         return DataList(map(lambda d:d.find_or_make(*arg),self))
     def getAllIDs(self): #  
         "Retrievs all objects IDs in the list."
@@ -374,7 +385,7 @@ class DataList(list):
         potpanels, but based on the antenna number. Attention: Make sure there is only one key object\
         attached per Data list element."
         if key=="": l1=self.val()
-        else: l1=self[key].val()
+        else: l1=DataList(map(lambda d:d[key].FirstObject().val(),self))
         l2=map(lambda x,y:(x,y),l1,range(len(l1)))
         l2.sort()
         return DataList(map(lambda i:self[i[1]],l2))
@@ -449,7 +460,7 @@ class DataList(list):
         map(lambda d:d.clearModification(),self)
         return self
     def setFunc_f_silent(self,f):
-        "Assigns a function to each data object in the list using the _f mechanism to specify which function to assign."
+        "Assigns a function to each data object in the list using the x_f mechanism to specify which function to assign."
         map(lambda d:d.setFunc_f_silent(f),self)
         return self
     def setList(self,l):
@@ -778,7 +789,7 @@ def object_val(self):
 def object_print(self):
     return "<hfObject: "+self.Status()+">";
 
-class _f():
+class x_f():
     "This encapsulates a function name and library that will be used by Data.setFunction"
     def __init__(self,funcname="Copy",library="",functype=TYPE.UNDEF):
         if type(funcname)==str:
@@ -790,16 +801,16 @@ class _f():
             self.library="Py"
             self.functype=funcname
     def __hftype__(self):
-        return "_f"
+        return "x_f"
 
-class _l():
+class x_l():
     "This encapsulates the Netlevel that can be used as a parameter during creation"
     def __init__(self,level=1):
         self.level=level
     def __repr__(self):
-        return "<_l("+str(self.level)+")>"
+        return "<x_l("+str(self.level)+")>"
     def __hftype__(self):
-        return "_l"
+        return "x_l"
 
 def object_hasPyQt(self):
     return not (self.getStoredPyQtObject() == None)
@@ -922,7 +933,7 @@ def object_SLOT(self):
     return self.PyQt().hfput
 
 def connect_action(guiaction,plottermethod):
-    return QtCore.QObject.connect(gui.__getattribute__(guiaction),QtCore.SIGNAL("triggered()"),gui.HMainPlotter.__getattribute__(plottermethod))
+    return QtCore.QObject.connect(hfglobal.gui.__getattribute__(guiaction),QtCore.SIGNAL("triggered()"),hfglobal.gui.HMainPlotter.__getattribute__(plottermethod))
 
 def object_connect(self,method,slot="setText",Type="QString",isSlot=True):
     "Conects the data object's update signal to a Slot of a QtObject. The Update signal will contain the content of the object as a QString parameter. If slot=(), then connect to a method and not a SLOT."
@@ -932,7 +943,7 @@ def object_connect(self,method,slot="setText",Type="QString",isSlot=True):
 
     
 def object_setFunc_f_silent(self,f):
-    "Assining a function using the _f class as input but not causing an update."
+    "Assining a function using the x_f class as input but not causing an update."
     sil=self.Silent(True)
     if type(f.functype)==TYPE:
         self.setFunc(f.funcname,f.library,f.functype)
@@ -950,7 +961,7 @@ def object_setFunc_f_silent(self,f):
     return self
 
 def object_setFunc_f(self,f):
-    "Assining a function using the _f class as input."
+    "Assining a function using the x_f class as input."
     if type(f.functype)==TYPE:
         self.setFunc(f.funcname,f.library,f.functype)
     elif f.library=="Py": 
@@ -1017,7 +1028,7 @@ def object_resetLink(self,value,*args):
     return self.resetLink_cc(value,*args)
 
 def object_xxshift(self,pre,other,dir):
-    "Used to overload the shift operators. Is called by functions like object_rrshift etc. The >> or << operators can be used to connect two data objetcs or a dataobject and a string or tuple. In the latter case a new object is created with the name of the string the data object links to. The Tuple contains the name as first element and then additional initialization parameters, e.g. a value to be put in, a function (bracketed by _f()), or a NetLevel (use _l(level))"
+    "Used to overload the shift operators. Is called by functions like object_rrshift etc. The >> or << operators can be used to connect two data objetcs or a dataobject and a string or tuple. In the latter case a new object is created with the name of the string the data object links to. The Tuple contains the name as first element and then additional initialization parameters, e.g. a value to be put in, a function (bracketed by x_f()), or a NetLevel (use x_l(level))"
     if type(other) in [tuple,list,DataParameterList]:
         newobj=self.newObject(pre+other[0],dir).initializeObject(other)
         return newobj
@@ -1045,42 +1056,42 @@ def object_xxshift_list(self,pre,other,dir):
 
 #other >> self
 def object_rrshift(self,other): 
-    " 'NAME'>>data object creates a new predecessor object with PUSH connection. ('NAME',value)>>data also assigns a value to the new object. This can also be a function, using _f(funcname,library,type).  A list of tuples [('Name',val),('Name',val),...] can be given to create multiple objects at the same time. The function returns the (last) new object."
+    " 'NAME'>>data object creates a new predecessor object with PUSH connection. ('NAME',value)>>data also assigns a value to the new object. This can also be a function, using x_f(funcname,library,type).  A list of tuples [('Name',val),('Name',val),...] can be given to create multiple objects at the same time. The function returns the (last) new object."
     return object_xxshift_list(self,"'",other,PUSH)
 
 #self>>other
 def object_rshift(self,other):
-    " data>>'NAME' object creates a new successor object with PUSH connection. data>>('NAME',value) also assigns a value to the new object. This can also be a function, using _f(funcname,library,type).  A list of tuples [('Name',val),('Name',val),...] can be given to create multiple objects at the same time. The function returns the (last) new object."
+    " data>>'NAME' object creates a new successor object with PUSH connection. data>>('NAME',value) also assigns a value to the new object. This can also be a function, using x_f(funcname,library,type).  A list of tuples [('Name',val),('Name',val),...] can be given to create multiple objects at the same time. The function returns the (last) new object."
     return object_xxshift_list(self,"",other,PUSH)
 
 #other<<self
 def object_rlshift(self,other):
-    " 'NAME'<<data object creates a new predecessor object with PULL connection. ('NAME',value)<<data also assigns a value to the new object. This can also be a function, using _f(funcname,library,type).  A list of tuples [('Name',val),('Name',val),...] can be given to create multiple objects at the same time. The function returns the (last) new object."
+    " 'NAME'<<data object creates a new predecessor object with PULL connection. ('NAME',value)<<data also assigns a value to the new object. This can also be a function, using x_f(funcname,library,type).  A list of tuples [('Name',val),('Name',val),...] can be given to create multiple objects at the same time. The function returns the (last) new object."
     return object_xxshift_list(self,"'",other,PULL)
 
 #self<<other
 def object_lshift(self,other): 
-    " data<<'NAME' creates a new successor object with PULL connection. data<<('NAME',value) also assigns a value to the new object. This can also be a function, using _f(funcname,library,type). A list of tuples [('Name',val),('Name',val),...] can be given to create multiple objects at the same time. The funciton returns the (last) new object."
+    " data<<'NAME' creates a new successor object with PULL connection. data<<('NAME',value) also assigns a value to the new object. This can also be a function, using x_f(funcname,library,type). A list of tuples [('Name',val),('Name',val),...] can be given to create multiple objects at the same time. The funciton returns the (last) new object."
     return object_xxshift_list(self,"",other,PULL)
 
 #other >> self
 def object_rrshift(self,other): 
-    " 'NAME'>>data object creates a new predecessor object with PUSH connection. ('NAME',value)>>data also assigns a value to the new object. This can also be a function, using _f(funcname,library,type).  A list of tuples [('Name',val),('Name',val),...] can be given to create multiple objects at the same time. The function returns the (last) new object."
+    " 'NAME'>>data object creates a new predecessor object with PUSH connection. ('NAME',value)>>data also assigns a value to the new object. This can also be a function, using x_f(funcname,library,type).  A list of tuples [('Name',val),('Name',val),...] can be given to create multiple objects at the same time. The function returns the (last) new object."
     return object_xxshift_list(self,"'",other,PUSH)
 
 #self>>other
 def object_rshift(self,other):
-    " data>>'NAME' object creates a new successor object with PUSH connection. data>>('NAME',value) also assigns a value to the new object. This can also be a function, using _f(funcname,library,type).  A list of tuples [('Name',val),('Name',val),...] can be given to create multiple objects at the same time. The function returns the (last) new object."
+    " data>>'NAME' object creates a new successor object with PUSH connection. data>>('NAME',value) also assigns a value to the new object. This can also be a function, using x_f(funcname,library,type).  A list of tuples [('Name',val),('Name',val),...] can be given to create multiple objects at the same time. The function returns the (last) new object."
     return object_xxshift_list(self,"",other,PUSH)
 
 #other<<self
 def object_rlshift(self,other):
-    " 'NAME'<<data object creates a new predecessor object with PULL connection. ('NAME',value)<<data also assigns a value to the new object. This can also be a function, using _f(funcname,library,type).  A list of tuples [('Name',val),('Name',val),...] can be given to create multiple objects at the same time. The function returns the (last) new object."
+    " 'NAME'<<data object creates a new predecessor object with PULL connection. ('NAME',value)<<data also assigns a value to the new object. This can also be a function, using x_f(funcname,library,type).  A list of tuples [('Name',val),('Name',val),...] can be given to create multiple objects at the same time. The function returns the (last) new object."
     return object_xxshift_list(self,"'",other,PULL)
 
 #self<<other
 def object_lshift(self,other): 
-    " data<<'NAME' creates a new successor object with PULL connection. data<<('NAME',value) also assigns a value to the new object. This can also be a function, using _f(funcname,library,type). A list of tuples [('Name',val),('Name',val),...] can be given to create multiple objects at the same time. The funciton returns the (last) new object."
+    " data<<'NAME' creates a new successor object with PULL connection. data<<('NAME',value) also assigns a value to the new object. This can also be a function, using x_f(funcname,library,type). A list of tuples [('Name',val),('Name',val),...] can be given to create multiple objects at the same time. The funciton returns the (last) new object."
     return object_xxshift_list(self,"",other,PULL)
 
 def DOTname(self):
