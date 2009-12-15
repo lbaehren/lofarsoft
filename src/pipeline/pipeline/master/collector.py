@@ -90,7 +90,12 @@ class collector(LOFARrecipe):
                         self.config.get('layout', 'results_directory'),
                         self.inputs['averaged_name']
             )
-            output = pyrap.images.image(averaged_file + ".img", values=result)
+            # Output for the averaged image.
+            # Use the coordinate system from SB0.
+            output = pyrap.images.image(
+                averaged_file + ".img", values=result,
+                coordsys=pyrap.images.image(image_names[0]).coordinates()
+            )
             self.logger.info("Wrote: %s" % (averaged_file + ".img",))
             output.tofits(averaged_file + ".fits")
             self.logger.info("Wrote: %s" % (averaged_file + ".fits",))
