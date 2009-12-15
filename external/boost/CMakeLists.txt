@@ -78,7 +78,6 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
       COMMAND ${ln_executable} -s detail seq/detail
       COMMENT "Creating symbolic link seq/detail -> detail"
       DEPENDEES install
-      DEPENDERS complete
       WORKING_DIRECTORY ${USG_ROOT}/release/include/boost/preprocessor
       )
   else (have_boost_tgz)
