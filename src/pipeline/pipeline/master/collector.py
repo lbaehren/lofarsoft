@@ -3,8 +3,8 @@ from pipeline.support.lofarrecipe import LOFARrecipe
 from pipeline.support.ipython import LOFARTask
 from pipeline.support.clusterdesc import ClusterDesc
 import pipeline.support.utilities as utilities
-from skim import run as create_hdf5
 import pyrap.images
+from skim.main import run as create_hdf5
 import os, os.path, glob, subprocess, sys, numpy
 import shutil, errno, re, logging, imp
 

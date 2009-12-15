@@ -147,7 +147,7 @@ class bbs(LOFARrecipe):
             "--db-user", self.inputs['db_user'],
             "--cluster-desc", self.config.get('cluster', 'clusterdesc'),
             "--key", self.inputs['key'],
-            "--instrument-db", self.inputs['instrument_db'],
+#            "--instrument-db", self.inputs['instrument_db'],
             self.inputs['gvds'],
             self.inputs['parset'],
             self.inputs['skymodel'],
