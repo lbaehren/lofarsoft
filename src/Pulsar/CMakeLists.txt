@@ -164,6 +164,17 @@ endif (NOT HAVE_PYTHON)
 ##__________________________________________________________
 ## X11 
 
+set (X11_LIB_SEARCH_PATH
+  /usr/pkg/xorg/lib
+  /usr/X11R6/lib
+  /usr/X11R7/lib
+  /usr/openwin/lib
+  /usr/lib
+  /usr/local/lib
+  /opt/lib
+  /sw/lib
+  )
+
 if (NOT HAVE_X11)
   include (FindX11)
 endif (NOT HAVE_X11)
