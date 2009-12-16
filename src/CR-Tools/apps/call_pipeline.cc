@@ -822,11 +822,14 @@ float_t Azg = 0, Zeg = 0, Xcg = 0, Ycg = 0;		// Grande direction and core
 float_t Size = 0, Sizeg = 0;				// Electron numbers (KASCADE + Grande)
 float_t Nmu = 0, Lmuo = 0, Sizmg = 0;			// Muon number, trucated muon number (KASCADE), Muon number (Grande)
 double_t geomag = 0;					// geomagnetic angle
-double_t lgE = 0, lg_errE = 0;				// estimated energy (KASCADE)
-double_t lgEg = 0, lg_errEg = 0;			// estimated energy (Grande)
-double_t lnMass = 0, ln_errMass = 0;			// estimated mass A (KASCADE)
-double_t lnMassg = 0, ln_errMassg = 0;			// estimated mass A (Grande)
-
+double_t lgE = 0, err_lgE = 0;				// estimated energy (KASCADE)
+double_t lgEg = 0, err_lgEg = 0;			// estimated energy (Grande)
+double_t lnA = 0, err_lnA = 0;		        	// estimated mass A (KASCADE)
+double_t lnAg = 0, err_lnAg = 0;	        	// estimated mass A (Grande)
+double_t err_core = 0, err_coreg = 0;                   // error of core position (KASCADE + Grande)
+double_t err_Az = 0, err_Azg = 0;                       // error of azimuth (KASCADE + Grande)
+double_t err_Ze = 0, err_Zeg = 0;                       // error of zenith (KASCADE + Grande)
+ 
 char reconstruction = 'A';	// A = KASCADE reconstruction taken, G = Grande reconstruction taken
 
 
@@ -1098,13 +1101,19 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
       inputTree->SetBranchAddress("Sizmg",&Sizmg);
       inputTree->SetBranchAddress("geomag",&geomag);
       inputTree->SetBranchAddress("lgE",&lgE);
-      inputTree->SetBranchAddress("lg_errE",&lg_errE);
       inputTree->SetBranchAddress("lgEg",&lgEg);
-      inputTree->SetBranchAddress("lg_errEg",&lg_errEg);
-      inputTree->SetBranchAddress("lnMass",&lnMass);
-      inputTree->SetBranchAddress("ln_errMass",&ln_errMass);
-      inputTree->SetBranchAddress("lnMassg",&lnMassg);
-      inputTree->SetBranchAddress("ln_errMassg",&ln_errMassg);
+      inputTree->SetBranchAddress("lnA",&lnA);
+      inputTree->SetBranchAddress("lnAg",&lnAg);
+      inputTree->SetBranchAddress("err_lgE",&err_lgE);
+      inputTree->SetBranchAddress("err_lgEg",&err_lgEg);
+      inputTree->SetBranchAddress("err_lnA",&err_lnA);
+      inputTree->SetBranchAddress("err_lnAg",&err_lnAg);
+      inputTree->SetBranchAddress("err_core",&err_core);
+      inputTree->SetBranchAddress("err_coreg",&err_coreg);
+      inputTree->SetBranchAddress("err_Az",&err_Az);
+      inputTree->SetBranchAddress("err_Azg",&err_Azg);
+      inputTree->SetBranchAddress("err_Ze",&err_Ze);
+      inputTree->SetBranchAddress("err_Zeg",&err_Zeg);
       inputTree->SetBranchAddress("Eventname",&Eventname);
 
       // as there is no radius of curvature in the file, set ignoreDistance to true
@@ -1422,13 +1431,19 @@ int main (int argc, char *argv[])
         roottree->Branch("Sizmg",&Sizmg,"Sizmg/F");
         roottree->Branch("geomag",&geomag,"geomag/D");
         roottree->Branch("lgE",&lgE,"lgE/D");
-        roottree->Branch("lg_errE",&lg_errE,"lg_errE/D");
         roottree->Branch("lgEg",&lgEg,"lgEg/D");
-        roottree->Branch("lg_errEg",&lg_errEg,"lg_errEg/D");
-        roottree->Branch("lnMass",&lnMass,"lnMass/D");
-        roottree->Branch("ln_errMass",&ln_errMass,"ln_errMass/D");
-        roottree->Branch("lnMassg",&lnMassg,"lnMassg/D");
-        roottree->Branch("ln_errMassg",&ln_errMassg,"ln_errMassg/D");
+        roottree->Branch("lnA",&lnA,"lnA/D");
+        roottree->Branch("lnAg",&lnAg,"lnAg/D");
+        roottree->Branch("err_lgE",&err_lgE,"err_lgE/D");
+        roottree->Branch("err_lgEg",&err_lgEg,"err_lgEg/D");
+        roottree->Branch("err_lnA",&err_lnA,"err_lnA/D");
+        roottree->Branch("err_lnAg",&err_lnAg,"err_lnAg/D");
+        roottree->Branch("err_core",&err_core,"err_core/D");
+        roottree->Branch("err_coreg",&err_coreg,"err_coreg/D");
+        roottree->Branch("err_Az",&err_Az,"err_Az/D");
+        roottree->Branch("err_Azg",&err_Azg,"err_Azg/D");
+        roottree->Branch("err_Ze",&err_Ze,"err_Ze/D");
+        roottree->Branch("err_Zeg",&err_Zeg,"err_Zeg/D");
         roottree->Branch("reconstruction",&reconstruction,"reconstruction/B");
       }
 

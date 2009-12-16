@@ -27,10 +27,10 @@ using namespace TMath;
 
 
    // Energy function***********************
-   double lg_EnergyK(double lgNe, double lgNmu, double theta)
+   double lg_EnergyK(double lgNe, double lgNmu, double theta) //theta in rad
    { 
      // transform to average 0-18deg sizes
-     dwb1=(D/cos((theta)/57.29578))-(D*1.025);
+     dwb1=(D/cos(theta))-(D*1.025);
      lgNe0=lgNe+(dwb1/xatte/log(10.));
      lgNmu0=lgNmu+(dwb1/xattm/log(10.));
     //variables from "QGSjet2+FLUKA"
@@ -46,8 +46,8 @@ using namespace TMath;
      varNe = pow(matrix[0][0]*errlgNe,2);
      varNmu = pow(matrix[0][1]*errlgNmu,2);
      dEdTheta = D/log(10.) * (matrix[0][0]/xatte+matrix[0][1]/xattm);
-     dEdTheta *= sin((theta)/57.29578) / pow(cos((theta)/57.29578),2); 
-     varTheta = pow(dEdTheta*(errTheta/57.29578),2);
+     dEdTheta *= sin(theta) / pow(cos(theta),2); 
+     varTheta = pow(dEdTheta*errTheta,2);
 
      errlgEn=sqrt(varNe + varNmu + varTheta);
      return errlgEn;
@@ -57,11 +57,11 @@ using namespace TMath;
    double lg_A(double lgNe, double lgNmu, double theta) 
    {
      // transform to average 0-18deg sizes
-     dwb1=(D/cos((theta)/57.29578))-(D*1.025);
+     dwb1=(D/cos(theta))-(D*1.025);
      lgNe0=lgNe+(dwb1/xatte/log(10.));
      lgNmu0=lgNmu+(dwb1/xattm/log(10.));
     //variables from "QGSjet2+FLUKA"
-     double parm[]={  -6.64185, -4.90102, 8.36298, -2.63904, -3.09907, 5.62201};
+     double parm[]={-6.64185, -4.90102, 8.36298, -2.63904, -3.09907, 5.62201};
 
      lnM = parm[0] + parm[1]*lgNe0 + parm[2]*lgNmu0;
      lnM += parm[3]*lgNe0*lgNe0 + parm[4]*lgNmu0*lgNmu0 + parm[5]*lgNe0*lgNmu0;
@@ -73,8 +73,8 @@ using namespace TMath;
       varNe = pow(matrix[1][0]*errlgNe,2);
       varNmu = pow(matrix[1][1]*errlgNmu,2);
       dAdTheta = D/log(10.) * (matrix[1][0]/xatte+matrix[1][1]/xattm);
-      dAdTheta *= sin((theta)/57.29578) / pow(cos((theta)/57.29578),2); 
-      varTheta = pow(dAdTheta*(errTheta/57.29578),2);
+      dAdTheta *= sin(theta) / pow(cos(theta),2); 
+      varTheta = pow(dAdTheta*errTheta,2);
  
       errlnM=sqrt(varNe + varNmu + varTheta);
       return errlnM;
@@ -332,16 +332,18 @@ int main(int argc, char* argv[])
     log10sizmg = Log10(Sizmg);
 
     ///********** Energy and primary Mass reconstructed by Grande (Wommer's formulas) *****///
-    if(Azg!=0 && Zeg!=0 && Sizeg>0 && Sizmg>0) {
+    if(Azg!=0 && Zeg!=0 && Sizeg>0 && Sizmg>0) { // Ze and Az in rad
       // calculate energy and mass
-      lgEg=(0.3069*log10sizeg)+(0.7064*log10sizmg)+(1.2699/TMath::Cos(Zeg/57.29577))+0.2931;
-      lnAg=(-3.5822*log10sizeg)+(4.6829*log10sizmg)+(-6.3948*TMath::Cos(Zeg/57.29577))+5.3495;
+      lgEg=(0.3069*log10sizeg)+(0.7064*log10sizmg)+(1.2699/TMath::Cos(Zeg))+0.2931;
+      lnAg=(-3.5822*log10sizeg)+(4.6829*log10sizmg)+(-6.3948*TMath::Cos(Zeg))+5.3495;
       // calculate energy and mass error
-      err_lnAg=((0.0165517*exp(lnAg)) -2); //from Michael's plots, linear dependence
-      if (exp(lnAg)<=1.5)
+      if (exp(lnAg)<=1.5) {
         err_lgEg=0.1588;  //from Michael's plots
-      else 
+        err_lnAg=2.13;
+      } else {
         err_lgEg=0.0922;
+        err_lnAg=( ((1.17 - 1.26) / (60.-2.))*exp(lnAg) + 1.263); //from Michael's plots, linear dependence
+      }  
 
       // use fixed error for core and angular uncertainties
       // (approximation for E > 10^17 eV)
@@ -377,19 +379,21 @@ int main(int argc, char* argv[])
 
       // mass dependent energy error from Michael's plots
       if(exp(lnA)<1.5)
-        err_lgE = 0.17;       
+        err_lgE = 0.17;
       else 
         err_lgE = 0.72;
-       
+
       // mass and zenith dependent mass error from Michael's plots  
-      if(Ze<14.)
-        FDeltaTheta=1.;
+      if(Ze<(14./57.29578))     // Ze < 14°
+        FDeltaTheta=1./1.265;
       else
-        FDeltaTheta=(-0.04*Ze)+1.4;
+        FDeltaTheta=(((2.05 - 1.1)/((40.-14.)/57.29578))*(Ze) + 0.6)/1.265;
+
       if (exp(lnA)<1.5)
-        FDeltaA=1.;
+        FDeltaA=2.12/1.269;
       else
-        FDeltaA=0.011*(exp(lnA))-0.5;
+        FDeltaA=(((0.58 - 1.226)/(60.-2.)) *(exp(lnA)) + 3.247)/1.269;
+
       err_lnA = 1.267*FDeltaA*FDeltaTheta;
 
       // use fixed error for core and azimuth uncertainties
