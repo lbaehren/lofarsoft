@@ -134,6 +134,7 @@ add_dependencies (presto
   fftw_install
   tempo_install
   bf2presto_install
+  scripts_install
   presto_includes
   presto_pyscripts_install
   presto_pylibscripts_install
