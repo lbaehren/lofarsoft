@@ -21,7 +21,7 @@ class excluder_node(LOFARnode):
                 "ANTENNA1 not in %s and ANTENNA2 not in %s" %
                 (str(station_ids), str(station_ids))
             )
-            selection.copy(output, deep=True)
+            selection.copy(output, deep=True).close()
         except Exception, e:
             self.logger.error(str(e))
             raise e
