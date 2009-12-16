@@ -164,16 +164,12 @@ endif (NOT HAVE_PYTHON)
 ##__________________________________________________________
 ## X11 
 
-set (X11_LIB_SEARCH_PATH
-  /usr/pkg/xorg/lib
-  /usr/X11R6/lib
-  /usr/X11R7/lib
-  /usr/openwin/lib
-  /usr/lib
-  /usr/local/lib
-  /opt/lib
-  /sw/lib
-  )
+list (APPEND lib_locations /usr/pkg/xorg/lib)
+list (APPEND lib_locations /usr/X11R6/lib)
+list (APPEND lib_locations /usr/X11R7/lib)
+list (APPEND lib_locations /usr/openwin/lib)
+
+set (X11_LIB_SEARCH_PATH ${lib_locations} CACHE PATH "X11 library search paths" FORCE)
 
 if (NOT HAVE_X11)
   include (FindX11)
