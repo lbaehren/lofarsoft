@@ -23,6 +23,7 @@ numberOfRCUsperStation = 96;
 mglGraphPS = 1
 timeWindowForCoincidence = 10000 # window for coincident pulse in samples
 latestTimeInFile = -1 # needed for determining bin-sizes in non-24-hour plots
+TwentyfourHourPlot = True
 #totalNumberOfTriggers = 0
 
 # keys for our trigger dictionary; separate lists for some of the statistics
@@ -105,12 +106,25 @@ def readTriggerListFromCSVFile(filename): # directly make histogram, not making 
     firstRecord = triggerReader.next()
     firstTime = int(firstRecord[timeKey])
     lastTime = latestTimeInFile
-    nBins = 200 # bins for time-series
+    
+    if (TwentyfourHourPlot):
+        firstTime = 0
+        lastTime = 86400
+        
+    
+    nBins = 240 # bins for time-series
     timeSeriesHistogram = [0] * nBins
-    timeSeriesProfileCount = [[0]*nBins] * 96
+    
+#    cols = 4
+# rows = 5
+# array = [[0 for i in range(cols)] for j in range(rows)]
+
+    timeSeriesProfileCount = [[0 for i in range(nBins)] for j in range(96)]
+#    timeSeriesProfileCount = [[0]*nBins] * 96
   #  print timeSeriesProfileCount
   #  print timeSeriesProfileCount[9][0]
-    timeSeriesProfileValue = [[0]*nBins] * 96
+    timeSeriesProfileValue = [[0 for i in range(nBins)] for j in range(96)]
+    
     
     for record in triggerReader:
         thisTime = int(record[timeKey])
@@ -119,6 +133,10 @@ def readTriggerListFromCSVFile(filename): # directly make histogram, not making 
             thisRCU = int(record[RCUnrKey])
             thisPowerBefore = int(record[powerBeforeKey])
             rcuCount[thisRCU] += 1
+            
+            if (TwentyfourHourPlot):
+                thisTime %= 86400
+            
             
             timeSeriesIndex = int(nBins * float(thisTime - firstTime) / float(lastTime - firstTime + 0.000001)) # epsilon to remove boundary effect when thisTime = lastTime           
             timeSeriesHistogram[timeSeriesIndex] += 1  
@@ -131,7 +149,12 @@ def readTriggerListFromCSVFile(filename): # directly make histogram, not making 
     global totalNumberOfTriggers
     totalNumberOfTriggers = triggerReader.line_num
     plotBinnedTimeSeriesOfTriggers(timeSeriesHistogram, firstTime, lastTime)
-    plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstTime, lastTime)
+   
+    group1 = range(16) + range(48,64)
+    group2 = range(16,32) + range(64,80)
+    group3 = range(32,48) + range(80,96)
+    RCUgroups = [group1, group2, group3]
+    plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstTime, lastTime, RCUgroups)
     
     print totalNumberOfTriggers
     return rcuCount        
@@ -453,7 +476,9 @@ def plotBinnedTimeSeriesOfTriggers(binnedData, firstTime, lastTime):
     graph.Clf()
     graph.SetFontSize(3.0)
     graph.SetRanges(0.0, maxX, 0.0, maxY)
-    #graph.SetTicks('x', 16.0, 4)
+    
+    if (TwentyfourHourPlot):
+      graph.SetTicks('x', 60.0, 0)
 
     graph.Axis("xy")
     graph.Grid()
@@ -484,16 +509,40 @@ def plotBinnedTimeSeriesOfTriggers(binnedData, firstTime, lastTime):
 
     graph.WriteEPS("timeSeriesOfTriggers.eps","Binned timeseries of triggers")
 
-def plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstTime, lastTime): 
+
+def plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstTime, lastTime, RCUgroups): 
     # make profile histogram timeseries of noise level ('power before') to see variations over time
     
     nBins = len(timeSeriesProfileCount[0])
+    nGroups = len(RCUgroups)
     
+    # average RCUS in one group
+    groupedCount = [[0 for i in range(nBins)] for j in range(nGroups)]
+    groupedValue = [[0 for i in range(nBins)] for j in range(nGroups)]
+#    groupedCount = [[0]*nBins] * nGroups
+#    groupedValue = [[0]*nBins] * nGroups
+    groupIndex = -1
+    global groups
+    groups = RCUgroups
+    print RCUgroups
+    print nGroups
+    global tpcount
+    tpcount = timeSeriesProfileCount
+    for group in RCUgroups:
+        groupIndex += 1
+        for RCU in group:
+            for i in range(nBins):
+                groupedCount[groupIndex][i] += timeSeriesProfileCount[RCU][i]
+                groupedValue[groupIndex][i] += timeSeriesProfileValue[RCU][i]
+  
+    print groupedCount[0]
+    print 'boe'
+    print groupedCount[1]
     timeBinSize = float(lastTime - firstTime) / nBins # seconds
-    print nBins
-    print firstTime
-    print lastTime
-    print timeBinSize
+#    print nBins
+#    print firstTime
+#    print lastTime
+#    print timeBinSize
     #nBins = (lastTime - firstTime) / timeBinSize
     # use again numpy's histogram function
     #(y, x) = numpy.histogram(time, int(nBins))
@@ -505,27 +554,38 @@ def plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstT
     mglGraphPS = 1
     graph = mglGraph(mglGraphPS, width, height)
 
-    gY = mglData(nBins, 96)
-    gX = mglData(nBins, 96)
+    gY = mglData(nBins, nGroups)
+    gX = mglData(nBins, nGroups)
 #    eY = mglData(nBins) # standard-deviation to be added...
 #    eX = mglData(nBins)
-    for RCU in range(96):
+    maxY = 0
+    for n in range(nGroups):
         for i in range(nBins):
-            if timeSeriesProfileCount[RCU][i] != 0:
-                gY.Put(5.0 * RCU + float(timeSeriesProfileValue[RCU][i]) / float(timeSeriesProfileCount[RCU][i]), i, RCU)
+            if groupedCount[n][i] != 0:
+                thisValue = float(groupedValue[n][i]) / float(groupedCount[n][i])
+                if thisValue > maxY:
+                    maxY = thisValue
+                gY.Put(thisValue, i, n)
             else:
-                gY.Put(NaN, i, RCU)
-            gX.Put(float(x[i]) / 60.0, i, RCU)
+                gY.Put(NaN, i, n)
+            gX.Put(float(x[i]) / 60.0, i, n)  
+ 
+                   # if timeSeriesProfileCount[RCU][i] != 0:
+          #      gY.Put(5.0 * RCU + float(timeSeriesProfileValue[RCU][i]) / float(timeSeriesProfileCount[RCU][i]), i, RCU)
+          # else:
+          #      gY.Put(NaN, i, RCU)
+          # gX.Put(float(x[i]) / 60.0, i, RCU)
             
     maxX = float(lastTime - firstTime) / 60.0
-    maxY = gY.Max('xy')[0]
+#    maxY = gY.Max('x')[0]
     print 'max'
     print maxX
     print maxY    
     graph.Clf()
     graph.SetFontSize(3.0)
-    graph.SetRanges(0.0, maxX, 0.0, 500.0)
-    #graph.SetTicks('x', 16.0, 4)
+    graph.SetRanges(0.0, maxX, 0.0, maxY * 1.05)
+    if (TwentyfourHourPlot):
+        graph.SetTicks('x', 60.0, 0) 
 
     graph.Axis("xy")
     graph.Grid()
