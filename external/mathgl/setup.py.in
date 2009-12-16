@@ -2,11 +2,12 @@ from distutils.core import setup, Extension
 import os
 
 try:
-	source_dir=os.environ["CMAKE_SOURCE_DIR"]
-	mgl_dir="mgl/libmgl${CMAKE_SHARED_LIBRARY_SUFFIX}"
+        source_dir=os.environ["CMAKE_SOURCE_DIR"]
+        mgl_dir="mgl/libmgl${CMAKE_SHARED_LIBRARY_SUFFIX}"
 except KeyError:
-	source_dir="."
-	mgl_dir="mgl/.libs/libmgl${CMAKE_SHARED_LIBRARY_SUFFIX}"
+        source_dir="."
+        mgl_dir="mgl/.libs/libmgl${CMAKE_SHARED_LIBRARY_SUFFIX}"
+
 
 mgl_module = Extension('_mathgl',
     sources=["lang/mgl_python.cpp"],
@@ -16,7 +17,7 @@ mgl_module = Extension('_mathgl',
 
 setup (
     name = "mathgl",
-    version = "1.8",
+    version = "1.10",
     maintainer="Dmitry Kulagin",
     maintainer_email="dik@ufp.appl.sci-nnov.ru",
     author="Alexey Balakin",

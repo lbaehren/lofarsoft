@@ -1,7 +1,35 @@
 
-set (CMAKE_INSTALL_PREFIX  ${MATHGL_prefix} CACHE PATH "Installation prefix" FORCE)
+set (CMAKE_INSTALL_PREFIX
+  ${USG_INSTALL_PREFIX}
+  CACHE
+  PATH
+  "Installation prefix"
+  FORCE
+  )
 
-set (enable-double ${MATHGL_ENABLE_DOUBLE} CACHE BOOL "Enable double precision in MathGL library")
+##____________________________________________________________________
+## Features/Extensions
+
+set (enable-double
+  ${MATHGL_ENABLE_DOUBLE}
+  CACHE
+  BOOL
+  "Enable double precision in MathGL library"
+  )
+
+set (enable-python
+  ${MATHGL_ENABLE_PYTHON}
+  CACHE
+  BOOL
+  "Enable Python extension"
+  )
+
+set (enable-qt
+  ${MATHGL_ENABLE_QT}
+  CACHE
+  BOOL
+  "Enable Qt extension"
+  )
 
 ##____________________________________________________________________
 ## GNU Scientific Library
@@ -9,11 +37,6 @@ set (enable-double ${MATHGL_ENABLE_DOUBLE} CACHE BOOL "Enable double precision i
 set (GSL_LIB         ${GSL_GSL_LIBRARY}   CACHE FILEPATH "Path to libgsl" )
 set (GSL_CBLAS_LIB   ${GSL_CBLAS_LIBRARY} CACHE FILEPATH "Path to libgslcblas" )
 set (GSL_INCLUDE_DIR ${GSL_INCLUDES}      CACHE PATH     "GSL header files" )
-
-##____________________________________________________________________
-## Bindings for Python
-
-set (enable-python         ${MATHGL_ENABLE_PYTHON} CACHE BOOL "Enable Python extension")
 
 ##____________________________________________________________________
 ## OpenGL
@@ -26,11 +49,6 @@ set (OPENGL_LIBRARIES      ${OPENGL_LIBRARIES} CACHE FILEPATH "Path to libOpenGL
 set (enable-hdf5         ${MATHGL_ENABLE_HDF5} CACHE BOOL "Enable HDF5 extension")
 
 set (HDF5_INCLUDE_DIR ${HDF5_INCLUDES} CACHE PATH "HDF5 header files")
-
-##____________________________________________________________________
-## Bindings for Qt widgets
-
-set (enable-qt         ${MATHGL_ENABLE_QT} CACHE BOOL "Enable Qt extension")
 
 ##____________________________________________________________________
 ## Add include directories

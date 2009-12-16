@@ -172,14 +172,12 @@ set (packages_external
   casacore
   cfitsio
   hdf5
-  mathgl
   numpy
   num_util
   pyrap
   qt
   root
   sip
-  startools
   szip
   wcslib
   wcstools
@@ -196,6 +194,7 @@ endif (NOT flex_executable)
 ## Packages handled directly through CMake
 
 add_subdirectory (${USG_ROOT}/external)
+add_subdirectory (${USG_ROOT}/devel_common/scripts)
 
 ##____________________________________________________________________
 ## generic build instructions for the packages
