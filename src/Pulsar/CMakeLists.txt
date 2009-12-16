@@ -169,11 +169,15 @@ list (APPEND lib_locations /usr/X11R6/lib)
 list (APPEND lib_locations /usr/X11R7/lib)
 list (APPEND lib_locations /usr/openwin/lib)
 
-set (X11_LIB_SEARCH_PATH ${lib_locations} CACHE PATH "X11 library search paths" FORCE)
-
 if (NOT HAVE_X11)
   include (FindX11)
 endif (NOT HAVE_X11)
+
+## some additional checking, because some libraries might not be found yet
+
+if (NOT X11_Xt_LIB)
+  find_library (X11_Xt_LIB Xt ${lib_locations})
+endif (NOT X11_Xt_LIB)
 
 ## -----------------------------------------------------------------------------
 ## Include directories
