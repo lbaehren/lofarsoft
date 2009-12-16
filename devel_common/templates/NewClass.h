@@ -58,7 +58,7 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
     
   public:
     
-    // ------------------------------------------------------------- Construction
+    // === Construction =========================================================
     
     //! Default constructor
     <newClass> ();
@@ -71,12 +71,12 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
     */
     <newClass> (<newClass> const &other);
     
-    // -------------------------------------------------------------- Destruction
+    // === Destruction ==========================================================
 
     //! Destructor
     ~<newClass> ();
     
-    // ---------------------------------------------------------------- Operators
+    // === Operators ============================================================
     
     /*!
       \brief Overloading of the copy operator
@@ -85,7 +85,7 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
     */
     <newClass>& operator= (<newClass> const &other); 
     
-    // --------------------------------------------------------------- Parameters
+    // === Parameter access =====================================================
     
     /*!
       \brief Get the name of the class
@@ -110,7 +110,7 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
     */
     void summary (std::ostream &os);    
 
-    // ------------------------------------------------------------------ Methods
+    // === Methods ==============================================================
     
     
     
