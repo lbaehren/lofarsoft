@@ -1,12 +1,8 @@
 import numpy as np
 import array as ar
 import os, stat, glob, sys, getopt
-#import matplotlib
 
-#matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-
+is_saveonly = False   # if True, the script saves only png files and exits
 Nx=4  # number of histograms on X-axis
 Ny=5  # on Y-axis
 tsamp=0.00131072  #  sampling interval (s)
@@ -21,6 +17,7 @@ def usage (prg):
         print "Program %s plots the time series of the subbands file\n" % (prg,)
         print "Usage: %s [-n, --nbins <value>] [-h, --help] <*sub>\n\
          -n, --nbins <value> - number of samples to average (default: 750)\n\
+	 --saveonly          - only saves png files and exits\n\
          -h, --help     - print this message\n" % (prg,)
 
 def parsecmdline (prg, argv):
@@ -31,7 +28,7 @@ def parsecmdline (prg, argv):
                 sys.exit()
         else:
                 try:
-                        opts, args = getopt.getopt (argv, "hn:", ["help", "nbins="])
+                        opts, args = getopt.getopt (argv, "hn:", ["help", "nbins=", "saveonly"])
                         for opt, arg in opts:
                                 if opt in ("-h", "--help"):
                                         usage (prg)
@@ -39,6 +36,10 @@ def parsecmdline (prg, argv):
                                 if opt in ("-n", "--nbins"):
                                         global Nbins
                                         Nbins = long(arg)
+
+				if opt in ("--saveonly"):
+					global is_saveonly
+					is_saveonly = True
 
                         if not args:
                                 print "No subband files!\n"
@@ -90,14 +91,15 @@ def plot_page (index):
 		else:
 			tax[ind].xaxis.set_major_locator(ticker.MaxNLocator(4))
 			for label in tax[ind].get_xticklabels(): label.set_fontsize(fs-2)   # decrease the fontsize of x-labels
-		tax[ind].yaxis.set_major_locator(ticker.MaxNLocator(3, prune='lower'))
+		tax[ind].yaxis.set_major_locator(ticker.MaxNLocator(3))
 		for label in tax[ind].get_yticklabels():  # decrease the fontsize and rotate y-labels
 			label.set_fontsize(fs-2)
 			label.set_rotation(90)
 		# plotting plot by plot
-		plt.draw()
-		# save page to png-file
-		plt.savefig(outnamestem + str(index) + ".png")
+		if is_saveonly == False: plt.draw()
+
+	# save page to png-file
+	plt.savefig(outnamestem + str(index) + ".png")
 
 	plt.show()
 
@@ -137,37 +139,50 @@ def plot_help():
 
 
 if __name__=="__main__":
-	""" the main function....
-	"""
+        """ the main function....
+        """
         parsecmdline (sys.argv[0].split("/")[-1], sys.argv[1:])
+        if is_saveonly:
+                import matplotlib
+                matplotlib.use('Agg')
+        else:
+                import matplotlib
 
-	nfiles=len(subfiles)
+        import matplotlib.pyplot as plt
+        import matplotlib.ticker as ticker
 
-	plt.ion() # turning ON interactive plotting
+        nfiles=len(subfiles)
 
-	# filestem for output png files
-	outnamestem=subfiles[0].split("/")[-1].split(".sub")[0] + ".subtime"
+        # filestem for output png files
+        outnamestem=subfiles[0].split("/")[-1].split(".sub")[0] + ".subtime"
 
         # reading inf-file to get info about sampling interval
         inffile = subfiles[0].split(".sub")[0] + ".sub.inf"
         for line in open(inffile):
-		if line.startswith(" Width of each time series bin"):
-			tsamp = float(line.split("=")[-1].strip())
+                if line.startswith(" Width of each time series bin"):
+                        tsamp = float(line.split("=")[-1].strip())
 
 
-	npages=int(np.ceil(float(nfiles)/(Nx * Ny)))
-	count = 0
+        npages=int(np.ceil(float(nfiles)/(Nx * Ny)))
+        count=0
 
-	sizes=[os.stat(file)[stat.ST_SIZE] / samplesize for file in subfiles]
-	size=max(sizes)
+        sizes=[os.stat(file)[stat.ST_SIZE] / samplesize for file in subfiles]
+        size=max(sizes)
 
         print "Number of subbands: ", nfiles
         print "Number of pages: ", npages
 
-	fig = plt.figure()
-        fig.subplots_adjust(hspace=0.001)
-        fig.canvas.mpl_connect('key_press_event', press)
         tax = [i for i in np.arange(0, nfiles, 1)]
         ts = np.zeros((nfiles, int(size/Nbins)))
-        plot_help()
-        plot_page(count)
+
+        if is_saveonly == False:
+                plt.ion() # turning ON interactive plotting
+                fig = plt.figure()
+                fig.subplots_adjust(hspace=0.001)
+                fig.canvas.mpl_connect('key_press_event', press)
+                plot_help()
+                plot_page(count)
+        else:
+                fig = plt.figure()
+                fig.subplots_adjust(hspace=0.001)
+                for pg in np.arange(0, npages, 1): plot_page(pg)

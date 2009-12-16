@@ -1,13 +1,8 @@
 import numpy as np
 import array as ar
 import os, os.path, stat, glob, sys, getopt
-import matplotlib
 
-matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-import matplotlib.cm as cm
-
+is_saveonly = False      # if True, script will save the dynamic spectrum in png file
 is_excludeonly = False   # if True, only completely bad subbands will be excluded
 threshold = 6 # threhold in sigmas to clip RFIs
 rfilimit = 30  # (in percents) if more, whole subband will be excluded
@@ -29,6 +24,7 @@ def usage (prg):
          -t, --threshold <value> - threshold (in sigma) to clip RFI (default: 6)\n\
 	 --excludeonly           - only exclude completely junk subbands\n\
 	 --rfilimit <value>      - percent of RFI per subband allowed not to exclude whole subband (default: 30)\n\
+	 --saveonly              - only saves png file and exits\n\
          -h, --help     - print this message\n" % (prg,)
 
 
@@ -40,7 +36,7 @@ def parsecmdline (prg, argv):
                 sys.exit()
         else:
                 try:
-                        opts, args = getopt.getopt (argv, "hn:t:", ["help", "nbins=", "threshold=", "rfilimit=", "excludeonly"])
+                        opts, args = getopt.getopt (argv, "hn:t:", ["help", "nbins=", "threshold=", "rfilimit=", "excludeonly", "saveonly"])
                         for opt, arg in opts:
                                 if opt in ("-h", "--help"):
                                         usage (prg)
@@ -62,6 +58,10 @@ def parsecmdline (prg, argv):
                                         global is_excludeonly
 					is_excludeonly = True
 
+                                if opt in ("--saveonly"):
+					global is_saveonly
+					is_saveonly = True
+
                         if not args:
                                 print "No subband files!\n"
                                 usage (prg)
@@ -75,6 +75,7 @@ def parsecmdline (prg, argv):
                         print "Wrong option!"
                         usage (prg)
                         sys.exit(2)
+	
 
 def setup_plot(x, title, colormap):
 	""" initializing dynamic spectrum plot
@@ -265,7 +266,16 @@ def plothist (series, selband, title):
 
 if __name__=="__main__":
         parsecmdline (sys.argv[0].split("/")[-1], sys.argv[1:])
+	if is_saveonly:
+		import matplotlib
+		matplotlib.use("Agg")
+	else:
+		import matplotlib
 
+	import matplotlib.pyplot as plt
+	import matplotlib.ticker as ticker
+	import matplotlib.cm as cm
+	
 	nfiles=len(subfiles)
 	# array of file sizes
 	sizes = [os.stat(file)[stat.ST_SIZE] / samplesize for file in subfiles]
@@ -283,6 +293,9 @@ if __name__=="__main__":
 	# to avoid problem with a need having first file called *.sub000
 	subband_offset = int(subfiles[1].split(".sub")[-1])-1
 
+	if is_saveonly:
+		pngname = subfiles[0].split(".sub")[0] + ".sub" + str(subband_offset) + "-" + str(subband_offset+nfiles-1) + ".png"
+
 	# forming the array for having the dynamic spectrum
 	spectrum=np.zeros((nfiles, int(size/Nbins)))
 
@@ -293,16 +306,16 @@ if __name__=="__main__":
 	rms=np.zeros((nfiles, int(size/Nbins)))      # 2D array of rms's
 	levels=np.zeros((nfiles, int(size/Nbins)))   # 2D array of levels (samples in sigma)
 
-	plt.ion() # interactive plotting
-	fig=plt.figure()
-	fig.canvas.mpl_connect('key_press_event', press)
-	setup_plot(spectrum, "Original dynamic spectrum", cm.jet)
-	plot_help()
-
 	# dictionary with indices of RFI'ish samples to be clipped
 	clipindices = {}  # for not _very_ bad subbands
 	badbands = []     # list of completely bad subbands
-	
+
+	if is_saveonly == False:
+		plt.ion() # interactive plotting
+		fig=plt.figure()
+		fig.canvas.mpl_connect('key_press_event', press)
+		setup_plot(spectrum, "Original dynamic spectrum", cm.jet)
+		plot_help()
 
 	for i in np.arange(0, nfiles, 1):
 		f = open(subfiles[i], "rb")
@@ -334,6 +347,12 @@ if __name__=="__main__":
 		else:
 			clipindices[i] = np.where(levels[i] > threshold)[0]
 
-		plot_update(spectrum)
+		if is_saveonly == False: plot_update(spectrum)
+		
+
+	if is_saveonly:
+		fig=plt.figure()
+		setup_plot(spectrum, "Original dynamic spectrum", cm.jet)
+		plt.savefig(pngname)
 
 	plt.show()
