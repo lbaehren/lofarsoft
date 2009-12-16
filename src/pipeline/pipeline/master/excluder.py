@@ -12,11 +12,11 @@ class excluder(pyraprunner):
         self.optionparser.add_option(
             '--station',
             dest="station",
-            help="Name of station to exclude (e.g. DE001LBA)"
+            help="Name of stations to exclude (e.g. DE001LBA)"
         )
 
     def _generate_arguments(self):
-        return "\"%s\"" % (self.inputs['station'])
+        return "\"%s\"" % ('\", \"'.join(string_to_list(self.inputs['station'])))
 
 if __name__ == '__main__':
     sys.exit(excluder().main())
