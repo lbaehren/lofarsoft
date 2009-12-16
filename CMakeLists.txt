@@ -175,7 +175,6 @@ set (packages_external
   numpy
   num_util
   pyrap
-  qt
   root
   sip
   szip

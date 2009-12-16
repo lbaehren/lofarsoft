@@ -7,6 +7,7 @@ add_subdirectory (mathgl)
 add_subdirectory (matplotlib)
 add_subdirectory (numeric)
 add_subdirectory (plplot)
+add_subdirectory (qt)
 add_subdirectory (swig)
 add_subdirectory (valgrind)
 
