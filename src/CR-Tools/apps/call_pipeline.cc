@@ -821,7 +821,6 @@ float_t Az = 0, Ze = 0, Xc = 0, Yc = 0;			// KASCADE direction and core
 float_t Azg = 0, Zeg = 0, Xcg = 0, Ycg = 0;		// Grande direction and core
 float_t Size = 0, Sizeg = 0;				// Electron numbers (KASCADE + Grande)
 float_t Nmu = 0, Lmuo = 0, Sizmg = 0;			// Muon number, trucated muon number (KASCADE), Muon number (Grande)
-double_t geomag = 0;					// geomagnetic angle
 double_t lgE = 0, err_lgE = 0;				// estimated energy (KASCADE)
 double_t lgEg = 0, err_lgEg = 0;			// estimated energy (Grande)
 double_t lnA = 0, err_lnA = 0;		        	// estimated mass A (KASCADE)
@@ -829,6 +828,7 @@ double_t lnAg = 0, err_lnAg = 0;	        	// estimated mass A (Grande)
 double_t err_core = 0, err_coreg = 0;                   // error of core position (KASCADE + Grande)
 double_t err_Az = 0, err_Azg = 0;                       // error of azimuth (KASCADE + Grande)
 double_t err_Ze = 0, err_Zeg = 0;                       // error of zenith (KASCADE + Grande)
+double_t geomag_angle = 0, geomag_angleg = 0;           // geomagnetic angle (KASCADE + Grande)
  
 char reconstruction = 'A';	// A = KASCADE reconstruction taken, G = Grande reconstruction taken
 
@@ -1090,16 +1090,15 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
       inputTree->SetBranchAddress("Ze",&Ze);
       inputTree->SetBranchAddress("Xc",&Xc);
       inputTree->SetBranchAddress("Yc",&Yc);
-      inputTree->SetBranchAddress("Azg",&Az);
-      inputTree->SetBranchAddress("Zeg",&Ze);
-      inputTree->SetBranchAddress("Xcg",&Xc);
-      inputTree->SetBranchAddress("Ycg",&Yc);
+      inputTree->SetBranchAddress("Azg",&Azg);
+      inputTree->SetBranchAddress("Zeg",&Zeg);
+      inputTree->SetBranchAddress("Xcg",&Xcg);
+      inputTree->SetBranchAddress("Ycg",&Ycg);
       inputTree->SetBranchAddress("Size",&Size);
       inputTree->SetBranchAddress("Sizeg",&Sizeg);
       inputTree->SetBranchAddress("Nmu",&Nmu);
       inputTree->SetBranchAddress("Lmuo",&Lmuo);
       inputTree->SetBranchAddress("Sizmg",&Sizmg);
-      inputTree->SetBranchAddress("geomag",&geomag);
       inputTree->SetBranchAddress("lgE",&lgE);
       inputTree->SetBranchAddress("lgEg",&lgEg);
       inputTree->SetBranchAddress("lnA",&lnA);
@@ -1114,12 +1113,19 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
       inputTree->SetBranchAddress("err_Azg",&err_Azg);
       inputTree->SetBranchAddress("err_Ze",&err_Ze);
       inputTree->SetBranchAddress("err_Zeg",&err_Zeg);
+      inputTree->SetBranchAddress("geomag_angle",&geomag_angle);
+      inputTree->SetBranchAddress("geomag_angleg",&geomag_angleg);
       inputTree->SetBranchAddress("Eventname",&Eventname);
 
       // as there is no radius of curvature in the file, set ignoreDistance to true
       if (!config["ignoreDistance"]->bValue()) {
         config["ignoreDistance"]->setValue("TRUE");
         cout << "\nWARNING: OVERWRITING CONFIGURATION: ignoreDistance was set to 'true'!\n" << endl;
+      }
+      // finding the radius of curvature works only, if the simplex fit is on
+      if (!config["simplexFit"]->bValue()) {
+        config["simplexFit"]->setValue("TRUE");
+        cout << "\nWARNING: OVERWRITING CONFIGURATION: simplexFit was set to 'true'!\n" << endl;
       }
 
       cout << "Opened file for readin: " << kascadeRootFile << endl;
@@ -1140,7 +1146,6 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
       cout << "\nReading event number " << eventNumber+1 << " from file \"" << kascadeRootFile << "\" ";
       inputTree->GetEntry(eventNumber);
       eventNumber++;
-
       // choose if Kascade or Grande date should be used:
       bool grande = false;
 
@@ -1157,20 +1162,19 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
         if ( (sqrt(Xc*Xc+Yc*Yc)>90) && ((Xcg<-50) && (Xcg>-420) && (Ycg<-30) && (Ycg>-550)) )
           grande = true;
       }
-
       // set variables (Grande or KASCADE reconstruction)
       eventname = string(Eventname);
       if (grande) {
         cout << "using the Grande reconstruction as input..." << endl;
-        azimuth = static_cast<double>(Azg);
-        elevation = static_cast<double>(90.-Zeg);
+        azimuth = static_cast<double>(Azg/Pi()*180.);
+        elevation = static_cast<double>(90.-Zeg/Pi()*180.);
         core_x = static_cast<double>(Xcg);
         core_y = static_cast<double>(Ycg);
         reconstruction = 'G';
       } else {
         cout << "using the KASCADE reconstruction as input..." << endl;
-        azimuth = static_cast<double>(Az);
-        elevation = static_cast<double>(90.-Ze);
+        azimuth = static_cast<double>(Az/Pi()*180.);
+        elevation = static_cast<double>(90.-Ze/Pi()*180.);
         core_x = static_cast<double>(Xc);
         core_y = static_cast<double>(Yc);
         reconstruction = 'A';
@@ -1429,7 +1433,6 @@ int main (int argc, char *argv[])
         roottree->Branch("Nmu",&Nmu,"Nmu/F");
         roottree->Branch("Lmuo",&Lmuo,"Lmuo/F");
         roottree->Branch("Sizmg",&Sizmg,"Sizmg/F");
-        roottree->Branch("geomag",&geomag,"geomag/D");
         roottree->Branch("lgE",&lgE,"lgE/D");
         roottree->Branch("lgEg",&lgEg,"lgEg/D");
         roottree->Branch("lnA",&lnA,"lnA/D");
@@ -1444,6 +1447,8 @@ int main (int argc, char *argv[])
         roottree->Branch("err_Azg",&err_Azg,"err_Azg/D");
         roottree->Branch("err_Ze",&err_Ze,"err_Ze/D");
         roottree->Branch("err_Zeg",&err_Zeg,"err_Zeg/D");
+        roottree->Branch("geomag_angle",&geomag_angle,"geomag_angle/D");
+        roottree->Branch("geomag_angleg",&geomag_angleg,"geomag_angleg/D");
         roottree->Branch("reconstruction",&reconstruction,"reconstruction/B");
       }
 

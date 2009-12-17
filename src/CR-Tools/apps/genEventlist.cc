@@ -1,3 +1,26 @@
+/*-------------------------------------------------------------------------*
+ | $Id::                                                                 $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2009                                                    *
+ *   Frank Schröder, Moses Ender, Katrin Link, Nunzia Palmieri             *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+ 
 #include<cstdlib>
 #include<iostream>
 #include<fstream>
@@ -10,6 +33,73 @@
 #include<TMath.h>
 #include<TCut.h>
 
+/*!
+  \file genEventlist.cc
+
+  \ingroup CR_Applications
+
+  \brief Creates eventlist (selection of LOPES events) for call_pipeline
+
+  \author Moses Ender, Frank Schr&ouml;der, Katrin Link, Nunzia Palmieri
+
+  \date 2009/17/12
+
+  <h3>Usage</h3>
+
+  \verbatim
+  ./genEventlist SEL10.root options.cfg "optional selection string"
+  \endverbatim
+
+  <h3>Prerequisites</h3>
+
+  options.cfg
+
+  Example:
+  \verbatim
+  # Option file to generate a LOPES-eventlist from the SEL10 KASCADE file
+
+  # Filenames of eventlists of 2007 and 2008
+  fn2005                  /users/iklx/lopesuser/code/genEventlist/eventlist-2005.txt
+  fn2006                  /users/iklx/lopesuser/code/genEventlist/eventlist-2006.txt
+  fn2007                  /users/iklx/lopesuser/code/genEventlist/eventlist-2007.txt
+  fn2008                  /users/iklx/lopesuser/code/genEventlist/eventlist-2008.txt
+  fn2009                  /users/iklx/lopesuser/code/genEventlist/eventlist-2009.txt
+
+  # use default kascade cut
+  # Fanka<4&&Ze<0.7854&&Age>0.4&&Age<1.4&&sqrt(Yc*Yc+Xc*Xc)<90
+
+  useKASCADE
+
+  # use default Grande cut (Fabiana's cuts)
+  # Fanka<4&&Zeg<0.7854&&Ageg>-0.385&&Ageg<1.485&&Hit7>0
+  # &&Xcg<-50&&Xcg>-420&&Ycg<-30&&Ycg>-550
+  # &&Sizmg>1111&&Sizeg>11111&&Idmx>0&&Nflg>0&&Ndtg>11&&log10(Nctot/8.5)>(1/4.2*(2.9*log10(Sizeg)-8.4))
+
+  #useGrande
+
+  # additional cuts (e.g., time range)
+  #TCut                   Ymd>051201&&Ymd<100101
+
+
+  # Define geomagnetic angel range
+  geomag_min              0
+  geomag_max              180
+
+  # Define energy range for the selection
+  energy_min              1e17
+  energy_max              1e20
+
+  # Write an additional textfile with all information
+  createInfoFile          1
+
+  # create script for copying event files
+  createCopyScript        0
+
+  # Name of the different files that should be created ( .txt, .info and .root )
+  namebase                eventlist
+  \endverbatim
+
+*/
 
 using namespace std;
 using namespace TMath;
@@ -101,41 +191,68 @@ int main(int argc, char* argv[])
   ifstream conf(argv[2]);
   string buf;
   stringstream opt;
-  char tmp[256];
+  char tmp[1024];
 
   // variables to read in
-  string cut_str, fn2005, fn2006, fn2007, fn2008, fn2009, namebase="eventlist";
+  string cut_str(""), fn2005(""), fn2006(""), fn2007(""), fn2008(""), fn2009(""), namebase="eventlist";
   Double_t geomag_min=0, geomag_max=90, energy_min=0, energy_max=1e20;
-  Bool_t createInfoFile, Grande;
+  Bool_t createInfoFile=false, createCopyScript=false, Grande=false;
 
-  while (conf.getline(tmp,256)) {
+   TCut cut;
+
+  while (conf.getline(tmp,1024)) {
     opt.clear();
     opt.str(tmp);
     opt>>buf;
-    if(buf.length()==0||buf.at(0)=='#') { continue;}
-    if(buf.compare("energy_min")==0) { opt >> energy_min; }
-    if(buf.compare("energy_max")==0) { opt >> energy_max; }
-    if(buf.compare("geomag_min")==0) { opt >> geomag_min; }
-    if(buf.compare("geomag_max")==0) { opt >> geomag_max; }
-    if(buf.compare("TCut")==0) { opt>>cut_str; }
-    if(buf.compare("createInfoFile")==0) { opt>>createInfoFile; }
-    if(buf.compare("fn2005")==0) { opt>>fn2005; }
-    if(buf.compare("fn2006")==0) { opt>>fn2006; }
-    if(buf.compare("fn2007")==0) { opt>>fn2007; }
-    if(buf.compare("fn2008")==0) { opt>>fn2008; }
-    if(buf.compare("fn2009")==0) { opt>>fn2009; }
-    if(buf.compare("namebase")==0) { opt>>namebase; }
+    if(buf.length()==0||buf.at(0)=='#') 
+      continue;
+    if(buf.compare("energy_min")==0) 
+      opt >> energy_min;
+    if(buf.compare("energy_max")==0) 
+      opt >> energy_max;
+    if(buf.compare("geomag_min")==0) 
+      opt >> geomag_min;
+    if(buf.compare("geomag_max")==0) 
+      opt >> geomag_max;
+    if(buf.compare("TCut")==0)
+      opt>>cut_str;
+    if(buf.compare("useKASCADE")==0) 
+      cut = TCut("Fanka<4&&Ze<0.7854&&Age>0.4&&Age<1.4&&sqrt(Yc*Yc+Xc*Xc)<90");
+    if(buf.compare("useGrande")==0) 
+      cut =
+      TCut("Fanka<4&&Zeg<0.7854&&Ageg>-0.385&&Ageg<1.485&&Hit7>0&&Xcg<-50&&Xcg>-420&&Ycg<-30&&Ycg>-550&&Sizmg>1111&&Sizeg>11111&&Idmx>0&&Nflg>0&&Ndtg>11&&log10(Nctot/8.5)>(1/4.2*(2.9*log10(Sizeg)-8.4))");
+    if(buf.compare("createInfoFile")==0) 
+      opt>>createInfoFile;
+    if(buf.compare("createCopyScript")==0) 
+      opt>>createCopyScript;
+    if(buf.compare("fn2005")==0) 
+      opt>>fn2005;
+    if(buf.compare("fn2006")==0) 
+      opt>>fn2006;
+    if(buf.compare("fn2007")==0) 
+      opt>>fn2007;
+    if(buf.compare("fn2008")==0)
+      opt>>fn2008;
+    if(buf.compare("fn2009")==0)
+      opt>>fn2009;
+    if(buf.compare("namebase")==0) 
+      opt>>namebase;
+    
     buf="";
-   }
- 
+  }
+  // add cut_string to cut
+  cut += cut_str.c_str();
+  
   // Decide which reconstruction should be used...
-  if(cut_str.find("sqrt(Yc*Yc+Xc*Xc)<")!=string::npos)
+  if(string(cut).find("sqrt(Yc*Yc+Xc*Xc)<")!=string::npos) {
+    cout << "\nUsing KASCADE cut..." << endl;
     Grande = false;
-  else
+  } else if (string(cut).find("Hit7>0")!=string::npos) {
+    cout << "\nUsing Grande cut..." << endl;
     Grande = true;
+  } else
+    cerr << "\n\nWARNING: Either KASCADE or Grande default cuts should be used!" << endl;
 
-
-  TCut cut((cut_str).c_str());
   if(argc==4)
     cut += argv[3];
 
@@ -149,7 +266,7 @@ int main(int argc, char* argv[])
      opt>>buf;
      cut+= ( string("Nmu>")+buf ).c_str();
   }
-  if( Grande && energy_min>1){
+  if( Grande && energy_min>1) {
      double mumin = (energy_min * 6.0e5/2.0e17);
      opt<<mumin;
      opt>>buf;
@@ -206,9 +323,9 @@ int main(int argc, char* argv[])
   Double_t energy, geomag, cos_geomag;
   Double_t lgE, lgEg, lnA, lnAg, err_lgE, err_lgEg, err_lnA, err_lnAg;
   Double_t err_core, err_coreg, err_Az, err_Azg, err_Ze, err_Zeg;
+  Double_t geomag_angle, geomag_angleg;
   
   k->Branch("Eventname",&eventname,"Eventname/C");
-  k->Branch("energy",&energy,"energy/D");
   k->Branch("Size",&Size,"Size/F");
   k->Branch("Sizeg",&Sizeg,"Sizeg/F");
   k->Branch("Nmu",&Nmu,"Nmu/F");
@@ -222,7 +339,6 @@ int main(int argc, char* argv[])
   k->Branch("Ze",&Ze,"Ze/F");
   k->Branch("Azg",&Azg,"Azg/F");
   k->Branch("Zeg",&Zeg,"Zeg/F");
-  k->Branch("geomag",&geomag,"geomag/D");
   k->Branch("Gt",&Gt,"Gt/i");
   k->Branch("Mmn",&Mmn,"Mmn/i");
 
@@ -243,10 +359,13 @@ int main(int argc, char* argv[])
   k->Branch("err_Azg",&err_Azg,"err_Azg/D");
   k->Branch("err_Ze",&err_Ze,"err_Ze/D");
   k->Branch("err_Zeg",&err_Zeg,"err_Zeg/D");
-
+  
+  // geomagnetic angle
+  k->Branch("geomag_angle",&geomag_angle,"geomag_angle/D");
+  k->Branch("geomag_angleg",&geomag_angleg,"geomag_angleg/D");
 
   // Additional eventlist info file *******************************************************************
-  ofstream f1, f2;
+  ofstream f1, f2, copyScript;
 
   f1.open( (namebase+".txt").c_str(), ios::out);
 
@@ -258,11 +377,22 @@ int main(int argc, char* argv[])
         <<"filename(event) azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n"
         <<"============================================================================================\n";
 
-  if(createInfoFile){
+  if (createInfoFile) {
        f2.open( (namebase+".info").c_str(), ios::out);
        f2<<"Filename                Gt        Mmn        Az        Ze        Geomag        Xc        Yc        Size        Sizeg         Sizmg        Nmu        Lmuo        Energy        Grande"<<endl
        <<"=================================================================================================================================="<<endl;
    }
+   
+  if (createCopyScript) {
+    copyScript.open( (namebase+"-copy.sh").c_str(), ios::out);
+    copyScript << "# bash script for copying event files" << endl
+               << "# Go to destination directory and execute script." << endl
+               << endl;
+  }
+
+
+  // get seperate strings for day month and year
+  string day, month, year;
 
   // Loop over ROOT-File ******************************************************************************
   for (int i=0; i<nentries; i++) {
@@ -274,11 +404,11 @@ int main(int argc, char* argv[])
     char tstr[32];
     strftime (tstr, 32, "%Y.%m.%d.%H:%M:%S", ptm);
     gtstring = tstr;
-
+    
     // Looking for filenames in eventlists **********************************************************
 
     if( Gt >= 1104537600 && Gt < 1136073600 ) //Jahr 2005
-      fin.open(fn2006.c_str(), ios::in);
+      fin.open(fn2005.c_str(), ios::in);
     else if( Gt >= 1136073600 && Gt < 1167609600 ) //Jahr 2006
       fin.open(fn2006.c_str(), ios::in);
     else if( Gt >= 1167609600 && Gt < 1199145600 ) //Jahr 2007
@@ -292,6 +422,15 @@ int main(int argc, char* argv[])
       continue;
     }
 
+    // create substrings for day, month and year
+    char temp[] = "XX";
+    temp[0] = tstr[2]; temp[1] = tstr[3];
+    year = string(temp);
+    temp[0] = tstr[5]; temp[1] = tstr[6];
+    month = string(temp);
+    temp[0] = tstr[8]; temp[1] = tstr[9];
+    day = string(temp);
+    
     fin.clear();
     fin.seekg (0, ios::beg);
 
@@ -351,12 +490,11 @@ int main(int argc, char* argv[])
       err_Azg = 0.006; // ~0.35°
       err_Zeg = 0.003; // ~0.17°
 
-      /*
-      cout<<"Grande------"<<endl;
-      cout<<"theta        "<<Zeg<<endl;
-      cout<<"Nmu    "<<Sizmg<<" Ne "<<Sizeg<<endl;
-      cout<<"energy k      "<<lgEg<<"+-  "<<err_lgEg<<endl;
-      cout<<"mass k      "<<lnAg<<"+-  "<<err_lnAg<<endl;*/
+      // calculate geomagnetic angle
+      cos_geomag =   TMath::Cos(Azg) * TMath::Sin(Zeg) * TMath::Cos(TMath::Pi()) * TMath::Sin(TMath::Pi()/180.0 * 25)
+                   + TMath::Sin(Azg) * TMath::Sin(Zeg) * TMath::Sin(TMath::Pi()) * TMath::Sin(TMath::Pi()/180.0 * 25)
+                   + TMath::Cos(Zeg) * TMath::Cos(TMath::Pi()/180.0 * 25);
+      geomag_angleg = ACos(cos_geomag);
     } else {
       lgEg=0.;
       lnAg=0.;
@@ -365,6 +503,7 @@ int main(int argc, char* argv[])
       err_coreg = 0.;
       err_Azg = 0.;
       err_Zeg = 0.;
+      geomag_angleg = 0.;
     }
 
     ///********** Energy and primary Mass reconstructed by KASCADE (Ralph's formulas) ******///
@@ -407,10 +546,11 @@ int main(int argc, char* argv[])
       else   
         err_Ze = 0.007; // ~0.4°
   
-      //      cout<<"theta        "<<Ze<<endl;
-      //      cout<<"Nmu    "<<Lmuo<<" Ne "<<Size<<endl;
-      //      cout<<"energy k      "<<lgE<<"+-  "<<err_lgE<<endl;
-      //      cout<<"mass k      "<<lnA<<"+-  "<<err_lnA<<endl;
+      // calculate geomagnetic angle
+      cos_geomag =   TMath::Cos(Az) * TMath::Sin(Ze) * TMath::Cos(TMath::Pi()) * TMath::Sin(TMath::Pi()/180.0 * 25)
+                   + TMath::Sin(Az) * TMath::Sin(Ze) * TMath::Sin(TMath::Pi()) * TMath::Sin(TMath::Pi()/180.0 * 25)
+                   + TMath::Cos(Ze) * TMath::Cos(TMath::Pi()/180.0 * 25);  
+      geomag_angle = ACos(cos_geomag);
     } else {
       lgE = 0.;
       lnA = 0.;
@@ -419,52 +559,31 @@ int main(int argc, char* argv[])
       err_core = 0.;
       err_Az = 0.;
       err_Ze = 0.;
+      geomag_angle = 0.;
     }
 
-    if( !Grande && Sqrt(Xc*Xc+Yc*Yc)<90 && Az!=0 && Ze!=0 && Size>0 && Lmuo>0) {
-      cos_geomag = TMath::Cos(Az) * TMath::Sin(Ze) * TMath::Cos(TMath::Pi()) * TMath::Sin(TMath::Pi()/180.0 * 25) + TMath::Sin(Az) * TMath::Sin(Ze) * TMath::Sin(TMath::Pi()) * TMath::Sin(TMath::Pi()/180.0 * 25)+TMath::Cos(Ze) * TMath::Cos(TMath::Pi()/180.0 * 25);   
-  
-      geomag = ACos(cos_geomag)*180./Pi();
-   
-      // use new energy formula
-      /* Double_t log10size = Log10(Size);
-      Double_t NeNmu = log10size-Log10(Lmuo);
-      Double_t Ke = -0.0854 + 0.0634 *NeNmu -0.0115 *Power(NeNmu,2.);
-     
-      if ((log10size-Ke) > 6.304) 
-        Ke = Ke + 0.000745 -0.0497 * Power((log10size-Ke-6.304),2.);
-
-      Double_t ne = Power(10. , (log10size-Ke));
-
-      Double_t Kmu = -0.824 +0.472 *(log10size-Ke)  -.0939 * Power( (log10size-Ke),2) + 0.00639 * Power( (log10size - Ke) ,3);
-      Double_t log10mu = Log10(Lmuo);
-      if ((log10mu-Kmu) > 5.22) 
-        Kmu = Kmu -0.00293 -0.194*Power((log10mu-Kmu-5.22),2);
-
-      Double_t log10ne = Log10(ne);
-      Double_t nm = Power(10,(log10mu - Kmu +0.6877 -0.03835*log10ne +0.001186*Power(log10ne,2)));
- 
-      Double_t a = 1. / Cos(Ze) - 1.025;
-      energy = Power( 10.,(0.3015*( log10ne + 1023./158./2.302585093*a ) +0.6762*( Log10(nm) + 1023./823./2.302585093*a ) +1.856 +9.) ); */
-      energy = Power(10.,lgE);
-    } else if (Grande && Azg!=0 && Zeg!= 0 && Sizeg>0 && Sizmg>0 && Xcg<-50&&Xcg>-420 &&Ycg<-30&&Ycg>-550) {
-      cos_geomag = TMath::Cos(Azg) * TMath::Sin(Zeg) * TMath::Cos(TMath::Pi()) * TMath::Sin(TMath::Pi()/180.0 * 25) + TMath::Sin(Azg) * TMath::Sin(Zeg) * TMath::Sin(TMath::Pi()) * TMath::Sin(TMath::Pi()/180.0 * 25)+TMath::Cos(Zeg) * TMath::Cos(TMath::Pi()/180.0 * 25);
- 
-      geomag = ACos(cos_geomag)*180./Pi();
-
-      // use new energy formula
-      // energy = Power(10., ( 0.319*Log10(Sizeg) + 0.709*Log10(Sizmg) + 1.236/ Cos(Zeg) + 0.238 +9.));
-      energy = Power(10.,lgEg);
-    } else
-      continue;
+  // calculate geomagnetic angle and determine energy for cutting
+  if( Grande  && Azg!=0 && Zeg!= 0 && Sizeg>0 && Sizmg>0 ) {
+    geomag = geomag_angleg*180./Pi();
+    energy = Power(10.,lgEg)*1e9;   // energy in eV, but lgEg in GeV
+  } else if (!Grande && Az!=0 && Ze!=0 && Size>0 && Lmuo>0) {
+    geomag = geomag_angle*180./Pi();
+    energy = Power(10.,lgE)*1e9;   // energy in eV, but lgEg in GeV
+  } else
+    continue;
        
     // Printing KASCADE or GRANDE data **************************************************************
 
     if( found && (geomag >= geomag_min) && (geomag <= geomag_max) ) { 
       if( !Grande && Az!=0 && Ze!=0 && Age>=0.4&&Age<=1.4 && Ze<0.7854 && energy>energy_min && energy<energy_max) {
         if( createInfoFile )
-          f2<<eventname<<"    "<< Gt<<"    "<< Mmn <<"    "<< Az*180./Pi()<<"    "<< Ze*180./Pi() <<"    "<< geomag<<"    "<< Xc <<"    "<< Yc <<"    "<< Size <<"    0    "<< Nmu<<"    "<< Lmuo <<"    "<< energy  <<"    0"<<endl;
-
+          f2<<eventname<<"    "<< Gt<<"    "<< Mmn <<"    "<< Az*180./Pi()<<"    "<< Ze*180./Pi() <<"    "
+            << geomag<<"    "<< Xc <<"    "<< Yc <<"    "<< Size <<"    0    "<< Nmu<<"    "<< Lmuo <<"    "<< energy  <<"    0"<<endl;
+        if (createCopyScript) {
+          copyScript << "cp /lxdata/lopes/" << year << "/" << month << "/" << day << "/" << eventname << "* ." << endl;
+          copyScript << "bunzip2 " << eventname << "*bz2" << endl;
+          copyScript << "rm " << eventname << "*bz2" << endl;
+        }
         f1<<eventname<<"    "<<Az*180./TMath::Pi()<<"    "<<90.-Ze*180./TMath::Pi()<<"    "<<"2500"<<"    "<<Xc<<"    "<<Yc<<endl;
         cout<<eventname<<"    "<<Az*180./TMath::Pi()<<"    "<<90.-Ze*180./TMath::Pi()<<"    "<<"2500"<<"    "<<Xc<<"    "<<Yc<<endl;
         count++;
@@ -472,7 +591,13 @@ int main(int argc, char* argv[])
       } else if ( Grande && Azg!=0 && Zeg!= 0 && Xcg<-50&&Xcg>-420 &&Ycg<-30&&Ycg>-550 &&Ageg>=-0.385&&Ageg<=1.485 && Zeg<0.7854 &&
                   energy>energy_min && energy<energy_max) {
         if( createInfoFile )
-          f2<<eventname<<"    "<< Gt<<"    "<< Mmn <<"    "<< Azg*180./Pi()<<"    "<< Zeg*180./Pi() <<"    "<< geomag<<"    "<< Xcg <<"    "<<  Ycg <<"    0    "<< Sizeg <<"    "<< Sizmg<<"    0    "<< energy  <<"    1"<<endl;
+          f2<<eventname<<"    "<< Gt<<"    "<< Mmn <<"    "<< Azg*180./Pi()<<"    "<< Zeg*180./Pi() 
+            <<"    "<< geomag<<"    "<< Xcg <<"    "<<  Ycg <<"    0    "<< Sizeg <<"    "<< Sizmg<<"    0    "<< energy  <<"    1"<<endl;
+        if (createCopyScript) {
+          copyScript << "cp /lxdata/lopes/" << year << "/" << month << "/" << day << "/" << eventname << "* ." << endl;
+          copyScript << "bunzip2 " << eventname << "*bz2" << endl;
+          copyScript << "rm " << eventname << "*bz2" << endl;
+        }
         f1<<eventname<<"    "<<Azg*180./TMath::Pi()<<"    "<<90.-Zeg*180./TMath::Pi()<<"    "<<"2500"<<"    "<<Xcg<<"    "<<Ycg<<endl;
         cout<<eventname<<"    "<<Azg*180./TMath::Pi()<<"    "<<90.-Zeg*180./TMath::Pi()<<"    "<<"2500"<<"    "<<Xcg<<"    "<<Ycg<<endl;
         count++;
@@ -480,7 +605,13 @@ int main(int argc, char* argv[])
       }
     }
   }
-  
+
+  if (createCopyScript) {
+    system (string("chmod 733 "+namebase+"-copy.sh").c_str());
+    cout << "\nCopy script created." << endl;
+    copyScript.close();
+  }  
+
   k->Write();
   fout->Close();
   f1.close();
