@@ -264,8 +264,8 @@ class hfQtPlot(QtGui.QWidget):
         if n>1:
             nx=self.d["'PlotWindow:npanelsplottedx"].val()
             ny=self.d["'PlotWindow:npanelsplottedy"].val()
-            width=self.d["'Width"].val()
-            height=self.d["'Height"].val()
+            width=self.gr.GetWidth()
+            height=self.gr.GetHeight()
             npx=int(ceil(1.0*xs/width*nx))
             npy=int(ceil(1.0*ys/height*ny))
             n=(npy-1)*nx+(npx-1)
@@ -278,6 +278,7 @@ class hfQtPlot(QtGui.QWidget):
     def screenP2coord(self,qp):
         "Given a QPoint this will return the coordinates  in the current units chosed by the axis of the panel closest to the point. It will also return the total rows & columns, and index of the selected panel. Returns a tupel of the form: (x1,y1,nx,ny,n)"
         npan=self.whichpanel(qp.x(),qp.y())
+#        print npan,qp.x(),qp.y() 
         xy=self.gr.CalcXYZ(qp.x(),qp.y())
         return (xy.x,xy.y) + npan
     def screenR2coord(self,qr):
