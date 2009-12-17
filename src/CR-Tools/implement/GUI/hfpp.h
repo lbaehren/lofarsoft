@@ -279,7 +279,7 @@ void (*TESTHInteger)( vector<HInteger> & vec0 , vector<HInteger> & vec1 , HInteg
 #define HF_PP_GUI_WRAPPERS\
   class  HF_PP_GUI_MAKE_FUNCNAME : public ObjectFunctionClass { \
 public: \
- DEFINE_PROCESS_CALLS_NUMONLY\   
+ DEFINE_PROCESS_CALLS_NUMONLY\
  HF_PP_GUI_MAKE_FUNCNAME (Data* dp) : ObjectFunctionClass(dp){	\
    dp->setUpdateable(HF_PP_IF_SET(HF_PP_GUI_UPDATEABLE));	\
     setParameters();\

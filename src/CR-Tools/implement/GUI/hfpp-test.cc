@@ -11,7 +11,7 @@ gcc -E -I$LOFARSOFT/release/include -I$LOFARSOFT/src/CR-Tools/implement ~/LOFAR/
 
 gcc -E -I$LOFARSOFT/release/include -I$LOFARSOFT/src/CR-Tools/implement -I$LOFARSOFT/build/cr/implement/GUI/ -I$LOFARSOFT/build/cr/implement -I. ~/LOFAR/usg/build/cr/implement/GUI/hffuncs.awk.cc  | gawk '/^#/{next} /^[ ]*$/{next} {print}' > tst
 
-gcc -E -I$LOFARSOFT/release/include -I$LOFARSOFT/src/CR-Tools/implement -I$LOFARSOFT/build/cr/implement/GUI/ -I$LOFARSOFT/build/cr/implement -I. ~/LOFAR/usg/src/CR-Tools/implement/GUI/hfanalysis.cc  | gawk '/^#/{next} /^[ ]*$/{next} {print}' > tst
+gcc -E -I$LOFARSOFT/release/include -I$LOFARSOFT/src/CR-Tools/implement -I$LOFARSOFT/build/cr/implement/GUI/ -I$LOFARSOFT/build/cr/implement -I. $LOFARSOFT/src/CR-Tools/implement/GUI/hfanalysis.cc  | gawk '/^#/{next} /^[ ]*$/{next} {print}' > tst
 
 
 Bug fixes:
