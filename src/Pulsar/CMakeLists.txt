@@ -176,7 +176,12 @@ endif (NOT HAVE_X11)
 ## some additional checking, because some libraries might not be found yet
 
 if (NOT X11_Xt_LIB)
+  ## search for the library
   find_library (X11_Xt_LIB Xt ${lib_locations})
+  ## add the library to the list of X11 libraries
+  if (X11_Xt_LIB)
+    list (APPEND X11_LIBRARIES ${X11_Xt_LIB})
+  endif (X11_Xt_LIB)
 endif (NOT X11_Xt_LIB)
 
 ## -----------------------------------------------------------------------------
