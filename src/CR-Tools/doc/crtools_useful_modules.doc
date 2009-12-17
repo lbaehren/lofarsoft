@@ -1,6 +1,17 @@
 /*!
+
   \page crtools_useful_modules CR-Tools :: Overview of Classes with general usability
 
+  <center><h3>Overview of Classes</h3></center>
+
+  \verbatim
+  Value    Meaning
+  --------------------------------------------------------------------
+    ?      Usability unknown
+    O      Specialized Class, use it to "steal" code or have it modified
+    +      Likely to be useful, give it a try before writing your own.
+    ++     Considered useful for general use. Think hard before writing your own stuff!
+  \endverbatim
 
   <table border=0>
     <tr>
@@ -12,63 +23,63 @@
     </tr>
     <tr>
       <td>Analysis</td>
-      <td align="center">+</td>
+      <td>+</td>
       <td>CR::CRflaggingPlugin</td>
       <td>Flaggs antennas based on spikyness, high-power, low-power</td>
       <td>LOPES "Plugin"</td>
     </tr>
     <tr>
       <td>Analysis</td>
-      <td align="center">+</td>
+      <td>+</td>
       <td>DataBlockStatistics</td>
       <td>Generate some statistics for a single block of time-series data.</td>
       <td>not tested recently</td>
     </tr>
     <tr>
       <td>Analysis</td>
-      <td align="center">++</td>
+      <td>++</td>
       <td>CR::dfitgauss</td>
       <td>Fit a Gaussian to 1d-data </td>
       <td>Same as the Glish routine</td>
     </tr>
     <tr>
       <td>Analysis</td>
-      <td align="center">O</td>
+      <td>O</td>
       <td>CR::DynamicSpectrum</td>
       <td>Calculates Dynamic spectra and e.g. generates FITS files</td>
       <td>CASA-heavy</td>
     </tr>
     <tr>
       <td>Analysis</td>
-      <td align="center">+</td>
+      <td>+</td>
       <td>CR::fitCR2gauss</td>
       <td>Guipipeline-style X-Beam -> CC-Beam fitting</td>
       <td></td>
     </tr>
     <tr>
       <td>Analysis</td>
-      <td align="center">?</td>
+      <td>?</td>
       <td>PulseProperties</td>
       <td>Storage container for pulse parameters</td>
       <td></td>
     </tr>
     <tr>
       <td>Analysis</td>
-      <td align="center">+</td>
+      <td>+</td>
       <td>CR::tbbTools</td>
       <td>Simulation of TBB FPGA algorithms</td>
       <td></td>
     </tr>
     <tr>
       <td>Calibration</td>
-      <td align="center">+</td>
+      <td>+</td>
       <td>AverageGain</td>
       <td>Calculate baseline of spectra and then normalize the Spectra</td>
       <td>uses BaselineGain, not tested recently</td>
     </tr>
     <tr>
       <td>Calibration</td>
-      <td align="center">+</td>
+      <td>+</td>
       <td>BaselineGain</td>
       <td>Different ways to calculate the baseline of spectra</td>
       <td>not tested recently</td>
@@ -82,14 +93,14 @@
     </tr>
     <tr>
       <td>Calibration</td>
-      <td align="center">+</td>
+      <td>+</td>
       <td>CR::CalTableInterpolater</td>
       <td>Interpolates CalTable-calibration data to needed grid</td>
       <td>Includes multi-d interpolation routine</td>
     </tr>
     <tr>
       <td>Calibration</td>
-      <td align="center">+</td>
+      <td>+</td>
       <td>CR::RFIMitigation[/Plugin]</td>
       <td>Flagging of RFI lines in a spectrum</td>
       <td>IMHO unnecessary complicated</td>
@@ -137,34 +148,6 @@
       <td>Linear fit through data points</td>
       <td></td>
     </tr>
-      <td></td>
-      <td align="center"></td>
-      <td></td>
-      <td></td>
-      <td></td>
   </table>
-
-  <h3>Usab.* = Usability Index:</h3>
-  <table border=0>
-     <tr>
-       <td class="indexkey" align="center">Value</td>
-       <td class="indexkey">Meaning</td>
-    </tr>
-    <tr>
-      <td align="center">?</td>
-      <td>Usability unkown</td>
-    </tr>
-    <tr>
-      <td align="center">O</td>
-      <td>Specialized Class, use it to "steal" code or have it modified</td>
-    </tr>
-    <tr>
-      <td align="center">+</td>
-      <td>Likely to be useful, give it a try before writing your own.</td>
-    </tr>
-    <tr>
-      <td align="center">++</td>
-      <td>Considered useful for general use. Think hard before writing your own stuff!</td>
-    </tr>
 
 */
