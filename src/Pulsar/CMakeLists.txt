@@ -178,8 +178,11 @@ if (NOT X11_Xt_LIB)
   find_library (libXt Xt ${lib_locations})
   ## add the library to the list of X11 libraries
   if (libXt)
+    message (STATUS "Found libXt = ${libXt}")
     set (X11_Xt_LIB ${libXt} CACHE FILEPATH "Path to libXt." FORCE)
     list (APPEND X11_LIBRARIES ${libXt})
+  else (libXt)
+    message (STATUS "Unable to find libXt!")
   endif (libXt)
 endif (NOT X11_Xt_LIB)
 
