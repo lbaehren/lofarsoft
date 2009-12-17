@@ -173,15 +173,14 @@ if (NOT HAVE_X11)
   include (FindX11)
 endif (NOT HAVE_X11)
 
-## some additional checking, because some libraries might not be found yet
-
 if (NOT X11_Xt_LIB)
   ## search for the library
-  find_library (X11_Xt_LIB Xt ${lib_locations})
+  find_library (libXt Xt ${lib_locations})
   ## add the library to the list of X11 libraries
-  if (X11_Xt_LIB)
-    list (APPEND X11_LIBRARIES ${X11_Xt_LIB})
-  endif (X11_Xt_LIB)
+  if (libXt)
+    set (X11_Xt_LIB ${libXt} CACHE FILEPATH "Path to libXt." FORCE)
+    list (APPEND X11_LIBRARIES ${libXt})
+  endif (libXt)
 endif (NOT X11_Xt_LIB)
 
 ## -----------------------------------------------------------------------------
