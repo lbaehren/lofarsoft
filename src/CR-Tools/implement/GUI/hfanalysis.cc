@@ -162,6 +162,7 @@ void hCloseFile(HIntPointer iptr) {
 /*! 
   Function to open a file with a datareader object and returning the pointer to the object as an integer
  */
+
 HIntPointer hOpenFile(HString Filename, vector<HInteger> & Offsets) {
   
   bool opened;

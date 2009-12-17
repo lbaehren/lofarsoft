@@ -2192,6 +2192,7 @@ improperly!
 
 See newObject.
 */
+
 objectid Data::setLink(Data *d,
 			const DIRECTION dir_type,
 			const DIRECTION dir,
