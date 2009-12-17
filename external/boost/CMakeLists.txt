@@ -76,6 +76,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
       )
     ## Post-installation patch of include paths
     ExternalProject_Add_Step (boost boost_step1
+      COMMAND rm -f ${boost_preprocessor}/seq/detail
       COMMAND ${ln_executable} -s ${boost_preprocessor}/detail ${boost_preprocessor}/seq/detail
       COMMENT "Creating symbolic link seq/detail -> detail"
       DEPENDEES install
