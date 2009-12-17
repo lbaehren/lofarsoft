@@ -81,7 +81,7 @@ def CRDataPipeline(self):
 
 def PlotDataPipeline(self):
     if settrace: pdb.set_trace()
-    #The following is a go example on intricacies of network
+    #The following is a good example on intricacies of network
     #programming. It is important to use double subscripts in the
     #following, since the data pipelines before yAxis could have
     #different lengths for different antennas. If that is so only one
@@ -93,10 +93,13 @@ def PlotDataPipeline(self):
     x=DataUnion(gdb["Results=GraphDataBuffer"])
     x=x.find_or_make("'Replot",DIR.NONE,DIR.TO)
     x=x.find_or_make("'GraphObject",x_f(hfGraphObject),x_l(1000))
-    DataUnion(gdb["Results=GraphDataBuffer"]).find_or_make("'Parameters=PlotPanel",x_l(999))
-    gdb["Results=GraphDataBuffer"].find_or_make("PlotData",x_f(hfPlotData)).find_or_make("PlotPanel",x_f(hfPlotPanel))
-    (DataUnion(gdb["Results=PlotPanel"]).find_or_make(":PlotWindow",x_f(hfPlotWindow))).find_or_make("QtPanel",x_f(hfQtPanel)) 
-
+#    DataUnion(gdb["Results=GraphDataBuffer"]).find_or_make("'Parameters=PlotPanel",x_l(999))
+#    gdb["Results=GraphDataBuffer"].find_or_make("PlotData",x_f(hfPlotData)).find_or_make("PlotPanel",x_f(hfPlotPanel))
+#    (DataUnion(gdb["Results=PlotPanel"]).find_or_make(":PlotWindow",x_f(hfPlotWindow))).find_or_make("QtPanel",x_f(hfQtPanel)) 
+    ("Parameters=PlotPanel",x_l(999)) >> DataUnion(gdb["Results=GraphDataBuffer"])
+    gdb["Results=GraphDataBuffer"] >> x_q("PlotData",x_f(hfPlotData)) >> x_q("PlotPanel",x_f(hfPlotPanel))
+    DataUnion(gdb["Results=PlotPanel"]) >> x_q(":PlotWindow",x_f(hfPlotWindow)) >> x_q("QtPanel",x_f(hfQtPanel)) 
+    self.All().clearModification()
 
 def ConnectGUIButtons(d):
     d["PlotWindow'npanels"].connect(hfglobal.gui.npanels)
@@ -150,9 +153,6 @@ class CRPipelineLauncher(hffunc):
         PlotDataPipeline(d)
         d.noMod()
         d.set(result[0])
-#
-        print "Initializing Plotting Network"
-#        global hfQtPlotWidget,hfm,gui,qtgui
         hfglobal.hfQtPlotWidget=hfQtPlotConstructor(d["QtPanel"])
         hfglobal.hfm=hfMainWindow(hfglobal.hfQtPlotWidget)
         hfglobal.hfm.raise_() # put it on top of all other windows
@@ -165,8 +165,6 @@ class CRPipelineLauncher(hffunc):
         qvblocksize=QtGui.QIntValidator(hfglobal.gui.blocksize)
         qvblocksize.setRange(0,d["Data'maxBlocksize"].getI())
         hfglobal.gui.blocksize.setValidator(qvblocksize)
-
-#
         return 0
     def process(self,d):
         AntennaObjectNames,unwantedAntennaNames,newAntennaNames=CRDataPipeline(d)
@@ -175,7 +173,7 @@ class CRPipelineLauncher(hffunc):
         if len(unwantedAntennaNames)>0: map(lambda x:CRDelAntennaPipeline(d,x),unwantedAntennaNames)
         d.set_silent(AntennaObjectNames)
         d.All().clearModification()
-        if len(newAntennaNames)!=0: map(lambda x:x.touch(True),d[newAntennaNames])
+        map(lambda x:x.touch(True),d[AntennaObjectNames])
         if (len(unwantedAntennaNames)!=0): 
             dgb=d["GraphDataBuffer"]
             dgb.Silent(True)

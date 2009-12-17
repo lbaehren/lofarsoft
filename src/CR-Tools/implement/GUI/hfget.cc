@@ -280,7 +280,7 @@ char* reftype_txt(REFTYPE x){
 }
 
 char* modaction_txt(MOD_ACTION x){
-  char* MODACTION_TXT[MOD_UNDEF+1]={"MOD_CLEARED",  "MOD_UPDATED",  "MOD_LINKCHANGED", "MOD_DELETED", "MOD_UNDEF"};
+  char* MODACTION_TXT[MOD_UNDEF+1]={"MOD_CLEARED",  "MOD_VISITED", "MOD_UPDATED",  "MOD_LINKCHANGED", "MOD_DELETED", "MOD_UNDEF"};
   if (x <= MOD_UNDEF && x >=0) {return MODACTION_TXT[x];}  else {return "UNKNOWN_MODACTION";};
 }
 
@@ -703,7 +703,7 @@ bool ModRecisValid(modification_record mod){
 
 bool operator== (const modification_record mod1, const modification_record mod2) {return mod1.ref==mod2.ref && mod1.version==mod2.version && mod1.action==mod2.action;}
 
-/*! \brief Tries to check whether an object is a valid data object. It checks whther the pointer is not NULL and not the NullObject and whether the magiccode is correct.
+/*! \brief Tries to check whether an object is a valid data object. It checks whether the pointer is not NULL and not the NullObject and whether the magiccode is correct.
 
  */
 
@@ -1724,18 +1724,20 @@ void Data::setModification(modification_record newmod){
 HString Data::strWorm(){
   std::ostringstream sout;
   dataworm::const_iterator it;
-  sout << endl << "UpdateWorm(" << getName(true) << "): ";
+  sout << "UpdateWorm(" << getName(true) << "): ";
   for (it=Worm->begin(); it<Worm->end(); ++it) {
     sout << (*it)->getName(true) << " -> ";
   };
-  sout << "END(Worm)." << endl;
+  sout << "END(Worm).";
   return sout.str();
 }
 
 /*!
 \brief Print content of the update Worm, which contains a list of all objects that need updating. Here return output as string.
 */
-void Data::printWorm(){cout << strWorm();}
+void Data::printWorm(bool ignoreempty){
+  if (!(ignoreempty && Worm->begin() == Worm->end())) cout << strWorm() << endl;
+}
 
 /*!
 \brief Execute the update worm which was created by setModification or checkModification
@@ -2199,7 +2201,7 @@ objectid Data::setLink(Data *d,
   DBG("setLink( I am =" << getName(true) << ", link to name=" << d->getName(true) << ", dir_type=" << direction_txt(dir_type)  << ", dir=" << direction_txt(dir) << ", otherport=" << otherport << ", thisport=" << thisport <<": started.");
   if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return -1;};
   if (in_vector(d,getNeighbours(dir))) {
-    ERROR("setLink( I am =" << getName(true) << ", link to name=" << d->getName(true) << ", dir_type=" << direction_txt(dir_type)  << ", dir=" << direction_txt(dir) << ", otherport=" << otherport << ", thisport=" << thisport << " -- Attempt to create a duplicate link!");
+    //    ERROR("setLink( I am =" << getName(true) << ", link to name=" << d->getName(true) << ", dir_type=" << direction_txt(dir_type)  << ", dir=" << direction_txt(dir) << ", otherport=" << otherport << ", thisport=" << thisport << " -- Attempt to create a duplicate link!");
     return -1;
     };
   Data* p = this;

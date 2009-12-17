@@ -229,12 +229,14 @@ class hfGraphObject(hffunc):
     "hfGraphObject: Creates a mgl graph object and stores it."
     def startup(self,d):
         self.setParameter("FontName","adventor")
+#        self.setParameter("FontPath",os.environ.get('LOFARSOFT')+"/src/CR-Tools/implement/GUI/Fonts")
         self.setParameter("FontPath",os.environ.get('LOFARSOFT')+"/src/CR-Tools/implement/GUI/Fonts")
         d.setAutoUpdate(False)
         return 0
     def process(self,d):
         self.gr=mglGraph(mglGraphZB)
-        print" Load Font disabled in hffuncs.py - self.gr.LoadFont(self.FontName,self.FontPath)"
+#        print" Load Font disabled in hffuncs.py - self.gr.LoadFont(self.FontName,self.FontPath)"
+#        self.gr.LoadFont(self.FontName,self.FontPath)
         d.noMod()
         d.putPy(self.gr)
         return 0
@@ -286,10 +288,10 @@ class hfGraphDataBuffer(hffunc):
         self.ydat.SetVec(self.yvec)
         if verbose: print "naxis=",naxis
         if verbose: print "self.ydat.ny=",self.ydat.ny," max=",self.ydat.Maximal()
-        self.putResult("xminval",self.xdat.Minimal())
-        self.putResult("xmaxval",self.xdat.Maximal())
-        self.putResult("yminval",self.ydat.Minimal())
-        self.putResult("ymaxval",self.ydat.Maximal())
+        self.putResult("xminval",min(self.xvec))
+        self.putResult("xmaxval",max(self.xvec))
+        self.putResult("yminval",min(self.yvec))
+        self.putResult("ymaxval",max(self.yvec))
         self.xvec=self.xvec[0:0]
         self.yvec=self.yvec[0:0]
         self.zvec=self.zvec[0:0]
@@ -512,7 +514,9 @@ class hfPlotWindow(hffunc):
         self.setParameter("npanels",-1)
         self.setParameter("npanelsx",-1)
         self.setParameter("npanelsy",-1)
-        self.setParameter("ZoomFactor",1.6) # Make sure this is float()!
+        self.setParameter("ZoomFactor",1.45) # Make sure this is float()!
+        self.setParameter("WindowShiftX",0.2) # Make sure this is float()!
+        self.setParameter("WindowShiftY",-0.2) # Make sure this is float()!
         self.setParameter("PipelineLauncher",[""])
         self.setParameter("GraphObject",None)
         self.setParameter("SortPanelKey","'Antenna")
@@ -521,11 +525,11 @@ class hfPlotWindow(hffunc):
         self.setResult("npanelsplottedy",0)
         return 0
     def process(self,d):
+#        hfglobal.ncount+=1; print "PLOTWINDOW:", hfglobal.ncount, d.getModFlags()
         if verbose: print "PlotWindow - Process"
         if not type(self.GraphObject)==mglGraph:
             print "Error: PlotWindow - GraphObject not of type mglGraph!"
             return 1
-#        print self.PipelineLauncher," --- ",d.getModFlags()
         self.GraphObject.Clf(self.BackgroundColor[0],self.BackgroundColor[1],self.BackgroundColor[2])
         self.GraphObject.SetPlotFactor(self.ZoomFactor)
         if self.Title=="":  self.GraphObject.Title(self.Filename,"iC:k",-0.7)
@@ -539,8 +543,8 @@ class hfPlotWindow(hffunc):
             self.putResult("npanelsplotted",npanels)
             self.putResult("npanelsplottedx",nx)
             self.putResult("npanelsplottedy",ny)
-            self.GraphObject.SubPlot(1,1,0)
-            self.PlotPanel[":PanelPosition"]=0
+            self.GraphObject.SubPlot(1,1,0,self.WindowShiftX,self.WindowShiftY)
+            self.PlotPanel[":PanelPosition"].set_silent(0)
             self.PlotPanel.update()
         elif type(self.PlotPanel)==DataList: #A Datalist is returned => more than one panel
             PlotPanelList=self.PlotPanel.sort(self.SortPanelKey)
@@ -557,11 +561,11 @@ class hfPlotWindow(hffunc):
             if verbose: print "nx,ny=",nx,ny," No. of PlotPanel Objects=",len(PlotPanelList)
             for dd in PlotPanelList: 
                 if n<npanels:
-                    self.GraphObject.SubPlot(nx,ny,n)
+                    self.GraphObject.SubPlot(nx,ny,n,self.WindowShiftX,self.WindowShiftY)
 #                    self.GraphObject.SetPlotFactor(self.ZoomFactor)
                     if verbose: print "Processing Plotpanel",dd.getName(True)
                     dd.update()
-                    dd[":PanelPosition"]=n
+                    dd[":PanelPosition"].set_silent(n)
                 n+=1
         else:
             print "Error: PlotWindow - PlotPanel not found."
@@ -574,11 +578,12 @@ class hfPlotWindow(hffunc):
 class hfQtPanel(hffunc):
     "hfQtPanel: Start the GUI Window"
     def startup(self,d):
+#        hfglobal.ncount+=1; print "QTPANEL", hfglobal.ncount, d.getModFlags()
         if verbose: print "QtPanel startup!"
         self.setParameter("Parent",None)
         self.setParameter("Title","HFLPLOT")
-        self.setParameter("Width",765)
-        self.setParameter("Height",450)
+        self.setParameter("Width",600)
+        self.setParameter("Height",400)
         self.setParameter("SelectBoard","")
         self.setParameter("PlotWidget",None)
         self.setParameter("PlotWindow",None)
@@ -594,7 +599,7 @@ class hfQtPanel(hffunc):
             self.obj.PlotWidget.putPy_silent(self.PlotWidget)
             self.obj.PlotWidget.setNetLevel(999)
             self.PlotWidget.setWindowTitle(self.Title)
-            self.setSize(self.Width,self.Height)
+            self.setSize(self.PlotWidget.width(),self.PlotWidget.height()-20)
             self.PlotWidget.setImage(QtGui.QImage())
         return 0
     def setSize(self,width,height):
@@ -602,6 +607,7 @@ class hfQtPanel(hffunc):
         self.PlotWidget.setGeometry(0,0,width,height)
     def process(self,d):
         if verbose: print "QtPanel process"
+#        pwin=d["'PlotWindow"].getPy()
         self.PlotWidget.setGraph(self.PlotWindow)
         return 0
 
@@ -624,6 +630,7 @@ class hfQtNetview(hffunc):
                     self.SVGWidget = self.GUI.networkdisplay
             if self.SVGWidget == None:
                 self.SVGWidget=QtSvg.QSvgWidget()
+#            
             self.SVGWidget.setAutoFillBackground(True)
             pal = QtGui.QPalette(self.SVGWidget.palette()) 
             pal.setColor(QtGui.QPalette.Window, QtGui.QColor('white')) 

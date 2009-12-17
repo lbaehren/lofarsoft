@@ -136,6 +136,13 @@ class hfQtPlot(QtGui.QWidget):
         self.mousemode="z"
         self.mouse_selectmode="p"
         self.presseventpos=()
+    def resizeEvent(self,event):
+        if hasattr(self,"gr"):
+            width=event.size().width(); height=event.size().height()
+            self.gr.SetSize(width,height)
+            self.setGeometry(0,0,width,height)
+            self.hfReplotNetwork()
+        self.update()
     def quit(self):
         print "Quitting GUI and Python ...."
         exit()
@@ -198,7 +205,7 @@ class hfQtPlot(QtGui.QWidget):
             obj["'xmax"].set_silent(xy[2])
             obj["'ymin"].set_silent(xy[1])
             obj["'ymax"].set_silent(xy[3])
-            obj["'Replot"].touch()
+            self.hfReplotNetwork()
         elif self.mousemode=="s":
             hfglobal.app.restoreOverrideCursor()
             pos=self.screenP2coord(event.pos())
@@ -482,8 +489,9 @@ class hfQtPlot(QtGui.QWidget):
         if (newobj.NFound()) & (oldobj.NFound()) & (not newobj==oldobj):
             oldobj // par
             newobj >> par
-            newobj.touch() # check if that is reall necessary ....
-        else: print what+"="+s,"Object not found (",par,")." 
+            newobj.touch() 
+            #self.hfReplotNetwork()
+#        else: print what+"="+s,"Object not found (",par,")." 
     def ydatatype(self,s): ##hf ...
         "Slot used by the GUI to change the yAxis Datatype"
         self.chooser(s,"Datatype",self.currentplotpanelobject()["'yAxis'Data'Parameters=Data"])

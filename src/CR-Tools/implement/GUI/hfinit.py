@@ -177,14 +177,17 @@ class DataParameterList(list):
     def __xor__(self,value):   #
         obj=value[0].insertNew(self[0],value[1])
         obj.initializeObject(self)
-        return obj;
+        return obj
 
 
-#def _d(*arg): 
-#    x=DataParameterList()
-#    x.extend(arg)
-#    return x
+class x_q(DataParameterList):
+    "Query data Class for setlink to indicate to that the object should be created only if it does not yet exist."
+    pass
 
+def x_d(*arg): 
+    x=DataParameterList()
+    x.extend(arg)
+    return x
 
 def x_d(*arg): 
     x=DataParameterList()
@@ -456,6 +459,11 @@ class DataList(list):
     def printStatus(self,value=True):
         map(lambda d:d.printStatus(value),self)
         return self
+    def printWorm(self,ignoreempty=True):
+        map(lambda d:d.printWorm(ignoreempty),self)
+        return self
+    def getModFlags(self):
+        return map(lambda d:d.getModFlags(),self)
     def clearModification(self):
         map(lambda d:d.clearModification(),self)
         return self
@@ -1034,13 +1042,13 @@ def object_xxshift(self,pre,other,dir):
         return newobj
     elif type(other)==Data:    # if both arguments are data objects, then only set a link
         other.setLink(self,dir)
-#        other.touch()
         return other
     elif (type(other)==DataList) | (type(other)==DataUnionClass):
         for d in other:
             d.setLink(self,dir)
-#        other.touch()
         return other
+    elif (type(other)==x_q):
+        return apply(self.find_or_make,tuple(other))
     else:
         return self.newObject(pre+other,dir)
 

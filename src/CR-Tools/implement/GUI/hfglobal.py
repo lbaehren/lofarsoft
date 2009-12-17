@@ -11,3 +11,4 @@ hfQtPlotWidget=0
 hfm=0
 gui=0
 qtgui=0
+ncount=0

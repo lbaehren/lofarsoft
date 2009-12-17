@@ -556,7 +556,7 @@ class Data {
   void clearModification();
   void clearModificationTO(objectid port);
   HString strWorm();
-  void printWorm();
+  void printWorm(bool ignoreempty=true);
   Data* setLinkpathChanged(bool change);
   bool getLinkpathChanged();
   void executeUpdateWorm();

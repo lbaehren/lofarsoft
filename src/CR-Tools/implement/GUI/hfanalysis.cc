@@ -175,7 +175,7 @@ HIntPointer hOpenFile(HString Filename, vector<HInteger> & Offsets) {
     lep = new CR::LopesEventIn;
     DBG("DataFunc_CR_dataReaderObject: lep=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
     opened=lep->attachFile(Filename);
-    MSG("Opening File="<<Filename);lep->summary();
+    cout << "File="<<Filename;lep->summary();
   } else if (Filetype=="LOFAR_TBB") {
     tbb = new CR::LOFAR_TBB(Filename,1024);
     DBG("DataFunc_CR_dataReaderObject: tbb=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
@@ -199,7 +199,7 @@ HIntPointer hOpenFile(HString Filename, vector<HInteger> & Offsets) {
   //Read the data Header, containing important information about the file (e.g. size)
   CasaRecord hdr=drp->headerRecord();
   uint i,nfields=hdr.nfields();
-  for (i=0; i<nfields; i++) MSG("hdr name="<<hdr.name(i) << " type="<<hdr.dataType(i));
+  //  for (i=0; i<nfields; i++) MSG("hdr name="<<hdr.name(i) << " type="<<hdr.dataType(i));
 
   //return value
   return iptr;
