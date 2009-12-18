@@ -168,6 +168,8 @@ list (APPEND lib_locations /usr/pkg/xorg/lib)
 list (APPEND lib_locations /usr/X11R6/lib)
 list (APPEND lib_locations /usr/X11R7/lib)
 list (APPEND lib_locations /usr/openwin/lib)
+list (APPEND lib_locations /opt/local/lib)
+list (APPEND lib_locations /usr/X11/lib)
 
 if (NOT HAVE_X11)
   include (FindX11)
