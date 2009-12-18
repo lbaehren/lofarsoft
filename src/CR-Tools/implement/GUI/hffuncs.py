@@ -234,7 +234,7 @@ class hfGraphObject(hffunc):
         d.setAutoUpdate(False)
         return 0
     def process(self,d):
-        self.gr=mglGraph(mglGraphZB)
+        self.gr=mglGraph(hfglobal.mglGraphZB)
 #        print" Load Font disabled in hffuncs.py - self.gr.LoadFont(self.FontName,self.FontPath)"
 #        self.gr.LoadFont(self.FontName,self.FontPath)
         d.noMod()
@@ -373,6 +373,7 @@ class hfPlotPanel(hffunc):
         self.setParameter("xAxisDatatype","",objname="xAxis'Datatype")
         self.setParameter("yAxisDatatype","",objname="yAxis'Datatype")
         self.setParameter("ColorPalette","brcmyhlnqeupg")
+        self.setParameter("FontScaleFactor",1.0)
         self.setResult("xmin",0.)
         self.setResult("xmax",1024.)
         self.setResult("ymin",-70.)
@@ -392,7 +393,7 @@ class hfPlotPanel(hffunc):
         ymaxval=max(toList(gdbo["'ymaxval"].val()))
         self.selected=self.data.isNeighbour("SelectBoard")
         self.GraphObject.SetFontDef("rR:r")
-        self.GraphObject.SetFontSize(9.)
+        self.GraphObject.SetFontSize(self.FontScaleFactor*7.)
         self.GraphObject.SetCut(False);
         self.GraphObject.SetBaseLineWidth(1); 
         self.GraphObject.SetTickLen(0.1,2);
@@ -475,10 +476,10 @@ class hfPlotPanel(hffunc):
         self.xAxisLabel+=xoffsettxt
         if not self.xAxisUnit=="": self.xAxisLabel=self.xAxisLabel+" ["+self.xAxisUnitPrefix+self.xAxisUnit+"]"
         if not self.yAxisUnit=="": self.yAxisLabel=self.yAxisLabel+" ["+self.yAxisUnitPrefix+self.yAxisUnit+"]"
-        self.GraphObject.SetFontSize(7.)
+        self.GraphObject.SetFontSize(self.FontScaleFactor*7.)
         self.GraphObject.Label("x",self.xAxisLabel,1)
         self.GraphObject.Label("y",self.yAxisLabel,1)
-        self.GraphObject.SetFontSize(5.)
+        self.GraphObject.SetFontSize(self.FontScaleFactor*5.)
         self.GraphObject.ClearLegend()
         if verbose: print "PlotPanel: plotted Box in Graphobject, calling PlotData"
         self.PlotData=self.data["'PlotData"]
@@ -517,8 +518,8 @@ class hfPlotWindow(hffunc):
         self.setParameter("ZoomFactor",1.6) # Make sure this is float()!
 #        self.setParameter("WindowShiftX",0.2) # Make sure this is float()!
 #        self.setParameter("WindowShiftY",-0.2) # Make sure this is float()!
-        self.setParameter("WindowShiftX",0) # Make sure this is float()!
-        self.setParameter("WindowShiftY",0) # Make sure this is float()!
+        self.setParameter("WindowShiftX",0.0) # Make sure this is float()!
+        self.setParameter("WindowShiftY",0.0) # Make sure this is float()!
         self.setParameter("PipelineLauncher",[""])
         self.setParameter("GraphObject",None)
         self.setParameter("SortPanelKey","'Antenna")
@@ -547,6 +548,7 @@ class hfPlotWindow(hffunc):
             self.putResult("npanelsplottedy",ny)
             self.GraphObject.SubPlot(1,1,0,self.WindowShiftX,self.WindowShiftY)
             self.PlotPanel[":PanelPosition"].set_silent(0)
+            self.PlotPanel["'FontScaleFactor"].set_silent(1.0)
             self.PlotPanel.update()
         elif type(self.PlotPanel)==DataList: #A Datalist is returned => more than one panel
             PlotPanelList=self.PlotPanel.sort(self.SortPanelKey)
@@ -566,8 +568,10 @@ class hfPlotWindow(hffunc):
                     self.GraphObject.SubPlot(nx,ny,n,self.WindowShiftX,self.WindowShiftY)
 #                    self.GraphObject.SetPlotFactor(self.ZoomFactor)
                     if verbose: print "Processing Plotpanel",dd.getName(True)
-                    dd.update()
+                    if npanels<10: dd["'FontScaleFactor"].set_silent(1.0)
+                    else: dd["'FontScaleFactor"].set_silent(sqrt(9.0/npanels))
                     dd[":PanelPosition"].set_silent(n)
+                    dd.update()
                 n+=1
         else:
             print "Error: PlotWindow - PlotPanel not found."

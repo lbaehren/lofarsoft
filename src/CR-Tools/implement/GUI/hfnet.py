@@ -12,7 +12,7 @@ from hfgui import *
 
 defaultblocksize=2**10
 print "--------------------------------------------"
-print "              CR-TOOLS GUI"
+print "              CR-TOOLS hGUI"
 print "--------------------------------------------"
 
 import pdb

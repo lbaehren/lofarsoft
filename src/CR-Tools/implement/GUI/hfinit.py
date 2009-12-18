@@ -26,10 +26,6 @@ def mem(size="rss"):
 mglData.SetVec = mglDataSetVecN
 
 
-mglGraphZB=0
-mglGraphPS=1
-mglGraphGL=2
-mglGraphIDTF=3
 #mglGraphAB is not available - ZB is default
 
 def e(file): 

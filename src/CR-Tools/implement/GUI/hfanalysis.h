@@ -1,6 +1,7 @@
 #ifndef HFANALYSIS_H
 #define HFANALYSIS_H
 
+#include <cmath>
 #include <casa/string.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/Array.h>
@@ -34,6 +35,11 @@
 
 //________________________________________________________________________
 //                                                     Function Definition
+
+template <class Iter> 
+HInteger hFindLowerBound(const Iter data_start, 
+			 const Iter data_end, 
+			 const IterValueType value) ;
 
 template <class Iter> 
 void hNegate(const Iter data_start,

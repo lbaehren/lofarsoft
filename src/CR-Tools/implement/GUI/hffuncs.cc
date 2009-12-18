@@ -1469,6 +1469,16 @@ int ReadTextFile(string filename)
 #define HF_PP_FILETYPE() (GUI)  // Tell the preprocessor (for generating wrappers) that from here on this is the part where the atomatic function wrappers are generated. 
 #include "hfwrappers-hfanalysis.cc.h"  // include wrapper definitions generated automatically from source
 
+/*
+
+The results of the preprocessor programming used here to generate the
+wrappers can be seen by using the following command and inspecting the
+outputfile tst.
+
+gcc -E -I$LOFARSOFT/release/include -I$LOFARSOFT/src/CR-Tools/implement -I$LOFARSOFT/build/cr/implement/GUI/ -I$LOFARSOFT/build/cr/implement -I. $LOFARSOFT/build/cr/implement/GUI/hffuncs.awk.cc   | gawk '/^#/{next} /^[ ]*$/{next} {print}' > tst
+
+*/
+
 
 //------------------------------------------------------------------------
 //Publish the Libraries - used in Data object constructor

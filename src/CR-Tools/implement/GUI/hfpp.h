@@ -64,8 +64,8 @@ HF_PP_GUI_RETURN_NEW_VECTOR         //Functions takes an input vector and return
 
 To define a parameter the following information is provided as a list of 6 elements:
 0) name 
-1) type (if templated specify the type of the default value)
-2) default value 
+1) type (if templated specify the type of the default value, see below)
+2) default value - so far only used to initialize the parameters in the GUI
 3) description
 4) whether or not the type is actually the templated type of the function 
 5) whether to pass by reference or by value (output/input parameter)
@@ -154,13 +154,18 @@ will give
 
 //Gives the c++ definition of the Nth (scalar) parameter
 #define HF_PP_DEF_PARAMETER_N(NMAX,N,T) BOOST_PP_IF(BOOST_PP_TUPLE_ELEM(6,4,BOOST_PP_CAT(HF_PP_PAR,N)),T,BOOST_PP_TUPLE_ELEM(6,1,BOOST_PP_CAT(HF_PP_PAR,N))) BOOST_PP_IF(BOOST_PP_TUPLE_ELEM(6,5,BOOST_PP_CAT(HF_PP_PAR,N)),&,) BOOST_PP_TUPLE_ELEM(6,0,BOOST_PP_CAT(HF_PP_PAR,N)) 
+//Returns the name of the nth parameter
 #define HF_PP_PAR_PARAMETER_N(NMAX,N,T) BOOST_PP_TUPLE_ELEM(6,0,BOOST_PP_CAT(HF_PP_PAR,N)) 
+//This returns the nth parameter but surrounded by a mycast if it is of templated type
+#define HF_PP_PAR_PARAMETER_N_CAST(NMAX,N,T) BOOST_PP_IF(BOOST_PP_TUPLE_ELEM(6,4,BOOST_PP_CAT(HF_PP_PAR,N)),mycast<T>,) (  HF_PP_PAR_PARAMETER_N(NMAX,N,T) )
 
 //Gives a list of the c++ definitions of all (i.e. N=NPAR) scalar parameters
 #define HF_PP_DEF_PARAMETERS(T) BOOST_PP_ENUM(HF_PP_NPAR,HF_PP_DEF_PARAMETER_N,T)
 #define HF_PP_PAR_PARAMETERS BOOST_PP_ENUM(HF_PP_NPAR,HF_PP_PAR_PARAMETER_N,T)
+#define HF_PP_PAR_PARAMETERS_CAST BOOST_PP_ENUM(HF_PP_NPAR,HF_PP_PAR_PARAMETER_N_CAST,T)
 //Adds a preceding comma to the parameterlist if nonzero so that this can be concatenated with another parameterlist
 #define HF_PP_PAR_PARAMETERS_COMMA BOOST_PP_COMMA_IF(HF_PP_NPAR) HF_PP_PAR_PARAMETERS
+#define HF_PP_PAR_PARAMETERS_CAST_COMMA BOOST_PP_COMMA_IF(HF_PP_NPAR) HF_PP_PAR_PARAMETERS_CAST
 
 //Create the entire parameter list consisting of the defintions of vectors and the other parameters
 //HF_PP_PAR_PARLIST will give the list without the type definition
@@ -231,9 +236,9 @@ void (*TESTHInteger)( vector<HInteger> & vec0 , vector<HInteger> & vec1 , HInteg
 #define HF_PP_VEC_WRAPPER_CODE_CASA_DEFAULT(FUNC) return FUNC(HF_PP_PAR_VECTORITERATORS(CASA) HF_PP_PAR_PARAMETERS_COMMA)
 
 #define HF_PP_VEC_WRAPPER_CODE_GUI_DEFAULTHF_PP_GUI_RETURN_POLICY HF_PP_VEC_WRAPPER_CODE_GUI_DEFAULT1 //Sets a default in case Return Policy is not defined.
-#define HF_PP_VEC_WRAPPER_CODE_GUI_DEFAULT0(FUNC) dp->getFirstFromVector(*vp,vs); dp->putOne(FUNC(*vp HF_PP_PAR_PARAMETERS_COMMA))
-#define HF_PP_VEC_WRAPPER_CODE_GUI_DEFAULT1(FUNC) dp->getFirstFromVector(*vp,vs); FUNC(*vp HF_PP_PAR_PARAMETERS_COMMA)
-#define HF_PP_VEC_WRAPPER_CODE_GUI_DEFAULT2(FUNC) dp->getFirstFromVector(*vp,vs); HF_PP_DEF_VECTOR_NOREF_STL(1,1,T); FUNC(*vp,HF_PP_VECTORNAME(1) HF_PP_PAR_PARAMETERS_COMMA);  copyvec(HF_PP_VECTORNAME(1),*vp)
+#define HF_PP_VEC_WRAPPER_CODE_GUI_DEFAULT0(FUNC) dp->getFirstFromVector(*vp,vs); copyvec(mycast<T>(FUNC(*vp HF_PP_PAR_PARAMETERS_CAST_COMMA)),*vp)
+#define HF_PP_VEC_WRAPPER_CODE_GUI_DEFAULT1(FUNC) dp->getFirstFromVector(*vp,vs); FUNC(*vp HF_PP_PAR_PARAMETERS_CAST_COMMA)
+#define HF_PP_VEC_WRAPPER_CODE_GUI_DEFAULT2(FUNC) dp->getFirstFromVector(*vp,vs); HF_PP_DEF_VECTOR_NOREF_STL(1,1,T); FUNC(*vp,HF_PP_VECTORNAME(1) HF_PP_PAR_PARAMETERS_CAST_COMMA);  copyvec(HF_PP_VECTORNAME(1),*vp)
 #define HF_PP_VEC_WRAPPER_CODE_GUI_DEFAULT(FUNC) BOOST_PP_CAT(HF_PP_VEC_WRAPPER_CODE_GUI_DEFAULT,HF_PP_GUI_RETURN_POLICY)(FUNC)
 
 #define HF_PP_VEC_WRAPPERS\

@@ -275,6 +275,14 @@ class hfQtPlot(QtGui.QWidget):
             n=1
         self.gr.SubPlot(nx,ny,n)
         return (nx,ny,n)
+#    def getDataValueXY(self,xs,ys):
+#        npan=self.whichpanel(qp.x(),qp.y())
+#        self.d["PlotPanel:PanelPosition="+str(npan)+"'xAxis"]
+    def coord2screenP(self,x,y):
+        xy1=self.gr.CalcXYZ(0,0)
+        xy2=self.gr.CalcXYZ(self.gr.GetWidth(),self.gr.GetHeight())
+        xp=round((x-xy1[0]))/(xy2[0]-xy1[0])
+        yp=round((x-xy1[1]))/(xy2[1]-xy1[1])
     def screenP2coord(self,qp):
         "Given a QPoint this will return the coordinates  in the current units chosed by the axis of the panel closest to the point. It will also return the total rows & columns, and index of the selected panel. Returns a tupel of the form: (x1,y1,nx,ny,n)"
         npan=self.whichpanel(qp.x(),qp.y())

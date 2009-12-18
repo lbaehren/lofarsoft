@@ -216,8 +216,26 @@ void copycast_vec(void *ptr, vector<S> *op) {
   Tit end=ip->end();
   if (it1==end) {op->clear();}
   else {
-    op->assign(ip->size(),hfnull<S>()); //make the new vector equal in size and initialize with proper Null values
+    op->resize(ip->size()); //make the new vector equal in size 
     Sit it2=op->begin();
+    while (it1!=end) {
+      *it2=mycast<S>(*it1);
+      it1++; it2++;
+    };
+  };
+}
+
+
+template <class T, class S>
+void copycast_vec(vector<T> &vi, vector<S> & vo) {
+  typedef typename vector<T>::iterator Tit; 
+  typedef typename vector<S>::iterator Sit; 
+  Tit it1=vi.begin();
+  Tit end=vi.end();
+  if (it1==end) {vo.clear();}
+  else {
+    vo.resize(vi.size()); //make the new vector equal in size and initialize with proper Null values
+    Sit it2=vo.begin();
     while (it1!=end) {
       *it2=mycast<S>(*it1);
       it1++; it2++;
@@ -241,7 +259,7 @@ void copycast_vec(void *ptr, vector<S> *op, Vector_Selector *vs) {
   if (it1==itend) {op->clear();return;};
     
   address size=ip->size();
-  op->resize(idx->size(),hfnull<S>()); 
+  op->resize(idx->size()); 
   Sit it2=op->begin();
   while (it1!=itend) {
     if (*it1<size) {
@@ -445,13 +463,23 @@ void copyvec(vector<T> & v1, vector<T> &v2) {
   Tit end=v1.end();
   if (it1==end) {v2.clear();}
   else {
-    v2.assign(v1.size(),hfnull<T>()); //make the new vector equal in size and initialize with proper Null values
+    v2.resize(v1.size()); //make the new vector equal in size and initialize with proper Null values
     Tit it2=v2.begin();
     while (it1!=end) {
       *it2=*it1;
       it1++; it2++;
     };
   };
+}
+
+/*!
+
+\brief Make a copy of a scalar values as vector of length one (overloaded from vec to vec copy)
+ */
+template <class T>
+void copyvec(T v1, vector<T> &v2) {
+  v2.resize(1); //make the new vector equal in size 
+  v2[0]=v1;
 }
 
 
@@ -4058,10 +4086,9 @@ void mglDataSetVecN(mglData* md, vector<HNumber> &vec){
     HNumber * a = &(vec[0]);
     md->Set(a,vec.size());
 }
-
 /*
-void mglDataSetVecI(mglData* md, vector<HInteger> &vec){
-    HInteger * a = &(vec[0]);
+void mglDataGetVecPos(mglData* md, double value){
+    HNumber * a = &(vec[0]);
     md->Set(a,vec.size());
 }
 */
@@ -4082,24 +4109,25 @@ void instantiate_hfget(DATATYPE type){
   DEF_VAL(HInteger);
 
   switch (type){
-
 #define SW_TYPE_COMM(EXT,TYPE) \
-vectostring(*d_ptr_##EXT); \
- mycast<TYPE>(ui);\
-d.getFirstFromVector(*d_ptr_##EXT, NULL);\
- copyvec(*d_ptr_##EXT,*d_ptr_##EXT);	\
-d.putOne(*val_##EXT);\
-d.putOne_silent(*val_##EXT);\
-d.put(*d_ptr_##EXT);\
-d.put_silent(*d_ptr_##EXT);\
-d.inspect(*d_ptr_##EXT);\
-vec_append(*d_ptr_##EXT,*d_ptr_##EXT);			\
-WhichType<TYPE>();\
-printvec(*d_ptr_##EXT,8);\
-printvec_noendl(*d_ptr_##EXT,8);\
-set_ptr_to_value(Null_p, INTEGER, *val_##EXT);\
-set_ptr_to_value<TYPE>(Null_p, INTEGER,*val_##EXT);\
-cast_ptr_to_value<TYPE>(Null_p, INTEGER)
+  vectostring(*d_ptr_##EXT); \
+  hfnull<TYPE>();				\
+  mycast<TYPE>(ui);				\
+  d.getFirstFromVector(*d_ptr_##EXT, NULL);	\
+  copyvec(*d_ptr_##EXT,*d_ptr_##EXT);		\
+  copyvec(*val_##EXT,*d_ptr_##EXT);		\
+  d.putOne(*val_##EXT);				\
+  d.putOne_silent(*val_##EXT);			\
+  d.put(*d_ptr_##EXT);				\
+  d.put_silent(*d_ptr_##EXT);			\
+  d.inspect(*d_ptr_##EXT);				\
+  vec_append(*d_ptr_##EXT,*d_ptr_##EXT);		\
+  WhichType<TYPE>();					\
+  printvec(*d_ptr_##EXT,8);				\
+  printvec_noendl(*d_ptr_##EXT,8);			\
+  set_ptr_to_value(Null_p, INTEGER, *val_##EXT);	\
+  set_ptr_to_value<TYPE>(Null_p, INTEGER,*val_##EXT);	\
+  cast_ptr_to_value<TYPE>(Null_p, INTEGER)
 #include "switch-type.cc"
   }
 }

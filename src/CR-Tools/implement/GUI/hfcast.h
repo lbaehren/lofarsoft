@@ -85,6 +85,9 @@ T cast_ptr_to_value(void * ptr, DATATYPE type);
 template <class T,class S>
   void copycast_vec(void *ptr, vector<S> *sp);
 
+template <class T,class S>
+  void copycast_vec(vector<T> &vi, vector<S> &vo);
+
 template <class T, class S>
   void copycast_vec(void *ptr, vector<S> *sp, Vector_Selector *vs);
 

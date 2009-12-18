@@ -18,6 +18,15 @@ using namespace std;
 //Some definitions needed for the preprosessor programming
 //$FILENAME: HFILE=hfwrappers-$SELF.h  // Copy source code (where specified with COPY_TO HFILE START) to the file hwrappers-hfanalysis.cc.h
 
+/*
+
+The results of the preprocessor programming used here to generate the
+wrappers can be seen by using the following command and inspecting the
+outputfile tst.
+
+gcc -E -I$LOFARSOFT/release/include -I$LOFARSOFT/src/CR-Tools/implement -I$LOFARSOFT/build/cr/implement/GUI/ -I$LOFARSOFT/build/cr/implement -I. $LOFARSOFT/src/CR-Tools/implement/GUI/hfanalysis.cc  | gawk '/^#/{next} /^[ ]*$/{next} {print}' > tst
+*/
+
 #undef HF_PP_FILETYPE
 #define HF_PP_FILETYPE() (CC)  // Tell the preprocessor (for generating wrappers) that this is a c++ source code file (brackets are crucial)
 
@@ -144,6 +153,26 @@ void aipsvec2stlvec(CasaVector<S>& data, vector<T>& stlvec){
 }
 
 
+//This function is copied from hfget.cc since I don't know a better
+//way to do a proper instantiation of a templated function across two
+//cpp files ..
+template <class T, class S>
+void copycast_vec(vector<T> &vi, vector<S> & vo) {
+  typedef typename vector<T>::iterator Tit; 
+  typedef typename vector<S>::iterator Sit; 
+  Tit it1=vi.begin();
+  Tit end=vi.end();
+  if (it1==end) {vo.clear();}
+  else {
+    vo.assign(vi.size(),hfnull<S>()); //make the new vector equal in size and initialize with proper Null values
+    Sit it2=vo.begin();
+    while (it1!=end) {
+      *it2=mycast<S>(*it1);
+      it1++; it2++;
+    };
+  };
+}
+
 
 //------------------------------------------------------------------------
 // I/O DataReader Access functions
@@ -176,7 +205,7 @@ HIntPointer hOpenFile(HString Filename, vector<HInteger> & Offsets) {
     lep = new CR::LopesEventIn;
     DBG("DataFunc_CR_dataReaderObject: lep=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
     opened=lep->attachFile(Filename);
-    cout << "File="<<Filename;lep->summary();
+    cout << "File="<<Filename << endl; lep->summary();
   } else if (Filetype=="LOFAR_TBB") {
     tbb = new CR::LOFAR_TBB(Filename,1024);
     DBG("DataFunc_CR_dataReaderObject: tbb=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
@@ -267,10 +296,10 @@ void hReadFile(vector<T> & vec,
   };
 
   CasaVector<uint> antennas(1,Antenna);
-  //  drp->setSelectedAntennas(antennas);
+  drp->setSelectedAntennas(antennas);
 
-//    Vector<uint> selantennas=drp->selectedAntennas();
-//    MSG("No of Selected Antennas" << drp->nofSelectedAntennas ()<< " SelectedAntennas[0]=" <<selantennas[0]);
+  //Vector<uint> selantennas=drp->selectedAntennas();
+  //  MSG("No of Selected Antennas" << drp->nofSelectedAntennas ()<< " SelectedAntennas[0]=" <<selantennas[0]);
 
   address ncol;
 
@@ -279,7 +308,11 @@ void hReadFile(vector<T> & vec,
   //#define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) *vp2=ary.column(Antenna).tovec(); else *vp2=ary.column(0).tovec(); dp->noMod(); dp->put(*vp2)
 
   if (Datatype=="Time") {
-    //    vector<HNumber>* vp2; *vp2 = drp->timeValues().tovec();
+//hf #define MAKE_CASA_VECTOR_FROM_STL(TYPE,VEC,CVEC)	\
+//     casa::IPosition shape(1,VEC.size());\
+//     casa::Vector<TYPE> CVEC(shape,&(VEC[0]),casa::SHARE)
+//     //    MAKE_CASA_VECTOR_FROM_STL(T,vec,cvec);
+//     //    drp->timeValues(cvec);
     CasaVector<double> val = drp->timeValues();
     aipsvec2stlvec(val,vec);
   }
@@ -289,7 +322,19 @@ void hReadFile(vector<T> & vec,
     aipsvec2stlvec(val,vec);
   }
   else if (Datatype=="Fx") {
-    //    vector<HNumber>* vp2 = new vector<HNumber>;
+//hf #define MAKE_UNION_CASA_MATRIX_AND_STLVEC(TYPECASA,STLVEC,CASAVEC) \
+//     casa::IPosition shape(2,STLVEC.size()); shape(1)=1;	\
+//     casa::Matrix<TYPECASA> CASAVEC(shape,reinterpret_cast<TYPECASA*>(&(STLVEC[0])),casa::SHARE)
+//     if (typeid(vec)==typeid(vector<double>)) {
+//       vec.resize(Blocksize);
+//       MAKE_UNION_CASA_MATRIX_AND_STLVEC(double,vec,mtrx);
+//       drp->fx(mtrx);
+//     } else {
+//       vector<double> nvec(Blocksize);
+//       MAKE_UNION_CASA_MATRIX_AND_STLVEC(double,nvec,mtrx);
+//       drp->fx(mtrx);
+//       copycast_vec(nvec,vec); //Copy back to output vector and convert type
+//     };
     CasaMatrix<CasaNumber> ary=drp->fx();
     copy_ary2vp;
   }
@@ -1019,6 +1064,73 @@ void hDownsample (const Iter idata_start,
     }
   *ito=hMean(it2,idata_end);
 }
+
+//$COPY_TO HFILE START --------------------------------------------------
+#include "hfpp-undef.cc"
+#define HF_PP_FUNCNAME hFindLowerBound  //The Name of the function
+//.......................................................................
+#define HF_PP_FUNCBRIEF "Finds the location in a monotonically increasing vector, where the search value is just above or equal to the value in the vector."
+//#define HF_PP_NO_GUI 1 //Don't generate a wrapper for the GUI
+#define HF_PP_GUI_LIBRARY Math
+#define HF_PP_FUNCTYPE HInteger     //Return value type of function is templated with T
+#define HF_PP_NVECS 1 //Number of (input/output) vectors
+#define HF_PP_NPAR 1  //Number of other parameters
+#define HF_PP_PAR0 (value,HNumber,0.0,"Value to find.",HF_PP_TEMPLATED_TYPE,HF_PP_PASS_AS_VALUE)  //Definition of input parameter
+#define HF_PP_GUI_LIBRARY Math
+#define HF_PP_GUI_RETURN_POLICY  HF_PP_GUI_RETURN_SCALAR //How function returns result (as single-valued return value, or as a vector)
+#include "hfdefaultwrappercode.h"
+//$COPY_TO END --------------------------------------------------
+
+/*!  \brief Finds -- through a binary search and interpolation -- the
+  location in a monotonically increasing vector, where the search
+  value is just above or equal to the value in the vector. 
+
+This requires random access iterators, in order to have an optimal search result.
+
+  \param data_start: STL Iterator pointing to the first element of an array with input
+  values.  
+
+  \param data_end: STL Iterator pointing to the end of the
+  input vector
+
+  \param value: The value to search for
+*/
+template <class Iter> 
+HInteger hFindLowerBound(const Iter data_start,
+			 const Iter data_end, 
+			 const IterValueType value) 
+{
+  HNumber value_n=mycast<HNumber>(value); //This also works for Complex then 
+  HInteger niter=0;
+  if (data_start==data_end) return 0;
+  HInteger maxpos=data_end-data_start-1,posguess;
+  Iter it1=data_start,it2=data_end-1,it0;
+  if (value_n<=mycast<HNumber>(*it1)) return 0;
+  if (value_n>=mycast<HNumber>(*it2)) return maxpos;
+  posguess=(value_n-mycast<HNumber>(*it1))/(mycast<HNumber>(*it2)-mycast<HNumber>(*it1))*maxpos;
+  it0=data_start+posguess;
+  if (it0<it1) return mycast<HInteger>(it1-data_start); //Error, Non monotonic  
+  if (it0>=it2) return mycast<HInteger>(it2-data_start); //Error, Non monotonic  
+  //cout << "hFindLowerBound(" << value_n << "): niter=" << niter << ", posguess=" << posguess << ", val=" << *it0 << " vals=(" << mycast<HNumber>(*(it0)) << ", " << mycast<HNumber>(*(it0+1)) << "), bracket=(" << it1-data_start << ", " << it2-data_start <<")" <<endl;
+  while (!((value_n < mycast<HNumber>(*(it0+1))) && (value_n >= mycast<HNumber>(*it0)))) {
+    if (value_n > mycast<HNumber>(*it0)) {
+      it1=it0;
+    } else {
+      it2=it0;
+    };
+    it0=it1+(it2-it1)/2;
+    if (*it0>value_n) it2=it0; //Binary search step
+    else it1=it0;
+    posguess=(value_n-mycast<HNumber>(*it1))/(mycast<HNumber>(*it2)-mycast<HNumber>(*it1))*(it2-it1)+(it1-data_start);
+    it0=data_start+posguess;
+    ++niter;
+    //  cout << "hFindLowerBound(" << value_n << "): niter=" << niter << ", posguess=" << posguess << ", val=" << *it0 << " vals=(" << mycast<HNumber>(*(it0)) << ", " << mycast<HNumber>(*(it0+1)) << "), bracket=(" << it1-data_start << ", " << it2-data_start <<")" <<endl;
+    if (it0<it1) return it1-data_start; //Error, Non monotonic  
+    if (it0>it2) return it2-data_start; //Error, Non monotonic 
+  };
+  return posguess;
+} 
+
 
 void dummy_instantitate_templates(){
   casa::Vector<HNumber> v;

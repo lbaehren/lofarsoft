@@ -12,3 +12,7 @@ hfm=0
 gui=0
 qtgui=0
 ncount=0
+mglGraphZB=0
+mglGraphPS=1
+mglGraphGL=2
+mglGraphIDTF=3
