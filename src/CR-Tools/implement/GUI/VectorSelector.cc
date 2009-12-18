@@ -24,8 +24,8 @@ using namespace std;
 // Vector_Selector
 //------------------------------------------------------------------------
 const bool noSelection(const Vector_Selector *vs) {
-  if (vs==NULL) return true;
-  if (vs->SelectorType()==SEL_ALL) return true;
+  if (NULL == vs) return true;
+  if (SEL_ALL == vs->SelectorType()) return true;
   return false;
 }
 
@@ -68,9 +68,9 @@ void select_vector_elements(vector<T>* ip, vector<T>* op, vector<address>* idx){
 Vector_Selector::Vector_Selector(){type=SEL_ALL; isindex=true;}
 Vector_Selector::~Vector_Selector(){}
 
-SELECTORTYPE Vector_Selector::SelectorType(){return type;}
+SELECTORTYPE Vector_Selector::SelectorType() const {return type;}
 
-bool Vector_Selector::isIndexable() {return isindex;}
+bool Vector_Selector::isIndexable() const {return isindex;}
 
 void Vector_Selector::setAbove(HNumber x){
   type=SEL_ABOVE;

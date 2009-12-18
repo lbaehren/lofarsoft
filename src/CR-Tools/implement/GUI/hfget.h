@@ -71,19 +71,19 @@ bool del_value (void *p, DATATYPE type);
 vector<HString> split_str_into_vector (HString str,
 				      char c=',');
 
-int string_find_chars (const HString s,
-		       const HString c,
+int string_find_chars (/*const*/ HString s,
+		       /*const*/ HString c,
 		       int &n,
-		       const int npos=0);
+		       /*const*/ int npos=0);
 
-int string_rfind_chars (const HString s,
-			const HString c,
+int string_rfind_chars (/*const*/ HString s,
+			/*const*/ HString c,
 			int &n,
-			const int npos=0);
+			/*const*/ int npos=0);
 
-HString string_rfind_chars_substr (const HString s,
-				  const HString c=RECORD_SEP,
-				  const int npos=0);
+HString string_rfind_chars_substr (/*const*/ HString s,
+				  /*const*/ HString c=RECORD_SEP,
+				  /*const*/ int npos=0);
 
 void parse_record_name_to_vector (HString name,
 				  vector<HString> &names,
@@ -107,10 +107,10 @@ bool parse_record_selection_to_vector (HString str,
 //------------------------------------------------------------------------
 
 template <class T>
-bool object_logic_cmpr(const Data* o_ptr, const T val);
+bool object_logic_cmpr(/*const*/ Data* o_ptr, /*const*/ T val);
 
 template <class T>
-bool object_logic_in_set(const Data* o_ptr, const vector<T> &set);
+bool object_logic_in_set(/*const*/ Data* o_ptr, /*const*/ vector<T> &set);
 
 // End object logic operators
 //------------------------------------------------------------------------

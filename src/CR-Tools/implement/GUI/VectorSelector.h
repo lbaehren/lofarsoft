@@ -56,8 +56,8 @@ template <class T>
   void setList(const vector<address> &vptr);
   void setOne(address start);
 
-  bool isIndexable();
-  SELECTORTYPE SelectorType();
+  bool isIndexable() const;
+  SELECTORTYPE SelectorType() const;
 
   template <class T>
     T getOne(const vector<T> &v);

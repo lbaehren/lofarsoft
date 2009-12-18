@@ -67,7 +67,7 @@ void setDebug(int level) {global_debuglevel = level;}
 // object == value
 
 template <class T>
-bool object_logic_cmpr(const Data* o_ptr, const T val){
+bool object_logic_cmpr(/*const*/ Data* o_ptr, /*const*/ T val){
   bool result;
   switch (o_ptr->getType()) {
 #define SW_TYPE_COMM(X,TYPE) result = ( (mycast<TYPE>(val)) == (o_ptr->getOne<TYPE>()))
@@ -83,7 +83,7 @@ bool object_logic_cmpr(const Data* o_ptr, const T val){
 // object == value1 || object == value2 || object == value3 ....
 
 template <class T>
-bool object_logic_in_set(const Data* o_ptr, const vector<T> &set){
+bool object_logic_in_set(/*const*/ Data* o_ptr, /*const*/ vector<T> &set){
   bool found=false;
   objectid i,s=set.size();
   DEF_VAL( T );
@@ -136,19 +136,19 @@ template<> inline HComplex hfnull<HComplex>(){return 0.0;}
 template<class S> inline HString mytostring(S v){std::ostringstream os; os << v; return os.str();}
 
 //Identity
-template<class T> inline T mycast(const T v){return v;}
+template<class T> inline T mycast(/*const*/ T v){return v;}
 
 //--Numbers ------------------------------------------------------------
 
 //Some Special cases to avoid ambiguity, hence first convert to common basic type
-template<class T> inline T mycast(const unsigned int v){return mycast<T>(static_cast<HInteger>(v));}
+template<class T> inline T mycast(/*const*/ unsigned int v){return mycast<T>(static_cast<HInteger>(v));}
 
 
 //Convert to arbitrary class T if not specified otherwise
-template<class T> inline T mycast(const HPointer v){return mycast<T>(reinterpret_cast<HInteger>(v));}
-template<class T> inline T mycast(const HInteger v){return static_cast<T>(v);}
-template<class T> inline T mycast(const HNumber v){return static_cast<T>(v);}
-template<class T> inline T mycast(const HComplex v){return static_cast<T>(v);}
+template<class T> inline T mycast(/*const*/ HPointer v){return mycast<T>(reinterpret_cast<HInteger>(v));}
+template<class T> inline T mycast(/*const*/ HInteger v){return static_cast<T>(v);}
+template<class T> inline T mycast(/*const*/ HNumber v){return static_cast<T>(v);}
+template<class T> inline T mycast(/*const*/ HComplex v){return static_cast<T>(v);}
 
 //Convert Numbers to Numbers and loose information (round float, absolute of complex)
 template<>  inline HInteger mycast<HInteger>(HNumber v){return static_cast<HInteger>(floor(v+0.5));}
@@ -163,21 +163,21 @@ template<> inline HString mycast<HString>(HPointer v){std::ostringstream os; os 
 template<> inline HString mycast<HString>(HInteger v){std::ostringstream os; os << v; return os.str();}
 template<> inline HString mycast<HString>(HNumber v){std::ostringstream os; os << v; return os.str();}
 template<> inline HString mycast<HString>(HComplex v){std::ostringstream os; os << v; return os.str();}
-template<> inline HPointer mycast(const HString v){HPointer t=NULL; std::istringstream is(v); is >> t; return t;}
-template<> inline HInteger mycast(const HString v){HInteger t=0; std::istringstream is(v); is >> t; return t;}
-template<> inline HNumber mycast(const HString v){HNumber t=0.0; std::istringstream is(v); is >> t; return t;}
-template<> inline HComplex mycast(const HString v){HComplex t=0.0; std::istringstream is(v); is >> t; return t;}
-template<class T> inline T mycast(const HString v){T t; std::istringstream is(v); is >> t; return t;}
+template<> inline HPointer mycast(/*const*/ HString v){HPointer t=NULL; std::istringstream is(v); is >> t; return t;}
+template<> inline HInteger mycast(/*const*/ HString v){HInteger t=0; std::istringstream is(v); is >> t; return t;}
+template<> inline HNumber mycast(/*const*/ HString v){HNumber t=0.0; std::istringstream is(v); is >> t; return t;}
+template<> inline HComplex mycast(/*const*/ HString v){HComplex t=0.0; std::istringstream is(v); is >> t; return t;}
+template<class T> inline T mycast(/*const*/ HString v){T t; std::istringstream is(v); is >> t; return t;}
 
 
 //--Pointers ------------------------------------------------------------
 
 
 //Convert Type T to HPointer:
-template<> inline HPointer mycast(const HPointer v){return v;}
-template<> inline HPointer mycast(const HInteger v){return reinterpret_cast<HPointer>(v);}
-template<> inline HPointer mycast(const HNumber v){return reinterpret_cast<HPointer>(mycast<HInteger>(v));}
-template<> inline HPointer mycast(const HComplex v){return reinterpret_cast<HPointer>(mycast<HInteger>(v));}
+template<> inline HPointer mycast(/*const*/ HPointer v){return v;}
+template<> inline HPointer mycast(/*const*/ HInteger v){return reinterpret_cast<HPointer>(v);}
+template<> inline HPointer mycast(/*const*/ HNumber v){return reinterpret_cast<HPointer>(mycast<HInteger>(v));}
+template<> inline HPointer mycast(/*const*/ HComplex v){return reinterpret_cast<HPointer>(mycast<HInteger>(v));}
 
 
 
@@ -187,11 +187,11 @@ template<> inline HPointer mycast(const HComplex v){return reinterpret_cast<HPoi
 
  */
 
-vector<address> DataListtoIDs(const DataList dl){
+vector<address> DataListtoIDs(DataList dl){
   DataList::iterator it;
   vector<address> vec;
   vec.reserve(dl.size());
-  it=dl.begin();
+  it = dl.begin();
   while (it!=dl.end()){
     SaveCall2(*it){vec.push_back((*it)->getOid());}
     it++;
@@ -366,7 +366,7 @@ void vec_append(vector<T> &v1,const vector<T> &v2){
    vec_unique, but due to a bug doesn't work yet!!!*/
 
 template <typename T>
-void vec_unique_copy(const vector<T> &v1,vector<T> &v2){
+void vec_unique_copy(/*const*/ vector<T> &v1,vector<T> &v2){
   typename vector<T>::const_iterator it1a,it_end,it_beg,it1b;
   typename vector<T>::iterator it2;
   bool found;
@@ -457,7 +457,7 @@ void copyvec(vector<T> & v1, vector<T> &v2) {
 
 
 template <class T>
-HString vectostring(const vector<T> v,const address maxlen=8){
+HString vectostring(/*const*/ vector<T> v,/*const*/ address maxlen=8){
   int i;
   int s;
   HString out="";
@@ -572,7 +572,7 @@ vector<HString> split_str_into_vector(HString str, char c)
 }
 
 //finds the first location of certain characters, n contains the position
-int string_find_chars (const HString s, const HString c, int &n, const int npos)
+int string_find_chars (/*const*/ HString s, /*const*/ HString c, int &n, /*const*/ int npos)
 {
   int i, slen=s.size();
   int nchrs=c.size();
@@ -590,7 +590,7 @@ finds the last location of certain characters (c) in string s, n contains the ch
 npos gives a starting position relative to the end
 */
 
-int string_rfind_chars (const HString s, const HString c, int &n, const int npos)
+int string_rfind_chars (/*const*/ HString s, /*const*/ HString c, int &n, /*const*/ int npos)
 {
   int i, slen=s.size();
   int nchrs=c.size();
@@ -607,7 +607,7 @@ finds the last location of certain characters (c) in string s, npos gives a star
 and the returns the string from the end up to (and excluding) the (punctuation) character 
 */
 
-HString string_rfind_chars_substr (const HString s, const HString c, const int npos)
+HString string_rfind_chars_substr (/*const*/ HString s, /*const*/ HString c, /*const*/ int npos)
 {
   int n,i=string_rfind_chars (s, c, n, npos);
   return s.substr(i,s.size()-i);
@@ -701,13 +701,13 @@ bool ModRecisValid(modification_record mod){
   return isDataObject(mod.ref) && mod.action<MOD_DELETED;
 };
 
-bool operator== (const modification_record mod1, const modification_record mod2) {return mod1.ref==mod2.ref && mod1.version==mod2.version && mod1.action==mod2.action;}
+bool operator== (/*const*/ modification_record mod1, /*const*/ modification_record mod2) {return mod1.ref==mod2.ref && mod1.version==mod2.version && mod1.action==mod2.action;}
 
 /*! \brief Tries to check whether an object is a valid data object. It checks whether the pointer is not NULL and not the NullObject and whether the magiccode is correct.
 
  */
 
-bool isDataObject(const Data* obj, const bool notquiet) {
+bool isDataObject(/*const*/ Data* obj, /*const*/ bool notquiet) {
   if (obj!=NULL && obj!=&NullObject) {
     if (obj->magiccode==MAGICCODE) return true;
     else if (obj->magiccode==MAGICCODE_DELETED) {
@@ -993,7 +993,7 @@ vector<HString> Data::listNeighbourNames(DIRECTION dir){
 
 */
 
-DIRECTION Data::getLinkDirection(const Data & neighbour){
+DIRECTION Data::getLinkDirection(/*const*/ Data & neighbour){
   objectid i;
   for (i=0; i<data.from.size(); ++i) {
     if (data.from[i]->ref==&neighbour) return DIR_FROM;
@@ -1009,7 +1009,7 @@ DIRECTION Data::getLinkDirection(const Data & neighbour){
 
 */
 
-DIRECTION Data::getLinkDirectionType(const Data & neighbour){
+DIRECTION Data::getLinkDirectionType(/*const*/ Data & neighbour){
   objectid i;
   for (i=0; i<data.from.size(); ++i) {
     if (data.from[i]->ref==&neighbour) return data.from[i]->direction;
@@ -1121,7 +1121,7 @@ between the current object (in direction "dir") and the objects with
 names in the "names" vector.
 
  */
-vector<address> Data::FindChainID(const DIRECTION dir,const vector<HString> names, const bool include_endpoints, const bool monotonic){
+vector<address> Data::FindChainID(/*const*/ DIRECTION dir,/*const*/ vector<HString> names, /*const*/ bool include_endpoints, /*const*/ bool monotonic){
   return DataListtoIDs(FindChain(dir,names,include_endpoints,monotonic));
 }
 
@@ -1135,7 +1135,7 @@ names in the "names" vector.
  */
 
 
-DataList Data::FindChain(const DIRECTION dir,const vector<HString> names, const bool include_endpoints, const bool monotonic){
+DataList Data::FindChain(/*const*/ DIRECTION dir,/*const*/ vector<HString> names, /*const*/ bool include_endpoints, /*const*/ bool monotonic){
   DataList newneighbours, neighbours, chain, endpoints;
   DataList::iterator it;
   DIRECTION dir2 = DIR_BOTH;
@@ -1307,7 +1307,7 @@ Data& Data::setNetLevel(longint lev){
 \brief Returns the name of the object. If longname=True also the ID is included in the name. 
 
 */
-HString Data::getName(const bool longname){
+HString Data::getName(/*const*/ bool longname) /*const*/{
   if (isDataObject(this)) {
     if (!longname) return data.name;
     ostringstream s;
@@ -1325,7 +1325,7 @@ used in a search path anymore). This is the name used in a search path
 (i.e., what one typcially specifies in square brackets).
 */
 
-HString Data::getSearchName(const bool longname){
+HString Data::getSearchName(/*const*/ bool longname){
   HString name=getName(longname);
   if (len()>=1) name=name+"="+getOne<HString>();
   return name;
@@ -1345,7 +1345,7 @@ After all the data from this object will also be passed through when
 doing a get.
 
  */
- DATATYPE Data::getType(){
+ DATATYPE Data::getType() /*const*/{
    if (data.type==UNDEF) {   
      if (!hasData()) {          
        if (data.from.size()>0) {
@@ -1361,10 +1361,10 @@ doing a get.
 /*!
 Set the data type of an object. This is only possible if the object does not yet contain a data vector.
  */
- void Data::setType(const DATATYPE typ){
+ void Data::setType(/*const*/ DATATYPE typ){
    if (!hasData()) {data.type=typ;};
 }
- objectid Data::getOid(){return data.oid;}
+ objectid Data::getOid()/*const*/ {return data.oid;}
  ObjectFunctionClass* Data::getFunction(){return data.of_ptr;};
 
 //  sendMessage(MSG_MODIFIED,DIR_TO);
@@ -1450,7 +1450,7 @@ void Data::setUpdateable(bool up){
  */
 
 //template <class T>
-//bool Data::doVerbose(const vector<T> &v,const bool checkmod)	{
+//bool Data::doVerbose(/*const*/ vector<T> &v,/*const*/ bool checkmod)	{
 bool Data::doVerbose()	{
   char in_c[256];
   HString in;
@@ -1604,7 +1604,7 @@ Use .update() to execute this object. See also wakeUp() to not set
 the modification (again) but run the update sequence.
  */
 
-Data& Data::touch(const bool silent){
+Data& Data::touch(/*const*/ bool silent){
   if (silent) {
     DOSILENT(setModification()); 
   } else {
@@ -1642,7 +1642,7 @@ the objects higher up the chain and cause update if necessary.
 
 */
 
-void Data::setModification(const MOD_ACTION action){
+void Data::setModification(/*const*/ MOD_ACTION action){
     modification_record newmod;
 
     if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return;};
@@ -2136,7 +2136,7 @@ longint Data::getNumberOfLinks(DIRECTION dir){
 \brief Like setLink it will set a link to a another object, however, if the link already exists it will be overwritten.
 
  */
-Data* Data::resetLink(Data* d, const DIRECTION dir_type, const DIRECTION dir) {
+Data* Data::resetLink(Data* d, /*const*/ DIRECTION dir_type, /*const*/ DIRECTION dir) {
   if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return &NullObject;};
   DIRECTION dirtype=dir_type;
   if (dirtype==DIR_NONE) dirtype=data.defdir;
@@ -2152,11 +2152,11 @@ Data* Data::resetLink(Data* d, const DIRECTION dir_type, const DIRECTION dir) {
   return d;
 }
 
-Data& Data::resetLink_Ref_3(Data& d, const DIRECTION dir_type, const DIRECTION dir) {
+Data& Data::resetLink_Ref_3(Data& d, /*const*/ DIRECTION dir_type, /*const*/ DIRECTION dir) {
   Data* result=resetLink(&d,dir_type,dir);
   SaveCall(result) return *result;
 }
-Data& Data::resetLink_Ref_2(Data& d, const DIRECTION dir_type) {
+Data& Data::resetLink_Ref_2(Data& d, /*const*/ DIRECTION dir_type) {
   Data* result=resetLink(&d,dir_type);
   SaveCall(result) return *result;
 }
@@ -2194,10 +2194,10 @@ See newObject.
 */
 
 objectid Data::setLink(Data *d,
-			const DIRECTION dir_type,
-			const DIRECTION dir,
-		       const objectid otherport,
-		       const objectid thisport)
+			/*const*/ DIRECTION dir_type,
+			/*const*/ DIRECTION dir,
+		       /*const*/ objectid otherport,
+		       /*const*/ objectid thisport)
 {
   DBG("setLink( I am =" << getName(true) << ", link to name=" << d->getName(true) << ", dir_type=" << direction_txt(dir_type)  << ", dir=" << direction_txt(dir) << ", otherport=" << otherport << ", thisport=" << thisport <<": started.");
   if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return -1;};
@@ -2287,9 +2287,9 @@ objectid Data::setLink(Data *d,
 };
 
 //The next was used for python binding, creating _Name, _ID etc.
-Data& Data::setLink_Ref_3(Data &d, const DIRECTION dir_type, const DIRECTION dir){
+Data& Data::setLink_Ref_3(Data &d, /*const*/ DIRECTION dir_type, /*const*/ DIRECTION dir){
   setLink(&d, dir_type,dir,-1,-1);  return d;}
-Data& Data::setLink_Ref_2(Data &d, const DIRECTION dir_type){
+Data& Data::setLink_Ref_2(Data &d, /*const*/ DIRECTION dir_type){
   setLink(&d, dir_type,DIR_FROM,-1,-1);  return d;}
 Data& Data::setLink_Ref_1(Data &d){
   setLink(&d, DIR_NONE,DIR_FROM,-1,-1);  return d;}
@@ -2332,7 +2332,7 @@ vector<HString> Data::getNeighbourNames(DIRECTION dir) {
 /*!\brief Returns a vector of pointers to the all immediate neighbours in direction DIR.
 
  */
-DataList Data::getNeighbours(const DIRECTION dir) {
+DataList Data::getNeighbours(/*const*/ DIRECTION dir) {
   DataList vec;
   vector<reference_descr*>::iterator it;
   vec.reserve(data.from.size()+data.to.size());
@@ -2957,11 +2957,11 @@ void Data::delFunction(){
   new function is exactly the same. In this case no action is
   performed. You will have to call delFunction explicitly first.
 */
-Data& Data::setFunction (const HString name,
-			const HString library,
-			const DATATYPE typ)
+Data& Data::setFunction (/*const*/ HString name,
+			/*const*/ HString library,
+			/*const*/ DATATYPE typ)
 {
-  if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return;};
+  if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return NullObject;};
   if (data.superior!=NULL && data.superior->library_ptr!=NULL) {
     if (data.superior->library_ptr->inLibrary(name,library)) {
       DBG("setFunction(" << name << "," << library << "," << datatype_txt(typ) << "): name=" << getName(true));
@@ -3011,10 +3011,10 @@ vector<HString> Data::listFunctions (HString lib, bool doprint){
 
 
 //Needed for Python Bindings
-template <class T> T Data::getOne_0_(){return getOne<T>();}
+template <class T> T Data::getOne_0_() /*const*/ {return getOne<T>();}
 
 template <class T>
-T Data::getOne(const address i){
+T Data::getOne(/*const*/ address i) /*const*/ {
   Vector_Selector *vs;
   vs = new Vector_Selector;
   vs->setOne(i);
@@ -3091,7 +3091,7 @@ void Data::doAutoUpdate(){
   specified name returns NULL if not found and "this" (pointer to current object)
   for an empty string.
 */
-Data* Data::find_name(const HString name, const DIRECTION dir) {
+Data* Data::find_name(/*const*/ HString name, /*const*/ DIRECTION dir) {
   Data *D_ptr=&NullObject; 
   if (name != data.name && name!="") {
     objectid i;
@@ -3113,7 +3113,7 @@ pointers to these objects. Returns multiple pointers in vec if multiple names ar
 The function returns true if the relative is found, and false if not.
 */
 
-  DataList Data::find_immediate_relatives(const HString name, const DIRECTION dir) {
+  DataList Data::find_immediate_relatives(/*const*/ HString name, /*const*/ DIRECTION dir) {
   objectid i;
   vector<reference_descr*> *p_ref;
   DataList vec;
@@ -3164,7 +3164,7 @@ elems contains elements the additional requirement is that the data
 vector (i.e., its first element) is among the elements.
 */
 template <class T>
-DataList Data::find_relatives(const HString name, const vector<T> &elems, const DIRECTION dir) {
+DataList Data::find_relatives(/*const*/ HString name, /*const*/ vector<T> &elems, /*const*/ DIRECTION dir) {
   DataList neighbours,next_neighbours,result;
   address i,level=0,n_size,el_size=elems.size();
   bool found=false;
@@ -3290,7 +3290,7 @@ See Find() for more information.
 
  */
 
-DataList Data::Search(const HString s) {
+DataList Data::Search(/*const*/ HString s) {
   DataList dl;
   HString ss;
   if (s.size()==0) return dl;
@@ -3364,7 +3364,7 @@ returned. The global search is mainly implemented for interactive use
 and is depreciated for programming purposes.
 
  */
-DataList Data::Find(const HString s, const int rpos) {
+DataList Data::Find(/*const*/ HString s, /*const*/ int rpos) {
   DataList vec_in,vec_out;
   bool found=true;
   bool selection;
@@ -3401,7 +3401,7 @@ DataList Data::Find(const HString s, const int rpos) {
 //returns the NullObject if not found and "this" if the vector is of length 0.
 
 
-Data* Data::find_names(const vector<HString> names, const vector<DIRECTION> dir) {
+Data* Data::find_names(/*const*/ vector<HString> names, /*const*/ vector<DIRECTION> dir) {
   if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return &NullObject;};
   Data *D_ptr=this; 
   objectid i;
@@ -3419,11 +3419,11 @@ bool Data::Empty(){
   return (data.of_ptr==NULL && data.d_ptr==NULL);
 }
 
-bool Data::hasFunc(){
+bool Data::hasFunc() /*const*/{
     return data.of_ptr!=NULL;
 }
 
-bool Data::hasData(){
+bool Data::hasData() /*const*/{
     return data.d_ptr!=NULL;
 }
 
@@ -3451,8 +3451,9 @@ vector to work on.
 */
 
 template <class T>
-void Data::getFirstFromVector(vector<T> &v, Vector_Selector* vs){
-  for (address i=0;i<data.from.size();i++){
+void Data::getFirstFromVector(vector<T> &v, Vector_Selector* vs) /*const*/{
+  address i;
+  for (i=0;i<data.from.size();i++){
     if (data.from[i]->name!="Parameters") {
       SaveCall(data.from[i]->ref) {
 	data.from[i]->ref->get(v,vs);
@@ -3468,7 +3469,7 @@ void Data::getFirstFromVector(vector<T> &v, Vector_Selector* vs){
 
 //Thin python wrapper for get
 template <class T> 
-void Data::get_1_(vector<T> &v){get(v);};
+void Data::get_1_(vector<T> &v) /*const*/ {get(v);};
 
 
 /*!
@@ -3476,7 +3477,7 @@ void Data::get_1_(vector<T> &v){get(v);};
 */
 
 template <class T> 
-void Data::get(vector<T> &v, Vector_Selector *vs) {
+void Data::get(vector<T> &v, Vector_Selector *vs) /*const*/ {
   objectid checkmod=false;
   DATATYPE type=WhichType<T>();
   DEF_D_PTR(T);

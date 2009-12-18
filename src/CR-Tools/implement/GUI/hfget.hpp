@@ -90,10 +90,10 @@ DEF_DATA_OID_NAME_FUNC_PYDEF_EXT( , FUNC  )
 
     void (Data::*Data_delLink)(Data &) = &Data::delLink;
 
-    void (Data::*Data_get_I)(vector<HInteger>&) = &Data::get_1_;
-    void (Data::*Data_get_N)(vector<HNumber>&) = &Data::get_1_;
-    void (Data::*Data_get_C)(vector<HComplex>&) = &Data::get_1_;
-    void (Data::*Data_get_S)(vector<HString>&) = &Data::get_1_;
+    void (Data::*Data_get_I)(vector<HInteger>&) /*const*/ = &Data::get_1_;
+    void (Data::*Data_get_N)(vector<HNumber>&) /*const*/ = &Data::get_1_;
+    void (Data::*Data_get_C)(vector<HComplex>&) /*const*/ = &Data::get_1_;
+    void (Data::*Data_get_S)(vector<HString>&) /*const*/ = &Data::get_1_;
 
     void (Data::*Data_inspect_I)(vector<HInteger>&) = &Data::inspect;
     void (Data::*Data_inspect_N)(vector<HNumber>&) = &Data::inspect;
@@ -130,15 +130,15 @@ DEF_DATA_OID_NAME_FUNC_PYDEF_EXT( , FUNC  )
     void (Data::*Data_putOne_oid_C)(objectid, HComplex) = &Data::putOne;
     void (Data::*Data_putOne_oid_S)(objectid, HString) = &Data::putOne;
 
-    HInteger (Data::*Data_getOne_I_1)(address) = &Data::getOne<HInteger>;
-    HNumber  (Data::*Data_getOne_N_1)(address) = &Data::getOne<HNumber>;
-    HComplex (Data::*Data_getOne_C_1)(address) = &Data::getOne<HComplex>;
-    HString  (Data::*Data_getOne_S_1)(address) = &Data::getOne<HString>;
+    HInteger (Data::*Data_getOne_I_1)(address)  /*const*/ = &Data::getOne<HInteger>;
+    HNumber  (Data::*Data_getOne_N_1)(address)  /*const*/ = &Data::getOne<HNumber>;
+    HComplex (Data::*Data_getOne_C_1)(address)  /*const*/ = &Data::getOne<HComplex>;
+    HString  (Data::*Data_getOne_S_1)(address)  /*const*/ = &Data::getOne<HString>;
 
-    HInteger(Data::*Data_getOne_I_0)() = &Data::getOne_0_<HInteger>;
-    HNumber (Data::*Data_getOne_N_0)() = &Data::getOne_0_<HNumber>;
-    HComplex(Data::*Data_getOne_C_0)() = &Data::getOne_0_<HComplex>;
-    HString (Data::*Data_getOne_S_0)() = &Data::getOne_0_<HString>;
+    HInteger(Data::*Data_getOne_I_0)() /*const*/ = &Data::getOne_0_<HInteger>;
+    HNumber (Data::*Data_getOne_N_0)() /*const*/ = &Data::getOne_0_<HNumber>;
+    HComplex(Data::*Data_getOne_C_0)() /*const*/ = &Data::getOne_0_<HComplex>;
+    HString (Data::*Data_getOne_S_0)() /*const*/ = &Data::getOne_0_<HString>;
 
 /*
 HInteger(Data::*Data_getParameter_I)(HString, HInteger) = &Data::getParameter;
