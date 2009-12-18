@@ -49,7 +49,8 @@ class DataFuncLibraryClass;
 typedef vector<Data*> DataList;
 //class DataList : vector<Data*> {}
 
-vector<address> DataListtoIDs(const DataList dl);
+//vector<address> DataListtoIDs(/*const*/ DataList dl);
+vector<address> DataListtoIDs(DataList dl);
 
 /*!
   \class Data 
@@ -218,7 +219,7 @@ errors...)
 
 typedef vector<Data*> dataworm;
 
-bool isDataObject(const Data* obj, const bool notquiet=true);
+bool isDataObject(/*const*/ Data* obj, /*const*/ bool notquiet=true);
 
 template <class T, class S>
 void copycast_vec(void *ptr, vector<S> *op);
@@ -237,7 +238,7 @@ struct modification_record {
   
 typedef modification_record visit_marker;
 
-bool ModRecisValid(const modification_record mod);
+bool ModRecisValid(/*const*/ modification_record mod);
 
 class Data {
   
@@ -379,16 +380,16 @@ class Data {
   void join_map_ReferenceDescriptors(map<objectid,reference_descr> &l1, map<objectid,reference_descr> l2);
   map<objectid,reference_descr> listNeighbours(DIRECTION dir,longint maxlevel);
   void getNeighboursList(DIRECTION dir,longint maxlevel,  vector<objectid> &oids, vector<HString> &names, vector<DIRECTION> &dirs,  vector<HString> & flags);
-  DataList FindChain(const DIRECTION dir,const vector<HString> names, const bool include_endpoints=true, const bool monotonic=false);
-  vector<address> FindChainID(const DIRECTION dir,const vector<HString> names, const bool include_endpoints=true, const bool monotonic=false);
+  DataList FindChain(/*const*/ DIRECTION dir,/*const*/ vector<HString> names, /*const*/ bool include_endpoints=true, /*const*/ bool monotonic=false);
+  vector<address> FindChainID(/*const*/ DIRECTION dir,/*const*/ vector<HString> names, /*const*/ bool include_endpoints=true, /*const*/ bool monotonic=false);
 
   vector<HString> listNeighbourNames(DIRECTION dir);
   vector<objectid> listNeighbourIDs(DIRECTION dir,longint maxlevel=MAXNETLEVEL);
   vector<DIRECTION> listNeighbourDirs(DIRECTION dir);
   vector<HString> listNeighbourModFlags(DIRECTION dir);
 
-  DIRECTION getLinkDirection(const Data & neighbour);
-  DIRECTION getLinkDirectionType(const Data & neighbour);
+  DIRECTION getLinkDirection(/*const*/ Data & neighbour);
+  DIRECTION getLinkDirectionType(/*const*/ Data & neighbour);
 
   vector<objectid> getAllIDs();
 
@@ -399,7 +400,7 @@ class Data {
   void setPort(objectid port, objectid refport, DIRECTION dir);
 
   vector<HString> getNeighbourNames(DIRECTION dir);
-  DataList getNeighbours(const DIRECTION dir);
+  DataList getNeighbours(/*const*/ DIRECTION dir);
   int getPort(Data & d, DIRECTION dir);
   reference_descr getLink(objectid port, DIRECTION dir);
 
@@ -423,18 +424,18 @@ class Data {
   HString getProperty(HString name);
   
   
-  DataList find_immediate_relatives(const HString name, const DIRECTION dir);
+  DataList find_immediate_relatives(/*const*/ HString name, /*const*/ DIRECTION dir);
 
   template <class T>
-    DataList find_relatives(const HString name,  const vector<T> &elems, const DIRECTION dir);
+    DataList find_relatives(/*const*/ HString name,  /*const*/ vector<T> &elems, /*const*/ DIRECTION dir);
 
   void dropVisitmarker(visit_marker vm);
   visit_marker getNewVisitmarker(longint v=-1);
   bool checkVisited(visit_marker vm);
 
   
-  DataList Search(const HString s);
-  DataList Find(const HString s, const int rpos=0);
+  DataList Search(/*const*/ HString s);
+  DataList Find(/*const*/ HString s, /*const*/ int rpos=0);
   
   vector<objectid> IDs(HString s);
   objectid ID(HString s);
@@ -462,33 +463,33 @@ class Data {
   */
 
   template <class T>
-    void get(vector<T> &v, Vector_Selector *vs=NULL); 
+    void get(vector<T> &v, Vector_Selector *vs=NULL) /*const*/; 
   
   template <class T>
-    void get_1_(vector<T> &v);
+    void get_1_(vector<T> &v) /*const*/;
   
   template <class T>
-    void getFirstFromVector(vector<T> &v, Vector_Selector* vs);
+    void getFirstFromVector(vector<T> &v, Vector_Selector* vs) /*const*/;
   
   template <class T>
-    T getOne(const address i=0); 
+    T getOne(/*const*/ address i=0) /*const*/; 
   template <class T>
-    T getOne_0_(); 
+    T getOne_0_() /*const*/; 
   
-  Data* find_name(const HString name="", const DIRECTION dir=DIR_FROM);
-  Data* find_names(const vector<HString> names, const vector<DIRECTION> dir);
+  Data* find_name(/*const*/ HString name="", /*const*/ DIRECTION dir=DIR_FROM);
+  Data* find_names(/*const*/ vector<HString> names, /*const*/ vector<DIRECTION> dir);
   
-  DATATYPE getType();
-  void setType(const DATATYPE typ);
+  DATATYPE getType() /*const*/;
+  void setType(/*const*/ DATATYPE typ);
   address len();
   longint incVersion();
   longint getVersion();
   void setVersion(longint ver);
   longint getNetLevel();
   Data& setNetLevel(longint lev);
-  HString getName (const bool longname=false);
-  HString getSearchName (const bool longname=false);
-  objectid getOid ();
+  HString getName (/*const*/ bool longname=false) /*const*/;
+  HString getSearchName (/*const*/ bool longname=false);
+  objectid getOid () /*const*/;
   HString getFuncName();
   address getMod();
   longint getNumberOfLinks(DIRECTION dir=DIR_BOTH);
@@ -532,7 +533,7 @@ class Data {
   Data& doSilent_Ref();
 
   //  template <class T>
-  //bool Data::doVerbose(const vector<T> &v,const bool checkmod);	
+  //bool Data::doVerbose(/*const*/ vector<T> &v,/*const*/ bool checkmod);	
   bool doVerbose();
     
   longint setVerbose(longint verbose);
@@ -543,14 +544,14 @@ class Data {
   bool Verbose();
   longint AllVerbose(longint verbose);
   bool Empty();
-  bool hasFunc();
-  bool hasData();
+  bool hasFunc() /*const*/;
+  bool hasData() /*const*/;
   Data& touch_0();
-  Data& touch(const bool silent=false);
+  Data& touch(/*const*/ bool silent=false);
   Data& wakeUp();
   bool checkModification();
   bool checkModification(objectid port, modification_record mod);
-  void setModification(const MOD_ACTION action=MOD_UPDATED);
+  void setModification(/*const*/ MOD_ACTION action=MOD_UPDATED);
   void setModification(modification_record newmod);
   void setModification(objectid port, modification_record mod);
   void clearModification();
@@ -598,9 +599,9 @@ class Data {
   bool callSimplePyObjectMethod(PyObject* pyobj, HString method);
 
   void delFunction();
-  Data& setFunction (const HString name,
-		    const HString library="",
-		    const DATATYPE typ=UNDEF);
+  Data& setFunction (/*const*/ HString name,
+		    /*const*/ HString library="",
+		    /*const*/ DATATYPE typ=UNDEF);
   
   vector<HString> listFunctions (HString lib="", bool doprint=true);
 
@@ -632,15 +633,15 @@ class Data {
 		   DIRECTION dir);
   
 
-  Data * resetLink(Data *d, const DIRECTION dir_type=DIR_NONE, const DIRECTION dir=DIR_FROM);
-  Data& resetLink_Ref_3(Data &d, const DIRECTION dir_type=DIR_NONE, const DIRECTION dir=DIR_FROM);
-  Data& resetLink_Ref_2(Data &d, const DIRECTION dir_type=DIR_NONE);
+  Data * resetLink(Data *d, /*const*/ DIRECTION dir_type=DIR_NONE, /*const*/ DIRECTION dir=DIR_FROM);
+  Data& resetLink_Ref_3(Data &d, /*const*/ DIRECTION dir_type=DIR_NONE, /*const*/ DIRECTION dir=DIR_FROM);
+  Data& resetLink_Ref_2(Data &d, /*const*/ DIRECTION dir_type=DIR_NONE);
   Data& resetLink_Ref_1(Data &d);
 
 
-  objectid setLink(Data* d, const DIRECTION dir_type=DIR_NONE, const DIRECTION dir=DIR_FROM , const objectid otherport=-1, const objectid thisport=-1);
-  Data& setLink_Ref_3(Data &d, const DIRECTION dir_type=DIR_NONE, const DIRECTION dir=DIR_FROM);
-  Data& setLink_Ref_2(Data &d, const DIRECTION dir_type=DIR_NONE);
+  objectid setLink(Data* d, /*const*/ DIRECTION dir_type=DIR_NONE, /*const*/ DIRECTION dir=DIR_FROM , /*const*/ objectid otherport=-1, /*const*/ objectid thisport=-1);
+  Data& setLink_Ref_3(Data &d, /*const*/ DIRECTION dir_type=DIR_NONE, /*const*/ DIRECTION dir=DIR_FROM);
+  Data& setLink_Ref_2(Data &d, /*const*/ DIRECTION dir_type=DIR_NONE);
   Data& setLink_Ref_1(Data &d);
   
   
