@@ -814,7 +814,8 @@ bool both_pol = false;		      // Should both polarizations be processed?
 string eventfilelistname("");			         // Name of the ASCII event list
 string kascadeRootFile("");			         // Name of root file with Kascade reconstruction and event names
 string eventname("");
-double azimuth=0, elevation=0, radiusOfCurvature=0, core_x=0, core_y=0;   // basic input parameters (e.g. from Kascade)
+double azimuth=0, elevation=0, radiusOfCurvature=0, core_x=0, core_y=0;   // basic input parameters (e.g. from Kascade), in m and degree
+double azimuthError = 0, zenithError = 0, coreError = 0; // errors (in m and radians!)
 
 // Variables of KASCADE root file
 float_t Az = 0, Ze = 0, Xc = 0, Yc = 0;			// KASCADE direction and core
@@ -1162,21 +1163,28 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
         if ( (sqrt(Xc*Xc+Yc*Yc)>90) && ((Xcg<-50) && (Xcg>-420) && (Ycg<-30) && (Ycg>-550)) )
           grande = true;
       }
+
       // set variables (Grande or KASCADE reconstruction)
       eventname = string(Eventname);
       if (grande) {
         cout << "using the Grande reconstruction as input..." << endl;
         azimuth = static_cast<double>(Azg/Pi()*180.);
+        azimuthError = static_cast<double>(err_Azg);
         elevation = static_cast<double>(90.-Zeg/Pi()*180.);
+        zenithError = static_cast<double>(err_Zeg);
         core_x = static_cast<double>(Xcg);
         core_y = static_cast<double>(Ycg);
+        coreError = static_cast<double>(err_coreg);
         reconstruction = 'G';
       } else {
         cout << "using the KASCADE reconstruction as input..." << endl;
         azimuth = static_cast<double>(Az/Pi()*180.);
+        azimuthError = static_cast<double>(err_Az);
         elevation = static_cast<double>(90.-Ze/Pi()*180.);
+        zenithError = static_cast<double>(err_Ze);
         core_x = static_cast<double>(Xc);
         core_y = static_cast<double>(Yc);
+        coreError = static_cast<double>(err_core);
         reconstruction = 'A';
       }
       return true;
@@ -1733,6 +1741,9 @@ int main (int argc, char *argv[])
           eventPipeline.setUpsamplingExponent(config["upsamplingExponent"]->uiValue());
           eventPipeline.setLateralSNRcut(config["lateralSNRcut"]->dValue());
           eventPipeline.setLateralTimeCut(config["lateralTimeCut"]->dValue());
+          eventPipeline.setCoreError(coreError);
+          eventPipeline.setAzimuthError(azimuthError);
+          eventPipeline.setZenithError(zenithError);
 
           // call the pipeline with an extra delay = 0.
           results = eventPipeline.RunPipeline (config["path"]->sValue()+eventname,
@@ -1852,6 +1863,9 @@ int main (int argc, char *argv[])
           eventPipeline.setUpsamplingExponent(config["upsamplingExponent"]->uiValue());
           eventPipeline.setLateralSNRcut(config["lateralSNRcut"]->dValue());
           eventPipeline.setLateralTimeCut(config["lateralTimeCut"]->dValue());
+          eventPipeline.setCoreError(coreError);
+          eventPipeline.setAzimuthError(azimuthError);
+          eventPipeline.setZenithError(zenithError);
 
           // call the pipeline with an extra delay = 0.
           results = eventPipeline.RunPipeline (config["path"]->sValue()+eventname,

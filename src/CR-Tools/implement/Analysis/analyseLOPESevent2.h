@@ -99,6 +99,13 @@ namespace CR { // Namespace CR -- begin
     double lateralSNRcut;
     //! Time window cut for lateral distribution (pulse time must be close to cc-beam center)
     double lateralTimeCut;
+    
+    //! Core uncertainty in m
+    double coreError;
+    //! Zenith uncertainty in radians
+    double zenithError;
+    //! Azimuth uncertainty in radians
+    double azimuthError;
 
     //! Input antenna selection (manually flagged antennas)
     Vector<Int> InputFlaggedAntIDs;
@@ -300,7 +307,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Set the SNR cut for the lateral distribution
 
-      \return  SNRcut -- SNR cut
+      \param  SNRcut -- SNR cut
     */
     inline void setLateralSNRcut (double const &SNRcut) {
       lateralSNRcut = SNRcut;
@@ -318,12 +325,66 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Set the timing cut for the lateral distribution
 
-      \return  timeCut -- timing cut
+      \param  timeCut -- timing cut
     */
     inline void setLateralTimeCut (double const &timeCut) {
       lateralTimeCut = timeCut;
     }
 
+    /*!
+      \brief Get the core uncertainty
+      
+      \return coreError -- core uncertainty
+    */
+    inline double getCoreError () {
+       return coreError;
+    }
+
+    /*!
+      \brief Set the core uncertainty
+      
+      \param  coreError -- core uncertainty
+    */
+    inline void setCoreError (double const &error) {
+      coreError = error;
+    }
+
+    /*!
+      \brief Get the zenith uncertainty (rad)
+      
+      \return zenithError -- zenith uncertainty (rad)
+    */
+    inline double getZenithError () {
+       return zenithError;
+    }
+
+    /*!
+      \brief Set the zenith uncertainty (rad)
+      
+      \param  zenithError -- zenith uncertainty (rad)
+    */
+    inline void setZenithError (double const &error) {
+      zenithError = error;
+    }
+
+
+    /*!
+      \brief Get the azimuth uncertainty (rad)
+      
+      \return azimuthError -- azimuth uncertainty (rad)
+    */
+    inline double getAzimuthError () {
+       return azimuthError;
+    }
+
+    /*!
+      \brief Set the azimuth uncertainty (rad)
+      
+      \param  azimuthError -- azimuth uncertainty (rad)
+    */
+    inline void setAzimuthError (double const &error) {
+      azimuthError = error;
+    }
 
 
     /*!
@@ -331,7 +392,7 @@ namespace CR { // Namespace CR -- begin
 
       \param ObsRecord - observatories record that matches observatory names to the 
                           path to the corresponding CalTable
-			  
+
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
     Bool initPipeline(Record ObsRecord);
@@ -365,47 +426,47 @@ namespace CR { // Namespace CR -- begin
       \param doAutoFlagging      - flags antennas due to bad signal (does not affect flagging by the phase 
       \param UpSamplingRate      - Samplerate for upsampling. If smaller than the original
                                    samplerate (80MHz for LOPES) then no upsampling is done.
-			                (Check the docs of <tt>UpSampledDR<\tt> for more info.)
+                                   (Check the docs of <tt>UpSampledDR<\tt> for more info.)
       \param Polarization        - Polarization type to select only part of the antennas 
                                    ("ANY": ignore antenna polarization)
       \param SinglePlots         - makes a plot for each antenna
       \param PlotRawData         - Plots the raw data FX
       \param CalculateMaxima     - Finds the maximum and the minimum of the trace in the plot range
       \param listCalcMaxima      - output version of CalculateMax
-      \param printShowerCoordinates -	 print the x,y and total distance between antenna and shower core in shower coordinates
-      \param ignoreDistance      -	ignores the given distance but tries to find it automatically 
+      \param printShowerCoordinates - print the x,y and total distance between antenna and shower core in shower coordinates
+      \param ignoreDistance      - ignores the given distance but tries to find it automatically 
 
       \return Record with the results.
     */
     Record RunPipeline (const string& evname,
-			Double Az,
-			Double El,
-			Double distance,
-			Double XC, 
-			Double YC,
-			Bool RotatePos,
-			string PlotPrefix=String(),
-			Bool generatePlots=False,
-			Bool generateSpectra=False,
-			Vector<Int> FlaggedAntIDs=Vector<Int>(),
-			Bool verbose=False,
-			Bool simplexFit=False,
-			Double ExtraDelay=0.,
-			int doTVcal=-1,
-			bool doGainCal=true,
-			bool doDispersionCal=true,
-			bool doDelayCal=true,
-			bool doRFImitigation=true,
-			bool doFlagNotActiveAnts=true,
-			bool doAutoFlagging=true,
-			Double UpSamplingRate=0.,
-			String Polarization="ANY",
-			bool SinglePlots=false,
-			bool PlotRawData=false,
-			bool CalculateMaxima=false,
-			bool listCalcMaxima=false,
-			bool printShowerCoordinates=false,
-			bool ignoreDistance=false);
+                        Double Az,
+                        Double El,
+                        Double distance,
+                        Double XC, 
+                        Double YC,
+                        Bool RotatePos,
+                        string PlotPrefix=String(),
+                        Bool generatePlots=False,
+                        Bool generateSpectra=False,
+                        Vector<Int> FlaggedAntIDs=Vector<Int>(),
+                        Bool verbose=False,
+                        Bool simplexFit=False,
+                        Double ExtraDelay=0.,
+                        int doTVcal=-1,
+                        bool doGainCal=true,
+                        bool doDispersionCal=true,
+                        bool doDelayCal=true,
+                        bool doRFImitigation=true,
+                        bool doFlagNotActiveAnts=true,
+                        bool doAutoFlagging=true,
+                        Double UpSamplingRate=0.,
+                        String Polarization="ANY",
+                        bool SinglePlots=false,
+                        bool PlotRawData=false,
+                        bool CalculateMaxima=false,
+                        bool listCalcMaxima=false,
+                        bool printShowerCoordinates=false,
+                        bool ignoreDistance=false);
 
 
     /*!
@@ -428,18 +489,18 @@ namespace CR { // Namespace CR -- begin
       \return Record with the results.
     */
     Record CalibrationPipeline (const string& evname,
-				string PlotPrefix=String(),
-				Bool generatePlots=False,
-				Bool generateSpectra=False,
-				Vector<Int> FlaggedAntIDs=Vector<Int>(),
-				Bool verbose=False,
-				bool doGainCal=false,
-				bool doDispersionCal=true,
-				bool doDelayCal=false,
-				bool doRFImitigation=false,
-				bool SinglePlots=false,
-				bool PlotRawData=false,
-				bool CalculateMaxima=false);
+                                string PlotPrefix=String(),
+                                Bool generatePlots=False,
+                                Bool generateSpectra=False,
+                                Vector<Int> FlaggedAntIDs=Vector<Int>(),
+                                Bool verbose=False,
+                                bool doGainCal=false,
+                                bool doDispersionCal=true,
+                                bool doDelayCal=false,
+                                bool doRFImitigation=false,
+                                bool SinglePlots=false,
+                                bool PlotRawData=false,
+                                bool CalculateMaxima=false);
 
     /*!
       \brief Prints the distances of the antennas to the core (in shower coordinates)

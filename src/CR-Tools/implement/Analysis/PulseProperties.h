@@ -108,10 +108,20 @@
     double fwhm;
     //! antenna position in shower coordinates x
     double distX;
-    //! antenna position in shower coordinates x
+    //! error of antenna position in shower coordinates x
+    double distXerr;
+    //! antenna position in shower coordinates y
     double distY;
-    //! distance of antenna position from shower axis
+    //! error of antenna position in shower coordinates y
+    double distYerr;
+    //! antenna position in shower coordinates z
+    double distZ;
+    //! error of antenna position in shower coordinates z
+    double distZerr;
+    //! distance of antenna position from shower axis sqrt(x^2+y^2)
     double dist;
+    //! error of distance of antenna position from shower axis (gaussian error propagation)
+    double disterr;
     //! mean noise of a certain part of the trace (for lateral distribution analysis)
     double noise;
     //! calculated pulse height for exponential lateral distribution

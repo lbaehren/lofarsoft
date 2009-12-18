@@ -51,7 +51,10 @@ namespace CR { // Namespace CR -- begin
       rawPulses( map<int,PulseProperties>() ),
       calibPulses( map<int,PulseProperties>() ),
       lateralSNRcut(1.0),
-      lateralTimeCut(25e-9)
+      lateralTimeCut(25e-9),
+      coreError(0.),
+      zenithError(0.),
+      azimuthError(0.)
   {;}
 
   // ============================================================================
@@ -536,14 +539,53 @@ namespace CR { // Namespace CR -- begin
 
       // get antenna positions and distances in shower coordinates
       Vector <double> distances = erg.asArrayDouble("distances");
-      Matrix <double> antPos = toShower(beamPipe_p->GetAntPositions(), erg.asDouble("Azimuth"), erg.asDouble("Elevation"));
+      // get antenna positions (shifted, so that core position is at 0)
+      Matrix <double> antPos = beamPipe_p->GetAntPositions(beamformDR_p);
+      // get antenna positions in shower coordinates
+      Matrix <double> antPosS = toShower(beamPipe_p->GetAntPositions(beamformDR_p), erg.asDouble("Azimuth"), erg.asDouble("Elevation"));
+
+      // for error calculation
+      // errors of GPS measurement (< 1-2 cm) is neglected
+      // possible shift between KASCADE and LOPES coordinate system ~20 cm is also negelected
+      // calcualte squared errors for x, y, and z in shower coordinates
+      // formulas: error propagation of transformation to shower coordinates
+      double sinEl = sin(erg.asDouble("Elevation")*PI/180.);
+      double cosEl = cos(erg.asDouble("Elevation")*PI/180.);
+      double sinAz = sin(erg.asDouble("Azimuth")*PI/180.);
+      double cosAz = cos(erg.asDouble("Azimuth")*PI/180.);
 
       // loop through antenna IDs and write distances in pulseProperties if element exists
       for (unsigned int i=0 ; i < antennaIDs.size(); i++)
         if (calibPulses.find(antennaIDs(i)) != calibPulses.end()) {
-          calibPulses[antennaIDs(i)].distX = antPos.row(i)(0);
-          calibPulses[antennaIDs(i)].distY = antPos.row(i)(1);
-          calibPulses[antennaIDs(i)].dist  = distances(i);
+          // substitution for better readablitiy
+          double x = antPos.row(i)(0);
+          double y = antPos.row(i)(1);
+          // double z = antPos.row(i)(2); // not used
+          double xS = antPosS.row(i)(0);
+          double yS = antPosS.row(i)(1);
+          double zS = antPosS.row(i)(2);
+          calibPulses[antennaIDs(i)].distX    = xS;
+          calibPulses[antennaIDs(i)].distY    = yS;
+          calibPulses[antennaIDs(i)].distZ    = zS;
+          calibPulses[antennaIDs(i)].dist     = distances(i);  // already calculated: dist = sqrt(xS^2+yS^2), no zS!
+          // calcualte errors
+          calibPulses[antennaIDs(i)].distXerr = sqrt(  pow(coreError, 2)
+                                                     + pow(( x*cosAz + y*sinAz)*azimuthError, 2)); 
+          calibPulses[antennaIDs(i)].distYerr = sqrt(  pow(coreError*sinEl, 2)
+                                                     + pow((-x*sinAz + y*cosAz)*azimuthError*sinEl, 2)
+                                                     + pow(( x*cosAz + y*sinAz)*zenithError *cosEl, 2)); 
+          calibPulses[antennaIDs(i)].distZerr = sqrt(  pow(coreError*cosEl, 2)
+                                                     + pow((-x*sinAz + y*cosAz)*azimuthError*cosEl, 2)
+                                                     + pow(( x*cosAz + y*sinAz)*zenithError *sinEl, 2)); 
+          calibPulses[antennaIDs(i)].disterr  = sqrt(  pow(xS*calibPulses[antennaIDs(i)].distXerr,2) 
+                                                     + pow(yS*calibPulses[antennaIDs(i)].distYerr,2))
+                                                / calibPulses[antennaIDs(i)].dist;
+          // for debug output                                                
+          /* cout << calibPulses[antennaIDs(i)].distX << " +/-" << calibPulses[antennaIDs(i)].distXerr << "\t "
+               << calibPulses[antennaIDs(i)].distY << " +/-" << calibPulses[antennaIDs(i)].distYerr << "\t "
+               << calibPulses[antennaIDs(i)].distZ << " +/-" << calibPulses[antennaIDs(i)].distZerr << "\t "
+               << calibPulses[antennaIDs(i)].dist  << " = "
+               << sqrt(xS*xS+yS*yS) << " +/-" << calibPulses[antennaIDs(i)].disterr  << "\t " << endl; */                                                   
         }
 
     } catch (AipsError x) {
@@ -626,18 +668,21 @@ namespace CR { // Namespace CR -- begin
 
         // execute latex without creating output at the term
         string shellCommand = "latex " + latexfilename + " > /dev/null";  // don't show the output to stdout
-        system(shellCommand.c_str());
+        if (system(shellCommand.c_str()) != 0)
+          cout << "\nWARNING: Possible error while executing shell command:\n" << shellCommand << endl;
 
         // execute dvips to create postscript file
         shellCommand = "dvips " + filename + " 2> /dev/null"; // don't show the output to stderr
-        system(shellCommand.c_str());
+        if (system(shellCommand.c_str()) != 0)
+          cout << "\nWARNING: Possible error while executing shell command:\n" << shellCommand << endl;
 
         // delete temporary files
         shellCommand = "rm -f " + filename + ".aux "
                                 + filename + ".dvi "
                                 + filename + ".tex "
                                 + filename + ".log ";
-        system(shellCommand.c_str());
+        if (system(shellCommand.c_str()) != 0)
+          cout << "\nWARNING: Possible error while executing shell command:\n" << shellCommand << endl;
 
 
         cout << "Created postscript summary: " << filename << ".ps" << endl;
@@ -768,7 +813,8 @@ namespace CR { // Namespace CR -- begin
       unsigned int ant = 0;        // counting antennas with pulse information
       for (unsigned int i=0 ; i < antennaIDs.size(); ++i)
         if (calibPulses.find(antennaIDs(i)) != calibPulses.end()) {
-           distance[ant] = distances(i);
+           distance[ant] = calibPulses[antennaIDs(i)].dist;
+           distanceEr[ant] = calibPulses[antennaIDs(i)].disterr;
            fieldStr[ant] = calibPulses[antennaIDs(i)].envelopeMaximum;
            noiseBgr[ant] = calibPulses[antennaIDs(i)].noise;
            timePos[ant] = calibPulses[antennaIDs(i)].envelopeTime;
@@ -798,7 +844,7 @@ namespace CR { // Namespace CR -- begin
       for (unsigned int i = 0; i < Nant; ++i) {
         /* error of field strength = 19% + noise */
         fieldStrEr[i]=fieldStr[i]*0.19+noiseBgr[i];
-        distanceEr[i]=15;                // should probably be calculated instead
+        //distanceEr[i]=15;                // should probably be calculated instead
 
         /* get largest distance and min and max field strength */
         if ( distance[i] > maxdist)
@@ -1133,10 +1179,14 @@ namespace CR { // Namespace CR -- begin
            // Pulse time relative to shower plane and relative to CC time
            // = geom. delay from beam forming (as it is substracted during analysis) + 
            // time of pulse in trace (- CC beam time, to get an average of 0).
-           timeVal      [ant] = antPos.row(i)(2) / lightspeed * 1e9;	// defined in Math/Constants.h
+           timeVal      [ant] = calibPulses[antennaIDs(i)].distZ / lightspeed * 1e9,    // defined in Math/Constants.h
            timeVal      [ant] += calibPulses[antennaIDs(i)].geomDelay;
            timeVal      [ant] += calibPulses[antennaIDs(i)].envelopeTime - ccCenter*1e9;
-           distance     [ant] = distances(i);
+           // pulse time error: Error from shower plane (geometry) + time calibration (2 ns)
+           timeValEr    [ant] = sqrt(  pow(calibPulses[antennaIDs(i)].distZerr / lightspeed * 1e9,2)
+                                     + pow(2.,2));
+           distance     [ant] = calibPulses[antennaIDs(i)].dist;
+           distanceEr   [ant] = calibPulses[antennaIDs(i)].disterr;
            fieldStr     [ant] = calibPulses[antennaIDs(i)].envelopeMaximum;
            noiseBgr     [ant] = calibPulses[antennaIDs(i)].noise;
            antennaNumber[ant] = i+1;
@@ -1166,9 +1216,6 @@ namespace CR { // Namespace CR -- begin
       unsigned int clean = 0;
       cout << "\nApplying quality cuts..." << endl;
       for (unsigned int i = 0; i < Nant; ++i) {
-        timeValEr [i] = 10;            // TODO: this should be based on some physical knowledge ...
-        distanceEr[i] = 10;            // TODO: this should be based on some physical knowledge ...
-
         /* Cuts taken from fitLateralDitribution */
         // pulse time correct? (default: pulse at cc-beam center +/- 25ns)
         /*if (abs(timeVal[i]*1e-9 - ccCenter) > lateralTimeCut) {
@@ -1334,9 +1381,10 @@ namespace CR { // Namespace CR -- begin
         erg.define("FTD_sigR_curv",fitFunc->GetParError(2));
         erg.define("FTD_chi2NDF",fitFunc->GetChisquare()/double(fitFunc->GetNDF()));
         cout << "Results of fit"
-             << "offset = " << fitFunc->GetParameter(0) << "\t +/- " << fitFunc->GetParError(0) << "\t ns \n"
-             << "R_curv = " << fitFunc->GetParameter(2) << "\t +/- " << fitFunc->GetParError(2) << "\t m \n"
+             << "offset = " << fitFunc->GetParameter(0) << "\t +/- " << fitFunc->GetParError(0) << "\t ns\n"
+             << "R_curv = " << fitFunc->GetParameter(2) << "\t +/- " << fitFunc->GetParError(2) << "\t m\n"
              << "Chi^2  = " << fitFunc->GetChisquare() << "\t NDF " << fitFunc->GetNDF() << "\n"
+             << "Curvature radius of CC-beam (to compare) = " << erg.asDouble("Distance") << " m\n"
              << endl;
 
         // write plot to file
