@@ -315,7 +315,7 @@ void ObjectFunctionClass::setParameterObjectPointer(HString name, Data* ptr){ pa
 */
 
 template <class T>
-T ObjectFunctionClass::getParameter(const HString name, const T defval){
+T ObjectFunctionClass::getParameter(/*const*/ HString name, /*const*/ T defval){
   Data * obj=getParameterObject(name);
   if (obj->Empty()) {
     obj->noMod()->putOne(defval);
@@ -330,7 +330,7 @@ T ObjectFunctionClass::getParameter(const HString name, const T defval){
 */
 
 template <class T>
-void ObjectFunctionClass::getParameter(const HString name, vector<T> &vec){
+void ObjectFunctionClass::getParameter(/*const*/ HString name, vector<T> &vec){
   Data * obj=getParameterObject(name);
   if (obj->Empty()) {
     obj->noMod()->put(vec);
@@ -348,7 +348,7 @@ connected to an object called "Parameter" that belongs to the current
 object).
  */
 template <class T>
-T ObjectFunctionClass::putParameter(const HString name, const T val){
+T ObjectFunctionClass::putParameter(/*const*/ HString name, /*const*/ T val){
   Data * obj=getParameterObject(name);
   obj->noMod()->putOne(val);
 }
@@ -362,7 +362,7 @@ connected to an object called "Parameter" that belongs to the current
 object).
  */
 template <class T>
-T ObjectFunctionClass::putParameter(const HString name, vector<T>& vec){
+T ObjectFunctionClass::putParameter(/*const*/ HString name, vector<T>& vec){
   Data * obj=getParameterObject(name);
   obj->noMod()->put(vec);
 }
@@ -558,7 +558,7 @@ DATATYPE DataFuncDescriptor::getType(){return fd.deftype;};
 
 //Return the name of the function being described 
 //(either with (fullname=false) or without the library name attached)
-HString DataFuncDescriptor::getName(bool fullname){
+HString DataFuncDescriptor::getName(bool fullname) /*const*/{
   HString s;
   if (fullname){
     s= fd.library + ":" + fd.name;
@@ -775,22 +775,22 @@ preprocessor step.
 #endif
 
 #define HF_MATH_FUNC( FUNC ) \
-template<>        inline HString FUNC<HString>(const HString v){return mycast<HString>(FUNC(mycast<HComplex>(v)));};\
-template<>        inline HPointer FUNC<HPointer>(const HPointer v){return v;};\
-template<class T> inline T FUNC(const T v)
+template<>        inline HString FUNC<HString>(/*const*/ HString v){return mycast<HString>(FUNC(mycast<HComplex>(v)));};\
+template<>        inline HPointer FUNC<HPointer>(/*const*/ HPointer v){return v;};\
+template<class T> inline T FUNC(/*const*/ T v)
 
 
 #define HF_MATH_FUNC2( FUNC )						\
-  inline HString FUNC(const HString v1, const HString v2){return mycast<HString>(FUNC(mycast<HComplex>(v1),mycast<HComplex>(v2)));}; \
-  template<class S>        inline HString FUNC(const HString v1, const S v2){return mycast<HString>(FUNC(mycast<S>(v1),v2));}; \
-  template<class S>        inline HString FUNC(const S v1, const HString v2){return mycast<HString>(FUNC(v1,mycast<S>(v2)));}; \
-  inline HPointer FUNC(const HPointer v1, const HPointer v2){return mycast<HPointer>(FUNC(mycast<HInteger>(v1),mycast<HInteger>(v2)));}; \
-  template<class S>        inline HPointer FUNC(const HPointer v1, const S v2){return mycast<HPointer>(FUNC(mycast<S>(v1),v2));}; \
-  template<class S>        inline HPointer FUNC(const S v1, const HPointer v2){return mycast<HPointer>(FUNC(v1,mycast<S>(v2)));}; \
-  template<class T, class S> inline T FUNC(const T v1,const S v2)	
+  inline HString FUNC(/*const*/ HString v1, /*const*/ HString v2){return mycast<HString>(FUNC(mycast<HComplex>(v1),mycast<HComplex>(v2)));}; \
+  template<class S>        inline HString FUNC(/*const*/ HString v1, /*const*/ S v2){return mycast<HString>(FUNC(mycast<S>(v1),v2));}; \
+  template<class S>        inline HString FUNC(/*const*/ S v1, /*const*/ HString v2){return mycast<HString>(FUNC(v1,mycast<S>(v2)));}; \
+  inline HPointer FUNC(/*const*/ HPointer v1, /*const*/ HPointer v2){return mycast<HPointer>(FUNC(mycast<HInteger>(v1),mycast<HInteger>(v2)));}; \
+  template<class S>        inline HPointer FUNC(/*const*/ HPointer v1, /*const*/ S v2){return mycast<HPointer>(FUNC(mycast<S>(v1),v2));}; \
+  template<class S>        inline HPointer FUNC(/*const*/ S v1, /*const*/ HPointer v2){return mycast<HPointer>(FUNC(v1,mycast<S>(v2)));}; \
+  template<class T, class S> inline T FUNC(/*const*/ T v1,/*const*/ S v2)	
 
 //---square
-//template<class T> inline T hf_square(const T v)
+//template<class T> inline T hf_square(/*const*/ T v)
 
 //$ITERATE MFUNC abs,acos,asin,atan,ceil,cos,cosh,exp,floor,log,log10,sin,sinh,sqrt,tan,tanh
 HF_MATH_FUNC(hf_$MFUNC){return $MFUNC(v);};
@@ -806,9 +806,9 @@ HF_MATH_FUNC2(hf_add){return v1+v2;};
 HF_MATH_FUNC2(hf_div){return v1/v2;}; 
 HF_MATH_FUNC2(hf_pow){return pow(v1,v2);}; 
 
-template<class T> inline T hf_phase(const T v){return mycast<T>(0.0);};
-template<> inline HComplex hf_phase<HComplex>(const HComplex v){return arg(v);}
-template<class T> inline T phase(const T v) {return arg(v);}
+template<class T> inline T hf_phase(/*const*/ T v){return mycast<T>(0.0);};
+template<> inline HComplex hf_phase<HComplex>(/*const*/ HComplex v){return arg(v);}
+template<class T> inline T phase(/*const*/ T v) {return arg(v);}
 
 //--End Math functions-----------------------------------------------------
 

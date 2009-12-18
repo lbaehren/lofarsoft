@@ -141,7 +141,7 @@ class DataFuncDescriptor {
   void setConstructor(ConstructorFunctionPointer);
   ConstructorFunctionPointer getConstructor();
 
-  HString getName(bool fullname=false);
+  HString getName(bool fullname=false) /*const*/;
   DATATYPE getType();
   bool getBuffered();
   /*!  If a function is buffered, a vector will be created by default
@@ -246,13 +246,13 @@ public:
   void setParameterObjectPointer(HString, Data*);
  
   template <class T>
-    void getParameter(const HString name, vector<T> &vec);
+    void getParameter(/*const*/ HString name, vector<T> &vec);
   template <class T>
-    T putParameter(const HString name, vector<T> & vec);
+    T putParameter(/*const*/ HString name, vector<T> & vec);
   template <class T>
-    T getParameter(const HString name, const T defval);
+    T getParameter(/*const*/ HString name, /*const*/ T defval);
   template <class T>
-    T putParameter(const HString name, const T val);
+    T putParameter(/*const*/ HString name, /*const*/ T val);
   template <class T>  
     Data* putResult(HString name,vector<T> vec);
   template <class T>  
@@ -310,23 +310,23 @@ preprocessor step.
 #endif
 
 #define HF_MATH_FUNC( FUNC ) \
-  template<class T> inline T FUNC(const T v);				\
-  template<>        inline HString FUNC<HString>(const HString v);	\
-  template<>        inline HPointer FUNC<HPointer>(const HPointer v);	
+  template<class T> inline T FUNC(/*const*/ T v);				\
+  template<>        inline HString FUNC<HString>(/*const*/ HString v);	\
+  template<>        inline HPointer FUNC<HPointer>(/*const*/ HPointer v);	
 
-template<class T> inline T hf_phase(const T v);
-template<>  inline HComplex hf_phase<HComplex>(const HComplex v);
-template<class T> inline T phase(const T v);
+template<class T> inline T hf_phase(/*const*/ T v);
+template<>  inline HComplex hf_phase<HComplex>(/*const*/ HComplex v);
+template<class T> inline T phase(/*const*/ T v);
 
 
 #define HF_MATH_FUNC2( FUNC ) \
-  template<class T, class S> inline T FUNC(const T v1, const S v2);\
-  inline HString FUNC(const HString v1, const HString v2); \
-  template<class S>        inline HString FUNC(const HString v1, const S v2); \
-  template<class S>        inline HString FUNC(const S v1, const HString v2); \
-  inline HPointer FUNC(const HPointer v1, const HPointer v2); \
-  template<class S>        inline HPointer FUNC(const HPointer v1, const S v2); \
-  template<class S>        inline HPointer FUNC(const S v1, const HPointer v2); 
+  template<class T, class S> inline T FUNC(/*const*/ T v1, /*const*/ S v2);\
+  inline HString FUNC(/*const*/ HString v1, /*const*/ HString v2); \
+  template<class S>        inline HString FUNC(/*const*/ HString v1, /*const*/ S v2); \
+  template<class S>        inline HString FUNC(/*const*/ S v1, /*const*/ HString v2); \
+  inline HPointer FUNC(/*const*/ HPointer v1, /*const*/ HPointer v2); \
+  template<class S>        inline HPointer FUNC(/*const*/ HPointer v1, /*const*/ S v2); \
+  template<class S>        inline HPointer FUNC(/*const*/ S v1, /*const*/ HPointer v2); 
 
 
 

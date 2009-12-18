@@ -32,6 +32,51 @@
 #define STLVectorIteratorC typename vector<HComplex>::iterator
 #define IterValueType typename Iter::value_type
 
+//________________________________________________________________________
+//                                                     Function Definition
+
+template <class Iter> 
+void hNegate(const Iter data_start,
+	     const Iter data_end);
+
+template <class Iter> 
+void hFill(const Iter data_start,
+	   const Iter data_end, 
+	   const IterValueType fill_value);
+
+template <class Iter> 
+IterValueType hSum(const Iter data_start,
+		   const Iter data_end);
+
+template <class Iter> 
+IterValueType hMean (const Iter data_start,
+		     const Iter data_end);
+
+template <class Iter> 
+IterValueType hMedian(const Iter data_start, 
+		      const Iter data_end);
+
+template <class Iter> 
+IterValueType hStdDev(const Iter data_start,
+		      const Iter data_end, 
+		      const IterValueType mean);
+
+template <class Iter> 
+IterValueType hStdDev(const Iter data_start,
+		      const Iter data_end);
+
+template <class Iter> 
+void hDownsample (const Iter idata_start,
+		  const Iter idata_end,
+		  const Iter odata_start,
+		  const Iter odata_end);
+
+
+
+
+//________________________________________________________________________
+//                                                 Preprocessor Definition
+
 #undef HF_PP_FILETYPE
 #define HF_PP_FILETYPE() (hFILE)  // Tell the preprocessor (for generating wrappers) that this is a c++ header file (brackets are crucial)
 #include "hfwrappers-hfanalysis.cc.h"  // include wrapper definitions generated automatically from source
@@ -138,6 +183,7 @@ void hRunningAverageVec(vector<HPointer> &vec_in,vector<HPointer> &vec_out, addr
 extern void (*hRunningAverageVec_N)(vector<HNumber > &vec_in,vector<HNumber > &vec_out, address len, hWEIGHTS wtype);
 extern void (*hRunningAverageVec_I)(vector<HInteger> &vec_in,vector<HInteger> &vec_out, address len, hWEIGHTS wtype);
 extern void (*hRunningAverageVec_C)(vector<HComplex> &vec_in,vector<HComplex> &vec_out, address len, hWEIGHTS wtype);
+
 
 
 #endif

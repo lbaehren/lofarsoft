@@ -1022,6 +1022,16 @@ void hDownsample (const Iter idata_start,
 
 void dummy_instantitate_templates(){
   casa::Vector<HNumber> v;
+  vector<HNumber> vn;
+  vector<HInteger> vi;
+  vector<HComplex> vc;
   hRunningAverageCasaVec(v, v,5,WEIGHTS_GAUSSIAN);
+  /*  hNegate(vn);
+  hNegate(vi);
+  hNegate(vi.begin(),vi.end());
+  hNegate(vc);
+  */
 }
+
+
 #undef HF_PP_FILETYPE
