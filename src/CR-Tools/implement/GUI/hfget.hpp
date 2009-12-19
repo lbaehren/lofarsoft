@@ -413,6 +413,8 @@ DEF_TEMPLATED_MEMBER_FUNCTIONS
 boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_id<mglData>());
 
  def("mglDataSetVecN", mglDataSetVecN);
+ def("mglDataGetVecPos", mglDataGetVecPos);
+ def("mglDataGetYfromX",mglDataGetYfromX);
  def("pytointptr",getPointerFromPythonObject);
  def("getptr", PyGetPtr);
  def("setDebug", setDebug);

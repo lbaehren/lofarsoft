@@ -4080,18 +4080,42 @@ which tells boost::python to recognize an object of type mglData and use our
 extraction function above.
  */
 
-//This just sets the data in an mgData wrapper to the STL vector vec.  The
-//function is exposed to python (in hfget.hpp) and can be called interactively
+/*!
+\brief This just sets the data in an mgData wrapper to the STL vector vec.  The
+function is exposed to python (in hfget.hpp) and can be called interactively
+*/
+
 void mglDataSetVecN(mglData* md, vector<HNumber> &vec){
     HNumber * a = &(vec[0]);
     md->Set(a,vec.size());
 }
-/*
-void mglDataGetVecPos(mglData* md, double value){
-    HNumber * a = &(vec[0]);
-    md->Set(a,vec.size());
-}
+
+/*!
+\brief Find in the mglData buffer the value "value" and return its position
 */
+
+HInteger mglDataGetVecPos(
+		      mglData* md, 
+		      HNumber value
+		      )
+{
+  return hFindLowerBound(md->a,md->nx,value);
+}
+
+/*!
+\brief Find for a given x value the corresponding y value in mglData buffer objects.
+
+Find in the first mglData buffer the value "value" and return the corresponding value (same position) in the second buffer.
+*/
+
+HNumber mglDataGetYfromX(
+		      mglData* mdx, 
+		      mglData* mdy, 
+		      double value
+		      )
+{
+  return mdy->a[min(mglDataGetVecPos(mdx,value),mdy->nx)];
+}
 
 //------------------------------------------------------------------------
 // End Swig compatibility tools

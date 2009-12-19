@@ -1065,6 +1065,7 @@ void hDownsample (const Iter idata_start,
   *ito=hMean(it2,idata_end);
 }
 
+
 //$COPY_TO HFILE START --------------------------------------------------
 #include "hfpp-undef.cc"
 #define HF_PP_FUNCNAME hFindLowerBound  //The Name of the function
@@ -1099,6 +1100,7 @@ template <class Iter>
 HInteger hFindLowerBound(const Iter data_start,
 			 const Iter data_end, 
 			 const IterValueType value) 
+//iterator_traits<Iter>::value_type value) 
 {
   HNumber value_n=mycast<HNumber>(value); //This also works for Complex then 
   HInteger niter=0;
@@ -1130,6 +1132,14 @@ HInteger hFindLowerBound(const Iter data_start,
   };
   return posguess;
 } 
+
+//Wrapper for c-style arrays
+HInteger hFindLowerBound(const HNumber* data_start,
+			 const HInteger len, 
+			 const HNumber value) 
+{
+  return hFindLowerBound(data_start,data_start+len,value);
+}
 
 
 void dummy_instantitate_templates(){

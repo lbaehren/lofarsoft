@@ -31,7 +31,8 @@
 #define STLVectorIteratorI typename vector<HInteger>::iterator
 #define STLVectorIteratorN typename vector<HNumber>::iterator
 #define STLVectorIteratorC typename vector<HComplex>::iterator
-#define IterValueType typename Iter::value_type
+#define IterValueType typename iterator_traits<Iter>::value_type
+//typename Iter::value_type
 
 //________________________________________________________________________
 //                                                     Function Definition
@@ -39,7 +40,12 @@
 template <class Iter> 
 HInteger hFindLowerBound(const Iter data_start, 
 			 const Iter data_end, 
-			 const IterValueType value) ;
+			 const typename iterator_traits<Iter>::value_type value);
+
+//Testing c-style arrays and pointers wrapper ...
+HInteger hFindLowerBound(const HNumber* data_start,
+			 const HInteger len, 
+			 const HNumber value); 
 
 template <class Iter> 
 void hNegate(const Iter data_start,
