@@ -516,6 +516,7 @@ class hfPlotWindow(hffunc):
         self.setParameter("npanelsx",-1)
         self.setParameter("npanelsy",-1)
         self.setParameter("ZoomFactor",1.6) # Make sure this is float()!
+#        self.setParameter("ZoomFactor",1.45) # Make sure this is float()!
 #        self.setParameter("WindowShiftX",0.2) # Make sure this is float()!
 #        self.setParameter("WindowShiftY",-0.2) # Make sure this is float()!
         self.setParameter("WindowShiftX",0.0) # Make sure this is float()!

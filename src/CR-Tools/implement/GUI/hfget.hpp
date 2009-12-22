@@ -415,6 +415,7 @@ boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_i
  def("mglDataSetVecN", mglDataSetVecN);
  def("mglDataGetVecPos", mglDataGetVecPos);
  def("mglDataGetYfromX",mglDataGetYfromX);
+ def("mglDataGetVecElement",mglDataGetVecElement);
  def("pytointptr",getPointerFromPythonObject);
  def("getptr", PyGetPtr);
  def("setDebug", setDebug);

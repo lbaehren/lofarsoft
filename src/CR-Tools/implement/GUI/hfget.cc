@@ -4103,6 +4103,18 @@ HInteger mglDataGetVecPos(
 }
 
 /*!
+\brief Get the nth element from the Data Vector stored in an mglData class object
+*/
+
+HNumber mglDataGetVecElement(
+			     mglData* md, 
+			     HInteger n
+			     )
+{
+  return md->a[n];
+}
+
+/*!
 \brief Find for a given x value the corresponding y value in mglData buffer objects.
 
 Find in the first mglData buffer the value "value" and return the corresponding value (same position) in the second buffer.

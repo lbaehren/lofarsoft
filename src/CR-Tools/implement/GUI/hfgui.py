@@ -128,9 +128,17 @@ class hfQtPlot(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.img=(QtGui.QImage())
-        self.rubberBand=False
-        self.rubberBand2=False
+        self.rubberBand=QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self);
+        self.rubberBandH=QtGui.QRubberBand(QtGui.QRubberBand.Line, self);
+        self.rubberBandV=QtGui.QRubberBand(QtGui.QRubberBand.Line, self);
         self.rubberOrigin=QtCore.QPoint()
+        self.popup=QtGui.QLabel(self)
+        self.popup.hide()
+        self.popup.setFont(QtGui.QFont("Helvetica", 10, QtGui.QFont.Bold))
+        self.popup.setFrameStyle(QtGui.QFrame.StyledPanel)
+        self.popup.setBackgroundRole(QtGui.QPalette.ToolTipBase)
+        self.popup.setAutoFillBackground(True) 
+        self.popup.setFrameShadow(QtGui.QFrame.Raised)
         self.consolelinecount=0
         self.DBGContinueButtonPressed=True
         self.mousemode="z"
@@ -164,6 +172,7 @@ class hfQtPlot(QtGui.QWidget):
         self.setMouseTracking(False)
         self.setCursor(QtCore.Qt.ArrowCursor)
     def hfmouse_value(self): 
+        print "Attention: Cursor values are only displayed correctly, if all subplots have the same plot ranges... (deselect Auto for Y)"
         self.mousemode="v"
         self.setMouseTracking(True)
         self.setCursor(QtCore.Qt.CrossCursor)
@@ -171,6 +180,9 @@ class hfQtPlot(QtGui.QWidget):
         self.mousemode="s"
         self.setCursor(QtCore.Qt.PointingHandCursor)
     def hfmouse_selectwhat(self,str): 
+        self.rubberBandH.hide()
+        self.rubberBandV.hide()
+        self.popup.hide()
         if str=="Values": self.mouse_selectmode="v"
         elif str=="Data Sets": self.mouse_selectmode="d"
         elif str=="Plot Panels": self.mouse_selectmode="p"
@@ -181,7 +193,7 @@ class hfQtPlot(QtGui.QWidget):
         self.presseventpos=self.screenP2coord(event.pos())
         if self.mousemode=="z":
             self.rubberOrigin = QtCore.QPoint(event.pos());
-            if not self.rubberBand: self.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self);
+#            if not self.rubberBand: self.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self);
             self.rubberBand.setGeometry(QtCore.QRect(self.rubberOrigin, QtCore.QSize()));
             self.rubberBand.show();
         if self.mousemode=="s":
@@ -190,8 +202,41 @@ class hfQtPlot(QtGui.QWidget):
         if self.mousemode=="z":
             self.rubberBand.setGeometry(QtCore.QRect(self.rubberOrigin, event.pos()).normalized())
         if self.mousemode=="v":
-            pos=self.screenP2coord(event.pos())
-            txt="x="+str(pos[0])+"\n "+"y="+str(pos[1])+"\n"+"Panel="+str(pos[4])
+            (xc,yc,nx,ny,npan)=self.screenP2coord(event.pos())
+            gdbo=self.d["'PlotPanel:PanelPosition="+str(npan)+"'xAxis:GraphDataBuffer"].FirstObject()
+            if gdbo.notFound(): return
+            gl=gdbo.getPyList()
+            ymin=gdbo["ymin"].val()
+            xmin=gdbo["xmin"].val()
+            ymax=gdbo["ymax"].val()
+            xmax=gdbo["xmax"].val()
+            n=mglDataGetVecPos(gl[0],xc);
+            x=mglDataGetVecElement(gl[0],n);
+            y=mglDataGetVecElement(gl[1],n);
+            (xsmin,ysmin)=self.coord2screenP(xmin,ymin,nx,ny,npan)
+            (xsmax,ysmax)=self.coord2screenP(xmax,ymax,nx,ny,npan)
+            (xs,ys)=self.coord2screenP(x,y,nx,ny,npan)
+#             print "xc,yc,npan=",xc,yc,npan
+#             print "x,y,n=",x,y,n
+#             print "xs,ys=",xs,ys
+#             print "x/ymin/max=",xmin,ymin,xmax,ymax
+#             print "x/ysmin/max=",xsmin,ysmin,xsmax,ysmax
+            if ((x>xmin) & (x<xmax) & (y>ymin) & (y<ymax)):
+#                print "Rubberband on!"
+                self.rubberBandV.setGeometry(QtCore.QRect(xs,ysmax,2,ysmin-ysmax).normalized())
+                self.rubberBandH.setGeometry(QtCore.QRect(xsmin,ys,xsmax-xsmin,2).normalized())
+                self.rubberBandH.show()
+                self.rubberBandV.show()
+                self.popup.setGeometry(xs+10,ys-35,80,25)
+                txt="x="+str(x)+"\n"+"y="+str(y)
+                self.popup.setText(QtCore.QString(txt))
+                self.popup.show()
+            else:
+                self.rubberBandH.hide()
+                self.rubberBandV.hide()
+                self.popup.hide()
+#            print "----------------------------------------"
+            txt="x="+str(xc)+"\n"+"y="+str(yc)+"\n"+"Panel="+str(npan)
             self.gui.CursorValueLabel.setText(QtCore.QString(txt))
     def mouseReleaseEvent(self,event):
         if event.button()==QtCore.Qt.LeftButton: self.mouseReleaseLeftEvent(event)        
@@ -275,18 +320,32 @@ class hfQtPlot(QtGui.QWidget):
             n=1
         self.gr.SubPlot(nx,ny,n)
         return (nx,ny,n)
-#    def getDataValueXY(self,xs,ys):
-#        npan=self.whichpanel(qp.x(),qp.y())
-#        self.d["PlotPanel:PanelPosition="+str(npan)+"'xAxis"]
-    def coord2screenP(self,x,y):
-        xy1=self.gr.CalcXYZ(0,0)
-        xy2=self.gr.CalcXYZ(self.gr.GetWidth(),self.gr.GetHeight())
-        xp=round((x-xy1[0]))/(xy2[0]-xy1[0])
-        yp=round((x-xy1[1]))/(xy2[1]-xy1[1])
+    def coord2screenP(self,x,y,nx,ny,n):
+        panel_width=self.gr.GetWidth()/nx
+        panel_height=self.gr.GetWidth()/ny
+        row=n/nx;
+        col=n-ny*row
+        xs1=col*panel_width+1
+        ys1=row*panel_height+1
+        xs2=xs1+panel_width-3
+        ys2=ys1+panel_height-3
+        xy1=self.gr.CalcXYZ(xs1,ys1)
+        xy2=self.gr.CalcXYZ(xs2,ys2)
+        xp=round((x-xy1.x)/(xy2.x-xy1.x)*(panel_width-2)+xs1)
+        yp=round((y-xy1.y)/(xy2.y-xy1.y)*(panel_height-2)+ys1)
+#         print "----------------------------------------"
+#         print "x,y,nx,ny,n=",x,y,nx,ny,n
+#         print "row,col=",row,col
+#         print "panel_width,panel_height=",panel_width,panel_height
+#         print "xs1,ys1,xs2,ys2",xs1,ys1,xs2,ys2
+#         print "xy1.x,xy1.y,xy2.x,xy2.y=",xy1.x,xy1.y,xy2.x,xy2.y
+#         print "xp,yp=",xp,yp
+#         print "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+        return (xp,yp)
     def screenP2coord(self,qp):
         "Given a QPoint this will return the coordinates  in the current units chosed by the axis of the panel closest to the point. It will also return the total rows & columns, and index of the selected panel. Returns a tupel of the form: (x1,y1,nx,ny,n)"
         npan=self.whichpanel(qp.x(),qp.y())
-#        print npan,qp.x(),qp.y() 
+        apply(self.gr.SubPlot,npan)
         xy=self.gr.CalcXYZ(qp.x(),qp.y())
         return (xy.x,xy.y) + npan
     def screenR2coord(self,qr):
