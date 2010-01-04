@@ -1170,27 +1170,6 @@ void writeBadPeriods(void)
 {
   cout << "\nSetting field 'Acitve' to false for bad periods.\n" << endl;
 
-  // test of an 19 /20 after discovery of the cable interchange
-  unsigned int start_date = 1228219200; // 2008-12-02 12:00:00 UTC
-  unsigned int stop_date = 1228753800; // 2008-12-08 16:30:00 UTC
-  if (!writer.AddData("Problems due to interchange of cables of Ant 19/20",antennaIDs[18],"HWSetup",start_date) )
-    cerr << "\nERROR while writing field: HWSetup" << endl;
-  if (!writer.AddData(False,antennaIDs[18],"Active",start_date) )
-    cerr << "\nERROR while writing field: Active" << endl;
-  if (!writer.AddData("Problems due to interchange of cables of Ant 19/20",antennaIDs[19],"HWSetup",start_date) )
-    cerr << "\nERROR while writing field: HWSetup" << endl;
-  if (!writer.AddData(False,antennaIDs[19],"Active",start_date) )
-    cerr << "\nERROR while writing field: Active" << endl;
-  if (!writer.AddData("Test of Ant 19/20 finished.",antennaIDs[18],"HWSetup",stop_date) )
-    cerr << "\nERROR while writing field: HWSetup" << endl;
-  if (!writer.AddData(True,antennaIDs[18],"Active",stop_date) )
-    cerr << "\nERROR while writing field: Active" << endl;
-  if (!writer.AddData("Test of Ant 19/20 finished.",antennaIDs[19],"HWSetup",stop_date) )
-    cerr << "\nERROR while writing field: HWSetup" << endl;
-  if (!writer.AddData(True,antennaIDs[19],"Active",stop_date) )
-    cerr << "\nERROR while writing field: Active" << endl;
-
-
   // flag antenna 5 because RCU dismounted
   unsigned int start_flag5_0 = 1132738933; // 2005-11-23 09:42 UTC
   unsigned int stop_flag5_0 = 1133098982; // 2005-11-27 13:43:02 UTC
@@ -1313,7 +1292,21 @@ void writeBadPeriods(void)
   if (!writer.AddData(True,antennaIDs[18],"Active",stop_flag19_0) )
     cerr << "\nERROR while writing field: Active" << endl;
 
-  // flag antenna 1 during change of pol 
+  // flag antenna 8 (unkown amplification)
+  unsigned int start_flag8_0 = 1164024911; // Mo 20. Nov 12:15:11 UTC 2006
+  unsigned int stop_flag8_0 = LOPES_pol_start;
+  if (!writer.AddData("flag antenna 8",antennaIDs[7],"HWSetup",start_flag8_0) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[7],"Active",start_flag8_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData(True,antennaIDs[7],"Active",stop_flag8_0) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 1 until NS rotation, because of unknown amplification during EW orientation
+  if (!writer.AddData(False,antennaIDs[0],"Active",LOPES_pol_start) )
+    cerr << "\nERROR while writing field: Active" << endl;
+ 
+  // flag antenna 1 during change of pol  
   unsigned int start_flag1_1 = 1169644646; // 2007-01-24 13:17:26 UTC
   unsigned int stop_flag1_1 = 1169644773; // 2007-01-24 13:19:33 UTC
   if (!writer.AddData("flag antenna 1",antennaIDs[0],"HWSetup",start_flag1_1) )
@@ -1326,15 +1319,15 @@ void writeBadPeriods(void)
     cerr << "\nERROR while writing field: Active" << endl;
 
   // flag antenna 8
-  unsigned int start_flag8_0 = 1171635325; // 2007-02-16 14:15:25 UTC
-  unsigned int stop_flag8_0 = 1171635792; // 2007-02-16 14:23:12 UTC
-  if (!writer.AddData("flag antenna 8",antennaIDs[7],"HWSetup",start_flag8_0) )
+  unsigned int start_flag8_1 = 1171635325; // 2007-02-16 14:15:25 UTC
+  unsigned int stop_flag8_1 = 1171635792; // 2007-02-16 14:23:12 UTC
+  if (!writer.AddData("flag antenna 8",antennaIDs[7],"HWSetup",start_flag8_1) )
     cerr << "\nERROR while writing field: HWSetup" << endl;
-  if (!writer.AddData(False,antennaIDs[7],"Active",start_flag8_0) )
+  if (!writer.AddData(False,antennaIDs[7],"Active",start_flag8_1) )
     cerr << "\nERROR while writing field: Active" << endl;
-  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[7],"HWSetup",stop_flag8_0) )
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[7],"HWSetup",stop_flag8_1) )
     cerr << "\nERROR while writing field: HWSetup" << endl;
-  if (!writer.AddData(True,antennaIDs[7],"Active",stop_flag8_0) )
+  if (!writer.AddData(True,antennaIDs[7],"Active",stop_flag8_1) )
     cerr << "\nERROR while writing field: Active" << endl;
 
   // flag antenna 5+6 for testings
@@ -1476,6 +1469,30 @@ void writeBadPeriods(void)
   if (!writer.AddData(True,antennaIDs[23],"Active",stop_flag24_1) )
     cerr << "\nERROR while writing field: Active" << endl;
 
+  // flag antenna 19, amplifier died
+  unsigned int start_flag19_1 = 1189779410; // Fr 14. Sep 14:16:50 UTC 2007
+  unsigned int stop_flag19_1 = 1200572552; // Do 17. Jan 12:22:32 UTC 2008 (new amplifier)
+  if (!writer.AddData("flag antenna 19, amplifier died",antennaIDs[18],"HWSetup",start_flag19_1) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[18],"Active",start_flag19_1) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[18],"HWSetup",stop_flag19_1) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[18],"Active",stop_flag19_1) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag antenna 21, amplifier died
+  unsigned int start_flag21_1 = 1190013765; // Mo 17. Sep 07:22:45 UTC 2007
+  unsigned int stop_flag21_1 = 1196265864; // Mi 28. Nov 16:04:24 UTC 2007 (new amplifier)
+  if (!writer.AddData("flag antenna 21, amplifier died",antennaIDs[20],"HWSetup",start_flag21_1) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[20],"Active",start_flag21_1) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[20],"HWSetup",stop_flag21_1) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[20],"Active",stop_flag21_1) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
   // flag antenna 3+4 for phase check
   unsigned int start_flag3_0 = 1203930205; // 2008-02-25 09:03:25 UTC
   unsigned int stop_flag3_0 = 1204110565; // 2008-02-27 11:09:25 UTC
@@ -1536,6 +1553,26 @@ void writeBadPeriods(void)
       cerr << "\nERROR while writing field: Active" << endl;
   }
 
+  // test of ant 19 /20 after discovery of the cable interchange
+  unsigned int start_date = 1228219200; // 2008-12-02 12:00:00 UTC
+  unsigned int stop_date = 1228753800; // 2008-12-08 16:30:00 UTC
+  if (!writer.AddData("Problems due to interchange of cables of Ant 19/20",antennaIDs[18],"HWSetup",start_date) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[18],"Active",start_date) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("Problems due to interchange of cables of Ant 19/20",antennaIDs[19],"HWSetup",start_date) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[19],"Active",start_date) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("Test of Ant 19/20 finished.",antennaIDs[18],"HWSetup",stop_date) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[18],"Active",stop_date) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("Test of Ant 19/20 finished.",antennaIDs[19],"HWSetup",stop_date) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[19],"Active",stop_date) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
   // flag 9910 antennas because of problems
   for (int i = 0; i < 10; ++i) {
     unsigned int start_flag9910_1 = 1222646400; // 2008-09-29 00:00:00 UTC  
@@ -1550,7 +1587,7 @@ void writeBadPeriods(void)
       cerr << "\nERROR while writing field: Active" << endl;
   }
 
-  // flag antennas 24 
+  // flag antenna 24 
   start_date = 1144143600; // 2006-04-04 09:40 UTC
   stop_date = LOPES_pol_start;
   if (!writer.AddData("Sign flip Ant 24",antennaIDs[23],"HWSetup",start_date) )
@@ -1626,6 +1663,19 @@ void writeBadPeriods(void)
     cerr << "\nERROR while writing field: HWSetup" << endl;
   if (!writer.AddData(True,antennaIDs[25],"Active",sallaplusdipol_2009_stop) )
     cerr << "\nERROR while writing field: Active" << endl;
+
+  // flag Ant 24 because of bad amplitude calibration after tripole test
+  start_date = 1246949302; // Di 7. Jul 06:48:22 UTC 2009 (date chosen by Katrin)
+  stop_date = 1260000000;  // somewhere in Dec 2009 during LOPES reconfiguration
+  if (!writer.AddData("Ant 24 might be bad",antennaIDs[23],"HWSetup",start_date) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(False,antennaIDs[23],"Active",start_date) )
+    cerr << "\nERROR while writing field: Active" << endl;
+  if (!writer.AddData("LOPES Dual Pol 15 EW, 15 NS",antennaIDs[23],"HWSetup",stop_date) )
+    cerr << "\nERROR while writing field: HWSetup" << endl;
+  if (!writer.AddData(True,antennaIDs[23],"Active",stop_date) )
+    cerr << "\nERROR while writing field: Active" << endl;
+
 }
 
 
@@ -1851,14 +1901,14 @@ void writeSallaplusdipolPositions(void)
 }
 
 
-// Write ElGainCal values:
+// Write ElGainCal values for dual pol setup (since GT 1165574694)
 // Data are read in from AmpFact-file from Steffen's root scripts for amplitude calibration
 void writeElGainCal(void)
 {
   const string path = "/users/iklx/lopesuser/amplitude_calibration/ampFact/";
-  const string files[] = {"Amp01", "Amp02", "Amp03", "Amp04", "Amp05", "Amp06", "Amp07", "Amp08", "Amp09", "Amp10",
-                          "Amp11", "Amp12", "Amp13", "Amp14", "Amp15", "Amp16", "Amp17", "Amp18", "Amp19", "Amp20",
-                          "Amp21", "Amp22", "Amp23", "Amp24", "Amp25", "Amp26", "Amp27", "Amp28", "Amp29", "Amp30"};
+  const string files[] = {"Amp01", "Amp02", "Amp03", "Amp04", "Amp05", "Amp06", "Amp07", "Amp08-1164027327", "Amp09", "Amp10",
+                          "Amp11", "Amp12", "Amp13", "Amp14", "Amp15", "Amp16", "Amp17", "Amp18", "Amp19-1165574694", "Amp20",
+                          "Amp21", "Amp22", "Amp23", "Amp24", "Amp25", "Amp26-1158071789", "Amp27", "Amp28", "Amp29", "Amp30"};
   // construct casacore Vectors with frequency values:
   // first create array, secondly a stl-vector and then a casacore Vector
   double freqAxis[] =  {4e+07, 4.1e+07, 4.2e+07, 4.3e+07, 4.4e+07, 4.5e+07, 4.6e+07, 4.7e+07, 4.8e+07, 4.9e+07, 5e+07, 5.1e+07, 5.2e+07, 5.3e+07, 5.4e+07, 5.5e+07, 5.6e+07, 5.7e+07, 5.8e+07, 5.9e+07, 6e+07, 6.1e+07, 6.2e+07, 6.3e+07, 6.4e+07, 6.5e+07, 6.6e+07, 6.7e+07, 6.8e+07, 6.9e+07, 7e+07, 7.1e+07, 7.2e+07, 7.3e+07, 7.4e+07, 7.5e+07, 7.6e+07, 7.7e+07, 7.8e+07, 7.9e+07, 8e+07};
@@ -1870,10 +1920,9 @@ void writeElGainCal(void)
   ElGainCal.set(0);
   
   ifstream infile;
-  double freq, gain, error;
-  
-  
-    // Add the value for all antennas
+  double freq, gain, error;  
+    
+  // Add the value for Dual Pol start for all antennas
   for (int i = 0; i < MAX_Antennas; i++) {
     infile.open(string(path+files[i]).c_str(), ifstream::in);
     // check if file could be opened
@@ -1906,15 +1955,56 @@ void writeElGainCal(void)
     infile.close();
     
     cout << "Writing ElGainCal values for dual polarization setup of dec 2006: " << antennaIDs[i] << endl;
-    if (!writer.AddData(ElGainCalFreq,antennaIDs[i],"ElGainCalFreq",LOPES_pol_start) )
-      cerr << "\nERROR while writing field: ElGainCalFreq" << endl;
     if (!writer.AddData(ElGainCal,antennaIDs[i],"ElGainCal",LOPES_pol_start) )
       cerr << "\nERROR while writing field: ElGainCal" << endl;  
-  }
+    if (!writer.AddData(ElGainCalFreq,antennaIDs[i],"ElGainCalFreq",LOPES_pol_start) )
+      cerr << "\nERROR while writing field: ElGainCalFreq" << endl;
+  } 
+      
+  // add further values for few antennas   
+  // (rewrite values of Ant 26, to overwrite wrong values in CalTables)
+  const string files2[] = {"Amp12-1188917618", "Amp19-1200572552", "Amp21-1196265864", "Amp21-1196265864", "Amp26-1158071789"};
+  const unsigned int GTs[] = {1188917618, 1200572552, 1190038594, 1196265864, 1189088414};
+  const int antenna[] = {12, 19, 21, 21, 26};
+  unsigned int Nants = sizeof(antenna)/sizeof(antenna[0]);
 
-  
-  // first: read in values for the start of LOPES-dual pol
-  
+  for (unsigned int i = 0; i < Nants; i++) {
+    infile.open(string(path+files2[i]).c_str(), ifstream::in);
+    // check if file could be opened
+    if (!(infile.is_open())) {
+      cerr << "Failed to open file \"" << path+files2[i] <<"\"." << endl;
+      return;
+    }
+    
+    for (unsigned int j = 0; j < Nfreqs; j++) {
+      if (!(infile.good())) {
+        cerr << "File \"" << path+files2[i] <<"\" is not good." << endl;
+        return;
+      }
+      infile >> freq >> gain >> error;
+
+      // calculate gain factor, and avoid very large values for band limits
+      if (gain < 1)
+        ElGainCal(j) = 1;
+      else
+        ElGainCal(j) = 1 / sqrt(gain);
+        
+      // cout << freq << " Gain = " << gain << " Error = " << error << " factor = " << ElGainCalFreq(j) << endl;
+
+      // check if frequency is consistent
+      if ( abs(freqAxis[j]/freq-1e6) > 0.01)  {
+        cerr << "Frequencies are inconsistent." << endl;
+        return;
+      }
+    }
+    infile.close();
+    
+    cout << "Writing ElGainCal values changing during dual polarization setup: " << antennaIDs[antenna[i]-1] << endl;
+    if (!writer.AddData(ElGainCal,antennaIDs[antenna[i]-1],"ElGainCal",GTs[i]) )
+      cerr << "\nERROR while writing field: ElGainCal" << endl;  
+    if (!writer.AddData(ElGainCalFreq,antennaIDs[antenna[i]-1],"ElGainCalFreq",GTs[i]) )
+      cerr << "\nERROR while writing field: ElGainCalFreq" << endl;
+  } 
   
 }
 
@@ -1972,7 +2062,7 @@ int main (int argc, char *argv[])
 
     // add field "Active" to store information, when an antenna had problems
     //  addActiveField(true);                // checked in
-    // writeBadPeriods();                // checked in
+    writeBadPeriods();                // checked in
     // writeTripoleDelays();        // checked in
     // writeTripolePositions();  // checked in
 
