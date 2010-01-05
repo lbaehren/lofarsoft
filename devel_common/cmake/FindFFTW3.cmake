@@ -84,3 +84,7 @@ ENDIF (HAVE_FFTW3)
 ## ------------------------------------------------------------------------------
 ## Mark as advanced ...
 
+mark_as_advanced (
+  FFTW3_INCLUDES
+  FFTW3_LIBRARIES
+  )
