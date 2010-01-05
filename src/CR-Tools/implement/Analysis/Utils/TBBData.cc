@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
- *   Maaijke Mevius (<mail>)                                            *
+ *   Maaijke Mevius (<mail>)                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -25,19 +25,32 @@
 
 namespace CR { // Namespace CR -- begin
 
+  //_____________________________________________________________________________
+  //                                                                     ~TBBData
+
+  TBBData::~TBBData(){
+    for(vector<TBB_Timeseries *>::iterator idat=daldata.begin();idat!=daldata.end();idat++)
+      delete *idat;
+    daldata.clear();
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                  nofAntennas
 
   TBBData::TBBData():nofAntennas(-1)
   {
   }
   
-  TBBData::~TBBData(){
-    for(vector<TBB_Timeseries *>::iterator idat=daldata.begin();idat!=daldata.end();idat++)
-      delete *idat;
-    daldata.clear();
-    
-  }
-  
-  void  TBBData::initData(vector<string> filenames,bool odd,bool even){
+  //_____________________________________________________________________________
+  //                                                                     initData
+
+  /*!
+    \e even, \e odd is dipole selection within a file (x an y repsectively) 
+  */
+  void  TBBData::initData (vector<string> filenames,
+			   bool odd,
+			   bool even)
+  {
     uint nofFiles = filenames.size();
   
     daldata.resize(nofFiles);
@@ -59,7 +72,11 @@ namespace CR { // Namespace CR -- begin
     initOffsets();
   }
   
-  void  TBBData::initOffsets(){
+  //_____________________________________________________________________________
+  //                                                                  initOffsets
+  
+  void  TBBData::initOffsets()
+  {
     //first get maximal offset
     uint nr_files = daldata.size();
     assert(nr_files>0);
@@ -70,17 +87,22 @@ namespace CR { // Namespace CR -- begin
     uint imax=0;
     uint maxdat=0;
     //get reference time;
-    uint time0= (daldata[0]->stationGroup(0)).time()(0);
+    std::vector<uint> attrTime;
+    (daldata[0]->stationGroup(0)).getAttributes("TIME",attrTime);
+    uint time0= attrTime[0];
+    //
     for (uint idat =0;idat<nr_files;idat++){
       uint nofGroups = daldata[idat]->nofStationGroups();
-       uint dipoles = daldata[idat]->nofDipoleDatasets() ;
-   
+      uint dipoles = daldata[idat]->nofDipoleDatasets() ;
+      casa::Vector<uint> samplenr;
+      casa::Vector<uint> timenr;
+      
       for(uint stati=0;stati <nofGroups;stati++)
 	{
- 
+	  
 	  TBB_StationGroup stat= daldata[idat]->stationGroup(stati);
-	  casa::Vector<uint> samplenr = stat.sample_number();
-	  casa::Vector<uint> timenr = stat.time();
+	  stat.getAttributes("TIME",timenr);
+	  stat.getAttributes("SAMPLE_NUMBER",samplenr);
 	  for(uint idip=dipstart;idip<dipoles;idip+=dipstep){
 	    int time_offs = timenr(idip)-time0;
 	    if(abs(time_offs)>0) {
@@ -95,12 +117,12 @@ namespace CR { // Namespace CR -- begin
 	    }
 	  }
 	}
-
+      
     }//file loop
- 
+    
     cout<<"Maximum offset for file:"<<maxdat<<" and dipolenr :"<<imax<<" = "<<max_samp<<endl;
     cout<<"time0 "<<time0<<endl;
-
+    
     minlength=1e9;
     nofAntennas=0;
     //Now fill vector with offsets
@@ -108,15 +130,18 @@ namespace CR { // Namespace CR -- begin
       uint nofGroups = daldata[idat]->nofStationGroups();
       
       uint dipoles = daldata[idat]->nofDipoleDatasets() ;
-       for(uint stati=0;stati <nofGroups;stati++)
+      for(uint stati=0;stati <nofGroups;stati++)
 	{
- 
+	  
 	  TBB_StationGroup stat= daldata[idat]->stationGroup(stati);
 	  // set sample at which to start reading
-	  casa::Vector<uint> lths = stat.data_length();
-	  
-	  casa::Vector<uint> samplenr = stat.sample_number();
-	  casa::Vector<uint> timenr   = stat.time();
+	  casa::Vector<uint> lths;
+	  casa::Vector<uint> samplenr;
+	  casa::Vector<uint> timenr;
+
+	  stat.getAttributes("DATA_LENGTH",lths);
+	  stat.getAttributes("SAMPLE_NUMBER",samplenr);
+	  stat.getAttributes("TIME",timenr);
 	  
 	  //read the data per dipole
 	  for(uint idip=dipstart;idip<dipoles;idip+=dipstep){
@@ -135,26 +160,59 @@ namespace CR { // Namespace CR -- begin
     
   }
 
-  void TBBData::getTimeSeries(vector<double>& out,uint blocksize,int ant, uint startSample) const{
+  //_____________________________________________________________________________
+  //                                                                getTimeSeries
 
+  void TBBData::getTimeSeries (vector<double>& out,
+			       uint blocksize,
+			       int ant,
+			       uint startSample) const
+  {
     out.clear();
     casa::Vector<double> outdat;
-    getTimeSeries(outdat,blocksize,ant,startSample);
+    getTimeSeries (outdat,blocksize,ant,startSample);
     
     outdat.tovector(out);
     
   };
   
-  void TBBData::getTimeSeries(casa::Vector<double>& out,uint blocksize,int ant, uint startSample) const{
+  //_____________________________________________________________________________
+  //                                                                getTimeSeries
 
+  /*!
+    \retval out -- Array/Vector returning the time-series data for dipole \e ant
+    \param blocksize -- The number of samples per block of data.
+    \param ant -- Index of the dipole within a station (not a global, unique 
+           identifier for the entire telescope).
+    \param startSample -- Start position within the dataset from which to start
+           reading the data.
+   */
+  void TBBData::getTimeSeries (casa::Vector<double>& out,
+			       uint blocksize,
+			       int ant,
+			       uint startSample) const
+  {
     assert(ant<nofAntennas);
-    vector<uint> dipoleSelection(1);
-    dipoleSelection[0] = dipnr[ant];
-    out= (daldata[filenr[ant]]->stationGroup(0)).fx(offsets[ant] + startSample,
-						       blocksize,
-						       dipoleSelection);
-    
+
+    int start;
+    casa::Vector<casa::String> dipoleIDs;
+    casa::Vector<casa::String> dipoleSelection(1);
+    casa::Matrix<double> data;
+
+    // Get the IDs/names of the dipoles attached to the station group
+    (daldata[filenr[ant]]->stationGroup(0)).dipoleNames (dipoleIDs);
+    // Select dipole
+    dipoleSelection[0] = dipoleIDs[ant];
+    // Set the position from which to start reading data
+    start              = offsets[ant] + startSample;
+
+    (daldata[filenr[ant]]->stationGroup(0)).fx(data,
+					       start,
+					       blocksize,
+					       dipoleSelection);
+
+    out = data.row(0);
   };
   
-}//namespace CR
+} // end -- namespace CR
 

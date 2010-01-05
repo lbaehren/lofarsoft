@@ -36,8 +36,6 @@
 // CR-Tools header files
 #include <Analysis/Utils/TimeSeriesData.h>
 
-
-
 // AIPS++/CASA header files
 
 using namespace std;
@@ -70,28 +68,51 @@ namespace CR { // Namespace CR -- begin
     <h3>Example(s)</h3>
     See tTBBData.cc
 
-  */  
+  */
   class TBBData:public TimeSeriesData{
+
   public:
+
+    //! Default constructor
     TBBData();
+    //! Default destructor
     ~TBBData();
-    void getTimeSeries(vector<double>& out,uint blocksize, int ant, uint startSample) const;
-    void getTimeSeries(casa::Vector<double>& out,uint blocksize, int ant, uint startSample) const;
-    void initData(vector<string> filenames,bool even=true,bool odd=false); //even, odd is dipole selection within a file (x an y repsectively) 
- 
+    //! Get time-series data
+    void getTimeSeries (vector<double>& out,
+			uint blocksize,
+			int ant,
+			uint startSample) const;
+    //! Get time-series data
+    void getTimeSeries (casa::Vector<double>& out,
+			uint blocksize,
+			int ant,
+			uint startSample) const;
+    //! Initialize access to the data
+    void initData (vector<string> filenames,
+		   bool even=true,
+		   bool odd=false);
+    //! Get the length of the data
     int getLength(){return minlength;}
+    //! Get the number of antennas
     int getNofAntennas(){return nofAntennas;}
- private:
+    
+  private:
+
+    //! Initialize the offsets between the different dipoles
     void  initOffsets();
-    vector<TBB_Timeseries *> daldata; //The data files
+    //! The data files themselves
+    vector<TBB_Timeseries *> daldata;
     vector<uint> filenr;
     vector<uint> dipnr;
     vector<uint> offsets;
+    //! The number of antennas
     int nofAntennas;
     uint minlength;
+    //! The dipole to start with
     uint dipstart;
+    //! Increment for stepping through the set of dipoles
     uint dipstep;
   };
-
+  
 }//namespace CR
 #endif
