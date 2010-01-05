@@ -574,18 +574,25 @@ namespace CR { // Namespace CR -- begin
           calibPulses[antennaIDs(i)].distYerr = sqrt(  pow(coreError*sinEl, 2)
                                                      + pow((-x*sinAz + y*cosAz)*azimuthError*sinEl, 2)
                                                      + pow(( x*cosAz + y*sinAz)*zenithError *cosEl, 2)); 
-          calibPulses[antennaIDs(i)].distZerr = sqrt(  pow(coreError*cosEl, 2)
+          // The error of z due to the core uncertainty should affect all z-values exactly in the same direction.
+          // That means a wrong core position should either decrease or increase all z-values the same way.
+          // Thus, it should not be considered as statistical error in any fit.
+          // Remark: for x and y this is also true, but the lateral distance R can increase or decrease
+          //         for different antennas if the core is wrong. Hence, for x and y the core uncertainty
+          //         cannot be negelected (maybe it can be paritially neglected, but I have not investigated this).
+          calibPulses[antennaIDs(i)].distZerr = sqrt(  // pow(coreError*cosEl, 2)
                                                      + pow((-x*sinAz + y*cosAz)*azimuthError*cosEl, 2)
                                                      + pow(( x*cosAz + y*sinAz)*zenithError *sinEl, 2)); 
+                                                    
           calibPulses[antennaIDs(i)].disterr  = sqrt(  pow(xS*calibPulses[antennaIDs(i)].distXerr,2) 
                                                      + pow(yS*calibPulses[antennaIDs(i)].distYerr,2))
                                                 / calibPulses[antennaIDs(i)].dist;
           // for debug output                                                
-          /* cout << calibPulses[antennaIDs(i)].distX << " +/-" << calibPulses[antennaIDs(i)].distXerr << "\t "
+          cout << calibPulses[antennaIDs(i)].distX << " +/-" << calibPulses[antennaIDs(i)].distXerr << "\t "
                << calibPulses[antennaIDs(i)].distY << " +/-" << calibPulses[antennaIDs(i)].distYerr << "\t "
                << calibPulses[antennaIDs(i)].distZ << " +/-" << calibPulses[antennaIDs(i)].distZerr << "\t "
                << calibPulses[antennaIDs(i)].dist  << " = "
-               << sqrt(xS*xS+yS*yS) << " +/-" << calibPulses[antennaIDs(i)].disterr  << "\t " << endl; */                                                   
+               << sqrt(xS*xS+yS*yS) << " +/-" << calibPulses[antennaIDs(i)].disterr  << "\t " << endl;                                                 
         }
 
     } catch (AipsError x) {
@@ -788,11 +795,20 @@ namespace CR { // Namespace CR -- begin
  {
     try {
       cout << "\nFitting lateral distribution..." << endl;
+      
+      // for investigation of suspicious antenna (mark it in green)
+      int greenAnt = 0;  // set it to zero if now antenna should be green
+      int greenValue = -1; // is set to array index which contains point information
 
       // get shower properties
       unsigned int GT = erg.asuInt("Date");
       double az = erg.asDouble("Azimuth");
       double el = erg.asDouble("Elevation");
+      
+      // for debugging: mark antenna 4 for the dual polarization setup in green
+      // TODO: Remove this lines if the case of antenna 4 is clear
+      if (GT > 1165574694)
+        greenAnt = 4;
 
       // get AntennaIDs to loop through pulse parameters
       Vector<int> antennaIDs;
@@ -820,6 +836,10 @@ namespace CR { // Namespace CR -- begin
            timePos[ant] = calibPulses[antennaIDs(i)].envelopeTime;
            antennaNumber[ant] = i+1;
            antID[ant] = antennaIDs(i);
+           // look if this antenna shall be marked in green in the plot
+           if (antennaNumber[ant] == greenAnt) {
+             greenValue = ant;
+           }  
            ++ant;
         }
       // consistancy check
@@ -979,6 +999,16 @@ namespace CR { // Namespace CR -- begin
       latPro->GetXaxis()->SetRangeUser(0,(maxdist*1.10));
       latPro->Draw("AP");
       latProClean->Draw("same p");
+
+      // mark point of one antenna in green (for debugging)
+      if (greenValue > 0) {
+        TGraph *latProGreen = new TGraph(1, &distance[greenValue], &fieldStr[greenValue]);
+        latProGreen->SetMarkerColor(3);
+        latProGreen->SetMarkerStyle(20);
+        latProGreen->SetMarkerSize(1.1);
+        latProGreen->Draw("same p");
+      }  
+
 
       /* statistic box of fit */
       TPaveStats *ptstats = new TPaveStats(0.62,0.84,0.98,0.99,"brNDC");
