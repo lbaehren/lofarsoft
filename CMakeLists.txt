@@ -320,18 +320,14 @@ add_custom_target (cr
   COMMENT "Building package CR-Tools ..."
   )
 
+add_dependencies (cr dal plplot fftw3)
+
+if (CR_WITH_GUI)
+  add_dependencies (cr mathgl)
+endif (CR_WITH_GUI)
+
 if (CR_WITH_STARTOOLS)
-  if (CR_WITH_GUI)
-    add_dependencies (cr dal startools mathgl plplot)
-  else (CR_WITH_GUI)
-    add_dependencies (cr dal startools plplot)
-  endif (CR_WITH_GUI)
-else (CR_WITH_STARTOOLS)
-  if (CR_WITH_GUI)
-    add_dependencies (cr dal mathgl plplot)
-  else (CR_WITH_GUI)
-    add_dependencies (cr dal plplot)
-  endif (CR_WITH_GUI)
+  add_dependencies (cr startools)
 endif (CR_WITH_STARTOOLS)
 
 ##____________________________________________________________________
