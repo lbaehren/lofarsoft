@@ -38,6 +38,12 @@ class dppp(LOFARrecipe):
             help="Parset containing configuration for DPPP"
         )
         self.optionparser.add_option(
+            '--suffix',
+            dest="suffix",
+            default="",
+            help="Suffix to add to trimmed data (default: overwrite existing)"
+        )
+        self.optionparser.add_option(
             '-w', '--working-directory',
             dest="working_directory",
             help="Working directory used on compute nodes"
@@ -88,7 +94,7 @@ class dppp(LOFARrecipe):
                         os.path.join(
                             self.inputs['working_directory'],
                             self.inputs['job_name'],
-                            os.path.basename(ms_name) + ".dppp"
+                            os.path.basename(ms_name) + self.inputs['suffix']
                         )
                     )
                     log_location = os.path.join(

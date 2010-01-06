@@ -27,6 +27,12 @@ class dppp_node(LOFARnode):
         with log_time(self.logger):
             self.logger.info("Processing %s" % (infile,))
 
+            # If the input and output filenames are the same, DPPP should not
+            # write a new MS, but rather update the existing one in-place.
+            # This is achieved by setting msout to an empty string.
+            if outfile == infile:
+                outfile = ""
+
             # Patch the parset with the correct input/output MS names.
             temp_parset_filename = patch_parset(
                 parset, {
