@@ -26,6 +26,25 @@ latestTimeInFile = -1 # needed for determining bin-sizes in non-24-hour plots
 TwentyfourHourPlot = True
 #totalNumberOfTriggers = 0
 
+# define global processed-data variables
+# Have to be global as we process incrementally, per block of triggers
+# and Python does not have static vars...
+#blockSizeForTriggerList = 100000
+rcuCount = [0] * numberOfRCUsperStation; # creates a list of 96 zeros
+nBins = 240 # bins for time-series
+firstTime = 0
+lastTime = 0
+timeSeriesHistogram = [0] * nBins 
+timeSeriesProfileCount = [[0 for i in range(nBins)] for j in range(96)]
+timeSeriesProfileValue = [[0 for i in range(nBins)] for j in range(96)]
+
+# define RCU groups for noise profile plot.
+group1 = range(16) + range(48,64)
+group2 = range(16,32) + range(64,80)
+group3 = range(32,48) + range(80,96)
+RCUgroups = [group1, group2, group3]
+
+
 # keys for our trigger dictionary; separate lists for some of the statistics
 RCUnrKey = 'RCUnr';             RCUnr = [] 
 seqnrKey = 'seqnr';             seqnr = []
@@ -42,7 +61,6 @@ if len(sys.argv) > 1:
 else:
     fileName = '2009-09-03_TRIGGER5.dat'   #  that's just handy for rapid testing...
     print 'No filename given; usage: python triggerstatsXL.py <filename>. Using file ' + fileName + ' by default.'
-
 
 def nofTriggersFilteredByThreshold(listOfTriggers, threshold):
     n = 0
@@ -87,89 +105,62 @@ def listOfTimeDifferences(listOfTriggers, rcu):
             print str(i) + ': ' + str(diff)
             lastTime = thisTime + float(thisSample / 200.0e6)
 
-def readTriggerListFromCSVFile(filename): # directly make histogram, not making triggerList
+def processCSVFile(filename): # directly make histogram, not making triggerList
     myKeys = [RCUnrKey, seqnrKey, timeKey, sampleKey, sumKey, nrSamplesKey, peakKey, powerBeforeKey, powerAfterKey]
     lastTimeReader = csv.DictReader(os.popen("tail -1 " + fileName), myKeys, delimiter=' ')
     global latestTimeInFile
     for record in lastTimeReader:
         latestTimeInFile = int(record[timeKey])
-        print latestTimeInFile
+#        print latestTimeInFile
     if latestTimeInFile > 2.2e9:
         print "Error reading latest timestamp in the file!"
-    
-   # numTriggers = triggerReader.line_num # trigger records don't span multiple lines
-   # print numTriggers
-#    triggerList = []
-    rcuCount = [0] * numberOfRCUsperStation; # creates a list of 96 zeros
-    
+       
     triggerReader = csv.DictReader(open(fileName), myKeys, delimiter=' ')
     firstRecord = triggerReader.next()
+   
+    global firstTime
+    global lastTime # needed even if they ARE defined globally
     firstTime = int(firstRecord[timeKey])
     lastTime = latestTimeInFile
     
     if (TwentyfourHourPlot):
         firstTime = 0
         lastTime = 86400
-        
-    
-    nBins = 240 # bins for time-series
-    timeSeriesHistogram = [0] * nBins
-    
-#    cols = 4
-# rows = 5
-# array = [[0 for i in range(cols)] for j in range(rows)]
-
-    timeSeriesProfileCount = [[0 for i in range(nBins)] for j in range(96)]
-#    timeSeriesProfileCount = [[0]*nBins] * 96
-  #  print timeSeriesProfileCount
-  #  print timeSeriesProfileCount[9][0]
-    timeSeriesProfileValue = [[0 for i in range(nBins)] for j in range(96)]
-    
     
     for record in triggerReader:
-        thisTime = int(record[timeKey])
-        if thisTime < 2.2e9: # Unix timestamps are signed ints, and they don't go that far...
-#            triggerList.append(record)
-            thisRCU = int(record[RCUnrKey])
-            thisPowerBefore = int(record[powerBeforeKey])
-            rcuCount[thisRCU] += 1
-            
-            if (TwentyfourHourPlot):
-                thisTime %= 86400
-            
-            
-            timeSeriesIndex = int(nBins * float(thisTime - firstTime) / float(lastTime - firstTime + 0.000001)) # epsilon to remove boundary effect when thisTime = lastTime           
-            timeSeriesHistogram[timeSeriesIndex] += 1  
-  #          print thisRCU
-  #          print timeSeriesIndex
-            timeSeriesProfileCount[thisRCU][timeSeriesIndex] += 1
-            timeSeriesProfileValue[thisRCU][timeSeriesIndex] += thisPowerBefore     
+        if (type(record[RCUnrKey]) != type('1')) | (type(record[timeKey]) != type('1')) | (type(record[powerBeforeKey]) != type('1')):
+        # all values in the record are of type 'string' by default; if error decoding line, it will return 'NoneType', which gives an exception on doing anything with it...
+            print 'Error parsing this line! Nr. ' + str(triggerReader.line_num)
         else:
-            print 'Invalid timestamp! ' + str(thisTime)
+            thisTime = int(record[timeKey])
+            if thisTime < 2.2e9: # Unix timestamps are signed ints, and they don't go that far...
+    #            triggerList.append(record)
+                updateRCUHistogram(record)
+                updateTimeSeriesAndNoiseProfile(record) 
+            else:
+                print 'Invalid timestamp! ' + str(thisTime)
+                
     global totalNumberOfTriggers
     totalNumberOfTriggers = triggerReader.line_num
-    plotBinnedTimeSeriesOfTriggers(timeSeriesHistogram, firstTime, lastTime)
-   
-    group1 = range(16) + range(48,64)
-    group2 = range(16,32) + range(64,80)
-    group3 = range(32,48) + range(80,96)
-    RCUgroups = [group1, group2, group3]
-    plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstTime, lastTime, RCUgroups)
-    
-    print totalNumberOfTriggers
-    return rcuCount        
-    
-def makeListsPerKey(triggerList): # makes globals, which is not good
-    for record in triggerList:
-        RCUnr.append(int(record[RCUnrKey]))
-        seqnr.append(int(record[seqnrKey]))
-        time.append(int(record[timeKey]))
-        sample.append(int(record[sampleKey]))
-        sum.append(int(record[sumKey]))
-        nrSamples.append(int(record[nrSamplesKey]))
-        peak.append(int(record[peakKey]))
-        powerBefore.append(int(record[powerBeforeKey]))
-        powerAfter.append(int(record[powerAfterKey]))
+     
+    print str(totalNumberOfTriggers) + ' triggers processed.'
+
+def updateRCUHistogram(trigger):
+    thisRCU = int(trigger[RCUnrKey])
+    rcuCount[thisRCU] += 1
+
+def updateTimeSeriesAndNoiseProfile(trigger):
+    thisRCU = int(trigger[RCUnrKey])
+    thisTime = int(trigger[timeKey]) 
+    if (TwentyfourHourPlot):
+        thisTime %= 86400
+        
+    thisPowerBefore = int(trigger[powerBeforeKey])
+    # calculate index in histogram:
+    timeSeriesIndex = int(nBins * float(thisTime - firstTime) / float(lastTime - firstTime + 0.000001)) # epsilon to remove boundary effect when thisTime = lastTime           
+    timeSeriesHistogram[timeSeriesIndex] += 1  
+    timeSeriesProfileCount[thisRCU][timeSeriesIndex] += 1
+    timeSeriesProfileValue[thisRCU][timeSeriesIndex] += thisPowerBefore     
 
 
 def sortedTriggerListByTimeAndSample(inputList): # sort triggers on 'time', then on 'sample'
@@ -183,47 +174,7 @@ def sortedTriggerListByTimeAndSample(inputList): # sort triggers on 'time', then
                 return cmp(a[fieldname1], b[fieldname1])
         return compare_two_dicts
 
-    #triggerList[0][timeKey] = 5
-    #triggerList[0][sampleKey] = 700
-    #triggerList[1][timeKey] = 5
-    #triggerList[1][sampleKey] = 750
-    #triggerList[2][timeKey] = 10
-    #triggerList[2][sampleKey] = 700
-    #triggerList[3][timeKey] = 5
-    #triggerList[3][sampleKey] = 699
-    #triggerList[4][timeKey] = 4
-    #triggerList[4][sampleKey] = 140000
-
     return sorted(inputList, compare_by(timeKey, sampleKey) )
-    
-  
-def coincidentPulseIndicesInTriggerList(sortedTriggerList, timeWindowInSamples): # input list is assumed to be time-sorted!
-    pulseIndices = []
-    # we have to guess the sampling rate! Well, let's look at the max value for 'sample'...
-    samplingRate = int(160e6)
-    if (max(sample) > 160e6):
-        samplingRate = int(200e6)
-
-    # Now search for 'pulses' = coincident triggers within a timeWindow
-    # make a list of indices in triggerList; every index in pulseIndices is the start of a new 'pulse'. 
-    # Pulse information can then be extracted just from the triggerList, as we know which ones belong together.
-
-    lastTimeInSamples = 0; 
-    i = 0
-    pulseIndices.append(0) # first pulse starts at 0
-    for record in sortedTriggerList: # pulse search
-        i+=1 # keep track of the index
-        thisSecond = int(record[timeKey])
-        thisSample = int(record[sampleKey])
-        thisTime = samplingRate * thisSecond + thisSample
-        
-        if (abs(thisTime - lastTimeInSamples) > timeWindowInSamples):
-            lastTimeInSamples = thisTime # start new pulse
-            pulseIndices.append(i) # at this index a new pulse begins
-    return pulseIndices
-
-def pulse(pulseIndices, triggerList, pulseno): # get list of triggers corresponding to pulse number 'pulseno' (0-based)
-    return triggerList[pulseIndices[pulseno]:pulseIndices[pulseno+1]]
     
 def timeSpanInMinutes(triggerList): # also fractional minutes
     totalTriggers = len(triggerList)
@@ -242,7 +193,7 @@ def makeTriggersVersusRCUHistogram(rcuCount): # also uses RCUnr global input
     x = range(96)
     y = rcuCount
     maxY = max(y)
-    maxX = max(x)
+    maxX = max(x)+1
     #y = 1000.0 * y / max(y)
 
     width=1200  
@@ -275,7 +226,7 @@ def makeTriggersVersusRCUHistogram(rcuCount): # also uses RCUnr global input
     graph.Label("x","RCU number",1)
     graph.Label("y","Counts",1)
     graph.Bars(gY);
-    graph.WriteEPS("triggersVersusRCUNumber.eps","Histogram of triggers vs RCU number")
+    graph.WriteEPS("triggersVersusRCUNumber-"+fileName+".eps","Histogram of triggers vs RCU number")
 
 
 def makeTriggersVersusThresholdPlot(triggerList):
@@ -333,127 +284,17 @@ def makeTriggersVersusThresholdPlot(triggerList):
 
     graph.WriteEPS("triggersVersusThreshold.eps","Counts per minute")
 
-
-# now continue with separation into 'pulses' (multiple RCUs triggering within a short timespan xxx)
-
-    
-# get pulses one by one, make histogram of # triggers per pulse. Scale to 'counts per minute'
-
-def makeNumberOfRCUsPerPulsePlot(sortedTriggerList, pulseIndices): 
-    gX = mglData(numberOfRCUsperStation)
-    for i in range(numberOfRCUsperStation):
-        gX[i] = i
-
-    gY = mglData(numberOfRCUsperStation)
-    
-    minutes = timeSpanInMinutes(sortedTriggerList)
-    
-    lastIndex = -1;    
-    for index in pulseIndices: # we can work only on the indices to get # RCUs 
-        gY[index - lastIndex] += 1.0 / minutes
-        lastIndex = index
-
-    width=800  
-    height=600
-    mglGraphPS = 1
-    graph = mglGraph(mglGraphPS, width, height)
-
-    graph.Clf()
-    graph.SetFontSize(2.5)
-    # set y-min range so you can just see 1 count in the entire interval.
-    yRangeMin = 0.95 / minutes
-    graph.Title("Histogram of number of RCUs per pulse")
-
-    graph.SetRanges(0.0, 30, yRangeMin, 2 * gY.Max('x')[0]) # needs better x-ranging!
-
-    graph.Puts(float(30) * 0.5, 2 * gY.Max('x')[0]*1.05, 0, "Coincidence window size = " + format(timeWindowForCoincidence, "6.0f"))
-
-    # make logplot
-    graph.SetOrigin(0.0, yRangeMin) 
-    graph.SetFunc("","lg(y)","") 
-    graph.SetTicks('y',0)		 
-
-    graph.SetTicks('x', 4.0, 4)
-
-    graph.Axis("xy")
-    graph.Grid()
-
-    graph.Label("x","Number of RCUs",1)
-    graph.Label("y","Counts per minute",1)
-    graph.Plot(gX,gY, 'b o#'); 
-    graph.WriteEPS("numberOfRCUsPerPulse.eps","Histogram of number of RCUs per coincident pulse")
-
-# now get a histogram of total-sum per pulse (counts per minute)
-
-# all 'sum' values of triggers inside one coincidence pulse get summed (total sum)
-def makeHistogramOfTotalSumInPulses(sortedTriggerList, pulseIndices): 
-    allTotalSums = []
-    for i in range(len(pulseIndices) - 1):
-        thisPulse = pulse(pulseIndices, sortedTriggerList, i)
-        thisTotalSum = 0;
-        for record in thisPulse:
-            thisTotalSum += int(record[sumKey])
-        allTotalSums.append(thisTotalSum)
-
-    print(len(allTotalSums))
-    print(len(pulseIndices))
-      
-    (y, x) = numpy.histogram(allTotalSums, 50)
-
-    gY = mglData(len(y))
-    gX = mglData(len(x))
-
-    minutes = timeSpanInMinutes(sortedTriggerList)
-    yRangeMin = 0.95 / minutes
-
-    for i in range(len(y)):
-        gY[i] = float(y[i]) / minutes # counts per minute
-
-    for i in range(len(x)):
-        gX[i] = float(x[i])
-        
-    width=1200  
-    height=600
-    mglGraphPS = 1
-    graph = mglGraph(mglGraphPS, width, height)
-
-    graph.Clf()
-    graph.SetFontSize(3.0)
-    #graph.SetRanges(0.0, float(max(x)), 0.0, float(max(y)) / minutes)
-    #graph.SetTicks('x', 16.0, 4)
-    #graph.SetRanges(gX[0], gX.Max('x')[0], yRangeMin, 2 * gY.Max('x')[0]) 
-    graph.SetRanges(0, gX.Max('x')[0], yRangeMin, 2 * gY.Max('x')[0])
-    # make logplot
-    graph.SetOrigin(0, yRangeMin) 
-    graph.SetFunc("","lg(y)","") 
-    graph.SetTicks('y',0)		 
-    #graph.SetTicks('x',0)
-
-    graph.Axis("xy")
-    graph.Grid()
-
-    graph.Title("Histogram of total sum per pulse")
-    graph.Label("x","total sum",1)
-    graph.Label("y","Counts per minute",1)
-    graph.Bars(gY);
-    graph.WriteEPS("totalSumPerPulse.eps","Histogram of total sum per pulse")
-
-
-
 def plotBinnedTimeSeriesOfTriggers(binnedData, firstTime, lastTime): 
     # make binned timeseries of trigger counts to see variations over time
     
     nBins = len(binnedData)
     
     timeBinSize = float(lastTime - firstTime) / nBins # seconds
-    print nBins
-    print firstTime
-    print lastTime
-    print timeBinSize
-    #nBins = (lastTime - firstTime) / timeBinSize
-    # use again numpy's histogram function
-    #(y, x) = numpy.histogram(time, int(nBins))
-    
+#    print nBins
+#    print firstTime
+#    print lastTime
+#    print timeBinSize
+
     x = [timeBinSize * float(k) for k in range(nBins)] # look, I can write compact Python statements! ;)
     y = binnedData
     width=1200  
@@ -468,9 +309,9 @@ def plotBinnedTimeSeriesOfTriggers(binnedData, firstTime, lastTime):
         gY[i] = float(y[i])
 
     for i in range(len(x)):
-        gX[i] = float(x[i]) / 60.0
+        gX[i] = float(x[i]) / 3600.0
 
-    maxX = gX.Max('x')[0]
+    maxX = float(lastTime - firstTime) / 3600.0
     maxY = float(max(y))
         
     graph.Clf()
@@ -478,7 +319,7 @@ def plotBinnedTimeSeriesOfTriggers(binnedData, firstTime, lastTime):
     graph.SetRanges(0.0, maxX, 0.0, maxY)
     
     if (TwentyfourHourPlot):
-      graph.SetTicks('x', 60.0, 0)
+      graph.SetTicks('x', 1.0, 0)
 
     graph.Axis("xy")
     graph.Grid()
@@ -490,24 +331,11 @@ def plotBinnedTimeSeriesOfTriggers(binnedData, firstTime, lastTime):
 
     graph.Puts(float(maxX) * 0.5,float(maxY)*1.05,0,"Total trigger count = " + str(totalNumberOfTriggers) + "; bin width = " + format(timeBinSize, "4.1f") + " s")
 
-    graph.Label("x","Time (min)",1)
+    graph.Label("x","Time (hr)",1)
     graph.Label("y","Counts",1)
     graph.Bars(gY)
 
-    #ggY = mglData(len(y),4)
-    #for i in range(len(y)):
-    #    ggY.Put(float(y[i]), i, 0)
-    #    ggY.Put(float(y[i]) * 0.7*0.7, i, 1)
-    #    ggY.Put(float(y[i]) * 0.7*0.7*0.7, i, 2)
-    #    ggY.Put(float(y[i]) * 0.7*0.7*0.7*0.7, i, 3)
-
-    #ggY=mglData(len(y))
-    #for i in range(len(y)):
-    #    ggY[i] = y[i] * 0.5
-    #    
-    #graph.Bars(ggY)
-
-    graph.WriteEPS("timeSeriesOfTriggers.eps","Binned timeseries of triggers")
+    graph.WriteEPS("timeSeriesOfTriggers-"+fileName+".eps","Binned timeseries of triggers")
 
 
 def plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstTime, lastTime, RCUgroups): 
@@ -519,15 +347,15 @@ def plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstT
     # average RCUS in one group
     groupedCount = [[0 for i in range(nBins)] for j in range(nGroups)]
     groupedValue = [[0 for i in range(nBins)] for j in range(nGroups)]
-#    groupedCount = [[0]*nBins] * nGroups
-#    groupedValue = [[0]*nBins] * nGroups
+#   DO NOT use: groupedCount = [[0]*nBins] * nGroups
+
     groupIndex = -1
     global groups
     groups = RCUgroups
-    print RCUgroups
-    print nGroups
-    global tpcount
-    tpcount = timeSeriesProfileCount
+#    print RCUgroups
+#    print nGroups
+#    global tpcount
+#    tpcount = timeSeriesProfileCount
     for group in RCUgroups:
         groupIndex += 1
         for RCU in group:
@@ -535,18 +363,10 @@ def plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstT
                 groupedCount[groupIndex][i] += timeSeriesProfileCount[RCU][i]
                 groupedValue[groupIndex][i] += timeSeriesProfileValue[RCU][i]
   
-    print groupedCount[0]
-    print 'boe'
-    print groupedCount[1]
+   # print groupedCount[0]
+    #print groupedCount[1]
     timeBinSize = float(lastTime - firstTime) / nBins # seconds
-#    print nBins
-#    print firstTime
-#    print lastTime
-#    print timeBinSize
-    #nBins = (lastTime - firstTime) / timeBinSize
-    # use again numpy's histogram function
-    #(y, x) = numpy.histogram(time, int(nBins))
-    
+
     x = [timeBinSize * float(k) for k in range(nBins)] # look, I can write compact Python statements! ;)
   
     width=1200  
@@ -556,8 +376,6 @@ def plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstT
 
     gY = mglData(nBins, nGroups)
     gX = mglData(nBins, nGroups)
-#    eY = mglData(nBins) # standard-deviation to be added...
-#    eX = mglData(nBins)
     maxY = 0
     for n in range(nGroups):
         for i in range(nBins):
@@ -568,7 +386,7 @@ def plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstT
                 gY.Put(thisValue, i, n)
             else:
                 gY.Put(NaN, i, n)
-            gX.Put(float(x[i]) / 60.0, i, n)  
+            gX.Put(float(x[i]) / 3600.0, i, n)  
  
                    # if timeSeriesProfileCount[RCU][i] != 0:
           #      gY.Put(5.0 * RCU + float(timeSeriesProfileValue[RCU][i]) / float(timeSeriesProfileCount[RCU][i]), i, RCU)
@@ -576,66 +394,43 @@ def plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstT
           #      gY.Put(NaN, i, RCU)
           # gX.Put(float(x[i]) / 60.0, i, RCU)
             
-    maxX = float(lastTime - firstTime) / 60.0
-#    maxY = gY.Max('x')[0]
+    maxX = float(lastTime - firstTime) / 3600.0
     print 'max'
     print maxX
     print maxY    
     graph.Clf()
-    graph.SetFontSize(3.0)
+    graph.SetFontSize(2.0)
     graph.SetRanges(0.0, maxX, 0.0, maxY * 1.05)
     if (TwentyfourHourPlot):
-        graph.SetTicks('x', 60.0, 0) 
+        graph.SetTicks('x', 1.0, 0) 
 
     graph.Axis("xy")
     graph.Grid()
 
     #graph.Title("Time series of # triggers (binned)")
-    graph.SetFontSize(6.0)
-    graph.Puts(float(maxX) * 0.5, float(2000) * 1.15, 0, "Profile histogram of noise level")
+    graph.SetFontSize(4.0)
+    graph.Puts(float(maxX) * 0.5, float(maxY) * 1.15, 0, "Profile histogram of noise level")
+    graph.SetFontSize(2.0)
+
+    graph.Puts(float(maxX) * 0.5,float(maxY)*1.08,0,"Total trigger count = " + str(totalNumberOfTriggers) + "; bin width = " + format(timeBinSize, "4.1f") + " s")
     graph.SetFontSize(3.0)
-
-    graph.Puts(float(maxX) * 0.5,float(maxY)*1.05,0,"Total trigger count = " + str(totalNumberOfTriggers) + "; bin width = " + format(timeBinSize, "4.1f") + " s")
-
-    graph.Label("x","Time (min)",1)
-    graph.Label("y","Counts",1)
+    graph.Label("x","Time (hr)",1)
+    graph.Label("y","Noise level",1)
     graph.Plot(gX, gY)
 
-    #ggY = mglData(len(y),4)
-    #for i in range(len(y)):
-    #    ggY.Put(float(y[i]), i, 0)
-    #    ggY.Put(float(y[i]) * 0.7*0.7, i, 1)
-    #    ggY.Put(float(y[i]) * 0.7*0.7*0.7, i, 2)
-    #    ggY.Put(float(y[i]) * 0.7*0.7*0.7*0.7, i, 3)
-
-    #ggY=mglData(len(y))
-    #for i in range(len(y)):
-    #    ggY[i] = y[i] * 0.5
-    #    
-    #graph.Bars(ggY)
-
-    graph.WriteEPS("noiseProfileHistogram.eps","Profile histogram of noise level")
+    graph.WriteEPS("noiseProfileHistogram"+fileName+".eps","Profile histogram of noise level")
 
 
 def runFullAnalysis():
     print "Reading trigger list..."
-    rcuCount = readTriggerListFromCSVFile(fileName)
-  #  print "Making lists per key..."
-   # makeListsPerKey(triggerList)
-    print "Making triggers versus RCU histogram..."
-    makeTriggersVersusRCUHistogram(rcuCount)
- #   print "Sorting trigger list..."
- #   sortedTriggerList = sortedTriggerListByTimeAndSample(triggerList)
- #   print "Making coincident pulse list..."
- #   pulseIndices = coincidentPulseIndicesInTriggerList(sortedTriggerList, timeWindowForCoincidence)
- #   print "Making numer of RCUs per pulse plot..."
- #   makeNumberOfRCUsPerPulsePlot(sortedTriggerList, pulseIndices)
+    processCSVFile(fileName)
     
-    #makeHistogramOfTotalSumInPulses(sortedTriggerList, pulseIndices)
- #   print "Making binned time-series of triggers..."
- #   makeBinnedTimeSeriesOfTriggers(triggerList)
- #   print "Making triggers versus threshold plot..."
- #   makeTriggersVersusThresholdPlot(triggerList)
+    print 'Creating plots...'
+    makeTriggersVersusRCUHistogram(rcuCount)
+    plotBinnedTimeSeriesOfTriggers(timeSeriesHistogram, firstTime, lastTime)
+   
+    plotProfileTimeSeries(timeSeriesProfileCount, timeSeriesProfileValue, firstTime, lastTime, RCUgroups)
+    print 'Done!'
 
 # main
 runFullAnalysis()
