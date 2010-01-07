@@ -2,6 +2,7 @@
 add_subdirectory (blitz)
 add_subdirectory (boost)
 add_subdirectory (fftw3)
+add_subdirectory (hdf5)
 add_subdirectory (itpp)
 add_subdirectory (mathgl)
 add_subdirectory (matplotlib)
@@ -14,6 +15,10 @@ add_subdirectory (valgrind)
 if (CR_WITH_STARTOOLS AND HAVE_FFTW3)
   add_subdirectory (startools)
 endif (CR_WITH_STARTOOLS AND HAVE_FFTW3)
+
+if (NOT bison_executable)
+  add_subdirectory (bison)
+endif (NOT bison_executable)
 
 ##____________________________________________________________________
 ## Packages which are only available on Mac OS X
