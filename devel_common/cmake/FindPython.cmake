@@ -158,7 +158,7 @@ foreach (python_version ${python_version_list})
       PATHS
       ${python_lib_locations}
       PATH_SUFFIXES
-#      python${python_version}/config #fkbreitl: removed since lib in standard location were not found
+      python${python_version}/config
       NO_DEFAULT_PATH
       )
 
