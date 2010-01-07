@@ -104,15 +104,15 @@ endif (doxygen_executable)
 
 add_custom_target (clean-build
   COMMAND rm -rf *~
+  COMMAND rm -rf external
   COMMAND rm -rf cmake_install.cmake
   COMMAND rm -rf CMakeCache.txt
   COMMAND rm -rf CMakeFiles
-  COMMAND rm -rf bison blitz boost
   COMMAND rm -rf casacore cfitsio cr
-  COMMAND rm -rf dal flex hdf5 mathgl
+  COMMAND rm -rf dal flex
   COMMAND rm -rf numeric numpy num_util
   COMMAND rm -rf plplot root
-  COMMAND rm -rf startools swig szip
+  COMMAND rm -rf startools szip
   COMMAND rm -rf wcslib wcstools
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Cleaning up build directory ..."
@@ -171,7 +171,6 @@ set (packages_external
   blas
   casacore
   cfitsio
-  hdf5
   numpy
   num_util
   pyrap
@@ -181,10 +180,6 @@ set (packages_external
   wcslib
   wcstools
   )
-
-if (NOT bison_executable)
-  list (APPEND packages_external bison)
-endif (NOT bison_executable)
 
 if (NOT flex_executable)
   list (APPEND packages_external flex)
