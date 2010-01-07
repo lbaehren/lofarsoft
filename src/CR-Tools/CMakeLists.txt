@@ -334,6 +334,8 @@ if (CR_WITH_GUI)
 
   ## Check for Qt4
 
+  set (DESIRED_QT_VERSION 4)
+  
   include (FindQtFink)
 
   if (NOT QT4_INCLUDES)
