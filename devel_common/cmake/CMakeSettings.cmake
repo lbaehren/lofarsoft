@@ -167,8 +167,11 @@ if (NOT USG_CMAKE_CONFIG)
     FORCE
     )
 
-  ## ----------------------------------------------------------------------------
-  ## Test datasets
+  ## ============================================================================
+  ##
+  ##  Test datasets
+  ##
+  ## ============================================================================
 
   ## FITS
   
@@ -230,13 +233,70 @@ if (NOT USG_CMAKE_CONFIG)
     PATH_SUFFIXES
     lopes
     )
-  
-  ## ----------------------------------------------------------------------------
-  ## Internal CMake variables
 
-#  if (CMAKE_MAJOR_VERSION GREATER 1 AND CMAKE_MINOR_VERSION GREATER 5)
-#    cmake_policy (VERSION 2.6)
-#  endif (CMAKE_MAJOR_VERSION GREATER 1 AND CMAKE_MINOR_VERSION GREATER 5)
+  ## ============================================================================
+  ##
+  ##  System inspection
+  ##
+  ## ============================================================================
+
+  ##________________________________________________________
+  ## Size of variable types
+  
+  include (CheckTypeSize)
+  
+  check_type_size ("short"         SIZEOF_SHORT       )
+  check_type_size ("int"           SIZEOF_INT         )
+  check_type_size ("float"         SIZEOF_FLOAT       )
+  check_type_size ("double"        SIZEOF_DOUBLE      )
+  check_type_size ("long"          SIZEOF_LONG        )
+  check_type_size ("long int"      SIZEOF_LONG_INT    )
+  check_type_size ("long long"     SIZEOF_LONG_LONG   )
+  check_type_size ("uint"          SIZEOF_UINT        )
+  check_type_size ("int32_t"       SIZEOF_INT32_T     )
+  check_type_size ("int64_t"       SIZEOF_INT64_T     )
+  check_type_size ("uint32_t"      SIZEOF_UINT32_T    )
+  check_type_size ("uint64_t"      SIZEOF_UINT64_T    )
+  
+  if (CMAKE_SIZEOF_VOID_P)
+    if (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+      message (STATUS "Adding compiler flag -DWORDSIZE_IS_64")
+      add_definitions (-DWORDSIZE_IS_64)
+    endif (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+  else (CMAKE_SIZEOF_VOID_P)
+    message (STATUS "Unable to check size of void*")
+  endif (CMAKE_SIZEOF_VOID_P)
+  
+  ##__________________________________________________________
+  ## System header files
+  
+  find_path (HAVE_LIBGEN_H     libgen.h      PATHS ${include_locations} )
+  find_path (HAVE_STDINT_H     stdint.h      PATHS ${include_locations} )
+  find_path (HAVE_STDLIB_H     stdlib.h      PATHS ${include_locations} )
+  find_path (HAVE_STRING_H     string.h      PATHS ${include_locations} )
+  find_path (HAVE_STRINGS_H    strings.h     PATHS ${include_locations} )
+  find_path (HAVE_SYS_STAT_H   sys/stat.h    PATHS ${include_locations} )
+  find_path (HAVE_SYS_TIME_H   sys/time.h    PATHS ${include_locations} )
+  find_path (HAVE_SYS_TYPES_H  sys/types.h   PATHS ${include_locations} )
+  find_path (HAVE_SYS_UTIME_H  sys/utime.h   PATHS ${include_locations} )
+  
+  ##__________________________________________________________
+  ## System Libraries
+  
+  find_library (HAVE_LIBM        m        PATHS ${lib_locations} )
+  find_library (HAVE_LIBUTIL     util     PATHS ${lib_locations} )
+  find_library (HAVE_LIBDL       dl       PATHS ${lib_locations} )
+  find_library (HAVE_LIBGD       gd       PATHS ${lib_locations} )
+  find_library (HAVE_LIBPTHREAD  pthread  PATHS ${lib_locations} )
+  find_library (HAVE_LIBZ        z        PATHS ${lib_locations} )
+  
+  ## ============================================================================
+  ##
+  ##  Internal CMake variables
+  ##
+  ## ============================================================================
+  
+  #set (CMAKE_OSX_ARCHITECTURES i386;ppc)
   
   if (UNIX)
     set (CMAKE_FIND_LIBRARY_PREFIXES "lib" CACHE STRING
@@ -279,12 +339,22 @@ if (NOT USG_CMAKE_CONFIG)
   ## ----------------------------------------------------------------------------
   ## Feedback 
 
+  message (STATUS)
+  message (STATUS "+------------------------------------------------------------+")
+  message (STATUS)
+
   message (STATUS "[USG CMake configuration]")
-  message (STATUS "Hostname                    = ${hostname}")
-  message (STATUS "USG_ROOT                    = ${USG_ROOT}")
-  message (STATUS "USG_INSTALL_PREFIX          = ${USG_INSTALL_PREFIX}")
-  message (STATUS "CMAKE_INSTALL_PREFIX        = ${CMAKE_INSTALL_PREFIX}")
-  message (STATUS "CMAKE_FIND_LIBRARY_PREFIXES = ${CMAKE_FIND_LIBRARY_PREFIXES}")
-  message (STATUS "CMAKE_FIND_LIBRARY_SUFFIXES = ${CMAKE_FIND_LIBRARY_SUFFIXES}")
+  message (STATUS " CMAKE_SYSTEM .............. : ${CMAKE_SYSTEM}")
+  message (STATUS " CMAKE_SYSTEM_VERSION ...... : ${CMAKE_SYSTEM_VERSION}")
+  message (STATUS " CMAKE_SYSTEM_PROCESSOR .... : ${CMAKE_SYSTEM_PROCESSOR}")
+  message (STATUS " CMAKE_INSTALL_PREFIX ...... : ${CMAKE_INSTALL_PREFIX}")
+  message (STATUS " CMAKE_FIND_LIBRARY_PREFIXES : ${CMAKE_FIND_LIBRARY_PREFIXES}")
+  message (STATUS " CMAKE_FIND_LIBRARY_SUFFIXES : ${CMAKE_FIND_LIBRARY_SUFFIXES}")
+  message (STATUS " Size of void* ............. : ${CMAKE_SIZEOF_VOID_P}")
+  message (STATUS " USG_ROOT .................. : ${USG_ROOT}")
+  
+  message (STATUS)
+  message (STATUS "+------------------------------------------------------------+")
+  message (STATUS)
   
 endif (NOT USG_CMAKE_CONFIG)
