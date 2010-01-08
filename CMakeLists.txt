@@ -111,7 +111,7 @@ add_custom_target (clean-build
   COMMAND rm -rf CMakeFiles
   COMMAND rm -rf casacore cfitsio cr
   COMMAND rm -rf dal
-  COMMAND rm -rf numeric numpy num_util
+  COMMAND rm -rf numeric num_util
   COMMAND rm -rf plplot root
   COMMAND rm -rf startools szip
   COMMAND rm -rf wcslib wcstools
@@ -172,7 +172,6 @@ set (packages_external
   blas
   casacore
   cfitsio
-  numpy
   num_util
   pyrap
   root
