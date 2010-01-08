@@ -110,7 +110,7 @@ add_custom_target (clean-build
   COMMAND rm -rf CMakeCache.txt
   COMMAND rm -rf CMakeFiles
   COMMAND rm -rf casacore cfitsio cr
-  COMMAND rm -rf dal flex
+  COMMAND rm -rf dal
   COMMAND rm -rf numeric numpy num_util
   COMMAND rm -rf plplot root
   COMMAND rm -rf startools szip
@@ -181,10 +181,6 @@ set (packages_external
   wcslib
   wcstools
   )
-
-if (NOT flex_executable)
-  list (APPEND packages_external flex)
-endif (NOT flex_executable)
 
 ## Packages handled directly through CMake
 

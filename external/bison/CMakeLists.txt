@@ -1,8 +1,8 @@
 
 ## ------------------------------------------------------------------------------
 #
-#  CMake wrapper around the GNU Autotools-based configure/build of the Bison
-#  lexical generator.
+#  CMake wrapper around the GNU Autotools-based configure/build of the BISON
+#  library.
 #
 ## ------------------------------------------------------------------------------
 
@@ -10,103 +10,74 @@
 project (BISON)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.8)
 
 ## -----------------------------------------------------------------------------
-## Only force rebuild of the tool, if it cannot be found on the system.
+## Only force rebuild of the library from the provided source code, if no system
+## installation can be found. In order to handle this properly, we use the CMake
+## find script
 
-option (BISON_FORCE_BUILD "Force rebuild and local installation" 0)
+option (BISON_FORCE_BUILD       "Force rebuild and local installation"      NO  )
+option (BISON_VERBOSE_BUILD     "Be verbose during build process?"          NO  )
 
-set (bin_locations
-  ## possible system-wide installation locations
-  /usr/bin
-  /usr/local/bin/
-  /opt
-  /opt/bin
-  /sw/bin
-  ## local installation as part of USG distribution
-  ${BISON_SOURCE_DIR}../../release/bin
-)
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_program (HAVE_BISON bison ${bin_locations})
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+  PATHS 
+  ${BISON_SOURCE_DIR}
+  ${BISON_SOURCE_DIR}/..
+  ${BISON_SOURCE_DIR}/../..
+  ${BISON_SOURCE_DIR}/../../..
+  $ENV{LOFARSOFT}
+  )
+
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
+  message (FATAL_ERROR "[Bison] Unable to locate additional CMake scripts!")
+endif (USG_ROOT)
+
+
+## ------------------------------------------------------------------------------
+## Check for system-wide BISON library installation
+
+find_program (HAVE_BISON bison PATHS ${bin_locations})
 
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_BISON OR BISON_FORCE_BUILD)
+  
+  include (ExternalProject)
 
-## ------------------------------------------------------------------------------
-## Locate the installation area
+  set (BISON_VERSION     "2.4")
+  set (BISON_DIRECTORY   "bison-${BISON_VERSION}")
+  set (BISON_TAR_ARCHIVE "${BISON_DIRECTORY}.tar.gz")
+  
+  ##__________________________________________________________________
+  ## Build the project
 
-find_path (BISON_prefix release_area.txt
-  PATHS
-  ${BISON_SOURCE_DIR}
-  PATH_SUFFIXES
-  ../release
-  ../../release
-  NO_DEFAULT_PATH
-  )
+  find_file (have_bison_tgz ${BISON_TAR_ARCHIVE} ${BISON_SOURCE_DIR})
 
-if (NOT BISON_prefix)
-  message (FATAL_ERROR "Unable to locate the installation area")
-endif (NOT BISON_prefix)
-
-## ------------------------------------------------------------------------------
-## Run the configure script provided along with the distribution
-
-## [1] configure
-
-message (STATUS "Running the Bison configure script...")
-
-execute_process (
-  WORKING_DIRECTORY ${BISON_SOURCE_DIR}
-  COMMAND ./configure --prefix=${BISON_prefix}
-  TIMEOUT 300
-  ERROR_VARIABLE error_configure
-  )
-
-if (error_configure)
-  message (STATUS "There was an error running the Bison configure script!")
-  message (SEND_ERROR "${error_configure}")
-endif (error_configure)
-
-## [2] make
-
-message (STATUS "Building Bison ...")
-
-execute_process (
-  WORKING_DIRECTORY ${BISON_SOURCE_DIR}
-  COMMAND make 
-  TIMEOUT 3600
-  ERROR_VARIABLE error_make
-  )
-
-if (error_make)
-  message (STATUS "There was an error building Bison!")
-  message (SEND_ERROR "${error_make}")
-endif (error_make)
-
-## [3] make install
-
-if (NOT error_make)
-
-message (STATUS "Installing Bison ...")
-
-execute_process (
-  WORKING_DIRECTORY ${BISON_SOURCE_DIR}
-  COMMAND make install
-  TIMEOUT 180
-  ERROR_VARIABLE error_make_install
-  )
-
-if (error_make_install)
-  message (STATUS "There was an error installing Bison!")
-  message (SEND_ERROR "${error_make_install}")
-endif (error_make_install)
-
-endif (NOT error_make)
-
-## <-- end build condition ----------------------------------------------------->
-
+  if (have_bison_tgz)
+    ExternalProject_Add (bison
+      PREFIX ${BISON_BINARY_DIR}
+      DOWNLOAD_DIR ${BISON_BINARY_DIR}
+      SOURCE_DIR ${BISON_BINARY_DIR}
+      URL ${have_bison_tgz}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${BISON_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}
+      )
+  else (have_bison_tgz)
+    message (WARNING "[Bison] Unable to build project - missing source!")
+  endif (have_bison_tgz)
+  
+  ## <-- end build condition ----------------------------------------------------->
+  
 else (NOT HAVE_BISON OR BISON_FORCE_BUILD)
-  message (STATUS "Found system-wide installation of Bison; skipping rebuild!")
+  add_custom_target (bison
+    WORKING_DIRECTORY ${BOOST_BINARY_DIR}
+    COMMENT "[Bison] Found system-wide installation; skipping rebuild!"
+    )
+  message (STATUS "[Bison] Found system-wide installation; skipping rebuild!")
 endif (NOT HAVE_BISON OR BISON_FORCE_BUILD)
