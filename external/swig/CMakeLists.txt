@@ -72,11 +72,11 @@ if (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)
   
   if (have_swig_tgz)
     ExternalProject_Add (swig
-      PREFIX ${USG_ROOT}/build/swig
-      DOWNLOAD_DIR ${SWIG_BINARY_DIR}/swig
-      SOURCE_DIR ${SWIG_BINARY_DIR}/swig
+      PREFIX ${SWIG_BINARY_DIR}
+      DOWNLOAD_DIR ${SWIG_BINARY_DIR}
+      SOURCE_DIR ${SWIG_BINARY_DIR}
       URL ${have_swig_tgz}
-      CONFIGURE_COMMAND ${SWIG_BINARY_DIR}/swig/configure --prefix=${USG_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${SWIG_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}
       )
   else (have_swig_tgz)
     status (WARNING "[Swig] Unable to build project - no sources found!")

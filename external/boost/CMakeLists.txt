@@ -89,7 +89,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
-  add_custom_target (plplot
+  add_custom_target (boost
     WORKING_DIRECTORY ${BOOST_BINARY_DIR}
     COMMENT "[Boost++] Found system-wide installation; skipping rebuild!"
     )
