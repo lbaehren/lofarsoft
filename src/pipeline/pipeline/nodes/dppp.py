@@ -27,11 +27,18 @@ class dppp_node(LOFARnode):
         with log_time(self.logger):
             self.logger.info("Processing %s" % (infile,))
 
+            # Create output directories and ensure the environment
+            # is initialised for DPPP run
+            create_directory(log_location)
+            env = utilities.read_initscript(initscript)
+
             # If the input and output filenames are the same, DPPP should not
             # write a new MS, but rather update the existing one in-place.
             # This is achieved by setting msout to an empty string.
             if outfile == infile:
-                outfile = ""
+                outfile = "\"\""
+            else:
+                create_directory(os.path.dirname(outfile))
 
             # Patch the parset with the correct input/output MS names.
             temp_parset_filename = patch_parset(
@@ -40,12 +47,6 @@ class dppp_node(LOFARnode):
                     'msout': outfile,
                 }
             )
-
-            # Create output directories and ensure the environment
-            # is initialised for DPPP run
-            create_directory(log_location)
-            create_directory(os.path.dirname(outfile))
-            env = utilities.read_initscript(initscript)
 
             try:
                 if not os.access(executable, os.X_OK):
