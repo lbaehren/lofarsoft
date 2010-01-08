@@ -23,8 +23,8 @@
 
 if (NOT USG_CMAKE_CONFIG)
 
-  ## First pass: if USG_ROOT is still undefined we need to define it, since this
-  ##             is the common starting point for all directory references below
+  ##________________________________________________________
+  ## Check if USG_ROOT is defined
 
   if (NOT USG_ROOT)
     message (STATUS "[USG CMake] USG_ROOT undefined; trying to locate it...")
@@ -46,35 +46,25 @@ if (NOT USG_CMAKE_CONFIG)
   if (USG_ROOT)
     ## This addition to the module path needs to go into the cache,
     ## because otherwise it will be gone at the next time CMake is run
-    set (CMAKE_MODULE_PATH ${USG_ROOT}/devel_common/cmake
-      CACHE
-      PATH 
+    set (CMAKE_MODULE_PATH ${USG_ROOT}/devel_common/cmake CACHE PATH
       "USG cmake modules"
       FORCE)
     ## installation location
-    set (USG_INSTALL_PREFIX ${USG_ROOT}/release
-      CACHE
-      PATH
+    set (USG_INSTALL_PREFIX ${USG_ROOT}/release CACHE PATH
       "USG default install area"
       FORCE
       )
-    set (CMAKE_INSTALL_PREFIX ${USG_ROOT}/release
-      CACHE
-      PATH
-      "CMake installation area"
+    set (CMAKE_INSTALL_PREFIX ${USG_ROOT}/release CACHE PATH
+      "CMake installation area" 
       FORCE
       )
     ## header files
-    include_directories (${USG_ROOT}/release/include
-      CACHE
-      PATH
+    include_directories (${USG_ROOT}/release/include CACHE PATH
       "USG include area"
       FORCE
       )
     ## (Test) data
-    set (USG_DATA ${USG_ROOT}/data
-      CACHE
-      PATH
+    set (USG_DATA ${USG_ROOT}/data CACHE PATH
       "USG data area"
       FORCE
       )
@@ -317,9 +307,12 @@ if (NOT USG_CMAKE_CONFIG)
     FORCE
     )
   
-  ## ----------------------------------------------------------------------------
+  ## ============================================================================
+  ##
   ##  Host-specific overrides
-  
+  ##
+  ## ============================================================================
+
   execute_process (COMMAND hostname -s
     OUTPUT_VARIABLE hostname
     OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -336,22 +329,26 @@ if (NOT USG_CMAKE_CONFIG)
   set (USG_CMAKE_CONFIG TRUE CACHE BOOL "USG CMake configuration flag" FORCE)
   mark_as_advanced(USG_CMAKE_CONFIG)
   
-  ## ----------------------------------------------------------------------------
-  ## Feedback 
+  ## ============================================================================
+  ##
+  ##  Configuration summary
+  ##
+  ## ============================================================================
 
   message (STATUS)
   message (STATUS "+------------------------------------------------------------+")
   message (STATUS)
 
   message (STATUS "[USG CMake configuration]")
-  message (STATUS " CMAKE_SYSTEM .............. : ${CMAKE_SYSTEM}")
-  message (STATUS " CMAKE_SYSTEM_VERSION ...... : ${CMAKE_SYSTEM_VERSION}")
-  message (STATUS " CMAKE_SYSTEM_PROCESSOR .... : ${CMAKE_SYSTEM_PROCESSOR}")
-  message (STATUS " CMAKE_INSTALL_PREFIX ...... : ${CMAKE_INSTALL_PREFIX}")
-  message (STATUS " CMAKE_FIND_LIBRARY_PREFIXES : ${CMAKE_FIND_LIBRARY_PREFIXES}")
-  message (STATUS " CMAKE_FIND_LIBRARY_SUFFIXES : ${CMAKE_FIND_LIBRARY_SUFFIXES}")
-  message (STATUS " Size of void* ............. : ${CMAKE_SIZEOF_VOID_P}")
-  message (STATUS " USG_ROOT .................. : ${USG_ROOT}")
+  message (STATUS " CMAKE_SYSTEM .............. : ${CMAKE_SYSTEM}"                )
+  message (STATUS " CMAKE_SYSTEM_VERSION ...... : ${CMAKE_SYSTEM_VERSION}"        )
+  message (STATUS " CMAKE_SYSTEM_PROCESSOR .... : ${CMAKE_SYSTEM_PROCESSOR}"      )
+  message (STATUS " CMAKE_SYSTEM_BIG_ENDIAN ... : ${CMAKE_SYSTEM_BIG_ENDIAN}"     )
+  message (STATUS " USG_ROOT .................. : ${USG_ROOT}"                    )
+  message (STATUS " CMAKE_INSTALL_PREFIX ...... : ${CMAKE_INSTALL_PREFIX}"        )
+  message (STATUS " CMAKE_FIND_LIBRARY_PREFIXES : ${CMAKE_FIND_LIBRARY_PREFIXES}" )
+  message (STATUS " CMAKE_FIND_LIBRARY_SUFFIXES : ${CMAKE_FIND_LIBRARY_SUFFIXES}" )
+  message (STATUS " Size of void* ............. : ${CMAKE_SIZEOF_VOID_P}"         )
   
   message (STATUS)
   message (STATUS "+------------------------------------------------------------+")
