@@ -293,6 +293,12 @@ using CR::LopesEventIn;
                             file with the same name will be overwritten.<br>
     <li>\b lateralTimeDistribution Status: <i>unfinished</i> - not tested, under development<br>
                             Plots lateral distribution of pulse arrival times.<br>
+    <li>\b randomDelay      Status: <i>preliminary</i> - not tested, under development<br>
+                            For timing uncertainty studies:<br>
+                            adds additional random delay (in ns) to each antenna.<br>
+    <li>\b startRandomSeed  Status: <i>preliminary</i> - not tested, under development<br>
+                            Random seed for root random number generator<br>
+                            Seed will be increased by 1 for each event.<br>
 
   <h3>Examples</h3>
 
@@ -809,6 +815,7 @@ ConfigData config;
 
 // Set default configuration values for the pipeline
 bool both_pol = false;		      // Should both polarizations be processed?
+UInt_t randomSeed = 1;                // random seed for root random number generator
 
 // Event parameters for calling the pipeline
 string eventfilelistname("");			         // Name of the ASCII event list
@@ -888,8 +895,10 @@ void readConfigFile (const string &filename)
    config.addDouble("lateralSNRcut", 1.0);            	// SNR cut for removing points from lateral distribution
    config.addDouble("lateralTimeCut", 15e-9);         	// Allowed time window +/- arround CC-beam-center for found peaks
    config.addBool("calculateMeanValues", false);   	// calculate some mean values of all processed events
-   config.addBool("lateralTimeDistribution", false);   // the lateral time distribution will not be generated
-
+   config.addBool("lateralTimeDistribution", false);    // the lateral time distribution will not be generated
+   config.addDouble("randomDelay", 0.);                 // random delay (in  ns), for timing uncertainty studies
+   config.addUint("startRandomSeed", 0);                // random seed for root random number generator
+ 
    IntType* _doTVcal = new IntType(-1);                // 1: yes, 0: no, -1: use default	
    _doTVcal->addAllowedValue(1);
    _doTVcal->addAllowedValue(0);
@@ -918,6 +927,9 @@ void readConfigFile (const string &filename)
      both_pol = true;
    else
      both_pol = false;
+     
+   // set random seed to start value  
+   randomSeed = config["startRandomSeed"]->uiValue();  
 }
 
 
@@ -1345,6 +1357,8 @@ int main (int argc, char *argv[])
              << "lateralTimeCut = 25e-9\n"
              << "calculateMeanValues = false\n"
              << "lateralTimeDistribution = false\n"
+             << "randomDelay = 0\n"
+             << "startRandomSeed = 1\n"
              << "... \n"
              << endl;
         return 0;	// exit here
@@ -1661,6 +1675,9 @@ int main (int argc, char *argv[])
       latMeanDistCC = 0, latMeanDistCC_NS = 0;
       rawPulsesMap = map <int,PulseProperties>();
       calibPulsesMap = map <int,PulseProperties>();
+      
+      // increase random seed
+      ++randomSeed;
 
       // Set observatory record to LOPES
       Record obsrec;
@@ -1774,7 +1791,9 @@ int main (int argc, char *argv[])
                                                config["CalculateMaxima"]->bValue(),
                                                config["listCalcMaxima"]->bValue(),
                                                config["printShowerCoordinates"]->bValue(),
-                                               config["ignoreDistance"]->bValue());
+                                               config["ignoreDistance"]->bValue(),
+                                               config["randomDelay"]->dValue(),
+                                               randomSeed);
 
           // adding results to variables (needed to fill them into the root tree)
           goodEW = results.asBool("goodReconstructed");
@@ -1896,7 +1915,9 @@ int main (int argc, char *argv[])
                                                config["CalculateMaxima"]->bValue(),
                                                config["listCalcMaxima"]->bValue(),
                                                config["printShowerCoordinates"]->bValue(),
-                                               config["ignoreDistance"]->bValue());
+                                               config["ignoreDistance"]->bValue(),
+                                               config["randomDelay"]->dValue(),
+                                               randomSeed);
 
           // adding results to variables (needed to fill them into the root tree)
           goodNS = results.asBool("goodReconstructed");

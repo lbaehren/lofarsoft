@@ -34,6 +34,8 @@
 
 #ifdef HAVE_STARTOOLS
 
+// for random generator
+#include <TRandom3.h>
 // This class is derived form CRinvFFT an adds upsampling
 #include <Analysis/CRinvFFT.h>
 // For Plots:
@@ -584,6 +586,17 @@ namespace CR { // Namespace CR -- begin
                                           Vector<Bool> antennaSelection = Vector<Bool>(),
                                           String Polarization="ANY",
                                           bool substractPedastal = true);
+
+    /*!
+      \brief Adds a random delay to the data of each antenna (for timing uncertainty studies)
+
+      \param dr                -- Pointer to the (initialized) DataReader
+      \param randomDelay       -- Sigma of the gaussian random distribution
+      \param randomSeed        -- Seed of the root random number generator (TRandom3)
+    */
+   void addRandomDelay(DataReader *dr,
+                       double randomDelay = 0.,
+                       unsigned int randomSeed = 1);
 
   private:
     

@@ -1770,6 +1770,56 @@ namespace CR { // Namespace CR -- begin
     }
     return timeSeries;
   }
+  
+  void CompletePipeline::addRandomDelay(DataReader *dr,
+                                        double randomDelay,
+                                        unsigned int randomSeed)
+  {
+    try {
+      Matrix<DComplex> dummyread = GetData(dr);  // perform dummy read to update cache and then modify cached data
+      
+      // define conversion constant and get frequency axis for converstion from ns in phase gradient
+      const complex<double> delayconv = 2*PI*complex<double>(0.,1.);
+
+      Vector<Double> freqVals = dr->frequencyValues(); 
+      Vector<DComplex> frequencies;
+      frequencies.resize(freqVals.shape());
+      convertArray(frequencies,freqVals);   
+      
+      cout << "\n\nStarting to add random delay!\n" 
+           << "This is a special step for timing uncertainty studies and should not be done during normal data analysis!\n"
+           << endl;
+      
+      // initialize random generator
+      TRandom3 randomGenerator(randomSeed);
+      cout << "Using random numbers with gaussian distribution around 0 ns with a sigma of " << randomDelay << " ns." << endl;
+
+      // consistency checks
+      if (frequencies.size() != CachedData_p.nrow()) {
+        cerr << "CompletePipeline::AddRandomDelay: " 
+             << "Consitency failure: length of 'frequencies' and 'CachedData_p' differ." << endl;
+        return;      
+      }
+      if (dummyread.shape() != CachedData_p.shape()) {
+        cerr << "CompletePipeline::AddRandomDelay: " 
+             << "Consitency failure: shape of 'GetData' and 'CachedData_p' differ." << endl;
+        return;      
+      }
+
+      // add different delay for each antenna
+      for (unsigned i=0; i < CachedData_p.ncolumn(); ++i) {     
+        double delay = randomGenerator.Gaus(0,randomDelay);
+        if (verbose)
+          cout << "Shifting antenna " << i+1 << "\t by " << delay << " ns." << endl;
+        CachedData_p.column(i) =  CachedData_p.column(i)*exp(delayconv*delay*1e-9*frequencies);
+      } 
+      
+    } catch (AipsError x) {
+      cerr << "CompletePipeline::AddRandomDelay: " << x.getMesg() << endl;
+    }
+  }
+                                      
+
 
 } // Namespace CR -- end
 

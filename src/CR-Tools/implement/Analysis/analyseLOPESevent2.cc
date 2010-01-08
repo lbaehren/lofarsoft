@@ -139,7 +139,9 @@ namespace CR { // Namespace CR -- begin
                                          bool CalculateMaxima,
                                          bool listCalcMaxima,
                                          bool printShowerCoordinates,
-                                         bool ignoreDistance) {
+                                         bool ignoreDistance,
+                                         double randomDelay,
+                                         unsigned int randomSeed) {
     Record erg;
     try {
       // ofstream latexfile;  // WARNING: causes problem in fitCR2gauss.cc line 200, left here for future tests
@@ -224,6 +226,10 @@ namespace CR { // Namespace CR -- begin
         if (CalculateMaxima)
           rawPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(), true);
       }
+
+      // add random delay for timing uncertainty studies
+      if (randomDelay > 0.)
+        CompleteBeamPipe_p->addRandomDelay(beamformDR_p,randomDelay, randomSeed);
 
       // Check if there are enough antennas left unflagged (otherwise quit)
       // beam forming is not useful with only 3 or less antennas.
@@ -344,9 +350,16 @@ namespace CR { // Namespace CR -- begin
         erg.define("rmsXbeam",rms(xbeam(remoteRegion)));
       }
 
+      // print resutls of reconstruction
+      cout << "\nRestuls of reconstruction:\n"
+           << "Azimuth = " << erg.asDouble("Azimuth") << " degree \t"
+           << "Elevation = " << erg.asDouble("Elevation") << " degree\n"
+           << "Radius of curvature (of CC-beam) = " << erg.asDouble("Distance") << " m\n"
+           << "CC-beam = " << erg.asDouble("CCheight")*1e6 << " µV/m/MHz \t"
+           << " X-beam = " << erg.asDouble("Xheight")*1e6  << " µV/m/MHz \n"
+           << endl;
 
       erg.define("goodReconstructed",true);  // assume that everything was fine, then this position is reached.
-
     } catch (AipsError x) {
       cerr << "analyseLOPESevent2::RunPipeline: " << x.getMesg() << endl;
       return Record();
@@ -588,11 +601,11 @@ namespace CR { // Namespace CR -- begin
                                                      + pow(yS*calibPulses[antennaIDs(i)].distYerr,2))
                                                 / calibPulses[antennaIDs(i)].dist;
           // for debug output                                                
-          cout << calibPulses[antennaIDs(i)].distX << " +/-" << calibPulses[antennaIDs(i)].distXerr << "\t "
+          /* cout << calibPulses[antennaIDs(i)].distX << " +/-" << calibPulses[antennaIDs(i)].distXerr << "\t "
                << calibPulses[antennaIDs(i)].distY << " +/-" << calibPulses[antennaIDs(i)].distYerr << "\t "
                << calibPulses[antennaIDs(i)].distZ << " +/-" << calibPulses[antennaIDs(i)].distZerr << "\t "
                << calibPulses[antennaIDs(i)].dist  << " = "
-               << sqrt(xS*xS+yS*yS) << " +/-" << calibPulses[antennaIDs(i)].disterr  << "\t " << endl;                                                 
+               << sqrt(xS*xS+yS*yS) << " +/-" << calibPulses[antennaIDs(i)].disterr  << "\t " << endl;  */                                               
         }
 
     } catch (AipsError x) {

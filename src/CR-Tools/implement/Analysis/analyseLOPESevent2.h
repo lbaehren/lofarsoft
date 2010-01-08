@@ -435,6 +435,8 @@ namespace CR { // Namespace CR -- begin
       \param listCalcMaxima      - output version of CalculateMax
       \param printShowerCoordinates - print the x,y and total distance between antenna and shower core in shower coordinates
       \param ignoreDistance      - ignores the given distance but tries to find it automatically 
+      \param randomDelay         - additional random delay, for timing uncertainty studies (use 0 for normal analysis)
+      \param randomSeed          - seed for random number generator
 
       \return Record with the results.
     */
@@ -466,7 +468,9 @@ namespace CR { // Namespace CR -- begin
                         bool CalculateMaxima=false,
                         bool listCalcMaxima=false,
                         bool printShowerCoordinates=false,
-                        bool ignoreDistance=false);
+                        bool ignoreDistance=false,
+                        double randomDelay=0.,
+                        unsigned int randomSeed=1);
 
 
     /*!
