@@ -48,8 +48,9 @@ namespace CR { // Namespace CR -- begin
     Double kascadeY[16] = {-78.,-78.,-78.,-78.,-26.,-26.,-26.,-26., 26., 26.,26.,26., 78., 78.,78.,78.};
     Vector<Double> kasX(IPosition(1,16),kascadeX,SHARE),kasY(IPosition(1,16),kascadeY,SHARE);
     Matrix<Double> ClusterPos(16,3);
-    ClusterPos.column(0) = kasX* 0.965925826 + kasY*0.258819045;
-    ClusterPos.column(1) = kasX*-0.258819045 + kasY*0.965925826;
+    // cos 15.25° = 0.964787323  ;  sin 15.25° = 0.263031214 (angle between LOPES and KASCADE system)
+    ClusterPos.column(0) = kasX* 0.964787323 + kasY*0.263031214;
+    ClusterPos.column(1) = kasX*-0.263031214 + kasY*0.964787323;
     ClusterPos.column(2) = 0.;
     parameters_p.define("ClusterPos",ClusterPos);
   }
