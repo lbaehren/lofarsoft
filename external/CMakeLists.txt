@@ -13,6 +13,7 @@ add_subdirectory (numpy)
 add_subdirectory (plplot)
 add_subdirectory (qt)
 add_subdirectory (swig)
+add_subdirectory (szip)
 add_subdirectory (valgrind)
 
 if (CR_WITH_STARTOOLS AND HAVE_FFTW3)

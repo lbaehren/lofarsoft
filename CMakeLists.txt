@@ -113,7 +113,7 @@ add_custom_target (clean-build
   COMMAND rm -rf dal
   COMMAND rm -rf numeric num_util
   COMMAND rm -rf plplot root
-  COMMAND rm -rf startools szip
+  COMMAND rm -rf startools
   COMMAND rm -rf wcslib wcstools
   WORKING_DIRECTORY ${USG_BUILD}
   COMMENT "Cleaning up build directory ..."
@@ -176,7 +176,6 @@ set (packages_external
   pyrap
   root
   sip
-  szip
   wcslib
   wcstools
   )
