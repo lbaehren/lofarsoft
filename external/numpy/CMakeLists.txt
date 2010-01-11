@@ -42,7 +42,10 @@ endif (USG_ROOT)
 ## ------------------------------------------------------------------------------
 ## Check for system-wide NUMPY library installation
 
-find_program (HAVE_NUMPY numpy PATHS ${bin_locations})
+set (PYTHON_FIND_QUIETLY YES )
+set (NUMPY_FIND_QUIETLY  YES )
+
+include (FindNumPy)
 
 ## <-- begin build condition --------------------------------------------------->
 
@@ -55,9 +58,13 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
   set (NUMPY_TAR_ARCHIVE "${NUMPY_DIRECTORY}.tar.gz")
   
   ## create "site.cfg" used later on
+
+  if (PYTHON_LIBRARIES)
+    get_filename_component (python_libdir ${PYTHON_LIBRARIES} PATH)
+  endif (PYTHON_LIBRARIES)
   
   file (WRITE ${NUMPY_BINARY_DIR}/site.cfg "[DEFAULT] \n")
-  file (APPEND ${NUMPY_BINARY_DIR}/site.cfg "library_dirs = /usr/lib, /usr/local/lib, /usr/lib64, /usr/local/lib64, /sw/lib \n")
+  file (APPEND ${NUMPY_BINARY_DIR}/site.cfg "library_dirs = /usr/lib, /usr/local/lib, /usr/lib64, /usr/local/lib64, /sw/lib, ${python_libdir} \n")
 
   ##__________________________________________________________________
   ## Build the project
@@ -78,6 +85,15 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
   else (have_numpy_tgz)
     message (WARNING "[Numpy] Unable to build project - missing source!")
   endif (have_numpy_tgz)
+
+  ##__________________________________________________________________
+  ## Configuration summary
+
+  message ("-------------------------------------------------------------")
+  message (STATUS "[NumPy] Summary of configuration status.")
+  message (STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
+  message (STATUS "PYTHON_VERSION   = ${PYTHON_VERSION}")
+  message ("-------------------------------------------------------------")
   
   ## <-- end build condition ----------------------------------------------------->
   
