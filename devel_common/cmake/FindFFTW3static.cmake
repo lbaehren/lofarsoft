@@ -1,5 +1,5 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
+# | $Id:: FindFFTW3.cmake 2076 2008-10-16 12:05:24Z baehren                   $ |
 # +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
@@ -46,7 +46,7 @@ FIND_PATH (FFTW3_INCLUDES fftw3.h
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-FIND_LIBRARY (FFTW3_LIBRARIES fftw3
+FIND_LIBRARY (FFTW3_LIBRARIES libfftw3.a
   PATHS
   ${lib_locations}
   /opt/aips++/local/lib
@@ -86,7 +86,3 @@ ENDIF (HAVE_FFTW3)
 ## ------------------------------------------------------------------------------
 ## Mark as advanced ...
 
-mark_as_advanced (
-  FFTW3_INCLUDES
-  FFTW3_LIBRARIES
-  )

@@ -1,5 +1,5 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
+# | $Id:: FindFFTW.cmake 2076 2008-10-16 12:05:24Z baehren                   $ |
 # +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
@@ -13,19 +13,19 @@
 # |   but WITHOUT ANY WARRANTY; without even the implied warranty of            |
 # |   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             |
 # |   GNU General Public License for more details.                              |
-# |                                                                             |
+# |                FFTWFFTW                                                             |
 # |   You should have received a copy of the GNU General Public License         |
 # |   along with this program; if not, write to the                             |
 # |   Free Software Foundation, Inc.,                                           |
 # |   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                 |
 # +-----------------------------------------------------------------------------+
 
-# - Check for the presence of FFTW3
+# - Check for the presence of FFTW
 #
-# The following variables are set when FFTW3 is found:
-#  HAVE_FFTW3       = Set to true, if all components of FFTW3 have been found.
-#  FFTW3_INCLUDES   = Include path for the header files of FFTW3
-#  FFTW3_LIBRARIES  = Link these to use FFTW3
+# The following variables are set when FFTW is found:
+#  HAVE_FFTW       = Set to true, if all components of FFTW have been found.
+#  FFTW_INCLUDES   = Include path for the header files of FFTW
+#  FFTW_LIBRARIES  = Link these to use FFTW
 
 ## -----------------------------------------------------------------------------
 ## Search locations
@@ -35,7 +35,7 @@ include (CMakeSettings)
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-FIND_PATH (FFTW3_INCLUDES fftw3.h
+FIND_PATH (FFTW_INCLUDES fftw.h
   PATHS
   ${include_locations}
   /opt/aips++/local/include
@@ -46,7 +46,7 @@ FIND_PATH (FFTW3_INCLUDES fftw3.h
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-FIND_LIBRARY (FFTW3_LIBRARIES fftw3
+FIND_LIBRARY (FFTW_LIBRARIES fftw 
   PATHS
   ${lib_locations}
   /opt/aips++/local/lib
@@ -57,36 +57,32 @@ FIND_LIBRARY (FFTW3_LIBRARIES fftw3
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
-IF (FFTW3_INCLUDES AND FFTW3_LIBRARIES)
-  SET (HAVE_FFTW3 TRUE)
-ELSE (FFTW3_INCLUDES AND FFTW3_LIBRARIES)
-  SET (HAVE_FFTW3 FALSE)
-  IF (NOT FFTW3_FIND_QUIETLY)
-    IF (NOT FFTW3_INCLUDES)
-      MESSAGE (STATUS "Unable to find FFTW3 header files!")
-    ENDIF (NOT FFTW3_INCLUDES)
-    IF (NOT FFTW3_LIBRARIES)
-      MESSAGE (STATUS "Unable to find FFTW3 library files!")
-    ENDIF (NOT FFTW3_LIBRARIES)
-  ENDIF (NOT FFTW3_FIND_QUIETLY)
-ENDIF (FFTW3_INCLUDES AND FFTW3_LIBRARIES)
+IF (FFTW_INCLUDES AND FFTW_LIBRARIES)
+  SET (HAVE_FFTW TRUE)
+ELSE (FFTW_INCLUDES AND FFTW_LIBRARIES)
+  SET (HAVE_FFTW FALSE)
+  IF (NOT FFTW_FIND_QUIETLY)
+    IF (NOT FFTW_INCLUDES)
+      MESSAGE (STATUS "Unable to find FFTW header files!")
+    ENDIF (NOT FFTW_INCLUDES)
+    IF (NOT FFTW_LIBRARIES)
+      MESSAGE (STATUS "Unable to find FFTW library files!")
+    ENDIF (NOT FFTW_LIBRARIES)
+  ENDIF (NOT FFTW_FIND_QUIETLY)
+ENDIF (FFTW_INCLUDES AND FFTW_LIBRARIES)
 
-IF (HAVE_FFTW3)
-  IF (NOT FFTW3_FIND_QUIETLY)
-    MESSAGE (STATUS "Found components for FFTW3")
-    MESSAGE (STATUS "FFTW3_INCLUDES  = ${FFTW3_INCLUDES}")
-    MESSAGE (STATUS "FFTW3_LIBRARIES = ${FFTW3_LIBRARIES}")
-  ENDIF (NOT FFTW3_FIND_QUIETLY)
-ELSE (HAVE_FFTW3)
-  IF (FFTW3_FIND_REQUIRED)
-    MESSAGE (FATAL_ERROR "Could not find FFTW3!")
-  ENDIF (FFTW3_FIND_REQUIRED)
-ENDIF (HAVE_FFTW3)
+IF (HAVE_FFTW)
+  IF (NOT FFTW_FIND_QUIETLY)
+    MESSAGE (STATUS "Found components for FFTW")
+    MESSAGE (STATUS "FFTW_INCLUDES  = ${FFTW_INCLUDES}")
+    MESSAGE (STATUS "FFTW_LIBRARIES = ${FFTW_LIBRARIES}")
+  ENDIF (NOT FFTW_FIND_QUIETLY)
+ELSE (HAVE_FFTW)
+  IF (FFTW_FIND_REQUIRED)
+    MESSAGE (FATAL_ERROR "Could not find FFTW!")
+  ENDIF (FFTW_FIND_REQUIRED)
+ENDIF (HAVE_FFTW)
 
 ## ------------------------------------------------------------------------------
 ## Mark as advanced ...
 
-mark_as_advanced (
-  FFTW3_INCLUDES
-  FFTW3_LIBRARIES
-  )
