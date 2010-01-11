@@ -57,7 +57,8 @@ if (NOT PULSAR_VERBOSE_CONFIGURE)
   set (PGPLOT_FIND_QUIETLY      YES )
   set (NUMPY_FIND_QUIETLY       YES )
   set (PYTHON_FIND_QUIETLY      YES )
-  set (MPI_FIND_QUIETLY      YES )
+  set (MPI_FIND_QUIETLY         YES )
+  set (FFTW3_FIND_QUIETLY       YES )
 endif (NOT PULSAR_VERBOSE_CONFIGURE)
 
 ## Handle option: debugging messages on/off
@@ -188,6 +189,40 @@ if (NOT X11_Xt_LIB)
   endif (libXt)
 endif (NOT X11_Xt_LIB)
 
+if (NOT X11_X11_LIB)
+  ## search for the library
+  find_library (libX11 X11 ${lib_locations})
+  ## add the library to the list of X11 libraries
+  if (libX11)
+    message (STATUS "Found libX11 = ${libX11}")
+    set (X11_X11_LIB ${libX11} CACHE FILEPATH "Path to libX11." FORCE)
+    list (APPEND X11_LIBRARIES ${libX11})
+  else (libX11)
+    message (STATUS "Unable to find libX11!")
+  endif (libX11)
+endif (NOT X11_X11_LIB)
+
+##__________________________________________________________
+## FFTW3 (not the same as FFTW3F)
+
+if (NOT FFTW3_FOUND)
+  include (FindFFTW3static)
+endif (NOT FFTW3_FOUND)
+
+list (APPEND lib_locations /opt/local/lib)
+
+if (NOT FFTW3_LIBRARIES)
+  ## search for the library
+  find_library (libfftw3 fftw3 ${lib_locations})
+  ## add the library to the list of X11 libraries
+  if (libfftw3)
+    message (STATUS "Found libfftw3 = ${libfftw3}")
+    set (FFTW3_LIBRARIES ${libfftw3} CACHE FILEPATH "Path to libfftw3." FORCE)
+  else (libfftw3)
+    message (STATUS "Unable to find libfftw3!")
+  endif (libfftw3)
+endif (NOT FFTW3_LIBRARIES)
+
 ## -----------------------------------------------------------------------------
 ## Include directories
 
@@ -272,6 +307,13 @@ endif (NUMERIC_INCLUDES)
 if (X11_FOUND)
   include_directories (${X11_INCLUDE_DIR})
 endif (X11_FOUND)
+
+if (HAVE_FFTW3)
+  include_directories (${FFTW3_INCLUDES})
+  add_definitions (-DHAVE_FFTW3)
+else (HAVE_FFTW3)
+  message (STATUS "[PULSAR] Missing or incomplete installation of FFTW3 (not the same as FFTW3F)!")
+endif (HAVE_FFTW3)
 
 ## -----------------------------------------------------------------------------
 ## Installation - We install into $LOFARSOFT/release/share/pulsar to keep all
