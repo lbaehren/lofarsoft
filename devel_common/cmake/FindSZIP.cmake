@@ -44,17 +44,30 @@ find_path (SZIP_INCLUDES szlib.h
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
-foreach (lib_name sz szip)
-  find_library (SZIP_LIBRARIES ${lib_name}
-    PATHS ${lib_locations}
-    NO_DEFAULT_PATH
-    )
 
-  if (SZIP_LIBRARIES)
-    break()
-  endif (SZIP_LIBRARIES)
+set (SZIP_LIBRARIES "")
 
-endforeach (lib_name)
+## libszip
+
+find_library (SZIP_SZIP_LIBRARY szip
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  )
+
+if (SZIP_SZIP_LIBRARY)
+  list (APPEND SZIP_LIBRARIES ${SZIP_SZIP_LIBRARY})
+endif (SZIP_SZIP_LIBRARY)
+
+## libsz
+
+find_library (SZIP_SZ_LIBRARY sz
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  )
+
+if (SZIP_SZ_LIBRARY)
+  list (APPEND SZIP_LIBRARIES ${SZIP_SZ_LIBRARY})
+endif (SZIP_SZ_LIBRARY)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -91,4 +104,6 @@ endif (HAVE_SZIP)
 mark_as_advanced (
   SZIP_INCLUDES
   SZIP_LIBRARIES
+  SZIP_SZIP_LIBRARY
+  SZIP_SZ_LIBRARY
   )

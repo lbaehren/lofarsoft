@@ -69,7 +69,7 @@ find_path (HAVE_HDF5_HDF5_HL_H hdf5_hl.h
 ## -----------------------------------------------------------------------------
 ## Check for the library components
 
-## [1] Core library
+## [1] Core library (libhdf5)
 
 find_library (HDF5_HDF5_LIBRARY
   NAMES hdf5
@@ -82,7 +82,7 @@ if (HDF5_HDF5_LIBRARY)
   set (HDF5_LIBRARIES ${HDF5_HDF5_LIBRARY})
 endif (HDF5_HDF5_LIBRARY)
 
-## [2] Additional libraries
+## [2] High level interface (libhdf5_hl)
 
 FIND_LIBRARY (HDF5_HDF5_HL_LIBRARY
   NAMES hdf5_hl
@@ -94,6 +94,19 @@ FIND_LIBRARY (HDF5_HDF5_HL_LIBRARY
 if (HDF5_HDF5_HL_LIBRARY)
   list (APPEND HDF5_LIBRARIES ${HDF5_HDF5_HL_LIBRARY})
 endif (HDF5_HDF5_HL_LIBRARY)
+
+## [3] C++ interface (libhdf5_cpp)
+
+FIND_LIBRARY (HDF5_HDF5_CPP_LIBRARY
+  NAMES hdf5_cpp
+  PATHS ${lib_locations}
+  PATH_SUFFIXES hdf5
+  NO_DEFAULT_PATH
+)
+
+if (HDF5_HDF5_CPP_LIBRARY)
+  list (APPEND HDF5_LIBRARIES ${HDF5_HDF5_CPP_LIBRARY})
+endif (HDF5_HDF5_CPP_LIBRARY)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -221,4 +234,5 @@ mark_as_advanced (
   HAVE_TESTHDF5VERSION
   HDF5_HDF5_LIBRARY
   HDF5_HDF5_HL_LIBRARY
+  HDF5_HDF5_CPP_LIBRARY
 )
