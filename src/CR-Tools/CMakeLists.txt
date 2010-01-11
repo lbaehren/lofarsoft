@@ -40,6 +40,7 @@ option (CR_BUILD_EXTERNAL_TESTS "Build test programs for external packages?" NO 
 option (CR_COMPILER_WARNINGS    "Enable standard set of compiler warnings?"  YES )
 option (CR_DEBUGGING_MESSAGES   "Print debugging information?"               NO  )
 option (CR_VERBOSE_CONFIGURE    "Verbose output during configuration?"       NO  )
+option (CR_WITH_PRIVATE         "Include building private code?"             NO  )
 option (CR_WITH_LEGACY          "Include building legacy code?"              YES )
 option (CR_WITH_GLISH           "Support for Glish applications?"            NO  )
 option (CR_WITH_PYTHON          "Support for Python applications?"           YES )
@@ -82,37 +83,6 @@ if (NOT CR_VERBOSE_CONFIGURE)
   ## output of the generated makefile
   set (CMAKE_VERBOSE_MAKEFILE  NO  )
 endif (NOT CR_VERBOSE_CONFIGURE)
-
-## System libraries ------------------------------
-
-find_library (HAVE_LIBM    m     PATHS ${lib_locations} )
-find_library (HAVE_LIBUTIL util  PATHS ${lib_locations} )
-find_library (HAVE_LIBDL   dl    PATHS ${lib_locations} )
-find_library (HAVE_LIBGD   gd    PATHS ${lib_locations} )
-
-## System header files ---------------------------
-
-find_path (HAVE_LIBGEN_H     libgen.h      PATHS ${include_locations} )
-find_path (HAVE_STDINT_H     stdint.h      PATHS ${include_locations} )
-find_path (HAVE_STDLIB_H     stdlib.h      PATHS ${include_locations} )
-find_path (HAVE_STRING_H     string.h      PATHS ${include_locations} )
-find_path (HAVE_STRINGS_H    strings.h     PATHS ${include_locations} )
-find_path (HAVE_SYS_STAT_H   sys/stat.h    PATHS ${include_locations} )
-find_path (HAVE_SYS_TIME_H   sys/time.h    PATHS ${include_locations} )
-find_path (HAVE_SYS_TYPES_H  sys/types.h   PATHS ${include_locations} )
-find_path (HAVE_SYS_UTIME_H  sys/utime.h   PATHS ${include_locations} )
-
-## Check type sizes ------------------------------
-
-include (CheckTypeSize)
-
-check_type_size ("short"         SIZEOF_SHORT       )
-check_type_size ("int"           SIZEOF_INT         )
-check_type_size ("float"         SIZEOF_FLOAT       )
-check_type_size ("double"        SIZEOF_DOUBLE      )
-check_type_size ("long"          SIZEOF_LONG        )
-check_type_size ("long long"     SIZEOF_LONG_LONG   )
-check_type_size ("uint"          SIZEOF_UINT        )
 
 ## Check functions -------------------------------
 
@@ -551,12 +521,16 @@ configure_file (${USG_ROOT}/devel_common/cmake/config_crtools.h.in
 
 ## Sub-directories
 
+add_subdirectory (implement)
+add_subdirectory (apps)
+
 if (CR_BUILD_EXTERNAL_TESTS)
   add_subdirectory (test)
 endif (CR_BUILD_EXTERNAL_TESTS)
 
-add_subdirectory (implement)
-add_subdirectory (apps)
+if (CR_WITH_PRIVATE)
+  add_subdirectory (private)
+endif (CR_WITH_PRIVATE)
 
 ## =============================================================================
 ##
@@ -609,12 +583,6 @@ endif (tar_executable AND gzip_executable)
 
 message (STATUS "+============================================================+")
 message (STATUS "| CR-Tools: Summary of configuration settings                |")
-message (STATUS "+------------------------------------------------------------+")
-message (STATUS " CMAKE_SYSTEM ............. : ${CMAKE_SYSTEM}")
-message (STATUS " CMAKE_SYSTEM_VERSION ..... : ${CMAKE_SYSTEM_VERSION}")
-message (STATUS " CMAKE_SYSTEM_PROCESSOR ... : ${CMAKE_SYSTEM_PROCESSOR}")
-message (STATUS " CMAKE_SYSTEM_64BIT ........: ${CMAKE_SYSTEM_64BIT}")
-message (STATUS " CMAKE_SYSTEM_BIG_ENDIAN .. : ${CMAKE_SYSTEM_BIG_ENDIAN}")
 message (STATUS "+------------------------------------------------------------+")
 message (STATUS " BLITZ .................... : ${HAVE_BLITZ}")
 message (STATUS " BOOST .................... : ${HAVE_BOOST}")
