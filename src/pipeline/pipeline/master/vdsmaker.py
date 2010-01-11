@@ -1,5 +1,5 @@
 from __future__ import with_statement
-import sys, os, tempfile
+import sys, os, tempfile, errno
 from subprocess import check_call, CalledProcessError
 
 # Local helpers
@@ -108,6 +108,23 @@ class vdsmaker(LOFARrecipe):
         except CalledProcessError:
             self.logger.exception("Call to combinevds failed")
             return 1
+        except OSError, failure:
+            # This has previously bombed out with OSError 24: too many open
+            # files. Attempt to print something useful if that happens again.
+            try:
+                if failure.errno == errno.EMFILE:
+                    count = 0
+                    for x in xrange(0, os.sysconf('SC_OPEN_MAX')):
+                        try:
+                            self.logger.debug(str(os.fstat(0)))
+                            count += 1
+                        except:
+                            pass
+                    self.logger.info("Had %d open files" % (count,))
+                else:
+                    self.logger.exception(failure)
+            finally:
+                return 1
         finally:
             # Save space on engines by clearing out old file lists
             mec.execute("clear_available_list(\"%s\")" % (available_list,))
