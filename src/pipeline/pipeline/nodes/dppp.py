@@ -75,7 +75,8 @@ class dppp_node(LOFARnode):
                 result = check_call(
                     cmd,
                     cwd=working_dir,
-                    env=env
+                    env=env,
+                    close_fds=True
                 )
                 self.logger.debug(
                     "%s returned exit status %d" % (executable, result)

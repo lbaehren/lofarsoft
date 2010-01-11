@@ -62,7 +62,8 @@ def read_initscript(filename, shell="/bin/sh"):
         shell=True,
         executable=shell,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
+        stderr=subprocess.PIPE,
+        close_fds=True
     )
     so, se = p.communicate()
     return dict([x.split('=', 1) for x in so.strip().split('\n')])

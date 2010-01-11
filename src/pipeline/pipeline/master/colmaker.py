@@ -1,5 +1,4 @@
 import sys, os, tempfile
-from subprocess import check_call
 
 from pipeline.support.ipython import LOFARTask
 from pipeline.support.lofarrecipe import LOFARrecipe

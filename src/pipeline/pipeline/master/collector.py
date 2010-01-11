@@ -73,7 +73,7 @@ class collector(LOFARrecipe):
                             results_dir
                     ]
                 self.logger.info(exec_string)
-                subprocess.check_call(exec_string)
+                subprocess.check_call(exec_string, close_fds=True)
             except subprocess.CalledProcessError:
                 self.logger.warn("No images moved from %s" % (node))
         
@@ -121,7 +121,8 @@ class collector(LOFARrecipe):
                     'out=%s' % (output)
                 ],
                 stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT
+                stderr=subprocess.STDOUT,
+                close_fds=True
             )
 
         self.logger.info("Creating HDF5 file")

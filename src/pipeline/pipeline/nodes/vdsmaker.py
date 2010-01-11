@@ -19,7 +19,9 @@ class makevds_node(LOFARnode):
                     raise ExecutableMissing(executable)
                 cmd = [executable, clusterdesc, infile, outfile]
                 self.logger.debug("Running: %s" % (' '.join(cmd,)))
-                makevds_process = Popen(cmd, stdout=PIPE, stderr=STDOUT)
+                makevds_process = Popen(
+                    cmd, stdout=PIPE, stderr=STDOUT, close_fds=True
+                )
                 result = makevds_process.wait()
                 if result != 0:
                     raise CalledProcessError(result, cmd)

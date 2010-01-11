@@ -121,7 +121,8 @@ class mwimager(LOFARrecipe):
                             mwimager_cmd,
                             env=env,
                             stdout=log,
-                            stderr=log
+                            stderr=log,
+                            close_fds=True
                             )
             else:
                 self.logger.info("Dry run: execution skipped")

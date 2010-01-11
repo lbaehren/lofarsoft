@@ -35,7 +35,8 @@ def sextract(filename, dataset):
 
         check_call(
             command_line,
-            cwd=os.path.dirname(filename)
+            cwd=os.path.dirname(filename),
+            close_fds=True
         )
 
         image = ImageData(FitsFile(fitsfile), dataset=dataset)

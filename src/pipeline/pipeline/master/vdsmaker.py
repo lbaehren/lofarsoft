@@ -102,7 +102,7 @@ class vdsmaker(LOFARrecipe):
         executable = self.inputs['combinevds']
         gvds_out   = "%s/%s" % (self.inputs['directory'], self.inputs['gvds'])
         try:
-            check_call([executable, gvds_out] + vdsnames)
+            check_call([executable, gvds_out] + vdsnames, close_fds=True)
             self.outputs['gvds'] = gvds_out
             return 0
         except CalledProcessError:
