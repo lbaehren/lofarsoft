@@ -14,7 +14,6 @@
 set (tests
   tClippingFraction
   tCRdelayPlugin
-#  tDynamicSpectrum
   tFirstStagePipeline
   tionoCalibration
   tSecondStagePipeline
@@ -23,7 +22,6 @@ set (tests
 
 if (CR_WITH_LEGACY) 
   list (APPEND tests tfitCR2gauss)
-#  list (APPEND tests tCRinvFFT)
 endif (CR_WITH_LEGACY)
 
 ##____________________________________________________________________
@@ -60,23 +58,29 @@ endforeach (src)
 ## ==============================================================================
 
 ##____________________________________________________________________
-## Test programs which require HDF5 library
+##                                                           tgenCRmap
 
-if (HAVE_HDF5)
+if (HAVE_HDF5 AND HAVE_DAL)
   ## compiler instructions
   add_executable (tgenCRmap tgenCRmap.cc)
   ## linker instructions
-  target_link_libraries (tgenCRmap cr ${HDF5_LIBRARIES})
+  target_link_libraries (tgenCRmap 
+    cr
+    ${HAVE_LIBZ}
+    ${DAL_LIBRARIES}
+    ${CASA_LIBRARIES}
+    ${HDF5_LIBRARIES}
+    )
   ## testing
   add_test (tgenCRmap tgenCRmap)
-endif (HAVE_HDF5)
+endif (HAVE_HDF5 AND HAVE_DAL)
 
 ##____________________________________________________________________
 ## Test programs which require the DAL
 
 if (HAVE_DAL AND HAVE_ROOT)
   ## compiler instructions
-#  add_executable (tNuMoonTrigger tNuMoonTrigger.cc)
+  #  add_executable (tNuMoonTrigger tNuMoonTrigger.cc)
   add_executable (tppfinversion tppfinversion.cc)
   ## linker instructions
   target_link_libraries (tppfinversion

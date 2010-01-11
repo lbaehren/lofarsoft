@@ -58,6 +58,7 @@ if (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
   ## linker instructions
   target_link_libraries (imager
     cr
+    ${HAVE_LIBZ}
     ${BOOST_PROGRAM_OPTIONS_LIBRARY}
     ${DAL_LIBRARIES}
     ${HDF5_LIBRARIES}
@@ -183,7 +184,9 @@ if (HAVE_CASA OR HAVE_CASACORE)
     ## linker instructions
     target_link_libraries (tbbTest
       cr
+      ${HAVE_LIBZ}
       ${DAL_LIBRARIES}
+      ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
       )
     ## installation instructions
@@ -196,28 +199,7 @@ if (HAVE_CASA OR HAVE_CASACORE)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
-## seftest
-
-if (HAVE_CASA OR HAVE_CASACORE)
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
-    ## compiler instructions
-    add_executable (seftest seftest.cc)
-    ## linker instructions
-    target_link_libraries (seftest
-      cr
-      ${DAL_LIBRARIES}
-      ${HDF5_LIBRARIES}
-      ${CFITSIO_LIBRARIES}
-      )
-    ## installation instructions
-    list (APPEND cr_apps seftest)
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
-    message (STATUS "[CR-Tools] Unable to build executable seftest.")
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
-endif (HAVE_CASA OR HAVE_CASACORE)
-
-## -------------------------------------------------------------------
-## testLOPESskymapping
+##                                                 testLOPESskymapping
 
 if (HAVE_CASACORE AND HAVE_DAL)
   if (DAL_LIBRARIES AND HDF5_LIBRARIES)
@@ -225,8 +207,10 @@ if (HAVE_CASACORE AND HAVE_DAL)
     add_executable (testLOPESskymapping testLOPESskymapping.cc)
     ## linker instructions
     target_link_libraries (testLOPESskymapping 
-      cr 
+      cr
+      ${HAVE_LIBZ}
       ${DAL_LIBRARIES}
+      ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
       ${CFITSIO_LIBRARIES}
       )
@@ -238,8 +222,7 @@ if (HAVE_CASACORE AND HAVE_DAL)
 endif (HAVE_CASACORE AND HAVE_DAL)
 
 ## -------------------------------------------------------------------
-
-## CalDynSpec
+##                                                          CalDynSpec
 
 if (HAVE_CASA OR HAVE_CASACORE)
   if (DAL_LIBRARIES AND HDF5_LIBRARIES)
@@ -248,9 +231,10 @@ if (HAVE_CASA OR HAVE_CASACORE)
     ## linker instructions
     target_link_libraries (CalDynSpec
       cr
+      ${HAVE_LIBZ}
       ${DAL_LIBRARIES}
+      ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
-      ${CFITSIO_LIBRARIES}
       )
     ## installation instructions
     list (APPEND cr_apps CalDynSpec)
@@ -258,49 +242,6 @@ if (HAVE_CASA OR HAVE_CASACORE)
     message (STATUS "[CR-Tools] Unable to build executable CalDynSpec.")
   endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
 endif (HAVE_CASA OR HAVE_CASACORE)
-
-## -------------------------------------------------------------------
-
-## seftestLOPESskymapping
-
-if (HAVE_CASACORE AND HAVE_DAL)
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
-    ## compiler instructions
-    add_executable (seftestLOPESskymapping seftestLOPESskymapping.cc)
-    ## linker instructions
-    target_link_libraries (seftestLOPESskymapping 
-      cr 
-      ${DAL_LIBRARIES}
-      ${HDF5_LIBRARIES}
-      ${CFITSIO_LIBRARIES}
-      )
-    ## installation instructions
-    list (APPEND cr_apps seftestLOPESskymapping)
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
-    message (STATUS "[CR-Tools] Unable to build executable seftestLOPESskymapping.")
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
-endif (HAVE_CASACORE AND HAVE_DAL)
-
-## -------------------------------------------------------------------
-## seftestlightningskymapping
-
-if (HAVE_CASACORE AND HAVE_DAL)
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
-    ## compiler instructions
-    add_executable (seftestlightningskymapping seftestlightningskymapping.cc)
-    ## linker instructions
-    target_link_libraries (seftestlightningskymapping 
-      cr 
-      ${DAL_LIBRARIES}
-      ${HDF5_LIBRARIES}
-      ${CFITSIO_LIBRARIES}
-      )
-    ## installation instructions
-    list (APPEND cr_apps seftestlightningskymapping)
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
-    message (STATUS "[CR-Tools] Unable to build executable seftestlightningskymapping.")
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
-endif (HAVE_CASACORE AND HAVE_DAL)
 
 ##_______________________________________________________________________________
 ##                                                     snstestlightningskymapping
@@ -311,8 +252,10 @@ if (HAVE_CASACORE AND HAVE_DAL)
     add_executable (snstestlightningskymapping snstestlightningskymapping.cc)
     ## linker instructions
     target_link_libraries (snstestlightningskymapping 
-      cr 
+      cr
+      ${HAVE_LIBZ}
       ${DAL_LIBRARIES}
+      ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
       ${CFITSIO_LIBRARIES}
       )
@@ -332,8 +275,10 @@ if (HAVE_CASACORE AND HAVE_DAL)
     add_executable (snstestnewskymapping snstestnewskymapping.cc)
     ## linker instructions
     target_link_libraries (snstestnewskymapping 
-      cr 
+      cr
+      ${HAVE_LIBZ}
       ${DAL_LIBRARIES}
+      ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
       ${CFITSIO_LIBRARIES}
       )
@@ -353,8 +298,10 @@ if (HAVE_CASACORE AND HAVE_DAL)
     add_executable (imagetofits imagetofits.cc)
     ## linker instructions
     target_link_libraries (imagetofits 
-      cr 
+      cr
+      ${HAVE_LIBZ}
       ${DAL_LIBRARIES}
+      ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
       ${CFITSIO_LIBRARIES}
       )
@@ -374,10 +321,11 @@ if (HAVE_CASACORE AND HAVE_DAL)
     add_executable (checkimage checkimage.cc)
     ## linker instructions
     target_link_libraries (checkimage 
-      cr 
+      cr
+      ${HAVE_LIBZ}
       ${DAL_LIBRARIES}
+      ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
-      ${CFITSIO_LIBRARIES}
       )
     ## installation instructions
     list (APPEND cr_apps checkimage)
@@ -416,10 +364,11 @@ if (HAVE_CASACORE AND HAVE_DAL AND CR_WITH_PLOTTING)
     add_executable (cccheck2 cccheck2.cc)
     ## linker instructions
     target_link_libraries (cccheck2 
-      cr 
+      cr
+      ${HAVE_LIBZ}
       ${DAL_LIBRARIES}
+      ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
-      ${CFITSIO_LIBRARIES}
       )
     ## installation instructions
     list (APPEND cr_apps cccheck2)
@@ -438,7 +387,9 @@ if (HAVE_CASA OR HAVE_CASACORE)
     ## linker instructions
     target_link_libraries (tbbStatistics
       cr
+      ${HAVE_LIBZ}
       ${DAL_LIBRARIES}
+      ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
       ${CFITSIO_LIBRARIES}
       )
@@ -576,13 +527,15 @@ if (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES AND HAVE_BOOST)
   ## linker instructions
   target_link_libraries (tbbTriggerAnalysis
     cr
-    ${BOOST_LIBRARIES}
+    ${HAVE_LIBZ}
     ${DAL_LIBRARIES}
+    ${CASA_LIBRARIES}
     ${HDF5_LIBRARIES}
+    ${BOOST_LIBRARIES}
     )
   ## installation instructions
   list (APPEND cr_apps tbbTriggerAnalysis)
-    
+  
 endif (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES AND HAVE_BOOST)
 
 

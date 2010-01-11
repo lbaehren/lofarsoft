@@ -78,6 +78,7 @@ if (NOT CR_VERBOSE_CONFIGURE)
   set (PYTHON_FIND_QUIETLY     YES )
   set (ROOT_FIND_QUIETLY       YES )
   set (STARTOOLS_FIND_QUIETLY  YES )
+  set (SZIP_FIND_QUIETLY       YES )
   set (WCSLIB_FIND_QUIETLY     YES )
   set (ZLIB_FIND_QUIETLY       YES )
   ## output of the generated makefile
@@ -114,6 +115,7 @@ include (FindPOPT)
 include (FindPostgreSQL)
 include (FindPython)
 include (FindROOT)
+include (FindSZIP)
 include (FindWCSLIB)
 
 if (NOT HAVE_PLPLOT)
@@ -290,6 +292,8 @@ if (CR_WITH_STARTOOLS)
     set (CR_WITH_STARTOOLS FALSE)
   endif (HAVE_STARTOOLS)
   
+else (CR_WITH_STARTOOLS)
+  set (HAVE_STARTOOLS FALSE)
 endif (CR_WITH_STARTOOLS)
 
 ## -------------------------------------------------------------------

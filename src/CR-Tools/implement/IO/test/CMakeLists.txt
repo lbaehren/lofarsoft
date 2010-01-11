@@ -48,7 +48,9 @@ if (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES)
   ## linker instructions
   target_link_libraries (tLOFAR_TBB
     cr
+    ${HAVE_LIBZ}
     ${DAL_LIBRARIES}
+    ${CASA_LIBRARIES}
     ${HDF5_LIBRARIES}
     )
   ## testing

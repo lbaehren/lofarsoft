@@ -54,7 +54,9 @@ if (HAVE_DAL AND HAVE_HDF5 AND positions_lopes08)
   ## linker instructions
   target_link_libraries (tSkymapper
     cr
+    ${HAVE_LIBZ}
     ${DAL_LIBRARIES}
+    ${CASA_LIBRARIES}
     ${HDF5_LIBRARIES}
     )
   ## testing

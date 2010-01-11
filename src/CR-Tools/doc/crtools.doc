@@ -54,6 +54,7 @@
       |   |-- data
       |   |-- docs
       |   |-- implement
+      |   |-- private
       |   |-- scripts
       |   `-- test
       |-- DAL
@@ -68,6 +69,9 @@
     <li><b>docs</b>
     <li><b>implement</b> -- Source code, mainly C++ classes, which are compiled
         into a library, based on which application programs are build.
+    <li><b>private</b> -- Source code from private projects of the individual
+        users; this is not part of the default build, but optionally can be
+	enabled.
   </ul>
 
 */
