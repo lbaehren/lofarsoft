@@ -50,7 +50,7 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
   
   include (ExternalProject)
 
-  set (NUMPY_VERSION     "1.4.0")
+  set (NUMPY_VERSION     "1.3.0")
   set (NUMPY_DIRECTORY   "numpy-${NUMPY_VERSION}")
   set (NUMPY_TAR_ARCHIVE "${NUMPY_DIRECTORY}.tar.gz")
   
