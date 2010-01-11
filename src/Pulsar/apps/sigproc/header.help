@@ -1,0 +1,26 @@
+\begin{verbatim}
+% header help
+
+header  - examine header parameters of filterbank data
+
+usage: header {filename} -{options}
+
+filename is the filterbank data file (def=stdin)
+
+options:
+
+-telescope   - return telescope name
+-machine     - return datataking machine name
+-source_name - return source name
+-fch1        - return frequency of channel 1 in MHz
+-foff        - return channel bandwidth in MHz
+-nchans      - return number of channels
+-tstart      - return time stamp of first sample (MJD)
+-tsamp       - return sample time (us)
+-nbits       - return number of bits per sample
+-nifs        - return number of IF channels
+-headersize  - return header size in bytes
+-datasize    - return data size in bytes if known
+-nsamples    - return number of samples if known
+-tobs        - return length of observation if known (s)
+\end{verbatim}

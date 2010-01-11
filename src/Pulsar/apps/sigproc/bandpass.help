@@ -1,0 +1,13 @@
+\begin{verbatim}
+% bandpass help
+
+bandpass - outputs the pass band from a filterbank file
+
+usage: bandpass {filename} -{options}
+
+options:
+
+   filename - filterbank data file (def=stdin)
+-d numdumps - number of dumps to average over (def=all)
+-t dumptime - number of seconds to average over (def=all)
+\end{verbatim}

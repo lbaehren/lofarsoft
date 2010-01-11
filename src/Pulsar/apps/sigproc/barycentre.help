@@ -1,0 +1,11 @@
+\begin{verbatim}
+% barycentre help
+
+barycentre - refer a datafile to a frame at rest wrt the solar system barycentre
+
+usage: barycentre inputfile -{options} > outputfile
+
+inputfile   - the name of the filterbank/time series file
+-mypolyco   - take user-defined polyco.bar file (def=create one)
+-verbose    - write out barycentre information to stderr (def=quiet)
+\end{verbatim}

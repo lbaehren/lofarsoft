@@ -1,0 +1,33 @@
+\begin{verbatim}
+% filterbank help
+
+filterbank - convert raw pulsar-machine data to filterbank format
+
+usage: filterbank <rawdatafile1> .... <rawdatafileN> -{options}
+
+rawdatafile - raw data file (recognized machines: WAPP, PSPM, OOTY)
+
+options:
+
+-o filename - output file containing filterbank data (def=stdout)
+-s skiptime - skip the first skiptime (s) of data (def=0.0)
+-r readtime - read readtime (s) of data (def=all)
+-i IFstream - write IFstream (IFstream=1,2,3,4)
+-n nbits    - write n-bit numbers (def=input format)
+-c minvalue - clip DM=0 samples > mean+minvalue*sigma (def=noclip)
+-swapout    - perform byte swapping on output data (def=native)
+-floats     - write floating-point numbers (equal to -n 32)
+-sumifs     - sum IFs 1+2 to form total-power data
+-headerfile - write header parameters to an ASCII file (head)
+-headeronly - write ONLY binary header parameters
+
+options for correlator (currently WAPP) data:
+
+-hamming    - apply Hamming window before FFT (def=nowindow)
+-hanning    - apply Hanning window before FFT (def=nowindow)
+-novanvleck - don't do van Vleck correction before FFT (def=doit)
+-invert     - invert the band after FFT (def=noinversion)
+-zerolag    - write just the zero-lag value for each IF
+-rawcfs     - write raw correlation functions (novanvleck)
+-corcfs     - write corrected correlation functions (vanvleck)
+\end{verbatim}

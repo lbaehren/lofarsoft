@@ -1,0 +1,17 @@
+\begin{verbatim}
+% reader help
+
+reader  - look at filterbank data in ASCII format
+
+usage: reader {filename} -{options}
+
+filename is the filterbank data file (def=stdin)
+
+options:
+
+-c        c - output only frequency channel c (1...nchans) (def=all)
+-i        i - output only IF channel i (1...nifs) (def=all)
+-numerate   - precede each dump with sample number (def=time)
+-noindex    - do not precede each dump with number/time
+-stream     - produce a stream of numbers with START/STOP boundaries
+\end{verbatim}

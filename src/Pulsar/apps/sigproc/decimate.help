@@ -1,0 +1,16 @@
+\begin{verbatim}
+% decimate help
+
+decimate - reduce time and/or frequency resolution of filterbank data
+
+usage: decimate {filename} -{options}
+
+options:
+
+   filename - filterbank data file (def=stdin)
+-c numchans - number of channels to add (def=all)
+-t numsamps - number of time samples to add (def=none)
+-T numsamps - (alternative to -t) specify number of output time samples
+-n numbits  - specify output number of bits (def=input)
+-headerless - do not broadcast resulting header (def=broadcast)
+\end{verbatim}

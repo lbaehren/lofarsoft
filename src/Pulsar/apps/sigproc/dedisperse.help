@@ -1,0 +1,32 @@
+\begin{verbatim}
+% dedisperse help
+
+dedisperse  - form time series from filterbank data or profile from folded data
+
+usage: dedisperse {filename} -{options}
+
+options:
+
+   filename - full name of the raw data file to be read (def=stdin)
+-d dm2ddisp - set DM value to dedisperse at (def=0.0)
+-b numbands - set output number of sub-bands (def=1)
+-B num_bits - set output number of bits (def=32)
+-o filename - output file name (def=stdout)
+-c minvalue - clip samples > minvalue*rms (def=noclip)
+-f reffreq  - dedisperse relative to refrf MHz (def=topofsubband)
+-F newfreq  - correct header value of centre frequency to newfreq MHz (def=header value)
+-n num_bins - set number of bins if input is profile (def=input)
+-i filename - read list of channels to ignore from a file (def=none)
+-p np1 np2  - add profile numbers np1 thru np2 if multiple WAPP dumps (def=all)
+-j Jyfactor - multiply dedispersed data by Jyfactor to convert to Jy
+-J Jyf1 Jyf2 - multiply dedispersed data by Jyf1 and Jyf2 to convert to Jy (use only for two-polarization data)
+-wappinvert - invert WAPP channel order (when using LSB data) (def=USB)
+-wappoffset - assume wapp fsky between two middle channels (for pre-52900 data ONLY)
+-swapout    - perform byte swapping on output data (def=native)
+-nobaseline - don't subtract baseline from the data (def=subtract)
+-sumifs     - sum 2 IFs when creating the final profile (def=don't)
+-headerless - write out data without any header info
+-epn        - write profiles in EPN format (def=ASCII)
+-asciipol   - write profiles in ASCII format for polarization package
+-stream     - write profiles as ASCII streams with START/STOP boundaries
+\end{verbatim}

@@ -1,0 +1,36 @@
+\begin{verbatim}
+% fold help
+
+fold - fold filterbank channels/time series data
+
+usage: fold {filename} -{options}
+
+options:
+
+   filename - full name of the raw data file to be read (def=stdin)
+-o out_file - output file for pulse profile data (def=stdout)
+-p fold_prd - period to fold (ms) or polyco file (def=polyco.dat)
+-a accelern - fold using constant acceleration (def=0 m/s/s)
+-f p_factor - multiply the period by p_factor (def=1.0)
+-m m_factor - output multiple profiles (STREAM only; def=1)
+-n num_bins - number of bins in folded profile(s) (def=window/tsamp)
+-d time/num - dump profiles every time s or num pulses (def=nodumps)
+-t samptime - hard-wire the sampling time (us) (def=header)
+-l phaseval - phase value (turns) of left edge of pulse (def=0.0)
+-r phaseval - phase value (turns) of right edge of pulse (def=1.0)
+-j Jyfactor - multiply all profiles by Jyfactor to convert to Jy
+-b baseline - subtract baseline from all profiles (def=autobase)
+-dt timeoff - add a time offset in seconds to tstart (def=0.0)
+-sk skiptim - skip the first skiptim s before folding (def=0.0)
+-re readtim - read and fold only readtim s of data (def=ALL)
+-ascii      - write profiles as ASCII numbers (this is the default)
+-epn        - write profiles in EPN format (def=ASCII)
+-acc        - write out accumulated profiles (def=subints)
+-bin        - write profiles in SIGPROC binary format (def=ASCII)
+-sub subint - shorthand for -nobaseline -stream -d subint.0
+-psrfits    - write profiles in PSRFITS format (def=ASCII)
+-totalpower - sum polarizations 1+2 before writing (def=nosumming)
+-asciipol   - write profiles in JMCs ASCII format for polarization
+-stream     - write profiles as ASCII streams with START/STOP bounds
+-nobaseline - don't subtract baseline from profiles (def=subtract)
+\end{verbatim}

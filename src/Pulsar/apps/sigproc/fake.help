@@ -1,0 +1,27 @@
+\begin{verbatim}
+% fake help
+
+fake - produce fake filterbank format data for testing downstream code
+
+usage: fake -{options}
+
+options:
+
+-period   p - period of fake pulsar in ms (def=random)
+-width    w - pulse width in percent (def=4)
+-snrpeak  s - signal-to-noise ratio of single pulse (def=1.0)
+-dm       d - dispersion measure of fake pulsar (def=random)
+-nbits    b - number of bits per sample (def=4)
+-nchans   n - number of filterbank channels (def=128)
+-tsamp    t - sampling time in us (def=80)
+-tobs     t - observation time in s (def=10)
+-tstart   t - MJD time stamp of first sample (def=50000.0)
+-nifs     n - number of IFs (def=1)
+-fch1     f - frequency of channel 1 in MHz (def=433.968)
+-foff     f - channel bandwidth in MHz (def=0.062)
+-seed     s - seed for Numerical Recipes ran1 (def=seconds since midnight)
+-nosmear    - do not add in dispersion/sampling smearing (def=add)
+-swapout    - perform byte swapping on output data (def=native)
+-evenodd    - even channels=1 odd channels=0 (def=noise+signal)
+-headerless - do not write header info at start of file (def=header)
+\end{verbatim}

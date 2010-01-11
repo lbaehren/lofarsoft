@@ -1,0 +1,13 @@
+\begin{verbatim}
+% profile help
+
+profile - produce ASCII or pseudo grey-scale displays of folded data
+
+usage: profile {filename} -{options}
+
+options:
+
+   filename - profile file (def=stdin)
+-p fraction - set max value to fraction of peak (def=1.0)
+-frequency  - label grey-scale profiles in frequency (def=time)
+\end{verbatim}

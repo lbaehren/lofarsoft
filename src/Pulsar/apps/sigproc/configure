@@ -1,0 +1,48 @@
+#!/bin/csh
+echo "Configuration script for SIGPROC makefile..."
+set osname = `printenv OSTYPE`
+if ($osname == "") then
+	echo "your OSTYPE variable is undefined..."
+	echo "edit your .cshrc file first to include the line"
+	echo ""
+	echo "setenv OSTYPE osname"
+	echo ""
+	echo "where osname should be either solaris, linux, hpux or darwin"
+	echo "contact drl@jb.man.ac.uk for further details"
+	exit
+endif
+echo "Before generating makefile.$osname, please enter the full path to"
+echo "the directory where the SIGPROC executables will be placed..."
+echo "[default = $PWD] "         | awk '{printf "%s ",$0}'
+set bin_dir = $<
+if ($bin_dir == "") set bin_dir = $PWD
+set makefile = makefile.$osname
+echo "Creating $makefile for target $bin_dir..." | awk '{printf "%s ",$0}'
+echo "# makefile.$osname - your system-specific makefile for SIGPROC" \
+		 > $makefile
+echo "BIN = $bin_dir" >> $makefile
+echo "# The following optional libraries need to be edited by hand..." \
+		>> $makefile
+echo "#LPGPLOT = -lpgplot -lcpgplot -L/usr/X11R6/lib -lX11" \
+	        >> $makefile
+echo "#LFITS = -L/usr/local/src/cfitsio -lcfitsio" \
+		>> $makefile
+echo "#LFFTW = -L/usr/local/lib/ -lfftw3 -lfftw3f" \
+		>> $makefile
+if ($osname == "solaris") then
+	echo "DFITS = " >> $makefile
+	echo "DFFTW = " >> $makefile
+	echo "SUNLM = -lsunmath" >> $makefile
+else
+	echo "SUNLM = " >> $makefile
+        echo "ifneq (Z(origin LFITS), undefined)" | sed s/'Z'/'$'/ >> $makefile
+  	echo "	DFITS = -DPSRFITS"                   >> $makefile
+	echo "endif"                                 >> $makefile
+        echo "ifneq (Z(origin LFFTW), undefined)" | sed s/'Z'/'$'/ >> $makefile
+  	echo "	DFFTW = -DFFTW"                      >> $makefile
+        echo "endif"                                 >> $makefile
+endif
+echo "DONE"
+echo "You are ready to compile the programs by typing 'make' at the prompt"
+echo "good luck... contact drl@jb.man.ac.uk for further details"
+exit

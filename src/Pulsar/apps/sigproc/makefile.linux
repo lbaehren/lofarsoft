@@ -1,0 +1,13 @@
+# makefile.linux - your system-specific makefile for SIGPROC
+BIN = /usr/local/src/sigproc-3.5
+# The following optional libraries need to be edited by hand...
+#LPGPLOT = -lpgplot -lcpgplot -L/usr/X11R6/lib -lX11
+#LFITS = -L/usr/local/src/cfitsio -lcfitsio
+#LFFTW = -L/usr/local/lib/ -lfftw3 -lfftw3f
+SUNLM = 
+ifneq ($(origin LFITS), undefined)
+	DFITS = -DPSRFITS
+endif
+ifneq ($(origin LFFTW), undefined)
+	DFFTW = -DFFTW
+endif
