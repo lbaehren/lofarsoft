@@ -275,6 +275,52 @@ if (CR_WITH_PLOTTING)
   
 endif (CR_WITH_PLOTTING)
 
+##____________________________________________________________________
+## tcheckNoiseInfluence
+
+if (HAVE_STARTOOLS AND CR_WITH_PLOTTING AND CR_WITH_PYTHON)
+
+  ## compiler instructions
+  add_executable (tcheckNoiseInfluence tcheckNoiseInfluence.cc)
+  ## linker instructions
+  if (HAVE_LIBM AND HAVE_LIBUTIL)
+    target_link_libraries (tcheckNoiseInfluence
+      cr
+      ${POSTGRESQL_LIBRARIES}
+      ${STARTOOLS_LIBRARIES}
+      ${FFTW3_LIBRARIES}
+      ${ROOT_LIBRARIES}
+      ${PYTHON_LIBRARIES}
+      ${HAVE_LIBUTIL}
+      ${HAVE_LIBM}
+      )
+  else (HAVE_LIBM AND HAVE_LIBUTIL)
+    target_link_libraries (tcheckNoiseInfluence
+      cr
+      ${POSTGRESQL_LIBRARIES}
+      ${STARTOOLS_LIBRARIES}
+      ${FFTW3_LIBRARIES}
+      ${ROOT_LIBRARIES}
+      ${PYTHON_LIBRARIES}
+      )
+  endif (HAVE_LIBM AND HAVE_LIBUTIL)
+  ## extra properties to take care of
+  if (APPLE)
+    set_target_properties (tcheckNoiseInfluence
+      PROPERTIES
+      LINK_FLAGS "-bind_at_load"
+      )
+  endif (APPLE)
+  ## testing
+  if (CR_ENABLE_TESTING) 
+    add_test (tcheckNoiseInfluence tcheckNoiseInfluence)
+  endif (CR_ENABLE_TESTING) 
+  ## installation
+  list (APPEND tests tcheckNoiseInfluence)
+
+endif (HAVE_STARTOOLS AND CR_WITH_PLOTTING AND CR_WITH_PYTHON)
+
+
 ## ==============================================================================
 ##
 ##  Testing

@@ -58,6 +58,7 @@ else (CR_WITH_STARTOOLS)
   message (STATUS "[CR-Tools] Removing source files requiring STAR-Tools installation.")
   list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/CompletePipeline.cc)
   list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/analyseLOPESevent2.cc)
+  list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/checkNoiseInfluence.cc)
   list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/PulseProperties.cc)
 endif (CR_WITH_STARTOOLS)
 
