@@ -4090,6 +4090,24 @@ void mglDataSetVecN(mglData* md, vector<HNumber> &vec){
     md->Set(a,vec.size());
 }
 
+
+/*!
+
+Converts a complex vector to real. This is just a quick hack ...
+ */
+
+void hAbsComplexVec(vector<HComplex> &cvec, vector<HNumber> &nvec){
+  nvec.resize(cvec.size());
+  typename vector<HComplex>::iterator cit=cvec.begin(),cend=cvec.end();  
+  typename vector<HNumber>::iterator nit=nvec.begin();
+  while (cit<cend) {
+    *nit=abs(*cit);
+    cit++;
+    nit++;
+  };
+}
+
+
 /*!
 \brief Find in the mglData buffer the value "value" and return its position
 */

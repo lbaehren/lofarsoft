@@ -1,3 +1,7 @@
+- implement a getParameter/ResultsObjects function in the Data object, use this to create a parameter browser and editor for functions ..
+
+- add Gauss fit and selecting
+
 
 
 hffuncs.cc:

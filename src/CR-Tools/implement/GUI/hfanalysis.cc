@@ -971,6 +971,179 @@ IterValueType hStdDev(const Iter data_start,const Iter data_end)
 
 //$COPY_TO HFILE START --------------------------------------------------
 #include "hfpp-undef.cc"
+#define HF_PP_FUNCNAME hSquareVec  //The Name of the function
+//.......................................................................
+#define HF_PP_FUNCBRIEF "Square the content of one vector in place."
+#define HF_PP_GUI_LIBRARY Math
+#define HF_PP_NO_GUI 1
+#define HF_PP_FUNCTYPE void   //No return value
+#define HF_PP_NVECS 1 //Number of (input/output) vectors
+#define HF_PP_NPAR 0  //Number of other parameters
+#include "hfdefaultwrappercode.h"
+//$COPY_TO END --------------------------------------------------
+
+/*!  \brief Square the content of one vector in place.
+
+
+  \param idata_start: Iterator pointing to the first element of an array with
+         input values.
+
+  \param idata_end: Iterator pointing to the end of the input vector
+
+
+*/
+
+template <class Iter> 
+void hSquareVec (const Iter idata_start,
+		 const Iter idata_end
+		 )
+{
+  Iter iti=idata_start;
+  while (iti<idata_end) {
+    *iti *= *iti;
+    ++iti;
+  }
+}
+
+//$COPY_TO HFILE START --------------------------------------------------
+#include "hfpp-undef.cc"
+#define HF_PP_FUNCNAME hAbsVec  //The Name of the function
+//.......................................................................
+#define HF_PP_FUNCBRIEF "Take the absolute of one vector in place."
+#define HF_PP_GUI_LIBRARY Math
+#define HF_PP_NO_GUI 1
+#define HF_PP_FUNCTYPE void   //No return value
+#define HF_PP_NVECS 1 //Number of (input/output) vectors
+#define HF_PP_NPAR 0  //Number of other parameters
+#include "hfdefaultwrappercode.h"
+//$COPY_TO END --------------------------------------------------
+
+/*!  \brief Square the content of one vector in place.
+
+
+  \param idata_start: Iterator pointing to the first element of an array with
+         input values.
+
+  \param idata_end: Iterator pointing to the end of the input vector
+
+
+*/
+
+template <class Iter> 
+void hAbsVec (const Iter idata_start,
+	      const Iter idata_end
+	      )
+{
+  Iter iti=idata_start;
+  while (iti<idata_end) {
+    *iti = abs(*iti);
+    ++iti;
+  }
+}
+
+
+//$COPY_TO HFILE START --------------------------------------------------
+#include "hfpp-undef.cc"
+#define HF_PP_FUNCNAME hAddVecs  //The Name of the function
+//.......................................................................
+#define HF_PP_FUNCBRIEF "Add the input vector to the values in the output vector."
+#define HF_PP_GUI_LIBRARY Math
+#define HF_PP_NO_GUI 1
+#define HF_PP_FUNCTYPE void   //No return value
+#define HF_PP_NVECS 2 //Number of (input/output) vectors
+#define HF_PP_NPAR 0  //Number of other parameters
+#include "hfdefaultwrappercode.h"
+//$COPY_TO END --------------------------------------------------
+
+/*!  \brief Add the input vector to the values in the output vector. 
+
+
+  \param idata_start: Iterator pointing to the first element of an array with
+         input values.
+
+  \param idata_end: Iterator pointing to the end of the input vector
+
+  \param odata_start: Iterator pointing to the first element of an array
+         which will contain output values.
+
+  \param odata_end: Iterator pointing to the last element of an array
+         which will contain output values. The length of the output
+         vector should be equal to the input vector.
+
+*/
+
+template <class Iter> 
+void hAddVecs (const Iter idata_start,
+		  const Iter idata_end,
+		  const Iter odata_start,
+		  const Iter odata_end)
+{
+  Iter ito=odata_start,iti=idata_start;
+  while (iti<idata_end && ito<odata_end) {
+    *ito += *iti;
+    ++ito; ++iti;
+    }
+}
+
+//$COPY_TO HFILE START --------------------------------------------------
+#include "hfpp-undef.cc"
+#define HF_PP_FUNCNAME hCopyVec  //The Name of the function
+//.......................................................................
+#define HF_PP_FUNCBRIEF "Copies the values of the input vector to the output vector."
+#define HF_PP_GUI_LIBRARY Math
+#define HF_PP_NO_GUI 1
+#define HF_PP_FUNCTYPE void   //No return value
+#define HF_PP_NVECS 2 //Number of (input/output) vectors
+#define HF_PP_NPAR 0  //Number of other parameters
+//#include "hfdefaultwrappercode.h"
+
+//Define your onw wrappers to make sure the vectors are of equal lengths
+#undef HF_PP_VEC_WRAPPER_CODE_STL
+#undef HF_PP_VEC_WRAPPER_CODE_CASA
+#define HF_PP_VEC_WRAPPER_CODE_STL \
+  HF_PP_VECTORNAME(1).resize(HF_PP_VECTORNAME(0).size()); \
+  HF_PP_FUNCNAME (HF_PP_PAR_VECTORLIST(HF_PP_NVECS))
+#define HF_PP_VEC_WRAPPER_CODE_CASA \
+  HF_PP_VECTORNAME(1).resize(*(HF_PP_VECTORNAME(0).shape().begin())); \
+  HF_PP_FUNCNAME (HF_PP_PAR_VECTORLIST(HF_PP_NVECS))
+HF_PP_GENERATE_WRAPPERS
+
+//$COPY_TO END --------------------------------------------------
+
+/*!  \brief Copy the input vector to the values in the output vector. !!BROKEN!!
+
+
+  \param idata_start: Iterator pointing to the first element of an array with
+         input values.
+
+  \param idata_end: Iterator pointing to the end of the input vector
+
+  \param odata_start: Iterator pointing to the first element of an array
+         which will contain output values.
+
+  \param odata_end: Iterator pointing to the last element of an array
+         which will contain output values. The length of the output
+         vector should be equal to the input vector.
+
+*/
+
+template <class Iter> 
+void hCopyVec (const Iter idata_start,
+		  const Iter idata_end,
+		  const Iter odata_start,
+		  const Iter odata_end)
+{
+  cout << "!!CopyVec: BROKEN !!!!" <<endl;
+  Iter ito=odata_start,iti=idata_start;
+  while (iti<idata_end && ito<odata_end) {
+    *ito = *iti;
+    ++ito; ++iti;
+    }
+}
+
+
+//$COPY_TO HFILE START --------------------------------------------------
+#include "hfpp-undef.cc"
 #define HF_PP_FUNCNAME hDownsample  //The Name of the function
 //.......................................................................
 #define HF_PP_FUNCBRIEF "Resamples (by averaging) an input vector to fit the size of the output vector."
