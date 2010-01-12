@@ -421,6 +421,7 @@ foreach (src ${presto_glib_binaries})
   set_target_properties (${src}
     PROPERTIES
 #    COMPILE_FLAGS "-g -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+#    COMPILE_FLAGS "-g -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
     COMPILE_FLAGS "-g -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
   )
   target_link_libraries (${src} presto ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${GLIB_LIBRARIES} ${libm})
@@ -491,7 +492,7 @@ install (
   )
 
 install (
-  TARGETS ${presto_binaries} ${presto_fc_binaries} ${presto_fc_special_binaries} 
+  TARGETS ${presto_binaries} ${presto_glib_binaries} ${presto_fc_binaries} ${presto_fc_special_binaries} 
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
