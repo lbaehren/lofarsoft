@@ -374,7 +374,7 @@ int main (int argc,
     dr[i] = new CR::LOFAR_TBB(pathname+inputfiles[i], blocksize);
     nantsinfile[i] = dr[i]->fx().shape()[1];
     rcu_ids[i]=dr[i]->channelID()%1000;
-		dr[i]->summary(true,true);
+    dr[i]->summary(std::cout,true,true);
 		cout<<"The observation time = "<<dr[i]->time()[0]<<endl;
     cout << "rcus for file" << i << ": " << rcu_ids[i] << endl;
 		

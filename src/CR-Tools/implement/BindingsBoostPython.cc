@@ -115,19 +115,18 @@ BOOST_PYTHON_MODULE (pycr)
   //  implement/Data
   //
   // ============================================================================
+
+  //__________________________________________________________________
+  //                                                         LOFAR_TBB
   
-  //   bpl::class_<LOFAR_DipoleDataset>("LOFAR_DipoleDataset")
-  //     .def(bpl::init<>())
-  //     .def(bpl::init<std::string,std::string>())
-  //     ;
-  
-  void (LOFAR_TBB::*summary1)(bool const &, bool const &) = &LOFAR_TBB::summary;
-  void (LOFAR_TBB::*summary2)(ostream &, bool const &, bool const &) = &LOFAR_TBB::summary;
+  void (LOFAR_TBB::*summary1)(ostream &,
+			      bool const &,
+			      bool const &) = &LOFAR_TBB::summary;
+
   bpl::class_<LOFAR_TBB>("LOFAR_TBB")
     .def(bpl::init<>())
     .def(bpl::init<std::string,uint>())
     .def("summary",summary1)
-    .def("summary",summary2)
     ;  
   
   // ============================================================================
@@ -136,7 +135,8 @@ BOOST_PYTHON_MODULE (pycr)
   //
   // ============================================================================
   
-  /* DataIterator */
+  //__________________________________________________________________
+  //                                                      DataIterator
   
   bpl::class_<DataIterator>("DataIterator")
     .def(bpl::init<>())
@@ -173,8 +173,9 @@ BOOST_PYTHON_MODULE (pycr)
     .def("summary", &DataIterator::summary)
     ;
 
-  /* DataReader */
-
+  //__________________________________________________________________
+  //                                                        DataReader
+  
   void (DataReader::*setBlocksize1)(uint const &) = &DataReader::setBlocksize;
   void (DataReader::*setBlocksize2)(uint const &,
 				    casa::Matrix<double> const &) = &DataReader::setBlocksize;

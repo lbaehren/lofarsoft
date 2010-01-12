@@ -94,43 +94,24 @@ namespace CR { // Namespace CR -- begin
 
   public:
     
-    // ------------------------------------------------------------- Construction
+    // === Construction =========================================================
 
     //! Default constructor
     LOFAR_TBB ();
-    
-    /*!
-      \brief Argumented constructor
-
-      \param filename -- Name of the file from which to read in the data
-      \param blocksize -- Size of a block of data, [samples]
-    */
+    //! Argumented constructor
     LOFAR_TBB (std::string const &filename,
 	       uint const &blocksize=1);
-    
-    /*!
-      \brief Argumented constructor
-      
-      \param timeseries -- TBB_Timeseries object encapsulating the basic 
-             information on how to interact with a LOFAR TBB time-series 
-	     dataset.
-    */
+    //! Argumented constructor
     LOFAR_TBB (TBB_Timeseries const &timeseries);
-    
-    /*!
-      \brief Copy constructor
-      
-      \param other -- Another LOFAR_TBB object from which to create this new
-      one.
-    */
+    //! Copy constructor
     LOFAR_TBB (LOFAR_TBB const &other);
     
-    // -------------------------------------------------------------- Destruction
+    // === Destruction ==========================================================
 
     //! Destructor
     ~LOFAR_TBB ();
     
-    // ---------------------------------------------------------------- Operators
+    // === Operators ============================================================
     
     /*!
       \brief Overloading of the copy operator
@@ -139,7 +120,7 @@ namespace CR { // Namespace CR -- begin
     */
     LOFAR_TBB& operator= (LOFAR_TBB const &other); 
     
-    // --------------------------------------------------------------- Parameters
+    // === Parameters access ====================================================
 
     /*!
       \brief Get the name of the class
@@ -150,21 +131,8 @@ namespace CR { // Namespace CR -- begin
       return "LOFAR_TBB";
     }
 
-    /*!
-      \brief Provide a summary of the internal status
-      
-      \param listStationGroups -- Recursive summary of the embedded
-             TBB_StationGroup objects?
-    */
-    inline void summary (bool const &listStationGroups=false,
-			 bool const &listChannelIDs=false) {
-      summary (std::cout,
-	       listStationGroups,
-	       listChannelIDs);
-    }
-
     //! Provide a summary of the internal status
-    void summary (std::ostream &os,
+    void summary (std::ostream &os=std::cout,
 		  bool const &listStationGroups=false,
 		  bool const &listChannelIDs=false);    
 

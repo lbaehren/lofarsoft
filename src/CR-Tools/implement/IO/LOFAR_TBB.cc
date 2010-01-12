@@ -45,6 +45,10 @@ namespace CR { // Namespace CR -- begin
   
   // ------------------------------------------------------------------ LOFAR_TBB
   
+  /*!
+    \param filename -- Name of the file from which to read in the data
+    \param blocksize -- Size of a block of data, [samples]
+  */
   LOFAR_TBB::LOFAR_TBB (std::string const &filename,
 			uint const &blocksize)
     : TBB_Timeseries (filename),
@@ -55,6 +59,11 @@ namespace CR { // Namespace CR -- begin
   
   // ------------------------------------------------------------------ LOFAR_TBB
   
+  /*!
+    \param timeseries -- TBB_Timeseries object encapsulating the basic 
+           information on how to interact with a LOFAR TBB time-series 
+	   dataset.
+  */
   LOFAR_TBB::LOFAR_TBB (TBB_Timeseries const &timeseries)
     : TBB_Timeseries (timeseries),
       DataReader ()
@@ -64,6 +73,10 @@ namespace CR { // Namespace CR -- begin
   
   // ------------------------------------------------------------------ LOFAR_TBB
   
+  /*!
+    \param other -- Another LOFAR_TBB object from which to create this new
+           one.
+  */
   LOFAR_TBB::LOFAR_TBB (LOFAR_TBB const &other)
   {
     copy (other);
@@ -118,6 +131,11 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
+  /*!
+    \param os -- Output stream to which the summary is being written.
+    \param listStationGroups -- Recursive summary of the embedded
+           TBB_StationGroup objects?
+  */
   void LOFAR_TBB::summary (std::ostream &os,
 			   bool const &listStationGroups,
 			   bool const &listChannelIDs)
