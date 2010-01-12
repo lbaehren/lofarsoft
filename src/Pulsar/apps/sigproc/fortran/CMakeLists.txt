@@ -74,9 +74,9 @@ zapit.f
 
 add_library (sigproc_fort STATIC ${fort_sigproc_sources})
 
-add_executable (sigproc_seek
-  seek.f
-  )
+#add_executable (sigproc_seek
+#  seek.f
+#  )
 
 add_executable (best
   best.f
@@ -103,8 +103,10 @@ add_executable (quickplot
   )
 
 set (sigproc_fc_binaries
-   sigproc_seek best step postproc grey mask quickplot
+   best step postproc grey mask quickplot
 )
+
+# sigproc_seek
 
 if (UNIX)
 ## if (APPLE)
