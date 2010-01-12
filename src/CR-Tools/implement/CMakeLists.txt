@@ -177,6 +177,7 @@ if (CR_WITH_PYTHON)
     )
   ## linker instructions
   target_link_libraries(pycr
+    ${HAVE_LIBZ}
     ${PYTHON_LIBRARIES}
     ${BOOST_LIBRARIES}
     ${HDF5_LIBRARIES}
