@@ -287,6 +287,18 @@ if (NOT USG_CMAKE_CONFIG)
   ## ============================================================================
   
   #set (CMAKE_OSX_ARCHITECTURES i386;ppc)
+
+  if (APPLE)
+    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+      if (CMAKE_SIZEOF_VOID_P)
+	if (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+	  set (CMAKE_SYSTEM_WORDSIZE 64)
+	else (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+	  set (CMAKE_SYSTEM_WORDSIZE 32)
+	endif (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+      endif (CMAKE_SIZEOF_VOID_P)
+    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+  endif (APPLE)
   
   if (UNIX)
     set (CMAKE_FIND_LIBRARY_PREFIXES "lib" CACHE STRING
@@ -343,7 +355,7 @@ if (NOT USG_CMAKE_CONFIG)
   message (STATUS " CMAKE_SYSTEM .............. : ${CMAKE_SYSTEM}"                )
   message (STATUS " CMAKE_SYSTEM_VERSION ...... : ${CMAKE_SYSTEM_VERSION}"        )
   message (STATUS " CMAKE_SYSTEM_PROCESSOR .... : ${CMAKE_SYSTEM_PROCESSOR}"      )
-  message (STATUS " CMAKE_SYSTEM_BIG_ENDIAN ... : ${CMAKE_SYSTEM_BIG_ENDIAN}"     )
+  message (STATUS " CMAKE_SYSTEM_WORDSIZE ..... : ${CMAKE_SYSTEM_WORDSIZE}"       )
   message (STATUS " USG_ROOT .................. : ${USG_ROOT}"                    )
   message (STATUS " CMAKE_INSTALL_PREFIX ...... : ${CMAKE_INSTALL_PREFIX}"        )
   message (STATUS " CMAKE_FIND_LIBRARY_PREFIXES : ${CMAKE_FIND_LIBRARY_PREFIXES}" )
