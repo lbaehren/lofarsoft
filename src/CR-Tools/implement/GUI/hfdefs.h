@@ -46,6 +46,7 @@ extern int global_debuglevel;
 #include <boost/python/args.hpp>
 #include <boost/python/tuple.hpp>
 #include <boost/python/class.hpp>
+#include <boost/python/str.hpp>
 #include <boost/python/return_internal_reference.hpp>
 #include <boost/python/operators.hpp>
 #include <boost/python/object_operators.hpp>

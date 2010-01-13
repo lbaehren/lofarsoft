@@ -1,3 +1,12 @@
+from numpy import *
+v=FloatVec();v.extend([0.0,0.0]);x=hVec2Buffer2(v)
+b=bytearray()
+b.extend(x)
+a=frombuffer(b)
+a[0]=1.0
+
+
+
 v=d["Antenna=0:y:Data"].val()
 
 offsets=IntVec()

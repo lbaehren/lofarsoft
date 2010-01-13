@@ -4090,6 +4090,17 @@ void mglDataSetVecN(mglData* md, vector<HNumber> &vec){
     md->Set(a,vec.size());
 }
 
+std::string hVec2Buffer(vector<HNumber> &vec){
+  std::string * ptr = reinterpret_cast<std::string*>(&(vec[0]));
+  return *ptr;
+}
+
+boost::python::str hVec2Buffer2(vector<HNumber> &vec){
+  boost::python::str s(reinterpret_cast<char*>(&(vec[0])),vec.size()*8);
+  return s;
+}
+
+
 
 /*!
 
