@@ -74,42 +74,7 @@ set (AIPSARCH
 ## ------------------------------------------------------------------------------
 ## Define where to search for libraries, header files and applications
 
-set (bin_locations
-  ./bin
-  /bin
-  /usr/sbin
-  /usr/bin
-  /usr/bin/X11
-  /usr/local/sbin
-  /usr/local/bin
-  /opt
-  /sw/bin
-)
-
-set (include_locations
-  ./include
-  ../../../local/include
-  /opt/casa/local/include
-  /usr/include
-  /usr/local/include
-  /opt
-  /sw/include
-  /Developer/SDKs/MacOSX10.4u.sdk/usr/include
-  /Developer/SDKs/MacOSX10.5.sdk/usr/include
-)
-
-set (lib_locations
-  ./lib
-  ../../../local/lib
-  /opt/casa/local/lib
-  /usr/lib
-  /usr/local/lib
-  /usr/X11R6/lib
-  /opt
-  /sw/lib
-  /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
-  /Developer/SDKs/MacOSX10.5.sdk/usr/lib
-)
+include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
 
 ## ------------------------------------------------------------------------------
 ## Append the detected configuration information to the existing "makedefs"
