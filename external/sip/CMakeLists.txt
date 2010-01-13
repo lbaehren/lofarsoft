@@ -105,7 +105,7 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
   ## Expand the tar-archive
   
   add_custom_target (expand_archive
-    COMMAND tar -xvzf ${SIP_TAR_ARCHIVE}
+    COMMAND tar -xzf ${SIP_TAR_ARCHIVE}
     WORKING_DIRECTORY ${SIP_BINARY_DIR}
     COMMENT "Expanding tar-archive ..."
     )

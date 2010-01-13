@@ -210,8 +210,11 @@ int test_data (std::string const &filename)
   cout << "[1] Retrieve time-series data without channel selection"
 	    << std::endl;
   try {
-    casa::Matrix<double> data = timeseries.fx (start,
-					       nofSamples);
+    casa::Matrix<double> data;
+
+    timeseries.fx (data,
+		   start,
+		   nofSamples);
     // feedback 
     cout << "-- Data start     = " << start        << std::endl;
     cout << "-- Data blocksize = " << nofSamples   << std::endl;
@@ -248,38 +251,41 @@ int test_data (std::string const &filename)
 
 int test_inversions (std::string const &filename)
 {
-  int nofFailedTests = 0;
-  try {
   std::cout << "\n[tppfinversion::test_inversions]\n" << std::endl;
   
-  Vector<Double> ppfcoeff(16384,0.0) ;
-  readAsciiVector( ppfcoeff,"Coeffs16384Kaiser-quant.dat" ) ;
-  Vector<Double> ppfcoeff_inv(16384, 0.0) ;
-  readAsciiVector( ppfcoeff_inv,"ppf_inv.dat" ) ;
+  int nofFailedTests = 0;
   
-  int start          = 0;
-  int nofSamples     = 516*1024;
-  TBB_Timeseries timeseries (filename);
-  Vector<Double> samples( nofSamples,0.0 );
-  
-  casa::Matrix<double> data = timeseries.fx (start,
-					     nofSamples);
+  try {
+    Vector<Double> ppfcoeff(16384,0.0) ;
+    readAsciiVector( ppfcoeff,"Coeffs16384Kaiser-quant.dat" ) ;
+    Vector<Double> ppfcoeff_inv(16384, 0.0) ;
+    readAsciiVector( ppfcoeff_inv,"ppf_inv.dat" ) ;
+    
+    int start          = 0;
+    int nofSamples     = 516*1024;
+    TBB_Timeseries timeseries (filename);
+    Vector<Double> samples( nofSamples,0.0 );
+    casa::Matrix<double> data;
+    
+    timeseries.fx (data,
+		   start,
+		   nofSamples);
     
     cout << "-- Data start     = " << start        << std::endl;
     cout << "-- Data blocksize = " << nofSamples   << std::endl;
     cout << "-- Data array     = " << data.shape() << std::endl;
     cout << "-- Data [0,]      = " << data.row(0)  << std::endl;
     cout << "-- Data [1,]      = " << data.row(1)  << std::endl;
-    					     
-  Vector<double> data_X = data.column(0);
-       
-  for( int sample=start ; sample < nofSamples ; sample++ ){
-          samples(sample)= data_X(sample) ;
-       } 
-       
-  for(uint p=0; p< 48; p++){
+    
+    Vector<double> data_X = data.column(0);
+    
+    for( int sample=start ; sample < nofSamples ; sample++ ){
+      samples(sample)= data_X(sample) ;
+    } 
+    
+    for(uint p=0; p< 48; p++){
       subband_ID(p) = band_ID[p] ;
-      }
+    }
     ppfinversion ppf_inv ;
     ppfimplement ppf_imp ;
     tbbctlIn newtbbctlIn ;
@@ -287,39 +293,32 @@ int test_inversions (std::string const &filename)
     
     Matrix<DComplex> ppfimplement = ppf_imp.FFTSamples( samples,
                                                         ppfcoeff );
-							
-//    int ROWS = ppfimplement.nrow() ;
+    
     int COLUMNS = ppfimplement.ncolumn() ;
     
     Vector<DComplex> ppfimplement_vector = ppfimplement.row(288) ;
-    
-//     for (int i=0; i< COLUMNS; i++ ){
-//        cout << "real part (" << ppfimplement_vector(i).real() << ", "
-//             << ppfimplement_vector(i).imag() << " )" <<endl ;
-// 	    }
-	Vector<float> X_amplitude(COLUMNS,0.0)  ;
+    Vector<float> X_amplitude(COLUMNS,0.0)  ;
     
     for (int ii=0; ii < COLUMNS; ii++ ) {
-        float x_real = float(ppfimplement_vector[ii].real()) ;
-        float x_imag = float(ppfimplement_vector[ii].imag()) ;
-        float squared_term = x_real*x_real +x_imag*x_imag ;
-        X_amplitude(ii)=sqrt(squared_term) ;
-       }    
-     ofstream logfile2;
-      logfile2.open( "band289", ios::out );
-      for( int sample=0 ; sample < COLUMNS ; sample++ ){
-           logfile2<< X_amplitude(sample) << endl;
-       }
+      float x_real = float(ppfimplement_vector[ii].real()) ;
+      float x_imag = float(ppfimplement_vector[ii].imag()) ;
+      float squared_term = x_real*x_real +x_imag*x_imag ;
+      X_amplitude(ii)=sqrt(squared_term) ;
+    }    
+    ofstream logfile2;
+    logfile2.open( "band289", ios::out );
+    for( int sample=0 ; sample < COLUMNS ; sample++ ){
+      logfile2<< X_amplitude(sample) << endl;
+    }
     logfile2.close() ;
-
     
-   } catch (std::string message) {
+    
+  } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
   return nofFailedTests ;
 }
-
 
 // -----------------------------------------------------------------------------
 
@@ -327,9 +326,8 @@ int main (int argc,
 	  char *argv[])
 {
   int nofFailedTests (0);
- // std::string fileBeamformed;
- // int test_ppfinversion (std::string const &filename) 
   std::string filename;
+
   if (argc > 1) {
     filename = std::string(argv[1]);
   } else {

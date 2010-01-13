@@ -151,7 +151,7 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
     
     if (HAVE_TAR)
       add_custom_target (expand_archive ALL
-	COMMAND tar -xvzf ${ROOT_TAR_ARCHIVE}
+	COMMAND tar -xzf ${ROOT_TAR_ARCHIVE}
 	WORKING_DIRECTORY ${ROOT_BINARY_DIR}
 	COMMENT "[ROOT] Expanding compressed tar-archive ..."
 	)

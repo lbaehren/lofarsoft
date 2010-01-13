@@ -18,8 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #ifndef _DYNAMICSPECTRUM_H_
 #define _DYNAMICSPECTRUM_H_
 
@@ -102,61 +100,31 @@ namespace CR {  // Namespace CR -- begin
       POWER
     };
     
-    // ------------------------------------------------------------- Construction
+    // === Construction =========================================================
     
-    /*!
-      \brief Default constructor
-    */
+    //! Default constructor
     DynamicSpectrum ();
-    /*!
-      \brief Argumented constructor
-      
-      \param crval -- [freq,time] 
-      \param cdelt -- [freq,time] 
-      \param units -- [freq,time] 
-    */
+    //! Argumented constructor
     DynamicSpectrum (const Vector<double>& crval,
 		     const Vector<double>& cdelt,
 		     const Vector<String>& units);
-    
-    /*!
-      \brief Argumented constructor
-
-      \param obsInfo  -- 
-      \param timeAxis -- 
-      \param freqAxis -- 
-    */
+    //! Argumented constructor
     DynamicSpectrum (casa::ObsInfo obsInfo,
 		     casa::LinearCoordinate timeAxis,
 		     casa::SpectralCoordinate freqAxis);
- 
-	  /*!
-	   \brief Argumented constructor
-	   
-	   \param ts2  -- LOFAR_TBB timeseries
-	   
-	   \param nrblocks -- Number of timesteps in the spectrum (optional, default 500)
-	   
-	   \param antennanr -- Antennanr from the dataset used (optional, default 0)
-	  */
-	  DynamicSpectrum (CR::LOFAR_TBB ts2, int nrblocks = 500, int antennanr = 0);	  
-	  
-    /*!
-      \brief Copy constructor
-      
-      \param other -- Another DynamicSpectrum object from which to create this
-             new one.
-    */
+    //! Argumented constructor
+    DynamicSpectrum (CR::LOFAR_TBB ts2,
+		     int nrblocks = 500,
+		     int antennanr = 0);	  
+    //! Copy constructor
     DynamicSpectrum (DynamicSpectrum const& other);
     
-    // -------------------------------------------------------------- Destruction
+    // === Destruction ==========================================================
     
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     ~DynamicSpectrum ();
     
-    // ---------------------------------------------------------------- Operators
+    // === Operators ============================================================
     
     /*!
       \brief Overloading of the copy operator
@@ -165,12 +133,13 @@ namespace CR {  // Namespace CR -- begin
     */
     DynamicSpectrum &operator= (DynamicSpectrum const &other); 
     
-    // --------------------------------------------------------------- Parameters
+    // === Parameter access =====================================================
 
+    //! Get the filenname of the dynamic spectrum
     inline std::string filename () {
       return filename_p;
     }
-
+    //! Set the filenname of the dynamic spectrum
     inline bool setFilename (std::string const &filename) {
       filename_p = filename;
       return true;
@@ -247,20 +216,12 @@ namespace CR {  // Namespace CR -- begin
     */
     casa::CoordinateSystem coordinateSystem ();
     
-    /*!
-      \brief Provide a summary of the internal status
-    */
-    inline void summary () {
-      summary (std::cout);
-    }
+    //! Provide a summary of the internal status
+    void summary (std::ostream &os=std::cout);    
 
-    /*!
-      \brief Provide a summary of the internal status
-    */
-    void summary (std::ostream &os);    
-
-    // ------------------------------------------------------------------ Methods
+    // === Methods ==============================================================
     
+    //! Process a block of data from a set of antennas
     bool processData (casa::Matrix<casa::DComplex> const &data);
     
     /*!
@@ -301,14 +262,9 @@ namespace CR {  // Namespace CR -- begin
     
   private:
     
-    /*!
-      \brief Unconditional copying
-    */
+    //! Unconditional copying
     void copy (DynamicSpectrum const& other);
-    
-    /*!
-      \brief Unconditional deletion 
-    */
+    //! Unconditional deletion 
     void destroy(void);
     
   };

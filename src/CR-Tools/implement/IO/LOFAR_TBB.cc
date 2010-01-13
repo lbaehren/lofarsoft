@@ -333,36 +333,35 @@ namespace CR { // Namespace CR -- begin
   //                                                                             fx
   
   /*!
-    \todo We still need to implement the support for the selection of dipoles
-    within this framework; the arrays originally set up by the DataReader class
-    are not yet being used here.
-    
-    \return fx -- [sample,dipole] 2-dim array with a block of time-series
+    \return data -- [sample,dipole] 2-dim array with a block of time-series
             values for the selected data channels (dipoles).
   */
   casa::Matrix<double> LOFAR_TBB::fx ()
   {
+    casa::Matrix<double> data;
     int start = iterator_p[0].position();
     
-    return TBB_Timeseries::fx (start,
-			       blocksize_p);
+    TBB_Timeseries::fx (data,
+			start,
+			blocksize_p);
+
+    return data;
   }
   
   //_______________________________________________________________________________
   //                                                                             fx
   
   /*!
-    \retval fx -- [sample,dipole] 2-dim array with a block of time-series
+    \retval data -- [sample,dipole] 2-dim array with a block of time-series
             values for the selected data channels (dipoles).
   */
   void LOFAR_TBB::fx (casa::Matrix<double> &data)
   {
     int start = iterator_p[0].position();
     
-    casa::Matrix<double> tmp = TBB_Timeseries::fx (start,
-						   blocksize_p);
-    data.resize(tmp.shape());
-    data = tmp;
+    TBB_Timeseries::fx (data,
+			start,
+			blocksize_p);
   }
   
 } // Namespace CR -- end

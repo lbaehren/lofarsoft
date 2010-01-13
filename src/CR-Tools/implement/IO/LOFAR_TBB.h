@@ -136,18 +136,9 @@ namespace CR { // Namespace CR -- begin
 		  bool const &listStationGroups=false,
 		  bool const &listChannelIDs=false);    
 
-    // ------------------------------------------------------------------ Methods
+    // === Methods ==============================================================
     
-    /*!
-      \brief Get a block of raw time-series data for the available data channels
-
-      \todo We still need to implement the support for the selection of dipoles
-      within this framework; the arrays originally set up by the DataReader class
-      are not yet being used here.
-      
-      \return fx -- [sample,dipole] 2-dim array with a block of time-series
-              values for the selected data channels (dipoles).
-    */
+    //! Get a block of raw time-series data for the available data channels
     casa::Matrix<double> fx ();
     //! Get a block of raw time-series data for the available data channels
     void fx (casa::Matrix<double> &data);

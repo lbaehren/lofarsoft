@@ -21,8 +21,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #include "DynamicSpectrum.h"
 
 namespace CR {  // Namespace CR -- begin
@@ -42,6 +40,11 @@ namespace CR {  // Namespace CR -- begin
   
   // ------------------------------------------------------------ DynamicSpectrum
   
+  /*!
+    \param crval -- [freq,time] 
+    \param cdelt -- [freq,time] 
+    \param units -- [freq,time] 
+  */
   DynamicSpectrum::DynamicSpectrum (const Vector<double>& crval,
 				    const Vector<double>& cdelt,
 				    const Vector<String>& units)
@@ -54,6 +57,11 @@ namespace CR {  // Namespace CR -- begin
   
   // ------------------------------------------------------------ DynamicSpectrum
   
+  /*!
+    \param obsInfo  -- 
+    \param timeAxis -- 
+    \param freqAxis -- 
+  */
   DynamicSpectrum::DynamicSpectrum (casa::ObsInfo obsInfo,
 				    casa::LinearCoordinate timeAxis,
 				    casa::SpectralCoordinate freqAxis)
@@ -62,59 +70,70 @@ namespace CR {  // Namespace CR -- begin
     timeAxis_p = timeAxis;
     freqAxis_p = freqAxis;
   }
-	
-  // ------------------------------------------------------------ DynamicSpectrum
-	
-  DynamicSpectrum::DynamicSpectrum (CR::LOFAR_TBB ts2, int nrblocks, int antennanr)
-	{
-		//Default values, to be adjusted:
-		//int antennanr = 0;
-		//int nrblocks = 500;
-
-		// Make the dynamic spectrum
-		const double alphaHanning = 0.5;
-		cout << "Hanning filter set to " << alphaHanning << endl;
-		ts2.setHanningFilter(alphaHanning);
-		int maxnrblocks = (int) ts2.data_length()(antennanr)/ts2.blocksize();
-		if(nrblocks == 0 || nrblocks > maxnrblocks){
-			nrblocks = maxnrblocks;
-		}
-		int fftsize = (int) ts2.fftLength();
-		dynamicSpectrum_p.resize(nrblocks,fftsize);
-		for(int blocknr=0; blocknr < nrblocks; blocknr++){
-			ts2.setBlock(blocknr);
-			Matrix<DComplex> ft = ts2.calfft();
-			Matrix<Double> absft = amplitude(ft);
-			//cout << setprecision(8) << absft.column(0) << endl ;
-			dynamicSpectrum_p.row(blocknr) = absft.column(antennanr);
-		}
-
-		
-		// Create time and frequency axes.
-		casa::Vector<double> freqs = ts2.frequencyValues(antennanr);
-		//cout << freqs(0) << std::endl;
-		double samplefreq = ts2.sample_frequency_value()(antennanr);
-		string frequnit = ts2.sample_frequency_unit()(antennanr);
-		double timestep = 1 / samplefreq * ts2.blocksize();
-		string timeunit;
-		if(frequnit == "MHz"){
-			timeunit = "us";
-		} else if(frequnit == "Hz"){
-			timeunit = "s";
-		} else if(frequnit == "kHz"){
-			timeunit = "ms";
-		} else{ timeunit = "1/" + frequnit;}
-		
-		
-		setFrequencyAxis( freqs(0), freqs(1)-freqs(0), frequnit);
-		setTimeAxis( 0, timestep, timeunit);
-
-        // set outputfilename (to be added)
-
-	}
   
   // ------------------------------------------------------------ DynamicSpectrum
   
+  /*!
+    \param ts2       -- LOFAR_TBB timeseries
+    \param nrblocks  -- Number of timesteps in the spectrum (optional, default 500)
+    \param antennanr -- Antennanr from the dataset used (optional, default 0)
+  */
+  DynamicSpectrum::DynamicSpectrum (CR::LOFAR_TBB ts2,
+				    int nrblocks,
+				    int antennanr)
+  {
+    //Default values, to be adjusted:
+    //int antennanr = 0;
+    //int nrblocks = 500;
+    
+    // Make the dynamic spectrum
+    const double alphaHanning = 0.5;
+    cout << "Hanning filter set to " << alphaHanning << endl;
+    ts2.setHanningFilter(alphaHanning);
+    int maxnrblocks = (int) ts2.data_length()(antennanr)/ts2.blocksize();
+    if(nrblocks == 0 || nrblocks > maxnrblocks){
+      nrblocks = maxnrblocks;
+    }
+    int fftsize = (int) ts2.fftLength();
+    dynamicSpectrum_p.resize(nrblocks,fftsize);
+    for(int blocknr=0; blocknr < nrblocks; blocknr++){
+      ts2.setBlock(blocknr);
+      Matrix<DComplex> ft = ts2.calfft();
+      Matrix<Double> absft = amplitude(ft);
+      //cout << setprecision(8) << absft.column(0) << endl ;
+      dynamicSpectrum_p.row(blocknr) = absft.column(antennanr);
+    }
+    
+    
+    // Create time and frequency axes.
+    casa::Vector<double> freqs = ts2.frequencyValues(antennanr);
+    //cout << freqs(0) << std::endl;
+    double samplefreq = ts2.sample_frequency_value()(antennanr);
+    string frequnit = ts2.sample_frequency_unit()(antennanr);
+    double timestep = 1 / samplefreq * ts2.blocksize();
+    string timeunit;
+    if(frequnit == "MHz"){
+      timeunit = "us";
+    } else if(frequnit == "Hz"){
+      timeunit = "s";
+    } else if(frequnit == "kHz"){
+      timeunit = "ms";
+    } else{ timeunit = "1/" + frequnit;}
+    
+    
+    setFrequencyAxis( freqs(0), freqs(1)-freqs(0), frequnit);
+    setTimeAxis( 0, timestep, timeunit);
+    
+    // set outputfilename (to be added)
+    
+  }
+  
+  // ------------------------------------------------------------ DynamicSpectrum
+  
+  /*!
+    \param other -- Another DynamicSpectrum object from which to create this
+           new one.
+  */
   DynamicSpectrum::DynamicSpectrum (DynamicSpectrum const& other)
   {
     copy (other);
@@ -356,14 +375,18 @@ namespace CR {  // Namespace CR -- begin
     int status            = 0;
     long naxis            = shape.nelements();
     uint nelements        = dynamicSpectrum_float.nrow() * dynamicSpectrum_float.ncolumn();
-    long naxes[2]         = { shape(0), shape(1)};
     long firstelement = 1;
-    char *ctype[] = {"TIME","FREQ"};
+    long naxes[2];
+    char *ctype[2];
     // char *cunit[] = {"sec","Hz"};
     // get the incrementvalues and units for the axes 
     std::string cd1(casa::String::toString(timeAxis_p.increment()(0)));
     std::string cd2(casa::String::toString(freqAxis_p.increment()(0)));
-    
+
+    naxes[0] = shape(0);
+    naxes[1] = shape(1);
+    ctype[0] = "TIME";
+    ctype[1] = "FREQ";
     
     std::string tunit(timeAxis_p.worldAxisUnits()(0));
     std::string funit(freqAxis_p.worldAxisUnits()(0));

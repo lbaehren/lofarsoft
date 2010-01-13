@@ -69,7 +69,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
     ExternalProject_Add (boost
       PREFIX ${BOOST_BINARY_DIR}
       DOWNLOAD_DIR ${BOOST_BINARY_DIR}/boost
-      PATCH_COMMAND ${tar_executable} -xvzf ${have_boost_cmake}
+      PATCH_COMMAND ${tar_executable} -xzf ${have_boost_cmake}
       SOURCE_DIR ${BOOST_BINARY_DIR}/boost
       URL ${have_boost_tgz}
       CMAKE_ARGS -C ${BOOST_BINARY_DIR}/boost.cmake

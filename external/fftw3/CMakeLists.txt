@@ -36,6 +36,8 @@ endif (USG_ROOT)
 ## ------------------------------------------------------------------------------
 ## Check if the program/package/library is already available
 
+set (FFTW3_FIND_QUIETLY YES)
+
 include (FindFFTW3)
 
 ## <-- begin build condition --------------------------------------------------->
