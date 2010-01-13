@@ -183,7 +183,7 @@ set (packages_external
 ## Packages handled directly through CMake
 
 add_subdirectory (${USG_ROOT}/external)
-add_subdirectory (${USG_ROOT}/devel_common/scripts)
+add_subdirectory (${USG_ROOT}/devel_common)
 
 ##____________________________________________________________________
 ## generic build instructions for the packages
