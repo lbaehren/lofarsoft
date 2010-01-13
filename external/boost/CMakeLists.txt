@@ -10,7 +10,7 @@ cmake_minimum_required (VERSION 2.8)
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (BOOST_FORCE_BUILD       "Force rebuild and local installation?"  YES )
+option (BOOST_FORCE_BUILD       "Force rebuild and local installation?"  NO )
 option (BOOST_VERBOSE_CONFIGURE "Be verbose during configuration?"       YES )
 option (BOOST_VERBOSE_BUILD     "Be verbose during build process?"       NO  )
 
