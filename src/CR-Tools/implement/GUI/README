@@ -1,5 +1,18 @@
 DON'T READ THIS - COMPLETELY OUTDATED ....
 
+log in to 
+
+ssh -X pan.astro.kun.nl
+
+cd /data/falcke/LOFAR/usg
+
+screen
+cntrl-a cntrl-d
+screen -r
+
+
+
+------------------------------------------------------------------------
 
  cp /Users/falcke/LOFAR/usg/build/mathgl/mathgl/widgets/libmgl-qt*dylib /Users/falcke/LOFAR/usg/release/lib/
 

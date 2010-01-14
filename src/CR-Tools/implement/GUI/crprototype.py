@@ -18,6 +18,21 @@ def Vec_iadd(self,vec):
 ComplexVec.__iadd__=Vec_iadd
 #----------------------------------------
 
+#-----------------------------------------
+#STL Vector to Numpy (copy) conversion
+#-----------------------------------------
+import numpy as np
+
+def vec2numpy(vec):
+    return np.frombuffer(hVecBuffer(vec))
+
+def list2numpy(l):
+    return np.frombuffer(hVecBuffer(list2vec(l)))
+
+
+list2vec([1.0,2,3,4])
+#-----------------------------------------
+
 global idata,fdata,cdata,sdata,output_vector
 offsets=IntVec()
 idata=IntVec()
@@ -54,7 +69,6 @@ hCloseFile(datareader_ptr)
 
 #Convert Complex Vector to real (using abs) for plotting
 hAbsComplexVec(output_vector,fdata)
-
 #Make plot with mathgl 
 gr=mglGraph(mglGraphZB,800,600) # Create mgl Graphobject
 qw=hplot(gr,fdata) # Plot it into simple Qt Widget

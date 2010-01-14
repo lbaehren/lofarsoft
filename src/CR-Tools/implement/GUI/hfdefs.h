@@ -16,6 +16,7 @@ extern int global_debuglevel;
 #include <complex>
 #include <cmath>
 #include <stdint.h>
+#include <limits.h>
 
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
@@ -84,26 +85,42 @@ extern int global_debuglevel;
 #define D2BG3( T ) 
 #endif
 
+//------------------------------------------
+//Determines the architecture: 32 vs 64 bit
+//------------------------------------------
+//In the following we will assume that pointers 
+//and HIntegers (i.e. my ints) are of that size.
+ 
+#if LONG_MAX > 2147483647
+#define H_OS64BIT 1
+#define H_NATIVE_WORD_SIZE int64_t
+#else 
+#define H_OS32BIT 1
+#define H_NATIVE_WORD_SIZE int32_t
+#endif
 
-typedef long int longint; /* should be at least 64 bits */
-typedef int HIntPointer; /* This should be an integer that has the same length as a Pointer*/
+//-------------------------------------------
 
-typedef /*long*/ int address ;
+typedef int64_t longint; /* should be at least 64 bits */
+typedef H_NATIVE_WORD_SIZE HIntPointer; /* This should be an integer that has the same length as a Pointer*/
+
+
+typedef HIntPointer address ;
 //This is used to identify each data field uniquely
-typedef int objectid;
+typedef HIntPointer objectid;
 //counts to keep track of whether an object was modified - 0 if not modified
-typedef int modval;
+typedef HIntPointer modval;
 
 
-#define MAXINT 2147483648
+#define MAXINT INT_MAX
 
 //the maximum version number that is allowed inside an object (should be ~MAXINT)
-#define MAXVERSION MAXINT
+#define MAXVERSION MAXINT-1
 
 
 //Define Types of Data to be stored
 //typedef intptr_t HInteger;
-typedef int HInteger;
+typedef HIntPointer HInteger;
 typedef double HNumber;
 typedef std::complex<double> HComplex;
 typedef std::string HString;

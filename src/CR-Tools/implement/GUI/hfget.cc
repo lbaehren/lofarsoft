@@ -120,7 +120,7 @@ HInteger getPointerFromPythonObject(PyObject* pyobj) {
 }
 
 /*
-Here we allow all types to be casted into others (even if that measn
+Here we allow all types to be casted into others (even if that means
 to loose information). mycast is the basic function which allows one to do that.
 
 */
@@ -4090,15 +4090,25 @@ void mglDataSetVecN(mglData* md, vector<HNumber> &vec){
     md->Set(a,vec.size());
 }
 
-std::string hVec2Buffer(vector<HNumber> &vec){
-  std::string * ptr = reinterpret_cast<std::string*>(&(vec[0]));
-  return *ptr;
-}
+/*!
+\brief Returns a byte-by-byte copy of the current vector as a python str object, which can be used as a buffer to create, e.g. a numpy array from it using fromstring(s).
+ */
 
-boost::python::str hVec2Buffer2(vector<HNumber> &vec){
-  boost::python::str s(reinterpret_cast<char*>(&(vec[0])),vec.size()*8);
+/*template <class T>
+boost::python::str hVecBuffer(vector<T> &vec){
+  boost::python::str s(reinterpret_cast<char*>(&(vec[0])),vec.size()*sizeof(T));
   return s;
 }
+*/
+
+
+//template <class T>
+
+PyObject * hVecBuffer(vector<HNumber> &vec){
+  PyObject* pyob=PyByteArray_FromStringAndSize(reinterpret_cast<char*>(&(vec[0])),vec.size()*sizeof(HNumber));
+  return pyob;
+}
+
 
 
 
@@ -4175,27 +4185,29 @@ void instantiate_hfget(DATATYPE type){
 
   switch (type){
 #define SW_TYPE_COMM(EXT,TYPE) \
-  vectostring(*d_ptr_##EXT); \
-  hfnull<TYPE>();				\
-  mycast<TYPE>(ui);				\
-  d.getFirstFromVector(*d_ptr_##EXT, NULL);	\
-  copyvec(*d_ptr_##EXT,*d_ptr_##EXT);		\
-  copyvec(*val_##EXT,*d_ptr_##EXT);		\
-  d.putOne(*val_##EXT);				\
-  d.putOne_silent(*val_##EXT);			\
-  d.put(*d_ptr_##EXT);				\
-  d.put_silent(*d_ptr_##EXT);			\
-  d.inspect(*d_ptr_##EXT);				\
-  vec_append(*d_ptr_##EXT,*d_ptr_##EXT);		\
-  WhichType<TYPE>();					\
-  printvec(*d_ptr_##EXT,8);				\
-  printvec_noendl(*d_ptr_##EXT,8);			\
-  set_ptr_to_value(Null_p, INTEGER, *val_##EXT);	\
-  set_ptr_to_value<TYPE>(Null_p, INTEGER,*val_##EXT);	\
-  cast_ptr_to_value<TYPE>(Null_p, INTEGER)
+    vectostring(*d_ptr_##EXT);			\
+    hfnull<TYPE>();				\
+    mycast<TYPE>(ui);				\
+    d.getFirstFromVector(*d_ptr_##EXT, NULL);	\
+    copyvec(*d_ptr_##EXT,*d_ptr_##EXT);		\
+    copyvec(*val_##EXT,*d_ptr_##EXT);		\
+    d.putOne(*val_##EXT);			\
+    d.putOne_silent(*val_##EXT);		\
+    d.put(*d_ptr_##EXT);			\
+    d.put_silent(*d_ptr_##EXT);				\
+    d.inspect(*d_ptr_##EXT);				\
+    vec_append(*d_ptr_##EXT,*d_ptr_##EXT);		\
+    WhichType<TYPE>();					\
+    printvec(*d_ptr_##EXT,8);				\
+    printvec_noendl(*d_ptr_##EXT,8);			\
+    set_ptr_to_value(Null_p, INTEGER, *val_##EXT);	\
+    set_ptr_to_value<TYPE>(Null_p, INTEGER,*val_##EXT);	\
+    cast_ptr_to_value<TYPE>(Null_p, INTEGER)
 #include "switch-type.cc"
   }
 }
+
+  //  hVecBuffer(*d_ptr_##EXT);		       
 
 /* specialize has_back_reference for Data
 namespace boost { namespace python
