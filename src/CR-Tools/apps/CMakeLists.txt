@@ -531,7 +531,7 @@ if (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES AND HAVE_BOOST)
     ${DAL_LIBRARIES}
     ${CASA_LIBRARIES}
     ${HDF5_LIBRARIES}
-    ${BOOST_LIBRARIES}
+    ${BOOST_PROGRAM_OPTIONS_LIBRARY}
     )
   ## installation instructions
   list (APPEND cr_apps tbbTriggerAnalysis)
