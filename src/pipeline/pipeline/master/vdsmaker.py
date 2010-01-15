@@ -1,6 +1,6 @@
 from __future__ import with_statement
 import sys, os, tempfile, errno
-from subprocess import check_call, CalledProcessError
+import subprocess
 
 # Local helpers
 from pipeline.support.ipython import LOFARTask
@@ -102,11 +102,24 @@ class vdsmaker(LOFARrecipe):
         executable = self.inputs['combinevds']
         gvds_out   = "%s/%s" % (self.inputs['directory'], self.inputs['gvds'])
         try:
-            check_call([executable, gvds_out] + vdsnames, close_fds=True)
+            # When we get an OSError 24, it seems we have
+            # /sys/devices/virtual/vtconsole/vtcon0 open many times.
+            # Speculating this is due to a failure of subprocess to write to
+            # the console (why?); try writing to pipes instead.
+            command = [executable, gvds_out] + vdsnames
+            combineproc = subprocess.Popen(
+                command,
+                close_fds=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            sour, serr = combineproc.communicate()
+            if combineproc.returncode != 0:
+                raise subprocess.CalledProcessError(combineproc.returncode, command)
             self.outputs['gvds'] = gvds_out
             return 0
-        except CalledProcessError:
-            self.logger.exception("Call to combinevds failed")
+        except subprocess.CalledProcessError, cpe:
+            self.logger.exception("combinevds failed with status %d: %s" % (cpe.returncode, serr))
             return 1
         except OSError, failure:
             # This has previously bombed out with OSError 24: too many open
@@ -116,7 +129,7 @@ class vdsmaker(LOFARrecipe):
                     count = 0
                     for x in xrange(0, os.sysconf('SC_OPEN_MAX')):
                         try:
-                            self.logger.debug(str(os.fstat(0)))
+                            self.logger.debug("open file %d: %s" (x, str(os.fstat(0))))
                             count += 1
                         except:
                             pass
