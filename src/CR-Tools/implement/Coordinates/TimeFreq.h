@@ -200,102 +200,43 @@ namespace CR { // Namespace CR -- begin
 
   public:
     
-    // ------------------------------------------------------------- Construction
+    // === Construction =========================================================
     
-    /*!
-      \brief Default constructor
-      
-      Initialized object with:
-      - <tt>blocksize=1</tt>
-      - <tt>sampleFrequency=80e06</tt>
-      - <tt>nyquistZone=1</tt>
-    */
+    //! Default constructor
     TimeFreq ();
-    
-    /*!
-      \brief Argumented constructor
-      
-      Initialized object with <tt>sampleFrequency=80e06</tt> and
-      <tt>nyquistZone=1</tt>.
-      
-      \param blocksize       -- Blocksize, [samples]
-    */
+    //! Argumented constructor
     TimeFreq (uint const &blocksize);
-    
-    /*!
-      \brief Argumented constructor
-      
-      \param blocksize       -- Blocksize, [samples]
-      \param sampleFrequency -- Sample frequency in the ADC step, [Hz]
-      \param nyquistZone     -- Nyquist zone,  [1]
-    */
+    //! Argumented constructor
     TimeFreq (uint const &blocksize,
 	      double const &sampleFrequency,
 	      uint const &nyquistZone);
-    
-    /*!
-      \brief Argumented constructor
-      
-      \param blocksize       -- Blocksize, [samples]
-      \param sampleFrequency -- Sample frequency in the ADC step, provided as
-             casa::Quantity, thereby enabling passing the value in units other
-	     but the base units.
-      \param nyquistZone     -- Nyquist zone,  [1]
-    */
-#ifdef HAVE_CASA
-    TimeFreq (uint const &blocksize,
-	      casa::Quantity const &sampleFrequency,
-	      uint const &nyquistZone);
-#endif 
-    
-    /*!
-      \brief Argumented constructor
-      
-      \param blocksize       -- Blocksize, [samples]
-      \param sampleFrequency -- Sample frequency in the ADC, [Hz]
-      \param nyquistZone     -- Nyquist zone,  [1]
-      \param referenceTime   -- Reference time, \f$ t_0 \f$
-    */
+    //! Argumented constructor
     TimeFreq (uint const &blocksize,
 	      double const &sampleFrequency,
 	      uint const &nyquistZone,
 	      double const &referenceTime);
     
-    /*!
-      \brief Argumented constructor
-      
-      \param blocksize       -- Blocksize, [samples]
-      \param sampleFrequency -- Sample frequency in the ADC step, provided as
-             casa::Quantity, thereby enabling passing the value in units other
-	     but the base units.
-      \param nyquistZone     -- Nyquist zone,  [1]
-      \param referenceTime   -- Reference time, \f$ t_0 \f$, provided as
-             casa::Quantity, thereby enabling passing the value in units other
-	     but the base units.
-    */
 #ifdef HAVE_CASA
+    //! Argumented constructor
+    TimeFreq (uint const &blocksize,
+	      casa::Quantity const &sampleFrequency,
+	      uint const &nyquistZone);
+    //! Argumented constructor
     TimeFreq (uint const &blocksize,
 	      casa::Quantity const &sampleFrequency,
 	      uint const &nyquistZone,
 	      casa::Quantity const &referenceTime);
 #endif
     
-    /*!
-      \brief Copy constructor
-      
-      \param other -- Another TimeFreq object from which to create this new
-      one.
-    */
+    //! Copy constructor
     TimeFreq (TimeFreq const &other);
     
-    // -------------------------------------------------------------- Destruction
+    // === Destruction ==========================================================
 
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     virtual ~TimeFreq ();
     
-    // ---------------------------------------------------------------- Operators
+    // === Operators ============================================================
     
     /*!
       \brief Overloading of the copy operator
@@ -304,11 +245,45 @@ namespace CR { // Namespace CR -- begin
     */
     TimeFreq& operator= (TimeFreq const &other); 
     
-    // --------------------------------------------------------------- Parameters
+    // === Parameter access =====================================================
     
     /*!
+      \brief Get the blocksize, \f$ N_{\rm Blocksize} \f$
+      \return blocksize -- Blocksize, [samples]
+    */
+    inline uint blocksize () const {
+      return blocksize_p;
+    }
+
+    /*!
+      \brief Set the blocksize, \f$ N_{\rm Blocksize} \f$
+      \param blocksize -- Blocksize, [samples]
+    */
+    virtual void setBlocksize (uint const &blocksize);
+    
+    /*!
+      \brief Get the sample frequency, \f$ \nu_{\rm Sample} \f$
+      \return sampleFrequency -- Sample frequency in the ADC, [Hz]
+    */
+    inline double sampleFrequency () const {
+      return sampleFrequency_p;
+    }
+
+    /*!
+      \brief Get the sample frequency, \f$ \nu_{\rm Sample} \f$
+      \param unit -- The unit of the returned frequency, e.g. MHz
+      \return sampleFrequency -- Sample frequency in the ADC
+    */
+    double sampleFrequency (casa::String const &unit);
+
+    /*!
+      \brief Set the sample frequency, \f$ \nu_{\rm Sample} \f$
+      \param sampleFrequency -- Sample frequency in the ADC, [Hz]
+    */
+    virtual void setSampleFrequency (double const &sampleFrequency);
+
+    /*!
       \brief Get the name of the class
-      
       \return className -- The name of the class, TimeFreq.
     */
     std::string className () const {
@@ -322,53 +297,7 @@ namespace CR { // Namespace CR -- begin
 
     //! Provide a summary of the internal status
     void summary (std::ostream &os);    
-
     
-    // ------------------------------------------------------ Internal parameters
-
-    /*!
-      \brief Get the blocksize, \f$ N_{\rm Blocksize} \f$
-
-      \return blocksize -- Blocksize, [samples]
-    */
-    inline uint blocksize () const {
-      return blocksize_p;
-    }
-
-    /*!
-      \brief Set the blocksize, \f$ N_{\rm Blocksize} \f$
-
-      \param blocksize -- Blocksize, [samples]
-    */
-    virtual void setBlocksize (uint const &blocksize);
-    
-    // --- sampleFrequency ---------------------------------
-
-    /*!
-      \brief Get the sample frequency, \f$ \nu_{\rm Sample} \f$
-
-      \return sampleFrequency -- Sample frequency in the ADC, [Hz]
-    */
-    inline double sampleFrequency () const {
-      return sampleFrequency_p;
-    }
-
-    /*!
-      \brief Get the sample frequency, \f$ \nu_{\rm Sample} \f$
-
-      \param unit -- The unit of the returned frequency, e.g. MHz
-
-      \return sampleFrequency -- Sample frequency in the ADC
-    */
-    double sampleFrequency (casa::String const &unit);
-
-    /*!
-      \brief Set the sample frequency, \f$ \nu_{\rm Sample} \f$
-
-      \param sampleFrequency -- Sample frequency in the ADC, [Hz]
-    */
-    virtual void setSampleFrequency (double const &sampleFrequency);
-
     /*!
       \brief Set the sample frequency, \f$ \nu_{\rm Sample} \f$
 
@@ -620,39 +549,16 @@ namespace CR { // Namespace CR -- begin
 
 #ifdef HAVE_CASA
 
-    /*!
-      \brief [optional:CASA] Create time axis coordinate from parameters
-      
-      \return coord -- The time axis as linear coordinate
-    */
+    //! [optional:CASA] Create time axis coordinate from parameters
     casa::LinearCoordinate timeAxis ();
-    
-    /*!
-      \brief [optional:CASA] Create time axis coordinate from parameters
-
-      \param crval -- Reference value in world coordinates, [s]
-      \param cdelt -- Increment along the coordinate axis, [s]
-      \param crpix -- Reference pixel
-      
-      \return coord -- The time axis as linear coordinate
-    */
+    //! [optional:CASA] Create time axis coordinate from parameters
     casa::LinearCoordinate timeAxis (double const &crval,
 				     double const &cdelt,
-				     double const &crpix);
-    
+				     double const &crpix,
+				     casa::String const &unit="s");
     //! [optional:CASA] Create frequency axis coordinate from parameters
     casa::SpectralCoordinate frequencyAxis ();
-
-    /*!
-      \brief [optional:CASA] Create frequency axis coordinate from parameters
-      
-      \param crval    -- Reference value in world coordinates, [Hz]
-      \param cdelt    -- Increment along the coordinate axis, [Hz]
-      \param crpix    -- Reference pixel
-      \param restfreq -- Rest frequency
-      
-      \return coord -- The frequency axis as spectral coordinate
-    */
+    //! [optional:CASA] Create frequency axis coordinate from parameters
     casa::SpectralCoordinate frequencyAxis (double const &crval,
 					    double const &cdelt,
 					    double const &crpix,
@@ -662,14 +568,9 @@ namespace CR { // Namespace CR -- begin
     
   private:
     
-    /*!
-      \brief Unconditional copying
-    */
+    //! Unconditional copying
     void copy (TimeFreq const &other);
-    
-    /*!
-      \brief Unconditional deletion 
-    */
+    //! Unconditional deletion 
     void destroy(void);
     
   };

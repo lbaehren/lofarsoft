@@ -34,6 +34,12 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                     TimeFreq
   
+  /*!
+    Initialized object with:
+    - <tt>blocksize=1</tt>
+    - <tt>sampleFrequency=80e06</tt>
+    - <tt>nyquistZone=1</tt>
+  */
   TimeFreq::TimeFreq ()
   {
     setBlocksize (1);
@@ -45,6 +51,12 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                     TimeFreq
   
+  /*!
+    Initialized object with <tt>sampleFrequency=80e06</tt> and
+    <tt>nyquistZone=1</tt>.
+    
+    \param blocksize       -- Blocksize, [samples]
+  */
   TimeFreq::TimeFreq (uint const &blocksize)
   {
     setBlocksize (blocksize);
@@ -52,10 +64,15 @@ namespace CR { // Namespace CR -- begin
     nyquistZone_p     = 1;
     referenceTime_p   = 0;
   }
-
+  
   //_____________________________________________________________________________
   //                                                                     TimeFreq
   
+  /*!
+    \param blocksize       -- Blocksize, [samples]
+    \param sampleFrequency -- Sample frequency in the ADC step, [Hz]
+    \param nyquistZone     -- Nyquist zone,  [1]
+  */
   TimeFreq::TimeFreq (uint const &blocksize,
 		      double const &sampleFrequency,
 		      uint const &nyquistZone)
@@ -68,8 +85,15 @@ namespace CR { // Namespace CR -- begin
   
   //_____________________________________________________________________________
   //                                                                     TimeFreq
-
+  
 #ifdef HAVE_CASA  
+  /*!
+    \param blocksize       -- Blocksize, [samples]
+    \param sampleFrequency -- Sample frequency in the ADC step, provided as
+           casa::Quantity, thereby enabling passing the value in units other
+	   but the base units.
+    \param nyquistZone     -- Nyquist zone,  [1]
+  */
   TimeFreq::TimeFreq (uint const &blocksize,
 		      casa::Quantity const &sampleFrequency,
 		      uint const &nyquistZone)
@@ -84,6 +108,12 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                     TimeFreq
   
+  /*!
+    \param blocksize       -- Blocksize, [samples]
+    \param sampleFrequency -- Sample frequency in the ADC, [Hz]
+    \param nyquistZone     -- Nyquist zone,  [1]
+    \param referenceTime   -- Reference time, \f$ t_0 \f$
+  */
   TimeFreq::TimeFreq (uint const &blocksize,
 		      double const &sampleFrequency,
 		      uint const &nyquistZone,
@@ -99,6 +129,16 @@ namespace CR { // Namespace CR -- begin
   //                                                                     TimeFreq
   
 #ifdef HAVE_CASA
+  /*!
+    \param blocksize       -- Blocksize, [samples]
+    \param sampleFrequency -- Sample frequency in the ADC step, provided as
+            casa::Quantity, thereby enabling passing the value in units other
+	    but the base units.
+    \param nyquistZone     -- Nyquist zone,  [1]
+    \param referenceTime   -- Reference time, \f$ t_0 \f$, provided as
+           casa::Quantity, thereby enabling passing the value in units other
+	   but the base units.
+  */
   TimeFreq::TimeFreq (uint const &blocksize,
 		      casa::Quantity const &sampleFrequency,
 		      uint const &nyquistZone,
@@ -114,6 +154,10 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                     TimeFreq
   
+  /*!
+    \param other -- Another TimeFreq object from which to create this new
+           one.
+  */
   TimeFreq::TimeFreq (TimeFreq const &other)
   {
     copy (other);
@@ -642,6 +686,9 @@ namespace CR { // Namespace CR -- begin
   
   // ------------------------------------------------------------------- timeAxis
   
+  /*!
+    \return coord -- The time axis as linear coordinate
+  */
   casa::LinearCoordinate TimeFreq::timeAxis ()
   {    
     double refValue (0.0);
@@ -652,17 +699,25 @@ namespace CR { // Namespace CR -- begin
 		     increment,
 		     refPixel);
   }
-
+  
   // ------------------------------------------------------------------- timeAxis
   
+  /*!
+    \param crval -- Reference value in world coordinates, [s]
+    \param cdelt -- Increment along the coordinate axis, [s]
+    \param crpix -- Reference pixel
+    
+    \return coord -- The time axis as linear coordinate
+  */
   casa::LinearCoordinate TimeFreq::timeAxis (double const &crval,
 					     double const &cdelt,
-					     double const &crpix)
+					     double const &crpix,
+					     casa::String const &unit)
   {
     uint nofAxes (1);
 
     casa::Vector<casa::String> names  (nofAxes,"Time");
-    casa::Vector<casa::String> units  (nofAxes,"s");
+    casa::Vector<casa::String> units  (nofAxes,unit);
     casa::Vector<casa::Double> refVal (nofAxes,crval);
     casa::Vector<casa::Double> inc    (nofAxes,cdelt);
     casa::Matrix<casa::Double> pc     (nofAxes,nofAxes);
@@ -694,6 +749,14 @@ namespace CR { // Namespace CR -- begin
   
   // -------------------------------------------------------------- frequencyAxis
   
+  /*!
+    \param crval    -- Reference value in world coordinates, [Hz]
+    \param cdelt    -- Increment along the coordinate axis, [Hz]
+    \param crpix    -- Reference pixel
+    \param restfreq -- Rest frequency
+    
+    \return coord -- The frequency axis as spectral coordinate
+  */
   casa::SpectralCoordinate TimeFreq::frequencyAxis (double const &crval,
 						    double const &cdelt,
 						    double const &crpix,

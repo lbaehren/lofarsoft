@@ -107,6 +107,10 @@ int test_TimeFreq ()
     TimeFreq data1 (blocksize);
     data1.summary();
     //
+    cout << "-- blocksize" << blocksize << endl;
+    cout << "-- sampleFrequency" << sampleFrequency << endl;
+    cout << "-- nyquistZone" << nyquistZone << endl;
+    //
     TimeFreq data2 (blocksize,sampleFrequency,nyquistZone);
     data2.summary();
   } catch (std::string message) {

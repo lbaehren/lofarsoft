@@ -38,6 +38,24 @@ foreach (src ${tests})
   add_test (${src} ${src})
 endforeach (src)
 
+##_______________________________________________________________________________
+##                                                            Testing preparation
+
+if (dataset_tbb)
+  
+  find_program (BASH_EXCUTABLE bash ${bin_locations})
+  get_filename_component (dataset_tbb_local ${dataset_tbb} NAME)
+  
+  foreach (testScript
+      tLOFAR_TBB
+      )
+    configure_file (${CR_SOURCE_DIR}/implement/IO/test/${testScript}.sh
+      ${CR_BINARY_DIR}/implement/IO/test/${testScript}.sh
+      )
+  endforeach (testScript)
+  
+endif (dataset_tbb)
+
 ##____________________________________________________________________
 ## tLOFAR_TBB
 
@@ -55,9 +73,9 @@ if (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES)
     )
   ## testing
   if (dataset_tbb)
-    add_test (tLOFAR_TBB tLOFAR_TBB ${dataset_tbb})
+    add_test (tLOFAR_TBB ${BASH_EXCUTABLE} tLOFAR_TBB.sh)
   else (dataset_tbb)
-    message (STATUS "Unable to run test tLOFAR_TBB; missing input data file.")
+    add_test (tLOFAR_TBB tLOFAR_TBB)
   endif (dataset_tbb)
   ## installation
   list (APPEND tests tLOFAR_TBB)

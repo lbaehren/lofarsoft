@@ -132,6 +132,13 @@ endif (CR_WITH_PYTHON)
 ##
 ## =============================================================================
 
+if (CMAKE_SIZEOF_VOID_P)
+  if (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+    message (STATUS "Adding compiler flag -DWORDSIZE_IS_64")
+    add_definitions (-DWORDSIZE_IS_64)
+  endif (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+endif (CMAKE_SIZEOF_VOID_P)
+
 ## -------------------------------------------------------------------
 ## Handle option: testing mode on/off
 
@@ -193,25 +200,15 @@ endif (CR_WITH_GLISH)
 
 if (HAVE_CASA OR HAVE_CASACORE)
   
-  ## compiler flags
+  ## Compiler flags
   set (HAVE_CASA YES)
 
   ## Platform test 32/64 bit ------------------------------
   set (CMAKE_SYSTEM_64BIT 0)
-  if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
-    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
-      if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-        set (CMAKE_SYSTEM_64BIT 1)
-        set (AIPS_64B YES)
-      endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
-  endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
-  if (APPLE)
-    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-      set (CMAKE_SYSTEM_64BIT YES)
-      set (AIPS_64B YES)
-    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-  endif (APPLE)
+  if (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+    set (CMAKE_SYSTEM_64BIT 1)
+    set (AIPS_64B YES)
+  endif (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
   
 endif (HAVE_CASA OR HAVE_CASACORE)
 

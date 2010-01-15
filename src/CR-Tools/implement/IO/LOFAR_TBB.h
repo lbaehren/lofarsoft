@@ -122,15 +122,10 @@ namespace CR { // Namespace CR -- begin
     
     // === Parameters access ====================================================
 
-    /*!
-      \brief Get the name of the class
-      
-      \return className -- The name of the class, LOFAR_TBB.
-    */
+    //! Get the name of the class, "LOFAR_TBB".
     std::string className () const {
       return "LOFAR_TBB";
     }
-
     //! Provide a summary of the internal status
     void summary (std::ostream &os=std::cout,
 		  bool const &listStationGroups=false,
@@ -143,14 +138,7 @@ namespace CR { // Namespace CR -- begin
     //! Get a block of raw time-series data for the available data channels
     void fx (casa::Matrix<double> &data);
 
-    /*!
-      \brief Set the record with the header information
-      
-      \param header -- Record containing the header information
-      
-      \return status -- Status of the operation; returns <tt>false</tt> in case an
-      error was encountered.
-    */
+    //! Set the record with the header information
     bool setHeaderRecord (casa::Record const &rec) {
       return DataReader::setHeaderRecord (rec);
     }
@@ -176,14 +164,8 @@ namespace CR { // Namespace CR -- begin
     
   private:
 
-    /*
-      \brief Initialize the internal settings
-
-      \return status -- Status of the operation; returns <tt>false</tt> if an
-              error was encountered.
-    */
+    //! Initialize the internal settings
     bool init ();
-
     //! Unconditional copying
     void copy (LOFAR_TBB const &other);
     //! Unconditional deletion 

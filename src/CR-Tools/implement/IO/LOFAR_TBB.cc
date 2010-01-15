@@ -312,6 +312,12 @@ namespace CR { // Namespace CR -- begin
   
   // ------------------------------------------------------------ setHeaderRecord
   
+  /*!
+    \param header -- Record containing the header information
+    
+    \return status -- Status of the operation; returns <tt>false</tt> in case an
+            error was encountered.
+  */
   bool LOFAR_TBB::setHeaderRecord () 
   {
     /* Get basic record entries from the attributes attached to the data set */
