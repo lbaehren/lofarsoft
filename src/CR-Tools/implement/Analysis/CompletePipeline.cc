@@ -871,6 +871,12 @@ namespace CR { // Namespace CR -- begin
       ymin *= 1.05;
       ymax *= 1.05;
 
+      // make y-axis symmetrical around 0
+      if (ymin > (-ymax))
+        ymin = -ymax;
+      if (ymax < (-ymin))
+        ymax = -ymin;
+
       // set up label for plots and filename
       string plotfilename;
       string label;
@@ -1283,7 +1289,7 @@ namespace CR { // Namespace CR -- begin
 
       // Define the time range considered (the same as the plot range)
       Slice range;
-      if (calculate_noise)
+      if ((calculate_noise) && (!calibrationMode))
         range = calculateCCRange(timeValues,cc_center);
       else
         range = calculatePlotRange(timeValues);
@@ -1447,6 +1453,7 @@ namespace CR { // Namespace CR -- begin
         if (calculate_noise) {
           // get the part of the trace for the noise
           traceNoise = yValues.column(i)(rangeNoise);
+
           for(unsigned int j = 0; j < timeRangeNoise.nelements(); j++)
             noise += abs(traceNoise(j));
 

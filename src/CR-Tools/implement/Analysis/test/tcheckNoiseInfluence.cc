@@ -64,10 +64,10 @@ using CR::checkNoiseInfluence;
 
 const string pulseEvent="2009.08.10.12:18:07.598.event";
 const int pulseAnt = 1;
-// const double pulseStart = 0.9e-6;
-// const double pulseStop  = 1.5e-6;
-const double pulseStart = -1e-5;
-const double pulseStop  = 1e-5;
+const double pulseStart = 0.9e-6;
+const double pulseStop  = 1.5e-6;
+// const double pulseStart = -1e-5;
+// const double pulseStop  = 1e-5;
 const int upsamplingExponent = 3;
 
 int main (int argc, char *argv[])
@@ -84,6 +84,7 @@ int main (int argc, char *argv[])
     // load pulse pattern from calibration event
     noisetest.setPlotInterval(pulseStart, pulseStop);
     noisetest.setUpsamplingExponent(upsamplingExponent);
+    noisetest.setCCWindowWidth(1e-6);  // noise will be calculated in window with 10 times the CCWindowWidth
     noisetest.loadPulsePattern(pulseEvent, pulseAnt, pulseStart, pulseStop);
 
     cout << "\nEnd of program.\n" << endl;

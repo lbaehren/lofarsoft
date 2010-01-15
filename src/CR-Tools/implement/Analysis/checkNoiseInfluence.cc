@@ -115,7 +115,7 @@ namespace CR { // Namespace CR -- begin
                                           getUpsamplingExponent(),false, true);
       // calculate the maxima
       double noiseTime = pulseStart-1e-4;   // noise range is normally calculated in respect to the time of the CC beam
-      calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), true, noiseTime);
+      calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false, noiseTime);
     } catch (AipsError x) {
       cerr << "checkNoiseInfluence::loadPulsePattern: " << x.getMesg() << endl;
     }
