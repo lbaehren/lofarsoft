@@ -78,6 +78,16 @@ class bbs(LOFARrecipe):
             dest="log",
             help="Log file"
         )
+        self.optionparser.add_option(
+            '--makevds-exec',
+            dest="makevds_exec",
+            help="makevds executable"
+        )
+        self.optionparser.add_option(
+            '--combinevds-exec',
+            dest="combinevds_exec",
+            help="combinevds executable"
+        )
 
     def go(self):
         self.logger.info("Starting BBS run")
@@ -90,6 +100,8 @@ class bbs(LOFARrecipe):
         inputs['directory'] = self.config.get('layout', 'vds_directory')
         inputs['gvds'] = self.inputs['gvds']
         inputs['args'] = self.inputs['args']
+        inputs['makevds'] = self.inputs['makevds_exec']
+        inputs['combinevds'] = self.inputs['combinevds_exec']
         outputs = LOFARoutput()
         if self.cook_recipe('vdsmaker', inputs, outputs):
             self.logger.warn("vdsmaker reports failure")
