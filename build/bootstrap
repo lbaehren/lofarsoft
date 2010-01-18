@@ -84,4 +84,7 @@ if test -z `which cmake` ; then {
 ## Run CMake to define build targets
 
 cd $basedir
+rm -rf CMakeCache.txt
+rm -rf CMakeFiles
+rm -rf Makefile
 cmake ..
