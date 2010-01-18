@@ -430,17 +430,17 @@ namespace CR { // Namespace CR -- begin
                                                          const int& upsampling_exp)
   {
     try {
+      Vector<Double> timeaxis;
+      dr->timeValues(timeaxis);
+
       // Check if upsampling shoud be done at all (if not, return not upsampled time axis)
       if (upsampling_exp < 1)
-        return static_cast< Vector<Double> >(dr->timeValues());
+        return timeaxis;
 
       // Check if upampling should be done be the same factor as last time
       // in this case, return the old values
       if (lastTimeUpsamplingExponent == upsampling_exp)
         return upTimeValues.copy();
-
-      // Get the not interpolated time axis
-      Vector<Double> timeaxis = static_cast< Vector<Double> >(dr->timeValues()); 
 
       // create upsampling factor by upsampling exponent
       unsigned int upsampled = pow(2,upsampling_exp);
@@ -621,7 +621,7 @@ namespace CR { // Namespace CR -- begin
       cout <<"Plotting the CC-beam and the Power-beam to file: " << plotfilename << endl;
 
       // Get the time axis
-      xaxis = (Vector<Double>)(dr->timeValues()); 
+      dr->timeValues(xaxis); 
 
       // Define plotrange
       Slice plotRange = calculatePlotRange(xaxis); 
@@ -720,7 +720,7 @@ namespace CR { // Namespace CR -- begin
       cout <<"Plotting the X-beam and the Power-beam to file: " << plotfilename << endl;
 
       // Get the time axis
-      xaxis = (Vector<Double>)(dr->timeValues()); 
+      dr->timeValues(xaxis); 
 
       // Define plotrange
       Slice plotRange = calculatePlotRange(xaxis); 
@@ -815,7 +815,7 @@ namespace CR { // Namespace CR -- begin
       deselectectPolarization(dr,antennaSelection);
 
       // Get the (not upsampled) time axis
-      xaxis = static_cast< Vector<Double> >(dr->timeValues());
+      dr->timeValues(xaxis);
 
       // Get the yValues of all antennas (raw data or fieldstrength)
       if (rawData) {
