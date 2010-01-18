@@ -63,6 +63,7 @@ using CR::checkNoiseInfluence;
 */
 
 const string pulseEvent="2009.08.10.12:18:07.598.event";
+const string noiseEvent="2009.06.15.19:42:11.987.event";
 const int pulseAnt = 1;
 const double pulseStart = 0.9e-6;
 const double pulseStop  = 1.5e-6;
@@ -86,6 +87,9 @@ int main (int argc, char *argv[])
     noisetest.setUpsamplingExponent(upsamplingExponent);
     noisetest.setCCWindowWidth(1e-6);  // noise will be calculated in window with 10 times the CCWindowWidth
     noisetest.loadPulsePattern(pulseEvent, pulseAnt, pulseStart, pulseStop);
+    
+    // load noise event
+    noisetest.loadNoiseEvent(noiseEvent);
 
     cout << "\nEnd of program.\n" << endl;
   } catch (AipsError x) {

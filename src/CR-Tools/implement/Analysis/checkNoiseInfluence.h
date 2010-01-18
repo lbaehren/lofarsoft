@@ -63,7 +63,17 @@ namespace CR { // Namespace CR -- begin
   */
   class checkNoiseInfluence : public analyseLOPESevent2 {
 
-//   protected:
+  protected:
+  //! trace of radio pulse to be added to data
+  Vector<Double> pulsePattern;
+
+  //! height of pulse in pulse pattern (used to scale it down or up)
+  double pulseHeight;
+  
+  //! upsampled trace of noise event
+  Matrix<Double> upsampledNoise;
+
+
   public:
 
     // ------------------------------------------------------------- Construction
@@ -135,6 +145,14 @@ namespace CR { // Namespace CR -- begin
                           const int& antenna, 
                           const double& pulseStart,
                           const double& pulseStop);
+                          
+    /*!
+      \brief Loads noise event
+      
+      \param evname          - path to the eventfile to be processed
+    */
+    void loadNoiseEvent(const string& evname);                          
+
                           
   }; // class definition
   

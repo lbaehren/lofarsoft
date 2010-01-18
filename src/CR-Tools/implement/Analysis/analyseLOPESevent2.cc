@@ -92,6 +92,14 @@ namespace CR { // Namespace CR -- begin
   Bool analyseLOPESevent2::initPipeline(Record ObsRecord){
     try {
       clear();
+
+      // reset values
+      CompleteBeamPipe_p = NULL;
+      rawPulses = map<int,PulseProperties>();
+      calibPulses = map<int,PulseProperties>();
+      pipeline = CompletePipeline();
+      upsamplePipe = CompletePipeline();
+
       // To use the methods of analyseLOPESevent, a pointer to the pipeline is needed.
       pipeline_p = &pipeline;
       upsamplePipe_p = &upsamplePipe;

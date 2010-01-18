@@ -552,7 +552,8 @@ Vector<double> upsampleTimeAxis(DataReader &dr, int upsamplingExp)
     double sampleTime = 1/(dr.sampleFrequency() * upsampled);
 
     // Get the not interpolated time axis
-    Vector<double> timeAxis = static_cast< Vector<double> >(dr.timeValues()); 
+    Vector<double> timeAxis;
+    dr.timeValues(timeAxis); 
 
     // get the length of the x-axis 
     long int timeLength = timeAxis.size();
@@ -602,7 +603,7 @@ void plotTrace(DataReader &dr, const string &PlotPrefix, int antenna)
     int color = 9;				// starting color
 
     // Get the (not upsampled) time axis
-    xaxis = static_cast< Vector<Double> >(dr.timeValues());
+    dr.timeValues(xaxis);
     // yValues = bandFilter(dataFX.column(antenna-1),50,10);
     // applying the band pass filter was not successfull
     yValues = dataFX.column(antenna-1);

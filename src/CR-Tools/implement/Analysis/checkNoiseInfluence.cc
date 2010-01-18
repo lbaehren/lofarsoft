@@ -34,7 +34,10 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
 
   checkNoiseInfluence::checkNoiseInfluence ()
-    : analyseLOPESevent2()
+    : analyseLOPESevent2(),
+    pulsePattern( Vector<Double>() ),
+    pulseHeight(0.),
+    upsampledNoise( Matrix<Double>() )
   {}
 
   // ============================================================================
@@ -100,14 +103,14 @@ namespace CR { // Namespace CR -- begin
       Vector <Bool> AntennaSelection = pipeline_p->GetAntennaMask(lev_p).copy();
       AntennaSelection.set(false);
       if (antenna > static_cast<int>(AntennaSelection.nelements())) {
-        cerr << "checkNoiseInfluence::loadPulsePattern: " << "Antenna number out ou range." << endl;
+        cerr << "checkNoiseInfluence::loadPulsePattern: " << "Antenna number out of range." << endl;
         return;
       }
       AntennaSelection(antenna-1)=true;
 
       // initialize Complete Pipeline
       CompleteBeamPipe_p = static_cast<CompletePipeline*>(pipeline_p);
-      CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
+      CompleteBeamPipe_p->setPlotInterval(pulseStart,pulseStop);
       CompleteBeamPipe_p->setCalibrationMode(true);
 
       // Plot the raw data, if desired
@@ -116,9 +119,72 @@ namespace CR { // Namespace CR -- begin
       // calculate the maxima
       double noiseTime = pulseStart-1e-4;   // noise range is normally calculated in respect to the time of the CC beam
       calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false, noiseTime);
+      
+      // load the pulse pattern: calculate time range of pulse and get up-sampled trace in this range
+      Vector<Double> timeValues =
+        CompleteBeamPipe_p->getUpsampledTimeAxis(lev_p, getUpsamplingExponent());
+      Slice range= CompleteBeamPipe_p->calculatePlotRange(timeValues);
+      pulsePattern =
+        CompleteBeamPipe_p->getUpsampledFieldstrength(lev_p, getUpsamplingExponent(), AntennaSelection).column(antenna-1)(range).copy();
+      pulseHeight = calibPulses.begin()->second.envelopeMaximum;
+      
     } catch (AipsError x) {
       cerr << "checkNoiseInfluence::loadPulsePattern: " << x.getMesg() << endl;
     }
+  }
+  
+  void checkNoiseInfluence::loadNoiseEvent(const string& evname)
+  {
+    try {   
+      cout << "\nLoading noise from file '" << evname << endl;      
+
+      // first delete old pipeline
+      clear(); // TODO: implement this method also in analyseLOPESevent2 !!!
+      pipeline_p->setVerbosity(true);
+
+      // Generate the Data Reader
+      if (! lev_p->attachFile(evname) ) {
+        cerr << "checkNoiseInfluence::loadNoiseEvent: " << "Failed to attach file: " << evname << endl;
+        return;
+      }
+
+      //  do all corrections which have an effect on the pulse shape
+      pipeline_p->doGainCal(true);
+      pipeline_p->doDispersionCal(true);
+      pipeline_p->doDelayCal(false);
+      pipeline_p->doFlagNotActiveAnts(false);
+
+      // initialize the Data Reader
+      if (! pipeline_p->InitEvent(lev_p)) {
+        cerr << "checkNoiseInfluence::loadNoiseEvent: " << "Failed to initialize the DataReader!" << endl;
+        return;
+      }
+
+      //  Enable/disable calibration steps for the SecondStagePipeline
+      pipeline_p->doPhaseCal(false);
+      pipeline_p->doRFImitigation(true);
+
+      // Generate the antenna selection (all antennas)
+      Vector <Bool> AntennaSelection = pipeline_p->GetAntennaMask(lev_p).copy();
+      AntennaSelection.set(true);
+      
+      // initialize Complete Pipeline
+      CompleteBeamPipe_p = static_cast<CompletePipeline*>(pipeline_p);
+
+      // create a plot to see, if things work
+      CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
+      CompleteBeamPipe_p->setCalibrationMode(true);
+
+      // Plot the raw data, if desired
+      CompleteBeamPipe_p->plotAllAntennas("noise", lev_p, AntennaSelection, false,
+                                          getUpsamplingExponent(),false, false);
+      // calculate the maxima
+      double noiseTime = plotStart()-1e-4;   // noise range is normally calculated in respect to the time of the CC beam
+      calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false, noiseTime);
+   
+    } catch (AipsError x) {
+      cerr << "checkNoiseInfluence::loadNoiseEvent: " << x.getMesg() << endl;
+    }  
   }
 
 } // Namespace CR -- end
