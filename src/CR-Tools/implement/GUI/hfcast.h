@@ -25,6 +25,8 @@ template<class T> inline T mycast(const T v);
 //--Numbers ------------------------------------------------------------
 
 template<class T> inline T mycast(const unsigned int v);
+template<class T> inline T mycast(const int32_t v);
+template<class T> inline T mycast(const int64_t v);
 
 //Convert to arbitrary class T if no specified otherwise
 template<class T> inline T mycast(const HPointer v);

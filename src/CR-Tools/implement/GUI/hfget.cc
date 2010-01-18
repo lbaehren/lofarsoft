@@ -142,6 +142,8 @@ template<class T> inline T mycast(/*const*/ T v){return v;}
 
 //Some Special cases to avoid ambiguity, hence first convert to common basic type
 template<class T> inline T mycast(/*const*/ unsigned int v){return mycast<T>(static_cast<HInteger>(v));}
+template<class T> inline T mycast(/*const*/ int32_t v){return mycast<T>(static_cast<HInteger>(v));}
+template<class T> inline T mycast(/*const*/ int64_t v){return mycast<T>(static_cast<HInteger>(v));}
 
 
 //Convert to arbitrary class T if not specified otherwise
