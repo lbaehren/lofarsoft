@@ -96,7 +96,7 @@ int test_fitCR2gauss ()
     pipeline.setDirection(41.9898208,64.70544,1750);
 
     std::cout << "                      ... retrieving the data from the pipeline," << std::endl;
-    Times = lev.timeValues();
+    lev.timeValues(Times);
     pipeline.GetTCXP(&lev, TimeSeries, ccBeam, xBeam, pBeam);
 
     StatisticsFilter<Double> mf(3,FilterType::MEAN);

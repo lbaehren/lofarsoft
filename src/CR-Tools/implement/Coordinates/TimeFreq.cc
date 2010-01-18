@@ -539,119 +539,88 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                 sampleValues
   
-#ifdef HAVE_CASA
-  casa::Vector<uint> TimeFreq::sampleValues (uint const &sampleOffset,
-					     bool const &offsetIsBlock)
+  bool TimeFreq::sampleValues (std::vector<uint> &samples,
+			       uint const &sampleOffset,
+			       bool const &offsetIsBlock)
   {
-    casa::Vector<uint> values (blocksize_p);
-    
-    if (offsetIsBlock) {
-      values = blocksize_p*sampleOffset;
-    } else {
-      values = sampleOffset;
+    // Check the size of the vector returning the sample values
+    if (samples.size() != blocksize_p) {
+      samples.resize(blocksize_p);
     }
-    
-    for (uint n(0); n<blocksize_p; n++) {
-      values(n) += n;
-    }
-    
-    return values;
-  }
-#else 
-  std::vector<uint> TimeFreq::sampleValues (uint const &sampleOffset,
-					    bool const &offsetIsBlock)
-  {
-    std::vector<uint> values (blocksize_p);
     
     if (offsetIsBlock) {
       for (uint n(0); n<blocksize_p; n++) {
-	values(n) = blocksize_p*sampleOffset+n;
+	samples[n] = blocksize_p*sampleOffset+n;
       }
     } else {
       for (uint n(0); n<blocksize_p; n++) {
-	values(n) = sampleOffset+n;
+	samples[n] = sampleOffset+n;
+      }
+    }
+
+    return true;
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                   timeValues
+
+  /*!
+    \retval timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
+            a data block of length \f$ N_{\rm Blocksize} \f$
+    \param sampleOffset
+    \param offsetIsBlock -- Is the offset measured in blocks? If set \e false,
+           the offset is considered in samples.
+    \return status -- Status of the operation; returns \e false in case an error
+            was encountered.
+  */
+  bool TimeFreq::timeValues (std::vector<double> &times,
+			     uint const &sampleOffset,
+			     bool const &offsetIsBlock)
+  {
+    std::vector<uint> samples;
+    // Get the sample values for the current block ...
+    sampleValues(samples,
+		 sampleOffset,
+		 offsetIsBlock);
+    // ... and convert these values to time
+    return timeValues (times,samples);
+  }
+
+  //_____________________________________________________________________________
+  //                                                                   timeValues
+
+  /*!
+    \retval timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
+            a data block of length \f$ N_{\rm Blocksize} \f$
+    \param sampleValues -- The value of the samples, for which the related
+           times are returned
+    \return status -- Status of the operation; returns \e false in case an error
+            was encountered.
+  */
+  bool TimeFreq::timeValues (std::vector<double> &times,
+			     std::vector<uint> const &sampleValues)
+  {
+    bool status (true);
+    uint nelem (sampleValues.size());
+
+    if (nelem != blocksize_p) {
+      std::cerr << "[TimeFreq::timeValues] Selection vector has wrong length!"
+		<< std::endl;
+      status = false;
+    }
+    else {
+      // Check size of the vector returning the time values
+      if (times.size() != nelem) {
+	times.resize(nelem);
+      }
+      // Compute the time values
+      for (uint n(0); n<nelem; n++) {
+	times[n] = referenceTime_p + sampleValues[n]/sampleFrequency_p;
       }
     }
     
-    return values;
+    return status;
   }
-#endif
-  
-  //_____________________________________________________________________________
-  //                                                                   timeValues
-  
-#ifdef HAVE_CASA
-  casa::Vector<double> TimeFreq::timeValues (uint const &sampleOffset,
-					     bool const &offsetIsBlock)
-  {
-    // Get the sample values for the current block ...
-    casa::Vector<uint> samples = sampleValues(sampleOffset,
-					      offsetIsBlock);
-    // ... and convert these values to time
-    return timeValues (samples);
-  }
-#else  
-  std::vector<double> TimeFreq::timeValues (uint const &sampleOffset,
-				       bool const &offsetIsBlock)
-  {
-    // Get the sample values for the current block ...
-    std::vector<uint> samples = sampleValues(sampleOffset,
-					     offsetIsBlock);
-    // ... and convert these values to time
-    return timeValues (samples);
-  }
-#endif
-  
-  //_____________________________________________________________________________
-  //                                                                   timeValues
-  
-#ifdef HAVE_CASA
-  casa::Vector<double> TimeFreq::timeValues (casa::Vector<uint> const &sampleValues)
-  {
-    uint nelem (sampleValues.size());
-    casa::Vector<double> times (blocksize_p);
-
-    /*
-      Since the function accepts vector of sample values of arbitray shape,
-      we at least give a warning in case the input vector does not match the
-      internally stored parameter for the blocksize
-    */
-    if (nelem != blocksize_p) {
-      std::cerr << "[TimeFreq::timeValues] Selection vector has wrong length!"
-		<< std::endl;
-    }
-    
-    for (uint n(0); n<nelem; n++) {
-      times(n) = referenceTime_p + sampleValues(n)/sampleFrequency_p;
-    }
-    
-    return times;
-    
-  }
-#else  
-  std::vector<double> TimeFreq::timeValues (std::vector<uint> const &sampleValues)
-  {
-    uint nelem (sampleValues.size());
-    std::vector<double> times (blocksize_p);
-
-    /*
-      Since the function accepts vector of sample values of arbitray shape,
-      we at least give a warning in case the input vector does not match the
-      internally stored parameter for the blocksize
-    */
-    if (nelem != blocksize_p) {
-      std::cerr << "[TimeFreq::timeValues] Selection vector has wrong length!"
-		<< std::endl;
-    }
-    
-    for (uint n(0); n<nelem; n++) {
-      times[n] = referenceTime_p + sampleValues[n]/sampleFrequency_p;
-    }
-    
-    return times;
-    
-  }
-#endif
 
   // ============================================================================
   //
@@ -660,7 +629,90 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
 
 #ifdef HAVE_CASA
+
+  //_____________________________________________________________________________
+  //                                                                 sampleValues
   
+  bool TimeFreq::sampleValues (casa::Vector<uint> &samples,
+			       uint const &sampleOffset,
+			       bool const &offsetIsBlock)
+  {
+    if (samples.size() != blocksize_p) {
+      samples.resize(blocksize_p);
+    }
+ 
+    if (offsetIsBlock) {
+      samples = blocksize_p*sampleOffset;
+    } else {
+      samples = sampleOffset;
+    }
+    
+    for (uint n(0); n<blocksize_p; n++) {
+      samples(n) += n;
+    }
+
+    return true;
+  }
+
+  //_____________________________________________________________________________
+  //                                                                   timeValues
+  
+  /*!
+    \return times -- Time values \f$ \{ \nu \} \f$ for the samples within
+            a data block of length \f$ N_{\rm Blocksize} \f$
+    \param sampleOffset -- Offset \f$ n_0 \f$ in the sample number
+           \f[ t[n] = t_0 + (n + n_0) T_{\rm Sample} \f]
+    
+  */
+  bool TimeFreq::timeValues (casa::Vector<double> &times,
+			     uint const &sampleOffset,
+			     bool const &offsetIsBlock)
+  {
+    casa::Vector<uint> samples;
+    // Get the sample values for the current block ...
+    sampleValues(samples,
+		 sampleOffset,
+		 offsetIsBlock);
+    // ... and convert these values to time
+    return timeValues (times,samples);
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                   timeValues
+  
+  /*!
+    \retval timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
+            a data block of length \f$ N_{\rm Blocksize} \f$
+    \param sampleValues -- The value of the samples, for which the related
+           times are returned
+    \return status -- Status of the operation; returns \e false in case an error
+            was encountered.
+  */
+  bool TimeFreq::timeValues (casa::Vector<double> &times,
+			     casa::Vector<uint> const &sampleValues)
+  {
+    bool status (true);
+    uint nelem (sampleValues.size());
+
+    if (nelem != blocksize_p) {
+      std::cerr << "[TimeFreq::timeValues] Selection vector has wrong length!"
+		<< std::endl;
+      status = false;
+    } 
+    else {
+      // Check size of the vector returning the time values
+      if (times.size() != nelem) {
+	times.resize (blocksize_p);
+      }
+      // Compute the time values
+      for (uint n(0); n<nelem; n++) {
+	times(n) = referenceTime_p + sampleValues(n)/sampleFrequency_p;
+      }
+    }
+
+    return status;
+  }
+
   //_____________________________________________________________________________
   //                                                              sampleFrequency
 

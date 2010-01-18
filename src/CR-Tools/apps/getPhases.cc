@@ -269,6 +269,7 @@ int main (int argc, char *argv[])
     FirstStagePipeline pipeline;
     LopesEventIn dr;
     Record obsrec;
+    casa::Vector<double> timeValues;
     obsrec.define("LOPES",CalTablePath);
     pipeline.SetObsRecord(obsrec);
 
@@ -292,17 +293,18 @@ int main (int argc, char *argv[])
     //double start_time = -300e-6; // start time in s
     //double stop_time = 100e-6; // interval size in s
     double start_time = -1; // start time in s
-    double stop_time = 1; // interval size in s
+    double stop_time = 1;   // interval size in s
+    dr.timeValues(timeValues);
     //number of elements smaller then start time
-    unsigned int startsample = ntrue(dr.timeValues()<start_time);
+    unsigned int startsample = ntrue(timeValues<start_time);
     //number of elements smaller then end time
-    unsigned int stopsample = ntrue(dr.timeValues()<stop_time);
+    unsigned int stopsample = ntrue(timeValues<stop_time);
 
     startsample += cutSamples;
-    stopsample -= cutSamples;
+    stopsample  -= cutSamples;
 
     if (startsample >= stopsample) {
-       cerr << "ERROR: cutSamples must be < 1/2 of the total samples, which are: " << dr.timeValues().size() << endl;
+       cerr << "ERROR: cutSamples must be < 1/2 of the total samples, which are: " << timeValues.size() << endl;
        return 1;
     }
     // WARNING:
@@ -310,7 +312,7 @@ int main (int argc, char *argv[])
     // (Problem does not persist anymore if one uses a fixed number of samples)
 
     // print information and set it in the datareader if only an interval of the time series is used
-    if ( (startsample!=0) || (stopsample != dr.timeValues().size()) )
+    if ( (startsample!=0) || (stopsample != timeValues.size()) )
     {
       cout << "Use Trace between sample " << startsample << " and sample " << stopsample << " ." << endl;
       dr.setShift(startsample);

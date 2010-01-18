@@ -43,7 +43,7 @@ option (CR_VERBOSE_CONFIGURE    "Verbose output during configuration?"       NO 
 option (CR_WITH_PRIVATE         "Include building private code?"             NO  )
 option (CR_WITH_LEGACY          "Include building legacy code?"              YES )
 option (CR_WITH_GLISH           "Support for Glish applications?"            NO  )
-option (CR_WITH_PYTHON          "Support for Python applications?"           YES )
+option (CR_WITH_PYCR            "Support for Python applications?"           YES )
 option (CR_WITH_PLOTTING        "Support for generation of plots?"           YES )
 option (CR_WITH_GUI             "Build the graphical interface?"             NO  )
 option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES )
@@ -70,6 +70,8 @@ if (NOT CR_VERBOSE_CONFIGURE)
   set (GTK_FIND_QUIETLY        YES )
   set (HDF5_FIND_QUIETLY       YES )
   set (LAPACK_FIND_QUIETLY     YES )
+  set (NUMPY_FIND_QUIETLY      YES )
+  set (NUMUTIL_FIND_QUIETLY    YES )
   set (PGPLOT_FIND_QUIETLY     YES )
   set (PLPLOT_FIND_QUIETLY     YES )
   set (PNG_FIND_QUIETLY        YES )
@@ -109,6 +111,8 @@ include (FindGFortran)
 include (FindGTK)
 include (FindHDF5)
 include (FindLAPACK)
+include (FindNumPy)
+include (FindNumUtil)
 include (FindPLplot)
 include (FindPNG)
 include (FindPOPT)
@@ -121,10 +125,6 @@ include (FindWCSLIB)
 if (NOT HAVE_PLPLOT)
   include (FindPGPLOT)
 endif (NOT HAVE_PLPLOT)
-
-if (CR_WITH_PYTHON)
-  include (FindPythonModules)
-endif (CR_WITH_PYTHON)
 
 ## =============================================================================
 ##
@@ -211,38 +211,6 @@ if (HAVE_CASA OR HAVE_CASACORE)
   endif (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
   
 endif (HAVE_CASA OR HAVE_CASACORE)
-
-## -------------------------------------------------------------------
-## Handle option: Generate Python bindings for the Library? ON/OFF
-
-if (CR_WITH_PYTHON)
-
-  ## Required external package: Python
-  if (NOT HAVE_PYTHON)
-    message (STATUS "[CR-Tools] Generation of Python bindings disabled; missing Python!")
-    set (CR_WITH_PYTHON OFF)
-  endif (NOT HAVE_PYTHON)
-  ## Required external package: Boost++
-  if (NOT HAVE_BOOST)
-    message (STATUS "[CR-Tools] Generation of Python bindings disabled; missing Boost!")
-    set (CR_WITH_PYTHON OFF)
-  endif (NOT HAVE_BOOST)
-  ## Required external package: NumPy
-  if (HAVE_NUMPY)
-    include_directories (${NUMPY_INCLUDES})
-  else (HAVE_NUMPY)
-    message (STATUS "[CR-Tools] Generation of Python bindings disabled; missing NumPy!")
-    set (CR_WITH_PYTHON OFF)
-  endif (HAVE_NUMPY)
-  ## Required external package: NumUtil
-  if (HAVE_NUM_UTIL)
-    include_directories (${NUM_UTIL_INCLUDES})
-  else (HAVE_NUM_UTIL)
-    message (STATUS "[CR-Tools] Generation of Python bindings disabled; missing NumUtil!")
-    set (CR_WITH_PYTHON OFF)
-  endif (HAVE_NUM_UTIL)
-
-endif (CR_WITH_PYTHON)
 
 ## -------------------------------------------------------------------
 ## Handle option: Activate support for generation of plots ON/OFF
@@ -612,6 +580,6 @@ message (STATUS " Print debugging messages .. : ${CR_DEBUGGING_MESSAGES}")
 message (STATUS " Enable LOPES-Star routines  : ${CR_WITH_STARTOOLS}")
 message (STATUS " Support for plotting ...... : ${CR_WITH_PLOTTING}")
 message (STATUS " Support for Glish ......... : ${CR_WITH_GLISH}")
-message (STATUS " Support for Python ........ : ${CR_WITH_PYTHON}")
+message (STATUS " Support for Python ........ : ${CR_WITH_PYCR}")
 message (STATUS " Graphical user interface .. : ${CR_WITH_GUI}")
 message (STATUS "+============================================================+")

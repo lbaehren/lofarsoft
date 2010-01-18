@@ -539,12 +539,10 @@ namespace CR { // Namespace CR -- begin
     */
     casa::IPosition shape ();
 
-    /*!
-      \brief Retrieve the world coordinates along the time axis
-
-      \return values -- 
-     */
-    Vector<double> timeValues ();
+    //! Retrieve the world coordinates along the time axis
+    casa::Vector<double> timeValues ();
+    //! Retrieve the world coordinates along the time axis
+    void timeValues (casa::Vector<double> &values);
     
     /*!
       \brief Retrieve the world coordinates along the frequency axis

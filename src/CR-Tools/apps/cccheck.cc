@@ -79,7 +79,7 @@ int ccmaker (string const &infile,
   
   ccdata = dr->invfft(vecdata);
   Vector<Double> xvals;
-  xvals = dr->timeValues();
+  dr->timeValues(xvals);
   
   Vector<Double> empty;
   int timesteps = 100;

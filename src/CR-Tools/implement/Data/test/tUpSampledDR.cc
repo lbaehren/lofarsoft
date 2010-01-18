@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -87,9 +87,9 @@ int test_UpSampledDR ()
     Matrix<Double> FX;
     FILE *allout;
 
-    Times = lev.timeValues();
-    TSlen = Times.nelements();
-    FX = lev.voltage();
+    lev.timeValues(Times);
+    TSlen  = Times.nelements();
+    FX     = lev.voltage();
     allout = fopen("tUpSampledDR-original.tab","w");
     for (i=0; i< TSlen; i++) {
       fprintf(allout,"\n %e ",Times(i)*1e6);
@@ -101,9 +101,9 @@ int test_UpSampledDR ()
     std::cout << "[5] Dumping upsampled data ..." << std::endl;
     Times.resize();
     FX.resize();
-    Times = newUpSampledDR.timeValues();
-    TSlen = Times.nelements();
-    FX = newUpSampledDR.voltage();
+    newUpSampledDR.timeValues(Times);
+    TSlen  = Times.nelements();
+    FX     = newUpSampledDR.voltage();
     allout = fopen("tUpSampledDR-upsampled.tab","w");
     for (i=0; i< TSlen; i++) {
       fprintf(allout,"\n %e ",Times(i)*1e6);

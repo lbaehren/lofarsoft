@@ -386,11 +386,24 @@ namespace CR { // Namespace CR -- begin
     
   }
 
-  //__________________________________________________________________ timeValues
+  //_____________________________________________________________________________
+  //                                                                   timeValues
 
-  Vector<double> TimeFreqCoordinate::timeValues ()
+  casa::Vector<double> TimeFreqCoordinate::timeValues ()
   {
-    int nofFrames;;
+    casa::Vector<double> values;
+    timeValues(values);
+    return values;
+  }
+
+  //_____________________________________________________________________________
+  //                                                                   timeValues
+
+  void TimeFreqCoordinate::timeValues (casa::Vector<double> &values)
+  {
+    uint nofFrames;
+    Vector<double> pixel (1);
+    Vector<double> world (1);
 
     if (timeAxisLast_p) {
       nofFrames = shape()(1);
@@ -398,20 +411,20 @@ namespace CR { // Namespace CR -- begin
       nofFrames = shape()(0);
     }
 
-    Vector<double> pixel (1);
-    Vector<double> world (1);
-    Vector<double> values (nofFrames);
+    if (values.size() != nofFrames) {
+      values.resize(nofFrames);
+    }
     
-    for (int n(0); n<nofFrames; n++) {
+    for (uint n(0); n<nofFrames; n++) {
       pixel(0) = n;
       coordTime_p.toWorld(world,pixel);
       values(n) = world(0);
     }
 
-    return values;
   }
-  
-  //_____________________________________________________________ frequencyValues
+
+  //_____________________________________________________________________________
+  //                                                              frequencyValues
 
   Vector<double> TimeFreqCoordinate::frequencyValues ()
   {

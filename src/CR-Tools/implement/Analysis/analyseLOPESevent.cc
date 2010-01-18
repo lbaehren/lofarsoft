@@ -326,7 +326,7 @@ namespace CR { // Namespace CR -- begin
 	tmpdouble = (max(fitStop_p,plotStop_p)-min(fitStart_p,plotStart_p)+1e-6)*UpSamplingRate;
 	upBlockSize = (uint)(pow(2.0,ceil(log(tmpdouble*3)/log(2.0))));
 	// Calculate where to start the block 
-	Times = upsampler_p->timeValues();
+	upsampler_p->timeValues(Times);
 	upBlock = ntrue( Times < ((fitStop_p+fitStart_p)/2.))/upBlockSize;
 	
 	
@@ -335,7 +335,7 @@ namespace CR { // Namespace CR -- begin
 	upsampler_p->setBlock(upBlock);
 	Times.resize();
 	if (verbose) {
-	  Times = upsampler_p->timeValues();
+	  upsampler_p->timeValues(Times);
 	  cout << "analyseLOPESevent::SetupEvent: " << "Upsampling: upBlockSize: " << upBlockSize
 	       << " upBlock: " << upBlock << " filter: " << filterStrength_p << endl;
 	  cout << "analyseLOPESevent::SetupEvent: " << " min(Times): " << min(Times)*1e6 
@@ -349,7 +349,7 @@ namespace CR { // Namespace CR -- begin
       };
       
       beamPipe_p->setExtraDelay(ExtraDelay);
-      Times = beamformDR_p->timeValues();
+      beamformDR_p->timeValues(Times);
       int nsamples = Times.nelements();      
       //initialize the fitter
       remoteRange_p(0) = (uInt)(nsamples*remoteStart_p);
@@ -550,7 +550,7 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> Times, ccBeam, xBeam, pBeam, tmpvec;
       Matrix<Double> TimeSeries;
       
-      Times = beamformDR_p->timeValues();
+      beamformDR_p->timeValues(Times);
       nsamples = Times.nelements();
       nants = AntennaSelection.nelements();
       if (! beamPipe_p->GetTCXP(beamformDR_p, TimeSeries, ccBeam, xBeam, pBeam, 
@@ -964,7 +964,7 @@ namespace CR { // Namespace CR -- begin
 	  (ergrec.asDouble("CCwidth_error")>1e-7)||
 	  ((ergrec.asDouble("CCheight_error")/ergrec.asDouble("CCheight"))>10) ) { 
 	goodfit=False;
-	pb = beamformDR_p->timeValues();
+	beamformDR_p->timeValues(pb);
 	erg = mean(ccb(Slice(ntrue(pb<-1.83e-6),5)))*1e6;
 	if (centerp != NULL) {
 	  *centerp = -1.8e-6;
@@ -1034,7 +1034,7 @@ namespace CR { // Namespace CR -- begin
            (ergrec.asDouble("Xcenter_error")>(fitStop_p-fitStart_p))||
            (ergrec.asDouble("Xwidth_error")>1e-7)||
            ((ergrec.asDouble("Xheight_error")/ergrec.asDouble("Xheight"))>10) ) {
- 	  pb = beamformDR_p->timeValues();
+ 	  beamformDR_p->timeValues(pb);
           // return mean of xb in timewindow of 62.5 ns starting at 1.83e-6
           *beamheightp=  mean(xb(Slice(ntrue(pb<-1.83e-6),int(beamformDR_p->sampleFrequency()/GetDataReader()->sampleFrequency())*5)))*1e6;
 	  goodfit=False;
@@ -1058,7 +1058,7 @@ namespace CR { // Namespace CR -- begin
             (ergrec.asDouble("CCcenter_error")>(fitStop_p-fitStart_p))||
             (ergrec.asDouble("CCwidth_error")>1e-7)||
             ((ergrec.asDouble("CCheight_error")/ergrec.asDouble("CCheight"))>10) ) {
-          pb = beamformDR_p->timeValues();
+          beamformDR_p->timeValues(pb);
 	  // return mean of ccb in timewindow of 62.5 ns around 1.83e-6
           *beamheightp=  mean(ccb(Slice(ntrue(pb<-1.83e-6),int(beamformDR_p->sampleFrequency()/GetDataReader()->sampleFrequency())*5)))*1e6;
           goodfit=False;

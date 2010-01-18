@@ -477,16 +477,15 @@ int test_time (uint const &blocksize)
   cout << "-- Block number = " << dr.block()     << endl;
   cout << endl;
 
-#ifdef HAVE_CASA
   cout << "[1] Default method for retrival of time values ..." << std::endl;
   try {
-    casa::Vector<double> timeValues = dr.timeValues();
-    cout << " [" << timeValues(0) << " " << timeValues(1) << " ...]" << endl;
+    std::vector<double> timeValues;
+    dr.timeValues(timeValues);
+    cout << " [" << timeValues[0] << " " << timeValues[1] << " ...]" << endl;
   } catch (std::string message) {
     cerr << message << endl;
     nofFailedTests++;
   }
-#endif
 
   return nofFailedTests;
 }

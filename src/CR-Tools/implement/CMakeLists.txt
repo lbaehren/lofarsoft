@@ -156,65 +156,11 @@ install (
 
 ## =============================================================================
 ##
-##  Python bindings to the library
+##  Optional libraries/bindings
 ##
 ## =============================================================================
 
-if (CR_WITH_PYTHON)
-
-  ## compiler instructions
-  add_library (pycr MODULE
-    Analysis/DynamicSpectrum.cc
-    Coordinates/CoordinateType.cc
-    Coordinates/TimeFreq.cc
-    IO/DataIterator.cc
-    IO/DataReader.cc
-    IO/LOFAR_TBB.cc
-    Math/BasicFilter.cc
-    Math/HanningFilter.cc
-    Coordinates/MConversions.cc
-    BindingsBoostPython.cc
-    )
-  ## linker instructions
-  target_link_libraries(pycr
-    ${HAVE_LIBZ}
-    ${PYTHON_LIBRARIES}
-    ${BOOST_LIBRARIES}
-    ${HDF5_LIBRARIES}
-    ${DAL_LIBRARIES}
-    ${cr_link_libraries}
-    )
-  ## additional target properties
-  if (APPLE)
-    set_target_properties (pycr
-      PROPERTIES
-      PREFIX ""
-      SUFFIX .so
-      COMPILE_FLAGS "-DPYTHON -fpermissive"
-      LINK_FLAGS "-fPIC -flat_namespace"
-      )
-  else (APPLE)
-    set_target_properties (pycr
-      PROPERTIES
-      PREFIX ""
-      SUFFIX .so
-      COMPILE_FLAGS "-DPYTHON"
-      LINK_FLAGS "-fPIC -shared -Wl"
-      )
-  endif (APPLE)
-  ## installation
-  install (
-    TARGETS pycr
-    LIBRARY DESTINATION lib/python
-    )
-  
-endif (CR_WITH_PYTHON)
-
-## =============================================================================
-##
-##  Graphical user interface
-##
-## =============================================================================
+add_subdirectory (Bindings)
 
 if (CR_WITH_GUI)
   add_subdirectory (GUI)

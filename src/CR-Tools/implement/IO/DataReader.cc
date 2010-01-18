@@ -179,6 +179,17 @@ namespace CR {  //  Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                   DataReader
   
+  /*!
+    \todo Based on (a) the problem of creating a copy of a stream - what does
+    this actually mean - and (b) the triggered discussion with Marcel and Ger
+    there a good argumentes to question while we should have a copy
+    constructor/function for this class; as long as we are just read from disk
+    files things can be done conceptually, but as soon as we make the
+    generalization to input streams, copy no longer makes sense.
+
+    \param other -- Another DataReader object from which to create this new
+                    one.
+  */
   DataReader::DataReader (DataReader const &other)
     : TimeFreq()
   {

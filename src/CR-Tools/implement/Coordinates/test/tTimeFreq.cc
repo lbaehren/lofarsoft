@@ -292,12 +292,19 @@ int test_timeValues ()
   
   cout << "[1] timeValues()" << endl;
   try {
+    std::vector<double> valuesSTL;
+
+    data.timeValues(valuesSTL);
+    cout << "[" << valuesSTL[0] 
+	 << " " << valuesSTL[1]
+	 << " " << valuesSTL[2] << " ...]" << endl;
+
 #ifdef HAVE_CASA
-    casa::Vector<double> values = data.timeValues();
-    cout << " [" << values(0) << " " << values(1)<< " " << values(2) << " ...]" << endl;
-#else 
-    std::vector<double> values = data.timeValues();
-    cout << " [" << values[0] << " " << values[1]<< " " << values[2] << " ...]" << endl;
+    casa::Vector<double> valuesCASA;
+    data.timeValues(valuesCASA);
+    cout << "[" << valuesCASA(0)
+	 << " " << valuesCASA(1)
+	 << " " << valuesCASA(2) << " ...]" << endl;
 #endif
   } catch (std::string message) {
     std::cerr << message << endl;
@@ -306,12 +313,17 @@ int test_timeValues ()
   
   cout << "[2] timeValues(uint,bool=false)" << endl;
   try {
+    std::vector<double> valuesSTL;
+    data.timeValues(valuesSTL,1,false);
+    cout << "[" << valuesSTL[0]
+	 << " " << valuesSTL[1]
+	 << " " << valuesSTL[2] << " ...]" << endl;
 #ifdef HAVE_CASA
-    casa::Vector<double> values = data.timeValues(1,false);
-    cout << " [" << values(0) << " " << values(1)<< " " << values(2) << " ...]" << endl;
-#else 
-    std::vector<double> values = data.timeValues(1,false);
-    cout << " [" << values[0] << " " << values[1]<< " " << values[2] << " ...]" << endl;
+    casa::Vector<double> valuesCASA;
+    data.timeValues(valuesCASA,1,false);
+    cout << "[" << valuesCASA(0)
+	 << " " << valuesCASA(1)
+	 << " " << valuesCASA(2) << " ...]" << endl;
 #endif
   } catch (std::string message) {
     std::cerr << message << endl;
@@ -320,12 +332,19 @@ int test_timeValues ()
 
   cout << "[2] timeValues(uint,bool=true)" << endl;
   try {
+    std::vector<double> valuesSTL;
+
+    data.timeValues(valuesSTL,1,true);
+    cout << "[" << valuesSTL[0]
+	 << " " << valuesSTL[1]
+	 << " " << valuesSTL[2] << " ...]" << endl;
+    
 #ifdef HAVE_CASA
-    casa::Vector<double> values = data.timeValues(1,true);
-    cout << " [" << values(0) << " " << values(1)<< " " << values(2) << " ...]" << endl;
-#else 
-    std::vector<double> values = data.timeValues(1,true);
-    cout << " [" << values[0] << " " << values[1]<< " " << values[2] << " ...]" << endl;
+    casa::Vector<double> valuesCASA;
+    data.timeValues(valuesCASA,1,true);
+    cout << "[" << valuesCASA(0)
+	 << " " << valuesCASA(1)
+	 << " " << valuesCASA(2) << " ...]" << endl;
 #endif
   } catch (std::string message) {
     std::cerr << message << endl;
@@ -511,13 +530,16 @@ int test_blocksize ()
   double sampleFrequency (80e06);
   uint nyquistZone (1);
   TimeFreq data (blocksize,sampleFrequency,nyquistZone);
+  casa::Vector<double> timeValues;
 
   int steps (5);
 
   for (int n(0); n<steps; ++n) {
+    data.timeValues(timeValues);
+    //
     std::cout << "-- blocksize="  << data.blocksize() 
 	      << "\tfftLength="   << data.fftLength() 
-	      << "\tshape(time)=" << data.timeValues().shape()
+	      << "\tshape(time)=" << timeValues.shape()
 	      << "\tshape(freq)=" << data.frequencyValues().shape()
 	      << std::endl;
     // update the blocksize

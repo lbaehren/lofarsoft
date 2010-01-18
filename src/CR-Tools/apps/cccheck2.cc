@@ -104,7 +104,7 @@ int ccmaker (string const &infile1,
   
   ccdata = dr1->invfft(vecdata);
   Vector<Double> xvals;
-  xvals = dr1->timeValues();
+  dr1->timeValues(xvals);
   
   Vector<Double> empty;
   int timesteps =zoom;//xvals.shape()[0];

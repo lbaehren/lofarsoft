@@ -309,7 +309,6 @@ namespace CR { // Namespace CR -- begin
     
     /*!
       \brief Set the sample frequency, \f$ \nu_{\rm Sample} \f$, from a Quantity
-
       \param sampleFrequency -- Sample frequency in the ADC, provided as a
               casa::Quantity (i.e. a value with a unit).
     */
@@ -319,7 +318,6 @@ namespace CR { // Namespace CR -- begin
     
     /*!
       \brief Get the Nyquist zone, \f$ N_{\rm Nyquist} \f$
-
       \return nyquistZone -- Nyquist zone,  [1]
     */
     inline uint nyquistZone () const {
@@ -328,14 +326,12 @@ namespace CR { // Namespace CR -- begin
 
     /*!
       \brief Set the Nyquist zone, \f$ N_{\rm Nyquist} \f$
-
       \param nyquistZone -- Nyquist zone,  [1]
     */
     virtual void setNyquistZone (uint const &nyquistZone);
 
     /*!
       \brief Get the reference time, i.e. the start of the time axis
-
       \return referenceTime -- The reference time, \f$ t_0 \f$, marking the
               start of the time axis
     */
@@ -345,7 +341,6 @@ namespace CR { // Namespace CR -- begin
 
     /*!
       \brief Set the reference time, i.e. the start of the time axis
-
       \param referenceTime -- The reference time, \f$ t_0 \f$, marking the
              start of the time axis
     */
@@ -355,7 +350,6 @@ namespace CR { // Namespace CR -- begin
     
     /*!
       \brief Set the reference time, i.e. the start of the time axis
-
       \param referenceTime -- The reference time, \f$ t_0 \f$, marking the
              start of the time axis
     */
@@ -363,11 +357,10 @@ namespace CR { // Namespace CR -- begin
       setReferenceTime (referenceTime.getValue("s"));
     }
 
-    // ------------------------------------------------------------------ Methods
+    // === Methods ==============================================================
 
     /*!
       \brief Get the output length of the FFT, \f$ N_{\rm FFT} \f$
-
       \return fftLength -- The output length of the FFT, [channels], i.e. the 
               number of frequency channels resulting from the FFT of a data
 	      block of \f$ N_{\rm Blocksize} \f$ samples.
@@ -378,7 +371,6 @@ namespace CR { // Namespace CR -- begin
 
     /*!
       \brief Get the sample interval, \f$ T_{\rm Sample} \f$
-
       \return sampleInterval -- The sample interval, [s], i.e. the inverse of the
               sample frequency.
     */
@@ -388,7 +380,6 @@ namespace CR { // Namespace CR -- begin
 
     /*!
       \brief Get the shape, i.e. the number of elements along each axis
-      
       \return shape -- [time,freq] The number of elements along each of the 
               two coupled axes.
     */
@@ -481,74 +472,34 @@ namespace CR { // Namespace CR -- begin
     std::vector<double> frequencyValues (double const &min,
 					 double const &max);
 #endif
-
-    /*!
-      \brief Get the sample values along the time axis
-
-      \return sampleValues -- 
-    */
-#ifdef HAVE_CASA
-    virtual casa::Vector<uint> sampleValues (uint const &sampleOffset=0,
-					     bool const &offsetIsBlock=false);
-#else 
-    virtual std::vector<uint> sampleValues (uint const &sampleOffset=0,
-					    bool const &offsetIsBlock=false);
-#endif
     
-    /*!
-      \brief Get the values along the time axis
-      
-      \return timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
-              a data block of length \f$ N_{\rm Blocksize} \f$ with zero offset;
-	      i.e. this function returns the first \f$ N_{\rm Blocksize} \f$ time
-	      values (as we know nothing here about blocks etc.).
-    */
-#ifdef HAVE_CASA
-    virtual inline casa::Vector<double> timeValues () {
-      return timeValues (0);
-    }
-#else 
-    virtual inline std::vector<double> timeValues () {
-      return timeValues (0);
-    }
-#endif
+    //! Get the sample values along the time axis
+    bool sampleValues (std::vector<uint> &samples,
+		       uint const &sampleOffset=0,
+		       bool const &offsetIsBlock=false);
+    //! Get the values along the time axis
+    bool timeValues (std::vector<double> &times,
+		     uint const &sampleOffset=0,
+		     bool const &offsetIsBlock=false);
+    //! Get the values along the time axis
+    bool timeValues (std::vector<double> &times,
+		     std::vector<uint> const &sampleValues);
     
-    /*!
-      \brief Get the values along the time axis
-      
-      \param sampleOffset -- Offset \f$ n_0 \f$ in the sample number
-             \f[ t[n] = t_0 + (n + n_0) T_{\rm Sample} \f]
-
-      \return timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
-      a data block of length \f$ N_{\rm Blocksize} \f$
-    */
-#ifdef HAVE_CASA
-    casa::Vector<double> timeValues (uint const &sampleOffset,
-				     bool const &offsetIsBlock=false);
-#else
-    std::vector<double> timeValues (uint const &sampleOffset,
-				    bool const &offsetIsBlock=false);
-#endif
+    // === Optional methods which require casacore ==============================
     
-    /*!
-      \brief Get the values along the time axis
-
-      \param sampleValues -- The value of the samples, for which the related
-             times are returned
-
-      \return timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
-              a data block of length \f$ N_{\rm Blocksize} \f$
-    */
 #ifdef HAVE_CASA
-    casa::Vector<double> timeValues (casa::Vector<uint> const &sampleValues);
-#else
-    std::vector<double> timeValues (std::vector<uint> const &sampleValues);
-#endif
-
-    // ---------------------------------- Optional methods which require casacore
-
-#ifdef HAVE_CASA
-
+    
+    //! Get the sample values along the time axis
+    bool sampleValues (casa::Vector<uint> &samples,
+		       uint const &sampleOffset=0,
+		       bool const &offsetIsBlock=false);
+    //! Get the values along the time axis
+    bool timeValues (casa::Vector<double> &times,
+		     uint const &sampleOffset=0,
+		     bool const &offsetIsBlock=false);
+    //! Get the values along the time axis
+    bool timeValues (casa::Vector<double> &times,
+		     casa::Vector<uint> const &sampleValues);
     //! [optional:CASA] Create time axis coordinate from parameters
     casa::LinearCoordinate timeAxis ();
     //! [optional:CASA] Create time axis coordinate from parameters

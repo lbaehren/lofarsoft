@@ -308,19 +308,14 @@ namespace CR {  //  Namespace CR -- begin
 	       Vector<String> const &filenames,
 	       DataIterator const *iterators);
     
-    // ----------------------------------------------------- (selected of) antennas
-    
     //! Selection of the antennas
     Vector<uint> selectedAntennas_p;
-    
-    // ----------------------------------------------------- (selected of) channels
-    
     //! Selection of the frequency channels
     Vector<uint> selectedChannels_p;
     
   public:
     
-    // --------------------------------------------------------------- Construction
+    // === Construction =========================================================
     
     //! Default constructor
     DataReader ();
@@ -339,57 +334,44 @@ namespace CR {  //  Namespace CR -- begin
 		Matrix<Double> const &adc2voltage,
 		Matrix<DComplex> const &fft2calfft);
     //! Argumented constructor
-  template <class T> 
-    DataReader (String const &filename,
-		uint const &blocksize,
-		T const &var,
-		Vector<Double> const &adc2voltage,
-		Matrix<DComplex> const &fft2calfft);
-  
-  /*!
-    \brief Copy constructor
-
-    \todo Based on (a) the problem of creating a copy of a stream - what does
-    this actually mean - and (b) the triggered discussion with Marcel and Ger
-    there a good argumentes to question while we should have a copy
-    constructor/function for this class; as long as we are just read from disk
-    files things can be done conceptually, but as soon as we make the
-    generalization to input streams, copy no longer makes sense.
-
-    \param other -- Another DataReader object from which to create this new
-                    one.
-  */
-  DataReader (DataReader const &other);
-
-  // ---------------------------------------------------------------- Destruction
-
-  //! Destructor
-  virtual ~DataReader ();
-
-  // ------------------------------------------------------------------ Operators
-
-  /*!
-    \brief Overloading of the copy operator
-
-    \param other -- Another DataReader object from which to make a copy.
-  */
-  DataReader& operator= (DataReader const &other); 
-
-  // ----------------------------------------------------------------- Parameters
-  
-  //! Set the blocksize, \f$ N_{\rm Blocksize} \f$
-  void setBlocksize (uint const &blocksize);
-  //! Set the blocksize, \f$ N_{\rm Blocksize} \f$
-  void setBlocksize (uint const &blocksize,
-		     Matrix<double> const &adc2voltage);
-  //! Set the blocksize, \f$ N_{\rm Blocksize} \f$
-  void setBlocksize (uint const &blocksize,
-		     Matrix<double> const &adc2voltage,
-		     Matrix<DComplex> const &fft2calfft);
-  //! Provide a summary of the internal parameters to standard output
-  inline void summary () {
-    summary (std::cout);
-  }
+    template <class T> 
+      DataReader (String const &filename,
+		  uint const &blocksize,
+		  T const &var,
+		  Vector<Double> const &adc2voltage,
+		  Matrix<DComplex> const &fft2calfft);
+    //! Copy constructor
+    DataReader (DataReader const &other);
+    
+    // === Destruction ==========================================================
+    
+    //! Destructor
+    virtual ~DataReader ();
+    
+    // === Operators ============================================================
+    
+    /*!
+      \brief Overloading of the copy operator
+      
+      \param other -- Another DataReader object from which to make a copy.
+    */
+    DataReader& operator= (DataReader const &other); 
+    
+    // === Parameter access =====================================================
+    
+    //! Set the blocksize, \f$ N_{\rm Blocksize} \f$
+    void setBlocksize (uint const &blocksize);
+    //! Set the blocksize, \f$ N_{\rm Blocksize} \f$
+    void setBlocksize (uint const &blocksize,
+		       Matrix<double> const &adc2voltage);
+    //! Set the blocksize, \f$ N_{\rm Blocksize} \f$
+    void setBlocksize (uint const &blocksize,
+		       Matrix<double> const &adc2voltage,
+		       Matrix<DComplex> const &fft2calfft);
+    //! Provide a summary of the internal parameters to standard output
+    inline void summary () {
+      summary (std::cout);
+    }
   
   /*!
     \brief Provide a summary of the internal parameters
@@ -798,26 +780,6 @@ namespace CR {  //  Namespace CR -- begin
                          FFT, [Hz]
    */
   Vector<Double> frequencyValues (Bool const &onlySelected=True);
-  
-  // ------------------------------- Overloading of functions from the base class
-  
-  /*!
-    \brief Get the values along the time axis
-    
-    \return timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
-            a data block of length \f$ N_{\rm Blocksize} \f$ with zero offset;
-	    i.e. this function returns the first \f$ N_{\rm Blocksize} \f$ time
-	    values (as we know nothing here about blocks etc.).
-  */
-#ifdef HAVE_CASA
-  virtual inline casa::Vector<double> timeValues () {
-    return TimeFreq::timeValues (block(),true);
-  }
-#else
-  virtual inline vector<double> timeValues () {
-    return TimeFreq::timeValues (block(),true);
-  }
-#endif
   
   // ------------------------------------------------------------- Hanning filter
   
