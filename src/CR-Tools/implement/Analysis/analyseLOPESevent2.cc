@@ -1477,7 +1477,9 @@ namespace CR { // Namespace CR -- begin
 
      while( beamformDR_p->block() <= endBlock) {
        cout<<"Processing block "<< beamformDR_p->block()<<" ["<< beamformDR_p->block()-startBlock+1 << "/"<<endBlock-startBlock+1<<"]"<<endl;
-       cout<<"startTime: " << beamformDR_p->timeValues()[0]<<endl;
+       // The following statement does not work any more
+       // since TimeFreq.cc::timeValues has been changed to demand a reference instead to return a vector
+       // cout<<"startTime: " << beamformDR_p->timeValues()[0]<<endl;
        stringstream str;
        str.clear();
        str<< beamformDR_p->block();
