@@ -325,6 +325,17 @@ namespace CR { // Namespace CR -- begin
       ObsToCTPath.assign(InputRecord);
       return True;
     };
+    
+    /*!
+      \brief Get the record that matches observatory names to the path to the corresponding CalTable
+
+      \return Record - record with the data
+    */
+
+    Record GetObsRecord() {
+      return ObsToCTPath;
+    }
+
 
     /*!
       \brief Set the verbosity

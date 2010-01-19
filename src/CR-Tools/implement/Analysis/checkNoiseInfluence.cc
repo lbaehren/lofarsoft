@@ -75,6 +75,9 @@ namespace CR { // Namespace CR -- begin
            << "\n,at time range from " << pulseStart << " s to " << pulseStop << " s."
            << endl;                 
 
+      // first delete potentially existing old pipeline
+      Record ObsRecord = pipeline_p->GetObsRecord();
+      initPipeline(ObsRecord);
       pipeline_p->setVerbosity(true);
 
       // Generate the Data Reader
@@ -136,10 +139,11 @@ namespace CR { // Namespace CR -- begin
   void checkNoiseInfluence::loadNoiseEvent(const string& evname)
   {
     try {   
-      cout << "\nLoading noise from file '" << evname << endl;      
+      cout << "\nLoading noise from file: " << evname << endl;      
 
-      // first delete old pipeline
-      clear(); // TODO: implement this method also in analyseLOPESevent2 !!!
+      // first delete potentially existing old pipeline
+      Record ObsRecord = pipeline_p->GetObsRecord();
+      initPipeline(ObsRecord);
       pipeline_p->setVerbosity(true);
 
       // Generate the Data Reader

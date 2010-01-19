@@ -72,8 +72,6 @@ namespace CR { // Namespace CR -- begin
 
   protected:
 
-    //! the new pipeline objects, one for the input, one for the upsampling (like CRinvFFT + LopesSTAR-upsampling)
-    CompletePipeline pipeline, upsamplePipe;
     //! switcher to the used pipeline (pipeline or upsamplePipe)
     CompletePipeline *CompleteBeamPipe_p;
 
@@ -112,6 +110,11 @@ namespace CR { // Namespace CR -- begin
 
     //! Selection of all antennas with the correct polarization
     Vector<Bool> PolarizationAntennaSelection;
+
+    /*!
+      \brief clear the object (make it ready for the next event)
+    */
+    void clear(void);
 
 
   public:
