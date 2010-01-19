@@ -117,7 +117,7 @@ using namespace TMath;
 
 
    // Energy function***********************
-   double lg_EnergyK(double lgNe, double lgNmu, double theta) //theta in rad
+   double lg_EnergyK(double lgNe, double lgNmu, double theta) //theta in rad && "Nmu" NOT truncated muon number!!!
    { 
      // transform to average 0-18deg sizes
      dwb1=(D/cos(theta))-(D*1.025);
@@ -455,7 +455,7 @@ int main(int argc, char* argv[])
     energy=0;
 
     //double errNe, errNmu, errTheta, errlog10Size,errlog10Lmuo,;
-    double log10Size, log10Lmuo, log10sizeg,log10sizmg;
+    double log10Size, log10Lmuo, log10Nmu, log10sizeg,log10sizmg;
     double FDeltaA, FDeltaTheta;  
 
     //errNe = (Size*20.)/100.;  //preliminar value!
@@ -465,6 +465,7 @@ int main(int argc, char* argv[])
     //transf into log10
     log10Size = Log10(Size);
     log10Lmuo = Log10(Lmuo);
+    log10Nmu = Log10(Nmu);
     //errlog10Size = (errNe)/(Size*log(10.));
     //errlog10Lmuo = (errNmu)/(Lmuo*log(10.));
     log10sizeg = Log10(Sizeg);
@@ -508,13 +509,13 @@ int main(int argc, char* argv[])
 
     ///********** Energy and primary Mass reconstructed by KASCADE (Ralph's formulas) ******///
     //NB- here no log---no LgE and LnA
-    if (Az!=0 && Ze!=0 && Size>0 && Lmuo>0) {
+    if (Az!=0 && Ze!=0 && Size>0 && Nmu>0) {
       //Energy and Energy error
-      lgE = lg_EnergyK(log10Size,log10Lmuo,Ze);
-      //err_lgE = err_lg_EnergyK(Ze,errlog10Size, errlog10Lmuo, errTheta);
+      lgE = lg_EnergyK(log10Size,log10Nmu,Ze);
+      //err_lgE = err_lg_EnergyK(Ze,errlog10Size, errlog10Nmu, errTheta);
       //Mass and Mass error
-      lnA=lg_A(log10Size,log10Lmuo,Ze);
-      //err_lnA=err_lg_A(Ze,errlog10Size, errlog10Lmuo, errTheta);
+      lnA=lg_A(log10Size,log10Nmu,Ze);
+      //err_lnA=err_lg_A(Ze,errlog10Size, errlog10Nmu, errTheta);
 
       // mass dependent energy error from Michael's plots
       if(exp(lnA)<1.5)
