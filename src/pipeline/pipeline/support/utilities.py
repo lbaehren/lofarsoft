@@ -3,6 +3,7 @@ from contextlib import closing, contextmanager
 from cuisine.parset import Parset
 from tempfile import mkstemp
 import os, errno, shutil, subprocess, time, resource
+from itertools import islice, repeat, chain, izip
 
 class ClusterError(Exception):
     pass
@@ -110,6 +111,21 @@ def string_to_list(my_string):
     Convert a list-like string (as in pipeline.cfg) to a list of values.
     """
     return [x.strip() for x in my_string.strip('[] ').split(',')]
+
+def izip_longest(*args, **kwds):
+    # This code is lifted from the Python 2.6 manual, since izip_longest isn't
+    # available in the 2.5 standard library.
+    # izip_longest('ABCD', 'xy', fillvalue='-') --> Ax By C- D-
+    fillvalue = None
+    def sentinel(counter = ([fillvalue]*(len(args)-1)).pop):
+        yield counter()         # yields the fillvalue, or raises IndexError
+    fillers = repeat(fillvalue)
+    iters = [chain(it, sentinel(), fillers) for it in args]
+    try:
+        for tup in izip(*iters):
+            yield tup
+    except IndexError:
+        pass
 
 def group_iterable(iterable, size):
     """
