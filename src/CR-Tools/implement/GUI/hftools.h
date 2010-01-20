@@ -1,6 +1,9 @@
 #ifndef HFTOOLS_H
 #define HFTOOLS_H
 
+//=========================================================================================
+// Common with hfget ....
+//=========================================================================================
 
 #include <string>
 #include <iostream>
@@ -105,11 +108,15 @@ typedef casa::Record CasaRecord ;
 #define CasaMatrix casa::Matrix
 #define CasaArray casa::Array
 #define CasaVector casa::Vector
+typedef casa::Vector CASAVector 
+typedef std::vector STLVector 
 
 //For some reasons NULL is primarily interpreted as Integer by the
 //compiler (e.g., when it needs to determine the type of templated functions).
 //So, this forces NULL to really be a NULL pointer ...
 #define Null_p reinterpret_cast<HPointer>(NULL)
+
+//=========================================================================================
 
 
 
