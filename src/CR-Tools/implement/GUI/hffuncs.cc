@@ -1465,8 +1465,8 @@ int ReadTextFile(string filename)
   };
 }
 
-#undef HF_PP_FILETYPE
-#define HF_PP_FILETYPE() (GUI)  // Tell the preprocessor (for generating wrappers) that from here on this is the part where the atomatic function wrappers are generated. 
+#undef HFPP_FILETYPE
+#define HFPP_FILETYPE() (GUI)  // Tell the preprocessor (for generating wrappers) that from here on this is the part where the atomatic function wrappers are generated. 
 #include "hfwrappers-hfanalysis.cc.h"  // include wrapper definitions generated automatically from source
 
 /*
@@ -1486,8 +1486,8 @@ gcc -E -I$LOFARSOFT/release/include -I$LOFARSOFT/src/CR-Tools/implement -I$LOFAR
 //Note that this will be filled in by the preprocessor 
 void DataFunc_Library_publish(DataFuncLibraryClass* library_ptr){
   //$PUBLISH Function
-#undef HF_PP_FILETYPE
-#define HF_PP_FILETYPE() (GUIPUBLISH)  // Tell the preprocessor (for generating wrappers) that from here on this is the part where the functions are published (and hence the WRAPPER generation macro is identified as such).
+#undef HFPP_FILETYPE
+#define HFPP_FILETYPE() (GUIPUBLISH)  // Tell the preprocessor (for generating wrappers) that from here on this is the part where the functions are published (and hence the WRAPPER generation macro is identified as such).
 #include "hfwrappers-hfanalysis.cc.h"  // include wrapper definitions generated automatically from source
 };
  
@@ -1496,4 +1496,4 @@ void dummy_instantiate(){
   CasaVector<int> OffsetsCasa;
   aipsvec2stlvec(OffsetsCasa, Offsets);
 }
-#undef HF_PP_FILETYPE
+#undef HFPP_FILETYPE

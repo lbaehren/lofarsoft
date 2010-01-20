@@ -1,31 +1,31 @@
-#ifdef HF_PP_FUNCTYPE_T
-#undef HF_PP_FUNCTYPE_T
+#ifdef HFPP_FUNCTYPE_T
+#undef HFPP_FUNCTYPE_T
 #endif
 
-#undef HF_PP_FUNCNAME
-#undef HF_PP_ALT_FUNCNAME
-#undef HF_PP_FUNCTYPE
-#undef HF_PP_FUNCBRIEF
-#undef HF_PP_VARIANT
+#undef HFPP_FUNCNAME
+#undef HFPP_ALT_FUNCNAME
+#undef HFPP_FUNCTYPE
+#undef HFPP_FUNCBRIEF
+#undef HFPP_VARIANT
 
-#undef HF_PP_NVECS
-#undef HF_PP_NPAR
+#undef HFPP_NVECS
+#undef HFPP_NPAR
 
-#undef HF_PP_PAR0
-#undef HF_PP_PAR1
-#undef HF_PP_PAR2
-#undef HF_PP_PAR3
-#undef HF_PP_PAR4
-#undef HF_PP_PAR5
-#undef HF_PP_PAR6
-#undef HF_PP_PAR7
-#undef HF_PP_PAR8
-#undef HF_PP_PAR9
-#undef HF_PP_PAR10
+#undef HFPP_PAR0
+#undef HFPP_PAR1
+#undef HFPP_PAR2
+#undef HFPP_PAR3
+#undef HFPP_PAR4
+#undef HFPP_PAR5
+#undef HFPP_PAR6
+#undef HFPP_PAR7
+#undef HFPP_PAR8
+#undef HFPP_PAR9
+#undef HFPP_PAR10
 
-#undef HF_PP_VEC_WRAPPER_CODE_STL
-#undef HF_PP_VEC_WRAPPER_CODE_CASA
+#undef HFPP_VEC_WRAPPER_CODE_STL
+#undef HFPP_VEC_WRAPPER_CODE_CASA
 
-#undef HF_PP_GUI_RETURN_POLICY
-#undef HF_PP_GUI_LIBRARY
-#undef HF_PP_NO_GUI
+#undef HFPP_GUI_RETURN_POLICY
+#undef HFPP_GUI_LIBRARY
+#undef HFPP_NO_GUI
