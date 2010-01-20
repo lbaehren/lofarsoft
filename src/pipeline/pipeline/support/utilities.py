@@ -110,3 +110,14 @@ def string_to_list(my_string):
     Convert a list-like string (as in pipeline.cfg) to a list of values.
     """
     return [x.strip() for x in my_string.strip('[] ').split(',')]
+
+def group_iterable(iterable, size):
+    """
+    Group the iterable into tuples of given size.  Returns a generator.
+
+    Example:
+    >>> for x in group([1,2,3,4,5], 3): print x
+    (1, 2, 3)
+    (4, 5)
+    """
+    return (filter(lambda x: x is not None, x) for x in izip_longest(*[islice(iterable, n, None, size) for n in xrange(size)]))
