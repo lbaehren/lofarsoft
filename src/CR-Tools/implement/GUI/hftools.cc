@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id:: hfget.cc 3995 2010-01-18 10:09:09Z falcke                       $ |
+ | $Id:: hftools.cc 3995 2010-01-18 10:09:09Z falcke                       $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2008                                                    *
@@ -22,8 +22,7 @@
  ***************************************************************************/
 
 /*! 
-  HFGET Version 0.1 - The basic data get/put mechanism for the Hyper-Flexible
-  Plotting Tool for LOFAR Data
+  HFTOOLS Version 0.1 - Tools to manipulate vectors 
 */
 
 
@@ -32,8 +31,7 @@ using namespace std;
 //#include "mainwindow.h" 
 #include "hfdefs.h" 
 #include "hfcast.h" 
-#include "VectorSelector.h"
-#include "hfget.h"
+#include "hftools.h"
 #include "hffuncs.awk.h"  
 #include "hfanalysis.h"  
 #include <time.h>
@@ -4084,7 +4082,7 @@ extraction function above.
 
 /*!
 \brief This just sets the data in an mgData wrapper to the STL vector vec.  The
-function is exposed to python (in hfget.hpp) and can be called interactively
+function is exposed to python (in hftools.hpp) and can be called interactively
 */
 
 void mglDataSetVecN(mglData* md, vector<HNumber> &vec){
@@ -4218,4 +4216,4 @@ namespace boost { namespace python
 }}
 */
 
-#include <GUI/hfget.hpp>
+#include <GUI/hftools.hpp>

@@ -313,11 +313,15 @@ void hReadFile(vector<T> & vec,
 //     casa::Vector<TYPE> CVEC(shape,&(VEC[0]),casa::SHARE)
 //     //    MAKE_CASA_VECTOR_FROM_STL(T,vec,cvec);
 //     //    drp->timeValues(cvec);
-    CasaVector<double> val = drp->timeValues();
-    aipsvec2stlvec(val,vec);
+//    CasaVector<double> val = drp->timeValues();
+    vector<double> vals;
+    drp->timeValues(vals);
+    copycast_vec(vals,vec);
   }
   else if (Datatype=="Frequency") {
     //vector<HNumber>* vp2; *vp2 = drp->frequencyValues().tovec();
+    //    vector<double> vals;
+    //copycast_vec(vals,vec);
     CasaVector<double> val = drp->frequencyValues();
     aipsvec2stlvec(val,vec);
   }

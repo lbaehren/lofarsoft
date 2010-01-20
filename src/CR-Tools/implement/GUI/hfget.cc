@@ -142,20 +142,22 @@ template<class T> inline T mycast(/*const*/ T v){return v;}
 
 //Some Special cases to avoid ambiguity, hence first convert to common basic type
 template<class T> inline T mycast(/*const*/ unsigned int v){return mycast<T>(static_cast<HInteger>(v));}
-template<class T> inline T mycast(/*const*/ int32_t v){return mycast<T>(static_cast<HInteger>(v));}
-template<class T> inline T mycast(/*const*/ int64_t v){return mycast<T>(static_cast<HInteger>(v));}
+
+//#if H_OS64BIT
+//template<class T> inline T mycast(/*const*/ int32_t v){return mycast<T>(static_cast<HInteger>(v));}
+//#if H_OS32BIT
+//template<class T> inline T mycast(/*const*/ int64_t v){return mycast<T>(static_cast<HInteger>(v));}
 
 
 //Convert to arbitrary class T if not specified otherwise
 template<class T> inline T mycast(/*const*/ HPointer v){return mycast<T>(reinterpret_cast<HInteger>(v));}
-//template<class T> inline T mycast(/*const*/ HInteger v){return static_cast<T>(v);}
+template<class T> inline T mycast(/*const*/ HInteger v){return static_cast<T>(v);}
 template<class T> inline T mycast(/*const*/ HNumber v){return static_cast<T>(v);}
 template<class T> inline T mycast(/*const*/ HComplex v){return static_cast<T>(v);}
 
 //Convert Numbers to Numbers and loose information (round float, absolute of complex)
 template<>  inline HInteger mycast<HInteger>(HNumber v){return static_cast<HInteger>(floor(v+0.5));}
 template<>  inline HInteger mycast<HInteger>(HComplex v){return static_cast<HInteger>(floor(real(v)+0.5));}
-
 template<>  inline HNumber mycast<HNumber>(HComplex v){return real(v);}
 
 //--Strings ------------------------------------------------------------

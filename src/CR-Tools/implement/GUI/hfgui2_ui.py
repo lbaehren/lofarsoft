@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'hfgui2.ui'
 #
-# Created: Sat Jan 16 16:50:07 2010
-#      by: PyQt4 UI code generator 4.4.3
+# Created: Wed Jan 20 16:18:06 2010
+#      by: PyQt4 UI code generator 4.5.1
 #
 # WARNING! All changes made in this file will be lost!
 
