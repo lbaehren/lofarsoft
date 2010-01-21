@@ -60,8 +60,8 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   
   ExternalProject_Add (root
     PREFIX ${ROOT_BINARY_DIR}
-    DOWNLOAD_DIR ${ROOT_BINARY_DIR}
-    SOURCE_DIR ${ROOT_BINARY_DIR}
+#    DOWNLOAD_DIR ${ROOT_BINARY_DIR}
+#    SOURCE_DIR ${ROOT_BINARY_DIR}
     SVN_REPOSITORY http://root.cern.ch/svn/root/trunk
     CONFIGURE_COMMAND ${ROOT_BINARY_DIR}/configure ${root_architecture} --prefix=${USG_INSTALL_PREFIX}
     )
