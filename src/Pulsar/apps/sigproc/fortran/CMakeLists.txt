@@ -144,7 +144,7 @@ foreach (src ${sigproc_fc_binaries})
     CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
     CMAKE_SHARED_LINKER_FLAGS ""
   )
-  target_link_libraries (${src} sigproc sigproc_fort ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${libm})
+  target_link_libraries (${src} sigproc_fort sigproc ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${libm})
 endforeach (src)
 
 #set (CMAKE_Fortran_COMPILE_OBJECT g77)
