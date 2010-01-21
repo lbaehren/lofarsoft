@@ -96,9 +96,7 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
       return "<newClass>";
     }
 
-    /*!
-      \brief Provide a summary of the internal status
-    */
+    //! Provide a summary of the object's internal parameters and status
     inline void summary () {
       summary (std::cout);
     }

@@ -186,7 +186,10 @@ if (NOT USG_CMAKE_CONFIG)
 
   ## TBB time-series data
   
-  find_file (dataset_tbb rw_20090417_181700.h5
+  find_file (dataset_tbb
+    NAMES
+    lightning_16_48.h5
+    rw_20090417_181700.h5
     PATHS
     ${USG_ROOT}/data
     ${USG_ROOT}/data/test
@@ -261,10 +264,12 @@ if (NOT USG_CMAKE_CONFIG)
   ## System header files
   
   find_path (HAVE_LIBGEN_H     libgen.h      PATHS ${include_locations} )
+  find_path (HAVE_MATH_H       math.h        PATHS ${include_locations} )
   find_path (HAVE_STDINT_H     stdint.h      PATHS ${include_locations} )
   find_path (HAVE_STDLIB_H     stdlib.h      PATHS ${include_locations} )
   find_path (HAVE_STRING_H     string.h      PATHS ${include_locations} )
   find_path (HAVE_STRINGS_H    strings.h     PATHS ${include_locations} )
+  find_path (HAVE_TIME_H       time.h        PATHS ${include_locations} )
   find_path (HAVE_SYS_STAT_H   sys/stat.h    PATHS ${include_locations} )
   find_path (HAVE_SYS_TIME_H   sys/time.h    PATHS ${include_locations} )
   find_path (HAVE_SYS_TYPES_H  sys/types.h   PATHS ${include_locations} )

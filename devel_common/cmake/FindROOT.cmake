@@ -50,13 +50,13 @@ endif (NOT ROOT_FIND_QUIETLY)
 find_path (ROOT_INCLUDES tCanvas.h TCint.h TObject.h
   PATHS
   ${include_locations}
-  /opt/root/include
+  /opt
   /opt/auger/root-v5.18.00
   $ENV{ROOTSYS}
   PATH_SUFFIXES
+  include
   root
   root/include
-  include
   NO_DEFAULT_PATH
   )
 
