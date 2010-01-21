@@ -257,10 +257,17 @@ AntennasDisplay::borders AntennasDisplay::getBorders (int plotsOffset)
    return output;
 }
 
+// ==============================================================================
+//
+//  Methods which require ROOT
+//
+// ==============================================================================
+
+#ifdef HAVE_ROOT
+
 //_______________________________________________________________________________
 //                                                                     createPlot
 
-#ifdef HAVE_ROOT
 TCanvas* AntennasDisplay::createPlot (std::string title,
                                       unsigned int width,
                                       unsigned int height,
@@ -286,226 +293,220 @@ TCanvas* AntennasDisplay::createPlot (std::string title,
                                       double elevationPlotMin,
                                       double elevationArrowSize)
 {
-   const unsigned int maxColorValue = 255; // ROOT's limitation
-
-   // Check input data
-   if
-   (
-      (xCoordinates.size() != yCoordinates.size())                             ||
-      (xCoordinates.size() == 0)                                               ||
-      (xCoordinatesALL.size() != yCoordinatesALL.size())
-   )
-   {
+  const unsigned int maxColorValue = 255; // ROOT's limitation
+  
+  // Check input data
+  if
+    (
+     (xCoordinates.size() != yCoordinates.size())                             ||
+     (xCoordinates.size() == 0)                                               ||
+     (xCoordinatesALL.size() != yCoordinatesALL.size())
+     )
+    {
       std::cerr<<"Incorrect input data"<<std::endl;
       return NULL;
-   }
-   // Check input parameters
-   if
-   (
-      (distanceOfLegColors == 0)                                               ||
-      (bckgFillColor > maxColorValue)                                          ||
-      (legFillColor > maxColorValue)                                           ||
-      (legTextSize  < 0 || legTextSize > 1)                                    ||
-      (legMarkerSize < 0)                                                      ||
-      (numberOfColorsInLeg + firstColorOfLeg > maxColorValue)                  ||
-      (legStartPosX < 0 || legStartPosX > 1)                                   ||
-      (legStartPosY < 0 || legStartPosY > 1)                                   ||
-      (legEndPosX < 0 || legEndPosX > 1)                                       ||
-      (legEndPosY < 0 || legEndPosY > 1)
-   )
-   {
+    }
+  // Check input parameters
+  if
+    (
+     (distanceOfLegColors == 0)                                               ||
+     (bckgFillColor > maxColorValue)                                          ||
+     (legFillColor > maxColorValue)                                           ||
+     (legTextSize  < 0 || legTextSize > 1)                                    ||
+     (legMarkerSize < 0)                                                      ||
+     (numberOfColorsInLeg + firstColorOfLeg > maxColorValue)                  ||
+     (legStartPosX < 0 || legStartPosX > 1)                                   ||
+     (legStartPosY < 0 || legStartPosY > 1)                                   ||
+     (legEndPosX < 0 || legEndPosX > 1)                                       ||
+     (legEndPosY < 0 || legEndPosY > 1)
+     )
+    {
       std::cerr<<"Incorrect input parameter";
       return NULL;
-   }
-
-   // Create canvas
-   TCanvas* c1 = new TCanvas("c1", "c1", width, height);
-   c1->SetFillColor(bckgFillColor);
-
-   // Create plot's frame
-   borders borderValues = getBorders(plotsOffset);
-   std::string plotDescription = title + "; X [m] ; Y [m]";
-   TH1F* h1 = c1->DrawFrame(borderValues.wValue, borderValues.sValue, borderValues.eValue, borderValues.nValue, plotDescription.c_str());
-   h1->GetXaxis()->CenterTitle();
-   h1->GetYaxis()->CenterTitle();
-
-   // Calculate time's multiplication value
-   double minimumTimeValue = getMinimumValue(times);
-   double maximumTimeValue = getMaximumValue(times);
-   double timeMulValue     = (double)(numberOfColorsInLeg) / (maximumTimeValue - minimumTimeValue);
-   double timeAddValue     = firstColorOfLeg - timeMulValue * minimumTimeValue;
-
-   // Draw the legend
-   TLegend* lg1 = new TLegend(legStartPosX, legStartPosY, legEndPosX, legEndPosY, "Time [ns]");
-   lg1->SetEntrySeparation(legEntrySeparation);
-
-   std::vector<TMarker*> vt1;
-
-   for(unsigned int i=numberOfColorsInLeg, j=0; i>0; i-=distanceOfLegColors, j++)
-   {
+    }
+  
+  // Create canvas
+  TCanvas* c1 = new TCanvas("c1", "c1", width, height);
+  c1->SetFillColor(bckgFillColor);
+  
+  // Create plot's frame
+  borders borderValues = getBorders(plotsOffset);
+  std::string plotDescription = title + "; X [m] ; Y [m]";
+  TH1F* h1 = c1->DrawFrame(borderValues.wValue, borderValues.sValue, borderValues.eValue, borderValues.nValue, plotDescription.c_str());
+  h1->GetXaxis()->CenterTitle();
+  h1->GetYaxis()->CenterTitle();
+  
+  // Calculate time's multiplication value
+  double minimumTimeValue = getMinimumValue(times);
+  double maximumTimeValue = getMaximumValue(times);
+  double timeMulValue     = (double)(numberOfColorsInLeg) / (maximumTimeValue - minimumTimeValue);
+  double timeAddValue     = firstColorOfLeg - timeMulValue * minimumTimeValue;
+  
+  // Draw the legend
+  TLegend* lg1 = new TLegend(legStartPosX, legStartPosY, legEndPosX, legEndPosY, "Time [ns]");
+  lg1->SetEntrySeparation(legEntrySeparation);
+  
+  std::vector<TMarker*> vt1;
+  
+  for(unsigned int i=numberOfColorsInLeg, j=0; i>0; i-=distanceOfLegColors, j++)
+    {
       vt1.push_back(new TMarker(0, 0, kFullSquare));
       vt1[j]->SetMarkerColor(i - 1 + firstColorOfLeg);
       vt1[j]->SetMarkerSize(legMarkerSize);
       if(i == numberOfColorsInLeg)
-      {
-         std::stringstream ss (std::stringstream::in | std::stringstream::out);
-         ss << maximumTimeValue;
-         lg1->AddEntry(vt1[j],ss.str().c_str(),"P");
-      }
+	{
+	  std::stringstream ss (std::stringstream::in | std::stringstream::out);
+	  ss << maximumTimeValue;
+	  lg1->AddEntry(vt1[j],ss.str().c_str(),"P");
+	}
       else if((i - distanceOfLegColors) <= 0)
-      {
-         std::stringstream ss (std::stringstream::in | std::stringstream::out);
-         ss << minimumTimeValue;
-         lg1->AddEntry(vt1[j],ss.str().c_str(),"P");
-      }
+	{
+	  std::stringstream ss (std::stringstream::in | std::stringstream::out);
+	  ss << minimumTimeValue;
+	  lg1->AddEntry(vt1[j],ss.str().c_str(),"P");
+	}
       else
-         lg1->AddEntry(vt1[j], " ", "P");
-   }
-
-
-   const static int textAngle = 15;
-
-   lg1->SetFillColor(legFillColor);
-   lg1->SetTextSize(legTextSize);
-   lg1->SetTextAngle(textAngle);
-   lg1->Draw();
-   lg1->SetBorderSize(legBorderSize);
-
-   // Calculate magnitude's multiplication value
-   double minimumMagnitudeValue = getMinimumValue(magnitudes);
-   double maximumMagnitudeValue = getMaximumValue(magnitudes);
-
-   double minimumDistance       = 0;
-
-   if(positionsGiven)
-      minimumDistance = getMinimumDistance(xCoordinatesALL, yCoordinatesALL, borderValues, plotFittingStep);
-   else
-      minimumDistance = getMinimumDistance(xCoordinates, yCoordinates, borderValues, plotFittingStep);
-
-   double magnitudeMulValue     = 0;
-   double magnitudeAddValue     = 0;
-
-   if(maximumMagnitudeValue - minimumMagnitudeValue != 0)
-   {
+	lg1->AddEntry(vt1[j], " ", "P");
+    }
+  
+  
+  const static int textAngle = 15;
+  
+  lg1->SetFillColor(legFillColor);
+  lg1->SetTextSize(legTextSize);
+  lg1->SetTextAngle(textAngle);
+  lg1->Draw();
+  lg1->SetBorderSize(legBorderSize);
+  
+  // Calculate magnitude's multiplication value
+  double minimumMagnitudeValue = getMinimumValue(magnitudes);
+  double maximumMagnitudeValue = getMaximumValue(magnitudes);
+  
+  double minimumDistance       = 0;
+  
+  if(positionsGiven)
+    minimumDistance = getMinimumDistance(xCoordinatesALL, yCoordinatesALL, borderValues, plotFittingStep);
+  else
+    minimumDistance = getMinimumDistance(xCoordinates, yCoordinates, borderValues, plotFittingStep);
+  
+  double magnitudeMulValue     = 0;
+  double magnitudeAddValue     = 0;
+  
+  if(maximumMagnitudeValue - minimumMagnitudeValue != 0)
+    {
       if(minimumMagnitudeValue != 0)
-      {
-         double minMaxRelation = 0;
-
-         if(maximumMagnitudeValue != 0)
+	{
+	  double minMaxRelation = 0;
+	  
+	  if(maximumMagnitudeValue != 0)
             minMaxRelation = minimumMagnitudeValue / maximumMagnitudeValue;
-         if(minMaxRelation < 0)
+	  if(minMaxRelation < 0)
             minMaxRelation *= -1;
-         magnitudeMulValue = (minimumDistance - minMaxRelation * minimumDistance)/ (maximumMagnitudeValue - minimumMagnitudeValue);
-      }
+	  magnitudeMulValue = (minimumDistance - minMaxRelation * minimumDistance)/ (maximumMagnitudeValue - minimumMagnitudeValue);
+	}
       else
-         magnitudeMulValue = minimumDistance / (maximumMagnitudeValue - minimumMagnitudeValue);
+	magnitudeMulValue = minimumDistance / (maximumMagnitudeValue - minimumMagnitudeValue);
       magnitudeAddValue = minimumDistance - magnitudeMulValue * maximumMagnitudeValue;
-   }
-   else
-   {
+    }
+  else
+    {
       if(maximumMagnitudeValue != 0)
-         magnitudeMulValue = minimumDistance / maximumMagnitudeValue;
-   }
-
-   // Draw core direction
-   if(showCore)
-   {
+	magnitudeMulValue = minimumDistance / maximumMagnitudeValue;
+    }
+  
+  // Draw core direction
+  if(showCore)
+    {
       const double elevationMax = 0;
       const double elevationMin = 90;
-
+      
       double elevationMulValue   = (elevationPlotMax - elevationPlotMin) / (elevationMax - elevationMin);
       double elevationAddValue   = elevationPlotMax;
       double elevationMagnitude  = elevation * elevationMulValue + elevationAddValue;
       azimuth                   *= M_PI / 180;
-
+      
       TArrow* arr = new TArrow(xCore, yCore,
                                elevationMagnitude * sin(azimuth) + xCore,
                                elevationMagnitude * cos(azimuth) + yCore,
                                elevationArrowSize, ">");
       arr->Draw();
-   }
-
-   // Draw magnitudes
-   std::vector<TLine*> vl1;
-
-   for(unsigned int i=0; i<xCoordinates.size(); i++)
-   {
+    }
+  
+  // Draw magnitudes
+  std::vector<TLine*> vl1;
+  
+  for(unsigned int i=0; i<xCoordinates.size(); i++)
+    {
       switch(polarizations[i])
-      {
-         case (int)NS :
-            vl1.push_back(getHorizontalLine(xCoordinates[i], yCoordinates[i], magnitudes[i] * magnitudeMulValue + magnitudeAddValue, lineWidth));
-         break;
-         case (int)EW :
-            vl1.push_back(getVerticalLine(xCoordinates[i], yCoordinates[i], magnitudes[i] * magnitudeMulValue + magnitudeAddValue, lineWidth));
-            break;
-      }
-
+	{
+	case (int)NS :
+	  vl1.push_back(getHorizontalLine(xCoordinates[i], yCoordinates[i], magnitudes[i] * magnitudeMulValue + magnitudeAddValue, lineWidth));
+	  break;
+	case (int)EW :
+	  vl1.push_back(getVerticalLine(xCoordinates[i], yCoordinates[i], magnitudes[i] * magnitudeMulValue + magnitudeAddValue, lineWidth));
+	  break;
+	}
+      
       int colorVal = 0;
-
+      
       if(distanceOfLegColors > 1)
-      {
-         unsigned int mVal = (times[i] * timeMulValue + timeAddValue-firstColorOfLeg) / distanceOfLegColors;
-         if(mVal >= numberOfColorsInLeg / distanceOfLegColors)
+	{
+	  unsigned int mVal = (times[i] * timeMulValue + timeAddValue-firstColorOfLeg) / distanceOfLegColors;
+	  if(mVal >= numberOfColorsInLeg / distanceOfLegColors)
             mVal--;
-         colorVal    = firstColorOfLeg + mVal * distanceOfLegColors;
-      }
+	  colorVal    = firstColorOfLeg + mVal * distanceOfLegColors;
+	}
       else
-         colorVal = (int) (times[i] * timeMulValue + timeAddValue);
-
+	colorVal = (int) (times[i] * timeMulValue + timeAddValue);
+      
       vl1[i]->SetLineColor(colorVal);
       vl1[i]->Draw();
-   }
-
-   // If all positions are given, antennas not providing signals can be identified
-   if(positionsGiven)
-   {
+    }
+  
+  // If all positions are given, antennas not providing signals can be identified
+  if(positionsGiven)
+    {
       deadAntennasPos deadAntennas = getDeadAntennas();
-
+      
       std::vector<TMarker*> vm1;
-
+      
       for(unsigned int i=0; i<deadAntennas.xCoordinatesDEAD.size(); i++)
-      {
-         vm1.push_back(new TMarker(deadAntennas.xCoordinatesDEAD[i], deadAntennas.yCoordinatesDEAD[i], 5));
-         vm1[i]->SetMarkerSize(deadAntMarkerSize);
-         vm1[i]->SetMarkerColor(deadAntColor);
-         vm1[i]->Draw();
-      }
-   }
-   return c1;
+	{
+	  vm1.push_back(new TMarker(deadAntennas.xCoordinatesDEAD[i], deadAntennas.yCoordinatesDEAD[i], 5));
+	  vm1[i]->SetMarkerSize(deadAntMarkerSize);
+	  vm1[i]->SetMarkerColor(deadAntColor);
+	  vm1[i]->Draw();
+	}
+    }
+  return c1;
 }
-#endif
 
 //_______________________________________________________________________________
 //                                                                     createPlot
 
-#ifdef HAVE_ROOT
-bool AntennasDisplay::createPlot(std::string filename,
-                                 std::string title)
+bool AntennasDisplay::createPlot (std::string filename,
+				  std::string title)
 {
-   TCanvas* c = createPlot(title);
-   if(c != NULL)
-      return savePlot(filename, c);
-   return true;
+  TCanvas* c = createPlot(title);
+  if(c != NULL)
+    return savePlot(filename, c);
+  return true;
 }
-#endif 
 
 //_______________________________________________________________________________
 //                                                                       savePlot
 
-#ifdef HAVE_ROOT
 bool AntennasDisplay::savePlot(std::string filename, TCanvas* c)
 {
-   std::stringstream plotNameStream(std::stringstream::in | std::stringstream::out);
-   plotNameStream << filename << ".eps";
-   c->Print(plotNameStream.str().c_str());
-   return true;
+  std::stringstream plotNameStream (std::stringstream::in | std::stringstream::out);
+  plotNameStream << filename << ".eps";
+  c->Print(plotNameStream.str().c_str());
+  return true;
 }
-#endif
 
 //_______________________________________________________________________________
 //                                                                getVerticalLine
 
-#ifdef HAVE_ROOT
 TLine* AntennasDisplay::getVerticalLine (double xCenter,
                                          double yCenter,
                                          double length,
@@ -515,12 +516,10 @@ TLine* AntennasDisplay::getVerticalLine (double xCenter,
    output->SetLineWidth(thickness);
    return output;
 }
-#endif
 
 //_______________________________________________________________________________
 //                                                                getVerticalLine
 
-#ifdef HAVE_ROOT
 TLine* AntennasDisplay::getHorizontalLine (double xCenter,
                                            double yCenter,
                                            double length,
@@ -530,4 +529,5 @@ TLine* AntennasDisplay::getHorizontalLine (double xCenter,
     output->SetLineWidth(thickness);
     return output;
 }
+
 #endif

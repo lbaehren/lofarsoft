@@ -13,7 +13,6 @@
 
 set (tests
   tData
-  tITS_Beam
   tITSMetadata
   tLopesEvent
   tLopesEventIn

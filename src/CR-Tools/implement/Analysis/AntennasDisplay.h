@@ -1,3 +1,26 @@
+/*-------------------------------------------------------------------------*
+ | $Id::                                                                 $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2009                                                    *
+ *   Marcin Franc <marcin.franc@gmail.com>                                 *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
 #include <iostream>
 #include <algorithm>
 #include <string>
@@ -14,9 +37,15 @@
 #include <TCanvas.h>
 #endif
 
-// (C) Marcin Franc [marcin.franc@gmail.com]
-
 /*!
+  \class AntennasDisplay
+
+  \brief Display the geometrical arrangement of antennas
+
+  \ingroup Analysis
+
+  \author Marcin Franc
+
   <b>Note:</b>
   
   For the sake of clear architecture of classes (MVC design pattern)
@@ -30,8 +59,9 @@ class AntennasDisplay
 {
    public:
 
-   // === Necessary structures ===
-   // Structure used to transfer the data about plot's borders
+  // === Structures =============================================================
+
+   //! Structure used to transfer the data about plot's borders
    struct borders
    {
       int nValue;
@@ -40,85 +70,100 @@ class AntennasDisplay
       int wValue;
    };
 
-   // Enumerator of polarization types
+   //! Enumerator of polarization types
    enum polarizationType
    {
-      NS = 0, EW =1
+     //! North-South polarization
+     NS = 0,
+     //! East-West polarization
+     EW =1
    };
-
-   // Structure used to transfer the data about positions of antennas not providing any signal
+   
+   //! Structure used to transfer the data about positions of antennas not providing any signal
    struct deadAntennasPos
    {
       std::vector<double> xCoordinatesDEAD;
       std::vector<double> yCoordinatesDEAD;
    };
-   // ============================
 
-   // === Public methods ===
-   // Constructor
+   // === Public Methods ========================================================
+
+   //! Constructor
    AntennasDisplay     ();
-   // Function adding a new antenna
-   void addNewAntenna  (double xCoordinate, double yCoordinate, double magnitude, double time, int polarization);
-   // Function setting positions of all antennas
-   bool setAllAntennas (std::vector<double> xCoordinatesALL, std::vector<double> yCoordinatesALL);
-   // Function setting coordinates of shower core
-   void setCore (double xCore, double yCore, double azimuth, double elevation);
-   // ======================
+   //! Function adding a new antenna
+   void addNewAntenna  (double xCoordinate,
+			double yCoordinate,
+			double magnitude, 
+			double time,
+			int polarization);
+   //! Function setting positions of all antennas
+   bool setAllAntennas (std::vector<double> xCoordinatesALL,
+			std::vector<double> yCoordinatesALL);
+   //! Function setting coordinates of shower core
+   void setCore (double xCore,
+		 double yCore, 
+		 double azimuth,
+		 double elevation);
 
-   //____________________________________________________________________________
-   //                                        Default values for creating the plot
+   // === Default values for creating the plot ==================================
 
-   // Width of resulting canvas
+   //! Width of resulting canvas
    const static int    _width               =  1024;
-   // Height of resulting canvas
+   //! Height of resulting canvas
    const static int    _height              =  768;
-   // Width of lines representing singal's magnitudes
+   //! Width of lines representing singal's magnitudes
    const static int    _lineWidth           =  3;
-   // Fitting parameter - the smaller it is, the more accurate maximum length of signal value depicted on the plot one can achieve
+   //! Fitting parameter - the smaller it is, the more accurate maximum length of signal value depicted on the plot one can achieve
    const static double _plotFittingStep     =  0.1;
-   // Plots offset
+   //! Plots offset
    const static int    _plotsOffset         =  10;
-   // Canvas' fill color
+   //! Canvas' fill color
    const static int    _bckgFillColor       =  10;
-   // Color in which dead antennas are drawn
+   //! Color in which dead antennas are drawn
    const static int    _deadAntColor        =  18;
-   // Size of marker indicating dead antenna
+   //! Size of marker indicating dead antenna
    const static int    _deadAntMarkerSize   =  1;
-   // Number of colors in the legend
+   //! Number of colors in the legend
    const static int    _numberOfColorsInLeg =  48;
-   // Distance between those colors
-   // Please note that if you want to use the color range [x,y] and only n colors from it where n < abs(x-y)
-   // you should make the distance be multiple of number of colors in the legend
+   /*!
+     \brief Distance between those colors
+     Please note that if you want to use the color range [x,y] and only n
+     colors from it where n < abs(x-y) you should make the distance be multiple
+     of number of colors in the legend.
+   */
    const static int    _distanceOfLegColors =  1;
-   // First color of the legend
+   //! First color of the legend
    const static int    _firstColorOfLeg     =  52;
-   // Size of bordder surrounding the legend
+   //! Size of bordder surrounding the legend
    const static int    _legBorderSize       =  0;
-   // Fill color of legend's field
+   //! Fill color of legend's field
    const static int    _legFillColor        =  10;
-   // Size of the text in the legend field
+   //! Size of the text in the legend field
    const static double _legTextSize         =  0.025;
-   // Legend positions (x1, y1, x2, y2)
+   //! Legend positions (x1, y1, x2, y2) -- \e x1 component
    const static double _legStartPosX        =  0.90;
+   //! Legend positions (x1, y1, x2, y2) -- \e y1 component
    const static double _legStartPosY        =  0.10;
+   //! Legend positions (x1, y1, x2, y2) -- \e x2 component
    const static double _legEndPosX          =  0.98;
+   //! Legend positions (x1, y1, x2, y2) -- \e y2 component
    const static double _legEndPosY          =  0.90;
-   // Distance between legend fields
+   //! Distance between legend fields
    const static double _legEntrySeparation  = -0.01;
-   // Size of each field in the legend
+   //! Size of each field in the legend
    const static double _legMarkerSize       =  1.25;
-   // Max elevation's line length
+   //! Max elevation's line length
    const static double _elevationPlotMax    =  20;
-   // Max elevation's line length
+   //! Max elevation's line length
    const static double _elevationPlotMin    =  1;
-   // Size of elevation's arrow
+   //! Size of elevation's arrow
    const static double _elevationArrowSize  =  0.015;
 
    //____________________________________________________________________________
    //                                                                     Methods
-
+   
 #ifdef HAVE_ROOT
-   // Either one can call createPlot setting all parameters ...
+   //! Either one can call createPlot setting all parameters ...
    TCanvas* createPlot (std::string title,
 			unsigned int width = _width,
 			unsigned int height = _height,
@@ -143,7 +188,7 @@ class AntennasDisplay
 			double elevationPlotMax = _elevationPlotMax,
 			double elevationPlotMin = _elevationPlotMin,
 			double elevationArrowSize = _elevationArrowSize);
-   // ... and then save the output ...
+   //! Save the output of the plot
    bool     savePlot   (std::string filename, TCanvas* c);
    // ... or call the function below to invoke createPlot with default parameters
    bool     createPlot (std::string filename, std::string title);
@@ -170,43 +215,39 @@ class AntennasDisplay
    double              elevation;
    bool                showCore;
 
-   //____________________________________________________________________________
-   //                                         Private methods - utility functions
+   // === Private methods - utility functions ===================================
 
    // Checking the activity of the anntenna having the position indicated by xCoordinate and yCoordinate
    bool                checkActivity        (double xCoordinate,
 					     double yCoordinate);
-   // Gets absolute difference between value1 and value2
+   //! Gets absolute difference between value1 and value2
    double              getAbsDifference     (double value1,
 					     double value2);
-   // Gets plot borders
+   //! Gets plot borders
    borders             getBorders           (int plotsOffset);
-   // Gets the positions of dead antennas
+   //! Gets the positions of dead antennas
    deadAntennasPos     getDeadAntennas      ();
-   // Gets the horizontal line
-#ifdef HAVE_ROOT
-   TLine*              getHorizontalLine    (double xCenter,
-					     double yCenter,
-					     double length,
-					     unsigned int thickness);
-#endif
-   // Gets the minimum value of the given vector
+   //! Gets the minimum value of the given vector
    double              getMinimumValue      (std::vector<double>& inputData);
-   // Gets the maximum value of the given vector
+   //! Gets the maximum value of the given vector
    double              getMaximumValue      (std::vector<double>& inputData);
    // Gets minimum distance between antennas and plot borders
    // The speed of fitting relies on the precision of plotFittingStep value
    double              getMinimumDistance   (std::vector<double>& inputData1, std::vector<double>& inputData2, borders borderValues, double plotFittingStep);
-   // Gets the difference of two vectors
+   //! Gets the difference of two vectors
    std::vector<double> getSetDifference     (std::vector<double> inputData1,
 					     std::vector<double> inputData2);
-   // Gets the vertical line
 #ifdef HAVE_ROOT
+   //! Gets the horizontal line
+   TLine*              getHorizontalLine    (double xCenter,
+					     double yCenter,
+					     double length,
+					     unsigned int thickness);
+   //! Gets the vertical line
    TLine*              getVerticalLine      (double xCenter,
 					     double yCenter,
 					     double length,
 					     unsigned int thickness);
 #endif
-   // ===========================================
 
 };

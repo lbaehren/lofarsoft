@@ -109,17 +109,17 @@ namespace CR { // Namespace CR -- begin
 
   public:
     
-    // ------------------------------------------------------------- Construction
+    // === Construction =========================================================
     
     //! Default constructor
     UpSampledDR ();
         
-    // -------------------------------------------------------------- Destruction
+    // === Destruction ==========================================================
 
     //! Destructor
     ~UpSampledDR ();
         
-    // --------------------------------------------------------------- Parameters
+    // === Parameter access =====================================================
     
     /*!
       \brief Get the name of the class
@@ -142,7 +142,7 @@ namespace CR { // Namespace CR -- begin
     */
     void summary (std::ostream &os);    
 
-    // ------------------------------------------------------------------ Methods
+    // === Methods ==============================================================
     
     /*!
       \brief Setup this DataReader
@@ -166,10 +166,10 @@ namespace CR { // Namespace CR -- begin
     //! Return the upsampled data in the original units.
     Matrix<Double> fx();
     //! Return the upsampled data in the original units.
-    void fx(Matrix<Double> &data);
+    void fx (Matrix<Double> &data);
     
   protected:
-
+    
     //! Set up the data streams - nothing to do here.
     bool setStreams() { return true;};
 

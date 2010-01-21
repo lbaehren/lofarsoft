@@ -56,10 +56,14 @@ if (CR_WITH_STARTOOLS)
   LIST (APPEND cr_sources ${CR_SOURCE_DIR}/implement/Analysis/RootDict.C)
 else (CR_WITH_STARTOOLS)
   message (STATUS "[CR-Tools] Removing source files requiring STAR-Tools installation.")
-  list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/CompletePipeline.cc)
-  list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/analyseLOPESevent2.cc)
-  list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/checkNoiseInfluence.cc)
-  list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/PulseProperties.cc)
+  foreach (cr_startools
+      CompletePipeline.cc
+      analyseLOPESevent2.cc
+      checkNoiseInfluence.cc
+      PulseProperties.cc
+      )
+    list (REMOVE_ITEM cr_sources ${CR_SOURCE_DIR}/implement/Analysis/${cr_startools})
+  endforeach (cr_startools)
 endif (CR_WITH_STARTOOLS)
 
 if (NOT CR_WITH_PLOTTING)

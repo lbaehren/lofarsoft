@@ -184,7 +184,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \retval Matrix with the data
   */
-  void UpSampledDR::fx(Matrix<Double> &fx)
+  void UpSampledDR::fx (Matrix<Double> &fx)
   {
     try {
       uint nofSelectedAntennas(DataReader::nofSelectedAntennas());

@@ -357,14 +357,13 @@ namespace CR { // Namespace CR -- begin
       fitObject.setTimeAxis(Times);
       fitObject.setRemoteRange(remoteRange_p);
       fitObject.setFitRangeSeconds(fitStart_p,fitStop_p);
-
+      
     } catch (AipsError x) {
       cerr << "analyseLOPESevent::SetupEvent: " << x.getMesg() << endl;
       return False;
     }; 
     return True;
   };
-  
 
   // ---------------------------------------------------------- doPositionFitting
 
