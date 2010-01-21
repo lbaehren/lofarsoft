@@ -112,7 +112,6 @@ add_custom_target (clean-build
   COMMAND rm -rf casacore cfitsio cr
   COMMAND rm -rf dal
   COMMAND rm -rf numeric num_util
-  COMMAND rm -rf plplot root
   COMMAND rm -rf startools
   COMMAND rm -rf wcslib wcstools
   WORKING_DIRECTORY ${USG_BUILD}
@@ -174,11 +173,14 @@ set (packages_external
   cfitsio
   num_util
   pyrap
-  root
   sip
   wcslib
   wcstools
   )
+
+if (CR_WITH_STARTOOLS)
+  list (APPEND packages_external startools)
+endif (CR_WITH_STARTOOLS)
 
 ## Packages handled directly through CMake
 
@@ -211,8 +213,6 @@ add_dependencies (matplotlib numpy)
 add_dependencies (num_util boost numpy)
 
 add_dependencies (pyrap casacore num_util)
-
-#add_dependencies (startools root)
 
 add_dependencies (wcslib boost flex)
 
@@ -321,6 +321,7 @@ if (CR_WITH_GUI)
 endif (CR_WITH_GUI)
 
 if (CR_WITH_STARTOOLS)
+  add_dependencies (startools root)
   add_dependencies (cr startools)
 endif (CR_WITH_STARTOOLS)
 
