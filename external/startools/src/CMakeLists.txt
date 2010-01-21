@@ -32,13 +32,13 @@ if (ROOT_LIBRARIES)
   list (APPEND link_libraries ${ROOT_LIBRARIES})
 endif (ROOT_LIBRARIES)
 
-if (libdl)
-  list (APPEND link_libraries ${libdl})
-endif (libdl)
+if (HAVE_LIBDL)
+  list (APPEND link_libraries ${HAVE_LIBDL})
+endif (HAVE_LIBDL)
 
-if (libm)
-  list (APPEND link_libraries ${libm})
-endif (libm)
+if (HAVE_LIBM)
+  list (APPEND link_libraries ${HAVE_LIBM})
+endif (HAVE_LIBM)
 
 ## ------------------------------------------------------------------------------
 ## Library 1: Star-Utilities

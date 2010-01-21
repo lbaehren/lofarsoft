@@ -40,6 +40,8 @@ endif (USG_ROOT)
 ## ------------------------------------------------------------------------------
 ## Check if the program/package/library is already available
 
+set (MATHGL_FIND_QUIETLY YES)
+
 include (FindMathGL)
 
 ## <-- begin build condition --------------------------------------------------->

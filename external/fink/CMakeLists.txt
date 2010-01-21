@@ -14,6 +14,7 @@ option (FINK_FORCE_BUILD       "Force rebuild and local installation?"    NO  )
 option (FINK_CMAKE_BUILD       "Use CMake to configure and build Fink?"   YES )
 option (FINK_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
 option (FINK_VERBOSE_BUILD     "Be verbose during build process?"         NO  )
+option (FINK_ASSUME_YES        "Default answer for all interactive questions?" YES)
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -83,26 +84,32 @@ endif (HAVE_FINK)
 ## ------------------------------------------------------------------------------
 ## Install Fink packages
 
+if (FINK_ASSUME_YES) 
+  set (FINK_COMMAND "${HAVE_FINK} --yes install")
+else (FINK_ASSUME_YES)
+  set (FINK_COMMAND "${HAVE_FINK} install")
+endif (FINK_ASSUME_YES)
+
 if (HAVE_FINK)
   add_custom_target (fink_packages
     COMMAND ${HAVE_FINK} selfupdate
     COMMAND ${HAVE_FINK} index
     COMMAND ${HAVE_FINK} scanpackages
-#    COMMAND ${HAVE_FINK} install atlas
-    COMMAND ${HAVE_FINK} install bison
-    COMMAMD ${HAVE_FINK} install doxygen
-    COMMAND ${HAVE_FINK} install flex
-    COMMAND ${HAVE_FINK} install fftw3
-    COMMAND ${HAVE_FINK} install fftw3-shlibs
-    COMMAND ${HAVE_FINK} install gfortran-shlibs
-    COMMAND ${HAVE_FINK} install gsl
-    COMMAND ${HAVE_FINK} install gsl-shlibs
-    COMMAND ${HAVE_FINK} install numpy-py26
-    COMMAND ${HAVE_FINK} install qt4-mac
-    COMMAND ${HAVE_FINK} install sip-py26
-    COMMAND ${HAVE_FINK} install swig
-    COMMAND ${HAVE_FINK} install pyqt4-py26
-    COMMAND ${HAVE_FINK} install wget
+#    COMMAND ${FINK_COMMAND} atlas
+    COMMAND ${FINK_COMMAND} bison
+    COMMAMD ${FINK_COMMAND} doxygen
+    COMMAND ${FINK_COMMAND} flex
+    COMMAND ${FINK_COMMAND} fftw3
+    COMMAND ${FINK_COMMAND} fftw3-shlibs
+    COMMAND ${FINK_COMMAND} gfortran-shlibs
+    COMMAND ${FINK_COMMAND} gsl
+    COMMAND ${FINK_COMMAND} gsl-shlibs
+    COMMAND ${FINK_COMMAND} numpy-py26
+    COMMAND ${FINK_COMMAND} qt4-mac
+    COMMAND ${FINK_COMMAND} sip-py26
+    COMMAND ${FINK_COMMAND} swig
+    COMMAND ${FINK_COMMAND} pyqt4-py26
+    COMMAND ${FINK_COMMAND} wget
     COMMENT "[Fink] Installing system packages ..."
     WORKING_DIRCTORY ${FINK_SOURCE_DIR}
     )
