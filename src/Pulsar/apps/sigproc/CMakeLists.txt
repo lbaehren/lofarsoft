@@ -156,6 +156,7 @@ if (UNIX)
      SUFFIX .a
      COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -Ddarwin"
      LINK_FLAGS "-static"
+     CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
      )
  else (APPLE)
    set_target_properties (sigproc
@@ -163,6 +164,7 @@ if (UNIX)
      SUFFIX .a
      COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -Dlinux"
      LINK_FLAGS "-static"
+     CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
      )
  endif (APPLE)
 endif (UNIX)
@@ -296,11 +298,15 @@ if (UNIX)
   set_target_properties (${src}
     PROPERTIES
     COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -Ddarwin"
+    CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
+    CMAKE_SHARED_LINKER_FLAGS ""
   )
  else (APPLE)
   set_target_properties (${src}
     PROPERTIES
     COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64  -Dlinux"
+    CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
+    CMAKE_SHARED_LINKER_FLAGS ""
   )
  endif (APPLE)
 endif (UNIX)
@@ -313,6 +319,8 @@ foreach (src ${sigproc_fc_binaries})
     PROPERTIES
     LINKER_LANGUAGE Fortran
     COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+    CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
+    CMAKE_SHARED_LINKER_FLAGS ""
   )
   target_link_libraries (${src} sigproc sigproc_fort ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${libm} ${PGPLOT_CPGPLOT_LIBRARY})
 endforeach (src)

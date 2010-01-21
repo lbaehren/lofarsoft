@@ -1,6 +1,6 @@
 ## ==============================================================================
 ##
-##  Project settings
+##  SIGPROC/fortran Project settings
 ##
 ## ==============================================================================
 
@@ -74,9 +74,9 @@ zapit.f
 
 add_library (sigproc_fort STATIC ${fort_sigproc_sources})
 
-#add_executable (sigproc_seek
-#  seek.f
-#  )
+add_executable (sigproc_seek
+  seek.f
+  )
 
 add_executable (best
   best.f
@@ -103,7 +103,7 @@ add_executable (quickplot
   )
 
 set (sigproc_fc_binaries
-   best step postproc grey mask quickplot
+   sigproc_seek best step postproc grey mask quickplot
 )
 
 # sigproc_seek
@@ -114,7 +114,8 @@ if (UNIX)
      PROPERTIES
      SUFFIX .a
      COMPILE_FLAGS "-ffixed-line-length-none -fbackslash"
-     LINK_FLAGS ""
+     LINK_FLAGS "-static"
+     CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
      )
 ## else (APPLE)
 ##   set_target_properties (sigproc_fort
@@ -139,6 +140,9 @@ foreach (src ${sigproc_fc_binaries})
 #    CMAKE_Fortran_LINK_EXECUTABLE g77
     COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
     LINK_FLAGS ""
+    LINKER_LANGUAGE Fortran
+    CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
+    CMAKE_SHARED_LINKER_FLAGS ""
   )
   target_link_libraries (${src} sigproc sigproc_fort ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${libm})
 endforeach (src)
