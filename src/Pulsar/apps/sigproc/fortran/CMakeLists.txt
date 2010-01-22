@@ -102,8 +102,12 @@ add_executable (quickplot
   quickplot.f
   )
 
-set (sigproc_fc_binaries
-   sigproc_seek best step postproc grey mask quickplot
+set (sigproc_fc1_binaries
+   best step postproc grey mask quickplot
+)
+
+set (sigproc_fc2_binaries
+   sigproc_seek
 )
 
 # sigproc_seek
@@ -113,7 +117,7 @@ if (UNIX)
    set_target_properties (sigproc_fort
      PROPERTIES
      SUFFIX .a
-     COMPILE_FLAGS "-ffixed-line-length-none -fbackslash"
+     COMPILE_FLAGS "-ffixed-line-length-none -fbackslash -fno-common"
      LINK_FLAGS "-static"
      CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
      )
@@ -133,19 +137,36 @@ endif (UNIX)
 ##  LINK_FLAGS "-fno-second-underscore"
 ##  )
 
-foreach (src ${sigproc_fc_binaries})
+foreach (src ${sigproc_fc1_binaries})
   set_target_properties (${src}
     PROPERTIES
 #    CMAKE_Fortran_COMPILE_OBJECT g77
 #    CMAKE_Fortran_LINK_EXECUTABLE g77
-    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fno-common"
+    LINK_FLAGS ""
+    LINKER_LANGUAGE Fortran
+    CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
+    CMAKE_SHARED_LINKER_FLAGS ""
+  )
+#  target_link_libraries (${src} sigproc_fort sigproc ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${libm})
+  target_link_libraries (${src} sigproc_fort ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${PGPLOT_LIBRARIES} ${libm})
+endforeach (src)
+
+foreach (src ${sigproc_fc2_binaries})
+  set_target_properties (${src}
+    PROPERTIES
+#    CMAKE_Fortran_COMPILE_OBJECT g77
+#    CMAKE_Fortran_LINK_EXECUTABLE g77
+    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fno-common"
     LINK_FLAGS ""
     LINKER_LANGUAGE Fortran
     CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
     CMAKE_SHARED_LINKER_FLAGS ""
   )
   target_link_libraries (${src} sigproc_fort sigproc ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${libm})
+#  target_link_libraries (${src} sigproc_fort ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${PGPLOT_LIBRARIES} ${libm})
 endforeach (src)
+
 
 #set (CMAKE_Fortran_COMPILE_OBJECT g77)
 #set (CMAKE_Fortran_LINK_EXECUTABLE g77)
@@ -164,7 +185,7 @@ install (
   )
   
   install (
-  TARGETS ${sigproc_fc_binaries} 
+  TARGETS ${sigproc_fc1_binaries} ${sigproc_fc2_binaries} 
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
