@@ -18,7 +18,6 @@ chan_freqs.c
 close_log.c  
 decimate_data.c
 decimate_header.c
-dedisperse_data.c
 dedisperse_header.c
 deg2dms.c
 dmdelay.c
@@ -108,13 +107,14 @@ head_parse.c
 mkheaderlex.c
 wapp2fb.c 
 alfa_position.c 
+dedisperse_data.c
 )
 
 set (sigproc_binaries
     filterbank fake bandpass reader decimate
     sigproc_fold polyco2period sigproc_profile flux splice barycentre
     depolyco sigproc_downsample splitter snrdm blanker 
-    header 
+    header flatten dedisperse clip sigproc_tree extract
 ) 
 
 set (sigproc_fc_binaries
@@ -202,9 +202,9 @@ add_executable (filterbank
   filterbank.c head_parse.c wapp2fb.c
   )
 
-#add_executable (extract
-#  extract.c
-#  )
+add_executable (extract
+  extract.c
+  )
 
 add_executable (fake
   fake.c
@@ -226,9 +226,9 @@ add_executable (decimate
   decimate.c
   )
 
-#add_executable (dedisperse
-#  dedisperse.c
-#  )
+add_executable (dedisperse
+  dedisperse.c
+  )
 
 add_executable (sigproc_fold
   fold.c
@@ -258,13 +258,13 @@ add_executable (depolyco
   depolyco.c
   )
 
-#add_executable (flatten
-#  flatten.c
-#  )
+add_executable (flatten
+  flatten.c
+  )
 
-#add_executable (clip
-#  clip.c
-#  )
+add_executable (clip
+  clip.c
+  )
 
 add_executable (sigproc_downsample
   downsample.c
@@ -282,9 +282,9 @@ add_executable (blanker
   blanker.c
   )
 
-#add_executable (sigproc_tree
-#  tree.c
-#  )
+add_executable (sigproc_tree
+  tree.c
+  )
 
 add_executable (pgplotter
   pgplotter.c
