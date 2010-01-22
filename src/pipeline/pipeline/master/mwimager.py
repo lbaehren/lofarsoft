@@ -1,7 +1,7 @@
 from __future__ import with_statement
-import sys, os, tempfile, glob, shutil, errno
-from subprocess import check_call, CalledProcessError
+import sys, os, tempfile, glob, shutil, errno, subprocess, itertools
 from contextlib import closing
+from pipeline.support.clusterdesc import ClusterDesc
 
 # Cusine core
 from cuisine.parset import Parset
@@ -65,85 +65,130 @@ class mwimager(LOFARrecipe):
             dest="combinevds_exec",
             help="combinevds executable"
         )
+        self.optionparser.add_option(
+            '--max-bands-per-node',
+            dest="max_bands_per_node",
+            help="Maximum number of subbands to farm out to a given cluster node",
+            default="8"
+        )
 
     def go(self):
         self.logger.info("Starting MWImager run")
         super(mwimager, self).go()
 
-        self.logger.info("Calling vdsmaker")
-        inputs = LOFARinput(self.inputs)
-        inputs['directory'] = self.config.get('layout', 'vds_directory')
-        inputs['gvds'] = self.inputs['gvds']
-        inputs['args'] = self.inputs['args']
-        inputs['makevds'] = self.inputs['makevds_exec']
-        inputs['combinevds'] = self.inputs['combinevds_exec']
-        outputs = LOFARoutput()
-        if self.cook_recipe('vdsmaker', inputs, outputs):
-            self.logger.warn("vdsmaker reports failure")
-            return 1
-
-        self.outputs["data"] = []
-
-        # Patch GVDS filename into parset
-        self.logger.debug("Setting up MWImager configuration")
-        temp_parset_filename = utilities.patch_parset(
-            self.inputs['parset'],
-            {'dataset': os.path.join(
-                self.config.get('layout', 'vds_directory'), self.inputs['gvds']
-                )
-            },
-            self.config.get('layout', 'parset_directory')
+        clusterdesc = ClusterDesc(
+            self.config.get('cluster', 'clusterdesc')
         )
 
-        # Initscript for basic LOFAR utilities
-        env = utilities.read_initscript(self.inputs['initscript'])
-        # Also add the path for cimager.sh
-        env['PATH'] = "%s:%s" % (self.inputs['askapsoft_path'], env['PATH'])
-        
-        # For the overall MWimgager log
-        log_location = "%s/%s" % (
-            self.config.get('layout', 'log_directory'),
-            self.inputs['log']
-        )
-        self.logger.debug("Logging to %s" % (log_location))
-        # Individual subband logs go in a temporary directory
-        # to be sorted out later.
-        log_root = os.path.join(tempfile.mkdtemp(), self.inputs['log'])
-        self.logger.debug("Logs dumped with root %s" % (log_root))
+        # Given a limited number of processes per node, the first task is to
+        # partition up the data for processing.
+        self.logger.debug('Listing data on nodes')
+        data = {}
+        for node in clusterdesc.get('ComputeNodes'):
+            self.logger.debug("Node: %s" % (node))
+            try:
+                exec_string = ["ssh", node, "--", "find",
+                    os.path.join(
+                        self.inputs['working_directory'],
+                        self.inputs['job_name']
+                        ),
+                    "-maxdepth 1",
+                    "-print0"
+                    ]
+                my_process = subprocess.Popen(exec_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                sout, serr = my_process.communicate()
+                data[node] = sout.split('\x00')
+            except:
+                pass
+            data[node] = utilities.group_iterable(
+                [element for element in data[node] if element in self.inputs['args']],
+                int(self.inputs['max_bands_per_node'])
+            )
 
-        mwimager_cmd = [
-            self.inputs['executable'],
-            temp_parset_filename,
-            self.config.get('cluster', 'clusterdesc'),
-            os.path.join(
-                self.inputs['working_directory'],
-                self.inputs['job_name']
-            ),
-            log_root
-        ]
-        if self.inputs['casa'] is True or self.inputs['casa'] == "True":
-            mwimager_cmd.insert(1, '-casa')
-        try:
-            self.logger.info("Running MWImager")
-            self.logger.debug("Executing: %s" % " ".join(mwimager_cmd))
-            if not self.inputs['dry_run']:
-                with utilities.log_time(self.logger):
-                    with closing(open(log_location, 'w')) as log:
-                        result = check_call(
-                            mwimager_cmd,
-                            env=env,
-                            stdout=log,
-                            stderr=log,
-                            close_fds=True
-                            )
-            else:
-                self.logger.info("Dry run: execution skipped")
-                result = 0
-        except CalledProcessError:
-            self.logger.exception("Call to mwimager failed")
-            result = 1
-        finally:
-            os.unlink(temp_parset_filename)
+        # Now produce an iterator which steps through the various chunks of
+        # data to image, and image each chunk
+        data_iterator = utilities.izip_longest(*list(data.values()))
+        for data_chunk in data_iterator:
+            self.logger.info("Starting new imager pass")
+            to_process = []
+            for node_data in data_chunk:
+                if node_data: to_process.extend(node_data)
+            self.logger.debug("Processing: " +str(to_process))
+
+            self.logger.info("Calling vdsmaker")
+            inputs = LOFARinput(self.inputs)
+            inputs['directory'] = self.config.get('layout', 'vds_directory')
+            inputs['gvds'] = self.inputs['gvds']
+            inputs['args'] = to_process
+            inputs['makevds'] = self.inputs['makevds_exec']
+            inputs['combinevds'] = self.inputs['combinevds_exec']
+            outputs = LOFARoutput()
+            if self.cook_recipe('vdsmaker', inputs, outputs):
+                self.logger.warn("vdsmaker reports failure")
+                return 1
+
+            self.outputs["data"] = []
+
+            # Patch GVDS filename into parset
+            self.logger.debug("Setting up MWImager configuration")
+            temp_parset_filename = utilities.patch_parset(
+                self.inputs['parset'],
+                {'dataset': os.path.join(
+                    self.config.get('layout', 'vds_directory'), self.inputs['gvds']
+                    )
+                },
+                self.config.get('layout', 'parset_directory')
+            )
+
+            # Initscript for basic LOFAR utilities
+            env = utilities.read_initscript(self.inputs['initscript'])
+            # Also add the path for cimager.sh
+            env['PATH'] = "%s:%s" % (self.inputs['askapsoft_path'], env['PATH'])
+
+            # For the overall MWimgager log
+            log_location = "%s/%s" % (
+                self.config.get('layout', 'log_directory'),
+                self.inputs['log']
+            )
+            self.logger.debug("Logging to %s" % (log_location))
+            # Individual subband logs go in a temporary directory
+            # to be sorted out later.
+            log_root = os.path.join(tempfile.mkdtemp(), self.inputs['log'])
+            self.logger.debug("Logs dumped with root %s" % (log_root))
+
+            mwimager_cmd = [
+                self.inputs['executable'],
+                temp_parset_filename,
+                self.config.get('cluster', 'clusterdesc'),
+                os.path.join(
+                    self.inputs['working_directory'],
+                    self.inputs['job_name']
+                ),
+                log_root
+            ]
+            if self.inputs['casa'] is True or self.inputs['casa'] == "True":
+                mwimager_cmd.insert(1, '-casa')
+            try:
+                self.logger.info("Running MWImager")
+                self.logger.debug("Executing: %s" % " ".join(mwimager_cmd))
+                if not self.inputs['dry_run']:
+                    with utilities.log_time(self.logger):
+                        with closing(open(log_location, 'w')) as log:
+                            result = subprocess.check_call(
+                                mwimager_cmd,
+                                env=env,
+                                stdout=log,
+                                stderr=log,
+                                close_fds=True
+                                )
+                else:
+                    self.logger.info("Dry run: execution skipped")
+                    result = 0
+            except subprocess.CalledProcessError:
+                self.logger.exception("Call to mwimager failed")
+                result = 1
+            finally:
+                os.unlink(temp_parset_filename)
 
         # Now parse the log files to:
         # 1: find the name of the images that have been written
