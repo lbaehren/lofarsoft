@@ -129,7 +129,7 @@ class vdsmaker(LOFARrecipe):
                     count = 0
                     for x in xrange(0, os.sysconf('SC_OPEN_MAX')):
                         try:
-                            self.logger.debug("open file %d: %s" (x, str(os.fstat(0))))
+                            self.logger.debug("open file %d: %s" (x, str(os.fstat(x))))
                             count += 1
                         except:
                             pass
