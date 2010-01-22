@@ -109,7 +109,7 @@ add_custom_target (clean-build
   COMMAND rm -rf cmake_install.cmake
   COMMAND rm -rf CMakeCache.txt
   COMMAND rm -rf CMakeFiles
-  COMMAND rm -rf casacore cfitsio cr
+  COMMAND rm -rf cfitsio cr
   COMMAND rm -rf dal
   COMMAND rm -rf numeric num_util
   COMMAND rm -rf startools
@@ -169,7 +169,6 @@ endif (svn_executable)
 
 set (packages_external
   blas
-  casacore
   cfitsio
   num_util
   pyrap
@@ -249,19 +248,6 @@ else (wget_executable)
     message (STATUS "WARNING: Unable to retrieve sample datasets - missing wget and curl!")
   endif (curl_executable)
 endif (wget_executable)
-
-##____________________________________________________________________
-## Update version of casacore
-
-if (svn_executable AND tar_executable)
-  add_custom_target (casacore-update
-    COMMAND rm -rf casacore
-    COMMAND ${svn_executable} co http://casacore.googlecode.com/svn/trunk casacore
-    COMMAND ${tar_executable} -cvzf ${LUS_SOURCE_DIR}/external/casacore/casacore.tgz casacore
-    COMMAND rm -rf casacore
-    WORKING_DIRECTORY ${USG_BUILD}
-  )
-endif (svn_executable AND tar_executable)
 
 ## ==============================================================================
 ##

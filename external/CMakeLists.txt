@@ -2,6 +2,7 @@
 add_subdirectory (bison)
 add_subdirectory (blitz)
 add_subdirectory (boost)
+add_subdirectory (casacore)
 add_subdirectory (flex)
 add_subdirectory (fftw3)
 add_subdirectory (hdf5)
