@@ -23,13 +23,13 @@
 # - Check for the presence of QT
 #
 # The following variables are set when QT is found:
-#  HAVE_QT           = Set to true, if all components of QT have been found.
-#  QT_INCLUDES       = Include path for the header files of QT
-#  HAVE_QT4_QWIDGET  = Include path to the QWidget header file
-#  QT_LIBRARIES      = Link these to use QT
-#  QT4_LIBARY_QTCORE = Path to the QtCore library
-#  QT4_LIBARY_QTGUI  = Path to the QtGui library
-#  QT_LFLAGS         = Linker flags (optional)
+#  HAVE_QT            = Set to true, if all components of QT have been found.
+#  QT_INCLUDES        = Include path for the header files of QT
+#  HAVE_QT4_QWIDGET   = Include path to the QWidget header file
+#  QT_LIBRARIES       = Link these to use QT
+#  QT4_LIBRARY_QTCORE = Path to the QtCore library
+#  QT4_LIBRARY_QTGUI  = Path to the QtGui library
+#  QT_LFLAGS          = Linker flags (optional)
 
 ## -----------------------------------------------------------------------------
 ## Search locations
@@ -57,33 +57,33 @@ endif (HAVE_QT4_QWIDGET)
 
 ## QtCore
 
-find_library (QT4_LIBARY_QTCORE QtCore
+find_library (QT4_LIBRARY_QTCORE QtCore
   PATHS ${lib_locations}
   PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
   )
-if (QT4_LIBARY_QTCORE)
-  list (APPEND QT4_LIBRARIES ${QT4_LIBARY_QTCORE})
-endif (QT4_LIBARY_QTCORE)
+if (QT4_LIBRARY_QTCORE)
+  list (APPEND QT4_LIBRARIES ${QT4_LIBRARY_QTCORE})
+endif (QT4_LIBRARY_QTCORE)
 
 ## QtGui
 
-find_library (QT4_LIBARY_QTGUI QtGui
+find_library (QT4_LIBRARY_QTGUI QtGui
   PATHS ${lib_locations}
   PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
   )
-if (QT4_LIBARY_QTGUI)
-  list (APPEND QT4_LIBRARIES ${QT4_LIBARY_QTGUI})
-endif (QT4_LIBARY_QTGUI)
+if (QT4_LIBRARY_QTGUI)
+  list (APPEND QT4_LIBRARIES ${QT4_LIBRARY_QTGUI})
+endif (QT4_LIBRARY_QTGUI)
 
 ## QtDesigner
 
-find_library (QT4_LIBARY_QTDESIGNER QtDesigner
+find_library (QT4_LIBRARY_QTDESIGNER QtDesigner
   PATHS ${lib_locations}
   PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
   )
-if (QT4_LIBARY_QTDESIGNER)
-  list (APPEND QT4_LIBRARIES ${QT4_LIBARY_QTDESIGNER})
-endif (QT4_LIBARY_QTDESIGNER)
+if (QT4_LIBRARY_QTDESIGNER)
+  list (APPEND QT4_LIBRARIES ${QT4_LIBRARY_QTDESIGNER})
+endif (QT4_LIBRARY_QTDESIGNER)
 
 ## Adjust the ordering for the statement passed to the linker
 
@@ -127,6 +127,6 @@ mark_as_advanced (
   QT_INCLUDES
   QT_LIBRARIES
   HAVE_QT4_QWIDGET
-  QT4_LIBARY_QTCORE
-  QT4_LIBARY_QTGUI
+  QT4_LIBRARY_QTCORE
+  QT4_LIBRARY_QTGUI
   )
