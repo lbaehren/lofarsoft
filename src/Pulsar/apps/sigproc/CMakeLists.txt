@@ -3,7 +3,7 @@
 
 ## libsigproc
 
-include_directories (${CMAKE_INSTALL_PREFIX}/include)
+include_directories (${CMAKE_INSTALL_PREFIX}/include ${PULSAR_BINARY_DIR}/apps/sigproc)
 
 set (sigproc_sources add_channels.c
 add_samples.c
@@ -91,7 +91,7 @@ wappcorrect.c
 wapp_prof.c
 write_profiles.c  
 write_epn.c
-y.tab.c
+${PULSAR_BINARY_DIR}/apps/sigproc/y.tab.c
 readtim.c
 chkio.c   
 ioinf.c 
@@ -120,9 +120,6 @@ set (sigproc_binaries
 set (sigproc_fc_binaries
    pgplotter
 )
-
-# these don't build with cmake, (probably X11 issues):
-# header dedisperse flatten clip sigproc_tree extract
 
 set (sigproc_scripts
   sigproc_quicklook
@@ -420,6 +417,15 @@ add_custom_target (makedummy
   WORKING_DIRECTORY ${PULSAR_SOURCE_DIR}/apps/sigproc
   COMMENT "Creating script ${CMAKE_INSTALL_PREFIX}/bin/makedummy"
  )
+
+find_package(BISON)
+
+if (EXISTS "${PULSAR_BINARY_DIR}/apps/sigproc/y.tab.c")
+  message (STATUS "[PULSAR] Yacc results file ${PULSAR_BINARY_DIR}/apps/sigproc/y.tab.c exists!")
+else (EXISTS "${PULSAR_BINARY_DIR}/apps/sigproc/y.tab.c")
+  message (STATUS "[PULSAR] Creating yacc results ${PULSAR_BINARY_DIR}/apps/sigproc/y.tab.c")
+  EXECUTE_PROCESS( COMMAND ${BISON_EXECUTABLE} -vdt -o ${PULSAR_BINARY_DIR}/apps/sigproc/y.tab.c ${PULSAR_SOURCE_DIR}/apps/sigproc/mkheader.y)
+endif (EXISTS "${PULSAR_BINARY_DIR}/apps/sigproc/y.tab.c")
 
 
 ## ==============================================================================
