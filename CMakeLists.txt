@@ -307,7 +307,6 @@ if (CR_WITH_GUI)
 endif (CR_WITH_GUI)
 
 if (CR_WITH_STARTOOLS)
-  add_dependencies (startools root)
   add_dependencies (cr startools)
 endif (CR_WITH_STARTOOLS)
 
