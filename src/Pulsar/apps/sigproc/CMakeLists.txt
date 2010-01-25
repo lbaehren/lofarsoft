@@ -179,6 +179,7 @@ add_dependencies (sigproc
   makedmlist
   monitor
   makedummy
+  sigproc_helpdocs
   )
 
 ##__________________________________________________________
@@ -331,10 +332,11 @@ ENDIF(NOT CMAKE_Fortran_LINK_EXECUTABLE)
 
 
 add_custom_target (sigproc_quicklook
-  COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/bin/sigproc_quicklook
+  COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/bin/sigproc_quicklook ${PULSAR_BINARY_DIR}/apps/sigproc/scripts/sigproc_quicklook
   COMMAND echo "\\#!"`which csh` | sed 's/ //g' >  ${CMAKE_INSTALL_PREFIX}/bin/sigproc_quicklook
   COMMAND cat quicklook.csh >>  ${CMAKE_INSTALL_PREFIX}/bin/sigproc_quicklook
   COMMAND chmod +x ${CMAKE_INSTALL_PREFIX}/bin/sigproc_quicklook
+  COMMAND cp  ${CMAKE_INSTALL_PREFIX}/bin/sigproc_quicklook ${PULSAR_BINARY_DIR}/apps/sigproc/scripts/sigproc_quicklook
   WORKING_DIRECTORY ${PULSAR_SOURCE_DIR}/apps/sigproc
   COMMENT "Creating script ${CMAKE_INSTALL_PREFIX}/bin/sigproc_quicklook"
  )
@@ -381,10 +383,11 @@ add_custom_target (accn
  )
 
 add_custom_target (polyco
-  COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/bin/polyco
+  COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/bin/polyco ${PULSAR_BINARY_DIR}/apps/sigproc/scripts/polyco
   COMMAND echo "\\#!"`which tclsh` | sed 's/ //g' >  ${CMAKE_INSTALL_PREFIX}/bin/polyco
   COMMAND cat polyco.tcl >>  ${CMAKE_INSTALL_PREFIX}/bin/polyco
   COMMAND chmod +x ${CMAKE_INSTALL_PREFIX}/bin/polyco
+  COMMAND cp ${CMAKE_INSTALL_PREFIX}/bin/polyco ${PULSAR_BINARY_DIR}/apps/sigproc/scripts/polyco
   WORKING_DIRECTORY ${PULSAR_SOURCE_DIR}/apps/sigproc
   COMMENT "Creating script ${CMAKE_INSTALL_PREFIX}/bin/polyco"
  )
@@ -416,6 +419,33 @@ add_custom_target (makedummy
   COMMAND chmod +x ${CMAKE_INSTALL_PREFIX}/bin/makedummy
   WORKING_DIRECTORY ${PULSAR_SOURCE_DIR}/apps/sigproc
   COMMENT "Creating script ${CMAKE_INSTALL_PREFIX}/bin/makedummy"
+ )
+ 
+find_package(LATEX)
+
+add_custom_target (sigproc_helpdocs
+  COMMAND cp ${PULSAR_SOURCE_DIR}/apps/sigproc/help.csh ${PULSAR_BINARY_DIR}/apps/sigproc/help.csh
+  COMMAND ./help.csh filterbank
+  COMMAND ./help.csh fake
+  COMMAND ./help.csh header
+  COMMAND ./help.csh bandpass
+  COMMAND ./help.csh reader
+  COMMAND ./help.csh decimate
+  COMMAND ./help.csh splice
+  COMMAND ./help.csh dedisperse
+  COMMAND ./help.csh sigproc_fold
+  COMMAND ./help.csh sigproc_profile
+  COMMAND ./help.csh flux
+  COMMAND ./help.csh scripts/polyco
+  COMMAND ./help.csh barycentre
+  COMMAND ./help.csh scripts/sigproc_quicklook
+  COMMAND cp ${PULSAR_SOURCE_DIR}/apps/sigproc/sigproc.tex ${PULSAR_BINARY_DIR}/apps/sigproc/sigproc.tex
+  COMMAND cp ${PULSAR_SOURCE_DIR}/apps/sigproc/version.history ${PULSAR_BINARY_DIR}/apps/sigproc/version.history
+#  COMMAND ${LATEX_COMPILER} sigproc
+  COMMAND ${PDFLATEX_COMPILER} sigproc
+  COMMAND cp sigproc.pdf ${CMAKE_INSTALL_PREFIX}/doc/
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/sigproc
+  COMMENT "Creating help files for sigproc, including ${CMAKE_INSTALL_PREFIX}/doc/sigproc.pdf"
  )
 
 find_package(BISON)
