@@ -49,53 +49,19 @@ find_path (HAVE_CLAPACK_H clapack.h
 
 set (LAPACK_LIBRARIES "")
 
-## Find liblapack
-
-find_library (LAPACK_LAPACK_LIBRARY lapack
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES lapack
-  )
-
-if (LAPACK_LAPACK_LIBRARY)
-  list (APPEND LAPACK_LIBRARIES ${LAPACK_LAPACK_LIBRARY})
-endif (LAPACK_LAPACK_LIBRARY)
-
-## Find libcblas
-
-find_library (LAPACK_CBLAS_LIBRARY cblas
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES lapack
-  )
-
-if (LAPACK_CBLAS_LIBRARY)
-  list (APPEND LAPACK_LIBRARIES ${LAPACK_CBLAS_LIBRARY})
-endif (LAPACK_CBLAS_LIBRARY)
-
-## Find libblas
-
-find_library (LAPACK_BLAS_LIBRARY blas
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES lapack
-  )
-
-if (LAPACK_BLAS_LIBRARY)
-  list (APPEND LAPACK_LIBRARIES ${LAPACK_BLAS_LIBRARY})
-endif (LAPACK_BLAS_LIBRARY)
-
-## Find libatlas
-
-find_library (LAPACK_ATLAS_LIBRARY atlas
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES lapack
-  )
-
-if (LAPACK_ATLAS_LIBRARY)
-  list (APPEND LAPACK_LIBRARIES ${LAPACK_ATLAS_LIBRARY})
-endif (LAPACK_ATLAS_LIBRARY)
+foreach (LAPACK_LIBRARY lapack cblas blas atlas)
+  ##
+  string(TOUPPER ${LAPACK_LIBRARY} LAPACK_TMP)
+  ## search for the library
+  find_library (LAPACK_${LAPACK_TMP}_LIBRARY ${LAPACK_LIBRARY}
+    PATHS ${lib_locations}
+    PATH_SUFFIXES lapack
+    )
+  ## add library to the list of LAPACK libraries
+  if (LAPACK_${LAPACK_TMP}_LIBRARY)
+    list (APPEND LAPACK_LIBRARIES ${LAPACK_${LAPACK_TMP}_LIBRARY})
+  endif (LAPACK_${LAPACK_TMP}_LIBRARY)
+endforeach (LAPACK_LIBRARY)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
