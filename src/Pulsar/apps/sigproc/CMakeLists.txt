@@ -453,20 +453,20 @@ add_custom_target (sigproc_helpdocs
 #  makedummy
 #  )
   COMMAND cp ${PULSAR_SOURCE_DIR}/apps/sigproc/help.csh ${PULSAR_BINARY_DIR}/apps/sigproc/help.csh
-  COMMAND ./help.csh filterbank
-  COMMAND ./help.csh fake
-  COMMAND ./help.csh header
-  COMMAND ./help.csh bandpass
-  COMMAND ./help.csh reader
-  COMMAND ./help.csh decimate
-  COMMAND ./help.csh splice
-  COMMAND ./help.csh dedisperse
-  COMMAND ./help.csh sigproc_fold
-  COMMAND ./help.csh sigproc_profile
-  COMMAND ./help.csh flux
-  COMMAND ./help.csh scripts/polyco
-  COMMAND ./help.csh barycentre
-  COMMAND ./help.csh scripts/sigproc_quicklook
+  COMMAND ./help.csh filterbank > /dev/null
+  COMMAND ./help.csh fake > /dev/null
+  COMMAND ./help.csh header > /dev/null
+  COMMAND ./help.csh bandpass > /dev/null
+  COMMAND ./help.csh reader > /dev/null
+  COMMAND ./help.csh decimate > /dev/null
+  COMMAND ./help.csh splice > /dev/null
+  COMMAND ./help.csh dedisperse > /dev/null
+  COMMAND ./help.csh sigproc_fold > /dev/null
+  COMMAND ./help.csh sigproc_profile > /dev/null
+  COMMAND ./help.csh flux > /dev/null
+  COMMAND ./help.csh scripts/polyco > /dev/null
+  COMMAND ./help.csh barycentre > /dev/null
+  COMMAND ./help.csh scripts/sigproc_quicklook > /dev/null
   COMMAND cp ${PULSAR_SOURCE_DIR}/apps/sigproc/sigproc.tex ${PULSAR_BINARY_DIR}/apps/sigproc/sigproc.tex
   COMMAND cp ${PULSAR_SOURCE_DIR}/apps/sigproc/version.history ${PULSAR_BINARY_DIR}/apps/sigproc/version.history
 #  COMMAND ${LATEX_COMPILER} sigproc
