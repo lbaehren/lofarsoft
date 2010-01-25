@@ -104,7 +104,7 @@ open_files.c
 write_pulses.c
 thresh_1d.c
 head_parse.c 
-mkheaderlex.c
+${PULSAR_BINARY_DIR}/apps/sigproc/mkheaderlex.c
 wapp2fb.c 
 alfa_position.c 
 dedisperse_data.c
@@ -426,6 +426,15 @@ else (EXISTS "${PULSAR_BINARY_DIR}/apps/sigproc/y.tab.c")
   message (STATUS "[PULSAR] Creating yacc results ${PULSAR_BINARY_DIR}/apps/sigproc/y.tab.c")
   EXECUTE_PROCESS( COMMAND ${BISON_EXECUTABLE} -vdt -o ${PULSAR_BINARY_DIR}/apps/sigproc/y.tab.c ${PULSAR_SOURCE_DIR}/apps/sigproc/mkheader.y)
 endif (EXISTS "${PULSAR_BINARY_DIR}/apps/sigproc/y.tab.c")
+
+find_package(FLEX)
+
+if (EXISTS "${PULSAR_BINARY_DIR}/apps/sigproc/mkheaderlex.c")
+  message (STATUS "[PULSAR] Yacc results file ${PULSAR_BINARY_DIR}/apps/sigproc/mkheaderlex.c exists!")
+else (EXISTS "${PULSAR_BINARY_DIR}/apps/sigproc/mkheaderlex.c")
+  message (STATUS "[PULSAR] Creating lex results ${PULSAR_BINARY_DIR}/apps/sigproc/mkheaderlex.c")
+  EXECUTE_PROCESS( COMMAND ${FLEX_EXECUTABLE} -o ${PULSAR_BINARY_DIR}/apps/sigproc/mkheaderlex.c ${PULSAR_SOURCE_DIR}/apps/sigproc/mkheader.l)
+endif (EXISTS "${PULSAR_BINARY_DIR}/apps/sigproc/mkheaderlex.c")
 
 
 ## ==============================================================================
