@@ -179,7 +179,6 @@ add_dependencies (sigproc
   makedmlist
   monitor
   makedummy
-  sigproc_helpdocs
   )
 
 ##__________________________________________________________
@@ -330,6 +329,13 @@ IF(NOT CMAKE_Fortran_LINK_EXECUTABLE)
     "<CMAKE_Fortran_COMPILER> <CMAKE_Fortran_LINK_FLAGS> <LINK_FLAGS> <FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>")
 ENDIF(NOT CMAKE_Fortran_LINK_EXECUTABLE)
 
+if (IS_DIRECTORY "${PULSAR_BINARY_DIR}/apps/sigproc/scripts")
+  message (STATUS "[PULSAR] Sigproc scripts location ${PULSAR_BINARY_DIR}/apps/sigproc/scripts exists!")
+else (IS_DIRECTORY "${PULSAR_BINARY_DIR}/apps/sigproc/scripts")
+  message (STATUS "[PULSAR] Sigproc scripts location ${PULSAR_BINARY_DIR}/apps/sigproc/scripts does not exist!")
+  message (STATUS "[PULSAR] Creating Sigproc scripts location ${PULSAR_BINARY_DIR}/apps/sigproc/scripts")
+  EXECUTE_PROCESS( COMMAND mkdir -p ${PULSAR_BINARY_DIR}/apps/sigproc/scripts)
+endif (IS_DIRECTORY "${PULSAR_BINARY_DIR}/apps/sigproc/scripts")
 
 add_custom_target (sigproc_quicklook
   COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/bin/sigproc_quicklook ${PULSAR_BINARY_DIR}/apps/sigproc/scripts/sigproc_quicklook
@@ -424,6 +430,28 @@ add_custom_target (makedummy
 find_package(LATEX)
 
 add_custom_target (sigproc_helpdocs
+#  ADD_DEPENDENCIES ( sigproc_helpdocs
+#  sigproc
+#  filterbank
+#  header
+#  bandpass
+#  reader decimate
+#  splice
+#  dedisperse
+#  sigproc_fold
+#  sigproc_profile
+#  flux
+#  barycentre
+#  sigproc_quicklook
+#  foldsignals
+#  hunt
+#  csearch
+#  accn
+#  polyco
+#  makedmlist
+#  monitor
+#  makedummy
+#  )
   COMMAND cp ${PULSAR_SOURCE_DIR}/apps/sigproc/help.csh ${PULSAR_BINARY_DIR}/apps/sigproc/help.csh
   COMMAND ./help.csh filterbank
   COMMAND ./help.csh fake
