@@ -28,6 +28,7 @@
 
 using namespace std;
 
+#undef HFPP_VERBOSE 
 #include "hftools.h"
 
 //Some definitions needed for the preprosessor programming:
@@ -40,14 +41,14 @@ using namespace std;
 // source code file (brackets are crucial)
 #undef HFPP_FILETYPE
 //-----------------------------------------------------------------------
-#define HFPP_FILETYPE() (CC)  
+#define HFPP_FILETYPE CC
 //-----------------------------------------------------------------------
 
 //$COPY_TO HFILE START --------------------------------------------------
-#include "hfppnew-undef.h"
-#define HFPP_FUNCDEF  (void)(hNegate)(1)("multiplies each element in the vector with -1")(HFPP_PAR_IS_SCALAR)(STL)(HFPP_PASS_AS_REFERENCE)
+//#define HFPP_WRAPPER_TYPES (HInteger)(HNumber)
+#define HFPP_FUNCDEF  (HFPP_VOID)(hNegate)(1)("multiplies each element in the vector with -1")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
-#include "hfppnew-generatewrappers.h"
+#include "hfppnew-generatewrappers.def"
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -62,15 +63,40 @@ using namespace std;
 template <class Iter> 
 void hNegate(const Iter data_start,const Iter data_end)
 {
-  typedef IterValueType T;
   Iter it=data_start;
-  //  T fac = -1;
+  IterValueType fac = -1;
   while (it!=data_end) {
-    *it=(*it) * -1;
+    *it=(*it) * fac;
     ++it;
   };
 }
 
+
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(hFill)(2)("Fills a vector with a constant value.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(fill_value)()("Fill value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+#include "hfppnew-generatewrappers.def"
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  \brief Fills a vector with a constant value.
+
+  \param data_start: STL Iterator pointing to the first element of an array with
+         input values.
+  \param data_end: STL Iterator pointing to the end of the input vector
+
+  \param fill_value: Value to fill vector with
+*/
+template <class Iter> 
+void hFill(const Iter data_start,const Iter data_end, const IterValueType fill_value)
+{
+  Iter it=data_start;
+  while (it!=data_end) {
+    *it=fill_value;
+    ++it;
+  };
+}
 
 
 #include <GUI/hftools.hpp>

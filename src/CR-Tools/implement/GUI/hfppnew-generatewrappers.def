@@ -1,3 +1,4 @@
+/* hfppnew-generatewrappers.def - START ..........................................*/
 //
 //GENERATING WRAPPERS
 //
@@ -5,6 +6,7 @@
 
 //First set all the values to default values, if not present
 //------------------------------------------------------------------------------
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS 0
 
 #ifndef HFPP_FUNC_BASE_CLASS_ALLOWED_TO_CHANGE
 #define HFPP_FUNC_BASE_CLASS_ALLOWED_TO_CHANGE HFPP_TRUE
@@ -36,18 +38,35 @@
 
 //Now set some definitions based on conditionals
 //------------------------------------------------------------------------------
-#if HFPP_GET_FUNC_TYPE_VALUE > 0
-#define HFPP_FUNC_TYPE_IS_TEMPLATED HFPP_GET_FUNC_TYPE_VALUE
-#define HFPP_GET_FUNC_BASETYPE BOOST_PP_SEQ_ELEM(HFPP_GET_FUNC_TYPE_VALUE,HFPP_TEMPLATE_PARAMETER_NAMES) 
+//Unless, explicitly set, yields a "return" statement if the function
+//type is not void (actually, HFPP_VOID, which is = -1)
+#if HFPP_GET_FUNC_TYPE_INPUTVALUE == HFPP_VOID	    
+#define HFPP_FUNC_TYPE_IS_TEMPLATED HFPP_FALSE
+#define HFPP_GET_FUNC_BASETYPE void	
+#define HFPP_GET_FUNC_RETURN	  
+#elif HFPP_GET_FUNC_TYPE_INPUTVALUE > 0
+#define HFPP_FUNC_TYPE_IS_TEMPLATED HFPP_GET_FUNC_TYPE_INPUTVALUE
+#define HFPP_GET_FUNC_BASETYPE BOOST_PP_SEQ_ELEM(HFPP_FUNC_TYPE_IS_TEMPLATED,HFPP_TEMPLATE_PARAMETER_NAMES) 
+#define HFPP_GET_FUNC_RETURN return	  
+#if HFPP_FUNC_TYPE_IS_TEMPLATED > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_FUNC_TYPE_IS_TEMPLATED
+#endif
 #else
 #define HFPP_FUNC_TYPE_IS_TEMPLATED HFPP_FALSE
-#define HFPP_GET_FUNC_BASETYPE HFPP_GET_FUNC_TYPE_VALUE
+#define HFPP_GET_FUNC_BASETYPE HFPP_GET_FUNC_TYPE_INPUTVALUE
+#define HFPP_GET_FUNC_RETURN return	  
 #endif
+
 
 #if HFPP_GET_FUNC_PARNUM > 0
 #if HFPP_GET_PAR_BASETYPE_VAL(0) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_0 HFPP_TRUE
 #define HFPP_GET_PAR_TEMPLATE_VALUE_0  HFPP_GET_PAR_BASETYPE_VAL(0)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_0 > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_0
+#endif
 #else
 #define HFPP_PAR_TYPE_IS_TEMPLATED_0 HFPP_FALSE
 #define HFPP_GET_PAR_TEMPLATE_VALUE_0  0
@@ -58,6 +77,10 @@
 #if HFPP_GET_PAR_BASETYPE_VAL(1) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_1 HFPP_TRUE
 #define HFPP_GET_PAR_TEMPLATE_VALUE_1  HFPP_GET_PAR_BASETYPE_VAL(1)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_1 > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_1
+#endif
 #else
 #define HFPP_PAR_TYPE_IS_TEMPLATED_1 HFPP_FALSE
 #define HFPP_GET_PAR_TEMPLATE_VALUE_1  0
@@ -68,6 +91,10 @@
 #if HFPP_GET_PAR_BASETYPE_VAL(2) > 0
 #define HFPP_PAR_TYPE_IS_TEMPLATED_2 HFPP_TRUE
 #define HFPP_GET_PAR_TEMPLATE_VALUE_2  HFPP_GET_PAR_BASETYPE_VAL(2)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_2 > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_2
+#endif
 #else
 #define HFPP_PAR_TYPE_IS_TEMPLATED_2 HFPP_FALSE
 #define HFPP_GET_PAR_TEMPLATE_VALUE_2  0
@@ -158,16 +185,7 @@
 ------ ATTENTION!!! NUMBER OF PARAMETERS TOO LONG FOR FUNCTION HFPP_GET_FUNC_NAME -------
 #endif
 
-//Unless, explicitly set, yields a "return" statement if the function type is not void 
-#ifndef HFPP_GET_FUNC_RETURN
-#if BOOST_PP_CAT(HFPP_IS_EQUAL,HFPP_GET_FUNC_TYPE) == HFPP_IS_EQUALvoid
-#define HFPP_GET_FUNC_RETURN
-#else
-#define HFPP_GET_FUNC_RETURN return 
-#endif
-#endif
-
-
+#define HFPP_FUNC_NUMBER_OF_WRAPPER_TYPES BOOST_PP_SEQ_SIZE(HFPP_WRAPPER_TYPES)
 
 #ifdef HFPP_VERBOSE
 /* hfppnew-generatewrappers.h - DEFAULT Values .................................*/
@@ -180,25 +198,75 @@
 //Define the base types of for the container classes will be made available (int, float, ...)
 //For each container class all these types will be instantiated
 /* HFPP_WRAPPER_TYPES= */ HFPP_WRAPPER_TYPES
+/* HFPP_FUNC_NUMBER_OF_WRAPPER_TYPES= */ HFPP_FUNC_NUMBER_OF_WRAPPER_TYPES
 //
 //Define the classes of wrappers that will be produced (STL, CASA, ....)
 /* HFPP_WRAPPER_CLASSES= */ HFPP_WRAPPER_CLASSES
 /* HFPP_MAKE_PYTHONWRAPPERS= */ HFPP_MAKE_PYTHONWRAPPERS
 /* HFPP_TEMPLATE_PARAMETER_NAMES= */ HFPP_TEMPLATE_PARAMETER_NAMES
-/* HFPP_GET_FUNC_RETURN = */ HFPP_GET_FUNC_RETURN 
 /* hfppnew-generatewrappers.h - Conditional Values .............................*/
+/* HFPP_GET_FUNC_RETURN = */ HFPP_GET_FUNC_RETURN 
 /* HFPP_GET_FUNC_BASETYPE= */ HFPP_GET_FUNC_BASETYPE
-//
 /* HFPP_PAR_TYPE_IS_TEMPLATED_0= */ HFPP_PAR_TYPE_IS_TEMPLATED_0
-/* HFPP_GET_PAR_BASETYPE_0= */ HFPP_GET_PAR_BASETYPE_0
+/* HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS = */ HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
 //
+#endif
+
+#ifndef HFPP_DONOT_MAKE_WRAPPERS
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
-#ifndef HFPP_DONOT_MAKE_WRAPPERS
 HFPP_MAKE_WRAPPERS
-#endif
 ////////////////////////////////////////////////////////////////////////////////
 //
-/* hfppnew-generatewrappers.h - END ............................................*/
+
+//========================================================================
+//--Undefine parameters
+//========================================================================
+#undef HFPP_VARIANT
+#undef HFPP_FUNC_BASE_CLASS_ALLOWED_TO_CHANGE
+#undef HFPP_WRAPPER_LIST
+#undef HFPP_WRAPPER_TYPES
+#undef HFPP_TEMPLATE_PARAMETER_NAMES 
+#undef HFPP_FUNC_TYPE_IS_TEMPLATED 
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_GET_FUNC_BASETYPE
+#undef HFPP_GET_FUNC_RETURN
+
+
+//--Undefine user-defined parameters from cc file
+#undef HFPP_FUNCDEF
+#undef HFPP_PARDEF_0
+#undef HFPP_PARDEF_1
+#undef HFPP_PARDEF_2
+#undef HFPP_PARDEF_3
+#undef HFPP_PARDEF_4
+#undef HFPP_PARDEF_5
+#undef HFPP_PARDEF_6
+#undef HFPP_PARDEF_7
+#undef HFPP_PARDEF_8
+#undef HFPP_PARDEF_9
+#undef HFPP_PARDEF_10
+
+#undef HFPP_PAR_TYPE_IS_TEMPLATED_0
+#undef HFPP_PAR_TYPE_IS_TEMPLATED_1
+#undef HFPP_PAR_TYPE_IS_TEMPLATED_2
+#undef HFPP_PAR_TYPE_IS_TEMPLATED_3
+#undef HFPP_PAR_TYPE_IS_TEMPLATED_4
+#undef HFPP_PAR_TYPE_IS_TEMPLATED_5
+#undef HFPP_PAR_TYPE_IS_TEMPLATED_6
+#undef HFPP_PAR_TYPE_IS_TEMPLATED_7
+#undef HFPP_PAR_TYPE_IS_TEMPLATED_8
+#undef HFPP_PAR_TYPE_IS_TEMPLATED_9
+#undef HFPP_PAR_TYPE_IS_TEMPLATED_10
+#undef HFPP_PAR_TYPE_IS_TEMPLATED_11
+#undef HFPP_PAR_TYPE_IS_TEMPLATED_12
+#undef HFPP_PAR_TYPE_IS_TEMPLATED_13
+#undef HFPP_PAR_TYPE_IS_TEMPLATED_14
+#undef HFPP_PAR_TYPE_IS_TEMPLATED_15
+
+#else
+#undef HFPP_DONOT_MAKE_WRAPPERS	
 #endif
+
+/* hfppnew-generatewrappers.def - END ............................................*/
 
