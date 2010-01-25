@@ -20,15 +20,16 @@
 
 #include <fstream>
 
-#include <Math/Hermite1D.h>
+#include "Hermite1D.h"
 
-using CR::Hermite1D;
+using std::cout;
+using std::endl;
 
 /*!
   \file tHermite1D.cc
-  
-  \ingroup CR_Math
 
+  \ingroup contrib
+  
   \brief A collection of test routines for Hermite1D
  
   \author Lars B&auml;hren
@@ -52,7 +53,7 @@ int test_Hermite1D ()
 {
   int nofFailedTests (0);
   
-  cout << "\n[testHermite1D] Testing default constructor" << endl;
+  std::cout << "\n[testHermite1D] Testing default constructor" << endl;
   try {
     Hermite1D h;
   } catch (std::string message) {
@@ -119,15 +120,15 @@ int test_order ()
 
   \return nofFailedTests -- The number of failed tests in this function
 */
-int test_eval (const int& order,
-	       const vector<double>& x) 
+int test_fx (const int& order,
+	     const std::vector<double>& x) 
 {
-  std::cout << "\n[tHermite1D::test_eval]\n" << std::endl;
+  std::cout << "\n[tHermite1D::test_fx]\n" << std::endl;
   
   int nofFailedTests (0);
-  int nelem;         // Number of elements in the input vector.
-  ofstream logfile;  // Stream for logfile taking computation output.
-  double *results;   // Array for storage of computation results
+  int nelem;              // Number of elements in the input vector.
+  std::ofstream logfile;  // Stream for logfile taking computation output.
+  double *results;        // Array for storage of computation results
   
   nelem = x.size();
   results = new double[nelem*order];
@@ -137,11 +138,11 @@ int test_eval (const int& order,
     Hermite1D h(order);
 
     for (int n=0; n<=order; n++) {
-      cout << "\tn=" << n << "\tH(0)=" << h.eval(n,0.0) << endl;
+      cout << "\tn=" << n << "\tH(0)=" << h.fx(n,0.0) << endl;
     }
   }
   
-  cout << "[2] Testing Hermite1D::eval(int,double) ..." << endl;
+  cout << "[2] Testing Hermite1D::fx(int,double) ..." << endl;
   try {
     double y;
     
@@ -149,11 +150,11 @@ int test_eval (const int& order,
       Hermite1D h(n);
       //
       cout << "\tEvaluating polynomial of order " << h.order() << " ... "
-	   << flush;
+	   << std::flush;
       //
       for (int i=0; i<nelem; i++) {
 	// compute
-        y = h.eval(n,x[i]);
+        y = h.fx(n,x[i]);
 	// collect results
 	results[n*nelem+i] = y;
       }
@@ -161,7 +162,7 @@ int test_eval (const int& order,
     }
 
     // Write the computation results to disk for later plotting
-    logfile.open ("tHermite1D.data1",ios::out);
+    logfile.open ("tHermite1D.data1",std::ios::out);
     for (int i=0; i<nelem; i++) {
       logfile << x[i];
       for (int n=0; n<order; n++) {
@@ -176,9 +177,9 @@ int test_eval (const int& order,
     nofFailedTests++;
   }
  
-  cout << "[3] Testing Hermite1D::eval(int,vector<double>) ..." << endl;
+  cout << "[3] Testing Hermite1D::fx(int,vector<double>) ..." << endl;
   try {
-    vector<double> y (x.size());
+    std::vector<double> y (x.size());
 
     cout << " -- order     = " << order    << endl;
     cout << " -- length(x) = " << x.size() << endl;
@@ -187,8 +188,9 @@ int test_eval (const int& order,
     for (int n=0; n<order; n++) {
       Hermite1D h(n);
       //
-      cout << " --> Evaluating polynomial of order " << h.order() << " ... " << flush;
-      y = h.eval(n,x);
+      cout << " --> Evaluating polynomial of order " << h.order() << " ... " 
+	   << std::flush;
+      y = h.fx(n,x);
       cout << "Done." << endl;
     }
   } catch (std::string message) {
@@ -214,7 +216,7 @@ int main (int argc, char *argv[])
   int order;
   unsigned int nx;
   unsigned int nofPoints;
-  vector<double> x;
+  std::vector<double> x;
 
   // assign variable values
   order = 10;
@@ -239,7 +241,7 @@ int main (int argc, char *argv[])
     // Test access to polynomial order
     nofFailedTests += test_order ();
     // Test evaluation of the Hermite polynomial
-    nofFailedTests += test_eval (order,x);
+    nofFailedTests += test_fx (order,x);
   }
   
   return nofFailedTests;

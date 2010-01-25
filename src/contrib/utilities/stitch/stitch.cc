@@ -45,7 +45,7 @@
 
 #include <images/Images/PagedImage.h>
 #include <images/Images/ImageInfo.h>
-#include <images/Images/ImageRegion.h>
+#include <images/Regions/ImageRegion.h>
 #include <coordinates/Coordinates/CoordinateSystem.h>
 #include <coordinates/Coordinates/CoordinateUtil.h>
 #include <lattices/Lattices/ArrayLattice.h>

@@ -24,7 +24,7 @@
 /*!
   \file tShapelets1D.cc
   
-  \ingroup CR_Math
+  \ingroup contrib
 
   \brief A collection of test routines for the Shapelets1D class
   
@@ -39,13 +39,13 @@
   </ul>
 */
 
-// C++ Standard library
 #include <fstream>
+#include "Shapelets1D.h"
 
-// Custom header files
-#include <Math/Shapelets1D.h>
-
-using CR::Shapelets1D;
+using std::cerr;
+using std::cout;
+using std::endl;
+using std::flush;
 
 // =============================================================================
 
@@ -76,7 +76,7 @@ void printShapelets1D (Shapelets1D& phi) {
                   evaluated.
  */
 bool test_Shapelets1D (const int& order,
-		       const vector<double>& x)
+		       const std::vector<double>& x)
 {
   cout << "\n[test_Shapelets1D] Testing default constructor" << endl;
   {
@@ -115,7 +115,7 @@ bool test_Shapelets1D (const int& order,
                   evaluated.
  */
 bool test_parameters (const int& order,
-		      const vector<double>& x)
+		      const std::vector<double>& x)
 {
   cout << "\n[test_Shapelets1D] Testing adjustment of parameters" << endl;
 
@@ -175,11 +175,11 @@ bool test_scales (const int& order)
                   evaluated.
 */
 bool test_eval (const int& order,
-		const vector<double>& x) 
+		const std::vector<double>& x) 
 {
-  int nelem;         // Number of elements in the input vector
-  ofstream logfile;  // Stream for logfile taking computation output.
-  double *results;   // Array for storage of computation results
+  int nelem;              // Number of elements in the input vector
+  std::ofstream logfile;  // Stream for logfile taking computation output.
+  double *results;        // Array for storage of computation results
   
   nelem = x.size();  
   results = new double[nelem*order];
@@ -196,7 +196,7 @@ bool test_eval (const int& order,
       //
       for (int i=0; i<nelem; i++) {
 	// compute ...
-        y = phi.eval(n,x[i]);
+        y = phi.fx(n,x[i]);
 	// ... and collect results
 	results[n*nelem+i] = y;
       }
@@ -204,7 +204,7 @@ bool test_eval (const int& order,
     }
 
     // Write the computation results to disk for later plotting
-    logfile.open ("tShapelets1D.data1",ios::out);
+    logfile.open ("tShapelets1D.data1",std::ios::out);
     for (int i=0; i<nelem; i++) {
       logfile << x[i];
       for (int n=0; n<order; n++) {
@@ -218,7 +218,7 @@ bool test_eval (const int& order,
   
   cout << "\n[testShapelets1D] Testing evaluation of Shapelet" << endl;
   {
-    vector<double> y;   // vector to take up the results
+    std::vector<double> y;   // vector to take up the results
     
     y.resize(nelem);
     
@@ -226,7 +226,7 @@ bool test_eval (const int& order,
       Shapelets1D h(n);
       //
       cout << "\tEvaluating Shapelet of order " << h.order() << " ... " << flush;
-      y = h.eval(n,x);
+      y = h.fx(n,x);
       cout << "Done." << endl;
     }
   }
@@ -249,7 +249,7 @@ int main () {
   int order;               // Maximum order of the Shapelets
   unsigned int nx;
   unsigned int nofPoints;  // Number of test values for which to evaluate
-  vector<double> x;        // Array of values for which to evaluate.
+  std::vector<double> x;        // Array of values for which to evaluate.
   
   // assign variable values
   order = 10;

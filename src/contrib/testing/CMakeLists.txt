@@ -174,7 +174,7 @@ if (HAVE_HDF5)
   ## Custom tests
 
   add_executable (hdf5_attributes hdf5_attributes.cc)
-  target_link_libraries (hdf5_attributes ${HDF5_LIBRARIES})
+  target_link_libraries (hdf5_attributes ${HAVE_LIBZ} ${HDF5_LIBRARIES})
   add_test (hdf5_attributes hdf5_attributes)
   
   ##__________________________________________________________________
@@ -207,7 +207,10 @@ if (HAVE_HDF5)
     ## compiler instructions
     add_executable (${src} ${src}.c)
     ## linker instructions
-    target_link_libraries (${src} ${HDF5_LIBRARIES})
+    target_link_libraries (${src}
+      ${HAVE_LIBZ}
+      ${HDF5_LIBRARIES}
+      )
     ## additional properties
     set_target_properties (${src} PROPERTIES
       COMPILE_FLAGS "-DH5_USE_16_API"

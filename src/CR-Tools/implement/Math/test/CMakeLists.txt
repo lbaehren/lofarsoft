@@ -8,16 +8,11 @@
 set (tests
   tBasicFilter
   tHanningFilter
-  tHermite1D
   tLinearRegression
   tMatrixOperations
   tMedianFilter
   tRaisedCosineFilter
   tRangeSplitter
-  tShapelets1D
-  tShapelets2D
-  tShapeletsModel1D
-  tShapeletsModel2D
   tStatisticsFilter
   tThreeVector
   tVectorConversion

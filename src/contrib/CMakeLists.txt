@@ -28,26 +28,10 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
 
 if (USG_ROOT)
   include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  SET (CMAKE_INSTALL_PREFIX ${USG_INSTALL_PREFIX})
 else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
-
-## -----------------------------------------------------------------------------
-## Installation
-
-find_path (prefix release_area.txt
-  PATHS
-  ${contrib_SOURCE_DIR}
-  PATH_SUFFIXES
-  ../release
-  ../../release
-  NO_DEFAULT_PATH
-  )
-
-if (prefix)
-  message (STATUS "Installation area located for user contributions.")
-  set (CMAKE_INSTALL_PREFIX ${prefix}) 
-endif (prefix)
 
 ## ------------------------------------------------------------------------------
 ## Locate components of required external packages
@@ -120,6 +104,7 @@ endif (HAVE_HDF5)
 ## Subdirectories
 
 add_subdirectory (data_inspection)
+add_subdirectory (shapelets)
 add_subdirectory (testing)
 add_subdirectory (utilities)
 
