@@ -121,6 +121,7 @@ analyse LOFAR data. In addition, the USG performs the following functions:
   |-- external
   `-- src
       |-- contrib        <-- you are here
+      |   |-- shapelets
       |   |-- testing
       |   `-- utilities
       |-- CR-Tools
