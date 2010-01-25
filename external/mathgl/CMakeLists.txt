@@ -150,22 +150,22 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
       message (WARNING "[MthGL] Unable to build package - missing sources!")
     endif (have_mathgl_tgz)
   endif (MATHGL_SVN_BUILD)
-
-    ## Post-installation patch of include paths
-    ExternalProject_Add_Step (mathgl mathgl_links
-      COMMAND rm -f gsl
-      COMMAND ${ln_executable} -s ${GSL_INCLUDES}/gsl .
-      COMMAND rm -f numpy
-      COMMAND ${ln_executable} -s ${NUMPY_INCLUDES}/numpy .
-      COMMENT "Creating symbolic links for include directories"
-      DEPENDEES patch
-      DEPENDERS configure
-      WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/include
-      )
+  
+  ## Post-installation patch of include paths
+  ExternalProject_Add_Step (mathgl mathgl_links
+    COMMAND rm -f gsl
+    COMMAND ${ln_executable} -s ${GSL_INCLUDES}/gsl .
+    COMMAND rm -f numpy
+    COMMAND ${ln_executable} -s ${NUMPY_INCLUDES}/numpy .
+    COMMENT "Creating symbolic links for include directories"
+    DEPENDEES patch
+    DEPENDERS configure
+    WORKING_DIRECTORY ${MATHGL_BINARY_DIR}/include
+    )
   
   ##__________________________________________________________________
   ## Configuration summary
-
+  
   message ("-------------------------------------------------------------")
   message (STATUS "[MathGL] Summary of configuration status")
   message (STATUS "Forced rebuild from source  = ${MATHGL_FORCE_BUILD}")
