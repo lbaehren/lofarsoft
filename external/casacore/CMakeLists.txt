@@ -40,14 +40,18 @@ set (CASACORE_FIND_QUIETLY YES)
 
 include (FindCASACORE)
 
+find_program (svn_executable  svn  PATHS ${bin_locations})
+find_program (tar_executable  tar  PATHS ${bin_locations})
+find_program (find_executable find PATHS ${bin_locations})
+
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
   
   include (ExternalProject)
-  
-  find_file (have_casacore_tgz casacore.tgz  ${CASACORE_SOURCE_DIR})
-  find_program (tar_executable tar PATHS ${bin_locations})
+
+  find_file (have_casacore_tgz   casacore.tgz  ${CASACORE_SOURCE_DIR})
+  find_file (have_casacore_cmake cmake.tgz     ${CASACORE_SOURCE_DIR})
 
   if (have_casacore_tgz)
     ExternalProject_Add (casacore
@@ -55,6 +59,7 @@ if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
       DOWNLOAD_DIR ${CASACORE_BINARY_DIR}
       SOURCE_DIR ${CASACORE_BINARY_DIR}
       URL ${have_casacore_tgz}
+      PATCH_COMMAND ${tar_executable} -xzf ${have_casacore_cmake}
       CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${USG_INSTALL_PREFIX}
       )
   else (have_casacore_tgz)
@@ -63,19 +68,10 @@ if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
       DOWNLOAD_DIR ${CASACORE_BINARY_DIR}
       SOURCE_DIR ${CASACORE_BINARY_DIR}
       URL http://casacore.googlecode.com/svn/trunk casacore
+      PATCH_COMMAND ${tar_executable} -xzf ${have_casacore_cmake}
       CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${USG_INSTALL_PREFIX}
       )
   endif (have_casacore_tgz)
-
-  ## Put CMake configuration scripts into place
-  ExternalProject_Add_Step (casacore casacore_cmake
-    COMMAND tar -xvzf ${CASACORE_SOURCE_DIR}/cmake.tgz
-    COMMENT "Creating symbolic links for include directories"
-    DEPENDEES patch
-    DEPENDERS configure
-    WORKING_DIRECTORY ${CASACORE_BINARY_DIR}
-    )
-  
   
   ## <-- end build condition ----------------------------------------------------->
   
@@ -89,9 +85,6 @@ endif (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
 ## ------------------------------------------------------------------------------
 ## Update the tar-archive to the latest version of the source
 
-find_program (svn_executable  svn  PATHS ${bin_locations})
-find_program (tar_executable  tar  PATHS ${bin_locations})
-
 if (svn_executable AND tar_executable)
   add_custom_target (update_casacore
     COMMAND rm -rf casacore
@@ -103,3 +96,13 @@ if (svn_executable AND tar_executable)
     )
 endif (svn_executable AND tar_executable)  
 
+## ------------------------------------------------------------------------------
+## Configuration summary
+
+message (STATUS "+------------------------------------------------------------+")
+message (STATUS "| casacore: Summary of configuration settings                |")
+message (STATUS "+------------------------------------------------------------+")
+message (STATUS " svn executable = ${svn_executable}")
+message (STATUS " tar executable = ${tar_executable}")
+message (STATUS " CMake scripts  = ${have_casacore_cmake}")
+message (STATUS "+------------------------------------------------------------+")
