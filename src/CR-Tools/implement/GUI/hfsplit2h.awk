@@ -18,4 +18,4 @@ BEGIN{FS="[ :=]+";WRITETOFILE=0}
 /^ *[/]* *\$COPY_TO +END/ {COPYTOFILE=0;next}
 /^ *[/]* *\$COPY_TO +[A-Z]+:/ {print substr($0,match($0,": *")+1) >>FILENAMES[$2]}
 (COPYTOFILE) {print $0 >> FILE}
-
+{print}

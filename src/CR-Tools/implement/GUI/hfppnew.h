@@ -35,7 +35,9 @@ gcc -E -C -P -D H_DEBUG_CPP $HFLAGS -I. $LOFARSOFT/src/CR-Tools/implement/GUI/hf
 
 
 //Defines datatypes to iterate wrappers over
-#define HFPP_NUMERIC_TYPES (HInteger)(HNumber)(HComplex)
+#define HFPP_REAL_NUMERIC_TYPES (HInteger)(HNumber)
+#define HFPP_STRING_TYPES (HString)
+#define HFPP_NUMERIC_TYPES HFPP_REAL_NUMERIC_TYPES (HComplex)
 #define HFPP_STRING_TYPES (HString)
 #define HFPP_POINTER_TYPES (HPointer)
 #define HFPP_NON_NUMERIC_TYPES HFPP_STRING_TYPES HFPP_POINTER_TYPES 
@@ -69,6 +71,45 @@ gcc -E -C -P -D H_DEBUG_CPP $HFLAGS -I. $LOFARSOFT/src/CR-Tools/implement/GUI/hf
 #define HFPP_GUI_RETURN_SCALAR 0      //Function returns a scalar as return value
 #define HFPP_GUI_RETURN_VECTOR_IN_PLACE 1 //Function takes vector as input and returns it modified (pass by reference)
 #define HFPP_GUI_RETURN_NEW_VECTOR 2 //Functions takes an input vector and returns a new vectors as second argument
+
+
+/*
+
+Now come a number of index lists that are used by HFPP_LOOP to
+generate all permuatattions of lists with multiple indices. The index
+lists are generated with the following Python code.
+------------------
+
+def make_list(n,m):
+    l=[]
+    for i in range(m): l.append(0)
+    s="("+format_list(l)+",BOOST_PP_NIL)"
+    while increment_list(n,l): 
+        s="("+format_list(l)+","+s+")"
+    print "#define HFPP_INDEXLIST_"+str(n)+"x"+str(m)+" "+s
+
+
+def increment_list(maxn,l):
+    return increment_list_element(maxn,len(l)-1,l)
+
+def increment_list_element(maxn,i,l):
+    l[i]+=1
+    if l[i]>=maxn:
+        if i==0: return False
+        else:
+            l[i]=0
+            return increment_list_element(maxn,i-1,l)
+    else: return True
+
+
+def format_list(l):
+    s=""
+    for x in l: s+="("+str(x)+")"
+    return s
+
+
+ */
+
 
 #define HFPP_INDEXLIST_1x1 ((0),BOOST_PP_NIL)
 #define HFPP_INDEXLIST_2x1 ((1),((0),BOOST_PP_NIL))

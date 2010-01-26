@@ -21,8 +21,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/*! 
-  HFTOOLS Version 0.1 - Tools to manipulate vectors 
+/*!  
+  HFTOOLS Version 0.1 - Tools to manipulate vectors and generate
+  wrappers for python
 */
 
 
@@ -32,7 +33,7 @@ using namespace std;
 #include "hftools.h"
 
 //Some definitions needed for the preprosessor programming:
-//Copy source code (where specified with COPY_TO HFILE START) to the file hwrappers-hfanalysis.cc.h
+//Copy source code (where specified with COPY_TO HFILE START) to the file hwrappers-hftools.iter.cc.h
 //-----------------------------------------------------------------------
 //$FILENAME: HFILE=hfwrappers-$SELF.h  
 //-----------------------------------------------------------------------
@@ -43,6 +44,26 @@ using namespace std;
 //-----------------------------------------------------------------------
 #define HFPP_FILETYPE CC
 //-----------------------------------------------------------------------
+
+
+//Identity
+template<class T> inline T hfcast(/*const*/ T v){return v;}
+
+//Convert to arbitrary class T if not specified otherwise
+template<class T> inline T hfcast(HInteger v){return static_cast<T>(v);}
+template<class T> inline T hfcast(HNumber v){return static_cast<T>(v);}
+template<class T> inline T hfcast(HComplex v){return static_cast<T>(v);}
+
+//Convert Numbers to Numbers and loose information (round float, absolute of complex)
+template<>  inline HInteger hfcast<HInteger>(HNumber v){return static_cast<HInteger>(floor(v+0.5));}
+template<>  inline HInteger hfcast<HInteger>(HComplex v){return static_cast<HInteger>(floor(real(v)+0.5));}
+template<>  inline HNumber hfcast<HNumber>(HComplex v){return real(v);}
+
+
+inline HInteger ptr2int(HPointer v){return reinterpret_cast<HInteger>(v);}
+inline HPointer int2ptr(HInteger v){return reinterpret_cast<HPointer>(v);}
+
+
 
 //$COPY_TO HFILE START --------------------------------------------------
 //#define HFPP_WRAPPER_TYPES (HInteger)(HNumber)
@@ -97,6 +118,134 @@ void hFill(const Iter data_start,const Iter data_end, const IterValueType fill_v
     ++it;
   };
 }
+
+
+//$NOITERATE MFUNC acos,asin,atan,ceil,floor 
+//atan, ceil, floor, acos, asin
+
+//$ITERATE MFUNC abs,cos,cosh,exp,log,log10,sin,sinh,sqrt,tan,tanh
+
+//$DOCSTRING1: Take the $MFUNC of all the elements in the vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(h$MFUNC!CAPS)(1)("$DOCSTRING1")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#include "hfppnew-generatewrappers.def"
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  \brief $DOCSTRING1
+
+  \param data_start: STL Iterator pointing to the first element of an array with
+         input values.
+  \param data_end: STL Iterator pointing to the end of the input vector
+
+*/
+template <class Iter> 
+void h$MFUNC!CAPS(const Iter data_start,const Iter data_end)
+{
+  Iter it=data_start;
+  while (it!=data_end) {
+    *it=$MFUNC(*it);
+    ++it;
+  };
+}
+
+
+//$DOCSTRING2: Take the $MFUNC of all the elements in the vector and return results in a second vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_VARIANT 1
+#define HFPP_FUNCDEF  (HFPP_VOID)(h$MFUNC!CAPS)(2)("$DOCSTRING2")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#include "hfppnew-generatewrappers.def"
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  \brief $DOCSTRING2
+
+  \param data_start: STL Iterator pointing to the first element of an array with
+         input values.
+  \param data_end: STL Iterator pointing to the end of the input vector
+
+  \param data_start: STL Iterator pointing to the first element of an array with
+         output values.
+  \param data_end: STL Iterator pointing to the end of the output vector
+
+*/
+template <class Iter> 
+void h$MFUNC!CAPS(const Iter data_start,const Iter data_end, const Iter out_start,const Iter out_end)
+{
+  Iter it=data_start;
+  Iter itout=out_start;
+  while (it!=data_end & itout !=out_end) {
+    *itout=$MFUNC(*it);
+    ++it; ++itout;
+  };
+}
+//$ENDITERATE
+
+//$ITERATE MFUNC acos,asin,atan,ceil,floor 
+
+//$DOCSTRING1: Take the $MFUNC of all the elements in the vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(h$MFUNC!CAPS)(1)("$DOCSTRING1")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#include "hfppnew-generatewrappers.def"
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  \brief $DOCSTRING1
+
+  \param data_start: STL Iterator pointing to the first element of an array with
+         input values.
+  \param data_end: STL Iterator pointing to the end of the input vector
+
+*/
+template <class Iter> 
+void h$MFUNC!CAPS(const Iter data_start,const Iter data_end)
+{
+  Iter it=data_start;
+  while (it!=data_end) {
+    *it=$MFUNC(*it);
+    ++it;
+  };
+}
+
+
+//$DOCSTRING2: Take the $MFUNC of all the elements in the vector and return results in a second vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_VARIANT 1
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(h$MFUNC!CAPS)(2)("$DOCSTRING2")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#include "hfppnew-generatewrappers.def"
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  \brief $DOCSTRING2
+
+  \param data_start: STL Iterator pointing to the first element of an array with
+         input values.
+  \param data_end: STL Iterator pointing to the end of the input vector
+
+  \param data_start: STL Iterator pointing to the first element of an array with
+         output values.
+  \param data_end: STL Iterator pointing to the end of the output vector
+
+*/
+template <class Iter> 
+void h$MFUNC!CAPS(const Iter data_start,const Iter data_end, const Iter out_start,const Iter out_end)
+{
+  Iter it=data_start;
+  Iter itout=out_start;
+  while (it!=data_end & itout !=out_end) {
+    *itout=$MFUNC(*it);
+    ++it; ++itout;
+  };
+}
+//$ENDITERATE
 
 
 #include <GUI/hftools.hpp>

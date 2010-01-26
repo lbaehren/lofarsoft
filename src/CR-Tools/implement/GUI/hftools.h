@@ -138,6 +138,28 @@ typedef casa::Record CasaRecord ;
 //So, this forces NULL to really be a NULL pointer ...
 #define Null_p reinterpret_cast<HPointer>(NULL)
 
+
+//----CASTING------------------------------------------------------------------------
+//Identity
+template<class T> inline T hfcast(/*const*/ T v);
+
+//Convert to arbitrary class T if not specified otherwise
+template<class T> inline T hfcast(HInteger v);
+template<class T> inline T hfcast(HNumber v);
+template<class T> inline T hfcast(HComplex v);
+
+//Convert Numbers to Numbers and loose information (round float, absolute of complex)
+template<>  inline HInteger hfcast<HInteger>(HNumber v);
+template<>  inline HInteger hfcast<HInteger>(HComplex v);
+template<>  inline HNumber hfcast<HNumber>(HComplex v);
+
+
+inline HInteger ptr2int(HPointer v);
+inline HPointer int2ptr(HInteger v);
+//----CASTING------------------------------------------------------------------------
+
+
+
 //=========================================================================================
 // Define Headers for Wrappers
 //=========================================================================================
@@ -145,7 +167,7 @@ typedef casa::Record CasaRecord ;
 // Tell the preprocessor (for generating wrappers) that this is a c++ header file (brackets are crucial)
 #define HFPP_FILETYPE hFILE  
 // include wrapper definitions generated automatically from source
-#include "hfwrappers-hftools.cc.h"  
+#include "hfwrappers-hftools.iter.cc.h"  
 #undef HFPP_FILETYPE
 //=========================================================================================
 
