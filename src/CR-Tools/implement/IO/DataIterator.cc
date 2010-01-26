@@ -33,78 +33,72 @@ namespace CR {  // Namespace CR -- begin
   //
   // ============================================================================
   
-  // ------------------------------------------------- DataIterator::DataIterator
+  //_____________________________________________________________________________
+  //                                                                 DataIterator
   
-  DataIterator::DataIterator ()
-  {
-    stepWidth_p = 1;
-    //
-    dataStart_p = 0;
-    stride_p    = 0;
-    shift_p     = 0;
-    blocksize_p = 1;
-    fftLength_p = 1;
-    block_p     = 0;
-    // 
-    setPosition();
-  }
-  
-  // ------------------------------------------------- DataIterator::DataIterator
-  
-  DataIterator::DataIterator (unsigned int const &blocksize)
-  {
-    stepWidth_p = 1;
-    //
-    dataStart_p = 0;
-    stride_p    = 0;
-    shift_p     = 0;
-    blocksize_p = blocksize;
-    block_p     = 0;
-    // 
-    setPosition();
-  }
-  
-  // ------------------------------------------------- DataIterator::DataIterator
-  
+  /*!
+    \param blocksize -- Size of a datablock, \f$ N_{\rm Blocksize} \f$, in units
+           of <tt>T</tt>
+    \param dataStart -- Start of the data segment, \f$ N_{\rm Start} \f$.
+  */
   DataIterator::DataIterator (unsigned int const &blocksize,
 			      unsigned int const &dataStart)
   {
-    stepWidth_p = 1;
-    //
-    dataStart_p = dataStart;
-    stride_p    = 0;
-    shift_p     = 0;
-    blocksize_p = blocksize;
-    block_p     = 0;
-    // 
-    setPosition();
+    init (blocksize, dataStart);
   }
   
-  // --------------------------------------------------- DataIterator::DataIterator
+  //_____________________________________________________________________________
+  //                                                                 DataIterator
   
+  /*!
+    \param blocksize -- Size of a datablock, \f$ N_{\rm Blocksize} \f$, in units
+           of <tt>T</tt>
+    \param stride    -- Stride between two subsequent blocks of data,
+           \f$ N_{Stride} \f$, in units of <tt>T</tt>
+    \param shift     -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$
+  */
   DataIterator::DataIterator (unsigned int const &blocksize,
 			      long int const &stride,
 			      int const &shift)
   {
-    stepWidth_p = 1;
-    //
-    dataStart_p = 0;
-    stride_p    = stride;
-    shift_p     = shift;
-    blocksize_p = blocksize;
-    fftLength_p = 1;
-    block_p     = 0;
-    // 
-    setPosition();
+    init (blocksize, 0, stride, shift);
   }
   
-  // --------------------------------------------------- DataIterator::DataIterator
+  //_____________________________________________________________________________
+  //                                                                 DataIterator
   
+  /*!
+    \param blocksize -- Size of a datablock, \f$ N_{\rm Blocksize} \f$, in units
+           of <tt>T</tt>
+    \param dataStart -- Start of the data segment, \f$ N_{\rm Start} \f$.
+    \param stride    -- Stride between two subsequent blocks of data,
+           \f$ N_{Stride} \f$, in units of <tt>T</tt>
+    \param shift     -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$
+  */
   DataIterator::DataIterator (unsigned int const &blocksize,
 			      unsigned int const &dataStart,
 			      long int const &stride,
 			      int const &shift)
   {
+    init (blocksize, dataStart, stride, shift);
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                 DataIterator
+  
+  DataIterator::DataIterator (DataIterator const &other)
+  {
+    copy (other);
+  }
+
+  //_____________________________________________________________________________
+  //                                                                         init
+  
+  void DataIterator::init (unsigned int const &blocksize,
+			   unsigned int const &dataStart,
+			   long int const &stride,
+			   int const &shift)
+  {
     stepWidth_p = 1;
     //
     dataStart_p = dataStart;
@@ -115,12 +109,6 @@ namespace CR {  // Namespace CR -- begin
     // 
     setPosition();
   }
-  
-  DataIterator::DataIterator (DataIterator const &other)
-  {
-    copy (other);
-  }
-  
   
   // ==============================================================================
   //
@@ -128,21 +116,19 @@ namespace CR {  // Namespace CR -- begin
   //
   // ==============================================================================
   
-  // -------------------------------------------------- DataIterator::~DataIterator
-  
   DataIterator::~DataIterator ()
   {
     destroy ();
   }
-  
-  
+
   // ==============================================================================
   //
   //  Operators
   //
   // ==============================================================================
   
-  // ----------------------------------------------------------- DataIterator::copy
+  //_____________________________________________________________________________
+  //                                                                         copy
   
   void DataIterator::copy (DataIterator const& other)
   {
@@ -159,12 +145,14 @@ namespace CR {  // Namespace CR -- begin
     position_p  = other.position_p;
   }
   
-  // -------------------------------------------------------- DataIterator::destroy
+  //_____________________________________________________________________________
+  //                                                                      destroy
   
   void DataIterator::destroy(void)
   {;}
   
-  // ------------------------------------------------------ DataIterator::operator=
+  //_____________________________________________________________________________
+  //                                                                    operator=
   
   DataIterator& DataIterator::operator= (DataIterator const &other)
   {
@@ -175,13 +163,14 @@ namespace CR {  // Namespace CR -- begin
     return *this;
   }
   
-  // ==============================================================================
+  // ============================================================================
   //
-  //  Member data
+  //  Parameter access
   //
-  // ==============================================================================
+  // ============================================================================
   
-  // --------------------------------------------------- DataIterator::setStepWidth
+  //_____________________________________________________________________________
+  //                                                                 setStepWidth
   
   template <class T> void DataIterator::setStepWidth (T const &var)
   {
@@ -189,7 +178,8 @@ namespace CR {  // Namespace CR -- begin
     setPosition ();
   }
   
-  // ------------------------------------------- DataIterator::setStepWidthToSample
+  //_____________________________________________________________________________
+  //                                                         setStepWidthToSample
   
   void DataIterator::setStepWidthToSample ()
   {
@@ -197,7 +187,8 @@ namespace CR {  // Namespace CR -- begin
     setPosition ();
   }
   
-  // ---------------------------------------------------- DataIterator::setPosition
+  //_____________________________________________________________________________
+  //                                                                  setPosition
   
   void DataIterator::setPosition ()
   {
@@ -273,10 +264,10 @@ namespace CR {  // Namespace CR -- begin
     std::cout << "-- FFT output lenght           = " << fftLength_p << std::endl;
     std::cout << "-- Start of the data segment   = " << dataStart_p << std::endl;
     std::cout << "-- Optional short w.r.t. start = " << shift_p     << std::endl;
-    std::cout << "-- Stride between blocks       = " << stride_p << std::endl;
-    std::cout << "-- Current data block number   = " << block_p << std::endl;
+    std::cout << "-- Stride between blocks       = " << stride_p    << std::endl;
+    std::cout << "-- Current data block number   = " << block_p     << std::endl;
     std::cout << "-- Stepwidth                   = " << stepWidth_p << std::endl;
-    std::cout << "-- Current position            = " << position_p << std::endl;
+    std::cout << "-- Current position            = " << position_p  << std::endl;
   }
   
   // ============================================================================

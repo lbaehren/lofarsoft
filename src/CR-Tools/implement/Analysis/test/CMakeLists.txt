@@ -43,12 +43,16 @@ endif (data_ppf_coefficients AND data_ppf_inversion)
 ## Build the test programs
 
 foreach (src ${tests})
+  
   ## compiler instructions
   add_executable (${src} ${src}.cc)
   ## linker instructions
-  target_link_libraries (${src} cr ${CASA_LIBRARIES})
+  target_link_libraries (${src}
+    cr
+    ${CASA_LIBRARIES})
   ## testing
   add_test (${src} ${src})
+
 endforeach (src)
 
 ## ==============================================================================
@@ -58,55 +62,14 @@ endforeach (src)
 ## ==============================================================================
 
 ##____________________________________________________________________
-##                                                           tgenCRmap
-
-if (HAVE_HDF5 AND HAVE_DAL)
-  ## compiler instructions
-  add_executable (tgenCRmap tgenCRmap.cc)
-  ## linker instructions
-  target_link_libraries (tgenCRmap 
-    cr
-    ${HAVE_LIBZ}
-    ${DAL_LIBRARIES}
-    ${CASA_LIBRARIES}
-    ${HDF5_LIBRARIES}
-    )
-  ## testing
-  add_test (tgenCRmap tgenCRmap)
-endif (HAVE_HDF5 AND HAVE_DAL)
-
-##____________________________________________________________________
 ## Test programs which require the DAL
 
-if (HAVE_DAL AND HAVE_ROOT)
-  ## compiler instructions
-  #  add_executable (tNuMoonTrigger tNuMoonTrigger.cc)
-  add_executable (tppfinversion tppfinversion.cc)
-  ## linker instructions
-  target_link_libraries (tppfinversion
-    cr
-    ${CASA_LIBRARIES}
-    ${DAL_LIBRARIES}
-    ${CASA_LIBRARIES}
-    ${HDF5_LIBRARIES}
-    ${CFITSIO_LIBRARIES}
-    ${ROOT_LIBRARIES}
-    )
-#  target_link_libraries (tNuMoonTrigger
-#    cr
-#    ${ROOT_LIBRARIES}
-#    ${DAL_LIBRARIES}
-#    ${HDF5_LIBRARIES}
-#    ${CFITSIO_LIBRARIES}
-#    )
-  ## testing
+if (dataset_beamformed)
   add_test (tppfinversion tppfinversion ${dataset_beamformed})
-  ## installation
-  list (APPEND tests tppfinversion)
-endif (HAVE_DAL AND HAVE_ROOT)
+endif (dataset_beamformed)
 
 if (data_ppf_coefficients AND data_ppf_inversion)
-
+  
   ## compiler instructions
   add_executable (tppfimplement tppfimplement.cc)
   ## linker instructions
@@ -194,68 +157,6 @@ if (CR_WITH_STARTOOLS)
 endif (CR_WITH_STARTOOLS)
 
 ##____________________________________________________________________
-## tCompletePipeline
-
-if (HAVE_STARTOOLS AND CR_WITH_PLOTTING AND CR_WITH_PYTHON)
-
-  ## compiler instructions
-  add_executable (tCompletePipeline tCompletePipeline.cc)
-  ## linker instructions
-  if (HAVE_LIBM AND HAVE_LIBUTIL)
-    target_link_libraries (tCompletePipeline
-      cr
-      ${POSTGRESQL_LIBRARIES}
-      ${STARTOOLS_LIBRARIES}
-      ${FFTW3_LIBRARIES}
-      ${ROOT_LIBRARIES}
-      ${PYTHON_LIBRARIES}
-      ${HAVE_LIBUTIL}
-      ${HAVE_LIBM}
-      )
-  else (HAVE_LIBM AND HAVE_LIBUTIL)
-    target_link_libraries (tCompletePipeline
-      cr
-      ${POSTGRESQL_LIBRARIES}
-      ${STARTOOLS_LIBRARIES}
-      ${FFTW3_LIBRARIES}
-      ${ROOT_LIBRARIES}
-      ${PYTHON_LIBRARIES}
-      )
-  endif (HAVE_LIBM AND HAVE_LIBUTIL)
-  ## extra properties to take care of
-  if (APPLE)
-    set_target_properties (tCompletePipeline
-      PROPERTIES
-      LINK_FLAGS "-bind_at_load"
-      )
-  endif (APPLE)
-  ## testing
-  if (CR_ENABLE_TESTING) 
-    add_test (tCompletePipeline tCompletePipeline)
-  endif (CR_ENABLE_TESTING) 
-  ## installation
-  list (APPEND tests tCompletePipeline)
-
-endif (HAVE_STARTOOLS AND CR_WITH_PLOTTING AND CR_WITH_PYTHON)
-
-##____________________________________________________________________
-## tPulseProperties
-
-if (HAVE_ROOT AND HAVE_STARTOOLS)
-  ## compiler instructions
-  add_executable (tPulseProperties tPulseProperties.cc)
-  ## linker instructions
-  target_link_libraries (tPulseProperties
-    cr
-    ${ROOT_LIBRARIES}
-    )
-  ## testing 
-  add_test (tPulseProperties tPulseProperties)
-  ## installation
-  list (APPEND tests tPulseProperties)
-endif (HAVE_ROOT AND HAVE_STARTOOLS)
-
-##____________________________________________________________________
 ## Compute and plot station beam
 
 if (CR_WITH_PLOTTING)
@@ -322,6 +223,42 @@ if (HAVE_STARTOOLS AND CR_WITH_PLOTTING AND HAVE_ROOT)
 
 endif (HAVE_STARTOOLS AND CR_WITH_PLOTTING AND HAVE_ROOT)
 
+##____________________________________________________________________
+##                                                    tAntennasDisplay
+##                                                    tPulseProperties
+
+if (HAVE_STARTOOLS AND HAVE_DAL)
+
+  foreach (src
+      tAntennasDisplay
+      tPulseProperties
+      tppfinversion
+      tgenCRmap
+      tCompletePipeline
+      )
+    ## compiler instructions
+    add_executable (${src} ${src}.cc)
+    ## linker instructions
+    target_link_libraries (${src}
+      cr
+      ${POSTGRESQL_LIBRARIES}
+      ${STARTOOLS_LIBRARIES}
+      ${FFTW3_LIBRARIES}
+      ${ROOT_LIBRARIES}
+      ${DAL_LIBRARIES}
+      ${CASA_LIBRARIES}
+      ${HDF5_LIBRARIES}
+      ${CFITSIO_LIBRARIES}
+      ${HAVE_LIBUTIL}
+      ${HAVE_LIBM}
+      )
+    ## testing
+    add_test (${src} ${src})
+    ## installation
+    list (APPEND tests ${src})
+  endforeach (src)
+  
+endif (HAVE_STARTOOLS AND HAVE_DAL)
 
 ## ==============================================================================
 ##

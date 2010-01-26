@@ -37,14 +37,16 @@
 #include <scimath/Mathematics.h>
 
 // LOPES-Tools header files
-#include <Math/BasicFilter.h>
+#include <Math/Constants.h>
+#include <Filters/BasicFilter.h>
 
 namespace CR {  // Namespace CR -- begin
   
   /*!
     \class RaisedCosineFilter
     
-    \ingroup CR_Math
+    \ingroup CR
+    \ingroup CR_Filters
     
     \brief Brief description for class RaisedCosineFilter
     

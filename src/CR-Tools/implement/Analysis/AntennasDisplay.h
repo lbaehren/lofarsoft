@@ -55,8 +55,8 @@
   anyway.
   Therefore this note has strictly informational purpose
  */
-class AntennasDisplay
-{
+class AntennasDisplay {
+
    public:
 
   // === Structures =============================================================
@@ -105,93 +105,38 @@ class AntennasDisplay
 		 double azimuth,
 		 double elevation);
 
-   // === Default values for creating the plot ==================================
-
-   //! Width of resulting canvas
-   const static int    _width               =  1024;
-   //! Height of resulting canvas
-   const static int    _height              =  768;
-   //! Width of lines representing singal's magnitudes
-   const static int    _lineWidth           =  3;
-   //! Fitting parameter - the smaller it is, the more accurate maximum length of signal value depicted on the plot one can achieve
-   const static double _plotFittingStep     =  0.1;
-   //! Plots offset
-   const static int    _plotsOffset         =  10;
-   //! Canvas' fill color
-   const static int    _bckgFillColor       =  10;
-   //! Color in which dead antennas are drawn
-   const static int    _deadAntColor        =  18;
-   //! Size of marker indicating dead antenna
-   const static int    _deadAntMarkerSize   =  1;
-   //! Number of colors in the legend
-   const static int    _numberOfColorsInLeg =  48;
-   /*!
-     \brief Distance between those colors
-     Please note that if you want to use the color range [x,y] and only n
-     colors from it where n < abs(x-y) you should make the distance be multiple
-     of number of colors in the legend.
-   */
-   const static int    _distanceOfLegColors =  1;
-   //! First color of the legend
-   const static int    _firstColorOfLeg     =  52;
-   //! Size of bordder surrounding the legend
-   const static int    _legBorderSize       =  0;
-   //! Fill color of legend's field
-   const static int    _legFillColor        =  10;
-   //! Size of the text in the legend field
-   const static double _legTextSize         =  0.025;
-   //! Legend positions (x1, y1, x2, y2) -- \e x1 component
-   const static double _legStartPosX        =  0.90;
-   //! Legend positions (x1, y1, x2, y2) -- \e y1 component
-   const static double _legStartPosY        =  0.10;
-   //! Legend positions (x1, y1, x2, y2) -- \e x2 component
-   const static double _legEndPosX          =  0.98;
-   //! Legend positions (x1, y1, x2, y2) -- \e y2 component
-   const static double _legEndPosY          =  0.90;
-   //! Distance between legend fields
-   const static double _legEntrySeparation  = -0.01;
-   //! Size of each field in the legend
-   const static double _legMarkerSize       =  1.25;
-   //! Max elevation's line length
-   const static double _elevationPlotMax    =  20;
-   //! Max elevation's line length
-   const static double _elevationPlotMin    =  1;
-   //! Size of elevation's arrow
-   const static double _elevationArrowSize  =  0.015;
-
-   //____________________________________________________________________________
-   //                                                                     Methods
-   
 #ifdef HAVE_ROOT
    //! Either one can call createPlot setting all parameters ...
    TCanvas* createPlot (std::string title,
-			unsigned int width = _width,
-			unsigned int height = _height,
-			unsigned int lineWidth = _lineWidth,
-			double plotFittingStep = _plotFittingStep,
-			unsigned int plotsOffset = _plotsOffset,
-			unsigned int bckgFillColor = _bckgFillColor,
-			unsigned int deadAntColor = _deadAntColor,
-			unsigned int deadAntMarkerSize = _deadAntMarkerSize,
-			unsigned int numberOfColorsInLeg = _numberOfColorsInLeg,
-			unsigned int distanceOfLegColors = _distanceOfLegColors,
-			unsigned int firstColorOfLeg = _firstColorOfLeg,
-			unsigned int legBorderSize = _legBorderSize,
-			unsigned int legFillColor = _legFillColor,
-			double legTextSize = _legTextSize,
-			double legStartPosX = _legStartPosX,
-			double legStartPosY = _legStartPosY,
-			double legEndPosX = _legEndPosX,
-			double legEndPosY = _legEndPosY,
-			double legEntrySeparation = _legEntrySeparation,
-			double legMarkerSize = _legMarkerSize,
-			double elevationPlotMax = _elevationPlotMax,
-			double elevationPlotMin = _elevationPlotMin,
-			double elevationArrowSize = _elevationArrowSize);
+			unsigned int width = 1024,
+			unsigned int height = 768,
+			unsigned int lineWidth = 3,
+			double plotFittingStep = 0.1,
+			unsigned int plotsOffset = 10,
+			unsigned int bckgFillColor = 10,
+			unsigned int deadAntColor = 18,
+			unsigned int deadAntMarkerSize = 1,
+			unsigned int numberOfColorsInLeg = 48,
+			unsigned int distanceOfLegColors = 1,
+			unsigned int firstColorOfLeg = 52,
+			unsigned int legBorderSize = 0,
+			unsigned int legFillColor = 10,
+			double legTextSize = 0.025,
+			double legStartPosX = 0.90,
+			double legStartPosY = 0.10,
+			double legEndPosX = 0.98,
+			double legEndPosY = 0.90,
+			double legEntrySeparation = -0.01,
+			double legMarkerSize = 1.25,
+			double elevationPlotMax = 20,
+			double elevationPlotMin = 1,
+			double elevationArrowSize = 0.015);
    //! Save the output of the plot
-   bool     savePlot   (std::string filename, TCanvas* c);
+   bool     savePlot   (std::string filename,
+			TCanvas* c);
    // ... or call the function below to invoke createPlot with default parameters
-   bool     createPlot (std::string filename, std::string title);
+   bool     createPlot (std::string filename,
+			std::string title);
 #endif
    
  private:

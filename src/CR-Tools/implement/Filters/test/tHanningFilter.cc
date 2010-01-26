@@ -24,8 +24,8 @@
 #include <iostream>
 #include <fstream>
 
-#include <Math/BasicFilter.h>
-#include <Math/HanningFilter.h>
+#include <Filters/BasicFilter.h>
+#include <Filters/HanningFilter.h>
 #include <IO/DataReader.h>
 #include <Data/ITS_Capture.h>
 
@@ -39,12 +39,13 @@ using CR::HanningFilter;
 /*!
   \file tHanningFilter.cc
   
-  \ingroup CR_Math
-
+  \ingroup CR
+  \ingroup CR_Filters
+  
   \brief A collection of test routines for the HanningFilter class
- 
+  
   \author Lars B&auml;hren
- 
+  
   \date 2005/11/16
 */
 
@@ -52,9 +53,9 @@ using CR::HanningFilter;
 
 /*!
   \brief Show the parameters of the Hanning filter
-
+  
   \param h -- HanningFilter object to be displayed
- */
+*/
 template <class T>
 void show_HanningFilter (HanningFilter<T> &h)
 {

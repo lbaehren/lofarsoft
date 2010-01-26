@@ -6,14 +6,9 @@
 ## Set up the list with test program sources
 
 set (tests
-  tBasicFilter
-  tHanningFilter
   tLinearRegression
   tMatrixOperations
-  tMedianFilter
-  tRaisedCosineFilter
   tRangeSplitter
-  tStatisticsFilter
   tThreeVector
   tVectorConversion
   tVectorNorms

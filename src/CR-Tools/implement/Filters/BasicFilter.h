@@ -31,14 +31,13 @@
 #include <casa/BasicSL/Complex.h>
 #include <scimath/Mathematics.h>
 
-using casa::Vector;
-
 namespace CR {  // Namespace CR -- begin
   
   /*!
     \class BasicFilter
     
-    \ingroup CR_Math
+    \ingroup CR
+    \ingroup CR_Filters
     
     \brief Basic characteristics and methods for filters
     
@@ -85,7 +84,6 @@ namespace CR {  // Namespace CR -- begin
       \endcode
     </ol>
   */
-  
   template <class T> class BasicFilter {
     
   protected:
@@ -93,7 +91,7 @@ namespace CR {  // Namespace CR -- begin
     //! Number of elements in a data vector passed to the filter
     unsigned int blocksize_p;
     //! Filter weights by which the incoming data are multiplied
-    Vector<T> weights_p;
+    casa::Vector<T> weights_p;
     
   public:
     
@@ -104,28 +102,39 @@ namespace CR {  // Namespace CR -- begin
       
       Contains a single filter weight of value 1.
     */
-    BasicFilter ();
+    BasicFilter () {
+      casa::Vector<T> weights (1,1);
+      setWeights(weights);
+    }
+    
     
     /*!
       \brief Constructor
       
       \param blocksize -- Number of elements in a data vector passed to the filter
     */
-    BasicFilter (const unsigned int& blocksize);
+    BasicFilter (const unsigned int& blocksize) {
+      casa::Vector<T> weights (blocksize,1);
+      setWeights(weights);
+    }
     
     /*!
       \brief Constructor
       
       \param weights -- The filter weights.
     */
-    BasicFilter (const Vector<T>& weights);
+    BasicFilter (const casa::Vector<T>& weights) {
+      setWeights(weights);
+    }
     
     /*!
       \brief Copy constructor
       
       \param other -- Another BasicFilter.
     */
-    BasicFilter (const BasicFilter<T>& other);
+    BasicFilter (const BasicFilter<T>& other) {
+      copy (other);
+    }
     
     // --- Destruction -----------------------------------------------------------
     
@@ -141,7 +150,13 @@ namespace CR {  // Namespace CR -- begin
       
       \param other -- Another BasicFilter.
     */
-    BasicFilter<T> &operator= (BasicFilter<T> const &other); 
+    BasicFilter<T> &operator= (BasicFilter<T> const &other) {
+      if (this != &other) {
+	destroy ();
+	copy (other);
+      }
+      return *this;
+    }
     
     // --- Parameters ------------------------------------------------------------
     
@@ -159,7 +174,7 @@ namespace CR {  // Namespace CR -- begin
       
       \return weights -- The filter weights.
     */
-    inline Vector<T> weights () {
+    inline casa::Vector<T> weights () {
       return weights_p;
     }
     
@@ -168,7 +183,7 @@ namespace CR {  // Namespace CR -- begin
       
       \param weights -- The filter weights.
     */
-    inline void setWeights (const Vector<T>& weights) {
+    inline void setWeights (const casa::Vector<T>& weights) {
       blocksize_p = weights.nelements();
       //
       weights_p.resize(blocksize_p);
@@ -186,7 +201,7 @@ namespace CR {  // Namespace CR -- begin
 	      vector does not match the shape of the array holding the weighting
 	      factors.
     */
-    inline bool filter (Vector<T>& data)
+    inline bool filter (casa::Vector<T>& data)
     {
       if (blocksize_p == data.nelements()) {
 	data *= weights_p;
@@ -205,8 +220,8 @@ namespace CR {  // Namespace CR -- begin
       
       \retval filteredData -- The data after application of the filter.
     */
-    inline bool filter (Vector<T> filteredData,
-			const Vector<T>& data)
+    inline bool filter (casa::Vector<T> filteredData,
+			const casa::Vector<T>& data)
     {
       if (blocksize_p == data.nelements()) {
 	filteredData.resize (data.shape());
@@ -223,9 +238,14 @@ namespace CR {  // Namespace CR -- begin
   private:
     
     //! Unconditional copying
-    void copy (BasicFilter<T> const& other);
+    void copy (BasicFilter<T> const& other) {
+      blocksize_p = other.blocksize_p;
+      //
+      weights_p.resize (blocksize_p);
+      weights_p = other.weights_p;
+    }
     //! Unconditional deletion 
-    void destroy(void);
+    void destroy(void) {;}
     
   };
   

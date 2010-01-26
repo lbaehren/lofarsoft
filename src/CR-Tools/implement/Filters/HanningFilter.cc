@@ -22,7 +22,7 @@
  ***************************************************************************/
 
 #include <Math/Constants.h>
-#include <Math/HanningFilter.h>
+#include <Filters/HanningFilter.h>
 
 namespace CR {  // Namespace CR -- begin
   
@@ -254,7 +254,7 @@ namespace CR {  // Namespace CR -- begin
   void HanningFilter<T>::setWeights ()
   {
     unsigned int blocksize (BasicFilter<T>::blocksize());
-    Vector<T> weights (blocksize,T(1));
+    casa::Vector<T> weights (blocksize,T(1));
     T factor (0);
     T x (0);
     

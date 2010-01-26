@@ -365,7 +365,7 @@ namespace CR {  //  Namespace CR -- begin
     TimeFreq::setSampleFrequency (sampleFrequency);
     // Parameters stored in CR::DataReader
     fileStream_p      = NULL;
-    startBlock_p      = 1;
+    startBlock_p      = 0;
     haveADC2Voltage_p = false;
     haveFFT2CalFFT_p  = false;
   }
@@ -744,20 +744,6 @@ namespace CR {  //  Namespace CR -- begin
   // ============================================================================
 
   //_____________________________________________________________________________
-  //                                                                setStartBlock
-  
-  void DataReader::setStartBlock (uint const &startBlock)
-  {
-    if (startBlock>0) {
-      startBlock_p = startBlock;
-    } else {
-      cerr << "[DataReader::setStartBlock] Invalid number for start block."
-		<< endl;
-      startBlock_p = 1;
-    }
-  }
-  
-  //_____________________________________________________________________________
   //                                                                     setBlock
   
   
@@ -770,7 +756,7 @@ namespace CR {  //  Namespace CR -- begin
   
   //_____________________________________________________________________________
   //                                                                    setStride
-
+  
   void DataReader::setStride (uint const &stride)
   {
     for (unsigned int n(0); n<nofStreams_p; n++) {

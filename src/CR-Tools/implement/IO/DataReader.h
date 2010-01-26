@@ -46,7 +46,7 @@
 
 #include <Coordinates/TimeFreq.h>
 #include <IO/DataIterator.h>
-#include <Math/HanningFilter.h>
+#include <Filters/HanningFilter.h>
 
 using namespace std;
 using namespace casa;
@@ -484,8 +484,10 @@ namespace CR {  //  Namespace CR -- begin
     \param startBlock -- The number of the block at which we start reading the
                          data
   */
-  void setStartBlock (uint const &startBlock);
-
+  inline void setStartBlock (uint const &startBlock) {
+    startBlock_p = startBlock;
+  };
+  
   /*!
     \brief Get the counter for the current block of data
 

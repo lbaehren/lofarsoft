@@ -21,53 +21,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Math/BasicFilter.h>
+#include <Filters/BasicFilter.h>
 
 namespace CR {  // Namespace CR -- begin
-  
-  // ============================================================================
-  //
-  //  Construction
-  //
-  // ============================================================================
-
-  //_____________________________________________________________________________
-  //                                                                  BasicFilter
-  
-  template <class T>
-  BasicFilter<T>::BasicFilter ()
-  {
-    Vector<T> weights (1,1);
-    setWeights(weights);
-  }
-  
-  //_____________________________________________________________________________
-  //                                                                  BasicFilter
-  
-  template <class T>
-  BasicFilter<T>::BasicFilter (const unsigned int& blocksize)
-  {
-    Vector<T> weights (blocksize,1);
-    setWeights(weights);
-  }
-  
-  //_____________________________________________________________________________
-  //                                                                  BasicFilter
-  
-  template <class T>
-  BasicFilter<T>::BasicFilter (const Vector<T>& weights)
-  {
-    setWeights(weights);
-  }
-  
-  //_____________________________________________________________________________
-  //                                                                  BasicFilter
-  
-  template <class T>
-  BasicFilter<T>::BasicFilter (const BasicFilter<T>& other)
-  {
-    copy (other);
-  }
   
   // ============================================================================
   //
@@ -83,37 +39,7 @@ namespace CR {  // Namespace CR -- begin
   //
   // ============================================================================
   
-  //_____________________________________________________________________________
-  //                                                                         copy
-  
-  template <class T>
-  void BasicFilter<T>::copy (BasicFilter<T> const& other)
-  {
-    blocksize_p = other.blocksize_p;
-    //
-    weights_p.resize (blocksize_p);
-    weights_p = other.weights_p;
-  }
-  
-  //_____________________________________________________________________________
-  //                                                                      destroy
-  
-  template <class T>
-  void BasicFilter<T>::destroy ()
-  {;}
-  
-  //_____________________________________________________________________________
-  //                                                                    operator=
-  
-  template <class T>
-  BasicFilter<T> &BasicFilter<T>::operator= (BasicFilter<T> const &other)
-  {
-    if (this != &other) {
-      destroy ();
-      copy (other);
-    }
-    return *this;
-  }
+  /* everything defined as inline */
   
   // ============================================================================
   //
@@ -129,10 +55,10 @@ namespace CR {  // Namespace CR -- begin
   //
   // ============================================================================
   
-  template class BasicFilter<casa::Int>;
-  template class BasicFilter<casa::Float>;
-  template class BasicFilter<casa::Double>;
-  template class BasicFilter<casa::Complex>;
-  template class BasicFilter<casa::DComplex>;
+//   template class BasicFilter<casa::Int>;
+//   template class BasicFilter<casa::Float>;
+//   template class BasicFilter<casa::Double>;
+//   template class BasicFilter<casa::Complex>;
+//   template class BasicFilter<casa::DComplex>;
   
 }  // Namespace CR -- end

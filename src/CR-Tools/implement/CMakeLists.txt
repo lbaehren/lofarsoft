@@ -16,6 +16,7 @@ set (cr_modules
   Calibration
   Coordinates
   Data
+  Filters
   Imaging
   IO
   Math

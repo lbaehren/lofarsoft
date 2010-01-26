@@ -49,8 +49,8 @@ if (CR_WITH_PYCR)
     ../IO/DataIterator.cc
     ../IO/DataReader.cc
     ../IO/LOFAR_TBB.cc
-    ../Math/BasicFilter.cc
-    ../Math/HanningFilter.cc
+    ../Filters/BasicFilter.cc
+    ../Filters/HanningFilter.cc
     ../Coordinates/MConversions.cc
     pycr.cc
     )

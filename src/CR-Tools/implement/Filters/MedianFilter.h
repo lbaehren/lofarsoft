@@ -33,11 +33,12 @@
 
 /*!
   \class MedianFilter
-
-  \ingroup CR_Math
-
+  
+  \ingroup CR
+  \ingroup CR_Filters
+  
   \brief A Meadian filter
-
+  
   \author Lars B&auml;hren
 
   \date 2005/12/21

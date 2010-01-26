@@ -82,6 +82,12 @@ bool AntennasDisplay::setAllAntennas (std::vector<double> xCoordinatesALL,
 //_______________________________________________________________________________
 //                                                                 setAllAntennas
 
+/*!
+  \param xCore -- x coordinate of the shower core position on the ground.
+  \param yCore -- y coordinate of the shower core position on the ground.
+  \param azimuth -- Azimuth angle of the shower's direction of arrival.
+  \param elevation -- Elevation angle of the shower's direction of arrival.
+*/
 void AntennasDisplay::setCore (double xCore,
                                double yCore,
                                double azimuth,
@@ -268,6 +274,37 @@ AntennasDisplay::borders AntennasDisplay::getBorders (int plotsOffset)
 //_______________________________________________________________________________
 //                                                                     createPlot
 
+/*!
+  \param title -- Title of the resulting canvas
+  \param width -- Width of resulting canvas
+  \param height -- Height of resulting canvas
+  \param lineWidth -- Width of lines representing singal's magnitudes
+  \param plotFittingStep -- Fitting parameter - the smaller it is, the more
+         accurate maximum length of signal value depicted on the plot one can
+	 achieve
+  \param plotsOffset -- Plots offset
+  \param bckgFillColor -- Canvas' fill color
+  \param deadAntColor -- Color in which dead antennas are drawn
+  \param deadAntMarkerSize -- Size of marker indicating dead antenna
+  \param numberOfColorsInLeg -- Number of colors in the legend
+  \param distanceOfLegColors -- Distance between those colors. Please note that
+         if you want to use the color range [x,y] and only n colors from it
+	 where n < abs(x-y) you should make the distance be multiple of number
+	 of colors in the legend.
+  \param firstColorOfLeg -- First color of the legend
+  \param legBorderSize -- Size of border surrounding the legend
+  \param legFillColor -- Fill color of legend's field
+  \param legTextSize -- Size of the text in the legend field
+  \param legStartPosX -- Legend positions (x1, y1, x2, y2) -- <tt>x1</tt> component
+  \param legStartPosY -- Legend positions (x1, y1, x2, y2) -- <tt>y1</tt> component
+  \param legEndPosX -- Legend positions (x1, y1, x2, y2) -- <tt>x2</tt> component
+  \param legEndPosY -- Legend positions (x1, y1, x2, y2) -- <tt>y2</tt> component
+  \param legEntrySeparation -- Distance between legend fields
+  \param legMarkerSize -- Size of each field in the legend
+  \param elevationPlotMax -- Max elevation's line length
+  \param elevationPlotMin -- Min elevation's line length
+  \param elevationArrowSize -- Size of elevation's arrow
+ */
 TCanvas* AntennasDisplay::createPlot (std::string title,
                                       unsigned int width,
                                       unsigned int height,

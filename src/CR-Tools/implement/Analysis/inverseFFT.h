@@ -44,7 +44,7 @@
 #include <scimath/Mathematics/InterpolateArray1D.h>
 
 // CR header files
-#include <Math/StatisticsFilter.h>
+#include <Filters/StatisticsFilter.h>
 #include <IO/DataIterator.h>
 
 using casa::DComplex;

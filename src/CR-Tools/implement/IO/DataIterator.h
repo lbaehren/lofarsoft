@@ -90,82 +90,37 @@ namespace CR {  // Namespace CR -- begin
     
   public:
     
-    // --- Construction ---------------------------------------------------------
+    // === Construction =========================================================
     
-    /*!
-      \brief Default constructor
-      
-      This will set \f$ N_{\rm Start} \equiv N_{Stride} \equiv N_{\rm Shift}
-      \equiv 0 \f$ and \f$ N_{\rm Blocksize} \equiv n_{\rm Block} \equiv 1 \f$,
-      thus \f$ n_{\rm Position} = 0 \f$.
-    */
-    DataIterator ();
+    //! Argumented constructor
+    DataIterator (unsigned int const &blocksize=1,
+		  unsigned int const &dataStart=0);
     
-    /*!
-      \brief Argumented constructor
-      
-      \param blocksize -- Size of a datablock (in units of <tt>T</tt>).
-    */
-    DataIterator (unsigned int const &blocksize);
-    
-    /*!
-      \brief Argumented constructor
-      
-      \param blocksize -- Size of a datablock, \f$ N_{\rm Blocksize} \f$, in units
-                          of <tt>T</tt>
-      \param dataStart -- Start of the data segment, \f$ N_{\rm Start} \f$.
-    */
-    DataIterator (unsigned int const &blocksize,
-		  unsigned int const &dataStart);
-    
-    /*!
-      \brief Argumented constructor
-      
-      \param blocksize -- Size of a datablock, \f$ N_{\rm Blocksize} \f$, in units
-                          of <tt>T</tt>
-      \param stride    -- Stride between two subsequent blocks of data,
-                          \f$ N_{Stride} \f$, in units of <tt>T</tt>
-      \param shift     -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$
-    */
+    //! Argumented constructor
     DataIterator (unsigned int const &blocksize,
 		  long int const &stride,
 		  int const &shift);
     
-    /*!
-      \brief Argumented constructor
-      
-      \param blocksize -- Size of a datablock, \f$ N_{\rm Blocksize} \f$, in units
-                          of <tt>T</tt>
-      \param dataStart -- Start of the data segment, \f$ N_{\rm Start} \f$.
-      \param stride    -- Stride between two subsequent blocks of data,
-                          \f$ N_{Stride} \f$, in units of <tt>T</tt>
-      \param shift     -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$
-    */
+    //! Argumented constructor
     DataIterator (unsigned int const &blocksize,
 		  unsigned int const &dataStart,
 		  long int const &stride,
 		  int const &shift);
     
-    /*!
-      \brief Copy constructor
-    */
+    //! Copy constructor
     DataIterator (DataIterator const &other);
     
-    // --- Destruction ----------------------------------------------------------
+    // === Destruction ==========================================================
     
-    /*!
-      \brief Destructor
-    */
+    //! Destructor
     ~DataIterator ();
     
-    // --- Operators ------------------------------------------------------------
+    // === Operators ============================================================
     
-    /*!
-      \brief Copy operator
-    */
+    //! Copy operator
     DataIterator &operator= (DataIterator const &other);
     
-    // --- Parameters -----------------------------------------------------------
+    // === Parameter access =====================================================
     
     /*!
       \brief Get the step width
@@ -272,7 +227,7 @@ namespace CR {  // Namespace CR -- begin
     /*!
       \brief Get the shift between the start of the data segment and the first block.
       
-      \return shift 
+      \return shift - Shift w.r.t. the start of the data segment
     */
     inline int shift () const {
       return shift_p;
@@ -281,7 +236,7 @@ namespace CR {  // Namespace CR -- begin
     /*!
       \brief Set the shift between the start of the data segment and the first block.
       
-      \param shift - Shift w.r.t. the start of the data segment (\f$ N_{\rm Start} \f$).
+      \param shift - Shift w.r.t. the start of the data segment
     */
     void setShift (int const &shift);
     
@@ -319,9 +274,7 @@ namespace CR {  // Namespace CR -- begin
     */
     void setBlock (unsigned int const &block);
     
-    /*!
-      \brief Advance the blocknumber by one.
-    */
+    //! Advance the blocknumber by one.
     void nextBlock ();
     
     // --- Methods --------------------------------------------------------------
@@ -345,31 +298,24 @@ namespace CR {  // Namespace CR -- begin
     */
     unsigned int maxNofBlocks (unsigned int const &filesize);
     
-    /*!
-      \brief Provide a summary of the internal status
-    */
+    //! Provide a summary of the internal status
     void summary ();
     
   private:
     
-    /*!
-      \brief Unconditional copying
-    */
+    //! Unconditional copying
     void copy (DataIterator const &other);
     
-    /*!
-      \brief Unconditional deletion 
-    */
+    //! Unconditional deletion 
     void destroy(void);
     
-    /*!
-      \brief Initialize internal buffers.
-    */
-    void init ();
+    //! Initialize internal buffers.
+    void init (unsigned int const &blocksize=1,
+	       unsigned int const &dataStart=0,
+	       long int const &stride=0,
+	       int const &shift=0);
     
-    /*!
-      \brief Set the current position within the filestream.
-    */
+    //! Set the current position within the filestream.
     void setPosition ();
     
   };
@@ -377,4 +323,4 @@ namespace CR {  // Namespace CR -- begin
 }  // Namespace CR -- end
 
 #endif /* _DATAITERATOR_H_ */
-  
+

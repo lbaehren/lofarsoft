@@ -22,7 +22,7 @@
  ***************************************************************************/
 
 #include <GlishClients/lopestools.h>
-#include <Math/MedianFilter.h>
+#include <Filters/MedianFilter.h>
 
 //--------------------------------------------------------------------------
 //

@@ -18,17 +18,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Math/RaisedCosineFilter.h>
+#include <Filters/RaisedCosineFilter.h>
 
 /*!
   \file tRaisedCosineFilter.cc
   
-  \ingroup CR_Math
-
+  \ingroup CR
+  \ingroup CR_Filters
+  
   \brief A collection of test routines for RaisedCosineFilter
- 
+  
   \author Lars Bahren
- 
+  
   \date 2005/11/17
 */
 
@@ -36,7 +37,7 @@
 
 /*!
   \brief Test constructors for a new RaisedCosineFilter object
-
+  
   \return nofFailedTests -- The number of failed tests.
 */
 int test_RaisedCosineFilter ()

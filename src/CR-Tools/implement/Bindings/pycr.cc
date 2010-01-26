@@ -28,10 +28,10 @@
 #include <crtools.h>
 #include <Coordinates/CoordinateType.h>
 #include <Coordinates/TimeFreq.h>
+#include <Filters/HanningFilter.h>
 #include <IO/LOFAR_TBB.h>
 #include <IO/DataIterator.h>
 #include <IO/DataReader.h>
-#include <Math/HanningFilter.h>
 #include <Analysis/DynamicSpectrum.h>
 
 // Basic Python header

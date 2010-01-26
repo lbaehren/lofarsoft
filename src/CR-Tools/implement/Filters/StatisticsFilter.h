@@ -21,8 +21,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #ifndef _STATISTICSFILTER_H_
 #define _STATISTICSFILTER_H_
 
@@ -36,7 +34,8 @@
 /*!
   \class FilterType
   
-  \ingroup CR_Math
+  \ingroup CR
+  \ingroup CR_Filters
 
   \author Lars B&auml;hren
 

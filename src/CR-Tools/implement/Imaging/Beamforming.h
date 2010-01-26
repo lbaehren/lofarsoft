@@ -41,7 +41,7 @@
 #include <Math/MathAlgebra.h>
 #include <Math/VectorConversion.h>
 #include <Math/VectorNorms.h>
-#include <Math/StatisticsFilter.h>
+#include <Filters/StatisticsFilter.h>
 
 namespace CR { // Namespace CR -- begin
   

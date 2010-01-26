@@ -110,6 +110,8 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 
   if (HAVE_PGPLOT OR HAVE_PLPLOT)
+
+    ## compiler instructions
     add_executable (call_pipeline
       call_pipeline.cc
       ${CR_SOURCE_DIR}/implement/Analysis/RootDict.C
@@ -125,13 +127,16 @@ if (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
     ## linker instructions
     target_link_libraries (call_pipeline
       cr
-      ${STARTOOLS_LIBRARIES}
-      ${ROOT_LIBRARIES}
-      ${FFTW3_LIBRARIES}
       ${POSTGRESQL_LIBRARIES}
+      ${STARTOOLS_LIBRARIES}
+      ${FFTW3_LIBRARIES}
+      ${ROOT_LIBRARIES}
+      ${HAVE_LIBUTIL}
+      ${HAVE_LIBM}
       )
     ## installation instructions
     list (APPEND cr_apps call_pipeline)
+
   endif (HAVE_PGPLOT OR HAVE_PLPLOT)
 
 endif (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)

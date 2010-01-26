@@ -41,7 +41,7 @@
 #include <casa/BasicSL/Complex.h>
 #include <scimath/Mathematics.h>
 
-#include <Math/BasicFilter.h>
+#include <Filters/BasicFilter.h>
 
 using std::cerr;
 using std::cout;
@@ -52,7 +52,8 @@ namespace CR {  // Namespace CR -- begin
   /*!
     \class HanningFilter
     
-    \ingroup CR_Math
+    \ingroup CR
+    \ingroup CR_Filters
     
     \brief A generalized Hanning filter 
     

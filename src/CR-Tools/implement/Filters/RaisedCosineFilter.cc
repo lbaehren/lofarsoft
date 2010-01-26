@@ -21,9 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Math/RaisedCosineFilter.h>
-
-const double pi = 3.1415926535897932384626433832795;
+#include <Filters/RaisedCosineFilter.h>
 
 namespace CR {  // Namespace CR -- begin
   
@@ -162,15 +160,15 @@ namespace CR {  // Namespace CR -- begin
     unsigned int blocksize = BasicFilter<T>::blocksize();
     T alpha                = 0.0;
     
-    Vector<T> weights (blocksize,1.0);
+    casa::Vector<T> weights (blocksize,1.0);
     
     // raising segment
-    alpha = pi/(deltaRise_p);
+    alpha = CR::pi/(deltaRise_p);
     for (n=0; n<deltaRise_p; n++) {
-      weights[n] = 0.5*(cos(alpha*(n)+pi) + 1);
+      weights[n] = 0.5*(cos(alpha*(n)+CR::pi) + 1);
     }
     // falling transition
-    alpha = pi/(deltaFall_p);
+    alpha = CR::pi/(deltaFall_p);
     for (n=0; n<deltaFall_p; n++) {
       weights[blocksize-deltaFall_p+n] = 0.5*(cos(alpha*(n)) + 1);
     }
