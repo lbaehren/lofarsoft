@@ -250,6 +250,9 @@ namespace CR { // Namespace CR -- begin
              << endl;
         return erg;
       }
+      // store number of antennas used for CC beam
+      erg.define("NCCbeamAntennas",uInt(ntrue(AntennaSelection)));
+
 
       //perform the position fitting (if simplexFit = false, then only the PhaseCenter is set)
       if (! doPositionFitting(Az, El, distance, center, XC, YC, RotatePos,
@@ -811,7 +814,7 @@ namespace CR { // Namespace CR -- begin
                                                   Record& erg,
                                                   const double& Xc,
                                                   const double& Yc,
-                                                  const double& energy)
+                                                  bool fitPowerLaw)
  {
     try {
       cout << "\nFitting lateral distribution..." << endl;
@@ -1078,6 +1081,9 @@ namespace CR { // Namespace CR -- begin
       /* FIT */
       // do fit only if there are at least 3 good antennas left (otherwise set parameters to 0)!
       if (clean >= 3) {
+        // store number of antennas used for fit
+        erg.define("NlateralAntennas",clean);
+
         // fit exponential
         TF1 *fitfuncExp;
         fitfuncExp=new TF1("fitfuncExp","[0]*exp(-x/[1])",50,190);
@@ -1110,59 +1116,71 @@ namespace CR { // Namespace CR -- begin
         cout << "\nCreating plot: " << plotNameStream.str() << endl;
         c1->Print(plotNameStream.str().c_str());
 
-        // fit power law
-        TF1 *fitfuncPow;
-        fitfuncPow=new TF1("fitfuncPow","[0]*x^[1]");
-        fitfuncPow->SetParName(0,"#epsilon_{0}");
-        fitfuncPow->SetParName(1,"k");
-        fitfuncPow->GetXaxis()->SetRange(20,300);
-        fitfuncPow->SetFillStyle(0);
-        fitfuncPow->SetLineWidth(2);
-        //fitfuncPow->SetLineColor(3);
-
-        cout << "------------------------------"<<endl;
-        latProClean->Fit(fitfuncPow, "");
-        ptstats->Draw();
-
-        // write fit results to record with other results
-        erg.define("epsPow",fitfuncPow->GetParameter(0));
-        erg.define("kPow",fitfuncPow->GetParameter(1));
-        erg.define("sigepsPow",fitfuncPow->GetParError(0));
-        erg.define("sigkPow",fitfuncPow->GetParError(1));
-        erg.define("chi2NDFPow",fitfuncPow->GetChisquare()/double(fitfuncPow->GetNDF()));
-        cout << "Result of power law fit epsPow * x ^ kPow:\n"
-             << "epsPow = " << fitfuncPow->GetParameter(0) << "\t +/- " << fitfuncPow->GetParError(0) << "\t µV/m/MHz\n"
-             << "kPow   = " << fitfuncPow->GetParameter(1) << "\t +/- " << fitfuncPow->GetParError(1) << "\t m\n"
-             << "Chi^2  = " << fitfuncPow->GetChisquare() << "\t NDF " << fitfuncPow->GetNDF() << "\n"
-             << endl;
-
-        // write plot to file
-        plotNameStream.str("");
-        plotNameStream << filePrefix << GT << "_pow.eps";
-        cout << "\nCreating plot: " << plotNameStream.str() << endl;
-        c1->Print(plotNameStream.str().c_str());
-
         // calculate residuals 
         double eps = fitfuncExp->GetParameter(0);
         double r_0 = fitfuncExp->GetParameter(1);
-        double epsPow = fitfuncPow->GetParameter(0);
-        double kPow = fitfuncPow->GetParameter(1);
         for (unsigned int i=0 ; i < clean; ++i) {
           double calculatedExp = eps * exp(-distanceClean[i]/r_0);
           double deviationExp  = 1. - fieldStrClean[i]/calculatedExp;
-          double calculatedPow = epsPow * pow(distanceClean[i], kPow);
-          double deviationPow  = 1. - fieldStrClean[i]/calculatedPow;
-
+ 
           calibPulses[antIDclean[i]].lateralExpHeight = calculatedExp;
           calibPulses[antIDclean[i]].lateralExpDeviation = deviationExp;
-          calibPulses[antIDclean[i]].lateralPowHeight = calculatedPow;
-          calibPulses[antIDclean[i]].lateralPowDeviation = deviationPow;
+            /* debug output 
+            cout << "Residuals for Ant " << antIDclean[i] << ": "
+                 << "Exp: " << deviationExp*100 << "  \% \t"
+                 << endl;
+            */
+        }
+
+        // fit power law
+        if (fitPowerLaw) {
+          TF1 *fitfuncPow;
+          fitfuncPow=new TF1("fitfuncPow","[0]*x^[1]");
+          fitfuncPow->SetParName(0,"#epsilon_{0}");
+          fitfuncPow->SetParName(1,"k");
+          fitfuncPow->GetXaxis()->SetRange(20,300);
+          fitfuncPow->SetFillStyle(0);
+          fitfuncPow->SetLineWidth(2);
+          //fitfuncPow->SetLineColor(3);
+
+          cout << "------------------------------"<<endl;
+          latProClean->Fit(fitfuncPow, "");
+          ptstats->Draw();
+
+          // write fit results to record with other results
+          erg.define("epsPow",fitfuncPow->GetParameter(0));
+          erg.define("kPow",fitfuncPow->GetParameter(1));
+          erg.define("sigepsPow",fitfuncPow->GetParError(0));
+          erg.define("sigkPow",fitfuncPow->GetParError(1));
+          erg.define("chi2NDFPow",fitfuncPow->GetChisquare()/double(fitfuncPow->GetNDF()));
+          cout << "Result of power law fit epsPow * x ^ kPow:\n"
+               << "epsPow = " << fitfuncPow->GetParameter(0) << "\t +/- " << fitfuncPow->GetParError(0) << "\t µV/m/MHz\n"
+               << "kPow   = " << fitfuncPow->GetParameter(1) << "\t +/- " << fitfuncPow->GetParError(1) << "\t m\n"
+               << "Chi^2  = " << fitfuncPow->GetChisquare() << "\t NDF " << fitfuncPow->GetNDF() << "\n"
+               << endl;
+
+          // write plot to file
+          plotNameStream.str("");
+          plotNameStream << filePrefix << GT << "_pow.eps";
+          cout << "\nCreating plot: " << plotNameStream.str() << endl;
+          c1->Print(plotNameStream.str().c_str());
+
+          // calculate residuals 
+          double epsPow = fitfuncPow->GetParameter(0);
+          double kPow = fitfuncPow->GetParameter(1);
+          for (unsigned int i=0 ; i < clean; ++i) {
+            double calculatedPow = epsPow * pow(distanceClean[i], kPow);
+            double deviationPow  = 1. - fieldStrClean[i]/calculatedPow;
+
+            calibPulses[antIDclean[i]].lateralPowHeight = calculatedPow;
+            calibPulses[antIDclean[i]].lateralPowDeviation = deviationPow;
             /* debug output 
             cout << "Residuals for Ant " << antIDclean[i] << ": "
                  << "Exp: " << deviationExp*100 << "  \% \t"
                  << "Pow: " << deviationPow*100 << "  \%"
                  << endl;
             */
+          }  
         }
       } else {
         erg.define("eps",0.);

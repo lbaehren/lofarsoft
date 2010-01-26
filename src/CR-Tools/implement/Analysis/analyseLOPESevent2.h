@@ -579,17 +579,17 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Fits the lateral distribution
 
-      \param filePrefix - the filename will be prefix+GT+".dat".
-      \param erg        - results of the pipeline (results from the fit will be added)
-      \param XC         - x-position of the shower center [in m]
-      \param YC         - y-position of the shower center [in m]
-      \param energy     - estimated shower energy
+      \param filePrefix  - the filename will be prefix+GT+".dat".
+      \param erg         - results of the pipeline (results from the fit will be added)
+      \param XC          - x-position of the shower center [in m]
+      \param YC          - y-position of the shower center [in m]
+      \param fitPowerLaw - fits not only an exponential, but also a power law
    */
     void fitLateralDistribution (const string& filePrefix,
                                  Record& erg,
                                  const double& Xc=0,
                                  const double& Yc=0,
-                                 const double& energy=0);
+                                 bool fitPowerLaw=false );
 
     /*!
       \brief Plots lateral distribution of arrival times
