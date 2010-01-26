@@ -27,8 +27,8 @@
 #  QT_INCLUDES        = Include path for the header files of QT
 #  HAVE_QT4_QWIDGET   = Include path to the QWidget header file
 #  QT_LIBRARIES       = Link these to use QT
-#  QT4_LIBRARY_QTCORE = Path to the QtCore library
-#  QT4_LIBRARY_QTGUI  = Path to the QtGui library
+#  QT4_QTCORE_LIBRARY = Path to the QtCore library
+#  QT4_QTGUI_LIBRARY  = Path to the QtGui library
 #  QT_LFLAGS          = Linker flags (optional)
 
 ## -----------------------------------------------------------------------------
@@ -57,33 +57,33 @@ endif (HAVE_QT4_QWIDGET)
 
 ## QtCore
 
-find_library (QT4_LIBRARY_QTCORE QtCore
+find_library (QT4_QTCORE_LIBRARY QtCore
   PATHS ${lib_locations}
   PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
   )
-if (QT4_LIBRARY_QTCORE)
-  list (APPEND QT4_LIBRARIES ${QT4_LIBRARY_QTCORE})
-endif (QT4_LIBRARY_QTCORE)
+if (QT4_QTCORE_LIBRARY)
+  list (APPEND QT4_LIBRARIES ${QT4_QTCORE_LIBRARY})
+endif (QT4_QTCORE_LIBRARY)
 
 ## QtGui
 
-find_library (QT4_LIBRARY_QTGUI QtGui
+find_library (QT4_QTGUI_LIBRARY QtGui
   PATHS ${lib_locations}
   PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
   )
-if (QT4_LIBRARY_QTGUI)
-  list (APPEND QT4_LIBRARIES ${QT4_LIBRARY_QTGUI})
-endif (QT4_LIBRARY_QTGUI)
+if (QT4_QTGUI_LIBRARY)
+  list (APPEND QT4_LIBRARIES ${QT4_QTGUI_LIBRARY})
+endif (QT4_QTGUI_LIBRARY)
 
 ## QtDesigner
 
-find_library (QT4_LIBRARY_QTDESIGNER QtDesigner
+find_library (QT4_QTDESIGNER_LIBRARY QtDesigner
   PATHS ${lib_locations}
   PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
   )
-if (QT4_LIBRARY_QTDESIGNER)
-  list (APPEND QT4_LIBRARIES ${QT4_LIBRARY_QTDESIGNER})
-endif (QT4_LIBRARY_QTDESIGNER)
+if (QT4_QTDESIGNER_LIBRARY)
+  list (APPEND QT4_LIBRARIES ${QT4_QTDESIGNER_LIBRARY})
+endif (QT4_QTDESIGNER_LIBRARY)
 
 ## Adjust the ordering for the statement passed to the linker
 
@@ -127,6 +127,7 @@ mark_as_advanced (
   QT_INCLUDES
   QT_LIBRARIES
   HAVE_QT4_QWIDGET
-  QT4_LIBRARY_QTCORE
-  QT4_LIBRARY_QTGUI
+  QT4_QTCORE_LIBRARY
+  QT4_QTGUI_LIBRARY
+  QT4_QTDESIGNER_LIBRARY
   )
