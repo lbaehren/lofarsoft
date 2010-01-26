@@ -1,0 +1,60 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="SHORTCUT ICON"
+ href="http://psrchive.sourceforge.net/img/square50.png">
+<style type="text/css">
+@import url("http://psrchive.sourceforge.net/css/psrchive.css");
+</style>
+</head>
+
+<!--#set var="name" value="Willem van Straten" -->
+<!--#set var="year" value="2006-2009" -->
+
+<body>
+
+<div id="super-header">
+<div id="header">
+
+<div id="header-left">
+  <img src="http://psrchive.sourceforge.net/img/square50.png">
+  <b><font size=6><!--#echo encoding="none" var="project_fancy" --></font></b>
+</div>
+
+<!--#if expr="'$project_freefind' != '0'" -->
+
+<div id="header-right">
+
+<TABLE CELLPADDING=5>
+<TR valign=top>
+<TD>Search <!--#echo encoding="none" var="project_fancy" -->:</TD>
+
+<TD>
+<FORM ACTION="http://search.freefind.com/find.html"
+ METHOD="GET" accept-charset="utf-8" target="_self">
+
+<FONT size=1 face="arial,helvetica" >
+<INPUT TYPE="HIDDEN" NAME="id" VALUE="<!--#echo var="project_freefind" -->">
+<INPUT TYPE="HIDDEN" NAME="pageid" VALUE="r">
+<INPUT TYPE="HIDDEN" NAME="mode" VALUE="ALL">
+<INPUT type="HIDDEN" name="n" value="0">
+<INPUT TYPE="HIDDEN" NAME="_charset_" VALUE="">
+<INPUT TYPE="HIDDEN" NAME="bcd" VALUE="&#247;">
+<INPUT TYPE="TEXT" NAME="query" SIZE="15"><small> 
+<INPUT TYPE="SUBMIT" VALUE=" Find "><br>
+</small>powered by <A HREF="http://www.freefind.com">
+FreeFind</A></font></FORM>
+
+</TD>
+</TR>
+</TABLE>
+
+</div>
+
+<!--#endif -->
+
+</div>
+</div>
+
+<!-- start the table for the rest of the page -->
+
+<TABLE CELLPADDING=10>
+<TR valign=top>

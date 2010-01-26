@@ -1,0 +1,26 @@
+#! /bin/csh -f
+
+# @configure_input@
+
+set tarfile = psrchive-@PACKAGE_VERSION@.tar.gz
+
+if ( ! -f $tarfile ) then
+  echo "$tarfile not found"
+  echo "Please run 'make dist' first"
+  exit
+endif
+
+# determine the SourceForge user name from CVS/Root
+set SFUSER = `awk -F@ '{print $1}' CVS/Root`
+
+# the sourceforge file release system details
+set frslogin = ${SFUSER},psrchive@frs.sourceforge.net
+set frspath = /home/frs/project/p/ps/psrchive/psrchive/@PACKAGE_VERSION@/$tarfile
+
+echo
+echo "This script will install the public release of $tarfile as $SFUSER"
+echo "Please hit <Enter> to continue or <Ctrl-C> to abort"
+$<
+
+rsync -e ssh $tarfile ${frslogin}:${frspath}
+

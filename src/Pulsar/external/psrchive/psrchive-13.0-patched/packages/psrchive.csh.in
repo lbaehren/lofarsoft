@@ -1,0 +1,20 @@
+#!/bin/csh -ef
+
+# @configure_input@
+
+mkdir -p @prefix@/src
+cd @prefix@/src
+
+source @abs_srcdir@/pulsar.cshrc
+
+if ( ! -f psrchive-8.1.tar.gz ) then
+  @download@ http://downloads.sourceforge.net/psrchive/psrchive-8.1.tar.gz
+endif
+
+gunzip -c psrchive-8.1.tar.gz | tar xvf -
+cd psrchive-8.1
+
+./configure --prefix=$PSRHOME/$LOGIN_ARCH
+make
+make install
+

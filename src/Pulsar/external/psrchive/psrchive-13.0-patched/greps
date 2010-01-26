@@ -1,0 +1,16 @@
+#!/bin/csh -fe
+
+if ( "$1" == "-h" || "$1" == "--help" || "$1" == "" ) then
+  echo
+  echo "greps: searches psrchive source code for regular expression"
+  echo
+  echo "usage:"
+  echo "  greps <regex>"
+  echo
+  exit
+endif
+
+grep $* `find Util Base More -name "*.[hcC]"`
+
+grep $* `find Util Base More -name Makefile.am`
+

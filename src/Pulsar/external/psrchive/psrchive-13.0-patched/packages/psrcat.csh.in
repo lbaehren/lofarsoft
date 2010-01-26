@@ -1,0 +1,22 @@
+#!/bin/csh -ef
+
+# @configure_input@
+
+mkdir -p @prefix@/src
+cd @prefix@/src
+
+if ( ! -f psrcat.tar.gz ) then
+  @download@ http://www.atnf.csiro.au/research/pulsar/psrcat/psrcat.tar.gz
+endif
+
+gunzip -c psrcat.tar.gz | tar xvf -
+cd psrcat
+
+source makeit
+
+mv psrcat $PSRHOME/$LOGIN_ARCH/bin
+
+mkdir -p $PSRHOME/runtime/psrcat
+
+mv psrcat.db $PSRHOME/runtime/psrcat
+

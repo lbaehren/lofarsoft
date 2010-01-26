@@ -1,0 +1,248 @@
+#
+# This file defines all pulsar parameters understood by the psrephem class
+#
+# Each line consists of a keyword name followed by a code specifying
+# the format of the data associated with it. The codes are as follows:
+#         0 = string, 
+#         1 = real, 
+#         2 = h:m:s --> turns
+#         3 = d:m:s --> turns
+#         4 = real  --> integer, fractional
+#         5 = integer
+# --> indicates the entity on the left specifies the format in the
+#      file and the entity on the right specifies the format used
+#      by readeph/writeph
+# this is followed by a 0 or a 1 to indicate whether an error value
+# is associated with the quantity. Such a value is assumed to be real.
+#      use keys2fort to produce the necessary fortran array definitions
+#      stored in keyinfo.com
+#
+# New parameters can be added in any position, with the proviso that
+# calling programs always use the "parameter" definitions produced
+# in keyinfo.com (e.g. EPH_RAJ) to index into arrays, rather than
+# directly using integers.
+#
+# Comments describe parameters and their units as expected/produced
+# by write_eph/read_eph
+#
+# Values in |straight brackets| indicate the format for a parameter
+#  as expected in new input files and as output by write_eph
+#
+# Values in <angle brackets> indicate the format for a parameter
+# as expected in _old_ ephemeris format files 
+
+#! Values commented out with #! are presumed no longer wanted
+
+# Commonly used parameters
+
+PSRJ 0 0      # Pulsar name (J2000)
+PSRB 0 0      # Pulsar name (B1950)
+
+RAJ 2 1       # Right Ascension (J2000) (turns) |hh:mm:ss.ssss... err in sec|
+              #                        <hh:mm[:ssss....] err in last digit>
+DECJ 3 1      # Declination (J2000) (turns) |[-]dd:mm:ss.ssss... err in arcsec|
+              #                        <[-/+]dd:mm[:ssss...] err in last digit>
+
+LAMBDA 1 1    # Ecliptic longitude (deg)
+BETA 1 1      # Ecliptic latitude (deg)
+
+ELONG 1 1     # Synonym for ecliptic longitude (deg)
+ELAT 1 1      # Synonym for ecliptic latitude (deg)
+
+PEPOCH 4 0    # Epoch of period [frequency] determination (MJD)
+
+F 1 1         # Barycentric frequency (s^-1)
+F1 1 1        # Time derivative of barycentric frequency (s^-2)
+              # <old files have Pdot in units of 10^-15>
+F2 1 1        # Second time derivative of barycentric freq. (s^-3)
+F3 1 1        # ....
+F4 1 1
+F5 1 1
+F6 1 1
+F7 1 1
+F8 1 1
+F9 1 1
+FA 1 1
+
+PMDEC 1 1     # Proper motion in DEC (mas/yr)
+PMRA 1 1      # Proper motion in RA  (mas/yr)
+PMLAMBDA 1 1  # Proper motion in ecliptic longitude (mas/yr)
+PMBETA 1 1    # Proper motion in ecliptic latitude (mas/yr)
+PMRV 1 1      # Radial 'proper motion' (mas/yr)
+POSEPOCH 4 0  # Epoch of position determination (MJD)
+PX 1 1        # Parallax (mas)
+DM 1 1        # Dispersion measure (pc cm^-3)
+DM1 1 1       # First time derivative of dispersion measure (pc cm^-3 yr^-1)
+DM2 1 1       # ....
+DM3 1 1
+DM4 1 1
+DM5 1 1
+DM6 1 1
+DM7 1 1
+DM8 1 1
+DM9 1 1
+
+RM 1 1        # Rotation Measure (rad m^-2)
+
+START 4 0     # Epoch of start of fit (MJD)
+FINISH 4 0    # Epoch of end of fit (MJD)
+ 
+# Tempo parameters
+CLK 0  0      # Terrestrial time standard
+EPHEM 0 0     # Solar system ephemeris
+TZRMJD 4 0    # Reference TOA (MJD)
+TZRFRQ 1 0    # Frequency of reference TOA (MHz)
+TZRSITE 0 0   # One-letter observatory code of reference TOA
+
+TZNSPAN 5 0   # Integer number of minutes spanned by each polynomial
+TZNCOEF 5 0   # Number of coefficients in each polynomial
+
+#TAU 1 1      # LOG10 of the temporal broadening of pulses at 1 GHz (log10(s))
+
+# Binary information. Keplerian parameters.
+BINARY 0      # Binary model
+A1 1 1        # Projected pulsar semi-major axis of 1st orbit. aka A1_1.
+A1_2 1 1      #    "         "     "    "     "  "  2nd orbit
+A1_3 1 1      # ...
+E 1 1         # Eccentricity of 1st orbit. aka E_1
+E_2 1 1    
+E_3 1 1    
+T0 4 1        # Epoch of periastron of 1st orbit. aka TO_1 
+T0_2 4 1     
+T0_3 4 1     
+PB 1 1        # Period of 1st orbit. aka PB_1 
+PB_2 1 1     
+PB_3 1 1     
+OM 1 1        # Longitude of periastron of 1st orbit. aka OM_1 
+OM_2 1 1 
+OM_3 1 1 
+
+FB 1 1        # Binary frequency used by BTX model
+FB_1 1 1      # First time derivative of binary frequency 
+FB_2 1 1
+FB_3 1 1
+FB_4 1 1
+FB_5 1 1
+FB_6 1 1
+FB_7 1 1
+FB_8 1 1
+FB_9 1 1
+
+KOM 1 1       # Longitude of ascending node  [DDK-WvS]
+KIN 1 1       # Inclination angle (0 - 180)  [DDK-WvS]
+
+# Post-Keplerian binary parameters.  
+OMDOT 1 1     # Rate of periastron advance (deg/yr), 1st orbit
+OMDOT_2 1 1   #   "         "         "        "    2nd orbit
+OMDOT_3 1 1  
+GAMMA 1 1     # Time dilation and gravitational redshift (sec) 
+PBDOT 1 1     # Rate of change of orbital period (10^-12), 1st orbit
+PBDOT_2 1 1  
+PBDOT_3 1 1  
+
+
+PPNGAMMA 1 1  # PPN parameter gamma
+SINI 1 1      # Sine of inclination angle
+SINI_2 1 1    # 
+SINI_3 1 1    # 
+MTOT 1 1      # Total system mass (solar masses)
+M2 1 1        # Companion mass (solar masses)
+M2_2 1 1      #   
+M2_3 1 1      # 
+DTHETA 1 1    # Relativistic deformation of the orbit (-6)
+XDOT 1 1      # Rate of change of projected semi-major axis (-12)
+EDOT 1 1      # Rate of change of eccentricity (-12)
+XOMDOT 1 1    # Rate of periastron advance minus GR prediction (deg/yr)
+XPBDOT 1 1    # Rate of change of orbital period minus GR prediction (10^-12)
+DR 1 0        # Relativistic deformation of the orbit (not fit)
+A0 1 0        # Aberration parameter (microsec) (not fit)
+B0 1 0        # Aberration parameter (microsec) (not fit)
+BP 1 0        # Tensor multi-scalar parameter beta-prime (not fit)
+BPP 1 0       # Tensor multi-scalar parameter beta-prime-prime (not fit)
+EPS1 1 1      # ELL1 timing model param (dimensionless)
+EPS2 1 1      #        "      "
+TASC 4 1      # Time of ascending node (MJD)
+
+# Glitches
+
+# Jodrell format
+EXPA 1 1      # Phase exponential amplitude
+EXPA_2 1 1    # Phase exponential amplitude
+EXPA_3 1 1    # Phase exponential amplitude
+EXPT 1 1      # Phase exponential timescale
+EXPT_2 1 1    # Phase exponential timescale
+EXPT_3 1 1    # Phase exponential timescale
+
+# Dick's format 
+GLEP_1 4 0    # Epoch of glitch num 1
+GLPH_1 1 1    # Glitch 1 phase increment
+GLF0_1 1 1    # Permanent glitch 1 pulse frequency increment (s^-1)
+GLF1_1 1 1    # Permanent glitch 1 frequency derivative increment (s^-2)
+GLF0D_1 1 1   # Decaying glitch 1 frequency increment (s^-1)
+GLTD_1 1 1    # Decay time constant for glitch 1 (days)
+GLEP_2 4 0
+GLPH_2 1 1
+GLF0_2 1 1
+GLF1_2 1 1
+GLF0D_2 1 1
+GLTD_2 1 1
+GLEP_3 4 0
+GLPH_3 1 1
+GLF0_3 1 1
+GLF1_3 1 1
+GLF0D_3 1 1
+GLTD_3 1 1
+GLEP_4 4 0
+GLPH_4 1 1
+GLF0_4 1 1
+GLF1_4 1 1
+GLF0D_4 1 1
+GLTD_4 1 1
+
+# Tempo parameters (rms residual in microsec, number of TOAs in fit)
+TRES 1 0
+NTOA 5 0
+
+# Number of iterations
+NITS 5 0
+
+# Special Kopeikin 96 flag takes out derivatives due to proper motion
+K96 5 0
+
+#
+# New parameters for TEMPO2
+#
+EPHVER           0 0      # Ephemeris version string
+ECLOBL           1 1      # Ecliptic obliquity 
+IPM              5 0      # Correct for interplanetary dispersion 
+TEMPO1           5 0      # Tempo1 emulation mode 
+DILATEFREQ       5 0      # Correct obs frequency for time dilation 
+NO_SS_SHAPIRO    5 0      # Turn off all solar system Shapiro delays
+PLANET_SHAPIRO   5 0      # Account for planetary Shapiro delays 
+CORRECT_TROPO    5 0      # Correct for tropospheric delays 
+UNITS            0 0      # Units for SSB timescale (SI, TDB) 
+NE1AU            1 1      # Solar electron density scale @1AU [cm**(-3) pc]
+TIMEEPH          0 0      # Time ephemeris code to use (IF99, fb90)
+T2CMETHOD        0 0      # Polar Motion/Prec/Nut code (IAU2000B, TEMPO)
+DMFACTOR         1 1      # DM/Dispersion Constant [cm**(-3) pc s**(-3)]
+DMEPOCH          1 0      # Epoch for DM 
+FDDC             1 1      # Scale of freq-dependent delay [s MHz**(-FDDI)]
+FDDI             1 1      # Spectral index of freq-dependent delay
+MSS              5 0      # Use Wex 1988 "MSS" in T2 binary model 
+BINIT            5 0      # Iterate to invert binary timing formula
+SHAPMAX          1 1      # -ln(1-sini) Shapiro delay parameter
+KMPRA            1 1      # PMRA for Kopeikin term [mas/yr]
+KPMDEC           1 1      # PMDEC for Kopeikin term [mas/yr]
+KPMELONG         1 1      # PMELONG for Kopeikin term [mas/yr]
+KPMELAT          1 1      # PMELAT for Kopeikin term [mas/yr]
+RV               1 1      # Radial velocity [km/s]
+RVS              1 1      # Radial velocity for Shklovskii-dot term [km/s]
+VT               1 1      # Transverse velocity for Doppler term [m s**(-2)]
+RACC             1 1      # Radial acceleration [m s**(-2)]
+PMACC            1 1      # Accel parallel to proper motion [m s**(-2)]
+D_SHK            1 1      # Distance for Shklovskii term [kpc]
+D_AOP            1 1      # Distance for annual-orbital parallax [kpc]
+D_OP             1 1      # Distance for orbital parallax [kpc]
+WAVE_FREQ        1 1      # Fundamental FITWAVE frequency [Hz]
+WAVES_1          1 1      # FITWAVE sine component amplitude [s]
+WAVEC_1          1 1      # FITWAVE cosine component amplitude [s]

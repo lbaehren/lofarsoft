@@ -1,0 +1,21 @@
+#!/bin/csh -ef
+
+# @configure_input@
+
+mkdir -p @prefix@/src
+cd @prefix@/src
+
+set cfitsio=cfitsio3140
+
+if ( ! -f ${cfitsio}.tar.gz ) then
+  @download@ ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/${cfitsio}.tar.gz
+endif
+
+gunzip -c ${cfitsio}.tar.gz | tar xvf -
+cd cfitsio
+
+./configure --prefix=@prefix@
+
+make
+make install
+

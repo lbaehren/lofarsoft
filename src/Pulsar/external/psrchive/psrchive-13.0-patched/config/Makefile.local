@@ -1,0 +1,9 @@
+
+intermediate-libs:
+	AM_MAKEFLAGS="$(AM_MAKEFLAGS) PROGRAMS=" $(MAKE) all-recursive
+
+libs: intermediate-libs
+	$(MAKE) install-libLTLIBRARIES
+
+include: install-data
+

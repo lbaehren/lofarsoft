@@ -1,0 +1,35 @@
+#!/bin/csh -f
+
+# @configure_input@
+
+#
+# This script installs the FFT benchmarks for each FFT library
+# 
+
+set prefix=@prefix@
+set datarootdir=@datarootdir@
+
+set max_nthread = 1
+
+if ( -f /proc/cpuinfo ) then
+  set max_nthread = `cat /proc/cpuinfo | grep processor | wc -l`
+else
+  set max_nthread = `sysctl hw.ncpu | awk '{print $2}'`
+endif
+
+echo Maximum number of threads = $max_nthread
+
+foreach lib ( $* )
+
+  set nthread = 1
+  while ($nthread <= $max_nthread)
+
+    ./fft_bench --library=$lib --nthread=$nthread
+    mv fft_bench.out @datadir@/fft_bench_${lib}_${nthread}.dat
+
+    @ nthread = $nthread * 2
+
+  end
+
+end
+
