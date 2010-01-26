@@ -50,7 +50,6 @@ option (TEST_DATASETS       "Download and install sample test datasets?"    NO  
 
 option (CR_WITH_GUI         "Build CR-Tools with graphical interface?"   NO  )
 option (CR_WITH_STARTOOLS   "Enable using routines from LOPES-Star?"     YES )
-option (CR_WITH_FFTW3       "Require FFTW3 for CR-Tools?"                YES )
 option (DAL_PYTHON_BINDINGS "Create python bindings for DAL?"            YES )
 
 ## ==============================================================================
@@ -298,16 +297,12 @@ add_custom_target (cr
 
 add_dependencies (cr dal plplot)
 
-if (CR_WITH_FFTW3)
-  add_dependencies (cr fftw3)
-endif (CR_WITH_FFTW3)
-
 if (CR_WITH_GUI)
   add_dependencies (cr mathgl)
 endif (CR_WITH_GUI)
 
 if (CR_WITH_STARTOOLS)
-  add_dependencies (cr startools)
+  add_dependencies (cr startools fftw3)
 endif (CR_WITH_STARTOOLS)
 
 ##____________________________________________________________________
