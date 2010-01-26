@@ -116,7 +116,7 @@ namespace CR { // Namespace CR -- begin
       CompleteBeamPipe_p->setPlotInterval(pulseStart,pulseStop);
       CompleteBeamPipe_p->setCalibrationMode(true);
 
-      // Plot the raw data, if desired
+      // Plot chosen pulse pattern
       CompleteBeamPipe_p->plotAllAntennas("pulsePattern", lev_p, AntennaSelection, true,
                                           getUpsamplingExponent(),false, true);
       // calculate the maxima
@@ -179,7 +179,7 @@ namespace CR { // Namespace CR -- begin
       CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
       CompleteBeamPipe_p->setCalibrationMode(true);
 
-      // Plot the raw data, if desired
+      // Plot noise
       CompleteBeamPipe_p->plotAllAntennas("noise", lev_p, AntennaSelection, false,
                                           getUpsamplingExponent(),false, false);
       // calculate the maxima

@@ -26,6 +26,9 @@ void AntennasDisplay::addNewAntenna (double xCoordinate,
    std::vector<double>::iterator iterX = std::find(xCoordinates.begin(), xCoordinates.end(), xCoordinate);
    std::vector<double>::iterator iterY = std::find(yCoordinates.begin(), yCoordinates.end(), yCoordinate);
 
+   /* Is it really useful to avoid repeated antenna coordinates?
+      Because, NS and EW antennas are at the same position. */
+   /*   
    if((iterX != xCoordinates.end()) && (iterY != yCoordinates.end()))
    {
       for(unsigned int i=0; i<xCoordinates.size(); i++)
@@ -35,7 +38,8 @@ void AntennasDisplay::addNewAntenna (double xCoordinate,
             break;
          }
    }
-
+   */
+   
    if(notRepeated)
    {
      xCoordinates.push_back  (xCoordinate);
@@ -57,6 +61,9 @@ bool AntennasDisplay::setAllAntennas (std::vector<double> xCoordinatesALL,
    // @@@ Latest changes @@@
    bool notRepeated = true;
 
+   /* Is it really useful to avoid repeated antenna coordinates?
+      Because, NS and EW antennas are at the same position. */
+   /*   
    for(unsigned int i=0; i<xCoordinatesALL.size(); i++)
    {
       for(unsigned int j=0; j<xCoordinatesALL.size(); j++)
@@ -66,6 +73,7 @@ bool AntennasDisplay::setAllAntennas (std::vector<double> xCoordinatesALL,
                notRepeated = false;
       }
    }
+   */
 
    if((xCoordinatesALL.size() == yCoordinatesALL.size()) && notRepeated)
    {
