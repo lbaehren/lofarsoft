@@ -119,6 +119,7 @@ typedef HIntPointer modval;
 typedef HIntPointer HInteger;
 typedef double HNumber;
 typedef std::complex<HNumber> HComplex;
+typedef bool HBool;
 typedef std::string HString;
 typedef void* HPointer;
 
@@ -156,6 +157,18 @@ template<>  inline HNumber hfcast<HNumber>(HComplex v);
 
 inline HInteger ptr2int(HPointer v);
 inline HPointer int2ptr(HInteger v);
+
+
+inline HComplex operator*(HInteger i, HComplex c);
+inline HComplex operator*(HComplex c, HInteger i);
+inline HComplex operator+(HInteger i, HComplex c);
+inline HComplex operator+(HComplex c, HInteger i);
+inline HComplex operator-(HInteger i, HComplex c);
+inline HComplex operator-(HComplex c, HInteger i);
+inline HComplex operator/(HInteger i, HComplex c);
+inline HComplex operator/(HComplex c, HInteger i);
+
+
 //----CASTING------------------------------------------------------------------------
 
 

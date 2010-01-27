@@ -10,10 +10,31 @@
 #define HFPP_FILETYPE CC
 //-----------------------------------------------------------------------
 
-/*
+/* README
+
 To test this file, do:
 gcc -E -C -P -D H_DEBUG_CPP -I. -I$LOFARSOFT/release/include $LOFARSOFT/src/CR-Tools/implement/GUI/hfppnew-test.cc | gawk '{gsub(" *\\<_H_NL_\\> *","\n"); print}'
-*/
+
+
+FILES needed for the pypeline:
+
+hftools.cc   - source code with definition of the routines
+hftools.h    - corresponding h file
+hftools.hpp  - file to generate python bindings
+
+hfpypeline.py   - basic pipepline demonstration
+hftools.py      - python defintions need to make nice wrappers and operators for the hftools in python
+hfppnew-generatewrappers.def  - X-macro, loaded to generate macros with the preprocessor
+hfppnew.h       - Definitions for the preprocessor
+hfppnew-test.cc - this file used for documentation and testing of the preprocessor
+
+hfsplit2h.awk  - awk script to split off parts of the souce code
+hfiter.awk     - awk script for simple variable replacement and source code repetition
+
+hcompile - example script to compile the hftools
+
+hstart  -shell script to start python with pypeline
+*/ 
 
 //
 //===============================================================================
@@ -22,14 +43,14 @@ gcc -E -C -P -D H_DEBUG_CPP -I. -I$LOFARSOFT/release/include $LOFARSOFT/src/CR-T
 //
 /*
 Now we will start and example which contains all the wrapper definitions
-#define HFPP_FUNCDEF  (HFPP_TEMPLATED_1)(hNegate)(3)("Some documentation")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_1)(hNegate)("Some documentation")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Great vector 1")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Great vector 2")(HFPP_PAR_IS_VECTOR)(CASA)(HFPP_PASS_AS_REFERENCE) 
 #define HFPP_PARDEF_2 (HNumber)(val)(0)("Nice scalar")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)  
 */
 //
-//#define HFPP_FUNCDEF  (HFPP_VOID)(hNegate)(3)("Some documentation")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_FUNCDEF  (HFPP_TEMPLATED_1)(hNegate)(3)("Some documentation")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
+//#define HFPP_FUNCDEF  (HFPP_VOID)(hNegate)("Some documentation")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_1)(hNegate)("Some documentation")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Great vector 1")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Great vector 2")(HFPP_PAR_IS_VECTOR)(CASA)(HFPP_PASS_AS_REFERENCE) 
 #define HFPP_PARDEF_2 (HNumber)(val)(0)("Nice scalar")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)  
@@ -50,6 +71,9 @@ Now we will start and example which contains all the wrapper definitions
 /*HFPP_GET_FUNC_TYPE_DECLARATION_TEMPLATED(STL,()(TT))= */ HFPP_GET_FUNC_TYPE_DECLARATION_TEMPLATED(STL,()(TT))
 //Function Name
 /*HFPP_GET_FUNC_NAME = */ HFPP_GET_FUNC_NAME
+//Function Name with the variant extension added. This is the name of
+//the function which is called by the wrappers
+/*HFPP_GET_FUNC_BASENAME = */ HFPP_GET_FUNC_BASENAME
 //Number of input/output parameters appearing in function definition
 /*HFPP_GET_FUNC_PARNUM = */ HFPP_GET_FUNC_PARNUM
 //A short documentation string describing the function.
@@ -58,6 +82,9 @@ Now we will start and example which contains all the wrapper definitions
 //Returns the default template type name for the function, if templated (e.g., T or S)
 //otherwise return base type (could be "void")
 /* HFPP_GET_FUNC_TEMPLATE_NAME= */ HFPP_GET_FUNC_TEMPLATE_NAME
+
+/*HFPP_GET_FUNC_PAR_TYPES=*/ HFPP_GET_FUNC_PAR_TYPES
+/*HFPP_GET_FUNC_PAR_NAMES=*/ HFPP_GET_FUNC_PAR_NAMES
 
 //...Parameter Definition.......................................................
 /* HFPP_GET_PAR_NAME(0) = */ HFPP_GET_PAR_NAME(0) 

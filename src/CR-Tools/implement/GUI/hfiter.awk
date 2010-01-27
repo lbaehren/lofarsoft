@@ -28,8 +28,8 @@ BEGIN{true=1; false=0; iter=false; inp=""}
     for (i in idxs) {
 	out = inp
 	idxsicap=toupper(substr(idxs[i],1,1)) substr(idxs[i],2) 
-	gsub("\\$" ivar "!CAPS",idxsicap,out)
-	gsub("\\$" ivar,idxs[i],out)
+	gsub("{?\\$" ivar "!CAPS}?",idxsicap,out)
+	gsub("{?\\$" ivar "}?",idxs[i],out)
 	print out
     }
     print $0

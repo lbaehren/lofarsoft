@@ -16,6 +16,6 @@ BEGIN{FS="[ :=]+";WRITETOFILE=0}
     next
 }
 /^ *[/]* *\$COPY_TO +END/ {COPYTOFILE=0;next}
-/^ *[/]* *\$COPY_TO +[A-Z]+:/ {print substr($0,match($0,": *")+1) >>FILENAMES[$2]}
+/^ *[/]* *\$COPY_TO +[A-Z]+:/ {FILE0=FILENAMES[$2]; sub(" *[/]* *\\$COPY_TO +[A-Z]+: *",""); print >> FILE0}
 (COPYTOFILE) {print $0 >> FILE}
 {print}
