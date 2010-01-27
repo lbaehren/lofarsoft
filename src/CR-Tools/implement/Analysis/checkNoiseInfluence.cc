@@ -183,7 +183,7 @@ namespace CR { // Namespace CR -- begin
       CompleteBeamPipe_p->plotAllAntennas("noise", lev_p, AntennaSelection, false,
                                           getUpsamplingExponent(),false, false);
       // calculate the maxima
-      double noiseTime = plotStart()-1e-4;   // noise range is normally calculated in respect to the time of the CC beam
+      double noiseTime = plotStart()+1e-7;   // noise range is normally calculated in respect to the time of the CC beam
       calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false, noiseTime);
    
     } catch (AipsError x) {

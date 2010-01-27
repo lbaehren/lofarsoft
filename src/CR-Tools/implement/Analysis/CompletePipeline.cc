@@ -543,6 +543,9 @@ namespace CR { // Namespace CR -- begin
           }
           noise /= trace.nelements();
           break;
+        case 1: // RMS (Radio-Auger)
+          noise = rms(trace);
+          break;
         default:
           cerr << "CompletePipeline:calculateNoise: " << "Unkown method for noise calculation!" << endl;
       }        
@@ -1256,6 +1259,7 @@ namespace CR { // Namespace CR -- begin
       vector<double> fwhm;                        // width of the pulse envelope
       vector<double> start_time;                // Stores the start time of the pulse (begin of FWHM)
       vector<double> noiseValues;                // Mean of trace in a region before the cc-beam
+      vector<double> snrValues;                    // Envelope height / noise
       Vector<Double> geomDelays;                // geometrical delays of beamforming in getShiftedFFT
       bool calculate_noise = false;                // Is set to true if cc_center is not the default (1e99)
 
@@ -1350,9 +1354,9 @@ namespace CR { // Namespace CR -- begin
 
 
       // print header line of output
-      cout <<  "Ant   env height   max height   min height     noise     env time   max time   min time   time of half height     FWHM\n"
-           <<  "[#]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]    [us]       [us]       [us]           [us]              [ns]\n"
-           <<  "----------------------------------------------------------------------------------------------------------------------\n";
+      cout << "Ant   env height   max height   min height     noise        SNR     env time   max time   min time   time of half height     FWHM\n"
+           << "[#]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]    (env)      [us]       [us]       [us]           [us]             [ns]\n"
+           <<  "---------------------------------------------------------------------------------------------------------------------------------\n";
 
       // find the maximal y values for all selected antennas
       for (unsigned int i = 0; i < antennaSelection.nelements(); ++i)
@@ -1365,6 +1369,7 @@ namespace CR { // Namespace CR -- begin
         double envMaximum = 0;
         int envMaxtimevalue = 0;
         double noise=0;
+        double snr=0;
 
         // save values in addition into pulse property class
         PulseProperties pulse;
@@ -1473,8 +1478,10 @@ namespace CR { // Namespace CR -- begin
         }
 
         // calculate the noise as mean of the part before of the trace before the pulse 
-        if (calculate_noise)
-          noise = calculateNoise(yValues.column(i)(rangeNoise));
+        if (calculate_noise) {
+          noise = calculateNoise(yValues.column(i)(rangeNoise),0);
+          snr = envMaximum / noise;
+        }  
 
         // store the calculated values for later calculation of the mean
         // multiply by 1e6 for conversion to micro
@@ -1485,6 +1492,7 @@ namespace CR { // Namespace CR -- begin
         envMaxima.push_back(envMaximum*1e6);
         envMaxima_time.push_back(timeRange(envMaxtimevalue)*1e6);
         noiseValues.push_back(noise*1e6);
+        snrValues.push_back(snr);
 
         // make quality check before push back (calculation of FWHM and pulsestart can fail)
         // if ((pulsestop-pulsestart) < 200e-9) fwhm.push_back( (pulsestop-pulsestart)*1e9);
@@ -1516,6 +1524,7 @@ namespace CR { // Namespace CR -- begin
              << setw(11)<< maximum*1e6 << "  "
              << setw(11)<< minimum*1e6 << " "
              << setw(11)<< noise*1e6 << "   "
+             << setw(8) << snr << "  "
              << setw(8) << timeRange(envMaxtimevalue)*1e6 << "   "
              << setw(8) << timeRange(maxtimevalue)*1e6 << "   "
              << setw(8) << timeRange(mintimevalue)*1e6 << "       "
@@ -1526,12 +1535,14 @@ namespace CR { // Namespace CR -- begin
 
       // calculate the averages and the range if there is more than one value
       if (envMaxima.size() > 1) {
-        cout <<  "----------------------------------------------------------------------------------------------------------------------\n";
+        cout <<
+        "---------------------------------------------------------------------------------------------------------------------------------\n";
         cout << "MIN  "
              << setw(11)<< min(static_cast< Vector<Double> >(envMaxima)) << "  "
              << setw(11)<< min(static_cast< Vector<Double> >(maxima))<< "  "
              << setw(11)<< min(static_cast< Vector<Double> >(minima)) << " "
              << setw(11)<< min(static_cast< Vector<Double> >(noiseValues)) << "   "
+             << setw(8) << min(static_cast< Vector<Double> >(snrValues)) << "  "
              << setw(8) << min(static_cast< Vector<Double> >(envMaxima_time)) << "   "
              << setw(8) << min(static_cast< Vector<Double> >(maxima_time)) << "   "
              << setw(8) << min(static_cast< Vector<Double> >(minima_time)) << "       "
@@ -1542,17 +1553,20 @@ namespace CR { // Namespace CR -- begin
              << setw(11)<< max(static_cast< Vector<Double> >(maxima))<< "  "
              << setw(11)<< max(static_cast< Vector<Double> >(minima)) << " "
              << setw(11)<< max(static_cast< Vector<Double> >(noiseValues)) << "   "
+             << setw(8) << max(static_cast< Vector<Double> >(snrValues)) << "  "
              << setw(8) << max(static_cast< Vector<Double> >(envMaxima_time)) << "   "
              << setw(8) << max(static_cast< Vector<Double> >(maxima_time)) << "   "
              << setw(8) << max(static_cast< Vector<Double> >(minima_time)) << "       "
              << setw(8) << max(static_cast< Vector<Double> >(start_time)) << "         "
              << setw(8) << max(static_cast< Vector<Double> >(fwhm)) << endl;
-        cout <<  "----------------------------------------------------------------------------------------------------------------------\n";
+        cout <<
+        "---------------------------------------------------------------------------------------------------------------------------------\n";
         cout << "MEAN "
              << setw(11)<< mean(static_cast< Vector<Double> >(envMaxima)) << "  "
              << setw(11)<< mean(static_cast< Vector<Double> >(maxima))<< "  "
              << setw(11)<< mean(static_cast< Vector<Double> >(minima)) << " "
              << setw(11)<< mean(static_cast< Vector<Double> >(noiseValues)) << "   "
+             << setw(8) << mean(static_cast< Vector<Double> >(snrValues)) << "  "
              << setw(8) << mean(static_cast< Vector<Double> >(envMaxima_time)) << "   "
              << setw(8) << mean(static_cast< Vector<Double> >(maxima_time)) << "   "
              << setw(8) << mean(static_cast< Vector<Double> >(minima_time)) << "       "
@@ -1563,6 +1577,7 @@ namespace CR { // Namespace CR -- begin
              << setw(11)<< median(static_cast< Vector<Double> >(maxima))<< "  "
              << setw(11)<< median(static_cast< Vector<Double> >(minima)) << " "
              << setw(11)<< median(static_cast< Vector<Double> >(noiseValues)) << "   "
+             << setw(8) << median(static_cast< Vector<Double> >(snrValues)) << "  "
              << setw(8) << median(static_cast< Vector<Double> >(envMaxima_time)) << "   "
              << setw(8) << median(static_cast< Vector<Double> >(maxima_time)) << "   "
              << setw(8) << median(static_cast< Vector<Double> >(minima_time)) << "       "
