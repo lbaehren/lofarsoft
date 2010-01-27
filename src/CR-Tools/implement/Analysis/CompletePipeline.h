@@ -424,6 +424,18 @@ namespace CR { // Namespace CR -- begin
     Slice calculateSpectrumRange (const Vector<Double>& xaxis) const;
 
 
+    /*!
+      \brief Calculates noise of a trace
+
+      \param trace            -- trace or part of trace to calculate the noise from
+      \param method           -- method of noise calculation:
+                                 0: Steffen's method: noise = mean of absolute values of trace
+
+      \return noise           -- noise (different methods will be implemented)
+    */
+    double calculateNoise (const Vector<Double>& trace, int method = 0) const;
+
+
 
     /*!
       \brief Gets a Slice with the time interval before the cc-beam
@@ -436,7 +448,6 @@ namespace CR { // Namespace CR -- begin
                                  CC-beam-center - 15 * cc-window until CC-beam-center - 5 * cc-window
     */
     Slice calculateNoiseRange (const Vector<Double>& xaxis, const double& ccBeamcenter) const;
-
 
 
     /*!

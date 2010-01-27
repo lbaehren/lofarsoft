@@ -532,6 +532,29 @@ namespace CR { // Namespace CR -- begin
   }
 
 
+  double CompletePipeline::calculateNoise (const Vector<Double>& trace, int method) const
+  {
+    double noise = 0.;
+    try {
+      switch(method) {
+        case 0: // Steffen's method    
+          for(unsigned int j = 0; j < trace.nelements(); ++j) {
+            noise += abs(trace(j));
+          }
+          noise /= trace.nelements();
+          break;
+        default:
+          cerr << "CompletePipeline:calculateNoise: " << "Unkown method for noise calculation!" << endl;
+      }        
+    } catch (AipsError x) {
+      cerr << "CompletePipeline:calculateNoise: " << x.getMesg() << endl;
+    }
+
+    // return dummy to avoid warning (this command is reached only in case of an error).
+    return noise;
+  }
+  
+  
   Slice CompletePipeline::calculateNoiseRange (const Vector<Double>& xaxis, const double& ccBeamcenter) const
   {
     try {
@@ -1450,15 +1473,8 @@ namespace CR { // Namespace CR -- begin
         }
 
         // calculate the noise as mean of the part before of the trace before the pulse 
-        if (calculate_noise) {
-          // get the part of the trace for the noise
-          traceNoise = yValues.column(i)(rangeNoise);
-
-          for(unsigned int j = 0; j < timeRangeNoise.nelements(); j++)
-            noise += abs(traceNoise(j));
-
-          noise /=timeRangeNoise.nelements();
-        }
+        if (calculate_noise)
+          noise = calculateNoise(yValues.column(i)(rangeNoise));
 
         // store the calculated values for later calculation of the mean
         // multiply by 1e6 for conversion to micro
@@ -1678,28 +1694,14 @@ namespace CR { // Namespace CR -- begin
         extrema.push_back(extremum*1e6);
         extrema_time.push_back(timeRange(extrematimevalue)*1e6);
 
-        // get current trace
-        traceNoise = yValues.column(i)(rangeNoise);
-        // loop through the values and search for the heighest and lowest one
-        for(unsigned int j = 0; j < timeRangeNoise.nelements(); j++)
-        {
-          noise += abs(traceNoise(j));
-        }
-        noise /=timeRangeNoise.nelements();
+        noise = calculateNoise(yValues.column(i)(rangeNoise));
 
         // print the calculated values
         cout << setw(2) << i+1 << " " << setw(7) <<extremum*1e6 << " ";
         cout << setw(8) << noise*1e+6  << " " << setw(8)<< timeRange(extrematimevalue)*1e6 ;
         cout << endl;
       } else {
-        // antenna has bad data
-        // get current trace
-        traceNoise = yValues.column(i)(rangeNoise);
-        // loop through the values and search for the heighest and lowest one
-        for(unsigned int j = 0; j < timeRangeNoise.nelements(); j++) {
-          noise += abs(traceNoise(j));
-        }
-        noise /=timeRangeNoise.nelements();
+        noise = calculateNoise(yValues.column(i)(rangeNoise));
         cout << std::setw(2) << i+1 << " 0.0      "<< setw(8) << noise*1e+6  << " 0.0" << endl;
       }
 
