@@ -2,13 +2,9 @@
 ##_______________________________________________________________________________
 ## Include directories
 
-if (QT4_INCLUDES AND GTK_INCLUDES AND BOOST_INCLUDES)
+if (QT_INCLUDES AND GTK_INCLUDES AND BOOST_INCLUDES)
   set (libhfget_includes "-I${GTK_INCLUDES} -I${BOOST_INCLUDES}")
-endif (QT4_INCLUDES AND GTK_INCLUDES AND BOOST_INCLUDES)
-
-if (QT4_INCLUDES)
-  include_directories (${QT4_INCLUDES})
-endif (QT4_INCLUDES)
+endif (QT_INCLUDES AND GTK_INCLUDES AND BOOST_INCLUDES)
 
 if (MATHGL_INCLUDES)
   include_directories (${MATHGL_INCLUDES})
@@ -61,7 +57,8 @@ target_link_libraries (hfget
   ${DAL_LIBRARIES}
   ${HDF5_LIBRARIES}
   ${CASA_LIBRARIES}
-  ${QT4_LIBRARIES}
+  ${QT_QTCORE_LIBRARY}
+  ${QT_QTGUI_LIBRARY}
   ${MATHGL_LIBRARIES}
   ${PYTHON_LIBRARIES}
   ${BOOST_LIBRARIES}

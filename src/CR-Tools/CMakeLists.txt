@@ -274,19 +274,19 @@ if (CR_WITH_GUI)
 
   ## Check for Qt4
 
-  set (DESIRED_QT_VERSION 4)
-  
-  include (FindQtFink)
+  include (FindQt4)
 
-  if (NOT QT4_INCLUDES)
+  if (QT_INCLUDES)
+    include_directories (${QT_INCLUDES})
+  else (QT_INCLUDES)
     message (STATUS "[CR-Tools] Unable to build GUI - missing Qt4 headers!")
     set (CR_WITH_GUI NO)
-  endif (NOT QT4_INCLUDES)
-
-  if (NOT QT4_LIBARY_QTCORE OR NOT QT4_LIBARY_QTGUI OR NOT HAVE_QT4_QWIDGET)
+  endif (QT_INCLUDES)
+  
+  if (NOT QT_QTCORE_LIBRARY OR NOT QT_QTGUI_LIBRARY)
     message (STATUS "[CR-Tools] Unable to build GUI - Qt4 libraries incomplete!")
     set (CR_WITH_GUI NO)
-  endif (NOT QT4_LIBARY_QTCORE OR NOT QT4_LIBARY_QTGUI OR NOT HAVE_QT4_QWIDGET)
+  endif (NOT QT_QTCORE_LIBRARY OR NOT QT_QTGUI_LIBRARY)
 
   ## Check for MathGL
 
@@ -572,6 +572,7 @@ message (STATUS " PNG ...................... : ${HAVE_PNG}")
 message (STATUS " POPT ..................... : ${HAVE_POPT}")
 message (STATUS " PostgreSQL ............... : ${HAVE_POSTGRESQL}")
 message (STATUS " Python ................... : ${HAVE_PYTHON}")
+message (STATUS " Qt4 ...................... : ${QT4_FOUND}")
 message (STATUS " ROOT ..................... : ${HAVE_ROOT}")
 message (STATUS " Star-Tools ............... : ${HAVE_STARTOOLS}")
 message (STATUS " WCSLIB ................... : ${HAVE_WCSLIB}")
