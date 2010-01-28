@@ -74,6 +74,10 @@
 //>>>>>>>>#include <boost/python/handle.hpp>
 #include <boost/python/handle.hpp>
 
+#include <crtools.h>
+#include "IO/LopesEventIn.h"
+#include "IO/LOFAR_TBB.h"
+
 #include <GUI/hfppnew.h>
 
 #define ERROR( txt ) ( cout << endl << "ERROR in file " << __FILE__ << " line " << __LINE__ << ": "  << txt << endl ) 
@@ -139,8 +143,13 @@ typedef casa::Record CasaRecord ;
 //So, this forces NULL to really be a NULL pointer ...
 #define Null_p reinterpret_cast<HPointer>(NULL)
 
+#define IntAsPtr(INT) reinterpret_cast<HPointer>(INT)
+#define PtrAsInt(PTR) reinterpret_cast<HInteger>(PTR)
 
-//----CASTING------------------------------------------------------------------------
+//========================================================================
+//                    Casting & Conversion Functions
+//========================================================================
+
 //Identity
 template<class T> inline T hfcast(/*const*/ T v);
 
@@ -168,13 +177,29 @@ inline HComplex operator-(HComplex c, HInteger i);
 inline HComplex operator/(HInteger i, HComplex c);
 inline HComplex operator/(HComplex c, HInteger i);
 
+//========================================================================
+//                        Helper Functions
+//========================================================================
 
-//----CASTING------------------------------------------------------------------------
+HString hgetFiletype(HString filename);
+HString hgetFileExtension(HString filename);
+
+//========================================================================
+//                           Math Functions
+//========================================================================
+
+template <class T> inline T square(T val);
 
 
+//========================================================================
+//                             I/O Functions
+//========================================================================
+
+HIntPointer hOpenFile(HString Filename);
+void hCloseFile(HIntPointer iptr);
 
 //=========================================================================================
-// Define Headers for Wrappers
+// Define headers for vector wrappers
 //=========================================================================================
 #undef HFPP_FILETYPE
 // Tell the preprocessor (for generating wrappers) that this is a c++ header file (brackets are crucial)

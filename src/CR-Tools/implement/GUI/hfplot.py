@@ -1,10 +1,13 @@
 #execfile("mgl-pyqt-test.py")
 
-#from PyQt4 import QtGui,QtCore
-#from mathgl import *
-#import sys
-#app = QtGui.QApplication(sys.argv)
-#qpointf=QtCore.QPointF()
+from PyQt4 import QtGui,QtCore
+from mathgl import *
+#import libhfget  as hf
+import sys
+app = QtGui.QApplication(sys.argv)
+qpointf=QtCore.QPointF()
+
+mglData.SetVec = hf.mglDataSetVecN
 
 class hfQtPlotter(QtGui.QWidget):
     def __init__(self, parent=None):

@@ -1,15 +1,22 @@
-BEGIN{true=1; false=0; iter=false; inp=""}
+BEGIN{true=1; false=0; iter=false}
 
-/^\/\/\$DOCSTRING1: / {docstring1 = $0; sub("\\/\\/\\$DOCSTRING1: +","",docstring1); print; next}
-/^\/\/\$DOCSTRING2: / {docstring2 = $0; sub("\\/\\/\\$DOCSTRING2: +","",docstring2); print; next}
+/^\/\/\$DOCSTRING: / {docstring = $0; sub("\\/\\/\\$DOCSTRING: +","",docstring); print; next}
+
+/^ *\$PARDOCSTRING/ && (funcdoc) {print commentdoc; commentdoc=""; funcdoc=0; next}
 
 { 
-    gsub("\\$DOCSTRING1",docstring1)
-    gsub("\\$DOCSTRING2",docstring2)
+    gsub("\\$DOCSTRING",docstring)
 }
 
 (!iter) {print}
 
+/^#define +HFPP_PARDEF_0+ +/ {commentdoc=""}
+
+/^#define +HFPP_PARDEF_[0-9]+ +/ { 
+    s=$0; gsub("\"","",s); split(s,ary,"[()]"); 
+    commentdoc=commentdoc "\n    \\param " ary[4] ": " ary[8] "\n"
+    funcdoc=1
+} 
 
 
 /^\/\/\$ITERATE [a-zA-Z][a-zA-Z0-9]*/ {

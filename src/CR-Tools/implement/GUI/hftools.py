@@ -17,7 +17,8 @@ def VecToPrintString(self,maxlen=10):
     return "Vec("+str(len(self))+")=[" +VecToString(self)+"]"
 
 
-hNumericalVectorTypes=[IntVec,FloatVec,ComplexVec]
+hRealVectorTypes=[IntVec,FloatVec]
+hNumericalVectorTypes=hRealVectorTypes+[ComplexVec]
 hOtherVectorTypes=[BoolVec,StringVec]
 hAllVectorTypes=hOtherVectorTypes+hNumericalVectorTypes
 
@@ -51,24 +52,51 @@ def Vec_imul(vec1,vec2):
     return vec1
 
 def Vec_add(vec1,val):
-    "Provides the + operator for adding two vectors or a vector plus a scalar. The result will be a new vector."
-    hiAdd(vec1,vec2)
-    return vec1
+    "Provides the + operator for adding two vectors or a vector and a scalar. The result will be a new vector."
+    vecout=vec1.new()
+    hAdd(vec1,val,vecout)
+    return vecout
 
+def Vec_sub(vec1,val):
+    "Provides the - operator for subtracting two vectors or a vector and a scalar. The result will be a new vector."
+    vecout=vec1.new()
+    hAdd(vec1,val,vecout)
+    return vecout
+
+def Vec_mul(vec1,val):
+    "Provides the * operator for multiplying two vectors or a vector and a scalar. The result will be a new vector."
+    vecout=vec1.new()
+    hAdd(vec1,val,vecout)
+    return vecout
+
+def Vec_div(vec1,val):
+    "Provides the / operator for dividing two vectors or a vector by a scalar. The result will be a new vector."
+    vecout=vec1.new()
+    hAdd(vec1,val,vecout)
+    return vecout
+
+setattr(ComplexVec,"SpectralPower",hSpectralPower)
 
 #for v in hNumericalVectorTypes:
 #    setattr
 for v in hAllVectorTypes:
     setattr(v,"__repr__",VecToPrintString)
-    setattr(v,"resize",hResize)
-    setattr(v,"fill",hFill)
+    for s in ["hResize","hFill","hNew","hCopy"]:     
+        setattr(v,s[1:].lower(),eval(s))
 
+for v in hRealVectorTypes:
+    for s in ["hAcos","hAsin","hAtan","hCeil","hFloor"]:     
+        setattr(v,s[1:].lower(),eval(s))
 
 for v in hNumericalVectorTypes:
-    for s in ["hAbs","hConvert","hMul","hDiv","hSub","hAdd","hiMul","hiDiv","hiSub","hiAdd"]:
-        setattr(v,s[1:].lower(),eval(s))
+    setattr(v,"__add__",Vec_add)
+    setattr(v,"__sub__",Vec_sub)
+    setattr(v,"__div__",Vec_div)
+    setattr(v,"__mul__",Vec_mul)
     setattr(v,"__iadd__",Vec_iadd)
     setattr(v,"__imul__",Vec_imul)
     setattr(v,"__idiv__",Vec_idiv)
     setattr(v,"__isub__",Vec_isub)
+    for s in ["hAbs","hConvert","hMul","hDiv","hSub","hAdd","hiMul","hiDiv","hiSub","hiAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMean","hSortMedian","hMedian","hStdDev","hDownsample"]:
+        setattr(v,s[1:].lower(),eval(s))
 
