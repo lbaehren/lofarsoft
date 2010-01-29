@@ -37,7 +37,7 @@ using namespace std;
 //Some definitions needed for the preprosessor programming:
 //Copy source code (where specified with COPY_TO HFILE START) to the file hwrappers-hftools.iter.cc.h
 //-----------------------------------------------------------------------
-//$FILENAME: HFILE=hfwrappers-$SELF.h  
+//$FILENAME: HFILE=hftools.def.h  
 //-----------------------------------------------------------------------
 
 // Tell the preprocessor (for generating wrappers) that this is a c++

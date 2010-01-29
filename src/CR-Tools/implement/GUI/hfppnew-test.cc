@@ -22,14 +22,16 @@ hftools.cc   - source code with definition of the routines
 hftools.h    - corresponding h file
 hftools.hpp  - file to generate python bindings
 
-hfpypeline.py   - basic pipepline demonstration
-hftools.py      - python defintions need to make nice wrappers and operators for the hftools in python
+hfpypeline.py   - basic pypepline demonstration
+hftools.py      - definition that python needs in order to make nice wrappers and operators for the hftools in python
+
 hfppnew-generatewrappers.def  - X-macro, loaded to generate macros with the preprocessor
 hfppnew.h       - Definitions for the preprocessor
 hfppnew-test.cc - this file used for documentation and testing of the preprocessor
 
 hfsplit2h.awk  - awk script to split off parts of the souce code
 hfiter.awk     - awk script for simple variable replacement and source code repetition
+hfgetdoc.awk   - awk script to extract some quick documentation
 
 hcompile - example script to compile the hftools
 

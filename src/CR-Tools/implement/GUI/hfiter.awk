@@ -10,7 +10,7 @@ BEGIN{true=1; false=0; iter=false}
 
 (!iter) {print}
 
-/^#define +HFPP_PARDEF_0+ +/ {commentdoc=""}
+/^#define +HFPP_PARDEF_0 +/ {commentdoc=""}
 
 /^#define +HFPP_PARDEF_[0-9]+ +/ { 
     s=$0; gsub("\"","",s); split(s,ary,"[()]"); 

@@ -5,7 +5,76 @@ extern int global_debuglevel;
 
 #define DBG_MODE 0
 
-#include <GUI/hftools.h>
+#include <string>
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <complex>
+#include <cmath>
+#include <stdint.h>
+#include <limits.h>
+
+#include <casa/Arrays/IPosition.h>
+#include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/MatrixMath.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/BasicSL/String.h>
+#include <casa/Containers/Block.h>
+#include <casa/Containers/Record.h>
+#include <casa/Containers/RecordField.h>
+#include <casa/Containers/List.h>
+#include <casa/Containers/ListIO.h>
+#include <casa/Containers/OrderedMap.h>
+#include <casa/Exceptions/Error.h>
+
+//>>>>>>>><boost/python/class.hpp>
+#include <boost/python/class.hpp>
+//>>>>>>>>#include <boost/python/object.hpp>
+#include <boost/python/object.hpp>
+//>>>>>>>>#include <boost/python/list.hpp>
+#include <boost/python/list.hpp>
+//>>>>>>>>#include <boost/python/extract.hpp>
+#include <boost/python/extract.hpp>
+//>>>>>>>>#include <boost/python/module.hpp>
+#include <boost/python/module.hpp>
+//>>>>>>>>#include <boost/python/def.hpp>
+#include <boost/python/def.hpp>
+//>>>>>>>>#include <boost/utility.hpp>
+#include <boost/utility.hpp>
+
+//>>>>>>>>#include <boost/python/call_method.hpp>
+#include <boost/python/call_method.hpp>
+//>>>>>>>>#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+//>>>>>>>>#include <boost/python/implicit.hpp>
+#include <boost/python/implicit.hpp>
+//>>>>>>>>#include <boost/python/enum.hpp>
+#include <boost/python/enum.hpp>
+//>>>>>>>>#include <boost/python/overloads.hpp>
+#include <boost/python/overloads.hpp>
+//>>>>>>>>#include <boost/python/args.hpp>
+#include <boost/python/args.hpp>
+//>>>>>>>>#include <boost/python/tuple.hpp>
+#include <boost/python/tuple.hpp>
+//>>>>>>>>#include <boost/python/class.hpp>
+#include <boost/python/class.hpp>
+//>>>>>>>>#include <boost/python/str.hpp>
+#include <boost/python/str.hpp>
+//>>>>>>>>#include <boost/python/return_internal_reference.hpp>
+#include <boost/python/return_internal_reference.hpp>
+//>>>>>>>>#include <boost/python/operators.hpp>
+#include <boost/python/operators.hpp>
+//>>>>>>>>#include <boost/python/object_operators.hpp>
+#include <boost/python/object_operators.hpp>
+//>>>>>>>>#include <boost/thread/thread.hpp>
+#include <boost/thread/thread.hpp>
+//>>>>>>>>#include <boost/python/has_back_reference.hpp>
+#include <boost/python/has_back_reference.hpp>
+//>>>>>>>>#include <boost/python/handle.hpp>
+#include <boost/python/handle.hpp>
+
+#include <GUI/hfcommon.h>
 
 #if DBG_MODE == 0 
 #define DBG( T ) 

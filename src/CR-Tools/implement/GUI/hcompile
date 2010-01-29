@@ -18,7 +18,9 @@ set LIBRARIES="/sw/lib/qt4-mac/lib  $LOFARSOFT/release/lib/libdal.a $LOFARSOFT/r
  
 echo "Preprocessor Step 1a: Iterating source code over certain variables. Generating file: " hftools.iter.cc
 gawk -f hfiter.awk   hftools.cc >  hftools.iter.cc
-echo "Preprocessor Step 1b: Splitting off certain snippets of code. Generating file: " hftools.tmp.cc
+echo "Preprocessor Step 1b: Generating some basic documentation: See file hftools.doc.tex"
+gawk -f hfgetdoc.awk hftools.iter.cc | sort >  hftools.doc.tex
+echo "Preprocessor Step 1c: Splitting off certain snippets of code. Generating file: " hftools.tmp.cc and hftools.def.h
 gawk -f hfsplit2h.awk hftools.iter.cc >  hftools.tmp.cc
 echo "Preprocessor Step 2: Using gcc preprocessor to generate wrappers. Generating file: " hftools.hfpp.cc
 gcc -E  -P -D H_DEBUG_CPP $HFLAGS -I. hftools.tmp.cc | gawk '{gsub(" *\\<_H_NL_\\> *","\n"); print}' > hftools.hfpp.cc
@@ -26,3 +28,8 @@ echo "Compile source code. Generating file: " hftools.cc.o
 /usr/bin/c++ $HFLAGS2 -o hftools.cc.o -c hftools.hfpp.cc
 echo "Link library. Generating file: "  $GUI/libhftools.so
 /usr/bin/c++  -Wall -Wno-comment -Woverloaded-virtual -Wno-non-template-friend -bundle -headerpad_max_install_names -fPIC -flat_namespace -Wl -o $GUI/libhftools.so $GUI/hftools.cc.o -F$LIBRARIES 
+
+echo " "
+echo "Available functions in hftools"
+echo "=============================="
+cat hftools.doc.tex
