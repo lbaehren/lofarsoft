@@ -1,10 +1,43 @@
 
+## ==============================================================================
+##
+##  Definition of Macros
+##
+## ==============================================================================
+
+find_program (gawk_executable gawk awk ${bin_locations})
+
+macro (cr_process_awk _infile _script)
+  
+  get_filename_component(_infile_filename  ${_infile} NAME)
+  get_filename_component(_infile_name      ${_infile} NAME_WE)
+  get_filename_component(_infile_extension ${_infile} EXT)
+
+  set (_outfile_filename ${_infile_name}.awk.${_infile_extension})
+  set (_outfile ${CR_BINARY_DIR}/implement/GUI/${_outfile_filename})
+
+  message (STATUS "[awk] ${_infile_filename} -> ${_outfile_filename}")
+  
+  execute_process (
+    WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement/GUI
+    COMMAND ${gawk_executable} -f ${_script} ${_infile} | ${gawk_executable} -f ${_script} > ${_outfile}
+    TIMEOUT 20
+    ERROR_VARIABLE awk_error
+    OUTPUT_QUIET
+    )
+  
+endmacro (cr_process_awk _infile _script)
+
 ##_______________________________________________________________________________
 ## Include directories
 
 if (QT_INCLUDES AND GTK_INCLUDES AND BOOST_INCLUDES)
   set (libhfget_includes "-I${GTK_INCLUDES} -I${BOOST_INCLUDES}")
 endif (QT_INCLUDES AND GTK_INCLUDES AND BOOST_INCLUDES)
+
+if (QT_INCLUDES)
+  include_directories (${QT_INCLUDES})
+endif (QT_INCLUDES)
 
 if (MATHGL_INCLUDES)
   include_directories (${MATHGL_INCLUDES})
@@ -13,17 +46,13 @@ endif (MATHGL_INCLUDES)
 ##_______________________________________________________________________________
 ## Pre-processing of the source files
 
-find_program (gawk_executable gawk awk ${bin_locations})
-
 if (gawk_executable)
   ## process input files
-  add_custom_target (hfget_awk
-    COMMAND ${gawk_executable} -f hfiter.awk hffuncs.cc | ${gawk_executable} -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.awk.cc
-    COMMAND ${gawk_executable} -f hfiter.awk hffuncs.h | ${gawk_executable} -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.awk.h
-    COMMAND ${gawk_executable} -f hfsplit2h.awk hfanalysis.cc
-    WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement/GUI
-    COMMENT "Running awk to generate source files ..."
-    )
+
+  cr_process_awk (hffuncs.cc hfiter.awk)
+  cr_process_awk (hffuncs.h hfiter.awk)
+  cr_process_awk (hfanalysis.cc hfsplit2h.awk)
+
   ## augment include path
   include_directories (
     ${CR_BINARY_DIR}/implement
