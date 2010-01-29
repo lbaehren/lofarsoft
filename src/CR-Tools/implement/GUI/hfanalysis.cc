@@ -12,7 +12,6 @@
 
 using namespace std;
 
-
 #include <GUI/hfanalysis.h>
 
 //Some definitions needed for the preprosessor programming
@@ -709,7 +708,7 @@ void (*hRunningAverageVec_C)(vector<HComplex> &vec_in,vector<HComplex> &vec_out,
 //                                                               hNegate
 
 //$COPY_TO HFILE START --------------------------------------------------
-#include "hfpp-undef.cc"
+#include <GUI/hfpp-undef.cc>
 #define HFPP_FUNCNAME hNegate  //The Name of the function
 //.......................................................................
 #define HFPP_FUNCBRIEF "Multiplies each element in the vector with -1."
@@ -717,7 +716,7 @@ void (*hRunningAverageVec_C)(vector<HComplex> &vec_in,vector<HComplex> &vec_out,
 #define HFPP_NVECS 1 //Number of (input/output) vectors
 #define HFPP_NPAR 0  //Number of other parameters
 #define HFPP_GUI_LIBRARY Math
-#include "hfdefaultwrappercode.h"
+#include <GUI/hfdefaultwrappercode.h>
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -749,7 +748,7 @@ void hNegate(const Iter data_start,const Iter data_end)
   \param data_end: STL Iterator pointing to the end of the input vector
 */
 //$COPY_TO HFILE START --------------------------------------------------
-#include "hfpp-undef.cc"
+#include <GUI/hfpp-undef.cc>
 #define HFPP_FUNCNAME hFill  //The Name of the function
 //.......................................................................
 #define HFPP_FUNCBRIEF "Fills a vector with a constant value."
@@ -760,7 +759,7 @@ void hNegate(const Iter data_start,const Iter data_end)
 #define HFPP_PAR0 (fill_value,HInteger,0,"Value to fill vector with.",HFPP_TEMPLATED_TYPE,HFPP_PASS_AS_VALUE)  //Definition of input parameter
 #define HFPP_NO_GUI 1 //Don't generate a wrapper for the GUI (use overloaded function) 
 #define HFPP_GUI_LIBRARY Math
-#include "hfdefaultwrappercode.h"
+#include <GUI/hfdefaultwrappercode.h>
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -784,7 +783,7 @@ void hFill(const Iter data_start,const Iter data_end, const IterValueType fill_v
 
 
 //$COPY_TO HFILE START --------------------------------------------------
-#include "hfpp-undef.cc"
+#include <GUI/hfpp-undef.cc>
 #define HFPP_FUNCNAME hSum  //The Name of the function
 //.......................................................................
 #define HFPP_FUNCBRIEF "Performs a sum over the values in a vector and returns the value"
@@ -794,7 +793,7 @@ void hFill(const Iter data_start,const Iter data_end, const IterValueType fill_v
 #define HFPP_NPAR 0  //Number of other parameters
 #define HFPP_GUI_LIBRARY Math
 #define HFPP_GUI_RETURN_POLICY  HFPP_GUI_RETURN_SCALAR
-#include "hfdefaultwrappercode.h"
+#include <GUI/hfdefaultwrappercode.h>
 //$COPY_TO END --------------------------------------------------
 
 /*!
@@ -819,7 +818,7 @@ IterValueType hSum(const Iter data_start,const Iter data_end)
 } 
 
 //$COPY_TO HFILE START --------------------------------------------------
-#include "hfpp-undef.cc"
+#include <GUI/hfpp-undef.cc>
 #define HFPP_FUNCNAME hMean  //The Name of the function
 //.......................................................................
 #define HFPP_FUNCBRIEF "Returns the mean value of all elements in a vector"
@@ -829,7 +828,7 @@ IterValueType hSum(const Iter data_start,const Iter data_end)
 #define HFPP_NPAR 0  //Number of other parameters
 #define HFPP_GUI_LIBRARY Math
 #define HFPP_GUI_RETURN_POLICY  HFPP_GUI_RETURN_SCALAR
-#include "hfdefaultwrappercode.h"
+#include <GUI/hfdefaultwrappercode.h>
 //$COPY_TO END --------------------------------------------------
 
 /*!
@@ -853,7 +852,7 @@ IterValueType hMean (const Iter data_start,const Iter data_end)
 
 
 //$COPY_TO HFILE START --------------------------------------------------
-#include "hfpp-undef.cc"
+#include <GUI/hfpp-undef.cc>
 #define HFPP_FUNCNAME hMedian  //The Name of the function
 //.......................................................................
 #define HFPP_FUNCBRIEF "Returns the median value of the elements in a vector."
@@ -876,7 +875,7 @@ HFPP_GENERATE_WRAPPERS
 #define HFPP_ALT_FUNCNAME hMedian
 #define HFPP_FUNCNAME hMedianSort  //The Name of the function
 #define HFPP_FUNCBRIEF "Returns the median value of the elements in a vector and sorts the element of the vector (slightly faster that hMedian)."
-#include "hfdefaultwrappercode.h"
+#include <GUI/hfdefaultwrappercode.h>
 //$COPY_TO END --------------------------------------------------
 
 
@@ -903,7 +902,7 @@ IterValueType hMedian(const Iter data_start, const Iter data_end)
 
 
 //$COPY_TO HFILE START --------------------------------------------------
-#include "hfpp-undef.cc"
+#include <GUI/hfpp-undef.cc>
 #define HFPP_FUNCNAME hStdDev  //The Name of the function
 //.......................................................................
 #define HFPP_FUNCBRIEF "Calculates the standard deviation around a mean value."
@@ -912,7 +911,7 @@ IterValueType hMedian(const Iter data_start, const Iter data_end)
 #define HFPP_NVECS 1 //Number of (input/output) vectors
 #define HFPP_NPAR 1  //Number of other parameters
 #define HFPP_PAR0 (mean,T,0,"Mean value of vector.",HFPP_TEMPLATED_TYPE,HFPP_PASS_AS_VALUE)  //Definition of input parameter
-#include "hfdefaultwrappercode.h"
+#include <GUI/hfdefaultwrappercode.h>
 //$COPY_TO END --------------------------------------------------
 
 /*!
@@ -943,7 +942,7 @@ IterValueType hStdDev(const Iter data_start,const Iter data_end, const IterValue
 } 
 
 //$COPY_TO HFILE START --------------------------------------------------
-#include "hfpp-undef.cc"
+#include <GUI/hfpp-undef.cc>
 #define HFPP_FUNCNAME hStdDev  //The Name of the function
 #define HFPP_VARIANT 1 //Indicating that this is an overloaded function
 //.......................................................................
@@ -953,7 +952,7 @@ IterValueType hStdDev(const Iter data_start,const Iter data_end, const IterValue
 #define HFPP_FUNCTYPE_T 1     //Return value type of function is templated with T
 #define HFPP_NVECS 1 //Number of (input/output) vectors
 #define HFPP_NPAR 0  //Number of other parameters
-#include "hfdefaultwrappercode.h"
+#include <GUI/hfdefaultwrappercode.h>
 //$COPY_TO END --------------------------------------------------
 
 /*!
@@ -975,7 +974,7 @@ IterValueType hStdDev(const Iter data_start,const Iter data_end)
 } 
 
 //$COPY_TO HFILE START --------------------------------------------------
-#include "hfpp-undef.cc"
+#include <GUI/hfpp-undef.cc>
 #define HFPP_FUNCNAME hSquareVec  //The Name of the function
 //.......................................................................
 #define HFPP_FUNCBRIEF "Square the content of one vector in place."
@@ -984,7 +983,7 @@ IterValueType hStdDev(const Iter data_start,const Iter data_end)
 #define HFPP_FUNCTYPE void   //No return value
 #define HFPP_NVECS 1 //Number of (input/output) vectors
 #define HFPP_NPAR 0  //Number of other parameters
-#include "hfdefaultwrappercode.h"
+#include <GUI/hfdefaultwrappercode.h>
 //$COPY_TO END --------------------------------------------------
 
 /*!  \brief Square the content of one vector in place.
@@ -1011,7 +1010,7 @@ void hSquareVec (const Iter idata_start,
 }
 
 //$COPY_TO HFILE START --------------------------------------------------
-#include "hfpp-undef.cc"
+#include <GUI/hfpp-undef.cc>
 #define HFPP_FUNCNAME hAbsVec  //The Name of the function
 //.......................................................................
 #define HFPP_FUNCBRIEF "Take the absolute of one vector in place."
@@ -1020,7 +1019,7 @@ void hSquareVec (const Iter idata_start,
 #define HFPP_FUNCTYPE void   //No return value
 #define HFPP_NVECS 1 //Number of (input/output) vectors
 #define HFPP_NPAR 0  //Number of other parameters
-#include "hfdefaultwrappercode.h"
+#include <GUI/hfdefaultwrappercode.h>
 //$COPY_TO END --------------------------------------------------
 
 /*!  \brief Square the content of one vector in place.
@@ -1048,7 +1047,7 @@ void hAbsVec (const Iter idata_start,
 
 
 //$COPY_TO HFILE START --------------------------------------------------
-#include "hfpp-undef.cc"
+#include <GUI/hfpp-undef.cc>
 #define HFPP_FUNCNAME hAddVecs  //The Name of the function
 //.......................................................................
 #define HFPP_FUNCBRIEF "Add the input vector to the values in the output vector."
@@ -1057,7 +1056,7 @@ void hAbsVec (const Iter idata_start,
 #define HFPP_FUNCTYPE void   //No return value
 #define HFPP_NVECS 2 //Number of (input/output) vectors
 #define HFPP_NPAR 0  //Number of other parameters
-#include "hfdefaultwrappercode.h"
+#include <GUI/hfdefaultwrappercode.h>
 //$COPY_TO END --------------------------------------------------
 
 /*!  \brief Add the input vector to the values in the output vector. 
@@ -1091,7 +1090,7 @@ void hAddVecs (const Iter idata_start,
 }
 
 //$COPY_TO HFILE START --------------------------------------------------
-#include "hfpp-undef.cc"
+#include <GUI/hfpp-undef.cc>
 #define HFPP_FUNCNAME hCopyVec  //The Name of the function
 //.......................................................................
 #define HFPP_FUNCBRIEF "Copies the values of the input vector to the output vector."
@@ -1100,7 +1099,7 @@ void hAddVecs (const Iter idata_start,
 #define HFPP_FUNCTYPE void   //No return value
 #define HFPP_NVECS 2 //Number of (input/output) vectors
 #define HFPP_NPAR 0  //Number of other parameters
-//#include "hfdefaultwrappercode.h"
+//#include <GUI/hfdefaultwrappercode.h>
 
 //Define your onw wrappers to make sure the vectors are of equal lengths
 #undef HFPP_VEC_WRAPPER_CODE_STL
@@ -1148,7 +1147,7 @@ void hCopyVec (const Iter idata_start,
 
 
 //$COPY_TO HFILE START --------------------------------------------------
-#include "hfpp-undef.cc"
+#include <GUI/hfpp-undef.cc>
 #define HFPP_FUNCNAME hDownsample  //The Name of the function
 //.......................................................................
 #define HFPP_FUNCBRIEF "Resamples (by averaging) an input vector to fit the size of the output vector."
@@ -1158,7 +1157,7 @@ void hCopyVec (const Iter idata_start,
 #define HFPP_FUNCTYPE void   //Return value type of function is templated with T
 #define HFPP_NVECS 2 //Number of (input/output) vectors
 #define HFPP_NPAR 0  //Number of other parameters
-#include "hfdefaultwrappercode.h"
+#include <GUI/hfdefaultwrappercode.h>
 
 //Define a 2nd convenience wrapper function where the length is specified and vector is resized
 #define HFPP_VARIANT 1
@@ -1245,7 +1244,7 @@ void hDownsample (const Iter idata_start,
 
 
 //$COPY_TO HFILE START --------------------------------------------------
-#include "hfpp-undef.cc"
+#include <GUI/hfpp-undef.cc>
 #define HFPP_FUNCNAME hFindLowerBound  //The Name of the function
 //.......................................................................
 #define HFPP_FUNCBRIEF "Finds the location in a monotonically increasing vector, where the search value is just above or equal to the value in the vector."
@@ -1257,7 +1256,7 @@ void hDownsample (const Iter idata_start,
 #define HFPP_PAR0 (value,HNumber,0.0,"Value to find.",HFPP_TEMPLATED_TYPE,HFPP_PASS_AS_VALUE)  //Definition of input parameter
 #define HFPP_GUI_LIBRARY Math
 #define HFPP_GUI_RETURN_POLICY  HFPP_GUI_RETURN_SCALAR //How function returns result (as single-valued return value, or as a vector)
-#include "hfdefaultwrappercode.h"
+#include <GUI/hfdefaultwrappercode.h>
 //$COPY_TO END --------------------------------------------------
 
 /*!  \brief Finds -- through a binary search and interpolation -- the

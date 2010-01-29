@@ -5,7 +5,7 @@
 ##
 ## ==============================================================================
 
-find_program (gawk_executable gawk awk ${bin_locations})
+find_program (bin_awk gawk awk ${bin_locations})
 
 macro (cr_process_awk _infile _script)
   
@@ -13,18 +13,22 @@ macro (cr_process_awk _infile _script)
   get_filename_component(_infile_name      ${_infile} NAME_WE)
   get_filename_component(_infile_extension ${_infile} EXT)
 
-  set (_outfile_filename ${_infile_name}.awk.${_infile_extension})
+  set (_outfile_filename ${_infile_name}.awk${_infile_extension})
   set (_outfile ${CR_BINARY_DIR}/implement/GUI/${_outfile_filename})
 
   message (STATUS "[awk] ${_infile_filename} -> ${_outfile_filename}")
   
   execute_process (
     WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement/GUI
-    COMMAND ${gawk_executable} -f ${_script} ${_infile} | ${gawk_executable} -f ${_script} > ${_outfile}
-    TIMEOUT 20
+    COMMAND ${bin_awk} -f ${_script} ${_infile}
+    TIMEOUT 30
+    OUTPUT_VARIABLE awk_output
     ERROR_VARIABLE awk_error
-    OUTPUT_QUIET
     )
+  
+  if (awk_output)
+    file (WRITE ${_outfile} ${awk_output})
+  endif (awk_output)
   
 endmacro (cr_process_awk _infile _script)
 
@@ -69,7 +73,6 @@ endif (gawk_executable)
 
 file (GLOB libhfget_sources 
   VectorSelector.cc
-  hfanalysis.cc
   ${CR_BINARY_DIR}/implement/GUI/*.cc
   hfget.cc
   )
