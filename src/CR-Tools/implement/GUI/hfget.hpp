@@ -11,8 +11,8 @@ or
 python
 execfile("hfget.py")
 */
-#undef HFPP_FILETYPE
-#define HFPP_FILETYPE() (PYTHON)  // Tell the preprocessor (for generating wrappers) that this is a c++ header file for Python exposure (brackets are crucial)
+#undef HF_PP_FILETYPE
+#define HF_PP_FILETYPE() (PYTHON)  // Tell the preprocessor (for generating wrappers) that this is a c++ header file for Python exposure (brackets are crucial)
 
 #define hPyExposeINCS(FUNC)  def(#FUNC,FUNC##_I);def(#FUNC,FUNC##_N);def(#FUNC,FUNC##_C);def(#FUNC,FUNC##_S)
 #define hPyExposeINC(FUNC)  def(#FUNC,FUNC##_I);def(#FUNC,FUNC##_N);def(#FUNC,FUNC##_C)
@@ -484,4 +484,4 @@ def("pytst",pytst);
 }
     */
 
-#undef HFPP_FILETYPE
+#undef HF_PP_FILETYPE

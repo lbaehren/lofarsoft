@@ -30,7 +30,7 @@ template<class T> inline T mycast(const int64_t v);
 
 //Convert to arbitrary class T if no specified otherwise
 template<class T> inline T mycast(const HPointer v);
-//template<class T> inline T mycast(const HInteger v);
+template<class T> inline T mycast(const HInteger v);
 template<class T> inline T mycast(const HNumber v);
 template<class T> inline T mycast(const HComplex v);
 template<class T> inline T mycast(const HString v);

@@ -89,8 +89,8 @@ void hDownsample (const Iter idata_start,
 //________________________________________________________________________
 //                                                 Preprocessor Definition
 
-#undef HFPP_FILETYPE
-#define HFPP_FILETYPE() (hFILE)  // Tell the preprocessor (for generating wrappers) that this is a c++ header file (brackets are crucial)
+#undef HF_PP_FILETYPE
+#define HF_PP_FILETYPE() (hFILE)  // Tell the preprocessor (for generating wrappers) that this is a c++ header file (brackets are crucial)
 #include "hfwrappers-hfanalysis.cc.h"  // include wrapper definitions generated automatically from source
 
 #define DefPythonWrapper_VecINCS_0_Parameters(FUNC) \
@@ -199,4 +199,4 @@ extern void (*hRunningAverageVec_C)(vector<HComplex> &vec_in,vector<HComplex> &v
 
 
 #endif
-#undef HFPP_FILETYPE
+#undef HF_PP_FILETYPE
