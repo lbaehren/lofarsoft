@@ -56,12 +56,13 @@ if (CR_WITH_PYCR)
     )
   ## linker instructions
   target_link_libraries(pycr
+    cr
     ${HAVE_LIBZ}
+    ${BOOST_PROGRAM_OPTIONS_LIBRARY}
+    ${DAL_LIBRARIES}
+    ${HDF5_LIBRARIES}
     ${PYTHON_LIBRARIES}
     ${BOOST_LIBRARIES}
-    ${HDF5_LIBRARIES}
-    ${DAL_LIBRARIES}
-    ${cr_link_libraries}
     )
   ## additional target properties
   if (APPLE)
