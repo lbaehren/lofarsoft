@@ -558,6 +558,15 @@ IF (UNIX)
   else (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
     set (CMAKE_SYSTEM_64BIT 0)
   endif (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+
+  ## --- Kernel version ------------------------------------
+  
+  execute_process (
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    COMMAND uname -m
+    TIMEOUT 20
+    OUTPUT_VARIABLE CMAKE_SYSTEM_KERNEL
+    )
   
 ENDIF (UNIX)
 
@@ -583,6 +592,7 @@ message (STATUS "+------------------------------------------------------------+"
 message (STATUS "CMAKE_SYSTEM ............... = ${CMAKE_SYSTEM}")
 message (STATUS "CMAKE_SYSTEM_PROCESSOR ..... = ${CMAKE_SYSTEM_PROCESSOR}")
 message (STATUS "CMAKE_SYSTEM_64BIT ......... = ${CMAKE_SYSTEM_64BIT}")
+message (STATUS "CMAKE_SYSTEM_KERNEL ........ = ${CMAKE_SYSTEM_KERNEL}")
 message (STATUS "CMAKE_MODULE_LINKER_FLAGS .. = ${CMAKE_MODULE_LINKER_FLAGS}")
 message (STATUS "CMAKE_INSTALL_PREFIX ....... = ${CMAKE_INSTALL_PREFIX}")
 message (STATUS "+------------------------------------------------------------+")
