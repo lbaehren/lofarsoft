@@ -530,18 +530,8 @@ endif (APPLE)
 ## Compiler settings
 
 IF (UNIX)
-  add_definitions (
-    -fPIC
-    -DAIPS_STDLIB
-    -DAIPS_AUTO_STL
-    )
-  IF (APPLE)
-    add_definitions (-DAIPS_DARWIN)
-  ELSE (APPLE)
-    ADD_DEFINITIONS (-DAIPS_LINUX)
-  ENDIF (APPLE)
-  
-  ## Platform test Big/Little Endian -----------------------
+
+  ## --- Platform test Big/Little Endian -------------------
   
 #  include (TestBigEndian)
 #  test_big_endian (CMAKE_SYSTEM_BIG_ENDIAN)
@@ -550,7 +540,7 @@ IF (UNIX)
     add_definitions (-DAIPS_BIG_ENDIAN)
   endif (CMAKE_SYSTEM_BIG_ENDIAN)
   
-  ## Platform test 32/64 bit -------------------------------
+  ## --- Platform test 32/64 bit ---------------------------
   
   if (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
     set (CMAKE_SYSTEM_64BIT 1)
@@ -567,10 +557,36 @@ IF (UNIX)
     TIMEOUT 20
     OUTPUT_VARIABLE CMAKE_SYSTEM_KERNEL
     )
+
+  ## --- Compiler flags ------------------------------------
+
+  add_definitions (
+    -fPIC
+    -DAIPS_STDLIB
+    -DAIPS_AUTO_STL
+    )
+
+  IF (APPLE)
+    add_definitions (-DAIPS_DARWIN)
+  ELSE (APPLE)
+    ADD_DEFINITIONS (-DAIPS_LINUX)
+  ENDIF (APPLE)
+  
+  ## --- Linker flags --------------------------------------
+  
+  if (APPLE)
+    if (CMAKE_SYSTEM_KERNEL MATCHES x86_x64)
+      set (CMAKE_MODULE_LINKER_FLAGS "-Xlinker -rpath -Xlinker -m64")
+    else (CMAKE_SYSTEM_KERNEL MATCHES x86_x64)
+      if (CMAKE_SYSTEM_KERNEL MATCHES i386)
+	set (CMAKE_MODULE_LINKER_FLAGS "-Xlinker -rpath -Xlinker -m32")
+      endif (CMAKE_SYSTEM_KERNEL MATCHES i386)
+    endif (CMAKE_SYSTEM_KERNEL MATCHES x86_x64)
+  else (APPLE)
+    set (CMAKE_MODULE_LINKER_FLAGS "-Xlinker -rpath -Xlinker")
+  endif (APPLE)
   
 ENDIF (UNIX)
-
-SET (CMAKE_MODULE_LINKER_FLAGS "-Xlinker -rpath -Xlinker")
 
 ## -----------------------------------------------------------------------------
 ## Sub-directories
@@ -591,7 +607,6 @@ message (STATUS "| [casacore] Configuration summary                           |"
 message (STATUS "+------------------------------------------------------------+")
 message (STATUS "CMAKE_SYSTEM ............... = ${CMAKE_SYSTEM}")
 message (STATUS "CMAKE_SYSTEM_PROCESSOR ..... = ${CMAKE_SYSTEM_PROCESSOR}")
-message (STATUS "CMAKE_SYSTEM_64BIT ......... = ${CMAKE_SYSTEM_64BIT}")
 message (STATUS "CMAKE_SYSTEM_KERNEL ........ = ${CMAKE_SYSTEM_KERNEL}")
 message (STATUS "CMAKE_MODULE_LINKER_FLAGS .. = ${CMAKE_MODULE_LINKER_FLAGS}")
 message (STATUS "CMAKE_INSTALL_PREFIX ....... = ${CMAKE_INSTALL_PREFIX}")

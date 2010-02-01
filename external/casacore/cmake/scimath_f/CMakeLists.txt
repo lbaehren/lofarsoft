@@ -21,29 +21,11 @@ endif (CASACORE_ENABLE_SHARED)
 
 ## linker instructions
 
-if (APPLE)
-  if (CMAKE_SYSTEM_KERNEL MATCHES x86_x64)
-    set_target_properties (casa_scimath_f
-      PROPERTIES
-      COMPILE_FLAGS "-fPIC -O2 -fPIC -m64"
-      LINKER_LANGUAGE Fortran
-      )
-  else (CMAKE_SYSTEM_KERNEL MATCHES x86_x64)
-    if (CMAKE_SYSTEM_KERNEL MATCHES i386)
-      set_target_properties (casa_scimath_f
-	PROPERTIES
-	COMPILE_FLAGS "-fPIC -O2 -fPIC -m32"
-	LINKER_LANGUAGE Fortran
-	)
-    endif (CMAKE_SYSTEM_KERNEL MATCHES i386)
-  endif (CMAKE_SYSTEM_KERNEL MATCHES x86_x64)
-else (APPLE)
-  set_target_properties (casa_scimath_f
-    PROPERTIES
-    COMPILE_FLAGS "-fPIC -O2 -fPIC"
-    LINKER_LANGUAGE Fortran
-    )
-endif (APPLE)
+set_target_properties (casa_scimath_f
+  PROPERTIES
+  COMPILE_FLAGS "-fPIC -O2 -fPIC"
+  LINKER_LANGUAGE Fortran
+  )
 
 ## -----------------------------------------------------------------------------
 ## Installation
