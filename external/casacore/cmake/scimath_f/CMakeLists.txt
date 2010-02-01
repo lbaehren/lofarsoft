@@ -21,11 +21,19 @@ endif (CASACORE_ENABLE_SHARED)
 
 ## linker instructions
 
-set_target_properties (casa_scimath_f
-  PROPERTIES
-  COMPILE_FLAGS "-fPIC -O2 -fPIC"
-  LINKER_LANGUAGE Fortran
-  )
+if (APPLE)
+  set_target_properties (casa_scimath_f
+    PROPERTIES
+    COMPILE_FLAGS "-fPIC -O2 -fPIC -m32"
+    LINKER_LANGUAGE Fortran
+    )
+else (APPLE)
+  set_target_properties (casa_scimath_f
+    PROPERTIES
+    COMPILE_FLAGS "-fPIC -O2 -fPIC"
+    LINKER_LANGUAGE Fortran
+    )
+endif (APPLE)
 
 ## -----------------------------------------------------------------------------
 ## Installation

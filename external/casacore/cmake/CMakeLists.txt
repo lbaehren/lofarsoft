@@ -583,7 +583,6 @@ message (STATUS "+------------------------------------------------------------+"
 message (STATUS "CMAKE_SYSTEM ............... = ${CMAKE_SYSTEM}")
 message (STATUS "CMAKE_SYSTEM_PROCESSOR ..... = ${CMAKE_SYSTEM_PROCESSOR}")
 message (STATUS "CMAKE_SYSTEM_64BIT ......... = ${CMAKE_SYSTEM_64BIT}")
-message (STATUS "CMAKE_SYSTEM_BIG_ENDIAN .... = ${CMAKE_SYSTEM_BIG_ENDIAN}")
 message (STATUS "CMAKE_MODULE_LINKER_FLAGS .. = ${CMAKE_MODULE_LINKER_FLAGS}")
 message (STATUS "CMAKE_INSTALL_PREFIX ....... = ${CMAKE_INSTALL_PREFIX}")
 message (STATUS "+------------------------------------------------------------+")

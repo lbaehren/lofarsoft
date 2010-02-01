@@ -1,0 +1,11 @@
+#!/bin/bash
+
+basedir=`pwd`
+
+echo "-- Removing up tar-archive with CMake scripts ..."
+rm cmake.tgz
+
+cd cmake
+
+echo "-- Creating tar-archive with CMake scripts ..."
+tar -cvzf $basedir/cmake.tgz `find . -name CMakeLists.txt`
