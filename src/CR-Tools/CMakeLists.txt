@@ -48,6 +48,54 @@ option (CR_WITH_PLOTTING        "Support for generation of plots?"           YES
 option (CR_WITH_GUI             "Build the graphical interface?"             NO  )
 option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES )
 
+## ==============================================================================
+##
+##  Definition of Macros
+##
+## ==============================================================================
+
+find_program (bin_awk gawk     awk   ${bin_locations})
+find_program (bash_executable  bash  ${bin_locations})
+find_program (tar_executable   tar   ${bin_locations})
+find_program (gzip_executable  gzip  ${bin_locations})
+
+##__________________________________________________________
+##                                            cr_process_awk
+
+macro (cr_process_awk _infile _script)
+  
+  get_filename_component(_infile_filename  ${_infile} NAME)
+  get_filename_component(_infile_name      ${_infile} NAME_WE)
+  get_filename_component(_infile_extension ${_infile} EXT)
+
+  set (_outfile_filename ${_infile_name}.awk${_infile_extension})
+  set (_outfile ${CR_BINARY_DIR}/implement/GUI/${_outfile_filename})
+
+  message (STATUS "[awk] ${_infile_filename} -> ${_outfile_filename}")
+  
+  if (${ARGC} EQUAL 2)
+    execute_process (
+      WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement/GUI
+      COMMAND ${bin_awk} -f ${_script} ${_infile}
+      TIMEOUT 30
+      OUTPUT_FILE ${_outfile}
+      )
+  else (${ARGC} EQUAL 2)
+    if (${ARGC} EQUAL 3)
+      execute_process (
+	WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement/GUI
+	COMMAND ${bin_awk} -f ${ARGV1} ${_infile}
+	COMMAND ${bin_awk} -f ${ARGV2}
+	TIMEOUT 30
+	OUTPUT_FILE ${_outfile}
+	)
+    else (${ARGC} EQUAL 3)
+      message (STATUS "[awk] Wrong number of arguments : ${ARGC}")
+    endif (${ARGC} EQUAL 3)
+  endif (${ARGC} EQUAL 2)
+  
+endmacro (cr_process_awk _infile _script)
+
 ## =============================================================================
 ##
 ##  External dependencies
@@ -276,12 +324,10 @@ if (CR_WITH_GUI)
 
   include (FindQt4)
 
-  if (QT_INCLUDES)
-    include_directories (${QT_INCLUDES})
-  else (QT_INCLUDES)
+  if (NOT QT_INCLUDES)
     message (STATUS "[CR-Tools] Unable to build GUI - missing Qt4 headers!")
     set (CR_WITH_GUI NO)
-  endif (QT_INCLUDES)
+  endif (NOT QT_INCLUDES)
   
   if (NOT QT_QTCORE_LIBRARY OR NOT QT_QTGUI_LIBRARY)
     message (STATUS "[CR-Tools] Unable to build GUI - Qt4 libraries incomplete!")
@@ -507,10 +553,6 @@ endif (CR_WITH_PRIVATE)
 ##  Creation of tar-archive
 ##
 ## =============================================================================
-
-find_program (bash_executable bash ${bin_locations})
-find_program (tar_executable tar ${bin_locations})
-find_program (gzip_executable gzip ${bin_locations})
 
 if (tar_executable AND gzip_executable)
 

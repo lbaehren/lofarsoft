@@ -2,13 +2,13 @@
 ##_______________________________________________________________________________
 ## Include directories
 
-if (QT4_INCLUDES AND GTK_INCLUDES AND BOOST_INCLUDES)
+if (GTK_INCLUDES AND BOOST_INCLUDES)
   set (libhfget_includes "-I${GTK_INCLUDES} -I${BOOST_INCLUDES}")
-endif (QT4_INCLUDES AND GTK_INCLUDES AND BOOST_INCLUDES)
+endif (GTK_INCLUDES AND BOOST_INCLUDES)
 
-if (QT4_INCLUDES)
-  include_directories (${QT4_INCLUDES})
-endif (QT4_INCLUDES)
+if (QT_INCLUDES)
+  include_directories (${QT_INCLUDES})
+endif (QT_INCLUDES)
 
 if (MATHGL_INCLUDES)
   include_directories (${MATHGL_INCLUDES})
@@ -17,26 +17,20 @@ endif (MATHGL_INCLUDES)
 ##_______________________________________________________________________________
 ## Pre-processing of the source files
 
-find_program (gawk_executable gawk awk ${bin_locations})
-
-if (gawk_executable)
+if (bin_awk)
   ## process input files
-  add_custom_target (hfget_awk
-    COMMAND ${gawk_executable} -f hfiter.awk hffuncs.cc | ${gawk_executable} -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.awk.cc
-    COMMAND ${gawk_executable} -f hfiter.awk hffuncs.h | ${gawk_executable} -f hfprep.awk > ${CR_BINARY_DIR}/implement/GUI/hffuncs.awk.h
-    COMMAND ${gawk_executable} -f hfsplit2h.awk hfanalysis.cc > ${CR_BINARY_DIR}/implement/GUI/hfanalysis.awk.cc
-    COMMAND ${gawk_executable} -f hfsplit2h.awk hfanalysis.h > ${CR_BINARY_DIR}/implement/GUI/hfanalysis.awk.h
-    WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement/GUI
-    COMMENT "Running awk to generate source files ..."
-    )
+  cr_process_awk (hfanalysis.cc hfsplit2h.awk)
+  cr_process_awk (hfanalysis.h hfsplit2h.awk)
+  cr_process_awk (hffuncs.cc hfiter.awk hfprep.awk)
+  cr_process_awk (hffuncs.h hfiter.awk hfprep.awk)
   ## augment include path
   include_directories (
     ${CR_BINARY_DIR}/implement
     ${CR_BINARY_DIR}/implement/GUI
     )
-else (gawk_executable)
+else (bin_awk)
   message (WARNING "Unable to process source files -- missing awk/gawk!")
-endif (gawk_executable)
+endif (bin_awk)
 
 ##_______________________________________________________________________________
 ## Create the library
@@ -44,16 +38,14 @@ endif (gawk_executable)
 ## List of source files
 
 file (GLOB libhfget_sources 
-  VectorSelector.cc
-#  hfanalysis.cc
-  ${CR_BINARY_DIR}/implement/GUI/*.cc
   hfget.cc
+  VectorSelector.cc
+  ${CR_BINARY_DIR}/implement/GUI/*.cc
   )
 
 ## compiler instructions
 
 add_library (hfget MODULE ${libhfget_sources})
-add_dependencies (hfget hfget_awk)
 
 ## linker instructions
 
@@ -69,6 +61,9 @@ target_link_libraries (hfget
   )
 
 ## Additional target properties
+
+add_dependencies (hfget hfget_awk)
+
 if (APPLE)
   set_target_properties (hfget
     PROPERTIES
