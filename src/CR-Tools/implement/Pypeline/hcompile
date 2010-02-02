@@ -1,0 +1,39 @@
+#!/bin/csh
+set FILE=hftools
+set PYPDIR=$LOFARSOFT/src/CR-Tools/implement/Pypeline
+
+echo "Compiling file: " $FILE.cc
+
+set HFLAGS="-I$LOFARSOFT/build/cr -I$LOFARSOFT/src/CR-Tools/implement -I$LOFARSOFT/release/lib/python2.6/site-packages/numpy/core/include -I$LOFARSOFT/release/include/python/num_util -I/sw/include -I$LOFARSOFT/release/include -I$LOFARSOFT/release/include/cfitsio -I$LOFARSOFT/release/include/dal -I$LOFARSOFT/release/include/hdf5 -I/opt/local/include -I/sw/include/python2.6 -I$LOFARSOFT/release/include/casacore -I/opt/local/include/qt4-mac -I/opt/local/include/qt4-mac/QtGui -I$LOFARSOFT/build/cr/implement -F/sw/lib/qt4-mac/lib -pipe -g -D_REENTRANT -w -fpermissive -DQT_GUI_LIB -DQT_CORE_LIB -I$LOFARSOFT/src/CR-Tools/implement/GUI -I/sw/include/gtk-2.0 -I$LOFARSOFT/release/include"
+
+
+set HFLAGS2="-Dhfget_EXPORTS -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_LITTLE_ENDIAN -DAIPS_64B -DWITH_CASA -mmacosx-version-min=10.5 -Wall -Wno-comment -Woverloaded-virtual -Wno-non-template-friend -fPIC -I/Users/falcke/LOFAR/usg/build/cr/implement/GUI -I/Users/falcke/LOFAR/usg/build/cr -I/Users/falcke/LOFAR/usg/src/CR-Tools/implement -I/sw/include -I/Users/falcke/LOFAR/usg/release/include -I/Users/falcke/LOFAR/usg/release/include/cfitsio -I/Users/falcke/LOFAR/usg/release/include/dal -I/Users/falcke/LOFAR/usg/release/include/hdf5 -I/opt/local/include -I/sw/include/python2.6 -I/Users/falcke/LOFAR/usg/release/include/casacore -I/opt/local/include/qt4-mac -I/opt/local/include/qt4-mac/QtGui -I/Users/falcke/LOFAR/usg/build/cr/implement   -F/sw/lib/qt4-mac/lib  -pipe -g -D_REENTRANT -w -fpermissive -DQT_GUI_LIB -DQT_CORE_LIB -I/Users/falcke/LOFAR/usg/src/CR-Tools/implement/GUI -I/sw/include/gtk-2.0 -I/Users/falcke/LOFAR/usg/release/include"
+
+set LIBRARIES="/sw/lib/qt4-mac/lib  $LOFARSOFT/release/lib/libdal.a $LOFARSOFT/release/lib/libhdf5.dylib $LOFARSOFT/release/lib/libhdf5_hl.dylib $LOFARSOFT/release/lib/libcasa_msvis.a $LOFARSOFT/release/lib/libcasa_msfits.a $LOFARSOFT/release/lib/libcasa_images.a $LOFARSOFT/release/lib/libcasa_ms.a $LOFARSOFT/release/lib/libcasa_lattices.a $LOFARSOFT/release/lib/libcasa_components.a $LOFARSOFT/release/lib/libcasa_coordinates.a $LOFARSOFT/release/lib/libcasa_fits.a $LOFARSOFT/release/lib/libcasa_measures.a $LOFARSOFT/release/lib/libcasa_scimath.a $LOFARSOFT/release/lib/libcasa_scimath_f.a $LOFARSOFT/release/lib/libmir.a $LOFARSOFT/release/lib/libcasa_tables.a $LOFARSOFT/release/lib/libcasa_casa.a /sw/lib/python2.6/config/libpython2.6.dylib $LOFARSOFT/release/lib/libboost_date_time.a $LOFARSOFT/release/lib/libboost_filesystem.a $LOFARSOFT/release/lib/libboost_iostreams.a $LOFARSOFT/release/lib/libboost_program_options.a $LOFARSOFT/release/lib/libboost_python.a $LOFARSOFT/release/lib/libboost_serialization.a $LOFARSOFT/release/lib/libboost_signals.a $LOFARSOFT/release/lib/libboost_system.a $LOFARSOFT/release/lib/libboost_thread.a $LOFARSOFT/release/lib/libboost_unit_test_framework.a $LOFARSOFT/release/lib/libboost_wave.a  $LOFARSOFT/release/lib/libcfitsio.a $LOFARSOFT/release/lib/libwcs.a /usr/X11R6/lib/libSM.dylib /usr/X11R6/lib/libICE.dylib /usr/X11R6/lib/libX11.dylib /usr/X11R6/lib/libXext.dylib $LOFARSOFT/release/lib/libplplotd.dylib $LOFARSOFT/release/lib/libplplotcxxd.dylib $LOFARSOFT/release/lib/libcsirocsa.dylib /opt/local/lib/libpng.dylib /sw/lib/libfftw3.dylib /usr/lib/libutil.dylib /usr/lib/libm.dylib $LOFARSOFT/build/cr/implement/libcr.a"
+
+#Libraries kicked out ...
+# -framework QtDesigner -framework QtGui -framework QtCore /Users/falcke/LOFAR/usg/release/lib/libmgl.dylib /Users/falcke/LOFAR/usg/release/lib/libmgl-qt.dylib
+#/sw/lib/gcc4.3/lib/libgfortran.dylib /sw/lib/liblapack.dylib /sw/lib/libcblas.dylib /usr/lib/libblas.dylib /sw/lib/libatlas.dylib
+
+#Preprocessor command keeping comments inside ...
+#gcc -E -C -P -D H_DEBUG_CPP $HFLAGS -I. hftools.tmp.cc | gawk '{gsub(" *\\<_H_NL_\\> *","\n"); print}' > hftools.hfpp.cc
+
+cd $PYPDIR
+
+echo "Preprocessor Step 1a: Iterating source code over certain variables. Generating file: " hftools.iter.cc
+gawk -f $GUI/hfiter.awk   hftools.cc >  hftools.iter.cc
+echo "Preprocessor Step 1b: Generating some basic documentation: See file hftools.doc.tex"
+gawk -f $GUI/hfgetdoc.awk hftools.iter.cc | sort >  hftools.doc.tex
+echo "Preprocessor Step 1c: Splitting off certain snippets of code. Generating file: " hftools.tmp.cc and hftools.def.h
+gawk -f $GUI/hfsplit2h.awk hftools.iter.cc >  hftools.tmp.cc
+echo "Preprocessor Step 2: Using gcc preprocessor to generate wrappers. Generating file: " hftools.hfpp.cc
+gcc -E  -P -D H_DEBUG_CPP $HFLAGS -I. hftools.tmp.cc | gawk '{gsub(" *\\<_H_NL_\\> *","\n"); print}' > hftools.hfpp.cc
+echo "Compile source code. Generating file: " hftools.cc.o
+/usr/bin/c++ $HFLAGS2 -o hftools.cc.o -c hftools.hfpp.cc
+echo "Link library. Generating file: "  $GUI/libhftools.so
+/usr/bin/c++  -Wall -Wno-comment -Woverloaded-virtual -Wno-non-template-friend -bundle -headerpad_max_install_names -fPIC -flat_namespace -Wl -o $GUI/libhftools.so $GUI/hftools.cc.o -F$LIBRARIES 
+
+echo " "
+echo "Available functions in hftools"
+echo "=============================="
+cat hftools.doc.tex
