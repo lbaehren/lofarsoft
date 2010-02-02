@@ -1,3 +1,3 @@
 #
-cd $LOFARSOFT/src/CR-Tools/implement/GUI
+cd $LOFARSOFT/src/CR-Tools/implement/Pypeline
 python -i hfpypeline.py 

@@ -30,8 +30,8 @@ echo "Preprocessor Step 2: Using gcc preprocessor to generate wrappers. Generati
 gcc -E  -P -D H_DEBUG_CPP $HFLAGS -I. hftools.tmp.cc | gawk '{gsub(" *\\<_H_NL_\\> *","\n"); print}' > hftools.hfpp.cc
 echo "Compile source code. Generating file: " hftools.cc.o
 /usr/bin/c++ $HFLAGS2 -o hftools.cc.o -c hftools.hfpp.cc
-echo "Link library. Generating file: "  $GUI/libhftools.so
-/usr/bin/c++  -Wall -Wno-comment -Woverloaded-virtual -Wno-non-template-friend -bundle -headerpad_max_install_names -fPIC -flat_namespace -Wl -o $GUI/libhftools.so $GUI/hftools.cc.o -F$LIBRARIES 
+echo "Link library. Generating file: "  $PYPDIR/libhftools.so
+/usr/bin/c++  -Wall -Wno-comment -Woverloaded-virtual -Wno-non-template-friend -bundle -headerpad_max_install_names -fPIC -flat_namespace -Wl -o $PYPDIR/libhftools.so $PYPDIR/hftools.cc.o -F$LIBRARIES 
 
 echo " "
 echo "Available functions in hftools"
