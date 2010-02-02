@@ -821,7 +821,7 @@ std::vector<T> HFPP_FUNC_NAME (
 
 //$DOCSTRING: Finds the location (i.e., returns integer) in a monotonically increasing vector, where the input search value is just above or equal to the value in the vector.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hFindLowerBound
+#define HFPP_FUNC_NAME hFindLowerBound2
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Sorted numeric input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE) 
@@ -937,7 +937,7 @@ void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out_start,
 //========================================================================
 
 //------------------------------------------------------------------------
-#define HFPP_FUNC_NAME hCloseFile
+//#define HFPP_FUNC_NAME hCloseFile
 //------------------------------------------------------------------------
 /*!
   \brief Function to close a file with a datareader object providing the pointer to the object as an integer.
@@ -951,7 +951,7 @@ void hCloseFile(HIntPointer iptr) {
 }
 
 //------------------------------------------------------------------------
-#define HFPP_FUNC_NAME hOpenFile
+//#define HFPP_FUNC_NAME hOpenFile
 //------------------------------------------------------------------------
 /*!
   \brief Function to open a file based on a filename and returning a pointer to a datareader object as an integer.
@@ -1131,7 +1131,7 @@ void HFPP_FUNC_NAME(std::vector<T> & vec,
   };
 
 //!!!One Needs to verify somehow that the parameters make sense !!!
-  if (Antenna > drp->nofAntennas()-1) {
+  if (Antenna > static_cast<HInteger>(drp->nofAntennas()-1)) {
     ERROR("Requested Antenna number too large!");
     return;
   };
