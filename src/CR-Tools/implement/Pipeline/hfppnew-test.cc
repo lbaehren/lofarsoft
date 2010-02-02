@@ -21,6 +21,7 @@ FILES needed for the pypeline:
 hftools.cc   - source code with definition of the routines
 hftools.h    - corresponding h file
 hftools.hpp  - file to generate python bindings
+hfcommon.h   - some common definitions used by the GUI and the Pypeline
 
 hfpypeline.py   - basic pypepline demonstration
 hftools.py      - definition that python needs in order to make nice wrappers and operators for the hftools in python

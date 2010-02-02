@@ -863,6 +863,75 @@ void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out_start,
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
+//$DOCSTRING: Finds the location (i.e., returns integer) in a monotonically increasing vector, where the input search value is just above or equal to the value in the vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFindLowerBound
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(value)()("value to search for")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+PASS_AS_REFERENCE) 
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+Finds -- through a binary search and interpolation -- the location in
+  a monotonically increasing vector, where the search value is just
+  above or equal to the value in the vector.
+
+This requires random access iterators, in order to have an optimal search result.
+
+*/
+template <class Iter> 
+HInteger hFindLowerBound(const Iter data_start,
+			 const Iter data_end, 
+			 const IterValueType value) 
+//iterator_traits<Iter>::value_type value) 
+{
+  HNumber value_n=mycast<HNumber>(value); //This also works for Complex then 
+  HInteger niter=0;
+  if (data_start==data_end) return 0;
+  HInteger maxpos=data_end-data_start-1,posguess;
+  Iter it1=data_start,it2=data_end-1,it0;
+  if (value_n<=mycast<HNumber>(*it1)) return 0;
+  if (value_n>=mycast<HNumber>(*it2)) return maxpos;
+  posguess=(value_n-mycast<HNumber>(*it1))/(mycast<HNumber>(*it2)-mycast<HNumber>(*it1))*maxpos;
+  it0=data_start+posguess;
+  if (it0<it1) return mycast<HInteger>(it1-data_start); //Error, Non monotonic  
+  if (it0>=it2) return mycast<HInteger>(it2-data_start); //Error, Non monotonic  
+  //cout << "hFindLowerBound(" << value_n << "): niter=" << niter << ", posguess=" << posguess << ", val=" << *it0 << " vals=(" << mycast<HNumber>(*(it0)) << ", " << mycast<HNumber>(*(it0+1)) << "), bracket=(" << it1-data_start << ", " << it2-data_start <<")" <<endl;
+  while (!((value_n < mycast<HNumber>(*(it0+1))) && (value_n >= mycast<HNumber>(*it0)))) {
+    if (value_n > mycast<HNumber>(*it0)) {
+      it1=it0;
+    } else {
+      it2=it0;
+    };
+    it0=it1+(it2-it1)/2;
+    if (*it0>value_n) it2=it0; //Binary search step
+    else it1=it0;
+    posguess=(value_n-mycast<HNumber>(*it1))/(mycast<HNumber>(*it2)-mycast<HNumber>(*it1))*(it2-it1)+(it1-data_start);
+    it0=data_start+posguess;
+    ++niter;
+    //  cout << "hFindLowerBound(" << value_n << "): niter=" << niter << ", posguess=" << posguess << ", val=" << *it0 << " vals=(" << mycast<HNumber>(*(it0)) << ", " << mycast<HNumber>(*(it0+1)) << "), bracket=(" << it1-data_start << ", " << it2-data_start <<")" <<endl;
+    if (it0<it1) return it1-data_start; //Error, Non monotonic  
+    if (it0>it2) return it2-data_start; //Error, Non monotonic 
+  };
+  return posguess;
+} 
+
+//Wrapper for c-style arrays
+HInteger hFindLowerBound(const HNumber* data_start,
+			 const HInteger len, 
+			 const HNumber value) 
+{
+  return hFindLowerBound(data_start,data_start+len,value);
+}
+
+
+
+
 //========================================================================
 //                             I/O Functions
 //========================================================================
@@ -1159,4 +1228,4 @@ void HFPP_FUNC_NAME(std::vector<T> & vec,
   else if (Datatype=="CalFFT") {aipscol2stlvec(drp->calfft(),*vp,0);}
 */
 
-#include <GUI/hftools.hpp>
+#include <Pipeline/hftools.hpp>

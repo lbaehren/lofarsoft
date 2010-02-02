@@ -1,5 +1,7 @@
 #!/bin/csh
 set FILE=hftools
+set PYPDIR=$LOFARSOFT/src/CR-Tools/implement/Pipeline
+
 echo "Compiling file: " $FILE.cc
 
 set HFLAGS="-I$LOFARSOFT/build/cr -I$LOFARSOFT/src/CR-Tools/implement -I$LOFARSOFT/release/lib/python2.6/site-packages/numpy/core/include -I$LOFARSOFT/release/include/python/num_util -I/sw/include -I$LOFARSOFT/release/include -I$LOFARSOFT/release/include/cfitsio -I$LOFARSOFT/release/include/dal -I$LOFARSOFT/release/include/hdf5 -I/opt/local/include -I/sw/include/python2.6 -I$LOFARSOFT/release/include/casacore -I/opt/local/include/qt4-mac -I/opt/local/include/qt4-mac/QtGui -I$LOFARSOFT/build/cr/implement -F/sw/lib/qt4-mac/lib -pipe -g -D_REENTRANT -w -fpermissive -DQT_GUI_LIB -DQT_CORE_LIB -I$LOFARSOFT/src/CR-Tools/implement/GUI -I/sw/include/gtk-2.0 -I$LOFARSOFT/release/include"
@@ -15,13 +17,15 @@ set LIBRARIES="/sw/lib/qt4-mac/lib  $LOFARSOFT/release/lib/libdal.a $LOFARSOFT/r
 
 #Preprocessor command keeping comments inside ...
 #gcc -E -C -P -D H_DEBUG_CPP $HFLAGS -I. hftools.tmp.cc | gawk '{gsub(" *\\<_H_NL_\\> *","\n"); print}' > hftools.hfpp.cc
- 
+
+cd $PYPDIR
+
 echo "Preprocessor Step 1a: Iterating source code over certain variables. Generating file: " hftools.iter.cc
-gawk -f hfiter.awk   hftools.cc >  hftools.iter.cc
+gawk -f $GUI/hfiter.awk   hftools.cc >  hftools.iter.cc
 echo "Preprocessor Step 1b: Generating some basic documentation: See file hftools.doc.tex"
-gawk -f hfgetdoc.awk hftools.iter.cc | sort >  hftools.doc.tex
+gawk -f $GUI/hfgetdoc.awk hftools.iter.cc | sort >  hftools.doc.tex
 echo "Preprocessor Step 1c: Splitting off certain snippets of code. Generating file: " hftools.tmp.cc and hftools.def.h
-gawk -f hfsplit2h.awk hftools.iter.cc >  hftools.tmp.cc
+gawk -f $GUI/hfsplit2h.awk hftools.iter.cc >  hftools.tmp.cc
 echo "Preprocessor Step 2: Using gcc preprocessor to generate wrappers. Generating file: " hftools.hfpp.cc
 gcc -E  -P -D H_DEBUG_CPP $HFLAGS -I. hftools.tmp.cc | gawk '{gsub(" *\\<_H_NL_\\> *","\n"); print}' > hftools.hfpp.cc
 echo "Compile source code. Generating file: " hftools.cc.o

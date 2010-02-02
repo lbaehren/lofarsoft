@@ -78,8 +78,8 @@
 #include "IO/LopesEventIn.h"
 #include "IO/LOFAR_TBB.h"
 
-#include <GUI/hfcommon.h>
-#include <GUI/hfppnew.h>
+#include <Pipeline/hfcommon.h>
+#include <Pipeline/hfppnew.h>
 
 //========================================================================
 //                    Casting & Conversion Functions

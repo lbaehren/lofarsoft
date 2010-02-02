@@ -2,12 +2,12 @@
 
 from PyQt4 import QtGui,QtCore
 from mathgl import *
-#import libhfget  as hf
+import libhfget
 import sys
 app = QtGui.QApplication(sys.argv)
 qpointf=QtCore.QPointF()
 
-mglData.SetVec = hf.mglDataSetVecN
+mglData.SetVec = mglDataSetVecN
 
 class hfQtPlotter(QtGui.QWidget):
     def __init__(self, parent=None):
@@ -72,7 +72,7 @@ def hplot(gr,yvec):
     qw = hfQtPlotter()
     qw.show()
     qw.plotGraph(gr)
-    qw.setGeometry(QtCore.QRect(20, 20, width+20, height+20))
+    qw.setGeometry(QtCore.QRect(100, 100, width+100, height+100))
     qw.raise_()
     return qw
 
