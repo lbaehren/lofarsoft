@@ -46,6 +46,7 @@ option (CR_WITH_GLISH           "Support for Glish applications?"            NO 
 option (CR_WITH_PYCR            "Support for Python applications?"           YES )
 option (CR_WITH_PLOTTING        "Support for generation of plots?"           YES )
 option (CR_WITH_GUI             "Build the graphical interface?"             NO  )
+option (CR_WITH_PYPELINE        "Build the Pypeline library?"                NO  )
 option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES )
 
 ## ==============================================================================

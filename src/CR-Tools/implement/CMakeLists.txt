@@ -167,6 +167,10 @@ install (
 
 add_subdirectory (Bindings)
 
+if (CR_WITH_PYPELINE)
+  add_subdirectory (Pypeline)
+endif (CR_WITH_PYPELINE)
+
 if (CR_WITH_GUI)
   add_subdirectory (GUI)
 endif (CR_WITH_GUI)
