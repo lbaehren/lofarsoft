@@ -35,7 +35,7 @@ using namespace std;
 #include "VectorSelector.h"
 #include "hfget.h"
 #include "hffuncs.awk.h"  
-#include "hfanalysis.h"  
+#include "hfanalysis.awk.h"
 #include <time.h>
 
 #define DOSILENT( DOSOMETHING ) bool SILENTx=Silent(true); DOSOMETHING; Silent(SILENTx)
