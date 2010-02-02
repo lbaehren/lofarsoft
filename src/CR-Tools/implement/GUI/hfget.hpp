@@ -387,7 +387,6 @@ DEF_TEMPLATED_MEMBER_FUNCTIONS
     ;
 */
 
-    /*  
     class_<std::vector<DIRECTION> >("DirVec")
         .def(vector_indexing_suite<std::vector<DIRECTION> >())
     ;
@@ -398,7 +397,7 @@ DEF_TEMPLATED_MEMBER_FUNCTIONS
     class_<std::vector<HNumber> >("FloatVec")
         .def(vector_indexing_suite<std::vector<HNumber> >())
     ;
-    
+     
     class_<std::vector<bool> >("BoolVec")
         .def(vector_indexing_suite<std::vector<bool> >())
     ;
@@ -410,7 +409,6 @@ DEF_TEMPLATED_MEMBER_FUNCTIONS
     class_<std::vector<HString> >("StringVec")
         .def(vector_indexing_suite<std::vector<HString> >())
     ;
-    */
 
 boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_id<mglData>());
 
