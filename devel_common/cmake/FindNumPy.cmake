@@ -80,7 +80,7 @@ find_path (NUMPY_ARRAYOBJECT_H numpy/arrayobject.h
   python
   core/include
   python/numpy/core/include
-#  NO_DEFAULT_PATH
+  NO_DEFAULT_PATH
 )
 
 find_path (NUMPY_NDARRAYOBJECT_H numpy/ndarrayobject.h
@@ -90,7 +90,7 @@ find_path (NUMPY_NDARRAYOBJECT_H numpy/ndarrayobject.h
   python
   core/include
   python/numpy/core/include
-#  NO_DEFAULT_PATH
+  NO_DEFAULT_PATH
 )
 
 find_path (NUMPY_INCLUDES numpy/__multiarray_api.h numpy/multiarray_api.txt
@@ -103,7 +103,7 @@ find_path (NUMPY_INCLUDES numpy/__multiarray_api.h numpy/multiarray_api.txt
   python${PYTHON_VERSION}
   python${PYTHON_VERSION}/site-packages/numpy
   python${PYTHON_VERSION}/site-packages/numpy/core/include
-#  NO_DEFAULT_PATH
+  NO_DEFAULT_PATH
   )
 
 ## -----------------------------------------------------------------------------
@@ -117,7 +117,7 @@ find_library (NUMPY_MULTIARRAY_LIBRARY multiarray
   core
   python/numpy/core
   python${PYTHON_VERSION}/site-packages/numpy/core
-#  NO_DEFAULT_PATH
+  NO_DEFAULT_PATH
   )
 if (NUMPY_MULTIARRAY_LIBRARY)
   list (APPEND NUMPY_LIBRARIES ${NUMPY_MULTIARRAY_LIBRARY})
@@ -131,7 +131,7 @@ find_library (NUMPY_SCALARMATH_LIBRARY scalarmath
   core
   python/numpy/core
   python${PYTHON_VERSION}/site-packages/numpy/core
-#  NO_DEFAULT_PATH
+  NO_DEFAULT_PATH
   )
 if (NUMPY_SCALARMATH_LIBRARY)
   list (APPEND NUMPY_LIBRARIES ${NUMPY_SCALARMATH_LIBRARY})
