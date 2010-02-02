@@ -260,6 +260,15 @@ if (NOT USG_CMAKE_CONFIG)
     message (STATUS "Unable to check size of void*")
   endif (CMAKE_SIZEOF_VOID_P)
   
+  if (UNIX)
+    execute_process (
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+      COMMAND uname -m
+      TIMEOUT 20
+      OUTPUT_VARIABLE CMAKE_SYSTEM_KERNEL
+      )
+  endif (UNIX)
+  
   ##__________________________________________________________
   ## System header files
   
@@ -361,6 +370,7 @@ if (NOT USG_CMAKE_CONFIG)
   message (STATUS " CMAKE_SYSTEM_VERSION ...... : ${CMAKE_SYSTEM_VERSION}"        )
   message (STATUS " CMAKE_SYSTEM_PROCESSOR .... : ${CMAKE_SYSTEM_PROCESSOR}"      )
   message (STATUS " CMAKE_SYSTEM_WORDSIZE ..... : ${CMAKE_SYSTEM_WORDSIZE}"       )
+  message (STATUS " CMAKE_SYSTEM_KERNEL ....... : ${CMAKE_SYSTEM_KERNEL}"         )
   message (STATUS " USG_ROOT .................. : ${USG_ROOT}"                    )
   message (STATUS " CMAKE_INSTALL_PREFIX ...... : ${CMAKE_INSTALL_PREFIX}"        )
   message (STATUS " CMAKE_FIND_LIBRARY_PREFIXES : ${CMAKE_FIND_LIBRARY_PREFIXES}" )
