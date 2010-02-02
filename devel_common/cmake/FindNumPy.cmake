@@ -73,11 +73,7 @@ endif (numpy_path)
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-set (NUMPY_INCLUDES "")
-
-## numpy/arrayobject.h
-
-find_path (NUMPY_ARRAYOBJECT_H numpy/arrayobject.h
+find_path (NUMPY_INCLUDES numpy/arrayobject.h numpy/ndarrayobject.h
   PATHS
   ${numpy_search_path}
   System/Library/Frameworks/Python.framework/Versions
@@ -91,29 +87,6 @@ find_path (NUMPY_ARRAYOBJECT_H numpy/arrayobject.h
   ${PYTHON_VERSION}/Extras/lib/python/numpy/core/include
   NO_DEFAULT_PATH
 )
-if (NUMPY_ARRAYOBJECT_H) 
-  list (APPEND NUMPY_INCLUDES ${NUMPY_ARRAYOBJECT_H})
-endif (NUMPY_ARRAYOBJECT_H)
-
-## numpy/ndarrayobject.h
-
-find_path (NUMPY_NDARRAYOBJECT_H numpy/ndarrayobject.h
-  PATHS
-  ${numpy_search_path}
-  System/Library/Frameworks/Python.framework/Versions
-  PATH_SUFFIXES
-  python
-  core/include
-  python/numpy/core/include
-  python${PYTHON_VERSION}
-  python${PYTHON_VERSION}/site-packages/numpy
-  python${PYTHON_VERSION}/site-packages/numpy/core/include
-  ${PYTHON_VERSION}/Extras/lib/python/numpy/core/include
-  NO_DEFAULT_PATH
-)
-if (NUMPY_NDARRAYOBJECT_H) 
-  list (APPEND NUMPY_INCLUDES ${NUMPY_NDARRAYOBJECT_H})
-endif (NUMPY_NDARRAYOBJECT_H)
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
