@@ -69,7 +69,6 @@ set (casacore_modules
   ms
   images
   msfits
-  msvis
   )
 
 ##__________________________________________________________
@@ -88,10 +87,12 @@ set (casacore_dependencies_scimath      scimath_f                  )
 set (casacore_dependencies_scimath_f    casa                       )
 set (casacore_dependencies_tables       casa                       )
 
-set (casacore_header_casa      casa/Arrays.h       )
-set (casacore_header_tables    tables/Tables.h     )
-set (casacore_header_scimath   scimath/Fitting.h   )
-set (casacore_header_measures  measures/Measures.h )
+set (casacore_header_casa      casa/Arrays.h        )
+set (casacore_header_tables    tables/Tables.h      )
+set (casacore_header_scimath   scimath/Fitting.h    )
+set (casacore_header_measures  measures/Measures.h  )
+set (casacore_header_fits      fits/FITS.h          )
+set (casacore_header_ms        ms/MeasurementSets.h )
 
 set (casacore_headers
   casa/Arrays.h
@@ -106,7 +107,6 @@ set (casacore_headers
   ms/MeasurementSets.h
   images/Images.h
   msfits/MSFits.h
-  msvis/MSVis.h
   )
 
 ## ==============================================================================
