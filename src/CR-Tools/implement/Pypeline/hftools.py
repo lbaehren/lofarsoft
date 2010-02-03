@@ -81,7 +81,7 @@ setattr(ComplexVec,"SpectralPower",hSpectralPower)
 #    setattr
 for v in hAllVectorTypes:
     setattr(v,"__repr__",VecToPrintString)
-    for s in ["hResize","hFill","hNew","hCopy"]:     
+    for s in ["hResize","hFill","hNew","hCopy","hSort"]:     
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hRealVectorTypes:
@@ -97,6 +97,6 @@ for v in hNumericalVectorTypes:
     setattr(v,"__imul__",Vec_imul)
     setattr(v,"__idiv__",Vec_idiv)
     setattr(v,"__isub__",Vec_isub)
-    for s in ["hAbs","hConvert","hMul","hDiv","hSub","hAdd","hiMul","hiDiv","hiSub","hiAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMean","hSortMedian","hMedian","hStdDev","hDownsample"]:
+    for s in ["hAbs","hConvert","hMul","hDiv","hSub","hAdd","hiMul","hiDiv","hiSub","hiAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMean","hSortMedian","hMedian","hStdDev","hDownsample","hFindLowerBound"]:
         setattr(v,s[1:].lower(),eval(s))
 

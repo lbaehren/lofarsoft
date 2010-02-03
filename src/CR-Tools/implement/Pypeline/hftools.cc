@@ -285,6 +285,30 @@ void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out_start,
 
 template <class T> inline T square(T val) {return val*val;}
 
+//$DOCSTRING: Implementation of the Gauss function
+//$COPY_TO HFILE START ---------------------------------------------------
+#define HFPP_FUNC_NAME funcGaussian
+//------------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE 
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(x)()("Position at which the Gaussian is evaluated")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+#define HFPP_PARDEF_1 (HNumber)(sigma)()("Width of the Gaussian")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+#define HFPP_PARDEF_2 (HNumber)(mu)()("Mean value of the Gaussian")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+inline HNumber funcGaussian (HNumber x,
+			     HNumber sigma,
+			     HNumber mu)
+{
+  return exp(-(x-mu)*(x-mu)/(2*sigma*sigma))/(sigma*sqrt(2*casa::C::pi));
+};
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+
 //========================================================================
 //$ITERATE MFUNC abs,cos,cosh,exp,log,log10,sin,sinh,sqrt,square,tan,tanh
 //========================================================================
@@ -646,6 +670,28 @@ IterValueType HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
+//$DOCSTRING: Sorts a vector in place 
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hSort
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Attention!!! The vector will be sorted in place. Hence, if you want to
+  keep the data in its original order, you need to copy the data first
+  to a scratch vector and then call this function with the scratch vector!
+*/
+template <class Iter> 
+IterValueType HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
+{
+  sort(vec,vec_end);
+} 
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 //$DOCSTRING: Sorts a vector in place and returns the median value of the elements 
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSortMedian
@@ -674,7 +720,7 @@ IterValueType HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMedian
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES 
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE) 
 //$COPY_TO END --------------------------------------------------
@@ -789,7 +835,7 @@ void HFPP_FUNC_NAME (const Iter vec1,
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hDownsample
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES 
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE) 
 #define HFPP_PARDEF_1 (HNumber)(downsample_factor)()("Factor by which to reduce original size")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
@@ -821,10 +867,10 @@ std::vector<T> HFPP_FUNC_NAME (
 
 //$DOCSTRING: Finds the location (i.e., returns integer) in a monotonically increasing vector, where the input search value is just above or equal to the value in the vector.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hFindLowerBound2
+#define HFPP_FUNC_NAME hFindLowerBound
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Sorted numeric input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Sorted numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(value)()("value to search for")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
 //$COPY_TO END --------------------------------------------------
 /*!
@@ -856,7 +902,7 @@ HInteger HFPP_FUNC_NAME (const Iter vec,
   it0=vec+posguess;
   if (it0<it1) return hfcast<HInteger>(it1-vec); //Error, Non monotonic  
   if (it0>=it2) return hfcast<HInteger>(it2-vec); //Error, Non monotonic  
-  //cout << "hFindLowerBound(" << value_n << "): niter=" << niter << ", posguess=" << posguess << ", val=" << *it0 << " vals=(" << hfcast<HNumber>(*(it0)) << ", " << hfcast<HNumber>(*(it0+1)) << "), bracket=(" << it1-vec << ", " << it2-vec <<")" <<endl;
+  //  cout << "hFindLowerBound(" << value_n << "): niter=" << niter << ", posguess=" << posguess << ", val=" << *it0 << " vals=(" << hfcast<HNumber>(*(it0)) << ", " << hfcast<HNumber>(*(it0+1)) << "), bracket=(" << it1-vec << ", " << it2-vec <<")" <<endl;
   while (!((value_n < hfcast<HNumber>(*(it0+1))) && (value_n >= hfcast<HNumber>(*it0)))) {
     if (value_n > hfcast<HNumber>(*it0)) {
       it1=it0;
@@ -869,7 +915,7 @@ HInteger HFPP_FUNC_NAME (const Iter vec,
     posguess=(value_n-hfcast<HNumber>(*it1))/(hfcast<HNumber>(*it2)-hfcast<HNumber>(*it1))*(it2-it1)+(it1-vec);
     it0=vec+posguess;
     ++niter;
-    //  cout << "hFindLowerBound(" << value_n << "): niter=" << niter << ", posguess=" << posguess << ", val=" << *it0 << " vals=(" << hfcast<HNumber>(*(it0)) << ", " << hfcast<HNumber>(*(it0+1)) << "), bracket=(" << it1-vec << ", " << it2-vec <<")" <<endl;
+    //cout << "hFindLowerBound(" << value_n << "): niter=" << niter << ", posguess=" << posguess << ", val=" << *it0 << " vals=(" << hfcast<HNumber>(*(it0)) << ", " << hfcast<HNumber>(*(it0+1)) << "), bracket=(" << it1-vec << ", " << it2-vec <<")" <<endl;
     if (it0<it1) return it1-vec; //Error, Non monotonic  
     if (it0>it2) return it2-vec; //Error, Non monotonic 
   };
@@ -886,6 +932,28 @@ HInteger hFindLowerBound(const HNumber* vec,
   return hFindLowerBound(vec,vec+len,value);
 }
 */
+
+//$DOCSTRING: Returns vector of weights of length len with constant weights normalized to give a sum of unity. Can be used by hRunningAverageT.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFlatWeights
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE) 
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+ //template <class T> 
+
+vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
+  vector<HNumber> weights(wlen,1.0/wlen);
+  return weights;
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //========================================================================
 //                     RF (Radio Frequency) Functions
