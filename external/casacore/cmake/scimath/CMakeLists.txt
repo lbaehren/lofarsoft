@@ -57,6 +57,13 @@ target_link_libraries (casa_scimath
   ${GFORTRAN_LIBRARIES}
   )
 
+if (APPLE)
+  set_target_properties(casa_scimath
+    PROPERTIES 
+    COMPILE_FLAGS "-fPIC -O2 -fPIC -Wno-unused"
+    LINK_FLAGS "-undefined dynamic_lookup")
+endif (APPLE)
+
 ## -----------------------------------------------------------------------------
 ## Installation
 
