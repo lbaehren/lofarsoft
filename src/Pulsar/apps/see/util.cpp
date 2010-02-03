@@ -4,9 +4,9 @@
 
 using namespace std;
 
-/*-----  Функция апдейта файла ресурсов, специфичных для see
-         для правильного указания базового файла -----*/
-
+/* The function to update Resources' file, specific for see
+ * to refer correctly to the base file
+*/
 void UpdateSeeXResources (char * filename, char * base) {
 
 std::string res, cur;

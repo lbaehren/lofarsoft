@@ -1,7 +1,7 @@
 #define MAIN_
 #include "see.hpp"
 
-/*--- Функция, которая отделяет имя файла от пути ----*/
+/*--- To split filename from the path ----*/
 
 char *SelectFileName (char * str)
 {
@@ -12,7 +12,7 @@ char *SelectFileName (char * str)
  return (++s);
  }
  
-/*----------- Функция для склеивания строки и числа -----------*/
+/*----------- To merge a string and a number -----------*/
 
 char * glue ( char * s, int d )
 {
@@ -24,7 +24,7 @@ char * glue ( char * s, int d )
 	delete (dest);
 }
 
-/*--------- Функция усреднения массива ----------------*/
+/*--------- To average an array ----------------*/
      
 long average ( float * mass, long sz )
 {
@@ -39,7 +39,7 @@ for (long i=0, j, k=0;i<sz;i+=aver, k++) {
  return (sz/aver + ostatok);    
 }
 
-/*--------- Функция сглаживания массива -----------------*/
+/*--------- To smooth an array -----------------*/
 
 long smoothing ( float * mass, long sz )
 {
@@ -341,14 +341,14 @@ int ParseCmdLine ( void )
   return(optind);
  }
 
-/*-------- Функция определения подходящего размера блока данных ------------------*/
+/*-------- To determine the appropriate size of data block ------------------*/
 
 long DataBlockDefinition ( void )
 {
-  // получаем разрешенный для использования объем памяти
-  // если вернулся 0 => maxblock < 0 и => размер блока будет равен размеру файла
+  // Obtain the allowed memory size for use
+  // If 0 was returned => maxblock < 0 and => the block size is equal to the file size
   unsigned long availmem = getAvailableMemory();
-  // это эмпирическая константа (память приблизительно используемая для переменных)
+  // empirical constant (memory size roughly used for the variables)
   unsigned long konstanta = 1500 * 1024;  
   long maxblock = ( availmem - konstanta - (next+1 != ac ? (NoCover == 1 ? 4 : 3)*(ac-next) : 0)*sizeof(short int) - sizeof(short int)*(next+1 != ac && NoCover == 1 ? 2 - smooth : 0) ) / ( sizeof(float) + razm + (next+1 != ac && NoCover == 1 ? sizeof(short int)/aver : 0) );
   if (maxblock >= si || maxblock < 2) return si;
@@ -378,9 +378,9 @@ int main ( int argc, char *argv[] )
  sprintf(XResourceFile, "%s", ".See");
  sprintf(OutputPath, "%s", "\0");
 
- // опции, которые не должны считаться графическими
+ // options that should not be considered as graphical ones
  char *options[] = { "-d", "-t", "-b" };
- int opt_kind[] = { 1, 1, 1 }; // какие это опции: 1 - есть аргумент, 0 - нет аргумента
+ int opt_kind[] = { 1, 1, 1 }; // what are these options: 1 - with argument, 0 - without argument
  CommandLineOptions clo(argc, argv, options, opt_kind, 3);
  av = clo.remove();
  ac = clo.getN();
@@ -400,9 +400,9 @@ int main ( int argc, char *argv[] )
  }
 
  if (Group < 1 || Group > ac-next) Group = 1;
- // если задано последовательное отображение, то игнорируем опцию --shift  (если Group == 1)
+ // If continious files changing is setup, then --shift is ignored (if Group=1)
  if (Seq && Group == 1) { Shift = 0.; NoCover = 0; }
- if (!Seq) { Cycle = false; slide_time = -1; Group = 1; } // если не задан Seq, то делаем Cycle = false и выключаем слайд-шоу
+ if (!Seq) { Cycle = false; slide_time = -1; Group = 1; } // if Seq is not set up, then Cycle=false and slide show is turned off
  
  if (le >= win) le = 0;
  if (si > win || si == -1) si = win;

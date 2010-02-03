@@ -2,7 +2,7 @@
 #define _PS_HPP
 
 /*---------------
- Описание класса postscript для печати в ps-файл
+ Class 'postscript' to print to ps-file
 ------------*/
 #include <iostream>
 #include <fstream>

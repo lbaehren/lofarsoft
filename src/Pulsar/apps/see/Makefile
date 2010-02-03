@@ -24,8 +24,8 @@ mem.o: mem.cpp see.hpp defines.hpp options.hpp
 util.o: util.cpp
 	$(CC) $(CFLAGS) util.cpp
 
-gifsave.o: gifsave.c gifsave.h
-	$(CC) $(CFLAGS) gifsave.c
+gifsave.o: gifsave.cpp gifsave.h
+	$(CC) $(CFLAGS) gifsave.cpp
 
 strip:
 	strip see

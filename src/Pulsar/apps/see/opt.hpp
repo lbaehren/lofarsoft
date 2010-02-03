@@ -41,14 +41,14 @@ public:
    removed_option.clear();
  };
 
- // обновляет опции
+ // updates options
  void update(int ac, char** av) {
   argN = ac;
   argV.clear();
   for (int i=0; i<ac; ++i) argV.push_back(av[i]);
  };
 
- // удаляем из списка выбранные опции
+ // remove selected options from the list
  char** remove() {
   list<string> nargV;
   list<string>::iterator it = argV.begin();
@@ -77,10 +77,10 @@ public:
    return presentation;
  };
 
- // возвращаем количество аргументов
+ // return the number of arguments
  int getN() { return argN; };
 
- // добавляем в список выбранные опции
+ // add selected options to the list
  char** add() {
    copy(removed_option.begin(), removed_option.end(), back_inserter(argV));
    argN += removed_option.size();

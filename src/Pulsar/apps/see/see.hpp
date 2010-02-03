@@ -1,4 +1,4 @@
-// подключение заголовочного файла, созданного configure
+// include header file, created by configure
 #include <defines.hpp>
 
 #include <stdio.h>
@@ -42,25 +42,24 @@ int razm, next, ac, header = 0;
 float maxglob, minglob, *m, Shift = 0.;
 char *type, **av;
 char *OutputPath;
-// если задано много файлов, то показывать их последовательно или нет
-// по умолчанию - нет
+// if there are several input files, then how to show them in sequence or not
+// default - is not
 bool Seq = false;
-bool Cycle = false; // вместе с опцией Seq позволяет просматривать файлы непрерывно
-                    // переходя с последнего на первый
-// в случае, если Seq = true, то cur_file - это номер текущего
-// отображаемого файла
+bool Cycle = false; // together with Seq option allows to go through files continiously
+                    // from the last to the first
+// if Seq = true, then cur_file is the number of current shown file
 long cur_file = 0;
-long timint = 5000; // это интервал времени (в мс) для отработки функции
-                    // которая проверяет, изменился файл или нет
-long slide_time = -1; // интервал времени (в мс) для слайд-шоу
-long Group = 1;       // количество файлов для группировки, если задана опция --seq
-bool Post = false;    // выводим сразу в postscript-файл, если true
+long timint = 5000; // time interval (in ms) for the function that checks
+                    // was file changed or not
+long slide_time = -1; // time interval (in ms) for the slide show
+long Group = 1;       // number of files to be groupped, if option --seq is used
+bool Post = false;    // if true, then prints to postscript file rather than X11 display
 
-/*-- Файл ресурсов общих для разных граф. приложений --*/
+/*-- General Resource File for different graphics applications --*/
 char * XBaseResourcesFile;
 
-/*-- Имя файла ресурсов для графики специфичной для See
-     из него подключается файл ресурсов XBaseResourcesFile
+/*-- The name of the Resource File that is special for See
+     From this file the general file XBaseResourcesFile is included
 --*/
 char * XResourceFile;
 
@@ -77,7 +76,7 @@ unsigned long getAvailableMemory ( void );
 
 #ifdef XW_
 
-/*--- Количество возможных увеличений/уменьшений масштаба изображения ---*/
+/*--- The number of possible zoom-in/zoom-outs of the image ---*/
 #define zoom 100
 #define MAX_COLOR_NUMBER 256
 
@@ -91,16 +90,16 @@ unsigned long getAvailableMemory ( void );
 typedef struct { Pixel fg, bg;
                  Font  font;   } wD, *twData;
 
-// контекст
+// context
 XtAppContext appcont;
-// дисплей
+// display
 Display *DisId;
-// корневой виджет
+// core widget
 Widget coreW;
 
 postscript ps; // ps-file
 
-extern char * XBaseResourcesFile, * XResourceFile;      /*-- Имена файлов ресурсов для графики --*/
+extern char * XBaseResourcesFile, * XResourceFile;      /*-- Resource Files' names --*/
 
 extern float maxglob, minglob, *m, Shift;
 extern char **av, *type;
@@ -120,11 +119,10 @@ extern int header;
 float max[zoom], min[zoom];
 float cur_x = 0., cur_y = 0.;
 
-// переключатель ВКЛ/ВЫКЛ автоматической отработки события Expose
-// при отсутствии Backing Store
-// по умолчанию - автоматически
-// отключение LCtrl + RCtrl
-// перерисовка - LCtrl или RCtrl
+// Switch ON/OFF of the automatic handling Expose event without Backing Store
+// default - automatic
+// switch off -  LCtrl + RCtrl
+// re-draw - LCtrl or RCtrl
 bool auto_expose = true;
 
 short int *keep, **keepcur;
@@ -134,11 +132,10 @@ long lp[zoom], wp[zoom], rp[zoom];
 int file, count = 0, tab = 0, noread = 0;
 
 extern long timint;
-unsigned long *mtstatus;     // массив времен изменений файлов (modification time)
+unsigned long *mtstatus;     // array of files' modifications times
 extern long slide_time;
-bool dir = true;            // устанавливаем первоначальное напрввление следования файлов
-                            // в случае, когда Cycle = false.
-			    // если dir = true, то вперед
+bool dir = true;            // set the first direction of files changing in case when Cycle is false
+			    // if dir = true, then forward
 extern long Group;			    
 
 unsigned int fow, foa, fod;
@@ -192,7 +189,7 @@ Dimension pw, ph;
 
 /*--------------------------------------------------------------------*/
 
-/*------- Описание класса image для работы с изображением ------------*/
+/*------- image class to deal with the image ------------*/
 
 class image {
 
