@@ -42,7 +42,7 @@ include (CMakeSettings)
 include (FindPython)
 
 ## -----------------------------------------------------------------------------
-## As the shared libraries of a Python module typically do not contain the 
+## As the shared libraries of a Python module typically do not contain the
 ## usual prefix, we need to remove it while searching for the NumPy libraries.
 ## In order however not to affect other CMake modules we need to swap back in the
 ## original prefixes once the end of this module is reached.
@@ -76,7 +76,7 @@ endif (numpy_path)
 find_path (NUMPY_INCLUDES numpy/arrayobject.h numpy/ndarrayobject.h
   PATHS
   ${numpy_search_path}
-  System/Library/Frameworks/Python.framework/Versions
+  /System/Library/Frameworks/Python.framework/Versions
   PATH_SUFFIXES
   python
   core/include
@@ -85,7 +85,7 @@ find_path (NUMPY_INCLUDES numpy/arrayobject.h numpy/ndarrayobject.h
   python${PYTHON_VERSION}/site-packages/numpy
   python${PYTHON_VERSION}/site-packages/numpy/core/include
   ${PYTHON_VERSION}/Extras/lib/python/numpy/core/include
-  NO_DEFAULT_PATH
+#  NO_DEFAULT_PATH
 )
 
 ## -----------------------------------------------------------------------------
@@ -94,7 +94,7 @@ find_path (NUMPY_INCLUDES numpy/arrayobject.h numpy/ndarrayobject.h
 find_library (NUMPY_MULTIARRAY_LIBRARY multiarray
   PATHS
   ${numpy_search_path}
-  System/Library/Frameworks/Python.framework/Versions
+  /System/Library/Frameworks/Python.framework/Versions
   PATH_SUFFIXES
   python
   core
@@ -110,7 +110,7 @@ endif (NUMPY_MULTIARRAY_LIBRARY)
 find_library (NUMPY_SCALARMATH_LIBRARY scalarmath
   PATHS
   ${numpy_search_path}
-  System/Library/Frameworks/Python.framework/Versions
+  /System/Library/Frameworks/Python.framework/Versions
   PATH_SUFFIXES
   python
   core
@@ -167,25 +167,25 @@ endif (NUMPY_VERSION_PY AND PYTHON_EXECUTABLE)
 if (numpy_version_test_output)
 
   set (NUMPY_API_VERSION ${numpy_version_test_output})
-  
+
 else (numpy_version_test_output)
-  
-  if (NUMPY_NDARRAYOBJECT_H)
-    file (STRINGS ${NUMPY_NDARRAYOBJECT_H} NPY_VERSION
-      REGEX "NPY_VERSION"
-      )
-    if (NPY_VERSION)
-      string (REGEX REPLACE "#define NPY_VERSION 0x" "" NUMPY_VERSION ${NPY_VERSION})
-    else (NPY_VERSION)
-      message (STATUS "[NumPy] Unable to extract version from header file.")
-    endif (NPY_VERSION)
-  endif (NUMPY_NDARRAYOBJECT_H)
-  
+
+#   if (NUMPY_NDARRAYOBJECT_H)
+#     file (STRINGS ${NUMPY_NDARRAYOBJECT_H} NPY_VERSION
+#       REGEX "NPY_VERSION"
+#       )
+#     if (NPY_VERSION)
+#       string (REGEX REPLACE "#define NPY_VERSION 0x" "" NUMPY_VERSION ${NPY_VERSION})
+#     else (NPY_VERSION)
+#       message (STATUS "[NumPy] Unable to extract version from header file.")
+#     endif (NPY_VERSION)
+#   endif (NUMPY_NDARRAYOBJECT_H)
+
   find_file (NUMPY_TEST_PROGRAM TestNumPyVersion.cc
     PATHS ${CMAKE_MODULE_PATH} ${USG_ROOT}
     PATH_SUFFIXES devel_common/cmake
     )
-  
+
   if (NUMPY_TEST_PROGRAM AND PYTHON_INCLUDES)
     ## try to compile and run
     try_run (
@@ -206,7 +206,7 @@ else (numpy_version_test_output)
   else (NUMPY_TEST_PROGRAM AND PYTHON_INCLUDES)
     message (STATUS "Unable to locate test program!")
   endif (NUMPY_TEST_PROGRAM AND PYTHON_INCLUDES)
-  
+
 endif (numpy_version_test_output)
 
 ## -----------------------------------------------------------------------------
