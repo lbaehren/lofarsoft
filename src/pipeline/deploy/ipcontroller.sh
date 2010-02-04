@@ -1,5 +1,5 @@
-export PYTHONPATH="/opt/pipeline/dependencies/lib/python2.5/site-packages"
 CONTROLPATH=$1
+export PYTHONPATH=$3
 
 mkdir -p $CONTROLPATH
 
