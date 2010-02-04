@@ -938,8 +938,8 @@ HInteger hFindLowerBound(const HNumber* vec,
 #define HFPP_FUNC_NAME hFlatWeights
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
-#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -947,8 +947,72 @@ HInteger hFindLowerBound(const HNumber* vec,
 */
  //template <class T> 
 
-vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
-  vector<HNumber> weights(wlen,1.0/wlen);
+std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
+  std::vector<HNumber> weights(wlen,1.0/wlen);
+  return weights;
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING:  Returns vector of weights of length wlen with linearly rising and decreasing weights centered at len/2. 
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hLinearWeights
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+The vector is normalized to give a sum of unity. Can be used by
+hRunningAverage.
+*/
+ //template <class T> 
+
+std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
+  std::vector<HNumber> weights(wlen,0.0);
+  HInteger i,middle=wlen/2;
+  HNumber f,sum=0.0;
+
+  for (i=0; i<wlen; i++) {
+    f=1.0-abs(middle-i)/(middle+1.0);
+    weights[i]=f;
+    sum+=f;
+  };
+  //Normalize to unity
+  for (i=0; i<wlen; i++) weights[i]=weights[i]/sum;
+  return weights;
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+//$DOCSTRING: Returns vector of weights of length wlen with Gaussian distribution centered at len/2 and sigma=len/4 (i.e. the Gaussian extends over 2 sigma in both directions).
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hGaussianWeights
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+ //template <class T> 
+
+std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
+  vector<HNumber> weights(wlen,0.0);
+  HInteger i,middle=wlen/2;
+  HNumber f,sum=0.0;
+
+  for (i=0; i<wlen; i++) {
+    f=funcGaussian(i,max(wlen/4.0,1.0),middle);
+    weights[i]=f;
+    sum+=f;
+  };
+  //Normalize to unity
+  for (i=0; i<wlen; i++) weights[i]=weights[i]/sum;
   return weights;
 }
 
