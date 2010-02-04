@@ -17,6 +17,12 @@ add_executable (see
   gifsave.cpp
   )
 
+add_custom_target (see_config
+ COMMAND sh ${PULSAR_SOURCE_DIR}/apps/see/config.sh
+ WORKING_DIRECTORY ${PULSAR_SOURCE_DIR}/apps/see
+ COMMENT "Configuring see ..." 
+ )
+
 set_target_properties (see
   PROPERTIES
   COMPILE_FLAGS "-c -g -O3 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -Wno-deprecated -I./ -I/usr/X11R6/include -I${PULSAR_SOURCE_DIR}/apps/see"
@@ -24,6 +30,8 @@ set_target_properties (see
 #  target_link_libraries (see X11 Xt SM ICE)
 #  target_link_libraries (see -lXt ${X11_Xt_LIB})
   )
+
+add_dependencies (see see_config)
 
 add_custom_target (see_install
   COMMAND cp ${PULSAR_BINARY_DIR}/apps/see/see ${CMAKE_INSTALL_PREFIX}/bin

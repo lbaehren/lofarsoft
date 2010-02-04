@@ -41,8 +41,9 @@ struct utsname utsinfo;
 
 #endif
 
-//if (strcasecmp(utsinfo.sysname, "Linux")) return 0;  // if it is not Linux - exit
-#ifdef __YES_LINUX__
+#if HAVE_SYS_UTSNAME_H
+ if (strcasecmp(utsinfo.sysname, "Linux")) return 0;  // if it is not Linux - exit
+#endif
 
 // obtain the kernel version
 // if < 2.3.16, then sysinfo gives info in bytes
@@ -89,11 +90,8 @@ struct sysinfo sinfo;
 
 #endif //#if HAVE_SYS_SYSINFO_H 
 
-#endif //#ifdef __YES_LINUX__
-
 #endif //#ifdef __NO_MEMORY_MACROS__
 
 return 0;
 }
-
 

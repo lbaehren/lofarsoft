@@ -1,5 +1,5 @@
-// include header file, created by configure
-#include <defines.hpp>
+// include config header file
+#include <config.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,19 +9,7 @@
 #include <string.h>
 #include <math.h>
 #include <getopt.h>
-
-#if TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
-
-#include "options.hpp"
+#include <time.h>
 
 #define MaxString 255
 
@@ -32,10 +20,7 @@ using namespace std;
 #include "opt.hpp"
 
 unsigned char NoCover = 0, exflag = 0;
-
-#if HAVE_STRUCT_DECL_IN_TEMPL_FUNC
- unsigned char Convert = 0;
-#endif
+unsigned char Convert = 0;
 
 long aver = 1, smooth = 1, le = 0, si = -1, iter, block = -1;
 int razm, next, ac, header = 0;
@@ -111,10 +96,7 @@ extern bool Seq, Cycle;
 extern long cur_file;
 extern bool Post;
 extern int header;
-
-#if HAVE_STRUCT_DECL_IN_TEMPL_FUNC
- extern unsigned char Convert;
-#endif
+extern unsigned char Convert;
 
 float max[zoom], min[zoom];
 float cur_x = 0., cur_y = 0.;
@@ -324,29 +306,17 @@ using namespace std;
 # include <sys/utsname.h>
 #endif
 
- #ifdef __Linux__
-  #define __YES_LINUX__
- #else
-  #ifdef __linux__
-   #define __YES_LINUX__
-  #endif
- #endif
+#if HAVE_SYS_SYSINFO_H
+# include <sys/sysinfo.h>
+#endif
 
- #ifdef __YES_LINUX__
+#if HAVE_LINUX_VERSION_H
+# include <linux/version.h>
+#endif
 
- #if HAVE_SYS_SYSINFO_H
- # include <sys/sysinfo.h>
- #endif
-
- #if HAVE_LINUX_VERSION_H
- # include <linux/version.h>
- #endif
-
-  #ifndef KERNEL_VERSION
-   #define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
-  #endif
-  
- #endif //#ifdef __YES_LINUX__
+#ifndef KERNEL_VERSION
+ #define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
+#endif
   
 #endif //#ifdef __NO_MEMORY_MACROS__
 

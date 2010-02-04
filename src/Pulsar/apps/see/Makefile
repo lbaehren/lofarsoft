@@ -12,13 +12,13 @@ all: see strip clean
 see: see.o regard.o mem.o util.o gifsave.o
 	$(CC) see.o regard.o mem.o util.o gifsave.o -o see $(X_PRE_LIBS) $(LIBS) $(X_EXTRA_LIBS)	
 
-regard.o: regard.cpp see.hpp ps.hpp defines.hpp options.hpp gifsave.h
+regard.o: regard.cpp see.hpp ps.hpp gifsave.h config.h
 	$(CC) $(CFLAGS) $(X_CFLAGS) $(INCL) regard.cpp
 	
-see.o: see.cpp see.hpp opt.hpp defines.hpp options.hpp
+see.o: see.cpp see.hpp opt.hpp config.h
 	$(CC) $(CFLAGS) $(INCL) see.cpp
 	
-mem.o: mem.cpp see.hpp defines.hpp options.hpp
+mem.o: mem.cpp see.hpp config.h
 	$(CC) $(CFLAGS) $(INCL) mem.cpp
 
 util.o: util.cpp
