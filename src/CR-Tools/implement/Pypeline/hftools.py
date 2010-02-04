@@ -16,6 +16,9 @@ def VecToString(self,maxlen=10):
 def VecToPrintString(self,maxlen=10):
     return "Vec("+str(len(self))+")=[" +VecToString(self)+"]"
 
+def MatrixToPrintString(self,maxlen=10):
+    return "Matrix("+str(len(self))+")=[" +VecToString(self)+"]"
+
 
 hRealVectorTypes=[IntVec,FloatVec]
 hNumericalVectorTypes=hRealVectorTypes+[ComplexVec]
@@ -76,6 +79,10 @@ def Vec_div(vec1,val):
     return vecout
 
 setattr(ComplexVec,"SpectralPower",hSpectralPower)
+
+
+setattr(IntMatrix,"__repr__",MatrixToPrintString)
+
 
 #for v in hNumericalVectorTypes:
 #    setattr

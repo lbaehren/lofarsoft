@@ -30,9 +30,11 @@
 using namespace std;
 
 
-
 #undef HFPP_VERBOSE 
 #include "hftools.h"
+
+//#include "htest.cc"
+
 
 //Some definitions needed for the preprosessor programming:
 //Copy source code (where specified with COPY_TO HFILE START) to the file hwrappers-hftools.iter.cc.h
@@ -42,6 +44,7 @@ using namespace std;
 
 // Tell the preprocessor (for generating wrappers) that this is a c++
 // source code file (brackets are crucial)
+
 
 #undef HFPP_FILETYPE
 //-----------------------
@@ -94,6 +97,45 @@ CasaVector<T> & stl2casa(std::vector<T> stlvec)
   CasaVector<T> casavec(shape,storage,casa::SHARE); 
   return casavec;
 }
+
+
+//========================================================================
+//                        Matrix Class
+//========================================================================
+
+// Testing a simple Matrix class that is built upon std::vectors
+
+namespace std {
+
+  template <class T, class Alloc>
+  class hmatrix : public vector<T,Alloc> {
+
+  public:
+    template <class Iter> hmatrix(Iter it1, Iter it2); 
+    hmatrix(const char* buf);
+    hmatrix();
+    ~hmatrix();
+  
+    void setDimension(HInteger newdim);
+    HInteger getDimension();
+  
+  private: 
+    HInteger dim;
+  };
+
+
+  template <class T, class Alloc> template <class Iter> hmatrix<T,Alloc>::hmatrix(Iter it1, Iter it2) : vector<T,Alloc>(it1,it2) {};
+  template <class T, class Alloc> hmatrix<T,Alloc>::hmatrix(const char* buf) : vector<T,Alloc>(buf){};
+  template <class T, class Alloc> hmatrix<T,Alloc>::hmatrix(){setDimension(1);};
+  template <class T, class Alloc> hmatrix<T,Alloc>::~hmatrix(){};
+
+  template <class T, class Alloc>
+  void hmatrix<T,Alloc>::setDimension(HInteger newdim){dim=newdim;};
+
+  template <class T, class Alloc>
+  HInteger hmatrix<T,Alloc>::getDimension(){return dim;};
+
+};
 
 //========================================================================
 //                        Helper Functions

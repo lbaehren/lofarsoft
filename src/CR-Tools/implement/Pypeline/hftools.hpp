@@ -13,9 +13,16 @@ BOOST_PYTHON_MODULE(libhftools)
 {
     using namespace boost::python;
     
-    class_<std::vector<HInteger> >("IntVec")
-      .def(vector_indexing_suite<std::vector<HInteger> >())
-      
+    class_<std::hmatrix<HInteger,allocator<HInteger> > >("IntMatrix")
+      .def(vector_indexing_suite<std::hmatrix<HInteger,allocator<HInteger> > >())
+      .def("setDimension",&std::hmatrix<HInteger,allocator<HInteger> >::setDimension)
+      .def("getDimension",&std::hmatrix<HInteger,allocator<HInteger> >::getDimension)
+
+      ;
+
+  class_<std::vector<HInteger> >("IntVec")
+    .def(vector_indexing_suite<std::vector<HInteger> >())
+     
       /*.def("thiAdd",fptr_hiAdd_HComplexHComplex12)
 	.def("thiAdd",fptr_hiAdd_HComplexHNumber12)
 	.def("thiAdd",fptr_hiAdd_HComplexHInteger12)
