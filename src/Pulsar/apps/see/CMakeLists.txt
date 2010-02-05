@@ -9,6 +9,9 @@ cmake_minimum_required(VERSION 2.6)
 
 project(see)
 
+# building the program only for Linux/UNIX architectures
+if (APPLE)
+
 add_executable (see
   see.cpp
   regard.cpp
@@ -26,7 +29,7 @@ add_custom_target (see_config
 set_target_properties (see
   PROPERTIES
   COMPILE_FLAGS "-c -g -O3 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -Wno-deprecated -I./ -I${X11_X11_INCLUDE_PATH} -I${PULSAR_SOURCE_DIR}/apps/see -I${PULSAR_BINARY_DIR}/apps/see"
- LINK_FLAGS "-L${X11_Xt_LIB} -L${X11_X11_LIB} -L${X11_SM_LIB} -L${X11_ICE_LIB}"
+  LINK_FLAGS "-L${X11_X11_LIB} -lXt -lSM -lICE" 
 #  target_link_libraries (see X11 Xt SM ICE)
 #  target_link_libraries (see -lXt ${X11_Xt_LIB})
   )
@@ -41,3 +44,10 @@ add_custom_target (see_install
 
 add_dependencies (see_install see)
 
+else (APPLE)
+
+add_custom_target (see
+ COMMENT "APPLE platform - skipping 'see' installation ..." 
+ )
+
+endif (APPLE)
