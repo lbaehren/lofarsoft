@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 2.6)
 project(see)
 
 # building the program only for Linux/UNIX architectures
-if (APPLE)
+if (NOT APPLE)
 
 add_executable (see
   see.cpp
@@ -44,10 +44,10 @@ add_custom_target (see_install
 
 add_dependencies (see_install see)
 
-else (APPLE)
+else (NOT APPLE)
 
 add_custom_target (see
  COMMENT "APPLE platform - skipping 'see' installation ..." 
  )
 
-endif (APPLE)
+endif (NOT APPLE)
