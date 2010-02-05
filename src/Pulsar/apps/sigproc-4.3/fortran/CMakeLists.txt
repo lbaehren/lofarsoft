@@ -30,7 +30,7 @@ dosearch.f
 #epnhdr.f
 epnpack.f
 fast_mean.f
-ffa.f
+#ffa.f
 ffft.f
 fftdata.f
 fftwdata.f
@@ -52,10 +52,10 @@ length.f
 mask.f
 meanrms.f
 minmax.f
-mjdnow.f
+#mjdnow.f
 mmzap.f
 normal.f
-peak.f
+#peak.f
 plotpulses.f
 plotpulses.old.f
 postproc.f
@@ -72,7 +72,7 @@ recon_prof.f
 resample.f
 rotate_time.f
 rwepn.f
-seek.f
+#seek.f
 seekin.f
 short.f
 singlepulse.f
