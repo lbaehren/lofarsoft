@@ -26,7 +26,7 @@ add_custom_target (see_config
 set_target_properties (see
   PROPERTIES
   COMPILE_FLAGS "-c -g -O3 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -Wno-deprecated -I./ -I/usr/X11R6/include -I${PULSAR_SOURCE_DIR}/apps/see -I${PULSAR_BINARY_DIR}/apps/see"
-  LINK_FLAGS "-lX11 -lXt -lSM -lICE -L${X11_Xt_LIB}"
+  LINK_FLAGS "-lXt -lSM -lICE -L${X11_Xt_LIB}"
 #  target_link_libraries (see X11 Xt SM ICE)
 #  target_link_libraries (see -lXt ${X11_Xt_LIB})
   )
