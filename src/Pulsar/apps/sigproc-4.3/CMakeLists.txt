@@ -81,7 +81,7 @@ open_file.c
 open_files.c
 open_log.c
 pack_unpack.c
-pgplotter.c
+#pgplotter.c
 phcalc.c
 polyco2period.c
 print_version.c
