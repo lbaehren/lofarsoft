@@ -475,15 +475,15 @@ namespace CR { // Namespace CR -- begin
     
     //! Get the sample values along the time axis
     bool sampleValues (std::vector<uint> &samples,
-		       uint const &sampleOffset=0,
+		       uint const &offset=0,
 		       bool const &offsetIsBlock=false);
     //! Get the values along the time axis
     bool timeValues (std::vector<double> &times,
-		     uint const &sampleOffset=0,
+		     uint const &offset=0,
 		     bool const &offsetIsBlock=false);
     //! Get the values along the time axis
     bool timeValues (std::vector<double> &times,
-		     std::vector<uint> const &sampleValues);
+		     std::vector<uint> const &samples);
     
     // === Optional methods which require casacore ==============================
     
@@ -499,7 +499,7 @@ namespace CR { // Namespace CR -- begin
 		     bool const &offsetIsBlock=false);
     //! Get the values along the time axis
     bool timeValues (casa::Vector<double> &times,
-		     casa::Vector<uint> const &sampleValues);
+		     casa::Vector<uint> const &samples);
     //! [optional:CASA] Create time axis coordinate from parameters
     casa::LinearCoordinate timeAxis ();
     //! [optional:CASA] Create time axis coordinate from parameters

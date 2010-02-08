@@ -267,90 +267,189 @@ int test_sampleFrequency ()
 }
 
 //_______________________________________________________________________________
+//                                                              test_sampleValues
+
+/*!
+  \brief Test retrival of the values along the sample axis
+  
+  \return nofFailedTests -- The number of failed tests encountered within this 
+          function.
+*/
+int test_sampleValues ()
+{
+  cout << "\n[test_sampleValues]\n" << endl;
+
+  int nofFailedTests (0);
+  uint blocksize (20);
+  double sampleFrequency (80e06);
+  uint nyquistZone (1);
+  TimeFreq data (blocksize,sampleFrequency,nyquistZone);
+  std::vector<uint> samples;
+
+  cout << "[1] Default function call ..." << endl;
+  {
+    data.sampleValues(samples);
+    // 
+    cout << "\t["
+	 << samples[0] << ","
+	 << samples[1] << ","
+	 << samples[2] << ", .. ]" << endl;
+  }
+
+  cout << "[2] Test increment by individual samples ..." << endl;
+  {
+    uint maxOffset (10);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      data.sampleValues(samples,offset);
+      // 
+      cout << "\t["
+	   << samples[0] << ","
+	   << samples[1] << ","
+	   << samples[2] << ", .. ]" << endl;
+    }
+  }
+  
+  cout << "[3] Test increment in units of blocks ..." << endl;
+  {
+    bool offsetIsBlock (true);
+    uint maxOffset (10);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      data.sampleValues(samples,offset,offsetIsBlock);
+      // 
+      cout << "\t["
+	   << samples[0] << ","
+	   << samples[1] << ","
+	   << samples[2] << ", .. ]" << endl;
+    }
+  }
+  
+  return nofFailedTests;
+}
+
+//_______________________________________________________________________________
 //                                                                test_timeValues
 
 /*!
   \brief Test retrival of the values along the time axis
   
-  \return nofFailedTests -- The number of failed tests.
+  \return nofFailedTests -- The number of failed tests encountered within this 
+          function.
 */
 int test_timeValues ()
 {
   cout << "\n[test_timeValues]\n" << endl;
 
   int nofFailedTests (0);
-  uint blocksize (2048);
+  uint blocksize (20);
   double sampleFrequency (80e06);
   uint nyquistZone (1);
   TimeFreq data (blocksize,sampleFrequency,nyquistZone);
 
-  cout << "-- Sample frequency [Hz] = " << sampleFrequency << endl;
-  cout << "-- Sample rate     [sec] = " << 1/sampleFrequency << endl;
-  cout << "-- Blocksize   [samples] = " << data.blocksize() << endl;
-  cout << "-- Blocksize       [sec] = " << data.blocksize()/sampleFrequency << endl;
-  cout << endl;
-  
-  cout << "[1] timeValues()" << endl;
-  try {
-    std::vector<double> valuesSTL;
+  cout << "[1] Default function call for std::vector<double> ..." << endl;
+  {
+    std::vector<double> times;
+    data.timeValues(times);
+    // 
+    cout << "\t["
+	 << times[0] << ","
+	 << times[1] << ","
+	 << times[2] << ", .. ]" << endl;
+  }
 
-    data.timeValues(valuesSTL);
-    cout << "[" << valuesSTL[0] 
-	 << " " << valuesSTL[1]
-	 << " " << valuesSTL[2] << " ...]" << endl;
+  cout << "[2] Test increment by individual samples ..." << endl;
+  {
+    std::vector<double> times;
+    uint maxOffset (10);
 
-#ifdef HAVE_CASA
-    casa::Vector<double> valuesCASA;
-    data.timeValues(valuesCASA);
-    cout << "[" << valuesCASA(0)
-	 << " " << valuesCASA(1)
-	 << " " << valuesCASA(2) << " ...]" << endl;
-#endif
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      data.timeValues(times,offset);
+      // 
+      cout << "\t["
+	   << times[0] << ","
+	   << times[1] << ","
+	   << times[2] << ", .. ]" << endl;
+    }
   }
   
-  cout << "[2] timeValues(uint,bool=false)" << endl;
-  try {
-    std::vector<double> valuesSTL;
-    data.timeValues(valuesSTL,1,false);
-    cout << "[" << valuesSTL[0]
-	 << " " << valuesSTL[1]
-	 << " " << valuesSTL[2] << " ...]" << endl;
-#ifdef HAVE_CASA
-    casa::Vector<double> valuesCASA;
-    data.timeValues(valuesCASA,1,false);
-    cout << "[" << valuesCASA(0)
-	 << " " << valuesCASA(1)
-	 << " " << valuesCASA(2) << " ...]" << endl;
-#endif
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
+  cout << "[3] Test increment in units of blocks ..." << endl;
+  {
+    std::vector<double> times;
+    bool offsetIsBlock (true);
+    uint maxOffset (10);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      data.timeValues(times,offset,offsetIsBlock);
+      // 
+      cout << "\t["
+	   << times[0] << ","
+	   << times[1] << ","
+	   << times[2] << ", .. ]" << endl;
+    }
   }
 
-  cout << "[2] timeValues(uint,bool=true)" << endl;
-  try {
-    std::vector<double> valuesSTL;
+  cout << "[4] Test conversion from samples to times ..." << endl;
+  {
+    std::vector<uint> samples;
+    std::vector<double> times;
+    uint maxOffset (10);
 
-    data.timeValues(valuesSTL,1,true);
-    cout << "[" << valuesSTL[0]
-	 << " " << valuesSTL[1]
-	 << " " << valuesSTL[2] << " ...]" << endl;
-    
-#ifdef HAVE_CASA
-    casa::Vector<double> valuesCASA;
-    data.timeValues(valuesCASA,1,true);
-    cout << "[" << valuesCASA(0)
-	 << " " << valuesCASA(1)
-	 << " " << valuesCASA(2) << " ...]" << endl;
-#endif
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      data.sampleValues(samples,offset);
+      data.timeValues(times,samples);
+      // 
+      cout << "\t["
+	   << times[0] << ","
+	   << times[1] << ","
+	   << times[2] << ", .. ]" << endl;
+    }
   }
 
+#ifdef HAVE_CASA
+  cout << "[5] Default function call for casa::Vector<double> ..." << endl;
+  {
+    casa::Vector<double> times;
+    data.timeValues(times);
+    // 
+    cout << "\t["
+	 << times[0] << ","
+	 << times[1] << ","
+	 << times[2] << ", .. ]" << endl;
+  }
+
+  cout << "[6] Test increment by individual samples ..." << endl;
+  {
+    casa::Vector<double> times;
+    uint maxOffset (10);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      data.timeValues(times,offset);
+      // 
+      cout << "\t["
+	   << times[0] << ","
+	   << times[1] << ","
+	   << times[2] << ", .. ]" << endl;
+    }
+  }
+  
+  cout << "[7] Test increment in units of blocks ..." << endl;
+  {
+    casa::Vector<double> times;
+    bool offsetIsBlock (true);
+    uint maxOffset (10);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      data.timeValues(times,offset,offsetIsBlock);
+      // 
+      cout << "\t["
+	   << times[0] << ","
+	   << times[1] << ","
+	   << times[2] << ", .. ]" << endl;
+    }
+  }
+#endif
+  
   return nofFailedTests;
 }
 
@@ -562,6 +661,8 @@ int main ()
   nofFailedTests += test_TimeFreq ();
   // Test accesss to the sample frequency in the ADC
   nofFailedTests += test_sampleFrequency ();
+  // Test retrival of the sample values
+  nofFailedTests += test_sampleValues ();
   // Test retrival of the time values
   nofFailedTests += test_timeValues ();
   // Test retrival of the frequency values

@@ -539,8 +539,15 @@ namespace CR { // Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                 sampleValues
   
+  /*!
+    \retval samples      -- Vector with the sample values.
+    \param offset        -- Offset for the start of axis with the samples values.
+    \param offsetIsBlock -- Is the offset given in units of a full block?
+    \return status       -- Status of the operation; returns \e false in case an
+            error was encountered.
+  */
   bool TimeFreq::sampleValues (std::vector<uint> &samples,
-			       uint const &sampleOffset,
+			       uint const &offset,
 			       bool const &offsetIsBlock)
   {
     // Check the size of the vector returning the sample values
@@ -550,11 +557,11 @@ namespace CR { // Namespace CR -- begin
     
     if (offsetIsBlock) {
       for (uint n(0); n<blocksize_p; n++) {
-	samples[n] = blocksize_p*sampleOffset+n;
+	samples[n] = blocksize_p*offset+n;
       }
     } else {
       for (uint n(0); n<blocksize_p; n++) {
-	samples[n] = sampleOffset+n;
+	samples[n] = offset+n;
       }
     }
 
@@ -567,20 +574,20 @@ namespace CR { // Namespace CR -- begin
   /*!
     \retval timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
             a data block of length \f$ N_{\rm Blocksize} \f$
-    \param sampleOffset
+    \param offset        -- Offset for the start of axis with the samples values.
     \param offsetIsBlock -- Is the offset measured in blocks? If set \e false,
            the offset is considered in samples.
     \return status -- Status of the operation; returns \e false in case an error
             was encountered.
   */
   bool TimeFreq::timeValues (std::vector<double> &times,
-			     uint const &sampleOffset,
+			     uint const &offset,
 			     bool const &offsetIsBlock)
   {
     std::vector<uint> samples;
     // Get the sample values for the current block ...
     sampleValues(samples,
-		 sampleOffset,
+		 offset,
 		 offsetIsBlock);
     // ... and convert these values to time
     return timeValues (times,samples);
@@ -592,16 +599,16 @@ namespace CR { // Namespace CR -- begin
   /*!
     \retval timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
             a data block of length \f$ N_{\rm Blocksize} \f$
-    \param sampleValues -- The value of the samples, for which the related
+    \param samples -- The value of the samples, for which the related
            times are returned
     \return status -- Status of the operation; returns \e false in case an error
             was encountered.
   */
   bool TimeFreq::timeValues (std::vector<double> &times,
-			     std::vector<uint> const &sampleValues)
+			     std::vector<uint> const &samples)
   {
     bool status (true);
-    uint nelem (sampleValues.size());
+    uint nelem (samples.size());
 
     if (nelem != blocksize_p) {
       std::cerr << "[TimeFreq::timeValues] Selection vector has wrong length!"
@@ -615,7 +622,7 @@ namespace CR { // Namespace CR -- begin
       }
       // Compute the time values
       for (uint n(0); n<nelem; n++) {
-	times[n] = referenceTime_p + sampleValues[n]/sampleFrequency_p;
+	times[n] = referenceTime_p + samples[n]/sampleFrequency_p;
       }
     }
     
@@ -683,16 +690,16 @@ namespace CR { // Namespace CR -- begin
   /*!
     \retval timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
             a data block of length \f$ N_{\rm Blocksize} \f$
-    \param sampleValues -- The value of the samples, for which the related
+    \param samples -- The value of the samples, for which the related
            times are returned
     \return status -- Status of the operation; returns \e false in case an error
             was encountered.
   */
   bool TimeFreq::timeValues (casa::Vector<double> &times,
-			     casa::Vector<uint> const &sampleValues)
+			     casa::Vector<uint> const &samples)
   {
     bool status (true);
-    uint nelem (sampleValues.size());
+    uint nelem (samples.size());
 
     if (nelem != blocksize_p) {
       std::cerr << "[TimeFreq::timeValues] Selection vector has wrong length!"
@@ -706,7 +713,7 @@ namespace CR { // Namespace CR -- begin
       }
       // Compute the time values
       for (uint n(0); n<nelem; n++) {
-	times(n) = referenceTime_p + sampleValues(n)/sampleFrequency_p;
+	times(n) = referenceTime_p + samples(n)/sampleFrequency_p;
       }
     }
 
