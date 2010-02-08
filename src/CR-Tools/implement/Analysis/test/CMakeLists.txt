@@ -49,7 +49,10 @@ foreach (src ${tests})
   ## linker instructions
   target_link_libraries (${src}
     cr
-    ${CASA_LIBRARIES})
+    ${CASA_LIBRARIES}
+    ${LAPACK_LIBRARIES}
+    ${GFORTRAN_LIBRARIES}
+    )
   ## testing
   add_test (${src} ${src})
 

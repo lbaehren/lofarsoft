@@ -18,11 +18,17 @@ endif (MATHGL_INCLUDES)
 ## Pre-processing of the source files
 
 if (bin_awk)
+
+  file (GLOB hfsplit2h_awk hfsplit2h.awk)
+  file (GLOB hfanalysis_h hfanalysis.h)
+  file (GLOB hfanalysis_cc hfanalysis.cc)
+
   ## process input files
-  cr_process_awk (hfanalysis.cc hfsplit2h.awk)
-  cr_process_awk (hfanalysis.h hfsplit2h.awk)
-  cr_process_awk (hffuncs.cc hfiter.awk hfprep.awk)
-  cr_process_awk (hffuncs.h hfiter.awk hfprep.awk)
+  cr_process_awk (hfanalysis.h  hfsplit2h.awk )
+  cr_process_awk (hfanalysis.cc hfsplit2h.awk )
+  cr_process_awk (hffuncs.h     hfiter.awk hfprep.awk)
+  cr_process_awk (hffuncs.cc    hfiter.awk hfprep.awk)
+
   ## augment include path
   include_directories (
     ${CR_BINARY_DIR}/implement
@@ -35,17 +41,15 @@ endif (bin_awk)
 ##_______________________________________________________________________________
 ## Create the library
 
-## List of source files
-
-file (GLOB libhfget_sources 
-  hfget.cc
-  VectorSelector.cc
-  ${CR_BINARY_DIR}/implement/GUI/*.cc
-  )
-
 ## compiler instructions
 
-add_library (hfget MODULE ${libhfget_sources})
+add_library (hfget MODULE
+  hfget.cc
+  VectorSelector.cc
+  ${CR_BINARY_DIR}/implement/GUI/hfanalysis.awk.cc
+  ${CR_BINARY_DIR}/implement/GUI/hffuncs.awk.cc
+  )
+
 
 ## linker instructions
 
