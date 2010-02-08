@@ -255,7 +255,7 @@ install (
   )
   
   install (
-  TARGETS ${sigproc_fc1_binaries} ${sigproc_fc2_binaries} 
+  TARGETS ${sigproc_fc1_binaries} ${sigproc_fc2_binaries} ${sigproc_fc3_binaries} ${sigproc_fc4_binaries} 
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
