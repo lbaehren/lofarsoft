@@ -364,10 +364,17 @@ namespace CR {  //  Namespace CR -- begin
     TimeFreq::setNyquistZone (nyquistZone);
     TimeFreq::setSampleFrequency (sampleFrequency);
     // Parameters stored in CR::DataReader
-    fileStream_p      = NULL;
-    startBlock_p      = 0;
-    haveADC2Voltage_p = false;
-    haveFFT2CalFFT_p  = false;
+    fileStream_p       = NULL;
+    streamsConnected_p = false;
+    haveADC2Voltage_p  = false;
+    haveFFT2CalFFT_p   = false;
+    startBlock_p       = 0;
+    // Set up the DataIterator objects
+    nofStreams_p = 1;
+    iterator_p   = new DataIterator[nofStreams_p];
+    iterator_p[0].setBlock(0);
+    iterator_p[0].setStride(0);
+    iterator_p[0].setBlocksize(blocksize);
   }
   
   //_____________________________________________________________________________
@@ -825,10 +832,10 @@ namespace CR {  //  Namespace CR -- begin
       iterator_p[n].nextBlock();
     }
   }
-  
+
   //_____________________________________________________________________________
   //                                                                    positions
-
+  
   Vector<unsigned int> DataReader::positions ()
   {
     Vector<unsigned int> currentPositions (nofStreams_p);

@@ -457,36 +457,71 @@ int test_frequency (uint const &blocksize)
   return nofFailedTests;
 }
 
-// -------------------------------------------------------------------- test_time
+//_______________________________________________________________________________
+//                                                                test_timeValues
 
 /*!
   \brief Test retrival of the values along the time axis
   
   \param blocksize -- The number of samples per block of data per antenna.
 
-  \return nofFailedTests -- The number of failed tests.
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
  */
-int test_time (uint const &blocksize)
+int test_timeValues (uint const &blocksize)
 {
-  cout << "\n[test_time]\n" << endl;
+  cout << "\n[tDataReader::test_timeValues]\n" << endl;
 
   int nofFailedTests (0);
-  DataReader dr (blocksize);
+  uint nyquistZone (1);
+  double samplerate (200e06);
+  DataReader dr (blocksize,nyquistZone,samplerate);
 
-  cout << "-- Blocksize    = " << dr.blocksize() << endl;
-  cout << "-- Block number = " << dr.block()     << endl;
-  cout << endl;
+  dr.summary();
 
-  cout << "[1] Default method for retrival of time values ..." << std::endl;
-  try {
-    std::vector<double> timeValues;
-    dr.timeValues(timeValues);
-    cout << " [" << timeValues[0] << " " << timeValues[1] << " ...]" << endl;
-  } catch (std::string message) {
-    cerr << message << endl;
-    nofFailedTests++;
+  cout << "[1] Default function call for std::vector<double> ..." << endl;
+  {
+    std::vector<double> times;
+    dr.timeValues(times);
+    // 
+    cout << "\t["
+	 << times[0] << ","
+	 << times[1]-times[0] << ","
+	 << times[2]-times[0] << ","
+	 << times[3]-times[0] << ", .. ]" << endl;
   }
 
+  cout << "[2] Default function call for casa::Vector<double> ..." << endl;
+  {
+    casa::Vector<double> times;
+    dr.timeValues(times);
+    // 
+    cout << "\t["
+	 << times[0] << ","
+	 << times[1]-times[0] << ","
+	 << times[2]-times[0] << ","
+	 << times[3]-times[0] << ", .. ]" << endl;
+  }
+
+  cout << "[3] Test increment in units of blocks ..." << endl;
+  {
+    bool offsetIsBlock (true);
+    uint maxOffset (10);
+    casa::Vector<double> times;
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      dr.timeValues(times,dr.block(),offsetIsBlock);
+      // 
+      cout << "\t["
+	   << times[0] << ","
+	   << times[1]-times[0] << ","
+	   << times[2]-times[0] << ","
+	   << times[3]-times[0] << ", .. ]" << endl;
+      // increment the number of the block
+      dr.nextBlock();
+    }
+  }
+  
   return nofFailedTests;
 }
 
@@ -494,9 +529,9 @@ int test_time (uint const &blocksize)
 
 /*!
   \brief Test manipulations of DataReader object as performed in applications
-
+  
   \return nofFailedTests -- The number of failed tests encountered in this
-                            function.
+          function.
 */
 int test_processing ()
 {
@@ -563,7 +598,7 @@ int main (int argc,
     nofFailedTests += test_DataIterator ();
     nofFailedTests += test_headerRecord ();
 //     nofFailedTests += test_selection ();
-//     nofFailedTests += test_time(blocksize);
+    nofFailedTests += test_timeValues(blocksize);
 //     nofFailedTests += test_frequency (blocksize);
 //     nofFailedTests += test_processing();
   } else {

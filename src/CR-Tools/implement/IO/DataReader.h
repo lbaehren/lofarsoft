@@ -566,7 +566,7 @@ namespace CR {  //  Namespace CR -- begin
   inline void toStartBlock () {
     setBlock (startBlock_p);
   }
-  
+
   /*!
     \brief Get the current positions of the attached data streams
     
