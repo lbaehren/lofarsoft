@@ -63,21 +63,68 @@ find_program (gzip_executable  gzip  ${bin_locations})
 ##__________________________________________________________
 ##                                            cr_process_awk
 
-macro (cr_process_awk _infile _script)
+macro (cr_process_awk _file _script)
+
+  ## get full path to the input file
+
+  set (_infile "")
+
+  find_file (_infile ${_file}
+    PATHS
+    ${CR_SOURCE_DIR}
+    ${CR_SOURCE_DIR}/implement
+    PATH_SUFFIXES 
+    GUI
+    Pypeline
+    NO_DEFAULT_PATH
+    )
+
+  if (NOT _infile)
+    set (_infile ${_file})
+  endif (NOT _infile)
+
+  ## get full path to the awk script
+
+  set (_awk_script "")
+
+  find_file (_awk_script ${_script}
+    PATHS
+    ${CR_SOURCE_DIR}
+    ${CR_SOURCE_DIR}/implement
+    PATH_SUFFIXES 
+    GUI
+    Pypeline
+    NO_DEFAULT_PATH
+    )
+
+  if (NOT _awk_script)
+    set (_awk_script ${_script})
+  endif (NOT _awk_script)
+
+  ## extract filename components
   
-  get_filename_component(_infile_filename  ${_infile} NAME)
-  get_filename_component(_infile_name      ${_infile} NAME_WE)
-  get_filename_component(_infile_extension ${_infile} EXT)
+  get_filename_component (_script_path      ${_awk_script} PATH    )
+  get_filename_component (_infile_path      ${_infile}     PATH    )
+  get_filename_component (_infile_filename  ${_infile}     NAME    )
+  get_filename_component (_infile_name      ${_infile}     NAME_WE )
+  get_filename_component (_infile_extension ${_infile}     EXT     )
 
   set (_outfile_filename ${_infile_name}.awk${_infile_extension})
   set (_outfile ${CR_BINARY_DIR}/implement/GUI/${_outfile_filename})
 
   message (STATUS "[awk] ${_infile_filename} -> ${_outfile_filename}")
-  
+
   if (${ARGC} EQUAL 2)
+#  add_custom_command (
+#    OUTPUT ${_outfile}
+#    COMMAND ${bin_awk}
+#    ARGS -f ${_awk_script} ${_infile}
+#    DEPENDS ${_infile}
+#    COMMENT "${_infile_filename} -> ${_outfile_filename"
+#    )
     execute_process (
       WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement/GUI
-      COMMAND ${bin_awk} -f ${_script} ${_infile}
+      COMMAND ${bin_awk} -f ${_awk_script} ${_infile}
       TIMEOUT 30
       OUTPUT_FILE ${_outfile}
       )
@@ -85,7 +132,7 @@ macro (cr_process_awk _infile _script)
     if (${ARGC} EQUAL 3)
       execute_process (
 	WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement/GUI
-	COMMAND ${bin_awk} -f ${ARGV1} ${_infile}
+	COMMAND ${bin_awk} -f ${_awk_script} ${_infile}
 	COMMAND ${bin_awk} -f ${ARGV2}
 	TIMEOUT 30
 	OUTPUT_FILE ${_outfile}
@@ -95,7 +142,7 @@ macro (cr_process_awk _infile _script)
     endif (${ARGC} EQUAL 3)
   endif (${ARGC} EQUAL 2)
   
-endmacro (cr_process_awk _infile _script)
+endmacro (cr_process_awk _file _script)
 
 ## =============================================================================
 ##
