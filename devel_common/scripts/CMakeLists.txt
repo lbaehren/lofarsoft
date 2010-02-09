@@ -18,7 +18,12 @@
 # *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 # ***************************************************************************
 
-configure_file (experimental-builds.in ${USG_ROOT}/release/bin/experimental-builds)
+foreach (infile 
+    experimental-builds
+    nightly-builds
+    )
+  configure_file (${infile}.in ${USG_ROOT}/release/bin/${infile})
+endforeach (infile )
 
 install (
   FILES newclass
