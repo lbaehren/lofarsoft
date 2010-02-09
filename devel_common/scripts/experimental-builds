@@ -1,0 +1,28 @@
+#!/bin/bash
+
+echo "-- Set environment variables ..."
+
+export LOFARSOFT=/home/lars/usg/code/trunk
+. $LOFARSOFT/devel_common/scripts/init.sh
+
+echo "-- Cleaning up code base ..."
+
+cd $LOFARSOFT
+rm -rf release
+rm -rf build
+
+echo "-- Updating working copy ..."
+
+svn up
+
+echo "-- Building projects ..."
+
+cd build
+./bootstrap
+
+make cr
+
+echo "-- Experimental build of selected projects ..."
+
+cd $LOFARSOFT/build/dal && make Experimental
+cd $LOFARSOFT/build/cr && make Experimental
