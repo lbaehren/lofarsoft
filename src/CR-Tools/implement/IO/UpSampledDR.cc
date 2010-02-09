@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Data/UpSampledDR.h>
+#include <IO/UpSampledDR.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -32,12 +32,8 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   UpSampledDR::UpSampledDR ()  
-    : DataReader (1){
-    init();
-  }
-  
-  void UpSampledDR::init(){
-    iterator_p = NULL;
+    : DataReader ()
+  {
     inpDR_p = NULL;
   }
   
@@ -67,8 +63,17 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   void UpSampledDR::summary (std::ostream &os)
-  {;}
-  
+  {
+    os << "[UpSampledDR::summary]" << endl;
+    // basic parameters
+    os << " -- blocksize ............ = " << blocksize_p  << endl;
+    os << " -- FFT length ........... = " << fftLength_p  << endl;
+    os << " -- file streams connected?  " << streamsConnected_p << endl;
+    if (streamsConnected_p) {
+      os << " -- nof. file streams .... = " << nofStreams() << endl;
+      os << " -- stream positions ..... = " << positions()  << endl;
+    }
+  }
   
   // ============================================================================
   //
@@ -76,8 +81,11 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  Bool UpSampledDR::setup(DataReader *inputDR, double newSampleFrequency, 
-			  Bool UseCalFFT, SecondStagePipeline *inpPipeline){
+  Bool UpSampledDR::setup (DataReader *inputDR,
+			   double newSampleFrequency, 
+			   Bool UseCalFFT,
+			   SecondStagePipeline *inpPipeline)
+  {
     try {
       if (inputDR == NULL){
 	cerr << "UpSampledDR::setup: " << "Need a valid DataReader pointer!" << endl;
@@ -98,7 +106,7 @@ namespace CR { // Namespace CR -- begin
 	DataReader::setNyquistZone(1);
       };
       inpDR_p = inputDR;
-
+      
       // --------------------------------------------
       // Functionality from the "setStreams" function
       // --------------------------------------------
@@ -148,10 +156,18 @@ namespace CR { // Namespace CR -- begin
   
   bool UpSampledDR::setHeaderRecord(){
     try {
-      header_p.mergeField(inpDR_p->headerRecord(),"Date", RecordInterface::OverwriteDuplicates);
-      header_p.mergeField(inpDR_p->headerRecord(),"AntennaIDs", RecordInterface::OverwriteDuplicates);
-      header_p.mergeField(inpDR_p->headerRecord(),"Observatory", RecordInterface::OverwriteDuplicates);
-      header_p.mergeField(inpDR_p->headerRecord(),"dDate", RecordInterface::OverwriteDuplicates);
+      header_p.mergeField(inpDR_p->headerRecord(),
+			  "Date", 
+			  RecordInterface::OverwriteDuplicates);
+      header_p.mergeField(inpDR_p->headerRecord(),
+			  "AntennaIDs",
+			  RecordInterface::OverwriteDuplicates);
+      header_p.mergeField(inpDR_p->headerRecord(),
+			  "Observatory",
+			  RecordInterface::OverwriteDuplicates);
+      header_p.mergeField(inpDR_p->headerRecord(),
+			  "dDate",
+			  RecordInterface::OverwriteDuplicates);
       int filesize = inpDR_p->headerRecord().asInt("Filesize");
       filesize = (int)floor(filesize*(DataReader::sampleFrequency()/inpDR_p->sampleFrequency())+0.5);
       header_p.define("Filesize",filesize);

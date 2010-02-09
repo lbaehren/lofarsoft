@@ -476,7 +476,7 @@ namespace CR {  //  Namespace CR -- begin
   */
   bool setHeaderRecord (Record const &header);
 
-  // ----------------------------------------- Navigation through the data volume
+  // === Navigation through the data volume =====================================
 
   /*!
     \brief Get the number of the block at which we start reading the data
@@ -497,9 +497,7 @@ namespace CR {  //  Namespace CR -- begin
     return iterator_p[0].block();
   }
 
-  /*!
-    \brief Set a specific data block to read next
-  */
+  //! Set a specific data block to read next
   void setBlock (uint const &block);
 
   /*!
@@ -575,7 +573,7 @@ namespace CR {  //  Namespace CR -- begin
   */
   Vector<unsigned int> positions ();
 
-  // -------------------------------------------------------------------- Methods
+  // === Methods ================================================================
 
   //! Get the raw time series after ADC conversion
   virtual Matrix<Double> fx ();

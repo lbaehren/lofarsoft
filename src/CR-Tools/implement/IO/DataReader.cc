@@ -753,12 +753,18 @@ namespace CR {  //  Namespace CR -- begin
   //_____________________________________________________________________________
   //                                                                     setBlock
   
-  
+  /*!
+    \param block -- The number of the block at which reading out of data will
+           start.
+  */
   void DataReader::setBlock (uint const &block)
   {
+    // Set the block for the DataIterators
     for (unsigned int n(0); n<nofStreams_p; n++) {
       iterator_p[n].setBlock(block);
     }
+    // Set the corresponding sample offset
+    TimeFreq::setSampleOffset(iterator_p[0].block(),false);
   }
   
   //_____________________________________________________________________________
@@ -828,9 +834,12 @@ namespace CR {  //  Namespace CR -- begin
 
   void DataReader::nextBlock ()
   {
+    // Increment data iterators
     for (unsigned int n(0); n<nofStreams_p; n++) {
       iterator_p[n].nextBlock();
     }
+    // Increment sample offset
+    TimeFreq::nextBlock();
   }
 
   //_____________________________________________________________________________

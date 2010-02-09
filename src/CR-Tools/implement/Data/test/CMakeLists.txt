@@ -19,8 +19,6 @@ set (tests
   tNDABeam
   tObservationData
   tTIM40Header
-  ttbbctlIn
-  tUpSampledDR
   )
 
 ##____________________________________________________________________

@@ -35,7 +35,7 @@
 #include <Analysis/CRflaggingPlugin.h>
 #include <Analysis/fitCR2gauss.h>
 #include <IO/LopesEventIn.h>
-#include <Data/UpSampledDR.h>
+#include <IO/UpSampledDR.h>
 #include <Utilities/SimplePlot.h>
 #include <Coordinates/SkymapQuantity.h>
 

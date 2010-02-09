@@ -581,18 +581,7 @@ namespace CR { // Namespace CR -- begin
                          const double& cc_center = 0);
 
 
-    /*!
-      \brief Get the unshifted time series for all antennas
-
-      \param dr                -- Pointer to the (initialized) DataReader
-      \param antennaSelection  -- (Optional) Vector of bool to select only part of the antennas.
-      \param Polarization      -- (Optional) Polarization type to select only part of the antennas
-                                 ("ANY" = ignore antenna polarization)
-      \param substractPedastal -- the mean of the trace will be substracted
-
-
-      \return Matrix with the traces after all calibration procedures but without beamforming
-    */
+    //! Get the unshifted time series for all antennas
     Matrix<Double> GetUnshiftedTimeSeries(DataReader *dr, 
                                           Vector<Bool> antennaSelection = Vector<Bool>(),
                                           String Polarization="ANY",
@@ -611,16 +600,12 @@ namespace CR { // Namespace CR -- begin
 
   private:
     
-    /*!
-      \brief Unconditional copying
-    */
-    void copy (CompletePipeline const &other);
-    
-    /*!
-      \brief Unconditional deletion 
-    */
-    void destroy(void);
-    
+   //! Unconditional copying
+   void copy (CompletePipeline const &other);
+   
+   //! Unconditional deletion 
+   void destroy(void);
+   
   };
   
 } // Namespace CR -- end

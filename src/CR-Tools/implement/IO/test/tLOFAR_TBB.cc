@@ -54,6 +54,25 @@ using CR::LOFAR_TBB;
 */
 
 //_______________________________________________________________________________
+//                                                                           show
+
+/*!
+  \param vec -- Vector of which to display the first \e nelem elements
+  \param nelem -- Number of elements to display from the vector \e vec.
+*/
+template <class T> void show (std::vector<T> const &vec,
+			      unsigned int nelem=4)
+{
+  cout << "\t[ ";
+  
+  for (unsigned int n(0); n<nelem; ++n) {
+    cout << vec[n] << ", ";
+  }
+
+  cout << ".. ]" << endl;
+}
+
+//_______________________________________________________________________________
 //                                                              test_construction
 
 /*!
@@ -128,6 +147,106 @@ int test_construction (std::string const &filename)
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+//_______________________________________________________________________________
+//                                                              test_sampleValues
+
+/*!
+  \brief Test retrieval of the values along the sample axis
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_sampleValues ()
+{
+  cout << "\n[tLOFAR_TBB::test_sampleValues]\n" << endl;
+
+  int nofFailedTests (0);
+  uint blocksize (1024);
+  uint nyquistZone (1);
+  double sampleFrequency (200e06);
+  std::vector<uint> samples;
+  uint maxOffset (5);
+
+  //________________________________________________________
+  // Create LOFAR_TBB object to perform the tests with
+
+  LOFAR_TBB dr;
+  dr.setBlocksize(blocksize);
+  dr.setNyquistZone (nyquistZone);
+  dr.setSampleFrequency (sampleFrequency);
+
+  //________________________________________________________
+  // Run the tests
+
+  cout << "[1] sampleValues (samples) ..." << endl;
+  {
+    dr.sampleValues(samples);
+    // 
+    show(samples);
+  }
+
+  cout << "[2] sampleValues (samples,offset) ..." << endl;
+  {
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      dr.sampleValues(samples,offset);
+      // 
+      show(samples);
+    }
+  }
+  
+  cout << "[3] sampleValues (samples,offset,false) ..." << endl;
+  {
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      dr.sampleValues(samples,offset,false);
+      // 
+      show(samples);
+    }
+  }
+
+  cout << "[4] setSampleOffset (offset) ..." << endl;
+  {
+    dr.setSampleOffset(0);
+    
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // set the offset
+      dr.setSampleOffset(offset);
+      // get the sample values
+      dr.sampleValues(samples);
+      // 
+      show(samples);
+    }
+  }
+  
+  cout << "[5] setSampleOffset (offset,false) ..." << endl;
+  {
+    dr.setSampleOffset(0);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // set the offset
+      dr.setSampleOffset(offset,false);
+      // get the sample values
+      dr.sampleValues(samples);
+      // 
+      show(samples);
+    }
+  }
+  
+  cout << "[6] nextBlock () ..." << endl;
+  {
+    dr.setSampleOffset(0);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // get the sample values
+      dr.sampleValues(samples);
+      // 
+      show(samples);
+      // increment block counter
+      dr.nextBlock();
+    }
   }
   
   return nofFailedTests;
@@ -348,6 +467,8 @@ int main (int argc,
 //   nofFailedTests += test_hdf5(filename);
 
   // Perform some basic tests using the DAL
+
+  nofFailedTests += test_sampleValues ();
   
   if (haveDataset) {
     // Test for the constructor(s)

@@ -40,7 +40,23 @@ using std::cout;
 using std::endl;
 using CR::TimeFreq;
 
-// -----------------------------------------------------------------------------
+//_______________________________________________________________________________
+//                                                                           show
+
+template <class T> void show (std::vector<T> const &vec,
+			      unsigned int nelem=4)
+{
+  cout << "\t[ ";
+  
+  for (unsigned int n(0); n<nelem; ++n) {
+    cout << vec[n] << ", ";
+  }
+
+  cout << ".. ]" << endl;
+}
+
+//_______________________________________________________________________________
+//                                                               show_frequencies
 
 /*!
   \brief Show the frequency values
@@ -280,48 +296,77 @@ int test_sampleValues ()
   cout << "\n[test_sampleValues]\n" << endl;
 
   int nofFailedTests (0);
-  uint blocksize (20);
+  uint blocksize (1024);
   double sampleFrequency (80e06);
   uint nyquistZone (1);
   TimeFreq data (blocksize,sampleFrequency,nyquistZone);
   std::vector<uint> samples;
+  uint maxOffset (5);
 
-  cout << "[1] Default function call ..." << endl;
+  cout << "[1] sampleValues (samples) ..." << endl;
   {
     data.sampleValues(samples);
     // 
-    cout << "\t["
-	 << samples[0] << ","
-	 << samples[1] << ","
-	 << samples[2] << ", .. ]" << endl;
+    show (samples);
   }
 
-  cout << "[2] Test increment by individual samples ..." << endl;
+  cout << "[2] sampleValues (samples,offset) ..." << endl;
   {
-    uint maxOffset (10);
-
     for (uint offset(0); offset<maxOffset; ++offset) {
       data.sampleValues(samples,offset);
       // 
-      cout << "\t["
-	   << samples[0] << ","
-	   << samples[1] << ","
-	   << samples[2] << ", .. ]" << endl;
+      show (samples);
     }
   }
   
-  cout << "[3] Test increment in units of blocks ..." << endl;
+  cout << "[3] sampleValues (samples,offset,false) ..." << endl;
   {
-    bool offsetIsBlock (true);
-    uint maxOffset (10);
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      data.sampleValues(samples,offset,false);
+      // 
+      show (samples);
+    }
+  }
+
+  cout << "[4] setSampleOffset (offset) ..." << endl;
+  {
+    data.setSampleOffset(0);
 
     for (uint offset(0); offset<maxOffset; ++offset) {
-      data.sampleValues(samples,offset,offsetIsBlock);
+      // set the offset
+      data.setSampleOffset(offset);
+      // get the sample values
+      data.sampleValues(samples);
       // 
-      cout << "\t["
-	   << samples[0] << ","
-	   << samples[1] << ","
-	   << samples[2] << ", .. ]" << endl;
+      show (samples);
+    }
+  }
+  
+  cout << "[5] setSampleOffset (offset,false) ..." << endl;
+  {
+    data.setSampleOffset(0);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // set the offset
+      data.setSampleOffset(offset,false);
+      // get the sample values
+      data.sampleValues(samples);
+      // 
+      show (samples);
+    }
+  }
+  
+  cout << "[6] nextBlock () ..." << endl;
+  {
+    data.setSampleOffset(0);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // get the sample values
+      data.sampleValues(samples);
+      // 
+      show (samples);
+      // increment the block
+      data.nextBlock();
     }
   }
   
@@ -342,113 +387,79 @@ int test_timeValues ()
   cout << "\n[test_timeValues]\n" << endl;
 
   int nofFailedTests (0);
-  uint blocksize (20);
+  uint blocksize (1024);
   double sampleFrequency (80e06);
   uint nyquistZone (1);
   TimeFreq data (blocksize,sampleFrequency,nyquistZone);
-
-  cout << "[1] Default function call for std::vector<double> ..." << endl;
+  std::vector<double> times;
+  uint maxOffset (5);
+  
+  cout << "[1] timeValues (times)" << endl;
   {
-    std::vector<double> times;
     data.timeValues(times);
     // 
-    cout << "\t["
-	 << times[0] << ","
-	 << times[1] << ","
-	 << times[2] << ", .. ]" << endl;
+    show (times);
   }
 
-  cout << "[2] Test increment by individual samples ..." << endl;
+  cout << "[2] timeValues (times,offset)" << endl;
   {
-    std::vector<double> times;
-    uint maxOffset (10);
-
     for (uint offset(0); offset<maxOffset; ++offset) {
       data.timeValues(times,offset);
       // 
-      cout << "\t["
-	   << times[0] << ","
-	   << times[1] << ","
-	   << times[2] << ", .. ]" << endl;
+      show (times);
     }
   }
   
-  cout << "[3] Test increment in units of blocks ..." << endl;
+  cout << "[3] timeValues (times,offset,false)" << endl;
   {
-    std::vector<double> times;
-    bool offsetIsBlock (true);
-    uint maxOffset (10);
-
     for (uint offset(0); offset<maxOffset; ++offset) {
-      data.timeValues(times,offset,offsetIsBlock);
+      data.timeValues(times,offset,false);
       // 
-      cout << "\t["
-	   << times[0] << ","
-	   << times[1] << ","
-	   << times[2] << ", .. ]" << endl;
+      show (times);
     }
   }
 
-  cout << "[4] Test conversion from samples to times ..." << endl;
+  cout << "[4] setSampleOffset (offset) ..." << endl;
   {
-    std::vector<uint> samples;
-    std::vector<double> times;
-    uint maxOffset (10);
+    data.setSampleOffset(0);
 
     for (uint offset(0); offset<maxOffset; ++offset) {
-      data.sampleValues(samples,offset);
-      data.timeValues(times,samples);
+      // set the offset
+      data.setSampleOffset(offset);
+      // get the sample values
+      data.timeValues(times);
       // 
-      cout << "\t["
-	   << times[0] << ","
-	   << times[1] << ","
-	   << times[2] << ", .. ]" << endl;
-    }
-  }
-
-#ifdef HAVE_CASA
-  cout << "[5] Default function call for casa::Vector<double> ..." << endl;
-  {
-    casa::Vector<double> times;
-    data.timeValues(times);
-    // 
-    cout << "\t["
-	 << times[0] << ","
-	 << times[1] << ","
-	 << times[2] << ", .. ]" << endl;
-  }
-
-  cout << "[6] Test increment by individual samples ..." << endl;
-  {
-    casa::Vector<double> times;
-    uint maxOffset (10);
-
-    for (uint offset(0); offset<maxOffset; ++offset) {
-      data.timeValues(times,offset);
-      // 
-      cout << "\t["
-	   << times[0] << ","
-	   << times[1] << ","
-	   << times[2] << ", .. ]" << endl;
+      show (times);
     }
   }
   
-  cout << "[7] Test increment in units of blocks ..." << endl;
+  cout << "[5] setSampleOffset (offset,false) ..." << endl;
   {
-    casa::Vector<double> times;
-    bool offsetIsBlock (true);
-    uint maxOffset (10);
+    data.setSampleOffset(0);
 
     for (uint offset(0); offset<maxOffset; ++offset) {
-      data.timeValues(times,offset,offsetIsBlock);
+      // set the offset
+      data.setSampleOffset(offset,false);
+      // get the sample values
+      data.timeValues(times);
       // 
-      cout << "\t["
-	   << times[0] << ","
-	   << times[1] << ","
-	   << times[2] << ", .. ]" << endl;
+      show (times);
     }
   }
-#endif
+  
+  cout << "[6] nextBlock () ..." << endl;
+  {
+    data.setSampleOffset(0);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // get the sample values
+      data.timeValues(times);
+      // 
+      show (times);
+      // increment the block
+      data.nextBlock();
+    }
+  }
   
   return nofFailedTests;
 }

@@ -1725,7 +1725,20 @@ namespace CR { // Namespace CR -- begin
     }
   }
 
-
+  //_____________________________________________________________________________
+  //                                                       GetUnshiftedTimeSeries
+  
+  /*!
+    \param dr                -- Pointer to the (initialized) DataReader
+    \param antennaSelection  -- (Optional) Vector of bool to select only part of
+           the antennas.
+    \param Polarization      -- (Optional) Polarization type to select only part
+           of the antennas ("ANY" = ignore antenna polarization)
+    \param substractPedastal -- the mean of the trace will be substracted
+    
+    \return timeSeries -- Matrix with the traces after all calibration procedures
+            but without beamforming
+  */
   Matrix<Double> CompletePipeline::GetUnshiftedTimeSeries(DataReader *dr,
                                                           Vector<Bool> antennaSelection,
                                                           String Polarization,
@@ -1767,7 +1780,8 @@ namespace CR { // Namespace CR -- begin
 
       nselants=ntrue(antennaSelection);
       if (nselants == 0) {
-        cerr << "CompletePipeline::GetUnshiftedTimeSeries: " << "No antennas selected/all antennas flagged!" << endl;
+        cerr << "CompletePipeline::GetUnshiftedTimeSeries: "
+	     << "No antennas selected/all antennas flagged!" << endl;
       }
 
       timeSeries.resize(blocksize,nselants);

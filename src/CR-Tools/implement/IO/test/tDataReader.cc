@@ -37,6 +37,7 @@ using CR::DataReader;
 /*!
   \file tDataReader.cc
 
+  \ingroup CR
   \ingroup IO
 
   \brief A collection of test routines for DataReader
@@ -45,6 +46,25 @@ using CR::DataReader;
  
   \date 2005/05/15
 */
+
+//_______________________________________________________________________________
+//                                                                           show
+
+/*!
+  \param vec -- Vector of which to display the first \e nelem elements
+  \param nelem -- Number of elements to display from the vector \e vec.
+*/
+template <class T> void show (std::vector<T> const &vec,
+			      unsigned int nelem=4)
+{
+  cout << "\t[ ";
+  
+  for (unsigned int n(0); n<nelem; ++n) {
+    cout << vec[n] << ", ";
+  }
+
+  cout << ".. ]" << endl;
+}
 
 //_______________________________________________________________________________
 //                                                                test_DataReader
@@ -458,6 +478,98 @@ int test_frequency (uint const &blocksize)
 }
 
 //_______________________________________________________________________________
+//                                                              test_sampleValues
+
+/*!
+  \brief Test retrival of the values along the sample-number axis
+  
+  \param blocksize -- The number of samples per block of data per antenna.
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+ */
+int test_sampleValues (uint const &blocksize)
+{
+  cout << "\n[tDataReader::test_sampleValues]\n" << endl;
+
+  int nofFailedTests (0);
+  uint nyquistZone (1);
+  double samplerate (200e06);
+  DataReader dr (blocksize,nyquistZone,samplerate);
+  std::vector<uint> samples;
+  uint maxOffset (5);
+
+  cout << "[1] sampleValues (samples) ..." << endl;
+  {
+    dr.sampleValues(samples);
+    // 
+    show(samples);
+  }
+
+  cout << "[2] sampleValues (samples,offset) ..." << endl;
+  {
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      dr.sampleValues(samples,offset);
+      // 
+      show(samples);
+    }
+  }
+  
+  cout << "[3] sampleValues (samples,offset,false) ..." << endl;
+  {
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      dr.sampleValues(samples,offset,false);
+      // 
+      show(samples);
+    }
+  }
+  
+  cout << "[4] setSampleOffset (offset) ..." << endl;
+  {
+    dr.setSampleOffset(0);
+    
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // set the offset
+      dr.setSampleOffset(offset);
+      // get the sample values
+      dr.sampleValues(samples);
+      // 
+      show(samples);
+    }
+  }
+  
+  cout << "[5] setSampleOffset (offset,false) ..." << endl;
+  {
+    dr.setSampleOffset(0);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // set the offset
+      dr.setSampleOffset(offset,false);
+      // get the sample values
+      dr.sampleValues(samples);
+      // 
+      show(samples);
+    }
+  }
+  
+  cout << "[6] nextBlock () ..." << endl;
+  {
+    dr.setSampleOffset(0);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // get the sample values
+      dr.sampleValues(samples);
+      // 
+      show(samples);
+      // increment block counter
+      dr.nextBlock();
+    }
+  }
+  
+  return nofFailedTests;
+}
+
+//_______________________________________________________________________________
 //                                                                test_timeValues
 
 /*!
@@ -476,48 +588,72 @@ int test_timeValues (uint const &blocksize)
   uint nyquistZone (1);
   double samplerate (200e06);
   DataReader dr (blocksize,nyquistZone,samplerate);
-
-  dr.summary();
-
-  cout << "[1] Default function call for std::vector<double> ..." << endl;
+  std::vector<double> times;
+  uint maxOffset (5);
+  
+  cout << "[1] timeValues (times)" << endl;
   {
-    std::vector<double> times;
     dr.timeValues(times);
     // 
-    cout << "\t["
-	 << times[0] << ","
-	 << times[1]-times[0] << ","
-	 << times[2]-times[0] << ","
-	 << times[3]-times[0] << ", .. ]" << endl;
+    show(times);
   }
 
-  cout << "[2] Default function call for casa::Vector<double> ..." << endl;
+  cout << "[2] timeValues (times,offset)" << endl;
   {
-    casa::Vector<double> times;
-    dr.timeValues(times);
-    // 
-    cout << "\t["
-	 << times[0] << ","
-	 << times[1]-times[0] << ","
-	 << times[2]-times[0] << ","
-	 << times[3]-times[0] << ", .. ]" << endl;
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      dr.timeValues(times,offset);
+      // 
+      show(times);
+    }
+  }
+  
+  cout << "[3] timeValues (times,offset,false)" << endl;
+  {
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      dr.timeValues(times,offset,false);
+      // 
+      show(times);
+    }
   }
 
-  cout << "[3] Test increment in units of blocks ..." << endl;
+  cout << "[4] setSampleOffset (offset) ..." << endl;
   {
-    bool offsetIsBlock (true);
-    uint maxOffset (10);
-    casa::Vector<double> times;
+    dr.setSampleOffset(0);
 
     for (uint offset(0); offset<maxOffset; ++offset) {
-      dr.timeValues(times,dr.block(),offsetIsBlock);
+      // set the offset
+      dr.setSampleOffset(offset);
+      // get the sample values
+      dr.timeValues(times);
       // 
-      cout << "\t["
-	   << times[0] << ","
-	   << times[1]-times[0] << ","
-	   << times[2]-times[0] << ","
-	   << times[3]-times[0] << ", .. ]" << endl;
-      // increment the number of the block
+      show(times);
+    }
+  }
+  
+  cout << "[5] setSampleOffset (offset,false) ..." << endl;
+  {
+    dr.setSampleOffset(0);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // set the offset
+      dr.setSampleOffset(offset,false);
+      // get the sample values
+      dr.timeValues(times);
+      // 
+      show(times);
+    }
+  }
+  
+  cout << "[5] nextBlock () ..." << endl;
+  {
+    dr.setSampleOffset(0);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // get the sample values
+      dr.timeValues(times);
+      // 
+      show(times);
+      // increment block counter
       dr.nextBlock();
     }
   }
@@ -525,7 +661,8 @@ int test_timeValues (uint const &blocksize)
   return nofFailedTests;
 }
 
-// -------------------------------------------------------------- test_processing
+//_______________________________________________________________________________
+//                                                                test_processing
 
 /*!
   \brief Test manipulations of DataReader object as performed in applications
@@ -587,7 +724,7 @@ int main (int argc,
           char *argv[])
 {
   int nofFailedTests (0);
-  uint blocksize (100);
+  uint blocksize (1024);
   
   // Test for the various constructors
   nofFailedTests += test_DataReader ();
@@ -598,6 +735,7 @@ int main (int argc,
     nofFailedTests += test_DataIterator ();
     nofFailedTests += test_headerRecord ();
 //     nofFailedTests += test_selection ();
+    nofFailedTests += test_sampleValues(blocksize);
     nofFailedTests += test_timeValues(blocksize);
 //     nofFailedTests += test_frequency (blocksize);
 //     nofFailedTests += test_processing();

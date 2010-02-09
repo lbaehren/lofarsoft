@@ -42,10 +42,8 @@ namespace CR { // Namespace CR -- begin
   */
   TimeFreq::TimeFreq ()
   {
-    setBlocksize (1);
-    sampleFrequency_p = 80e06;
-    nyquistZone_p     = 1;
-    referenceTime_p   = 0;
+    init (1,
+	  80e06);
   }
   
   //_____________________________________________________________________________
@@ -59,10 +57,8 @@ namespace CR { // Namespace CR -- begin
   */
   TimeFreq::TimeFreq (uint const &blocksize)
   {
-    setBlocksize (blocksize);
-    sampleFrequency_p = 80e06;
-    nyquistZone_p     = 1;
-    referenceTime_p   = 0;
+    init (blocksize,
+	  80e06);
   }
   
   //_____________________________________________________________________________
@@ -77,10 +73,9 @@ namespace CR { // Namespace CR -- begin
 		      double const &sampleFrequency,
 		      uint const &nyquistZone)
   {
-    setBlocksize (blocksize);
-    sampleFrequency_p = sampleFrequency;
-    nyquistZone_p     = nyquistZone;
-    referenceTime_p   = 0;
+    init (blocksize,
+	  sampleFrequency,
+	  nyquistZone);
   }
   
   //_____________________________________________________________________________
@@ -119,10 +114,10 @@ namespace CR { // Namespace CR -- begin
 		      uint const &nyquistZone,
 		      double const &referenceTime)
   {
-    setBlocksize (blocksize);
-    sampleFrequency_p = sampleFrequency;
-    nyquistZone_p     = nyquistZone;
-    referenceTime_p   = referenceTime;
+    init (blocksize,
+	  sampleFrequency,
+	  nyquistZone,
+	  referenceTime);
   }
   
   //_____________________________________________________________________________
@@ -228,7 +223,20 @@ namespace CR { // Namespace CR -- begin
   void TimeFreq::setNyquistZone (uint const &nyquistZone) {
     nyquistZone_p = nyquistZone;
   }
+
+  //_____________________________________________________________________________
+  //                                                              setSampleOffset
   
+  void TimeFreq::setSampleOffset (uint const &offset,
+				  bool const &offsetInSamples)
+  {
+    if (offsetInSamples) {
+      sampleOffset_p = offset;
+    } else {
+      sampleOffset_p = offset*blocksize_p;
+    }
+  }
+
   // -------------------------------------------------------------------- summary
   
   /*!
@@ -251,6 +259,7 @@ namespace CR { // Namespace CR -- begin
     os << "-- Blocksize      [samples] = " << blocksize_p          << std::endl;
     os << "-- Sample frequency    [Hz] = " << sampleFrequency_p    << std::endl;
     os << "-- Nyquist zone             = " << nyquistZone_p        << std::endl;
+    os << "-- Sample offset  [samples] = " << sampleOffset_p       << std::endl;
     os << "-- Reference time     [sec] = " << referenceTime_p      << std::endl;
     os << "-- FFT length    [channels] = " << fftLength_p          << std::endl;
     os << "-- Sample interval      [s] = " << sampleInterval()     << std::endl;
@@ -267,7 +276,31 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  // ---------------------------------------------------------------------- shape
+  //_____________________________________________________________________________
+  //                                                                         init
+
+  /*!
+    \param blocksize       -- Blocksize, [samples]
+    \param sampleFrequency -- Sample frequency in the ADC, [Hz]
+    \param nyquistZone     -- Nyquist zone,  [1]
+    \param referenceTime   -- Reference time, \f$ t_0 \f$
+    \param sampleOffset    -- Sample offset
+  */
+  void TimeFreq::init (uint const &blocksize,
+		       double const &sampleFrequency,
+		       uint const &nyquistZone,
+		       double const &referenceTime,
+		       uint const &sampleOffset)
+  {
+    setBlocksize (blocksize);
+    setSampleFrequency (sampleFrequency);
+    setNyquistZone (nyquistZone);
+    setReferenceTime (referenceTime);
+    setSampleOffset (sampleOffset);
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                        shape
 
 #ifdef HAVE_CASA
   casa::IPosition TimeFreq::shape () {
@@ -282,7 +315,8 @@ namespace CR { // Namespace CR -- begin
   }
 #endif
 
-  // ------------------------------------------------------------------ increment
+  //_____________________________________________________________________________
+  //                                                                    increment
 
 #ifdef HAVE_CASA
   casa::Vector<double> TimeFreq::increment ()
@@ -538,36 +572,59 @@ namespace CR { // Namespace CR -- begin
 
   //_____________________________________________________________________________
   //                                                                 sampleValues
-  
+
   /*!
     \retval samples      -- Vector with the sample values.
-    \param offset        -- Offset for the start of axis with the samples values.
-    \param offsetIsBlock -- Is the offset given in units of a full block?
     \return status       -- Status of the operation; returns \e false in case an
+            error was encountered.
+  */
+  bool TimeFreq::sampleValues (std::vector<uint> &samples)
+  {
+    return sampleValues (samples,
+			 sampleOffset_p);
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                 sampleValues
+
+  /*!
+    \retval samples        -- Vector with the sample values.
+    \param offset          -- Offset for the start of axis with the samples values.
+    \param offsetInSamples -- Is the offset given in units of samples?
+    \return status         -- Status of the operation; returns \e false in case an
             error was encountered.
   */
   bool TimeFreq::sampleValues (std::vector<uint> &samples,
 			       uint const &offset,
-			       bool const &offsetIsBlock)
+			       bool const &offsetInSamples)
   {
     // Check the size of the vector returning the sample values
     if (samples.size() != blocksize_p) {
       samples.resize(blocksize_p);
     }
     
-    if (offsetIsBlock) {
-      for (uint n(0); n<blocksize_p; n++) {
-	samples[n] = blocksize_p*offset+n;
-      }
-    } else {
+    if (offsetInSamples) {
       for (uint n(0); n<blocksize_p; n++) {
 	samples[n] = offset+n;
       }
+    } else {
+      for (uint n(0); n<blocksize_p; n++) {
+	samples[n] = blocksize_p*offset+n;
+      }
     }
-
+    
     return true;
   }
   
+  //_____________________________________________________________________________
+  //                                                                   timeValues
+  
+  bool TimeFreq::timeValues (std::vector<double> &times)
+  {
+    return timeValues (times,
+		       sampleOffset_p);
+  }
+
   //_____________________________________________________________________________
   //                                                                   timeValues
 
@@ -575,20 +632,20 @@ namespace CR { // Namespace CR -- begin
     \retval timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
             a data block of length \f$ N_{\rm Blocksize} \f$
     \param offset        -- Offset for the start of axis with the samples values.
-    \param offsetIsBlock -- Is the offset measured in blocks? If set \e false,
-           the offset is considered in samples.
+    \param offsetInSamples -- Is the offset measured in samples? If set \e false,
+           the offset is considered in blocks.
     \return status -- Status of the operation; returns \e false in case an error
             was encountered.
   */
   bool TimeFreq::timeValues (std::vector<double> &times,
 			     uint const &offset,
-			     bool const &offsetIsBlock)
+			     bool const &offsetInSamples)
   {
     std::vector<uint> samples;
     // Get the sample values for the current block ...
     sampleValues(samples,
 		 offset,
-		 offsetIsBlock);
+		 offsetInSamples);
     // ... and convert these values to time
     return timeValues (times,samples);
   }
@@ -639,26 +696,49 @@ namespace CR { // Namespace CR -- begin
 
   //_____________________________________________________________________________
   //                                                                 sampleValues
+
+  /*!
+    \retval samples      -- Vector with the sample values.
+    \return status       -- Status of the operation; returns \e false in case an
+            error was encountered.
+  */
+  bool TimeFreq::sampleValues (casa::Vector<uint> &samples)
+  {
+    return sampleValues (samples,
+			 sampleOffset_p);
+  }
+  
+  //_____________________________________________________________________________
+  //                                                                 sampleValues
   
   bool TimeFreq::sampleValues (casa::Vector<uint> &samples,
-			       uint const &sampleOffset,
-			       bool const &offsetIsBlock)
+			       uint const &offset,
+			       bool const &offsetInSamples)
   {
     if (samples.size() != blocksize_p) {
       samples.resize(blocksize_p);
     }
  
-    if (offsetIsBlock) {
-      samples = blocksize_p*sampleOffset;
+    if (offsetInSamples) {
+      for (uint n(0); n<blocksize_p; n++) {
+	samples(n) = offset+n;
+      }
     } else {
-      samples = sampleOffset;
+      for (uint n(0); n<blocksize_p; n++) {
+	samples(n) = blocksize_p*offset+n;
+      }
     }
     
-    for (uint n(0); n<blocksize_p; n++) {
-      samples(n) += n;
-    }
-
     return true;
+  }
+
+  //_____________________________________________________________________________
+  //                                                                   timeValues
+  
+  bool TimeFreq::timeValues (casa::Vector<double> &times)
+  {
+    return timeValues (times,
+		       sampleOffset_p);
   }
 
   //_____________________________________________________________________________
@@ -672,14 +752,14 @@ namespace CR { // Namespace CR -- begin
     
   */
   bool TimeFreq::timeValues (casa::Vector<double> &times,
-			     uint const &sampleOffset,
-			     bool const &offsetIsBlock)
+			     uint const &offset,
+			     bool const &offsetInSamples)
   {
     casa::Vector<uint> samples;
     // Get the sample values for the current block ...
     sampleValues(samples,
-		 sampleOffset,
-		 offsetIsBlock);
+		 offset,
+		 offsetInSamples);
     // ... and convert these values to time
     return timeValues (times,samples);
   }

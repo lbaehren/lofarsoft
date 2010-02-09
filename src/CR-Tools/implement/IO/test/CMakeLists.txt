@@ -21,6 +21,7 @@ set (tests
   ttoLOPESgrid
   tTSmatrix2Event
   tRawSubbandIn
+  ttbbctlIn
   )
 
 if (HAVE_HDF5)
@@ -57,7 +58,23 @@ if (dataset_tbb)
 endif (dataset_tbb)
 
 ##____________________________________________________________________
-## tLOFAR_TBB
+## Test working with LOPES example dataset
+
+foreach (src tUpSampledDR)
+  ## compiler instructions
+  add_executable (${src} ${src}.cc)
+  ## linker instructions
+  target_link_libraries (${src} cr)
+  ## testing
+  if (dataset_lopes_example)
+    add_test (${src} ${src} ${dataset_lopes_example})
+  else (dataset_lopes_example)
+    add_test (${src} ${src})
+  endif (dataset_lopes_example)
+endforeach (src)
+
+##____________________________________________________________________
+##                                                          tLOFAR_TBB
 
 if (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES)
   

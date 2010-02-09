@@ -195,6 +195,8 @@ namespace CR { // Namespace CR -- begin
     double sampleFrequency_p;
     //! Nyquist zone, \f$ N_{\rm Nyquist} \f$,  [1]
     uint nyquistZone_p;
+    //! Sample offset
+    uint sampleOffset_p;
     //! Reference time, \f$ t_0 \f$
     double referenceTime_p;
 
@@ -357,8 +359,22 @@ namespace CR { // Namespace CR -- begin
       setReferenceTime (referenceTime.getValue("s"));
     }
 
-    // === Methods ==============================================================
+    //! Get the sample offset
+    inline uint sampleOffset () const {
+      return sampleOffset_p;
+    }
 
+    //! Set the sample offset
+    void setSampleOffset (uint const &offset,
+			  bool const &offsetInSamples=true);
+
+    //! Increment the sample offset by one block
+    virtual inline void nextBlock () {
+      sampleOffset_p += blocksize_p;
+    }
+    
+    // === Methods ==============================================================
+    
     /*!
       \brief Get the output length of the FFT, \f$ N_{\rm FFT} \f$
       \return fftLength -- The output length of the FFT, [channels], i.e. the 
@@ -474,13 +490,17 @@ namespace CR { // Namespace CR -- begin
 #endif
     
     //! Get the sample values along the time axis
+    bool sampleValues (std::vector<uint> &samples);
+    //! Get the sample values along the time axis
     bool sampleValues (std::vector<uint> &samples,
-		       uint const &offset=0,
-		       bool const &offsetIsBlock=false);
+		       uint const &offset,
+		       bool const &offsetInSamples=true);
+    //! Get the values along the time axis
+    bool timeValues (std::vector<double> &times);
     //! Get the values along the time axis
     bool timeValues (std::vector<double> &times,
-		     uint const &offset=0,
-		     bool const &offsetIsBlock=false);
+		     uint const &offset,
+		     bool const &offsetInSamples=true);
     //! Get the values along the time axis
     bool timeValues (std::vector<double> &times,
 		     std::vector<uint> const &samples);
@@ -489,15 +509,19 @@ namespace CR { // Namespace CR -- begin
     
 #ifdef HAVE_CASA
     
-    //! Get the sample values along the time axis
+    //! [optional:CASA] Get the sample values along the time axis
+    bool sampleValues (casa::Vector<uint> &samples);
+    //! [optional:CASA] Get the sample values along the time axis
     bool sampleValues (casa::Vector<uint> &samples,
-		       uint const &sampleOffset=0,
-		       bool const &offsetIsBlock=false);
-    //! Get the values along the time axis
+		       uint const &offset,
+		       bool const &offsetInSamples=true);
+    //! [optional:CASA] Get the values along the time axis
+    bool timeValues (casa::Vector<double> &times);
+    //! [optional:CASA] Get the values along the time axis
     bool timeValues (casa::Vector<double> &times,
-		     uint const &sampleOffset=0,
-		     bool const &offsetIsBlock=false);
-    //! Get the values along the time axis
+		     uint const &offset,
+		     bool const &offsetInSamples=true);
+    //! [optional:CASA] Get the values along the time axis
     bool timeValues (casa::Vector<double> &times,
 		     casa::Vector<uint> const &samples);
     //! [optional:CASA] Create time axis coordinate from parameters
@@ -519,6 +543,12 @@ namespace CR { // Namespace CR -- begin
     
   private:
     
+    //! Initialize the set of internal parameters
+    void init (uint const &blocksize,
+	       double const &sampleFrequency,
+	       uint const &nyquistZone=1,
+	       double const &referenceTime=0,
+	       uint const &sampleOffset=0);
     //! Unconditional copying
     void copy (TimeFreq const &other);
     //! Unconditional deletion 

@@ -444,8 +444,7 @@ endif (dataset_tbb)
 find_file (dataset_lopes_example example.event
   PATHS
   ${CR_SOURCE_DIR}/data
-  ${CR_SOURCE_DIR}/../data
-  ${CR_SOURCE_DIR}/../../data
+  ${USG_ROOT}/data
   PATH_SUFFIXES
   lopes
   )

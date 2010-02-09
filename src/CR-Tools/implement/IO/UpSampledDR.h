@@ -47,7 +47,8 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class UpSampledDR
     
-    \ingroup CR_Data
+    \ingroup CR
+    \ingroup IO
     
     \brief DataReader class that upsamples the the output of another DataReader
     
@@ -182,15 +183,8 @@ namespace CR { // Namespace CR -- begin
     bool setHeaderRecord();
     
   private:
-        
-    /*!
-      \brief blank initialization
-    */
-    void init(void);
 
-    /*!
-      \brief Unconditional deletion 
-    */
+    //! Unconditional deletion 
     void destroy(void);
     
   };
