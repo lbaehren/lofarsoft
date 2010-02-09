@@ -18,6 +18,8 @@
 # *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 # ***************************************************************************
 
+configure_file (experimental-builds.in ${USG_ROOT}/release/bin/experimental-builds)
+
 install (
   FILES newclass
   DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
