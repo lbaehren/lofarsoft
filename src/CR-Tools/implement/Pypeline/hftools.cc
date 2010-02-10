@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/*!  
+/*!
   HFTOOLS Version 0.1 - Tools to manipulate vectors and generate
   wrappers for python
 */
@@ -30,7 +30,7 @@
 using namespace std;
 
 
-#undef HFPP_VERBOSE 
+#undef HFPP_VERBOSE
 #include "hftools.h"
 
 //#include "htest.cc"
@@ -39,7 +39,7 @@ using namespace std;
 //Some definitions needed for the preprosessor programming:
 //Copy source code (where specified with COPY_TO HFILE START) to the file hwrappers-hftools.iter.cc.h
 //-----------------------------------------------------------------------
-//$FILENAME: HFILE=hftools.def.h  
+//$FILENAME: HFILE=hftools.def.h
 //-----------------------------------------------------------------------
 
 // Tell the preprocessor (for generating wrappers) that this is a c++
@@ -56,11 +56,11 @@ using namespace std;
 //                    Casting & Conversion Functions
 //========================================================================
 template<class T> T hfnull(){};
-template<> inline HString  hfnull<HString>(){HString null=""; return null;} 
-template<> inline HPointer hfnull<HPointer>(){return NULL;} 
-template<> inline HInteger hfnull<HInteger>(){return 0;} 
-template<> inline HNumber  hfnull<HNumber>(){return 0.0;} 
-template<> inline HComplex hfnull<HComplex>(){return 0.0;} 
+template<> inline HString  hfnull<HString>(){HString null=""; return null;}
+template<> inline HPointer hfnull<HPointer>(){return NULL;}
+template<> inline HInteger hfnull<HInteger>(){return 0;}
+template<> inline HNumber  hfnull<HNumber>(){return 0.0;}
+template<> inline HComplex hfnull<HComplex>(){return 0.0;}
 
 //Identity
 template<class T> inline T hfcast(/*const*/ T v){return v;}
@@ -94,7 +94,7 @@ CasaVector<T> & stl2casa(std::vector<T> stlvec)
 {
   T * storage = &(stlvec[0]);
   casa::IPosition shape(1,stlvec.size()); //tell casa the size of the vector
-  CasaVector<T> casavec(shape,storage,casa::SHARE); 
+  CasaVector<T> casavec(shape,storage,casa::SHARE);
   return casavec;
 }
 
@@ -111,15 +111,15 @@ namespace std {
   class hmatrix : public vector<T,Alloc> {
 
   public:
-    template <class Iter> hmatrix(Iter it1, Iter it2); 
+    template <class Iter> hmatrix(Iter it1, Iter it2);
     hmatrix(const char* buf);
     hmatrix();
     ~hmatrix();
-  
+
     void setDimension(HInteger newdim);
     HInteger getDimension();
-  
-  private: 
+
+  private:
     HInteger dim;
   };
 
@@ -172,10 +172,10 @@ HString hgetFileExtension(HString filename){
 
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFill
-#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES 
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(hFill)("Fills a vector with a constant value.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(fill_value)()("Fill value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(fill_value)()("Fill value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -187,7 +187,7 @@ HString hgetFileExtension(HString filename){
 
   \param fill_value: Value to fill vector with
 */
-template <class Iter> 
+template <class Iter>
 void hFill(const Iter vec,const Iter vec_end, const IterValueType fill_value)
 {
   Iter it=vec;
@@ -202,16 +202,16 @@ void hFill(const Iter vec,const Iter vec_end, const IterValueType fill_value)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hNew
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE 
-#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES 
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class T> 
+template <class T>
 std::vector<T> HFPP_FUNC_NAME(std::vector<T> & vec)
 {
   std::vector<T> vnew(vec.size());
@@ -222,11 +222,11 @@ std::vector<T> HFPP_FUNC_NAME(std::vector<T> & vec)
 
 //$DOCSTRING: Resize a vector to a new length.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE 
-#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES 
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(hResize)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HInteger)(newsize)()("New size of vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(newsize)()("New size of vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -234,21 +234,22 @@ std::vector<T> HFPP_FUNC_NAME(std::vector<T> & vec)
   $PARDOCSTRING
 
  */
-template <class T> 
+template <class T>
 void hResize(std::vector<T> & vec, HInteger newsize)
 {
   vec.resize(newsize);
 }
-
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 //$DOCSTRING: Resize a vector to a new length and will new elements in vector with a specific value.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE 
-#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES 
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(hResize)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HInteger)(newsize)()("New size")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
-#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(fill)()("Value to fill new vector elements with")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(newsize)()("New size")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(fill)()("Value to fill new vector elements with")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -256,26 +257,28 @@ void hResize(std::vector<T> & vec, HInteger newsize)
   $PARDOCSTRING
 
 */
-template <class T> 
+template <class T>
 void hResize(std::vector<T> & vec, HInteger newsize, T fill)
 {
   vec.resize(newsize,fill);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 //$DOCSTRING: Copies and converts a vector to a vector of another type.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hConvert
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class Iterin, class Iter> 
+template <class Iterin, class Iter>
 void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2_start,const Iter vec2_end)
 {
   typedef IterValueType T;
@@ -292,8 +295,8 @@ void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2_sta
 #define HFPP_FUNC_NAME hCopy
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(outvec)()("Vector containing a copy of the input values")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(outvec)()("Vector containing a copy of the input values")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -307,7 +310,7 @@ void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2_sta
          output values.
   \param out_end: STL Iterator pointing to the end of the output vector
 */
-template <class Iterin, class Iter> 
+template <class Iterin, class Iter>
 void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out_start,const Iter out_end)
 {
   typedef IterValueType T;
@@ -325,17 +328,35 @@ void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out_start,
 //                           Math Functions
 //========================================================================
 
-template <class T> inline T square(T val) {return val*val;}
+//$DOCSTRING: Returns the squared value of the parameter
+//$COPY_TO HFILE START ---------------------------------------------------
+#define HFPP_FUNC_NAME square
+//------------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED)(val)()("Value to be squared")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+template <class T>
+inline T square(T val)
+{
+  return val*val;
+}
+
+
 
 //$DOCSTRING: Implementation of the Gauss function
 //$COPY_TO HFILE START ---------------------------------------------------
 #define HFPP_FUNC_NAME funcGaussian
 //------------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE 
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(x)()("Position at which the Gaussian is evaluated")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
-#define HFPP_PARDEF_1 (HNumber)(sigma)()("Width of the Gaussian")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
-#define HFPP_PARDEF_2 (HNumber)(mu)()("Mean value of the Gaussian")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+#define HFPP_PARDEF_0 (HNumber)(x)()("Position at which the Gaussian is evaluated")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HNumber)(sigma)()("Width of the Gaussian")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HNumber)(mu)()("Mean value of the Gaussian")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
  \brief $DOCSTRING
@@ -359,7 +380,7 @@ inline HNumber funcGaussian (HNumber x,
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_VARIANT 1
 #define HFPP_FUNCDEF  (HFPP_VOID)(h{$MFUNC!CAPS})("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -370,7 +391,7 @@ inline HNumber funcGaussian (HNumber x,
   \param vec_end: STL Iterator pointing to the end of the input vector
 
 */
-template <class Iter> 
+template <class Iter>
 void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
 {
   Iter it=vec;
@@ -386,8 +407,8 @@ void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_VARIANT 2
 #define HFPP_FUNCDEF  (HFPP_VOID)(h{$MFUNC!CAPS})("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -402,7 +423,7 @@ void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
   \param out_end: STL Iterator pointing to the end of the output vector
 
 */
-template <class Iter> 
+template <class Iter>
 void h{$MFUNC!CAPS}2(const Iter vec,const Iter vec_end, const Iter out_start,const Iter out_end)
 {
   Iter it=vec;
@@ -417,7 +438,7 @@ void h{$MFUNC!CAPS}2(const Iter vec,const Iter vec_end, const Iter out_start,con
 //$ENDITERATE
 
 //========================================================================
-//$ITERATE MFUNC acos,asin,atan,ceil,floor 
+//$ITERATE MFUNC acos,asin,atan,ceil,floor
 //========================================================================
 
 //$DOCSTRING: Take the $MFUNC of all the elements in the vector.
@@ -425,7 +446,7 @@ void h{$MFUNC!CAPS}2(const Iter vec,const Iter vec_end, const Iter out_start,con
 #define HFPP_FUNC_VARIANT 1
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(h{$MFUNC!CAPS})("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -436,7 +457,7 @@ void h{$MFUNC!CAPS}2(const Iter vec,const Iter vec_end, const Iter out_start,con
   \param vec_end: STL Iterator pointing to the end of the input vector
 
 */
-template <class Iter> 
+template <class Iter>
 void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
 {
   Iter it=vec;
@@ -453,8 +474,8 @@ void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
 #define HFPP_FUNC_VARIANT 2
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(h{$MFUNC!CAPS})("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -469,7 +490,7 @@ void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
   \param vec_end: STL Iterator pointing to the end of the output vector
 
 */
-template <class Iter1,class Iter2> 
+template <class Iter1,class Iter2>
 void h{$MFUNC!CAPS}2(const Iter1 vec,const Iter1 vec_end, const Iter2 out_start,const Iter2 out_end)
 {
   Iter1 it=vec;
@@ -502,8 +523,8 @@ void h{$MFUNC!CAPS}2(const Iter1 vec,const Iter1 vec_end, const Iter2 out_start,
 #define HFPP_FUNC_NAME hi$MFUNC
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing the second operands")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing the second operands")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -517,7 +538,7 @@ void h{$MFUNC!CAPS}2(const Iter1 vec,const Iter1 vec_end, const Iter2 out_start,
          input values.
   \param vec2_end: STL Iterator pointing to the end of the input vector
 */
-template <class Iter, class Iterin> 
+template <class Iter, class Iterin>
 void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin vec2_end)
 {
   typedef IterValueType T;
@@ -536,8 +557,8 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const
 //-----------------------------------------------------------------------
 #define HFPP_FUNC_VARIANT 2
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(val)()("Value containing the second operand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(val)()("Value containing the second operand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -549,7 +570,7 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const
 
   \param val: Value containing the second operand
 */
-template <class Iter, class S> 
+template <class Iter, class S>
 void hi{$MFUNC}2(const Iter vec1,const Iter vec1_end, S val)
 {
   typedef IterValueType T;
@@ -567,9 +588,9 @@ void hi{$MFUNC}2(const Iter vec1,const Iter vec1_end, S val)
 #define HFPP_FUNC_NAME h$MFUNC
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing the second operands")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_2 (HFPP_TEMPLATED_3)(vec3)()("Vector containing the results")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing the second operands")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_3)(vec3)()("Vector containing the results")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -587,7 +608,7 @@ void hi{$MFUNC}2(const Iter vec1,const Iter vec1_end, S val)
          output values.
   \param vec3_end: STL Iterator pointing to the end of the output vector
 */
-template <class Iterin1, class Iterin2, class Iter> 
+template <class Iterin1, class Iterin2, class Iter>
 void HFPP_FUNC_NAME(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end, const Iter vec3_start,const Iter vec3_end)
 {
   typedef IterValueType T;
@@ -607,9 +628,9 @@ void HFPP_FUNC_NAME(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec
 //-----------------------------------------------------------------------
 #define HFPP_FUNC_VARIANT 2
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(val)()("Value containing the second operand")(HFPP_PAR_IS_SCALAR)(STDIT)(HFPP_PASS_AS_VALUE) 
-#define HFPP_PARDEF_2 (HFPP_TEMPLATED_3)(vec2)()("Vector containing the output")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(val)()("Value containing the second operand")(HFPP_PAR_IS_SCALAR)(STDIT)(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_3)(vec2)()("Vector containing the output")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -625,7 +646,7 @@ void HFPP_FUNC_NAME(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec
          output values.
   \param vec2_end: STL Iterator pointing to the end of the output vector
 */
-template <class Iterin1, class S, class Iter> 
+template <class Iterin1, class S, class Iter>
 void h{$MFUNC}2(const Iterin1 vec1,const Iterin1 vec1_end, S val, const Iter vec2,const Iter vec2_end)
 {
   typedef IterValueType T;
@@ -645,7 +666,7 @@ void h{$MFUNC}2(const Iterin1 vec1,const Iterin1 vec1_end, S val, const Iter vec
 #define HFPP_FUNC_NAME hNegate
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -656,7 +677,7 @@ void h{$MFUNC}2(const Iterin1 vec1,const Iterin1 vec1_end, S val, const Iter vec
   \param vec_end: STL Iterator pointing to the end of the input vector
 */
 
-template <class Iter> 
+template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 {
   Iter it=vec;
@@ -673,13 +694,13 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 #define HFPP_FUNC_NAME hSum
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
  $PARDOCSTRING
 */
-template <class Iter> 
+template <class Iter>
 IterValueType HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 {
   typedef IterValueType T;
@@ -687,7 +708,7 @@ IterValueType HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
   Iter it=vec;
   while (it!=vec_end) {sum+=*it; ++it;};
   return sum;
-} 
+}
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$DOCSTRING: Returns the mean value of all elements in a vector
@@ -695,29 +716,29 @@ IterValueType HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 #define HFPP_FUNC_NAME hMean
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
  $PARDOCSTRING
 */
-template <class Iter> 
+template <class Iter>
 IterValueType HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 {
   typedef IterValueType T;
   T mean=hSum(vec,vec_end);
-  if (vec_end>vec) mean/=(vec_end-vec); 
+  if (vec_end>vec) mean/=(vec_end-vec);
   return mean;
-} 
+}
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Sorts a vector in place 
+//$DOCSTRING: Sorts a vector in place
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSort
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -727,19 +748,19 @@ IterValueType HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
   keep the data in its original order, you need to copy the data first
   to a scratch vector and then call this function with the scratch vector!
 */
-template <class Iter> 
+template <class Iter>
 IterValueType HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
 {
   sort(vec,vec_end);
-} 
+}
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Sorts a vector in place and returns the median value of the elements 
+//$DOCSTRING: Sorts a vector in place and returns the median value of the elements
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSortMedian
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -749,33 +770,33 @@ IterValueType HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
   keep the data in its original order, you need to copy the data first
   to a scratch vector and then call this function with the scratch vector!
 */
-template <class Iter> 
+template <class Iter>
 IterValueType HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
 {
   sort(vec,vec_end);
   if (vec_end!=vec) return *(vec+(vec_end-vec)/2);
   else return hfnull<IterValueType>();
-} 
+}
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Returns the median value of the elements 
+//$DOCSTRING: Returns the median value of the elements
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMedian
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class T> 
+template <class T>
 T HFPP_FUNC_NAME(std::vector<T> & vec)
 {
   std::vector<T> scratch(vec);
   return hSortMedian(scratch);
-} 
+}
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$DOCSTRING: Calculates the standard deviation around a mean value.
@@ -783,15 +804,15 @@ T HFPP_FUNC_NAME(std::vector<T> & vec)
 #define HFPP_FUNC_NAME hStdDev
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(mean)()("The mean value of the vector caluclated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(mean)()("The mean value of the vector caluclated beforehand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class Iter> 
+template <class Iter>
 IterValueType hStdDev (const Iter vec,const Iter vec_end, const IterValueType mean)
 {
   typedef IterValueType T;
@@ -805,7 +826,7 @@ IterValueType hStdDev (const Iter vec,const Iter vec_end, const IterValueType me
   };
   if (len>1) return sqrt(sum / (len-1));
   else return sqrt(sum);
-} 
+}
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$DOCSTRING: Calculates the standard deviation of a vector of values
@@ -813,18 +834,18 @@ IterValueType hStdDev (const Iter vec,const Iter vec_end, const IterValueType me
 #define HFPP_FUNC_NAME hStdDev
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class Iter> 
+template <class Iter>
 IterValueType hStdDev (const Iter vec,const Iter vec_end)
 {
   return hStdDev(vec,vec_end,hMean(vec,vec_end));
-} 
+}
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
@@ -833,8 +854,8 @@ IterValueType hStdDev (const Iter vec,const Iter vec_end)
 #define HFPP_FUNC_NAME hDownsample
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec2)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec2)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 
 //$COPY_TO END --------------------------------------------------
 /*!
@@ -848,26 +869,26 @@ IterValueType hStdDev (const Iter vec,const Iter vec_end)
      possible exception of the last block.
 */
 
-template <class Iter> 
+template <class Iter>
 void HFPP_FUNC_NAME (const Iter vec1,
 		  const Iter vec1_end,
 		  const Iter vec2,
 		  const Iter vec2_end)
 {
-  if (vec2>=vec2_end) return; //If size 0 do nothing 
-  if (vec1>=vec1_end) return; //If size 0 do nothing 
+  if (vec2>=vec2_end) return; //If size 0 do nothing
+  if (vec1>=vec1_end) return; //If size 0 do nothing
   HInteger ilen=(vec1_end-vec1);
   HInteger olen=(vec2_end-vec2);
-  HInteger blen=max(ilen/(olen-1),1); 
+  HInteger blen=max(ilen/(olen-1),1);
   //use max to avoid infinite loops if output vector is too large
   Iter it2,it1=vec1;
-  Iter ito=vec2,ito_end=vec2_end-1; 
+  Iter ito=vec2,ito_end=vec2_end-1;
   //only produce the first N-1 blocks in the output vector
   while (it1<vec1_end && ito<ito_end) {
     it2=min(it1+blen,vec1_end);
     *ito=hMean(it1,it2);
-    it1=it2; 
-    ++ito; 
+    it1=it2;
+    ++ito;
     }
   *ito=hMean(it2,vec1_end);
 }
@@ -879,8 +900,8 @@ void HFPP_FUNC_NAME (const Iter vec1,
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HNumber)(downsample_factor)()("Factor by which to reduce original size")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(downsample_factor)()("Factor by which to reduce original size")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 
 //$COPY_TO END --------------------------------------------------
 /*!
@@ -894,15 +915,16 @@ void HFPP_FUNC_NAME (const Iter vec1,
      possible exception of the last block.
 */
 
-template <class T> 
+template <class T>
 std::vector<T> HFPP_FUNC_NAME (
-		  std::vector<T> & vec, 
+		  std::vector<T> & vec,
 		  HNumber downsample_factor
 		  )
 {
-  std::vector<T> newvec(floor(vec.size()/downsample_factor+0.5));
+  std::vector<T>
+ newvec(floor(vec.size()/downsample_factor+0.5));
   hDownsample(vec,newvec);
-  return newvec; 
+  return newvec;
 }
 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -912,8 +934,8 @@ std::vector<T> HFPP_FUNC_NAME (
 #define HFPP_FUNC_NAME hFindLowerBound
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Sorted numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(value)()("value to search for")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Sorted numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(value)()("value to search for")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -927,13 +949,13 @@ Finds -- through a binary search and interpolation -- the location in
 This requires random access iterators, in order to have an optimal search result.
 
 */
-template <class Iter> 
+template <class Iter>
 HInteger HFPP_FUNC_NAME (const Iter vec,
-			 const Iter vec_end, 
-			 const IterValueType value) 
-//iterator_traits<Iter>::value_type value) 
+			 const Iter vec_end,
+			 const IterValueType value)
+//iterator_traits<Iter>::value_type value)
 {
-  HNumber value_n=hfcast<HNumber>(value); //This also works for Complex then 
+  HNumber value_n=hfcast<HNumber>(value); //This also works for Complex then
   HInteger niter=0;
   if (vec==vec_end) return 0;
   HInteger maxpos=vec_end-vec-1,posguess;
@@ -942,8 +964,8 @@ HInteger HFPP_FUNC_NAME (const Iter vec,
   if (value_n>=hfcast<HNumber>(*it2)) return maxpos;
   posguess=(value_n-hfcast<HNumber>(*it1))/(hfcast<HNumber>(*it2)-hfcast<HNumber>(*it1))*maxpos;
   it0=vec+posguess;
-  if (it0<it1) return hfcast<HInteger>(it1-vec); //Error, Non monotonic  
-  if (it0>=it2) return hfcast<HInteger>(it2-vec); //Error, Non monotonic  
+  if (it0<it1) return hfcast<HInteger>(it1-vec); //Error, Non monotonic
+  if (it0>=it2) return hfcast<HInteger>(it2-vec); //Error, Non monotonic
   //  cout << "hFindLowerBound(" << value_n << "): niter=" << niter << ", posguess=" << posguess << ", val=" << *it0 << " vals=(" << hfcast<HNumber>(*(it0)) << ", " << hfcast<HNumber>(*(it0+1)) << "), bracket=(" << it1-vec << ", " << it2-vec <<")" <<endl;
   while (!((value_n < hfcast<HNumber>(*(it0+1))) && (value_n >= hfcast<HNumber>(*it0)))) {
     if (value_n > hfcast<HNumber>(*it0)) {
@@ -958,18 +980,18 @@ HInteger HFPP_FUNC_NAME (const Iter vec,
     it0=vec+posguess;
     ++niter;
     //cout << "hFindLowerBound(" << value_n << "): niter=" << niter << ", posguess=" << posguess << ", val=" << *it0 << " vals=(" << hfcast<HNumber>(*(it0)) << ", " << hfcast<HNumber>(*(it0+1)) << "), bracket=(" << it1-vec << ", " << it2-vec <<")" <<endl;
-    if (it0<it1) return it1-vec; //Error, Non monotonic  
-    if (it0>it2) return it2-vec; //Error, Non monotonic 
+    if (it0<it1) return it1-vec; //Error, Non monotonic
+    if (it0>it2) return it2-vec; //Error, Non monotonic
   };
   return posguess;
-} 
+}
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 /*
 //Wrapper for c-style arrays
 HInteger hFindLowerBound(const HNumber* vec,
-			 const HInteger len, 
-			 const HNumber value) 
+			 const HInteger len,
+			 const HNumber value)
 {
   return hFindLowerBound(vec,vec+len,value);
 }
@@ -981,28 +1003,29 @@ HInteger hFindLowerBound(const HNumber* vec,
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+#define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
- //template <class T> 
+ //template <class T>
 
 std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
   std::vector<HNumber> weights(wlen,1.0/wlen);
   return weights;
 }
-
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING:  Returns vector of weights of length wlen with linearly rising and decreasing weights centered at len/2. 
+
+
+//$DOCSTRING:  Returns vector of weights of length wlen with linearly rising and decreasing weights centered at len/2.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hLinearWeights
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+#define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -1011,7 +1034,7 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
 The vector is normalized to give a sum of unity. Can be used by
 hRunningAverage.
 */
- //template <class T> 
+ //template <class T>
 
 std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
   std::vector<HNumber> weights(wlen,0.0);
@@ -1035,13 +1058,14 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+#define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
- //template <class T> 
+ //template <class T>
+
 
 std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
   vector<HNumber> weights(wlen,0.0);
@@ -1057,8 +1081,133 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
   for (i=0; i<wlen; i++) weights[i]=weights[i]/sum;
   return weights;
 }
-
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Create a normalized weight vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hWeights
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(wlen)()("Length of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (hWEIGHTS)(wtype)()("Type of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+vector<HNumber> hWeights(HInteger wlen, hWEIGHTS wtype){
+  vector<HNumber> weights;
+  if (wlen<1) wlen=1;
+  switch (wtype) {
+  case WEIGHTS_LINEAR:
+    weights=hLinearWeights(wlen);
+    break;
+  case WEIGHTS_GAUSSIAN:
+    weights=hGaussianWeights(wlen);
+    break;
+  default: //  WEIGHTS_FLAT:
+    weights=hFlatWeights(wlen);
+  };
+  return weights;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Calculate the running average of an input vector using a weight vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hRunningAverage
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES (STL)
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(idata)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(odata)()("Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(weights)()("Weight vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class DataIter, class NumVecIter>
+void HFPP_FUNC_NAME (const DataIter  idata,
+		     const DataIter  idata_end,
+		     const DataIter  odata,
+		     const DataIter  odata_start,
+		     const NumVecIter weights,
+		     const NumVecIter weights_end)
+{
+  HInteger l=(weights_end-weights);
+  /* Index of the central element of the weights vector (i.e., where it
+     typically would peak) */
+  HInteger middle=l/2;
+  /* To avoid too many rounding errors with Integers */
+  typename DataIter::value_type fac = l*10;
+
+  DataIter  dit;
+  DataIter  dit2;
+  DataIter  din=idata;
+  DataIter  dout=odata;
+  NumVecIter wit;
+
+  while (din!=idata_end) {
+    dit=din-middle; //data iterator set to the first element to be taken into account (left from current element)
+    wit=weights; // weight iterators set to beginning of weights
+    while (wit!=weights_end) {
+      if (dit<idata) dit2=idata;
+      else if (dit>=idata_end) dit2=idata_end-1;
+      else dit2=dit;
+      *dout=*dout+((*dit2)*(*wit)*fac);
+      ++dit; ++wit;
+    };
+    *dout/=fac;
+    ++dout; ++din; //point to the next element in data input and output vector
+  };
+  return;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+
+//$DOCSTRING: Overloaded function to automatically calculate weights.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hRunningAverage
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES (STL)
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(idata)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(odata)()("Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(wlen)()("Length of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (hWEIGHTS)(wtype)()("Type of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class DataIter>
+void HFPP_FUNC_NAME (const DataIter idata,
+		     const DataIter idata_end,
+		     const DataIter odata,
+		     const DataIter odata_end,
+		     HInteger wlen,
+		     hWEIGHTS wtype)
+{
+  vector<HNumber> weights = hWeights(wlen, wtype);
+  hRunningAverage<DataIter, vector<HNumber>::iterator> (idata,
+							idata_end,
+							odata,
+							odata_end,
+							weights.begin(),
+							weights.end());
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 
 
 //========================================================================
@@ -1066,13 +1215,14 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
 //========================================================================
 
 
-//$DOCSTRING: Calculates the power of a complex spectrum and add it to an output vector. 
+//$DOCSTRING: Calculates the power of a complex spectrum and add it to an output vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSpectralPower
 //-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES (STL)
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HComplex)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HNumber)(outvec)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HComplex)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(outvec)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -1090,7 +1240,7 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
          output values.
   \param out_end: STL Iterator pointing to the end of the output vector
 */
-template <class Iterin, class Iter> 
+template <class Iterin, class Iter>
 void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out_start,const Iter out_end)
 {
   typedef IterValueType T;
@@ -1139,7 +1289,7 @@ HIntPointer hOpenFile(HString Filename) {
   union{HIntPointer iptr; void* ptr; CR::DataReader* drp; CR::LOFAR_TBB* tbb; CR::LopesEventIn* lep;};
 
   //Create the a pointer to the DataReader object and store the pointer
-      
+
   HString Filetype = hgetFiletype(Filename);
   if (Filetype=="LOPESEvent") {
     lep = new CR::LopesEventIn;
@@ -1158,7 +1308,7 @@ HIntPointer hOpenFile(HString Filename) {
     ERROR("DataFunc_CR_dataReaderObject: Unknown Filetype = " << Filetype  << ", Filename=" << Filename);
     opened=false;
   }
-  
+
   if (!opened){
     ERROR("DataFunc_CR_dataReaderObject: Opening file " << Filename << " failed.");
     return PtrAsInt(Null_p);
@@ -1176,7 +1326,7 @@ HIntPointer hOpenFile(HString Filename) {
 template <class S, class T>
 void aipscol2stlvec(casa::Matrix<S> &data, std::vector<T>& stlvec, const HInteger col){
     HInteger i,nrow,ncol;
-    
+
     nrow=data.nrow();
     ncol=data.ncolumn();
     //    if (ncol>1) {MSG("aipscol2stlvec: ncol="<<ncol <<" (nrow="<<nrow<<")");};
@@ -1188,12 +1338,12 @@ void aipscol2stlvec(casa::Matrix<S> &data, std::vector<T>& stlvec, const HIntege
 
     stlvec.resize(nrow);
     CasaVector<S> CASAVec = data.column(col);
-    
+
 //    p=stlvec.begin();
-    
+
     for (i=0;i<nrow;i++) {
-//	*p=hfcast<T>(CASAVec[i]); 
-	stlvec[i]=hfcast<T>(CASAVec[i]); 
+//	*p=hfcast<T>(CASAVec[i]);
+	stlvec[i]=hfcast<T>(CASAVec[i]);
 //	p++;
     };
 }
@@ -1206,13 +1356,13 @@ template <class S, class T>
 void aipsvec2stlvec(CasaVector<S>& data, std::vector<T>& stlvec){
     HInteger i,n;
 //    std::vector<R>::iterator p;
-    
+
     n=data.size();
     stlvec.resize(n);
 //    p=stlvec.begin();
     for (i=0;i<n;i++) {
-//	*p=hfcast<T>(data[i]); 
-	stlvec[i]=hfcast<T>(data[i]); 
+//	*p=hfcast<T>(data[i]);
+	stlvec[i]=hfcast<T>(data[i]);
 //	p++;
     };
 }
@@ -1223,8 +1373,8 @@ void aipsvec2stlvec(CasaVector<S>& data, std::vector<T>& stlvec){
 //cpp files ..
 template <class T, class S>
 void copycast_vec(std::vector<T> &vi, std::vector<S> & vo) {
-  typedef typename std::vector<T>::iterator Tit; 
-  typedef typename std::vector<S>::iterator Sit; 
+  typedef typename std::vector<T>::iterator Tit;
+  typedef typename std::vector<S>::iterator Sit;
   Tit it1=vi.begin();
   Tit end=vi.end();
   if (it1==end) {vo.clear();}
@@ -1246,18 +1396,18 @@ void copycast_vec(std::vector<T> &vi, std::vector<S> & vo) {
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Data (output) vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HIntPointer)(iptr)()("Integer containing pointer to the datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Data (output) vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HIntPointer)(iptr)()("Integer containing pointer to the datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_2 (HString)(Datatype)()("Name of the data column to be retrieved (e.g., FFT, Fx,Time, Frequency...)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_3 (HInteger)(Antenna)()("Antenna number")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
-#define HFPP_PARDEF_4 (HInteger)(Blocksize)()("Length of the data block to read")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
-#define HFPP_PARDEF_5 (HInteger)(Block)()("Block number to read")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
-#define HFPP_PARDEF_6 (HInteger)(Stride)()("Stride between blocks")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
-#define HFPP_PARDEF_7 (HInteger)(Shift)()("Shift start of first block by n samples")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE) 
-//#define HFPP_PARDEF_8 (HInteger)(Offsets)()("Offsets per antenna")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_3 (HInteger)(Antenna)()("Antenna number")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HInteger)(Blocksize)()("Length of the data block to read")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HInteger)(Block)()("Block number to read")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_6 (HInteger)(Stride)()("Stride between blocks")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_7 (HInteger)(Shift)()("Shift start of first block by n samples")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//#define HFPP_PARDEF_8 (HInteger)(Offsets)()("Offsets per antenna")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 
-/*! 
+/*!
  \brief $DOCSTRING
  $PARDOCSTRING
 
@@ -1284,7 +1434,7 @@ The data will then be in the vector idata. You can covert that to a
 Python list with [].extend(idata)
 */
 
-template <class T> 
+template <class T>
 void HFPP_FUNC_NAME(std::vector<T> & vec,
 		    HIntPointer iptr,
 		    HString Datatype,
@@ -1293,14 +1443,14 @@ void HFPP_FUNC_NAME(std::vector<T> & vec,
 		    HInteger Block,
 		    HInteger Stride,
 		    HInteger Shift)
-//	       std::vector<HInteger> & Offsets) 
+//	       std::vector<HInteger> & Offsets)
 {
-  
-  DataReader *drp=reinterpret_cast<DataReader*>(iptr); 
-  
+
+  DataReader *drp=reinterpret_cast<DataReader*>(iptr);
+
   //First retrieve the pointer to the pointer to the dataRead and check whether it is non-NULL.
   if (drp==Null_p){
-    ERROR("dataRead: pointer to FileObject is NULL, DataReader not found."); 
+    ERROR("dataRead: pointer to FileObject is NULL, DataReader not found.");
     return;
   };
 
@@ -1326,7 +1476,7 @@ void HFPP_FUNC_NAME(std::vector<T> & vec,
 
   address ncol;
 
-  #define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) aipscol2stlvec(ary,vec,Antenna); else aipscol2stlvec(ary,vec,0); 
+  #define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) aipscol2stlvec(ary,vec,Antenna); else aipscol2stlvec(ary,vec,0);
 
   //#define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) *vp2=ary.column(Antenna).tovec(); else *vp2=ary.column(0).tovec(); dp->noMod(); dp->put(*vp2)
 

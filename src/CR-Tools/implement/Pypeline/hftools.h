@@ -123,6 +123,8 @@ HString hgetFileExtension(HString filename);
 //                           Math Functions
 //========================================================================
 
+enum hWEIGHTS {WEIGHTS_FLAT,WEIGHTS_LINEAR,WEIGHTS_GAUSSIAN};
+vector<HNumber> hWeights(HInteger wlen, hWEIGHTS wtype);
 template <class T> inline T square(T val);
 
 
@@ -138,9 +140,9 @@ void hCloseFile(HIntPointer iptr);
 //=========================================================================================
 #undef HFPP_FILETYPE
 // Tell the preprocessor (for generating wrappers) that this is a c++ header file (brackets are crucial)
-#define HFPP_FILETYPE hFILE  
+#define HFPP_FILETYPE hFILE
 // include wrapper definitions generated automatically from source
-#include "hftools.def.h"  
+#include "hftools.def.h"
 #undef HFPP_FILETYPE
 //=========================================================================================
 

@@ -60,6 +60,11 @@ BOOST_PYTHON_MODULE(libhftools)
     def("hgetFiletype",hgetFiletype);
     def("hgetFileExtension",hgetFileExtension);
 
+    enum_<hWEIGHTS>("hWEIGHTS")
+      .value("FLAT",WEIGHTS_FLAT)
+      .value("LINEAR",WEIGHTS_LINEAR)
+      .value("GAUSSIAN", WEIGHTS_GAUSSIAN);
+
 #include "hftools.def.h"
 
 }
