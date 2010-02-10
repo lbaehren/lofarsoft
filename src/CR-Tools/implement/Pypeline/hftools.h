@@ -14,6 +14,7 @@
 #include <cmath>
 #include <stdint.h>
 #include <limits.h>
+#include <typeinfo>
 
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>

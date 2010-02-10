@@ -12,6 +12,10 @@
 #define HFPP_FUNC_VARIANT
 #endif
 
+#ifndef HFPP_CODE_PRE
+#define HFPP_CODE_PRE
+#endif
+
 #ifndef HFPP_FUNC_BASE_CLASS_ALLOWED_TO_CHANGE
 #define HFPP_FUNC_BASE_CLASS_ALLOWED_TO_CHANGE HFPP_TRUE
 #else
@@ -267,7 +271,7 @@ HFPP_MAKE_WRAPPERS
 #undef HFPP_GET_FUNC_TEMPLATE_DEFINITION
 #undef HFPP_GET_FUNC_BASETYPE
 #undef HFPP_GET_FUNC_RETURN
-
+#undef HFPP_CODE_PRE
 
 //--Undefine user-defined parameters from cc file
 #undef HFPP_FUNCDEF

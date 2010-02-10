@@ -408,7 +408,7 @@ inline HNumber funcGaussian (HNumber x,
 };
 
 /*!
-  \brief Returns vector of weights of length len with constant weights normalized to give a sum of unity. Can be used by hRunningAverageT.
+  \brief 
 */
 vector<HNumber> hFlatWeights (address wlen) {
   vector<HNumber> weights(wlen,1.0/wlen);
@@ -448,8 +448,6 @@ vector<HNumber> hGaussianWeights(address wlen){
   address i,middle=wlen/2;
   HNumber f,sum=0.0;
 
-  //This is not the most effective way of doing things for linear
-  //weights but that allows one to adapt this easily to other functions
   for (i=0; i<wlen; i++) {
     f=funcGaussian(i,max(middle/3.0,1.0),middle);
     weights[i]=f;

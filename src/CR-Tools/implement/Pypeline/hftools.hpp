@@ -15,10 +15,15 @@ BOOST_PYTHON_MODULE(libhftools)
     
     class_<std::hmatrix<HInteger,allocator<HInteger> > >("IntMatrix")
       .def(vector_indexing_suite<std::hmatrix<HInteger,allocator<HInteger> > >())
-      .def("setDimension",&std::hmatrix<HInteger,allocator<HInteger> >::setDimension)
-      .def("getDimension",&std::hmatrix<HInteger,allocator<HInteger> >::getDimension)
+      //      .def("setDimension",&std::hmatrix<HInteger,allocator<HInteger> >::setDimension)
+      //.def("getDimension",&std::hmatrix<HInteger,allocator<HInteger> >::getDimension)
 
       ;
+    /*
+  class_<casa::Vector<HInteger> >("CasaIntVec")
+    .def(vector_indexing_suite<casa::Vector<HInteger> >())
+    ;
+    */
 
   class_<std::vector<HInteger> >("IntVec")
     .def(vector_indexing_suite<std::vector<HInteger> >())

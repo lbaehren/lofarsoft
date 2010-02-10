@@ -65,6 +65,15 @@ gcc -E -C -P -D H_DEBUG_CPP $HFLAGS -I. $LOFARSOFT/src/CR-Tools/implement/GUI/hf
 #define HFPP_TEMPLATED_7 7
 #define HFPP_TEMPLATED_8 8
 
+#define HFPP_TEMPLATED_TYPE_1 1
+#define HFPP_TEMPLATED_TYPE_2 2
+#define HFPP_TEMPLATED_TYPE_3 3
+#define HFPP_TEMPLATED_TYPE_4 4
+#define HFPP_TEMPLATED_TYPE_5 5
+#define HFPP_TEMPLATED_TYPE_6 6
+#define HFPP_TEMPLATED_TYPE_7 7
+#define HFPP_TEMPLATED_TYPE_8 8
+
 #define HFPP_PAR_IS_SCALAR 0
 #define HFPP_PAR_IS_VECTOR 1
 #define HFPP_PAR_IS_MATRIX 2
@@ -250,6 +259,8 @@ def format_list(l):
 #define HFPP_GET_FUNC_PAR_NAMES BOOST_PP_REPEAT(HFPP_GET_FUNC_PARNUM,HFPP_GET_FUNC_PAR_NAMES_MACRO,BOOST_PP_EMPTY())
 #define HFPP_GET_FUNC_PAR_TYPES_MACRO(XXX,N,DATA) (HFPP_GET_PAR_BASETYPE_VAL(N))
 #define HFPP_GET_FUNC_PAR_TYPES BOOST_PP_REPEAT(HFPP_GET_FUNC_PARNUM,HFPP_GET_FUNC_PAR_TYPES_MACRO,BOOST_PP_EMPTY())
+#define HFPP_GET_FUNC_PAR_CLASSES_MACRO(XXX,N,DATA) (HFPP_GET_PAR_BASE_CLASS(N))
+#define HFPP_GET_FUNC_PAR_CLASSES BOOST_PP_REPEAT(HFPP_GET_FUNC_PARNUM,HFPP_GET_FUNC_PAR_CLASSES_MACRO,BOOST_PP_EMPTY())
 
 
 //------------------------------------------------------------------------------
@@ -316,11 +327,11 @@ def format_list(l):
 
 #define HFPP_GET_FUNC_TEMPLATE_TYPENAMES BOOST_PP_ENUM(HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS,HFPP_GET_FUNC_TEMPLATE_TYPENAMES_MACRO,BOOST_PP_EMPTY())
 
-
 //Now generate the Wrappers of certain types and for certain file type 
 //wrappers for stl vectors in the .cc (actual source code) file
 #define HFPP_MAKE_WRAPPERS_VEC_CC(WRAPPERTYPE) \
   HFPP_GET_FUNC_TEMPLATE_DEFINITION inline HFPP_GET_FUNC_BASETYPE HFPP_GET_FUNC_NAME(HFPP_GET_PARLIST_DECLARATION_TEMPLATED(WRAPPERTYPE,HFPP_TEMPLATE_PARAMETER_NAMES)) { _H_NL_ \
+      HFPP_CODE_PRE \
       HFPP_GET_FUNC_RETURN HFPP_GET_FUNC_BASENAME  (HFPP_GET_PARLIST_INPUT(WRAPPERTYPE)); _H_NL_ \
   } 
 
@@ -351,7 +362,7 @@ def format_list(l):
 //Creates a unique name for a pointer variable, consisting of the
 //function name, the template types (provided as a sequence:
 //(int)(double)(complex)), and a potential variant number to make
-#define HFPP_GET_PYTHON_POINTER_VARIABLE(TYPES) BOOST_PP_CAT(fptr_,BOOST_PP_CAT(HFPP_GET_FUNC_BASENAME,BOOST_PP_CAT(_,BOOST_PP_SEQ_CAT(TYPES HFPP_GET_FUNC_PAR_TYPES))))
+#define HFPP_GET_PYTHON_POINTER_VARIABLE(TYPES) BOOST_PP_CAT(fptr_,BOOST_PP_CAT(HFPP_GET_FUNC_BASENAME,BOOST_PP_CAT(_,BOOST_PP_SEQ_CAT(TYPES HFPP_GET_FUNC_PAR_TYPES HFPP_GET_FUNC_PAR_CLASSES))))
 
 //This turns a sequence of indices (i.e., (1)(0)(2)) into a sequence
 //of the corresponsing wrapper type (e.g., (double)(int)(complex))

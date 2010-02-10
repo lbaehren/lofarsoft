@@ -104,7 +104,7 @@ CasaVector<T> & stl2casa(std::vector<T> stlvec)
 //========================================================================
 
 // Testing a simple Matrix class that is built upon std::vectors
-
+// we do actually not really want to do this ....
 namespace std {
 
   template <class T, class Alloc>
@@ -116,25 +116,52 @@ namespace std {
     hmatrix();
     ~hmatrix();
 
-    void setDimension(HInteger newdim);
-    HInteger getDimension();
+    void setNumberOfDimensions(HInteger newdim);
+    HInteger getNumberOfDimensions();
+
+    void setDimensionN(HInteger n, HInteger size);
+
+    void setDimensions(HInteger dim0);
+    void setDimensions(HInteger dim0, HInteger dim1);
+    void setDimensions(HInteger dim0, HInteger dim1, HInteger dim3);
+
 
   private:
-    HInteger dim;
+    HInteger ndim;
+    vector<HInteger>* dimensions_p;
   };
 
 
   template <class T, class Alloc> template <class Iter> hmatrix<T,Alloc>::hmatrix(Iter it1, Iter it2) : vector<T,Alloc>(it1,it2) {};
   template <class T, class Alloc> hmatrix<T,Alloc>::hmatrix(const char* buf) : vector<T,Alloc>(buf){};
-  template <class T, class Alloc> hmatrix<T,Alloc>::hmatrix(){setDimension(1);};
+  template <class T, class Alloc> hmatrix<T,Alloc>::hmatrix(){
+    ndim=0;
+    dimensions_p=NULL;
+    //    setDimension(2);
+  };
   template <class T, class Alloc> hmatrix<T,Alloc>::~hmatrix(){};
 
   template <class T, class Alloc>
-  void hmatrix<T,Alloc>::setDimension(HInteger newdim){dim=newdim;};
+  void hmatrix<T,Alloc>::setNumberOfDimensions(HInteger newdim){
+    if (newdim==ndim) return;
+    if (dimensions_p != NULL) delete dimensions_p;
+    ndim=newdim;
+    dimensions_p = new vector<HString>(ndim);
+  };
 
   template <class T, class Alloc>
-  HInteger hmatrix<T,Alloc>::getDimension(){return dim;};
+  HInteger hmatrix<T,Alloc>::getNumberOfDimensions(){return ndim;};
 
+  template <class T, class Alloc>
+  void hmatrix<T,Alloc>::setDimensionN(HInteger n, HInteger size){
+  }
+
+  template <class T, class Alloc>
+  void setDimensions(HInteger dim0){}
+  template <class T, class Alloc>
+  void setDimensions(HInteger dim0, HInteger dim1){}
+  template <class T, class Alloc>
+  void setDimensions(HInteger dim0, HInteger dim1, HInteger dim3){}
 };
 
 //========================================================================
@@ -241,7 +268,6 @@ void hResize(std::vector<T> & vec, HInteger newsize)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-
 //$DOCSTRING: Resize a vector to a new length and will new elements in vector with a specific value.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
@@ -264,14 +290,57 @@ void hResize(std::vector<T> & vec, HInteger newsize, T fill)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Resize an STL vector to the same length as a second vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(hResize)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE_1)(vec1)()("Input vector to be resized")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE_2)(vec2)()("Reference vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE) 
+//$COPY_TO END --------------------------------------------------
+/*!
 
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+
+template <class T, class S> 
+void hResize(std::vector<T> & vec1,std::vector<S> & vec2)
+{
+  vec1.resize(vec2.size());
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+//$DOCSTRING: Resize a casa vector to the same length as a second vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE 
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES 
+#define HFPP_FUNCDEF  (HFPP_VOID)(hResize)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE_1)(vec1)()("Input vector to be resized")(HFPP_PAR_IS_VECTOR)(CASA)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE_2)(vec2)()("Reference vector")(HFPP_PAR_IS_VECTOR)(CASA)(HFPP_PASS_AS_REFERENCE) 
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+template <class T, class S> 
+void hResize(casa::Vector<T> & vec1,casa::Vector<S> & vec2)
+{
+  vec1.resize(*(vec2.shape().begin()));
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 //$DOCSTRING: Copies and converts a vector to a vector of another type.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hConvert
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_CODE_PRE hResize(vec2,vec1); //code will be inserted in wrapper generation in cc file
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -1462,34 +1531,26 @@ void HFPP_FUNC_NAME(std::vector<T> & vec,
   drp->setBlocksize(Blocksize);
   drp->setBlock(Block);
   drp->setStride(Stride);
-  /*  if (Offsets.size()>0) {
-    drp->setShift(Shift-Offsets[Antenna]);
-    } else {*/
   drp->setShift(Shift);
-    //  };
 
   CasaVector<uint> antennas(1,Antenna);
   drp->setSelectedAntennas(antennas);
-
-  //Vector<uint> selantennas=drp->selectedAntennas();
-  //  MSG("No of Selected Antennas" << drp->nofSelectedAntennas ()<< " SelectedAntennas[0]=" <<selantennas[0]);
 
   address ncol;
 
   #define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) aipscol2stlvec(ary,vec,Antenna); else aipscol2stlvec(ary,vec,0);
 
-  //#define copy_ary2vp  ncol=ary.ncolumn(); /* MSG("ncol="<<ncol<<", Antenna="<<Antenna); */ if (ncol>1 && Antenna<ncol) *vp2=ary.column(Antenna).tovec(); else *vp2=ary.column(0).tovec(); dp->noMod(); dp->put(*vp2)
 
   if (Datatype=="Time") {
-//hf #define MAKE_CASA_VECTOR_FROM_STL(TYPE,VEC,CVEC)	\
-//     casa::IPosition shape(1,VEC.size());\
-//     casa::Vector<TYPE> CVEC(shape,&(VEC[0]),casa::SHARE)
-//     //    MAKE_CASA_VECTOR_FROM_STL(T,vec,cvec);
-//     //    drp->timeValues(cvec);
-//    CasaVector<double> val = drp->timeValues();
-    std::vector<double> vals;
-    drp->timeValues(vals);
-    copycast_vec(vals,vec);
+    if (typeid(vec) == typeid(vector<double>)) {
+      std::vector<double> * vec_p;
+      vec_p=reinterpret_cast<vector<double>*>(&vec); //That is just a tr
+      drp->timeValues(*vec_p);
+    }  else {
+      std::vector<double> tmpvec;
+      drp->timeValues(tmpvec);
+      hConvert(tmpvec,vec);
+    };
   }
   else if (Datatype=="Frequency") {
     //vector<HNumber>* vp2; *vp2 = drp->frequencyValues().tovec();

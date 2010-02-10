@@ -36,6 +36,7 @@ using namespace std;
 #include "hfget.h"
 #include "hffuncs.awk.h"  
 #include "hfanalysis.awk.h"
+//#include "hftools.awk.h"
 #include <time.h>
 
 #define DOSILENT( DOSOMETHING ) bool SILENTx=Silent(true); DOSOMETHING; Silent(SILENTx)

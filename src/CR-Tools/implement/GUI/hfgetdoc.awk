@@ -1,6 +1,6 @@
 BEGIN{npar=0}
 
-/^#define +HFPP_FUNC_NAME +/ {
+/^[/ ]*#define +HFPP_FUNC_NAME +/ {
     funcname = $3
     npar=0;
     newfunc=1
