@@ -1,0 +1,9 @@
+Simple demonstration of the Echo Protocol over an EventPort using Python.
+
+Usage:
+
+>>> from ep_echo import EP_Interface
+>>> interface = EP_Interface()
+>>> interface.time_echo()
+
+This is a proof of concept, not production-ready code!
