@@ -174,6 +174,8 @@ namespace CR { // Namespace CR -- begin
       erg.define("rmsPbeam",double(0));
       erg.define("meandist",double(0));
       erg.define("Date",uInt(0));
+      erg.define("NCCbeamAntennas",uInt(0));
+
 
       // store a copy of the input antenna selection for later use
       InputFlaggedAntIDs = FlaggedAntIDs.copy();
@@ -1193,6 +1195,7 @@ namespace CR { // Namespace CR -- begin
         erg.define("sigepsPow",0.);
         erg.define("sigkPow",0.);
         erg.define("chi2NDFPow",0.);
+        erg.define("NlateralAntennas",0);
         cout << "No fit was done, because less than 3 antennas are 'good':\n"
              << "eps = " << 0 << "\t +/- " << 0 << "\t µV/m/MHz\n"
              << "R_0 = " << 0 << "\t +/- " << 0 << "\t m\n"
