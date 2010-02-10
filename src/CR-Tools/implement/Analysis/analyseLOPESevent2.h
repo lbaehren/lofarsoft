@@ -72,6 +72,9 @@ namespace CR { // Namespace CR -- begin
 
   protected:
 
+    //! the new pipeline objects, one for the input, one for the upsampling (like CRinvFFT + LopesSTAR-upsampling)
+    CompletePipeline pipeline, upsamplePipe;
+
     //! switcher to the used pipeline (pipeline or upsamplePipe)
     CompletePipeline *CompleteBeamPipe_p;
 

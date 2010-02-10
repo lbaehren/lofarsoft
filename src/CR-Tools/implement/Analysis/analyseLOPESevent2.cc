@@ -93,15 +93,19 @@ namespace CR { // Namespace CR -- begin
     rawPulses = map<int,PulseProperties>();
     calibPulses = map<int,PulseProperties>();
     analyseLOPESevent::clear();
+    
+    // reset pipelines
+    pipeline = CompletePipeline();
+    upsamplePipe = CompletePipeline();
+
+    // To use the methods of analyseLOPESevent, a pointer to the pipeline is needed.
+    pipeline_p = &pipeline;
+    upsamplePipe_p = &upsamplePipe;
   }
 
   Bool analyseLOPESevent2::initPipeline(Record ObsRecord){
     try {
       clear();
-
-      // To use the methods of analyseLOPESevent, a pointer to the pipeline is needed.
-      pipeline_p = new CompletePipeline();
-      upsamplePipe_p = new CompletePipeline();
 
       // use pointers if code from analyseLOPESevent.cc is reused
       lev_p = new LopesEventIn();
