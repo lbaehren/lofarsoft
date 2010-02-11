@@ -102,46 +102,56 @@ template <class T> class MedianFilter {
 
  public:
 
-  // --------------------------------------------------------------- Construction
+  // === Construction ===========================================================
 
-  /*!
-    \brief Default constructor
-  */
-  MedianFilter ();
-
+  //! Default constructor
+  MedianFilter () {
+    setStrength (3);
+  }
+  
   /*!
     \brief Argumented constructor
 
     \param strength -- Strength of the filter, i.e. the number of bins over
                        which to average
   */
-  MedianFilter (const int& strength);
-
+  MedianFilter (const int& strength) {
+    setStrength (strength);
+  }
+  
   /*!
     \brief Copy constructor
 
     \param other -- Another MedianFilter object from which to create this new
                     one.
   */
-  MedianFilter (MedianFilter<T> const& other);
-
-  // ---------------------------------------------------------------- Destruction
-
-  /*!
-    \brief Destructor
-  */
-  ~MedianFilter ();
-
-  // ------------------------------------------------------------------ Operators
+  MedianFilter (MedianFilter<T> const& other) {
+    copy (other);
+  }
+  
+  // === Destruction ============================================================
+  
+  //! Destructor
+  ~MedianFilter () {
+    destroy();
+  }
+  
+  // === Operators ==============================================================
 
   /*!
     \brief Overloading of the copy operator
 
     \param other -- Another MedianFilter object from which to make a copy.
   */
-  MedianFilter &operator= (MedianFilter<T> const &other); 
-
-  // ----------------------------------------------------------------- Parameters
+  MedianFilter &operator= (MedianFilter<T> const &other) {
+    if (this != &other) {
+      destroy ();
+      copy (other);
+    }
+    return *this;
+  }
+  
+  // === Parameter access =======================================================
 
   /*!
     \brief Strength of the filter
@@ -149,7 +159,7 @@ template <class T> class MedianFilter {
     \return strength -- Strength of the filter, i.e. the number of bins over
                         which to average
   */
-  int strenght () {
+  inline int strenght () const  {
     return strength_p;
   }
 
@@ -159,11 +169,11 @@ template <class T> class MedianFilter {
     \param strength -- Strength of the filter, i.e. the number of bins over
                        which to average
   */
-  void setStrength (const int& strength) {
+  inline void setStrength (const int& strength) {
     strength_p = strength;
   }
 
-  // -------------------------------------------------------------------- Methods
+  // === Methods ================================================================
 
   /*!
     \brief Apply the filter to data, non-destructive.
@@ -172,8 +182,16 @@ template <class T> class MedianFilter {
 
     \return result -- Data after application of the filter
   */
-  Vector<T> filter (const Vector<T>& data);
-
+  Vector<T> filter (const Vector<T>& data) {
+    blocksize_p = data.nelements();
+    
+    if ((strength_p < 1) ||(strength_p > blocksize_p)) {
+      strength_p = 1;
+    }
+    
+    return applyFilter (data);
+  }
+  
   /*!
     \brief Apply the filter to data, non-destructive.
 
@@ -185,19 +203,16 @@ template <class T> class MedianFilter {
 
  private:
 
-  /*!
-    \brief Unconditional copying
-  */
-  void copy (MedianFilter<T> const& other);
+  //! Unconditional copying
+  void copy (MedianFilter<T> const& other) {
+    strength_p  = other.strength_p;
+    blocksize_p = other.blocksize_p;
+  }
+  
+  //! Unconditional deletion 
+  void destroy(void) {;}
 
-  /*!
-    \brief Unconditional deletion 
-  */
-  void destroy(void);
-
-  /*!
-    \brief Apply the filter to the data
-   */
+  //! Apply the filter to the data
   Vector<T> applyFilter (const Vector<T>& data);
   
 };

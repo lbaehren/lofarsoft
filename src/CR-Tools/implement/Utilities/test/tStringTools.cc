@@ -43,6 +43,8 @@ int string2char ()
     //
     cout << i+1 << "\t[" << teststring << "] -> ["
 	 << tmp << "]" << endl;
+    //
+    delete tmp;
   }
 
   return nofFailedTests;
@@ -79,9 +81,8 @@ int main ()
 
   cout << endl;
 
-  {
-    nofFailedTests += string2char ();
-  }
+  // Test conversion of string to aray of characters
+  nofFailedTests += string2char ();
 
   return nofFailedTests;
 

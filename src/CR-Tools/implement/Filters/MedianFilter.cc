@@ -25,83 +25,6 @@
 
 // ==============================================================================
 //
-//  Construction
-//
-// ==============================================================================
-
-template <class T>
-MedianFilter<T>::MedianFilter ()
-{
-  setStrength (3);
-}
-
-template <class T>
-MedianFilter<T>::MedianFilter (const int& strength)
-{
-  setStrength (strength);
-}
-
-template <class T>
-MedianFilter<T>::MedianFilter (MedianFilter const& other)
-{
-  copy (other);
-}
-
-// ==============================================================================
-//
-//  Destruction
-//
-// ==============================================================================
-
-template <class T>
-MedianFilter<T>::~MedianFilter ()
-{
-  destroy();
-}
-
-// ==============================================================================
-//
-//  Operators
-//
-// ==============================================================================
-
-// -------------------------------------------------------------------- operator=
-
-template <class T>
-MedianFilter<T> &MedianFilter<T>::operator= (MedianFilter<T> const &other)
-{
-  if (this != &other) {
-    destroy ();
-    copy (other);
-  }
-  return *this;
-}
-
-// ------------------------------------------------------------------------- copy
-
-template <class T>
-void MedianFilter<T>::copy (MedianFilter<T> const& other)
-{
-  strength_p = other.strength_p;
-  blocksize_p = other.blocksize_p;
-}
-
-// ---------------------------------------------------------------------- destroy
-
-template <class T>
-void MedianFilter<T>::destroy ()
-{;}
-
-// ==============================================================================
-//
-//  Parameters
-//
-// ==============================================================================
-
-
-
-// ==============================================================================
-//
 //  Methods
 //
 // ==============================================================================
@@ -130,20 +53,6 @@ Vector<T> MedianFilter<T>::applyFilter (const Vector<T>& data)
   };
 
   return result;
-}
-
-// ----------------------------------------------------------------------- filter
-
-template <class T>
-Vector<T> MedianFilter<T>::filter (const Vector<T>& data)
-{
-  blocksize_p = data.nelements();
-
-  if ((strength_p < 1) ||(strength_p > blocksize_p)) {
-    strength_p = 1;
-  }
-
-  return applyFilter (data);
 }
 
 // ----------------------------------------------------------------------- filter

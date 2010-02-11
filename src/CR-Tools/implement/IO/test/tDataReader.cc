@@ -149,7 +149,7 @@ int test_headerRecord ()
 
   int nofFailedTests (0);
 
-  cout << "[1] Retrieve the header record from the LOFAR_TBB object ..." << endl;
+  cout << "[1] Retrieve the header record ..." << endl;
   try {
     DataReader dr;
     casa::Record rec = dr.headerRecord();
@@ -209,7 +209,10 @@ int test_DataIterator ()
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
-    
+
+  // release allocated memory
+  delete [] iterators;
+  
   return nofFailedTests;
 }
 
@@ -288,7 +291,8 @@ int test_selection ()
   return nofFailedTests;
 }
 
-// -------------------------------------------------------- test_conversionArrays
+//_______________________________________________________________________________
+//                                                          test_conversionArrays
 
 /*!
   \brief Test assignment of the conversion array
@@ -303,10 +307,9 @@ int test_selection ()
 */
 int test_conversionArrays (uint const &blocksize)
 {  
-  cout << "\n[test_conversionArrays]\n" << std::endl;
+  cout << "\n[tDataReader::test_conversionArrays]\n" << std::endl;
 
   int nofFailedTests (0);
-
   uint fftLength (blocksize/2+1);
   uint nofAntennas (5);
   
@@ -731,12 +734,12 @@ int main (int argc,
 
 
   if (nofFailedTests == 0) {
-    nofFailedTests += test_conversionArrays (blocksize);
-    nofFailedTests += test_DataIterator ();
-    nofFailedTests += test_headerRecord ();
-//     nofFailedTests += test_selection ();
     nofFailedTests += test_sampleValues(blocksize);
     nofFailedTests += test_timeValues(blocksize);
+    nofFailedTests += test_DataIterator ();
+    nofFailedTests += test_conversionArrays (blocksize);
+    nofFailedTests += test_headerRecord ();
+//     nofFailedTests += test_selection ();
 //     nofFailedTests += test_frequency (blocksize);
 //     nofFailedTests += test_processing();
   } else {

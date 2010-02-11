@@ -54,8 +54,7 @@ namespace CR {  //  Namespace CR -- begin
     \endverbatim
   */
   DataReader::DataReader ()
-    : TimeFreq(),
-      streamsConnected_p(false)
+    : TimeFreq()
   {
     init (TimeFreq::blocksize());
   }
@@ -221,16 +220,16 @@ namespace CR {  //  Namespace CR -- begin
      * allocated, we first should check for indications, that indeed this might
      * have been the case.
      */
-    if (streamsConnected_p) {
-      if (fileStream_p != NULL) {
-	// close all the data streams
-	for (uint stream (0); stream<nofStreams_p; stream++) {
-	  fileStream_p[stream].close();
-	}
-	// release the fileStream array
-	delete [] fileStream_p;
-      };  
-      // release previously allocated memory
+    if (fileStream_p != NULL && nofStreams_p>0) {
+      // close all the data streams
+      for (uint stream (0); stream<nofStreams_p; stream++) {
+	fileStream_p[stream].close();
+      }
+      // release the fileStream array
+      delete [] fileStream_p;
+    };  
+    
+    if (iterator_p != NULL) {
       delete [] iterator_p;
     }
   }
@@ -339,6 +338,12 @@ namespace CR {  //  Namespace CR -- begin
   */
   void DataReader::init (uint const &blocksize) 
   {
+    streamsConnected_p     = false;
+    haveADC2Voltage_p      = false;
+    haveFFT2CalFFT_p       = false;
+    selectChannels_p       = false;
+    applyHanning_p         = false;
+    startBlock_p           = 0;
     uint nyquistZone       = nyquistZone_p;
     double sampleFrequency = sampleFrequency_p;
     
@@ -363,6 +368,9 @@ namespace CR {  //  Namespace CR -- begin
     TimeFreq::setBlocksize (blocksize);
     TimeFreq::setNyquistZone (nyquistZone);
     TimeFreq::setSampleFrequency (sampleFrequency);
+    // Check if arrays havebeen assigned already
+//     if (fileStream_p != NULL) { delete [] fileStream_p; }
+//     if (iterator_p   != NULL) { delete [] iterator_p;   }
     // Parameters stored in CR::DataReader
     fileStream_p       = NULL;
     streamsConnected_p = false;
@@ -436,9 +444,9 @@ namespace CR {  //  Namespace CR -- begin
     /* Check of the number of antennas is consistent */
     if (shapeADC(1) != shapeFFT(1)) {
       cerr << "[DataReader::init] Inconsistent number of antennas!" << endl;
-      cerr << " - shape(adc2voltage) = " << adc2voltage.shape() << endl;
-      cerr << " - shape(fft2calfft)  = " << fft2calfft.shape() << endl;
-      cerr << " => Rejecting conversion arrays!" << endl;
+      cerr << " - shape(adc2voltage) = " << adc2voltage.shape()     << endl;
+      cerr << " - shape(fft2calfft)  = " << fft2calfft.shape()      << endl;
+      cerr << " => Rejecting conversion arrays!"                    << endl;
       status = false;
       /*
 	If the shapes are incorrect there is no way to determine, which of the 
@@ -501,7 +509,6 @@ namespace CR {  //  Namespace CR -- begin
       // -- Setup of the Hanning filter (disabled by default)
       
       setHanningFilter (0.0);
-      
     }    
   }
   
