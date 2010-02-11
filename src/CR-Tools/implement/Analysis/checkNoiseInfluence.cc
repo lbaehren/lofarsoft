@@ -75,10 +75,9 @@ namespace CR { // Namespace CR -- begin
            << "\n,at time range from " << pulseStart << " s to " << pulseStop << " s."
            << endl;                 
 
-      // first delete potentially existing old pipeline
-      Record ObsRecord = pipeline_p->GetObsRecord();
-      initPipeline(ObsRecord);
-      pipeline_p->setVerbosity(true);
+      // first reset potentially existing old pipeline
+      pipeline.init();
+      upsamplePipe.init();
 
       // Generate the Data Reader
       if (! lev_p->attachFile(evname) ) {
@@ -121,7 +120,7 @@ namespace CR { // Namespace CR -- begin
                                           getUpsamplingExponent(),false, true);
       // calculate the maxima
       double noiseTime = pulseStart-1e-4;   // noise range is normally calculated in respect to the time of the CC beam
-      calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false, noiseTime);
+      calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false, noiseTime, 3);
       
       // load the pulse pattern: calculate time range of pulse and get up-sampled trace in this range
       Vector<Double> timeValues =
@@ -141,10 +140,9 @@ namespace CR { // Namespace CR -- begin
     try {   
       cout << "\nLoading noise from file: " << evname << endl;      
 
-      // first delete potentially existing old pipeline
-      Record ObsRecord = pipeline_p->GetObsRecord();
-      initPipeline(ObsRecord);
-      pipeline_p->setVerbosity(true);
+      // first reset potentially existing old pipeline
+      pipeline.init();
+      upsamplePipe.init();
 
       // Generate the Data Reader
       if (! lev_p->attachFile(evname) ) {
@@ -184,7 +182,7 @@ namespace CR { // Namespace CR -- begin
                                           getUpsamplingExponent(),false, false);
       // calculate the maxima
       double noiseTime = plotStart()+1e-7;   // noise range is normally calculated in respect to the time of the CC beam
-      calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false, noiseTime);
+      calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false, noiseTime, 3);
    
     } catch (AipsError x) {
       cerr << "checkNoiseInfluence::loadNoiseEvent: " << x.getMesg() << endl;

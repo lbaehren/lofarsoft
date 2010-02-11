@@ -42,34 +42,33 @@ namespace CR { // Namespace CR -- begin
     ccWindowWidth_p(0.045e-6),
     spectrumStart_p(40e6),
     spectrumStop_p(80e6),
-    plotlist(),
+    plotlist(vector<string> ()),
     lastUpsamplingExponent(-1),
     lastTimeUpsamplingExponent(-1),
-    upFieldStrength(),
-    upsampledAntennas(),
-    upTimeValues(),
+    upFieldStrength(Matrix<Double> ()),
+    upsampledAntennas(vector<bool> ()),
+    upTimeValues(Vector<Double> ()),
     Polarization("ANY"),
     calibrationMode(false)
   {;}
   
-  // ----------------------------------------------------------- CompletePipeline
-  
-  CompletePipeline::CompletePipeline (CompletePipeline const &other):
-    plotStart_p(-2.05e-6),
-    plotStop_p(-1.55e-6),
-    ccWindowWidth_p(0.045e-6),
-    spectrumStart_p(40e6),
-    spectrumStop_p(80e6),
-    plotlist(),
-    lastUpsamplingExponent(-1),
-    lastTimeUpsamplingExponent(-1),
-    upFieldStrength(),
-    upsampledAntennas(),
-    upTimeValues(),
-    Polarization("ANY"),
-    calibrationMode(false)
-  {
-    copy (other);
+  void CompletePipeline::init(void) {
+    plotStart_p = -2.05e-6;
+    plotStop_p = -1.55e-6;
+    ccWindowWidth_p = 0.045e-6;
+    spectrumStart_p = 40e6;
+    spectrumStop_p = 80e6;
+    plotlist = vector<string> ();
+    lastUpsamplingExponent = -1;
+    lastTimeUpsamplingExponent = -1;
+    upFieldStrength.resize(0,0);
+    upsampledAntennas = vector<bool> ();
+    upTimeValues.resize(0);
+    Polarization = "ANY";
+    calibrationMode = false;
+    FirstStagePipeline::init();
+    SecondStagePipeline::init();
+    CRinvFFT::init();
   }
   
   // ============================================================================
@@ -545,6 +544,12 @@ namespace CR { // Namespace CR -- begin
           break;
         case 1: // RMS (Radio-Auger)
           noise = rms(trace);
+          break;
+        case 2: // mean of envelope
+          noise = mean(envelope(trace));
+          break;
+        case 3: // rms of envelope
+          noise = rms(envelope(trace));
           break;
         default:
           cerr << "CompletePipeline:calculateNoise: " << "Unkown method for noise calculation!" << endl;
@@ -1239,7 +1244,8 @@ namespace CR { // Namespace CR -- begin
                                                               Vector<Bool> antennaSelection,
                                                               const int& upsampling_exp,
                                                               const bool& rawData,
-                                                              const double& cc_center)
+                                                              const double& cc_center,
+                                                              int noiseMethod)
   {
     map <int,PulseProperties> pulses;           // return value with pulse properties
     try {
@@ -1479,7 +1485,7 @@ namespace CR { // Namespace CR -- begin
 
         // calculate the noise as mean of the part before of the trace before the pulse 
         if (calculate_noise) {
-          noise = calculateNoise(yValues.column(i)(rangeNoise),0);
+          noise = calculateNoise(yValues.column(i)(rangeNoise),noiseMethod);
           snr = envMaximum / noise;
         }  
 

@@ -304,7 +304,8 @@ namespace CR { // Namespace CR -- begin
       \brief Unconditional deletion 
     */
     void destroy(void);
-
+    
+  protected:
     /*!
       \brief Initialize parameters
     */

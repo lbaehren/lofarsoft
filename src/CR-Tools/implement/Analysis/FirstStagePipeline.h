@@ -362,16 +362,17 @@ namespace CR { // Namespace CR -- begin
     */
     Bool setCalibration(DataReader *dr);
     
-    /*!
-      \brief Standard initialization
-    */
-    void init(void);
-
    /*!
       \brief Unconditional deletion 
     */
     void destroy(void);
     
+  protected:  
+    /*!
+      \brief Standard initialization
+    */
+    void init(void);
+
   };
   
 } // Namespace CR -- end

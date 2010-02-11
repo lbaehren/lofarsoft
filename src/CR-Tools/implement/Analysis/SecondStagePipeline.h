@@ -247,15 +247,17 @@ namespace CR { // Namespace CR -- begin
     */
     Bool updateCache(DataReader *dr);
      
-    /*!
-      \brief Initialize the data
-    */
-    void init();
-
+    
     /*!
       \brief Unconditional deletion 
     */
     void destroy(void);
+    
+  protected:
+    /*!
+      \brief Initialize the data
+    */
+    void init();
     
   };
   

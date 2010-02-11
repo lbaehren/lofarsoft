@@ -96,7 +96,7 @@ namespace CR { // Namespace CR -- begin
     //! Contains the upsampled fieldstrength
     Matrix<Double> upFieldStrength;
     //! Selection of upsampled antennas
-    vector<bool> upsampledAntennas; 		// warning: don't use CasaCore-Vector as it makes only a flat copy using '='
+    vector<bool> upsampledAntennas;                 // warning: don't use CasaCore-Vector as it makes only a flat copy using '='
     //! Contains inerpolated time axis for upsampled fieldstrength
     Vector<Double> upTimeValues;
 
@@ -115,13 +115,12 @@ namespace CR { // Namespace CR -- begin
     */
     CompletePipeline ();
     
+    // ------------------------------------------------------------- Intialize
+    
     /*!
-      \brief Copy constructor
-      
-      \param other -- Another CompletePipeline object from which to create this new
-      one.
+      \brief Reset variables
     */
-    CompletePipeline (CompletePipeline const &other);
+    void init (void);
     
     // -------------------------------------------------------------- Destruction
 
@@ -208,7 +207,7 @@ namespace CR { // Namespace CR -- begin
       \param plotStop  -- Stop time of the interval diplayed in the plot
     */
     inline void setPlotInterval (double const &plotStart,
-				 double const &plotStop) {
+                                 double const &plotStop) {
       plotStart_p = plotStart;
       plotStop_p  = plotStop;
     }
@@ -362,8 +361,8 @@ namespace CR { // Namespace CR -- begin
                                          corresponding to not selected antennas will not contain meaningless values.)
     */
     Matrix<Double> getUpsampledFieldstrength (DataReader *dr,
-					      const int& upsampling_exp,
-				 	      Vector<Bool> antennaSelection = Vector<Bool>());
+                                              const int& upsampling_exp,
+                                               Vector<Bool> antennaSelection = Vector<Bool>());
 
     /*!
       \brief Gets the upsampled raw data FX of selected antennas (data are not stored for reuse)
@@ -380,10 +379,10 @@ namespace CR { // Namespace CR -- begin
                                    corresponding to not selected antennas will not contain meaningless values.)
     */
     Matrix<Double> getUpsampledFX (DataReader *dr,
-				   const int& upsampling_exp,
-		                   Vector<Bool> antennaSelection = Vector<Bool>(),
-				   const bool& offsetSubstraction = false,
-				   const bool& voltage = false);
+                                   const int& upsampling_exp,
+                                   Vector<Bool> antennaSelection = Vector<Bool>(),
+                                   const bool& offsetSubstraction = false,
+                                   const bool& voltage = false);
 
     /*!
       \brief Gets the time axis for upsampled data (data are stored for reuse)
@@ -399,7 +398,7 @@ namespace CR { // Namespace CR -- begin
                                     last time value of the original axis.
     */
     Vector<Double> getUpsampledTimeAxis (DataReader *dr,
-					 const int& upsampling_exp);
+                                         const int& upsampling_exp);
 
 
     /*!
@@ -526,7 +525,7 @@ namespace CR { // Namespace CR -- begin
                           const bool& seperated = false,
                           const int& upsampling_exp = 0,
                           const bool& rawData = false,
-			  const bool& plotEnvelope = false);
+                          const bool& plotEnvelope = false);
 
     /*!
       \brief Plots the spectrum of all antennas and a median spectrum
@@ -556,6 +555,7 @@ namespace CR { // Namespace CR -- begin
       \param rawData          -- uses the raw ADC data instead of the calibrated fieldstrength
       \param cc_center        -- center (time) of CC-beam fit (tries to calculate the noise before the pulse,
                                  if this information is given)
+      \param noiseMethod      -- method for calculation of noise                           
 
       \return pulses          -- a map with the calculated pulse parameters (keys = antennaIDs)
     */
@@ -564,7 +564,8 @@ namespace CR { // Namespace CR -- begin
                                                Vector<Bool> antennaSelection = Vector<Bool>(),
                                                const int& upsampling_exp = 0,
                                                const bool& rawData = false,
-                                               const double& cc_center = 1e99);
+                                               const double& cc_center = 1e99,
+                                               int noiseMethod = 0);
     /*!
       \brief same as calculateMaxima, but different output form and does not work with the envelope of the trace
 

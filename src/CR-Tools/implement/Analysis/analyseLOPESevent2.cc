@@ -92,11 +92,19 @@ namespace CR { // Namespace CR -- begin
   void analyseLOPESevent2::clear() {
     rawPulses = map<int,PulseProperties>();
     calibPulses = map<int,PulseProperties>();
-    analyseLOPESevent::clear();
+
+    // from analyseLOPESevent::clear():
+    if (lev_p != NULL) {
+      delete lev_p;
+      lev_p = NULL;
+    }
+    if (upsampler_p != NULL) {
+      delete upsampler_p;
+      upsampler_p = NULL;
+    }
     
-    // reset pipelines
-    pipeline = CompletePipeline();
-    upsamplePipe = CompletePipeline();
+    pipeline.init();
+    upsamplePipe.init();
 
     // To use the methods of analyseLOPESevent, a pointer to the pipeline is needed.
     pipeline_p = &pipeline;
