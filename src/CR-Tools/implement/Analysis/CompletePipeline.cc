@@ -535,21 +535,39 @@ namespace CR { // Namespace CR -- begin
   {
     double noise = 0.;
     try {
+      vector<double> localExtrema; //  vector to store local extrema of trace
+
+      // first: calculate trace for noise calculation
+      Vector<Double> noiseTrace(trace.nelements());   
+      if ((method == 0) || (method == 2))       // choose abolute of trace
+        for(unsigned int j = 0; j < trace.nelements(); ++j)
+          noiseTrace(j) = abs(trace(j));
+      if (method == 3) {  // envelope
+        noiseTrace = envelope(trace);
+        method = 2;  // proceed for search of local maxima like in method 2
+      }  
+        
+      // calculate noise with different methods  
       switch(method) {
-        case 0: // Steffen's method    
-          for(unsigned int j = 0; j < trace.nelements(); ++j) {
-            noise += abs(trace(j));
-          }
-          noise /= trace.nelements();
+        case 0: // Steffen's method (mean of the absolute)
+          noise = mean(noiseTrace);
           break;
         case 1: // RMS (Radio-Auger)
           noise = rms(trace);
           break;
-        case 2: // mean of envelope
-          noise = mean(envelope(trace));
-          break;
-        case 3: // rms of envelope
-          noise = rms(envelope(trace));
+        case 2: // mean of local maxima (absolute of trace or envelope)
+          // search for local extrema and store them
+          for(unsigned int j = 1; j < noiseTrace.nelements()-1; ++j) {
+            if ( (noiseTrace(j-1) < noiseTrace(j)) && (noiseTrace(j) > noiseTrace(j+1)) )
+              localExtrema.push_back(noiseTrace(j));
+          }
+          if (localExtrema.size() == 0) {
+            noise = max(noiseTrace);
+            cerr << "CompletePipeline:calculateNoise: " << "WARNING: noise interval too small!" << endl;
+          } else {
+            //  cout << "Calculating noise as mean of " << localExtrema.size() << " local extrema." << endl;
+            noise = mean(static_cast< Vector<double> >(localExtrema));
+          }  
           break;
         default:
           cerr << "CompletePipeline:calculateNoise: " << "Unkown method for noise calculation!" << endl;
