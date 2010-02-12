@@ -406,7 +406,8 @@ int test_conversionArrays (uint const &blocksize)
   return nofFailedTests;
 }
 
-// --------------------------------------------------------------- test_frequency
+//_______________________________________________________________________________
+//                                                                 test_frequency
 
 /*!
   \brief Test access to the data building up the frequency axis
@@ -569,6 +570,20 @@ int test_sampleValues (uint const &blocksize)
     }
   }
   
+  cout << "[7] setBlock () ..." << endl;
+  {
+    dr.setSampleOffset(0);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // set the block number
+      dr.setBlock(offset);
+      // get the sample values
+      dr.sampleValues(samples);
+      // 
+      show(samples);
+    }
+  }
+  
   return nofFailedTests;
 }
 
@@ -647,7 +662,7 @@ int test_timeValues (uint const &blocksize)
     }
   }
   
-  cout << "[5] nextBlock () ..." << endl;
+  cout << "[6] nextBlock () ..." << endl;
   {
     dr.setSampleOffset(0);
 
@@ -658,6 +673,20 @@ int test_timeValues (uint const &blocksize)
       show(times);
       // increment block counter
       dr.nextBlock();
+    }
+  }
+  
+  cout << "[7] setBlock () ..." << endl;
+  {
+    dr.setSampleOffset(0);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // set the block number
+      dr.setBlock(offset);
+      // get the sample values
+      dr.timeValues(times);
+      // 
+      show(times);
     }
   }
   

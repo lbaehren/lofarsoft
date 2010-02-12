@@ -249,6 +249,137 @@ int test_sampleValues ()
     }
   }
   
+  cout << "[7] setBlock () ..." << endl;
+  {
+    dr.setSampleOffset(0);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // set the block number
+      dr.setBlock(offset);
+      // get the sample values
+      dr.sampleValues(samples);
+      // 
+      show(samples);
+    }
+  }
+  
+  return nofFailedTests;
+}
+
+//_______________________________________________________________________________
+//                                                                test_timeValues
+
+/*!
+  \brief Test retrival of the values along the time axis
+  
+  \param blocksize -- The number of samples per block of data per antenna.
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+ */
+int test_timeValues ()
+{
+  cout << "\n[tLOFAR_TBB::test_timeValues]\n" << endl;
+
+  int nofFailedTests (0);
+  uint blocksize (1024);
+  uint nyquistZone (1);
+  double sampleFrequency (200e06);
+  std::vector<double> times;
+  uint maxOffset (5);
+
+  //________________________________________________________
+  // Create LOFAR_TBB object to perform the tests with
+
+  LOFAR_TBB dr;
+  dr.setBlocksize(blocksize);
+  dr.setNyquistZone (nyquistZone);
+  dr.setSampleFrequency (sampleFrequency);
+
+  //________________________________________________________
+  // Run the tests
+
+  cout << "[1] timeValues (times)" << endl;
+  {
+    dr.timeValues(times);
+    // 
+    show(times);
+  }
+
+  cout << "[2] timeValues (times,offset)" << endl;
+  {
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      dr.timeValues(times,offset);
+      // 
+      show(times);
+    }
+  }
+  
+  cout << "[3] timeValues (times,offset,false)" << endl;
+  {
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      dr.timeValues(times,offset,false);
+      // 
+      show(times);
+    }
+  }
+
+  cout << "[4] setSampleOffset (offset) ..." << endl;
+  {
+    dr.setSampleOffset(0);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // set the offset
+      dr.setSampleOffset(offset);
+      // get the sample values
+      dr.timeValues(times);
+      // 
+      show(times);
+    }
+  }
+  
+  cout << "[5] setSampleOffset (offset,false) ..." << endl;
+  {
+    dr.setSampleOffset(0);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // set the offset
+      dr.setSampleOffset(offset,false);
+      // get the sample values
+      dr.timeValues(times);
+      // 
+      show(times);
+    }
+  }
+  
+  cout << "[6] nextBlock () ..." << endl;
+  {
+    dr.setSampleOffset(0);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // get the sample values
+      dr.timeValues(times);
+      // 
+      show(times);
+      // increment block counter
+      dr.nextBlock();
+    }
+  }
+  
+  cout << "[7] setBlock () ..." << endl;
+  {
+    dr.setSampleOffset(0);
+
+    for (uint offset(0); offset<maxOffset; ++offset) {
+      // set the block number
+      dr.setBlock(offset);
+      // get the sample values
+      dr.timeValues(times);
+      // 
+      show(times);
+    }
+  }
+  
   return nofFailedTests;
 }
 
@@ -317,52 +448,36 @@ int test_data (std::string const &filename)
   
   int nofFailedTests (0);
   uint blocksize (1024);
-
+  
   // create object to handle the data
-  LOFAR_TBB data (filename,
-		  blocksize);
-	
+  LOFAR_TBB dr (filename,
+		blocksize);
+  
   cout << "[1] Reading one block of ADC values ..." << endl;
   try {
-    casa::Matrix<double> fx = data.fx();
-
+    casa::Matrix<double> fx = dr.fx();
+    
     cout << "-- shape (fx)     = " << fx.shape() << endl;
     cout << "-- ADC values [0] = ["
 	 << fx(0,0) << " "
 	 << fx(1,0) << " "
 	 << fx(2,0) << " "
 	 << fx(3,0) << " .. ]" << endl;
-//    cout << "-- ADC values [1] = ["
-//	 << fx(0,1) << " "
-//	 << fx(1,1) << " "
-//	 << fx(2,1) << " "
-//	 << fx(3,1) << " .. ]" << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
-
-	// test changing the blocksize
-	blocksize = 10240;
-	cout << "[1a] changing blocksize from 1024 to " << blocksize << "...";
-	data.setBlocksize(blocksize);
-	cout << "changed." << endl;
-		
+  
   cout << "[2] Reading one block of voltage values ..." << endl;
   try {
-    casa::Matrix<double> voltage = data.voltage();
-
+    casa::Matrix<double> voltage = dr.voltage();
+    
     cout << "-- shape (voltage)    = " << voltage.shape() << endl;
     cout << "-- Voltage values [0] = ["
 	 << voltage(0,0) << " "
 	 << voltage(1,0) << " "
 	 << voltage(2,0) << " "
 	 << voltage(3,0) << " .. ]" << endl;
-//    cout << "-- Voltage values [1] = ["
-//	 << voltage(0,1) << " "
-//	 << voltage(1,1) << " "
-//	 << voltage(2,1) << " "
-//	 << voltage(3,1) << " .. ]" << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -370,58 +485,48 @@ int test_data (std::string const &filename)
   
   cout << "[3] Reading FFT for one block of data ..." << endl;
   try {
-    casa::Matrix<casa::DComplex> fft = data.fft();
-
+    casa::Matrix<casa::DComplex> fft = dr.fft();
+    
     cout << "-- shape (fft)    = " << fft.shape() << endl;
     cout << "-- FFT values [0] = ["
 	 << fft(0,0) << " "
 	 << fft(1,0) << " "
 	 << fft(2,0) << " "
 	 << fft(3,0) << " .. ]" << endl;
-//    cout << "-- FFT values [1] = ["
-//	 << fft(0,1) << " "
-//	 << fft(1,1) << " "
-//	 << fft(2,1) << " "
-//	 << fft(3,1) << " .. ]" << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
-
+  
   cout << "[4] Reading calibrated FFT for one block of data ..." << endl;
   try {
-    casa::Matrix<DComplex> calfft = data.calfft();
-
+    casa::Matrix<DComplex> calfft = dr.calfft();
+    
     cout << "-- shape (calfft)      = " << calfft.shape() << endl;
     cout << "-- Cal. FFT values [0] = ["
 	 << calfft(0,0) << " "
 	 << calfft(1,0) << " "
 	 << calfft(2,0) << " "
 	 << calfft(3,0) << " .. ]" << endl;
-//    cout << "-- Cal. FFT values [1] = ["
-//	 << calfft(0,1) << " "
-//	 << calfft(1,1) << " "
-//	 << calfft(2,1) << " "
-//	 << calfft(3,1) << " .. ]" << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
-
-  cout << "[5] Read multiple blocks of ADC values ..." << endl;
+  
+  cout << "[5] Test DataReader::nextBlock() ..." << endl;
   try {
     uint nofBlocks (10);
-    uint nofDipoles = data.nofDipoleDatasets();
-    casa::Matrix<double> fx (data.blocksize(),
+    uint nofDipoles = dr.nofDipoleDatasets();
+    casa::Matrix<double> fx (dr.blocksize(),
 			     nofDipoles);
-
+    
     cout << "-- blocksize    = " << blocksize  << endl;
     cout << "-- nof. dipoles = " << nofDipoles << endl;
     cout << "-- shape(fx)    = " << fx.shape() << endl;
-
+    
     for (uint block(0); block<nofBlocks; block++) {
       // get the data for the current block
-      fx = data.fx();
+      fx = dr.fx();
       // feedback
       cout << "\t" << block << "/" << nofBlocks
 	   << "\t" << min(fx)
@@ -429,9 +534,39 @@ int test_data (std::string const &filename)
 	   << "\t" << max(fx)
 	   << endl;
       // increment the block-counter
-      data.nextBlock();
+      dr.nextBlock();
     }
-
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[6] Reading multiple blocks of varying size ..." << endl;
+  try {
+    uint blocksizeMax  = 10240;
+    uint blocksizeIncr = 1024;
+    uint nofBlocks     = 5;
+    
+    for (blocksize=1024; blocksize<=blocksizeMax; blocksize+=blocksizeIncr) {
+      // set the new blocksize
+      dr.setBlocksize (blocksize);
+      // go through multiple blocks of data
+      for (uint block(0); block<nofBlocks; ++block) {
+	// set the block number
+	dr.setBlock(block);
+	// retrieve data
+	casa::Matrix<double> fx          = dr.fx();
+	casa::Matrix<double> voltage     = dr.voltage();
+	casa::Matrix<casa::DComplex> fft = dr.fft();
+	// Feedback
+	cout << "\t"  << dr.blocksize()
+	     << " / " << dr.block()
+	     << "\tshape(fx)=" << fx.shape()
+	     << "\tshape(voltage)=" << voltage.shape()
+	     << "\tshape(fft)=" << fft.shape()
+	     << endl;
+      }
+    }
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -469,6 +604,7 @@ int main (int argc,
   // Perform some basic tests using the DAL
 
   nofFailedTests += test_sampleValues ();
+  nofFailedTests += test_timeValues ();
   
   if (haveDataset) {
     // Test for the constructor(s)
