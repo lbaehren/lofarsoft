@@ -10,6 +10,8 @@ from pipeline.support.utilities import patch_parset, create_directory, log_time
 from pipeline.support.lofarexceptions import ExecutableMissing
 import pipeline.support.utilities as utilities
 
+CASA_DATE_FORMAT = "%Y/%m/%d/%H:%M:%S.000"
+
 class casapy_node(LOFARnode):
     def run(self, infile, parset, start_time, end_time, increment)
         # Time execution of this job
@@ -22,60 +24,39 @@ class casapy_node(LOFARnode):
             self.logger.debug("Start time: %s, end time: %s" % (str(start_time), str(end_time)))
             increment = timedelta(0, increment)
 
-
-
-            # Patch the parset with the correct input/output MS names.
-            temp_parset_filename = patch_parset(
-                parset, {
-                    'msin': infile,
-                    'msout': outfile,
-                }
-            )
-
-            try:
-                if not os.access(executable, os.X_OK):
-                    raise ExecutableMissing(executable)
-
-                # DPPP looks for a log_prop file in its working directory
-                # We create a temporary directory with the right log_prop,
-                # run DPPP there, then delete it again when we're done.
-                working_dir = tempfile.mkdtemp()
-                log_prop_filename = os.path.join(
-                    working_dir, os.path.basename(executable) + ".log_prop"
-                )
-                with open(log_prop_filename, 'w') as log_prop_file:
-                    log_prop_file.write(log_prop % {'filename': os.path.join(
-                            log_location,
-                            os.path.basename(executable) + '.' + os.path.basename(infile) + '.log'
-                        )}
+            process_start = start_time
+            while process_start < end_time:
+                process_end = process_start + increment
+                if process_end > end_time:
+                    td = end_time - process_start
+                    self.logger.info(
+                        "Note: final image is %.3f seconds long" % (
+                            td.days * 86400 + td.seconds + td.microseconds / 1e6
+                        )
                     )
-                    log_prop_file.write(log_format)
+                    process_end = end_time
+                time_range = "\'%s~%s\'" % (
+                    process_start.strftime(CASA_DATE_FORMAT),
+                    process_end.strftime(CASA_DATE_FORMAT)
+                )
+                self.logger.debug("Now processing %s" % (time_range))
 
-                # We use subprocess.check_call() to spawn DPPP and check 
-                # its exit status.
-                # What is the '1' for? Required by DP3...
-                cmd = [executable, temp_parset_filename, '1']
-                self.logger.debug("Running: %s" % (' '.join(cmd),))
-                result = check_call(
-                    cmd,
-                    cwd=working_dir,
-                    env=env,
-                    close_fds=True
+                tmp_parset_filename = patch_parset(
+                    parset, {
+                        'Selection.timerange': time_range,
+                        'Image.name': '-' + str(int(time.mktime(process_start.timetuple())))
+                    }
                 )
-                self.logger.debug(
-                    "%s returned exit status %d" % (executable, result)
-                )
-            except ExecutableMissing, e:
-                self.logger.error("%s not found" % (e.args[0]))
-                raise
-            except CalledProcessError, e:
-                # For CalledProcessError isn't properly propagated by IPython
-                # Temporary workaround...
-                self.logger.error(str(e))
-                raise Exception
-            finally:
-                # Clean up tempoerary files.
-                os.unlink(temp_parset_filename)
-                shutil.rmtree(working_dir)
+
+                try:
+                    #
+                    # Run casapy
+                    #
+                    pass
+                finally:
+                    # Clean up tempoerary files.
+                    os.unlink(temp_parset_filename)
+
+                process_start += increment
 
             return result
