@@ -2,8 +2,8 @@ from __future__ import with_statement
 import sys, os
 
 # Local helpers
-from pipeline.support.lofarrecipe import LOFARrecipe
-from pipeline.support.ipython import LOFARTask, LOFARoutput
+from pipeline.support.lofarrecipe import LOFARrecipe, LOFARoutput
+from pipeline.support.ipython import LOFARTask
 from pipeline.support.group_data import group_files
 import pipeline.support.utilities as utilities
 from pipeline.support.clusterlogger import clusterlogger
