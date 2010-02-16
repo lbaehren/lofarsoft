@@ -102,7 +102,7 @@ class casapy(LOFARrecipe):
             self.logger,
             clusterdesc,
             os.path.join(self.inputs['working_directory'], self.inputs['job_name']),
-            int(self.inputs['max_bands_per_node'],
+            int(self.inputs['max_bands_per_node']),
             self.inputs['args']
         ):
             self.logger.debug("Processing: " + str(data_group))
