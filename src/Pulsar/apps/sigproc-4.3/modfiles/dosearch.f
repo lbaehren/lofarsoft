@@ -262,7 +262,7 @@ c
          write(llog,*) 'Lyne-Ashworth harmonic summing'
          call oldsumhrm(samp,npf,nf1) ! Lyne-Ashworth code
       else
-         write(llog,*) 'DBs slow-but-simple harmonic summing routine'
+         write(llog,*) 'DB\'s slow-but-simple harmonic summing routine'
          call sumhrm(samp,npf,nf1)    ! David Barnes code
       endif
 c      

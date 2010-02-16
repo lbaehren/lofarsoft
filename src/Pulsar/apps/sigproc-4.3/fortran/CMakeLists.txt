@@ -13,8 +13,10 @@
 
 enable_language(Fortran)
 
-SET (CMAKE_Fortran_COMPILER g77)
-set (ENV{FC} g77)
+####SET (CMAKE_Fortran_COMPILER g77)
+###SET (CMAKE_Fortran_COMPILER g95)
+####set (ENV{FC} g77)
+###set (ENV{FC} g95)
 #unset (CMAKE_OSX_DEPLOYMENT_TARGET)
 unset (COMPILE_FLAGS)
 set (CMAKE_OSX_DEPLOYMENT_TARGET "")
@@ -22,8 +24,8 @@ set (CMAKE_OSX_DEPLOYMENT_TARGET "")
 include_directories (${PULSAR_SOURCE_DIR}/apps/sigproc-4.3)
 
 file (GLOB fort_sigproc_sources baseline.f
-best.f
-chaninfo.f
+#best.f
+#chaninfo.f
 clock.f
 cpower.f
 dosearch.f
@@ -34,7 +36,7 @@ fast_mean.f
 ffft.f
 fftdata.f
 fftwdata.f
-fftwdummy.f
+#fftwdummy.f
 find_norm.f
 formspec.f
 freq.f
@@ -45,20 +47,20 @@ getmjd.f
 getrmea.f
 getrrms.f
 glun.f
-grey.f
+#grey.f
 histmax.f
 indexxf77.f
 length.f
-mask.f
+#mask.f
 meanrms.f
 minmax.f
 #mjdnow.f
 mmzap.f
 normal.f
 #peak.f
-plotpulses.f
-plotpulses.old.f
-postproc.f
+#plotpulses.f
+#plotpulses.old.f
+#postproc.f
 #quickplot.f
 quikgray.f
 ralphs_mean.f
@@ -77,16 +79,16 @@ seekin.f
 short.f
 singlepulse.f
 slfit.f
-sort3.f
+#sort3.f
 spcsnr.f
-spec.f
+#spec.f
 sprof.f
-step.f
-sumfft.f
+#step.f
+#sumfft.f
 sumhrm.f
-tbary.f
+#tbary.f
 timer.f
-tssb.f
+#tssb.f
 writeepn.f
 writespec.f
 zap_birdies.f
@@ -144,7 +146,7 @@ add_executable (plotpulses
   )
   
 set (sigproc_fc1_binaries
-   best step postproc grey mask quickplot sumfft chaninfo plotpulses
+    step postproc grey sumfft chaninfo
 )
 
 set (sigproc_fc2_binaries
@@ -152,11 +154,15 @@ set (sigproc_fc2_binaries
 )
 
 set (sigproc_fc3_binaries
-   ffa 
+   best mask quickplot plotpulses
 )
 
 set (sigproc_fc4_binaries
    peak
+)
+
+set (sigproc_fc5_binaries
+   ffa
 )
 
 if (UNIX)
@@ -164,9 +170,12 @@ if (UNIX)
    set_target_properties (sigproc_fort
      PROPERTIES
      SUFFIX .a
-     COMPILE_FLAGS "-ffixed-line-length-none -fbackslash -fno-common"
+#     COMPILE_FLAGS "-ffixed-line-length-132 -freal-loops -fno-common"
+#     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fopenmp -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132"
+#     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132 -freal-loops"
+     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132"
      LINK_FLAGS "-static"
-     CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
+###     CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
      )
 ## else (APPLE)
 ##   set_target_properties (sigproc_fort
@@ -189,7 +198,10 @@ foreach (src ${sigproc_fc1_binaries})
     PROPERTIES
 #    CMAKE_Fortran_COMPILE_OBJECT g77
 #    CMAKE_Fortran_LINK_EXECUTABLE g77
-    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fno-common"
+#    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fno-common"
+#     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fopenmp -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132 -freal-loops"
+#     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132 -freal-loops"
+     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132"
     LINK_FLAGS ""
     LINKER_LANGUAGE Fortran
     CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
@@ -204,11 +216,14 @@ foreach (src ${sigproc_fc2_binaries})
     PROPERTIES
 #    CMAKE_Fortran_COMPILE_OBJECT g77
 #    CMAKE_Fortran_LINK_EXECUTABLE g77
-    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fno-common"
+#    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+#     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fopenmp -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132 -freal-loops"
+#     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132 -freal-loops"
+     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132"
     LINK_FLAGS ""
     LINKER_LANGUAGE Fortran
-    CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
-    CMAKE_SHARED_LINKER_FLAGS ""
+###    CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
+###    CMAKE_SHARED_LINKER_FLAGS ""
   )
   target_link_libraries (${src} sigproc_fort sigproc ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a)
 endforeach (src)
@@ -216,19 +231,40 @@ endforeach (src)
 foreach (src ${sigproc_fc3_binaries})
   set_target_properties (${src}
     PROPERTIES
-    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fno-common"
+#    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fno-common"
+#     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fopenmp -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132 -freal-loops"
+#     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132 -freal-loops"
+     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132"
     LINK_FLAGS ""
     LINKER_LANGUAGE Fortran
     CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
     CMAKE_SHARED_LINKER_FLAGS ""
   )
-  target_link_libraries (${src} sigproc_fort sigproc)
+  target_link_libraries (${src} sigproc_fort ${PGPLOT_LIBRARIES} ${X11_X11_LIB})
 endforeach (src)
 
 foreach (src ${sigproc_fc4_binaries})
   set_target_properties (${src}
     PROPERTIES
-    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fno-common"
+#    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fno-common -freal-loops"
+#     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fopenmp -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132 -freal-loops"
+#     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132 -freal-loops"
+     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132"
+    LINK_FLAGS ""
+    LINKER_LANGUAGE Fortran
+    CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
+    CMAKE_SHARED_LINKER_FLAGS ""
+  )
+  target_link_libraries (${src} sigproc_fort sigproc ${PGPLOT_LIBRARIES} ${X11_X11_LIB})
+endforeach (src)
+
+foreach (src ${sigproc_fc5_binaries})
+  set_target_properties (${src}
+    PROPERTIES
+#    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fno-common -freal-loops"
+#     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fopenmp -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132 -freal-loops"
+#     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132 -freal-loops"
+     COMPILE_FLAGS "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -g -DPSRFITS -DFFTW -ffixed-line-length-132"
     LINK_FLAGS ""
     LINKER_LANGUAGE Fortran
     CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
@@ -236,7 +272,6 @@ foreach (src ${sigproc_fc4_binaries})
   )
   target_link_libraries (${src} sigproc_fort sigproc)
 endforeach (src)
-
 
 #set (CMAKE_Fortran_COMPILE_OBJECT g77)
 #set (CMAKE_Fortran_LINK_EXECUTABLE g77)
@@ -255,7 +290,7 @@ install (
   )
   
   install (
-  TARGETS ${sigproc_fc1_binaries} ${sigproc_fc2_binaries} ${sigproc_fc3_binaries} ${sigproc_fc4_binaries} 
+  TARGETS ${sigproc_fc1_binaries} ${sigproc_fc2_binaries} ${sigproc_fc3_binaries} ${sigproc_fc4_binaries} ${sigproc_fc5_binaries} 
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

@@ -7,60 +7,61 @@ include_directories (${CMAKE_INSTALL_PREFIX}/include ${PULSAR_BINARY_DIR}/apps/s
 
 set (sigproc_sources add_channels.c
 add_samples.c
-alfa_position.c
+#alfa_position.c
 aliases.c
 angle_split.c
 aoftm.c
 bandfactors.c
-bandpass.c
-barycentre.c
+#bandpass.c
+#barycentre.c
 bit.c
-blanker.c
+#blanker.c
 #bpp.c
 bpp2fb.c
-brute.c
+#brute.c
 cel2gal.c
 #cfits_subs.c
 chan_freqs.c
 #clip.c
 #clipper.c
 close_log.c
-conv.c
+#conv.c
 #convertSigM.c
 cprofc.c
-decimate.c
+#decimate.c
 decimate_data.c
 decimate_header.c
 #dedisperse.c
+dedisperse_data.c
 dedisperse_header.c
 deg2dms.c
-depolyco.c
-dice.c
+#depolyco.c
+#dice.c
 dmdelay.c
 dmshift.c
-downsample.c
+#downsample.c
 eraseDP.c
 error_message.c
-extract.c
-fake.c
-fbview.c
+#extract.c
+#fake.c
+#fbview.c
 fetch_hdrval.c
 ffreq.c
 file_exists.c
-filterbank.c
+#filterbank.c
 filterbank_header.c
-flatten.c
-flux.c
-fold.c
+#flatten.c
+#flux.c
+#fold.c
 fold_data.c
 fold_header.c
 fshift_prof.c
-getpulse.c
+#getpulse.c
 gmrt2fb.c
 #gmrt2fil.c
 #grayplot.c
-head_parse.c
-header.c
+#head_parse.c
+#header.c
 help.c
 ignored_channels.c
 indexx.c
@@ -68,8 +69,8 @@ inv_cerf.c
 lookup.c
 machine2prf.c
 mjd.c
-mkheader.c
-newfind.c
+#mkheader.c
+#newfind.c
 norm_prof.c
 np2.c
 nrselect.c
@@ -83,16 +84,16 @@ open_log.c
 pack_unpack.c
 #pgplotter.c
 phcalc.c
-polyco2period.c
+#polyco2period.c
 print_version.c
 process.c
 prof_adds.c
-prof_cent.c
+#prof_cent.c
 prof_ddis.c
 prof_sbas.c
 prof_sumc.c
 prof_sumifs.c
-profile.c
+#profile.c
 pspm2fb.c
 pspm_decode.c
 pspm_prof.c
@@ -106,8 +107,8 @@ read_aoscan.c
 read_block.c
 read_header.c
 read_polyco.c
-readchunk.c
-reader.c
+#readchunk.c
+#reader.c
 readtim.c
 recipes.c
 scale_prof.c
@@ -120,9 +121,9 @@ single_ch.c
 sizeof_file.c
 slalib.c
 smooth.c
-snrdm.c
-splice.c
-splitter.c
+#snrdm.c
+#splice.c
+#splitter.c
 ssm.c
 strings_equal.c
 submean.c
@@ -130,15 +131,15 @@ submedian.c
 swap_bytes.c
 thresh_1d.c
 #toi.c
-tree.c
-tune.c
+#tree.c
+#tune.c
 typeof_inputdata.c
 update_log.c
 uttime.c
 vanvleck.c
 vmax.c
 vmin.c
-wapp2fb.c
+#wapp2fb.c
 #wapp_header.c
 wapp_prof.c
 wappcorrect.c
@@ -147,8 +148,7 @@ write_epn.c
 write_profiles.c
 write_pulses.c
 ${PULSAR_BINARY_DIR}/apps/sigproc/y.tab.c
-${PULSAR_BINARY_DIR}/apps/sigproc/mkheaderlex.c
-dedisperse_data.c
+#${PULSAR_BINARY_DIR}/apps/sigproc/mkheaderlex.c
 )
 
 set (sigproc_binaries
@@ -181,11 +181,11 @@ set (sigproc_scripts
 add_library (sigproc STATIC ${sigproc_sources})
 
 target_link_libraries (sigproc
-  ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a
-  ${FFTW3_LIBRARIES}
-  ${CFITSIO_LIBRARIES}
-  ${PGPLOT_LIBRARIES}
-  ${X11_LIBRARIES}
+#  ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a
+#  ${FFTW3_LIBRARIES}
+#  ${CFITSIO_LIBRARIES}
+#  ${PGPLOT_LIBRARIES}
+#  ${X11_LIBRARIES}
   )
 
 if (UNIX)
@@ -238,6 +238,7 @@ add_subdirectory (fortran)
 ## Build instructions for executables
 
 add_executable (filterbank
+#  filterbank.c head_parse.c ${PULSAR_BINARY_DIR}/apps/sigproc/mkheaderlex.c wapp2fb.c
   filterbank.c head_parse.c wapp2fb.c
   )
 
@@ -250,7 +251,7 @@ add_executable (fake
   )
 
 add_executable (header
-  header.c
+  header.c head_parse.c
   )
 
 add_executable (bandpass
@@ -266,7 +267,7 @@ add_executable (decimate
   )
 
 add_executable (dedisperse
-  dedisperse.c
+  dedisperse.c head_parse.c  
   )
 
 add_executable (sigproc_fold
@@ -365,7 +366,7 @@ if (UNIX)
   )
  endif (APPLE)
 endif (UNIX)
-  target_link_libraries (${src} sigproc sigproc_fort ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${libm})
+  target_link_libraries (${src} sigproc sigproc_fort ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${FFTW3_LIBRARIES} ${CFITSIO_LIBRARIES} ${libm})
 endforeach (src)
 
 
@@ -377,7 +378,7 @@ foreach (src ${sigproc_fc_binaries})
     CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
     CMAKE_SHARED_LINKER_FLAGS ""
   )
-  target_link_libraries (${src} sigproc sigproc_fort ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${libm} ${PGPLOT_CPGPLOT_LIBRARY})
+  target_link_libraries (${src} sigproc sigproc_fort ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${FFTW3_LIBRARIES} ${CFITSIO_LIBRARIES} ${libm} ${PGPLOT_CPGPLOT_LIBRARY})
 endforeach (src)
 
 set (CMAKE_Fortran_COMPILER g77)

@@ -6,7 +6,7 @@ c
 c   Controls the command-line inputs to seek
 c
       include 'seek.inc'
-      integer narg,iargc,i,llog,p2,lun,f
+      integer narg,iargc,i,llog,p2,lun
       character*80 option,sfile
       logical dump,rspc,pmzap,mmzap,pulse,app,pzero,fftw,recon,prdh
       integer oldw
