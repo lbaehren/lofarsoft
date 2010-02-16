@@ -22,7 +22,7 @@ def run_casapy(infile, parset, start_time, end_time, increment):
 
 class casapy(LOFARrecipe):
     def __init__(self):
-        super(dppp, self).__init__()
+        super(casapy, self).__init__()
         self.optionparser.add_option(
             '--executable',
             dest="executable",
@@ -48,6 +48,22 @@ class casapy(LOFARrecipe):
             dest="gvds",
             help="G(V)DS file describing data to be processed"
         )
+        self.optionparser.add_option(
+            '--makevds-exec',
+            dest="makevds_exec",
+            help="makevds executable"
+        )
+        self.optionparser.add_option(
+            '--combinevds-exec',
+            dest="combinevds_exec",
+            help="combinevds executable"
+        )
+        self.optionparser.add_option(
+            '--max-bands-per-node',
+            dest="max_bands_per_node",
+            help="Maximum number of subbands to farm out to a given cluster node",
+            default="8"
+        )
 
     def go(self):
         self.logger.info("Starting CASApy run")
@@ -60,7 +76,7 @@ class casapy(LOFARrecipe):
         tc, mec = self._get_cluster()
         mec.push_function(
             dict(
-                run_dppp=run_dppp,
+                run_casapy=run_casapy,
                 build_available_list=utilities.build_available_list,
                 clear_available_list=utilities.clear_available_list
             )
@@ -160,4 +176,4 @@ class casapy(LOFARrecipe):
             return 0
 
 if __name__ == '__main__':
-    sys.exit(dppp().main())
+    sys.exit(casapy().main())
