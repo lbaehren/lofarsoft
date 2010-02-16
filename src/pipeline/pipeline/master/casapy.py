@@ -3,11 +3,12 @@ import sys, os
 
 # Local helpers
 from pipeline.support.lofarrecipe import LOFARrecipe
-from pipeline.support.ipython import LOFARTask
+from pipeline.support.ipython import LOFARTask, LOFARoutput
+from pipeline.support.group_data import group_files
 import pipeline.support.utilities as utilities
 from pipeline.support.clusterlogger import clusterlogger
 
-def run_casapy(ms_name, ms_outname, parset, log_location, executable, initscript):
+def run_casapy(infile, parset, start_time, end_time, increment):
     # Run on engine to process data with DPPP
     from pipeline.nodes.casapy import casapy_node
     return casapy_node(loghost=loghost, logport=logport).run(
@@ -25,7 +26,7 @@ class casapy(LOFARrecipe):
         self.optionparser.add_option(
             '--executable',
             dest="executable",
-            help="DPPP executable"
+            help="CASApy executable"
         )
         self.optionparser.add_option(
             '-p', '--parset',
@@ -38,8 +39,8 @@ class casapy(LOFARrecipe):
             help="Working directory used on compute nodes"
         )
         self.optionparser.add_option(
-            '-t', '--time-increment',
-            dest="time_increment",
+            '-t', '--increment',
+            dest="increment",
             help="Length of each image in seconds"
         )
         self.optionparser.add_option(
@@ -53,11 +54,6 @@ class casapy(LOFARrecipe):
         super(casapy, self).go()
 
         job_directory = self.config.get("layout", "job_directory")
-        ms_names = self.inputs['args']
-
-        gvds = utilities.get_parset(self.inputs['gvds'])
-        start_time = gvds['StartTime']
-        end_time = gvds['EndTime']
 
         # Connect to the IPython cluster and initialise it with
         # the funtions we need.
@@ -77,75 +73,91 @@ class casapy(LOFARrecipe):
         available_list = "%s%s" % (
             self.inputs['job_name'], self.__class__.__name__
         )
-        mec.push(dict(filenames=ms_names))
+        mec.push(dict(filenames=self.inputs['args']))
         mec.execute(
             "build_available_list(\"%s\")" % (available_list,)
         )
 
-        # clusterlogger context manager accepts networked logging
-        # from compute nodes.
-        with clusterlogger(self.logger) as (loghost, logport):
-            # Timer for total casapy job execution
-            with utilities.log_time(self.logger):
-                self.logger.debug("Logging to %s:%d" % (loghost, logport))
-                tasks = []
-                outnames = []
-                # Iterate over SB names, building and scheduling a casapy job
-                # for each one.
-                for ms_name in ms_names:
-                    outnames.append(
-                        os.path.join(
-                            self.inputs['working_directory'],
-                            self.inputs['job_name'],
-                            os.path.basename(ms_name) + self.inputs['suffix']
+        clusterdesc = ClusterDesc(
+            self.config.get('cluster', 'clusterdesc')
+        )
+
+        for data_group in group_files(
+            self.logger,
+            clusterdesc,
+            os.path.join(self.inputs['working_directory'], self.inputs['job_name']),
+            int(self.inputs['max_bands_per_node'],
+            self.inputs['args']
+        ):
+            self.logger.debug("Processing: " + str(data_group))
+            self.logger.info("Calling vdsmaker")
+            inputs = LOFARinput(self.inputs)
+            inputs['directory'] = self.config.get('layout', 'vds_directory')
+            inputs['gvds'] = self.inputs['gvds']
+            inputs['args'] = data_group
+            inputs['makevds'] = self.inputs['makevds_exec']
+            inputs['combinevds'] = self.inputs['combinevds_exec']
+            outputs = LOFARoutput()
+            if self.cook_recipe('vdsmaker', inputs, outputs):
+                self.logger.warn("vdsmaker reports failure")
+                return 1
+
+
+            gvds = utilities.get_parset(self.inputs['gvds'])
+            start_time = gvds['StartTime']
+            end_time = gvds['EndTime']
+
+            # clusterlogger context manager accepts networked logging
+            # from compute nodes.
+            with clusterlogger(self.logger) as (loghost, logport):
+                # Timer for total casapy job execution
+                with utilities.log_time(self.logger):
+                    self.logger.debug("Logging to %s:%d" % (loghost, logport))
+                    tasks = []
+                    # Iterate over SB names, building and scheduling a casapy job
+                    # for each one.
+                    for ms_name in data_group:
+                        task = LOFARTask(
+                            "result = run_casapy(infile, parset, start_time, end_time, increment)",
+                            push=dict(
+                                infile=ms_name,
+                                parset=self.inputs['parset'],
+                                start_time=start_time,
+                                end_time=end_time,
+                                increment=self.inputs['increment'],
+                                loghost=loghost,
+                                logport=logport
+                            ),
+                            pull="result",
+                            depend=utilities.check_for_path,
+                            dependargs=(ms_name, available_list)
                         )
-                    )
-                    log_location = os.path.join(
-                        self.config.get('layout', 'log_directory'),
-                        'dppp'
-                    )
-                    task = LOFARTask(
-                        "result = run_casapy(ms_name, ms_outname, parset, log_location, executable, initscript)",
-                        push=dict(
-                            ms_name=ms_name,
-                            ms_outname=outnames[-1],
-                            parset=self.inputs['parset'],
-                            log_location=log_location,
-                            executable=self.inputs['executable'],
-                            initscript=self.inputs['initscript'],
-                            loghost=loghost,
-                            logport=logport
-                        ),
-                        pull="result",
-                        depend=utilities.check_for_path,
-                        dependargs=(ms_name, available_list)
-                    )
-                    self.logger.info("Scheduling processing of %s" % (ms_name,))
-                    if self.inputs['dry_run'] == "False":
-                        self.inputs['dry_run'] = False
-                    if not self.inputs['dry_run']:
-                        tasks.append(tc.run(task))
-                    else:
-                        self.logger.info("Dry run: scheduling skipped")
+                        self.logger.info("Scheduling processing of %s" % (ms_name,))
+                        if self.inputs['dry_run'] == "False":
+                            self.inputs['dry_run'] = False
+                        if not self.inputs['dry_run']:
+                            tasks.append(tc.run(task))
+                        else:
+                            self.logger.info("Dry run: scheduling skipped")
 
-                # Wait for all jobs to finish
-                self.logger.info("Waiting for all DPPP tasks to complete")
-                tc.barrier(tasks)
+                    # Wait for all jobs to finish
+                    self.logger.info("Waiting for all DPPP tasks to complete")
+                    tc.barrier(tasks)
 
-        failure = False
-        for task in tasks:
-            ##### Print failing tasks?
-            ##### Abort if all tasks failed?
-            res = tc.get_task_result(task)
-            if res.failure:
-                self.logger.warn("Task %s failed" % (task))
-                self.logger.warn(res)
-                self.logger.warn(res.failure.getTraceback())
-                failure = True
-        if failure:
-            return 1
-        self.outputs['data'] = outnames
-        return 0
+            failure = False
+            for task in tasks:
+                ##### Print failing tasks?
+                ##### Abort if all tasks failed?
+                res = tc.get_task_result(task)
+                if res.failure:
+                    self.logger.warn("Task %s failed" % (task))
+                    self.logger.warn(res)
+                    self.logger.warn(res.failure.getTraceback())
+                    failure = True
+            if failure:
+                return 1
+            self.outputs['data'] = outnames
+            return 0
 
 if __name__ == '__main__':
     sys.exit(dppp().main())

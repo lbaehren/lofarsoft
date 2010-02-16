@@ -44,7 +44,8 @@ class casapy_node(LOFARnode):
                 tmp_parset_filename = patch_parset(
                     parset, {
                         'Selection.timerange': time_range,
-                        'Image.name': '-' + str(int(time.mktime(process_start.timetuple())))
+                        'Image.name': '-' + str(int(time.mktime(process_start.timetuple()))),
+                        'dataset': infile
                     }
                 )
 
