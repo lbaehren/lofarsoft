@@ -819,6 +819,7 @@ ConfigData config;
 
 // Set default configuration values for the pipeline
 bool both_pol = false;		      // Should both polarizations be processed?
+bool three_pol = false;                // Should all three polarizations be processed?
 UInt_t randomSeed = 1;                // random seed for root random number generator
 
 // Event parameters for calling the pipeline
@@ -910,12 +911,14 @@ void readConfigFile (const string &filename)
    _doTVcal->addAllowedValue(-1);
    config.addType("doTVcal", _doTVcal);
 
-   StringType* _polarization = new StringType("ANY");  // polarization: ANY (=don't care), EW, NS or BOTH
+   StringType* _polarization = new StringType("ANY");  // polarization: ANY (=don't care), EW, NS, VE, BOTH or THREE
    _polarization->addAllowedValue("ANY");
    _polarization->addAllowedValue("EW");
    _polarization->addAllowedValue("NS");
    _polarization->addAllowedValue("BOTH");
-   config.addType("polarization", _polarization);
+   _polarization->addAllowedValue("VE");
+   _polarization->addAllowedValue("THREE");
+  config.addType("polarization", _polarization);
 
    StringType* _rootFileMode = new StringType("RECREATE");      // Mode, how to access root file
    _rootFileMode->addAllowedValue("RECREATE");
@@ -933,6 +936,11 @@ void readConfigFile (const string &filename)
    else
      both_pol = false;
      
+   if(config["polarization"]->sValue() == "THREE")
+     three_pol = true;
+   else
+     three_pol = false;
+
    // set random seed to start value  
    randomSeed = config["startRandomSeed"]->uiValue();  
 }
@@ -1240,40 +1248,42 @@ bool getNextEvent()
 
 int main (int argc, char *argv[])
 {
-  Record results;					 // results of the pipeline
+ Record results;                                        // results of the pipeline
 
   // variables for reconstruction information (output of pipeline)
+
   unsigned int gt = 0;
-  char eventfilename[64] ;			         // Name of event file (first 64 characters)
-  double CCheight, CCheight_NS;                          // CCheight will be used for EW polarization or ANY polarization
-  double CCwidth, CCwidth_NS;
-  double CCheight_error, CCheight_error_NS;
-  bool CCconverged, CCconvergedNS;                       // is true if the Gaussian fit to the CCbeam converged
-  double Xheight, Xheight_NS;                            // CCheight will be used for EW polarization or ANY polarization
-  double Xheight_error, Xheight_error_NS;
-  bool Xconverged, XconvergedNS;                         // is true if the Gaussian fit to the CCbeam converged
-  double AzL, ElL, AzL_NS, ElL_NS;                       // Azimuth and Elevation
-  double distanceResult = 0, distanceResultNS = 0;       // distance = radius of curvature
-  double R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0;             // R_0 from lateral distribution exponential fit
-  double eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0;             // Epsilon from lateral distribution exponential fit
-  double chi2NDF = 0, chi2NDF_NS = 0;                                // Chi^2/NDF of lateral distribution exponential fit
-  double kPow = 0, sigkPow = 0, kPow_NS = 0, sigkPow_NS = 0;         // k from lateral distribution power law fit
-  double epsPow = 0, sigepsPow = 0, epsPow_NS = 0, sigepsPow_NS = 0; // Epsilon from lateral distribution power law fit
-  double chi2NDFPow = 0, chi2NDFPow_NS = 0;                          // Chi^2/NDF of lateral distribution power law fit
+  char eventfilename[64] ;                               // Name of event file (first 64 characters)
+  double CCheight, CCheight_NS, CCheight_VE;                          // CCheight will be used for EW polarization or ANY polarization
+  double CCwidth, CCwidth_NS, CCwidth_VE;
+  double CCheight_error, CCheight_error_NS, CCheight_error_VE;
+  bool CCconverged, CCconvergedNS, CCconvergedVE;                       // is true if the Gaussian fit to the CCbeam converged
+  double Xheight, Xheight_NS, Xheight_VE;                            // CCheight will be used for EW polarization or ANY polarization
+  double Xheight_error, Xheight_error_NS, Xheight_error_VE;
+  bool Xconverged, XconvergedNS, XconvergedVE;                         // is true if the Gaussian fit to the CCbeam converged
+  double AzL, ElL, AzL_NS, ElL_NS, AzL_VE, ElL_VE;                       // Azimuth and Elevation
+  double distanceResult = 0, distanceResultNS = 0, distanceResultVE = 0;       // distance = radius of curvature
+  double R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;             // R_0 from lateral distribution exponential fit
+  double eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;             // Epsilon from lateral distribution exponential fit
+  double chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;                                // Chi^2/NDF of lateral distribution exponential fit
+  double kPow = 0, sigkPow = 0, kPow_NS = 0, sigkPow_NS = 0, kPow_VE = 0, sigkPow_VE = 0;         // k from lateral distribution power law fit
+  double epsPow = 0, sigepsPow = 0, epsPow_NS = 0, sigepsPow_NS = 0, epsPow_VE = 0, sigepsPow_VE = 0; // Epsilon from lateral distribution power law fit
+  double chi2NDFPow = 0, chi2NDFPow_NS = 0, chi2NDFPow_VE = 0;                          // Chi^2/NDF of lateral distribution power law fit
   map <int,PulseProperties> rawPulsesMap;                // pulse properties of pules in raw data traces
   map <int,PulseProperties> calibPulsesMap;              // pulse properties of pules in calibrated data traces
-  bool goodEW = false, goodNS = false;                // true if reconstruction worked
-  double rmsCCbeam, rmsCCbeam_NS;                        // rms values of the beams in remote region
-  double rmsXbeam, rmsXbeam_NS;
-  double rmsPbeam, rmsPbeam_NS;
+  bool goodEW = false, goodNS = false, goodVE = false;                // true if reconstruction worked
+  double rmsCCbeam, rmsCCbeam_NS, rmsCCbeam_VE;                        // rms values of the beams in remote region
+  double rmsXbeam, rmsXbeam_NS, rmsXbeam_VE;
+  double rmsPbeam, rmsPbeam_NS, rmsPbeam_VE;
   unsigned int NCCbeamAntennas = 0, NlateralAntennas = 0; // antennas used for CC beam and lateral distribution
   unsigned int NCCbeamAntennas_NS = 0, NlateralAntennas_NS = 0; // antennas used for CC beam and lateral distribution
-  int CutCloseToCore, CutCloseToCore_NS;              // # of cut antennas in lateral distribution fit
-  int CutSmallSignal, CutSmallSignal_NS;              // # of cut antennas in lateral distribution fit
-  int CutBadTiming, CutBadTiming_NS;                  // # of cut antennas in lateral distribution fit
-  int CutSNR, CutSNR_NS;                              // # of cut antennas in lateral distribution fit
-  double latMeanDist, latMeanDist_NS;                 // mean distance of the antennas in the lateral distribution
-  double latMeanDistCC, latMeanDistCC_NS;             // mean distance of the antennas used for the CC beam
+  unsigned int NCCbeamAntennas_VE = 0, NlateralAntennas_VE = 0; // antennas used for CC beam and lateral distribution
+  int CutCloseToCore, CutCloseToCore_NS, CutCloseToCore_VE;              // # of cut antennas in lateral distribution fit
+  int CutSmallSignal, CutSmallSignal_NS, CutSmallSignal_VE;              // # of cut antennas in lateral distribution fit
+  int CutBadTiming, CutBadTiming_NS, CutBadTiming_VE;                  // # of cut antennas in lateral distribution fit
+  int CutSNR, CutSNR_NS, CutSNR_VE;                              // # of cut antennas in lateral distribution fit
+  double latMeanDist, latMeanDist_NS, latMeanDist_VE;                 // mean distance of the antennas in the lateral distribution
+  double latMeanDistCC, latMeanDistCC_NS, latMeanDistCC_VE;             // mean distance of the antennas used for the CC beam
   PulseProperties* rawPulses[MAX_NUM_ANTENNAS];       // use array of pointers to store pulse properties in root tree
   PulseProperties* calibPulses[MAX_NUM_ANTENNAS];     // use array of pointers to store pulse properties in root tree
   PulseProperties* meanRawPulses[MAX_NUM_ANTENNAS];   // mean pulse properties of all events
@@ -1521,7 +1531,7 @@ int main (int argc, char *argv[])
           }  
         }
       }
-      if ( (config["polarization"]->sValue() == "EW") || (config["polarization"]->sValue() == "BOTH")) {
+      if ( (config["polarization"]->sValue() == "EW") || (config["polarization"]->sValue() == "BOTH") || (config["polarization"]->sValue() == "THREE") ) {
         roottree->Branch("AzL_EW",&AzL,"AzL_EW/D");
         roottree->Branch("ElL_EW",&ElL,"ElL_EW/D");
         roottree->Branch("Distance_EW",&distanceResult,"Distance_EW/D");	// radius of curvature
@@ -1559,7 +1569,7 @@ int main (int argc, char *argv[])
           }  
         }
       }
-      if ( (config["polarization"]->sValue() == "NS") || (config["polarization"]->sValue() == "BOTH")) {
+      if ( (config["polarization"]->sValue() == "NS") || (config["polarization"]->sValue() == "BOTH") || (config["polarization"]->sValue() == "THREE") ) {
         roottree->Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
         roottree->Branch("ElL_NS",&ElL_NS,"ElL_NS/D");
         roottree->Branch("Distance_NS",&distanceResultNS,"Distance_NS/D");	// radius of curvature
@@ -1595,6 +1605,44 @@ int main (int argc, char *argv[])
             roottree->Branch("sigepsPow_NS",&sigepsPow_NS,"sigepsPow_NS/D");
             roottree->Branch("chi2NDFPow_NS",&chi2NDFPow_NS,"chi2NDFPow_NS/D");
           }   
+        }
+      }
+      if ( (config["polarization"]->sValue() == "VE") || (config["polarization"]->sValue() == "THREE") ) {
+        roottree->Branch("AzL_VE",&AzL_NS,"AzL_VE/D");
+        roottree->Branch("ElL_VE",&ElL_NS,"ElL_VE/D");
+        roottree->Branch("Distance_VE",&distanceResultNS,"Distance_VE/D");      // radius of curvature
+        roottree->Branch("CCheight_VE",&CCheight_NS,"CCheight_VE/D");
+        roottree->Branch("CCwidth_VE",&CCwidth_NS,"CCwidth_VE/D");
+        roottree->Branch("CCheight_error_VE",&CCheight_error_NS,"CCheight_error_VE/D");
+        roottree->Branch("CCconverged_VE",&CCconverged,"CCconverged_VE/B");
+        roottree->Branch("Xheight_VE",&Xheight_NS,"Xheight_VE/D");
+        roottree->Branch("Xheight_error_VE",&Xheight_error_NS,"Xheight_error_VE/D");
+        roottree->Branch("Xconverged_VE",&Xconverged,"Xconverged_VE/B");
+        roottree->Branch("goodReconstructed_VE",&goodNS,"goodReconstructed_VE/B");
+        roottree->Branch("rmsCCbeam_VE",&rmsCCbeam_NS,"rmsCCbeam_VE/D");
+        roottree->Branch("rmsXbeam_VE",&rmsXbeam_NS,"rmsXbeam_VE/D");
+        roottree->Branch("rmsPbeam_VE",&rmsPbeam_NS,"rmsPbeam_Ve/D");
+        roottree->Branch("latMeanDistCC_VE",&latMeanDistCC_NS,"latMeanDistCC_VE/D");
+        roottree->Branch("NCCbeamAntennas_VE",&NCCbeamAntennas_NS,"NCCbeamAntennas_VE/I");
+        if (config["lateralDistribution"]->bValue()) {
+          roottree->Branch("R_0_VE",&R_0_NS,"R_0_VE/D");
+          roottree->Branch("sigR_0_VE",&sigR_0_NS,"sigR_0_VE/D");
+          roottree->Branch("eps_VE",&eps_NS,"eps_VE/D");
+          roottree->Branch("sigeps_VE",&sigeps_NS,"sigeps_VE/D");
+          roottree->Branch("chi2NDF_VE",&chi2NDF_NS,"chi2NDF_VE/D");
+          roottree->Branch("CutCloseToCore_VE",&CutCloseToCore_NS,"CutCloseToCore_VE/I");
+          roottree->Branch("CutSmallSignal_VE",&CutSmallSignal_NS,"CutSmallSignal_VE/I");
+          roottree->Branch("CutBadTiming_VE",&CutBadTiming_NS,"CutBadTiming_VE/I");
+          roottree->Branch("CutSNR_VE",&CutSNR_NS,"CutSNR_VE/I");
+          roottree->Branch("latMeanDist_VE",&latMeanDist_NS,"latMeanDist_VE/D");
+          roottree->Branch("NlateralAntennas_VE",&NlateralAntennas_NS,"NlateralAntennas_VE/I");
+          if (config["lateralPowerLaw"]->bValue()) {
+            roottree->Branch("kPow_VE",&kPow_NS,"kPow_VE/D");
+            roottree->Branch("sigkPow_VE",&sigkPow_NS,"sigkPow_VE/D");
+            roottree->Branch("epsPow_VE",&epsPow_NS,"epsPow_VE/D");
+            roottree->Branch("sigepsPow_VE",&sigepsPow_NS,"sigepsPow_VE/D");
+            roottree->Branch("chi2NDFPow_VE",&chi2NDFPow_NS,"chi2NDFPow_VE/D");
+          }
         }
       }
     } //if
@@ -1658,7 +1706,7 @@ int main (int argc, char *argv[])
       // if they are not set to true during reconstruction the event is not written into the root file
       goodEW = false;
       goodNS = false;
-
+      goodVE = false;
       // Generate cstring with a length of 64 characters to write to the root file, using the eventname
       string eventname_ =  eventname;
       // deletes the file path, if it exists    
@@ -1670,34 +1718,36 @@ int main (int argc, char *argv[])
 
       // reset all resuls to 0
       gt = 0;
-      CCheight = 0, CCheight_NS = 0;
-      CCwidth = 0, CCwidth_NS = 0;
-      CCheight_error = 0, CCheight_error_NS = 0;
-      CCconverged = 0, CCconvergedNS = 0;
-      Xheight = 0, Xheight_NS = 0;
-      Xheight_error = 0, Xheight_error_NS = 0;
-      Xconverged = 0, XconvergedNS = 0;
-      AzL = 0, ElL = 0, AzL_NS = 0, ElL_NS = 0;
-      distanceResult = 0, distanceResultNS = 0;
-      R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0;
-      eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0;
-      chi2NDF = 0, chi2NDF_NS = 0;
-      kPow = 0, sigkPow = 0, kPow_NS = 0, sigkPow_NS = 0;
-      epsPow = 0, sigepsPow = 0, epsPow_NS = 0, sigepsPow_NS = 0;
-      chi2NDFPow = 0, chi2NDFPow_NS = 0;
-      rmsCCbeam = 0, rmsXbeam = 0, rmsPbeam = 0;
+      CCheight = 0, CCheight_NS = 0, CCheight_VE = 0;
+      CCwidth = 0, CCwidth_NS = 0, CCwidth_VE = 0;
+      CCheight_error = 0, CCheight_error_NS = 0, CCheight_error_VE = 0;
+      CCconverged = 0, CCconvergedNS = 0, CCconvergedVE = 0;
+      Xheight = 0, Xheight_NS = 0, Xheight_VE = 0;
+      Xheight_error = 0, Xheight_error_NS = 0, Xheight_error_VE = 0;
+      Xconverged = 0, XconvergedNS = 0, XconvergedVE = 0;
+      AzL = 0, ElL = 0, AzL_NS = 0, ElL_NS = 0, AzL_VE = 0, ElL_VE = 0;
+      distanceResult = 0, distanceResultNS = 0, distanceResultVE = 0;
+      R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;
+      eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;
+      chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;
+      kPow = 0, sigkPow = 0, kPow_NS = 0, sigkPow_NS = 0, kPow_VE = 0, sigkPow_VE = 0;
+      epsPow = 0, sigepsPow = 0, epsPow_NS = 0, sigepsPow_NS = 0, epsPow_VE = 0, sigepsPow_VE = 0;
+      chi2NDFPow = 0, chi2NDFPow_NS = 0, chi2NDFPow_VE = 0;
+      rmsCCbeam = 0, rmsXbeam = 0, rmsPbeam = 0 ;
       rmsCCbeam_NS = 0, rmsXbeam_NS = 0, rmsPbeam_NS = 0;
+      rmsCCbeam_VE = 0, rmsXbeam_VE = 0, rmsPbeam_VE = 0;
       NCCbeamAntennas = 0, NlateralAntennas = 0;
       NCCbeamAntennas_NS = 0, NlateralAntennas_NS = 0;
-      CutCloseToCore = 0, CutCloseToCore_NS = 0;
-      CutSmallSignal = 0, CutSmallSignal_NS = 0;
-      CutBadTiming = 0, CutBadTiming_NS = 0;
-      CutSNR = 0, CutSNR_NS = 0;
-      latMeanDist = 0, latMeanDist_NS = 0;
-      latMeanDistCC = 0, latMeanDistCC_NS = 0;
+      NCCbeamAntennas_VE = 0, NlateralAntennas_VE = 0;
+      CutCloseToCore = 0, CutCloseToCore_NS = 0, CutCloseToCore_VE = 0;
+      CutSmallSignal = 0, CutSmallSignal_NS = 0, CutSmallSignal_VE = 0;
+      CutBadTiming = 0, CutBadTiming_NS = 0, CutBadTiming_VE = 0;
+      CutSNR = 0, CutSNR_NS = 0, CutSNR_VE = 0;
+      latMeanDist = 0, latMeanDist_NS = 0, latMeanDist_VE = 0;
+      latMeanDistCC = 0, latMeanDistCC_NS = 0, latMeanDistCC_VE = 0;
       rawPulsesMap = map <int,PulseProperties>();
       calibPulsesMap = map <int,PulseProperties>();
-      
+ 
       // increase random seed
       ++randomSeed;
 
@@ -1760,8 +1810,8 @@ int main (int argc, char *argv[])
           antIDs = eventPipeline.getAntennaIDs();
         }
       } else {
-        if ( (config["polarization"]->sValue() == "ANY") || (config["polarization"]->sValue() == "EW") || both_pol) {
-          if (both_pol) {
+        if ( (config["polarization"]->sValue() == "ANY") || (config["polarization"]->sValue() == "EW") || both_pol || three_pol ) {
+          if (both_pol || three_pol) {
             cout << "\nPipeline is started for East-West Polarization.\n" << endl;
             polPlotPrefix = "-EW";
             config["polarization"]->setValue("EW");	// do EW here
@@ -1888,8 +1938,8 @@ int main (int argc, char *argv[])
           }
         }
 
-        if ( (config["polarization"]->sValue() == "NS") || both_pol) {
-          if (both_pol) {
+        if ( (config["polarization"]->sValue() == "NS") || both_pol || three_pol ) {
+          if (both_pol || three_pol) {
             cout << "\nPipeline is started for North-South Polarization.\n" << endl;
             polPlotPrefix = "-NS";
             config["polarization"]->setValue("NS");	// do NS here
@@ -1994,6 +2044,137 @@ int main (int argc, char *argv[])
                 epsPow_NS = results.asDouble("epsPow");
                 sigepsPow_NS = results.asDouble("sigepsPow");
                 chi2NDFPow_NS = results.asDouble("chi2NDFPow");
+              }
+            }
+
+            // plot lateral distribution of arrival times, if requested
+            if (config["lateralTimeDistribution"]->bValue())
+              eventPipeline.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",results, core_x, core_y);
+
+            // get the pulse properties and insert them into allready existing EW map
+            // (which will be empty, if polarization = EW, but still existing
+            map <int,PulseProperties> newPulses(eventPipeline.getRawPulseProperties());
+            rawPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
+            newPulses = eventPipeline.getCalibPulseProperties();
+            calibPulsesMap.insert(newPulses.begin(), newPulses.end()) ;
+
+            // getting necessary data to plot [added: mfranc]
+            if(config["eventDisplayPlot"]->bValue()) {
+              antPos = eventPipeline.getAntennaPositions();
+              antIDs = eventPipeline.getAntennaIDs();
+            }
+          } else {
+            cout << "\nEvent '" << eventname << "' could not be reconstructed for '"
+                 << config["polarization"]->sValue() << "' polarization, skipping..." << endl;
+          }
+        }
+
+        if ( (config["polarization"]->sValue() == "VE") || three_pol ) {
+          if (three_pol) {
+            cout << "\nPipeline is started for VE Polarization.\n" << endl;
+            polPlotPrefix = "-VE";
+            config["polarization"]->setValue("VE");     // do VE here
+          }
+
+          // initialize the pipeline
+          analyseLOPESevent2 eventPipeline;
+          eventPipeline.initPipeline(obsrec);
+
+          // set parameters of pipeline
+          eventPipeline.setMinBeamformingAntennasCut(config["minBeamformingAntennas"]->uiValue());
+          eventPipeline.setPlotInterval(config["plotStart"]->dValue(),config["plotStop"]->dValue());
+          eventPipeline.setSpectrumInterval(config["spectrumStart"]->dValue(),config["spectrumStop"]->dValue());
+          eventPipeline.setFreqInterval(config["freqStart"]->dValue(),config["freqStop"]->dValue());
+          eventPipeline.setCCWindowWidth(config["ccWindowWidth"]->dValue());
+          eventPipeline.setUpsamplingExponent(config["upsamplingExponent"]->uiValue());
+          eventPipeline.setLateralSNRcut(config["lateralSNRcut"]->dValue());
+          eventPipeline.setLateralTimeCut(config["lateralTimeCut"]->dValue());
+          eventPipeline.setCoreError(coreError);
+          eventPipeline.setAzimuthError(azimuthError);
+          eventPipeline.setZenithError(zenithError);
+
+          // call the pipeline with an extra delay = 0.
+          results = eventPipeline.RunPipeline (config["path"]->sValue()+eventname,
+                                               azimuth,
+                                               elevation,
+                                               radiusOfCurvature,
+                                               core_x,
+                                               core_y,
+                                               config["RotatePos"]->bValue(),
+                                               plotprefix+polPlotPrefix,
+                                               config["generatePlots"]->bValue(),
+                                               config["generateSpectra"]->bValue(),
+                                               static_cast< Vector<int> >(config.getFlagged()),
+                                               config["verbose"]->bValue(),
+                                               config["simplexFit"]->bValue(),
+                                               0.,
+                                               config["doTVcal"]->iValue(),
+                                               config["doGainCal"]->bValue(),
+                                               config["doDispersionCal"]->bValue(),
+                                               config["doDelayCal"]->bValue(),
+                                               config["doRFImitigation"]->bValue(),
+                                               config["doFlagNotActiveAnts"]->bValue(),
+                                               config["doAutoFlagging"]->bValue(),
+                                               config["upsamplingRate"]->dValue(),
+                                               config["polarization"]->sValue(),
+                                               config["singlePlots"]->bValue(),
+                                               config["PlotRawData"]->bValue(),
+                                               config["CalculateMaxima"]->bValue(),
+                                               config["listCalcMaxima"]->bValue(),
+                                               config["printShowerCoordinates"]->bValue(),
+                                               config["ignoreDistance"]->bValue(),
+                                               config["randomDelay"]->dValue(),
+                                               randomSeed);
+
+          // adding results to variables (needed to fill them into the root tree)
+          goodVE = results.asBool("goodReconstructed");
+          AzL_VE = results.asDouble("Azimuth");
+          ElL_VE = results.asDouble("Elevation");
+          distanceResultVE = results.asDouble("Distance");
+          CCheight_VE = results.asDouble("CCheight");
+          CCwidth_VE = results.asDouble("CCwidth");
+          CCheight_error_VE = results.asDouble("CCheight_error");
+          CCconvergedVE = results.asBool("CCconverged");
+          Xheight_VE = results.asDouble("Xheight");
+          Xheight_error_VE = results.asDouble("Xheight_error");
+          XconvergedVE = results.asBool("Xconverged");
+          rmsCCbeam_VE = results.asDouble("rmsCCbeam");
+          rmsXbeam_VE = results.asDouble("rmsXbeam");
+          rmsPbeam_VE = results.asDouble("rmsPbeam");
+          latMeanDistCC_VE = results.asDouble("meandist");
+          NCCbeamAntennas_VE = results.asuInt("NCCbeamAntennas");
+          gt = results.asuInt("Date");
+
+          // if event was good reconstructed, then try additional steps
+          if (goodNS) {
+            /* make a postscript with a summary of all plots
+             if summaryColumns = 0 the method does not create a summary. */
+            eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",config["summaryColumns"]->uiValue());
+
+            // create a special file for the lateral distribution output
+            if (config["lateralOutputFile"]->bValue())
+              eventPipeline.createLateralOutput("lateral"+polPlotPrefix+"-",results, core_x, core_y);
+
+            // generate the lateral distribution
+            if (config["lateralDistribution"]->bValue()) {
+              eventPipeline.fitLateralDistribution("lateral"+polPlotPrefix+"-",results, core_x, core_y, config["lateralPowerLaw"]->bValue());
+              R_0_VE = results.asDouble("R_0");
+              sigR_0_VE = results.asDouble("sigR_0");
+              eps_VE = results.asDouble("eps");
+              sigeps_VE = results.asDouble("sigeps");
+              chi2NDF_VE = results.asDouble("chi2NDF");
+              CutCloseToCore_VE = results.asInt("CutCloseToCore");
+              CutSmallSignal_VE = results.asInt("CutSmallSignal");
+              CutBadTiming_VE = results.asInt("CutBadTiming");
+              CutSNR_VE = results.asInt("CutSNR");
+              latMeanDist_VE = results.asDouble("latMeanDist");
+              NlateralAntennas_VE = results.asuInt("NlateralAntennas");
+              if (config["lateralPowerLaw"]->bValue()) {
+                kPow_VE = results.asDouble("kPow");
+                sigkPow_VE = results.asDouble("sigkPow");
+                epsPow_VE = results.asDouble("epsPow");
+                sigepsPow_VE = results.asDouble("sigepsPow");
+                chi2NDFPow_VE = results.asDouble("chi2NDFPow");
               }
             }
 
@@ -2151,7 +2332,7 @@ int main (int argc, char *argv[])
       // write information of last event to root file
       if (config["rootFileName"]->sValue() != "") {
         // check if event was reconstructed or if also bad events shall be written to the root file
-        if (goodEW || goodNS || config["writeBadEvents"]->bValue()) {
+        if (goodEW || goodNS || goodVE || config["writeBadEvents"]->bValue()) {
           cout << "Adding results to root tree and saving root file \"" << config["rootFileName"]->sValue() << "\"\n" << endl;
           roottree->Fill();
           rootfile->Write("",TObject::kOverwrite);
