@@ -414,7 +414,7 @@ inline T square(T val)
 {
   return val*val;
 }
-
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
 //$DOCSTRING: Implementation of the Gauss function
@@ -818,7 +818,7 @@ IterValueType HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
   to a scratch vector and then call this function with the scratch vector!
 */
 template <class Iter>
-IterValueType HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
 {
   sort(vec,vec_end);
 }
