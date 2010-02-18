@@ -11,7 +11,7 @@ from pipeline.support.clusterlogger import clusterlogger
 from pipeline.support.clusterdesc import ClusterDesc
 
 def run_casapy(infile, parset, start_time, end_time, increment):
-    # Run on engine to process data with DPPP
+    # Run on engine to process data with Casapy
     from pipeline.nodes.casapy import casapy_node
     return casapy_node(loghost=loghost, logport=logport).run(
         ms_name,
@@ -33,7 +33,7 @@ class casapy(LOFARrecipe):
         self.optionparser.add_option(
             '-p', '--parset',
             dest="parset",
-            help="Parset containing configuration for DPPP"
+            help="Parset containing configuration for CASAPY"
         )
         self.optionparser.add_option(
             '-w', '--working-directory',
@@ -163,7 +163,7 @@ class casapy(LOFARrecipe):
                             self.logger.info("Dry run: scheduling skipped")
 
                     # Wait for all jobs to finish
-                    self.logger.info("Waiting for all DPPP tasks to complete")
+                    self.logger.info("Waiting for all CASApy tasks to complete")
                     tc.barrier(tasks)
 
             failure = False
