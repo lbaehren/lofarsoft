@@ -121,7 +121,11 @@ class casapy(LOFARrecipe):
                 return 1
 
 
-            gvds = utilities.get_parset(self.inputs['gvds'])
+            gvds = utilities.get_parset(
+                os.path.join(
+                    self.config.get('layout', 'vds_directory'), self.inputs['gvds']
+                )
+            )
             start_time = gvds['StartTime']
             end_time = gvds['EndTime']
 
