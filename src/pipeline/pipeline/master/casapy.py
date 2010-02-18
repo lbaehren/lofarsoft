@@ -14,12 +14,11 @@ def run_casapy(infile, parset, start_time, end_time, increment):
     # Run on engine to process data with Casapy
     from pipeline.nodes.casapy import casapy_node
     return casapy_node(loghost=loghost, logport=logport).run(
-        ms_name,
-        ms_outname,
+        infile,
         parset,
-        log_location,
-        executable,
-        initscript
+        start_time,
+        end_time,
+        increment
     )
 
 class casapy(LOFARrecipe):

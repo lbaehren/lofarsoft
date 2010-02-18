@@ -13,7 +13,7 @@ import pipeline.support.utilities as utilities
 CASA_DATE_FORMAT = "%Y/%m/%d/%H:%M:%S.000"
 
 class casapy_node(LOFARnode):
-    def run(self, infile, parset, start_time, end_time, increment)
+    def run(self, infile, parset, start_time, end_time, increment):
         # Time execution of this job
         with log_time(self.logger):
             self.logger.info("Processing %s" % (infile,))
