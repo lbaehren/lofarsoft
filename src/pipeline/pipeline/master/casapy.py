@@ -2,11 +2,13 @@ from __future__ import with_statement
 import sys, os
 
 # Local helpers
-from pipeline.support.lofarrecipe import LOFARrecipe, LOFARoutput
+from pipeline.support.lofarrecipe import LOFARrecipe
+from pipeline.support.lofaringredient import LOFARoutput, LOFARinput
 from pipeline.support.ipython import LOFARTask
 from pipeline.support.group_data import group_files
 import pipeline.support.utilities as utilities
 from pipeline.support.clusterlogger import clusterlogger
+from pipeline.support.clusterdesc import ClusterDesc
 
 def run_casapy(infile, parset, start_time, end_time, increment):
     # Run on engine to process data with DPPP
