@@ -14,8 +14,8 @@
 
 
 #include <GUI/hfdefs.h>
-#include <GUI/hfcast.h> 
-#include <GUI/hffuncs.awk.h>  
+#include <GUI/hfcast.h>
+#include <GUI/hffuncs.awk.h>
 #include <crtools.h>
 
 #include "IO/LopesEventIn.h"
@@ -37,47 +37,61 @@
 //________________________________________________________________________
 //                                                     Function Definition
 
-template <class Iter> 
-HInteger hFindLowerBound(const Iter data_start, 
-			 const Iter data_end, 
+template <class Iter>
+HInteger hFindLowerBound(const Iter data_start,
+			 const Iter data_end,
 			 const typename iterator_traits<Iter>::value_type value);
 
 //Testing c-style arrays and pointers wrapper ...
 HInteger hFindLowerBound(const HNumber* data_start,
-			 const HInteger len, 
-			 const HNumber value); 
+			 const HInteger len,
+			 const HNumber value);
 
-template <class Iter> 
+template <class Iter>
 void hNegate(const Iter data_start,
 	     const Iter data_end);
 
-template <class Iter> 
+template <class Iter>
 void hFill(const Iter data_start,
-	   const Iter data_end, 
+	   const Iter data_end,
 	   const IterValueType fill_value);
 
-template <class Iter> 
+template <class Iter>
 IterValueType hSum(const Iter data_start,
 		   const Iter data_end);
 
-template <class Iter> 
+template <class Iter>
 IterValueType hMean (const Iter data_start,
 		     const Iter data_end);
 
-template <class Iter> 
-IterValueType hMedian(const Iter data_start, 
+template <class Iter>
+IterValueType hMedian(const Iter data_start,
 		      const Iter data_end);
 
-template <class Iter> 
+template <class Iter>
 IterValueType hStdDev(const Iter data_start,
-		      const Iter data_end, 
+		      const Iter data_end,
 		      const IterValueType mean);
 
-template <class Iter> 
+template <class Iter>
 IterValueType hStdDev(const Iter data_start,
 		      const Iter data_end);
 
-template <class Iter> 
+template <class Iter>
+void hSquareVec (const Iter idata_start,
+		 const Iter idata_end);
+
+template <class Iter>
+void hAbsVec (const Iter idata_start,
+	      const Iter idata_end);
+
+template <class Iter>
+void hAddVecs  (const Iter idata_start,
+		const Iter idata_end,
+		const Iter odata_start,
+		const Iter odata_end);
+
+template <class Iter>
 void hDownsample (const Iter idata_start,
 		  const Iter idata_end,
 		  const Iter odata_start,
@@ -124,7 +138,7 @@ void hDownsample (const Iter idata_start,
   extern void (*FUNC##_C)(vector<HComplex > &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8); \
   extern void (*FUNC##_S)(vector<HString > &vec,VAL1,VAL2,VAL3,VAL4,VAL5,VAL6,VAL7,VAL8)
 
- 
+
 
 //========================================================================
 //End Preprocessor Definitions
@@ -136,8 +150,8 @@ void hCloseFile(HIntPointer iptr);
 //!Function to create a DataReader Object returning an integer containing the pointer (for Python)
 HIntPointer hOpenFile(HString Filename, vector<HInteger> & Offsets);
 
-//! Read data from a Datareader object (pointer in iptr) into an stl vector 
-template <class T> 
+//! Read data from a Datareader object (pointer in iptr) into an stl vector
+template <class T>
 void hReadFile(vector<T> & vec,
 	       const HIntPointer iptr,
 	       const HString Datatype,
@@ -146,7 +160,7 @@ void hReadFile(vector<T> & vec,
 	       const HInteger Block,
 	       const HInteger Stride,
 	       const HInteger Shift,
-	       vector<HInteger> & Offsets); 
+	       vector<HInteger> & Offsets);
 
 DefPythonWrapper_VecINCS_8_Parameters(hReadFile,
 				   const HIntPointer iptr,
@@ -164,7 +178,7 @@ inline HNumber funcGaussian(HNumber x,
 			    HNumber mu=0.0);
 
 //! Calculate the running average of an array of Numbers.
-template <class T> 
+template <class T>
 void hRunningAverageT (const STLVectorIteratorT idata_start,
 		       const STLVectorIteratorT idata_end,
 		       const STLVectorIteratorT odata_start,
