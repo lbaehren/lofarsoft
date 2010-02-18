@@ -69,7 +69,7 @@ add_custom_target (tempo_install
   COMMAND cp src/tempo ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND sed -e \"s|CMAKE_CHANGE|${CMAKE_INSTALL_PREFIX}/bin|g\" tempo.cfg > ${CMAKE_INSTALL_PREFIX}/bin/tempo.cfg
   COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/bin/tempo.hlp ${CMAKE_INSTALL_PREFIX}/obsys.dat ${CMAKE_INSTALL_PREFIX}/ephem ${CMAKE_INSTALL_PREFIX}/clock ${CMAKE_INSTALL_PREFIX}/test ${CMAKE_INSTALL_PREFIX}/tzpar 
-  COMMAND cp tempo.hlp obsys.dat ${CMAKE_INSTALL_PREFIX}/bin
+  COMMAND cp tempo.hlp obsys.dat tztot.dat ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r ephem ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r clock ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r test ${CMAKE_INSTALL_PREFIX}/bin
@@ -164,7 +164,7 @@ add_dependencies (psrchive_bootstrap psrchive_unpack)
 if (UNIX)
  if (APPLE)
 add_custom_target (psrchive_configure
-  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX}/psrchive --exec-prefix=${CMAKE_INSTALL_PREFIX}/psrchive --with-x LOGIN_ARCH=macos
+  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX}/psrchive --exec-prefix=${CMAKE_INSTALL_PREFIX}/psrchive --with-x LOGIN_ARCH=mac --x-includes=${X11_X11_INCLUDE_PATH} --x-libraries=${X11_X11_INCLUDE_PATH}/../lib --build=mac --enable-debug --disable-local --with-mpi --with-fftw-include-dir=${CMAKE_INSTALL_PREFIX}/include --with-fftw-lib-dir=${CMAKE_INSTALL_PREFIX}/lib
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name} 
   COMMENT "Configuring project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name} ..."
   )
