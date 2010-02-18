@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------*
- | $Id:: sandertest.cc													 $ |
+ | $Id:: snstestnewskymapping.cc 2009-07-13 swelles                      $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2010                                                    *
- *   Sander ter Veen (s.terveen@astro.ru.nl)                           *
+ *   Copyright (C) 2006                                                    *
+ *   Andreas Horneffer (A.Horneffer@astro.ru.nl)                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -55,11 +55,11 @@ using CR::Skymapper;
  
  \ingroup CR_Applications
  
- \brief Test routines
+ \brief Test the Skymapper with different input files with multiple antennas
  
- \author Sander ter Veen
+ \author Sander & Sef
  
- \date 2010/02/08
+ \date 2009/08/04
  
  <h3>Synopsis</h3>
  
@@ -80,6 +80,74 @@ using CR::Skymapper;
  
  \return selected_positions --  The positions of the selected antenna's 
  */
+
+void get_caltable(const char * filename,vector<double> &calp0, vector<double> &calp1){
+	calp0.clear();
+	calp1.clear();
+	ifstream pos;
+	pos.open(filename);
+	double dph,slope;
+	while(!pos.eof()) {
+		pos>>dph>>slope;
+		calp0.push_back(dph); 
+		calp1.push_back(slope); 
+	}
+	pos.close();
+}
+
+
+
+casa::Vector<MVPosition> antenna_position_value (casa::Vector<Int> rcu_ids, int station_id, string antennaselection)
+{
+	string infile;
+	if(station_id==142){ //CS302
+		infile = "../../../../data/calibration/AntennaPos/CS302-AntennaArrays.conf";
+	}
+	else{
+		cerr << "Station not added yet! Don't trust the result! Using CS302 positions instead.";
+		infile = "../../../../data/calibration/AntennaPos/CS302-AntennaArrays.conf";
+	}
+		
+	ifstream ant_file (infile.c_str()); 
+	string temp;
+	int nrantennas, nrpolarizations, nrdirections;
+	casa::Vector<MVPosition> all_positions;
+	casa::Vector<MVPosition> selected_positions;
+	do{ant_file >> temp;} while(temp != antennaselection);
+	ant_file >> temp; ant_file >> temp; ant_file >> temp; ant_file >> temp; ant_file >> temp; 
+	ant_file >> temp; ant_file >> nrantennas; cout << " nrants " << nrantennas << std::endl;
+	ant_file >> temp; ant_file >> nrpolarizations; cout << " nrpol " << nrpolarizations << std::endl;
+	ant_file >> temp; ant_file >> nrdirections; cout << " nrdir " << nrdirections << std::endl;
+	ant_file >> temp;
+	
+	
+	all_positions.resize(nrantennas);
+	Int nrRCUs;
+	rcu_ids.shape(nrRCUs);
+	selected_positions.resize(nrRCUs);
+	
+	
+	
+	float posx;
+	float posy;
+	float posz;
+	for(int ant=0; ant < nrantennas; ant++){
+		ant_file >> posx; ant_file >> posy; ant_file >> posz;
+		ant_file >> temp; ant_file >> temp; ant_file >> temp;
+	    all_positions(ant)=MVPosition(posx,posy,posz);
+    }
+	
+	int rcu_id;
+	for(int i=0;i<nrRCUs;i++){
+		rcu_id=rcu_ids(i);
+		selected_positions(i)=all_positions(rcu_id/2);///2);
+	}
+	
+	return selected_positions;
+	
+}
+
+
 casa::Vector<MVPosition> CS302_antenna_position_value (casa::Vector<Int> rcu_ids)
 {
 	casa::Vector<MVPosition> all_positions;
@@ -325,15 +393,15 @@ int main (int argc,
 	cout<<"Dit is de door Sef & Sander aangepaste versie van testLOPESskymapping"<<endl;
 	
 	uint nofFailedTests=0, blocksize=1024, nfreq;
-	std::string infile, outfile="snstestnewskymapping.h5";
+	std::string infile, outfile="Skymap.h5";
 	
 	/*
 	 Check if filename of the dataset is provided on the command line; if only
 	 a fraction of the possible tests can be carried out.
 	 */
 	if (argc < 2) {
-		std::cout << "Usage: testnewskymapping <inputfile.dat> [<output-image>]. Now using snstestnewskymapping.dat" << endl;
-		infile = "../../../src/CR-Tools/apps/snstestnewskymapping.dat"; 
+		std::cout << "Usage: testnewskymapping <inputfile.dat> [<output-image>]. Now using /data/sandertest.dat" << endl;
+		infile = "../../../../src/CR-Tools/data/sandertest.dat"; 
 	} else {
 		infile = argv[1];
 		if (argc > 2) {
@@ -353,11 +421,16 @@ int main (int argc,
 	int ninputfiles;
 	//int nantsinfile;
 	int nants=0;
-	
+	string property;
 	string pathname;
-	
+	b_file >> property;
 	b_file >> ninputfiles;
+	cout << " Reading " << ninputfiles << " files\n";
+	
+	b_file >> property;
 	b_file >> pathname;
+	
+	
 	vector<string> inputfiles(ninputfiles);
 	vector<int> nantsinfile(ninputfiles);
 	
@@ -368,20 +441,24 @@ int main (int argc,
 	Vector< int >*rcu_ids;
 	rcu_ids=new Vector< int >[ninputfiles];	
 	
+	int station_id;
 #ifndef upload
+	b_file >> property;
+	
 	for(int i=0; i<ninputfiles; i++){
 		b_file>> inputfiles[i];
 		dr[i] = new CR::LOFAR_TBB(pathname+inputfiles[i], blocksize);
 		nantsinfile[i] = dr[i]->fx().shape()[1];
+		station_id = (int) dr[i]->channelID()[0]/1000000;
+		cout << "Station id: " << dr[i]->channelID()/1000000 << std::endl;
 		rcu_ids[i]=dr[i]->channelID()%1000;
-		dr[i]->summary(std::cout,true,true);
+
+		//dr[i]->summary(true,true);
 		cout<<"The observation time = "<<dr[i]->time()[0]<<endl;
 		cout << "rcus for file" << i << ": " << rcu_ids[i] << endl;
 		
 		nants+=nantsinfile[i];
 	}
-	
-	cout<<"total number of antennas = "<<nants<<endl;
 	
 	int pixels;
 	float increment;
@@ -396,25 +473,85 @@ int main (int argc,
 	string arrayspread;
 	string selection;
 	
+	float azimuth;
+	float elevation;
+	float partofsky;
+	float freqstart;
+	float freqend;
 	
+	int calibration;
+	float calibrationfactor=1.0;
+	int gainnormalisation;
 	
 	//Read file:
-	b_file>> pixels;
-	increment = 231./pixels;
-	b_file>> depth;
-	b_file>> startdepth;
-	b_file>> depthstr;
+	b_file >> property; b_file>> pixels;
 	
-	b_file>> nframes;
-	b_file>> blocksperframe;
-	b_file>> startblock;
+	b_file >> property; b_file>> depth;
+	b_file >> property; b_file>> startdepth;
+	b_file >> property; b_file>> depthstr;
+	
+	b_file >> property; b_file>> nframes;
+	b_file >> property; b_file>> blocksperframe;
+	b_file >> property; b_file>> startblock;
 	cout << "startblock = " << startblock << endl;
-	b_file>> selection;
+	b_file >> property; b_file>> selection;
 	cout << "selection = "<< selection << endl;
-	b_file>> arrayspread;
+	b_file >> property; b_file>> arrayspread;
+	b_file >> property; b_file>> azimuth;
+	b_file >> property; b_file>> elevation;
+	b_file >> property; b_file>> partofsky;
+	b_file >> property; b_file>> freqstart;
+	b_file >> property; b_file>> freqend;
+	b_file >> property; b_file>> calibration;
+    cout << "calibration = " << calibration << endl;
+	b_file >> property; b_file>> calibrationfactor;
+	b_file >> property; b_file>> gainnormalisation;
+	increment = 231.*partofsky/pixels;
+
 	
+	if(arrayspread=="HBA"){
+		for(int i=0; i<ninputfiles; i++){
+			dr[i]->setNyquistZone(2);
+		}
+		freqstart-=100; 
+		freqend-=100;
+	}
+	
+	
+	
+	cout<<"total number of antennas = "<<nants<<endl;
 	// check out the antennaselection
 	
+	
+	//data only verified for X so far
+	if(calibration==1 && calibrationfactor != 0){
+		vector<double> p0, p1;
+	    get_caltable("../../../../src/CR-Tools/data/calibrationCS302.dat",p0,p1);
+		for(int i=0; i<ninputfiles; i++){
+			casa::Matrix<casa::DComplex> matCal(dr[i]->fft2calfft().shape());
+			cout << "shape of calibration matrix: " << matCal.shape() << endl;
+			casa::Vector<casa::Double> frequencies = dr[i]->frequencyValues();
+			if(matCal.shape()(0)!=frequencies.shape()(0)){ cout << "Something has changed in the objects shapes which will fail the calibration\n"; return 12; }
+			//cout << dr[i]->frequencyValues();
+			//return 0;
+			for(int antenna=0;  antenna<matCal.shape()(1); antenna++){
+				for(int ifreq=0;ifreq<matCal.shape()(0);ifreq++){
+					//double freq=100e6+ifreq*200e6/1024;
+		            
+					double phase=p0[rcu_ids[i](antenna)/2]+frequencies(ifreq)*p1[rcu_ids[i](antenna)/2];
+					//cout << phase << " ";
+					matCal(ifreq,antenna)=DComplex(cos(-calibrationfactor*phase),sin(-calibrationfactor*phase));
+				}
+			}
+			//cout << "calibration value before setting them: " << dr[i]->fft2calfft() << endl;
+			dr[i]->setFFT2calFFT(matCal);
+			//if(!test){ cout << "FAILED TO SET CALIBRATION" << endl; }
+			cout << matCal(Slice(0,2),Slice(0,16)) << endl; 
+			cout << "\ncalibration value after setting them: " << dr[i]->fft2calfft()(Slice(0,2),Slice(0,16)) << endl;
+		}					 
+	}
+
+	//select antennas
 	Vector< bool >*antennaselection;
 	antennaselection=new Vector< bool>[ninputfiles];
 	
@@ -433,11 +570,37 @@ int main (int argc,
 	} else {
 		cout <<"Another selection than odd, even or all is not implemented yet " << selection;
 	}
+	std::set<std::string> dipoleselection;
+	dipoleselection.insert("142000002");
+	dipoleselection.insert("142002022");
+	dipoleselection.insert("142005042");
+	dipoleselection.insert("142008066");
+	dipoleselection.insert("142011094");
+	for(int i=0;i<ninputfiles;i++){
+		dr[i]->setSelectedAntennas(antennaselection[i]);
+		cout << dr[i]->selectedAntennas() << endl;
+		cout << "...." << endl;
+		
+		
+		//cout << dr[i]->headerRecord().asArrayInt("AntennaIDs");
+		
+		
+		cout << dr[i]->setSelectedDipoles(dipoleselection);
+		//cout << dr[i]->selectedDipoles();
+		//cout << dr[i]->shift() << endl;
+		cout << dr[i]->fx().shape() << endl;
+		cout << dr[i]->fft().shape() << endl;
+		//cout << dr[i]->channelID() << endl;
+	}
+	//Vector<Int> AntennaIDs;
 	
+	return 1;
 	int nUsedants=0;
 	vector<int> nUsedantsinfile(ninputfiles);
 	Vector< int >*used_rcu_ids;
 	used_rcu_ids=new Vector< int >[ninputfiles];
+	
+	
 	
 	for(int i=0;i<ninputfiles;i++){
 		nUsedantsinfile[i]=0;
@@ -485,12 +648,15 @@ int main (int argc,
 		//set reference pixel, reference value, and coord increment
 		Vector<double> tmpvec;
 		tmpvec = spatial.referencePixel();
-		tmpvec(0) = (pixels-1.)/2; tmpvec(1)=(pixels-1.)/2; tmpvec(2)=0.;
+		tmpvec(0) = (pixels-1+pixels%2)/2.; tmpvec(1)=(pixels-1+pixels%2)/2.; tmpvec(2)=0.;
+		//tmpvec(0) = -0.5; tmpvec(1)=-0.5; tmpvec(2)=0.;
+
 		spatial.setReferencePixel(tmpvec);
 		tmpvec = spatial.referenceValue();
-		tmpvec(0) = 180.; tmpvec(1)=90.;  tmpvec(2)=startdepth;
+		tmpvec(0) = azimuth; tmpvec(1)=elevation;  tmpvec(2)=startdepth;
 		spatial.setReferenceValue(tmpvec,true);
 		tmpvec = spatial.increment();
+		//tmpvec(0) = -increment; tmpvec(1)=increment;  tmpvec(2)=depthstr;
 		tmpvec(0) = increment; tmpvec(1)=increment;  tmpvec(2)=depthstr;
 		spatial.setIncrement(tmpvec,true);
 		
@@ -502,6 +668,9 @@ int main (int argc,
 		timeFreq.setNyquistZone(1);
 		if(arrayspread=="HBA"){ timeFreq.setNyquistZone(2); cout << "using nyquistzone 2\n";}
 		timeFreq.setSampleFrequency(2e8);
+		
+		cout << "frequency values used" << endl;
+		cout << timeFreq.frequencyValues()(256);
 		
 		// Skymap coordinate
 		cout << "testnewskymapping::simpleImage Setting up SkymapCoordinate"  << endl;
@@ -527,11 +696,11 @@ int main (int argc,
 			tempantPositions.resize(nRCU);
 			
 			if(arrayspread=="inner"){
-				tempantPositions = CS302_antenna_position_value(used_rcu_ids[i]);
+				tempantPositions = antenna_position_value(used_rcu_ids[i], station_id, "LBA_INNER");
 			} else if(arrayspread=="outer"){
-				tempantPositions = CS302_antenna_position_value_outer(used_rcu_ids[i]);
+				tempantPositions = antenna_position_value(used_rcu_ids[i], station_id, "LBA_OUTER");
 			} else if(arrayspread=="HBA"){
-				tempantPositions = CS302_antenna_position_value_HBA(used_rcu_ids[i]);
+				tempantPositions = antenna_position_value(used_rcu_ids[i], station_id, "HBA_0");
 			} else cout<<"Valid antennaspreads are 'inner' , 'outer' and 'HBA' ."<<endl;
 			
 			//nrRCUs = new int(0);
@@ -547,18 +716,18 @@ int main (int argc,
 		
 		//________________________________________________________
 		// Set up the skymapper 
-		
-		cout << "testnewskymapping::simpleImage Setting up the Skymapper..."  << endl;
-		
-		Skymapper skymapper (coord,
-							 subantPositions,		// change for number of antennas
-							 outfile,
-							 Skymapper::HDF5Image);
-		
-		cout << "                                                         ... done."  << endl;
-		
-		skymapper.setFarField();				// Not for imaging lightning!!!
-		skymapper.summary();
+
+//		cout << "testnewskymapping::simpleImage Setting up the Skymapper..."  << endl;
+//		
+//		Skymapper skymapper (coord,
+//							 subantPositions,		// change for number of antennas
+//							 outfile,
+//							 Skymapper::HDF5Image);
+//		
+//		cout << "                                                         ... done."  << endl;
+//		
+//		skymapper.setFarField();				// Not for imaging lightning!!!
+//		skymapper.summary();
 		
 		//________________________________________________________
 		// process the event
@@ -597,10 +766,9 @@ int main (int argc,
 		
 		
 		// Calculate the average amplitudes per frequency and antenna for calibration.
-		//return 0;
-//---------------------------------------------------
-		Matrix<Double> Amplitudes(dr[0]->fftLength(),nUsedants);
 		
+		Matrix<Double> Amplitudes(dr[0]->fftLength(),nUsedants);
+		if(gainnormalisation){
 		for (uint blocknum=startblock; blocknum<startblock+nofBlocks; blocknum++){
 			
 			// Keep track of where we are:
@@ -618,8 +786,12 @@ int main (int argc,
 				for(int j=0; j<nantsinfile[i]; j++){
 					if(!antennaselection[i][j]){continue;} //skip antenna's that are not selected
 					dr[i]->setShift(offset1[i][j]);
-					data.column(counter) = dr[i]->fft().column(j);
 					
+					data.column(counter) = dr[i]->fft().column(j);
+					if(i==0 && j==0 && blocknum==startblock){
+						//cout << "calfft" <<  data.column(counter) << endl;
+						//cout << " fft" << dr[i]->fft().column(j) << endl;
+					}
 					counter++;
 				}
 			}
@@ -635,11 +807,13 @@ int main (int argc,
 		cout<< Amplitudes(nofBlocks/2,0)<<endl;
 		convertArray(AmplitudesC,Amplitudes);
 		cout<< AmplitudesC(nofBlocks/2,0)<<endl;
+		}
 		/*for(uInt j=0; j<Amplitudes.ncolumn(); j++) {
 		 cout<<"Amplitudes for antenna "<<j<<" at freq 255,288,303 and 275:\t"<<Amplitudes(255,j)<<"\t"<<Amplitudes(288,j)<<"\t"<<Amplitudes(303,j)<<"\t"<<Amplitudes(275,j)<<endl;
 		 }*/
 		
 		t2 =  time(NULL);
+		
 		for (uint blocknum=startblock; blocknum<startblock+nofBlocks; blocknum++){
 			
 			// Keep track of where we are:
@@ -665,108 +839,27 @@ int main (int argc,
 				for(int j=0; j<nantsinfile[i]; j++){
 					if(!antennaselection[i][j]){continue;} //skip antenna's that are not selected
 					dr[i]->setShift(offset1[i][j]);
-					data.column(counter) = dr[i]->fft().column(j);
+					data.column(counter) = dr[i]->calfft().column(j);
 					
 					counter++;
 					//cout<<"weer een antenne toegevoegd..."<<endl;
 				}
 			}
 			// Remove the low and high frequencies, which contain noise:
+			
 			int startrow,nrows,startcol,ncol;
 			startcol = 0; ncol = nUsedants;
-			startrow = 0; nrows =  (nfreq*40)/100;
+			startrow = 0; nrows =  (nfreq*freqstart)/100;
 			data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			nrows = (nfreq*40)/100;
+			nrows = (nfreq*(100-freqend))/100;
 			startrow = nfreq-nrows;
 			data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
 			
 			
-			// Remove RFI:
 			
-			/*
-			 // For 090729, 11:38, even:
-			 nrows = (nfreq*11)/513;  // Remove 5 frequency bins around peak frequency.
-			 startrow = 205;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 startrow = 242;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 */
-			/*
-			 // For 090729, 11:38, odd:
-			 nrows = (nfreq*11)/513;  // Remove 5 frequency bins around peak frequency.
-			 startrow = 205;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 nrows = (nfreq*21)/513;  // Remove 10 frequency bins around peak frequency.
-			 startrow = 237;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 nrows = (nfreq*7)/513;  // Remove 3 frequency bins around peak frequency.
-			 startrow = 279;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 nrows = (nfreq*5)/513;  // Remove 2 frequency bins around peak frequency.
-			 startrow = 309;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 */
-			/*
-			 // For 090729, 12:20, odd:
-			 nrows = (nfreq*5)/513;  // Remove 2 frequency bins around peak frequency.
-			 startrow = 208;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 startrow = 253;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 startrow = 279;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 nrows = (nfreq*13)/513;  // Remove 6 frequency bins around peak frequency.
-			 startrow = 282;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 nrows = (nfreq*3)/513;  // Remove 1 frequency bins around peak frequency.
-			 startrow = 408;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 */
+			if(gainnormalisation) {data = data / AmplitudesC;}
+//			skymapper.processData(data);
 			
-			/*
-			 // For 090813, 11:01:
-			 nrows = (nfreq*5)/513;  // Remove 2 frequency bins around peak frequency.
-			 
-			 startrow = 253;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 startrow = 286;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 startrow = 301;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 
-			 nrows = (nfreq*3)/513;  // Remove 1 frequency bin around peak frequency.
-			 startrow = 338;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 startrow = 342;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 startrow = 349;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 startrow = 369;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 */
-			
-			/*    
-			 // For Crab pulse 1
-			 nrows = (nfreq*12)/513;  // Remove 2 frequency bins around peak frequency.
-			 
-			 startrow = 152;
-			 nrows = (nfreq*16)/513;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 startrow = 350;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 
-			 nrows = (nfreq*3)/513;  // Remove 2 frequency bins around peak frequency.
-			 startrow = 419;
-			 data(Slice(startrow,nrows),Slice(startcol,ncol)) = 0.;
-			 */	
-			
-			
-			data = data / AmplitudesC;
-			skymapper.processData(data);
-			
-			// Free virtual memory:
-			//for(int i=0; i<ninputfiles; i++){delete dr[i];}
-			//for(int i=0; i<ninputfiles; i++){dr[i] = new CR::LOFAR_TBB(pathname+inputfiles[i], blocksize);}
 			
 		};
 		

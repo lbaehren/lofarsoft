@@ -12,6 +12,7 @@ if (HAVE_CASACORE AND HAVE_DAL AND DAL_LIBRARIES AND HDF5_LIBRARIES)
       MSDynSpec
       zenittest
       sandertest
+      tDynSpec
     )
     
     ## compiler instructions
