@@ -79,6 +79,8 @@ set (libs
   Rint
   Postscript
   Matrix
+  Minuit
+  MLP
   Physics
   MathCore
   Thread
