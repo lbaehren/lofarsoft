@@ -295,15 +295,20 @@ add_custom_target (cr
   COMMENT "Building package CR-Tools ..."
   )
 
-add_dependencies (cr dal plplot)
-
-if (CR_WITH_GUI)
-  add_dependencies (cr mathgl)
-endif (CR_WITH_GUI)
+add_dependencies (cr dal mathgl plplot)
 
 if (CR_WITH_STARTOOLS)
   add_dependencies (cr startools fftw3)
 endif (CR_WITH_STARTOOLS)
+
+##____________________________________________________________________
+##                                       LASA (LOFAR Air-Shower Array)
+
+add_custom_target (lasa
+  COMMAND ./build_package.sh lasa ${USG_ROOT}/src/LASA
+  WORKING_DIRECTORY ${USG_BUILD}
+  COMMENT "Building package LASA ..."
+  )
 
 ##____________________________________________________________________
 ##                                                              Pulsar

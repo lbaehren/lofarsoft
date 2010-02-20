@@ -165,7 +165,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH YES)
 
 ## =============================================================================
 ##
-##  Build instructions
+##  Instructions for build and installation
 ##
 ## =============================================================================
 
@@ -179,6 +179,8 @@ add_library (lasa
 
 target_link_libraries (lasa ${lasa_link_libraries})
 
+## main program
+
 add_executable (main_program
   main_program.cxx
   )
@@ -188,6 +190,15 @@ target_link_libraries (main_program lasa)
 if (LASA_ENABLE_TESTING)
   add_subdirectory (test)
 endif (LASA_ENABLE_TESTING)
+
+## Installation
+
+install (
+  TARGETS lasa
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
 
 ## =============================================================================
 ##
