@@ -163,3 +163,20 @@ analyse LOFAR data. In addition, the USG performs the following functions:
       `-- RM          <-- you are here
   \endverbatim
 */
+
+/*!
+  \defgroup LASA LOFAR Air-Shower Array
+
+  \verbatim
+  lofarsoft
+  |-- data
+  |-- doc
+  |-- release
+  |-- build
+  |-- devel_common
+  |-- external
+  `-- src
+      `-- LASA        <-- you are here
+  \endverbatim
+*/
+
