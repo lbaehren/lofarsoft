@@ -1,0 +1,42 @@
+//-------------------------------------------------Control settings for LASA(1-5)---------------------------------
+//Keyword		Det(1-2)	Det(3-4)	Det(5-6)	Det(7-8)	Det(9-10)	Det(11-12)	Det(13-14)	Det(15-16)	Det(17-18)	Det(19-20)	Keyword Defn 
+//----------------------------------------------------------------------------------------------------------------
+SYS_NAME		lasa1		lasa1		lasa2		lasa2		lasa3		lasa3		lasa4		lasa4		lasa5		lasa5		Name of the PC connected
+UNIT_STATE		Master		Slave		Master		Slave		Master		Slave		Master		Slave		Master		Slave		State of the Hisparc unit: Master/Slave
+UNIT_SERIAL_NO		FTQZTB7R	FTRCDY18	FTRCDXM1	FTQSEUA3	FTRCDX3M	FTQSEUA3	xxx		xxx		xxx		xxx		Hisparc unit serial no.
+PORT_NO			3301		3302		3303		3304		3305		3306		3307		3308		3309		3310		Port no. on the server ("dwingeloo")
+KEYWORD5		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		yyy
+KEYWORD6		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		yyy
+KEYWORD7		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		yyy
+KEYWORD8		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		yyy
+KEYWORD9		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		yyy
+KEYWORD10		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		xxx		yyy
+//------------------------------------------------HIASPARC control settings-------------------------------------
+CHANNEL_1_OFFSET+	127		152		143		146		138		125		128		128		128		128		ADC offset(+) adjust (default)	
+CHANNEL_1_OFFSET-	116		102		95		103		108		113		128		128		128		128		ADC offset(-) adjust (default)	
+CHANNEL_2_OFFSET+	140		130		127		134		124		120		128		128		128		128		ADC offset(+) adjust (default)	
+CHANNEL_2_OFFSET-	111		99		100		106		114		116		128		128		128		128		ADC offset(-) adjust (default)	
+CHANNEL_1_GAIN+		111		71		124		91		98		54		128		128		128		128		ADC gain adjust(+) for channel 1 (default) 
+CHANNEL_1_GAIN-		142		184		145		169		148		208		128		128		128		128		ADC gain adjust(-) for channel 1 (default)
+CHANNEL_2_GAIN+		65		61		46		50		70		6		128		128		128		128		ADC gain adjust(+) for channel 2 (default)
+CHANNEL_2_GAIN-		188		195		196		200		198		246		128		128		128		128		ADC gain adjust(-) for channel 2 (default)
+COMMON_OFFSET_ADJ	62		54		46		43		40		44		0		0		0		0		ADC common offset adjust? (default)
+FULL_SCALE_ADJ		0		0		0		0		0		0		0		0		0		0		ADC full scale adjust? (default)
+CHANNEL_1_INTE_TIME	255		255		255		255		255		255		255		255		255		255		Channel 1 integrator time? (default)
+CHANNEL_2_INTE_TIME	255		255		255		255		255		255		255		255		255		255		Channel 2 integrator time? (default)
+COMP_THRES_LOW		88		88		88		88		88		88		88		88		88		88		Comparator threshold low (default)
+COMP_THRES_HIGH		230		230		230		230		230		230		230		230		230		230		Comparator threshold high (default)
+CHANNEL_1_HV		0		0		1400		1400		0		0		1200		1200		1200		1200		Channel 1 PMT high voltage in Volts
+CHANNEL_2_HV		1600		1600		1400		1400		0		0		1200		1200		1200		1200		Channel 2 PMT high voltage in Volts
+CHANNEL_1_THRES_LOW	15		15		15		15		15		15		40		40		40		40		Channel 1 threshold low in mV
+CHANNEL_1_THRES_HIGH	1000		1000		1000		1000		1000		1000		1000		1000		1000		1000		Channel 1 threshold high in mV (default)
+CHANNEL_2_THRES_LOW	15		15		15		15		15		15		40		40		40		40		Channel 2 threshold low in mV (default)
+CHANNEL_2_THRES_HIGH	1000		1000		1000		1000		1000		1000		1000		1000		1000		1000		Channel 2 threshold high in mV (default)
+TRIGG_CONDITION		2		2		1		1		1		1		1		1		1		1		Atleast 1 out of 4 channels low
+PRE_COIN_TIME		2000		2000		2000		2000		2000		2000		2000		2000		2000		2000		Pre-coincidence time in nsecs.
+COIN_TIME		400		400		400		400		4000		4000		400		400		400		400		Coincidence time in nsecs.
+POST_COIN_TIME		7600		7600		7600		7600		7600		7600		7600		7600		7600		7600		Post-coincidence time in nsecs.
+//------------------------------------------------------Others-------------------------------------------------
+LOG_BOOK		60		60		60		60		60		60		60		60		60		60		Interval (sec) to write log book.
+CALIBRATION		1		1		1		1		1		1		1		1		1		1		ADC calibration flag (1:on and 0:off)
+//END

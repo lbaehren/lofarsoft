@@ -1,0 +1,4 @@
+#!/bin/csh 
+echo "Start LASA $1"
+
+ssh root@lasa{$1} "/opt/Satyendra/run/main_lasa u{$1}1 u{$1}0"

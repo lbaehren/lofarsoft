@@ -1,0 +1,5 @@
+#!/bin/csh
+
+echo "Start DWINGELOO"
+xterm -T "DWINGELOO" -e "./main_program" &
+
