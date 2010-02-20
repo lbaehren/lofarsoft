@@ -169,7 +169,8 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH YES)
 ##
 ## =============================================================================
 
-## liblasa
+##__________________________________________________________
+##                                                   liblasa
 
 add_library (lasa
   monitoring.cxx
@@ -179,22 +180,29 @@ add_library (lasa
 
 target_link_libraries (lasa ${lasa_link_libraries})
 
-## main program
+##__________________________________________________________
+##                                              main program
 
-add_executable (main_program
+add_executable (lasa_main
   main_program.cxx
   )
 
-target_link_libraries (main_program lasa)
+target_link_libraries (lasa_main lasa)
+
+##__________________________________________________________
+##                                           Sub-directories
+
+add_subdirectory (analysis)
 
 if (LASA_ENABLE_TESTING)
   add_subdirectory (test)
 endif (LASA_ENABLE_TESTING)
 
-## Installation
+##__________________________________________________________
+##                                              Installation
 
 install (
-  TARGETS lasa
+  TARGETS lasa lasa_main
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
