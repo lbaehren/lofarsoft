@@ -41,6 +41,8 @@ endif (CR_WITH_PYCR)
 
 if (CR_WITH_PYCR)
 
+  file (GLOB pycr_sources *.cc)
+
   ## compiler instructions
   add_library (pycr MODULE
     ../Analysis/DynamicSpectrum.cc
@@ -52,7 +54,7 @@ if (CR_WITH_PYCR)
     ../Filters/BasicFilter.cc
     ../Filters/HanningFilter.cc
     ../Coordinates/MConversions.cc
-    pycr.cc
+    ${pycr_sources}
     )
   ## linker instructions
   target_link_libraries(pycr

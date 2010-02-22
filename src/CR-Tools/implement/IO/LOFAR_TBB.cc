@@ -345,7 +345,11 @@ namespace CR { // Namespace CR -- begin
   casa::Matrix<double> LOFAR_TBB::fx ()
   {
     casa::Matrix<double> data;
-    int start = iterator_p[0].position();
+    casa::Vector<int> start (nofStreams_p);
+
+    for (uint n(0); n<nofStreams_p; ++n) {
+      start(n) = iterator_p[n].position(); 
+    }
     
     TBB_Timeseries::fx (data,
 			start,
@@ -363,7 +367,11 @@ namespace CR { // Namespace CR -- begin
   */
   void LOFAR_TBB::fx (casa::Matrix<double> &data)
   {
-    int start = iterator_p[0].position();
+   casa::Vector<int> start (nofStreams_p);
+
+    for (uint n(0); n<nofStreams_p; ++n) {
+      start(n) = iterator_p[n].position(); 
+    }
     
     TBB_Timeseries::fx (data,
 			start,

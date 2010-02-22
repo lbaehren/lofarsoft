@@ -21,37 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <string>
-#include <vector>
-
-// CR-Tools header files
-#include <crtools.h>
-#include <Coordinates/CoordinateType.h>
-#include <Coordinates/TimeFreq.h>
-#include <Filters/HanningFilter.h>
-#include <IO/LOFAR_TBB.h>
-#include <IO/DataIterator.h>
-#include <IO/DataReader.h>
-#include <Analysis/DynamicSpectrum.h>
-
-// Basic Python header
-#include <Python.h>
-
-// Boost.Python header files
-#include <boost/python.hpp>
-#include <boost/python/object.hpp>
-#include <boost/python/list.hpp>
-#include <boost/python/extract.hpp>
-
-namespace bpl = boost::python;
-
-using CR::CoordinateType;
-using CR::DataIterator;
-using CR::DataReader;
-using CR::HanningFilter;
-using CR::TimeFreq;
-using CR::LOFAR_TBB;
-using CR::DynamicSpectrum;
+#include "pycr.h"
 
 BOOST_PYTHON_MODULE (pycr)
 {
@@ -68,41 +38,8 @@ BOOST_PYTHON_MODULE (pycr)
   //
   // ============================================================================
   
-  //_____________________________________________________________________________
-  //                                                               CoordinateType
-
-  bpl::class_<CoordinateType>("CoordinateType")
-    .def(bpl::init<>())
-    .def(bpl::init<CoordinateType::Types>()) 
-    .def("className", &CoordinateType::className)
-    .def("type", &CoordinateType::type)
-    .def("name", &CoordinateType::name)
-    .def("getName", &CoordinateType::getName)
-    ;  
-
-  //_____________________________________________________________________________
-  //                                                                     TimeFreq
-  
-  bpl::class_<TimeFreq>("TimeFreq")
-    .def(bpl::init<>())
-    .def(bpl::init<uint>()) 
-    .def(bpl::init<uint,double,uint>())
-    .def(bpl::init<uint,double,uint,double>())
-    .def("className", &TimeFreq::className)
-    .def("blocksize", &TimeFreq::blocksize,
-	 "Get the number of samples per block of data")
-    .def("setBlocksize", &TimeFreq::setBlocksize,
-	 "Set the number of samples per block of data")
-//     .def("sampleFrequency",
-//  	 &TimeFreq::sampleFrequency<>(),
-//  	 "Get the sample frequency in analog-to-digital conversion")
-    .def("nyquistZone", &TimeFreq::nyquistZone,
-	 "Get the Nyquist zone in which the data where sampled")
-    .def("setNyquistZone", &TimeFreq::setNyquistZone,
-	 "Set the Nyquist zone in which the data where sampled")
-    .def("referenceTime", &TimeFreq::referenceTime,
-	 "Get the reference time for the time axis")
-    ;
+  export_CoordinateType ();
+  export_TimeFreq ();
   
   // ============================================================================
   //
@@ -116,18 +53,7 @@ BOOST_PYTHON_MODULE (pycr)
   //
   // ============================================================================
 
-  //__________________________________________________________________
-  //                                                         LOFAR_TBB
-  
-  void (LOFAR_TBB::*summary1)(ostream &,
-			      bool const &,
-			      bool const &) = &LOFAR_TBB::summary;
-
-  bpl::class_<LOFAR_TBB>("LOFAR_TBB")
-    .def(bpl::init<>())
-    .def(bpl::init<std::string,uint>())
-    .def("summary",summary1)
-    ;  
+  export_LOFAR_TBB ();
   
   // ============================================================================
   //
