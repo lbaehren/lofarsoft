@@ -44,6 +44,10 @@ set (MATHGL_FIND_QUIETLY YES)
 
 include (FindMathGL)
 
+find_program (svn_executable  svn  PATHS ${bin_locations})
+find_program (tar_executable  tar  PATHS ${bin_locations})
+find_program (find_executable find PATHS ${bin_locations})
+
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
@@ -77,13 +81,93 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   endif (NOT MATHGL_VERBOSE_CONFIGURE)
 
   set (DESIRED_QT_VERSION 4)
+  set (QT4_FOUND NO)
+  list (APPEND CMAKE_LIBRARY_PATH /sw/lib/qt4-mac)
 
   include (FindGSL)
   include (FindHDF5)
   include (FindPython)
   include (FindOpenGL)
-  include (FindQt)
+  include (FindQt4)
 
+  ## Extra check for Qt4 _________________________
+  
+  if (NOT QT_MOC_EXECUTABLE)
+    find_program (QT_MOC_EXECUTABLE moc ${bin_locations})
+  endif (NOT QT_MOC_EXECUTABLE)
+
+  find_path (QT_INCLUDES QtCore/QTimerEvent QtCore/QResource
+    PATHS ${include_locations}
+    PATH_SUFFIXES
+    qt4-mac qt4-mac/include
+    qt4-x11 qt4-x11/include
+    )
+
+  find_path (QT_QTCORE_INCLUDES QTimerEvent QResource
+    PATHS ${include_locations}
+    PATH_SUFFIXES
+    QtCore
+    qt4-mac qt4-mac/include qt4-mac/include/QtCore
+    qt4-x11 qt4-x11/include
+    )
+  if (QT_QTCORE_INCLUDES)
+    list (APPEND QT_INCLUDES ${QT_QTCORE_INCLUDES})
+  endif (QT_QTCORE_INCLUDES)
+  
+  find_path (QT_QTGUI_INCLUDES QAction QCloseEvent QMenu
+    PATHS ${include_locations}
+    PATH_SUFFIXES
+    QtGui
+    qt4-mac qt4-mac/include qt4-mac/include/QtGui
+    qt4-x11 qt4-x11/include
+    )
+  if (QT_QTGUI_INCLUDES)
+    list (APPEND QT_INCLUDES ${QT_QTGUI_INCLUDES})
+  endif (QT_QTGUI_INCLUDES)
+  
+  if (NOT QT_QTCORE_LIBRARY)
+    find_library (QT_QTCORE_LIBRARY QtCore
+      PATHS ${lib_locations}
+      PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
+      NO_DEFAULT_PATH
+      )
+    if (QT_QTCORE_LIBRARY)
+      list (APPEND QT_LIBRARIES ${QT_QTCORE_LIBRARY})
+    else (QT_QTCORE_LIBRARY)
+      set (QT4_FOUND NO)
+    endif (QT_QTCORE_LIBRARY)
+  endif (NOT QT_QTCORE_LIBRARY)
+  
+  if (NOT QT_QTGUI_LIBRARY)
+    find_library (QT_QTGUI_LIBRARY QtGui
+      PATHS ${lib_locations}
+      PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
+      NO_DEFAULT_PATH
+      )
+    if (QT_QTGUI_LIBRARY)
+      list (APPEND QT_LIBRARIES ${QT_QTGUI_LIBRARY})
+    else (QT_QTGUI_LIBRARY)
+      set (QT4_FOUND NO)
+    endif (QT_QTGUI_LIBRARY)
+  endif (NOT QT_QTGUI_LIBRARY)
+  
+  if (NOT QT_QTDESIGNER_LIBRARY)
+    find_library (QT_QTDESIGNER_LIBRARY QtDesigner
+      PATHS ${lib_locations}
+      PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
+      NO_DEFAULT_PATH
+      )
+    if (QT_QTDESIGNER_LIBRARY)
+      list (APPEND QT_LIBRARIES ${QT_QTDESIGNER_LIBRARY})
+    else (QT_QTDESIGNER_LIBRARY)
+      set (QT4_FOUND NO)
+    endif (QT_QTDESIGNER_LIBRARY)
+  endif (NOT QT_QTDESIGNER_LIBRARY)
+  
+  if (QT_LIBRARIES)
+    list(REVERSE QT_LIBRARIES)
+  endif (QT_LIBRARIES)
+  
   ## Python bindings
   
   if (HAVE_PYTHON)
@@ -175,11 +259,12 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   message (STATUS "HDF5_INCLUDES               = ${HDF5_INCLUDES}")
   message (STATUS "NUMPY_INCLUDES              = ${NUMPY_INCLUDES}")
   message (STATUS "DESIRED_QT_VERSION          = ${DESIRED_QT_VERSION}")
-  message (STATUS "QT3_INSTALLED               = ${QT3_INSTALLED}")
-  message (STATUS "QT4_INSTALLED               = ${QT4_INSTALLED}")
+  message (STATUS "Qt includes                 = ${QT_INCLUDES}")
+  message (STATUS "Qt4 QtCore library          = ${QT_QTCORE_INCLUDES}")
+  message (STATUS "Qt4 QtGui library           = ${QT_QTGUI_LIBRARY}")
   message ("-------------------------------------------------------------")
 
-  ## <-- end build condition ----------------------------------------------------->
+  ## <-- end build condition --------------------------------------------------->
   
 else (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   add_custom_target (mathgl
@@ -188,3 +273,17 @@ else (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     )
   message (STATUS "[MathGL] Found system-wide installation; skipping rebuild!")
 endif (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
+
+## ------------------------------------------------------------------------------
+## Update the tar-archive to the latest version of the source
+
+if (svn_executable AND tar_executable)
+  add_custom_target (update_mathgl
+    COMMAND rm -rf mathgl
+    COMMAND ${svn_executable} co http://ufp.appl.sci-nnov.ru/svn/mathgl/trunk mathgl
+    COMMAND ${tar_executable} -cvzf mathgl.tgz mathgl --exclude .svn
+    COMMAND rm -rf mathgl
+    WORKING_DIRECTORY ${MATHGL_SOURCE_DIR}
+    COMMENT "Retrieving latest version of MathGL source code ..."
+    )
+endif (svn_executable AND tar_executable)  

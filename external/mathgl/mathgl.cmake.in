@@ -10,45 +10,45 @@ set (CMAKE_INSTALL_PREFIX
 ##____________________________________________________________________
 ## Features/Extensions
 
-set (enable-double
-  ${MATHGL_ENABLE_DOUBLE}
-  CACHE
-  BOOL
-  "Enable double precision in MathGL library"
-  )
-
-set (enable-python
-  ${MATHGL_ENABLE_PYTHON}
-  CACHE
-  BOOL
-  "Enable Python extension"
-  )
-
-set (enable-qt
-  ${MATHGL_ENABLE_QT}
-  CACHE
-  BOOL
-  "Enable Qt extension"
-  )
+set (enable-double ${MATHGL_ENABLE_DOUBLE} CACHE BOOL "Enable double precision")
 
 ##____________________________________________________________________
-## GNU Scientific Library
+##                                              GNU Scientific Library
 
 set (GSL_LIB         ${GSL_GSL_LIBRARY}   CACHE FILEPATH "Path to libgsl" )
 set (GSL_CBLAS_LIB   ${GSL_CBLAS_LIBRARY} CACHE FILEPATH "Path to libgslcblas" )
 set (GSL_INCLUDE_DIR ${GSL_INCLUDES}      CACHE PATH     "GSL header files" )
 
 ##____________________________________________________________________
-## OpenGL
-
-set (OPENGL_LIBRARIES      ${OPENGL_LIBRARIES} CACHE FILEPATH "Path to libOpenGL")
-
-##____________________________________________________________________
-## HDF5
+##                                                                HDF5
 
 set (enable-hdf5         ${MATHGL_ENABLE_HDF5} CACHE BOOL "Enable HDF5 extension")
 
 set (HDF5_INCLUDE_DIR ${HDF5_INCLUDES} CACHE PATH "HDF5 header files")
+
+##____________________________________________________________________
+##                                                              Python
+
+set (enable-python ${MATHGL_ENABLE_PYTHON} CACHE BOOL "Enable Python extension")
+
+##____________________________________________________________________
+##                                                              OpenGL
+
+set (OPENGL_LIBRARIES      ${OPENGL_LIBRARIES} CACHE FILEPATH "Path to libOpenGL")
+
+##____________________________________________________________________
+##                                                                 QT4
+
+set (enable-qt             ${QT4_FOUND}             CACHE BOOL     "Enable Qt4")
+set (use_qt                ${QT4_FOUND}             CACHE BOOL     "Enable Qt4")
+set (QT4_FOUND             ${QT4_FOUND}             CACHE BOOL     "Enable Qt4")
+set (QT_MOC_EXECUTABLE     ${QT_MOC_EXECUTABLE}     CACHE FILEPATH "Path to libOpenGL")
+set (QT_INCLUDES           ${QT_INCLUDES}           CACHE PATH     "Qt header files")
+set (QT_INCLUDE_DIR        ${QT_INCLUDES}           CACHE PATH     "Qt header files")
+set (QT_QTCORE_LIBRARY     ${QT_QTCORE_LIBRARY}     CACHE FILEPATH "QtCore library")
+set (QT_QTGUI_LIBRARY      ${QT_QTGUI_LIBRARY}      CACHE FILEPATH "QtGui library")
+set (QT_QTDESIGNER_LIBRARY ${QT_QTDESIGNER_LIBRARY} CACHE FILEPATH "QtDesigner library")
+set (QT_LIBRARIES          ${QT_LIBRARIES}          CACHE FILEPATH "Qt libraries")
 
 ##____________________________________________________________________
 ## Add include directories
