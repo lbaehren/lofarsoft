@@ -295,8 +295,8 @@ void hResize(std::vector<T> & vec, HInteger newsize, T fill)
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(hResize)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE_1)(vec1)()("Input vector to be resized")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE_2)(vec2)()("Reference vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE_1)(vec1)()("Input vector to be resized")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE_2)(vec2)()("Reference vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -305,7 +305,7 @@ void hResize(std::vector<T> & vec, HInteger newsize, T fill)
 
 */
 
-template <class T, class S> 
+template <class T, class S>
 void hResize(std::vector<T> & vec1,std::vector<S> & vec2)
 {
   vec1.resize(vec2.size());
@@ -314,11 +314,11 @@ void hResize(std::vector<T> & vec1,std::vector<S> & vec2)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 //$DOCSTRING: Resize a casa vector to the same length as a second vector
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE 
-#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES 
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(hResize)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE_1)(vec1)()("Input vector to be resized")(HFPP_PAR_IS_VECTOR)(CASA)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE_2)(vec2)()("Reference vector")(HFPP_PAR_IS_VECTOR)(CASA)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE_1)(vec1)()("Input vector to be resized")(HFPP_PAR_IS_VECTOR)(CASA)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE_2)(vec2)()("Reference vector")(HFPP_PAR_IS_VECTOR)(CASA)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -326,7 +326,7 @@ void hResize(std::vector<T> & vec1,std::vector<S> & vec2)
   $PARDOCSTRING
 
 */
-template <class T, class S> 
+template <class T, class S>
 void hResize(casa::Vector<T> & vec1,casa::Vector<S> & vec2)
 {
   vec1.resize(*(vec2.shape().begin()));
@@ -339,8 +339,8 @@ void hResize(casa::Vector<T> & vec1,casa::Vector<S> & vec2)
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_CODE_PRE hResize(vec2,vec1); //code will be inserted in wrapper generation in cc file
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE) 
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -353,7 +353,7 @@ void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2_sta
   typedef IterValueType T;
   Iterin it=vec1;
   Iter itout=vec2_start;
-  while (it!=vec1_end & itout !=vec2_end) {
+  while ((it!=vec1_end) && (itout !=vec2_end)) {
     *itout=hfcast<T>(*it);
     ++it; ++itout;
   };
@@ -385,7 +385,7 @@ void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out_start,
   typedef IterValueType T;
   Iterin it=vec;
   Iter itout=out_start;
-  while (it!=vec_end & itout !=out_end) {
+  while ((it!=vec_end) && (itout !=out_end)) {
     *itout=*it;
     ++it; ++itout;
   };
@@ -497,7 +497,7 @@ void h{$MFUNC!CAPS}2(const Iter vec,const Iter vec_end, const Iter out_start,con
 {
   Iter it=vec;
   Iter itout=out_start;
-  while (it!=vec_end & itout !=out_end) {
+  while ((it!=vec_end) && (itout !=out_end)) {
     *itout=$MFUNC(*it);
     ++it; ++itout;
   };
@@ -564,7 +564,7 @@ void h{$MFUNC!CAPS}2(const Iter1 vec,const Iter1 vec_end, const Iter2 out_start,
 {
   Iter1 it=vec;
   Iter2 itout=out_start;
-  while (it!=vec_end & itout !=out_end) {
+  while ((it!=vec_end) && (itout !=out_end)) {
     *itout=$MFUNC(*it);
     ++it; ++itout;
   };
@@ -613,7 +613,7 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const
   typedef IterValueType T;
   Iter it=vec1;
   Iterin itout=vec2;
-  while (it!=vec1_end & itout !=vec2_end) {
+  while ((it!=vec1_end) && (itout !=vec2_end)) {
     *it HFPP_OPERATOR_INPLACE_$MFUNC hfcast<T>(*itout);
     ++it; ++itout;
   };
@@ -684,7 +684,7 @@ void HFPP_FUNC_NAME(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec
   Iterin1 it1=vec1;
   Iterin2 it2=vec2;
   Iter itout=vec3_start;
-  while (it1!=vec1_end & it2 !=vec2_end & itout !=vec3_end) {
+  while ((it1!=vec1_end) && (it2 !=vec2_end) && (itout !=vec3_end)) {
     *itout = hfcast<T>((*it1) HFPP_OPERATOR_$MFUNC  (*it2));
     ++it1; ++it2; ++itout;
   };
@@ -722,7 +722,7 @@ void h{$MFUNC}2(const Iterin1 vec1,const Iterin1 vec1_end, S val, const Iter vec
   Iterin1 itin=vec1;
   Iter itout=vec2;
   T val_t=hfcast<T>(val);
-  while (itin!=vec1_end & itout !=vec2_end) {
+  while ((itin!=vec1_end) && (itout !=vec2_end)) {
     *itout = hfcast<T>(*itin) HFPP_OPERATOR_$MFUNC  val_t;
     ++itin; ++itout;
   };
@@ -953,7 +953,7 @@ void HFPP_FUNC_NAME (const Iter vec1,
   Iter it2,it1=vec1;
   Iter ito=vec2,ito_end=vec2_end-1;
   //only produce the first N-1 blocks in the output vector
-  while (it1<vec1_end && ito<ito_end) {
+  while ((it1<vec1_end) && (ito<ito_end)) {
     it2=min(it1+blen,vec1_end);
     *ito=hMean(it1,it2);
     it1=it2;
@@ -1315,7 +1315,7 @@ void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out_start,
   typedef IterValueType T;
   Iterin it=vec;
   Iter itout=out_start;
-  while (it!=vec_end & itout !=out_end) {
+  while ((it!=vec_end) && (itout !=out_end)) {
     *itout+=real((*it)*conj(*it));
     ++it; ++itout;
   };

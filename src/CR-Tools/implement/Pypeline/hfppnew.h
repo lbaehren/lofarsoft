@@ -17,7 +17,7 @@ gcc -E -C -P -D H_DEBUG_CPP $HFLAGS -I. $LOFARSOFT/src/CR-Tools/implement/GUI/hf
 
 //This allows one to generate an output where newlines are inserted by another preprocessor
 #ifndef H_DEBUG_CPP
-#define _H_NL_ 
+#define _H_NL_
 #endif
 
 #include <boost/preprocessor/seq.hpp>
@@ -32,7 +32,7 @@ gcc -E -C -P -D H_DEBUG_CPP $HFLAGS -I. $LOFARSOFT/src/CR-Tools/implement/GUI/hf
 //Some convenience definitions
 #define HFPP_TRUE 1
 #define HFPP_FALSE 0
-#define HFPP_NONE 
+#define HFPP_NONE
 
 //Defines datatypes to iterate wrappers over
 #define HFPP_REAL_NUMERIC_TYPES (HInteger)(HNumber)
@@ -41,7 +41,7 @@ gcc -E -C -P -D H_DEBUG_CPP $HFLAGS -I. $LOFARSOFT/src/CR-Tools/implement/GUI/hf
 #define HFPP_STRING_TYPES (HString)
 #define HFPP_LOGICAL_TYPES (HBool)
 #define HFPP_POINTER_TYPES (HPointer)
-#define HFPP_NON_NUMERIC_TYPES HFPP_STRING_TYPES HFPP_POINTER_TYPES 
+#define HFPP_NON_NUMERIC_TYPES HFPP_STRING_TYPES HFPP_POINTER_TYPES
 #define HFPP_ALL_TYPES HFPP_NUMERIC_TYPES HFPP_NON_NUMERIC_TYPES
 #define HFPP_ALL_PYTHONTYPES HFPP_NUMERIC_TYPES HFPP_LOGICAL_TYPES HFPP_STRING_TYPES
 
@@ -49,7 +49,7 @@ gcc -E -C -P -D H_DEBUG_CPP $HFLAGS -I. $LOFARSOFT/src/CR-Tools/implement/GUI/hf
 #define HFPP_DEFAULT_WRAPPER_CLASSES (STL)(CASA)
 #define HFPP_DEFAULT_WRAPPER_TYPES HFPP_NUMERIC_TYPES
 
-//Used for nicer source code to determine how a parameter is passed and whether its type is templated  
+//Used for nicer source code to determine how a parameter is passed and whether its type is templated
 #define HFPP_VOID -1
 #define HFPP_PASS_AS_VALUE 0
 #define HFPP_PASS_AS_REFERENCE 1
@@ -78,7 +78,7 @@ gcc -E -C -P -D H_DEBUG_CPP $HFLAGS -I. $LOFARSOFT/src/CR-Tools/implement/GUI/hf
 #define HFPP_PAR_IS_VECTOR 1
 #define HFPP_PAR_IS_MATRIX 2
 
-//Tell the GUI how the return value of the library function is returned 
+//Tell the GUI how the return value of the library function is returned
 #define HFPP_GUI_RETURN_SCALAR 0      //Function returns a scalar as return value
 #define HFPP_GUI_RETURN_VECTOR_IN_PLACE 1 //Function takes vector as input and returns it modified (pass by reference)
 #define HFPP_GUI_RETURN_NEW_VECTOR 2 //Functions takes an input vector and returns a new vectors as second argument
@@ -95,7 +95,7 @@ def make_list(n,m):
     l=[]
     for i in range(m): l.append(0)
     s="("+format_list(l)+",BOOST_PP_NIL)"
-    while increment_list(n,l): 
+    while increment_list(n,l):
         s="("+format_list(l)+","+s+")"
     print "#define HFPP_INDEXLIST_"+str(n)+"x"+str(m)+" "+s
 
@@ -278,7 +278,7 @@ def format_list(l):
 #define HFPP_GET_FUNC_TEMPLATE_NAME BOOST_PP_IF(HFPP_FUNC_TYPE_IS_TEMPLATED,HFPP_GET_TEMPLATE_PARAMETER_NAME(HFPP_FUNC_TYPE_IS_TEMPLATED),HFPP_GET_FUNC_BASETYPE)
 
 //Returns the default function return type
-#define HFPP_GET_FUNC_TYPE_TEMPLATED(BASECLASS,TEMPLATETYPE) BOOST_PP_CAT(BOOST_PP_CAT(HFPP_GET_PAR_DECLARATION_DIM,HFPP_GET_FUNC_DIM),BOOST_PP_IF(HFPP_FUNC_BASE_CLASS_ALLOWED_TO_CHANGE,BASECLASS,HFPP_GET_FUNC_BASE_CLASS))(BOOST_PP_IF(HFPP_FUNC_TYPE_IS_TEMPLATED,BOOST_PP_SEQ_ELEM(HFPP_FUNC_TYPE_IS_TEMPLATED,TEMPLATETYPE),HFPP_GET_FUNC_BASETYPE))  
+#define HFPP_GET_FUNC_TYPE_TEMPLATED(BASECLASS,TEMPLATETYPE) BOOST_PP_CAT(BOOST_PP_CAT(HFPP_GET_PAR_DECLARATION_DIM,HFPP_GET_FUNC_DIM),BOOST_PP_IF(HFPP_FUNC_BASE_CLASS_ALLOWED_TO_CHANGE,BASECLASS,HFPP_GET_FUNC_BASE_CLASS))(BOOST_PP_IF(HFPP_FUNC_TYPE_IS_TEMPLATED,BOOST_PP_SEQ_ELEM(HFPP_FUNC_TYPE_IS_TEMPLATED,TEMPLATETYPE),HFPP_GET_FUNC_BASETYPE))
 
 #define HFPP_GET_FUNC_TYPE HFPP_GET_FUNC_TYPE_TEMPLATED(HFPP_GET_FUNC_BASE_CLASS,HFPP_GET_FUNC_TEMPLATE_NAME)
 
@@ -287,7 +287,7 @@ def format_list(l):
 
 
 //Generates the full type of a parameter, i.e. including the container type, like "vector<HInteger>"
-#define HFPP_GET_PAR_TYPE_TEMPLATED(N,WRAPPERTYPE,TEMPLATETYPES) BOOST_PP_CAT(BOOST_PP_CAT(HFPP_GET_PAR_DECLARATION_DIM,HFPP_GET_PAR_DIM(N)),WRAPPERTYPE)(BOOST_PP_IF(HFPP_GET_PAR_TEMPLATED(N),BOOST_PP_SEQ_ELEM(HFPP_GET_PAR_TEMPLATED(N),TEMPLATETYPES),HFPP_GET_PAR_BASETYPE(N)))  
+#define HFPP_GET_PAR_TYPE_TEMPLATED(N,WRAPPERTYPE,TEMPLATETYPES) BOOST_PP_CAT(BOOST_PP_CAT(HFPP_GET_PAR_DECLARATION_DIM,HFPP_GET_PAR_DIM(N)),WRAPPERTYPE)(BOOST_PP_IF(HFPP_GET_PAR_TEMPLATED(N),BOOST_PP_SEQ_ELEM(HFPP_GET_PAR_TEMPLATED(N),TEMPLATETYPES),HFPP_GET_PAR_BASETYPE(N)))
 
 //Generate a parameter declaration, that can go into the parameter
 //list of the function definition: "vector<HInteger>& vec"
@@ -299,7 +299,7 @@ def format_list(l):
 #define HFPP_GET_PARLIST_DECLARATION_TEMPLATED(WRAPPERTYPE,TEMPLATETYPES) BOOST_PP_ENUM(HFPP_GET_FUNC_PARNUM,HFPP_GET_PAR_DECLARATION_TEMPLATED_MACRO,(WRAPPERTYPE)(TEMPLATETYPES))
 
 
-//Now we define the functions that actually are used to generate the parameters for calling another function of different container classes 
+//Now we define the functions that actually are used to generate the parameters for calling another function of different container classes
 #define HFPP_CONVERT_PAR_INPUT_STL_TO_0(SCALAR) SCALAR
 #define HFPP_CONVERT_PAR_INPUT_CASA_TO_0(SCALAR) SCALAR
 #define HFPP_CONVERT_PAR_INPUT_STDIT_TO_0(SCALAR) SCALAR
@@ -327,20 +327,20 @@ def format_list(l):
 
 #define HFPP_GET_FUNC_TEMPLATE_TYPENAMES BOOST_PP_ENUM(HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS,HFPP_GET_FUNC_TEMPLATE_TYPENAMES_MACRO,BOOST_PP_EMPTY())
 
-//Now generate the Wrappers of certain types and for certain file type 
+//Now generate the Wrappers of certain types and for certain file type
 //wrappers for stl vectors in the .cc (actual source code) file
 #define HFPP_MAKE_WRAPPERS_VEC_CC(WRAPPERTYPE) \
   HFPP_GET_FUNC_TEMPLATE_DEFINITION inline HFPP_GET_FUNC_BASETYPE HFPP_GET_FUNC_NAME(HFPP_GET_PARLIST_DECLARATION_TEMPLATED(WRAPPERTYPE,HFPP_TEMPLATE_PARAMETER_NAMES)) { _H_NL_ \
       HFPP_CODE_PRE \
       HFPP_GET_FUNC_RETURN HFPP_GET_FUNC_BASENAME  (HFPP_GET_PARLIST_INPUT(WRAPPERTYPE)); _H_NL_ \
-  } 
+  }
 
 #define HFPP_MAKE_WRAPPERS_VEC_hFILE(WRAPPERTYPE)\
   HFPP_GET_FUNC_TEMPLATE_DEFINITION inline HFPP_GET_FUNC_BASETYPE HFPP_GET_FUNC_NAME(HFPP_GET_PARLIST_DECLARATION_TEMPLATED(WRAPPERTYPE,HFPP_TEMPLATE_PARAMETER_NAMES));
 
 
-#define HFPP_MAKE_WRAPPERS_MACRO_VEC_CC(ZZZ,YYY,WRAPPERTYPE) HFPP_MAKE_WRAPPERS_VEC_CC(WRAPPERTYPE)  
-#define HFPP_MAKE_WRAPPERS_MACRO_VEC_hFILE(ZZZ,YYY,WRAPPERTYPE) HFPP_MAKE_WRAPPERS_VEC_hFILE(WRAPPERTYPE)  
+#define HFPP_MAKE_WRAPPERS_MACRO_VEC_CC(ZZZ,YYY,WRAPPERTYPE) HFPP_MAKE_WRAPPERS_VEC_CC(WRAPPERTYPE)
+#define HFPP_MAKE_WRAPPERS_MACRO_VEC_hFILE(ZZZ,YYY,WRAPPERTYPE) HFPP_MAKE_WRAPPERS_VEC_hFILE(WRAPPERTYPE)
 
 #define HFPP_MAKE_WRAPPERS_CASA_hFILE HFPP_MAKE_WRAPPERS_VEC_hFILE(CASA)
 #define HFPP_MAKE_WRAPPERS_STL_hFILE HFPP_MAKE_WRAPPERS_VEC_hFILE(STL)
@@ -404,7 +404,7 @@ def format_list(l):
 //========================================================================
 #define HFPP_GENERATE_WRAPPERS_VEC_FILE(WRAPPERCLASS,FILE) HFPP_MAKE_WRAPPERS_##WRAPPERCLASS##_##FILE
 #define HFPP_WRAPPERCLASS_AND_FILETYPE(WRAPPERCLASS) (WRAPPERCLASS,HFPP_FILETYPE)
-#define HFPP_GENERATE_WRAPPERS_VEC_MACRO(ZZZ,YYY,WRAPPERCLASS) BOOST_PP_EXPAND(HFPP_GENERATE_WRAPPERS_VEC_FILE HFPP_WRAPPERCLASS_AND_FILETYPE(WRAPPERCLASS)) _H_NL_ 
+#define HFPP_GENERATE_WRAPPERS_VEC_MACRO(ZZZ,YYY,WRAPPERCLASS) BOOST_PP_EXPAND(HFPP_GENERATE_WRAPPERS_VEC_FILE HFPP_WRAPPERCLASS_AND_FILETYPE(WRAPPERCLASS)) _H_NL_
 #define HFPP_GENERATE_WRAPPERS_VEC BOOST_PP_SEQ_FOR_EACH(HFPP_GENERATE_WRAPPERS_VEC_MACRO,,HFPP_WRAPPER_CLASSES)
 
 
@@ -424,11 +424,5 @@ def format_list(l):
 
 #define HFPP_LOOP_CONCAT_INDICES(ZZZ,DATA,LIST) (DATA,LIST)
 
-#endif HFPP_H
+#endif /* HFPP_H */
 
-
-/*
-
-
-
- */
