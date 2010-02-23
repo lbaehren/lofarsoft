@@ -24,7 +24,7 @@ for USG_PACKAGE in dal cr
 {
     echo "-- Building $USG_PACKAGE ..."
     cd ${USG_ROOT}/build
-    make ${USG_PACKAGE}
+    make $USG_PACKAGE
     echo "-- Experimental build of $USG_PACKAGE ..."
     cd ${USG_ROOT}/build/$USG_PACKAGE
     make Experimental
