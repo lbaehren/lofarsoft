@@ -29,6 +29,20 @@ gcc -E -C -P -D H_DEBUG_CPP $HFLAGS -I. $LOFARSOFT/src/CR-Tools/implement/GUI/hf
 #include <boost/preprocessor/facilities/expand.hpp>
 #include <boost/preprocessor/stringize.hpp>
 
+//Definitions of Operators
+#define HFPP_OPERATOR_Mul *
+#define HFPP_OPERATOR_INPLACE_Mul *=
+#define HFPP_OPERATOR_Add +
+#define HFPP_OPERATOR_INPLACE_Add +=
+#define HFPP_OPERATOR_Div /
+#define HFPP_OPERATOR_INPLACE_Div /=
+#define HFPP_OPERATOR_Sub -
+#define HFPP_OPERATOR_INPLACE_Sub -=
+#define HFPP_OPERATOR_GreaterThan >
+#define HFPP_OPERATOR_GreaterEqual >=
+#define HFPP_OPERATOR_LessThan <
+#define HFPP_OPERATOR_LessEqual <=
+
 //Some convenience definitions
 #define HFPP_TRUE 1
 #define HFPP_FALSE 0

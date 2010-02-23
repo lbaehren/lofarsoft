@@ -4,3 +4,4 @@ echo TEMPORARY BUG FIX: make rebuild_cache - Remove when fixed for good
 cd $LOFARSOFT/build/cr
 make rebuild_cache
 make hftools
+make install

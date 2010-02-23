@@ -92,7 +92,7 @@ for v in hAllVectorTypes:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hRealVectorTypes:
-    for s in ["hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan"]:     
+    for s in ["hMean","hStdDev","hDownsample","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs"]:     
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hNumericalVectorTypes:
@@ -104,6 +104,6 @@ for v in hNumericalVectorTypes:
     setattr(v,"__imul__",Vec_imul)
     setattr(v,"__idiv__",Vec_idiv)
     setattr(v,"__isub__",Vec_isub)
-    for s in ["hAbs","hConvert","hMul","hDiv","hSub","hAdd","hiMul","hiDiv","hiSub","hiAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hMean","hSortMedian","hMedian","hStdDev","hDownsample","hFindLowerBound"]:
+    for s in ["hAbs","hConvert","hMul","hDiv","hSub","hAdd","hiMul","hiDiv","hiSub","hiAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hSortMedian","hMedian","hFindLowerBound"]:
         setattr(v,s[1:].lower(),eval(s))
 

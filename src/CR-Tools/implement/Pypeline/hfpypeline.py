@@ -84,9 +84,9 @@ for Block in range(64):
     hReadFile(rawdata,datareader_ptr,"Fx",Antenna,Blocksize,Block,Stride,Shift)
     datamean = rawdata.mean()
     datarms = rawdata.stddev(datamean)
-    datanpeaks=rawdata.findgreaterthan(3*datarms,where)
+    datanpeaks=rawdata.findgreaterthanabs(int(round(3*datarms)),where)
     print "("+str(datamean)+",", str(datarms)+",", str(datanpeaks)+") -",
-print " - Done."
+print "Done."
 hCloseFile(datareader_ptr)
 
 

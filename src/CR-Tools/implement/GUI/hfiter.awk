@@ -1,8 +1,8 @@
 BEGIN{true=1; false=0; iter=false}
 
-/^\/\/\$DOCSTRING: / {docstring = $0; sub("\\/\\/\\$DOCSTRING: +","",docstring); print; next}
+/^\/\/\$DOCSTRING: / {docstring = $0; sub("\\/\\/\\$DOCSTRING: +","",docstring); next}
 
-/^ *\$PARDOCSTRING/ && (funcdoc) {print commentdoc; commentdoc=""; funcdoc=0; next}
+/^ *\$PARDOCSTRING/ && (funcdoc) {$0=commentdoc; commentdoc=""; funcdoc=0}
 
 { 
     gsub("\\$DOCSTRING",docstring)
