@@ -3,11 +3,11 @@
 echo "-- Set environment variables ..."
 
 export LOFARSOFT=${USG_ROOT}
-. $LOFARSOFT/devel_common/scripts/init.sh
+. cd ${USG_ROOT}/devel_common/scripts/init.sh
 
 echo "-- Cleaning up code base ..."
 
-cd $LOFARSOFT
+cd ${USG_ROOT}
 rm -rf release
 rm -rf build
 
@@ -17,12 +17,12 @@ svn up
 
 echo "-- Building projects ..."
 
-cd build
+cd ${USG_ROOT}/build
 ./bootstrap
 
 make cr
 
-echo "-- Experimental build of selected projects ..."
+echo "-- Nightly build of selected projects ..."
 
-cd $LOFARSOFT/build/dal && make Nightly
-cd $LOFARSOFT/build/cr && make Nightly
+cd ${USG_ROOT}/build/dal && make Nightly
+cd ${USG_ROOT}/build/cr && make Nightly
