@@ -3,7 +3,7 @@
 echo "-- Set environment variables ..."
 
 export LOFARSOFT=${USG_ROOT}
-. cd ${USG_ROOT}/devel_common/scripts/init.sh
+. ${USG_ROOT}/devel_common/scripts/init.sh
 
 echo "-- Cleaning up code base ..."
 
