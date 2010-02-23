@@ -54,33 +54,10 @@ endif (QT4_FOUND)
 
 if (NOT HAVE_QT OR QT_FORCE_BUILD)
   
-  if (UNIX)
-    if (APPLE)
-      set (QT_SYSTEM "mac")
-    else (APPLE)
-      set (QT_SYSTEM "x11")
-    endif (APPLE)
-  endif (UNIX)
-
-  set (QT_BUILD_DIR "qt-${QT_SYSTEM}-opensource-src-4.4.0")
-  set (QT_TAR_ARCHIVE "${QT_BUILD_DIR}.tar.gz")
-  set (QT_URL "${USG_DOWNLOAD}/software/${QT_TAR_ARCHIVE}")
-
-  ##__________________________________________________________________
-  ## Download the tar-archive from the USG server
+  set (QT_VERSION "4.6.2")
+  set (QT_TAR_ARCHIVE "qt-everywhere-opensource-src-${QT_VERSION}.tar.gz")
+  set (QT_URL "http://get.qt.nokia.com/qt/source/${QT_TAR_ARCHIVE}")
   
-  if (UNIX)
-    if (APPLE)
-      set (QT_SYSTEM "mac")
-    else (APPLE)
-      set (QT_SYSTEM "x11")
-    endif (APPLE)
-  endif (UNIX)
-  set (QT_BUILD_DIR "qt-${QT_SYSTEM}-opensource-src-4.4.0")
-  set (QT_TAR_ARCHIVE "${QT_BUILD_DIR}.tar.gz")
-  
-  set (QT_URL "${USG_DOWNLOAD}/software/${QT_TAR_ARCHIVE}")
-
   ##__________________________________________________________________
   ## Build the project
   
