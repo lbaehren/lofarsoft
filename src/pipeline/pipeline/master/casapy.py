@@ -127,6 +127,7 @@ class casapy(LOFARrecipe):
             )
             start_time = gvds['StartTime']
             end_time = gvds['EndTime']
+            self.inputs['increment'] = int(self.inputs['increment'])
 
             # clusterlogger context manager accepts networked logging
             # from compute nodes.
@@ -175,10 +176,11 @@ class casapy(LOFARrecipe):
                     self.logger.warn(res)
                     self.logger.warn(res.failure.getTraceback())
                     failure = True
-            if failure:
-                return 1
-            self.outputs['data'] = outnames
-            return 0
+
+        if failure:
+            return 1
+#            self.outputs['data'] = outnames
+        return 0
 
 if __name__ == '__main__':
     sys.exit(casapy().main())

@@ -4,7 +4,7 @@ from contextlib import closing
 from subprocess import check_call, CalledProcessError
 from dateutil.parser import parse as parse_date
 from datetime import timedelta
-import os.path, tempfile, shutil
+import os.path, tempfile, shutil, time
 
 from pipeline.support.lofarnode import LOFARnode
 from pipeline.support.utilities import patch_parset, create_directory, log_time
@@ -45,19 +45,23 @@ class casapy_node(LOFARnode):
                 tmp_parset_filename = patch_parset(
                     parset, {
                         'Selection.timerange': time_range,
-                        'Image.name': '-' + str(int(time.mktime(process_start.timetuple()))),
+                        'Images.name': '-' + str(int(time.mktime(process_start.timetuple()))),
                         'dataset': infile
                     }
                 )
 
                 try:
-                    #
-                    # Run casapy
-                    #
-                    pass
+                    result = check_call([
+                        os.path.expanduser('~rol/sw/bin/casapy'),
+                        tmp_parset_filename,
+                    ])
+                except CalledProcessError, e:
+                    self.logger.error(str(e))
+                    self.logger.error("Failed dataset was %s %s" % (infile, time_range))
+                    raise Exception
                 finally:
                     # Clean up tempoerary files.
-                    os.unlink(temp_parset_filename)
+                    os.unlink(tmp_parset_filename)
 
                 process_start += increment
 
