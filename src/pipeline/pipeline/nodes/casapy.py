@@ -3,6 +3,7 @@ from __future__ import with_statement
 from contextlib import closing
 from subprocess import check_call, CalledProcessError
 from dateutil.parser import parse as parse_date
+from datetime import timedelta
 import os.path, tempfile, shutil
 
 from pipeline.support.lofarnode import LOFARnode
