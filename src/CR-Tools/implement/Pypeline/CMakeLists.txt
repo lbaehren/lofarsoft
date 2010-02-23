@@ -40,15 +40,65 @@ execute_process (
   TIMEOUT 20
   )
 
+execute_process (
+  COMMAND ${CMAKE_CXX_COMPILER} -E  -P -D H_DEBUG_CPP -I${CR_SOURCE_DIR}/implement/Pypeline ${CR_BINARY_DIR}/implement/Pypeline/hftools.awk.cc
+  COMMAND ${bin_awk} '{gsub(" *\\<_H_NL_\\> *","\n"); print}'
+  OUTPUT_FILE ${CR_BINARY_DIR}/implement/Pypeline/hftools.hfpp.cc
+  TIMEOUT 20
+  )
+
+#set_source_files_properties (
+#  ${CR_BINARY_DIR}/implement/Pypeline/hftools.awk.cc
+#  PROPERTIES
+#  KEEP_EXTENSION TRUE
+#  LANGUAGE CXX
+#  OBJECT_DEPENDS ${hftools_cc}
+#  COMPILE_DEFINITIONS E;P
+#  COMPILE_FLAGS "-DH_DEBUG_CPP"
+#  )
+
 ##_______________________________________________________________________________
 ## Create the library
 
 include_directories (${CR_SOURCE_DIR}/implement/Pypeline)
 
-file (GLOB hftools_sources ${CR_BINARY_DIR}/implement/Pypeline/*.cc)
+add_library (hftools MODULE
+  ${CR_BINARY_DIR}/implement/Pypeline/hftools.hfpp.cc
+  )
 
-add_library (hftools ${hftools_sources} )
+target_link_libraries (hftools
+  cr
+  ${DAL_LIBRARIES}
+  ${HDF5_LIBRARIES}
+  ${CASA_LIBRARIES}
+  ${PYTHON_LIBRARIES}
+  ${BOOST_LIBRARIES}
+  )
 
-set_target_properties (PROPERTIES
-  COMPILE_FLAGS "-E -P -D H_DEBUG_CPP  -Wall -Wno-comment -Woverloaded-virtual -Wno-non-template-friend -bundle -headerpad_max_install_names -fPIC -flat_namespace -Wl"
-)
+## additional target properties
+if (APPLE)
+  set_target_properties (hftools
+    PROPERTIES
+    PREFIX "lib"
+    SUFFIX .so
+    COMPILE_FLAGS "-fpermissive -DH_DEBUG_CPP"
+    LINK_FLAGS "-fPIC -flat_namespace -Wl"
+    )
+else (APPLE)
+  set_target_properties (hftools
+    PROPERTIES
+    PREFIX "lib"
+    SUFFIX .so
+    COMPILE_FLAGS "-DH_DEBUG_CPP"
+    LINK_FLAGS "-fPIC -shared -Wl"
+    )
+endif (APPLE)
+
+
+##_______________________________________________________________________________
+## Installation
+
+install (
+  TARGETS hftools
+  LIBRARY DESTINATION lib/python
+  )
