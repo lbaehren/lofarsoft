@@ -40,7 +40,7 @@ class dppp(LOFARrecipe):
         self.optionparser.add_option(
             '--suffix',
             dest="suffix",
-            default="",
+            default=".dppp",
             help="Suffix to add to trimmed data (default: overwrite existing)"
         )
         self.optionparser.add_option(
