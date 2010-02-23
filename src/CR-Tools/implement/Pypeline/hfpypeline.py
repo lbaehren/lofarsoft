@@ -64,16 +64,32 @@ Antenna=1; Blocksize=1024; Stride=0; Shift=0
 
 #Define data vectors to work with
 fftdata = ComplexVec()
+
 powerspectrum = FloatVec()
 powerspectrum.resize(Blocksize/2+1,0.0)
 
-print "Summing up Block: ",
+print "Summing up Blocks: ",
 for Block in range(64): 
     print Block,",",
     hReadFile(fftdata,datareader_ptr,"CalFFT",Antenna,Blocksize,Block,Stride,Shift)
     fftdata.SpectralPower(powerspectrum) 
 print " - Done."
+
+rawdata = IntVec()
+where=IntVec()
+where.resize(Blocksize)
+print "Quality checking of Blocks: ",
+for Block in range(64): 
+    print str(Block)+":",
+    hReadFile(rawdata,datareader_ptr,"Fx",Antenna,Blocksize,Block,Stride,Shift)
+    datamean = rawdata.mean()
+    datarms = rawdata.stddev(datamean)
+    datanpeaks=rawdata.findgreaterthan(3*datarms,where)
+    print "("+str(datamean)+",", str(datarms)+",", str(datanpeaks)+") -",
+print " - Done."
 hCloseFile(datareader_ptr)
+
+
 #execfile("hfplot.py")
 #gr=mglGraph(mglGraphZB,800,600) # Create mgl Graphobject
 #qw=hplot(gr,powerspectrum) # Plot it into simple Qt Widget

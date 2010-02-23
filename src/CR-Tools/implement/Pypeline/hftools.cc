@@ -917,6 +917,38 @@ IterValueType hStdDev (const Iter vec,const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Find the samples that are above a certain value and returns the number of samples found
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFindGreaterThan
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(threshold)()("The threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(vecout)()("Output vector - contains a list of positions in input vector which are above threshold")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueType threshold, const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end)
+{
+  Iter it=vec;
+  typename vector<HInteger>::iterator itout=vecout;
+  while (it<vec_end) {
+    if (*it > threshold) {
+      if (itout < vecout_end) {
+	*itout=(it-vec);
+	++itout; 
+      };
+    };
+    ++it;
+  };
+  return (itout-vecout);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 
 //$DOCSTRING: Downsample the input vector to a smaller output vector.
 //$COPY_TO HFILE START --------------------------------------------------

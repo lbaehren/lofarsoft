@@ -92,7 +92,7 @@ for v in hAllVectorTypes:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hRealVectorTypes:
-    for s in ["hAcos","hAsin","hAtan","hCeil","hFloor"]:     
+    for s in ["hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan"]:     
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hNumericalVectorTypes:
