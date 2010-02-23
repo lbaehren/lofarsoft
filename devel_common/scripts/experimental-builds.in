@@ -20,9 +20,12 @@ echo "-- Building projects ..."
 cd ${USG_ROOT}/build
 ./bootstrap
 
-make cr
-
-echo "-- Experimental build of selected projects ..."
-
-cd ${USG_ROOT}/build/dal && make Experimental
-cd ${USG_ROOT}/build/cr && make Experimental
+for USG_PACKAGE in dal cr
+{
+    echo "-- Building $USG_PACKAGE ..."
+    cd ${USG_ROOT}/build
+    make ${USG_PACKAGE}
+    echo "-- Experimental build of $USG_PACKAGE ..."
+    cd ${USG_ROOT}/build/$USG_PACKAGE
+    make Experimental
+}
