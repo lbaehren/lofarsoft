@@ -24,6 +24,7 @@
 /*!
   \file pycr_IO.cc
   \ingroup CR
+  \ingroup pycr
   \brief Python bindings for the classes in the CR-Tools module IO
 */
 
@@ -32,12 +33,13 @@
 //_______________________________________________________________________________
 //                                                                      LOFAR_TBB
 
-void (LOFAR_TBB::*summary1)(ostream &,
-			    bool const &,
-			    bool const &) = &LOFAR_TBB::summary;
-
+//! Bindings for the CR::LOFAR_TBB class
 void export_LOFAR_TBB ()
 {
+  void (LOFAR_TBB::*summary1)(ostream &,
+			      bool const &,
+			      bool const &) = &LOFAR_TBB::summary;
+  
   bpl::class_<LOFAR_TBB>("LOFAR_TBB")
     .def(bpl::init<>())
     .def(bpl::init<std::string,uint>())

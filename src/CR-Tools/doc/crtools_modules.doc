@@ -835,3 +835,17 @@ for (uint block(0); block<nofBlocks; block++) {
   over and over again. The Math module of the CR-Pipeline is a collection of
   such additional functions.
 */
+
+// ==============================================================================
+//
+//  CR-Tools/implement/Bindings
+//
+// ==============================================================================
+
+/*!
+  \defgroup pycr CR-Tools :: Python bindings
+
+  \ingroup CR
+
+  \brief Python bindings for the classes and functions in libcr
+*/

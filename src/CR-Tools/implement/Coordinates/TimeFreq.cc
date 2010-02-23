@@ -255,7 +255,7 @@ namespace CR { // Namespace CR -- begin
   */
   void TimeFreq::summary (std::ostream &os)
   {
-    os << "[TimeFreqSkymap] Summary of internal parameters." << std::endl;
+    os << "[TimeFreq] Summary of internal parameters." << std::endl;
     os << "-- Blocksize      [samples] = " << blocksize_p          << std::endl;
     os << "-- Sample frequency    [Hz] = " << sampleFrequency_p    << std::endl;
     os << "-- Nyquist zone             = " << nyquistZone_p        << std::endl;

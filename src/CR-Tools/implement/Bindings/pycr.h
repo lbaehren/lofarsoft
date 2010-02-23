@@ -21,6 +21,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+/*!
+  \file pycr.h
+  \ingroup CR
+  \ingroup pycr
+  \brief Python bindings
+*/
+
 #include <string>
 #include <vector>
 
@@ -32,13 +39,16 @@
 
 // CR-Tools header files
 #include <crtools.h>
+#include <Analysis/DynamicSpectrum.h>
 #include <Coordinates/CoordinateType.h>
+#include <Coordinates/SkymapQuantity.h>
 #include <Coordinates/TimeFreq.h>
+#include <Filters/BasicFilter.h>
 #include <Filters/HanningFilter.h>
+#include <Filters/RaisedCosineFilter.h>
 #include <IO/LOFAR_TBB.h>
 #include <IO/DataIterator.h>
 #include <IO/DataReader.h>
-#include <Analysis/DynamicSpectrum.h>
 
 // Basic Python header
 #include <Python.h>
@@ -51,34 +61,39 @@
 #include <boost/python/list.hpp>
 #include <boost/python/extract.hpp>
 
-// ==============================================================================
-//
-//  Namespace usage
-//
-// ==============================================================================
-
 namespace bpl = boost::python;
 
-using CR::CoordinateType;
-using CR::DataIterator;
-using CR::DataReader;
-using CR::HanningFilter;
-using CR::TimeFreq;
-using CR::LOFAR_TBB;
+// ==============================================================================
+//
+//  Function prototypes & Namespace usage
+//
+// ==============================================================================
+
 using CR::DynamicSpectrum;
 
-// ==============================================================================
-//
-//  Function prototypes
-//
-// ==============================================================================
+// === Coordinates ===============================
 
-/* Coordinates */
+using CR::CoordinateType;
+using CR::SkymapQuantity;
+using CR::TimeFreq;
 
 void export_CoordinateType ();
+void export_SkymapQuantity ();
 void export_TimeFreq ();
 
-/* IO */
+// === Filters ===================================
+
+using CR::BasicFilter;
+using CR::HanningFilter;
+
+void export_BasicFilter ();
+void export_HanningFilter ();
+
+// === IO ========================================
+
+using CR::DataIterator;
+using CR::DataReader;
+using CR::LOFAR_TBB;
 
 void export_LOFAR_TBB ();
 
