@@ -39,8 +39,8 @@ include (CMakeSettings)
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (QT4_INCLUDES Qt/qatomic.h QtGui/QTableWidgetItem QtGui/QWidget
-  PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
+find_path (QT4_INCLUDES QTimer QMouseEvent
+  PATHS ${include_locations} /usr/lib /sw/lib
   PATH_SUFFIXES qt4-mac qt4-mac/include qt4-x11 qt4-x11/include
   )
 
