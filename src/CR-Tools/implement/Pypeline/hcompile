@@ -28,6 +28,7 @@ echo "Preprocessor Step 1c: Splitting off certain snippets of code. Generating f
 gawk -f $GUI/hfsplit2h.awk hftools.iter.cc >  hftools.tmp.cc
 echo "Preprocessor Step 2: Using gcc preprocessor to generate wrappers. Generating file: " hftools.hfpp.cc
 gcc -E  -P -D H_DEBUG_CPP $HFLAGS -I. hftools.tmp.cc | gawk '{gsub(" *\\<_H_NL_\\> *","\n"); print}' > hftools.hfpp.cc
+#gcc -E  -P -D H_DEBUG_CPP $HFLAGS -I. hftools.tmp.cc | sed 's/_H_NL_/NEWLINE/' > hftools.hfpp.cc
 echo "Compile source code. Generating file: " hftools.cc.o
 /usr/bin/c++ $HFLAGS2 -o hftools.cc.o -c hftools.hfpp.cc
 echo "Link library. Generating file: "  $PYPDIR/hftools.so
