@@ -40,22 +40,18 @@ execute_process (
   TIMEOUT 20
   )
 
-execute_process (
-  COMMAND ${CMAKE_CXX_COMPILER} -E  -P -D H_DEBUG_CPP -I${CR_SOURCE_DIR}/implement/Pypeline ${CR_BINARY_DIR}/implement/Pypeline/hftools.awk.cc
-  COMMAND ${bin_awk} '{gsub(" *\\<_H_NL_\\> *","\n"); print}'
-  OUTPUT_FILE ${CR_BINARY_DIR}/implement/Pypeline/hftools.hfpp.cc
-  TIMEOUT 20
+add_custom_command (
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/hftools.hfpp.cc
+  DEPENDS ${hftools_cc}
+  COMMAND ${CMAKE_CXX_COMPILER}
+  ARGS -E  -P -DH_DEBUG_CPP -D_H_NL_=\" \" -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES} -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} -o ${CMAKE_CURRENT_BINARY_DIR}/hftools.hfpp.cc ${CMAKE_CURRENT_BINARY_DIR}/hftools.awk.cc
   )
 
-#set_source_files_properties (
-#  ${CR_BINARY_DIR}/implement/Pypeline/hftools.awk.cc
-#  PROPERTIES
-#  KEEP_EXTENSION TRUE
-#  LANGUAGE CXX
-#  OBJECT_DEPENDS ${hftools_cc}
-#  COMPILE_DEFINITIONS E;P
-#  COMPILE_FLAGS "-DH_DEBUG_CPP"
-#  )
+set_source_files_properties (
+  ${CMAKE_CURRENT_BINARY_DIR}/hftools.hfpp.cc
+  PROPERTIES
+  OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/hftools.awk.cc
+  )
 
 ##_______________________________________________________________________________
 ## Create the library
@@ -63,7 +59,7 @@ execute_process (
 include_directories (${CR_SOURCE_DIR}/implement/Pypeline)
 
 add_library (hftools MODULE
-  ${CR_BINARY_DIR}/implement/Pypeline/hftools.hfpp.cc
+  ${CMAKE_CURRENT_BINARY_DIR}/hftools.hfpp.cc
   )
 
 target_link_libraries (hftools
@@ -71,15 +67,15 @@ target_link_libraries (hftools
   ${DAL_LIBRARIES}
   ${HDF5_LIBRARIES}
   ${CASA_LIBRARIES}
-  ${PYTHON_LIBRARIES}
   ${BOOST_LIBRARIES}
+  ${PYTHON_LIBRARIES}
   )
 
 ## additional target properties
 if (APPLE)
   set_target_properties (hftools
     PROPERTIES
-    PREFIX "lib"
+    PREFIX ""
     SUFFIX .so
     COMPILE_FLAGS "-fpermissive -DH_DEBUG_CPP"
     LINK_FLAGS "-fPIC -flat_namespace -Wl"
@@ -87,7 +83,7 @@ if (APPLE)
 else (APPLE)
   set_target_properties (hftools
     PROPERTIES
-    PREFIX "lib"
+    PREFIX ""
     SUFFIX .so
     COMPILE_FLAGS "-DH_DEBUG_CPP"
     LINK_FLAGS "-fPIC -shared -Wl"
