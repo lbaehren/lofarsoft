@@ -1,5 +1,5 @@
 # Import module
-from libhftools import *
+from hftools import *
 
 #Some definitons to make pretty (and short) output of vectors
 def VecToString(self,maxlen=10):

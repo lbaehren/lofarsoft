@@ -9,7 +9,7 @@
 #undef HFPP_FILETYPE
 #define HFPP_FILETYPE hPYTHON
 
-BOOST_PYTHON_MODULE(libhftools)
+BOOST_PYTHON_MODULE(hftools)
 {
     using namespace boost::python;
 
