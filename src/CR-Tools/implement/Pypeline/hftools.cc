@@ -913,7 +913,7 @@ HNumber hStdDev (const Iter vec,const Iter vec_end)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //========================================================================
-//$ITERATE MFUNC GreaterThan,GreaterEqual,LessThan,LessEqual 
+//$ITERATE MFUNC GreaterThan,GreaterEqual,LessThan,LessEqual
 //========================================================================
 
 //$DOCSTRING: Find the samples that are $MFUNC a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
@@ -939,7 +939,7 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueTyp
     if (*it HFPP_OPERATOR_$MFUNC threshold) {
       if (itout < vecout_end) {
 	*itout=(it-vec);
-	++itout; 
+	++itout;
       };
     };
     ++it;
@@ -971,7 +971,7 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueTyp
     if (abs(*it) HFPP_OPERATOR_$MFUNC threshold) {
       if (itout < vecout_end) {
 	*itout=(it-vec);
-	++itout; 
+	++itout;
       };
     };
     ++it;
@@ -1386,6 +1386,31 @@ void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out_start,
     *itout+=real((*it)*conj(*it));
     ++it; ++itout;
   };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Convert the ADC value to a voltage
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hADC2Voltage
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES (STL)
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(adc2voltage)()("Scaling factor if the gain")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const HNumber adc2voltage) {
+  Iter it = vec;
+  while(it != vec_end) {
+    *it *= adc2voltage;
+    it++;
+  }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
