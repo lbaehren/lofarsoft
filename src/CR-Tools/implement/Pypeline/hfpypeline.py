@@ -65,6 +65,8 @@ Filesize=64*1024
 
 #DataReader Parameters
 nAntennas=8
+Observatory="LOPES"
+ObservationTime=0
 Antenna=0; Blocksize=Filesize/2; Stride=0; Shift=0; 
 nBlocks=Filesize/Blocksize
 FFTSize=Blocksize/2+1
@@ -82,15 +84,25 @@ for Block in range(nBlocks):
     fftdata.SpectralPower(powerspectrum) 
 print " - Done."
 
-rawdata = IntVec()
+nsigma=4
+
+qualityfields=("mean","rms","nonGaussianity")
+qualitylimits=((-15,15),(100,300),(-5,5))
+
+def CheckParameterConformance(fields,limits,data):
+    noncompliance=[]
+    for i in range(len(fields)):
+        if (data[i]<limits[i][0]) | (data[i]>limits[i][1]) : noncompliance.append(fields[i])
+    return noncompliance
+
+            
+rawdata=IntVec()
 where=IntVec()
 where.resize(Blocksize)
-nsigma=4
 probability=funcGaussian(nsigma,1,0)
 npeaksexpected=probability*Blocksize
 npeakserror=sqrt(npeaksexpected)
-
-
+qualityflaglist=[]
 print "Quality checking of Blocks: nsigma=",nsigma, "peaks expected=",npeaksexpected
 for Antenna in range(nAntennas):
     for Block in range(nBlocks): 
@@ -99,9 +111,16 @@ for Antenna in range(nAntennas):
         datamean = rawdata.mean()
         datarms = rawdata.stddev(datamean)
         datanpeaks=rawdata.findgreaterthanabs(int(round(nsigma*datarms)),where)
-        nonGaussianity=(datanpeaks-npeaksexpected)/npeakserror
-        print "mean={0:4.2f},".format(datamean),"rms={0:5.1f},".format(datarms),"npeaks={0:5d},".format(datanpeaks),"nonGaussianity={0:5.2f}".format(nonGaussianity)
+        dataNonGaussianity=(datanpeaks-npeaksexpected)/npeakserror
+        qualitydata=(datamean,datarms,dataNonGaussianity)
+        print "mean={0:4.2f},".format(datamean),"rms={0:5.1f},".format(datarms),"npeaks={0:5d},".format(datanpeaks),"nonGaussianity={0:5.2f}".format(dataNonGaussianity),
+        noncompliancelist=CheckParameterConformance(qualityfields,qualitylimits,qualitydata)
+        if noncompliancelist: 
+            qualityflaglist.append((Antenna,Block,noncompliancelist))
+            print noncompliancelist,"!!"
+        else: print ""
 print "Done."
+print "Qualit Flaglist:",qualityflaglist
 hCloseFile(datareader_ptr)
 
 
