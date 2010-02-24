@@ -49,6 +49,8 @@
 #include <IO/LOFAR_TBB.h>
 #include <IO/DataIterator.h>
 #include <IO/DataReader.h>
+#include <Imaging/GeomDelay.h>
+#include <Imaging/GeomPhase.h>
 
 // Basic Python header
 #include <Python.h>
@@ -97,3 +99,10 @@ using CR::LOFAR_TBB;
 
 void export_LOFAR_TBB ();
 
+// === Imaging ===================================
+
+using CR::GeomDelay;
+using CR::GeomPhase;
+
+void export_GeomDelay ();
+void export_GeomPhase ();

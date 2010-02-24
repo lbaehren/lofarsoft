@@ -46,7 +46,9 @@ BOOST_PYTHON_MODULE (pycr)
   
   //__________________________________________________________________
   //                                                 implement/Imaging
-
+  
+  export_GeomDelay ();
+  export_GeomPhase ();
   
   //__________________________________________________________________
   //                                                    implement/Data
