@@ -1,5 +1,5 @@
 # Import module
-from hftools import *
+from libhftools import *
 
 #Some definitons to make pretty (and short) output of vectors
 def VecToString(self,maxlen=10):
@@ -89,11 +89,11 @@ setattr(IntMatrix,"__repr__",MatrixToPrintString)
 #    setattr
 for v in hAllVectorTypes:
     setattr(v,"__repr__",VecToPrintString)
-    for s in ["hResize","hFill","hNew","hCopy","hSort"]:     
+    for s in ["hResize","hFill","hNew","hCopy","hSort"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hRealVectorTypes:
-    for s in ["hMean","hStdDev","hDownsample","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs"]:     
+    for s in ["hMean","hStdDev","hDownsample","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hNumericalVectorTypes:

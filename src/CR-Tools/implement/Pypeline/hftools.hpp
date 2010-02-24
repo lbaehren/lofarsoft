@@ -5,14 +5,14 @@
 
 
 // Tell the preprocessor (for generating wrappers) that this is a c++
-// header file for Python exposure 
+// header file for Python exposure
 #undef HFPP_FILETYPE
-#define HFPP_FILETYPE hPYTHON  
+#define HFPP_FILETYPE hPYTHON
 
-BOOST_PYTHON_MODULE(hftools)
+BOOST_PYTHON_MODULE(libhftools)
 {
     using namespace boost::python;
-    
+
     class_<std::hmatrix<HInteger,allocator<HInteger> > >("IntMatrix")
       .def(vector_indexing_suite<std::hmatrix<HInteger,allocator<HInteger> > >())
       //      .def("setDimension",&std::hmatrix<HInteger,allocator<HInteger> >::setDimension)
@@ -27,7 +27,7 @@ BOOST_PYTHON_MODULE(hftools)
 
   class_<std::vector<HInteger> >("IntVec")
     .def(vector_indexing_suite<std::vector<HInteger> >())
-     
+
       /*.def("thiAdd",fptr_hiAdd_HComplexHComplex12)
 	.def("thiAdd",fptr_hiAdd_HComplexHNumber12)
 	.def("thiAdd",fptr_hiAdd_HComplexHInteger12)
@@ -39,15 +39,15 @@ BOOST_PYTHON_MODULE(hftools)
 	.def("thiAdd",fptr_hiAdd_HIntegerHInteger12)
       */
       ;
-    
+
     class_<std::vector<HNumber> >("FloatVec")
         .def(vector_indexing_suite<std::vector<HNumber> >())
       ;
-    
+
     class_<std::vector<bool> >("BoolVec")
         .def(vector_indexing_suite<std::vector<bool> >())
       ;
-    
+
     class_<std::vector<HComplex> >("ComplexVec")
         .def(vector_indexing_suite<std::vector<HComplex> >())
       ;
