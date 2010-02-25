@@ -39,6 +39,12 @@ struct EP_Interface
 BOOST_PYTHON_MODULE(ep_echo)
 {
     using namespace boost::python;
+
+    // These are exposed as module-level attributes in Python
+    scope().attr("PING") = ECHO_PING;
+    scope().attr("ECHO") = ECHO_ECHO;
+    scope().attr("CLOCK") = ECHO_CLOCK;
+
     class_<EP_Interface>("EP_Interface", init<optional<std::string> >())
         .def("time_echo", &EP_Interface::time_echo)
     ;
