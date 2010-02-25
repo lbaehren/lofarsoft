@@ -1,5 +1,4 @@
 LOFARROOT = /home/swinbank/Work/LOFAR
-LOFARCONF = -I/home/swinbank/include
 
 MACSRC    = $(LOFARROOT)/MAC/MACIO/src/EventPort.cc $(LOFARROOT)/MAC/MACIO/src/GCF_Event.cc
 MACINC    = -I$(LOFARROOT)/MAC/MACIO/include
