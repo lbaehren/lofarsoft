@@ -1057,8 +1057,7 @@ std::vector<T> HFPP_FUNC_NAME (
 		  HNumber downsample_factor
 		  )
 {
-  std::vector<T>
- newvec(floor(vec.size()/downsample_factor+0.5));
+  std::vector<T> newvec(floor(vec.size()/downsample_factor+0.5));
   hDownsample(vec,newvec);
   return newvec;
 }
@@ -1414,6 +1413,63 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const HNumber adc2voltag
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Create a hanning filter.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hGetHanningFilter
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASS (STL)
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector containing hanning filter")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end){
+  HInteger Blocksize = vec_end - vec;
+  CR::HanningFilter<HNumber> hanning_filter(Blocksize);
+  Iter itv = vec;
+  CasaVector<HNumber> filter = hanning_filter.weights();
+  CasaVector<HNumber>::iterator itf = filter.begin();
+
+  while ((itv != vec_end) && (itf != filter.end())) {
+    *itv = (IterValueType) *itf;
+    itv++; itf++;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Apply a hanning filter on a vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hApplyHanningFilter
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector containing the data on which the hanning filter will be applied.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end){
+  HInteger Blocksize = vec_end - vec;
+  Iter itv = vec;
+  vector<HNumber> filter(Blocksize);
+  vector<HNumber>::iterator itf = filter.begin();
+
+  hGetHanningFilter(filter.begin(), filter.end());
+  while ((itv != vec_end) && (itf != filter.end())) {
+    *itv *= (IterValueType) *itf ;
+    itv++; itf++;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
 
