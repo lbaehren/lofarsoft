@@ -309,10 +309,12 @@ namespace CR { // Namespace CR -- begin
           CompleteBeamPipe_p->plotAllAntennas(PlotPrefix, beamformDR_p, AntennaSelection, true,
                                               getUpsamplingExponent(),false);
 
-        // calculate the maxima
+        // calculate the maxima:
+        // calculate noise as mean of local maxima of the envelope in time range of -10.5 to -0.5 µs before CC center)
         if (CalculateMaxima)
           calibPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),
-                                                            false, fiterg.asDouble("CCcenter"));
+                                                            false, fiterg.asDouble("CCcenter"),
+                                                            3, fiterg.asDouble("CCcenter") - 10.5e-6, fiterg.asDouble("CCcenter") - 0.5e-6);
         // user friendly list of calculated maxima
         if (listCalcMaxima)
           CompleteBeamPipe_p->listCalcMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),fiterg.asDouble("CCcenter"));

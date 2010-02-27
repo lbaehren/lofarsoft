@@ -119,8 +119,8 @@ namespace CR { // Namespace CR -- begin
       CompleteBeamPipe_p->plotAllAntennas("pulsePattern", lev_p, AntennaSelection, true,
                                           getUpsamplingExponent(),false, true);
       // calculate the maxima
-      double noiseTime = pulseStart-1e-4;   // noise range is normally calculated in respect to the time of the CC beam
-      calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false, noiseTime, 3);
+      calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false,
+                                                        1e99, 3, pulseStart - 10.5e-6, pulseStart - 0.5e-6);
       
       // load the pulse pattern: calculate time range of pulse and get up-sampled trace in this range
       Vector<Double> timeValues =
@@ -181,8 +181,13 @@ namespace CR { // Namespace CR -- begin
       CompleteBeamPipe_p->plotAllAntennas("noise", lev_p, AntennaSelection, false,
                                           getUpsamplingExponent(),false, false);
       // calculate the maxima
-      double noiseTime = plotStart()+1e-7;   // noise range is normally calculated in respect to the time of the CC beam
-      calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false, noiseTime, 3);
+      for (int i = 0; i < 2; i++) {
+        setPlotInterval(-150e-6 + i*15e-6, -149e-6 + i*15e-6);
+        CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
+        double noiseTime = (plotStart()+plotStop())/2.;   // noise range is normally calculated in respect to the time of the CC beam
+        calibPulses = CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false,
+                                                          noiseTime, 3, plotStart() - 10.5e-6, plotStart() - 0.5e-6);
+      }                                                    
    
     } catch (AipsError x) {
       cerr << "checkNoiseInfluence::loadNoiseEvent: " << x.getMesg() << endl;

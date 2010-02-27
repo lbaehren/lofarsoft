@@ -441,12 +441,17 @@ namespace CR { // Namespace CR -- begin
              for the given xaxis
 
       \param xaxis            -- a time axis (may be upsampled or not)
-      \param ccBeamcenter      -- position in time of the CC-beam center
+      \param starttime        -- start time to calculate noise in s
+      \param stoptime         -- stop time to calculate noise in s
 
-      \return noiseRange      -- a Slice containing the indices of the xaxis interval corresponding to 
-                                 CC-beam-center - 15 * cc-window until CC-beam-center - 5 * cc-window
+      \return noiseRange      -- a Slice containing the indices of the xaxis interval corresponding to
+                                 the start and stop time. Steffen defined as time range                             
+                                 CC-beam-center - 15 * cc-window until CC-beam-center - 5 * cc-window, 
+                                 but now the default is 10 µs, ending 0.5 µs before the CC-beam center.
     */
-    Slice calculateNoiseRange (const Vector<Double>& xaxis, const double& ccBeamcenter) const;
+    Slice calculateNoiseRange (const Vector<Double>& xaxis,
+                               const double& starttime,
+                               const double& stoptime) const;
 
 
     /*!
@@ -555,7 +560,9 @@ namespace CR { // Namespace CR -- begin
       \param rawData          -- uses the raw ADC data instead of the calibrated fieldstrength
       \param cc_center        -- center (time) of CC-beam fit (tries to calculate the noise before the pulse,
                                  if this information is given)
-      \param noiseMethod      -- method for calculation of noise                           
+      \param noiseMethod      -- method for calculation of noise (0 means no calculation of noise)
+      \param noiseStart       -- start of noise range (must be specified, if noiseMethod != 0)
+      \param noiseStop        -- stop of noise range (must be specified, if noiseMethod != 0)
 
       \return pulses          -- a map with the calculated pulse parameters (keys = antennaIDs)
     */
@@ -565,7 +572,9 @@ namespace CR { // Namespace CR -- begin
                                                const int& upsampling_exp = 0,
                                                const bool& rawData = false,
                                                const double& cc_center = 1e99,
-                                               int noiseMethod = 0);
+                                               int noiseMethod = 0,
+                                               const double& noiseStart = 0,
+                                               const double& noiseStop = 0);
     /*!
       \brief same as calculateMaxima, but different output form and does not work with the envelope of the trace
 

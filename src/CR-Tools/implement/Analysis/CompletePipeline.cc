@@ -581,21 +581,17 @@ namespace CR { // Namespace CR -- begin
   }
   
   
-  Slice CompletePipeline::calculateNoiseRange (const Vector<Double>& xaxis, const double& ccBeamcenter) const
+  Slice CompletePipeline::calculateNoiseRange (const Vector<Double>& xaxis,
+                                               const double& starttime,
+                                               const double& stoptime) const
   {
     try {
-      // check if plotStart is <= plotStop
-      if (ccBeamcenter == 0.0) {
-        cerr << "CompletePipeline:calculateNoiseRange: Error: CC-beam did not converged !" << endl;
-        return Slice(0,0);
-      }
-
       // calculate noise interval
-      int startsample = ntrue(xaxis<ccBeamcenter-15*ccWindowWidth_p);
-      int stopsample = ntrue(xaxis<ccBeamcenter-5*ccWindowWidth_p);
+      int startsample = ntrue(xaxis<starttime);
+      int stopsample = ntrue(xaxis<stoptime);
 
       if (startsample >= stopsample) {
-        cerr << "CompletePipeline:calculateNoiseRange: Error: range is too small!" << endl;
+        cerr << "CompletePipeline:calculateNoiseRange: Error: range is too small or out of bounds!" << endl;
         return Slice(0,0);
       }
 
@@ -1263,13 +1259,15 @@ namespace CR { // Namespace CR -- begin
                                                               const int& upsampling_exp,
                                                               const bool& rawData,
                                                               const double& cc_center,
-                                                              int noiseMethod)
+                                                              int noiseMethod,
+                                                              const double& noiseStart,
+                                                              const double& noiseStop)
   {
     map <int,PulseProperties> pulses;           // return value with pulse properties
     try {
       Vector<Double> timeValues;                // time values
       Vector<Double> timeRange;                        // time values of pulse region (= plot region)
-      Vector<Double> timeRangeNoise;                // time values of noise region
+      Slice timeRangeNoise;                       // time range of trace used for noise calculation
       Matrix<Double> yValues;                        // y-values
       Vector<Double> trace;                        // trace currently processed
       Vector<Double> traceNoise;                // trace with noise currently processed
@@ -1285,18 +1283,11 @@ namespace CR { // Namespace CR -- begin
       vector<double> noiseValues;                // Mean of trace in a region before the cc-beam
       vector<double> snrValues;                    // Envelope height / noise
       Vector<Double> geomDelays;                // geometrical delays of beamforming in getShiftedFFT
-      bool calculate_noise = false;                // Is set to true if cc_center is not the default (1e99)
-
+ 
       if (rawData)
         cout << "\nLooking for maxima in the envelope of the raw data FX: \n";
       else
         cout << "\nLooking for maxima in the envelope of the calibrated field strength: \n";
-
-      // check if noise shall be calculated
-      if ( cc_center != 1e99) {
-        calculate_noise = true;
-        cout << "Noise will be calculated.\n";
-      }
 
       // make antennaSelection unique, as casacore-Vectors are allways passed by reference
       antennaSelection.unique();
@@ -1340,7 +1331,7 @@ namespace CR { // Namespace CR -- begin
 
       // Define the time range considered (the same as the plot range)
       Slice range;
-      if ((calculate_noise) && (!calibrationMode))
+      if ((noiseMethod != 0) && (!calibrationMode))
         range = calculateCCRange(timeValues,cc_center);
       else
         range = calculatePlotRange(timeValues);
@@ -1360,23 +1351,9 @@ namespace CR { // Namespace CR -- begin
       }
 
       // get the time range for noise calculation
-      Slice rangeNoise;
-      if (calculate_noise) {
-        // check if cc_center is at a valid position (time must be within the time-axis)
-        if ( (cc_center < timeValues(0)) || (cc_center > timeValues(timeValues.endPosition())) ) {
-          cerr << "CompletePipeline:calculateMaxima: ERROR: Center of CC-Beam is at an invalid time: " 
-               << cc_center << " s\n"
-               << "CompletePipeline:calculateMaxima: exiting function!" << endl;
-          return pulses;
-        }
-
-        // Define the time range considered (the same length as the plot range, 
-        // but before actual plot range)
-        rangeNoise = calculateNoiseRange(timeValues, cc_center);
-        timeRangeNoise = timeValues(rangeNoise);
-     }
-
-
+      if (noiseMethod != 0)
+        timeRangeNoise = calculateNoiseRange(timeValues, noiseStart, noiseStop);
+ 
       // print header line of output
       cout << "Ant   env height   max height   min height     noise        SNR     env time   max time   min time   time of half height     FWHM\n"
            << "[#]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]    (env)      [us]       [us]       [us]           [us]             [ns]\n"
@@ -1455,19 +1432,40 @@ namespace CR { // Namespace CR -- begin
           mintimevalue = j;
           minimum = trace(j);
 
-          // find the maximum of the envelope (recalculate slope, as it could be differen)
-          if ( envTrace(ccTime) < envTrace(ccTime-1) ) 
-            slope = -1;
-          else
-            slope = 1;
-          j = ccTime;        // counter
-          while( (j > 0) && (j < envTrace.size()-1) && (envTrace(j) < envTrace(j+slope)) ) {
-            j += slope;
-          }
-          if ( (j==0) && (j = envTrace.size()) )
-            cout << "WARNING: Range is too small: Local maximum of the envelope could not be found!" << endl;
-          envMaxtimevalue = j;
-          envMaximum = envTrace(j);
+          // check if there is a local maximum of the envelope at the ccTime
+          if ( (envTrace(ccTime) > envTrace(ccTime-1)) && (envTrace(ccTime) > envTrace(ccTime+1)) ) {
+            envMaxtimevalue = ccTime;
+          } else {       // find local maxima of envelope left and right of ccTime an take the closest one
+            // left: first pass potential local minimum if there is one in between
+            unsigned int left = ccTime;
+            while( (left > 0) && (envTrace(left) >= envTrace(left-1)) ) 
+              --left;
+            // now look for next local maximum
+            while( (left > 0) && (envTrace(left) < envTrace(left-1)) ) 
+              --left;
+            // right first pass potential local minimum if there is one in between
+            unsigned int right = ccTime;
+            while( (right < envTrace.size()-1) && (envTrace(right) >= envTrace(right+1)) ) 
+              ++right;
+            // now look for next local maximum
+            while( (right < envTrace.size()-1) && (envTrace(right) < envTrace(right+1)) ) 
+              ++right;
+            
+            // check if maximum could be found within trace
+            if ( (left == 0) && (right == envTrace.size()) )
+              cerr << "WARNING: Noise range is too small: Local maximum of the envelope could not be found!" << endl;
+            // check which maximum is closer to cc-beam and take it
+            if ( (ccTime-left) > (right-ccTime) ) {
+              envMaxtimevalue = right;
+            } else {
+              envMaxtimevalue = left;
+            }  
+          
+            // cross-check for ambigiouty
+            if ( (ccTime-left) == (right-ccTime) )
+              cerr << "WARNING: Local maximum of the envelope ambigious: Up-Sampling rate is probably too low!" << endl;
+          }  
+           envMaximum = envTrace(envMaxtimevalue);
         }
 
         // calculate FWHM
@@ -1502,8 +1500,8 @@ namespace CR { // Namespace CR -- begin
         }
 
         // calculate the noise as mean of the part before of the trace before the pulse 
-        if (calculate_noise) {
-          noise = calculateNoise(yValues.column(i)(rangeNoise),noiseMethod);
+        if (noiseMethod!=0) {
+          noise = calculateNoise(yValues.column(i)(timeRangeNoise),noiseMethod);
           snr = envMaximum / noise;
         }  
 
@@ -1681,9 +1679,8 @@ namespace CR { // Namespace CR -- begin
       Slice range = calculateCCRange(timeValues, cc_center);
       // Define the time range considered (the same length as the plot range, 
       // but before actual plot range)
-      Slice rangeNoise = calculateNoiseRange(timeValues, cc_center);
-
-
+      Slice rangeNoise = calculateNoiseRange(timeValues, cc_center-15*ccWindowWidth_p, cc_center-5*ccWindowWidth_p);
+   
       // Start with height 0 and search for heigher and lower values
       double maximum = 0;
       double minimum = 0;
@@ -1805,7 +1802,7 @@ namespace CR { // Namespace CR -- begin
       nselants=ntrue(antennaSelection);
       if (nselants == 0) {
         cerr << "CompletePipeline::GetUnshiftedTimeSeries: "
-	     << "No antennas selected/all antennas flagged!" << endl;
+              << "No antennas selected/all antennas flagged!" << endl;
       }
 
       timeSeries.resize(blocksize,nselants);

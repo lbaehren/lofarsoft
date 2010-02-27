@@ -85,7 +85,7 @@ int main (int argc, char *argv[])
     // load pulse pattern from calibration event
     noisetest.setPlotInterval(pulseStart, pulseStop);
     noisetest.setUpsamplingExponent(upsamplingExponent);
-    noisetest.setCCWindowWidth(1e-6);  // noise will be calculated in window with 10 times the CCWindowWidth
+    noisetest.setCCWindowWidth(1e-7);
     noisetest.loadPulsePattern(pulseEvent, pulseAnt, pulseStart, pulseStop);
     
     // load noise event
