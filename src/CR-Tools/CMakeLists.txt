@@ -46,7 +46,7 @@ option (CR_WITH_GLISH           "Support for Glish applications?"            NO 
 option (CR_WITH_PYCR            "Support for Python applications?"           YES )
 option (CR_WITH_PLOTTING        "Support for generation of plots?"           YES )
 option (CR_WITH_GUI             "Build the graphical interface?"             NO  )
-option (CR_WITH_PYPELINE        "Build the Pypeline library?"                NO  )
+option (CR_WITH_PYPELINE        "Build the Pypeline library?"                YES )
 option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES )
 
 ## ==============================================================================
@@ -363,6 +363,11 @@ endif (CR_WITH_STARTOOLS)
 
 if (CR_WITH_GUI)
 
+  ## Enable hftools Python module
+  set (CR_WITH_PYPELINE YES)
+
+  ## Check for Boost
+
   if (NOT HAVE_BOOST)
     message (STATUS "[CR-Tools] Unable to build GUI - missing Boost!")
     set (CR_WITH_GUI NO)
@@ -391,6 +396,31 @@ if (CR_WITH_GUI)
   endif (NOT HAVE_MATHGL)
 
 endif (CR_WITH_GUI)
+
+## -------------------------------------------------------------------
+## Option: Create Python pipeline module? ON/OFF
+
+if (CR_WITH_PYPELINE)
+  
+  ## Check for Boost.Python and Python
+  if (BOOST_LIBRARIES AND PYTHON_LIBRARIES)
+    set (CR_WITH_PYPELINE YES)
+  else (BOOST_LIBRARIES AND PYTHON_LIBRARIES)
+    set (CR_WITH_PYPELINE NO)
+    message (STATUS "[CR-Tools] Unable to build Pypeline - missing Python!")
+  endif (BOOST_LIBRARIES AND PYTHON_LIBRARIES)
+
+  ## Check for DAL and underlying libraries
+  if (DAL_LIBRARIES AND HDF5_LIBRARIES AND CASA_LIBRARIES)
+    set (CR_WITH_PYPELINE YES)
+  else (DAL_LIBRARIES AND HDF5_LIBRARIES AND CASA_LIBRARIES)
+    set (CR_WITH_PYPELINE NO)
+    message (STATUS "[CR-Tools] Unable to build Pypeline - missing DAL!")
+  endif (DAL_LIBRARIES AND HDF5_LIBRARIES AND CASA_LIBRARIES)
+  
+else (CR_WITH_PYPELINE)
+  set (CR_WITH_GUI NO)
+endif (CR_WITH_PYPELINE)
 
 ## =============================================================================
 ##
