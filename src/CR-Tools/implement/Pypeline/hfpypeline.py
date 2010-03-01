@@ -57,14 +57,15 @@ demo("Standard Deviation:","v1.stddev()")
 #Now use Dataeader
 #------------------------------------------------------------------------
 LOFARSOFT=os.environ["LOFARSOFT"]
-filename=LOFARSOFT+"/data/lopes/example.event"
+filename=LOFARSOFT+"/data/lopes/test.event"
+#filename=LOFARSOFT+"/data/lopes/example.event"
 #filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 
 datareader_ptr=hOpenFile(filename)
 Filesize=64*1024
 
 #DataReader Parameters
-nAntennas=8
+nAntennas=30
 Observatory="LOPES"
 ObservationTime=0
 Antenna=0; Blocksize=Filesize/2; Stride=0; Shift=0; 
@@ -87,7 +88,7 @@ print " - Done."
 nsigma=4
 
 qualityfields=("mean","rms","nonGaussianity")
-qualitylimits=((-15,15),(100,300),(-5,5))
+qualitylimits=((-15,15),(10,40),(-5,5))
 
 def CheckParameterConformance(fields,limits,data):
     noncompliance=[]
@@ -120,8 +121,19 @@ for Antenna in range(nAntennas):
             print noncompliancelist,"!!"
         else: print ""
 print "Done."
-print "Qualit Flaglist:",qualityflaglist
+print "Quality Flaglist:",qualityflaglist
 hCloseFile(datareader_ptr)
+
+antennapositions=[(-30,10,5.3),(0,0,1)]
+skypositions=[(500,400,2000),(1000,1000,3000),(-4000,3300,1000)]
+
+ants=FloatVec()
+ants.extendflat(antennapositions)
+sky=FloatVec()
+sky.extendflat(skypositions)
+delays=FloatVec()
+delays.resize(len(ants)*len(sky)/9)
+hGeometricDelays(ants,sky,delays,False)
 
 
 #execfile("hfplot.py")

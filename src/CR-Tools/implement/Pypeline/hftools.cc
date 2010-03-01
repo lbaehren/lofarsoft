@@ -578,7 +578,7 @@ void h{$MFUNC!CAPS}2(const Iter1 vec,const Iter1 vec_end, const Iter2 out_start,
 //========================================================================
 
 
-//$DOCSTRING: Performs a $MFUNC between the two vectors, which is returned in the first vector.
+//$DOCSTRING: Performs a $MFUNC between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hi$MFUNC
 //-----------------------------------------------------------------------
@@ -602,11 +602,12 @@ template <class Iter, class Iterin>
 void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin vec2_end)
 {
   typedef IterValueType T;
-  Iter it=vec1;
-  Iterin itout=vec2;
-  while ((it!=vec1_end) && (itout !=vec2_end)) {
-    *it HFPP_OPERATOR_INPLACE_$MFUNC hfcast<T>(*itout);
-    ++it; ++itout;
+  Iter it1=vec1;
+  Iterin it2=vec2;
+  while (it1!=vec1_end) {
+    *it1 HFPP_OPERATOR_INPLACE_$MFUNC hfcast<T>(*it2);
+    ++it1; ++it2;
+    if (it2==vec2_end) it2=vec2;
   };
 }
 
@@ -675,9 +676,10 @@ void HFPP_FUNC_NAME(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec
   Iterin1 it1=vec1;
   Iterin2 it2=vec2;
   Iter itout=vec3_start;
-  while ((it1!=vec1_end) && (it2 !=vec2_end) && (itout !=vec3_end)) {
+  while ((it1!=vec1_end)  && (itout !=vec3_end)) {
     *itout = hfcast<T>((*it1) HFPP_OPERATOR_$MFUNC  (*it2));
     ++it1; ++it2; ++itout;
+    if (it2==vec2_end) it2=vec2;
   };
 }
 
@@ -768,6 +770,49 @@ IterValueType HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
   Iter it=vec;
   while (it!=vec_end) {sum+=*it; ++it;};
   return sum;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Returns the lengths or norm of a vector (i.e. Sqrt(Sum_i(xi*+2)))
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hNorm
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+template <class Iter>
+HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
+{
+  HNumber sum=0;
+  Iter it=vec;
+  while (it!=vec_end) {sum += (*it) * (*it); ++it;};
+  return sqrt(sum);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Normalizes a vector to length unity
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hNormalize
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+template <class Iter>
+HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
+{
+  HNumber norm=hNorm(vec,vec_end);
+  Iter it=vec;
+  while (it!=vec_end) {*it=(*it)/norm; ++it;};
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1348,6 +1393,110 @@ void HFPP_FUNC_NAME (const DataIter idata,
 //========================================================================
 //                     RF (Radio Frequency) Functions
 //========================================================================
+
+//$DOCSTRING: Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located in a certain direction in farfield (based on L. Bahren)
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hGeometricDelayFarField
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(antPosition)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(skyDirection)()("Normalized vector in Cartesian coordinates pointing towards a sky position from the antenna - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+
+template <class Iter>
+HNumber HFPP_FUNC_NAME (
+			const Iter antPosition,
+			const Iter skyDirection
+			)
+{
+  return - (*skyDirection * *antPosition
+	    + *(skyDirection+1) * *(antPosition+1)
+	    + *(skyDirection+2) * *(antPosition+2))/CR::lightspeed;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located at a certain 3D space coordinate in nearfield (based on L. Bahren)
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hGeometricDelayNearField
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(antPosition)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(skyPosition)()("Vector in Cartesian coordinates (Meters) pointing towards a sky location, relative to phase center - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(distance)()("Distance of source, i.e. the length of skyPosition - provided to speed up calculation")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+
+template <class Iter>
+HNumber HFPP_FUNC_NAME (
+			const Iter antPosition,
+			const Iter skyPosition,
+			const HNumber distance)
+{
+  return (
+	  sqrt(
+	       square(*skyPosition - *antPosition)
+	       +square(*(skyPosition+1) - *(antPosition+1))
+	       +square(*(skyPosition+2) - *(antPosition+2))
+	       ) - distance
+	  )/CR::lightspeed;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Calculates the time delay in seconds for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hGeometricDelays
+//-----------------------------------------------------------------------
+//#define HFPP_WRAPPER_CLASSES (STL)
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(antPositions)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length number of antennas times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(skyPositions)()("Vector in Cartesian coordinates (Meters) pointing towards a sky location, relative to phase center - vector of length number of skypositions times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(delays)()("Vector containing the delays in seconds for all antennas and positions [antenna index runs fastest: (ant1,pos1),(ant2,pos1),...] - length of vector has to be number of antennas times positions")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (bool)(farfield)()("Calculate in farfield approximation if true, otherwise do near field calculation")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+
+template <class Iter>
+HNumber HFPP_FUNC_NAME (
+			const Iter antPositions,
+			const Iter antPositions_end,
+			const Iter skyPositions,
+			const Iter skyPositions_end,
+			const Iter delays,
+			const Iter delays_end,
+			const bool farfield
+			)
+{
+  Iter 
+    ant, 
+    sky=skyPositions, 
+    del=delays,
+    ant_end=antPositions_end-3, 
+    sky_end=skyPositions_end-3;
+  if (farfield) {
+    std::vector<HNumber> work(3);
+    while (sky < sky_end && del < delays_end) {
+      //Normalize the vector first
+      hCopy(sky,sky+3,work.begin(),work.end());
+      hNormalize(work);
+      ant=antPositions; 
+      while (ant < ant_end) {
+	*del=hGeometricDelayFarField(ant,sky);
+	ant+=3; ++del;
+      };
+      sky+=3;
+    };
+  } else {
+    while (sky < sky_end && del < delays_end) {
+      HNumber distance = hNorm(sky,sky+3); //distance from phase center
+      ant=antPositions; 
+      while (ant < ant_end) {
+	*del=hGeometricDelayNearField(ant,sky,distance);
+	ant+=3; ++del;
+      };
+      sky+=3;
+    };
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 
 //$DOCSTRING: Calculates the power of a complex spectrum and add it to an output vector.

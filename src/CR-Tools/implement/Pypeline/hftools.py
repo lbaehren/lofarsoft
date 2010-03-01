@@ -20,6 +20,9 @@ def VecToPrintString(self,maxlen=10):
 def MatrixToPrintString(self,maxlen=10):
     return "Matrix("+str(len(self))+")=[" +VecToString(self)+"]"
 
+def extendflat(vec,l):
+    map(lambda x:vec.extend(x),l)
+
 
 hRealVectorTypes=[IntVec,FloatVec]
 hNumericalVectorTypes=hRealVectorTypes+[ComplexVec]
@@ -64,19 +67,19 @@ def Vec_add(vec1,val):
 def Vec_sub(vec1,val):
     "Provides the - operator for subtracting two vectors or a vector and a scalar. The result will be a new vector."
     vecout=vec1.new()
-    hAdd(vec1,val,vecout)
+    hSub(vec1,val,vecout)
     return vecout
 
 def Vec_mul(vec1,val):
     "Provides the * operator for multiplying two vectors or a vector and a scalar. The result will be a new vector."
     vecout=vec1.new()
-    hAdd(vec1,val,vecout)
+    hMul(vec1,val,vecout)
     return vecout
 
 def Vec_div(vec1,val):
     "Provides the / operator for dividing two vectors or a vector by a scalar. The result will be a new vector."
     vecout=vec1.new()
-    hAdd(vec1,val,vecout)
+    hDiv(vec1,val,vecout)
     return vecout
 
 setattr(ComplexVec,"SpectralPower",hSpectralPower)
@@ -89,11 +92,12 @@ setattr(IntMatrix,"__repr__",MatrixToPrintString)
 #    setattr
 for v in hAllVectorTypes:
     setattr(v,"__repr__",VecToPrintString)
+    setattr(v,"extendflat",extendflat)
     for s in ["hResize","hFill","hNew","hCopy","hSort"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hRealVectorTypes:
-    for s in ["hMean","hStdDev","hDownsample","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs"]:
+    for s in ["hMean","hStdDev","hDownsample","hNorm","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs"]:
         setattr(v,s[1:].lower(),eval(s))
 
 for v in hNumericalVectorTypes:
