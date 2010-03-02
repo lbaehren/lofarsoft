@@ -124,8 +124,12 @@ print "Done."
 print "Quality Flaglist:",qualityflaglist
 hCloseFile(datareader_ptr)
 
-antennapositions=[(-30,10,5.3),(0,0,1)]
-skypositions=[(500,400,2000),(1000,1000,3000),(-4000,3300,1000)]
+#------------------------------------------------------------------------
+print "\nNow testing calculation of geometric antenna delays"
+antennapositions=[(-300,100,0.0),(0,0,1)]
+skypositions=[(0,0,100),(1000,1000,3000),(-4000,3300,1000)]
+print "Antennas=",antennapositions
+print "Skypositions=",skypositions
 
 ants=FloatVec()
 ants.extendflat(antennapositions)
@@ -135,6 +139,7 @@ delays=FloatVec()
 delays.resize(len(ants)*len(sky)/9)
 hGeometricDelays(ants,sky,delays,False)
 
+print "Delays=",delays
 
 #execfile("hfplot.py")
 #gr=mglGraph(mglGraphZB,800,600) # Create mgl Graphobject

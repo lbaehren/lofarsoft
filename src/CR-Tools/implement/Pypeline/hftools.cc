@@ -1400,18 +1400,20 @@ void HFPP_FUNC_NAME (const DataIter idata,
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(antPosition)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(skyDirection)()("Normalized vector in Cartesian coordinates pointing towards a sky position from the antenna - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(skyDirection)()("Vector in Cartesian coordinates pointing towards a sky position from the antenna - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(length)()("Length of the skyDirection vector, used for normalization - provided to speed up calculation")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 
 template <class Iter>
 HNumber HFPP_FUNC_NAME (
 			const Iter antPosition,
-			const Iter skyDirection
+			const Iter skyDirection,
+			HNumber length
 			)
 {
   return - (*skyDirection * *antPosition
 	    + *(skyDirection+1) * *(antPosition+1)
-	    + *(skyDirection+2) * *(antPosition+2))/CR::lightspeed;
+	    + *(skyDirection+2) * *(antPosition+2))/length/CR::lightspeed;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1464,30 +1466,29 @@ HNumber HFPP_FUNC_NAME (
 			const bool farfield
 			)
 {
+  HNumber distance;
   Iter 
     ant, 
     sky=skyPositions, 
     del=delays,
-    ant_end=antPositions_end-3, 
-    sky_end=skyPositions_end-3;
+    ant_end=antPositions_end-2, 
+    sky_end=skyPositions_end-2;
+
   if (farfield) {
-    std::vector<HNumber> work(3);
     while (sky < sky_end && del < delays_end) {
-      //Normalize the vector first
-      hCopy(sky,sky+3,work.begin(),work.end());
-      hNormalize(work);
+      distance = hNorm(sky,sky+3); 
       ant=antPositions; 
-      while (ant < ant_end) {
-	*del=hGeometricDelayFarField(ant,sky);
+      while (ant < ant_end && del < delays_end) {
+	*del=hGeometricDelayFarField(ant,sky,distance);
 	ant+=3; ++del;
       };
       sky+=3;
     };
   } else {
     while (sky < sky_end && del < delays_end) {
-      HNumber distance = hNorm(sky,sky+3); //distance from phase center
+      distance = hNorm(sky,sky+3); //distance from phase center
       ant=antPositions; 
-      while (ant < ant_end) {
+      while (ant < ant_end && del < delays_end) {
 	*del=hGeometricDelayNearField(ant,sky,distance);
 	ant+=3; ++del;
       };
