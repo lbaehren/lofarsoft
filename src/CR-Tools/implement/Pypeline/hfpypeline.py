@@ -128,18 +128,33 @@ hCloseFile(datareader_ptr)
 print "\nNow testing calculation of geometric antenna delays"
 antennapositions=[(-300,100,0.0),(0,0,1)]
 skypositions=[(0,0,100),(1000,1000,3000),(-4000,3300,1000)]
-print "Antennas=",antennapositions
-print "Skypositions=",skypositions
+frequencies=[5.*10**7,6.*10**7,7.*10**7]
+print "Antennas=",antennapositions,"m"
+print "Skypositions=",skypositions,"m"
+print "Frequencies=",frequencies,"Hz"
+
+freqs=FloatVec()
+freqs.extend(frequencies)
 
 ants=FloatVec()
 ants.extendflat(antennapositions)
 sky=FloatVec()
 sky.extendflat(skypositions)
+
 delays=FloatVec()
 delays.resize(len(ants)*len(sky)/9)
 hGeometricDelays(ants,sky,delays,False)
+print "Geometric Delays=",delays
 
-print "Delays=",delays
+phases=FloatVec()
+phases.resize(len(delays)*len(freqs))
+hGeometricPhases(freqs,ants,sky,phases,False)
+print "Geometric Phases=",phases
+
+weights=ComplexVec()
+weights.resize(phases)
+hGeometricWeights(freqs,ants,sky,weights,False)
+print "Geometric Weights=",weights
 
 #execfile("hfplot.py")
 #gr=mglGraph(mglGraphZB,800,600) # Create mgl Graphobject
@@ -161,19 +176,19 @@ hADC2Voltage(rawdata, gainConversionFactor)
 print "Creating Hanning filter..."
 
 hanningFilter0 = FloatVec()
-hanningFilter0.resize(size(rawdata))
+hanningFilter0.resize(rawdata)
 hGetHanningFilter(hanningFilter0) # Basic hanning filter
 
 hanningFilter1 = FloatVec()
-hanningFilter1.resize(size(rawdata))
+hanningFilter1.resize(rawdata)
 hGetHanningFilter(hanningFilter1,0.5) # Hanning filter with height parameter
 
 hanningFilter2 = FloatVec()
-hanningFilter2.resize(size(rawdata))
+hanningFilter2.resize(rawdata)
 hGetHanningFilter(hanningFilter2,0.5, 256) # Hanning filter with height and width parameters
 
 hanningFilter3 = FloatVec()
-hanningFilter.resize(size(rawdata))
+hanningFilter3.resize(rawdata)
 hGetHanningFilter(hanningFilter3,0.75) # Hanning filter with height, width and slope parameters
 
 print "Applying Hanning filter to data..."

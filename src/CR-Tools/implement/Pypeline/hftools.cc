@@ -268,7 +268,7 @@ void hResize(std::vector<T> & vec, HInteger newsize)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Resize a vector to a new length and will new elements in vector with a specific value.
+//$DOCSTRING: Resize a vector to a new length and fill new elements in vector with a specific value.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
@@ -413,6 +413,25 @@ template <class T>
 inline T square(T val)
 {
   return val*val;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Returns the interferometer phase in radians for a given frequency and time 
+//$COPY_TO HFILE START ---------------------------------------------------
+#define HFPP_FUNC_NAME hPhase
+//------------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(frequency)()("Frequency in Hz")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(time)()("Time in seconds")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+inline HNumber hPhase(HNumber frequency, HNumber time)
+{
+  return CR::_2pi*frequency*time;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1403,6 +1422,10 @@ void HFPP_FUNC_NAME (const DataIter idata,
 #define HFPP_PARDEF_1 (HNumber)(skyDirection)()("Vector in Cartesian coordinates pointing towards a sky position from the antenna - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HNumber)(length)()("Length of the skyDirection vector, used for normalization - provided to speed up calculation")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
 
 template <class Iter>
 HNumber HFPP_FUNC_NAME (
@@ -1426,6 +1449,10 @@ HNumber HFPP_FUNC_NAME (
 #define HFPP_PARDEF_1 (HNumber)(skyPosition)()("Vector in Cartesian coordinates (Meters) pointing towards a sky location, relative to phase center - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HNumber)(distance)()("Distance of source, i.e. the length of skyPosition - provided to speed up calculation")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
 
 template <class Iter>
 HNumber HFPP_FUNC_NAME (
@@ -1447,13 +1474,16 @@ HNumber HFPP_FUNC_NAME (
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGeometricDelays
 //-----------------------------------------------------------------------
-//#define HFPP_WRAPPER_CLASSES (STL)
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(antPositions)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length number of antennas times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(skyPositions)()("Vector in Cartesian coordinates (Meters) pointing towards a sky location, relative to phase center - vector of length number of skypositions times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HNumber)(delays)()("Vector containing the delays in seconds for all antennas and positions [antenna index runs fastest: (ant1,pos1),(ant2,pos1),...] - length of vector has to be number of antennas times positions")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(delays)()("Output vector containing the delays in seconds for all antennas and positions [antenna index runs fastest: (ant1,pos1),(ant2,pos1),...] - length of vector has to be number of antennas times positions")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_3 (bool)(farfield)()("Calculate in farfield approximation if true, otherwise do near field calculation")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
 
 template <class Iter>
 HNumber HFPP_FUNC_NAME (
@@ -1497,6 +1527,148 @@ HNumber HFPP_FUNC_NAME (
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Calculates the phase gradients for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field and for different frequencies.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hGeometricPhases
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(frequencies)()("Vector of frequencies (in Hz) to calculate phases for")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(antPositions)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length number of antennas times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(skyPositions)()("Vector in Cartesian coordinates (Meters) pointing towards a sky location, relative to phase center - vector of length number of skypositions times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(phases)()("Output vector containing the phases in radians for all frequencies, antennas and positions [frequency index, runs fastest, then antenna index: (nu1,ant1,pos1),(nu2,ant1,pos1),...] - length of vector has to be number of antennas times positions time frequency bins")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (bool)(farfield)()("Calculate in farfield approximation if true, otherwise do near field calculation")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class Iter>
+HNumber HFPP_FUNC_NAME (
+			const Iter frequencies,
+			const Iter frequencies_end,
+			const Iter antPositions,
+			const Iter antPositions_end,
+			const Iter skyPositions,
+			const Iter skyPositions_end,
+			const Iter phases,
+			const Iter phases_end,
+			const bool farfield
+			)
+{
+  HNumber distance;
+  Iter 
+    ant, 
+    freq,
+    sky=skyPositions, 
+    phase=phases,
+    ant_end=antPositions_end-2, 
+    sky_end=skyPositions_end-2;
+
+  if (farfield) {
+    while (sky < sky_end && phase < phases_end) {
+      distance = hNorm(sky,sky+3); 
+      ant=antPositions; 
+      while (ant < ant_end && phase < phases_end) {
+	freq=frequencies;
+	while (freq < frequencies_end && phase < phases_end) {
+	  *phase=hPhase(*freq,hGeometricDelayFarField(ant,sky,distance));
+	  ++phase; ++freq;
+	};
+	ant+=3; 
+      };
+      sky+=3;
+    };
+  } else {
+    while (sky < sky_end && phase < phases_end) {
+      distance = hNorm(sky,sky+3); 
+      ant=antPositions; 
+      while (ant < ant_end && phase < phases_end) {
+	freq=frequencies;
+	while (freq < frequencies_end && phase < phases_end) {
+	  *phase=hPhase(*freq,hGeometricDelayNearField(ant,sky,distance));
+	  ++phase; ++freq;
+	};
+	ant+=3; 
+      };
+      sky+=3;
+    };
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Calculates the phase gradients as complex weights for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field and for different frequencies.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hGeometricWeights
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(frequencies)()("Vector of frequencies (in Hz) to calculate phases for")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(antPositions)()("Cartesian antenna positions (Meters) relative to a reference location (phase center) - vector of length number of antennas times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(skyPositions)()("Vector in Cartesian coordinates (Meters) pointing towards a sky location, relative to phase center - vector of length number of skypositions times three")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HComplex)(weights)()("Output vector containing the phases in radians for all frequencies, antennas and positions [frequency index, runs fastest, then antenna index: (nu1,ant1,pos1),(nu2,ant1,pos1),...] - length of vector has to be number of antennas times positions time frequency bins")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (bool)(farfield)()("Calculate in farfield approximation if true, otherwise do near field calculation")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class Iter, class CIter>
+HNumber HFPP_FUNC_NAME (
+			const Iter frequencies,
+			const Iter frequencies_end,
+			const Iter antPositions,
+			const Iter antPositions_end,
+			const Iter skyPositions,
+			const Iter skyPositions_end,
+			const CIter weights,
+			const CIter weights_end,
+			const bool farfield
+			)
+{
+  HNumber distance;
+  Iter 
+    ant, 
+    freq,
+    sky=skyPositions, 
+    ant_end=antPositions_end-2, 
+    sky_end=skyPositions_end-2;
+  CIter weight=weights;
+
+  if (farfield) {
+    while (sky < sky_end && weight < weights_end) {
+      distance = hNorm(sky,sky+3); 
+      ant=antPositions; 
+      while (ant < ant_end && weight < weights_end) {
+	freq=frequencies;
+	while (freq < frequencies_end && weight < weights_end) {
+	  *weight=exp(HComplex(0.0,hPhase(*freq,hGeometricDelayFarField(ant,sky,distance))));
+	  ++weight; ++freq;
+	};
+	ant+=3; 
+      };
+      sky+=3;
+    };
+  } else {
+    while (sky < sky_end && weight < weights_end) {
+      distance = hNorm(sky,sky+3); 
+      ant=antPositions; 
+      while (ant < ant_end && weight < weights_end) {
+	freq=frequencies;
+	while (freq < frequencies_end && weight < weights_end) {
+	  *weight=exp(HComplex(0.0,hPhase(*freq,hGeometricDelayNearField(ant,sky,distance))));
+	  ++weight; ++freq;
+	};
+	ant+=3; 
+      };
+      sky+=3;
+    };
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 
 
