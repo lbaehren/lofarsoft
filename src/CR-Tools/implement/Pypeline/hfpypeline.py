@@ -68,7 +68,7 @@ Filesize=64*1024
 nAntennas=30
 Observatory="LOPES"
 ObservationTime=0
-Antenna=0; Blocksize=Filesize/2; Stride=0; Shift=0; 
+Antenna=0; Blocksize=Filesize/2; Stride=0; Shift=0;
 nBlocks=Filesize/Blocksize
 FFTSize=Blocksize/2+1
 
@@ -79,10 +79,10 @@ powerspectrum = FloatVec()
 powerspectrum.resize(FFTSize,0.0)
 
 print "Summing up Blocks: ",
-for Block in range(nBlocks): 
+for Block in range(nBlocks):
     print Block,",",
     hReadFile(fftdata,datareader_ptr,"CalFFT",Antenna,Blocksize,Block,Stride,Shift)
-    fftdata.SpectralPower(powerspectrum) 
+    fftdata.SpectralPower(powerspectrum)
 print " - Done."
 
 nsigma=4
@@ -96,7 +96,7 @@ def CheckParameterConformance(fields,limits,data):
         if (data[i]<limits[i][0]) | (data[i]>limits[i][1]) : noncompliance.append(fields[i])
     return noncompliance
 
-            
+
 rawdata=IntVec()
 where=IntVec()
 where.resize(Blocksize)
@@ -106,7 +106,7 @@ npeakserror=sqrt(npeaksexpected)
 qualityflaglist=[]
 print "Quality checking of Blocks: nsigma=",nsigma, "peaks expected=",npeaksexpected
 for Antenna in range(nAntennas):
-    for Block in range(nBlocks): 
+    for Block in range(nBlocks):
         print "Antenna={0:2d},".format(Antenna),"Block={0:3d}:".format(Block),
         hReadFile(rawdata,datareader_ptr,"Fx",Antenna,Blocksize,Block,Stride,Shift)
         datamean = rawdata.mean()
@@ -116,7 +116,7 @@ for Antenna in range(nAntennas):
         qualitydata=(datamean,datarms,dataNonGaussianity)
         print "mean={0:4.2f},".format(datamean),"rms={0:5.1f},".format(datarms),"npeaks={0:5d},".format(datanpeaks),"nonGaussianity={0:5.2f}".format(dataNonGaussianity),
         noncompliancelist=CheckParameterConformance(qualityfields,qualitylimits,qualitydata)
-        if noncompliancelist: 
+        if noncompliancelist:
             qualityflaglist.append((Antenna,Block,noncompliancelist))
             print noncompliancelist,"!!"
         else: print ""
@@ -144,3 +144,42 @@ print "Delays=",delays
 #execfile("hfplot.py")
 #gr=mglGraph(mglGraphZB,800,600) # Create mgl Graphobject
 #qw=hplot(gr,powerspectrum) # Plot it into simple Qt Widget
+
+
+# ____________________________________________________________ Gain calibration
+
+print "Performing Gain calibration..."
+
+gainConversionFactor = 10.0
+rawdata = FloatVec()
+rawdata.resize(1024,1.0)
+hADC2Voltage(rawdata, gainConversionFactor)
+
+
+# ______________________________________________________________ Hanning filter
+
+print "Creating Hanning filter..."
+
+hanningFilter0 = FloatVec()
+hanningFilter0.resize(size(rawdata))
+hGetHanningFilter(hanningFilter0) # Basic hanning filter
+
+hanningFilter1 = FloatVec()
+hanningFilter1.resize(size(rawdata))
+hGetHanningFilter(hanningFilter1,0.5) # Hanning filter with height parameter
+
+hanningFilter2 = FloatVec()
+hanningFilter2.resize(size(rawdata))
+hGetHanningFilter(hanningFilter2,0.5, 256) # Hanning filter with height and width parameters
+
+hanningFilter3 = FloatVec()
+hanningFilter.resize(size(rawdata))
+hGetHanningFilter(hanningFilter3,0.75) # Hanning filter with height, width and slope parameters
+
+print "Applying Hanning filter to data..."
+
+# Apply a basic Hanning window on the data
+# hApplyHanningFilter(rawdata)
+
+# Apply a previously defined filter on the data
+hApplyFilter(rawdata, hanningFilter2)
