@@ -15,6 +15,7 @@ set (enable-double ${MATHGL_ENABLE_DOUBLE} CACHE BOOL "Enable double precision")
 ##____________________________________________________________________
 ##                                              GNU Scientific Library
 
+set (enable-gsl      ${HAVE_GSL}          CACHE BOOL     "Enable GSL extension")
 set (GSL_LIB         ${GSL_GSL_LIBRARY}   CACHE FILEPATH "Path to libgsl" )
 set (GSL_CBLAS_LIB   ${GSL_CBLAS_LIBRARY} CACHE FILEPATH "Path to libgslcblas" )
 set (GSL_INCLUDE_DIR ${GSL_INCLUDES}      CACHE PATH     "GSL header files" )

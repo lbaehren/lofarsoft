@@ -201,12 +201,12 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
 
   configure_file (
     ${MATHGL_SOURCE_DIR}/mathgl.cmake.in
-    ${MATHGL_BINARY_DIR}/mathgl.cmake
+    ${MATHGL_BINARY_DIR}/tmp/mathgl.cmake
     )
 
   configure_file (
     ${MATHGL_SOURCE_DIR}/setup.py.in
-    ${MATHGL_BINARY_DIR}/setup.py
+    ${MATHGL_BINARY_DIR}/tmp/setup.py
     )
 
   ## have CMake configure the project
@@ -234,6 +234,16 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
       message (WARNING "[MthGL] Unable to build package - missing sources!")
     endif (have_mathgl_tgz)
   endif (MATHGL_SVN_BUILD)
+  
+  ## Pre-configure of configuration scripts
+  ExternalProject_Add_Step (mathgl mathgl_config
+    COMMAND mv ./tmp/setup.py .
+    COMMAND mv ./tmp/mathgl.cmake .
+    COMMENT "Setting up configuration scripts"
+    DEPENDEES patch
+    DEPENDERS configure
+    WORKING_DIRECTORY ${MATHGL_BINARY_DIR}
+    )
   
   ## Post-installation patch of include paths
   ExternalProject_Add_Step (mathgl mathgl_links
