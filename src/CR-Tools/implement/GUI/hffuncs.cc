@@ -1295,7 +1295,7 @@ $$ {
   hdr.asArrayInt("AntennaIDs").tovector(AntennaIDs);
   nofAntennas=drp->nofAntennas();
   Filetype = determine_filetype(Filename);
-  maxBlocksize=min(filesize, 1048576);
+  maxBlocksize=min(filesize, 1048hfpp576);
 
   //... and store it in results objects
   putResult("Date",date);

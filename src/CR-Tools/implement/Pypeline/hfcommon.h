@@ -52,6 +52,10 @@ typedef bool HBool;
 typedef std::string HString;
 typedef void* HPointer;
 
+typedef boost::python::object HPyObject;
+//typedef boost::python::object* HPyObjectPtr;
+typedef PyObject* HPyObjectPtr;
+
 //Define types that are being used for the data reader and the casa arrays
 typedef double CasaNumber;
 typedef casa::DComplex CasaComplex;

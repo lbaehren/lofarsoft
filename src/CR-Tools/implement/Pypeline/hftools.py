@@ -109,6 +109,6 @@ for v in hNumericalVectorTypes:
     setattr(v,"__imul__",Vec_imul)
     setattr(v,"__idiv__",Vec_idiv)
     setattr(v,"__isub__",Vec_isub)
-    for s in ["hAbs","hConvert","hMul","hDiv","hSub","hAdd","hiMul","hiDiv","hiSub","hiAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hSortMedian","hMedian","hFindLowerBound"]:
+    for s in ["hAbs","hConvert","hMul","hDiv","hSub","hAdd","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hMulAddConv","hDivAddConv","hSubAddConv","hAddAddConv","hiMul","hiDiv","hiSub","hiAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hSortMedian","hMedian","hFindLowerBound"]:
         setattr(v,s[1:].lower(),eval(s))
 

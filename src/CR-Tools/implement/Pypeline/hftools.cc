@@ -66,6 +66,7 @@ template<> inline HComplex hfnull<HComplex>(){return 0.0;}
 template<class T> inline T hfcast(/*const*/ T v){return v;}
 
 //Convert to arbitrary class T if not specified otherwise
+template<class T> inline T hfcast(uint v){return static_cast<T>(v);}
 template<class T> inline T hfcast(HInteger v){return static_cast<T>(v);}
 template<class T> inline T hfcast(HNumber v){return static_cast<T>(v);}
 template<class T> inline T hfcast(HComplex v){return static_cast<T>(v);}
@@ -90,7 +91,7 @@ inline HComplex operator/(HInteger i, HComplex c) {return hfcast<HComplex>(i)/c;
 inline HComplex operator/(HComplex c, HInteger i) {return c/hfcast<HComplex>(i);}
 
 template <class T>
-CasaVector<T> & stl2casa(std::vector<T> stlvec)
+CasaVector<T> & stl2casa(std::vector<T>& stlvec)
 {
   T * storage = &(stlvec[0]);
   casa::IPosition shape(1,stlvec.size()); //tell casa the size of the vector
@@ -98,6 +99,36 @@ CasaVector<T> & stl2casa(std::vector<T> stlvec)
   return casavec;
 }
 
+vector<HNumber> PyList2STLFloatVec(PyObject* pyob){
+  std::vector<HNumber> vec;
+  if (PyList_Check(pyob)){
+    HInteger i,size=PyList_Size(pyob);
+    vec.reserve(size);
+    for (i=0;i<size;++i) vec.push_back(PyFloat_AsDouble(PyList_GetItem(pyob,i)));
+  }
+  return vec;
+}
+
+vector<HInteger> PyList2STLIntVec(PyObject* pyob){
+  std::vector<HInteger> vec;
+  if (PyList_Check(pyob)){
+    HInteger i,size=PyList_Size(pyob);
+    vec.reserve(size);
+    for (i=0;i<size;++i) vec.push_back(PyInt_AsLong(PyList_GetItem(pyob,i)));
+  }
+  return vec;
+}
+
+vector<uint> PyList2STLuIntVec(PyObject* pyob){
+  std::vector<uint> vec;
+  if (PyList_Check(pyob)){
+    HInteger i,size=PyList_Size(pyob);
+    vec.reserve(size);
+    for (i=0;i<size;++i) vec.push_back(PyInt_AsLong(PyList_GetItem(pyob,i)));
+  }
+  return vec;
+}
+  
 
 //========================================================================
 //                        Matrix Class
@@ -348,11 +379,11 @@ void hResize(casa::Vector<T> & vec1,casa::Vector<S> & vec2)
   $PARDOCSTRING
 */
 template <class Iterin, class Iter>
-void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2_start,const Iter vec2_end)
+void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,const Iter vec2_end)
 {
   typedef IterValueType T;
   Iterin it=vec1;
-  Iter itout=vec2_start;
+  Iter itout=vec2;
   while ((it!=vec1_end) && (itout !=vec2_end)) {
     *itout=hfcast<T>(*it);
     ++it; ++itout;
@@ -375,16 +406,16 @@ void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2_sta
          input values.
   \param vec_end: STL Iterator pointing to the end of the input vector
 
-  \param out_start: STL Iterator pointing to the first element of an array with
+  \param out: STL Iterator pointing to the first element of an array with
          output values.
   \param out_end: STL Iterator pointing to the end of the output vector
 */
 template <class Iterin, class Iter>
-void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out_start,const Iter out_end)
+void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const Iter out_end)
 {
   typedef IterValueType T;
   Iterin it=vec;
-  Iter itout=out_start;
+  Iter itout=out;
   while ((it!=vec_end) && (itout !=out_end)) {
     *itout=*it;
     ++it; ++itout;
@@ -506,16 +537,16 @@ void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
          input values.
   \param vec_end: STL Iterator pointing to the end of the input vector
 
-  \param out_start: STL Iterator pointing to the first element of an array with
+  \param out: STL Iterator pointing to the first element of an array with
          output values.
   \param out_end: STL Iterator pointing to the end of the output vector
 
 */
 template <class Iter>
-void h{$MFUNC!CAPS}2(const Iter vec,const Iter vec_end, const Iter out_start,const Iter out_end)
+void h{$MFUNC!CAPS}2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end)
 {
   Iter it=vec;
-  Iter itout=out_start;
+  Iter itout=out;
   while ((it!=vec_end) && (itout !=out_end)) {
     *itout=$MFUNC(*it);
     ++it; ++itout;
@@ -573,16 +604,16 @@ void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
          input values.
   \param vec_end: STL Iterator pointing to the end of the input vector
 
-  \param data_start: STL Iterator pointing to the first element of an array with
+  \param data: STL Iterator pointing to the first element of an array with
          output values.
   \param vec_end: STL Iterator pointing to the end of the output vector
 
 */
 template <class Iter1,class Iter2>
-void h{$MFUNC!CAPS}2(const Iter1 vec,const Iter1 vec_end, const Iter2 out_start,const Iter2 out_end)
+void h{$MFUNC!CAPS}2(const Iter1 vec,const Iter1 vec_end, const Iter2 out,const Iter2 out_end)
 {
   Iter1 it=vec;
-  Iter2 itout=out_start;
+  Iter2 itout=out;
   while ((it!=vec_end) && (itout !=out_end)) {
     *itout=$MFUNC(*it);
     ++it; ++itout;
@@ -684,19 +715,73 @@ void hi{$MFUNC}2(const Iter vec1,const Iter vec1_end, S val)
          input values.
   \param vec2_end: STL Iterator pointing to the end of the input vector
 
-  \param vec3_start: STL Iterator pointing to the first element of an array with
+  \param vec3: STL Iterator pointing to the first element of an array with
          output values.
   \param vec3_end: STL Iterator pointing to the end of the output vector
 */
 template <class Iterin1, class Iterin2, class Iter>
-void HFPP_FUNC_NAME(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end, const Iter vec3_start,const Iter vec3_end)
+void HFPP_FUNC_NAME(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end, const Iter vec3,const Iter vec3_end)
 {
   typedef IterValueType T;
   Iterin1 it1=vec1;
   Iterin2 it2=vec2;
-  Iter itout=vec3_start;
+  Iter itout=vec3;
   while ((it1!=vec1_end)  && (itout !=vec3_end)) {
     *itout = hfcast<T>((*it1) HFPP_OPERATOR_$MFUNC  (*it2));
+    ++it1; ++it2; ++itout;
+    if (it2==vec2_end) it2=vec2;
+  };
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+//$DOCSTRING: Performs a $MFUNC between the two vectors, and adds the result to the output (third) vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h{$MFUNC}Add
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vec2)()("Vector containing the second operands")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_1)(vec3)()("Vector containing the results")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec2_end, const Iter vec3,const Iter vec3_end)
+{
+  typedef IterValueType T;
+  Iter it1(vec1), it2(vec2), itout(vec3);
+  while ((it1!=vec1_end)  && (itout !=vec3_end)) {
+    *itout += (*it1) HFPP_OPERATOR_$MFUNC  (*it2);
+    ++it1; ++it2; ++itout;
+    if (it2==vec2_end) it2=vec2;
+  };
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+//$DOCSTRING: Performs a $MFUNC between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h{$MFUNC}AddConv
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing the second operands")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_3)(vec3)()("Vector containing the results")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iterin1, class Iterin2, class Iter>
+void HFPP_FUNC_NAME(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end, const Iter vec3,const Iter vec3_end)
+{
+  typedef IterValueType T;
+  Iterin1 it1=vec1;
+  Iterin2 it2=vec2;
+  Iter itout=vec3;
+  while ((it1!=vec1_end)  && (itout !=vec3_end)) {
+    *itout += hfcast<T>((*it1) HFPP_OPERATOR_$MFUNC  (*it2));
     ++it1; ++it2; ++itout;
     if (it2==vec2_end) it2=vec2;
   };
@@ -1337,7 +1422,7 @@ template <class DataIter, class NumVecIter>
 void HFPP_FUNC_NAME (const DataIter  idata,
 		     const DataIter  idata_end,
 		     const DataIter  odata,
-		     const DataIter  odata_start,
+		     const DataIter  odata_end,
 		     const NumVecIter weights,
 		     const NumVecIter weights_end)
 {
@@ -1350,14 +1435,14 @@ void HFPP_FUNC_NAME (const DataIter  idata,
 
   DataIter  dit;
   DataIter  dit2;
-  DataIter  din=idata;
-  DataIter  dout=odata;
+  DataIter  din(idata);
+  DataIter  dout(odata);
   NumVecIter wit;
 
-  while (din!=idata_end) {
+  while (din<idata_end && dout<odata_end) {
     dit=din-middle; //data iterator set to the first element to be taken into account (left from current element)
     wit=weights; // weight iterators set to beginning of weights
-    while (wit!=weights_end) {
+    while (wit<weights_end) {
       if (dit<idata) dit2=idata;
       else if (dit>=idata_end) dit2=idata_end-1;
       else dit2=dit;
@@ -1370,7 +1455,6 @@ void HFPP_FUNC_NAME (const DataIter  idata,
   return;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
 
 
 //$DOCSTRING: Overloaded function to automatically calculate weights.
@@ -1693,16 +1777,16 @@ HNumber HFPP_FUNC_NAME (
          input values.
   \param vec_end: STL Iterator pointing to the end of the input vector
 
-  \param out_start: STL Iterator pointing to the first element of an array with
+  \param out: STL Iterator pointing to the first element of an array with
          output values.
   \param out_end: STL Iterator pointing to the end of the output vector
 */
 template <class Iterin, class Iter>
-void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out_start,const Iter out_end)
+void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const Iter out_end)
 {
   typedef IterValueType T;
-  Iterin it=vec;
-  Iter itout=out_start;
+  Iterin it(vec);
+  Iter itout(out);
   while ((it!=vec_end) && (itout !=out_end)) {
     *itout+=real((*it)*conj(*it));
     ++it; ++itout;
@@ -2016,7 +2100,7 @@ void aipsvec2stlvec(CasaVector<S>& data, std::vector<T>& stlvec){
     for (i=0;i<n;i++) {
 //	*p=hfcast<T>(data[i]);
 	stlvec[i]=hfcast<T>(data[i]);
-//	p++;
+//	++p;
     };
 }
 
@@ -2040,6 +2124,184 @@ void copycast_vec(std::vector<T> &vi, std::vector<S> & vo) {
     };
   };
 }
+
+//$DOCSTRING: Get the value of a metadata keyword from the header
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hgetFileHeaderTyped
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES HFPP_LOGICAL_TYPES //HFPP_STRING_TYPES
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HIntPointer)(iptr)()("Integer containing pointer to the datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HString)(keyword)()("Keyword ro be read out from the file header")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED)(result)()("Variable whose type simply specifies the type to be returned")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)//(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+template <class T>
+T HFPP_FUNC_NAME(HIntPointer iptr, HString key, T result)
+{
+  DataReader *drp(reinterpret_cast<DataReader*>(iptr));
+  drp->headerRecord().get(key,result);
+  return result;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Get the value of a metadata keyword from the header
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hgetFileHeaderString
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNCDEF  (HString)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HIntPointer)(iptr)()("Integer containing pointer to the datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HString)(keyword)()("Keyword ro be read out from the file header")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+HString HFPP_FUNC_NAME(HIntPointer iptr, HString key)
+{
+  casa::String casastr;
+  DataReader *drp(reinterpret_cast<DataReader*>(iptr));
+  drp->headerRecord().get(key,casastr);
+  return (HString) casastr;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Return information from a data file as a Python object 
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hgetFilePy
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNCDEF  (HPyObject)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HIntPointer)(iptr)()("Integer containing pointer to the datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HString)(keyword)()("Keyword ro be read out from the file metadata")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+HPyObject HFPP_FUNC_NAME(HIntPointer iptr, HString key)
+{
+  DataReader *drp(reinterpret_cast<DataReader*>(iptr));
+#define HFPP_REPEAT(TYPE,KEY)  if (key== #KEY) {TYPE result(drp->KEY ()); HPyObject pyob(result); return pyob;} else
+  HFPP_REPEAT(uint,nofAntennas)
+    HFPP_REPEAT(uint,nofSelectedChannels)
+    HFPP_REPEAT(uint,nofSelectedAntennas)
+    HFPP_REPEAT(uint,nofBaselines)
+    HFPP_REPEAT(uint,block)
+    HFPP_REPEAT(uint,blocksize)
+    HFPP_REPEAT(uint,stride)
+    HFPP_REPEAT(uint,fftLength)
+    HFPP_REPEAT(uint,nyquistZone)
+    HFPP_REPEAT(double,sampleInterval)
+    HFPP_REPEAT(double,referenceTime)
+    HFPP_REPEAT(double,sampleFrequency) 
+#undef HFPP_REPEAT
+#define HFPP_REPEAT(TYPE,TYPE2,KEY) if (key== #KEY) {CasaVector<TYPE> casavec(drp->KEY ()); std::vector<TYPE2> result; aipsvec2stlvec(casavec,result); HPyObject pyob(result); return pyob;} else
+    HFPP_REPEAT(uint,HInteger,antennas)
+    HFPP_REPEAT(uint,HInteger,selectedAntennas)
+    HFPP_REPEAT(uint,HInteger,selectedChannels)
+    HFPP_REPEAT(uint,HInteger,positions)
+    HFPP_REPEAT(double,HNumber,increment)
+    HFPP_REPEAT(double,HNumber,frequencyValues)
+    HFPP_REPEAT(double,HNumber,frequencyRange)
+    #undef HFPP_REPEAT
+    { HString result; result = result
+#define HFPP_REPEAT(TYPE,KEY)  + #KEY + ", "
+  HFPP_REPEAT(uint,nofAntennas)
+    HFPP_REPEAT(uint,nofSelectedChannels)
+    HFPP_REPEAT(uint,nofSelectedAntennas)
+    HFPP_REPEAT(uint,nofBaselines)
+    HFPP_REPEAT(uint,block)
+    HFPP_REPEAT(uint,blocksize)
+    HFPP_REPEAT(uint,stride)
+    HFPP_REPEAT(uint,fftLength)
+    HFPP_REPEAT(uint,nyquistZone)
+    HFPP_REPEAT(double,sampleInterval)
+    HFPP_REPEAT(double,referenceTime)
+    HFPP_REPEAT(double,sampleFrequency) 
+#undef HFPP_REPEAT
+#define HFPP_REPEAT(TYPE,TYPE2,KEY)  + #KEY + ", "
+    HFPP_REPEAT(uint,HInteger,antennas)
+    HFPP_REPEAT(uint,HInteger,selectedAntennas)
+    HFPP_REPEAT(uint,HInteger,selectedChannels)
+    HFPP_REPEAT(uint,HInteger,positions)
+    HFPP_REPEAT(double,HNumber,increment)
+    HFPP_REPEAT(double,HNumber,frequencyValues)
+    HFPP_REPEAT(double,HNumber,frequencyRange)
+#undef HFPP_REPEAT
+		     + "help";
+      if (key!="help") cout << "Unknown keyword " << key <<"!"<<endl;
+      cout  << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << " - available keywords: "<< result <<endl;
+      HPyObject pyob(result);
+      return pyob;
+    };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Set parameters in a data file with a Python object as input
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hsetFilePy
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HIntPointer)(iptr)()("Integer containing pointer to the datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HString)(keyword)()("Keyword to be set in the file")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HPyObjectPtr)(pyob)()("Input paramter")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+////$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+*/
+void HFPP_FUNC_NAME(HIntPointer iptr, HString key, HPyObjectPtr pyob)
+{
+  DataReader *drp(reinterpret_cast<DataReader*>(iptr));
+#define HFPP_REPEAT(TYPE,TYPE2,KEY) if (key== #KEY) {TYPE input(TYPE2 (pyob)); drp->set##KEY (input);} else
+  HFPP_REPEAT(uint,PyInt_AsLong,Blocksize)
+    HFPP_REPEAT(uint,PyInt_AsLong,StartBlock)
+    HFPP_REPEAT(uint,PyInt_AsLong,Block)
+    HFPP_REPEAT(uint,PyInt_AsLong,Stride)
+    HFPP_REPEAT(uint,PyInt_AsLong,SampleOffset)
+    HFPP_REPEAT(uint,PyInt_AsLong,NyquistZone)
+    HFPP_REPEAT(double,PyFloat_AsDouble,ReferenceTime)
+    HFPP_REPEAT(double,PyFloat_AsDouble,SampleFrequency)
+    HFPP_REPEAT(int,PyInt_AsLong,Shift)
+    if (key=="SelectedAntennas") {
+      vector<uint> stlvec(PyList2STLuIntVec(pyob)); 
+      uint * storage = &(stlvec[0]);
+      casa::IPosition shape(1,stlvec.size()); //tell casa the size of the vector
+      CasaVector<uint> casavec(shape,storage,casa::SHARE);
+      drp->setSelectedAntennas(casavec);
+    } else
+#undef HFPP_REPEAT
+#define HFPP_REPEAT(TYPE,TYPE2,KEY)  + #KEY + ", "
+    { HString txt; txt = txt
+  HFPP_REPEAT(uint,PyInt_AsLong,Blocksize)
+    HFPP_REPEAT(uint,PyInt_AsLong,StartBlock)
+    HFPP_REPEAT(uint,PyInt_AsLong,Block)
+    HFPP_REPEAT(uint,PyInt_AsLong,Stride)
+    HFPP_REPEAT(uint,PyInt_AsLong,SampleOffset)
+    HFPP_REPEAT(uint,PyInt_AsLong,NyquistZone)
+    HFPP_REPEAT(double,PyFloat_AsDouble,ReferenceTime)
+    HFPP_REPEAT(double,PyFloat_AsDouble,SampleFrequency)
+    HFPP_REPEAT(int,PyInt_AsLong,Shift)
+    HFPP_REPEAT(XX,XX,SelectedAntennas)
+#undef HFPP_REPEAT
+		     + "help";
+      if (key!="help") cout << "Unknown keyword " << key <<"!"<<endl;
+      cout  << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << " - available keywords: "<< txt <<endl;
+    };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 
 
 

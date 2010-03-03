@@ -57,20 +57,40 @@ demo("Standard Deviation:","v1.stddev()")
 #Now use Dataeader
 #------------------------------------------------------------------------
 LOFARSOFT=os.environ["LOFARSOFT"]
-filename=LOFARSOFT+"/data/lopes/test.event"
-#filename=LOFARSOFT+"/data/lopes/example.event"
+#filename=LOFARSOFT+"/data/lopes/test.event"
+filename=LOFARSOFT+"/data/lopes/example.event"  # solar burst
 #filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 
-datareader_ptr=hOpenFile(filename)
-Filesize=64*1024
+print "Opening file: ",filename
+print "---------------------------------------------"
+file=hOpenFile(filename)
+print "---------------------------------------------"
+print "Reading header information:"
+obsname=hgetFileHeaderString(file,"Observatory")
+obsdate=hgetFileHeaderTyped(file,"Date",0)
+filesize=hgetFileHeaderTyped(file,"Filesize",0)
+print "obsname=",obsname
+print "obsdate=",obsdate
+print "filesize=",filesize
+print "---------------------------------------------"
+print "Reading file information:"
+nAntennas=hgetFilePy(file,"nofAntennas")
+blocksize=hgetFilePy(file,"blocksize")
+sampleFrequency=hgetFilePy(file,"sampleFrequency")
+fftlength=hgetFilePy(file,"fftLength")
+antennas=hgetFilePy(file,"help")
+print "nAtennas=",nAntennas
+print "blocksize=",blocksize
+print "sampleFrequency=",sampleFrequency
+print "fftlength=",fftlength
+print "antennas=",antennas
+print "---------------------------------------------"
+hgetFilePy(file,"help")
 
 #DataReader Parameters
-nAntennas=30
-Observatory="LOPES"
-ObservationTime=0
-Antenna=0; Blocksize=Filesize/2; Stride=0; Shift=0;
-nBlocks=Filesize/Blocksize
-FFTSize=Blocksize/2+1
+Antenna=0; blocksize=min(filesize/2,64*1024); Stride=0; Shift=0;
+nBlocks=filesize/blocksize
+FFTSize=blocksize/2+1
 
 #Define data vectors to work with
 fftdata = ComplexVec()
@@ -78,10 +98,12 @@ fftdata = ComplexVec()
 powerspectrum = FloatVec()
 powerspectrum.resize(FFTSize,0.0)
 
-print "Summing up Blocks: ",
+print "---------------------------------------------"
+
+print "Summing up blocks for power spectrum: ",
 for Block in range(nBlocks):
     print Block,",",
-    hReadFile(fftdata,datareader_ptr,"CalFFT",Antenna,Blocksize,Block,Stride,Shift)
+    hReadFile(fftdata,file,"CalFFT",Antenna,blocksize,Block,Stride,Shift)
     fftdata.SpectralPower(powerspectrum)
 print " - Done."
 
@@ -99,16 +121,16 @@ def CheckParameterConformance(fields,limits,data):
 
 rawdata=IntVec()
 where=IntVec()
-where.resize(Blocksize)
+where.resize(blocksize)
 probability=funcGaussian(nsigma,1,0)
-npeaksexpected=probability*Blocksize
+npeaksexpected=probability*blocksize
 npeakserror=sqrt(npeaksexpected)
 qualityflaglist=[]
 print "Quality checking of Blocks: nsigma=",nsigma, "peaks expected=",npeaksexpected
 for Antenna in range(nAntennas):
     for Block in range(nBlocks):
         print "Antenna={0:2d},".format(Antenna),"Block={0:3d}:".format(Block),
-        hReadFile(rawdata,datareader_ptr,"Fx",Antenna,Blocksize,Block,Stride,Shift)
+        hReadFile(rawdata,file,"Fx",Antenna,blocksize,Block,Stride,Shift)
         datamean = rawdata.mean()
         datarms = rawdata.stddev(datamean)
         datanpeaks=rawdata.findgreaterthanabs(int(round(nsigma*datarms)),where)
@@ -122,7 +144,7 @@ for Antenna in range(nAntennas):
         else: print ""
 print "Done."
 print "Quality Flaglist:",qualityflaglist
-hCloseFile(datareader_ptr)
+hCloseFile(file)
 
 #------------------------------------------------------------------------
 print "\nNow testing calculation of geometric antenna delays"
@@ -198,3 +220,11 @@ print "Applying Hanning filter to data..."
 
 # Apply a previously defined filter on the data
 hApplyFilter(rawdata, hanningFilter2)
+
+
+#------------------------------------------------------------------------
+#Testing
+file=hOpenFile(filename)
+#hgetFilePy(file,"frequencyValues")
+#i=1024
+#hsetFilePy(file,"help",i)
