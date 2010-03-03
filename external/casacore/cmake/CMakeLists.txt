@@ -236,6 +236,7 @@ if (CASACORE_ENABLE_HDF5)
   
   if (HAVE_HDF5)
     add_definitions (-DHAVE_HDF5)
+    include_directories (${HDF5_INCLUDES})
   endif (HAVE_HDF5)
   
 endif (CASACORE_ENABLE_HDF5) 
