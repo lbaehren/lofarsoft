@@ -41,10 +41,11 @@ endif (USG_ROOT)
 ##
 ## ==============================================================================
 
-option (ENABLE_DASHBOARD    "Send a build report to the Dashboard server?"  YES )
-option (POST_BUILD_CLEAN    "Clean up the build directory after a build?"   NO  )
-option (MULTITHREADED_BUILD "Enable multithreading during build?"           NO  )
-option (TEST_DATASETS       "Download and install sample test datasets?"    NO  )
+option (ENABLE_DASHBOARD       "Send a build report to the Dashboard server?" YES )
+option (POST_BUILD_CLEAN       "Clean up the build directory after a build?"  NO  )
+option (MULTITHREADED_BUILD    "Enable multithreading during build?"          NO  )
+option (TEST_DATASETS          "Download and install sample test datasets?"   NO  )
+option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO  )
 
 ## Options affecting the build of individual packages
 
@@ -61,13 +62,14 @@ option (DAL_PYTHON_BINDINGS "Create python bindings for DAL?"            YES )
 ##
 ## ==============================================================================
 
-find_program (bison_executable   bison   PATHS ${bin_locations})
-find_program (curl_executable    curl    PATHS ${bin_locations})
-find_program (doxygen_executable doxygen PATHS ${bin_locations})
-find_program (flex_executable    flex    PATHS ${bin_locations})
-find_program (svn_executable     svn     PATHS ${bin_locations})
-find_program (tar_executable     tar     PATHS ${bin_locations})
-find_program (wget_executable    wget    PATHS ${bin_locations})
+find_program (bison_executable      bison   PATHS ${bin_locations})
+find_program (curl_executable       curl    PATHS ${bin_locations})
+find_program (doxygen_executable    doxygen PATHS ${bin_locations})
+find_program (flex_executable       flex    PATHS ${bin_locations})
+find_program (perl_executable       perl    PATHS ${bin_locations})
+find_program (svn_executable        svn     PATHS ${bin_locations})
+find_program (tar_executable        tar     PATHS ${bin_locations})
+find_program (wget_executable       wget    PATHS ${bin_locations})
 
 ## ==============================================================================
 ##
@@ -76,6 +78,20 @@ find_program (wget_executable    wget    PATHS ${bin_locations})
 ## ==============================================================================
 
 if (doxygen_executable)
+  if (DOXYGEN_GENERATE_LATEX)
+    ## Locate required executables
+    find_program (latex_executable      latex      PATHS ${bin_locations})
+    find_program (makeindex_executable  makeindex  PATHS ${bin_locations})
+    find_program (pdflatex_executable   pdflatex   PATHS ${bin_locations})
+    ## Is LaTeX available?
+    if (latex_executable AND makeindex_executable)
+      set (DOXYGEN_GENERATE_LATEX YES)
+    endif (latex_executable AND makeindex_executable)
+    ## Is PDFLaTeX available?
+    if (pdflatex_executable)
+      set (DOXYGEN_USE_PDFLATEX YES)
+    endif (pdflatex_executable)
+  endif (DOXYGEN_GENERATE_LATEX)
   ## Creation configuration file for Doxygen
   configure_file (${USG_ROOT}/doc/Doxyfile.in ${USG_ROOT}/doc/Doxyfile)
   ## Create documentation
