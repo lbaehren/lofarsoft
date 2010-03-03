@@ -149,12 +149,17 @@ endif (G2C_LIBRARY)
 
 if (CASACORE_ENABLE_HDF5) 
   
+  set (HAVE_HDF5 TRUE)
+  
   ## Header files
   
   find_path (HDF5_INCLUDES hdf5.h hdf5_hl.h
     PATHS ${include_locations}
     PATH_SUFFIXES hdf5 include include/hdf5
     )
+  if (NOT HDF5_INCLUDES) 
+    set (HAVE_HDF5 FALSE)
+  endif (NOT HDF5_INCLUDES)
   
   find_file (HAVE_H5PUBLIC_H H5public.h
     PATHS ${include_locations}
@@ -228,6 +233,10 @@ if (CASACORE_ENABLE_HDF5)
     endif (${HDF5_MAJOR_VERSION} STRLESS 1)
     
   endif (HAVE_H5PUBLIC_H)
+  
+  if (HAVE_HDF5)
+    add_definitions (-DHAVE_HDF5)
+  endif (HAVE_HDF5)
   
 endif (CASACORE_ENABLE_HDF5) 
 

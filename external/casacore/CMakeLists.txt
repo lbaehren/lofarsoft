@@ -10,10 +10,10 @@ cmake_minimum_required (VERSION 2.8)
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (CASACORE_FORCE_BUILD       "Force rebuild and local installation?"    NO  )
+option (CASACORE_FORCE_BUILD       "Force rebuild and local installation?"       NO  )
 option (CASACORE_CMAKE_BUILD       "Use CMake to configure and build CASACORE?"  YES )
-option (CASACORE_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
-option (CASACORE_VERBOSE_BUILD     "Be verbose during build process?"         NO  )
+option (CASACORE_VERBOSE_CONFIGURE "Be verbose during configuration?"            NO  )
+option (CASACORE_VERBOSE_BUILD     "Be verbose during build process?"            NO  )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -96,13 +96,12 @@ if (svn_executable AND tar_executable)
     )
 endif (svn_executable AND tar_executable)  
 
-## ------------------------------------------------------------------------------
-## Configuration summary
+if (tar_executable)
+  add_custom_target (update_casacore_cmake
+    COMMAND rm -rf ../cmake.tgz
+    COMMAND ${tar_executable} -cvzf ../cmake.tgz . --exclude .svn
+    WORKING_DIRECTORY ${CASACORE_SOURCE_DIR}/cmake
+    COMMENT "Retrieving latest version of casacore source code ..."
+    )
+endif (tar_executable)
 
-message (STATUS "+------------------------------------------------------------+")
-message (STATUS "| casacore: Summary of configuration settings                |")
-message (STATUS "+------------------------------------------------------------+")
-message (STATUS " svn executable = ${svn_executable}")
-message (STATUS " tar executable = ${tar_executable}")
-message (STATUS " CMake scripts  = ${have_casacore_cmake}")
-message (STATUS "+------------------------------------------------------------+")
