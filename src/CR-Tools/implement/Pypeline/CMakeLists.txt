@@ -44,7 +44,7 @@ add_custom_command (
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/hftools.hfpp.cc
   DEPENDS ${hftools_cc}
   COMMAND ${CMAKE_CXX_COMPILER}
-  ARGS -E  -P -DH_DEBUG_CPP -D_H_NL_=\" \" -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES} -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} -o ${CMAKE_CURRENT_BINARY_DIR}/hftools.hfpp.cc ${CMAKE_CURRENT_BINARY_DIR}/hftools.awk.cc
+  ARGS -E  -P -DH_DEBUG_CPP -D_H_NL_=\" \" -I${WCSLIB_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} -o ${CMAKE_CURRENT_BINARY_DIR}/hftools.hfpp.cc ${CMAKE_CURRENT_BINARY_DIR}/hftools.awk.cc
   )
 
 set_source_files_properties (
@@ -52,6 +52,15 @@ set_source_files_properties (
   PROPERTIES
   OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/hftools.awk.cc
   )
+
+########### is this needed???
+#set_source_files_properties (
+#  ${CMAKE_CURRENT_BINARY_DIR}/hftools.awk.cc
+#  PROPERTIES
+#  OBJECT_DEPENDS ${hftools_cc}
+#  OBJECT_DEPENDS ${CR_SOURCE_DIR}/implement/GUI/hfiter.awk
+#  OBJECT_DEPENDS ${CR_SOURCE_DIR}/implement/GUI/hfsplit2h.awk
+#  )
 
 ##_______________________________________________________________________________
 ## Create the library
