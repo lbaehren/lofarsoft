@@ -103,7 +103,7 @@ print "---------------------------------------------"
 print "Summing up blocks for power spectrum: ",
 for Block in range(nBlocks):
     print Block,",",
-    hReadFile(fftdata,file,"CalFFT",Antenna,blocksize,Block,Stride,Shift)
+    hReadFileOld(fftdata,file,"CalFFT",Antenna,blocksize,Block,Stride,Shift)
     fftdata.SpectralPower(powerspectrum)
 print " - Done."
 
@@ -130,7 +130,7 @@ print "Quality checking of Blocks: nsigma=",nsigma, "peaks expected=",npeaksexpe
 for Antenna in range(nAntennas):
     for Block in range(nBlocks):
         print "Antenna={0:2d},".format(Antenna),"Block={0:3d}:".format(Block),
-        hReadFile(rawdata,file,"Fx",Antenna,blocksize,Block,Stride,Shift)
+        hReadFileOld(rawdata,file,"Fx",Antenna,blocksize,Block,Stride,Shift)
         datamean = rawdata.mean()
         datarms = rawdata.stddev(datamean)
         datanpeaks=rawdata.findgreaterthanabs(int(round(nsigma*datarms)),where)
@@ -225,6 +225,27 @@ hApplyFilter(rawdata, hanningFilter2)
 #------------------------------------------------------------------------
 #Testing
 file=hOpenFile(filename)
-#hgetFilePy(file,"frequencyValues")
-#i=1024
-#hsetFilePy(file,"help",i)
+hsetFilePy(file,"help",0)
+hsetFilePy(file,"SelectedAntennas",[0,1,3])
+hsetFilePy(file,"Blocksize",512)
+nAntennas=hgetFilePy(file,"nofSelectedAntennas")
+blocksize=hgetFilePy(file,"blocksize")
+fftlen=hgetFilePy(file,"fftLength")
+timedata=FloatVec()
+timedata.resize(blocksize)
+hReadFile(file,"Time",timedata)
+frequencydata=FloatVec()
+frequencydata.resize(fftlen)
+hReadFile(file,"Frequency",frequencydata)
+fxdata=FloatVec()
+fxdata.resize(blocksize*nAntennas)
+hReadFile(file,"Fx",fxdata)
+voltagedata=FloatVec()
+voltagedata.resize(blocksize*nAntennas)
+hReadFile(file,"Voltage",voltagedata)
+fftdata=ComplexVec()
+fftdata.resize(fftlen*nAntennas)
+hReadFile(file,"FFT",fftdata)
+
+
+print hgetFilePy(file,"selectedAntennas")

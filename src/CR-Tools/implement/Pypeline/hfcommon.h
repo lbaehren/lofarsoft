@@ -67,6 +67,9 @@ typedef casa::Record CasaRecord ;
 #define CasaVector casa::Vector
 #define IterValueType typename Iter::value_type
 
+#define STL2CASA_SHARED(TYPE,STLVEC,CASAVEC) TYPE * STL_storage = &(STLVEC[0]); casa::IPosition CASA_shape(1,STLVEC.size()); casa::Vector<TYPE> CASAVEC(CASA_shape,STL_storage,casa::SHARE);
+
+
 //For some reasons NULL is primarily interpreted as Integer by the
 //compiler (e.g., when it needs to determine the type of templated functions).
 //So, this forces NULL to really be a NULL pointer ...
@@ -74,5 +77,7 @@ typedef casa::Record CasaRecord ;
 
 #define IntAsPtr(INT) reinterpret_cast<HPointer>(INT)
 #define PtrAsInt(PTR) reinterpret_cast<HInteger>(PTR)
+
+
 
 #endif

@@ -2299,11 +2299,108 @@ void HFPP_FUNC_NAME(HIntPointer iptr, HString key, HPyObjectPtr pyob)
 
 
 
+//$DOCSTRING: Read data from a Datareader object (pointer in iptr) into a vector, where the size should be pre-allocated.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hReadFile
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HIntPointer)(iptr)()("Integer containing pointer to the datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HString)(Datatype)()("Name of the data column to be retrieved (e.g., FFT, Fx,Time, Frequency...)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(vec)()("Data (output) vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+
+Example on how to use this with the Python wrapper
+
+file=hOpenFile("data/lofar/RS307C-readfullsecond.h5")
+file=hOpenFile("/Users/falcke/LOFAR/usg/data/lopes/test.event")
+
+#offsets=IntVec()
+idata=IntVec()
+hReadFile(file,"Fx",idata)
+hCloseFile(file)
+
+The data will then be in the vector idata. You can covert that to a
+Python list with [].extend(idata)
+*/
+
+template <class T>
+void HFPP_FUNC_NAME(
+		    HIntPointer iptr,
+		    HString Datatype,
+		    std::vector<T> & vec
+		    )
+{
+  
+  DataReader *drp=reinterpret_cast<DataReader*>(iptr);
+
+  //First retrieve the pointer to the pointer to the dataRead and check whether it is non-NULL.
+  if (drp==Null_p){
+    ERROR("dataRead: pointer to FileObject is NULL, DataReader not found.");
+    return;
+  };
+
+  if (Datatype=="Time") {
+    if (typeid(vec) == typeid(vector<double>)) {
+      std::vector<double> * vec_p;
+      vec_p=reinterpret_cast<vector<double>*>(&vec); //That is just a trick to fool the compiler
+      drp->timeValues(*vec_p);
+    }  else {
+      cout << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl; 
+    };
+  } else if (Datatype=="Frequency") {
+    if (typeid(vec) == typeid(vector<double>)) {
+//       std::vector<double> tmpvec;
+//       STL2CASA_SHARED(double,tmpvec,casavec); //Create casa vector sharing memory with the stl vector
+//       casa::Vector<double> * vec_p;  //Get pointer to casa vector 
+//       vec_p=reinterpret_cast<casa::Vector<double>*>(&casavec); //That is just a trick to fool the compiler to 
+//                                                               //compile this section for T!=double (even though it is then never used)
+//       *vec_p=drp->frequencyValues(); //read data into the casa and hence also into the stl vector
+//       hConvert(tmpvec,vec);
+//     }  else {   //Input vector is not of the right format
+//       std::vector<double> tmpvec;  //Create temporary stl vector
+//       STL2CASA_SHARED(double,tmpvec,casavec);  //Create casa vector sharing memory with the tmp stl vector
+//       casavec=drp->frequencyValues(); //read data into the casa vector (hence als tmp stl vector)
+//       hConvert(tmpvec,vec); // Copy and convert data from tmp stl (=casa) vector to the output vector.
+//     };
+    CasaVector<double> val = drp->frequencyValues();
+    aipsvec2stlvec(val,vec);
+    }  else {
+      cout << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl; 
+    };
+  }
+#define HFPP_REPEAT(TYPESTL,TYPECASA,FIELD)				\
+  if (typeid(vec)==typeid(std::vector<TYPESTL>)) {				\
+    casa::IPosition shape(2);						\
+    shape(0)=drp->blocksize(); shape(1)=drp->nofSelectedAntennas();	\
+    casa::Matrix<TYPECASA> casamtrx(shape,reinterpret_cast<TYPECASA*>(&(vec[0])),casa::SHARE); \
+    drp->FIELD (casamtrx);						\
+  } else {								\
+    cout << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl; \
+  }
+  else if (Datatype=="Fx") {HFPP_REPEAT(HNumber,double,fx);}
+  else if (Datatype=="Voltage") {HFPP_REPEAT(HNumber,double,voltage);}
+  //  else if (Datatype=="invFFT") {HFPP_REPEAT(HNumber,double,invfft);}
+  else if (Datatype=="FFT") {HFPP_REPEAT(HComplex,CasaComplex,fft);}
+  else if (Datatype=="FFT") {HFPP_REPEAT(HComplex,CasaComplex,calfft);}
+  else {
+    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype=" << Datatype << " is unknown.");
+    vec.clear();
+  };
+  return;
+}
+#undef HFPP_REPEAT
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 
 //$DOCSTRING: Read data from a Datareader object (pointer in iptr) into a vector.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hReadFile
+#define HFPP_FUNC_NAME hReadFileOld
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2324,8 +2421,8 @@ void HFPP_FUNC_NAME(HIntPointer iptr, HString key, HPyObjectPtr pyob)
 
 Example on how to use this with the Python wrapper
 
-datareader_ptr=hOpenFile("data/lofar/RS307C-readfullsecond.h5")
-datareader_ptr=hOpenFile("/Users/falcke/LOFAR/usg/data/lopes/test.event")
+file=hOpenFile("data/lofar/RS307C-readfullsecond.h5")
+file=hOpenFile("/Users/falcke/LOFAR/usg/data/lopes/test.event")
 
 #offsets=IntVec()
 data=FloatVec()
@@ -2338,8 +2435,8 @@ Blocksize=1024
 Block=10
 Stride=0
 Shift=0
-hReadFile(idata,datareader_ptr,Datatype,Antenna,Blocksize,Block,Stride,Shift,offsets)
-hCloseFile(datareader_ptr)
+hReadFile(idata,file,Datatype,Antenna,Blocksize,Block,Stride,Shift,offsets)
+hCloseFile(file)
 
 The data will then be in the vector idata. You can covert that to a
 Python list with [].extend(idata)
