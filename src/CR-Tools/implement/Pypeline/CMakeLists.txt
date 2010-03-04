@@ -54,13 +54,14 @@ set_source_files_properties (
   )
 
 ########### is this needed???
-#set_source_files_properties (
-#  ${CMAKE_CURRENT_BINARY_DIR}/hftools.awk.cc
-#  PROPERTIES
-#  OBJECT_DEPENDS ${hftools_cc}
-#  OBJECT_DEPENDS ${CR_SOURCE_DIR}/implement/GUI/hfiter.awk
-#  OBJECT_DEPENDS ${CR_SOURCE_DIR}/implement/GUI/hfsplit2h.awk
-#  )
+########### in a way yes, but it doesn't seem to work...
+set_source_files_properties (
+  ${CMAKE_CURRENT_BINARY_DIR}/hftools.awk.cc
+  PROPERTIES
+  OBJECT_DEPENDS ${hftools_cc}
+  OBJECT_DEPENDS ${CR_SOURCE_DIR}/implement/GUI/hfiter.awk
+  OBJECT_DEPENDS ${CR_SOURCE_DIR}/implement/GUI/hfsplit2h.awk
+  )
 
 ##_______________________________________________________________________________
 ## Create the library
