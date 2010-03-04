@@ -32,10 +32,21 @@ using namespace std;
 */
 rmCube::~rmCube()
 {
-  if(buffer!=NULL)		// If there is a buffer associated...
-  {
-    free(this->buffer);		// free memory of buffer
-  }
+  delete[] this->buffer;	// delete memory of buffer which was created with new!!! 
+  
+  // TODO: also check for plane buffer etc.
+}
+
+
+/*!
+  \brief Empty constructor
+*/
+rmCube::rmCube()
+{
+  // Initialize all buffers with NULL
+  buffer=NULL;
+
+  //   cout << "empty constructor" << endl;
 }
 
 
@@ -84,6 +95,8 @@ rmCube::rmCube(int x, int y, int faradaySize, double stepsize)
   this->ra_high=0;
   this->dec_low=0;
   this->dec_high=0;
+
+//   cout << "rmCube::rmCube(int x, int y, int faradaySize, double stepsize) constructor" << endl;
 }
 
 
@@ -125,6 +138,8 @@ rmCube::rmCube(int x, int y, vector<double> faradayDepths)
   {
     faradayDepths[i]=faradayDepths[i];			// write Faraday depth into list to probe for
   }
+  
+//   cout << "rmCube::rmCube(int x, int y, vector<double> faradayDepths) constructor" << endl;  
 }
 
 
@@ -531,7 +546,7 @@ void rmCube::computeCube()
 }
 
 
-/*
+
 /*!
   \brief Compute RM with parameters from rmCube attributes
   

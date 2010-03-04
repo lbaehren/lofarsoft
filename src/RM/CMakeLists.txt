@@ -223,6 +223,8 @@ include_directories (BEFORE
   ${RM_BINARY_DIR}
   ${RM_SOURCE_DIR}
   ${RM_SOURCE_DIR}/implement
+  ${RM_SOURCE_DIR}/implement/rmLib
+  ${RM_SOURCE_DIR}/implement/rmWiener
   ${RM_SOURCE_DIR}/apps/rmcmd
   ${RM_SOURCE_DIR}/test
   )
@@ -279,7 +281,7 @@ endif (HAVE_ITPP)
 ##
 ## =============================================================================
 
-set (link_libraries
+set (rm_link_libraries
   ${DAL_LIBRARIES}
   ${CASA_LIBRARIES}
   ${HDF5_LIBRARIES}
@@ -289,13 +291,7 @@ set (link_libraries
   )
 
 add_subdirectory (implement)
-
-if (RM_BUILD_EXTERNAL_TESTS)
-  add_subdirectory (test)
-endif (RM_BUILD_EXTERNAL_TESTS)
-
-add_subdirectory (apps/rmcmd)
-add_subdirectory (apps/rmdesktool)
+add_subdirectory (apps)
 
 ## =============================================================================
 ##

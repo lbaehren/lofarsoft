@@ -74,22 +74,35 @@ private:
   //casa::Unit faradayUnit;
   
   //! Compute delta lambda squareds from frequencies using tophat function
-  vector<double> deltaLambdaSqTopHat(const vector<double> &frequency,
-												 const vector<double> &bandwidth,
-												 vector<double> &lambda_centre);
+  void deltaLambdaSqTopHat(const vector<double> &frequency,
+			   const vector<double> &bandwidth,
+			   vector<double> &lambda_centre,
+			   vector<double> &delta_lambda_squareds);
 
   //! Calculate integrated total intensity along one line of sight
-  vector<double> totalIntensity(const vector<double> &, int);
+  double totalIntensity(const vector<double> &, int);
 
-	//! Compute the weighted average lambda zero from the observed lambda squareds
+  //! Compute the weighted average lambda zero from the observed lambda squareds
   double weightedLambdaZero(vector<double> &lambda_squareds, vector<double> &weights);
+
+  //! Compute delta lambda squareds (or Faraday depths....) from vector list
+ // void computeDeltas(const vector<double> &, vector<double>);
+
+  //! Compute weights from noise vector (inverse weighting)
+  void computeWeights(const vector<double> &, vector<double> &);
+
 
   // Public functions.
 public:
+  vector<double> deltaLambdaSq(const vector<double> &lambdaSq);	
+	
   //! Calculate delta lambda squared steps from lower and higher frequency limits
   vector<double> deltaLambdaSq(	const vector<double> &freq_low, 
-											const vector<double> &freq_high,
-											bool freq=true);
+				const vector<double> &freq_high,
+				bool freq=true);
+
+  //! compute deltas of an input vector
+  void computeDeltas(const vector<double> &values, vector<double> &deltas);
 	
   //! Convert frequency vector to lambda squared vector
   vector<double> freqToLambdaSq(const vector<double> &frequency);
@@ -144,42 +157,51 @@ public:
 
   // Compute the Rotation Measure Spread Function (RMSF)
   vector<complex<double> > RMSF( const vector<double> &,
-			        						const vector<double> &,
-											const vector<double> &,
-											const vector<double> &,
-											const double lambdaZero=0);
+				 const vector<double> &,
+				 const vector<double> &,
+				 const vector<double> &,
+				 const double lambdaZero=0);
 											
 	// Compute the Rotation Measure Spread Function from input frequencies
-   vector<complex<double> > RMSFfreq(const vector<double> &phis,    
-									  			 const vector<double> &frequencies,                     
-									  			 const vector<double> &weights,                         
-									  			 const vector<double> &delta_frequencies,               
-									  			 const double freqZero=0);			
+   vector<complex<double> > RMSFfreq( const vector<double> &phis,    
+				      const vector<double> &frequencies,                     
+				      const vector<double> &weights,                         
+				      const vector<double> &delta_frequencies,               
+				      const double freqZero=0);			
+
+	//! Normalize RMSF vector to value given by max (default=1)
+	void normalizeRMSF(vector<complex<double> > &rmsf, const double max=1);
 									
 	//! Forward Fourier Transform to compute polarized intensities from RM for a selection of lambdas
 	vector<complex<double> > forwardFourier(const vector<double> &lambda_sqs,
-														 const vector<complex<double> > &rmpolint,
-														 const vector<double> &faradays,
-														 const vector<double> &weights,
-														 const vector<double> &delta_faradays,
-														 const double lambdaZero);					   
+						const vector<complex<double> > &rmpolint,				const vector<double> &faradays,
+						const vector<double> &weights,
+						const vector<double> &delta_faradays,
+						const double lambdaZero);					   
+
+	vector<complex<double> > forwardFourier(const vector<double> &lambda_sqs,
+						const vector<double> &rmpolint,
+						const vector<double> &faradays,
+						const vector<double> &weights,
+						const vector<double> &delta_faradays,
+						const double lambdaZero);
 
 	//! Forward Fourier Transform for Q only
 	vector<double> forwardFourierQ( const vector<double> &lambda_sqs,
-										     const vector<double> &rmpolint,
-											  const vector<double> &faradays,
-											  const vector<double> &weights,
-											  const vector<double> &delta_faradays,
-											  const double lambdaZero);
+					const vector<double> &rmpolint,
+					const vector<double> &faradays,
+					const vector<double> &weights,
+					const vector<double> &delta_faradays,
+					const double lambdaZero);
 
 
 	//! Forward Fourier Transform for U only
 	vector<double> forwardFourierU( const vector<double> &lambda_sqs,
-										     const vector<double> &rmpolint,
-											  const vector<double> &faradays,
-											  const vector<double> &weights,
-											  const vector<double> &delta_faradays,
-											  const double lambdaZero);
+					const vector<double> &rmpolint,
+					const vector<double> &faradays,
+					const vector<double> &weights,
+					const vector<double> &delta_faradays,
+					const double lambdaZero);
 
   // Clean a RM vector line-of-sight down to threshold  (will appear in rmclean class)
 //  int RMClean(vector<double> &phis, double threshold);
@@ -255,9 +277,13 @@ public:
   double rmErrorLsq(double rmsnoisechan, vector<double> &lambdaSqs, double P);
 
   //! Error estimate based on Bayesian statistics
-  vector<double> rmErrorBayes(vector<complex<double> > &intensities,
-			      vector<double> &lambda_sqs,
-			      bool lambda_sq=true);
+  void rmErrorBayes(vector<double> &error,
+		    const vector<complex<double> > &intensities,
+		    const vector<double> &lambda_sqs,
+		    const bool lambda_sq=true);
+			      
+  //! compute the power of a complex vector
+  void complexPower(const vector<complex<double> > &signal, vector<double> &power);		      
 };
 
 #endif		// _RM_H_

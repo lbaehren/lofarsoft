@@ -3,7 +3,7 @@ add_executable (rmsynth main.cpp)
 
 target_link_libraries (rmsynth
   rm
-  ${link_libraries}
+  ${rm_link_libraries}
   )
 
 install (
