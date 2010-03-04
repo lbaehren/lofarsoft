@@ -5,6 +5,7 @@
 set (rm_modules
   rmLib
   rmSim
+  rmClean
   )
 
 if (HAVE_ITPP)

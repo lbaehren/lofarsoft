@@ -7,35 +7,35 @@
 
 
 #ifndef RMSIM_H
-#define RMSIM_
+#define RMSIM_H
 
 
-	/*!
-		\class RMSim 
-		
-		\ingroup RM
-		
-		\brief Simulation of Rotation Measure emission to test algorithms
-	
-		\author Sven Duscha (sduscha@mpa-garching.mpg.de)
-		
-		\test tRMSim.cpp
-		
-		<h3>Prerequisites</h3>
-		
-		- \ref rm
-		
-		<h3>Synopsis</h3>
-		
-		This class can create different Faraday emission regions along a line of
-		sight vector. These may be simple Faraday screens or block structures, but
-		also smoothed emission regions can be created.
-		
-		Gaussian noise can be added, but it is more useful to add noise to the
-		Fourier transformed polarized emission.
-		
-		<h3>Examples</h3>
-	*/
+/*!
+  \class RMSim 
+  
+  \ingroup RM
+  
+  \brief Simulation of Rotation Measure emission to test algorithms
+  
+  \author Sven Duscha (sduscha@mpa-garching.mpg.de)
+  
+  \test tRMSim.cpp
+  
+  <h3>Prerequisites</h3>
+  
+  - \ref rm
+  
+  <h3>Synopsis</h3>
+  
+  This class can create different Faraday emission regions along a line of
+  sight vector. These may be simple Faraday screens or block structures, but
+  also smoothed emission regions can be created.
+  
+  Gaussian noise can be added, but it is more useful to add noise to the
+  Fourier transformed polarized emission.
+  
+  <h3>Examples</h3>
+*/
 
 #include <vector>
 #include <complex>	
@@ -43,24 +43,32 @@
 #include "rmio.h"
 #include "rm.h"
 
-class rmsim : public rmnoise, public rmio, public rm		// has to take public routines of rm to perform Forward transform to polarized emission
+//! Has to take public routines of rm to perform Forward transform to polarized emission
+class rmsim : public rmnoise, public rmio, public rm
 {
-private:
-	std::vector<double> faradayLOS;					//! vector for simulated Faraday emission
-	std::vector<std::complex<double> > polarizedInt;	//! vector for simulated polarized emission (Q and U)
-	std::vector<double> faradayDepths;				//! alternative way to give position in Faraday depth instead of vector index
-	std::vector<double> lambdaSquareds;				//! lambda squareds for simulated observation
-	std::vector<double> deltaLambdaSquareds;		//! delta lambda squareds for simulated observation
-	std::vector<double> frequencies;				//! frequencies for simulated observation 
-	std::vector<double> deltaFrequencies;			//! delta frequencies for simulated observation
-	std::vector<double> weights;					//! vector containing weighting
-
-public:
-	rmsim();											//! constructor
-//	rmsim(std::vector<double> &, std::vector<double> &, std::vector<double> &);
-//	~rmsim();											//! destructor
-	
-	// Algorithm functions for a complete LOS emission with multiple regions (working on class attribute vector)
+  //! Vector for simulated Faraday emission
+  std::vector<double> faradayLOS;
+  //! Vector for simulated polarized emission (Q and U)
+  std::vector<std::complex<double> > polarizedInt;
+  //! Alternative way to give position in Faraday depth instead of vector index
+  std::vector<double> faradayDepths;
+  //! Lambda squareds for simulated observation
+  std::vector<double> lambdaSquareds;
+  //! Delta lambda squareds for simulated observation
+  std::vector<double> deltaLambdaSquareds;
+  //! Frequencies for simulated observation 
+  std::vector<double> frequencies;
+  //! Delta frequencies for simulated observation
+  std::vector<double> deltaFrequencies;
+  //! Vector containing weighting
+  std::vector<double> weights;
+  
+ public:
+  rmsim();											//! constructor
+  //	rmsim(std::vector<double> &, std::vector<double> &, std::vector<double> &);
+  //	~rmsim();											//! destructor
+  
+  // Algorithm functions for a complete LOS emission with multiple regions (working on class attribute vector)
 	void faradayScreens(const std::vector<unsigned int> &positions, const std::vector<double> &heights, const double rmsffwhm);
 	void faradayBlocks(const std::vector<unsigned int> &positions, const std::vector<unsigned int> &widths, const std::vector<double> &heights, const double rmsffwhm);
 	void faradayGaussians(const std::vector<unsigned int> &positions, const std::vector<unsigned int> &fwhms, const std::vector<double> &heights, const double rmsffwhm);
