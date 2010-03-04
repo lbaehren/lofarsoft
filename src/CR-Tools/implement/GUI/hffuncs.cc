@@ -44,10 +44,10 @@ using namespace std;
 
 //#include <GUI/mainwindow.h>
 #include <GUI/hfdefs.h>
-#include <GUI/hfcast.h> 
+#include <GUI/hfcast.h>
 #include <GUI/hfget.h>
 #include <GUI/hffuncs.awk.h>
-#include <GUI/hfanalysis.h>  
+#include <GUI/hfanalysis.h>
 #include <crtools.h>
 
 #include "IO/LopesEventIn.h"
@@ -87,7 +87,7 @@ HString determine_filetype(HString filename){
 
 //virtual functions//
 
-/* 
+/*
 The process_X methods will be defined in the object functions to call
 a single templated (or not if typing is not relevant) method process
 that defines the function to be performed.
@@ -104,8 +104,8 @@ void ObjectFunctionClass::setParameters(){};
 void ObjectFunctionClass::startup(){};
 void ObjectFunctionClass::cleanup(){};
 void ObjectFunctionClass::process_end(){
-  DBG("setLinkpathChanged(false): " << data_pointer->getName(true) << ", funcname=" << getName(true));	      
-  data_pointer->setLinkpathChanged(false);	      
+  DBG("setLinkpathChanged(false): " << data_pointer->getName(true) << ", funcname=" << getName(true));
+  data_pointer->setLinkpathChanged(false);
 };
 
 
@@ -123,7 +123,7 @@ void ObjectFunctionClass::instantiate_one(){
   putParameter(s,vec);
   getParameterDefault<T>(s);
   putResult("",val);
-}; 
+};
 //This ensures all templates for all known types are created
 //The user could change this and only create selected ones.
 void ObjectFunctionClass::instantiate(){
@@ -150,7 +150,7 @@ void ObjectFunctionClass::setParameter(HString internal_name, HComplex default_v
 void ObjectFunctionClass::setParameter(HString internal_name, HString default_value, HString prefix, HString external_name){setParameterT(internal_name, default_value, prefix, external_name);};
 
 
-template <class T>  
+template <class T>
 void ObjectFunctionClass::setParameterT(HString internal_name, T default_value, HString prefix, HString external_name){
   DATATYPE type=WhichType<T>();
   HString ext_name;
@@ -158,8 +158,8 @@ void ObjectFunctionClass::setParameterT(HString internal_name, T default_value, 
   ext_name=prefix+ext_name;
   pit=parameter_list.find(internal_name);
   parameter_item p_i;
-  DBG("ObjectFunctionClass::setParameter: internal_name=" << internal_name 
-      << ", ext_name=" << ext_name << ", default_value=" << default_value 
+  DBG("ObjectFunctionClass::setParameter: internal_name=" << internal_name
+      << ", ext_name=" << ext_name << ", default_value=" << default_value
       << " Type=" << datatype_txt(type));
   if (pit != parameter_list.end()) {  //Name already exists
     if ((pit->second).type==type) {  // and type is the same
@@ -179,7 +179,7 @@ void ObjectFunctionClass::setParameterT(HString internal_name, T default_value, 
 }
 
 /*!
-\brief Retrieves all parameters from the network and create them, if they do not exist. 
+\brief Retrieves all parameters from the network and create them, if they do not exist.
 
 In this form it is only useful at the time of initialization. Since
 the value is not stored locally yet.
@@ -200,16 +200,16 @@ void ObjectFunctionClass::getParameters(){
   };
 }
 
-HString ObjectFunctionClass::getParametersObjectName(){ 
+HString ObjectFunctionClass::getParametersObjectName(){
   return "'Parameters="+data_pointer->getName();
 }
 
-HString ObjectFunctionClass::getResultsObjectName(){ 
+HString ObjectFunctionClass::getResultsObjectName(){
   return ":Results="+data_pointer->getName();
 }
 
 
-/*! 
+/*!
 \brief Find the object named "Parameters", which is linked to all
 objects containing parameters of the current (function) object. Create
 it, if not found.
@@ -285,7 +285,7 @@ Data* ObjectFunctionClass::getParameterObject(HString name){
     };
     return obj;
   }
-} 
+}
 
 /*!
 
@@ -326,7 +326,7 @@ T ObjectFunctionClass::getParameter(/*const*/ HString name, /*const*/ T defval){
 }
 
 /*!
-\brief Retrieve the corresponding parameter object (with name "name") and return its value in the vector (vec). If object does not exist, create it and return and assign the default values which are assumed to be in vec. 
+\brief Retrieve the corresponding parameter object (with name "name") and return its value in the vector (vec). If object does not exist, create it and return and assign the default values which are assumed to be in vec.
 */
 
 template <class T>
@@ -393,14 +393,14 @@ active data object. Will be called at the end of a Data object
 function call.
 
  */
-template <class T>  
+template <class T>
 Data* ObjectFunctionClass::putResult(HString name,vector<T> vec){
   Data* robj=getResultObject(name);
   robj->put_silent(vec);
   return data_pointer;
 }
 
-template <class T>  
+template <class T>
 Data* ObjectFunctionClass::putResult(HString name,T val){
   Data* robj=getResultObject(name);
   robj->putOne_silent(val);
@@ -522,7 +522,7 @@ Creates a new instance of the class (on the heap) and returns a
 ObjectFunctionClass* DataFuncDescriptor::newFunction(Data *dp, DATATYPE typ){
   DataFuncDescriptor fdnew;
   DATATYPE newtype=typ;
-  
+
   //Call the Constructor of that function - defined with
   //DATAFUNC_CONSTRUCTOR (this will actually create the method and
   //hence call its constructor.
@@ -540,7 +540,7 @@ ObjectFunctionClass* DataFuncDescriptor::newFunction(Data *dp, DATATYPE typ){
   };
   return fdnew.getFunction();
 }
-    
+
 //returns the function to call
 void DataFuncDescriptor::setFunction(ObjectFunctionClass* f_ptr){fd.f_ptr=f_ptr;}
 ObjectFunctionClass* DataFuncDescriptor::getFunction(){return fd.f_ptr;}
@@ -553,10 +553,10 @@ ConstructorFunctionPointer DataFuncDescriptor::getConstructor(){return fd.constr
 //Return the library name the function belongs to
 HString DataFuncDescriptor::getLibrary(){return fd.library;};
 
-//Return the default type of the function 
+//Return the default type of the function
 DATATYPE DataFuncDescriptor::getType(){return fd.deftype;};
 
-//Return the name of the function being described 
+//Return the name of the function being described
 //(either with (fullname=false) or without the library name attached)
 HString DataFuncDescriptor::getName(bool fullname) /*const*/{
   HString s;
@@ -577,7 +577,7 @@ HString DataFuncDescriptor::getDocstring(bool shortdoc){
 
 
 /*========================================================================
-  class DataFuncLibraryClass 
+  class DataFuncLibraryClass
   ========================================================================*/
 /*
 This class stores Libraries of pointers to function classes that an object can use.
@@ -591,16 +591,16 @@ DataFuncLibraryClass::DataFuncLibraryClass(){
 
 DataFuncLibraryClass::~DataFuncLibraryClass(){}
 
-/*! 
+/*!
   \brief Adds a function constructor to the library, so that it can be called later on
 
-Here provide the library with a pointer to the function constructing the object. 
+Here provide the library with a pointer to the function constructing the object.
 The constructor function will be called with construct=false, which means that
-only the Function Descriptor is returned, but no actual instance is created. 
+only the Function Descriptor is returned, but no actual instance is created.
 
 When a function is later assigned to an object, then the call to the
-constructor fucntion stored in the libray with construct=true is made, 
-an instance is created on the heap, and the Function Descriptor will contain 
+constructor fucntion stored in the libray with construct=true is made,
+an instance is created on the heap, and the Function Descriptor will contain
 an actual pointer to the class.
 */
 void DataFuncLibraryClass::addFunc(ConstructorFunctionPointer c_ptr){
@@ -633,7 +633,7 @@ void DataFuncLibraryClass::addFuncnameToLibrary(HString name,HString lib){
   };
 }
 
-/*! 
+/*!
 \brief Check whether a particular function name is in a particular library
  */
 bool DataFuncLibraryClass::isFuncnameInLibrary(HString name, HString lib){
@@ -643,7 +643,7 @@ bool DataFuncLibraryClass::isFuncnameInLibrary(HString name, HString lib){
 }
 
 
-/*! 
+/*!
 
 \brief Searches all libraries and returns the name of the first one
 that contains a function of name "name". Returns "" if no match is
@@ -681,7 +681,7 @@ ObjectFunctionClass* DataFuncLibraryClass::f_ptr(HString name, HString library){
 }
 
 /*!
-\brief Retrieves the struct describing the function class 
+\brief Retrieves the struct describing the function class
 */
 
 DataFuncDescriptor* DataFuncLibraryClass::FuncDescriptor(HString name, HString library){
@@ -712,7 +712,7 @@ vector<HString> DataFuncLibraryClass::listFunctions(bool doprint){
   vector<HString> out;
   HString s;
   for (it=func_library.begin();it!=func_library.end();++it) {
-    s=(it->second).getName(true) + " - " + (it->second).getDocstring(); 
+    s=(it->second).getName(true) + " - " + (it->second).getDocstring();
     out.push_back(s);
     if (doprint) cout << s <<endl;
   };
@@ -742,12 +742,12 @@ vector<HString> DataFuncLibraryClass::getFuncnames(HString library, bool doprint
     if (doprint) printvec(fit->second,(fit->second).size());
     return fit->second;
   } else {
-    vector<HString> out; 
+    vector<HString> out;
     return out;
   };
 }
 
-//End DataFuncLibraryClass 
+//End DataFuncLibraryClass
 //........................................................................
 
 
@@ -787,7 +787,7 @@ template<class T> inline T FUNC(/*const*/ T v)
   inline HPointer FUNC(/*const*/ HPointer v1, /*const*/ HPointer v2){return mycast<HPointer>(FUNC(mycast<HInteger>(v1),mycast<HInteger>(v2)));}; \
   template<class S>        inline HPointer FUNC(/*const*/ HPointer v1, /*const*/ S v2){return mycast<HPointer>(FUNC(mycast<S>(v1),v2));}; \
   template<class S>        inline HPointer FUNC(/*const*/ S v1, /*const*/ HPointer v2){return mycast<HPointer>(FUNC(v1,mycast<S>(v2)));}; \
-  template<class T, class S> inline T FUNC(/*const*/ T v1,/*const*/ S v2)	
+  template<class T, class S> inline T FUNC(/*const*/ T v1,/*const*/ S v2)
 
 //---square
 //template<class T> inline T hf_square(/*const*/ T v)
@@ -796,15 +796,15 @@ template<class T> inline T FUNC(/*const*/ T v)
 HF_MATH_FUNC(hf_$MFUNC){return $MFUNC(v);};
 //$ENDITERATE
 
-HF_MATH_FUNC(hf_square){return v*v;}; 
-HF_MATH_FUNC(hf_negative){return -v;}; 
-HF_MATH_FUNC(hf_ssqrt){if (v<0) return -sqrt(-v); else return sqrt(v);}; 
+HF_MATH_FUNC(hf_square){return v*v;};
+HF_MATH_FUNC(hf_negative){return -v;};
+HF_MATH_FUNC(hf_ssqrt){if (v<0) return -sqrt(-v); else return sqrt(v);};
 
 HF_MATH_FUNC2(hf_sub){return v1-v2;};
-HF_MATH_FUNC2(hf_mul){return v1*v2;}; 
-HF_MATH_FUNC2(hf_add){return v1+v2;}; 
-HF_MATH_FUNC2(hf_div){return v1/v2;}; 
-HF_MATH_FUNC2(hf_pow){return pow(v1,v2);}; 
+HF_MATH_FUNC2(hf_mul){return v1*v2;};
+HF_MATH_FUNC2(hf_add){return v1+v2;};
+HF_MATH_FUNC2(hf_div){return v1/v2;};
+HF_MATH_FUNC2(hf_pow){return pow(v1,v2);};
 
 template<class T> inline T hf_phase(/*const*/ T v){return mycast<T>(0.0);};
 template<> inline HComplex hf_phase<HComplex>(/*const*/ HComplex v){return arg(v);}
@@ -878,12 +878,12 @@ SET_FUNC_VECPARAMETER_AWK($*VecPar);\
 SET_FUNC_PARAMETER_AWK($*Par);\
 };\
  \
-template <class T> void process(F_PARAMETERS) {\  
+template <class T> void process(F_PARAMETERS) {\
   GET_FUNC_VECPARAMETER_AWK($*VecPar);\
   GET_FUNC_PARAMETER_AWK($*Par);
 
 $END: Function }; DATAFUNC_CONSTRUCTOR($Name,$Lib,"$Info",$Type,$buffered);
-$PUBLISH: Function PUBLISH_OBJECT_FUNCTION($Lib,$Name); 
+$PUBLISH: Function PUBLISH_OBJECT_FUNCTION($Lib,$Name);
 ------------------------------------------------------------------------------*/
 
 
@@ -900,7 +900,7 @@ Par: UnitName, HString, ""
 Par: UnitPrefix, HString,""
 Par: UnitScaleFactor, HNumber, 1.0
 ------------------------------------------------------------------------------*/
-$$ { 
+$$ {
   dp->getFirstFromVector(*vp,vs);
   INIT_FUNC_ITERATORS(it,end);
   while (it!=end) {*it=hf_div(*it,UnitScaleFactor);++it;};
@@ -950,14 +950,14 @@ $${
 /*------------------------------------------------------------------------------
 Lib: Math
 Name: RunningAverage
-Info: Calculates the running averages over multiple samples of an vector using flat, linear, or Gaussian weighting 
+Info: Calculates the running averages over multiple samples of an vector using flat, linear, or Gaussian weighting
 Type: NUMBER
 buffered: false
 updateable: false
 Par: RunningAverageWeightType, HString, "GAUSSIAN"
 Par: RunningAverageLength, HInteger, 7
 ------------------------------------------------------------------------------*/
-$$ { 
+$$ {
   vector<T> tmpvec;
   hWEIGHTS wtype=WEIGHTS_LINEAR;
   if (RunningAverageWeightType=="GAUSSIAN") wtype=WEIGHTS_GAUSSIAN;
@@ -980,11 +980,11 @@ Type: NUMBER
 buffered: false
 updateable: false
 ------------------------------------------------------------------------------*/
-$${ 
+$${
   dp->getFirstFromVector(*vp,vs);
 
   INIT_FUNC_ITERATORS(it,end);
- 
+
   while (it!=end) {
    *it=hf_$MFUNC(*it);
    ++it;
@@ -1005,7 +1005,7 @@ Type: COMPLEX
 buffered: false
 updateable: false
 ------------------------------------------------------------------------------*/
-$${ 
+$${
   vector<HComplex>* cvp;
   if (WhichType<T>()==COMPLEX) cvp=reinterpret_cast<vector<HComplex>*>(vp); // no need for new vector
   else cvp=new vector<HComplex>;
@@ -1013,12 +1013,12 @@ $${
   dp->getFirstFromVector(*cvp,vs);
   vp->resize(cvp->size(),hfnull<T>());
 
-  ITERATORS(HComplex,cvp,it1,end1);    
-  ITERATORS_T(vp,it2,end2);    
- 
+  ITERATORS(HComplex,cvp,it1,end1);
+  ITERATORS_T(vp,it2,end2);
+
   while (it1!=end1 && it2!=end2) {
     *it2=mycast<T>($MFUNC(*it1));
-    it1++; it2++; 
+    it1++; it2++;
   };
 }
 //$END Function -----------------------------------------------------------------
@@ -1034,7 +1034,7 @@ Type: NUMBER
 buffered: false
 updateable: false
 ------------------------------------------------------------------------------*/
-$${ 
+$${
   dp->getFirstFromVector(*vp,vs);
 
   INIT_FUNC_ITERATORS(it,end);
@@ -1058,7 +1058,7 @@ Type: NUMBER
 buffered: false
 updateable: false
 ------------------------------------------------------------------------------*/
-$${ 
+$${
   dp->getFirstFromVector(*vp,vs);
 
   T * storage = &((*vp)[0]);
@@ -1068,10 +1068,10 @@ $${
   //  INIT_FUNC_ITERATORS(it,end);
 
   typedef typename casa::Vector<T>::contiter iterator_T;
-  iterator_T it=cvec.cbegin(); 
-  iterator_T end=cvec.cend();  
+  iterator_T it=cvec.cbegin();
+  iterator_T end=cvec.cend();
 
-  if (it==end) {return;};  
+  if (it==end) {return;};
 
   while (it!=end) {
     *it=hf_mul(*it,*it);
@@ -1096,10 +1096,10 @@ Type: NUMBER
 buffered: false
 updateable: false
 ------------------------------------------------------------------------------*/
-$${ 
+$${
   dp->getFirstFromVector(*vp,vs);
   vector<T> rvec;
-  
+
   Data* robj=dp->Ptr("'Reference");
   if (!isDataObject(robj)) {
     ERROR("Math Function $MFUNC (" << dp->getName(true) << ") - No Reference object found, no calculation performed.");
@@ -1107,7 +1107,7 @@ $${
   }
 
   robj->get(rvec,vs);
-  
+
   if (rvec.size()==0) {
     ERROR("Math Function $MFUNC (" << dp->getName(true) << ") - No data in Reference object found, no calculation performed.");
     return;
@@ -1151,7 +1151,7 @@ Par: OffsetFixed, HInteger, int(false)
 // The following line with $$ is a comment for the preprocessor, but
 // the bracket makes life easier for the editor since we have to add
 // one at the end of this block as well
-$$ { 
+$$ {
 dp->getFirstFromVector(*vp,vs);
 
  INIT_FUNC_ITERATORS(it,end);
@@ -1188,7 +1188,7 @@ buffered: false
 updateable: true
 ------------------------------------------------------------------------------*/
 $${
-  dp->getFirstFromVector(*vp,vs);    //copy data vector from predecessor 
+  dp->getFirstFromVector(*vp,vs);    //copy data vector from predecessor
   cout << dp->getName() << ": ";  //and print
   printvec(*vp);
 }
@@ -1217,14 +1217,14 @@ $${
     return;
   };
 
-  MSG("Range: vs1 VectorSelector not yet implemented!"); 
+  MSG("Range: vs1 VectorSelector not yet implemented!");
 
   size=floor(abs((end-start)/inc))+1;
   if (vp->capacity()<size) {vp->reserve(size);};
 
   //Fill the return data vector and make sure it is casted to the right output type
   for (i=0;i<size;i++) {vp->push_back(mycast<T>(i*inc+start));};
-    
+
 }
 //$END Function -----------------------------------------------------------------
 
@@ -1255,7 +1255,7 @@ buffered: true
 updateable: true
 Par: Filename, HString, dataset_lopes
 ------------------------------------------------------------------------------*/
-$$ { 
+$$ {
 
   DBG("dataReaderObject: Retrieved filename parameter =" << Filename); // gets filename from object set in hfnet.py
 
@@ -1266,9 +1266,9 @@ $$ {
   HInteger nofAntennas;
   address maxBlocksize;
   HString Filetype;
-  vector<HInteger> AntennaIDs; 
+  vector<HInteger> AntennaIDs;
   vector<HInteger> Offsets;
-  
+
   //Create the a pointer to the DataReader object and store the pointer
   //Here we could have if statements depending on data types
 
@@ -1285,7 +1285,7 @@ $$ {
   //it. The object should actually me made read-only, since the pointer is
   //not to be changed by put ever again until the window is deleted
 
-  vp->push_back(mycast<T>(ptr)); 
+  vp->push_back(mycast<T>(ptr));
 
   //Read out some header information ...
   CasaRecord hdr=drp->headerRecord();
@@ -1295,7 +1295,7 @@ $$ {
   hdr.asArrayInt("AntennaIDs").tovector(AntennaIDs);
   nofAntennas=drp->nofAntennas();
   Filetype = determine_filetype(Filename);
-  maxBlocksize=min(filesize, 1048hfpp576);
+  maxBlocksize=min(filesize, 1048576);
 
   //... and store it in results objects
   putResult("Date",date);
@@ -1310,7 +1310,7 @@ $$ {
 }
 
 void cleanup(){
-  delete reinterpret_cast<CR::DataReader*>(data_pointer->getOne<HPointer>()); 
+  delete reinterpret_cast<CR::DataReader*>(data_pointer->getOne<HPointer>());
 }
 
 
@@ -1339,10 +1339,10 @@ Par: Shift, HInteger, 0
 Par: Datatype, HString, "Fx"
 VecPar: Offsets, HInteger
 ------------------------------------------------------------------------------*/
-$$ { 
+$$ {
   if (Blocksize<1) Blocksize=maxBlocksize;
-  hReadFile(*vp,AsIPtr(File),Datatype,Antenna,Blocksize,Block,Stride,Shift,Offsets); 
-  HInteger maxBlock=Filesize/Blocksize-1;	
+  hReadFile(*vp,AsIPtr(File),Datatype,Antenna,Blocksize,Block,Stride,Shift,Offsets);
+  HInteger maxBlock=Filesize/Blocksize-1;
   putResult("maxBlock",maxBlock);
 }
 //$END Function ----------------------------------------------------------------
@@ -1378,14 +1378,14 @@ void startup(){
 void cleanup(){
   data_pointer->callSimplePyObjectMethod(data_pointer->retrievePyFunc(), "hfcleanup");
 }
- 
+
 //$END Function ----------------------------------------------------------------
 
 //------------------------------------------------------------------------
 //Network functions
 //------------------------------------------------------------------------
 
-/* 
+/*
 These functions can be called from each object to perform certain functions
  */
 
@@ -1466,7 +1466,7 @@ int ReadTextFile(string filename)
 }
 
 #undef HF_PP_FILETYPE
-#define HF_PP_FILETYPE() (GUI)  // Tell the preprocessor (for generating wrappers) that from here on this is the part where the atomatic function wrappers are generated. 
+#define HF_PP_FILETYPE() (GUI)  // Tell the preprocessor (for generating wrappers) that from here on this is the part where the atomatic function wrappers are generated.
 #include "hfwrappers-hfanalysis.cc.h"  // include wrapper definitions generated automatically from source
 
 /*
@@ -1483,14 +1483,14 @@ gcc -E -I$LOFARSOFT/release/include -I$LOFARSOFT/src/CR-Tools/implement -I$LOFAR
 //------------------------------------------------------------------------
 //Publish the Libraries - used in Data object constructor
 //------------------------------------------------------------------------
-//Note that this will be filled in by the preprocessor 
+//Note that this will be filled in by the preprocessor
 void DataFunc_Library_publish(DataFuncLibraryClass* library_ptr){
   //$PUBLISH Function
 #undef HF_PP_FILETYPE
 #define HF_PP_FILETYPE() (GUIPUBLISH)  // Tell the preprocessor (for generating wrappers) that from here on this is the part where the functions are published (and hence the WRAPPER generation macro is identified as such).
 #include "hfwrappers-hfanalysis.cc.h"  // include wrapper definitions generated automatically from source
 };
- 
+
 void dummy_instantiate(){
   vector<HInteger> Offsets;
   CasaVector<int> OffsetsCasa;
