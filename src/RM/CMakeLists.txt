@@ -285,12 +285,14 @@ set (rm_link_libraries
   ${DAL_LIBRARIES}
   ${CASA_LIBRARIES}
   ${HDF5_LIBRARIES}
+  ${ITPP_LIBRARIES}
   ${CFITSIO_LIBRARIES}
   ${WCSLIB_LIBRARIES}
   ${LAPACK_LIBRARIES}
   )
 
 add_subdirectory (implement)
+add_subdirectory (test)
 add_subdirectory (apps)
 
 ## =============================================================================
