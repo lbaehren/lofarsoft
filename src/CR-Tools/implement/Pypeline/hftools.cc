@@ -454,7 +454,7 @@ inline T square(T val)
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(frequency)()("Frequency in Hz")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(time)()("Time in seconds")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HNumber)(time)()("Time in seconds")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
  \brief $DOCSTRING
@@ -1989,6 +1989,8 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end){
 
 
 
+
+
 //========================================================================
 //                             I/O Functions
 //========================================================================
@@ -2335,7 +2337,7 @@ void HFPP_FUNC_NAME(
 		    std::vector<T> & vec
 		    )
 {
-  
+
   DataReader *drp=reinterpret_cast<DataReader*>(iptr);
 
   //First retrieve the pointer to the pointer to the dataRead and check whether it is non-NULL.
@@ -2350,14 +2352,14 @@ void HFPP_FUNC_NAME(
       vec_p=reinterpret_cast<vector<double>*>(&vec); //That is just a trick to fool the compiler
       drp->timeValues(*vec_p);
     }  else {
-      cout << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl; 
+      cout << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl;
     };
   } else if (Datatype=="Frequency") {
     if (typeid(vec) == typeid(vector<double>)) {
 //       std::vector<double> tmpvec;
 //       STL2CASA_SHARED(double,tmpvec,casavec); //Create casa vector sharing memory with the stl vector
-//       casa::Vector<double> * vec_p;  //Get pointer to casa vector 
-//       vec_p=reinterpret_cast<casa::Vector<double>*>(&casavec); //That is just a trick to fool the compiler to 
+//       casa::Vector<double> * vec_p;  //Get pointer to casa vector
+//       vec_p=reinterpret_cast<casa::Vector<double>*>(&casavec); //That is just a trick to fool the compiler to
 //                                                               //compile this section for T!=double (even though it is then never used)
 //       *vec_p=drp->frequencyValues(); //read data into the casa and hence also into the stl vector
 //       hConvert(tmpvec,vec);
@@ -2370,7 +2372,7 @@ void HFPP_FUNC_NAME(
     CasaVector<double> val = drp->frequencyValues();
     aipsvec2stlvec(val,vec);
     }  else {
-      cout << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl; 
+      cout << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl;
     };
   }
 #define HFPP_REPEAT(TYPESTL,TYPECASA,FIELD)				\
