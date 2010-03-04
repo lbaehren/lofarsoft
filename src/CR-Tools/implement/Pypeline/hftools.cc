@@ -128,7 +128,7 @@ vector<uint> PyList2STLuIntVec(PyObject* pyob){
   }
   return vec;
 }
-  
+
 
 //========================================================================
 //                        Matrix Class
@@ -447,7 +447,7 @@ inline T square(T val)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Returns the interferometer phase in radians for a given frequency and time 
+//$DOCSTRING: Returns the interferometer phase in radians for a given frequency and time
 //$COPY_TO HFILE START ---------------------------------------------------
 #define HFPP_FUNC_NAME hPhase
 //------------------------------------------------------------------------
@@ -1643,39 +1643,39 @@ HNumber HFPP_FUNC_NAME (
 			)
 {
   HNumber distance;
-  Iter 
-    ant, 
+  Iter
+    ant,
     freq,
-    sky=skyPositions, 
+    sky=skyPositions,
     phase=phases,
-    ant_end=antPositions_end-2, 
+    ant_end=antPositions_end-2,
     sky_end=skyPositions_end-2;
 
   if (farfield) {
     while (sky < sky_end && phase < phases_end) {
-      distance = hNorm(sky,sky+3); 
-      ant=antPositions; 
+      distance = hNorm(sky,sky+3);
+      ant=antPositions;
       while (ant < ant_end && phase < phases_end) {
 	freq=frequencies;
 	while (freq < frequencies_end && phase < phases_end) {
 	  *phase=hPhase(*freq,hGeometricDelayFarField(ant,sky,distance));
 	  ++phase; ++freq;
 	};
-	ant+=3; 
+	ant+=3;
       };
       sky+=3;
     };
   } else {
     while (sky < sky_end && phase < phases_end) {
-      distance = hNorm(sky,sky+3); 
-      ant=antPositions; 
+      distance = hNorm(sky,sky+3);
+      ant=antPositions;
       while (ant < ant_end && phase < phases_end) {
 	freq=frequencies;
 	while (freq < frequencies_end && phase < phases_end) {
 	  *phase=hPhase(*freq,hGeometricDelayNearField(ant,sky,distance));
 	  ++phase; ++freq;
 	};
-	ant+=3; 
+	ant+=3;
       };
       sky+=3;
     };
@@ -1713,39 +1713,39 @@ HNumber HFPP_FUNC_NAME (
 			)
 {
   HNumber distance;
-  Iter 
-    ant, 
+  Iter
+    ant,
     freq,
-    sky=skyPositions, 
-    ant_end=antPositions_end-2, 
+    sky=skyPositions,
+    ant_end=antPositions_end-2,
     sky_end=skyPositions_end-2;
   CIter weight=weights;
 
   if (farfield) {
     while (sky < sky_end && weight < weights_end) {
-      distance = hNorm(sky,sky+3); 
-      ant=antPositions; 
+      distance = hNorm(sky,sky+3);
+      ant=antPositions;
       while (ant < ant_end && weight < weights_end) {
 	freq=frequencies;
 	while (freq < frequencies_end && weight < weights_end) {
 	  *weight=exp(HComplex(0.0,hPhase(*freq,hGeometricDelayFarField(ant,sky,distance))));
 	  ++weight; ++freq;
 	};
-	ant+=3; 
+	ant+=3;
       };
       sky+=3;
     };
   } else {
     while (sky < sky_end && weight < weights_end) {
-      distance = hNorm(sky,sky+3); 
-      ant=antPositions; 
+      distance = hNorm(sky,sky+3);
+      ant=antPositions;
       while (ant < ant_end && weight < weights_end) {
 	freq=frequencies;
 	while (freq < frequencies_end && weight < weights_end) {
 	  *weight=exp(HComplex(0.0,hPhase(*freq,hGeometricDelayNearField(ant,sky,distance))));
 	  ++weight; ++freq;
 	};
-	ant+=3; 
+	ant+=3;
       };
       sky+=3;
     };
@@ -1881,15 +1881,10 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 		       const double Alpha,
 		       const uint Beta) {
   uint blocksize = vec_end - vec;
-  CR::HanningFilter<HNumber> hanning_filter(blocksize, Alpha, Beta);
-  Iter it_v = vec;
-  CasaVector<HNumber> filter = hanning_filter.weights();
-  CasaVector<HNumber>::iterator it_f = filter.begin();
+  uint BetaRise = (blocksize - Beta)/2;
+  uint BetaFall = (blocksize - Beta)/2;
 
-  while ((it_v != vec_end) && (it_f != filter.end())) {
-    *it_v = (IterValueType) *it_f;
-    it_v++; it_f++;
-  }
+  hGetHanningFilter(vec, vec_end, Alpha, Beta, BetaRise, BetaFall);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1912,8 +1907,8 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 template <class Iter>
 void hGetHanningFilter(const Iter vec, const Iter vec_end,
 		       const double Alpha) {
-
-  hGetHanningFilter(vec, vec_end, Alpha, 0);
+  uint Beta = 0;
+  hGetHanningFilter(vec, vec_end, Alpha, Beta);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1934,7 +1929,8 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end){
-  hGetHanningFilter(vec, vec_end, 0.5);
+  double Alpha = 0.5;
+  hGetHanningFilter(vec, vec_end, Alpha);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1954,10 +1950,10 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end){
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class Iter, class IterW>
-void HFPP_FUNC_NAME(const Iter data, const Iter data_end, const IterW filter, IterW filter_end){
-  Iter  it_d = data;
-  IterW it_f = filter;
+template <class Iter, class IterFilter>
+void HFPP_FUNC_NAME(const Iter data, const Iter data_end, const IterFilter filter, IterFilter filter_end){
+  Iter       it_d = data;
+  IterFilter it_f = filter;
 
   while ((it_d != data_end) && (it_f != filter_end)) {
     *it_d *= (IterValueType) *it_f;
@@ -2173,7 +2169,7 @@ HString HFPP_FUNC_NAME(HIntPointer iptr, HString key)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Return information from a data file as a Python object 
+//$DOCSTRING: Return information from a data file as a Python object
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hgetFilePy
 //-----------------------------------------------------------------------
@@ -2201,7 +2197,7 @@ HPyObject HFPP_FUNC_NAME(HIntPointer iptr, HString key)
     HFPP_REPEAT(uint,nyquistZone)
     HFPP_REPEAT(double,sampleInterval)
     HFPP_REPEAT(double,referenceTime)
-    HFPP_REPEAT(double,sampleFrequency) 
+    HFPP_REPEAT(double,sampleFrequency)
 #undef HFPP_REPEAT
 #define HFPP_REPEAT(TYPE,TYPE2,KEY) if (key== #KEY) {CasaVector<TYPE> casavec(drp->KEY ()); std::vector<TYPE2> result; aipsvec2stlvec(casavec,result); HPyObject pyob(result); return pyob;} else
     HFPP_REPEAT(uint,HInteger,antennas)
@@ -2225,7 +2221,7 @@ HPyObject HFPP_FUNC_NAME(HIntPointer iptr, HString key)
     HFPP_REPEAT(uint,nyquistZone)
     HFPP_REPEAT(double,sampleInterval)
     HFPP_REPEAT(double,referenceTime)
-    HFPP_REPEAT(double,sampleFrequency) 
+    HFPP_REPEAT(double,sampleFrequency)
 #undef HFPP_REPEAT
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  + #KEY + ", "
     HFPP_REPEAT(uint,HInteger,antennas)
@@ -2274,7 +2270,7 @@ void HFPP_FUNC_NAME(HIntPointer iptr, HString key, HPyObjectPtr pyob)
     HFPP_REPEAT(double,PyFloat_AsDouble,SampleFrequency)
     HFPP_REPEAT(int,PyInt_AsLong,Shift)
     if (key=="SelectedAntennas") {
-      vector<uint> stlvec(PyList2STLuIntVec(pyob)); 
+      vector<uint> stlvec(PyList2STLuIntVec(pyob));
       uint * storage = &(stlvec[0]);
       casa::IPosition shape(1,stlvec.size()); //tell casa the size of the vector
       CasaVector<uint> casavec(shape,storage,casa::SHARE);
