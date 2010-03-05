@@ -60,8 +60,6 @@ BOOST_PYTHON_MODULE(hftools)
     // def("pytointptr",getPointerFromPythonObject);
     //def("getptr", PyGetPtr);
 
-    def("hOpenFile",hOpenFile);
-    def("hCloseFile",hCloseFile);
     def("hgetFiletype",hgetFiletype);
     def("hgetFileExtension",hgetFileExtension);
 

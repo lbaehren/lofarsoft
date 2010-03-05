@@ -1,6 +1,11 @@
-execfile("hftools.py")
+#import matplotlib.pyplot as plt
+#plt.plot([1,2,3])
+#plt.ylabel(’some numbers’)
+#plt.show()
+
 import os
 from math import *
+from pycrtools import *
 
 def demo(descr,code,code2=""):
     print descr
@@ -57,35 +62,37 @@ demo("Standard Deviation:","v1.stddev()")
 #Now use Dataeader
 #------------------------------------------------------------------------
 LOFARSOFT=os.environ["LOFARSOFT"]
-#filename=LOFARSOFT+"/data/lopes/test.event"
-filename=LOFARSOFT+"/data/lopes/example.event"  # solar burst
+filename=LOFARSOFT+"/data/lopes/test.event"
+#filename=LOFARSOFT+"/data/lopes/example.event"  # solar burst
 #filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
+#filename=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
+
 
 print "Opening file: ",filename
 print "---------------------------------------------"
-file=hOpenFile(filename)
+file=hFileOpen(filename)
 print "---------------------------------------------"
 print "Reading header information:"
-obsname=hgetFileHeaderString(file,"Observatory")
-obsdate=hgetFileHeaderTyped(file,"Date",0)
-filesize=hgetFileHeaderTyped(file,"Filesize",0)
+obsname=hFileGetParameter(file,"Observatory")
+obsdate=hFileGetParameter(file,"Date")
+filesize=hFileGetParameter(file,"Filesize")
 print "obsname=",obsname
 print "obsdate=",obsdate
 print "filesize=",filesize
 print "---------------------------------------------"
 print "Reading file information:"
-nAntennas=hgetFilePy(file,"nofAntennas")
-blocksize=hgetFilePy(file,"blocksize")
-sampleFrequency=hgetFilePy(file,"sampleFrequency")
-fftlength=hgetFilePy(file,"fftLength")
-antennas=hgetFilePy(file,"help")
+nAntennas=hFileGetParameter(file,"nofAntennas")
+blocksize=hFileGetParameter(file,"blocksize")
+sampleFrequency=hFileGetParameter(file,"sampleFrequency")
+fftlength=hFileGetParameter(file,"fftLength")
+antennas=hFileGetParameter(file,"help")
 print "nAtennas=",nAntennas
 print "blocksize=",blocksize
 print "sampleFrequency=",sampleFrequency
 print "fftlength=",fftlength
 print "antennas=",antennas
 print "---------------------------------------------"
-hgetFilePy(file,"help")
+hFileGetParameter(file,"help")
 
 #DataReader Parameters
 Antenna=0; blocksize=min(filesize/2,64*1024); Stride=0; Shift=0;
@@ -144,7 +151,7 @@ for Antenna in range(nAntennas):
         else: print ""
 print "Done."
 print "Quality Flaglist:",qualityflaglist
-hCloseFile(file)
+hFileClose(file)
 
 #------------------------------------------------------------------------
 print "\nNow testing calculation of geometric antenna delays"
@@ -224,28 +231,39 @@ hApplyFilter(rawdata, hanningFilter2)
 
 #------------------------------------------------------------------------
 #Testing
-file=hOpenFile(filename)
-hsetFilePy(file,"help",0)
-hsetFilePy(file,"SelectedAntennas",[0,1,3])
-hsetFilePy(file,"Blocksize",512)
-nAntennas=hgetFilePy(file,"nofSelectedAntennas")
-blocksize=hgetFilePy(file,"blocksize")
-fftlen=hgetFilePy(file,"fftLength")
+file=hFileOpen(filename)
+hFileSetParameter(file,"help",0)
+hFileSetParameter(file,"SelectedAntennas",[0,1,3])
+hFileSetParameter(file,"Blocksize",512)
+
+print "Selected Antennas=",hFileGetParameter(file,"selectedAntennas")
+
+nAntennas=hFileGetParameter(file,"nofSelectedAntennas")
+blocksize=hFileGetParameter(file,"blocksize")
+fftlen=hFileGetParameter(file,"fftLength")
 timedata=FloatVec()
 timedata.resize(blocksize)
-hReadFile(file,"Time",timedata)
+hFileRead(file,"Time",timedata)
 frequencydata=FloatVec()
 frequencydata.resize(fftlen)
-hReadFile(file,"Frequency",frequencydata)
+hFileRead(file,"Frequency",frequencydata)
 fxdata=FloatVec()
 fxdata.resize(blocksize*nAntennas)
-hReadFile(file,"Fx",fxdata)
+hFileRead(file,"Fx",fxdata)
 voltagedata=FloatVec()
 voltagedata.resize(blocksize*nAntennas)
-hReadFile(file,"Voltage",voltagedata)
+hFileRead(file,"Voltage",voltagedata)
 fftdata=ComplexVec()
 fftdata.resize(fftlen*nAntennas)
-hReadFile(file,"FFT",fftdata)
+hFileRead(file,"FFT",fftdata)
+
+antennaIDs=hFileGetParameter(file,"AntennaIDs")
+print "Antenna IDs=",antennaIDs
+
+if obsname=='LOPES':
+    antennapositions=hCalTable("~/LOFAR/usg/data/lopes/LOPES-CalTable","Position",obsdate,list(antennaIDs))
+    print "Antenna positions from LOPES caltable=",antennapositions
+else:
+    print "Not caltables for non-LOPES files."
 
 
-print hgetFilePy(file,"selectedAntennas")

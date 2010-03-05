@@ -1,7 +1,8 @@
 #
 #rm $LOFARSOFT/build/cr/implement/Pypeline/hftools.awk.cc 
-echo TEMPORARY BUG FIX: make rebuild_cache - Remove when fixed for good
+#echo TEMPORARY BUG FIX: make rebuild_cache - Remove when fixed for good
 cd $LOFARSOFT/build/cr
 make rebuild_cache
+#rm $LOFARSOFT/build/cr/implement/Pypeline/hftools.*
 make hftools
 make install

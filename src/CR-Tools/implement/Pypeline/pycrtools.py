@@ -112,3 +112,33 @@ for v in hNumericalVectorTypes:
     for s in ["hAbs","hConvert","hMul","hDiv","hSub","hAdd","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hMulAddConv","hDivAddConv","hSubAddConv","hAddAddConv","hiMul","hiDiv","hiSub","hiAdd","hCos","hCosh","hExp","hLog","hLog10","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hSortMedian","hMedian","hFindLowerBound"]:
         setattr(v,s[1:].lower(),eval(s))
 
+#------------------------------------------------------------------------
+# cr DataReader Class
+#------------------------------------------------------------------------
+
+class crfile():
+    """
+    This is a simple class to interface with the LOFAR CRTOOLS
+    datareader class. MORE DESCRIPTION ...
+    """
+    def __init__(self,filename):
+#        print "Opening File=",filename
+        self.iptr = hFileOpen(filename)
+        self.filename=filename
+    def __del__(self):
+        self.close()
+    def __repr__(self):
+        return "crfile<"+self.filename+">"
+    def close(self):
+        print "Closing File=",self.filename
+        hFileClose(self.iptr)
+        self.iptr=0
+    def read(self,key,vec):
+        hFileRead(self.iptr,key,vec)
+        return vec
+    def set(self,key,val):
+        hFileSetParameter(self.iptr,key,val)
+        return self
+    def get(self,key):
+        return hFileGetParameter(self.iptr,key)
+        

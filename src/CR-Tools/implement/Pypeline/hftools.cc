@@ -129,9 +129,73 @@ vector<uint> PyList2STLuIntVec(PyObject* pyob){
   return vec;
 }
 
+template <class S, class T>
+void aipscol2stlvec(casa::Matrix<S> &data, std::vector<T>& stlvec, const HInteger col){
+    HInteger i,nrow,ncol;
+
+    nrow=data.nrow();
+    ncol=data.ncolumn();
+    //    if (ncol>1) {MSG("aipscol2stlvec: ncol="<<ncol <<" (nrow="<<nrow<<")");};
+    if (col>=ncol) {
+	ERROR("aipscol2stlvec: column number col=" << col << " is larger than total number of columns (" << ncol << ") in matrix.");
+	stlvec.clear();
+	return;
+    }
+
+    stlvec.resize(nrow);
+    CasaVector<S> CASAVec = data.column(col);
+
+//    p=stlvec.begin();
+
+    for (i=0;i<nrow;i++) {
+//	*p=hfcast<T>(CASAVec[i]);
+	stlvec[i]=hfcast<T>(CASAVec[i]);
+//	p++;
+    };
+}
+
+/*!
+  \brief The function converts an aips++ vector to an stl vector
+ */
+
+template <class S, class T>
+void aipsvec2stlvec(CasaVector<S>& data, std::vector<T>& stlvec){
+    HInteger i,n;
+//    std::vector<R>::iterator p;
+
+    n=data.size();
+    stlvec.resize(n);
+//    p=stlvec.begin();
+    for (i=0;i<n;i++) {
+//	*p=hfcast<T>(data[i]);
+	stlvec[i]=hfcast<T>(data[i]);
+//	++p;
+    };
+}
+
+
+//This function is copied from hfget.cc since I don't know a better
+//way to do a proper instantiation of a templated function across two
+//cpp files ..
+template <class T, class S>
+void copycast_vec(std::vector<T> &vi, std::vector<S> & vo) {
+  typedef typename std::vector<T>::iterator Tit;
+  typedef typename std::vector<S>::iterator Sit;
+  Tit it1=vi.begin();
+  Tit end=vi.end();
+  if (it1==end) {vo.clear();}
+  else {
+    vo.assign(vi.size(),hfnull<S>()); //make the new vector equal in size and initialize with proper Null values
+    Sit it2=vo.begin();
+    while (it1!=end) {
+      *it2=hfcast<S>(*it1);
+      it1++; it2++;
+    };
+  };
+}
 
 //========================================================================
-//                        Matrix Class
+//                        Matrix Class !!!!!IGNORE!!!!!
 //========================================================================
 
 // Testing a simple Matrix class that is built upon std::vectors
@@ -912,11 +976,12 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
  $PARDOCSTRING
 */
 template <class Iter>
-HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
+void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 {
   HNumber norm=hNorm(vec,vec_end);
   Iter it=vec;
   while (it!=vec_end) {*it=(*it)/norm; ++it;};
+
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1570,7 +1635,7 @@ HNumber HFPP_FUNC_NAME (
 */
 
 template <class Iter>
-HNumber HFPP_FUNC_NAME (
+void HFPP_FUNC_NAME (
 			const Iter antPositions,
 			const Iter antPositions_end,
 			const Iter skyPositions,
@@ -1630,7 +1695,7 @@ HNumber HFPP_FUNC_NAME (
 */
 
 template <class Iter>
-HNumber HFPP_FUNC_NAME (
+void HFPP_FUNC_NAME (
 			const Iter frequencies,
 			const Iter frequencies_end,
 			const Iter antPositions,
@@ -1700,7 +1765,7 @@ HNumber HFPP_FUNC_NAME (
 */
 
 template <class Iter, class CIter>
-HNumber HFPP_FUNC_NAME (
+void HFPP_FUNC_NAME (
 			const Iter frequencies,
 			const Iter frequencies_end,
 			const Iter antPositions,
@@ -1995,30 +2060,41 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end){
 //                             I/O Functions
 //========================================================================
 
+//$DOCSTRING: Function to close a file with a datareader object providing the pointer to the object as an integer.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFileClose
 //------------------------------------------------------------------------
-//#define HFPP_FUNC_NAME hCloseFile
-//------------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HIntPointer)(iptr)()("Pointer to a DataReader object, stored as an integer.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
 /*!
-  \brief Function to close a file with a datareader object providing the pointer to the object as an integer.
-
-  \param iptr: Pointer to a DataReader object, stored as an integer.
+ \brief $DOCSTRING
+ $PARDOCSTRING
 */
-void hCloseFile(HIntPointer iptr) {
+
+void HFPP_FUNC_NAME(HIntPointer iptr) {
   union{void* ptr; CR::DataReader* drp;};
   ptr=IntAsPtr(iptr);
   if (ptr!=Null_p) delete drp;
 }
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+
+//$DOCSTRING: Function to open a file based on a filename and returning a pointer to a datareader object as an integer
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFileOpen
 //------------------------------------------------------------------------
-//#define HFPP_FUNC_NAME hOpenFile
-//------------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNCDEF  (HIntPointer)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HString)(Filename)()("Filename of file to opwn including full directory name")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
 /*!
-  \brief Function to open a file based on a filename and returning a pointer to a datareader object as an integer.
-
-  \param filename: Full name of the file to be opened.
+ \brief $DOCSTRING
+ $PARDOCSTRING
 */
 
-HIntPointer hOpenFile(HString Filename) {
+HIntPointer HFPP_FUNC_NAME(HString Filename) {
 
   bool opened;
   union{HIntPointer iptr; void* ptr; CR::DataReader* drp; CR::LOFAR_TBB* tbb; CR::LopesEventIn* lep;};
@@ -2029,151 +2105,29 @@ HIntPointer hOpenFile(HString Filename) {
   if (Filetype=="LOPESEvent") {
     lep = new CR::LopesEventIn;
     opened=lep->attachFile(Filename);
-    cout << "File="<<Filename << endl; lep->summary();
+    MSG("Opening LOPES File="<<Filename); lep->summary();
   } else if (Filetype=="LOFAR_TBB") {
     tbb = new CR::LOFAR_TBB(Filename,1024);
     opened=tbb!=NULL;
-    MSG("Opening File="<<Filename);tbb->summary();
-    /*    if (opened) {
-      CasaVector<int> OffsetsCasa = tbb->sample_offset();
-      aipsvec2stlvec(OffsetsCasa, Offsets);
-      };
-    */
+    MSG("Opening LOFAR File="<<Filename);tbb->summary();
   } else {
-    ERROR("DataFunc_CR_dataReaderObject: Unknown Filetype = " << Filetype  << ", Filename=" << Filename);
+    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Unknown Filetype = " << Filetype  << ", Filename=" << Filename);
     opened=false;
   }
 
   if (!opened){
-    ERROR("DataFunc_CR_dataReaderObject: Opening file " << Filename << " failed.");
+    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Opening file " << Filename << " failed.");
     return PtrAsInt(Null_p);
   };
 
-  //Read the data Header, containing important information about the file (e.g. size)
-  //CasaRecord hdr=drp->headerRecord();
-  //uint i,nfields=hdr.nfields();
-  //  for (i=0; i<nfields; i++) MSG("hdr name="<<hdr.name(i) << " type="<<hdr.dataType(i));
-
   return iptr;
 }
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //------------------------------------------------------------------------
-template <class S, class T>
-void aipscol2stlvec(casa::Matrix<S> &data, std::vector<T>& stlvec, const HInteger col){
-    HInteger i,nrow,ncol;
-
-    nrow=data.nrow();
-    ncol=data.ncolumn();
-    //    if (ncol>1) {MSG("aipscol2stlvec: ncol="<<ncol <<" (nrow="<<nrow<<")");};
-    if (col>=ncol) {
-	ERROR("aipscol2stlvec: column number col=" << col << " is larger than total number of columns (" << ncol << ") in matrix.");
-	stlvec.clear();
-	return;
-    }
-
-    stlvec.resize(nrow);
-    CasaVector<S> CASAVec = data.column(col);
-
-//    p=stlvec.begin();
-
-    for (i=0;i<nrow;i++) {
-//	*p=hfcast<T>(CASAVec[i]);
-	stlvec[i]=hfcast<T>(CASAVec[i]);
-//	p++;
-    };
-}
-
-/*!
-  \brief The function converts an aips++ vector to an stl vector
- */
-
-template <class S, class T>
-void aipsvec2stlvec(CasaVector<S>& data, std::vector<T>& stlvec){
-    HInteger i,n;
-//    std::vector<R>::iterator p;
-
-    n=data.size();
-    stlvec.resize(n);
-//    p=stlvec.begin();
-    for (i=0;i<n;i++) {
-//	*p=hfcast<T>(data[i]);
-	stlvec[i]=hfcast<T>(data[i]);
-//	++p;
-    };
-}
-
-
-//This function is copied from hfget.cc since I don't know a better
-//way to do a proper instantiation of a templated function across two
-//cpp files ..
-template <class T, class S>
-void copycast_vec(std::vector<T> &vi, std::vector<S> & vo) {
-  typedef typename std::vector<T>::iterator Tit;
-  typedef typename std::vector<S>::iterator Sit;
-  Tit it1=vi.begin();
-  Tit end=vi.end();
-  if (it1==end) {vo.clear();}
-  else {
-    vo.assign(vi.size(),hfnull<S>()); //make the new vector equal in size and initialize with proper Null values
-    Sit it2=vo.begin();
-    while (it1!=end) {
-      *it2=hfcast<S>(*it1);
-      it1++; it2++;
-    };
-  };
-}
-
-//$DOCSTRING: Get the value of a metadata keyword from the header
-//$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hgetFileHeaderTyped
-//-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
-#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES HFPP_LOGICAL_TYPES //HFPP_STRING_TYPES
-#define HFPP_FUNCDEF  (HFPP_TEMPLATED)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HIntPointer)(iptr)()("Integer containing pointer to the datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_1 (HString)(keyword)()("Keyword ro be read out from the file header")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_2 (HFPP_TEMPLATED)(result)()("Variable whose type simply specifies the type to be returned")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)//(HFPP_PASS_AS_REFERENCE)
-//$COPY_TO END --------------------------------------------------
-/*!
- \brief $DOCSTRING
- $PARDOCSTRING
-*/
-template <class T>
-T HFPP_FUNC_NAME(HIntPointer iptr, HString key, T result)
-{
-  DataReader *drp(reinterpret_cast<DataReader*>(iptr));
-  drp->headerRecord().get(key,result);
-  return result;
-}
-//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
-
-//$DOCSTRING: Get the value of a metadata keyword from the header
-//$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hgetFileHeaderString
-//-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES HFPP_NONE
-#define HFPP_FUNCDEF  (HString)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HIntPointer)(iptr)()("Integer containing pointer to the datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_1 (HString)(keyword)()("Keyword ro be read out from the file header")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-//$COPY_TO END --------------------------------------------------
-/*!
- \brief $DOCSTRING
- $PARDOCSTRING
-*/
-HString HFPP_FUNC_NAME(HIntPointer iptr, HString key)
-{
-  casa::String casastr;
-  DataReader *drp(reinterpret_cast<DataReader*>(iptr));
-  drp->headerRecord().get(key,casastr);
-  return (HString) casastr;
-}
-//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
-
 //$DOCSTRING: Return information from a data file as a Python object
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hgetFilePy
+#define HFPP_FUNC_NAME hFileGetParameter
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_FUNCDEF  (HPyObject)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2187,19 +2141,19 @@ HString HFPP_FUNC_NAME(HIntPointer iptr, HString key)
 HPyObject HFPP_FUNC_NAME(HIntPointer iptr, HString key)
 {
   DataReader *drp(reinterpret_cast<DataReader*>(iptr));
-#define HFPP_REPEAT(TYPE,KEY)  if (key== #KEY) {TYPE result(drp->KEY ()); HPyObject pyob(result); return pyob;} else
-  HFPP_REPEAT(uint,nofAntennas)
-    HFPP_REPEAT(uint,nofSelectedChannels)
-    HFPP_REPEAT(uint,nofSelectedAntennas)
-    HFPP_REPEAT(uint,nofBaselines)
-    HFPP_REPEAT(uint,block)
-    HFPP_REPEAT(uint,blocksize)
-    HFPP_REPEAT(uint,stride)
-    HFPP_REPEAT(uint,fftLength)
-    HFPP_REPEAT(uint,nyquistZone)
-    HFPP_REPEAT(double,sampleInterval)
-    HFPP_REPEAT(double,referenceTime)
-    HFPP_REPEAT(double,sampleFrequency)
+#define HFPP_REPEAT(TYPE,TYPE2,KEY)  if (key== #KEY) {TYPE result(drp->KEY ()); HPyObject pyob((TYPE2)result); return pyob;} else
+  HFPP_REPEAT(uint,uint,nofAntennas)
+    HFPP_REPEAT(uint,uint,nofSelectedChannels)
+    HFPP_REPEAT(uint,uint,nofSelectedAntennas)
+    HFPP_REPEAT(uint,uint,nofBaselines)
+    HFPP_REPEAT(uint,uint,block)
+    HFPP_REPEAT(uint,uint,blocksize)
+    HFPP_REPEAT(uint,uint,stride)
+    HFPP_REPEAT(uint,uint,fftLength)
+    HFPP_REPEAT(uint,uint,nyquistZone)
+    HFPP_REPEAT(double,double,sampleInterval)
+    HFPP_REPEAT(double,double,referenceTime)
+    HFPP_REPEAT(double,double,sampleFrequency)
 #undef HFPP_REPEAT
 #define HFPP_REPEAT(TYPE,TYPE2,KEY) if (key== #KEY) {CasaVector<TYPE> casavec(drp->KEY ()); std::vector<TYPE2> result; aipsvec2stlvec(casavec,result); HPyObject pyob(result); return pyob;} else
     HFPP_REPEAT(uint,HInteger,antennas)
@@ -2209,23 +2163,35 @@ HPyObject HFPP_FUNC_NAME(HIntPointer iptr, HString key)
     HFPP_REPEAT(double,HNumber,increment)
     HFPP_REPEAT(double,HNumber,frequencyValues)
     HFPP_REPEAT(double,HNumber,frequencyRange)
-    #undef HFPP_REPEAT
-    { HString result; result = result
-#define HFPP_REPEAT(TYPE,KEY)  + #KEY + ", "
-  HFPP_REPEAT(uint,nofAntennas)
-    HFPP_REPEAT(uint,nofSelectedChannels)
-    HFPP_REPEAT(uint,nofSelectedAntennas)
-    HFPP_REPEAT(uint,nofBaselines)
-    HFPP_REPEAT(uint,block)
-    HFPP_REPEAT(uint,blocksize)
-    HFPP_REPEAT(uint,stride)
-    HFPP_REPEAT(uint,fftLength)
-    HFPP_REPEAT(uint,nyquistZone)
-    HFPP_REPEAT(double,sampleInterval)
-    HFPP_REPEAT(double,referenceTime)
-    HFPP_REPEAT(double,sampleFrequency)
 #undef HFPP_REPEAT
+#define HFPP_REPEAT(TYPE,TYPE2,KEY)  if (key== #KEY) {TYPE result;  drp->headerRecord().get(key,result); HPyObject pyob((TYPE2)result); return pyob;} else
+      HFPP_REPEAT(uint,uint,Date)
+	HFPP_REPEAT(casa::String,HString,Observatory)
+	HFPP_REPEAT(int,int,Filesize)
+	HFPP_REPEAT(double,double,dDate)
+	HFPP_REPEAT(int,int,presync)
+	HFPP_REPEAT(int,int,TL)
+	HFPP_REPEAT(int,int,LTL)
+	HFPP_REPEAT(int,int,EventClass)
+	HFPP_REPEAT(casa::uChar,uint,SampleFreq)
+	HFPP_REPEAT(uint,uint,StartSample)
+#undef HFPP_REPEAT
+	if (key== "AntennaIDs") {CasaVector<int> casavec; drp->headerRecord().get(key,casavec); std::vector<int> result; aipsvec2stlvec(casavec,result); HPyObject pyob(result); return pyob;} else
+    { HString result; result = result
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  + #KEY + ", "
+  HFPP_REPEAT(uint,uint,nofAntennas)
+    HFPP_REPEAT(uint,uint,nofSelectedChannels)
+    HFPP_REPEAT(uint,uint,nofSelectedAntennas)
+    HFPP_REPEAT(uint,uint,nofBaselines)
+    HFPP_REPEAT(uint,uint,block)
+    HFPP_REPEAT(uint,uint,blocksize)
+    HFPP_REPEAT(uint,uint,stride)
+    HFPP_REPEAT(uint,uint,fftLength)
+    HFPP_REPEAT(uint,uint,nyquistZone)
+    HFPP_REPEAT(double,double,sampleInterval)
+    HFPP_REPEAT(double,double,referenceTime)
+    HFPP_REPEAT(double,double,sampleFrequency)
+
     HFPP_REPEAT(uint,HInteger,antennas)
     HFPP_REPEAT(uint,HInteger,selectedAntennas)
     HFPP_REPEAT(uint,HInteger,selectedChannels)
@@ -2233,6 +2199,19 @@ HPyObject HFPP_FUNC_NAME(HIntPointer iptr, HString key)
     HFPP_REPEAT(double,HNumber,increment)
     HFPP_REPEAT(double,HNumber,frequencyValues)
     HFPP_REPEAT(double,HNumber,frequencyRange)
+
+      HFPP_REPEAT(uint,uint,Date)
+	HFPP_REPEAT(casa::String,HString,Observatory)
+	HFPP_REPEAT(int,int,Filesize)
+	HFPP_REPEAT(double,double,dDate)
+	HFPP_REPEAT(int,int,presync)
+	HFPP_REPEAT(int,int,TL)
+	HFPP_REPEAT(int,int,LTL)
+	HFPP_REPEAT(int,int,EventClass)
+	HFPP_REPEAT(casa::uChar,uint,SampleFreq)
+	HFPP_REPEAT(uint,uint,StartSample)
+//------------------------------------------------------------------------
+	HFPP_REPEAT(int,int,AntennaIDs)
 #undef HFPP_REPEAT
 		     + "help";
       if (key!="help") cout << "Unknown keyword " << key <<"!"<<endl;
@@ -2246,7 +2225,7 @@ HPyObject HFPP_FUNC_NAME(HIntPointer iptr, HString key)
 
 //$DOCSTRING: Set parameters in a data file with a Python object as input
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hsetFilePy
+#define HFPP_FUNC_NAME hFileSetParameter
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2290,7 +2269,7 @@ void HFPP_FUNC_NAME(HIntPointer iptr, HString key, HPyObjectPtr pyob)
     HFPP_REPEAT(double,PyFloat_AsDouble,ReferenceTime)
     HFPP_REPEAT(double,PyFloat_AsDouble,SampleFrequency)
     HFPP_REPEAT(int,PyInt_AsLong,Shift)
-    HFPP_REPEAT(XX,XX,SelectedAntennas)
+    HFPP_REPEAT(uint,XX,SelectedAntennas)
 #undef HFPP_REPEAT
 		     + "help";
       if (key!="help") cout << "Unknown keyword " << key <<"!"<<endl;
@@ -2303,7 +2282,7 @@ void HFPP_FUNC_NAME(HIntPointer iptr, HString key, HPyObjectPtr pyob)
 
 //$DOCSTRING: Read data from a Datareader object (pointer in iptr) into a vector, where the size should be pre-allocated.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hReadFile
+#define HFPP_FUNC_NAME hFileRead
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2318,8 +2297,8 @@ void HFPP_FUNC_NAME(HIntPointer iptr, HString key, HPyObjectPtr pyob)
 
 Example on how to use this with the Python wrapper
 
-file=hOpenFile("data/lofar/RS307C-readfullsecond.h5")
-file=hOpenFile("/Users/falcke/LOFAR/usg/data/lopes/test.event")
+file=hFileOpen("data/lofar/RS307C-readfullsecond.h5")
+file=hFileOpen("/Users/falcke/LOFAR/usg/data/lopes/test.event")
 
 #offsets=IntVec()
 idata=IntVec()
@@ -2338,14 +2317,16 @@ void HFPP_FUNC_NAME(
 		    )
 {
 
+  //Create a DataReader Pointer from an interger variable
   DataReader *drp=reinterpret_cast<DataReader*>(iptr);
 
-  //First retrieve the pointer to the pointer to the dataRead and check whether it is non-NULL.
+  //Check whether it is non-NULL.
   if (drp==Null_p){
-    ERROR("dataRead: pointer to FileObject is NULL, DataReader not found.");
+    ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": pointer to FileObject is NULL, DataReader not found.");
     return;
   };
 
+  //------TIME------------------------------
   if (Datatype=="Time") {
     if (typeid(vec) == typeid(vector<double>)) {
       std::vector<double> * vec_p;
@@ -2354,27 +2335,18 @@ void HFPP_FUNC_NAME(
     }  else {
       cout << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl;
     };
+  //------FREQUENCY------------------------------
   } else if (Datatype=="Frequency") {
     if (typeid(vec) == typeid(vector<double>)) {
-//       std::vector<double> tmpvec;
-//       STL2CASA_SHARED(double,tmpvec,casavec); //Create casa vector sharing memory with the stl vector
-//       casa::Vector<double> * vec_p;  //Get pointer to casa vector
-//       vec_p=reinterpret_cast<casa::Vector<double>*>(&casavec); //That is just a trick to fool the compiler to
-//                                                               //compile this section for T!=double (even though it is then never used)
-//       *vec_p=drp->frequencyValues(); //read data into the casa and hence also into the stl vector
-//       hConvert(tmpvec,vec);
-//     }  else {   //Input vector is not of the right format
-//       std::vector<double> tmpvec;  //Create temporary stl vector
-//       STL2CASA_SHARED(double,tmpvec,casavec);  //Create casa vector sharing memory with the tmp stl vector
-//       casavec=drp->frequencyValues(); //read data into the casa vector (hence als tmp stl vector)
-//       hConvert(tmpvec,vec); // Copy and convert data from tmp stl (=casa) vector to the output vector.
-//     };
     CasaVector<double> val = drp->frequencyValues();
     aipsvec2stlvec(val,vec);
     }  else {
       cout << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl;
     };
   }
+//..........................................................................................
+//Conversion from aips to stl using shared memory space
+//..........................................................................................
 #define HFPP_REPEAT(TYPESTL,TYPECASA,FIELD)				\
   if (typeid(vec)==typeid(std::vector<TYPESTL>)) {				\
     casa::IPosition shape(2);						\
@@ -2384,11 +2356,16 @@ void HFPP_FUNC_NAME(
   } else {								\
     cout << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl; \
   }
+//..........................................................................................
+
+  //------FX------------------------------
   else if (Datatype=="Fx") {HFPP_REPEAT(HNumber,double,fx);}
+  //------VOLTAGE------------------------------
   else if (Datatype=="Voltage") {HFPP_REPEAT(HNumber,double,voltage);}
-  //  else if (Datatype=="invFFT") {HFPP_REPEAT(HNumber,double,invfft);}
+  //------FFT------------------------------
   else if (Datatype=="FFT") {HFPP_REPEAT(HComplex,CasaComplex,fft);}
-  else if (Datatype=="FFT") {HFPP_REPEAT(HComplex,CasaComplex,calfft);}
+  //------CALFFT------------------------------
+  else if (Datatype=="CalFFT") {HFPP_REPEAT(HComplex,CasaComplex,calfft);}
   else {
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype=" << Datatype << " is unknown.");
     vec.clear();
@@ -2398,7 +2375,52 @@ void HFPP_FUNC_NAME(
 #undef HFPP_REPEAT
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//------------------------------------------------------------------------
+//$DOCSTRING: Return a list of antenna positions from the CalTables - this is a test
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hCalTable
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNCDEF  (HPyObjectPtr)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HString)(filename)()("Filename of the caltable")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HString)(keyword)()("Keyword to be read out from the file metadata (currenly only Position is implemented)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(date)()("Date for which the information is requested")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HPyObjectPtr)(pyob)()("(Python) List  with antenna IDs")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
 
+Example: 
+antennaIDs=hFileGetParameter(file,"AntennaIDs")
+x=hCalTable("~/LOFAR/usg/data/lopes/LOPES-CalTable",obsdate,list(antennaIDs))
+
+*/
+HPyObjectPtr HFPP_FUNC_NAME(HString filename, HString keyword, HInteger date, HPyObjectPtr pyob) {
+  CR::CalTableReader* CTRead = new CR::CalTableReader(filename);
+  HInteger i,ant,size;
+  casa::Vector<Double> tmpvec;
+  HPyObjectPtr list=PyList_New(0),tuple;
+  if (CTRead != NULL && PyList_Check(pyob)) {  //Check if CalTable was opened ... and Python object is a list
+    size=PyList_Size(pyob);
+    for (i=0;i<size;++i){  //loop over all antennas
+      ant=PyInt_AsLong(PyList_GetItem(pyob,i));  //Get the ith element of the list, i.e. the antenna ID
+      CTRead->GetData((uint)date, ant, keyword, &tmpvec);
+      tuple=PyTuple_Pack(3,PyFloat_FromDouble(tmpvec[0]),PyFloat_FromDouble(tmpvec[1]),PyFloat_FromDouble(tmpvec[2]));
+      PyList_Append(list,tuple);
+    };
+  };
+  return list;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+
+
+//========================================================================================
+//OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!
+//OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!
+//========================================================================================
 
 //$DOCSTRING: Read data from a Datareader object (pointer in iptr) into a vector.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -2553,5 +2575,26 @@ void HFPP_FUNC_NAME(std::vector<T> & vec,
   else if (Datatype=="FFT") {aipscol2stlvec(drp->fft(),*vp,0);}
   else if (Datatype=="CalFFT") {aipscol2stlvec(drp->calfft(),*vp,0);}
 */
+
+
+//       std::vector<double> tmpvec;
+//       STL2CASA_SHARED(double,tmpvec,casavec); //Create casa vector sharing memory with the stl vector
+//       casa::Vector<double> * vec_p;  //Get pointer to casa vector
+//       vec_p=reinterpret_cast<casa::Vector<double>*>(&casavec); //That is just a trick to fool the compiler to
+//                                                               //compile this section for T!=double (even though it is then never used)
+//       *vec_p=drp->frequencyValues(); //read data into the casa and hence also into the stl vector
+//       hConvert(tmpvec,vec);
+//     }  else {   //Input vector is not of the right format
+//       std::vector<double> tmpvec;  //Create temporary stl vector
+//       STL2CASA_SHARED(double,tmpvec,casavec);  //Create casa vector sharing memory with the tmp stl vector
+//       casavec=drp->frequencyValues(); //read data into the casa vector (hence als tmp stl vector)
+//       hConvert(tmpvec,vec); // Copy and convert data from tmp stl (=casa) vector to the output vector.
+//     };
+
+
+//========================================================================================
+//OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!
+//OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!OUTDATED!!!
+//========================================================================================
 
 #include <Pypeline/hftools.hpp>

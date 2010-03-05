@@ -81,6 +81,7 @@
 #include "Math/Constants.h"
 #include <Pypeline/hfcommon.h>
 #include <Pypeline/hfppnew.h>
+#include <Calibration/CalTableReader.h>
 
 //========================================================================
 //                    Casting & Conversion Functions
