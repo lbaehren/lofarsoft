@@ -33,7 +33,8 @@ Let's see how we can open a file. First define a filename, e.g.:
 
 """
 LOFARSOFT=os.environ["LOFARSOFT"]
-filename=LOFARSOFT+"/data/lopes/example.event"
+#filename=LOFARSOFT+"/data/lopes/example.event"
+filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 """
 > '/Users/falcke/LOFAR/usg/data/lopes/sample.event'
 
