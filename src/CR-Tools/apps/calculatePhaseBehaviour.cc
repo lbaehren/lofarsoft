@@ -820,6 +820,10 @@ void plotPhase (Vector<double> frequencies,
     ymax = max(phases) * 1.05;
 
 
+    // fixed plot range
+    ymin = -260;
+    ymax = 260;
+
     // create the plot filename
     string plotfilename = PlotPrefix + ".ps";
 
@@ -834,7 +838,8 @@ void plotPhase (Vector<double> frequencies,
     plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
     // Add labels
-    plotter.AddLabels("Frequency [MHz]", "Phase [degree]",label);
+    //plotter.AddLabels("Frequency [MHz]", "Phase [degree]",label);
+    plotter.AddLabels("Frequency [MHz]", "Phase [degree]");
 
     // Plot phases
     plotter.PlotLine(frequencies,phases,color,1);
@@ -889,6 +894,10 @@ void plotDelay (Vector<double> frequencies,
     // find the minimal and maximal y values for the plot and take 105% to have some space
     ymin = min(delay) * 1.05;
     ymax = max(delay) * 1.05;
+    
+    // fixed plot range
+    ymin = -380;
+    ymax = 320;
 
 
     // create the plot filename
@@ -905,7 +914,8 @@ void plotDelay (Vector<double> frequencies,
     plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
     // Add labels
-    plotter.AddLabels("Frequency [MHz]", "Delay [ns]",label);
+    //plotter.AddLabels("Frequency [MHz]", "Delay [ns]",label);
+    plotter.AddLabels("Frequency [MHz]", "Delay [ns]");
 
     // Plot phases
     plotter.PlotLine(frequencies,delay,color,1);
@@ -1357,6 +1367,13 @@ void readPhaseFile(const string &filename, const double approxDelay)
     for (unsigned int i = 0; i < phases.size(); i++)
     {
       phases[i] = reducePhase(phases[i] + delay*frequencies[i] * 360);
+      // hack for plot
+      if (frequencies[i] < 46e6)
+        if (phases[i]<-50)
+          phases[i] += 360;
+      if (frequencies[i] > 70e6)
+        if (phases[i]>100)
+          phases[i] -= 360;
     }
 
     // create plot prefix
@@ -1371,7 +1388,8 @@ void readPhaseFile(const string &filename, const double approxDelay)
 
     // plot data
     plotPhase(frequencies, phases, plotPrefix);
-    plotDelay(frequencies, calcGroupDelay(frequencies, phases), plotPrefix, groupdelay);
+    //plotDelay(frequencies, calcGroupDelay(frequencies, phases), plotPrefix, groupdelay);
+    plotDelay(frequencies, groupdelay, plotPrefix);
 
     if (false) 	// give additional output if desired
     {
