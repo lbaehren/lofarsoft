@@ -21,9 +21,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/*!
-  HFTOOLS Version 0.1 - Tools to manipulate vectors and generate
-  wrappers for python
+/*! 
+ HFTOOLS Version 0.2 - Basic algorithms for the CR pipeline with
+  automatic wrapper generation for python.  Includes various tools to
+  manipulate stl vectors in python and wrapper function for CR Tool classes.
 */
 #include <memory>
 
@@ -32,8 +33,6 @@ using namespace std;
 
 #undef HFPP_VERBOSE
 #include "hftools.h"
-
-//#include "htest.cc"
 
 
 //Some definitions needed for the preprosessor programming:
@@ -50,6 +49,89 @@ using namespace std;
 //-----------------------
 #define HFPP_FILETYPE CC
 //-----------------------
+
+//HFDOCSTART: Marks begin of file hftools.doc.cc which is being read by doxygen--------------
+
+/*!
+ HFTOOLS Version 0.2 - Basic algorithms for the CR pipeline with
+  automatic wrapper generation for python.  Includes various tools to
+  manipulate stl vectors in python and wrapper function for CR Tool classes.
+
+Here is an alphabetic list of some of the functions that are available.
+
+funcGaussian(x, sigma, mu)          - Implementation of the Gauss function
+hAdd(vec1, val, vec2)               - Performs a Add between the vector and a scalar, where the result is returned in the second vector.
+hAdd(vec1, vec2, vec3)              - Performs a Add between the two vectors, which is returned in the third vector.
+hAddAdd(vec1, vec2, vec3)           - Performs a Add between the two vectors, and adds the result to the output (third) vector.
+hAddAddConv(vec1, vec2, vec3)       - Performs a Add between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+hCalTable(filename, keyword, date, pyob) - Return a list of antenna positions from the CalTables - this is a test
+hConvert(vec1, vec2)                - Copies and converts a vector to a vector of another type.
+hCopy(vec, outvec)                  - Copies a vector to another one.
+hDiv(vec1, val, vec2)               - Performs a Div between the vector and a scalar, where the result is returned in the second vector.
+hDiv(vec1, vec2, vec3)              - Performs a Div between the two vectors, which is returned in the third vector.
+hDivAdd(vec1, vec2, vec3)           - Performs a Div between the two vectors, and adds the result to the output (third) vector.
+hDivAddConv(vec1, vec2, vec3)       - Performs a Div between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+hDownsample(vec, downsample_factor) - Downsample the input vector by a cetain factor and return a new vector
+hDownsample(vec1, vec2)             - Downsample the input vector to a smaller output vector.
+hFileClose(iptr)                    - Function to close a file with a datareader object providing the pointer to the object as an integer.
+hFileGetParameter(iptr, keyword)    - Return information from a data file as a Python object
+hFileOpen(Filename)                 - Function to open a file based on a filename and returning a pointer to a datareader object as an integer
+hFileRead(iptr, Datatype, vec)      - Read data from a Datareader object (pointer in iptr) into a vector, where the size should be pre-allocated.
+hFileSetParameter(iptr, keyword, pyob) - Set parameters in a data file with a Python object as input
+hFill(vec, fill_value)              - Fills a vector with a constant value.
+hFindGreaterEqual(vec, threshold, vecout) - Find the samples that are GreaterEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindGreaterEqualAbs(vec, threshold, vecout) - Find the samples whose absolute values are GreaterEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindGreaterThan(vec, threshold, vecout) - Find the samples that are GreaterThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindGreaterThanAbs(vec, threshold, vecout) - Find the samples whose absolute values are GreaterThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindLessEqual(vec, threshold, vecout) - Find the samples that are LessEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindLessEqualAbs(vec, threshold, vecout) - Find the samples whose absolute values are LessEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindLessThan(vec, threshold, vecout) - Find the samples that are LessThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindLessThanAbs(vec, threshold, vecout) - Find the samples whose absolute values are LessThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindLowerBound(vec, value)         - Finds the location (i.e., returns integer) in a monotonically increasing vector, where the input search value is just above or equal to the value in the vector.
+hFlatWeights(wlen)                  - Returns vector of weights of length len with constant weights normalized to give a sum of unity. Can be used by hRunningAverageT.
+hGaussianWeights(wlen)              - Returns vector of weights of length wlen with Gaussian distribution centered at len/2 and sigma=len/4 (i.e. the Gaussian extends over 2 sigma in both directions).
+hGeometricDelayFarField(antPosition, skyDirection, length) - Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located in a certain direction in farfield (based on L. Bahren)
+hGeometricDelayNearField(antPosition, skyPosition, distance) - Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located at a certain 3D space coordinate in nearfield (based on L. Bahren)
+hGeometricDelays(antPositions, skyPositions, delays, farfield) - Calculates the time delay in seconds for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field
+hGeometricPhases(frequencies, antPositions, skyPositions, phases, farfield) - Calculates the phase gradients for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field and for different frequencies.
+hGeometricWeights(frequencies, antPositions, skyPositions, weights, farfield) - Calculates the phase gradients as complex weights for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field and for different frequencies.
+hLinearWeights(wlen)                - Returns vector of weights of length wlen with linearly rising and decreasing weights centered at len/2.
+hMean(vec)                          - Returns the mean value of all elements in a vector
+hMedian(vec)                        - Returns the median value of the elements
+hMul(vec1, val, vec2)               - Performs a Mul between the vector and a scalar, where the result is returned in the second vector.
+hMul(vec1, vec2, vec3)              - Performs a Mul between the two vectors, which is returned in the third vector.
+hMulAdd(vec1, vec2, vec3)           - Performs a Mul between the two vectors, and adds the result to the output (third) vector.
+hMulAddConv(vec1, vec2, vec3)       - Performs a Mul between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+hNegate(vec)                        - Multiplies each element in the vector with -1 in place, i.e. the input vector is also the output vector.
+hNew(vec)                           - Make and return a new vector of the same size and type as the input vector
+hNorm(vec)                          - Returns the lengths or norm of a vector (i.e. Sqrt(Sum_i(xi*+2)))
+hNormalize(vec)                     - Normalizes a vector to length unity
+hPhase(frequency, time)             - Returns the interferometer phase in radians for a given frequency and time
+hReadFileOld(vec, iptr, Datatype, Antenna, Blocksize, Block, Stride, Shift) - Read data from a Datareader object (pointer in iptr) into a vector.
+hRunningAverage(idata, odata, weights) - Calculate the running average of an input vector using a weight vector.
+hRunningAverage(idata, odata, wlen, wtype) - Overloaded function to automatically calculate weights.
+hSort(vec)                          - Sorts a vector in place
+hSortMedian(vec)                    - Sorts a vector in place and returns the median value of the elements
+hSpectralPower(vec, outvec)         - Calculates the power of a complex spectrum and add it to an output vector.
+hStdDev(vec)                        - Calculates the standard deviation of a vector of values
+hStdDev(vec, mean)                  - Calculates the standard deviation around a mean value.
+hSub(vec1, val, vec2)               - Performs a Sub between the vector and a scalar, where the result is returned in the second vector.
+hSub(vec1, vec2, vec3)              - Performs a Sub between the two vectors, which is returned in the third vector.
+hSubAdd(vec1, vec2, vec3)           - Performs a Sub between the two vectors, and adds the result to the output (third) vector.
+hSubAddConv(vec1, vec2, vec3)       - Performs a Sub between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+hSum(vec)                           - Performs a sum over the values in a vector and returns the value
+hWeights(wlen, wtype)               - Create a normalized weight vector.
+hiAdd(vec1, val)                    - Performs a Add between the vector and a scalar (applied to each element), which is returned in the first vector.
+hiAdd(vec1, vec2)                   - Performs a Add between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
+hiDiv(vec1, val)                    - Performs a Div between the vector and a scalar (applied to each element), which is returned in the first vector.
+hiDiv(vec1, vec2)                   - Performs a Div between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
+hiMul(vec1, val)                    - Performs a Mul between the vector and a scalar (applied to each element), which is returned in the first vector.
+hiMul(vec1, vec2)                   - Performs a Mul between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
+hiSub(vec1, val)                    - Performs a Sub between the vector and a scalar (applied to each element), which is returned in the first vector.
+hiSub(vec1, vec2)                   - Performs a Sub between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
+square(val)                         - Returns the squared value of the parameter
+
+*/
 
 
 //========================================================================
