@@ -195,10 +195,15 @@ if (NOT USG_CMAKE_CONFIG)
     ${USG_ROOT}/data/test
     )
   
-  find_file (dataset_tbb_raw rw_20071024_090656_0101.dat rw_20071024_090656_0102.dat
+  find_file (dataset_tbb_raw
+    NAMES
+    triggered-pulse-2010-02-11-TBB1.h5
+    rw_20071024_090656_0101.dat
+    rw_20071024_090656_0102.dat
     PATHS
     ${USG_ROOT}/data
     ${USG_ROOT}/data/test
+    ${USG_ROOT}/data/lofar/trigger-2010-02-11
     )
 
   ## Beam-formed data
