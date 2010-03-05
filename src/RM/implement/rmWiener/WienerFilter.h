@@ -5,10 +5,12 @@
 #include <string>
 #include <vector>
 // IT++ header files
+#ifdef HAVE_ITPP
 #include <itpp/itbase.h>
 #include <itpp/itcomm.h>
+#endif
 // RM header files
-#include "rmnoise.h"
+#include "rmNoise.h"
 
 using namespace std;
 using namespace itpp;
