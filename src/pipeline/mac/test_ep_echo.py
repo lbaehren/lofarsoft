@@ -27,7 +27,11 @@ class TestReceiveEcho(unittest.TestCase):
 
     def test_ping_time(self):
         self.assertEqual(self.epe.ping_time, self.eee.ping_time)
+
+    def test_seqnr(self):
         self.assertEqual(self.epe.seqnr, self.eee.seqnr)
+
+    def test_long_ping(self):
         self.assertTrue(self.eee.echo_time > self.eee.ping_time)
 
 if __name__ == '__main__':

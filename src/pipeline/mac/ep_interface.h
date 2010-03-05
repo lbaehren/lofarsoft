@@ -27,6 +27,7 @@ public:
     void send_event(GenericEventWrapper* wrapped_event) {
         this->my_EventPort->send(wrapped_event->get_event_ptr());
         }
+    ~EP_Interface() { delete this->my_EventPort; }
 };
 
 #endif
