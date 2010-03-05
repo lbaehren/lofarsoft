@@ -2,7 +2,7 @@
 #include <iostream>				// C++/STL iostream
 #include <fstream>				// file stream I/O
 #include "dalFITS.h"
-#include "rmio.h"
+#include "rmIO.h"
 
 using namespace std;
 
