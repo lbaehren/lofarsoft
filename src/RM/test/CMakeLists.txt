@@ -5,11 +5,11 @@
 file (GLOB rm_tests *.cc *.cpp)
 
 if (NOT HAVE_ITPP)
-  list (REMOVE_item rm_tests trmnoise.cpp)
+  list (REMOVE_ITEM rm_tests trmnoise.cpp)
 endif (NOT HAVE_ITPP)
 
 if (NOT HAVE_FFTW3)
-  list (REMOVE_item rm_tests tPreshift.cpp)
+  list (REMOVE_ITEM rm_tests tPreshift.cpp)
 endif (NOT HAVE_FFTW3)
 
 ##__________________________________________________________
