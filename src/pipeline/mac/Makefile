@@ -1,6 +1,7 @@
 LOFARROOT = /home/swinbank/Work/LOFAR
 
-MACSRC    = $(LOFARROOT)/MAC/MACIO/src/EventPort.cc $(LOFARROOT)/MAC/MACIO/src/GCF_Event.cc
+MACPRTSRC = $(LOFARROOT)/MAC/MACIO/src/EventPort.cc
+MACEVTSRC = $(LOFARROOT)/MAC/MACIO/src/GCF_Event.cc
 MACINC    = -I$(LOFARROOT)/MAC/MACIO/include
 
 COMMONSRC = $(LOFARROOT)/LCS/Common/src/SymbolTable.cc $(LOFARROOT)/LCS/Common/src/AddressTranslator.cc $(LOFARROOT)/LCS/Common/src/hexdump.cc $(LOFARROOT)/LCS/Common/src/SystemUtil.cc $(LOFARROOT)/LCS/Common/src/StringUtil.cc $(LOFARROOT)/LCS/Common/src/Backtrace.cc $(LOFARROOT)/LCS/Common/src/Net/Socket.cc $(LOFARROOT)/LCS/Common/src/LofarLogger.cc
@@ -12,8 +13,15 @@ GCFINC    = -I$(LOFARROOT)/MAC/GCF/TM/include
 LOG4CPLUS = -I/data/sys/opt/LofIm/external/log4cplus/builds/log4cplus-1.0.2-3/include -L/data/sys/opt/LofIm/external/log4cplus/builds/log4cplus-1.0.2-3/lib/ -llog4cplus
 BPYTHON   = -I/usr/include/python2.5 -lboost_python -lpython2.5
 
-ep_echo: echo_protocol sb_protocol
-	g++ -fPIC -shared -o ep_echo.so ep_echo.cc eventwrappers.cc Echo_Protocol.cc SB_Protocol.cc -I. $(MACSRC) $(COMMONSRC) $(LOFARCONF) $(COMMONINC) $(MACINC) $(LOG4CPLUS) $(BPYTHON) -lbfd
+OUTPUTDIR = ep
+
+default: ep_interface ep_echo
+
+ep_interface: sb_protocol
+	g++ -fPIC -shared -o $(OUTPUTDIR)/interface/_ep_interface.so ep_interface.cc SB_Protocol.cc -I. $(MACPRTSRC) $(MACEVTSRC) $(COMMONSRC) $(LOFARCONF) $(COMMONINC) $(MACINC) $(LOG4CPLUS) $(BPYTHON) -lbfd
+
+ep_echo: echo_protocol ep_interface
+	g++ -fPIC -shared -o $(OUTPUTDIR)/echo/_ep_echo.so ep_echo.cc eventwrappers.cc Echo_Protocol.cc -I. $(MACEVTSRC) $(COMMONSRC) $(LOFARCONF) $(COMMONINC) $(MACINC) $(LOG4CPLUS) $(BPYTHON) -lbfd
 
 ep_control: controller_protocol sb_protocol
 	g++ -fPIC -shared -o ep_control.so ep_control.cc Controller_Protocol.cc SB_Protocol.cc -I. $(MACSRC) $(COMMONSRC) $(LOFARCONF) $(COMMONINC) $(MACINC) $(APLINC) $(GCFINC) $(LOG4CPLUS) $(BPYTHON) -lbfd
@@ -28,4 +36,4 @@ controller_protocol:
 	autogen -L $(LOFARROOT)/MAC/MACIO/autogen/ $(LOFARROOT)/MAC/APL/APLCommon/src/Controller_Protocol.prot
 
 clean:
-	\rm -f Echo_Protocol.cc SB_Protocol.cc Controller_Protocol.cc Echo_Protocol.ph Controller_Protocol.ph SB_Protocol.ph ep_echo.so ep_control.so
+	\rm -f Echo_Protocol.cc SB_Protocol.cc Controller_Protocol.cc Echo_Protocol.ph Controller_Protocol.ph SB_Protocol.ph ep/interface/_ep_interface.so ep/echo/_ep_echo.so ep_control.so

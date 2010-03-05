@@ -1,20 +1,35 @@
-# Simple test program for ep_echo Python module
-import ep_echo
+import unittest
+import ep.echo
+import time
 
-event_mapping = {
-    ep_echo.ECHO: ep_echo.EchoEchoEvent
-}
+class TestPingEvent(unittest.TestCase):
+    def setUp(self):
+        self.epe = ep.echo.EchoPingEvent()
 
-if __name__ == "__main__":
-    ep_interface = ep_echo.EP_Interface("EchoServer:test", ep_echo.PROTOCOL)
-    ping_event = ep_echo.EchoPingEvent()
-    ep_interface.send_event(ping_event)
-    generic_event = ep_interface.receive_event()
+    def test_init_time(self):
+        self.assertTrue(self.epe.ping_time < time.time())
 
-    my_event = event_mapping[generic_event.signal](generic_event)
+    def test_change_time(self):
+        now = time.time()
+        self.epe.ping_time = now
+        self.assertAlmostEqual(self.epe.ping_time, now, 5)
 
-    # In this test, we only know about echo events
-    if my_event.signal == ep_echo.ECHO:
-        print "Ping time: %f s" % (my_event.echo_time - my_event.ping_time)
-    else:
-        print "Did not receive an echo in reply!"
+    def test_changq_seqnr(self):
+        self.epe.seqnr = 10
+        self.assertEqual(self.epe.seqnr, 10)
+
+class TestReceiveEcho(unittest.TestCase):
+    def setUp(self):
+        interface = ep.echo.EchoPort_Interface()
+        self.epe = ep.echo.EchoPingEvent()
+        interface.send_event(self.epe)
+        self.eee = interface.receive_event()
+
+    def test_ping_time(self):
+        self.assertEqual(self.epe.ping_time, self.eee.ping_time)
+        self.assertEqual(self.epe.seqnr, self.eee.seqnr)
+        self.assertTrue(self.eee.echo_time > self.eee.ping_time)
+
+if __name__ == '__main__':
+    unittest.main()
+

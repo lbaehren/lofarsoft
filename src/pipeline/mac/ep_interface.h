@@ -19,11 +19,10 @@ public:
     EP_Interface(std::string servicename, short protocol_id, std::string host = "") {
         this->my_EventPort = new LOFAR::MACIO::EventPort(servicename, false, protocol_id, host, true);
     }
-    GenericEventWrapper receive_event() {
+    GenericEventWrapper* receive_event() {
         LOFAR::MACIO::GCFEvent* ackPtr;
         ackPtr = my_EventPort->receive();
-        GenericEventWrapper event(ackPtr);
-        return event;
+        return new GenericEventWrapper(ackPtr);
     }
     void send_event(GenericEventWrapper* wrapped_event) {
         this->my_EventPort->send(wrapped_event->get_event_ptr());
