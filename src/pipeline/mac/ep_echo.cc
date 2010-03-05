@@ -21,7 +21,6 @@ GenericEventWrapper EP_Interface::receive_event()
     ackPtr = echoPort->receive();
 //    EchoEchoEventWrapper event(ackPtr);
     GenericEventWrapper event(ackPtr);
-    std::cout << event.get_signal();
     return event;
 }
 
