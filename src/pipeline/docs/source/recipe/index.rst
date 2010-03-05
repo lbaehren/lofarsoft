@@ -147,11 +147,13 @@ LOFAR Extensions
             -c, --config
 
                 The location of the pipeline configuration file. Every recipe
-                must have a configuration file, but it may be empty. If one is
-                not provided by the user, it is inferred from the location of
-                the module::
-
-                  from pipeline import __path__ as config_path
+                must have a configuration file, but it may be empty. If a
+                configuration file is not specified in the inputs to a recipe,
+                one will be search for in (1) the current working directory
+                under the filename ``pipeline.cfg``, (2) the executing user's
+                home directory, as ``~/.pipeline.cfg``. If neither of these
+                exist, the recipe will raise :class:`PipelineException` and
+                exit.
 
                 It is stored in :attr:`~WSRTrecipe.inputs` as
                 ``config``. See the :ref:`config-file` section for details on
@@ -164,7 +166,7 @@ LOFAR Extensions
                 pipeline components to skip parts of their processing for test
                 processes.
 
-            --start-time
+            -st, --start-time
 
                 *Expert use*. Pipeline logs, results, etc are stored according
                 to pipeline start time. This option exists so that the various
