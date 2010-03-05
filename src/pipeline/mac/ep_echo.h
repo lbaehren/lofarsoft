@@ -12,27 +12,6 @@
 #include <sys/time.h>
 #include <iostream>
 
-/*class PythonEvent {
-public:
-//    void send(EP_Interface&);
-    long get_signal();
-    LOFAR::MACIO::GCFEvent* evPtr;
-};
-
-class EchoEvent: public PythonEvent {
-public:
-    EchoEvent(LOFAR::MACIO::GCFEvent*);
-    double get_pt();
-    double get_et();
-};
-
-class PingEvent : public PythonEvent {
-public:
-    PingEvent();
-    double get_pt();
-    PingEvent(const PingEvent&) {};
-};*/
-
 class GenericEventWrapper {
 private:
     LOFAR::MACIO::GCFEvent* my_event;
@@ -87,14 +66,7 @@ public:
     EP_Interface(std::string);
 
     GenericEventWrapper receive_event();
-//    void send_event(const PythonEvent&);
     void send_event(GenericEventWrapper*);
-
-    void send_ping();
-    double time_echo();
 };
-
-
-
 
 #endif
