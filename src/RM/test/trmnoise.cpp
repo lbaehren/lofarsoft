@@ -1,6 +1,6 @@
 
 #include <iostream>
-#include "rmnoise.h"
+#include "rmNoise.h"
 
 using namespace std;
 

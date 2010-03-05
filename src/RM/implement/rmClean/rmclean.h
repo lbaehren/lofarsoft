@@ -8,7 +8,7 @@
 #include <vector>
 #include <complex>
 #include <fftw3.h>
-#include "rmio.h"
+#include "rmIO.h"
 
 using namespace std;
 

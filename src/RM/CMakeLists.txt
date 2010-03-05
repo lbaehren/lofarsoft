@@ -304,6 +304,10 @@ if (HAVE_LIBZ)
   list (APPEND rm_link_libraries ${HAVE_LIBZ})
 endif (HAVE_LIBZ)
 
+if (HAVE_LIBDL)
+  list (APPEND rm_link_libraries ${HAVE_LIBDL})
+endif (HAVE_LIBDL)
+
 ## =============================================================================
 ##
 ##  Configuration for the subdirectories

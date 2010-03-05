@@ -4,7 +4,7 @@
 
 #include <vector>
 #include "rm.h"
-#include "rmio.h"
+#include "rmIO.h"
 
 namespace RM {
   

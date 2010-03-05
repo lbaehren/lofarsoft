@@ -4,8 +4,8 @@
 
 #include <vector>
 #include <complex>	
-#include "rmnoise.h"
-#include "rmio.h"
+#include "rmNoise.h"
+#include "rmIO.h"
 #include "rm.h"
 
 namespace RM {
