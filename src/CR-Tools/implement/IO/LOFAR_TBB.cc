@@ -130,6 +130,9 @@ namespace CR { // Namespace CR -- begin
   //  Parameters
   //
   // ============================================================================
+
+  //_____________________________________________________________________________
+  //                                                                      summary
   
   /*!
     \param os -- Output stream to which the summary is being written.
@@ -140,29 +143,47 @@ namespace CR { // Namespace CR -- begin
 			   bool const &listStationGroups,
 			   bool const &listChannelIDs)
   {
-    os << "[LOFAR_TBB] Summary of object properties" << endl;
+    std::string telescope     ("UNDEFINED");
+    std::string observer      ("UNDEFINED");
+    std::string projectID     ("UNDEFINED");
+    std::string projectTitle  ("UNDEFINED");
+    std::string projectPI     ("UNDEFINED");
+    std::string observationID ("UNDEFINED");
 
-      os << "-- Name of data file .... : " << filename_p            << endl;
-      os << "-- HDF5 file ID ......... : " << location_p              << endl;
+    // Retrieve LOFAR common metadata ______________________
     
-    if (location_p > 0) {
+    if (H5Iis_valid (location_p)) {
       DAL::CommonAttributes attr = commonAttributes();
-      /* Variables describing the dataset itself */
-      os << "-- Telescope            : " << attr.telescope()     << endl;
-      os << "-- Observer             : " << attr.observer()      << endl;
-      os << "-- Project              : " << attr.projectTitle()  << endl;
-      os << "-- Observation ID       : " << attr.observationID() << endl;
-      os << "-- nof. station groups  : " << stationGroups_p.size()      << endl;
-      os << "-- nof. dipole datasets : " << nofDipoleDatasets()  << endl;
-      
-      /* Variables describing the setup of the DataReader */
-      os << "-- blocksize   [samples ] : " << blocksize_p                   << endl;
-      os << "-- FFT length  [channels] : " << DataReader::fftLength()       << endl;
-      os << "-- Sample frequency  [Hz] : " << DataReader::sampleFrequency() << endl;
-      os << "-- Nyquist zone ......... : " << DataReader::nyquistZone()     << endl;
-      
-      /* The rest of the summary output is conditional, because given the number
-	 station it might get quite a lot. */
+      telescope     = attr.telescope();
+      observer      = attr.observer();
+      projectID     = attr.projectID();
+      projectTitle  = attr.projectTitle();
+      projectPI     = attr.projectPI();
+      observationID = attr.observationID();
+    }
+    
+    // Display summary _____________________________________
+
+    os << "[LOFAR_TBB] Summary of object properties" << endl;
+    os << "-- Name of data file      : " << filename_p                    << endl;
+    os << "-- HDF5 file ID           : " << location_p                    << endl;
+    os << "-- blocksize   [samples ] : " << blocksize_p                   << endl;
+    os << "-- FFT length  [channels] : " << DataReader::fftLength()       << endl;
+    os << "-- Sample frequency  [Hz] : " << DataReader::sampleFrequency() << endl;
+    os << "-- Nyquist zone           : " << DataReader::nyquistZone()     << endl;
+    os << "-- Telescope              : " << telescope                     << endl;
+    os << "-- Observer               : " << observer                      << endl;
+    os << "-- Project ID             : " << projectID                     << endl;
+    os << "-- Project title          : " << projectTitle                  << endl;
+    os << "-- Project PI             : " << projectPI                     << endl;
+    os << "-- Observation ID         : " << observationID                 << endl;
+    os << "-- nof. station groups    : " << stationGroups_p.size()        << endl;
+    os << "-- nof. dipole datasets   : " << nofDipoleDatasets()           << endl;
+    os << "-- Channel IDs            : " << channelID_p                   << endl;
+
+    // Summary of underlying structures ____________________
+    
+    if (H5Iis_valid (location_p)) {
       
       if (listChannelIDs) {
 	/* [1] Retrieve the channel IDs */
@@ -184,17 +205,15 @@ namespace CR { // Namespace CR -- begin
   //  Methods
   //
   // ============================================================================
-  
-  // ----------------------------------------------------------------------- init
+
+  //_____________________________________________________________________________
+  //                                                                         init
   
   bool LOFAR_TBB::init ()
   {
-#ifdef DEBUGGING_MESSAGES
-    std::cout << "[LOFAR_TBB::init()]" << std::endl;
-#endif
-    
     bool status (true);
-    
+    uint nofDipoles (0);
+
     /* Check if we are actually connected to a dataset */
     
     if (location_p < 0) {
@@ -205,7 +224,7 @@ namespace CR { // Namespace CR -- begin
     /*
      * Set up the vector collecting the IDs for the individual dipoles
      */
-    uint nofDipoles = TBB_Timeseries::nofDipoleDatasets();
+    nofDipoles = TBB_Timeseries::nofDipoleDatasets();
     channelID_p.resize (nofDipoles);
     
     std::cout << "-- nof dipole datasets = " << nofDipoles << std::endl;
