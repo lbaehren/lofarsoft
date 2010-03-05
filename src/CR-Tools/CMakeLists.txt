@@ -55,10 +55,10 @@ option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES
 ##
 ## ==============================================================================
 
-find_program (awk_executable   gawk awk ${bin_locations} )
-find_program (bash_executable  bash     ${bin_locations} )
-find_program (tar_executable   tar      ${bin_locations} )
-find_program (gzip_executable  gzip     ${bin_locations} )
+find_program (awk_executable   NAMES gawk awk  PATHS ${bin_locations} )
+find_program (bash_executable  NAMES bash      PATHS ${bin_locations} )
+find_program (tar_executable   NAMES tar       PATHS ${bin_locations} )
+find_program (gzip_executable  NAMES gzip      PATHS ${bin_locations} )
 
 ##__________________________________________________________
 ##                                            cr_process_awk
