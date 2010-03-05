@@ -36,7 +36,7 @@ include (CMakeSettings)
 ## Check for the header files
 
 find_path (GSL_INCLUDES gsl_version.h
-  PATHS ${include_locations}
+  PATHS ${include_locations} /data/sys/opt/gsl/gsl-1.13/include
   PATH_SUFFIXES gsl
   NO_DEFAULT_PATH
   )
@@ -52,7 +52,7 @@ set (GSL_LIBRARIES "")
 ## [1] libgsl
 
 find_library (GSL_GSL_LIBRARY gsl
-  PATHS ${lib_locations}
+  PATHS ${lib_locations} /data/sys/opt/gsl/gsl-1.13/lib
   NO_DEFAULT_PATH
   )
 
@@ -63,7 +63,7 @@ endif (GSL_GSL_LIBRARY)
 ## [2] libgslcblas
 
 find_library (GSL_CBLAS_LIBRARY gslcblas
-  PATHS ${lib_locations}
+  PATHS ${lib_locations} /data/sys/opt/gsl/gsl-1.13/lib
   NO_DEFAULT_PATH
   )
 
