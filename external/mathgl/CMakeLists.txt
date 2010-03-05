@@ -90,6 +90,12 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   include (FindOpenGL)
   include (FindQt4)
 
+  ## Extra check for GSL _________________________
+
+  if (NOT GSL_INCLUDES OR NOT GSL_LIBRARIES)
+    set (HAVE_GSL FALSE)
+  endif (NOT GSL_INCLUDES OR NOT GSL_LIBRARIES)
+
   ## Extra check for Qt4 _________________________
   
   if (NOT QT_MOC_EXECUTABLE)
