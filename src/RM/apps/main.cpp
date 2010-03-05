@@ -18,7 +18,7 @@
 
 #include "rm.h"							// RM Synthesis class
 #include "rmCube.h"						// RM Cube class
-#include "dalFITS.h"
+#include "rmFITS.h"
 
 // casa includes (from /usr/local/include/casacore)
 #include <casa/Arrays.h>
@@ -41,7 +41,7 @@
 using namespace std;
 using namespace casa;
 
-using RM::dalFITS;
+using RM::rmFITS;
 using RM::rmCube;
 
 int main (int argc, char * const argv[]) {
@@ -197,7 +197,7 @@ int main (int argc, char * const argv[]) {
       }
     
     
-    dalFITS fitsimage("Leiden_GEETEE_CS1_1.FITS", READONLY);
+    rmFITS fitsimage("Leiden_GEETEE_CS1_1.FITS", READONLY);
     fitsimage.moveAbsoluteHDU(1);
     
     int naxis=0;

@@ -1,7 +1,7 @@
 
 #include <iostream>				// C++/STL iostream
 #include <fstream>				// file stream I/O
-#include "dalFITS.h"
+#include "rmFITS.h"
 #include "rmIO.h"
 
 using namespace std;
@@ -29,10 +29,10 @@ namespace RM {  //  BEGIN -- namespace RM
 	// TODO
 	// use dal to read lambda Squareds and deltaLambdaSquareds from file
       }
-    else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+    else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
       {
 	// TODO
-	// use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+	// use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
       }
     else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
       {
@@ -81,10 +81,10 @@ namespace RM {  //  BEGIN -- namespace RM
 	// TODO
 	// use dal to read lambda Squareds and deltaLambdaSquareds from file
       }
-    else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+    else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
       {
 	// TODO
-	// use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+	// use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
       }
     else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
       {
@@ -140,10 +140,10 @@ void rmIO::readLambdaSquareds(const std::string &filename, vector<double> &lambd
     // TODO
     // use dal to read lambda Squareds and deltaLambdaSquareds from file
   }
-  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
   {
     // TODO
-    // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+    // use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
   }
   else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
   {
@@ -192,10 +192,10 @@ void rmIO::readFrequenciesAndDeltaFrequencies(	const std::string &filename,
     // TODO
     // use dal to read lambda Squareds and deltaLambdaSquareds from file
   }
-  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
   {
     // TODO
-    // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+    // use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
   }
   else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
   {
@@ -256,10 +256,10 @@ void rmIO::readLambdaSquaredsAndDeltaSquareds(	const std::string &filename,
     // TODO
     // use dal to read lambda Squareds and deltaLambdaSquareds from file
   }
-  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
   {
     // TODO
-    // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+    // use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
   }
   else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
   {
@@ -381,10 +381,10 @@ void rmIO::readRMSFfromFile(	vector<complex<double> > &rmsf,
     	// TODO
     	// use dal to read lambda Squareds and deltaLambdaSquareds from file
   	}
-  	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
   	{
     	// TODO
-    	// use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+    	// use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
   	}
   	else if(filename.find(".txt", 1)!=string::npos || filename.find(".dat", 1)!=string::npos)	// if it is text file
   	{
@@ -441,10 +441,10 @@ void rmIO::readRMSFfromFile(	vector<double> &faradaydepths,
     	// TODO
     	// use dal to read lambda Squareds and deltaLambdaSquareds from file
   	}
-  	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
   	{
     	// TODO
-    	// use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+    	// use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
   	}
   	else if(filename.find(".txt", 1)!=string::npos || filename.find(".dat", 1)!=string::npos)	// if it is text file
   	{
@@ -506,10 +506,10 @@ void rmIO::readVectorFromFile(std::vector<double> &v, const std::string &filenam
     	// TODO
     	// use dal to read lambda Squareds and deltaLambdaSquareds from file
   	}
-  	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
   	{
     	// TODO
-    	// use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+    	// use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
   	}
   	else if(filename.find(".txt", 1)!=string::npos || filename.find(".dat", 1)!=string::npos)	// if it is text file
   	{
@@ -557,10 +557,10 @@ void rmIO::read2VectorsFromFile(vector<double> &vec1,
     	// TODO
     	// use dal to read lambda Squareds and deltaLambdaSquareds from file
   	}
-  	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
   	{
     	// TODO
-    	// use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+    	// use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
   	}
   	else if(filename.find(".txt", 1)!=string::npos || filename.find(".dat", 1)!=string::npos)	// if it is text file
   	{
@@ -628,10 +628,10 @@ void rmIO::write2VectorsToFile(const vector<double> &vec1, const vector<double> 
   		// TODO
 		// use dal to read lambda Squareds and deltaLambdaSquareds from file
 	}
-	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
 	{
 		// TODO
-		// use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+		// use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
 	}
 	else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
 	{
@@ -673,10 +673,10 @@ void rmIO::writeRMSFtoFile(const vector<complex<double> > &rmsf, const string &f
   		// TODO
 	   // use dal to read lambda Squareds and deltaLambdaSquareds from file
 	}
-	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
 	{
 		// TODO
-	   // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+	   // use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
 	}
 	else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
 	{
@@ -721,10 +721,10 @@ void rmIO::writeRMSFtoFile(	const vector<double> &faradaydepths,
   		// TODO
 	   // use dal to read lambda Squareds and deltaLambdaSquareds from file
 	}
-	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
 	{
 		// TODO
-	   // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+	   // use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
 	}
 	else if(filename.find(".txt", 1)!=string::npos || filename.find(".dat", 1)!=string::npos)	// if it is text file
 	{
@@ -904,7 +904,7 @@ bool rmIO::checkImageCube(const std::string &filename, int hdu=1)
 	{
   		// TODO
 	}
-	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+	else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
 	{
 		// Open FITS image
 		
@@ -944,9 +944,9 @@ bool rmIO::checkImageCubeQ(const std::string &filename, int hdu=1)
 	{
   		// TODO
 	}
-	else if(filename.find(".fits", 1)!=string::npos || filename.find(".FITS", 1)!=string::npos)	// if FITS file  use dalFITS
+	else if(filename.find(".fits", 1)!=string::npos || filename.find(".FITS", 1)!=string::npos)	// if FITS file  use rmFITS
 	{
-		DAL::dalFITS fitsimage(filename, READONLY);				// create and open dalFITS image object
+		DAL::rmFITS fitsimage(filename, READONLY);				// create and open rmFITS image object
 		
 		if(fitsimage.getImgDim()!=3)							// must have 3 axes
 			throw "rmIO::checkImageCubeQ image cube has wrong dimensions";
@@ -988,9 +988,9 @@ bool rmIO::checkImageCubeU(const std::string &filename, int hdu=1)
 	{
   		// TODO
 	}
-	else if(filename.find(".fits", 1)!=string::npos || filename.find(".FITS", 1)!=string::npos)		// if FITS file  use dalFITS 
+	else if(filename.find(".fits", 1)!=string::npos || filename.find(".FITS", 1)!=string::npos)		// if FITS file  use rmFITS 
 	{
-		DAL::dalFITS fitsimage(filename, READONLY);			// create and open dalFITS image object
+		DAL::rmFITS fitsimage(filename, READONLY);			// create and open rmFITS image object
 
 		if(fitsimage.getImgDim()!=3)			// must have 3 axes
 			throw "rmIO::checkImageCubeU image cube has wrong dimensions";

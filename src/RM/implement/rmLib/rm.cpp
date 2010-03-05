@@ -13,13 +13,14 @@
 #include <assert.h>
 #include <algorithm>				// max_lement
 
-/*
-#include <casa/Arrays.h>			// CASA library functions
+#ifdef HAVE_CASA
+#include <casa/Arrays.h>
 #include <casa/Arrays/Array.h>
 #include <casa/Utilities/DataType.h>
 #include <tables/Tables/TiledFileAccess.h>
 #include <lattices/Lattices/TiledShape.h>
-*/
+#endif
+
 #include "rm.h"					// rm class declarations
 
 using namespace std;
@@ -30,23 +31,16 @@ using namespace std;
 //
 //===============================================================================
 
-/*!
-  \brief Default constructor
-*/
-rm::rm()
+rm::rm ()
 {
   // do nothing in particular
 }
 
 
-/*!
-  \brief rm class destructor
-*/
-
-rm::~rm()
+rm::~rm ()
 { 
   // Free memory? Currently nothing to be done
-//  cout << "rm destructor called" << endl;
+  //  cout << "rm destructor called" << endl;
 }
 
 //===============================================================================
@@ -57,9 +51,9 @@ rm::~rm()
 
 /*!
   \brief Convert from frequencies to lambda squared
-
+  
   \param frequency - frequency vector 
-
+  
   \return lambda_sq - converted lambda squared vector
 */
 //vector<double>rm::freqToLambdaSq(vector<double> &frequency);
@@ -1241,10 +1235,10 @@ vector<double> rm::readFrequencies(const std::string &filename)
     // TODO
     // use dal to read lambda Squareds and deltaLambdaSquareds from file
   }
-  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
   {
     // TODO
-    // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+    // use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
   }
   else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
   {
@@ -1296,10 +1290,10 @@ vector<double> rm::readFrequenciesDiffFrequencies(const std::string &filename, v
     // TODO
     // use dal to read lambda Squareds and deltaLambdaSquareds from file
   }
-  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
   {
     // TODO
-    // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+    // use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
   }
   else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
   {
@@ -1357,10 +1351,10 @@ vector<double> rm::readLambdaSquareds(const std::string &filename)
     // TODO
     // use dal to read lambda Squareds and deltaLambdaSquareds from file
   }
-  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
   {
     // TODO
-    // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+    // use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
   }
   else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
   {
@@ -1412,10 +1406,10 @@ vector<double> rm::readFrequenciesAndDeltaFrequencies(const std::string &filenam
     // TODO
     // use dal to read lambda Squareds and deltaLambdaSquareds from file
   }
-  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
   {
     // TODO
-    // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+    // use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
   }
   else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
   {
@@ -1471,10 +1465,10 @@ vector<double> rm::readLambdaSquaredsAndDeltaSquareds(const std::string &filenam
     // TODO
     // use dal to read lambda Squareds and deltaLambdaSquareds from file
   }
-  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use rmFITS table
   {
     // TODO
-    // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+    // use rmFITSTable to read lambda Squareds and deltaLambdaSquareds from file
   }
   else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
   {

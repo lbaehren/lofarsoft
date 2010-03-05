@@ -1,3 +1,22 @@
+
+#ifndef RM_H
+#define RM_H
+
+#include <vector>
+#include <iostream>			// streamed input output for rm cubes
+#include <complex>			// complex math functions
+
+#ifdef HAVE_CASA
+#include <casa/Arrays/Array.h>		// use CASA Arrays as temporary buffers
+#include <casa/Quanta/Unit.h>		// use CASA Unit class for unit handling
+#include <casa/Quanta.h>		// ... and unit conversion
+#endif
+
+#include "rmFITS.h"	// rmFITS file access
+
+// Namespace usage
+using namespace std;
+
 /*!
   \class rm
   
@@ -29,33 +48,9 @@
   
   <h3>Example(s)</h3>
   
-*/  
+*/ 
+class rm {
 
-#ifndef RM_H
-#define RM_H
-
-#include <vector>
-#include <iostream>			// streamed input output for rm cubes
-#include <complex>			// complex math functions
-
-/*
-#include <casa/Arrays/Array.h>		// use CASA Arrays as temporary buffers
-#include <casa/Quanta/Unit.h>		// use CASA Unit class for unit handling
-#include <casa/Quanta.h>		// ... and unit conversion
-
-
-//#include "../../DAL/implement/dalFITS.h"	// dalFITS file access
-#include "dalFITS.h"	// dalFITS file access
-*/
-
-// Namespace usage
-using namespace std;
-//using namespace casa;
-
-class rm
-{
-  // Private variables
-private:
   //! Cached line of sight rm values if already computed
   vector<double> cached_los;
   //! Pixel coords of cached rm los values

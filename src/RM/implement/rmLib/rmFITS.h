@@ -18,8 +18,8 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#ifndef DALFITS_H
-#define DALFITS_H
+#ifndef RMFITS_H
+#define RMFITS_H
 
 // C++ Standard library
 #include <stdio.h>
@@ -60,7 +60,7 @@
 namespace RM {
   
   /*!
-   \class dalFITS
+   \class rmFITS
     
     \ingroup RM
     
@@ -68,9 +68,9 @@ namespace RM {
     
     \author Sven Duscha
     
-    \test tdalFITS.cpp
+    \test trmFITS.cpp
   */
-  class dalFITS {
+  class rmFITS {
     
   private:
     //! file handle for direct file access
@@ -133,14 +133,14 @@ namespace RM {
     // === Construction =========================================================
     
     //! Default constructor, creating an initialised, but empty object
-    dalFITS ();
+    rmFITS ();
     //! Constructor with associated filename
-    dalFITS (const std::string &,
+    rmFITS (const std::string &,
 	     int mode);
     //! Copy constructor
-    dalFITS (dalFITS const& other);
+    rmFITS (rmFITS const& other);
     //! Copy constructor
-    dalFITS(dalFITS const &other,
+    rmFITS(rmFITS const &other,
 	    bool previous,
 	    bool current,
 	    bool following);
@@ -148,7 +148,7 @@ namespace RM {
     // === Destruction ==========================================================
 
     //! Destructor
-    ~dalFITS ();
+    ~rmFITS ();
 
     // === Methods ==============================================================
     
@@ -164,7 +164,7 @@ namespace RM {
     void openTable(const std::string &filename, int iomode);
     //! Close a FITS file handle
     void close();
-    //! Get the filename of the FITS file opened in this dalFITS object
+    //! Get the filename of the FITS file opened in this rmFITS object
     std::string filename();
     //! Get Lattice in object
     void getLattice();
@@ -175,7 +175,7 @@ namespace RM {
     int readNumHDUs();
     //! Read the current header postion (HDU) in FITS file
     int readCurrentHDU();
-    void copyCHDU(dalFITS const &other);
+    void copyCHDU(rmFITS const &other);
     //! Move to HDU unit given by \e hdu
     void moveAbsoluteHDU(int hdu);
     void moveRelativeHDU(int hdu);
@@ -325,8 +325,8 @@ namespace RM {
     void deleteRecord(int keynum);
     //! Delete the key referenced by &keyname from the CHDU
     void deleteKey(std::string keyname);
-    //! Copy the Header of this FITS to the &other dalFITS object
-    void copyHeader(dalFITS &other);
+    //! Copy the Header of this FITS to the &other rmFITS object
+    void copyHeader(rmFITS &other);
     //! Delete the CHDU
     void deleteHDU(int *hdutype);
     //! Write the Header checksum to the CHDU
@@ -465,14 +465,12 @@ namespace RM {
     // ============================================================================
     
     //! Get the name of the class
-    std::string className () const
-    {
-		return "dalFITS";
+    std::string className () const {
+      return "rmFITS";
     }
     
     //! Provide a summary of the internal status
-    inline void summary ()
-    {
+    inline void summary () {
       summary (std::cout);
     }
     

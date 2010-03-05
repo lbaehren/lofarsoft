@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id:: dalFITS.cpp 2939 2009-08-12 09:02:41Z baehren                   $ |
+ | $Id:: rmFITS.cpp 2939 2009-08-12 09:02:41Z baehren                   $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2008                                                    *
@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "dalFITS.h"
+#include "rmFITS.h"
 #include <sys/stat.h>	// needed to check for existence of a file
 
 using namespace std;
@@ -35,9 +35,9 @@ namespace RM {
   // ============================================================================
   
   //_____________________________________________________________________________
-  //                                                                      dalFITS
+  //                                                                      rmFITS
   
-  dalFITS::dalFITS()
+  rmFITS::rmFITS()
   {
     // initialise critical pointers
     fptr         = NULL;
@@ -51,13 +51,13 @@ namespace RM {
   
   
   //_____________________________________________________________________________
-  //                                                                      dalFITS
+  //                                                                      rmFITS
   
   /*!
     \param &filename - filename of FITS file
     \param iomode - I/O Read () OR Write
   */
-  dalFITS::dalFITS (const string &filename,
+  rmFITS::rmFITS (const string &filename,
                     int iomode)
   {
     fptr         = NULL;    // initialise FITS filepointer
@@ -77,7 +77,7 @@ namespace RM {
 	    		{
 	      		fits_get_errstatus(fitsstatus_p, fits_error_message);
 	      		cout << fits_error_message << endl;
-	      		throw "dalFITS::dalFITS could not open file";	// get fits error from fitsstatus property later
+	      		throw "rmFITS::rmFITS could not open file";	// get fits error from fitsstatus property later
 	    		}
 	 		}
 	 }
@@ -88,13 +88,13 @@ namespace RM {
         {
 	      	fits_get_errstatus(fitsstatus_p, fits_error_message);
 	      	cout << fits_error_message << endl;	
-            throw "dalFITS::open could not create file";
+            throw "rmFITS::open could not create file";
         }
 	
     	/*    // ... and open it
         if (fits_open_file(&fptr, filename.c_str(), iomode, &fitsstatus_p))
         {
-            throw "dalFITS::open";	// get fits error from fitsstatus property later
+            throw "rmFITS::open";	// get fits error from fitsstatus property later
         }
       */
 
@@ -103,33 +103,33 @@ namespace RM {
   }
   
   //_____________________________________________________________________________
-  //                                                                      dalFITS
+  //                                                                      rmFITS
   
   /*!
     \brief Copy constructor that copies the whole FITS file
     
-    \param other - dalFITS object to be copied to
+    \param other - rmFITS object to be copied to
   */
-  dalFITS::dalFITS (dalFITS const &other)
+  rmFITS::rmFITS (rmFITS const &other)
   {
     if (fits_copy_file(fptr, other.fptr, 1, 1, 1, &fitsstatus_p))
       {
-        throw "dalFITS::dalFITS copy constructor";
+        throw "rmFITS::rmFITS copy constructor";
       }
   }
   
   //_____________________________________________________________________________
-  //                                                                      dalFITS
+  //                                                                      rmFITS
   
   /*!
-    \brief Copy constructor that copies a complete dalFITS object to another
+    \brief Copy constructor that copies a complete rmFITS object to another
     
-    \param &other - other dalFITS object to be copied to
-    \param previous - copy previous (before CHDU) HDUs to other dalFITS object
-    \param current - copy current HDU to other dalFITS object
-    \param following - copy following (after CHDU) HDUs to other dalFITS object
+    \param &other - other rmFITS object to be copied to
+    \param previous - copy previous (before CHDU) HDUs to other rmFITS object
+    \param current - copy current HDU to other rmFITS object
+    \param following - copy following (after CHDU) HDUs to other rmFITS object
   */
-  dalFITS::dalFITS (dalFITS const &other,
+  rmFITS::rmFITS (rmFITS const &other,
                     bool previous,
                     bool current,
                     bool following)
@@ -148,7 +148,7 @@ namespace RM {
     
     if (fits_copy_file(fptr, other.fptr, previousInt, currentInt, followingInt, &fitsstatus_p))
       {
-        throw "dalFITS::dalFITS copy constructor";
+        throw "rmFITS::rmFITS copy constructor";
       }
   }
   
@@ -156,18 +156,18 @@ namespace RM {
   //                                                                     copyCHDU
   
   /*!
-    \brief Copy constructor that copies only one HDU and appends it to another dalFITS object
+    \brief Copy constructor that copies only one HDU and appends it to another rmFITS object
     
-    \param &other - other dalFITS object to append HDU to
+    \param &other - other rmFITS object to append HDU to
     \param hdu - HDU number to copy
   */
-  void dalFITS::copyCHDU(dalFITS const &other)
+  void rmFITS::copyCHDU(rmFITS const &other)
   {
     int morekeys=0;	// Don't reserve space for more keys
     
     if (fits_copy_hdu(fptr, other.fptr, morekeys, &fitsstatus_p))
       {
-        throw "dalFITS::dalFITS copy constructor";
+        throw "rmFITS::rmFITS copy constructor";
       }
   }
 
@@ -175,7 +175,7 @@ namespace RM {
   /*!
     \brief Destructor
   */
-  dalFITS::~dalFITS()
+  rmFITS::~rmFITS()
   {
 	 if(fptr!=NULL)				// only try to close the FITS file if it hasn't been closed before...
 	 {
@@ -207,13 +207,13 @@ namespace RM {
   	 \brief Open an existing file with filename and iomode specified in class attributes
   */
 /* // currently not all of these attributes exist in the class...
-  void dalFITS::open()
+  void rmFITS::open()
   {
 		if(this->filename=="")
-			throw "dalFITS::open no filename set in attributes";
+			throw "rmFITS::open no filename set in attributes";
   		if(fits_open_file(&fptr, const_cast<char *>(this->filename.c_str()), iomode, &fitsstatus_p))
 		{
-			throw "dalFITS::open failed to open file";
+			throw "rmFITS::open failed to open file";
 		}
   }
 */
@@ -224,11 +224,11 @@ namespace RM {
 	 \param filename - name of file to open
 	 \param iomode - I/O mode to open the file READONLY / READWRITE
   */
-  void dalFITS::open(const string &filename, const int iomode)
+  void rmFITS::open(const string &filename, const int iomode)
   {
   		if(fits_open_file(&fptr, const_cast<char *>(filename.c_str()), iomode, &fitsstatus_p))
 		{
-			throw "dalFITS::open failed to open file";
+			throw "rmFITS::open failed to open file";
 		}
   }
 
@@ -238,12 +238,12 @@ namespace RM {
 
     \param iomode - I/O-mode: READONLY, READWRITE
   */
-  void dalFITS::openData (const std::string &filename,
+  void rmFITS::openData (const std::string &filename,
                           int iomode)
   {
     if (fits_open_data(&fptr, const_cast<char *>(filename.c_str()), iomode , &fitsstatus_p))
       {
-        throw "dalFITS::openData";
+        throw "rmFITS::openData";
       }
     
     if (readHDUType()==IMAGE_HDU)	 // if it is an image extension
@@ -259,12 +259,12 @@ namespace RM {
   /*!
     \param iomode - I/O-mode: R, RW
   */
-  void dalFITS::openImage (const std::string &filename,
+  void rmFITS::openImage (const std::string &filename,
                            int iomode)
   {
     if (fits_open_image(&fptr, const_cast<char *>(filename.c_str()), iomode, &fitsstatus_p))
       {
-        throw "dalFITS::openImage";
+        throw "rmFITS::openImage";
       }
     
     if (readHDUType()==IMAGE_HDU)	 // if it is an image extension
@@ -279,12 +279,12 @@ namespace RM {
   /*!
     \param iomode - I/O-mode: R, RW
   */
-  void dalFITS::openTable (const std::string &filename,
+  void rmFITS::openTable (const std::string &filename,
                            int iomode)
   {
     if (fits_open_table(&fptr, const_cast<char *>(filename.c_str()), iomode, &fitsstatus_p))
       {
-        throw "dalFITS::openTable";
+        throw "rmFITS::openTable";
       }
     
   }
@@ -296,7 +296,7 @@ namespace RM {
     \brief Get a (casa) Lattice<Float> to access the fits file
   */
 	/*
-  void dalFITS::getLattice()
+  void rmFITS::getLattice()
   {
     // Generic lattice variable for casa lattice
     casa::LatticeBase *latticeBase;
@@ -305,13 +305,13 @@ namespace RM {
     // Register the FITS and Miriad image types
     casa::FITSImage::registerOpenFunction();
     
-    // Get filename of dalFITS object
+    // Get filename of rmFITS object
     
     // Try open the file with generic casa function
     latticeBase=casa::ImageOpener::openImage (filename);
     
     if (lattice_p==NULL) {
-      throw "dalFITS::getLattice ";
+      throw "rmFITS::getLattice ";
     }
     
     // Currently only support double lattices:
@@ -346,13 +346,13 @@ namespace RM {
   /*  
 	\brief Close the FITS file of this object		
   */
-  void dalFITS::close()
+  void rmFITS::close()
   {
 	 	fits_close_file(this->fptr, &fitsstatus_p);
     	if(fitsstatus_p)
 	 	{
 			printFitsError();
-    		throw "dalFITS::close error while closing";
+    		throw "rmFITS::close error while closing";
     	}
 	 	else
 	 	{
@@ -366,15 +366,15 @@ namespace RM {
   //                                                                 getFitsError
   
   /*!
-    \brief Get the filename of the FITS file opened in this dalFITS object
+    \brief Get the filename of the FITS file opened in this rmFITS object
   */  
-  string dalFITS::filename()
+  string rmFITS::filename()
   {
 		string filename;			// string to contain FITS filename
 	
 		if(fits_file_name(fptr, const_cast<char*>(filename.c_str()), &fitsstatus_p))
 		{
-			throw "dalFITS::filename could not get filename of object";
+			throw "rmFITS::filename could not get filename of object";
 		}
 		
 		return filename;
@@ -389,7 +389,7 @@ namespace RM {
     
     \return fitserrormsg - Complete string with all FITS errors on the error stack
   */
-  std::string dalFITS::getFitsError ()
+  std::string rmFITS::getFitsError ()
   {
     char fits_error_message[81];
     std::string complete_error_message;
@@ -425,7 +425,7 @@ namespace RM {
     
     \return fitserrormsg - Complete string with all FITS errors on the error stack
   */
-  void dalFITS::printFitsError()
+  void rmFITS::printFitsError()
   {
     char fits_error_message[81];
     std::string complete_error_message;
@@ -460,13 +460,13 @@ namespace RM {
   /*!
     \return numHDUS - number of HDUs in FITS file
   */
-  int dalFITS::readNumHDUs ()
+  int rmFITS::readNumHDUs ()
   {
     int nofHDUs=0;	// number of hdus in FITS file
 
     if (fits_get_num_hdus(fptr, &nofHDUs ,&fitsstatus_p))
       {
-        throw "dalFITS::readNumHDUs";
+        throw "rmFITS::readNumHDUs";
       }
 
     return nofHDUs;
@@ -480,11 +480,11 @@ namespace RM {
 
     \return hdutype - type of HDU moved to
   */
-  void dalFITS::moveAbsoluteHDU(int hdu)
+  void rmFITS::moveAbsoluteHDU(int hdu)
   {
     if (fits_movabs_hdu(fptr, hdu, NULL, &fitsstatus_p))
       {
-        throw "dalFITS::moveAbsoluteHDU";
+        throw "rmFITS::moveAbsoluteHDU";
       }
 
     if (readHDUType()==IMAGE_HDU)	 // if it is an image extension
@@ -499,11 +499,11 @@ namespace RM {
 
     \param hdu - move relative number of HDUs
   */
-  void dalFITS::moveRelativeHDU(int nhdu)
+  void rmFITS::moveRelativeHDU(int nhdu)
   {
     if (fits_movrel_hdu(fptr, nhdu, NULL, &fitsstatus_p))	// try to move nhdu
       {
-        throw "dalFITS::moveRelativeHDU";
+        throw "rmFITS::moveRelativeHDU";
       }
 
     if (readHDUType()==IMAGE_HDU)	 // if it is an image extension
@@ -519,13 +519,13 @@ namespace RM {
   /*!
     \return chdu - current HDU in FITS file
   */
-  int dalFITS::readCurrentHDU()
+  int rmFITS::readCurrentHDU()
   {
     int hdupos=0;		// local variable to hold chdu
 
     if (fits_get_hdu_num(fptr, &hdupos))
     {
-    	throw "dalFITS::readCurrentHDU";
+    	throw "rmFITS::readCurrentHDU";
     }
 
     return hdupos;		// return to caller
@@ -539,14 +539,14 @@ namespace RM {
 
     \return hdutype - Type of HDU moved to
   */
-  int dalFITS::moveNameHDU(const std::string &extname)
+  int rmFITS::moveNameHDU(const std::string &extname)
   {
     int hdutype=0;			// type of HDU
 
     // ignoring the version number of the extension
     if (fits_movnam_hdu(fptr, hdutype, const_cast<char*>(extname.c_str()) , NULL, &fitsstatus_p))
       {
-        throw "dalFITS::moveNameHDU";
+        throw "rmFITS::moveNameHDU";
       }
 
     if (readHDUType()==IMAGE_HDU)	 // if it is an image extension
@@ -565,7 +565,7 @@ namespace RM {
 	
 		\return X - X dimension of an image
 	*/
-	long dalFITS::X()
+	long rmFITS::X()
 	{
 		return this->dimensions_p[0];
 	}
@@ -575,7 +575,7 @@ namespace RM {
 	
 		\return Y - Y dimension of an image
 	*/	
-	long dalFITS::Y()
+	long rmFITS::Y()
 	{
 		return this->dimensions_p[1];
 	}
@@ -585,7 +585,7 @@ namespace RM {
 
 		\return Z - Z dimension of an image
 	*/	
-	long dalFITS::Z()
+	long rmFITS::Z()
 	{
 		return this->dimensions_p[2];
 	}
@@ -596,16 +596,16 @@ namespace RM {
 	
 		\return dim - vector of length equal the number of axes and in each entry length of that axis
   */
-  vector<int64_t> dalFITS::dimensions()
+  vector<int64_t> rmFITS::dimensions()
   {
   		return this->dimensions_p;
   }
 
 
   /*!
-    \brief Update the information contained in the dimensions-vector of the dalFITS object
+    \brief Update the information contained in the dimensions-vector of the rmFITS object
   */
-  void dalFITS::updateImageDimensions()
+  void rmFITS::updateImageDimensions()
   {
     int i=0;
     int naxis=0;
@@ -632,13 +632,13 @@ namespace RM {
 
     \return hduype - Type of current HDU
   */
-  int dalFITS::readHDUType()
+  int rmFITS::readHDUType()
   {
     int hdutype=0;
 
     if (fits_get_hdu_type(fptr,  &hdutype, &fitsstatus_p))
       {
-        throw "dalFITS::readHDUType";
+        throw "rmFITS::readHDUType";
       }
 
     return hdutype;
@@ -648,15 +648,15 @@ namespace RM {
   /*!
     \brief Read the filename of the currently opened FITS file
 
-    \return filename - Name of FITS file currently opened in dalFITS object
+    \return filename - Name of FITS file currently opened in rmFITS object
   */
-  std::string dalFITS::readFilename()
+  std::string rmFITS::readFilename()
   {
     std::string filename;	// local variable to hold FITS filename
 
     if (fits_file_name(fptr, const_cast<char *>(filename.c_str()), &fitsstatus_p))
       {
-        throw "dalFITS::readFilename";
+        throw "rmFITS::readFilename";
       }
 
     return filename;
@@ -666,13 +666,13 @@ namespace RM {
   /*!
     \brief Read the IO mode of the currently opened FITS file
   */
-  int dalFITS::readFileMode()
+  int rmFITS::readFileMode()
   {
     int mode;
 
     if (fits_file_mode(fptr, &mode, &fitsstatus_p))
       {
-        throw "dalFITS::readFileMode";
+        throw "rmFITS::readFileMode";
       }
 
     return mode;
@@ -682,13 +682,13 @@ namespace RM {
   /*!
     \brief Read the url type, e.g. file://, ftp:// of the currently opened FITS file
   */
-  std::string dalFITS::readURLType()
+  std::string rmFITS::readURLType()
   {
     string urltype;
 
     if (fits_url_type(fptr, const_cast<char *> (urltype.c_str()), &fitsstatus_p))
       {
-        throw "dalFITS::readURLType";
+        throw "rmFITS::readURLType";
       }
 
     return urltype;
@@ -696,13 +696,13 @@ namespace RM {
 
 
   /*!
-    \brief Delete the fitsfile of the dalFITS object
+    \brief Delete the fitsfile of the rmFITS object
   */
-  void dalFITS::deleteFITSfile()
+  void rmFITS::deleteFITSfile()
   {
     if (fits_delete_file(fptr, &fitsstatus_p))
       {
-        throw "dalFITS::deleteFITSfile";
+        throw "rmFITS::deleteFITSfile";
       }
   }
 
@@ -710,11 +710,11 @@ namespace RM {
   /*!
     \brief Flush the FITS file, close and reopen
   */
-  void dalFITS::flushFITSfile()
+  void rmFITS::flushFITSfile()
   {
     if (fits_flush_file(fptr, &fitsstatus_p))
       {
-        throw "dalFITS::fits_flush_file";
+        throw "rmFITS::fits_flush_file";
       }
   }
 
@@ -722,11 +722,11 @@ namespace RM {
   /*!
     \brief Flush buffer (without proper closing and reopening)
   */
-  void dalFITS::flushFITSBuffer()
+  void rmFITS::flushFITSBuffer()
   {
     if (fits_flush_buffer(fptr, 0, &fitsstatus_p))
       {
-        throw "dalFITS::fitsFITSBbuffer";
+        throw "rmFITS::fitsFITSBbuffer";
       }
   }
 
@@ -742,13 +742,13 @@ namespace RM {
 
       \return bitpix - Bits per pixel
    */
-  int dalFITS::getImgType()
+  int rmFITS::getImgType()
   {
     int bitpix=0;
 
     if (fits_get_img_type(fptr, &bitpix, &fitsstatus_p))
       {
-        throw "dalFITS::getImgType";
+        throw "rmFITS::getImgType";
       }
 
     return bitpix;	// pass on cfitsio return value
@@ -760,16 +760,16 @@ namespace RM {
 
     \return naxis - Number of axis in image
   */
-  int dalFITS::getImgDim()
+  int rmFITS::getImgDim()
   {
     int naxis=0;
 
     if (fits_get_img_dim(fptr, &naxis,  &fitsstatus_p))
       {
-        throw "dalFITS::getImgDim";
+        throw "rmFITS::getImgDim";
       }
 
-    dimensions_p.resize(naxis);	// resize dimensions vector in dalFITS object
+    dimensions_p.resize(naxis);	// resize dimensions vector in rmFITS object
 
     return naxis;	// return number of axes
   }
@@ -780,9 +780,9 @@ namespace RM {
   /*!
       \brief Get image size of the FITS image
       
-      This functions will only update dalFITS object do not pass parameters
+      This functions will only update rmFITS object do not pass parameters
   */
-  void dalFITS::getImgSize()
+  void rmFITS::getImgSize()
   {
     unsigned int i=0;		// loop variable
     int maxdim=getImgDim();	// maximum number of dimensions
@@ -790,7 +790,7 @@ namespace RM {
 
     if (fits_get_img_size(fptr, maxdim, naxes , &fitsstatus_p))
       {
-        throw "dalFITS::getImageSize";
+        throw "rmFITS::getImageSize";
       }
 
     for (i=0; i<dimensions_p.size(); i++)
@@ -806,13 +806,13 @@ namespace RM {
       \param maxdim - Maximum number of dimensions
       \param &naxes - Array to hold axes lengths
     */
-    void dalFITS::getImgSize(int maxdim,  long *naxes)
+    void rmFITS::getImgSize(int maxdim,  long *naxes)
     {
       unsigned int i=0;		// loop variable
       
       if (fits_get_img_size(fptr, maxdim, naxes , &fitsstatus_p))
 	{
-	  throw "dalFITS::getImageSize";
+	  throw "rmFITS::getImageSize";
 	}
       
       for (i=0; i<dimensions_p.size(); i++)
@@ -828,11 +828,11 @@ namespace RM {
     \param &naxis - Number of axes
     \param *naxes - Array with length of each axis
   */
-  void dalFITS::getImgParam(int maxdim,  int &bitpix, int &naxis, long *naxes)
+  void rmFITS::getImgParam(int maxdim,  int &bitpix, int &naxis, long *naxes)
   {
     if (fits_get_img_param(fptr, maxdim, &bitpix, &naxis, naxes, &fitsstatus_p))
       {
-        throw "dalFITS::getImageParam";
+        throw "rmFITS::getImageParam";
       }
   }
 
@@ -844,18 +844,18 @@ namespace RM {
     \param naxis - Number of axes
     \param *naxes - Array with length of each axis
   */
-  void dalFITS::createImg(int bitpix, int naxis, long *naxes)
+  void rmFITS::createImg(int bitpix, int naxis, long *naxes)
   {
     //-----------------------------------------------------------
     // Check input parameters
     //
     if(bitpix != -32)
     {
-      throw "dalFITS::createImg bitpix is not TDOUBLE_IMG";
+      throw "rmFITS::createImg bitpix is not TDOUBLE_IMG";
     }
     if (naxis==0 || naxes==NULL)
     {
-        throw "dalFITS::createImg naxis or naxes NULL";
+        throw "rmFITS::createImg naxis or naxes NULL";
     }
     
 	cout << "naxis = " << naxis << "  naxes[0]=" << naxes[0] << "  naxes[1]=" << naxes[1] << "  naxes[2]=" << naxes[2] << endl;
@@ -863,7 +863,7 @@ namespace RM {
     //-----------------------------------------------------------
     if (fits_create_img(fptr, bitpix, naxis , naxes, &fitsstatus_p))
       {
-        throw "dalFITS::createImg";
+        throw "rmFITS::createImg";
       }
   }
 
@@ -876,11 +876,11 @@ namespace RM {
     \param nelements - Number of elements to write
     \param *array - Array containing data
   */
-  void dalFITS::writePix(int datatype, long *fpixel, long nelements, void *array)
+  void rmFITS::writePix(int datatype, long *fpixel, long nelements, void *array)
   {
     if (fits_write_pix(fptr, datatype, fpixel, nelements, array, &fitsstatus_p))
       {
-        throw "dalFITS::writePix";
+        throw "rmFITS::writePix";
       }
   }
 
@@ -894,11 +894,11 @@ namespace RM {
     \param *array - Array containing data
     \param *nulval - Nullvalue to be written to file
   */
-  void dalFITS::writePixNull(int datatype, long *fpixel, long nelements, void *array, void *nulval)
+  void rmFITS::writePixNull(int datatype, long *fpixel, long nelements, void *array, void *nulval)
   {
     if (fits_write_pixnull(fptr, datatype, fpixel , nelements, array, nulval, &fitsstatus_p))
       {
-        throw "dalFITS::writePix";
+        throw "rmFITS::writePix";
       }
   }
 
@@ -912,11 +912,11 @@ namespace RM {
     \param *array - Array containing data
     \param *anynul - If any null value was encountered
   */
-  void dalFITS::readPix(int datatype, long *fpixel, long nelements, void *nulval, void *array, int *anynul)
+  void rmFITS::readPix(int datatype, long *fpixel, long nelements, void *nulval, void *array, int *anynul)
   {
     if (fits_read_pix(fptr, datatype, fpixel, nelements, nulval, array, anynul, &fitsstatus_p))
       {
-        throw "dalFITS::readPix";
+        throw "rmFITS::readPix";
       }
   }
 
@@ -932,7 +932,7 @@ namespace RM {
     \param *array - array to read into
     \param *anynul - if any null vallue was encountered
   */
-  void dalFITS::readSubset(int  datatype, long *fpixel,
+  void rmFITS::readSubset(int  datatype, long *fpixel,
                            long *lpixel, long *inc, void *nulval,  void *array,
                            int *anynul)
   {
@@ -941,7 +941,7 @@ namespace RM {
 		{
 	  		fits_get_errstatus(fitsstatus_p, fits_error_message);
 	  		cout << fits_error_message << endl;
-	  		throw "dalFITS::readSubset";
+	  		throw "rmFITS::readSubset";
 		}
   }
 
@@ -957,16 +957,16 @@ namespace RM {
     \param vec - vector to read into
     \param *anynul - if any null vallue was encountered
   */
-  void dalFITS::readSubset(int  datatype, long *fpixel,
+  void rmFITS::readSubset(int  datatype, long *fpixel,
                            long *lpixel, long *inc, void *nulval,  vector<double> &vec,
                            int *anynul)
   {
       unsigned int nelements=1;		// compute number of elements to read
   
       if(fpixel==NULL)
-			throw "dalFITS::readSubset lpixel is NULL pointer";
+			throw "rmFITS::readSubset lpixel is NULL pointer";
       if(lpixel==NULL)
-			throw "dalFITS::readSubset fpixel is NULL pointer";
+			throw "rmFITS::readSubset fpixel is NULL pointer";
       //-------------------------------------------------------
 
 
@@ -979,7 +979,7 @@ namespace RM {
      cout.flush();
   
       if(nelements > vec.size())
-			throw "dalFITS::readSubset nelements to read exceeds vec.size()";
+			throw "rmFITS::readSubset nelements to read exceeds vec.size()";
   
       cout << "nelements = " << nelements << endl;
       cout << "vev.size() = " << vec.size() << endl;
@@ -996,7 +996,7 @@ namespace RM {
       {
 			fits_get_errstatus(fitsstatus_p, fits_error_message);
 			cout << fits_error_message << endl;
-        throw "dalFITS::readSubset";
+        throw "rmFITS::readSubset";
       }
   }
 
@@ -1008,11 +1008,11 @@ namespace RM {
       \param *lpixel - array giving upper right corner of writing
       \param *array - array containing data
   */
-  void dalFITS::writeSubset(int datatype, long *fpixel, long *lpixel, double *array)
+  void rmFITS::writeSubset(int datatype, long *fpixel, long *lpixel, double *array)
   {
     if (fits_write_subset(fptr, datatype, fpixel, lpixel, array, &fitsstatus_p))
       {
-        throw "dalFITS::writeSubset";
+        throw "rmFITS::writeSubset";
       }
   }
 
@@ -1031,7 +1031,7 @@ namespace RM {
     \param *plane - pointer to array holding the data read from the image
     \param z - z axis position to read plane from
   */
-  void dalFITS::readPlane(double *plane, const unsigned long z, void *nulval)
+  void rmFITS::readPlane(double *plane, const unsigned long z, void *nulval)
   {
     long fpixel[3];
     int nelements=0;
@@ -1040,12 +1040,12 @@ namespace RM {
     // Check if z is within the FITS cube
     if (z > (unsigned long) dimensions_p[2])
       {
-        throw "dalFITS::readPlane out of range";
+        throw "rmFITS::readPlane out of range";
       }
 
     if (readHDUType()!=IMAGE_HDU)	// Check if current HDU is an image extension
     {
-        throw "dalFITS::readPlane CHDU is not an image";
+        throw "rmFITS::readPlane CHDU is not an image";
     }
 
     // Read from FITS file one plane
@@ -1062,7 +1062,7 @@ namespace RM {
     }
     else
     {
-        throw "dalFITS::readPlaneNULL pointer";
+        throw "rmFITS::readPlaneNULL pointer";
     }
 }
 
@@ -1076,7 +1076,7 @@ namespace RM {
 	\param array - 2-dimensional array to read into
 	\param dim1 - first dimension of array (corresponds to y-axis of image)
 */
-void dalFITS::read2D(double *array, long long dim1)
+void rmFITS::read2D(double *array, long long dim1)
 {
 	double nulval=0;		// null value
 	int anynul=0;			// indicater if any null value was returned from image
@@ -1085,18 +1085,18 @@ void dalFITS::read2D(double *array, long long dim1)
 	//**********************************************************
 	// Check parameters
 	if(array==NULL)
-		throw "dalFITS::read2D array is NULL";
+		throw "rmFITS::read2D array is NULL";
 	if(dim1<=0)
-		throw "dalFITS::read2D dim1 is <= 0";
+		throw "rmFITS::read2D dim1 is <= 0";
 	
 	//**********************************************************
 	// get naxis1 and naxis2 from image dimensions
 	getImgDim();
 
 	if(dimensions_p[0]<=0)
-		throw "dalFITS::read2D naxis1 <= 0";
+		throw "rmFITS::read2D naxis1 <= 0";
 	if(dimensions_p[0]<=0)
-		throw "dalFITS::read2D naxis2 <= 0";
+		throw "rmFITS::read2D naxis2 <= 0";
 		
 	
 	fits_read_2d_dbl(fptr, group, nulval, dim1, dimensions_p[0], dimensions_p[1], array, &anynul, &fitsstatus_p);
@@ -1104,7 +1104,7 @@ void dalFITS::read2D(double *array, long long dim1)
 	{
 		fits_get_errstatus(fitsstatus_p, fits_error_message);		
 		cout << fits_error_message << endl;
-		throw "dalFITS::read2D failed";		
+		throw "rmFITS::read2D failed";		
 	}
 }
 
@@ -1118,16 +1118,16 @@ void dalFITS::read2D(double *array, long long dim1)
 	\param array - 2-dimensional array to write
 	\param dim1 - first dimension of array (corresponds to y-axis of image)
 */
-void dalFITS::write2D(double *array, const long long dim1)
+void rmFITS::write2D(double *array, const long long dim1)
 {
 	long group=0;			// What is this parameter?
 	
 	//**********************************************************
 	// Check parameters
 	if(array==NULL)
-		throw "dalFITS::write2D array is NULL";
+		throw "rmFITS::write2D array is NULL";
 	if(dim1<=0)
-		throw "dalFITS::write2D dim1 is <= 0";
+		throw "rmFITS::write2D dim1 is <= 0";
 	
 	//**********************************************************	
 	fits_write_2d_dbl(fptr, group, dim1, dimensions_p[0], dimensions_p[1], array, &fitsstatus_p);
@@ -1135,7 +1135,7 @@ void dalFITS::write2D(double *array, const long long dim1)
 	{
 		fits_get_errstatus(fitsstatus_p, fits_error_message);		
 		cout << fits_error_message << endl;
-		throw "dalFITS::write2D failed";		
+		throw "rmFITS::write2D failed";		
 	}
 }
 
@@ -1148,7 +1148,7 @@ void dalFITS::write2D(double *array, const long long dim1)
 	 \param inc - increment of elements to skip
 	 \param nulval - value used for nulls found in image
   */
-  void dalFITS::readLine (vector<double> &line,
+  void rmFITS::readLine (vector<double> &line,
 			  const unsigned long x,
 			  const unsigned long y,
 			  long *inc,
@@ -1161,7 +1161,7 @@ void dalFITS::write2D(double *array, const long long dim1)
     // Check if vector has right dimension, same as z dimension of cube
     if (readHDUType()!=IMAGE_HDU)	 // Check if current HDU is an image extension
     {
-        throw "dalFITS::readLine CHDU is not an image";
+        throw "rmFITS::readLine CHDU is not an image";
     }
 
     // Define first pixel to read, read along one line of sight
@@ -1176,11 +1176,11 @@ void dalFITS::write2D(double *array, const long long dim1)
 	 // Check consistency of pixel data
 	 //
 	 if(x > static_cast<unsigned int>(dimensions_p[0]))
-		throw "dalFITS::readLine x is out of range";
+		throw "rmFITS::readLine x is out of range";
 	 if(y > static_cast<unsigned int>(dimensions_p[1]))
-		throw "dalFITS::readLine y is out of range";
+		throw "rmFITS::readLine y is out of range";
 	 if(dimensions_p[2]==0)
-		throw "dalFITS::readLine image is only 2-D";
+		throw "rmFITS::readLine image is only 2-D";
     //-------------------------------------------------------
     //line.resize(dimensions_p[2]);
     // Read subset from FITS file
@@ -1189,7 +1189,7 @@ void dalFITS::write2D(double *array, const long long dim1)
     {
 		fits_get_errstatus(fitsstatus_p, fits_error_message);		
 		cout << fits_error_message << endl;
-		throw "dalFITS::readLine readSubset failed";
+		throw "rmFITS::readLine readSubset failed";
     }	
 }
 
@@ -1203,7 +1203,7 @@ void dalFITS::write2D(double *array, const long long dim1)
  	\param inc - increment of elements to skip
  	\param nulval - value used for nulls found in image
  */
- void dalFITS::readLine (double *line,
+ void rmFITS::readLine (double *line,
 		  const unsigned long x,
 		  const unsigned long y,
 		  long *inc,
@@ -1216,7 +1216,7 @@ void dalFITS::write2D(double *array, const long long dim1)
    // Check if vector has right dimension, same as z dimension of cube
    if (readHDUType()!=IMAGE_HDU)	 // Check if current HDU is an image extension
    {
-       throw "dalFITS::readLine CHDU is not an image";
+       throw "rmFITS::readLine CHDU is not an image";
    }
 
    // Define first pixel to read, read along one line of sight
@@ -1231,16 +1231,16 @@ void dalFITS::write2D(double *array, const long long dim1)
  // Check consistency of pixel data
  //
  if(x > static_cast<unsigned int>(dimensions_p[0]))
-	throw "dalFITS::readLine x is out of range";
+	throw "rmFITS::readLine x is out of range";
  if(y > static_cast<unsigned int>(dimensions_p[1]))
-	throw "dalFITS::readLine y is out of range";
+	throw "rmFITS::readLine y is out of range";
  if(line==NULL)
-	throw "dalFITS::readLine line is NULL pointer";
+	throw "rmFITS::readLine line is NULL pointer";
  if(inc==NULL) 
-	throw "dalFITS::readLine inc is NULL pointer";
+	throw "rmFITS::readLine inc is NULL pointer";
 
 
-	// void dalFITS::readSubset(int  datatype, long *fpixel,
+	// void rmFITS::readSubset(int  datatype, long *fpixel,
 	//	                           long *lpixel, long *inc, void *nulval,  void *array,
 	//                           int *anynul)
 
@@ -1251,7 +1251,7 @@ void dalFITS::write2D(double *array, const long long dim1)
    {
 		fits_get_errstatus(fitsstatus_p, fits_error_message);		
 		cout << fits_error_message << endl;
-		throw "dalFITS::readLine readSubset failed";
+		throw "rmFITS::readLine readSubset failed";
    }	
 }
 
@@ -1263,7 +1263,7 @@ void dalFITS::write2D(double *array, const long long dim1)
     \param x - x axis lower left corner position to read line from
     \param y - y axis lower left corner position to read line from
 */
-void dalFITS::readZLine (double *line,
+void rmFITS::readZLine (double *line,
 			  					const unsigned long x,
 			  					const unsigned long y)
 {
@@ -1276,7 +1276,7 @@ void dalFITS::readZLine (double *line,
     // Check if vector has right dimension, same as z dimension of cube
     if (readHDUType()!=IMAGE_HDU)	 // Check if current HDU is an image extension
     {
-        throw "dalFITS::readLine CHDU is not an image";
+        throw "rmFITS::readLine CHDU is not an image";
     }
 
     // Define first pixel to read, read along one line of sight
@@ -1291,13 +1291,13 @@ void dalFITS::readZLine (double *line,
 	 // Check consistency of pixel data
 	 //
 	 if(x > static_cast<unsigned int>(dimensions_p[0]))
-		throw "dalFITS::readLine x is out of range";
+		throw "rmFITS::readLine x is out of range";
 	 if(y > static_cast<unsigned int>(dimensions_p[1]))
-		throw "dalFITS::readLine y is out of range";
+		throw "rmFITS::readLine y is out of range";
   	 if(line==NULL)
-		throw "dalFITS::readLine NULL pointer";
+		throw "rmFITS::readLine NULL pointer";
    
-//	 void dalFITS::readSubset(int  datatype, long *fpixel,
+//	 void rmFITS::readSubset(int  datatype, long *fpixel,
 //		                           long *lpixel, long *inc, void *nulval,  void *array,
 //	                           int *anynul)
 
@@ -1308,7 +1308,7 @@ void dalFITS::readZLine (double *line,
     {
 		fits_get_errstatus(fitsstatus_p, fits_error_message);		
 		cout << fits_error_message << endl;
-		throw "dalFITS::readLine readSubset failed";
+		throw "rmFITS::readLine readSubset failed";
     }	
 }
 
@@ -1325,7 +1325,7 @@ void dalFITS::readZLine (double *line,
     \param x_size - size in x direction in pixels
     \param y_size - size in y direction in pixels
   */
-  void dalFITS::readSubCube (double *subCube,
+  void rmFITS::readSubCube (double *subCube,
                              unsigned long x_pos,
                              unsigned long y_pos,
                              unsigned long x_size,
@@ -1341,15 +1341,15 @@ void dalFITS::readZLine (double *line,
 	 // Check consistency of pixel data
 	 //
 	 if(x_pos > static_cast<unsigned int>(dimensions_p[0]))
-		throw "dalFITS::readSubCube x_pos is out of range";
+		throw "rmFITS::readSubCube x_pos is out of range";
 	 if(y_pos > static_cast<unsigned int>(dimensions_p[1]))
-		throw "dalFITS::readSubCube y_pos is out of range";
+		throw "rmFITS::readSubCube y_pos is out of range";
 	 if(x_pos+x_size > static_cast<unsigned int>(dimensions_p[0]))
-		throw "dalFITS::readSubCube x_size is out of range";
+		throw "rmFITS::readSubCube x_size is out of range";
 	 if(y_pos+y_size > static_cast<unsigned int>(dimensions_p[1]))
-		throw "dalFITS::readSubCube y_size is out of range";
+		throw "rmFITS::readSubCube y_size is out of range";
   	 if(subCube==NULL)
-		throw "dalFITS::readSubCube NULL pointer";
+		throw "rmFITS::readSubCube NULL pointer";
 
 	 //-------------------------------------------------------
     fpixel[0]=x_pos;
@@ -1362,10 +1362,10 @@ void dalFITS::readZLine (double *line,
 
     if (readHDUType()!=IMAGE_HDU)   // Check if current HDU is an image extension
     {
-    	throw "dalFITS::readSubCube CHDU is not an image";
+    	throw "rmFITS::readSubCube CHDU is not an image";
     }
 
-	//	 void dalFITS::readSubset(int  datatype, long *fpixel,
+	//	 void rmFITS::readSubset(int  datatype, long *fpixel,
 	//		                           long *lpixel, long *inc, void *nulval,  void *array,
 	//	                           int *anynul)
 
@@ -1376,7 +1376,7 @@ void dalFITS::readZLine (double *line,
     {
 		fits_get_errstatus(fitsstatus_p, fits_error_message);		
 		cout << fits_error_message << endl;
-		throw "dalFITS::readSubCube readSubset failed";
+		throw "rmFITS::readSubCube readSubset failed";
     }
 
   }
@@ -1399,7 +1399,7 @@ void dalFITS::readZLine (double *line,
     \param z - z position to write plane to
     \param nulval - pointer to data to be substituted for any 0 values encountered
   */
-  void dalFITS::writePlane (double *plane,
+  void rmFITS::writePlane (double *plane,
                             const long x,
                             const long y,
                             const long z,
@@ -1411,17 +1411,17 @@ void dalFITS::readZLine (double *line,
     // Check if Faraday plane has the same x-/y-dimensions as naxes dimensions of FITS
 	 updateImageDimensions();
     if ((int64_t)x > dimensions_p[0] || (int64_t)y > dimensions_p[1]) {
-      throw "dalFITS::writePlane dimensions do not match";
+      throw "rmFITS::writePlane dimensions do not match";
     }
     
     // check if plane counter is above limit
     if (z > dimensions_p[2]) {
-      throw "dalFITS::writePlane z out of range";
+      throw "rmFITS::writePlane z out of range";
     }
     
     /* Check if current HDU is an image extension */
     if (readHDUType()!=IMAGE_HDU) {
-      throw "dalFITS::writePlane CHDU is not an image";
+      throw "rmFITS::writePlane CHDU is not an image";
     }
     
     // Read from FITS file one plane
@@ -1434,7 +1434,7 @@ void dalFITS::readZLine (double *line,
     // Write to FITS file
     if (plane==NULL)
     {
-        throw "dalFITS::writePlane NULL pointer";
+        throw "rmFITS::writePlane NULL pointer";
     }
     else if (nulval==NULL)
     {
@@ -1455,7 +1455,7 @@ void dalFITS::readZLine (double *line,
     \param x - x position in pixels to write line to
     \param y - y position in pixels to write line to
   */
-  void dalFITS::writeLine(double *line,
+  void rmFITS::writeLine(double *line,
                           const long x,
                           const long y,
                           void *nulval)
@@ -1474,7 +1474,7 @@ void dalFITS::readZLine (double *line,
     \param x_size - horizontal size of tile
     \param y_size - vertical size of tile
   */
-  void dalFITS::writeTile(double* tile,
+  void rmFITS::writeTile(double* tile,
                           const long x_pos,
                           const long y_pos,
                           const long x_size,
@@ -1496,7 +1496,7 @@ void dalFITS::readZLine (double *line,
     \param x_size - x-dimension of cube in pixels
     \param y_size - y-dimension of cube in pixels
   */
-  void dalFITS::writeSubCube( double* subcube,
+  void rmFITS::writeSubCube( double* subcube,
                               long x_size,
                               long y_size,
                               long x_pos,
@@ -1521,19 +1521,19 @@ void dalFITS::readZLine (double *line,
   //
   // ============================================================================
 
-  // Methods for reading keywords and records from a dalFITS file
+  // Methods for reading keywords and records from a rmFITS file
 
 
   /*!
     \param &keysexist - number of existing keywords (without END)
     \param &morekeys - morekeys=-1 if the header has not yet been closed
   */
-  void dalFITS::getHDRspace (int &keysexist,
+  void rmFITS::getHDRspace (int &keysexist,
                              int &morekeys)
   {
     if (fits_get_hdrspace(fptr, &keysexist, &morekeys, &fitsstatus_p))
       {
-        throw "dalFITS::getHDRspace";
+        throw "rmFITS::getHDRspace";
       }
   }
 
@@ -1542,12 +1542,12 @@ void dalFITS::readZLine (double *line,
     \param keynum - nth key to read, first keyword in the header is at keynum=1
     \param record - write the entire 80-character header record into this string
   */
-  void dalFITS::readRecord (int keynum,
+  void rmFITS::readRecord (int keynum,
                             std::string record)
   {
     if (fits_read_record(fptr, keynum, const_cast<char *>(record.c_str()), &fitsstatus_p))
       {
-        throw "dalFITS::readRecord";
+        throw "rmFITS::readRecord";
       }
   }
 
@@ -1557,12 +1557,12 @@ void dalFITS::readZLine (double *line,
     \param keyname - name of key to read
     \param record - write the entire 80-character header record into this string
   */
-  void dalFITS::readCard (std::string keyname,
+  void rmFITS::readCard (std::string keyname,
                           std::string record)
   {
     if (fits_read_card(fptr, const_cast<char *>(keyname.c_str()), const_cast<char *>(record.c_str()), &fitsstatus_p))
       {
-        throw "dalFITS::readCard";
+        throw "rmFITS::readCard";
       }
   }
 
@@ -1575,14 +1575,14 @@ void dalFITS::readZLine (double *line,
     \param value - string that will contain the key's value
     \param comment - string that will contain the corresponding comment
   */
-  void dalFITS::readKeyn (int keynum,
+  void rmFITS::readKeyn (int keynum,
                           std::string keyname,
                           std::string value,
                           std::string comment)
   {
     if (fits_read_keyn(fptr, keynum, const_cast<char *>(keyname.c_str()), const_cast<char *>(value.c_str()), const_cast<char *>(comment.c_str()), &fitsstatus_p))
       {
-        throw "dalFITS::readKeyn";
+        throw "rmFITS::readKeyn";
       }
   }
 
@@ -1595,14 +1595,14 @@ void dalFITS::readZLine (double *line,
     \param value - value of key to look for
     \param comment - comment of key to look for
   */
-  void dalFITS::readKey (int datatype,
+  void rmFITS::readKey (int datatype,
                          std::string keyname,
                          void *value,
                          std::string comment)
   {
     if (fits_read_key(fptr, datatype, const_cast<char *>(keyname.c_str()), value, const_cast<char *>(comment.c_str()), &fitsstatus_p))
       {
-        throw "dalFITS::readKey";
+        throw "rmFITS::readKey";
       }
   }
 
@@ -1616,7 +1616,7 @@ void dalFITS::readZLine (double *line,
     \param nexc - number of excluded keys, may be set to 0 if there are no keys excluded
     \param card - string to write card to
   */
-  void dalFITS::findNextKey (char **inclist,
+  void rmFITS::findNextKey (char **inclist,
                              int ninc,
                              char **exclist,
                              int nexc,
@@ -1624,7 +1624,7 @@ void dalFITS::readZLine (double *line,
   {
     if (fits_find_nextkey(fptr, inclist, ninc, exclist, nexc, const_cast<char *>(card.c_str()), &fitsstatus_p))
       {
-        throw "dalFITS::findNextKey";
+        throw "rmFITS::findNextKey";
       }
   }
 
@@ -1635,19 +1635,19 @@ void dalFITS::readZLine (double *line,
     \param keyname - name of key
     \param unit - string to write the physical unit to
   */
-  void dalFITS::readKeyUnit (std::string keyname,
+  void rmFITS::readKeyUnit (std::string keyname,
                              std::string unit)
   {
     if (fits_read_key_unit(fptr, const_cast<char *>(keyname.c_str()), const_cast<char *>(unit.c_str()), &fitsstatus_p))
       {
-        throw "dalFITS::readKeyUnit";
+        throw "rmFITS::readKeyUnit";
       }
   }
 
 
   //===============================================================
   //
-  // Methods for writing keywords and records to a dalFITS file
+  // Methods for writing keywords and records to a rmFITS file
   //
   //===============================================================
 
@@ -1659,7 +1659,7 @@ void dalFITS::readZLine (double *line,
     \param *value - value to write into field
     \param comment - comment string
   */
-  void dalFITS::writeKey (int datatype,
+  void rmFITS::writeKey (int datatype,
                           std::string keyname,
                           void *value,
                           std::string comment)
@@ -1667,7 +1667,7 @@ void dalFITS::readZLine (double *line,
     if (fits_write_key(fptr, datatype, const_cast<char
                        *>(keyname.c_str()), value, const_cast<char *>(comment.c_str()), &fitsstatus_p))
       {
-        throw "dalFITS::writeKey";
+        throw "rmFITS::writeKey";
       }
   }
 
@@ -1680,7 +1680,7 @@ void dalFITS::readZLine (double *line,
     \param value - value to write into field
     \param comment - comment string
   */
-  void dalFITS::updateKey (int datatype,
+  void rmFITS::updateKey (int datatype,
                            std::string &keyname,
                            void *value,
                            std::string &comment)
@@ -1693,7 +1693,7 @@ void dalFITS::readZLine (double *line,
                          const_cast<char *>(comment.c_str()),
                          &fitsstatus_p))
       {
-        throw "dalFITS::updateKey";
+        throw "rmFITS::updateKey";
       }
   }
 
@@ -1703,11 +1703,11 @@ void dalFITS::readZLine (double *line,
 
     \param card - string containing card information
   */
-  void dalFITS::writeRecord(std::string &card)
+  void rmFITS::writeRecord(std::string &card)
   {
     if (fits_write_record(fptr, const_cast<char *>(card.c_str()), &fitsstatus_p))
       {
-        throw "dalFITS:writeRecord";
+        throw "rmFITS:writeRecord";
       }
   }
 
@@ -1718,12 +1718,12 @@ void dalFITS::readZLine (double *line,
     \param keyname - name of key to modify key of
     \param comment - new comment string
   */
-  void dalFITS::modifyComment (std::string &keyname,
+  void rmFITS::modifyComment (std::string &keyname,
                                std::string &comment)
   {
     if (fits_modify_comment(fptr, const_cast<char *>(keyname.c_str()), const_cast<char *>(comment.c_str()), &fitsstatus_p))
       {
-        throw "dalFITS::modifyComment";
+        throw "rmFITS::modifyComment";
       }
   }
 
@@ -1734,12 +1734,12 @@ void dalFITS::readZLine (double *line,
     \param keyname - name of key to modify unit of
     \param unit - string with physical unit
   */
-  void dalFITS::writeKeyUnit (std::string &keyname,
+  void rmFITS::writeKeyUnit (std::string &keyname,
                               std::string &unit)
   {
     if (fits_write_key_unit(fptr, const_cast<char *>(keyname.c_str()), const_cast<char *>(unit.c_str()), &fitsstatus_p))
       {
-        throw "dalFITS::writeKeyUnit";
+        throw "rmFITS::writeKeyUnit";
       }
   }
 
@@ -1749,11 +1749,11 @@ void dalFITS::readZLine (double *line,
   /*!
     \param &comment - write a comment to the CHU
   */
-  void dalFITS::writeComment (std::string &comment)
+  void rmFITS::writeComment (std::string &comment)
   {
     if (fits_write_comment(fptr, const_cast<char *>(comment.c_str()),  &fitsstatus_p))
       {
-        throw "dalFITS::writeComment";
+        throw "rmFITS::writeComment";
       }
   }
 
@@ -1763,22 +1763,22 @@ void dalFITS::readZLine (double *line,
   /*!
     \param history - History text
   */
-  void dalFITS::writeHistory(std::string &history)
+  void rmFITS::writeHistory(std::string &history)
   {
     if (fits_write_history(fptr, const_cast<char *>(history.c_str()),  &fitsstatus_p))
       {
-        throw "dalFITS::writeHistory";
+        throw "rmFITS::writeHistory";
       }
   }
 
   //_____________________________________________________________________________
   //                                                                    writeDate
 
-  void dalFITS::writeDate()
+  void rmFITS::writeDate()
   {
     if (fits_write_date(fptr,  &fitsstatus_p))
       {
-        throw "dalFITS::writeDate";
+        throw "rmFITS::writeDate";
       }
   }
 
@@ -1788,11 +1788,11 @@ void dalFITS::readZLine (double *line,
   /*!
     \param keynum - number of key to delete
   */
-  void dalFITS::deleteRecord (int keynum)
+  void rmFITS::deleteRecord (int keynum)
   {
     if (fits_delete_record(fptr, keynum,  &fitsstatus_p))
       {
-        throw "dalFITS::deleteRecord";
+        throw "rmFITS::deleteRecord";
       }
   }
 
@@ -1802,11 +1802,11 @@ void dalFITS::readZLine (double *line,
   /*!
     \param keyname - name of key to delete
   */
-  void dalFITS::deleteKey (std::string keyname)
+  void rmFITS::deleteKey (std::string keyname)
   {
     if (fits_delete_key(fptr, const_cast<char *>(keyname.c_str()),  &fitsstatus_p))
       {
-        throw "dalFITS::deleteKey";
+        throw "rmFITS::deleteKey";
       }
   }
 
@@ -1814,13 +1814,13 @@ void dalFITS::readZLine (double *line,
   //                                                                   copyHeader
 
   /*!
-    \param &other - other dalFITS object to copy header from
+    \param &other - other rmFITS object to copy header from
   */
-  void dalFITS::copyHeader (dalFITS &other)
+  void rmFITS::copyHeader (rmFITS &other)
   {
     if (fits_copy_header(fptr, other.fptr, &fitsstatus_p))
       {
-        throw "dalFITS::copyHeader";
+        throw "rmFITS::copyHeader";
       }
   }
 
@@ -1830,22 +1830,22 @@ void dalFITS::readZLine (double *line,
   /*!
     \param *hdutype - Stores the HDUType of the deleted HDU (can be NULL if not needed)
   */
-  void dalFITS::deleteHDU (int *hdutype=NULL)
+  void rmFITS::deleteHDU (int *hdutype=NULL)
   {
     if (fits_delete_hdu(fptr, hdutype ,&fitsstatus_p))
       {
-        throw "dalFITS::deleteHDU";
+        throw "rmFITS::deleteHDU";
       }
   }
 
   //_____________________________________________________________________________
   //                                                                writeChecksum
 
-  void dalFITS::writeChecksum()
+  void rmFITS::writeChecksum()
   {
     if (fits_write_chksum(fptr, &fitsstatus_p))
       {
-        throw "dalFITS::writeChecksum";
+        throw "rmFITS::writeChecksum";
       }
   }
 
@@ -1856,14 +1856,14 @@ void dalFITS::readZLine (double *line,
     \param dataok - bool indicating that data part of hdu is ok
     \param hduok - bool indicating that hdu is ok
   */
-  void dalFITS::verifyChecksum (bool &dataok,
+  void rmFITS::verifyChecksum (bool &dataok,
                                 bool &hduok)
   {
     int dataok_int=0, hduok_int=0;
 
     if (fits_verify_chksum(fptr, &dataok_int, &hduok_int, &fitsstatus_p))
       {
-        throw "dalFITS::verifyChecksum";
+        throw "rmFITS::verifyChecksum";
       }
 
     // convert int dataok and int hduk to bools
@@ -1881,13 +1881,13 @@ void dalFITS::readZLine (double *line,
       \param &value - string to hold content of value
       \param &comment - string to hold content of comment
     */
-  void dalFITS::parseValue (std::string &card,
+  void rmFITS::parseValue (std::string &card,
                             std::string &value,
                             std::string &comment)
   {
     if (fits_parse_value(const_cast<char *>(card.c_str()), const_cast<char *>(value.c_str()), const_cast<char *>(comment.c_str()), &fitsstatus_p))
       {
-        throw "dalFITS::parseValue";
+        throw "rmFITS::parseValue";
       }
   }
 
@@ -1902,13 +1902,13 @@ void dalFITS::readZLine (double *line,
     \param value - value of key to look for
     \param dtype - data type of that key/value
   */
-  char dalFITS::getKeytype (std::string &value)
+  char rmFITS::getKeytype (std::string &value)
   {
     char dtype;
 
     if (fits_get_keytype(const_cast<char *>(value.c_str()), &dtype, &fitsstatus_p))
       {
-        throw "dalFITS::getKeytype";
+        throw "rmFITS::getKeytype";
       }
 
     return dtype;
@@ -1920,13 +1920,13 @@ void dalFITS::readZLine (double *line,
   /*!
     \param card - Card to determine class of
   */
-  int dalFITS::getKeyclass (std::string &card)
+  int rmFITS::getKeyclass (std::string &card)
   {
     int keyclass=0;
 
     if (fits_get_keyclass(const_cast<char *>(card.c_str())))
       {
-        throw "dalFITS::getKeyclass";
+        throw "rmFITS::getKeyclass";
       }
 
     return keyclass;
@@ -1941,14 +1941,14 @@ void dalFITS::readZLine (double *line,
 
     \return keytype - determines if the keyword is a COMMENT or not
   */
-  int dalFITS::parseTemplate (std::string &templatec,
+  int rmFITS::parseTemplate (std::string &templatec,
                               std::string &card)
   {
     int keytype=0;
 
     if (fits_parse_template(const_cast<char *>(templatec.c_str()), const_cast<char *>(card.c_str()), &keytype, &fitsstatus_p))
       {
-        throw "dalFITS::parseTemplate";
+        throw "rmFITS::parseTemplate";
       }
 
     return keytype;
@@ -1966,13 +1966,13 @@ void dalFITS::readZLine (double *line,
 
     \param hdu to write to (default 1)
   */
-  void dalFITS::writeRMHeader (int hdu)
+  void rmFITS::writeRMHeader (int hdu)
   {
     moveAbsoluteHDU(hdu);
 
     if(readHDUType()!=IMAGE_HDU) // Check if it is an image extension
-      throw "dalFITS:writeRMHeader HDU is not an image extension";
-    // Copy dalFITS image header
+      throw "rmFITS:writeRMHeader HDU is not an image extension";
+    // Copy rmFITS image header
 
     // Write individual header keywords to FITS
 
@@ -1987,7 +1987,7 @@ void dalFITS::readZLine (double *line,
 
     \param filename - Name of the file to check for its existence
   */
-  bool dalFITS::fileExists (const std::string &filename)
+  bool rmFITS::fileExists (const std::string &filename)
   {
     struct stat stFileInfo;
     bool blnReturn;
@@ -2025,9 +2025,9 @@ void dalFITS::readZLine (double *line,
       \param os -- Output stream to which the summary is going to be written
   */
 
-  void dalFITS::summary (std::ostream &os)
+  void rmFITS::summary (std::ostream &os)
   {
-    os << "[dalFITS] Summary of object properties" << std::endl;
+    os << "[rmFITS] Summary of object properties" << std::endl;
     os << "-- Status of last cfitsio operation = " << fitsstatus_p << std::endl;
   }
 
