@@ -29,9 +29,7 @@ class EchoPingEventWrapper : public GenericEventWrapper {
 private:
     EchoPingEvent* my_event;
 public:
-    EchoPingEventWrapper() {
-        this->my_event = new EchoPingEvent;
-    }
+    EchoPingEventWrapper();
     double get_pt();
     void set_pt(double);
     LOFAR::TYPES::uint16 get_seqnr();
@@ -44,14 +42,8 @@ class EchoEchoEventWrapper : public GenericEventWrapper {
 private:
     EchoEchoEvent* my_event;
 public:
-    EchoEchoEventWrapper(LOFAR::MACIO::GCFEvent* my_event) {
-        this->my_event = new EchoEchoEvent(*my_event);
-    }
-    EchoEchoEventWrapper(GenericEventWrapper& my_gev) {
-        LOFAR::MACIO::GCFEvent* event_ptr;
-        event_ptr = my_gev.get_event_ptr();
-        this->my_event = new EchoEchoEvent(*event_ptr);
-    }
+    EchoEchoEventWrapper(LOFAR::MACIO::GCFEvent*);
+    EchoEchoEventWrapper(GenericEventWrapper&);
     double get_pt();
     double get_et();
     LOFAR::TYPES::uint16 get_seqnr();
@@ -63,8 +55,10 @@ class EP_Interface {
 private:
     LOFAR::MACIO::EventPort* echoPort;
 public:
-    EP_Interface(std::string);
-
+    // Has to be defined here, or Boost doesn't see it.
+    EP_Interface(std::string host = "") {
+        this->echoPort = new LOFAR::MACIO::EventPort("EchoServer:test", false, ECHO_PROTOCOL, host, true);
+    }
     GenericEventWrapper receive_event();
     void send_event(GenericEventWrapper*);
 };

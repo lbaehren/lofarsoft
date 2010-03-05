@@ -13,7 +13,7 @@ LOG4CPLUS = -I/data/sys/opt/LofIm/external/log4cplus/builds/log4cplus-1.0.2-3/in
 BPYTHON   = -I/usr/include/python2.5 -lboost_python -lpython2.5
 
 ep_echo: echo_protocol sb_protocol
-	g++ -fPIC -shared -o ep_echo.so ep_echo.cc Echo_Protocol.cc SB_Protocol.cc -I. $(MACSRC) $(COMMONSRC) $(LOFARCONF) $(COMMONINC) $(MACINC) $(LOG4CPLUS) $(BPYTHON) -lbfd
+	g++ -fPIC -shared -o ep_echo.so ep_echo.cc ep_definitions.cc Echo_Protocol.cc SB_Protocol.cc -I. $(MACSRC) $(COMMONSRC) $(LOFARCONF) $(COMMONINC) $(MACINC) $(LOG4CPLUS) $(BPYTHON) -lbfd
 
 ep_control: controller_protocol sb_protocol
 	g++ -fPIC -shared -o ep_control.so ep_control.cc Controller_Protocol.cc SB_Protocol.cc -I. $(MACSRC) $(COMMONSRC) $(LOFARCONF) $(COMMONINC) $(MACINC) $(APLINC) $(GCFINC) $(LOG4CPLUS) $(BPYTHON) -lbfd
