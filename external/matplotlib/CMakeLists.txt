@@ -61,7 +61,7 @@ if (NOT HAVE_MATPLOTLIB OR MATPLOTLIB_FORCE_BUILD)
       URL ${have_matplotlib_tgz}
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${MATPLOTLIB_BINARY_DIR}/setup.py build
-      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${MATPLOTLIB_BINARY_DIR}/setup.py install --home=${USG_INSTALL_PREFIX}
+      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${MATPLOTLIB_BINARY_DIR}/setup.py install --prefix=  --home=${USG_INSTALL_PREFIX}
       )
   else (have_matplotlib_tgz)
     status (WARNING "[Matplotlib] Unable to build project - no sources found!")
