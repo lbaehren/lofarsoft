@@ -10,7 +10,6 @@
 #include <boost/python.hpp>
 #include <string>
 #include <sys/time.h>
-#include <iostream>
 
 class GenericEventWrapper {
 private:
@@ -61,8 +60,9 @@ public:
 };
         
 class EP_Interface {
-public:
+private:
     LOFAR::MACIO::EventPort* echoPort;
+public:
     EP_Interface(std::string);
 
     GenericEventWrapper receive_event();
