@@ -3,13 +3,8 @@
 
 #include <lofar_config.h>
 #include <Common/LofarLogger.h>
-#include <MACIO/EventPort.h>
-#include <MACIO/MACServiceInfo.h>
-#include "Echo_Protocol.ph"
-
-#include <boost/python.hpp>
-#include <string>
 #include <sys/time.h>
+#include "Echo_Protocol.ph"
 
 class GenericEventWrapper {
 private:
@@ -49,18 +44,6 @@ public:
     LOFAR::TYPES::uint16 get_seqnr();
     virtual LOFAR::TYPES::uint16 get_signal() { return this->my_event->signal; }
     virtual EchoEchoEvent* get_event_ptr() { return this->my_event; }
-};
-        
-class EP_Interface {
-private:
-    LOFAR::MACIO::EventPort* echoPort;
-public:
-    // Has to be defined here, or Boost doesn't see it.
-    EP_Interface(std::string host = "") {
-        this->echoPort = new LOFAR::MACIO::EventPort("EchoServer:test", false, ECHO_PROTOCOL, host, true);
-    }
-    GenericEventWrapper receive_event();
-    void send_event(GenericEventWrapper*);
 };
 
 #endif

@@ -1,24 +1,4 @@
-#include "ep_echo.h"
-
-//
-// Event Port Interface
-//
-
-//EP_Interface::EP_Interface(std::string host = "") {
-//    this->echoPort = new LOFAR::MACIO::EventPort("EchoServer:test", false, ECHO_PROTOCOL, host, true);
-//}
-
-GenericEventWrapper EP_Interface::receive_event()
-{
-    LOFAR::MACIO::GCFEvent* ackPtr;
-    ackPtr = echoPort->receive();
-    GenericEventWrapper event(ackPtr);
-    return event;
-}
-
-void EP_Interface::send_event(GenericEventWrapper* wrapped_event) {
-    this->echoPort->send(wrapped_event->get_event_ptr());
-};
+#include "eventwrappers.h"
 
 //
 // Specific event types

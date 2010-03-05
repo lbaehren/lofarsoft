@@ -1,4 +1,5 @@
-#include "ep_echo.h"
+#include "ep_interface.h"
+#include "eventwrappers.h"
 #include <boost/python.hpp>
 
 BOOST_PYTHON_MODULE(ep_echo) {
