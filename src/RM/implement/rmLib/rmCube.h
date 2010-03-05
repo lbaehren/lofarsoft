@@ -1,49 +1,57 @@
-/*!
-  \class rmCube
-  
-  \ingroup RM
-  
-  \brief Provides methods for handling a complete Faraday Rotation Measure cube
-  
-  \author Sven Duscha
-  
-  \date 15.05.09.
-  
-  \test trmCube.cc
-  
-  <h3>Prerequisite</h3>
-  
-  <ul type="square">
-  <li>rm
-  </ul>
-    
-  <h3>Synopsis</h3>
-
-  The rmCube class provides methods for handling Faraday cube objects. It stores the cube attributes (dimensions and Faraday depths), and a pointer to a buffer used for computation
-  of RM values. Depending on the settings of bufferDimensions this buffer can used as line-of-sight, tile or (sub-)Cube buffer to store computed Faraday depths.
-    
-  <h3>Example(s)</h3>
-  
-*/ 
 
 #ifndef RM_CUBE_H
 #define RM_CUBE_H
 
+#include <vector>
 #include "rm.h"
 #include "rmio.h"
-#include <vector>
 
-class rmCube : public rm , public rmio
-{
+namespace RM {
+  
+  /*!
+    \class rmCube
+    \ingroup RM
+    
+    \brief Provides methods for handling a complete Faraday Rotation Measure cube
+    
+    \author Sven Duscha
+    
+    \date 15/05/2009
+    
+    \test trmCube.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type="square">
+    <li>rm
+    </ul>
+    
+    <h3>Synopsis</h3>
+    
+    The rmCube class provides methods for handling Faraday cube objects. It stores
+    the cube attributes (dimensions and Faraday depths), and a pointer to a buffer
+    used for computation of RM values. Depending on the settings of bufferDimensions
+    this buffer can used as line-of-sight, tile or (sub-)Cube buffer to store
+    computed Faraday depths.
+    
+    <h3>Example(s)</h3>
+    
+  */ 
+  class rmCube : public rm , public rmIO
+  {
   private:
-    int xSize;		//!> horizontal size in pixels
-    int ySize;		//!> vertical size in pixels
-    int faradaySize;	//!> total Farday range covered
-
-    int currentX;	//!> current X position in cube
-    int currentY;	//!> current Y position in cube
-    int currentFaradayDepth;	//!> current Faraday Depth
-
+    
+    //! Horizontal size in pixels
+    int xSize;
+    //! Vertical size in pixels
+    int ySize;
+    //! Total Farday range covered
+    int faradaySize;
+    
+    int currentX;	              //!> current X position in cube
+    int currentY;	              //!> current Y position in cube
+    int currentFaradayDepth;    //!> current Faraday Depth
+    
     // Image plane dimensions
     double ra;			//!> total RA of field
     double dec;		//!> total DEC of field
@@ -59,7 +67,7 @@ class rmCube : public rm , public rmio
     
     std::string rmAlgorithm;					//!> algorithm used to compute RM
     std::string errorEstimationAlgorithm;	//!> algorithm used for error estimation
-
+    
     double *buffer; 									//!> pointer to buffer for computed Faraday depths
     std::vector<int> bufferDimensions;			//!> dimensions of buffer (line, tile, plane,...)
   
@@ -68,23 +76,46 @@ class rmCube : public rm , public rmio
     std::vector<double> deltaLambdaSqs;		//!> delta lambda squareds that belong to RM cube input image
     std::vector<double> weights;					//!> weighting factors for channels
     std::string weightingAlgorithm;				//!> algorithm used to compute weights
-    std::vector<std::complex<double> > rmsf;	//!> Rotation Measure Spread Function
+    //! Rotation Measure Spread Function
+    std::vector<std::complex<double> > rmsf;
   
   public:
-    rmCube();											//! empty constructor without initial values
-    rmCube(int x, int y, int faradaySize);	//! default constructor with dimensions
-    //! construct a rmCube from given faradaySize and stepsize
-    rmCube(int x, int y, int faradaySize, double stepsize);
-    rmCube(int, int, std::vector<double>); 	//! constructor giving individual faradayDepths vector
 
-    ~rmCube();											//! destructor
+    // === Construction =========================================================
 
-    // Methods to access attributes
-    int getXSize();				//! get XSize of Faraday cube
-    int getYSize();				//! get YSize of Faraday cube
-    int getFaradaySize();		//! get FaradaySize of Faraday cube
-    int getCurrentX();			//! get current X position in Faraday cube
-    int getCurrentY();			//! get current Y position in Faraday cube
+    //! Empty constructor without initial values
+    rmCube();
+    //! Argumented constructor with dimensions
+    rmCube (int x,
+	    int y,
+	    int faradaySize);
+    //! Construct a rmCube from given faradaySize and stepsize
+    rmCube (int x,
+	    int y,
+	    int faradaySize,
+	    double stepsize);
+    //! Constructor giving individual faradayDepths vector
+    rmCube (int x,
+	    int y,
+	    std::vector<double>);
+
+    // === Destruction ==========================================================
+    
+    //! Destructor
+    ~rmCube();
+
+    // === Parameter access =====================================================
+
+    //! Get XSize of Faraday cube
+    int getXSize();
+    //! Get YSize of Faraday cube
+    int getYSize();
+    //! Get FaradaySize of Faraday cube
+    int getFaradaySize();
+    //! Get current X position in Faraday cube
+    int getCurrentX();
+    //! Get current Y position in Faraday cube
+    int getCurrentY();
     
     int setCurrentX(int currentX);	//! set current X position in Faraday cube
     int setCurrentY(int currentY);	//! set current Y position in Faraday cube   
@@ -139,7 +170,12 @@ class rmCube : public rm , public rmio
 
     // High-level RM compute functions
     void computePlane(double faradayDepth);				//! compute one Faraday plane for faradayDepth
-    void computeCube();											//! compute the whole Cube with paramaters from attributes
-};
+
+    //! Compute the whole Cube with paramaters from attributes
+    void computeCube();
+
+  }; // END -- class rmCube
+
+} // END -- namespace RM
 
 #endif

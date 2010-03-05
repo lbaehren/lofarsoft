@@ -1,18 +1,20 @@
-// Program for testing of high-level noise generating functions
-//
-// File:		tnoise.cpp
-// Author:		Sven Duscha (sduscha@mpa-garching.mpg.de)
-// Date:		14-10-2009
-// Last change:		14-10-2009
 
 #include <iostream>
 #include "rmnoise.h"
 
 using namespace std;
 
+/*!
+  \file trmnoise.cpp
+  \ingroup RM
+  \brief Program for testing of high-level noise generating functions
+  
+  \author Sven Duscha (sduscha@mpa-garching.mpg.de)
+  \date 14-10-2009 (Last change: 14-10-2009)
+*/
 int main(int argc, char **argv)
 {
-  rmnoise RMnoise;		// create rmnoise object
+  RM::rmNoise RMnoise;		// create rmnoise object
   vector<double> noise(100);	// noise vector
   
   RMnoise.createNoiseVector(noise, 100, "gaussian", 0);

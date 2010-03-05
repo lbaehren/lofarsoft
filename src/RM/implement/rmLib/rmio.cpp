@@ -1,10 +1,3 @@
-/* 	Implementation of RM I/O functions mainly needed for testing
-	
-		File:			rmio.cpp
-		Author:			Sven Duscha (sduscha@mpa-garching.mpg.de)
-		Date:			01-08-2009
-		Last change:	26-10-2009
-*/
 
 #include <iostream>				// C++/STL iostream
 #include <fstream>				// file stream I/O
@@ -13,122 +6,129 @@
 
 using namespace std;
 
-/*!
-  \brief Read the distribution of measured frequencies from a text file
-  
-  \param filename -- name of txt file with frequency distribution
-  \param frequencies -- vector with frequencies
-*/
-void rmio::readFrequencies(const std::string &filename, vector<double> &frequencies)
-{
-//  vector<double> frequencies;		// hold list of lambda squareds
-  double frequency;			// individual lambda squared read per line
+namespace RM {  //  BEGIN -- namespace RM
 
-  //----------------------------------------------------------
-  // Check if filename is text file FITS file or HDF5 file
-  if(filename.find(".hdf5", 1)!=string::npos)	// if HDF5 use dal
-  {
-    // TODO
-    // use dal to read lambda Squareds and deltaLambdaSquareds from file
-  }
-  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
-  {
-    // TODO
-    // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
-  }
-  else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
-  {
-    ifstream infile(const_cast<const char*>(filename.c_str()), ifstream::in);	// open file for reading
+  //_____________________________________________________________________________
+  //                                                              readFrequencies
   
-    if(infile.fail())
-    {
-      throw "rmio::readFrequencies failed to open file";
-    }
-  
-//	 unsigned int i=0;
+  /*!
+    \brief Read the distribution of measured frequencies from a text file
+    
+    \param filename -- name of txt file with frequency distribution
+    \param frequencies -- vector with frequencies
+  */
+  void rmIO::readFrequencies(const std::string &filename, vector<double> &frequencies)
+  {
+    //  vector<double> frequencies;		// hold list of lambda squareds
+    double frequency;			// individual lambda squared read per line
+    
+    //----------------------------------------------------------
+    // Check if filename is text file FITS file or HDF5 file
+    if(filename.find(".hdf5", 1)!=string::npos)	// if HDF5 use dal
+      {
+	// TODO
+	// use dal to read lambda Squareds and deltaLambdaSquareds from file
+      }
+    else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+      {
+	// TODO
+	// use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+      }
+    else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
+      {
+	ifstream infile(const_cast<const char*>(filename.c_str()), ifstream::in);	// open file for reading
+	
+	if(infile.fail())
+	  {
+	    throw "rmIO::readFrequencies failed to open file";
+	  }
+	
+	//	 unsigned int i=0;
 	frequencies.resize(0);
-    while(infile.good())	// as long as we can read from the file...
-    {
-      infile >> frequency;	// read double into temporary variable
-      frequencies.push_back (frequency);	// push back into lambdaSquareds vector
-    }
-
-    infile.close();		// close the text file
+	while(infile.good())	// as long as we can read from the file...
+	  {
+	    infile >> frequency;	// read double into temporary variable
+	    frequencies.push_back (frequency);	// push back into lambdaSquareds vector
+	  }
+	
+	infile.close();		// close the text file
+      }
   }
-}
-
-
-/*!
-  \brief Read the distribution of measured frequencies from a text file
   
-  \param filename -- name of txt file with frequency distribution
-  \param frequencies -- vector with frequencies
-  \param deltafreqs - vector to take delta frequencies (computed from difference)
-*/
-void rmio::readFrequenciesDiffFrequencies(	const std::string &filename, 
-															vector<double> &frequencies,
-															vector<double> &deltafreqs)
-{
-//  vector<double> frequencies;		// hold list of lambda squareds
-  double frequency=0;				// individual lambda squared read per line
-  double prev_frequency=0;			// value of previous frequency read
-  double difference=0;					// difference between current and previous frequency
-
-  //----------------------------------------------------------
-  // Check if filename is text file FITS file or HDF5 file
-  if(filename.find(".hdf5", 1)!=string::npos)	// if HDF5 use dal
+  //_____________________________________________________________________________
+  //                                               readFrequenciesDiffFrequencies
+  
+  /*!
+    \brief Read the distribution of measured frequencies from a text file
+    
+    \param filename -- name of txt file with frequency distribution
+    \param frequencies -- vector with frequencies
+    \param deltafreqs - vector to take delta frequencies (computed from difference)
+  */
+  void rmIO::readFrequenciesDiffFrequencies (const std::string &filename, 
+					     vector<double> &frequencies,
+					     vector<double> &deltafreqs)
   {
-    // TODO
-    // use dal to read lambda Squareds and deltaLambdaSquareds from file
+    //  vector<double> frequencies;		// hold list of lambda squareds
+    double frequency=0;				// individual lambda squared read per line
+    double prev_frequency=0;			// value of previous frequency read
+    double difference=0;					// difference between current and previous frequency
+    
+    //----------------------------------------------------------
+    // Check if filename is text file FITS file or HDF5 file
+    if(filename.find(".hdf5", 1)!=string::npos)	// if HDF5 use dal
+      {
+	// TODO
+	// use dal to read lambda Squareds and deltaLambdaSquareds from file
+      }
+    else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
+      {
+	// TODO
+	// use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
+      }
+    else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
+      {
+	ifstream infile(const_cast<const char*>(filename.c_str()), ifstream::in);	// open file for reading
+	
+	if(infile.fail())
+	  {
+	    throw "rmIO::readFrequencies failed to open file";
+	  }
+	
+	unsigned int i=0;					// vector index variable
+	while(infile.good())				// as long as we can read from the file...
+	  {
+	    infile >> frequency;				// read double into temporary variable
+	    
+	    if(frequencies.size() > i)					// if there is sufficient space in frequencies vector...
+	      frequencies[i]=frequency;				// write to index i
+	    else												// otherwise
+	      frequencies.push_back (frequency);	// push back into lambdaSquareds vector
+	    
+	    if(prev_frequency!=0)
+	      {
+		difference=frequency-prev_frequency;
+		deltafreqs.push_back (difference);			// write into delta vector
+	      }
+	    prev_frequency=frequency;							// keep as previous frequency
+	  }
+	deltafreqs.push_back (difference);					// write last diff into delta vector
+	
+	infile.close();		// close the text file
+      }
+    
+    //  return frequencies;	 // return frequencies vector
   }
-  else if(filename.find(".fits", 1)!=string::npos)	// if FITS file  use dalFITS table
-  {
-    // TODO
-    // use dalFITSTable to read lambda Squareds and deltaLambdaSquareds from file
-  }
-  else if(filename.find(".txt", 1)!=string::npos)	// if it is text file
-  {
-    ifstream infile(const_cast<const char*>(filename.c_str()), ifstream::in);	// open file for reading
   
-    if(infile.fail())
-    {
-      throw "rmio::readFrequencies failed to open file";
-    }
   
-	 unsigned int i=0;					// vector index variable
-    while(infile.good())				// as long as we can read from the file...
-    {
-      infile >> frequency;				// read double into temporary variable
-
-		if(frequencies.size() > i)					// if there is sufficient space in frequencies vector...
-			frequencies[i]=frequency;				// write to index i
-		else												// otherwise
-      	frequencies.push_back (frequency);	// push back into lambdaSquareds vector
-   	
-		if(prev_frequency!=0)
-		{
-	      difference=frequency-prev_frequency;
-			deltafreqs.push_back (difference);			// write into delta vector
-		}
-		prev_frequency=frequency;							// keep as previous frequency
-    }
-	 deltafreqs.push_back (difference);					// write last diff into delta vector
-
-    infile.close();		// close the text file
-  }
-
-//  return frequencies;	 // return frequencies vector
-}
-
-
-
-/*!
-  \brief Read the distribution of measured lambda squareds from a text file
   
-  \param filename -- name of txt file with lambda squared distribution
-  \param lambdaSquareds -- vector with lambda squareds
-*/
-void rmio::readLambdaSquareds(const std::string &filename, vector<double> &lambdaSquareds)
+  /*!
+    \brief Read the distribution of measured lambda squareds from a text file
+    
+    \param filename -- name of txt file with lambda squared distribution
+    \param lambdaSquareds -- vector with lambda squareds
+  */
+void rmIO::readLambdaSquareds(const std::string &filename, vector<double> &lambdaSquareds)
 {
 //  vector<double> lambdaSquareds;	// hold list of lambda squareds
   double lambdaSq;			// individual lambda squared read per line
@@ -151,7 +151,7 @@ void rmio::readLambdaSquareds(const std::string &filename, vector<double> &lambd
   
     if(infile.fail())
     {
-      throw "rmio::readLambdaSquareds failed to open file";
+      throw "rmIO::readLambdaSquareds failed to open file";
     }
   
 //	 unsigned int i=0;		// vector index variable
@@ -177,7 +177,7 @@ void rmio::readLambdaSquareds(const std::string &filename, vector<double> &lambd
   \param frequencies - vector with frequencies
   \param deltaFrequencies - vector to keep delta Frequencies
 */
-void rmio::readFrequenciesAndDeltaFrequencies(	const std::string &filename,
+void rmIO::readFrequenciesAndDeltaFrequencies(	const std::string &filename,
  																vector<double> &frequencies,
 																vector<double> &deltaFrequencies)
 {
@@ -203,7 +203,7 @@ void rmio::readFrequenciesAndDeltaFrequencies(	const std::string &filename,
   
     if(infile.fail())
     {
-      throw "rmio::readFrequenciesAndDeltaFrequencies failed to open file";
+      throw "rmIO::readFrequenciesAndDeltaFrequencies failed to open file";
     }
 
 //    unsigned int i=0;						// vector index variable if vector has sufficient size
@@ -241,7 +241,7 @@ void rmio::readFrequenciesAndDeltaFrequencies(	const std::string &filename,
   \param lambdaSquareds - vector with lambda squareds
   \param deltaLambdaSquareds - vector with delta lambda squareds
 */
-void rmio::readLambdaSquaredsAndDeltaSquareds(	const std::string &filename,  
+void rmIO::readLambdaSquaredsAndDeltaSquareds(	const std::string &filename,  
 																vector<double> &lambdaSquareds,
  																vector<double> &deltaLambdaSquareds)
 {
@@ -267,7 +267,7 @@ void rmio::readLambdaSquaredsAndDeltaSquareds(	const std::string &filename,
   
     if(infile.fail())
     {
-      throw "rmio::readLambdaSquaredsAndDeltaSquareds failed to open file";
+      throw "rmIO::readLambdaSquaredsAndDeltaSquareds failed to open file";
     }
   
 	 lambdaSquareds.resize(0);
@@ -315,7 +315,7 @@ void rmio::readLambdaSquaredsAndDeltaSquareds(	const std::string &filename,
 	\param &delta_lambda_squareds - vector to store delta lambda squared values in
 	\param &intensities				-	vector<complex<double> > to store complex polarized intensities
 */
-void rmio::readSimDataFromFile(	const std::string &filename, 
+void rmIO::readSimDataFromFile(	const std::string &filename, 
 											vector<double> &lambdasquareds, 
 											vector<double> &delta_lambda_squareds, 
 											vector<complex<double> > &intensities)
@@ -334,7 +334,7 @@ void rmio::readSimDataFromFile(	const std::string &filename,
 
    if(infile.fail())
    {
-      throw "rmio::readSimDataFromFile failed to open file";
+      throw "rmIO::readSimDataFromFile failed to open file";
    }
 	
 	while(infile.good())
@@ -368,7 +368,7 @@ void rmio::readSimDataFromFile(	const std::string &filename,
 	\param rmsf - complex vector containing rmsf intensities
 	\param filename - file to read from (can be FITS/HDF5 or txt file)
 */
-void rmio::readRMSFfromFile(	vector<complex<double> > &rmsf,
+void rmIO::readRMSFfromFile(	vector<complex<double> > &rmsf,
 										const string &filename)
 {
 	double real=0, imag=0;		// real and imaginary part of RMSF intensity to read per line
@@ -392,7 +392,7 @@ void rmio::readRMSFfromFile(	vector<complex<double> > &rmsf,
 
 	   if(infile.fail())
 	   {
-	      throw "rmio::readRMSFfromFile failed to open file";
+	      throw "rmIO::readRMSFfromFile failed to open file";
 	   }
 	
 		while(infile.good())
@@ -415,7 +415,7 @@ void rmio::readRMSFfromFile(	vector<complex<double> > &rmsf,
 	}
 	else		// otherwise, if file extension was not recognized
 	{
-		throw "rmio::readRMSFfromFile file extension was not recognized";
+		throw "rmIO::readRMSFfromFile file extension was not recognized";
 	}
 }
 
@@ -427,7 +427,7 @@ void rmio::readRMSFfromFile(	vector<complex<double> > &rmsf,
 	\param rmsf - complex vector containing rmsf intensities
 	\param filename - file to read from (can be FITS/HDF5 or txt file)
 */
-void rmio::readRMSFfromFile(	vector<double> &faradaydepths,
+void rmIO::readRMSFfromFile(	vector<double> &faradaydepths,
 										vector<complex<double> > &rmsf,
 										const string &filename)
 {
@@ -452,7 +452,7 @@ void rmio::readRMSFfromFile(	vector<double> &faradaydepths,
 
 	   if(infile.fail())
 	   {
-	      throw "rmio::readRMSFfromFile failed to open file";
+	      throw "rmIO::readRMSFfromFile failed to open file";
 	   }
 	
 		while(infile.good())
@@ -484,7 +484,7 @@ void rmio::readRMSFfromFile(	vector<double> &faradaydepths,
 	}
 	else		// otherwise, if file extension was not recognized
 	{
-		throw "rmio::readRMSFfromFile file extension was not recognized";
+		throw "rmIO::readRMSFfromFile file extension was not recognized";
 	}
 }
 
@@ -495,7 +495,7 @@ void rmio::readRMSFfromFile(	vector<double> &faradaydepths,
  \param v - vector to read into
  \param filename - name of file to read from (FITS, HDF5 or TXT)
 */
-void rmio::readVectorFromFile(std::vector<double> &v, const std::string &filename)
+void rmIO::readVectorFromFile(std::vector<double> &v, const std::string &filename)
 {
 	double value=0;					// value to read per line
 	
@@ -517,7 +517,7 @@ void rmio::readVectorFromFile(std::vector<double> &v, const std::string &filenam
 		
 		if(infile.fail())
 		{
-			throw "rmio::readVectorFromFile failed to open file";
+			throw "rmIO::readVectorFromFile failed to open file";
 		}
 		
 		v.clear();
@@ -531,7 +531,7 @@ void rmio::readVectorFromFile(std::vector<double> &v, const std::string &filenam
 	}
 	else		// otherwise, if file extension was not recognized
 	{
-		throw "rmio::readVectorFromFile file extension was not recognized";
+		throw "rmIO::readVectorFromFile file extension was not recognized";
 	}
 }
 
@@ -543,7 +543,7 @@ void rmio::readVectorFromFile(std::vector<double> &v, const std::string &filenam
  \param vec2 - real vector 1 to read from second column of file
  \param filename - file to read from (can be FITS/HDF5 or txt file)
 */
-void rmio::read2VectorsFromFile(vector<double> &vec1,
+void rmIO::read2VectorsFromFile(vector<double> &vec1,
 								vector<double> &vec2,
 								const string &filename)
 {
@@ -568,7 +568,7 @@ void rmio::read2VectorsFromFile(vector<double> &vec1,
 		
 		if(infile.fail())
 		{
-			throw "rmio::readRMSFfromFile failed to open file";
+			throw "rmIO::readRMSFfromFile failed to open file";
 		}
 		
 		while(infile.good())
@@ -600,7 +600,7 @@ void rmio::read2VectorsFromFile(vector<double> &vec1,
 	}
 	else		// otherwise, if file extension was not recognized
 	{
-		throw "rmio::readRMSFfromFile file extension was not recognized";
+		throw "rmIO::readRMSFfromFile file extension was not recognized";
 	}
 }
 
@@ -612,13 +612,13 @@ void rmio::read2VectorsFromFile(vector<double> &vec1,
  \param vec2 - real vector 1 to write to second column of file 
  \param filename - fileanme to write to (can be FITS/HDF5 or txt file)
 */
-void rmio::write2VectorsToFile(const vector<double> &vec1, const vector<double> &vec2, const string &filename)
+void rmIO::write2VectorsToFile(const vector<double> &vec1, const vector<double> &vec2, const string &filename)
 {
 	// Check data integrity
 	if(vec1.size()==0)
-		throw "rmio::write2VectorsToFile vec1 has size 0";
+		throw "rmIO::write2VectorsToFile vec1 has size 0";
 	if(vec2.size()==0)
-		throw "rmio::write2VectorsToFile vec2 has size 0";
+		throw "rmIO::write2VectorsToFile vec2 has size 0";
 	
 	
 	//----------------------------------------------------------
@@ -640,7 +640,7 @@ void rmio::write2VectorsToFile(const vector<double> &vec1, const vector<double> 
 		
 		if(outfile.fail())
 		{
-			throw "rmio::writeRMSFtoFile failed to open file";
+			throw "rmIO::writeRMSFtoFile failed to open file";
 		}
 		
 		for(unsigned int i=0; i < vec1.size(); i++)
@@ -660,11 +660,11 @@ void rmio::write2VectorsToFile(const vector<double> &vec1, const vector<double> 
 	\param rmsf - complex vector with RMSF intensities in Q and U
 	\param filename - fileanme to write to (can be FITS/HDF5 or txt file)
 */
-void rmio::writeRMSFtoFile(const vector<complex<double> > &rmsf, const string &filename)
+void rmIO::writeRMSFtoFile(const vector<complex<double> > &rmsf, const string &filename)
 {
 	// Check data integrity
 	if(rmsf.size()==0)
-		throw "rmio::writeRMSFtoFile";
+		throw "rmIO::writeRMSFtoFile";
 		
 	//----------------------------------------------------------
 	// Check if filename is text file FITS file or HDF5 file
@@ -685,7 +685,7 @@ void rmio::writeRMSFtoFile(const vector<complex<double> > &rmsf, const string &f
 
 		if(outfile.fail())
 		{
-			throw "rmio::writeRMSFtoFile failed to open file";
+			throw "rmIO::writeRMSFtoFile failed to open file";
 		}
 	
 		for(unsigned int i=0; i < rmsf.size(); i++)
@@ -706,13 +706,13 @@ void rmio::writeRMSFtoFile(const vector<complex<double> > &rmsf, const string &f
 	\param rmsf - complex vector with RMSF intensities in Q and U
 	\param filename - fileanme to write to (can be FITS/HDF5 or txt file)
 */
-void rmio::writeRMSFtoFile(	const vector<double> &faradaydepths,
+void rmIO::writeRMSFtoFile(	const vector<double> &faradaydepths,
 							const vector<complex<double> > &rmsf, 
 							const string &filename)
 {
 	// Check data integrity
 	if(rmsf.size()==0)
-		throw "rmio::writeRMSFtoFile";
+		throw "rmIO::writeRMSFtoFile";
 		
 	//----------------------------------------------------------
 	// Check if filename is text file FITS file or HDF5 file
@@ -733,7 +733,7 @@ void rmio::writeRMSFtoFile(	const vector<double> &faradaydepths,
 
 		if(outfile.fail())
 		{
-			throw "rmio::writeRMSFtoFile failed to open file";
+			throw "rmIO::writeRMSFtoFile failed to open file";
 		}
 	
 		for(unsigned int i=0; i < rmsf.size(); i++)
@@ -746,7 +746,7 @@ void rmio::writeRMSFtoFile(	const vector<double> &faradaydepths,
 		outfile.flush();
 	}
 	else
-		throw "rmio::writeRMSFtoFile unrecognized file extension";
+		throw "rmIO::writeRMSFtoFile unrecognized file extension";
 }
 
 
@@ -757,7 +757,7 @@ void rmio::writeRMSFtoFile(	const vector<double> &faradaydepths,
   \param filename - name of file to create or append to
   \param mode - write mode: overwrite, append
 */
-void rmio::writeRMtoFile(const vector<double> &rm, const std::string &filename)
+void rmIO::writeRMtoFile(const vector<double> &rm, const std::string &filename)
 {
   unsigned int i=0;	// loop variable
  
@@ -779,7 +779,7 @@ void rmio::writeRMtoFile(const vector<double> &rm, const std::string &filename)
   \param rm - vector containing data (real double) to write to file
   \param filename - name of file to create or append to
 */
-void rmio::writeRMtoFile(const vector<complex<double> > &rm, const std::string &filename)
+void rmIO::writeRMtoFile(const vector<complex<double> > &rm, const std::string &filename)
 {
   ofstream outfile(const_cast<const char *>(filename.c_str()), ofstream::out);
 
@@ -801,12 +801,12 @@ void rmio::writeRMtoFile(const vector<complex<double> > &rm, const std::string &
   \param rm - vector containing data (real double) to write to file
   \param filename - name of file to create or append to
 */
-void rmio::writeRMtoFile(const vector<double> &lambdasq, 
+void rmIO::writeRMtoFile(const vector<double> &lambdasq, 
 						 const vector<complex<double> > &rm, 
 						 const std::string &filename)
 {
   if(lambdasq.size()!=rm.size())
-	 throw "rmio::writeRMtoFile lambdasq and rm vector differ in size";
+	 throw "rmIO::writeRMtoFile lambdasq and rm vector differ in size";
 	
   ofstream outfile(const_cast<const char *>(filename.c_str()), ofstream::out);
 
@@ -829,12 +829,12 @@ void rmio::writeRMtoFile(const vector<double> &lambdasq,
 	\param polint - vector containing complex polarized intensities
 	\param filename - name of text file to write to
 */
-void rmio::writePolIntToFile(const std::vector<double> &frequencies, 
+void rmIO::writePolIntToFile(const std::vector<double> &frequencies, 
 							 const std::vector<std::complex<double> > &polint, 
 							 const std::string &filename)
 {
   if(frequencies.size()!=polint.size())
-	 throw "rmio::writePolIntToFile frequencies and polint vector differ in size";
+	 throw "rmIO::writePolIntToFile frequencies and polint vector differ in size";
 
   ofstream outfile(const_cast<const char *>(filename.c_str()), ofstream::out);
 
@@ -857,12 +857,12 @@ void rmio::writePolIntToFile(const std::vector<double> &frequencies,
 	\param intensities - vector containing single polarized intensities (Q or U)
 	\param filename - name of text file to write to
 */
-void rmio::writeIntToFile(const std::vector<double> &frequencies, 
+void rmIO::writeIntToFile(const std::vector<double> &frequencies, 
 						  const std::vector<double> &intensities, 
 						  const std::string &filename)
 {
   if(frequencies.size()!=intensities.size())
-	 throw "rmio::writePolIntToFile frequencies and polint vector differ in size";
+	 throw "rmIO::writePolIntToFile frequencies and polint vector differ in size";
 
   ofstream outfile(const_cast<const char *>(filename.c_str()), ofstream::out);
 
@@ -893,10 +893,10 @@ void rmio::writeIntToFile(const std::vector<double> &frequencies,
 	
 	\return check - true if image format is correct, false if not
 */
-bool rmio::checkImageCube(const std::string &filename, int hdu=1)
+bool rmIO::checkImageCube(const std::string &filename, int hdu=1)
 {
 	if(filename.size()==0 || filename=="")
-		throw "rmio::checkImageCube no filename provided";
+		throw "rmIO::checkImageCube no filename provided";
 		
 	//----------------------------------------------------------
 	// Check if filename is text file FITS file or HDF5 file
@@ -917,7 +917,7 @@ bool rmio::checkImageCube(const std::string &filename, int hdu=1)
 	}	
 	else
 	{
-		throw "rmio::checkImageCube unknown file extension";
+		throw "rmIO::checkImageCube unknown file extension";
 	}
 	
 	return false;
@@ -933,10 +933,10 @@ bool rmio::checkImageCube(const std::string &filename, int hdu=1)
 	\return check - true if image format is correct, false if not
 */
 /*
-bool rmio::checkImageCubeQ(const std::string &filename, int hdu=1)
+bool rmIO::checkImageCubeQ(const std::string &filename, int hdu=1)
 {
 	if(filename.size()==0 || filename=="")
-		throw "rmio::checkImageCube no filename provided";
+		throw "rmIO::checkImageCube no filename provided";
 			
 	//----------------------------------------------------------
 	// Check if filename is text file FITS file or HDF5 file
@@ -949,10 +949,10 @@ bool rmio::checkImageCubeQ(const std::string &filename, int hdu=1)
 		DAL::dalFITS fitsimage(filename, READONLY);				// create and open dalFITS image object
 		
 		if(fitsimage.getImgDim()!=3)							// must have 3 axes
-			throw "rmio::checkImageCubeQ image cube has wrong dimensions";
+			throw "rmIO::checkImageCubeQ image cube has wrong dimensions";
 		
 		if(fitsimage.getImgType()!=-32) 						// 32-Bit double format (-32)
-			throw "rmio::checkImageCubeQ pixel values are not in 32 bit";
+			throw "rmIO::checkImageCubeQ pixel values are not in 32 bit";
 
 		fitsimage.close();										// close FITS image
 
@@ -960,7 +960,7 @@ bool rmio::checkImageCubeQ(const std::string &filename, int hdu=1)
 	}	
 	else
 	{
-		throw "rmio::checkImageCube unknown file extension";
+		throw "rmIO::checkImageCube unknown file extension";
 	}	
 	
 	return false;
@@ -977,10 +977,10 @@ bool rmio::checkImageCubeQ(const std::string &filename, int hdu=1)
 	\return check - true if image format is correct, false if not
 */
 /*
-bool rmio::checkImageCubeU(const std::string &filename, int hdu=1)
+bool rmIO::checkImageCubeU(const std::string &filename, int hdu=1)
 {
 	if(filename.size()==0 || filename=="")
-		throw "rmio::checkImageCube no filename provided";
+		throw "rmIO::checkImageCube no filename provided";
 		
 	//----------------------------------------------------------
 	// Check if filename file FITS file or HDF5 file
@@ -993,10 +993,10 @@ bool rmio::checkImageCubeU(const std::string &filename, int hdu=1)
 		DAL::dalFITS fitsimage(filename, READONLY);			// create and open dalFITS image object
 
 		if(fitsimage.getImgDim()!=3)			// must have 3 axes
-			throw "rmio::checkImageCubeU image cube has wrong dimensions";
+			throw "rmIO::checkImageCubeU image cube has wrong dimensions";
 		
 		if(fitsimage.getImgType()!=-32) 		// 32-Bit double format (-32)
-			throw "rmio::checkImageCubeU pixel values are not in 32 bit";
+			throw "rmIO::checkImageCubeU pixel values are not in 32 bit";
 
 		fitsimage.close();										// close FITS image
 
@@ -1004,7 +1004,7 @@ bool rmio::checkImageCubeU(const std::string &filename, int hdu=1)
 	}	
 	else
 	{
-		throw "rmio::checkImageCube unknown file extension";
+		throw "rmIO::checkImageCube unknown file extension";
 	}
 	
 	return false;
@@ -1018,7 +1018,7 @@ bool rmio::checkImageCubeU(const std::string &filename, int hdu=1)
   	\param filename - text file containing input list with 2-D FITS files
 	\param list - vector of strings to contain 2-D FITS filenames
 */
-void rmio::readFileList(const string &listfilename, vector<string> &list)
+void rmIO::readFileList(const string &listfilename, vector<string> &list)
 {
         string filenameitem;    // local variable for filename
 
@@ -1038,3 +1038,5 @@ void rmio::readFileList(const string &listfilename, vector<string> &list)
 
       infile.close();
 }
+  
+}  //  END -- namespace RM

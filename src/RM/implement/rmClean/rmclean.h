@@ -12,7 +12,7 @@
 
 using namespace std;
 
-class rmclean : public rmio
+class rmclean : public RM::rmIO
 {
   vector<complex<double> > dirtyMap;					//! dirty Map on which is worked on
   //	vector<complex<double> > minorCleanComponent;	//! vector with a set of minor cycle CLEAN components

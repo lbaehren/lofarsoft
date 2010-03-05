@@ -2,9 +2,18 @@
 ##__________________________________________________________
 ## Assemble list of source files
 
-if (HAVE_ITPP)
-  list (APPEND rm_tests trmnoise.cpp)
-endif (HAVE_ITPP)
+file (GLOB rm_tests *.cc *.cpp)
+
+if (NOT HAVE_ITPP)
+  list (REMOVE_item rm_tests trmnoise.cpp)
+endif (NOT HAVE_ITPP)
+
+if (NOT HAVE_FFTW3)
+  list (REMOVE_item rm_tests tPreshift.cpp)
+endif (NOT HAVE_FFTW3)
+
+##__________________________________________________________
+## Build the test programs
 
 foreach (src ${rm_tests})
   ## get the name of the file without the extension
@@ -14,6 +23,8 @@ foreach (src ${rm_tests})
   add_executable(${src} ${src}${extension})
   ## linker instructions
   target_link_libraries(${src} rm ${rm_link_libraries})
+  ## Testing
+  add_test (${src} ${src})
   ## installation instructions
   install (TARGETS ${src}
     RUNTIME DESTINATION bin

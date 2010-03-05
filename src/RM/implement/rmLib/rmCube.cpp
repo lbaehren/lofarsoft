@@ -10,140 +10,143 @@
 #include <math.h>				// mathematics library
 #include <string.h>
 
-//#include <casa/Arrays.h>			// CASA library functions
-//#include <casa/Arrays/Array.h>
-//#include <casa/Utilities/DataType.h>
-//#include <tables/Tables/TiledFileAccess.h>
-//#include <lattices/Lattices/TiledShape.h>
+#ifdef HAVE_CASA
+#include <casa/Arrays.h>
+#include <casa/Arrays/Array.h>
+#include <casa/Utilities/DataType.h>
+#include <tables/Tables/TiledFileAccess.h>
+#include <lattices/Lattices/TiledShape.h>
+#endif 
 
 #include "rmCube.h"				// rmCube class declarations
 
 using namespace std;
 
-
-//===============================================================================
-//
-//  Constructions / Destruction
-//
-//===============================================================================
-
-/*!
-  \brief Default destructor
-*/
-rmCube::~rmCube()
-{
-  delete[] this->buffer;	// delete memory of buffer which was created with new!!! 
+namespace RM {
   
-  // TODO: also check for plane buffer etc.
-}
-
-
-/*!
-  \brief Empty constructor
-*/
-rmCube::rmCube()
-{
-  // Initialize all buffers with NULL
-  buffer=NULL;
-
-  //   cout << "empty constructor" << endl;
-}
-
-
-/*!
-  \brief rmCube constructor, creates a RM cube with given dimensions
-
-  \param x - Horizontal dimension in pixels
-  \param y - Vertical dimension in pixels
-  \param faradaySize - total extension in Faraday depth
-  \param stepsize - Step size between Faraday depths
-*/
-rmCube::rmCube(int x, int y, int faradaySize, double stepsize)
-{
-  int steps=0;	// number of steps=faradaySize/stepsize
-  int i=0;	// loop variable
-
-  this->xSize=x;
-  this->ySize=y;
-  this->faradaySize=faradaySize;
-
-  this->buffer=NULL;	// set buffer to NULL (no buffer associated, yet)
-
-  // Use stepsize to create a vector of equally spaced Faraday depths
-  if(fmod(faradaySize, stepsize))
+  //===============================================================================
+  //
+  //  Constructions / Destruction
+  //
+  //===============================================================================
+  
+  /*!
+    \brief Default destructor
+  */
+  rmCube::~rmCube()
   {
-    throw "rmCube: faradaySize is not an integral multiple of stepsize";
-  }
-  else
-  {
-    steps=faradaySize/stepsize;
-    this->faradayDepths.resize(steps);	// set faradayDepths vector's size to size of steps
-  
-    for(i=0; i<steps; i++)
-    {
-      faradayDepths[i]=i*stepsize;
-    }
-  } 
-  
-  // Set remaining attributes to defaults
-  this->currentX=0;
-  this->currentY=0;
-  this->currentFaradayDepth=0;
-  this->ra=0;
-  this->dec=0;
-  this->ra_low=0;
-  this->ra_high=0;
-  this->dec_low=0;
-  this->dec_high=0;
-
-//   cout << "rmCube::rmCube(int x, int y, int faradaySize, double stepsize) constructor" << endl;
-}
-
-
-/*!
-  \brief Constructor with setting individual Faraday depth vector
-
-  \param x - Horizontal dimension in pixels
-  \param y - Vertical dimension in pixels
-  \param faradayDepths - total extension in Faraday depth
-*/
-rmCube::rmCube(int x, int y, vector<double> faradayDepths)
-{
-  // Check parameters for consistency
-  if(x<=0)
-	 throw "rmCube::rmCube x dimension is <=0";
-  if(y<=0)
-	 throw "rmCube::rmCube y dimension is <=0";
-  if(faradayDepths.size()==0)
-	 throw "rmCube::rmCube faradayDepths has size 0";
-
-  this->xSize=x;
-  this->ySize=y;
-  this->faradaySize=faradayDepths.size();
-
-  this->buffer=NULL;	// set buffer to NULL (no buffer associated, yet)
-  
-  // Set remaining attributes to defaults
-  this->currentX=0;
-  this->currentY=0;
-  this->currentFaradayDepth=0;
-  this->ra=0;
-  this->dec=0;
-  this->ra_low=0;
-  this->ra_high=0;
-  this->dec_low=0;
-  this->dec_high=0;
-
-  for(unsigned int i=0; i<faradayDepths.size(); i++)		// loop over faradayDepths vector given
-  {
-    faradayDepths[i]=faradayDepths[i];			// write Faraday depth into list to probe for
+    delete[] this->buffer;	// delete memory of buffer which was created with new!!! 
+    
+    // TODO: also check for plane buffer etc.
   }
   
-//   cout << "rmCube::rmCube(int x, int y, vector<double> faradayDepths) constructor" << endl;  
-}
-
-
-//===============================================================================
+  
+  /*!
+    \brief Empty constructor
+  */
+  rmCube::rmCube()
+  {
+    // Initialize all buffers with NULL
+    buffer=NULL;
+    
+    //   cout << "empty constructor" << endl;
+  }
+  
+  
+  /*!
+    \brief rmCube constructor, creates a RM cube with given dimensions
+    
+    \param x - Horizontal dimension in pixels
+    \param y - Vertical dimension in pixels
+    \param faradaySize - total extension in Faraday depth
+    \param stepsize - Step size between Faraday depths
+  */
+  rmCube::rmCube(int x, int y, int faradaySize, double stepsize)
+  {
+    int steps=0;	// number of steps=faradaySize/stepsize
+    int i=0;	// loop variable
+    
+    this->xSize=x;
+    this->ySize=y;
+    this->faradaySize=faradaySize;
+    
+    this->buffer=NULL;	// set buffer to NULL (no buffer associated, yet)
+    
+    // Use stepsize to create a vector of equally spaced Faraday depths
+    if(fmod(faradaySize, stepsize))
+      {
+	throw "rmCube: faradaySize is not an integral multiple of stepsize";
+      }
+    else
+      {
+	steps=faradaySize/stepsize;
+	this->faradayDepths.resize(steps);	// set faradayDepths vector's size to size of steps
+	
+	for(i=0; i<steps; i++)
+	  {
+	    faradayDepths[i]=i*stepsize;
+	  }
+      } 
+    
+    // Set remaining attributes to defaults
+    this->currentX=0;
+    this->currentY=0;
+    this->currentFaradayDepth=0;
+    this->ra=0;
+    this->dec=0;
+    this->ra_low=0;
+    this->ra_high=0;
+    this->dec_low=0;
+    this->dec_high=0;
+    
+    //   cout << "rmCube::rmCube(int x, int y, int faradaySize, double stepsize) constructor" << endl;
+  }
+  
+  
+  /*!
+    \brief Constructor with setting individual Faraday depth vector
+    
+    \param x - Horizontal dimension in pixels
+    \param y - Vertical dimension in pixels
+    \param faradayDepths - total extension in Faraday depth
+  */
+  rmCube::rmCube(int x, int y, vector<double> faradayDepths)
+  {
+    // Check parameters for consistency
+    if(x<=0)
+      throw "rmCube::rmCube x dimension is <=0";
+    if(y<=0)
+      throw "rmCube::rmCube y dimension is <=0";
+    if(faradayDepths.size()==0)
+      throw "rmCube::rmCube faradayDepths has size 0";
+    
+    this->xSize=x;
+    this->ySize=y;
+    this->faradaySize=faradayDepths.size();
+    
+    this->buffer=NULL;	// set buffer to NULL (no buffer associated, yet)
+    
+    // Set remaining attributes to defaults
+    this->currentX=0;
+    this->currentY=0;
+    this->currentFaradayDepth=0;
+    this->ra=0;
+    this->dec=0;
+    this->ra_low=0;
+    this->ra_high=0;
+    this->dec_low=0;
+    this->dec_high=0;
+    
+    for(unsigned int i=0; i<faradayDepths.size(); i++)		// loop over faradayDepths vector given
+      {
+	faradayDepths[i]=faradayDepths[i];			// write Faraday depth into list to probe for
+      }
+    
+    //   cout << "rmCube::rmCube(int x, int y, vector<double> faradayDepths) constructor" << endl;  
+  }
+  
+  
+  //===============================================================================
 //
 //  Methods
 //
@@ -558,3 +561,5 @@ vector<complex<double> > rmCube::inverseFourier()
   return rm::RMSF(faradayDepths, lambdaSqs, weights, deltaLambdaSqs, false);
 }
 */
+
+}  //  END -- namespace RM

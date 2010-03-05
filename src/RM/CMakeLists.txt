@@ -9,6 +9,10 @@ project (RM)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.5)
 
+## Load CMake modules
+include (CTest)
+enable_testing()
+
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
@@ -35,8 +39,6 @@ endif (NOT USG_ROOT)
 ##
 ## =============================================================================
 
-option (RM_BUILD_TESTS          "Build the test programs?"                   YES )
-option (RM_BUILD_EXTERNAL_TESTS "Build test programs for external packages?" YES )
 option (RM_COMPILER_WARNINGS    "Enable standard set of compiler warnings?"  YES )
 option (RM_DEBUGGING_MESSAGES   "Print debugging information?"               NO  )
 option (RM_VERBOSE_CONFIGURE    "Verbose output during configuration?"       NO  )
@@ -138,15 +140,6 @@ include (FindWCSLIB)
 ## =============================================================================
 
 ## -------------------------------------------------------------------
-## Handle option: testing mode on/off
-
-if (RM_BUILD_TESTS OR RM_BUILD_EXTERNAL_TESTS)
-  set (UPDATE_TYPE "svn")
-  include (CTest)
-  enable_testing()
-endif (RM_BUILD_TESTS OR RM_BUILD_EXTERNAL_TESTS)
-
-## -------------------------------------------------------------------
 ## Handle option: debugging messages on/off
 
 if (RM_DEBUGGING_MESSAGES)
@@ -224,6 +217,8 @@ include_directories (BEFORE
   ${RM_SOURCE_DIR}
   ${RM_SOURCE_DIR}/implement
   ${RM_SOURCE_DIR}/implement/rmLib
+  ${RM_SOURCE_DIR}/implement/rmClean
+  ${RM_SOURCE_DIR}/implement/rmSim
   ${RM_SOURCE_DIR}/implement/rmWiener
   ${RM_SOURCE_DIR}/apps/rmcmd
   ${RM_SOURCE_DIR}/test
@@ -254,12 +249,12 @@ else (HAVE_CFITSIO)
   message (STATUS "[RM] Missing or incomplete installation of CFITSIO!")
 endif (HAVE_CFITSIO)
 
-if (HAVE_WCSLIB)
-  include_directories (${WCSLIB_INCLUDES})
-  add_definitions (-DHAVE_WCSLIB)
-else (HAVE_WCSLIB)
-  message (STATUS "[RM] Missing or incomplete installation of WCSLIB!")
-endif (HAVE_WCSLIB)
+if (HAVE_FFTW3)
+  include_directories (${FFTW3_INCLUDES})
+  add_definitions (-DHAVE_FFTW3)
+else (HAVE_FFTW3)
+  message (STATUS "[RM] Missing or incomplete installation of FFTW3!")
+endif (HAVE_FFTW3)
 
 if (HAVE_HDF5)
   include_directories (${HDF5_INCLUDES})
@@ -275,21 +270,45 @@ else (HAVE_ITPP)
   message (STATUS "[RM] IT++ installation incomplete!")
 endif (HAVE_ITPP)
 
+if (HAVE_WCSLIB)
+  include_directories (${WCSLIB_INCLUDES})
+  add_definitions (-DHAVE_WCSLIB)
+else (HAVE_WCSLIB)
+  message (STATUS "[RM] Missing or incomplete installation of WCSLIB!")
+endif (HAVE_WCSLIB)
+
 ## =============================================================================
 ##
-##  Configuration for the subdirectories
+##  External libraries
 ##
 ## =============================================================================
 
 set (rm_link_libraries
   ${DAL_LIBRARIES}
   ${CASA_LIBRARIES}
-  ${HDF5_LIBRARIES}
-  ${ITPP_LIBRARIES}
   ${CFITSIO_LIBRARIES}
+  ${FFTW3_LIBRARIES}
   ${WCSLIB_LIBRARIES}
   ${LAPACK_LIBRARIES}
   )
+
+if (ITPP_LIBRARIES)
+  list (APPEND rm_link_libraries ${ITPP_LIBRARIES})
+endif (ITPP_LIBRARIES)
+
+if (HDF5_LIBRARIES)
+  list (APPEND rm_link_libraries ${HDF5_LIBRARIES})
+endif (HDF5_LIBRARIES)
+
+if (HAVE_LIBZ)
+  list (APPEND rm_link_libraries ${HAVE_LIBZ})
+endif (HAVE_LIBZ)
+
+## =============================================================================
+##
+##  Configuration for the subdirectories
+##
+## =============================================================================
 
 add_subdirectory (implement)
 add_subdirectory (test)

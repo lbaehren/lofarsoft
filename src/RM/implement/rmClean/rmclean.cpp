@@ -1,29 +1,25 @@
-// Test and development of an RM CLEAN to later clean RM cubes
-//
-//	File:				rmclean.cpp
-//	Author:			Sven Duscha (sduscha@mpa-garching.mpg.de)
-//	Date:				05-07-2009
-// Last change:	22-08-2009
-
 
 #include <iostream>
 #include <algorithm>
 #include <math.h>
-#include <limits>				// maximum value for variables on architecture/compiler
+#include <limits>   /* maximum value for variables on architecture/compiler */
 #include <fftw3.h>
 #include "rmclean.h"
 
 using namespace std;
 
+// ==============================================================================
+//
+//  Construction
+//
+// ==============================================================================
 
 /*!
-	\brief Default constructor
-	
-	\param length - length of FFTs, i.e. number of lambda squared channels
+  \param length - length of FFTs, i.e. number of lambda squared channels
 */
-rmclean::rmclean(const unsigned int length)
+rmclean::rmclean (const unsigned int length)
 {
-	numIterations=0;			// initialize current number of iterations
+  numIterations=0;			// initialize current number of iterations
 
 	if(length==0)
 		throw "rmclean::rmclean length is 0";
@@ -151,9 +147,12 @@ vector<double> rmclean::hogbom(const vector<double> &data, const double threshol
 	double max=numeric_limits<double>::max( );		// initiliaze with architecture/compiler maximum value
 	unsigned int maxpos=0;							// position of maximum found
 	
-	double *Gauss=NULL, *Dirac=NULL;				// input arrays for FFTW FT
-	fftw_complex *fftwGauss, *fftwDirac;		// output arrays for FFTW FT
-	fftw_plan fftwplanGauss, fftwplanDirac;	// fftw_plans
+// 	double *Gauss=NULL;          /*  Input array for FFTW FT   */
+// 	double *Dirac=NULL;          /*  Input array for FFTW FT   */
+// 	fftw_complex *fftwGauss;     /*  Output array for FFTW FT  */
+// 	fftw_complex  *fftwDirac;    /*  Output array for FFTW FT  */
+// 	fftw_plan fftwplanGauss;     /*  FFTW plan for Gauss data  */
+// 	fftw_plan fftwplanDirac;     /*  FFTW plan for Dirac data  */
 	
 	//-------------------------------------------------------------
 	// Data integrity checks

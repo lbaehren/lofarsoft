@@ -1,10 +1,3 @@
-// Implementation of RMSim class to simulate Faraday emission regions
-//
-// File:		rmsim.cpp
-// Author:		Sven Duscha (sduscha@mpa-garching.mpg.de)
-// Date:		22-08-2009
-// Last change:		14-10-2009
-
 
 #include <iostream>
 #include <vector>
@@ -12,277 +5,300 @@
 #include <cmath>
 #include "rmsim.h"
 
-
 using namespace std;
 
-//******************************************************************************
-//
-// Algorithm functions to add an additional emission region to an existing LOS
-//
-//*******************************************************************************
+namespace RM {
 
+  // ============================================================================
+  //
+  //  Construction
+  //
+  // ============================================================================
+  
+  rmsim::rmsim()
+  {
+  }
+  
+  rmsim::rmsim (vector<double> &faradaydepths,
+		vector<double> &frequencies,
+		vector<double> &weights)
+  {
+  }
 
-/*!
-	\brief Constructor
-*/
-rmsim::rmsim()
-{
-	
-	
-}
+  // ============================================================================
+  //
+  //  Destruction
+  //
+  // ============================================================================
+  
+//   rmsim::~rmsim()
+//   { 
+//   }
 
-
-/*!
-	\brief Constructor creating an object initialized with parameters
-*/
-/*
-rmsim::rmsim(vector<double> &faradaydepths, vector<double> &frequencies, vector<double> &weights)
-{
-	
-}
-*/
-
-/*!
-	\brief Destructor
-*/
-/*
-rmsim::~rmsim()
-{
-	
-}
-*/
- 
-
-/*!
-	\brief Add a Faraday screen emission (width=1) to the Faraday LOS vector
-	
-	\param los - vector containing simulated Faraday emission as total power P
-	\param position - position within the vector (index) where the Faraday screen is set to
-	\param height - polarized intensity P (Jy/rad m^-2/RMSF) of Faraday screen
-	\param rmsf - FWHM of RMSF (optional parameter to normalize to different RMSFs)
-*/
-void rmsim::addFaradayScreen(vector<double> &los, const unsigned int position, double height, const double rmsffwhm)
-{
-//	unsigned int length=los.size();			// keep length of vector in own variable
-	
-	// Check input parameters
-	if(los.size()==0)
-		throw "rmsim::addFaradayScreen los vector has size 0";
-	if(position < 0 || position > los.size())
-		throw "rmsim::addFaradayScreen position is out of range";
-	if(height<=0)	
-		throw "rmsim::addFaradayScreen height <=0";
-	if(rmsffwhm<0)
-		throw "rmsim::addFaradayScreen rmsffwhm < 0";
-		
-	//-------------------------------------------
-
-	if(rmsffwhm!=0)							// if RMSF FWHM to normalize to was given
-	{
-		height=height/rmsffwhm;				// normalize polarized emission to that RMSF
-	}
-	
-	los[position]+=height;					// put 1-dimensional Faraday screen at position
-}
-
-
-/*!
-	\brief Add a Faraday emission block of height and width  to an existing LOS
-	
-	\param los - vector containing simulated Faraday emission as total power P
-	\param position - position within the vector (index) where the Faraday block (centre) is set to
-	\param height - polarized intensity P (Jy/rad m^-2/RMSF) of Faraday block
-	\param rmsf - FWHM of RMSF (optional parameter to normalize to different RMSFs)	
-*/
-void rmsim::addFaradayBlock(vector<double> &los, const unsigned int position, double height, const unsigned int width, const double rmsffwhm)
-{
-	unsigned int length=los.size();
-	
-	// Check input parameters
-	if(length==0)
-		throw "rmsim::addFaradayBlock los vector has size 0";
-	if(position < 0 || position > length)
-		throw "rmsim::addFaradayBlock position is out of range";
-	if(height<=0)	
-		throw "rmsim::addFaradayBlock height <=0";
-	if(rmsffwhm<0)
-		throw "rmsim::addFaradayBlock rmsffwhm < 0";
-
-
-	//-------------------------------------------
-
-	if(rmsffwhm!=0)					// if RMSF FWHM to normalize to was given
-	{
-		height=height/rmsffwhm;		// normalize polarized emission to that RMSF
-	}
-
-	for(unsigned int i=position - (width/2); i < position + (width/2); i++)
-	{
-		los[i]+=height;
-	}
-	
-}
-
-
-/*!
-	\brief Add a smooth Gaussian Faraday emission region to the line of sight vector
-	
-	\param los - line of sight vector containing Faraday emission simulation
-	\param position - position within the vector (index) where the Faraday block (centre) is set to
-	\param height - polarized intensity P (Jy/rad m^-2/RMSF) of Faraday block
-	\param rmsffwhm - FWHM of RMSF (optional parameter to normalize to different RMSFs)	
-*/
-void rmsim::addFaradayGaussian(vector<double> &los, const unsigned int position, double height, const unsigned int fwhm, const double rmsffwhm)
-{
-	// Check input parameters
-	if(los.size()==0)
-		throw "rmsim::addFaradayGaussian los vector has size 0";
-	if(position < 0 || position > los.size())
-		throw "rmsim::addFaradayGaussian position is out of range";
-	if(height<=0)	
-		throw "rmsim::addFaradayGaussian height <= 0";
-	if(fwhm<=0)
-		throw "rmsim::addFaradayGaussian fwhm <= 0";
-	if(rmsffwhm<0)
-		throw "rmsim::addFaradayGaussian rmsffwhm < 0";
-
-	//-----------------------------------------------------------
-
-	if(rmsffwhm!=0)					// if RMSF FWHM to normalize to was given
-	{
-		height=height/rmsffwhm;		// normalize polarized emission to that RMSF
-	}
-	
-	createGaussian(los, height, fwhm, position);		// create a Gaussian and add it to the line of sight vector los
-}
-
-
-/*!
-	\brief Add a Faraday slab emission region to the line of sight vector
-
-	\param los - line of sight vector containing Faraday emission simulation
-	\param positionleft - position within the vector (index) where the Faraday slab left edge is set to
-	\param positionright - position within the vector (index) where the Faraday slab right edge is set to	
-	\param heightleft - polarized intensity P (Jy/rad m^-2/RMSF) on the left side of Faraday slab
-	\param heightright - polarized intensity P (Jy/rad m^-2/RMSF) on the right side of Faraday slab
-	\param rmsffwhm - FWHM of RMSF (optional parameter to normalize to different RMSFs)
-*/
-void addFaradaySlab(vector<double> &los, const unsigned int positionleft, const unsigned int positionright, double heightleft, double heightright, const double rmsffwhm)
-{
-	// Check input parameters
-	if(los.size()==0)
-		throw "rmsim::addFaradaySlab los vector has size 0";
-	if(positionleft < 0 || positionleft > los.size())
-		throw "rmsim::addFaradaySlab position is out of range";
-	if(positionright < 0 || positionright > los.size())
-		throw "rmsim::addFaradaySlab position is out of range";
-	if(heightleft<=0)	
-		throw "rmsim::addFaradaySlab heightleft <= 0";
-	if(heightright<=0)	
-		throw "rmsim::addFaradaySlab heightright <= 0";
-	if(rmsffwhm<0)
-		throw "rmsim::addFaradaySlab rmsffwhm < 0";
-
-	//-----------------------------------------------------------
-
-	if(rmsffwhm!=0)								// if RMSF FWHM to normalize to was given
-	{
-		heightleft=heightleft/rmsffwhm;		// normalize polarized emission to that RMSF
-		heightright=heightright/rmsffwhm;	// normalize polarized emission to that RMSF
-	}	
-	
-	
-}	
-
-
-//******************************************************************************
-//
-// Algorithm functions to add an additional emission region to the class internal LOS
-//
-//*******************************************************************************
-
-/*!
-	\brief Resize the class internal Faraday LOS vector
-	
-	\param size - size to resize class internal LOS vector to
-*/
-void rmsim::faradayLOSresize(unsigned int size)
-{
-	if(size==0)
-		throw "rmsim::faradayLOSresize size is 0";
-	else
-		faradayLOS.resize(size);
-}
-
-
-/*!
-	\brief Add a Faraday screen emission (width=1) to the class internal Faraday LOS vector
-	
-	\param position - position within the vector (index) where the Faraday screen is set to
-	\param height - polarized intensity P (Jy/rad m^-2/RMSF) of Faraday screen
-	\param rmsf - FWHM of RMSF (optional parameter to normalize to different RMSFs)
-*/
-void rmsim::addFaradayScreen(const unsigned int position, double height, const double rmsffwhm=0)
-{
-//	unsigned int length=faradayLOS.size();			// keep length of vector in own variable
-	
-	// Check input parameters
-	if(faradayLOS.size()==0)
-		throw "rmsim::addFaradayScreen faradayLOS vector has size 0";
-	if(position < 0 || position > faradayLOS.size())
-		throw "rmsim::addFaradayScreen position is out of range";
-	if(height<=0)	
-		throw "rmsim::addFaradayScreen height <=0";
-	if(rmsffwhm<0)
-		throw "rmsim::addFaradayScreen rmsffwhm < 0";
-		
-	//-------------------------------------------
-
-	if(rmsffwhm!=0)							// if RMSF FWHM to normalize to was given
-	{
-		height=height/rmsffwhm;				// normalize polarized emission to that RMSF
-	}
-	
-	faradayLOS[position]=height;			// put 1-dimensional Faraday screen at position
-}
-
-
-/*!
-	\brief Add a Faraday emission block of height and width to the internal faradayLOS vector
-	
-	\param position - position within the vector (index) where the Faraday block (centre) is set to
-	\param height - polarized intensity P (Jy/rad m^-2/RMSF) of Faraday block
-	\param rmsf - FWHM of RMSF (optional parameter to normalize to different RMSFs)	
-*/
-void rmsim::addFaradayBlock(const unsigned int position, double height, const unsigned int width, const double rmsffwhm=0)
-{
-	unsigned int length=faradayLOS.size();
-	
-	// Check input parameters
-	if(length==0)
-		throw "rmsim::addFaradayBlock faradayLOS vector has size 0";
-	if(position < 0 || position > length)
-		throw "rmsim::addFaradayBlock position is out of range";
-	if(height<=0)	
-		throw "rmsim::addFaradayBlock height <=0";
-	if(rmsffwhm<0)
-		throw "rmsim::addFaradayBlock rmsffwhm < 0";
-
-
-	//-------------------------------------------
-
-	if(rmsffwhm!=0)					// if RMSF FWHM to normalize to was given
-	{
-		height=height/rmsffwhm;		// normalize polarized emission to that RMSF
-	}
-
-	for(unsigned int i=position - (width/2); i < position + (width/2); i++)
-	{
-		faradayLOS[i]=height;
-	}
-	
-}
-
+  // ============================================================================
+  //
+  //  Methods
+  //
+  // ============================================================================
+  
+  //_____________________________________________________________________________
+  //                                                             addFaradayScreen
+  
+  /*!
+    \param los - vector containing simulated Faraday emission as total power P
+    \param position - position within the vector (index) where the Faraday screen
+           is set to
+    \param height - polarized intensity P (Jy/rad m^-2/RMSF) of Faraday screen
+    \param rmsf - FWHM of RMSF (optional parameter to normalize to different RMSFs)
+  */
+  void rmsim::addFaradayScreen (vector<double> &los,
+				const unsigned int position,
+				double height,
+				const double rmsffwhm)
+  {
+    /* keep length of vector in own variable */
+    //	unsigned int length=los.size();
+    
+    // Check input parameters
+    if(los.size()==0)
+      throw "rmsim::addFaradayScreen los vector has size 0";
+    if(position < 0 || position > los.size())
+      throw "rmsim::addFaradayScreen position is out of range";
+    if(height<=0)	
+      throw "rmsim::addFaradayScreen height <=0";
+    if(rmsffwhm<0)
+      throw "rmsim::addFaradayScreen rmsffwhm < 0";
+    
+    //-------------------------------------------
+    
+    /* If RMSF FWHM to normalize to was given */
+    if(rmsffwhm!=0) {
+      /* Normalize polarized emission to that RMSF */
+      height=height/rmsffwhm;
+    }
+    
+    /* Put 1-dimensional Faraday screen at position */
+    los[position]+=height;
+  }
+  
+  //_____________________________________________________________________________
+  //                                                              addFaradayBlock
+  
+  /*!
+    \param los - vector containing simulated Faraday emission as total power P
+    \param position - position within the vector (index) where the Faraday block
+           (centre) is set to
+    \param height - polarized intensity P (Jy/rad m^-2/RMSF) of Faraday block
+    \param rmsf - FWHM of RMSF (optional parameter to normalize to different RMSFs)	
+  */
+  void rmsim::addFaradayBlock (vector<double> &los,
+			       const unsigned int position,
+			       double height,
+			       const unsigned int width,
+			       const double rmsffwhm)
+  {
+    unsigned int length=los.size();
+    
+    // Check input parameters
+    if(length==0)
+      throw "rmsim::addFaradayBlock los vector has size 0";
+    if(position < 0 || position > length)
+      throw "rmsim::addFaradayBlock position is out of range";
+    if(height<=0)	
+      throw "rmsim::addFaradayBlock height <=0";
+    if(rmsffwhm<0)
+      throw "rmsim::addFaradayBlock rmsffwhm < 0";
+    
+    
+    //-------------------------------------------
+    
+    /* If RMSF FWHM to normalize to was given */
+    if(rmsffwhm!=0) {
+      /* normalize polarized emission to that RMSF */
+      height=height/rmsffwhm;
+    }
+    
+    for (unsigned int i=position - (width/2); i < position + (width/2); i++) {
+      los[i]+=height;
+    }
+    
+  }
+  
+  //_____________________________________________________________________________
+  //                                                           addFaradayGaussian
+  
+  /*!
+    \brief Add a smooth Gaussian Faraday emission region to the line of sight vector
+    
+    \param los - line of sight vector containing Faraday emission simulation
+    \param position - position within the vector (index) where the Faraday block
+           (centre) is set to
+    \param height - polarized intensity P (Jy/rad m^-2/RMSF) of Faraday block
+    \param rmsffwhm - FWHM of RMSF (optional parameter to normalize to different RMSFs)	
+  */
+  void rmsim::addFaradayGaussian (vector<double> &los,
+				  const unsigned int position,
+				  double height,
+				  const unsigned int fwhm,
+				  const double rmsffwhm)
+  {
+    // Check input parameters
+    if(los.size()==0)
+      throw "rmsim::addFaradayGaussian los vector has size 0";
+    if(position < 0 || position > los.size())
+      throw "rmsim::addFaradayGaussian position is out of range";
+    if(height<=0)	
+      throw "rmsim::addFaradayGaussian height <= 0";
+    if(fwhm<=0)
+      throw "rmsim::addFaradayGaussian fwhm <= 0";
+    if(rmsffwhm<0)
+      throw "rmsim::addFaradayGaussian rmsffwhm < 0";
+    
+    //-----------------------------------------------------------
+    
+    if(rmsffwhm!=0)					// if RMSF FWHM to normalize to was given
+      {
+	height=height/rmsffwhm;		// normalize polarized emission to that RMSF
+      }
+    
+    createGaussian(los, height, fwhm, position);		// create a Gaussian and add it to the line of sight vector los
+  }
+  
+  //_____________________________________________________________________________
+  //                                                               addFaradaySlab
+  
+  /*!
+    \param los - line of sight vector containing Faraday emission simulation
+    \param positionleft - position within the vector (index) where the Faraday
+           slab left edge is set to
+    \param positionright - position within the vector (index) where the Faraday
+           slab right edge is set to	
+    \param heightleft - polarized intensity P (Jy/rad m^-2/RMSF) on the left
+           side of Faraday slab
+    \param heightright - polarized intensity P (Jy/rad m^-2/RMSF) on the right
+           side of Faraday slab
+    \param rmsffwhm - FWHM of RMSF (optional parameter to normalize to different
+           RMSFs)
+  */
+  void addFaradaySlab (vector<double> &los,
+		       const unsigned int positionleft,
+		       const unsigned int positionright,
+		       double heightleft,
+		       double heightright,
+		       const double rmsffwhm)
+  {
+    // Check input parameters
+    if(los.size()==0)
+      throw "rmsim::addFaradaySlab los vector has size 0";
+    if(positionleft < 0 || positionleft > los.size())
+      throw "rmsim::addFaradaySlab position is out of range";
+    if(positionright < 0 || positionright > los.size())
+      throw "rmsim::addFaradaySlab position is out of range";
+    if(heightleft<=0)	
+      throw "rmsim::addFaradaySlab heightleft <= 0";
+    if(heightright<=0)	
+      throw "rmsim::addFaradaySlab heightright <= 0";
+    if(rmsffwhm<0)
+      throw "rmsim::addFaradaySlab rmsffwhm < 0";
+    
+    //-----------------------------------------------------------
+    
+    if(rmsffwhm!=0)								// if RMSF FWHM to normalize to was given
+      {
+	heightleft=heightleft/rmsffwhm;		// normalize polarized emission to that RMSF
+	heightright=heightright/rmsffwhm;	// normalize polarized emission to that RMSF
+      }	
+    
+    
+  }	
+  
+  
+  //******************************************************************************
+  //
+  // Algorithm functions to add an additional emission region to the class internal LOS
+  //
+  //*******************************************************************************
+  
+  /*!
+    \param size - size to resize class internal LOS vector to
+  */
+  void rmsim::faradayLOSresize(unsigned int size)
+  {
+    if(size==0)
+      throw "rmsim::faradayLOSresize size is 0";
+    else
+      faradayLOS.resize(size);
+  }
+  
+  
+  /*!
+    \brief Add a Faraday screen emission (width=1) to the class internal Faraday LOS vector
+    
+    \param position - position within the vector (index) where the Faraday screen is set to
+    \param height - polarized intensity P (Jy/rad m^-2/RMSF) of Faraday screen
+    \param rmsf - FWHM of RMSF (optional parameter to normalize to different RMSFs)
+  */
+  void rmsim::addFaradayScreen(const unsigned int position, double height, const double rmsffwhm=0)
+  {
+    //	unsigned int length=faradayLOS.size();			// keep length of vector in own variable
+    
+    // Check input parameters
+    if(faradayLOS.size()==0)
+      throw "rmsim::addFaradayScreen faradayLOS vector has size 0";
+    if(position < 0 || position > faradayLOS.size())
+      throw "rmsim::addFaradayScreen position is out of range";
+    if(height<=0)	
+      throw "rmsim::addFaradayScreen height <=0";
+    if(rmsffwhm<0)
+      throw "rmsim::addFaradayScreen rmsffwhm < 0";
+    
+    //-------------------------------------------
+    
+    if(rmsffwhm!=0)							// if RMSF FWHM to normalize to was given
+      {
+	height=height/rmsffwhm;				// normalize polarized emission to that RMSF
+      }
+    
+    faradayLOS[position]=height;			// put 1-dimensional Faraday screen at position
+  }
+  
+  
+  /*!
+    \brief Add a Faraday emission block of height and width to the internal faradayLOS vector
+    
+    \param position - position within the vector (index) where the Faraday block (centre) is set to
+    \param height - polarized intensity P (Jy/rad m^-2/RMSF) of Faraday block
+    \param rmsf - FWHM of RMSF (optional parameter to normalize to different RMSFs)	
+  */
+  void rmsim::addFaradayBlock(const unsigned int position, double height, const unsigned int width, const double rmsffwhm=0)
+  {
+    unsigned int length=faradayLOS.size();
+    
+    // Check input parameters
+    if(length==0)
+      throw "rmsim::addFaradayBlock faradayLOS vector has size 0";
+    if(position < 0 || position > length)
+      throw "rmsim::addFaradayBlock position is out of range";
+    if(height<=0)	
+      throw "rmsim::addFaradayBlock height <=0";
+    if(rmsffwhm<0)
+      throw "rmsim::addFaradayBlock rmsffwhm < 0";
+    
+    
+    //-------------------------------------------
+    
+    if(rmsffwhm!=0)					// if RMSF FWHM to normalize to was given
+      {
+	height=height/rmsffwhm;		// normalize polarized emission to that RMSF
+      }
+    
+    for(unsigned int i=position - (width/2); i < position + (width/2); i++)
+      {
+	faradayLOS[i]=height;
+      }
+    
+  }
+  
 
 /*!
 	\brief Add a smooth Gaussian Faraday emission region to the internal faradayLOS vector
@@ -716,3 +732,5 @@ void rmsim::computePolarizedEmission()
 
 }
 */
+
+}  // END : namespace RM
