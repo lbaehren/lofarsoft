@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/*! 
+/*!
  HFTOOLS Version 0.2 - Basic algorithms for the CR pipeline with
   automatic wrapper generation for python.  Includes various tools to
   manipulate stl vectors in python and wrapper function for CR Tool classes.
@@ -2136,6 +2136,131 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end){
 
 
 
+//-----------------------------------------------------------------------
+//$DOCSTRING: Apply an FFT on a vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFFT
+//-----------------------------------------------------------------------
+//#define HFPP_WRAPPER_CLASS (STL)
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE_1)(data_in)()("Vector containing the data on which the FFT will be applied.")(HFPP_PAR_IS_VECTOR)(CASA)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE_2)(data_out)()("Return vector in which the inverse FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(CASA)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (uint)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class IterIn, class IterOut>
+void HFPP_FUNC_NAME(const IterIn  data_in,  const IterIn  data_in_end,
+		    const IterOut data_out, const IterOut data_out_end,
+		    const uint nyquistZone) {
+  uint channel;
+  uint blocksize = data_in_end - data_in;
+  uint fftLength = blocksize/2+1;
+  uint nofChannels = fftLength;
+  IPosition shape_in  = (1,blocksize);
+  IPosition shape_out = (1,fftLength);
+  FFTServer<Double,DComplex> fftserver(shape_in, FFTEnums::REALTOCOMPLEX);
+
+  Vector<Double> cvec_in(shape_in, reinterpret_cast<Double*>(data_in), casa::SHARE);
+  Vector<DComplex> cvec_out(shape_out, 0.);
+  IterOut it_out;
+
+  // Apply FFT
+  fftserver.fft(cvec_out, cvec_in);
+
+  // Is there some aftercare needed (checking/setting the size of the in/output vector)
+  switch (nyquistZone) {
+  case 1:
+  case 3:
+  case 5:
+    {
+      it_out = data_out;
+      channel = 0;
+      while ((it_out != data_out_end) && (channel < nofChannels)) {
+	*it_out = cvec_out(channel);
+	it_out++; channel++;
+      }
+    }
+    break;
+  case 2:
+  case 4:
+  case 6:
+    {
+      /// See datareader for implementation.
+      it_out = data_out;
+      channel = 0;
+      while ((it_out != data_out_end) && (channel < nofChannels)) {
+	*it_out = conj(cvec_out(fftLength - channel - 1));
+	it_out++; channel++;
+      }
+    }
+    break;
+  }
+  /// TODO: Check if output is correct.
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Apply an Inverse FFT on a vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hInvFFT
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_CLASS (STL)
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(data_in)()("Vector containing the input data on which the inverse FFT will be applied.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(data_out)()("Return vector in which the inverse FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (uint)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class IterIn, class IterOut>
+void HFPP_FUNC_NAME(const IterIn data_in, const IterIn data_in_end,
+		    const IterOut data_out, const IterOut data_out_end,
+		    const uint nyquistZone) {
+  // uint channel;
+  // uint blocksize = data_out_end - data_out;
+  // uint fftLength = blocksize/2 + 1;
+  // uint nofChannels = fftLength;
+  // IPosition shape_in = (1,fftLength);
+  // IPosition shape_out = (1, blocksize);
+
+  // Vector<DComplex> cvec_f(shape_in, reinterpret_cast<DComplex*>(data_in), casa::SHARE);
+  // Vector<Double> cvec_out(shape_out, 0.);
+
+  // if ((data_in_end - data_in) != fftLength) {
+  //   cerr << "[invfft] Bad input: len(data_in) != fftLength" << endl;
+  // };
+
+  // try {
+  //   Vector<DComplex> cvec_in(fftLength);
+  //   FFTServer<Double,DComplex> server(shape_out,
+  // 				      FFTEnums::REALTOCOMPLEX);
+  //   switch (nyquistZone) {
+  //   case 1:
+  //   case 3:
+  //     for (channel=0; channel<nofChannels; channel++) {
+  // 	cvec_in(channel) = cvec_f(channel);
+  //     }
+  //     break;
+  //   case 2:
+  //     for (channel=0; channel<nofChannels; channel++) {
+  // 	cvec_in(channel) = conj(cvec_f(fftLength - channel - 1));
+  //     }
+  //     break;
+  //   }
+  //   server.fft(cvec_out,cvec_in);
+  // } catch (AipsError x) {
+  //   cerr << "[invfft]" << x.getMesg() << endl;
+  // }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 
 //========================================================================
@@ -2473,7 +2598,7 @@ void HFPP_FUNC_NAME(
  \brief $DOCSTRING
  $PARDOCSTRING
 
-Example: 
+Example:
 antennaIDs=hFileGetParameter(file,"AntennaIDs")
 x=hCalTable("~/LOFAR/usg/data/lopes/LOPES-CalTable",obsdate,list(antennaIDs))
 
