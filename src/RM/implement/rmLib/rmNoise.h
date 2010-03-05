@@ -31,8 +31,10 @@
 #include <complex>
 #include <vector>
 // IT++ header files
+#ifdef HAVE_ITPP
 #include <itpp/itbase.h>
 #include <itpp/itcomm.h>
+#endif
 
 namespace RM {
   
@@ -168,11 +170,13 @@ namespace RM {
 			    double sigma,
 			    const std::string &type,
 			    const double alpha=0);
+#ifdef HAVE_ITPP
     //! Create a complex noise vector with noise characteristic specified by type
     void createNoiseVector (itpp::cvec &noise,
 			    double sigma,
 			    const std::string &type, 
 			    const double alpha=0);
+#endif
 
     //! Add noise to real signal (single polarization)
     void addNoise (std::vector<double> &signal,
@@ -184,10 +188,12 @@ namespace RM {
 		   double rms,
 		   std::string &type,
 		   double alpha=0);
+#ifdef HAVE_ITPP
     void addNoise (itpp::cvec &signal,
 		   double rms,
 		   std::string &type,
 		   double alpha=0);
+#endif
 
     // === Private methods ======================================================
 

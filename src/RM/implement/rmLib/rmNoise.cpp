@@ -129,7 +129,8 @@ namespace RM {
   
   //_____________________________________________________________________________
   //                                                            createNoiseVector
-  
+
+#ifdef HAVE_ITPP  
   /*!
     \param noise - itpp cvec vector to contain noise
     \param sigma - sigma (standard deviation) value for noise distribution
@@ -189,6 +190,7 @@ namespace RM {
       }
     */
   }
+#endif
   
   //_____________________________________________________________________________
   //                                                                     addNoise
@@ -299,7 +301,8 @@ namespace RM {
   
   //_____________________________________________________________________________
   //                                                                     addNoise
-  
+
+#ifdef HAVE_ITPP  
   /*!
     \brief Add noise to a ITTP complex signal vector cvec
     
@@ -347,10 +350,10 @@ namespace RM {
 	    signal[i]=signal[i]+noise[i];  	  // Add noise vector to signal vector
 	  }
       }
-    else if(type=="powernoise")
-      {
-	// TODO
-      }
+    else if(type=="powernoise") {
+      // TODO
+    }
   }
+#endif
   
 }  // end namespace RM
