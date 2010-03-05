@@ -6,7 +6,7 @@ event_mapping = {
 }
 
 if __name__ == "__main__":
-    ep_interface = ep_echo.EP_Interface()
+    ep_interface = ep_echo.EP_Interface("EchoServer:test", ep_echo.PROTOCOL)
     ping_event = ep_echo.EchoPingEvent()
     ep_interface.send_event(ping_event)
     generic_event = ep_interface.receive_event()

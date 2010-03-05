@@ -1,3 +1,4 @@
+#include "Echo_Protocol.ph"
 #include "ep_interface.h"
 #include "eventwrappers.h"
 #include <boost/python.hpp>
@@ -6,6 +7,7 @@ BOOST_PYTHON_MODULE(ep_echo) {
     using namespace boost::python;
 
     // These are exposed as module-level attributes in Python
+    scope().attr("PROTOCOL") = (short) ECHO_PROTOCOL;
     scope().attr("PING") = ECHO_PING;
     scope().attr("ECHO") = ECHO_ECHO;
     scope().attr("CLOCK") = ECHO_CLOCK;
@@ -25,7 +27,7 @@ BOOST_PYTHON_MODULE(ep_echo) {
         .add_property("seqnr", &EchoEchoEventWrapper::get_seqnr)
     ;
 
-    class_<EP_Interface>("EP_Interface", init<optional<std::string> >())
+    class_<EP_Interface>("EP_Interface", "EP_Interface(ServiceMask, Protocol, Host=localhost)", init<std::string, short, optional<std::string> >())
         .def("receive_event", &EP_Interface::receive_event)
         .def("send_event", &EP_Interface::send_event)
     ;

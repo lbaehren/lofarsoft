@@ -5,7 +5,6 @@
 #include <Common/LofarLogger.h>
 #include <MACIO/EventPort.h>
 #include <string>
-//#include <MACIO/MACServiceInfo.h>
 
 #include "eventwrappers.h"
 
@@ -15,19 +14,19 @@
 
 class EP_Interface {
 private:
-    LOFAR::MACIO::EventPort* echoPort;
+    LOFAR::MACIO::EventPort* my_EventPort;
 public:
-    EP_Interface(std::string host = "") {
-        this->echoPort = new LOFAR::MACIO::EventPort("EchoServer:test", false, ECHO_PROTOCOL, host, true);
+    EP_Interface(std::string servicename, short protocol_id, std::string host = "") {
+        this->my_EventPort = new LOFAR::MACIO::EventPort(servicename, false, protocol_id, host, true);
     }
     GenericEventWrapper receive_event() {
         LOFAR::MACIO::GCFEvent* ackPtr;
-        ackPtr = echoPort->receive();
+        ackPtr = my_EventPort->receive();
         GenericEventWrapper event(ackPtr);
         return event;
     }
     void send_event(GenericEventWrapper* wrapped_event) {
-        this->echoPort->send(wrapped_event->get_event_ptr());
+        this->my_EventPort->send(wrapped_event->get_event_ptr());
         }
 };
 
