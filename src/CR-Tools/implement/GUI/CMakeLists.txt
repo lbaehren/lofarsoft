@@ -17,7 +17,7 @@ endif (MATHGL_INCLUDES)
 ##_______________________________________________________________________________
 ## Pre-processing of the source files
 
-if (bin_awk)
+if (awk_executable)
 
   file (GLOB hfsplit2h_awk hfsplit2h.awk)
   file (GLOB hfanalysis_h hfanalysis.h)
@@ -34,9 +34,9 @@ if (bin_awk)
     ${CR_BINARY_DIR}/implement
     ${CR_BINARY_DIR}/implement/GUI
     )
-else (bin_awk)
+else (awk_executable)
   message (WARNING "Unable to process source files -- missing awk/gawk!")
-endif (bin_awk)
+endif (awk_executable)
 
 ##_______________________________________________________________________________
 ## Create the library

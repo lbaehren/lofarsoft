@@ -36,10 +36,60 @@
 //! Bindings for the CR::BasicFilter class
 void export_BasicFilter ()
 {
-//   bpl::class_<BasicFilter<class T> >("BasicFilter")
-//     .def(bpl::init<>())
-//     .def(bpl::init<unsigned int>())
-//     ;  
+  typedef BasicFilter<int> BasicFilter_int;
+  typedef BasicFilter<uint> BasicFilter_uint;
+  typedef BasicFilter<short> BasicFilter_short;
+  typedef BasicFilter<long> BasicFilter_long;
+  typedef BasicFilter<float> BasicFilter_float;
+  typedef BasicFilter<double> BasicFilter_double;
+
+  bpl::class_<BasicFilter_int >("BasicFilter")
+    .def(bpl::init<>())
+    .def(bpl::init<unsigned int>())
+    .def("blocksize", &BasicFilter_int::blocksize)
+    .def("weights", &BasicFilter_int::weights)
+    .def("setWeights", &BasicFilter_int::setWeights)
+     ;  
+
+  bpl::class_<BasicFilter_uint >("BasicFilter")
+    .def(bpl::init<>())
+    .def(bpl::init<unsigned int>())
+    .def("blocksize", &BasicFilter_uint::blocksize)
+    .def("weights", &BasicFilter_uint::weights)
+    .def("setWeights", &BasicFilter_uint::setWeights)
+     ;  
+
+  bpl::class_<BasicFilter_short >("BasicFilter")
+    .def(bpl::init<>())
+    .def(bpl::init<unsigned int>())
+    .def("blocksize", &BasicFilter_short::blocksize)
+    .def("weights", &BasicFilter_short::weights)
+    .def("setWeights", &BasicFilter_short::setWeights)
+     ;  
+
+  bpl::class_<BasicFilter_long >("BasicFilter")
+    .def(bpl::init<>())
+    .def(bpl::init<unsigned int>())
+    .def("blocksize", &BasicFilter_long::blocksize)
+    .def("weights", &BasicFilter_long::weights)
+    .def("setWeights", &BasicFilter_long::setWeights)
+     ;  
+
+  bpl::class_<BasicFilter_float >("BasicFilter")
+    .def(bpl::init<>())
+    .def(bpl::init<unsigned int>())
+    .def("blocksize", &BasicFilter_float::blocksize)
+    .def("weights", &BasicFilter_float::weights)
+    .def("setWeights", &BasicFilter_float::setWeights)
+     ;  
+
+  bpl::class_<BasicFilter_double >("BasicFilter")
+    .def(bpl::init<>())
+    .def(bpl::init<unsigned int>())
+    .def("blocksize", &BasicFilter_double::blocksize)
+    .def("weights", &BasicFilter_double::weights)
+    .def("setWeights", &BasicFilter_double::setWeights)
+     ;  
 }
 
 //_______________________________________________________________________________
@@ -48,6 +98,13 @@ void export_BasicFilter ()
 //! Bindings for the CR::HanningFilter class
 void export_HanningFilter ()
 {
+  typedef HanningFilter<int> HanningFilter_int;
+  typedef HanningFilter<uint> HanningFilter_uint;
+  typedef HanningFilter<short> HanningFilter_short;
+  typedef HanningFilter<long> HanningFilter_long;
+  typedef HanningFilter<float> HanningFilter_float;
+  typedef HanningFilter<double> HanningFilter_double;
+
 //   bpl::class_<HanningFilter<class T> >("HanningFilter")
 //     .def(bpl::init<>())
 //     .def(bpl::init<unsigned int>())

@@ -24,8 +24,8 @@ file (GLOB hftools_cc hftools.cc)
 ## Generating some basic documentation
 
 execute_process (
-  COMMAND ${bin_awk} -f ${CR_SOURCE_DIR}/implement/GUI/hfiter.awk ${hftools_cc}
-  COMMAND ${bin_awk} -f ${CR_SOURCE_DIR}/implement/GUI/hfgetdoc.awk
+  COMMAND ${awk_executable} -f ${CR_SOURCE_DIR}/implement/GUI/hfiter.awk ${hftools_cc}
+  COMMAND ${awk_executable} -f ${CR_SOURCE_DIR}/implement/GUI/hfgetdoc.awk
   COMMAND sort
   OUTPUT_FILE ${CR_BINARY_DIR}/implement/Pypeline/hftools.doc.tex
   TIMEOUT 20
@@ -34,8 +34,8 @@ execute_process (
 ## Splitting off certain snippets of code
 
 execute_process (
-  COMMAND ${bin_awk} -f ${CR_SOURCE_DIR}/implement/GUI/hfiter.awk ${hftools_cc}
-  COMMAND ${bin_awk} -f ${CR_SOURCE_DIR}/implement/GUI/hfsplit2h.awk 
+  COMMAND ${awk_executable} -f ${CR_SOURCE_DIR}/implement/GUI/hfiter.awk ${hftools_cc}
+  COMMAND ${awk_executable} -f ${CR_SOURCE_DIR}/implement/GUI/hfsplit2h.awk 
   OUTPUT_FILE ${CR_BINARY_DIR}/implement/Pypeline/hftools.awk.cc
   TIMEOUT 20
   )
@@ -52,7 +52,7 @@ add_custom_command (
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/hftools.hfpp.cc
   DEPENDS ${hftools_cc}
   COMMAND ${CMAKE_CXX_COMPILER}
-  ARGS -E -DH_DEBUG_CPP -I${WCSLIB_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/hftools.awk.cc | ${bin_awk} -f ${CR_SOURCE_DIR}/implement/GUI/hfinsert-newline.awk  > ${CMAKE_CURRENT_BINARY_DIR}/hftools.hfpp.cc
+  ARGS -E -DH_DEBUG_CPP -I${WCSLIB_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/hftools.awk.cc | ${awk_executable} -f ${CR_SOURCE_DIR}/implement/GUI/hfinsert-newline.awk  > ${CMAKE_CURRENT_BINARY_DIR}/hftools.hfpp.cc
     )
 
 set_source_files_properties (

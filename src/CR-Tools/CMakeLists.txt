@@ -55,10 +55,10 @@ option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES
 ##
 ## ==============================================================================
 
-find_program (bin_awk gawk     awk   ${bin_locations})
-find_program (bash_executable  bash  ${bin_locations})
-find_program (tar_executable   tar   ${bin_locations})
-find_program (gzip_executable  gzip  ${bin_locations})
+find_program (awk_executable   gawk awk ${bin_locations} )
+find_program (bash_executable  bash     ${bin_locations} )
+find_program (tar_executable   tar      ${bin_locations} )
+find_program (gzip_executable  gzip     ${bin_locations} )
 
 ##__________________________________________________________
 ##                                            cr_process_awk
@@ -117,14 +117,14 @@ macro (cr_process_awk _file _script)
   if (${ARGC} EQUAL 2)
 #  add_custom_command (
 #    OUTPUT ${_outfile}
-#    COMMAND ${bin_awk}
+#    COMMAND ${awk_executable}
 #    ARGS -f ${_awk_script} ${_infile}
 #    DEPENDS ${_infile}
 #    COMMENT "${_infile_filename} -> ${_outfile_filename"
 #    )
     execute_process (
       WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement/GUI
-      COMMAND ${bin_awk} -f ${_awk_script} ${_infile}
+      COMMAND ${awk_executable} -f ${_awk_script} ${_infile}
       TIMEOUT 30
       OUTPUT_FILE ${_outfile}
       )
@@ -132,8 +132,8 @@ macro (cr_process_awk _file _script)
     if (${ARGC} EQUAL 3)
       execute_process (
 	WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement/GUI
-	COMMAND ${bin_awk} -f ${_awk_script} ${_infile}
-	COMMAND ${bin_awk} -f ${ARGV2}
+	COMMAND ${awk_executable} -f ${_awk_script} ${_infile}
+	COMMAND ${awk_executable} -f ${ARGV2}
 	TIMEOUT 30
 	OUTPUT_FILE ${_outfile}
 	)
@@ -401,6 +401,12 @@ endif (CR_WITH_GUI)
 ## Option: Create Python pipeline module? ON/OFF
 
 if (CR_WITH_PYPELINE)
+
+  ## Check for system tools to process the source code
+  if (NOT awk_executable)
+    set (CR_WITH_PYPELINE NO)
+    message (STATUS "[CR-Tools] Unable to build Pypeline - missing awk!")
+  endif (NOT awk_executable)
   
   ## Check for Boost.Python and Python
   if (BOOST_LIBRARIES AND PYTHON_LIBRARIES)
