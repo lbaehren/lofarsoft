@@ -64,23 +64,9 @@ Configuration
 -------------
 
 Various default parameters for pipeline operation are stored in a
-configuration file. Normally, this lives within the top-level Python
-``pipeline`` module at ``pipeline/pipeline.cfg``. This file is designed to be
-used in conjuntion with the ``ConfigParser`` module from the `Python Standard
-Library <http://docs.python.org/library/configparser.html>`_.
-
-The file should be read using an instance of ``SafeConfigParser``; at this
-time, it should be given a job name and optionally a working directory to use
-as part of the configuration::
-
-  >>> from ConfigParser import SafeConfigParser as ConfigParser
-  >>> from pipeline import __path__ as config_path
-  >>> config = ConfigParser({
-          "job_name": ....,
-          "runtime_directory": ....
-      })
-  >>> config.read("%s/%s" % (config_path[0], "pipeline.cfg"))
-
+configuration file. The contents of this file are available to recipes as
+``self.config``, which is an instance of ``SafeConfigParser`` from the `Python
+Standard Library <http://docs.python.org/library/configparser.html>`_.
 
 .. _ipython-deploy:
 
