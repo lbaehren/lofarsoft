@@ -1,8 +1,3 @@
-#import matplotlib.pyplot as plt
-#plt.plot([1,2,3])
-#plt.ylabel(’some numbers’)
-#plt.show()
-
 import os
 from math import *
 from pycrtools import *
@@ -16,7 +11,7 @@ def demo(descr,code,code2=""):
 n=IntVec()
 v1=FloatVec()
 v1=FloatVec()
-v1.extend([1,2,3,4,0,5])
+v1.extend([0,1,2,3,4,5])
 v2=FloatVec()
 v2.resize(5)
 n.resize(7)
@@ -39,11 +34,16 @@ v3.resize(10)
 v2.mul(3.5,v3)
 print v2,v3
 
+v1=Vector([0.0,1,2,3,4,5])
+v2=Vector(float,len(v1),2.0)
+
 print "\n------------------------------------------------------------------------"
 demo("Vector:","v1")
 demo("Vector:","v2")
 demo("Resize a vector:","v2.resize(8)","v2")
 demo("Resize a vector and fill with non-zero values:","v2.resize(10,-1)","v2")
+demo("Resize a vector to same size as other vector:","v2.resize(v1)","v2")
+
 v3=v2.new()
 print "Make a new vector of same size and type as original one:"
 print "v3=v2.new();v3=",v3

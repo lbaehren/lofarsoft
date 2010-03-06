@@ -25,7 +25,8 @@ cd $PYPDIR
 echo "Preprocessor Step 1a: Iterating source code over certain variables. Generating file: " hftools.iter.cc
 gawk -f $GUI/hfiter.awk   hftools.cc >  hftools.iter.cc
 echo "Preprocessor Step 1b: Generating some basic documentation: See file hftools.doc.tex"
-gawk -f $GUI/hfgetdoc.awk hftools.iter.cc | sort >  hftools.doc.txt
+gawk -f $GUI/hfgetdoc.awk hftools.iter.cc >  hftools.doc.txt
+gawk -f $GUI/hfgetpydoc.awk hftools.iter.cc >  hftools.doc.py
 echo "Preprocessor Step 1c: Splitting off certain snippets of code. Generating file: " hftools.tmp.cc and hftools.def.h
 gawk -f $GUI/hfsplit2h.awk hftools.iter.cc >  hftools.tmp.cc
 echo "Preprocessor Step 2: Using gcc preprocessor to generate wrappers. Generating file: " hftools.hfpp.cc

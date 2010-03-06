@@ -21,15 +21,12 @@ endif (MATHGL_INCLUDES)
 
 file (GLOB hftools_cc hftools.cc)
 
-## Generating some basic documentation
-
-execute_process (
-  COMMAND ${awk_executable} -f ${CR_SOURCE_DIR}/implement/GUI/hfiter.awk ${hftools_cc}
-  COMMAND ${awk_executable} -f ${CR_SOURCE_DIR}/implement/GUI/hfgetdoc.awk
-  COMMAND sort
-  OUTPUT_FILE ${CR_BINARY_DIR}/implement/Pypeline/hftools.doc.tex
-  TIMEOUT 20
-  )
+#execute_process (
+#  COMMAND ${awk_executable} -f ${CR_SOURCE_DIR}/implement/GUI/hfiter.awk ${hftools_cc}
+#  COMMAND ${awk_executable} -f ${CR_SOURCE_DIR}/implement/GUI/hfgetdoc.awk
+#  OUTPUT_FILE ${CR_BINARY_DIR}/implement/Pypeline/hftools.doc.tex
+#  TIMEOUT 20
+#  )
 
 add_custom_command (
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/hftools.hfpp.cc
@@ -37,9 +34,17 @@ add_custom_command (
   DEPENDS ${CR_SOURCE_DIR}/implement/Pypeline/hftools.hpp
   DEPENDS ${CR_SOURCE_DIR}/implement/Pypeline/hftools.h	
   DEPENDS ${hftools_cc}
-  COMMAND ${bin_awk} -f ${CR_SOURCE_DIR}/implement/GUI/hfiter.awk ${hftools_cc} | ${bin_awk} -f ${CR_SOURCE_DIR}/implement/GUI/hfsplit2h.awk > ${CR_BINARY_DIR}/implement/Pypeline/hftools.awk.cc
-  COMMAND ${CMAKE_CXX_COMPILER} -E -P -DH_DEBUG_CPP  -I${WCSLIB_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/hftools.awk.cc | ${awk_executable} -f ${CR_SOURCE_DIR}/implement/GUI/hfinsert-newline.awk  > ${CMAKE_CURRENT_BINARY_DIR}/hftools.hfpp.cc
-    )
+#Performing some variable substituions and iterations
+  COMMAND ${bin_awk} -f ${CR_SOURCE_DIR}/implement/GUI/hfiter.awk ${hftools_cc} > ${CR_BINARY_DIR}/implement/Pypeline/hftools.iter.cc
+#Now split off the wrapper definitions into various files (needs to take place in buld directory ...)
+  COMMAND ${bin_awk} -f ${CR_SOURCE_DIR}/implement/GUI/hfsplit2h.awk  ${CR_BINARY_DIR}/implement/Pypeline/hftools.iter.cc > ${CR_BINARY_DIR}/implement/Pypeline/hftools.awk.cc
+#Generate the basic documentation strings that python help will use
+  COMMAND ${bin_awk} -f ${CR_SOURCE_DIR}/implement/GUI/hfgetpydoc.awk ${CR_BINARY_DIR}/implement/Pypeline/hftools.iter.cc > ${CR_BINARY_DIR}/implement/Pypeline/hftools.doc.py
+#Generate some basic documentation in text form
+  COMMAND ${bin_awk} -f ${CR_SOURCE_DIR}/implement/GUI/hfgetdoc.awk ${CR_BINARY_DIR}/implement/Pypeline/hftools.iter.cc > ${CR_BINARY_DIR}/implement/Pypeline/hftools.doc.tex
+#Finally execute gcc in preprocessor mode (and insert some newlines) - this file will be compiled and is quite instructive for debugging
+  COMMAND ${CMAKE_CXX_COMPILER} -E -P -DH_DEBUG_CPP  -I${WCSLIB_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/hftools.awk.cc | ${bin_awk} -f ${CR_SOURCE_DIR}/implement/GUI/hfinsert-newline.awk  > ${CMAKE_CURRENT_BINARY_DIR}/hftools.hfpp.cc
+    )	  
 
 set_source_files_properties (
   ${CMAKE_CURRENT_BINARY_DIR}/hftools.hfpp.cc

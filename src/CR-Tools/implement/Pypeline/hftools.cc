@@ -57,7 +57,103 @@ using namespace std;
   automatic wrapper generation for python.  Includes various tools to
   manipulate stl vectors in python and wrapper function for CR Tool classes.
 
+========================================================================
+Here is a list of the available functions:
+========================================================================
+
+
+SECTION: Administrative Vector Functions
+------------------------------
+hFill(vec, fill_value)              - Fills a vector with a constant value.
+hNew(vec)                           - Make and return a new vector of the same size and type as the input vector
+hConvert(vec1, vec2)                - Copies and converts a vector to a vector of another type.
+hCopy(vec, outvec)                  - Copies a vector to another one.
+
+SECTION: Math Functions
+------------------------------
+square(val)                         - Returns the squared value of the parameter
+hPhase(frequency, time)             - Returns the interferometer phase in radians for a given frequency and time
+funcGaussian(x, sigma, mu)          - Implementation of the Gauss function
+hiSub(vec1, vec2)                   - Performs a Sub between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
+hiSub(vec1, val)                    - Performs a Sub between the vector and a scalar (applied to each element), which is returned in the first vector.
+hSub(vec1, vec2, vec3)              - Performs a Sub between the two vectors, which is returned in the third vector.
+hSubAdd(vec1, vec2, vec3)           - Performs a Sub between the two vectors, and adds the result to the output (third) vector.
+hSubAddConv(vec1, vec2, vec3)       - Performs a Sub between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+hSub(vec1, val, vec2)               - Performs a Sub between the vector and a scalar, where the result is returned in the second vector.
+hiMul(vec1, vec2)                   - Performs a Mul between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
+hiMul(vec1, val)                    - Performs a Mul between the vector and a scalar (applied to each element), which is returned in the first vector.
+hMul(vec1, vec2, vec3)              - Performs a Mul between the two vectors, which is returned in the third vector.
+hMulAdd(vec1, vec2, vec3)           - Performs a Mul between the two vectors, and adds the result to the output (third) vector.
+hMulAddConv(vec1, vec2, vec3)       - Performs a Mul between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+hMul(vec1, val, vec2)               - Performs a Mul between the vector and a scalar, where the result is returned in the second vector.
+hiAdd(vec1, vec2)                   - Performs a Add between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
+hiAdd(vec1, val)                    - Performs a Add between the vector and a scalar (applied to each element), which is returned in the first vector.
+hAdd(vec1, vec2, vec3)              - Performs a Add between the two vectors, which is returned in the third vector.
+hAddAdd(vec1, vec2, vec3)           - Performs a Add between the two vectors, and adds the result to the output (third) vector.
+hAddAddConv(vec1, vec2, vec3)       - Performs a Add between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+hAdd(vec1, val, vec2)               - Performs a Add between the vector and a scalar, where the result is returned in the second vector.
+hiDiv(vec1, vec2)                   - Performs a Div between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
+hiDiv(vec1, val)                    - Performs a Div between the vector and a scalar (applied to each element), which is returned in the first vector.
+hDiv(vec1, vec2, vec3)              - Performs a Div between the two vectors, which is returned in the third vector.
+hDivAdd(vec1, vec2, vec3)           - Performs a Div between the two vectors, and adds the result to the output (third) vector.
+hDivAddConv(vec1, vec2, vec3)       - Performs a Div between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+hDiv(vec1, val, vec2)               - Performs a Div between the vector and a scalar, where the result is returned in the second vector.
+hNegate(vec)                        - Multiplies each element in the vector with -1 in place, i.e. the input vector is also the output vector.
+hSum(vec)                           - Performs a sum over the values in a vector and returns the value
+hNorm(vec)                          - Returns the lengths or norm of a vector (i.e. Sqrt(Sum_i(xi*+2)))
+hNormalize(vec)                     - Normalizes a vector to length unity
+hMean(vec)                          - Returns the mean value of all elements in a vector
+hSort(vec)                          - Sorts a vector in place
+hSortMedian(vec)                    - Sorts a vector in place and returns the median value of the elements
+hMedian(vec)                        - Returns the median value of the elements
+hStdDev(vec, mean)                  - Calculates the standard deviation around a mean value.
+hStdDev(vec)                        - Calculates the standard deviation of a vector of values
+hFindLessEqual(vec, threshold, vecout) - Find the samples that are LessEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindLessEqualAbs(vec, threshold, vecout) - Find the samples whose absolute values are LessEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindGreaterThan(vec, threshold, vecout) - Find the samples that are GreaterThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindGreaterThanAbs(vec, threshold, vecout) - Find the samples whose absolute values are GreaterThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindGreaterEqual(vec, threshold, vecout) - Find the samples that are GreaterEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindGreaterEqualAbs(vec, threshold, vecout) - Find the samples whose absolute values are GreaterEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindLessThan(vec, threshold, vecout) - Find the samples that are LessThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindLessThanAbs(vec, threshold, vecout) - Find the samples whose absolute values are LessThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hDownsample(vec1, vec2)             - Downsample the input vector to a smaller output vector.
+hDownsample(vec, downsample_factor) - Downsample the input vector by a cetain factor and return a new vector
+hFindLowerBound(vec, value)         - Finds the location (i.e., returns integer) in a monotonically increasing vector, where the input search value is just above or equal to the value in the vector.
+hFlatWeights(wlen)                  - Returns vector of weights of length len with constant weights normalized to give a sum of unity. Can be used by hRunningAverageT.
+hLinearWeights(wlen)                - Returns vector of weights of length wlen with linearly rising and decreasing weights centered at len/2.
+hGaussianWeights(wlen)              - Returns vector of weights of length wlen with Gaussian distribution centered at len/2 and sigma=len/4 (i.e. the Gaussian extends over 2 sigma in both directions).
+hWeights(wlen, wtype)               - Create a normalized weight vector.
+hRunningAverage(idata, odata, weights) - Calculate the running average of an input vector using a weight vector.
+hRunningAverage(idata, odata, wlen, wtype) - Overloaded function to automatically calculate weights.
+
+SECTION: RF (Radio Frequency) Functions
+------------------------------
+hGeometricDelayFarField(antPosition, skyDirection, length) - Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located in a certain direction in farfield (based on L. Bahren)
+hGeometricDelayNearField(antPosition, skyPosition, distance) - Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located at a certain 3D space coordinate in nearfield (based on L. Bahren)
+hGeometricDelays(antPositions, skyPositions, delays, farfield) - Calculates the time delay in seconds for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field
+hGeometricPhases(frequencies, antPositions, skyPositions, phases, farfield) - Calculates the phase gradients for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field and for different frequencies.
+hGeometricWeights(frequencies, antPositions, skyPositions, weights, farfield) - Calculates the phase gradients as complex weights for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field and for different frequencies.
+hSpectralPower(vec, outvec)         - Calculates the power of a complex spectrum and add it to an output vector.
+
+SECTION: I/O Functions (DataReader)
+------------------------------
+hFileClose(iptr)                    - Function to close a file with a datareader object providing the pointer to the object as an integer.
+hFileOpen(Filename)                 - Function to open a file based on a filename and returning a pointer to a datareader object as an integer
+hFileGetParameter(iptr, keyword)    - Return information from a data file as a Python object
+hFileSetParameter(iptr, keyword, pyob) - Set parameters in a data file with a Python object as input
+hFileRead(iptr, Datatype, vec)      - Read data from a Datareader object (pointer in iptr) into a vector, where the size should be pre-allocated.
+hCalTable(filename, keyword, date, pyob) - Return a list of antenna positions from the CalTables - this is a test
+
+SECTION: Coordinate Conversion (VectorConversion.cc)
+------------------------------
+hCoordinateConvert(source, sourceCoordinate, target, targetCoordinate, anglesInDegrees) - Converts a 3D spatial vector into a different Coordinate type (e.g. Spherical to Cartesian)
+hReadFileOld(vec, iptr, Datatype, Antenna, Blocksize, Block, Stride, Shift) - Read data from a Datareader object (pointer in iptr) into a vector.
+
+
+
+========================================================================
 Here is an alphabetic list of some of the functions that are available.
+========================================================================
 
 funcGaussian(x, sigma, mu)          - Implementation of the Gauss function
 hAdd(vec1, val, vec2)               - Performs a Add between the vector and a scalar, where the result is returned in the second vector.
@@ -135,7 +231,7 @@ square(val)                         - Returns the squared value of the parameter
 
 
 //========================================================================
-//                    Casting & Conversion Functions
+//                 Casting & Conversion Functions
 //========================================================================
 template<class T> T hfnull(){};
 template<> inline HString  hfnull<HString>(){HString null=""; return null;}
@@ -277,7 +373,7 @@ void copycast_vec(std::vector<T> &vi, std::vector<S> & vo) {
 }
 
 //========================================================================
-//                        Matrix Class !!!!!IGNORE!!!!!
+//                   Matrix Class !!!!!IGNORE!!!!!
 //========================================================================
 
 // Testing a simple Matrix class that is built upon std::vectors
@@ -369,27 +465,23 @@ HString hgetFileExtension(HString filename){
 }
 
 
+ 
 //========================================================================
-//                    Administrative Vector Functions
+//$SECTION:           Administrative Vector Function
 //========================================================================
 
-
+//$DOCSTRING: Fills a vector with a constant value.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFill
+//-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
-#define HFPP_FUNCDEF  (HFPP_VOID)(hFill)("Fills a vector with a constant value.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNCDEF  (HFPP_VOID)(hFill)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(fill_value)()("Fill value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
-  \brief Fills a vector with a constant value.
-
-  \param vec: STL Iterator pointing to the first element of an array with
-         input values.
-  \param vec_end: STL Iterator pointing to the end of the input vector
-
-  \param fill_value: Value to fill vector with
+  \brief $DOCSTRING
+  $PARDOCSTRING
 */
 template <class Iter>
 void hFill(const Iter vec,const Iter vec_end, const IterValueType fill_value)
@@ -402,7 +494,7 @@ void hFill(const Iter vec,const Iter vec_end, const IterValueType fill_value)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Make and return a new vector of the same size and type as the input vector
+//$DOCSTRING: Make and return a new vector of the same size and type as the input vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hNew
 //-----------------------------------------------------------------------
@@ -433,10 +525,8 @@ std::vector<T> HFPP_FUNC_NAME(std::vector<T> & vec)
 #define HFPP_PARDEF_1 (HInteger)(newsize)()("New size of vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
   $PARDOCSTRING
-
  */
 template <class T>
 void hResize(std::vector<T> & vec, HInteger newsize)
@@ -455,10 +545,8 @@ void hResize(std::vector<T> & vec, HInteger newsize)
 #define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(fill)()("Value to fill new vector elements with")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
   $PARDOCSTRING
-
 */
 template <class T>
 void hResize(std::vector<T> & vec, HInteger newsize, T fill)
@@ -467,7 +555,7 @@ void hResize(std::vector<T> & vec, HInteger newsize, T fill)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Resize an STL vector to the same length as a second vector
+//$DOCSTRING: Resize an STL vector to the same length as a second vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
@@ -476,10 +564,8 @@ void hResize(std::vector<T> & vec, HInteger newsize, T fill)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE_2)(vec2)()("Reference vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
   $PARDOCSTRING
-
 */
 
 template <class T, class S>
@@ -489,7 +575,7 @@ void hResize(std::vector<T> & vec1,std::vector<S> & vec2)
 }
 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-//$DOCSTRING: Resize a casa vector to the same length as a second vector
+//$DOCSTRING: Resize a casa vector to the same length as a second vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
@@ -498,10 +584,8 @@ void hResize(std::vector<T> & vec1,std::vector<S> & vec2)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE_2)(vec2)()("Reference vector")(HFPP_PAR_IS_VECTOR)(CASA)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
   $PARDOCSTRING
-
 */
 template <class T, class S>
 void hResize(casa::Vector<T> & vec1,casa::Vector<S> & vec2)
@@ -520,7 +604,6 @@ void hResize(casa::Vector<T> & vec1,casa::Vector<S> & vec2)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
   $PARDOCSTRING
 */
@@ -545,16 +628,8 @@ void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,con
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(outvec)()("Vector containing a copy of the input values")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
-
-  \param vec: STL Iterator pointing to the first element of an array with
-         input values.
-  \param vec_end: STL Iterator pointing to the end of the input vector
-
-  \param out: STL Iterator pointing to the first element of an array with
-         output values.
-  \param out_end: STL Iterator pointing to the end of the output vector
+  $PARDOCSTRING
 */
 template <class Iterin, class Iter>
 void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const Iter out_end)
@@ -570,11 +645,12 @@ void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
+
 //========================================================================
-//                           Math Functions
+//$SECTION:                 Math Function
 //========================================================================
 
-//$DOCSTRING: Returns the squared value of the parameter
+//$DOCSTRING: Returns the squared value of the parameter.
 //$COPY_TO HFILE START ---------------------------------------------------
 #define HFPP_FUNC_NAME square
 //------------------------------------------------------------------------
@@ -593,7 +669,7 @@ inline T square(T val)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Returns the interferometer phase in radians for a given frequency and time
+//$DOCSTRING: Returns the interferometer phase in radians for a given frequency and time.
 //$COPY_TO HFILE START ---------------------------------------------------
 #define HFPP_FUNC_NAME hPhase
 //------------------------------------------------------------------------
@@ -613,7 +689,7 @@ inline HNumber hPhase(HNumber frequency, HNumber time)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Implementation of the Gauss function
+//$DOCSTRING: Implementation of the Gauss function.
 //$COPY_TO HFILE START ---------------------------------------------------
 #define HFPP_FUNC_NAME funcGaussian
 //------------------------------------------------------------------------
@@ -635,26 +711,21 @@ inline HNumber funcGaussian (HNumber x,
 };
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-
-
 //========================================================================
 //$ITERATE MFUNC abs,cos,cosh,exp,log,log10,sin,sinh,sqrt,square,tan,tanh
 //========================================================================
 
 //$DOCSTRING: Take the $MFUNC of all the elements in the vector.
 //$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h{$MFUNC!CAPS}
+//-----------------------------------------------------------------------
 #define HFPP_FUNC_VARIANT 1
 #define HFPP_FUNCDEF  (HFPP_VOID)(h{$MFUNC!CAPS})("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
-
-  \param vec: STL Iterator pointing to the first element of an array with
-         input values.
-  \param vec_end: STL Iterator pointing to the end of the input vector
-
+  $PARDOCSTRING
 */
 template <class Iter>
 void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
@@ -670,23 +741,16 @@ void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
 
 //$DOCSTRING: Take the $MFUNC of all the elements in the vector and return results in a second vector.
 //$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h{$MFUNC!CAPS}
+//-----------------------------------------------------------------------
 #define HFPP_FUNC_VARIANT 2
 #define HFPP_FUNCDEF  (HFPP_VOID)(h{$MFUNC!CAPS})("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
-
-  \param vec: STL Iterator pointing to the first element of an array with
-         input values.
-  \param vec_end: STL Iterator pointing to the end of the input vector
-
-  \param out: STL Iterator pointing to the first element of an array with
-         output values.
-  \param out_end: STL Iterator pointing to the end of the output vector
-
+  $PARDOCSTRING
 */
 template <class Iter>
 void h{$MFUNC!CAPS}2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end)
@@ -697,7 +761,7 @@ void h{$MFUNC!CAPS}2(const Iter vec,const Iter vec_end, const Iter out,const Ite
     *itout=$MFUNC(*it);
     ++it; ++itout;
   };
-}
+} 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$ENDITERATE
@@ -708,19 +772,16 @@ void h{$MFUNC!CAPS}2(const Iter vec,const Iter vec_end, const Iter out,const Ite
 
 //$DOCSTRING: Take the $MFUNC of all the elements in the vector.
 //$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h{$MFUNC!CAPS}
+//-----------------------------------------------------------------------
 #define HFPP_FUNC_VARIANT 1
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(h{$MFUNC!CAPS})("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
-
-  \param vec: STL Iterator pointing to the first element of an array with
-         input values.
-  \param vec_end: STL Iterator pointing to the end of the input vector
-
+  $PARDOCSTRING
 */
 template <class Iter>
 void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
@@ -736,6 +797,8 @@ void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
 
 //$DOCSTRING: Take the $MFUNC of all the elements in the vector and return results in a second vector.
 //$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h{$MFUNC!CAPS}
+//-----------------------------------------------------------------------
 #define HFPP_FUNC_VARIANT 2
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(h{$MFUNC!CAPS})("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -743,17 +806,8 @@ void h{$MFUNC!CAPS}1(const Iter vec,const Iter vec_end)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vecout)()("Numeric output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
-
-  \param vec: STL Iterator pointing to the first element of an array with
-         input values.
-  \param vec_end: STL Iterator pointing to the end of the input vector
-
-  \param data: STL Iterator pointing to the first element of an array with
-         output values.
-  \param vec_end: STL Iterator pointing to the end of the output vector
-
+  $PARDOCSTRING
 */
 template <class Iter1,class Iter2>
 void h{$MFUNC!CAPS}2(const Iter1 vec,const Iter1 vec_end, const Iter2 out,const Iter2 out_end)
@@ -783,16 +837,8 @@ void h{$MFUNC!CAPS}2(const Iter1 vec,const Iter1 vec_end, const Iter2 out,const 
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing the second operands")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
-
-  \param vec1: STL Iterator pointing to the first element of an array with
-         input and output values.
-  \param vec1_end: STL Iterator pointing to the end of the input vector
-
-  \param vec2: STL Iterator pointing to the first element of an array with
-         input values.
-  \param vec2_end: STL Iterator pointing to the end of the input vector
+  $PARDOCSTRING
 */
 template <class Iter, class Iterin>
 void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin vec2_end)
@@ -813,19 +859,13 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const
 #define HFPP_FUNC_NAME hi$MFUNC
 //-----------------------------------------------------------------------
 #define HFPP_FUNC_VARIANT 2
-#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNCDEF  (HFPP_VOID)(hi$MFUNC)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(val)()("Value containing the second operand")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
-
-  \param vec1: STL Iterator pointing to the first element of an array with
-         input and output values.
-  \param vec1_end: STL Iterator pointing to the end of the input vector
-
-  \param val: Value containing the second operand
+  $PARDOCSTRING
 */
 template <class Iter, class S>
 void hi{$MFUNC}2(const Iter vec1,const Iter vec1_end, S val)
@@ -850,20 +890,8 @@ void hi{$MFUNC}2(const Iter vec1,const Iter vec1_end, S val)
 #define HFPP_PARDEF_2 (HFPP_TEMPLATED_3)(vec3)()("Vector containing the results")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
-
-  \param vec1: STL Iterator pointing to the first element of an array with
-         input  values.
-  \param vec1_end: STL Iterator pointing to the end of the input vector
-
-  \param vec2: STL Iterator pointing to the first element of an array with
-         input values.
-  \param vec2_end: STL Iterator pointing to the end of the input vector
-
-  \param vec3: STL Iterator pointing to the first element of an array with
-         output values.
-  \param vec3_end: STL Iterator pointing to the end of the output vector
+  $PARDOCSTRING
 */
 template <class Iterin1, class Iterin2, class Iter>
 void HFPP_FUNC_NAME(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end, const Iter vec3,const Iter vec3_end)
@@ -939,24 +967,14 @@ void HFPP_FUNC_NAME(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec
 #define HFPP_FUNC_NAME h$MFUNC
 //-----------------------------------------------------------------------
 #define HFPP_FUNC_VARIANT 2
-#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNCDEF  (HFPP_VOID)(h$MFUNC)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(val)()("Value containing the second operand")(HFPP_PAR_IS_SCALAR)(STDIT)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_2 (HFPP_TEMPLATED_3)(vec2)()("Vector containing the output")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
-
-  \param vec1: STL Iterator pointing to the first element of an array with
-         input  values.
-  \param vec1_end: STL Iterator pointing to the end of the input vector
-
-  \param val parameter containing the second operand
-
-  \param vec2: STL Iterator pointing to the first element of an array with
-         output values.
-  \param vec2_end: STL Iterator pointing to the end of the output vector
+  $PARDOCSTRING
 */
 template <class Iterin1, class S, class Iter>
 void h{$MFUNC}2(const Iterin1 vec1,const Iterin1 vec1_end, S val, const Iter vec2,const Iter vec2_end)
@@ -981,12 +999,8 @@ void h{$MFUNC}2(const Iterin1 vec1,const Iterin1 vec1_end, S val, const Iter vec
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
-
-  \param vec: STL Iterator pointing to the first element of an array with
-         input values.
-  \param vec_end: STL Iterator pointing to the end of the input vector
+  $PARDOCSTRING
 */
 
 template <class Iter>
@@ -1001,7 +1015,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Performs a sum over the values in a vector and returns the value
+//$DOCSTRING: Performs a sum over the values in a vector and returns the value.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSum
 //-----------------------------------------------------------------------
@@ -1023,7 +1037,7 @@ IterValueType HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Returns the lengths or norm of a vector (i.e. Sqrt(Sum_i(xi*+2)))
+//$DOCSTRING: Returns the lengths or norm of a vector (i.e. Sqrt(Sum_i(xi*+2))).
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hNorm
 //-----------------------------------------------------------------------
@@ -1045,7 +1059,7 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Normalizes a vector to length unity
+//$DOCSTRING: Normalizes a vector to length unity.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hNormalize
 //-----------------------------------------------------------------------
@@ -1067,7 +1081,7 @@ void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Returns the mean value of all elements in a vector
+//$DOCSTRING: Returns the mean value of all elements in a vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMean
 //-----------------------------------------------------------------------
@@ -1089,7 +1103,7 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Sorts a vector in place
+//$DOCSTRING: Sorts a vector in place.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSort
 //-----------------------------------------------------------------------
@@ -1111,7 +1125,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Sorts a vector in place and returns the median value of the elements
+//$DOCSTRING: Sorts a vector in place and returns the median value of the elements.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSortMedian
 //-----------------------------------------------------------------------
@@ -1136,7 +1150,7 @@ IterValueType HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Returns the median value of the elements
+//$DOCSTRING: Returns the median value of the elements.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMedian
 //-----------------------------------------------------------------------
@@ -1188,7 +1202,7 @@ HNumber hStdDev (const Iter vec,const Iter vec_end, const IterValueType mean)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Calculates the standard deviation of a vector of values
+//$DOCSTRING: Calculates the standard deviation of a vector of values.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hStdDev
 //-----------------------------------------------------------------------
@@ -1212,7 +1226,7 @@ HNumber hStdDev (const Iter vec,const Iter vec_end)
 //$ITERATE MFUNC GreaterThan,GreaterEqual,LessThan,LessEqual
 //========================================================================
 
-//$DOCSTRING: Find the samples that are $MFUNC a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+//$DOCSTRING: Find the samples that are $MFUNC a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFind{$MFUNC}
 //-----------------------------------------------------------------------
@@ -1244,7 +1258,7 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueTyp
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Find the samples whose absolute values are $MFUNC a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+//$DOCSTRING: Find the samples whose absolute values are $MFUNC a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFind{$MFUNC}Abs
 //-----------------------------------------------------------------------
@@ -1325,7 +1339,7 @@ void HFPP_FUNC_NAME (const Iter vec1,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Downsample the input vector by a cetain factor and return a new vector
+//$DOCSTRING: Downsample the input vector by a cetain factor and return a new vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hDownsample
 //-----------------------------------------------------------------------
@@ -1639,12 +1653,12 @@ void HFPP_FUNC_NAME (const DataIter idata,
 
 
 
-
+//
 //========================================================================
-//                     RF (Radio Frequency) Functions
+//$SECTION:           RF (Radio Frequency) Function
 //========================================================================
 
-//$DOCSTRING: Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located in a certain direction in farfield (based on L. Bahren)
+//$DOCSTRING: Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located in a certain direction in farfield (based on L. Bahren).
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGeometricDelayFarField
 //-----------------------------------------------------------------------
@@ -1671,7 +1685,7 @@ HNumber HFPP_FUNC_NAME (
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located at a certain 3D space coordinate in nearfield (based on L. Bahren)
+//$DOCSTRING: Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located at a certain 3D space coordinate in nearfield (based on L. Bahren).
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGeometricDelayNearField
 //-----------------------------------------------------------------------
@@ -1701,7 +1715,7 @@ HNumber HFPP_FUNC_NAME (
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Calculates the time delay in seconds for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field
+//$DOCSTRING: Calculates the time delay in seconds for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGeometricDelays
 //-----------------------------------------------------------------------
@@ -1901,8 +1915,6 @@ void HFPP_FUNC_NAME (
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-
-
 //$DOCSTRING: Calculates the power of a complex spectrum and add it to an output vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSpectralPower
@@ -1915,18 +1927,11 @@ void HFPP_FUNC_NAME (
 /*!
 
   \brief $DOCSTRING
+  $PARDOCSTRING
 
   The fact that the result is added to the output vector allows one to
   call the function multiple times and get a summed spectrum. If you
   need it only once, just fill the vector with zeros.
-
-  \param vec: STL Iterator pointing to the first element of an array with
-         input values.
-  \param vec_end: STL Iterator pointing to the end of the input vector
-
-  \param out: STL Iterator pointing to the first element of an array with
-         output values.
-  \param out_end: STL Iterator pointing to the end of the output vector
 */
 template <class Iterin, class Iter>
 void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const Iter out_end)
@@ -1943,7 +1948,7 @@ void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const 
 
 
 //-----------------------------------------------------------------------
-//$DOCSTRING: Convert the ADC value to a voltage
+//$DOCSTRING: Convert the ADC value to a voltage.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hADC2Voltage
 //-----------------------------------------------------------------------
@@ -2137,7 +2142,7 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end){
 
 
 //-----------------------------------------------------------------------
-//$DOCSTRING: Apply an FFT on a vector
+//$DOCSTRING: Apply an FFT on a vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFFT
 //-----------------------------------------------------------------------
@@ -2204,7 +2209,7 @@ void HFPP_FUNC_NAME(const IterIn  data_in,  const IterIn  data_in_end,
 
 
 //-----------------------------------------------------------------------
-//$DOCSTRING: Apply an Inverse FFT on a vector
+//$DOCSTRING: Apply an Inverse FFT on a vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hInvFFT
 //-----------------------------------------------------------------------
@@ -2261,9 +2266,9 @@ void HFPP_FUNC_NAME(const IterIn data_in, const IterIn data_in_end,
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-
+//
 //========================================================================
-//                     I/O Functions (DataReader)
+//$SECTION:              I/O Function (DataReader)
 //========================================================================
 
 //$DOCSTRING: Function to close a file with a datareader object providing the pointer to the object as an integer.
@@ -2287,7 +2292,7 @@ void HFPP_FUNC_NAME(HIntPointer iptr) {
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Function to open a file based on a filename and returning a pointer to a datareader object as an integer
+//$DOCSTRING: Function to open a file based on a filename and returning a pointer to a datareader object as an integer.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFileOpen
 //------------------------------------------------------------------------
@@ -2331,7 +2336,7 @@ HIntPointer HFPP_FUNC_NAME(HString Filename) {
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //------------------------------------------------------------------------
-//$DOCSTRING: Return information from a data file as a Python object
+//$DOCSTRING: Return information from a data file as a Python object.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFileGetParameter
 //-----------------------------------------------------------------------
@@ -2351,15 +2356,15 @@ HPyObject HFPP_FUNC_NAME(HIntPointer iptr, HString key)
   HFPP_REPEAT(uint,uint,nofAntennas)
     HFPP_REPEAT(uint,uint,nofSelectedChannels)
     HFPP_REPEAT(uint,uint,nofSelectedAntennas)
-    HFPP_REPEAT(uint,uint,nofBaselines)
-    HFPP_REPEAT(uint,uint,block)
     HFPP_REPEAT(uint,uint,blocksize)
-    HFPP_REPEAT(uint,uint,stride)
     HFPP_REPEAT(uint,uint,fftLength)
+    HFPP_REPEAT(uint,uint,block)
+    HFPP_REPEAT(uint,uint,stride)
     HFPP_REPEAT(uint,uint,nyquistZone)
     HFPP_REPEAT(double,double,sampleInterval)
     HFPP_REPEAT(double,double,referenceTime)
     HFPP_REPEAT(double,double,sampleFrequency)
+    HFPP_REPEAT(uint,uint,nofBaselines)
 #undef HFPP_REPEAT
 #define HFPP_REPEAT(TYPE,TYPE2,KEY) if (key== #KEY) {CasaVector<TYPE> casavec(drp->KEY ()); std::vector<TYPE2> result; aipsvec2stlvec(casavec,result); HPyObject pyob(result); return pyob;} else
     HFPP_REPEAT(uint,HInteger,antennas)
@@ -2429,7 +2434,7 @@ HPyObject HFPP_FUNC_NAME(HIntPointer iptr, HString key)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Set parameters in a data file with a Python object as input
+//$DOCSTRING: Set parameters in a data file with a Python object as input.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFileSetParameter
 //-----------------------------------------------------------------------
@@ -2447,9 +2452,9 @@ void HFPP_FUNC_NAME(HIntPointer iptr, HString key, HPyObjectPtr pyob)
 {
   DataReader *drp(reinterpret_cast<DataReader*>(iptr));
 #define HFPP_REPEAT(TYPE,TYPE2,KEY) if (key== #KEY) {TYPE input(TYPE2 (pyob)); drp->set##KEY (input);} else
-  HFPP_REPEAT(uint,PyInt_AsLong,Blocksize)
+  HFPP_REPEAT(uint,PyInt_AsLong,Block)
+    HFPP_REPEAT(uint,PyInt_AsLong,Blocksize)
     HFPP_REPEAT(uint,PyInt_AsLong,StartBlock)
-    HFPP_REPEAT(uint,PyInt_AsLong,Block)
     HFPP_REPEAT(uint,PyInt_AsLong,Stride)
     HFPP_REPEAT(uint,PyInt_AsLong,SampleOffset)
     HFPP_REPEAT(uint,PyInt_AsLong,NyquistZone)
@@ -2496,7 +2501,6 @@ void HFPP_FUNC_NAME(HIntPointer iptr, HString key, HPyObjectPtr pyob)
 #define HFPP_PARDEF_1 (HString)(Datatype)()("Name of the data column to be retrieved (e.g., FFT, Fx,Time, Frequency...)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(vec)()("Data (output) vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
-
 /*!
  \brief $DOCSTRING
  $PARDOCSTRING
@@ -2582,7 +2586,7 @@ void HFPP_FUNC_NAME(
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //------------------------------------------------------------------------
-//$DOCSTRING: Return a list of antenna positions from the CalTables - this is a test
+//$DOCSTRING: Return a list of antenna positions from the CalTables - this is a test.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hCalTable
 //-----------------------------------------------------------------------
@@ -2620,12 +2624,13 @@ HPyObjectPtr HFPP_FUNC_NAME(HString filename, HString keyword, HInteger date, HP
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//
 //========================================================================
-//              Coordinate Conversion (VectorConversion.cc)
+//$SECTION:      Coordinate Conversion (VectorConversion.cc)
 //========================================================================
 
 
-//$DOCSTRING: Converts a 3D spatial vector into a different Coordinate type (e.g. Spherical to Cartesian)
+//$DOCSTRING: Converts a 3D spatial vector into a different Coordinate type (e.g. Spherical to Cartesian).
 //$ORIGIN: Math/VectorConversion.cc
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hCoordinateConvert
@@ -2665,7 +2670,6 @@ Available Coordinate Types are:
       Spherical,
       - Time
       Time
-
 */
 
 template <class Iter>

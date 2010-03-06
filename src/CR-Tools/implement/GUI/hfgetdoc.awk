@@ -1,5 +1,11 @@
 BEGIN{npar=0}
 
+/^\/\/\$SECTION:/ {
+    gsub("\\/\\/\\$SECTION: *","")
+    print "\nSECTION:", $0
+    print "--------------------------------------------------"
+}
+
 /^[/ ]*#define +HFPP_FUNC_NAME +/ {
     funcname = $3
     npar=0;
