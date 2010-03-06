@@ -67,6 +67,8 @@ typedef casa::Record CasaRecord ;
 #define CasaVector casa::Vector
 #define IterValueType typename Iter::value_type
 
+typedef CR::CoordinateType::Types CRCoordinateType;
+
 #define STL2CASA_SHARED(TYPE,STLVEC,CASAVEC) TYPE * STL_storage = &(STLVEC[0]); casa::IPosition CASA_shape(1,STLVEC.size()); casa::Vector<TYPE> CASAVEC(CASA_shape,STL_storage,casa::SHARE);
 
 

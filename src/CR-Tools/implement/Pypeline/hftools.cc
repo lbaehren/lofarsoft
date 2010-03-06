@@ -173,7 +173,7 @@ inline HComplex operator/(HInteger i, HComplex c) {return hfcast<HComplex>(i)/c;
 inline HComplex operator/(HComplex c, HInteger i) {return c/hfcast<HComplex>(i);}
 
 template <class T>
-CasaVector<T> & stl2casa(std::vector<T>& stlvec)
+CasaVector<T> stl2casa(std::vector<T>& stlvec)
 {
   T * storage = &(stlvec[0]);
   casa::IPosition shape(1,stlvec.size()); //tell casa the size of the vector
@@ -2141,11 +2141,10 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end){
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFFT
 //-----------------------------------------------------------------------
-//#define HFPP_WRAPPER_CLASS (STL)
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE_1)(data_in)()("Vector containing the data on which the FFT will be applied.")(HFPP_PAR_IS_VECTOR)(CASA)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE_2)(data_out)()("Return vector in which the inverse FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(CASA)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (uint)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(data_in)()("Vector containing the data on which the FFT will be applied.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(data_out)()("Return vector in which the FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*
   \brief $DOCSTRING
@@ -2154,16 +2153,16 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end){
 template <class IterIn, class IterOut>
 void HFPP_FUNC_NAME(const IterIn  data_in,  const IterIn  data_in_end,
 		    const IterOut data_out, const IterOut data_out_end,
-		    const uint nyquistZone) {
+		    const HInteger nyquistZone) { 
   uint channel;
-  uint blocksize = data_in_end - data_in;
-  uint fftLength = blocksize/2+1;
-  uint nofChannels = fftLength;
-  IPosition shape_in  = (1,blocksize);
-  IPosition shape_out = (1,fftLength);
+  uint blocksize(data_in_end - data_in);
+  uint fftLength(blocksize/2+1);
+  uint nofChannels(fftLength);
+  IPosition shape_in(1,blocksize);
+  IPosition shape_out(1,fftLength);
   FFTServer<Double,DComplex> fftserver(shape_in, FFTEnums::REALTOCOMPLEX);
 
-  Vector<Double> cvec_in(shape_in, reinterpret_cast<Double*>(data_in), casa::SHARE);
+  Vector<Double> cvec_in(shape_in, reinterpret_cast<Double*>(&(*data_in)), casa::SHARE);
   Vector<DComplex> cvec_out(shape_out, 0.);
   IterOut it_out;
 
@@ -2264,7 +2263,7 @@ void HFPP_FUNC_NAME(const IterIn data_in, const IterIn data_in_end,
 
 
 //========================================================================
-//                             I/O Functions
+//                     I/O Functions (DataReader)
 //========================================================================
 
 //$DOCSTRING: Function to close a file with a datareader object providing the pointer to the object as an integer.
@@ -2621,7 +2620,75 @@ HPyObjectPtr HFPP_FUNC_NAME(HString filename, HString keyword, HInteger date, HP
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//========================================================================
+//              Coordinate Conversion (VectorConversion.cc)
+//========================================================================
 
+
+//$DOCSTRING: Converts a 3D spatial vector into a different Coordinate type (e.g. Spherical to Cartesian)
+//$ORIGIN: Math/VectorConversion.cc
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hCoordinateConvert
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (bool)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(source)()("Coordinates of the source to be converted - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (CRCoordinateType)(sourceCoordinate)()("Type of the coordinates for the source")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HNumber)(target)()("Coordinates of the source to be converted - vector of length 3")(HFPP_PAR_IS_VECTOR)(STDITFIXED)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (CRCoordinateType)(targetCoordinate)()("Type of the coordinates for the target (output vector)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (bool)(anglesInDegrees)()("True if the angles are in degree, otherwise in radians")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+Available Coordinate Types are:
+
+      -  Azimuth-Elevation-Height, \f$ \vec x = (Az,El,H) \f$
+      AzElHeight,
+      -  Azimuth-Elevation-Radius, \f$ \vec x = (Az,El,R) \f$
+      AzElRadius,
+      -  Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
+      Cartesian,
+      -  Cylindrical coordinates, \f$ \vec x = (r,\phi,h) \f$
+      Cylindrical,
+      -  Direction on the sky, \f$ \vec x = (Lon,Lat) \f$
+      Direction,
+      -  Direction on the sky with radial distance, \f$ \vec x = (Lon,Lat,R) \f$
+      DirectionRadius,
+      -  Frquency
+      Frequency,
+      -  Longitude-Latitude-Radius
+      LongLatRadius,
+      -  North-East-Height
+      NorthEastHeight,
+      -  Spherical coordinates, \f$ \vec x = (r,\phi,\theta) \f$
+      Spherical,
+      - Time
+      Time
+
+*/
+
+template <class Iter>
+bool HFPP_FUNC_NAME  (Iter source,
+		    CR::CoordinateType::Types const &sourceCoordinate,
+		    Iter target,
+		    CR::CoordinateType::Types const &targetCoordinate,
+		    bool anglesInDegrees
+		    )
+{
+  return CR::convertVector(    
+			   *target,
+			   *(target+1),
+			   *(target+2),
+			   targetCoordinate,
+			   *source,
+			   *(source+1),
+			   *(source+2),
+			   sourceCoordinate,
+			   anglesInDegrees
+			       );
+    }
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
 //========================================================================================

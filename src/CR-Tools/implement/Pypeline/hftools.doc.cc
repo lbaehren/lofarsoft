@@ -4,6 +4,81 @@
  HFTOOLS Version 0.2 - Basic algorithms for the CR pipeline with
   automatic wrapper generation for python.  Includes various tools to
   manipulate stl vectors in python and wrapper function for CR Tool classes.
+
+Here is an alphabetic list of some of the functions that are available.
+
+funcGaussian(x, sigma, mu)          - Implementation of the Gauss function
+hAdd(vec1, val, vec2)               - Performs a Add between the vector and a scalar, where the result is returned in the second vector.
+hAdd(vec1, vec2, vec3)              - Performs a Add between the two vectors, which is returned in the third vector.
+hAddAdd(vec1, vec2, vec3)           - Performs a Add between the two vectors, and adds the result to the output (third) vector.
+hAddAddConv(vec1, vec2, vec3)       - Performs a Add between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+hCalTable(filename, keyword, date, pyob) - Return a list of antenna positions from the CalTables - this is a test
+hConvert(vec1, vec2)                - Copies and converts a vector to a vector of another type.
+hCopy(vec, outvec)                  - Copies a vector to another one.
+hDiv(vec1, val, vec2)               - Performs a Div between the vector and a scalar, where the result is returned in the second vector.
+hDiv(vec1, vec2, vec3)              - Performs a Div between the two vectors, which is returned in the third vector.
+hDivAdd(vec1, vec2, vec3)           - Performs a Div between the two vectors, and adds the result to the output (third) vector.
+hDivAddConv(vec1, vec2, vec3)       - Performs a Div between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+hDownsample(vec, downsample_factor) - Downsample the input vector by a cetain factor and return a new vector
+hDownsample(vec1, vec2)             - Downsample the input vector to a smaller output vector.
+hFileClose(iptr)                    - Function to close a file with a datareader object providing the pointer to the object as an integer.
+hFileGetParameter(iptr, keyword)    - Return information from a data file as a Python object
+hFileOpen(Filename)                 - Function to open a file based on a filename and returning a pointer to a datareader object as an integer
+hFileRead(iptr, Datatype, vec)      - Read data from a Datareader object (pointer in iptr) into a vector, where the size should be pre-allocated.
+hFileSetParameter(iptr, keyword, pyob) - Set parameters in a data file with a Python object as input
+hFill(vec, fill_value)              - Fills a vector with a constant value.
+hFindGreaterEqual(vec, threshold, vecout) - Find the samples that are GreaterEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindGreaterEqualAbs(vec, threshold, vecout) - Find the samples whose absolute values are GreaterEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindGreaterThan(vec, threshold, vecout) - Find the samples that are GreaterThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindGreaterThanAbs(vec, threshold, vecout) - Find the samples whose absolute values are GreaterThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindLessEqual(vec, threshold, vecout) - Find the samples that are LessEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindLessEqualAbs(vec, threshold, vecout) - Find the samples whose absolute values are LessEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindLessThan(vec, threshold, vecout) - Find the samples that are LessThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindLessThanAbs(vec, threshold, vecout) - Find the samples whose absolute values are LessThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector
+hFindLowerBound(vec, value)         - Finds the location (i.e., returns integer) in a monotonically increasing vector, where the input search value is just above or equal to the value in the vector.
+hFlatWeights(wlen)                  - Returns vector of weights of length len with constant weights normalized to give a sum of unity. Can be used by hRunningAverageT.
+hGaussianWeights(wlen)              - Returns vector of weights of length wlen with Gaussian distribution centered at len/2 and sigma=len/4 (i.e. the Gaussian extends over 2 sigma in both directions).
+hGeometricDelayFarField(antPosition, skyDirection, length) - Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located in a certain direction in farfield (based on L. Bahren)
+hGeometricDelayNearField(antPosition, skyPosition, distance) - Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located at a certain 3D space coordinate in nearfield (based on L. Bahren)
+hGeometricDelays(antPositions, skyPositions, delays, farfield) - Calculates the time delay in seconds for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field
+hGeometricPhases(frequencies, antPositions, skyPositions, phases, farfield) - Calculates the phase gradients for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field and for different frequencies.
+hGeometricWeights(frequencies, antPositions, skyPositions, weights, farfield) - Calculates the phase gradients as complex weights for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field and for different frequencies.
+hLinearWeights(wlen)                - Returns vector of weights of length wlen with linearly rising and decreasing weights centered at len/2.
+hMean(vec)                          - Returns the mean value of all elements in a vector
+hMedian(vec)                        - Returns the median value of the elements
+hMul(vec1, val, vec2)               - Performs a Mul between the vector and a scalar, where the result is returned in the second vector.
+hMul(vec1, vec2, vec3)              - Performs a Mul between the two vectors, which is returned in the third vector.
+hMulAdd(vec1, vec2, vec3)           - Performs a Mul between the two vectors, and adds the result to the output (third) vector.
+hMulAddConv(vec1, vec2, vec3)       - Performs a Mul between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+hNegate(vec)                        - Multiplies each element in the vector with -1 in place, i.e. the input vector is also the output vector.
+hNew(vec)                           - Make and return a new vector of the same size and type as the input vector
+hNorm(vec)                          - Returns the lengths or norm of a vector (i.e. Sqrt(Sum_i(xi*+2)))
+hNormalize(vec)                     - Normalizes a vector to length unity
+hPhase(frequency, time)             - Returns the interferometer phase in radians for a given frequency and time
+hReadFileOld(vec, iptr, Datatype, Antenna, Blocksize, Block, Stride, Shift) - Read data from a Datareader object (pointer in iptr) into a vector.
+hRunningAverage(idata, odata, weights) - Calculate the running average of an input vector using a weight vector.
+hRunningAverage(idata, odata, wlen, wtype) - Overloaded function to automatically calculate weights.
+hSort(vec)                          - Sorts a vector in place
+hSortMedian(vec)                    - Sorts a vector in place and returns the median value of the elements
+hSpectralPower(vec, outvec)         - Calculates the power of a complex spectrum and add it to an output vector.
+hStdDev(vec)                        - Calculates the standard deviation of a vector of values
+hStdDev(vec, mean)                  - Calculates the standard deviation around a mean value.
+hSub(vec1, val, vec2)               - Performs a Sub between the vector and a scalar, where the result is returned in the second vector.
+hSub(vec1, vec2, vec3)              - Performs a Sub between the two vectors, which is returned in the third vector.
+hSubAdd(vec1, vec2, vec3)           - Performs a Sub between the two vectors, and adds the result to the output (third) vector.
+hSubAddConv(vec1, vec2, vec3)       - Performs a Sub between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+hSum(vec)                           - Performs a sum over the values in a vector and returns the value
+hWeights(wlen, wtype)               - Create a normalized weight vector.
+hiAdd(vec1, val)                    - Performs a Add between the vector and a scalar (applied to each element), which is returned in the first vector.
+hiAdd(vec1, vec2)                   - Performs a Add between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
+hiDiv(vec1, val)                    - Performs a Div between the vector and a scalar (applied to each element), which is returned in the first vector.
+hiDiv(vec1, vec2)                   - Performs a Div between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
+hiMul(vec1, val)                    - Performs a Mul between the vector and a scalar (applied to each element), which is returned in the first vector.
+hiMul(vec1, vec2)                   - Performs a Mul between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
+hiSub(vec1, val)                    - Performs a Sub between the vector and a scalar (applied to each element), which is returned in the first vector.
+hiSub(vec1, vec2)                   - Performs a Sub between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
+square(val)                         - Returns the squared value of the parameter
+
 */
 //========================================================================
 //                    Casting & Conversion Functions
@@ -36,7 +111,7 @@ inline HComplex operator-(HComplex c, HInteger i) {return c-hfcast<HComplex>(i);
 inline HComplex operator/(HInteger i, HComplex c) {return hfcast<HComplex>(i)/c;}
 inline HComplex operator/(HComplex c, HInteger i) {return c/hfcast<HComplex>(i);}
 template <class T>
-casa::Vector<T> & stl2casa(std::vector<T>& stlvec)
+casa::Vector<T> stl2casa(std::vector<T>& stlvec)
 {
   T * storage = &(stlvec[0]);
   casa::IPosition shape(1,stlvec.size()); //tell casa the size of the vector
@@ -77,7 +152,7 @@ void aipscol2stlvec(casa::Matrix<S> &data, std::vector<T>& stlvec, const HIntege
     ncol=data.ncolumn();
     //    if (ncol>1) {MSG("aipscol2stlvec: ncol="<<ncol <<" (nrow="<<nrow<<")");};
     if (col>=ncol) {
- ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 152 << ": " << "aipscol2stlvec: column number col=" << col << " is larger than total number of columns (" << ncol << ") in matrix." << endl );
+ ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 223 << ": " << "aipscol2stlvec: column number col=" << col << " is larger than total number of columns (" << ncol << ") in matrix." << endl );
  stlvec.clear();
  return;
     }
@@ -6934,8 +7009,185 @@ void (*fptr_hApplyHanningFilter_HInteger1STDIT)( std::vector<HInteger> & data) =
 //========================================================================
 //--Undefine user-defined parameters from cc file
 /* hfppnew-generatewrappers.def - END ............................................*/
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+/*
+  \brief Apply an FFT on a vector
+
+    \param data_in: Vector containing the data on which the FFT will be applied.
+
+    \param data_out: Return vector in which the FFT transformed data is stored.
+
+    \param nyquistZone: Nyquist zone
+
+*/
+template <class IterIn, class IterOut>
+void hFFT(const IterIn data_in, const IterIn data_in_end,
+      const IterOut data_out, const IterOut data_out_end,
+      const HInteger nyquistZone) {
+  uint channel;
+  uint blocksize(data_in_end - data_in);
+  uint fftLength(blocksize/2+1);
+  uint nofChannels(fftLength);
+  IPosition shape_in(1,blocksize);
+  IPosition shape_out(1,fftLength);
+  FFTServer<Double,DComplex> fftserver(shape_in, FFTEnums::REALTOCOMPLEX);
+  Vector<Double> cvec_in(shape_in, reinterpret_cast<Double*>(&(*data_in)), casa::SHARE);
+  Vector<DComplex> cvec_out(shape_out, 0.);
+  IterOut it_out;
+  // Apply FFT
+  fftserver.fft(cvec_out, cvec_in);
+  // Is there some aftercare needed (checking/setting the size of the in/output vector)
+  switch (nyquistZone) {
+  case 1:
+  case 3:
+  case 5:
+    {
+      it_out = data_out;
+      channel = 0;
+      while ((it_out != data_out_end) && (channel < nofChannels)) {
+ *it_out = cvec_out(channel);
+ it_out++; channel++;
+      }
+    }
+    break;
+  case 2:
+  case 4:
+  case 6:
+    {
+      /// See datareader for implementation.
+      it_out = data_out;
+      channel = 0;
+      while ((it_out != data_out_end) && (channel < nofChannels)) {
+ *it_out = conj(cvec_out(fftLength - channel - 1));
+ it_out++; channel++;
+      }
+    }
+    break;
+  }
+  /// TODO: Check if output is correct.
+}
+/* hfppnew-generatewrappers.def - START ..........................................*/
+//
+//GENERATING WRAPPERS
+//
+//First set all the values to default values, if not present
+//------------------------------------------------------------------------------
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different base types (int, double, ...) that will be
+//instantiated for template parameters. Important e.g. for pythn
+//bindings
+//Defines names of the template parameters (e.g., T, S) that are being
+//used in templated function defintions (e.g., template <class T>)
+//Now set some definitions based on conditionals
+//------------------------------------------------------------------------------
+//Unless, explicitly set, yields a "return" statement if the function
+//type is not void (actually, HFPP_VOID, which is = -1)
+////////////////////////////////////////////////////////////////////////////////
+//Generate wrappers
+ inline void hFFT( std::vector<HNumber> & data_in , std::vector<HComplex> & data_out , HInteger nyquistZone) {
+hFFT ( data_in.begin(),data_in.end() , data_out.begin(),data_out.end() , nyquistZone);
+}
+inline void hFFT( casa::Vector<HNumber> & data_in , casa::Vector<HComplex> & data_out , HInteger nyquistZone) {
+hFFT ( data_in.cbegin(),data_in.cend() , data_out.cbegin(),data_out.cend() , nyquistZone);
+}
+
+void (*fptr_hFFT_HIntegerHNumberHComplexHIntegerSTDITSTDIT)( std::vector<HNumber> & data_in , std::vector<HComplex> & data_out , HInteger nyquistZone) = &hFFT;
+
+////////////////////////////////////////////////////////////////////////////////
+//
 //========================================================================
-//                             I/O Functions
+//--Undefine parameters
+//========================================================================
+//--Undefine user-defined parameters from cc file
+/* hfppnew-generatewrappers.def - END ............................................*/
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+/*
+  \brief Apply an Inverse FFT on a vector
+
+    \param data_in: Vector containing the input data on which the inverse FFT will be applied.
+
+    \param data_out: Return vector in which the inverse FFT transformed data is stored.
+
+    \param nyquistZone: Nyquist zone
+
+*/
+template <class IterIn, class IterOut>
+void hInvFFT(const IterIn data_in, const IterIn data_in_end,
+      const IterOut data_out, const IterOut data_out_end,
+      const uint nyquistZone) {
+  // uint channel;
+  // uint blocksize = data_out_end - data_out;
+  // uint fftLength = blocksize/2 + 1;
+  // uint nofChannels = fftLength;
+  // IPosition shape_in = (1,fftLength);
+  // IPosition shape_out = (1, blocksize);
+  // Vector<DComplex> cvec_f(shape_in, reinterpret_cast<DComplex*>(data_in), casa::SHARE);
+  // Vector<Double> cvec_out(shape_out, 0.);
+  // if ((data_in_end - data_in) != fftLength) {
+  //   cerr << "[invfft] Bad input: len(data_in) != fftLength" << endl;
+  // };
+  // try {
+  //   Vector<DComplex> cvec_in(fftLength);
+  //   FFTServer<Double,DComplex> server(shape_out,
+  // 				      FFTEnums::REALTOCOMPLEX);
+  //   switch (nyquistZone) {
+  //   case 1:
+  //   case 3:
+  //     for (channel=0; channel<nofChannels; channel++) {
+  // 	cvec_in(channel) = cvec_f(channel);
+  //     }
+  //     break;
+  //   case 2:
+  //     for (channel=0; channel<nofChannels; channel++) {
+  // 	cvec_in(channel) = conj(cvec_f(fftLength - channel - 1));
+  //     }
+  //     break;
+  //   }
+  //   server.fft(cvec_out,cvec_in);
+  // } catch (AipsError x) {
+  //   cerr << "[invfft]" << x.getMesg() << endl;
+  // }
+}
+/* hfppnew-generatewrappers.def - START ..........................................*/
+//
+//GENERATING WRAPPERS
+//
+//First set all the values to default values, if not present
+//------------------------------------------------------------------------------
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different base types (int, double, ...) that will be
+//instantiated for template parameters. Important e.g. for pythn
+//bindings
+//Defines names of the template parameters (e.g., T, S) that are being
+//used in templated function defintions (e.g., template <class T>)
+//Now set some definitions based on conditionals
+//------------------------------------------------------------------------------
+//Unless, explicitly set, yields a "return" statement if the function
+//type is not void (actually, HFPP_VOID, which is = -1)
+////////////////////////////////////////////////////////////////////////////////
+//Generate wrappers
+template < class T > inline void hInvFFT( std::vector<T> & data_in , std::vector<T> & data_out , uint nyquistZone) {
+hInvFFT ( data_in.begin(),data_in.end() , data_out.begin(),data_out.end() , nyquistZone);
+}
+template < class T > inline void hInvFFT( casa::Vector<T> & data_in , casa::Vector<T> & data_out , uint nyquistZone) {
+hInvFFT ( data_in.cbegin(),data_in.cend() , data_out.cbegin(),data_out.cend() , nyquistZone);
+}
+
+void (*fptr_hInvFFT_HComplex11uintSTDITSTDIT)( std::vector<HComplex> & data_in , std::vector<HComplex> & data_out , uint nyquistZone) = &hInvFFT;
+void (*fptr_hInvFFT_HNumber11uintSTDITSTDIT)( std::vector<HNumber> & data_in , std::vector<HNumber> & data_out , uint nyquistZone) = &hInvFFT;
+void (*fptr_hInvFFT_HInteger11uintSTDITSTDIT)( std::vector<HInteger> & data_in , std::vector<HInteger> & data_out , uint nyquistZone) = &hInvFFT;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//========================================================================
+//--Undefine parameters
+//========================================================================
+//--Undefine user-defined parameters from cc file
+/* hfppnew-generatewrappers.def - END ............................................*/
+//========================================================================
+//                     I/O Functions (DataReader)
 //========================================================================
 //------------------------------------------------------------------------
 /*!
@@ -6991,17 +7243,17 @@ HIntPointer hFileOpen(HString Filename) {
   if (Filetype=="LOPESEvent") {
     lep = new CR::LopesEventIn;
     opened=lep->attachFile(Filename);
-    ( cout << "[" << "hftools.tmp.cc" << "," << 3769 << "]: " << "Opening LOPES File="<<Filename << endl ); lep->summary();
+    ( cout << "[" << "hftools.tmp.cc" << "," << 3970 << "]: " << "Opening LOPES File="<<Filename << endl ); lep->summary();
   } else if (Filetype=="LOFAR_TBB") {
     tbb = new CR::LOFAR_TBB(Filename,1024);
     opened=tbb!=__null;
-    ( cout << "[" << "hftools.tmp.cc" << "," << 3773 << "]: " << "Opening LOFAR File="<<Filename << endl );tbb->summary();
+    ( cout << "[" << "hftools.tmp.cc" << "," << 3974 << "]: " << "Opening LOFAR File="<<Filename << endl );tbb->summary();
   } else {
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 3775 << ": " << "hFileOpen" << ": Unknown Filetype = " << Filetype << ", Filename=" << Filename << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 3976 << ": " << "hFileOpen" << ": Unknown Filetype = " << Filetype << ", Filename=" << Filename << endl );
     opened=false;
   }
   if (!opened){
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 3780 << ": " << "hFileOpen" << ": Opening file " << Filename << " failed." << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 3981 << ": " << "hFileOpen" << ": Opening file " << Filename << " failed." << endl );
     return reinterpret_cast<HInteger>(reinterpret_cast<HPointer>(__null));
   };
   return iptr;
@@ -7250,7 +7502,7 @@ void hFileRead(
   DataReader *drp=reinterpret_cast<DataReader*>(iptr);
   //Check whether it is non-NULL.
   if (drp==reinterpret_cast<HPointer>(__null)){
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 3993 << ": " << "hFileRead" << ": pointer to FileObject is NULL, DataReader not found." << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4194 << ": " << "hFileRead" << ": pointer to FileObject is NULL, DataReader not found." << endl );
     return;
   };
   //------TIME------------------------------
@@ -7284,7 +7536,7 @@ void hFileRead(
   //------CALFFT------------------------------
   else if (Datatype=="CalFFT") {if (typeid(vec)==typeid(std::vector<HComplex>)) { casa::IPosition shape(2); shape(0)=drp->blocksize(); shape(1)=drp->nofSelectedAntennas(); casa::Matrix<CasaComplex> casamtrx(shape,reinterpret_cast<CasaComplex*>(&(vec[0])),casa::SHARE); drp->calfft (casamtrx); } else { cout << "hFileRead" << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl; };}
   else {
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4038 << ": " << "hFileRead" << ": Datatype=" << Datatype << " is unknown." << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4239 << ": " << "hFileRead" << ": Datatype=" << Datatype << " is unknown." << endl );
     vec.clear();
   };
   return;
@@ -7332,7 +7584,7 @@ void (*fptr_hFileRead_HIntegerHIntPointerHString1STL)( HIntPointer iptr , HStrin
     \param pyob: 
 
 
-Example: 
+Example:
 antennaIDs=hFileGetParameter(file,"AntennaIDs")
 x=hCalTable("~/LOFAR/usg/data/lopes/LOPES-CalTable",obsdate,list(antennaIDs))
 
@@ -7372,6 +7624,105 @@ HPyObjectPtr hCalTable(HString filename, HString keyword, HInteger date, HPyObje
 //Generate wrappers
 
 HPyObjectPtr (*fptr_hCalTable_HIntegerHStringHStringHIntegerHPyObjectPtr)( HString filename , HString keyword , HInteger date , HPyObjectPtr pyob) = &hCalTable;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//========================================================================
+//--Undefine parameters
+//========================================================================
+//--Undefine user-defined parameters from cc file
+/* hfppnew-generatewrappers.def - END ............................................*/
+//========================================================================
+//              Coordinate Conversion (VectorConversion.cc)
+//========================================================================
+//$ORIGIN: Math/VectorConversion.cc
+//-----------------------------------------------------------------------
+/*!
+  \brief Converts a 3D spatial vector into a different Coordinate type (e.g. Spherical to Cartesian)
+
+    \param source: Coordinates of the source to be converted - vector of length 3
+
+    \param sourceCoordinate: Type of the coordinates for the source
+
+    \param target: Coordinates of the source to be converted - vector of length 3
+
+    \param targetCoordinate: Type of the coordinates for the target 
+
+    \param anglesInDegrees: True if the angles are in degree, otherwise in radians
+
+
+Available Coordinate Types are:
+
+      -  Azimuth-Elevation-Height, \f$ \vec x = (Az,El,H) \f$
+      AzElHeight,
+      -  Azimuth-Elevation-Radius, \f$ \vec x = (Az,El,R) \f$
+      AzElRadius,
+      -  Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
+      Cartesian,
+      -  Cylindrical coordinates, \f$ \vec x = (r,\phi,h) \f$
+      Cylindrical,
+      -  Direction on the sky, \f$ \vec x = (Lon,Lat) \f$
+      Direction,
+      -  Direction on the sky with radial distance, \f$ \vec x = (Lon,Lat,R) \f$
+      DirectionRadius,
+      -  Frquency
+      Frequency,
+      -  Longitude-Latitude-Radius
+      LongLatRadius,
+      -  North-East-Height
+      NorthEastHeight,
+      -  Spherical coordinates, \f$ \vec x = (r,\phi,\theta) \f$
+      Spherical,
+      - Time
+      Time
+
+*/
+template <class Iter>
+bool hCoordinateConvert (Iter source,
+      CR::CoordinateType::Types const &sourceCoordinate,
+      Iter target,
+      CR::CoordinateType::Types const &targetCoordinate,
+      bool anglesInDegrees
+      )
+{
+  return CR::convertVector(
+      *target,
+      *(target+1),
+      *(target+2),
+      targetCoordinate,
+      *source,
+      *(source+1),
+      *(source+2),
+      sourceCoordinate,
+      anglesInDegrees
+          );
+    }
+/* hfppnew-generatewrappers.def - START ..........................................*/
+//
+//GENERATING WRAPPERS
+//
+//First set all the values to default values, if not present
+//------------------------------------------------------------------------------
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different base types (int, double, ...) that will be
+//instantiated for template parameters. Important e.g. for pythn
+//bindings
+//Defines names of the template parameters (e.g., T, S) that are being
+//used in templated function defintions (e.g., template <class T>)
+//Now set some definitions based on conditionals
+//------------------------------------------------------------------------------
+//Unless, explicitly set, yields a "return" statement if the function
+//type is not void (actually, HFPP_VOID, which is = -1)
+////////////////////////////////////////////////////////////////////////////////
+//Generate wrappers
+ inline bool hCoordinateConvert( std::vector<HNumber> & source , CRCoordinateType sourceCoordinate , std::vector<HNumber> & target , CRCoordinateType targetCoordinate , bool anglesInDegrees) {
+return hCoordinateConvert ( source.begin() , sourceCoordinate , target.begin() , targetCoordinate , anglesInDegrees);
+}
+inline bool hCoordinateConvert( casa::Vector<HNumber> & source , CRCoordinateType sourceCoordinate , casa::Vector<HNumber> & target , CRCoordinateType targetCoordinate , bool anglesInDegrees) {
+return hCoordinateConvert ( source.cbegin() , sourceCoordinate , target.cbegin() , targetCoordinate , anglesInDegrees);
+}
+
+bool (*fptr_hCoordinateConvert_HIntegerHNumberCRCoordinateTypeHNumberCRCoordinateTypeboolSTDITFIXEDSTDITFIXED)( std::vector<HNumber> & source , CRCoordinateType sourceCoordinate , std::vector<HNumber> & target , CRCoordinateType targetCoordinate , bool anglesInDegrees) = &hCoordinateConvert;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -7442,12 +7793,12 @@ void hReadFileOld(std::vector<T> & vec,
   DataReader *drp=reinterpret_cast<DataReader*>(iptr);
   //First retrieve the pointer to the pointer to the dataRead and check whether it is non-NULL.
   if (drp==reinterpret_cast<HPointer>(__null)){
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4171 << ": " << "dataRead: pointer to FileObject is NULL, DataReader not found." << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4447 << ": " << "dataRead: pointer to FileObject is NULL, DataReader not found." << endl );
     return;
   };
 //!!!One Needs to verify somehow that the parameters make sense !!!
   if (Antenna > static_cast<HInteger>(drp->nofAntennas()-1)) {
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4177 << ": " << "Requested Antenna number too large!" << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4453 << ": " << "Requested Antenna number too large!" << endl );
     return;
   };
   drp->setBlocksize(Blocksize);
@@ -7511,7 +7862,7 @@ void hReadFileOld(std::vector<T> & vec,
     ncol=ary.ncolumn(); if (ncol>1 && Antenna<ncol) aipscol2stlvec(ary,vec,Antenna); else aipscol2stlvec(ary,vec,0);;
   }
   else {
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4249 << ": " << "DataFunc_CR_dataRead: Datatype=" << Datatype << " is unknown." << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4525 << ": " << "DataFunc_CR_dataRead: Datatype=" << Datatype << " is unknown." << endl );
     vec.clear();
     return;
   };
@@ -7622,10 +7973,34 @@ void init_module_hftools(); extern "C" __attribute__ ((visibility("default"))) v
       .value("FLAT",WEIGHTS_FLAT)
       .value("LINEAR",WEIGHTS_LINEAR)
       .value("GAUSSIAN", WEIGHTS_GAUSSIAN);
+    enum_<CR::CoordinateType::Types>("CoordinateTypes")
+      //! Azimuth-Elevation-Height, \f$ \vec x = (Az,El,H) \f$
+      .value("AzElHeight",CR::CoordinateType::AzElHeight)
+      //! Azimuth-Elevation-Radius, \f$ \vec x = (Az,El,R) \f$
+      .value("AzElRadius",CR::CoordinateType::AzElRadius)
+      //! Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
+      .value("Cartesian",CR::CoordinateType::Cartesian)
+      //! Cylindrical coordinates, \f$ \vec x = (r,\phi,h) \f$
+      .value("Cylindrical",CR::CoordinateType::Cylindrical)
+      //! Direction on the sky, \f$ \vec x = (Lon,Lat) \f$
+      .value("Direction",CR::CoordinateType::Direction)
+      //! Direction on the sky with radial distance, \f$ \vec x = (Lon,Lat,R) \f$
+      .value("DirectionRadius",CR::CoordinateType::DirectionRadius)
+      //! Frquency
+      .value("Frequency",CR::CoordinateType::Frequency)
+      //! Longitude-Latitude-Radius
+      .value("LongLatRadius",CR::CoordinateType::LongLatRadius)
+      //! North-East-Height
+      .value("NorthEastHeight",CR::CoordinateType::NorthEastHeight)
+      //! Spherical coordinates, \f$ \vec x = (r,\phi,\theta) \f$
+      .value("Spherical",CR::CoordinateType::Spherical)
+      //! Time
+      .value("Time",CR::CoordinateType::Time);
+    //The following will include the automatically generated python wrappers
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -7665,7 +8040,7 @@ def("hFill",fptr_hFill_HInteger11STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -7703,7 +8078,7 @@ def("hNew",fptr_hNew_HInteger1STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -7740,7 +8115,7 @@ def("hResize",fptr_hResize_HInteger1HIntegerSTL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -7777,7 +8152,7 @@ def("hResize",fptr_hResize_HInteger1HInteger1STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -7834,7 +8209,7 @@ def("hResize",fptr_hResize_HIntegerHInteger12STLSTL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -7891,7 +8266,7 @@ def("hResize",fptr_hResize_HIntegerHInteger12CASACASA );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -7936,7 +8311,7 @@ def("hConvert",fptr_hConvert_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -7975,7 +8350,7 @@ def("hCopy",fptr_hCopy_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -8011,7 +8386,7 @@ def("square",fptr_square_HInteger1 );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -8045,7 +8420,7 @@ def("hPhase",fptr_hPhase_HIntegerHNumberHNumber );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -8079,7 +8454,7 @@ def("funcGaussian",fptr_funcGaussian_HIntegerHNumberHNumberHNumber );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8117,7 +8492,7 @@ def("hExp",fptr_hExp1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8155,7 +8530,7 @@ def("hExp",fptr_hExp2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8193,7 +8568,7 @@ def("hLog",fptr_hLog1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8231,7 +8606,7 @@ def("hLog",fptr_hLog2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8269,7 +8644,7 @@ def("hLog10",fptr_hLog101_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8307,7 +8682,7 @@ def("hLog10",fptr_hLog102_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8345,7 +8720,7 @@ def("hSin",fptr_hSin1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8383,7 +8758,7 @@ def("hSin",fptr_hSin2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8421,7 +8796,7 @@ def("hSinh",fptr_hSinh1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8459,7 +8834,7 @@ def("hSinh",fptr_hSinh2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8497,7 +8872,7 @@ def("hSqrt",fptr_hSqrt1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8535,7 +8910,7 @@ def("hSqrt",fptr_hSqrt2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8573,7 +8948,7 @@ def("hSquare",fptr_hSquare1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8611,7 +8986,7 @@ def("hSquare",fptr_hSquare2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8649,7 +9024,7 @@ def("hTan",fptr_hTan1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8687,7 +9062,7 @@ def("hTan",fptr_hTan2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8725,7 +9100,7 @@ def("hTanh",fptr_hTanh1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8763,7 +9138,7 @@ def("hTanh",fptr_hTanh2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8801,7 +9176,7 @@ def("hAbs",fptr_hAbs1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8839,7 +9214,7 @@ def("hAbs",fptr_hAbs2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8877,7 +9252,7 @@ def("hCos",fptr_hCos1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8915,7 +9290,7 @@ def("hCos",fptr_hCos2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8953,7 +9328,7 @@ def("hCosh",fptr_hCosh1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8991,7 +9366,7 @@ def("hCosh",fptr_hCosh2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -9028,7 +9403,7 @@ def("hCeil",fptr_hCeil1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -9067,7 +9442,7 @@ def("hCeil",fptr_hCeil2_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -9104,7 +9479,7 @@ def("hFloor",fptr_hFloor1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -9143,7 +9518,7 @@ def("hFloor",fptr_hFloor2_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -9180,7 +9555,7 @@ def("hAcos",fptr_hAcos1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -9219,7 +9594,7 @@ def("hAcos",fptr_hAcos2_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -9256,7 +9631,7 @@ def("hAsin",fptr_hAsin1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -9295,7 +9670,7 @@ def("hAsin",fptr_hAsin2_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -9332,7 +9707,7 @@ def("hAtan",fptr_hAtan1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -9371,7 +9746,7 @@ def("hAtan",fptr_hAtan2_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9416,7 +9791,7 @@ def("hiSub",fptr_hiSub_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9461,7 +9836,7 @@ def("hiSub",fptr_hiSub2_HIntegerHInteger12STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9524,7 +9899,7 @@ def("hSub",fptr_hSub_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9563,7 +9938,7 @@ def("hSubAdd",fptr_hSubAdd_HInteger111STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9626,7 +10001,7 @@ def("hSubAddConv",fptr_hSubAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9689,7 +10064,7 @@ def("hSub",fptr_hSub2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9734,7 +10109,7 @@ def("hiMul",fptr_hiMul_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9779,7 +10154,7 @@ def("hiMul",fptr_hiMul2_HIntegerHInteger12STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9842,7 +10217,7 @@ def("hMul",fptr_hMul_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9881,7 +10256,7 @@ def("hMulAdd",fptr_hMulAdd_HInteger111STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9944,7 +10319,7 @@ def("hMulAddConv",fptr_hMulAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10007,7 +10382,7 @@ def("hMul",fptr_hMul2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10052,7 +10427,7 @@ def("hiAdd",fptr_hiAdd_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10097,7 +10472,7 @@ def("hiAdd",fptr_hiAdd2_HIntegerHInteger12STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10160,7 +10535,7 @@ def("hAdd",fptr_hAdd_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10199,7 +10574,7 @@ def("hAddAdd",fptr_hAddAdd_HInteger111STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10262,7 +10637,7 @@ def("hAddAddConv",fptr_hAddAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10325,7 +10700,7 @@ def("hAdd",fptr_hAdd2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10370,7 +10745,7 @@ def("hiDiv",fptr_hiDiv_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10415,7 +10790,7 @@ def("hiDiv",fptr_hiDiv2_HIntegerHInteger12STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10478,7 +10853,7 @@ def("hDiv",fptr_hDiv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10517,7 +10892,7 @@ def("hDivAdd",fptr_hDivAdd_HInteger111STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10580,7 +10955,7 @@ def("hDivAddConv",fptr_hDivAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10643,7 +11018,7 @@ def("hDiv",fptr_hDiv2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10682,7 +11057,7 @@ def("hNegate",fptr_hNegate_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10721,7 +11096,7 @@ def("hSum",fptr_hSum_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10759,7 +11134,7 @@ def("hNorm",fptr_hNorm_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10797,7 +11172,7 @@ def("hNormalize",fptr_hNormalize_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10835,7 +11210,7 @@ def("hMean",fptr_hMean_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10874,7 +11249,7 @@ def("hSort",fptr_hSort_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10912,7 +11287,7 @@ def("hSortMedian",fptr_hSortMedian_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10947,7 +11322,7 @@ def("hMedian",fptr_hMedian_HInteger1STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10985,7 +11360,7 @@ def("hStdDev",fptr_hStdDev_HInteger1HNumberSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11023,7 +11398,7 @@ def("hStdDev",fptr_hStdDev_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11061,7 +11436,7 @@ def("hFindLessEqual",fptr_hFindLessEqual_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11099,7 +11474,7 @@ def("hFindLessEqualAbs",fptr_hFindLessEqualAbs_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11137,7 +11512,7 @@ def("hFindGreaterThan",fptr_hFindGreaterThan_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11175,7 +11550,7 @@ def("hFindGreaterThanAbs",fptr_hFindGreaterThanAbs_HInteger11HIntegerSTDITSTDIT 
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11213,7 +11588,7 @@ def("hFindGreaterEqual",fptr_hFindGreaterEqual_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11251,7 +11626,7 @@ def("hFindGreaterEqualAbs",fptr_hFindGreaterEqualAbs_HInteger11HIntegerSTDITSTDI
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11289,7 +11664,7 @@ def("hFindLessThan",fptr_hFindLessThan_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11327,7 +11702,7 @@ def("hFindLessThanAbs",fptr_hFindLessThanAbs_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11365,7 +11740,7 @@ def("hDownsample",fptr_hDownsample_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11400,7 +11775,7 @@ def("hDownsample",fptr_hDownsample_HInteger1HNumberSTL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11439,7 +11814,7 @@ def("hFindLowerBound",fptr_hFindLowerBound_HInteger11STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11473,7 +11848,7 @@ def("hFlatWeights",fptr_hFlatWeights_HIntegerHInteger );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11507,7 +11882,7 @@ def("hLinearWeights",fptr_hLinearWeights_HIntegerHInteger );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11541,7 +11916,7 @@ def("hGaussianWeights",fptr_hGaussianWeights_HIntegerHInteger );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11575,7 +11950,7 @@ def("hWeights",fptr_hWeights_HIntegerHIntegerhWEIGHTS );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11610,7 +11985,7 @@ def("hRunningAverage",fptr_hRunningAverage_HIntegerHNumberHNumberHNumberSTDITSTD
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11645,7 +12020,7 @@ def("hRunningAverage",fptr_hRunningAverage_HIntegerHNumberHNumberHIntegerhWEIGHT
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11682,7 +12057,7 @@ def("hGeometricDelayFarField",fptr_hGeometricDelayFarField_HIntegerHNumberHNumbe
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11719,7 +12094,7 @@ def("hGeometricDelayNearField",fptr_hGeometricDelayNearField_HIntegerHNumberHNum
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11756,7 +12131,7 @@ def("hGeometricDelays",fptr_hGeometricDelays_HIntegerHNumberHNumberHNumberboolST
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11793,7 +12168,7 @@ def("hGeometricPhases",fptr_hGeometricPhases_HIntegerHNumberHNumberHNumberHNumbe
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11830,7 +12205,7 @@ def("hGeometricWeights",fptr_hGeometricWeights_HIntegerHNumberHNumberHNumberHCom
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11865,7 +12240,7 @@ def("hSpectralPower",fptr_hSpectralPower_HIntegerHComplexHNumberSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11902,7 +12277,7 @@ def("hADC2Voltage",fptr_hADC2Voltage_HInteger1HNumberSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11941,7 +12316,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1HNumberuintuintuintSTDIT
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11980,7 +12355,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1HNumberuintSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12019,7 +12394,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1HNumberSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12058,7 +12433,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12097,7 +12472,7 @@ def("hApplyFilter",fptr_hApplyFilter_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12136,7 +12511,83 @@ def("hApplyHanningFilter",fptr_hApplyHanningFilter_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
+//----------------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------
+/* hfppnew-generatewrappers.def - START ..........................................*/
+//
+//GENERATING WRAPPERS
+//
+//First set all the values to default values, if not present
+//------------------------------------------------------------------------------
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different base types (int, double, ...) that will be
+//instantiated for template parameters. Important e.g. for pythn
+//bindings
+//Defines names of the template parameters (e.g., T, S) that are being
+//used in templated function defintions (e.g., template <class T>)
+//Now set some definitions based on conditionals
+//------------------------------------------------------------------------------
+//Unless, explicitly set, yields a "return" statement if the function
+//type is not void (actually, HFPP_VOID, which is = -1)
+////////////////////////////////////////////////////////////////////////////////
+//Generate wrappers
+
+
+
+def("hFFT",fptr_hFFT_HIntegerHNumberHComplexHIntegerSTDITSTDIT );
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//========================================================================
+//--Undefine parameters
+//========================================================================
+//--Undefine user-defined parameters from cc file
+/* hfppnew-generatewrappers.def - END ............................................*/
+//==================================================================================
+// ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
+//==================================================================================
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
+//----------------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------
+/* hfppnew-generatewrappers.def - START ..........................................*/
+//
+//GENERATING WRAPPERS
+//
+//First set all the values to default values, if not present
+//------------------------------------------------------------------------------
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different base types (int, double, ...) that will be
+//instantiated for template parameters. Important e.g. for pythn
+//bindings
+//Defines names of the template parameters (e.g., T, S) that are being
+//used in templated function defintions (e.g., template <class T>)
+//Now set some definitions based on conditionals
+//------------------------------------------------------------------------------
+//Unless, explicitly set, yields a "return" statement if the function
+//type is not void (actually, HFPP_VOID, which is = -1)
+////////////////////////////////////////////////////////////////////////////////
+//Generate wrappers
+
+
+
+def("hInvFFT",fptr_hInvFFT_HComplex11uintSTDITSTDIT );
+def("hInvFFT",fptr_hInvFFT_HNumber11uintSTDITSTDIT );
+def("hInvFFT",fptr_hInvFFT_HInteger11uintSTDITSTDIT );
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//========================================================================
+//--Undefine parameters
+//========================================================================
+//--Undefine user-defined parameters from cc file
+/* hfppnew-generatewrappers.def - END ............................................*/
+//==================================================================================
+// ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
+//==================================================================================
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -12170,7 +12621,7 @@ def("hFileClose",fptr_hFileClose_HIntegerHIntPointer );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -12204,7 +12655,7 @@ def("hFileOpen",fptr_hFileOpen_HIntegerHString );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12238,7 +12689,7 @@ def("hFileGetParameter",fptr_hFileGetParameter_HIntegerHIntPointerHString );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12272,7 +12723,7 @@ def("hFileSetParameter",fptr_hFileSetParameter_HIntegerHIntPointerHStringHPyObje
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12308,7 +12759,7 @@ def("hFileRead",fptr_hFileRead_HIntegerHIntPointerHString1STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12342,7 +12793,44 @@ def("hCalTable",fptr_hCalTable_HIntegerHStringHStringHIntegerHPyObjectPtr );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Fri Mar 05 11:18:20 CET 2010
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
+//----------------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------
+/* hfppnew-generatewrappers.def - START ..........................................*/
+//
+//GENERATING WRAPPERS
+//
+//First set all the values to default values, if not present
+//------------------------------------------------------------------------------
+//Defines all the different types of wrappers that will be built (STL, CASA, ...)
+//Defines all the different base types (int, double, ...) that will be
+//instantiated for template parameters. Important e.g. for pythn
+//bindings
+//Defines names of the template parameters (e.g., T, S) that are being
+//used in templated function defintions (e.g., template <class T>)
+//Now set some definitions based on conditionals
+//------------------------------------------------------------------------------
+//Unless, explicitly set, yields a "return" statement if the function
+//type is not void (actually, HFPP_VOID, which is = -1)
+////////////////////////////////////////////////////////////////////////////////
+//Generate wrappers
+
+
+
+def("hCoordinateConvert",fptr_hCoordinateConvert_HIntegerHNumberCRCoordinateTypeHNumberCRCoordinateTypeboolSTDITFIXEDSTDITFIXED );
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//========================================================================
+//--Undefine parameters
+//========================================================================
+//--Undefine user-defined parameters from cc file
+/* hfppnew-generatewrappers.def - END ............................................*/
+//==================================================================================
+// ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
+//==================================================================================
+//     File was generated from hftools.iter.cc on Sat Mar 06 01:47:42 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------

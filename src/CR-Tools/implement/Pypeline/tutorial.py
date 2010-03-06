@@ -33,8 +33,8 @@ Let's see how we can open a file. First define a filename, e.g.:
 
 """
 LOFARSOFT=os.environ["LOFARSOFT"]
-#filename=LOFARSOFT+"/data/lopes/example.event"
-filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
+filename=LOFARSOFT+"/data/lopes/example.event"
+#filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 """
 > '/Users/falcke/LOFAR/usg/data/lopes/sample.event'
 
@@ -44,6 +44,7 @@ interface to the LOFAR CRTOOLS datareader class and was defined in pycrtools.py.
 The following will open a data file:
 """
 file=crfile(filename)
+file.set("Blocksize",1024)
 """
 >
 [hftools.tmp.cc,3758]: Opening LOPES File=/Users/falcke/LOFAR/usg/data/lopes/example.event
@@ -133,7 +134,6 @@ antennaIDs= Vec(8)=[10101,10102,10201,10202,20101,20102,20201,20202]
 selectedAntennas= Vec(8)=[0,1,2,3,4,5,6,7]
 fftlength= 32769
 sampleFrequency= 80000000.0
-
 
 We can also change parameters in a very similar fashion, using the
 "set" method, which is an implementation of the "hFileSetParameter"
@@ -232,5 +232,63 @@ available methods with "dir", e.g.
 dir(fxdata)
 """
 > ['__add__', '__class__', '__contains__', '__delattr__', '__delitem__', '__dict__', '__div__', '__doc__', '__format__', '__getattribute__', '__getitem__', '__hash__', '__iadd__', '__idiv__', '__imul__', '__init__', '__instance_size__', '__isub__', '__iter__', '__len__', '__module__', '__mul__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__setitem__', '__sizeof__', '__str__', '__sub__', '__subclasshook__', '__weakref__', 'abs', 'acos', 'add', 'addadd', 'addaddconv', 'append', 'asin', 'atan', 'ceil', 'convert', 'copy', 'cos', 'cosh', 'div', 'divadd', 'divaddconv', 'downsample', 'exp', 'extend', 'extendflat', 'fill', 'findgreaterequal', 'findgreaterequalabs', 'findgreaterthan', 'findgreaterthanabs', 'findlessequal', 'findlessequalabs', 'findlessthan', 'findlessthanabs', 'findlowerbound', 'floor', 'iadd', 'idiv', 'imul', 'isub', 'log', 'log10', 'mean', 'median', 'mul', 'muladd', 'muladdconv', 'new', 'norm', 'normalize', 'resize', 'sin', 'sinh', 'sort', 'sortmedian', 'sqrt', 'square', 'stddev', 'sub', 'subadd', 'subaddconv', 'sum', 'tan', 'tanh']
+
+"""
+
+"""
+(+) Fourier Transforms (FFT)
+----------------------------
+
+We can make a FFT of a float vector. This function will only return
+the non-redundant part of the FFT (i.e., just one half).  Again we
+need to provide a properly sized output vector (input length/2+1). We
+also have to specify as a second parameter in which NyquistZone the
+data was take. 
+
+Nyquist sampling means that one needs, for example, 200 MHz sampling
+rate to digitize a bandwidth of 100 MHz. The first Nyquist zone is
+then 0-100 MHz, and the second is 100-200 MHz.
+
+So, let's do the transform:
+"""
+fftdata=ComplexVec()
+fftdata.resize(513)
+fxdata[0:1024].fft(fftdata,1)
+"""
+>>> fftdata
+Vec(513)=[(6078+0j),(99.3936739874-28.663986893j),(-93.6321366929-4.95059820124j),(82.9590664565+28.8729314743j),(-83.6744655239+4.46573054789j),(169.1861864-61.2949652607j),(-118.623662378+53.2694320202j),(75.764787806-74.6606191354j),(-115.629434646+29.4373842905j),(98.0844400537-16.0574421952j),...]
+
+
+
+(+) Coordinates
+---------------
+
+We also have access to a few functions dealing with astronomical
+coordinates. Assume, we have a source at an Azmiut/Elevation position
+of (178 Degree,28 Degree) and we want to convert that into Cartesian
+coordinates (which, for example, is required by our beamformer).
+
+We first turn this into std vector and create a vector that is
+supposed to hold the Cartesian coordinates. Note that the AzEL vector
+is actually AzElRadius, where we need to set the radius to unity.
+
+"""
+azel=FloatVec()
+azel.extend((178,28,1))
+cartesian=azel.new()
+"""
+>>> azel
+Vec(3)=[178.0,28.0,1.0]
+>>> cartesian
+Vec(3)=[0.0,0.0,0.0]
+
+We then do the conversion, using 
+"""
+hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
+"""
+yielding the following output vector:
+
+>>> cartesian
+Vec(3)=[0.0308144266055,-0.882409725042,0.469471562786]
 
 """

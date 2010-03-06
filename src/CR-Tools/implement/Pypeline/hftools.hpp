@@ -68,7 +68,33 @@ BOOST_PYTHON_MODULE(hftools)
       .value("LINEAR",WEIGHTS_LINEAR)
       .value("GAUSSIAN", WEIGHTS_GAUSSIAN);
 
+    enum_<CR::CoordinateType::Types>("CoordinateTypes")
+      //! Azimuth-Elevation-Height, \f$ \vec x = (Az,El,H) \f$
+      .value("AzElHeight",CR::CoordinateType::AzElHeight)
+      //! Azimuth-Elevation-Radius, \f$ \vec x = (Az,El,R) \f$
+      .value("AzElRadius",CR::CoordinateType::AzElRadius)
+      //! Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
+      .value("Cartesian",CR::CoordinateType::Cartesian)
+      //! Cylindrical coordinates, \f$ \vec x = (r,\phi,h) \f$
+      .value("Cylindrical",CR::CoordinateType::Cylindrical)
+      //! Direction on the sky, \f$ \vec x = (Lon,Lat) \f$
+      .value("Direction",CR::CoordinateType::Direction)
+      //! Direction on the sky with radial distance, \f$ \vec x = (Lon,Lat,R) \f$
+      .value("DirectionRadius",CR::CoordinateType::DirectionRadius)
+      //! Frquency
+      .value("Frequency",CR::CoordinateType::Frequency)
+      //! Longitude-Latitude-Radius
+      .value("LongLatRadius",CR::CoordinateType::LongLatRadius)
+      //! North-East-Height
+      .value("NorthEastHeight",CR::CoordinateType::NorthEastHeight)
+      //! Spherical coordinates, \f$ \vec x = (r,\phi,\theta) \f$
+      .value("Spherical",CR::CoordinateType::Spherical)
+      //! Time
+      .value("Time",CR::CoordinateType::Time);
+
+    //The following will include the automatically generated python wrappers
 #include "hftools.def.h"
 
-}
+}    
+
 #undef HFPP_FILETYPE

@@ -4,5 +4,5 @@
 cd $LOFARSOFT/build/cr
 #make rebuild_cache
 #rm $LOFARSOFT/build/cr/implement/Pypeline/hftools.*
-make hftools
+make -j2 hftools
 make install

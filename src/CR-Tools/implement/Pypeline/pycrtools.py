@@ -83,13 +83,12 @@ def Vec_div(vec1,val):
     return vecout
 
 setattr(ComplexVec,"SpectralPower",hSpectralPower)
+setattr(FloatVec,"fft",hFFT)
 
 
 setattr(IntMatrix,"__repr__",MatrixToPrintString)
 
 
-#for v in hNumericalVectorTypes:
-#    setattr
 for v in hAllVectorTypes:
     setattr(v,"__repr__",VecToPrintString)
     setattr(v,"extendflat",extendflat)

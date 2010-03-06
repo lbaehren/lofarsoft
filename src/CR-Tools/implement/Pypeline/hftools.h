@@ -78,6 +78,8 @@
 #include <crtools.h>
 #include "IO/LopesEventIn.h"
 #include "IO/LOFAR_TBB.h"
+#include <Coordinates/CoordinateType.h>
+#include "Math/VectorConversion.h"
 #include "Math/Constants.h"
 #include <Pypeline/hfcommon.h>
 #include <Pypeline/hfppnew.h>
