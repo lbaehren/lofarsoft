@@ -20,6 +20,7 @@ sources detected in the data.
 .. toctree::
    :maxdepth: 2
 
+   quickstart/index.rst
    framework/index.rst
    recipe/index.rst
    parallel/index.rst
