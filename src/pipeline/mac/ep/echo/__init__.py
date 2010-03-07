@@ -1,4 +1,11 @@
-from _ep_echo import ECHO, PROTOCOL, EchoPingEvent, EchoEchoEvent
+# First import relevant protocol & event names
+from _ep_echo import PROTOCOL
+from _ep_echo import ECHO, PING, CLOCK
+
+# Events we can handle
+from _ep_echo import EchoPingEvent, EchoEchoEvent
+
+# Customized EventPort interface
 from ep.interface import EventPort_Interface, EventNotFoundException
 
 
