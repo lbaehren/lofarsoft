@@ -1,0 +1,1456 @@
+%PDF-1.4
+1 0 obj
+<<
+/Creator (PyText2Pdf 1.3 By Anand B Pillai )
+/CreationDate (D:20100307213418)
+/Producer (PyText2Pdf 1.3(\251 Anand B Pillai))
+/Title (tutorial.py)
+>>
+endobj
+2 0 obj
+<<
+/Type /Catalog
+/Pages 3 0 R
+>>
+endobj
+4 0 obj
+<<
+/BaseFont /Courier /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font >>
+>>
+endobj
+5 0 obj
+<<
+  /Font << /F1 4 0 R >>
+  /ProcSet [ /PDF /Text ]
+>>
+endobj
+6 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 7 0 R
+>>
+endobj
+7 0 obj
+<<
+/Length 8 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(def p_\(var\): print var,"=",eval\(var\))'
+(""")'
+(========================================================================)'
+(                          pycrtools TUTORIAL)'
+(========================================================================)'
+()'
+(Version History:)'
+( -    started March 1, 2010 by H. Falcke)'
+()'
+(\(+\) StartUp)'
+(-----------)'
+()'
+(First one needs to load the library. This can be done by "from hftools)'
+(import *" which makes all the c++ functions and their python wrappers)'
+(available.)'
+()'
+(In addition there are some helpful definitons in python as well, which)'
+(are stored in "pycrtools.py". This file actually imports hftools for)'
+(you. Hence, all you actually need to do is \(make sure the file is in)'
+(your search path\))'
+()'
+(""")'
+(from pycrtools import *)'
+(""")'
+()'
+(The most convenient way is probably to define an alias in your .bashr)'
+(or .profile files, like)'
+()'
+(alias pycr='/sw/bin/python2.6 -i $LOFARSOFT/src/CR-Tools/implement/Pypeline/pycr)'
+(init.py')'
+()'
+(then you can simply start the pyrtools with 'pycr'.)'
+()'
+(The file pycrinit.py also allows you to read in a second file to be)'
+(executed, like this one here. So, you can run the tutorial with)'
+()'
+(pycr -i tutorial.py)'
+()'
+(from the UNIX prompt.)'
+()'
+()'
+(\(+\) Getting Help)'
+(================)'
+()'
+(The pycrtools have a built-in help system, which can be accessed with:)'
+()'
+(>>> help\(\))'
+()'
+(To get information on a specific function or method type)'
+(help\(func\). This will essentially print the docstring of the python)'
+(object and list all its methods. Hence, help will work on any decently)'
+(implemented python object, including the standard ones.)'
+()'
+(For example,)'
+()'
+(>>> help\(IntVec\))'
+()'
+(will give documentation on the integer vector, while)'
+()'
+(>>> help\(IntVec.sin\))'
+ET
+endstream
+endobj
+8 0 obj
+1865
+endobj
+9 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 10 0 R
+>>
+endobj
+10 0 obj
+<<
+/Length 11 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+()'
+(will give the documentation on the "sin" method associated with it.)'
+()'
+(For a listing of all available functions in the pycrtools type)'
+()'
+(>>> help\(all\).)'
+()'
+()'
+(\(+\) Vectors)'
+(===========)'
+()'
+(\(++\) Some Basics)'
+(-----------)'
+()'
+(The fundamental data structure we use is a standard c++ vector defined)'
+(in the c++ standard template library \(STL\). This is wrapped and)'
+(exposed to python using the Boost Python system.)'
+()'
+(\(NB: Unfortunately different systems provide different python data)'
+(structures. Hence a function exposed to python with SWIG or SIP is not)'
+(diretcly able to accept a BOOST PYTHON wrapped vector as input or vice)'
+(versa. If you want to do this you have to provide extra conversion)'
+(routines.\))'
+()'
+(In line with the basic python philosophy, vectors are passed as)'
+(references. Since we are working with large sets of data processing)'
+(time is as important as convenience. Hence the basic principle is that)'
+(we try to avoid copying large chunks of data as much as possible.)'
+()'
+(The basic functions operating on the data in c++ either take STL)'
+(iterators as inputs \(i.e. pointers to the begin and end of the memory)'
+(where the data in the STL vector is stored\) or casa::Vectors, which)'
+(are created with shared memory \(i.e. their physical memory is the same)'
+(as that of the STL vector\).)'
+()'
+(For that reason MEMORY ALLOCATION is done almost exculsively in the)'
+(Python layer. The fast majority of c++ functions is not even able to)'
+(allocate or free any memory. This allows for very efficient memory)'
+(management and processing, but also means that the user is responsible)'
+(for providing properly sized vectors as inputs AND output)'
+(vectors. I.e.: you need to know beforehand what sized vector you)'
+(expect in return!)'
+()'
+(That may be annoying, but forces you to think carefully about how to)'
+(use memory. For example, if there is a processing done multiple times)'
+(using a scratch vector of fixed size, you reuse the same vector over)'
+(and over again, thus avoiding a lot of unnecessary allocation and)'
+(deallocation of memory and creation of vectors.)'
+()'
+(Also, we are currently not supporting multidimensional data)'
+(structures. Mulit-dimensionally data is simply written sequentially)'
+(into the memory - you need to know how your data is organized. On the)'
+(other hand, in many case you can then easily process an entire matrix)'
+(at once.)'
+( )'
+()'
+(\(++\) Construction of STL Vectors)'
+(--------------------------------)'
+()'
+(A number of vector types are provided: bool, int, float, complex, and)'
+ET
+endstream
+endobj
+11 0 obj
+2645
+endobj
+12 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 13 0 R
+>>
+endobj
+13 0 obj
+<<
+/Length 14 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(str.)'
+()'
+(To creat a vector most efficently, use the original vector constructors:)'
+()'
+(- BoolVec\(\))'
+(- IntVec\(\))'
+(- FloatVec\(\) )'
+(- ComplexVec\(\) )'
+(- StringVec\(\))'
+()'
+(e.g.)'
+(""")'
+(v=FloatVec\(\))'
+(""")'
+(>>> v)'
+(Vec\(0\)=[])'
+()'
+(will create a floating point vector of size 0. )'
+()'
+()'
+(The vector can be filled with a python list or tuple, by using the extend attrib)'
+(ute:)'
+(""")'
+(v.extend\([1,2,3,4]\))'
+(""")'
+(>>> v)'
+(Vec\(4\)=[1.0,2.0,3.0,4.0])'
+()'
+(Note, that python has automatically converted the integers into)'
+(floats, since the STL vector does not allow any automatic typing.)'
+()'
+(The stl vector can be converted back to a python list by using the)'
+(python list creator:)'
+()'
+(>>> list\(v\))'
+([1.0, 2.0, 3.0, 4.0])'
+()'
+()'
+()'
+(However, the basic Boost Python STL vector constructor takes no)'
+(arguments and is a bit cumbersome to use in the long run.  Here we)'
+(provide a wrapper function that is useful for interactive use.  )'
+()'
+(Usage:)'
+()'
+(Vector\(Type\) -  will create an empty vector of type "Type", where Type is)'
+(a basic Python type, i.e.  bool, int, float, complex, str.)'
+()'
+(Vector\(Type,size\) - will create an vector of type "Type", with length "size".)'
+()'
+(Vector\(Type,size,fill\) - will create an vector of type "Type", with length)'
+("size" and initialized with the value "fill")'
+()'
+(Vector\([1,2,3,...]\) or Vector\(\(1,2,3,...\)\) - if a list or a tuple is)'
+(provided as first argument then a vector is created of the type of the)'
+(first element in the list or tuple \(here an integer\) and filled with)'
+(the contents of the list or tuple.)'
+()'
+(So, what we will now use is:)'
+()'
+ET
+endstream
+endobj
+14 0 obj
+1711
+endobj
+15 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 16 0 R
+>>
+endobj
+16 0 obj
+<<
+/Length 17 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(>>>v=Vector\([1.,2,3,4]\))'
+(>>> v)'
+(Vec\(4\)=[1.0,2.0,3.0,4.0])'
+()'
+()'
+(Note, that size and fill take precedence over the list and tuple)'
+(input. Hence if you create a vector with Vector\([1,2,3],size=2\) it)'
+(will contain only [1,2]. Vector\([1,2,3],size=2,fill=4\) will give)'
+([4,4].)'
+()'
+(As the latest addition some simple support for multiple dimensions has)'
+(been implemented, using the methods:)'
+()'
+(vector.setDim\([n1,n2,..]\))'
+(vector.getDim\(\))'
+(vector.elem\(n\))'
+()'
+(This will be described later ....)'
+()'
+()'
+(\(+++\) Referencing, memory allocation, indexing, slicing)'
+(........................................................)'
+()'
+(Following basic python rules, the STL vector will persist in memory as)'
+(long as there is a python reference to it. If you destroy v also the)'
+(c++ memory will disappear. Hence, if you keep a pointer to the vector)'
+(in c++ and try to work on it after the python object was destroyed,)'
+(your programme may crash. That's why by default memory management is)'
+(done ONLY on one side, namely the python side!)'
+()'
+(To illustrate how Python deals with references, consider the following)'
+(example:)'
+()'
+(>>> x=v)'
+(>>> x[0]=3)'
+(>>> v)'
+(Vec\(4\)=[3.0,2.0,3.0,4.0])'
+()'
+(Hence, the new python object x is actually a reference to the same c++)'
+(vector that was created in v. Modifying elements in x modifies)'
+(elements in v. If you destroy v or x, the vector will not be)'
+(destroyed, since there is still a reference to it left. Only if you)'
+(destroy x and v the memory will be freed.)'
+()'
+()'
+(As note above, this vector is subscriptable and sliceable, using the)'
+(standard python syntax.)'
+()'
+(>>> v[1:3])'
+(Vec\(2\)=[2.0,3.0])'
+()'
+(We can also resize vectors and change their memory allocation:)'
+()'
+(""")'
+(v1=Vector\([0.0,1,2,3,4,5]\))'
+(v2=Vector\(float,len\(v1\),2.0\))'
+(""")'
+(>>>v1)'
+(Vec\(6\)=[0.0,1.0,2.0,3.0,4.0,5.0])'
+(>>>v2)'
+ET
+endstream
+endobj
+17 0 obj
+1957
+endobj
+18 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 19 0 R
+>>
+endobj
+19 0 obj
+<<
+/Length 20 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(Vec\(6\)=[2.0,2.0,2.0,2.0,2.0,2.0])'
+()'
+()'
+(With the resize attribute you allocate new memory while keeping the)'
+(data. It is not guaranteed that the new memory actually occupies the)'
+(same physical space.)'
+()'
+(""")'
+(v2.resize\(8\))'
+(""")'
+(>>> v2)'
+(Vec\(8\)=[2.0,2.0,2.0,2.0,2.0,2.0,0.0,0.0] )'
+()'
+(Resize a vector and fill with non-zero values:)'
+()'
+(""")'
+(v2.resize\(10,-1\))'
+(""")'
+(>>> v2)'
+(Vec\(10\)=[2.0,2.0,2.0,2.0,2.0,2.0,0.0,0.0,-1.0,-1.0])'
+()'
+(Resize a vector to same size as another vector:)'
+()'
+(""")'
+(v2.resize\(v1\))'
+(""")'
+(>>> v2)'
+(Vec\(6\)=[2.0,2.0,2.0,2.0,2.0,2.0])'
+()'
+(Make a new vector of same size and type as the original one:)'
+()'
+(""")'
+(v3=v2.new\(\))'
+(""")'
+(>>> v3)'
+(Vec\(6\)=[0.0,0.0,0.0,0.0,0.0,0.0])'
+()'
+(Fill a vector with values)'
+(""")'
+(v3.fill\(-2\))'
+(""")'
+(>>>v3)'
+(Vec\(6\)=[-2.0,-2.0,-2.0,-2.0,-2.0,-2.0])'
+()'
+(\(+++\) Vector arithmetic)'
+(........................................................)'
+()'
+(The vectors have a number of mathematical functions attached to)'
+(them. A full list can be seen by typing)'
+()'
+(>>> dir\(Vector\(float\)\))'
+(['__add__', '__class__', '__contains__', '__delattr__', '__delitem__', '__dict__)'
+(', '__div__', '__doc__', '__format__', '__getattribute__', '__getitem__', '__has)'
+(h__', '__iadd__', '__idiv__', '__imul__', '__init__', '__instance_size__', '__is)'
+(ub__', '__iter__', '__len__', '__module__', '__mul__', '__new__', '__reduce__', )'
+('__reduce_ex__', '__repr__', '__setattr__', '__setitem__', '__sizeof__', '__str_)'
+(_', '__sub__', '__subclasshook__', '__weakref__', 'abs', 'acos', 'add', 'addadd')'
+(, 'addaddconv', 'append', 'asin', 'atan', 'ceil', 'convert', 'copy', 'cos', 'cos)'
+(h', 'div', 'divadd', 'divaddconv', 'downsample', 'exp', 'extend', 'extendflat', )'
+('fft', 'fill', 'findgreaterequal', 'findgreaterequalabs', 'findgreaterthan', 'fi)'
+ET
+endstream
+endobj
+20 0 obj
+1912
+endobj
+21 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 22 0 R
+>>
+endobj
+22 0 obj
+<<
+/Length 23 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(ndgreaterthanabs', 'findlessequal', 'findlessequalabs', 'findlessthan', 'findles)'
+(sthanabs', 'findlowerbound', 'floor', 'iadd', 'idiv', 'imul', 'isub', 'log', 'lo)'
+(g10', 'mean', 'median', 'mul', 'muladd', 'muladdconv', 'new', 'norm', 'normalize)'
+(', 'resize', 'sin', 'sinh', 'sort', 'sortmedian', 'sqrt', 'square', 'stddev', 's)'
+(ub', 'subadd', 'subaddconv', 'sum', 'tan', 'tanh'])'
+()'
+(Some of the basic arithmetic is available in an intuitve way.)'
+()'
+(You can add a scalar to a vector by)'
+(>>> v1+3)'
+(Vec\(6\)=[3.0,4.0,5.0,6.0,7.0,8.0])'
+()'
+(This will actually create a new vector \(and destroy it right away,)'
+(since no reference was kept\). The original vector is unchanged.)'
+()'
+(You can also add two vectors:)'
+(>>>v1+v2)'
+(Vec\(6\)=[2.0,3.0,4.0,5.0,6.0,7.0])'
+()'
+(In order to change the vector, you can use the "in place" operators)'
+(+=, -=, /=, *= :)'
+()'
+(Adding a vector in place:)'
+(>>>v1+=v2;)'
+(>>>v1)'
+(Vec\(6\)=[2.0,3.0,4.0,5.0,6.0,7.0])'
+()'
+(now v1 was actually modified such that v2 was added to the content of)'
+(v1 and the results is stored in v1.)'
+()'
+(Similarly you can do)'
+()'
+(- v1-=v2)'
+(- v1*=v2)'
+(- v1/=v2)'
+()'
+(Here is a list of functions you can use)'
+()'
+(  Mean: v1.mean\(\) = 4.5 Median:)'
+(v1.median\(\) = 5.0 Summing: v1.sum\(\) = 27.0 Standard Deviation:)'
+(v1.stddev\(\) = 1.87082869339)'
+()'
+()'
+()'
+(\(+\) File I/O)'
+(------------)'
+()'
+(\(++\) Opening and Closing a CR Data File)'
+(---------------------------------------)'
+()'
+(Let's see how we can open a file. First define a filename, e.g.:)'
+()'
+(""")'
+(LOFARSOFT=os.environ["LOFARSOFT"])'
+(filename=LOFARSOFT+"/data/lopes/example.event")'
+(#filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5")'
+(""")'
+(> '/Users/falcke/LOFAR/usg/data/lopes/sample.event')'
+()'
+(We can create a new file object, using the "crfile" class, which is an)'
+ET
+endstream
+endobj
+23 0 obj
+1898
+endobj
+24 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 25 0 R
+>>
+endobj
+25 0 obj
+<<
+/Length 26 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(interface to the LOFAR CRTOOLS datareader class and was defined in pycrtools.py.)'
+( )'
+()'
+(The following will open a data file:)'
+(""")'
+(file=crfile\(filename\))'
+(file.set\("Blocksize",1024\))'
+(""")'
+(>)'
+([hftools.tmp.cc,3758]: Opening LOPES File=/Users/falcke/LOFAR/usg/data/lopes/exa)'
+(mple.event)'
+([DataReader::summary])'
+( -- blocksize ............ = 65536)'
+( -- FFT length ........... = 32769)'
+( -- file streams connected?  0)'
+( -- shape\(adc2voltage\) ... = [65536, 8])'
+( -- shape\(fft2calfft\) .... = [32769, 8])'
+( -- nof. antennas ........ = 8)'
+( -- nof. selected antennas = 8)'
+( -- nof. selected channels = 32769)'
+( -- shape\(fx\) ............ = [65536, 8])'
+( -- shape\(voltage\) ....... = [65536, 8])'
+( -- shape\(fft\) ........... = [32769, 8])'
+( -- shape\(calfft\) ........ = [32769, 8])'
+()'
+(The crfile class stores a pointer to the data reader object, which can)'
+(be retrieved with)'
+(""")'
+(file.iptr)'
+(""")'
+(> 17209856)'
+()'
+(and similarly the filename with)'
+(""")'
+(file.filename)'
+(""")'
+(> '/Users/falcke/LOFAR/usg/data/lopes/example.event')'
+()'
+(The file will be automatically closed \(and the DataReader object be)'
+(destroyed\), whenever the crfile object is deleted, e.g. with)'
+("file=0". One can also explicitly close the file with "file.close\(\)".)'
+()'
+()'
+(\(++\) Setting and retrieving metadata \(parameters\))'
+(-------------------------------------------------)'
+()'
+(Now we need to access the meta data in the file. This is done using a)'
+(single method "get". This method actually calls the function)'
+("hFileGetParameter" defined in the c++ code.)'
+()'
+(Which observatory did we actually use?)'
+(""")'
+(obsname=file.get\("Observatory"\))'
+(""")'
+(> 'LOPES')'
+()'
+(There are more keywords, of course. A list of implemented parameters)'
+(we can access is obtained by)'
+()'
+(""")'
+ET
+endstream
+endobj
+26 0 obj
+1878
+endobj
+27 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 28 0 R
+>>
+endobj
+28 0 obj
+<<
+/Length 29 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(keywords=file.get\("help"\))'
+(""")'
+(> hFileGetParameter - available keywords: nofAntennas, nofSelectedChannels, nofS)'
+(electedAntennas, nofBaselines, block, blocksize, stride, fftLength, nyquistZone,)'
+( sampleInterval, referenceTime, sampleFrequency, antennas, selectedAntennas, sel)'
+(ectedChannels, positions, increment, frequencyValues, frequencyRange, Date, Obse)'
+(rvatory, Filesize, dDate, presync, TL, LTL, EventClass, SampleFreq, StartSample,)'
+( AntennaIDs, help)'
+()'
+(Note, that the results are returned as PythonObjects. Hence, this)'
+(makes use of the power of python with automatic typing. For, example)'
+(""")'
+(file.get\("frequencyRange"\))'
+(""")'
+(> Vec\(2\)=[40000000.0,80000000.0])'
+()'
+(actually returns a vector. )'
+()'
+(Here no difference is made where the data comes frome. The keyword)'
+(Obervatory accesses the header record in the data file while the)'
+(frequencRange accesses a method of the DataReader.)'
+()'
+(Now we will define a number of useful variables that contain essential)'
+(parameters that we later will use.)'
+()'
+(""")'
+(obsdate   =file.get\("Date"\); p_\("obsdate"\))'
+(filesize  =file.get\("Filesize"\); p_\("filesize"\))'
+(blocksize =file.get\("blocksize"\); p_\("blocksize"\))'
+(nAntennas =file.get\("nofAntennas"\); p_\("nAntennas"\))'
+(antennas  =file.get\("antennas"\); p_\("antennas"\))'
+(antennaIDs=file.get\("AntennaIDs"\); p_\("antennaIDs"\))'
+(selectedAntennas=file.get\("selectedAntennas"\); p_\("selectedAntennas"\))'
+(nofSelectedAntennas=file.get\("nofSelectedAntennas"\); p_\("nofSelectedAntennas"\))'
+(fftlength =file.get\("fftLength"\); p_\("fftlength"\))'
+(sampleFrequency =file.get\("sampleFrequency"\); p_\("sampleFrequency"\))'
+(nBlocks=filesize/blocksize; p_\("nBlocks"\))'
+(""")'
+(> obsdate = 1067339149)'
+(> filesize = 65536)'
+(> blocksize = 1024)'
+(> nAntennas = 8)'
+(> antennas = Vec\(8\)=[0,1,2,3,4,5,6,7])'
+(> antennaIDs = Vec\(8\)=[10101,10102,10201,10202,20101,20102,20201,20202])'
+(> selectedAntennas = Vec\(8\)=[0,1,2,3,4,5,6,7])'
+(> nofSelectedAntennas = 8)'
+(> fftlength = 513)'
+(> sampleFrequency = 80000000.0)'
+(> blocksize = 1024)'
+()'
+(We can also change parameters in a very similar fashion, using the)'
+("set" method, which is an implementation of the "hFileSetParameter")'
+(function. E.g. changing the blocksize we already did before. This is)'
+(simply)'
+(""")'
+(blocksize=1024)'
+(file.set\("Blocksize",blocksize\))'
+("""")'
+(again the list of implemented keywords is visible with using)'
+(""")'
+ET
+endstream
+endobj
+29 0 obj
+2524
+endobj
+30 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 31 0 R
+>>
+endobj
+31 0 obj
+<<
+/Length 32 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(file.set\("help",0\))'
+(""")'
+(> hFileSetParameter - available keywords: Blocksize, StartBlock,)'
+(  Block, Stride, SampleOffset, NyquistZone, ReferenceTime,)'
+(  SampleFrequency, Shift, SelectedAntennas, help)'
+()'
+(The set method actually returns the crfile object. Hence you can)'
+(append multiple set commands after each other.)'
+(""")'
+(file.set\("Block",2\).set\("SelectedAntennas",[0,2]\))'
+(""")'
+(> crfile</Users/falcke/LOFAR/usg/data/lopes/example.event>)'
+()'
+(Note, that we have now reduced the number of antennas to two: namely)'
+(antenna 0 and 2 and the number of selected antennas is)'
+()'
+(>>>file.get\("nofSelectedAntennas"\))'
+( 2)'
+()'
+(However, now we want to work on all antennas again:)'
+(""")'
+(file.set\("SelectedAntennas",range\(nAntennas\)\))'
+(""")'
+(\(++\) Reading in Data)'
+(--------------------)'
+()'
+(The next step is to actually read in data. This is done with the read)'
+(method \(accessing "hFileRead"\). The data is read flatly into a 1D)'
+(vector. This is also true if mutliple antennas are read out at)'
+(once. Here simply the data from the antennas follow each other.)'
+()'
+(Also, by default memory allocation of the vectors has to be done in)'
+(python before calling any of the functions. This improves speed and)'
+(efficiency, but requires one to programme carefully and to understand)'
+(the data structrue.)'
+()'
+(First we create a FloatVec, which is BoostPython wrapped standard)'
+(\(STL\) vector of doubles.)'
+()'
+(""")'
+(fxdata=Vector\(\))'
+(""")'
+(and resize it to the size we need)'
+(""")'
+(fxdata.setDim\([nofSelectedAntennas,blocksize]\))'
+(""")'
+()'
+(This is now a large vector filled with zeros.)'
+()'
+(>>> fxdata)'
+(Vec\(2048\)=[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,...])'
+()'
+(Now we can read in the raw time series data, using "file.read" and a)'
+(keyword. Currently implemented are the data fields "Fx", "Voltage",)'
+("FFT", "CalFFT","Time", "Frequency".)'
+()'
+(So, let us read in the raw time series data, i.e. the electric field)'
+(in the antenna as digitized by the ADC. This is provided by the)'
+(keyword "Fx" \(means f\(x\) \).)'
+(""")'
+ET
+endstream
+endobj
+32 0 obj
+2140
+endobj
+33 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 34 0 R
+>>
+endobj
+34 0 obj
+<<
+/Length 35 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(file.read\("Fx",fxdata\))'
+(""")'
+(>>>fxdata)'
+( Vec\(2048\)=[212.0,-278.0,196.0,236.0,4.0,-94.0,-192.0,208.0,-66.0,-62.0,...])'
+()'
+(and voila the vector is filled with time series data from the data file.. )'
+()'
+(Access the various antennas through slicing)'
+(""")'
+(ant1data=fxdata[0:blocksize])'
+(ant2data=fxdata.elem\(1\))'
+(""")'
+(>>> ant2data)'
+(Vec\(1024\)=[-94.0,-165.0,-6.0,35.0,-310.0,-23.0,-128.0,97.0,239.0,289.0,...])'
+()'
+(which makes a copy of the data vector if used in this way, while)'
+(""")'
+(ant1data[0:3]=[0,1,2];)'
+(""")'
+(>>>  ant1data;)'
+( Vec\(2046\)=[0.0,1.0,2.0,-94.0,-192.0,208.0,-66.0,-62.0,-157.0,-120.0,...])'
+()'
+(actually modifies the original data vector.)'
+()'
+(To get the x -Axis we create a second vector)'
+(""")'
+(timedata=Vector\(float,blocksize\))'
+(file.read\("Time",timedata\))'
+(""")'
+(> Vec\(1024\)=[-0.000384,-0.0003839875,-0.000383975,-0.0003839625,-0.00038395,-0.0)'
+(003839375,-0.000383925,-0.0003839125,-0.0003839,-0.0003838875,...])'
+()'
+(This is the time relative to the trigger in seconds. So, let's have)'
+(that in microseconds, by multiplying with one million.)'
+(""")'
+(timedata *= 10**6)'
+(""")'
+(>>> timedata)'
+(Vec\(1024\)=[-384.0,-383.9875,-383.975,-383.9625,-383.95,-383.9375,-383.925,-383.9)'
+(125,-383.9,-383.8875,...])'
+()'
+(We do the same now for the frequency axis, which we convert to MHz. As)'
+(length we have to take the length of the Fourier transformed time)'
+(block \(which is blocksize/2+1\).)'
+(""")'
+(freqdata=Vector\(float,fftlength\))'
+(file.read\("Frequency",freqdata\))'
+(freqdata/=10**6)'
+(""")'
+(>>> freqdata)'
+(Vec\(513\)=[40.0,40.078125,40.15625,40.234375,40.3125,40.390625,40.46875,40.546875)'
+(,40.625,40.703125,...])'
+()'
+()'
+(\(+\) Fourier Transforms \(FFT\))'
+(----------------------------)'
+()'
+(We can make a FFT of a float vector. This function will only return)'
+(the non-redundant part of the FFT \(i.e., just one half\).  Again we)'
+(need to provide a properly sized output vector \(input length/2+1\). We)'
+ET
+endstream
+endobj
+35 0 obj
+2044
+endobj
+36 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 37 0 R
+>>
+endobj
+37 0 obj
+<<
+/Length 38 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(also have to specify as a second parameter in which NyquistZone the)'
+(data was take. )'
+()'
+(Nyquist sampling means that one needs, for example, 200 MHz sampling)'
+(rate to digitize a bandwidth of 100 MHz. The first Nyquist zone is)'
+(then 0-100 MHz, and the second is 100-200 MHz.)'
+()'
+(So, let's do the transform:)'
+(""")'
+(fftdata=Vector\(complex,fftlength\))'
+(fxdata[0:blocksize].fft\(fftdata,1\))'
+(""")'
+(>>> fftdata)'
+(Vec\(513\)=[\(6078+0j\),\(99.3936739874-28.663986893j\),\(-93.6321366929-4.95059820124j)'
+(\),\(82.9590664565+28.8729314743j\),\(-83.6744655239+4.46573054789j\),\(169.1861864-61)'
+(.2949652607j\),\(-118.623662378+53.2694320202j\),\(75.764787806-74.6606191354j\),\(-11)'
+(5.629434646+29.4373842905j\),\(98.0844400537-16.0574421952j\),...])'
+()'
+(Here we have used the fft method of the float vector, which is just a)'
+(call to the stand-alone function hFFT defined in hftools.cc.)'
+()'
+(to get the power, we have to square the complex data and convert it to)'
+(floats. This can be done using the complex function "norm" )'
+(""")'
+(spectrum=Vector\(float,fftlength\))'
+(fftdata.norm\(spectrum\))'
+(""")'
+()'
+(We can now try to calulcate the average spectum of the data set for)'
+(one antenna, by looping over all blocks.)'
+(""")'
+(avspectrum=Vector\(float\))'
+(avspectrum.setDim\([nofSelectedAntennas,fftlength]\))'
+(fftall=Vector\(complex\))'
+(fftall.setDim\([nofSelectedAntennas,fftlength]\))'
+(for block in range\(nBlocks\):)'
+(    print block,",",)'
+(    file.set\("Block",block\).read\("FFT",fftall\))'
+(    fftall.spectralpower\(avspectrum\))'
+(""")'
+(\(NOTE: This doesn't work yet due to a bug in     file.read\("FFT",...\) !!!!\))'
+()'
+(\(+\) Basic Plotting)'
+(------------------)'
+()'
+(In order to plot the data, we can use external packages. Two packages)'
+(are being provided here: matplotlib and mathgl. The former is)'
+(specifically designed for python and thus slightly easier to use)'
+(interactively. Since version 0.99 it is supposed to bea capable of 3D)'
+(plots \(at the time of writing we use 0.98\). Mathgl is perhaps a little)'
+(faster and convenient for real time applications and hence is used in)'
+(our GUI programming.)'
+()'
+(\(++\) Mathgl)'
+()'
+(Here is a simple example on how to use mathgl code \(here without a)'
+(widget\))'
+()'
+(from mathgl import *)'
+()'
+ET
+endstream
+endobj
+38 0 obj
+2354
+endobj
+39 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 40 0 R
+>>
+endobj
+40 0 obj
+<<
+/Length 41 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(width=800)'
+(height=600)'
+(size=1024)'
+(gr=mglGraph\(mglGraphPS,width,height\))'
+(y=mglData\(size\))'
+(y.Modify\("cos\(2*pi*x\)"\))'
+(x=mglData\(size\))'
+(x.Modify\("x*1024"\);)'
+(ymax=y.Maximal\(\))'
+(ymin=y.Minimal\(\))'
+(gr.Clf\(\))'
+(gr.SetRanges\(0,0.5,ymin,ymax\))'
+(gr.Axis\("xy"\))'
+(gr.Title\("Test Plot x"\))'
+(gr.Label\("x","x-Axis",1\))'
+(gr.Label\("y","y-Axis",1\))'
+(gr.Plot\(x,y\);)'
+(gr.WriteEPS\("test-y.eps","Test Plot"\))'
+()'
+(\(++\) Matplotlib)'
+()'
+(Now we import matplotlib)'
+(""")'
+(import matplotlib.pyplot as plt)'
+(print "\\n!! A plot window should pop up somehwere \(in the background?\) !!")'
+(plt.show\(\))'
+(plt.title\("Average Spectrum for Two Antennas"\))'
+(plt.plot\(freqdata,avspectrum.elem\(0\)\))'
+(plt.plot\(freqdata,avspectrum.elem\(1\)\))'
+(plt.ylabel\("Power of Electric Field [ADC counts]$^2$"\))'
+(plt.xlabel\("Frequency [MHz]"\))'
+(""")'
+(and a window should pop up.  \(NB: At least on a Mac the window likes)'
+(to stubbornly hide behind other windows, so search your screen)'
+(carefully if no window pops up.\))'
+()'
+(to plot time series data, use:)'
+()'
+(plt.clf\(\))'
+(plt.plot\(timedata,fxdata[0:blocksize]\))'
+(plt.ylabel\("Electric Field [ADC counts]"\))'
+(plt.xlabel\("Time [$\\mu$s]"\))'
+()'
+()'
+()'
+(\(+\) Coordinates)'
+(---------------)'
+()'
+(We also have access to a few functions dealing with astronomical)'
+(coordinates. Assume, we have a source at an Azmiut/Elevation position)'
+(of \(178 Degree,28 Degree\) and we want to convert that into Cartesian)'
+(coordinates \(which, for example, is required by our beamformer\).)'
+()'
+(We first turn this into std vector and create a vector that is)'
+(supposed to hold the Cartesian coordinates. Note that the AzEL vector)'
+(is actually AzElRadius, where we need to set the radius to unity.)'
+()'
+(""")'
+(azel=FloatVec\(\))'
+(azel.extend\(\(178,28,1\)\))'
+ET
+endstream
+endobj
+41 0 obj
+1897
+endobj
+42 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 43 0 R
+>>
+endobj
+43 0 obj
+<<
+/Length 44 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(cartesian=azel.new\(\))'
+(""")'
+(>>> azel)'
+(Vec\(3\)=[178.0,28.0,1.0])'
+(>>> cartesian)'
+(Vec\(3\)=[0.0,0.0,0.0])'
+()'
+(We then do the conversion, using )'
+(""")'
+(hCoordinateConvert\(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Car)'
+(tesian,True\))'
+(""")'
+(yielding the following output vector:)'
+()'
+(>>> cartesian)'
+(Vec\(3\)=[0.0308144266055,-0.882409725042,0.469471562786])'
+()'
+(""")'
+()'
+()'
+(""")'
+()'
+(\(+\) Appendix: Listing of all Functions:)'
+(=======================================)'
+()'
+(SECTION: Administrative Vector Function)'
+(--------------------------------------------------)'
+(hFill\(vec, fill_value\)              - Fills a vector with a constant value.)'
+(hNew\(vec\)                           - Make and return a new vector of the same s)'
+(ize and type as the input vector.)'
+(hConvert\(vec1, vec2\)                - Copies and converts a vector to a vector o)'
+(f another type.)'
+(hCopy\(vec, outvec\)                  - Copies a vector to another one.)'
+()'
+(SECTION: Math Function)'
+(--------------------------------------------------)'
+(square\(val\)                         - Returns the squared value of the parameter)'
+(.)'
+(hPhase\(frequency, time\)             - Returns the interferometer phase in radian)'
+(s for a given frequency and time.)'
+(funcGaussian\(x, sigma, mu\)          - Implementation of the Gauss function.)'
+(hExp\(vec\)                           - Take the exp of all the elements in the ve)'
+(ctor.)'
+(hExp\(vec, vecout\)                   - Take the exp of all the elements in the ve)'
+(ctor and return results in a second vector.)'
+(hLog\(vec\)                           - Take the log of all the elements in the ve)'
+(ctor.)'
+(hLog\(vec, vecout\)                   - Take the log of all the elements in the ve)'
+(ctor and return results in a second vector.)'
+(hLog10\(vec\)                         - Take the log10 of all the elements in the )'
+(vector.)'
+(hLog10\(vec, vecout\)                 - Take the log10 of all the elements in the )'
+(vector and return results in a second vector.)'
+(hSin\(vec\)                           - Take the sin of all the elements in the ve)'
+(ctor.)'
+(hSin\(vec, vecout\)                   - Take the sin of all the elements in the ve)'
+(ctor and return results in a second vector.)'
+(hSinh\(vec\)                          - Take the sinh of all the elements in the v)'
+(ector.)'
+(hSinh\(vec, vecout\)                  - Take the sinh of all the elements in the v)'
+ET
+endstream
+endobj
+44 0 obj
+2517
+endobj
+45 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 46 0 R
+>>
+endobj
+46 0 obj
+<<
+/Length 47 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(ector and return results in a second vector.)'
+(hSqrt\(vec\)                          - Take the sqrt of all the elements in the v)'
+(ector.)'
+(hSqrt\(vec, vecout\)                  - Take the sqrt of all the elements in the v)'
+(ector and return results in a second vector.)'
+(hSquare\(vec\)                        - Take the square of all the elements in the)'
+( vector.)'
+(hSquare\(vec, vecout\)                - Take the square of all the elements in the)'
+( vector and return results in a second vector.)'
+(hTan\(vec\)                           - Take the tan of all the elements in the ve)'
+(ctor.)'
+(hTan\(vec, vecout\)                   - Take the tan of all the elements in the ve)'
+(ctor and return results in a second vector.)'
+(hTanh\(vec\)                          - Take the tanh of all the elements in the v)'
+(ector.)'
+(hTanh\(vec, vecout\)                  - Take the tanh of all the elements in the v)'
+(ector and return results in a second vector.)'
+(hAbs\(vec\)                           - Take the abs of all the elements in the ve)'
+(ctor.)'
+(hAbs\(vec, vecout\)                   - Take the abs of all the elements in the ve)'
+(ctor and return results in a second vector.)'
+(hCos\(vec\)                           - Take the cos of all the elements in the ve)'
+(ctor.)'
+(hCos\(vec, vecout\)                   - Take the cos of all the elements in the ve)'
+(ctor and return results in a second vector.)'
+(hCosh\(vec\)                          - Take the cosh of all the elements in the v)'
+(ector.)'
+(hCosh\(vec, vecout\)                  - Take the cosh of all the elements in the v)'
+(ector and return results in a second vector.)'
+(hCeil\(vec\)                          - Take the ceil of all the elements in the v)'
+(ector.)'
+(hCeil\(vec, vecout\)                  - Take the ceil of all the elements in the v)'
+(ector and return results in a second vector.)'
+(hFloor\(vec\)                         - Take the floor of all the elements in the )'
+(vector.)'
+(hFloor\(vec, vecout\)                 - Take the floor of all the elements in the )'
+(vector and return results in a second vector.)'
+(hAcos\(vec\)                          - Take the acos of all the elements in the v)'
+(ector.)'
+(hAcos\(vec, vecout\)                  - Take the acos of all the elements in the v)'
+(ector and return results in a second vector.)'
+(hAsin\(vec\)                          - Take the asin of all the elements in the v)'
+(ector.)'
+(hAsin\(vec, vecout\)                  - Take the asin of all the elements in the v)'
+(ector and return results in a second vector.)'
+(hAtan\(vec\)                          - Take the atan of all the elements in the v)'
+(ector.)'
+(hAtan\(vec, vecout\)                  - Take the atan of all the elements in the v)'
+(ector and return results in a second vector.)'
+(hiSub\(vec1, vec2\)                   - Performs a Sub between the two vectors, wh)'
+(ich is returned in the first vector. If the second vector is shorter it will be )'
+(applied multiple times.)'
+(hiSub\(vec1, val\)                    - Performs a Sub between the vector and a sc)'
+(alar \(applied to each element\), which is returned in the first vector.)'
+(hSub\(vec1, vec2, vec3\)              - Performs a Sub between the two vectors, wh)'
+(ich is returned in the third vector.)'
+(hSubAdd\(vec1, vec2, vec3\)           - Performs a Sub between the two vectors, an)'
+(d adds the result to the output \(third\) vector.)'
+(hSubAddConv\(vec1, vec2, vec3\)       - Performs a Sub between the two vectors, an)'
+(d adds the result to the output \(third\) vector - automatic casting is done.)'
+ET
+endstream
+endobj
+47 0 obj
+3639
+endobj
+48 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 49 0 R
+>>
+endobj
+49 0 obj
+<<
+/Length 50 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(hSub\(vec1, val, vec2\)               - Performs a Sub between the vector and a sc)'
+(alar, where the result is returned in the second vector.)'
+(hiMul\(vec1, vec2\)                   - Performs a Mul between the two vectors, wh)'
+(ich is returned in the first vector. If the second vector is shorter it will be )'
+(applied multiple times.)'
+(hiMul\(vec1, val\)                    - Performs a Mul between the vector and a sc)'
+(alar \(applied to each element\), which is returned in the first vector.)'
+(hMul\(vec1, vec2, vec3\)              - Performs a Mul between the two vectors, wh)'
+(ich is returned in the third vector.)'
+(hMulAdd\(vec1, vec2, vec3\)           - Performs a Mul between the two vectors, an)'
+(d adds the result to the output \(third\) vector.)'
+(hMulAddConv\(vec1, vec2, vec3\)       - Performs a Mul between the two vectors, an)'
+(d adds the result to the output \(third\) vector - automatic casting is done.)'
+(hMul\(vec1, val, vec2\)               - Performs a Mul between the vector and a sc)'
+(alar, where the result is returned in the second vector.)'
+(hiAdd\(vec1, vec2\)                   - Performs a Add between the two vectors, wh)'
+(ich is returned in the first vector. If the second vector is shorter it will be )'
+(applied multiple times.)'
+(hiAdd\(vec1, val\)                    - Performs a Add between the vector and a sc)'
+(alar \(applied to each element\), which is returned in the first vector.)'
+(hAdd\(vec1, vec2, vec3\)              - Performs a Add between the two vectors, wh)'
+(ich is returned in the third vector.)'
+(hAddAdd\(vec1, vec2, vec3\)           - Performs a Add between the two vectors, an)'
+(d adds the result to the output \(third\) vector.)'
+(hAddAddConv\(vec1, vec2, vec3\)       - Performs a Add between the two vectors, an)'
+(d adds the result to the output \(third\) vector - automatic casting is done.)'
+(hAdd\(vec1, val, vec2\)               - Performs a Add between the vector and a sc)'
+(alar, where the result is returned in the second vector.)'
+(hiDiv\(vec1, vec2\)                   - Performs a Div between the two vectors, wh)'
+(ich is returned in the first vector. If the second vector is shorter it will be )'
+(applied multiple times.)'
+(hiDiv\(vec1, val\)                    - Performs a Div between the vector and a sc)'
+(alar \(applied to each element\), which is returned in the first vector.)'
+(hDiv\(vec1, vec2, vec3\)              - Performs a Div between the two vectors, wh)'
+(ich is returned in the third vector.)'
+(hDivAdd\(vec1, vec2, vec3\)           - Performs a Div between the two vectors, an)'
+(d adds the result to the output \(third\) vector.)'
+(hDivAddConv\(vec1, vec2, vec3\)       - Performs a Div between the two vectors, an)'
+(d adds the result to the output \(third\) vector - automatic casting is done.)'
+(hDiv\(vec1, val, vec2\)               - Performs a Div between the vector and a sc)'
+(alar, where the result is returned in the second vector.)'
+(hConj\(vec\)                          - Calculate the complex conjugate of all ele)'
+(ments in the complex vector.)'
+(hCrossCorrelateComplex\(vec1, vec2\)  - Multiplies the elements of the first vecto)'
+(r with the complex conjugate of the elements in the second and returns the resul)'
+(ts in the first.)'
+(hReal\(vec, vecout\)                  - Take the real of all the elements in the c)'
+(omplex vector and return results in a float vector.)'
+(hArg\(vec, vecout\)                   - Take the arg of all the elements in the co)'
+(mplex vector and return results in a float vector.)'
+(hImag\(vec, vecout\)                  - Take the imag of all the elements in the c)'
+(omplex vector and return results in a float vector.)'
+(hNorm\(vec, vecout\)                  - Take the norm of all the elements in the c)'
+(omplex vector and return results in a float vector.)'
+(hNegate\(vec\)                        - Multiplies each element in the vector with)'
+( -1 in place, i.e. the input vector is also the output vector.)'
+(hSum\(vec\)                           - Performs a sum over the values in a vector)'
+( and returns the value.)'
+(hNorm\(vec\)                          - Returns the lengths or norm of a vector \(i)'
+(.e. Sqrt\(Sum_i\(xi*+2\)\)\).)'
+ET
+endstream
+endobj
+50 0 obj
+4253
+endobj
+51 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 52 0 R
+>>
+endobj
+52 0 obj
+<<
+/Length 53 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(hNormalize\(vec\)                     - Normalizes a vector to length unity.)'
+(hMean\(vec\)                          - Returns the mean value of all elements in )'
+(a vector.)'
+(hSort\(vec\)                          - Sorts a vector in place.)'
+(hSortMedian\(vec\)                    - Sorts a vector in place and returns the me)'
+(dian value of the elements.)'
+(hMedian\(vec\)                        - Returns the median value of the elements.)'
+(hStdDev\(vec, mean\)                  - Calculates the standard deviation around a)'
+( mean value.)'
+(hStdDev\(vec\)                        - Calculates the standard deviation of a vec)'
+(tor of values.)'
+(hFindLessEqual\(vec, threshold, vecout\) - Find the samples that are LessEqual a c)'
+(ertain threshold value and returns the number of samples found and the positions)'
+( of the samples in a second vector.)'
+(hFindLessEqualAbs\(vec, threshold, vecout\) - Find the samples whose absolute valu)'
+(es are LessEqual a certain threshold value and returns the number of samples fou)'
+(nd and the positions of the samples in a second vector.)'
+(hFindGreaterThan\(vec, threshold, vecout\) - Find the samples that are GreaterThan)'
+( a certain threshold value and returns the number of samples found and the posit)'
+(ions of the samples in a second vector.)'
+(hFindGreaterThanAbs\(vec, threshold, vecout\) - Find the samples whose absolute va)'
+(lues are GreaterThan a certain threshold value and returns the number of samples)'
+( found and the positions of the samples in a second vector.)'
+(hFindGreaterEqual\(vec, threshold, vecout\) - Find the samples that are GreaterEqu)'
+(al a certain threshold value and returns the number of samples found and the pos)'
+(itions of the samples in a second vector.)'
+(hFindGreaterEqualAbs\(vec, threshold, vecout\) - Find the samples whose absolute v)'
+(alues are GreaterEqual a certain threshold value and returns the number of sampl)'
+(es found and the positions of the samples in a second vector.)'
+(hFindLessThan\(vec, threshold, vecout\) - Find the samples that are LessThan a cer)'
+(tain threshold value and returns the number of samples found and the positions o)'
+(f the samples in a second vector.)'
+(hFindLessThanAbs\(vec, threshold, vecout\) - Find the samples whose absolute value)'
+(s are LessThan a certain threshold value and returns the number of samples found)'
+( and the positions of the samples in a second vector.)'
+(hDownsample\(vec1, vec2\)             - Downsample the input vector to a smaller o)'
+(utput vector.)'
+(hDownsample\(vec, downsample_factor\) - Downsample the input vector by a cetain fa)'
+(ctor and return a new vector.)'
+(hFindLowerBound\(vec, value\)         - Finds the location \(i.e., returns integer\))'
+( in a monotonically increasing vector, where the input search value is just abov)'
+(e or equal to the value in the vector.)'
+(hFlatWeights\(wlen\)                  - Returns vector of weights of length len wi)'
+(th constant weights normalized to give a sum of unity. Can be used by hRunningAv)'
+(erageT.)'
+(hLinearWeights\(wlen\)                - Returns vector of weights of length wlen w)'
+(ith linearly rising and decreasing weights centered at len/2.)'
+(hGaussianWeights\(wlen\)              - Returns vector of weights of length wlen w)'
+(ith Gaussian distribution centered at len/2 and sigma=len/4 \(i.e. the Gaussian e)'
+(xtends over 2 sigma in both directions\).)'
+(hWeights\(wlen, wtype\)               - Create a normalized weight vector.)'
+(hRunningAverage\(idata, odata, weights\) - Calculate the running average of an inp)'
+(ut vector using a weight vector.)'
+(hRunningAverage\(idata, odata, wlen, wtype\) - Overloaded function to automaticall)'
+(y calculate weights.)'
+()'
+(SECTION: RF \(Radio Frequency\) Function)'
+(--------------------------------------------------)'
+(hGeometricDelayFarField\(antPosition, skyDirection, length\) - Calculates the time)'
+( delay in seconds for a signal received at an antenna position relative to a pha)'
+ET
+endstream
+endobj
+53 0 obj
+4029
+endobj
+54 0 obj
+<<
+/Type /Page
+/Parent 3 0 R
+/Resources 5 0 R
+/Contents 55 0 R
+>>
+endobj
+55 0 obj
+<<
+/Length 56 0 R
+>>
+stream
+BT
+/F1 10 Tf
+1 0 0 1 50 752 Tm
+12 TL
+(se center from a source located in a certain direction in farfield \(based on L. )'
+(Bahren\).)'
+(hGeometricDelayNearField\(antPosition, skyPosition, distance\) - Calculates the ti)'
+(me delay in seconds for a signal received at an antenna position relative to a p)'
+(hase center from a source located at a certain 3D space coordinate in nearfield )'
+(\(based on L. Bahren\).)'
+(hGeometricDelays\(antPositions, skyPositions, delays, farfield\) - Calculates the )'
+(time delay in seconds for signals received at various antenna positions relative)'
+( to a phase center from sources located at certain 3D space coordinates in near )'
+(or far field.)'
+(hGeometricPhases\(frequencies, antPositions, skyPositions, phases, farfield\) - Ca)'
+(lculates the phase gradients for signals received at various antenna positions r)'
+(elative to a phase center from sources located at certain 3D space coordinates i)'
+(n near or far field and for different frequencies.)'
+(hGeometricWeights\(frequencies, antPositions, skyPositions, weights, farfield\) - )'
+(Calculates the phase gradients as complex weights for signals received at variou)'
+(s antenna positions relative to a phase center from sources located at certain 3)'
+(D space coordinates in near or far field and for different frequencies.)'
+(hSpectralPower\(vec, outvec\)         - Calculates the power of a complex spectrum)'
+( and add it to an output vector.)'
+()'
+(SECTION: I/O Function \(DataReader\))'
+(--------------------------------------------------)'
+(hFileClose\(iptr\)                    - Function to close a file with a datareader)'
+( object providing the pointer to the object as an integer.)'
+(hFileOpen\(Filename\)                 - Function to open a file based on a filenam)'
+(e and returning a pointer to a datareader object as an integer.)'
+(hFileGetParameter\(iptr, keyword\)    - Return information from a data file as a P)'
+(ython object.)'
+(hFileSetParameter\(iptr, keyword, pyob\) - Set parameters in a data file with a Py)'
+(thon object as input.)'
+(hFileRead\(iptr, Datatype, vec\)      - Read data from a Datareader object \(pointe)'
+(r in iptr\) into a vector, where the size should be pre-allocated.)'
+(hCalTable\(filename, keyword, date, pyob\) - Return a list of antenna positions fr)'
+(om the CalTables - this is a test.)'
+()'
+(SECTION: Coordinate Conversion \(VectorConversion.cc\))'
+(--------------------------------------------------)'
+(hCoordinateConvert\(source, sourceCoordinate, target, targetCoordinate, anglesInD)'
+(egrees\) - Converts a 3D spatial vector into a different Coordinate type \(e.g. Sp)'
+(herical to Cartesian\).)'
+(hReadFileOld\(vec, iptr, Datatype, Antenna, Blocksize, Block, Stride, Shift\) - Re)'
+(ad data from a Datareader object \(pointer in iptr\) into a vector.)'
+()'
+(""")'
+()'
+()'
+()'
+()'
+()'
+()'
+()'
+()'
+()'
+()'
+()'
+()'
+()'
+()'
+()'
+ET
+endstream
+endobj
+56 0 obj
+2885
+endobj
+3 0 obj
+<<
+/Type /Pages
+/Count 17
+/MediaBox [ 0 0 612 792 ]
+/Kids [ 6 0 R 9 0 R 12 0 R 15 0 R 18 0 R 21 0 R 24 0 R 27 0 R 30 0 R 33 0 R 36 0 R 39 0 R 42 0 R 45 0 R 48 0 R 51 0 R 54 0 R ]
+>>
+endobj
+xref
+0 57
+0000000000 65535 f 0000000009 00000 n 0000000177 00000 n 0000045216 00000 n 0000000226 00000 n 0000000334 00000 n 0000000405 00000 n 0000000485 00000 n 0000002402 00000 n 0000002422 00000 n 0000002503 00000 n 0000005202 00000 n 0000005223 00000 n 0000005305 00000 n 0000007070 00000 n 0000007091 00000 n 0000007173 00000 n 0000009184 00000 n 0000009205 00000 n 0000009287 00000 n 0000011253 00000 n 0000011274 00000 n 0000011356 00000 n 0000013308 00000 n 0000013329 00000 n 0000013411 00000 n 0000015343 00000 n 0000015364 00000 n 0000015446 00000 n 0000018024 00000 n 0000018045 00000 n 0000018127 00000 n 0000020321 00000 n 0000020342 00000 n 0000020424 00000 n 0000022522 00000 n 0000022543 00000 n 0000022625 00000 n 0000025033 00000 n 0000025054 00000 n 0000025136 00000 n 0000027087 00000 n 0000027108 00000 n 0000027190 00000 n 0000029761 00000 n 0000029782 00000 n 0000029864 00000 n 0000033557 00000 n 0000033578 00000 n 0000033660 00000 n 0000037967 00000 n 0000037988 00000 n 0000038070 00000 n 0000042153 00000 n 0000042174 00000 n 0000042256 00000 n 0000045195 00000 n trailer
+<<
+/Size 57
+/Root 2 0 R
+/Info 1 0 R
+>>
+startxref
+45413
+%%EOF

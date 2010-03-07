@@ -186,6 +186,15 @@ input. Hence if you create a vector with Vector([1,2,3],size=2) it
 will contain only [1,2]. Vector([1,2,3],size=2,fill=4) will give
 [4,4].
 
+As the latest addition some simple support for multiple dimensions has
+been implemented, using the methods:
+
+vector.setDim([n1,n2,..])
+vector.getDim()
+vector.elem(n)
+
+This will be described later ....
+
 
 (+++) Referencing, memory allocation, indexing, slicing
 ........................................................
@@ -491,7 +500,7 @@ fxdata=Vector()
 """
 and resize it to the size we need
 """
-fxdata.resize(blocksize*nofSelectedAntennas)
+fxdata.setDim([nofSelectedAntennas,blocksize])
 """
 
 This is now a large vector filled with zeros.
@@ -517,7 +526,7 @@ and voila the vector is filled with time series data from the data file..
 Access the various antennas through slicing
 """
 ant1data=fxdata[0:blocksize]
-ant2data=fxdata[blocksize:2*blocksize]
+ant2data=fxdata.elem(1)
 """
 >>> ant2data
 Vec(1024)=[-94.0,-165.0,-6.0,35.0,-310.0,-23.0,-128.0,97.0,239.0,289.0,...]
@@ -592,8 +601,10 @@ fftdata.norm(spectrum)
 We can now try to calulcate the average spectum of the data set for
 one antenna, by looping over all blocks.
 """
-avspectrum=Vector(float,fftlength*nofSelectedAntennas,0.0)
-fftall=Vector(complex,fftlength*nofSelectedAntennas)
+avspectrum=Vector(float)
+avspectrum.setDim([nofSelectedAntennas,fftlength])
+fftall=Vector(complex)
+fftall.setDim([nofSelectedAntennas,fftlength])
 for block in range(nBlocks):
     print block,",",
     file.set("Block",block).read("FFT",fftall)
@@ -646,8 +657,8 @@ import matplotlib.pyplot as plt
 print "\n!! A plot window should pop up somehwere (in the background?) !!"
 plt.show()
 plt.title("Average Spectrum for Two Antennas")
-plt.plot(freqdata,avspectrum[0:fftlength])
-plt.plot(freqdata,avspectrum[fftlength:2*fftlength])
+plt.plot(freqdata,avspectrum.elem(0))
+plt.plot(freqdata,avspectrum.elem(1))
 plt.ylabel("Power of Electric Field [ADC counts]$^2$")
 plt.xlabel("Frequency [MHz]")
 """
@@ -694,5 +705,140 @@ yielding the following output vector:
 
 >>> cartesian
 Vec(3)=[0.0308144266055,-0.882409725042,0.469471562786]
+
+"""
+
+
+"""
+
+(+) Appendix: Listing of all Functions:
+=======================================
+
+SECTION: Administrative Vector Function
+--------------------------------------------------
+hFill(vec, fill_value)              - Fills a vector with a constant value.
+hNew(vec)                           - Make and return a new vector of the same size and type as the input vector.
+hConvert(vec1, vec2)                - Copies and converts a vector to a vector of another type.
+hCopy(vec, outvec)                  - Copies a vector to another one.
+
+SECTION: Math Function
+--------------------------------------------------
+square(val)                         - Returns the squared value of the parameter.
+hPhase(frequency, time)             - Returns the interferometer phase in radians for a given frequency and time.
+funcGaussian(x, sigma, mu)          - Implementation of the Gauss function.
+hExp(vec)                           - Take the exp of all the elements in the vector.
+hExp(vec, vecout)                   - Take the exp of all the elements in the vector and return results in a second vector.
+hLog(vec)                           - Take the log of all the elements in the vector.
+hLog(vec, vecout)                   - Take the log of all the elements in the vector and return results in a second vector.
+hLog10(vec)                         - Take the log10 of all the elements in the vector.
+hLog10(vec, vecout)                 - Take the log10 of all the elements in the vector and return results in a second vector.
+hSin(vec)                           - Take the sin of all the elements in the vector.
+hSin(vec, vecout)                   - Take the sin of all the elements in the vector and return results in a second vector.
+hSinh(vec)                          - Take the sinh of all the elements in the vector.
+hSinh(vec, vecout)                  - Take the sinh of all the elements in the vector and return results in a second vector.
+hSqrt(vec)                          - Take the sqrt of all the elements in the vector.
+hSqrt(vec, vecout)                  - Take the sqrt of all the elements in the vector and return results in a second vector.
+hSquare(vec)                        - Take the square of all the elements in the vector.
+hSquare(vec, vecout)                - Take the square of all the elements in the vector and return results in a second vector.
+hTan(vec)                           - Take the tan of all the elements in the vector.
+hTan(vec, vecout)                   - Take the tan of all the elements in the vector and return results in a second vector.
+hTanh(vec)                          - Take the tanh of all the elements in the vector.
+hTanh(vec, vecout)                  - Take the tanh of all the elements in the vector and return results in a second vector.
+hAbs(vec)                           - Take the abs of all the elements in the vector.
+hAbs(vec, vecout)                   - Take the abs of all the elements in the vector and return results in a second vector.
+hCos(vec)                           - Take the cos of all the elements in the vector.
+hCos(vec, vecout)                   - Take the cos of all the elements in the vector and return results in a second vector.
+hCosh(vec)                          - Take the cosh of all the elements in the vector.
+hCosh(vec, vecout)                  - Take the cosh of all the elements in the vector and return results in a second vector.
+hCeil(vec)                          - Take the ceil of all the elements in the vector.
+hCeil(vec, vecout)                  - Take the ceil of all the elements in the vector and return results in a second vector.
+hFloor(vec)                         - Take the floor of all the elements in the vector.
+hFloor(vec, vecout)                 - Take the floor of all the elements in the vector and return results in a second vector.
+hAcos(vec)                          - Take the acos of all the elements in the vector.
+hAcos(vec, vecout)                  - Take the acos of all the elements in the vector and return results in a second vector.
+hAsin(vec)                          - Take the asin of all the elements in the vector.
+hAsin(vec, vecout)                  - Take the asin of all the elements in the vector and return results in a second vector.
+hAtan(vec)                          - Take the atan of all the elements in the vector.
+hAtan(vec, vecout)                  - Take the atan of all the elements in the vector and return results in a second vector.
+hiSub(vec1, vec2)                   - Performs a Sub between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
+hiSub(vec1, val)                    - Performs a Sub between the vector and a scalar (applied to each element), which is returned in the first vector.
+hSub(vec1, vec2, vec3)              - Performs a Sub between the two vectors, which is returned in the third vector.
+hSubAdd(vec1, vec2, vec3)           - Performs a Sub between the two vectors, and adds the result to the output (third) vector.
+hSubAddConv(vec1, vec2, vec3)       - Performs a Sub between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+hSub(vec1, val, vec2)               - Performs a Sub between the vector and a scalar, where the result is returned in the second vector.
+hiMul(vec1, vec2)                   - Performs a Mul between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
+hiMul(vec1, val)                    - Performs a Mul between the vector and a scalar (applied to each element), which is returned in the first vector.
+hMul(vec1, vec2, vec3)              - Performs a Mul between the two vectors, which is returned in the third vector.
+hMulAdd(vec1, vec2, vec3)           - Performs a Mul between the two vectors, and adds the result to the output (third) vector.
+hMulAddConv(vec1, vec2, vec3)       - Performs a Mul between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+hMul(vec1, val, vec2)               - Performs a Mul between the vector and a scalar, where the result is returned in the second vector.
+hiAdd(vec1, vec2)                   - Performs a Add between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
+hiAdd(vec1, val)                    - Performs a Add between the vector and a scalar (applied to each element), which is returned in the first vector.
+hAdd(vec1, vec2, vec3)              - Performs a Add between the two vectors, which is returned in the third vector.
+hAddAdd(vec1, vec2, vec3)           - Performs a Add between the two vectors, and adds the result to the output (third) vector.
+hAddAddConv(vec1, vec2, vec3)       - Performs a Add between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+hAdd(vec1, val, vec2)               - Performs a Add between the vector and a scalar, where the result is returned in the second vector.
+hiDiv(vec1, vec2)                   - Performs a Div between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
+hiDiv(vec1, val)                    - Performs a Div between the vector and a scalar (applied to each element), which is returned in the first vector.
+hDiv(vec1, vec2, vec3)              - Performs a Div between the two vectors, which is returned in the third vector.
+hDivAdd(vec1, vec2, vec3)           - Performs a Div between the two vectors, and adds the result to the output (third) vector.
+hDivAddConv(vec1, vec2, vec3)       - Performs a Div between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
+hDiv(vec1, val, vec2)               - Performs a Div between the vector and a scalar, where the result is returned in the second vector.
+hConj(vec)                          - Calculate the complex conjugate of all elements in the complex vector.
+hCrossCorrelateComplex(vec1, vec2)  - Multiplies the elements of the first vector with the complex conjugate of the elements in the second and returns the results in the first.
+hReal(vec, vecout)                  - Take the real of all the elements in the complex vector and return results in a float vector.
+hArg(vec, vecout)                   - Take the arg of all the elements in the complex vector and return results in a float vector.
+hImag(vec, vecout)                  - Take the imag of all the elements in the complex vector and return results in a float vector.
+hNorm(vec, vecout)                  - Take the norm of all the elements in the complex vector and return results in a float vector.
+hNegate(vec)                        - Multiplies each element in the vector with -1 in place, i.e. the input vector is also the output vector.
+hSum(vec)                           - Performs a sum over the values in a vector and returns the value.
+hNorm(vec)                          - Returns the lengths or norm of a vector (i.e. Sqrt(Sum_i(xi*+2))).
+hNormalize(vec)                     - Normalizes a vector to length unity.
+hMean(vec)                          - Returns the mean value of all elements in a vector.
+hSort(vec)                          - Sorts a vector in place.
+hSortMedian(vec)                    - Sorts a vector in place and returns the median value of the elements.
+hMedian(vec)                        - Returns the median value of the elements.
+hStdDev(vec, mean)                  - Calculates the standard deviation around a mean value.
+hStdDev(vec)                        - Calculates the standard deviation of a vector of values.
+hFindLessEqual(vec, threshold, vecout) - Find the samples that are LessEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
+hFindLessEqualAbs(vec, threshold, vecout) - Find the samples whose absolute values are LessEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
+hFindGreaterThan(vec, threshold, vecout) - Find the samples that are GreaterThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
+hFindGreaterThanAbs(vec, threshold, vecout) - Find the samples whose absolute values are GreaterThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
+hFindGreaterEqual(vec, threshold, vecout) - Find the samples that are GreaterEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
+hFindGreaterEqualAbs(vec, threshold, vecout) - Find the samples whose absolute values are GreaterEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
+hFindLessThan(vec, threshold, vecout) - Find the samples that are LessThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
+hFindLessThanAbs(vec, threshold, vecout) - Find the samples whose absolute values are LessThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
+hDownsample(vec1, vec2)             - Downsample the input vector to a smaller output vector.
+hDownsample(vec, downsample_factor) - Downsample the input vector by a cetain factor and return a new vector.
+hFindLowerBound(vec, value)         - Finds the location (i.e., returns integer) in a monotonically increasing vector, where the input search value is just above or equal to the value in the vector.
+hFlatWeights(wlen)                  - Returns vector of weights of length len with constant weights normalized to give a sum of unity. Can be used by hRunningAverageT.
+hLinearWeights(wlen)                - Returns vector of weights of length wlen with linearly rising and decreasing weights centered at len/2.
+hGaussianWeights(wlen)              - Returns vector of weights of length wlen with Gaussian distribution centered at len/2 and sigma=len/4 (i.e. the Gaussian extends over 2 sigma in both directions).
+hWeights(wlen, wtype)               - Create a normalized weight vector.
+hRunningAverage(idata, odata, weights) - Calculate the running average of an input vector using a weight vector.
+hRunningAverage(idata, odata, wlen, wtype) - Overloaded function to automatically calculate weights.
+
+SECTION: RF (Radio Frequency) Function
+--------------------------------------------------
+hGeometricDelayFarField(antPosition, skyDirection, length) - Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located in a certain direction in farfield (based on L. Bahren).
+hGeometricDelayNearField(antPosition, skyPosition, distance) - Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located at a certain 3D space coordinate in nearfield (based on L. Bahren).
+hGeometricDelays(antPositions, skyPositions, delays, farfield) - Calculates the time delay in seconds for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field.
+hGeometricPhases(frequencies, antPositions, skyPositions, phases, farfield) - Calculates the phase gradients for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field and for different frequencies.
+hGeometricWeights(frequencies, antPositions, skyPositions, weights, farfield) - Calculates the phase gradients as complex weights for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field and for different frequencies.
+hSpectralPower(vec, outvec)         - Calculates the power of a complex spectrum and add it to an output vector.
+
+SECTION: I/O Function (DataReader)
+--------------------------------------------------
+hFileClose(iptr)                    - Function to close a file with a datareader object providing the pointer to the object as an integer.
+hFileOpen(Filename)                 - Function to open a file based on a filename and returning a pointer to a datareader object as an integer.
+hFileGetParameter(iptr, keyword)    - Return information from a data file as a Python object.
+hFileSetParameter(iptr, keyword, pyob) - Set parameters in a data file with a Python object as input.
+hFileRead(iptr, Datatype, vec)      - Read data from a Datareader object (pointer in iptr) into a vector, where the size should be pre-allocated.
+hCalTable(filename, keyword, date, pyob) - Return a list of antenna positions from the CalTables - this is a test.
+
+SECTION: Coordinate Conversion (VectorConversion.cc)
+--------------------------------------------------
+hCoordinateConvert(source, sourceCoordinate, target, targetCoordinate, anglesInDegrees) - Converts a 3D spatial vector into a different Coordinate type (e.g. Spherical to Cartesian).
+hReadFileOld(vec, iptr, Datatype, Antenna, Blocksize, Block, Stride, Shift) - Read data from a Datareader object (pointer in iptr) into a vector.
 
 """
