@@ -596,8 +596,7 @@ avspectrum=Vector(float,fftlength*nofSelectedAntennas,0.0)
 fftall=Vector(complex,fftlength*nofSelectedAntennas)
 for block in range(nBlocks):
     print block,",",
-    file.set("Block",block)
-    file.read("FFT",fftall)
+    file.set("Block",block).read("FFT",fftall)
     fftall.spectralpower(avspectrum)
 """
 (NOTE: This doesn't work yet due to a bug in     file.read("FFT",...) !!!!)
@@ -644,14 +643,26 @@ gr.WriteEPS("test-y.eps","Test Plot")
 Now we import matplotlib
 """
 import matplotlib.pyplot as plt
-plt.plot(fxdata[0:blocksize])
-plt.ylabel("Electric Field [ADC counts]")
+print "\n!! A plot window should pop up somehwere (in the background?) !!"
 plt.show()
+plt.title("Average Spectrum for Two Antennas")
+plt.plot(freqdata,avspectrum[0:fftlength])
+plt.plot(freqdata,avspectrum[fftlength:2*fftlength])
+plt.ylabel("Power of Electric Field [ADC counts]$^2$")
+plt.xlabel("Frequency [MHz]")
 """
-and a window should pop up.
+and a window should pop up.  (NB: At least on a Mac the window likes
+to stubbornly hide behind other windows, so search your screen
+carefully if no window pops up.)
 
-(NB: At least on a Mac the window likes to stubbornly hide behind
-other windows, so search your screen carefully if no window pops up.)
+to plot time series data, use:
+
+plt.clf()
+plt.plot(timedata,fxdata[0:blocksize])
+plt.ylabel("Electric Field [ADC counts]")
+plt.xlabel("Time [$\mu$s]")
+
+
 
 (+) Coordinates
 ---------------

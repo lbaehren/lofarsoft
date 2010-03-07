@@ -4658,7 +4658,7 @@ void (*fptr_hCrossCorrelateComplex_HIntegerHComplexHComplexSTDITSTDIT)( std::vec
 The following functions are available for getting real values from
 complex numbers:
   abs - absolute value of a complex number
-  norm - magnitude of a complex number squared
+  norm - magnitude of a complex number squared, i.e. c * conj(c) 
   arg - phase angle of a complex number
   imag - imaginary part of a complex number
   real - real part of a complex number
@@ -4720,7 +4720,7 @@ void (*fptr_hReal_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComplex> & ve
 The following functions are available for getting real values from
 complex numbers:
   abs - absolute value of a complex number
-  norm - magnitude of a complex number squared
+  norm - magnitude of a complex number squared, i.e. c * conj(c) 
   arg - phase angle of a complex number
   imag - imaginary part of a complex number
   real - real part of a complex number
@@ -4782,7 +4782,7 @@ void (*fptr_hArg_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComplex> & vec
 The following functions are available for getting real values from
 complex numbers:
   abs - absolute value of a complex number
-  norm - magnitude of a complex number squared
+  norm - magnitude of a complex number squared, i.e. c * conj(c) 
   arg - phase angle of a complex number
   imag - imaginary part of a complex number
   real - real part of a complex number
@@ -4844,7 +4844,7 @@ void (*fptr_hImag_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComplex> & ve
 The following functions are available for getting real values from
 complex numbers:
   abs - absolute value of a complex number
-  norm - magnitude of a complex number squared
+  norm - magnitude of a complex number squared, i.e. c * conj(c) 
   arg - phase angle of a complex number
   imag - imaginary part of a complex number
   real - real part of a complex number
@@ -7814,13 +7814,41 @@ void hFileRead(
 //..........................................................................................
 //..........................................................................................
   //------FX------------------------------
-  else if (Datatype=="Fx") {if (typeid(vec)==typeid(std::vector<HNumber>)) { casa::IPosition shape(2); shape(0)=drp->blocksize(); shape(1)=drp->nofSelectedAntennas(); casa::Matrix<double> casamtrx(shape,reinterpret_cast<double*>(&(vec[0])),casa::SHARE); drp->fx (casamtrx); } else { cout << "hFileRead" << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl; };}
+  else if (Datatype=="Fx") {if (typeid(vec)==typeid(std::vector<HNumber>)) {
+casa::IPosition shape(2);
+shape(0)=drp->blocksize(); shape(1)=drp->nofSelectedAntennas();
+casa::Matrix<double> casamtrx(shape,reinterpret_cast<double*>(&(vec[0])),casa::SHARE);
+drp->fx (casamtrx);
+} else {
+cout << "hFileRead" << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl;
+};}
   //------VOLTAGE------------------------------
-  else if (Datatype=="Voltage") {if (typeid(vec)==typeid(std::vector<HNumber>)) { casa::IPosition shape(2); shape(0)=drp->blocksize(); shape(1)=drp->nofSelectedAntennas(); casa::Matrix<double> casamtrx(shape,reinterpret_cast<double*>(&(vec[0])),casa::SHARE); drp->voltage (casamtrx); } else { cout << "hFileRead" << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl; };}
+  else if (Datatype=="Voltage") {if (typeid(vec)==typeid(std::vector<HNumber>)) {
+casa::IPosition shape(2);
+shape(0)=drp->blocksize(); shape(1)=drp->nofSelectedAntennas();
+casa::Matrix<double> casamtrx(shape,reinterpret_cast<double*>(&(vec[0])),casa::SHARE);
+drp->voltage (casamtrx);
+} else {
+cout << "hFileRead" << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl;
+};}
   //------FFT------------------------------
-  else if (Datatype=="FFT") {if (typeid(vec)==typeid(std::vector<HComplex>)) { casa::IPosition shape(2); shape(0)=drp->blocksize(); shape(1)=drp->nofSelectedAntennas(); casa::Matrix<CasaComplex> casamtrx(shape,reinterpret_cast<CasaComplex*>(&(vec[0])),casa::SHARE); drp->fft (casamtrx); } else { cout << "hFileRead" << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl; };}
+  else if (Datatype=="FFT") {if (typeid(vec)==typeid(std::vector<HComplex>)) {
+casa::IPosition shape(2);
+shape(0)=drp->blocksize(); shape(1)=drp->nofSelectedAntennas();
+casa::Matrix<CasaComplex> casamtrx(shape,reinterpret_cast<CasaComplex*>(&(vec[0])),casa::SHARE);
+drp->fft (casamtrx);
+} else {
+cout << "hFileRead" << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl;
+};}
   //------CALFFT------------------------------
-  else if (Datatype=="CalFFT") {if (typeid(vec)==typeid(std::vector<HComplex>)) { casa::IPosition shape(2); shape(0)=drp->blocksize(); shape(1)=drp->nofSelectedAntennas(); casa::Matrix<CasaComplex> casamtrx(shape,reinterpret_cast<CasaComplex*>(&(vec[0])),casa::SHARE); drp->calfft (casamtrx); } else { cout << "hFileRead" << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl; };}
+  else if (Datatype=="CalFFT") {if (typeid(vec)==typeid(std::vector<HComplex>)) {
+casa::IPosition shape(2);
+shape(0)=drp->blocksize(); shape(1)=drp->nofSelectedAntennas();
+casa::Matrix<CasaComplex> casamtrx(shape,reinterpret_cast<CasaComplex*>(&(vec[0])),casa::SHARE);
+drp->calfft (casamtrx);
+} else {
+cout << "hFileRead" << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl;
+};}
   else {
     ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4394 << ": " << "hFileRead" << ": Datatype=" << Datatype << " is unknown." << endl );
     vec.clear();
@@ -8286,7 +8314,7 @@ void init_module_hftools(); extern "C" __attribute__ ((visibility("default"))) v
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8327,7 +8355,7 @@ def("hFill",fptr_hFill_HInteger11STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8365,7 +8393,7 @@ def("hNew",fptr_hNew_HInteger1STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8402,7 +8430,7 @@ def("hResize",fptr_hResize_HInteger1HIntegerSTL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8439,7 +8467,7 @@ def("hResize",fptr_hResize_HInteger1HInteger1STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8496,7 +8524,7 @@ def("hResize",fptr_hResize_HIntegerHInteger12STLSTL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8553,7 +8581,7 @@ def("hResize",fptr_hResize_HIntegerHInteger12CASACASA );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8598,7 +8626,7 @@ def("hConvert",fptr_hConvert_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8637,7 +8665,7 @@ def("hCopy",fptr_hCopy_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -8673,7 +8701,7 @@ def("square",fptr_square_HInteger1 );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -8707,7 +8735,7 @@ def("hPhase",fptr_hPhase_HIntegerHNumberHNumber );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -8741,7 +8769,7 @@ def("funcGaussian",fptr_funcGaussian_HIntegerHNumberHNumberHNumber );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8780,7 +8808,7 @@ def("hExp",fptr_hExp1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8819,7 +8847,7 @@ def("hExp",fptr_hExp2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8858,7 +8886,7 @@ def("hLog",fptr_hLog1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8897,7 +8925,7 @@ def("hLog",fptr_hLog2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8936,7 +8964,7 @@ def("hLog10",fptr_hLog101_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8975,7 +9003,7 @@ def("hLog10",fptr_hLog102_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9014,7 +9042,7 @@ def("hSin",fptr_hSin1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9053,7 +9081,7 @@ def("hSin",fptr_hSin2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9092,7 +9120,7 @@ def("hSinh",fptr_hSinh1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9131,7 +9159,7 @@ def("hSinh",fptr_hSinh2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9170,7 +9198,7 @@ def("hSqrt",fptr_hSqrt1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9209,7 +9237,7 @@ def("hSqrt",fptr_hSqrt2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9248,7 +9276,7 @@ def("hSquare",fptr_hSquare1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9287,7 +9315,7 @@ def("hSquare",fptr_hSquare2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9326,7 +9354,7 @@ def("hTan",fptr_hTan1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9365,7 +9393,7 @@ def("hTan",fptr_hTan2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9404,7 +9432,7 @@ def("hTanh",fptr_hTanh1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9443,7 +9471,7 @@ def("hTanh",fptr_hTanh2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9482,7 +9510,7 @@ def("hAbs",fptr_hAbs1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9521,7 +9549,7 @@ def("hAbs",fptr_hAbs2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9560,7 +9588,7 @@ def("hCos",fptr_hCos1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9599,7 +9627,7 @@ def("hCos",fptr_hCos2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9638,7 +9666,7 @@ def("hCosh",fptr_hCosh1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9677,7 +9705,7 @@ def("hCosh",fptr_hCosh2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9715,7 +9743,7 @@ def("hCeil",fptr_hCeil1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9755,7 +9783,7 @@ def("hCeil",fptr_hCeil2_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9793,7 +9821,7 @@ def("hFloor",fptr_hFloor1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9833,7 +9861,7 @@ def("hFloor",fptr_hFloor2_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9871,7 +9899,7 @@ def("hAcos",fptr_hAcos1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9911,7 +9939,7 @@ def("hAcos",fptr_hAcos2_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9949,7 +9977,7 @@ def("hAsin",fptr_hAsin1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9989,7 +10017,7 @@ def("hAsin",fptr_hAsin2_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10027,7 +10055,7 @@ def("hAtan",fptr_hAtan1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10067,7 +10095,7 @@ def("hAtan",fptr_hAtan2_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10112,7 +10140,7 @@ def("hiSub",fptr_hiSub_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10157,7 +10185,7 @@ def("hiSub",fptr_hiSub2_HIntegerHInteger12STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10220,7 +10248,7 @@ def("hSub",fptr_hSub_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10259,7 +10287,7 @@ def("hSubAdd",fptr_hSubAdd_HInteger111STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10322,7 +10350,7 @@ def("hSubAddConv",fptr_hSubAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10385,7 +10413,7 @@ def("hSub",fptr_hSub2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10430,7 +10458,7 @@ def("hiMul",fptr_hiMul_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10475,7 +10503,7 @@ def("hiMul",fptr_hiMul2_HIntegerHInteger12STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10538,7 +10566,7 @@ def("hMul",fptr_hMul_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10577,7 +10605,7 @@ def("hMulAdd",fptr_hMulAdd_HInteger111STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10640,7 +10668,7 @@ def("hMulAddConv",fptr_hMulAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10703,7 +10731,7 @@ def("hMul",fptr_hMul2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10748,7 +10776,7 @@ def("hiAdd",fptr_hiAdd_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10793,7 +10821,7 @@ def("hiAdd",fptr_hiAdd2_HIntegerHInteger12STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10856,7 +10884,7 @@ def("hAdd",fptr_hAdd_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10895,7 +10923,7 @@ def("hAddAdd",fptr_hAddAdd_HInteger111STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10958,7 +10986,7 @@ def("hAddAddConv",fptr_hAddAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11021,7 +11049,7 @@ def("hAdd",fptr_hAdd2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11066,7 +11094,7 @@ def("hiDiv",fptr_hiDiv_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11111,7 +11139,7 @@ def("hiDiv",fptr_hiDiv2_HIntegerHInteger12STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11174,7 +11202,7 @@ def("hDiv",fptr_hDiv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11213,7 +11241,7 @@ def("hDivAdd",fptr_hDivAdd_HInteger111STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11276,7 +11304,7 @@ def("hDivAddConv",fptr_hDivAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11339,7 +11367,7 @@ def("hDiv",fptr_hDiv2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11376,7 +11404,7 @@ def("hConj",fptr_hConj_HIntegerHComplexSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11413,7 +11441,7 @@ def("hCrossCorrelateComplex",fptr_hCrossCorrelateComplex_HIntegerHComplexHComple
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11450,7 +11478,7 @@ def("hReal",fptr_hReal_HIntegerHComplexHNumberSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11487,7 +11515,7 @@ def("hArg",fptr_hArg_HIntegerHComplexHNumberSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11524,7 +11552,7 @@ def("hImag",fptr_hImag_HIntegerHComplexHNumberSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11561,7 +11589,7 @@ def("hNorm",fptr_hNorm_HIntegerHComplexHNumberSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11600,7 +11628,7 @@ def("hNegate",fptr_hNegate_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11639,7 +11667,7 @@ def("hSum",fptr_hSum_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11677,7 +11705,7 @@ def("hNorm",fptr_hNorm_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11715,7 +11743,7 @@ def("hNormalize",fptr_hNormalize_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11753,7 +11781,7 @@ def("hMean",fptr_hMean_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11792,7 +11820,7 @@ def("hSort",fptr_hSort_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11830,7 +11858,7 @@ def("hSortMedian",fptr_hSortMedian_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11865,7 +11893,7 @@ def("hMedian",fptr_hMedian_HInteger1STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11903,7 +11931,7 @@ def("hStdDev",fptr_hStdDev_HInteger1HNumberSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11941,7 +11969,7 @@ def("hStdDev",fptr_hStdDev_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11979,7 +12007,7 @@ def("hFindLessEqual",fptr_hFindLessEqual_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12017,7 +12045,7 @@ def("hFindLessEqualAbs",fptr_hFindLessEqualAbs_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12055,7 +12083,7 @@ def("hFindGreaterThan",fptr_hFindGreaterThan_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12093,7 +12121,7 @@ def("hFindGreaterThanAbs",fptr_hFindGreaterThanAbs_HInteger11HIntegerSTDITSTDIT 
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12131,7 +12159,7 @@ def("hFindGreaterEqual",fptr_hFindGreaterEqual_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12169,7 +12197,7 @@ def("hFindGreaterEqualAbs",fptr_hFindGreaterEqualAbs_HInteger11HIntegerSTDITSTDI
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12207,7 +12235,7 @@ def("hFindLessThan",fptr_hFindLessThan_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12245,7 +12273,7 @@ def("hFindLessThanAbs",fptr_hFindLessThanAbs_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12283,7 +12311,7 @@ def("hDownsample",fptr_hDownsample_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12318,7 +12346,7 @@ def("hDownsample",fptr_hDownsample_HInteger1HNumberSTL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12357,7 +12385,7 @@ def("hFindLowerBound",fptr_hFindLowerBound_HInteger11STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12391,7 +12419,7 @@ def("hFlatWeights",fptr_hFlatWeights_HIntegerHInteger );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12425,7 +12453,7 @@ def("hLinearWeights",fptr_hLinearWeights_HIntegerHInteger );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12459,7 +12487,7 @@ def("hGaussianWeights",fptr_hGaussianWeights_HIntegerHInteger );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12493,7 +12521,7 @@ def("hWeights",fptr_hWeights_HIntegerHIntegerhWEIGHTS );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12528,7 +12556,7 @@ def("hRunningAverage",fptr_hRunningAverage_HIntegerHNumberHNumberHNumberSTDITSTD
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12563,7 +12591,7 @@ def("hRunningAverage",fptr_hRunningAverage_HIntegerHNumberHNumberHIntegerhWEIGHT
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12600,7 +12628,7 @@ def("hGeometricDelayFarField",fptr_hGeometricDelayFarField_HIntegerHNumberHNumbe
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12637,7 +12665,7 @@ def("hGeometricDelayNearField",fptr_hGeometricDelayNearField_HIntegerHNumberHNum
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12674,7 +12702,7 @@ def("hGeometricDelays",fptr_hGeometricDelays_HIntegerHNumberHNumberHNumberboolST
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12711,7 +12739,7 @@ def("hGeometricPhases",fptr_hGeometricPhases_HIntegerHNumberHNumberHNumberHNumbe
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12748,7 +12776,7 @@ def("hGeometricWeights",fptr_hGeometricWeights_HIntegerHNumberHNumberHNumberHCom
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12783,7 +12811,7 @@ def("hSpectralPower",fptr_hSpectralPower_HIntegerHComplexHNumberSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12820,7 +12848,7 @@ def("hADC2Voltage",fptr_hADC2Voltage_HInteger1HNumberSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12859,7 +12887,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1HNumberuintuintuintSTDIT
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12898,7 +12926,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1HNumberuintSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12937,7 +12965,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1HNumberSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12976,7 +13004,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13015,7 +13043,7 @@ def("hApplyFilter",fptr_hApplyFilter_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13054,7 +13082,7 @@ def("hApplyHanningFilter",fptr_hApplyHanningFilter_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13091,7 +13119,7 @@ def("hFFT",fptr_hFFT_HIntegerHNumberHComplexHIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13130,7 +13158,7 @@ def("hInvFFT",fptr_hInvFFT_HInteger11uintSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -13164,7 +13192,7 @@ def("hFileClose",fptr_hFileClose_HIntegerHIntPointer );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -13198,7 +13226,7 @@ def("hFileOpen",fptr_hFileOpen_HIntegerHString );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13232,7 +13260,7 @@ def("hFileGetParameter",fptr_hFileGetParameter_HIntegerHIntPointerHString );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13266,7 +13294,7 @@ def("hFileSetParameter",fptr_hFileSetParameter_HIntegerHIntPointerHStringHPyObje
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13302,7 +13330,7 @@ def("hFileRead",fptr_hFileRead_HIntegerHIntPointerHString1STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13336,7 +13364,7 @@ def("hCalTable",fptr_hCalTable_HIntegerHStringHStringHIntegerHPyObjectPtr );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13373,7 +13401,7 @@ def("hCoordinateConvert",fptr_hCoordinateConvert_HIntegerHNumberCRCoordinateType
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from hftools.iter.cc on Sun Mar 07 02:52:15 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------

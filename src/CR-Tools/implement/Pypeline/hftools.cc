@@ -2665,25 +2665,25 @@ void HFPP_FUNC_NAME(
 //..........................................................................................
 //Conversion from aips to stl using shared memory space
 //..........................................................................................
-#define HFPP_REPEAT(TYPESTL,TYPECASA,FIELD)				\
-  if (typeid(vec)==typeid(std::vector<TYPESTL>)) {				\
-    casa::IPosition shape(2);						\
-    shape(0)=drp->blocksize(); shape(1)=drp->nofSelectedAntennas();	\
-    casa::Matrix<TYPECASA> casamtrx(shape,reinterpret_cast<TYPECASA*>(&(vec[0])),casa::SHARE); \
-    drp->FIELD (casamtrx);						\
-  } else {								\
-    cout << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl; \
+#define HFPP_REPEAT(TYPESTL,TYPECASA,FIELD,SIZE)				\
+  if (typeid(vec)==typeid(std::vector<TYPESTL>)) {	_H_NL_			\
+    casa::IPosition shape(2);				_H_NL_		\
+    shape(0)=drp->SIZE (); shape(1)=drp->nofSelectedAntennas();	_H_NL_\
+    casa::Matrix<TYPECASA> casamtrx(shape,reinterpret_cast<TYPECASA*>(&(vec[0])),casa::SHARE); _H_NL_\
+    drp->FIELD (casamtrx);						_H_NL_\
+  } else {								_H_NL_\
+    cout << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl; _H_NL_\
   }
 //..........................................................................................
 
   //------FX------------------------------
-  else if (Datatype=="Fx") {HFPP_REPEAT(HNumber,double,fx);}
+  else if (Datatype=="Fx") {HFPP_REPEAT(HNumber,double,fx,blocksize);}
   //------VOLTAGE------------------------------
-  else if (Datatype=="Voltage") {HFPP_REPEAT(HNumber,double,voltage);}
+  else if (Datatype=="Voltage") {HFPP_REPEAT(HNumber,double,voltage,blocksize);}
   //------FFT------------------------------
-  else if (Datatype=="FFT") {HFPP_REPEAT(HComplex,CasaComplex,fft);}
+  else if (Datatype=="FFT") {HFPP_REPEAT(HComplex,CasaComplex,fft,fftLength);}
   //------CALFFT------------------------------
-  else if (Datatype=="CalFFT") {HFPP_REPEAT(HComplex,CasaComplex,calfft);}
+  else if (Datatype=="CalFFT") {HFPP_REPEAT(HComplex,CasaComplex,calfft,fftLength);}
   else {
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype=" << Datatype << " is unknown.");
     vec.clear();
