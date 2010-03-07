@@ -45,3 +45,6 @@ echo " "
 echo "Available functions in hftools"
 echo "=============================="
 cat hftools.doc.txt
+
+
+#rm hftools.cc.o hftools.doc.txt hftools.iter.cc hftools.def.h	hftools.doc.py	hftools.hfpp.cc	hftools.tmp.cc hftools.so

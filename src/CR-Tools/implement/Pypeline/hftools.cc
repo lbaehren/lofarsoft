@@ -991,6 +991,114 @@ void h{$MFUNC}2(const Iterin1 vec1,const Iterin1 vec1_end, S val, const Iter vec
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 //$ENDITERATE
 
+
+
+////////////////////
+//COMPLEX FUNCTIONS
+///////////////////
+
+//$DOCSTRING: Calculate the complex conjugate of all elements in the complex vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hConj
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void  HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
+{
+  Iter it=vec;
+  while (it!=vec_end) {
+    *it=conj(*it);
+    ++it;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Multiplies the elements of the first vector with the complex conjugate of the elements in the second and returns the results in the first.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hCrossCorrelateComplex
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vec1)()("Complex input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(vec2)()("Second complex vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+ If the second vector is shorter than the first one, the second vector
+ will simply wrap around and begin from the start until the end of the
+ first vector is reached. If the first vector is shorter, then the
+ calculation will simply stop.
+
+ Relation to Cross Correlation:
+ ------------------------------
+ If the complex input vectors are the Fourier transformed data of two
+ (real) vector f1 & f2, then vec1*conj(vec2) will be the Fourier
+ transform of the crosscorrelation between f1 and f2.
+
+ Hence, in order to calculate a cross correlation between f1 & f2, first do
+ f1.fft(vec1) and f2.fft(vec2), then vec1.crosscorrelatecomplex(vec2)
+ and FFT back through vec1.invfft(floatvec).
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec2_end)
+{
+  Iter it1=vec1;
+  Iter it2=vec2;
+  while (it1!=vec1_end) {
+    *it1 *= conj(*it2);
+    ++it1; ++it2;
+    if (it2==vec2_end) it2=vec2;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//========================================================================
+//$ITERATE MFUNC arg,imag,norm,real
+//========================================================================
+
+//$DOCSTRING: Take the $MFUNC of all the elements in the complex vector and return results in a float vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h{$MFUNC!CAPS}
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(h{$MFUNC!CAPS})("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vec)()("Complex input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(vecout)()("Float output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+The following functions are available for getting real values from
+complex numbers:
+  abs - absolute value of a complex number
+  norm - magnitude of a complex number squared, i.e. c * conj(c) 
+  arg - phase angle of a complex number
+  imag - imaginary part of a complex number
+  real - real part of a complex number
+*/
+template <class Iter, class Iterout>
+void h{$MFUNC!CAPS}(const Iter vec,const Iter vec_end, const Iterout vecout,const Iterout vecout_end)
+{
+  Iter it=vec;
+  Iterout itout=vecout;
+  while ((it!=vec_end) && (itout !=vecout_end)) {
+    *itout=$MFUNC(*it);
+    ++it; ++itout;
+  };
+} 
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$ENDITERATE
+
+
+
 //$DOCSTRING: Multiplies each element in the vector with -1 in place, i.e. the input vector is also the output vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hNegate

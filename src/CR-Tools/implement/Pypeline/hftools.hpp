@@ -93,7 +93,7 @@ BOOST_PYTHON_MODULE(hftools)
       .value("Time",CR::CoordinateType::Time);
 
     //The following will include the automatically generated python wrappers
-#include "hftools.def.h"
+#include "../../../../build/cr/implement/Pypeline/hftools.def.h"
 
 }    
 

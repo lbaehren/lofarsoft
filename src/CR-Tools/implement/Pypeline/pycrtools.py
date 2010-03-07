@@ -174,6 +174,7 @@ hRealVectorTypes=[IntVec,FloatVec]
 hNumericalVectorTypes=hRealVectorTypes+[ComplexVec]
 hOtherVectorTypes=[BoolVec,StringVec]
 hAllVectorTypes=hOtherVectorTypes+hNumericalVectorTypes
+hAllListTypes=hAllVectorTypes+[list,tuple]
 
 #Operator Overloading - basic arithmetic 
 
@@ -241,7 +242,6 @@ def Vec_div(vec1,val):
 
 
 #Fourier Transforms 
-setattr(ComplexVec,"SpectralPower",hSpectralPower)
 setattr(FloatVec,"fft",hFFT)
 
 
@@ -254,6 +254,10 @@ for v in hAllVectorTypes:
 for v in hRealVectorTypes:
     for s in ["hMean","hStdDev","hDownsample","hNorm","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hFindGreaterThan","hFindGreaterEqual","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThan","hFindLessEqual","hFindLessThanAbs","hFindLessEqualAbs"]:
         setattr(v,s[1:].lower(),eval(s))
+
+
+for s in ["hSpectralPower","hArg","hImag","hNorm","hReal","hConj","hCrossCorrelateComplex"]:
+    setattr(ComplexVec,s[1:].lower(),eval(s))
 
 for v in hNumericalVectorTypes:
     setattr(v,"__add__",Vec_add)
@@ -307,8 +311,7 @@ def Vector(Type=float,size=-1,fill=None):
     if (Type==complex): vec=ComplexVec()
     if (Type==str): vec=StringVec()
     if (Type==bool): vec=BoolVec()
-    if (type(Type)==list): vec=Vector(type(Type[0])); vec.extend(Type)
-    if (type(Type)==tuple): vec=Vector(type(Type[0])); vec.extend(Type)
+    if (type(Type) in hAllListTypes): vec=Vector(type(Type[0])); vec.extend(Type)
     if (size>=0): vec.resize(size)
     if (not fill==None): vec.fill(fill)
     return vec

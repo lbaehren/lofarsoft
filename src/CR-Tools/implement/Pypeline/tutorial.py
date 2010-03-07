@@ -68,7 +68,7 @@ For a listing of all available functions in the pycrtools type
 (+) Vectors
 ===========
 
-(++) Basics
+(++) Some Basics
 -----------
 
 The fundamental data structure we use is a standard c++ vector defined
@@ -321,8 +321,8 @@ v1.stddev() = 1.87082869339
 (+) File I/O
 ------------
 
-(++) Opening and Closing a File
--------------------------------
+(++) Opening and Closing a CR Data File
+---------------------------------------
 
 Let's see how we can open a file. First define a filename, e.g.:
 
@@ -413,26 +413,29 @@ Now we will define a number of useful variables that contain essential
 parameters that we later will use.
 
 """
-obsdate   =file.get("Date"); print "obsdate=",obsdate
-filesize  =file.get("Filesize"); print "filesize=",filesize
-blocksize =file.get("blocksize"); print "blocksize=",blocksize
-nAntennas =file.get("nofAntennas"); print "nAntennas=",nAntennas
-antennas  =file.get("antennas"); print "antennas=",antennas
-antennaIDs=file.get("AntennaIDs"); print "antennaIDs=",antennaIDs
-selectedAntennas=file.get("selectedAntennas"); print "selectedAntennas=",selectedAntennas
-fftlength =file.get("fftLength"); print "fftlength=",fftlength
-sampleFrequency =file.get("sampleFrequency"); print "sampleFrequency=",sampleFrequency
+obsdate   =file.get("Date"); p_("obsdate")
+filesize  =file.get("Filesize"); p_("filesize")
+blocksize =file.get("blocksize"); p_("blocksize")
+nAntennas =file.get("nofAntennas"); p_("nAntennas")
+antennas  =file.get("antennas"); p_("antennas")
+antennaIDs=file.get("AntennaIDs"); p_("antennaIDs")
+selectedAntennas=file.get("selectedAntennas"); p_("selectedAntennas")
+nofSelectedAntennas=file.get("nofSelectedAntennas"); p_("nofSelectedAntennas")
+fftlength =file.get("fftLength"); p_("fftlength")
+sampleFrequency =file.get("sampleFrequency"); p_("sampleFrequency")
+nBlocks=filesize/blocksize; p_("nBlocks")
 """
->
-obsdate= 1067339149
-filesize= 65536
-blocksize= 65536
-nAntennas= 8
-antennas= Vec(8)=[0,1,2,3,4,5,6,7]
-antennaIDs= Vec(8)=[10101,10102,10201,10202,20101,20102,20201,20202]
-selectedAntennas= Vec(8)=[0,1,2,3,4,5,6,7]
-fftlength= 32769
-sampleFrequency= 80000000.0
+> obsdate = 1067339149
+> filesize = 65536
+> blocksize = 1024
+> nAntennas = 8
+> antennas = Vec(8)=[0,1,2,3,4,5,6,7]
+> antennaIDs = Vec(8)=[10101,10102,10201,10202,20101,20102,20201,20202]
+> selectedAntennas = Vec(8)=[0,1,2,3,4,5,6,7]
+> nofSelectedAntennas = 8
+> fftlength = 513
+> sampleFrequency = 80000000.0
+> blocksize = 1024
 
 We can also change parameters in a very similar fashion, using the
 "set" method, which is an implementation of the "hFileSetParameter"
@@ -458,13 +461,15 @@ file.set("Block",2).set("SelectedAntennas",[0,2])
 > crfile</Users/falcke/LOFAR/usg/data/lopes/example.event>
 
 Note, that we have now reduced the number of antennas to two: namely
-antenna 0 and 2. So, we need to set
+antenna 0 and 2 and the number of selected antennas is
 
-"""
-nofSelectedAntennas=file.get("nofSelectedAntennas"); p_("nofSelectedAntennas")
-"""
-> nofSelectedAntennas= 2
+>>>file.get("nofSelectedAntennas")
+ 2
 
+However, now we want to work on all antennas again:
+"""
+file.set("SelectedAntennas",range(nAntennas))
+"""
 (++) Reading in Data
 --------------------
 
@@ -482,7 +487,7 @@ First we create a FloatVec, which is BoostPython wrapped standard
 (STL) vector of doubles.
 
 """
-fxdata=FloatVec()
+fxdata=Vector()
 """
 and resize it to the size we need
 """
@@ -494,10 +499,13 @@ This is now a large vector filled with zeros.
 >>> fxdata
 Vec(2048)=[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,...]
 
-Now we can read in the raw time series data, using "file.read" and the
-keyword "Fx". (Currently implemented are the data fields "Fx",
-"Voltage", "FFT", "CalFFT","Time", "Frequency".)
+Now we can read in the raw time series data, using "file.read" and a
+keyword. Currently implemented are the data fields "Fx", "Voltage",
+"FFT", "CalFFT","Time", "Frequency".
 
+So, let us read in the raw time series data, i.e. the electric field
+in the antenna as digitized by the ADC. This is provided by the
+keyword "Fx" (means f(x) ).
 """
 file.read("Fx",fxdata)
 """
@@ -516,27 +524,40 @@ Vec(1024)=[-94.0,-165.0,-6.0,35.0,-310.0,-23.0,-128.0,97.0,239.0,289.0,...]
 
 which makes a copy of the data vector if used in this way, while
 """
-fxdata[0:3]=[0,1,2];
+ant1data[0:3]=[0,1,2];
 """
->>>  fxdata;
+>>>  ant1data;
  Vec(2046)=[0.0,1.0,2.0,-94.0,-192.0,208.0,-66.0,-62.0,-157.0,-120.0,...]
 
 actually modifies the original data vector.
 
-(+) VECTORS
-------------
+To get the x -Axis we create a second vector
+"""
+timedata=Vector(float,blocksize)
+file.read("Time",timedata)
+"""
+> Vec(1024)=[-0.000384,-0.0003839875,-0.000383975,-0.0003839625,-0.00038395,-0.0003839375,-0.000383925,-0.0003839125,-0.0003839,-0.0003838875,...]
 
-The vectors come with quite a number of useful methods, which are
-defined in c++ and added as methods in pycrtools.py. You can list the
-available methods with "dir", e.g.
+This is the time relative to the trigger in seconds. So, let's have
+that in microseconds, by multiplying with one million.
 """
-dir(fxdata)
+timedata *= 10**6
 """
-> ['__add__', '__class__', '__contains__', '__delattr__', '__delitem__', '__dict__', '__div__', '__doc__', '__format__', '__getattribute__', '__getitem__', '__hash__', '__iadd__', '__idiv__', '__imul__', '__init__', '__instance_size__', '__isub__', '__iter__', '__len__', '__module__', '__mul__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__setitem__', '__sizeof__', '__str__', '__sub__', '__subclasshook__', '__weakref__', 'abs', 'acos', 'add', 'addadd', 'addaddconv', 'append', 'asin', 'atan', 'ceil', 'convert', 'copy', 'cos', 'cosh', 'div', 'divadd', 'divaddconv', 'downsample', 'exp', 'extend', 'extendflat', 'fill', 'findgreaterequal', 'findgreaterequalabs', 'findgreaterthan', 'findgreaterthanabs', 'findlessequal', 'findlessequalabs', 'findlessthan', 'findlessthanabs', 'findlowerbound', 'floor', 'iadd', 'idiv', 'imul', 'isub', 'log', 'log10', 'mean', 'median', 'mul', 'muladd', 'muladdconv', 'new', 'norm', 'normalize', 'resize', 'sin', 'sinh', 'sort', 'sortmedian', 'sqrt', 'square', 'stddev', 'sub', 'subadd', 'subaddconv', 'sum', 'tan', 'tanh']
+>>> timedata
+Vec(1024)=[-384.0,-383.9875,-383.975,-383.9625,-383.95,-383.9375,-383.925,-383.9125,-383.9,-383.8875,...]
 
+We do the same now for the frequency axis, which we convert to MHz. As
+length we have to take the length of the Fourier transformed time
+block (which is blocksize/2+1).
 """
+freqdata=Vector(float,fftlength)
+file.read("Frequency",freqdata)
+freqdata/=10**6
+"""
+>>> freqdata
+Vec(513)=[40.0,40.078125,40.15625,40.234375,40.3125,40.390625,40.46875,40.546875,40.625,40.703125,...]
 
-"""
+
 (+) Fourier Transforms (FFT)
 ----------------------------
 
@@ -552,19 +573,35 @@ then 0-100 MHz, and the second is 100-200 MHz.
 
 So, let's do the transform:
 """
-fftdata=ComplexVec()
-fftdata.resize(513)
-fxdata[0:1024].fft(fftdata,1)
+fftdata=Vector(complex,fftlength)
+fxdata[0:blocksize].fft(fftdata,1)
 """
 >>> fftdata
 Vec(513)=[(6078+0j),(99.3936739874-28.663986893j),(-93.6321366929-4.95059820124j),(82.9590664565+28.8729314743j),(-83.6744655239+4.46573054789j),(169.1861864-61.2949652607j),(-118.623662378+53.2694320202j),(75.764787806-74.6606191354j),(-115.629434646+29.4373842905j),(98.0844400537-16.0574421952j),...]
 
-
 Here we have used the fft method of the float vector, which is just a
 call to the stand-alone function hFFT defined in hftools.cc.
+
+to get the power, we have to square the complex data and convert it to
+floats. This can be done using the complex function "norm" 
+"""
+spectrum=Vector(float,fftlength)
+fftdata.norm(spectrum)
 """
 
+We can now try to calulcate the average spectum of the data set for
+one antenna, by looping over all blocks.
 """
+avspectrum=Vector(float,fftlength*nofSelectedAntennas,0.0)
+fftall=Vector(complex,fftlength*nofSelectedAntennas)
+for block in range(nBlocks):
+    print block,",",
+    file.set("Block",block)
+    file.read("FFT",fftall)
+    fftall.spectralpower(avspectrum)
+"""
+(NOTE: This doesn't work yet due to a bug in     file.read("FFT",...) !!!!)
+
 (+) Basic Plotting
 ------------------
 
@@ -606,12 +643,15 @@ gr.WriteEPS("test-y.eps","Test Plot")
 
 Now we import matplotlib
 """
-#import matplotlib.pyplot as plt
-#plt.plot([1,2,3])
-#plt.ylabel("some numbers")
-#plt.show()
-
+import matplotlib.pyplot as plt
+plt.plot(fxdata[0:blocksize])
+plt.ylabel("Electric Field [ADC counts]")
+plt.show()
 """
+and a window should pop up.
+
+(NB: At least on a Mac the window likes to stubbornly hide behind
+other windows, so search your screen carefully if no window pops up.)
 
 (+) Coordinates
 ---------------

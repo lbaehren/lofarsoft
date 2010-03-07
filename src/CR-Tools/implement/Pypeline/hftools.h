@@ -146,7 +146,7 @@ void hCloseFile(HIntPointer iptr);
 // Tell the preprocessor (for generating wrappers) that this is a c++ header file (brackets are crucial)
 #define HFPP_FILETYPE hFILE
 // include wrapper definitions generated automatically from source
-#include "hftools.def.h"
+#include "../../../../build/cr/implement/Pypeline/hftools.def.h"
 #undef HFPP_FILETYPE
 //=========================================================================================
 
