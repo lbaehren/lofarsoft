@@ -42,4 +42,4 @@ controller_protocol:
 	mv Controller_Protocol.ph include/
 
 clean:
-	\rm -f src/Echo_Protocol.cc src/SB_Protocol.cc src/Controller_Protocol.cc include/Echo_Protocol.ph include/Controller_Protocol.ph include/SB_Protocol.ph ep/interface/_ep_interface.so ep/echo/_ep_echo.so ep_control.so
+	\rm -f src/Echo_Protocol.cc src/SB_Protocol.cc src/Controller_Protocol.cc include/Echo_Protocol.ph include/Controller_Protocol.ph include/SB_Protocol.ph ep/interface/_ep_interface.so ep/echo/_ep_echo.so ep/control/_ep_control.so
