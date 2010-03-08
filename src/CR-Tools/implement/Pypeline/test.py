@@ -1,3 +1,4 @@
+#gdb --annotate=3 -quiet -f --args python -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/pycrtools.py -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/test.py
 from pycrtools import *
 import os
 from math import *
@@ -15,7 +16,8 @@ blocksize =file.get("blocksize"); print "blocksize=",blocksize
 fftlength =file.get("fftLength"); print "fftlength=",fftlength
 sampleFrequency =file.get("sampleFrequency"); print "sampleFrequency=",sampleFrequency
 blocksize=1024
+print "Set Blocksize=",blocksize
 file.set("Blocksize",blocksize)
 timedata=FloatVec()
-timedata.resize(blocksize)
+timedata.setDim([nAntennas,blocksize])
 #file.read("Time",timedata)

@@ -7,4 +7,5 @@
 from pycrtools import *
 
 #execute yet another script if added in the parameter list
-if sys.argv[-2] == "-i": execfile(sys.argv[-1])
+if len(sys.argv)>=3:
+    if sys.argv[-2] == "-i": execfile(sys.argv[-1])

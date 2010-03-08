@@ -1,0 +1,8 @@
+#!/bin/csh
+set filename=$1
+gawk -f prettypy.awk $filename > $filename.out
+cat $filename.toc $filename.out > $filename.txt	
+./pytext2pdf.py $filename.txt	
+set pdffile=$filename.pdf
+rm $filename.txt $filename.toc $filename.out
+mv $pdffile {$filename:r}.pdf

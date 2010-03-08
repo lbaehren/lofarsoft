@@ -2435,29 +2435,28 @@ void HFPP_FUNC_NAME(HIntPointer iptr) {
 HIntPointer HFPP_FUNC_NAME(HString Filename) {
 
   bool opened;
-  union{HIntPointer iptr; void* ptr; CR::DataReader* drp; CR::LOFAR_TBB* tbb; CR::LopesEventIn* lep;};
-
+    
   //Create the a pointer to the DataReader object and store the pointer
+  union{HIntPointer iptr; CR::DataReader* drp;};
 
   HString Filetype = hgetFiletype(Filename);
   if (Filetype=="LOPESEvent") {
-    lep = new CR::LopesEventIn;
+    CR::LopesEventIn* lep = new CR::LopesEventIn;
     opened=lep->attachFile(Filename);
-    MSG("Opening LOPES File="<<Filename); lep->summary();
+    drp=lep;
+    MSG("Opening LOPES File="<<Filename); drp->summary();
   } else if (Filetype=="LOFAR_TBB") {
-    tbb = new CR::LOFAR_TBB(Filename,1024);
-    opened=tbb!=NULL;
-    MSG("Opening LOFAR File="<<Filename);tbb->summary();
+    drp = new CR::LOFAR_TBB(Filename,1024);
+    opened=drp!=NULL;
+    MSG("Opening LOFAR File="<<Filename); drp->summary();
   } else {
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Unknown Filetype = " << Filetype  << ", Filename=" << Filename);
     opened=false;
   }
-
   if (!opened){
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Opening file " << Filename << " failed.");
     return PtrAsInt(Null_p);
   };
-
   return iptr;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -2479,7 +2478,7 @@ HIntPointer HFPP_FUNC_NAME(HString Filename) {
 HPyObject HFPP_FUNC_NAME(HIntPointer iptr, HString key)
 {
   DataReader *drp(reinterpret_cast<DataReader*>(iptr));
-#define HFPP_REPEAT(TYPE,TYPE2,KEY)  if (key== #KEY) {TYPE result(drp->KEY ()); HPyObject pyob((TYPE2)result); return pyob;} else
+#define HFPP_REPEAT(TYPE,TYPE2,KEY)  if (key== #KEY) {_H_NL_ TYPE result(drp->KEY ()); _H_NL_ HPyObject pyob((TYPE2)result); _H_NL_ return pyob;} else
   HFPP_REPEAT(uint,uint,nofAntennas)
     HFPP_REPEAT(uint,uint,nofSelectedChannels)
     HFPP_REPEAT(uint,uint,nofSelectedAntennas)
@@ -2493,7 +2492,7 @@ HPyObject HFPP_FUNC_NAME(HIntPointer iptr, HString key)
     HFPP_REPEAT(double,double,sampleFrequency)
     HFPP_REPEAT(uint,uint,nofBaselines)
 #undef HFPP_REPEAT
-#define HFPP_REPEAT(TYPE,TYPE2,KEY) if (key== #KEY) {CasaVector<TYPE> casavec(drp->KEY ()); std::vector<TYPE2> result; aipsvec2stlvec(casavec,result); HPyObject pyob(result); return pyob;} else
+#define HFPP_REPEAT(TYPE,TYPE2,KEY) if (key== #KEY) {_H_NL_ CasaVector<TYPE> casavec(drp->KEY ()); _H_NL_ std::vector<TYPE2> result; _H_NL_ aipsvec2stlvec(casavec,result); _H_NL_ HPyObject pyob(result); _H_NL_ return pyob;} else
     HFPP_REPEAT(uint,HInteger,antennas)
     HFPP_REPEAT(uint,HInteger,selectedAntennas)
     HFPP_REPEAT(uint,HInteger,selectedChannels)
@@ -2502,7 +2501,7 @@ HPyObject HFPP_FUNC_NAME(HIntPointer iptr, HString key)
     HFPP_REPEAT(double,HNumber,frequencyValues)
     HFPP_REPEAT(double,HNumber,frequencyRange)
 #undef HFPP_REPEAT
-#define HFPP_REPEAT(TYPE,TYPE2,KEY)  if (key== #KEY) {TYPE result;  drp->headerRecord().get(key,result); HPyObject pyob((TYPE2)result); return pyob;} else
+#define HFPP_REPEAT(TYPE,TYPE2,KEY)  if (key== #KEY) {_H_NL_ TYPE result;  _H_NL_ drp->headerRecord().get(key,result); _H_NL_ HPyObject pyob((TYPE2)result); _H_NL_ return pyob;} else
       HFPP_REPEAT(uint,uint,Date)
 	HFPP_REPEAT(casa::String,HString,Observatory)
 	HFPP_REPEAT(int,int,Filesize)
@@ -2514,7 +2513,7 @@ HPyObject HFPP_FUNC_NAME(HIntPointer iptr, HString key)
 	HFPP_REPEAT(casa::uChar,uint,SampleFreq)
 	HFPP_REPEAT(uint,uint,StartSample)
 #undef HFPP_REPEAT
-	if (key== "AntennaIDs") {CasaVector<int> casavec; drp->headerRecord().get(key,casavec); std::vector<int> result; aipsvec2stlvec(casavec,result); HPyObject pyob(result); return pyob;} else
+	if (key== "AntennaIDs") {_H_NL_ CasaVector<int> casavec; _H_NL_ drp->headerRecord().get(key,casavec); _H_NL_ std::vector<int> result; _H_NL_ aipsvec2stlvec(casavec,result); _H_NL_ HPyObject pyob(result); _H_NL_ return pyob;} else
     { HString result; result = result
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  + #KEY + ", "
   HFPP_REPEAT(uint,uint,nofAntennas)

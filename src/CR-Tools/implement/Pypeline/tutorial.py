@@ -20,6 +20,7 @@ you. Hence, all you actually need to do is (make sure the file is in
 your search path)
 
 """
+def p_(var): print var,"=",eval(var)
 from pycrtools import *
 """
 
@@ -106,12 +107,12 @@ using a scratch vector of fixed size, you reuse the same vector over
 and over again, thus avoiding a lot of unnecessary allocation and
 deallocation of memory and creation of vectors.
 
-Also, we are currently not supporting multidimensional data
-structures. Mulit-dimensionally data is simply written sequentially
-into the memory - you need to know how your data is organized. On the
-other hand, in many case you can then easily process an entire matrix
-at once.
- 
+Also, the basic vectors are inherently one-dimensional and not
+multi-dimensional. On the other hand, multi-dimensional data is always
+simply written sequentially into the memory - you just need to know
+(and think about) how your data is organized. Some rudimentary support
+for multi-dimensions has been added (if the data you need is
+contiguous), but needs further work (see setDim, getDim, elem).
 
 (++) Construction of STL Vectors
 --------------------------------
@@ -337,8 +338,9 @@ Let's see how we can open a file. First define a filename, e.g.:
 
 """
 LOFARSOFT=os.environ["LOFARSOFT"]
-filename=LOFARSOFT+"/data/lopes/example.event"
+#filename=LOFARSOFT+"/data/lopes/example.event"
 #filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
+filename=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
 """
 > '/Users/falcke/LOFAR/usg/data/lopes/sample.event'
 
@@ -348,7 +350,7 @@ interface to the LOFAR CRTOOLS datareader class and was defined in pycrtools.py.
 The following will open a data file:
 """
 file=crfile(filename)
-file.set("Blocksize",1024)
+file.set("Blocksize",1024*2)
 """
 >
 [hftools.tmp.cc,3758]: Opening LOPES File=/Users/falcke/LOFAR/usg/data/lopes/example.event
@@ -432,6 +434,7 @@ selectedAntennas=file.get("selectedAntennas"); p_("selectedAntennas")
 nofSelectedAntennas=file.get("nofSelectedAntennas"); p_("nofSelectedAntennas")
 fftlength =file.get("fftLength"); p_("fftlength")
 sampleFrequency =file.get("sampleFrequency"); p_("sampleFrequency")
+maxblocksize=min(filesize,1024*1024); p_("maxblocksize")
 nBlocks=filesize/blocksize; p_("nBlocks")
 """
 > obsdate = 1067339149
@@ -451,7 +454,6 @@ We can also change parameters in a very similar fashion, using the
 function. E.g. changing the blocksize we already did before. This is
 simply
 """
-blocksize=1024
 file.set("Blocksize",blocksize)
 """"
 again the list of implemented keywords is visible with using
@@ -477,7 +479,7 @@ antenna 0 and 2 and the number of selected antennas is
 
 However, now we want to work on all antennas again:
 """
-file.set("SelectedAntennas",range(nAntennas))
+file.set("Block",0).set("SelectedAntennas",range(nAntennas))
 """
 (++) Reading in Data
 --------------------
@@ -494,7 +496,6 @@ the data structrue.
 
 First we create a FloatVec, which is BoostPython wrapped standard
 (STL) vector of doubles.
-
 """
 fxdata=Vector()
 """
@@ -525,17 +526,21 @@ and voila the vector is filled with time series data from the data file..
 
 Access the various antennas through slicing
 """
-ant1data=fxdata[0:blocksize]
-ant2data=fxdata.elem(1)
+ant0data=fxdata[0:blocksize]
 """
->>> ant2data
+or use the .elem method, which returns the nth element of the highest dimension
+"""
+ant0data=fxdata.elem(0)
+ant1data=fxdata.elem(1)
+"""
+>>> ant0data
 Vec(1024)=[-94.0,-165.0,-6.0,35.0,-310.0,-23.0,-128.0,97.0,239.0,289.0,...]
 
-which makes a copy of the data vector if used in this way, while
+This makes a copy of the data vector if used in this way, while
 """
-ant1data[0:3]=[0,1,2];
+fxdata[0:3]=[0,1,2]
 """
->>>  ant1data;
+>>>  fxdata
  Vec(2046)=[0.0,1.0,2.0,-94.0,-192.0,208.0,-66.0,-62.0,-157.0,-120.0,...]
 
 actually modifies the original data vector.
@@ -583,7 +588,7 @@ then 0-100 MHz, and the second is 100-200 MHz.
 So, let's do the transform:
 """
 fftdata=Vector(complex,fftlength)
-fxdata[0:blocksize].fft(fftdata,1)
+fxdata.elem(0).fft(fftdata,1)
 """
 >>> fftdata
 Vec(513)=[(6078+0j),(99.3936739874-28.663986893j),(-93.6321366929-4.95059820124j),(82.9590664565+28.8729314743j),(-83.6744655239+4.46573054789j),(169.1861864-61.2949652607j),(-118.623662378+53.2694320202j),(75.764787806-74.6606191354j),(-115.629434646+29.4373842905j),(98.0844400537-16.0574421952j),...]
@@ -610,7 +615,6 @@ for block in range(nBlocks):
     file.set("Block",block).read("FFT",fftall)
     fftall.spectralpower(avspectrum)
 """
-(NOTE: This doesn't work yet due to a bug in     file.read("FFT",...) !!!!)
 
 (+) Basic Plotting
 ------------------
@@ -656,9 +660,10 @@ Now we import matplotlib
 import matplotlib.pyplot as plt
 print "\n!! A plot window should pop up somehwere (in the background?) !!"
 plt.show()
+plt.subplot(1,2,1)
 plt.title("Average Spectrum for Two Antennas")
-plt.plot(freqdata,avspectrum.elem(0))
-plt.plot(freqdata,avspectrum.elem(1))
+plt.semilogy(freqdata,avspectrum.elem(0))
+plt.semilogy(freqdata,avspectrum.elem(1))
 plt.ylabel("Power of Electric Field [ADC counts]$^2$")
 plt.xlabel("Frequency [MHz]")
 """
@@ -666,13 +671,25 @@ and a window should pop up.  (NB: At least on a Mac the window likes
 to stubbornly hide behind other windows, so search your screen
 carefully if no window pops up.)
 
-to plot time series data, use:
-
-plt.clf()
-plt.plot(timedata,fxdata[0:blocksize])
+To plot the time series of the entire data set, we first read in all sample from all antennas
+"""
+file.set("Block",0).set("Blocksize",maxblocksize)
+fxall=Vector(); fxall.setDim([nofSelectedAntennas,maxblocksize])
+timeall=Vector(float,maxblocksize) 
+file.read("Time",timeall); timeall *= 10**6.
+file.read("Fx",fxall)
+"""
+and then we plot it 
+"""
+plt.subplot(1,2,2)
+plt.title("Time Series of Antenna 0")
+plt.plot(timeall,fxall.elem(0))
 plt.ylabel("Electric Field [ADC counts]")
 plt.xlabel("Time [$\mu$s]")
+"""
 
+So, for a linear plot use .plot, for a loglog plot use .loglog and for
+a log-linear plot use .semilogx or .semilogy ...
 
 
 (+) Coordinates
