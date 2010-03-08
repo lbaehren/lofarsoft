@@ -6,6 +6,8 @@ from ConfigParser import SafeConfigParser as ConfigParser
 
 # Support function
 def _get_config(filename):
+    if not os.path.isfile(filename):
+        raise IOError, "Configuration file not found"
     config = ConfigParser()
     config.read(filename)
     return config
