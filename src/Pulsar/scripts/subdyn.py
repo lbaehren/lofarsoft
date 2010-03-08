@@ -7,6 +7,8 @@ is_excludeonly = False   # if True, only completely bad subbands will be exclude
 threshold = 6 # threhold in sigmas to clip RFIs
 rfilimit = 30  # (in percents) if more, whole subband will be excluded
 tsamp=0.00131072  #  sampling interval (s)
+samples2show = 0 #  size of window to show in seconds (if 0, show the whole file(s))
+samples_offset = 0 # offset from the beginning to skip (if 0 , show the whole file(s))
 Nbins = 750 # number of bins to average
 histbins = 100 # number of bins in the histogram
 xlow=-32768 # lowest sample value (for signed short)
@@ -21,6 +23,8 @@ def usage (prg):
         print "Usage: %s [-n, --nbins <value>] [-t, --threshold <value>]\n\
 			[--rfilimit <value>] [--excludeonly] [-h, --help] <*sub>\n\
          -n, --nbins <value>     - number of samples to average (default: 750)\n\
+	 -w, --win   <value>     - size of the window (in seconds) to show\n\
+	 -l, --offset  <value>   - offset from the beginning (in seconds)\n\
          -t, --threshold <value> - threshold (in sigma) to clip RFI (default: 6)\n\
 	 --excludeonly           - only exclude completely junk subbands\n\
 	 --rfilimit <value>      - percent of RFI per subband allowed not to exclude whole subband (default: 30)\n\
@@ -36,7 +40,7 @@ def parsecmdline (prg, argv):
                 sys.exit()
         else:
                 try:
-                        opts, args = getopt.getopt (argv, "hn:t:", ["help", "nbins=", "threshold=", "rfilimit=", "excludeonly", "saveonly"])
+                        opts, args = getopt.getopt (argv, "hn:t:w:l:", ["help", "nbins=", "threshold=", "rfilimit=", "excludeonly", "saveonly", "win=", "offset="])
                         for opt, arg in opts:
                                 if opt in ("-h", "--help"):
                                         usage (prg)
@@ -61,6 +65,14 @@ def parsecmdline (prg, argv):
                                 if opt in ("--saveonly"):
 					global is_saveonly
 					is_saveonly = True
+
+				if opt in ("-w", "--win"):
+					global samples2show
+					samples2show = float(arg)
+
+				if opt in ("-l", "--offset"):
+					global samples_offset
+					samples_offset = float(arg)
 
                         if not args:
                                 print "No subband files!\n"
@@ -87,7 +99,7 @@ def setup_plot(x, title, colormap):
 	cbar = fig.colorbar (cax, orientation='horizontal', spacing='uniform', pad=0.1)
         def printsub (x, pos=None): return '%d' % (subband_offset + x)
 	ax.yaxis.set_major_formatter(ticker.FuncFormatter(printsub))
-	def printtime (x, pos=None): return '%1.0f'%(float(x) * tsamp * Nbins)
+	def printtime (x, pos=None): return '%1.0f'%(float(samples_offset)*tsamp + float(x) * tsamp * Nbins)
 	ax.xaxis.set_major_formatter(ticker.FuncFormatter(printtime))
 	for label in ax.get_xticklabels(): label.set_fontsize(fs)
 	for label in ax.get_yticklabels(): label.set_fontsize(fs)
@@ -226,7 +238,7 @@ def plottime(series, selband, title, clr="blue", overlap=False):
 	"""
 	plt.clf()
 	axt = figt.add_subplot(111)
-	def printtime (x, pos=None): return '%1.0f'%(float(x) * tsamp * Nbins)
+	def printtime (x, pos=None): return '%1.0f'%(float(samples_offset)*tsamp + float(x) * tsamp * Nbins)
 	plt.xlabel("Time (s)", fontsize=fs)
 	plt.ylabel("Flux density (arb. units)", fontsize=fs)
 
@@ -288,6 +300,21 @@ if __name__=="__main__":
 		if line.startswith(" Width of each time series bin"):
 			tsamp = float(line.split("=")[-1].strip())
 
+	# handle offset from the beginning
+	if samples_offset > 0:
+		samples_offset = int (samples_offset / tsamp)
+		if samples_offset > size - 2:
+			samples_offset = 0
+	# will show only samples2show number of bins (if chosen)
+	if samples2show > 0:
+		samples2show = int(samples2show / tsamp)	
+		if size-samples_offset > samples2show: 
+			size = samples2show
+			sizes = [samples2show for value in sizes]
+		else:
+			if samples_offset > 0:
+				sizes = [value - samples_offset for value in sizes]
+
 	# first subband number
 	# i am reading [1] file (and then decrease value by 1) rather than just reading [0] file
 	# to avoid problem with a need having first file called *.sub000
@@ -320,6 +347,7 @@ if __name__=="__main__":
 	for i in np.arange(0, nfiles, 1):
 		f = open(subfiles[i], "rb")
 		data = ar.array('h')  # 'h' - for signed short
+		f.seek (samples_offset * samplesize)  # position to the first sample to read
 		data.read(f, sizes[i])
 		f.close()
 		ndata = np.array(data)
@@ -329,17 +357,22 @@ if __name__=="__main__":
 		mean[i] = [np.mean(np.sort(ndata[k*Nbins:(k+1)*Nbins])[0:Nbins/2]) for k in np.arange(0, int(size/Nbins), 1)]
 		rms[i] = [np.std(np.sort(ndata[k*Nbins:(k+1)*Nbins])[0:Nbins/2]) for k in np.arange(0, int(size/Nbins), 1)]
 
-		sig = np.trim_zeros(np.sort(rms[i]), 'bf')[0]
-		# I should remove np.abs at some point, because it's not really correct. I am using it here
-		# to avoid really huge negative spikes
-		av = np.trim_zeros(np.sort(np.abs(mean[i])), 'bf')[0]
+		# check if all values in rms are zeros. If so, then exclude thsi subband
+		if np.size(np.trim_zeros(np.sort(rms[i]), 'bf')) != 0:
+			sig = np.trim_zeros(np.sort(rms[i]), 'bf')[0]
+			# I should remove np.abs at some point, because it's not really correct. I am using it here
+			# to avoid really huge negative spikes
+			av = np.trim_zeros(np.sort(np.abs(mean[i])), 'bf')[0]
 
-		levels[i] = [np.abs((float(k - av))/sig) for k in spectrum[i]]
-		mask[i] = [(levels[i][k] > threshold and spectrum[i][k] or 0) for k in np.arange(0, int(size/Nbins), 1)]
-		clipped[i] = [(spectrum[i][k] - mask[i][k]) for k in np.arange(0, int(size/Nbins), 1)]
+			levels[i] = [np.abs((float(k - av))/sig) for k in spectrum[i]]
+			mask[i] = [(levels[i][k] > threshold and spectrum[i][k] or 0) for k in np.arange(0, int(size/Nbins), 1)]
+			clipped[i] = [(spectrum[i][k] - mask[i][k]) for k in np.arange(0, int(size/Nbins), 1)]
 
-		# are there many zeros?
-		rfi_fraction = (float(len(clipped[i]) - len(np.trim_zeros(clipped[i])))/len(clipped[i]))*100.
+			# are there many zeros?
+			rfi_fraction = (float(len(clipped[i]) - len(np.trim_zeros(clipped[i])))/len(clipped[i]))*100.
+		else:
+			rfi_fraction = 100.
+
 		if rfi_fraction >= rfilimit:  # bad subband  
 			clipped[i] = np.zeros(int(size/Nbins))
 			badbands.append(i)
