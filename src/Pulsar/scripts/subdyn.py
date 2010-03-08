@@ -299,6 +299,10 @@ if __name__=="__main__":
 	for line in open(inffile):
 		if line.startswith(" Width of each time series bin"):
 			tsamp = float(line.split("=")[-1].strip())
+		if line.startswith(" Central freq of low channel"):
+			cfreq = float(line.split("=")[-1].strip())
+		if line.startswith(" Channel bandwidth (MHz)"):
+			chanbw = float(line.split("=")[-1].strip())
 
 	# handle offset from the beginning
 	if samples_offset > 0:
@@ -382,6 +386,14 @@ if __name__=="__main__":
 
 		if is_saveonly == False: plot_update(spectrum)
 		
+	badchanfreqs = [cfreq + float(sb) * chanbw for sb in badbands]
+	rfirepname = subfiles[0].split(".sub")[0] + ".sub" + str(subband_offset) + "-" + str(subband_offset+nfiles-1) + ".rfirep"
+	np.savetxt("." + rfirepname, np.transpose((badbands, badchanfreqs)), fmt="%d\t\t%.6g")
+	rfirep = open (rfirepname, 'w')	
+	rfirep.write("# Subband	Freq (MHz)\n")
+	rfirep.close()
+	os.system("cat " + "." + rfirepname + " >> " + rfirepname)
+	os.system("rm -f " + "." + rfirepname)
 
 	if is_saveonly:
 		fig=plt.figure()
