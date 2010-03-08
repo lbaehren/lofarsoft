@@ -465,7 +465,7 @@ HString hgetFileExtension(HString filename){
 }
 
 
- 
+
 //========================================================================
 //$SECTION:           Administrative Vector Function
 //========================================================================
@@ -761,7 +761,7 @@ void h{$MFUNC!CAPS}2(const Iter vec,const Iter vec_end, const Iter out,const Ite
     *itout=$MFUNC(*it);
     ++it; ++itout;
   };
-} 
+}
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$ENDITERATE
@@ -1078,7 +1078,7 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter vec2,const I
 The following functions are available for getting real values from
 complex numbers:
   abs - absolute value of a complex number
-  norm - magnitude of a complex number squared, i.e. c * conj(c) 
+  norm - magnitude of a complex number squared, i.e. c * conj(c)
   arg - phase angle of a complex number
   imag - imaginary part of a complex number
   real - real part of a complex number
@@ -1092,7 +1092,7 @@ void h{$MFUNC!CAPS}(const Iter vec,const Iter vec_end, const Iterout vecout,cons
     *itout=$MFUNC(*it);
     ++it; ++itout;
   };
-} 
+}
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$ENDITERATE
@@ -2055,7 +2055,7 @@ void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//-----------------------------------------------------------------------
+
 //$DOCSTRING: Convert the ADC value to a voltage.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hADC2Voltage
@@ -2065,7 +2065,7 @@ void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const 
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(adc2voltage)()("Scaling factor if the gain")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
-/*
+/*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
@@ -2095,7 +2095,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const HNumber adc2voltag
 #define HFPP_PARDEF_3 (uint)(BetaRise)()("Rising slope parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_4 (uint)(BetaFall)()("Falling slope parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
-/*
+/*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
@@ -2132,7 +2132,7 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 #define HFPP_PARDEF_1 (HNumber)(Alpha)()("Height parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_2 (uint)(Beta)()("Width parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
-/*
+/*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
@@ -2160,7 +2160,7 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Return vector containing Hanning filter")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(Alpha)()("Height parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
-/*
+/*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
@@ -2183,7 +2183,7 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Return vector containing Hanning filter")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
-/*
+/*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
@@ -2206,7 +2206,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end){
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(data)()("Vector containing the data on which the filter will be applied.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(filter)()("Vector containing the filter.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
-/*
+/*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
@@ -2233,7 +2233,7 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end, const IterFilter filte
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(data)()("Input and return vector containing the data on which the Hanning filter will be applied.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
-/*
+/*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
@@ -2259,14 +2259,14 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end){
 #define HFPP_PARDEF_1 (HComplex)(data_out)()("Return vector in which the FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
-/*
+/*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
 template <class IterIn, class IterOut>
 void HFPP_FUNC_NAME(const IterIn  data_in,  const IterIn  data_in_end,
 		    const IterOut data_out, const IterOut data_out_end,
-		    const HInteger nyquistZone) { 
+		    const HInteger nyquistZone) {
   uint channel;
   uint blocksize(data_in_end - data_in);
   uint fftLength(blocksize/2+1);
@@ -2275,11 +2275,21 @@ void HFPP_FUNC_NAME(const IterIn  data_in,  const IterIn  data_in_end,
   IPosition shape_out(1,fftLength);
   FFTServer<Double,DComplex> fftserver(shape_in, FFTEnums::REALTOCOMPLEX);
 
-  Vector<Double> cvec_in(shape_in, reinterpret_cast<Double*>(&(*data_in)), casa::SHARE);
+  //  Vector<Double> cvec_in(shape_in, reinterpret_cast<Double*>(&(*data_in)), casa::SHARE);
+  Vector<Double> cvec_in(shape_in, 0.);
   Vector<DComplex> cvec_out(shape_out, 0.);
-  IterOut it_out;
+
+  IterIn it_in = data_in;
+  IterOut it_out = data_out;
+  Vector<Double>::iterator it_vin=cvec_in.begin();
+  // make copy of input vector since fft will also modify the order of the input data.
+  while ((it_in != data_in_end) && (it_vin != cvec_in.end())) {
+    *it_vin  = *it_in;
+    it_in++; it_vin++;
+  }
 
   // Apply FFT
+
   fftserver.fft(cvec_out, cvec_in);
 
   // Is there some aftercare needed (checking/setting the size of the in/output vector)
@@ -2321,55 +2331,64 @@ void HFPP_FUNC_NAME(const IterIn  data_in,  const IterIn  data_in_end,
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hInvFFT
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASS (STL)
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(data_in)()("Vector containing the input data on which the inverse FFT will be applied.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(data_out)()("Return vector in which the inverse FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (uint)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(data_in)()("Vector containing the input data on which the inverse FFT will be applied.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(data_out)()("Return vector in which the inverse FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
-/*
+/*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
 template <class IterIn, class IterOut>
-void HFPP_FUNC_NAME(const IterIn data_in, const IterIn data_in_end,
+void HFPP_FUNC_NAME(const IterIn data_in,   const IterIn data_in_end,
 		    const IterOut data_out, const IterOut data_out_end,
-		    const uint nyquistZone) {
-  // uint channel;
-  // uint blocksize = data_out_end - data_out;
-  // uint fftLength = blocksize/2 + 1;
-  // uint nofChannels = fftLength;
-  // IPosition shape_in = (1,fftLength);
-  // IPosition shape_out = (1, blocksize);
+		    const HInteger nyquistZone) {
+  uint channel;
+  uint blocksize(data_out_end - data_out);
+  uint fftLength(blocksize/2+1);
+  uint nofChannels(fftLength);
+  IPosition shape_in(1,fftLength);
+  IPosition shape_out(1,blocksize);
 
-  // Vector<DComplex> cvec_f(shape_in, reinterpret_cast<DComplex*>(data_in), casa::SHARE);
-  // Vector<Double> cvec_out(shape_out, 0.);
+  Vector<DComplex> cvec_f(shape_in, reinterpret_cast<DComplex*>(&(*data_in)), casa::SHARE);
+  Vector<DComplex> cvec_in(fftLength);
+  Vector<Double> cvec_out(shape_out, 0.);
 
-  // if ((data_in_end - data_in) != fftLength) {
-  //   cerr << "[invfft] Bad input: len(data_in) != fftLength" << endl;
-  // };
+  if ((data_in_end - data_in) != fftLength) {
+    cerr << "[invfft] Bad input: len(data_in) != fftLength" << endl;
+    cerr << "  len(data_in) = " << (data_in_end - data_in) << endl;
+    cerr << "  fftLength    = " << fftLength << endl;
+  };
 
-  // try {
-  //   Vector<DComplex> cvec_in(fftLength);
-  //   FFTServer<Double,DComplex> server(shape_out,
-  // 				      FFTEnums::REALTOCOMPLEX);
-  //   switch (nyquistZone) {
-  //   case 1:
-  //   case 3:
-  //     for (channel=0; channel<nofChannels; channel++) {
-  // 	cvec_in(channel) = cvec_f(channel);
-  //     }
-  //     break;
-  //   case 2:
-  //     for (channel=0; channel<nofChannels; channel++) {
-  // 	cvec_in(channel) = conj(cvec_f(fftLength - channel - 1));
-  //     }
-  //     break;
-  //   }
-  //   server.fft(cvec_out,cvec_in);
-  // } catch (AipsError x) {
-  //   cerr << "[invfft]" << x.getMesg() << endl;
-  // }
+  try {
+    FFTServer<Double,DComplex> server(shape_out,
+				      FFTEnums::REALTOCOMPLEX);
+    switch (nyquistZone) {
+    case 1:
+    case 3:
+      for (channel=0; channel<nofChannels; channel++) {
+   	cvec_in(channel) = cvec_f(channel);
+      }
+      break;
+    case 2:
+      for (channel=0; channel<nofChannels; channel++) {
+  	cvec_in(channel) = conj(cvec_f(fftLength - channel - 1));
+      }
+      break;
+    }
+    server.fft(cvec_out,cvec_in);
+
+    // Copy result back to data_out
+    Vector<Double>::iterator it_vout= cvec_out.begin();
+    IterOut it_dout = data_out;
+    while ((it_vout != cvec_out.end()) && (it_dout != data_out_end)) {
+      *it_dout = *it_vout;
+      it_vout++; it_dout++;
+    }
+  } catch (AipsError x) {
+    cerr << "[invfft]" << x.getMesg() << endl;
+  }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -2788,7 +2807,7 @@ bool HFPP_FUNC_NAME  (Iter source,
 		    bool anglesInDegrees
 		    )
 {
-  return CR::convertVector(    
+  return CR::convertVector(
 			   *target,
 			   *(target+1),
 			   *(target+2),
