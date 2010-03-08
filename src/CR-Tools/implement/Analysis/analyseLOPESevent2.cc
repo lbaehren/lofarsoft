@@ -285,7 +285,7 @@ namespace CR { // Namespace CR -- begin
       // Generate plots
       if (generatePlots) {
         // Plot CC-beam; if fit has converged, then also plot the result of the fit
-            if (fiterg.asBool("CCconverged"))
+        if (fiterg.asBool("CCconverged"))
           CompleteBeamPipe_p->plotCCbeam(PlotPrefix + "-CC", beamformDR_p, fiterg.asArrayDouble("Cgaussian"),
                                          AntennaSelection, filterStrength_p, remoteRange_p(0), remoteRange_p(1));
         else
@@ -293,7 +293,7 @@ namespace CR { // Namespace CR -- begin
                                          AntennaSelection, filterStrength_p, remoteRange_p(0), remoteRange_p(1));
 
         // Plot X-beam; if fit has converged, then also plot the result of the fit
-            if (fiterg.asBool("Xconverged"))
+        if (fiterg.asBool("Xconverged"))
           CompleteBeamPipe_p->plotXbeam(PlotPrefix + "-X", beamformDR_p, fiterg.asArrayDouble("Xgaussian"),
                                         AntennaSelection, filterStrength_p, remoteRange_p(0), remoteRange_p(1) );
         else
@@ -309,15 +309,17 @@ namespace CR { // Namespace CR -- begin
           CompleteBeamPipe_p->plotAllAntennas(PlotPrefix, beamformDR_p, AntennaSelection, true,
                                               getUpsamplingExponent(),false);
 
-        // calculate the maxima:
+        // calculate the maxima (only if CC-beam was reconstructed successfully):
         // calculate noise as mean of local maxima of the envelope in time range of -10.5 to -0.5 µs before CC center)
-        if (CalculateMaxima)
-          calibPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),
+        if (fiterg.asBool("CCconverged")) {
+          if (CalculateMaxima)
+            calibPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),
                                                             false, fiterg.asDouble("CCcenter"),
                                                             3, fiterg.asDouble("CCcenter") - 10.5e-6, fiterg.asDouble("CCcenter") - 0.5e-6);
-        // user friendly list of calculated maxima
-        if (listCalcMaxima)
-          CompleteBeamPipe_p->listCalcMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),fiterg.asDouble("CCcenter"));
+          // user friendly list of calculated maxima
+          if (listCalcMaxima)
+            CompleteBeamPipe_p->listCalcMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),fiterg.asDouble("CCcenter"));
+        }    
       }
 
       // Generate spectra
@@ -384,8 +386,9 @@ namespace CR { // Namespace CR -- begin
            << "CC-beam = " << erg.asDouble("CCheight")*1e6 << " µV/m/MHz \t"
            << " X-beam = " << erg.asDouble("Xheight")*1e6  << " µV/m/MHz \n"
            << endl;
-
-      erg.define("goodReconstructed",true);  // assume that everything was fine, then this position is reached.
+ 
+     if ( (fiterg.asBool("CCconverged")) && (fiterg.asBool("Xconverged")) )
+       erg.define("goodReconstructed",true);  // assume that everything was fine, then this position is reached.
     } catch (AipsError x) {
       cerr << "analyseLOPESevent2::RunPipeline: " << x.getMesg() << endl;
       return Record();
