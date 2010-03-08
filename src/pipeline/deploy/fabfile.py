@@ -11,32 +11,39 @@ def _get_config(filename):
     return config
 
 # These functions actually do the work
-def head_node(configfile=os.path.expanduser('~/.pipeline.cfg')):
+def head_node(configfile='~/.pipeline.cfg'):
     clusterdesc = ClusterDesc(
-        _get_config(configfile).get('cluster', 'clusterdesc')
+        _get_config(
+            os.path.expanduser(configfile)
+        ).get('cluster', 'clusterdesc')
     )
     env.hosts = clusterdesc.get('HeadNode')
 
-def compute_nodes(configfile=os.path.expanduser('~/.pipeline.cfg')):
+def compute_nodes(configfile='~/.pipeline.cfg'):
     clusterdesc = ClusterDesc(
-        _get_config(configfile).get('cluster', 'clusterdesc')
+        _get_config(
+            os.path.expanduser(configfile)
+        ).get('cluster', 'clusterdesc')
     )
     env.hosts = clusterdesc.get('ComputeNodes')
 
-def start_controller(configfile=os.path.expanduser('~/.pipeline.cfg')):
+def start_controller(configfile='~/.pipeline.cfg'):
+    configfile = os.path.expanduser(configfile)
     require('hosts', provided_by=[head_node])
     controlpath = _get_config(configfile).get('DEFAULT', 'runtime_directory')
     controller_ppath = _get_config(configfile).get('deploy', 'controller_ppath')
     script_path = _get_config(configfile).get('deploy', 'script_path')
     run("bash %s/ipcontroller.sh %s start %s" % (script_path, controlpath, controller_ppath))
 
-def stop_controller(configfile=os.path.expanduser('~/.pipeline.cfg')):
+def stop_controller(configfile='~/.pipeline.cfg'):
+    configfile = os.path.expanduser(configfile)
     require('hosts', provided_by=[head_node])
     controlpath = _get_config(configfile).get('DEFAULT', 'runtime_directory')
     script_path = _get_config(configfile).get('deploy', 'script_path')
     run("bash %s/ipcontroller.sh %s stop" % (script_path, controlpath))
 
-def start_engine(configfile=os.path.expanduser('~/.pipeline.cfg')):
+def start_engine(configfile='~/.pipeline.cfg'):
+    configfile = os.path.expanduser(configfile)
     require('hosts', provided_by=[compute_nodes])
     controlpath = _get_config(configfile).get('DEFAULT', 'runtime_directory')
     engine_ppath = _get_config(configfile).get('deploy', 'engine_ppath')
@@ -44,7 +51,8 @@ def start_engine(configfile=os.path.expanduser('~/.pipeline.cfg')):
     script_path = _get_config(configfile).get('deploy', 'script_path')
     run("bash %s/ipengine.sh %s start %s %s" % (script_path, controlpath, engine_ppath, engine_lpath))
 
-def stop_engine(configfile=os.path.expanduser('~/.pipeline.cfg')):
+def stop_engine(configfile='~/.pipeline.cfg'):
+    configfile = os.path.expanduser(configfile)
     require('hosts', provided_by=[compute_nodes])
     controlpath = _get_config(configfile).get('DEFAULT', 'runtime_directory')
     script_path = _get_config(configfile).get('deploy', 'script_path')
