@@ -1,32 +1,61 @@
 BEGIN{
-    comment=0; 
+    command=1; 
     begin=1; 
+    LINE=0;
     SECTION1=0; TOC=""; 
-    process="/sw/bin/python2.6 -u -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/pycrtools.py > tmp.txt"
+    input = "prettypy.inp"
+    process="/sw/bin/python2.6 -u -i /Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/pycrtools.py > prettypy.tmp"
 }
 
-/"""/{
-    comment = ! comment; 
-    begin=0; 
+
+/^#%SKIP/ {skip=1} # Skipping producing output from the python command
+
+/^#/ {next}
+
+/"""/ {
+    if (command && !begin) {
+	if (skip) {skip=0}
+	else {print "%%LINE:",LINE} #finish off previous command
+    }
+    if (command) {command=0}
+    else {command=1}
+    begin=0
     next 
 }
 
 (begin) {
     if (TOC==""){
-	TOC=FILENAME ".toc"
+	TOC="prettypy.toc"
 	print "Table of Contents\n=================\n" > TOC
     }
     print $0 |& process
     next}
 
 #Here come the actual commands ...
-(!comment) { 
-    print "$$$>>> " $0
-    print $0 |& process
+(command) && /^    / { # this is an indented command, so just pass it on without a line number
+	    print "... " $0
+	    print $0 >> input
+	    print $0 |& process
+	    next
+	}
+
+(command) {
+    if (skip) {skip=0}
+    else if (command>1) {print "%%LINE:",LINE} #finish off previous command
+    command++
     LINE++
-    print ">>> LINE:",LINE,$0 >> "tmp.txt" 
-    next
+    print "\nprint '%%LINE:'," LINE  >> input
+    print "\nprint '%%LINE:'," LINE  |& process
+    print $0 >> input
+    print $0 |& process
 }
+
+/^p_\(/{next} # take out the printing commands
+/^ *$/ && (command) {print; next}
+
+(command) {print ">>> " $0; next}
+
+
 
 ##Now replace Section markers with actual Section numbers
 /^ *\(\+\)/ {SECTION1++; sub(" *\\(\\+\\)",SECTION1 ". "); SECTION2=0; print >> TOC}

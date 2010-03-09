@@ -1,4 +1,7 @@
-def p_(var): print var,"=",eval(var)
+def p_(var): 
+    if (type(var)==list): map(lambda x:p_(x),var)
+    else: print var,"=",eval(var)
+
 """
 ========================================================================
                           pycrtools TUTORIAL
@@ -6,6 +9,8 @@ def p_(var): print var,"=",eval(var)
 
 Version History:
  -    started March 1, 2010 by H. Falcke
+
+%%MERGE: toc
 
 (+) StartUp
 -----------
@@ -20,7 +25,6 @@ you. Hence, all you actually need to do is (make sure the file is in
 your search path)
 
 """
-def p_(var): print var,"=",eval(var)
 from pycrtools import *
 """
 
@@ -129,32 +133,27 @@ To creat a vector most efficently, use the original vector constructors:
 - StringVec()
 
 e.g.
+
 """
-v=FloatVec()
+v=FloatVec(); v
 """
->>> v
-Vec(0)=[]
 
 will create a floating point vector of size 0. 
 
-
 The vector can be filled with a python list or tuple, by using the extend attribute:
+
 """
-v.extend([1,2,3,4])
+v.extend([1,2,3,4]);v
 """
->>> v
-Vec(4)=[1.0,2.0,3.0,4.0]
 
 Note, that python has automatically converted the integers into
 floats, since the STL vector does not allow any automatic typing.
 
-The stl vector can be converted back to a python list by using the
+The STL vector can be converted back to a python list by using the
 python list creator:
 
 >>> list(v)
-[1.0, 2.0, 3.0, 4.0]
-
-
+  [1.0, 2.0, 3.0, 4.0]
 
 However, the basic Boost Python STL vector constructor takes no
 arguments and is a bit cumbersome to use in the long run.  Here we
@@ -177,10 +176,8 @@ the contents of the list or tuple.
 
 So, what we will now use is:
 
->>>v=Vector([1.,2,3,4])
->>> v
-Vec(4)=[1.0,2.0,3.0,4.0]
-
+>>> v=Vector([1.,2,3,4]); v
+  Vec(4)=[1.0,2.0,3.0,4.0]
 
 Note, that size and fill take precedence over the list and tuple
 input. Hence if you create a vector with Vector([1,2,3],size=2) it
@@ -195,7 +192,6 @@ vector.getDim()
 vector.elem(n)
 
 This will be described later ....
-
 
 (+++) Referencing, memory allocation, indexing, slicing
 ........................................................
@@ -213,7 +209,7 @@ example:
 >>> x=v
 >>> x[0]=3
 >>> v
-Vec(4)=[3.0,2.0,3.0,4.0]
+  Vec(4)=[3.0,2.0,3.0,4.0]
 
 Hence, the new python object x is actually a reference to the same c++
 vector that was created in v. Modifying elements in x modifies
@@ -226,60 +222,51 @@ As note above, this vector is subscriptable and sliceable, using the
 standard python syntax.
 
 >>> v[1:3]
-Vec(2)=[2.0,3.0]
+  Vec(2)=[2.0,3.0]
 
 We can also resize vectors and change their memory allocation:
 
 """
-v1=Vector([0.0,1,2,3,4,5])
-v2=Vector(float,len(v1),2.0)
+v1=Vector([0.0,1,2,3,4,5]);v1
+v2=Vector(float,len(v1),2.0);v2
 """
->>>v1
-Vec(6)=[0.0,1.0,2.0,3.0,4.0,5.0]
->>>v2
-Vec(6)=[2.0,2.0,2.0,2.0,2.0,2.0]
-
 
 With the resize attribute you allocate new memory while keeping the
 data. It is not guaranteed that the new memory actually occupies the
 same physical space.
 
 """
-v2.resize(8)
+v2.resize(8);
+v2
 """
->>> v2
-Vec(8)=[2.0,2.0,2.0,2.0,2.0,2.0,0.0,0.0] 
 
 Resize a vector and fill with non-zero values:
 
 """
 v2.resize(10,-1)
+v2
 """
->>> v2
-Vec(10)=[2.0,2.0,2.0,2.0,2.0,2.0,0.0,0.0,-1.0,-1.0]
 
 Resize a vector to same size as another vector:
 
 """
 v2.resize(v1)
+v2
 """
->>> v2
-Vec(6)=[2.0,2.0,2.0,2.0,2.0,2.0]
 
 Make a new vector of same size and type as the original one:
 
 """
 v3=v2.new()
+v3
 """
->>> v3
-Vec(6)=[0.0,0.0,0.0,0.0,0.0,0.0]
 
 Fill a vector with values
+
 """
 v3.fill(-2)
+v3
 """
->>>v3
-Vec(6)=[-2.0,-2.0,-2.0,-2.0,-2.0,-2.0]
 
 (+++) Vector arithmetic
 ........................................................
@@ -293,23 +280,26 @@ them. A full list can be seen by typing
 Some of the basic arithmetic is available in an intuitve way.
 
 You can add a scalar to a vector by
+
 >>> v1+3
-Vec(6)=[3.0,4.0,5.0,6.0,7.0,8.0]
+  Vec(6)=[3.0,4.0,5.0,6.0,7.0,8.0]
 
 This will actually create a new vector (and destroy it right away,
 since no reference was kept). The original vector is unchanged.
 
 You can also add two vectors:
+
 >>>v1+v2
-Vec(6)=[2.0,3.0,4.0,5.0,6.0,7.0]
+  Vec(6)=[2.0,3.0,4.0,5.0,6.0,7.0]
 
 In order to change the vector, you can use the "in place" operators
 +=, -=, /=, *= :
 
 Adding a vector in place:
+
 >>>v1+=v2;
 >>>v1
-Vec(6)=[2.0,3.0,4.0,5.0,6.0,7.0]
+  Vec(6)=[2.0,3.0,4.0,5.0,6.0,7.0]
 
 now v1 was actually modified such that v2 was added to the content of
 v1 and the results is stored in v1.
@@ -320,13 +310,31 @@ Similarly you can do
 - v1*=v2
 - v1/=v2
 
-Here is a list of functions you can use
+Here is a list of other functions you can use
 
-  Mean: v1.mean() = 4.5 Median:
-v1.median() = 5.0 Summing: v1.sum() = 27.0 Standard Deviation:
-v1.stddev() = 1.87082869339
+Mean: 
 
+"""
+p_("v1.mean()")
+"""
 
+Median:
+
+"""
+p_("v1.median()")
+"""
+
+Summing all elements in a vector: 
+
+"""
+p_("v1.sum()")
+"""
+
+Standard Deviation:
+
+"""
+p_("v1.stddev()")
+"""
 
 (+) File I/O
 ------------
@@ -341,45 +349,32 @@ LOFARSOFT=os.environ["LOFARSOFT"]
 #filename=LOFARSOFT+"/data/lopes/example.event"
 #filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 filename=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
+filename
 """
-> '/Users/falcke/LOFAR/usg/data/lopes/sample.event'
 
 We can create a new file object, using the "crfile" class, which is an
 interface to the LOFAR CRTOOLS datareader class and was defined in pycrtools.py. 
 
 The following will open a data file:
+
 """
 file=crfile(filename)
 file.set("Blocksize",1024*2)
+#%SKIP
 """
->
-[hftools.tmp.cc,3758]: Opening LOPES File=/Users/falcke/LOFAR/usg/data/lopes/example.event
-[DataReader::summary]
- -- blocksize ............ = 65536
- -- FFT length ........... = 32769
- -- file streams connected?  0
- -- shape(adc2voltage) ... = [65536, 8]
- -- shape(fft2calfft) .... = [32769, 8]
- -- nof. antennas ........ = 8
- -- nof. selected antennas = 8
- -- nof. selected channels = 32769
- -- shape(fx) ............ = [65536, 8]
- -- shape(voltage) ....... = [65536, 8]
- -- shape(fft) ........... = [32769, 8]
- -- shape(calfft) ........ = [32769, 8]
 
 The crfile class stores a pointer to the data reader object, which can
 be retrieved with
+
 """
 file.iptr
 """
-> 17209856
 
 and similarly the filename with
+
 """
 file.filename
 """
-> '/Users/falcke/LOFAR/usg/data/lopes/example.event'
 
 The file will be automatically closed (and the DataReader object be
 destroyed), whenever the crfile object is deleted, e.g. with
@@ -394,10 +389,11 @@ single method "get". This method actually calls the function
 "hFileGetParameter" defined in the c++ code.
 
 Which observatory did we actually use?
+
 """
-obsname=file.get("Observatory")
+obsname=file.get("Observatory");
+p_("obsname")
 """
-> 'LOPES'
 
 There are more keywords, of course. A list of implemented parameters
 we can access is obtained by
@@ -405,14 +401,13 @@ we can access is obtained by
 """
 keywords=file.get("help")
 """
-> hFileGetParameter - available keywords: nofAntennas, nofSelectedChannels, nofSelectedAntennas, nofBaselines, block, blocksize, stride, fftLength, nyquistZone, sampleInterval, referenceTime, sampleFrequency, antennas, selectedAntennas, selectedChannels, positions, increment, frequencyValues, frequencyRange, Date, Observatory, Filesize, dDate, presync, TL, LTL, EventClass, SampleFreq, StartSample, AntennaIDs, help
 
 Note, that the results are returned as PythonObjects. Hence, this
 makes use of the power of python with automatic typing. For, example
+
 """
 file.get("frequencyRange")
 """
-> Vec(2)=[40000000.0,80000000.0]
 
 actually returns a vector. 
 
@@ -424,52 +419,48 @@ Now we will define a number of useful variables that contain essential
 parameters that we later will use.
 
 """
-obsdate   =file.get("Date"); p_("obsdate")
-filesize  =file.get("Filesize"); p_("filesize")
-blocksize =file.get("blocksize"); p_("blocksize")
-nAntennas =file.get("nofAntennas"); p_("nAntennas")
-antennas  =file.get("antennas"); p_("antennas")
-antennaIDs=file.get("AntennaIDs"); p_("antennaIDs")
-selectedAntennas=file.get("selectedAntennas"); p_("selectedAntennas")
-nofSelectedAntennas=file.get("nofSelectedAntennas"); p_("nofSelectedAntennas")
-fftlength =file.get("fftLength"); p_("fftlength")
-sampleFrequency =file.get("sampleFrequency"); p_("sampleFrequency")
-maxblocksize=min(filesize,1024*1024); p_("maxblocksize")
-nBlocks=filesize/blocksize; p_("nBlocks")
+obsdate   =file.get("Date"); 
+filesize  =file.get("Filesize");
+blocksize =file.get("blocksize"); 
+nAntennas =file.get("nofAntennas"); 
+antennas  =file.get("antennas"); 
+antennaIDs=file.get("AntennaIDs"); 
+selectedAntennas=file.get("selectedAntennas");
+nofSelectedAntennas=file.get("nofSelectedAntennas"); 
+fftlength =file.get("fftLength");
+sampleFrequency =file.get("sampleFrequency");
+maxblocksize=min(filesize,1024*1024); 
+nBlocks=filesize/blocksize; 
+
+#map(lambda var:p_(var),["obsdate","filesize","blocksize","nAntennas","antennas","antennaIDs","selectedAntennas","nofSelectedAntennas","fftlength","sampleFrequency","maxblocksize","nBlocks"])
+p_(["obsdate","filesize","blocksize","nAntennas","antennas","antennaIDs","selectedAntennas","nofSelectedAntennas","fftlength","sampleFrequency","maxblocksize","nBlocks"])
+
 """
-> obsdate = 1067339149
-> filesize = 65536
-> blocksize = 1024
-> nAntennas = 8
-> antennas = Vec(8)=[0,1,2,3,4,5,6,7]
-> antennaIDs = Vec(8)=[10101,10102,10201,10202,20101,20102,20201,20202]
-> selectedAntennas = Vec(8)=[0,1,2,3,4,5,6,7]
-> nofSelectedAntennas = 8
-> fftlength = 513
-> sampleFrequency = 80000000.0
-> blocksize = 1024
 
 We can also change parameters in a very similar fashion, using the
 "set" method, which is an implementation of the "hFileSetParameter"
 function. E.g. changing the blocksize we already did before. This is
 simply
+
 """
-file.set("Blocksize",blocksize)
+file.set("Blocksize",blocksize);
+#%SKIP
 """"
+
 again the list of implemented keywords is visible with using
+
 """
-file.set("help",0)
+file.set("help",0);
+#%SKIP
 """
-> hFileSetParameter - available keywords: Blocksize, StartBlock,
-  Block, Stride, SampleOffset, NyquistZone, ReferenceTime,
-  SampleFrequency, Shift, SelectedAntennas, help
 
 The set method actually returns the crfile object. Hence you can
 append multiple set commands after each other.
+
 """
-file.set("Block",2).set("SelectedAntennas",[0,2])
+file.set("Block",2).set("SelectedAntennas",[0,2]);
+#%SKIP
 """
-> crfile</Users/falcke/LOFAR/usg/data/lopes/example.event>
 
 Note, that we have now reduced the number of antennas to two: namely
 antenna 0 and 2 and the number of selected antennas is
@@ -478,11 +469,15 @@ antenna 0 and 2 and the number of selected antennas is
  2
 
 However, now we want to work on all antennas again:
+
 """
 file.set("Block",0).set("SelectedAntennas",range(nAntennas))
+#%SKIP
 """
+
+
 (++) Reading in Data
---------------------
+---------------------
 
 The next step is to actually read in data. This is done with the read
 method (accessing "hFileRead"). The data is read flatly into a 1D
@@ -496,10 +491,13 @@ the data structrue.
 
 First we create a FloatVec, which is BoostPython wrapped standard
 (STL) vector of doubles.
+
 """
 fxdata=Vector()
 """
+
 and resize it to the size we need
+
 """
 fxdata.setDim([nofSelectedAntennas,blocksize])
 """
@@ -516,61 +514,60 @@ keyword. Currently implemented are the data fields "Fx", "Voltage",
 So, let us read in the raw time series data, i.e. the electric field
 in the antenna as digitized by the ADC. This is provided by the
 keyword "Fx" (means f(x) ).
+
 """
 file.read("Fx",fxdata)
 """
->>>fxdata
- Vec(2048)=[212.0,-278.0,196.0,236.0,4.0,-94.0,-192.0,208.0,-66.0,-62.0,...]
 
 and voila the vector is filled with time series data from the data file.. 
 
 Access the various antennas through slicing
+
 """
 ant0data=fxdata[0:blocksize]
 """
 or use the .elem method, which returns the nth element of the highest dimension
+
 """
 ant0data=fxdata.elem(0)
 ant1data=fxdata.elem(1)
+ant0data
 """
->>> ant0data
-Vec(1024)=[-94.0,-165.0,-6.0,35.0,-310.0,-23.0,-128.0,97.0,239.0,289.0,...]
 
 This makes a copy of the data vector if used in this way, while
+
 """
 fxdata[0:3]=[0,1,2]
+fxdata
 """
->>>  fxdata
- Vec(2046)=[0.0,1.0,2.0,-94.0,-192.0,208.0,-66.0,-62.0,-157.0,-120.0,...]
 
 actually modifies the original data vector.
 
 To get the x -Axis we create a second vector
+
 """
 timedata=Vector(float,blocksize)
 file.read("Time",timedata)
 """
-> Vec(1024)=[-0.000384,-0.0003839875,-0.000383975,-0.0003839625,-0.00038395,-0.0003839375,-0.000383925,-0.0003839125,-0.0003839,-0.0003838875,...]
 
 This is the time relative to the trigger in seconds. So, let's have
 that in microseconds, by multiplying with one million.
+
 """
 timedata *= 10**6
+timedata
 """
->>> timedata
-Vec(1024)=[-384.0,-383.9875,-383.975,-383.9625,-383.95,-383.9375,-383.925,-383.9125,-383.9,-383.8875,...]
 
 We do the same now for the frequency axis, which we convert to MHz. As
 length we have to take the length of the Fourier transformed time
 block (which is blocksize/2+1).
+
 """
 freqdata=Vector(float,fftlength)
 file.read("Frequency",freqdata)
 freqdata/=10**6
+freqdata
 """
->>> freqdata
-Vec(513)=[40.0,40.078125,40.15625,40.234375,40.3125,40.390625,40.46875,40.546875,40.625,40.703125,...]
-
 
 (+) Fourier Transforms (FFT)
 ----------------------------
@@ -589,15 +586,15 @@ So, let's do the transform:
 """
 fftdata=Vector(complex,fftlength)
 fxdata.elem(0).fft(fftdata,1)
+fftdata
 """
->>> fftdata
-Vec(513)=[(6078+0j),(99.3936739874-28.663986893j),(-93.6321366929-4.95059820124j),(82.9590664565+28.8729314743j),(-83.6744655239+4.46573054789j),(169.1861864-61.2949652607j),(-118.623662378+53.2694320202j),(75.764787806-74.6606191354j),(-115.629434646+29.4373842905j),(98.0844400537-16.0574421952j),...]
 
 Here we have used the fft method of the float vector, which is just a
 call to the stand-alone function hFFT defined in hftools.cc.
 
 to get the power, we have to square the complex data and convert it to
 floats. This can be done using the complex function "norm" 
+
 """
 spectrum=Vector(float,fftlength)
 fftdata.norm(spectrum)
@@ -605,16 +602,18 @@ fftdata.norm(spectrum)
 
 We can now try to calulcate the average spectum of the data set for
 one antenna, by looping over all blocks.
+
 """
 avspectrum=Vector(float)
 avspectrum.setDim([nofSelectedAntennas,fftlength])
 fftall=Vector(complex)
 fftall.setDim([nofSelectedAntennas,fftlength])
 for block in range(nBlocks):
-    print block,",",
     file.set("Block",block).read("FFT",fftall)
     fftall.spectralpower(avspectrum)
+#%SKIP
 """
+
 
 (+) Basic Plotting
 ------------------
@@ -656,36 +655,57 @@ gr.WriteEPS("test-y.eps","Test Plot")
 (++) Matplotlib
 
 Now we import matplotlib
+
 """
 import matplotlib.pyplot as plt
-print "\n!! A plot window should pop up somehwere (in the background?) !!"
+"""
+
+And a plot window should pop up somehwere (in the background?) !!"
+(NB: At least on a Mac the window likes to stubbornly hide behind
+other windows, so search your screen carefully if no window pops up.)
+
+Now, we can issue some of the plotting commands.
+
+"""
 plt.show()
 plt.subplot(1,2,1)
+#%SKIP
 plt.title("Average Spectrum for Two Antennas")
+#%SKIP
 plt.semilogy(freqdata,avspectrum.elem(0))
+#%SKIP
 plt.semilogy(freqdata,avspectrum.elem(1))
+#%SKIP
 plt.ylabel("Power of Electric Field [ADC counts]$^2$")
+#%SKIP
 plt.xlabel("Frequency [MHz]")
+#%SKIP
 """
-and a window should pop up.  (NB: At least on a Mac the window likes
-to stubbornly hide behind other windows, so search your screen
-carefully if no window pops up.)
 
 To plot the time series of the entire data set, we first read in all sample from all antennas
+
 """
 file.set("Block",0).set("Blocksize",maxblocksize)
+#%SKIP
 fxall=Vector(); fxall.setDim([nofSelectedAntennas,maxblocksize])
 timeall=Vector(float,maxblocksize) 
 file.read("Time",timeall); timeall *= 10**6.
 file.read("Fx",fxall)
 """
+
 and then we plot it 
+
 """
 plt.subplot(1,2,2)
+#%SKIP
 plt.title("Time Series of Antenna 0")
+#%SKIP
 plt.plot(timeall,fxall.elem(0))
+#%SKIP
 plt.ylabel("Electric Field [ADC counts]")
+#%SKIP
 plt.xlabel("Time [$\mu$s]")
+#%SKIP
 """
 
 So, for a linear plot use .plot, for a loglog plot use .loglog and for
@@ -708,154 +728,27 @@ is actually AzElRadius, where we need to set the radius to unity.
 azel=FloatVec()
 azel.extend((178,28,1))
 cartesian=azel.new()
+azel
+cartesian
 """
->>> azel
-Vec(3)=[178.0,28.0,1.0]
->>> cartesian
-Vec(3)=[0.0,0.0,0.0]
 
 We then do the conversion, using 
+
 """
 hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
 """
+
 yielding the following output vector:
 
->>> cartesian
-Vec(3)=[0.0308144266055,-0.882409725042,0.469471562786]
-
 """
-
-
+cartesian
 """
 
 (+) Appendix: Listing of all Functions:
 =======================================
 
-SECTION: Administrative Vector Function
---------------------------------------------------
-hFill(vec, fill_value)              - Fills a vector with a constant value.
-hNew(vec)                           - Make and return a new vector of the same size and type as the input vector.
-hConvert(vec1, vec2)                - Copies and converts a vector to a vector of another type.
-hCopy(vec, outvec)                  - Copies a vector to another one.
-
-SECTION: Math Function
---------------------------------------------------
-square(val)                         - Returns the squared value of the parameter.
-hPhase(frequency, time)             - Returns the interferometer phase in radians for a given frequency and time.
-funcGaussian(x, sigma, mu)          - Implementation of the Gauss function.
-hExp(vec)                           - Take the exp of all the elements in the vector.
-hExp(vec, vecout)                   - Take the exp of all the elements in the vector and return results in a second vector.
-hLog(vec)                           - Take the log of all the elements in the vector.
-hLog(vec, vecout)                   - Take the log of all the elements in the vector and return results in a second vector.
-hLog10(vec)                         - Take the log10 of all the elements in the vector.
-hLog10(vec, vecout)                 - Take the log10 of all the elements in the vector and return results in a second vector.
-hSin(vec)                           - Take the sin of all the elements in the vector.
-hSin(vec, vecout)                   - Take the sin of all the elements in the vector and return results in a second vector.
-hSinh(vec)                          - Take the sinh of all the elements in the vector.
-hSinh(vec, vecout)                  - Take the sinh of all the elements in the vector and return results in a second vector.
-hSqrt(vec)                          - Take the sqrt of all the elements in the vector.
-hSqrt(vec, vecout)                  - Take the sqrt of all the elements in the vector and return results in a second vector.
-hSquare(vec)                        - Take the square of all the elements in the vector.
-hSquare(vec, vecout)                - Take the square of all the elements in the vector and return results in a second vector.
-hTan(vec)                           - Take the tan of all the elements in the vector.
-hTan(vec, vecout)                   - Take the tan of all the elements in the vector and return results in a second vector.
-hTanh(vec)                          - Take the tanh of all the elements in the vector.
-hTanh(vec, vecout)                  - Take the tanh of all the elements in the vector and return results in a second vector.
-hAbs(vec)                           - Take the abs of all the elements in the vector.
-hAbs(vec, vecout)                   - Take the abs of all the elements in the vector and return results in a second vector.
-hCos(vec)                           - Take the cos of all the elements in the vector.
-hCos(vec, vecout)                   - Take the cos of all the elements in the vector and return results in a second vector.
-hCosh(vec)                          - Take the cosh of all the elements in the vector.
-hCosh(vec, vecout)                  - Take the cosh of all the elements in the vector and return results in a second vector.
-hCeil(vec)                          - Take the ceil of all the elements in the vector.
-hCeil(vec, vecout)                  - Take the ceil of all the elements in the vector and return results in a second vector.
-hFloor(vec)                         - Take the floor of all the elements in the vector.
-hFloor(vec, vecout)                 - Take the floor of all the elements in the vector and return results in a second vector.
-hAcos(vec)                          - Take the acos of all the elements in the vector.
-hAcos(vec, vecout)                  - Take the acos of all the elements in the vector and return results in a second vector.
-hAsin(vec)                          - Take the asin of all the elements in the vector.
-hAsin(vec, vecout)                  - Take the asin of all the elements in the vector and return results in a second vector.
-hAtan(vec)                          - Take the atan of all the elements in the vector.
-hAtan(vec, vecout)                  - Take the atan of all the elements in the vector and return results in a second vector.
-hiSub(vec1, vec2)                   - Performs a Sub between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
-hiSub(vec1, val)                    - Performs a Sub between the vector and a scalar (applied to each element), which is returned in the first vector.
-hSub(vec1, vec2, vec3)              - Performs a Sub between the two vectors, which is returned in the third vector.
-hSubAdd(vec1, vec2, vec3)           - Performs a Sub between the two vectors, and adds the result to the output (third) vector.
-hSubAddConv(vec1, vec2, vec3)       - Performs a Sub between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
-hSub(vec1, val, vec2)               - Performs a Sub between the vector and a scalar, where the result is returned in the second vector.
-hiMul(vec1, vec2)                   - Performs a Mul between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
-hiMul(vec1, val)                    - Performs a Mul between the vector and a scalar (applied to each element), which is returned in the first vector.
-hMul(vec1, vec2, vec3)              - Performs a Mul between the two vectors, which is returned in the third vector.
-hMulAdd(vec1, vec2, vec3)           - Performs a Mul between the two vectors, and adds the result to the output (third) vector.
-hMulAddConv(vec1, vec2, vec3)       - Performs a Mul between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
-hMul(vec1, val, vec2)               - Performs a Mul between the vector and a scalar, where the result is returned in the second vector.
-hiAdd(vec1, vec2)                   - Performs a Add between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
-hiAdd(vec1, val)                    - Performs a Add between the vector and a scalar (applied to each element), which is returned in the first vector.
-hAdd(vec1, vec2, vec3)              - Performs a Add between the two vectors, which is returned in the third vector.
-hAddAdd(vec1, vec2, vec3)           - Performs a Add between the two vectors, and adds the result to the output (third) vector.
-hAddAddConv(vec1, vec2, vec3)       - Performs a Add between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
-hAdd(vec1, val, vec2)               - Performs a Add between the vector and a scalar, where the result is returned in the second vector.
-hiDiv(vec1, vec2)                   - Performs a Div between the two vectors, which is returned in the first vector. If the second vector is shorter it will be applied multiple times.
-hiDiv(vec1, val)                    - Performs a Div between the vector and a scalar (applied to each element), which is returned in the first vector.
-hDiv(vec1, vec2, vec3)              - Performs a Div between the two vectors, which is returned in the third vector.
-hDivAdd(vec1, vec2, vec3)           - Performs a Div between the two vectors, and adds the result to the output (third) vector.
-hDivAddConv(vec1, vec2, vec3)       - Performs a Div between the two vectors, and adds the result to the output (third) vector - automatic casting is done.
-hDiv(vec1, val, vec2)               - Performs a Div between the vector and a scalar, where the result is returned in the second vector.
-hConj(vec)                          - Calculate the complex conjugate of all elements in the complex vector.
-hCrossCorrelateComplex(vec1, vec2)  - Multiplies the elements of the first vector with the complex conjugate of the elements in the second and returns the results in the first.
-hReal(vec, vecout)                  - Take the real of all the elements in the complex vector and return results in a float vector.
-hArg(vec, vecout)                   - Take the arg of all the elements in the complex vector and return results in a float vector.
-hImag(vec, vecout)                  - Take the imag of all the elements in the complex vector and return results in a float vector.
-hNorm(vec, vecout)                  - Take the norm of all the elements in the complex vector and return results in a float vector.
-hNegate(vec)                        - Multiplies each element in the vector with -1 in place, i.e. the input vector is also the output vector.
-hSum(vec)                           - Performs a sum over the values in a vector and returns the value.
-hNorm(vec)                          - Returns the lengths or norm of a vector (i.e. Sqrt(Sum_i(xi*+2))).
-hNormalize(vec)                     - Normalizes a vector to length unity.
-hMean(vec)                          - Returns the mean value of all elements in a vector.
-hSort(vec)                          - Sorts a vector in place.
-hSortMedian(vec)                    - Sorts a vector in place and returns the median value of the elements.
-hMedian(vec)                        - Returns the median value of the elements.
-hStdDev(vec, mean)                  - Calculates the standard deviation around a mean value.
-hStdDev(vec)                        - Calculates the standard deviation of a vector of values.
-hFindLessEqual(vec, threshold, vecout) - Find the samples that are LessEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
-hFindLessEqualAbs(vec, threshold, vecout) - Find the samples whose absolute values are LessEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
-hFindGreaterThan(vec, threshold, vecout) - Find the samples that are GreaterThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
-hFindGreaterThanAbs(vec, threshold, vecout) - Find the samples whose absolute values are GreaterThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
-hFindGreaterEqual(vec, threshold, vecout) - Find the samples that are GreaterEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
-hFindGreaterEqualAbs(vec, threshold, vecout) - Find the samples whose absolute values are GreaterEqual a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
-hFindLessThan(vec, threshold, vecout) - Find the samples that are LessThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
-hFindLessThanAbs(vec, threshold, vecout) - Find the samples whose absolute values are LessThan a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
-hDownsample(vec1, vec2)             - Downsample the input vector to a smaller output vector.
-hDownsample(vec, downsample_factor) - Downsample the input vector by a cetain factor and return a new vector.
-hFindLowerBound(vec, value)         - Finds the location (i.e., returns integer) in a monotonically increasing vector, where the input search value is just above or equal to the value in the vector.
-hFlatWeights(wlen)                  - Returns vector of weights of length len with constant weights normalized to give a sum of unity. Can be used by hRunningAverageT.
-hLinearWeights(wlen)                - Returns vector of weights of length wlen with linearly rising and decreasing weights centered at len/2.
-hGaussianWeights(wlen)              - Returns vector of weights of length wlen with Gaussian distribution centered at len/2 and sigma=len/4 (i.e. the Gaussian extends over 2 sigma in both directions).
-hWeights(wlen, wtype)               - Create a normalized weight vector.
-hRunningAverage(idata, odata, weights) - Calculate the running average of an input vector using a weight vector.
-hRunningAverage(idata, odata, wlen, wtype) - Overloaded function to automatically calculate weights.
-
-SECTION: RF (Radio Frequency) Function
---------------------------------------------------
-hGeometricDelayFarField(antPosition, skyDirection, length) - Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located in a certain direction in farfield (based on L. Bahren).
-hGeometricDelayNearField(antPosition, skyPosition, distance) - Calculates the time delay in seconds for a signal received at an antenna position relative to a phase center from a source located at a certain 3D space coordinate in nearfield (based on L. Bahren).
-hGeometricDelays(antPositions, skyPositions, delays, farfield) - Calculates the time delay in seconds for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field.
-hGeometricPhases(frequencies, antPositions, skyPositions, phases, farfield) - Calculates the phase gradients for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field and for different frequencies.
-hGeometricWeights(frequencies, antPositions, skyPositions, weights, farfield) - Calculates the phase gradients as complex weights for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field and for different frequencies.
-hSpectralPower(vec, outvec)         - Calculates the power of a complex spectrum and add it to an output vector.
-
-SECTION: I/O Function (DataReader)
---------------------------------------------------
-hFileClose(iptr)                    - Function to close a file with a datareader object providing the pointer to the object as an integer.
-hFileOpen(Filename)                 - Function to open a file based on a filename and returning a pointer to a datareader object as an integer.
-hFileGetParameter(iptr, keyword)    - Return information from a data file as a Python object.
-hFileSetParameter(iptr, keyword, pyob) - Set parameters in a data file with a Python object as input.
-hFileRead(iptr, Datatype, vec)      - Read data from a Datareader object (pointer in iptr) into a vector, where the size should be pre-allocated.
-hCalTable(filename, keyword, date, pyob) - Return a list of antenna positions from the CalTables - this is a test.
-
-SECTION: Coordinate Conversion (VectorConversion.cc)
---------------------------------------------------
-hCoordinateConvert(source, sourceCoordinate, target, targetCoordinate, anglesInDegrees) - Converts a 3D spatial vector into a different Coordinate type (e.g. Spherical to Cartesian).
-hReadFileOld(vec, iptr, Datatype, Antenna, Blocksize, Block, Stride, Shift) - Read data from a Datareader object (pointer in iptr) into a vector.
+"""
+help(all)
+"""
 
 """

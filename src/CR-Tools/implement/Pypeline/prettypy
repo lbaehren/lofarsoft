@@ -1,8 +1,9 @@
 #!/bin/csh
 set filename=$1
 gawk -f prettypy.awk $filename > $filename.out
-cat $filename.toc $filename.out > $filename.txt	
-./pytext2pdf.py $filename.txt	
+gawk -f prettypy-merge.awk $filename.out > $filename.txt
+./pytext2pdf.py -c 90 -P A4 -f Courier -s 9 $filename.txt	
 set pdffile=$filename.pdf
-rm $filename.txt $filename.toc $filename.out
+#rm $filename.txt
+rm  $filename.out prettypy.toc prettypy.tmp prettypy.inp 
 mv $pdffile {$filename:r}.pdf

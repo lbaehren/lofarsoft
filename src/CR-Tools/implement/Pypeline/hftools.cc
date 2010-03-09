@@ -464,8 +464,7 @@ HString hgetFileExtension(HString filename){
   else {return filename.substr(pos,size-pos);};
 }
 
-
-
+ 
 //========================================================================
 //$SECTION:           Administrative Vector Function
 //========================================================================

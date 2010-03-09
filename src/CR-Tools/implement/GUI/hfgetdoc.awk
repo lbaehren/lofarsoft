@@ -1,5 +1,19 @@
 BEGIN{npar=0}
 
+function blockset(s,indent,width){
+    l=width
+    prep=""
+    while (length(s)>l) {
+	m=match(substr(s,1,l)," [^ ]*$")
+	if (m<1) {m=l}
+	print prep substr(s,1,m)
+	s=substr(s,m+1)
+	prep = substr("                                                                                ",1,indent)
+	l=width-indent
+    }
+    print prep s
+}
+
 /^\/\/\$SECTION:/ {
     gsub("\\/\\/\\$SECTION: *","")
     print "\nSECTION:", $0
@@ -29,7 +43,9 @@ BEGIN{npar=0}
     if (npar>0) s=s pars[1,"Name"]
     for (i=2; i<=npar; i++) s= s ", " pars[i,"Name"]
     s=s ")"
-    s=s substr("                                  ",length(s)) " - " funcdoc
-    print s
+    s=s substr("                     ",length(s)) " - " funcdoc
+#    printf ("%s",s)
+    blockset(s,25,78)
+    print " "
     newfunc=0
 }
