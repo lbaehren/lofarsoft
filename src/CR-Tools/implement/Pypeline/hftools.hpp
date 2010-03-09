@@ -16,7 +16,7 @@ BOOST_PYTHON_MODULE(hftools)
     class_<CR::DataReader>("DataReader")
       //      .def("read",&hFileRead) -> This is defined in pycrtools.py, since it is templated
       .def("get",&hFileGetParameter)
-      .def("set",&hFileSetParameter)
+      .def("set",&hFileSetParameter,return_internal_reference<>())
       .def("summary",&hFileSummary)
       ;    
 

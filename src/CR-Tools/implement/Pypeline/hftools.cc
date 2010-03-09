@@ -2452,7 +2452,8 @@ CRDataReader & HFPP_FUNC_NAME(HString Filename) {
   }
   if (!opened){
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Opening file " << Filename << " failed.");
-    return *drp;
+    CR::LopesEventIn* lep = new CR::LopesEventIn; //Make a dummy data reader ....
+    drp=lep;
   };
   return *drp;
 }
