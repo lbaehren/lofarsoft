@@ -125,7 +125,7 @@ add_custom_target (clean-build
   COMMAND rm -rf CMakeCache.txt
   COMMAND rm -rf CMakeFiles
   COMMAND rm -rf cfitsio cr
-  COMMAND rm -rf dal
+  COMMAND rm -rf dal devel_common
   COMMAND rm -rf numeric num_util
   COMMAND rm -rf startools
   COMMAND rm -rf wcslib wcstools
@@ -228,6 +228,8 @@ add_dependencies (num_util boost numpy)
 
 add_dependencies (pyrap casacore num_util)
 
+add_dependencies (pyqt sip)
+
 add_dependencies (wcslib boost flex)
 
 add_dependencies (plplot numpy swig)
@@ -316,6 +318,10 @@ add_dependencies (cr dal mathgl plplot)
 if (CR_WITH_STARTOOLS)
   add_dependencies (cr startools fftw3)
 endif (CR_WITH_STARTOOLS)
+
+if (CR_WITH_GUI)
+  add_dependencies (cr pyqt)
+endif (CR_WITH_GUI)
 
 ##____________________________________________________________________
 ##                                       LASA (LOFAR Air-Shower Array)
