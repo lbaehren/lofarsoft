@@ -183,9 +183,8 @@ void copycast_vec(vector<T> &vi, vector<S> & vo) {
 Function to close a file with a datareader object providing the pointer to the object as an integer
 */
 void hCloseFile(HIntPointer iptr) {
-  union{void* ptr; CR::DataReader* drp;};
-  ptr=AsPtr(iptr);
-  if (ptr!=Null_p) delete drp;
+  CR::DataReader* drp=reinterpret_cast<CR::DataReader*>(AsPtr(iptr));
+  if (drp!=Null_p) delete drp;
 }
 
 /*! 
@@ -195,25 +194,23 @@ void hCloseFile(HIntPointer iptr) {
 HIntPointer hOpenFile(HString Filename, vector<HInteger> & Offsets) {
   
   bool opened;
-  union{HIntPointer iptr; CR::DataReader* drp;};
-
+  CR::DataReader* drp;
   //Create the a pointer to the DataReader object and store the pointer
       
   DBG("DataFunc_CR_dataReaderObject: Opening File, Filename=" << Filename);
   HString Filetype = determine_filetype(Filename);
   if (Filetype=="LOPESEvent") {
     CR::LopesEventIn* lep = new CR::LopesEventIn;
-    DBG("DataFunc_CR_dataReaderObject: lep=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
     opened=lep->attachFile(Filename);
     drp=lep;
     cout << "File="<<Filename << endl; lep->summary();
   } else if (Filetype=="LOFAR_TBB") {
-    drp = new CR::LOFAR_TBB(Filename,1024);
-    DBG("DataFunc_CR_dataReaderObject: tbb=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
+    CR::LOFAR_TBB* tbb = new CR::LOFAR_TBB(Filename,1024);
+    drp=tbb;
     opened=drp!=NULL;
     MSG("Opening File="<<Filename);drp->summary();
     if (opened) {
-      CasaVector<int> OffsetsCasa = drp->sample_offset();
+      CasaVector<int> OffsetsCasa = tbb->sample_offset();
       aipsvec2stlvec(OffsetsCasa, Offsets);
       };
   } else {
@@ -233,7 +230,7 @@ HIntPointer hOpenFile(HString Filename, vector<HInteger> & Offsets) {
   //  for (i=0; i<nfields; i++) MSG("hdr name="<<hdr.name(i) << " type="<<hdr.dataType(i));
 
   //return value
-  return iptr;
+  return reinterpret_cast<HIntPointer>(drp);
 }
 
 //------------------------------------------------------------------------
