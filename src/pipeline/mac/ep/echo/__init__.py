@@ -1,13 +1,13 @@
-# First import relevant protocol & event names
+# We'll create a customized EventPort interface
+# Note that we require GenericEvent, so ep.interface must be available first
+from ep.interface import EventPort_Interface, EventNotFoundException
+
+# Relevant protocol & event names
 from _ep_echo import PROTOCOL
 from _ep_echo import ECHO, PING, CLOCK
 
 # Events we can handle
 from _ep_echo import EchoPingEvent, EchoEchoEvent
-
-# Customized EventPort interface
-from ep.interface import EventPort_Interface, EventNotFoundException
-
 
 class EchoPort_Interface(EventPort_Interface):
     def __init__(self):
