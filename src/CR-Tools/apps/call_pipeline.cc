@@ -65,8 +65,8 @@ using CR::LopesEventIn;
     Requires one of the following arguments:
     <li> --in         eventfile list      list with LOPES event files (.event)
     <li> --k          Kascade root file   (containing also the LOPES event names)
-    Optional argumens:
     <li> --config     textfile            a file with configuration settings for the pipeline
+    Optional argumens:
     <li> --help                           prints a help message
   </ul>
 
@@ -1867,27 +1867,27 @@ int main (int argc, char *argv[])
                                                config["randomDelay"]->dValue(),
                                                randomSeed);
 
-          // adding results to variables (needed to fill them into the root tree)
           goodEW = results.asBool("goodReconstructed");
-          AzL = results.asDouble("Azimuth");
-          ElL = results.asDouble("Elevation");
-          distanceResult = results.asDouble("Distance");
-          CCheight = results.asDouble("CCheight");
-          CCwidth = results.asDouble("CCwidth");
-          CCheight_error = results.asDouble("CCheight_error");
-          CCconverged = results.asBool("CCconverged");
-          Xheight = results.asDouble("Xheight");
-          Xheight_error = results.asDouble("Xheight_error");
-          Xconverged = results.asBool("Xconverged");
-          rmsCCbeam = results.asDouble("rmsCCbeam");
-          rmsXbeam = results.asDouble("rmsXbeam");
-          rmsPbeam = results.asDouble("rmsPbeam");
-          latMeanDistCC = results.asDouble("meandist");
-          NCCbeamAntennas = results.asuInt("NCCbeamAntennas");
-          gt = results.asuInt("Date");
-
           // if event was good reconstructed, then try additional steps
           if (goodEW) {
+            // adding results to variables (needed to fill them into the root tree)
+            AzL = results.asDouble("Azimuth");
+            ElL = results.asDouble("Elevation");
+            distanceResult = results.asDouble("Distance");
+            CCheight = results.asDouble("CCheight");
+            CCwidth = results.asDouble("CCwidth");
+            CCheight_error = results.asDouble("CCheight_error");
+            CCconverged = results.asBool("CCconverged");
+            Xheight = results.asDouble("Xheight");
+            Xheight_error = results.asDouble("Xheight_error");
+            Xconverged = results.asBool("Xconverged");
+            rmsCCbeam = results.asDouble("rmsCCbeam");
+            rmsXbeam = results.asDouble("rmsXbeam");
+            rmsPbeam = results.asDouble("rmsPbeam");
+            latMeanDistCC = results.asDouble("meandist");
+            NCCbeamAntennas = results.asuInt("NCCbeamAntennas");
+            gt = results.asuInt("Date");
+
             // make a postscript with a summary of all plots
             // if summaryColumns = 0 the method does not create a summary.
             eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",config["summaryColumns"]->uiValue());
@@ -1995,27 +1995,27 @@ int main (int argc, char *argv[])
                                                config["randomDelay"]->dValue(),
                                                randomSeed);
 
-          // adding results to variables (needed to fill them into the root tree)
           goodNS = results.asBool("goodReconstructed");
-          AzL_NS = results.asDouble("Azimuth");
-          ElL_NS = results.asDouble("Elevation");
-          distanceResultNS = results.asDouble("Distance");
-          CCheight_NS = results.asDouble("CCheight");
-          CCwidth_NS = results.asDouble("CCwidth");
-          CCheight_error_NS = results.asDouble("CCheight_error");
-          CCconvergedNS = results.asBool("CCconverged");
-          Xheight_NS = results.asDouble("Xheight");
-          Xheight_error_NS = results.asDouble("Xheight_error");
-          XconvergedNS = results.asBool("Xconverged");
-          rmsCCbeam_NS = results.asDouble("rmsCCbeam");
-          rmsXbeam_NS = results.asDouble("rmsXbeam");
-          rmsPbeam_NS = results.asDouble("rmsPbeam");
-          latMeanDistCC_NS = results.asDouble("meandist");
-          NCCbeamAntennas_NS = results.asuInt("NCCbeamAntennas");
-          gt = results.asuInt("Date");
-
           // if event was good reconstructed, then try additional steps
           if (goodNS) {
+            // adding results to variables (needed to fill them into the root tree)
+            AzL_NS = results.asDouble("Azimuth");
+            ElL_NS = results.asDouble("Elevation");
+            distanceResultNS = results.asDouble("Distance");
+            CCheight_NS = results.asDouble("CCheight");
+            CCwidth_NS = results.asDouble("CCwidth");
+            CCheight_error_NS = results.asDouble("CCheight_error");
+            CCconvergedNS = results.asBool("CCconverged");
+            Xheight_NS = results.asDouble("Xheight");
+            Xheight_error_NS = results.asDouble("Xheight_error");
+            XconvergedNS = results.asBool("Xconverged");
+            rmsCCbeam_NS = results.asDouble("rmsCCbeam");
+            rmsXbeam_NS = results.asDouble("rmsXbeam");
+            rmsPbeam_NS = results.asDouble("rmsPbeam");
+            latMeanDistCC_NS = results.asDouble("meandist");
+            NCCbeamAntennas_NS = results.asuInt("NCCbeamAntennas");
+            gt = results.asuInt("Date");
+
             /* make a postscript with a summary of all plots
              if summaryColumns = 0 the method does not create a summary. */
             eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",config["summaryColumns"]->uiValue());
@@ -2126,27 +2126,27 @@ int main (int argc, char *argv[])
                                                config["randomDelay"]->dValue(),
                                                randomSeed);
 
-          // adding results to variables (needed to fill them into the root tree)
           goodVE = results.asBool("goodReconstructed");
-          AzL_VE = results.asDouble("Azimuth");
-          ElL_VE = results.asDouble("Elevation");
-          distanceResultVE = results.asDouble("Distance");
-          CCheight_VE = results.asDouble("CCheight");
-          CCwidth_VE = results.asDouble("CCwidth");
-          CCheight_error_VE = results.asDouble("CCheight_error");
-          CCconvergedVE = results.asBool("CCconverged");
-          Xheight_VE = results.asDouble("Xheight");
-          Xheight_error_VE = results.asDouble("Xheight_error");
-          XconvergedVE = results.asBool("Xconverged");
-          rmsCCbeam_VE = results.asDouble("rmsCCbeam");
-          rmsXbeam_VE = results.asDouble("rmsXbeam");
-          rmsPbeam_VE = results.asDouble("rmsPbeam");
-          latMeanDistCC_VE = results.asDouble("meandist");
-          NCCbeamAntennas_VE = results.asuInt("NCCbeamAntennas");
-          gt = results.asuInt("Date");
-
           // if event was good reconstructed, then try additional steps
-          if (goodNS) {
+          if (goodVE) {
+            // adding results to variables (needed to fill them into the root tree)
+            AzL_VE = results.asDouble("Azimuth");
+            ElL_VE = results.asDouble("Elevation");
+            distanceResultVE = results.asDouble("Distance");
+            CCheight_VE = results.asDouble("CCheight");
+            CCwidth_VE = results.asDouble("CCwidth");
+            CCheight_error_VE = results.asDouble("CCheight_error");
+            CCconvergedVE = results.asBool("CCconverged");
+            Xheight_VE = results.asDouble("Xheight");
+            Xheight_error_VE = results.asDouble("Xheight_error");
+            XconvergedVE = results.asBool("Xconverged");
+            rmsCCbeam_VE = results.asDouble("rmsCCbeam");
+            rmsXbeam_VE = results.asDouble("rmsXbeam");
+            rmsPbeam_VE = results.asDouble("rmsPbeam");
+            latMeanDistCC_VE = results.asDouble("meandist");
+            NCCbeamAntennas_VE = results.asuInt("NCCbeamAntennas");
+            gt = results.asuInt("Date");
+
             /* make a postscript with a summary of all plots
              if summaryColumns = 0 the method does not create a summary. */
             eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",config["summaryColumns"]->uiValue());
