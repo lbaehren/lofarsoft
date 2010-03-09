@@ -23,13 +23,14 @@
 # - Check for the presence of QT
 #
 # The following variables are set when QT is found:
-#  HAVE_QT            = Set to true, if all components of QT have been found.
-#  QT_INCLUDES        = Include path for the header files of QT
-#  HAVE_QT4_QWIDGET   = Include path to the QWidget header file
-#  QT_LIBRARIES       = Link these to use QT
-#  QT4_QTCORE_LIBRARY = Path to the QtCore library
-#  QT4_QTGUI_LIBRARY  = Path to the QtGui library
-#  QT_LFLAGS          = Linker flags (optional)
+#  QT_MOC_EXECUTABLE      -- Path to the moc application program
+#  QT_QMAKE_EXECUTABLE    -- Path to the qmake application program
+#  QT_INCLUDES            -- Common Qt include directory
+#  QT_QTCORE_INCLUDES     -- QtCore header files
+#  QT_QTGUI_INCLUDES      -- QtGui header files 
+#  QT_QTCORE_LIBRARY      -- QtCore library
+#  QT_QTGUI_LIBRARY       -- QtGui libray
+#  QT_QTDESIGNER_LIBRARY  -- QtDesigner library
 
 ## -----------------------------------------------------------------------------
 ## Search locations
@@ -37,53 +38,91 @@
 include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
+## Executables
+
+## moc
+
+if (NOT QT_MOC_EXECUTABLE)
+  find_program (QT_MOC_EXECUTABLE moc ${bin_locations})
+endif (NOT QT_MOC_EXECUTABLE)
+
+## qmake
+
+if (NOT QT_QMAKE_EXECUTABLE)
+  find_program (QT_QMAKE_EXECUTABLE qmake ${bin_locations})
+endif (NOT QT_QMAKE_EXECUTABLE)
+
+## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (QT4_INCLUDES QTimer QMouseEvent
-  PATHS ${include_locations} /usr/lib /sw/lib
-  PATH_SUFFIXES qt4-mac qt4-mac/include qt4-x11 qt4-x11/include
+find_path (QT_INCLUDES QtCore/QTimerEvent QtCore/QResource
+  PATHS ${include_locations} /sw/lib
+  PATH_SUFFIXES
+  qt4-mac
+  qt4-mac/include
+  qt4-x11
+  qt4-x11/include
   )
 
-find_path (HAVE_QT4_QWIDGET QWidget
-  PATHS ${include_locations} /usr/lib /sw/lib /opt/aips++/local/include
-  PATH_SUFFIXES qt4-mac/include/QtGui qt4-x11/include/QtGui QtGui
+find_path (QT_QTCORE_INCLUDES QTimerEvent QResource
+  PATHS ${include_locations} /sw/lib
+  PATH_SUFFIXES
+  qt4-mac
+  qt4-mac/include
+  qt4-mac/include/QtCore
+  qt4-x11
+  qt4-x11/include
+  qt4-x11/include/QtCore
   )
-if (HAVE_QT4_QWIDGET)
-  list (APPEND QT4_INCLUDES ${HAVE_QT4_QWIDGET})
-endif (HAVE_QT4_QWIDGET)
+if (QT_QTCORE_INCLUDES)
+  list (APPEND QT_INCLUDES ${QT_QTCORE_INCLUDES})
+endif (QT_QTCORE_INCLUDES)
+
+find_path (QT_QTGUI_INCLUDES QAction QCloseEvent QMenu
+  PATHS ${include_locations} /sw/lib
+  PATH_SUFFIXES
+  qt4-mac
+  qt4-mac/include
+  qt4-mac/include/QtGui
+  qt4-x11
+  qt4-x11/include
+  qt4-x11/include/QtGui
+  )
+if (QT_QTGUI_INCLUDES)
+  list (APPEND QT_INCLUDES ${QT_QTGUI_INCLUDES})
+endif (QT_QTGUI_INCLUDES)
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-## QtCore
-
-find_library (QT4_QTCORE_LIBRARY QtCore
-  PATHS ${lib_locations}
-  PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
-  )
-if (QT4_QTCORE_LIBRARY)
-  list (APPEND QT4_LIBRARIES ${QT4_QTCORE_LIBRARY})
-endif (QT4_QTCORE_LIBRARY)
-
-## QtGui
-
-find_library (QT4_QTGUI_LIBRARY QtGui
-  PATHS ${lib_locations}
-  PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
-  )
-if (QT4_QTGUI_LIBRARY)
-  list (APPEND QT4_LIBRARIES ${QT4_QTGUI_LIBRARY})
-endif (QT4_QTGUI_LIBRARY)
-
-## QtDesigner
-
-find_library (QT4_QTDESIGNER_LIBRARY QtDesigner
-  PATHS ${lib_locations}
-  PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
-  )
-if (QT4_QTDESIGNER_LIBRARY)
-  list (APPEND QT4_LIBRARIES ${QT4_QTDESIGNER_LIBRARY})
-endif (QT4_QTDESIGNER_LIBRARY)
+foreach (_lib
+    QtCore
+    QtGui
+    QtDesigner
+    QtMotif
+    QtMultimedia
+    QtOpenGL
+    QtXml
+    )
+  ## variable name to be used internally
+  string (TOUPPER ${_lib} _var)
+  ## search for the library
+  if (NOT QT_${_var}_LIBRARY)
+    find_library (QT_${_var}_LIBRARY ${_lib}
+      PATHS ${lib_locations} /sw/lib
+      PATH_SUFFIXES
+      qt4-mac
+      qt4-mac/lib
+      qt4-x11
+      qt4-x11/lib
+      NO_DEFAULT_PATH
+      )
+    ## append to list of libraries
+    if (QT_${_var}_LIBRARY)
+      list (APPEND QT_LIBRARIES ${QT_${_var}_LIBRARY})
+    endif (QT_${_var}_LIBRARY)
+  endif (NOT QT_${_var}_LIBRARY)
+endforeach (_lib)
 
 ## Adjust the ordering for the statement passed to the linker
 
