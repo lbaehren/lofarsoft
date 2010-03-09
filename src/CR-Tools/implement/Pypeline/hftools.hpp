@@ -13,6 +13,13 @@ BOOST_PYTHON_MODULE(hftools)
 {
     using namespace boost::python;
 
+    class_<CR::DataReader>("DataReader")
+      //      .def("read",&hFileRead) -> This is defined in pycrtools.py, since it is templated
+      .def("get",&hFileGetParameter)
+      .def("set",&hFileSetParameter)
+      .def("summary",&hFileSummary)
+      ;    
+
     class_<std::hmatrix<HInteger,allocator<HInteger> > >("IntMatrix")
       .def(vector_indexing_suite<std::hmatrix<HInteger,allocator<HInteger> > >())
       //      .def("setDimension",&std::hmatrix<HInteger,allocator<HInteger> >::setDimension)

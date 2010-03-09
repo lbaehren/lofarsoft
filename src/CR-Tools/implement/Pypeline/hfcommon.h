@@ -62,6 +62,9 @@ typedef casa::DComplex CasaComplex;
 typedef int CasaInteger;
 typedef casa::Record CasaRecord ;
 
+typedef CR::DataReader* DataReaderPointer;
+typedef CR::DataReader CRDataReader;
+
 #define CasaMatrix casa::Matrix
 #define CasaArray casa::Array
 #define CasaVector casa::Vector

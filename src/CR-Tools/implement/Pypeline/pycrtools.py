@@ -394,29 +394,25 @@ def Vector(Type=float,size=-1,fill=None):
 # cr DataReader Class
 #------------------------------------------------------------------------
 
-class crfile():
+def crfile(filename):
     """
+    file=crfile("FILENAME.h5") -> DataReader Object
+
     This is a simple class to interface with the LOFAR CRTOOLS
-    datareader class. MORE DESCRIPTION ...
+    datareader class. It deals with LOFAR and LOEPS data alike. You
+    can read data vectors, read or set parameters and get summary of the contents.
     """
-    def __init__(self,filename):
-#        print "Opening File=",filename
-        self.iptr = hFileOpen(filename)
-        self.filename=filename
-    def __del__(self):
-        self.close()
-    def __repr__(self):
-        return "crfile<"+self.filename+">"
-    def close(self):
-        print "Closing File=",self.filename
-        hFileClose(self.iptr)
-        self.iptr=0
-    def read(self,key,vec):
-        hFileRead(self.iptr,key,vec)
-        return vec
-    def set(self,key,val):
-        hFileSetParameter(self.iptr,key,val)
-        return self
-    def get(self,key):
-        return hFileGetParameter(self.iptr,key)
-        
+    file=hFileOpen(filename)
+    file.filename=filename
+    return file
+
+DataReader.read=hFileRead
+DataReader.__doc__="""
+    file=crfile("FILENAME.h5") -> DataReader Object
+
+    This is a simple class to interface with the LOFAR CRTOOLS
+    datareader class. It deals with LOFAR and LOEPS data alike. You
+    can read data vectors, read or set parameters and get summary of the contents.
+"""
+#DataReader.get=hFileGetParameter
+#DataReader.get=hFileGetParameter

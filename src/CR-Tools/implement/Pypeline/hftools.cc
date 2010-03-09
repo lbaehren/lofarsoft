@@ -2354,7 +2354,7 @@ void HFPP_FUNC_NAME(const IterIn data_in,   const IterIn data_in_end,
   Vector<DComplex> cvec_in(fftLength);
   Vector<Double> cvec_out(shape_out, 0.);
 
-  if ((data_in_end - data_in) != fftLength) {
+  if ((data_in_end - data_in) != (int)fftLength) {
     cerr << "[invfft] Bad input: len(data_in) != fftLength" << endl;
     cerr << "  len(data_in) = " << (data_in_end - data_in) << endl;
     cerr << "  fftLength    = " << fftLength << endl;
@@ -2397,33 +2397,31 @@ void HFPP_FUNC_NAME(const IterIn data_in,   const IterIn data_in_end,
 //$SECTION:              I/O Function (DataReader)
 //========================================================================
 
-//$DOCSTRING: Function to close a file with a datareader object providing the pointer to the object as an integer.
+//$DOCSTRING: Print a brief summary of the file contents and current settings.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hFileClose
+#define HFPP_FUNC_NAME hFileSummary
 //------------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HIntPointer)(iptr)()("Pointer to a DataReader object, stored as an integer.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (CRDataReader)(dr)()("DataReader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
  \brief $DOCSTRING
  $PARDOCSTRING
 */
 
-void HFPP_FUNC_NAME(HIntPointer iptr) {
-  union{void* ptr; CR::DataReader* drp;};
-  ptr=IntAsPtr(iptr);
-  if (ptr!=Null_p) delete drp;
+void HFPP_FUNC_NAME(CRDataReader & dr) {
+  dr.summary();
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Function to open a file based on a filename and returning a pointer to a datareader object as an integer.
+//$DOCSTRING: Function to open a file based on a filename and returning a datareader object.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFileOpen
 //------------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
-#define HFPP_FUNCDEF  (HIntPointer)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNCDEF  (CRDataReader)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_0 (HString)(Filename)()("Filename of file to opwn including full directory name")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
@@ -2431,32 +2429,32 @@ void HFPP_FUNC_NAME(HIntPointer iptr) {
  $PARDOCSTRING
 */
 
-HIntPointer HFPP_FUNC_NAME(HString Filename) {
+CRDataReader & HFPP_FUNC_NAME(HString Filename) {
 
   bool opened;
     
   //Create the a pointer to the DataReader object and store the pointer
-  union{HIntPointer iptr; CR::DataReader* drp;};
-
+  CR::DataReader* drp;
   HString Filetype = hgetFiletype(Filename);
+
   if (Filetype=="LOPESEvent") {
     CR::LopesEventIn* lep = new CR::LopesEventIn;
     opened=lep->attachFile(Filename);
     drp=lep;
-    MSG("Opening LOPES File="<<Filename); drp->summary();
+    cout << "Opening LOPES File="<<Filename<<endl; drp->summary();
   } else if (Filetype=="LOFAR_TBB") {
     drp = new CR::LOFAR_TBB(Filename,1024);
     opened=drp!=NULL;
-    MSG("Opening LOFAR File="<<Filename); drp->summary();
+    cout << "Opening LOFAR File="<<Filename<<endl; drp->summary();
   } else {
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Unknown Filetype = " << Filetype  << ", Filename=" << Filename);
     opened=false;
   }
   if (!opened){
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Opening file " << Filename << " failed.");
-    return PtrAsInt(Null_p);
+    return *drp;
   };
-  return iptr;
+  return *drp;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -2467,16 +2465,16 @@ HIntPointer HFPP_FUNC_NAME(HString Filename) {
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
 #define HFPP_FUNCDEF  (HPyObject)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HIntPointer)(iptr)()("Integer containing pointer to the datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (CRDataReader)(dr)()("Datareader object openen, e.g. with hFileOpen or crfile.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HString)(keyword)()("Keyword ro be read out from the file metadata")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
  \brief $DOCSTRING
  $PARDOCSTRING
 */
-HPyObject HFPP_FUNC_NAME(HIntPointer iptr, HString key)
+HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
 {
-  DataReader *drp(reinterpret_cast<DataReader*>(iptr));
+  DataReader *drp=&dr;
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  if (key== #KEY) {_H_NL_ TYPE result(drp->KEY ()); _H_NL_ HPyObject pyob((TYPE2)result); _H_NL_ return pyob;} else
   HFPP_REPEAT(uint,uint,nofAntennas)
     HFPP_REPEAT(uint,uint,nofSelectedChannels)
@@ -2564,8 +2562,8 @@ HPyObject HFPP_FUNC_NAME(HIntPointer iptr, HString key)
 #define HFPP_FUNC_NAME hFileSetParameter
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
-#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HIntPointer)(iptr)()("Integer containing pointer to the datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNCDEF  (CRDataReader)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (CRDataReader)(dr)()("Datareader object openen, e.g. with hFileOpen or crfile.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HString)(keyword)()("Keyword to be set in the file")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_2 (HPyObjectPtr)(pyob)()("Input paramter")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 ////$COPY_TO END --------------------------------------------------
@@ -2573,9 +2571,9 @@ HPyObject HFPP_FUNC_NAME(HIntPointer iptr, HString key)
  \brief $DOCSTRING
  $PARDOCSTRING
 */
-void HFPP_FUNC_NAME(HIntPointer iptr, HString key, HPyObjectPtr pyob)
+CRDataReader & HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
 {
-  DataReader *drp(reinterpret_cast<DataReader*>(iptr));
+  DataReader *drp=&dr;
 #define HFPP_REPEAT(TYPE,TYPE2,KEY) if (key== #KEY) {TYPE input(TYPE2 (pyob)); drp->set##KEY (input);} else
   HFPP_REPEAT(uint,PyInt_AsLong,Block)
     HFPP_REPEAT(uint,PyInt_AsLong,Blocksize)
@@ -2611,6 +2609,7 @@ void HFPP_FUNC_NAME(HIntPointer iptr, HString key, HPyObjectPtr pyob)
       if (key!="help") cout << "Unknown keyword " << key <<"!"<<endl;
       cout  << BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << " - available keywords: "<< txt <<endl;
     };
+  return dr;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -2621,8 +2620,8 @@ void HFPP_FUNC_NAME(HIntPointer iptr, HString key, HPyObjectPtr pyob)
 #define HFPP_FUNC_NAME hFileRead
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
-#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HIntPointer)(iptr)()("Integer containing pointer to the datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNCDEF  (CRDataReader)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (CRDataReader)(dr)()("Datareader object, opened e.g. with hFileOpen or crfile.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HString)(Datatype)()("Name of the data column to be retrieved (e.g., FFT, Fx,Time, Frequency...)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(vec)()("Data (output) vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
@@ -2645,20 +2644,20 @@ Python list with [].extend(idata)
 */
 
 template <class T>
-void HFPP_FUNC_NAME(
-		    HIntPointer iptr,
+CRDataReader & HFPP_FUNC_NAME(
+		    CRDataReader &dr,
 		    HString Datatype,
 		    std::vector<T> & vec
 		    )
 {
 
   //Create a DataReader Pointer from an interger variable
-  DataReader *drp=reinterpret_cast<DataReader*>(iptr);
+  DataReader *drp=&dr;
 
   //Check whether it is non-NULL.
   if (drp==Null_p){
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": pointer to FileObject is NULL, DataReader not found.");
-    return;
+    return dr;
   };
 
   //------TIME------------------------------
@@ -2705,7 +2704,7 @@ void HFPP_FUNC_NAME(
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Datatype=" << Datatype << " is unknown.");
     vec.clear();
   };
-  return;
+  return dr;
 }
 #undef HFPP_REPEAT
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"

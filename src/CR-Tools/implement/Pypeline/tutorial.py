@@ -355,7 +355,7 @@ filename
 We can create a new file object, using the "crfile" class, which is an
 interface to the LOFAR CRTOOLS datareader class and was defined in pycrtools.py. 
 
-The following will open a data file:
+The following will open a data file and return a DataReader object:
 
 """
 file=crfile(filename)
@@ -363,22 +363,14 @@ file.set("Blocksize",1024*2)
 #%SKIP
 """
 
-The crfile class stores a pointer to the data reader object, which can
-be retrieved with
-
-"""
-file.iptr
-"""
-
-and similarly the filename with
+The associated filename can be retrieved with
 
 """
 file.filename
 """
 
 The file will be automatically closed (and the DataReader object be
-destroyed), whenever the crfile object is deleted, e.g. with
-"file=0". One can also explicitly close the file with "file.close()".
+destroyed), whenever the crfile object is deleted, e.g. with "file=0".
 
 
 (++) Setting and retrieving metadata (parameters)
