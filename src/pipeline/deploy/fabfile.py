@@ -1,8 +1,10 @@
-from fabric.api import env, hosts, run, put, get, env, require
+from fabric.api import env, hosts, run, put, get, require
 from pipeline.support.clusterdesc import ClusterDesc
 import os.path
 
 from ConfigParser import SafeConfigParser as ConfigParser
+
+env['use_shell'] = False
 
 # Support function
 def _get_config(filename):
