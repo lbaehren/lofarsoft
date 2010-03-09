@@ -2,7 +2,7 @@
 1 0 obj
 <<
 /Creator (PyText2Pdf 1.3 By Anand B Pillai )
-/CreationDate (D:20100309024806)
+/CreationDate (D:20100309182908)
 /Producer (PyText2Pdf 1.3(\251 Anand B Pillai))
 /Title (tutorial.py.txt)
 >>
@@ -546,15 +546,14 @@ BT
 (We can create a new file object, using the "crfile" class, which is an)'
 (interface to the LOFAR CRTOOLS datareader class and was defined in pycrtools.py. )'
 ()'
-(The following will open a data file:)'
+(The following will open a data file and return a DataReader object:)'
 ()'
 (>>> file=crfile\(filename\))'
 (  -- nof dipole datasets = 16)'
 (  -- Setting up DataIterator objects ...)'
 (  -- Setting up header record ...)'
-(  [/Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.awk.cc,4149]: Opening LOFAR)'
-( File=/Users/falcke/LOFAR/usg/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB)'
-(1.h5)'
+(  Opening LOFAR File=/Users/falcke/LOFAR/usg/data/lofar/trigger-2010-02-11/triggered-pulse)'
+(-2010-02-11-TBB1.h5)'
 (  [DataReader::summary])'
 (   -- blocksize ............ = 1024)'
 (   -- FFT length ........... = 513)'
@@ -570,21 +569,14 @@ BT
 (   -- shape\(calfft\) ........ = [513, 16])'
 (>>> file.set\("Blocksize",1024*2\))'
 ()'
-(The crfile class stores a pointer to the data reader object, which can)'
-(be retrieved with)'
-()'
-(>>> file.iptr)'
-(  8776276)'
-()'
-(and similarly the filename with)'
+(The associated filename can be retrieved with)'
 ()'
 (>>> file.filename)'
 (  '/Users/falcke/LOFAR/usg/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h)'
 (5')'
 ()'
 (The file will be automatically closed \(and the DataReader object be)'
-(destroyed\), whenever the crfile object is deleted, e.g. with)'
-("file=0". One can also explicitly close the file with "file.close\(\)".)'
+(destroyed\), whenever the crfile object is deleted, e.g. with "file=0".)'
 ()'
 ()'
 (4.2.  Setting and retrieving metadata \(parameters\))'
@@ -599,11 +591,19 @@ BT
 (>>> obsname=file.get\("Observatory"\);)'
 (  obsname = LOFAR)'
 ()'
+(There are more keywords, of course. A list of implemented parameters)'
+(we can access is obtained by)'
+()'
+(>>> keywords=file.get\("help"\))'
+(  hFileGetParameter - available keywords: nofAntennas, nofSelectedChannels, nofSelectedAnt)'
+(ennas, nofBaselines, block, blocksize, stride, fftLength, nyquistZone, sampleInterval, ref)'
+(erenceTime, sampleFrequency, antennas, selectedAntennas, selectedChannels, positions, incr)'
+(ement, frequencyValues, frequencyRange, Date, Observatory, Filesize, dDate, presync, TL, L)'
 ET
 endstream
 endobj
 26 0 obj
-2212
+2499
 endobj
 27 0 obj
 <<
@@ -622,14 +622,6 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
-(There are more keywords, of course. A list of implemented parameters)'
-(we can access is obtained by)'
-()'
-(>>> keywords=file.get\("help"\))'
-(  hFileGetParameter - available keywords: nofAntennas, nofSelectedChannels, nofSelectedAnt)'
-(ennas, nofBaselines, block, blocksize, stride, fftLength, nyquistZone, sampleInterval, ref)'
-(erenceTime, sampleFrequency, antennas, selectedAntennas, selectedChannels, positions, incr)'
-(ement, frequencyValues, frequencyRange, Date, Observatory, Filesize, dDate, presync, TL, L)'
 (TL, EventClass, SampleFreq, StartSample, AntennaIDs, help)'
 ()'
 (Note, that the results are returned as PythonObjects. Hence, this)'
@@ -682,11 +674,19 @@ BT
 ()'
 (>>> file.set\("Blocksize",blocksize\);)'
 ()'
+(again the list of implemented keywords is visible with using)'
+()'
+(>>> file.set\("help",0\);)'
+()'
+(The set method actually returns the crfile object. Hence you can)'
+(append multiple set commands after each other.)'
+()'
+(>>> file.set\("Block",2\).set\("SelectedAntennas",[0,2]\);)'
 ET
 endstream
 endobj
 29 0 obj
-2505
+2271
 endobj
 30 0 obj
 <<
@@ -705,14 +705,6 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
-(again the list of implemented keywords is visible with using)'
-()'
-(>>> file.set\("help",0\);)'
-()'
-(The set method actually returns the crfile object. Hence you can)'
-(append multiple set commands after each other.)'
-()'
-(>>> file.set\("Block",2\).set\("SelectedAntennas",[0,2]\);)'
 ()'
 (Note, that we have now reduced the number of antennas to two: namely)'
 (antenna 0 and 2 and the number of selected antennas is)'
@@ -761,15 +753,23 @@ BT
 (keyword "Fx" \(means f\(x\) \).)'
 ()'
 (>>> file.read\("Fx",fxdata\))'
-(  Vec\(32768\)=[16.0,17.0,10.0,18.0,17.0,6.0,16.0,17.0,-1.0,0.0,...])'
+(  <hftools.DataReader object at 0x738f0>)'
 ()'
 (and voila the vector is filled with time series data from the data file.. )'
 ()'
+(Access the various antennas through slicing)'
+()'
+(>>> ant0data=fxdata[0:blocksize])'
+(or use the .elem method, which returns the nth element of the highest dimension)'
+()'
+(>>> ant0data=fxdata.elem\(0\))'
+(>>> ant1data=fxdata.elem\(1\))'
+(>>> ant0data)'
 ET
 endstream
 endobj
 32 0 obj
-2150
+2093
 endobj
 33 0 obj
 <<
@@ -788,14 +788,6 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
-(Access the various antennas through slicing)'
-()'
-(>>> ant0data=fxdata[0:blocksize])'
-(or use the .elem method, which returns the nth element of the highest dimension)'
-()'
-(>>> ant0data=fxdata.elem\(0\))'
-(>>> ant1data=fxdata.elem\(1\))'
-(>>> ant0data)'
 (  Vec\(2048\)=[16.0,17.0,10.0,18.0,17.0,6.0,16.0,17.0,-1.0,0.0,...])'
 ()'
 (This makes a copy of the data vector if used in this way, while)'
@@ -810,7 +802,7 @@ BT
 ()'
 (>>> timedata=Vector\(float,blocksize\))'
 (>>> file.read\("Time",timedata\))'
-(  Vec\(2048\)=[0.0,5e-09,1e-08,1.5e-08,2e-08,2.5e-08,3e-08,3.5e-08,4e-08,4.5e-08,...])'
+(  <hftools.DataReader object at 0x73260>)'
 ()'
 (This is the time relative to the trigger in seconds. So, let's have)'
 (that in microseconds, by multiplying with one million.)'
@@ -825,8 +817,7 @@ BT
 ()'
 (>>> freqdata=Vector\(float,fftlength\))'
 (>>> file.read\("Frequency",freqdata\))'
-(  Vec\(1025\)=[0.0,97656.25,195312.5,292968.75,390625.0,488281.25,585937.5,683593.75,781250.)'
-(0,878906.25,...])'
+(  <hftools.DataReader object at 0x73260>)'
 (>>> freqdata/=10**6)'
 (>>> freqdata)'
 (  Vec\(1025\)=[0.0,0.09765625,0.1953125,0.29296875,0.390625,0.48828125,0.5859375,0.68359375,)'
@@ -848,11 +839,20 @@ BT
 (So, let's do the transform:)'
 (>>> fftdata=Vector\(complex,fftlength\))'
 (>>> fxdata.elem\(0\).fft\(fftdata,1\))'
+(>>> fftdata)'
+(  Vec\(1025\)=[\(14736+0j\),\(-38.0622213601+23.4859171199j\),\(9.68095724748+20.0546226652j\),\(-2)'
+(9.6260665947+15.6167985077j\),\(-37.7150725681-45.6666687196j\),\(-10.7191165725-6.87166502804)'
+(j\),\(-51.8022613662+5.13208605582j\),\(-12.0958025896+51.3491571044j\),\(32.7738487563-53.40582)'
+(96902j\),\(9.04631849557+9.31539046418j\),...])'
+()'
+(Here we have used the fft method of the float vector, which is just a)'
+(call to the stand-alone function hFFT defined in hftools.cc.)'
+()'
 ET
 endstream
 endobj
 35 0 obj
-2326
+2464
 endobj
 36 0 obj
 <<
@@ -871,15 +871,6 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
-(>>> fftdata)'
-(  Vec\(1025\)=[\(14736+0j\),\(-38.0622213601+23.4859171199j\),\(9.68095724748+20.0546226652j\),\(-2)'
-(9.6260665947+15.6167985077j\),\(-37.7150725681-45.6666687196j\),\(-10.7191165725-6.87166502804)'
-(j\),\(-51.8022613662+5.13208605582j\),\(-12.0958025896+51.3491571044j\),\(32.7738487563-53.40582)'
-(96902j\),\(9.04631849557+9.31539046418j\),...])'
-()'
-(Here we have used the fft method of the float vector, which is just a)'
-(call to the stand-alone function hFFT defined in hftools.cc.)'
-()'
 (to get the power, we have to square the complex data and convert it to)'
 (floats. This can be done using the complex function "norm" )'
 ()'
@@ -931,11 +922,20 @@ BT
 (gr.Axis\("xy"\))'
 (gr.Title\("Test Plot x"\))'
 (gr.Label\("x","x-Axis",1\))'
+(gr.Label\("y","y-Axis",1\))'
+(gr.Plot\(x,y\);)'
+(gr.WriteEPS\("test-y.eps","Test Plot"\))'
+()'
+(6.2.  Matplotlib)'
+()'
+(Now we import matplotlib)'
+()'
+(>>> import matplotlib.pyplot as plt)'
 ET
 endstream
 endobj
 38 0 obj
-2210
+1890
 endobj
 39 0 obj
 <<
@@ -954,15 +954,6 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
-(gr.Label\("y","y-Axis",1\))'
-(gr.Plot\(x,y\);)'
-(gr.WriteEPS\("test-y.eps","Test Plot"\))'
-()'
-(6.2.  Matplotlib)'
-()'
-(Now we import matplotlib)'
-()'
-(>>> import matplotlib.pyplot as plt)'
 ()'
 (And a plot window should pop up somehwere \(in the background?\) !!")'
 (\(NB: At least on a Mac the window likes to stubbornly hide behind)'
@@ -985,9 +976,9 @@ BT
 (>>> fxall=Vector\(\); fxall.setDim\([nofSelectedAntennas,maxblocksize]\))'
 (>>> timeall=Vector\(float,maxblocksize\) )'
 (>>> file.read\("Time",timeall\); timeall *= 10**6.)'
-(  Vec\(132096\)=[0.0,5e-09,1e-08,1.5e-08,2e-08,2.5e-08,3e-08,3.5e-08,4e-08,4.5e-08,...])'
+(  <hftools.DataReader object at 0x3ee35e0>)'
 (>>> file.read\("Fx",fxall\))'
-(  Vec\(2113536\)=[16.0,17.0,10.0,18.0,17.0,6.0,16.0,17.0,-1.0,0.0,...])'
+(  <hftools.DataReader object at 0x73928>)'
 ()'
 (and then we plot it )'
 ()'
@@ -1014,11 +1005,20 @@ BT
 (is actually AzElRadius, where we need to set the radius to unity.)'
 ()'
 (>>> azel=FloatVec\(\))'
+(>>> azel.extend\(\(178,28,1\)\))'
+(>>> cartesian=azel.new\(\))'
+(>>> azel)'
+(  Vec\(3\)=[178.0,28.0,1.0])'
+(>>> cartesian)'
+(  Vec\(3\)=[0.0,0.0,0.0])'
+()'
+(We then do the conversion, using )'
+()'
 ET
 endstream
 endobj
 41 0 obj
-2309
+2241
 endobj
 42 0 obj
 <<
@@ -1037,15 +1037,6 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
-(>>> azel.extend\(\(178,28,1\)\))'
-(>>> cartesian=azel.new\(\))'
-(>>> azel)'
-(  Vec\(3\)=[178.0,28.0,1.0])'
-(>>> cartesian)'
-(  Vec\(3\)=[0.0,0.0,0.0])'
-()'
-(We then do the conversion, using )'
-()'
 (>>> hCoordinateConvert\(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian)'
 (,True\))'
 (  True)'
@@ -1097,11 +1088,20 @@ BT
 (   )'
 (  hLog10\(vec, vecout\)    - Take the log10 of all the elements in the vector and )'
 (                           return results in a second vector.)'
+(   )'
+(  hSin\(vec\)              - Take the sin of all the elements in the vector.)'
+(   )'
+(  hSin\(vec, vecout\)      - Take the sin of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hSinh\(vec\)             - Take the sinh of all the elements in the vector.)'
+(   )'
+(  hSinh\(vec, vecout\)     - Take the sinh of all the elements in the vector and )'
 ET
 endstream
 endobj
 44 0 obj
-2282
+2507
 endobj
 45 0 obj
 <<
@@ -1120,15 +1120,6 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
-(   )'
-(  hSin\(vec\)              - Take the sin of all the elements in the vector.)'
-(   )'
-(  hSin\(vec, vecout\)      - Take the sin of all the elements in the vector and )'
-(                           return results in a second vector.)'
-(   )'
-(  hSinh\(vec\)             - Take the sinh of all the elements in the vector.)'
-(   )'
-(  hSinh\(vec, vecout\)     - Take the sinh of all the elements in the vector and )'
 (                           return results in a second vector.)'
 (   )'
 (  hSqrt\(vec\)             - Take the sqrt of all the elements in the vector.)'
@@ -1180,11 +1171,20 @@ BT
 (   )'
 (  hAcos\(vec, vecout\)     - Take the acos of all the elements in the vector and )'
 (                           return results in a second vector.)'
+(   )'
+(  hAsin\(vec\)             - Take the asin of all the elements in the vector.)'
+(   )'
+(  hAsin\(vec, vecout\)     - Take the asin of all the elements in the vector and )'
+(                           return results in a second vector.)'
+(   )'
+(  hAtan\(vec\)             - Take the atan of all the elements in the vector.)'
+(   )'
+(  hAtan\(vec, vecout\)     - Take the atan of all the elements in the vector and )'
 ET
 endstream
 endobj
 47 0 obj
-2977
+2979
 endobj
 48 0 obj
 <<
@@ -1203,15 +1203,6 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
-(   )'
-(  hAsin\(vec\)             - Take the asin of all the elements in the vector.)'
-(   )'
-(  hAsin\(vec, vecout\)     - Take the asin of all the elements in the vector and )'
-(                           return results in a second vector.)'
-(   )'
-(  hAtan\(vec\)             - Take the atan of all the elements in the vector.)'
-(   )'
-(  hAtan\(vec, vecout\)     - Take the atan of all the elements in the vector and )'
 (                           return results in a second vector.)'
 (   )'
 (  hiSub\(vec1, vec2\)      - Performs a Sub between the two vectors, which is )'
@@ -1263,11 +1254,20 @@ BT
 (  hiAdd\(vec1, val\)       - Performs a Add between the vector and a scalar )'
 (                           \(applied to each element\), which is returned in the )'
 (                           first vector.)'
+(   )'
+(  hAdd\(vec1, vec2, vec3\) - Performs a Add between the two vectors, which is )'
+(                           returned in the third vector.)'
+(   )'
+(  hAddAdd\(vec1, vec2, vec3\) - Performs a Add between the two vectors, and adds )'
+(                           the result to the output \(third\) vector.)'
+(   )'
+(  hAddAddConv\(vec1, vec2, vec3\) - Performs a Add between the two vectors, and )'
+(                           adds the result to the output \(third\) vector - )'
 ET
 endstream
 endobj
 50 0 obj
-3340
+3400
 endobj
 51 0 obj
 <<
@@ -1286,15 +1286,6 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
-(   )'
-(  hAdd\(vec1, vec2, vec3\) - Performs a Add between the two vectors, which is )'
-(                           returned in the third vector.)'
-(   )'
-(  hAddAdd\(vec1, vec2, vec3\) - Performs a Add between the two vectors, and adds )'
-(                           the result to the output \(third\) vector.)'
-(   )'
-(  hAddAddConv\(vec1, vec2, vec3\) - Performs a Add between the two vectors, and )'
-(                           adds the result to the output \(third\) vector - )'
 (                           automatic casting is done.)'
 (   )'
 (  hAdd\(vec1, val, vec2\)  - Performs a Add between the vector and a scalar, )'
@@ -1346,11 +1337,20 @@ BT
 (   )'
 (  hSum\(vec\)              - Performs a sum over the values in a vector and )'
 (                           returns the value.)'
+(   )'
+(  hNorm\(vec\)             - Returns the lengths or norm of a vector \(i.e. )'
+(                           Sqrt\(Sum_i\(xi*+2\)\)\).)'
+(   )'
+(  hNormalize\(vec\)        - Normalizes a vector to length unity.)'
+(   )'
+(  hMean\(vec\)             - Returns the mean value of all elements in a vector.)'
+(   )'
+(  hSort\(vec\)             - Sorts a vector in place.)'
 ET
 endstream
 endobj
 53 0 obj
-3314
+3203
 endobj
 54 0 obj
 <<
@@ -1369,15 +1369,6 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
-(   )'
-(  hNorm\(vec\)             - Returns the lengths or norm of a vector \(i.e. )'
-(                           Sqrt\(Sum_i\(xi*+2\)\)\).)'
-(   )'
-(  hNormalize\(vec\)        - Normalizes a vector to length unity.)'
-(   )'
-(  hMean\(vec\)             - Returns the mean value of all elements in a vector.)'
-(   )'
-(  hSort\(vec\)             - Sorts a vector in place.)'
 (   )'
 (  hSortMedian\(vec\)       - Sorts a vector in place and returns the median value )'
 (                           of the elements.)'
@@ -1429,11 +1420,20 @@ BT
 (                           values are LessThan a certain threshold value and )'
 (                           returns the number of samples found and the )'
 (                           positions of the samples in a second vector.)'
+(   )'
+(  hDownsample\(vec1, vec2\) - Downsample the input vector to a smaller output )'
+(                           vector.)'
+(   )'
+(  hDownsample\(vec, downsample_factor\) - Downsample the input vector by a cetain )'
+(                           factor and return a new vector.)'
+(   )'
+(  hFindLowerBound\(vec, value\) - Finds the location \(i.e., returns integer\) in a )'
+(                           monotonically increasing vector, where the input )'
 ET
 endstream
 endobj
 56 0 obj
-3406
+3489
 endobj
 57 0 obj
 <<
@@ -1452,15 +1452,6 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
-(   )'
-(  hDownsample\(vec1, vec2\) - Downsample the input vector to a smaller output )'
-(                           vector.)'
-(   )'
-(  hDownsample\(vec, downsample_factor\) - Downsample the input vector by a cetain )'
-(                           factor and return a new vector.)'
-(   )'
-(  hFindLowerBound\(vec, value\) - Finds the location \(i.e., returns integer\) in a )'
-(                           monotonically increasing vector, where the input )'
 (                           search value is just above or equal to the value in )'
 (                           the vector.)'
 (   )'
@@ -1512,11 +1503,20 @@ BT
 (                           center from sources located at certain 3D space )'
 (                           coordinates in near or far field and for different )'
 (                           frequencies.)'
+(   )'
+(  hGeometricWeights\(frequencies, antPositions, skyPositions, weights, farfield\) )'
+(                           - Calculates the phase gradients as complex weights )'
+(                           for signals received at various antenna positions )'
+(                           relative to a phase center from sources located at )'
+(                           certain 3D space coordinates in near or far field )'
+(                           and for different frequencies.)'
+(   )'
+(  hSpectralPower\(vec, outvec\) - Calculates the power of a complex spectrum and )'
 ET
 endstream
 endobj
 59 0 obj
-3483
+3599
 endobj
 60 0 obj
 <<
@@ -1535,15 +1535,6 @@ BT
 /F1 9 Tf
 1 0 0 1 50 752 Tm
 12 TL
-(   )'
-(  hGeometricWeights\(frequencies, antPositions, skyPositions, weights, farfield\) )'
-(                           - Calculates the phase gradients as complex weights )'
-(                           for signals received at various antenna positions )'
-(                           relative to a phase center from sources located at )'
-(                           certain 3D space coordinates in near or far field )'
-(                           and for different frequencies.)'
-(   )'
-(  hSpectralPower\(vec, outvec\) - Calculates the power of a complex spectrum and )'
 (                           add it to an output vector.)'
 (   )'
 (  hADC2Voltage\(vec, adc2voltage\) - Convert the ADC value to a voltage.)'
@@ -1568,21 +1559,20 @@ BT
 (  )'
 (  SECTION: I/O Function \(DataReader\))'
 (  --------------------------------------------------)'
-(  hFileClose\(iptr\)       - Function to close a file with a datareader object )'
-(                           providing the pointer to the object as an integer.)'
+(  hFileSummary\(dr\)       - Print a brief summary of the file contents and )'
+(                           current settings.)'
 (   )'
 (  hFileOpen\(Filename\)    - Function to open a file based on a filename and )'
-(                           returning a pointer to a datareader object as an )'
-(                           integer.)'
+(                           returning a datareader object.)'
 (   )'
-(  hFileGetParameter\(iptr, keyword\) - Return information from a data file as a )'
+(  hFileGetParameter\(dr, keyword\) - Return information from a data file as a )'
 (                           Python object.)'
 (   )'
-(  hFileSetParameter\(iptr, keyword, pyob\) - Set parameters in a data file with a )'
+(  hFileSetParameter\(dr, keyword, pyob\) - Set parameters in a data file with a )'
 (                           Python object as input.)'
 (   )'
-(  hFileRead\(iptr, Datatype, vec\) - Read data from a Datareader object \(pointer )'
-(                           in iptr\) into a vector, where the size should be )'
+(  hFileRead\(dr, Datatype, vec\) - Read data from a Datareader object \(pointer in )'
+(                           iptr\) into a vector, where the size should be )'
 (                           pre-allocated.)'
 (   )'
 (  hCalTable\(filename, keyword, date, pyob\) - Return a list of antenna positions )'
@@ -1595,85 +1585,12 @@ BT
 (                           anglesInDegrees\) - Converts a 3D spatial vector into )'
 (                           a different Coordinate type \(e.g. Spherical to )'
 (                           Cartesian\).)'
-ET
-endstream
-endobj
-62 0 obj
-2980
-endobj
-63 0 obj
-<<
-/Type /Page
-/Parent 3 0 R
-/Resources 5 0 R
-/Contents 64 0 R
->>
-endobj
-64 0 obj
-<<
-/Length 65 0 R
->>
-stream
-BT
-/F1 9 Tf
-1 0 0 1 50 752 Tm
-12 TL
 (   )'
 (  hReadFileOld\(vec, iptr, Datatype, Antenna, Blocksize, Block, Stride, Shift\) - )'
 (                           Read data from a Datareader object \(pointer in iptr\) )'
 (                           into a vector.)'
 (   )'
 (  )'
-(  Closing File= /Users/falcke/LOFAR/usg/data/lofar/trigger-2010-02-11/triggered-pulse-2010)'
-(-02-11-TBB1.h5)'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
-()'
 ()'
 ()'
 ()'
@@ -1681,25 +1598,25 @@ BT
 ET
 endstream
 endobj
-65 0 obj
-596
+62 0 obj
+2560
 endobj
 3 0 obj
 <<
 /Type /Pages
-/Count 20
+/Count 19
 /MediaBox [ 0 0 612 792 ]
-/Kids [ 6 0 R 9 0 R 12 0 R 15 0 R 18 0 R 21 0 R 24 0 R 27 0 R 30 0 R 33 0 R 36 0 R 39 0 R 42 0 R 45 0 R 48 0 R 51 0 R 54 0 R 57 0 R 60 0 R 63 0 R ]
+/Kids [ 6 0 R 9 0 R 12 0 R 15 0 R 18 0 R 21 0 R 24 0 R 27 0 R 30 0 R 33 0 R 36 0 R 39 0 R 42 0 R 45 0 R 48 0 R 51 0 R 54 0 R 57 0 R 60 0 R ]
 >>
 endobj
 xref
-0 66
-0000000000 65535 f 0000000009 00000 n 0000000181 00000 n 0000052048 00000 n 0000000230 00000 n 0000000338 00000 n 0000000409 00000 n 0000000489 00000 n 0000002363 00000 n 0000002383 00000 n 0000002464 00000 n 0000004886 00000 n 0000004907 00000 n 0000004989 00000 n 0000007203 00000 n 0000007224 00000 n 0000007306 00000 n 0000009607 00000 n 0000009628 00000 n 0000009710 00000 n 0000012219 00000 n 0000012240 00000 n 0000012322 00000 n 0000013740 00000 n 0000013761 00000 n 0000013843 00000 n 0000016109 00000 n 0000016130 00000 n 0000016212 00000 n 0000018771 00000 n 0000018792 00000 n 0000018874 00000 n 0000021078 00000 n 0000021099 00000 n 0000021181 00000 n 0000023561 00000 n 0000023582 00000 n 0000023664 00000 n 0000025928 00000 n 0000025949 00000 n 0000026031 00000 n 0000028394 00000 n 0000028415 00000 n 0000028497 00000 n 0000030833 00000 n 0000030854 00000 n 0000030936 00000 n 0000033967 00000 n 0000033988 00000 n 0000034070 00000 n 0000037464 00000 n 0000037485 00000 n 0000037567 00000 n 0000040935 00000 n 0000040956 00000 n 0000041038 00000 n 0000044498 00000 n 0000044519 00000 n 0000044601 00000 n 0000048138 00000 n 0000048159 00000 n 0000048241 00000 n 0000051275 00000 n 0000051296 00000 n 0000051378 00000 n 0000052028 00000 n trailer
+0 63
+0000000000 65535 f 0000000009 00000 n 0000000181 00000 n 0000050997 00000 n 0000000230 00000 n 0000000338 00000 n 0000000409 00000 n 0000000489 00000 n 0000002363 00000 n 0000002383 00000 n 0000002464 00000 n 0000004886 00000 n 0000004907 00000 n 0000004989 00000 n 0000007203 00000 n 0000007224 00000 n 0000007306 00000 n 0000009607 00000 n 0000009628 00000 n 0000009710 00000 n 0000012219 00000 n 0000012240 00000 n 0000012322 00000 n 0000013740 00000 n 0000013761 00000 n 0000013843 00000 n 0000016396 00000 n 0000016417 00000 n 0000016499 00000 n 0000018824 00000 n 0000018845 00000 n 0000018927 00000 n 0000021074 00000 n 0000021095 00000 n 0000021177 00000 n 0000023695 00000 n 0000023716 00000 n 0000023798 00000 n 0000025742 00000 n 0000025763 00000 n 0000025845 00000 n 0000028140 00000 n 0000028161 00000 n 0000028243 00000 n 0000030804 00000 n 0000030825 00000 n 0000030907 00000 n 0000033940 00000 n 0000033961 00000 n 0000034043 00000 n 0000037497 00000 n 0000037518 00000 n 0000037600 00000 n 0000040857 00000 n 0000040878 00000 n 0000040960 00000 n 0000044503 00000 n 0000044524 00000 n 0000044606 00000 n 0000048259 00000 n 0000048280 00000 n 0000048362 00000 n 0000050976 00000 n trailer
 <<
-/Size 66
+/Size 63
 /Root 2 0 R
 /Info 1 0 R
 >>
 startxref
-52266
+51208
 %%EOF
