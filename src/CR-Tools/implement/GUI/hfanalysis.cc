@@ -195,24 +195,25 @@ void hCloseFile(HIntPointer iptr) {
 HIntPointer hOpenFile(HString Filename, vector<HInteger> & Offsets) {
   
   bool opened;
-  union{HIntPointer iptr; void* ptr; CR::DataReader* drp; CR::LOFAR_TBB* tbb; CR::LopesEventIn* lep;};
+  union{HIntPointer iptr; CR::DataReader* drp;};
 
   //Create the a pointer to the DataReader object and store the pointer
       
   DBG("DataFunc_CR_dataReaderObject: Opening File, Filename=" << Filename);
   HString Filetype = determine_filetype(Filename);
   if (Filetype=="LOPESEvent") {
-    lep = new CR::LopesEventIn;
+    CR::LopesEventIn* lep = new CR::LopesEventIn;
     DBG("DataFunc_CR_dataReaderObject: lep=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
     opened=lep->attachFile(Filename);
+    drp=lep;
     cout << "File="<<Filename << endl; lep->summary();
   } else if (Filetype=="LOFAR_TBB") {
-    tbb = new CR::LOFAR_TBB(Filename,1024);
+    drp = new CR::LOFAR_TBB(Filename,1024);
     DBG("DataFunc_CR_dataReaderObject: tbb=" << ptr << " = " << reinterpret_cast<HInteger>(ptr));
-    opened=tbb!=NULL;
-    MSG("Opening File="<<Filename);tbb->summary();
+    opened=drp!=NULL;
+    MSG("Opening File="<<Filename);drp->summary();
     if (opened) {
-      CasaVector<int> OffsetsCasa = tbb->sample_offset();
+      CasaVector<int> OffsetsCasa = drp->sample_offset();
       aipsvec2stlvec(OffsetsCasa, Offsets);
       };
   } else {
