@@ -912,15 +912,14 @@ namespace CR { // Namespace CR -- begin
             ymax = max(upYvalues.column(i)(upplotRange));
         }
 
-      // multiply ymin and ymax by 105% to have some space at the bottom and the top of the plot
-      ymin *= 1.05;
-      ymax *= 1.05;
-
       // make y-axis symmetrical around 0
-      if (ymin > (-ymax))
-        ymin = -ymax;
       if (ymax < (-ymin))
         ymax = -ymin;
+
+      // round y-axis height
+      int digit = trunc(log10(ymax));
+      ymax = double(ceil(ymax*pow(10.,-digit)*25))/25./pow(10.,-digit)*1.05;
+      ymin = -ymax;
 
       // set up label for plots and filename
       string plotfilename;
