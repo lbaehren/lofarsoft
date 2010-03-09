@@ -366,16 +366,20 @@ if (CR_WITH_GUI)
   ## Enable hftools Python module
   set (CR_WITH_PYPELINE YES)
 
-  ## Check for Boost
+  ## Check for Boost _____________________________
 
   if (NOT HAVE_BOOST)
     message (STATUS "[CR-Tools] Unable to build GUI - missing Boost!")
     set (CR_WITH_GUI NO)
   endif (NOT HAVE_BOOST)
 
-  ## Check for Qt4
+  ## Check for Qt4 _______________________________
 
   include (FindQt4)
+
+  if (NOT QT4_FOUND)
+    include (FindQtFink)
+  endif (NOT QT4_FOUND)
 
   if (NOT QT_INCLUDES)
     message (STATUS "[CR-Tools] Unable to build GUI - missing Qt4 headers!")
@@ -387,7 +391,7 @@ if (CR_WITH_GUI)
     set (CR_WITH_GUI NO)
   endif (NOT QT_QTCORE_LIBRARY OR NOT QT_QTGUI_LIBRARY)
 
-  ## Check for MathGL
+  ## Check for MathGL ____________________________
 
   include (FindMathGL)
 
