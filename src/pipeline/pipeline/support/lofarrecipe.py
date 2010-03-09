@@ -33,7 +33,7 @@ class LOFARrecipe(WSRTrecipe):
             action="store_true"
         )
         self.optionparser.add_option(
-            '-st', '--start-time',
+            '--start-time',
             dest="start_time",
             help="[Expert use] Pipeline start time"
         )
