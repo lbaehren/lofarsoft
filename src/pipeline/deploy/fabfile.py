@@ -4,8 +4,6 @@ import os.path
 
 from ConfigParser import SafeConfigParser as ConfigParser
 
-env['use_shell'] = False
-
 # Support function
 def _get_config(filename):
     if not os.path.isfile(filename):
@@ -37,14 +35,14 @@ def start_controller(configfile='~/.pipeline.cfg'):
     controlpath = _get_config(configfile).get('DEFAULT', 'runtime_directory')
     controller_ppath = _get_config(configfile).get('deploy', 'controller_ppath')
     script_path = _get_config(configfile).get('deploy', 'script_path')
-    run("bash %s/ipcontroller.sh %s start %s" % (script_path, controlpath, controller_ppath))
+    run("bash %s/ipcontroller.sh %s start %s" % (script_path, controlpath, controller_ppath), shell=False)
 
 def stop_controller(configfile='~/.pipeline.cfg'):
     configfile = os.path.expanduser(configfile)
     require('hosts', provided_by=[head_node])
     controlpath = _get_config(configfile).get('DEFAULT', 'runtime_directory')
     script_path = _get_config(configfile).get('deploy', 'script_path')
-    run("bash %s/ipcontroller.sh %s stop" % (script_path, controlpath))
+    run("bash %s/ipcontroller.sh %s stop" % (script_path, controlpath), shell=False)
 
 def start_engine(configfile='~/.pipeline.cfg'):
     configfile = os.path.expanduser(configfile)
@@ -53,11 +51,11 @@ def start_engine(configfile='~/.pipeline.cfg'):
     engine_ppath = _get_config(configfile).get('deploy', 'engine_ppath')
     engine_lpath = _get_config(configfile).get('deploy', 'engine_lpath')
     script_path = _get_config(configfile).get('deploy', 'script_path')
-    run("bash %s/ipengine.sh %s start %s %s" % (script_path, controlpath, engine_ppath, engine_lpath))
+    run("bash %s/ipengine.sh %s start %s %s" % (script_path, controlpath, engine_ppath, engine_lpath), shell=False)
 
 def stop_engine(configfile='~/.pipeline.cfg'):
     configfile = os.path.expanduser(configfile)
     require('hosts', provided_by=[compute_nodes])
     controlpath = _get_config(configfile).get('DEFAULT', 'runtime_directory')
     script_path = _get_config(configfile).get('deploy', 'script_path')
-    run("bash %s/ipengine.sh %s stop" % (script_path, controlpath))
+    run("bash %s/ipengine.sh %s stop" % (script_path, controlpath), shell=False)
