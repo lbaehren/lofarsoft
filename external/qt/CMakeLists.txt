@@ -36,18 +36,25 @@ endif (USG_ROOT)
 ## ------------------------------------------------------------------------------
 ## Check if the program/package/library is already available
 
+if (NOT QT_VERBOSE_CONFIGURE)
+  set (QT_FIND_QUIETLY  YES )
+  set (QT4_FIND_QUIETLY YES )
+endif (NOT QT_VERBOSE_CONFIGURE)
+
 include (FindQt4)
 
 if (QT4_FOUND)
   ## set internal variable
   set (HAVE_QT YES)
   ## Summary about the version of Qt found on the system
-  message (STATUS "Have Qt                       = ${QT_FOUND}")
-  message (STATUS "Have Qt4                      = ${QT4_FOUND}")
-  message (STATUS "The major version of Qt found = ${QT_VERSION_MAJOR}")
-  message (STATUS "The minor version of Qt found = ${QT_VERSION_MINOR}")
-  message (STATUS "The patch version of Qt found = ${QT_VERSION_PATCH}")
-  message (STATUS "The edition of Qt             = ${QT_EDITION}")
+  if (QT_VERBOSE_CONFIGURE)
+    message (STATUS "Have Qt                       = ${QT_FOUND}")
+    message (STATUS "Have Qt4                      = ${QT4_FOUND}")
+    message (STATUS "The major version of Qt found = ${QT_VERSION_MAJOR}")
+    message (STATUS "The minor version of Qt found = ${QT_VERSION_MINOR}")
+    message (STATUS "The patch version of Qt found = ${QT_VERSION_PATCH}")
+    message (STATUS "The edition of Qt             = ${QT_EDITION}")
+  endif (QT_VERBOSE_CONFIGURE)
 endif (QT4_FOUND)
 
 ## <-- begin build condition --------------------------------------------------->
