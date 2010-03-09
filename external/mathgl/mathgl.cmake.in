@@ -7,6 +7,8 @@ set (CMAKE_INSTALL_PREFIX
   FORCE
   )
 
+set (CMAKE_VERBOSE_MAKEFILE OFF)
+
 ##____________________________________________________________________
 ## Features/Extensions
 
@@ -40,21 +42,25 @@ set (OPENGL_LIBRARIES      ${OPENGL_LIBRARIES} CACHE FILEPATH "Path to libOpenGL
 ##____________________________________________________________________
 ##                                                                 QT4
 
-set (enable-qt             ${QT4_FOUND}             CACHE BOOL     "Enable Qt4")
-set (use_qt                ${QT4_FOUND}             CACHE BOOL     "Enable Qt4")
-set (QT4_FOUND             ${QT4_FOUND}             CACHE BOOL     "Enable Qt4")
-set (QT_MOC_EXECUTABLE     ${QT_MOC_EXECUTABLE}     CACHE FILEPATH "Path to libOpenGL")
-set (QT_INCLUDES           ${QT_INCLUDES}           CACHE PATH     "Qt header files")
-set (QT_INCLUDE_DIR        ${QT_INCLUDES}           CACHE PATH     "Qt header files")
-set (QT_QTCORE_LIBRARY     ${QT_QTCORE_LIBRARY}     CACHE FILEPATH "QtCore library")
-set (QT_QTGUI_LIBRARY      ${QT_QTGUI_LIBRARY}      CACHE FILEPATH "QtGui library")
+set (enable-qt             ${QT4_FOUND}             CACHE BOOL     "Enable Qt4"      )
+set (use_qt                ${QT4_FOUND}             CACHE BOOL     "Enable Qt4"      )
+set (QT4_FOUND             ${QT4_FOUND}             CACHE BOOL     "Found Qt4"       )
+set (QT_MOC_EXECUTABLE     ${QT_MOC_EXECUTABLE}     CACHE FILEPATH "moc executable"  )
+set (QT_QMAKE_EXECUTABLE   ${QT_QMAKE_EXECUTABLE}   CACHE FILEPATH "qmake executable")
+set (QT_INCLUDES           ${QT_INCLUDES}           CACHE PATH     "Qt header files" )
+set (QT_INCLUDE_DIR        ${QT_INCLUDES}           CACHE PATH     "Qt header files" )
+set (QT_QTCORE_LIBRARY     ${QT_QTCORE_LIBRARY}     CACHE FILEPATH "QtCore library"  )
+set (QT_QTGUI_LIBRARY      ${QT_QTGUI_LIBRARY}      CACHE FILEPATH "QtGui library"   )
 set (QT_QTDESIGNER_LIBRARY ${QT_QTDESIGNER_LIBRARY} CACHE FILEPATH "QtDesigner library")
-set (QT_LIBRARIES          ${QT_LIBRARIES}          CACHE FILEPATH "Qt libraries")
+set (QT_LIBRARIES          ${QT_LIBRARIES}          CACHE FILEPATH "Qt libraries"    )
 
 ##____________________________________________________________________
 ## Add include directories
 
-include_directories (
-  ${GSL_INCLUDES}
-  ${QT_INCLUDE_DIR}
-)
+if (GSL_INCLUDES)
+  include_directories (${GSL_INCLUDES})
+endif (GSL_INCLUDES)
+
+if (QT_INCLUDE_DIR)
+  include_directories (${QT_INCLUDE_DIR})
+endif (QT_INCLUDE_DIR)

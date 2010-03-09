@@ -79,10 +79,11 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
     set (PYTHON_FIND_QUIETLY YES )
     set (QT_FIND_QUIETLY     YES )
   endif (NOT MATHGL_VERBOSE_CONFIGURE)
-
+  
   set (DESIRED_QT_VERSION 4)
   set (QT4_FOUND NO)
   list (APPEND CMAKE_LIBRARY_PATH /sw/lib/qt4-mac)
+  list (APPEND CMAKE_INCLUDE_PATH /sw/lib/qt4-mac/include)
 
   include (FindGSL)
   include (FindHDF5)
@@ -98,83 +99,11 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
 
   ## Extra check for Qt4 _________________________
   
-  if (NOT QT_MOC_EXECUTABLE)
-    find_program (QT_MOC_EXECUTABLE moc ${bin_locations})
-  endif (NOT QT_MOC_EXECUTABLE)
-
-  find_path (QT_INCLUDES QtCore/QTimerEvent QtCore/QResource
-    PATHS ${include_locations}
-    PATH_SUFFIXES
-    qt4-mac qt4-mac/include
-    qt4-x11 qt4-x11/include
-    )
-
-  find_path (QT_QTCORE_INCLUDES QTimerEvent QResource
-    PATHS ${include_locations}
-    PATH_SUFFIXES
-    QtCore
-    qt4-mac qt4-mac/include qt4-mac/include/QtCore
-    qt4-x11 qt4-x11/include
-    )
-  if (QT_QTCORE_INCLUDES)
-    list (APPEND QT_INCLUDES ${QT_QTCORE_INCLUDES})
-  endif (QT_QTCORE_INCLUDES)
+  if (NOT QT4_FOUND)
+    include (FindQtFink)
+  endif (NOT QT4_FOUND)
   
-  find_path (QT_QTGUI_INCLUDES QAction QCloseEvent QMenu
-    PATHS ${include_locations}
-    PATH_SUFFIXES
-    QtGui
-    qt4-mac qt4-mac/include qt4-mac/include/QtGui
-    qt4-x11 qt4-x11/include
-    )
-  if (QT_QTGUI_INCLUDES)
-    list (APPEND QT_INCLUDES ${QT_QTGUI_INCLUDES})
-  endif (QT_QTGUI_INCLUDES)
-  
-  if (NOT QT_QTCORE_LIBRARY)
-    find_library (QT_QTCORE_LIBRARY QtCore
-      PATHS ${lib_locations}
-      PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
-      NO_DEFAULT_PATH
-      )
-    if (QT_QTCORE_LIBRARY)
-      list (APPEND QT_LIBRARIES ${QT_QTCORE_LIBRARY})
-    else (QT_QTCORE_LIBRARY)
-      set (QT4_FOUND NO)
-    endif (QT_QTCORE_LIBRARY)
-  endif (NOT QT_QTCORE_LIBRARY)
-  
-  if (NOT QT_QTGUI_LIBRARY)
-    find_library (QT_QTGUI_LIBRARY QtGui
-      PATHS ${lib_locations}
-      PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
-      NO_DEFAULT_PATH
-      )
-    if (QT_QTGUI_LIBRARY)
-      list (APPEND QT_LIBRARIES ${QT_QTGUI_LIBRARY})
-    else (QT_QTGUI_LIBRARY)
-      set (QT4_FOUND NO)
-    endif (QT_QTGUI_LIBRARY)
-  endif (NOT QT_QTGUI_LIBRARY)
-  
-  if (NOT QT_QTDESIGNER_LIBRARY)
-    find_library (QT_QTDESIGNER_LIBRARY QtDesigner
-      PATHS ${lib_locations}
-      PATH_SUFFIXES qt4-mac qt4-mac/lib qt4-x11 qt4-x11/lib
-      NO_DEFAULT_PATH
-      )
-    if (QT_QTDESIGNER_LIBRARY)
-      list (APPEND QT_LIBRARIES ${QT_QTDESIGNER_LIBRARY})
-    else (QT_QTDESIGNER_LIBRARY)
-      set (QT4_FOUND NO)
-    endif (QT_QTDESIGNER_LIBRARY)
-  endif (NOT QT_QTDESIGNER_LIBRARY)
-  
-  if (QT_LIBRARIES)
-    list(REVERSE QT_LIBRARIES)
-  endif (QT_LIBRARIES)
-  
-  ## Python bindings
+  ## Python bindings _____________________________
   
   if (HAVE_PYTHON)
     
