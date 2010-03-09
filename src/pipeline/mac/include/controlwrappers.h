@@ -34,7 +34,7 @@ public:
     }
     std::string get_cntlrName() { return this->my_event->cntlrName; }
     uint16 get_result() { return this->my_event->result; }
-
+    virtual uint16 get_signal() { return this->my_event->signal; }
     virtual CONTROLConnectedEvent* get_event_ptr() { return this->my_event; }
 };
 
@@ -49,7 +49,7 @@ public:
     }
     std::string get_cntlrName() { return this->my_event->cntlrName; }
     uint16 get_result() { return this->my_event->result; }
-
+    virtual uint16 get_signal() { return this->my_event->signal; }
     virtual CONTROLResyncedEvent* get_event_ptr() { return this->my_event; }
 };
 
@@ -64,7 +64,7 @@ public:
     }
     std::string get_cntlrName() { return this->my_event->cntlrName; }
     uint16 get_result() { return this->my_event->result; }
-
+    virtual uint16 get_signal() { return this->my_event->signal; }
     virtual CONTROLClaimedEvent* get_event_ptr() { return this->my_event; }
 };
 
@@ -79,7 +79,7 @@ public:
     }
     std::string get_cntlrName() { return this->my_event->cntlrName; }
     uint16 get_result() { return this->my_event->result; }
-
+    virtual uint16 get_signal() { return this->my_event->signal; }
     virtual CONTROLPreparedEvent* get_event_ptr() { return this->my_event; }
 };
 
@@ -94,7 +94,7 @@ public:
     }
     std::string get_cntlrName() { return this->my_event->cntlrName; }
     uint16 get_result() { return this->my_event->result; }
-
+    virtual uint16 get_signal() { return this->my_event->signal; }
     virtual CONTROLResumedEvent* get_event_ptr() { return this->my_event; }
 };
 
@@ -109,7 +109,7 @@ public:
     }
     std::string get_cntlrName() { return this->my_event->cntlrName; }
     uint16 get_result() { return this->my_event->result; }
-
+    virtual uint16 get_signal() { return this->my_event->signal; }
     virtual CONTROLSuspendedEvent* get_event_ptr() { return this->my_event; }
 };
 
@@ -124,7 +124,7 @@ public:
     }
     std::string get_cntlrName() { return this->my_event->cntlrName; }
     uint16 get_result() { return this->my_event->result; }
-
+    virtual uint16 get_signal() { return this->my_event->signal; }
     virtual CONTROLReleasedEvent* get_event_ptr() { return this->my_event; }
 };
 
@@ -143,7 +143,7 @@ public:
     uint16 get_result() { return this->my_event->result; }
     uint32 get_treeID() { return this->my_event->treeID; }
     std::string get_errorMsg() { return this->my_event->errorMsg; }
-
+    virtual uint16 get_signal() { return this->my_event->signal; }
     virtual CONTROLQuitedEvent* get_event_ptr() { return this->my_event; }
 };
 
