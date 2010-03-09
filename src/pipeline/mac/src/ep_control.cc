@@ -39,10 +39,6 @@ BOOST_PYTHON_MODULE(_ep_control)
 
     // Events
 
-    class_<GenericEventWrapper>("GenericEvent")
-        .add_property("signal", &GenericEventWrapper::get_signal)
-    ;
-
     // These events may be sent
     class_<CONTROLStartedEventWrapper, bases<GenericEventWrapper> >("ControlStartedEvent", init<std::string, bool>())
         .add_property("controller_name", &CONTROLStartedEventWrapper::get_cntlrName)

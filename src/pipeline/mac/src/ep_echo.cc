@@ -11,10 +11,6 @@ BOOST_PYTHON_MODULE(_ep_echo) {
     scope().attr("ECHO") = ECHO_ECHO;
     scope().attr("CLOCK") = ECHO_CLOCK;
 
-    class_<GenericEventWrapper>("GenericEvent")
-        .add_property("signal", &GenericEventWrapper::get_signal)
-    ;
-
     class_<EchoPingEventWrapper, boost::noncopyable, bases<GenericEventWrapper> >("EchoPingEvent")
         .add_property("ping_time", &EchoPingEventWrapper::get_pt, &EchoPingEventWrapper::set_pt)
         .add_property("seqnr", &EchoPingEventWrapper::get_seqnr, &EchoPingEventWrapper::set_seqnr)
