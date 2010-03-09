@@ -166,7 +166,7 @@ LOFAR Extensions
                 pipeline components to skip parts of their processing for test
                 processes.
 
-            -st, --start-time
+             --start-time
 
                 *Expert use*. Pipeline logs, results, etc are stored according
                 to pipeline start time. This option exists so that the various
