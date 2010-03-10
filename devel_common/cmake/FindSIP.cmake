@@ -84,7 +84,10 @@ if (SIP_SIPCONFIG_PY)
   file (STRINGS ${SIP_SIPCONFIG_PY} SIP_VERSION_STRING
     REGEX "sip_version_str"
     )
-  string (REGEX MATCH "[0-9].[0-9].[0-9]" SIP_VERSION ${SIP_VERSION_STRING})
+  ## extract the version string
+  if (SIP_VERSION_STRING)
+    string (REGEX MATCH "[0-9].[0-9].[0-9]" SIP_VERSION ${SIP_VERSION_STRING})
+  endif (SIP_VERSION_STRING)
 else (SIP_SIPCONFIG_PY)
   message (STATUS "[FindSIP] Unable to determine version - no config file!")
 endif (SIP_SIPCONFIG_PY)
