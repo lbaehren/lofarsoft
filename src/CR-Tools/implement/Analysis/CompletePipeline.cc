@@ -709,7 +709,7 @@ namespace CR { // Namespace CR -- begin
       // Create the Plot
       string label;
       label = "GT " + gtlabel.str() + " - CC-Beam and Power";
-      plotter.AddLabels("time t [#gmsec]", "CC-beam [#gmV/m/MHz]",label);
+      plotter.AddLabels("time t [#gms]", "CC-beam [#gmV/m/MHz]",label);
 
       // Add CC-beam
       plotter.PlotLine(xaxis(plotRange),ccbeam(plotRange),9,1);
@@ -808,7 +808,7 @@ namespace CR { // Namespace CR -- begin
       // Create the Plot
       string label;
       label = "GT " + gtlabel.str() + " - X-Beam and Power";
-      plotter.AddLabels("time t [#gmsec]", "X-beam [#gmV/m/MHz]",label);
+      plotter.AddLabels("time t [#gms]", "X-beam [#gmV/m/MHz]",label);
 
       // Add X-beam
       plotter.PlotLine(xaxis(plotRange),xbeam(plotRange),9,1);
@@ -973,12 +973,12 @@ namespace CR { // Namespace CR -- begin
 
             // Add labels
             if (calibrationMode) {
-              plotter.AddLabels("time t [#gmsec]", "voltage [V]",label);
+              plotter.AddLabels("time t [#gms]", "voltage [V]",label);
             } else {
               if (rawData)
-                plotter.AddLabels("time t [#gmsec]", "counts",label);
+                plotter.AddLabels("time t [#gms]", "counts",label);
               else
-                plotter.AddLabels("time t [#gmsec]", "field strength #ge#d0#u [#gmV/m/MHz]",label);
+                plotter.AddLabels("time t [#gms]", "field strength #ge#d0#u [#gmV/m/MHz]",label);
             }
 
             // Plot (upsampled) trace
@@ -1018,12 +1018,12 @@ namespace CR { // Namespace CR -- begin
         label = "GT " + gtlabel.str() + " - " + antennanumber.str() + " Antennas";
 
         if (calibrationMode) {
-          plotter.AddLabels("time t [#gmsec]", "Voltage [V]",label);
+          plotter.AddLabels("time t [#gms]", "Voltage [V]",label);
         } else {
           if (rawData)
-            plotter.AddLabels("time t [#gmsec]", "counts",label);
+            plotter.AddLabels("time t [#gms]", "counts",label);
           else
-            plotter.AddLabels("time t [#gmsec]", "field strength #ge#d0#u [#gmV/m/MHz]",label);
+            plotter.AddLabels("time t [#gms]", "field strength #ge#d0#u [#gmV/m/MHz]",label);
         }
 
         // Create the plots looping through antennas

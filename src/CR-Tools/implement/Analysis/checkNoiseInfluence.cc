@@ -180,6 +180,10 @@ namespace CR { // Namespace CR -- begin
       // Plot noise
       CompleteBeamPipe_p->plotAllAntennas("noise", lev_p, AntennaSelection, false,
                                           getUpsamplingExponent(),false, false);
+
+      // store upsampled noise
+      upsampledNoise=CompleteBeamPipe_p->getUpsampledFieldstrength(lev_p, getUpsamplingExponent(), AntennaSelection);
+                                         
       // calculate the maxima
       for (int i = 0; i < 2; i++) {
         setPlotInterval(-150e-6 + i*15e-6, -149e-6 + i*15e-6);
@@ -193,6 +197,36 @@ namespace CR { // Namespace CR -- begin
       cerr << "checkNoiseInfluence::loadNoiseEvent: " << x.getMesg() << endl;
     }  
   }
+  
+  void checkNoiseInfluence::addPulseToNoise(const double& pulseSNR)                          
+  {
+    try {   
+      // Generate the antenna selection (all antennas)
+      Vector <Bool> AntennaSelection = pipeline_p->GetAntennaMask(lev_p).copy();
+      AntennaSelection.set(true);
+      
+      // check if noise was loaded consistently
+      if (upsampledNoise.shape() !=  
+          CompleteBeamPipe_p->getUpsampledFieldstrength(lev_p, getUpsamplingExponent(), AntennaSelection).shape()) {
+        cerr << "checkNoiseInfluence::addPulseToNoise: " << "Error: Load noise, first!" << endl;
+        return;
+      }
+
+      CompleteBeamPipe_p->setUpsampledFieldStrength(upsampledNoise);
+
+      // create a plot to see, if things work
+      CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
+      CompleteBeamPipe_p->setCalibrationMode(true);
+
+      // Plot noise
+      CompleteBeamPipe_p->plotAllAntennas("noise2", lev_p, AntennaSelection, false,
+                                          getUpsamplingExponent(),false, false);
+
+    } catch (AipsError x) {
+      cerr << "checkNoiseInfluence::addPulseToNoise: " << x.getMesg() << endl;
+    }  
+  }
+
 
 } // Namespace CR -- end
 

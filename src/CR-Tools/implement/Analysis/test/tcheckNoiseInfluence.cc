@@ -90,6 +90,9 @@ int main (int argc, char *argv[])
     
     // load noise event
     noisetest.loadNoiseEvent(noiseEvent);
+    
+    // add pulse to noise
+    noisetest.addPulseToNoise(0);
 
     cout << "\nEnd of program.\n" << endl;
   } catch (AipsError x) {

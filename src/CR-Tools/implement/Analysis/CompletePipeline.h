@@ -362,7 +362,7 @@ namespace CR { // Namespace CR -- begin
     */
     Matrix<Double> getUpsampledFieldstrength (DataReader *dr,
                                               const int& upsampling_exp,
-                                               Vector<Bool> antennaSelection = Vector<Bool>());
+                                              Vector<Bool> antennaSelection = Vector<Bool>());
 
     /*!
       \brief Gets the upsampled raw data FX of selected antennas (data are not stored for reuse)
@@ -604,9 +604,23 @@ namespace CR { // Namespace CR -- begin
       \param randomDelay       -- Sigma of the gaussian random distribution
       \param randomSeed        -- Seed of the root random number generator (TRandom3)
     */
-   void addRandomDelay(DataReader *dr,
-                       double randomDelay = 0.,
-                       unsigned int randomSeed = 1);
+    void addRandomDelay(DataReader *dr,
+                        double randomDelay = 0.,
+                        unsigned int randomSeed = 1);
+
+
+    /*!
+      \brief Sets the upsampled field strength (WARNING: do not use this function for normal data analysis)
+
+      \param fieldStrength     -- matrix with field strength to set (you MUST verify before, that it has the correct shape)
+    */
+    inline void setUpsampledFieldStrength(const Matrix<Double> fieldStrength) {
+      if (upFieldStrength.shape() == fieldStrength.shape())
+        upFieldStrength = fieldStrength.copy();
+      else
+        cerr << "\nCompletePipeline::setUpsampledFieldStrength: ERROR: shape inconsistent!\n" << endl;
+    }    
+
 
   private:
     

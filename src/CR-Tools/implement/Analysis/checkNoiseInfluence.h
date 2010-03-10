@@ -153,6 +153,13 @@ namespace CR { // Namespace CR -- begin
     */
     void loadNoiseEvent(const string& evname);                          
 
+    /*!
+      \brief Adds pulse to the noise
+      
+      \param pulseSNR          - signal-to-noise ratio to which the test pulse is scaled
+    */
+    void addPulseToNoise(const double& pulseSNR);                          
+
                           
   }; // class definition
   
