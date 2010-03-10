@@ -30,9 +30,9 @@
 #  PYTHON_INCLUDES        = Include path for the header files of PYTHON
 #  PYTHON_LIBRARIES       = Link these to use PYTHON
 #  PYTHON_VERSION         = Python version, as return from "python --version"
-#  PYTHON_MAJOR_VERSION   = (not yet implemented)
-#  PYTHON_MINOR_VERSION   = (not yet implemented)
-#  PYTHON_RELEASE_VERSION = (not yet implemented)
+#  PYTHON_MAJOR_VERSION   = Python major version
+#  PYTHON_MINOR_VERSION   = Python minor version
+#  PYTHON_RELEASE_VERSION = Python release version
 #  PYTHON_LFGLAS          = Linker flags (optional)
 #
 # Beside the core components of Python we also include a search for optional
@@ -135,6 +135,14 @@ foreach (python_version ${python_version_list})
 	)
       if (version_test_error)
 	string (REGEX REPLACE "Python " "" version_test_error ${version_test_error})
+	## extract major version
+	string (REGEX MATCH "[0-9]" PYTHON_MAJOR_VERSION ${version_test_error})
+	## extract minor version
+	string (REGEX REPLACE "${PYTHON_MAJOR_VERSION}." "" PYTHON_MINOR_VERSION ${version_test_error})
+	string (REGEX MATCH "[0-9]" PYTHON_MINOR_VERSION ${PYTHON_MINOR_VERSION})
+	## extract patch version
+	string (REGEX REPLACE "${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION}" "" PYTHON_RELEASE_VERSION ${version_test_error})
+	string (REGEX MATCH "[0-9]" PYTHON_RELEASE_VERSION ${PYTHON_RELEASE_VERSION})
       endif (version_test_error)
     endif(PYTHON_EXECUTABLE)
     
