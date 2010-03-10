@@ -29,14 +29,14 @@ from ep.control import ControlQuitedEvent
 
 class sip(control):
     def pipeline_logic(self):
-        pipeline_state = {
+        self.state = pipeline_state = {
             'run':   threading.Event(),
             'quit':  threading.Event(),
             'pause': threading.Event()
         }
 
-        control_thread  = threading.Thread(target=control_loop, args=(pipeine_state,))
-        pipeline_thread = threading.Thread(target=pipeline_definition, args=(pipeline_state,))
+        control_thread  = threading.Thread(target=control_loop)
+        pipeline_thread = threading.Thread(target=pipeline_definition)
 
         # The control_thread will finish when we're done; the pipeline_thread
         # is daemonic.
@@ -46,7 +46,7 @@ class sip(control):
         control_thread.join()
         self.logger.info("Control loop finished; shutting down")
 
-    def control_loop(self, state):
+    def control_loop(self):
         my_interface = ControllerPort_Interface()
         my_interface.send_event(ControlStartedEvent)
 
@@ -86,17 +86,17 @@ class sip(control):
                 pass
             elif isinstance(currentEvent, ControlSuspendEvent):
                 self.logger.debug("Clearing run state; pipeline must pause")
-                state['run'].clear()
+                self.state['run'].clear()
                 my_interface.send(ControlSuspendedEvent())
             elif isinstance(currentEvent, ControlResumeEvent):
                 self.logger.debug("Setting run state: pipeline may run")
-                state['run'].set()
+                self.state['run'].set()
                 my_interface.send(ControlResumedEvent())
             elif isinstance(currentEvent, ControlReleaseEvent):
                 pass
             elif isinstance(currentEvent, ControlQuitEvent):
                 self.logger.debug("Setting quit state: pipeline must exit")
-                state['quit'].set() # Signal pipeline to stop at next opportunity
+                self.state['quit'].set() # Signal pipeline to stop at next opportunity
                 my_interface.send(ControlQuitedEvent())
             elif isinstance(currentEvent, ControlResyncEvent):
                 pass
@@ -108,7 +108,7 @@ class sip(control):
             # The daemonic event_receiver shouldn't be a problem, but
             # let's stop it just in case.
             # (Do we need to notify MAC?)
-            if state['finished'].is_set():
+            if self.state['finished'].is_set():
                 self.logger.debug("Got finished state: control loop exiting")
                 event_receiver.active = False
                 break
@@ -116,20 +116,20 @@ class sip(control):
             time.sleep(1)
             
                 
-    def pipeline_definition(self, state):
+    def pipeline_definition(self):
         self.logger.info("Waiting for run state")
-        state['run'].wait()
+        self.state['run'].wait()
         self.logger.info("Run state set; starting pipeline run")
         with log_time(self.logger):
             try:
                 datafiles = self.run_task("vdsreader")
-                state['run'].wait()
-                if state['quit'].is_set():
+                self.state['run'].wait()
+                if self.state['quit'].is_set():
                     self.logger.info("Pipeline instructed to quit; bailing out")
                     raise PipelineQuit
                 datafiles = self.run_task("dppp_pass1", datafiles)
-                state['run'].wait()
-                if state['quit'].is_set():
+                self.state['run'].wait()
+                if self.state['quit'].is_set():
                     self.logger.info("Pipeline instructed to quit; bailing out")
                     raise PipelineQuit
             except PipelineQuit:
@@ -141,7 +141,7 @@ class sip(control):
                 # to MAC, even if we exit unsuccessfully. Maybe we should
                 # communicate that back?
                 self.logger.info("Entering finished state")
-                state['finished'].set()
+                self.state['finished'].set()
         
        
 if __name__ == '__main__':
