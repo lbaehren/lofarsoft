@@ -61,14 +61,25 @@ if (NOT HAVE_PYTHON OR PYTHON_FORCE_BUILD)
     )
   
   if (HAVE_PYTHON_SOURCE)
-    ExternalProject_Add (python
-      PREFIX ${PYTHON_BINARY_DIR}
-      DOWNLOAD_DIR ${PYTHON_BINARY_DIR}
-      SOURCE_DIR ${PYTHON_BINARY_DIR}
-      URL ${HAVE_PYTHON_SOURCE}
-      BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${PYTHON_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX} --enable-framework
+    if (APPLE)
+      ExternalProject_Add (python
+	PREFIX ${PYTHON_BINARY_DIR}
+	DOWNLOAD_DIR ${PYTHON_BINARY_DIR}
+	SOURCE_DIR ${PYTHON_BINARY_DIR}
+	URL ${HAVE_PYTHON_SOURCE}
+	BUILD_IN_SOURCE 1
+	CONFIGURE_COMMAND ${PYTHON_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX} --enable-framework
+	)
+    else (APPLE)
+      ExternalProject_Add (python
+	PREFIX ${PYTHON_BINARY_DIR}
+	DOWNLOAD_DIR ${PYTHON_BINARY_DIR}
+	SOURCE_DIR ${PYTHON_BINARY_DIR}
+	URL ${HAVE_PYTHON_SOURCE}
+	BUILD_IN_SOURCE 1
+	CONFIGURE_COMMAND ${PYTHON_BINARY_DIR}/configure --prefix=${USG_INSTALL_PREFIX}
       )
+    endif (APPLE)
   else (HAVE_PYTHON_SOURCE)
     message (STATUS "[Python] Unable to build package - missing source archive!")
   endif (HAVE_PYTHON_SOURCE)
