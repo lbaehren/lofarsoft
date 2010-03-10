@@ -2452,10 +2452,10 @@ CRDataReader & HFPP_FUNC_NAME(HString Filename) {
   }
   if (!opened){
     ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": Opening file " << Filename << " failed.");
-    CR::LopesEventIn* lep = new CR::LopesEventIn; //Make a dummy data reader ....
+    CR::LopesEventIn* lep = new CR::LopesEventIn; //Make a dummy data reader ....  
     drp=lep;
-  };
-  return *drp;
+  }; 
+  return *drp; 
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -2511,7 +2511,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, HString key)
 	HFPP_REPEAT(casa::uChar,uint,SampleFreq)
 	HFPP_REPEAT(uint,uint,StartSample)
 #undef HFPP_REPEAT
-	if (key== "AntennaIDs") {_H_NL_ CasaVector<int> casavec; _H_NL_ drp->headerRecord().get(key,casavec); _H_NL_ std::vector<int> result; _H_NL_ aipsvec2stlvec(casavec,result); _H_NL_ HPyObject pyob(result); _H_NL_ return pyob;} else
+	if (key== "AntennaIDs") {_H_NL_ CasaVector<int> casavec; _H_NL_ drp->headerRecord().get(key,casavec); _H_NL_ std::vector<HInteger> result; _H_NL_ aipsvec2stlvec(casavec,result); _H_NL_ HPyObject pyob(result); _H_NL_ return pyob;} else
     { HString result; result = result
 #define HFPP_REPEAT(TYPE,TYPE2,KEY)  + #KEY + ", "
   HFPP_REPEAT(uint,uint,nofAntennas)
