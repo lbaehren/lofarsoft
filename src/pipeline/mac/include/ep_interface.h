@@ -5,6 +5,7 @@
 #include <Common/LofarLogger.h>
 #include <MACIO/EventPort.h>
 #include <string>
+#include <Python.h>
 
 #include "eventwrappers.h"
 
@@ -21,7 +22,9 @@ public:
     }
     GenericEventWrapper* receive_event() {
         LOFAR::MACIO::GCFEvent* ackPtr;
+        Py_BEGIN_ALLOW_THREADS
         ackPtr = my_EventPort->receive();
+        Py_END_ALLOW_THREADS
         return new GenericEventWrapper(ackPtr);
     }
     void send_event(GenericEventWrapper* wrapped_event) {
