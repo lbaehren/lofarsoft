@@ -137,7 +137,7 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
     WORKING_DIRECTORY ${SIP_BINARY_DIR}/${SIP_DIRECTORY}
     COMMENT "[SIP] Installing software and cleaning up ..."
     )
-  add_dependencies (install run_make)
+  add_dependencies (sip run_make)
 
   ## <-- end build condition ----------------------------------------------------->
   
