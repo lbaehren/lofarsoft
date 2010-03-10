@@ -74,7 +74,7 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
       SOURCE_DIR ${SIP_BINARY_DIR}
       BINARY_DIR ${SIP_BINARY_DIR}/build
       URL ${have_sip_tgz}
-      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} configure.py -b ${CMAKE_INSTALL_PREFIX}/bin -d ${CMAKE_INSTALL_PREFIX}/lib/python -e ${CMAKE_INSTALL_PREFIX}/include/sip -v ${CMAKE_INSTALL_PREFIX}/share/sip
+      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${SIP_BINARY_DIR}/configure.py -b ${CMAKE_INSTALL_PREFIX}/bin -d ${CMAKE_INSTALL_PREFIX}/lib/python -e ${CMAKE_INSTALL_PREFIX}/include/sip -v ${CMAKE_INSTALL_PREFIX}/share/sip
       )
   else (have_sip_tgz)
     ExternalProject_Add (sip
@@ -83,7 +83,7 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
       SOURCE_DIR ${SIP_BINARY_DIR}
       BINARY_DIR ${SIP_BINARY_DIR}/build
       URL ${SIP_URL}
-      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} configure.py -b ${CMAKE_INSTALL_PREFIX}/bin -d ${CMAKE_INSTALL_PREFIX}/lib/python -e ${CMAKE_INSTALL_PREFIX}/include/sip -v ${CMAKE_INSTALL_PREFIX}/share/sip
+      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${SIP_BINARY_DIR}/configure.py -b ${CMAKE_INSTALL_PREFIX}/bin -d ${CMAKE_INSTALL_PREFIX}/lib/python -e ${CMAKE_INSTALL_PREFIX}/include/sip -v ${CMAKE_INSTALL_PREFIX}/share/sip
       )
   endif (have_sip_tgz)
 
