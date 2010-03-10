@@ -139,10 +139,14 @@ foreach (python_version ${python_version_list})
 	string (REGEX MATCH "[0-9]" PYTHON_MAJOR_VERSION ${version_test_error})
 	## extract minor version
 	string (REGEX REPLACE "${PYTHON_MAJOR_VERSION}." "" PYTHON_MINOR_VERSION ${version_test_error})
-	string (REGEX MATCH "[0-9]" PYTHON_MINOR_VERSION ${PYTHON_MINOR_VERSION})
+	if (PYTHON_MINOR_VERSION)
+	  string (REGEX MATCH "[0-9]" PYTHON_MINOR_VERSION ${PYTHON_MINOR_VERSION})
+	endif (PYTHON_MINOR_VERSION)
 	## extract patch version
 	string (REGEX REPLACE "${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION}" "" PYTHON_RELEASE_VERSION ${version_test_error})
-	string (REGEX MATCH "[0-9]" PYTHON_RELEASE_VERSION ${PYTHON_RELEASE_VERSION})
+	if (PYTHON_RELEASE_VERSION)
+	  string (REGEX MATCH "[0-9]" PYTHON_RELEASE_VERSION ${PYTHON_RELEASE_VERSION})
+	endif (PYTHON_RELEASE_VERSION)
       endif (version_test_error)
     endif(PYTHON_EXECUTABLE)
     
