@@ -41,6 +41,7 @@ endif (USG_ROOT)
 ##
 ## ==============================================================================
 
+option (LUS_VERBOSE_CONFIGURE   "Be verbose during configuration?"            NO  )
 option (ENABLE_DASHBOARD       "Send a build report to the Dashboard server?" YES )
 option (POST_BUILD_CLEAN       "Clean up the build directory after a build?"  NO  )
 option (MULTITHREADED_BUILD    "Enable multithreading during build?"          NO  )
@@ -387,11 +388,12 @@ add_dependencies (contrib dal)
 ##
 ## ==============================================================================
 
-message (STATUS "------------------------------------------------------------")
-message (STATUS "LOFARSOFT          = $ENV{LOFARSOFT}")
-message (STATUS "USG_ROOT           = ${USG_ROOT}")
-message (STATUS "USG_INSTALL_PREFIX = ${USG_INSTALL_PREFIX}")
-message (STATUS "USG_PYTHONPATH     = ${USG_PYTHONPATH}")
-message (STATUS "USG_DATA           = ${USG_DATA}")
-message (STATUS "------------------------------------------------------------")
-
+if (LUS_VERBOSE_CONFIGURE)
+  message (STATUS "------------------------------------------------------------")
+  message (STATUS "LOFARSOFT          = $ENV{LOFARSOFT}")
+  message (STATUS "USG_ROOT           = ${USG_ROOT}")
+  message (STATUS "USG_INSTALL_PREFIX = ${USG_INSTALL_PREFIX}")
+  message (STATUS "USG_PYTHONPATH     = ${USG_PYTHONPATH}")
+  message (STATUS "USG_DATA           = ${USG_DATA}")
+  message (STATUS "------------------------------------------------------------")
+endif (LUS_VERBOSE_CONFIGURE)

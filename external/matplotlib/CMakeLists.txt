@@ -42,6 +42,7 @@ if (NOT MATPLOTLIB_VERBOSE_CONFIGURE)
   set (PYTHON_FIND_QUIETLY      YES )
 endif (NOT MATPLOTLIB_VERBOSE_CONFIGURE)
 
+include (FindPython)
 include (FindNumPy)
 include (FindMatplotlib)
 

@@ -11,7 +11,6 @@ cmake_minimum_required (VERSION 2.8)
 ## find script
 
 option (PYQT_FORCE_BUILD       "Force rebuild and local installation?"    NO  )
-option (PYQT_CMAKE_BUILD       "Use CMake to configure and build IT++?"   YES )
 option (PYQT_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
 option (PYQT_VERBOSE_BUILD     "Be verbose during build process?"         NO  )
 
@@ -73,7 +72,7 @@ if (NOT HAVE_PYQT OR PYQT_FORCE_BUILD)
       SOURCE_DIR ${PYQT_BINARY_DIR}
       URL ${have_pyqt_tgz}
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${PYQT_BINARY_DIR}/configure.py -d ${CMAKE_INSTALL_PREFIX}/lib/python
+      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${PYQT_BINARY_DIR}/configure.py -d ${CMAKE_INSTALL_PREFIX}/lib/python -b ${CMAKE_INSTALL_PREFIX}/bin -p ${CMAKE_INSTALL_PREFIX}/plugins
       )
   else (have_pyqt_tgz)
     ExternalProject_Add (pyqt
@@ -82,7 +81,7 @@ if (NOT HAVE_PYQT OR PYQT_FORCE_BUILD)
       SOURCE_DIR ${PYQT_BINARY_DIR}
       URL ${PYQT_URL}
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${PYQT_BINARY_DIR}/configure.py -d ${CMAKE_INSTALL_PREFIX}/lib/python
+      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${PYQT_BINARY_DIR}/configure.py -d ${CMAKE_INSTALL_PREFIX}/lib/python -b ${CMAKE_INSTALL_PREFIX}/bin -p ${CMAKE_INSTALL_PREFIX}/plugins
       )
   endif (have_pyqt_tgz)
   
