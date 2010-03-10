@@ -248,7 +248,7 @@ void aipscol2stlvec(casa::Matrix<S> &data, std::vector<T>& stlvec, const HIntege
     ncol=data.ncolumn();
     //    if (ncol>1) {MSG("aipscol2stlvec: ncol="<<ncol <<" (nrow="<<nrow<<")");};
     if (col>=ncol) {
- ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 319 << ": " << "aipscol2stlvec: column number col=" << col << " is larger than total number of columns (" << ncol << ") in matrix." << endl );
+ ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 322 << ": " << "aipscol2stlvec: column number col=" << col << " is larger than total number of columns (" << ncol << ") in matrix." << endl );
  stlvec.clear();
  return;
     }
@@ -406,20 +406,64 @@ void hFill(const Iter vec,const Iter vec_end, const typename Iter::value_type fi
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hFill( std::vector<T> & vec , T fill_value) {
 hFill ( vec.begin(),vec.end() , fill_value);
 }
+
 template < class T > inline void hFill( casa::Vector<T> & vec , T fill_value) {
 hFill ( vec.cbegin(),vec.cend() , fill_value);
 }
+
 
 void (*fptr_hFill_HString11STDIT)( std::vector<HString> & vec , HString fill_value) = &hFill;
 void (*fptr_hFill_HBool11STDIT)( std::vector<HBool> & vec , HBool fill_value) = &hFill;
 void (*fptr_hFill_HComplex11STDIT)( std::vector<HComplex> & vec , HComplex fill_value) = &hFill;
 void (*fptr_hFill_HNumber11STDIT)( std::vector<HNumber> & vec , HNumber fill_value) = &hFill;
 void (*fptr_hFill_HInteger11STDIT)( std::vector<HInteger> & vec , HInteger fill_value) = &hFill;
+
+template < class T > inline void hFill_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T fill_value ) {
+hFill ( vec.begin() + vecslice1,vec.begin() + vecslice2 , fill_value);
+}
+
+template < class T > inline void hFill_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T fill_value ) {
+hFill ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , fill_value);
+}
+
+
+void (*fptr_hFill_hSLICED_HString11STDIT)( std::vector<HString> & vec , HInteger vecslice1 , HInteger vecslice2 , HString fill_value ) = &hFill_hSLICED;
+void (*fptr_hFill_hSLICED_HBool11STDIT)( std::vector<HBool> & vec , HInteger vecslice1 , HInteger vecslice2 , HBool fill_value ) = &hFill_hSLICED;
+void (*fptr_hFill_hSLICED_HComplex11STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HComplex fill_value ) = &hFill_hSLICED;
+void (*fptr_hFill_hSLICED_HNumber11STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber fill_value ) = &hFill_hSLICED;
+void (*fptr_hFill_hSLICED_HInteger11STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger fill_value ) = &hFill_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -456,6 +500,32 @@ std::vector<T> hNew(std::vector<T> & vec)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -464,6 +534,13 @@ std::vector<HBool> (*fptr_hNew_HBool1STL)( std::vector<HBool> & vec) = &hNew;
 std::vector<HComplex> (*fptr_hNew_HComplex1STL)( std::vector<HComplex> & vec) = &hNew;
 std::vector<HNumber> (*fptr_hNew_HNumber1STL)( std::vector<HNumber> & vec) = &hNew;
 std::vector<HInteger> (*fptr_hNew_HInteger1STL)( std::vector<HInteger> & vec) = &hNew;
+
+
+std::vector<HString> (*fptr_hNew_hSLICED_HString1STL)( std::vector<HString> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNew_hSLICED;
+std::vector<HBool> (*fptr_hNew_hSLICED_HBool1STL)( std::vector<HBool> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNew_hSLICED;
+std::vector<HComplex> (*fptr_hNew_hSLICED_HComplex1STL)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNew_hSLICED;
+std::vector<HNumber> (*fptr_hNew_hSLICED_HNumber1STL)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNew_hSLICED;
+std::vector<HInteger> (*fptr_hNew_hSLICED_HInteger1STL)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNew_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -500,6 +577,33 @@ void hResize(std::vector<T> & vec, HInteger newsize)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -508,6 +612,13 @@ void (*fptr_hResize_HBool1HIntegerSTL)( std::vector<HBool> & vec , HInteger news
 void (*fptr_hResize_HComplex1HIntegerSTL)( std::vector<HComplex> & vec , HInteger newsize) = &hResize;
 void (*fptr_hResize_HNumber1HIntegerSTL)( std::vector<HNumber> & vec , HInteger newsize) = &hResize;
 void (*fptr_hResize_HInteger1HIntegerSTL)( std::vector<HInteger> & vec , HInteger newsize) = &hResize;
+
+
+void (*fptr_hResize_hSLICED_HString1HIntegerSTL)( std::vector<HString> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger newsize ) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HBool1HIntegerSTL)( std::vector<HBool> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger newsize ) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HComplex1HIntegerSTL)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger newsize ) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HNumber1HIntegerSTL)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger newsize ) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HInteger1HIntegerSTL)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger newsize ) = &hResize_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -546,6 +657,34 @@ void hResize(std::vector<T> & vec, HInteger newsize, T fill)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -554,6 +693,13 @@ void (*fptr_hResize_HBool1HInteger1STL)( std::vector<HBool> & vec , HInteger new
 void (*fptr_hResize_HComplex1HInteger1STL)( std::vector<HComplex> & vec , HInteger newsize , HComplex fill) = &hResize;
 void (*fptr_hResize_HNumber1HInteger1STL)( std::vector<HNumber> & vec , HInteger newsize , HNumber fill) = &hResize;
 void (*fptr_hResize_HInteger1HInteger1STL)( std::vector<HInteger> & vec , HInteger newsize , HInteger fill) = &hResize;
+
+
+void (*fptr_hResize_hSLICED_HString1HInteger1STL)( std::vector<HString> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger newsize , HString fill ) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HBool1HInteger1STL)( std::vector<HBool> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger newsize , HBool fill ) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HComplex1HInteger1STL)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger newsize , HComplex fill ) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HNumber1HInteger1STL)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger newsize , HNumber fill ) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HInteger1HInteger1STL)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger newsize , HInteger fill ) = &hResize_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -590,6 +736,33 @@ void hResize(std::vector<T> & vec1,std::vector<S> & vec2)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -618,6 +791,33 @@ void (*fptr_hResize_HIntegerHBool12STLSTL)( std::vector<HInteger> & vec1 , std::
 void (*fptr_hResize_HIntegerHComplex12STLSTL)( std::vector<HInteger> & vec1 , std::vector<HComplex> & vec2) = &hResize;
 void (*fptr_hResize_HIntegerHNumber12STLSTL)( std::vector<HInteger> & vec1 , std::vector<HNumber> & vec2) = &hResize;
 void (*fptr_hResize_HIntegerHInteger12STLSTL)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2) = &hResize;
+
+
+void (*fptr_hResize_hSLICED_HStringHString12STLSTL)( std::vector<HString> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HString> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HStringHBool12STLSTL)( std::vector<HString> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HBool> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HStringHComplex12STLSTL)( std::vector<HString> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HStringHNumber12STLSTL)( std::vector<HString> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HStringHInteger12STLSTL)( std::vector<HString> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HBoolHString12STLSTL)( std::vector<HBool> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HString> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HBoolHBool12STLSTL)( std::vector<HBool> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HBool> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HBoolHComplex12STLSTL)( std::vector<HBool> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HBoolHNumber12STLSTL)( std::vector<HBool> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HBoolHInteger12STLSTL)( std::vector<HBool> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HComplexHString12STLSTL)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HString> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HComplexHBool12STLSTL)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HBool> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HComplexHComplex12STLSTL)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HComplexHNumber12STLSTL)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HComplexHInteger12STLSTL)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HNumberHString12STLSTL)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HString> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HNumberHBool12STLSTL)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HBool> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HNumberHComplex12STLSTL)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HNumberHNumber12STLSTL)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HNumberHInteger12STLSTL)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HIntegerHString12STLSTL)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HString> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HIntegerHBool12STLSTL)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HBool> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HIntegerHComplex12STLSTL)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HIntegerHNumber12STLSTL)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HIntegerHInteger12STLSTL)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -654,6 +854,33 @@ void hResize(casa::Vector<T> & vec1,casa::Vector<S> & vec2)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -682,6 +909,33 @@ void (*fptr_hResize_HIntegerHBool12CASACASA)( std::vector<HInteger> & vec1 , std
 void (*fptr_hResize_HIntegerHComplex12CASACASA)( std::vector<HInteger> & vec1 , std::vector<HComplex> & vec2) = &hResize;
 void (*fptr_hResize_HIntegerHNumber12CASACASA)( std::vector<HInteger> & vec1 , std::vector<HNumber> & vec2) = &hResize;
 void (*fptr_hResize_HIntegerHInteger12CASACASA)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2) = &hResize;
+
+
+void (*fptr_hResize_hSLICED_HStringHString12CASACASA)( std::vector<HString> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HString> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HStringHBool12CASACASA)( std::vector<HString> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HBool> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HStringHComplex12CASACASA)( std::vector<HString> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HStringHNumber12CASACASA)( std::vector<HString> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HStringHInteger12CASACASA)( std::vector<HString> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HBoolHString12CASACASA)( std::vector<HBool> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HString> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HBoolHBool12CASACASA)( std::vector<HBool> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HBool> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HBoolHComplex12CASACASA)( std::vector<HBool> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HBoolHNumber12CASACASA)( std::vector<HBool> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HBoolHInteger12CASACASA)( std::vector<HBool> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HComplexHString12CASACASA)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HString> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HComplexHBool12CASACASA)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HBool> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HComplexHComplex12CASACASA)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HComplexHNumber12CASACASA)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HComplexHInteger12CASACASA)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HNumberHString12CASACASA)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HString> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HNumberHBool12CASACASA)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HBool> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HNumberHComplex12CASACASA)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HNumberHNumber12CASACASA)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HNumberHInteger12CASACASA)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HIntegerHString12CASACASA)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HString> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HIntegerHBool12CASACASA)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HBool> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HIntegerHComplex12CASACASA)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HIntegerHNumber12CASACASA)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
+void (*fptr_hResize_hSLICED_HIntegerHInteger12CASACASA)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hResize_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -726,14 +980,43 @@ void hConvert(const Iterin vec1,const Iterin vec1_end, const Iter vec2,const Ite
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S > inline void hConvert( std::vector<T> & vec1 , std::vector<S> & vec2) {
 hResize(vec2,vec1); hConvert ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
 }
+
 template < class T , class S > inline void hConvert( casa::Vector<T> & vec1 , casa::Vector<S> & vec2) {
 hResize(vec2,vec1); hConvert ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend());
 }
+
 
 void (*fptr_hConvert_HComplexHComplex12STDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2) = &hConvert;
 void (*fptr_hConvert_HComplexHNumber12STDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HNumber> & vec2) = &hConvert;
@@ -744,6 +1027,25 @@ void (*fptr_hConvert_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec1 ,
 void (*fptr_hConvert_HIntegerHComplex12STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HComplex> & vec2) = &hConvert;
 void (*fptr_hConvert_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HNumber> & vec2) = &hConvert;
 void (*fptr_hConvert_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2) = &hConvert;
+
+template < class T , class S > inline void hConvert_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hResize(vec2,vec1); hConvert ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
+}
+
+template < class T , class S > inline void hConvert_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hResize(vec2,vec1); hConvert ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
+}
+
+
+void (*fptr_hConvert_hSLICED_HComplexHComplex12STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
+void (*fptr_hConvert_hSLICED_HComplexHNumber12STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
+void (*fptr_hConvert_hSLICED_HComplexHInteger12STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
+void (*fptr_hConvert_hSLICED_HNumberHComplex12STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
+void (*fptr_hConvert_hSLICED_HNumberHNumber12STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
+void (*fptr_hConvert_hSLICED_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
+void (*fptr_hConvert_hSLICED_HIntegerHComplex12STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
+void (*fptr_hConvert_hSLICED_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
+void (*fptr_hConvert_hSLICED_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hConvert_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -788,18 +1090,60 @@ void hCopy(const Iterin vec,const Iterin vec_end, const Iter out,const Iter out_
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hCopy( std::vector<T> & vec , std::vector<T> & outvec) {
 hCopy ( vec.begin(),vec.end() , outvec.begin(),outvec.end());
 }
+
 template < class T > inline void hCopy( casa::Vector<T> & vec , casa::Vector<T> & outvec) {
 hCopy ( vec.cbegin(),vec.cend() , outvec.cbegin(),outvec.cend());
 }
 
+
 void (*fptr_hCopy_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , std::vector<HComplex> & outvec) = &hCopy;
 void (*fptr_hCopy_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & outvec) = &hCopy;
 void (*fptr_hCopy_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & outvec) = &hCopy;
+
+template < class T > inline void hCopy_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<T> & outvec , HInteger outvecslice1 , HInteger outvecslice2) {
+hCopy ( vec.begin() + vecslice1,vec.begin() + vecslice2 , outvec.begin() + outvecslice1,outvec.begin() + outvecslice2);
+}
+
+template < class T > inline void hCopy_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & outvec , HInteger outvecslice1 , HInteger outvecslice2) {
+hCopy ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , outvec.cbegin() + outvecslice1,outvec.cbegin() + outvecslice2);
+}
+
+
+void (*fptr_hCopy_hSLICED_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & outvec , HInteger outvecslice1 , HInteger outvecslice2) = &hCopy_hSLICED;
+void (*fptr_hCopy_hSLICED_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & outvec , HInteger outvecslice1 , HInteger outvecslice2) = &hCopy_hSLICED;
+void (*fptr_hCopy_hSLICED_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & outvec , HInteger outvecslice1 , HInteger outvecslice2) = &hCopy_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -838,6 +1182,32 @@ inline T square(T val)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -880,6 +1250,33 @@ inline HNumber hPhase(HNumber frequency, HNumber time)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -924,6 +1321,34 @@ inline HNumber funcGaussian (HNumber x,
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -971,18 +1396,59 @@ void hExp1(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hExp( std::vector<T> & vec) {
 hExp1 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hExp( casa::Vector<T> & vec) {
 hExp1 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hExp1_HComplex1STDIT)( std::vector<HComplex> & vec) = &hExp;
 void (*fptr_hExp1_HNumber1STDIT)( std::vector<HNumber> & vec) = &hExp;
 void (*fptr_hExp1_HInteger1STDIT)( std::vector<HInteger> & vec) = &hExp;
+
+template < class T > inline void hExp_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hExp1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hExp_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hExp1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hExp_hSLICED1_HComplex1STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hExp_hSLICED;
+void (*fptr_hExp_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hExp_hSLICED;
+void (*fptr_hExp_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hExp_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1026,18 +1492,60 @@ void hExp2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hExp( std::vector<T> & vec , std::vector<T> & vecout) {
 hExp2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T > inline void hExp( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
 hExp2 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
 
+
 void (*fptr_hExp2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , std::vector<HComplex> & vecout) = &hExp;
 void (*fptr_hExp2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hExp;
 void (*fptr_hExp2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hExp;
+
+template < class T > inline void hExp_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hExp2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline void hExp_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hExp2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hExp_hSLICED2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hExp_hSLICED;
+void (*fptr_hExp_hSLICED2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hExp_hSLICED;
+void (*fptr_hExp_hSLICED2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hExp_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1079,18 +1587,59 @@ void hLog1(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hLog( std::vector<T> & vec) {
 hLog1 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hLog( casa::Vector<T> & vec) {
 hLog1 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hLog1_HComplex1STDIT)( std::vector<HComplex> & vec) = &hLog;
 void (*fptr_hLog1_HNumber1STDIT)( std::vector<HNumber> & vec) = &hLog;
 void (*fptr_hLog1_HInteger1STDIT)( std::vector<HInteger> & vec) = &hLog;
+
+template < class T > inline void hLog_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hLog1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hLog_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hLog1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hLog_hSLICED1_HComplex1STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog_hSLICED;
+void (*fptr_hLog_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog_hSLICED;
+void (*fptr_hLog_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1134,18 +1683,60 @@ void hLog2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hLog( std::vector<T> & vec , std::vector<T> & vecout) {
 hLog2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T > inline void hLog( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
 hLog2 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
 
+
 void (*fptr_hLog2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , std::vector<HComplex> & vecout) = &hLog;
 void (*fptr_hLog2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hLog;
 void (*fptr_hLog2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hLog;
+
+template < class T > inline void hLog_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hLog2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline void hLog_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hLog2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hLog_hSLICED2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog_hSLICED;
+void (*fptr_hLog_hSLICED2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog_hSLICED;
+void (*fptr_hLog_hSLICED2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1187,18 +1778,59 @@ void hLog101(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hLog10( std::vector<T> & vec) {
 hLog101 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hLog10( casa::Vector<T> & vec) {
 hLog101 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hLog101_HComplex1STDIT)( std::vector<HComplex> & vec) = &hLog10;
 void (*fptr_hLog101_HNumber1STDIT)( std::vector<HNumber> & vec) = &hLog10;
 void (*fptr_hLog101_HInteger1STDIT)( std::vector<HInteger> & vec) = &hLog10;
+
+template < class T > inline void hLog10_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hLog101 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hLog10_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hLog101 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hLog10_hSLICED1_HComplex1STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog10_hSLICED;
+void (*fptr_hLog10_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog10_hSLICED;
+void (*fptr_hLog10_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hLog10_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1242,18 +1874,60 @@ void hLog102(const Iter vec,const Iter vec_end, const Iter out,const Iter out_en
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hLog10( std::vector<T> & vec , std::vector<T> & vecout) {
 hLog102 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T > inline void hLog10( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
 hLog102 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
 
+
 void (*fptr_hLog102_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , std::vector<HComplex> & vecout) = &hLog10;
 void (*fptr_hLog102_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hLog10;
 void (*fptr_hLog102_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hLog10;
+
+template < class T > inline void hLog10_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hLog102 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline void hLog10_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hLog102 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hLog10_hSLICED2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog10_hSLICED;
+void (*fptr_hLog10_hSLICED2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog10_hSLICED;
+void (*fptr_hLog10_hSLICED2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hLog10_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1295,18 +1969,59 @@ void hSin1(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hSin( std::vector<T> & vec) {
 hSin1 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hSin( casa::Vector<T> & vec) {
 hSin1 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hSin1_HComplex1STDIT)( std::vector<HComplex> & vec) = &hSin;
 void (*fptr_hSin1_HNumber1STDIT)( std::vector<HNumber> & vec) = &hSin;
 void (*fptr_hSin1_HInteger1STDIT)( std::vector<HInteger> & vec) = &hSin;
+
+template < class T > inline void hSin_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hSin1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hSin_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hSin1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hSin_hSLICED1_HComplex1STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSin_hSLICED;
+void (*fptr_hSin_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSin_hSLICED;
+void (*fptr_hSin_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSin_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1350,18 +2065,60 @@ void hSin2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hSin( std::vector<T> & vec , std::vector<T> & vecout) {
 hSin2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T > inline void hSin( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
 hSin2 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
 
+
 void (*fptr_hSin2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , std::vector<HComplex> & vecout) = &hSin;
 void (*fptr_hSin2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hSin;
 void (*fptr_hSin2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hSin;
+
+template < class T > inline void hSin_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hSin2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline void hSin_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hSin2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hSin_hSLICED2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSin_hSLICED;
+void (*fptr_hSin_hSLICED2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSin_hSLICED;
+void (*fptr_hSin_hSLICED2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSin_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1403,18 +2160,59 @@ void hSinh1(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hSinh( std::vector<T> & vec) {
 hSinh1 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hSinh( casa::Vector<T> & vec) {
 hSinh1 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hSinh1_HComplex1STDIT)( std::vector<HComplex> & vec) = &hSinh;
 void (*fptr_hSinh1_HNumber1STDIT)( std::vector<HNumber> & vec) = &hSinh;
 void (*fptr_hSinh1_HInteger1STDIT)( std::vector<HInteger> & vec) = &hSinh;
+
+template < class T > inline void hSinh_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hSinh1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hSinh_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hSinh1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hSinh_hSLICED1_HComplex1STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSinh_hSLICED;
+void (*fptr_hSinh_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSinh_hSLICED;
+void (*fptr_hSinh_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSinh_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1458,18 +2256,60 @@ void hSinh2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hSinh( std::vector<T> & vec , std::vector<T> & vecout) {
 hSinh2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T > inline void hSinh( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
 hSinh2 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
 
+
 void (*fptr_hSinh2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , std::vector<HComplex> & vecout) = &hSinh;
 void (*fptr_hSinh2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hSinh;
 void (*fptr_hSinh2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hSinh;
+
+template < class T > inline void hSinh_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hSinh2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline void hSinh_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hSinh2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hSinh_hSLICED2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSinh_hSLICED;
+void (*fptr_hSinh_hSLICED2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSinh_hSLICED;
+void (*fptr_hSinh_hSLICED2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSinh_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1511,18 +2351,59 @@ void hSqrt1(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hSqrt( std::vector<T> & vec) {
 hSqrt1 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hSqrt( casa::Vector<T> & vec) {
 hSqrt1 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hSqrt1_HComplex1STDIT)( std::vector<HComplex> & vec) = &hSqrt;
 void (*fptr_hSqrt1_HNumber1STDIT)( std::vector<HNumber> & vec) = &hSqrt;
 void (*fptr_hSqrt1_HInteger1STDIT)( std::vector<HInteger> & vec) = &hSqrt;
+
+template < class T > inline void hSqrt_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hSqrt1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hSqrt_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hSqrt1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hSqrt_hSLICED1_HComplex1STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSqrt_hSLICED;
+void (*fptr_hSqrt_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSqrt_hSLICED;
+void (*fptr_hSqrt_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSqrt_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1566,18 +2447,60 @@ void hSqrt2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hSqrt( std::vector<T> & vec , std::vector<T> & vecout) {
 hSqrt2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T > inline void hSqrt( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
 hSqrt2 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
 
+
 void (*fptr_hSqrt2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , std::vector<HComplex> & vecout) = &hSqrt;
 void (*fptr_hSqrt2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hSqrt;
 void (*fptr_hSqrt2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hSqrt;
+
+template < class T > inline void hSqrt_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hSqrt2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline void hSqrt_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hSqrt2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hSqrt_hSLICED2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSqrt_hSLICED;
+void (*fptr_hSqrt_hSLICED2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSqrt_hSLICED;
+void (*fptr_hSqrt_hSLICED2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSqrt_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1619,18 +2542,59 @@ void hSquare1(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hSquare( std::vector<T> & vec) {
 hSquare1 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hSquare( casa::Vector<T> & vec) {
 hSquare1 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hSquare1_HComplex1STDIT)( std::vector<HComplex> & vec) = &hSquare;
 void (*fptr_hSquare1_HNumber1STDIT)( std::vector<HNumber> & vec) = &hSquare;
 void (*fptr_hSquare1_HInteger1STDIT)( std::vector<HInteger> & vec) = &hSquare;
+
+template < class T > inline void hSquare_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hSquare1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hSquare_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hSquare1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hSquare_hSLICED1_HComplex1STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSquare_hSLICED;
+void (*fptr_hSquare_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSquare_hSLICED;
+void (*fptr_hSquare_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSquare_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1674,18 +2638,60 @@ void hSquare2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_e
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hSquare( std::vector<T> & vec , std::vector<T> & vecout) {
 hSquare2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T > inline void hSquare( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
 hSquare2 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
 
+
 void (*fptr_hSquare2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , std::vector<HComplex> & vecout) = &hSquare;
 void (*fptr_hSquare2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hSquare;
 void (*fptr_hSquare2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hSquare;
+
+template < class T > inline void hSquare_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hSquare2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline void hSquare_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hSquare2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hSquare_hSLICED2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSquare_hSLICED;
+void (*fptr_hSquare_hSLICED2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSquare_hSLICED;
+void (*fptr_hSquare_hSLICED2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hSquare_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1727,18 +2733,59 @@ void hTan1(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hTan( std::vector<T> & vec) {
 hTan1 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hTan( casa::Vector<T> & vec) {
 hTan1 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hTan1_HComplex1STDIT)( std::vector<HComplex> & vec) = &hTan;
 void (*fptr_hTan1_HNumber1STDIT)( std::vector<HNumber> & vec) = &hTan;
 void (*fptr_hTan1_HInteger1STDIT)( std::vector<HInteger> & vec) = &hTan;
+
+template < class T > inline void hTan_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hTan1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hTan_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hTan1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hTan_hSLICED1_HComplex1STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTan_hSLICED;
+void (*fptr_hTan_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTan_hSLICED;
+void (*fptr_hTan_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTan_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1782,18 +2829,60 @@ void hTan2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hTan( std::vector<T> & vec , std::vector<T> & vecout) {
 hTan2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T > inline void hTan( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
 hTan2 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
 
+
 void (*fptr_hTan2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , std::vector<HComplex> & vecout) = &hTan;
 void (*fptr_hTan2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hTan;
 void (*fptr_hTan2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hTan;
+
+template < class T > inline void hTan_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hTan2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline void hTan_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hTan2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hTan_hSLICED2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTan_hSLICED;
+void (*fptr_hTan_hSLICED2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTan_hSLICED;
+void (*fptr_hTan_hSLICED2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTan_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1835,18 +2924,59 @@ void hTanh1(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hTanh( std::vector<T> & vec) {
 hTanh1 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hTanh( casa::Vector<T> & vec) {
 hTanh1 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hTanh1_HComplex1STDIT)( std::vector<HComplex> & vec) = &hTanh;
 void (*fptr_hTanh1_HNumber1STDIT)( std::vector<HNumber> & vec) = &hTanh;
 void (*fptr_hTanh1_HInteger1STDIT)( std::vector<HInteger> & vec) = &hTanh;
+
+template < class T > inline void hTanh_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hTanh1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hTanh_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hTanh1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hTanh_hSLICED1_HComplex1STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTanh_hSLICED;
+void (*fptr_hTanh_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTanh_hSLICED;
+void (*fptr_hTanh_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hTanh_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1890,18 +3020,60 @@ void hTanh2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hTanh( std::vector<T> & vec , std::vector<T> & vecout) {
 hTanh2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T > inline void hTanh( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
 hTanh2 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
 
+
 void (*fptr_hTanh2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , std::vector<HComplex> & vecout) = &hTanh;
 void (*fptr_hTanh2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hTanh;
 void (*fptr_hTanh2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hTanh;
+
+template < class T > inline void hTanh_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hTanh2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline void hTanh_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hTanh2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hTanh_hSLICED2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTanh_hSLICED;
+void (*fptr_hTanh_hSLICED2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTanh_hSLICED;
+void (*fptr_hTanh_hSLICED2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hTanh_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1943,18 +3115,59 @@ void hAbs1(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hAbs( std::vector<T> & vec) {
 hAbs1 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hAbs( casa::Vector<T> & vec) {
 hAbs1 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hAbs1_HComplex1STDIT)( std::vector<HComplex> & vec) = &hAbs;
 void (*fptr_hAbs1_HNumber1STDIT)( std::vector<HNumber> & vec) = &hAbs;
 void (*fptr_hAbs1_HInteger1STDIT)( std::vector<HInteger> & vec) = &hAbs;
+
+template < class T > inline void hAbs_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hAbs1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hAbs_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hAbs1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hAbs_hSLICED1_HComplex1STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAbs_hSLICED;
+void (*fptr_hAbs_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAbs_hSLICED;
+void (*fptr_hAbs_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAbs_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1998,18 +3211,60 @@ void hAbs2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hAbs( std::vector<T> & vec , std::vector<T> & vecout) {
 hAbs2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T > inline void hAbs( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
 hAbs2 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
 
+
 void (*fptr_hAbs2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , std::vector<HComplex> & vecout) = &hAbs;
 void (*fptr_hAbs2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hAbs;
 void (*fptr_hAbs2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hAbs;
+
+template < class T > inline void hAbs_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hAbs2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline void hAbs_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hAbs2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hAbs_hSLICED2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAbs_hSLICED;
+void (*fptr_hAbs_hSLICED2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAbs_hSLICED;
+void (*fptr_hAbs_hSLICED2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAbs_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2051,18 +3306,59 @@ void hCos1(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hCos( std::vector<T> & vec) {
 hCos1 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hCos( casa::Vector<T> & vec) {
 hCos1 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hCos1_HComplex1STDIT)( std::vector<HComplex> & vec) = &hCos;
 void (*fptr_hCos1_HNumber1STDIT)( std::vector<HNumber> & vec) = &hCos;
 void (*fptr_hCos1_HInteger1STDIT)( std::vector<HInteger> & vec) = &hCos;
+
+template < class T > inline void hCos_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hCos1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hCos_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hCos1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hCos_hSLICED1_HComplex1STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCos_hSLICED;
+void (*fptr_hCos_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCos_hSLICED;
+void (*fptr_hCos_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCos_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2106,18 +3402,60 @@ void hCos2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hCos( std::vector<T> & vec , std::vector<T> & vecout) {
 hCos2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T > inline void hCos( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
 hCos2 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
 
+
 void (*fptr_hCos2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , std::vector<HComplex> & vecout) = &hCos;
 void (*fptr_hCos2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hCos;
 void (*fptr_hCos2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hCos;
+
+template < class T > inline void hCos_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hCos2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline void hCos_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hCos2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hCos_hSLICED2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCos_hSLICED;
+void (*fptr_hCos_hSLICED2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCos_hSLICED;
+void (*fptr_hCos_hSLICED2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCos_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2159,18 +3497,59 @@ void hCosh1(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hCosh( std::vector<T> & vec) {
 hCosh1 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hCosh( casa::Vector<T> & vec) {
 hCosh1 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hCosh1_HComplex1STDIT)( std::vector<HComplex> & vec) = &hCosh;
 void (*fptr_hCosh1_HNumber1STDIT)( std::vector<HNumber> & vec) = &hCosh;
 void (*fptr_hCosh1_HInteger1STDIT)( std::vector<HInteger> & vec) = &hCosh;
+
+template < class T > inline void hCosh_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hCosh1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hCosh_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hCosh1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hCosh_hSLICED1_HComplex1STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCosh_hSLICED;
+void (*fptr_hCosh_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCosh_hSLICED;
+void (*fptr_hCosh_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCosh_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2214,18 +3593,60 @@ void hCosh2(const Iter vec,const Iter vec_end, const Iter out,const Iter out_end
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hCosh( std::vector<T> & vec , std::vector<T> & vecout) {
 hCosh2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T > inline void hCosh( casa::Vector<T> & vec , casa::Vector<T> & vecout) {
 hCosh2 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
 
+
 void (*fptr_hCosh2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , std::vector<HComplex> & vecout) = &hCosh;
 void (*fptr_hCosh2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hCosh;
 void (*fptr_hCosh2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hCosh;
+
+template < class T > inline void hCosh_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hCosh2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline void hCosh_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<T> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hCosh2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hCosh_hSLICED2_HComplex11STDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HComplex> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCosh_hSLICED;
+void (*fptr_hCosh_hSLICED2_HNumber11STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCosh_hSLICED;
+void (*fptr_hCosh_hSLICED2_HInteger11STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCosh_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2270,17 +3691,57 @@ void hCeil1(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hCeil( std::vector<T> & vec) {
 hCeil1 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hCeil( casa::Vector<T> & vec) {
 hCeil1 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hCeil1_HNumber1STDIT)( std::vector<HNumber> & vec) = &hCeil;
 void (*fptr_hCeil1_HInteger1STDIT)( std::vector<HInteger> & vec) = &hCeil;
+
+template < class T > inline void hCeil_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hCeil1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hCeil_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hCeil1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hCeil_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCeil_hSLICED;
+void (*fptr_hCeil_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hCeil_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2324,19 +3785,62 @@ void hCeil2(const Iter1 vec,const Iter1 vec_end, const Iter2 out,const Iter2 out
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S > inline void hCeil( std::vector<T> & vec , std::vector<S> & vecout) {
 hCeil2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T , class S > inline void hCeil( casa::Vector<T> & vec , casa::Vector<S> & vecout) {
 hCeil2 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
+
 
 void (*fptr_hCeil2_HNumberHNumber12STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hCeil;
 void (*fptr_hCeil2_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HInteger> & vecout) = &hCeil;
 void (*fptr_hCeil2_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HNumber> & vecout) = &hCeil;
 void (*fptr_hCeil2_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hCeil;
+
+template < class T , class S > inline void hCeil_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hCeil2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T , class S > inline void hCeil_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hCeil2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hCeil_hSLICED2_HNumberHNumber12STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCeil_hSLICED;
+void (*fptr_hCeil_hSLICED2_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCeil_hSLICED;
+void (*fptr_hCeil_hSLICED2_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCeil_hSLICED;
+void (*fptr_hCeil_hSLICED2_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hCeil_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2378,17 +3882,57 @@ void hFloor1(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hFloor( std::vector<T> & vec) {
 hFloor1 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hFloor( casa::Vector<T> & vec) {
 hFloor1 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hFloor1_HNumber1STDIT)( std::vector<HNumber> & vec) = &hFloor;
 void (*fptr_hFloor1_HInteger1STDIT)( std::vector<HInteger> & vec) = &hFloor;
+
+template < class T > inline void hFloor_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hFloor1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hFloor_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hFloor1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hFloor_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hFloor_hSLICED;
+void (*fptr_hFloor_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hFloor_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2432,19 +3976,62 @@ void hFloor2(const Iter1 vec,const Iter1 vec_end, const Iter2 out,const Iter2 ou
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S > inline void hFloor( std::vector<T> & vec , std::vector<S> & vecout) {
 hFloor2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T , class S > inline void hFloor( casa::Vector<T> & vec , casa::Vector<S> & vecout) {
 hFloor2 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
+
 
 void (*fptr_hFloor2_HNumberHNumber12STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hFloor;
 void (*fptr_hFloor2_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HInteger> & vecout) = &hFloor;
 void (*fptr_hFloor2_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HNumber> & vecout) = &hFloor;
 void (*fptr_hFloor2_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hFloor;
+
+template < class T , class S > inline void hFloor_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hFloor2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T , class S > inline void hFloor_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hFloor2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hFloor_hSLICED2_HNumberHNumber12STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFloor_hSLICED;
+void (*fptr_hFloor_hSLICED2_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFloor_hSLICED;
+void (*fptr_hFloor_hSLICED2_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFloor_hSLICED;
+void (*fptr_hFloor_hSLICED2_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFloor_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2486,17 +4073,57 @@ void hAcos1(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hAcos( std::vector<T> & vec) {
 hAcos1 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hAcos( casa::Vector<T> & vec) {
 hAcos1 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hAcos1_HNumber1STDIT)( std::vector<HNumber> & vec) = &hAcos;
 void (*fptr_hAcos1_HInteger1STDIT)( std::vector<HInteger> & vec) = &hAcos;
+
+template < class T > inline void hAcos_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hAcos1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hAcos_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hAcos1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hAcos_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAcos_hSLICED;
+void (*fptr_hAcos_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAcos_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2540,19 +4167,62 @@ void hAcos2(const Iter1 vec,const Iter1 vec_end, const Iter2 out,const Iter2 out
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S > inline void hAcos( std::vector<T> & vec , std::vector<S> & vecout) {
 hAcos2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T , class S > inline void hAcos( casa::Vector<T> & vec , casa::Vector<S> & vecout) {
 hAcos2 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
+
 
 void (*fptr_hAcos2_HNumberHNumber12STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hAcos;
 void (*fptr_hAcos2_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HInteger> & vecout) = &hAcos;
 void (*fptr_hAcos2_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HNumber> & vecout) = &hAcos;
 void (*fptr_hAcos2_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hAcos;
+
+template < class T , class S > inline void hAcos_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hAcos2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T , class S > inline void hAcos_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hAcos2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hAcos_hSLICED2_HNumberHNumber12STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAcos_hSLICED;
+void (*fptr_hAcos_hSLICED2_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAcos_hSLICED;
+void (*fptr_hAcos_hSLICED2_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAcos_hSLICED;
+void (*fptr_hAcos_hSLICED2_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAcos_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2594,17 +4264,57 @@ void hAsin1(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hAsin( std::vector<T> & vec) {
 hAsin1 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hAsin( casa::Vector<T> & vec) {
 hAsin1 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hAsin1_HNumber1STDIT)( std::vector<HNumber> & vec) = &hAsin;
 void (*fptr_hAsin1_HInteger1STDIT)( std::vector<HInteger> & vec) = &hAsin;
+
+template < class T > inline void hAsin_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hAsin1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hAsin_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hAsin1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hAsin_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAsin_hSLICED;
+void (*fptr_hAsin_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAsin_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2648,19 +4358,62 @@ void hAsin2(const Iter1 vec,const Iter1 vec_end, const Iter2 out,const Iter2 out
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S > inline void hAsin( std::vector<T> & vec , std::vector<S> & vecout) {
 hAsin2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T , class S > inline void hAsin( casa::Vector<T> & vec , casa::Vector<S> & vecout) {
 hAsin2 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
+
 
 void (*fptr_hAsin2_HNumberHNumber12STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hAsin;
 void (*fptr_hAsin2_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HInteger> & vecout) = &hAsin;
 void (*fptr_hAsin2_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HNumber> & vecout) = &hAsin;
 void (*fptr_hAsin2_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hAsin;
+
+template < class T , class S > inline void hAsin_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hAsin2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T , class S > inline void hAsin_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hAsin2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hAsin_hSLICED2_HNumberHNumber12STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAsin_hSLICED;
+void (*fptr_hAsin_hSLICED2_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAsin_hSLICED;
+void (*fptr_hAsin_hSLICED2_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAsin_hSLICED;
+void (*fptr_hAsin_hSLICED2_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAsin_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2702,17 +4455,57 @@ void hAtan1(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hAtan( std::vector<T> & vec) {
 hAtan1 ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hAtan( casa::Vector<T> & vec) {
 hAtan1 ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hAtan1_HNumber1STDIT)( std::vector<HNumber> & vec) = &hAtan;
 void (*fptr_hAtan1_HInteger1STDIT)( std::vector<HInteger> & vec) = &hAtan;
+
+template < class T > inline void hAtan_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hAtan1 ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hAtan_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hAtan1 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hAtan_hSLICED1_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAtan_hSLICED;
+void (*fptr_hAtan_hSLICED1_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hAtan_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2756,19 +4549,62 @@ void hAtan2(const Iter1 vec,const Iter1 vec_end, const Iter2 out,const Iter2 out
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S > inline void hAtan( std::vector<T> & vec , std::vector<S> & vecout) {
 hAtan2 ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 template < class T , class S > inline void hAtan( casa::Vector<T> & vec , casa::Vector<S> & vecout) {
 hAtan2 ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
+
 
 void (*fptr_hAtan2_HNumberHNumber12STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HNumber> & vecout) = &hAtan;
 void (*fptr_hAtan2_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec , std::vector<HInteger> & vecout) = &hAtan;
 void (*fptr_hAtan2_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HNumber> & vecout) = &hAtan;
 void (*fptr_hAtan2_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec , std::vector<HInteger> & vecout) = &hAtan;
+
+template < class T , class S > inline void hAtan_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hAtan2 ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T , class S > inline void hAtan_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<S> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hAtan2 ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hAtan_hSLICED2_HNumberHNumber12STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAtan_hSLICED;
+void (*fptr_hAtan_hSLICED2_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAtan_hSLICED;
+void (*fptr_hAtan_hSLICED2_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAtan_hSLICED;
+void (*fptr_hAtan_hSLICED2_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hAtan_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2818,14 +4654,43 @@ void hiSub(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin v
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S > inline void hiSub( std::vector<T> & vec1 , std::vector<S> & vec2) {
 hiSub ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
 }
+
 template < class T , class S > inline void hiSub( casa::Vector<T> & vec1 , casa::Vector<S> & vec2) {
 hiSub ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend());
 }
+
 
 void (*fptr_hiSub_HComplexHComplex12STDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2) = &hiSub;
 void (*fptr_hiSub_HComplexHNumber12STDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HNumber> & vec2) = &hiSub;
@@ -2836,6 +4701,25 @@ void (*fptr_hiSub_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec1 , st
 void (*fptr_hiSub_HIntegerHComplex12STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HComplex> & vec2) = &hiSub;
 void (*fptr_hiSub_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HNumber> & vec2) = &hiSub;
 void (*fptr_hiSub_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2) = &hiSub;
+
+template < class T , class S > inline void hiSub_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hiSub ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
+}
+
+template < class T , class S > inline void hiSub_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hiSub ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
+}
+
+
+void (*fptr_hiSub_hSLICED_HComplexHComplex12STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
+void (*fptr_hiSub_hSLICED_HComplexHNumber12STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
+void (*fptr_hiSub_hSLICED_HComplexHInteger12STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
+void (*fptr_hiSub_hSLICED_HNumberHComplex12STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
+void (*fptr_hiSub_hSLICED_HNumberHNumber12STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
+void (*fptr_hiSub_hSLICED_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
+void (*fptr_hiSub_hSLICED_HIntegerHComplex12STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
+void (*fptr_hiSub_hSLICED_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
+void (*fptr_hiSub_hSLICED_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiSub_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2880,14 +4764,43 @@ void hiSub2(const Iter vec1,const Iter vec1_end, S val)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S > inline void hiSub( std::vector<T> & vec1 , S val) {
 hiSub2 ( vec1.begin(),vec1.end() , val);
 }
+
 template < class T , class S > inline void hiSub( casa::Vector<T> & vec1 , S val) {
 hiSub2 ( vec1.cbegin(),vec1.cend() , val);
 }
+
 
 void (*fptr_hiSub2_HComplexHComplex12STDIT)( std::vector<HComplex> & vec1 , HComplex val) = &hiSub;
 void (*fptr_hiSub2_HComplexHNumber12STDIT)( std::vector<HComplex> & vec1 , HNumber val) = &hiSub;
@@ -2898,6 +4811,25 @@ void (*fptr_hiSub2_HNumberHInteger12STDIT)( std::vector<HNumber> & vec1 , HInteg
 void (*fptr_hiSub2_HIntegerHComplex12STDIT)( std::vector<HInteger> & vec1 , HComplex val) = &hiSub;
 void (*fptr_hiSub2_HIntegerHNumber12STDIT)( std::vector<HInteger> & vec1 , HNumber val) = &hiSub;
 void (*fptr_hiSub2_HIntegerHInteger12STDIT)( std::vector<HInteger> & vec1 , HInteger val) = &hiSub;
+
+template < class T , class S > inline void hiSub_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val ) {
+hiSub2 ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , val);
+}
+
+template < class T , class S > inline void hiSub_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val ) {
+hiSub2 ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , val);
+}
+
+
+void (*fptr_hiSub_hSLICED2_HComplexHComplex12STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiSub_hSLICED;
+void (*fptr_hiSub_hSLICED2_HComplexHNumber12STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiSub_hSLICED;
+void (*fptr_hiSub_hSLICED2_HComplexHInteger12STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiSub_hSLICED;
+void (*fptr_hiSub_hSLICED2_HNumberHComplex12STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiSub_hSLICED;
+void (*fptr_hiSub_hSLICED2_HNumberHNumber12STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiSub_hSLICED;
+void (*fptr_hiSub_hSLICED2_HNumberHInteger12STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiSub_hSLICED;
+void (*fptr_hiSub_hSLICED2_HIntegerHComplex12STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiSub_hSLICED;
+void (*fptr_hiSub_hSLICED2_HIntegerHNumber12STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiSub_hSLICED;
+void (*fptr_hiSub_hSLICED2_HIntegerHInteger12STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiSub_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -2946,14 +4878,44 @@ void hSub(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const It
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S , class U > inline void hSub( std::vector<T> & vec1 , std::vector<S> & vec2 , std::vector<U> & vec3) {
 hSub ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
 }
+
 template < class T , class S , class U > inline void hSub( casa::Vector<T> & vec1 , casa::Vector<S> & vec2 , casa::Vector<U> & vec3) {
 hSub ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend() , vec3.cbegin(),vec3.cend());
 }
+
 
 void (*fptr_hSub_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HComplex> & vec3) = &hSub;
 void (*fptr_hSub_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HNumber> & vec3) = &hSub;
@@ -2982,6 +4944,43 @@ void (*fptr_hSub_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HIntege
 void (*fptr_hSub_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HComplex> & vec3) = &hSub;
 void (*fptr_hSub_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HNumber> & vec3) = &hSub;
 void (*fptr_hSub_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HInteger> & vec3) = &hSub;
+
+template < class T , class S , class U > inline void hSub_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hSub ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
+}
+
+template < class T , class S , class U > inline void hSub_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hSub ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
+}
+
+
+void (*fptr_hSub_hSLICED_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HComplexHComplexHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HComplexHNumberHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HComplexHNumberHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HComplexHNumberHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HComplexHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HComplexHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HComplexHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HNumberHComplexHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HNumberHComplexHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HNumberHComplexHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HNumberHNumberHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HNumberHNumberHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HNumberHNumberHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HNumberHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HNumberHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HNumberHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HIntegerHComplexHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HIntegerHComplexHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HIntegerHComplexHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HIntegerHNumberHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HIntegerHNumberHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSub_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -3028,18 +5027,61 @@ void hSubAdd(const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hSubAdd( std::vector<T> & vec1 , std::vector<T> & vec2 , std::vector<T> & vec3) {
 hSubAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
 }
+
 template < class T > inline void hSubAdd( casa::Vector<T> & vec1 , casa::Vector<T> & vec2 , casa::Vector<T> & vec3) {
 hSubAdd ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend() , vec3.cbegin(),vec3.cend());
 }
 
+
 void (*fptr_hSubAdd_HComplex111STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HComplex> & vec3) = &hSubAdd;
 void (*fptr_hSubAdd_HNumber111STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , std::vector<HNumber> & vec2 , std::vector<HNumber> & vec3) = &hSubAdd;
 void (*fptr_hSubAdd_HInteger111STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HInteger> & vec3) = &hSubAdd;
+
+template < class T > inline void hSubAdd_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<T> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hSubAdd ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
+}
+
+template < class T > inline void hSubAdd_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<T> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hSubAdd ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
+}
+
+
+void (*fptr_hSubAdd_hSLICED_HComplex111STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAdd_hSLICED;
+void (*fptr_hSubAdd_hSLICED_HNumber111STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAdd_hSLICED;
+void (*fptr_hSubAdd_hSLICED_HInteger111STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAdd_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -3088,14 +5130,44 @@ void hSubAddConv(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,c
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S , class U > inline void hSubAddConv( std::vector<T> & vec1 , std::vector<S> & vec2 , std::vector<U> & vec3) {
 hSubAddConv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
 }
+
 template < class T , class S , class U > inline void hSubAddConv( casa::Vector<T> & vec1 , casa::Vector<S> & vec2 , casa::Vector<U> & vec3) {
 hSubAddConv ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend() , vec3.cbegin(),vec3.cend());
 }
+
 
 void (*fptr_hSubAddConv_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HComplex> & vec3) = &hSubAddConv;
 void (*fptr_hSubAddConv_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HNumber> & vec3) = &hSubAddConv;
@@ -3124,6 +5196,43 @@ void (*fptr_hSubAddConv_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<
 void (*fptr_hSubAddConv_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HComplex> & vec3) = &hSubAddConv;
 void (*fptr_hSubAddConv_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HNumber> & vec3) = &hSubAddConv;
 void (*fptr_hSubAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HInteger> & vec3) = &hSubAddConv;
+
+template < class T , class S , class U > inline void hSubAddConv_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hSubAddConv ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
+}
+
+template < class T , class S , class U > inline void hSubAddConv_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hSubAddConv ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
+}
+
+
+void (*fptr_hSubAddConv_hSLICED_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HComplexHComplexHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HComplexHNumberHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HComplexHNumberHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HComplexHNumberHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HComplexHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HComplexHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HComplexHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HNumberHComplexHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HNumberHComplexHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HNumberHComplexHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HNumberHNumberHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HNumberHNumberHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HNumberHNumberHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HNumberHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HNumberHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HNumberHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HIntegerHComplexHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HIntegerHComplexHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HIntegerHComplexHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HIntegerHNumberHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HIntegerHNumberHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
+void (*fptr_hSubAddConv_hSLICED_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hSubAddConv_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -3171,14 +5280,44 @@ void hSub2(const Iterin1 vec1,const Iterin1 vec1_end, S val, const Iter vec2,con
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S , class U > inline void hSub( std::vector<T> & vec1 , S val , std::vector<U> & vec2) {
 hSub2 ( vec1.begin(),vec1.end() , val , vec2.begin(),vec2.end());
 }
+
 template < class T , class S , class U > inline void hSub( casa::Vector<T> & vec1 , S val , casa::Vector<U> & vec2) {
 hSub2 ( vec1.cbegin(),vec1.cend() , val , vec2.cbegin(),vec2.cend());
 }
+
 
 void (*fptr_hSub2_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HComplex val , std::vector<HComplex> & vec2) = &hSub;
 void (*fptr_hSub2_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HComplex val , std::vector<HNumber> & vec2) = &hSub;
@@ -3207,6 +5346,43 @@ void (*fptr_hSub2_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HInteg
 void (*fptr_hSub2_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger val , std::vector<HComplex> & vec2) = &hSub;
 void (*fptr_hSub2_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger val , std::vector<HNumber> & vec2) = &hSub;
 void (*fptr_hSub2_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger val , std::vector<HInteger> & vec2) = &hSub;
+
+template < class T , class S , class U > inline void hSub_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val , std::vector<U> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hSub2 ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , val , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
+}
+
+template < class T , class S , class U > inline void hSub_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val , casa::Vector<U> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hSub2 ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , val , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
+}
+
+
+void (*fptr_hSub_hSLICED2_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HComplexHComplexHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HComplexHNumberHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HComplexHNumberHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HComplexHNumberHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HComplexHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HComplexHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HComplexHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HNumberHComplexHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HNumberHComplexHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HNumberHComplexHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HNumberHNumberHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HNumberHNumberHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HNumberHNumberHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HNumberHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HNumberHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HNumberHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HIntegerHComplexHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HIntegerHComplexHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HIntegerHComplexHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HIntegerHNumberHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HIntegerHNumberHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
+void (*fptr_hSub_hSLICED2_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hSub_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -3253,14 +5429,43 @@ void hiMul(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin v
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S > inline void hiMul( std::vector<T> & vec1 , std::vector<S> & vec2) {
 hiMul ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
 }
+
 template < class T , class S > inline void hiMul( casa::Vector<T> & vec1 , casa::Vector<S> & vec2) {
 hiMul ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend());
 }
+
 
 void (*fptr_hiMul_HComplexHComplex12STDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2) = &hiMul;
 void (*fptr_hiMul_HComplexHNumber12STDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HNumber> & vec2) = &hiMul;
@@ -3271,6 +5476,25 @@ void (*fptr_hiMul_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec1 , st
 void (*fptr_hiMul_HIntegerHComplex12STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HComplex> & vec2) = &hiMul;
 void (*fptr_hiMul_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HNumber> & vec2) = &hiMul;
 void (*fptr_hiMul_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2) = &hiMul;
+
+template < class T , class S > inline void hiMul_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hiMul ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
+}
+
+template < class T , class S > inline void hiMul_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hiMul ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
+}
+
+
+void (*fptr_hiMul_hSLICED_HComplexHComplex12STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
+void (*fptr_hiMul_hSLICED_HComplexHNumber12STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
+void (*fptr_hiMul_hSLICED_HComplexHInteger12STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
+void (*fptr_hiMul_hSLICED_HNumberHComplex12STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
+void (*fptr_hiMul_hSLICED_HNumberHNumber12STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
+void (*fptr_hiMul_hSLICED_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
+void (*fptr_hiMul_hSLICED_HIntegerHComplex12STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
+void (*fptr_hiMul_hSLICED_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
+void (*fptr_hiMul_hSLICED_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiMul_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -3315,14 +5539,43 @@ void hiMul2(const Iter vec1,const Iter vec1_end, S val)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S > inline void hiMul( std::vector<T> & vec1 , S val) {
 hiMul2 ( vec1.begin(),vec1.end() , val);
 }
+
 template < class T , class S > inline void hiMul( casa::Vector<T> & vec1 , S val) {
 hiMul2 ( vec1.cbegin(),vec1.cend() , val);
 }
+
 
 void (*fptr_hiMul2_HComplexHComplex12STDIT)( std::vector<HComplex> & vec1 , HComplex val) = &hiMul;
 void (*fptr_hiMul2_HComplexHNumber12STDIT)( std::vector<HComplex> & vec1 , HNumber val) = &hiMul;
@@ -3333,6 +5586,25 @@ void (*fptr_hiMul2_HNumberHInteger12STDIT)( std::vector<HNumber> & vec1 , HInteg
 void (*fptr_hiMul2_HIntegerHComplex12STDIT)( std::vector<HInteger> & vec1 , HComplex val) = &hiMul;
 void (*fptr_hiMul2_HIntegerHNumber12STDIT)( std::vector<HInteger> & vec1 , HNumber val) = &hiMul;
 void (*fptr_hiMul2_HIntegerHInteger12STDIT)( std::vector<HInteger> & vec1 , HInteger val) = &hiMul;
+
+template < class T , class S > inline void hiMul_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val ) {
+hiMul2 ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , val);
+}
+
+template < class T , class S > inline void hiMul_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val ) {
+hiMul2 ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , val);
+}
+
+
+void (*fptr_hiMul_hSLICED2_HComplexHComplex12STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiMul_hSLICED;
+void (*fptr_hiMul_hSLICED2_HComplexHNumber12STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiMul_hSLICED;
+void (*fptr_hiMul_hSLICED2_HComplexHInteger12STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiMul_hSLICED;
+void (*fptr_hiMul_hSLICED2_HNumberHComplex12STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiMul_hSLICED;
+void (*fptr_hiMul_hSLICED2_HNumberHNumber12STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiMul_hSLICED;
+void (*fptr_hiMul_hSLICED2_HNumberHInteger12STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiMul_hSLICED;
+void (*fptr_hiMul_hSLICED2_HIntegerHComplex12STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiMul_hSLICED;
+void (*fptr_hiMul_hSLICED2_HIntegerHNumber12STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiMul_hSLICED;
+void (*fptr_hiMul_hSLICED2_HIntegerHInteger12STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiMul_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -3381,14 +5653,44 @@ void hMul(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const It
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S , class U > inline void hMul( std::vector<T> & vec1 , std::vector<S> & vec2 , std::vector<U> & vec3) {
 hMul ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
 }
+
 template < class T , class S , class U > inline void hMul( casa::Vector<T> & vec1 , casa::Vector<S> & vec2 , casa::Vector<U> & vec3) {
 hMul ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend() , vec3.cbegin(),vec3.cend());
 }
+
 
 void (*fptr_hMul_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HComplex> & vec3) = &hMul;
 void (*fptr_hMul_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HNumber> & vec3) = &hMul;
@@ -3417,6 +5719,43 @@ void (*fptr_hMul_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HIntege
 void (*fptr_hMul_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HComplex> & vec3) = &hMul;
 void (*fptr_hMul_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HNumber> & vec3) = &hMul;
 void (*fptr_hMul_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HInteger> & vec3) = &hMul;
+
+template < class T , class S , class U > inline void hMul_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hMul ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
+}
+
+template < class T , class S , class U > inline void hMul_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hMul ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
+}
+
+
+void (*fptr_hMul_hSLICED_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HComplexHComplexHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HComplexHNumberHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HComplexHNumberHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HComplexHNumberHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HComplexHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HComplexHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HComplexHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HNumberHComplexHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HNumberHComplexHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HNumberHComplexHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HNumberHNumberHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HNumberHNumberHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HNumberHNumberHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HNumberHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HNumberHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HNumberHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HIntegerHComplexHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HIntegerHComplexHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HIntegerHComplexHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HIntegerHNumberHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HIntegerHNumberHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMul_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -3463,18 +5802,61 @@ void hMulAdd(const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hMulAdd( std::vector<T> & vec1 , std::vector<T> & vec2 , std::vector<T> & vec3) {
 hMulAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
 }
+
 template < class T > inline void hMulAdd( casa::Vector<T> & vec1 , casa::Vector<T> & vec2 , casa::Vector<T> & vec3) {
 hMulAdd ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend() , vec3.cbegin(),vec3.cend());
 }
 
+
 void (*fptr_hMulAdd_HComplex111STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HComplex> & vec3) = &hMulAdd;
 void (*fptr_hMulAdd_HNumber111STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , std::vector<HNumber> & vec2 , std::vector<HNumber> & vec3) = &hMulAdd;
 void (*fptr_hMulAdd_HInteger111STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HInteger> & vec3) = &hMulAdd;
+
+template < class T > inline void hMulAdd_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<T> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hMulAdd ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
+}
+
+template < class T > inline void hMulAdd_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<T> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hMulAdd ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
+}
+
+
+void (*fptr_hMulAdd_hSLICED_HComplex111STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAdd_hSLICED;
+void (*fptr_hMulAdd_hSLICED_HNumber111STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAdd_hSLICED;
+void (*fptr_hMulAdd_hSLICED_HInteger111STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAdd_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -3523,14 +5905,44 @@ void hMulAddConv(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,c
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S , class U > inline void hMulAddConv( std::vector<T> & vec1 , std::vector<S> & vec2 , std::vector<U> & vec3) {
 hMulAddConv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
 }
+
 template < class T , class S , class U > inline void hMulAddConv( casa::Vector<T> & vec1 , casa::Vector<S> & vec2 , casa::Vector<U> & vec3) {
 hMulAddConv ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend() , vec3.cbegin(),vec3.cend());
 }
+
 
 void (*fptr_hMulAddConv_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HComplex> & vec3) = &hMulAddConv;
 void (*fptr_hMulAddConv_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HNumber> & vec3) = &hMulAddConv;
@@ -3559,6 +5971,43 @@ void (*fptr_hMulAddConv_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<
 void (*fptr_hMulAddConv_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HComplex> & vec3) = &hMulAddConv;
 void (*fptr_hMulAddConv_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HNumber> & vec3) = &hMulAddConv;
 void (*fptr_hMulAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HInteger> & vec3) = &hMulAddConv;
+
+template < class T , class S , class U > inline void hMulAddConv_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hMulAddConv ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
+}
+
+template < class T , class S , class U > inline void hMulAddConv_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hMulAddConv ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
+}
+
+
+void (*fptr_hMulAddConv_hSLICED_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HComplexHComplexHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HComplexHNumberHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HComplexHNumberHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HComplexHNumberHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HComplexHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HComplexHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HComplexHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HNumberHComplexHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HNumberHComplexHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HNumberHComplexHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HNumberHNumberHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HNumberHNumberHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HNumberHNumberHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HNumberHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HNumberHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HNumberHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HIntegerHComplexHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HIntegerHComplexHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HIntegerHComplexHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HIntegerHNumberHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HIntegerHNumberHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
+void (*fptr_hMulAddConv_hSLICED_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hMulAddConv_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -3606,14 +6055,44 @@ void hMul2(const Iterin1 vec1,const Iterin1 vec1_end, S val, const Iter vec2,con
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S , class U > inline void hMul( std::vector<T> & vec1 , S val , std::vector<U> & vec2) {
 hMul2 ( vec1.begin(),vec1.end() , val , vec2.begin(),vec2.end());
 }
+
 template < class T , class S , class U > inline void hMul( casa::Vector<T> & vec1 , S val , casa::Vector<U> & vec2) {
 hMul2 ( vec1.cbegin(),vec1.cend() , val , vec2.cbegin(),vec2.cend());
 }
+
 
 void (*fptr_hMul2_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HComplex val , std::vector<HComplex> & vec2) = &hMul;
 void (*fptr_hMul2_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HComplex val , std::vector<HNumber> & vec2) = &hMul;
@@ -3642,6 +6121,43 @@ void (*fptr_hMul2_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HInteg
 void (*fptr_hMul2_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger val , std::vector<HComplex> & vec2) = &hMul;
 void (*fptr_hMul2_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger val , std::vector<HNumber> & vec2) = &hMul;
 void (*fptr_hMul2_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger val , std::vector<HInteger> & vec2) = &hMul;
+
+template < class T , class S , class U > inline void hMul_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val , std::vector<U> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hMul2 ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , val , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
+}
+
+template < class T , class S , class U > inline void hMul_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val , casa::Vector<U> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hMul2 ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , val , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
+}
+
+
+void (*fptr_hMul_hSLICED2_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HComplexHComplexHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HComplexHNumberHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HComplexHNumberHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HComplexHNumberHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HComplexHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HComplexHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HComplexHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HNumberHComplexHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HNumberHComplexHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HNumberHComplexHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HNumberHNumberHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HNumberHNumberHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HNumberHNumberHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HNumberHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HNumberHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HNumberHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HIntegerHComplexHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HIntegerHComplexHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HIntegerHComplexHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HIntegerHNumberHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HIntegerHNumberHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
+void (*fptr_hMul_hSLICED2_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hMul_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -3688,14 +6204,43 @@ void hiAdd(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin v
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S > inline void hiAdd( std::vector<T> & vec1 , std::vector<S> & vec2) {
 hiAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
 }
+
 template < class T , class S > inline void hiAdd( casa::Vector<T> & vec1 , casa::Vector<S> & vec2) {
 hiAdd ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend());
 }
+
 
 void (*fptr_hiAdd_HComplexHComplex12STDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2) = &hiAdd;
 void (*fptr_hiAdd_HComplexHNumber12STDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HNumber> & vec2) = &hiAdd;
@@ -3706,6 +6251,25 @@ void (*fptr_hiAdd_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec1 , st
 void (*fptr_hiAdd_HIntegerHComplex12STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HComplex> & vec2) = &hiAdd;
 void (*fptr_hiAdd_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HNumber> & vec2) = &hiAdd;
 void (*fptr_hiAdd_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2) = &hiAdd;
+
+template < class T , class S > inline void hiAdd_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hiAdd ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
+}
+
+template < class T , class S > inline void hiAdd_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hiAdd ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
+}
+
+
+void (*fptr_hiAdd_hSLICED_HComplexHComplex12STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
+void (*fptr_hiAdd_hSLICED_HComplexHNumber12STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
+void (*fptr_hiAdd_hSLICED_HComplexHInteger12STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
+void (*fptr_hiAdd_hSLICED_HNumberHComplex12STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
+void (*fptr_hiAdd_hSLICED_HNumberHNumber12STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
+void (*fptr_hiAdd_hSLICED_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
+void (*fptr_hiAdd_hSLICED_HIntegerHComplex12STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
+void (*fptr_hiAdd_hSLICED_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
+void (*fptr_hiAdd_hSLICED_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiAdd_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -3750,14 +6314,43 @@ void hiAdd2(const Iter vec1,const Iter vec1_end, S val)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S > inline void hiAdd( std::vector<T> & vec1 , S val) {
 hiAdd2 ( vec1.begin(),vec1.end() , val);
 }
+
 template < class T , class S > inline void hiAdd( casa::Vector<T> & vec1 , S val) {
 hiAdd2 ( vec1.cbegin(),vec1.cend() , val);
 }
+
 
 void (*fptr_hiAdd2_HComplexHComplex12STDIT)( std::vector<HComplex> & vec1 , HComplex val) = &hiAdd;
 void (*fptr_hiAdd2_HComplexHNumber12STDIT)( std::vector<HComplex> & vec1 , HNumber val) = &hiAdd;
@@ -3768,6 +6361,25 @@ void (*fptr_hiAdd2_HNumberHInteger12STDIT)( std::vector<HNumber> & vec1 , HInteg
 void (*fptr_hiAdd2_HIntegerHComplex12STDIT)( std::vector<HInteger> & vec1 , HComplex val) = &hiAdd;
 void (*fptr_hiAdd2_HIntegerHNumber12STDIT)( std::vector<HInteger> & vec1 , HNumber val) = &hiAdd;
 void (*fptr_hiAdd2_HIntegerHInteger12STDIT)( std::vector<HInteger> & vec1 , HInteger val) = &hiAdd;
+
+template < class T , class S > inline void hiAdd_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val ) {
+hiAdd2 ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , val);
+}
+
+template < class T , class S > inline void hiAdd_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val ) {
+hiAdd2 ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , val);
+}
+
+
+void (*fptr_hiAdd_hSLICED2_HComplexHComplex12STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiAdd_hSLICED;
+void (*fptr_hiAdd_hSLICED2_HComplexHNumber12STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiAdd_hSLICED;
+void (*fptr_hiAdd_hSLICED2_HComplexHInteger12STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiAdd_hSLICED;
+void (*fptr_hiAdd_hSLICED2_HNumberHComplex12STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiAdd_hSLICED;
+void (*fptr_hiAdd_hSLICED2_HNumberHNumber12STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiAdd_hSLICED;
+void (*fptr_hiAdd_hSLICED2_HNumberHInteger12STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiAdd_hSLICED;
+void (*fptr_hiAdd_hSLICED2_HIntegerHComplex12STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiAdd_hSLICED;
+void (*fptr_hiAdd_hSLICED2_HIntegerHNumber12STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiAdd_hSLICED;
+void (*fptr_hiAdd_hSLICED2_HIntegerHInteger12STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiAdd_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -3816,14 +6428,44 @@ void hAdd(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const It
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S , class U > inline void hAdd( std::vector<T> & vec1 , std::vector<S> & vec2 , std::vector<U> & vec3) {
 hAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
 }
+
 template < class T , class S , class U > inline void hAdd( casa::Vector<T> & vec1 , casa::Vector<S> & vec2 , casa::Vector<U> & vec3) {
 hAdd ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend() , vec3.cbegin(),vec3.cend());
 }
+
 
 void (*fptr_hAdd_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HComplex> & vec3) = &hAdd;
 void (*fptr_hAdd_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HNumber> & vec3) = &hAdd;
@@ -3852,6 +6494,43 @@ void (*fptr_hAdd_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HIntege
 void (*fptr_hAdd_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HComplex> & vec3) = &hAdd;
 void (*fptr_hAdd_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HNumber> & vec3) = &hAdd;
 void (*fptr_hAdd_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HInteger> & vec3) = &hAdd;
+
+template < class T , class S , class U > inline void hAdd_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hAdd ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
+}
+
+template < class T , class S , class U > inline void hAdd_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hAdd ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
+}
+
+
+void (*fptr_hAdd_hSLICED_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HComplexHComplexHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HComplexHNumberHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HComplexHNumberHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HComplexHNumberHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HComplexHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HComplexHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HComplexHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HNumberHComplexHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HNumberHComplexHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HNumberHComplexHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HNumberHNumberHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HNumberHNumberHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HNumberHNumberHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HNumberHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HNumberHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HNumberHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HIntegerHComplexHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HIntegerHComplexHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HIntegerHComplexHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HIntegerHNumberHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HIntegerHNumberHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAdd_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -3898,18 +6577,61 @@ void hAddAdd(const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hAddAdd( std::vector<T> & vec1 , std::vector<T> & vec2 , std::vector<T> & vec3) {
 hAddAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
 }
+
 template < class T > inline void hAddAdd( casa::Vector<T> & vec1 , casa::Vector<T> & vec2 , casa::Vector<T> & vec3) {
 hAddAdd ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend() , vec3.cbegin(),vec3.cend());
 }
 
+
 void (*fptr_hAddAdd_HComplex111STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HComplex> & vec3) = &hAddAdd;
 void (*fptr_hAddAdd_HNumber111STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , std::vector<HNumber> & vec2 , std::vector<HNumber> & vec3) = &hAddAdd;
 void (*fptr_hAddAdd_HInteger111STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HInteger> & vec3) = &hAddAdd;
+
+template < class T > inline void hAddAdd_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<T> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hAddAdd ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
+}
+
+template < class T > inline void hAddAdd_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<T> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hAddAdd ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
+}
+
+
+void (*fptr_hAddAdd_hSLICED_HComplex111STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAdd_hSLICED;
+void (*fptr_hAddAdd_hSLICED_HNumber111STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAdd_hSLICED;
+void (*fptr_hAddAdd_hSLICED_HInteger111STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAdd_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -3958,14 +6680,44 @@ void hAddAddConv(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,c
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S , class U > inline void hAddAddConv( std::vector<T> & vec1 , std::vector<S> & vec2 , std::vector<U> & vec3) {
 hAddAddConv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
 }
+
 template < class T , class S , class U > inline void hAddAddConv( casa::Vector<T> & vec1 , casa::Vector<S> & vec2 , casa::Vector<U> & vec3) {
 hAddAddConv ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend() , vec3.cbegin(),vec3.cend());
 }
+
 
 void (*fptr_hAddAddConv_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HComplex> & vec3) = &hAddAddConv;
 void (*fptr_hAddAddConv_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HNumber> & vec3) = &hAddAddConv;
@@ -3994,6 +6746,43 @@ void (*fptr_hAddAddConv_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<
 void (*fptr_hAddAddConv_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HComplex> & vec3) = &hAddAddConv;
 void (*fptr_hAddAddConv_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HNumber> & vec3) = &hAddAddConv;
 void (*fptr_hAddAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HInteger> & vec3) = &hAddAddConv;
+
+template < class T , class S , class U > inline void hAddAddConv_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hAddAddConv ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
+}
+
+template < class T , class S , class U > inline void hAddAddConv_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hAddAddConv ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
+}
+
+
+void (*fptr_hAddAddConv_hSLICED_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HComplexHComplexHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HComplexHNumberHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HComplexHNumberHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HComplexHNumberHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HComplexHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HComplexHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HComplexHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HNumberHComplexHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HNumberHComplexHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HNumberHComplexHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HNumberHNumberHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HNumberHNumberHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HNumberHNumberHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HNumberHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HNumberHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HNumberHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HIntegerHComplexHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HIntegerHComplexHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HIntegerHComplexHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HIntegerHNumberHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HIntegerHNumberHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
+void (*fptr_hAddAddConv_hSLICED_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hAddAddConv_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -4041,14 +6830,44 @@ void hAdd2(const Iterin1 vec1,const Iterin1 vec1_end, S val, const Iter vec2,con
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S , class U > inline void hAdd( std::vector<T> & vec1 , S val , std::vector<U> & vec2) {
 hAdd2 ( vec1.begin(),vec1.end() , val , vec2.begin(),vec2.end());
 }
+
 template < class T , class S , class U > inline void hAdd( casa::Vector<T> & vec1 , S val , casa::Vector<U> & vec2) {
 hAdd2 ( vec1.cbegin(),vec1.cend() , val , vec2.cbegin(),vec2.cend());
 }
+
 
 void (*fptr_hAdd2_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HComplex val , std::vector<HComplex> & vec2) = &hAdd;
 void (*fptr_hAdd2_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HComplex val , std::vector<HNumber> & vec2) = &hAdd;
@@ -4077,6 +6896,43 @@ void (*fptr_hAdd2_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HInteg
 void (*fptr_hAdd2_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger val , std::vector<HComplex> & vec2) = &hAdd;
 void (*fptr_hAdd2_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger val , std::vector<HNumber> & vec2) = &hAdd;
 void (*fptr_hAdd2_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger val , std::vector<HInteger> & vec2) = &hAdd;
+
+template < class T , class S , class U > inline void hAdd_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val , std::vector<U> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hAdd2 ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , val , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
+}
+
+template < class T , class S , class U > inline void hAdd_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val , casa::Vector<U> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hAdd2 ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , val , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
+}
+
+
+void (*fptr_hAdd_hSLICED2_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HComplexHComplexHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HComplexHNumberHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HComplexHNumberHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HComplexHNumberHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HComplexHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HComplexHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HComplexHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HNumberHComplexHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HNumberHComplexHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HNumberHComplexHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HNumberHNumberHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HNumberHNumberHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HNumberHNumberHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HNumberHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HNumberHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HNumberHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HIntegerHComplexHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HIntegerHComplexHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HIntegerHComplexHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HIntegerHNumberHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HIntegerHNumberHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
+void (*fptr_hAdd_hSLICED2_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hAdd_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -4123,14 +6979,43 @@ void hiDiv(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin v
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S > inline void hiDiv( std::vector<T> & vec1 , std::vector<S> & vec2) {
 hiDiv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
 }
+
 template < class T , class S > inline void hiDiv( casa::Vector<T> & vec1 , casa::Vector<S> & vec2) {
 hiDiv ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend());
 }
+
 
 void (*fptr_hiDiv_HComplexHComplex12STDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2) = &hiDiv;
 void (*fptr_hiDiv_HComplexHNumber12STDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HNumber> & vec2) = &hiDiv;
@@ -4141,6 +7026,25 @@ void (*fptr_hiDiv_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec1 , st
 void (*fptr_hiDiv_HIntegerHComplex12STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HComplex> & vec2) = &hiDiv;
 void (*fptr_hiDiv_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HNumber> & vec2) = &hiDiv;
 void (*fptr_hiDiv_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2) = &hiDiv;
+
+template < class T , class S > inline void hiDiv_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hiDiv ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
+}
+
+template < class T , class S > inline void hiDiv_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hiDiv ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
+}
+
+
+void (*fptr_hiDiv_hSLICED_HComplexHComplex12STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
+void (*fptr_hiDiv_hSLICED_HComplexHNumber12STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
+void (*fptr_hiDiv_hSLICED_HComplexHInteger12STDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
+void (*fptr_hiDiv_hSLICED_HNumberHComplex12STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
+void (*fptr_hiDiv_hSLICED_HNumberHNumber12STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
+void (*fptr_hiDiv_hSLICED_HNumberHInteger12STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
+void (*fptr_hiDiv_hSLICED_HIntegerHComplex12STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
+void (*fptr_hiDiv_hSLICED_HIntegerHNumber12STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
+void (*fptr_hiDiv_hSLICED_HIntegerHInteger12STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hiDiv_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -4185,14 +7089,43 @@ void hiDiv2(const Iter vec1,const Iter vec1_end, S val)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S > inline void hiDiv( std::vector<T> & vec1 , S val) {
 hiDiv2 ( vec1.begin(),vec1.end() , val);
 }
+
 template < class T , class S > inline void hiDiv( casa::Vector<T> & vec1 , S val) {
 hiDiv2 ( vec1.cbegin(),vec1.cend() , val);
 }
+
 
 void (*fptr_hiDiv2_HComplexHComplex12STDIT)( std::vector<HComplex> & vec1 , HComplex val) = &hiDiv;
 void (*fptr_hiDiv2_HComplexHNumber12STDIT)( std::vector<HComplex> & vec1 , HNumber val) = &hiDiv;
@@ -4203,6 +7136,25 @@ void (*fptr_hiDiv2_HNumberHInteger12STDIT)( std::vector<HNumber> & vec1 , HInteg
 void (*fptr_hiDiv2_HIntegerHComplex12STDIT)( std::vector<HInteger> & vec1 , HComplex val) = &hiDiv;
 void (*fptr_hiDiv2_HIntegerHNumber12STDIT)( std::vector<HInteger> & vec1 , HNumber val) = &hiDiv;
 void (*fptr_hiDiv2_HIntegerHInteger12STDIT)( std::vector<HInteger> & vec1 , HInteger val) = &hiDiv;
+
+template < class T , class S > inline void hiDiv_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val ) {
+hiDiv2 ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , val);
+}
+
+template < class T , class S > inline void hiDiv_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val ) {
+hiDiv2 ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , val);
+}
+
+
+void (*fptr_hiDiv_hSLICED2_HComplexHComplex12STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiDiv_hSLICED;
+void (*fptr_hiDiv_hSLICED2_HComplexHNumber12STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiDiv_hSLICED;
+void (*fptr_hiDiv_hSLICED2_HComplexHInteger12STDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiDiv_hSLICED;
+void (*fptr_hiDiv_hSLICED2_HNumberHComplex12STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiDiv_hSLICED;
+void (*fptr_hiDiv_hSLICED2_HNumberHNumber12STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiDiv_hSLICED;
+void (*fptr_hiDiv_hSLICED2_HNumberHInteger12STDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiDiv_hSLICED;
+void (*fptr_hiDiv_hSLICED2_HIntegerHComplex12STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val ) = &hiDiv_hSLICED;
+void (*fptr_hiDiv_hSLICED2_HIntegerHNumber12STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val ) = &hiDiv_hSLICED;
+void (*fptr_hiDiv_hSLICED2_HIntegerHInteger12STDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val ) = &hiDiv_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -4251,14 +7203,44 @@ void hDiv(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const It
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S , class U > inline void hDiv( std::vector<T> & vec1 , std::vector<S> & vec2 , std::vector<U> & vec3) {
 hDiv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
 }
+
 template < class T , class S , class U > inline void hDiv( casa::Vector<T> & vec1 , casa::Vector<S> & vec2 , casa::Vector<U> & vec3) {
 hDiv ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend() , vec3.cbegin(),vec3.cend());
 }
+
 
 void (*fptr_hDiv_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HComplex> & vec3) = &hDiv;
 void (*fptr_hDiv_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HNumber> & vec3) = &hDiv;
@@ -4287,6 +7269,43 @@ void (*fptr_hDiv_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HIntege
 void (*fptr_hDiv_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HComplex> & vec3) = &hDiv;
 void (*fptr_hDiv_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HNumber> & vec3) = &hDiv;
 void (*fptr_hDiv_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HInteger> & vec3) = &hDiv;
+
+template < class T , class S , class U > inline void hDiv_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hDiv ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
+}
+
+template < class T , class S , class U > inline void hDiv_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hDiv ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
+}
+
+
+void (*fptr_hDiv_hSLICED_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HComplexHComplexHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HComplexHNumberHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HComplexHNumberHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HComplexHNumberHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HComplexHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HComplexHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HComplexHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HNumberHComplexHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HNumberHComplexHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HNumberHComplexHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HNumberHNumberHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HNumberHNumberHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HNumberHNumberHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HNumberHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HNumberHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HNumberHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HIntegerHComplexHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HIntegerHComplexHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HIntegerHComplexHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HIntegerHNumberHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HIntegerHNumberHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDiv_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -4333,18 +7352,61 @@ void hDivAdd(const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hDivAdd( std::vector<T> & vec1 , std::vector<T> & vec2 , std::vector<T> & vec3) {
 hDivAdd ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
 }
+
 template < class T > inline void hDivAdd( casa::Vector<T> & vec1 , casa::Vector<T> & vec2 , casa::Vector<T> & vec3) {
 hDivAdd ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend() , vec3.cbegin(),vec3.cend());
 }
 
+
 void (*fptr_hDivAdd_HComplex111STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HComplex> & vec3) = &hDivAdd;
 void (*fptr_hDivAdd_HNumber111STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , std::vector<HNumber> & vec2 , std::vector<HNumber> & vec3) = &hDivAdd;
 void (*fptr_hDivAdd_HInteger111STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HInteger> & vec3) = &hDivAdd;
+
+template < class T > inline void hDivAdd_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<T> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hDivAdd ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
+}
+
+template < class T > inline void hDivAdd_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<T> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hDivAdd ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
+}
+
+
+void (*fptr_hDivAdd_hSLICED_HComplex111STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAdd_hSLICED;
+void (*fptr_hDivAdd_hSLICED_HNumber111STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAdd_hSLICED;
+void (*fptr_hDivAdd_hSLICED_HInteger111STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAdd_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -4393,14 +7455,44 @@ void hDivAddConv(const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,c
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S , class U > inline void hDivAddConv( std::vector<T> & vec1 , std::vector<S> & vec2 , std::vector<U> & vec3) {
 hDivAddConv ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end() , vec3.begin(),vec3.end());
 }
+
 template < class T , class S , class U > inline void hDivAddConv( casa::Vector<T> & vec1 , casa::Vector<S> & vec2 , casa::Vector<U> & vec3) {
 hDivAddConv ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend() , vec3.cbegin(),vec3.cend());
 }
+
 
 void (*fptr_hDivAddConv_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HComplex> & vec3) = &hDivAddConv;
 void (*fptr_hDivAddConv_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2 , std::vector<HNumber> & vec3) = &hDivAddConv;
@@ -4429,6 +7521,43 @@ void (*fptr_hDivAddConv_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<
 void (*fptr_hDivAddConv_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HComplex> & vec3) = &hDivAddConv;
 void (*fptr_hDivAddConv_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HNumber> & vec3) = &hDivAddConv;
 void (*fptr_hDivAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2 , std::vector<HInteger> & vec3) = &hDivAddConv;
+
+template < class T , class S , class U > inline void hDivAddConv_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hDivAddConv ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2 , vec3.begin() + vec3slice1,vec3.begin() + vec3slice2);
+}
+
+template < class T , class S , class U > inline void hDivAddConv_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<S> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , casa::Vector<U> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) {
+hDivAddConv ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2 , vec3.cbegin() + vec3slice1,vec3.cbegin() + vec3slice2);
+}
+
+
+void (*fptr_hDivAddConv_hSLICED_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HComplexHComplexHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HComplexHNumberHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HComplexHNumberHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HComplexHNumberHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HComplexHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HComplexHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HComplexHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HNumberHComplexHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HNumberHComplexHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HNumberHComplexHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HNumberHNumberHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HNumberHNumberHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HNumberHNumberHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HNumberHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HNumberHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HNumberHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HIntegerHComplexHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HIntegerHComplexHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HIntegerHComplexHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HIntegerHNumberHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HIntegerHNumberHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HComplex> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HNumber> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
+void (*fptr_hDivAddConv_hSLICED_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2 , std::vector<HInteger> & vec3 , HInteger vec3slice1 , HInteger vec3slice2) = &hDivAddConv_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -4476,14 +7605,44 @@ void hDiv2(const Iterin1 vec1,const Iterin1 vec1_end, S val, const Iter vec2,con
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T , class S , class U > inline void hDiv( std::vector<T> & vec1 , S val , std::vector<U> & vec2) {
 hDiv2 ( vec1.begin(),vec1.end() , val , vec2.begin(),vec2.end());
 }
+
 template < class T , class S , class U > inline void hDiv( casa::Vector<T> & vec1 , S val , casa::Vector<U> & vec2) {
 hDiv2 ( vec1.cbegin(),vec1.cend() , val , vec2.cbegin(),vec2.cend());
 }
+
 
 void (*fptr_hDiv2_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HComplex val , std::vector<HComplex> & vec2) = &hDiv;
 void (*fptr_hDiv2_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HComplex val , std::vector<HNumber> & vec2) = &hDiv;
@@ -4512,6 +7671,43 @@ void (*fptr_hDiv2_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HInteg
 void (*fptr_hDiv2_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger val , std::vector<HComplex> & vec2) = &hDiv;
 void (*fptr_hDiv2_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger val , std::vector<HNumber> & vec2) = &hDiv;
 void (*fptr_hDiv2_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger val , std::vector<HInteger> & vec2) = &hDiv;
+
+template < class T , class S , class U > inline void hDiv_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val , std::vector<U> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hDiv2 ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , val , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
+}
+
+template < class T , class S , class U > inline void hDiv_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , S val , casa::Vector<U> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hDiv2 ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , val , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
+}
+
+
+void (*fptr_hDiv_hSLICED2_HComplexHComplexHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HComplexHComplexHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HComplexHComplexHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HComplexHNumberHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HComplexHNumberHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HComplexHNumberHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HComplexHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HComplexHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HComplexHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HNumberHComplexHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HNumberHComplexHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HNumberHComplexHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HNumberHNumberHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HNumberHNumberHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HNumberHNumberHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HNumberHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HNumberHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HNumberHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HIntegerHComplexHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HIntegerHComplexHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HIntegerHComplexHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HComplex val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HIntegerHNumberHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HIntegerHNumberHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HIntegerHNumberHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HNumber val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HIntegerHIntegerHComplex123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HIntegerHIntegerHNumber123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
+void (*fptr_hDiv_hSLICED2_HIntegerHIntegerHInteger123STDITSTDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , HInteger val , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDiv_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -4556,16 +7752,55 @@ void hConj(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
  inline void hConj( std::vector<HComplex> & vec) {
 hConj ( vec.begin(),vec.end());
 }
+
 inline void hConj( casa::Vector<HComplex> & vec) {
 hConj ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hConj_HIntegerHComplexSTDIT)( std::vector<HComplex> & vec) = &hConj;
+
+ inline void hConj_hSLICED ( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hConj ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+inline void hConj_hSLICED ( casa::Vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hConj ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hConj_hSLICED_HIntegerHComplexSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hConj_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -4625,16 +7860,56 @@ void hCrossCorrelateComplex(const Iter vec1,const Iter vec1_end, const Iter vec2
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
  inline void hCrossCorrelateComplex( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2) {
 hCrossCorrelateComplex ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
 }
+
 inline void hCrossCorrelateComplex( casa::Vector<HComplex> & vec1 , casa::Vector<HComplex> & vec2) {
 hCrossCorrelateComplex ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend());
 }
 
+
 void (*fptr_hCrossCorrelateComplex_HIntegerHComplexHComplexSTDITSTDIT)( std::vector<HComplex> & vec1 , std::vector<HComplex> & vec2) = &hCrossCorrelateComplex;
+
+ inline void hCrossCorrelateComplex_hSLICED ( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hCrossCorrelateComplex ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
+}
+
+inline void hCrossCorrelateComplex_hSLICED ( casa::Vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hCrossCorrelateComplex ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
+}
+
+
+void (*fptr_hCrossCorrelateComplex_hSLICED_HIntegerHComplexHComplexSTDITSTDIT)( std::vector<HComplex> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HComplex> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hCrossCorrelateComplex_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -4658,7 +7933,7 @@ void (*fptr_hCrossCorrelateComplex_HIntegerHComplexHComplexSTDITSTDIT)( std::vec
 The following functions are available for getting real values from
 complex numbers:
   abs - absolute value of a complex number
-  norm - magnitude of a complex number squared, i.e. c * conj(c) 
+  norm - magnitude of a complex number squared, i.e. c * conj(c)
   arg - phase angle of a complex number
   imag - imaginary part of a complex number
   real - real part of a complex number
@@ -4689,16 +7964,56 @@ void hReal(const Iter vec,const Iter vec_end, const Iterout vecout,const Iterout
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
  inline void hReal( std::vector<HComplex> & vec , std::vector<HNumber> & vecout) {
 hReal ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 inline void hReal( casa::Vector<HComplex> & vec , casa::Vector<HNumber> & vecout) {
 hReal ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
 
+
 void (*fptr_hReal_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComplex> & vec , std::vector<HNumber> & vecout) = &hReal;
+
+ inline void hReal_hSLICED ( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hReal ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+inline void hReal_hSLICED ( casa::Vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hReal ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hReal_hSLICED_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hReal_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -4720,7 +8035,7 @@ void (*fptr_hReal_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComplex> & ve
 The following functions are available for getting real values from
 complex numbers:
   abs - absolute value of a complex number
-  norm - magnitude of a complex number squared, i.e. c * conj(c) 
+  norm - magnitude of a complex number squared, i.e. c * conj(c)
   arg - phase angle of a complex number
   imag - imaginary part of a complex number
   real - real part of a complex number
@@ -4751,16 +8066,56 @@ void hArg(const Iter vec,const Iter vec_end, const Iterout vecout,const Iterout 
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
  inline void hArg( std::vector<HComplex> & vec , std::vector<HNumber> & vecout) {
 hArg ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 inline void hArg( casa::Vector<HComplex> & vec , casa::Vector<HNumber> & vecout) {
 hArg ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
 
+
 void (*fptr_hArg_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComplex> & vec , std::vector<HNumber> & vecout) = &hArg;
+
+ inline void hArg_hSLICED ( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hArg ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+inline void hArg_hSLICED ( casa::Vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hArg ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hArg_hSLICED_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hArg_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -4782,7 +8137,7 @@ void (*fptr_hArg_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComplex> & vec
 The following functions are available for getting real values from
 complex numbers:
   abs - absolute value of a complex number
-  norm - magnitude of a complex number squared, i.e. c * conj(c) 
+  norm - magnitude of a complex number squared, i.e. c * conj(c)
   arg - phase angle of a complex number
   imag - imaginary part of a complex number
   real - real part of a complex number
@@ -4813,16 +8168,56 @@ void hImag(const Iter vec,const Iter vec_end, const Iterout vecout,const Iterout
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
  inline void hImag( std::vector<HComplex> & vec , std::vector<HNumber> & vecout) {
 hImag ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 inline void hImag( casa::Vector<HComplex> & vec , casa::Vector<HNumber> & vecout) {
 hImag ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
 
+
 void (*fptr_hImag_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComplex> & vec , std::vector<HNumber> & vecout) = &hImag;
+
+ inline void hImag_hSLICED ( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hImag ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+inline void hImag_hSLICED ( casa::Vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hImag ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hImag_hSLICED_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hImag_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -4844,7 +8239,7 @@ void (*fptr_hImag_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComplex> & ve
 The following functions are available for getting real values from
 complex numbers:
   abs - absolute value of a complex number
-  norm - magnitude of a complex number squared, i.e. c * conj(c) 
+  norm - magnitude of a complex number squared, i.e. c * conj(c)
   arg - phase angle of a complex number
   imag - imaginary part of a complex number
   real - real part of a complex number
@@ -4875,16 +8270,56 @@ void hNorm(const Iter vec,const Iter vec_end, const Iterout vecout,const Iterout
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
  inline void hNorm( std::vector<HComplex> & vec , std::vector<HNumber> & vecout) {
 hNorm ( vec.begin(),vec.end() , vecout.begin(),vecout.end());
 }
+
 inline void hNorm( casa::Vector<HComplex> & vec , casa::Vector<HNumber> & vecout) {
 hNorm ( vec.cbegin(),vec.cend() , vecout.cbegin(),vecout.cend());
 }
 
+
 void (*fptr_hNorm_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComplex> & vec , std::vector<HNumber> & vecout) = &hNorm;
+
+ inline void hNorm_hSLICED ( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hNorm ( vec.begin() + vecslice1,vec.begin() + vecslice2 , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+inline void hNorm_hSLICED ( casa::Vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , casa::Vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+hNorm ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+void (*fptr_hNorm_hSLICED_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hNorm_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -4927,18 +8362,59 @@ void hNegate(const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hNegate( std::vector<T> & vec) {
 hNegate ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hNegate( casa::Vector<T> & vec) {
 hNegate ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hNegate_HComplex1STDIT)( std::vector<HComplex> & vec) = &hNegate;
 void (*fptr_hNegate_HNumber1STDIT)( std::vector<HNumber> & vec) = &hNegate;
 void (*fptr_hNegate_HInteger1STDIT)( std::vector<HInteger> & vec) = &hNegate;
+
+template < class T > inline void hNegate_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hNegate ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hNegate_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hNegate ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hNegate_hSLICED_HComplex1STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNegate_hSLICED;
+void (*fptr_hNegate_hSLICED_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNegate_hSLICED;
+void (*fptr_hNegate_hSLICED_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNegate_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -4979,18 +8455,59 @@ typename Iter::value_type hSum (const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline T hSum( std::vector<T> & vec) {
 return hSum ( vec.begin(),vec.end());
 }
+
 template < class T > inline T hSum( casa::Vector<T> & vec) {
 return hSum ( vec.cbegin(),vec.cend());
 }
 
+
 HComplex (*fptr_hSum_HComplex1STDIT)( std::vector<HComplex> & vec) = &hSum;
 HNumber (*fptr_hSum_HNumber1STDIT)( std::vector<HNumber> & vec) = &hSum;
 HInteger (*fptr_hSum_HInteger1STDIT)( std::vector<HInteger> & vec) = &hSum;
+
+template < class T > inline T hSum_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+return hSum ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline T hSum_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+return hSum ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+HComplex (*fptr_hSum_hSLICED_HComplex1STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSum_hSLICED;
+HNumber (*fptr_hSum_hSLICED_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSum_hSLICED;
+HInteger (*fptr_hSum_hSLICED_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSum_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5030,17 +8547,57 @@ HNumber hNorm (const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline HNumber hNorm( std::vector<T> & vec) {
 return hNorm ( vec.begin(),vec.end());
 }
+
 template < class T > inline HNumber hNorm( casa::Vector<T> & vec) {
 return hNorm ( vec.cbegin(),vec.cend());
 }
 
+
 HNumber (*fptr_hNorm_HNumber1STDIT)( std::vector<HNumber> & vec) = &hNorm;
 HNumber (*fptr_hNorm_HInteger1STDIT)( std::vector<HInteger> & vec) = &hNorm;
+
+template < class T > inline HNumber hNorm_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+return hNorm ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline HNumber hNorm_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+return hNorm ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+HNumber (*fptr_hNorm_hSLICED_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNorm_hSLICED;
+HNumber (*fptr_hNorm_hSLICED_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNorm_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5079,17 +8636,57 @@ void hNormalize (const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hNormalize( std::vector<T> & vec) {
 hNormalize ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hNormalize( casa::Vector<T> & vec) {
 hNormalize ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hNormalize_HNumber1STDIT)( std::vector<HNumber> & vec) = &hNormalize;
 void (*fptr_hNormalize_HInteger1STDIT)( std::vector<HInteger> & vec) = &hNormalize;
+
+template < class T > inline void hNormalize_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hNormalize ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hNormalize_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hNormalize ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hNormalize_hSLICED_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNormalize_hSLICED;
+void (*fptr_hNormalize_hSLICED_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hNormalize_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5128,17 +8725,57 @@ HNumber hMean (const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline HNumber hMean( std::vector<T> & vec) {
 return hMean ( vec.begin(),vec.end());
 }
+
 template < class T > inline HNumber hMean( casa::Vector<T> & vec) {
 return hMean ( vec.cbegin(),vec.cend());
 }
 
+
 HNumber (*fptr_hMean_HNumber1STDIT)( std::vector<HNumber> & vec) = &hMean;
 HNumber (*fptr_hMean_HInteger1STDIT)( std::vector<HInteger> & vec) = &hMean;
+
+template < class T > inline HNumber hMean_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+return hMean ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline HNumber hMean_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+return hMean ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+HNumber (*fptr_hMean_hSLICED_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hMean_hSLICED;
+HNumber (*fptr_hMean_hSLICED_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hMean_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5179,18 +8816,59 @@ void hSort(const Iter vec, const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hSort( std::vector<T> & vec) {
 hSort ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hSort( casa::Vector<T> & vec) {
 hSort ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hSort_HComplex1STDIT)( std::vector<HComplex> & vec) = &hSort;
 void (*fptr_hSort_HNumber1STDIT)( std::vector<HNumber> & vec) = &hSort;
 void (*fptr_hSort_HInteger1STDIT)( std::vector<HInteger> & vec) = &hSort;
+
+template < class T > inline void hSort_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hSort ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hSort_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hSort ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hSort_hSLICED_HComplex1STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSort_hSLICED;
+void (*fptr_hSort_hSLICED_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSort_hSLICED;
+void (*fptr_hSort_hSLICED_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSort_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5233,17 +8911,57 @@ typename Iter::value_type hSortMedian(const Iter vec, const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline T hSortMedian( std::vector<T> & vec) {
 return hSortMedian ( vec.begin(),vec.end());
 }
+
 template < class T > inline T hSortMedian( casa::Vector<T> & vec) {
 return hSortMedian ( vec.cbegin(),vec.cend());
 }
 
+
 HNumber (*fptr_hSortMedian_HNumber1STDIT)( std::vector<HNumber> & vec) = &hSortMedian;
 HInteger (*fptr_hSortMedian_HInteger1STDIT)( std::vector<HInteger> & vec) = &hSortMedian;
+
+template < class T > inline T hSortMedian_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+return hSortMedian ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline T hSortMedian_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+return hSortMedian ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+HNumber (*fptr_hSortMedian_hSLICED_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSortMedian_hSLICED;
+HInteger (*fptr_hSortMedian_hSLICED_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hSortMedian_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5280,11 +8998,41 @@ T hMedian(std::vector<T> & vec)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
 HNumber (*fptr_hMedian_HNumber1STL)( std::vector<HNumber> & vec) = &hMedian;
 HInteger (*fptr_hMedian_HInteger1STL)( std::vector<HInteger> & vec) = &hMedian;
+
+
+HNumber (*fptr_hMedian_hSLICED_HNumber1STL)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hMedian_hSLICED;
+HInteger (*fptr_hMedian_hSLICED_HInteger1STL)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hMedian_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5333,17 +9081,58 @@ HNumber hStdDev (const Iter vec,const Iter vec_end, const typename Iter::value_t
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline HNumber hStdDev( std::vector<T> & vec , HNumber mean) {
 return hStdDev ( vec.begin(),vec.end() , mean);
 }
+
 template < class T > inline HNumber hStdDev( casa::Vector<T> & vec , HNumber mean) {
 return hStdDev ( vec.cbegin(),vec.cend() , mean);
 }
 
+
 HNumber (*fptr_hStdDev_HNumber1HNumberSTDIT)( std::vector<HNumber> & vec , HNumber mean) = &hStdDev;
 HNumber (*fptr_hStdDev_HInteger1HNumberSTDIT)( std::vector<HInteger> & vec , HNumber mean) = &hStdDev;
+
+template < class T > inline HNumber hStdDev_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber mean ) {
+return hStdDev ( vec.begin() + vecslice1,vec.begin() + vecslice2 , mean);
+}
+
+template < class T > inline HNumber hStdDev_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber mean ) {
+return hStdDev ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , mean);
+}
+
+
+HNumber (*fptr_hStdDev_hSLICED_HNumber1HNumberSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber mean ) = &hStdDev_hSLICED;
+HNumber (*fptr_hStdDev_hSLICED_HInteger1HNumberSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber mean ) = &hStdDev_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5380,17 +9169,57 @@ HNumber hStdDev (const Iter vec,const Iter vec_end)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline HNumber hStdDev( std::vector<T> & vec) {
 return hStdDev ( vec.begin(),vec.end());
 }
+
 template < class T > inline HNumber hStdDev( casa::Vector<T> & vec) {
 return hStdDev ( vec.cbegin(),vec.cend());
 }
 
+
 HNumber (*fptr_hStdDev_HNumber1STDIT)( std::vector<HNumber> & vec) = &hStdDev;
 HNumber (*fptr_hStdDev_HInteger1STDIT)( std::vector<HInteger> & vec) = &hStdDev;
+
+template < class T > inline HNumber hStdDev_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+return hStdDev ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline HNumber hStdDev_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+return hStdDev ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+HNumber (*fptr_hStdDev_hSLICED_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hStdDev_hSLICED;
+HNumber (*fptr_hStdDev_hSLICED_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hStdDev_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5445,17 +9274,59 @@ HInteger hFindLessEqual (const Iter vec , const Iter vec_end, const typename Ite
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline HInteger hFindLessEqual( std::vector<T> & vec , T threshold , std::vector<HInteger> & vecout) {
 return hFindLessEqual ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
 }
+
 template < class T > inline HInteger hFindLessEqual( casa::Vector<T> & vec , T threshold , casa::Vector<HInteger> & vecout) {
 return hFindLessEqual ( vec.cbegin(),vec.cend() , threshold , vecout.cbegin(),vecout.cend());
 }
 
+
 HInteger (*fptr_hFindLessEqual_HNumber11HIntegerSTDITSTDIT)( std::vector<HNumber> & vec , HNumber threshold , std::vector<HInteger> & vecout) = &hFindLessEqual;
 HInteger (*fptr_hFindLessEqual_HInteger11HIntegerSTDITSTDIT)( std::vector<HInteger> & vec , HInteger threshold , std::vector<HInteger> & vecout) = &hFindLessEqual;
+
+template < class T > inline HInteger hFindLessEqual_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+return hFindLessEqual ( vec.begin() + vecslice1,vec.begin() + vecslice2 , threshold , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline HInteger hFindLessEqual_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , casa::Vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+return hFindLessEqual ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , threshold , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+HInteger (*fptr_hFindLessEqual_hSLICED_HNumber11HIntegerSTDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessEqual_hSLICED;
+HInteger (*fptr_hFindLessEqual_hSLICED_HInteger11HIntegerSTDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessEqual_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5507,17 +9378,59 @@ HInteger hFindLessEqualAbs (const Iter vec , const Iter vec_end, const typename 
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline HInteger hFindLessEqualAbs( std::vector<T> & vec , T threshold , std::vector<HInteger> & vecout) {
 return hFindLessEqualAbs ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
 }
+
 template < class T > inline HInteger hFindLessEqualAbs( casa::Vector<T> & vec , T threshold , casa::Vector<HInteger> & vecout) {
 return hFindLessEqualAbs ( vec.cbegin(),vec.cend() , threshold , vecout.cbegin(),vecout.cend());
 }
 
+
 HInteger (*fptr_hFindLessEqualAbs_HNumber11HIntegerSTDITSTDIT)( std::vector<HNumber> & vec , HNumber threshold , std::vector<HInteger> & vecout) = &hFindLessEqualAbs;
 HInteger (*fptr_hFindLessEqualAbs_HInteger11HIntegerSTDITSTDIT)( std::vector<HInteger> & vec , HInteger threshold , std::vector<HInteger> & vecout) = &hFindLessEqualAbs;
+
+template < class T > inline HInteger hFindLessEqualAbs_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+return hFindLessEqualAbs ( vec.begin() + vecslice1,vec.begin() + vecslice2 , threshold , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline HInteger hFindLessEqualAbs_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , casa::Vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+return hFindLessEqualAbs ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , threshold , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+HInteger (*fptr_hFindLessEqualAbs_hSLICED_HNumber11HIntegerSTDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessEqualAbs_hSLICED;
+HInteger (*fptr_hFindLessEqualAbs_hSLICED_HInteger11HIntegerSTDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessEqualAbs_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5570,17 +9483,59 @@ HInteger hFindGreaterThan (const Iter vec , const Iter vec_end, const typename I
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline HInteger hFindGreaterThan( std::vector<T> & vec , T threshold , std::vector<HInteger> & vecout) {
 return hFindGreaterThan ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
 }
+
 template < class T > inline HInteger hFindGreaterThan( casa::Vector<T> & vec , T threshold , casa::Vector<HInteger> & vecout) {
 return hFindGreaterThan ( vec.cbegin(),vec.cend() , threshold , vecout.cbegin(),vecout.cend());
 }
 
+
 HInteger (*fptr_hFindGreaterThan_HNumber11HIntegerSTDITSTDIT)( std::vector<HNumber> & vec , HNumber threshold , std::vector<HInteger> & vecout) = &hFindGreaterThan;
 HInteger (*fptr_hFindGreaterThan_HInteger11HIntegerSTDITSTDIT)( std::vector<HInteger> & vec , HInteger threshold , std::vector<HInteger> & vecout) = &hFindGreaterThan;
+
+template < class T > inline HInteger hFindGreaterThan_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+return hFindGreaterThan ( vec.begin() + vecslice1,vec.begin() + vecslice2 , threshold , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline HInteger hFindGreaterThan_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , casa::Vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+return hFindGreaterThan ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , threshold , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+HInteger (*fptr_hFindGreaterThan_hSLICED_HNumber11HIntegerSTDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterThan_hSLICED;
+HInteger (*fptr_hFindGreaterThan_hSLICED_HInteger11HIntegerSTDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterThan_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5632,17 +9587,59 @@ HInteger hFindGreaterThanAbs (const Iter vec , const Iter vec_end, const typenam
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline HInteger hFindGreaterThanAbs( std::vector<T> & vec , T threshold , std::vector<HInteger> & vecout) {
 return hFindGreaterThanAbs ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
 }
+
 template < class T > inline HInteger hFindGreaterThanAbs( casa::Vector<T> & vec , T threshold , casa::Vector<HInteger> & vecout) {
 return hFindGreaterThanAbs ( vec.cbegin(),vec.cend() , threshold , vecout.cbegin(),vecout.cend());
 }
 
+
 HInteger (*fptr_hFindGreaterThanAbs_HNumber11HIntegerSTDITSTDIT)( std::vector<HNumber> & vec , HNumber threshold , std::vector<HInteger> & vecout) = &hFindGreaterThanAbs;
 HInteger (*fptr_hFindGreaterThanAbs_HInteger11HIntegerSTDITSTDIT)( std::vector<HInteger> & vec , HInteger threshold , std::vector<HInteger> & vecout) = &hFindGreaterThanAbs;
+
+template < class T > inline HInteger hFindGreaterThanAbs_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+return hFindGreaterThanAbs ( vec.begin() + vecslice1,vec.begin() + vecslice2 , threshold , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline HInteger hFindGreaterThanAbs_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , casa::Vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+return hFindGreaterThanAbs ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , threshold , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+HInteger (*fptr_hFindGreaterThanAbs_hSLICED_HNumber11HIntegerSTDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterThanAbs_hSLICED;
+HInteger (*fptr_hFindGreaterThanAbs_hSLICED_HInteger11HIntegerSTDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterThanAbs_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5695,17 +9692,59 @@ HInteger hFindGreaterEqual (const Iter vec , const Iter vec_end, const typename 
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline HInteger hFindGreaterEqual( std::vector<T> & vec , T threshold , std::vector<HInteger> & vecout) {
 return hFindGreaterEqual ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
 }
+
 template < class T > inline HInteger hFindGreaterEqual( casa::Vector<T> & vec , T threshold , casa::Vector<HInteger> & vecout) {
 return hFindGreaterEqual ( vec.cbegin(),vec.cend() , threshold , vecout.cbegin(),vecout.cend());
 }
 
+
 HInteger (*fptr_hFindGreaterEqual_HNumber11HIntegerSTDITSTDIT)( std::vector<HNumber> & vec , HNumber threshold , std::vector<HInteger> & vecout) = &hFindGreaterEqual;
 HInteger (*fptr_hFindGreaterEqual_HInteger11HIntegerSTDITSTDIT)( std::vector<HInteger> & vec , HInteger threshold , std::vector<HInteger> & vecout) = &hFindGreaterEqual;
+
+template < class T > inline HInteger hFindGreaterEqual_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+return hFindGreaterEqual ( vec.begin() + vecslice1,vec.begin() + vecslice2 , threshold , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline HInteger hFindGreaterEqual_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , casa::Vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+return hFindGreaterEqual ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , threshold , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+HInteger (*fptr_hFindGreaterEqual_hSLICED_HNumber11HIntegerSTDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterEqual_hSLICED;
+HInteger (*fptr_hFindGreaterEqual_hSLICED_HInteger11HIntegerSTDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterEqual_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5757,17 +9796,59 @@ HInteger hFindGreaterEqualAbs (const Iter vec , const Iter vec_end, const typena
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline HInteger hFindGreaterEqualAbs( std::vector<T> & vec , T threshold , std::vector<HInteger> & vecout) {
 return hFindGreaterEqualAbs ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
 }
+
 template < class T > inline HInteger hFindGreaterEqualAbs( casa::Vector<T> & vec , T threshold , casa::Vector<HInteger> & vecout) {
 return hFindGreaterEqualAbs ( vec.cbegin(),vec.cend() , threshold , vecout.cbegin(),vecout.cend());
 }
 
+
 HInteger (*fptr_hFindGreaterEqualAbs_HNumber11HIntegerSTDITSTDIT)( std::vector<HNumber> & vec , HNumber threshold , std::vector<HInteger> & vecout) = &hFindGreaterEqualAbs;
 HInteger (*fptr_hFindGreaterEqualAbs_HInteger11HIntegerSTDITSTDIT)( std::vector<HInteger> & vec , HInteger threshold , std::vector<HInteger> & vecout) = &hFindGreaterEqualAbs;
+
+template < class T > inline HInteger hFindGreaterEqualAbs_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+return hFindGreaterEqualAbs ( vec.begin() + vecslice1,vec.begin() + vecslice2 , threshold , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline HInteger hFindGreaterEqualAbs_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , casa::Vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+return hFindGreaterEqualAbs ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , threshold , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+HInteger (*fptr_hFindGreaterEqualAbs_hSLICED_HNumber11HIntegerSTDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterEqualAbs_hSLICED;
+HInteger (*fptr_hFindGreaterEqualAbs_hSLICED_HInteger11HIntegerSTDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindGreaterEqualAbs_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5820,17 +9901,59 @@ HInteger hFindLessThan (const Iter vec , const Iter vec_end, const typename Iter
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline HInteger hFindLessThan( std::vector<T> & vec , T threshold , std::vector<HInteger> & vecout) {
 return hFindLessThan ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
 }
+
 template < class T > inline HInteger hFindLessThan( casa::Vector<T> & vec , T threshold , casa::Vector<HInteger> & vecout) {
 return hFindLessThan ( vec.cbegin(),vec.cend() , threshold , vecout.cbegin(),vecout.cend());
 }
 
+
 HInteger (*fptr_hFindLessThan_HNumber11HIntegerSTDITSTDIT)( std::vector<HNumber> & vec , HNumber threshold , std::vector<HInteger> & vecout) = &hFindLessThan;
 HInteger (*fptr_hFindLessThan_HInteger11HIntegerSTDITSTDIT)( std::vector<HInteger> & vec , HInteger threshold , std::vector<HInteger> & vecout) = &hFindLessThan;
+
+template < class T > inline HInteger hFindLessThan_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+return hFindLessThan ( vec.begin() + vecslice1,vec.begin() + vecslice2 , threshold , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline HInteger hFindLessThan_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , casa::Vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+return hFindLessThan ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , threshold , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+HInteger (*fptr_hFindLessThan_hSLICED_HNumber11HIntegerSTDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessThan_hSLICED;
+HInteger (*fptr_hFindLessThan_hSLICED_HInteger11HIntegerSTDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessThan_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5882,17 +10005,59 @@ HInteger hFindLessThanAbs (const Iter vec , const Iter vec_end, const typename I
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline HInteger hFindLessThanAbs( std::vector<T> & vec , T threshold , std::vector<HInteger> & vecout) {
 return hFindLessThanAbs ( vec.begin(),vec.end() , threshold , vecout.begin(),vecout.end());
 }
+
 template < class T > inline HInteger hFindLessThanAbs( casa::Vector<T> & vec , T threshold , casa::Vector<HInteger> & vecout) {
 return hFindLessThanAbs ( vec.cbegin(),vec.cend() , threshold , vecout.cbegin(),vecout.cend());
 }
 
+
 HInteger (*fptr_hFindLessThanAbs_HNumber11HIntegerSTDITSTDIT)( std::vector<HNumber> & vec , HNumber threshold , std::vector<HInteger> & vecout) = &hFindLessThanAbs;
 HInteger (*fptr_hFindLessThanAbs_HInteger11HIntegerSTDITSTDIT)( std::vector<HInteger> & vec , HInteger threshold , std::vector<HInteger> & vecout) = &hFindLessThanAbs;
+
+template < class T > inline HInteger hFindLessThanAbs_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+return hFindLessThanAbs ( vec.begin() + vecslice1,vec.begin() + vecslice2 , threshold , vecout.begin() + vecoutslice1,vecout.begin() + vecoutslice2);
+}
+
+template < class T > inline HInteger hFindLessThanAbs_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T threshold , casa::Vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) {
+return hFindLessThanAbs ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , threshold , vecout.cbegin() + vecoutslice1,vecout.cbegin() + vecoutslice2);
+}
+
+
+HInteger (*fptr_hFindLessThanAbs_hSLICED_HNumber11HIntegerSTDITSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessThanAbs_hSLICED;
+HInteger (*fptr_hFindLessThanAbs_hSLICED_HInteger11HIntegerSTDITSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger threshold , std::vector<HInteger> & vecout , HInteger vecoutslice1 , HInteger vecoutslice2) = &hFindLessThanAbs_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5956,17 +10121,58 @@ void hDownsample (const Iter vec1,
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hDownsample( std::vector<T> & vec1 , std::vector<T> & vec2) {
 hDownsample ( vec1.begin(),vec1.end() , vec2.begin(),vec2.end());
 }
+
 template < class T > inline void hDownsample( casa::Vector<T> & vec1 , casa::Vector<T> & vec2) {
 hDownsample ( vec1.cbegin(),vec1.cend() , vec2.cbegin(),vec2.cend());
 }
 
+
 void (*fptr_hDownsample_HNumber11STDITSTDIT)( std::vector<HNumber> & vec1 , std::vector<HNumber> & vec2) = &hDownsample;
 void (*fptr_hDownsample_HInteger11STDITSTDIT)( std::vector<HInteger> & vec1 , std::vector<HInteger> & vec2) = &hDownsample;
+
+template < class T > inline void hDownsample_hSLICED ( std::vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hDownsample ( vec1.begin() + vec1slice1,vec1.begin() + vec1slice2 , vec2.begin() + vec2slice1,vec2.begin() + vec2slice2);
+}
+
+template < class T > inline void hDownsample_hSLICED ( casa::Vector<T> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , casa::Vector<T> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) {
+hDownsample ( vec1.cbegin() + vec1slice1,vec1.cbegin() + vec1slice2 , vec2.cbegin() + vec2slice1,vec2.cbegin() + vec2slice2);
+}
+
+
+void (*fptr_hDownsample_hSLICED_HNumber11STDITSTDIT)( std::vector<HNumber> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HNumber> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDownsample_hSLICED;
+void (*fptr_hDownsample_hSLICED_HInteger11STDITSTDIT)( std::vector<HInteger> & vec1 , HInteger vec1slice1 , HInteger vec1slice2 , std::vector<HInteger> & vec2 , HInteger vec2slice1 , HInteger vec2slice2) = &hDownsample_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -6015,11 +10221,42 @@ std::vector<T> hDownsample (
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
 std::vector<HNumber> (*fptr_hDownsample_HNumber1HNumberSTL)( std::vector<HNumber> & vec , HNumber downsample_factor) = &hDownsample;
 std::vector<HInteger> (*fptr_hDownsample_HInteger1HNumberSTL)( std::vector<HInteger> & vec , HNumber downsample_factor) = &hDownsample;
+
+
+std::vector<HNumber> (*fptr_hDownsample_hSLICED_HNumber1HNumberSTL)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber downsample_factor ) = &hDownsample_hSLICED;
+std::vector<HInteger> (*fptr_hDownsample_hSLICED_HInteger1HNumberSTL)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber downsample_factor ) = &hDownsample_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -6097,18 +10334,60 @@ HInteger hFindLowerBound (const Iter vec,
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline HInteger hFindLowerBound( std::vector<T> & vec , T value) {
 return hFindLowerBound ( vec.begin(),vec.end() , value);
 }
+
 template < class T > inline HInteger hFindLowerBound( casa::Vector<T> & vec , T value) {
 return hFindLowerBound ( vec.cbegin(),vec.cend() , value);
 }
 
+
 HInteger (*fptr_hFindLowerBound_HComplex11STDIT)( std::vector<HComplex> & vec , HComplex value) = &hFindLowerBound;
 HInteger (*fptr_hFindLowerBound_HNumber11STDIT)( std::vector<HNumber> & vec , HNumber value) = &hFindLowerBound;
 HInteger (*fptr_hFindLowerBound_HInteger11STDIT)( std::vector<HInteger> & vec , HInteger value) = &hFindLowerBound;
+
+template < class T > inline HInteger hFindLowerBound_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T value ) {
+return hFindLowerBound ( vec.begin() + vecslice1,vec.begin() + vecslice2 , value);
+}
+
+template < class T > inline HInteger hFindLowerBound_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , T value ) {
+return hFindLowerBound ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , value);
+}
+
+
+HInteger (*fptr_hFindLowerBound_hSLICED_HComplex11STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HComplex value ) = &hFindLowerBound_hSLICED;
+HInteger (*fptr_hFindLowerBound_hSLICED_HNumber11STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber value ) = &hFindLowerBound_hSLICED;
+HInteger (*fptr_hFindLowerBound_hSLICED_HInteger11STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HInteger value ) = &hFindLowerBound_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -6153,6 +10432,32 @@ std::vector<HNumber> hFlatWeights (HInteger wlen) {
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -6204,6 +10509,32 @@ std::vector<HNumber> hLinearWeights (HInteger wlen) {
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -6252,6 +10583,32 @@ std::vector<HNumber> hGaussianWeights (HInteger wlen) {
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -6304,6 +10661,33 @@ vector<HNumber> hWeights(HInteger wlen, hWEIGHTS wtype){
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -6377,13 +10761,49 @@ void hRunningAverage (const DataIter idata,
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
  inline void hRunningAverage( std::vector<HNumber> & idata , std::vector<HNumber> & odata , std::vector<HNumber> & weights) {
 hRunningAverage ( idata.begin(),idata.end() , odata.begin(),odata.end() , weights.begin(),weights.end());
 }
 
+
 void (*fptr_hRunningAverage_HIntegerHNumberHNumberHNumberSTDITSTDITSTDIT)( std::vector<HNumber> & idata , std::vector<HNumber> & odata , std::vector<HNumber> & weights) = &hRunningAverage;
+
+ inline void hRunningAverage_hSLICED ( std::vector<HNumber> & idata , HInteger idataslice1 , HInteger idataslice2 , std::vector<HNumber> & odata , HInteger odataslice1 , HInteger odataslice2 , std::vector<HNumber> & weights , HInteger weightsslice1 , HInteger weightsslice2) {
+hRunningAverage ( idata.begin() + idataslice1,idata.begin() + idataslice2 , odata.begin() + odataslice1,odata.begin() + odataslice2 , weights.begin() + weightsslice1,weights.begin() + weightsslice2);
+}
+
+
+void (*fptr_hRunningAverage_hSLICED_HIntegerHNumberHNumberHNumberSTDITSTDITSTDIT)( std::vector<HNumber> & idata , HInteger idataslice1 , HInteger idataslice2 , std::vector<HNumber> & odata , HInteger odataslice1 , HInteger odataslice2 , std::vector<HNumber> & weights , HInteger weightsslice1 , HInteger weightsslice2) = &hRunningAverage_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -6436,13 +10856,50 @@ void hRunningAverage (const DataIter idata,
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
  inline void hRunningAverage( std::vector<HNumber> & idata , std::vector<HNumber> & odata , HInteger wlen , hWEIGHTS wtype) {
 hRunningAverage ( idata.begin(),idata.end() , odata.begin(),odata.end() , wlen , wtype);
 }
 
+
 void (*fptr_hRunningAverage_HIntegerHNumberHNumberHIntegerhWEIGHTSSTDITSTDIT)( std::vector<HNumber> & idata , std::vector<HNumber> & odata , HInteger wlen , hWEIGHTS wtype) = &hRunningAverage;
+
+ inline void hRunningAverage_hSLICED ( std::vector<HNumber> & idata , HInteger idataslice1 , HInteger idataslice2 , std::vector<HNumber> & odata , HInteger odataslice1 , HInteger odataslice2 , HInteger wlen , hWEIGHTS wtype ) {
+hRunningAverage ( idata.begin() + idataslice1,idata.begin() + idataslice2 , odata.begin() + odataslice1,odata.begin() + odataslice2 , wlen , wtype);
+}
+
+
+void (*fptr_hRunningAverage_hSLICED_HIntegerHNumberHNumberHIntegerhWEIGHTSSTDITSTDIT)( std::vector<HNumber> & idata , HInteger idataslice1 , HInteger idataslice2 , std::vector<HNumber> & odata , HInteger odataslice1 , HInteger odataslice2 , HInteger wlen , hWEIGHTS wtype ) = &hRunningAverage_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -6493,16 +10950,57 @@ HNumber hGeometricDelayFarField (
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
  inline HNumber hGeometricDelayFarField( std::vector<HNumber> & antPosition , std::vector<HNumber> & skyDirection , HNumber length) {
 return hGeometricDelayFarField ( antPosition.begin() , skyDirection.begin() , length);
 }
+
 inline HNumber hGeometricDelayFarField( casa::Vector<HNumber> & antPosition , casa::Vector<HNumber> & skyDirection , HNumber length) {
 return hGeometricDelayFarField ( antPosition.cbegin() , skyDirection.cbegin() , length);
 }
 
+
 HNumber (*fptr_hGeometricDelayFarField_HIntegerHNumberHNumberHNumberSTDITFIXEDSTDITFIXED)( std::vector<HNumber> & antPosition , std::vector<HNumber> & skyDirection , HNumber length) = &hGeometricDelayFarField;
+
+ inline HNumber hGeometricDelayFarField_hSLICED ( std::vector<HNumber> & antPosition , HInteger antPositionslice1 , HInteger antPositionslice2 , std::vector<HNumber> & skyDirection , HInteger skyDirectionslice1 , HInteger skyDirectionslice2 , HNumber length ) {
+return hGeometricDelayFarField ( antPosition.begin() , skyDirection.begin() , length);
+}
+
+inline HNumber hGeometricDelayFarField_hSLICED ( casa::Vector<HNumber> & antPosition , HInteger antPositionslice1 , HInteger antPositionslice2 , casa::Vector<HNumber> & skyDirection , HInteger skyDirectionslice1 , HInteger skyDirectionslice2 , HNumber length ) {
+return hGeometricDelayFarField ( antPosition.cbegin() , skyDirection.cbegin() , length);
+}
+
+
+HNumber (*fptr_hGeometricDelayFarField_hSLICED_HIntegerHNumberHNumberHNumberSTDITFIXEDSTDITFIXED)( std::vector<HNumber> & antPosition , HInteger antPositionslice1 , HInteger antPositionslice2 , std::vector<HNumber> & skyDirection , HInteger skyDirectionslice1 , HInteger skyDirectionslice2 , HNumber length ) = &hGeometricDelayFarField_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -6552,16 +11050,57 @@ HNumber hGeometricDelayNearField (
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
  inline HNumber hGeometricDelayNearField( std::vector<HNumber> & antPosition , std::vector<HNumber> & skyPosition , HNumber distance) {
 return hGeometricDelayNearField ( antPosition.begin() , skyPosition.begin() , distance);
 }
+
 inline HNumber hGeometricDelayNearField( casa::Vector<HNumber> & antPosition , casa::Vector<HNumber> & skyPosition , HNumber distance) {
 return hGeometricDelayNearField ( antPosition.cbegin() , skyPosition.cbegin() , distance);
 }
 
+
 HNumber (*fptr_hGeometricDelayNearField_HIntegerHNumberHNumberHNumberSTDITFIXEDSTDITFIXED)( std::vector<HNumber> & antPosition , std::vector<HNumber> & skyPosition , HNumber distance) = &hGeometricDelayNearField;
+
+ inline HNumber hGeometricDelayNearField_hSLICED ( std::vector<HNumber> & antPosition , HInteger antPositionslice1 , HInteger antPositionslice2 , std::vector<HNumber> & skyPosition , HInteger skyPositionslice1 , HInteger skyPositionslice2 , HNumber distance ) {
+return hGeometricDelayNearField ( antPosition.begin() , skyPosition.begin() , distance);
+}
+
+inline HNumber hGeometricDelayNearField_hSLICED ( casa::Vector<HNumber> & antPosition , HInteger antPositionslice1 , HInteger antPositionslice2 , casa::Vector<HNumber> & skyPosition , HInteger skyPositionslice1 , HInteger skyPositionslice2 , HNumber distance ) {
+return hGeometricDelayNearField ( antPosition.cbegin() , skyPosition.cbegin() , distance);
+}
+
+
+HNumber (*fptr_hGeometricDelayNearField_hSLICED_HIntegerHNumberHNumberHNumberSTDITFIXEDSTDITFIXED)( std::vector<HNumber> & antPosition , HInteger antPositionslice1 , HInteger antPositionslice2 , std::vector<HNumber> & skyPosition , HInteger skyPositionslice1 , HInteger skyPositionslice2 , HNumber distance ) = &hGeometricDelayNearField_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -6639,16 +11178,58 @@ void hGeometricDelays (
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
  inline void hGeometricDelays( std::vector<HNumber> & antPositions , std::vector<HNumber> & skyPositions , std::vector<HNumber> & delays , bool farfield) {
 hGeometricDelays ( antPositions.begin(),antPositions.end() , skyPositions.begin(),skyPositions.end() , delays.begin(),delays.end() , farfield);
 }
+
 inline void hGeometricDelays( casa::Vector<HNumber> & antPositions , casa::Vector<HNumber> & skyPositions , casa::Vector<HNumber> & delays , bool farfield) {
 hGeometricDelays ( antPositions.cbegin(),antPositions.cend() , skyPositions.cbegin(),skyPositions.cend() , delays.cbegin(),delays.cend() , farfield);
 }
 
+
 void (*fptr_hGeometricDelays_HIntegerHNumberHNumberHNumberboolSTDITSTDITSTDIT)( std::vector<HNumber> & antPositions , std::vector<HNumber> & skyPositions , std::vector<HNumber> & delays , bool farfield) = &hGeometricDelays;
+
+ inline void hGeometricDelays_hSLICED ( std::vector<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , std::vector<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , std::vector<HNumber> & delays , HInteger delaysslice1 , HInteger delaysslice2 , bool farfield ) {
+hGeometricDelays ( antPositions.begin() + antPositionsslice1,antPositions.begin() + antPositionsslice2 , skyPositions.begin() + skyPositionsslice1,skyPositions.begin() + skyPositionsslice2 , delays.begin() + delaysslice1,delays.begin() + delaysslice2 , farfield);
+}
+
+inline void hGeometricDelays_hSLICED ( casa::Vector<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , casa::Vector<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , casa::Vector<HNumber> & delays , HInteger delaysslice1 , HInteger delaysslice2 , bool farfield ) {
+hGeometricDelays ( antPositions.cbegin() + antPositionsslice1,antPositions.cbegin() + antPositionsslice2 , skyPositions.cbegin() + skyPositionsslice1,skyPositions.cbegin() + skyPositionsslice2 , delays.cbegin() + delaysslice1,delays.cbegin() + delaysslice2 , farfield);
+}
+
+
+void (*fptr_hGeometricDelays_hSLICED_HIntegerHNumberHNumberHNumberboolSTDITSTDITSTDIT)( std::vector<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , std::vector<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , std::vector<HNumber> & delays , HInteger delaysslice1 , HInteger delaysslice2 , bool farfield ) = &hGeometricDelays_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -6739,16 +11320,59 @@ void hGeometricPhases (
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
  inline void hGeometricPhases( std::vector<HNumber> & frequencies , std::vector<HNumber> & antPositions , std::vector<HNumber> & skyPositions , std::vector<HNumber> & phases , bool farfield) {
 hGeometricPhases ( frequencies.begin(),frequencies.end() , antPositions.begin(),antPositions.end() , skyPositions.begin(),skyPositions.end() , phases.begin(),phases.end() , farfield);
 }
+
 inline void hGeometricPhases( casa::Vector<HNumber> & frequencies , casa::Vector<HNumber> & antPositions , casa::Vector<HNumber> & skyPositions , casa::Vector<HNumber> & phases , bool farfield) {
 hGeometricPhases ( frequencies.cbegin(),frequencies.cend() , antPositions.cbegin(),antPositions.cend() , skyPositions.cbegin(),skyPositions.cend() , phases.cbegin(),phases.cend() , farfield);
 }
 
+
 void (*fptr_hGeometricPhases_HIntegerHNumberHNumberHNumberHNumberboolSTDITSTDITSTDITSTDIT)( std::vector<HNumber> & frequencies , std::vector<HNumber> & antPositions , std::vector<HNumber> & skyPositions , std::vector<HNumber> & phases , bool farfield) = &hGeometricPhases;
+
+ inline void hGeometricPhases_hSLICED ( std::vector<HNumber> & frequencies , HInteger frequenciesslice1 , HInteger frequenciesslice2 , std::vector<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , std::vector<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , std::vector<HNumber> & phases , HInteger phasesslice1 , HInteger phasesslice2 , bool farfield ) {
+hGeometricPhases ( frequencies.begin() + frequenciesslice1,frequencies.begin() + frequenciesslice2 , antPositions.begin() + antPositionsslice1,antPositions.begin() + antPositionsslice2 , skyPositions.begin() + skyPositionsslice1,skyPositions.begin() + skyPositionsslice2 , phases.begin() + phasesslice1,phases.begin() + phasesslice2 , farfield);
+}
+
+inline void hGeometricPhases_hSLICED ( casa::Vector<HNumber> & frequencies , HInteger frequenciesslice1 , HInteger frequenciesslice2 , casa::Vector<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , casa::Vector<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , casa::Vector<HNumber> & phases , HInteger phasesslice1 , HInteger phasesslice2 , bool farfield ) {
+hGeometricPhases ( frequencies.cbegin() + frequenciesslice1,frequencies.cbegin() + frequenciesslice2 , antPositions.cbegin() + antPositionsslice1,antPositions.cbegin() + antPositionsslice2 , skyPositions.cbegin() + skyPositionsslice1,skyPositions.cbegin() + skyPositionsslice2 , phases.cbegin() + phasesslice1,phases.cbegin() + phasesslice2 , farfield);
+}
+
+
+void (*fptr_hGeometricPhases_hSLICED_HIntegerHNumberHNumberHNumberHNumberboolSTDITSTDITSTDITSTDIT)( std::vector<HNumber> & frequencies , HInteger frequenciesslice1 , HInteger frequenciesslice2 , std::vector<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , std::vector<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , std::vector<HNumber> & phases , HInteger phasesslice1 , HInteger phasesslice2 , bool farfield ) = &hGeometricPhases_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -6839,16 +11463,59 @@ void hGeometricWeights (
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
  inline void hGeometricWeights( std::vector<HNumber> & frequencies , std::vector<HNumber> & antPositions , std::vector<HNumber> & skyPositions , std::vector<HComplex> & weights , bool farfield) {
 hGeometricWeights ( frequencies.begin(),frequencies.end() , antPositions.begin(),antPositions.end() , skyPositions.begin(),skyPositions.end() , weights.begin(),weights.end() , farfield);
 }
+
 inline void hGeometricWeights( casa::Vector<HNumber> & frequencies , casa::Vector<HNumber> & antPositions , casa::Vector<HNumber> & skyPositions , casa::Vector<HComplex> & weights , bool farfield) {
 hGeometricWeights ( frequencies.cbegin(),frequencies.cend() , antPositions.cbegin(),antPositions.cend() , skyPositions.cbegin(),skyPositions.cend() , weights.cbegin(),weights.cend() , farfield);
 }
 
+
 void (*fptr_hGeometricWeights_HIntegerHNumberHNumberHNumberHComplexboolSTDITSTDITSTDITSTDIT)( std::vector<HNumber> & frequencies , std::vector<HNumber> & antPositions , std::vector<HNumber> & skyPositions , std::vector<HComplex> & weights , bool farfield) = &hGeometricWeights;
+
+ inline void hGeometricWeights_hSLICED ( std::vector<HNumber> & frequencies , HInteger frequenciesslice1 , HInteger frequenciesslice2 , std::vector<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , std::vector<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , std::vector<HComplex> & weights , HInteger weightsslice1 , HInteger weightsslice2 , bool farfield ) {
+hGeometricWeights ( frequencies.begin() + frequenciesslice1,frequencies.begin() + frequenciesslice2 , antPositions.begin() + antPositionsslice1,antPositions.begin() + antPositionsslice2 , skyPositions.begin() + skyPositionsslice1,skyPositions.begin() + skyPositionsslice2 , weights.begin() + weightsslice1,weights.begin() + weightsslice2 , farfield);
+}
+
+inline void hGeometricWeights_hSLICED ( casa::Vector<HNumber> & frequencies , HInteger frequenciesslice1 , HInteger frequenciesslice2 , casa::Vector<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , casa::Vector<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , casa::Vector<HComplex> & weights , HInteger weightsslice1 , HInteger weightsslice2 , bool farfield ) {
+hGeometricWeights ( frequencies.cbegin() + frequenciesslice1,frequencies.cbegin() + frequenciesslice2 , antPositions.cbegin() + antPositionsslice1,antPositions.cbegin() + antPositionsslice2 , skyPositions.cbegin() + skyPositionsslice1,skyPositions.cbegin() + skyPositionsslice2 , weights.cbegin() + weightsslice1,weights.cbegin() + weightsslice2 , farfield);
+}
+
+
+void (*fptr_hGeometricWeights_hSLICED_HIntegerHNumberHNumberHNumberHComplexboolSTDITSTDITSTDITSTDIT)( std::vector<HNumber> & frequencies , HInteger frequenciesslice1 , HInteger frequenciesslice2 , std::vector<HNumber> & antPositions , HInteger antPositionsslice1 , HInteger antPositionsslice2 , std::vector<HNumber> & skyPositions , HInteger skyPositionsslice1 , HInteger skyPositionsslice2 , std::vector<HComplex> & weights , HInteger weightsslice1 , HInteger weightsslice2 , bool farfield ) = &hGeometricWeights_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -6897,13 +11564,48 @@ void hSpectralPower(const Iterin vec,const Iterin vec_end, const Iter out,const 
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
  inline void hSpectralPower( std::vector<HComplex> & vec , std::vector<HNumber> & outvec) {
 hSpectralPower ( vec.begin(),vec.end() , outvec.begin(),outvec.end());
 }
 
+
 void (*fptr_hSpectralPower_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComplex> & vec , std::vector<HNumber> & outvec) = &hSpectralPower;
+
+ inline void hSpectralPower_hSLICED ( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & outvec , HInteger outvecslice1 , HInteger outvecslice2) {
+hSpectralPower ( vec.begin() + vecslice1,vec.begin() + vecslice2 , outvec.begin() + outvecslice1,outvec.begin() + outvecslice2);
+}
+
+
+void (*fptr_hSpectralPower_hSLICED_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , std::vector<HNumber> & outvec , HInteger outvecslice1 , HInteger outvecslice2) = &hSpectralPower_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -6913,8 +11615,7 @@ void (*fptr_hSpectralPower_HIntegerHComplexHNumberSTDITSTDIT)( std::vector<HComp
 //--Undefine user-defined parameters from cc file
 /* hfppnew-generatewrappers.def - END ............................................*/
 //-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-/*
+/*!
   \brief Convert the ADC value to a voltage.
 
     \param vec: Numeric input and output vector
@@ -6945,15 +11646,52 @@ void hADC2Voltage(const Iter vec, const Iter vec_end, const HNumber adc2voltage)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hADC2Voltage( std::vector<T> & vec , HNumber adc2voltage) {
 hADC2Voltage ( vec.begin(),vec.end() , adc2voltage);
 }
 
+
 void (*fptr_hADC2Voltage_HComplex1HNumberSTDIT)( std::vector<HComplex> & vec , HNumber adc2voltage) = &hADC2Voltage;
 void (*fptr_hADC2Voltage_HNumber1HNumberSTDIT)( std::vector<HNumber> & vec , HNumber adc2voltage) = &hADC2Voltage;
 void (*fptr_hADC2Voltage_HInteger1HNumberSTDIT)( std::vector<HInteger> & vec , HNumber adc2voltage) = &hADC2Voltage;
+
+template < class T > inline void hADC2Voltage_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber adc2voltage ) {
+hADC2Voltage ( vec.begin() + vecslice1,vec.begin() + vecslice2 , adc2voltage);
+}
+
+
+void (*fptr_hADC2Voltage_hSLICED_HComplex1HNumberSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber adc2voltage ) = &hADC2Voltage_hSLICED;
+void (*fptr_hADC2Voltage_hSLICED_HNumber1HNumberSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber adc2voltage ) = &hADC2Voltage_hSLICED;
+void (*fptr_hADC2Voltage_hSLICED_HInteger1HNumberSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber adc2voltage ) = &hADC2Voltage_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -6964,7 +11702,7 @@ void (*fptr_hADC2Voltage_HInteger1HNumberSTDIT)( std::vector<HInteger> & vec , H
 /* hfppnew-generatewrappers.def - END ............................................*/
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-/*
+/*!
   \brief Create a Hanning filter.
 
     \param vec: Return vector containing Hanning filter
@@ -7010,18 +11748,63 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hGetHanningFilter( std::vector<T> & vec , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall) {
 hGetHanningFilter ( vec.begin(),vec.end() , Alpha , Beta , BetaRise , BetaFall);
 }
+
 template < class T > inline void hGetHanningFilter( casa::Vector<T> & vec , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall) {
 hGetHanningFilter ( vec.cbegin(),vec.cend() , Alpha , Beta , BetaRise , BetaFall);
 }
 
+
 void (*fptr_hGetHanningFilter_HComplex1HNumberuintuintuintSTDIT)( std::vector<HComplex> & vec , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall) = &hGetHanningFilter;
 void (*fptr_hGetHanningFilter_HNumber1HNumberuintuintuintSTDIT)( std::vector<HNumber> & vec , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall) = &hGetHanningFilter;
 void (*fptr_hGetHanningFilter_HInteger1HNumberuintuintuintSTDIT)( std::vector<HInteger> & vec , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall) = &hGetHanningFilter;
+
+template < class T > inline void hGetHanningFilter_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall ) {
+hGetHanningFilter ( vec.begin() + vecslice1,vec.begin() + vecslice2 , Alpha , Beta , BetaRise , BetaFall);
+}
+
+template < class T > inline void hGetHanningFilter_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall ) {
+hGetHanningFilter ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , Alpha , Beta , BetaRise , BetaFall);
+}
+
+
+void (*fptr_hGetHanningFilter_hSLICED_HComplex1HNumberuintuintuintSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall ) = &hGetHanningFilter_hSLICED;
+void (*fptr_hGetHanningFilter_hSLICED_HNumber1HNumberuintuintuintSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall ) = &hGetHanningFilter_hSLICED;
+void (*fptr_hGetHanningFilter_hSLICED_HInteger1HNumberuintuintuintSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta , uint BetaRise , uint BetaFall ) = &hGetHanningFilter_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -7032,7 +11815,7 @@ void (*fptr_hGetHanningFilter_HInteger1HNumberuintuintuintSTDIT)( std::vector<HI
 /* hfppnew-generatewrappers.def - END ............................................*/
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-/*
+/*!
   \brief Create a Hanning filter.
 
     \param vec: Return vector containing Hanning filter
@@ -7067,18 +11850,61 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hGetHanningFilter( std::vector<T> & vec , HNumber Alpha , uint Beta) {
 hGetHanningFilter ( vec.begin(),vec.end() , Alpha , Beta);
 }
+
 template < class T > inline void hGetHanningFilter( casa::Vector<T> & vec , HNumber Alpha , uint Beta) {
 hGetHanningFilter ( vec.cbegin(),vec.cend() , Alpha , Beta);
 }
 
+
 void (*fptr_hGetHanningFilter_HComplex1HNumberuintSTDIT)( std::vector<HComplex> & vec , HNumber Alpha , uint Beta) = &hGetHanningFilter;
 void (*fptr_hGetHanningFilter_HNumber1HNumberuintSTDIT)( std::vector<HNumber> & vec , HNumber Alpha , uint Beta) = &hGetHanningFilter;
 void (*fptr_hGetHanningFilter_HInteger1HNumberuintSTDIT)( std::vector<HInteger> & vec , HNumber Alpha , uint Beta) = &hGetHanningFilter;
+
+template < class T > inline void hGetHanningFilter_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta ) {
+hGetHanningFilter ( vec.begin() + vecslice1,vec.begin() + vecslice2 , Alpha , Beta);
+}
+
+template < class T > inline void hGetHanningFilter_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta ) {
+hGetHanningFilter ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , Alpha , Beta);
+}
+
+
+void (*fptr_hGetHanningFilter_hSLICED_HComplex1HNumberuintSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta ) = &hGetHanningFilter_hSLICED;
+void (*fptr_hGetHanningFilter_hSLICED_HNumber1HNumberuintSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta ) = &hGetHanningFilter_hSLICED;
+void (*fptr_hGetHanningFilter_hSLICED_HInteger1HNumberuintSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha , uint Beta ) = &hGetHanningFilter_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -7089,7 +11915,7 @@ void (*fptr_hGetHanningFilter_HInteger1HNumberuintSTDIT)( std::vector<HInteger> 
 /* hfppnew-generatewrappers.def - END ............................................*/
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-/*
+/*!
   \brief Create a Hanning filter.
 
     \param vec: Return vector containing Hanning filter
@@ -7119,18 +11945,60 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hGetHanningFilter( std::vector<T> & vec , HNumber Alpha) {
 hGetHanningFilter ( vec.begin(),vec.end() , Alpha);
 }
+
 template < class T > inline void hGetHanningFilter( casa::Vector<T> & vec , HNumber Alpha) {
 hGetHanningFilter ( vec.cbegin(),vec.cend() , Alpha);
 }
 
+
 void (*fptr_hGetHanningFilter_HComplex1HNumberSTDIT)( std::vector<HComplex> & vec , HNumber Alpha) = &hGetHanningFilter;
 void (*fptr_hGetHanningFilter_HNumber1HNumberSTDIT)( std::vector<HNumber> & vec , HNumber Alpha) = &hGetHanningFilter;
 void (*fptr_hGetHanningFilter_HInteger1HNumberSTDIT)( std::vector<HInteger> & vec , HNumber Alpha) = &hGetHanningFilter;
+
+template < class T > inline void hGetHanningFilter_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha ) {
+hGetHanningFilter ( vec.begin() + vecslice1,vec.begin() + vecslice2 , Alpha);
+}
+
+template < class T > inline void hGetHanningFilter_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha ) {
+hGetHanningFilter ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2 , Alpha);
+}
+
+
+void (*fptr_hGetHanningFilter_hSLICED_HComplex1HNumberSTDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha ) = &hGetHanningFilter_hSLICED;
+void (*fptr_hGetHanningFilter_hSLICED_HNumber1HNumberSTDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha ) = &hGetHanningFilter_hSLICED;
+void (*fptr_hGetHanningFilter_hSLICED_HInteger1HNumberSTDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HNumber Alpha ) = &hGetHanningFilter_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -7141,7 +12009,7 @@ void (*fptr_hGetHanningFilter_HInteger1HNumberSTDIT)( std::vector<HInteger> & ve
 /* hfppnew-generatewrappers.def - END ............................................*/
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-/*
+/*!
   \brief Create a Hanning filter.
 
     \param vec: Return vector containing Hanning filter
@@ -7168,18 +12036,59 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end){
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hGetHanningFilter( std::vector<T> & vec) {
 hGetHanningFilter ( vec.begin(),vec.end());
 }
+
 template < class T > inline void hGetHanningFilter( casa::Vector<T> & vec) {
 hGetHanningFilter ( vec.cbegin(),vec.cend());
 }
 
+
 void (*fptr_hGetHanningFilter_HComplex1STDIT)( std::vector<HComplex> & vec) = &hGetHanningFilter;
 void (*fptr_hGetHanningFilter_HNumber1STDIT)( std::vector<HNumber> & vec) = &hGetHanningFilter;
 void (*fptr_hGetHanningFilter_HInteger1STDIT)( std::vector<HInteger> & vec) = &hGetHanningFilter;
+
+template < class T > inline void hGetHanningFilter_hSLICED ( std::vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hGetHanningFilter ( vec.begin() + vecslice1,vec.begin() + vecslice2);
+}
+
+template < class T > inline void hGetHanningFilter_hSLICED ( casa::Vector<T> & vec , HInteger vecslice1 , HInteger vecslice2) {
+hGetHanningFilter ( vec.cbegin() + vecslice1,vec.cbegin() + vecslice2);
+}
+
+
+void (*fptr_hGetHanningFilter_hSLICED_HComplex1STDIT)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hGetHanningFilter_hSLICED;
+void (*fptr_hGetHanningFilter_hSLICED_HNumber1STDIT)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hGetHanningFilter_hSLICED;
+void (*fptr_hGetHanningFilter_hSLICED_HInteger1STDIT)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hGetHanningFilter_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -7190,7 +12099,7 @@ void (*fptr_hGetHanningFilter_HInteger1STDIT)( std::vector<HInteger> & vec) = &h
 /* hfppnew-generatewrappers.def - END ............................................*/
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-/*
+/*!
   \brief Apply a predefined filter on a vector.
 
     \param data: Vector containing the data on which the filter will be applied.
@@ -7223,18 +12132,60 @@ void hApplyFilter(const Iter data, const Iter data_end, const IterFilter filter,
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hApplyFilter( std::vector<T> & data , std::vector<T> & filter) {
 hApplyFilter ( data.begin(),data.end() , filter.begin(),filter.end());
 }
+
 template < class T > inline void hApplyFilter( casa::Vector<T> & data , casa::Vector<T> & filter) {
 hApplyFilter ( data.cbegin(),data.cend() , filter.cbegin(),filter.cend());
 }
 
+
 void (*fptr_hApplyFilter_HComplex11STDITSTDIT)( std::vector<HComplex> & data , std::vector<HComplex> & filter) = &hApplyFilter;
 void (*fptr_hApplyFilter_HNumber11STDITSTDIT)( std::vector<HNumber> & data , std::vector<HNumber> & filter) = &hApplyFilter;
 void (*fptr_hApplyFilter_HInteger11STDITSTDIT)( std::vector<HInteger> & data , std::vector<HInteger> & filter) = &hApplyFilter;
+
+template < class T > inline void hApplyFilter_hSLICED ( std::vector<T> & data , HInteger dataslice1 , HInteger dataslice2 , std::vector<T> & filter , HInteger filterslice1 , HInteger filterslice2) {
+hApplyFilter ( data.begin() + dataslice1,data.begin() + dataslice2 , filter.begin() + filterslice1,filter.begin() + filterslice2);
+}
+
+template < class T > inline void hApplyFilter_hSLICED ( casa::Vector<T> & data , HInteger dataslice1 , HInteger dataslice2 , casa::Vector<T> & filter , HInteger filterslice1 , HInteger filterslice2) {
+hApplyFilter ( data.cbegin() + dataslice1,data.cbegin() + dataslice2 , filter.cbegin() + filterslice1,filter.cbegin() + filterslice2);
+}
+
+
+void (*fptr_hApplyFilter_hSLICED_HComplex11STDITSTDIT)( std::vector<HComplex> & data , HInteger dataslice1 , HInteger dataslice2 , std::vector<HComplex> & filter , HInteger filterslice1 , HInteger filterslice2) = &hApplyFilter_hSLICED;
+void (*fptr_hApplyFilter_hSLICED_HNumber11STDITSTDIT)( std::vector<HNumber> & data , HInteger dataslice1 , HInteger dataslice2 , std::vector<HNumber> & filter , HInteger filterslice1 , HInteger filterslice2) = &hApplyFilter_hSLICED;
+void (*fptr_hApplyFilter_hSLICED_HInteger11STDITSTDIT)( std::vector<HInteger> & data , HInteger dataslice1 , HInteger dataslice2 , std::vector<HInteger> & filter , HInteger filterslice1 , HInteger filterslice2) = &hApplyFilter_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -7245,7 +12196,7 @@ void (*fptr_hApplyFilter_HInteger11STDITSTDIT)( std::vector<HInteger> & data , s
 /* hfppnew-generatewrappers.def - END ............................................*/
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-/*
+/*!
   \brief Apply a Hanning filter on a vector.
 
     \param data: Input and return vector containing the data on which the Hanning filter will be applied.
@@ -7274,18 +12225,59 @@ void hApplyHanningFilter(const Iter data, const Iter data_end){
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 template < class T > inline void hApplyHanningFilter( std::vector<T> & data) {
 hApplyHanningFilter ( data.begin(),data.end());
 }
+
 template < class T > inline void hApplyHanningFilter( casa::Vector<T> & data) {
 hApplyHanningFilter ( data.cbegin(),data.cend());
 }
 
+
 void (*fptr_hApplyHanningFilter_HComplex1STDIT)( std::vector<HComplex> & data) = &hApplyHanningFilter;
 void (*fptr_hApplyHanningFilter_HNumber1STDIT)( std::vector<HNumber> & data) = &hApplyHanningFilter;
 void (*fptr_hApplyHanningFilter_HInteger1STDIT)( std::vector<HInteger> & data) = &hApplyHanningFilter;
+
+template < class T > inline void hApplyHanningFilter_hSLICED ( std::vector<T> & data , HInteger dataslice1 , HInteger dataslice2) {
+hApplyHanningFilter ( data.begin() + dataslice1,data.begin() + dataslice2);
+}
+
+template < class T > inline void hApplyHanningFilter_hSLICED ( casa::Vector<T> & data , HInteger dataslice1 , HInteger dataslice2) {
+hApplyHanningFilter ( data.cbegin() + dataslice1,data.cbegin() + dataslice2);
+}
+
+
+void (*fptr_hApplyHanningFilter_hSLICED_HComplex1STDIT)( std::vector<HComplex> & data , HInteger dataslice1 , HInteger dataslice2) = &hApplyHanningFilter_hSLICED;
+void (*fptr_hApplyHanningFilter_hSLICED_HNumber1STDIT)( std::vector<HNumber> & data , HInteger dataslice1 , HInteger dataslice2) = &hApplyHanningFilter_hSLICED;
+void (*fptr_hApplyHanningFilter_hSLICED_HInteger1STDIT)( std::vector<HInteger> & data , HInteger dataslice1 , HInteger dataslice2) = &hApplyHanningFilter_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -7296,7 +12288,7 @@ void (*fptr_hApplyHanningFilter_HInteger1STDIT)( std::vector<HInteger> & data) =
 /* hfppnew-generatewrappers.def - END ............................................*/
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-/*
+/*!
   \brief Apply an FFT on a vector.
 
     \param data_in: Vector containing the data on which the FFT will be applied.
@@ -7317,9 +12309,17 @@ void hFFT(const IterIn data_in, const IterIn data_in_end,
   IPosition shape_in(1,blocksize);
   IPosition shape_out(1,fftLength);
   FFTServer<Double,DComplex> fftserver(shape_in, FFTEnums::REALTOCOMPLEX);
-  Vector<Double> cvec_in(shape_in, reinterpret_cast<Double*>(&(*data_in)), casa::SHARE);
+  //  Vector<Double> cvec_in(shape_in, reinterpret_cast<Double*>(&(*data_in)), casa::SHARE);
+  Vector<Double> cvec_in(shape_in, 0.);
   Vector<DComplex> cvec_out(shape_out, 0.);
-  IterOut it_out;
+  IterIn it_in = data_in;
+  IterOut it_out = data_out;
+  Vector<Double>::iterator it_vin=cvec_in.begin();
+  // make copy of input vector since fft will also modify the order of the input data.
+  while ((it_in != data_in_end) && (it_vin != cvec_in.end())) {
+    *it_vin = *it_in;
+    it_in++; it_vin++;
+  }
   // Apply FFT
   fftserver.fft(cvec_out, cvec_in);
   // Is there some aftercare needed (checking/setting the size of the in/output vector)
@@ -7368,16 +12368,57 @@ void hFFT(const IterIn data_in, const IterIn data_in_end,
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
  inline void hFFT( std::vector<HNumber> & data_in , std::vector<HComplex> & data_out , HInteger nyquistZone) {
 hFFT ( data_in.begin(),data_in.end() , data_out.begin(),data_out.end() , nyquistZone);
 }
+
 inline void hFFT( casa::Vector<HNumber> & data_in , casa::Vector<HComplex> & data_out , HInteger nyquistZone) {
 hFFT ( data_in.cbegin(),data_in.cend() , data_out.cbegin(),data_out.cend() , nyquistZone);
 }
 
+
 void (*fptr_hFFT_HIntegerHNumberHComplexHIntegerSTDITSTDIT)( std::vector<HNumber> & data_in , std::vector<HComplex> & data_out , HInteger nyquistZone) = &hFFT;
+
+ inline void hFFT_hSLICED ( std::vector<HNumber> & data_in , HInteger data_inslice1 , HInteger data_inslice2 , std::vector<HComplex> & data_out , HInteger data_outslice1 , HInteger data_outslice2 , HInteger nyquistZone ) {
+hFFT ( data_in.begin() + data_inslice1,data_in.begin() + data_inslice2 , data_out.begin() + data_outslice1,data_out.begin() + data_outslice2 , nyquistZone);
+}
+
+inline void hFFT_hSLICED ( casa::Vector<HNumber> & data_in , HInteger data_inslice1 , HInteger data_inslice2 , casa::Vector<HComplex> & data_out , HInteger data_outslice1 , HInteger data_outslice2 , HInteger nyquistZone ) {
+hFFT ( data_in.cbegin() + data_inslice1,data_in.cbegin() + data_inslice2 , data_out.cbegin() + data_outslice1,data_out.cbegin() + data_outslice2 , nyquistZone);
+}
+
+
+void (*fptr_hFFT_hSLICED_HIntegerHNumberHComplexHIntegerSTDITSTDIT)( std::vector<HNumber> & data_in , HInteger data_inslice1 , HInteger data_inslice2 , std::vector<HComplex> & data_out , HInteger data_outslice1 , HInteger data_outslice2 , HInteger nyquistZone ) = &hFFT_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -7388,7 +12429,7 @@ void (*fptr_hFFT_HIntegerHNumberHComplexHIntegerSTDITSTDIT)( std::vector<HNumber
 /* hfppnew-generatewrappers.def - END ............................................*/
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-/*
+/*!
   \brief Apply an Inverse FFT on a vector.
 
     \param data_in: Vector containing the input data on which the inverse FFT will be applied.
@@ -7401,39 +12442,48 @@ void (*fptr_hFFT_HIntegerHNumberHComplexHIntegerSTDITSTDIT)( std::vector<HNumber
 template <class IterIn, class IterOut>
 void hInvFFT(const IterIn data_in, const IterIn data_in_end,
       const IterOut data_out, const IterOut data_out_end,
-      const uint nyquistZone) {
-  // uint channel;
-  // uint blocksize = data_out_end - data_out;
-  // uint fftLength = blocksize/2 + 1;
-  // uint nofChannels = fftLength;
-  // IPosition shape_in = (1,fftLength);
-  // IPosition shape_out = (1, blocksize);
-  // Vector<DComplex> cvec_f(shape_in, reinterpret_cast<DComplex*>(data_in), casa::SHARE);
-  // Vector<Double> cvec_out(shape_out, 0.);
-  // if ((data_in_end - data_in) != fftLength) {
-  //   cerr << "[invfft] Bad input: len(data_in) != fftLength" << endl;
-  // };
-  // try {
-  //   Vector<DComplex> cvec_in(fftLength);
-  //   FFTServer<Double,DComplex> server(shape_out,
-  // 				      FFTEnums::REALTOCOMPLEX);
-  //   switch (nyquistZone) {
-  //   case 1:
-  //   case 3:
-  //     for (channel=0; channel<nofChannels; channel++) {
-  // 	cvec_in(channel) = cvec_f(channel);
-  //     }
-  //     break;
-  //   case 2:
-  //     for (channel=0; channel<nofChannels; channel++) {
-  // 	cvec_in(channel) = conj(cvec_f(fftLength - channel - 1));
-  //     }
-  //     break;
-  //   }
-  //   server.fft(cvec_out,cvec_in);
-  // } catch (AipsError x) {
-  //   cerr << "[invfft]" << x.getMesg() << endl;
-  // }
+      const HInteger nyquistZone) {
+  uint channel;
+  uint blocksize(data_out_end - data_out);
+  uint fftLength(blocksize/2+1);
+  uint nofChannels(fftLength);
+  IPosition shape_in(1,fftLength);
+  IPosition shape_out(1,blocksize);
+  Vector<DComplex> cvec_f(shape_in, reinterpret_cast<DComplex*>(&(*data_in)), casa::SHARE);
+  Vector<DComplex> cvec_in(fftLength);
+  Vector<Double> cvec_out(shape_out, 0.);
+  if ((data_in_end - data_in) != (int)fftLength) {
+    cerr << "[invfft] Bad input: len(data_in) != fftLength" << endl;
+    cerr << "  len(data_in) = " << (data_in_end - data_in) << endl;
+    cerr << "  fftLength    = " << fftLength << endl;
+  };
+  try {
+    FFTServer<Double,DComplex> server(shape_out,
+          FFTEnums::REALTOCOMPLEX);
+    switch (nyquistZone) {
+    case 1:
+    case 3:
+      for (channel=0; channel<nofChannels; channel++) {
+    cvec_in(channel) = cvec_f(channel);
+      }
+      break;
+    case 2:
+      for (channel=0; channel<nofChannels; channel++) {
+   cvec_in(channel) = conj(cvec_f(fftLength - channel - 1));
+      }
+      break;
+    }
+    server.fft(cvec_out,cvec_in);
+    // Copy result back to data_out
+    Vector<Double>::iterator it_vout= cvec_out.begin();
+    IterOut it_dout = data_out;
+    while ((it_vout != cvec_out.end()) && (it_dout != data_out_end)) {
+      *it_dout = *it_vout;
+      it_vout++; it_dout++;
+    }
+  } catch (AipsError x) {
+    cerr << "[invfft]" << x.getMesg() << endl;
+  }
 }
 /* hfppnew-generatewrappers.def - START ..........................................*/
 //
@@ -7451,18 +12501,57 @@ void hInvFFT(const IterIn data_in, const IterIn data_in_end,
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
-template < class T > inline void hInvFFT( std::vector<T> & data_in , std::vector<T> & data_out , uint nyquistZone) {
+ inline void hInvFFT( std::vector<HComplex> & data_in , std::vector<HNumber> & data_out , HInteger nyquistZone) {
 hInvFFT ( data_in.begin(),data_in.end() , data_out.begin(),data_out.end() , nyquistZone);
 }
-template < class T > inline void hInvFFT( casa::Vector<T> & data_in , casa::Vector<T> & data_out , uint nyquistZone) {
+
+inline void hInvFFT( casa::Vector<HComplex> & data_in , casa::Vector<HNumber> & data_out , HInteger nyquistZone) {
 hInvFFT ( data_in.cbegin(),data_in.cend() , data_out.cbegin(),data_out.cend() , nyquistZone);
 }
 
-void (*fptr_hInvFFT_HComplex11uintSTDITSTDIT)( std::vector<HComplex> & data_in , std::vector<HComplex> & data_out , uint nyquistZone) = &hInvFFT;
-void (*fptr_hInvFFT_HNumber11uintSTDITSTDIT)( std::vector<HNumber> & data_in , std::vector<HNumber> & data_out , uint nyquistZone) = &hInvFFT;
-void (*fptr_hInvFFT_HInteger11uintSTDITSTDIT)( std::vector<HInteger> & data_in , std::vector<HInteger> & data_out , uint nyquistZone) = &hInvFFT;
+
+void (*fptr_hInvFFT_HIntegerHComplexHNumberHIntegerSTDITSTDIT)( std::vector<HComplex> & data_in , std::vector<HNumber> & data_out , HInteger nyquistZone) = &hInvFFT;
+
+ inline void hInvFFT_hSLICED ( std::vector<HComplex> & data_in , HInteger data_inslice1 , HInteger data_inslice2 , std::vector<HNumber> & data_out , HInteger data_outslice1 , HInteger data_outslice2 , HInteger nyquistZone ) {
+hInvFFT ( data_in.begin() + data_inslice1,data_in.begin() + data_inslice2 , data_out.begin() + data_outslice1,data_out.begin() + data_outslice2 , nyquistZone);
+}
+
+inline void hInvFFT_hSLICED ( casa::Vector<HComplex> & data_in , HInteger data_inslice1 , HInteger data_inslice2 , casa::Vector<HNumber> & data_out , HInteger data_outslice1 , HInteger data_outslice2 , HInteger nyquistZone ) {
+hInvFFT ( data_in.cbegin() + data_inslice1,data_in.cbegin() + data_inslice2 , data_out.cbegin() + data_outslice1,data_out.cbegin() + data_outslice2 , nyquistZone);
+}
+
+
+void (*fptr_hInvFFT_hSLICED_HIntegerHComplexHNumberHIntegerSTDITSTDIT)( std::vector<HComplex> & data_in , HInteger data_inslice1 , HInteger data_inslice2 , std::vector<HNumber> & data_out , HInteger data_outslice1 , HInteger data_outslice2 , HInteger nyquistZone ) = &hInvFFT_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -7477,15 +12566,13 @@ void (*fptr_hInvFFT_HInteger11uintSTDITSTDIT)( std::vector<HInteger> & data_in ,
 //========================================================================
 //------------------------------------------------------------------------
 /*!
- \brief Function to close a file with a datareader object providing the pointer to the object as an integer.
+ \brief Print a brief summary of the file contents and current settings.
 
-    \param iptr: Pointer to a DataReader object, stored as an integer.
+    \param dr: DataReader object
 
 */
-void hFileClose(HIntPointer iptr) {
-  union{void* ptr; CR::DataReader* drp;};
-  ptr=reinterpret_cast<HPointer>(iptr);
-  if (ptr!=reinterpret_cast<HPointer>(__null)) delete drp;
+void hFileSummary(CRDataReader & dr) {
+  dr.summary();
 }
 /* hfppnew-generatewrappers.def - START ..........................................*/
 //
@@ -7502,10 +12589,36 @@ void hFileClose(HIntPointer iptr) {
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
-void (*fptr_hFileClose_HIntegerHIntPointer)( HIntPointer iptr) = &hFileClose;
+void (*fptr_hFileSummary_HIntegerCRDataReader)( CRDataReader & dr) = &hFileSummary;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -7516,33 +12629,35 @@ void (*fptr_hFileClose_HIntegerHIntPointer)( HIntPointer iptr) = &hFileClose;
 /* hfppnew-generatewrappers.def - END ............................................*/
 //------------------------------------------------------------------------
 /*!
- \brief Function to open a file based on a filename and returning a pointer to a datareader object as an integer.
+ \brief Function to open a file based on a filename and returning a datareader object.
 
     \param Filename: Filename of file to opwn including full directory name
 
 */
-HIntPointer hFileOpen(HString Filename) {
+CRDataReader & hFileOpen(HString Filename) {
   bool opened;
-  union{HIntPointer iptr; void* ptr; CR::DataReader* drp; CR::LOFAR_TBB* tbb; CR::LopesEventIn* lep;};
   //Create the a pointer to the DataReader object and store the pointer
+  CR::DataReader* drp;
   HString Filetype = hgetFiletype(Filename);
   if (Filetype=="LOPESEvent") {
-    lep = new CR::LopesEventIn;
+    CR::LopesEventIn* lep = new CR::LopesEventIn;
     opened=lep->attachFile(Filename);
-    ( cout << "[" << "hftools.tmp.cc" << "," << 4126 << "]: " << "Opening LOPES File="<<Filename << endl ); lep->summary();
+    drp=lep;
+    cout << "Opening LOPES File="<<Filename<<endl; drp->summary();
   } else if (Filetype=="LOFAR_TBB") {
-    tbb = new CR::LOFAR_TBB(Filename,1024);
-    opened=tbb!=__null;
-    ( cout << "[" << "hftools.tmp.cc" << "," << 4130 << "]: " << "Opening LOFAR File="<<Filename << endl );tbb->summary();
+    drp = new CR::LOFAR_TBB(Filename,1024);
+    opened=drp!=__null;
+    cout << "Opening LOFAR File="<<Filename<<endl; drp->summary();
   } else {
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4132 << ": " << "hFileOpen" << ": Unknown Filetype = " << Filetype << ", Filename=" << Filename << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4152 << ": " << "hFileOpen" << ": Unknown Filetype = " << Filetype << ", Filename=" << Filename << endl );
     opened=false;
   }
   if (!opened){
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4137 << ": " << "hFileOpen" << ": Opening file " << Filename << " failed." << endl );
-    return reinterpret_cast<HInteger>(reinterpret_cast<HPointer>(__null));
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4156 << ": " << "hFileOpen" << ": Opening file " << Filename << " failed." << endl );
+    CR::LopesEventIn* lep = new CR::LopesEventIn; //Make a dummy data reader ....  
+    drp=lep;
   };
-  return iptr;
+  return *drp;
 }
 /* hfppnew-generatewrappers.def - START ..........................................*/
 //
@@ -7559,10 +12674,36 @@ HIntPointer hFileOpen(HString Filename) {
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
-HIntPointer (*fptr_hFileOpen_HIntegerHString)( HString Filename) = &hFileOpen;
+CRDataReader & (*fptr_hFileOpen_HIntegerHString)( HString Filename) = &hFileOpen;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -7576,44 +12717,161 @@ HIntPointer (*fptr_hFileOpen_HIntegerHString)( HString Filename) = &hFileOpen;
 /*!
  \brief Return information from a data file as a Python object.
 
-    \param iptr: Integer containing pointer to the datareader object
+    \param dr: Datareader object openen, e.g. with hFileOpen or crfile.
 
     \param keyword: Keyword ro be read out from the file metadata
 
 */
-HPyObject hFileGetParameter(HIntPointer iptr, HString key)
+HPyObject hFileGetParameter(CRDataReader &dr, HString key)
 {
-  DataReader *drp(reinterpret_cast<DataReader*>(iptr));
-  if (key== "nofAntennas") {uint result(drp->nofAntennas ()); HPyObject pyob((uint)result); return pyob;} else
-    if (key== "nofSelectedChannels") {uint result(drp->nofSelectedChannels ()); HPyObject pyob((uint)result); return pyob;} else
-    if (key== "nofSelectedAntennas") {uint result(drp->nofSelectedAntennas ()); HPyObject pyob((uint)result); return pyob;} else
-    if (key== "blocksize") {uint result(drp->blocksize ()); HPyObject pyob((uint)result); return pyob;} else
-    if (key== "fftLength") {uint result(drp->fftLength ()); HPyObject pyob((uint)result); return pyob;} else
-    if (key== "block") {uint result(drp->block ()); HPyObject pyob((uint)result); return pyob;} else
-    if (key== "stride") {uint result(drp->stride ()); HPyObject pyob((uint)result); return pyob;} else
-    if (key== "nyquistZone") {uint result(drp->nyquistZone ()); HPyObject pyob((uint)result); return pyob;} else
-    if (key== "sampleInterval") {double result(drp->sampleInterval ()); HPyObject pyob((double)result); return pyob;} else
-    if (key== "referenceTime") {double result(drp->referenceTime ()); HPyObject pyob((double)result); return pyob;} else
-    if (key== "sampleFrequency") {double result(drp->sampleFrequency ()); HPyObject pyob((double)result); return pyob;} else
-    if (key== "nofBaselines") {uint result(drp->nofBaselines ()); HPyObject pyob((uint)result); return pyob;} else
-    if (key== "antennas") {casa::Vector<uint> casavec(drp->antennas ()); std::vector<HInteger> result; aipsvec2stlvec(casavec,result); HPyObject pyob(result); return pyob;} else
-    if (key== "selectedAntennas") {casa::Vector<uint> casavec(drp->selectedAntennas ()); std::vector<HInteger> result; aipsvec2stlvec(casavec,result); HPyObject pyob(result); return pyob;} else
-    if (key== "selectedChannels") {casa::Vector<uint> casavec(drp->selectedChannels ()); std::vector<HInteger> result; aipsvec2stlvec(casavec,result); HPyObject pyob(result); return pyob;} else
-    if (key== "positions") {casa::Vector<uint> casavec(drp->positions ()); std::vector<HInteger> result; aipsvec2stlvec(casavec,result); HPyObject pyob(result); return pyob;} else
-    if (key== "increment") {casa::Vector<double> casavec(drp->increment ()); std::vector<HNumber> result; aipsvec2stlvec(casavec,result); HPyObject pyob(result); return pyob;} else
-    if (key== "frequencyValues") {casa::Vector<double> casavec(drp->frequencyValues ()); std::vector<HNumber> result; aipsvec2stlvec(casavec,result); HPyObject pyob(result); return pyob;} else
-    if (key== "frequencyRange") {casa::Vector<double> casavec(drp->frequencyRange ()); std::vector<HNumber> result; aipsvec2stlvec(casavec,result); HPyObject pyob(result); return pyob;} else
-      if (key== "Date") {uint result; drp->headerRecord().get(key,result); HPyObject pyob((uint)result); return pyob;} else
- if (key== "Observatory") {casa::String result; drp->headerRecord().get(key,result); HPyObject pyob((HString)result); return pyob;} else
- if (key== "Filesize") {int result; drp->headerRecord().get(key,result); HPyObject pyob((int)result); return pyob;} else
- if (key== "dDate") {double result; drp->headerRecord().get(key,result); HPyObject pyob((double)result); return pyob;} else
- if (key== "presync") {int result; drp->headerRecord().get(key,result); HPyObject pyob((int)result); return pyob;} else
- if (key== "TL") {int result; drp->headerRecord().get(key,result); HPyObject pyob((int)result); return pyob;} else
- if (key== "LTL") {int result; drp->headerRecord().get(key,result); HPyObject pyob((int)result); return pyob;} else
- if (key== "EventClass") {int result; drp->headerRecord().get(key,result); HPyObject pyob((int)result); return pyob;} else
- if (key== "SampleFreq") {casa::uChar result; drp->headerRecord().get(key,result); HPyObject pyob((uint)result); return pyob;} else
- if (key== "StartSample") {uint result; drp->headerRecord().get(key,result); HPyObject pyob((uint)result); return pyob;} else
- if (key== "AntennaIDs") {casa::Vector<int> casavec; drp->headerRecord().get(key,casavec); std::vector<int> result; aipsvec2stlvec(casavec,result); HPyObject pyob(result); return pyob;} else
+  DataReader *drp=&dr;
+  if (key== "nofAntennas") {
+uint result(drp->nofAntennas ());
+HPyObject pyob((uint)result);
+return pyob;} else
+    if (key== "nofSelectedChannels") {
+uint result(drp->nofSelectedChannels ());
+HPyObject pyob((uint)result);
+return pyob;} else
+    if (key== "nofSelectedAntennas") {
+uint result(drp->nofSelectedAntennas ());
+HPyObject pyob((uint)result);
+return pyob;} else
+    if (key== "blocksize") {
+uint result(drp->blocksize ());
+HPyObject pyob((uint)result);
+return pyob;} else
+    if (key== "fftLength") {
+uint result(drp->fftLength ());
+HPyObject pyob((uint)result);
+return pyob;} else
+    if (key== "block") {
+uint result(drp->block ());
+HPyObject pyob((uint)result);
+return pyob;} else
+    if (key== "stride") {
+uint result(drp->stride ());
+HPyObject pyob((uint)result);
+return pyob;} else
+    if (key== "nyquistZone") {
+uint result(drp->nyquistZone ());
+HPyObject pyob((uint)result);
+return pyob;} else
+    if (key== "sampleInterval") {
+double result(drp->sampleInterval ());
+HPyObject pyob((double)result);
+return pyob;} else
+    if (key== "referenceTime") {
+double result(drp->referenceTime ());
+HPyObject pyob((double)result);
+return pyob;} else
+    if (key== "sampleFrequency") {
+double result(drp->sampleFrequency ());
+HPyObject pyob((double)result);
+return pyob;} else
+    if (key== "nofBaselines") {
+uint result(drp->nofBaselines ());
+HPyObject pyob((uint)result);
+return pyob;} else
+    if (key== "antennas") {
+casa::Vector<uint> casavec(drp->antennas ());
+std::vector<HInteger> result;
+aipsvec2stlvec(casavec,result);
+HPyObject pyob(result);
+return pyob;} else
+    if (key== "selectedAntennas") {
+casa::Vector<uint> casavec(drp->selectedAntennas ());
+std::vector<HInteger> result;
+aipsvec2stlvec(casavec,result);
+HPyObject pyob(result);
+return pyob;} else
+    if (key== "selectedChannels") {
+casa::Vector<uint> casavec(drp->selectedChannels ());
+std::vector<HInteger> result;
+aipsvec2stlvec(casavec,result);
+HPyObject pyob(result);
+return pyob;} else
+    if (key== "positions") {
+casa::Vector<uint> casavec(drp->positions ());
+std::vector<HInteger> result;
+aipsvec2stlvec(casavec,result);
+HPyObject pyob(result);
+return pyob;} else
+    if (key== "increment") {
+casa::Vector<double> casavec(drp->increment ());
+std::vector<HNumber> result;
+aipsvec2stlvec(casavec,result);
+HPyObject pyob(result);
+return pyob;} else
+    if (key== "frequencyValues") {
+casa::Vector<double> casavec(drp->frequencyValues ());
+std::vector<HNumber> result;
+aipsvec2stlvec(casavec,result);
+HPyObject pyob(result);
+return pyob;} else
+    if (key== "frequencyRange") {
+casa::Vector<double> casavec(drp->frequencyRange ());
+std::vector<HNumber> result;
+aipsvec2stlvec(casavec,result);
+HPyObject pyob(result);
+return pyob;} else
+      if (key== "Date") {
+uint result;
+drp->headerRecord().get(key,result);
+HPyObject pyob((uint)result);
+return pyob;} else
+ if (key== "Observatory") {
+casa::String result;
+drp->headerRecord().get(key,result);
+HPyObject pyob((HString)result);
+return pyob;} else
+ if (key== "Filesize") {
+int result;
+drp->headerRecord().get(key,result);
+HPyObject pyob((int)result);
+return pyob;} else
+ if (key== "dDate") {
+double result;
+drp->headerRecord().get(key,result);
+HPyObject pyob((double)result);
+return pyob;} else
+ if (key== "presync") {
+int result;
+drp->headerRecord().get(key,result);
+HPyObject pyob((int)result);
+return pyob;} else
+ if (key== "TL") {
+int result;
+drp->headerRecord().get(key,result);
+HPyObject pyob((int)result);
+return pyob;} else
+ if (key== "LTL") {
+int result;
+drp->headerRecord().get(key,result);
+HPyObject pyob((int)result);
+return pyob;} else
+ if (key== "EventClass") {
+int result;
+drp->headerRecord().get(key,result);
+HPyObject pyob((int)result);
+return pyob;} else
+ if (key== "SampleFreq") {
+casa::uChar result;
+drp->headerRecord().get(key,result);
+HPyObject pyob((uint)result);
+return pyob;} else
+ if (key== "StartSample") {
+uint result;
+drp->headerRecord().get(key,result);
+HPyObject pyob((uint)result);
+return pyob;} else
+ if (key== "AntennaIDs") {
+casa::Vector<int> casavec;
+drp->headerRecord().get(key,casavec);
+std::vector<HInteger> result;
+aipsvec2stlvec(casavec,result);
+HPyObject pyob(result);
+return pyob;} else
     { HString result; result = result
   + "nofAntennas" + ", "
     + "nofSelectedChannels" + ", "
@@ -7668,10 +12926,37 @@ HPyObject hFileGetParameter(HIntPointer iptr, HString key)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
-HPyObject (*fptr_hFileGetParameter_HIntegerHIntPointerHString)( HIntPointer iptr , HString keyword) = &hFileGetParameter;
+HPyObject (*fptr_hFileGetParameter_HIntegerCRDataReaderHString)( CRDataReader & dr , HString keyword) = &hFileGetParameter;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -7684,16 +12969,16 @@ HPyObject (*fptr_hFileGetParameter_HIntegerHIntPointerHString)( HIntPointer iptr
 /*!
  \brief Set parameters in a data file with a Python object as input.
 
-    \param iptr: Integer containing pointer to the datareader object
+    \param dr: Datareader object openen, e.g. with hFileOpen or crfile.
 
     \param keyword: Keyword to be set in the file
 
     \param pyob: Input paramter
 
 */
-void hFileSetParameter(HIntPointer iptr, HString key, HPyObjectPtr pyob)
+CRDataReader & hFileSetParameter(CRDataReader &dr, HString key, HPyObjectPtr pyob)
 {
-  DataReader *drp(reinterpret_cast<DataReader*>(iptr));
+  DataReader *drp=&dr;
   if (key== "Block") {uint input(PyInt_AsLong (pyob)); drp->setBlock (input);} else
     if (key== "Blocksize") {uint input(PyInt_AsLong (pyob)); drp->setBlocksize (input);} else
     if (key== "StartBlock") {uint input(PyInt_AsLong (pyob)); drp->setStartBlock (input);} else
@@ -7725,6 +13010,7 @@ void hFileSetParameter(HIntPointer iptr, HString key, HPyObjectPtr pyob)
       if (key!="help") cout << "Unknown keyword " << key <<"!"<<endl;
       cout << "hFileSetParameter" << " - available keywords: "<< txt <<endl;
     };
+  return dr;
 }
 /* hfppnew-generatewrappers.def - START ..........................................*/
 //
@@ -7741,10 +13027,38 @@ void hFileSetParameter(HIntPointer iptr, HString key, HPyObjectPtr pyob)
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
-void (*fptr_hFileSetParameter_HIntegerHIntPointerHStringHPyObjectPtr)( HIntPointer iptr , HString keyword , HPyObjectPtr pyob) = &hFileSetParameter;
+CRDataReader & (*fptr_hFileSetParameter_HIntegerCRDataReaderHStringHPyObjectPtr)( CRDataReader & dr , HString keyword , HPyObjectPtr pyob) = &hFileSetParameter;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -7757,7 +13071,7 @@ void (*fptr_hFileSetParameter_HIntegerHIntPointerHStringHPyObjectPtr)( HIntPoint
 /*!
  \brief Read data from a Datareader object (pointer in iptr) into a vector, where the size should be pre-allocated.
 
-    \param iptr: Integer containing pointer to the datareader object
+    \param dr: Datareader object, opened e.g. with hFileOpen or crfile.
 
     \param Datatype: Name of the data column to be retrieved 
 
@@ -7778,18 +13092,18 @@ The data will then be in the vector idata. You can covert that to a
 Python list with [].extend(idata)
 */
 template <class T>
-void hFileRead(
-      HIntPointer iptr,
+CRDataReader & hFileRead(
+      CRDataReader &dr,
       HString Datatype,
       std::vector<T> & vec
       )
 {
   //Create a DataReader Pointer from an interger variable
-  DataReader *drp=reinterpret_cast<DataReader*>(iptr);
+  DataReader *drp=&dr;
   //Check whether it is non-NULL.
   if (drp==reinterpret_cast<HPointer>(__null)){
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4349 << ": " << "hFileRead" << ": pointer to FileObject is NULL, DataReader not found." << endl );
-    return;
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4369 << ": " << "hFileRead" << ": pointer to FileObject is NULL, DataReader not found." << endl );
+    return dr;
   };
   //------TIME------------------------------
   if (Datatype=="Time") {
@@ -7816,7 +13130,7 @@ void hFileRead(
   //------FX------------------------------
   else if (Datatype=="Fx") {if (typeid(vec)==typeid(std::vector<HNumber>)) {
 casa::IPosition shape(2);
-shape(0)=drp->blocksize(); shape(1)=drp->nofSelectedAntennas();
+shape(0)=drp->blocksize (); shape(1)=drp->nofSelectedAntennas();
 casa::Matrix<double> casamtrx(shape,reinterpret_cast<double*>(&(vec[0])),casa::SHARE);
 drp->fx (casamtrx);
 } else {
@@ -7825,7 +13139,7 @@ cout << "hFileRead" << ": Datatype " << typeid(vec).name() << " not supported fo
   //------VOLTAGE------------------------------
   else if (Datatype=="Voltage") {if (typeid(vec)==typeid(std::vector<HNumber>)) {
 casa::IPosition shape(2);
-shape(0)=drp->blocksize(); shape(1)=drp->nofSelectedAntennas();
+shape(0)=drp->blocksize (); shape(1)=drp->nofSelectedAntennas();
 casa::Matrix<double> casamtrx(shape,reinterpret_cast<double*>(&(vec[0])),casa::SHARE);
 drp->voltage (casamtrx);
 } else {
@@ -7834,7 +13148,7 @@ cout << "hFileRead" << ": Datatype " << typeid(vec).name() << " not supported fo
   //------FFT------------------------------
   else if (Datatype=="FFT") {if (typeid(vec)==typeid(std::vector<HComplex>)) {
 casa::IPosition shape(2);
-shape(0)=drp->blocksize(); shape(1)=drp->nofSelectedAntennas();
+shape(0)=drp->fftLength (); shape(1)=drp->nofSelectedAntennas();
 casa::Matrix<CasaComplex> casamtrx(shape,reinterpret_cast<CasaComplex*>(&(vec[0])),casa::SHARE);
 drp->fft (casamtrx);
 } else {
@@ -7843,17 +13157,17 @@ cout << "hFileRead" << ": Datatype " << typeid(vec).name() << " not supported fo
   //------CALFFT------------------------------
   else if (Datatype=="CalFFT") {if (typeid(vec)==typeid(std::vector<HComplex>)) {
 casa::IPosition shape(2);
-shape(0)=drp->blocksize(); shape(1)=drp->nofSelectedAntennas();
+shape(0)=drp->fftLength (); shape(1)=drp->nofSelectedAntennas();
 casa::Matrix<CasaComplex> casamtrx(shape,reinterpret_cast<CasaComplex*>(&(vec[0])),casa::SHARE);
 drp->calfft (casamtrx);
 } else {
 cout << "hFileRead" << ": Datatype " << typeid(vec).name() << " not supported for data field = " << Datatype << "." <<endl;
 };}
   else {
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4394 << ": " << "hFileRead" << ": Datatype=" << Datatype << " is unknown." << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4414 << ": " << "hFileRead" << ": Datatype=" << Datatype << " is unknown." << endl );
     vec.clear();
   };
-  return;
+  return dr;
 }
 /* hfppnew-generatewrappers.def - START ..........................................*/
 //
@@ -7870,12 +13184,45 @@ cout << "hFileRead" << ": Datatype " << typeid(vec).name() << " not supported fo
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
-void (*fptr_hFileRead_HComplexHIntPointerHString1STL)( HIntPointer iptr , HString Datatype , std::vector<HComplex> & vec) = &hFileRead;
-void (*fptr_hFileRead_HNumberHIntPointerHString1STL)( HIntPointer iptr , HString Datatype , std::vector<HNumber> & vec) = &hFileRead;
-void (*fptr_hFileRead_HIntegerHIntPointerHString1STL)( HIntPointer iptr , HString Datatype , std::vector<HInteger> & vec) = &hFileRead;
+CRDataReader & (*fptr_hFileRead_HComplexCRDataReaderHString1STL)( CRDataReader & dr , HString Datatype , std::vector<HComplex> & vec) = &hFileRead;
+CRDataReader & (*fptr_hFileRead_HNumberCRDataReaderHString1STL)( CRDataReader & dr , HString Datatype , std::vector<HNumber> & vec) = &hFileRead;
+CRDataReader & (*fptr_hFileRead_HIntegerCRDataReaderHString1STL)( CRDataReader & dr , HString Datatype , std::vector<HInteger> & vec) = &hFileRead;
+
+
+CRDataReader & (*fptr_hFileRead_hSLICED_HComplexCRDataReaderHString1STL)( CRDataReader & dr , HString Datatype , std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2) = &hFileRead_hSLICED;
+CRDataReader & (*fptr_hFileRead_hSLICED_HNumberCRDataReaderHString1STL)( CRDataReader & dr , HString Datatype , std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2) = &hFileRead_hSLICED;
+CRDataReader & (*fptr_hFileRead_hSLICED_HIntegerCRDataReaderHString1STL)( CRDataReader & dr , HString Datatype , std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2) = &hFileRead_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -7934,6 +13281,35 @@ HPyObjectPtr hCalTable(HString filename, HString keyword, HInteger date, HPyObje
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8027,16 +13403,59 @@ bool hCoordinateConvert (Iter source,
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
  inline bool hCoordinateConvert( std::vector<HNumber> & source , CRCoordinateType sourceCoordinate , std::vector<HNumber> & target , CRCoordinateType targetCoordinate , bool anglesInDegrees) {
 return hCoordinateConvert ( source.begin() , sourceCoordinate , target.begin() , targetCoordinate , anglesInDegrees);
 }
+
 inline bool hCoordinateConvert( casa::Vector<HNumber> & source , CRCoordinateType sourceCoordinate , casa::Vector<HNumber> & target , CRCoordinateType targetCoordinate , bool anglesInDegrees) {
 return hCoordinateConvert ( source.cbegin() , sourceCoordinate , target.cbegin() , targetCoordinate , anglesInDegrees);
 }
 
+
 bool (*fptr_hCoordinateConvert_HIntegerHNumberCRCoordinateTypeHNumberCRCoordinateTypeboolSTDITFIXEDSTDITFIXED)( std::vector<HNumber> & source , CRCoordinateType sourceCoordinate , std::vector<HNumber> & target , CRCoordinateType targetCoordinate , bool anglesInDegrees) = &hCoordinateConvert;
+
+ inline bool hCoordinateConvert_hSLICED ( std::vector<HNumber> & source , HInteger sourceslice1 , HInteger sourceslice2 , CRCoordinateType sourceCoordinate , std::vector<HNumber> & target , HInteger targetslice1 , HInteger targetslice2 , CRCoordinateType targetCoordinate , bool anglesInDegrees ) {
+return hCoordinateConvert ( source.begin() , sourceCoordinate , target.begin() , targetCoordinate , anglesInDegrees);
+}
+
+inline bool hCoordinateConvert_hSLICED ( casa::Vector<HNumber> & source , HInteger sourceslice1 , HInteger sourceslice2 , CRCoordinateType sourceCoordinate , casa::Vector<HNumber> & target , HInteger targetslice1 , HInteger targetslice2 , CRCoordinateType targetCoordinate , bool anglesInDegrees ) {
+return hCoordinateConvert ( source.cbegin() , sourceCoordinate , target.cbegin() , targetCoordinate , anglesInDegrees);
+}
+
+
+bool (*fptr_hCoordinateConvert_hSLICED_HIntegerHNumberCRCoordinateTypeHNumberCRCoordinateTypeboolSTDITFIXEDSTDITFIXED)( std::vector<HNumber> & source , HInteger sourceslice1 , HInteger sourceslice2 , CRCoordinateType sourceCoordinate , std::vector<HNumber> & target , HInteger targetslice1 , HInteger targetslice2 , CRCoordinateType targetCoordinate , bool anglesInDegrees ) = &hCoordinateConvert_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -8107,12 +13526,12 @@ void hReadFileOld(std::vector<T> & vec,
   DataReader *drp=reinterpret_cast<DataReader*>(iptr);
   //First retrieve the pointer to the pointer to the dataRead and check whether it is non-NULL.
   if (drp==reinterpret_cast<HPointer>(__null)){
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4602 << ": " << "dataRead: pointer to FileObject is NULL, DataReader not found." << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4622 << ": " << "dataRead: pointer to FileObject is NULL, DataReader not found." << endl );
     return;
   };
 //!!!One Needs to verify somehow that the parameters make sense !!!
   if (Antenna > static_cast<HInteger>(drp->nofAntennas()-1)) {
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4608 << ": " << "Requested Antenna number too large!" << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4628 << ": " << "Requested Antenna number too large!" << endl );
     return;
   };
   drp->setBlocksize(Blocksize);
@@ -8176,7 +13595,7 @@ void hReadFileOld(std::vector<T> & vec,
     ncol=ary.ncolumn(); if (ncol>1 && Antenna<ncol) aipscol2stlvec(ary,vec,Antenna); else aipscol2stlvec(ary,vec,0);;
   }
   else {
-    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4680 << ": " << "DataFunc_CR_dataRead: Datatype=" << Datatype << " is unknown." << endl );
+    ( cout << endl << "ERROR in file " << "hftools.tmp.cc" << " line " << 4700 << ": " << "DataFunc_CR_dataRead: Datatype=" << Datatype << " is unknown." << endl );
     vec.clear();
     return;
   };
@@ -8197,12 +13616,50 @@ void hReadFileOld(std::vector<T> & vec,
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
 void (*fptr_hReadFileOld_HComplex1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHIntegerSTL)( std::vector<HComplex> & vec , HIntPointer iptr , HString Datatype , HInteger Antenna , HInteger Blocksize , HInteger Block , HInteger Stride , HInteger Shift) = &hReadFileOld;
 void (*fptr_hReadFileOld_HNumber1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHIntegerSTL)( std::vector<HNumber> & vec , HIntPointer iptr , HString Datatype , HInteger Antenna , HInteger Blocksize , HInteger Block , HInteger Stride , HInteger Shift) = &hReadFileOld;
 void (*fptr_hReadFileOld_HInteger1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHIntegerSTL)( std::vector<HInteger> & vec , HIntPointer iptr , HString Datatype , HInteger Antenna , HInteger Blocksize , HInteger Block , HInteger Stride , HInteger Shift) = &hReadFileOld;
+
+
+void (*fptr_hReadFileOld_hSLICED_HComplex1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHIntegerSTL)( std::vector<HComplex> & vec , HInteger vecslice1 , HInteger vecslice2 , HIntPointer iptr , HString Datatype , HInteger Antenna , HInteger Blocksize , HInteger Block , HInteger Stride , HInteger Shift ) = &hReadFileOld_hSLICED;
+void (*fptr_hReadFileOld_hSLICED_HNumber1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHIntegerSTL)( std::vector<HNumber> & vec , HInteger vecslice1 , HInteger vecslice2 , HIntPointer iptr , HString Datatype , HInteger Antenna , HInteger Blocksize , HInteger Block , HInteger Stride , HInteger Shift ) = &hReadFileOld_hSLICED;
+void (*fptr_hReadFileOld_hSLICED_HInteger1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHIntegerSTL)( std::vector<HInteger> & vec , HInteger vecslice1 , HInteger vecslice2 , HIntPointer iptr , HString Datatype , HInteger Antenna , HInteger Blocksize , HInteger Block , HInteger Stride , HInteger Shift ) = &hReadFileOld_hSLICED;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -8243,6 +13700,12 @@ void (*fptr_hReadFileOld_HInteger1HIntPointerHStringHIntegerHIntegerHIntegerHInt
 void init_module_hftools(); extern "C" __attribute__ ((visibility("default"))) void inithftools() { boost::python::detail::init_module("hftools", &init_module_hftools); } void init_module_hftools()
 {
     using namespace boost::python;
+    class_<CR::DataReader>("DataReader")
+      //      .def("read",&hFileRead) -> This is defined in pycrtools.py, since it is templated
+      .def("get",&hFileGetParameter)
+      .def("set",&hFileSetParameter,return_internal_reference<>())
+      .def("summary",&hFileSummary)
+      ;
     class_<std::hmatrix<HInteger,allocator<HInteger> > >("IntMatrix")
       .def(vector_indexing_suite<std::hmatrix<HInteger,allocator<HInteger> > >())
       //      .def("setDimension",&std::hmatrix<HInteger,allocator<HInteger> >::setDimension)
@@ -8314,7 +13777,7 @@ void init_module_hftools(); extern "C" __attribute__ ((visibility("default"))) v
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8334,6 +13797,33 @@ void init_module_hftools(); extern "C" __attribute__ ((visibility("default"))) v
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8345,6 +13835,15 @@ def("hFill",fptr_hFill_HComplex11STDIT );
 def("hFill",fptr_hFill_HNumber11STDIT );
 def("hFill",fptr_hFill_HInteger11STDIT );
 
+
+
+
+def("hFill_hSLICED",fptr_hFill_hSLICED_HString11STDIT );
+def("hFill_hSLICED",fptr_hFill_hSLICED_HBool11STDIT );
+def("hFill_hSLICED",fptr_hFill_hSLICED_HComplex11STDIT );
+def("hFill_hSLICED",fptr_hFill_hSLICED_HNumber11STDIT );
+def("hFill_hSLICED",fptr_hFill_hSLICED_HInteger11STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -8355,7 +13854,7 @@ def("hFill",fptr_hFill_HInteger11STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8374,6 +13873,32 @@ def("hFill",fptr_hFill_HInteger11STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8383,6 +13908,13 @@ def("hNew",fptr_hNew_HComplex1STL );
 def("hNew",fptr_hNew_HNumber1STL );
 def("hNew",fptr_hNew_HInteger1STL );
 
+
+def("hNew_hSLICED",fptr_hNew_hSLICED_HString1STL );
+def("hNew_hSLICED",fptr_hNew_hSLICED_HBool1STL );
+def("hNew_hSLICED",fptr_hNew_hSLICED_HComplex1STL );
+def("hNew_hSLICED",fptr_hNew_hSLICED_HNumber1STL );
+def("hNew_hSLICED",fptr_hNew_hSLICED_HInteger1STL );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -8393,7 +13925,7 @@ def("hNew",fptr_hNew_HInteger1STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8411,6 +13943,33 @@ def("hNew",fptr_hNew_HInteger1STL );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8420,6 +13979,13 @@ def("hResize",fptr_hResize_HComplex1HIntegerSTL );
 def("hResize",fptr_hResize_HNumber1HIntegerSTL );
 def("hResize",fptr_hResize_HInteger1HIntegerSTL );
 
+
+def("hResize_hSLICED",fptr_hResize_hSLICED_HString1HIntegerSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HBool1HIntegerSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HComplex1HIntegerSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HNumber1HIntegerSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HInteger1HIntegerSTL );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -8430,7 +13996,7 @@ def("hResize",fptr_hResize_HInteger1HIntegerSTL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8448,6 +14014,34 @@ def("hResize",fptr_hResize_HInteger1HIntegerSTL );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8457,6 +14051,13 @@ def("hResize",fptr_hResize_HComplex1HInteger1STL );
 def("hResize",fptr_hResize_HNumber1HInteger1STL );
 def("hResize",fptr_hResize_HInteger1HInteger1STL );
 
+
+def("hResize_hSLICED",fptr_hResize_hSLICED_HString1HInteger1STL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HBool1HInteger1STL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HComplex1HInteger1STL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HNumber1HInteger1STL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HInteger1HInteger1STL );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -8467,7 +14068,7 @@ def("hResize",fptr_hResize_HInteger1HInteger1STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8485,6 +14086,33 @@ def("hResize",fptr_hResize_HInteger1HInteger1STL );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8514,6 +14142,33 @@ def("hResize",fptr_hResize_HIntegerHComplex12STLSTL );
 def("hResize",fptr_hResize_HIntegerHNumber12STLSTL );
 def("hResize",fptr_hResize_HIntegerHInteger12STLSTL );
 
+
+def("hResize_hSLICED",fptr_hResize_hSLICED_HStringHString12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HStringHBool12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HStringHComplex12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HStringHNumber12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HStringHInteger12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HBoolHString12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HBoolHBool12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HBoolHComplex12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HBoolHNumber12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HBoolHInteger12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HComplexHString12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HComplexHBool12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HComplexHComplex12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HComplexHNumber12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HComplexHInteger12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HNumberHString12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HNumberHBool12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HNumberHComplex12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HNumberHNumber12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HNumberHInteger12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HIntegerHString12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HIntegerHBool12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HIntegerHComplex12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HIntegerHNumber12STLSTL );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HIntegerHInteger12STLSTL );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -8524,7 +14179,7 @@ def("hResize",fptr_hResize_HIntegerHInteger12STLSTL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 /* hfppnew-generatewrappers.def - START ..........................................*/
@@ -8542,6 +14197,33 @@ def("hResize",fptr_hResize_HIntegerHInteger12STLSTL );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8571,6 +14253,33 @@ def("hResize",fptr_hResize_HIntegerHComplex12CASACASA );
 def("hResize",fptr_hResize_HIntegerHNumber12CASACASA );
 def("hResize",fptr_hResize_HIntegerHInteger12CASACASA );
 
+
+def("hResize_hSLICED",fptr_hResize_hSLICED_HStringHString12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HStringHBool12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HStringHComplex12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HStringHNumber12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HStringHInteger12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HBoolHString12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HBoolHBool12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HBoolHComplex12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HBoolHNumber12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HBoolHInteger12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HComplexHString12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HComplexHBool12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HComplexHComplex12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HComplexHNumber12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HComplexHInteger12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HNumberHString12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HNumberHBool12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HNumberHComplex12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HNumberHNumber12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HNumberHInteger12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HIntegerHString12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HIntegerHBool12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HIntegerHComplex12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HIntegerHNumber12CASACASA );
+def("hResize_hSLICED",fptr_hResize_hSLICED_HIntegerHInteger12CASACASA );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -8581,7 +14290,7 @@ def("hResize",fptr_hResize_HIntegerHInteger12CASACASA );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8601,6 +14310,33 @@ def("hResize",fptr_hResize_HIntegerHInteger12CASACASA );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8616,6 +14352,19 @@ def("hConvert",fptr_hConvert_HIntegerHComplex12STDITSTDIT );
 def("hConvert",fptr_hConvert_HIntegerHNumber12STDITSTDIT );
 def("hConvert",fptr_hConvert_HIntegerHInteger12STDITSTDIT );
 
+
+
+
+def("hConvert_hSLICED",fptr_hConvert_hSLICED_HComplexHComplex12STDITSTDIT );
+def("hConvert_hSLICED",fptr_hConvert_hSLICED_HComplexHNumber12STDITSTDIT );
+def("hConvert_hSLICED",fptr_hConvert_hSLICED_HComplexHInteger12STDITSTDIT );
+def("hConvert_hSLICED",fptr_hConvert_hSLICED_HNumberHComplex12STDITSTDIT );
+def("hConvert_hSLICED",fptr_hConvert_hSLICED_HNumberHNumber12STDITSTDIT );
+def("hConvert_hSLICED",fptr_hConvert_hSLICED_HNumberHInteger12STDITSTDIT );
+def("hConvert_hSLICED",fptr_hConvert_hSLICED_HIntegerHComplex12STDITSTDIT );
+def("hConvert_hSLICED",fptr_hConvert_hSLICED_HIntegerHNumber12STDITSTDIT );
+def("hConvert_hSLICED",fptr_hConvert_hSLICED_HIntegerHInteger12STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -8626,7 +14375,7 @@ def("hConvert",fptr_hConvert_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8646,6 +14395,33 @@ def("hConvert",fptr_hConvert_HIntegerHInteger12STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8654,6 +14430,13 @@ def("hConvert",fptr_hConvert_HIntegerHInteger12STDITSTDIT );
 def("hCopy",fptr_hCopy_HComplex11STDITSTDIT );
 def("hCopy",fptr_hCopy_HNumber11STDITSTDIT );
 def("hCopy",fptr_hCopy_HInteger11STDITSTDIT );
+
+
+
+
+def("hCopy_hSLICED",fptr_hCopy_hSLICED_HComplex11STDITSTDIT );
+def("hCopy_hSLICED",fptr_hCopy_hSLICED_HNumber11STDITSTDIT );
+def("hCopy_hSLICED",fptr_hCopy_hSLICED_HInteger11STDITSTDIT );
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -8665,7 +14448,7 @@ def("hCopy",fptr_hCopy_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -8684,6 +14467,32 @@ def("hCopy",fptr_hCopy_HInteger11STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8701,7 +14510,7 @@ def("square",fptr_square_HInteger1 );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -8720,6 +14529,33 @@ def("square",fptr_square_HInteger1 );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8735,7 +14571,7 @@ def("hPhase",fptr_hPhase_HIntegerHNumberHNumber );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -8754,6 +14590,34 @@ def("hPhase",fptr_hPhase_HIntegerHNumberHNumber );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8769,7 +14633,7 @@ def("funcGaussian",fptr_funcGaussian_HIntegerHNumberHNumberHNumber );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8789,6 +14653,32 @@ def("funcGaussian",fptr_funcGaussian_HIntegerHNumberHNumberHNumber );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8798,6 +14688,13 @@ def("hExp",fptr_hExp1_HComplex1STDIT );
 def("hExp",fptr_hExp1_HNumber1STDIT );
 def("hExp",fptr_hExp1_HInteger1STDIT );
 
+
+
+
+def("hExp_hSLICED",fptr_hExp_hSLICED1_HComplex1STDIT );
+def("hExp_hSLICED",fptr_hExp_hSLICED1_HNumber1STDIT );
+def("hExp_hSLICED",fptr_hExp_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -8808,7 +14705,7 @@ def("hExp",fptr_hExp1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8828,6 +14725,33 @@ def("hExp",fptr_hExp1_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8837,6 +14761,13 @@ def("hExp",fptr_hExp2_HComplex11STDITSTDIT );
 def("hExp",fptr_hExp2_HNumber11STDITSTDIT );
 def("hExp",fptr_hExp2_HInteger11STDITSTDIT );
 
+
+
+
+def("hExp_hSLICED",fptr_hExp_hSLICED2_HComplex11STDITSTDIT );
+def("hExp_hSLICED",fptr_hExp_hSLICED2_HNumber11STDITSTDIT );
+def("hExp_hSLICED",fptr_hExp_hSLICED2_HInteger11STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -8847,7 +14778,7 @@ def("hExp",fptr_hExp2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8867,6 +14798,32 @@ def("hExp",fptr_hExp2_HInteger11STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8876,6 +14833,13 @@ def("hLog",fptr_hLog1_HComplex1STDIT );
 def("hLog",fptr_hLog1_HNumber1STDIT );
 def("hLog",fptr_hLog1_HInteger1STDIT );
 
+
+
+
+def("hLog_hSLICED",fptr_hLog_hSLICED1_HComplex1STDIT );
+def("hLog_hSLICED",fptr_hLog_hSLICED1_HNumber1STDIT );
+def("hLog_hSLICED",fptr_hLog_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -8886,7 +14850,7 @@ def("hLog",fptr_hLog1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8906,6 +14870,33 @@ def("hLog",fptr_hLog1_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8915,6 +14906,13 @@ def("hLog",fptr_hLog2_HComplex11STDITSTDIT );
 def("hLog",fptr_hLog2_HNumber11STDITSTDIT );
 def("hLog",fptr_hLog2_HInteger11STDITSTDIT );
 
+
+
+
+def("hLog_hSLICED",fptr_hLog_hSLICED2_HComplex11STDITSTDIT );
+def("hLog_hSLICED",fptr_hLog_hSLICED2_HNumber11STDITSTDIT );
+def("hLog_hSLICED",fptr_hLog_hSLICED2_HInteger11STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -8925,7 +14923,7 @@ def("hLog",fptr_hLog2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8945,6 +14943,32 @@ def("hLog",fptr_hLog2_HInteger11STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8954,6 +14978,13 @@ def("hLog10",fptr_hLog101_HComplex1STDIT );
 def("hLog10",fptr_hLog101_HNumber1STDIT );
 def("hLog10",fptr_hLog101_HInteger1STDIT );
 
+
+
+
+def("hLog10_hSLICED",fptr_hLog10_hSLICED1_HComplex1STDIT );
+def("hLog10_hSLICED",fptr_hLog10_hSLICED1_HNumber1STDIT );
+def("hLog10_hSLICED",fptr_hLog10_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -8964,7 +14995,7 @@ def("hLog10",fptr_hLog101_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -8984,6 +15015,33 @@ def("hLog10",fptr_hLog101_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -8993,6 +15051,13 @@ def("hLog10",fptr_hLog102_HComplex11STDITSTDIT );
 def("hLog10",fptr_hLog102_HNumber11STDITSTDIT );
 def("hLog10",fptr_hLog102_HInteger11STDITSTDIT );
 
+
+
+
+def("hLog10_hSLICED",fptr_hLog10_hSLICED2_HComplex11STDITSTDIT );
+def("hLog10_hSLICED",fptr_hLog10_hSLICED2_HNumber11STDITSTDIT );
+def("hLog10_hSLICED",fptr_hLog10_hSLICED2_HInteger11STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9003,7 +15068,7 @@ def("hLog10",fptr_hLog102_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9023,6 +15088,32 @@ def("hLog10",fptr_hLog102_HInteger11STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9032,6 +15123,13 @@ def("hSin",fptr_hSin1_HComplex1STDIT );
 def("hSin",fptr_hSin1_HNumber1STDIT );
 def("hSin",fptr_hSin1_HInteger1STDIT );
 
+
+
+
+def("hSin_hSLICED",fptr_hSin_hSLICED1_HComplex1STDIT );
+def("hSin_hSLICED",fptr_hSin_hSLICED1_HNumber1STDIT );
+def("hSin_hSLICED",fptr_hSin_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9042,7 +15140,7 @@ def("hSin",fptr_hSin1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9062,6 +15160,33 @@ def("hSin",fptr_hSin1_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9071,6 +15196,13 @@ def("hSin",fptr_hSin2_HComplex11STDITSTDIT );
 def("hSin",fptr_hSin2_HNumber11STDITSTDIT );
 def("hSin",fptr_hSin2_HInteger11STDITSTDIT );
 
+
+
+
+def("hSin_hSLICED",fptr_hSin_hSLICED2_HComplex11STDITSTDIT );
+def("hSin_hSLICED",fptr_hSin_hSLICED2_HNumber11STDITSTDIT );
+def("hSin_hSLICED",fptr_hSin_hSLICED2_HInteger11STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9081,7 +15213,7 @@ def("hSin",fptr_hSin2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9101,6 +15233,32 @@ def("hSin",fptr_hSin2_HInteger11STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9110,6 +15268,13 @@ def("hSinh",fptr_hSinh1_HComplex1STDIT );
 def("hSinh",fptr_hSinh1_HNumber1STDIT );
 def("hSinh",fptr_hSinh1_HInteger1STDIT );
 
+
+
+
+def("hSinh_hSLICED",fptr_hSinh_hSLICED1_HComplex1STDIT );
+def("hSinh_hSLICED",fptr_hSinh_hSLICED1_HNumber1STDIT );
+def("hSinh_hSLICED",fptr_hSinh_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9120,7 +15285,7 @@ def("hSinh",fptr_hSinh1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9140,6 +15305,33 @@ def("hSinh",fptr_hSinh1_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9149,6 +15341,13 @@ def("hSinh",fptr_hSinh2_HComplex11STDITSTDIT );
 def("hSinh",fptr_hSinh2_HNumber11STDITSTDIT );
 def("hSinh",fptr_hSinh2_HInteger11STDITSTDIT );
 
+
+
+
+def("hSinh_hSLICED",fptr_hSinh_hSLICED2_HComplex11STDITSTDIT );
+def("hSinh_hSLICED",fptr_hSinh_hSLICED2_HNumber11STDITSTDIT );
+def("hSinh_hSLICED",fptr_hSinh_hSLICED2_HInteger11STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9159,7 +15358,7 @@ def("hSinh",fptr_hSinh2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9179,6 +15378,32 @@ def("hSinh",fptr_hSinh2_HInteger11STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9188,6 +15413,13 @@ def("hSqrt",fptr_hSqrt1_HComplex1STDIT );
 def("hSqrt",fptr_hSqrt1_HNumber1STDIT );
 def("hSqrt",fptr_hSqrt1_HInteger1STDIT );
 
+
+
+
+def("hSqrt_hSLICED",fptr_hSqrt_hSLICED1_HComplex1STDIT );
+def("hSqrt_hSLICED",fptr_hSqrt_hSLICED1_HNumber1STDIT );
+def("hSqrt_hSLICED",fptr_hSqrt_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9198,7 +15430,7 @@ def("hSqrt",fptr_hSqrt1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9218,6 +15450,33 @@ def("hSqrt",fptr_hSqrt1_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9227,6 +15486,13 @@ def("hSqrt",fptr_hSqrt2_HComplex11STDITSTDIT );
 def("hSqrt",fptr_hSqrt2_HNumber11STDITSTDIT );
 def("hSqrt",fptr_hSqrt2_HInteger11STDITSTDIT );
 
+
+
+
+def("hSqrt_hSLICED",fptr_hSqrt_hSLICED2_HComplex11STDITSTDIT );
+def("hSqrt_hSLICED",fptr_hSqrt_hSLICED2_HNumber11STDITSTDIT );
+def("hSqrt_hSLICED",fptr_hSqrt_hSLICED2_HInteger11STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9237,7 +15503,7 @@ def("hSqrt",fptr_hSqrt2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9257,6 +15523,32 @@ def("hSqrt",fptr_hSqrt2_HInteger11STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9266,6 +15558,13 @@ def("hSquare",fptr_hSquare1_HComplex1STDIT );
 def("hSquare",fptr_hSquare1_HNumber1STDIT );
 def("hSquare",fptr_hSquare1_HInteger1STDIT );
 
+
+
+
+def("hSquare_hSLICED",fptr_hSquare_hSLICED1_HComplex1STDIT );
+def("hSquare_hSLICED",fptr_hSquare_hSLICED1_HNumber1STDIT );
+def("hSquare_hSLICED",fptr_hSquare_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9276,7 +15575,7 @@ def("hSquare",fptr_hSquare1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9296,6 +15595,33 @@ def("hSquare",fptr_hSquare1_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9305,6 +15631,13 @@ def("hSquare",fptr_hSquare2_HComplex11STDITSTDIT );
 def("hSquare",fptr_hSquare2_HNumber11STDITSTDIT );
 def("hSquare",fptr_hSquare2_HInteger11STDITSTDIT );
 
+
+
+
+def("hSquare_hSLICED",fptr_hSquare_hSLICED2_HComplex11STDITSTDIT );
+def("hSquare_hSLICED",fptr_hSquare_hSLICED2_HNumber11STDITSTDIT );
+def("hSquare_hSLICED",fptr_hSquare_hSLICED2_HInteger11STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9315,7 +15648,7 @@ def("hSquare",fptr_hSquare2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9335,6 +15668,32 @@ def("hSquare",fptr_hSquare2_HInteger11STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9344,6 +15703,13 @@ def("hTan",fptr_hTan1_HComplex1STDIT );
 def("hTan",fptr_hTan1_HNumber1STDIT );
 def("hTan",fptr_hTan1_HInteger1STDIT );
 
+
+
+
+def("hTan_hSLICED",fptr_hTan_hSLICED1_HComplex1STDIT );
+def("hTan_hSLICED",fptr_hTan_hSLICED1_HNumber1STDIT );
+def("hTan_hSLICED",fptr_hTan_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9354,7 +15720,7 @@ def("hTan",fptr_hTan1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9374,6 +15740,33 @@ def("hTan",fptr_hTan1_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9383,6 +15776,13 @@ def("hTan",fptr_hTan2_HComplex11STDITSTDIT );
 def("hTan",fptr_hTan2_HNumber11STDITSTDIT );
 def("hTan",fptr_hTan2_HInteger11STDITSTDIT );
 
+
+
+
+def("hTan_hSLICED",fptr_hTan_hSLICED2_HComplex11STDITSTDIT );
+def("hTan_hSLICED",fptr_hTan_hSLICED2_HNumber11STDITSTDIT );
+def("hTan_hSLICED",fptr_hTan_hSLICED2_HInteger11STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9393,7 +15793,7 @@ def("hTan",fptr_hTan2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9413,6 +15813,32 @@ def("hTan",fptr_hTan2_HInteger11STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9422,6 +15848,13 @@ def("hTanh",fptr_hTanh1_HComplex1STDIT );
 def("hTanh",fptr_hTanh1_HNumber1STDIT );
 def("hTanh",fptr_hTanh1_HInteger1STDIT );
 
+
+
+
+def("hTanh_hSLICED",fptr_hTanh_hSLICED1_HComplex1STDIT );
+def("hTanh_hSLICED",fptr_hTanh_hSLICED1_HNumber1STDIT );
+def("hTanh_hSLICED",fptr_hTanh_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9432,7 +15865,7 @@ def("hTanh",fptr_hTanh1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9452,6 +15885,33 @@ def("hTanh",fptr_hTanh1_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9461,6 +15921,13 @@ def("hTanh",fptr_hTanh2_HComplex11STDITSTDIT );
 def("hTanh",fptr_hTanh2_HNumber11STDITSTDIT );
 def("hTanh",fptr_hTanh2_HInteger11STDITSTDIT );
 
+
+
+
+def("hTanh_hSLICED",fptr_hTanh_hSLICED2_HComplex11STDITSTDIT );
+def("hTanh_hSLICED",fptr_hTanh_hSLICED2_HNumber11STDITSTDIT );
+def("hTanh_hSLICED",fptr_hTanh_hSLICED2_HInteger11STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9471,7 +15938,7 @@ def("hTanh",fptr_hTanh2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9491,6 +15958,32 @@ def("hTanh",fptr_hTanh2_HInteger11STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9500,6 +15993,13 @@ def("hAbs",fptr_hAbs1_HComplex1STDIT );
 def("hAbs",fptr_hAbs1_HNumber1STDIT );
 def("hAbs",fptr_hAbs1_HInteger1STDIT );
 
+
+
+
+def("hAbs_hSLICED",fptr_hAbs_hSLICED1_HComplex1STDIT );
+def("hAbs_hSLICED",fptr_hAbs_hSLICED1_HNumber1STDIT );
+def("hAbs_hSLICED",fptr_hAbs_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9510,7 +16010,7 @@ def("hAbs",fptr_hAbs1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9530,6 +16030,33 @@ def("hAbs",fptr_hAbs1_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9539,6 +16066,13 @@ def("hAbs",fptr_hAbs2_HComplex11STDITSTDIT );
 def("hAbs",fptr_hAbs2_HNumber11STDITSTDIT );
 def("hAbs",fptr_hAbs2_HInteger11STDITSTDIT );
 
+
+
+
+def("hAbs_hSLICED",fptr_hAbs_hSLICED2_HComplex11STDITSTDIT );
+def("hAbs_hSLICED",fptr_hAbs_hSLICED2_HNumber11STDITSTDIT );
+def("hAbs_hSLICED",fptr_hAbs_hSLICED2_HInteger11STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9549,7 +16083,7 @@ def("hAbs",fptr_hAbs2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9569,6 +16103,32 @@ def("hAbs",fptr_hAbs2_HInteger11STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9578,6 +16138,13 @@ def("hCos",fptr_hCos1_HComplex1STDIT );
 def("hCos",fptr_hCos1_HNumber1STDIT );
 def("hCos",fptr_hCos1_HInteger1STDIT );
 
+
+
+
+def("hCos_hSLICED",fptr_hCos_hSLICED1_HComplex1STDIT );
+def("hCos_hSLICED",fptr_hCos_hSLICED1_HNumber1STDIT );
+def("hCos_hSLICED",fptr_hCos_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9588,7 +16155,7 @@ def("hCos",fptr_hCos1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9608,6 +16175,33 @@ def("hCos",fptr_hCos1_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9617,6 +16211,13 @@ def("hCos",fptr_hCos2_HComplex11STDITSTDIT );
 def("hCos",fptr_hCos2_HNumber11STDITSTDIT );
 def("hCos",fptr_hCos2_HInteger11STDITSTDIT );
 
+
+
+
+def("hCos_hSLICED",fptr_hCos_hSLICED2_HComplex11STDITSTDIT );
+def("hCos_hSLICED",fptr_hCos_hSLICED2_HNumber11STDITSTDIT );
+def("hCos_hSLICED",fptr_hCos_hSLICED2_HInteger11STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9627,7 +16228,7 @@ def("hCos",fptr_hCos2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9647,6 +16248,32 @@ def("hCos",fptr_hCos2_HInteger11STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9656,6 +16283,13 @@ def("hCosh",fptr_hCosh1_HComplex1STDIT );
 def("hCosh",fptr_hCosh1_HNumber1STDIT );
 def("hCosh",fptr_hCosh1_HInteger1STDIT );
 
+
+
+
+def("hCosh_hSLICED",fptr_hCosh_hSLICED1_HComplex1STDIT );
+def("hCosh_hSLICED",fptr_hCosh_hSLICED1_HNumber1STDIT );
+def("hCosh_hSLICED",fptr_hCosh_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9666,7 +16300,7 @@ def("hCosh",fptr_hCosh1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9686,6 +16320,33 @@ def("hCosh",fptr_hCosh1_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9695,6 +16356,13 @@ def("hCosh",fptr_hCosh2_HComplex11STDITSTDIT );
 def("hCosh",fptr_hCosh2_HNumber11STDITSTDIT );
 def("hCosh",fptr_hCosh2_HInteger11STDITSTDIT );
 
+
+
+
+def("hCosh_hSLICED",fptr_hCosh_hSLICED2_HComplex11STDITSTDIT );
+def("hCosh_hSLICED",fptr_hCosh_hSLICED2_HNumber11STDITSTDIT );
+def("hCosh_hSLICED",fptr_hCosh_hSLICED2_HInteger11STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9705,7 +16373,7 @@ def("hCosh",fptr_hCosh2_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9725,6 +16393,32 @@ def("hCosh",fptr_hCosh2_HInteger11STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9733,6 +16427,12 @@ def("hCosh",fptr_hCosh2_HInteger11STDITSTDIT );
 def("hCeil",fptr_hCeil1_HNumber1STDIT );
 def("hCeil",fptr_hCeil1_HInteger1STDIT );
 
+
+
+
+def("hCeil_hSLICED",fptr_hCeil_hSLICED1_HNumber1STDIT );
+def("hCeil_hSLICED",fptr_hCeil_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9743,7 +16443,7 @@ def("hCeil",fptr_hCeil1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9763,6 +16463,33 @@ def("hCeil",fptr_hCeil1_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9773,6 +16500,14 @@ def("hCeil",fptr_hCeil2_HNumberHInteger12STDITSTDIT );
 def("hCeil",fptr_hCeil2_HIntegerHNumber12STDITSTDIT );
 def("hCeil",fptr_hCeil2_HIntegerHInteger12STDITSTDIT );
 
+
+
+
+def("hCeil_hSLICED",fptr_hCeil_hSLICED2_HNumberHNumber12STDITSTDIT );
+def("hCeil_hSLICED",fptr_hCeil_hSLICED2_HNumberHInteger12STDITSTDIT );
+def("hCeil_hSLICED",fptr_hCeil_hSLICED2_HIntegerHNumber12STDITSTDIT );
+def("hCeil_hSLICED",fptr_hCeil_hSLICED2_HIntegerHInteger12STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9783,7 +16518,7 @@ def("hCeil",fptr_hCeil2_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9803,6 +16538,32 @@ def("hCeil",fptr_hCeil2_HIntegerHInteger12STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9811,6 +16572,12 @@ def("hCeil",fptr_hCeil2_HIntegerHInteger12STDITSTDIT );
 def("hFloor",fptr_hFloor1_HNumber1STDIT );
 def("hFloor",fptr_hFloor1_HInteger1STDIT );
 
+
+
+
+def("hFloor_hSLICED",fptr_hFloor_hSLICED1_HNumber1STDIT );
+def("hFloor_hSLICED",fptr_hFloor_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9821,7 +16588,7 @@ def("hFloor",fptr_hFloor1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9841,6 +16608,33 @@ def("hFloor",fptr_hFloor1_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9851,6 +16645,14 @@ def("hFloor",fptr_hFloor2_HNumberHInteger12STDITSTDIT );
 def("hFloor",fptr_hFloor2_HIntegerHNumber12STDITSTDIT );
 def("hFloor",fptr_hFloor2_HIntegerHInteger12STDITSTDIT );
 
+
+
+
+def("hFloor_hSLICED",fptr_hFloor_hSLICED2_HNumberHNumber12STDITSTDIT );
+def("hFloor_hSLICED",fptr_hFloor_hSLICED2_HNumberHInteger12STDITSTDIT );
+def("hFloor_hSLICED",fptr_hFloor_hSLICED2_HIntegerHNumber12STDITSTDIT );
+def("hFloor_hSLICED",fptr_hFloor_hSLICED2_HIntegerHInteger12STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9861,7 +16663,7 @@ def("hFloor",fptr_hFloor2_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9881,6 +16683,32 @@ def("hFloor",fptr_hFloor2_HIntegerHInteger12STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9889,6 +16717,12 @@ def("hFloor",fptr_hFloor2_HIntegerHInteger12STDITSTDIT );
 def("hAcos",fptr_hAcos1_HNumber1STDIT );
 def("hAcos",fptr_hAcos1_HInteger1STDIT );
 
+
+
+
+def("hAcos_hSLICED",fptr_hAcos_hSLICED1_HNumber1STDIT );
+def("hAcos_hSLICED",fptr_hAcos_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9899,7 +16733,7 @@ def("hAcos",fptr_hAcos1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9919,6 +16753,33 @@ def("hAcos",fptr_hAcos1_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9929,6 +16790,14 @@ def("hAcos",fptr_hAcos2_HNumberHInteger12STDITSTDIT );
 def("hAcos",fptr_hAcos2_HIntegerHNumber12STDITSTDIT );
 def("hAcos",fptr_hAcos2_HIntegerHInteger12STDITSTDIT );
 
+
+
+
+def("hAcos_hSLICED",fptr_hAcos_hSLICED2_HNumberHNumber12STDITSTDIT );
+def("hAcos_hSLICED",fptr_hAcos_hSLICED2_HNumberHInteger12STDITSTDIT );
+def("hAcos_hSLICED",fptr_hAcos_hSLICED2_HIntegerHNumber12STDITSTDIT );
+def("hAcos_hSLICED",fptr_hAcos_hSLICED2_HIntegerHInteger12STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9939,7 +16808,7 @@ def("hAcos",fptr_hAcos2_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9959,6 +16828,32 @@ def("hAcos",fptr_hAcos2_HIntegerHInteger12STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -9967,6 +16862,12 @@ def("hAcos",fptr_hAcos2_HIntegerHInteger12STDITSTDIT );
 def("hAsin",fptr_hAsin1_HNumber1STDIT );
 def("hAsin",fptr_hAsin1_HInteger1STDIT );
 
+
+
+
+def("hAsin_hSLICED",fptr_hAsin_hSLICED1_HNumber1STDIT );
+def("hAsin_hSLICED",fptr_hAsin_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -9977,7 +16878,7 @@ def("hAsin",fptr_hAsin1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -9997,6 +16898,33 @@ def("hAsin",fptr_hAsin1_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10007,6 +16935,14 @@ def("hAsin",fptr_hAsin2_HNumberHInteger12STDITSTDIT );
 def("hAsin",fptr_hAsin2_HIntegerHNumber12STDITSTDIT );
 def("hAsin",fptr_hAsin2_HIntegerHInteger12STDITSTDIT );
 
+
+
+
+def("hAsin_hSLICED",fptr_hAsin_hSLICED2_HNumberHNumber12STDITSTDIT );
+def("hAsin_hSLICED",fptr_hAsin_hSLICED2_HNumberHInteger12STDITSTDIT );
+def("hAsin_hSLICED",fptr_hAsin_hSLICED2_HIntegerHNumber12STDITSTDIT );
+def("hAsin_hSLICED",fptr_hAsin_hSLICED2_HIntegerHInteger12STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10017,7 +16953,7 @@ def("hAsin",fptr_hAsin2_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10037,6 +16973,32 @@ def("hAsin",fptr_hAsin2_HIntegerHInteger12STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10045,6 +17007,12 @@ def("hAsin",fptr_hAsin2_HIntegerHInteger12STDITSTDIT );
 def("hAtan",fptr_hAtan1_HNumber1STDIT );
 def("hAtan",fptr_hAtan1_HInteger1STDIT );
 
+
+
+
+def("hAtan_hSLICED",fptr_hAtan_hSLICED1_HNumber1STDIT );
+def("hAtan_hSLICED",fptr_hAtan_hSLICED1_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10055,7 +17023,7 @@ def("hAtan",fptr_hAtan1_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10075,6 +17043,33 @@ def("hAtan",fptr_hAtan1_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10085,6 +17080,14 @@ def("hAtan",fptr_hAtan2_HNumberHInteger12STDITSTDIT );
 def("hAtan",fptr_hAtan2_HIntegerHNumber12STDITSTDIT );
 def("hAtan",fptr_hAtan2_HIntegerHInteger12STDITSTDIT );
 
+
+
+
+def("hAtan_hSLICED",fptr_hAtan_hSLICED2_HNumberHNumber12STDITSTDIT );
+def("hAtan_hSLICED",fptr_hAtan_hSLICED2_HNumberHInteger12STDITSTDIT );
+def("hAtan_hSLICED",fptr_hAtan_hSLICED2_HIntegerHNumber12STDITSTDIT );
+def("hAtan_hSLICED",fptr_hAtan_hSLICED2_HIntegerHInteger12STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10095,7 +17098,7 @@ def("hAtan",fptr_hAtan2_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10115,6 +17118,33 @@ def("hAtan",fptr_hAtan2_HIntegerHInteger12STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10130,6 +17160,19 @@ def("hiSub",fptr_hiSub_HIntegerHComplex12STDITSTDIT );
 def("hiSub",fptr_hiSub_HIntegerHNumber12STDITSTDIT );
 def("hiSub",fptr_hiSub_HIntegerHInteger12STDITSTDIT );
 
+
+
+
+def("hiSub_hSLICED",fptr_hiSub_hSLICED_HComplexHComplex12STDITSTDIT );
+def("hiSub_hSLICED",fptr_hiSub_hSLICED_HComplexHNumber12STDITSTDIT );
+def("hiSub_hSLICED",fptr_hiSub_hSLICED_HComplexHInteger12STDITSTDIT );
+def("hiSub_hSLICED",fptr_hiSub_hSLICED_HNumberHComplex12STDITSTDIT );
+def("hiSub_hSLICED",fptr_hiSub_hSLICED_HNumberHNumber12STDITSTDIT );
+def("hiSub_hSLICED",fptr_hiSub_hSLICED_HNumberHInteger12STDITSTDIT );
+def("hiSub_hSLICED",fptr_hiSub_hSLICED_HIntegerHComplex12STDITSTDIT );
+def("hiSub_hSLICED",fptr_hiSub_hSLICED_HIntegerHNumber12STDITSTDIT );
+def("hiSub_hSLICED",fptr_hiSub_hSLICED_HIntegerHInteger12STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10140,7 +17183,7 @@ def("hiSub",fptr_hiSub_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10160,6 +17203,33 @@ def("hiSub",fptr_hiSub_HIntegerHInteger12STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10175,6 +17245,19 @@ def("hiSub",fptr_hiSub2_HIntegerHComplex12STDIT );
 def("hiSub",fptr_hiSub2_HIntegerHNumber12STDIT );
 def("hiSub",fptr_hiSub2_HIntegerHInteger12STDIT );
 
+
+
+
+def("hiSub_hSLICED",fptr_hiSub_hSLICED2_HComplexHComplex12STDIT );
+def("hiSub_hSLICED",fptr_hiSub_hSLICED2_HComplexHNumber12STDIT );
+def("hiSub_hSLICED",fptr_hiSub_hSLICED2_HComplexHInteger12STDIT );
+def("hiSub_hSLICED",fptr_hiSub_hSLICED2_HNumberHComplex12STDIT );
+def("hiSub_hSLICED",fptr_hiSub_hSLICED2_HNumberHNumber12STDIT );
+def("hiSub_hSLICED",fptr_hiSub_hSLICED2_HNumberHInteger12STDIT );
+def("hiSub_hSLICED",fptr_hiSub_hSLICED2_HIntegerHComplex12STDIT );
+def("hiSub_hSLICED",fptr_hiSub_hSLICED2_HIntegerHNumber12STDIT );
+def("hiSub_hSLICED",fptr_hiSub_hSLICED2_HIntegerHInteger12STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10185,7 +17268,7 @@ def("hiSub",fptr_hiSub2_HIntegerHInteger12STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10205,6 +17288,34 @@ def("hiSub",fptr_hiSub2_HIntegerHInteger12STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10238,6 +17349,37 @@ def("hSub",fptr_hSub_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
 def("hSub",fptr_hSub_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
 def("hSub",fptr_hSub_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 
+
+
+
+def("hSub_hSLICED",fptr_hSub_hSLICED_HComplexHComplexHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HComplexHComplexHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HComplexHComplexHInteger123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HComplexHNumberHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HComplexHNumberHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HComplexHNumberHInteger123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HComplexHIntegerHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HComplexHIntegerHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HComplexHIntegerHInteger123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HNumberHComplexHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HNumberHComplexHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HNumberHComplexHInteger123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HNumberHNumberHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HNumberHNumberHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HNumberHNumberHInteger123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HNumberHIntegerHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HNumberHIntegerHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HNumberHIntegerHInteger123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HIntegerHComplexHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HIntegerHComplexHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HIntegerHComplexHInteger123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HIntegerHNumberHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HIntegerHNumberHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HIntegerHNumberHInteger123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10248,7 +17390,7 @@ def("hSub",fptr_hSub_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10268,6 +17410,34 @@ def("hSub",fptr_hSub_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10277,6 +17447,13 @@ def("hSubAdd",fptr_hSubAdd_HComplex111STDITSTDITSTDIT );
 def("hSubAdd",fptr_hSubAdd_HNumber111STDITSTDITSTDIT );
 def("hSubAdd",fptr_hSubAdd_HInteger111STDITSTDITSTDIT );
 
+
+
+
+def("hSubAdd_hSLICED",fptr_hSubAdd_hSLICED_HComplex111STDITSTDITSTDIT );
+def("hSubAdd_hSLICED",fptr_hSubAdd_hSLICED_HNumber111STDITSTDITSTDIT );
+def("hSubAdd_hSLICED",fptr_hSubAdd_hSLICED_HInteger111STDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10287,7 +17464,7 @@ def("hSubAdd",fptr_hSubAdd_HInteger111STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10307,6 +17484,34 @@ def("hSubAdd",fptr_hSubAdd_HInteger111STDITSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10340,6 +17545,37 @@ def("hSubAddConv",fptr_hSubAddConv_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
 def("hSubAddConv",fptr_hSubAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 
+
+
+
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HComplexHComplexHComplex123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HComplexHComplexHNumber123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HComplexHComplexHInteger123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HComplexHNumberHComplex123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HComplexHNumberHNumber123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HComplexHNumberHInteger123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HComplexHIntegerHComplex123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HComplexHIntegerHNumber123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HComplexHIntegerHInteger123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HNumberHComplexHComplex123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HNumberHComplexHNumber123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HNumberHComplexHInteger123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HNumberHNumberHComplex123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HNumberHNumberHNumber123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HNumberHNumberHInteger123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HNumberHIntegerHComplex123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HNumberHIntegerHNumber123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HNumberHIntegerHInteger123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HIntegerHComplexHComplex123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HIntegerHComplexHNumber123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HIntegerHComplexHInteger123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HIntegerHNumberHComplex123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HIntegerHNumberHNumber123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HIntegerHNumberHInteger123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
+def("hSubAddConv_hSLICED",fptr_hSubAddConv_hSLICED_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10350,7 +17586,7 @@ def("hSubAddConv",fptr_hSubAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10370,6 +17606,34 @@ def("hSubAddConv",fptr_hSubAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10403,6 +17667,37 @@ def("hSub",fptr_hSub2_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
 def("hSub",fptr_hSub2_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
 def("hSub",fptr_hSub2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 
+
+
+
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HComplexHComplexHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HComplexHComplexHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HComplexHComplexHInteger123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HComplexHNumberHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HComplexHNumberHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HComplexHNumberHInteger123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HComplexHIntegerHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HComplexHIntegerHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HComplexHIntegerHInteger123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HNumberHComplexHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HNumberHComplexHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HNumberHComplexHInteger123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HNumberHNumberHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HNumberHNumberHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HNumberHNumberHInteger123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HNumberHIntegerHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HNumberHIntegerHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HNumberHIntegerHInteger123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HIntegerHComplexHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HIntegerHComplexHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HIntegerHComplexHInteger123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HIntegerHNumberHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HIntegerHNumberHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HIntegerHNumberHInteger123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
+def("hSub_hSLICED",fptr_hSub_hSLICED2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10413,7 +17708,7 @@ def("hSub",fptr_hSub2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10433,6 +17728,33 @@ def("hSub",fptr_hSub2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10448,6 +17770,19 @@ def("hiMul",fptr_hiMul_HIntegerHComplex12STDITSTDIT );
 def("hiMul",fptr_hiMul_HIntegerHNumber12STDITSTDIT );
 def("hiMul",fptr_hiMul_HIntegerHInteger12STDITSTDIT );
 
+
+
+
+def("hiMul_hSLICED",fptr_hiMul_hSLICED_HComplexHComplex12STDITSTDIT );
+def("hiMul_hSLICED",fptr_hiMul_hSLICED_HComplexHNumber12STDITSTDIT );
+def("hiMul_hSLICED",fptr_hiMul_hSLICED_HComplexHInteger12STDITSTDIT );
+def("hiMul_hSLICED",fptr_hiMul_hSLICED_HNumberHComplex12STDITSTDIT );
+def("hiMul_hSLICED",fptr_hiMul_hSLICED_HNumberHNumber12STDITSTDIT );
+def("hiMul_hSLICED",fptr_hiMul_hSLICED_HNumberHInteger12STDITSTDIT );
+def("hiMul_hSLICED",fptr_hiMul_hSLICED_HIntegerHComplex12STDITSTDIT );
+def("hiMul_hSLICED",fptr_hiMul_hSLICED_HIntegerHNumber12STDITSTDIT );
+def("hiMul_hSLICED",fptr_hiMul_hSLICED_HIntegerHInteger12STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10458,7 +17793,7 @@ def("hiMul",fptr_hiMul_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10478,6 +17813,33 @@ def("hiMul",fptr_hiMul_HIntegerHInteger12STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10493,6 +17855,19 @@ def("hiMul",fptr_hiMul2_HIntegerHComplex12STDIT );
 def("hiMul",fptr_hiMul2_HIntegerHNumber12STDIT );
 def("hiMul",fptr_hiMul2_HIntegerHInteger12STDIT );
 
+
+
+
+def("hiMul_hSLICED",fptr_hiMul_hSLICED2_HComplexHComplex12STDIT );
+def("hiMul_hSLICED",fptr_hiMul_hSLICED2_HComplexHNumber12STDIT );
+def("hiMul_hSLICED",fptr_hiMul_hSLICED2_HComplexHInteger12STDIT );
+def("hiMul_hSLICED",fptr_hiMul_hSLICED2_HNumberHComplex12STDIT );
+def("hiMul_hSLICED",fptr_hiMul_hSLICED2_HNumberHNumber12STDIT );
+def("hiMul_hSLICED",fptr_hiMul_hSLICED2_HNumberHInteger12STDIT );
+def("hiMul_hSLICED",fptr_hiMul_hSLICED2_HIntegerHComplex12STDIT );
+def("hiMul_hSLICED",fptr_hiMul_hSLICED2_HIntegerHNumber12STDIT );
+def("hiMul_hSLICED",fptr_hiMul_hSLICED2_HIntegerHInteger12STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10503,7 +17878,7 @@ def("hiMul",fptr_hiMul2_HIntegerHInteger12STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10523,6 +17898,34 @@ def("hiMul",fptr_hiMul2_HIntegerHInteger12STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10556,6 +17959,37 @@ def("hMul",fptr_hMul_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
 def("hMul",fptr_hMul_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
 def("hMul",fptr_hMul_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 
+
+
+
+def("hMul_hSLICED",fptr_hMul_hSLICED_HComplexHComplexHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HComplexHComplexHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HComplexHComplexHInteger123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HComplexHNumberHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HComplexHNumberHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HComplexHNumberHInteger123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HComplexHIntegerHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HComplexHIntegerHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HComplexHIntegerHInteger123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HNumberHComplexHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HNumberHComplexHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HNumberHComplexHInteger123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HNumberHNumberHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HNumberHNumberHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HNumberHNumberHInteger123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HNumberHIntegerHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HNumberHIntegerHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HNumberHIntegerHInteger123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HIntegerHComplexHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HIntegerHComplexHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HIntegerHComplexHInteger123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HIntegerHNumberHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HIntegerHNumberHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HIntegerHNumberHInteger123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10566,7 +18000,7 @@ def("hMul",fptr_hMul_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10586,6 +18020,34 @@ def("hMul",fptr_hMul_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10595,6 +18057,13 @@ def("hMulAdd",fptr_hMulAdd_HComplex111STDITSTDITSTDIT );
 def("hMulAdd",fptr_hMulAdd_HNumber111STDITSTDITSTDIT );
 def("hMulAdd",fptr_hMulAdd_HInteger111STDITSTDITSTDIT );
 
+
+
+
+def("hMulAdd_hSLICED",fptr_hMulAdd_hSLICED_HComplex111STDITSTDITSTDIT );
+def("hMulAdd_hSLICED",fptr_hMulAdd_hSLICED_HNumber111STDITSTDITSTDIT );
+def("hMulAdd_hSLICED",fptr_hMulAdd_hSLICED_HInteger111STDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10605,7 +18074,7 @@ def("hMulAdd",fptr_hMulAdd_HInteger111STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10625,6 +18094,34 @@ def("hMulAdd",fptr_hMulAdd_HInteger111STDITSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10658,6 +18155,37 @@ def("hMulAddConv",fptr_hMulAddConv_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
 def("hMulAddConv",fptr_hMulAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 
+
+
+
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HComplexHComplexHComplex123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HComplexHComplexHNumber123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HComplexHComplexHInteger123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HComplexHNumberHComplex123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HComplexHNumberHNumber123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HComplexHNumberHInteger123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HComplexHIntegerHComplex123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HComplexHIntegerHNumber123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HComplexHIntegerHInteger123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HNumberHComplexHComplex123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HNumberHComplexHNumber123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HNumberHComplexHInteger123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HNumberHNumberHComplex123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HNumberHNumberHNumber123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HNumberHNumberHInteger123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HNumberHIntegerHComplex123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HNumberHIntegerHNumber123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HNumberHIntegerHInteger123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HIntegerHComplexHComplex123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HIntegerHComplexHNumber123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HIntegerHComplexHInteger123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HIntegerHNumberHComplex123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HIntegerHNumberHNumber123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HIntegerHNumberHInteger123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
+def("hMulAddConv_hSLICED",fptr_hMulAddConv_hSLICED_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10668,7 +18196,7 @@ def("hMulAddConv",fptr_hMulAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10688,6 +18216,34 @@ def("hMulAddConv",fptr_hMulAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10721,6 +18277,37 @@ def("hMul",fptr_hMul2_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
 def("hMul",fptr_hMul2_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
 def("hMul",fptr_hMul2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 
+
+
+
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HComplexHComplexHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HComplexHComplexHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HComplexHComplexHInteger123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HComplexHNumberHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HComplexHNumberHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HComplexHNumberHInteger123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HComplexHIntegerHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HComplexHIntegerHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HComplexHIntegerHInteger123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HNumberHComplexHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HNumberHComplexHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HNumberHComplexHInteger123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HNumberHNumberHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HNumberHNumberHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HNumberHNumberHInteger123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HNumberHIntegerHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HNumberHIntegerHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HNumberHIntegerHInteger123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HIntegerHComplexHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HIntegerHComplexHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HIntegerHComplexHInteger123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HIntegerHNumberHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HIntegerHNumberHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HIntegerHNumberHInteger123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
+def("hMul_hSLICED",fptr_hMul_hSLICED2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10731,7 +18318,7 @@ def("hMul",fptr_hMul2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10751,6 +18338,33 @@ def("hMul",fptr_hMul2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10766,6 +18380,19 @@ def("hiAdd",fptr_hiAdd_HIntegerHComplex12STDITSTDIT );
 def("hiAdd",fptr_hiAdd_HIntegerHNumber12STDITSTDIT );
 def("hiAdd",fptr_hiAdd_HIntegerHInteger12STDITSTDIT );
 
+
+
+
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED_HComplexHComplex12STDITSTDIT );
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED_HComplexHNumber12STDITSTDIT );
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED_HComplexHInteger12STDITSTDIT );
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED_HNumberHComplex12STDITSTDIT );
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED_HNumberHNumber12STDITSTDIT );
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED_HNumberHInteger12STDITSTDIT );
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED_HIntegerHComplex12STDITSTDIT );
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED_HIntegerHNumber12STDITSTDIT );
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED_HIntegerHInteger12STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10776,7 +18403,7 @@ def("hiAdd",fptr_hiAdd_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10796,6 +18423,33 @@ def("hiAdd",fptr_hiAdd_HIntegerHInteger12STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10811,6 +18465,19 @@ def("hiAdd",fptr_hiAdd2_HIntegerHComplex12STDIT );
 def("hiAdd",fptr_hiAdd2_HIntegerHNumber12STDIT );
 def("hiAdd",fptr_hiAdd2_HIntegerHInteger12STDIT );
 
+
+
+
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED2_HComplexHComplex12STDIT );
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED2_HComplexHNumber12STDIT );
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED2_HComplexHInteger12STDIT );
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED2_HNumberHComplex12STDIT );
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED2_HNumberHNumber12STDIT );
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED2_HNumberHInteger12STDIT );
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED2_HIntegerHComplex12STDIT );
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED2_HIntegerHNumber12STDIT );
+def("hiAdd_hSLICED",fptr_hiAdd_hSLICED2_HIntegerHInteger12STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10821,7 +18488,7 @@ def("hiAdd",fptr_hiAdd2_HIntegerHInteger12STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10841,6 +18508,34 @@ def("hiAdd",fptr_hiAdd2_HIntegerHInteger12STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10874,6 +18569,37 @@ def("hAdd",fptr_hAdd_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 
+
+
+
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HComplexHComplexHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HComplexHComplexHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HComplexHComplexHInteger123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HComplexHNumberHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HComplexHNumberHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HComplexHNumberHInteger123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HComplexHIntegerHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HComplexHIntegerHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HComplexHIntegerHInteger123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HNumberHComplexHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HNumberHComplexHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HNumberHComplexHInteger123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HNumberHNumberHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HNumberHNumberHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HNumberHNumberHInteger123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HNumberHIntegerHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HNumberHIntegerHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HNumberHIntegerHInteger123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HIntegerHComplexHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HIntegerHComplexHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HIntegerHComplexHInteger123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HIntegerHNumberHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HIntegerHNumberHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HIntegerHNumberHInteger123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10884,7 +18610,7 @@ def("hAdd",fptr_hAdd_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10904,6 +18630,34 @@ def("hAdd",fptr_hAdd_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10913,6 +18667,13 @@ def("hAddAdd",fptr_hAddAdd_HComplex111STDITSTDITSTDIT );
 def("hAddAdd",fptr_hAddAdd_HNumber111STDITSTDITSTDIT );
 def("hAddAdd",fptr_hAddAdd_HInteger111STDITSTDITSTDIT );
 
+
+
+
+def("hAddAdd_hSLICED",fptr_hAddAdd_hSLICED_HComplex111STDITSTDITSTDIT );
+def("hAddAdd_hSLICED",fptr_hAddAdd_hSLICED_HNumber111STDITSTDITSTDIT );
+def("hAddAdd_hSLICED",fptr_hAddAdd_hSLICED_HInteger111STDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10923,7 +18684,7 @@ def("hAddAdd",fptr_hAddAdd_HInteger111STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -10943,6 +18704,34 @@ def("hAddAdd",fptr_hAddAdd_HInteger111STDITSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -10976,6 +18765,37 @@ def("hAddAddConv",fptr_hAddAddConv_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
 def("hAddAddConv",fptr_hAddAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 
+
+
+
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HComplexHComplexHComplex123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HComplexHComplexHNumber123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HComplexHComplexHInteger123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HComplexHNumberHComplex123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HComplexHNumberHNumber123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HComplexHNumberHInteger123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HComplexHIntegerHComplex123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HComplexHIntegerHNumber123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HComplexHIntegerHInteger123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HNumberHComplexHComplex123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HNumberHComplexHNumber123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HNumberHComplexHInteger123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HNumberHNumberHComplex123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HNumberHNumberHNumber123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HNumberHNumberHInteger123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HNumberHIntegerHComplex123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HNumberHIntegerHNumber123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HNumberHIntegerHInteger123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HIntegerHComplexHComplex123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HIntegerHComplexHNumber123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HIntegerHComplexHInteger123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HIntegerHNumberHComplex123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HIntegerHNumberHNumber123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HIntegerHNumberHInteger123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
+def("hAddAddConv_hSLICED",fptr_hAddAddConv_hSLICED_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -10986,7 +18806,7 @@ def("hAddAddConv",fptr_hAddAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11006,6 +18826,34 @@ def("hAddAddConv",fptr_hAddAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11039,6 +18887,37 @@ def("hAdd",fptr_hAdd2_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd2_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
 def("hAdd",fptr_hAdd2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 
+
+
+
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HComplexHComplexHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HComplexHComplexHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HComplexHComplexHInteger123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HComplexHNumberHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HComplexHNumberHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HComplexHNumberHInteger123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HComplexHIntegerHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HComplexHIntegerHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HComplexHIntegerHInteger123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HNumberHComplexHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HNumberHComplexHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HNumberHComplexHInteger123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HNumberHNumberHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HNumberHNumberHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HNumberHNumberHInteger123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HNumberHIntegerHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HNumberHIntegerHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HNumberHIntegerHInteger123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HIntegerHComplexHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HIntegerHComplexHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HIntegerHComplexHInteger123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HIntegerHNumberHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HIntegerHNumberHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HIntegerHNumberHInteger123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
+def("hAdd_hSLICED",fptr_hAdd_hSLICED2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11049,7 +18928,7 @@ def("hAdd",fptr_hAdd2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11069,6 +18948,33 @@ def("hAdd",fptr_hAdd2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11084,6 +18990,19 @@ def("hiDiv",fptr_hiDiv_HIntegerHComplex12STDITSTDIT );
 def("hiDiv",fptr_hiDiv_HIntegerHNumber12STDITSTDIT );
 def("hiDiv",fptr_hiDiv_HIntegerHInteger12STDITSTDIT );
 
+
+
+
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED_HComplexHComplex12STDITSTDIT );
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED_HComplexHNumber12STDITSTDIT );
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED_HComplexHInteger12STDITSTDIT );
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED_HNumberHComplex12STDITSTDIT );
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED_HNumberHNumber12STDITSTDIT );
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED_HNumberHInteger12STDITSTDIT );
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED_HIntegerHComplex12STDITSTDIT );
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED_HIntegerHNumber12STDITSTDIT );
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED_HIntegerHInteger12STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11094,7 +19013,7 @@ def("hiDiv",fptr_hiDiv_HIntegerHInteger12STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11114,6 +19033,33 @@ def("hiDiv",fptr_hiDiv_HIntegerHInteger12STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11129,6 +19075,19 @@ def("hiDiv",fptr_hiDiv2_HIntegerHComplex12STDIT );
 def("hiDiv",fptr_hiDiv2_HIntegerHNumber12STDIT );
 def("hiDiv",fptr_hiDiv2_HIntegerHInteger12STDIT );
 
+
+
+
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED2_HComplexHComplex12STDIT );
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED2_HComplexHNumber12STDIT );
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED2_HComplexHInteger12STDIT );
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED2_HNumberHComplex12STDIT );
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED2_HNumberHNumber12STDIT );
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED2_HNumberHInteger12STDIT );
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED2_HIntegerHComplex12STDIT );
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED2_HIntegerHNumber12STDIT );
+def("hiDiv_hSLICED",fptr_hiDiv_hSLICED2_HIntegerHInteger12STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11139,7 +19098,7 @@ def("hiDiv",fptr_hiDiv2_HIntegerHInteger12STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11159,6 +19118,34 @@ def("hiDiv",fptr_hiDiv2_HIntegerHInteger12STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11192,6 +19179,37 @@ def("hDiv",fptr_hDiv_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 
+
+
+
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HComplexHComplexHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HComplexHComplexHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HComplexHComplexHInteger123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HComplexHNumberHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HComplexHNumberHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HComplexHNumberHInteger123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HComplexHIntegerHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HComplexHIntegerHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HComplexHIntegerHInteger123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HNumberHComplexHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HNumberHComplexHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HNumberHComplexHInteger123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HNumberHNumberHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HNumberHNumberHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HNumberHNumberHInteger123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HNumberHIntegerHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HNumberHIntegerHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HNumberHIntegerHInteger123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HIntegerHComplexHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HIntegerHComplexHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HIntegerHComplexHInteger123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HIntegerHNumberHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HIntegerHNumberHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HIntegerHNumberHInteger123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11202,7 +19220,7 @@ def("hDiv",fptr_hDiv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11222,6 +19240,34 @@ def("hDiv",fptr_hDiv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11231,6 +19277,13 @@ def("hDivAdd",fptr_hDivAdd_HComplex111STDITSTDITSTDIT );
 def("hDivAdd",fptr_hDivAdd_HNumber111STDITSTDITSTDIT );
 def("hDivAdd",fptr_hDivAdd_HInteger111STDITSTDITSTDIT );
 
+
+
+
+def("hDivAdd_hSLICED",fptr_hDivAdd_hSLICED_HComplex111STDITSTDITSTDIT );
+def("hDivAdd_hSLICED",fptr_hDivAdd_hSLICED_HNumber111STDITSTDITSTDIT );
+def("hDivAdd_hSLICED",fptr_hDivAdd_hSLICED_HInteger111STDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11241,7 +19294,7 @@ def("hDivAdd",fptr_hDivAdd_HInteger111STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11261,6 +19314,34 @@ def("hDivAdd",fptr_hDivAdd_HInteger111STDITSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11294,6 +19375,37 @@ def("hDivAddConv",fptr_hDivAddConv_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
 def("hDivAddConv",fptr_hDivAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 
+
+
+
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HComplexHComplexHComplex123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HComplexHComplexHNumber123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HComplexHComplexHInteger123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HComplexHNumberHComplex123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HComplexHNumberHNumber123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HComplexHNumberHInteger123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HComplexHIntegerHComplex123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HComplexHIntegerHNumber123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HComplexHIntegerHInteger123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HNumberHComplexHComplex123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HNumberHComplexHNumber123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HNumberHComplexHInteger123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HNumberHNumberHComplex123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HNumberHNumberHNumber123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HNumberHNumberHInteger123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HNumberHIntegerHComplex123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HNumberHIntegerHNumber123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HNumberHIntegerHInteger123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HIntegerHComplexHComplex123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HIntegerHComplexHNumber123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HIntegerHComplexHInteger123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HIntegerHNumberHComplex123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HIntegerHNumberHNumber123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HIntegerHNumberHInteger123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
+def("hDivAddConv_hSLICED",fptr_hDivAddConv_hSLICED_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11304,7 +19416,7 @@ def("hDivAddConv",fptr_hDivAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11324,6 +19436,34 @@ def("hDivAddConv",fptr_hDivAddConv_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11357,6 +19497,37 @@ def("hDiv",fptr_hDiv2_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv2_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
 def("hDiv",fptr_hDiv2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 
+
+
+
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HComplexHComplexHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HComplexHComplexHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HComplexHComplexHInteger123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HComplexHNumberHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HComplexHNumberHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HComplexHNumberHInteger123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HComplexHIntegerHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HComplexHIntegerHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HComplexHIntegerHInteger123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HNumberHComplexHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HNumberHComplexHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HNumberHComplexHInteger123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HNumberHNumberHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HNumberHNumberHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HNumberHNumberHInteger123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HNumberHIntegerHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HNumberHIntegerHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HNumberHIntegerHInteger123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HIntegerHComplexHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HIntegerHComplexHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HIntegerHComplexHInteger123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HIntegerHNumberHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HIntegerHNumberHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HIntegerHNumberHInteger123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HIntegerHIntegerHComplex123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HIntegerHIntegerHNumber123STDITSTDITSTDIT );
+def("hDiv_hSLICED",fptr_hDiv_hSLICED2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11367,7 +19538,7 @@ def("hDiv",fptr_hDiv2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11387,6 +19558,32 @@ def("hDiv",fptr_hDiv2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11394,6 +19591,11 @@ def("hDiv",fptr_hDiv2_HIntegerHIntegerHInteger123STDITSTDITSTDIT );
 
 def("hConj",fptr_hConj_HIntegerHComplexSTDIT );
 
+
+
+
+def("hConj_hSLICED",fptr_hConj_hSLICED_HIntegerHComplexSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11404,7 +19606,7 @@ def("hConj",fptr_hConj_HIntegerHComplexSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11424,6 +19626,33 @@ def("hConj",fptr_hConj_HIntegerHComplexSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11431,6 +19660,11 @@ def("hConj",fptr_hConj_HIntegerHComplexSTDIT );
 
 def("hCrossCorrelateComplex",fptr_hCrossCorrelateComplex_HIntegerHComplexHComplexSTDITSTDIT );
 
+
+
+
+def("hCrossCorrelateComplex_hSLICED",fptr_hCrossCorrelateComplex_hSLICED_HIntegerHComplexHComplexSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11441,7 +19675,7 @@ def("hCrossCorrelateComplex",fptr_hCrossCorrelateComplex_HIntegerHComplexHComple
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11461,6 +19695,33 @@ def("hCrossCorrelateComplex",fptr_hCrossCorrelateComplex_HIntegerHComplexHComple
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11468,6 +19729,11 @@ def("hCrossCorrelateComplex",fptr_hCrossCorrelateComplex_HIntegerHComplexHComple
 
 def("hReal",fptr_hReal_HIntegerHComplexHNumberSTDITSTDIT );
 
+
+
+
+def("hReal_hSLICED",fptr_hReal_hSLICED_HIntegerHComplexHNumberSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11478,7 +19744,7 @@ def("hReal",fptr_hReal_HIntegerHComplexHNumberSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11498,6 +19764,33 @@ def("hReal",fptr_hReal_HIntegerHComplexHNumberSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11505,6 +19798,11 @@ def("hReal",fptr_hReal_HIntegerHComplexHNumberSTDITSTDIT );
 
 def("hArg",fptr_hArg_HIntegerHComplexHNumberSTDITSTDIT );
 
+
+
+
+def("hArg_hSLICED",fptr_hArg_hSLICED_HIntegerHComplexHNumberSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11515,7 +19813,7 @@ def("hArg",fptr_hArg_HIntegerHComplexHNumberSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11535,6 +19833,33 @@ def("hArg",fptr_hArg_HIntegerHComplexHNumberSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11542,6 +19867,11 @@ def("hArg",fptr_hArg_HIntegerHComplexHNumberSTDITSTDIT );
 
 def("hImag",fptr_hImag_HIntegerHComplexHNumberSTDITSTDIT );
 
+
+
+
+def("hImag_hSLICED",fptr_hImag_hSLICED_HIntegerHComplexHNumberSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11552,7 +19882,7 @@ def("hImag",fptr_hImag_HIntegerHComplexHNumberSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11572,6 +19902,33 @@ def("hImag",fptr_hImag_HIntegerHComplexHNumberSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11579,6 +19936,11 @@ def("hImag",fptr_hImag_HIntegerHComplexHNumberSTDITSTDIT );
 
 def("hNorm",fptr_hNorm_HIntegerHComplexHNumberSTDITSTDIT );
 
+
+
+
+def("hNorm_hSLICED",fptr_hNorm_hSLICED_HIntegerHComplexHNumberSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11589,7 +19951,7 @@ def("hNorm",fptr_hNorm_HIntegerHComplexHNumberSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11609,6 +19971,32 @@ def("hNorm",fptr_hNorm_HIntegerHComplexHNumberSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11618,6 +20006,13 @@ def("hNegate",fptr_hNegate_HComplex1STDIT );
 def("hNegate",fptr_hNegate_HNumber1STDIT );
 def("hNegate",fptr_hNegate_HInteger1STDIT );
 
+
+
+
+def("hNegate_hSLICED",fptr_hNegate_hSLICED_HComplex1STDIT );
+def("hNegate_hSLICED",fptr_hNegate_hSLICED_HNumber1STDIT );
+def("hNegate_hSLICED",fptr_hNegate_hSLICED_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11628,7 +20023,7 @@ def("hNegate",fptr_hNegate_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11648,6 +20043,32 @@ def("hNegate",fptr_hNegate_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11657,6 +20078,13 @@ def("hSum",fptr_hSum_HComplex1STDIT );
 def("hSum",fptr_hSum_HNumber1STDIT );
 def("hSum",fptr_hSum_HInteger1STDIT );
 
+
+
+
+def("hSum_hSLICED",fptr_hSum_hSLICED_HComplex1STDIT );
+def("hSum_hSLICED",fptr_hSum_hSLICED_HNumber1STDIT );
+def("hSum_hSLICED",fptr_hSum_hSLICED_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11667,7 +20095,7 @@ def("hSum",fptr_hSum_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11687,6 +20115,32 @@ def("hSum",fptr_hSum_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11695,6 +20149,12 @@ def("hSum",fptr_hSum_HInteger1STDIT );
 def("hNorm",fptr_hNorm_HNumber1STDIT );
 def("hNorm",fptr_hNorm_HInteger1STDIT );
 
+
+
+
+def("hNorm_hSLICED",fptr_hNorm_hSLICED_HNumber1STDIT );
+def("hNorm_hSLICED",fptr_hNorm_hSLICED_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11705,7 +20165,7 @@ def("hNorm",fptr_hNorm_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11725,6 +20185,32 @@ def("hNorm",fptr_hNorm_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11733,6 +20219,12 @@ def("hNorm",fptr_hNorm_HInteger1STDIT );
 def("hNormalize",fptr_hNormalize_HNumber1STDIT );
 def("hNormalize",fptr_hNormalize_HInteger1STDIT );
 
+
+
+
+def("hNormalize_hSLICED",fptr_hNormalize_hSLICED_HNumber1STDIT );
+def("hNormalize_hSLICED",fptr_hNormalize_hSLICED_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11743,7 +20235,7 @@ def("hNormalize",fptr_hNormalize_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11763,6 +20255,32 @@ def("hNormalize",fptr_hNormalize_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11771,6 +20289,12 @@ def("hNormalize",fptr_hNormalize_HInteger1STDIT );
 def("hMean",fptr_hMean_HNumber1STDIT );
 def("hMean",fptr_hMean_HInteger1STDIT );
 
+
+
+
+def("hMean_hSLICED",fptr_hMean_hSLICED_HNumber1STDIT );
+def("hMean_hSLICED",fptr_hMean_hSLICED_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11781,7 +20305,7 @@ def("hMean",fptr_hMean_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11801,6 +20325,32 @@ def("hMean",fptr_hMean_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11810,6 +20360,13 @@ def("hSort",fptr_hSort_HComplex1STDIT );
 def("hSort",fptr_hSort_HNumber1STDIT );
 def("hSort",fptr_hSort_HInteger1STDIT );
 
+
+
+
+def("hSort_hSLICED",fptr_hSort_hSLICED_HComplex1STDIT );
+def("hSort_hSLICED",fptr_hSort_hSLICED_HNumber1STDIT );
+def("hSort_hSLICED",fptr_hSort_hSLICED_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11820,7 +20377,7 @@ def("hSort",fptr_hSort_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11840,6 +20397,32 @@ def("hSort",fptr_hSort_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11848,6 +20431,12 @@ def("hSort",fptr_hSort_HInteger1STDIT );
 def("hSortMedian",fptr_hSortMedian_HNumber1STDIT );
 def("hSortMedian",fptr_hSortMedian_HInteger1STDIT );
 
+
+
+
+def("hSortMedian_hSLICED",fptr_hSortMedian_hSLICED_HNumber1STDIT );
+def("hSortMedian_hSLICED",fptr_hSortMedian_hSLICED_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11858,7 +20447,7 @@ def("hSortMedian",fptr_hSortMedian_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11877,11 +20466,41 @@ def("hSortMedian",fptr_hSortMedian_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
 def("hMedian",fptr_hMedian_HNumber1STL );
 def("hMedian",fptr_hMedian_HInteger1STL );
+
+
+def("hMedian_hSLICED",fptr_hMedian_hSLICED_HNumber1STL );
+def("hMedian_hSLICED",fptr_hMedian_hSLICED_HInteger1STL );
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -11893,7 +20512,7 @@ def("hMedian",fptr_hMedian_HInteger1STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11913,6 +20532,33 @@ def("hMedian",fptr_hMedian_HInteger1STL );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11921,6 +20567,12 @@ def("hMedian",fptr_hMedian_HInteger1STL );
 def("hStdDev",fptr_hStdDev_HNumber1HNumberSTDIT );
 def("hStdDev",fptr_hStdDev_HInteger1HNumberSTDIT );
 
+
+
+
+def("hStdDev_hSLICED",fptr_hStdDev_hSLICED_HNumber1HNumberSTDIT );
+def("hStdDev_hSLICED",fptr_hStdDev_hSLICED_HInteger1HNumberSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11931,7 +20583,7 @@ def("hStdDev",fptr_hStdDev_HInteger1HNumberSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11951,6 +20603,32 @@ def("hStdDev",fptr_hStdDev_HInteger1HNumberSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11959,6 +20637,12 @@ def("hStdDev",fptr_hStdDev_HInteger1HNumberSTDIT );
 def("hStdDev",fptr_hStdDev_HNumber1STDIT );
 def("hStdDev",fptr_hStdDev_HInteger1STDIT );
 
+
+
+
+def("hStdDev_hSLICED",fptr_hStdDev_hSLICED_HNumber1STDIT );
+def("hStdDev_hSLICED",fptr_hStdDev_hSLICED_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -11969,7 +20653,7 @@ def("hStdDev",fptr_hStdDev_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -11989,6 +20673,34 @@ def("hStdDev",fptr_hStdDev_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -11997,6 +20709,12 @@ def("hStdDev",fptr_hStdDev_HInteger1STDIT );
 def("hFindLessEqual",fptr_hFindLessEqual_HNumber11HIntegerSTDITSTDIT );
 def("hFindLessEqual",fptr_hFindLessEqual_HInteger11HIntegerSTDITSTDIT );
 
+
+
+
+def("hFindLessEqual_hSLICED",fptr_hFindLessEqual_hSLICED_HNumber11HIntegerSTDITSTDIT );
+def("hFindLessEqual_hSLICED",fptr_hFindLessEqual_hSLICED_HInteger11HIntegerSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12007,7 +20725,7 @@ def("hFindLessEqual",fptr_hFindLessEqual_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12027,6 +20745,34 @@ def("hFindLessEqual",fptr_hFindLessEqual_HInteger11HIntegerSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12035,6 +20781,12 @@ def("hFindLessEqual",fptr_hFindLessEqual_HInteger11HIntegerSTDITSTDIT );
 def("hFindLessEqualAbs",fptr_hFindLessEqualAbs_HNumber11HIntegerSTDITSTDIT );
 def("hFindLessEqualAbs",fptr_hFindLessEqualAbs_HInteger11HIntegerSTDITSTDIT );
 
+
+
+
+def("hFindLessEqualAbs_hSLICED",fptr_hFindLessEqualAbs_hSLICED_HNumber11HIntegerSTDITSTDIT );
+def("hFindLessEqualAbs_hSLICED",fptr_hFindLessEqualAbs_hSLICED_HInteger11HIntegerSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12045,7 +20797,7 @@ def("hFindLessEqualAbs",fptr_hFindLessEqualAbs_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12065,6 +20817,34 @@ def("hFindLessEqualAbs",fptr_hFindLessEqualAbs_HInteger11HIntegerSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12073,6 +20853,12 @@ def("hFindLessEqualAbs",fptr_hFindLessEqualAbs_HInteger11HIntegerSTDITSTDIT );
 def("hFindGreaterThan",fptr_hFindGreaterThan_HNumber11HIntegerSTDITSTDIT );
 def("hFindGreaterThan",fptr_hFindGreaterThan_HInteger11HIntegerSTDITSTDIT );
 
+
+
+
+def("hFindGreaterThan_hSLICED",fptr_hFindGreaterThan_hSLICED_HNumber11HIntegerSTDITSTDIT );
+def("hFindGreaterThan_hSLICED",fptr_hFindGreaterThan_hSLICED_HInteger11HIntegerSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12083,7 +20869,7 @@ def("hFindGreaterThan",fptr_hFindGreaterThan_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12103,6 +20889,34 @@ def("hFindGreaterThan",fptr_hFindGreaterThan_HInteger11HIntegerSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12111,6 +20925,12 @@ def("hFindGreaterThan",fptr_hFindGreaterThan_HInteger11HIntegerSTDITSTDIT );
 def("hFindGreaterThanAbs",fptr_hFindGreaterThanAbs_HNumber11HIntegerSTDITSTDIT );
 def("hFindGreaterThanAbs",fptr_hFindGreaterThanAbs_HInteger11HIntegerSTDITSTDIT );
 
+
+
+
+def("hFindGreaterThanAbs_hSLICED",fptr_hFindGreaterThanAbs_hSLICED_HNumber11HIntegerSTDITSTDIT );
+def("hFindGreaterThanAbs_hSLICED",fptr_hFindGreaterThanAbs_hSLICED_HInteger11HIntegerSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12121,7 +20941,7 @@ def("hFindGreaterThanAbs",fptr_hFindGreaterThanAbs_HInteger11HIntegerSTDITSTDIT 
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12141,6 +20961,34 @@ def("hFindGreaterThanAbs",fptr_hFindGreaterThanAbs_HInteger11HIntegerSTDITSTDIT 
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12149,6 +20997,12 @@ def("hFindGreaterThanAbs",fptr_hFindGreaterThanAbs_HInteger11HIntegerSTDITSTDIT 
 def("hFindGreaterEqual",fptr_hFindGreaterEqual_HNumber11HIntegerSTDITSTDIT );
 def("hFindGreaterEqual",fptr_hFindGreaterEqual_HInteger11HIntegerSTDITSTDIT );
 
+
+
+
+def("hFindGreaterEqual_hSLICED",fptr_hFindGreaterEqual_hSLICED_HNumber11HIntegerSTDITSTDIT );
+def("hFindGreaterEqual_hSLICED",fptr_hFindGreaterEqual_hSLICED_HInteger11HIntegerSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12159,7 +21013,7 @@ def("hFindGreaterEqual",fptr_hFindGreaterEqual_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12179,6 +21033,34 @@ def("hFindGreaterEqual",fptr_hFindGreaterEqual_HInteger11HIntegerSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12187,6 +21069,12 @@ def("hFindGreaterEqual",fptr_hFindGreaterEqual_HInteger11HIntegerSTDITSTDIT );
 def("hFindGreaterEqualAbs",fptr_hFindGreaterEqualAbs_HNumber11HIntegerSTDITSTDIT );
 def("hFindGreaterEqualAbs",fptr_hFindGreaterEqualAbs_HInteger11HIntegerSTDITSTDIT );
 
+
+
+
+def("hFindGreaterEqualAbs_hSLICED",fptr_hFindGreaterEqualAbs_hSLICED_HNumber11HIntegerSTDITSTDIT );
+def("hFindGreaterEqualAbs_hSLICED",fptr_hFindGreaterEqualAbs_hSLICED_HInteger11HIntegerSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12197,7 +21085,7 @@ def("hFindGreaterEqualAbs",fptr_hFindGreaterEqualAbs_HInteger11HIntegerSTDITSTDI
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12217,6 +21105,34 @@ def("hFindGreaterEqualAbs",fptr_hFindGreaterEqualAbs_HInteger11HIntegerSTDITSTDI
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12225,6 +21141,12 @@ def("hFindGreaterEqualAbs",fptr_hFindGreaterEqualAbs_HInteger11HIntegerSTDITSTDI
 def("hFindLessThan",fptr_hFindLessThan_HNumber11HIntegerSTDITSTDIT );
 def("hFindLessThan",fptr_hFindLessThan_HInteger11HIntegerSTDITSTDIT );
 
+
+
+
+def("hFindLessThan_hSLICED",fptr_hFindLessThan_hSLICED_HNumber11HIntegerSTDITSTDIT );
+def("hFindLessThan_hSLICED",fptr_hFindLessThan_hSLICED_HInteger11HIntegerSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12235,7 +21157,7 @@ def("hFindLessThan",fptr_hFindLessThan_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12255,6 +21177,34 @@ def("hFindLessThan",fptr_hFindLessThan_HInteger11HIntegerSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12263,6 +21213,12 @@ def("hFindLessThan",fptr_hFindLessThan_HInteger11HIntegerSTDITSTDIT );
 def("hFindLessThanAbs",fptr_hFindLessThanAbs_HNumber11HIntegerSTDITSTDIT );
 def("hFindLessThanAbs",fptr_hFindLessThanAbs_HInteger11HIntegerSTDITSTDIT );
 
+
+
+
+def("hFindLessThanAbs_hSLICED",fptr_hFindLessThanAbs_hSLICED_HNumber11HIntegerSTDITSTDIT );
+def("hFindLessThanAbs_hSLICED",fptr_hFindLessThanAbs_hSLICED_HInteger11HIntegerSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12273,7 +21229,7 @@ def("hFindLessThanAbs",fptr_hFindLessThanAbs_HInteger11HIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12293,6 +21249,33 @@ def("hFindLessThanAbs",fptr_hFindLessThanAbs_HInteger11HIntegerSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12301,6 +21284,12 @@ def("hFindLessThanAbs",fptr_hFindLessThanAbs_HInteger11HIntegerSTDITSTDIT );
 def("hDownsample",fptr_hDownsample_HNumber11STDITSTDIT );
 def("hDownsample",fptr_hDownsample_HInteger11STDITSTDIT );
 
+
+
+
+def("hDownsample_hSLICED",fptr_hDownsample_hSLICED_HNumber11STDITSTDIT );
+def("hDownsample_hSLICED",fptr_hDownsample_hSLICED_HInteger11STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12311,7 +21300,7 @@ def("hDownsample",fptr_hDownsample_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12330,11 +21319,42 @@ def("hDownsample",fptr_hDownsample_HInteger11STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
 def("hDownsample",fptr_hDownsample_HNumber1HNumberSTL );
 def("hDownsample",fptr_hDownsample_HInteger1HNumberSTL );
+
+
+def("hDownsample_hSLICED",fptr_hDownsample_hSLICED_HNumber1HNumberSTL );
+def("hDownsample_hSLICED",fptr_hDownsample_hSLICED_HInteger1HNumberSTL );
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -12346,7 +21366,7 @@ def("hDownsample",fptr_hDownsample_HInteger1HNumberSTL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12366,6 +21386,33 @@ def("hDownsample",fptr_hDownsample_HInteger1HNumberSTL );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12375,6 +21422,13 @@ def("hFindLowerBound",fptr_hFindLowerBound_HComplex11STDIT );
 def("hFindLowerBound",fptr_hFindLowerBound_HNumber11STDIT );
 def("hFindLowerBound",fptr_hFindLowerBound_HInteger11STDIT );
 
+
+
+
+def("hFindLowerBound_hSLICED",fptr_hFindLowerBound_hSLICED_HComplex11STDIT );
+def("hFindLowerBound_hSLICED",fptr_hFindLowerBound_hSLICED_HNumber11STDIT );
+def("hFindLowerBound_hSLICED",fptr_hFindLowerBound_hSLICED_HInteger11STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12385,7 +21439,7 @@ def("hFindLowerBound",fptr_hFindLowerBound_HInteger11STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12404,6 +21458,32 @@ def("hFindLowerBound",fptr_hFindLowerBound_HInteger11STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12419,7 +21499,7 @@ def("hFlatWeights",fptr_hFlatWeights_HIntegerHInteger );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12438,6 +21518,32 @@ def("hFlatWeights",fptr_hFlatWeights_HIntegerHInteger );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12453,7 +21559,7 @@ def("hLinearWeights",fptr_hLinearWeights_HIntegerHInteger );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12472,6 +21578,32 @@ def("hLinearWeights",fptr_hLinearWeights_HIntegerHInteger );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12487,7 +21619,7 @@ def("hGaussianWeights",fptr_hGaussianWeights_HIntegerHInteger );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12506,6 +21638,33 @@ def("hGaussianWeights",fptr_hGaussianWeights_HIntegerHInteger );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12521,7 +21680,7 @@ def("hWeights",fptr_hWeights_HIntegerHIntegerhWEIGHTS );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12540,12 +21699,44 @@ def("hWeights",fptr_hWeights_HIntegerHIntegerhWEIGHTS );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
 
 def("hRunningAverage",fptr_hRunningAverage_HIntegerHNumberHNumberHNumberSTDITSTDITSTDIT );
 
+
+
+def("hRunningAverage_hSLICED",fptr_hRunningAverage_hSLICED_HIntegerHNumberHNumberHNumberSTDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12556,7 +21747,7 @@ def("hRunningAverage",fptr_hRunningAverage_HIntegerHNumberHNumberHNumberSTDITSTD
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12575,11 +21766,44 @@ def("hRunningAverage",fptr_hRunningAverage_HIntegerHNumberHNumberHNumberSTDITSTD
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
 
 def("hRunningAverage",fptr_hRunningAverage_HIntegerHNumberHNumberHIntegerhWEIGHTSSTDITSTDIT );
+
+
+
+def("hRunningAverage_hSLICED",fptr_hRunningAverage_hSLICED_HIntegerHNumberHNumberHIntegerhWEIGHTSSTDITSTDIT );
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -12591,7 +21815,7 @@ def("hRunningAverage",fptr_hRunningAverage_HIntegerHNumberHNumberHIntegerhWEIGHT
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12611,6 +21835,34 @@ def("hRunningAverage",fptr_hRunningAverage_HIntegerHNumberHNumberHIntegerhWEIGHT
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12618,6 +21870,11 @@ def("hRunningAverage",fptr_hRunningAverage_HIntegerHNumberHNumberHIntegerhWEIGHT
 
 def("hGeometricDelayFarField",fptr_hGeometricDelayFarField_HIntegerHNumberHNumberHNumberSTDITFIXEDSTDITFIXED );
 
+
+
+
+def("hGeometricDelayFarField_hSLICED",fptr_hGeometricDelayFarField_hSLICED_HIntegerHNumberHNumberHNumberSTDITFIXEDSTDITFIXED );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12628,7 +21885,7 @@ def("hGeometricDelayFarField",fptr_hGeometricDelayFarField_HIntegerHNumberHNumbe
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12648,6 +21905,34 @@ def("hGeometricDelayFarField",fptr_hGeometricDelayFarField_HIntegerHNumberHNumbe
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12655,6 +21940,11 @@ def("hGeometricDelayFarField",fptr_hGeometricDelayFarField_HIntegerHNumberHNumbe
 
 def("hGeometricDelayNearField",fptr_hGeometricDelayNearField_HIntegerHNumberHNumberHNumberSTDITFIXEDSTDITFIXED );
 
+
+
+
+def("hGeometricDelayNearField_hSLICED",fptr_hGeometricDelayNearField_hSLICED_HIntegerHNumberHNumberHNumberSTDITFIXEDSTDITFIXED );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12665,7 +21955,7 @@ def("hGeometricDelayNearField",fptr_hGeometricDelayNearField_HIntegerHNumberHNum
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12685,6 +21975,35 @@ def("hGeometricDelayNearField",fptr_hGeometricDelayNearField_HIntegerHNumberHNum
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12692,6 +22011,11 @@ def("hGeometricDelayNearField",fptr_hGeometricDelayNearField_HIntegerHNumberHNum
 
 def("hGeometricDelays",fptr_hGeometricDelays_HIntegerHNumberHNumberHNumberboolSTDITSTDITSTDIT );
 
+
+
+
+def("hGeometricDelays_hSLICED",fptr_hGeometricDelays_hSLICED_HIntegerHNumberHNumberHNumberboolSTDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12702,7 +22026,7 @@ def("hGeometricDelays",fptr_hGeometricDelays_HIntegerHNumberHNumberHNumberboolST
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12722,6 +22046,36 @@ def("hGeometricDelays",fptr_hGeometricDelays_HIntegerHNumberHNumberHNumberboolST
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12729,6 +22083,11 @@ def("hGeometricDelays",fptr_hGeometricDelays_HIntegerHNumberHNumberHNumberboolST
 
 def("hGeometricPhases",fptr_hGeometricPhases_HIntegerHNumberHNumberHNumberHNumberboolSTDITSTDITSTDITSTDIT );
 
+
+
+
+def("hGeometricPhases_hSLICED",fptr_hGeometricPhases_hSLICED_HIntegerHNumberHNumberHNumberHNumberboolSTDITSTDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12739,7 +22098,7 @@ def("hGeometricPhases",fptr_hGeometricPhases_HIntegerHNumberHNumberHNumberHNumbe
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12759,6 +22118,36 @@ def("hGeometricPhases",fptr_hGeometricPhases_HIntegerHNumberHNumberHNumberHNumbe
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12766,6 +22155,11 @@ def("hGeometricPhases",fptr_hGeometricPhases_HIntegerHNumberHNumberHNumberHNumbe
 
 def("hGeometricWeights",fptr_hGeometricWeights_HIntegerHNumberHNumberHNumberHComplexboolSTDITSTDITSTDITSTDIT );
 
+
+
+
+def("hGeometricWeights_hSLICED",fptr_hGeometricWeights_hSLICED_HIntegerHNumberHNumberHNumberHComplexboolSTDITSTDITSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12776,7 +22170,7 @@ def("hGeometricWeights",fptr_hGeometricWeights_HIntegerHNumberHNumberHNumberHCom
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12795,12 +22189,43 @@ def("hGeometricWeights",fptr_hGeometricWeights_HIntegerHNumberHNumberHNumberHCom
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
 
 def("hSpectralPower",fptr_hSpectralPower_HIntegerHComplexHNumberSTDITSTDIT );
 
+
+
+def("hSpectralPower_hSLICED",fptr_hSpectralPower_hSLICED_HIntegerHComplexHNumberSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12811,7 +22236,7 @@ def("hSpectralPower",fptr_hSpectralPower_HIntegerHComplexHNumberSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12830,6 +22255,33 @@ def("hSpectralPower",fptr_hSpectralPower_HIntegerHComplexHNumberSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12838,6 +22290,12 @@ def("hADC2Voltage",fptr_hADC2Voltage_HComplex1HNumberSTDIT );
 def("hADC2Voltage",fptr_hADC2Voltage_HNumber1HNumberSTDIT );
 def("hADC2Voltage",fptr_hADC2Voltage_HInteger1HNumberSTDIT );
 
+
+
+def("hADC2Voltage_hSLICED",fptr_hADC2Voltage_hSLICED_HComplex1HNumberSTDIT );
+def("hADC2Voltage_hSLICED",fptr_hADC2Voltage_hSLICED_HNumber1HNumberSTDIT );
+def("hADC2Voltage_hSLICED",fptr_hADC2Voltage_hSLICED_HInteger1HNumberSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12848,7 +22306,7 @@ def("hADC2Voltage",fptr_hADC2Voltage_HInteger1HNumberSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12868,6 +22326,36 @@ def("hADC2Voltage",fptr_hADC2Voltage_HInteger1HNumberSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12877,6 +22365,13 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HComplex1HNumberuintuintuintSTDIT
 def("hGetHanningFilter",fptr_hGetHanningFilter_HNumber1HNumberuintuintuintSTDIT );
 def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1HNumberuintuintuintSTDIT );
 
+
+
+
+def("hGetHanningFilter_hSLICED",fptr_hGetHanningFilter_hSLICED_HComplex1HNumberuintuintuintSTDIT );
+def("hGetHanningFilter_hSLICED",fptr_hGetHanningFilter_hSLICED_HNumber1HNumberuintuintuintSTDIT );
+def("hGetHanningFilter_hSLICED",fptr_hGetHanningFilter_hSLICED_HInteger1HNumberuintuintuintSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12887,7 +22382,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1HNumberuintuintuintSTDIT
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12907,6 +22402,34 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1HNumberuintuintuintSTDIT
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12916,6 +22439,13 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HComplex1HNumberuintSTDIT );
 def("hGetHanningFilter",fptr_hGetHanningFilter_HNumber1HNumberuintSTDIT );
 def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1HNumberuintSTDIT );
 
+
+
+
+def("hGetHanningFilter_hSLICED",fptr_hGetHanningFilter_hSLICED_HComplex1HNumberuintSTDIT );
+def("hGetHanningFilter_hSLICED",fptr_hGetHanningFilter_hSLICED_HNumber1HNumberuintSTDIT );
+def("hGetHanningFilter_hSLICED",fptr_hGetHanningFilter_hSLICED_HInteger1HNumberuintSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12926,7 +22456,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1HNumberuintSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12946,6 +22476,33 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1HNumberuintSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12955,6 +22512,13 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HComplex1HNumberSTDIT );
 def("hGetHanningFilter",fptr_hGetHanningFilter_HNumber1HNumberSTDIT );
 def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1HNumberSTDIT );
 
+
+
+
+def("hGetHanningFilter_hSLICED",fptr_hGetHanningFilter_hSLICED_HComplex1HNumberSTDIT );
+def("hGetHanningFilter_hSLICED",fptr_hGetHanningFilter_hSLICED_HNumber1HNumberSTDIT );
+def("hGetHanningFilter_hSLICED",fptr_hGetHanningFilter_hSLICED_HInteger1HNumberSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -12965,7 +22529,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1HNumberSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -12985,6 +22549,32 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1HNumberSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -12994,6 +22584,13 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HComplex1STDIT );
 def("hGetHanningFilter",fptr_hGetHanningFilter_HNumber1STDIT );
 def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1STDIT );
 
+
+
+
+def("hGetHanningFilter_hSLICED",fptr_hGetHanningFilter_hSLICED_HComplex1STDIT );
+def("hGetHanningFilter_hSLICED",fptr_hGetHanningFilter_hSLICED_HNumber1STDIT );
+def("hGetHanningFilter_hSLICED",fptr_hGetHanningFilter_hSLICED_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -13004,7 +22601,7 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13024,6 +22621,33 @@ def("hGetHanningFilter",fptr_hGetHanningFilter_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -13033,6 +22657,13 @@ def("hApplyFilter",fptr_hApplyFilter_HComplex11STDITSTDIT );
 def("hApplyFilter",fptr_hApplyFilter_HNumber11STDITSTDIT );
 def("hApplyFilter",fptr_hApplyFilter_HInteger11STDITSTDIT );
 
+
+
+
+def("hApplyFilter_hSLICED",fptr_hApplyFilter_hSLICED_HComplex11STDITSTDIT );
+def("hApplyFilter_hSLICED",fptr_hApplyFilter_hSLICED_HNumber11STDITSTDIT );
+def("hApplyFilter_hSLICED",fptr_hApplyFilter_hSLICED_HInteger11STDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -13043,7 +22674,7 @@ def("hApplyFilter",fptr_hApplyFilter_HInteger11STDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13063,6 +22694,32 @@ def("hApplyFilter",fptr_hApplyFilter_HInteger11STDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -13072,6 +22729,13 @@ def("hApplyHanningFilter",fptr_hApplyHanningFilter_HComplex1STDIT );
 def("hApplyHanningFilter",fptr_hApplyHanningFilter_HNumber1STDIT );
 def("hApplyHanningFilter",fptr_hApplyHanningFilter_HInteger1STDIT );
 
+
+
+
+def("hApplyHanningFilter_hSLICED",fptr_hApplyHanningFilter_hSLICED_HComplex1STDIT );
+def("hApplyHanningFilter_hSLICED",fptr_hApplyHanningFilter_hSLICED_HNumber1STDIT );
+def("hApplyHanningFilter_hSLICED",fptr_hApplyHanningFilter_hSLICED_HInteger1STDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -13082,7 +22746,7 @@ def("hApplyHanningFilter",fptr_hApplyHanningFilter_HInteger1STDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13102,6 +22766,34 @@ def("hApplyHanningFilter",fptr_hApplyHanningFilter_HInteger1STDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -13109,6 +22801,11 @@ def("hApplyHanningFilter",fptr_hApplyHanningFilter_HInteger1STDIT );
 
 def("hFFT",fptr_hFFT_HIntegerHNumberHComplexHIntegerSTDITSTDIT );
 
+
+
+
+def("hFFT_hSLICED",fptr_hFFT_hSLICED_HIntegerHNumberHComplexHIntegerSTDITSTDIT );
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 //========================================================================
@@ -13119,7 +22816,7 @@ def("hFFT",fptr_hFFT_HIntegerHNumberHComplexHIntegerSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13139,14 +22836,45 @@ def("hFFT",fptr_hFFT_HIntegerHNumberHComplexHIntegerSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
 
 
-def("hInvFFT",fptr_hInvFFT_HComplex11uintSTDITSTDIT );
-def("hInvFFT",fptr_hInvFFT_HNumber11uintSTDITSTDIT );
-def("hInvFFT",fptr_hInvFFT_HInteger11uintSTDITSTDIT );
+def("hInvFFT",fptr_hInvFFT_HIntegerHComplexHNumberHIntegerSTDITSTDIT );
+
+
+
+
+def("hInvFFT_hSLICED",fptr_hInvFFT_hSLICED_HIntegerHComplexHNumberHIntegerSTDITSTDIT );
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -13158,7 +22886,7 @@ def("hInvFFT",fptr_hInvFFT_HInteger11uintSTDITSTDIT );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -13177,10 +22905,36 @@ def("hInvFFT",fptr_hInvFFT_HInteger11uintSTDITSTDIT );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
-def("hFileClose",fptr_hFileClose_HIntegerHIntPointer );
+def("hFileSummary",fptr_hFileSummary_HIntegerCRDataReader );
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -13192,7 +22946,7 @@ def("hFileClose",fptr_hFileClose_HIntegerHIntPointer );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
@@ -13211,10 +22965,36 @@ def("hFileClose",fptr_hFileClose_HIntegerHIntPointer );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
-def("hFileOpen",fptr_hFileOpen_HIntegerHString );
+def("hFileOpen",fptr_hFileOpen_HIntegerHString , return_internal_reference<>());
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -13226,7 +23006,7 @@ def("hFileOpen",fptr_hFileOpen_HIntegerHString );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13245,10 +23025,37 @@ def("hFileOpen",fptr_hFileOpen_HIntegerHString );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
-def("hFileGetParameter",fptr_hFileGetParameter_HIntegerHIntPointerHString );
+def("hFileGetParameter",fptr_hFileGetParameter_HIntegerCRDataReaderHString );
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -13260,7 +23067,7 @@ def("hFileGetParameter",fptr_hFileGetParameter_HIntegerHIntPointerHString );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13279,10 +23086,38 @@ def("hFileGetParameter",fptr_hFileGetParameter_HIntegerHIntPointerHString );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
-def("hFileSetParameter",fptr_hFileSetParameter_HIntegerHIntPointerHStringHPyObjectPtr );
+def("hFileSetParameter",fptr_hFileSetParameter_HIntegerCRDataReaderHStringHPyObjectPtr , return_internal_reference<>());
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -13294,7 +23129,7 @@ def("hFileSetParameter",fptr_hFileSetParameter_HIntegerHIntPointerHStringHPyObje
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13313,12 +23148,45 @@ def("hFileSetParameter",fptr_hFileSetParameter_HIntegerHIntPointerHStringHPyObje
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
-def("hFileRead",fptr_hFileRead_HComplexHIntPointerHString1STL );
-def("hFileRead",fptr_hFileRead_HNumberHIntPointerHString1STL );
-def("hFileRead",fptr_hFileRead_HIntegerHIntPointerHString1STL );
+def("hFileRead",fptr_hFileRead_HComplexCRDataReaderHString1STL , return_internal_reference<>());
+def("hFileRead",fptr_hFileRead_HNumberCRDataReaderHString1STL , return_internal_reference<>());
+def("hFileRead",fptr_hFileRead_HIntegerCRDataReaderHString1STL , return_internal_reference<>());
+
+
+def("hFileRead_hSLICED",fptr_hFileRead_hSLICED_HComplexCRDataReaderHString1STL , return_internal_reference<>());
+def("hFileRead_hSLICED",fptr_hFileRead_hSLICED_HNumberCRDataReaderHString1STL , return_internal_reference<>());
+def("hFileRead_hSLICED",fptr_hFileRead_hSLICED_HIntegerCRDataReaderHString1STL , return_internal_reference<>());
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -13330,7 +23198,7 @@ def("hFileRead",fptr_hFileRead_HIntegerHIntPointerHString1STL );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13349,6 +23217,35 @@ def("hFileRead",fptr_hFileRead_HIntegerHIntPointerHString1STL );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
@@ -13364,7 +23261,7 @@ def("hCalTable",fptr_hCalTable_HIntegerHStringHStringHIntegerHPyObjectPtr );
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13384,12 +23281,47 @@ def("hCalTable",fptr_hCalTable_HIntegerHStringHStringHIntegerHPyObjectPtr );
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
 
 
 def("hCoordinateConvert",fptr_hCoordinateConvert_HIntegerHNumberCRCoordinateTypeHNumberCRCoordinateTypeboolSTDITFIXEDSTDITFIXED );
+
+
+
+
+def("hCoordinateConvert_hSLICED",fptr_hCoordinateConvert_hSLICED_HIntegerHNumberCRCoordinateTypeHNumberCRCoordinateTypeboolSTDITFIXEDSTDITFIXED );
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -13401,7 +23333,7 @@ def("hCoordinateConvert",fptr_hCoordinateConvert_HIntegerHNumberCRCoordinateType
 //==================================================================================
 // ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY hfsplit2h.awk
 //==================================================================================
-//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Sun Mar 07 12:22:26 CET 2010
+//     File was generated from /Users/falcke/LOFAR/usg/build/cr/implement/Pypeline/hftools.iter.cc on Wed Mar 10 21:08:12 CET 2010
 //----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------
@@ -13421,12 +23353,50 @@ def("hCoordinateConvert",fptr_hCoordinateConvert_HIntegerHNumberCRCoordinateType
 //------------------------------------------------------------------------------
 //Unless, explicitly set, yields a "return" statement if the function
 //type is not void (actually, HFPP_VOID, which is = -1)
+/* Python code to generate the following blocks
+s="""
+#ifdef HFPP_PARDEF_$$$
+#undef HFPP_GET_FUNC_PARNUM
+#define HFPP_GET_FUNC_PARNUM %%%
+//Check if parameter is a vector
+#if HFPP_GET_PAR_DIM($$$)>0
+#undef HFPP_FUNC_HAS_VECTORS
+#define HFPP_FUNC_HAS_VECTORS 1
+#endif // HAS_VECTORS
+#if HFPP_GET_PAR_BASETYPE_VAL($$$) > 0
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_TRUE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  HFPP_GET_PAR_BASETYPE_VAL($$$)
+#if HFPP_GET_PAR_TEMPLATE_VALUE_$$$ > HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#undef HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS
+#define HFPP_FUNC_NUMBER_OF_TEMPLATE_PARAMETERS HFPP_GET_PAR_TEMPLATE_VALUE_$$$
+#endif
+#else
+#define HFPP_PAR_TYPE_IS_TEMPLATED_$$$ HFPP_FALSE
+#define HFPP_GET_PAR_TEMPLATE_VALUE_$$$  0
+#endif
+#endif
+"""
+for i in range(15): print s.replace("$$$",str(i)).replace("%%%",str(i+1))
+*/
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
+//Check if parameter is a vector
 ////////////////////////////////////////////////////////////////////////////////
 //Generate wrappers
 
 def("hReadFileOld",fptr_hReadFileOld_HComplex1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHIntegerSTL );
 def("hReadFileOld",fptr_hReadFileOld_HNumber1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHIntegerSTL );
 def("hReadFileOld",fptr_hReadFileOld_HInteger1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHIntegerSTL );
+
+
+def("hReadFileOld_hSLICED",fptr_hReadFileOld_hSLICED_HComplex1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHIntegerSTL );
+def("hReadFileOld_hSLICED",fptr_hReadFileOld_hSLICED_HNumber1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHIntegerSTL );
+def("hReadFileOld_hSLICED",fptr_hReadFileOld_hSLICED_HInteger1HIntPointerHStringHIntegerHIntegerHIntegerHIntegerHIntegerSTL );
 
 ////////////////////////////////////////////////////////////////////////////////
 //

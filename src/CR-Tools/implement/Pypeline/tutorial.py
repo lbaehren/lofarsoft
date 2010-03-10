@@ -692,7 +692,7 @@ plt.subplot(1,2,2)
 #%SKIP
 plt.title("Time Series of Antenna 0")
 #%SKIP
-plt.plot(timeall,fxall.elem(0))
+plt.plot(timeall,fxall.elem(15))
 #%SKIP
 plt.ylabel("Electric Field [ADC counts]")
 #%SKIP
@@ -702,6 +702,11 @@ plt.xlabel("Time [$\mu$s]")
 
 So, for a linear plot use .plot, for a loglog plot use .loglog and for
 a log-linear plot use .semilogx or .semilogy ...
+
+(+) CR Pipeline Modules
+
+qualitycriteria=[("mean",(-15,15)),("rms",(5,15)),("nonGaussianity",(-3,3))]
+qualityresults=CRQualityCheck(file,qualitycriteria) 
 
 
 (+) Coordinates
@@ -740,7 +745,7 @@ cartesian
 =======================================
 
 """
-help(all)
+#help(all)
 """
 
 """

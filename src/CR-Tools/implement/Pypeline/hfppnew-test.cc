@@ -13,7 +13,7 @@
 /* README
 
 To test this file, do:
-gcc -E -C -P -D H_DEBUG_CPP -I. -I$LOFARSOFT/release/include $LOFARSOFT/src/CR-Tools/implement/GUI/hfppnew-test.cc | gawk '{gsub(" *\\<_H_NL_\\> *","\n"); print}'
+gcc -E -C -P -D H_DEBUG_CPP -I. -I$LOFARSOFT/release/include $LOFARSOFT/src/CR-Tools/implement/Pypeline/hfppnew-test.cc | gawk '{gsub(" *\\<_H_NL_\\> *","\n"); print}'
 
 
 FILES needed for the pypeline:
@@ -169,7 +169,7 @@ Now we will start and example which contains all the wrapper definitions
 //Creates a unique name for a pointer variable, consisting of the
 //function name, the templae types (provided as a sequence:
 //(int)(double)(complex)), and a potential variant number to make
-/*HFPP_GET_PYTHON_POINTER_VARIABLE(testfunc,(int)(double))=*/ HFPP_GET_PYTHON_POINTER_VARIABLE(testfunc,(int)(double))
+/*HFPP_GET_PYTHON_POINTER_VARIABLE((int)(double))=*/ HFPP_GET_PYTHON_POINTER_VARIABLE((int)(double))
 
 //
 //This turns a sequence of indices (i.e., (1)(0)(2)) into a sequence
@@ -180,6 +180,11 @@ Now we will start and example which contains all the wrapper definitions
 /* HFPP_MAKE_WRAPPERS_VEC_CC(STL): */ 
 HFPP_MAKE_WRAPPERS_VEC_CC(STL)
 //
+/* HFPP_MAKE_WRAPPERS_VEC_CC(STL): */ 
+HFPP_MAKE_WRAPPERS_VEC_CC_SLICED(STL)
+//
+
+
 /* HFPP_MAKE_WRAPPERS_VEC_CC(CASA): */ 
 HFPP_MAKE_WRAPPERS_VEC_CC(CASA)
 //

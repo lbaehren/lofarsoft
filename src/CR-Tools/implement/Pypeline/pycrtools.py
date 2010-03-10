@@ -149,6 +149,7 @@ def hArray_setDim(self,dimensions_list):
     if (not len(self)==newsize): self.resize(newsize)
     self.dimension=dimensions_list
     self.ndim=len(dimensions_list)
+    return self
 
 def hArray_getDim(self):
     """
@@ -407,12 +408,69 @@ def crfile(filename):
     return file
 
 DataReader.read=hFileRead
-DataReader.__doc__="""
-    file=crfile("FILENAME.h5") -> DataReader Object
+DataReader.__doc__=crfile.__doc__
 
-    This is a simple class to interface with the LOFAR CRTOOLS
-    datareader class. It deals with LOFAR and LOEPS data alike. You
-    can read data vectors, read or set parameters and get summary of the contents.
-"""
-#DataReader.get=hFileGetParameter
-#DataReader.get=hFileGetParameter
+#------------------------------------------------------------------------
+# Pypeline Extension, Functions and Algorithms
+#------------------------------------------------------------------------
+
+def CheckParameterConformance(data,limits):
+    """
+    CheckParameterConformance([12,-10],[("mean",(-15,15)),("rms",(10,40))])  ->  ["rms"]
+    
+    Checks whether a list of numbers is within a range of limits
+    specified beforehand. The limits are provided as a list of tuples,
+    of the form ("FIELDNAME",(LOWERLIMT,UPPERLIMIT)). A list of
+    fieldnames is returned where the data does not fall within the
+    specified range.
+
+    """
+    result=[]
+    for i in range(len(data)):
+        if (data[i]<limits[i][1][0]) | (data[i]>limits[i][1][1]): result.append(limits[i][0])
+    return result
+
+
+def CRQualityCheck(file,limits,maxblocksize=65536,nsigma=5):
+    """
+    CRQualityCheck(file,[("mean",(-15,15)),("rms",(5,15)),("nonGaussianity",(-1,3))]) 
+
+    Will step through all antennas of a file assess the data quality. For each 
+
+    """
+#Initialize some parameters
+    nAntennas=file.get("nofAntennas")
+    filesize=file.get("Filesize")
+    blocksize=min(filesize/4,maxblocksize)
+    file.set("Blocksize",blocksize)
+    nBlocks=filesize/blocksize; 
+    blocklist=range(nBlocks/4)+range(3*nBlocks/4,nBlocks)
+#Create the some scratch vectors
+    qualityflaglist=[]
+    where=Vector(int,blocksize)
+    rawdata=Vector(float)
+    rawdata.setDim([nAntennas,blocksize])
+#Calculate probabilities to find certain peaks
+    probability=funcGaussian(nsigma,1,0) # what is the probability of a 5 sigma peak
+    npeaksexpected=probability*blocksize # what is the probability to see such a peak with the blocksize
+    npeakserror=sqrt(npeaksexpected) # what is the statisitcal error on that expectation
+#Start checking
+    print "Quality checking of file ",file.filename
+    print "Considering",nAntennas," antennas and the Blocks:",blocklist
+    print "Blocksize=",blocksize,", nsigma=",nsigma, ", number of peaks expected per block=",npeaksexpected
+    for Block in blocklist:
+        file.set("Block",Block).read("Voltage",rawdata)
+        for Antenna in range(nAntennas):
+            print "Antenna={0:2d},".format(Antenna),"Block={0:3d}:".format(Block),
+            datamean = rawdata.mean(Antenna*blocksize,(Antenna+1)*blocksize)
+            datarms = rawdata.elem(Antenna).stddev(datamean)
+            datanpeaks=rawdata.elem(Antenna).findgreaterthanabs(int(round(nsigma*datarms)),where)
+            dataNonGaussianity=(datanpeaks-npeaksexpected)/npeakserror
+            print "mean={0:4.2f},".format(datamean),"rms={0:5.1f},".format(datarms),"npeaks={0:5d},".format(datanpeaks),"nonGaussianity={0:5.2f}".format(dataNonGaussianity),
+            noncompliancelist=CheckParameterConformance([datamean,datarms,dataNonGaussianity],limits)
+            if noncompliancelist:
+                qualityflaglist.append((Antenna,Block,noncompliancelist))
+                print noncompliancelist,"!!"
+            else: print ""
+    return qualityflaglist
+

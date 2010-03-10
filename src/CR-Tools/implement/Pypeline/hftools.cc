@@ -501,6 +501,7 @@ void hFill(const Iter vec,const Iter vec_end, const IterValueType fill_value)
 #define HFPP_FUNC_NAME hNew
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
@@ -521,6 +522,7 @@ std::vector<T> HFPP_FUNC_NAME(std::vector<T> & vec)
 //$DOCSTRING: Resize a vector to a new length.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(hResize)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
@@ -540,6 +542,7 @@ void hResize(std::vector<T> & vec, HInteger newsize)
 //$DOCSTRING: Resize a vector to a new length and fill new elements in vector with a specific value.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(hResize)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
@@ -560,6 +563,7 @@ void hResize(std::vector<T> & vec, HInteger newsize, T fill)
 //$DOCSTRING: Resize an STL vector to the same length as a second vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(hResize)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE_1)(vec1)()("Input vector to be resized")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
@@ -580,6 +584,7 @@ void hResize(std::vector<T> & vec1,std::vector<S> & vec2)
 //$DOCSTRING: Resize a casa vector to the same length as a second vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(hResize)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE_1)(vec1)()("Input vector to be resized")(HFPP_PAR_IS_VECTOR)(CASA)(HFPP_PASS_AS_REFERENCE)
@@ -1265,6 +1270,7 @@ IterValueType HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
 #define HFPP_FUNC_NAME hMedian
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
@@ -1454,6 +1460,7 @@ void HFPP_FUNC_NAME (const Iter vec1,
 #define HFPP_FUNC_NAME hDownsample
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
@@ -1557,6 +1564,7 @@ HInteger hFindLowerBound(const HNumber* vec,
 #define HFPP_FUNC_NAME hFlatWeights
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
@@ -1579,6 +1587,7 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
 #define HFPP_FUNC_NAME hLinearWeights
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
@@ -1612,6 +1621,7 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
 #define HFPP_FUNC_NAME hGaussianWeights
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
@@ -1646,6 +1656,7 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
 #define HFPP_FUNC_NAME hWeights
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HInteger)(wlen)()("Length of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_1 (hWEIGHTS)(wtype)()("Type of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2062,7 +2073,6 @@ void HFPP_FUNC_NAME(const Iterin vec,const Iterin vec_end, const Iter out,const 
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hADC2Voltage
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASSES (STL)
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(adc2voltage)()("Scaling factor if the gain")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2082,14 +2092,11 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const HNumber adc2voltag
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-
-
 //-----------------------------------------------------------------------
 //$DOCSTRING: Create a Hanning filter.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGetHanningFilter
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASS (STL)
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Return vector containing Hanning filter")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(Alpha)()("Height parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2128,7 +2135,6 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGetHanningFilter
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASS (STL)
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Return vector containing Hanning filter")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(Alpha)()("Height parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2157,7 +2163,6 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGetHanningFilter
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASS (STL)
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Return vector containing Hanning filter")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(Alpha)()("Height parameter of Hanning function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2181,7 +2186,6 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGetHanningFilter
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASS (STL)
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Return vector containing Hanning filter")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
@@ -2203,7 +2207,6 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end){
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hApplyFilter
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASS (STL)
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(data)()("Vector containing the data on which the filter will be applied.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(filter)()("Vector containing the filter.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -2231,7 +2234,6 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end, const IterFilter filte
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hApplyHanningFilter
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_CLASS (STL)
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(data)()("Input and return vector containing the data on which the Hanning filter will be applied.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
@@ -2624,6 +2626,7 @@ CRDataReader & HFPP_FUNC_NAME(CRDataReader &dr, HString key, HPyObjectPtr pyob)
 #define HFPP_FUNC_NAME hFileRead
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (CRDataReader)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_0 (CRDataReader)(dr)()("Datareader object, opened e.g. with hFileOpen or crfile.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HString)(Datatype)()("Name of the data column to be retrieved (e.g., FFT, Fx,Time, Frequency...)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -2833,6 +2836,7 @@ bool HFPP_FUNC_NAME  (Iter source,
 #define HFPP_FUNC_NAME hReadFileOld
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_NONE
+#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Data (output) vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HIntPointer)(iptr)()("Integer containing pointer to the datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)

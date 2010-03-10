@@ -36,15 +36,16 @@ echo "Generate a file that can be processed by Doxygen (don't compile this file)
 gcc -E -C -P -D H_DEBUG_CPP $HFLAGS -I. hftools.tmp.cc | gawk 'BEGIN{skip=1} /HFDOCSTART:/ {skip=0; print} (skip) {next} {gsub(" *\\<_H_NL_\\> *","\n"); print}' > hftools.doc.cc
 
 #gcc -E  -P -D H_DEBUG_CPP $HFLAGS -I. hftools.tmp.cc | sed 's/_H_NL_/NEWLINE/' > hftools.hfpp.cc
-echo "Compile source code. Generating file: " hftools.cc.o
-/usr/bin/c++ $HFLAGS2 -o hftools.cc.o -c hftools.hfpp.cc
-echo "Link library. Generating file: "  $PYPDIR/hftools.so
-/usr/bin/c++  -Wall -Wno-comment -Woverloaded-virtual -Wno-non-template-friend -bundle -headerpad_max_install_names -fPIC -flat_namespace -Wl -o $PYPDIR/hftools.so $PYPDIR/hftools.cc.o -F$LIBRARIES 
+#echo "Compile source code. Generating file: " hftools.cc.o
+#/usr/bin/c++ $HFLAGS2 -o hftools.cc.o -c hftools.hfpp.cc
+#echo "Link library. Generating file: "  $PYPDIR/hftools.so
+#/usr/bin/c++  -Wall -Wno-comment -Woverloaded-virtual -Wno-non-template-friend -bundle -headerpad_max_install_names -fPIC -flat_namespace -Wl -o $PYPDIR/hftools.so $PYPDIR/hftools.cc.o -F$LIBRARIES 
 
-echo " "
-echo "Available functions in hftools"
-echo "=============================="
-cat hftools.doc.txt
+#echo " "
+#echo "Available functions in hftools"
+#echo "=============================="
+#cat hftools.doc.txt
 
 
 #rm hftools.cc.o hftools.doc.txt hftools.iter.cc hftools.def.h	hftools.doc.py	hftools.hfpp.cc	hftools.tmp.cc hftools.so
+

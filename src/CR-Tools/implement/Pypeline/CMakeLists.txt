@@ -34,6 +34,9 @@ add_custom_command (
   PRE_BUILD
   DEPENDS ${CR_SOURCE_DIR}/implement/Pypeline/hftools.hpp
   DEPENDS ${CR_SOURCE_DIR}/implement/Pypeline/hftools.h	
+  DEPENDS ${CR_SOURCE_DIR}/implement/Pypeline/hfppnew.h	
+  DEPENDS ${CR_SOURCE_DIR}/implement/Pypeline/hfcommon.h	
+  DEPENDS ${CR_SOURCE_DIR}/implement/Pypeline/hfppnew-generatewrappers.def	
   DEPENDS ${hftools_cc}
 #Performing some variable substituions and iterations
   COMMAND ${awk_executable} -f ${CR_SOURCE_DIR}/implement/GUI/hfiter.awk ${hftools_cc} > ${CR_BINARY_DIR}/implement/Pypeline/hftools.iter.cc
@@ -43,6 +46,8 @@ add_custom_command (
   COMMAND ${awk_executable} -f ${CR_SOURCE_DIR}/implement/GUI/hfgetpydoc.awk ${CR_BINARY_DIR}/implement/Pypeline/hftools.iter.cc > ${CR_BINARY_DIR}/implement/Pypeline/hftools.doc.py
 #Generate some basic documentation in text form
   COMMAND ${awk_executable} -f ${CR_SOURCE_DIR}/implement/GUI/hfgetdoc.awk ${CR_BINARY_DIR}/implement/Pypeline/hftools.iter.cc > ${CR_BINARY_DIR}/implement/Pypeline/hftools.doc.tex
+#Generate a file that can be processed by doxygen
+  COMMAND ${CMAKE_CXX_COMPILER} -E -C -P -DH_DEBUG_CPP  -I${WCSLIB_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/hftools.awk.cc | ${awk_executable} -f ${CR_SOURCE_DIR}/implement/GUI/hfinsert-newline.awk  > ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.cc
 #Finally execute gcc in preprocessor mode (and insert some newlines) - this file will be compiled and is quite instructive for debugging
   COMMAND ${CMAKE_CXX_COMPILER} -E -P -DH_DEBUG_CPP  -I${WCSLIB_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/hftools.awk.cc | ${awk_executable} -f ${CR_SOURCE_DIR}/implement/GUI/hfinsert-newline.awk  > ${CMAKE_CURRENT_BINARY_DIR}/hftools.hfpp.cc
     )	  
