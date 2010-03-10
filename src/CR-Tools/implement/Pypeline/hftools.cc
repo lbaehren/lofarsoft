@@ -245,6 +245,9 @@ template<class T> inline T hfcast(/*const*/ T v){return v;}
 
 //Convert to arbitrary class T if not specified otherwise
 template<class T> inline T hfcast(uint v){return static_cast<T>(v);}
+#if H_OS64BIT
+template<class T> inline T hfcast(int v){return static_cast<T>(v);}
+#endif
 template<class T> inline T hfcast(HInteger v){return static_cast<T>(v);}
 template<class T> inline T hfcast(HNumber v){return static_cast<T>(v);}
 template<class T> inline T hfcast(HComplex v){return static_cast<T>(v);}
