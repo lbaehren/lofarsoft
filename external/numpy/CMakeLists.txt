@@ -18,6 +18,7 @@ cmake_minimum_required (VERSION 2.8)
 ## find script
 
 option (NUMPY_FORCE_BUILD       "Force rebuild and local installation"      NO  )
+option (NUMPY_VERBOSE_CONFIGURE "Be verbose during configuration?"          NO  )
 option (NUMPY_VERBOSE_BUILD     "Be verbose during build process?"          NO  )
 
 ## ------------------------------------------------------------------------------
@@ -42,8 +43,10 @@ endif (USG_ROOT)
 ## ------------------------------------------------------------------------------
 ## Check for system-wide NUMPY library installation
 
-set (PYTHON_FIND_QUIETLY YES )
-set (NUMPY_FIND_QUIETLY  YES )
+if (NOT NUMPY_VERBOSE_CONFIGURE)
+  set (PYTHON_FIND_QUIETLY YES )
+  set (NUMPY_FIND_QUIETLY  YES )
+endif (NOT NUMPY_VERBOSE_CONFIGURE)
 
 include (FindNumPy)
 
@@ -88,12 +91,14 @@ if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
 
   ##__________________________________________________________________
   ## Configuration summary
-
-  message ("-------------------------------------------------------------")
-  message (STATUS "[NumPy] Summary of configuration status.")
-  message (STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
-  message (STATUS "PYTHON_VERSION   = ${PYTHON_VERSION}")
-  message ("-------------------------------------------------------------")
+  
+  if (NUMPY_VERBOSE_CONFIGURE)
+    message ("-------------------------------------------------------------")
+    message (STATUS "[NumPy] Summary of configuration status.")
+    message (STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
+    message (STATUS "PYTHON_VERSION   = ${PYTHON_VERSION}")
+    message ("-------------------------------------------------------------")
+  endif (NUMPY_VERBOSE_CONFIGURE)
   
   ## <-- end build condition ----------------------------------------------------->
   

@@ -41,8 +41,6 @@ include (CMakeSettings)
 
 set (TMP_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES})
 
-set (CMAKE_FIND_LIBRARY_PREFIXES "" CACHE STRING "Library prefixes" FORCE )
-
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 

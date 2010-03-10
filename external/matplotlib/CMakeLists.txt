@@ -38,8 +38,8 @@ endif (USG_ROOT)
 
 if (NOT MATPLOTLIB_VERBOSE_CONFIGURE)
   set (MATPLOTLIB_FIND_QUIETLY  YES )
-  set (NUMPY_FIND_QUIETLY  YES )
-  set (PYTHON_FIND_QUIETLY YES )
+  set (NUMPY_FIND_QUIETLY       YES )
+  set (PYTHON_FIND_QUIETLY      YES )
 endif (NOT MATPLOTLIB_VERBOSE_CONFIGURE)
 
 include (FindNumPy)
@@ -51,7 +51,10 @@ if (NOT HAVE_MATPLOTLIB OR MATPLOTLIB_FORCE_BUILD)
 
   include (ExternalProject)
   
-  find_file (have_matplotlib_tgz matplotlib-0.98.5.3.tar.gz ${MATPLOTLIB_SOURCE_DIR})
+  set (matplotlib_version "0.98.5.3")
+  set (matplotlib_tar_archive "matplotlib-${matplotlib_version}.tar.gz")
+
+  find_file (have_matplotlib_tgz ${matplotlib_tar_archive} ${MATPLOTLIB_SOURCE_DIR})
   
   if (have_matplotlib_tgz)
     ExternalProject_Add (matplotlib

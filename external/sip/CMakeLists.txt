@@ -56,12 +56,6 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
   ##__________________________________________________________________
   ## Configure and build the project
 
-  find_program (HAVE_WGET  wget  ${bin_locations} )
-  find_program (HAVE_CURL  curl  ${bin_locations} )
-  find_program (HAVE_TAR   tar   ${bin_locations} )
-
-# http://www.riverbankcomputing.co.uk/static/Downloads/sip4/sip-4.10.tar.gz
-
   set (SIP_VERSION "4.10")
   set (SIP_DIRECTORY "sip-${SIP_VERSION}")
   set (SIP_TAR_ARCHIVE "${SIP_DIRECTORY}.tar.gz")
@@ -96,5 +90,8 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_SIP OR SIP_FORCE_BUILD)
-  message (STATUS "Found system-wide installation of SIP; skipping rebuild!")
+  add_custom_target (sip
+    WORKING_DIRECTORY ${SIP_BINARY_DIR}
+    COMMENT "[Sip] Found system-wide installation; skipping rebuild!"
+    )
 endif (NOT HAVE_SIP OR SIP_FORCE_BUILD)
