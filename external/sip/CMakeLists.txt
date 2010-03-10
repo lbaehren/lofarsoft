@@ -130,7 +130,7 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
   
   ## run "make install"
 
-  add_custom_target (install ALL
+  add_custom_target (sip ALL
     COMMAND make install
     COMMAND rm -rf ${SIP_BINARY_DIR}/${SIP_TAR_ARCHIVE}
     COMMAND rm -rf ${SIP_BINARY_DIR}/${SIP_DIRECTORY}
