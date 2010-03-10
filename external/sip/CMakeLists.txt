@@ -3,7 +3,7 @@
 project (SIP)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the library from the provided source code, if no system
@@ -30,43 +30,39 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
 if (USG_ROOT)
   include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
 else (USG_ROOT)
-  message (FATAL_ERROR "[SIP] Unable to locate additional CMake scripts!")
+  message (FATAL_ERROR "[Sip] Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
 ## ------------------------------------------------------------------------------
 ## Check if the program/package/library is already available
 
-include (FindSIP)
+if (NOT SIP_VERBOSE_CONFIGURE)
+  set (PYTHON_FIND_QUIETLY YES )
+  set (SIP_FIND_QUIETLY    YES )
+endif (NOT SIP_VERBOSE_CONFIGURE)
+
+include (FindPython)
+#include (FindSIP)
 
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
   
   ##__________________________________________________________________
-  ## Locate the installation area
-  
-  find_path (SIP_prefix release_area.txt
-    PATHS
-    ${SIP_SOURCE_DIR}
-    PATH_SUFFIXES
-    ../release
-    ../../release
-    ../../../release
-    NO_DEFAULT_PATH
-    )
-  
-  if (NOT SIP_prefix)
-    message (FATAL_ERROR "[SIP] Unable to locate the installation area")
-  endif (NOT SIP_prefix)
-  
+  ## Additional CMake modules
+
+  include (ExternalProject)
+
   ##__________________________________________________________________
-  ## Tools and definitions
+  ## Configure and build the project
 
   find_program (HAVE_WGET  wget  ${bin_locations} )
   find_program (HAVE_CURL  curl  ${bin_locations} )
   find_program (HAVE_TAR   tar   ${bin_locations} )
 
-  set (SIP_VERSION "4.8.1")
+# http://www.riverbankcomputing.co.uk/static/Downloads/sip4/sip-4.10.tar.gz
+
+  set (SIP_VERSION "4.10")
   set (SIP_DIRECTORY "sip-${SIP_VERSION}")
   set (SIP_TAR_ARCHIVE "${SIP_DIRECTORY}.tar.gz")
   set (SIP_URL "http://www.riverbankcomputing.co.uk/static/Downloads/sip4/${SIP_TAR_ARCHIVE}")
@@ -117,7 +113,7 @@ if (NOT HAVE_SIP OR SIP_FORCE_BUILD)
   ## run "./configure"
 
   add_custom_target (run_configure ALL
-    COMMAND python configure.py -b ${SIP_prefix}/bin -d ${SIP_prefix}/lib/python -e ${SIP_prefix}/include/sip -v ${SIP_prefix}/share/sip
+    COMMAND ${PYTHON_EXECUTABLE} configure.py -b ${SIP_prefix}/bin -d ${SIP_prefix}/lib/python -e ${SIP_prefix}/include/sip -v ${SIP_prefix}/share/sip
     WORKING_DIRECTORY ${SIP_BINARY_DIR}/${SIP_DIRECTORY}
     COMMENT "[SIP] Running configure ..."
     )
