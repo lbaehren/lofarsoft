@@ -1,11 +1,11 @@
 #ifndef EP_INTERFACE_H
 #define EP_INTERFACE_H
 
+#include <boost/python.hpp>
 #include <lofar_config.h>
 #include <Common/LofarLogger.h>
 #include <MACIO/EventPort.h>
 #include <string>
-#include <Python.h>
 
 #include "eventwrappers.h"
 
