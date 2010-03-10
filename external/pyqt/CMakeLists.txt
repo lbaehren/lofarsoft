@@ -69,20 +69,20 @@ if (NOT HAVE_PYQT OR PYQT_FORCE_BUILD)
   if (have_pyqt_tgz)
     ExternalProject_Add (pyqt
       PREFIX ${PYQT_BINARY_DIR}
-      DOWNLOAD_DIR ${PYQT_BINARY_DIR}/pyqt
-      SOURCE_DIR ${PYQT_BINARY_DIR}/pyqt
+      DOWNLOAD_DIR ${PYQT_BINARY_DIR}
+      SOURCE_DIR ${PYQT_BINARY_DIR}
       URL ${have_pyqt_tgz}
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} configure.py
+      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${PYQT_BINARY_DIR}/configure.py -d ${CMAKE_INSTALL_PREFIX}/lib/python
       )
   else (have_pyqt_tgz)
     ExternalProject_Add (pyqt
       PREFIX ${PYQT_BINARY_DIR}
-      DOWNLOAD_DIR ${PYQT_BINARY_DIR}/pyqt
-      SOURCE_DIR ${PYQT_BINARY_DIR}/pyqt
+      DOWNLOAD_DIR ${PYQT_BINARY_DIR}
+      SOURCE_DIR ${PYQT_BINARY_DIR}
       URL ${PYQT_URL}
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} configure.py
+      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${PYQT_BINARY_DIR}/configure.py -d ${CMAKE_INSTALL_PREFIX}/lib/python
       )
   endif (have_pyqt_tgz)
   
