@@ -66,3 +66,4 @@ class ControllerPort_Interface(EventPort_Interface):
             CONTROL_RELEASE:  ControlReleaseEvent,
             CONTROL_QUIT:     ControlQuitEvent
         }
+        super(ControllerPort_Interface, self).__init__("EchoServer:test", PROTOCOL, event_mapping)
