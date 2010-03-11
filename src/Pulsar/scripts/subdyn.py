@@ -301,7 +301,7 @@ if __name__=="__main__":
 			tsamp = float(line.split("=")[-1].strip())
 		if line.startswith(" Central freq of low channel"):
 			cfreq = float(line.split("=")[-1].strip())
-		if line.startswith(" Channel bandwidth (MHz)"):
+		if line.startswith(" Channel bandwidth"):
 			chanbw = float(line.split("=")[-1].strip())
 
 	# handle offset from the beginning
