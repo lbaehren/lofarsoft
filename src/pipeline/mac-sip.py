@@ -61,7 +61,6 @@ class sip(object):
             self.state['quit'].set()
             self.state['run'].set() 
             return 
-#        my_interface.send_event(ControlStartedEvent(self.cntlrname, True))
         my_interface.send_event(ControlConnectEvent(self.cntlrname))
 
         class ReceiverThread(threading.Thread):
@@ -83,7 +82,6 @@ class sip(object):
                     return None
                 
         event_receiver = ReceiverThread(my_interface)
-#        event_receiver.daemon = True
         event_receiver.setDaemon(True)
         event_receiver.start()
         
