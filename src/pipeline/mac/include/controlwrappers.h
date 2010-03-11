@@ -8,34 +8,17 @@ typedef LOFAR::TYPES::uint16 uint16;
 typedef LOFAR::TYPES::uint32 uint32;
 
 // Sendable messages
-class CONTROLStartedEventWrapper : public GenericEventWrapper {
+class CONTROLConnectEventWrapper : public GenericEventWrapper {
 private:
-    CONTROLStartedEvent* my_event;
+    CONTROLConnectEvent* my_event;
 public:
-    CONTROLStartedEventWrapper(std::string cntlrName, bool successful) {
-        this->my_event = new CONTROLStartedEvent;
+    CONTROLConnectEventWrapper(std::string cntlrName) {
+        this->my_event = new CONTROLConnectEvent;
         this->my_event->cntlrName = cntlrName;
-        this->my_event->successful = successful;
     }
     std::string get_cntlrName() { return this->my_event->cntlrName; }
-    bool get_successful() { return this->my_event->successful; }
     virtual uint16 get_signal() { return this->my_event->signal; }
-    virtual CONTROLStartedEvent* get_event_ptr() { return this->my_event; }
-};
-
-class CONTROLConnectedEventWrapper : public GenericEventWrapper {
-private:
-    CONTROLConnectedEvent* my_event;
-public:
-    CONTROLConnectedEventWrapper(std::string cntlrName, uint16 result) {
-        this->my_event = new CONTROLConnectedEvent;
-        this->my_event->cntlrName = cntlrName;
-        this->my_event->result = result;
-    }
-    std::string get_cntlrName() { return this->my_event->cntlrName; }
-    uint16 get_result() { return this->my_event->result; }
-    virtual uint16 get_signal() { return this->my_event->signal; }
-    virtual CONTROLConnectedEvent* get_event_ptr() { return this->my_event; }
+    virtual CONTROLConnectEvent* get_event_ptr() { return this->my_event; }
 };
 
 class CONTROLResyncedEventWrapper : public GenericEventWrapper {
@@ -81,6 +64,21 @@ public:
     uint16 get_result() { return this->my_event->result; }
     virtual uint16 get_signal() { return this->my_event->signal; }
     virtual CONTROLPreparedEvent* get_event_ptr() { return this->my_event; }
+};
+
+class CONTROLScheduledEventWrapper : public GenericEventWrapper {
+private:
+    CONTROLScheduledEvent* my_event;
+public:
+    CONTROLScheduledEventWrapper(std::string cntlrName, uint16 result) {
+        this->my_event = new CONTROLScheduledEvent;
+        this->my_event->cntlrName = cntlrName;
+        this->my_event->result = result;
+    }
+    std::string get_cntlrName() { return this->my_event->cntlrName; }
+    uint16 get_result() { return this->my_event->result; }
+    virtual uint16 get_signal() { return this->my_event->signal; }
+    virtual CONTROLScheduledEvent* get_event_ptr() { return this->my_event; }
 };
 
 class CONTROLResumedEventWrapper : public GenericEventWrapper {
@@ -149,19 +147,20 @@ public:
 
 // Receivable messages
 
-// First the simple: connect, claim, prepare, resume, suspend, release, quit
-class CONTROLConnectEventWrapper : public GenericEventWrapper {
+// First the simple: connected, claim, prepare, resume, suspend, release, quit
+class CONTROLConnectedEventWrapper : public GenericEventWrapper {
 private:
-    CONTROLConnectEvent* my_event;
+    CONTROLConnectedEvent* my_event;
 public:
-    CONTROLConnectEventWrapper(GenericEventWrapper& my_gev) {
+    CONTROLConnectedEventWrapper(GenericEventWrapper& my_gev) {
         LOFAR::MACIO::GCFEvent* event_ptr;
         event_ptr = my_gev.get_event_ptr();
-        this->my_event = new CONTROLConnectEvent(*event_ptr);
+        this->my_event = new CONTROLConnectedEvent(*event_ptr);
     }
     std::string get_cntlrName() { return this->my_event->cntlrName; }
+    uint16 get_result() { return this->my_event->result; }
     virtual uint16 get_signal() { return this->my_event->signal; }
-    virtual CONTROLConnectEvent* get_event_ptr() { return this->my_event; }
+    virtual CONTROLConnectedEvent* get_event_ptr() { return this->my_event; }
 };
 
 class CONTROLClaimEventWrapper : public GenericEventWrapper {

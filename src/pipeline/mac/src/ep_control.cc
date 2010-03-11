@@ -40,14 +40,13 @@ BOOST_PYTHON_MODULE(_ep_control)
     // Events
 
     // These events may be sent
-    class_<CONTROLStartedEventWrapper, bases<GenericEventWrapper> >("ControlStartedEvent", init<std::string, bool>())
-        .add_property("controller_name", &CONTROLStartedEventWrapper::get_cntlrName)
-        .add_property("successful", &CONTROLStartedEventWrapper::get_successful)
+    class_<CONTROLConnectEventWrapper, bases<GenericEventWrapper> >("ControlConnectEvent", init<std::string>())
+        .add_property("controller_name", &CONTROLConnectedEventWrapper::get_cntlrName)
     ;
 
-    class_<CONTROLConnectedEventWrapper, bases<GenericEventWrapper> >("ControlConnectedEvent", init<std::string, uint16>())
-        .add_property("controller_name", &CONTROLConnectedEventWrapper::get_cntlrName)
-        .add_property("result", &CONTROLConnectedEventWrapper::get_result)
+    class_<CONTROLScheduledEventWrapper, bases<GenericEventWrapper> >("ControlScheduledEvent", init<std::string, uint16>())
+        .add_property("controller_name", &CONTROLScheduledEventWrapper::get_cntlrName)
+        .add_property("result", &CONTROLScheduledEventWrapper::get_result)
     ;
 
     class_<CONTROLResyncedEventWrapper, bases<GenericEventWrapper> >("ControlResyncedEvent", init<std::string, uint16>())
@@ -88,8 +87,9 @@ BOOST_PYTHON_MODULE(_ep_control)
     ;
 
     // These events may be received
-    class_<CONTROLConnectEventWrapper, bases<GenericEventWrapper> >("ControlConnectEvent", init<GenericEventWrapper&>())
-        .add_property("controller_name", &CONTROLConnectEventWrapper::get_cntlrName)
+    class_<CONTROLConnectedEventWrapper, bases<GenericEventWrapper> >("ControlConnectedEvent", init<GenericEventWrapper&>())
+        .add_property("controller_name", &CONTROLConnectedEventWrapper::get_cntlrName)
+        .add_property("result", &CONTROLConnectedEventWrapper::get_result)
     ;
 
     class_<CONTROLClaimEventWrapper, bases<GenericEventWrapper> >("ControlClaimEvent", init<GenericEventWrapper&>())

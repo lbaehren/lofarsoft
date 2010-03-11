@@ -43,7 +43,6 @@ from _ep_control import ControlResyncEvent
 from _ep_control import ControlScheduleEvent
 
 # Events we can send
-from _ep_control import ControlStartedEvent
 from _ep_control import ControlConnectedEvent
 from _ep_control import ControlResyncedEvent
 from _ep_control import ControlClaimedEvent
@@ -52,11 +51,12 @@ from _ep_control import ControlResumedEvent
 from _ep_control import ControlSuspendedEvent
 from _ep_control import ControlReleasedEvent
 from _ep_control import ControlQuitedEvent
+from _ep_control import ControlScheduledEvent
 
 class ControllerPort_Interface(EventPort_Interface):
-    def __init__(self):
+    def __init__(self, servicemask, hostname):
         event_mapping = {
-            CONTROL_CONNECT:  ControlConnectEvent,
+            CONTROL_CONNECTED:  ControlConnectedEvent,
             CONTROL_RESYNC:   ControlResyncEvent,
             CONTROL_SCHEDULE: ControlScheduleEvent,
             CONTROL_CLAIM:    ControlClaimEvent,
@@ -66,4 +66,4 @@ class ControllerPort_Interface(EventPort_Interface):
             CONTROL_RELEASE:  ControlReleaseEvent,
             CONTROL_QUIT:     ControlQuitEvent
         }
-        super(ControllerPort_Interface, self).__init__("EchoServer:test", PROTOCOL, event_mapping)
+        super(ControllerPort_Interface, self).__init__(servicemask, PROTOCOL, event_mapping, hostname)
