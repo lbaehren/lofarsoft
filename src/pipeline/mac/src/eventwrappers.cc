@@ -18,7 +18,7 @@ double EchoPingEventWrapper::get_pt() {
 
 void EchoPingEventWrapper::set_pt(double my_time) {
     this->my_event->ping_time.tv_sec = (int) my_time;
-    this->my_event->ping_time.tv_usec = 1000000.0 * (my_time - (int) my_time);
+    this->my_event->ping_time.tv_usec = (int) (1000000.0 * (my_time - (int) my_time));
 }
 
 LOFAR::TYPES::uint16 EchoPingEventWrapper::get_seqnr() {
