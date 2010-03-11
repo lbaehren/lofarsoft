@@ -8,8 +8,8 @@ class EventNotFoundException(EventPortException):
 
 class EventPort_Interface(EP_Interface):
 
-    def __init__(self, servicemask, protocol, mapping):
-        super(EventPort_Interface, self).__init__(servicemask, protocol)
+    def __init__(self, servicemask, protocol, mapping, hostname='localhost'):
+        super(EventPort_Interface, self).__init__(servicemask, protocol, hostname)
         self.__event_mapping = mapping
 
     def receive_event(self):
