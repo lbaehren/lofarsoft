@@ -16,7 +16,7 @@ class sip(MAC_control):
         # Customise this to the requirements of a specific job.
         with log_time(self.logger):
             datafiles = self.run_task("vdsreader")
-            datafiles = self.run_task("dppp_pass1", datafiles)
+            datafiles = self.run_task("ndppp", datafiles)
        
 if __name__ == '__main__':
     sys.exit(sip().main())
