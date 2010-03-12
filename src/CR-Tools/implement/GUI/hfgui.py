@@ -172,6 +172,8 @@ class hfQtPlot(QtGui.QWidget):
         self.setMouseTracking(False)
         self.setCursor(QtCore.Qt.ArrowCursor)
     def hfmouse_value(self): 
+        print "Value Display Mode is diasabled due to recent incompatabilities between the latest SWIG and Boost.Pythong versions"
+        return
         print "Attention: Cursor values are only displayed correctly, if all subplots have the same plot ranges... (deselect Auto for Y)"
         self.mousemode="v"
         self.setMouseTracking(True)

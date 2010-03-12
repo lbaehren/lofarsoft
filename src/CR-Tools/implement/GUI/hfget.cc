@@ -948,6 +948,7 @@ HString Data::Status(bool short_output){
   sout << "pydbg = " << data.pydbg << endl;
   sout << "pyqt = " << data.pyqt << endl;
   sout << "py_func = " << data.py_func << endl;
+  sout << "py_self = " << data.py_self << endl;
   sout << "s_ptr = " << data.s_ptr << endl;
   PRINT_DATACONTENT(noMod);
   PRINT_DATACONTENT(noSignal);
@@ -2687,8 +2688,9 @@ boost::python::handle<> Data::retrievePyDBGObject() {
 
   #REF: deletePyFunc, retrievePyFunc, retrievePyFuncObject
  */
-Data& Data::storePyFunc(PyObject* pyobj) {
+Data& Data::storePyFunc(PyObject* pyobj,PyObject* self) {
   data.py_func=pyobj;
+  data.py_self=self;
   return *this;
 }
 
@@ -2735,14 +2737,28 @@ bool Data::callSimplePyObjectMethod(PyObject* pyobj, HString method) {
   //first we need to check if attribute is present in the Python Object
   if (!PyObject_HasAttrString(pyobj, method.c_str())) {
     ERROR("callSimplePyObjectMethod: Object does not have Attribute " << method); return false;};
-  int ret=boost::python::call_method<int>(pyobj,method.c_str(),boost::ref(*this));
-  if (ret!=0) {
-    ERROR("callSimplePyObjectMethod - startup method returned user-defined error code" << ret);
+  if (data.py_self==NULL) {
+    ERROR("callSimplePyObjectMethod - pointer to self not stored in Data object - internal error");
     return false;
+  };
+//Create a python string with the method name
+  PyObject* methodname=PyString_FromString(method.c_str()); 
+// Call the method of the python object with a reference to the current data object as argument
+  PyObject* tmppy=PyObject_CallMethodObjArgs(pyobj,methodname,data.py_self,NULL); 
+  //  boost::python::object xxx(*this); //This works, but makes a copy of the data (=this) object rather than a reference
+  //  PyObject* dataobj=xxx.ptr();
+  //  PyObject* tmppy=PyObject_CallMethodObjArgs(pyobj,methodname,dataobj,NULL);
+  //........................................................................
+  //int ret=boost::python::call_method<int>(pyobj,method.c_str(),boost::ref(*this));  // This used to work, in 1.38 but not in 1.40
+  //if (ret!=0) {
+    //    ERROR("callSimplePyObjectMethod - startup method returned user-defined error code" << ret);
+
+  if (tmppy==NULL) {
+    ERROR("callSimplePyObjectMethod - method" << method << " returned user-defined error code.");
+    //    return false;
   };
   return true;
 }
-
 
 
 /*! \brief Store a list of python object reference in the  Data buffer.
@@ -4046,16 +4062,20 @@ SWIG objects. Specifically for getting vector data into an mglData object
 
 #include <mgl/mgl_qt.h>
 
-//The basic wrapper SWIG uses ...
+
+//The basic wrapper SWIG uses ... CHECK if that has changed!
 struct PySwigObject {
     PyObject_HEAD
     void * ptr;
     const char * desc;
 };
 
-/*
-This function returns the pointer to an object exposed in SWIG
- */
+
+//This function returns the pointer to an object exposed in SWIG -
+//doesn't seem to work anymore with recent swig/boost python
+//versions. Has the swig setup changed?
+
+
 void* extract_swig_wrapped_pointer(PyObject* obj)
 {
     char thisStr[] = "this";
@@ -4070,33 +4090,121 @@ void* extract_swig_wrapped_pointer(PyObject* obj)
     return (((PySwigObject*)thisAttr)->ptr);
 }
 
-//just prints the pointer of a Python Object
-void PyGetPtr(PyObject* obj){
-    cout << reinterpret_cast<void*>(obj) << endl;
+/*
+void* print_swig_wrapped_pointer(PyObject* obj)
+{
+    char thisStr[] = "this";
+    //first we need to get the this attribute from the Python Object
+    if (!PyObject_HasAttrString(obj, thisStr))
+        return NULL;
+
+    PyObject* thisAttr = PyObject_GetAttrString(obj, thisStr);
+    if (thisAttr == NULL)
+        return NULL;
+    //This Python Object is a SWIG Wrapper and contains our pointer
 }
 
-/*
-in the definiton of our boost python module in the .hpp file, we then have to
-add the follwoing line
 
-boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_id<mglData>());
+//in the definiton of our boost python module in the .hpp file, we
+//then have to add the following line
 
-which tells boost::python to recognize an object of type mglData and use our
-extraction function above.
- */
+//boost::python::converter::registry::insert(&extract_swig_wrapped_pointer, type_id<mglData>());
 
-/*!
-\brief This just sets the data in an mgData wrapper to the STL vector vec.  The
-function is exposed to python (in hfget.hpp) and can be called interactively
+//which tells boost::python to recognize an object of type mglData and use our
+//extraction function above.
+
+
+
+//\brief This just sets the data in an mgData wrapper to the STL vector vec.  The
+//function is exposed to python (in hfget.hpp) and can be called interactively
+
+
+HInteger mglDataSetVecNOld(const mglData* md, const std::vector<HNumber> &vec){
+  cout << "mglDataSetVecN(mglData* md, vector<HNumber> &vec) ";
+    HNumber * a = &(vec[0]);
+    cout << "vec[0]=" << vec[0];
+    cout << " &(vec[0])=" <<  &(vec[0]);
+    //    cout << " vec.begin()=" << vec.begin();
+    cout << " a=" << a;
+    cout << " *a=" << *a <<endl;
+    md->Set(a,vec.size());
+    cout << "vec[0]=" << vec[0];
+    cout << " &(vec[0])=" <<  &(vec[0]);
+    //    cout << " vec.begin()=" << vec.begin();
+    cout << " a=" << a;
+    cout << " *a=" << *a <<endl;
+    return 0;
+}
+
+HInteger mglDataSetVecN(const mglData* md, const std::vector<HNumber> &vec){
+  cout << "mglDataSetVecN(mglData* md, vector<HNumber> &vec) ";
+    HNumber * a = &(vec[0]);
+    cout << "vec[0]=" << vec[0];
+    cout << " &(vec[0])=" <<  &(vec[0]);
+    //    cout << " vec.begin()=" << vec.begin();
+    cout << " a=" << a;
+    cout << " *a=" << *a <<endl;
+    md->Set(vec);
+    cout << "vec[0]=" << vec[0];
+    cout << " &(vec[0])=" <<  &(vec[0]);
+    //    cout << " vec.begin()=" << vec.begin();
+    cout << " a=" << a;
+    cout << " *a=" << *a <<endl;
+    return 0;
+}
+
+HInteger mglDataSetVecNSwig(PyObject* pyobj, const std::vector<HNumber> &vec){
+  cout << "mglDataSetVecN(mglData* md, vector<HNumber> &vec) " << endl;
+  PySwigObject* pyswigobj=extract_swig_wrapped_pointer(pyobj);
+  void * ptr=pyswigobj->ptr;
+  PyObject* pyptr=(PyObject*)pyswigobj->ptr;
+  cout << "ptr=" << reinterpret_cast<HIntPointer>(ptr) <<endl;
+  void * ptr2;//=(boost::python::extract<void*>(boost::python::object(pyptr)));
+  mglData* md=reinterpret_cast<mglData*>(ptr2);
+  //  mglData* md0=boost::python::extract<mglData*>(boost::python::object(pyswigobj));
+  HNumber * a = &(vec[0]);
+  cout << "vec[0]=" << vec[0];
+  cout << " &(vec[0])=" <<  &(vec[0]);
+  //    cout << " vec.begin()=" << vec.begin();
+  cout << " a=" << a;
+  cout << " *a=" << *a <<endl;
+  md->Set(vec);
+  cout << "vec[0]=" << vec[0];
+  cout << " &(vec[0])=" <<  &(vec[0]);
+  //    cout << " vec.begin()=" << vec.begin();
+  cout << " a=" << a;
+  cout << " *a=" << *a <<endl;
+  return 0;
+}
+
+
+HInteger mglDataSetVecNi(const HIntPointer i, const std::vector<HNumber> &vec){
+  mglData* md = reinterpret_cast<mglData*>(i);
+  cout << "mglDataSetVecN(mglData* md, vector<HNumber> &vec) ";
+    HNumber * a = &(vec[0]);
+    cout << "vec[0]=" << vec[0];
+    cout << " &(vec[0])=" <<  &(vec[0]);
+    //    cout << " vec.begin()=" << vec.begin();
+    cout << " a=" << a;
+    cout << " *a=" << *a <<endl;
+    md->Set(a,vec.size());
+    cout << "vec[0]=" << vec[0];
+    cout << " &(vec[0])=" <<  &(vec[0]);
+    //    cout << " vec.begin()=" << vec.begin();
+    cout << " a=" << a;
+    cout << " *a=" << *a <<endl;
+    return 0;
+}
+
+HInteger mglDataPtr(const mglData* md, const std::vector<HNumber> &vec){
+  HIntPointer i = reinterpret_cast<HIntPointer>(md);
+  cout << " md=" << i <<endl;
+  return i;
+}
 */
 
-void mglDataSetVecN(mglData* md, vector<HNumber> &vec){
-    HNumber * a = &(vec[0]);
-    md->Set(a,vec.size());
-}
-
 /*!
-\brief Returns a byte-by-byte copy of the current vector as a python str object, which can be used as a buffer to create, e.g. a numpy array from it using fromstring(s).
+\brief Returns a byte-by-byte copy of the current vector as a python str object, which can be used as a buffer to create, e.g. a numpy array from it using fromstring(s). - NONSENSE - NUMPY arrays can be directly made from a STL vector (copying)
  */
 
 /*template <class T>
@@ -4106,31 +4214,18 @@ boost::python::str hVecBuffer(vector<T> &vec){
 }
 */
 
-
+/* This here was the latest version ...
 //template <class T>
 
 PyObject * hVecBuffer(vector<HNumber> &vec){
   PyObject* pyob=PyByteArray_FromStringAndSize(reinterpret_cast<char*>(&(vec[0])),vec.size()*sizeof(HNumber));
   return pyob;
 }
+*/
 
-
-
-
-/*!
-
-Converts a complex vector to real. This is just a quick hack ...
- */
-
-void hAbsComplexVec(vector<HComplex> &cvec, vector<HNumber> &nvec){
-  nvec.resize(cvec.size());
-  vector<HComplex>::iterator cit=cvec.begin(),cend=cvec.end();
-  vector<HNumber>::iterator nit=nvec.begin();
-  while (cit<cend) {
-    *nit=abs(*cit);
-    cit++;
-    nit++;
-  };
+//!just prints the pointer of a Python Object
+void PyGetPtr(PyObject* obj){
+    cout << reinterpret_cast<void*>(obj) << endl;
 }
 
 

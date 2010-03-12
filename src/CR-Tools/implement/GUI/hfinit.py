@@ -20,10 +20,10 @@ def mem(size="rss"):
 
 #Extending mathgl to accept STL vectors 
 
-#def mglDataSetVec(self,vec):
-#    mglDataSet(self,vec)
+def mglDataVec(vec): 
+    return mglData(numpy.array(vec))
 
-mglData.SetVec = mglDataSetVecN
+#mglData.SetVec = mglDataSetVecN
 
 
 #mglGraphAB is not available - ZB is default
@@ -954,7 +954,7 @@ def object_setFunc_f_silent(self,f):
     elif f.library=="Py": 
 #       In this case we have specified a Python function
         self.setStoredPyFuncObject(f.functype()) ##Store Python function to keep the instance under python
-        self.storePyFunc(self.getStoredPyFuncObject()) ##Store it also on the c++ level (this can perhaps smarter ...)
+        self.storePyFunc(self.getStoredPyFuncObject(),self) ##Store it also on the c++ level (this can perhaps smarter ...)
         self.setFunc(f.funcname,f.library,TYPE.STRING) 
 #        print self.getStoredPyObjecdt()
 #        print type(self.getStoredPyFuncObject())
@@ -971,7 +971,7 @@ def object_setFunc_f(self,f):
     elif f.library=="Py": 
 #       In this case we have specified a Python function
         self.setStoredPyFuncObject(f.functype()) ##Store Python function to keep the instance under python
-        self.storePyFunc(self.getStoredPyFuncObject()) ##Store it also on the c++ level (this can perhaps smarter ...)
+        self.storePyFunc(self.getStoredPyFuncObject(),self) ##Store it also on the c++ level (this can perhaps smarter ...)
         self.setFunc(f.funcname,f.library,TYPE.STRING) 
 ##        self.setStoredPyFuncObject(f.functype())
 #        print self.getStoredPyFuncObject()

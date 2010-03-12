@@ -361,6 +361,7 @@ class Data {
     PyObject * pydbg; //Contains a pointer to a Py object which is called during debugging steps.
     PyObject * pyqt; //Contains a pointer to a PyQT object which is used to send and received Qt SIGNALS
     PyObject * py_func; //Contains a pointer to a Py object which contains a user-defined Python function
+    PyObject * py_self; //Contains a pointer to the Python object of the data object itself (set by storePyFunc ....)
     
     //Finally, Finally, the pointer to the superior containing
     //information about the whole network 
@@ -591,7 +592,7 @@ class Data {
   boost::python::handle<> retrievePyDBGObject();
   void signalPyDBG(HString signal,HString input);
 
-  Data& storePyFunc(PyObject* pyobj);
+  Data& storePyFunc(PyObject* pyobj, PyObject* self);
   Data& deletePyFunc(PyObject* pyobj);
   PyObject* retrievePyFunc();
   boost::python::handle<> retrievePyFuncObject();

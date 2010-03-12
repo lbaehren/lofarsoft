@@ -1,10 +1,14 @@
+settrace= False
+verbose = False
+#import pdb
 #pdb.set_trace()
+#settrace=True
+
 execfile("hfimport.py")
 from hfinit import *
 from hfpywrappers import *
 import hfgui
 
-setdebug=False 
 
 class NULL_Pointer():
     def null(self):
@@ -13,7 +17,6 @@ class NULL_Pointer():
 NULL=NULL_Pointer()
 NONEPointer=pytointptr(None)
 
-verbose = False
 
 def logaxisval(xmin,xmax, maxsep=5):
     xmax=abs(xmax)
@@ -36,7 +39,10 @@ class empty():
 
 class hffunc():
     def hfstartup(self,d):
-        if verbose: print "Startup.", self.__doc__
+        if verbose: 
+            print "Startup.", self.__doc__
+            print "d=",d
+            d.printStatus(False)
         d.Silent(True)
         self.data=d
         self.pars=[]  #This is the parameter_item struct, which is named parameter_list in c++
@@ -66,6 +72,7 @@ class hffunc():
         if verbose: 
             print "Process.", self.__doc__
             self.data.printStatus(True)
+            print "d=",d
         return self.process(d)
     def hfcleanup(self,d):
         if verbose: print "Cleanup.", self.__doc__
@@ -259,9 +266,6 @@ class hfGraphDataBuffer(hffunc):
         self.yvec=FloatVec() #create local scratch vectors
         self.xvec=FloatVec()
         self.zvec=FloatVec()
-        self.xdat=mglData() # create local mglData vectors - better create method which does that directly (getmglData)
-        self.ydat=mglData()
-        self.zdat=mglData()
     def process(self,d):
         if verbose: print "Process hfGraphDataBuffer user function"
         naxis=0;
@@ -277,17 +281,17 @@ class hfGraphDataBuffer(hffunc):
             axis.get(self.xvec) #Use Vector selector in the future ...!
             if len(self.xvec)>len(self.yvec): self.xvec=self.xvec[0:len(self.yvec)]
             if len(self.xvec)<len(self.yvec): self.yvec=self.yvec[0:len(self.xvec)]
-            if verbose: print "self.xdat.nx=",self.xdat.nx," max=",self.xdat.Maximal()
+#            if verbose: print "self.xdat.nx=",self.xdat.nx," max=",self.xdat.Maximal()
             axis=self.data["'zAxis"]
             if type(axis)==Data:
                 naxis+=1;
                 axis.get(self.zvec)
-                self.zdat.SetVec(self.zvec)
+                self.zdat=mglDataVec(self.zvec)
         if naxis==1: self.xvec.extend(range(len(self.yvec)))
-        self.xdat.SetVec(self.xvec)
-        self.ydat.SetVec(self.yvec)
+        self.xdat=mglDataVec(self.xvec)
+        self.ydat=mglDataVec(self.yvec)
         if verbose: print "naxis=",naxis
-        if verbose: print "self.ydat.ny=",self.ydat.ny," max=",self.ydat.Maximal()
+#        if verbose: print "self.ydat.ny=",self.ydat.ny," max=",self.ydat.Maximal()
         self.putResult("xminval",min(self.xvec))
         self.putResult("xmaxval",max(self.xvec))
         self.putResult("yminval",min(self.yvec))
@@ -324,6 +328,7 @@ class hfPlotData(hffunc):
         if verbose: print "self.GraphDataBuffer=",self.GraphDataBuffer
         if (self.GraphObject==None) | (self.GraphDataBuffer==[None]): return
         self.GraphObject.SetBaseLineWidth(1); 
+        if settrace: pdb.set_trace()
         if self.Color=="":
             self.GraphObject.AddLegend(str(self.Antenna)+": "+str(self.AntennaID),self.GraphObject.currentcolor)
             if naxis==1: self.GraphObject.Plot(self.GraphDataBuffer[0],self.GraphObject.currentcolor) ## shouldn't happen
@@ -379,7 +384,6 @@ class hfPlotPanel(hffunc):
         self.setResult("ymin",-70.)
         self.setResult("ymax",70.)
         self.setResult("PanelPosition",0)
-        if settrace: pdb.set_trace()
         return 0
     def process(self,d):
         if verbose: print "Processing hfPlotPanel."
@@ -460,7 +464,6 @@ class hfPlotPanel(hffunc):
         self.putResult("xmax",xmax)
         self.putResult("ymin",ymin)
         self.putResult("ymax",ymax)
-        if settrace: pdb.set_trace()
         if self.OffsetValue==0: xoffsettxt=""
         elif self.OffsetValue>0: xoffsettxt=" + "+str(self.OffsetValue)
         else: xoffsettxt=" - "+str(abs(self.OffsetValue))
