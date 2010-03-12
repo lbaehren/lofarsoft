@@ -56,10 +56,6 @@ class control(LOFARrecipe):
             (self.name,)
         )
 
-        # Now set up an IPython cluster
-        self.logger.info("Deploying IPython cluster.")
-
-
         try:
             self.pipeline_logic()
         except PipelineException, message:
